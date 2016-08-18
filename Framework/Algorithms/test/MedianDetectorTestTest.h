@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/MedianDetectorTest.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -179,11 +180,7 @@ public:
     Workspace_sptr space = WorkspaceFactory::Instance().create(
         "Workspace2D", Nhist, specLength, specLength - 1);
     m_2DWS = boost::dynamic_pointer_cast<Workspace2D>(space);
-    BinEdges x(specLength);
-    auto &xData = x.mutableData();
-    for (int i = 0; i < specLength; ++i) {
-      xData[i] = i * 1000;
-    }
+    BinEdges x(specLength, HistogramData::LinearGenerator(0.0, 1000.0));
     // the data will be 21 random numbers
     double yArray[specLength - 1] = {0.2, 4, 50, 0.001, 0, 0,     0,
                                      1,   0, 15, 4,     0, 0.001, 2e-10,

@@ -13,7 +13,7 @@ class SwapWidths(DataProcessorAlgorithm):
 
 
     def category(self):
-        return 'Workflow\\MIDAS;PythonAlgorithms;Inelastic'
+        return 'Workflow\\MIDAS;Inelastic'
 
 
     def summary(self):

@@ -1,7 +1,8 @@
 #include "MantidQtMantidWidgets/InstrumentView/ColorMapWidget.h"
-#include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtAPI/GraphOptions.h"
+#include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtAPI/PowerScaleEngine.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidQtMantidWidgets/DoubleSpinBox.h"
 
 #include <QVBoxLayout>
@@ -186,17 +187,17 @@ void ColorMapWidget::setMaxValue(double value) {
 /**
 * returns the min value as QString
 */
-QString ColorMapWidget::getMinValue() { return m_minValueBox->text(); }
+QString ColorMapWidget::getMinValue() const { return m_minValueBox->text(); }
 
 /**
 * returns the min value as QString
 */
-QString ColorMapWidget::getMaxValue() { return m_maxValueBox->text(); }
+QString ColorMapWidget::getMaxValue() const { return m_maxValueBox->text(); }
 
 /**
 * returns the mnth powder as QString
 */
-QString ColorMapWidget::getNth_power() { return m_dspnN->text(); }
+QString ColorMapWidget::getNth_power() const { return m_dspnN->text(); }
 
 /**
 * Update the min value text box.
@@ -319,6 +320,50 @@ void ColorMapWidget::mouseReleaseEvent(QMouseEvent * /*e*/) {
   }
   QApplication::restoreOverrideCursor();
   m_dragging = false;
+}
+
+/**
+ * Save the state of the color map widget to a project file.
+ * @return string representing the current state of the color map widget.
+ */
+std::string ColorMapWidget::saveToProject() const {
+  API::TSVSerialiser tsv, cm;
+  cm.writeLine("ScaleType") << getScaleType();
+  cm.writeLine("Power") << getNth_power();
+  cm.writeLine("MinValue") << getMinValue();
+  cm.writeLine("MaxValue") << getMaxValue();
+  tsv.writeSection("colormap", cm.outputLines());
+  return tsv.outputLines();
+}
+
+/**
+ * Load the state of the color map widget from a project file.
+ * @param lines :: string representing the current state of the color map
+ * widget.
+ */
+void ColorMapWidget::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+  if (tsv.selectSection("colormap")) {
+    std::string colorMapLines;
+    tsv >> colorMapLines;
+    API::TSVSerialiser cm(colorMapLines);
+
+    int scaleType;
+    double min, max, power;
+    cm.selectLine("ScaleType");
+    cm >> scaleType;
+    cm.selectLine("Power");
+    cm >> power;
+    cm.selectLine("MinValue");
+    cm >> min;
+    cm.selectLine("MaxValue");
+    cm >> max;
+
+    setScaleType(scaleType);
+    setNthPower(power);
+    setMinValue(min);
+    setMaxValue(max);
+  }
 }
 } // MantidWidgets
 } // MantidQt

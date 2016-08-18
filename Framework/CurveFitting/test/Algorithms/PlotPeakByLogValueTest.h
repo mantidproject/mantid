@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidCurveFitting/Algorithms/PlotPeakByLogValue.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -28,6 +29,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Algorithms;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::LinearGenerator;
 
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
 typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
@@ -654,25 +656,21 @@ private:
             numHists, numBins, true);
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    BinEdges xdata(numBins + 1);
     // Update X data  to a sensible values. Looks roughly like the MARI binning
+    BinEdges xdata(numBins + 1, LinearGenerator(5.0, 5.5));
     // Update the Y values. We don't care about errors here
 
     // We'll simply use a gaussian as a test
     const double peakOneCentre(6493.0), sigmaSqOne(250 * 250.),
         peakTwoCentre(10625.), sigmaSqTwo(50 * 50);
     const double peakOneHeight(3000.), peakTwoHeight(1000.);
-    for (int i = 0; i <= numBins; ++i) {
-      const double xValue = 5.0 + 5.5 * i;
-      if (i < numBins) {
-        testWS->dataY(0)[i] =
-            peakOneHeight *
-            exp(-0.5 * pow(xValue - peakOneCentre, 2.) / sigmaSqOne);
-        testWS->dataY(1)[i] =
-            peakTwoHeight *
-            exp(-0.5 * pow(xValue - peakTwoCentre, 2.) / sigmaSqTwo);
-      }
-      xdata.mutableData()[i] = xValue;
+    for (int i = 0; i < numBins; ++i) {
+      testWS->dataY(0)[i] =
+          peakOneHeight *
+          exp(-0.5 * pow(xdata[i] - peakOneCentre, 2.) / sigmaSqOne);
+      testWS->dataY(1)[i] =
+          peakTwoHeight *
+          exp(-0.5 * pow(xdata[i] - peakTwoCentre, 2.) / sigmaSqTwo);
     }
     testWS->setBinEdges(0, xdata);
     testWS->setBinEdges(1, xdata);

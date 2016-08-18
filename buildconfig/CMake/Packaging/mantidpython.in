@@ -6,12 +6,7 @@
 
 # Find out where we are
 SCRIPTFILE=$(readlink -f "$0")
-INSTALLDIR=$(echo $SCRIPTFILE | sed -r -e 's|^(.*)/(.*)$|\1|g') #.* is greedy and eats up until the final slash
-if [ $(command -v ipython2) ]; then
-    PROG=$(command -v ipython2)
-else
-    PROG=$(command -v ipython)
-fi
+INSTALLDIR=${SCRIPTFILE%/*}
 
 # Define extra libraries and load paths
 LOCAL_PRELOAD=@TCMALLOC_RUNTIME_LIB@
@@ -48,19 +43,26 @@ if [ -n "${PYTHONPATH}" ]; then
     LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
 fi
 
-if [ -n "$1" ] && [ "$1" = "--classic" ]; then
-    shift
-    PROG=@PYTHON_EXECUTABLE@
-fi
-
 # Define MANTIDPATH
 MANTIDPATH="${INSTALLDIR}"
 
-# Launch ipython or python
+if [ -n "$1" ] && [ "$1" = "--classic" ]; then
+    shift
+
+    set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ $*@WRAPPER_POSTFIX@
+
+else
+    IPYTHON_STARTUP="import IPython;IPython.start_ipython()"
+
+    set -- @WRAPPER_PREFIX@@PYTHON_EXECUTABLE@ -c "${IPYTHON_STARTUP}" $*@WRAPPER_POSTFIX@
+
+fi
+
+
 LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
-    TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD=${TCM_REPORT} \
-    LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=pyqt \
-    PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
-    MANTIDPATH=${MANTIDPATH} \
-    PYTHONPATH=${LOCAL_PYTHONPATH} \
-    @WRAPPER_PREFIX@${PROG} $*@WRAPPER_POSTFIX@
+  TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD=${TCM_REPORT} \
+  LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=pyqt \
+  PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
+  MANTIDPATH=${MANTIDPATH} \
+  PYTHONPATH=${LOCAL_PYTHONPATH} \
+  exec "$@"

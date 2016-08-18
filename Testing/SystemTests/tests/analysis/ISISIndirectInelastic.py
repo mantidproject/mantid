@@ -69,7 +69,6 @@ stresstesting.MantidStressTest
 
 import stresstesting
 import os
-import platform
 from abc import ABCMeta, abstractmethod
 
 from mantid.simpleapi import *
@@ -1011,11 +1010,6 @@ class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
 #------------------------- OSIRIS tests ---------------------------------------
 
 class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
-
-    def skipTests(self):
-        # Skip Test OSX
-        if platform.system() == "Darwin":
-            return True
 
     def __init__(self):
         ISISIndirectInelasticIqtAndIqtFitMulti.__init__(self)

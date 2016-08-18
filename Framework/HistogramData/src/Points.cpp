@@ -14,11 +14,12 @@ Points::Points(const BinEdges &edges) {
     m_data = Kernel::make_cow<HistogramX>(0);
     return;
   }
-  m_data = Kernel::make_cow<HistogramX>(edges.size() - 1);
-  auto &data = m_data.access();
+
+  std::vector<double> data(edges.size() - 1);
   for (size_t i = 0; i < data.size(); ++i) {
     data[i] = (0.5 * (edges[i] + edges[i + 1]));
   }
+  m_data = Kernel::make_cow<HistogramX>(std::move(data));
 }
 
 } // namespace HistogramData

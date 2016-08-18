@@ -1,7 +1,9 @@
 #ifndef MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST_H_
 #define MANTID_ALGORITHMS_PDFFOURIERTRANSFORMTEST_H_
 
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <cxxtest/TestSuite.h>
+#include <numeric>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/UnitFactory.h"
@@ -51,7 +53,7 @@ public:
   void test_CheckResult() {
 
     API::Workspace_sptr ws =
-        createWS(20, 0.1, "TestInput2", "MomentumTransfer");
+        createWS(20, 0.1, "CheckResult", "MomentumTransfer");
 
     // 1. Run PDFFT
     API::IAlgorithm *pdfft =
@@ -78,13 +80,48 @@ public:
 
     TS_ASSERT_DELTA(R[0], 0.01, 0.0001);
     TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
-    TS_ASSERT_DELTA(GofR[0], 0.022981, 0.0001);
-    TS_ASSERT_DELTA(GofR[249], -0.616449, 0.0001);
+    TS_ASSERT_DELTA(GofR[0], 0.0186, 0.0001);
+    TS_ASSERT_DELTA(GofR[249], -0.3867, 0.0001);
+  }
+
+  void test_CheckNan() {
+
+    API::Workspace_sptr ws =
+        createWS(20, 0.1, "CheckNan", "MomentumTransfer", true);
+
+    // 1. Run PDFFT
+    API::IAlgorithm *pdfft =
+        Mantid::API::FrameworkManager::Instance().createAlgorithm(
+            "PDFFourierTransform");
+
+    pdfft->initialize();
+    pdfft->setProperty("InputWorkspace", ws);
+    pdfft->setProperty("OutputWorkspace", "PDFGofR");
+    pdfft->setProperty("InputSofQType", "S(Q)");
+    pdfft->setProperty("Rmax", 20.0);
+    pdfft->setProperty("DeltaR", 0.01);
+    pdfft->setProperty("Qmin", 0.0);
+    pdfft->setProperty("Qmax", 30.0);
+    pdfft->setProperty("PDFType", "G(r)");
+
+    pdfft->execute();
+
+    DataObjects::Workspace2D_sptr pdfws =
+        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+            API::AnalysisDataService::Instance().retrieve("PDFGofR"));
+    MantidVec &R = pdfws->dataX(0);
+    MantidVec &GofR = pdfws->dataY(0);
+
+    TS_ASSERT_DELTA(R[0], 0.01, 0.0001);
+    TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
+    // make sure that nan didn' slip in
+    TS_ASSERT(std::find_if(GofR.begin(), GofR.end(),
+                           boost::math::isnan<double>) == GofR.end());
   }
 
   void test_filter() {
     API::MatrixWorkspace_sptr ws =
-        createWS(200, 0.1, "TestInput3", "MomentumTransfer");
+        createWS(200, 0.1, "filter", "MomentumTransfer");
     MantidVec &SofQ = ws->dataY(0);
     for (size_t i = 0; i < SofQ.size(); i++) {
       SofQ[i] = 1.0;
@@ -124,7 +161,8 @@ private:
    */
   Mantid::API::MatrixWorkspace_sptr createWS(size_t n, double dx,
                                              const std::string &name,
-                                             const std::string unitlabel) {
+                                             const std::string unitlabel,
+                                             const bool withBadValues = false) {
 
     Mantid::API::FrameworkManager::Instance();
     Mantid::DataObjects::Workspace2D_sptr ws =
@@ -140,6 +178,11 @@ private:
       X[i] = double(i) * dx;
       Y[i] = X[i] + 1.0;
       E[i] = sqrt(fabs(X[i]));
+    }
+
+    if (withBadValues) {
+      Y[0] = std::numeric_limits<double>::quiet_NaN();
+      Y[Y.size() - 1] = std::numeric_limits<double>::quiet_NaN();
     }
 
     ws->getAxis(0)->unit() =

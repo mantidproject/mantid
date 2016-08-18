@@ -6,6 +6,7 @@
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Rendering/StructuredGeometryHandler.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/Matrix.h"
 #include <algorithm>
 #include <boost/make_shared.hpp>
@@ -612,6 +613,10 @@ const boost::shared_ptr<const Object> StructuredDetector::shape() const {
   Geometry::ShapeFactory shapeCreator;
 
   return shapeCreator.createShape(xmlHexahedralShape);
+}
+
+const Kernel::Material StructuredDetector::material() const {
+  return Kernel::Material();
 }
 
 //-------------------------------------------------------------------------------------------------

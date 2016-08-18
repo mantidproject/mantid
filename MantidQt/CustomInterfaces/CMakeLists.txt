@@ -84,14 +84,18 @@ set ( SRC_FILES
 	src/Muon/MuonAnalysisOptionTab.cpp
 	src/Muon/MuonAnalysisResultTableTab.cpp
 	src/Reflectometry/MeasurementItem.cpp
-	src/Reflectometry/QtReflMainView.cpp
+	src/Reflectometry/QtReflMainWindowView.cpp
+	src/Reflectometry/QtReflRunsTabView.cpp
+	src/Reflectometry/QtReflSettingsTabView.cpp
 	src/Reflectometry/ReflCatalogSearcher.cpp
 	src/Reflectometry/ReflGenericDataProcessorPresenterFactory.cpp
 	src/Reflectometry/ReflLegacyTransferStrategy.cpp
-	src/Reflectometry/ReflMainViewPresenter.cpp
+	src/Reflectometry/ReflMainWindowPresenter.cpp
 	src/Reflectometry/ReflMeasureTransferStrategy.cpp
 	src/Reflectometry/ReflNexusMeasurementItemSource.cpp
+	src/Reflectometry/ReflRunsTabPresenter.cpp
 	src/Reflectometry/ReflSearchModel.cpp
+	src/Reflectometry/ReflSettingsTabPresenter.cpp
 	src/Reflectometry/ReflTableSchema.cpp
 	src/Reflectometry/TransferResults.cpp
 	src/SANSAddFiles.cpp
@@ -229,15 +233,21 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
 	inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
-	inc/MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/IReflSearcher.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/MeasurementItem.h
-	inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h
+	inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainWindowView.h
+	inc/MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflCatalogSearcher.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflMainView.h
-	inc/MantidQtCustomInterfaces/Reflectometry/ReflMainViewPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h
+	inc/MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabView.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflMainWindowPresenter.h
+	inc/MantidQtCustomInterfaces/Reflectometry/ReflRunsTabPresenter.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMeasureTransferStrategy.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflMeasurementItemSource.h
 	inc/MantidQtCustomInterfaces/Reflectometry/ReflNexusMeasurementItemSource.h
@@ -373,7 +383,8 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h
                 inc/MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h
-                inc/MantidQtCustomInterfaces/Reflectometry/QtReflMainView.h
+                inc/MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h
+                inc/MantidQtCustomInterfaces/Reflectometry/QtReflSettingsTabView.h
                 inc/MantidQtCustomInterfaces/SampleTransmission.h
                 inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
@@ -446,7 +457,9 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Muon/ALCInterface.ui
                inc/MantidQtCustomInterfaces/Muon/ALCPeakFittingView.ui
                inc/MantidQtCustomInterfaces/Muon/MuonAnalysis.ui
-               inc/MantidQtCustomInterfaces/Reflectometry/ReflMainWidget.ui
+               inc/MantidQtCustomInterfaces/Reflectometry/ReflMainWindowWidget.ui
+               inc/MantidQtCustomInterfaces/Reflectometry/ReflRunsTabWidget.ui
+               inc/MantidQtCustomInterfaces/Reflectometry/ReflSettingsTabWidget.ui
                inc/MantidQtCustomInterfaces/Reflectometry/ReflWindow.ui
                inc/MantidQtCustomInterfaces/SampleTransmission.ui
                inc/MantidQtCustomInterfaces/SANSBackgroundCorrectionWidget.ui
@@ -484,9 +497,11 @@ set ( TEST_FILES
 	MeasurementItemTest.h
 	MuonAnalysisHelperTest.h
 	ReflLegacyTransferStrategyTest.h
-	ReflMainViewPresenterTest.h
+	ReflMainWindowPresenterTest.h
 	ReflMeasureTransferStrategyTest.h
 	ReflNexusMeasurementItemSourceTest.h
+	ReflRunsTabPresenterTest.h
+	ReflSettingsTabPresenterTest.h
 	StackOfImagesDirsTest.h
 	TomographyIfacePresenterTest.h
 	UserInputValidatorTest.h

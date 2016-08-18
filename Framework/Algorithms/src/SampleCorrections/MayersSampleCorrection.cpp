@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Material.h"
 
 namespace Mantid {
 namespace Algorithms {

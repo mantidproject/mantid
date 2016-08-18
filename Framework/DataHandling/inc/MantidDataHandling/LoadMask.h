@@ -53,8 +53,7 @@ public:
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Load file containing masking information to a SpecialWorkspace2D "
-           "(masking workspace). This algorithm is renamed from "
-           "LoadMaskingFile.";
+           "(masking workspace).";
   }
 
   /// Algorithm's version for identification
@@ -74,50 +73,65 @@ private:
   /// Parse XML
   void parseXML();
   /// Convert value to data
-  void parseComponent(std::string valuetext, bool tomask);
+  void parseComponent(const std::string &valuetext, bool tomask);
   /// Convert value to detector ids
-  void parseDetectorIDs(std::string inputstr, bool tomask);
+  void parseDetectorIDs(const std::string &inputstr, bool tomask);
   /// Convert value to spectrum Nos
-  void parseSpectrumNos(std::string inputstr, bool tomask);
+  void parseSpectrumNos(const std::string &inputstr,
+                        std::vector<int32_t> &targetMask);
   /// Split a string
-  void splitString(std::string inputstr, std::vector<std::string> &strings,
-                   std::string sep);
+  void splitString(const std::string &inputstr,
+                   std::vector<std::string> &strings, std::string sep);
   /// Split and convert string
-  void parseRangeText(std::string inputstr, std::vector<int32_t> &singles,
+  void parseRangeText(const std::string &inputstr,
+                      std::vector<int32_t> &singles,
                       std::vector<int32_t> &pairs);
   /// Initialize a Mask Workspace
   void intializeMaskWorkspace();
   /// Convert component to detectors
-  void componentToDetectors(std::vector<std::string> componentnames,
+  void componentToDetectors(const std::vector<std::string> &componentnames,
                             std::vector<int32_t> &detectors);
   /// Convert bank to detector
-  void bankToDetectors(std::vector<std::string> singlebanks,
+  void bankToDetectors(const std::vector<std::string> &singlebanks,
                        std::vector<int32_t> &detectors,
                        std::vector<int32_t> &detectorpairslow,
                        std::vector<int32_t> &detectorpairsup);
   /// Convert input detector to detector
-  void detectorToDetectors(std::vector<int32_t> singles,
-                           std::vector<int32_t> pairslow,
-                           std::vector<int32_t> pairsup,
+  void detectorToDetectors(const std::vector<int32_t> &singles,
+                           const std::vector<int32_t> &pairslow,
+                           const std::vector<int32_t> &pairsup,
                            std::vector<int32_t> &detectors,
                            std::vector<int32_t> &detectorpairslow,
                            std::vector<int32_t> &detectorpairsup);
-  void processMaskOnDetectors(bool tomask, std::vector<int32_t> singledetids,
+  void processMaskOnDetectors(const detid2index_map &indexmap, bool tomask,
+                              std::vector<int32_t> singledetids,
                               std::vector<int32_t> pairdetids_low,
                               std::vector<int32_t> pairdetids_up);
   /// Convert spectrum to detector
-  void processMaskOnWorkspaceIndex(bool mask, std::vector<int32_t> pairslow,
-                                   std::vector<int32_t> pairsup);
+  void processMaskOnWorkspaceIndex(bool mask,
+                                   std::vector<int32_t> &maskedSpecID,
+                                   std::vector<int32_t> &singleDetIds);
+
   void initDetectors();
 
-  void loadISISMaskFile(std::string isisfilename);
-  void parseISISStringToVector(std::string ins, std::vector<int> &rangestartvec,
+  void loadISISMaskFile(const std::string &isisfilename,
+                        std::vector<int32_t> &spectraMasks);
+  void parseISISStringToVector(const std::string &ins,
+                               std::vector<int> &rangestartvec,
                                std::vector<int> &rangeendvec);
+
+  std::map<std::string, std::string> validateInputs() override;
+
+  void convertSpMasksToDetIDs(const API::MatrixWorkspace_sptr &SourceWS,
+                              const std::vector<int32_t> &maskedSpecID,
+                              std::vector<int32_t> &singleDetIds);
 
   /// Mask Workspace
   DataObjects::MaskWorkspace_sptr m_maskWS;
   /// Instrument name
   std::string m_instrumentPropValue;
+  /// optional source workspace, containing spectra-detector mapping
+  API::MatrixWorkspace_sptr m_sourceMapWS;
   /// XML document loaded
   Poco::XML::Document *m_pDoc;
   /// Root element of the parsed XML
@@ -127,19 +141,19 @@ private:
   bool m_defaultToUse;
 
   std::vector<int32_t> mask_detid_single;
-  std::vector<int32_t> mask_specid_single;
   std::vector<int32_t> mask_detid_pair_low;
-  std::vector<int32_t> mask_specid_pair_low;
   std::vector<int32_t> mask_detid_pair_up;
-  std::vector<int32_t> mask_specid_pair_up;
-  std::vector<std::string> mask_bankid_single;
 
   std::vector<int32_t> unmask_detid_single;
-  std::vector<int32_t> unmask_specid_single;
   std::vector<int32_t> unmask_detid_pair_low;
-  std::vector<int32_t> unmask_specid_pair_low;
   std::vector<int32_t> unmask_detid_pair_up;
-  std::vector<int32_t> unmask_specid_pair_up;
+
+  // spectra mask provided
+  std::vector<int32_t> m_MaskSpecID;
+  // spectra unmask provided
+  std::vector<int32_t> m_unMaskSpecID;
+
+  std::vector<std::string> mask_bankid_single;
   std::vector<std::string> unmask_bankid_single;
 };
 

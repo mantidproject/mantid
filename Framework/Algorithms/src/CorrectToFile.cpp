@@ -72,9 +72,9 @@ void CorrectToFile::exec() {
     }
 
     // Get references to the correction factors
-    const MantidVec &Xcor = rkhInput->readX(0);
-    const MantidVec &Ycor = rkhInput->readY(0);
-    const MantidVec &Ecor = rkhInput->readE(0);
+    auto &Xcor = rkhInput->x(0);
+    auto &Ycor = rkhInput->y(0);
+    auto &Ecor = rkhInput->e(0);
 
     const bool divide = operation == "Divide";
     double Yfactor, correctError;
@@ -87,13 +87,13 @@ void CorrectToFile::exec() {
 
     for (int64_t i = 0; i < nOutSpec; ++i) {
       const auto xIn = toCorrect->points(i);
-      outputWS->setX(i, toCorrect->refX(i));
+      outputWS->setSharedX(i, toCorrect->sharedX(i));
 
-      MantidVec &yOut = outputWS->dataY(i);
-      MantidVec &eOut = outputWS->dataE(i);
+      auto &yOut = outputWS->mutableY(i);
+      auto &eOut = outputWS->mutableE(i);
 
-      const MantidVec &yIn = toCorrect->readY(i);
-      const MantidVec &eIn = toCorrect->readE(i);
+      auto &yIn = toCorrect->y(i);
+      auto &eIn = toCorrect->e(i);
 
       for (size_t j = 0; j < nbins; ++j) {
         const double currentX = xIn[j];

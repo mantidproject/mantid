@@ -1,20 +1,20 @@
 #include "MantidAlgorithms/ExportTimeSeriesLog.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/Events.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 #include <algorithm>
 #include <fstream>
-#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -232,9 +232,9 @@ void ExportTimeSeriesLog::setupWorkspace2D(
     throw runtime_error(
         "Unable to create a Workspace2D casted to MatrixWorkspace.");
 
-  MantidVec &vecX = m_outWS->dataX(0);
-  MantidVec &vecY = m_outWS->dataY(0);
-  MantidVec &vecE = m_outWS->dataE(0);
+  auto &vecX = m_outWS->mutableX(0);
+  auto &vecY = m_outWS->mutableY(0);
+  auto &vecE = m_outWS->mutableE(0);
 
   for (size_t index = 0; index < outsize; ++index) {
     size_t i_time = index + start_index;

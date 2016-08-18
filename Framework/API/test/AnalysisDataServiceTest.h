@@ -311,11 +311,15 @@ public:
     TSM_ASSERT_EQUALS("Hidden entries should not be returned", names.size(), 2);
     TSM_ASSERT_EQUALS("Hidden entries should not be returned", objects.size(),
                       2);
-    TS_ASSERT_DIFFERS(names.find("One"), names.end());
-    TS_ASSERT_DIFFERS(names.find("Two"), names.end());
-    TS_ASSERT_EQUALS(names.find("__Three"), names.end());
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "One"),
+                      names.end());
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "Two"),
+                      names.end());
+    TS_ASSERT_EQUALS(std::find(names.cbegin(), names.cend(), "__Three"),
+                     names.end());
     TSM_ASSERT_EQUALS("Hidden entries should not be returned",
-                      names.find("__Three"), names.end());
+                      std::find(names.cbegin(), names.cend(), "__Three"),
+                      names.end());
 
     ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
                                         "1");
@@ -323,7 +327,8 @@ public:
     objects = ads.getObjects();
     TS_ASSERT_EQUALS(names.size(), 3);
     TS_ASSERT_EQUALS(objects.size(), 3);
-    TS_ASSERT_DIFFERS(names.find("__Three"), names.end());
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "__Three"),
+                      names.end());
     ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
                                         "0");
   }

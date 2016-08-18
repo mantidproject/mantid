@@ -64,7 +64,7 @@ public:
     m_tinyReflWS = create2DWorkspaceWithReflectometryInstrument();
 
     FrameworkManager::Instance();
-    MantidVec xData = {0, 0, 0, 0};
+    MantidVec xData = {0, 1, 2, 3};
     MantidVec yData = {0, 0, 0};
 
     auto createWorkspace =

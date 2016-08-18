@@ -4,12 +4,12 @@
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/FFT.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/FFT.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -56,9 +56,9 @@ public:
     MatrixWorkspace_sptr fWS = fft->getProperty("OutputWorkspace");
     TS_ASSERT(fWS);
 
-    const MantidVec &X = fWS->readX(3);
-    const MantidVec &Yr = fWS->readY(3);
-    const MantidVec &Yi = fWS->readY(4);
+    auto &X = fWS->x(3);
+    auto &Yr = fWS->y(3);
+    auto &Yi = fWS->y(4);
 
     const MantidVec::const_iterator it = std::find(X.begin(), X.end(), 0.);
 
@@ -106,10 +106,10 @@ public:
     MatrixWorkspace_sptr outWS = fft->getProperty("OutputWorkspace");
     TS_ASSERT(outWS);
 
-    const MantidVec &Y0 = inputWS->readY(0);
+    auto &Y0 = inputWS->y(0);
 
-    const MantidVec &X = outWS->readX(0);
-    const MantidVec &Y = outWS->readY(0);
+    auto &X = outWS->x(0);
+    auto &Y = outWS->y(0);
 
     for (int i = 0; i < N; i++) {
       TS_ASSERT_DELTA(X[i], dX * (i - N / 2), 0.00001);
@@ -136,9 +136,9 @@ public:
     MatrixWorkspace_sptr fWS = fft->getProperty("OutputWorkspace");
     TS_ASSERT(fWS);
 
-    const MantidVec &X = fWS->readX(3);
-    const MantidVec &Yr = fWS->readY(3);
-    const MantidVec &Yi = fWS->readY(4);
+    auto &X = fWS->x(3);
+    auto &Yr = fWS->y(3);
+    auto &Yi = fWS->y(4);
 
     const MantidVec::const_iterator it = std::find(X.begin(), X.end(), 0.);
 
@@ -186,10 +186,10 @@ public:
     MatrixWorkspace_sptr fWS = fft->getProperty("OutputWorkspace");
     TS_ASSERT(fWS);
 
-    const MantidVec &Y0 = inWS->readY(0);
+    auto &Y0 = inWS->y(0);
 
-    const MantidVec &X = fWS->readX(0);
-    const MantidVec &Y = fWS->readY(0);
+    auto &X = fWS->x(0);
+    auto &Y = fWS->y(0);
 
     for (int i = 0; i < N; i++) {
       TS_ASSERT_DELTA(X[i], dX * (i - N / 2), 0.00001);
@@ -216,9 +216,9 @@ public:
     MatrixWorkspace_sptr fWS = fft->getProperty("OutputWorkspace");
     TS_ASSERT(fWS);
 
-    const MantidVec &X = fWS->readX(3);
-    const MantidVec &Yr = fWS->readY(3);
-    const MantidVec &Yi = fWS->readY(4);
+    auto &X = fWS->x(3);
+    auto &Yr = fWS->y(3);
+    auto &Yi = fWS->y(4);
 
     const MantidVec::const_iterator it = std::find(X.begin(), X.end(), 0.);
 
@@ -267,10 +267,10 @@ public:
     MatrixWorkspace_sptr fWS = fft->getProperty("OutputWorkspace");
     TS_ASSERT(fWS);
 
-    const MantidVec &Y0 = inWS->readY(0);
+    auto &Y0 = inWS->y(0);
 
-    const MantidVec &X = fWS->readX(0);
-    const MantidVec &Y = fWS->readY(0);
+    auto &X = fWS->x(0);
+    auto &Y = fWS->y(0);
 
     for (int i = 0; i < N; i++) {
       TS_ASSERT_DELTA(X[i], dX * (i - N / 2), 0.00001);
@@ -297,9 +297,9 @@ public:
     MatrixWorkspace_sptr fWS = fft->getProperty("OutputWorkspace");
     TS_ASSERT(fWS);
 
-    const MantidVec &X = fWS->readX(3);
-    const MantidVec &Yr = fWS->readY(3);
-    const MantidVec &Yi = fWS->readY(4);
+    auto &X = fWS->x(3);
+    auto &Yr = fWS->y(3);
+    auto &Yi = fWS->y(4);
 
     const MantidVec::const_iterator it = std::find(X.begin(), X.end(), 0.);
 
@@ -347,10 +347,10 @@ public:
 
     MatrixWorkspace_sptr fWS = fft->getProperty("OutputWorkspace");
 
-    const MantidVec &Y0 = inWS->readY(0);
+    auto &Y0 = inWS->y(0);
 
-    const MantidVec &X = fWS->readX(0);
-    const MantidVec &Y = fWS->readY(0);
+    auto &X = fWS->x(0);
+    auto &Y = fWS->y(0);
 
     for (int i = 0; i < N; i++) {
       TS_ASSERT_DELTA(X[i], dX * (i - N / 2), 0.00001);
@@ -384,9 +384,9 @@ public:
     TS_ASSERT_EQUALS(fWS->getAxis(0)->unit()->caption(), "Quantity");
     TS_ASSERT_EQUALS(fWS->getAxis(0)->unit()->label(), "");
 
-    const MantidVec &X = fWS->readX(0);
-    const MantidVec &Yr = fWS->readY(0);
-    const MantidVec &Yi = fWS->readY(1);
+    auto &X = fWS->x(0);
+    auto &Yr = fWS->y(0);
+    auto &Yi = fWS->y(1);
 
     const MantidVec::const_iterator it = std::find(X.begin(), X.end(), 0.);
 
@@ -431,7 +431,7 @@ public:
     // Test X values
     // When the input unit is 'Energy' in 'meV'
     // there is a factor of 1/2.418e2 in X
-    const MantidVec &X = fWS->readX(0);
+    auto &X = fWS->x(0);
 
     const MantidVec::const_iterator it = std::find(X.begin(), X.end(), 0.);
     int i0 = static_cast<int>(it - X.begin());
@@ -451,7 +451,7 @@ public:
   void testUnequalBinWidths_Throws() {
     const int N = 100;
     auto inputWS = createWS(N, 0);
-    Mantid::MantidVec &X = inputWS->dataX(0);
+    auto &X = inputWS->mutableX(0);
     double aveX = (X[51] + X[49]) / 2.0;
     X[50] = aveX + 0.01;
 
@@ -469,7 +469,7 @@ public:
   void testUnequalBinWidths_acceptRoundingErrors() {
     const int N = 100;
     auto inputWS = createWS(N, 0);
-    Mantid::MantidVec &X = inputWS->dataX(0);
+    auto &X = inputWS->mutableX(0);
     double aveX = (X[51] + X[49]) / 2.0;
     X[50] = aveX + 0.01;
 
@@ -574,8 +574,8 @@ public:
     fft->setChild(true);
     fft->setPropertyValue("OutputWorkspace", "__NotUsed");
     fft->setPropertyValue("Real", "0");
-    const auto &noOffsetX = inputWS->readX(0);
-    const auto &offsetX = offsetWS->readX(0);
+    auto &noOffsetX = inputWS->x(0);
+    auto &offsetX = offsetWS->x(0);
     const double offsetShift = -offsetX[offsetX.size() / 2];
     const double noOffsetShift = -noOffsetX[noOffsetX.size() / 2];
     fft->setProperty("InputWorkspace", inputWS);
@@ -698,9 +698,9 @@ private:
         boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 1, n + dn, n));
 
-    Mantid::MantidVec &X = ws->dataX(0);
-    Mantid::MantidVec &Y = ws->dataY(0);
-    Mantid::MantidVec &E = ws->dataE(0);
+    auto &X = ws->mutableX(0);
+    auto &Y = ws->mutableY(0);
+    auto &E = ws->mutableE(0);
 
     int n2 = n / 2;
     for (int k = 0; k <= n2; k++) {
