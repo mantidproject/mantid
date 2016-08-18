@@ -524,9 +524,8 @@ void IndirectSymmetrise::plotClicked() {
 
   QStringList workspaces;
   workspaces << m_uiForm.dsInput->getCurrentDataName()
-    << QString::fromStdString(m_pythonExportWsName);
+             << QString::fromStdString(m_pythonExportWsName);
   plotSpectrum(workspaces);
-
 }
 
 /**
