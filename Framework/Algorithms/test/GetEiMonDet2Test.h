@@ -64,49 +64,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "0"))
   }
 
-  void testEnergyTolerance() {
-    const double tolerance = 1.134;
-    // Within tolerances.
-    double realEi = 0.99 * tolerance * EI;
-    auto peaks = peakCentres(100, realEi, std::numeric_limits<double>::max());
-    std::vector<bool> successes(peaks.size(), true);
-    auto eppTable = createEPPTable(peaks, successes);
-    auto ws = createWorkspace();
-    GetEiMonDet2 algorithm;
-    setupSimple(ws, eppTable, algorithm);
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("EnergyTolerance", 100 * (tolerance - 1)))
-    TS_ASSERT_THROWS_NOTHING(algorithm.execute())
-    TS_ASSERT(algorithm.isExecuted())
-    TS_ASSERT_DELTA(static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")), realEi, 1e-6)
-    // Out of tolerances.
-    realEi = 1.01 * tolerance * EI;
-    peaks = peakCentres(100, realEi, std::numeric_limits<double>::max());
-    eppTable = createEPPTable(peaks, successes);
-    GetEiMonDet2 failingAlgorithm;
-    setupSimple(ws, eppTable, failingAlgorithm);
-    TS_ASSERT_THROWS_NOTHING(failingAlgorithm.setProperty("EnergyTolerance", 100 * (tolerance - 1)))
-    TS_ASSERT_THROWS_NOTHING(failingAlgorithm.execute())
-    TS_ASSERT(!failingAlgorithm.isExecuted())
-    // Lower tolerance boundary --- but still successful.
-    realEi = 1.01 * (2 - tolerance) * EI;
-    peaks = peakCentres(100, realEi, std::numeric_limits<double>::max());
-    eppTable = createEPPTable(peaks, successes);
-    GetEiMonDet2 algorithm2;
-    setupSimple(ws, eppTable, algorithm2);
-    TS_ASSERT_THROWS_NOTHING(algorithm2.setProperty("EnergyTolerance", 100 * (tolerance - 1)))
-    TS_ASSERT_THROWS_NOTHING(algorithm2.execute())
-    TS_ASSERT(algorithm2.isExecuted())
-    // Too low final energy.
-    realEi = 0.99 * (2 - tolerance) * EI;
-    peaks = peakCentres(100, realEi, std::numeric_limits<double>::max());
-    eppTable = createEPPTable(peaks, successes);
-    GetEiMonDet2 failingAlgorithm2;
-    setupSimple(ws, eppTable, failingAlgorithm2);
-    TS_ASSERT_THROWS_NOTHING(failingAlgorithm2.setProperty("EnergyTolerance", 100 * (tolerance - 1)))
-    TS_ASSERT_THROWS_NOTHING(failingAlgorithm2.execute())
-    TS_ASSERT(!failingAlgorithm2.isExecuted())
-  }
-
   void testSuccessOnMinimumInput() {
     const double realEi = 0.97 * EI;
     const auto peaks = peakCentres(100, realEi, std::numeric_limits<double>::max());
@@ -156,7 +113,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorEPPTable", detectorEPPTable))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("IndexType", "SpectrumNumber"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "2"))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("EnergyTolerance", 20.0))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("IncidentEnergy", EI))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorWorkspace", monitorWs))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorEPPTable", monitorEPPTable))

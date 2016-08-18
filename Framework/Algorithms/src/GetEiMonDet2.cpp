@@ -77,8 +77,6 @@ void GetEiMonDet2::init() {
   mustBePositive->setLower(0);
   declareProperty(
       PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositive, "Taken from the sample logs, if not specified.", Direction::InOut);
-  declareProperty(
-      PropertyNames::ENERGY_TOLERANCE, 10.0, boost::make_shared<BoundedValidator<double>>(0, 100), "Tolerance between calculated energy and " + PropertyNames::INCIDENT_ENERGY + ", in percents.");
 }
 
 template<typename T, typename Map>
@@ -218,21 +216,23 @@ void GetEiMonDet2::exec() {
 
   // Calculate actual time of flight from monitor to detectors.
   double timeOfFlight = detectorEPP - monitorEPP;
-  const double energyTolerance = static_cast<double>(getProperty(PropertyNames::ENERGY_TOLERANCE)) / 100;
-  const double lowerTimeTolerance = 1 / std::sqrt(1 + energyTolerance);
-  const double upperTimeTolerance = 1 / std::sqrt(1 - energyTolerance);
-  unsigned delayFrameCount = 0;
   const double nominalTimeOfFlight = flightLength / std::sqrt(2 * nominalIncidentEnergy * meV / NeutronMass) * 1e6; // In microseconds.
-  while (timeOfFlight <= lowerTimeTolerance * nominalTimeOfFlight) {
+  const double energyTolerance = 20;
+  const double toleranceLimit = 1 / std::sqrt(1 + energyTolerance) * nominalTimeOfFlight;
+  const double pulseInterval = getProperty(PropertyNames::PULSE_INTERVAL);
+  const double pulseIntervalLimit = nominalTimeOfFlight - pulseInterval / 2;
+  const double lowerTimeLimit = toleranceLimit > pulseIntervalLimit ? toleranceLimit : pulseIntervalLimit;
+  const double upperTimeLimit = toleranceLimit > pulseIntervalLimit ? 1 / std::sqrt(1 - energyTolerance) * nominalTimeOfFlight : nominalTimeOfFlight + pulseInterval / 2;
+  unsigned delayFrameCount = 0;
+  while (timeOfFlight <= lowerTimeLimit) {
     // Neutrons hit the detectors in a later frame.
-    const double pulseInterval = getProperty(PropertyNames::PULSE_INTERVAL);
     if (pulseInterval == EMPTY_DBL()) {
       throw std::runtime_error("Too small or negative time-of-flight and no " + PropertyNames::PULSE_INTERVAL + " specified");
     }
     ++delayFrameCount;
     timeOfFlight = delayFrameCount * pulseInterval - monitorEPP + detectorEPP;
   }
-  if (timeOfFlight > upperTimeTolerance * nominalTimeOfFlight) {
+  if (timeOfFlight > upperTimeLimit) {
     throw std::runtime_error("Calculated time-of-flight too large");
   }
 
