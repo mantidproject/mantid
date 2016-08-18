@@ -127,6 +127,9 @@ void IndirectMoments::handleSampleInputReady(const QString &filename) {
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateProperties(QtProperty *, double)));
+
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
 /**
