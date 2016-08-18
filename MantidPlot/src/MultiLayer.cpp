@@ -1464,7 +1464,8 @@ void MultiLayer::convertToWaterfall() {
     return;
 
   hide();
-  active->setWaterfallOffset(10, 20);
+  active->setWaterfallOffset(default_waterfall_width_offset,
+                             default_waterfall_height_offset);
   setWaterfallLayout(true);
   // Next two lines replace the legend so that it works on reversing the curve
   // order
