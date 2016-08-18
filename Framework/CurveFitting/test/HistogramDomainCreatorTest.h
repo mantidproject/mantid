@@ -461,7 +461,7 @@ private:
     size_t nx = ny + 1;
     double x0 = -1.0;
     double x1 = 1.0;
-    double dx = (x1 - x0) / ny;
+    double dx = (x1 - x0) / static_cast<double>(ny);
     ws->initialize(1, nx, ny);
     Mantid::MantidVec &x = ws->dataX(0);
     Mantid::MantidVec &y = ws->dataY(0);
