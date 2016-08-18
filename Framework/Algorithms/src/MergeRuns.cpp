@@ -132,10 +132,11 @@ void MergeRuns::exec() {
 
     size_t numberOfWSs = m_inMatrixWS.size();
     int numberOfWSsAdded = 1;
-    this->createSampleLogsMaps(*it);
 
     // Take the first input workspace as the first argument to the addition
-    MatrixWorkspace_sptr outWS = m_inMatrixWS.front();
+    MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
+    this->createSampleLogsMaps(outWS);
+
     m_progress = new Progress(this, 0.0, 1.0, numberOfWSs - 1);
     // Note that the iterator is incremented before first pass so that 1st
     // workspace isn't added to itself
