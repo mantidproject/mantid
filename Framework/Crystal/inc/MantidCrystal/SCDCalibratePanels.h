@@ -166,13 +166,13 @@ public:
                      boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
 
   void LoadISawDetCal(boost::shared_ptr<const Geometry::Instrument> &instrument,
-                      std::set<std::string> &AllBankName, double &T0,
+                      boost::container::flat_set<std::string> &AllBankName, double &T0,
                       double &L0, std::string filename,
                       std::string bankPrefixName);
 
 private:
   void saveIsawDetCal(boost::shared_ptr<Geometry::Instrument> &instrument,
-                      std::set<std::string> &AllBankName, double T0,
+                      boost::container::flat_set<std::string> &AllBankName, double T0,
                       std::string filename);
 
   void createResultWorkspace(const int numGroups, const int colNum,
@@ -208,7 +208,7 @@ private:
    *Groups
    */
   void saveXmlFile(std::string const FileName,
-                   std::set<std::string> const AllBankNames,
+                   boost::container::flat_set<std::string> const AllBankNames,
                    Geometry::Instrument_const_sptr const instrument) const;
 };
 

@@ -16,6 +16,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ReducedCell.h"
 #include <boost/math/special_functions/round.hpp>
+#include <boost/container/flat_set.hpp>
 #include <Poco/File.h>
 #include <sstream>
 
@@ -169,7 +170,7 @@ void SCDCalibratePanels::exec() {
 
   if (changeL1)
     findL1(nPeaks, peaksWs);
-  set<string> MyBankNames;
+  boost::container::flat_set<string> MyBankNames;
   for (int i = 0; i < nPeaks; ++i) {
     MyBankNames.insert(peaksWs->getPeak(i).getBankName());
   }
@@ -177,16 +178,16 @@ void SCDCalibratePanels::exec() {
   PARALLEL_FOR1(peaksWs)
   for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    std::set<string>::iterator it = MyBankNames.begin();
+    boost::container::flat_set<string>::iterator it = MyBankNames.begin();
     advance(it, i);
     std::string iBank = *it;
     const std::string bankName = "__PWS_" + iBank;
     PeaksWorkspace_sptr local = peaksWs->clone();
     AnalysisDataService::Instance().addOrReplace(bankName, local);
-    for (int i = nPeaks - 1; i >= 0; --i) {
-      Peak peak = local->getPeak(i);
+    for (int j = nPeaks - 1; j >= 0; --j) {
+      Peak peak = local->getPeak(j);
       if (peak.getBankName() != iBank) {
-        local->removePeak(i);
+        local->removePeak(j);
       }
     }
     int nBankPeaks = local->getNumberPeaks();
@@ -203,9 +204,10 @@ void SCDCalibratePanels::exec() {
     MantidVec &yVec = outSpec.dataY();
     MantidVec &eVec = outSpec.dataE();
     MantidVec &xVec = outSpec.dataX();
+    std::fill(yVec.begin(),yVec.end(),0.0);
 
     for (int i = 0; i < nBankPeaks; i++) {
-      Peak peak = local->getPeak(i);
+      const DataObjects::Peak &peak = local->getPeak(i);
       // 1/sigma is considered the weight for the fit
       double weight = 1.;                // default is even weighting
       if (peak.getSigmaIntensity() > 0.) // prefer weight by sigmaI
@@ -215,9 +217,9 @@ void SCDCalibratePanels::exec() {
       else if (peak.getBinCount() > 0.) // then by counts in peak centre
         weight = 1.0 / peak.getBinCount();
       for (int j = 0; j < 3; j++) {
-        xVec[i * 3 + j] = i * 3 + j;
-        yVec[i * 3 + j] = 0.0;
-        eVec[i * 3 + j] = weight;
+        int k = i * 3 + j; 
+        xVec[k] = i * 3 + j;
+        eVec[k] = weight;
       }
     }
 
@@ -369,7 +371,7 @@ void SCDCalibratePanels::exec() {
   PARALLEL_FOR3(ColWksp, RowWksp, TofWksp)
   for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    std::set<string>::iterator it = MyBankNames.begin();
+    boost::container::flat_set<string>::iterator it = MyBankNames.begin();
     advance(it, i);
     std::string bankName = *it;
     size_t k = bankName.find_last_not_of("0123456789");
@@ -379,6 +381,12 @@ void SCDCalibratePanels::exec() {
     ColWksp->getSpectrum(i).setSpectrumNo(specnum_t(bank));
     RowWksp->getSpectrum(i).setSpectrumNo(specnum_t(bank));
     TofWksp->getSpectrum(i).setSpectrumNo(specnum_t(bank));
+    Mantid::MantidVec &ColX = ColWksp->dataX(i);
+    Mantid::MantidVec &ColY = ColWksp->dataY(i);
+    Mantid::MantidVec &RowX = RowWksp->dataX(i);
+    Mantid::MantidVec &RowY = RowWksp->dataY(i);
+    Mantid::MantidVec &TofX = TofWksp->dataX(i);
+    Mantid::MantidVec &TofY = TofWksp->dataY(i);
     int icount = 0;
     for (int j = 0; j < nPeaks; j++) {
       Peak peak = peaksWs->getPeak(j);
@@ -387,12 +395,12 @@ void SCDCalibratePanels::exec() {
           V3D q_lab =
               (peak.getGoniometerMatrix() * UB) * peak.getHKL() * M_2_PI;
           Peak theoretical(peak.getInstrument(), q_lab);
-          ColWksp->dataX(i)[icount] = peak.getCol();
-          ColWksp->dataY(i)[icount] = theoretical.getCol();
-          RowWksp->dataX(i)[icount] = peak.getRow();
-          RowWksp->dataY(i)[icount] = theoretical.getRow();
-          TofWksp->dataX(i)[icount] = peak.getTOF();
-          TofWksp->dataY(i)[icount] = theoretical.getTOF();
+          ColX[icount] = peak.getCol();
+          ColY[icount] = theoretical.getCol();
+          RowX[icount] = peak.getRow();
+          RowY[icount] = theoretical.getRow();
+          TofX[icount] = peak.getTOF();
+          TofY[icount] = theoretical.getTOF();
         } catch (...) {
           // g_log.debug() << "Problem only in printing peaks\n";
         }
@@ -429,9 +437,10 @@ void SCDCalibratePanels::findL1(int nPeaks,
   MantidVec &yVec = outSp.dataY();
   MantidVec &eVec = outSp.dataE();
   MantidVec &xVec = outSp.dataX();
+  std::fill(yVec.begin(),yVec.end(),0.0);
 
   for (int i = 0; i < nPeaks; i++) {
-    DataObjects::Peak peak = peaksWs->getPeak(i);
+    const DataObjects::Peak &peak = peaksWs->getPeak(i);
 
     // 1/sigma is considered the weight for the fit
     double weight = 1.;                // default is even weighting
@@ -441,9 +450,11 @@ void SCDCalibratePanels::findL1(int nPeaks,
       weight = 1.0 / peak.getIntensity();
     else if (peak.getBinCount() > 0.) // then by counts in peak centre
       weight = 1.0 / peak.getBinCount();
-    xVec[i * 3] = i;
-    yVec[i * 3 + 1] = 0.0;
-    eVec[i * 3 + 2] = weight;
+    for (int j = 0; j < 3; j++) {
+      int k = i * 3 + j; 
+      xVec[k] = i * 3 + j;
+      eVec[k] = weight;
+    }
   }
   IAlgorithm_sptr fitL1_alg;
   try {
@@ -533,7 +544,7 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
  *  @param bankPrefixName   The prefix to the bank names.
  */
 void SCDCalibratePanels::LoadISawDetCal(
-    boost::shared_ptr<const Instrument> &instrument, set<string> &AllBankName,
+    boost::shared_ptr<const Instrument> &instrument, boost::container::flat_set<string> &AllBankName,
     double &T0, double &L0, string filename, string bankPrefixName) {
 
   V3D beamline, samplePos;
@@ -745,7 +756,7 @@ void SCDCalibratePanels::createResultWorkspace(const int numGroups,
  * @param filename     -The name of the DetCal file to save the results to
  */
 void SCDCalibratePanels::saveIsawDetCal(
-    boost::shared_ptr<Instrument> &instrument, set<string> &AllBankName,
+    boost::shared_ptr<Instrument> &instrument, boost::container::flat_set<string> &AllBankName,
     double T0, string filename) {
   // having a filename triggers doing the work
   if (filename.empty())
@@ -1004,7 +1015,7 @@ void writeXmlParameter(ofstream &ostream, const string &name,
 }
 
 void SCDCalibratePanels::saveXmlFile(
-    string const FileName, set<string> const AllBankNames,
+    string const FileName, boost::container::flat_set<string> const AllBankNames,
     Instrument_const_sptr const instrument) const {
   if (FileName.empty())
     return;
@@ -1020,9 +1031,7 @@ void SCDCalibratePanels::saveXmlFile(
   ParameterMap_sptr pmap = instrument->getParameterMap();
 
   // write out the detector banks
-  for (int i = 0; i < static_cast<int>(AllBankNames.size()); ++i) {
-    std::set<string>::iterator it = AllBankNames.begin();
-    advance(it, i);
+  for (auto it = AllBankNames.rbegin(); it != AllBankNames.rend(); ++it) {
     std::string bankName = *it;
     if (instrument->getName().compare("CORELLI") == 0.0)
       bankName.append("/sixteenpack");
