@@ -199,6 +199,10 @@ void IndirectMoments::momentsAlgComplete(bool error) {
   m_uiForm.ppMomentsPreview->addSpectrum(
       "M2", QString::fromStdString(resultWsNames[3]), 0, Qt::red);
   m_uiForm.ppMomentsPreview->resizeX();
+
+  // Enable plot and save buttons
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 } // namespace CustomInterfaces
