@@ -155,6 +155,93 @@ bool Shape2D::isMasked(const QPointF &p) const {
   return m_fill_color != QColor() && contains(p);
 }
 
+/** Load shape 2D state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ * @return a new shape2D with old state applied
+ */
+Shape2D *Shape2D::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+
+  if (!tsv.selectLine("Type"))
+    return nullptr;
+
+  std::string type;
+  tsv >> type;
+
+  Shape2D *shape = loadShape2DFromType(type, lines);
+  if (!shape)
+    return nullptr;
+
+  if (tsv.selectLine("Properties")) {
+    bool scalable, editing, selected, visible;
+    tsv >> scalable >> editing >> selected >> visible;
+
+    shape->setScalable(scalable);
+    shape->edit(editing);
+    shape->setSelected(selected);
+    shape->setVisible(visible);
+  }
+
+  if (tsv.selectLine("Color")) {
+    QColor color;
+    tsv >> color;
+    shape->setColor(color);
+  }
+
+  if (tsv.selectLine("FillColor")) {
+    QColor color;
+    tsv >> color;
+    shape->setFillColor(color);
+  }
+
+  return shape;
+}
+
+/**
+ * Instantiate different types of Shape2D from a string
+ *
+ * @param type :: a string representing the type e.g. ellipse
+ * @param lines :: Mantid project lines to parse state from
+ * @return a new instance of a Shape2D
+ */
+Shape2D *Shape2D::loadShape2DFromType(const std::string &type,
+                                      const std::string &lines) {
+  Shape2D *shape = nullptr;
+
+  if (type == "ellipse") {
+    shape = Shape2DEllipse::loadFromProject(lines);
+  } else if (type == "rectangle") {
+    shape = Shape2DRectangle::loadFromProject(lines);
+  } else if (type == "ring") {
+    shape = Shape2DRing::loadFromProject(lines);
+  } else if (type == "free") {
+    shape = Shape2DFree::loadFromProject(lines);
+  }
+
+  return shape;
+}
+
+/** Save the state of the shape 2D to a Mantid project file
+ * @return a string representing the state of the shape 2D
+ */
+std::string Shape2D::saveToProject() const {
+  API::TSVSerialiser tsv;
+  bool props[]{m_scalable, m_editing, m_selected, m_visible};
+
+  tsv.writeLine("Properties");
+  for (auto prop : props) {
+    tsv << prop;
+  }
+
+  auto color = getColor();
+  tsv.writeLine("Color") << color;
+
+  auto fillColor = getFillColor();
+  tsv.writeLine("FillColor") << fillColor;
+
+  return tsv.outputLines();
+}
+
 // --- Shape2DEllipse --- //
 
 Shape2DEllipse::Shape2DEllipse(const QPointF &center, double radius1,
@@ -261,6 +348,32 @@ void Shape2DEllipse::setPoint(const QString &prop, const QPointF &value) {
   }
 }
 
+/** Load shape 2D state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ * @return a new shape2D in the shape of a ellipse
+ */
+Shape2D *Shape2DEllipse::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+  tsv.selectLine("Parameters");
+  double radius1, radius2, x, y;
+  tsv >> radius1 >> radius2 >> x >> y;
+  return new Shape2DEllipse(QPointF(x, y), radius1, radius2);
+}
+
+/** Save the state of the shape 2D ellipe to a Mantid project file
+ * @return a string representing the state of the shape 2D
+ */
+std::string Shape2DEllipse::saveToProject() const {
+  API::TSVSerialiser tsv;
+  double radius1 = getDouble("radius1");
+  double radius2 = getDouble("radius2");
+  auto centre = getPoint("centre");
+
+  tsv.writeLine("Type") << "ellipse";
+  tsv.writeLine("Parameters") << radius1 << radius2 << centre.x(), centre.y();
+  tsv.writeRaw(Shape2D::saveToProject());
+  return tsv.outputLines();
+}
 // --- Shape2DRectangle --- //
 
 Shape2DRectangle::Shape2DRectangle() { m_boundingRect = RectF(); }
@@ -297,6 +410,36 @@ void Shape2DRectangle::drawShape(QPainter &painter) const {
 
 void Shape2DRectangle::addToPath(QPainterPath &path) const {
   path.addRect(m_boundingRect.toQRectF());
+}
+
+/** Load shape 2D state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ * @return a new shape2D in the shape of a rectangle
+ */
+Shape2D *Shape2DRectangle::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+  tsv.selectLine("Parameters");
+  double x0, y0, x1, y1;
+  tsv >> x0 >> y0 >> x1 >> y1;
+  QPointF point1(x0, y0);
+  QPointF point2(x1, y1);
+  return new Shape2DRectangle(point1, point2);
+}
+
+/** Save the state of the shape 2D rectangle to a Mantid project file
+ * @return a string representing the state of the shape 2D
+ */
+std::string Shape2DRectangle::saveToProject() const {
+  API::TSVSerialiser tsv;
+  auto x0 = m_boundingRect.x0();
+  auto x1 = m_boundingRect.x1();
+  auto y0 = m_boundingRect.y0();
+  auto y1 = m_boundingRect.y1();
+
+  tsv.writeLine("Type") << "rectangle";
+  tsv.writeLine("Parameters") << x0 << y0 << x1 << y1;
+  tsv.writeRaw(Shape2D::saveToProject());
+  return tsv.outputLines();
 }
 
 // --- Shape2DRing --- //
@@ -438,6 +581,40 @@ void Shape2DRing::setColor(const QColor &color) {
   m_outer_shape->setColor(color);
 }
 
+/** Load shape 2D state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ * @return a new shape2D in the shape of a ring
+ */
+Shape2D *Shape2DRing::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+  tsv.selectLine("Parameters");
+  double xWidth, yWidth;
+  tsv >> xWidth >> yWidth;
+
+  tsv.selectSection("shape");
+  std::string baseShapeLines;
+  tsv >> baseShapeLines;
+
+  auto baseShape = Shape2D::loadFromProject(baseShapeLines);
+  return new Shape2DRing(baseShape, xWidth, yWidth);
+}
+
+/** Save the state of the shape 2D ring to a Mantid project file
+ * @return a string representing the state of the shape 2D
+ */
+std::string Shape2DRing::saveToProject() const {
+  API::TSVSerialiser tsv;
+  auto xWidth = getDouble("xwidth");
+  auto yWidth = getDouble("ywidth");
+  auto baseShape = getOuterShape();
+
+  tsv.writeLine("Type") << "ring";
+  tsv.writeLine("Parameters") << xWidth << yWidth;
+  tsv.writeSection("shape", baseShape->saveToProject());
+  tsv.writeRaw(Shape2D::saveToProject());
+  return tsv.outputLines();
+}
+
 //------------------------------------------------------------------------------
 
 /// Construct a zero-sized shape.
@@ -571,5 +748,45 @@ void Shape2DFree::subtractPolygon(const QPolygonF &polygon) {
   m_polygon = m_polygon.subtracted(polygon);
   resetBoundingRect();
 }
+
+/** Load shape 2D state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ * @return a new freefrom shape2D
+ */
+Shape2D *Shape2DFree::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+  QPolygonF polygon;
+
+  size_t paramCount = tsv.values("Parameters").size() - 1;
+
+  tsv.selectLine("Parameters");
+  for (size_t i = 0; i < paramCount; i += 2) {
+    double x, y;
+    tsv >> x >> y;
+    polygon << QPointF(x, y);
+  }
+
+  return new Shape2DFree(polygon);
+}
+
+/** Save the state of the shape 2D to a Mantid project file
+ * @return a string representing the state of the shape 2D
+ */
+std::string Shape2DFree::saveToProject() const {
+  API::TSVSerialiser tsv;
+
+  tsv.writeLine("Type") << "free";
+  tsv.writeLine("Parameters");
+  for (auto &point : m_polygon) {
+    tsv << point.x() << point.y();
+  }
+  tsv.writeRaw(Shape2D::saveToProject());
+  return tsv.outputLines();
+}
+
+Shape2DFree::Shape2DFree(const QPolygonF &polygon) : m_polygon(polygon) {
+  resetBoundingRect();
+}
+
 } // MantidWidgets
 } // MantidQt

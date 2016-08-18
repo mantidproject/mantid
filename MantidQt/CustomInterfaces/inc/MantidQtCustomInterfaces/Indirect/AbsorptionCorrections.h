@@ -33,6 +33,8 @@ private:
   QString m_outputFactorsWsName;
 
   Ui::AbsorptionCorrections m_uiForm;
+  /// alg
+  Mantid::API::IAlgorithm_sptr m_absCorAlgo;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

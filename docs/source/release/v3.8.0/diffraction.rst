@@ -42,6 +42,15 @@ Engineering Diffraction
 - EnggFocus: bins are now masked at the beginning of the workflow
   (when using the option MaskBinsXMins)
 
+- :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>` an algorithm which saves a TableWorkspace containing
+  diffraction fitting results as an ASCII file
+
+- New *Fit All* button on the Fitting Tab will enable user to
+  batch-process all the runs and banks when a range of run number
+  is given. During the Fit process,
+  :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>` algorithm
+  will be utilised to save *engggui_fitting_fitpeaks_param*
+  TableWorkspace as a `csv` file.
 
 Powder Diffraction
 ------------------
@@ -71,6 +80,14 @@ Powder Diffraction
   
 - :ref:`pearl-powder-diffraction-ref`: A workflow diagram for 
   ``pearl_run_focus`` function has been created. 
+
+
+Imaging
+-------
+
+- An updated version of the IMAT instrument definition now includes
+  prototype diffraction detector banks.
+
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_
 and

@@ -17,10 +17,24 @@ Algorithms
 Bayes
 #####
 
+Quasi
+~~~~~
+
+- Saving and plotting are performed after the algorithm is run via the use of push buttons at the bottom of the interface
+
+
 Stretch
 ~~~~~~~
 
 - Previously the Quest script was used to drive the Bayes stretch interface. This functionality has been ported to the algorithm :ref:`BayesStretch <algm-BayesStretch>`.
+
+Corrections
+###########
+
+Absorption
+~~~~~~~~~~
+
+- Mantid plotting is now handled in the interface rather than the respective algorithm
 
 
 Data Reduction
@@ -28,8 +42,8 @@ Data Reduction
 
 ISIS Calibration
 ~~~~~~~~~~~~~~~~
-- Add load log option to ISIS calibration interface
 
+- Add load log option to ISIS calibration interface
 
 Data Analysis
 #############
@@ -70,6 +84,7 @@ Improvements
 - Range bars colours in the *ISIS Calibration* interface have been updated to match the convention in the fit wizard.
 - Vesuvio sigma_theta value updated for single and double differencing in both forward and back scattering. The new value is 0.016 for all.
 - The Elwin interface now uses the resolution of the instrument to create the range bars when possible
+- Shift of container data and conversion of units to wavelength have been removed from ApplyPaalmanPings interface and added to ApplyPaalmanPingsCorrection algorithm.
 
 
 Bugfixes
