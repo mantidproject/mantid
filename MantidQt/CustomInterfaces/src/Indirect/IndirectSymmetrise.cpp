@@ -221,6 +221,9 @@ void IndirectSymmetrise::algorithmComplete(bool error) {
                << QString::fromStdString(m_pythonExportWsName);
     plotSpectrum(workspaces);
   }
+  // Enable save and plot
+  uiForm.pbPlot->setEnabled(true);
+  uiForm.pbSave->setEnabled(true);
 }
 
 /**
