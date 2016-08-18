@@ -204,7 +204,7 @@ void SCDCalibratePanels::exec() {
     MantidVec &yVec = outSpec.dataY();
     MantidVec &eVec = outSpec.dataE();
     MantidVec &xVec = outSpec.dataX();
-    std::fill(yVec.begin(),yVec.end(),0.0);
+    std::fill(yVec.begin(), yVec.end(), 0.0);
 
     for (int i = 0; i < nBankPeaks; i++) {
       const DataObjects::Peak &peak = local->getPeak(i);
@@ -217,7 +217,7 @@ void SCDCalibratePanels::exec() {
       else if (peak.getBinCount() > 0.) // then by counts in peak centre
         weight = 1.0 / peak.getBinCount();
       for (int j = 0; j < 3; j++) {
-        int k = i * 3 + j; 
+        int k = i * 3 + j;
         xVec[k] = i * 3 + j;
         eVec[k] = weight;
       }
@@ -437,7 +437,7 @@ void SCDCalibratePanels::findL1(int nPeaks,
   MantidVec &yVec = outSp.dataY();
   MantidVec &eVec = outSp.dataE();
   MantidVec &xVec = outSp.dataX();
-  std::fill(yVec.begin(),yVec.end(),0.0);
+  std::fill(yVec.begin(), yVec.end(), 0.0);
 
   for (int i = 0; i < nPeaks; i++) {
     const DataObjects::Peak &peak = peaksWs->getPeak(i);
@@ -451,7 +451,7 @@ void SCDCalibratePanels::findL1(int nPeaks,
     else if (peak.getBinCount() > 0.) // then by counts in peak centre
       weight = 1.0 / peak.getBinCount();
     for (int j = 0; j < 3; j++) {
-      int k = i * 3 + j; 
+      int k = i * 3 + j;
       xVec[k] = i * 3 + j;
       eVec[k] = weight;
     }
@@ -544,8 +544,9 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
  *  @param bankPrefixName   The prefix to the bank names.
  */
 void SCDCalibratePanels::LoadISawDetCal(
-    boost::shared_ptr<const Instrument> &instrument, boost::container::flat_set<string> &AllBankName,
-    double &T0, double &L0, string filename, string bankPrefixName) {
+    boost::shared_ptr<const Instrument> &instrument,
+    boost::container::flat_set<string> &AllBankName, double &T0, double &L0,
+    string filename, string bankPrefixName) {
 
   V3D beamline, samplePos;
   double beamlineLen;
@@ -756,8 +757,9 @@ void SCDCalibratePanels::createResultWorkspace(const int numGroups,
  * @param filename     -The name of the DetCal file to save the results to
  */
 void SCDCalibratePanels::saveIsawDetCal(
-    boost::shared_ptr<Instrument> &instrument, boost::container::flat_set<string> &AllBankName,
-    double T0, string filename) {
+    boost::shared_ptr<Instrument> &instrument,
+    boost::container::flat_set<string> &AllBankName, double T0,
+    string filename) {
   // having a filename triggers doing the work
   if (filename.empty())
     return;
@@ -1015,7 +1017,8 @@ void writeXmlParameter(ofstream &ostream, const string &name,
 }
 
 void SCDCalibratePanels::saveXmlFile(
-    string const FileName, boost::container::flat_set<string> const AllBankNames,
+    string const FileName,
+    boost::container::flat_set<string> const AllBankNames,
     Instrument_const_sptr const instrument) const {
   if (FileName.empty())
     return;
