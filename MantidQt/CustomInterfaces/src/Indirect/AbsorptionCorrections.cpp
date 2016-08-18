@@ -117,7 +117,8 @@ void AbsorptionCorrections::run() {
 
   // Set the correction workspace to keep the factors if desired
   bool keepCorrectionFactors = m_uiForm.ckKeepFactors->isChecked();
-  QString m_outputFactorsWsName = outputBaseName + "_" + sampleShape + "_Factors";
+  QString m_outputFactorsWsName =
+      outputBaseName + "_" + sampleShape + "_Factors";
   if (keepCorrectionFactors)
     absCorAlgo->setProperty("CorrectionsWorkspace",
                             m_outputFactorsWsName.toStdString());

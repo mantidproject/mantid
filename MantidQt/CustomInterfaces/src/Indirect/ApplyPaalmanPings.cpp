@@ -376,7 +376,6 @@ void ApplyPaalmanPings::absCorComplete(bool error) {
     return;
   }
 
-
   // Convert back to original sample units
   if (m_originalSampleUnits != "Wavelength") {
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
