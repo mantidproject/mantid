@@ -10,6 +10,7 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 
+#include <algorithm>
 #include <fstream>
 
 #include <boost/lexical_cast.hpp>
@@ -36,8 +37,7 @@ const std::string EnggDiffractionPresenter::g_shortMsgRBNumberRequired =
 const std::string EnggDiffractionPresenter::g_msgRBNumberRequired =
     std::string("An experiment reference number (or so called \"RB "
                 "number\" at ISIS) is "
-                "required to effectively use this interface, "
-                "this can be entered at the top of the screen. \n") +
+                "required to effectively use this interface. \n") +
     "The output calibration, focusing and fitting results will be "
     "saved in directories named using the RB number entered.";
 
@@ -598,7 +598,6 @@ void EnggDiffractionPresenter::processRBNumberChange() {
   const std::string rbn = m_view->getRBNumber();
   auto valid = validateRBNumber(rbn);
   m_view->enableTabs(valid);
-  m_view->highlightRbNumber(valid);
   m_view->splashMessage(!valid, g_shortMsgRBNumberRequired,
                         g_msgRBNumberRequired);
   if (!valid) {
@@ -1060,18 +1059,34 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   MatrixWorkspace_sptr vanCurvesWS;
   MatrixWorkspace_sptr ceriaWS;
 
+  // If the file is numerical only we need to append
+  // it in case the favorite instrument isn't set to ENGINX
+  const std::string currentInst = m_view->currentInstrument();
+  // Vanadium file
+  std::string vanFileName(vanNo);
+  if (std::all_of(vanNo.begin(), vanNo.end(), ::isdigit)) {
+    // This only has digits - append prefix
+    vanFileName = currentInst + vanFileName;
+  }
+
+  // Cerium file
+  std::string cerFileName(ceriaNo);
+  if (std::all_of(ceriaNo.begin(), ceriaNo.end(), ::isdigit)) {
+    // All digits - append inst prefix
+    cerFileName = currentInst + cerFileName;
+  }
+
   // save vanIntegWS and vanCurvesWS as open genie
   // see where spec number comes from
 
-  loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
+  loadOrCalcVanadiumWorkspaces(vanFileName, cs.m_inputDirCalib, vanIntegWS,
                                vanCurvesWS, cs.m_forceRecalcOverwrite, specNos);
 
-  const std::string instStr = m_view->currentInstrument();
   try {
     auto load =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
     load->initialize();
-    load->setPropertyValue("Filename", instStr + ceriaNo);
+    load->setPropertyValue("Filename", cerFileName);
     const std::string ceriaWSName = "engggui_calibration_sample_ws";
     load->setPropertyValue("OutputWorkspace", ceriaWSName);
     load->execute();
@@ -1187,6 +1202,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   // specific bank name as suffix
   for (size_t bankIdx = 0; bankIdx < difc.size(); ++bankIdx) {
     Poco::Path bankOutputFullPath(saveDir);
+    // Need to use van number not file name here else it will be
+    // "ENGINX_ENGINX12345_ENGINX12345...." as out name
     const std::string bankFilename = buildCalibrateSuggestedFilename(
         vanNo, ceriaNo, "bank_" + bankNames[bankIdx]);
     bankOutputFullPath.append(bankFilename);
@@ -1864,7 +1881,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
   findPrecalcVanadiumCorrFilenames(vanNo, inputDirCalib, preIntegFilename,
                                    preCurvesFilename, foundPrecalc);
 
-  // if pre caluclated not found ..
+  // if pre calculated not found ..
   if (forceRecalc || !foundPrecalc) {
     g_log.notice() << "Calculating Vanadium corrections. This may take a "
                       "few seconds...\n";
@@ -2175,8 +2192,7 @@ void EnggDiffractionPresenter::doRebinningTime(const std::string &runNo,
 void EnggDiffractionPresenter::inputChecksBeforeRebin(
     const std::string &runNo) {
   if (runNo.empty()) {
-    throw std::invalid_argument("The run to pre-process is invalid. The run" +
-                                g_runNumberErrorStr);
+    throw std::invalid_argument("The run to pre-process" + g_runNumberErrorStr);
   }
 }
 
