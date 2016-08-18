@@ -181,6 +181,10 @@ void ConvertUnits::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
+/**Executes the main part of the algorithm that handles the conversion of the units
+* @param inputWS :: the input workspace that will be converted
+* @return A pointer to a MatrixWorkspace_sptr that contains the converted units
+*/
 MatrixWorkspace_sptr
 ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
 
