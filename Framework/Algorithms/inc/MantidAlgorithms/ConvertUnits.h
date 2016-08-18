@@ -106,6 +106,14 @@ private:
   void setupMemberVariables(const API::MatrixWorkspace_const_sptr inputWS);
   API::MatrixWorkspace_sptr
   setupOutputWorkspace(const API::MatrixWorkspace_const_sptr inputWS);
+  API::MatrixWorkspace_sptr
+  executeUnitConversion(const API::MatrixWorkspace_sptr inputWS);
+
+  API::MatrixWorkspace_sptr
+  convertToHistogram(const API::MatrixWorkspace_sptr inputWS);
+
+  API::MatrixWorkspace_sptr
+  convertToPointData(const API::MatrixWorkspace_sptr inputWS);
 
   /// Convert the workspace units according to a simple output = a * (input^b)
   /// relationship
