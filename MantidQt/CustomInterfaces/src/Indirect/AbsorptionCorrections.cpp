@@ -102,9 +102,6 @@ void AbsorptionCorrections::run() {
     addShapeSpecificCanOptions(absCorAlgo, sampleShape);
   }
 
-  bool plot = m_uiForm.ckPlot->isChecked();
-  absCorAlgo->setProperty("Plot", plot);
-
   // Generate workspace names
   int nameCutIndex = sampleWsName.lastIndexOf("_");
   if (nameCutIndex == -1)
@@ -132,7 +129,7 @@ void AbsorptionCorrections::run() {
     if (keepCorrectionFactors)
       addSaveWorkspace(outputFactorsWsName);
   }
-
+  m_absCorAlgo = absCorAlgo;
   // Run algorithm batch
   m_batchAlgoRunner->executeBatchAsync();
 
@@ -303,6 +300,28 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
     shiftLog->setProperty("LogText", boost::lexical_cast<std::string>(
                                          m_uiForm.spCanShift->value()));
     shiftLog->execute();
+  }
+  // Plot output
+
+  bool plot = m_uiForm.ckPlot->isChecked();
+  if (plot) {
+    QStringList plotData = {QString::fromStdString(m_pythonExportWsName),
+                            m_uiForm.dsSampleInput->getCurrentDataName()};
+    auto outputFactorsWsName =
+        m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
+    if (m_uiForm.ckKeepFactors->isChecked()) {
+      QStringList plotCorr = {QString::fromStdString(outputFactorsWsName) +
+                              "_ass"};
+      if (m_uiForm.ckUseCanCorrections->isChecked()) {
+        plotCorr.push_back(QString::fromStdString(outputFactorsWsName) +
+                           "_acc");
+        QString shiftedWs = QString::fromStdString(
+            m_absCorAlgo->getPropertyValue("CanWorkspace"));
+        plotData.push_back(shiftedWs);
+      }
+      plotSpectrum(plotCorr, 0);
+    }
+    IndirectTab::plotSpectrum(plotData, 0);
   }
 }
 
