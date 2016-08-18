@@ -36,7 +36,7 @@
 #include "muParserScript.h"
 #include "ScriptingEnv.h"
 #include "analysis/fft2D.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include "MantidKernel/Strings.h"
 
@@ -1014,7 +1014,7 @@ void MatrixModel::pasteData(double *clipboardBuffer, int topRow, int leftCol,
 MatrixModel::~MatrixModel() { free(d_data); }
 
 std::string MatrixModel::saveToProject() {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
 
   for (int row = 0; row < d_rows; ++row) {
     // Index to the first element of each row
