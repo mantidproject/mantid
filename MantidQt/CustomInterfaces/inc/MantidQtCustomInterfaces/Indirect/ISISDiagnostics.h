@@ -83,7 +83,6 @@ private slots:
 
 private:
   Ui::ISISDiagnostics m_uiForm;
-  QString m_outputWs;
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

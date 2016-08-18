@@ -237,11 +237,8 @@ void ISISDiagnostics::algorithmComplete(bool error) {
   }
 
   for (size_t i = 0; i < sliceOutputGroup->size(); i++) {
-    QString m_outputWs =
-        QString::fromStdString(sliceOutputGroup->getItem(i)->name());
-
-    if (m_uiForm.ckSave->isChecked())
-      addSaveWorkspaceToQueue(m_outputWs);
+    QString wsName =
+      QString::fromStdString(sliceOutputGroup->getItem(i)->name());
   }
   // Enable plot and save buttons
   m_uiForm.pbSave->setEnabled(true);
@@ -474,9 +471,19 @@ void ISISDiagnostics::pbRunFinished() {
  * Handles mantid plotting
  */
 void ISISDiagnostics::plotClicked() {
-  bool plot = checkADSForPlotSaveWorkspace(m_outputWs.toStdString, false);
+  bool plot = checkADSForPlotSaveWorkspace(m_pythonExportWsName, true);
   if (plot)
-    plotSpectrum(m_outputWs);
+    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+}
+
+/**
+ * Handles saving workspace
+ */
+void ISISDiagnostics::saveClicked() {
+  bool save = checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+  if (save)
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatchAsync();
 }
 } // namespace CustomInterfaces
 } // namespace Mantid
