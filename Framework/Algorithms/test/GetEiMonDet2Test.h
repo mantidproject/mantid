@@ -113,7 +113,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorEPPTable", detectorEPPTable))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("IndexType", "SpectrumNumber"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "2"))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("IncidentEnergy", EI))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("NominalIncidentEnergy", EI))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorWorkspace", monitorWs))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorEPPTable", monitorEPPTable))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Monitor", 1))

@@ -36,6 +36,7 @@ namespace PropertyNames {
   const static std::string MONITOR("Monitor");
   const static std::string MONITOR_EPP_TABLE("MonitorEPPTable");
   const static std::string MONITOR_WORKSPACE("MonitorWorkspace");
+  const static std::string NOMINAL_ENERGY("NominalIncidentEnergy");
   const static std::string PULSE_INTERVAL("PulseInterval");
 }
 
@@ -76,7 +77,9 @@ void GetEiMonDet2::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
   declareProperty(
-      PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositive, "Taken from the sample logs, if not specified.", Direction::InOut);
+      PropertyNames::NOMINAL_ENERGY, EMPTY_DBL(), mustBePositive, "Taken from the sample logs, if not specified.");
+  declareProperty(
+      PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositive, "Taken from the sample logs, if not specified.", Direction::Output);
 }
 
 template<typename T, typename Map>
@@ -146,10 +149,10 @@ void GetEiMonDet2::exec() {
       throw std::runtime_error(PropertyNames::MONITOR + " is also listed in " + PropertyNames::DETECTORS);
     }
   }
-  double nominalIncidentEnergy = getProperty(PropertyNames::INCIDENT_ENERGY);
+  double nominalIncidentEnergy = getProperty(PropertyNames::NOMINAL_ENERGY);
   if (nominalIncidentEnergy == EMPTY_DBL()) {
     if (!detectorWs->run().hasProperty("Ei")) {
-      throw std::runtime_error("No " + PropertyNames::INCIDENT_ENERGY + " given and no Ei field found in sample logs");
+      throw std::runtime_error("No " + PropertyNames::NOMINAL_ENERGY + " given and no Ei field found in sample logs");
     }
     nominalIncidentEnergy = std::stod(detectorWs->run().getProperty("Ei")->value());
   }
