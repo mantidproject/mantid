@@ -1,5 +1,8 @@
 #include "MantidDataHandling/ProcessBankData.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataObjects/Events.h"
+
+using namespace Mantid::DataObjects;
 
 namespace Mantid{
 namespace DataHandling{
