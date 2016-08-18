@@ -221,7 +221,8 @@ void IndirectMoments::saveClicked() {
   QString outputWs =
       getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
   bool save = checkADSForPlotSaveWorkspace(outputWs.toStdString(), false);
-  addSaveWorkspaceToQueue(outputWs);
+  if (save)
+    addSaveWorkspaceToQueue(outputWs);
   m_batchAlgoRunner->executeBatchAsync();
 }
 
