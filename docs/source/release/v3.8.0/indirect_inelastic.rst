@@ -28,14 +28,22 @@ Stretch
 
 - Previously the Quest script was used to drive the Bayes stretch interface. This functionality has been ported to the algorithm :ref:`BayesStretch <algm-BayesStretch>`.
 
+Corrections
+###########
+
+Absorption
+~~~~~~~~~~
+
+- Mantid plotting is now handled in the interface rather than the respective algorithm
+
 
 Data Reduction
 ##############
 
 ISIS Calibration
 ~~~~~~~~~~~~~~~~
-- Add load log option to ISIS calibration interface
 
+- Add load log option to ISIS calibration interface
 
 Data Analysis
 #############

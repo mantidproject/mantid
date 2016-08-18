@@ -620,14 +620,37 @@ public:
     TS_ASSERT_THROWS_NOTHING(h.setCountStandardDeviations(2));
   }
 
+  void test_setFrequenciesDataValid() {
+    Histogram h(BinEdges{1, 2, 3});
+    std::vector<double> freqs(2, 0.36);
+    h.setFrequencies(freqs);
+    TS_ASSERT_EQUALS(freqs, h.y().rawData());
+  }
+
   void test_setFrequencyVariances() {
     Histogram h(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h.setFrequencyVariances(2));
   }
 
+  void test_setFrequencyVariancesDataValid() {
+    Histogram h(BinEdges{1, 2, 3});
+    std::vector<double> freqVars(2, 100);
+    std::vector<double> freqStdDevs(2, 10);
+
+    h.setFrequencyVariances(freqVars);
+    TS_ASSERT_EQUALS(freqStdDevs, h.e().rawData());
+  }
+
   void test_setFrequencyStandardDeviations() {
     Histogram h(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h.setFrequencyStandardDeviations(2));
+  }
+
+  void test_setFrequencyStandardDeviationsDataValid() {
+    Histogram h(BinEdges{1, 2, 3});
+    std::vector<double> freqStdDevs(2, 0.11);
+    h.setFrequencyStandardDeviations(freqStdDevs);
+    TS_ASSERT_EQUALS(freqStdDevs, h.e().rawData());
   }
 
   void test_setCountVariances_size_mismatch() {
