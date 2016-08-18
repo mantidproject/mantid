@@ -169,6 +169,7 @@ void LoadSpice2D::init() {
 void LoadSpice2D::exec() {
 
   setInputPropertiesAsMemberProperties();
+  setTimes();
   std::map<std::string, std::string> metadata =
       m_xmlHandler.get_metadata("Detector");
   setWavelength(metadata);
@@ -285,7 +286,12 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
     from_string<double>(m_dwavelength, s, std::dec);
 
     // 20160720: New wavelength will be a ratio
-    m_dwavelength = m_wavelength * m_dwavelength;
+    // HUGLY HACK! Comparing dates...
+    DateAndTime changingDate("2016-07-20 00:00:00");
+    if (m_startTime >= changingDate) {
+      g_log.debug() << "Using wavelength spread as a ratio" << '\n';
+      m_dwavelength = m_wavelength * m_dwavelength;
+    }
 
     g_log.debug() << "setWavelength: " << m_wavelength << " , " << m_dwavelength
                   << '\n';
@@ -475,18 +481,25 @@ void LoadSpice2D::setBeamTrapRunProperty(
 
   addRunProperty<double>("beam-trap-diameter", trapDiameterInUse, "mm");
 }
-void LoadSpice2D::setMetadataAsRunProperties(
-    std::map<std::string, std::string> &metadata) {
-  setBeamTrapRunProperty(metadata);
 
+void LoadSpice2D::setTimes() {
   // start_time
   std::map<std::string, std::string> attributes =
       m_xmlHandler.get_attributes_from_tag("/");
 
-  addRunProperty<std::string>(attributes, "start_time", "run_start", "");
+  m_startTime = DateAndTime(attributes["start_time"]);
+  m_endTime = DateAndTime(attributes["end_time"]);
+}
 
-  m_workspace->mutableRun().setStartAndEndTime(attributes["start_time"],
-                                               attributes["end_time"]);
+void LoadSpice2D::setMetadataAsRunProperties(
+    std::map<std::string, std::string> &metadata) {
+
+  setBeamTrapRunProperty(metadata);
+
+  addRunProperty<std::string>("start_time", m_startTime.toISO8601String(), "");
+  addRunProperty<std::string>("run_start", m_startTime.toISO8601String(), "");
+
+  m_workspace->mutableRun().setStartAndEndTime(m_startTime, m_endTime);
 
   // sample thickness
   addRunProperty<double>(metadata, "Header/Sample_Thickness",
