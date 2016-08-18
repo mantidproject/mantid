@@ -1844,7 +1844,6 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
   // as it requires the graphs to exist first!
   multiLayer->setWaterfallLayout(isWaterfall);
 
-
   return multiLayer;
 }
 
