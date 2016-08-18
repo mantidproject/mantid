@@ -137,6 +137,7 @@ void IndirectSqw::sqwAlgDone(bool error) {
   // Enable save and plot
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
+  m_uiForm.cbPlotType->setEnabled(true);
 }
 
 /**
