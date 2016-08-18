@@ -128,22 +128,28 @@ public:
     double dp = 1e-9;
     fun.setParameter("Amplitude", 2.1 + dp);
     fun.function(*domain, values1);
-    for(size_t i = 0; i < values1.size(); ++i) {
-      TS_ASSERT_DELTA(jacobian.get(i, 0), (values1.getCalculated(i) - values->getCalculated(i)) / dp, 1e-5);
+    for (size_t i = 0; i < values1.size(); ++i) {
+      TS_ASSERT_DELTA(
+          jacobian.get(i, 0),
+          (values1.getCalculated(i) - values->getCalculated(i)) / dp, 1e-5);
     }
 
     fun.setParameter("Amplitude", 2.1);
     fun.setParameter("PeakCentre", dp);
     fun.function(*domain, values1);
-    for(size_t i = 0; i < values1.size(); ++i) {
-      TS_ASSERT_DELTA(jacobian.get(i, 1), (values1.getCalculated(i) - values->getCalculated(i)) / dp, 1e-5);
+    for (size_t i = 0; i < values1.size(); ++i) {
+      TS_ASSERT_DELTA(
+          jacobian.get(i, 1),
+          (values1.getCalculated(i) - values->getCalculated(i)) / dp, 1e-5);
     }
 
     fun.setParameter("PeakCentre", 0.0);
     fun.setParameter("FWHM", 1.0 + dp);
     fun.function(*domain, values1);
-    for(size_t i = 0; i < values1.size(); ++i) {
-      TS_ASSERT_DELTA(jacobian.get(i, 2), (values1.getCalculated(i) - values->getCalculated(i)) / dp, 1e-5);
+    for (size_t i = 0; i < values1.size(); ++i) {
+      TS_ASSERT_DELTA(
+          jacobian.get(i, 2),
+          (values1.getCalculated(i) - values->getCalculated(i)) / dp, 1e-5);
     }
   }
 
@@ -193,7 +199,8 @@ public:
 
   void test_Gaussian() {
 
-    FunctionDomain1DHistogram domain({-1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0});
+    FunctionDomain1DHistogram domain(
+        {-1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0});
     FunctionValues values(domain);
 
     Gaussian fun;
@@ -220,23 +227,29 @@ public:
     double dp = 1e-9;
     fun.setParameter("Height", 2.1 + dp);
     fun.function(domain, values1);
-    for(size_t i = 0; i < values1.size(); ++i) {
-      TS_ASSERT_DELTA(jacobian.get(i, 0), (values1.getCalculated(i) - values.getCalculated(i)) / dp, 1e-5);
+    for (size_t i = 0; i < values1.size(); ++i) {
+      TS_ASSERT_DELTA(jacobian.get(i, 0),
+                      (values1.getCalculated(i) - values.getCalculated(i)) / dp,
+                      1e-5);
     }
 
     fun.setParameter("Height", 2.1);
     fun.setParameter("PeakCentre", dp);
     fun.function(domain, values1);
-    for(size_t i = 0; i < values1.size(); ++i) {
-      TS_ASSERT_DELTA(jacobian.get(i, 1), (values1.getCalculated(i) - values.getCalculated(i)) / dp, 1e-5);
+    for (size_t i = 0; i < values1.size(); ++i) {
+      TS_ASSERT_DELTA(jacobian.get(i, 1),
+                      (values1.getCalculated(i) - values.getCalculated(i)) / dp,
+                      1e-5);
     }
 
     fun.setParameter("PeakCentre", 0.0);
     auto oldPar = fun.activeParameter(2);
     fun.setActiveParameter(2, oldPar + dp);
     fun.function(domain, values1);
-    for(size_t i = 0; i < values1.size(); ++i) {
-      TS_ASSERT_DELTA(jacobian.get(i, 2), (values1.getCalculated(i) - values.getCalculated(i)) / dp, 1e-5);
+    for (size_t i = 0; i < values1.size(); ++i) {
+      TS_ASSERT_DELTA(jacobian.get(i, 2),
+                      (values1.getCalculated(i) - values.getCalculated(i)) / dp,
+                      1e-5);
     }
   }
 

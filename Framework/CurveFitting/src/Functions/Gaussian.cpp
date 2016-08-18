@@ -160,8 +160,9 @@ void Gaussian::histogramDerivative1D(Jacobian *jacobian, double left,
   const double w = pow(1 / s, 2);
   const double sw = sqrt(w);
 
-  auto cumulFun =
-      [sw, c](double x) { return sqrt(M_PI / 2) / sw * erf(sw / sqrt(2.0) * (x - c)); };
+  auto cumulFun = [sw, c](double x) {
+    return sqrt(M_PI / 2) / sw * erf(sw / sqrt(2.0) * (x - c));
+  };
   auto fun = [w, c](double x) { return exp(-w / 2 * pow(x - c, 2)); };
 
   double xl = left;
