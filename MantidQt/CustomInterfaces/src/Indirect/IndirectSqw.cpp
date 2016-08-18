@@ -150,22 +150,6 @@ void IndirectSqw::sqwAlgDone(bool error) {
   if (error)
     return;
 
-  // Get the workspace name
-  QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-  QString sqwWsName = sampleWsName.left(sampleWsName.length() - 4) + "_sqw";
-
-  QString plotType = m_uiForm.cbPlotType->currentText();
-
-  if (plotType == "Contour")
-    plot2D(sqwWsName);
-
-  else if (plotType == "Spectra") {
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        sqwWsName.toStdString());
-    int numHist = static_cast<int>(ws->getNumberHistograms());
-    plotSpectrum(sqwWsName, 0, numHist - 1);
-  }
-
   // Enable save and plot
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
@@ -199,6 +183,23 @@ void IndirectSqw::plotContour() {
     m_pythonRunner.runPythonCode(pyInput);
   } else {
     emit showMessageBox("Invalid filename.");
+  }
+}
+
+/**
+ * Handles mantid plotting
+ */
+void IndirectSqw::plotClicked() {
+  QString plotType = m_uiForm.cbPlotType->currentText();
+
+  if (plotType == "Contour")
+    plot2D(QString::fromStdString(m_pythonExportWsName));
+
+  else if (plotType == "Spectra") {
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      m_pythonExportWsName);
+    int numHist = static_cast<int>(ws->getNumberHistograms());
+    plotSpectrum(QString::fromStdString(m_pythonExportWsName), 0, numHist - 1);
   }
 }
 
