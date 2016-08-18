@@ -330,7 +330,7 @@ Fitting
              early stage of definition and implementation. Not all
              options may be supported and/or consistent at the moment.
 			 
-.. warning:: The input workspace must be converted into a focussed file
+.. warning:: The input workspace must be converted into a focused file
 			 first. The steps to complete this are found here: :ref:`focus-Engineering_Diffraction-ref`
 
 The Fitting tab provides a graphical interface which fits an expected
@@ -344,7 +344,12 @@ To use the Fitting tab, user is required to provide:
 1. A focused file as Focus Run input by browsing or entering single/multi
    run number
 2. List of expected peaks which can be either by browsing a (*CSV*) file
-   or entering within the text-field simply click on the Fit button.
+   or entering within the text-field
+3. Next click on the *Fit* button if you would like to fit single focused
+   file or you can click *Fit All* button which will enable user to
+   batch-process all the runs and banks when a range of run number is given,
+   *Fit All* process may also be used when when a single run number is given
+   or a file is browsed
 
 .. _ExpectedPeaks-Engineering_Diffraction-ref:
 
@@ -386,7 +391,7 @@ Output
 ^^^^^^
 
 Once the Fit button has been clicked Mantid will process the data. Please wait
-until the Fitting process has completed. Upon completion you should be able to 
+until the Fitting process has completed. Upon completion you should be able to
 view on the Fitting tab which will contain:
 
 - The focused workspace plotted in the background in gray crosses.
@@ -405,6 +410,10 @@ workspaces window:
    so the fitted data can be compared with focused data
 3. The *engggui_fitting_single_peaks* workspace with each workspace
    index representing individual expected peak.
+
+During the Fit process, :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>`
+algorithm will be utilised to save *engggui_fitting_fitpeaks_param*
+TableWorkspace as a `csv` file.
 
 In the plots, the x or abscissa axis is in d-spacing units, which are
 more convenient for peak fitting than time-of-flight. However the run
