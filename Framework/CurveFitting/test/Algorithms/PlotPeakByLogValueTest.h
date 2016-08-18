@@ -562,7 +562,7 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", 3, nbins + 1, nbins);
     double x0 = -10.0;
     double x1 = 10.0;
-    double dx = (x1 - x0) / nbins;
+    double dx = (x1 - x0) / static_cast<double>(nbins);
     for (size_t i = 0; i < nbins; ++i) {
       auto x = x0 + double(i) * dx;
       ws->dataX(0)[i] = x;

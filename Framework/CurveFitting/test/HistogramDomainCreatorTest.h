@@ -14,6 +14,7 @@
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"
+#include "MantidCurveFitting/GSLJacobian.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
@@ -25,6 +26,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::CurveFitting::Functions;
 using Mantid::CurveFitting::HistogramDomainCreator;
 using Mantid::CurveFitting::Algorithms::Fit;
+using Mantid::CurveFitting::GSLJacobian;
 
 class HistogramDomainCreatorTest : public CxxTest::TestSuite {
 public:
@@ -82,7 +84,6 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), 10);
     auto &h = dynamic_cast<FunctionDomain1DHistogram &>(*domain);
     auto &x = ws->readX(0);
-    auto &y = ws->readY(0);
     for (size_t j = 0; j < 10; ++j) {
       TS_ASSERT_EQUALS(h[j], x[j + 1]);
     }
@@ -105,20 +106,45 @@ public:
 
     Lorentzian fun;
     fun.initialize();
+    fun.setParameter("Amplitude", 2.1);
     fun.setParameter("FWHM", 1.0);
     fun.function(*domain, *values);
 
-    auto &d1d = dynamic_cast<FunctionDomain1D &>(*domain);
-    TS_ASSERT_DELTA(values->getCalculated(0), 0.0302240668, 1e-9);
-    TS_ASSERT_DELTA(values->getCalculated(1), 0.0433343771, 1e-9);
-    TS_ASSERT_DELTA(values->getCalculated(2), 0.0640812259, 1e-9);
-    TS_ASSERT_DELTA(values->getCalculated(3), 0.0936577709, 1e-9);
-    TS_ASSERT_DELTA(values->getCalculated(4), 0.121118942, 1e-9);
-    TS_ASSERT_DELTA(values->getCalculated(5), 0.121118942, 1e-9);
-    TS_ASSERT_DELTA(values->getCalculated(6), 0.0936577709, 1e-9);
-    TS_ASSERT_DELTA(values->getCalculated(7), 0.0640812259, 1e-9);
-    TS_ASSERT_DELTA(values->getCalculated(8), 0.0433343771, 1e-9);
-    TS_ASSERT_DELTA(values->getCalculated(9), 0.0302240668, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(0), 2.1 * 0.0302240668, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(1), 2.1 * 0.0433343771, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(2), 2.1 * 0.0640812259, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(3), 2.1 * 0.0936577709, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(4), 2.1 * 0.121118942, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(5), 2.1 * 0.121118942, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(6), 2.1 * 0.0936577709, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(7), 2.1 * 0.0640812259, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(8), 2.1 * 0.0433343771, 1e-9);
+    TS_ASSERT_DELTA(values->getCalculated(9), 2.1 * 0.0302240668, 1e-9);
+
+    GSLJacobian jacobian(fun, 10);
+    fun.functionDeriv(*domain, jacobian);
+
+    FunctionValues values1(*domain);
+    double dp = 1e-9;
+    fun.setParameter("Amplitude", 2.1 + dp);
+    fun.function(*domain, values1);
+    for(size_t i = 0; i < values1.size(); ++i) {
+      TS_ASSERT_DELTA(jacobian.get(i, 0), (values1.getCalculated(i) - values->getCalculated(i)) / dp, 1e-5);
+    }
+
+    fun.setParameter("Amplitude", 2.1);
+    fun.setParameter("PeakCentre", dp);
+    fun.function(*domain, values1);
+    for(size_t i = 0; i < values1.size(); ++i) {
+      TS_ASSERT_DELTA(jacobian.get(i, 1), (values1.getCalculated(i) - values->getCalculated(i)) / dp, 1e-5);
+    }
+
+    fun.setParameter("PeakCentre", 0.0);
+    fun.setParameter("FWHM", 1.0 + dp);
+    fun.function(*domain, values1);
+    for(size_t i = 0; i < values1.size(); ++i) {
+      TS_ASSERT_DELTA(jacobian.get(i, 2), (values1.getCalculated(i) - values->getCalculated(i)) / dp, 1e-5);
+    }
   }
 
   void test_Lorentzian_integral() {
@@ -163,6 +189,55 @@ public:
     }
 
     AnalysisDataService::Instance().clear();
+  }
+
+  void test_Gaussian() {
+
+    FunctionDomain1DHistogram domain({-1.0, -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0});
+    FunctionValues values(domain);
+
+    Gaussian fun;
+    fun.initialize();
+    fun.setParameter("Height", 2.1);
+    fun.setParameter("Sigma", 0.3);
+    fun.function(domain, values);
+
+    TS_ASSERT_DELTA(values.getCalculated(0), 0.00537128264648, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(1), 0.0298776137685, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(2), 0.108112093951, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(3), 0.254691556195, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(4), 0.390857798247, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(5), 0.390857798247, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(6), 0.254691556195, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(7), 0.108112093951, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(8), 0.0298776137685, 1e-9);
+    TS_ASSERT_DELTA(values.getCalculated(9), 0.00537128264648, 1e-9);
+
+    GSLJacobian jacobian(fun, 10);
+    fun.functionDeriv(domain, jacobian);
+
+    FunctionValues values1(domain);
+    double dp = 1e-9;
+    fun.setParameter("Height", 2.1 + dp);
+    fun.function(domain, values1);
+    for(size_t i = 0; i < values1.size(); ++i) {
+      TS_ASSERT_DELTA(jacobian.get(i, 0), (values1.getCalculated(i) - values.getCalculated(i)) / dp, 1e-5);
+    }
+
+    fun.setParameter("Height", 2.1);
+    fun.setParameter("PeakCentre", dp);
+    fun.function(domain, values1);
+    for(size_t i = 0; i < values1.size(); ++i) {
+      TS_ASSERT_DELTA(jacobian.get(i, 1), (values1.getCalculated(i) - values.getCalculated(i)) / dp, 1e-5);
+    }
+
+    fun.setParameter("PeakCentre", 0.0);
+    auto oldPar = fun.activeParameter(2);
+    fun.setActiveParameter(2, oldPar + dp);
+    fun.function(domain, values1);
+    for(size_t i = 0; i < values1.size(); ++i) {
+      TS_ASSERT_DELTA(jacobian.get(i, 2), (values1.getCalculated(i) - values.getCalculated(i)) / dp, 1e-5);
+    }
   }
 
   void test_Gaussian_integral() {

@@ -154,7 +154,7 @@ public:
   double leftBoundary() const;
 
 protected:
-  DISABLE_COPY_AND_ASSIGN(FunctionDomain1DHistogram);
+  DISABLE_COPY_AND_ASSIGN(FunctionDomain1DHistogram)
   std::vector<double> m_bins; ///< vector of bin boundaries
 };
 

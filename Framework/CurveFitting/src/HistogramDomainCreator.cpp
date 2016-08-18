@@ -128,9 +128,10 @@ boost::shared_ptr<API::Workspace> HistogramDomainCreator::createOutputWorkspace(
     auto &mws = dynamic_cast<MatrixWorkspace &>(*ws);
     auto &bins = dynamic_cast<FunctionDomain1DHistogram &>(*domain);
     for (size_t iSpec = 1; iSpec < mws.getNumberHistograms(); ++iSpec) {
-      if (iSpec == 2)
-        continue; // skip the diff spectrum
-      auto &x = mws.readX(iSpec);
+      if (iSpec == 2) {
+        // skip the diff spectrum
+        continue;
+      }
       auto &y = mws.dataY(iSpec);
       auto &e = mws.dataE(iSpec);
       double left = bins.leftBoundary();

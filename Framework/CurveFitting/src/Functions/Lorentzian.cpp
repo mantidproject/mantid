@@ -142,7 +142,7 @@ void Lorentzian::histogramDerivative1D(Jacobian *jacobian, double left,
   const double g = getParameter("FWHM");
   const double g2 = g * g;
 
-  auto cumulFun = [g, c](double x) { return atan((x - c) / g) / M_PI; };
+  auto cumulFun = [g, c](double x) { return atan((x - c) / g * 2) / M_PI; };
   auto denom = [g2, c](double x) { return (g2 + 4 * pow(c - x, 2)) * M_PI; };
 
   double xl = left;
@@ -153,9 +153,8 @@ void Lorentzian::histogramDerivative1D(Jacobian *jacobian, double left,
     double denomRight = denom(xr);
     double cRight = cumulFun(xr);
     jacobian->set(i, 0, cRight - cLeft);
-    jacobian->set(i, 1, -2.0 * (g / denomRight - g / denomLeft));
-    jacobian->set(i, 2, -2.0 * ((xr - c) / denomRight - (xl - c) / denomLeft));
-    //----------------------------------
+    jacobian->set(i, 1, -2.0 * (g / denomRight - g / denomLeft) * amplitude);
+    jacobian->set(i, 2, -2.0 * ((xr - c) / denomRight - (xl - c) / denomLeft) * amplitude);
     denomLeft = denomRight;
     cLeft = cRight;
     xl = xr;
