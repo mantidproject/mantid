@@ -83,16 +83,19 @@ void ConvertUnits::init() {
 }
 
 /** Executes the algorithm
-*  @throw std::runtime_error If the input workspace has not had its unit set
-*  @throw NotImplementedError If the input workspace contains point (not
-* histogram) data
+*  @throw std::runtime_error :: Thrown in the following cases:
+*   - If the input workspace has not had its unit set
+*   - If the input workspace contains Points, but ConvertFromPointData
+*       has not been enabled.
+*   - If ConvertFromPointData has been enabled, but the conversion to Bins
+*       or back to Points fails.
 *  @throw InstrumentDefinitionError If unable to calculate source-sample
 * distance
 */
 void ConvertUnits::exec() {
   // Get the workspaces
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  bool acceptPointData = getProperty("ConvertFromPointData");
+  const bool acceptPointData = getProperty("ConvertFromPointData");
   bool workspaceWasConverted = false;
 
   // we can do that before anything else, because it doesn't
@@ -149,10 +152,9 @@ void ConvertUnits::exec() {
       }
     } else {
       throw std::runtime_error("Workspace contains points, you can either run "
-                               "ConvertToHistogram on it, or check "
-                               "ConvertFromPointData");
+                               "ConvertToHistogram on it, or set "
+                               "ConvertFromPointData to enabled");
     }
-
   } else {
     correctWS = inputWS;
   }
@@ -181,13 +183,17 @@ void ConvertUnits::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-/**Executes the main part of the algorithm that handles the conversion of the units
+/**Executes the main part of the algorithm that handles the conversion of the
+* units
 * @param inputWS :: the input workspace that will be converted
+* @throw std::runtime_error :: If the workspace has invalid X axis binning
 * @return A pointer to a MatrixWorkspace_sptr that contains the converted units
 */
 MatrixWorkspace_sptr
 ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
 
+  // A WS holding BinEdges cannot have less than 2 values, as a bin has
+  // 2 edges, having less than 2 values would mean that the WS contains Points
   if (inputWS->x(0).size() < 2) {
     std::stringstream msg;
     msg << "Input workspace has invalid X axis binning parameters. Should "
