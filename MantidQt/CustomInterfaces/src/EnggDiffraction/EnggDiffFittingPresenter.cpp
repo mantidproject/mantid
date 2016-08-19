@@ -394,7 +394,7 @@ void EnggDiffFittingPresenter::updateFittingDirVec(
   try {
     bool found = false;
 
-    std::string cwd(focusDir);
+    const std::string cwd(focusDir);
     Poco::DirectoryIterator it(cwd);
     Poco::DirectoryIterator end;
     while (it != end) {
