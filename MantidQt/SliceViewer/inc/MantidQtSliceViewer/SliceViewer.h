@@ -138,6 +138,11 @@ public:
       const std::string &wsName,
       boost::shared_ptr<Mantid::API::IPeaksWorkspace> &changedPeaksWS);
 
+  /// Load the state of the slice viewer from a Mantid project file
+  void loadFromProject(const std::string &lines);
+  /// Save the state of the slice viewer to a Mantid project file
+  std::string saveToProject() const;
+
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed
   void changedShownDim(size_t dimX, size_t dimY);

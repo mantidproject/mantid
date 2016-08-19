@@ -26,6 +26,7 @@
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/SignalBlocker.h"
 #include "MantidQtAPI/SignalRange.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
@@ -2602,6 +2603,92 @@ void SliceViewer::applyColorScalingForCurrentSliceIfRequired() {
   if (useAutoColorScaleforCurrentSlice) {
     setColorScaleAutoSlice();
   }
+}
+
+/**
+ * Load the state of the slice viewer from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
+void SliceViewer::loadFromProject(const std::string &lines)
+{
+  API::TSVSerialiser tsv(lines);
+
+  int dimX, dimY, aspectRatio, normalization;
+  double xMin, yMin, xMax, yMax;
+  bool dynamicRebin, fastRender;
+  std::vector<float> slicePoints;
+
+  // read in settings from project file
+  tsv.selectLine("Dimensions");
+  tsv >> dimX >> dimY;
+  tsv.selectLine("SlicePoint");
+  tsv >> slicePoints;
+  tsv.selectLine("DynamicRebinMode");
+  tsv >> dynamicRebin;
+  tsv.selectLine("FasterRendering");
+  tsv >> fastRender;
+  tsv.selectLine("Normalization");
+  tsv >> normalization;
+  auto norm = static_cast<Mantid::API::MDNormalization>(normalization);
+  tsv.selectLine("AspectRatioType");
+  tsv >> aspectRatio;
+  auto ratio = static_cast<AspectRatioType>(aspectRatio);
+  tsv.selectLine("Limits");
+  tsv >> xMin >> yMin >> xMax >> yMax;
+
+  // apply settings to interface
+  setXYDim(dimX, dimY);
+  setRebinMode(dynamicRebin);
+  setFastRender(fastRender);
+  setNormalization(norm);
+  setAspectRatio(ratio);
+  setXYLimits(xMin, xMax, yMin, yMax);
+
+  // set slice points for each dimension
+  for (size_t i = 0; i < slicePoints.size(); ++i) {
+    setSlicePoint(static_cast<int>(i), slicePoints[i]);
+  }
+
+  // handle overlay workspace
+  if (tsv.selectLine("OverlayWorkspace")) {
+    std::string workspace_name;
+    tsv >> workspace_name;
+
+    // now find the workspace in the ADS set it
+    auto &ads = AnalysisDataService::Instance();
+    if (ads.doesExist(workspace_name)) {
+      m_overlayWS = ads.retrieveWS<IMDWorkspace>(workspace_name);
+      m_overlayWSName = workspace_name;
+    }
+  }
+}
+
+/**
+ * Save the state of th slice viewer to a Mantid project file
+ * @return a string representing the current state
+ */
+std::string SliceViewer::saveToProject() const
+{
+  API::TSVSerialiser tsv;
+
+  tsv.writeLine("Dimensions") << m_dimX << m_dimY;
+  tsv.writeLine("SlicePoint") << m_slicePoint.toString("\t");
+  tsv.writeLine("DynamicRebinMode") << m_rebinMode;
+  tsv.writeLine("FasterRendering") << m_fastRender;
+  tsv.writeLine("Normalization") << static_cast<int>(getNormalization());
+  tsv.writeLine("AspectRatioType") << static_cast<int>(m_aspectRatioType);
+
+  auto xLimits = getXLimits();
+  auto yLimits = getYLimits();
+
+  tsv.writeLine("Limits");
+  tsv << xLimits.minValue() << yLimits.minValue();
+  tsv << xLimits.maxValue() << yLimits.maxValue();
+
+  if (m_overlayWS)
+    tsv.writeLine("OverlayWorkspace") << m_overlayWS->name();
+
+  return tsv.outputLines();
 }
 
 } // namespace

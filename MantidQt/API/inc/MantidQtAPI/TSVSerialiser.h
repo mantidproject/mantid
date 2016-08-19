@@ -58,6 +58,21 @@ public:
 
   std::vector<std::string> values(const std::string &name,
                                   const size_t i = 0) const;
+
+  template <typename T>
+  TSVSerialiser &operator>>(std::vector<T> &val) {
+    val.reserve(m_curValues.size() - m_curIndex);
+
+    for (size_t i = m_curIndex; i < m_curValues.size(); ++i) {
+      auto valStr = m_curValues.at(i);
+      std::stringstream valSS(valStr);
+      T ret;
+      valSS >> ret;
+      val.push_back(ret);
+    }
+    return *this;
+  }
+
   std::vector<std::string> sections(const std::string &name) const;
 
   std::string lineAsString(const std::string &name, const size_t i = 0) const;
