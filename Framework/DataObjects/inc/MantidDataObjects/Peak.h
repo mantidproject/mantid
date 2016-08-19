@@ -28,9 +28,11 @@ public:
   Peak();
   Peak(Geometry::Instrument_const_sptr m_inst, Mantid::Kernel::V3D QLabFrame,
        boost::optional<double> detectorDistance = boost::optional<double>());
-  Peak(Geometry::Instrument_const_sptr m_inst, Mantid::Kernel::V3D QSampleFrame,
-       Mantid::Kernel::Matrix<double> goniometer,
-       boost::optional<double> detectorDistance = boost::optional<double>());
+  Peak(const Geometry::Instrument_const_sptr &m_inst,
+       const Mantid::Kernel::V3D &QSampleFrame,
+       const Mantid::Kernel::Matrix<double> &goniometer,
+       const boost::optional<double> &detectorDistance =
+           boost::optional<double>());
   Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
        double m_Wavelength);
   Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
@@ -77,7 +79,7 @@ public:
   void setL(double m_L) override;
   void setBankName(std::string m_bankName);
   void setHKL(double H, double K, double L) override;
-  void setHKL(Mantid::Kernel::V3D HKL) override;
+  void setHKL(const Mantid::Kernel::V3D &HKL) override;
   void resetHKL();
 
   Mantid::Kernel::V3D getQLabFrame() const override;
@@ -85,11 +87,11 @@ public:
   Mantid::Kernel::V3D getDetectorPosition() const override;
   Mantid::Kernel::V3D getDetectorPositionNoCheck() const override;
 
-  void setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
-                       boost::optional<double> detectorDistance =
+  void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
+                       const boost::optional<double> &detectorDistance =
                            boost::optional<double>()) override;
-  void setQLabFrame(Mantid::Kernel::V3D QLabFrame,
-                    boost::optional<double> detectorDistance =
+  void setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
+                    const boost::optional<double> &detectorDistance =
                         boost::optional<double>()) override;
 
   void setWavelength(double wavelength) override;
@@ -113,8 +115,8 @@ public:
   void setBinCount(double m_binCount) override;
 
   Mantid::Kernel::Matrix<double> getGoniometerMatrix() const override;
-  void
-  setGoniometerMatrix(Mantid::Kernel::Matrix<double> goniometerMatrix) override;
+  void setGoniometerMatrix(
+      const Mantid::Kernel::Matrix<double> &goniometerMatrix) override;
 
   std::string getBankName() const override;
   int getRow() const override;
