@@ -2,6 +2,8 @@
 #define MANTID_ALGORITHMS_GETEIMONDET2_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -66,6 +68,16 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Inelastic\\Ei"; }
 
+private:
+  void averageDetectorDistanceAndTOF(const std::vector<size_t> &detectorIndices, double &sampleToDetectorDistance, double &detectorEPP) const;
+  double computeTOF(const double distance, const double detectorEPP, const double monitorEPP) const;
+  void monitorDistanceAndTOF(const size_t monitorIndex, double &monitorToSampleDistance, double &monitorEPP) const;
+  void parseIndices(std::vector<size_t> &detectorIndices, size_t &monitorIndex) const;
+  void sanitizeIndices(std::vector<size_t> &detectorIndices, size_t monitorIndex) const;
+  Mantid::API::MatrixWorkspace_const_sptr m_detectorWs;
+  Mantid::API::ITableWorkspace_const_sptr m_detectorEPPTable;
+  Mantid::API::MatrixWorkspace_const_sptr m_monitorWs;
+  Mantid::API::ITableWorkspace_const_sptr m_monitorEPPTable;
 };
 
 } // namespace Algorithms
