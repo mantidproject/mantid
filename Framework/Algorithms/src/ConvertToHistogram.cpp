@@ -51,11 +51,10 @@ ConvertToHistogram::getNewXSize(const MatrixWorkspace_sptr inputWS) const {
  * are guessed such that the boundary goes mid-way between each point
  * @param inputX :: A const reference to the input data
  */
-Kernel::cow_ptr<HistogramData::HistogramX>
-ConvertToHistogram::calculateXPoints(
+Kernel::cow_ptr<HistogramData::HistogramX> ConvertToHistogram::calculateXPoints(
     Kernel::cow_ptr<HistogramData::HistogramX> inputX) const {
-  return HistogramData::BinEdges(HistogramData::Points(
-    std::move(inputX))).cowData();
+  return HistogramData::BinEdges(HistogramData::Points(std::move(inputX)))
+      .cowData();
 }
 }
 }

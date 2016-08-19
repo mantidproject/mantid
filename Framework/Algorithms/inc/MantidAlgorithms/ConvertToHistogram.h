@@ -59,7 +59,7 @@ private:
   getNewXSize(const API::MatrixWorkspace_sptr inputWS) const override;
   /// Calculate the X point values. Implement in an inheriting class.
   Kernel::cow_ptr<HistogramData::HistogramX> calculateXPoints(
-    Kernel::cow_ptr<HistogramData::HistogramX> inputX) const override;
+      Kernel::cow_ptr<HistogramData::HistogramX> inputX) const override;
 };
 
 } // namespace Algorithm
