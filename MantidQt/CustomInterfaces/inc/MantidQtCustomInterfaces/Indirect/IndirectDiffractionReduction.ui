@@ -270,140 +270,140 @@
        </layout>
       </widget>
       <widget class="QWidget" name="pageCalibOnly">
-       <layout class="QVBoxLayout" name="verticalLayout_8">
-        <property name="margin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="QGroupBox" name="gbCalibOnly">
-          <property name="title">
-           <string>Calibration</string>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_5">
+         <layout class="QVBoxLayout" name="verticalLayout_8">
            <property name="margin">
-            <number>6</number>
-           </property>
-           <item row="0" column="0">
-            <widget class="QCheckBox" name="ckUseCalib">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>22</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Use Calibration File</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfCalFile_only" native="true">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>41</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="findRunFiles" stdset="0">
-              <bool>false</bool>
-             </property>
-             <property name="label" stdset="0">
-              <string>Cal File</string>
-             </property>
-             <property name="multipleFiles" stdset="0">
-              <bool>false</bool>
-             </property>
-             <property name="optional" stdset="0">
-              <bool>true</bool>
-             </property>
-             <property name="fileExtensions" stdset="0">
-              <string>.cal</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="gbDspaceRebinCalibOnly">
-          <property name="title">
-           <string>Rebin in D-Spacing (optional)</string>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_9">
-           <property name="spacing">
-            <number>6</number>
-           </property>
-           <property name="margin">
-            <number>6</number>
+             <number>0</number>
            </property>
            <item>
-            <widget class="QLabel" name="lbRebinStart_calibOnly">
-             <property name="text">
-              <string>Start:</string>
-             </property>
-            </widget>
+             <widget class="QGroupBox" name="gbCalibOnly">
+               <property name="title">
+                 <string>Calibration</string>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_5">
+                 <property name="margin">
+                   <number>6</number>
+                 </property>
+                 <item row="0" column="0">
+                   <widget class="QCheckBox" name="ckUseCalib">
+                     <property name="text">
+                       <string>Use Calibration File</string>
+                     </property>
+                     <property name="minimumSize">
+                       <size>
+                         <width>0</width>
+                         <height>22</height>
+                       </size>
+                     </property>
+                   </widget>
+                 </item>
+                 <item row="1" column="0" colspan="2">
+                   <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfCalFile_only" native="true">
+                     <property name="sizePolicy">
+                       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>41</verstretch>
+                       </sizepolicy>
+                     </property>
+                     <property name="findRunFiles" stdset="0">
+                       <bool>false</bool>
+                     </property>
+                     <property name="label" stdset="0">
+                       <string>Cal File</string>
+                     </property>
+                     <property name="multipleFiles" stdset="0">
+                       <bool>false</bool>
+                     </property>
+                     <property name="optional" stdset="0">
+                       <bool>true</bool>
+                     </property>
+                     <property name="enabled" stdset="0">
+                       <bool>false</bool>
+                     </property>
+                     <property name="fileExtensions" stdset="0">
+                       <string>.cal</string>
+                     </property>
+                   </widget>
+                 </item>
+               </layout>
+             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="leRebinStart_CalibOnly"/>
+             <widget class="QGroupBox" name="gbDspaceRebinCalibOnly">
+               <property name="title">
+                   <string>Rebin in D-Spacing (optional)</string>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_9">
+                   <property name="spacing">
+                     <number>6</number>
+                   </property>
+                   <property name="margin">
+                     <number>6</number>
+                   </property>
+                   <item>
+                     <widget class="QLabel" name="lbRebinStart_calibOnly">
+                       <property name="text">
+                         <string>Start:</string>
+                       </property>
+                     </widget>
+                   </item>
+                   <item>
+                     <widget class="QLineEdit" name="leRebinStart_CalibOnly"/>
+                   </item>
+                   <item>
+                     <widget class="QLabel" name="valRebinStart_CalibOnly">
+                       <property name="styleSheet">
+                         <string notr="true">color: rgb(170, 0, 0);</string>
+                       </property>
+                       <property name="text">
+                         <string>*</string>
+                       </property>
+                     </widget>
+                   </item>
+                   <item>
+                     <widget class="QLabel" name="lbRebinWidth_CalibOnly">
+                       <property name="text">
+                         <string>Width:</string>
+                       </property>
+                     </widget>
+                   </item>
+                   <item>
+                     <widget class="QLineEdit" name="leRebinWidth_CalibOnly"/>
+                   </item>
+                   <item>
+                     <widget class="QLabel" name="valRebinWidth_CalibOnly">
+                       <property name="styleSheet">
+                         <string notr="true">color: rgb(170, 0, 0);</string>
+                       </property>
+                       <property name="text">
+                         <string>*</string>
+                       </property>
+                     </widget>
+                   </item>
+                   <item>
+                     <widget class="QLabel" name="lbRebinEnd_CalibOnly">
+                       <property name="text">
+                         <string>End:</string>
+                       </property>
+                     </widget>
+                   </item>
+                   <item>
+                     <widget class="QLineEdit" name="leRebinEnd_CalibOnly"/>
+                   </item>
+                   <item>
+                     <widget class="QLabel" name="valRebinEnd_CalibOnly">
+                       <property name="styleSheet">
+                         <string notr="true">color: rgb(170, 0, 0);</string>
+                       </property>
+                       <property name="text">
+                         <string>*</string>
+                       </property>
+                     </widget>
+                   </item>
+                 </layout>
+             </widget>
            </item>
-           <item>
-            <widget class="QLabel" name="valRebinStart_CalibOnly">
-             <property name="styleSheet">
-              <string notr="true">color: rgb(170, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>*</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="lbRebinWidth_CalibOnly">
-             <property name="text">
-              <string>Width:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="leRebinWidth_CalibOnly"/>
-           </item>
-           <item>
-            <widget class="QLabel" name="valRebinWidth_CalibOnly">
-             <property name="styleSheet">
-              <string notr="true">color: rgb(170, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>*</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="lbRebinEnd_CalibOnly">
-             <property name="text">
-              <string>End:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="leRebinEnd_CalibOnly"/>
-           </item>
-           <item>
-            <widget class="QLabel" name="valRebinEnd_CalibOnly">
-             <property name="styleSheet">
-              <string notr="true">color: rgb(170, 0, 0);</string>
-             </property>
-             <property name="text">
-              <string>*</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-       </layout>
-      </widget>
+         </layout>
+       </widget>
       <widget class="QWidget" name="pageDSpaceRebin">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -531,9 +531,6 @@
        </item>
        <item>
         <widget class="QComboBox" name="cbPlotType">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
          <item>
           <property name="text">
            <string>None</string>
@@ -544,16 +541,6 @@
            <string>Spectra</string>
           </property>
          </item>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pbPlot">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Plot</string>
-         </property>
         </widget>
        </item>
       </layout>
@@ -753,20 +740,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>ckUseCalib</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>rfCalFile_only</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>20</x>
-     <y>20</y>
-    </hint>
-   </hints>
+    <sender>ckUseCalib</sender>
+    <signal>toggled(bool)</signal>
+    <receiver>rfCalFile_only</receiver>
+    <slot>setEnabled(bool)</slot>
   </connection>
   <connection>
    <sender>ckCanScale</sender>
