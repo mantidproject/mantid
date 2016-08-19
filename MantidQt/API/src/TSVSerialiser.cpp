@@ -247,15 +247,15 @@ bool TSVSerialiser::asBool(const size_t i) const {
   return ret;
 }
 
-QRect TSVSerialiser::asQRect(const size_t i) const {
+QRect TSVSerialiser::asQRect(const size_t i) {
   if (i + 3 >= m_curValues.size())
     return QRect();
 
-  std::string valStr = m_curValues.at(i);
-
-  std::stringstream valSS(valStr);
-  int x0, y0, x1, y1;
-  valSS >> x0 >> y0 >> x1 >> y1;
+  int x0 = asInt(m_curIndex);
+  int y0 = asInt(++m_curIndex);
+  int x1 = asInt(++m_curIndex);
+  int y1 = asInt(++m_curIndex);
+  ++m_curIndex;
 
   QPoint point0(x0, y0);
   QPoint point1(x1, y1);
@@ -264,15 +264,15 @@ QRect TSVSerialiser::asQRect(const size_t i) const {
   return rect;
 }
 
-QColor TSVSerialiser::asQColor(const size_t i) const {
+QColor TSVSerialiser::asQColor(const size_t i) {
   if (i + 3 >= m_curValues.size())
     return QColor();
 
-  std::string valStr = m_curValues.at(i);
-
-  std::stringstream valSS(valStr);
-  int r, g, b, a;
-  valSS >> r >> g >> b >> a;
+  int r = asInt(m_curIndex);
+  int g = asInt(++m_curIndex);
+  int b = asInt(++m_curIndex);
+  int a = asInt(++m_curIndex);
+  ++m_curIndex;
 
   QColor color(r, g, b, a);
   return color;
@@ -328,12 +328,12 @@ TSVSerialiser &TSVSerialiser::operator>>(bool &val) {
 }
 
 TSVSerialiser &TSVSerialiser::operator>>(QRect &val) {
-  val = asQRect(m_curIndex++);
+  val = asQRect(m_curIndex);
   return *this;
 }
 
 TSVSerialiser &TSVSerialiser::operator>>(QColor &val) {
-  val = asQColor(m_curIndex++);
+  val = asQColor(m_curIndex);
   return *this;
 }
 

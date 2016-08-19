@@ -473,13 +473,17 @@ API::IProjectSerialisable *SliceViewerWindow::loadFromProject(const std::string 
     UNUSED_ARG(fileVersion);
     MantidQt::API::TSVSerialiser tsv(lines);
     QString wsName, label;
+    QRect geometry;
 
+    tsv.selectLine("geometry");
+    tsv >> geometry;
     tsv.selectLine("Workspace");
     tsv >> wsName;
     tsv.selectLine("Label");
     tsv >> label;
 
     auto window = new SliceViewerWindow(wsName, label);
+    window->setGeometry(geometry);
     window->show();
     return window;
 }
@@ -488,7 +492,7 @@ std::string SliceViewerWindow::saveToProject(ApplicationWindow *app)
 {
   UNUSED_ARG(app);
   MantidQt::API::TSVSerialiser tsv, tab;
-  // save a reference to the workspace being viewed
+  tab.writeLine("geometry") << geometry();
   tab.writeLine("Workspace") << m_ws->name();
   tab.writeLine("Label") << m_label;
   tsv.writeSection("sliceviewer", tab.outputLines());

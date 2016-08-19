@@ -73,8 +73,8 @@ public:
   std::string asString(const size_t i) const;
   QString asQString(const size_t i) const;
   bool asBool(const size_t i) const;
-  QRect asQRect(const size_t i) const;
-  QColor asQColor(const size_t i) const;
+  QRect asQRect(const size_t i);
+  QColor asQColor(const size_t i);
 
   TSVSerialiser &operator>>(int &val);
   TSVSerialiser &operator>>(size_t &val);
