@@ -437,7 +437,12 @@ QString ProjectSerialiser::saveWorkspaces() {
 QString ProjectSerialiser::saveAdditionalWindows() {
   QString output;
   for (auto win : window->getSerialisableWindows()) {
-    output += QString::fromStdString(win->saveToProject(window));
+    auto serialisableWindow = dynamic_cast<IProjectSerialisable *>(win);
+    if (!serialisableWindow)
+      continue;
+
+    auto lines = serialisableWindow->saveToProject(window);
+    output += QString::fromStdString(lines);
   }
   return output;
 }
@@ -675,6 +680,6 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines, const in
     tsv >> sliceLines;
 
     auto win = SliceViewer::SliceViewerWindow::loadFromProject(sliceLines, window, fileVersion);
-    window->addSerialisableWindow(win);
+    window->addSerialisableWindow(dynamic_cast<QObject *>(win));
   }
 }

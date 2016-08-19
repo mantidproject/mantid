@@ -1093,15 +1093,13 @@ public slots:
   /// Show/hide MantidPlot toolbars.
   void setToolbarsVisible(bool visible);
   /// Get a list of serialisable project windows
-  QList<MantidQt::API::IProjectSerialisable *> getSerialisableWindows() {
+  QList<QObject *> getSerialisableWindows() const {
     return m_serialisableWindows;
   }
   /// Add a serialisable window
-  void addSerialisableWindow(MantidQt::API::IProjectSerialisable *window) {
-    m_serialisableWindows.push_back(window);
-  }
+  void addSerialisableWindow(QObject *window);
   /// Remove a serialisable window
-  void removeSerialisableWindow(MantidQt::API::IProjectSerialisable *window);
+  void removeSerialisableWindow(QObject *window);
 
   /// \name Tiled window
   //@{
@@ -1428,7 +1426,7 @@ private:
   // Map interfaces to their categories.
   QMap<QString, QSet<QString>> m_interfaceCategories;
   /// Keep a list of serialisable windows
-  QList<MantidQt::API::IProjectSerialisable *> m_serialisableWindows;
+  QList<QObject *> m_serialisableWindows;
 
   mutable MdiSubWindow *d_active_window;
   MdiSubWindow *getActiveWindow() const;
