@@ -199,7 +199,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     std::string strFPath = selectedfPath.toString();
     // returns empty if no directory is found
 
-	// split directory if 'ENGINX_' found by '_.'
+    // split directory if 'ENGINX_' found by '_.'
     std::vector<std::string> splitBaseName;
     if (strFPath.find("ENGINX_") != std::string::npos) {
       boost::split(splitBaseName, strFPath, boost::is_any_of("_."));
@@ -601,7 +601,6 @@ void EnggDiffFittingPresenter::inputChecksBeforeFitting(
                                 " is invalid, "
                                 "fitting process failed. Please try again!");
   }
-
 }
 
 std::vector<std::string> EnggDiffFittingPresenter::splitFittingDirectory(
@@ -794,7 +793,7 @@ void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
                                std::string &filePath) {
 
   // split to get run number and bank
-  auto fileSplit = m_view->splitFittingDirectory(filePath);
+  auto fileSplit = splitFittingDirectory(filePath);
   // returns ['ENGINX', <RUN-NUMBER>, 'focused', `bank`, <BANK>, '.nxs']
   auto runNumber = fileSplit[1];
 
