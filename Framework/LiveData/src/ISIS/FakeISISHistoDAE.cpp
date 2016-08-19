@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidLiveData/FakeISISHistoDAE.h"
+#include "MantidLiveData/ISIS/FakeISISHistoDAE.h"
 #include <numeric>
 
 #include <Poco/Net/TCPServer.h>
