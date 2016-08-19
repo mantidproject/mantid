@@ -98,7 +98,8 @@ void IFunctionAdapter::declareAttribute(const std::string &name,
  * @param name :: The name of the new attribute
  * @returns The value of the attribute
  */
-PyObject *IFunctionAdapter::getAttributeValue(IFunction &self, const std::string &name) {
+PyObject *IFunctionAdapter::getAttributeValue(IFunction &self,
+                                              const std::string &name) {
   auto attr = self.getAttribute(name);
   return getAttributeValue(self, attr);
 }
@@ -109,7 +110,8 @@ PyObject *IFunctionAdapter::getAttributeValue(IFunction &self, const std::string
  * @returns The value of the attribute
  */
 PyObject *
-IFunctionAdapter::getAttributeValue(IFunction &self, const API::IFunction::Attribute &attr) {
+IFunctionAdapter::getAttributeValue(IFunction &self,
+                                    const API::IFunction::Attribute &attr) {
   std::string type = attr.type();
   PyObject *result(nullptr);
   if (type == "int")

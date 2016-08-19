@@ -117,7 +117,8 @@ void export_IFunction() {
            "Declare an attribute with an initial value")
 
       .def("getAttributeValue",
-            (PyObject* (*)(IFunction&,const std::string&))IFunctionAdapter::getAttributeValue,
+           (PyObject * (*)(IFunction &, const std::string &))
+               IFunctionAdapter::getAttributeValue,
            (arg("self"), arg("name")),
            "Return the value of the named attribute")
 

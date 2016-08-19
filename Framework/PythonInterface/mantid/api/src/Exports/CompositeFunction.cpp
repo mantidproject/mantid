@@ -13,10 +13,10 @@ void export_CompositeFunction() {
            "Get the number of member functions.")
       .def("__len__", &CompositeFunction::nFunctions, arg("self"),
            "Get the number of member functions.")
-      .def("getFunction", &CompositeFunction::getFunction, (arg("self"), arg("i")),
-           "Get the i-th function.")
-      .def("__getitem__", &CompositeFunction::getFunction, (arg("self"), arg("i")),
-           "Get the i-th function.")
-      .def("add", &CompositeFunction::addFunction, (arg("self"), arg("function")),
-           "Add a member function.");
+      .def("getFunction", &CompositeFunction::getFunction,
+           (arg("self"), arg("i")), "Get the i-th function.")
+      .def("__getitem__", &CompositeFunction::getFunction,
+           (arg("self"), arg("i")), "Get the i-th function.")
+      .def("add", &CompositeFunction::addFunction,
+           (arg("self"), arg("function")), "Add a member function.");
 }

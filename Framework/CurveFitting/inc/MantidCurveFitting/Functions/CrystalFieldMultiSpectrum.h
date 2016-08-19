@@ -48,11 +48,13 @@ private:
   /// Build a function for a single spectrum.
   API::IFunction_sptr buildSpectrum(int nre, const DoubleFortranVector &en,
                                     const ComplexFortranMatrix &wf,
-                                    double temperature, double fwhm, size_t i) const;
+                                    double temperature, double fwhm,
+                                    size_t i) const;
   /// Update a function for a single spectrum.
   void updateSpectrum(API::IFunction &spectrum, int nre,
                       const DoubleFortranVector &en,
-                      const ComplexFortranMatrix &wf, double temperature, size_t i) const;
+                      const ComplexFortranMatrix &wf, double temperature,
+                      size_t i) const;
   /// Calculate excitations at given temperature
   void calcExcitations(int nre, const DoubleFortranVector &en,
                        const ComplexFortranMatrix &wf, double temperature,

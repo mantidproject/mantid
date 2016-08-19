@@ -90,7 +90,7 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
   if (name == "Temperatures") {
     // Define (declare) the parameters for intensity scaling.
     auto nSpec = attr.asVector().size();
-    dynamic_cast<Peaks&>(*m_source).declareIntensityScaling(nSpec);
+    dynamic_cast<Peaks &>(*m_source).declareIntensityScaling(nSpec);
     m_nOwnParams = m_source->nParams();
   }
   FunctionGenerator::setAttribute(name, attr);

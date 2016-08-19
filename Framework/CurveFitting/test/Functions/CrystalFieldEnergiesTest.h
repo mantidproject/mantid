@@ -233,9 +233,8 @@ public:
 
 private:
   bool run(int nre, const std::map<std::string, double> &bkq,
-           const std::map<std::string, double> &bme,
-           GSLVector &evalues, ComplexMatrix &evectors,
-           ComplexMatrix &hamiltonian) {
+           const std::map<std::string, double> &bme, GSLVector &evalues,
+           ComplexMatrix &evectors, ComplexMatrix &hamiltonian) {
     CrystalFieldEnergies alg;
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

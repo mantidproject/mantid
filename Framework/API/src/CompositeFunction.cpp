@@ -776,7 +776,8 @@ size_t CompositeFunction::getNumberDomains() const {
 /// working on (== getNumberDomains()). The result of evaluation of the
 /// created functions on their domains must be the same as if this function
 /// was evaluated on the composition of those domains.
-std::vector<IFunction_sptr> CompositeFunction::createEquivalentFunctions() const {
+std::vector<IFunction_sptr>
+CompositeFunction::createEquivalentFunctions() const {
   auto nd = getNumberDomains();
   if (nd == 1) {
     return std::vector<IFunction_sptr>(
@@ -786,16 +787,16 @@ std::vector<IFunction_sptr> CompositeFunction::createEquivalentFunctions() const
   auto nf = nFunctions();
   std::vector<std::vector<IFunction_sptr>> equiv;
   equiv.reserve(nf);
-  for(size_t i = 0; i < nf; ++i) {
+  for (size_t i = 0; i < nf; ++i) {
     equiv.push_back(getFunction(i)->createEquivalentFunctions());
   }
 
   std::vector<IFunction_sptr> funs;
   funs.reserve(nd);
-  for(size_t i = 0; i < nd; ++i) {
+  for (size_t i = 0; i < nd; ++i) {
     auto comp = new CompositeFunction;
     funs.push_back(IFunction_sptr(comp));
-    for(size_t j = 0; j < nf; ++j) {
+    for (size_t j = 0; j < nf; ++j) {
       comp->addFunction(equiv[j][i]);
     }
   }
