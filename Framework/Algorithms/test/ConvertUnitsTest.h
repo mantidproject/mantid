@@ -236,20 +236,20 @@ public:
     // check if the units are successfully converted
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "TOF");
 
-	// Test that X data is still Points (it was converted back)
+    // Test that X data is still Points (it was converted back)
     TS_ASSERT_EQUALS(output2D->x(101).size(), 10);
     // Test that Y & E data is unchanged
     TS_ASSERT_EQUALS(output2D->y(101).size(), 10);
     TS_ASSERT_EQUALS(output2D->e(101).size(), 10);
 
-	// Test that their size is the same
-	TS_ASSERT_EQUALS(output2D->blocksize(), pointsWS2D->blocksize());
+    // Test that their size is the same
+    TS_ASSERT_EQUALS(output2D->blocksize(), pointsWS2D->blocksize());
 
-	// Test that spectra that should have been zeroed have been
-	TS_ASSERT_EQUALS(output2D->y(0)[1], 0);
-	TS_ASSERT_EQUALS(output2D->e(0)[8], 0);
+    // Test that spectra that should have been zeroed have been
+    TS_ASSERT_EQUALS(output2D->y(0)[1], 0);
+    TS_ASSERT_EQUALS(output2D->e(0)[8], 0);
 
-	// Compare to see if X values have changed
+    // Compare to see if X values have changed
     const size_t xsize = output2D->blocksize();
     for (size_t i = 0; i < output2D->getNumberHistograms(); ++i) {
       auto &inX = pointsWS2D->x(i);

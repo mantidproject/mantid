@@ -198,8 +198,7 @@ ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
     std::stringstream msg;
     msg << "Input workspace has invalid X axis binning parameters. Should "
            "have "
-           "at least 2 values. Found "
-        << inputWS->x(0).size() << ".";
+           "at least 2 values. Found " << inputWS->x(0).size() << ".";
     throw std::runtime_error(msg.str());
   }
   if (inputWS->x(0).front() > inputWS->x(0).back() ||
@@ -601,8 +600,8 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
       // EventWorkspace part, modifying the EventLists.
       if (m_inputEvents) {
-        eventWS->getSpectrum(i).convertUnitsViaTof(localFromUnit.get(),
-                                                   localOutputUnit.get());
+        eventWS->getSpectrum(i)
+            .convertUnitsViaTof(localFromUnit.get(), localOutputUnit.get());
       }
     } else {
       // Get to here if exception thrown when calculating distance to detector
@@ -816,10 +815,10 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
                   workspace->x(j)[k] + 1);
       }
 
-      result->mutableY(j).assign(workspace->y(j).cbegin(),
-                                 workspace->y(j).cbegin() + (k - 1));
-      result->mutableE(j).assign(workspace->e(j).cbegin(),
-                                 workspace->e(j).cbegin() + (k - 1));
+      result->mutableY(j)
+          .assign(workspace->y(j).cbegin(), workspace->y(j).cbegin() + (k - 1));
+      result->mutableE(j)
+          .assign(workspace->e(j).cbegin(), workspace->e(j).cbegin() + (k - 1));
     }
   }
 
