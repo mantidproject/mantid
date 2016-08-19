@@ -16,7 +16,7 @@ Example
 ------------
 Angular auto-correlations calculated for methyliodide.
 
-.. image:: ../images/AngularAutoCorrelationsSingleAxis.png
+.. image:: ../images/AngularCrossCorrelationsSingleAxis.png
     :align: center
 
 .. categories::
