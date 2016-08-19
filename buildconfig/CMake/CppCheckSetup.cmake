@@ -42,7 +42,7 @@ if ( CPPCHECK_EXECUTABLE )
       )
 
   set ( CPPCHECK_EXCLUDES
-        Framework/LiveData/src/LoadDAE/
+        Framework/LiveData/src/DAE/
         Framework/DataHandling/src/LoadRaw/
         Framework/ICat/inc/MantidICat/ICat3/GSoapGenerated/
         Framework/ICat/src/ICat3/GSoapGenerated/
@@ -131,4 +131,3 @@ if ( CPPCHECK_EXECUTABLE )
     set_target_properties(cppcheck PROPERTIES EXCLUDE_FROM_ALL TRUE)
   endif()
 endif ( CPPCHECK_EXECUTABLE )
-
