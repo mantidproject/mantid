@@ -27,10 +27,14 @@
 #include <limits>
 
 #include <boost/math/special_functions/fpclassify.hpp>
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::API;
 using namespace Mantid::Geometry;
+
+// Register the window into the WindowFactory
+DECLARE_WINDOW(MantidMatrix)
 
 namespace {
 Logger g_log("MantidMatrix");
@@ -83,13 +87,14 @@ int modelTypeToInt(MantidMatrixModel::Type type) {
 }
 
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
-                           ApplicationWindow *parent, const QString &label,
+                           QWidget *parent, const QString &label,
                            const QString &name, int start, int end)
     : MdiSubWindow(parent, label, name, 0), WorkspaceObserver(),
-      m_appWindow(parent), m_workspace(ws), y_start(0.0), y_end(0.0),
-      m_histogram(false), m_min(0), m_max(0), m_are_min_max_set(false),
-      m_boundingRect(), m_strName(name.toStdString()), m_selectedRows(),
-      m_selectedCols() {
+      m_workspace(ws), y_start(0.0), y_end(0.0), m_histogram(false), m_min(0),
+      m_max(0), m_are_min_max_set(false), m_boundingRect(),
+      m_strName(name.toStdString()), m_selectedRows(), m_selectedCols() {
+  m_workspace = ws;
+
   setup(ws, start, end);
   setWindowTitle(name);
   setName(name);
@@ -1080,7 +1085,8 @@ QChar MantidMatrix::numberFormat() { return activeModel()->format(); }
 int MantidMatrix::precision() { return activeModel()->precision(); }
 
 void MantidMatrix::setMatrixProperties() {
-  MantidMatrixDialog dlg(m_appWindow);
+  QWidget *parent = parentWidget();
+  MantidMatrixDialog dlg(parent);
   dlg.setMatrix(this);
   dlg.exec();
 }
@@ -1179,14 +1185,51 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
   }
 }
 
-void MantidMatrix::loadFromProject(const std::string &lines,
-                                   ApplicationWindow *app,
-                                   const int fileVersion) {
-  Q_UNUSED(lines);
-  Q_UNUSED(app);
+IProjectSerialisable *MantidMatrix::loadFromProject(const std::string &lines,
+                                                    ApplicationWindow *app,
+                                                    const int fileVersion) {
   Q_UNUSED(fileVersion);
-  // We don't actually need to do any loading. It's all taken care of by
-  // ApplicationWindow.
+  TSVSerialiser tsv(lines);
+
+  MantidMatrix *matrix = nullptr;
+  if (tsv.selectLine("WorkspaceName")) {
+    const std::string wsName = tsv.asString(1);
+    MatrixWorkspace_sptr ws;
+
+    if (AnalysisDataService::Instance().doesExist(wsName))
+      ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+
+    if (!ws)
+      return nullptr;
+
+    matrix = new MantidMatrix(ws, app, "Mantid", QString::fromStdString(wsName),
+                              -1, -1);
+  }
+
+  if (!matrix)
+    return nullptr;
+
+  // Append to the list of mantid matrix apps
+  app->addMantidMatrixWindow(matrix);
+  app->addMdiSubWindow(matrix);
+
+  if (tsv.selectLine("geometry")) {
+    const std::string geometry = tsv.lineAsString("geometry");
+    app->restoreWindowGeometry(app, matrix, QString::fromStdString(geometry));
+  }
+
+  if (tsv.selectLine("tgeometry")) {
+    const std::string geometry = tsv.lineAsString("tgeometry");
+    app->restoreWindowGeometry(app, matrix, QString::fromStdString(geometry));
+  }
+
+  if (tsv.selectLine("SelectedTab")) {
+    int index;
+    tsv >> index;
+    matrix->m_tabs->setCurrentIndex(index);
+  }
+
+  return matrix;
 }
 
 std::string MantidMatrix::saveToProject(ApplicationWindow *app) {
@@ -1195,6 +1238,7 @@ std::string MantidMatrix::saveToProject(ApplicationWindow *app) {
   tsv.writeRaw("<mantidmatrix>");
   tsv.writeLine("WorkspaceName") << m_strName;
   tsv.writeRaw(app->windowGeometryInfo(this));
+  tsv.writeLine("SelectedTab") << m_tabs->currentIndex();
   tsv.writeRaw("</mantidmatrix>");
 
   return tsv.outputLines();

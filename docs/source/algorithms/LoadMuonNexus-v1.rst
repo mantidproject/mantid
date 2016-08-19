@@ -24,8 +24,12 @@ load all the specified spectra.
 
 -  TODO get XML descriptions of Muon instruments. This data is not in
    existing Muon Nexus files.
--  TODO load the spectra detector mapping. This may be very simple for
-   Muon instruments.
+
+Spectra-detector mapping
+########################
+
+For all v1 muon Nexus files, there is a one-to-one mapping between spectrum
+number and detector ID.
 
 Time series data
 ################
@@ -157,11 +161,14 @@ Log values are loaded into the workspace run object as follows:
 +-------------------------------------------+-------------------------------+
 | ``run/sample/magnetic_field``             | ``sample_magn_field``         |
 +-------------------------------------------+-------------------------------+
-| \- single-period:                         | ``goodfrm`` (number of good   |
-| ``run/instrument/beam/frames_good``       | frames)                       |
-| \- multi-period:                          |                               |
-| ``run/instrument/beam/frames_period_daq`` |                               |
+| ``run/instrument/beam/frames_good``       | ``goodfrm`` (number of good   |
+| (for single-period data)                  | frames)                       |
 |                                           |                               |
+| (If ``frames_good`` not present, use      |                               |
+| ``frames`` instead.)                      |                               |
++-------------------------------------------+                               |
+| ``run/instrument/beam/frames_period_daq`` |                               |
+| (for multi-period data)                   |                               |
 +-------------------------------------------+-------------------------------+
 | Other NX\_LOG entries under ``run``       | time series (via LoadMuonLog) |
 +-------------------------------------------+-------------------------------+

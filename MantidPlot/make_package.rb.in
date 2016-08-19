@@ -20,7 +20,7 @@ end
 
 def addPythonLibrary(directory)
   p "copying directory #{directory}"
-  output = system("rsync -a --exclude=.pyc #{directory} Contents/MacOS/")
+  output = system("rsync -a -L --exclude=.pyc #{directory} Contents/MacOS/")
   if output != true
     exit 1
   end
@@ -49,7 +49,7 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libTKernel.dylib",
                      "libTKBO.dylib",
                      "libTKernel.dylib",
-                     "libTKBO.dylib",
+                     "libTKShHealing.dylib",
                      "libTKPrim.dylib",
                      "libTKMesh.dylib",
                      "libTKBRep.dylib",
@@ -66,12 +66,16 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libhdf5.dylib",
                      "libhdf5_hl.dylib",
                      "libhdf5_cpp.dylib",
+                     "libhdf5_hl_cpp.dylib",
                      "libmfhdf.dylib",
                      "libdf.dylib",
                      "libsz.dylib",
                      "libjpeg.dylib",
                      "libssl.dylib",
-                     "libcrypto.dylib"]
+                     "libcrypto.dylib",
+                     "libtbb.dylib",
+                     "libtbbmalloc.dylib",
+                     "libtbbmalloc_proxy.dylib"]
 
 poco_version = "@POCO_VERSION@".split(".").map(&:to_i)
 if(poco_version[0] > 1 || (poco_version[0] == 1 && poco_version[1] >= 6))
@@ -110,7 +114,7 @@ if( "@MAKE_VATES@" == "ON" )
   end
 
   `mkdir Contents/Libraries`
-  vatesfiles = ["Contents/MacOS/VatesSimpleGui","Contents/MacOS/libMantidParaViewQtWidgets.dylib","Contents/MacOS/libMantidVatesAPI.dylib","pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib"]+Dir["pvplugins/pvplugins/*.dylib"] 
+  vatesfiles = ["Contents/MacOS/MantidPlot","Contents/MacOS/libMantidQtAPI.dylib","Contents/MacOS/VatesSimpleGui","Contents/MacOS/libMantidParaViewQtWidgets.dylib","Contents/MacOS/libMantidVatesAPI.dylib","pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib"]+Dir["pvplugins/pvplugins/*.dylib"] 
   vatesfiles.each do |file|
     add_ParaView_Libraries(file)
   end
@@ -184,31 +188,48 @@ else
   exit 1
 end
 
-#change id of all PyQt4 libraries
-pyqt4_patterns = ["**/PyQt4/*.so"]
-pyqt4_patterns.each do |pattern|
-  Dir[pattern].each do |library|
-    basename =  File.basename(library)
-    `chmod +w Contents/MacOS/PyQt4/#{basename}`  
-    `install_name_tool -id @rpath/#{basename} Contents/MacOS/PyQt4/#{basename}`
-  end
+# We only need one copy of openssl
+`install_name_tool -change @loader_path/../../../libssl.1.0.0.dylib @loader_path/../../../../MacOS/libssl.dylib Contents/Frameworks/QtNetwork.framework/Versions/4/QtNetwork`
+`install_name_tool -change @loader_path/../../../libcrypto.1.0.0.dylib @loader_path/../../../../MacOS/libcrypto.dylib Contents/Frameworks/QtNetwork.framework/Versions/4/QtNetwork`
+`rm Contents/Frameworks/libssl.1.0.0.dylib`
+`rm Contents/Frameworks/libcrypto.1.0.0.dylib`
+
+#change id of all libraries that match patterns
+def change_id(patterns, lib_path)
+    patterns.each do |pattern|
+        Dir[pattern].each do |library|
+            basename =  File.basename(library)
+            `chmod +w #{lib_path}/#{basename}`
+            `install_name_tool -id @rpath/#{basename} #{lib_path}/#{basename}`
+        end
+    end
 end
 
 #Homebrew recently switched the linking from /usr/local/lib/* to /usr/local/opt/qt/lib/*
 #This attempts to determine the correct path to pass to install_name_tool.
-QtLinkingDir = []
-Dir[pyqt4_patterns[0]].each do |library|
-  dependencies = `otool -L #{library}`
-  dependencies.split("\n").each do |dependency|
-    if dependency.match('Qt.*.framework/Versions/\d/Qt.*')
-       if dependency.match('/usr/local/opt/qt/lib')
-         QtLinkingDir << '/usr/local/opt/qt/lib'
-       else
-         QtLinkingDir << '/usr/local/lib'
-       end
+def find_linking_directories(patterns, lib_name, lib_path)
+    linking_dir = []
+    Dir[patterns[0]].each do |library|
+        dependencies = `otool -L #{library}`
+        dependencies.split("\n").each do |dependency|
+            if dependency.match(lib_name)
+                if dependency.match(lib_path)
+                    linking_dir << lib_path
+                else
+                    linking_dir << '/usr/local/lib'
+                end
+            end
+        end
     end
-  end
+    return linking_dir
 end
+
+
+#change id of all PyQt4 libraries
+pyqt4_patterns = ["**/PyQt4/*.so"]
+change_id(pyqt4_patterns, "Contents/MacOS/PyQt4/")
+
+QtLinkingDir = find_linking_directories(pyqt4_patterns, 'Qt.*.framework/Versions/\d/Qt.*', '/usr/local/opt/qt/lib')
 
 if QtLinkingDir.uniq != [QtLinkingDir[0]]
   p "Error updating PyQt4 dynamic linking!"
@@ -236,6 +257,7 @@ end
 `install_name_tool -change #{QtLinkingDir[0]}/QtXml.framework/Versions/4/QtXml @loader_path/../../Frameworks/QtXml.framework/Versions/4/QtXml Contents/MacOS/PyQt4/QtXml.so`
 `install_name_tool -change #{QtLinkingDir[0]}/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtXml.so`
 
+
 #Copy over python libraries not included with OSX. 
 #currently missing epics
 path = "/Library/Python/2.7/site-packages"
@@ -243,6 +265,41 @@ directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","bac
 directories.each do |directory|
   addPythonLibrary("#{path}/#{directory}")
 end
+
+
+# ---------------------------------------------
+# H5Py section
+# ---------------------------------------------
+h5py_path = "/usr/local/lib/python2.7/site-packages"
+h5py_directories = ["h5py"]
+h5py_directories.each do |directory|
+  addPythonLibrary("#{h5py_path}/#{directory}")
+end
+
+h5py_patterns = ["**/h5py/*.so"]
+change_id(h5py_patterns, "Contents/MacOS/h5py/")
+
+h5py_linking_dir = find_linking_directories(h5py_patterns, 'lib/libhdf5', '/usr/local/opt/hdf5/lib')
+
+h5py_patterns.each do |pattern|
+  Dir[pattern].each do |library|
+    basename =  File.basename(library)
+    dependencies = `otool -L #{library}`
+    dependencies.split("\n").each do |dependency|
+        currentname = dependency.strip.split(" ")
+        filename = currentname[0]
+        if filename.include? "libhdf5"
+          name_split_on_slash = filename.strip.split("/")
+          filename_no_dir = name_split_on_slash[-1]
+          parts = filename_no_dir.strip.split(".")
+          loader_filename = parts[0] + "." + parts[2]
+          `install_name_tool -add_rpath @loader_path/../ Contents/MacOS/h5py/#{basename} > /dev/null 2>&1`
+          `install_name_tool -change #{h5py_linking_dir[0]}/#{filename_no_dir} @rpath/#{loader_filename} Contents/MacOS/h5py/#{basename}`
+       end
+    end
+  end
+end
+
 
 files = ["gnureadline.so","readline.py","pyparsing.py","mistune.py"]
 files.each do |file|
@@ -264,7 +321,19 @@ search_patterns.each do |pattern|
         p "issue with library: #{library} linked against: #{dependency}"
         exit 1
       end
+      if dependency.include? "@loader_path/libTK"
+        p "issue with library: #{library} linked against: #{dependency}"
+        p "Is an OpenCascade library missing?"
+        exit 1
+      end
+
       if( "@MAKE_VATES@" == "ON" )
+        if dependency.include? "@loader_path"
+          if dependency.include? "libvtk"
+            p "ParaView libraries found Contents/Libraries. Is the vatesfiles list is complete?"
+            exit 1
+          end
+        end
         if dependency.include? "#{ParaView_dir}"
           p "issue with library: #{library} linking against: #{dependency}"
           exit 1

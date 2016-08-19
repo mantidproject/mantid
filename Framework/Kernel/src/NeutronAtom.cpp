@@ -133,7 +133,8 @@ NeutronAtom::NeutronAtom()
     : z_number(0), a_number(0), coh_scatt_length_real(NAN),
       coh_scatt_length_img(NAN), inc_scatt_length_real(NAN),
       inc_scatt_length_img(NAN), coh_scatt_xs(NAN), inc_scatt_xs(NAN),
-      tot_scatt_xs(NAN), abs_scatt_xs(NAN) {}
+      tot_scatt_xs(NAN), abs_scatt_xs(NAN), tot_scatt_length(NAN),
+      coh_scatt_length(NAN), inc_scatt_length(NAN) {}
 
 /// @cond
 static const NeutronAtom H(1, -3.7390, 0., 1.7568, 80.26, 82.02, 0.3326);

@@ -94,10 +94,15 @@ IvsQ_13460_13462
 Layout
 ------
 
+Runs tab
+~~~~~~~~
+
+This section describes the different elements in the *Runs* tab.
+
 .. interface:: ISIS Reflectometry (Polref)
 
 Menu bar
-~~~~~~~~
+^^^^^^^^
 
 .. interface:: ISIS Reflectometry (Polref)
   :widget: menuBar
@@ -140,7 +145,7 @@ The **Edit** menu provides access to the same actions found in the tool bar.
 These are documented in the `Tool Bar`_ section of this document.
 
 Processing Table
-~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^
 
 .. interface:: ISIS Reflectometry (Polref)
   :widget: groupProcessPane
@@ -157,24 +162,6 @@ together using :ref:`Stitch1DMany <algm-Stitch1DMany>`.
 Above the processing table is a tool bar containing various actions for
 manipulating the processing table.
 
-Below the table is a section showing the algorithms used by the interface to reduce the data. For
-each of them, there is a text box allowing the specification of pre-processing,
-processing and post-processing options. Pre-processing options refer to the algorithms :ref:`Plus <algm-Plus>` (applied
-to the **Run(s)** column when multiple runs are specified) and :ref:`CreateTransmissionWorkspaceAuto <algm-CreateTransmissionWorkspaceAuto>`
-(applied to **Transmission Run(s)**). Options to the main reduction algorithm,
-:ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`, can also be
-supplied using the corresponding text box. Note that when conflicting options are specified
-for the reduction, i.e. different values for the same property are specified via this
-text box and the **Options** column (see description below), the latter will prevail. Therefore,
-the **ReflectometryReductionOneAuto** text box should be used to specify global options that will be
-applied to all the rows in the table, whereas the **Options** column will only be applicable
-to the specific row for which those options are defined. Finally, post-processing instructions,
-i.e. instructions to :ref:`Stitch1DMany <algm-Stitch1DMany>`, can also be supplied similarly (note
-that at least a bin width must be specified for this algorithm to run successfully, for instance *Params="-0.03"*). Pre-processing,
-processing and post-processing options are specified in ``key=value`` pairs separated by commas.
-Values containing commas must be quoted.
-
-
 Below the table is a progress bar, which shows the current progress of any
 processing that is in progress. And at the bottom, near the **Process**
 button is the processing instrument selector. The processing instrument is
@@ -187,7 +174,7 @@ complete. A generated notebook contains python code to repeat the processing
 steps and output relevant plots.
 
 Tool Bar
-~~~~~~~~
+^^^^^^^^
 
 This table details the behaviour of the actions in the tool bar, from left to right.
 
@@ -249,7 +236,7 @@ This table details the behaviour of the actions in the tool bar, from left to ri
 +------------------+----------------------------------------------------------+
 
 Columns
-~~~~~~~
+^^^^^^^
 
 .. WARNING If you're updating this documentation, you probably also want to update the "What's This" tips for the columns in QReflTableModel.cpp
 
@@ -332,7 +319,7 @@ Columns
 +---------------------+-----------+---------------------------------------------------------------------------------+
 
 Search Interface
-~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^
 
 .. interface:: ISIS Reflectometry (Polref)
   :widget: groupSearchPane
@@ -397,6 +384,26 @@ Hovering over the highlighted run with your cursor will allow you to see why the
 .. figure:: /images/ISISReflectometryPolref_tooltip_failed_run.jpg
    :alt: Showing tooltip from failed transfer.
 
+
+Settings tab
+~~~~~~~~~~~~
+
+The *Settings* tab can be used to specify global options for the reduction and post-processing. It shows the algorithms used
+by the interface to reduce the data, together with a text box allowing the specification of pre-processing,
+processing and post-processing options. Pre-processing options refer to the algorithms :ref:`Plus <algm-Plus>` (applied
+to the **Run(s)** column when multiple runs are specified) and :ref:`CreateTransmissionWorkspaceAuto <algm-CreateTransmissionWorkspaceAuto>`
+(applied to **Transmission Run(s)**). Options to the main reduction algorithm,
+:ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`, can also be
+supplied using the corresponding text box. Note that when conflicting options are specified
+for the reduction, i.e. different values for the same property are specified via this
+text box and the **Options** column in the *Runs* tab, the latter will prevail. Therefore,
+the **ReflectometryReductionOneAuto** text box should be used to specify global options that will be
+applied to all the rows in the table, whereas the **Options** column will only be applicable
+to the specific row for which those options are defined. Finally, post-processing instructions,
+i.e. instructions to :ref:`Stitch1DMany <algm-Stitch1DMany>`, can also be supplied similarly (note
+that at least a bin width must be specified for this algorithm to run successfully, for instance *Params="-0.03"*). Pre-processing,
+processing and post-processing options are specified in ``key=value`` pairs separated by commas.
+Values containing commas must be quoted.
 
 .. _ISIS_Reflectomety-Options:
 

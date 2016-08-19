@@ -9,6 +9,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <algorithm>
+
 using namespace Mantid;
 
 class IncreasingAxisValidatorTest : public CxxTest::TestSuite {
@@ -31,7 +33,8 @@ public:
     m_wrong_ws->initialize(1, 3, 3);
 
     auto bad_points = {2.0, 1.0, 0.0};
-    m_wrong_ws->setPoints(0, bad_points);
+    std::copy(bad_points.begin(), bad_points.end(),
+              m_wrong_ws->mutableX(0).begin());
   }
 
   void testRight() { TS_ASSERT_EQUALS(validator.isValid(m_right_ws), ""); }

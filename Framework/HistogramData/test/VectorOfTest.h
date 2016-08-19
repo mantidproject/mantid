@@ -10,15 +10,14 @@
 
 using Mantid::HistogramData::detail::VectorOf;
 using Mantid::HistogramData::detail::Iterable;
-using Mantid::HistogramData::HistogramX;
 using Mantid::Kernel::cow_ptr;
 using Mantid::Kernel::make_cow;
 
-class VectorOfTester : public VectorOf<VectorOfTester, HistogramX>,
+class VectorOfTester : public VectorOf<VectorOfTester, std::vector<double>>,
                        public Iterable<VectorOfTester> {
 public:
-  using VectorOf<VectorOfTester, HistogramX>::VectorOf;
-  using VectorOf<VectorOfTester, HistogramX>::operator=;
+  using VectorOf<VectorOfTester, std::vector<double>>::VectorOf;
+  using VectorOf<VectorOfTester, std::vector<double>>::operator=;
   VectorOfTester() = default;
   VectorOfTester(const VectorOfTester &) = default;
   VectorOfTester(VectorOfTester &&) = default;
@@ -120,7 +119,7 @@ public:
     TS_ASSERT_EQUALS(dest[3], src[3]);
   }
 
-  void test_value_assignment() {
+  void test_count_value_assignment() {
     VectorOfTester dest(1);
 
     dest.assign(3, 9.8);
@@ -180,6 +179,16 @@ public:
     TS_ASSERT_EQUALS(values[1], 0.2);
     TS_ASSERT_EQUALS(values[2], 0.3);
   }
+  void test_value_assignment() {
+    VectorOfTester dest(3);
+
+    dest = 9.8;
+
+    TS_ASSERT_EQUALS(dest.size(), 3);
+    TS_ASSERT_EQUALS(dest[0], 9.8);
+    TS_ASSERT_EQUALS(dest[1], 9.8);
+    TS_ASSERT_EQUALS(dest[2], 9.8);
+  }
 
   void test_empty_initializer_list_assignment() {
     std::initializer_list<double> empty_list;
@@ -189,7 +198,7 @@ public:
   }
 
   void test_cow_ptr_constructor() {
-    auto cow = make_cow<HistogramX>(2, 0.1);
+    auto cow = make_cow<std::vector<double>>(2, 0.1);
     VectorOfTester values(cow);
     TS_ASSERT(values);
     TS_ASSERT_EQUALS(values.size(), 2);
@@ -199,13 +208,13 @@ public:
   }
 
   void test_null_cow_ptr_constructor() {
-    cow_ptr<HistogramX> cow(nullptr);
+    cow_ptr<std::vector<double>> cow(nullptr);
     VectorOfTester values(cow);
     TS_ASSERT(!values);
   }
 
   void test_shared_ptr_constructor() {
-    auto shared = boost::make_shared<HistogramX>(2, 0.1);
+    auto shared = boost::make_shared<std::vector<double>>(2, 0.1);
     VectorOfTester values(shared);
     TS_ASSERT(values);
     TS_ASSERT_EQUALS(values.size(), 2);
@@ -215,7 +224,7 @@ public:
   }
 
   void test_null_shared_ptr_constructor() {
-    boost::shared_ptr<HistogramX> shared;
+    boost::shared_ptr<std::vector<double>> shared;
     VectorOfTester values(shared);
     TS_ASSERT(!values);
   }
@@ -240,7 +249,7 @@ public:
   }
 
   void test_cow_ptr_assignment() {
-    auto cow = make_cow<HistogramX>(2, 0.1);
+    auto cow = make_cow<std::vector<double>>(2, 0.1);
     VectorOfTester values(1);
     values = cow;
     TS_ASSERT(values);
@@ -251,7 +260,7 @@ public:
   }
 
   void test_null_cow_ptr_assignment() {
-    cow_ptr<HistogramX> cow(nullptr);
+    cow_ptr<std::vector<double>> cow(nullptr);
     VectorOfTester values(1);
     values = cow;
     TS_ASSERT(!values);
@@ -272,7 +281,7 @@ public:
   }
 
   void test_shared_ptr_assignment() {
-    auto shared = boost::make_shared<HistogramX>(2, 0.1);
+    auto shared = boost::make_shared<std::vector<double>>(2, 0.1);
     VectorOfTester values(1);
     values = shared;
     TS_ASSERT(values);
@@ -283,14 +292,14 @@ public:
   }
 
   void test_null_shared_ptr_assignment() {
-    boost::shared_ptr<HistogramX> shared;
+    boost::shared_ptr<std::vector<double>> shared;
     VectorOfTester values(1);
     values = shared;
     TS_ASSERT(!values);
   }
 
   void test_shared_ptr_self_assignment() {
-    auto shared = boost::make_shared<HistogramX>(2, 0.1);
+    auto shared = boost::make_shared<std::vector<double>>(2, 0.1);
     VectorOfTester values(1);
     values = shared;
     TS_ASSERT_THROWS_NOTHING(values = shared);

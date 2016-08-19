@@ -111,6 +111,14 @@ protected:
   /// Plot a spectrum plot with a given spectra range of a given workspace
   void plotSpectrum(const QString &workspaceName, int specStart, int specEnd);
 
+  /// Plot a spectrum plot with a given set of spectra
+  void plotSpectra(const QStringList &workspaceNames,
+                   const std::vector<int> &wsIndices);
+
+  /// Plot a spectrum plot with a given set of spectra of a given workspace
+  void plotSpectra(const QString &workspaceName,
+                   const std::vector<int> &wsIndices);
+
   /// Plot a time bin plot given a list of workspace names
   void plotTimeBin(const QStringList &workspaceNames, int binIndex = 0);
   /// Plot a time bin plot of a given workspace
@@ -147,6 +155,11 @@ protected:
   void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
 
   QString runPythonCode(QString vode, bool no_output = false);
+
+  /// Checks the ADS for a workspace named `workspaceName`,
+  /// opens a warning box for plotting/saving if none found
+  bool checkADSForPlotSaveWorkspace(const std::string &workspaceName,
+                                    const bool &plotting);
 
   /// Parent QWidget (if applicable)
   QWidget *m_parentWidget;

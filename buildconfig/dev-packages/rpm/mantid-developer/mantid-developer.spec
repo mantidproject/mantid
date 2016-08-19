@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        1.16
+Version:        1.17
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -55,6 +55,8 @@ Requires: redhat-lsb
 Requires: rpmdevtools
 Requires: scipy
 Requires: sip-devel
+Requires: tbb
+Requires: tbb-devel
 Requires: git
 Requires: openssl-devel
 Requires: texlive-latex
@@ -97,6 +99,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Tue Aug 02 2016 Peter Peterson <petersonpf@ornl.gov>
+- Require tbb
+
 * Wed May 18 2016 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Require h5py >= 2.3.1
 

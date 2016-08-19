@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_CLEARMASKFLAGTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/ClearMaskFlag.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -17,6 +18,7 @@ using Mantid::MantidVecPtr;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
 
 class ClearMaskFlagTest : public CxxTest::TestSuite {
 public:
@@ -42,7 +44,7 @@ public:
 
     // create the workspace
     auto space2D = createWorkspace<Workspace2D>(numspec, 6, 5);
-    BinEdges x(6, 10.0);
+    BinEdges x(6, LinearGenerator(10.0, 1.0));
     Counts y(5, 1.0);
     CountStandardDeviations e(5, 1.0);
     for (int j = 0; j < numspec; ++j) {

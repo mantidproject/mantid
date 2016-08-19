@@ -89,7 +89,7 @@
       <item row="0" column="0">
        <widget class="QLabel" name="lbInputType">
         <property name="text">
-         <string>Input type:</string>
+         <string>Sample:</string>
         </property>
        </widget>
       </item>

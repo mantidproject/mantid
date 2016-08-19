@@ -22,6 +22,7 @@ if ( CXXTEST_FOUND )
             Kernel
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
+            ${QWT_LIBRARIES}
             ${QT_LIBRARIES}
             ${GMOCK_LIBRARIES}
             ${GTEST_LIBRARIES} )
