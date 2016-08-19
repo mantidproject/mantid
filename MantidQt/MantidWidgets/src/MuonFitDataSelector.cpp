@@ -69,6 +69,8 @@ void MuonFitDataSelector::setUpConnections() {
           SLOT(checkForMultiGroupPeriodSelection()));
   connect(this, SIGNAL(selectedPeriodsChanged()), this,
           SLOT(checkForMultiGroupPeriodSelection()));
+  connect(this, SIGNAL(workspaceChanged()), this,
+          SLOT(checkForMultiGroupPeriodSelection()));
   connect(m_ui.cbDataset, SIGNAL(currentIndexChanged(int)), this,
           SIGNAL(datasetIndexChanged(int)));
   connect(m_ui.btnNextDataset, SIGNAL(clicked()), this, SLOT(setNextDataset()));
@@ -86,7 +88,6 @@ void MuonFitDataSelector::setUpConnections() {
  */
 void MuonFitDataSelector::fitTypeChanged(bool state) {
   (void)state;
-  checkForMultiGroupPeriodSelection();
   emit workspaceChanged();
 }
 
@@ -565,7 +566,6 @@ void MuonFitDataSelector::periodCombinationStateChanged(int state) {
   if (m_ui.txtFirst->text().isEmpty() && m_ui.txtSecond->text().isEmpty()) {
     m_ui.txtFirst->setText("1");
   }
-  checkForMultiGroupPeriodSelection();
   emit selectedPeriodsChanged();
 }
 
