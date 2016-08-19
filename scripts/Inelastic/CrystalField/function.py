@@ -21,16 +21,20 @@ class Function(object):
         self._ties = {}
         self._constraints = []
 
+    def copyFrom(self, attrib, params, ties, constraints):
+        """Make shallow copies of the member collections"""
+        from copy import copy
+        self._attrib = copy(attrib)
+        self._params = copy(params)
+        self._ties = copy(ties)
+        self._constraints = copy(constraints)
+
     def clone(self):
         """Make a copy of self."""
-        from copy import copy
-        f = Function(self._name)
+        function = Function(self._name)
         # Make shallow copies of the member collections
-        f._attrib = copy(self._attrib)
-        f._params = copy(self._params)
-        f._ties = copy(self._ties)
-        f._constraints = copy(self._constraints)
-        return f
+        function.copyFrom(self._attrib, self._params, self._ties, self._constraints)
+        return function
 
     @property
     def name(self):
@@ -69,16 +73,16 @@ class Function(object):
         attrib = ['%s=%s' % item for item in self._attrib.items()] + \
                  ['%s=%s' % item for item in self._params.items()]
         if len(attrib) > 0:
-            s = 'name=%s,%s' % (self._name, ','.join(attrib))
+            out = 'name=%s,%s' % (self._name, ','.join(attrib))
         else:
-            s = 'name=%s' % self._name
+            out = 'name=%s' % self._name
         ties = ','.join(['%s=%s' % item for item in self._ties.items()])
         if len(ties) > 0:
-            s += ',ties=(%s)' % ties
+            out += ',ties=(%s)' % ties
         constraints = ','.join(self._constraints)
         if len(constraints) > 0:
-            s += ',constraints=(%s)' % constraints
-        return s
+            out += ',constraints=(%s)' % constraints
+        return out
 
     def paramString(self, prefix):
         attrib = ['%s%s=%s' % ((prefix,) + item) for item in self._attrib.items()] + \
@@ -90,8 +94,7 @@ class Function(object):
         Update values of the fitting parameters.
         @param func: A IFunction object containing new parameter values.
         """
-        n = func.nParams()
-        for i in range(n):
+        for i in range(func.nParams()):
             par = func.parameterName(i)
             self._params[par] = func.getParameterValue(i)
 
@@ -122,9 +125,9 @@ class CompositeProperties(object):
 
     def getSize(self):
         """Get number of maps (functions) defined here"""
-        s = self._properties.keys()
-        if len(s) > 0:
-            return max(s) + 1
+        keys = self._properties.keys()
+        if len(keys) > 0:
+            return max(keys) + 1
         return 0
 
     def toStringList(self):
@@ -147,14 +150,14 @@ class CompositeProperties(object):
         Example:
             'f0.Height=100,f0.Sigma=1.0,f1.Height=120,f1.Sigma=2.0,f5.Height=300,f5.Sigma=3.0'
         """
-        s = ''
+        out = ''
         for i in self._properties:
-            f = '%sf%s.' % (prefix, i + shift)
+            fullPrefix = '%sf%s.' % (prefix, i + shift)
             props = self._properties[i]
-            if len(s) > 0:
-                s += ','
-            s += ','.join(['%s%s=%s' % ((f,) + item) for item in props.items()])
-        return s[:]
+            if len(out) > 0:
+                out += ','
+            out += ','.join(['%s%s=%s' % ((fullPrefix,) + item) for item in props.items()])
+        return out[:]
 
 
 class PeaksFunction(object):
@@ -242,49 +245,49 @@ class PeaksFunction(object):
 
     def nPeaks(self):
         """Get the number of peaks"""
-        n = max(self._attrib.getSize(), self._params.getSize())
-        if n == 0:
+        numPeaks = max(self._attrib.getSize(), self._params.getSize())
+        if numPeaks == 0:
             raise RuntimeError('PeaksFunction has no defined parameters or attributes.')
-        return n
+        return numPeaks
 
     def toString(self):
         """Create function initialisation string"""
-        n = self.nPeaks()
+        numPeaks = self.nPeaks()
         attribs = self._attrib.toStringList()
         params = self._params.toStringList()
-        if len(attribs) < n:
-            attribs += [''] * (n - len(attribs))
-        if len(params) < n:
-            params += [''] * (n - len(params))
+        if len(attribs) < numPeaks:
+            attribs += [''] * (numPeaks - len(attribs))
+        if len(params) < numPeaks:
+            params += [''] * (numPeaks - len(params))
         peaks = []
-        for i in range(n):
-            a = attribs[i]
-            p = params[i]
-            if len(a) != 0 or len(p) != 0:
-                if len(a) == 0:
-                    peaks.append('name=%s,%s' % (self._name, p))
-                elif len(p) == 0:
-                    peaks.append('name=%s,%s' % (self._name, a))
+        for i in range(numPeaks):
+            attrib = attribs[i]
+            param = params[i]
+            if len(attrib) != 0 or len(param) != 0:
+                if len(attrib) == 0:
+                    peaks.append('name=%s,%s' % (self._name, param))
+                elif len(param) == 0:
+                    peaks.append('name=%s,%s' % (self._name, attrib))
                 else:
-                    peaks.append('name=%s,%s,%s' % (self._name, a,p))
+                    peaks.append('name=%s,%s,%s' % (self._name, attrib,param))
             else:
                 peaks.append('name=%s' % self._name)
-        s = ';'.join(peaks)
+        out = ';'.join(peaks)
         if len(self._ties) > 0:
-            s += ';%s' % self.tiesString()
-        return s
+            out += ';%s' % self.tiesString()
+        return out
 
     def paramString(self, prefix='', shift=0):
         """Format a comma-separated list of all peaks attributes and parameters in a CompositeFunction
         style.
         """
-        na = self._attrib.getSize()
-        np = self._params.getSize()
-        if na == 0 and np == 0:
+        numAttributes = self._attrib.getSize()
+        numParams = self._params.getSize()
+        if numAttributes == 0 and numParams == 0:
             return ''
-        elif na == 0:
+        elif numAttributes == 0:
             return self._params.toCompositeString(prefix, shift)
-        elif np == 0:
+        elif numParams == 0:
             return self._attrib.toCompositeString(prefix, shift)
         else:
             return '%s,%s' % (self._attrib.toCompositeString(prefix, shift),
@@ -317,20 +320,22 @@ class Background(object):
 
     def clone(self):
         """Make a copy of self."""
-        b = Background()
+        aCopy = Background()
         if self.peak is not None:
-            b.peak = self.peak.clone()
+            aCopy.peak = self.peak.clone()
         if self.background is not None:
-            b.background = self.background.clone()
-        return b
+            aCopy.background = self.background.clone()
+        return aCopy
 
-    def __mul__(self, n):
+    def __mul__(self, nCopies):
         """Make expressions like Background(...) * 8 return a list of 8 identical backgrounds."""
-        return [self.clone() for i in range(n)]
+        copies = [self] * nCopies
+        return map(Background.clone, copies)
+        # return [self.clone() for i in range(nCopies)]
 
-    def __rmul__(self, n):
+    def __rmul__(self, nCopies):
         """Make expressions like 2 * Background(...) return a list of 2 identical backgrounds."""
-        return self.__mul__(n)
+        return self.__mul__(nCopies)
 
     def toString(self):
         if self.peak is None and self.background is None:
