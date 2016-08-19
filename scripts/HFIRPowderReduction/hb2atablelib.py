@@ -70,6 +70,7 @@ class ScanInfoSetupTableWidget(BaseTable.NTableWidget):
     """ A customized table to present HB2A information table setup
     """
     TableSetupList = [('Item Name', 'str'),
+                      ('Log Type', 'str'),
                       ('Use', 'checkbox')]
 
     def __init__(self, parent):
@@ -84,7 +85,7 @@ class ScanInfoSetupTableWidget(BaseTable.NTableWidget):
 
         return
 
-    def add_item(self, item_name, use=True):
+    def add_item(self, item_name, item_type, use=True):
         """
         add an item to table
         Returns:

@@ -1546,25 +1546,31 @@ class MainWindow(QtGui.QMainWindow):
         except RuntimeError as run_err:
             raise run_err
 
-        # load
-        # FIXME/TODO/NOW: Expand from sample code below - Enable testing scan
-        # LoadSpiceAscii(Filename='/home/wzz/Projects/workspaces/Mantid/HB2A/HB2A_exp0496_scan0055.dat', 
-        # OutputWorkspace='HB2A_exp0496_scan0055_RawTable', RunInfoWorkspace='HB2A_exp0496_scan0055ExpInfo')
-        # table_ws = mtd['HB2A_exp0496_scan0055_RawTable']
-        # col_names = table_ws.getColumnNames()
-        # matrix_ws = mtd['HB2A_exp0496_scan0055ExpInfo']
-        # for p in matrix_ws.getRun().getProperties():
-        #    print p.name, p.value
-        # all p.value are strings
+        # Download and load the first run
+        status, ret_obj = self._myControl.download_spice_file(exp_number, scan_number)
+        if not status:
+            err_msg = ret_obj
+            self.pop_error_message(err_msg)
+            return
+        else:
+            spice_file_name = ret_obj
 
-        # log_name_list = self._myControl.get_log_names(exp_number, scan_number)
-        # FIXME - remove this fake code
-        log_name_list = ['Scan', 'Temp A', 'Temp B']
+        # Load data
+        status, ret_obj = self._myControl.loadSpicePDData(expno=exp_number, scanno=scan_number,
+                datafilename=spice_file_name)
+        if not status:
+            self.pop_error_message(err_msg)
+            return
+
+        # get information
+        spice_log_list, spice_col_list = self._myControl.get_log_names(exp_number, scan_number)
+
+        # load
 
         # pop up a window for user to select the log names and types for output in the table
         self._scanInfoSetupWindow = InfoTableSetupWindow.ScanInfoTableSetupWindow(self)
         self._scanInfoSetupWindow.set_up_information('blabla')
-        self._scanInfoSetupWindow.add_log_names(log_name_list)
+        self._scanInfoSetupWindow.add_log_names(spoice_log_list, spice_col_list)
 
         self._scanInfoSetupWindow.show()
 
@@ -2624,3 +2630,12 @@ class MainWindow(QtGui.QMainWindow):
             xlabel = 'Wacky Unknown'
 
         return xlabel
+
+
+    def pop_error_message(self, error_message):
+        """ Pop up a dialog with error message
+        """
+        # TODO/NOW - ASAP
+
+        return
+

@@ -24,11 +24,12 @@ class ScanInfoTableSetupWindow(QtGui.QMainWindow):
 
         return
 
-    def add_log_names(self, log_name_list):
+    def add_log_names(self, spice_log_list, spice_col_list):
         """
         Add log names to table
         Args:
-            log_name_list: list of string for log names
+            spice_log_list: list of string for log names
+            spice_col_list: list of string for spice table column names
         Returns:
 
         """

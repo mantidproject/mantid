@@ -529,6 +529,33 @@ class HFIRPDRedControl(object):
 
         return self._myWorkspaceDict[(exp, scan)]
 
+    def get_log_name_list(self, exp_number, scan_number):
+        """
+        Get the list of log names, including sample logs and spice table column names
+        :return: 2 tuple
+        """
+        # check input
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+   
+        # FIXME/TODO - what are the functions of get_spice_table_ws...
+        spice_table_ws = self.get_spice_table_ws(exp_number, scan_number, throw=True)
+        spice_matrix_ws = self.get_spice_info_ws(exp_number, scan_number, throw=True)
+
+        # get column names
+        spice_col_names = spice_table_ws.getColumnNames()
+        spice_log_names = list()
+        for sample_log in spice_matrix_ws.getRun().getProperties():
+            spice_log_names.append(sample_log.name)
+        # END-FOR
+
+        # FIXME/TODO/NOW: Expand from sample code below - Enable testing scan
+        # LoadSpiceAscii(Filename='/home/wzz/Projects/workspaces/Mantid/HB2A/HB2A_exp0496_scan0055.dat', 
+        # OutputWorkspace='HB2A_exp0496_scan0055_RawTable', RunInfoWorkspace='HB2A_exp0496_scan0055ExpInfo')
+        # table_ws = mtd['HB2A_exp0496_scan0055_RawTable']
+        # matrix_ws = mtd['HB2A_exp0496_scan0055ExpInfo']
+
+        return spice_log_names, spice_col_names
 
     def hasDataLoaded(self, exp, scan):
         """ Check whether an experiment data set (defined by exp No. and scan No.)
