@@ -506,7 +506,7 @@ void EnggDiffFittingPresenter::processLoad() {
                           "Please select a focused file to load");
       m_view->showStatus("Error while plotting the focused workspace");
     }
-  } catch (std::invalid_argument &ia) {
+  } catch (std::invalid_argument) {
     m_view->userWarning(
         "Error loading file",
         "Unable to load the selected focused file, Please try again.");
