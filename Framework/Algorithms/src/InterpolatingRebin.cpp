@@ -319,7 +319,7 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
       yNew[i] = gsl_spline_eval(spline, xCensNew[i], acc);
       //(basic) error estimate the based on a weighted mean of the errors of the
       // surrounding input data points
-      eNew[i] = estimateError(xCensOld.rawData(), eOld, xCensNew[i]);
+      eNew[i] = estimateError(xCensOld, eOld, xCensNew[i]);
     }
   }
   // for GSL to clear up its memory use
@@ -354,12 +354,12 @@ Histogram InterpolatingRebin::noInterpolation(const Histogram &oldHistogram,
 
   yNew.assign(yNew.size(), oldHistogram.y().front());
 
-  const auto &xOldData = oldHistogram.x().rawData();
+  const auto &xPointData = oldHistogram.points();
   const auto &eOld = oldHistogram.e();
 
   // -1 because xNew.size is 1 bigger than eNew
   std::transform(xNew.cbegin(), xNew.cend() - 1, eNew.begin(),
-                 [&](double x) { return estimateError(xOldData, eOld, x); });
+                 [&](double x) { return estimateError(xPointData, eOld, x); });
 
   return newHistogram;
 }
@@ -375,7 +375,7 @@ Histogram InterpolatingRebin::noInterpolation(const Histogram &oldHistogram,
 *  @param[in] xNew the value of x for at the point of interest
 *  @return the estimated error at that point
 */
-double InterpolatingRebin::estimateError(const std::vector<double> &xsOld,
+double InterpolatingRebin::estimateError(const Points &xsOld,
                                          const HistogramE &esOld,
                                          const double xNew) const {
 
