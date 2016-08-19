@@ -1224,8 +1224,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   * @param vanNo The user input for the vanadium run
   * @param outVanName The fixed filename for the vanadium run
   */
-void EnggDiffractionPresenter::appendCalibInstPrefix(const std::string vanNo,
-                                                     std::string &outVanName) {
+void EnggDiffractionPresenter::appendCalibInstPrefix(
+    const std::string vanNo, std::string &outVanName) const {
   // Use a single non numeric digit so we are guaranteed to skip
   // generating cerium file names
   const std::string cer = "-";
