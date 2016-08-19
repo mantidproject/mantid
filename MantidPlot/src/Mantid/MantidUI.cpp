@@ -879,7 +879,7 @@ void MantidUI::showSliceViewer() {
     // Pop up the window
     w->show();
     // And add it
-    // appWindow()->d_workspace->addSubWindow(w);
+    appWindow()->addSerialisableWindow(w);
   }
 }
 

@@ -1,6 +1,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidKernel/DataService.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/VMD.h"
@@ -464,6 +465,34 @@ void SliceViewerWindow::afterReplaceHandle(
       m_slicer->peakWorkspaceChanged(wsName, new_peaks_ws);
     }
   }
+}
+
+API::IProjectSerialisable *SliceViewerWindow::loadFromProject(const std::string &lines, ApplicationWindow *app, const int fileVersion)
+{
+    UNUSED_ARG(app);
+    UNUSED_ARG(fileVersion);
+    MantidQt::API::TSVSerialiser tsv(lines);
+    QString wsName, label;
+
+    tsv.selectLine("Workspace");
+    tsv >> wsName;
+    tsv.selectLine("Label");
+    tsv >> label;
+
+    auto window = new SliceViewerWindow(wsName, label);
+    window->show();
+    return window;
+}
+
+std::string SliceViewerWindow::saveToProject(ApplicationWindow *app)
+{
+  UNUSED_ARG(app);
+  MantidQt::API::TSVSerialiser tsv, tab;
+  // save a reference to the workspace being viewed
+  tab.writeLine("Workspace") << m_ws->name();
+  tab.writeLine("Label") << m_label;
+  tsv.writeSection("sliceviewer", tab.outputLines());
+  return tsv.outputLines();
 }
 
 } // namespace SliceViewer

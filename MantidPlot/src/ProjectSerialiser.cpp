@@ -14,6 +14,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidQtAPI/PlotAxis.h"
+#include "MantidQtSliceViewer/SliceViewerWindow.h"
 
 #include <QTextCodec>
 #include <QTextStream>
@@ -129,6 +130,7 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
   loadWindows(tsv, fileVersion);
   loadLogData(tsv);
   loadScriptWindow(tsv, fileVersion);
+  loadAdditionalWindows(lines, fileVersion);
 
   // Deal with subfolders last.
   loadSubFolders(tsv, fileVersion);
@@ -272,6 +274,8 @@ QString ProjectSerialiser::serialiseProjectState(Folder *folder) {
     std::string scriptString = scriptingWindow->saveToProject(window);
     text += QString::fromStdString(scriptString);
   }
+
+  text += saveAdditionalWindows();
 
   // Finally, recursively save folders
   if (folder) {
@@ -421,6 +425,21 @@ QString ProjectSerialiser::saveWorkspaces() {
   }
   wsNames += "\n</mantidworkspaces>\n";
   return wsNames;
+}
+
+/**
+ * Save additional windows that are not MdiSubWindows
+ *
+ * This includes windows such as the slice viewer, VSI, and the spectrum viewer
+ *
+ * @return a string representing the sections of the
+ */
+QString ProjectSerialiser::saveAdditionalWindows() {
+  QString output;
+  for (auto win : window->getSerialisableWindows()) {
+    output += QString::fromStdString(win->saveToProject(window));
+  }
+  return output;
 }
 
 /**
@@ -637,4 +656,25 @@ void ProjectSerialiser::loadWsToMantidTree(const std::string &wsName) {
   std::string fileName(window->workingDir.toStdString() + "/" + wsName);
   fileName.append(".nxs");
   window->mantidUI->loadWSFromFile(wsName, fileName);
+}
+
+/**
+ * Load additional windows which are not MdiSubWindows
+ *
+ * This will load other windows in Mantid such as the slice viewer, VSI, and
+ * the spectrum viewer
+ *
+ * @param tsv :: the TSVSerialiser object for the project file
+ * @param fileVersion :: the version of the project file
+ */
+void ProjectSerialiser::loadAdditionalWindows(const std::string &lines, const int fileVersion) {
+  TSVSerialiser tsv(lines);
+
+  if (tsv.selectSection("SliceViewer")) {
+    std::string sliceLines;
+    tsv >> sliceLines;
+
+    auto win = SliceViewer::SliceViewerWindow::loadFromProject(sliceLines, window, fileVersion);
+    window->addSerialisableWindow(win);
+  }
 }
