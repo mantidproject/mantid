@@ -1,10 +1,10 @@
-# pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-import os
-import unittest
+import os, unittest, numpy as np
 from mantid.simpleapi import *
-from mantid.api import MatrixWorkspace, WorkspaceGroup
+from mantid.api import MatrixWorkspace, WorkspaceGroup, AnalysisDataService
+from testhelpers import run_algorithm
+import IndirectILLReduction
 
 class IndirectILLReductionTest(unittest.TestCase):
 
@@ -12,15 +12,21 @@ class IndirectILLReductionTest(unittest.TestCase):
     _args = {}
     _run_name = None
     _run_path = None
-    _multi_run_name = None
+    _run = None
 
-    def setUp(self):
-        self._run_name = 'ILL/IN16B/146191'
-        self._multi_run_name = 'ILL/IN16B/146191,ILL/IN16B/146192'
+    @classmethod
+    def setUp(cls):
+        cls._run_name = 'ILL/IN16B/146191.nxs'
+        cls._multi_runs = 'ILL/IN16B/146191.nxs,ILL/IN16B/146192.nxs'
 
-    def tearDown(self):
+        # Reference workspace after loading (comparisons using blocksize(), getNumberHistograms(), ( SampleLogs, ...))
+        ws_loaded = Load(cls._run_name)
+        cls._run = ws_loaded
+
+    @classmethod
+    def tearDown(cls):
         #clean up any files we made
-        for ws in self._output_workspaces[1:]:
+        for ws in cls._output_workspaces[1:]:
             path = os.path.join(config['defaultsave.directory'], ws.name() + '.nxs')
             if os.path.isfile(path):
                 try:
@@ -29,46 +35,63 @@ class IndirectILLReductionTest(unittest.TestCase):
                     continue
 
         #reset output workspaces list
-        self._output_workspaces = []
+        cls._output_workspaces = []
 
-    def test_multifile(self):
-        self._args['Run'] = self._multi_run_name + '.nxs'
+    def test_multifiles(self):
+        self._args['Run'] = self._multi_runs
 
-        red = IndirectILLReduction(**self._args)
+        alg_test = run_algorithm('IndirectILLReduction', **self._args)
 
-        self.assertTrue(isinstance(red, WorkspaceGroup), "Should be a group workspace")
-        self.assertEqual(red.size(), 2)
-        self.assertTrue(isinstance(red.getItem(0), MatrixWorkspace), "Should be a matrix workspace")
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
+        self.assertEqual(mtd['red'].size(), 2, "WorkspaceGroup red should contain two runs")
+        self.assertTrue(isinstance(mtd['red'], WorkspaceGroup), "Should be a group workspace")
+        self.assertTrue(isinstance(mtd['red'].getItem(0), MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual(mtd['red'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
 
     def test_sumruns(self):
-        self._args['Run'] = self._multi_run_name + '.nxs'
+        self._args['Run'] = self._multi_runs
         self._args['SumRuns'] = True
 
-        red = IndirectILLReduction(**self._args)
-        self.assertEquals(red.size(), 1)
+        alg_test = run_algorithm('IndirectILLReduction', **self._args)
+
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
+        self.assertEqual(mtd['red'].size(), 1, "WorkspaceGroup red should contain one workspace")
+        self.assertTrue(isinstance(mtd['red'], WorkspaceGroup), "Should be a group workspace")
+        self.assertTrue(isinstance(mtd['red'].getItem(0), MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual(self._run.blocksize() / 2, mtd['146191_red'].blocksize(),
+                        "Should have half of the blocksize of an not-reduced, loaded workspace")
+        self.assertEqual(mtd['red'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
 
     def test_save_results(self):
-        self._args['Run'] = self._run_name + '.nxs'
+        self._args['Run'] = self._run_name
         self._args['Save'] = True
 
-        IndirectILLReduction(**self._args)
-
+        alg_test = run_algorithm('IndirectILLReduction', **self._args)
         path = os.path.join(config['defaultsave.directory'], '146191_red.nxs')
+
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
         self.assertTrue(os.path.isfile(path), path)
 
     def test_no_verbose(self):
-        self._args['Run'] = self._run_name + '.nxs'
+        self._args['Run'] = self._run_name
 
-        IndirectILLReduction(**self._args)
+        alg_test = run_algorithm('IndirectILLReduction', **self._args)
 
-        self.assertTrue(isinstance(mtd['146191_red'], MatrixWorkspace), "Should be a matrix workspace")
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
+        self.assertEqual(mtd['red'].size(), 1, "WorkspaceGroup red should contain one workspace")
+        self.assertTrue(isinstance(mtd['red'], WorkspaceGroup), "Should be a group workspace")
+        self.assertTrue(isinstance(mtd['red'].getItem(0), MatrixWorkspace), "Should be a matrix workspace")
+        self.assertEqual(self._run.blocksize() / 2, mtd['146191_red'].blocksize(),
+                        "Should have half of the blocksize of an not-reduced, loaded workspace")
+        self.assertEqual(mtd['red'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
 
     def test_debug_mode(self):
-        self._args['Run'] = self._run_name + '.nxs'
+        self._args['Run'] = self._run_name
         self._args['DebugMode'] = True
 
-        IndirectILLReduction(**self._args)
+        alg_test = run_algorithm('IndirectILLReduction', **self._args)
 
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction failed")
         self.assertTrue(isinstance(mtd['red'], WorkspaceGroup), "Should be a group workspace")
         self.assertTrue(isinstance(mtd['red_raw'], WorkspaceGroup), "Should be a group workspace")
         self.assertTrue(isinstance(mtd['red_left'], WorkspaceGroup), "Should be a group workspace")
@@ -78,8 +101,30 @@ class IndirectILLReductionTest(unittest.TestCase):
         self.assertTrue(isinstance(mtd['red_vnorm'], WorkspaceGroup), "Should be a group workspace")
         self.assertTrue(isinstance(mtd['red_detgrouped'], WorkspaceGroup), "Should be a group workspace")
 
+        # Workspace characteristics
+        self.assertEqual(self._run.blocksize() / 2, mtd['red'].getItem(0).blocksize())
+        self.assertEqual(self._run.blocksize()    , mtd['red_raw'].getItem(0).blocksize())
+        self.assertEqual(self._run.blocksize() / 2, mtd['red_left'].getItem(0).blocksize())
+        self.assertEqual(self._run.blocksize() / 2, mtd['red_right'].getItem(0).blocksize())
+        self.assertEqual(self._run.blocksize()    , mtd['red_monitor'].getItem(0).blocksize())
+        self.assertEqual(self._run.blocksize()    , mtd['red_mnorm'].getItem(0).blocksize())
+        self.assertEqual(self._run.blocksize()    , mtd['red_vnorm'].getItem(0).blocksize())
+        self.assertEqual(self._run.blocksize()    , mtd['red_detgrouped'].getItem(0).blocksize())
+
+        self.assertEqual(mtd['red'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
+        self.assertEqual(mtd['red_raw'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
+        self.assertEqual(mtd['red_left'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
+        self.assertEqual(mtd['red_right'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
+        self.assertEqual(mtd['red_monitor'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
+        self.assertEqual(mtd['red_mnorm'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
+        self.assertEqual(mtd['red_vnorm'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
+        self.assertEqual(mtd['red_detgrouped'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
+
+        self.assertEqual(self._run.getNumberHistograms() , mtd['red_raw'].getItem(0).getNumberHistograms())
+        self.assertEqual("Success!", CheckWorkspacesMatch(self._run, mtd['red_raw'].getItem(0)))
+
     def test_mapping_file_option(self):
-        self._args['Run'] = self._run_name + '.nxs'
+        self._args['Run'] = self._run_name
 
         # manually get name of grouping file from parameter file
         idf = os.path.join(config['instrumentDefinition.directory'], "IN16B_Definition.xml")
@@ -95,12 +140,11 @@ class IndirectILLReductionTest(unittest.TestCase):
         #rather than reading the default directly from the IP File.
         self._args['MapFile'] = os.path.join(config['groupingFiles.directory'], grouping_filename)
 
-        IndirectILLReduction(**self._args)
+        alg_test = run_algorithm('IndirectILLReduction', **self._args)
 
-        self.assertEqual(18, mtd['146191_red'].getNumberHistograms())
-
-    # Tests related to function _shift_spectra
-    def test_sample_log
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
+        self.assertEqual(self._run.blocksize() / 2, mtd['146191_red'].blocksize(),
+                         "Should have half of the blocksize of an not-reduced, loaded workspace")
 
 if __name__ == '__main__':
     unittest.main()

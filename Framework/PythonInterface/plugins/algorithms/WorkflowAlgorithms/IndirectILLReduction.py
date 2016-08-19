@@ -399,7 +399,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     def _perform_unmirror(self, red, left, right):
         """
         Handling unmirror options and sum left and right wing if needed
-        :return: reduced workspace
+        :param red:          reduced workspace, will be updated
+        :param left:         left workspace
+        :param right:        right workspace
+        :return: start_bin   bins with smaller bin number will be masked
+        :return: end_bin     bins with higher bin number will be masked
         """
         # Initial bins out of which range masking will be performed
         start_bin = 0
@@ -466,7 +470,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         if ws2 is not None and \
             (size != mtd[ws2].blocksize() or number_spectra != mtd[ws2].getNumberHistograms()):
-            self.log().warning('Input Workspaces should have the same bins and number of spectra')
+            self.log().warning('Input workspaces should have the same number of bins and spectra')
 
         mid_bin = int(size / 2)
 
@@ -524,8 +528,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         """
         Calls MaskBins for masking bins before startbin and after endbin according to unmirror options
         :param ws:          Input workspace to be masked
-        :param xminbin:        Bins smaller than xminbin will be masked
-        :param xmaxbin:        Bins larger than xmaxbin will be masked
+        :param xminbin:     Bins smaller than xminbin will be masked
+        :param xmaxbin:     Bins larger than xmaxbin will be masked
         """
 
         # Temporary workspace containing bin boundaries
