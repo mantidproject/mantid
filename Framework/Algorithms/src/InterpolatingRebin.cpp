@@ -202,11 +202,12 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
   const size_t size_new = xNew.size() - 1; // -1 because BinEdges
 
   // get the bin centres of the input data
-  std::vector<double> xCensOld(size_new);
-  VectorHelper::convertToBinCentre(oldHistogram.x().rawData(), xCensOld);
+  auto xCensOld = oldHistogram.points();
+  VectorHelper::convertToBinCentre(oldHistogram.x().rawData(),
+                                   xCensOld.mutableRawData());
   // the centres of the output data
-  std::vector<double> xCensNew(size_new);
-  VectorHelper::convertToBinCentre(xNew.rawData(), xCensNew);
+  Points xCensNew(size_new);
+  VectorHelper::convertToBinCentre(xNew.rawData(), xCensNew.mutableRawData());
 
   // find the range of input values whose x-values just suround the output
   // x-values
@@ -219,7 +220,7 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
         1e-8 * (xCensOld.back() - xCensOld.front())) {
       oldIn1 = 1;
       // make what should be a very small correction
-      xCensNew.front() = xCensOld.front();
+      xCensNew.mutableRawData().front() = xCensOld.front();
     }
   }
 
@@ -233,7 +234,7 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
         1e-8 * (xCensOld.back() - xCensOld.front())) {
       oldIn2 = size_old - 1;
       // make what should be a very small correction
-      xCensNew.back() = xCensOld.back();
+      xCensNew.mutableRawData().back() = xCensOld.back();
     }
   }
 
@@ -314,12 +315,11 @@ Histogram InterpolatingRebin::cubicInterpolation(const Histogram &oldHistogram,
       throw std::runtime_error("Error setting up GSL spline functions");
     }
 
-    // todo std transform?
     for (size_t i = 0; i < size_new; ++i) {
       yNew[i] = gsl_spline_eval(spline, xCensNew[i], acc);
       //(basic) error estimate the based on a weighted mean of the errors of the
       // surrounding input data points
-      eNew[i] = estimateError(xCensOld, eOld, xCensNew[i]);
+      eNew[i] = estimateError(xCensOld.rawData(), eOld, xCensNew[i]);
     }
   }
   // for GSL to clear up its memory use
@@ -356,7 +356,9 @@ Histogram InterpolatingRebin::noInterpolation(const Histogram &oldHistogram,
 
   const auto &xOldData = oldHistogram.x().rawData();
   const auto &eOld = oldHistogram.e();
-  std::transform(xNew.cbegin(), xNew.cend(), eNew.begin(),
+
+  // -1 because xNew.size is 1 bigger than eNew
+  std::transform(xNew.cbegin(), xNew.cend() - 1, eNew.begin(),
                  [&](double x) { return estimateError(xOldData, eOld, x); });
 
   return newHistogram;
