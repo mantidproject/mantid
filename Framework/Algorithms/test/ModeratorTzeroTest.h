@@ -312,24 +312,57 @@ public:
     delete suite;
   }
 
-  void setUp() {
+  ModeratorTzeroTestPerformance() {
     input = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         10000, 1000, true);
     input->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
-    AnalysisDataService::Instance().add("input", input);
+	output = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+		10000, 1000, true);
+	output->getAxis(0)->unit() =
+		Mantid::Kernel::UnitFactory::Instance().create("TOF");
+
+	inputEvent = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
+		10, 100, true);
+	inputEvent->getAxis(0)->unit() =
+		Mantid::Kernel::UnitFactory::Instance().create("TOF");
+
+	outputEvent = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
+		10, 100, true);
+	outputEvent->getAxis(0)->unit() =
+		Mantid::Kernel::UnitFactory::Instance().create("TOF");
+	
+	test = boost::dynamic_pointer_cast<MatrixWorkspace>(inputEvent);
+	AnalysisDataService::Instance().add("input", input);
+	AnalysisDataService::Instance().add("output", output);
+	AnalysisDataService::Instance().add("inputEvent", inputEvent);
+	AnalysisDataService::Instance().add("outputEvent", outputEvent);
   }
 
-  void tearDown() { AnalysisDataService::Instance().remove("input"); }
+  ~ModeratorTzeroTestPerformance() {
+	  AnalysisDataService::Instance().remove("input");
+	  AnalysisDataService::Instance().remove("output");
+	  AnalysisDataService::Instance().remove("inputEvent");
+	  AnalysisDataService::Instance().remove("outputEvent");
+  }
 
   void testExecIndirect() {
     AddToIndirectInstrument(input, true, true);
     alg.initialize();
     alg.setProperty("InputWorkspace", input);
-    alg.setPropertyValue("OutputWorkspace", "input");
+    alg.setPropertyValue("OutputWorkspace", "output");
     alg.setProperty("EMode", "Indirect");
-    alg.execute();
+	alg.execute();
+  }
+
+  void testExecIndirectEvent() {
+	  AddToIndirectInstrument(test, true, true);
+	  alg.initialize();
+	  alg.setProperty("InputWorkspace", inputEvent);
+	  alg.setPropertyValue("OutputWorkspace", "outputEvent");
+	  alg.setProperty("EMode", "Indirect");
+	  alg.execute();
   }
 
   void testExecDirect() {
@@ -340,15 +373,31 @@ public:
 
     alg.initialize();
     alg.setProperty("InputWorkspace", input);
-    alg.setPropertyValue("OutputWorkspace", "input");
+    alg.setPropertyValue("OutputWorkspace", "output");
     alg.setProperty("EMode", "Direct");
     alg.execute();
+  }
+
+  void testExecDirectEvent() {
+	  inputEvent->instrumentParameters().addString(
+		  inputEvent->getInstrument()->getComponentID(), "t0_formula",
+		  "101.9*incidentEnergy^(-0.41)*exp(-incidentEnergy/282.0)");
+	  inputEvent->mutableRun().addProperty("Ei", 100.0, "meV", true);
+
+	  alg.initialize();
+	  alg.setProperty("InputWorkspace", inputEvent);
+	  alg.setPropertyValue("OutputWorkspace", "outputEvent");
+	  alg.setProperty("EMode", "Direct");
+	  alg.execute();
   }
 
 private:
   ModeratorTzero alg;
   MatrixWorkspace_sptr input;
+  MatrixWorkspace_sptr test;
+  EventWorkspace_sptr inputEvent;
   MatrixWorkspace_sptr output;
+  EventWorkspace_sptr outputEvent;
 };
 
 #endif /*MANTID_ALGORITHMS_MODERATORTZEROTEST_H_*/

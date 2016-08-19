@@ -207,6 +207,11 @@ public:
         10000, 1000, true);
     input->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
+
+	inputEvent = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
+		10, 100, true);
+	inputEvent->getAxis(0)->unit() =
+		Mantid::Kernel::UnitFactory::Instance().create("TOF");
   }
 
   void testExec() {
@@ -217,9 +222,18 @@ public:
     alg.execute();
   }
 
+  void testExecEvent() {
+    AddToInstrument(inputEvent, true, true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputEvent);
+    alg.setPropertyValue("OutputWorkspace", "output");
+    alg.execute();
+  }
+
 private:
   ModeratorTzeroLinear alg;
   MatrixWorkspace_sptr input;
+  EventWorkspace_sptr inputEvent;
 };
 
 #endif /* MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_ */

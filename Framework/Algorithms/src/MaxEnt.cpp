@@ -21,6 +21,9 @@ namespace Algorithms {
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 using Mantid::HistogramData::Points;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
 
 using namespace API;
@@ -737,12 +740,12 @@ void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
     }
   }
 
-  outWS->mutableX(spec).assign(X.begin(), X.end());
-  outWS->mutableY(spec).assign(YR.begin(), YR.end());
-  outWS->mutableE(spec).assign(E.begin(), E.end());
-  outWS->mutableX(nspec + spec).assign(X.begin(), X.end());
-  outWS->mutableY(nspec + spec).assign(YI.begin(), YI.end());
-  outWS->mutableE(nspec + spec).assign(E.begin(), E.end());
+  outWS->mutableX(spec) = std::move(X);
+  outWS->mutableY(spec) = std::move(YR);
+  outWS->mutableE(spec) = std::move(E);
+  outWS->setSharedX(nspec + spec, outWS->sharedX(spec));
+  outWS->mutableY(nspec + spec) = std::move(YI);
+  outWS->setSharedE(nspec + spec, outWS->sharedE(spec));
 }
 
 /** Populates the output workspaces
@@ -792,12 +795,12 @@ void MaxEnt::populateDataWS(const MatrixWorkspace_sptr &inWS, size_t spec,
     }
   }
 
-  outWS->mutableX(spec).assign(X.begin(), X.end());
-  outWS->mutableY(spec).assign(YR.begin(), YR.end());
-  outWS->mutableE(spec).assign(E.begin(), E.end());
-  outWS->mutableX(nspec + spec).assign(X.begin(), X.end());
-  outWS->mutableY(nspec + spec).assign(YI.begin(), YI.end());
-  outWS->mutableE(nspec + spec).assign(E.begin(), E.end());
+  outWS->mutableX(spec) = std::move(X);
+  outWS->mutableY(spec) = std::move(YR);
+  outWS->mutableE(spec) = std::move(E);
+  outWS->setSharedX(nspec + spec, outWS->sharedX(spec));
+  outWS->mutableY(nspec + spec) = std::move(YI);
+  outWS->setSharedE(nspec + spec, outWS->sharedE(spec));
 }
 
 } // namespace Algorithms

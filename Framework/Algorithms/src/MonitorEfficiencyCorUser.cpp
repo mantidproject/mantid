@@ -71,10 +71,11 @@ void MonitorEfficiencyCorUser::exec() {
       static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
   // Loop over the histograms (detector spectra)
+  double factor = 1 / eff0;
   PARALLEL_FOR2(m_outputWS, m_inputWS)
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    m_outputWS->setHistogram(i, m_inputWS->histogram(i) / eff0);
+    m_outputWS->setHistogram(i, m_inputWS->histogram(i) * factor);
 
     prog.report("Detector Efficiency correction...");
     PARALLEL_END_INTERUPT_REGION

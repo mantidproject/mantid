@@ -561,4 +561,48 @@ public:
   }
 };
 
+class MaxEntTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MaxEntTestPerformance *createSuite() {
+    return new MaxEntTestPerformance();
+  }
+  static void destroySuite(MaxEntTestPerformance *suite) { delete suite; }
+
+  MaxEntTestPerformance() {
+    input = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 100);
+    alg = AlgorithmManager::Instance().create("MaxEnt");
+  }
+
+  void testExecReal() {
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", input);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+	alg->execute();
+  }
+
+  void testExecComplex() {
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", input);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setProperty("ComplexData", true);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+	alg->execute();
+  }
+
+private:
+  MatrixWorkspace_sptr input;
+  IAlgorithm_sptr alg;
+};
+
 #endif /* MANTID_ALGORITHMS_MAXENTTEST_H_ */
