@@ -69,10 +69,10 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst,
  *detector. Calculated if not explicitly provided.
  *        Used to give a valid TOF. Default 1.0 meters.
  */
-Peak::Peak(Geometry::Instrument_const_sptr m_inst,
-           Mantid::Kernel::V3D QSampleFrame,
-           Mantid::Kernel::Matrix<double> goniometer,
-           boost::optional<double> detectorDistance)
+Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
+           const Mantid::Kernel::V3D &QSampleFrame,
+           const Mantid::Kernel::Matrix<double> &goniometer,
+           const boost::optional<double> &detectorDistance)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
@@ -492,8 +492,8 @@ Mantid::Kernel::V3D Peak::getQSampleFrame() const {
  * @param detectorDistance :: distance between the sample and the detector.
  *        Used to give a valid TOF. You do NOT need to explicitly set this.
  */
-void Peak::setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
-                           boost::optional<double> detectorDistance) {
+void Peak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
+                           const boost::optional<double> &detectorDistance) {
   V3D Qlab = m_GoniometerMatrix * QSampleFrame;
   this->setQLabFrame(Qlab, detectorDistance);
 }
@@ -514,8 +514,8 @@ void Peak::setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
  *this is provided. Then we do not
  * ray trace to find the intersecing detector.
  */
-void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
-                        boost::optional<double> detectorDistance) {
+void Peak::setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
+                        const boost::optional<double> &detectorDistance) {
   // Clear out the detector = we can't know them
   m_detectorID = -1;
   m_det = IDetector_sptr();
@@ -743,7 +743,7 @@ void Peak::resetHKL() {
  *
  * @param HKL :: vector with x,y,z -> h,k,l
  */
-void Peak::setHKL(Mantid::Kernel::V3D HKL) {
+void Peak::setHKL(const Mantid::Kernel::V3D &HKL) {
   if (m_orig_H == 0 && m_orig_K == 0 && m_orig_L == 0) {
     m_orig_H = m_H;
     m_orig_K = m_K;
@@ -801,7 +801,7 @@ Mantid::Kernel::Matrix<double> Peak::getGoniometerMatrix() const {
  * the goniometer
  * @throw std::invalid_argument if matrix is not 3x3*/
 void Peak::setGoniometerMatrix(
-    Mantid::Kernel::Matrix<double> goniometerMatrix) {
+    const Mantid::Kernel::Matrix<double> &goniometerMatrix) {
   if ((goniometerMatrix.numCols() != 3) || (goniometerMatrix.numRows() != 3))
     throw std::invalid_argument(
         "Peak::setGoniometerMatrix(): Goniometer matrix must be 3x3.");
