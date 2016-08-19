@@ -218,7 +218,7 @@ void SCDCalibratePanels::exec() {
         weight = 1.0 / peak.getBinCount();
       for (int j = 0; j < 3; j++) {
         int k = i * 3 + j;
-        xVec[k] = i * 3 + j;
+        xVec[k] = k;
         eVec[k] = weight;
       }
     }
@@ -452,7 +452,7 @@ void SCDCalibratePanels::findL1(int nPeaks,
       weight = 1.0 / peak.getBinCount();
     for (int j = 0; j < 3; j++) {
       int k = i * 3 + j;
-      xVec[k] = i * 3 + j;
+      xVec[k] = k;
       eVec[k] = weight;
     }
   }
@@ -544,7 +544,7 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
  *  @param bankPrefixName   The prefix to the bank names.
  */
 void SCDCalibratePanels::LoadISawDetCal(
-    boost::shared_ptr<const Instrument> &instrument,
+		boost::shared_ptr<const Instrument> &instrument,
     boost::container::flat_set<string> &AllBankName, double &T0, double &L0,
     string filename, string bankPrefixName) {
 
