@@ -540,15 +540,6 @@ void SliceViewer::initMenus() {
 //------------------------------------------------------------------------------
 /** Intialize the zooming/panning tools */
 void SliceViewer::initZoomer() {
-  //  QwtPlotZoomer * zoomer = new CustomZoomer(m_plot->canvas());
-  //  zoomer->setMousePattern(QwtEventPattern::MouseSelect1,  Qt::LeftButton);
-  //  zoomer->setTrackerMode(QwtPicker::AlwaysOff);
-  //  const QColor c(Qt::darkBlue);
-  //  zoomer->setRubberBandPen(c);
-  //  zoomer->setTrackerPen(c);
-  //  QObject::connect(zoomer, SIGNAL(zoomed(const QRectF &)),
-  //      this, SLOT(zoomRectSlot(const QRectF &)));
-
   QwtPlotPicker *zoomer = new QwtPlotPicker(m_plot->canvas());
   zoomer->setSelectionFlags(QwtPicker::RectSelection |
                             QwtPicker::DragSelection);
