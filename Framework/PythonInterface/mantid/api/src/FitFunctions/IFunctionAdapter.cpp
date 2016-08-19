@@ -95,7 +95,8 @@ void IFunctionAdapter::declareAttribute(const std::string &name,
 
 /**
  * Get the value of the named attribute as a Python object
- * @param name :: The name of the new attribute
+ * @param self :: A reference to a function object that has the attribute.
+ * @param name :: The name of the new attribute.
  * @returns The value of the attribute
  */
 PyObject *IFunctionAdapter::getAttributeValue(IFunction &self,
@@ -106,6 +107,7 @@ PyObject *IFunctionAdapter::getAttributeValue(IFunction &self,
 
 /**
  * Get the value of the given attribute as a Python object
+ * @param self :: A reference to a function object that has the attribute.
  * @param attr An attribute object
  * @returns The value of the attribute
  */
