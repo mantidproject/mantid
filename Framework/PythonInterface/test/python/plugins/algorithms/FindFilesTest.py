@@ -11,8 +11,8 @@ class FindFilesTest(unittest.TestCase):
 
         criteria = '$raw_data_1/duration$ > 1000 or $raw_data_1/good_frames$ > 10000'
         res = FindFiles(FileList=self._fileslist,NexusCriteria=criteria)
-        self.assertEqual(res.count(','), 1,"There should be 1 comma, since only 1st and 3rd files satisfy.")
         outfiles = res.split(',')
+        self.assertEqual(len(outfiles), 2, "Only 1st and 3rd files satisfy.")
         self.assertTrue(outfiles[0].endswith('INTER00013460.nxs'),'Fully resolved first file name')
         self.assertTrue(outfiles[1].endswith('INTER00013464.nxs'),'Fully resolved second file name')
 
