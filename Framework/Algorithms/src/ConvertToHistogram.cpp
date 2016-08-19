@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertToHistogram.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -49,21 +50,12 @@ ConvertToHistogram::getNewXSize(const MatrixWorkspace_sptr inputWS) const {
  * boundaries
  * are guessed such that the boundary goes mid-way between each point
  * @param inputX :: A const reference to the input data
- * @param outputX :: A reference to the output data
  */
-void ConvertToHistogram::calculateXPoints(const MantidVec &inputX,
-                                          MantidVec &outputX) const {
-  const size_t numPoints = inputX.size();
-  const size_t numBoundaries = numPoints + 1;
-  assert(outputX.size() == numBoundaries);
-  // Handle the front and back points outside
-  for (size_t i = 0; i < numPoints - 1; ++i) {
-    outputX[i + 1] = 0.5 * (inputX[i + 1] + inputX[i]);
-  }
-  // Now deal with the end points
-  outputX[0] = inputX.front() - (outputX[1] - inputX.front());
-  outputX[numPoints] =
-      inputX.back() + (inputX.back() - outputX[numBoundaries - 2]);
+Kernel::cow_ptr<HistogramData::HistogramX>
+ConvertToHistogram::calculateXPoints(
+    Kernel::cow_ptr<HistogramData::HistogramX> inputX) const {
+  return HistogramData::BinEdges(HistogramData::Points(
+    std::move(inputX))).cowData();
 }
 }
 }

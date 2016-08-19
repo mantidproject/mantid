@@ -68,7 +68,8 @@ void XDataConverter::exec() {
     // Copy over the Y and E data
     outputWS->setSharedY(i, inputWS->sharedY(i));
     outputWS->setSharedE(i, inputWS->sharedE(i));
-    setXData(outputWS, inputWS, i);
+    //setXData(outputWS, inputWS, i);
+    outputWS->setSharedX(i, calculateXPoints(inputWS->sharedX(i)));
     prog.report();
 
     PARALLEL_END_INTERUPT_REGION
@@ -85,6 +86,7 @@ void XDataConverter::exec() {
  * @param inputWS :: The input workspace
  * @param index :: The index
  */
+/*
 void XDataConverter::setXData(API::MatrixWorkspace_sptr outputWS,
                               const API::MatrixWorkspace_sptr inputWS,
                               const int index) {
@@ -105,6 +107,6 @@ void XDataConverter::setXData(API::MatrixWorkspace_sptr outputWS,
     MantidVec &xPoints = outputWS->dataX(index);
     calculateXPoints(xBoundaries, xPoints);
   }
-}
+}*/
 }
 }

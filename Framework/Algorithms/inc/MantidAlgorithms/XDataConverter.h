@@ -60,8 +60,8 @@ protected:
   virtual std::size_t
   getNewXSize(const API::MatrixWorkspace_sptr inputWS) const = 0;
   /// Calculate the X point values. Implement in an inheriting class.
-  virtual void calculateXPoints(const MantidVec &inputX,
-                                MantidVec &outputX) const = 0;
+  virtual Kernel::cow_ptr<HistogramData::HistogramX> calculateXPoints(
+    const Kernel::cow_ptr<HistogramData::HistogramX> inputX) const = 0;
 
 private:
   /// Override init

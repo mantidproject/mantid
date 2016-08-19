@@ -46,11 +46,12 @@ ConvertToPointData::getNewXSize(const MatrixWorkspace_sptr inputWS) const {
 /**
  * Calculate the X point values
  * @param inputX :: A const reference to the input data
- * @param outputX :: A reference to the output data
  */
-void ConvertToPointData::calculateXPoints(const MantidVec &inputX,
-                                          MantidVec &outputX) const {
-  Kernel::VectorHelper::convertToBinCentre(inputX, outputX);
+Kernel::cow_ptr<HistogramData::HistogramX>
+ConvertToPointData::calculateXPoints(
+    Kernel::cow_ptr<HistogramData::HistogramX> inputX) const {
+  return HistogramData::Points(HistogramData::BinEdges(
+    std::move(inputX))).cowData();
 }
 }
 }
