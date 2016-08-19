@@ -34,6 +34,7 @@ set ( TEST_PY_FILES
   ExportSpectraMaskTest.py   
   FilterLogByTimeTest.py
   FindEPPTest.py
+  FindFilesTest.py
   FindReflectometryLinesTest.py
   FitGaussianTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
