@@ -992,8 +992,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             prefix = self._outPrefix
         filename = os.path.join(self._outDir, prefix)
         if pdfgetn:
-            self.log().notice("Saving 'pdfgetn' is deprecated. Use PDtoPDFgetN instead.")
             if "pdfgetn" in self._outTypes:
+                self.log().notice("Saving 'pdfgetn' is deprecated. Use PDtoPDFgetN instead.")
                 pdfwksp = str(wksp)+"_norm"
                 api.SetUncertainties(InputWorkspace=wksp, OutputWorkspace=pdfwksp, SetError="sqrt")
                 api.SaveGSS(InputWorkspace=pdfwksp, Filename=filename+".getn", SplitFiles=False, Append=False,
@@ -1245,7 +1245,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     van_bkgd_run_number = van_bkgd_run_number_list[0]
                 else:
                     van_bkgd_run_number = van_bkgd_run_number_list[samRunIndex]
-                van_bkgd_ws_name = getBasename(van_bkgd_run_number)
+                van_bkgd_ws_name = getBasename(van_bkgd_run_number) + "_vanbg"
 
                 # load background runs and sum if necessary
                 if self.getProperty("Sum").value:
