@@ -10,6 +10,7 @@
 #include "MantidAlgorithms/MergeRuns.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/shared_ptr.hpp>
@@ -18,6 +19,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::DataHandling::LoadEventPreNexus;
 
@@ -129,6 +131,33 @@ private:
     AnalysisDataService::Instance().addOrReplace("a3", a);
     AnalysisDataService::Instance().addOrReplace("b3", b);
     AnalysisDataService::Instance().addOrReplace("group3", group);
+    return group;
+  }
+
+  WorkspaceGroup_sptr create_workspace_with_sample_logs(std::string merge_type) {
+    MatrixWorkspace_sptr a =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            2, 1000, true);
+    MatrixWorkspace_sptr b =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            2, 1000, true);
+
+    Property *prop1 = new PropertyWithValue<double>("double_prop", 1.0);
+    Property *prop2 = new PropertyWithValue<double>("double_prop", 2.0);
+
+    a->mutableRun().addLogData(prop1);
+    b->mutableRun().addLogData(prop2);
+
+    a->instrumentParameters().addString(a->getInstrument()->getComponentID(), merge_type, "double_prop");
+    b->instrumentParameters().addString(b->getInstrument()->getComponentID(), merge_type, "double_prop");
+
+    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    group->addWorkspace(a);
+    group->addWorkspace(b);
+
+    AnalysisDataService::Instance().addOrReplace("a1", a);
+    AnalysisDataService::Instance().addOrReplace("b1", b);
+    AnalysisDataService::Instance().addOrReplace("group1", group);
     return group;
   }
 
@@ -845,6 +874,67 @@ public:
   void test_useCustomInputPropertyName() {
     MergeRuns alg;
     TS_ASSERT(alg.useCustomInputPropertyName());
+  }
+
+  void do_test_mergeSampleLogs(std::string mergeType, std::string result) {
+    WorkspaceGroup_sptr input = create_workspace_with_sample_logs(mergeType);
+
+    MatrixWorkspace_sptr input0 = boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0));
+    MatrixWorkspace_sptr input1 = boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(1));
+
+    MergeRuns alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaces", input0->name() + "," + input1->name()));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outWS"));
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    MatrixWorkspace_sptr output;
+    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+
+    Property *prop;
+
+    if (mergeType.compare("sample_logs_fail") == 0) {
+      TS_ASSERT_EQUALS(output->getSpectrum(0).dataY().front(), 2.0);
+    } else {
+      TS_ASSERT_EQUALS(output->getSpectrum(0).dataY().front(), 4.0);
+    }
+
+    if (mergeType.compare("sample_logs_list") == 0) {
+      prop = output->mutableRun().getLogData("double_prop_list");
+      TS_ASSERT_EQUALS(prop->value(), result);
+    } else {
+      prop = output->mutableRun().getLogData("double_prop");
+      TS_ASSERT_EQUALS(prop->value(), result);
+    }
+  }
+
+  void test_mergeSampleLogs_average() {
+    do_test_mergeSampleLogs("sample_logs_average", "1.5");
+  }
+
+  void test_mergeSampleLogs_min() {
+    do_test_mergeSampleLogs("sample_logs_min", "1");
+  }
+
+  void test_mergeSampleLogs_max() {
+    do_test_mergeSampleLogs("sample_logs_max", "2");
+  }
+
+  void test_mergeSampleLogs_sum() {
+    do_test_mergeSampleLogs("sample_logs_sum", "3");
+  }
+
+  void test_mergeSampleLogs_list() {
+    do_test_mergeSampleLogs("sample_logs_list", "1, 2");
+  }
+
+  void test_mergeSampleLogs_warn() {
+    do_test_mergeSampleLogs("sample_logs_warn", "1");
+  }
+
+  void test_mergeSampleLogs_fail() {
+    do_test_mergeSampleLogs("sample_logs_fail", "1");
   }
 
 private:

@@ -740,7 +740,7 @@ void MergeRuns::calculateUpdatedSampleLogs(MatrixWorkspace_sptr ws, MatrixWorksp
 
     switch (item.second.second) {
     case average: {
-      double value = (wsNumber + outWSNumber) * ((numberOfWSsAdded + 1) / (double) (numberOfWSsAdded + 2));
+      double value = (wsNumber + outWSNumber) * ((numberOfWSsAdded) / (double) (numberOfWSsAdded + 1));
       item.second.first->setValue(std::to_string(value));
       break;
     }
