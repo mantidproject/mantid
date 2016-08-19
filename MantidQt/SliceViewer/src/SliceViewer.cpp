@@ -2607,7 +2607,7 @@ void SliceViewer::setColorBarAutoScale(bool autoscale) {
 */
 void SliceViewer::applyColorScalingForCurrentSliceIfRequired() {
   auto useAutoColorScaleforCurrentSlice =
-      m_colorBar->getAutoColorScaleforCurrentSlice();
+      m_colorBar->getAutoScaleforCurrentSlice();
   if (useAutoColorScaleforCurrentSlice) {
     setColorScaleAutoSlice();
   }

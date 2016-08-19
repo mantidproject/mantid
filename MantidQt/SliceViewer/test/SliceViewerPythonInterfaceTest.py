@@ -199,10 +199,10 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertAlmostEqual( sv.getSlicePoint(2), 7.6, 2)
         # Go to too small a value
         sv.setSlicePoint(2, -12.3)
-        self.assertAlmostEqual( sv.getSlicePoint(2), 0.0, 2)
+        self.assertAlmostEqual( sv.getSlicePoint(2), 0.166, 2)
         # Go to too big a value
         sv.setSlicePoint(2, 22.3)
-        self.assertAlmostEqual( sv.getSlicePoint(2), 10.0, 2)
+        self.assertAlmostEqual( sv.getSlicePoint(2), 9.833, 2)
 
     def test_setSlicePoint_strings(self):
         sv = self.sv

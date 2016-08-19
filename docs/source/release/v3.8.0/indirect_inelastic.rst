@@ -17,10 +17,24 @@ Algorithms
 Bayes
 #####
 
+Quasi
+~~~~~
+
+- Saving and plotting are performed after the algorithm is run via the use of push buttons at the bottom of the interface
+
+
 Stretch
 ~~~~~~~
 
 - Previously the Quest script was used to drive the Bayes stretch interface. This functionality has been ported to the algorithm :ref:`BayesStretch <algm-BayesStretch>`.
+
+Corrections
+###########
+
+Absorption
+~~~~~~~~~~
+
+- Mantid plotting is now handled in the interface rather than the respective algorithm
 
 
 Data Reduction
@@ -28,8 +42,8 @@ Data Reduction
 
 ISIS Calibration
 ~~~~~~~~~~~~~~~~
-- Add load log option to ISIS calibration interface
 
+- Add load log option to ISIS calibration interface
 
 Data Analysis
 #############
@@ -41,8 +55,10 @@ Elwin
 - When using multiple input files, the naming convention for the outputworkspace contains the `first-final` run number.
   An example of this would be `osi92764-92767_graphite002_red_elwin_elf` for OSIRIS run between 92764-92767
 
-Jump Fit
-~~~~~~~~
+ConvFit
+~~~~~~~
+
+- Plotting and saving is now performed after the algorithm is run. These are push buttons at the bottom of the interface which are enabled post algorithm completion
 
 Simulations
 ###########
@@ -50,7 +66,8 @@ Simulations
 Density Of States
 ~~~~~~~~~~~~~~~~~
 
-- :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` now allows for the parsing of isotopes from the *.phonon or *.castep file in the form 'element:isotope' 
+- :ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` now allows for the parsing of isotopes from the *.phonon or *.castep file in the form 'element:isotope'
+- Allow for the loading of separate indexes for each element via the Output Format combo box in the interface.
 
 Load nMoldyn
 ~~~~~~~~~~~~
@@ -67,6 +84,7 @@ Improvements
 - Range bars colours in the *ISIS Calibration* interface have been updated to match the convention in the fit wizard.
 - Vesuvio sigma_theta value updated for single and double differencing in both forward and back scattering. The new value is 0.016 for all.
 - The Elwin interface now uses the resolution of the instrument to create the range bars when possible
+- Shift of container data and conversion of units to wavelength have been removed from ApplyPaalmanPings interface and added to ApplyPaalmanPingsCorrection algorithm.
 
 
 Bugfixes

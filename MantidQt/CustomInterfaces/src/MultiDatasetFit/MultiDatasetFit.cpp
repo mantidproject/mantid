@@ -22,6 +22,7 @@ namespace {
 // tool options pages
 const int zoomToolPage = 0;
 const int rangeToolPage = 1;
+Mantid::Kernel::Logger g_log("MultiDatasetFit");
 }
 
 namespace MantidQt {
@@ -738,6 +739,10 @@ double MultiDatasetFit::getLogValue(const QString &logName,
                                     int i) const {
   return m_dataController->getLogValue(logName, function, i);
 }
+
+/// Log a warning
+/// @param msg :: A warning message to log.
+void MultiDatasetFit::logWarning(const std::string &msg) { g_log.warning(msg); }
 
 } // CustomInterfaces
 } // MantidQt

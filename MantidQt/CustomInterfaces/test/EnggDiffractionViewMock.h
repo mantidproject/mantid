@@ -103,6 +103,8 @@ public:
   // virtual void enableTabs(bool enable);
   MOCK_METHOD1(enableTabs, void(bool));
 
+  MOCK_METHOD1(highlightRbNumber, void(bool));
+
   // virtual void enableCalibrateFocusFitUserActions(bool enable);
   MOCK_METHOD1(enableCalibrateFocusFitUserActions, void(bool));
 

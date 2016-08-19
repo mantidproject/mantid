@@ -937,9 +937,8 @@ void GenericDataProcessorPresenter::groupRows() {
 
   const auto selectedRows = m_view->getSelectedRows();
 
-  if (selectedRows.size() < 2) {
-    // Rows belong to the same group (size == 1) or
-    // no rows were selected (size == 0)
+  if (selectedRows.empty()) {
+    // no rows were selected
     return;
   }
 
@@ -1287,6 +1286,12 @@ void GenericDataProcessorPresenter::copySelected() {
   std::vector<std::string> lines;
 
   const auto selectedRows = m_view->getSelectedRows();
+
+  if (selectedRows.empty()) {
+    m_view->setClipboard(std::string());
+    return;
+  }
+
   for (const auto &item : selectedRows) {
     const int group = item.first;
     auto rows = item.second;
@@ -1317,6 +1322,10 @@ void GenericDataProcessorPresenter::cutSelected() {
 * append new rows */
 void GenericDataProcessorPresenter::pasteSelected() {
   const std::string text = m_view->getClipboard();
+
+  if (text.empty())
+    return;
+
   // Contains the data to paste plus the original group index in the first
   // element
   std::vector<std::string> lines;
