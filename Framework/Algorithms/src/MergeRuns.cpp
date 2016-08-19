@@ -708,14 +708,21 @@ void MergeRuns::getSampleList(MergeLogType sampleLogBehaviour, std::string param
   StringTokenizer tokenizer(params, ",", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
 
   for (auto item : tokenizer.asVector()) {
-    if (sampleLogBehaviour == list) {
-      Property* prop = ws->getLog(item);
-      Property* stringProperty = new PropertyWithValue<std::string>(item + "_list", prop->value(), Direction::Input);
-      m_logMap[item] = std::make_pair(stringProperty, sampleLogBehaviour);
-      ws->mutableRun().addProperty(item + "_list", ws->getLog(item)->value());
-    } else {
-      m_logMap[item] = std::make_pair(ws->getLog(item), sampleLogBehaviour);
+    Property *prop;
+    try {
+      prop = ws->getLog(item);
+    } catch (std::invalid_argument e) {
+      g_log.warning() << "Could not merge sample log \"" << item << "\", does not exist in workspace!" << std::endl;
+      continue;
     }
+    if (sampleLogBehaviour == list) {
+      Property *stringProperty = new PropertyWithValue<std::string>(item + "_list", prop->value(), Direction::Input);
+      m_logMap[item] = std::make_pair(stringProperty, sampleLogBehaviour);
+      ws->mutableRun().addProperty(item + "_list", prop->value());
+    } else {
+      m_logMap[item] = std::make_pair(prop, sampleLogBehaviour);
+    }
+
   }
 }
 

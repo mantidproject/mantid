@@ -134,7 +134,8 @@ private:
     return group;
   }
 
-  WorkspaceGroup_sptr create_workspace_with_sample_logs(std::string merge_type) {
+  template<typename T>
+  WorkspaceGroup_sptr create_workspace_with_sample_logs(std::string merge_type, T value_1, T value_2) {
     MatrixWorkspace_sptr a =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             2, 1000, true);
@@ -142,14 +143,14 @@ private:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             2, 1000, true);
 
-    Property *prop1 = new PropertyWithValue<double>("double_prop", 1.0);
-    Property *prop2 = new PropertyWithValue<double>("double_prop", 2.0);
+    Property *prop1 = new PropertyWithValue<T>("prop", value_1);
+    Property *prop2 = new PropertyWithValue<T>("prop", value_2);
 
     a->mutableRun().addLogData(prop1);
     b->mutableRun().addLogData(prop2);
 
-    a->instrumentParameters().addString(a->getInstrument()->getComponentID(), merge_type, "double_prop");
-    b->instrumentParameters().addString(b->getInstrument()->getComponentID(), merge_type, "double_prop");
+    a->instrumentParameters().addString(a->getInstrument()->getComponentID(), merge_type, "prop");
+    b->instrumentParameters().addString(b->getInstrument()->getComponentID(), merge_type, "prop");
 
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
     group->addWorkspace(a);
@@ -876,9 +877,7 @@ public:
     TS_ASSERT(alg.useCustomInputPropertyName());
   }
 
-  void do_test_mergeSampleLogs(std::string mergeType, std::string result) {
-    WorkspaceGroup_sptr input = create_workspace_with_sample_logs(mergeType);
-
+  void do_test_mergeSampleLogs(WorkspaceGroup_sptr input, std::string mergeType, std::string result, int filesMerged) {
     MatrixWorkspace_sptr input0 = boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0));
     MatrixWorkspace_sptr input1 = boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(1));
 
@@ -894,47 +893,59 @@ public:
 
     Property *prop;
 
-    if (mergeType.compare("sample_logs_fail") == 0) {
-      TS_ASSERT_EQUALS(output->getSpectrum(0).dataY().front(), 2.0);
-    } else {
-      TS_ASSERT_EQUALS(output->getSpectrum(0).dataY().front(), 4.0);
-    }
+    TS_ASSERT_EQUALS(output->getSpectrum(0).dataY().front(), 2.0 * filesMerged);
 
     if (mergeType.compare("sample_logs_list") == 0) {
-      prop = output->mutableRun().getLogData("double_prop_list");
+      prop = output->mutableRun().getLogData("prop_list");
       TS_ASSERT_EQUALS(prop->value(), result);
     } else {
-      prop = output->mutableRun().getLogData("double_prop");
+      prop = output->mutableRun().getLogData("prop");
       TS_ASSERT_EQUALS(prop->value(), result);
     }
   }
 
   void test_mergeSampleLogs_average() {
-    do_test_mergeSampleLogs("sample_logs_average", "1.5");
+    std::string mergeType = "sample_logs_average";
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, 1.0, 2.0), mergeType, "1.5", 2);
   }
 
   void test_mergeSampleLogs_min() {
-    do_test_mergeSampleLogs("sample_logs_min", "1");
+    std::string mergeType = "sample_logs_min";
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, 1.0, 2.0), mergeType, "1", 2);
   }
 
   void test_mergeSampleLogs_max() {
-    do_test_mergeSampleLogs("sample_logs_max", "2");
+    std::string mergeType = "sample_logs_max";
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, 1.0, 2.0), mergeType, "2", 2);
   }
 
   void test_mergeSampleLogs_sum() {
-    do_test_mergeSampleLogs("sample_logs_sum", "3");
+    std::string mergeType = "sample_logs_sum";
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, 1.0, 2.0), mergeType, "3", 2);
   }
 
   void test_mergeSampleLogs_list() {
-    do_test_mergeSampleLogs("sample_logs_list", "1, 2");
+    std::string mergeType = "sample_logs_list";
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, 1.0, 2.0), mergeType, "1, 2", 2);
   }
 
   void test_mergeSampleLogs_warn() {
-    do_test_mergeSampleLogs("sample_logs_warn", "1");
+    std::string mergeType = "sample_logs_warn";
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, 1.0, 2.0), mergeType, "1", 2);
   }
 
   void test_mergeSampleLogs_fail() {
-    do_test_mergeSampleLogs("sample_logs_fail", "1");
+    std::string mergeType = "sample_logs_fail";
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, 1.0, 2.0), mergeType, "1", 1);
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, 1.0, 1.0), mergeType, "1", 2);
+  }
+
+  void test_mergeSampleLogs_non_existent_log_is_ignored() {
+    std::string mergeType = "sample_logs_average";
+    WorkspaceGroup_sptr gws = create_workspace_with_sample_logs<double>(mergeType, 1.0, 2.0);
+    MatrixWorkspace_sptr a = boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
+    a->instrumentParameters().addString(a->getInstrument()->getComponentID(), mergeType, "prop, non_existent");
+    do_test_mergeSampleLogs(gws, mergeType, "1.5", 2);
   }
 
 private:
