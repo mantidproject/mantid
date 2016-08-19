@@ -112,7 +112,7 @@
 #include "DataPickerTool.h"
 #include "TiledWindow.h"
 #include "DockedWindow.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "ProjectSerialiser.h"
 
 // TODO: move tool-specific code to an extension manager
@@ -4572,6 +4572,14 @@ void ApplicationWindow::openRecentProject(QAction *action) {
     // Have to change the working directory here because that is used when
     // finding the nexus files to load
     workingDir = QFileInfo(f).absolutePath();
+
+    // store the working directory in the settings so it may be accessed
+    // elsewhere in the Qt layer.
+    QSettings settings;
+    settings.beginGroup("/Project");
+    settings.setValue("/WorkingDirectory", workingDir);
+    settings.endGroup();
+
     ApplicationWindow *a = open(fn, false, false);
     if (a && (fn.endsWith(".qti", Qt::CaseInsensitive) ||
               fn.endsWith(".qti~", Qt::CaseInsensitive) ||
@@ -4605,6 +4613,13 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
                                                   const int fileVersion) {
   newProject();
   m_mantidmatrixWindows.clear();
+
+  // store the working directory in the settings so it may be accessed
+  // elsewhere in the Qt layer.
+  QSettings settings;
+  settings.beginGroup("/Project");
+  settings.setValue("/WorkingDirectory", workingDir);
+  settings.endGroup();
 
   projectname = filename;
   setWindowTitle("MantidPlot - " + filename);
@@ -13493,6 +13508,10 @@ bool ApplicationWindow::isSilentStartup(const QString &arg) {
 }
 
 void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
+  m_exec_on_start = false;
+  m_quit_after_exec = false;
+  m_cmdline_filename = "";
+
   int num_args = args.count();
   if (num_args == 0) {
     initWindow();
@@ -13500,9 +13519,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
     return;
   }
 
-  bool exec(false), quit(false), default_settings(false),
-      unknown_opt_found(false);
-  QString file_name;
+  bool default_settings(false), unknown_opt_found(false);
   QString str;
   int filename_argindex(0), counter(0);
   foreach (str, args) {
@@ -13515,17 +13532,17 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
     } else if ((str == "-d" || str == "--default-settings")) {
       default_settings = true;
     } else if (str.endsWith("--execute") || str.endsWith("-x")) {
-      exec = true;
-      quit = false;
+      m_exec_on_start = true;
+      m_quit_after_exec = false;
     } else if (shouldExecuteAndQuit(str)) {
-      exec = true;
-      quit = true;
+      m_exec_on_start = true;
+      m_quit_after_exec = true;
     } else if (isSilentStartup(str)) {
       g_log.debug("Starting in Silent mode");
     } // if filename not found yet then these are all program arguments so we
     // should
     // know what they all are
-    else if (file_name.isEmpty() &&
+    else if (m_cmdline_filename.isEmpty() &&
              (str.startsWith("-") || str.startsWith("--"))) {
       g_log.warning()
           << "'" << str.toLatin1().constData()
@@ -13536,36 +13553,36 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
     } else {
       // First option that doesn't start "-" is considered a filename and the
       // rest arguments to that file
-      if (file_name.isEmpty()) {
-        file_name = str;
+      if (m_cmdline_filename.isEmpty()) {
+        m_cmdline_filename = str;
         filename_argindex = counter;
       }
     }
     ++counter;
   }
 
-  if (unknown_opt_found || file_name.isEmpty()) { // no file name given
+  if (unknown_opt_found || m_cmdline_filename.isEmpty()) { // no file name given
     initWindow();
     savedProject();
     return;
   } else {
-    QFileInfo fi(file_name);
+    QFileInfo fi(m_cmdline_filename);
     if (fi.isDir()) {
       QMessageBox::critical(
           this, tr("MantidPlot - Error opening file"), // Mantid
           tr("<b>%1</b> is a directory, please specify a file name!")
-              .arg(file_name));
+              .arg(m_cmdline_filename));
       return;
     } else if (!fi.exists()) {
       QMessageBox::critical(
           this, tr("MantidPlot - Error opening file"), // Mantid
-          tr("The file: <b>%1</b> doesn't exist!").arg(file_name));
+          tr("The file: <b>%1</b> doesn't exist!").arg(m_cmdline_filename));
       return;
     } else if (!fi.isReadable()) {
       QMessageBox::critical(
           this, tr("MantidPlot - Error opening file"), // Mantid
           tr("You don't have the permission to open this file: <b>%1</b>")
-              .arg(file_name));
+              .arg(m_cmdline_filename));
       return;
     }
 
@@ -13577,26 +13594,9 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
     // Set as arguments in script environment
     scriptingEnv()->setSysArgs(cmdArgs);
 
-    if (exec) {
-      if (quit) {
-        // Minimize ourselves
-        this->showMinimized();
-        try {
-          executeScriptFile(file_name, Script::Asynchronous);
-        } catch (std::runtime_error &exc) {
-          std::cerr << "Error thrown while running script file asynchronously '"
-                    << exc.what() << "'\n";
-          setExitCode(1);
-        }
-        saved = true;
-        this->close();
-      } else {
-        loadScript(file_name);
-        scriptingWindow->executeCurrentTab(Script::Asynchronous);
-      }
-    } else {
+    if (!m_quit_after_exec && !m_cmdline_filename.isEmpty()) {
       saved = true;
-      open(file_name, default_settings, false);
+      open(m_cmdline_filename, default_settings, false);
     }
   }
 }
@@ -14708,14 +14708,15 @@ void ApplicationWindow::executeScriptFile(
 }
 
 /**
- * This is the slot for handing script exits when it returns successfully
+ * This is the slot for handing script execution errors. It is only
+ * attached by ::executeScriptFile which is only done in the '-xq'
+ * command line option.
  *
  * @param lineNumber The line number in the script that caused the error.
  */
 void ApplicationWindow::onScriptExecuteSuccess(const QString &message) {
   g_log.notice() << message.toStdString() << "\n";
   this->setExitCode(0);
-  this->exitWithPresetCode();
 }
 
 /**
@@ -14734,7 +14735,6 @@ void ApplicationWindow::onScriptExecuteError(const QString &message,
                 << scriptName.toStdString() << "\" encountered:\n"
                 << message.toStdString();
   this->setExitCode(1);
-  this->exitWithPresetCode();
 }
 
 /**
@@ -16251,7 +16251,25 @@ void ApplicationWindow::validateWindowPos(MdiSubWindow *w, int &x, int &y) {
  * Currently:
  *  - Update of Script Repository
  */
-void ApplicationWindow::about2Start() {
+void ApplicationWindow::onAboutToStart() {
+  if (m_exec_on_start) {
+    if (m_quit_after_exec) {
+      try {
+        // Script completion triggers close with correct code automatically
+        executeScriptFile(m_cmdline_filename, Script::Asynchronous);
+      } catch (std::runtime_error &exc) {
+        std::cerr << "Error thrown while running script file asynchronously '"
+                  << exc.what() << "'\n";
+        this->setExitCode(1);
+      }
+      saved = true;
+      this->close();
+      return;
+    } else {
+      scriptingWindow->executeCurrentTab(Script::Asynchronous);
+    }
+  }
+
   // Show first time set up
   if (d_showFirstTimeSetup)
     showFirstTimeSetup();

@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Material.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -490,5 +491,10 @@ std::string DetectorGroup::getFullName() const {
   }
   return result;
 }
+
+const Kernel::Material DetectorGroup::material() const {
+  return Kernel::Material();
+}
+
 } // namespace Geometry
 } // namespace Mantid

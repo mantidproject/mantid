@@ -32,6 +32,15 @@ SliceViewerWindow::SliceViewerWindow(const QString &wsName,
                                      const QString &label, Qt::WFlags f)
     : QMainWindow(NULL, f), WorkspaceObserver(), m_lastLinerWidth(0),
       m_lastPeaksViewerWidth(0) {
+
+#ifdef Q_OS_MAC
+  // Work around to ensure that floating windows remain on top of the main
+  // application window, but below other applications on Mac
+  Qt::WindowFlags flags = windowFlags();
+  Qt::WindowFlags new_flags = flags | Qt::Tool;
+  setWindowFlags(new_flags);
+#endif
+
   // Set the window icon
   QIcon icon;
   icon.addFile(

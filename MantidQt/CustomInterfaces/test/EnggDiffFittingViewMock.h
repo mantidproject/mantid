@@ -118,9 +118,20 @@ public:
   // regenerating the list - view widget when not required
   MOCK_METHOD0(getFittingMultiRunMode, bool());
 
-  // sets the fitting mode to multi-run or single to avoid
-  // regenerating the list - view widget when not required
+  // sets the fitting mode to multi-run to avoid regenerating
+  // the list and widgets - view widget when not required
   MOCK_METHOD1(setFittingMultiRunMode, void(bool mode));
+
+  // To determine whether the current loop is single-run in order
+  // to avoid regenerating the list and widgets
+  MOCK_METHOD0(getFittingSingleRunMode, bool());
+
+  // sets the fitting mode to single-run to avoid regenerating
+  // the list and widgets - view widget when not required
+  MOCK_METHOD1(setFittingSingleRunMode, void(bool mode));
+
+  // enable or disable the Fit All button
+  MOCK_CONST_METHOD1(enableFitAllButton, void(bool enable));
 
   // void saveSettings() const;
   MOCK_CONST_METHOD0(saveSettings, void());

@@ -728,5 +728,112 @@ QPointF InstrumentWidgetRenderTab::getUCorrection() const {
   return QPointF();
 }
 
+/**
+ * Save widget render tab to a project file.
+ * @return string representing the current state of the project file.
+ */
+std::string
+MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
+  API::TSVSerialiser tab;
+
+  tab.writeLine("AxesView") << mAxisCombo->currentIndex();
+  tab.writeLine("AutoScaling") << m_autoscaling->isChecked();
+  tab.writeLine("DisplayAxes") << m_displayAxes->isChecked();
+  tab.writeLine("FlipView") << m_flipCheckBox->isChecked();
+  tab.writeLine("DisplayDetectorsOnly") << m_displayDetectorsOnly->isChecked();
+  tab.writeLine("DisplayWireframe") << m_wireframe->isChecked();
+  tab.writeLine("DisplayLighting") << m_lighting->isChecked();
+  tab.writeLine("UseOpenGL") << m_GLView->isChecked();
+  tab.writeLine("UseUCorrection") << m_UCorrection->isChecked();
+
+  // peak options
+  auto surface = getSurface();
+  tab.writeLine("ShowLabels") << surface->getShowPeakLabelsFlag();
+  tab.writeLine("ShowRows") << surface->getShowPeakRowsFlag();
+  tab.writeLine("LabelPrecision") << surface->getPeakLabelPrecision();
+  tab.writeLine("ShowRelativeIntensity");
+  tab << surface->getShowPeakRelativeIntensityFlag();
+
+  const auto colorMap = m_colorMapWidget->saveToProject();
+  tab.writeSection("colormap", colorMap);
+
+  API::TSVSerialiser tsv;
+  tsv.writeSection("rendertab", tab.outputLines());
+  return tsv.outputLines();
+}
+
+/**
+ * Load the state of the render tab from a project file.
+ * @param lines :: lines defining the state of the render tab
+ */
+void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+
+  if (!tsv.selectSection("rendertab"))
+    return;
+
+  std::string tabLines;
+  tsv >> tabLines;
+  API::TSVSerialiser tab(tabLines);
+
+  bool autoScaling, displayAxes, flipView, displayDetectorsOnly,
+      displayWireframe, displayLighting, useOpenGL, useUCorrection;
+  int axesView;
+
+  tab.selectLine("AxesView");
+  tab >> axesView;
+  tab.selectLine("AutoScaling");
+  tab >> autoScaling;
+  tab.selectLine("DisplayAxes");
+  tab >> displayAxes;
+  tab.selectLine("FlipView");
+  tab >> flipView;
+  tab.selectLine("DisplayDetectorsOnly");
+  tab >> displayDetectorsOnly;
+  tab.selectLine("DisplayWireframe");
+  tab >> displayWireframe;
+  tab.selectLine("DisplayLighting");
+  tab >> displayLighting;
+  tab.selectLine("UseOpenGL");
+  tab >> useOpenGL;
+  tab.selectLine("UseUCorrection");
+  tab >> useUCorrection;
+
+  mAxisCombo->setCurrentIndex(axesView);
+  m_autoscaling->setChecked(autoScaling);
+  m_displayAxes->setChecked(displayAxes);
+  m_flipCheckBox->setChecked(flipView);
+  m_displayDetectorsOnly->setChecked(displayDetectorsOnly);
+  m_wireframe->setChecked(displayWireframe);
+  m_lighting->setChecked(displayLighting);
+  m_GLView->setChecked(useOpenGL);
+  m_UCorrection->setChecked(useUCorrection);
+
+  // peak options
+  auto surface = getSurface();
+  bool showLabels, showRows, showRelativeIntensity;
+  int labelPrecision;
+
+  tab.selectLine("ShowLabels");
+  tab >> showLabels;
+  tab.selectLine("ShowRows");
+  tab >> showRows;
+  tab.selectLine("LabelPrecision");
+  tab >> labelPrecision;
+  tab.selectLine("ShowRelativeIntensity");
+  tab >> showRelativeIntensity;
+
+  surface->setShowPeakLabelsFlag(showLabels);
+  surface->setShowPeakRowsFlag(showRows);
+  surface->setPeakLabelPrecision(labelPrecision);
+  surface->setShowPeakRelativeIntensityFlag(showRelativeIntensity);
+
+  if (tab.selectSection("colormap")) {
+    std::string colorMapLines;
+    tab >> colorMapLines;
+    m_colorMapWidget->loadFromProject(colorMapLines);
+  }
+}
+
 } // MantidWidgets
 } // MantidQt

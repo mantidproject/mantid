@@ -1245,9 +1245,14 @@ Table *MantidUI::createDetectorTable(
       // Need to get R, theta through these methods to be correct for grouped
       // detectors
       R = det->getDistance(*sample);
-      theta = showSignedTwoTheta ? ws->detectorSignedTwoTheta(*det)
-                                 : ws->detectorTwoTheta(*det);
-      theta *= 180.0 / M_PI; // To degrees
+      try {
+        theta = showSignedTwoTheta ? ws->detectorSignedTwoTheta(*det)
+                                   : ws->detectorTwoTheta(*det);
+        theta *= 180.0 / M_PI; // To degrees
+      } catch (const Mantid::Kernel::Exception::InstrumentDefinitionError &ex) {
+        // Log the error and leave theta as it is
+        g_log.error(ex.what());
+      }
       QString isMonitor = det->isMonitor() ? "yes" : "no";
 
       colValues << QVariant(specNo) << QVariant(detIds);

@@ -1,9 +1,11 @@
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import StringArrayProperty, Direction
 from mantid.simpleapi import *
 from mantid.api import *
 
 import numpy as np
+
 
 class PoldiMerge(PythonAlgorithm):
     comparedPropertyNames = ["TablePositionX", "TablePositionY", "TablePositionZ"]
@@ -32,8 +34,9 @@ class PoldiMerge(PythonAlgorithm):
                                                direction=Direction.Output),
                              doc="Workspace where all counts from the list workspaces have been added")
 
-        self.declareProperty("CheckInstruments", True, "If checked, only workspaces with equal"\
-                                "instrument parameters are merged. Do not disable without a very good reason.")
+        self.declareProperty("CheckInstruments", True, "If checked, only workspaces with equal"
+                                                       "instrument parameters are merged."
+                                                       "Do not disable without a very good reason.")
 
     def PyExec(self):
         self.checkInstruments = self.getProperty("CheckInstruments").value
@@ -51,7 +54,6 @@ class PoldiMerge(PythonAlgorithm):
 
             ws = AnalysisDataService.retrieve(wsName)
             workspaces += self.getWorkspacesRecursive(ws)
-
 
         workspaceCount = len(workspaces)
 
@@ -78,7 +80,8 @@ class PoldiMerge(PythonAlgorithm):
         rightRun = rightWorkspace.getRun()
 
         if not self.chopperSpeedsMatch(leftRun, rightRun):
-            raise RuntimeError("Chopper speeds do not match (" + '&'.join((leftWorkspace.getName(), rightWorkspace.getName())) + ")")
+            raise RuntimeError(
+                "Chopper speeds do not match (" + '&'.join((leftWorkspace.getName(), rightWorkspace.getName())) + ")")
 
         return self.propertiesMatch(leftRun, rightRun) and self.instrumentsMatch(leftWorkspace, rightWorkspace)
 
@@ -159,5 +162,6 @@ class PoldiMerge(PythonAlgorithm):
             raise RuntimeError("Can only merge MatrixWorkspaces, this is " + type(workspace))
 
         return returnList
+
 
 AlgorithmFactory.subscribe(PoldiMerge)

@@ -1,5 +1,6 @@
 # pylint: disable=no-init,invalid-name, too-many-instance-attributes
 
+from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
 from mantid.api import *

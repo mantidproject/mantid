@@ -36,12 +36,15 @@ const std::string EnggDiffFittingViewQtWidget::g_peaksListExt =
     "Other extensions/all files (*.*)";
 
 bool EnggDiffFittingViewQtWidget::m_fittingMutliRunMode = false;
+bool EnggDiffFittingViewQtWidget::m_fittingSingleRunMode = false;
+
 std::vector<std::string> EnggDiffFittingViewQtWidget::m_fitting_runno_dir_vec;
 
 EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
     QWidget * /*parent*/, boost::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
     boost::shared_ptr<IEnggDiffractionSettings> mainSettings,
     boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+    boost::shared_ptr<IEnggDiffractionParam> mainParam,
     boost::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner)
     : IEnggDiffFittingView(), m_fittedDataVector(), m_mainMsgProvider(mainMsg),
       m_mainSettings(mainSettings), m_mainPythonRunner(mainPythonRunner),
@@ -49,7 +52,7 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
 
   initLayout();
 
-  m_presenter.reset(new EnggDiffFittingPresenter(this, mainCalib));
+  m_presenter.reset(new EnggDiffFittingPresenter(this, mainCalib, mainParam));
   m_presenter->notify(IEnggDiffFittingPresenter::Start);
 }
 
@@ -79,7 +82,7 @@ void EnggDiffFittingViewQtWidget::doSetup() {
           SLOT(browseFitFocusedRun()));
 
   connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(textEdited(const QString &)),
-          this, SLOT(resetFittingMultiMode()));
+          this, SLOT(resetFittingMode()));
 
   connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(editingFinished()), this,
           SLOT(FittingRunNo()));
@@ -101,6 +104,9 @@ void EnggDiffFittingViewQtWidget::doSetup() {
           SLOT(browseClicked()));
 
   connect(m_ui.pushButton_fit, SIGNAL(released()), this, SLOT(fitClicked()));
+
+  connect(m_ui.pushButton_fit_all, SIGNAL(released()), this,
+          SLOT(fitAllClicked()));
 
   // add peak by clicking the button
   connect(m_ui.pushButton_select_peak, SIGNAL(released()), SLOT(setPeakPick()));
@@ -212,6 +218,10 @@ void EnggDiffFittingViewQtWidget::fitClicked() {
   m_presenter->notify(IEnggDiffFittingPresenter::FitPeaks);
 }
 
+void EnggDiffFittingViewQtWidget::fitAllClicked() {
+  m_presenter->notify(IEnggDiffFittingPresenter::FitAllPeaks);
+}
+
 void EnggDiffFittingViewQtWidget::FittingRunNo() {
   m_presenter->notify(IEnggDiffFittingPresenter::FittingRunNo);
 }
@@ -252,10 +262,11 @@ void EnggDiffFittingViewQtWidget::listViewFittingRun() {
   }
 }
 
-void EnggDiffFittingViewQtWidget::resetFittingMultiMode() {
+void EnggDiffFittingViewQtWidget::resetFittingMode() {
   // resets the global variable so the list view widgets
   // adds the run number to for single runs too
   m_fittingMutliRunMode = false;
+  m_fittingSingleRunMode = false;
 }
 
 void EnggDiffFittingViewQtWidget::setDataVector(
@@ -419,7 +430,7 @@ EnggDiffFittingViewQtWidget::getSaveFile(const std::string &prevPath) {
 }
 
 void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
-  resetFittingMultiMode();
+  resetFittingMode();
   QString prevPath = QString::fromStdString(focusingDir());
   if (prevPath.isEmpty()) {
     prevPath =
@@ -447,6 +458,10 @@ void EnggDiffFittingViewQtWidget::setFittingRunNo(const std::string &path) {
 
 std::string EnggDiffFittingViewQtWidget::getFittingRunNo() const {
   return m_ui.lineEdit_pushButton_run_num->text().toStdString();
+}
+
+void EnggDiffFittingViewQtWidget::enableFitAllButton(bool enable) const {
+  m_ui.pushButton_fit_all->setEnabled(enable);
 }
 
 void EnggDiffFittingViewQtWidget::clearFittingComboBox() const {
@@ -513,6 +528,23 @@ void EnggDiffFittingViewQtWidget::setPeakList(
   m_ui.lineEdit_fitting_peaks->setText(QString::fromStdString(peakList));
 }
 
+<<<<<<< HEAD
+=======
+std::vector<std::string>
+EnggDiffFittingViewQtWidget::splitFittingDirectory(std::string &selectedfPath) {
+
+  Poco::Path PocofPath(selectedfPath);
+  std::string selectedbankfName = PocofPath.getBaseName();
+  std::vector<std::string> splitBaseName;
+  if (selectedbankfName.find("ENGINX_") != std::string::npos) {
+    // splits file by _ and .
+    // vector of (ENGINX, RUN-NUMBER, FOCUSED, BANK, NXS)
+    boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
+  }
+  return splitBaseName;
+}
+
+>>>>>>> origin/master
 void EnggDiffFittingViewQtWidget::setBankEmit() { emit setBank(); }
 
 void EnggDiffFittingViewQtWidget::setBankIdComboBox(int idx) {
@@ -535,8 +567,17 @@ std::vector<std::string> EnggDiffFittingViewQtWidget::getFittingRunNumVec() {
 
 void EnggDiffFittingViewQtWidget::setFittingRunNumVec(
     std::vector<std::string> assignVec) {
+  // holds all the directories required
   m_fitting_runno_dir_vec.clear();
   m_fitting_runno_dir_vec = assignVec;
+}
+
+bool EnggDiffFittingViewQtWidget::getFittingSingleRunMode() {
+  return m_fittingSingleRunMode;
+}
+
+void EnggDiffFittingViewQtWidget::setFittingSingleRunMode(bool mode) {
+  m_fittingSingleRunMode = mode;
 }
 
 void EnggDiffFittingViewQtWidget::setFittingMultiRunMode(bool mode) {

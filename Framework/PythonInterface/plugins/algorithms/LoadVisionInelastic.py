@@ -2,6 +2,7 @@
 #from mantid.api import AlgorithmFactory
 #from mantid.simpleapi import PythonAlgorithm, WorkspaceProperty
 # from mantid.kernel import Direction
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
 import mantid.simpleapi

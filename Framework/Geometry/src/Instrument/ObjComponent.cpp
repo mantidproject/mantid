@@ -5,6 +5,7 @@
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Material.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include <cfloat>
 
@@ -18,27 +19,24 @@ using Kernel::Quat;
  * @param map: pointer to the ParameterMap
  * */
 ObjComponent::ObjComponent(const IComponent *base, const ParameterMap *map)
-    : Component(base, map), m_shape(), m_material() {}
+    : Component(base, map), m_shape() {}
 
 /** Constructor
 *  @param name ::   The name of the component
 *  @param parent :: The Parent geometry object of this component
 */
 ObjComponent::ObjComponent(const std::string &name, IComponent *parent)
-    : IObjComponent(), Component(name, parent), m_shape(), m_material() {}
+    : IObjComponent(), Component(name, parent), m_shape() {}
 
 /** Constructor
 *  @param name ::   The name of the component
 *  @param shape ::  A pointer to the object describing the shape of this
 * component
 *  @param parent :: The Parent geometry object of this component
-*  @param material :: An optional pointer to the material object of this
-* component
 */
 ObjComponent::ObjComponent(const std::string &name, Object_const_sptr shape,
-                           IComponent *parent, Kernel::Material_sptr material)
-    : IObjComponent(), Component(name, parent), m_shape(shape),
-      m_material(material) {}
+                           IComponent *parent)
+    : IObjComponent(), Component(name, parent), m_shape(shape) {}
 
 /** Return the shape of the component
  */
@@ -66,8 +64,8 @@ void ObjComponent::setShape(Object_const_sptr newShape) {
  * Return the material of the component. Currently
  * unaffected by parametrization
  */
-const Kernel::Material_const_sptr ObjComponent::material() const {
-  return m_material;
+const Kernel::Material ObjComponent::material() const {
+  return m_shape->material();
 }
 
 /// Does the point given lie within this object component?

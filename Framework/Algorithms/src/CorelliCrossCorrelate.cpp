@@ -131,10 +131,9 @@ void CorelliCrossCorrelate::exec() {
 
   // Calculate the duty cycle and the event weights from the duty cycle.
   double dutyCycle = totalOpen / sequence.back();
-  float weightTransparent = static_cast<float>(1.0 / dutyCycle);
-  float weightAbsorbing = static_cast<float>(-1.0 / (1.0 - dutyCycle));
+  float weightAbsorbing = static_cast<float>(-dutyCycle / (1.0 - dutyCycle));
   g_log.information() << "dutyCycle = " << dutyCycle
-                      << " weightTransparent = " << weightTransparent
+                      << " weightTransparent = 1.0"
                       << " weightAbsorbing = " << weightAbsorbing << "\n";
 
   // Read in the TDC timings for the correlation chopper and apply the timing
@@ -184,7 +183,6 @@ void CorelliCrossCorrelate::exec() {
 
   // Do the cross correlation.
   int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
-  g_log.notice("Start cross-correlation\n");
   API::Progress prog = API::Progress(this, 0.0, 1.0, numHistograms);
   PARALLEL_FOR1(outputWS)
   for (int64_t i = 0; i < numHistograms; ++i) {
@@ -245,9 +243,6 @@ void CorelliCrossCorrelate::exec() {
       if ((location - sequence.begin()) % 2 == 0) {
         it->m_weight *= weightAbsorbing;
         it->m_errorSquared *= weightAbsorbing * weightAbsorbing;
-      } else {
-        it->m_weight *= weightTransparent;
-        it->m_errorSquared *= weightTransparent * weightTransparent;
       }
     }
 
