@@ -89,6 +89,7 @@ void GetEiMonDet2::init() {
 }
 
 void GetEiMonDet2::exec() {
+  progress(0);
   m_detectorWs = getProperty(PropertyNames::DETECTOR_WORKSPACE);
   m_detectorEPPTable = getProperty(PropertyNames::DETECTOR_EPP_TABLE);
   m_monitorWs = getProperty(PropertyNames::MONITOR_WORKSPACE);
@@ -110,6 +111,7 @@ void GetEiMonDet2::exec() {
   double sampleToDetectorDistance;
   double detectorEPP;
   averageDetectorDistanceAndTOF(detectorIndices, sampleToDetectorDistance, detectorEPP);
+  progress(0.9);
   double monitorToSampleDistance;
   double monitorEPP;
   monitorDistanceAndTOF(monitorIndex, monitorToSampleDistance, monitorEPP);
@@ -117,12 +119,13 @@ void GetEiMonDet2::exec() {
   double timeOfFlight = computeTOF(flightLength, detectorEPP, monitorEPP);
   const double velocity = flightLength / timeOfFlight * 1e6;
   const double energy = 0.5 * NeutronMass * velocity * velocity / meV;
+  progress(1.0);
   g_log.notice() << "Final time-of-flight:" << timeOfFlight << " which gives " << energy << " as " + PropertyNames::INCIDENT_ENERGY + ".\n";
   // Set output properties.
   setProperty(PropertyNames::INCIDENT_ENERGY, energy);
 }
 
-void GetEiMonDet2::averageDetectorDistanceAndTOF(const std::vector<size_t> &detectorIndices, double &sampleToDetectorDistance, double &detectorEPP) const {
+void GetEiMonDet2::averageDetectorDistanceAndTOF(const std::vector<size_t> &detectorIndices, double &sampleToDetectorDistance, double &detectorEPP) {
   auto peakPositionColumn = m_detectorEPPTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
   auto fitStatusColumn = m_detectorEPPTable->getColumn(EPPTableLiterals::FIT_STATUS_COLUMN);
   if (!peakPositionColumn || !fitStatusColumn) {
@@ -136,6 +139,7 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(const std::vector<size_t> &dete
   detectorEPP = 0.0;
   size_t n = 0;
   for (const auto index : detectorIndices) {
+    interruption_point();
     if (index >= peakPositionColumn->size()) {
       throw std::runtime_error("Invalid value in " + PropertyNames::DETECTORS);
     }
@@ -172,7 +176,7 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(const std::vector<size_t> &dete
   g_log.information() << "Average detector EPP: " << detectorEPP << ".\n";
 }
 
-double GetEiMonDet2::computeTOF(const double distance, const double detectorEPP, const double monitorEPP) const {
+double GetEiMonDet2::computeTOF(const double distance, const double detectorEPP, const double monitorEPP) {
   // Calculate actual time of flight from monitor to detectors.
   double timeOfFlight = detectorEPP - monitorEPP;
   double nominalIncidentEnergy = getProperty(PropertyNames::NOMINAL_ENERGY);
@@ -197,6 +201,7 @@ double GetEiMonDet2::computeTOF(const double distance, const double detectorEPP,
   }
   unsigned delayFrameCount = 0;
   while (timeOfFlight <= lowerTimeLimit) {
+    interruption_point();
     // Neutrons hit the detectors in a later frame.
     if (pulseInterval == EMPTY_DBL()) {
       throw std::runtime_error("No " + PropertyNames::PULSE_INTERVAL + " specified");

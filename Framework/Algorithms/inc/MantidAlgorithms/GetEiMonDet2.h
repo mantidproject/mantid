@@ -69,8 +69,8 @@ public:
   const std::string category() const override { return "Inelastic\\Ei"; }
 
 private:
-  void averageDetectorDistanceAndTOF(const std::vector<size_t> &detectorIndices, double &sampleToDetectorDistance, double &detectorEPP) const;
-  double computeTOF(const double distance, const double detectorEPP, const double monitorEPP) const;
+  void averageDetectorDistanceAndTOF(const std::vector<size_t> &detectorIndices, double &sampleToDetectorDistance, double &detectorEPP);
+  double computeTOF(const double distance, const double detectorEPP, const double monitorEPP);
   void monitorDistanceAndTOF(const size_t monitorIndex, double &monitorToSampleDistance, double &monitorEPP) const;
   void parseIndices(std::vector<size_t> &detectorIndices, size_t &monitorIndex) const;
   void sanitizeIndices(std::vector<size_t> &detectorIndices, size_t monitorIndex) const;
