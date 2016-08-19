@@ -302,7 +302,6 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
   const int finalBlockSize = readStop - readOptimumStop;
 
   int wsIndex = 0;
-  // This cast is safe as m_spec_min must be >= 1
   int histIndex = m_spec_min - 1;
 
   for (; histIndex < readStop;) {
