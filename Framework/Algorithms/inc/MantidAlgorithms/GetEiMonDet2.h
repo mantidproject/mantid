@@ -1,29 +1,18 @@
 #ifndef MANTID_ALGORITHMS_GETEIMONDET2_H_
 #define MANTID_ALGORITHMS_GETEIMONDET2_H_
 
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {
-/** TODO rewrite
- * Requires an estimate for the initial neutron energy which it uses to
-  search for monitor peaks and from these calculate an accurate energy
 
-    Required Properties:
-    <UL>
-    <LI>InputWorkspace - The X units of this workspace must be time of flight
-  with times in micro-seconds</LI>
-    <LI>Monitor1ID - The detector ID of the first monitor</LI>
-    <LI>Monitor2ID - The detector ID of the second monitor</LI>
-    <LI>EnergyEstimate - An approximate value for the typical incident energy,
-  energy of neutrons leaving the source (meV)</LI>
-    <LI>IncidentEnergy - The calculated energy</LI>
-    </UL>
-
-    @author Antti Soininen Institut Laue-Langevin
-    @date XX/08/2016
+/** Estimates the incident neutron energy from the time of flight
+    between a monitor and a set of detectors.
 
     Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak
   Ridge National Laboratory & European Spallation Source
@@ -48,35 +37,52 @@ namespace Algorithms {
 */
 class DLLExport GetEiMonDet2 : public Mantid::API::Algorithm {
 public:
-  /// Initialize the algorithm
+  /// Initializes the algorithm
   void init() override;
-  /// Execute the algorithm
+
+  /// Executes the algorithm
   void exec() override;
 
-  /// Algorithm's name for identification overriding a virtual method
+  /// Returns algorithm's name for identification
+
   const std::string name() const override { return "GetEiMonDet"; }
-  /// Summary of algorithms purpose
+
+  /// Returns a summary of algorithm's purpose
   const std::string summary() const override {
-    // TODO rewrite
     return "Calculates the kinetic energy of neutrons leaving the source based "
-           "on the time it takes for them to travel between a monitor and some "
-           "detectors.";
+           "on the time it takes for them to travel between a monitor and a set "
+           "of detectors.";
   }
 
-  /// Algorithm's version for identification overriding a virtual method
+  /// Returns algorithm's version for identification
   int version() const override { return 2; }
+
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Inelastic\\Ei"; }
 
 private:
+  /// Calculates the average sample-to-detector distance and TOF
   void averageDetectorDistanceAndTOF(const std::vector<size_t> &detectorIndices, double &sampleToDetectorDistance, double &detectorEPP);
+
+  /// Calculates the total TOF from monitor to detectors
   double computeTOF(const double distance, const double detectorEPP, const double monitorEPP);
+
+  /// Sets the monitor-to-sample distance and TOF
   void monitorDistanceAndTOF(const size_t monitorIndex, double &monitorToSampleDistance, double &monitorEPP) const;
+
+  /// Reads detector and monitor indices from properties
   void parseIndices(std::vector<size_t> &detectorIndices, size_t &monitorIndex) const;
+
+  /// Removes duplicates and checks consistency
   void sanitizeIndices(std::vector<size_t> &detectorIndices, size_t monitorIndex) const;
+
+  /// Shared pointer to the detector workspace
   Mantid::API::MatrixWorkspace_const_sptr m_detectorWs;
+  /// Shared pointer to the detectors' EPP table
   Mantid::API::ITableWorkspace_const_sptr m_detectorEPPTable;
+  /// Shared pointer to the monitor workspace
   Mantid::API::MatrixWorkspace_const_sptr m_monitorWs;
+  /// Shared pointer to the monitor's EPP table
   Mantid::API::ITableWorkspace_const_sptr m_monitorEPPTable;
 };
 

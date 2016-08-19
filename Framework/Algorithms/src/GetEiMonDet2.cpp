@@ -1,3 +1,6 @@
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "MantidAlgorithms/GetEiMonDet2.h"
 
 #include "MantidAPI/InstrumentValidator.h"
@@ -20,42 +23,70 @@ using namespace Mantid::PhysicalConstants;
 namespace Mantid {
 namespace Algorithms {
 
+/** A private namespace to store string constants dealing with
+ *  tables returned by the FindEPP algorithm.
+ */
 namespace EPPTableLiterals {
-const std::string FIT_STATUS_COLUMN("FitStatus");
-const std::string PEAK_CENTRE_COLUMN("PeakCentre");
-const std::string FIT_STATUS_SUCCESS("success");
+  /// Title of the fit status column in EPP tables
+  const static std::string FIT_STATUS_COLUMN("FitStatus");
+  /// Title of the peak centre column in EPP tables
+  const static std::string PEAK_CENTRE_COLUMN("PeakCentre");
+  /// Tag for successfully fitted rows in EPP tables
+  const static std::string FIT_STATUS_SUCCESS("success");
 }
 
+/** A private namespace listing the different ways to index
+ *  spectra in Mantid.
+ */
 namespace IndexTypes {
+  /// Tag for detector ids
   const static std::string DETECTOR_ID("DetectorID");
+  /// Tag for spectrum numbers
   const static std::string SPECTRUM_NUMBER("SpectrumNumber");
+  /// Tag for workspace indices
   const static std::string WORKSPACE_INDEX("WorkspaceIndex");
 }
 
+/** A private namespace holding the property names of
+ *  GetEiMonDet algorithm, version 2.
+ */
 namespace PropertyNames {
+  /// Name of the detector epp table property
   const static std::string DETECTOR_EPP_TABLE("DetectorEPPTable");
+  /// Name of the detector workspace property
   const static std::string DETECTOR_WORKSPACE("DetectorWorkspace");
+  /// Name of the detector index list property
   const static std::string DETECTORS("Detectors");
-  const static std::string ENERGY_TOLERANCE("EnergyTolerance");
+  /// Name of the incident energy output property
   const static std::string INCIDENT_ENERGY("IncidentEnergy");
+  /// Name of the monitor and detector fields' type property
   const static std::string INDEX_TYPE("IndexType");
+  /// Name of the monitor index property
   const static std::string MONITOR("Monitor");
+  /// Name of the monitor epp table property
   const static std::string MONITOR_EPP_TABLE("MonitorEPPTable");
+  /// Name of the monitor workspace property
   const static std::string MONITOR_WORKSPACE("MonitorWorkspace");
+  /// Name of the incident energy guess property
   const static std::string NOMINAL_ENERGY("NominalIncidentEnergy");
+  /// Name of the neutron pulse interval property
   const static std::string PULSE_INTERVAL("PulseInterval");
 }
 
 // Register the algorithm into the algorithm factory.
 DECLARE_ALGORITHM(GetEiMonDet2)
 
+/** Initialized the algorithm.
+ *
+ */
 void GetEiMonDet2::init() {
   auto tofWorkspace = boost::make_shared<CompositeValidator>();
   tofWorkspace->add<WorkspaceUnitValidator>("TOF");
   tofWorkspace->add<InstrumentValidator>();
-
   auto mandatoryStringProperty = boost::make_shared<MandatoryValidator<std::string>>();
   auto mandatoryDetectorIdProperty = boost::make_shared<MandatoryValidator<detid_t>>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  mustBePositive->setLower(0);
 
   declareProperty(
       make_unique<WorkspaceProperty<>>(PropertyNames::DETECTOR_WORKSPACE, "", Direction::Input,
@@ -80,14 +111,15 @@ void GetEiMonDet2::init() {
       PropertyNames::MONITOR, EMPTY_INT(), mandatoryDetectorIdProperty, "Monitor's detector id/spectrum number/workspace index.");
   declareProperty(
       PropertyNames::PULSE_INTERVAL, EMPTY_DBL(), "Interval between neutron pulses, in microseconds.");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
-  mustBePositive->setLower(0);
   declareProperty(
       PropertyNames::NOMINAL_ENERGY, EMPTY_DBL(), mustBePositive, "Incident energy guess. Taken from the sample logs, if not specified.");
   declareProperty(
       PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositive, "Calculated incident energy.", Direction::Output);
 }
 
+/** Executes the algorithm.
+ *
+ */
 void GetEiMonDet2::exec() {
   progress(0);
   m_detectorWs = getProperty(PropertyNames::DETECTOR_WORKSPACE);
@@ -101,8 +133,6 @@ void GetEiMonDet2::exec() {
     m_monitorEPPTable = m_detectorEPPTable;
   }
 
-  // Get the workspace indices for detectors and monitor, converting
-  // from detector id's or spectrum numbers if necessary.
   std::vector<size_t> detectorIndices;
   size_t monitorIndex;
   parseIndices(detectorIndices, monitorIndex);
@@ -121,10 +151,19 @@ void GetEiMonDet2::exec() {
   const double energy = 0.5 * NeutronMass * velocity * velocity / meV;
   progress(1.0);
   g_log.notice() << "Final time-of-flight:" << timeOfFlight << " which gives " << energy << " as " + PropertyNames::INCIDENT_ENERGY + ".\n";
-  // Set output properties.
+
   setProperty(PropertyNames::INCIDENT_ENERGY, energy);
 }
 
+/** Calculates the average distance between the sample and given
+ *  detectors.
+ *  @param detectorIndices A vector containing workspace indices
+ *         to the detectors
+ *  @param sampleToDetectorDistance An output parameter for the
+ *         average distance between the sample and the detectors
+ *  @param detectorEPP An output parameter for the average position
+ *         of the detectors' elastic peak
+ */
 void GetEiMonDet2::averageDetectorDistanceAndTOF(const std::vector<size_t> &detectorIndices, double &sampleToDetectorDistance, double &detectorEPP) {
   auto peakPositionColumn = m_detectorEPPTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
   auto fitStatusColumn = m_detectorEPPTable->getColumn(EPPTableLiterals::FIT_STATUS_COLUMN);
@@ -176,8 +215,13 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(const std::vector<size_t> &dete
   g_log.information() << "Average detector EPP: " << detectorEPP << ".\n";
 }
 
+/** Calculates the time of flight from the monitor to the detectors.
+ *  @param distance The total distance between the monitor and the detectors
+ *  @param detectorEPP The position of the detectors' elastic peak
+ *  @param monitorEPP The position of the monitor's elastic peak
+ *  @return The time of flight between the monitor and the detectors
+ */
 double GetEiMonDet2::computeTOF(const double distance, const double detectorEPP, const double monitorEPP) {
-  // Calculate actual time of flight from monitor to detectors.
   double timeOfFlight = detectorEPP - monitorEPP;
   double nominalIncidentEnergy = getProperty(PropertyNames::NOMINAL_ENERGY);
   if (nominalIncidentEnergy == EMPTY_DBL()) {
@@ -188,7 +232,8 @@ double GetEiMonDet2::computeTOF(const double distance, const double detectorEPP,
   }
   const double nominalTimeOfFlight = distance / std::sqrt(2 * nominalIncidentEnergy * meV / NeutronMass) * 1e6; // In microseconds.
   g_log.information() << "Nominal time-of-flight: " << nominalTimeOfFlight << ".\n";
-  const double energyTolerance = 20;
+  // Check if the obtained time-of-flight makes any sense.
+  const double energyTolerance = 20; // %'s of the nominal energy
   const double toleranceLimit = 1 / std::sqrt(1 + energyTolerance) * nominalTimeOfFlight;
   const double pulseInterval = getProperty(PropertyNames::PULSE_INTERVAL);
   const double pulseIntervalLimit = nominalTimeOfFlight - pulseInterval / 2;
@@ -201,8 +246,8 @@ double GetEiMonDet2::computeTOF(const double distance, const double detectorEPP,
   }
   unsigned delayFrameCount = 0;
   while (timeOfFlight <= lowerTimeLimit) {
-    interruption_point();
     // Neutrons hit the detectors in a later frame.
+    interruption_point();
     if (pulseInterval == EMPTY_DBL()) {
       throw std::runtime_error("No " + PropertyNames::PULSE_INTERVAL + " specified");
     }
@@ -215,6 +260,13 @@ double GetEiMonDet2::computeTOF(const double distance, const double detectorEPP,
   return timeOfFlight;
 }
 
+/** Obtains the distance between the monitor and the sample.
+ *  @param monitorIndex Workspace index specifying the monitor spectra
+ *  @param monitorToSampleDistance Output parameter for the monitor to
+ *         sample distance
+ *  @param monitorEPP Output parameter for the monitors elastic peak
+ *         position
+ */
 void GetEiMonDet2::monitorDistanceAndTOF(const size_t monitorIndex, double &monitorToSampleDistance, double &monitorEPP) const {
   // Monitor-to-sample distance.
   const auto peakPositionColumn = m_monitorEPPTable->getColumn(EPPTableLiterals::PEAK_CENTRE_COLUMN);
@@ -244,6 +296,16 @@ void GetEiMonDet2::monitorDistanceAndTOF(const size_t monitorIndex, double &moni
   g_log.information() << "Monitor EPP: " << monitorEPP << ".\n";
 }
 
+/** Transforms detector and monitor indices according to given maps.
+ *  @param detectors A vector of detector indices to be transformed
+ *  @param monitor A monitor index to be transformed
+ *  @param detectorIndexMap A map from detector to workspace indices
+ *  @param monitorIndexMap A map from monitor to workspace indices
+ *  @param detectorIndices Output parameter for the detector
+ *         workspace indices
+ *  @param monitorIndex Output parameter for the monitor
+ *         workspace indices
+ */
 template<typename T, typename Map>
 void mapIndices(const std::vector<unsigned int>& detectors, const T monitor, const Map& detectorIndexMap, const Map& monitorIndexMap, std::vector<size_t>& detectorIndices, size_t& monitorIndex) {
   auto back = std::back_inserter(detectorIndices);
@@ -263,9 +325,13 @@ void mapIndices(const std::vector<unsigned int>& detectors, const T monitor, con
   }
 }
 
+/** Parser detector and monitor indices from user's input and
+ *  transfrorms them to workspace indices.
+ *  @param detectorIndices Output parameter for the detector workspace
+ *         indices
+ *  @param monitorIndex Output parameter for the monitor workspace index
+ */
 void GetEiMonDet2::parseIndices(std::vector<size_t> &detectorIndices, size_t &monitorIndex) const {
-  // Get the workspace indices for detectors and monitor, converting
-  // from detector id's or spectrum numbers if necessary.
   detectorIndices.clear();
   UserStringParser spectraListParser;
   const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);
@@ -293,6 +359,11 @@ void GetEiMonDet2::parseIndices(std::vector<size_t> &detectorIndices, size_t &mo
   }
 }
 
+/** Erases duplicate indices and check that monitor index is not in
+ *  the detector index list.
+ *  @param detectorIndices A vector of detector indices
+ *  @param monitorIndex Monitor index
+ */
 void GetEiMonDet2::sanitizeIndices(std::vector<size_t> &detectorIndices, size_t monitorIndex) const {
  std::sort(detectorIndices.begin(), detectorIndices.end());
  detectorIndices.erase(std::unique(detectorIndices.begin(), detectorIndices.end()), detectorIndices.end());
