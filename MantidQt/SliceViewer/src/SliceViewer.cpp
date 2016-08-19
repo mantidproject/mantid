@@ -2615,7 +2615,7 @@ void SliceViewer::loadFromProject(const std::string &lines)
 
   int dimX, dimY, aspectRatio, normalization;
   double xMin, yMin, xMax, yMax;
-  bool dynamicRebin, fastRender;
+  bool dynamicRebin, fastRender, autoRebin;
   std::vector<float> slicePoints;
 
   // read in settings from project file
@@ -2633,6 +2633,8 @@ void SliceViewer::loadFromProject(const std::string &lines)
   tsv.selectLine("AspectRatioType");
   tsv >> aspectRatio;
   auto ratio = static_cast<AspectRatioType>(aspectRatio);
+  tsv.selectLine("AutoRebin");
+  tsv >> autoRebin;
   tsv.selectLine("Limits");
   tsv >> xMin >> yMin >> xMax >> yMax;
 
@@ -2643,10 +2645,18 @@ void SliceViewer::loadFromProject(const std::string &lines)
   setNormalization(norm);
   setAspectRatio(ratio);
   setXYLimits(xMin, xMax, yMin, yMax);
+  ui.btnAutoRebin->setChecked(autoRebin);
 
   // set slice points for each dimension
   for (size_t i = 0; i < slicePoints.size(); ++i) {
     setSlicePoint(static_cast<int>(i), slicePoints[i]);
+  }
+
+  // setup dimension widgets
+  if (tsv.selectSection("dimensionwidgets")) {
+    std::string dimensionLines;
+    tsv >> dimensionLines;
+    loadDimensionWidgets(dimensionLines);
   }
 
   // handle overlay workspace
@@ -2654,13 +2664,32 @@ void SliceViewer::loadFromProject(const std::string &lines)
     std::string workspace_name;
     tsv >> workspace_name;
 
-    // now find the workspace in the ADS set it
-    auto &ads = AnalysisDataService::Instance();
-    if (ads.doesExist(workspace_name)) {
-      m_overlayWS = ads.retrieveWS<IMDWorkspace>(workspace_name);
-      m_overlayWSName = workspace_name;
-    }
+    m_overlayWSName = workspace_name;
+    dynamicRebinComplete(false);
   }
+}
+
+/** Load the current state of the dimension widgets from a string
+ * @param lines :: a string containing the state of the widgets
+ */
+void SliceViewer::loadDimensionWidgets(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+
+  size_t nDims;
+  tsv.selectLine("NumDimensions");
+  tsv >> nDims;
+
+  for (size_t i = 0; i < nDims; i++) {
+    double thickness;
+    int numBins;
+    tsv.selectLine("Dimension", i);
+    tsv >> thickness >> numBins;
+
+    m_dimWidgets[i]->setNumBins(numBins);
+    m_dimWidgets[i]->setThickness(thickness);
+  }
+
+  updateDimensionSliceWidgets();
 }
 
 /**
@@ -2677,6 +2706,7 @@ std::string SliceViewer::saveToProject() const
   tsv.writeLine("FasterRendering") << m_fastRender;
   tsv.writeLine("Normalization") << static_cast<int>(getNormalization());
   tsv.writeLine("AspectRatioType") << static_cast<int>(m_aspectRatioType);
+  tsv.writeLine("AutoRebin") << isAutoRebinSet();
 
   auto xLimits = getXLimits();
   auto yLimits = getYLimits();
@@ -2685,8 +2715,25 @@ std::string SliceViewer::saveToProject() const
   tsv << xLimits.minValue() << yLimits.minValue();
   tsv << xLimits.maxValue() << yLimits.maxValue();
 
+  tsv.writeSection("dimensionwidgets", saveDimensionWidgets());
+
   if (m_overlayWS)
     tsv.writeLine("OverlayWorkspace") << m_overlayWS->name();
+
+  return tsv.outputLines();
+}
+
+/** Save the current state of the dimension widgets to string
+ * @return a string containing the state of the widgets
+ */
+std::string SliceViewer::saveDimensionWidgets() const {
+  API::TSVSerialiser tsv;
+  tsv.writeLine("NumDimensions") << m_dimWidgets.size();
+
+  for (const auto &dim : m_dimWidgets) {
+    tsv.writeLine("Dimension");
+    tsv << dim->getThickness() << dim->getNumBins();
+  }
 
   return tsv.outputLines();
 }

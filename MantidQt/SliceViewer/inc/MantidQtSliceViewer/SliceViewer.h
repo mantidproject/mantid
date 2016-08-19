@@ -142,6 +142,10 @@ public:
   void loadFromProject(const std::string &lines);
   /// Save the state of the slice viewer to a Mantid project file
   std::string saveToProject() const;
+  /// Load the stae of the dimension widgets from a Mantid project file
+  void loadDimensionWidgets(const std::string &lines);
+  /// Save the stae of the dimension widgets to a Mantid project file
+  std::string saveDimensionWidgets() const;
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed
