@@ -9,15 +9,15 @@ using namespace Mantid::API;
 
 QwtRasterDataMDNonOrthogonal::QwtRasterDataMDNonOrthogonal()
     : m_lookPoint(nullptr) {
-  m_skewMatrix[0] = 1.0;
-  m_skewMatrix[1] = 0.0;
-  m_skewMatrix[2] = 0.0;
-  m_skewMatrix[3] = 0.0;
-  m_skewMatrix[4] = 1.0;
-  m_skewMatrix[5] = 0.0;
-  m_skewMatrix[6] = 0.0;
-  m_skewMatrix[7] = 0.0;
-  m_skewMatrix[8] = 1.0;
+	m_skewMatrix[0] = 1.0;
+	m_skewMatrix[1] = 0.0;
+	m_skewMatrix[2] = 0.0;
+	m_skewMatrix[3] = 0.0;
+	m_skewMatrix[4] = 1.0;
+	m_skewMatrix[5] = 0.0;
+	m_skewMatrix[6] = 0.0;
+	m_skewMatrix[7] = 0.0;
+	m_skewMatrix[8] = 1.0;
 
   m_missingHKLdim = 0;
 }
@@ -36,6 +36,7 @@ QwtRasterDataMDNonOrthogonal::~QwtRasterDataMDNonOrthogonal() {
 double QwtRasterDataMDNonOrthogonal::value(double x, double y) const {
   if (!m_ws)
     return 0;
+ 
 
   // Generate the vector of coordinates, filling in X and Y
   for (size_t d = 0; d < m_nd; d++) {
@@ -60,9 +61,8 @@ double QwtRasterDataMDNonOrthogonal::value(double x, double y) const {
   m_lookPoint[m_missingHKLdim] = v1 * m_skewMatrix[0 + 3 * m_missingHKLdim] +
 	  v2 * m_skewMatrix[1 + 3 * m_missingHKLdim] +
 	  v3 * m_skewMatrix[2 + 3 * m_missingHKLdim];
-
-
-
+  
+  
   // Get the signal at that point
   signal_t value = 0;
 
@@ -100,7 +100,6 @@ void QwtRasterDataMDNonOrthogonal::setWorkspace(IMDWorkspace_const_sptr ws) {
   // Add the skewMatrix for the basis
   Mantid::Kernel::DblMatrix skewMatrix(m_nd, m_nd, true);
   provideSkewMatrix(skewMatrix, ws);
-
   // Transform from double to coord_t
   std::size_t index = 0;
   for (std::size_t i = 0; i < skewMatrix.numRows(); ++i) {
@@ -166,7 +165,7 @@ void QwtRasterDataMDNonOrthogonal::copyFrom(
     dest.m_lookPoint[d] = source.m_lookPoint[d];
   }
 
-  for (size_t d = 0; d < 3; ++d) {
+  for (size_t d = 0; d < 9; ++d) {
     dest.m_skewMatrix[d] = source.m_skewMatrix[d];
 
   }

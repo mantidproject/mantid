@@ -45,8 +45,6 @@ void normalizeColumns(Mantid::Kernel::DblMatrix &skewMatrix) {
 	bNorm.push_back(std::sqrt(sumOverRow));
   }
 
-  
-  //STILL THE SAME SKEWMAT
   // Apply column normalisation to skew matrix --> TODO: Check why 3 is
   // hardcoded
   Mantid::Kernel::DblMatrix scaleMat(3, 3, true);
@@ -54,7 +52,6 @@ void normalizeColumns(Mantid::Kernel::DblMatrix &skewMatrix) {
   scaleMat[1][1] /= bNorm[1];
   scaleMat[2][2] /= bNorm[2];
   skewMatrix *= scaleMat;
-  std::cout << skewMatrix << std::endl;
 }
 
 void stripMatrix(Mantid::Kernel::DblMatrix &matrix) {
@@ -144,10 +141,10 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, T workspace) {
   // Perform similarity transform to get coordinate orientation correct
   skewMatrix = affMat.Tprime() * (skewMatrix * affMat);
 
-  basisNormalization = affMat * basisNormalization;
   if (4 == workspace->getNumDims()) {
     stripMatrix(skewMatrix);
   }
+
 }
 
 template <typename T> bool doRequiresSkewMatrix(T workspace) {
