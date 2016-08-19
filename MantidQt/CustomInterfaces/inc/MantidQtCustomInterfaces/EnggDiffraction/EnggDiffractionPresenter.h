@@ -152,7 +152,8 @@ private:
   void appendCalibInstPrefix(const std::string vanNo, std::string &outVanName);
 
   void appendCalibInstPrefix(const std::string vanNo, const std::string cerNo,
-	  std::string &outVanName, std::string &outCerName) const;
+                             std::string &outVanName,
+                             std::string &outCerName) const;
 
   std::string
   buildCalibrateSuggestedFilename(const std::string &vanNo,

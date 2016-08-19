@@ -1224,43 +1224,42 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   * @param vanNo The user input for the vanadium run
   * @param outVanName The fixed filename for the vanadium run
   */
-void EnggDiffractionPresenter::appendCalibInstPrefix(const std::string vanNo, std::string & outVanName)
-{
-	// Use a single non numeric digit so we are guaranteed to skip
-	// generating cerium file names
-	const std::string cer = "-";
-	std::string outCerName;
-	appendCalibInstPrefix(vanNo, cer, outVanName, outCerName);
+void EnggDiffractionPresenter::appendCalibInstPrefix(const std::string vanNo,
+                                                     std::string &outVanName) {
+  // Use a single non numeric digit so we are guaranteed to skip
+  // generating cerium file names
+  const std::string cer = "-";
+  std::string outCerName;
+  appendCalibInstPrefix(vanNo, cer, outVanName, outCerName);
 }
 
 /**
   * Appends the current instrument as a filename prefix for numeric
   * only inputs of both the Vanadium and Cerium Oxide runs so Load
   * can find the files.
-  * 
+  *
   * @param vanNo The user input for the vanadium run
   * @param cerNo The user input for the cerium run
   * @param outVanName The fixed filename for the vanadium run
   * @param outCerName The fixed filename for the cerium run
   */
-void EnggDiffractionPresenter::appendCalibInstPrefix(const std::string vanNo, const std::string cerNo, std::string &outVanName, std::string &outCerName) const
-{
-	// If the file is numerical only we need to append
-	// it in case the favorite instrument isn't set to ENGINX
-	const std::string currentInst = m_view->currentInstrument();
-	// Vanadium file
-	if (std::all_of(vanNo.begin(), vanNo.end(), ::isdigit)) {
-		// This only has digits - append prefix
-		outVanName = currentInst + vanNo;
-	}
+void EnggDiffractionPresenter::appendCalibInstPrefix(
+    const std::string vanNo, const std::string cerNo, std::string &outVanName,
+    std::string &outCerName) const {
+  // If the file is numerical only we need to append
+  // it in case the favorite instrument isn't set to ENGINX
+  const std::string currentInst = m_view->currentInstrument();
+  // Vanadium file
+  if (std::all_of(vanNo.begin(), vanNo.end(), ::isdigit)) {
+    // This only has digits - append prefix
+    outVanName = currentInst + vanNo;
+  }
 
-	// Cerium file
-	if (std::all_of(cerNo.begin(), cerNo.end(), ::isdigit)) {
-		// All digits - append inst prefix
-		outCerName = currentInst + cerNo;
-	}
-
-
+  // Cerium file
+  if (std::all_of(cerNo.begin(), cerNo.end(), ::isdigit)) {
+    // All digits - append inst prefix
+    outCerName = currentInst + cerNo;
+  }
 }
 
 /**
