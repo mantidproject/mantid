@@ -444,11 +444,8 @@ void SCDCalibratePanels::findL1(int nPeaks,
       weight = 1.0 / peak.getIntensity();
     else if (peak.getBinCount() > 0.) // then by counts in peak centre
       weight = 1.0 / peak.getBinCount();
-    for (int j = 0; j < 3; j++) {
-      int k = i * 3 + j;
-      xVec[k] = i * 3 + j;
-      eVec[k] = weight;
-    }
+    xVec[i * 3] = i;
+    eVec[i * 3 + 2] = weight;
   }
   IAlgorithm_sptr fitL1_alg;
   try {
@@ -1028,8 +1025,7 @@ void SCDCalibratePanels::saveXmlFile(
   ParameterMap_sptr pmap = instrument->getParameterMap();
 
   // write out the detector banks
-  for (auto it = AllBankNames.rbegin(); it != AllBankNames.rend(); ++it) {
-    std::string bankName = *it;
+  for (auto bankName : AllBankNames) {
     if (instrument->getName().compare("CORELLI") == 0.0)
       bankName.append("/sixteenpack");
     oss3 << "<component-link name=\"" << bankName << "\">\n";
