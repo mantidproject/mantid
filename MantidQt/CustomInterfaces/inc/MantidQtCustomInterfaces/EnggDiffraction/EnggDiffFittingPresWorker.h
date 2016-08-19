@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h"
 
 #include <QThread>
+#include <stdexcept>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -48,11 +49,19 @@ public:
 private slots:
 
   void fitting() {
-
     for (size_t i = 0; i < m_multiRunNo.size(); ++i) {
 
       auto runNo = m_multiRunNo[i];
-      m_pres->doFitting(runNo, m_expectedPeaks);
+      try {
+        m_pres->doFitting(runNo, m_expectedPeaks);
+      } catch (std::runtime_error &e) {
+        // If we catch any sort of exception throw we should break
+        // the loop to ensure we don't continue and emit
+        // the finished signal to Qt and replay the error to log
+        Mantid::Kernel::Logger log("EngineeringDiffractionFitting");
+        log.error(e.what());
+        break;
+      }
     }
     emit finished();
   }
