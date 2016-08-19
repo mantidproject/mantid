@@ -50,8 +50,8 @@ public:
   /// Returns a summary of algorithm's purpose
   const std::string summary() const override {
     return "Calculates the kinetic energy of neutrons leaving the source based "
-           "on the time it takes for them to travel between a monitor and a set "
-           "of detectors.";
+           "on the time it takes for them to travel between a monitor and a "
+           "set of detectors.";
   }
 
   /// Returns algorithm's version for identification
@@ -62,19 +62,26 @@ public:
 
 private:
   /// Calculates the average sample-to-detector distance and TOF
-  void averageDetectorDistanceAndTOF(const std::vector<size_t> &detectorIndices, double &sampleToDetectorDistance, double &detectorEPP);
+  void averageDetectorDistanceAndTOF(const std::vector<size_t> &detectorIndices,
+                                     double &sampleToDetectorDistance,
+                                     double &detectorEPP);
 
   /// Calculates the total TOF from monitor to detectors
-  double computeTOF(const double distance, const double detectorEPP, const double monitorEPP);
+  double computeTOF(const double distance, const double detectorEPP,
+                    const double monitorEPP);
 
   /// Sets the monitor-to-sample distance and TOF
-  void monitorDistanceAndTOF(const size_t monitorIndex, double &monitorToSampleDistance, double &monitorEPP) const;
+  void monitorDistanceAndTOF(const size_t monitorIndex,
+                             double &monitorToSampleDistance,
+                             double &monitorEPP) const;
 
   /// Reads detector and monitor indices from properties
-  void parseIndices(std::vector<size_t> &detectorIndices, size_t &monitorIndex) const;
+  void parseIndices(std::vector<size_t> &detectorIndices,
+                    size_t &monitorIndex) const;
 
   /// Removes duplicates and checks consistency
-  void sanitizeIndices(std::vector<size_t> &detectorIndices, size_t monitorIndex) const;
+  void sanitizeIndices(std::vector<size_t> &detectorIndices,
+                       size_t monitorIndex) const;
 
   /// Shared pointer to the detector workspace
   Mantid::API::MatrixWorkspace_const_sptr m_detectorWs;
