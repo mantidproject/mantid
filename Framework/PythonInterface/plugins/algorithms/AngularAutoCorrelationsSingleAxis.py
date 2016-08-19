@@ -37,7 +37,7 @@ class AngularAutoCorrelationsSingleAxis(PythonAlgorithm):
         # Load trajectory file
         trajectory=netcdf.netcdf_file(file_name,mode="r")
 
-        print "Loading particle id's, molecule id's and coordinate array..."
+        logger.information("Loading particle id's, molecule id's and coordinate array...")
         start_time=time.time()
 
         # netcdf object containing the particle id numbers
@@ -121,10 +121,10 @@ class AngularAutoCorrelationsSingleAxis(PythonAlgorithm):
         # Number of spatial dimensions
         n_dimensions=int(configuration.shape[2])
 
-        print str(time.time()-start_time) + " s"
+        logger.information(str(time.time()-start_time) + " s")
 
 
-        print "Transforming coordinates..."
+        logger.information("Transforming coordinates...")
         start_time=time.time()
 
         # Box size for each timestep. Shape: timesteps x (3 consecutive 3-vectors)
@@ -147,10 +147,10 @@ class AngularAutoCorrelationsSingleAxis(PythonAlgorithm):
         # Transform particle trajectories (configuration array) to Cartesian coordinates at each time step.
         cartesian_configuration=np.array([[np.dot(box_size_tensors[j],np.transpose(configuration_copy[i,j])) for j in range(n_timesteps)] for i in range(n_particles)])
 
-        print str(time.time()-start_time) + " s"
+        logger.information(str(time.time()-start_time) + " s")
 
 
-        print "Calculating orientation vectors..."
+        logger.information("Calculating orientation vectors...")
         start_time=time.time()
 
         # Initialise orientation vector array. Shape: (# of molecules) x (# of timesteps) x (# of dimensions)
@@ -200,10 +200,10 @@ class AngularAutoCorrelationsSingleAxis(PythonAlgorithm):
             # Store calculations in the orientation_vectors array
             orientation_vectors[i]=np.swapaxes(np.array([x,y,z]),0,1)
 
-        print str(time.time()-start_time) + " s"
+        logger.information(str(time.time()-start_time) + " s")
 
 
-        print "Calculating angular auto-correlations..."
+        logger.information("Calculating angular auto-correlations...")
         start_time=time.time()
 
         R_avg=np.zeros(n_timesteps)
@@ -212,7 +212,7 @@ class AngularAutoCorrelationsSingleAxis(PythonAlgorithm):
 
         R_avg=1.0*R_avg/n_molecules
 
-        print str(time.time()-start_time)+" s"
+        logger.information(str(time.time()-start_time)+" s")
 
 
         # Initialise & populate the output_ws workspace

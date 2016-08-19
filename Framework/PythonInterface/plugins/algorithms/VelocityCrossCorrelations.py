@@ -32,7 +32,7 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         # Load trajectory file
         trajectory=netcdf.netcdf_file(file_name,mode="r")
 
-        print "Loading particle id's and coordinate array..."
+        logger.information("Loading particle id's and coordinate array...")
         start_time=time.time()
 
         # netcdf object containing the particle id numbers
@@ -83,10 +83,10 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         # Number of spatial dimensions
         n_dimensions=int(configuration.shape[2])
 
-        print str(time.time()-start_time) + " s"
+        logger.information(str(time.time()-start_time) + " s")
 
 
-        print "Transforming coordinates..."
+        logger.information("Transforming coordinates...")
         start_time=time.time()
 
         # Box size for each timestep. Shape: timesteps x (3 consecutive 3-vectors)
@@ -111,10 +111,10 @@ class VelocityCrossCorrelations(PythonAlgorithm):
 
         # # Transform particle trajectories (configuration array) to Cartesian coordinates at each time step
 
-        print str(time.time()-start_time) + " s"
+        logger.information(str(time.time()-start_time) + " s")
 
 
-        print "Calculating velocities..."
+        logger.information("Calculating velocities...")
         start_time=time.time()
 
         # Initialise velocity arrray. Note that the first dimension is 2 elements shorter than the coordinate array. Use finite difference methods to evaluate the time-derivative to 1st order
@@ -131,10 +131,10 @@ class VelocityCrossCorrelations(PythonAlgorithm):
 
         # Transform velocities (configuration array) back to Cartesian coordinates at each time step
         velocities=np.array([[np.dot(box_size_tensors[j+1],np.transpose(velocities[i,j])) for j in range(n_timesteps-1)] for i in range(n_particles)])
-        print str(time.time()-start_time) + " s"
+        logger.information(str(time.time()-start_time) + " s")
 
 
-        print "Calculating velocity cross-correlations (resource intensive calculation)..."
+        logger.information("Calculating velocity cross-correlations (resource intensive calculation)...")
         start_time=time.time()
 
         correlation_length=n_timesteps-1
@@ -158,7 +158,7 @@ class VelocityCrossCorrelations(PythonAlgorithm):
                     correlations[l,k]+=correlation_temp
                     correlation_count[l,k]+=1
 
-        print str(time.time()-start_time) + " s"
+        logger.information(str(time.time()-start_time) + " s")
 
 
         # Neutron coherent scattering lengths (femtometres)
@@ -265,7 +265,7 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         }
 
 
-        print "Averaging correlation Fourier transforms & scaling with the coherent neutron scattering lenghts..."
+        logger.information("Averaging correlation Fourier transforms & scaling with the coherent neutron scattering lenghts...")
         start_time=time.time()
 
         # Scaling cross-correlations with the scattering lengths
@@ -273,7 +273,7 @@ class VelocityCrossCorrelations(PythonAlgorithm):
             for j in range(i,n_species):
                 correlations[i,j]=correlations[i,j]*Coh_b[elements[i]]*Coh_b[elements[j]]/correlation_count[i,j]
 
-        print str(time.time()-start_time) + " s"
+        logger.information(str(time.time()-start_time) + " s")
 
 
         # Generate a list of row names according to the atomic species present in the simulation
