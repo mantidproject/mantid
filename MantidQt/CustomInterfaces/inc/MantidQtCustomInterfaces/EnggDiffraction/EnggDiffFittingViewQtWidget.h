@@ -124,6 +124,8 @@ public:
 
   void setBankEmit() override;
 
+  void resetCanvas() override;
+
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                      bool focused, bool plotSinglePeaks) override;
 

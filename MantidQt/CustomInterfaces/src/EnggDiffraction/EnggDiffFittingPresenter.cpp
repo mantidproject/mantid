@@ -485,23 +485,31 @@ void EnggDiffFittingPresenter::processLoad() {
   // while directory vector is not empty
   // if loaded here set a global variable true so doesnt load again?
 
-  MatrixWorkspace_sptr focusedWS;
-  const std::string focusedFile = m_view->getFittingRunNo();
-  Poco::Path selectedfPath(focusedFile);
+  try {
+    MatrixWorkspace_sptr focusedWS;
+    const std::string focusedFile = m_view->getFittingRunNo();
+    Poco::Path selectedfPath(focusedFile);
 
-  if (!focusedFile.empty() && selectedfPath.isFile()) {
-    runLoadAlg(focusedFile, focusedWS);
-    setDifcTzero(focusedWS);
-    convertUnits(g_focusedFittingWSName);
-    plotFocusedFile(false);
+    if (!focusedFile.empty() && selectedfPath.isFile()) {
+      runLoadAlg(focusedFile, focusedWS);
+      setDifcTzero(focusedWS);
+      convertUnits(g_focusedFittingWSName);
+      plotFocusedFile(false);
 
-    m_view->showStatus("Focused file loaded! (Click 'Select "
-                       "Peak' to activate peak picker tool, hold Shift + Click "
-                       "Peak, Click 'Add Peak')");
+      m_view->showStatus(
+          "Focused file loaded! (Click 'Select "
+          "Peak' to activate peak picker tool, hold Shift + Click "
+          "Peak, Click 'Add Peak')");
 
-  } else {
-    m_view->userWarning("No File Found", "Please select a valid focused file!");
-    m_view->showStatus("Error while plotting the focused workspace");
+    } else {
+      m_view->userWarning("No File Found",
+                          "Please select a focused file to load");
+      m_view->showStatus("Error while plotting the focused workspace");
+    }
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning(
+        "Error loading file",
+        "Unable to load the selected focused file, Please try again.");
   }
 }
 
@@ -1507,6 +1515,10 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
 
   try {
 
+    // detaches previous plots from canvas
+    m_view->resetCanvas();
+
+    // plots focused workspace
     plotFocusedFile(m_fittingFinishedOK);
 
     if (m_fittingFinishedOK) {

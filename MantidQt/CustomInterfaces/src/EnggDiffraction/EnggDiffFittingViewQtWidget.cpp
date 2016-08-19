@@ -276,27 +276,33 @@ void EnggDiffFittingViewQtWidget::resetFittingMode() {
   m_fittingSingleRunMode = false;
 }
 
+void EnggDiffFittingViewQtWidget::resetCanvas() {
+  // clear vector and detach curves to avoid plot crash
+  // when only plotting focused workspace
+  for (auto curves : m_fittedDataVector) {
+    if (curves) {
+      curves->detach();
+      delete curves;
+    }
+  }
+
+  if (m_fittedDataVector.size() > 0)
+    m_fittedDataVector.clear();
+
+  // set it as false as there will be no valid workspace to plot
+  m_ui.pushButton_plot_separate_window->setEnabled(false);
+}
+
 void EnggDiffFittingViewQtWidget::setDataVector(
     std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
     bool plotSinglePeaks) {
 
   if (!plotSinglePeaks) {
     // clear vector and detach curves to avoid plot crash
-    // when only plotting focused workspace
-    for (auto curves : m_fittedDataVector) {
-      if (curves) {
-        curves->detach();
-        delete curves;
-      }
-    }
-
-    if (m_fittedDataVector.size() > 0)
-      m_fittedDataVector.clear();
-
-    // set it as false as there will be no valid workspace to plot
-    m_ui.pushButton_plot_separate_window->setEnabled(false);
+    resetCanvas();
   }
 
+  // when only plotting focused workspace
   if (focused) {
     dataCurvesFactory(data, m_focusedDataVector, focused);
   } else {
