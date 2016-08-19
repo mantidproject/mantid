@@ -68,8 +68,8 @@ void XDataConverter::exec() {
     // Copy over the Y and E data
     outputWS->setSharedY(i, inputWS->sharedY(i));
     outputWS->setSharedE(i, inputWS->sharedE(i));
-    //setXData(outputWS, inputWS, i);
-    outputWS->setSharedX(i, calculateXPoints(inputWS->sharedX(i)));
+    setXData(outputWS, inputWS, i);
+    //outputWS->setSharedX(i, calculateXPoints(inputWS->sharedX(i)));
     prog.report();
 
     PARALLEL_END_INTERUPT_REGION
@@ -86,7 +86,6 @@ void XDataConverter::exec() {
  * @param inputWS :: The input workspace
  * @param index :: The index
  */
-/*
 void XDataConverter::setXData(API::MatrixWorkspace_sptr outputWS,
                               const API::MatrixWorkspace_sptr inputWS,
                               const int index) {
@@ -94,19 +93,14 @@ void XDataConverter::setXData(API::MatrixWorkspace_sptr outputWS,
     PARALLEL_CRITICAL(XDataConverter_para) {
       if (!m_cachedX) {
         PARALLEL_CRITICAL(XDataConverter_parb) {
-          MantidVec tmp(getNewXSize(inputWS));
-          calculateXPoints(inputWS->readX(index), tmp);
-          m_cachedX =
-              Kernel::make_cow<HistogramData::HistogramX>(std::move(tmp));
+          m_cachedX = calculateXPoints(inputWS->sharedX(index));
         }
       }
     }
     outputWS->setSharedX(index, m_cachedX);
   } else {
-    const MantidVec &xBoundaries = inputWS->readX(index);
-    MantidVec &xPoints = outputWS->dataX(index);
-    calculateXPoints(xBoundaries, xPoints);
+    outputWS->setSharedX(index, calculateXPoints(inputWS->sharedX(index)));
   }
-}*/
+}
 }
 }
