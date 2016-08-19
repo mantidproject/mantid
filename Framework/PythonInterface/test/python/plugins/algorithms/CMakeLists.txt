@@ -5,6 +5,8 @@
 set ( TEST_PY_FILES
   AddSampleLogMultipleTest.py
   AlignComponentsTest.py
+  AngularAutoCorrelationsSingleAxisTest.py
+  AngularAutoCorrelationsTwoAxesTest.py
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
   BayesStretchTest.py
@@ -103,6 +105,8 @@ set ( TEST_PY_FILES
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
+  VelocityCrossCorrelationsTest.py
+  VelocityAutoCorrelationsTest.py
   VesuvioDiffractionReductionTest.py
   VesuvioPreFitTest.py
   VesuvioResolutionTest.py
