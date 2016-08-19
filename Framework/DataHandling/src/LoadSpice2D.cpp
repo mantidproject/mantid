@@ -454,8 +454,8 @@ void LoadSpice2D::setBeamTrapRunProperty(
   // Check how many traps are in use (store indexes):
   std::vector<size_t> trapIndexInUse;
   for (size_t i = 0; i < trapMotorPositions.size(); i++) {
-    if (trapMotorPositions[i] > 11.0) {
-      // Resting positions are below 10. Make sure we have one trap in use!
+    if (trapMotorPositions[i] > 26.0) {
+      // Resting positions are below 25. Make sure we have one trap in use!
       trapIndexInUse.push_back(i);
     }
   }
@@ -580,10 +580,12 @@ LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
 
   double total_sample_detector_distance;
   if (metadata.find("Motor_Positions/sdd") != metadata.end()) {
+
     // When sdd exists overrides all the distances
     from_string<double>(total_sample_detector_distance,
                         metadata["Motor_Positions/sdd"], std::dec);
     total_sample_detector_distance *= 1000.0;
+    sample_detector_distance = total_sample_detector_distance;
 
     addRunProperty<double>("sample-detector-distance-offset", 0, "mm");
     addRunProperty<double>("sample-detector-distance", sample_detector_distance,

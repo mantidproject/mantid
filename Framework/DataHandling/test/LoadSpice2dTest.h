@@ -152,7 +152,7 @@ public:
     TS_ASSERT_EQUALS(prop->type(), "number");
     double beam_trap_diameter =
         ws2d->run().getPropertyValueAsType<double>("beam-trap-diameter");
-    TS_ASSERT_DELTA(beam_trap_diameter, 101.6, tolerance);
+    TS_ASSERT_DELTA(beam_trap_diameter, 76.2, tolerance);
 
     prop = ws2d->run().getProperty("source-aperture-diameter");
     dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
