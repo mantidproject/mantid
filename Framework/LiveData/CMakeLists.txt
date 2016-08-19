@@ -48,6 +48,7 @@ set ( TEST_FILES
 	FakeEventDataListenerTest.h
 	FileEventDataListenerTest.h
 	ISISHistoDataListenerTest.h
+	ISISKafkaEventListenerTest.h
 	LiveDataAlgorithmTest.h
 	LoadLiveDataTest.h
 	MonitorLiveDataTest.h
