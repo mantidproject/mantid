@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/FakeEventDataListener.cpp
 	src/FakeISISHistoDAE.cpp
 	src/FileEventDataListener.cpp
+	src/ISIS/FakeISISEventDAE.cpp
 	src/ISISHistoDataListener.cpp
 	src/ISISLiveEventDataListener.cpp
 	src/LiveDataAlgorithm.cpp
@@ -29,9 +30,10 @@ set ( INC_FILES
 	inc/MantidLiveData/FakeEventDataListener.h
 	inc/MantidLiveData/FakeISISHistoDAE.h
 	inc/MantidLiveData/FileEventDataListener.h
+	inc/MantidLiveData/ISIS/FakeISISEventDAE.h
+	inc/MantidLiveData/ISIS/TCPEventStreamDefs.h
 	inc/MantidLiveData/ISISHistoDataListener.h
 	inc/MantidLiveData/ISISLiveEventDataListener.h
-	inc/MantidLiveData/ISIS/TCPEventStreamDefs.h
 	inc/MantidLiveData/LiveDataAlgorithm.h
 	inc/MantidLiveData/LoadLiveData.h
 	inc/MantidLiveData/MonitorLiveData.h
@@ -73,7 +75,7 @@ set_target_properties ( LiveData PROPERTIES OUTPUT_NAME MantidLiveData )
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( LiveData PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 endif ()
- 
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET LiveData PROPERTY FOLDER "MantidFramework" )
 

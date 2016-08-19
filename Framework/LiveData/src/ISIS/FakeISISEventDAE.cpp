@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidISISLiveData/FakeISISEventDAE.h"
-#include "MantidISISLiveData/TCPEventStreamDefs.h"
+#include "MantidLiveData/ISIS/FakeISISEventDAE.h"
+#include "MantidLiveData/ISIS/TCPEventStreamDefs.h"
 
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/Timer.h"
@@ -17,7 +17,7 @@
 #include <numeric>
 
 namespace Mantid {
-namespace ISISLiveData {
+namespace LiveData {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FakeISISEventDAE)
 
