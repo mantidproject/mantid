@@ -8,10 +8,6 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
-namespace HistogramData {
-class HistogramY;
-}
-
 namespace Kernel {
 namespace Units {
 class Label;
