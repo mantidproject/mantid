@@ -6,10 +6,14 @@
 
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::CountVariances;
+using Mantid::HistogramData::Frequencies;
+using Mantid::HistogramData::FrequencyStandardDeviations;
+using Mantid::HistogramData::FrequencyVariances;
 
-namespace Mantid {
-namespace HistogramData {
-
+namespace {
 Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
   if (input.yMode() != Histogram::YMode::Counts ||
       input.xMode() != Histogram::XMode::BinEdges) {
@@ -135,6 +139,23 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
   }
   return Histogram(binEdges, newFrequencies, newFrequencyStdDev);
 }
+}
+
+namespace Mantid {
+namespace HistogramData {
+
+Histogram rebin(const Histogram &input, const BinEdges &binEdges) {
+  if (input.xMode != Histogram::XMode::BinEdges)
+    throw std::runtime_error(
+        "XMode must be Histogram::XMode::BinEdges for input histogram");
+  if (input.yMode == Histogram::YMode::Counts)
+    return rebinCounts(input, binEdges);
+  else if (input.yMode == Histogram::YMode::Frequencies)
+    return rebinFrequencies(input, binEdges);
+  else
+    throw std::runtime_error("YMode must be defined for input histogram.");
+}
+
 
 } // namespace HistogramData
 } // namespace Mantid

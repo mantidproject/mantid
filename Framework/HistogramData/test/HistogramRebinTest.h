@@ -19,46 +19,26 @@ public:
   static HistogramRebinTest *createSuite() { return new HistogramRebinTest(); }
   static void destroySuite(HistogramRebinTest *suite) { delete suite; }
 
-  void testExecRebinCounts() {
-    TS_ASSERT_THROWS_NOTHING(rebinCounts(
-        getCountsHistogram(), BinEdges(10, LinearGenerator(0, 0.5))));
+  void testExecrebin() {
+    TS_ASSERT_THROWS_NOTHING(
+        rebin(getCountsHistogram(), BinEdges(10, LinearGenerator(0, 0.5))));
   }
 
   void testExecRebinFrequency() {
-    TS_ASSERT_THROWS_NOTHING(rebinFrequencies(
-        getFrequencyHistogram(), BinEdges(10, LinearGenerator(0, 0.5))));
+    TS_ASSERT_THROWS_NOTHING(
+        rebin(getFrequencyHistogram(), BinEdges(10, LinearGenerator(0, 0.5))));
   }
 
-  void testRebinFrequenciesFailModes() {
+  void testRebinNoYModeDefined() {
     BinEdges edges(5, LinearGenerator(0, 2));
-    // Incorrect YMode
-    TS_ASSERT_THROWS(rebinFrequencies(getCountsHistogram(), edges),
-                     std::runtime_error);
-    // Incorrect XMode
-    TS_ASSERT_THROWS(rebinFrequencies(Histogram(Histogram::XMode::Points,
-                                                Histogram::YMode::Frequencies),
-                                      edges),
-                     std::runtime_error);
-    // No YMode set
+    // X Mode Counts
     TS_ASSERT_THROWS(
-        rebinFrequencies(Histogram(BinEdges(10, LinearGenerator(0, 0.5))),
-                         edges),
+        rebin(Histogram(Histogram::XMode::Points, Histogram::YMode::Counts),
+              edges),
         std::runtime_error);
-  }
-
-  void testRebinCountsFailModes() {
-    BinEdges edges(5, LinearGenerator(0, 2));
-    // Incorrect YMode
-    TS_ASSERT_THROWS(rebinCounts(getFrequencyHistogram(), edges),
-                     std::runtime_error);
-    // Incorrect XMode
-    TS_ASSERT_THROWS(rebinCounts(Histogram(Histogram::XMode::Points,
-                                           Histogram::YMode::Counts),
-                                 edges),
-                     std::runtime_error);
     // No YMode set
     TS_ASSERT_THROWS(
-        rebinCounts(Histogram(BinEdges(10, LinearGenerator(0, 0.5))), edges),
+        rebin(Histogram(BinEdges(10, LinearGenerator(0, 0.5))), edges),
         std::runtime_error);
   }
 
@@ -66,10 +46,7 @@ public:
     std::vector<double> binEdges{1, 2, 3, 3, 5, 7};
     BinEdges edges(binEdges);
 
-    TS_ASSERT_THROWS(rebinCounts(getCountsHistogram(), edges),
-                     std::runtime_error);
-    TS_ASSERT_THROWS(rebinFrequencies(getFrequencyHistogram(), edges),
-                     std::runtime_error);
+    TS_ASSERT_THROWS(rebin(getCountsHistogram(), edges), std::runtime_error);
   }
 
   void testRebinFailsInputBinEdgesInvalid() {
@@ -77,16 +54,15 @@ public:
     Histogram hist(BinEdges(std::move(binEdges)), Counts(5, 10));
     BinEdges edges{1, 2, 3, 4, 5, 6};
 
-    TS_ASSERT_THROWS(rebinCounts(hist, edges), std::runtime_error);
-    TS_ASSERT_THROWS(rebinFrequencies(hist, edges), std::runtime_error);
+    TS_ASSERT_THROWS(rebin(hist, edges), std::runtime_error);
   }
 
   void testRebinIdenticalBins() {
     auto histCounts = getCountsHistogram();
     auto histFreq = getFrequencyHistogram();
 
-    auto outCounts = rebinCounts(histCounts, histCounts.binEdges());
-    auto outFreq = rebinFrequencies(histFreq, histFreq.binEdges());
+    auto outCounts = rebin(histCounts, histCounts.binEdges());
+    auto outFreq = rebin(histFreq, histFreq.binEdges());
 
     TS_ASSERT_EQUALS(outCounts.x().rawData(), histCounts.x().rawData());
     TS_ASSERT_EQUALS(outCounts.y().rawData(), histCounts.y().rawData());
@@ -101,14 +77,14 @@ public:
     auto histCounts = getCountsHistogram();
     auto histFreq = getFrequencyHistogram();
 
-    auto outCounts =
-        rebinCounts(histCounts, BinEdges(10, LinearGenerator(30, 1)));
-    auto outFreq =
-        rebinFrequencies(histFreq, BinEdges(5, LinearGenerator(100, 2)));
+    auto outCounts = rebin(histCounts, BinEdges(10, LinearGenerator(30, 1)));
+    auto outFreq = rebin(histFreq, BinEdges(5, LinearGenerator(100, 2)));
 
     TS_ASSERT(std::all_of(outCounts.y().cbegin(), outCounts.y().cend(),
                           [](const double i) { return i == 0; }));
     TS_ASSERT(std::all_of(outFreq.y().cbegin(), outFreq.y().cend(),
+                          [](const double i) { return i == 0; }));
+    TS_ASSERT(std::all_of(outFreq.e().cbegin(), outFreq.e().cend(),
                           [](const double i) { return i == 0; }));
   }
 
@@ -120,8 +96,8 @@ public:
     Histogram histFreq(BinEdges{0, 1, 2}, Frequencies{12, 12});
     BinEdges edges{0, 0.5, 1, 1.5, 2};
 
-    auto outCounts = rebinCounts(hist, edges);
-    auto outFreq = rebinFrequencies(histFreq, edges);
+    auto outCounts = rebin(hist, edges);
+    auto outFreq = rebin(histFreq, edges);
 
     for (size_t i = 0; i < outCounts.y().size(); i++) {
       TS_ASSERT_EQUALS(outCounts.y()[i], 5.0);
@@ -138,8 +114,8 @@ public:
                        Frequencies{3, 9, 8, 12});
     BinEdges edges(3, LinearGenerator(0, 2));
 
-    auto outCounts = rebinCounts(hist, edges);
-    auto outFreq = rebinFrequencies(histFreq, edges);
+    auto outCounts = rebin(hist, edges);
+    auto outFreq = rebin(histFreq, edges);
 
     for (size_t i = 0; i < outCounts.y().size(); i++) {
       TS_ASSERT_EQUALS(outCounts.y()[i],
@@ -157,8 +133,8 @@ public:
     Histogram histFreq(BinEdges(3, LinearGenerator(0, 1)), Frequencies{12, 20});
     BinEdges edges{0, 0.5, 1.5, 2};
 
-    auto outCounts = rebinCounts(hist, edges);
-    auto outFreq = rebinFrequencies(histFreq, edges);
+    auto outCounts = rebin(hist, edges);
+    auto outFreq = rebin(histFreq, edges);
 
     TS_ASSERT_EQUALS(outCounts.y()[0], hist.y()[0] / 2);
     TS_ASSERT_EQUALS(outCounts.y()[1], (hist.y()[0] + hist.y()[1]) / 2);
@@ -177,8 +153,8 @@ public:
     Histogram histFreq(BinEdges{0, 0.5, 1.5, 2}, Frequencies{16, 32, 8});
     BinEdges edges{0, 1, 2};
 
-    auto outCounts = rebinCounts(hist, edges);
-    auto outFreq = rebinFrequencies(histFreq, edges);
+    auto outCounts = rebin(hist, edges);
+    auto outFreq = rebin(histFreq, edges);
 
     TS_ASSERT_EQUALS(outCounts.y()[0], hist.y()[0] + (hist.y()[1] / 2));
     TS_ASSERT_EQUALS(outCounts.y()[1], (hist.y()[1] / 2) + hist.y()[2]);
@@ -195,8 +171,8 @@ public:
     Histogram histFreq(BinEdges{0, 1, 2, 3}, Frequencies{210, 19, 80});
     BinEdges edges{0, 0.5, 2.5, 3};
 
-    auto outCounts = rebinCounts(hist, edges);
-    auto outFreq = rebinFrequencies(histFreq, edges);
+    auto outCounts = rebin(hist, edges);
+    auto outFreq = rebin(histFreq, edges);
 
     TS_ASSERT_EQUALS(outCounts.y()[0], hist.y()[0] / 2);
     TS_ASSERT_EQUALS(outCounts.y()[1],
@@ -218,8 +194,8 @@ public:
     Histogram histFreq(BinEdges{0, 0.5, 2.5, 3}, Frequencies{17, 8, 15});
     BinEdges edges{0, 1, 2, 3};
 
-    auto outCounts = rebinCounts(hist, edges);
-    auto outFreq = rebinFrequencies(histFreq, edges);
+    auto outCounts = rebin(hist, edges);
+    auto outFreq = rebin(histFreq, edges);
 
     TS_ASSERT_EQUALS(outCounts.y()[0], hist.y()[0] + (hist.y()[1] / 4));
     TS_ASSERT_EQUALS(outCounts.y()[1], hist.y()[1] / 2);
@@ -267,24 +243,24 @@ public:
     setupOutput();
   }
 
-  void testRebinCountsSmallerBins() {
+  void testrebinSmallerBins() {
     for (int i = 0; i < nIters; i++)
-      rebinCounts(hist, smBins);
+      rebin(hist, smBins);
   }
 
-  void testRebinFrequenciesSmallerBins() {
+  void testrebinSmallerBins() {
     for (int i = 0; i < nIters; i++)
-      rebinFrequencies(histFreq, smBins);
+      rebin(histFreq, smBins);
   }
 
-  void testRebinCountsLargerBins() {
+  void testrebinLargerBins() {
     for (int i = 0; i < nIters; i++)
-      rebinCounts(hist, lgBins);
+      rebin(hist, lgBins);
   }
 
-  void testRebinFrequenciesLargerBins() {
+  void testrebinLargerBins() {
     for (int i = 0; i < nIters; i++)
-      rebinFrequencies(histFreq, lgBins);
+      rebin(histFreq, lgBins);
   }
 
 private:
