@@ -207,9 +207,9 @@ private:
    * @param instrument   The instrument with the new values for the banks in
    *Groups
    */
-  void saveXmlFile(std::string const FileName,
-                   boost::container::flat_set<std::string> const AllBankNames,
-                   Geometry::Instrument_const_sptr const instrument) const;
+  void saveXmlFile(const std::string &FileName,
+                   const boost::container::flat_set<std::string> &AllBankNames,
+                   const Geometry::Instrument &instrument) const;
 };
 
 } // namespace Crystal

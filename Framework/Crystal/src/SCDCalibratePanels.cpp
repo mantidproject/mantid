@@ -342,7 +342,7 @@ void SCDCalibratePanels::exec() {
   string DetCalFileName = getProperty("DetCalFilename");
   saveIsawDetCal(inst, MyBankNames, 0.0, DetCalFileName);
   string XmlFileName = getProperty("XmlFilename");
-  saveXmlFile(XmlFileName, MyBankNames, inst);
+  saveXmlFile(XmlFileName, MyBankNames, *inst);
   // create table of theoretical vs calculated
   //----------------- Calculate & Create Calculated vs Theoretical
   // workspaces------------------,);
@@ -1008,9 +1008,9 @@ void writeXmlParameter(ofstream &ostream, const string &name,
 }
 
 void SCDCalibratePanels::saveXmlFile(
-    string const FileName,
-    boost::container::flat_set<string> const AllBankNames,
-    Instrument_const_sptr const instrument) const {
+    const string &FileName,
+    const boost::container::flat_set<string> &AllBankNames,
+    const Instrument &instrument) const {
   if (FileName.empty())
     return;
 
@@ -1019,18 +1019,18 @@ void SCDCalibratePanels::saveXmlFile(
   // create the file and add the header
   ofstream oss3(FileName.c_str());
   oss3 << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
-  oss3 << " <parameter-file instrument=\"" << instrument->getName()
-       << "\" valid-from=\"" << instrument->getValidFromDate().toISO8601String()
+  oss3 << " <parameter-file instrument=\"" << instrument.getName()
+       << "\" valid-from=\"" << instrument.getValidFromDate().toISO8601String()
        << "\">\n";
-  ParameterMap_sptr pmap = instrument->getParameterMap();
+  ParameterMap_sptr pmap = instrument.getParameterMap();
 
   // write out the detector banks
   for (auto bankName : AllBankNames) {
-    if (instrument->getName().compare("CORELLI") == 0.0)
+    if (instrument.getName().compare("CORELLI") == 0.0)
       bankName.append("/sixteenpack");
     oss3 << "<component-link name=\"" << bankName << "\">\n";
     boost::shared_ptr<const IComponent> bank =
-        instrument->getComponentByName(bankName);
+        instrument.getComponentByName(bankName);
 
     Quat RelRot = bank->getRelativeRot();
 
@@ -1070,10 +1070,10 @@ void SCDCalibratePanels::saveXmlFile(
   } // for each bank in the group
 
   // write out the source
-  IComponent_const_sptr source = instrument->getSource();
+  IComponent_const_sptr source = instrument.getSource();
 
   oss3 << "<component-link name=\"" << source->getName() << "\">\n";
-  IComponent_const_sptr sample = instrument->getSample();
+  IComponent_const_sptr sample = instrument.getSample();
   V3D sourceRelPos = source->getRelativePos();
 
   writeXmlParameter(oss3, "x", sourceRelPos.X());
