@@ -76,7 +76,8 @@ public:
   void doFitting(const std::string &focusedRunNo,
                  const std::string &expectedPeaks);
 
-  void runLoadAlg(const std::string focusedFile);
+  void runLoadAlg(const std::string focusedFile,
+                  Mantid::API::MatrixWorkspace_sptr &focusedWS);
 
   void runFittingAlgs(std::string FocusedFitPeaksTableName,
                       std::string FocusedWSName);
@@ -86,7 +87,7 @@ public:
                      std::string tableName, size_t row, std::string &startX,
                      std::string &endX);
 
-  void plotFocusedFile();
+  void plotFocusedFile(bool plotSinglePeaks);
 
   void plotFitPeaksCurves();
 

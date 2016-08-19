@@ -485,10 +485,24 @@ void EnggDiffFittingPresenter::processLoad() {
   // while directory vector is not empty
   // if loaded here set a global variable true so doesnt load again?
 
+  MatrixWorkspace_sptr focusedWS;
   const std::string focusedFile = m_view->getFittingRunNo();
+  Poco::Path selectedfPath(focusedFile);
 
-  runLoadAlg(focusedFile);
-  plotFocusedFile();
+  if (!focusedFile.empty() && selectedfPath.isFile()) {
+    runLoadAlg(focusedFile, focusedWS);
+    setDifcTzero(focusedWS);
+    convertUnits(g_focusedFittingWSName);
+    plotFocusedFile(false);
+
+    m_view->showStatus("Focused file loaded! (Click 'Select "
+                       "Peak' to activate peak picker tool, hold Shift + Click "
+                       "Peak, Click 'Add Peak')");
+
+  } else {
+    m_view->userWarning("No File Found", "Please select a valid focused file!");
+    m_view->showStatus("Error while plotting the focused workspace");
+  }
 }
 
 void EnggDiffFittingPresenter::processShutDown() {
@@ -720,7 +734,7 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
   }
 
   // load the focused workspace file to perform single peak fits
-  runLoadAlg(focusedRunNo);
+  runLoadAlg(focusedRunNo, focusedWS);
 
   setDifcTzero(focusedWS);
 
@@ -767,7 +781,9 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
   }
 }
 
-void EnggDiffFittingPresenter::runLoadAlg(const std::string focusedFile) {
+void EnggDiffFittingPresenter::runLoadAlg(
+    const std::string focusedFile,
+    Mantid::API::MatrixWorkspace_sptr &focusedWS) {
   // load the focused workspace file to perform single peak fits
   try {
     auto load =
@@ -778,8 +794,7 @@ void EnggDiffFittingPresenter::runLoadAlg(const std::string focusedFile) {
     load->execute();
 
     AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-    MatrixWorkspace_sptr focusedWS =
-        ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
+    focusedWS = ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
   } catch (std::runtime_error &re) {
     g_log.error()
         << "Error while loading focused data. "
@@ -1449,7 +1464,7 @@ bool EnggDiffFittingPresenter::isDigit(std::string text) {
   return true;
 }
 
-void EnggDiffFittingPresenter::plotFocusedFile() {
+void EnggDiffFittingPresenter::plotFocusedFile(bool plotSinglePeaks) {
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
 
   if (!ADS.doesExist(g_focusedFittingWSName)) {
@@ -1460,11 +1475,10 @@ void EnggDiffFittingPresenter::plotFocusedFile() {
   }
 
   try {
-    // code goes here @shahroz
     auto focusedPeaksWS =
         ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
     auto focusedData = ALCHelper::curveDataFromWs(focusedPeaksWS);
-    m_view->setDataVector(focusedData, true, m_fittingFinishedOK);
+    m_view->setDataVector(focusedData, true, plotSinglePeaks);
 
   } catch (std::runtime_error &re) {
     g_log.error()
@@ -1492,10 +1506,8 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
   }
 
   try {
-    auto focusedPeaksWS =
-        ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
-    auto focusedData = ALCHelper::curveDataFromWs(focusedPeaksWS);
-    m_view->setDataVector(focusedData, true, m_fittingFinishedOK);
+
+    plotFocusedFile(m_fittingFinishedOK);
 
     if (m_fittingFinishedOK) {
       g_log.debug() << "single peaks fitting being plotted now.\n";
