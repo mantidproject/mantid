@@ -1059,22 +1059,9 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   MatrixWorkspace_sptr vanCurvesWS;
   MatrixWorkspace_sptr ceriaWS;
 
-  // If the file is numerical only we need to append
-  // it in case the favorite instrument isn't set to ENGINX
-  const std::string currentInst = m_view->currentInstrument();
-  // Vanadium file
-  std::string vanFileName(vanNo);
-  if (std::all_of(vanNo.begin(), vanNo.end(), ::isdigit)) {
-    // This only has digits - append prefix
-    vanFileName = currentInst + vanFileName;
-  }
-
-  // Cerium file
-  std::string cerFileName(ceriaNo);
-  if (std::all_of(ceriaNo.begin(), ceriaNo.end(), ::isdigit)) {
-    // All digits - append inst prefix
-    cerFileName = currentInst + cerFileName;
-  }
+  // Append current instrument name if numerical only entry
+  std::string vanFileName, cerFileName;
+  appendCalibInstPrefix(vanNo, ceriaNo, vanFileName, cerFileName);
 
   // save vanIntegWS and vanCurvesWS as open genie
   // see where spec number comes from
@@ -1228,6 +1215,52 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   // plots the calibrated workspaces.
   g_plottingCounter++;
   plotCalibWorkspace(difc, tzero, specNos);
+}
+
+/**
+  * Appends the current instrument as a filename prefix for numeric
+  * only inputs of the Vanadium run so Load can find the file
+  *
+  * @param vanNo The user input for the vanadium run
+  * @param outVanName The fixed filename for the vanadium run
+  */
+void EnggDiffractionPresenter::appendCalibInstPrefix(const std::string vanNo, std::string & outVanName)
+{
+	// Use a single non numeric digit so we are guaranteed to skip
+	// generating cerium file names
+	const std::string cer = "-";
+	std::string outCerName;
+	appendCalibInstPrefix(vanNo, cer, outVanName, outCerName);
+}
+
+/**
+  * Appends the current instrument as a filename prefix for numeric
+  * only inputs of both the Vanadium and Cerium Oxide runs so Load
+  * can find the files.
+  * 
+  * @param vanNo The user input for the vanadium run
+  * @param cerNo The user input for the cerium run
+  * @param outVanName The fixed filename for the vanadium run
+  * @param outCerName The fixed filename for the cerium run
+  */
+void EnggDiffractionPresenter::appendCalibInstPrefix(const std::string vanNo, const std::string cerNo, std::string &outVanName, std::string &outCerName) const
+{
+	// If the file is numerical only we need to append
+	// it in case the favorite instrument isn't set to ENGINX
+	const std::string currentInst = m_view->currentInstrument();
+	// Vanadium file
+	if (std::all_of(vanNo.begin(), vanNo.end(), ::isdigit)) {
+		// This only has digits - append prefix
+		outVanName = currentInst + vanNo;
+	}
+
+	// Cerium file
+	if (std::all_of(cerNo.begin(), cerNo.end(), ::isdigit)) {
+		// All digits - append inst prefix
+		outCerName = currentInst + cerNo;
+	}
+
+
 }
 
 /**
@@ -1682,7 +1715,14 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   MatrixWorkspace_sptr inWS;
 
   const std::string vanNo = m_view->currentVanadiumNo();
-  loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
+
+  // Append instrument name if numerical only entry
+  std::string vanFileName;
+  // We dont need cerium file name so just pass vanadium number twice and
+  // ignore return
+  appendCalibInstPrefix(vanNo, vanFileName);
+
+  loadOrCalcVanadiumWorkspaces(vanFileName, cs.m_inputDirCalib, vanIntegWS,
                                vanCurvesWS, cs.m_forceRecalcOverwrite, "");
 
   const std::string inWSName = "engggui_focusing_input_ws";
