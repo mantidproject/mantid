@@ -133,8 +133,7 @@ void ModeratorTzero::exec() {
   // iterate over the spectra
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    auto &outbins = outputWS->mutableX(i);
-    outputWS->setSharedX(i, inputWS->sharedX(i));
+    outputWS->setHistogram(i, inputWS->histogram(i));
 
     // One parser for each parallel processor needed (except Edirect mode)
     double E1;
@@ -187,6 +186,7 @@ void ModeratorTzero::exec() {
         // shift the time of flights by the emission time from the moderator
         if (t2 >= 0) // t2 < 0 when no detector info is available
         {
+          auto &outbins = outputWS->mutableX(i);
           for (auto &tof : outbins) {
             if (tof < m_t1min + t2)
               tof -= min_t0_next;
@@ -196,6 +196,7 @@ void ModeratorTzero::exec() {
         }
       } // end of if(emode=="Indirect")
       else if (emode == "Elastic") {
+        auto &outbins = outputWS->mutableX(i);
         for (auto &tof : outbins) {
           if (tof < m_t1min * (L1 + L2) / L1)
             tof -= min_t0_next;
@@ -208,9 +209,6 @@ void ModeratorTzero::exec() {
       } // end of else if(emode="Direct")
     }   // end of if(L2 >= 0)
 
-    // Copy y and e data
-    outputWS->setSharedY(i, inputWS->sharedY(i));
-    outputWS->setSharedE(i, inputWS->sharedE(i));
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   } // end of for (int i = 0; i < static_cast<int>(numHists); ++i)
