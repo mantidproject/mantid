@@ -35,7 +35,7 @@ class AngularAutoCorrelationsSingleAxis(PythonAlgorithm):
 
 		# Get the two user-specified species
 		type1=self.getPropertyValue("SpeciesOne")
-		type2=self.getPropertyValue("SpeciesTwo")		
+		type2=self.getPropertyValue("SpeciesTwo")
 
 		# Load trajectory file
 		trajectory=netcdf.netcdf_file(file_name,mode="r")
