@@ -488,13 +488,19 @@ void He3TubeEfficiency::computeEfficiencyCorrection(
 template <class T>
 void He3TubeEfficiency::eventHelper(std::vector<T> &events, double expval) {
   const double scale = this->getProperty("ScaleFactor");
-
-  for (auto it = events.begin(); it != events.end(); ++it) {
-    float de =
-        static_cast<float>(this->detectorEfficiency(expval * it->tof(), scale));
-    it->m_weight *= de;
-    it->m_errorSquared *= de * de;
-  }
+  std::for_each(events.begin(), events.end(), [&](T &event){
+      float de = static_cast<float>(
+          this->detectorEfficiency(expval * event.tof(), scale));
+      event.m_weight *= de;
+      event.m_errorSquared *= de * de;
+  });
+  //
+  // for (auto &event : events) {
+  //   float de = static_cast<float>(
+  //       this->detectorEfficiency(expval * event.tof(), scale));
+  //   event.m_weight *= de;
+  //   event.m_errorSquared *= de * de;
+  // }
 }
 
 } // namespace Algorithms
