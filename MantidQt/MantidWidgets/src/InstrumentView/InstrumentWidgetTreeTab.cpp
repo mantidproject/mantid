@@ -74,10 +74,19 @@ void InstrumentWidgetTreeTab::loadFromProject(const std::string &lines) {
   tsv >> tabLines;
   API::TSVSerialiser tab(tabLines);
 
-  std::string componentName;
   if (tab.selectLine("SelectedComponent")) {
+    std::string componentName;
     tab >> componentName;
     selectComponentByName(QString::fromStdString(componentName));
+  }
+
+  if (tab.selectLine("ExpandedItems")) {
+    auto names = tab.values("ExpandedItems");
+    for (auto &name : names) {
+      auto qName = QString::fromStdString(name);
+      auto index = m_instrumentTree->findComponentByName(qName);
+      m_instrumentTree->setExpanded(index, true);
+    }
   }
 }
 
@@ -94,6 +103,12 @@ std::string InstrumentWidgetTreeTab::saveToProject() const {
     auto item = model->data(index);
     auto name = item.value<QString>();
     tab.writeLine("SelectedComponent") << name;
+  }
+
+  auto names = m_instrumentTree->findExpandedComponents();
+  tab.writeLine("ExpandedItems");
+  for (auto name : names) {
+    tab << name;
   }
 
   tsv.writeSection("treetab", tab.outputLines());
