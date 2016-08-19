@@ -1222,6 +1222,13 @@ MantidMatrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
     const std::string geometry = tsv.lineAsString("tgeometry");
     app->restoreWindowGeometry(app, matrix, QString::fromStdString(geometry));
   }
+
+  if (tsv.selectLine("SelectedTab")) {
+    int index;
+    tsv >> index;
+    matrix->m_tabs->setCurrentIndex(index);
+  }
+
   return matrix;
 }
 
@@ -1231,6 +1238,7 @@ std::string MantidMatrix::saveToProject(ApplicationWindow *app) {
   tsv.writeRaw("<mantidmatrix>");
   tsv.writeLine("WorkspaceName") << m_strName;
   tsv.writeRaw(app->windowGeometryInfo(this));
+  tsv.writeLine("SelectedTab") << m_tabs->currentIndex();
   tsv.writeRaw("</mantidmatrix>");
 
   return tsv.outputLines();

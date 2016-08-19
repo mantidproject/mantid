@@ -124,6 +124,12 @@ void SofQW::exec() {
 
   MatrixWorkspace_sptr outputWS = childAlg->getProperty("OutputWorkspace");
   this->setProperty("OutputWorkspace", outputWS);
+
+  // Progress reports & cancellation
+  MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+  const size_t nHistos = inputWorkspace->getNumberHistograms();
+  auto m_progress = new Progress(this, 0.0, 1.0, nHistos);
+  m_progress->report("Creating output workspace");
 }
 
 /** Creates the output workspace, setting the axes according to the input

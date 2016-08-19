@@ -38,6 +38,7 @@ Algorithm Toolbox
 
 Algorithms
 ##########
+
 .. figure::  ../../images/GroupWorkspaces_multipleInput.png
    :width: 487
    :align: right
@@ -48,15 +49,20 @@ Algorithms
 Scripting Window
 ################
 
+ - All `matplotlib` examples now work out of the box when run inside the MantidPlot scripting environment.
+
+
 Progress Reporting
 ##################
 
+- The progress reporting for algorithms has been improved, so that the progress is reported correctly when processing workspace groups or multi-period workspaces.
 - The progress reporting for algorithms has been improved, so that the progress is reported correctly when processin workspace groups or multi-period workspaces.
 
 
 Documentation
 #############
-* Added Ragged Workspace as a concept page
+
+- Added Ragged Workspace as a concept page
 
 Options Window
 ###############
@@ -71,7 +77,8 @@ Bugs Resolved
 
 SliceViewer Improvements
 ------------------------
-* When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
+* When opening the SliceViewer, it will default to showing the first two non-integrated dimensions
+* The SliceViewer now uses bin centres instead of bin edges when slicing on a histogram workspace
 
 VSI Improvements
 ----------------

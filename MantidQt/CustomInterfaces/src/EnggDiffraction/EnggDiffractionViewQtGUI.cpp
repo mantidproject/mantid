@@ -91,7 +91,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   boost::shared_ptr<EnggDiffractionViewQtGUI> sharedView(
       this, [](EnggDiffractionViewQtGUI *) {});
   m_fittingWidget = new EnggDiffFittingViewQtWidget(
-      m_ui.tabMain, sharedView, sharedView, fullPres, sharedView);
+      m_ui.tabMain, sharedView, sharedView, fullPres, fullPres, sharedView);
   m_ui.tabMain->addTab(m_fittingWidget, QString("Fitting"));
 
   QWidget *wSettings = new QWidget(m_ui.tabMain);
@@ -116,7 +116,11 @@ void EnggDiffractionViewQtGUI::initLayout() {
   doSetupTabSettings();
 
   m_presenter->notify(IEnggDiffractionPresenter::Start);
-  m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
+  // We need to delay the RB-number check for the pop-up (splash message)
+  // as it will be shown very early (before the interface
+  // window itself is shown) and that will cause a crash in Qt code on
+  // some platforms (windows 10, and 7 sometimes).
+  // so perform the check in the showEvent method to check on start up
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabCalib() {
@@ -630,7 +634,11 @@ void EnggDiffractionViewQtGUI::enableCalibrateFocusFitUserActions(bool enable) {
 
   m_uiTabFocus.groupBox_cropped->setEnabled(enable);
   m_uiTabFocus.groupBox_texture->setEnabled(enable);
-  m_uiTabFocus.groupBox_focus_output_options->setEnabled(enable);
+
+  // Disable all focus output options except graph plotting
+  m_uiTabFocus.checkBox_plot_focused_ws->setEnabled(enable);
+  m_uiTabFocus.checkBox_save_output_files->setEnabled(enable);
+  m_uiTabFocus.comboBox_Multi_Runs->setEnabled(enable);
 
   m_uiTabFocus.pushButton_stop_focus->setDisabled(enable);
   m_uiTabFocus.pushButton_reset->setEnabled(enable);
@@ -647,6 +655,14 @@ void EnggDiffractionViewQtGUI::enableCalibrateFocusFitUserActions(bool enable) {
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
   for (int ti = 0; ti < m_ui.tabMain->count(); ++ti) {
     m_ui.tabMain->setTabEnabled(ti, enable);
+  }
+}
+
+void EnggDiffractionViewQtGUI::highlightRbNumber(bool isValid) {
+  if (!isValid) {
+    m_ui.label_RBNumber->setStyleSheet("background-color: red; color : white;");
+  } else {
+    m_ui.label_RBNumber->setStyleSheet("background-color: white");
   }
 }
 
@@ -1049,6 +1065,11 @@ void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
 
   // rebin tab
   m_uiTabPreproc.MWRunFiles_preproc_run_num->setInstrumentOverride(prefixInput);
+}
+
+void EnggDiffractionViewQtGUI::showEvent(QShowEvent *) {
+  // make sure that the RB number is checked on interface startup/show
+  m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
 }
 
 void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {

@@ -64,7 +64,7 @@ public:
    * form.
    */
   Base *loadFromProject(const std::string &lines, ApplicationWindow *app,
-                        const int fileVersion = -1) const {
+                        const int fileVersion = -1) const override {
     return C::loadFromProject(lines, app, fileVersion);
   }
 };
