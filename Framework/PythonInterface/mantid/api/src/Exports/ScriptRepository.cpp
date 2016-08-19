@@ -1,4 +1,5 @@
 #include "MantidAPI/ScriptRepository.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 
 #include <boost/python/class.hpp>
@@ -9,6 +10,8 @@
 
 using namespace Mantid::API;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(ScriptRepository)
 
 namespace {
 /** @cond */

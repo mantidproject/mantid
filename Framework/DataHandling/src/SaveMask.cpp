@@ -184,8 +184,6 @@ void SaveMask::exec() {
   writer.writeNode(std::cout, pDoc);
   writer.writeNode(ofs, pDoc);
   ofs.close();
-
-  return;
 }
 
 } // namespace DataHandling

@@ -2555,6 +2555,56 @@ public:
     HistogramData::Histogram points(HistogramData::Points{0, 2});
     TS_ASSERT_THROWS(el.setHistogram(points), std::runtime_error);
   }
+
+  void test_YMode() {
+    EventList e;
+    TS_ASSERT_EQUALS(e.yMode(), HistogramData::Histogram::YMode::Counts);
+  }
+
+  void test_setHistogram_rejects_YMode_Frequencies() {
+    EventList e;
+    HistogramData::Histogram h(BinEdges(0));
+    h.setYMode(HistogramData::Histogram::YMode::Counts);
+    TS_ASSERT_THROWS_NOTHING(e.setHistogram(h));
+    h.setYMode(HistogramData::Histogram::YMode::Frequencies);
+    TS_ASSERT_THROWS(e.setHistogram(h), std::runtime_error);
+  }
+
+  void test_setHistogram_preserves_YMode_when_setting_uninitialized() {
+    EventList e;
+    HistogramData::Histogram h(BinEdges(0));
+    TS_ASSERT_EQUALS(h.yMode(), HistogramData::Histogram::YMode::Uninitialized);
+    TS_ASSERT_THROWS_NOTHING(e.setHistogram(h));
+    TS_ASSERT_EQUALS(e.yMode(), HistogramData::Histogram::YMode::Counts);
+  }
+
+  void test_histogram_has_correct_YMode() {
+    EventList e;
+    e.setYMode(HistogramData::Histogram::YMode::Frequencies);
+    TS_ASSERT_EQUALS(e.histogram().yMode(),
+                     HistogramData::Histogram::YMode::Frequencies);
+  }
+
+  void test_YMode_affects_event_data_interpretation() {
+    // Data generated from the events is put into the histogram as Y and E.
+    // Depending on the YMode, this is interpreted as Counts or Frequencies. In
+    // particular, data generated from events is *not* forcibly intepreted as
+    // counts, i.e., internally we do not use Histogram.setCounts(), since the
+    // bin width may be absorbed into the event weight.
+    EventList e;
+    e += TofEvent(1);
+    e += TofEvent(1);
+    e += TofEvent(3);
+    e.setHistogram(HistogramData::BinEdges{0, 2, 4});
+    auto countHist = e.histogram();
+    TS_ASSERT_EQUALS(countHist.counts()[0], 2.0);
+    TS_ASSERT_EQUALS(countHist.counts()[1], 1.0);
+    // Intepret events as if weighted by bin width, happens, e.g., in 'Divide'.
+    e.setYMode(HistogramData::Histogram::YMode::Frequencies);
+    auto freqHist = e.histogram();
+    TS_ASSERT_EQUALS(freqHist.counts()[0], 4.0);
+    TS_ASSERT_EQUALS(freqHist.counts()[1], 2.0);
+  }
 };
 
 //==========================================================================================

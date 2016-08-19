@@ -12,9 +12,11 @@ Description
 The algorithm LoadNexusProcessed will read a Nexus data file created
 by :ref:`algm-SaveNexusProcessed` and place the data into the named
 workspace. The file name can be an absolute or relative path and
-should have the extension .nxs, .nx5 or .xml. Warning - using XML
-format can be extremely slow for large data sets and generate very
-large files.
+should have the extension .nxs, .nx5 or .xml. 
+
+.. warning:: 
+	Using XML format can be extremely slow for large data sets and generate very
+	large files.
 
 The optional parameters can be used to control which spectra are
 loaded into the workspace. If SpectrumMin and SpectrumMax are given,
@@ -22,6 +24,7 @@ then only that range to data will be loaded. A specific list of
 spectra to load can also be given (SpectrumList). Filtering of spectra
 is supported when loading into workspaces of type :ref:`Workspace2Ds
 <Workspace2D>` and also :ref:`EventWorkspaces <EventWorkspace>`.
+
 
 A Mantid Nexus file may contain several workspace entries each labelled
 with an integer starting at 1. By default the highest number workspace

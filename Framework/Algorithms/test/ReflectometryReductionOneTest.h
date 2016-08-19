@@ -244,6 +244,8 @@ public:
     // defined in the IPF, so CalculateResolution should throw.
     inWS->setInstrument(m_tinyReflWS->getInstrument());
     inWS->getAxis(0)->setUnit("Wavelength");
+    // Setup bad bin edges, Rebin will throw (not CalculateResolution?)
+    inWS->dataX(0).assign(inWS->readX(0).size(), inWS->readX(0)[0]);
     alg->setProperty("InputWorkspace", inWS);
     alg->setProperty("OutputWorkspace", "rebinnedWS");
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);

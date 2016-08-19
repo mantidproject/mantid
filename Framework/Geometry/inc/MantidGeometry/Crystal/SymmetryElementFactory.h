@@ -257,16 +257,18 @@ private:
   friend struct Mantid::Kernel::CreateUsingNew<SymmetryElementFactoryImpl>;
 };
 
-#ifdef _WIN32
-template class MANTID_GEOMETRY_DLL
-    Mantid::Kernel::SingletonHolder<SymmetryElementFactoryImpl>;
-#endif
-
 typedef Mantid::Kernel::SingletonHolder<SymmetryElementFactoryImpl>
     SymmetryElementFactory;
 
 } // namespace Geometry
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
+    SingletonHolder<Mantid::Geometry::SymmetryElementFactoryImpl>;
+}
+}
 
 #define DECLARE_SYMMETRY_ELEMENT_GENERATOR(classname)                          \
   namespace {                                                                  \

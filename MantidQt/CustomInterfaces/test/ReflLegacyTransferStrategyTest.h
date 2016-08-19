@@ -9,7 +9,7 @@
 
 #include "MantidQtCustomInterfaces/Reflectometry/ReflLegacyTransferStrategy.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflTableSchema.h"
-#include "ReflMainViewMockObjects.h"
+#include "ReflMockObjects.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;

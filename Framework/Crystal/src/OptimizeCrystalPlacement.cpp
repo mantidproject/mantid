@@ -190,8 +190,7 @@ void OptimizeCrystalPlacement::exec() {
 
       Geometry::Goniometer Gon(peak.getGoniometerMatrix());
       std::vector<double> phichiOmega = Gon.getEulerAngles("YZY");
-      ChiPhiOmega.push_back(
-          V3D(phichiOmega[1], phichiOmega[2], phichiOmega[0]));
+      ChiPhiOmega.emplace_back(phichiOmega[1], phichiOmega[2], phichiOmega[0]);
     }
 
     if (use) // add to lists for workspace
@@ -226,7 +225,7 @@ void OptimizeCrystalPlacement::exec() {
   //--------- Setting Function and Constraint argumens to PeakHKLErrors
   //---------------
   std::vector<std::string> ChRunNumList;
-  std::string predChar = "";
+  std::string predChar;
   for (auto runNum : RunNumList) {
     auto it1 = NOoptimizeRuns.begin();
     for (; it1 != NOoptimizeRuns.end() && *it1 != runNum; ++it1) {
@@ -263,7 +262,7 @@ void OptimizeCrystalPlacement::exec() {
 
   int nParams = 3;
   double DegreeTol = getProperty("MaxAngularChange");
-  std::string startConstraint = "";
+  std::string startConstraint;
 
   for (size_t i = 0; i < RunNumList.size(); i++) {
     int runNum = RunNumList[i];
@@ -330,7 +329,7 @@ void OptimizeCrystalPlacement::exec() {
 
   fit_alg->setProperty("CreateOutput", true);
 
-  std::string Ties = "";
+  std::string Ties;
 
   if (!(bool)getProperty("AdjustSampleOffsets")) {
     std::ostringstream oss3(std::ostringstream::out);

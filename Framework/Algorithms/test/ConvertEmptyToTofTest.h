@@ -62,8 +62,8 @@ public:
       return;
 
     // Check the results
-    TS_ASSERT_DELTA(*(outWS->dataX(1).begin()), 31463.8, 0.1);
-    TS_ASSERT_DELTA(*(outWS->dataX(1).end() - 1), 34493.8, 0.1);
+    TS_ASSERT_DELTA(*(outWS->x(1).begin()), 31463.8, 0.1);
+    TS_ASSERT_DELTA(*(outWS->x(1).end() - 1), 34493.8, 0.1);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -102,8 +102,8 @@ public:
       return;
 
     // Check the results
-    TS_ASSERT_DELTA(*(outWS->dataX(1).begin()), 31433.8, 0.1);
-    TS_ASSERT_DELTA(*(outWS->dataX(1).end() - 1), 34463.8, 0.1);
+    TS_ASSERT_DELTA(*(outWS->x(1).begin()), 31433.8, 0.1);
+    TS_ASSERT_DELTA(*(outWS->x(1).end() - 1), 34463.8, 0.1);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -139,8 +139,8 @@ public:
       return;
 
     // Check the results
-    TS_ASSERT_DELTA(*(outWS->dataX(1).begin()), 30113.8, 0.1);
-    TS_ASSERT_DELTA(*(outWS->dataX(1).end() - 1), 33143.8, 0.1);
+    TS_ASSERT_DELTA(*(outWS->x(1).begin()), 30113.8, 0.1);
+    TS_ASSERT_DELTA(*(outWS->x(1).end() - 1), 33143.8, 0.1);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -167,8 +167,9 @@ private:
     for (size_t i = 0; i < nHist; ++i) {
       for (size_t j = 0; j < nBins - 1; ++j) {
         // gaussian peak centred at 50,and h=10
-        testWS->dataY(i)[j] = 10 * exp(-pow((static_cast<double>(j) - 50), 2) /
-                                       (2 * pow(1.5, 2)));
+        testWS->mutableY(i)[j] =
+            10 *
+            exp(-pow((static_cast<double>(j) - 50), 2) / (2 * pow(1.5, 2)));
       }
     }
     return testWS;

@@ -3,13 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h"
 #include "MantidCurveFitting/Functions/BSpline.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
-#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+
+#include "MantidTestHelpers/MultiDomainFunctionHelper.h"
 
 #include <sstream>
 
@@ -415,6 +417,51 @@ public:
       double xx = x[i];
       TS_ASSERT_DELTA(y[i], -cos(xx), 0.012);
     }
+  }
+
+  void test_Multidomain() {
+    auto domain = Mantid::TestHelpers::makeMultiDomainDomain3();
+
+    auto values = boost::make_shared<FunctionValues>(*domain);
+    const double A0 = 0, A1 = 1, A2 = 2;
+    const double B0 = 1, B1 = 2, B2 = 3;
+
+    auto &d0 = static_cast<const FunctionDomain1D &>(domain->getDomain(0));
+    for (size_t i = 0; i < d0.size(); ++i) {
+      values->setFitData(i, A0 + A1 + A2 + (B0 + B1 + B2) * d0[i]);
+    }
+
+    auto &d1 = static_cast<const FunctionDomain1D &>(domain->getDomain(1));
+    for (size_t i = 0; i < d1.size(); ++i) {
+      values->setFitData(9 + i, A0 + A1 + (B0 + B1) * d1[i]);
+    }
+
+    auto &d2 = static_cast<const FunctionDomain1D &>(domain->getDomain(2));
+    for (size_t i = 0; i < d2.size(); ++i) {
+      values->setFitData(19 + i, A0 + A2 + (B0 + B2) * d2[i]);
+    }
+    values->setFitWeights(1);
+
+    auto multi = Mantid::TestHelpers::makeMultiDomainFunction3();
+
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
+    costFun->setFittingFunction(multi, domain, values);
+    TS_ASSERT_EQUALS(costFun->nParams(), 6);
+
+    FuncMinimisers::LevenbergMarquardtMDMinimizer s;
+    s.initialize(costFun);
+    TS_ASSERT(s.minimize());
+
+    TS_ASSERT_EQUALS(s.getError(), "success");
+    TS_ASSERT_DELTA(s.costFunctionVal(), 0, 1e-4);
+
+    TS_ASSERT_DELTA(multi->getFunction(0)->getParameter("A"), 0, 1e-8);
+    TS_ASSERT_DELTA(multi->getFunction(0)->getParameter("B"), 1, 1e-8);
+    TS_ASSERT_DELTA(multi->getFunction(1)->getParameter("A"), 1, 1e-8);
+    TS_ASSERT_DELTA(multi->getFunction(1)->getParameter("B"), 2, 1e-8);
+    TS_ASSERT_DELTA(multi->getFunction(2)->getParameter("A"), 2, 1e-8);
+    TS_ASSERT_DELTA(multi->getFunction(2)->getParameter("B"), 3, 1e-8);
   }
 
 private:

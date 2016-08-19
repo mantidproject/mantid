@@ -95,7 +95,6 @@ void Track::removeCojoins() {
       ++nextNode;
     }
   }
-  return;
 }
 
 /**
@@ -217,8 +216,7 @@ void Track::buildLink() {
     }
   }
 
-  m_surfPoints.clear(); // While vector
-  return;
+  m_surfPoints.clear();
 }
 
 } // NAMESPACE Geometry

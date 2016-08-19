@@ -15,6 +15,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
@@ -44,8 +45,11 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using HistogramData::BinEdges;
 using HistogramData::Counts;
 using HistogramData::CountStandardDeviations;
+using HistogramData::HistogramX;
+using HistogramData::LinearGenerator;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps) {
   m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
@@ -79,7 +83,7 @@ Workspace2D_sptr Create1DWorkspaceRand(int size) {
   std::generate(e1.begin(), e1.end(), randFunc);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
-  retVal->setPoints(0, size, 1.0);
+  retVal->setPoints(0, size, LinearGenerator(1.0, 1.0));
   retVal->dataY(0) = y1;
   retVal->dataE(0) = e1;
   return retVal;
@@ -91,7 +95,7 @@ Workspace2D_sptr Create1DWorkspaceConstant(int size, double value,
   MantidVec e1(size, error);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
-  retVal->setPoints(0, size, 1.0);
+  retVal->setPoints(0, size, LinearGenerator(1.0, 1.0));
   retVal->dataY(0) = y1;
   retVal->dataE(0) = e1;
   return retVal;
@@ -112,7 +116,7 @@ Workspace2D_sptr Create1DWorkspaceFib(int size) {
   std::generate(y1.begin(), y1.end(), FibSeries<double>());
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
-  retVal->setPoints(0, size, 1.0);
+  retVal->setPoints(0, size, LinearGenerator(1.0, 1.0));
   retVal->dataY(0) = y1;
   retVal->dataE(0) = e1;
   return retVal;
@@ -155,7 +159,7 @@ Create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
                             const std::set<int64_t> &maskedWorkspaceIndices,
                             double xVal, double yVal, double eVal) {
   auto x1 = Kernel::make_cow<HistogramData::HistogramX>(
-      isHist ? nBins + 1 : nBins, xVal);
+      isHist ? nBins + 1 : nBins, LinearGenerator(xVal, 1.0));
   Counts y1(nBins, yVal);
   CountStandardDeviations e1(nBins, eVal);
   auto retVal = boost::make_shared<Workspace2D>();
@@ -256,12 +260,9 @@ WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist, int nBins,
  */
 Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0,
                                          double deltax) {
-  HistogramData::BinEdges x(nbins + 1);
+  BinEdges x(nbins + 1, LinearGenerator(x0, deltax));
   Counts y(nbins, 2);
   CountStandardDeviations e(nbins, M_SQRT2);
-  for (int i = 0; i < nbins + 1; ++i) {
-    x.mutableData()[i] = x0 + i * deltax;
-  }
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(nhist, nbins + 1, nbins);
   for (int i = 0; i < nhist; i++) {
@@ -278,13 +279,10 @@ Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0,
  */
 Workspace2D_sptr Create2DWorkspaceBinned(int nhist, const int numBoundaries,
                                          const double xBoundaries[]) {
-  HistogramData::BinEdges x(numBoundaries);
+  BinEdges x(xBoundaries, xBoundaries + numBoundaries);
   const int numBins = numBoundaries - 1;
   Counts y(numBins, 2);
   CountStandardDeviations e(numBins, M_SQRT2);
-  for (int i = 0; i < numBoundaries; ++i) {
-    x.mutableData()[i] = xBoundaries[i];
-  }
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(nhist, numBins + 1, numBins);
   for (int i = 0; i < nhist; i++) {
@@ -621,15 +619,7 @@ CreateEventWorkspaceWithStartTime(int numPixels, int numBins, int numEvents,
     }
   }
 
-  // Create the x-axis for histogramming.
-  HistogramData::BinEdges x1(numBins);
-  auto &xRef = x1.mutableData();
-  for (int i = 0; i < numBins; ++i) {
-    xRef[i] = x0 + i * binDelta;
-  }
-
-  // Set all the histograms at once.
-  retVal->setAllX(x1);
+  retVal->setAllX(BinEdges(numBins, LinearGenerator(x0, binDelta)));
 
   return retVal;
 }
@@ -655,25 +645,13 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
   }
 
   if (xOffset == 0.) {
-    // Create the x-axis for histogramming.
-    HistogramData::BinEdges x1(numBins);
-    auto &xRef = x1.mutableData();
-    const double x0 = 0.;
-    for (int i = 0; i < numBins; ++i) {
-      xRef[i] = x0 + static_cast<double>(i) * binDelta;
-    }
-
-    // Set all the histograms at once.
-    retVal->setAllX(x1);
+    retVal->setAllX(BinEdges(numBins, LinearGenerator(0.0, binDelta)));
   } else {
     for (size_t g = 0; g < groups.size(); g++) {
       // Create the x-axis for histogramming.
-      MantidVec x1(numBins);
       const double x0 = xOffset * static_cast<double>(g);
-      for (int i = 0; i < numBins; ++i) {
-        x1[i] = x0 + static_cast<double>(i) * binDelta;
-      }
-      retVal->setX(g, make_cow<HistogramData::HistogramX>(x1));
+      retVal->setX(
+          g, make_cow<HistogramX>(numBins, LinearGenerator(x0, binDelta)));
     }
   }
 
@@ -697,11 +675,9 @@ EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
   auto pAxis0 = new NumericAxis(numbins);
   // Create the original X axis to histogram on.
   // Create the x-axis for histogramming.
-  HistogramData::BinEdges axis(numbins);
-  auto &xRef = axis.mutableData();
+  HistogramData::BinEdges axis(numbins, LinearGenerator(0.0, bin_delta));
   for (int i = 0; i < static_cast<int>(numbins); ++i) {
-    xRef[i] = i * bin_delta;
-    pAxis0->setValue(i, xRef[i]);
+    pAxis0->setValue(i, axis[i]);
   }
   pAxis0->setUnit("TOF");
 

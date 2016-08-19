@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
 
 #include <boost/python/class.hpp>
@@ -8,6 +9,8 @@
 using Mantid::API::IFunction;
 using Mantid::PythonInterface::IFunctionAdapter;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IFunction)
 
 namespace {
 ///@cond

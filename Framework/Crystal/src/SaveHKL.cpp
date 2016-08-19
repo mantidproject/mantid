@@ -3,6 +3,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidCrystal/AnvredCorrection.h"
@@ -165,7 +166,7 @@ void SaveHKL::exec() {
   bool append = getProperty("AppendFile");
   if (append && Poco::File(filename.c_str()).exists()) {
     IAlgorithm_sptr load_alg = createChildAlgorithm("LoadHKL");
-    load_alg->setPropertyValue("Filename", filename.c_str());
+    load_alg->setPropertyValue("Filename", filename);
     load_alg->setProperty("OutputWorkspace", "peaks");
     load_alg->executeAsChildAlg();
     // Get back the result

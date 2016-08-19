@@ -5,9 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Instantiator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Instantiator.h"
 #include "MantidKernel/RegistrationHelper.h"
+#include "MantidKernel/CaseInsensitiveMap.h"
 
 // Boost
 #ifndef Q_MOC_RUN
@@ -23,7 +24,6 @@
 #include <cstring>
 #include <functional>
 #include <iterator>
-#include <map>
 #include <vector>
 
 namespace Mantid {
@@ -35,15 +35,6 @@ namespace Kernel {
 class Logger;
 
 typedef std::less<std::string> CaseSensitiveStringComparator;
-struct CaseInsensitiveStringComparator {
-  bool operator()(const std::string &s1, const std::string &s2) const {
-#ifdef _MSC_VER
-    return stricmp(s1.c_str(), s2.c_str()) < 0;
-#else
-    return strcasecmp(s1.c_str(), s2.c_str()) < 0;
-#endif
-  }
-};
 
 /** @class DynamicFactory DynamicFactory.h Kernel/DynamicFactory.h
 

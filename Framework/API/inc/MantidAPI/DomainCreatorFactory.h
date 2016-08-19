@@ -68,18 +68,17 @@ private:
   using Kernel::DynamicFactory<IDomainCreator>::createUnwrapped;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// DomainCreatorFactoryImpl (needed for dllexport/dllimport) and a typedef for
-/// it.
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<DomainCreatorFactoryImpl>;
-#endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<DomainCreatorFactoryImpl>
+typedef Mantid::Kernel::SingletonHolder<DomainCreatorFactoryImpl>
     DomainCreatorFactory;
 
 } // namespace API
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::DomainCreatorFactoryImpl>;
+}
+}
 
 #endif /* MANTID_API_DOMAINCREATORFACTORY_H_ */

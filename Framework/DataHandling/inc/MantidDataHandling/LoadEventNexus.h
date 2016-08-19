@@ -326,7 +326,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
                                        T localWorkspace,
                                        const std::string &top_entry_name,
                                        Algorithm *alg) {
-  std::string instrument = "";
+  std::string instrument;
 
   // Get the instrument name
   ::NeXus::File nxfile(nexusfilename);
@@ -476,7 +476,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
 
   // Get the run number
   file.openData("run_number");
-  std::string run("");
+  std::string run;
   if (file.getInfo().type == ::NeXus::CHAR) {
     run = file.getStrData();
   } else if (file.isDataInt()) {
@@ -494,7 +494,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   // get the experiment identifier
   try {
     file.openData("experiment_identifier");
-    std::string expId("");
+    std::string expId;
     if (file.getInfo().type == ::NeXus::CHAR) {
       expId = file.getStrData();
     }
@@ -510,7 +510,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   try {
     file.openGroup("sample", "NXsample");
     file.openData("name");
-    std::string name("");
+    std::string name;
     if (file.getInfo().type == ::NeXus::CHAR) {
       name = file.getStrData();
     }
@@ -531,7 +531,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
     // get the units
     // clang-format off
     std::vector< ::NeXus::AttrInfo> infos = file.getAttrInfos();
-    std::string units("");
+    std::string units;
     for (std::vector< ::NeXus::AttrInfo>::const_iterator it = infos.begin();
          it != infos.end(); ++it) {
       if (it->name.compare("units") == 0) {

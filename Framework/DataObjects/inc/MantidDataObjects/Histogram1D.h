@@ -37,11 +37,8 @@ private:
   HistogramData::Histogram m_histogram;
 
 public:
-  Histogram1D(HistogramData::Histogram::XMode mode)
-      : API::ISpectrum(), m_histogram(mode) {
-    m_histogram.setCounts(0);
-    m_histogram.setCountStandardDeviations(0);
-  }
+  Histogram1D(HistogramData::Histogram::XMode xmode,
+              HistogramData::Histogram::YMode ymode);
 
   Histogram1D(const Histogram1D &) = default;
   Histogram1D(Histogram1D &&) = default;

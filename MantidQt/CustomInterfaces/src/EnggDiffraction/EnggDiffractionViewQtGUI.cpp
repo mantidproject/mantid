@@ -1,22 +1,13 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtMantidWidgets/MWRunFiles.h"
-#include "Poco/DirectoryIterator.h"
 
-using namespace Mantid::API;
-using namespace MantidQt::CustomInterfaces;
-
-#include <array>
-#include <fstream>
-#include <random>
-
+#include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
-#include <boost/lexical_cast.hpp>
 
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -24,7 +15,8 @@ using namespace MantidQt::CustomInterfaces;
 #include <QMessageBox>
 #include <QSettings>
 
-#include <qwt_symbol.h>
+using namespace Mantid::API;
+using namespace MantidQt::CustomInterfaces;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -34,11 +26,9 @@ DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 
 const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 
-int EnggDiffractionViewQtGUI::m_currentType = 0;
-int EnggDiffractionViewQtGUI::m_currentRunMode = 0;
-bool EnggDiffractionViewQtGUI::m_fittingMutliRunMode = false;
-int EnggDiffractionViewQtGUI::m_currentCropCalibBankName = 0;
-std::vector<std::string> EnggDiffractionViewQtGUI::m_fitting_runno_dir_vec;
+int EnggDiffractionViewQtGUI::g_currentType = 0;
+int EnggDiffractionViewQtGUI::g_currentRunMode = 0;
+int EnggDiffractionViewQtGUI::g_currentCropCalibBankName = 0;
 
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
     "GSAS instrument parameters, IPARM file: PRM, PAR, IPAR, IPARAM "
@@ -59,7 +49,7 @@ const std::string EnggDiffractionViewQtGUI::g_DetGrpExtStr =
     "(*.csv *.txt);;"
     "Other extensions/all files (*.*)";
 
-const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
+const std::string EnggDiffractionViewQtGUI::g_settingsGroup =
     "CustomInterfaces/EnggDiffractionView";
 
 /**
@@ -68,26 +58,21 @@ const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
 * @param parent Parent window (most likely the Mantid main app window).
 */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
-      m_currentCalibFilename(""), m_splashMsg(nullptr), m_focusedDataVector(),
-      m_fittedDataVector(), m_peakPicker(nullptr), m_zoomTool(nullptr),
-      m_presenter(nullptr) {}
+    : UserSubWindow(parent), IEnggDiffractionView(), m_fittingWidget(nullptr),
+      m_currentInst("ENGINX"), m_splashMsg(nullptr), m_presenter(nullptr) {}
 
-EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {
-  for (auto curves : m_focusedDataVector) {
-    curves->detach();
-    delete curves;
-  }
-
-  for (auto curves : m_fittedDataVector) {
-    curves->detach();
-    delete curves;
-  }
-}
+EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
 
 void EnggDiffractionViewQtGUI::initLayout() {
   // setup container ui
   m_ui.setupUi(this);
+
+  // presenter that knows how to handle a IEnggDiffractionView should
+  // take care of all the logic. Note that the view needs to know the
+  // concrete presenter
+  auto fullPres = boost::make_shared<EnggDiffractionPresenter>(this);
+  m_presenter = fullPres;
+
   // add tab contents and set up their ui's
   QWidget *wCalib = new QWidget(m_ui.tabMain);
   m_uiTabCalib.setupUi(wCalib);
@@ -101,9 +86,13 @@ void EnggDiffractionViewQtGUI::initLayout() {
   m_uiTabPreproc.setupUi(wPreproc);
   m_ui.tabMain->addTab(wPreproc, QString("Pre-processing"));
 
-  QWidget *wFitting = new QWidget(m_ui.tabMain);
-  m_uiTabFitting.setupUi(wFitting);
-  m_ui.tabMain->addTab(wFitting, QString("Fitting"));
+  // This is created from a QWidget* -> use null-deleter to prevent double-free
+  // with Qt
+  boost::shared_ptr<EnggDiffractionViewQtGUI> sharedView(
+      this, [](EnggDiffractionViewQtGUI *) {});
+  m_fittingWidget = new EnggDiffFittingViewQtWidget(
+      m_ui.tabMain, sharedView, sharedView, fullPres, fullPres, sharedView);
+  m_ui.tabMain->addTab(m_fittingWidget, QString("Fitting"));
 
   QWidget *wSettings = new QWidget(m_ui.tabMain);
   m_uiTabSettings.setupUi(wSettings);
@@ -124,18 +113,14 @@ void EnggDiffractionViewQtGUI::initLayout() {
   doSetupTabCalib();
   doSetupTabFocus();
   doSetupTabPreproc();
-  doSetupTabFitting();
   doSetupTabSettings();
 
-  // presenter that knows how to handle a IEnggDiffractionView should take care
-  // of all the logic
-  // note that the view needs to know the concrete presenter
-  m_presenter.reset(new EnggDiffractionPresenter(this));
-
-  // it will know what compute resources and tools we have available:
-  // This view doesn't even know the names of compute resources, etc.
   m_presenter->notify(IEnggDiffractionPresenter::Start);
-  m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
+  // We need to delay the RB-number check for the pop-up (splash message)
+  // as it will be shown very early (before the interface
+  // window itself is shown) and that will cause a crash in Qt code on
+  // some platforms (windows 10, and 7 sometimes).
+  // so perform the check in the showEvent method to check on start up
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabCalib() {
@@ -175,7 +160,7 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   connect(m_uiTabCalib.comboBox_calib_cropped_bank_name,
           SIGNAL(currentIndexChanged(int)), this, SLOT(enableSpecNos()));
 
-  enableCalibrateAndFocusActions(true);
+  enableCalibrateFocusFitUserActions(true);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabFocus() {
@@ -214,75 +199,6 @@ void EnggDiffractionViewQtGUI::doSetupTabPreproc() {
 
   connect(m_uiTabPreproc.pushButton_rebin_multiperiod, SIGNAL(released()), this,
           SLOT(rebinMultiperiodClicked()));
-}
-
-void EnggDiffractionViewQtGUI::doSetupTabFitting() {
-
-  connect(m_uiTabFitting.pushButton_fitting_browse_run_num, SIGNAL(released()),
-          this, SLOT(browseFitFocusedRun()));
-
-  connect(m_uiTabFitting.lineEdit_pushButton_run_num,
-          SIGNAL(textEdited(const QString &)), this,
-          SLOT(resetFittingMultiMode()));
-
-  connect(m_uiTabFitting.lineEdit_pushButton_run_num, SIGNAL(editingFinished()),
-          this, SLOT(FittingRunNo()));
-
-  connect(m_uiTabFitting.lineEdit_pushButton_run_num, SIGNAL(returnPressed()),
-          this, SLOT(FittingRunNo()));
-
-  connect(this, SIGNAL(getBanks()), this, SLOT(FittingRunNo()));
-
-  connect(this, SIGNAL(setBank()), this, SLOT(listViewFittingRun()));
-
-  connect(m_uiTabFitting.listWidget_fitting_run_num,
-          SIGNAL(itemSelectionChanged()), this, SLOT(listViewFittingRun()));
-
-  connect(m_uiTabFitting.comboBox_bank, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(setBankDir(int)));
-
-  connect(m_uiTabFitting.pushButton_fitting_browse_peaks, SIGNAL(released()),
-          this, SLOT(browsePeaksToFit()));
-
-  connect(m_uiTabFitting.pushButton_fit, SIGNAL(released()), this,
-          SLOT(fitClicked()));
-
-  // add peak by clicking the button
-  connect(m_uiTabFitting.pushButton_select_peak, SIGNAL(released()),
-          SLOT(setPeakPick()));
-
-  connect(m_uiTabFitting.pushButton_add_peak, SIGNAL(released()),
-          SLOT(addPeakToList()));
-
-  connect(m_uiTabFitting.pushButton_save_peak_list, SIGNAL(released()),
-          SLOT(savePeakList()));
-
-  connect(m_uiTabFitting.pushButton_clear_peak_list, SIGNAL(released()),
-          SLOT(clearPeakList()));
-
-  connect(m_uiTabFitting.pushButton_plot_separate_window, SIGNAL(released()),
-          SLOT(plotSeparateWindow()));
-
-  m_uiTabFitting.dataPlot->setCanvasBackground(Qt::white);
-  m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::xBottom, "d-Spacing (A)");
-  m_uiTabFitting.dataPlot->setAxisTitle(QwtPlot::yLeft, "Counts (us)^-1");
-  QFont font("MS Shell Dlg 2", 8);
-  m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::xBottom, font);
-  m_uiTabFitting.dataPlot->setAxisFont(QwtPlot::yLeft, font);
-
-  // constructor of the peakPicker
-  // XXX: Being a QwtPlotItem, should get deleted when m_ui.plot gets deleted
-  // (auto-delete option)
-  m_peakPicker =
-      new MantidWidgets::PeakPicker(m_uiTabFitting.dataPlot, Qt::red);
-  setPeakPickerEnabled(false);
-
-  m_zoomTool = new QwtPlotZoomer(
-      QwtPlot::xBottom, QwtPlot::yLeft,
-      QwtPicker::DragSelection | QwtPicker::CornerToCorner,
-      QwtPicker::AlwaysOff, m_uiTabFitting.dataPlot->canvas());
-  m_zoomTool->setRubberBandPen(QPen(Qt::black));
-  setZoomTool(false);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -357,7 +273,7 @@ void EnggDiffractionViewQtGUI::doSetupSplashMsg() {
 
 void EnggDiffractionViewQtGUI::readSettings() {
   QSettings qs;
-  qs.beginGroup(QString::fromStdString(m_settingsGroup));
+  qs.beginGroup(QString::fromStdString(g_settingsGroup));
 
   m_ui.lineEdit_RBNumber->setText(
       qs.value("user-params-RBNumber", "").toString());
@@ -368,7 +284,6 @@ void EnggDiffractionViewQtGUI::readSettings() {
       qs.value("user-params-current-ceria-num", "").toString());
   QString calibFname = qs.value("current-calib-filename", "").toString();
   m_uiTabCalib.lineEdit_current_calib_filename->setText(calibFname);
-  m_currentCalibFilename = calibFname.toStdString();
 
   m_uiTabCalib.MWRunFiles_new_vanadium_num->setUserInput(
       qs.value("user-params-new-vanadium-num", "").toString());
@@ -447,13 +362,6 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_uiTabPreproc.doubleSpinBox_step_time->setValue(
       qs.value("user-params-step-time", 1).toDouble());
 
-  // user params - fitting
-  m_uiTabFitting.lineEdit_pushButton_run_num->setText(
-      qs.value("user-params-fitting-focused-file", "").toString());
-  m_uiTabFitting.comboBox_bank->setCurrentIndex(0);
-  m_uiTabFitting.lineEdit_fitting_peaks->setText(
-      qs.value("user-params-fitting-peaks-to-fit", "").toString());
-
   // settings
   QString lastPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
@@ -490,7 +398,7 @@ void EnggDiffractionViewQtGUI::readSettings() {
 
 void EnggDiffractionViewQtGUI::saveSettings() const {
   QSettings qs;
-  qs.beginGroup(QString::fromStdString(m_settingsGroup));
+  qs.beginGroup(QString::fromStdString(g_settingsGroup));
 
   qs.setValue("user-params-RBNumber", m_ui.lineEdit_RBNumber->text());
 
@@ -568,13 +476,6 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
 
   qs.value("user-params-step-time",
            m_uiTabPreproc.doubleSpinBox_step_time->value());
-
-  // fitting tab
-
-  qs.setValue("user-params-fitting-focused-file",
-              m_uiTabFitting.lineEdit_pushButton_run_num->text());
-  qs.setValue("user-params-fitting-peaks-to-fit",
-              m_uiTabFitting.lineEdit_fitting_peaks->text());
 
   // TODO: this should become << >> operators on EnggDiffCalibSettings
   qs.setValue("input-dir-calib-files",
@@ -718,7 +619,7 @@ void EnggDiffractionViewQtGUI::newCalibLoaded(const std::string &vanadiumNo,
   }
 }
 
-void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
+void EnggDiffractionViewQtGUI::enableCalibrateFocusFitUserActions(bool enable) {
   // calibrate
   m_uiTabCalib.groupBox_make_new_calib->setEnabled(enable);
   m_uiTabCalib.groupBox_current_calib->setEnabled(enable);
@@ -733,7 +634,11 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
 
   m_uiTabFocus.groupBox_cropped->setEnabled(enable);
   m_uiTabFocus.groupBox_texture->setEnabled(enable);
-  m_uiTabFocus.groupBox_focus_output_options->setEnabled(enable);
+
+  // Disable all focus output options except graph plotting
+  m_uiTabFocus.checkBox_plot_focused_ws->setEnabled(enable);
+  m_uiTabFocus.checkBox_save_output_files->setEnabled(enable);
+  m_uiTabFocus.comboBox_Multi_Runs->setEnabled(enable);
 
   m_uiTabFocus.pushButton_stop_focus->setDisabled(enable);
   m_uiTabFocus.pushButton_reset->setEnabled(enable);
@@ -744,20 +649,20 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabPreproc.pushButton_rebin_multiperiod->setEnabled(enable);
 
   // fitting
-  m_uiTabFitting.pushButton_fitting_browse_run_num->setEnabled(enable);
-  m_uiTabFitting.lineEdit_pushButton_run_num->setEnabled(enable);
-  m_uiTabFitting.pushButton_fitting_browse_peaks->setEnabled(enable);
-  m_uiTabFitting.lineEdit_fitting_peaks->setEnabled(enable);
-  m_uiTabFitting.pushButton_fit->setEnabled(enable);
-  m_uiTabFitting.pushButton_clear_peak_list->setEnabled(enable);
-  m_uiTabFitting.pushButton_save_peak_list->setEnabled(enable);
-  m_uiTabFitting.comboBox_bank->setEnabled(enable);
-  m_uiTabFitting.groupBox_fititng_preview->setEnabled(enable);
+  m_fittingWidget->enable(enable);
 }
 
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
   for (int ti = 0; ti < m_ui.tabMain->count(); ++ti) {
     m_ui.tabMain->setTabEnabled(ti, enable);
+  }
+}
+
+void EnggDiffractionViewQtGUI::highlightRbNumber(bool isValid) {
+  if (!isValid) {
+    m_ui.label_RBNumber->setStyleSheet("background-color: red; color : white;");
+  } else {
+    m_ui.label_RBNumber->setStyleSheet("background-color: white");
   }
 }
 
@@ -777,207 +682,6 @@ size_t EnggDiffractionViewQtGUI::rebinningPulsesNumberPeriods() const {
 
 double EnggDiffractionViewQtGUI::rebinningPulsesTime() const {
   return m_uiTabPreproc.doubleSpinBox_step_time->value();
-}
-
-void EnggDiffractionViewQtGUI::setBankDir(int idx) {
-
-  if (m_fitting_runno_dir_vec.size() >= size_t(idx)) {
-
-    std::string bankDir = m_fitting_runno_dir_vec[idx];
-    Poco::Path fpath(bankDir);
-
-    setFittingRunNo(QString::fromUtf8(bankDir.c_str()));
-  }
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
-    listViewFittingRun() {
-
-  if (m_fittingMutliRunMode) {
-    auto listView = m_uiTabFitting.listWidget_fitting_run_num;
-    auto currentRow = listView->currentRow();
-    auto item = listView->item(currentRow);
-    QString itemText = item->text();
-
-    setFittingRunNo(itemText);
-    FittingRunNo();
-  }
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
-    resetFittingMultiMode() {
-  // resets the global variable so the list view widgets
-  // adds the run number to for single runs too
-  m_fittingMutliRunMode = false;
-}
-
-std::string EnggDiffractionViewQtGUI::fittingRunNoFactory(std::string bank,
-                                                          std::string fileName,
-                                                          std::string &bankDir,
-                                                          std::string fileDir) {
-
-  std::string genDir = fileName.substr(0, fileName.size() - 1);
-  Poco::Path bankFile(genDir + bank + ".nxs");
-  if (bankFile.isFile()) {
-    bankDir = fileDir + genDir + bank + ".nxs";
-  }
-  return bankDir;
-}
-
-std::string EnggDiffractionViewQtGUI::readPeaksFile(std::string fileDir) {
-  std::string fileData = "";
-  std::string line;
-  std::string comma = ", ";
-
-  std::ifstream peakFile(fileDir);
-
-  if (peakFile.is_open()) {
-    while (std::getline(peakFile, line)) {
-      fileData += line;
-      if (!peakFile.eof())
-        fileData += comma;
-    }
-    peakFile.close();
-  }
-
-  else
-    fileData = "";
-
-  return fileData;
-}
-
-void EnggDiffractionViewQtGUI::setDataVector(
-    std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
-    bool plotSinglePeaks) {
-
-  if (!plotSinglePeaks) {
-    // clear vector and detach curves to avoid plot crash
-    // when only plotting focused workspace
-    for (auto curves : m_fittedDataVector) {
-      if (curves) {
-        curves->detach();
-        delete curves;
-      }
-    }
-
-    if (m_fittedDataVector.size() > 0)
-      m_fittedDataVector.clear();
-
-    // set it as false as there will be no valid workspace to plot
-    m_uiTabFitting.pushButton_plot_separate_window->setEnabled(false);
-  }
-
-  if (focused) {
-    dataCurvesFactory(data, m_focusedDataVector, focused);
-  } else {
-    dataCurvesFactory(data, m_fittedDataVector, focused);
-  }
-}
-
-void EnggDiffractionViewQtGUI::dataCurvesFactory(
-    std::vector<boost::shared_ptr<QwtData>> &data,
-    std::vector<QwtPlotCurve *> &dataVector, bool focused) {
-
-  // clear vector
-  for (auto curves : dataVector) {
-    if (curves) {
-      curves->detach();
-      delete curves;
-    }
-  }
-
-  if (dataVector.size() > 0)
-    dataVector.clear();
-  resetView();
-
-  // dark colours could be removed so that the coloured peaks stand out more
-  const std::array<QColor, 16> QPenList{
-      {Qt::white, Qt::red, Qt::darkRed, Qt::green, Qt::darkGreen, Qt::blue,
-       Qt::darkBlue, Qt::cyan, Qt::darkCyan, Qt::magenta, Qt::darkMagenta,
-       Qt::yellow, Qt::darkYellow, Qt::gray, Qt::lightGray, Qt::black}};
-
-  std::mt19937 gen;
-  std::uniform_int_distribution<std::size_t> dis(0, QPenList.size() - 1);
-
-  for (size_t i = 0; i < data.size(); i++) {
-    auto *peak = data[i].get();
-
-    QwtPlotCurve *dataCurve = new QwtPlotCurve();
-    if (!focused) {
-      dataCurve->setStyle(QwtPlotCurve::Lines);
-      auto randIndex = dis(gen);
-      dataCurve->setPen(QPen(QPenList[randIndex], 2));
-
-      // only set enabled when single peak workspace plotted
-      m_uiTabFitting.pushButton_plot_separate_window->setEnabled(true);
-    } else {
-      dataCurve->setStyle(QwtPlotCurve::NoCurve);
-      // focused workspace in bg set as darkGrey crosses insted of line
-      dataCurve->setSymbol(QwtSymbol(QwtSymbol::XCross, QBrush(),
-                                     QPen(Qt::darkGray, 1), QSize(3, 3)));
-    }
-    dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
-
-    dataVector.push_back(dataCurve);
-
-    dataVector[i]->setData(*peak);
-    dataVector[i]->attach(m_uiTabFitting.dataPlot);
-  }
-
-  m_uiTabFitting.dataPlot->replot();
-  m_zoomTool->setZoomBase();
-  // enable zoom & select peak btn after the plotting on graph
-  setZoomTool(true);
-  m_uiTabFitting.pushButton_select_peak->setEnabled(true);
-  data.clear();
-}
-
-void EnggDiffractionViewQtGUI::setPeakPickerEnabled(bool enabled) {
-  m_peakPicker->setEnabled(enabled);
-  m_peakPicker->setVisible(enabled);
-  m_uiTabFitting.dataPlot->replot(); // PeakPicker might get hidden/shown
-  m_uiTabFitting.pushButton_add_peak->setEnabled(enabled);
-  if (enabled) {
-    QString btnText = "Reset Peak Selector";
-    m_uiTabFitting.pushButton_select_peak->setText(btnText);
-  }
-}
-
-void EnggDiffractionViewQtGUI::setPeakPicker(
-    const IPeakFunction_const_sptr &peak) {
-  m_peakPicker->setPeak(peak);
-  m_uiTabFitting.dataPlot->replot();
-}
-
-double EnggDiffractionViewQtGUI::getPeakCentre() const {
-  auto peak = m_peakPicker->peak();
-  auto centre = peak->centre();
-  return centre;
-}
-
-void EnggDiffractionViewQtGUI::fittingWriteFile(const std::string &fileDir) {
-  std::ofstream outfile(fileDir.c_str());
-  if (!outfile) {
-    userWarning("File not found",
-                "File " + fileDir + " , could not be found. Please try again!");
-  } else {
-    auto expPeaks = m_uiTabFitting.lineEdit_fitting_peaks->text();
-    outfile << expPeaks.toStdString();
-  }
-}
-
-void EnggDiffractionViewQtGUI::setZoomTool(bool enabled) {
-  m_zoomTool->setEnabled(enabled);
-}
-
-void EnggDiffractionViewQtGUI::resetView() {
-  // Resets the view to a sensible default
-  // Auto scale the axis
-  m_uiTabFitting.dataPlot->setAxisAutoScale(QwtPlot::xBottom);
-  m_uiTabFitting.dataPlot->setAxisAutoScale(QwtPlot::yLeft);
-
-  // Set this as the default zoom level
-  m_zoomTool->setZoomBase(true);
 }
 
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum(const std::string &wsName) {
@@ -1111,14 +815,6 @@ void EnggDiffractionViewQtGUI::rebinMultiperiodClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::RebinMultiperiod);
 }
 
-void EnggDiffractionViewQtGUI::fitClicked() {
-  m_presenter->notify(IEnggDiffractionPresenter::FitPeaks);
-}
-
-void EnggDiffractionViewQtGUI::FittingRunNo() {
-  m_presenter->notify(IEnggDiffractionPresenter::FittingRunNo);
-}
-
 void EnggDiffractionViewQtGUI::browseInputDirCalib() {
   QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
   if (prevPath.isEmpty()) {
@@ -1211,8 +907,7 @@ void EnggDiffractionViewQtGUI::browseDirFocusing() {
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
   m_focusDir = dir.toStdString();
-  m_uiTabSettings.lineEdit_dir_focusing->setText(
-      QString::fromStdString(m_focusDir));
+  m_uiTabSettings.lineEdit_dir_focusing->setText(dir);
 }
 
 void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
@@ -1232,59 +927,6 @@ void EnggDiffractionViewQtGUI::browseTextureDetGroupingFile() {
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
   m_uiTabFocus.lineEdit_texture_grouping_file->setText(path);
-}
-
-void EnggDiffractionViewQtGUI::browseFitFocusedRun() {
-  resetFittingMultiMode();
-  QString prevPath = QString::fromStdString(m_focusDir);
-  if (prevPath.isEmpty()) {
-    prevPath =
-        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  }
-  std::string nexusFormat = "Nexus file with calibration table: NXS, NEXUS"
-                            "(*.nxs *.nexus);;";
-
-  QString path(
-      QFileDialog::getOpenFileName(this, tr("Open Focused File "), prevPath,
-                                   QString::fromStdString(nexusFormat)));
-
-  if (path.isEmpty()) {
-    return;
-  }
-
-  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
-  setFittingRunNo(path);
-  getBanks();
-}
-
-void EnggDiffractionViewQtGUI::browsePeaksToFit() {
-
-  try {
-    QString prevPath = QString::fromStdString(m_focusDir);
-    if (prevPath.isEmpty()) {
-      prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
-                     .getPreviousDirectory();
-    }
-
-    QString path(
-        QFileDialog::getOpenFileName(this, tr("Open Peaks To Fit"), prevPath,
-                                     QString::fromStdString(g_DetGrpExtStr)));
-
-    if (path.isEmpty()) {
-      return;
-    }
-
-    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
-
-    std::string peaksData = readPeaksFile(path.toStdString());
-
-    m_uiTabFitting.lineEdit_fitting_peaks->setText(
-        QString::fromStdString(peaksData));
-  } catch (...) {
-    userWarning("Unable to import the peaks from a file: ",
-                "File corrupted or could not be opened. Please try again");
-    return;
-  }
 }
 
 std::vector<std::string> EnggDiffractionViewQtGUI::focusingRunNo() const {
@@ -1358,11 +1000,11 @@ void EnggDiffractionViewQtGUI::calibspecNoChanged(int /*idx*/) {
   QComboBox *BankName = m_uiTabCalib.comboBox_calib_cropped_bank_name;
   if (!BankName)
     return;
-  m_currentCropCalibBankName = BankName->currentIndex();
+  g_currentCropCalibBankName = BankName->currentIndex();
 }
 
 void EnggDiffractionViewQtGUI::enableSpecNos() {
-  if (m_currentCropCalibBankName == 0) {
+  if (g_currentCropCalibBankName == 0) {
     m_uiTabCalib.lineEdit_cropped_spec_nos->setEnabled(true);
     m_uiTabCalib.lineEdit_cropped_customise_bank_name->setEnabled(true);
   } else {
@@ -1384,219 +1026,14 @@ void EnggDiffractionViewQtGUI::multiRunModeChanged(int /*idx*/) {
   QComboBox *plotType = m_uiTabFocus.comboBox_Multi_Runs;
   if (!plotType)
     return;
-  m_currentRunMode = plotType->currentIndex();
+  g_currentRunMode = plotType->currentIndex();
 }
 
 void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {
   QComboBox *plotType = m_uiTabFocus.comboBox_PlotData;
   if (!plotType)
     return;
-  m_currentType = plotType->currentIndex();
-}
-
-void EnggDiffractionViewQtGUI::setBankIdComboBox(int idx) {
-  QComboBox *bankName = m_uiTabFitting.comboBox_bank;
-  bankName->setCurrentIndex(idx);
-}
-
-void EnggDiffractionViewQtGUI::setFittingRunNo(QString path) {
-  m_uiTabFitting.lineEdit_pushButton_run_num->setText(path);
-}
-
-std::string EnggDiffractionViewQtGUI::getFittingRunNo() const {
-  return m_uiTabFitting.lineEdit_pushButton_run_num->text().toStdString();
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
-    clearFittingComboBox() const {
-  m_uiTabFitting.comboBox_bank->clear();
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
-    enableFittingComboBox(bool enable) const {
-  m_uiTabFitting.comboBox_bank->setEnabled(enable);
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
-    clearFittingListWidget() const {
-  m_uiTabFitting.listWidget_fitting_run_num->clear();
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
-    enableFittingListWidget(bool enable) const {
-  m_uiTabFitting.listWidget_fitting_run_num->setEnabled(enable);
-}
-
-int MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
-    getFittingListWidgetCurrentRow() const {
-  return m_uiTabFitting.listWidget_fitting_run_num->currentRow();
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::
-    setFittingListWidgetCurrentRow(int idx) const {
-  m_uiTabFitting.listWidget_fitting_run_num->setCurrentRow(idx);
-}
-
-int EnggDiffractionViewQtGUI::getFittingComboIdx(std::string bank) const {
-  return m_uiTabFitting.comboBox_bank->findText(QString::fromStdString(bank));
-}
-
-void EnggDiffractionViewQtGUI::plotSeparateWindow() {
-  std::string pyCode =
-
-      "fitting_single_peaks_twin_ws = \"__engggui_fitting_single_peaks_twin\"\n"
-      "if (mtd.doesExist(fitting_single_peaks_twin_ws)):\n"
-      " DeleteWorkspace(fitting_single_peaks_twin_ws)\n"
-
-      "single_peak_ws = CloneWorkspace(InputWorkspace = "
-      "\"engggui_fitting_single_peaks\", OutputWorkspace = "
-      "fitting_single_peaks_twin_ws)\n"
-      "tot_spec = single_peak_ws.getNumberHistograms()\n"
-
-      "spec_list = []\n"
-      "for i in range(0, tot_spec):\n"
-      " spec_list.append(i)\n"
-
-      "fitting_plot = plotSpectrum(single_peak_ws, spec_list).activeLayer()\n"
-      "fitting_plot.setTitle(\"Engg GUI Single Peaks Fitting Workspace\")\n";
-
-  std::string status =
-      runPythonCode(QString::fromStdString(pyCode), false).toStdString();
-  m_logMsgs.emplace_back("Plotted output focused data, with status string " +
-                         status);
-  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
-}
-
-std::string EnggDiffractionViewQtGUI::fittingPeaksData() const {
-
-  return m_uiTabFitting.lineEdit_fitting_peaks->text().toStdString();
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakList(
-    std::string peakList) const {
-  m_uiTabFitting.lineEdit_fitting_peaks->setText(
-      QString::fromStdString(peakList));
-}
-
-std::vector<std::string>
-EnggDiffractionViewQtGUI::splitFittingDirectory(std::string &selectedfPath) {
-
-  Poco::Path PocofPath(selectedfPath);
-  std::string selectedbankfName = PocofPath.getBaseName();
-  std::vector<std::string> splitBaseName;
-  if (selectedbankfName.find("ENGINX_") != std::string::npos) {
-    boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
-  }
-  return splitBaseName;
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setBankEmit() {
-  emit setBank();
-}
-
-std::string
-MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::getFocusDir() {
-  return m_focusDir;
-}
-
-void EnggDiffractionViewQtGUI::addBankItem(std::string bankID) {
-
-  m_uiTabFitting.comboBox_bank->addItem(QString::fromStdString(bankID));
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addRunNoItem(
-    std::string runNo) {
-  m_uiTabFitting.listWidget_fitting_run_num->addItem(
-      QString::fromStdString(runNo));
-}
-
-std::vector<std::string> EnggDiffractionViewQtGUI::getFittingRunNumVec() {
-  return m_fitting_runno_dir_vec;
-}
-
-void EnggDiffractionViewQtGUI::setFittingRunNumVec(
-    std::vector<std::string> assignVec) {
-  m_fitting_runno_dir_vec.clear();
-  m_fitting_runno_dir_vec = assignVec;
-}
-
-void EnggDiffractionViewQtGUI::setFittingMultiRunMode(bool mode) {
-  m_fittingMutliRunMode = mode;
-}
-
-bool EnggDiffractionViewQtGUI::getFittingMultiRunMode() {
-  return m_fittingMutliRunMode;
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::setPeakPick() {
-  auto bk2bk =
-      FunctionFactory::Instance().createFunction("BackToBackExponential");
-  auto bk2bkFunc = boost::dynamic_pointer_cast<IPeakFunction>(bk2bk);
-  // set the peak to BackToBackExponential function
-  setPeakPicker(bk2bkFunc);
-  setPeakPickerEnabled(true);
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::addPeakToList() {
-
-  if (m_peakPicker->isEnabled()) {
-    auto peakCentre = getPeakCentre();
-
-    std::stringstream stream;
-    stream << std::fixed << std::setprecision(4) << peakCentre;
-    auto strPeakCentre = stream.str();
-
-    auto curExpPeaksList = m_uiTabFitting.lineEdit_fitting_peaks->text();
-    QString comma = ",";
-
-    if (!curExpPeaksList.isEmpty()) {
-      // when further peak added to list
-      std::string expPeakStr = curExpPeaksList.toStdString();
-      std::string lastTwoChr = expPeakStr.substr(expPeakStr.size() - 2);
-      auto lastChr = expPeakStr.back();
-      if (lastChr == ',' || lastTwoChr == ", ") {
-        curExpPeaksList.append(QString::fromStdString(strPeakCentre));
-      } else {
-        curExpPeaksList.append(comma + QString::fromStdString(strPeakCentre));
-      }
-      m_uiTabFitting.lineEdit_fitting_peaks->setText(curExpPeaksList);
-    } else {
-      // when new peak given when list is empty
-      curExpPeaksList.append(QString::fromStdString(strPeakCentre));
-      curExpPeaksList.append(comma);
-      m_uiTabFitting.lineEdit_fitting_peaks->setText(curExpPeaksList);
-    }
-  }
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::savePeakList() {
-  // call function in EnggPresenter..
-
-  try {
-    QString prevPath = QString::fromStdString(m_focusDir);
-    if (prevPath.isEmpty()) {
-      prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
-                     .getPreviousDirectory();
-    }
-
-    QString path(QFileDialog::getSaveFileName(
-        this, tr("Save Expected Peaks List"), prevPath,
-        QString::fromStdString(g_DetGrpExtStr)));
-
-    if (path.isEmpty()) {
-      return;
-    }
-    const std::string strPath = path.toStdString();
-    fittingWriteFile(strPath);
-  } catch (...) {
-    userWarning("Unable to save the peaks file: ",
-                "Invalid file path or or could not be saved. Please try again");
-    return;
-  }
-}
-
-void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::clearPeakList() {
-  m_uiTabFitting.lineEdit_fitting_peaks->clear();
+  g_currentType = plotType->currentIndex();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
@@ -1628,6 +1065,11 @@ void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
 
   // rebin tab
   m_uiTabPreproc.MWRunFiles_preproc_run_num->setInstrumentOverride(prefixInput);
+}
+
+void EnggDiffractionViewQtGUI::showEvent(QShowEvent *) {
+  // make sure that the RB number is checked on interface startup/show
+  m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
 }
 
 void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
@@ -1665,7 +1107,7 @@ void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
 
 void EnggDiffractionViewQtGUI::openHelpWin() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("Engineering_Diffraction"));
+      nullptr, QString("Engineering_Diffraction"));
 }
 
 } // namespace CustomInterfaces

@@ -106,8 +106,6 @@ void SaveFullprofResolution::exec() {
   }
   ofile << filestr;
   ofile.close();
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -146,8 +144,6 @@ void SaveFullprofResolution::processProperties() {
     g_log.error(errmsg.str());
     throw runtime_error(errmsg.str());
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -228,8 +224,6 @@ void SaveFullprofResolution::parseTableWorkspace() {
     dbss << setw(20) << mit->first << " = " << setprecision(5) << mit->second
          << '\n';
   g_log.debug(dbss.str());
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

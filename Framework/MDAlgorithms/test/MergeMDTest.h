@@ -126,6 +126,27 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
+
+  void test_displayNormalization() {
+    // Name of the output workspace.
+    std::string outWSName("MergeMDTest_OutputWS");
+    auto ws0 =
+        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("ws0");
+    ws0->setDisplayNormalization(API::MDNormalization::NoNormalization);
+    ws0->setDisplayNormalizationHisto(
+        API::MDNormalization::NumEventsNormalization);
+    auto ws = execute_merge(outWSName);
+    if (!ws)
+      return;
+
+    TS_ASSERT_EQUALS(API::MDNormalization::NoNormalization,
+                     ws->displayNormalization());
+    TS_ASSERT_EQUALS(API::MDNormalization::NumEventsNormalization,
+                     ws->displayNormalizationHisto());
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
 };
 
 #endif /* MANTID_MDALGORITHMS_MERGEMDTEST_H_ */

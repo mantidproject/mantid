@@ -137,17 +137,16 @@ private:
 #endif
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
-#ifdef _WIN32
-// this breaks new namespace declaration rules; need to find a better fix
-template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<FrameworkManagerImpl>;
-#endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<FrameworkManagerImpl>
-    FrameworkManager;
+typedef Mantid::Kernel::SingletonHolder<FrameworkManagerImpl> FrameworkManager;
 
 } // namespace Kernel
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::FrameworkManagerImpl>;
+}
+}
 
 #endif /*MANTID_API_FRAMEWORKMANAGER_H_*/

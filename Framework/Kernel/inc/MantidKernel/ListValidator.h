@@ -47,7 +47,7 @@ namespace Kernel {
 template <typename TYPE> class ListValidator : public TypedValidator<TYPE> {
 public:
   /// Default constructor. Sets up an empty list of valid values.
-  ListValidator() : TypedValidator<TYPE>() {}
+  ListValidator() : TypedValidator<TYPE>(), m_allowMultiSelection(false) {}
 
   /** Constructor
    *  @param values :: A set of values consisting of the valid values
@@ -56,8 +56,8 @@ public:
   explicit ListValidator(const std::set<TYPE> &values,
                          const bool allowMultiSelection = false)
       : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
-        m_AllowMultiSelection(allowMultiSelection) {
-    if (m_AllowMultiSelection) {
+        m_allowMultiSelection(allowMultiSelection) {
+    if (m_allowMultiSelection) {
       throw Kernel::Exception::NotImplementedError(
           "The List Validator does not support Multi selection yet");
     }
@@ -70,8 +70,8 @@ public:
   explicit ListValidator(const std::unordered_set<TYPE> &values,
                          const bool allowMultiSelection = false)
       : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
-        m_AllowMultiSelection(allowMultiSelection) {
-    if (m_AllowMultiSelection) {
+        m_allowMultiSelection(allowMultiSelection) {
+    if (m_allowMultiSelection) {
       throw Kernel::Exception::NotImplementedError(
           "The List Validator does not support Multi selection yet");
     }
@@ -88,7 +88,7 @@ public:
                          const bool allowMultiSelection = false)
       : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
         m_aliases(aliases.begin(), aliases.end()),
-        m_AllowMultiSelection(allowMultiSelection) {
+        m_allowMultiSelection(allowMultiSelection) {
     for (auto aliasIt = m_aliases.begin(); aliasIt != m_aliases.end();
          ++aliasIt) {
       if (values.end() ==
@@ -97,7 +97,7 @@ public:
         throw std::invalid_argument("Alias " + aliasIt->first +
                                     " refers to invalid value " +
                                     aliasIt->second);
-        if (m_AllowMultiSelection) {
+        if (m_allowMultiSelection) {
           throw Kernel::Exception::NotImplementedError(
               "The List Validator does not support Multi selection yet");
         }
@@ -148,14 +148,14 @@ public:
     return aliasIt->second;
   }
 
-  bool isMultipleSelectionAllowed() override { return m_AllowMultiSelection; }
+  bool isMultipleSelectionAllowed() override { return m_allowMultiSelection; }
 
   void setMultipleSelectionAllowed(const bool isMultiSelectionAllowed) {
     if (isMultiSelectionAllowed) {
       throw Kernel::Exception::NotImplementedError(
           "The List Validator does not support Multi selection yet");
     }
-    m_AllowMultiSelection = isMultiSelectionAllowed;
+    m_allowMultiSelection = isMultiSelectionAllowed;
   }
 
 protected:
@@ -220,7 +220,7 @@ protected:
   std::map<std::string, std::string> m_aliases;
 
   /// if the validator should allow multiple selection
-  bool m_AllowMultiSelection;
+  bool m_allowMultiSelection;
 };
 
 /// ListValidator<std::string> is used heavily

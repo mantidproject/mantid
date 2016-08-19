@@ -1,4 +1,5 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
@@ -14,6 +15,8 @@ using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 namespace Converters = Mantid::PythonInterface::Converters;
 namespace NumPy = Mantid::PythonInterface::NumPy;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IMDHistoWorkspace)
 
 namespace {
 /**

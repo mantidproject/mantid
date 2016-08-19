@@ -14,6 +14,8 @@
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h"
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h"
 
+#include <qwt_data.h>
+
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -171,7 +173,7 @@ public:
     EXPECT_CALL(
         *m_view,
         setDataCurve(AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1, 1E-8),
-                           QwtDataX(1, 1, 1E-8), QwtDataX(2, 1, 1E-8),
+                           QwtDataX(1, 2, 1E-8), QwtDataX(2, 3, 1E-8),
                            QwtDataY(0, 2, 1E-8), QwtDataY(1, 2, 1E-8),
                            QwtDataY(2, 2, 1E-8)),
                      AllOf(Property(&std::vector<double>::size, 3),

@@ -388,8 +388,6 @@ void LoadIsawDetCal::exec() {
   }
 
   setProperty("InputWorkspace", ws);
-
-  return;
 }
 
 /**

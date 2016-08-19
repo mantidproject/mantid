@@ -50,8 +50,6 @@ void ThermalNeutronBk2BkExpBeta::function1D(double *out, const double *xValues,
     out[i] =
         corefunction(xValues[i], width, tcross, beta0, beta1, beta0t, beta1t);
   }
-
-  return;
 }
 
 /** Derivative: use numerical derivative

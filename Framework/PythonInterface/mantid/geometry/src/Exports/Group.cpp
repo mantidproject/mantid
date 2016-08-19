@@ -1,5 +1,5 @@
-
 #include "MantidGeometry/Crystal/Group.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
 
 #include <boost/python/class.hpp>
@@ -13,8 +13,9 @@
 using namespace Mantid::Geometry;
 using Mantid::Geometry::SymmetryOperation;
 using Mantid::PythonInterface::Converters::PyObjectToMatrix;
-
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(Group)
 
 namespace {
 std::vector<std::string> getSymmetryOperationStrings(Group &self) {

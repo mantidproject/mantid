@@ -46,8 +46,6 @@ void ThermalNeutronBk2BkExpSigma::function1D(double *out, const double *xValues,
   for (size_t i = 0; i < nData; ++i) {
     out[i] = corefunction(xValues[i], sig0sq, sig1sq, sig2sq);
   }
-
-  return;
 }
 
 /** Derivative: use numerical derivative

@@ -1,3 +1,4 @@
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -27,9 +28,11 @@ using namespace Geometry;
 using namespace DataObjects;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using HistogramData::BinEdges;
 using HistogramData::Counts;
 using HistogramData::CountVariances;
 using HistogramData::CountStandardDeviations;
+using HistogramData::LinearGenerator;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSampleWorkspace)
@@ -189,7 +192,7 @@ void CreateSampleWorkspace::exec() {
                        "bin - it has been changed to " << binWidth << '\n';
   }
 
-  std::string functionString = "";
+  std::string functionString;
   if (m_preDefinedFunctionmap.find(preDefinedFunction) !=
       m_preDefinedFunctionmap.end()) {
     // extract pre-defined string
@@ -293,10 +296,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     int numPixels, int numBins, double x0, double binDelta,
     int start_at_pixelID, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
-  HistogramData::BinEdges x(numBins + 1);
-  for (int i = 0; i < numBins + 1; ++i) {
-    x.mutableData()[i] = x0 + i * binDelta;
-  }
+  BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
 
   std::vector<double> xValues(cbegin(x), cend(x) - 1);
   Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
@@ -332,17 +332,11 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
 
   retVal->setInstrument(inst);
 
-  // Create the x-axis for histogramming.
-  HistogramData::BinEdges x1(numXBins);
-  auto &xRef = x1.mutableData();
-  for (int i = 0; i < numXBins; ++i) {
-    xRef[i] = x0 + i * binDelta;
-  }
-
   // Set all the histograms at once.
-  retVal->setAllX(x1);
+  BinEdges x(numXBins, LinearGenerator(x0, binDelta));
+  retVal->setAllX(x);
 
-  std::vector<double> xValues(xRef.begin(), xRef.end() - 1);
+  std::vector<double> xValues(x.cbegin(), x.cend() - 1);
   std::vector<double> yValues =
       evalFunction(functionString, xValues, isRandom ? 1 : 0);
 

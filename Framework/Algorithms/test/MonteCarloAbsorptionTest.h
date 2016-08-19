@@ -6,6 +6,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 

@@ -135,7 +135,7 @@ bool ParameterMap::operator==(const ParameterMap &rhs) const {
 const std::string ParameterMap::getDescription(const std::string &compName,
                                                const std::string &name) const {
   pmap_cit it;
-  std::string result("");
+  std::string result;
   for (it = m_map.begin(); it != m_map.end(); ++it) {
     if (compName.compare(((const IComponent *)(*it).first)->getName()) == 0) {
       boost::shared_ptr<Parameter> param =
@@ -160,7 +160,7 @@ const std::string
 ParameterMap::getShortDescription(const std::string &compName,
                                   const std::string &name) const {
   pmap_cit it;
-  std::string result("");
+  std::string result;
   for (it = m_map.begin(); it != m_map.end(); ++it) {
     if (compName.compare(((const IComponent *)(*it).first)->getName()) == 0) {
       boost::shared_ptr<Parameter> param =

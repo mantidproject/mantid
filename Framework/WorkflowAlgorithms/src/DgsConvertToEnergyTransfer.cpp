@@ -169,8 +169,8 @@ void DgsConvertToEnergyTransfer::exec() {
                                    "find the initial energy");
         }
 
-        std::string loadAlgName("");
-        std::string fileProp("");
+        std::string loadAlgName;
+        std::string fileProp;
         if (boost::ends_with(runFileName, "_event.nxs") ||
             boost::ends_with(runFileName, ".nxs.h5") ||
             boost::ends_with(runFileName, ".nxs")) {
@@ -273,7 +273,7 @@ void DgsConvertToEnergyTransfer::exec() {
   const double binOffset = -monPeak;
 
   if ("ISIS" == facility) {
-    std::string detcalFile("");
+    std::string detcalFile;
     if (reductionManager->existsProperty("SampleDetCalFilename")) {
       detcalFile = reductionManager->getPropertyValue("SampleDetCalFilename");
     }
@@ -563,7 +563,7 @@ void DgsConvertToEnergyTransfer::exec() {
   // Mask and group workspace if necessary.
   MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
   MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
-  std::string oldGroupFile("");
+  std::string oldGroupFile;
   std::string filePropMod = this->getProperty("AlternateGroupingTag");
   std::string fileProp = filePropMod + "OldGroupingFilename";
   if (reductionManager->existsProperty(fileProp)) {

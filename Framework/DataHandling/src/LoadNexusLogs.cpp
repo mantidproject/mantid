@@ -554,7 +554,7 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
   // Now the values: Could be a string, int or double
   file.openData("value");
   // Get the units of the property
-  std::string value_units("");
+  std::string value_units;
   try {
     file.getAttr("units", value_units);
   } catch (::NeXus::Exception &) {

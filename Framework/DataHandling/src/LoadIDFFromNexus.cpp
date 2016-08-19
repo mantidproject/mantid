@@ -97,7 +97,7 @@ void LoadIDFFromNexus::exec() {
                 << "\n";
 
   // Read parameter correction file, if found
-  std::string correctionParameterFile = "";
+  std::string correctionParameterFile;
   bool append = false;
   if (parameterCorrectionFile != "") {
     // Read parameter correction file
@@ -144,10 +144,8 @@ void LoadIDFFromNexus::exec() {
     }
   } else {
     g_log.notice() << "No correction parameter file applies to the date for "
-                      "correection file.\n";
+                      "correction file.\n";
   }
-
-  return;
 }
 
 /*  Gets the full pathname of the parameter correction file, if it exists

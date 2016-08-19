@@ -1,6 +1,6 @@
-
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 
 #include <boost/python/class.hpp>
@@ -12,8 +12,9 @@
 using Mantid::Geometry::Group;
 using Mantid::Geometry::SpaceGroup;
 using Mantid::Geometry::SymmetryOperation;
-
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(SpaceGroup)
 
 namespace //<unnamed>
     {

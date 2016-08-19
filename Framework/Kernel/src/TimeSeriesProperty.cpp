@@ -308,8 +308,6 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
 
   // 4. Make size consistent
   m_size = static_cast<int>(m_values.size());
-
-  return;
 }
 
 /**
@@ -370,12 +368,10 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
       TimeValueUnit<TYPE> temp(t_start, m_values[tstartindex].value());
       mp_copy.push_back(temp);
     } else {
-      mp_copy.push_back(
-          TimeValueUnit<TYPE>(t_start, m_values[tstartindex].value()));
+      mp_copy.emplace_back(t_start, m_values[tstartindex].value());
       for (size_t im = size_t(tstartindex + 1); im <= size_t(tstopindex);
            ++im) {
-        mp_copy.push_back(
-            TimeValueUnit<TYPE>(m_values[im].time(), m_values[im].value()));
+        mp_copy.emplace_back(m_values[im].time(), m_values[im].value());
       }
     }
   } // ENDFOR
@@ -389,8 +385,6 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
   mp_copy.clear();
 
   m_size = static_cast<int>(m_values.size());
-
-  return;
 }
 
 /**
@@ -526,8 +520,6 @@ void TimeSeriesProperty<TYPE>::splitByTime(
       // "\n";
     }
   }
-
-  return;
 }
 
 // The makeFilterByValue & expandFilterToRange methods generate a bunch of
@@ -621,7 +613,7 @@ void TimeSeriesProperty<TYPE>::makeFilterByValue(
         // boundaries are centred.
         // Otherwise, use the first 'bad' time.
         stop = centre ? lastTime + tol : t;
-        split.push_back(SplittingInterval(start, stop, 0));
+        split.emplace_back(start, stop, 0);
         // Reset the number of good ones, for next time
         numgood = 0;
       }
@@ -633,10 +625,8 @@ void TimeSeriesProperty<TYPE>::makeFilterByValue(
     // The log ended on "good" so we need to close it using the last time we
     // found
     stop = t + tol;
-    split.push_back(SplittingInterval(start, stop, 0));
+    split.emplace_back(start, stop, 0);
   }
-
-  return;
 }
 
 /** Function specialization for TimeSeriesProperty<std::string>
@@ -686,7 +676,7 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(
   double val = firstValue();
   if ((val >= min) && (val <= max)) {
     TimeSplitterType extraFilter;
-    extraFilter.push_back(SplittingInterval(range.begin(), firstTime(), 0));
+    extraFilter.emplace_back(range.begin(), firstTime(), 0);
     // Include everything from the start of the run to the first time measured
     // (which may be a null time interval; this'll be ignored)
     split = split | extraFilter;
@@ -696,13 +686,11 @@ void TimeSeriesProperty<TYPE>::expandFilterToRange(
   val = lastValue();
   if ((val >= min) && (val <= max)) {
     TimeSplitterType extraFilter;
-    extraFilter.push_back(SplittingInterval(lastTime(), range.end(), 0));
+    extraFilter.emplace_back(lastTime(), range.end(), 0);
     // Include everything from the start of the run to the first time measured
     // (which may be a null time interval; this'll be ignored)
     split = split | extraFilter;
   }
-
-  return;
 }
 
 /** Function specialization for TimeSeriesProperty<std::string>
@@ -777,7 +765,7 @@ double TimeSeriesProperty<TYPE>::timeAverageValue() const {
   double retVal = 0.0;
   try {
     TimeSplitterType filter;
-    filter.push_back(SplittingInterval(this->firstTime(), this->lastTime()));
+    filter.emplace_back(this->firstTime(), this->lastTime());
     retVal = this->averageValueInFilter(filter);
   } catch (std::exception &) {
     // just return nan
@@ -935,8 +923,6 @@ void TimeSeriesProperty<TYPE>::addValue(const Kernel::DateAndTime &time,
   }
 
   m_filterApplied = false;
-
-  return;
 }
 
 /** Add a value to the map
@@ -1269,8 +1255,6 @@ void TimeSeriesProperty<TYPE>::create(const std::vector<DateAndTime> &new_times,
 
   // reset the size
   m_size = static_cast<int>(m_values.size());
-
-  return;
 }
 
 /** Returns the value at a particular time
@@ -1656,8 +1640,6 @@ void TimeSeriesProperty<TYPE>::filterWith(
   // 3. Reset flag and do filter
   m_filterApplied = false;
   applyFilter();
-
-  return;
 }
 
 /**
@@ -1666,8 +1648,6 @@ void TimeSeriesProperty<TYPE>::filterWith(
 template <typename TYPE> void TimeSeriesProperty<TYPE>::clearFilter() {
   m_filter.clear();
   m_filterQuickRef.clear();
-
-  return;
 }
 
 /**
@@ -1686,8 +1666,6 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::countSize() const {
                                               : m_filterQuickRef.back().second;
     m_size = static_cast<int>(nvalues);
   }
-
-  return;
 }
 
 /**  Check if str has the right time format
@@ -1788,8 +1766,6 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
   g_log.warning() << "Log " << this->name() << " has " << numremoved
                   << " entries removed due to duplicated time. "
                   << "\n";
-
-  return;
 }
 
 /*
@@ -1827,8 +1803,6 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::sort() const {
     std::stable_sort(m_values.begin(), m_values.end());
     m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
   }
-
-  return;
 }
 
 /** Find the index of the entry of time t in the mP vector (sorted)
@@ -2024,8 +1998,6 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::applyFilter() const {
 
   // 6. Re-count size
   countSize();
-
-  return;
 }
 
 /*
@@ -2171,8 +2143,7 @@ void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
 /// @cond
 // -------------------------- Macro to instantiation concrete types
 // --------------------------------
-#define INSTANTIATE(TYPE)                                                      \
-  template MANTID_KERNEL_DLL class TimeSeriesProperty<TYPE>;
+#define INSTANTIATE(TYPE) template class TimeSeriesProperty<TYPE>;
 
 // -------------------------- Concrete instantiation
 // -----------------------------------------------

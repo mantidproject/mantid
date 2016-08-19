@@ -23,9 +23,15 @@
       <item>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="12" column="2">
-         <widget class="QPushButton" name="pushButton_6">
+         <widget class="QLabel" name="label_5">
+          <property name="frameShadow">
+           <enum>QFrame::Sunken</enum>
+          </property>
           <property name="text">
-           <string>Zoom In (X)</string>
+           <string>X</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -39,56 +45,112 @@
           </property>
          </widget>
         </item>
-        <item row="12" column="3">
-         <widget class="QPushButton" name="pushButton_5">
+        <item row="17" column="4">
+         <widget class="QPushButton" name="pushButton_2">
           <property name="text">
-           <string>Zoom Out (X)</string>
+           <string>Zoom</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
-         <widget class="QComboBox" name="comboBox_scans">
-          <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;List of available scans&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="2">
-         <widget class="QPushButton" name="pushButton_plot3D">
-          <property name="text">
-           <string>Plot</string>
-          </property>
-         </widget>
-        </item>
-        <item row="19" column="3">
-         <widget class="QPushButton" name="pushButton_quit">
-          <property name="text">
-           <string>Close</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="3">
-         <widget class="QLineEdit" name="lineEdit_baseColorGreen">
+        <item row="12" column="4">
+         <widget class="QPushButton" name="pushButton_zoomInX">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="text">
+           <string>Zoom</string>
+          </property>
          </widget>
         </item>
-        <item row="4" column="2">
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item row="7" column="3">
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
-           <widget class="QCheckBox" name="checkBox_changeRed">
+           <widget class="QLineEdit" name="lineEdit_countsThresholdLower">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>200</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Data points underthreashold will not be plot on the canvas&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="4" column="3">
+         <widget class="QLineEdit" name="lineEdit_baseColorRed">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;3 floats from 0 to 1 for RGB&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="2">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QLabel" name="label_2">
             <property name="layoutDirection">
              <enum>Qt::LeftToRight</enum>
             </property>
             <property name="text">
-             <string/>
+             <string>Green</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
             </property>
            </widget>
           </item>
+         </layout>
+        </item>
+        <item row="9" column="2">
+         <widget class="QPushButton" name="pushButton_checkCounts">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>700</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Check</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="3">
+         <widget class="QLabel" name="label_numberDataPoints">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Number of Counts</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="2">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
            <widget class="QLabel" name="label">
             <property name="layoutDirection">
@@ -130,15 +192,8 @@
           </property>
          </spacer>
         </item>
-        <item row="17" column="3">
-         <widget class="QPushButton" name="pushButton_2">
-          <property name="text">
-           <string>PushButton</string>
-          </property>
-         </widget>
-        </item>
-        <item row="14" column="3">
-         <widget class="QLineEdit" name="lineEdit_4">
+        <item row="5" column="3">
+         <widget class="QLineEdit" name="lineEdit_baseColorGreen">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -149,16 +204,6 @@
         </item>
         <item row="6" column="2">
          <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <item>
-           <widget class="QCheckBox" name="checkBox_changeBlue">
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
           <item>
            <widget class="QLabel" name="label_4">
             <property name="layoutDirection">
@@ -174,14 +219,7 @@
           </item>
          </layout>
         </item>
-        <item row="17" column="2">
-         <widget class="QPushButton" name="pushButton">
-          <property name="text">
-           <string>PushButton</string>
-          </property>
-         </widget>
-        </item>
-        <item row="18" column="3">
+        <item row="19" column="3">
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -194,63 +232,41 @@
           </property>
          </spacer>
         </item>
-        <item row="0" column="3">
+        <item row="0" column="4">
          <widget class="QComboBox" name="comboBox_dataKey">
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;List of data keys&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
-        <item row="19" column="2">
-         <widget class="QPushButton" name="pushButton_clearPlots">
+        <item row="14" column="4">
+         <widget class="QPushButton" name="pushButton">
           <property name="text">
-           <string>Clear</string>
+           <string>Zoom</string>
           </property>
          </widget>
         </item>
-        <item row="7" column="3">
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QLineEdit" name="lineEdit_countsThresholdLower">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>60</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Data points underthreashold will not be plot on the canvas&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="lineEdit_countsThresholdUpper">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>60</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Data points underthreashold will not be plot on the canvas&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+        <item row="14" column="3">
+         <widget class="QLineEdit" name="lineEdit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
         </item>
-        <item row="14" column="2">
+        <item row="12" column="3">
+         <widget class="QLineEdit" name="lineEdit_xMax">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="17" column="3">
          <widget class="QLineEdit" name="lineEdit_3">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -260,68 +276,41 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="3">
-         <widget class="QLineEdit" name="lineEdit_baseColorRed">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+        <item row="14" column="2">
+         <widget class="QLabel" name="label_6">
+          <property name="frameShadow">
+           <enum>QFrame::Sunken</enum>
           </property>
-          <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;3 floats from 0 to 1 for RGB&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <property name="text">
+           <string>Y</string>
           </property>
-         </widget>
-        </item>
-        <item row="16" column="3">
-         <widget class="QLineEdit" name="lineEdit_6">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
-        <item row="5" column="2">
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QCheckBox" name="checkBox_changeGreen">
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_2">
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="text">
-             <string>Green</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="16" column="2">
-         <widget class="QLineEdit" name="lineEdit_5">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+        <item row="9" column="4">
+         <widget class="QPushButton" name="pushButton_plot3D">
+          <property name="text">
+           <string>Plot</string>
           </property>
          </widget>
         </item>
-        <item row="9" column="2">
-         <widget class="QPushButton" name="pushButton_checkCounts">
+        <item row="17" column="2">
+         <widget class="QLabel" name="label_7">
+          <property name="frameShadow">
+           <enum>QFrame::Sunken</enum>
+          </property>
+          <property name="text">
+           <string>Z</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="4">
+         <widget class="QLineEdit" name="lineEdit_countsThresholdUpper">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -330,24 +319,63 @@
           </property>
           <property name="maximumSize">
            <size>
-            <width>700</width>
+            <width>200</width>
             <height>16777215</height>
            </size>
           </property>
-          <property name="text">
-           <string>Check</string>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Data points underthreashold will not be plot on the canvas&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
-        <item row="9" column="3">
-         <widget class="QLabel" name="label_numberDataPoints">
-          <property name="font">
-           <font>
-            <pointsize>9</pointsize>
-           </font>
+        <item row="4" column="4">
+         <widget class="QCheckBox" name="checkBox_changeRed">
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
           </property>
           <property name="text">
-           <string>Number of Counts</string>
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="4">
+         <widget class="QCheckBox" name="checkBox_changeGreen">
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="4">
+         <widget class="QCheckBox" name="checkBox_changeBlue">
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QComboBox" name="comboBox_scans">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;List of available scans&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="20" column="3">
+         <widget class="QPushButton" name="pushButton_clearPlots">
+          <property name="text">
+           <string>Clear</string>
+          </property>
+         </widget>
+        </item>
+        <item row="20" column="4">
+         <widget class="QPushButton" name="pushButton_quit">
+          <property name="text">
+           <string>Close</string>
           </property>
          </widget>
         </item>

@@ -42,8 +42,6 @@ void Polynomial::function1D(double *out, const double *xValues,
     }
     out[i] = temp;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -91,8 +89,6 @@ void Polynomial::functionDeriv1D(API::Jacobian *out, const double *xValues,
       nx *= x;
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

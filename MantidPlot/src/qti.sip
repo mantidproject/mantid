@@ -130,7 +130,7 @@ public:
 
   SIP_PYOBJECT text(SIP_PYOBJECT, int);
 %MethodCode
-  
+
   sipIsErr = 0;
   CHECK_TABLE_COL(a0);
   CHECK_TABLE_ROW(a1);
@@ -684,13 +684,13 @@ private:
 	Grid(const Grid&);
 };
 
-namespace MantidQt 
+namespace MantidQt
 {
-%TypeHeaderCode 
+%TypeHeaderCode
 #include "MantidQtAPI/DistributionOptions.h"
 %End
 
-	enum DistributionFlag {DistributionDefault, DistributionTrue, DistributionFalse};  
+	enum DistributionFlag {DistributionDefault, DistributionTrue, DistributionFalse};
 };
 
 class Graph : QWidget /PyName=Layer/
@@ -1128,9 +1128,9 @@ public:
 %End
   Matrix* newMatrix();
   Matrix* newMatrix(const QString&, int=32, int=32);
-  
+
   TiledWindow *newTiledWindow();
-  
+
   MultiLayer *plot(const QString&) /PyName=graph/;
 %MethodCode
   sipRes = sipCpp->currentFolder()->graph(*a0, false);
@@ -1291,7 +1291,9 @@ public:
   // Simulate file-like object (required for IPython)
   void flush();
   // Simulate file-like object (required for colorama)
-  bool closed();
+  bool closed() const;
+  // Simulate file-like object
+  bool isatty() const;
   void set_parent(SIP_PYOBJECT);
 private:
   PythonScripting(const PythonScripting&);
@@ -1307,6 +1309,8 @@ public:
   void flush();
   // Simulate file-like object (required for colorama)
   bool closed();
+  // Simulate file-like object
+  bool isatty() const;
   // Line number trace
   void lineNumberChanged(SIP_PYOBJECT,int);
 private:

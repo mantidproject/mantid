@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Crystal/SymmetryElement.h"
 
 #include <boost/python/class.hpp>
@@ -7,6 +8,8 @@
 
 using namespace Mantid::Geometry;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(SymmetryElement)
 
 namespace {
 Mantid::Kernel::V3D getAxis(SymmetryElement &self) {

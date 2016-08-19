@@ -137,7 +137,7 @@ MantidVec LoadSassena::loadQvectors(const hid_t &h5file,
   if (getProperty("SortByQVectors")) {
     std::vector<mypair> qvmodpair;
     for (int iq = 0; iq < nq; iq++)
-      qvmodpair.push_back(mypair(qvmod[iq], iq));
+      qvmodpair.emplace_back(qvmod[iq], iq);
     std::sort(qvmodpair.begin(), qvmodpair.end(), compare);
     for (int iq = 0; iq < nq; iq++)
       sorting_indexes.push_back(qvmodpair[iq].second);

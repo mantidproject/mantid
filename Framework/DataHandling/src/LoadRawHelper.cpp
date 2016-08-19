@@ -1181,7 +1181,7 @@ LoadRawHelper::searchForLogFiles(const std::string &pathToRawFile) {
     // ones.
 
     // strip out the raw data file identifier
-    std::string l_rawID("");
+    std::string l_rawID;
     size_t idx = l_filenamePart.rfind('.');
 
     if (idx != std::string::npos) {

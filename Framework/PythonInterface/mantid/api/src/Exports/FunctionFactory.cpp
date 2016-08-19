@@ -1,6 +1,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 
@@ -20,6 +21,8 @@ using Mantid::PythonInterface::PythonObjectInstantiator;
 using Mantid::Kernel::AbstractInstantiator;
 
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(FunctionFactoryImpl)
 
 namespace {
 ///@cond

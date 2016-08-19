@@ -63,17 +63,17 @@ private:
   CostFunctionFactoryImpl();
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<CostFunctionFactoryImpl>;
-#endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<CostFunctionFactoryImpl>
+typedef Mantid::Kernel::SingletonHolder<CostFunctionFactoryImpl>
     CostFunctionFactory;
 
 } // namespace API
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::CostFunctionFactoryImpl>;
+}
+}
 
 #endif /*MANTID_API_COSTFUNCTIONFACTORY_H_*/

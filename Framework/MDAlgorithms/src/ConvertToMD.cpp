@@ -261,7 +261,6 @@ void ConvertToMD::exec() {
   // free up the sp to the input workspace, which would be deleted if nobody
   // needs it any more;
   m_InWS2D.reset();
-  return;
 }
 /**
  * Copy over the part of metadata necessary to initialize ConvertToMD plugin

@@ -30,7 +30,6 @@ public:
   static void destroySuite(ConvertUnitsUsingDetectorTableTest *suite) {
     delete suite;
   }
-
   void test_Init() {
     ConvertUnitsUsingDetectorTable alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -83,17 +82,8 @@ public:
     auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         workspaceName);
 
-    //      for (int j=0; j < outWS->getNumberHistograms(); ++j) {
-    //          for (int i=0; i < outWS->blocksize(); ++i) {
-    //              std::cout << "dataX[" << j << "]["<< i << "] = " <<
-    //              outWS->dataX(j)[i] << '\n';
-    //          }
-    //      }
-
-    TS_ASSERT_DELTA(outWS->dataX(0)[0], 0.0, 0.000001);
-    TS_ASSERT_DELTA(outWS->dataX(0)[9], 0.000323676, 0.000001);
-    //      TS_ASSERT_DELTA( outWS->dataX(1)[0], 0.179818, 0.000001 );
-    //      TS_ASSERT_DELTA( outWS->dataX(1)[9], 0.017982, 0.000001 );
+    TS_ASSERT_DELTA(outWS->x(0)[0], 0.0, 0.000001);
+    TS_ASSERT_DELTA(outWS->x(0)[9], 0.000323676, 0.000001);
 
     AnalysisDataService::Instance().remove(workspaceName);
   }

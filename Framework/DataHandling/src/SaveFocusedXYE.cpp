@@ -192,7 +192,6 @@ void SaveFocusedXYE::exec() {
   if (!split) {
     out.close();
   }
-  return;
 }
 
 /** virtual method to set the non workspace properties for this algorithm

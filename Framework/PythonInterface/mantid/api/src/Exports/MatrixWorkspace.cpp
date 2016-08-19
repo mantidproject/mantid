@@ -3,6 +3,7 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
@@ -23,6 +24,8 @@ using namespace Mantid::PythonInterface::Policies;
 using namespace Mantid::PythonInterface::Registry;
 namespace NumPy = Mantid::PythonInterface::NumPy;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(MatrixWorkspace)
 
 namespace {
 /// Typedef for data access, i.e. dataX,Y,E members
@@ -229,10 +232,9 @@ void export_MatrixWorkspace() {
            "Get a pointer to a workspace axis")
       .def("isHistogramData", &MatrixWorkspace::isHistogramData, arg("self"),
            "Returns True if this is considered to be binned data.")
-      .def("isDistribution", (const bool &(MatrixWorkspace::*)() const) &
+      .def("isDistribution", (bool (MatrixWorkspace::*)() const) &
                                  MatrixWorkspace::isDistribution,
-           arg("self"), return_value_policy<copy_const_reference>(),
-           "Returns the status of the distribution flag")
+           arg("self"), "Returns the status of the distribution flag")
       .def("YUnit", &MatrixWorkspace::YUnit, arg("self"),
            "Returns the current Y unit for the data (Y axis) in the workspace")
       .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),

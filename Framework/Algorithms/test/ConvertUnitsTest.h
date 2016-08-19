@@ -161,23 +161,18 @@ public:
     Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
     // Check that the output unit is correct
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "Wavelength");
+
     // Test that y & e data is unchanged
-    Mantid::MantidVec y = output2D->dataY(101);
-    Mantid::MantidVec e = output2D->dataE(101);
-    unsigned int ten = 10;
-    TS_ASSERT_EQUALS(y.size(), ten);
-    TS_ASSERT_EQUALS(e.size(), ten);
-    Mantid::MantidVec yIn = input2D->dataY(101);
-    Mantid::MantidVec eIn = input2D->dataE(101);
-    TS_ASSERT_DELTA(y[0], yIn[0], 1e-6);
-    TS_ASSERT_DELTA(y[4], yIn[4], 1e-6);
-    TS_ASSERT_DELTA(e[1], eIn[1], 1e-6);
+    TS_ASSERT_EQUALS(output2D->y(101).size(), 10);
+    TS_ASSERT_EQUALS(output2D->e(101).size(), 10);
+
+    TS_ASSERT_DELTA(output2D->y(101)[0], input2D->y(101)[0], 1e-6);
+    TS_ASSERT_DELTA(output2D->y(101)[4], input2D->y(101)[4], 1e-6);
+    TS_ASSERT_DELTA(output2D->e(101)[1], input2D->e(101)[1], 1e-6);
+
     // Test that spectra that should have been zeroed have been
-    Mantid::MantidVec x = output2D->dataX(0);
-    y = output2D->dataY(0);
-    e = output2D->dataE(0);
-    TS_ASSERT_EQUALS(y[1], 0);
-    TS_ASSERT_EQUALS(e[9], 0);
+    TS_ASSERT_EQUALS(output2D->y(0)[1], 0);
+    TS_ASSERT_EQUALS(output2D->e(0)[9], 0);
     // Check that the data has truly been copied (i.e. isn't a reference to the
     // same
     //    vector in both workspaces)
@@ -186,18 +181,16 @@ public:
     CountStandardDeviations testE(test, test + 10);
     output2D->setCounts(111, testY);
     output2D->setCountStandardDeviations(111, testE);
-    y = output2D->dataY(111);
-    TS_ASSERT_EQUALS(y[3], 44.0);
-    yIn = input2D->dataY(111);
-    TS_ASSERT_EQUALS(yIn[3], 3.0);
+
+    TS_ASSERT_EQUALS(output2D->y(111)[3], 44.0);
+
+    TS_ASSERT_EQUALS(input2D->y(111)[3], 3.0);
 
     // Check that a couple of x bin boundaries have been correctly converted
-    x = output2D->dataX(103);
-    TS_ASSERT_DELTA(x[5], 1.5808, 0.0001);
-    TS_ASSERT_DELTA(x[10], 3.1617, 0.0001);
+    TS_ASSERT_DELTA(output2D->x(103)[5], 1.5808, 0.0001);
+    TS_ASSERT_DELTA(output2D->x(103)[10], 3.1617, 0.0001);
     // Just check that an input bin boundary is unchanged
-    Mantid::MantidVec xIn = input2D->dataX(66);
-    TS_ASSERT_EQUALS(xIn[4], 4000.0);
+    TS_ASSERT_EQUALS(input2D->x(66)[4], 4000.0);
 
     AnalysisDataService::Instance().remove("outputSpace");
   }
@@ -217,7 +210,7 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "quickOut2"));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Energy");
-    TS_ASSERT_DELTA(output->dataX(1)[1], 10.10, 0.01);
+    TS_ASSERT_DELTA(output->x(1)[1], 10.10, 0.01);
     // Check EMode has been set
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Elastic, output->getEMode());
 
@@ -244,12 +237,15 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "quickOut"));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "dSpacing");
-    TS_ASSERT_EQUALS(&(output->dataX(0)[0]), &(output->dataX(0)[0]));
+    // What is this meant to be testing should this be input vs output?
+    TS_ASSERT_EQUALS(&(output->x(0)[0]), &(output->x(0)[0]));
     const size_t xsize = output->blocksize();
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
-      const auto &outX = output->readX(i);
+      auto &outX = output->x(i);
       for (size_t j = 0; j <= xsize; ++j) {
-        TS_ASSERT_EQUALS(outX[j], 2.0 * M_PI);
+        // Axis gets reversed by ConvertUnits to make it strictly increasing
+        TS_ASSERT_EQUALS(outX[j],
+                         2.0 * M_PI / (1.0 + static_cast<double>(xsize - j)));
       }
     }
 
@@ -307,13 +303,13 @@ public:
             "output"));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "MomentumTransfer");
     // What is this testing? Does it have to do with copy-on-write dataX?
-    TS_ASSERT_EQUALS(&(output->dataX(0)[0]), &(output->dataX(0)[0]));
+    TS_ASSERT_EQUALS(&(output->x(0)[0]), &(output->x(0)[0]));
     const size_t xsize = output->blocksize();
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
-      const auto &inX = input->readX(i);
-      const auto &inY = input->readY(i);
-      const auto &outX = output->readX(i);
-      const auto &outY = output->readY(i);
+      auto &inX = input->x(i);
+      auto &inY = input->y(i);
+      auto &outX = output->x(i);
+      auto &outY = output->y(i);
       for (size_t j = 0; j <= xsize; ++j) {
         TS_ASSERT_DELTA(outX[j], inX[j], 1e-9);
       }
@@ -425,7 +421,7 @@ public:
     size_t num_events = WS->getNumberEvents();
     EventList el = WS->getSpectrum(wkspIndex);
     double a_tof = el.getEvents()[0].tof();
-    double a_x = el.dataX()[1];
+    double a_x = el.x()[1];
 
     if (!alg.isInitialized())
       alg.initialize();
@@ -448,7 +444,7 @@ public:
     // But a TOF changed.
     TS_ASSERT_DIFFERS(a_tof, WS->getSpectrum(wkspIndex).getEvents()[0].tof());
     // and a X changed
-    TS_ASSERT_DIFFERS(a_x, WS->getSpectrum(wkspIndex).dataX()[1]);
+    TS_ASSERT_DIFFERS(a_x, WS->getSpectrum(wkspIndex).x()[1]);
     // Check EMode has been set
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, WS->getEMode());
   }
@@ -551,6 +547,45 @@ public:
 
   void testExecEvent_RemainsSorted_Pulsetime_to_Energy() {
     do_testExecEvent_RemainsSorted(PULSETIME_SORT, "Energy");
+  }
+
+  void testDeltaEFailDoesNotAlterInPlaceWorkspace() {
+
+    std::string wsName =
+        "ConvertUnits_testDeltaEFailDoesNotAlterInPlaceWorkspace";
+    MatrixWorkspace_sptr ws =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 200,
+                                                                     false);
+    // set to a distribution
+    ws->setDistribution(true);
+    AnalysisDataService::Instance().add(wsName, ws);
+
+    // get a copy of some original values
+    auto originalUnit = ws->getAxis(0)->unit();
+    auto originalEMode = ws->getEMode();
+    TS_ASSERT_THROWS_ANYTHING(ws->getEFixed());
+    auto originalYdata = ws->readY(0);
+
+    ConvertUnits conv;
+    conv.initialize();
+    conv.setPropertyValue("InputWorkspace", wsName);
+    // in place conversion
+    conv.setPropertyValue("OutputWorkspace", wsName);
+    conv.setPropertyValue("Target", "DeltaE");
+    // do not set emode - this will cause a failure
+    // do not set efixed either
+    conv.execute();
+
+    TSM_ASSERT("Expected ConvertUnits to throw on deltaE conversion without "
+               "eMode or eFixed set",
+               !conv.isExecuted());
+
+    TS_ASSERT_EQUALS(originalUnit, ws->getAxis(0)->unit());
+    TS_ASSERT_EQUALS(originalEMode, ws->getEMode());
+    TS_ASSERT_THROWS_ANYTHING(ws->getEFixed());
+    TS_ASSERT_EQUALS(originalYdata, ws->readY(0));
+
+    AnalysisDataService::Instance().remove(wsName);
   }
 
 private:

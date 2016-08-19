@@ -319,8 +319,6 @@ void LoadEventPreNexus2::init() {
   setPropertyGroup("DBOutputBlockNumber", dbgrp);
   setPropertyGroup("DBNumberOutputEvents", dbgrp);
   setPropertyGroup("DBNumberOutputPulses", dbgrp);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -396,8 +394,6 @@ void LoadEventPreNexus2::exec() {
 
   // Cleanup
   delete prog;
-
-  return;
 } // exec()
 
 //------------------------------------------------------------------------------------------------
@@ -447,8 +443,6 @@ void LoadEventPreNexus2::createOutputWorkspace(
                                 << "\"\n";
   }
   this->loadPixelMap(mapping_filename);
-
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -478,8 +472,6 @@ void LoadEventPreNexus2::unmaskVetoEventIndex() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  return;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -553,8 +545,6 @@ void LoadEventPreNexus2::processImbedLogs() {
     g_log.notice() << "Processed imbedded log " << logname << "\n";
 
   } // ENDFOR pit
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -586,8 +576,6 @@ void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle,
   g_log.information() << "Size of Property " << property->name() << " = "
                       << property->size() << " vs Original Log Size = " << nbins
                       << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -946,9 +934,6 @@ void LoadEventPreNexus2::procEvents(
       g_log.notice() << "Pixel " << tmpid << ":  Total number of events = "
                      << this->wrongdetid_pulsetimes[vindex].size() << '\n';
     }
-
-    return;
-
 } // End of procEvents
 
 //----------------------------------------------------------------------------------------------
@@ -1171,8 +1156,6 @@ void LoadEventPreNexus2::procEventsLinear(
     if (local_longest_tof > longest_tof)
       longest_tof = local_longest_tof;
   } // END_CRITICAL
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1214,8 +1197,6 @@ void LoadEventPreNexus2::setProtonCharge(
 
   g_log.information() << "Total proton charge of " << integ
                       << " microAmp*hours found by integrating.\n";
-
-  return;
 }
 
 //-----------------------------------------------------------------------------
@@ -1286,8 +1267,6 @@ void LoadEventPreNexus2::openEventFile(const std::string &filename) {
   }
 
   g_log.information() << "Reading " << max_events << " event records\n";
-
-  return;
 }
 
 //-----------------------------------------------------------------------------
@@ -1387,8 +1366,6 @@ void LoadEventPreNexus2::processInvestigationInputs() {
     m_dbOpNumPulses = static_cast<size_t>(dbnumpulses);
   else
     m_dbOpNumPulses = 0;
-
-  return;
 }
 
 } // namespace DataHandling
