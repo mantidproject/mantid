@@ -312,6 +312,7 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         if self.maskDetectors:
             l("MaskDetectors(%s, '%s')" % (gAll, self.maskDetectors))
+
         l()
 
         if self.NORM_MONITOR == self.normalise:
@@ -322,10 +323,12 @@ class TOFTOFScriptElement(BaseScriptElement):
             if self.vanRuns:
                 wsVanNorm = wsVan + 'Norm'
                 l("%s = MonitorEfficiencyCorUser(%s)" % (wsVanNorm, wsVan))
+
             if self.ecRuns:
                 wsECNorm = wsEC + 'Norm'
                 l("%s = MonitorEfficiencyCorUser(%s)" % (wsECNorm, wsEC))
-                l("%s = MonitorEfficiencyCorUser(%s)" % (gDataNorm, gDataRuns))
+
+            l("%s = MonitorEfficiencyCorUser(%s)" % (gDataNorm, gDataRuns))
             l()
 
         elif self.NORM_TIME == self.normalise:
@@ -333,12 +336,15 @@ class TOFTOFScriptElement(BaseScriptElement):
 
             # TODO (ask Wiebke how to do it best)
             l("# normalise to time")
+
             if self.vanRuns:
                 wsVanNorm = wsVan + 'Norm'
                 l("%s = Scale(%s, 1/%s, 'Multiply')" % (wsVanNorm, wsVan, logTime(wsVan)))
+
             if self.ecRuns:
                 wsECNorm = wsEC + 'Norm'
                 l("%s = Scale(%s, 1/%s, 'Multiply')" % (wsECNorm, wsEC, logTime(wsEC)))
+
             l("names = []")
             l("for ws in %s:" % (gDataRuns))
             l("    name = ws.getName() + 'Norm'")
