@@ -43,8 +43,8 @@ public:
 
   /// Copy constructor
   Peak(const Peak &other);
-  Peak(Peak &&) noexcept = default;
-  Peak &operator=(Peak &&) noexcept = default;
+  Peak(Peak &&) = default;
+  Peak &operator=(Peak &&) = default;
 
   // Construct a peak from a reference to the interface
 
