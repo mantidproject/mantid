@@ -544,7 +544,7 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
  *  @param bankPrefixName   The prefix to the bank names.
  */
 void SCDCalibratePanels::LoadISawDetCal(
-		boost::shared_ptr<const Instrument> &instrument,
+    boost::shared_ptr<const Instrument> &instrument,
     boost::container::flat_set<string> &AllBankName, double &T0, double &L0,
     string filename, string bankPrefixName) {
 
