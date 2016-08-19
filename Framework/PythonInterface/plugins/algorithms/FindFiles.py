@@ -25,7 +25,7 @@ class FindFiles(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(MultipleFileProperty('FileList',extensions=['nxs']),doc='List of input files')
         self.declareProperty(name='NexusCriteria',defaultValue='',
-                             doc='Logical expresion for metadata criteria using python syntax.'
+                             doc='Logical expresion for metadata criteria using python syntax. '
                                  'Provide full absolute names for nexus entries enclosed with $ symbol from both sides.')
         self.declareProperty(name='Result', defaultValue='', direction=Direction.Output,
                              doc='Comma separated list of the fully resolved file names satisfying the given criteria.')
@@ -52,7 +52,7 @@ class FindFiles(PythonAlgorithm):
                         # keep other portions intact
                         toeval += splitted[i]
                 try:
-                    if eval(toeval,{'__builtins__':{}}): # disable builtins for safer eval, but not 100% safe!
+                    if eval(toeval):
                         outputfiles.append(run)
                 except (NameError,ValueError,SyntaxError):
                     self.log().error('Invalid syntax, check NexusCriteria.')
