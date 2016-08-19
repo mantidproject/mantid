@@ -78,6 +78,10 @@ void EnggDiffFittingPresenter::notify(
     fittingRunNoChanged();
     break;
 
+  case IEnggDiffFittingPresenter::Load:
+    processLoad();
+    break;
+
   case IEnggDiffFittingPresenter::FitPeaks:
     processFitPeaks();
     break;
@@ -476,6 +480,17 @@ void EnggDiffFittingPresenter::enableMultiRun(
 
 void EnggDiffFittingPresenter::processStart() {}
 
+void EnggDiffFittingPresenter::processLoad() {
+  // while file text-area is not empty
+  // while directory vector is not empty
+  // if loaded here set a global variable true so doesnt load again?
+
+  const std::string focusedFile = m_view->getFittingRunNo();
+
+  runLoadAlg(focusedFile);
+  plotFocusedFile();
+}
+
 void EnggDiffFittingPresenter::processShutDown() {
   m_view->saveSettings();
   cleanup();
@@ -705,25 +720,7 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
   }
 
   // load the focused workspace file to perform single peak fits
-  try {
-    auto load =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
-    load->initialize();
-    load->setPropertyValue("Filename", focusedRunNo);
-    load->setPropertyValue("OutputWorkspace", g_focusedFittingWSName);
-    load->execute();
-
-    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-    focusedWS = ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
-  } catch (std::runtime_error &re) {
-    g_log.error()
-        << "Error while loading focused data. "
-           "Could not run the algorithm Load successfully for the Fit "
-           "peaks (file name: " +
-               focusedRunNo + "). Error description: " + re.what() +
-               " Please check also the previous log messages for details.";
-    return;
-  }
+  runLoadAlg(focusedRunNo);
 
   setDifcTzero(focusedWS);
 
@@ -766,6 +763,30 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
   } catch (std::invalid_argument &ia) {
     g_log.error() << "Error, Fitting could not finish off correctly, " +
                          std::string(ia.what()) << '\n';
+    return;
+  }
+}
+
+void EnggDiffFittingPresenter::runLoadAlg(const std::string focusedFile) {
+  // load the focused workspace file to perform single peak fits
+  try {
+    auto load =
+        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+    load->initialize();
+    load->setPropertyValue("Filename", focusedFile);
+    load->setPropertyValue("OutputWorkspace", g_focusedFittingWSName);
+    load->execute();
+
+    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+    MatrixWorkspace_sptr focusedWS =
+        ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
+  } catch (std::runtime_error &re) {
+    g_log.error()
+        << "Error while loading focused data. "
+           "Could not run the algorithm Load successfully for the Fit "
+           "peaks (file name: " +
+               focusedFile + "). Error description: " + re.what() +
+               " Please check also the previous log messages for details.";
     return;
   }
 }
@@ -1426,6 +1447,36 @@ bool EnggDiffFittingPresenter::isDigit(std::string text) {
     }
   }
   return true;
+}
+
+void EnggDiffFittingPresenter::plotFocusedFile() {
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+
+  if (!ADS.doesExist(g_focusedFittingWSName)) {
+    g_log.error() << "Focused workspace could not be plotted as there is no " +
+                         g_focusedFittingWSName + " workspace found.\n";
+    m_view->showStatus("Error while plotting focused workspace");
+    return;
+  }
+
+  try {
+    // code goes here @shahroz
+    auto focusedPeaksWS =
+        ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
+    auto focusedData = ALCHelper::curveDataFromWs(focusedPeaksWS);
+    m_view->setDataVector(focusedData, true, m_fittingFinishedOK);
+
+  } catch (std::runtime_error &re) {
+    g_log.error()
+        << "Unable to plot focused " + g_focusedFittingWSName +
+               "workspace on the canvas. "
+               "Error description: " +
+               re.what() +
+               " Please check also the previous log messages for details.";
+
+    m_view->showStatus("Error while plotting the peaks fitted");
+    throw;
+  }
 }
 
 void EnggDiffFittingPresenter::plotFitPeaksCurves() {

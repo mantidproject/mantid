@@ -76,6 +76,8 @@ public:
   void doFitting(const std::string &focusedRunNo,
                  const std::string &expectedPeaks);
 
+  void runLoadAlg(const std::string focusedFile);
+
   void runFittingAlgs(std::string FocusedFitPeaksTableName,
                       std::string FocusedWSName);
 
@@ -83,6 +85,8 @@ public:
   functionStrFactory(Mantid::API::ITableWorkspace_sptr &paramTableWS,
                      std::string tableName, size_t row, std::string &startX,
                      std::string &endX);
+
+  void plotFocusedFile();
 
   void plotFitPeaksCurves();
 
@@ -125,6 +129,7 @@ public:
 
 protected:
   void processStart();
+  void processLoad();
   void processFitPeaks();
   void processFitAllPeaks();
   void processShutDown();
