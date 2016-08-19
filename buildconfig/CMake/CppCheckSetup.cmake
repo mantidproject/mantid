@@ -42,7 +42,7 @@ if ( CPPCHECK_EXECUTABLE )
       )
 
   set ( CPPCHECK_EXCLUDES
-        Framework/LiveData/src/DAE/
+        Framework/LiveData/src/ISIS/DAE/
         Framework/DataHandling/src/LoadRaw/
         Framework/ICat/inc/MantidICat/ICat3/GSoapGenerated/
         Framework/ICat/src/ICat3/GSoapGenerated/
