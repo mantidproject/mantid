@@ -103,6 +103,8 @@ void EnggDiffFittingViewQtWidget::doSetup() {
   connect(m_ui.pushButton_fitting_browse_peaks, SIGNAL(released()), this,
           SLOT(browseClicked()));
 
+  connect(m_ui.pushButton_load, SIGNAL(released()), this, SLOT(loadClicked()));
+
   connect(m_ui.pushButton_fit, SIGNAL(released()), this, SLOT(fitClicked()));
 
   connect(m_ui.pushButton_fit_all, SIGNAL(released()), this,
@@ -171,6 +173,7 @@ void EnggDiffFittingViewQtWidget::saveSettings() const {
 
 void EnggDiffFittingViewQtWidget::enable(bool enable) {
   m_ui.pushButton_fitting_browse_run_num->setEnabled(enable);
+  m_ui.pushButton_load->setEnabled(enable);
   m_ui.lineEdit_pushButton_run_num->setEnabled(enable);
   m_ui.pushButton_fitting_browse_peaks->setEnabled(enable);
   m_ui.lineEdit_fitting_peaks->setEnabled(enable);
@@ -212,6 +215,10 @@ std::string EnggDiffFittingViewQtWidget::focusingDir() const {
 std::string
 EnggDiffFittingViewQtWidget::enggRunPythonCode(const std::string &pyCode) {
   return m_mainPythonRunner->enggRunPythonCode(pyCode);
+}
+
+void EnggDiffFittingViewQtWidget::loadClicked() {
+  m_presenter->notify(IEnggDiffFittingPresenter::Load);
 }
 
 void EnggDiffFittingViewQtWidget::fitClicked() {

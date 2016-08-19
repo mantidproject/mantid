@@ -180,6 +180,7 @@ private slots:
   void setBankIdComboBox(int idx) override;
   void setPeakPick();
   void clearPeakList();
+  void loadClicked();
   void fitClicked();
   void fitAllClicked();
   void FittingRunNo();
