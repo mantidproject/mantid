@@ -24,6 +24,7 @@ DECLARE_ALGORITHM(FakeISISEventDAE)
 using namespace Kernel;
 using namespace API;
 
+namespace {
 /**
 * Implements Poco TCPServerConnection and does the actual job of interpreting
 * commands
@@ -144,6 +145,7 @@ public:
                                     m_nEvents, m_prog);
   }
 };
+} // end anonymous
 
 /// (Empty) Constructor
 FakeISISEventDAE::FakeISISEventDAE() : m_server(nullptr) {}

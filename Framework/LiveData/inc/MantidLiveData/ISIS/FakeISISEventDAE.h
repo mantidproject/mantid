@@ -1,5 +1,5 @@
-#ifndef MANTID_LIVEDATA_FAKEISISHISTODAE_H_
-#define MANTID_LIVEDATA_FAKEISISHISTODAE_H_
+#ifndef MANTID_LIVEDATA_FAKEISISEVENTDAE_H_
+#define MANTID_LIVEDATA_FAKEISISEVENTDAE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -73,4 +73,4 @@ private:
 } // namespace LiveData
 } // namespace Mantid
 
-#endif /*MANTID_LIVEDATA_FAKEISISHISTODAE_H_*/
+#endif /*MANTID_LIVEDATA_FAKEEventSHISTODAE_H_*/

@@ -13,6 +13,8 @@ namespace LiveData {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FakeISISHistoDAE)
 
+namespace {
+
 typedef enum {
   ISISDSUnknown = 0,
   ISISDSInt32 = 1,
@@ -306,6 +308,8 @@ public:
     return new TestServerConnection(socket, m_nPeriods, m_nSpectra, m_nBins);
   }
 };
+
+} // end anonymous
 
 using namespace Kernel;
 using namespace API;
