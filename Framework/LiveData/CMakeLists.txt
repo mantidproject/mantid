@@ -48,12 +48,18 @@ set ( TEST_FILES
 	FakeEventDataListenerTest.h
 	FileEventDataListenerTest.h
 	ISISHistoDataListenerTest.h
-	ISISKafkaEventListenerTest.h
 	LiveDataAlgorithmTest.h
 	LoadLiveDataTest.h
 	MonitorLiveDataTest.h
 	StartLiveDataTest.h
 )
+
+find_package ( LibRDKafka )
+if ( LIBRDKAFKA_FOUND )
+  set ( SRC_FILES ${SRC_FILES} src/ISIS/ISISKafkaEventListener.cpp )
+  set ( INC_FILES ${INC_FILES} inc/MantidLiveData/ISIS/ISISKafkaEventListener.h )
+  set ( TEST_FILES ${TEST_FILES} ISISKafkaEventListenerTest.h )
+endif()
 
 if (COVERALLS)
     foreach( loop_var ${SRC_FILES} ${INC_FILES})
