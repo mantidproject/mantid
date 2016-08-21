@@ -22,7 +22,7 @@ class CalculatePowder(IOmodule):
         @param abins_data: object of type AbinsData with data from input DFT file
         @param temperature:  temperature in K
         """
-        super(CalculatePowder, self).__init__(input_filename=filename, group_name=AbinsParameters.powder_data_group)
+        super(CalculatePowder, self).__init__(input_filename=filename, group_name=AbinsParameters.powder_data_group+ "/"+ "%sK"%temperature)
 
         if not isinstance(abins_data, AbinsData):
             raise ValueError("Object of AbinsData was expected.")
@@ -111,7 +111,7 @@ class CalculatePowder(IOmodule):
         data = self._calculate_powder()
 
         self.addAttribute("filename", self._input_filename)
-        self.addStructuredDataset("powder_data_%sK"%self._temperature, data.extract())
+        self.addStructuredDataset("powder_data", data.extract())
 
         self.save()
 
@@ -123,13 +123,13 @@ class CalculatePowder(IOmodule):
         Loads mean square displacements and Debye-Waller factors from an hdf file.
         @return: object of type PowderData with mean square displacements and Debye-Waller factors.
         """
-        _data = self.load(list_of_structured_datasets=["powder_data_%sK"%self._temperature])
+        _data = self.load(list_of_structured_datasets=["powder_data"])
 
 
         _powder_data = PowderData(temperature=self._temperature,
-                                  num_atoms=_data["structured_datasets"]["powder_data_%sK"%self._temperature]["msd"].shape[0])
+                                  num_atoms=_data["structured_datasets"]["powder_data"]["msd"].shape[0])
 
-        _powder_data.set(_data["structured_datasets"]["powder_data_%sK"%self._temperature])
+        _powder_data.set(_data["structured_datasets"]["powder_data"])
 
         return _powder_data
 
