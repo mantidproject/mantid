@@ -19,7 +19,7 @@ class CalculateQ(IOmodule):
         @param instrument: object of type  Instrument
         @param sample_form: form in which sample is (Powder or SingleCrystal)
         """
-        super(CalculateQ, self).__init__(input_filename=filename, group_name=AbinsParameters.Q_data_group)
+        super(CalculateQ, self).__init__(input_filename=filename, group_name=AbinsParameters.Q_data_group+  "/%s"%instrument +"/" + sample_form)
 
         if isinstance(instrument, Instrument):
             self._instrument = instrument
@@ -80,9 +80,6 @@ class CalculateQ(IOmodule):
             raise ValueError("General case of Q data not implemented yet.")
 
         self.addNumpyDataset("data", self._Qvectors.extract()) # Q vectors in the form of numpy array
-        self.addAttribute("frequency_dependence",self._Qvectors._frequency_dependence)
-        self.addAttribute("instrument_name", self._instrument._name)
-        self.addAttribute("sample_Form", self._sample_form)
         self.addAttribute("filename", self._input_filename)
         self.save()
 
@@ -94,8 +91,8 @@ class CalculateQ(IOmodule):
         Loads  Q data from hdf file.
         @return: QData object
         """
-        data = self.load(list_of_numpy_datasets=["data"], list_of_attributes=["frequency_dependence"])
-        freq = data["attributes"]["frequency_dependence"]
+        data = self.load(list_of_numpy_datasets=["data"])
+        freq =  self._instrument != "None"
         results = QData(frequency_dependence=freq)
 
         if freq: results.set_k(k=data["datasets"]["data"].shape[0])
