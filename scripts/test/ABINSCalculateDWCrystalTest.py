@@ -39,18 +39,15 @@ class ABINSCalculateDWCrystalTest(unittest.TestCase):
         _castep_reader =  LoadCASTEP(input_DFT_filename=filename)
 
         _good_data = _castep_reader.readPhononFile()
-        # wrong filename
-        with self.assertRaises(ValueError):
-            _poor_tester = CalculateDWCrystal(filename=1, temperature=self._temperature, abins_data=_good_data)
 
         # wrong temperature
         with self.assertRaises(ValueError):
-            _poor_tester = CalculateDWCrystal(filename=filename, temperature=-10, abins_data=_good_data)
+            _poor_tester = CalculateDWCrystal(temperature=-10, abins_data=_good_data)
 
         # data from object of type AtomsData instead of object of type AbinsData
         bad_data = _good_data.extract()["atoms_data"]
         with self.assertRaises(ValueError):
-            _poor_tester = CalculateDWCrystal(filename=filename, temperature=self._temperature, abins_data=bad_data)
+            _poor_tester = CalculateDWCrystal(temperature=self._temperature, abins_data=bad_data)
 
 
     #       main test
@@ -67,7 +64,7 @@ class ABINSCalculateDWCrystalTest(unittest.TestCase):
         # calculation of DW
         _good_data = self._get_good_data(filename=name)
 
-        _good_tester = CalculateDWCrystal(filename=name + ".phonon", temperature=self._temperature, abins_data=_good_data["DFT"])
+        _good_tester = CalculateDWCrystal(temperature=self._temperature, abins_data=_good_data["DFT"])
         calculated_data = _good_tester.getDW()
 
         # check if evaluated DW are correct

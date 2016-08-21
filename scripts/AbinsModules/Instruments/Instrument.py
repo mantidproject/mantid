@@ -31,3 +31,7 @@ class Instrument(object):
         @return: abscissa for convoluted S
         """
         return None
+
+
+    def __str__(self):
+        return self._name

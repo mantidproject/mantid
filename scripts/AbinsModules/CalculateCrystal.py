@@ -12,9 +12,6 @@ class CalculateCrystal(IOmodule):
         @param abins_data: object of type AbinsData with data from phonon DFT file
         @param temperature:  temperature in K
         """
-
-        super(CalculateCrystal, self).__init__(input_filename=filename, group_name=AbinsParameters.crystal_data_group + "/" + "%sK"%temperature)
-
         if not isinstance(abins_data, AbinsData):
             raise ValueError("Object of AbinsData was expected.")
         self._abins_data = abins_data
@@ -25,10 +22,12 @@ class CalculateCrystal(IOmodule):
             raise ValueError("Temperature cannot be negative.")
         self._temperature = float(temperature) # temperature in K
 
+        super(CalculateCrystal, self).__init__(input_filename=filename, group_name=AbinsParameters.crystal_data_group + "/" + "%sK"%self._temperature)
+
 
     def _calculate_crystal(self):
 
-        _dw_crystal = CalculateDWCrystal(filename=self._input_filename, temperature=self._temperature, abins_data=self._abins_data)
+        _dw_crystal = CalculateDWCrystal(temperature=self._temperature, abins_data=self._abins_data)
         _dw_crystal_data = _dw_crystal.getDW()
         _crystal_data = CrystalData()
         _crystal_data.set(abins_data=self._abins_data, dw_crystal_data=_dw_crystal_data)

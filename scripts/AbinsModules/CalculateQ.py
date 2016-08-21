@@ -19,12 +19,10 @@ class CalculateQ(IOmodule):
         @param instrument: object of type  Instrument
         @param sample_form: form in which sample is (Powder or SingleCrystal)
         """
-        super(CalculateQ, self).__init__(input_filename=filename, group_name=AbinsParameters.Q_data_group+  "/%s"%instrument +"/" + sample_form)
-
         if isinstance(instrument, Instrument):
             self._instrument = instrument
         elif instrument is None:
-            self._instrument = None
+            self._instrument = "None"
         else:
             raise ValueError("Invalid instrument.")
 
@@ -35,6 +33,8 @@ class CalculateQ(IOmodule):
         self._k_points_data = None
         self._Qvectors = None # data with Q vectors
 
+        super(CalculateQ, self).__init__(input_filename=filename, group_name=AbinsParameters.Q_data_group + "/%s"%self._instrument + "/" + self._sample_form)
+
 
     def  collectFrequencies(self, k_points_data=None):
         """
@@ -42,7 +42,7 @@ class CalculateQ(IOmodule):
         @param k_points_data: frequencies in the form of numpy array
         """
 
-        if self._instrument is None:
+        if self._instrument == "None":
             raise ValueError("Q vectors do not depend on frequency so collecting  frequencies is not needed.")
         
         if not isinstance(k_points_data, KpointsData):

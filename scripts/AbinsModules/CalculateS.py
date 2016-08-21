@@ -27,13 +27,13 @@ class CalculateS(IOmodule):
         @param instrument_name: name of instrument (str)
 
         """
-        super(CalculateS, self).__init__(input_filename=filename, group_name=AbinsParameters.S_data_group)
+
 
         if not (isinstance(temperature, float) or isinstance(temperature, int)):
             raise ValueError("Invalid value of the temperature. Number was expected.")
         if temperature < 0:
             raise ValueError("Temperature cannot be negative.")
-        self._temperature = temperature
+        self._temperature = float(temperature)
 
         if  sample_form in AbinsParameters.all_sample_forms:
             self._sample_form = sample_form
@@ -49,6 +49,8 @@ class CalculateS(IOmodule):
             self._instrument_name = instrument_name
         else:
             raise ValueError("Unknown instrument %s" % instrument_name)
+
+        super(CalculateS, self).__init__(input_filename=filename, group_name=AbinsParameters.S_data_group + "/" + self._instrument_name + "/" + self._sample_form +"/%sK"%self._temperature)
 
 
     def _calculate_S(self):
@@ -207,8 +209,6 @@ class CalculateS(IOmodule):
 
         data = self._calculate_S()
 
-        self.addAttribute("temperature", self._temperature)
-        self.addAttribute("sample_form", self._sample_form)
         self.addAttribute("filename", self._input_filename)
         extracted_data = data.extract()
         self.addStructuredDataset("atoms_data", extracted_data["atoms_data"])
@@ -229,9 +229,8 @@ class CalculateS(IOmodule):
         """
         _data = self.load(list_of_structured_datasets=["atoms_data"],
                           list_of_numpy_datasets=["convoluted_frequencies"],
-                          list_of_attributes=["temperature", "sample_form", "filename"])
-        _s_data = SData(temperature=_data["attributes"]["temperature"],
-                        sample_form=_data["attributes"]["sample_form"])
+                          list_of_attributes=["filename"])
+        _s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
         _s_data.set(items=dict(atoms_data=_data["structured_datasets"]["atoms_data"],
                                convoluted_frequencies=_data["datasets"]["convoluted_frequencies"]))
 

@@ -13,20 +13,17 @@ class CalculateDWCrystal(IOmodule):
     Class for calculating Debye-Waller factors for single crystals (sample form is SingleCrystal).
     """
     
-    def __init__(self, filename=None, temperature=None, abins_data=None):
+    def __init__(self, temperature=None, abins_data=None):
         """
-        @param filename:  name of input filename (CASTEP: foo.phonon)
         @param temperature: temperature in K for which Debye-Waller factors should be calculated
         @param abins_data: input Abins data (type: AbinsData)
         """
-
-        super(CalculateDWCrystal, self).__init__(input_filename=filename, group_name=AbinsParameters.DW_data_group)
 
         if not (isinstance(temperature, float) or isinstance(temperature, int)):
             raise ValueError("Invalid value of the temperature. Number was expected.")
         if temperature < 0:
             raise ValueError("Temperature cannot be negative.")
-        self._temperature = temperature
+        self._temperature = float(temperature)
 
         if isinstance(abins_data, AbinsData):
             self._abins_data = abins_data
