@@ -716,13 +716,10 @@ void MergeRuns::getSampleList(MergeLogType sampleLogBehaviour, std::string param
       continue;
     }
     if (sampleLogBehaviour == list) {
-      Property *stringProperty = new PropertyWithValue<std::string>(item + "_list", prop->value(), Direction::Input);
-      m_logMap[item] = std::make_pair(stringProperty, sampleLogBehaviour);
       ws->mutableRun().addProperty(item + "_list", prop->value());
-    } else {
-      m_logMap[item] = std::make_pair(prop, sampleLogBehaviour);
+      prop = ws->getLog(item + "_list");
     }
-
+    m_logMap[item] = std::make_pair(prop, sampleLogBehaviour);
   }
 }
 
