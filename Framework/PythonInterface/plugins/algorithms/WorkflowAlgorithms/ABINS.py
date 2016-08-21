@@ -59,7 +59,7 @@ class ABINS(PythonAlgorithm):
                              extensions=["raw", "dat"]),
                              doc="File with the experimental inelastic spectrum to compare.")
 
-        self.declareProperty(name="Temperature[K]",
+        self.declareProperty(name="Temperature",
                              direction=Direction.Input,
                              defaultValue=10.0,
                              doc="Temperature in K for which dynamical structure factor S should be calculated.")
@@ -104,9 +104,9 @@ class ABINS(PythonAlgorithm):
         """
         issues = dict()
 
-        temperature = self.getProperty("Temperature[K]").value
+        temperature = self.getProperty("Temperature").value
         if temperature < 0:
-            issues["Temperature[K]"] = "Temperature must be positive."
+            issues["Temperature"] = "Temperature must be positive."
 
         scale = self.getProperty("Scale").value
         if scale < 0:
@@ -512,7 +512,7 @@ class ABINS(PythonAlgorithm):
         self._dft_program = self.getProperty("DFTprogram").value
         self._phononFile = self.getProperty("PhononFile").value
         self._experimentalFile = self.getProperty("ExperimentalFile").value
-        self._temperature = self.getProperty("Temperature[K]").value
+        self._temperature = self.getProperty("Temperature").value
         self._scale =  self.getProperty("Scale").value
         self._sampleForm = self.getProperty("SampleForm").value
         self._instrument = self.getProperty("Instrument").value
