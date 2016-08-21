@@ -877,7 +877,7 @@ public:
     TS_ASSERT(alg.useCustomInputPropertyName());
   }
 
-  void do_test_mergeSampleLogs(WorkspaceGroup_sptr input, std::string mergeType, std::string result, int filesMerged) {
+  void do_test_mergeSampleLogs(WorkspaceGroup_sptr input, std::string mergeType, std::string result, int filesMerged, bool noOutput = false) {
     MatrixWorkspace_sptr input0 = boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0));
     MatrixWorkspace_sptr input1 = boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(1));
 
@@ -885,11 +885,15 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaces", input0->name() + "," + input1->name()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outWS"));
-
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr output;
-    output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    if (noOutput) {
+        TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"), Mantid::Kernel::Exception::NotFoundError);
+        return;
+    } else {
+        TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"));
+    }
 
     Property *prop;
 
@@ -902,6 +906,15 @@ public:
       prop = output->mutableRun().getLogData("prop");
       TS_ASSERT_EQUALS(prop->value(), result);
     }
+
+    sample_logs_teardown();
+  }
+
+  void sample_logs_teardown() {
+    AnalysisDataService::Instance().remove("a1");
+    AnalysisDataService::Instance().remove("b1");
+    AnalysisDataService::Instance().remove("group1");
+    AnalysisDataService::Instance().remove("outWS");
   }
 
   void test_mergeSampleLogs_average() {
@@ -946,6 +959,16 @@ public:
     MatrixWorkspace_sptr a = boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
     a->instrumentParameters().addString(a->getInstrument()->getComponentID(), mergeType, "prop, non_existent");
     do_test_mergeSampleLogs(gws, mergeType, "1.5", 2);
+  }
+
+  void test_mergeSampleLogs_log_used_twice_throws_error() {
+    std::string mergeTypeAverage = "sample_logs_average";
+    std::string mergeTypeSum = "sample_logs_sum";
+    WorkspaceGroup_sptr gws = create_workspace_with_sample_logs<double>(mergeTypeAverage, 1.0, 2.0);
+    MatrixWorkspace_sptr a = boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
+    a->instrumentParameters().addString(a->getInstrument()->getComponentID(), mergeTypeSum, "prop");
+
+    do_test_mergeSampleLogs(gws, mergeTypeAverage, "1.5", 1, true);
   }
 
 private:

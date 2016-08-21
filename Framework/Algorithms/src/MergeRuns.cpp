@@ -683,6 +683,10 @@ void MergeRuns::getSampleList(const MergeLogType &sampleLogBehaviour, const std:
   StringTokenizer tokenizer(params, ",", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
 
   for (auto item : tokenizer.asVector()) {
+    if (m_logMap.count(item) != 0) {
+      throw std::invalid_argument("Error when making list of merge items, sample log \"" + item + "\" defined more than once!");
+    }
+
     Property *prop;
     try {
       prop = ws->getLog(item);
