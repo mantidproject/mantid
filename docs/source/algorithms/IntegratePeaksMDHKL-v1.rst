@@ -22,7 +22,7 @@ in parallel and less memory is required than binning all HKL at once.
 
 with the errors summed in quadrature:
 
-:math:`\sigma_{I,corr}^2 = \sigma_{I,peak}^2 + pts_{peak}/pts_{bg} * \sigma_{I,bg}^2`
+:math:`\sigma_{I,corr}^2 = \sigma_{I,peak}^2 + (pts_{peak}/pts_{bg})^2 * \sigma_{I,bg}^2`
 
 Using the DeltaHKL parameter, the problem of nearly peaks or regions of diffuse scattering can be avoided.  Also for 
 normalized data, the unmeasured data points are excluded from the background. See white regions in last figure.
