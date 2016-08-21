@@ -29,31 +29,6 @@ std::string generateDifferenceMessage(std::string item, std::string wsName, std:
 }
 }
 
-//namespace {
-///// Templated method to convert property to double
-//template<typename T>
-//bool convertSingleValue(const Property *property, double &value) {
-//  if (auto log = dynamic_cast<const PropertyWithValue<T> *>(property)) {
-//    value = static_cast<double>(*log);
-//    return true;
-//  } else {
-//    return false;
-//  }
-//}
-//
-///// Converts numeric property to double
-//bool convertSingleValue(const Property *property, double &value) {
-//  // The first one to succeed short-circuits and the value is returned.
-//  // If all fail, returns false.
-//  return convertSingleValue<double>(property, value) ||
-//      convertSingleValue<int32_t>(property, value) ||
-//      convertSingleValue<int64_t>(property, value) ||
-//      convertSingleValue<float>(property, value) ||
-//      convertSingleValue<uint32_t>(property, value) ||
-//      convertSingleValue<uint64_t>(property, value);
-//}
-//}
-
 /// Default constructor
 MergeRuns::MergeRuns()
     : MultiPeriodGroupAlgorithm(), m_progress(nullptr), m_inEventWS(),
@@ -693,7 +668,7 @@ void MergeRuns::fillHistory() {
   }
 }
 
-void MergeRuns::createSampleLogsMaps(MatrixWorkspace_sptr ws) {
+void MergeRuns::createSampleLogsMaps(const MatrixWorkspace_sptr &ws) {
   getSampleList(average, "sample_logs_average", ws);
   getSampleList(min, "sample_logs_min", ws);
   getSampleList(max, "sample_logs_max", ws);
@@ -703,7 +678,7 @@ void MergeRuns::createSampleLogsMaps(MatrixWorkspace_sptr ws) {
   getSampleList(fail, "sample_logs_fail", ws);
 }
 
-void MergeRuns::getSampleList(MergeLogType sampleLogBehaviour, std::string parameterName, MatrixWorkspace_sptr ws) {
+void MergeRuns::getSampleList(const MergeLogType &sampleLogBehaviour, const std::string &parameterName, const MatrixWorkspace_sptr &ws) {
   std::string params = ws->getInstrument()->getParameterAsString(parameterName, false);
   StringTokenizer tokenizer(params, ",", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
 
@@ -723,12 +698,12 @@ void MergeRuns::getSampleList(MergeLogType sampleLogBehaviour, std::string param
   }
 }
 
-void MergeRuns::calculateUpdatedSampleLogs(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr outWS, int numberOfWSsAdded) {
+void MergeRuns::calculateUpdatedSampleLogs(const MatrixWorkspace_sptr &ws, const MatrixWorkspace_sptr &outWS, const int numberOfWSsAdded) {
   for (auto item : m_logMap) {
     Property *wsProperty = ws->getLog(item.first);
 
-    double wsNumber;
-    double outWSNumber;
+    double wsNumber = 0;
+    double outWSNumber = 0;
 
     try {
       wsNumber = ws->getLogAsSingleValue(item.first);
@@ -775,15 +750,14 @@ void MergeRuns::calculateUpdatedSampleLogs(MatrixWorkspace_sptr ws, MatrixWorksp
     }
   }
 
-void MergeRuns::setUpdatedSampleLogs(MatrixWorkspace_sptr ws) {
+void MergeRuns::setUpdatedSampleLogs(const MatrixWorkspace_sptr &ws) {
   for (auto item : m_logMap) {
     Property *outWSProperty = ws->getLog(item.first)->clone();
-//    outWSProperty->setValueFromProperty(*item.second.first);
     ws->mutableRun().addProperty(outWSProperty, true);
   }
 }
 
-void MergeRuns::resetSampleLogs(MatrixWorkspace_sptr ws) {
+void MergeRuns::resetSampleLogs(const MatrixWorkspace_sptr &ws) {
   for (auto item : m_logMap) {
     Property *wsProperty = ws->getLog(item.first);
     item.second.first->setValue(wsProperty->value());

@@ -159,14 +159,12 @@ private:
   /// Addition tables for event workspaces
   std::vector<boost::shared_ptr<AdditionTable>> m_tables;
 
-  void createSampleLogsMaps(API::MatrixWorkspace_sptr ws);
-  void getSampleList(MergeLogType, std::string parameterName, API::MatrixWorkspace_sptr ws);
-  void calculateUpdatedSampleLogs(API::MatrixWorkspace_sptr ws, API::MatrixWorkspace_sptr outWS, int numberOfWSsAdded);
-  void setUpdatedSampleLogs(API::MatrixWorkspace_sptr ws);
-  void resetSampleLogs(API::MatrixWorkspace_sptr ws);
-
-//  sample_logs_map_string getSampleListString(SampleLogMergeType, std::string parameterName, API::MatrixWorkspace_sptr ws);
-
+  /// Create and update sample logs according to instrument parameters
+  void createSampleLogsMaps(const API::MatrixWorkspace_sptr &ws);
+  void getSampleList(const MergeLogType &, const std::string &parameterName, const API::MatrixWorkspace_sptr &ws);
+  void calculateUpdatedSampleLogs(const API::MatrixWorkspace_sptr &ws, const API::MatrixWorkspace_sptr &outWS, const int numberOfWSsAdded);
+  void setUpdatedSampleLogs(const API::MatrixWorkspace_sptr &ws);
+  void resetSampleLogs(const API::MatrixWorkspace_sptr &ws);
 };
 
 } // namespace Algorithm
