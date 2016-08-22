@@ -237,7 +237,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
       } else {
         // true if string convertible to digit
-        auto isRunNumber = isDigit(strFocusedFile);
+        bool isRunNumber = isDigit(strFocusedFile);
         auto focusDir = m_view->focusingDir();
 
         // if not valid parent dir and not valid single run number
@@ -1468,15 +1468,8 @@ void EnggDiffFittingPresenter::setDefaultBank(
     m_view->setFittingRunNo(selectedFile);
 }
 
-bool EnggDiffFittingPresenter::isDigit(std::string text) const {
-  // bool isDig = true;
-  for (auto i : text) {
-    char *str = &text[i];
-    if (!std::isdigit(*str)) {
-      return false;
-    }
-  }
-  return true;
+bool EnggDiffFittingPresenter::isDigit(const std::string text) const {
+	return std::all_of(text.cbegin(), text.cend(), ::isdigit);
 }
 
 void EnggDiffFittingPresenter::plotFitPeaksCurves() {
