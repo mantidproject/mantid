@@ -33,14 +33,14 @@ public:
        const Mantid::Kernel::V3D &QSampleFrame,
        const Mantid::Kernel::Matrix<double> &goniometer,
        boost::optional<double> detectorDistance = boost::none);
-  Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
+  Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
        double m_Wavelength);
-  Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
-       double m_Wavelength, Mantid::Kernel::V3D HKL);
-  Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
-       double m_Wavelength, Mantid::Kernel::V3D HKL,
-       Mantid::Kernel::Matrix<double> goniometer);
-  Peak(Geometry::Instrument_const_sptr m_inst, double scattering,
+  Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
+       double m_Wavelength, const Mantid::Kernel::V3D &HKL);
+  Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
+       double m_Wavelength, const Mantid::Kernel::V3D &HKL,
+       const Mantid::Kernel::Matrix<double> &goniometer);
+  Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
        double m_Wavelength);
 
   /// Copy constructor

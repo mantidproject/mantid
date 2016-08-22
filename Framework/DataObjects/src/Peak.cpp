@@ -94,7 +94,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
  * @param m_Wavelength :: incident neutron wavelength, in Angstroms
  * @return
  */
-Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
+Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
            double m_Wavelength)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
@@ -116,8 +116,8 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
  * @param HKL :: vector with H,K,L position of the peak
  * @return
  */
-Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
-           double m_Wavelength, Mantid::Kernel::V3D HKL)
+Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
+           double m_Wavelength, const Mantid::Kernel::V3D &HKL)
     : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
@@ -139,9 +139,9 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
  * @param goniometer :: a 3x3 rotation matrix
  * @return
  */
-Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
-           double m_Wavelength, Mantid::Kernel::V3D HKL,
-           Mantid::Kernel::Matrix<double> goniometer)
+Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
+           double m_Wavelength, const Mantid::Kernel::V3D &HKL,
+           const Mantid::Kernel::Matrix<double> &goniometer)
     : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
@@ -163,7 +163,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
  * @param m_Wavelength :: incident neutron wavelength, in Angstroms
  * @return
  */
-Peak::Peak(Geometry::Instrument_const_sptr m_inst, double scattering,
+Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
            double m_Wavelength)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
