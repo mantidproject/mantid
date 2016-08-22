@@ -1469,7 +1469,7 @@ void EnggDiffFittingPresenter::setDefaultBank(
 }
 
 bool EnggDiffFittingPresenter::isDigit(const std::string text) const {
-	return std::all_of(text.cbegin(), text.cend(), ::isdigit);
+  return std::all_of(text.cbegin(), text.cend(), ::isdigit);
 }
 
 void EnggDiffFittingPresenter::plotFitPeaksCurves() {
