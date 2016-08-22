@@ -47,6 +47,14 @@ public:
   /// Create results table
   Mantid::API::ITableWorkspace_sptr createTable() const;
 
+protected:
+  /// Check if fit tables have same parameters
+  bool haveSameParameters(
+      const std::vector<Mantid::API::ITableWorkspace_sptr> &tables) const;
+  /// Remove error columns for fixed parameters from a results table
+  void removeFixedParameterErrors(
+      const Mantid::API::ITableWorkspace_sptr table) const;
+
 private:
   /// Get map of label to workspaces
   std::map<QString, std::vector<std::string>> getWorkspacesByLabel() const;

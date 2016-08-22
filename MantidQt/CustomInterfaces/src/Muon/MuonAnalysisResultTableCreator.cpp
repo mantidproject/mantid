@@ -52,6 +52,7 @@ constexpr static int PLOT_TYPE_LABEL(6);
 
 /// The strings "Error" and "Cost function value"
 const static std::string ERROR_STRING("Error");
+constexpr static size_t ERROR_LENGTH(5);
 const static QString ERROR_QSTRING{QString::fromStdString(ERROR_STRING)};
 const static std::string COSTFN_STRING("Cost function value");
 const static QString COSTFN_QSTRING{QString::fromStdString(COSTFN_STRING)};
@@ -124,7 +125,7 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
 
   // Remove error columns if all errors are zero
   // (because these correspond to fixed parameters)
-  MuonAnalysisHelper::removeFixedParameterErrors(table); //////////////////////////////////////////////// TODO: move to this class
+  removeFixedParameterErrors(table);
       
   return table;
 }
@@ -234,7 +235,7 @@ void MuonAnalysisResultTableCreator::checkSameFitModel() const {
   for (const auto &item : m_items) {
     paramTables.push_back(getFitParametersTable(item));
   }
-  if (!MuonAnalysisHelper::haveSameParameters(paramTables)) { //////////////////////////////////////////////// TODO: move to this class
+  if (!haveSameParameters(paramTables)) {
     throw std::runtime_error(
         "Please pick workspaces with the same fitted parameters");
   }
@@ -577,6 +578,82 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
       row << params[wsName].value(paramName);
       columnIndex++;
     }
+  }
+}
+
+/**
+ * Checks the given set of fit tables to see if all fits had same parameters.
+ * @param tables :: [input] Fit tables
+ * @returns :: True if all fits used same model, otherwise false.
+ */
+bool MuonAnalysisResultTableCreator::haveSameParameters(
+    const std::vector<ITableWorkspace_sptr> &tables) const {
+  bool sameParams = true;
+
+  // lambda to pull keys out of table
+  auto getKeysFromTable = [](const Mantid::API::ITableWorkspace_sptr &tab) {
+    std::vector<std::string> keys;
+    if (tab) {
+      Mantid::API::TableRow row = tab->getFirstRow();
+      do {
+        std::string key;
+        row >> key;
+        keys.push_back(key);
+      } while (row.next());
+    }
+    return keys;
+  };
+
+  if (tables.size() > 1) {
+    const auto &firstKeys = getKeysFromTable(tables.front());
+    for (size_t i = 1; i < tables.size(); ++i) {
+      const auto &keys = getKeysFromTable(tables[i]);
+      if (keys != firstKeys) {
+        sameParams = false;
+        break;
+      }
+    }
+  }
+  return sameParams;
+}
+
+/**
+ * Removes error columns from the table if all errors are zero,
+ * as these columns correspond to fixed parameters.
+ * @param table :: [input, output] Pointer to TableWorkspace to edit
+ */
+void MuonAnalysisResultTableCreator::removeFixedParameterErrors(
+    const ITableWorkspace_sptr table) const {
+  assert(table);
+  const size_t nRows = table->rowCount();
+  const auto colNames = table->getColumnNames();
+  std::vector<std::string> zeroErrorColumns;
+
+  for (const auto &name : colNames) {
+    // if name does not end with "Error", continue
+    const size_t nameLength = name.length();
+    if (nameLength < ERROR_LENGTH ||
+        name.compare(nameLength - ERROR_LENGTH, ERROR_LENGTH, ERROR_STRING)) {
+      continue;
+    }
+
+    auto col = table->getColumn(name);
+    bool allZeros = true;
+    // Check if all values in the column are zero
+    for (size_t iRow = 0; iRow < nRows; ++iRow) {
+      const double val = col->toDouble(iRow);
+      if (std::abs(val) > std::numeric_limits<double>::epsilon()) {
+        allZeros = false;
+        break;
+      }
+    }
+    if (allZeros) {
+      zeroErrorColumns.push_back(name);
+    }
+  }
+
+  for (const auto &name : zeroErrorColumns) {
+    table->removeColumn(name);
   }
 }
 } // namespace CustomInterfaces

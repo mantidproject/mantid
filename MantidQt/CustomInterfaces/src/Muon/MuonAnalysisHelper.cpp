@@ -40,9 +40,6 @@ QColor getWorkspaceColor(size_t index) {
     return QColor("black");
   }
 }
-/// The string "Error"
-const static std::string ERROR_STRING("Error");
-constexpr static size_t ERROR_LENGTH(5);
 
 /// Get keys from parameter table
 std::vector<std::string>
@@ -1139,65 +1136,6 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
   }
 
   return colors;
-}
-
-/**
- * Removes error columns from the table if all errors are zero,
- * as these columns correspond to fixed parameters.
- * @param table :: [input, output] Pointer to TableWorkspace to edit
- */
-void removeFixedParameterErrors(const ITableWorkspace_sptr table) {
-  assert(table);
-  const size_t nRows = table->rowCount();
-  const auto colNames = table->getColumnNames();
-  std::vector<std::string> zeroErrorColumns;
-
-  for (const auto &name : colNames) {
-    // if name does not end with "Error", continue
-    const size_t nameLength = name.length();
-    if (nameLength < ERROR_LENGTH ||
-        name.compare(nameLength - ERROR_LENGTH, ERROR_LENGTH, ERROR_STRING)) {
-      continue;
-    }
-
-    auto col = table->getColumn(name);
-    bool allZeros = true;
-    // Check if all values in the column are zero
-    for (size_t iRow = 0; iRow < nRows; ++iRow) {
-      const double val = col->toDouble(iRow);
-      if (std::abs(val) > std::numeric_limits<double>::epsilon()) {
-        allZeros = false;
-        break;
-      }
-    }
-    if (allZeros) {
-      zeroErrorColumns.push_back(name);
-    }
-  }
-
-  for (const auto &name : zeroErrorColumns) {
-    table->removeColumn(name);
-  }
-}
-
-/**
- * Checks the given set of fit tables to see if all fits had same parameters.
- * @param tables :: [input] Fit tables
- * @returns :: True if all fits used same model, otherwise false.
- */
-bool haveSameParameters(const std::vector<ITableWorkspace_sptr> &tables) {
-  bool sameParams = true;
-  if (tables.size() > 1) {
-    const auto &firstKeys = getKeysFromTable(tables.front());
-    for (size_t i = 1; i < tables.size(); ++i) {
-      const auto &keys = getKeysFromTable(tables[i]);
-      if (keys != firstKeys) {
-        sameParams = false;
-        break;
-      }
-    }
-  }
-  return sameParams;
 }
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces

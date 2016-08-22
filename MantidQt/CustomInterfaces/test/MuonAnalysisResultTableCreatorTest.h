@@ -41,6 +41,22 @@ public:
   virtual ~RAII_ADS() { AnalysisDataService::Instance().clear(); }
 };
 
+/// Derived class to test protected methods
+class TestCreator : public MuonAnalysisResultTableCreator {
+public:
+  TestCreator(const QStringList &items, const QStringList &logs,
+              LogValuesMap *logValues)
+      : MuonAnalysisResultTableCreator(items, logs, logValues, false) {}
+  bool haveSameParameters(
+      const std::vector<Mantid::API::ITableWorkspace_sptr> &tables) const {
+    return MuonAnalysisResultTableCreator::haveSameParameters(tables);
+  }
+  void removeFixedParameterErrors(
+      const Mantid::API::ITableWorkspace_sptr table) const {
+    MuonAnalysisResultTableCreator::removeFixedParameterErrors(table);
+  }
+};
+
 class MuonAnalysisResultTableCreatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -281,6 +297,73 @@ public:
     // Test
     MuonAnalysisResultTableCreator creator(labels, m_logs, &m_logValues, true);
     TS_ASSERT_THROWS(creator.createTable(), std::runtime_error);
+  }
+
+  void test_haveSameParameters_Yes() {
+    const QStringList workspaces{"EMU00020918; Pair; long; Asym; #1",
+                                 "EMU00020919; Pair; long; Asym; #1"};
+    this->setUpLogs(workspaces);
+    TestCreator creator(workspaces, m_logs, &m_logValues);
+
+    const auto &tableOne = getParamTable(m_firstRun);
+    const auto &tableTwo = getParamTable(m_firstRun + 1);
+    const auto &tableThree = getParamTable(m_firstRun + 2);
+    bool sameParams;
+    TS_ASSERT_THROWS_NOTHING(sameParams = creator.haveSameParameters(
+                                 {tableOne, tableTwo, tableThree}));
+    TS_ASSERT_EQUALS(true, sameParams);
+  }
+
+  void test_haveSameParameters_No() {
+    const QStringList workspaces{"EMU00020918; Pair; long; Asym; #1",
+                                 "EMU00020919; Pair; long; Asym; #1"};
+    this->setUpLogs(workspaces);
+    TestCreator creator(workspaces, m_logs, &m_logValues);
+
+    const auto &tableOne = getParamTable(m_firstRun);
+    const auto &tableTwo = getParamTable(m_firstRun + 1);
+    const auto &tableThree = getAlternateParamTable();
+    bool sameParams;
+    TS_ASSERT_THROWS_NOTHING(sameParams = creator.haveSameParameters(
+                                 {tableOne, tableTwo, tableThree}));
+    TS_ASSERT_EQUALS(false, sameParams);
+  }
+
+  void test_removeFixedParameterErrors() {
+    const QStringList workspaces{"EMU00020918; Pair; long; Asym; #1",
+                                 "EMU00020919; Pair; long; Asym; #1"};
+    this->setUpLogs(workspaces);
+    TestCreator creator(workspaces, m_logs, &m_logValues);
+
+    // Create table in function so that we will no longer have shared ownership
+    // of its columns when they are deleted
+    const auto table = []() {
+      auto tab = WorkspaceFactory::Instance().createTable();
+      /*auto col = */ tab->addColumn("str", "Run");
+      /*auto col = */ tab->addColumn("double", "A0");
+      /*auto col = */ tab->addColumn("double", "A0Error");
+      /*auto col = */ tab->addColumn("double", "A1");
+      /*auto col = */ tab->addColumn("double", "A1Error");
+      /*auto col = */ tab->addColumn("double", "Cost function");
+      /*auto col = */ tab->addColumn("double", "Cost function Error");
+
+      TableRow row1 = tab->appendRow();
+      TableRow row2 = tab->appendRow();
+      TableRow row3 = tab->appendRow();
+
+      row1 << "15189" << 2.5 << 0.0 << 3.0 << 0.0 << 0.5 << 0.0;
+      row2 << "15190" << 2.2 << 0.3 << 3.2 << 0.0 << 0.3 << 0.0;
+      row3 << "15191" << 2.3 << 0.2 << 3.1 << 0.0 << 0.4 << 0.0;
+      return tab;
+    }();
+
+    TS_ASSERT_THROWS_NOTHING(creator.removeFixedParameterErrors(table));
+
+    TS_ASSERT_EQUALS(5, table->columnCount());
+    const auto names = table->getColumnNames();
+    const std::vector<std::string> expectedNames{"Run", "A0", "A0Error", "A1",
+                                                 "Cost function"};
+    TS_ASSERT_EQUALS(names, expectedNames);
   }
 
 private:
