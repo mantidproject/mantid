@@ -34,7 +34,6 @@ set ( TEST_PY_FILES
   ExportSpectraMaskTest.py   
   FilterLogByTimeTest.py
   FindEPPTest.py
-  FindFilesTest.py
   FindReflectometryLinesTest.py
   FitGaussianTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
@@ -104,6 +103,7 @@ set ( TEST_PY_FILES
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
+  SelectNexusFilesByMetadataTest.py
   VesuvioDiffractionReductionTest.py
   VesuvioPreFitTest.py
   VesuvioResolutionTest.py

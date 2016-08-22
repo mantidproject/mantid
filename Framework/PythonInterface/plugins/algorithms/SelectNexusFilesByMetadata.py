@@ -7,7 +7,7 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid import logger
 
-class FindFiles(PythonAlgorithm):
+class SelectNexusFilesByMetadata(PythonAlgorithm):
 
     _criteria_splitted = []
 
@@ -15,7 +15,7 @@ class FindFiles(PythonAlgorithm):
         return "DataHandling\\Nexus"
 
     def summary(self):
-        return 'Filters files by metadata criteria'
+        return 'Filters nexus files by metadata criteria'
 
     def validateInputs(self):
         issues = dict()
@@ -98,4 +98,4 @@ class FindFiles(PythonAlgorithm):
         self.setPropertyValue('Result',','.join(outputfiles))
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(FindFiles)
+AlgorithmFactory.subscribe(SelectNexusFilesByMetadata)

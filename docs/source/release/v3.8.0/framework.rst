@@ -111,7 +111,7 @@ Python
 Python Algorithms
 #################
 
-- New algorithm :ref:`FindFiles <algm-FindFiles>` provides quick filtering of nexus files based on criteria imposed on metadata.
+- New algorithm :ref:`SelectNexusFilesByMetadata <algm-SelectNexusFilesByMetadata>` provides quick filtering of nexus files based on criteria imposed on metadata.
 
 Bug Fixes
 ---------
