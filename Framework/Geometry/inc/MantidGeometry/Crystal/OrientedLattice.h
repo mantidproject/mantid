@@ -88,6 +88,7 @@ private:
   void recalculateFromGstar(const Kernel::DblMatrix &NewGstar) override {
     UnitCell::recalculateFromGstar(NewGstar);
   }
+  void recalculate();
 };
 } // namespace Mantid
 } // namespace Geometry
