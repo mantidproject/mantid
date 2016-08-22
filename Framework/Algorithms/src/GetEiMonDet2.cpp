@@ -377,13 +377,13 @@ void mapIndices(const std::vector<unsigned int> &detectors, const T monitor,
       detectors.cbegin(), detectors.cend(), back, [&detectorIndexMap](T i) {
         try {
           return detectorIndexMap.at(i);
-        } catch (std::out_of_range &e) {
+        } catch (std::out_of_range &) {
           throw std::runtime_error(PropertyNames::DETECTORS + " out of range.");
         }
       });
   try {
     monitorIndex = monitorIndexMap.at(monitor);
-  } catch (std::out_of_range &e) {
+  } catch (std::out_of_range &) {
     throw std::runtime_error(PropertyNames::MONITOR + " out of range.");
   }
 }
