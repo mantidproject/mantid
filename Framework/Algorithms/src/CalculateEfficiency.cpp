@@ -74,13 +74,20 @@ void CalculateEfficiency::exec() {
   //  We must use that masked detector
   const std::string maskedFullComponent =
       getPropertyValue("MaskedFullComponent");
-  if (!maskedFullComponent.empty())
+  if (!maskedFullComponent.empty()) {
+    g_log.debug() << "CalculateEfficiency: Masking Full Component: "
+                  << maskedFullComponent << "\n";
     maskComponent(*inputWS, maskedFullComponent);
+  }
 
   // BioSANS has 2 detectors and the front masks the back!!!!
   // We must mask the shaded part to calculate efficency
   std::vector<int> maskedEdges = getProperty("MaskedEdges");
-  if (!maskedEdges.empty()) {
+  if (!maskedEdges.empty() && (maskedEdges[0] > 0 || maskedEdges[1] > 0 ||
+                               maskedEdges[2] > 0 || maskedEdges[3] > 0)) {
+    g_log.debug() << "CalculateEfficiency: Masking edges length = "
+                  << maskedEdges.size() << ")"
+                  << " of the component " << maskedFullComponent << "\n";
     const std::string maskedComponent = getPropertyValue("MaskedComponent");
     maskEdges(inputWS, maskedEdges[0], maskedEdges[1], maskedEdges[2],
               maskedEdges[3], maskedComponent);
@@ -343,8 +350,14 @@ void CalculateEfficiency::maskEdges(MatrixWorkspace_sptr ws, int left,
                   " to be a RectangularDetector. maskEdges not executed.");
     return;
   }
-  std::vector<int> IDs;
 
+  if (!component) {
+    g_log.warning("Component " + componentName +
+                  " is not a RectangularDetector. MaskEdges not executed.");
+    return;
+  }
+
+  std::vector<int> IDs;
   // left
   int i = 0;
 
