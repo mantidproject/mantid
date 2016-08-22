@@ -61,9 +61,9 @@ class FindFiles(PythonAlgorithm):
                 for i, item in enumerate(self._criteria_splitted):
                     if i % 2 == 1: # at odd indices will always be the nexus entry names
                         try:
-                            if len(nexusfile.get(item).shape) > 1:
-                                self.log().warning('Nexus entry %s has more than 1 dimensions in file %s.'
-                                                   'Skipping the file.' % (item,run))
+                            if len(nexusfile.get(item).shape) > 1 or len(nexusfile.get(item)) > 1:
+                                self.log().warning('Nexus entry %s has more than 1 dimension or more than one element'
+                                                   'in file %s. Skipping the file.' % (item,run))
                                 toeval = '0'
                                 break
 

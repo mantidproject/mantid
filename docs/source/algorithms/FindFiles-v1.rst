@@ -14,7 +14,7 @@ This is done without actually loading the data, but just the needed metadata.
 Input files need to exist and be specified following the Mantid rules in `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_.
 Note, that the ``+`` and ``-`` rules will act as ``,`` and ``:`` correspondingly, since the summing does not make sense for the given purpose.
 Criteria could be any python logical expression involving the nexus entry names enclosed with ``$`` symbol.
-Arbitrary number of criteria can be combined. If the metadata entry is an array (1-dimensional), the first value will be considered.
+Arbitrary number of criteria can be combined. The metadata entry should containt only one element.
 Note, that if the entry is of string type, string comparison will be performed.
 As a result, a plain comma separated list of fully resolved file names satisfying the criteria will be returned.
 
