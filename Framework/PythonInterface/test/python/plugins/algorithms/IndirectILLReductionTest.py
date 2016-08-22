@@ -44,9 +44,8 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
         self.assertEqual(mtd['red'].size(), 2, "WorkspaceGroup red should contain two runs")
-        self.assertTrue(isinstance(mtd['red'], WorkspaceGroup), "Should be a group workspace")
-        self.assertTrue(isinstance(mtd['red'].getItem(0), MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual(mtd['red'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
+
+        self._workspace_properties(mtd['red'])
 
     def test_sumruns(self):
         self._args['Run'] = self._multi_runs
@@ -56,11 +55,8 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
         self.assertEqual(mtd['red'].size(), 1, "WorkspaceGroup red should contain one workspace")
-        self.assertTrue(isinstance(mtd['red'], WorkspaceGroup), "Should be a group workspace")
-        self.assertTrue(isinstance(mtd['red'].getItem(0), MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual(self._run.blocksize() / 2, mtd['146191_red'].blocksize(),
-                        "Should have half of the blocksize of an not-reduced, loaded workspace")
-        self.assertEqual(mtd['red'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
+
+        self._workspace_properties(mtd['red'])
 
     def test_save_results(self):
         self._args['Run'] = self._run_name
@@ -79,11 +75,7 @@ class IndirectILLReductionTest(unittest.TestCase):
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
         self.assertEqual(mtd['red'].size(), 1, "WorkspaceGroup red should contain one workspace")
-        self.assertTrue(isinstance(mtd['red'], WorkspaceGroup), "Should be a group workspace")
-        self.assertTrue(isinstance(mtd['red'].getItem(0), MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual(self._run.blocksize() / 2, mtd['146191_red'].blocksize(),
-                        "Should have half of the blocksize of an not-reduced, loaded workspace")
-        self.assertEqual(mtd['red'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
+        self._workspace_properties(mtd['red'])
 
     def test_debug_mode(self):
         self._args['Run'] = self._run_name
@@ -92,16 +84,17 @@ class IndirectILLReductionTest(unittest.TestCase):
         alg_test = run_algorithm('IndirectILLReduction', **self._args)
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction failed")
-        self.assertTrue(isinstance(mtd['red'], WorkspaceGroup), "Should be a group workspace")
-        self.assertTrue(isinstance(mtd['red_raw'], WorkspaceGroup), "Should be a group workspace")
-        self.assertTrue(isinstance(mtd['red_left'], WorkspaceGroup), "Should be a group workspace")
-        self.assertTrue(isinstance(mtd['red_right'], WorkspaceGroup), "Should be a group workspace")
-        self.assertTrue(isinstance(mtd['red_monitor'], WorkspaceGroup), "Should be a group workspace")
-        self.assertTrue(isinstance(mtd['red_mnorm'], WorkspaceGroup), "Should be a group workspace")
-        self.assertTrue(isinstance(mtd['red_vnorm'], WorkspaceGroup), "Should be a group workspace")
-        self.assertTrue(isinstance(mtd['red_detgrouped'], WorkspaceGroup), "Should be a group workspace")
 
-        # Workspace characteristics
+        self._workspace_properties(mtd['red'])
+        self._workspace_properties(mtd['red_raw'])
+        self._workspace_properties(mtd['red_left'])
+        self._workspace_properties(mtd['red_right'])
+        self._workspace_properties(mtd['red_monitor'])
+        self._workspace_properties(mtd['red_mnorm'])
+        self._workspace_properties(mtd['red_vnorm'])
+        self._workspace_properties(mtd['red_detgrouped'])
+
+        # Further workspace characteristics
         self.assertEqual(self._run.blocksize() / 2, mtd['red'].getItem(0).blocksize())
         self.assertEqual(self._run.blocksize()    , mtd['red_raw'].getItem(0).blocksize())
         self.assertEqual(self._run.blocksize() / 2, mtd['red_left'].getItem(0).blocksize())
@@ -110,15 +103,6 @@ class IndirectILLReductionTest(unittest.TestCase):
         self.assertEqual(self._run.blocksize()    , mtd['red_mnorm'].getItem(0).blocksize())
         self.assertEqual(self._run.blocksize()    , mtd['red_vnorm'].getItem(0).blocksize())
         self.assertEqual(self._run.blocksize()    , mtd['red_detgrouped'].getItem(0).blocksize())
-
-        self.assertEqual(mtd['red'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
-        self.assertEqual(mtd['red_raw'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
-        self.assertEqual(mtd['red_left'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
-        self.assertEqual(mtd['red_right'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
-        self.assertEqual(mtd['red_monitor'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
-        self.assertEqual(mtd['red_mnorm'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
-        self.assertEqual(mtd['red_vnorm'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
-        self.assertEqual(mtd['red_detgrouped'].getItem(0).getHistory(), None, "Should have AlgorithmsHistory")
 
         self.assertEqual(self._run.getNumberHistograms() , mtd['red_raw'].getItem(0).getNumberHistograms())
         self.assertEqual("Success!", CheckWorkspacesMatch(self._run, mtd['red_raw'].getItem(0)))
@@ -143,8 +127,14 @@ class IndirectILLReductionTest(unittest.TestCase):
         alg_test = run_algorithm('IndirectILLReduction', **self._args)
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
-        self.assertEqual(self._run.blocksize() / 2, mtd['146191_red'].blocksize(),
-                         "Should have half of the blocksize of an not-reduced, loaded workspace")
+        self._workspace_properties(mtd['red'])
+
+    def _workspace_properties(self, ws):
+
+        self.assertTrue(isinstance(ws, WorkspaceGroup), "Should be a group workspace")
+        self.assertTrue(isinstance(ws.getItem(0), MatrixWorkspace), "Should be a matrix workspace")
+        self.assertTrue(ws.getItem(0).getSampleDetails(), "Should have SampleLogs")
+        self.assertTrue(ws.getItem(0).getHistory().lastAlgorithm(), "Should have AlgorithmsHistory")
 
 if __name__ == '__main__':
     unittest.main()

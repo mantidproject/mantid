@@ -11,18 +11,6 @@ from IndirectImport import import_mantidplot
 
 class IndirectILLReduction(DataProcessorAlgorithm):
 
-    # Output workspace, will be set by user input
-    _red_ws = 'red'
-
-    # Optional workspaces for DebugMode
-    _raw_ws = 'raw'
-    _det_ws = 'detgrouped'
-    _monitor_ws = 'monitor'
-    _mnorm_ws = 'mnorm'
-    _vnorm_ws = 'vnorm'
-    _left_ws = 'left'
-    _right_ws = 'right'
-
     # Optional input calibration workspace
     _calib_ws = None
 
@@ -117,11 +105,45 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              defaultValue=False,
                              doc='Whether to output the workspaces in intermediate steps.')
 
-        # Output workspace property
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "red",
-                                                     optional=PropertyMode.Optional,
+        # Output workspace properties
+        self.declareProperty(WorkspaceGroupProperty("OutputWorkspace", "red",
                                                      direction=Direction.Output),
-                             doc="Name for the output reduced workspace created.")
+                             doc="Group name for the reduced workspace(s).")
+
+        self.declareProperty(WorkspaceGroupProperty("RawWorkspace", "raw",
+                                                    optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Group name for the raw workspace(s).")
+
+        self.declareProperty(WorkspaceGroupProperty("MonitorWorkspace", "monitor",
+                                                    optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Group name for the monitor workspace(s).")
+
+        self.declareProperty(WorkspaceGroupProperty("DetWorkspace", "detgrouped",
+                                                    optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Group name for the det workspace(s).")
+
+        self.declareProperty(WorkspaceGroupProperty("MnormWorkspace", "mnorm",
+                                                    optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Group name for the mnorm workspace(s).")
+
+        self.declareProperty(WorkspaceGroupProperty("VnormWorkspace", "vnorm",
+                                                    optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Group name for the vnorm workspace(s).")
+
+        self.declareProperty(WorkspaceGroupProperty("RightWorkspace", "right",
+                                                    optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Group name for the right workspace(s).")
+
+        self.declareProperty(WorkspaceGroupProperty("LeftWorkspace", "left",
+                                                    optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
+                             doc="Group name for the left workspace(s).")
 
     def setUp(self):
 
@@ -136,7 +158,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._save = self.getProperty('Save').value
         self._sum_runs = self.getProperty('SumRuns').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
+
         self._red_ws = self.getPropertyValue('OutputWorkspace')
+        self._raw_ws = self._red_ws + '_' + self.getPropertyValue('RawWorkspace')
+        self._monitor_ws = self._red_ws + '_' + self.getPropertyValue('MonitorWorkspace')
+        self._det_ws = self._red_ws + '_' + self.getPropertyValue('DetWorkspace')
+        self._mnorm_ws = self._red_ws + '_' + self.getPropertyValue('MnormWorkspace')
+        self._vnorm_ws = self._red_ws + '_' + self.getPropertyValue('VnormWorkspace')
+        self._left_ws = self._red_ws + '_' + self.getPropertyValue('LeftWorkspace')
+        self._right_ws = self._red_ws + '_' + self.getPropertyValue('RightWorkspace')
 
         if self._sum_runs:
             self.log().notice('All the runs will be summed')
@@ -507,9 +537,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             if (size - to_shift) < end_bin:
                 end_bin = size - to_shift
                 self.log().notice('New right boundary for masking due to left shift by %d bins' % to_shift)
-            elif to_shift < start_bin:
-                start_bin = to_shift
-                self.log().notice('New left boundary for masking due to right shift by %d bins' % -to_shift)
+            elif abs(to_shift) > start_bin:
+                start_bin = abs(to_shift)
+                self.log().notice('New left boundary for masking due to right shift by %d bins' % abs(to_shift))
             else:
                 self.log().notice('Shifting does not result in a new range for masking')
 
@@ -549,14 +579,16 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             DeleteWorkspace('left_van')
             DeleteWorkspace('right_van')
 
-        # group and set reduced ws group
         list_red = []
         # first group and set reduced ws
         for run in runlist:
             list_red.append(run + '_' + self._red_ws)
 
-        GroupWorkspaces(list_red, OutputWorkspace=self._red_ws)
-        self.setPropertyValue('OutputWorkspace', self._red_ws)
+        # Group result workspaces
+        GroupWorkspaces(InputWorkspaces=list_red,
+                        OutputWorkspace=self._red_ws)
+
+        self.setProperty('OutputWorkspace', self._red_ws)
 
         # group optional ws in debug mode
         if self._debug_mode:
@@ -578,13 +610,21 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 list_right.append(run + '_' + self._right_ws)
                 list_left.append(run + '_' + self._left_ws)
 
-            GroupWorkspaces(list_raw, OutputWorkspace=self._red_ws + '_' + self._raw_ws)
-            GroupWorkspaces(list_monitor, OutputWorkspace=self._red_ws + '_' + self._monitor_ws)
-            GroupWorkspaces(list_det, OutputWorkspace=self._red_ws + '_' + self._det_ws)
-            GroupWorkspaces(list_mnorm, OutputWorkspace=self._red_ws + '_' +  self._mnorm_ws)
-            GroupWorkspaces(list_vnorm, OutputWorkspace=self._red_ws + '_' +  self._vnorm_ws)
-            GroupWorkspaces(list_left, OutputWorkspace=self._red_ws + '_' + self._left_ws)
-            GroupWorkspaces(list_right, OutputWorkspace=self._red_ws + '_' + self._right_ws)
+                GroupWorkspaces(InputWorkspaces=list_raw, OutputWorkspace=self._raw_ws)
+                GroupWorkspaces(InputWorkspaces=list_monitor, OutputWorkspace=self._monitor_ws)
+                GroupWorkspaces(InputWorkspaces=list_det, OutputWorkspace=self._det_ws)
+                GroupWorkspaces(InputWorkspaces=list_mnorm, OutputWorkspace=self._mnorm_ws)
+                GroupWorkspaces(InputWorkspaces=list_vnorm, OutputWorkspace=self._vnorm_ws)
+                GroupWorkspaces(InputWorkspaces=list_right, OutputWorkspace=self._right_ws)
+                GroupWorkspaces(InputWorkspaces=list_left, OutputWorkspace=self._left_ws)
+
+                self.setProperty('RawWorkspace', self._raw_ws)
+                self.setProperty('MonitorWorkspace', self._monitor_ws)
+                self.setProperty('DetWorkspace', self._det_ws)
+                self.setProperty('MnormWorkspace', self._mnorm_ws)
+                self.setProperty('VnormWorkspace', self._vnorm_ws)
+                self.setProperty('RightWorkspace', self._right_ws)
+                self.setProperty('LeftWorkspace', self._left_ws)
 
         # Save if needed
         if self._save:
