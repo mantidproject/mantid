@@ -61,6 +61,7 @@ public:
   MOCK_METHOD1(setSimultaneousFitLabel, void(const QString &));
   MOCK_CONST_METHOD0(getDatasetIndex, int());
   MOCK_METHOD1(setDatasetNames, void(const QStringList &));
+  MOCK_CONST_METHOD0(getDatasetName, QString());
   MOCK_METHOD0(askUserWhetherToOverwrite, bool());
 };
 

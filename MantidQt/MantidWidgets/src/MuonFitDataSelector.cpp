@@ -656,6 +656,14 @@ int MuonFitDataSelector::getDatasetIndex() const {
 }
 
 /**
+ * Return name of currently selected dataset
+ * @returns :: name of dataset selected in combobox
+ */
+QString MuonFitDataSelector::getDatasetName() const {
+  return m_ui.cbDataset->currentText();
+}
+
+/**
  * Replaces list of dataset names with the supplied list
  * @param datasetNames :: [input] List of names to use
  */

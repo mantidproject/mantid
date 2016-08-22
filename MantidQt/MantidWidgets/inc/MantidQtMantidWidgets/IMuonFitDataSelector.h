@@ -41,6 +41,7 @@ public:
   virtual void setSimultaneousFitLabel(const QString &label) = 0;
   virtual int getDatasetIndex() const = 0;
   virtual void setDatasetNames(const QStringList &datasetNames) = 0;
+  virtual QString getDatasetName() const = 0;
   virtual bool askUserWhetherToOverwrite() = 0;
 };
 } // namespace MantidWidgets

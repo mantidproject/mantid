@@ -82,6 +82,8 @@ public:
   int getDatasetIndex() const override;
   /// Set names of datasets for selection
   void setDatasetNames(const QStringList &datasetNames) override;
+  /// Get name of selected dataset
+  QString getDatasetName() const override;
   /// Ask user whether to overwrite label or not
   bool askUserWhetherToOverwrite() override;
 
