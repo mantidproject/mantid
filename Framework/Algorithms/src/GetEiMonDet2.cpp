@@ -202,7 +202,7 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
   size_t n = 0;
   PRAGMA_OMP(parallel for if ( m_detectorEPPTable->threadSafe())
              reduction(+: n, distanceSum, eppSum))
-  for (size_t i = 0; i < detectorIndices.size(); ++i) {
+  for (int i = 0; static_cast<size_t>(i) < detectorIndices.size(); ++i) {
     PARALLEL_START_INTERUPT_REGION
     const size_t index = detectorIndices[i];
     interruption_point();
