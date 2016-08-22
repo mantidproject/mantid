@@ -82,11 +82,11 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
         # Check wether user-specified species present in the trajectory file
         if type1.lower() not in elements:
-            raise "Species one not found in the trajectory file. Please try again..."
+            raise RuntimeError('Species one not found in the trajectory file. Please try again...')
         if type2.lower() not in elements:
-            raise "Species two not found in the trajectory file. Please try again..."
+            raise RuntimeError('Species two not found in the trajectory file. Please try again...')
         if type3.lower() not in elements:
-            raise "Species three not found in the trajectory file. Please try again..."
+            raise RuntimeError('Species three not found in the trajectory file. Please try again...')
 
         # Initialise lists in the species_to_particles dictionary
         for j in elements:
