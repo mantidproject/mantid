@@ -108,3 +108,4 @@ for i in range(WSROW.getNumberHistograms()):
                  (IDnum, numPeaks, rmsd_col_mm, rmsd_row_mm, rmsd_combined_mm))
 
 print '\nAll done!'
+
