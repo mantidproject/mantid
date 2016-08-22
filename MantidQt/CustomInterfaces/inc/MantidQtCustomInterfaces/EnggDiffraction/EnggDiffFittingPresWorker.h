@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGPRESWORKER_H_
 
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h"
+#include "MantidKernel/Logger.h"
 
 #include <QThread>
 #include <stdexcept>
