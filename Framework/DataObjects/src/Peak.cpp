@@ -121,7 +121,8 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
     : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
+      m_orig_H(0), m_orig_K(0), m_orig_L(0),
+      m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setDetectorID(m_detectorID);
@@ -144,7 +145,8 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
     : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
       m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
-      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
+      m_orig_H(0), m_orig_K(0), m_orig_L(0),
+      m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
@@ -167,7 +169,7 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, double scattering,
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
       m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
-      m_peakShape(new NoShape) {
+      m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
   this->setWavelength(m_Wavelength);
