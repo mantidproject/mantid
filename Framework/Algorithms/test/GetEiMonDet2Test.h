@@ -25,7 +25,7 @@ static constexpr double DETECTOR_DISTANCE = 1.78;
 static constexpr double EI = 66.6; // meV
 static constexpr double MONITOR_DISTANCE = 0.44;
 
-constexpr double velocity(const double energy) {
+double velocity(const double energy) {
   return std::sqrt(2 * energy * meV / NeutronMass);
 }
 
