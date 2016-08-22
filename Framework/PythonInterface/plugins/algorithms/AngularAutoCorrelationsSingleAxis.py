@@ -1,3 +1,4 @@
+# pylint: disable=too-many-branches,too-many-locals, invalid-name
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -26,10 +27,9 @@ class AngularAutoCorrelationsSingleAxis(PythonAlgorithm):
         self.declareProperty("SpeciesTwo",'',direction=Direction.Input,doc="Specify the second species, e.g. H, He, Li...")
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace','',direction=Direction.Output),doc="Output workspace name")
-        self.declareProperty(WorkspaceProperty('OutputWorkspaceFT','',direction=Direction.Output),doc="Fourier Transform output workspace name")
+        self.declareProperty(WorkspaceProperty('OutputWorkspaceFT','',direction=Direction.Output),
+                             doc="Fourier Transform output workspace name")
 
-    # pylint disable=too-many-branches
-    # pylint disable=too-many-locals
     def PyExec(self):
         # Get file path
         file_name=self.getPropertyValue("InputFile")

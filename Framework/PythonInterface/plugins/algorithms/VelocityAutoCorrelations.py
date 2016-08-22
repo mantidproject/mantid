@@ -1,3 +1,4 @@
+# pylint: disable=too-many-branches,too-many-locals, invalid-name
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -26,8 +27,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace','',direction=Direction.Output),doc="Output workspace name")
 
-    # pylint disable=too-many-branches
-    # pylint disable=too-many-locals
     def PyExec(self):
 
         # Get file path
@@ -136,7 +135,7 @@ class VelocityAutoCorrelations(PythonAlgorithm):
 
         # Transform velocities (configuration array) back to Cartesian coordinates at each time step
         velocities=np.array([[np.dot(box_size_tensors[j+1],np.transpose(velocities[i,j]))
-                            for j in range(n_timesteps-1)] for i in range(n_particles)])
+                              for j in range(n_timesteps-1)] for i in range(n_particles)])
         logger.information(str(time.time()-start_time) + " s")
 
 
@@ -164,103 +163,102 @@ class VelocityAutoCorrelations(PythonAlgorithm):
         # Sources:
         # https://www.ncnr.nist.gov/resources/n-lengths/list.html
         # http://www.ati.ac.at/~neutropt/scattering/RecommendedScatteringLengthsOfElements.PDF
-        Coh_b={
-        'h':1.0,
-        'he':1.0,
-        'li':1.0,
-        'be':1.0,
-        'b':1.0,
-        'c':1.0,
-        'n':1.0,
-        'o':1.0,
-        'f':1.0,
-        'ne':1.0,
-        'na':1.0,
-        'mg':1.0,
-        'al':1.0,
-        'si':1.0,
-        'p':1.0,
-        's':1.0,
-        'cl':1.0,
-        'ar':1.0,
-        'k':1.0,
-        'ca':1.0,
-        'sc':1.0,
-        'ti':1.0,
-        'v':1.0,
-        'cr':1.0,
-        'mn':1.0,
-        'fe':1.0,
-        'co':1.0,
-        'ni':1.0,
-        'cu':1.0,
-        'zn':1.0,
-        'ga':1.0,
-        'ge':1.0,
-        'as':1.0,
-        'se':1.0,
-        'br':1.0,
-        'kr':1.0,
-        'rb':1.0,
-        'sr':1.0,
-        'y':1.0,
-        'zr':1.0,
-        'nb':1.0,
-        'mo':1.0,
-        'tc':1.0,
-        'ru':1.0,
-        'rh':1.0,
-        'pd':1.0,
-        'ag':1.0,
-        'cd':1.0,
-        'in':1.0,
-        'sn':1.0,
-        'sb':1.0,
-        'te':1.0,
-        'i':1.0,
-        'xe':1.0,
-        'cs':1.0,
-        'ba':1.0,
-        'la':1.0,
-        'ce':1.0,
-        'pr':1.0,
-        'nd':1.0,
-        'pm':1.0,
-        'sm':1.0,
-        'eu':1.0,
-        'gd':1.0,
-        'tb':1.0,
-        'dy':1.0,
-        'ho':1.0,
-        'er':1.0,
-        'tm':1.0,
-        'yb':1.0,
-        'lu':1.0,
-        'hf':1.0,
-        'ta':1.0,
-        'w':1.0,
-        're':1.0,
-        'os':1.0,
-        'ir':1.0,
-        'pt':1.0,
-        'au':1.0,
-        'hg':1.0,
-        'tl':1.0,
-        'pb':1.0,
-        'bi':1.0,
-        'po':1.0,
-        'at':1.0,
-        'rn':1.0,
-        'fr':1.0,
-        'ra':1.0,
-        'ac':1.0,
-        'th':1.0,
-        'pa':1.0,
-        'u':1.0,
-        'np':1.0,
-        'pu':1.0,
-        'am':1.0,
-        'cm':1.0}
+        Coh_b={'h':1.0,
+               'he':1.0,
+               'li':1.0,
+               'be':1.0,
+               'b':1.0,
+               'c':1.0,
+               'n':1.0,
+               'o':1.0,
+               'f':1.0,
+               'ne':1.0,
+               'na':1.0,
+               'mg':1.0,
+               'al':1.0,
+               'si':1.0,
+               'p':1.0,
+               's':1.0,
+               'cl':1.0,
+               'ar':1.0,
+               'k':1.0,
+               'ca':1.0,
+               'sc':1.0,
+               'ti':1.0,
+               'v':1.0,
+               'cr':1.0,
+               'mn':1.0,
+               'fe':1.0,
+               'co':1.0,
+               'ni':1.0,
+               'cu':1.0,
+               'zn':1.0,
+               'ga':1.0,
+               'ge':1.0,
+               'as':1.0,
+               'se':1.0,
+               'br':1.0,
+               'kr':1.0,
+               'rb':1.0,
+               'sr':1.0,
+               'y':1.0,
+               'zr':1.0,
+               'nb':1.0,
+               'mo':1.0,
+               'tc':1.0,
+               'ru':1.0,
+               'rh':1.0,
+               'pd':1.0,
+               'ag':1.0,
+               'cd':1.0,
+               'in':1.0,
+               'sn':1.0,
+               'sb':1.0,
+               'te':1.0,
+               'i':1.0,
+               'xe':1.0,
+               'cs':1.0,
+               'ba':1.0,
+               'la':1.0,
+               'ce':1.0,
+               'pr':1.0,
+               'nd':1.0,
+               'pm':1.0,
+               'sm':1.0,
+               'eu':1.0,
+               'gd':1.0,
+               'tb':1.0,
+               'dy':1.0,
+               'ho':1.0,
+               'er':1.0,
+               'tm':1.0,
+               'yb':1.0,
+               'lu':1.0,
+               'hf':1.0,
+               'ta':1.0,
+               'w':1.0,
+               're':1.0,
+               'os':1.0,
+               'ir':1.0,
+               'pt':1.0,
+               'au':1.0,
+               'hg':1.0,
+               'tl':1.0,
+               'pb':1.0,
+               'bi':1.0,
+               'po':1.0,
+               'at':1.0,
+               'rn':1.0,
+               'fr':1.0,
+               'ra':1.0,
+               'ac':1.0,
+               'th':1.0,
+               'pa':1.0,
+               'u':1.0,
+               'np':1.0,
+               'pu':1.0,
+               'am':1.0,
+               'cm':1.0}
 
 
         logger.information("Averaging auto-correlations...")
@@ -277,11 +275,11 @@ class VelocityAutoCorrelations(PythonAlgorithm):
         # Generate a list of row names according to the atomic species present in the simulation
         row_names=[]
         for i in range(n_species):
-                row_names.append(elements[i].capitalize())
+            row_names.append(elements[i].capitalize())
 
         # Initialise & populate the output_ws workspace
         nrows=n_species
-        nbins=(np.shape(correlations)[2])
+        #(np.shape(correlations)[2])
         yvals=np.empty(0)
         for i in range(n_species):
             # Add folded correlations to the array passed to the workspace
@@ -294,7 +292,8 @@ class VelocityAutoCorrelations(PythonAlgorithm):
         evals=np.zeros(np.shape(yvals))
 
         output_name=self.getPropertyValue("OutputWorkspace")
-        output_ws=CreateWorkspace(OutputWorkspace=output_name,DataX=xvals,DataY=yvals,DataE=evals,NSpec=nrows,VerticalAxisUnit="Text",VerticalAxisValues=row_names,UnitX="ps")
+        output_ws=CreateWorkspace(OutputWorkspace=output_name,DataX=xvals,
+                                  DataY=yvals,DataE=evals,NSpec=nrows,VerticalAxisUnit="Text",VerticalAxisValues=row_names,UnitX="ps")
 
         # Set output workspace to output_ws
         self.setProperty('OutputWorkspace',output_ws)

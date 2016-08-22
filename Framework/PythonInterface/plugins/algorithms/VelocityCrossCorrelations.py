@@ -23,7 +23,7 @@ class VelocityCrossCorrelations(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(FileProperty('InputFile', '', action = FileAction.Load),
-                                           doc = "Input .nc file with an MMTK trajectory")
+                             doc = "Input .nc file with an MMTK trajectory")
 
         self.declareProperty("Timestep", "1.0", direction = Direction.Input,
                              doc="Specify the timestep between trajectory points in the simulation, fs")
@@ -140,7 +140,7 @@ class VelocityCrossCorrelations(PythonAlgorithm):
 
         # Transform velocities (configuration array) back to Cartesian coordinates at each time step
         velocities=np.array([[np.dot(box_size_tensors[j+1],np.transpose(velocities[i,j]))
-                            for j in range(n_timesteps-1)] for i in range(n_particles)])
+                              for j in range(n_timesteps-1)] for i in range(n_particles)])
         logger.information(str(time.time()-start_time) + " s")
 
 
@@ -155,7 +155,8 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         # Compute cross-correlations for each pair of particles in each spatial coordinate
         for i in range(n_particles):
             for j in range(i+1,n_particles):
-                # Retrieve particle indices from the 'particles' dictionary and determine the relevant position in the 'correlations' matrices
+                # Retrieve particle indices from the 'particles' dictionary and
+                # determine the relevant position in the 'correlations' matrices
                 k=elements.index(atoms_to_species[i])
                 l=elements.index(atoms_to_species[j])
                 # Check for the order of elements (ensures upper triangular matrix form & consistent order of operations)
@@ -175,103 +176,102 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         # Sources:
         # https://www.ncnr.nist.gov/resources/n-lengths/list.html
         # http://www.ati.ac.at/~neutropt/scattering/RecommendedScatteringLengthsOfElements.PDF
-        Coh_b={
-        'h':-3.7409,
-        'he':3.26,
-        'li':-1.90,
-        'be':7.79,
-        'b':5.30,
-        'c':6.6484,
-        'n':9.36,
-        'o':5.805,
-        'f':5.654,
-        'ne':4.60,
-        'na':3.63,
-        'mg':5.375,
-        'al':3.449,
-        'si':4.15071,
-        'p':5.13,
-        's':2.847,
-        'cl':9.5792,
-        'ar':1.909,
-        'k':3.67,
-        'ca':4.70,
-        'sc':12.29,
-        'ti':-3.37,
-        'v':-0.443,
-        'cr':3.635,
-        'mn':-3.73,
-        'fe':9.45,
-        'co':2.49,
-        'ni':10.3,
-        'cu':7.718,
-        'zn':5.680,
-        'ga':7.288,
-        'ge':8.185,
-        'as':6.58,
-        'se':7.970,
-        'br':6.79,
-        'kr':7.81,
-        'rb':7.08,
-        'sr':7.02,
-        'y':7.75,
-        'zr':7.16,
-        'nb':7.054,
-        'mo':6.715,
-        'tc':6.8,
-        'ru':7.02,
-        'rh':5.90,
-        'pd':5.91,
-        'ag':5.922,
-        'cd':4.83,
-        'in':4.065,
-        'sn':6.225,
-        'sb':5.57,
-        'te':5.68,
-        'i':5.28,
-        'xe':4.69,
-        'cs':5.42,
-        'ba':5.07,
-        'la':8.24,
-        'ce':4.84,
-        'pr':4.58,
-        'nd':7.69,
-        'pm':12.6,
-        'sm':0.00,
-        'eu':5.3,
-        'gd':9.5,
-        'tb':7.34,
-        'dy':16.9,
-        'ho':8.44,
-        'er':7.79,
-        'tm':7.07,
-        'yb':12.41,
-        'lu':7.21,
-        'hf':7.77,
-        'ta':6.91,
-        'w':4.755,
-        're':9.2,
-        'os':10.7,
-        'ir':10.6,
-        'pt':9.60,
-        'au':7.63,
-        'hg':12.66,
-        'tl':8.776,
-        'pb':9.401,
-        'bi':8.532,
-        'po':None,
-        'at':None,
-        'rn':None,
-        'fr':None,
-        'ra':10.0,
-        'ac':None,
-        'th':10.31,
-        'pa':9.1,
-        'u':8.417,
-        'np':10.55,
-        'pu':None,
-        'am':8.3,
-        'cm':9.5}
+        Coh_b={'h':-3.7409,
+               'he':3.26,
+               'li':-1.90,
+               'be':7.79,
+               'b':5.30,
+               'c':6.6484,
+               'n':9.36,
+               'o':5.805,
+               'f':5.654,
+               'ne':4.60,
+               'na':3.63,
+               'mg':5.375,
+               'al':3.449,
+               'si':4.15071,
+               'p':5.13,
+               's':2.847,
+               'cl':9.5792,
+               'ar':1.909,
+               'k':3.67,
+               'ca':4.70,
+               'sc':12.29,
+               'ti':-3.37,
+               'v':-0.443,
+               'cr':3.635,
+               'mn':-3.73,
+               'fe':9.45,
+               'co':2.49,
+               'ni':10.3,
+               'cu':7.718,
+               'zn':5.680,
+               'ga':7.288,
+               'ge':8.185,
+               'as':6.58,
+               'se':7.970,
+               'br':6.79,
+               'kr':7.81,
+               'rb':7.08,
+               'sr':7.02,
+               'y':7.75,
+               'zr':7.16,
+               'nb':7.054,
+               'mo':6.715,
+               'tc':6.8,
+               'ru':7.02,
+               'rh':5.90,
+               'pd':5.91,
+               'ag':5.922,
+               'cd':4.83,
+               'in':4.065,
+               'sn':6.225,
+               'sb':5.57,
+               'te':5.68,
+               'i':5.28,
+               'xe':4.69,
+               'cs':5.42,
+               'ba':5.07,
+               'la':8.24,
+               'ce':4.84,
+               'pr':4.58,
+               'nd':7.69,
+               'pm':12.6,
+               'sm':0.00,
+               'eu':5.3,
+               'gd':9.5,
+               'tb':7.34,
+               'dy':16.9,
+               'ho':8.44,
+               'er':7.79,
+               'tm':7.07,
+               'yb':12.41,
+               'lu':7.21,
+               'hf':7.77,
+               'ta':6.91,
+               'w':4.755,
+               're':9.2,
+               'os':10.7,
+               'ir':10.6,
+               'pt':9.60,
+               'au':7.63,
+               'hg':12.66,
+               'tl':8.776,
+               'pb':9.401,
+               'bi':8.532,
+               'po':None,
+               'at':None,
+               'rn':None,
+               'fr':None,
+               'ra':10.0,
+               'ac':None,
+               'th':10.31,
+               'pa':9.1,
+               'u':8.417,
+               'np':10.55,
+               'pu':None,
+               'am':8.3,
+               'cm':9.5}
 
 
         logger.information("Averaging correlation Fourier transforms & scaling with the coherent neutron scattering lenghts...")
@@ -293,7 +293,7 @@ class VelocityCrossCorrelations(PythonAlgorithm):
 
         # Initialise & populate the output_ws workspace
         nrows=(n_species*n_species-n_species)/2+n_species
-        nbins=(np.shape(correlations)[2])
+        #nbins=(np.shape(correlations)[2])
         yvals=np.empty(0)
         for i in range(n_species):
             for j in range(i,n_species):
@@ -308,7 +308,8 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         evals=np.zeros(np.shape(yvals))
 
         output_name=self.getPropertyValue("OutputWorkspace")
-        output_ws=CreateWorkspace(OutputWorkspace=output_name,DataX=xvals,DataY=yvals,DataE=evals,NSpec=nrows,VerticalAxisUnit="Text",VerticalAxisValues=row_names,UnitX="ps")
+        output_ws=CreateWorkspace(OutputWorkspace=output_name,DataX=xvals,DataY=yvals,
+                                  DataE=evals,NSpec=nrows,VerticalAxisUnit="Text",VerticalAxisValues=row_names,UnitX="ps")
 
         # Set output workspace to output_ws
         self.setProperty('OutputWorkspace',output_ws)

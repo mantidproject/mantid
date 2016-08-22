@@ -1,3 +1,4 @@
+# pylint: disable=too-many-branches,too-many-locals, invalid-name
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -14,9 +15,9 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
     def summary(self):
         return ("Calculates the angular auto-correlations of molecules in a simulation along two user-defined axes. "
-        "The first axis is defined by the vector connecting the average position of species two and the average position "
-        "of species one (user input). The second axis is perpendicular to axis 1 and is constructed by considering one "
-        "arbitrary atom of species 3 (user input). Timestep must be specified in femtoseconds.")
+                "The first axis is defined by the vector connecting the average position of species two and the average position "
+                "of species one (user input). The second axis is perpendicular to axis 1 and is constructed by considering one "
+                "arbitrary atom of species 3 (user input). Timestep must be specified in femtoseconds.")
 
     def PyInit(self):
         self.declareProperty(FileProperty('InputFile','',action=FileAction.Load),doc="Input .nc file with an MMTK trajectory")
@@ -31,8 +32,6 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace','',direction=Direction.Output),doc="Output workspace name")
         self.declareProperty(WorkspaceProperty('OutputWorkspaceFT','FT',direction=Direction.Output),doc="FT Output workspace name")
 
-    # pylint disable=too-many-branches
-    # pylint disable=too-many-locals
     def PyExec(self):
         # Get file path
         file_name=self.getPropertyValue("InputFile")
@@ -123,7 +122,7 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
         # Extract useful simulation parameters
         # Number of species present in the simulation
-        n_species=len(elements)
+        # n_species=len(elements)
         # Number of particles present in the simulation
         n_particles=len(p_atoms)
         # Number of molecules present in the simulation
@@ -296,8 +295,8 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         xvals=np.arange(0,np.shape(yvals)[0])
 
         FT_output_name=self.getPropertyValue("OutputWorkspaceFT")
-        FT_output_ws=CreateWorkspace(OutputWorkspace=FT_output_name,DataX=xvals,UnitX="1/fs",
-                                     DataY=yvals,DataE=evals,NSpec=nrows,VerticalAxisUnit="Text",VerticalAxisValues=["FT Axis 1","FT Axis 2"])
+        FT_output_ws=CreateWorkspace(OutputWorkspace=FT_output_name,DataX=xvals,UnitX="1/fs",DataY=yvals,
+                                     DataE=evals,NSpec=nrows,VerticalAxisUnit="Text",VerticalAxisValues=["FT Axis 1","FT Axis 2"])
         self.setProperty("OutputWorkspaceFT",FT_output_ws)
 
 
