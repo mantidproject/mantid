@@ -107,42 +107,42 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         # Output workspace properties
         self.declareProperty(WorkspaceGroupProperty("OutputWorkspace", "red",
-                                                     direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc="Group name for the reduced workspace(s).")
 
         self.declareProperty(WorkspaceGroupProperty("RawWorkspace", "raw",
                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc="Group name for the raw workspace(s).")
 
         self.declareProperty(WorkspaceGroupProperty("MonitorWorkspace", "monitor",
                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc="Group name for the monitor workspace(s).")
 
         self.declareProperty(WorkspaceGroupProperty("DetWorkspace", "detgrouped",
                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc="Group name for the det workspace(s).")
 
         self.declareProperty(WorkspaceGroupProperty("MnormWorkspace", "mnorm",
                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc="Group name for the mnorm workspace(s).")
 
         self.declareProperty(WorkspaceGroupProperty("VnormWorkspace", "vnorm",
                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc="Group name for the vnorm workspace(s).")
 
         self.declareProperty(WorkspaceGroupProperty("RightWorkspace", "right",
                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc="Group name for the right workspace(s).")
 
         self.declareProperty(WorkspaceGroupProperty("LeftWorkspace", "left",
                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc="Group name for the left workspace(s).")
 
     def setUp(self):
