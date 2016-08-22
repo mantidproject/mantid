@@ -80,6 +80,14 @@ Correlations
 - New algorithms :ref:`VelocityCrossCorrelations <algm-VelocityCrossCorrelations>` and :ref:`VelocityAutoCorrelations <VelocityAutoCorrelations>`
 - New algorithms :ref:`AngularAutoCorrelationsSingleAxis <AngularAutoCorrelationsSingleAxis>` and :ref:`AngularAutoCorrelationsTwoAxes <AngularAutoCorrelationsTwoAxes>`
 
+VESUVIO
+#######
+
+- Add the functionality for ties between internal parameters within each mass profile. This allows for the creation of a BivariateGaussian profile from the MultivariateGaussian profile
+  Ties can be added within the defintion of the mass profile with the following:
+    flags['masses'] = [{'value':1.0079, 'function': 'MultivariateGaussian', 'SigmaX': 5, 'SigmaY': 5, 'SigmaZ': 5, 'ties': 'SigmaX=SigmaY'}]
+  The above will tie SigmaX to SigmaY for this MultivariateGaussian in the driver script
+
 Improvements
 ------------
 
