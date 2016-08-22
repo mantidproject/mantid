@@ -1060,20 +1060,21 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   MatrixWorkspace_sptr ceriaWS;
 
   // Append current instrument name if numerical only entry
-  std::string vanFileName, cerFileName;
-  appendCalibInstPrefix(vanNo, ceriaNo, vanFileName, cerFileName);
+  // to help Load algorithm determine instrument
+  std::string vanFileHint, cerFileHint;
+  appendCalibInstPrefix(vanNo, ceriaNo, vanFileHint, cerFileHint);
 
   // save vanIntegWS and vanCurvesWS as open genie
   // see where spec number comes from
 
-  loadOrCalcVanadiumWorkspaces(vanFileName, cs.m_inputDirCalib, vanIntegWS,
+  loadOrCalcVanadiumWorkspaces(vanFileHint, cs.m_inputDirCalib, vanIntegWS,
                                vanCurvesWS, cs.m_forceRecalcOverwrite, specNos);
 
   try {
     auto load =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
     load->initialize();
-    load->setPropertyValue("Filename", cerFileName);
+    load->setPropertyValue("Filename", cerFileHint);
     const std::string ceriaWSName = "engggui_calibration_sample_ws";
     load->setPropertyValue("OutputWorkspace", ceriaWSName);
     load->execute();
@@ -1715,13 +1716,13 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
   const std::string vanNo = m_view->currentVanadiumNo();
 
-  // Append instrument name if numerical only entry
-  std::string vanFileName;
+  // Append instrument name if numerical only entry to help load
+  std::string vanFileHint;
   // We dont need cerium file name so just pass vanadium number twice and
   // ignore return
-  appendCalibInstPrefix(vanNo, vanFileName);
+  appendCalibInstPrefix(vanNo, vanFileHint);
 
-  loadOrCalcVanadiumWorkspaces(vanFileName, cs.m_inputDirCalib, vanIntegWS,
+  loadOrCalcVanadiumWorkspaces(vanFileHint, cs.m_inputDirCalib, vanIntegWS,
                                vanCurvesWS, cs.m_forceRecalcOverwrite, "");
 
   const std::string inWSName = "engggui_focusing_input_ws";
