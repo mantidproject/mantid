@@ -53,6 +53,8 @@ public:
 
   void run() override;
 
+  void preCount();
+
 private:
   /// Algorithm being run
   LoadEventNexus *alg;
