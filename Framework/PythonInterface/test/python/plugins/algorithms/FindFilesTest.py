@@ -20,7 +20,7 @@ class FindFilesTest(unittest.TestCase):
 
         criteria = '$raw_data_1/duration$ += 1000'
         with self.assertRaises(RuntimeError):
-            FindFiles(FileList=self._fileslist, NexusCriteria=criteria)
+            res = FindFiles(FileList=self._fileslist, NexusCriteria=criteria)
 
     def test_wrong_nexus_entry(self):
 
