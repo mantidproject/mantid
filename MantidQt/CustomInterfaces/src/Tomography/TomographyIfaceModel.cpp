@@ -349,6 +349,12 @@ void TomographyIfaceModel::doSubmitReconstructionJob(
     throw;
   }
 
+  if (run.empty()) {
+    throw std::runtime_error(
+        "The script or executable to run is not defined "
+        "(empty string). You need to setup the reconstruction tool.");
+  }
+
   // with SCARF we use one (pseudo)-transaction for every submission
   auto transAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "StartRemoteTransaction");
@@ -598,8 +604,9 @@ void TomographyIfaceModel::makeRunnableWithOptions(
   // Special case. Just pass on user inputs.
   if (tool == g_customCmdTool) {
     const std::string cmd = m_toolsSettings.custom.toCommand();
-    std::string options;
-    splitCmdLine(cmd, run, options);
+
+    opt.resize(1);
+    splitCmdLine(cmd, run, opt[0]);
     return;
   }
 

@@ -135,12 +135,14 @@ endif ()
 
 # Local dev version
 set ( EXTRA_LDPATH "${ParaView_DIR}/lib" )
-set ( MANTIDPLOT_EXEC MantidPlot )
-configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
-                 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh @ONLY )
-# Needs to be executable
-execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh"
-                  OUTPUT_QUIET ERROR_QUIET )
+if (ENABLE_MANTIDPLOT)
+  set ( MANTIDPLOT_EXEC MantidPlot )
+  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
+                   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh @ONLY )
+  # Needs to be executable
+  execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh"
+                    OUTPUT_QUIET ERROR_QUIET )
+endif ()
 configure_file ( ${CMAKE_MODULE_PATH}/Packaging/mantidpython.in
                  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython @ONLY )
 # Needs to be executable
@@ -149,15 +151,17 @@ execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantid
 
 # Package version
 set ( EXTRA_LDPATH "\${INSTALLDIR}/../lib/paraview-5.1" )
-set ( MANTIDPLOT_EXEC MantidPlot_exe )
-configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
-                 ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install @ONLY )
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
-          DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh
-          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-          GROUP_EXECUTE GROUP_READ
-          WORLD_EXECUTE WORLD_READ
-)
+if (ENABLE_MANTIDPLOT)
+  set ( MANTIDPLOT_EXEC MantidPlot_exe )
+  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install @ONLY )
+  install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
+            DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh
+            PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+            GROUP_EXECUTE GROUP_READ
+            WORLD_EXECUTE WORLD_READ
+  )
+endif ()
 configure_file ( ${CMAKE_MODULE_PATH}/Packaging/mantidpython.in
                  ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install @ONLY )
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install

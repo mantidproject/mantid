@@ -38,7 +38,7 @@
 #include "MatrixModel.h"
 #include "UserFunction.h" //Mantid
 
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -2516,7 +2516,7 @@ IProjectSerialisable *Graph3D::loadFromProject(const std::string &lines,
 
   const std::string tsvLines = boost::algorithm::join(lineVec, "\n");
 
-  TSVSerialiser tsv(tsvLines);
+  MantidQt::API::TSVSerialiser tsv(tsvLines);
 
   if (tsv.selectLine("SurfaceFunction")) {
     auto params = graph->readSurfaceFunction(tsv);
@@ -2784,7 +2784,7 @@ void Graph3D::setupMatrixPlot3D(ApplicationWindow *app, const QString &caption,
 }
 
 void Graph3D::setupMantidMatrixPlot3D(ApplicationWindow *app,
-                                      TSVSerialiser &tsv) {
+                                      MantidQt::API::TSVSerialiser &tsv) {
   using MantidQt::API::PlotAxis;
   MantidMatrix *matrix = readWorkspaceForPlot(app, tsv);
   int style = read3DPlotStyle(tsv);
@@ -2835,7 +2835,7 @@ void Graph3D::setupMantidMatrixPlot3D(ApplicationWindow *app,
 }
 
 MantidMatrix *Graph3D::readWorkspaceForPlot(ApplicationWindow *app,
-                                            TSVSerialiser &tsv) {
+                                            MantidQt::API::TSVSerialiser &tsv) {
   MantidMatrix *m = nullptr;
   if (tsv.selectLine("title")) {
     std::string wsName = tsv.asString(1);
@@ -2851,7 +2851,7 @@ MantidMatrix *Graph3D::readWorkspaceForPlot(ApplicationWindow *app,
   return m;
 }
 
-int Graph3D::read3DPlotStyle(TSVSerialiser &tsv) {
+int Graph3D::read3DPlotStyle(MantidQt::API::TSVSerialiser &tsv) {
   int style = Qwt3D::WIREFRAME;
   if (tsv.selectLine("Style"))
     tsv >> style;
@@ -2859,7 +2859,7 @@ int Graph3D::read3DPlotStyle(TSVSerialiser &tsv) {
 }
 
 Graph3D::SurfaceFunctionParams
-Graph3D::readSurfaceFunction(TSVSerialiser &tsv) {
+Graph3D::readSurfaceFunction(MantidQt::API::TSVSerialiser &tsv) {
   SurfaceFunctionParams params;
   tsv >> params.formula;
   params.type = readSurfaceFunctionType(params.formula);
@@ -2928,7 +2928,7 @@ Graph3D::readSurfaceFunctionType(const std::string &formula) {
 }
 
 std::string Graph3D::saveToProject(ApplicationWindow *app) {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
   tsv.writeRaw("<SurfacePlot>");
   tsv.writeLine(name().toStdString()) << birthDate();
   tsv.writeRaw(app->windowGeometryInfo(this));

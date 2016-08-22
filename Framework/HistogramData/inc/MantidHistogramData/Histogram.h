@@ -404,7 +404,7 @@ template <typename... T> void Histogram::setFrequencies(T &&... data) & {
   checkSize(frequencies);
   if (selfAssignmentY(data...))
     return;
-  m_y = Counts(frequencies, binEdges()).cowData();
+  m_y = frequencies.cowData();
 }
 
 /// Sets the Histogram's frequency variances.
@@ -414,7 +414,7 @@ template <typename... T> void Histogram::setFrequencyVariances(T &&... data) & {
   checkSize(frequencies);
   if (selfAssignmentE(data...))
     return;
-  m_e = CountStandardDeviations(frequencies, binEdges()).cowData();
+  m_e = FrequencyStandardDeviations(std::move(frequencies)).cowData();
 }
 
 /// Sets the Histogram's frequency standard deviations.
@@ -425,7 +425,7 @@ void Histogram::setFrequencyStandardDeviations(T &&... data) & {
   checkSize(frequencies);
   if (selfAssignmentE(data...))
     return;
-  m_e = CountStandardDeviations(frequencies, binEdges()).cowData();
+  m_e = frequencies.cowData();
 }
 
 template <>

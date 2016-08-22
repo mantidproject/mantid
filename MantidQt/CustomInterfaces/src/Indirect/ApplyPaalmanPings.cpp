@@ -151,17 +151,7 @@ void ApplyPaalmanPings::run() {
   MatrixWorkspace_sptr sampleWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           m_sampleWorkspaceName);
-  m_originalSampleUnits = sampleWs->getAxis(0)->unit()->unitID();
-
-  // If not in wavelength then do conversion
-  if (m_originalSampleUnits != "Wavelength") {
-    g_log.information(
-        "Sample workspace not in wavelength, need to convert to continue.");
-    absCorProps["SampleWorkspace"] =
-        addConvertUnitsStep(sampleWs, "Wavelength");
-  } else {
-    absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
-  }
+  absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
   const bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
@@ -178,25 +168,6 @@ void ApplyPaalmanPings::run() {
     clone->setProperty("Outputworkspace", cloneName);
     clone->execute();
 
-    const bool useShift = m_uiForm.ckShiftCan->isChecked();
-    if (useShift) {
-      IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
-      scaleX->initialize();
-      scaleX->setLogging(false);
-      scaleX->setProperty("InputWorkspace", cloneName);
-      scaleX->setProperty("OutputWorkspace", cloneName);
-      scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
-      scaleX->setProperty("Operation", "Add");
-      scaleX->execute();
-      IAlgorithm_sptr rebin =
-          AlgorithmManager::Instance().create("RebinToWorkspace");
-      rebin->initialize();
-      rebin->setLogging(false);
-      rebin->setProperty("WorkspaceToRebin", cloneName);
-      rebin->setProperty("WorkspaceToMatch", m_sampleWorkspaceName);
-      rebin->setProperty("OutputWorkspace", cloneName);
-      rebin->execute();
-    }
     canClone =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(cloneName);
     // Check for same binning across sample and container
@@ -221,20 +192,16 @@ void ApplyPaalmanPings::run() {
       }
     }
 
-    // If not in wavelength then do conversion
-    std::string originalCanUnits = canClone->getAxis(0)->unit()->unitID();
-    if (originalCanUnits != "Wavelength") {
-      g_log.information("Container workspace not in wavelength, need to "
-                        "convert to continue.");
-      absCorProps["CanWorkspace"] = addConvertUnitsStep(canClone, "Wavelength");
-    } else {
-      absCorProps["CanWorkspace"] = cloneName;
-    }
+    absCorProps["CanWorkspace"] = cloneName;
 
     const bool useCanScale = m_uiForm.ckScaleCan->isChecked();
     if (useCanScale) {
       const double canScaleFactor = m_uiForm.spCanScale->value();
       applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
+    }
+    if (m_uiForm.ckShiftCan->isChecked()) { // If container is shifted
+      const double canShiftFactor = m_uiForm.spCanShift->value();
+      applyCorrAlg->setProperty("canShiftFactor", canShiftFactor);
     }
   }
 
@@ -401,22 +368,10 @@ void ApplyPaalmanPings::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
   const bool useCan = m_uiForm.ckUseCan->isChecked();
-  const bool useShift = m_uiForm.ckShiftCan->isChecked();
   if (error) {
     emit showMessageBox(
         "Unable to apply corrections.\nSee Results Log for more details.");
     return;
-  }
-
-  // Convert back to original sample units
-  if (m_originalSampleUnits != "Wavelength") {
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        m_pythonExportWsName);
-
-    std::string eMode("");
-    if (m_originalSampleUnits == "dSpacing")
-      eMode = "Elastic";
-    addConvertUnitsStep(ws, m_originalSampleUnits, "", eMode);
   }
 
   // Add save algorithms if required
@@ -424,7 +379,7 @@ void ApplyPaalmanPings::absCorComplete(bool error) {
   if (save)
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   if (useCan) {
-    if (useShift) {
+    if (m_uiForm.ckShiftCan->isChecked()) { // If container is shifted
       IAlgorithm_sptr shiftLog =
           AlgorithmManager::Instance().create("AddSampleLog");
       shiftLog->initialize();
