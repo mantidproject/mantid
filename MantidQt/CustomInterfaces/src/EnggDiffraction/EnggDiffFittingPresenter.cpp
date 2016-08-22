@@ -293,8 +293,9 @@ void EnggDiffFittingPresenter::browsedFile(
     const std::vector<std::string> &splitBaseName,
     std::vector<std::string> &runNoVec, const std::string &bankFileDir) {
   // to track the FittingRunnoChanged loop number
-  if (g_fitting_runno_counter == 0)
+  if (g_fitting_runno_counter == 0) {
     g_multi_run_directories.clear();
+  }
 
   g_fitting_runno_counter++;
 
@@ -360,8 +361,9 @@ void EnggDiffFittingPresenter::processSingleRun(
     std::vector<std::string> &runnoDirVector,
     const std::vector<std::string> &splitBaseName) {
 
-  if (g_fitting_runno_counter == 0)
+  if (g_fitting_runno_counter == 0) {
     g_multi_run_directories.clear();
+  }
 
   // to track the FittingRunnoChanged loop number
   g_fitting_runno_counter++;
@@ -417,8 +419,9 @@ void EnggDiffFittingPresenter::updateFittingDirVec(
       ++it;
     }
 
-    if (found)
+    if (found) {
       foundRunNumber.push_back(runNumberVec);
+    }
 
   } catch (std::runtime_error &re) {
     m_view->userWarning("Invalid file",
@@ -466,9 +469,9 @@ void EnggDiffFittingPresenter::enableMultiRun(
       } else {
 
         // clear previous directories set before updateFittingDirVec
-        if (g_fitting_runno_counter == 0)
+        if (g_fitting_runno_counter == 0) {
           g_multi_run_directories.clear();
-
+        }
         // to track the FittingRunnoChanged loop number
         g_fitting_runno_counter++;
 
@@ -482,7 +485,7 @@ void EnggDiffFittingPresenter::enableMultiRun(
         }
 
         int diff = (lastNum - firstNum) + 1;
-        auto run_vec_size = foundRunNumber.size();
+        size_t run_vec_size = foundRunNumber.size();
 
         if (size_t(diff) == run_vec_size) {
           setRunNoItems(foundRunNumber, true);
@@ -1467,7 +1470,7 @@ void EnggDiffFittingPresenter::setDefaultBank(
 
 bool EnggDiffFittingPresenter::isDigit(std::string text) const {
   // bool isDig = true;
-  for (size_t i = 0; i < text.size(); i++) {
+  for (auto i : text) {
     char *str = &text[i];
     if (!std::isdigit(*str)) {
       return false;
