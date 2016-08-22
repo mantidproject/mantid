@@ -52,7 +52,9 @@ TestDataListener::TestDataListener()
 /// Destructor
 TestDataListener::~TestDataListener() { delete m_rand; }
 
-bool TestDataListener::connect(const Poco::Net::SocketAddress &) {
+bool TestDataListener::connect(
+    const Poco::Net::SocketAddress &,
+    const Mantid::API::ILiveListener::ConnectionArgs &args) {
   // Do nothing for now. Later, put in stuff to help test failure modes.
   return true;
 }

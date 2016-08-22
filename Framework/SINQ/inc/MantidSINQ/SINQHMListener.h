@@ -47,7 +47,8 @@ public:
   bool supportsHistory() const override { return false; }
   bool buffersEvents() const override { return false; }
 
-  bool connect(const Poco::Net::SocketAddress &address) override;
+  bool connect(const Poco::Net::SocketAddress &address,
+               const Mantid::API::ILiveListener::ConnectionArgs &args) override;
   void start(Mantid::Kernel::DateAndTime startTime =
                  Mantid::Kernel::DateAndTime()) override;
   boost::shared_ptr<Mantid::API::Workspace> extractData() override;

@@ -44,6 +44,13 @@ class Workspace;
 class MANTID_API_DLL ILiveListener : public Kernel::PropertyManager {
 public:
   //----------------------------------------------------------------------
+  // ConnectionArgs - Stores additional connection parameters
+  //----------------------------------------------------------------------
+  struct ConnectionArgs {
+    std::string instrumentName; /// Name of the instrument
+  };
+
+  //----------------------------------------------------------------------
   // Static properties
   //----------------------------------------------------------------------
 
@@ -59,10 +66,13 @@ public:
   //----------------------------------------------------------------------
 
   /** Connect to the specified address and start listening/buffering
-   *  @param address   The IP address and port to contact
-   *  @return True if the connection was successfully established
+   * @param address The IP address and port to contact
+   * @param args A ConnectionArgs object used to supply additional arguments
+   * required for the connection
+   * @return True if the connection was successfully established
    */
-  virtual bool connect(const Poco::Net::SocketAddress &address) = 0;
+  virtual bool connect(const Poco::Net::SocketAddress &address,
+                       const ConnectionArgs &args) = 0;
 
   /** Commence the collection of data from the DAS. Must be called before
    * extractData().
@@ -123,6 +133,7 @@ public:
    *  End     : The run has ended since the last call to extractData
    */
   enum RunStatus { NoRun = 0, BeginRun = 1, Running = 2, EndRun = 4 };
+
   /** Gets the current run status of the listened-to data stream
    *  @return A value of the RunStatus enumeration indicating the present status
    */

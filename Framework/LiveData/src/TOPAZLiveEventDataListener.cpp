@@ -202,9 +202,12 @@ TOPAZLiveEventDataListener::~TOPAZLiveEventDataListener() {
 /// Connect to the TOPAZ event_catcher util (which will supply us with
 /// events).
 /// @param address The address to attempt to connect to
+/// @param args A ConnectionArgs object used to supply additional arguments
+/// required for the connection
 /// @return Returns true if the connection succeeds.  False otherwise.
 bool TOPAZLiveEventDataListener::connect(
-    const Poco::Net::SocketAddress &address)
+    const Poco::Net::SocketAddress &address,
+    const Mantid::API::ILiveListener::ConnectionArgs &args)
 // The SocketAddress class will throw various exceptions if it encounters an
 // error.  We're assuming the calling function will catch any exceptions that
 // are important

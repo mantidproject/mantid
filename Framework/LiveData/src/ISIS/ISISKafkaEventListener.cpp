@@ -15,8 +15,11 @@ namespace LiveData {
 DECLARE_LISTENER(ISISKafkaEventListener)
 
 /// @copydoc ILiveListener::connect
-bool ISISKafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
+bool ISISKafkaEventListener::connect(
+    const Poco::Net::SocketAddress &address,
+    const API::ILiveListener::ConnectionArgs &args) {
   UNUSED_ARG(address);
+  UNUSED_ARG(args);
   return false;
 }
 
@@ -29,7 +32,6 @@ void ISISKafkaEventListener::start(Kernel::DateAndTime startTime) {
 boost::shared_ptr<API::Workspace> ISISKafkaEventListener::extractData() {
   return boost::shared_ptr<API::Workspace>();
 }
-
 
 /// @copydoc ILiveListener::runStatus
 API::ILiveListener::RunStatus ISISKafkaEventListener::runStatus() {

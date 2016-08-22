@@ -121,8 +121,12 @@ SNSLiveEventDataListener::~SNSLiveEventDataListener() {
 /// if the address is '0.0.0.0', it looks on localhost:31415 (useful for
 /// debugging and testing).
 /// @param address The address to attempt to connect to
+/// @param args A ConnectionArgs object used to supply additional arguments
+/// required for the connection
 /// @return Returns true if the connection succeeds.  False otherwise.
-bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
+bool SNSLiveEventDataListener::connect(
+    const Poco::Net::SocketAddress &address,
+    const API::ILiveListener::ConnectionArgs &args)
 // The SocketAddress class will throw various exceptions if it encounters an
 // error.  We're assuming the calling function will catch any exceptions
 // that are important.

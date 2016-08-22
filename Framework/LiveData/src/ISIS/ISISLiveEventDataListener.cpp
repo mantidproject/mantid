@@ -39,9 +39,8 @@ Kernel::Logger g_log("ISISLiveEventDataListener");
  * The constructor
  */
 ISISLiveEventDataListener::ISISLiveEventDataListener()
-    : LiveListener(), m_isConnected(false), m_stopThread(false),
-      m_runNumber(0), m_daeHandle(), m_numberOfPeriods(0),
-      m_numberOfSpectra(0) {
+    : LiveListener(), m_isConnected(false), m_stopThread(false), m_runNumber(0),
+      m_daeHandle(), m_numberOfPeriods(0), m_numberOfSpectra(0) {
   m_warnings["period"] = "Period number is outside the range. Changed to 0.";
 }
 
@@ -75,7 +74,8 @@ ISISLiveEventDataListener::~ISISLiveEventDataListener() {
 
 // connect the listener to DAE
 bool ISISLiveEventDataListener::connect(
-    const Poco::Net::SocketAddress &address) {
+    const Poco::Net::SocketAddress &address,
+    const Mantid::API::ILiveListener::ConnectionArgs &) {
   // If we don't have an address, force a connection to the test server running
   // on
   // localhost on the default port

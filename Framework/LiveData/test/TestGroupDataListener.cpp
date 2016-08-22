@@ -20,7 +20,9 @@ TestGroupDataListener::TestGroupDataListener() : ILiveListener(), m_buffer() {
   this->createWorkspace();
 }
 
-bool TestGroupDataListener::connect(const Poco::Net::SocketAddress &) {
+bool TestGroupDataListener::connect(
+    const Poco::Net::SocketAddress &,
+    const Mantid::API::ILiveListener::ConnectionArgs &args) {
   // Do nothing.
   return true;
 }

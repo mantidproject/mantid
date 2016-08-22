@@ -31,8 +31,10 @@ Kernel::Logger g_log("LiveListenerFactory");
 boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
     const std::string &instrumentName, bool connect,
     const Kernel::IPropertyManager *properties) const {
+  using Poco::Net::SocketAddress;
   ILiveListener_sptr listener;
   // See if we know about the instrument with the given name
+  ILiveListener::ConnectionArgs args = {instrumentName};
   try {
     Kernel::InstrumentInfo inst =
         Kernel::ConfigService::Instance().getInstrument(instrumentName);
@@ -43,7 +45,7 @@ boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
       listener->updatePropertyValues(*properties);
     }
     if (connect &&
-        !listener->connect(Poco::Net::SocketAddress(inst.liveDataAddress()))) {
+        !listener->connect(SocketAddress(inst.liveDataAddress()), args)) {
       // If we can't connect, log and throw an exception
       std::stringstream ss;
       ss << "Unable to connect listener " << listener->name() << " to "
@@ -61,7 +63,7 @@ boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
     //   exception get out
     listener = Kernel::DynamicFactory<ILiveListener>::create(instrumentName);
     if (connect)
-      listener->connect(Poco::Net::SocketAddress()); // Dummy argument for now
+      listener->connect(SocketAddress(), args);
   }
   // The Poco SocketAddress can throw all manner of exceptions if the address
   // string it gets is

@@ -51,7 +51,8 @@ public:
   } // For the time being at least
   bool buffersEvents() const override { return true; }
 
-  bool connect(const Poco::Net::SocketAddress &address) override;
+  bool connect(const Poco::Net::SocketAddress &address,
+               const API::ILiveListener::ConnectionArgs &) override;
   void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
 

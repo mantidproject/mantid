@@ -82,7 +82,9 @@ FileEventDataListener::~FileEventDataListener() {
   delete m_chunkload;
 }
 
-bool FileEventDataListener::connect(const Poco::Net::SocketAddress &) {
+bool FileEventDataListener::connect(
+    const Poco::Net::SocketAddress &,
+    const Mantid::API::ILiveListener::ConnectionArgs &) {
   // Do nothing for now. Later, put in stuff to help test failure modes.
   return true;
 }

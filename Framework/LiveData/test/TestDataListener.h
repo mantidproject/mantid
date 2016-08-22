@@ -23,7 +23,8 @@ public:
   bool supportsHistory() const override { return false; }
   bool buffersEvents() const override { return true; }
 
-  bool connect(const Poco::Net::SocketAddress &address) override;
+  bool connect(const Poco::Net::SocketAddress &address,
+               const API::ILiveListener::ConnectionArgs &args) override;
   void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
 
