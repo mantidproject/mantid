@@ -546,31 +546,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # Mask bins to the left of the final bin range
         if masking is True:
             # Mask corrupted bins according to shifted workspaces
-            self.log().debug('Mask bin numbers smaller than %d and larger than %d' % (start_bin, end_bin-1))
-            self.log().notice('Bins out of the energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin-1]))
+            self.log().debug('Mask bin numbers smaller than %d and larger than %d' % (start_bin, end_bin - 1))
+            self.log().notice('Bins out of energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin - 1]))
             # Mask bins to the left and right of the final bin range
             MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=x[0], XMax=x[start_bin])
             MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=x[end_bin], XMax=x[end])
 
         return start_bin, end_bin
-
-    def _perform_masking(self, ws, xminbin, xmaxbin):
-        """
-        Calls MaskBins for masking bins before startbin and after endbin according to unmirror options
-        :param ws:          Input workspace to be masked
-        :param xminbin:     Bins smaller than xminbin will be masked
-        :param xmaxbin:     Bins larger than xmaxbin will be masked
-        """
-
-        # Temporary workspace containing bin boundaries
-        __temp = mtd[ws].readX(0)
-
-        self.log().notice('Mask bin numbers smaller than %f and larger than %f' % (xminbin, xmaxbin))
-        self.log().notice('This corresponds to an energy range of [%f %f] meV' %(__temp[xminbin],
-                                                                                                 __temp[xmaxbin]))
-        # Mask bins to the left and right of the final bin range
-        MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=__temp[0], XMax=__temp[xminbin])
-        MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=__temp[xmaxbin], XMax=__temp[mtd[red].blocksize()])
 
     def _finalize(self, runlist):
 
