@@ -44,7 +44,7 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
         return issues
 
     def PyInit(self):
-        self.declareProperty(MultipleFileProperty('FileList',extensions=['nxs']),doc='List of input files')
+        self.declareProperty(MultipleFileProperty('FileList',extensions=['nxs','hdf']),doc='List of input files')
         self.declareProperty(name='NexusCriteria',defaultValue='',
                              doc='Logical expresion for metadata criteria using python syntax. '
                                  'Provide full absolute names for nexus entries enclosed with $ symbol from both sides.')
