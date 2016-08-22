@@ -206,13 +206,15 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
                              " doesn't seem to contain the expected table");
   }
 
-  // Average sample-to-detector distances.
   const auto sample = m_detectorWs->getInstrument()->getSample();
-  sampleToDetectorDistance = 0.0;
-  // Average detector EPPs.
-  detectorEPP = 0.0;
+  double distanceSum = 0;
+  double eppSum = 0;
   size_t n = 0;
-  for (const auto index : detectorIndices) {
+  PRAGMA_OMP(parallel for if ( m_detectorEPPTable->threadSafe())
+             reduction(+: n, distanceSum, eppSum))
+  for (size_t i = 0; i < detectorIndices.size(); ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    const size_t index = detectorIndices[i];
     interruption_point();
     if (index >= peakPositionColumn->size()) {
       throw std::runtime_error("Invalid value in " +
@@ -231,9 +233,9 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
       }
       if (!detector->isMasked()) {
         const double d = detector->getDistance(*sample);
-        sampleToDetectorDistance += d;
+        distanceSum += d;
         const double epp = (*peakPositionColumn)[index];
-        detectorEPP += epp;
+        eppSum += epp;
         ++n;
         g_log.debug() << "Including detector at workspace index " << index <<
                          " - distance: " << d << " EPP: " << epp << ".\n";
@@ -248,15 +250,17 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
           "Excluding detector with unsuccessful fit at workspace index " <<
                        index << ".\n";
     }
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
   if (n == 0) {
     throw std::runtime_error("No successful detector fits found in " +
                              PropertyNames::DETECTOR_EPP_TABLE);
   }
-  sampleToDetectorDistance /= static_cast<double>(n);
+  sampleToDetectorDistance = distanceSum / static_cast<double>(n);
   g_log.information() << "Average sample-to-detector distance: " <<
                          sampleToDetectorDistance << ".\n";
-  detectorEPP /= static_cast<double>(n);
+  detectorEPP = eppSum / static_cast<double>(n);
   g_log.information() << "Average detector EPP: " << detectorEPP << ".\n";
 }
 
