@@ -28,11 +28,6 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 
-namespace {
-  /// static logger
-  Logger g_log("ReflRunsTabPresenter");
-}
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
