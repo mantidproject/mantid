@@ -43,9 +43,9 @@ Peak::Peak()
  *detector. Calculated if not explicitly provided.
  *        Used to give a valid TOF. Default 1.0 meters.
  */
-Peak::Peak(Geometry::Instrument_const_sptr m_inst,
-           Mantid::Kernel::V3D QLabFrame,
-           boost::optional<double> detectorDistance)
+Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
+           const Mantid::Kernel::V3D &QLabFrame,
+           const boost::optional<double> &detectorDistance)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
