@@ -158,12 +158,12 @@ class VelocityAutoCorrelations(PythonAlgorithm):
         # https://www.ncnr.nist.gov/resources/n-lengths/list.html
         # http://www.ati.ac.at/~neutropt/scattering/RecommendedScatteringLengthsOfElements.PDF
         Coh_b={
-        'h':0.99985*25.274+0.00015*4.04,
-        'he':0.0000014*(-2.5)+0.9999986*0,
-        'li':0.075*(-1.89)+0.925*(-2.49),
-        'be':0.12,
-        'b':0.20*(-4.7)+0.80*(-1.3),
-        'c':0.989*0.0+0.011*(-0.52),
+        'h':1.0,
+        'he':1.0,
+        'li':1.0,
+        'be':1.0,
+        'b':1.0,
+        'c':1.0,
         'n':1.0,
         'o':1.0,
         'f':1.0,
@@ -203,7 +203,7 @@ class VelocityAutoCorrelations(PythonAlgorithm):
         'tc':1.0,
         'ru':1.0,
         'rh':1.0,
-        'pd':5.91,
+        'pd':1.0,
         'ag':1.0,
         'cd':1.0,
         'in':1.0,
@@ -253,11 +253,10 @@ class VelocityAutoCorrelations(PythonAlgorithm):
         'np':1.0,
         'pu':1.0,
         'am':1.0,
-        'cm':1.0
-        }
+        'cm':1.0}
 
 
-        logger.information("Averaging auto-correlations & scaling with the coherent neutron scattering lenghts...????????????????????")
+        logger.information("Averaging auto-correlations...")
         start_time=time.time()
 
         # Scaling cross-correlations with the scattering lengths
