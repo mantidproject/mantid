@@ -8,6 +8,13 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/IPropertyManager.h"
 
+namespace Mantid {namespace HistogramData {
+	class BinEdges;
+	class CountStandardDeviations;
+	class Counts;
+}
+}
+
 namespace Mantid {
 namespace Algorithms {
 /** Normalizes a 2D workspace by a specified monitor spectrum. By default ,the
@@ -111,8 +118,7 @@ protected: // for testing
 
   void normaliseBinByBin(const API::MatrixWorkspace_sptr &inputWorkspace,
                          API::MatrixWorkspace_sptr &outputWorkspace);
-  void normalisationFactor(const MantidVec &X, MantidVec *Y, MantidVec *E);
-  //
+  void normalisationFactor(const HistogramData::BinEdges &X, HistogramData::Counts &Y, HistogramData::CountStandardDeviations &E);
 
 private:
   /// A single spectrum workspace containing the monitor

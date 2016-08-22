@@ -563,13 +563,12 @@ void NormaliseToMonitor::normaliseBinByBin(
       boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
 
   // Get hold of the monitor spectrum
-  const auto &monX = m_monitor->x(0);
+  const auto &monX = m_monitor->binEdges(0);
   auto monY = m_monitor->counts(0);
   auto monE = m_monitor->countStandardDeviations(0);
   // Calculate the overall normalization just the once if bins are all matching
   if (m_commonBins)
-    this->normalisationFactor(monX.rawData(), &monY.mutableRawData(),
-                              &monE.mutableRawData());
+    this->normalisationFactor(monX, monY, monE);
 
   const size_t numHists = inputWorkspace->getNumberHistograms();
   auto specLength = inputWorkspace->blocksize();
@@ -582,9 +581,11 @@ void NormaliseToMonitor::normaliseBinByBin(
     PARALLEL_START_INTERUPT_REGION
     prog.report();
 
-    const auto &X = inputWorkspace->x(i);
+    const auto &X = inputWorkspace->binEdges(i);
     // If not rebinning, just point to our monitor spectra, otherwise create new
     // vectors
+	//TODO TEST
+	m_commonBins = true;
     auto Y = (m_commonBins ? monY : Counts(specLength));
     auto E = (m_commonBins ? monE : CountStandardDeviations(specLength));
 
@@ -599,8 +600,7 @@ void NormaliseToMonitor::normaliseBinByBin(
           monX.rawData(), monY.mutableRawData(), monE.mutableRawData(),
           X.rawData(), Y.mutableRawData(), E.mutableRawData(), false);
       // Recalculate the overall normalization factor
-      this->normalisationFactor(X.rawData(), &Y.mutableRawData(),
-                                &E.mutableRawData());
+      this->normalisationFactor(X, Y, E);
     }
 
     if (inputEvent) {
@@ -657,19 +657,23 @@ void NormaliseToMonitor::normaliseBinByBin(
 /** Calculates the overall normalization factor.
  *  This multiplies result by (bin width * sum of monitor counts) / total frame
  * width.
- *  @param X The X vector
- *  @param Y The data vector
- *  @param E The error vector
+ *  @param X The BinEdges of the workspace
+ *  @param Y The Counts of the workspace
+ *  @param E The CountStandardDeviations of the workspace
  */
-void NormaliseToMonitor::normalisationFactor(const MantidVec &X, MantidVec *Y,
-                                             MantidVec *E) {
-  const double monitorSum = std::accumulate(Y->begin(), Y->end(), 0.0);
+void NormaliseToMonitor::normalisationFactor(const BinEdges &X, Counts &Y,
+                                             CountStandardDeviations &E) {
+  const double monitorSum = std::accumulate(Y.begin(), Y.end(), 0.0);
   const double range = X.back() - X.front();
-  MantidVec::size_type specLength = Y->size();
-  for (MantidVec::size_type j = 0; j < specLength; ++j) {
+  auto specLength = Y.size();
+
+  auto &yNew = Y.mutableRawData();
+  auto &eNew = E.mutableRawData();
+
+  for (auto j = 0; j < specLength; ++j) {
     const double factor = range / ((X[j + 1] - X[j]) * monitorSum);
-    (*Y)[j] *= factor;
-    (*E)[j] *= factor;
+    yNew[j] *= factor;
+    eNew[j] *= factor;
   }
 }
 
