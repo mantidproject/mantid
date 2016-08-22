@@ -110,56 +110,6 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_fittingWithBadFileName() {
-    // The filename of the focused file need to take the format
-    // ENGINX_<runNumber>_Focused_Bank_<number>
-
-    testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
-
-    const std::string badFileName = "ENGINX00228061.nxs";
-    EXPECT_CALL(mockView, getFittingRunNo())
-        .Times(1)
-        .WillOnce(Return(badFileName));
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
-
-    // Check that execution actually stops and it doesn't continue
-    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
-    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(testing::_))
-        .Times(0);
-
-    pres.notify(IEnggDiffFittingPresenter::FitPeaks);
-    TSM_ASSERT("Mock not used as expected. Test continued despite bad filename",
-               testing::Mock::VerifyAndClearExpectations(&mockView))
-  }
-
-  void test_fittingWithGoodFileName() {
-    // Test that filename of expected format is still accepted
-
-    testing::NiceMock<MockEnggDiffFittingView> mockView;
-    EnggDiffFittingPresenterNoThread pres(&mockView);
-
-    const std::string goodFileName = "ENGINX_241391_focused_bank_1.nxs";
-
-    std::ofstream tmpFile(goodFileName.c_str());
-    tmpFile.close();
-
-    EXPECT_CALL(mockView, getFittingRunNo())
-        .Times(1)
-        .WillOnce(Return(goodFileName));
-    EXPECT_CALL(mockView, showStatus(testing::_)).Times(testing::AtLeast(1));
-    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(testing::_))
-        .Times(testing::AtLeast(1));
-
-    // Check that execution actually continues and doesn't stop
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-
-    pres.notify(IEnggDiffFittingPresenter::FitPeaks);
-    TSM_ASSERT("Mock not used as expected. Test stopped despite good filename",
-               testing::Mock::VerifyAndClearExpectations(&mockView))
-  }
-
   // This would test the fitting tab with no focused workspace
   // which should produce a warning
   void test_fitting_without_focused_run() {
