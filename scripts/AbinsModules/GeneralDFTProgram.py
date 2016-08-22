@@ -1,5 +1,3 @@
-import hashlib
-
 # ABINS modules
 from IOmodule import IOmodule
 from KpointsData import KpointsData
@@ -151,25 +149,6 @@ class GeneralDFTProgram(IOmodule):
         """
 
         pass
-
-
-    def _calculateHash(self):
-        """
-        This method calculates hash of the phonon file according to SHA-2 algorithm from hashlib library: sha512.
-        @return: string representation of hash for phonon file which contains only hexadecimal digits
-        """
-
-        buf = 65536  # chop content of phonon file into 64kb chunks to minimize memory consumption for hash creation
-        sha = hashlib.sha512()
-
-        with open(self._input_filename, 'rU') as f:
-            while True:
-                data = f.read(buf)
-                if not data:
-                    break
-                sha.update(data)
-
-        return sha.hexdigest()
 
 
     def _rearrange_data(self, data=None):

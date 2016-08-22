@@ -43,7 +43,7 @@ class CalculateCrystal(IOmodule):
         """
 
         data = self._calculate_crystal()
-        self.addAttribute("filename", self._input_filename)
+        self.addFileAttributes()
         self.addNumpyDataset("dw", data.extract()["dw_crystal_data"]) # AbinsData is already stored in an hdf file so only data for DW factors should be stored.
 
         self.save()

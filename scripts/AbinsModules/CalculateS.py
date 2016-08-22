@@ -209,7 +209,7 @@ class CalculateS(IOmodule):
 
         data = self._calculate_S()
 
-        self.addAttribute("filename", self._input_filename)
+        self.addFileAttributes()
         extracted_data = data.extract()
         self.addStructuredDataset("atoms_data", extracted_data["atoms_data"])
         self.addNumpyDataset("convoluted_frequencies", extracted_data["convoluted_frequencies"])

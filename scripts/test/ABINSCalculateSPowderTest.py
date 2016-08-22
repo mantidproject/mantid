@@ -30,10 +30,10 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
     _instrument_name = "TOSCA"
     # data
     # Use case: one k-point
-    C6H6 = _core + "benzene"
+    C6H6 = path.relpath(_core + "benzene")
 
     #  Use case: many k-points
-    Si2 = _core + "Si2-sc"
+    Si2 = path.relpath(_core + "Si2-sc")
 
     #     test input
     def test_wrong_input(self):

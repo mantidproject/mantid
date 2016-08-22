@@ -112,7 +112,7 @@ class CalculatePowder(IOmodule):
 
         data = self._calculate_powder()
 
-        self.addAttribute("filename", self._input_filename)
+        self.addFileAttributes()
         self.addStructuredDataset("powder_data", data.extract())
 
         self.save()

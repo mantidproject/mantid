@@ -244,8 +244,6 @@ class LoadCASTEP(GeneralDFTProgram):
                           "k_vectors": np.asarray(k_vectors),
                           "atomic_displacements": np.asarray(eigenvectors)})
 
-        hash_filename = self._calculateHash()
-
         self._recoverSymmetryPoints(data=file_data)
 
         # save stuff to hdf file
@@ -257,8 +255,7 @@ class LoadCASTEP(GeneralDFTProgram):
         for item in _structured_datasets:
             self.addStructuredDataset(name=item, value=file_data[item])
 
-        self.addAttribute("hash", hash_filename)
-        self.addAttribute("filename", self._input_filename)
+        self.addFileAttributes()
         self.addAttribute("DFT_program", "CASTEP")
 
         self.save()

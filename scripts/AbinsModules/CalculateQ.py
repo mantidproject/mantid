@@ -80,7 +80,7 @@ class CalculateQ(IOmodule):
             raise ValueError("General case of Q data not implemented yet.")
 
         self.addNumpyDataset("data", self._Qvectors.extract()) # Q vectors in the form of numpy array
-        self.addAttribute("filename", self._input_filename)
+        self.addFileAttributes()
         self.save()
 
         return self._Qvectors

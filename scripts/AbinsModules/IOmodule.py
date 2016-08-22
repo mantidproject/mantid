@@ -2,6 +2,9 @@ import h5py
 import numpy
 import subprocess
 import shutil
+import hashlib
+
+from mantid.kernel import logger
 
 class IOmodule(object):
     """
@@ -12,6 +15,10 @@ class IOmodule(object):
         if  isinstance(input_filename, str):
 
             self._input_filename = input_filename
+            try:
+                self._hash_input_filename = self._calculateHash()
+            except IOError as err:
+                logger.error(str(err))
 
             # extract name of file from its path.
             begin=0
@@ -54,6 +61,16 @@ class IOmodule(object):
         """
         self._attributes[name] = value
 
+
+    def addFileAttributes(self):
+        """
+        Adds file attributes: filename and hash of file to the collection of all attributes.
+        @return:
+        """
+        self.addAttribute("hash", self._hash_input_filename)
+        self.addAttribute("filename", self._input_filename)
+
+
     def addStructuredDataset(self, name=None, value=None):
         """
         Adds data in the form of dictionary or a list of dictionaries into the collection of structured datasets.
@@ -61,6 +78,7 @@ class IOmodule(object):
         @param value: dictionary or list of dictionaries is expected
         """
         self._structured_datasets[name] = value
+
 
     def addNumpyDataset(self, name=None, value=None):
         """
@@ -70,6 +88,7 @@ class IOmodule(object):
         http://docs.h5py.org/en/latest/high/dataset.html
         """
         self._numpy_datasets[name] = value
+
 
     def _save_attributes(self, group=None):
         """
@@ -81,6 +100,7 @@ class IOmodule(object):
                 group.attrs[name] = self._attributes[name]
             else:
                 raise ValueError("Invalid value of attribute. String, int or bytes was expected! (invalid type : %s)" %type(self._attributes[name]))
+
 
     def _recursively_save_structured_data_to_group(self, hdf_file=None, path=None, dic=None):
         """
@@ -377,3 +397,21 @@ class IOmodule(object):
 
         return results
 
+
+    def _calculateHash(self):
+        """
+        This method calculates hash of the phonon file according to SHA-2 algorithm from hashlib library: sha512.
+        @return: string representation of hash for phonon file which contains only hexadecimal digits
+        """
+
+        buf = 65536  # chop content of phonon file into 64kb chunks to minimize memory consumption for hash creation
+        sha = hashlib.sha512()
+
+        with open(self._input_filename, 'rU') as f:
+            while True:
+                data = f.read(buf)
+                if not data:
+                    break
+                sha.update(data)
+
+        return sha.hexdigest()

@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 from mantid.simpleapi import *
 
+from os import path
 
 try:
     import simplejson as json
@@ -29,27 +30,31 @@ from AbinsModules import AbinsParameters
 
 class ABINSCalculateQTest(unittest.TestCase):
 
+    def setUp(self):
+        _core = "../ExternalData/Testing/Data/UnitTest/"
+        producer = InstrumentProducer()
+        self._tosca_instrument = producer.produceInstrument("TOSCA")
+        self._filename = path.relpath(_core + "Si2-sc.phonon")
 
     def test_simple(self):
         """
         Tests various  assertions
         """
-        producer = InstrumentProducer()
-        tosca_instrument = producer.produceInstrument("TOSCA")
+
         # wrong file name
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=1, instrument=tosca_instrument, sample_form="Powder")
+            poor_q_calculator = CalculateQ(filename=1, instrument=self._tosca_instrument, sample_form="Powder")
 
         # wrong instrument
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename="one_file", instrument="Different_instrument", sample_form="Powder")
+            poor_q_calculator = CalculateQ(filename=self._filename, instrument="Different_instrument", sample_form="Powder")
 
         # wrong sample form
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename="one_file", instrument=tosca_instrument, sample_form="Solid")
+            poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument, sample_form="Solid")
 
         # no frequencies required for the case when Q vectors do not depend on frequencies
-        poor_q_calculator = CalculateQ(filename="one_file", sample_form="Powder")
+        poor_q_calculator = CalculateQ(filename=self._filename, sample_form="Powder")
         with self.assertRaises(ValueError):
             poor_q_calculator.collectFrequencies(k_points_data=np.array([1, 2, 3, 4]))
 
@@ -76,8 +81,8 @@ class ABINSCalculateQTest(unittest.TestCase):
 
         producer = InstrumentProducer()
         tosca_instrument = producer.produceInstrument("TOSCA")
-        q_calculator = CalculateQ(filename="TestingFile_TOSCA.phonon",
-                                  instrument=tosca_instrument,
+        q_calculator = CalculateQ(filename=self._filename,
+                                  instrument=self._tosca_instrument,
                                   sample_form="Powder")
         q_calculator.collectFrequencies(k_points_data=raw_data)
         q_vectors = q_calculator.getQvectors()
