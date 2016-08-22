@@ -94,8 +94,6 @@ void SaveNexus::exec() {
   m_inputWorkspace = getProperty("InputWorkspace");
 
   runSaveNexusProcessed();
-
-  return;
 }
 /** virtual method to set the non workspace properties for this algorithm
  *  @param alg :: pointer to the algorithm

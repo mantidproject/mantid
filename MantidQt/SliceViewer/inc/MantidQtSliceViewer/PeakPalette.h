@@ -130,8 +130,8 @@ bool PeakPalette<C>::operator==(const PeakPalette &other) const {
 }
 
 // Forward declaration for template specialization
-template <> PeakPalette<QColor>::PeakPalette();
-template <> PeakPalette<PeakViewColor>::PeakPalette();
+template <> DLLExport PeakPalette<QColor>::PeakPalette();
+template <> DLLExport PeakPalette<PeakViewColor>::PeakPalette();
 
 } // namespace
 }

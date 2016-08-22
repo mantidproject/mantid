@@ -10,6 +10,7 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -232,8 +233,10 @@ public:
     auto tag = sampleShape.getShapeXML().find("cylinder");
     TS_ASSERT(tag != std::string::npos);
 
-    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0, 0.01)));
-    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.02, 0)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.009, 0.015)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, -0.009, 0.015)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.011, 0.015)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, -0.011, 0.015)));
   }
 
   void test_Setting_Geometry_As_HollowCylinder() {
@@ -249,8 +252,10 @@ public:
     // New shape
     const auto &sampleShape = inputWS->sample().getShape();
     TS_ASSERT(sampleShape.hasValidShape());
-    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.01, 0.035)));
-    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.02, 0)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, 0.009, 0.045)));
+    TS_ASSERT_EQUALS(true, sampleShape.isValid(V3D(0, -0.009, 0.045)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, 0.011, 0.045)));
+    TS_ASSERT_EQUALS(false, sampleShape.isValid(V3D(0, -0.011, 0.045)));
   }
 
   //----------------------------------------------------------------------------

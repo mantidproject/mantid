@@ -2,10 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CorrectKiKf.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -130,13 +130,13 @@ void CorrectKiKf::exec() {
         }
     }
 
-    MantidVec &yOut = outputWS->dataY(i);
-    MantidVec &eOut = outputWS->dataE(i);
+    auto &yOut = outputWS->mutableY(i);
+    auto &eOut = outputWS->mutableE(i);
     const auto &xIn = inputWS->points(i);
-    const MantidVec &yIn = inputWS->readY(i);
-    const MantidVec &eIn = inputWS->readE(i);
+    auto &yIn = inputWS->y(i);
+    auto &eIn = inputWS->e(i);
     // Copy the energy transfer axis
-    outputWS->setX(i, inputWS->refX(i));
+    outputWS->setSharedX(i, inputWS->sharedX(i));
     for (unsigned int j = 0; j < size; ++j) {
       const double deltaE = xIn[j];
       double Ei = 0.;
@@ -174,7 +174,6 @@ void CorrectKiKf::exec() {
   if ((negativeEnergyWarning) && (efixedProp == EMPTY_DBL()))
     g_log.information() << "Try to set fixed energy\n";
   this->setProperty("OutputWorkspace", outputWS);
-  return;
 }
 
 /**

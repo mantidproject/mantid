@@ -135,9 +135,7 @@ void LoadSPE::exec() {
     reportFormatError(std::string(comment));
 
   // Now the X bin boundaries
-  auto XValues = HistogramData::BinEdges(nbins + 1);
-  auto &X = XValues.mutableData();
-
+  std::vector<double> X(nbins + 1);
   for (size_t i = 0; i <= nbins; ++i) {
     retval = fscanf(speFile, "%10le", &X[i]);
     if (retval != 1) {
@@ -146,6 +144,8 @@ void LoadSPE::exec() {
       reportFormatError(ss.str());
     }
   }
+  HistogramData::BinEdges XValues(std::move(X));
+
   // Read to EOL
   fgets(comment, 100, speFile);
 
@@ -227,8 +227,6 @@ void LoadSPE::readHistogram(FILE *speFile, API::MatrixWorkspace_sptr workspace,
   }
   // Read to EOL
   fgets(comment, 100, speFile);
-
-  return;
 }
 
 /** Called if the file is not formatted as expected

@@ -293,8 +293,24 @@ void ReplicateMD::exec() {
    the linear index -> linear index calculation below will not work correctly.
    */
   MDHistoWorkspace_const_sptr transposedDataWS = dataWS;
-  if (dataWS->getNumDims() == shapeWS->getNumDims()) {
+  if (nDimsData <= nDimsShape) {
     auto axes = findAxes(*shapeWS, *dataWS);
+    // Check that the indices stored in axes are compatible with the
+    // dimensionality of the data workspace
+    const auto numberOfDimensionsOfDataWorkspace = static_cast<int>(nDimsData);
+    for (const auto &axis : axes) {
+      if (axis >= numberOfDimensionsOfDataWorkspace) {
+        std::string message =
+            "ReplicateMD: Cannot transpose the data workspace. Attempting to "
+            "swap dimension index " +
+            std::to_string(
+                std::distance(static_cast<const int *>(&axes[0]), &axis)) +
+            " with index " + std::to_string(axis) +
+            ", but the dimensionality of the data workspace is " +
+            std::to_string(nDimsData);
+        throw std::runtime_error(message);
+      }
+    }
     transposedDataWS = transposeMD(dataWS, axes);
     nDimsData = transposedDataWS->getNumDims();
   }

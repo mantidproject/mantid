@@ -36,7 +36,7 @@ std::string DateTimeValidator::checkValidity(const std::string &value) const {
   if (m_allowedEmpty && value.empty()) {
     return "";
   } else {
-    std::string error("");
+    std::string error;
     try {
       auto displayLogs = false;
       DateAndTime timestamp(value, displayLogs);

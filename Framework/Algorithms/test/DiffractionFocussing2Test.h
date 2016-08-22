@@ -1,6 +1,7 @@
 #ifndef DIFFRACTIONFOCUSSING2TEST_H_
 #define DIFFRACTIONFOCUSSING2TEST_H_
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAlgorithms/MaskBins.h"

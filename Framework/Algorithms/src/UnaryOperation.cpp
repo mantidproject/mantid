@@ -99,7 +99,6 @@ void UnaryOperation::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  return;
 }
 
 /// Executes the algorithm for events

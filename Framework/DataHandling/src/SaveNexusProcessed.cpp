@@ -299,7 +299,6 @@ void SaveNexusProcessed::doExec(Workspace_sptr inputWorkspace,
 
   inputWorkspace->history().saveNexus(cppFile);
   nexusFile->closeGroup();
-  return;
 }
 
 //-----------------------------------------------------------------------------------------------

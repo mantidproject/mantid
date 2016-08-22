@@ -1269,7 +1269,7 @@ bool Algorithm::processGroups() {
     // Set all non-workspace properties
     this->copyNonWorkspaceProperties(alg, int(entry) + 1);
 
-    std::string outputBaseName = "";
+    std::string outputBaseName;
 
     // ---------- Set all the input workspaces ----------------------------
     for (size_t iwp = 0; iwp < m_groups.size(); iwp++) {

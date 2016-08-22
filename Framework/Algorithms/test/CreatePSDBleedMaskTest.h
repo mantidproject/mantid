@@ -79,11 +79,11 @@ public:
     // Test masking
     int failedIndexStart(50), failedIndexEnd(99);
     for (int i = failedIndexStart; i <= failedIndexEnd; ++i) {
-      TS_ASSERT_EQUALS(outputWS->readY(i)[0], 1.);
+      TS_ASSERT_EQUALS(outputWS->y(i)[0], 1.);
     }
 
     for (int i = 0; i <= 49; ++i) {
-      TS_ASSERT_EQUALS(outputWS->readY(i)[0], 0.);
+      TS_ASSERT_EQUALS(outputWS->y(i)[0], 0.);
     }
 
     dataStore.remove(outputName);
@@ -102,7 +102,7 @@ private:
     // Set a spectra to have high count such that the fail the test
     const int failedTube(1);
     // Set a high value to tip that tube over the max count rate
-    testWS->dataY(failedTube * nPixelsPerTube + 1)[0] = 100.0;
+    testWS->mutableY(failedTube * nPixelsPerTube + 1)[0] = 100.0;
     return testWS;
   }
 

@@ -108,8 +108,6 @@ void ExtractMaskToTable::exec() {
   }
 
   addToTableWorkspace(outws, maskeddetids, xmin, xmax, prevmaskeddetids);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -296,8 +294,6 @@ void ExtractMaskToTable::copyTableWorkspaceContent(
     TableRow newrow = targetWS->appendRow();
     newrow << xmin << xmax << speclist;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -380,8 +376,6 @@ void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws,
   string specliststr = spectralist.str();
   TableRow newrow = outws->appendRow();
   newrow << xmin << xmax << specliststr;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

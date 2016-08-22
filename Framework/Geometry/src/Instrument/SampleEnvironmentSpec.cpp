@@ -53,7 +53,7 @@ void SampleEnvironmentSpec::addContainer(const Container_const_sptr &can) {
         "SampleEnvironmentSpec::addContainer() - Container must "
         "have an id field. Empty string found.");
   }
-  m_cans.insert(std::make_pair(can->id(), can));
+  m_cans.emplace(can->id(), can);
 }
 
 /**

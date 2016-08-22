@@ -141,8 +141,6 @@ void LoadInstrumentFromNexus::exec() {
     << "of the sample. This value can be changed via the 'instrument.l1'
   configuration property.\n";
   */
-
-  return;
 }
 
 } // namespace DataHandling

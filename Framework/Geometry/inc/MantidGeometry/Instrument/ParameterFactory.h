@@ -12,16 +12,6 @@
 #include <map>
 #include <vector>
 
-#ifdef _WIN32
-#if (IN_MANTID_GEOMETRY)
-#define GEOMETRY_DLL_EXPORT DLLExport
-#else
-#define GEOMETRY_DLL_EXPORT DLLImport
-#endif
-#else
-#define GEOMETRY_DLL_EXPORT
-#endif
-
 namespace Mantid {
 
 namespace Kernel {
@@ -61,7 +51,7 @@ class Parameter;
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class GEOMETRY_DLL_EXPORT ParameterFactory {
+class MANTID_GEOMETRY_DLL ParameterFactory {
 public:
   template <class C> static void subscribe(const std::string &className);
 

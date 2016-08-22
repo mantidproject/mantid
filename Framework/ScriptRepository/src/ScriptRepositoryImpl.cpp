@@ -476,7 +476,7 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
   // evaluate the status for all entries
   // and also fill up the output vector (in reverse order)
   Mantid::API::SCRIPTSTATUS acc_status = Mantid::API::BOTH_UNCHANGED;
-  std::string last_directory = "";
+  std::string last_directory;
   for (auto it = repo.rbegin(); it != repo.rend(); ++it) {
     // for every entry, it takes the path and RepositoryEntry
     std::string entry_path = it->first;

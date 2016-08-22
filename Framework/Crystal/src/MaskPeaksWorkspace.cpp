@@ -167,8 +167,6 @@ void MaskPeaksWorkspace::exec() {
   maskbinstb->setPropertyValue("OutputWorkspace", m_inputW->getName());
   maskbinstb->setProperty("MaskingInformation", tablews);
   maskbinstb->execute();
-
-  return;
 }
 
 void MaskPeaksWorkspace::retrieveProperties() {

@@ -142,7 +142,7 @@ if the option **Subtract** is checked, and finally the type of **Calculation** t
 with the time limits. A click on the **Load** button results in the calculation of the
 asymmetry, displayed on the right panel.
 
-.. figure:: ../images/ALCDataLoading3.6.png
+.. figure:: ../images/ALCDataLoading3.7.png
    :align: center
    :width: 800
 
@@ -156,9 +156,11 @@ Last
 
 Log
   The name of the log value which will be used as the X-axis in the output workspace. The list of
-  possible logs is automatically populated when the first nexus file is browsed and selected.
+  possible logs is automatically populated when the first nexus file is browsed and selected. If
+  the run start/end time is chosen, they are plotted in seconds relative to the start time of the
+  first run.
 
-Function
+Take log value at
   The function to apply to the time series log: Mean/Min/Max/First/Last.
 
 Dead Time Correction

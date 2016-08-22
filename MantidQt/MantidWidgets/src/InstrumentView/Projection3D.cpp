@@ -12,6 +12,7 @@
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtMantidWidgets/InputController.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -459,6 +460,30 @@ void Projection3D::setLightingModel(bool picking) const {
     glDisable(GL_LINE_SMOOTH);
     glDisable(GL_NORMALIZE);
   }
+}
+
+/** Load 3D projection state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
+void Projection3D::loadFromProject(const std::string &lines) {
+  ProjectionSurface::loadFromProject(lines);
+  API::TSVSerialiser tsv(lines);
+
+  if (tsv.selectSection("Viewport")) {
+    std::string viewportLines;
+    tsv >> viewportLines;
+    m_viewport.loadFromProject(viewportLines);
+  }
+}
+
+/** Save the state of the 3D projection to a Mantid project file
+ * @return a string representing the state of the 3D projection
+ */
+std::string Projection3D::saveToProject() const {
+  API::TSVSerialiser tsv;
+  tsv.writeRaw(ProjectionSurface::saveToProject());
+  tsv.writeSection("Viewport", m_viewport.saveToProject());
+  return tsv.outputLines();
 }
 
 } // MantidWidgets

@@ -362,7 +362,6 @@ void PolyBase::compress(const double epsilon)
     iDegree = 0;
 
   afCoeff.resize(iDegree + 1);
-  return;
 }
 
 void PolyBase::divide(const PolyBase &pD, PolyBase &pQ, PolyBase &pR,
@@ -406,7 +405,6 @@ void PolyBase::divide(const PolyBase &pD, PolyBase &pQ, PolyBase &pR,
   pQ.setDegree(0);
   pQ[0] = 0.0;
   pR = *this;
-  return;
 }
 
 std::vector<double> PolyBase::realRoots(const double epsilon)
@@ -583,7 +581,6 @@ void PolyBase::write(std::ostream &OX) const
 */
 {
   copy(afCoeff.begin(), afCoeff.end(), std::ostream_iterator<double>(OX, " "));
-  return;
 }
 
 } // NAMESPACE  mathLevel

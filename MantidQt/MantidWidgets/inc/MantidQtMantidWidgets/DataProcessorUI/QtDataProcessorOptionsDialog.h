@@ -42,9 +42,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport QtDataProcessorOptionsDialog : public QDialog {
   Q_OBJECT
 public:
-  QtDataProcessorOptionsDialog(
-      DataProcessorView *view,
-      boost::shared_ptr<DataProcessorPresenter> presenter);
+  QtDataProcessorOptionsDialog(DataProcessorView *view,
+                               DataProcessorPresenter *presenter);
   ~QtDataProcessorOptionsDialog() override;
 
 protected:
@@ -58,7 +57,7 @@ protected:
   // the interface
   Ui::DataProcessorOptionsDialog ui;
   // the presenter
-  boost::shared_ptr<DataProcessorPresenter> m_presenter;
+  DataProcessorPresenter *m_presenter;
   // maps option names to widget names
   std::map<std::string, QString> m_bindings;
 };

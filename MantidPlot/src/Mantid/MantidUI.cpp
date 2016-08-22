@@ -1245,9 +1245,14 @@ Table *MantidUI::createDetectorTable(
       // Need to get R, theta through these methods to be correct for grouped
       // detectors
       R = det->getDistance(*sample);
-      theta = showSignedTwoTheta ? ws->detectorSignedTwoTheta(*det)
-                                 : ws->detectorTwoTheta(*det);
-      theta *= 180.0 / M_PI; // To degrees
+      try {
+        theta = showSignedTwoTheta ? ws->detectorSignedTwoTheta(*det)
+                                   : ws->detectorTwoTheta(*det);
+        theta *= 180.0 / M_PI; // To degrees
+      } catch (const Mantid::Kernel::Exception::InstrumentDefinitionError &ex) {
+        // Log the error and leave theta as it is
+        g_log.error(ex.what());
+      }
       QString isMonitor = det->isMonitor() ? "yes" : "no";
 
       colValues << QVariant(specNo) << QVariant(detIds);
@@ -3449,27 +3454,6 @@ void MantidUI::loadWSFromFile(const std::string &wsName,
     executeAlgorithmAsync(alg, true /* wait for completion */);
   } catch (...) {
   }
-}
-
-MantidMatrix *MantidUI::openMatrixWorkspace(const std::string &wsName,
-                                            int lower, int upper) {
-  MatrixWorkspace_sptr ws;
-
-  if (AnalysisDataService::Instance().doesExist(wsName))
-    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
-
-  if (!ws)
-    return 0;
-
-  MantidMatrix *w = new MantidMatrix(
-      ws, appWindow(), "Mantid", QString::fromStdString(wsName), lower, upper);
-
-  if (!w)
-    return 0;
-
-  appWindow()->addMdiSubWindow(w);
-
-  return w;
 }
 
 bool MantidUI::workspacesDockPlot1To1() {

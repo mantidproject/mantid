@@ -11,6 +11,8 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountVariances;
 
 class DetectorEfficiencyCorTest : public CxxTest::TestSuite {
 public:
@@ -67,8 +69,8 @@ public:
     MatrixWorkspace_sptr result = grouper.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1);
-    TS_ASSERT_DELTA(result->readY(0).front(), 10.07373656, 1e-8);
-    TS_ASSERT_DELTA(result->readY(0).back(), 0.0, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).front(), 10.07373656, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).back(), 0.0, 1e-8);
   }
 
   void testDataWithGroupedDetectors() {
@@ -98,8 +100,8 @@ public:
     MatrixWorkspace_sptr result = grouper.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1);
-    TS_ASSERT_DELTA(result->readY(0).front(), 10.07367566, 1e-8);
-    TS_ASSERT_DELTA(result->readY(0).back(), 0.0, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).front(), 10.07367566, 1e-8);
+    TS_ASSERT_DELTA(result->y(0).back(), 0.0, 1e-8);
   }
 
 private:
@@ -117,14 +119,9 @@ private:
     space->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
 
-    BinEdges x{0.0, 0.0, 0.0, 0.0, 4.0};
-    // Fill a couple of zeros just as a check that it doesn't get changed
-    std::vector<double> y{10, 11, 12, 0};
-    std::vector<double> e{sqrt(5.0), sqrt(5.0), sqrt(5.0), 0.0};
-
-    space2D->setBinEdges(0, x);
-    space2D->dataY(0) = y;
-    space2D->dataE(0) = e;
+    space2D->setHistogram(0, BinEdges{1e-14, 2e-14, 3e-14, 4e-14, 4.0},
+                          Counts{10, 11, 12, 0},
+                          CountVariances{5.0, 5.0, 5.0, 0.0});
 
     std::string xmlShape = "<cylinder id=\"shape\"> ";
     xmlShape += "<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> ";

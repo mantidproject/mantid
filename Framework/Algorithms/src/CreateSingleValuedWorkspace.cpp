@@ -2,9 +2,9 @@
 // Includes
 //------------------------
 #include "MantidAlgorithms/CreateSingleValuedWorkspace.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Algorithms;
@@ -37,9 +37,9 @@ void CreateSingleValuedWorkspace::exec() {
   MatrixWorkspace_sptr singleValued =
       WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
 
-  singleValued->dataX(0)[0] = 0.0;
-  singleValued->dataY(0)[0] = dataValue;
-  singleValued->dataE(0)[0] = errorValue;
+  singleValued->mutableX(0)[0] = 0.0;
+  singleValued->mutableY(0)[0] = dataValue;
+  singleValued->mutableE(0)[0] = errorValue;
 
   setProperty("OutputWorkspace", singleValued);
   // Done :)

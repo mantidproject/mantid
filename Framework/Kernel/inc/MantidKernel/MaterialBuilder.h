@@ -59,10 +59,13 @@ public:
 private:
   typedef std::tuple<PhysicalConstants::NeutronAtom, double> Composition;
 
+  bool hasOverrideNeutronProperties() const;
   void overrideNeutronProperties(PhysicalConstants::NeutronAtom &neutron) const;
-  Composition createCompositionFromFormula() const;
-  Composition createCompositionFromAtomicNumber() const;
-  double getOrCalculateRho(double totalNumAtoms, double rmm) const;
+  PhysicalConstants::NeutronAtom generateCustomNeutron() const;
+
+  // Material::ChemicalFormula createCompositionFromFormula() const;
+  Material::ChemicalFormula createCompositionFromAtomicNumber() const;
+  double getOrCalculateRho(const Material::ChemicalFormula &formula) const;
 
   std::string m_name;
   std::unique_ptr<Material::ChemicalFormula> m_formula;

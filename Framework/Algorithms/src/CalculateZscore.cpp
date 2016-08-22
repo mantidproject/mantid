@@ -1,11 +1,11 @@
 #include "MantidAlgorithms/CalculateZscore.h"
 
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Statistics.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 #include <sstream>
 
@@ -57,8 +57,8 @@ void CalculateZscore::exec() {
   } else {
     numspec = 1;
   }
-  size_t sizex = inpWS->readX(0).size();
-  size_t sizey = inpWS->readY(0).size();
+  size_t sizex = inpWS->x(0).size();
+  size_t sizey = inpWS->y(0).size();
 
   Workspace2D_sptr outWS = boost::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create("Workspace2D", numspec, sizex,
@@ -85,28 +85,24 @@ void CalculateZscore::exec() {
     }
 
     // b) Calculate Zscore
-    const MantidVec &inpX = inpWS->readX(wsindex);
-    const MantidVec &inpY = inpWS->readY(wsindex);
-    const MantidVec &inpE = inpWS->readE(wsindex);
+    auto &inpY = inpWS->y(wsindex).rawData();
+    auto &inpE = inpWS->e(wsindex).rawData();
 
-    MantidVec &vecX = outWS->dataX(i);
-    MantidVec &vecY = outWS->dataY(i);
-    MantidVec &vecE = outWS->dataE(i);
+    auto &histY = outWS->mutableY(i);
+    auto &histE = outWS->mutableE(i);
 
     vector<double> yzscores = getZscore(inpY);
     vector<double> ezscores = getZscore(inpE);
 
-    vecX = inpX;
-    vecY = yzscores;
-    vecE = ezscores;
+    outWS->setSharedX(i, inpWS->sharedX(wsindex));
+    histY = yzscores;
+    histE = ezscores;
 
     progress.report("Calculating Z Score");
   } // ENDFOR
 
   // 4. Set the output
   setProperty("OutputWorkspace", outWS);
-
-  return;
 }
 
 } // namespace Algorithms

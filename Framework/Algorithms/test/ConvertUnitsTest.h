@@ -1,23 +1,22 @@
 #ifndef CONVERTUNITSTEST_H_
 #define CONVERTUNITSTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ConvertToDistribution.h"
-#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/ConvertToDistribution.h"
+#include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidDataHandling/LoadEventPreNexus.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -26,49 +25,242 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Points;
 using Mantid::HistogramData::CountVariances;
 using Mantid::HistogramData::CountStandardDeviations;
 
+namespace {
+
+/// Creates a BinEdges workspace with TOF XUnits
+void setup_WS(std::string &inputSpace) {
+  // Set up a small workspace for testing
+  auto space2D = createWorkspace<Workspace2D>(256, 11, 10);
+  BinEdges x{0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
+  Counts a{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  CountVariances variances{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  CountStandardDeviations e(variances);
+  for (int j = 0; j < 256; ++j) {
+    space2D->setBinEdges(j, x);
+    space2D->setCounts(j, a);
+    space2D->setCountStandardDeviations(j, e);
+    // Just set the spectrum number to match the index
+    space2D->getSpectrum(j).setSpectrumNo(j);
+    space2D->getSpectrum(j).setDetectorID(j);
+  }
+  space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+
+  // Register the workspace in the data service
+  AnalysisDataService::Instance().addOrReplace(inputSpace, space2D);
+
+  // Load the instrument data
+  Mantid::DataHandling::LoadInstrument loader;
+  loader.initialize();
+  // Path to test input file assumes Test directory checked out from SVN
+  const std::string inputFile =
+      ConfigService::Instance().getInstrumentDirectory() + "HET_Definition.xml";
+  loader.setPropertyValue("Filename", inputFile);
+  loader.setPropertyValue("Workspace", inputSpace);
+  loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
+  loader.execute();
+}
+
+/// Creates a Points workspace with TOF XUnits
+void setup_Points_WS(std::string &inputSpace) {
+  // Set up a small workspace for testing
+  auto space2D = createWorkspace<Workspace2D>(256, 10, 10);
+
+  // these are the converted points from the BinEdges in setup_WS()
+  Points x{500, 1500, 2500, 3500, 4500, 5500, 6500, 7500, 8500, 9500};
+  Counts a{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  CountVariances variances{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  CountStandardDeviations e(variances);
+  for (int j = 0; j < 256; ++j) {
+    space2D->setPoints(j, x);
+    space2D->setCounts(j, a);
+    space2D->setCountStandardDeviations(j, e);
+    // Just set the spectrum number to match the index
+    space2D->getSpectrum(j).setSpectrumNo(j);
+    space2D->getSpectrum(j).setDetectorID(j);
+  }
+  space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+
+  // Register the workspace in the data service
+  AnalysisDataService::Instance().addOrReplace(inputSpace, space2D);
+
+  // Load the instrument data
+  Mantid::DataHandling::LoadInstrument loader;
+  loader.initialize();
+  // Path to test input file assumes Test directory checked out from SVN
+  const std::string inputFile =
+      ConfigService::Instance().getInstrumentDirectory() + "HET_Definition.xml";
+  loader.setPropertyValue("Filename", inputFile);
+  loader.setPropertyValue("Workspace", inputSpace);
+  loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
+  loader.execute();
+}
+}
+
 class ConvertUnitsTest : public CxxTest::TestSuite {
 public:
-  void setup_WS() {
-    // Set up a small workspace for testing
-    auto space2D = createWorkspace<Workspace2D>(256, 11, 10);
-    BinEdges x{0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000};
-    Counts a{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    CountVariances variances{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    CountStandardDeviations e(variances);
-    for (int j = 0; j < 256; ++j) {
-      space2D->setBinEdges(j, x);
-      space2D->setCounts(j, a);
-      space2D->setCountStandardDeviations(j, e);
-      // Just set the spectrum number to match the index
-      space2D->getSpectrum(j).setSpectrumNo(j);
-      space2D->getSpectrum(j).setDetectorID(j);
-    }
-    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConvertUnitsTest *createSuite() { return new ConvertUnitsTest(); }
+  static void destroySuite(ConvertUnitsTest *suite) { delete suite; }
 
-    // Register the workspace in the data service
-    this->inputSpace = "testWorkspace";
-    AnalysisDataService::Instance().addOrReplace(inputSpace, space2D);
-
-    // Load the instrument data
-    Mantid::DataHandling::LoadInstrument loader;
-    loader.initialize();
-    // Path to test input file assumes Test directory checked out from SVN
-    const std::string inputFile =
-        ConfigService::Instance().getInstrumentDirectory() +
-        "HET_Definition.xml";
-    loader.setPropertyValue("Filename", inputFile);
-    loader.setPropertyValue("Workspace", this->inputSpace);
-    loader.setProperty("RewriteSpectraMap",
-                       Mantid::Kernel::OptionalBool(false));
-    loader.execute();
-  }
-
+  void setUp() override { inputSpace = "testWorkspace"; }
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
+  }
+
+  /// Tests the execution of the algorithm with a Points Workspace
+  void test_Exec_Points_Input() {
+    setup_Points_WS(inputSpace);
+
+    ConvertUnits convertUnits;
+    TS_ASSERT_THROWS_NOTHING(convertUnits.initialize());
+    TS_ASSERT(convertUnits.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(
+        convertUnits.setPropertyValue("InputWorkspace", inputSpace));
+    TS_ASSERT_THROWS_NOTHING(
+        convertUnits.setPropertyValue("OutputWorkspace", "outWS"));
+    TS_ASSERT_THROWS_NOTHING(
+        convertUnits.setPropertyValue("Target", "Wavelength"));
+    TS_ASSERT_THROWS_NOTHING(convertUnits.execute());
+    TS_ASSERT(convertUnits.isExecuted());
+
+    Workspace_sptr input;
+    TS_ASSERT_THROWS_NOTHING(
+        input = AnalysisDataService::Instance().retrieve(inputSpace));
+    Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
+
+    // make sure input WS is not changed, i.e. still not Histogram
+    TS_ASSERT(!input2D->isHistogramData());
+
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "outWS"));
+    Workspace2D_sptr output2D =
+        boost::dynamic_pointer_cast<Workspace2D>(output);
+
+    // Test that X data is still Points (it was converted back)
+    TS_ASSERT(!output2D->isHistogramData());
+
+    // Check that the output unit is correct
+    TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "Wavelength");
+
+    // Test that X data is still Points (it was converted back)
+    TS_ASSERT_EQUALS(output2D->x(101).size(), 10);
+    // Test that Y & E data is unchanged
+    TS_ASSERT_EQUALS(output2D->y(101).size(), 10);
+    TS_ASSERT_EQUALS(output2D->e(101).size(), 10);
+
+    TS_ASSERT_DELTA(output2D->y(101)[0], input2D->y(101)[0], 1e-6);
+    TS_ASSERT_DELTA(output2D->y(101)[4], input2D->y(101)[4], 1e-6);
+    TS_ASSERT_DELTA(output2D->e(101)[1], input2D->e(101)[1], 1e-6);
+
+    // Test that spectra that should have been zeroed have been
+    TS_ASSERT_EQUALS(output2D->y(0)[1], 0);
+    TS_ASSERT_EQUALS(output2D->e(0)[8], 0);
+    // Check that the data has truly been copied (i.e. isn't a reference to the
+    // same vector in both workspaces)
+    double test[10] = {11, 22, 33, 44, 55, 66, 77, 88, 99, 1010};
+    Counts testY(test, test + 10);
+    CountStandardDeviations testE(test, test + 10);
+    output2D->setCounts(111, testY);
+    output2D->setCountStandardDeviations(111, testE);
+
+    TS_ASSERT_EQUALS(output2D->y(111)[3], 44.0);
+
+    TS_ASSERT_EQUALS(input2D->y(111)[3], 3.0);
+
+    // Check that a couple of x points have been correctly converted
+    TS_ASSERT_DELTA(output2D->x(103)[4], 1.4228, 0.0001);
+    TS_ASSERT_DELTA(output2D->x(103)[5], 1.7389, 0.0001);
+    TS_ASSERT_DELTA(output2D->x(103)[9], 3.0037, 0.0001);
+
+    // Just check that an input bin boundary is unchanged
+    TS_ASSERT_EQUALS(input2D->x(66)[4], 4500.0);
+
+    AnalysisDataService::Instance().remove("outWS");
+  }
+
+  /// Tests converting back and forth with a Points Workspace
+  void test_Points_Convert_Back_and_Forth() {
+    // set up points WS with units TOF
+    setup_Points_WS(inputSpace);
+
+    ConvertUnits convertUnits;
+    TS_ASSERT_THROWS_NOTHING(convertUnits.initialize());
+
+    // used to hold the middle workspace
+    const std::string temp_ws_name = "tempWS";
+
+    alg.setRethrows(true);
+    // Convert to Wavelength
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", inputSpace));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", temp_ws_name));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Target", "Wavelength"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Convert back to TOF
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", temp_ws_name));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Target", "TOF"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // get the input WS to compare values
+    Workspace_sptr pointsWS;
+    TS_ASSERT_THROWS_NOTHING(
+        pointsWS = AnalysisDataService::Instance().retrieve(inputSpace));
+    Workspace2D_sptr pointsWS2D =
+        boost::dynamic_pointer_cast<Workspace2D>(pointsWS);
+
+    // This is the WS with units converted back to TOF
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "outWS"));
+    Workspace2D_sptr output2D =
+        boost::dynamic_pointer_cast<Workspace2D>(output);
+
+    // Test that X data is still Points (it was converted back)
+    TS_ASSERT(!output2D->isHistogramData());
+
+    // check if the units are successfully converted
+    TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "TOF");
+
+    // Test that X data is still Points (it was converted back)
+    TS_ASSERT_EQUALS(output2D->x(101).size(), 10);
+    // Test that Y & E data is unchanged
+    TS_ASSERT_EQUALS(output2D->y(101).size(), 10);
+    TS_ASSERT_EQUALS(output2D->e(101).size(), 10);
+
+    // Test that their size is the same
+    TS_ASSERT_EQUALS(output2D->blocksize(), pointsWS2D->blocksize());
+
+    // Test that spectra that should have been zeroed have been
+    TS_ASSERT_EQUALS(output2D->y(0)[1], 0);
+    TS_ASSERT_EQUALS(output2D->e(0)[8], 0);
+
+    // Compare to see if X values have changed
+    const size_t xsize = output2D->blocksize();
+    for (size_t i = 0; i < output2D->getNumberHistograms(); ++i) {
+      auto &inX = pointsWS2D->x(i);
+      auto &outX = output2D->x(i);
+      for (size_t j = 0; j < xsize; ++j) {
+        TS_ASSERT_DELTA(outX[j], inX[j], 1e-9);
+      }
+    }
+
+    AnalysisDataService::Instance().remove(temp_ws_name);
+    AnalysisDataService::Instance().remove("outWS");
   }
 
   /* Test that when the units are the same between the input workspace and the
@@ -78,7 +270,7 @@ public:
    * workspace.
    */
   void test_Exec_Input_Same_Output_And_Same_Units() {
-    this->setup_WS();
+    setup_WS(inputSpace);
     if (!alg.isInitialized())
       alg.initialize();
 
@@ -107,7 +299,7 @@ public:
    * in-memory workspace.
    */
   void test_Exec_Input_different_Output_But_Same_Units() {
-    this->setup_WS();
+    setup_WS(inputSpace);
     if (!alg.isInitialized())
       alg.initialize();
 
@@ -133,7 +325,7 @@ public:
   }
 
   void testExec() {
-    this->setup_WS();
+    setup_WS(inputSpace);
     if (!alg.isInitialized())
       alg.initialize();
 
@@ -146,7 +338,7 @@ public:
     alg.setPropertyValue("AlignBins", "1");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
-    alg.isExecuted();
+    TS_ASSERT(alg.isExecuted());
 
     // Get back the saved workspace
     Workspace_sptr output;
@@ -159,45 +351,38 @@ public:
     Workspace2D_sptr output2D =
         boost::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
+
     // Check that the output unit is correct
     TS_ASSERT_EQUALS(output2D->getAxis(0)->unit()->unitID(), "Wavelength");
+
     // Test that y & e data is unchanged
-    Mantid::MantidVec y = output2D->dataY(101);
-    Mantid::MantidVec e = output2D->dataE(101);
-    unsigned int ten = 10;
-    TS_ASSERT_EQUALS(y.size(), ten);
-    TS_ASSERT_EQUALS(e.size(), ten);
-    Mantid::MantidVec yIn = input2D->dataY(101);
-    Mantid::MantidVec eIn = input2D->dataE(101);
-    TS_ASSERT_DELTA(y[0], yIn[0], 1e-6);
-    TS_ASSERT_DELTA(y[4], yIn[4], 1e-6);
-    TS_ASSERT_DELTA(e[1], eIn[1], 1e-6);
+    TS_ASSERT_EQUALS(output2D->y(101).size(), 10);
+    TS_ASSERT_EQUALS(output2D->e(101).size(), 10);
+
+    TS_ASSERT_DELTA(output2D->y(101)[0], input2D->y(101)[0], 1e-6);
+    TS_ASSERT_DELTA(output2D->y(101)[4], input2D->y(101)[4], 1e-6);
+    TS_ASSERT_DELTA(output2D->e(101)[1], input2D->e(101)[1], 1e-6);
+
     // Test that spectra that should have been zeroed have been
-    Mantid::MantidVec x = output2D->dataX(0);
-    y = output2D->dataY(0);
-    e = output2D->dataE(0);
-    TS_ASSERT_EQUALS(y[1], 0);
-    TS_ASSERT_EQUALS(e[9], 0);
-    // Check that the data has truly been copied (i.e. isn't a reference to the
-    // same
-    //    vector in both workspaces)
+    TS_ASSERT_EQUALS(output2D->y(0)[1], 0);
+    TS_ASSERT_EQUALS(output2D->e(0)[9], 0);
+    // Check that the data has truly been copied
+    //(i.e. isn't a reference to the same vector in both workspaces)
     double test[10] = {11, 22, 33, 44, 55, 66, 77, 88, 99, 1010};
     Counts testY(test, test + 10);
     CountStandardDeviations testE(test, test + 10);
     output2D->setCounts(111, testY);
     output2D->setCountStandardDeviations(111, testE);
-    y = output2D->dataY(111);
-    TS_ASSERT_EQUALS(y[3], 44.0);
-    yIn = input2D->dataY(111);
-    TS_ASSERT_EQUALS(yIn[3], 3.0);
+
+    TS_ASSERT_EQUALS(output2D->y(111)[3], 44.0);
+
+    TS_ASSERT_EQUALS(input2D->y(111)[3], 3.0);
 
     // Check that a couple of x bin boundaries have been correctly converted
-    x = output2D->dataX(103);
-    TS_ASSERT_DELTA(x[5], 1.5808, 0.0001);
-    TS_ASSERT_DELTA(x[10], 3.1617, 0.0001);
+    TS_ASSERT_DELTA(output2D->x(103)[5], 1.5808, 0.0001);
+    TS_ASSERT_DELTA(output2D->x(103)[10], 3.1617, 0.0001);
     // Just check that an input bin boundary is unchanged
-    Mantid::MantidVec xIn = input2D->dataX(66);
-    TS_ASSERT_EQUALS(xIn[4], 4000.0);
+    TS_ASSERT_EQUALS(input2D->x(66)[4], 4000.0);
 
     AnalysisDataService::Instance().remove("outputSpace");
   }
@@ -217,7 +402,7 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "quickOut2"));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Energy");
-    TS_ASSERT_DELTA(output->dataX(1)[1], 10.10, 0.01);
+    TS_ASSERT_DELTA(output->x(1)[1], 10.10, 0.01);
     // Check EMode has been set
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Elastic, output->getEMode());
 
@@ -244,12 +429,15 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "quickOut"));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "dSpacing");
-    TS_ASSERT_EQUALS(&(output->dataX(0)[0]), &(output->dataX(0)[0]));
+    // What is this meant to be testing should this be input vs output?
+    TS_ASSERT_EQUALS(&(output->x(0)[0]), &(output->x(0)[0]));
     const size_t xsize = output->blocksize();
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
-      const auto &outX = output->readX(i);
+      auto &outX = output->x(i);
       for (size_t j = 0; j <= xsize; ++j) {
-        TS_ASSERT_EQUALS(outX[j], 2.0 * M_PI);
+        // Axis gets reversed by ConvertUnits to make it strictly increasing
+        TS_ASSERT_EQUALS(outX[j],
+                         2.0 * M_PI / (1.0 + static_cast<double>(xsize - j)));
       }
     }
 
@@ -307,13 +495,13 @@ public:
             "output"));
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "MomentumTransfer");
     // What is this testing? Does it have to do with copy-on-write dataX?
-    TS_ASSERT_EQUALS(&(output->dataX(0)[0]), &(output->dataX(0)[0]));
+    TS_ASSERT_EQUALS(&(output->x(0)[0]), &(output->x(0)[0]));
     const size_t xsize = output->blocksize();
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
-      const auto &inX = input->readX(i);
-      const auto &inY = input->readY(i);
-      const auto &outX = output->readX(i);
-      const auto &outY = output->readY(i);
+      auto &inX = input->x(i);
+      auto &inY = input->y(i);
+      auto &outX = output->x(i);
+      auto &outY = output->y(i);
       for (size_t j = 0; j <= xsize; ++j) {
         TS_ASSERT_DELTA(outX[j], inX[j], 1e-9);
       }
@@ -425,7 +613,7 @@ public:
     size_t num_events = WS->getNumberEvents();
     EventList el = WS->getSpectrum(wkspIndex);
     double a_tof = el.getEvents()[0].tof();
-    double a_x = el.dataX()[1];
+    double a_x = el.x()[1];
 
     if (!alg.isInitialized())
       alg.initialize();
@@ -448,7 +636,7 @@ public:
     // But a TOF changed.
     TS_ASSERT_DIFFERS(a_tof, WS->getSpectrum(wkspIndex).getEvents()[0].tof());
     // and a X changed
-    TS_ASSERT_DIFFERS(a_x, WS->getSpectrum(wkspIndex).dataX()[1]);
+    TS_ASSERT_DIFFERS(a_x, WS->getSpectrum(wkspIndex).x()[1]);
     // Check EMode has been set
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, WS->getEMode());
   }
@@ -553,6 +741,45 @@ public:
     do_testExecEvent_RemainsSorted(PULSETIME_SORT, "Energy");
   }
 
+  void testDeltaEFailDoesNotAlterInPlaceWorkspace() {
+
+    std::string wsName =
+        "ConvertUnits_testDeltaEFailDoesNotAlterInPlaceWorkspace";
+    MatrixWorkspace_sptr ws =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 200,
+                                                                     false);
+    // set to a distribution
+    ws->setDistribution(true);
+    AnalysisDataService::Instance().add(wsName, ws);
+
+    // get a copy of some original values
+    auto originalUnit = ws->getAxis(0)->unit();
+    auto originalEMode = ws->getEMode();
+    TS_ASSERT_THROWS_ANYTHING(ws->getEFixed());
+    auto originalYdata = ws->readY(0);
+
+    ConvertUnits conv;
+    conv.initialize();
+    conv.setPropertyValue("InputWorkspace", wsName);
+    // in place conversion
+    conv.setPropertyValue("OutputWorkspace", wsName);
+    conv.setPropertyValue("Target", "DeltaE");
+    // do not set emode - this will cause a failure
+    // do not set efixed either
+    conv.execute();
+
+    TSM_ASSERT("Expected ConvertUnits to throw on deltaE conversion without "
+               "eMode or eFixed set",
+               !conv.isExecuted());
+
+    TS_ASSERT_EQUALS(originalUnit, ws->getAxis(0)->unit());
+    TS_ASSERT_EQUALS(originalEMode, ws->getEMode());
+    TS_ASSERT_THROWS_ANYTHING(ws->getEFixed());
+    TS_ASSERT_EQUALS(originalYdata, ws->readY(0));
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
 private:
   ConvertUnits alg;
   std::string inputSpace;
@@ -568,11 +795,32 @@ public:
   }
   static void destroySuite(ConvertUnitsTestPerformance *suite) { delete suite; }
 
-  ConvertUnitsTestPerformance() {
+  void setUp() override {
     FrameworkManager::Instance().exec(
         "Load", "Filename=HET15869;OutputWorkspace=hist_tof");
     FrameworkManager::Instance().exec(
         "Load", "Filename=CNCS_7860_event;OutputWorkspace=event_tof");
+    std::string WSname = "inputWS";
+    setup_Points_WS(WSname);
+  }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("outWS");
+    AnalysisDataService::Instance().remove("hist_wave");
+    AnalysisDataService::Instance().remove("hist_");
+    AnalysisDataService::Instance().remove("event_wave");
+    AnalysisDataService::Instance().remove("event_");
+  }
+
+  void test_points_workspace() {
+
+    ConvertUnits alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "inputWS");
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.setPropertyValue("Target", "Wavelength");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
   }
 
   void test_histogram_workspace() {

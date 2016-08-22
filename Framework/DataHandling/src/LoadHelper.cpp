@@ -28,7 +28,7 @@ using namespace API;
  */
 std::string
 LoadHelper::findInstrumentNexusPath(const Mantid::NeXus::NXEntry &firstEntry) {
-  std::string insNamePath = "";
+  std::string insNamePath;
   std::vector<Mantid::NeXus::NXClassInfo> v = firstEntry.groups();
   for (auto it = v.begin(); it < v.end(); it++) {
     if (it->nxclass == "NXinstrument") {

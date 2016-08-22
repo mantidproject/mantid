@@ -130,7 +130,7 @@ std::string EQSANSLoad::findConfigFile(const int &run) {
       Kernel::ConfigService::Instance().getDataSearchDirs();
 
   int max_run_number = 0;
-  std::string config_file = "";
+  std::string config_file;
   static boost::regex re1("eqsans_configuration\\.([0-9]+)$");
   boost::smatch matches;
   for (const auto &searchPath : searchPaths) {
@@ -594,7 +594,7 @@ void EQSANSLoad::exec() {
 
   // Get the run number so we can find the proper config file
   int run_number = 0;
-  std::string config_file = "";
+  std::string config_file;
   if (dataWS->run().hasProperty("run_number")) {
     const std::string run_str =
         dataWS->run().getPropertyValueAsType<std::string>("run_number");

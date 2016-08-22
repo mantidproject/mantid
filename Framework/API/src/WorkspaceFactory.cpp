@@ -137,8 +137,6 @@ void WorkspaceFactoryImpl::initializeFromParent(
       }
     }
   }
-
-  return;
 }
 
 /** Creates a new instance of the class with the given name, and allocates

@@ -273,8 +273,6 @@ void DiffractionEventCalibrateDetectors::init() {
 
   // Disable default gsl error handler (which is to call abort!)
   gsl_set_error_handler_off();
-
-  return;
 }
 
 /** Executes the algorithm
@@ -583,8 +581,6 @@ void DiffractionEventCalibrateDetectors::exec() {
 
   // Closing
   outfile.close();
-
-  return;
 }
 
 } // namespace Algorithm

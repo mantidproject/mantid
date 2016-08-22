@@ -14,11 +14,11 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <Poco/File.h>
-
+#include <boost/regex.hpp>
 #include <fstream>
+#include <Poco/File.h>
 #include <sstream>
+#include <string>
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
@@ -28,6 +28,13 @@ namespace Mantid {
 namespace DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadGSS)
+
+namespace { // anonymous namespace
+const boost::regex DET_POS_REG_EXP{"^#.+flight path\\s+([0-9.]+).+"
+                                   "tth\\s+([0-9.]+).+"
+                                   "DIFC\\s+([0-9.]+)"};
+const boost::regex L1_REG_EXP{"^#.+flight path\\s+([0-9.]+)\\s*m"};
+} // end of anonymous namespace
 
 //----------------------------------------------------------------------------------------------
 /** Return the confidence with with this algorithm can load the file
@@ -91,8 +98,6 @@ void LoadGSS::exec() {
       loadGSASFile(filename, useBankAsSpectrum);
 
   setProperty("OutputWorkspace", outputWorkspace);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -189,33 +194,51 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         }
       } else if (key1 == "Primary") {
         // Primary flight path ...
-        std::string s1, s2;
-        inputLine >> s1 >> s2;
-        primaryflightpath = atof(s2.c_str()); // convertToDouble(s2);
-        g_log.information() << "L1 = " << primaryflightpath << '\n';
+        boost::smatch result;
+        if (boost::regex_search(inputLine.str(), result, L1_REG_EXP) &&
+            result.size() == 2) {
+          primaryflightpath = std::stod(std::string(result[1]));
+
+        } else {
+          std::stringstream msg;
+          msg << "Failed to parse primary flight path from line \""
+              << inputLine.str() << "\"";
+          g_log.warning(msg.str());
+        }
+
+        std::stringstream msg;
+        msg << "L1 = " << primaryflightpath;
+        g_log.information(msg.str());
       } else if (key1 == "Total") {
         // Total flight path .... .... including total flying path, difc and
         // 2theta of 1 bank
-        std::string s1, s2, s3, s4, s5, s6;
-        inputLine >> s1 >> s2 >> s3 >> s4 >> s5 >> s6;
-#if 0
-          double totalpath = convertToDouble(s2);
-          double tth = convertToDouble(s4);
-          double difc = convertToDouble(s6);
-#else
-        double totalpath = atof(s2.c_str());
-        double tth = atof(s4.c_str());
-        double difc = atof(s6.c_str());
-#endif
+
+        double totalpath(0.f);
+        double tth(0.f);
+        double difc(0.f);
+
+        boost::smatch result;
+        if (boost::regex_search(inputLine.str(), result, DET_POS_REG_EXP) &&
+            result.size() == 4) {
+          totalpath = std::stod(std::string(result[1]));
+          tth = std::stod(std::string(result[2]));
+          difc = std::stod(std::string(result[3]));
+        } else {
+          std::stringstream msg;
+          msg << "Failed to parse position from line \"" << inputLine.str()
+              << "\"";
+          g_log.warning(msg.str());
+        }
 
         totalflightpaths.push_back(totalpath);
         twothetas.push_back(tth);
         difcs.push_back(difc);
 
-        g_log.information() << "Bank " << difcs.size() - 1
-                            << ": Total flight path = " << totalpath
-                            << "  2Theta = " << tth << "  DIFC = " << difc
-                            << "\n";
+        std::stringstream msg;
+        msg << "Bank " << difcs.size() - 1
+            << ": Total flight path = " << totalpath << "  2Theta = " << tth
+            << "  DIFC = " << difc;
+        g_log.information(msg.str());
       } // if keys....
 
     } // ENDIF for Line with #
@@ -433,7 +456,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 /** Convert a string containing number and unit to double
   */
 double LoadGSS::convertToDouble(std::string inputstring) {
-  std::string temps = "";
+  std::string temps;
   int isize = static_cast<int>(inputstring.size());
   for (int i = 0; i < isize; i++) {
     char thechar = inputstring[i];
@@ -445,7 +468,7 @@ double LoadGSS::convertToDouble(std::string inputstring) {
     }
   }
 
-  double rd = atof(temps.c_str());
+  double rd = std::stod(temps);
 
   return rd;
 }
@@ -526,8 +549,6 @@ void LoadGSS::createInstrumentGeometry(
     instrument->markAsDetector(detector);
 
   } // ENDFOR (i: spectrum)
-
-  return;
 }
 
 } // namespace

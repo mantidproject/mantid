@@ -86,20 +86,19 @@ private:
   using Kernel::DynamicFactory<IRemoteJobManager>::create;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// RemoteJobManagerFactoryImpl (needed for dllexport) and a typedef for it.
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<RemoteJobManagerFactoryImpl>;
-#endif /* _WIN32 */
-
 // The factory is just a specialisation of SingletonHolder
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<
-    RemoteJobManagerFactoryImpl> RemoteJobManagerFactory;
+typedef Mantid::Kernel::SingletonHolder<RemoteJobManagerFactoryImpl>
+    RemoteJobManagerFactory;
 
 } // namespace API
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::RemoteJobManagerFactoryImpl>;
+}
+}
 
 /* Macro to register (remote job manager) classes into the factory. As
  * with the equivalent macros of the workspace factory or the

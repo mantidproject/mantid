@@ -52,7 +52,7 @@ public:
 
       // test alternate member function.
       double output3[1];
-      signal->GetTupleValue(index, output3);
+      signal->GetTypedTuple(index, output3);
       TS_ASSERT_DELTA(1.0, output3[0], 0.0001);
 
       // test alternate member function.
@@ -97,8 +97,8 @@ public:
 
     for (auto idx = 0; idx < imageSize / 4; ++idx) {
       double output1[1], output2[1];
-      signal->GetTupleValue(idx * 4, output1);
-      doubleArray->GetTupleValue(idx, output2);
+      signal->GetTypedTuple(idx * 4, output1);
+      doubleArray->GetTypedTuple(idx, output2);
       TS_ASSERT_DELTA(output1[0], output2[0], 0.0001);
     }
   }
@@ -153,8 +153,8 @@ public:
 
     for (auto idx = 0; idx < 100; ++idx) {
       double output1[1], output2[1];
-      signal->GetTupleValue(idx, output1);
-      doubleArray->GetTupleValue(idx, output2);
+      signal->GetTypedTuple(idx, output1);
+      doubleArray->GetTypedTuple(idx, output2);
       TS_ASSERT_DELTA(output1[0], output2[0], 0.0001);
     }
   }
@@ -235,7 +235,7 @@ public:
     for (auto index = 0; index < imageSize; ++index) {
       // test member function.
       double output[1];
-      m_signal->GetTupleValue(index, output);
+      m_signal->GetTypedTuple(index, output);
       TS_ASSERT_DELTA(0.25, output[0], 0.0001);
     }
   }

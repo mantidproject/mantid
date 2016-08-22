@@ -1,8 +1,10 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
 import os
 import sys
+from six import iteritems
 
 def simple_algorithm(algorithm_str, parameters):
     return _execute(algorithm_str, parameters)
@@ -14,7 +16,7 @@ def _execute(algorithm_str, parameters, is_name=True):
         alg = Algorithm.fromString(algorithm_str)
     alg.initialize()
     alg.setChild(True)
-    for key, value in parameters.iteritems():
+    for key, value in iteritems(parameters):
         if value is None:
             Logger("TransmissionUtils").error("Trying to set %s=None" % key)
         if alg.existsProperty(key):
@@ -26,7 +28,7 @@ def _execute(algorithm_str, parameters, is_name=True):
         alg.execute()
     except:
         Logger("TransmissionUtils").error("Error executing [%s]" % str(alg))
-        Logger("TransmissionUtils").error(str(sys.exc_value))
+        Logger("TransmissionUtils").error(str(sys.exc_info()[1]))
     return alg
 
 #pylint: disable=too-many-locals
@@ -260,7 +262,7 @@ def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det,
             Logger("TransmissionUtils").warning("Could not retrieve unfitted transmission for %s" % trans_output_workspace)
         return output_ws, raw_ws
     except:
-        Logger("TransmissionUtils").error("Couldn't compute transmission. Is the beam center in the right place?\n%s" % sys.exc_value)
+        Logger("TransmissionUtils").error("Couldn't compute transmission. Is the beam center in the right place?\n%s" % sys.exc_info()[1])
         return None, None
 
 def apply_transmission(self, workspace, trans_workspace):

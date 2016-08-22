@@ -66,7 +66,7 @@ std::string FunctionProperty::getDefault() const { return ""; }
 *  @return Error message from FunctionFactory or "" on success.
 */
 std::string FunctionProperty::setValue(const std::string &value) {
-  std::string error = "";
+  std::string error;
   try {
     m_value = boost::shared_ptr<IFunction>(
         FunctionFactory::Instance().createInitialized(value));

@@ -10,7 +10,7 @@ namespace CustomInterfaces {
 ReflGenericDataProcessorPresenterFactory creates a Reflectometry
 GenericDataProcessorPresenter
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -40,7 +40,7 @@ public:
   /**
   * Creates a Reflectometry Data Processor Presenter
   */
-  boost::shared_ptr<MantidQt::MantidWidgets::GenericDataProcessorPresenter>
+  std::unique_ptr<MantidQt::MantidWidgets::GenericDataProcessorPresenter>
   create() override;
 };
 }

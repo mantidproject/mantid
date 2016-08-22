@@ -26,7 +26,8 @@ if ( CXXTEST_FOUND )
             ${NEXUS_LIBRARIES}
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
-            ${HDF5_LIBRARIES} )
+            ${HDF5_LIBRARIES}
+            ${HDF5_HL_LIBRARIES} )
   add_dependencies ( DataHandlingTest Algorithms MDAlgorithms )
   add_dependencies ( FrameworkTests DataHandlingTest )
   # Test data

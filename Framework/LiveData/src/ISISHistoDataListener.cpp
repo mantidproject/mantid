@@ -145,9 +145,7 @@ int ISISHistoDataListener::runNumber() const {
 
 void ISISHistoDataListener::start(
     Kernel::DateAndTime /*startTime*/) // Ignore the start time
-{
-  return;
-}
+{}
 
 /**
  * Read the data from the DAE.

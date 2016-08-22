@@ -82,9 +82,9 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
             self._verify_workspace(workspace)
 
 
-    def test_sampleOnly(self):
+    def test_sampleOnly_indirect(self):
         """
-        Test simple run with sample workspace only.
+        Test simple run with sample workspace only for indirect mode
         """
 
         FlatPlatePaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
@@ -96,6 +96,23 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
                                         Emode='Indirect',
                                         Efixed=1.845)
 
+        ass_ws_name = self._corrections_ws_name + '_ass'
+        self. _verify_workspace(ass_ws_name)
+
+    def test_sampleOnly_direct(self):
+        """
+        Test simple run with sample workspace only for direct mode
+        """
+    
+        FlatPlatePaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                        SampleWorkspace=self._sample_ws,
+                                        SampleChemicalFormula='H2-O',
+                                        SampleThickness=0.1,
+                                        SampleAngle=45,
+                                        NumberWavelengths=10,
+                                        Emode='Direct',
+                                        Efixed=1.845)
+    
         ass_ws_name = self._corrections_ws_name + '_ass'
         self. _verify_workspace(ass_ws_name)
 

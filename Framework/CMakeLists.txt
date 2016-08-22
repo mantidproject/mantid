@@ -1,5 +1,5 @@
 # This is mainly here so you don't get a complaint when running cmake
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required (VERSION 3.5)
 
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../buildconfig/CMake")
@@ -49,13 +49,11 @@ set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} )
 ###########################################################################
 
 # Only available on Linux (specifically RedHat), and for a framework-only build
-if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
+if ( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
   set ( MPI_BUILD OFF CACHE BOOL "Enable MPI options" )
   if ( MPI_BUILD )
-  include ( MPISetup )
-        set ( MANTIDLIBS  ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES} )
-        find_package ( OpenGL REQUIRED )
-        find_package ( GSL REQUIRED )
+    include ( MPISetup )
+    set ( MANTIDLIBS  ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES} )
   endif ( MPI_BUILD )
 endif ()
 

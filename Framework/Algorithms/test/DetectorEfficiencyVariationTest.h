@@ -1,23 +1,24 @@
 #ifndef DETECTOREFFICIENCYVARIATION_H_
 #define DETECTOREFFICIENCYVARIATION_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/DetectorEfficiencyVariation.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAlgorithms/DetectorEfficiencyVariation.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/UnitFactory.h"
 #include <Poco/Path.h>
+#include <boost/lexical_cast.hpp>
+#include <boost/shared_ptr.hpp>
 #include <cmath>
-#include <sstream>
 #include <fstream>
 #include <ios>
+#include <sstream>
 #include <string>
 
 using namespace Mantid::Kernel;
@@ -84,15 +85,15 @@ public:
     int firstGoodSpec = (Nhist / 2) - int((variation - 1) / m_ramp) + 1;
     int lastGoodSpec = (Nhist / 2) + int((variation - 1) / m_ramp) - 1;
     for (int lHist = 0; lHist < firstGoodSpec; lHist++) {
-      TS_ASSERT_EQUALS(static_cast<double>(outputMat->readY(lHist).front()),
+      TS_ASSERT_EQUALS(static_cast<double>(outputMat->y(lHist).front()),
                        static_cast<double>(BadVal))
     }
     for (int lHist = firstGoodSpec; lHist <= lastGoodSpec; lHist++) {
-      TS_ASSERT_EQUALS(static_cast<double>(outputMat->readY(lHist).front()),
+      TS_ASSERT_EQUALS(static_cast<double>(outputMat->y(lHist).front()),
                        static_cast<double>(GoodVal))
     }
     for (int lHist = lastGoodSpec + 1; lHist < Nhist; lHist++) {
-      TS_ASSERT_EQUALS(static_cast<double>(outputMat->readY(lHist).front()),
+      TS_ASSERT_EQUALS(static_cast<double>(outputMat->y(lHist).front()),
                        static_cast<double>(BadVal))
     }
   }
@@ -108,11 +109,7 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", Nhist, NXs, NXs - 1);
     Workspace2D_sptr inputA = boost::dynamic_pointer_cast<Workspace2D>(spaceA);
     Workspace2D_sptr inputB = boost::dynamic_pointer_cast<Workspace2D>(spaceB);
-    BinEdges x(NXs);
-    auto &xData = x.mutableData();
-    for (int i = 0; i < NXs; ++i) {
-      xData[i] = i * 1000;
-    }
+    BinEdges x(NXs, HistogramData::LinearGenerator(0.0, 1000.0));
     // random numbers that will be copied into the workspace spectra
     const short ySize = NXs - 1;
     double yArray[ySize] = {

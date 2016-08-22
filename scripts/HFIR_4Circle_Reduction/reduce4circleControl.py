@@ -209,7 +209,7 @@ class CWSCDReductionControl(object):
         if self.has_merged_data(exp_number, scan_number, pt_number_list):
             pass
         else:
-            raise RuntimeError('Data must be merged before')
+            return False, 'Exp %d Scan %d: data must be merged already.' % (exp_number, scan_number)
 
         # Find peak in Q-space
         merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
@@ -579,7 +579,6 @@ class CWSCDReductionControl(object):
             return False, 'RuntimeError: %s.' % str(error)
 
         # get the information whether there is any k-shift vector specified by user
-        print '[DB...Prototype] Current k-shift vectors are ... ', self._kShiftDict
 
         # form k-shift and peak intensity information
         scan_kindex_dict = dict()
@@ -601,7 +600,11 @@ class CWSCDReductionControl(object):
         no_shift = len(scan_kindex_dict) == 0
         for scan_number in scan_number_list:
             peak_dict = dict()
-            peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)]. get_current_hkl()
+            try:
+                peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)]. get_current_hkl()
+            except RuntimeError as run_err:
+                return False, str('Peak index error: %s.' % run_err)
+
             peak_dict['intensity'] = self._myPeakInfoDict[(exp_number, scan_number)].get_intensity()
             peak_dict['sigma'] = self._myPeakInfoDict[(exp_number, scan_number)].get_sigma()
             if no_shift:
@@ -619,7 +622,7 @@ class CWSCDReductionControl(object):
         except AssertionError as error:
             return False, 'AssertionError: %s.' % str(error)
         except RuntimeError as error:
-            return False, 'RuntimeError; %s.' % str(error)
+            return False, 'RuntimeError: %s.' % str(error)
 
         return True, file_content
 
@@ -673,7 +676,6 @@ class CWSCDReductionControl(object):
         # Find peak in Q-space
         merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_number_list)
         peak_ws_name = get_peak_ws_name(exp_number, scan_number, pt_number_list)
-        print '[DB] Found peaks are output workspace %s.' % peak_ws_name
         api.FindPeaksMD(InputWorkspace=merged_ws_name,
                         MaxPeaks=10,
                         PeakDistanceThreshold=5.,
@@ -1110,7 +1112,8 @@ class CWSCDReductionControl(object):
 
     def integrate_scan_peaks(self, exp, scan, peak_radius, peak_centre,
                              merge_peaks=True, use_mask=False,
-                             normalization='', mask_ws_name=None):
+                             normalization='', mask_ws_name=None,
+                             scale_factor=1):
         """
         :param exp:
         :param scan:
@@ -1121,6 +1124,7 @@ class CWSCDReductionControl(object):
         :param use_mask:
         :param normalization: normalization set up (by time or ...)
         :param mask_ws_name: mask workspace name or None
+        :param scale_factor: integrated peaks' scaling factor
         :return:
         """
         # check
@@ -1166,10 +1170,7 @@ class CWSCDReductionControl(object):
         elif normalization == 'monitor':
             norm_by_mon = True
 
-        print '[DB-INFO] Integrate Pt. with mask workspace %s. Norm by time = %d; Norm by monitor = %d.' \
-              '' % (mask_ws_name, norm_by_time, norm_by_mon)
-
-        # VZ-FUTURE: Are you sure ScaleFactor is 1 !!!
+        # integrate peak of a scan
         api.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
                                OutputWorkspace=integrated_peak_ws_name,
                                PeakRadius=peak_radius,
@@ -1178,13 +1179,12 @@ class CWSCDReductionControl(object):
                                NormalizeByMonitor=norm_by_mon,
                                NormalizeByTime=norm_by_time,
                                MaskWorkspace=mask_ws_name,
-                               ScaleFactor=1)
+                               ScaleFactor=scale_factor)
 
         # process the output workspace
         pt_dict = dict()
         out_peak_ws = AnalysisDataService.retrieve(integrated_peak_ws_name)
         num_peaks = out_peak_ws.rowCount()
-        print '[DB....BAT] There are %d peaks to export!' % num_peaks
 
         for i_peak in xrange(num_peaks):
             peak_i = out_peak_ws.getPeak(i_peak)
@@ -1192,6 +1192,11 @@ class CWSCDReductionControl(object):
             intensity_i = peak_i.getIntensity()
             pt_dict[run_number_i] = intensity_i
         # END-FOR
+
+        # store the data into peak info
+        if (exp, scan) not in self._myPeakInfoDict:
+            raise RuntimeError('Exp %d Scan %d is not recorded in PeakInfo-Dict' % (exp, scan))
+        self._myPeakInfoDict[(exp, scan)].set_pt_intensity(pt_dict)
 
         return True, pt_dict
 
@@ -1367,6 +1372,7 @@ class CWSCDReductionControl(object):
     def load_spice_scan_file(self, exp_no, scan_no, spice_file_name=None):
         """
         Load a SPICE scan file to table workspace and run information matrix workspace.
+        :param exp_no:
         :param scan_no:
         :param spice_file_name:
         :return: status (boolean), error message (string)
@@ -1374,6 +1380,7 @@ class CWSCDReductionControl(object):
         # Default for exp_no
         if exp_no is None:
             exp_no = self._expNumber
+        print '[DB...BAD] Load Spice Scan File Exp Number = %d, Stored Exp. Number = %d' % (exp_no, self._expNumber)
 
         # Check whether the workspace has been loaded
         assert isinstance(exp_no, int)
@@ -1495,7 +1502,6 @@ class CWSCDReductionControl(object):
                 continue
             pt_list_str += ',%d' % pt
         # END-FOR (pt)
-        print '[DB] Pt list = %s' % pt_list_str
         if pt_list_str == '-1':
             return False, err_msg
 
@@ -1829,8 +1835,6 @@ class CWSCDReductionControl(object):
                          oriented_lattice.errorc(), oriented_lattice.erroralpha(),
                          oriented_lattice.errorbeta(), oriented_lattice.errorgamma()]
 
-        print '[DB-BAT] Refined UB = ', refined_ub_matrix, 'of type', type(refined_ub_matrix)
-
         result_tuple = (peak_ws, refined_ub_matrix, lattice, lattice_error)
 
         return result_tuple
@@ -2078,7 +2082,6 @@ class CWSCDReductionControl(object):
         try:
             ws = self._mySpiceTableDict[(exp_no, scan_no)]
         except KeyError:
-            print '[DB] Keys to SPICE TABLE: %s' % str(self._mySpiceTableDict.keys())
             return None
 
         return ws
@@ -2236,10 +2239,8 @@ class CWSCDReductionControl(object):
                 wavelength = get_hb3a_wavelength(m1)
                 if wavelength is None:
                     q_range = 0.
-                    print '[DB-BAT] 2theta = %f, lambda = None, Q = %f' % (two_theta, q_range)
                 else:
                     q_range = 4.*math.pi*math.sin(two_theta/180.*math.pi*0.5)/wavelength
-                    print '[DB-BAT] 2theta = %f, lambda = %f, Q = %f' % (two_theta, wavelength, q_range)
 
                 # appending to list
                 scan_sum_list.append([max_count, scan_number, max_row, max_h, max_k, max_l,

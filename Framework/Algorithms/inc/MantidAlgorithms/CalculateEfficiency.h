@@ -72,6 +72,9 @@ private:
                           API::MatrixWorkspace_sptr outputWS, double sum,
                           double error, int nPixels, double min_eff,
                           double max_eff);
+
+  void maskComponent(API::MatrixWorkspace &ws,
+                     const std::string &componentName);
 };
 
 } // namespace Algorithm

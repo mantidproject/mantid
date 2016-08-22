@@ -190,13 +190,21 @@ public:
   }
 
   void
-  test_GetPropertyAsSingleValue_Throws_If_Type_Is_Not_Double_Or_TimeSeries_Double() {
+  test_GetPropertyAsSingleValue_Throws_If_Type_Is_Not_Numeric_Or_TimeSeries_Numeric() {
+    Run runInfo;
+    const std::string name = "string_prop";
+    runInfo.addProperty<std::string>(name, "string"); // Adds a string property
+
+    TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name),
+                     std::invalid_argument);
+  }
+
+  void test_GetPropertyAsSingleValue_Does_Not_Throw_If_Type_Is_Int() {
     Run runInfo;
     const std::string name = "int_prop";
     runInfo.addProperty(name, 1); // Adds an int property
 
-    TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name),
-                     std::invalid_argument);
+    TS_ASSERT_THROWS_NOTHING(runInfo.getPropertyAsSingleValue(name));
   }
 
   void

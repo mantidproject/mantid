@@ -360,7 +360,7 @@ bool FABADAMinimizer::iterate(size_t) {
     // convergenceMaxIterations iterations, stop and throw the error.
     else {
       API::IFunction_sptr fun = m_leastSquares->getFittingFunction();
-      std::string failed = "";
+      std::string failed;
       for (size_t i = 0; i < nParams; ++i) {
         if (!m_par_converged[i]) {
           failed = failed + fun->parameterName(i) + ", ";
