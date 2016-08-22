@@ -77,3 +77,7 @@ class PowderData(GeneralData):
             raise ValueError("Invalid size of mean square displacements.")
          if items["dw"].shape != (self._num_atoms,):
              raise ValueError("Invalid size of Debye-Waller factors.")
+
+
+    def __str__(self):
+        return "Powder data"

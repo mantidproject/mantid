@@ -112,3 +112,7 @@ class KpointsData(GeneralData):
     def extract(self):
 
         return self._data
+
+
+    def __str__(self):
+        return "K-points data"

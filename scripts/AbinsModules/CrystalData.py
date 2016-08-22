@@ -40,3 +40,8 @@ class CrystalData(GeneralData):
             return self._data
         else:
             raise ValueError("Object fo type CrystalData is inconsistent.")
+
+
+    def __str__(self):
+        return "Crystal data"
+

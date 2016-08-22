@@ -85,7 +85,7 @@ class ABINSCalculateQTest(unittest.TestCase):
                                   instrument=self._tosca_instrument,
                                   sample_form="Powder")
         q_calculator.collectFrequencies(k_points_data=raw_data)
-        q_vectors = q_calculator.getQvectors()
+        q_vectors = q_calculator.calculateData()
 
         # noinspection PyTypeChecker
         self.assertEqual(True,np.allclose(correct_q_data, q_vectors.extract()))

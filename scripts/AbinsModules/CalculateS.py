@@ -61,16 +61,18 @@ class CalculateS(IOmodule):
 
         # Calculate Q
         _q_calculator = CalculateQ(filename=self._input_filename, instrument=_instrument, sample_form=self._sample_form)
+        _q_vectors = None
         if self._instrument_name != "None":
 
             _q_calculator.collectFrequencies(k_points_data=self._abins_data.getKpointsData())
-        _q_vectors = _q_calculator.getQvectors()
+            _q_vectors = _q_calculator.getData()
 
         # Powder case: calculate MSD and DW
         if self._sample_form == "Powder":
 
             _powder_calculator = CalculatePowder(filename=self._input_filename, abins_data=self._abins_data, temperature=self._temperature)
-            _powder_data = _powder_calculator.getPowder()
+            _powder_data = _powder_calculator.getData()
+
             _s_data = self._calculate_s_powder(q_data=_q_vectors, powder_data=_powder_data, instrument=_instrument)
 
         # Crystal case: calculate DW
@@ -201,7 +203,7 @@ class CalculateS(IOmodule):
 
 
 
-    def getS(self):
+    def calculateData(self):
         """
         Calculates dynamical structure factor S.
         @return: object of type SData and dictionary with total S.

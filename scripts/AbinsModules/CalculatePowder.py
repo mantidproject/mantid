@@ -104,7 +104,7 @@ class CalculatePowder(IOmodule):
         return _powder
 
 
-    def getPowder(self):
+    def calculateData(self):
         """
         Calculates mean square displacements and Debye-Waller factors.  Saves both MSD and DW  to an hdf file.
         @return: object of type PowderData with mean square displacements and Debye-Waller factors.

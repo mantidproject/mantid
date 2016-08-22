@@ -1,3 +1,5 @@
+from mantid.kernel import logger
+
 # ABINS modules
 from IOmodule import IOmodule
 from KpointsData import KpointsData
@@ -102,21 +104,6 @@ class GeneralDFTProgram(IOmodule):
         return None
 
 
-    def validData(self):
-        """
-        Checks if input DFT file and content of HDF file are consistent.
-        @return: True if consistent, otherwise False.
-        """
-        current_hash = self._calculateHash()
-        saved_hash = None
-        try:
-            saved_hash = self.load(list_of_attributes=["hash"])
-        except ValueError:
-            return False # no hash was found
-
-        return current_hash == saved_hash["attributes"]["hash"]
-
-
     def loadData(self):
         """
         Loads data from hdf file.
@@ -173,5 +160,25 @@ class GeneralDFTProgram(IOmodule):
         _data = AbinsData()
         _data.set(k_points_data=k_points, atoms_data=atoms)
         return _data
+
+
+    def getData(self):
+
+        # try to load DFT data from *.hdf5 file
+        try:
+
+            self.validData()
+            dft_data = self.loadData()
+            logger.notice(str(dft_data) + " has been loaded from the HDF file.")
+
+        # if loading from *.hdf5 file failed than read data directly  from input DFT file and erase hdf file
+        except IOError as err:
+
+            logger.notice(str(err))
+            self.eraseHDFfile()
+            dft_data = self.readPhononFile()
+            logger.notice(str(dft_data) + " from DFT input file has been loaded.")
+
+        return dft_data
 
 

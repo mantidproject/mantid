@@ -67,7 +67,7 @@ class ABINSCalculateCrystalTest(unittest.TestCase):
         _good_data = self._get_good_data(filename=name)
 
         _good_tester = CalculateCrystal(filename=name + ".phonon", temperature=self._temperature, abins_data=_good_data["DFT"])
-        calculated_data = _good_tester.getCrystal().extract()
+        calculated_data = _good_tester.calculateData().extract()
 
         # check if evaluated crystal data  is correct
         self.assertEqual(True, np.allclose(_good_data["dw_crystal_data"], calculated_data['dw_crystal_data']))

@@ -80,10 +80,13 @@ class AtomsDaTa(GeneralData):
                 self._append(item=item)
 
 
-
     def extract(self):
         if len(self._data) == self._num_atoms:
             return self._data
         else:
             raise ValueError("Size of AtomsData and number of atoms is inconsistent.")
+
+
+    def __str__(self):
+        return "Atoms data"
 

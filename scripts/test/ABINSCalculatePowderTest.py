@@ -67,7 +67,7 @@ class ABINSCalculatePowderTest(unittest.TestCase):
         _good_data = self._get_good_data(filename=name)
 
         _good_tester = CalculatePowder(filename=name + ".phonon", temperature=self._temperature, abins_data=_good_data["DFT"])
-        calculated_data = _good_tester.getPowder().extract()
+        calculated_data = _good_tester.calculateData().extract()
 
         # check if evaluated powder data  is correct
         for key in _good_data["powder"]:

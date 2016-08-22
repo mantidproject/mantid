@@ -143,21 +143,29 @@ class ABINS(PythonAlgorithm):
         prog_reporter = Progress(self, begin, end, steps)
         prog_reporter.report("Input data from the user has been collected.")
 
-        # 2) read dft data
+        # 2) read DFT data
         dft_data = None
+
         if self._dft_program == "CASTEP":
+
             dft_reader = LoadCASTEP(input_DFT_filename=self._phononFile)
-            dft_data = dft_reader.readPhononFile()
+
         else:
+
             raise RuntimeError("Currently only output files from CASTEP are supported.")
-        prog_reporter.report("Phonon file has been read.")
+
+        dft_data = dft_reader.getData()
+
+        prog_reporter.report("Phonon data has been read.")
 
         # 3) calculate S
         s_calculator = CalculateS(filename=self._phononFile, temperature=self._temperature,
                                   instrument_name=self._instrument, abins_data=dft_data,
                                   sample_form=self._sampleForm)
-        s_data = s_calculator.getS()
-        prog_reporter.report("Dynamical structure factors have been calculated.")
+
+        s_data = s_calculator.getData()
+
+        prog_reporter.report("Dynamical structure factors have been determined.")
 
         # 4) get atoms for which S should be plotted
         _data  = dft_data.getAtomsData().extract()
@@ -429,7 +437,7 @@ class ABINS(PythonAlgorithm):
         :return: Dictionary with two entries "Invalid", "Comment". Valid key can have two values: True/ False. As it
                  comes to "Comment" it is an empty string if Valid:True, otherwise stores description of the problem.
         """
-        logger.debug("Validate CASTEP phonon file: ")
+        logger.information("Validate CASTEP phonon file: ")
 
         output = {"Invalid": False, "Comment": ""}
         msg_err = "Invalid %s file. " %filename

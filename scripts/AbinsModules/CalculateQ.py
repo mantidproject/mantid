@@ -69,7 +69,7 @@ class CalculateQ(IOmodule):
             raise ValueError("SingleCrystal user case is not implemented.")
 
 
-    def getQvectors(self):
+    def calculateData(self):
         """
         Calculates Q vectors and return them. Saves Q vectors to an hdf file.
         @return: Q vectors for the required instrument

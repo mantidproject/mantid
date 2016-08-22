@@ -53,3 +53,7 @@ class SData(GeneralData):
         @return: data
         """
         return self._data
+
+
+    def __str__(self):
+        return "Dynamical structure factors data"

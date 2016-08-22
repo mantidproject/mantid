@@ -28,14 +28,14 @@ class CalculateCrystal(IOmodule):
     def _calculate_crystal(self):
 
         _dw_crystal = CalculateDWCrystal(temperature=self._temperature, abins_data=self._abins_data)
-        _dw_crystal_data = _dw_crystal.getDW()
+        _dw_crystal_data = _dw_crystal.calculateData()
         _crystal_data = CrystalData()
         _crystal_data.set(abins_data=self._abins_data, dw_crystal_data=_dw_crystal_data)
 
         return _crystal_data
 
 
-    def getCrystal(self):
+    def calculateData(self):
         """
         Calculates data needed for calculation of S(Q, omega) in case experimental sample is in  the form of single crystal.
         Saves calculated data to an hdf file.

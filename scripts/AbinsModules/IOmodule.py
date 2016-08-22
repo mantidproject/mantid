@@ -16,7 +16,7 @@ class IOmodule(object):
 
             self._input_filename = input_filename
             try:
-                self._hash_input_filename = self._calculateHash()
+                self._hash_input_filename = self.calculateHash()
             except IOError as err:
                 logger.error(str(err))
 
@@ -42,6 +42,54 @@ class IOmodule(object):
                                        # dictionaries
 
         # Fields which have a form of empty dictionaries have to be set by an inheriting class.
+
+
+    def validData(self):
+        """
+        Checks if input DFT file and content of HDF file are consistent.
+        @return: True if consistent, otherwise False.
+        """
+        _saved_hash = self.load(list_of_attributes=["hash"])
+
+        return self._hash_input_filename == _saved_hash["attributes"]["hash"]
+
+
+    def loadData(self):
+        """
+        Method which loads data from an hdf file. Method which has to be implemented by inheriting class.
+        """
+        return None
+
+
+    def calculateData(self):
+        """
+        Method which evaluates data in case loading failed. Method which has to be implemented by inheriting class.
+        """
+        return None
+
+
+    def getData(self):
+        """
+        Method Obtain data
+        @return:
+        """
+        _data = None
+
+        try:
+
+            self.validData()
+            _data = self.loadData()
+            logger.notice(str(_data) + " has been loaded from the HDF file.")
+            
+
+        except (IOError, ValueError) as err:
+
+            logger.notice("Warning: "+ str(err) + " Data has to be calculated.")
+            _data = self.calculateData()
+            logger.notice(str(_data) + " has been calculated.")
+            
+
+        return _data
 
 
     def eraseHDFfile(self):
@@ -398,7 +446,7 @@ class IOmodule(object):
         return results
 
 
-    def _calculateHash(self):
+    def calculateHash(self):
         """
         This method calculates hash of the phonon file according to SHA-2 algorithm from hashlib library: sha512.
         @return: string representation of hash for phonon file which contains only hexadecimal digits

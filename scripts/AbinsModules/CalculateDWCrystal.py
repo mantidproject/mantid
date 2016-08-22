@@ -89,7 +89,7 @@ class CalculateDWCrystal(IOmodule):
         return _DW
 
 
-    def getDW(self):
+    def calculateData(self):
         """
         Calculates Debye-Waller factors.
         @return: object of type DwData with Debye-Waller factors.

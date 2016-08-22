@@ -48,3 +48,7 @@ class AbinsData(GeneralData):
             raise ValueError("Abins data is inconsistent.")
 
         return self._data
+
+
+    def __str__(self):
+        return "DFT data"

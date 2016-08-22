@@ -74,6 +74,10 @@ class QData(GeneralData):
         return self._data
 
 
+    def __str__(self):
+        return "Q vectors data"
+
+
 
 
 

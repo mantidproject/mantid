@@ -21,3 +21,10 @@ class GeneralData(object):
         """
         return None
 
+
+    def __str__(self):
+        """
+        String representation of class instnaces. Has to be implemented by inheriting classes.
+        """
+        return None
+

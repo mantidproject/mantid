@@ -65,7 +65,7 @@ class ABINSCalculateDWCrystalTest(unittest.TestCase):
         _good_data = self._get_good_data(filename=name)
 
         _good_tester = CalculateDWCrystal(temperature=self._temperature, abins_data=_good_data["DFT"])
-        calculated_data = _good_tester.getDW()
+        calculated_data = _good_tester.calculateData()
 
         # check if evaluated DW are correct
         self.assertEqual(True, np.allclose(_good_data["DW"], calculated_data.extract()))
