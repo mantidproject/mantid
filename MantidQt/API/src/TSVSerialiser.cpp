@@ -278,6 +278,31 @@ QColor TSVSerialiser::asQColor(const size_t i) {
   return color;
 }
 
+QPoint TSVSerialiser::asQPoint(const size_t i) {
+  if (i + 1 >= m_curValues.size())
+    return QPoint();
+
+  int x = asInt(m_curIndex);
+  int y = asInt(++m_curIndex);
+  ++m_curIndex;
+
+  QPoint point(x, y);
+  return point;
+}
+
+QPointF TSVSerialiser::asQPointF(const size_t i) {
+  if (i + 1 >= m_curValues.size())
+    return QPointF();
+
+  double x = asDouble(m_curIndex);
+  double y = asDouble(++m_curIndex);
+  ++m_curIndex;
+
+  QPointF point(x, y);
+  return point;
+}
+
+
 std::string TSVSerialiser::asString(const size_t i) const {
   if (i >= m_curValues.size())
     return "";
@@ -334,6 +359,16 @@ TSVSerialiser &TSVSerialiser::operator>>(QRect &val) {
 
 TSVSerialiser &TSVSerialiser::operator>>(QColor &val) {
   val = asQColor(m_curIndex);
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator>>(QPoint &val) {
+  val = asQPoint(m_curIndex);
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator>>(QPointF &val) {
+  val = asQPointF(m_curIndex);
   return *this;
 }
 
@@ -397,6 +432,18 @@ TSVSerialiser &TSVSerialiser::operator<<(const QColor &val) {
 
   m_output << "\t" << val.red() << "\t" << val.green() << "\t" << val.blue()
            << "\t" << val.alpha();
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator<<(const QPoint &val) {
+
+  m_output << "\t" << val.x() << "\t" << val.y();
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator<<(const QPointF &val) {
+
+  m_output << "\t" << val.x() << "\t" << val.y();
   return *this;
 }
 

@@ -90,6 +90,8 @@ public:
   bool asBool(const size_t i) const;
   QRect asQRect(const size_t i);
   QColor asQColor(const size_t i);
+  QPoint asQPoint(const size_t i);
+  QPointF asQPointF(const size_t i);
 
   TSVSerialiser &operator>>(int &val);
   TSVSerialiser &operator>>(size_t &val);
@@ -100,6 +102,8 @@ public:
   TSVSerialiser &operator>>(bool &val);
   TSVSerialiser &operator>>(QRect &val);
   TSVSerialiser &operator>>(QColor &val);
+  TSVSerialiser &operator>>(QPoint &val);
+  TSVSerialiser &operator>>(QPointF &val);
 
   TSVSerialiser &writeLine(const std::string &name);
 
@@ -112,6 +116,8 @@ public:
   TSVSerialiser &operator<<(const bool &val);
   TSVSerialiser &operator<<(const QRect &val);
   TSVSerialiser &operator<<(const QColor &val);
+  TSVSerialiser &operator<<(const QPoint &val);
+  TSVSerialiser &operator<<(const QPointF &val);
 
   void writeRaw(const std::string &raw);
   void writeSection(const std::string &name, const std::string &body);
