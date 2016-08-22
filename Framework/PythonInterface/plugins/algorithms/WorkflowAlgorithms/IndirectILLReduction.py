@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name,too-many-instance-attributes
+#pylint: disable=no-init,too-many-instance-attributes,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
 import os.path
@@ -6,7 +6,7 @@ import numpy as np
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
-from mantid import config, logger, mtd
+from mantid import config, mtd
 from IndirectImport import import_mantidplot
 
 class IndirectILLReduction(DataProcessorAlgorithm):
@@ -536,12 +536,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
             if (size - to_shift) < end_bin:
                 end_bin = size - to_shift
-                self.log().notice('New right boundary for masking due to left shift by %d bins' % to_shift)
+                self.log().debug('New right boundary for masking due to left shift by %d bins' % to_shift)
             elif abs(to_shift) > start_bin:
                 start_bin = abs(to_shift)
-                self.log().notice('New left boundary for masking due to right shift by %d bins' % abs(to_shift))
+                self.log().debug('New left boundary for masking due to right shift by %d bins' % abs(to_shift))
             else:
-                self.log().notice('Shifting does not result in a new range for masking')
+                self.log().debug('Shifting does not result in a new range for masking')
 
         # Mask bins to the left of the final bin range
         if masking is True:
@@ -567,8 +567,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             list_red.append(run + '_' + self._red_ws)
 
         # Group result workspaces
-        GroupWorkspaces(InputWorkspaces=list_red,
-                        OutputWorkspace=self._red_ws)
+        GroupWorkspaces(InputWorkspaces=list_red, OutputWorkspace=self._red_ws)
 
         self.setProperty('OutputWorkspace', self._red_ws)
 
