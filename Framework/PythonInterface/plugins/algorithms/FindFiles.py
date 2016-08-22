@@ -70,8 +70,8 @@ class FindFiles(PythonAlgorithm):
                             # replace entry name by it's value
                             value = nexusfile.get(item)[0]
 
-                            if isinstance(value,str):
-                                # string value, need to qoute for eval
+                            if str(value.dtype).startswith('|S'):
+                                # string value, need to quote for eval
                                 toeval += '\"'+ value + '\"'
                             else:
                                 toeval += str(value)
