@@ -90,15 +90,15 @@ void GetEiMonDet2::init() {
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
 
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      PropertyNames::DETECTOR_WORKSPACE.c_str(), "",
+                      Direction::Input, tofWorkspace),
+                  "A workspace containing the detector spectra.");
   declareProperty(
-      make_unique<WorkspaceProperty<>>(PropertyNames::DETECTOR_WORKSPACE.c_str(),
-                                       "", Direction::Input, tofWorkspace),
-      "A workspace containing the detector spectra.");
-  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
-                      PropertyNames::DETECTOR_EPP_TABLE.c_str(), "",
-                      Direction::Input),
-                  "An EPP table corresponding to " +
-                      PropertyNames::DETECTOR_WORKSPACE + ".");
+      make_unique<WorkspaceProperty<ITableWorkspace>>(
+          PropertyNames::DETECTOR_EPP_TABLE.c_str(), "", Direction::Input),
+      "An EPP table corresponding to " + PropertyNames::DETECTOR_WORKSPACE +
+          ".");
   const std::vector<std::string> indexTypes{IndexTypes::DETECTOR_ID,
                                             IndexTypes::SPECTRUM_NUMBER,
                                             IndexTypes::WORKSPACE_INDEX};
@@ -111,8 +111,7 @@ void GetEiMonDet2::init() {
                   mandatoryStringProperty);
   declareProperty(make_unique<WorkspaceProperty<>>(
                       PropertyNames::MONITOR_WORKSPACE.c_str(), "",
-                      Direction::Input, PropertyMode::Optional,
-                      tofWorkspace),
+                      Direction::Input, PropertyMode::Optional, tofWorkspace),
                   "A Workspace containing the monitor spectrum. If empty, " +
                       PropertyNames::DETECTOR_WORKSPACE + " will be used.");
   declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
@@ -120,10 +119,10 @@ void GetEiMonDet2::init() {
                       Direction::Input, PropertyMode::Optional),
                   "An EPP table corresponding to " +
                       PropertyNames::MONITOR_WORKSPACE);
-  setPropertySettings(PropertyNames::MONITOR_EPP_TABLE,
-                      make_unique<EnabledWhenProperty>(
-                          PropertyNames::MONITOR_WORKSPACE.c_str(),
-                          IS_NOT_DEFAULT));
+  setPropertySettings(
+      PropertyNames::MONITOR_EPP_TABLE,
+      make_unique<EnabledWhenProperty>(PropertyNames::MONITOR_WORKSPACE.c_str(),
+                                       IS_NOT_DEFAULT));
   declareProperty(PropertyNames::MONITOR, EMPTY_INT(),
                   mandatoryDetectorIdProperty,
                   "Monitor's detector id/spectrum number/workspace index.");
