@@ -75,6 +75,8 @@ Improved
   now check if a Workspace with that name already exists in the ADS and gives
   the option to override it.
 
+- :ref:`FFT <algm-FFT>` deals correctly with histogram input data. Internally, it converts to point data, and the output is always a point data workspace. (It can be converted to histogram data using :ref:`ConvertToHistogram <algm-ConvertToHistogram>` if required).
+
 Deprecated
 ##########
 

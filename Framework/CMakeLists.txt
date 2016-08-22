@@ -129,7 +129,6 @@ endif ()
 add_subdirectory (MDAlgorithms)
 add_subdirectory (Doxygen)
 add_subdirectory (ScriptRepository)
-add_subdirectory (ISISLiveData)
 
 ###########################################################################
 # Add a custom target to build all of the Framework
@@ -140,7 +139,7 @@ set ( FRAMEWORK_LIBS Kernel HistogramData Geometry API DataObjects
                      PythonDataObjectsModule
                      DataHandling Nexus Algorithms CurveFitting ICat
                      Crystal MDAlgorithms WorkflowAlgorithms
-                     LiveData ISISLiveData RemoteAlgorithms RemoteJobManagers
+                     LiveData RemoteAlgorithms RemoteJobManagers
                      SINQ
 )
 
