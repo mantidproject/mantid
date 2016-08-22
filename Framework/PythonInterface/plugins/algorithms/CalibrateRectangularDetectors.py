@@ -248,6 +248,11 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             SaveDspacemap(InputWorkspace=wkspName+"offset",
                           DspacemapFile=outfilename)
         if "calibration" in self._outTypes:
+            # for the sake of legacy
+            SaveCalFile(OffsetsWorkspace=wkspName+"offset",
+                        GroupingWorkspace=wkspName+"group",
+                        MaskWorkspace=wkspName+"mask",Filename=calib + '.cal')
+            # the real version
             outfilename = calibFilePrefix + '.h5'
             if os.path.exists(outfilename):
                 os.unlink(outfilename)
