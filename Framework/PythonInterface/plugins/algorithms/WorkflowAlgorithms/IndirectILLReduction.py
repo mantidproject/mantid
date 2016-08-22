@@ -390,7 +390,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=0, XMax=xmin)
             MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=0, XMax=xmin)
         if xmax < size:
-            self.log().debug('Mask monitor bins larger than %d' % xmax)
+            self.log().debug('Mask monitor bins larger than %d' % (xmax - 1))
             MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=xmax, XMax=size)
             MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=xmax, XMax=size)
 
@@ -412,12 +412,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         # Mask bins out of final energy range
         if start_bin > 0:
-            self.log().debug('Mask bins smaller than %d and larger than %d' % (start_bin, end_bin))
-            self.log().notice('Bins out of the energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin]))
+            self.log().debug('Mask bins smaller than %d and larger than %d' % (start_bin, end_bin - 1))
+            self.log().notice('Bins out of energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin - 1]))
             MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[0], XMax=x[start_bin])
         if end_bin < len(x) - 1:
-            self.log().debug('Mask bins smaller than %d and larger than %d' % (start_bin, end_bin))
-            self.log().notice('Bins out of the energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin]))
+            self.log().debug('Mask bins smaller than %d and larger than %d' % (start_bin, end_bin - 1))
+            self.log().notice('Bins out of energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin - 1]))
             MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[end_bin], XMax=x[len(x) - 1])
 
         # cleanup by-products if not needed
@@ -546,13 +546,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # Mask bins to the left of the final bin range
         if masking is True:
             # Mask corrupted bins according to shifted workspaces
-            self.log().debug('Mask bin numbers smaller than %d and larger than %d' % (start_bin, end_bin))
-            self.log().notice('Bins out of the energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin]))
+            self.log().debug('Mask bin numbers smaller than %d and larger than %d' % (start_bin, end_bin-1))
+            self.log().notice('Bins out of the energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin-1]))
             # Mask bins to the left and right of the final bin range
             MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=x[0], XMax=x[start_bin])
             MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=x[end_bin], XMax=x[end])
 
-        return -start_bin, end_bin
+        return start_bin, end_bin
 
     def _perform_masking(self, ws, xminbin, xmaxbin):
         """
