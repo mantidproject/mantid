@@ -2659,6 +2659,12 @@ void SliceViewer::loadFromProject(const std::string &lines)
     loadDimensionWidgets(dimensionLines);
   }
 
+  if (tsv.selectSection("colormap")) {
+    std::string colorMapLines;
+    tsv >> colorMapLines;
+    m_colorBar->loadFromProject(colorMapLines);
+  }
+
   // handle overlay workspace
   if (tsv.selectLine("OverlayWorkspace")) {
     std::string workspace_name;
@@ -2716,6 +2722,7 @@ std::string SliceViewer::saveToProject() const
   tsv << xLimits.maxValue() << yLimits.maxValue();
 
   tsv.writeSection("dimensionwidgets", saveDimensionWidgets());
+  tsv.writeSection("colormap", m_colorBar->saveToProject());
 
   if (m_overlayWS)
     tsv.writeLine("OverlayWorkspace") << m_overlayWS->name();
