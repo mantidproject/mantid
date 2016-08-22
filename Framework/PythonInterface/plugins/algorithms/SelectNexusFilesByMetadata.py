@@ -61,14 +61,17 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
                 for i, item in enumerate(self._criteria_splitted):
                     if i % 2 == 1: # at odd indices will always be the nexus entry names
                         try:
-                            if len(nexusfile.get(item).shape) > 1 or len(nexusfile.get(item)) > 1:
+                            # try to get the entry from the file
+                            entry = nexusfile.get(item)
+                            
+                            if len(entry.shape) > 1 or len(entry) > 1:
                                 self.log().warning('Nexus entry %s has more than one dimension or more than one element'
                                                    'in file %s. Skipping the file.' % (item,run))
                                 toeval = '0'
                                 break
 
                             # replace entry name by it's value
-                            value = nexusfile.get(item)[0]
+                            value = entry[0]
 
                             if str(value.dtype).startswith('|S'):
                                 # string value, need to quote for eval
