@@ -1,3 +1,4 @@
+# pylint: disable=too-many-branches,too-many-locals, invalid-name
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -22,15 +23,14 @@ class VelocityCrossCorrelations(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(FileProperty('InputFile', '', action = FileAction.Load),
-                                          doc = "Input .nc file with an MMTK trajectory")
+                                           doc = "Input .nc file with an MMTK trajectory")
 
         self.declareProperty("Timestep", "1.0", direction = Direction.Input,
                              doc="Specify the timestep between trajectory points in the simulation, fs")
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace','',direction=Direction.Output),doc="Output workspace name")
 
-    # pylint disable=too-many-branches
-    # pylint disable=too-many-locals
+
     def PyExec(self):
 
         # Get file path
