@@ -155,7 +155,8 @@ public:
 
   virtual std::vector<std::pair<std::string, std::string>>
   peakInfo(const Kernel::V3D &QFrame, bool labCoords) const = 0;
-  virtual int peakInfoNumber(const Kernel::V3D &qLabFrame, bool labCoords) const = 0;
+  virtual int peakInfoNumber(const Kernel::V3D &qLabFrame,
+                             bool labCoords) const = 0;
 
   std::string convention;
 
