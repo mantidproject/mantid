@@ -3,7 +3,7 @@
 
 <facility name="TEST" FileExtensions=".nxs,.dat,.xml">
 
-   <livedata listener="MockILiveListener"/>
+   <livedata listener="MockLiveListener"/>
 
    <instrument name="MINITOPAZ"> 
       <technique>Test Neutron Diffraction</technique>

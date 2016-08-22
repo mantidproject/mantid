@@ -157,7 +157,7 @@ Kernel::Logger g_log("SNSLiveEventDataListener");
 
 /// Constructor
 TOPAZLiveEventDataListener::TOPAZLiveEventDataListener()
-    : ILiveListener(), m_workspaceInitialized(false), m_eventBuffer(),
+    : LiveListener(), m_workspaceInitialized(false), m_eventBuffer(),
       m_monitorLogs(), m_wsName(), m_indexMap(), m_monitorIndexMap(),
       m_tcpSocket(), m_dataSocket(), m_dataAddr(), m_isConnected(false),
       m_udpBuf(nullptr), m_udpBufSize(32768), m_runNumber(0), m_mutex(),

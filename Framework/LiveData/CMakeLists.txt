@@ -29,9 +29,9 @@ set ( INC_FILES
 	inc/MantidLiveData/FileEventDataListener.h
 	inc/MantidLiveData/ISIS/FakeISISEventDAE.h
 	inc/MantidLiveData/ISIS/FakeISISHistoDAE.h
-	inc/MantidLiveData/ISIS/TCPEventStreamDefs.h
 	inc/MantidLiveData/ISIS/ISISHistoDataListener.h
 	inc/MantidLiveData/ISIS/ISISLiveEventDataListener.h
+	inc/MantidLiveData/ISIS/TCPEventStreamDefs.h
 	inc/MantidLiveData/LiveDataAlgorithm.h
 	inc/MantidLiveData/LoadLiveData.h
 	inc/MantidLiveData/MonitorLiveData.h

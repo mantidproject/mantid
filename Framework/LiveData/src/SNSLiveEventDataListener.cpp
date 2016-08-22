@@ -68,7 +68,7 @@ Kernel::Logger g_log("SNSLiveEventDataListener");
 
 /// Constructor
 SNSLiveEventDataListener::SNSLiveEventDataListener()
-    : ILiveListener(), ADARA::Parser(), m_status(NoRun), m_runNumber(0),
+    : LiveListener(), ADARA::Parser(), m_status(NoRun), m_runNumber(0),
       m_workspaceInitialized(false), m_socket(), m_isConnected(false),
       m_pauseNetRead(false), m_stopThread(false), m_runPaused(false),
       m_ignorePackets(true), m_filterUntilRunStart(false)

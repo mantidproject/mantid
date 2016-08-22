@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ILiveListener.h"
+#include "MantidAPI/LiveListener.h"
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -35,7 +35,7 @@ namespace LiveData {
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-class DLLExport ISISKafkaEventListener : public API::ILiveListener {
+class DLLExport ISISKafkaEventListener : public API::LiveListener {
 public:
   ISISKafkaEventListener() = default;
   /// Destructor. Should handle termination of any socket connections.

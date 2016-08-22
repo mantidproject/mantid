@@ -97,7 +97,7 @@ public:
   virtual boost::shared_ptr<Workspace> extractData() = 0;
 
   //----------------------------------------------------------------------
-  // State flags
+  // State information
   //----------------------------------------------------------------------
 
   /** Has the connection to the DAS been established?
@@ -114,7 +114,7 @@ public:
    * to
    *  extracting the data. Calling this method resets the flag.
    */
-  virtual bool dataReset();
+  virtual bool dataReset() = 0;
 
   /** The possible run statuses (initial list taken from SNS SMS protocol)
    *  None    : No current run
@@ -131,19 +131,10 @@ public:
   /// Returns the run number of the current run
   virtual int runNumber() const = 0;
 
-  /** Sets a list of spectra to be extracted. Default is reading all available
-   * spectra.
+  /** Sets a list of spectra to be extracted.
    * @param specList :: A vector with spectra indices.
    */
-  virtual void setSpectra(const std::vector<specnum_t> &specList) {
-    (void)specList;
-  }
-
-  /// Constructor.
-  ILiveListener();
-
-protected:
-  bool m_dataReset; ///< Indicates the receipt of a reset signal from the DAS.
+  virtual void setSpectra(const std::vector<specnum_t> &specList) = 0;
 };
 
 /// Shared pointer to an ILiveListener
