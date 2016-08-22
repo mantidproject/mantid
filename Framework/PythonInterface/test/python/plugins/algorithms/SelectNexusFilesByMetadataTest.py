@@ -1,4 +1,3 @@
-#pylint: disable=unused-variable
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -20,8 +19,13 @@ class SelectNexusFilesByMetadataTest(unittest.TestCase):
     def test_invalid_syntax(self):
 
         criteria = '$raw_data_1/duration$ += 1000'
-        with self.assertRaises(RuntimeError):
-            res = SelectNexusFilesByMetadata(FileList=self._fileslist, NexusCriteria=criteria)
+        throws = False
+        try:
+            SelectNexusFilesByMetadata(FileList=self._fileslist, NexusCriteria=criteria)
+        except RuntimeError:
+            throws = True
+        self.assertTrue(throws,"Should raise a runtime error")
+        # asserRaises does not work with python 2.6 so fails on RHEL 6
 
     def test_wrong_nexus_entry(self):
 
