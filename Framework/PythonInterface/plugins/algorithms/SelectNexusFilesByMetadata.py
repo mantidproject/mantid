@@ -63,7 +63,7 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
                         try:
                             # try to get the entry from the file
                             entry = nexusfile.get(item)
-                            
+
                             if len(entry.shape) > 1 or len(entry) > 1:
                                 self.log().warning('Nexus entry %s has more than one dimension or more than one element'
                                                    'in file %s. Skipping the file.' % (item,run))
