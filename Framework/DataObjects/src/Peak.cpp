@@ -45,7 +45,7 @@ Peak::Peak()
  */
 Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
            const Mantid::Kernel::V3D &QLabFrame,
-           const boost::optional<double> &detectorDistance)
+           boost::optional<double> detectorDistance)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(3, 3, true),
       m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
@@ -72,7 +72,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
 Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
            const Mantid::Kernel::V3D &QSampleFrame,
            const Mantid::Kernel::Matrix<double> &goniometer,
-           const boost::optional<double> &detectorDistance)
+           boost::optional<double> detectorDistance)
     : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
       m_binCount(0), m_GoniometerMatrix(goniometer),
       m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
@@ -230,6 +230,9 @@ Peak::Peak(const Geometry::IPeak &ipeak)
     this->m_detIDs = peak->m_detIDs;
   }
 }
+
+Peak::Peak(Peak &&) noexcept = default;
+Peak &Peak::operator=(Peak &&) noexcept = default;
 
 //----------------------------------------------------------------------------------------------
 /** Set the incident wavelength of the neutron. Calculates the energy from this.
@@ -495,7 +498,7 @@ Mantid::Kernel::V3D Peak::getQSampleFrame() const {
  *        Used to give a valid TOF. You do NOT need to explicitly set this.
  */
 void Peak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
-                           const boost::optional<double> &detectorDistance) {
+                           boost::optional<double> detectorDistance) {
   V3D Qlab = m_GoniometerMatrix * QSampleFrame;
   this->setQLabFrame(Qlab, detectorDistance);
 }
@@ -517,7 +520,7 @@ void Peak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
  * ray trace to find the intersecing detector.
  */
 void Peak::setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
-                        const boost::optional<double> &detectorDistance) {
+                        boost::optional<double> detectorDistance) {
   // Clear out the detector = we can't know them
   m_detectorID = -1;
   m_det = IDetector_sptr();
@@ -922,7 +925,7 @@ void Peak::setPeakShape(Mantid::Geometry::PeakShape *shape) {
  * @param shape : Desired shape
  */
 void Peak::setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape) {
-  this->m_peakShape = shape;
+  this->m_peakShape = std::move(shape);
 }
 
 /**

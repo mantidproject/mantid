@@ -50,12 +50,10 @@ public:
   virtual Mantid::Kernel::V3D getQSampleFrame() const = 0;
   virtual bool findDetector() = 0;
 
-  virtual void
-  setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
-                  const boost::optional<double> &detectorDistance) = 0;
-  virtual void
-  setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
-               const boost::optional<double> &detectorDistance) = 0;
+  virtual void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
+                               boost::optional<double> detectorDistance) = 0;
+  virtual void setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
+                            boost::optional<double> detectorDistance) = 0;
 
   virtual void setWavelength(double wavelength) = 0;
   virtual double getWavelength() const = 0;

@@ -106,9 +106,9 @@ public:
   Peak &getPeak(int peakNum) override;
   const Peak &getPeak(int peakNum) const override;
 
-  Geometry::IPeak *createPeak(Kernel::V3D QLabFrame,
-                              boost::optional<double> detectorDistance =
-                                  boost::optional<double>()) const override;
+  Geometry::IPeak *createPeak(
+      Kernel::V3D QLabFrame,
+      boost::optional<double> detectorDistance = boost::none) const override;
   std::vector<std::pair<std::string, std::string>>
   peakInfo(Kernel::V3D qFrame, bool labCoords) const override;
 
