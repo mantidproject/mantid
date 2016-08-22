@@ -231,7 +231,7 @@ Peak::Peak(const Geometry::IPeak &ipeak)
   }
 }
 
-#if defined(_MSC_VER) && _MSC_VER <= 1700
+#if defined(_MSC_VER) && _MSC_VER <= 1900
 Peak::Peak(Peak &&) = default;
 Peak &Peak::operator=(Peak &&) = default;
 #else
