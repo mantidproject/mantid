@@ -63,9 +63,11 @@ Note, that :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>` itself just cal
 for the given (vanadium) run and performs Integration around the specified peak range.
 
 DebugMode
-~~~~~~~~~~~
+~~~~~~~~~
 This provides a flexibility to monitor the snapshots of workspaces at different intermediate steps.
 If enabled, along with the reduced, left and right workspaces, many other workspaces will be created.
+They also will be grouped and a tuple of many :ref:`WorkspaceGroup <WorkspaceGroup>` s will be returned, where the
+first item would be the group for the final reduced result.
 
 Output Naming Conventions
 ~~~~~~~~~~~~~~~~~~~~~~~~~

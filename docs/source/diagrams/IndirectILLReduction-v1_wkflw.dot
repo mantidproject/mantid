@@ -47,21 +47,14 @@ digraph IndirectILLReduction {
     ConvertAxisByFormula_Right [label="ConvertAxisByFormula"]
     GroupWorkspaces
     Divide
-    Plus3 [label="Plus"]
-    Plus4 [label="Plus"]
-    Plus5 [label="Plus"]
-    Plus6 [label="Plus"]
-    Plus7 [label="Plus"]
+    Plus
     Scale
   }
 
   subgraph processes {
   	$process_style
   	ExtractWorkspace
-    ShiftSpectra4 [label="ShiftSpectra"]
-    ShiftSpectra5 [label="ShiftSpectra"]
-    ShiftSpectra6 [label="ShiftSpectra"]
-    ShiftSpectra7 [label="ShiftSpectra"]
+    ShiftSpectra
   }
 
   Run -> Load
@@ -86,44 +79,17 @@ digraph IndirectILLReduction {
   ExtractWorkspace -> ConvertAxisByFormula_Right [label="Right"]
   ConvertAxisByFormula_Left -> Left
   ConvertAxisByFormula_Right -> Right
-  Left -> UnmirrorOption
-  Right -> UnmirrorOption
+  UnmirrorOption -> ShiftSpectra
+  Left -> ShiftSpectra
+  Right -> ShiftSpectra
   VanadiumRun -> IndirectILLReduction
   IndirectILLReduction -> VLeft
   IndirectILLReduction -> VRight
-  VLeft -> UnmirrorOption
-  VRight -> UnmirrorOption
-  UnmirrorOption -> Plus3 [label="3"]
-  Left -> Plus3
-  Right -> Plus3 
-  UnmirrorOption -> ShiftSpectra4 [label="4"]
-  Right -> ShiftSpectra4
-  Left -> ShiftSpectra4
-  ShiftSpectra4 -> Plus4 [label="Right Shifted"]
-  Left -> Plus4
-  UnmirrorOption -> ShiftSpectra5 [label="5"]
-  ShiftSpectra5 -> Plus5 [label="Right Shifted"]
-  Right -> ShiftSpectra5
-  VRight -> ShiftSpectra5
-  Left -> Plus5
-  UnmirrorOption -> ShiftSpectra6 [label="6"]
-  Left -> ShiftSpectra6
-  Right -> ShiftSpectra6
-  ShiftSpectra6 -> Plus6 [label="Left Shifted"]
-  ShiftSpectra6 -> Plus6 [label="Right Shifted"]
-  UnmirrorOption -> ShiftSpectra7 [label="7"]
-  Left -> ShiftSpectra7
-  Right -> ShiftSpectra7
-  VLeft -> ShiftSpectra7
-  VRight -> ShiftSpectra7
-  ShiftSpectra7 -> Plus7 [label="Left Shifted"]
-  ShiftSpectra7 -> Plus7 [label="Right Shifted"]
+  VLeft -> ShiftSpectra
+  VRight -> ShiftSpectra
+  ShiftSpectra -> Plus
+  Plus -> Scale
   ScaleF -> Scale
-  Plus3 -> Scale
-  Plus4 -> Scale 
-  Plus5 -> Scale
-  Plus6 -> Scale
-  Plus7 -> Scale
   Scale -> MaskBins
   MaskBins -> GroupWorkspaces
   GroupWorkspaces -> OutputWorkspace
