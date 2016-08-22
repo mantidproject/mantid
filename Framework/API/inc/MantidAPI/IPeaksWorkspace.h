@@ -110,7 +110,7 @@ public:
    * @return a pointer to a new Peak object.
    */
   virtual Mantid::Geometry::IPeak *
-  createPeak(Mantid::Kernel::V3D QLabFrame,
+  createPeak(const Mantid::Kernel::V3D &QLabFrame,
              boost::optional<double> detectorDistance) const = 0;
 
   /**
@@ -119,7 +119,7 @@ public:
    * @return a pointer to a new Peak object.
    */
   virtual Mantid::Geometry::IPeak *
-  createPeakHKL(Mantid::Kernel::V3D HKL) const = 0;
+  createPeakHKL(const Mantid::Kernel::V3D &HKL) const = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Determine if the workspace has been integrated using a peaks integration
@@ -154,8 +154,8 @@ public:
   getSpecialCoordinateSystem() const = 0;
 
   virtual std::vector<std::pair<std::string, std::string>>
-  peakInfo(Kernel::V3D QFrame, bool labCoords) const = 0;
-  virtual int peakInfoNumber(Kernel::V3D qLabFrame, bool labCoords) const = 0;
+  peakInfo(const Kernel::V3D &QFrame, bool labCoords) const = 0;
+  virtual int peakInfoNumber(const Kernel::V3D &qLabFrame, bool labCoords) const = 0;
 
   std::string convention;
 

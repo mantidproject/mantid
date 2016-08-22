@@ -365,9 +365,7 @@ void SCDCalibratePanels::exec() {
   PARALLEL_FOR3(ColWksp, RowWksp, TofWksp)
   for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    boost::container::flat_set<string>::iterator it = MyBankNames.begin();
-    advance(it, i);
-    std::string bankName = *it;
+    const std::string &bankName = *std::next(MyBankNames.begin(), i);
     size_t k = bankName.find_last_not_of("0123456789");
     int bank = 0;
     if (k < bankName.length())
