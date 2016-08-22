@@ -231,9 +231,13 @@ Peak::Peak(const Geometry::IPeak &ipeak)
   }
 }
 
+#if defined(_MSC_VER) && _MSC_VER <= 1700
+Peak::Peak(Peak &&) = default;
+Peak &Peak::operator=(Peak &&) = default;
+#else
 Peak::Peak(Peak &&) noexcept = default;
 Peak &Peak::operator=(Peak &&) noexcept = default;
-
+#endif
 //----------------------------------------------------------------------------------------------
 /** Set the incident wavelength of the neutron. Calculates the energy from this.
  * Assumes elastic scattering.

@@ -45,8 +45,16 @@ public:
 
   /// Copy constructor
   Peak(const Peak &other);
+// MSVC 2015 won't build with noexcept.
+// error C2610: 'Mantid::DataObjects::Peak::Peak(Mantid::DataObjects::Peak &&)
+// noexcept': is not a special member function which can be defaulted
+#if defined(_MSC_VER) && _MSC_VER <= 1700
+  Peak(Peak &&);
+  Peak &operator=(Peak &&);
+#else
   Peak(Peak &&) noexcept;
   Peak &operator=(Peak &&) noexcept;
+#endif
 
   // Construct a peak from a reference to the interface
 
