@@ -1,13 +1,15 @@
-#pylint: disable=eval-used,consider-using-enumerate
+#pylint: disable=eval-used
 from __future__ import (absolute_import, division, print_function)
 
 import h5py
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
-from mantid import config, logger, mtd
+from mantid import logger
 
 class FindFiles(PythonAlgorithm):
+
+    _criteria_splitted = []
 
     def category(self):
         return "DataHandling\\Nexus"
@@ -17,9 +19,28 @@ class FindFiles(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        dollars = self.getPropertyValue('NexusCriteria').count('$')
-        if  dollars % 2 != 0 or dollars < 2:
+        criteria = self.getPropertyValue('NexusCriteria')
+
+        # at least one nexus entry should be specified
+        dollars = criteria.count('$')
+        if dollars % 2 != 0 or dollars < 2:
             issues['NexusCriteria'] = 'Make sure the nexus entry name is enclosed with $ sybmols'
+        else:
+            # check if the syntax of criteria is valid by replacing the nexus entries with dummy values
+            self._criteria_splitted = criteria.split('$')
+            toeval = ''
+            for i, item in enumerate(self._criteria_splitted):
+                if i % 2 == 1:  # at odd indices will always be the nexus entry names
+                    # replace nexus entry names by 0
+                    toeval += '0'
+                else:
+                    # keep other portions intact
+                    toeval += item
+            try:
+                eval(toeval)
+            except (NameError, ValueError, SyntaxError):
+                issues['NexusCriteria'] = 'Invalid syntax, check NexusCriteria.'
+
         return issues
 
     def PyInit(self):
@@ -32,31 +53,44 @@ class FindFiles(PythonAlgorithm):
 
     def PyExec(self):
         outputfiles = []
-        splitted = self.getPropertyValue('NexusCriteria').split('$')
-
-        # for the purpose here + is meaningless, so they will silently replaced with ,
+        # for the purpose here + is meaningless, so they will be silently replaced with ,
         for run in self.getPropertyValue('FileList').replace('+', ',').split(','):
             with h5py.File(run,'r') as nexusfile:
                 toeval = ''
-                for i in range(len(splitted)):
+                item = None # for pylint
+                for i, item in enumerate(self._criteria_splitted):
                     if i % 2 == 1: # at odd indices will always be the nexus entry names
-                        # replace nexus entry names by their values
                         try:
-                            toeval += str(nexusfile.get(splitted[i])[0])
-                        except TypeError:
-                            self.log().warning('Nexus entry %s does not exist in file %s. Skipping the file.\n' \
-                                               % (splitted[i],run))
-                            toeval = '0' # and not False, since builtins are disabled in eval
+                            if len(nexusfile.get(item).shape) > 1:
+                                self.log().warning('Nexus entry %s has more than 1 dimensions in file %s.'
+                                                   'Skipping the file.' % (item,run))
+                                toeval = '0'
+                                break
+
+                            # replace entry name by it's value
+                            value = nexusfile.get(item)[0]
+
+                            if isinstance(value,str):
+                                # string value, need to qoute for eval
+                                toeval += '\"'+ value + '\"'
+                            else:
+                                toeval += str(value)
+
+                        except (TypeError,AttributeError):
+                            self.log().warning('Nexus entry %s does not exist in file %s. Skipping the file.' % (item,run))
+                            toeval = '0'
                             break
                     else:
                         # keep other portions intact
-                        toeval += splitted[i]
+                        toeval += item
+                self.log().debug('Expression to be evaluated for file %s :\n %s' % (run, toeval))
                 try:
                     if eval(toeval):
                         outputfiles.append(run)
                 except (NameError,ValueError,SyntaxError):
-                    self.log().error('Invalid syntax, check NexusCriteria.')
-                    break
+                    # even if syntax is validated, eval can still throw, since
+                    # the nexus entry value itself can be spurious for a given file
+                    self.log().warning('Invalid value for the nexus entry %s in file %s. Skipping the file.' % (item, run))
 
         if not outputfiles:
             self.log().notice('No files where found to satisfy the criteria, check the FileList and/or NexusCriteria')

@@ -14,7 +14,7 @@ This is done without actually loading the data, but just the needed metadata.
 Input files need to exist and be specified following the Mantid rules in `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_.
 Note, that the ``+`` and ``-`` rules will act as ``,`` and ``:`` correspondingly, since the summing does not make sense for the given purpose.
 Criteria could be any python logical expression involving the nexus entry names enclosed with ``$`` symbol.
-Arbitrary number of criteria can be combined.
+Arbitrary number of criteria can be combined. If the metadata entry is an array (1-dimensional), the first value will be considered.
 As a result, a plain comma separated list of fully resolved file names satisfying the criteria will be returned.
 
 **Example - Running FindFiles**
@@ -23,8 +23,7 @@ As a result, a plain comma separated list of fully resolved file names satisfyin
 
     res = FindFiles(FileList='INTER00013460,13463,13464.nxs',
                     NexusCriteria='$raw_data_1/duration$ > 1000 or $raw_data_1/good_frames$ > 10000')
-    print("res is now a string containing comma separated paths of %i \
-    file names that satisfy the criteria" % len(res.split(',')))
+    print("res is now a string containing comma separated paths of %i file names that satisfy the criteria" % len(res.split(',')))
 
 Output:
 
