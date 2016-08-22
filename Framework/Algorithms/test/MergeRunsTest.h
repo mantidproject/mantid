@@ -968,7 +968,16 @@ public:
     MatrixWorkspace_sptr a = boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
     a->instrumentParameters().addString(a->getInstrument()->getComponentID(), mergeTypeSum, "prop");
 
+    // Error is caught by Algorithm, but check no output workspace created
     do_test_mergeSampleLogs(gws, mergeTypeAverage, "1.5", 1, true);
+  }
+
+  void test_mergeSampleLogs_non_numeric_property_fails_to_merge() {
+    // Fails two merge as one, two not numbers
+    std::string mergeType = "sample_logs_average";
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<std::string>(mergeType, "one", "two"), mergeType, "one", 1);
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<std::string>(mergeType, "1", "two"), mergeType, "1", 1);
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<std::string>(mergeType, "one", "2"), mergeType, "one", 1);
   }
 
 private:
