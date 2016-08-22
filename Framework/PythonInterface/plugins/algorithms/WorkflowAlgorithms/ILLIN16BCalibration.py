@@ -52,12 +52,19 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
     def PyExec(self):
         self._setup()
 
+        if self._mirror_sense is True:
+            # Run requires to have two wings
+            unmirror_option = 3
+        else:
+            # Run can have one wing (or two wings -> set peak range accordingly)
+            unmirror_option = 0
+
         # Do an energy transfer reduction
         temp = IndirectILLReduction(Run=self._input_file,
                                     MapFile=self._map_file,
                                     SumRuns=True,DebugMode=False,
                                     MirrorSense=self._mirror_sense,
-                                    UnmirrorOption=3)
+                                    UnmirrorOption=unmirror_option)
 
         # Integrate within peak range
         number_histograms = temp.getItem(0).getNumberHistograms()
@@ -131,6 +138,7 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
                 return 'Invalid range'
         else:
             return 'Incorrect number of values (should be 2)'
+
 
         return None
 
