@@ -2615,10 +2615,12 @@ void SliceViewer::loadFromProject(const std::string &lines)
 
   int dimX, dimY, aspectRatio, normalization;
   double xMin, yMin, xMax, yMax;
-  bool dynamicRebin, fastRender, autoRebin;
+  bool dynamicRebin, fastRender, autoRebin, overlayVisible;
   std::vector<float> slicePoints;
 
   // read in settings from project file
+  tsv.selectLine("LineMode");
+  tsv >> overlayVisible;
   tsv.selectLine("Dimensions");
   tsv >> dimX >> dimY;
   tsv.selectLine("SlicePoint");
@@ -2646,6 +2648,7 @@ void SliceViewer::loadFromProject(const std::string &lines)
   setAspectRatio(ratio);
   setXYLimits(xMin, xMax, yMin, yMax);
   ui.btnAutoRebin->setChecked(autoRebin);
+  m_syncLineMode->toggle(overlayVisible);
 
   // set slice points for each dimension
   for (size_t i = 0; i < slicePoints.size(); ++i) {
@@ -2659,10 +2662,18 @@ void SliceViewer::loadFromProject(const std::string &lines)
     loadDimensionWidgets(dimensionLines);
   }
 
+  // setup color map
   if (tsv.selectSection("colormap")) {
     std::string colorMapLines;
     tsv >> colorMapLines;
     m_colorBar->loadFromProject(colorMapLines);
+  }
+
+  // setup line overlay
+  if (tsv.selectSection("overlay")) {
+    std::string overlayLines;
+    tsv >> overlayLines;
+    m_lineOverlay->loadFromProject(overlayLines);
   }
 
   // handle overlay workspace
@@ -2706,6 +2717,7 @@ std::string SliceViewer::saveToProject() const
 {
   API::TSVSerialiser tsv;
 
+  tsv.writeLine("LineMode") << m_lineOverlay->isShown();
   tsv.writeLine("Dimensions") << m_dimX << m_dimY;
   tsv.writeLine("SlicePoint") << m_slicePoint.toString("\t");
   tsv.writeLine("DynamicRebinMode") << m_rebinMode;
@@ -2723,6 +2735,7 @@ std::string SliceViewer::saveToProject() const
 
   tsv.writeSection("dimensionwidgets", saveDimensionWidgets());
   tsv.writeSection("colormap", m_colorBar->saveToProject());
+  tsv.writeSection("overlay", m_lineOverlay->saveToProject());
 
   if (m_overlayWS)
     tsv.writeLine("OverlayWorkspace") << m_overlayWS->name();

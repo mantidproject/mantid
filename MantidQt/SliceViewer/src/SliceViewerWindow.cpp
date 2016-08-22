@@ -484,6 +484,13 @@ API::IProjectSerialisable *SliceViewerWindow::loadFromProject(const std::string 
 
     auto window = new SliceViewerWindow(wsName, label);
     window->m_slicer->loadFromProject(lines);
+
+    if (tsv.selectSection("lineviewer")) {
+      std::string lineViewerLines;
+      tsv >> lineViewerLines;
+      window->m_liner->loadFromProject(lineViewerLines);
+    }
+
     window->setGeometry(geometry);
     window->show();
     return window;
@@ -497,6 +504,7 @@ std::string SliceViewerWindow::saveToProject(ApplicationWindow *app)
   tab.writeLine("Workspace") << m_ws->name();
   tab.writeLine("Label") << m_label;
   tab.writeRaw(m_slicer->saveToProject());
+  tab.writeSection("lineviewer", m_liner->saveToProject());
   tsv.writeSection("sliceviewer", tab.outputLines());
   return tsv.outputLines();
 }
