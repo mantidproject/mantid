@@ -386,13 +386,25 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         # Masking bins according to their bin numbers
         if xmin > 0:
-            self.log().debug('Mask monitor bins smaller than %d' % xmin)
+            self.log().debug('Mask bins (left ws and right ws) smaller than %d' % xmin)
             MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=0, XMax=xmin)
             MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=0, XMax=xmin)
         if xmax < size:
-            self.log().debug('Mask monitor bins larger than %d' % (xmax - 1))
+            self.log().debug('Mask bins (left ws and right ws) larger than %d' % (xmax - 1))
             MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=xmax, XMax=size)
             MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=xmax, XMax=size)
+
+        # Mask bins of reduced workspace for unmirror_option 0
+        if self._unmirror_option == 0:
+            if xmin_left > 0:
+                self.log().debug('Mask red ws bins smaller than %d' % xmin_left)
+                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=0, XMax=xmin_left)
+            if xmin_right < size and xmax_left < size:
+                self.log().debug('Mask red ws bins between %d, %d' % (xmax_left, int(size / 2) + xmin_right - 1))
+                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=xmax_left, XMax=int(size / 2) + xmin_right)
+            if xmax_right < size:
+                self.log().debug('Mask red ws bins larger than %d' % (xmax_right + int(size / 2)))
+                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=xmax_right + int(size / 2), XMax=size)
 
         # Delete the left and right monitors
         DeleteWorkspace('__left_mon')
