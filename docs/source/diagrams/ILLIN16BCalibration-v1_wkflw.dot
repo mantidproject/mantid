@@ -15,7 +15,7 @@ digraph ILLIN16BCalibration {
   subgraph params {
     $param_style
     Run
-    MirrorMode
+    MirrorSense
     MapFile
     PeakRange
     ScaleFactor
@@ -34,7 +34,7 @@ digraph ILLIN16BCalibration {
 
   Run -> IndirectILLReduction
   MapFile -> IndirectILLReduction
-  MirrorMode -> IndirectILLReduction
+  MirrorSense -> IndirectILLReduction
   IndirectILLReduction -> Integration [label="ReducedWorkspace"]
   PeakRange -> Integration
   Integration -> FindDetectorsOutsideLimits

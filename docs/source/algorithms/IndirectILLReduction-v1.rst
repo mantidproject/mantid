@@ -48,13 +48,13 @@ These options are inherited identically from (and validated against) previous **
 
 Multiple File Reduction
 ~~~~~~~~~~~~~~~~~~~~~~~
-The algorithm is capable of running over multiple files.
+The algorithm is capable of running over multiple files.  
 Run needs to be specified following the Mantid conventions in `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_.
 When ``SumRuns=True``, all the numors will be merged while loading.
 Note, for **Range** and **Stepped Range** (see `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_), ``SumRuns`` will be ignored.
 Please use **Added Range** and **Added Stepped Range** instead (see `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_).
 
-CalibrationWorkspace
+CalibrationWorkspace 
 ~~~~~~~~~~~~~~~~~~~~
 Note, that this is not the same as ``VanadiumRun``. This represents a one column workspace containing calibration intensities
 computed with :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>` algorithm.
@@ -62,7 +62,7 @@ It then can be seeded back to :ref:`IndirectILLReduction <algm-IndirectILLReduct
 Note, that :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>` itself just calls :ref:`IndirectILLReduction <algm-IndirectILLReduction>`
 for the given (vanadium) run and performs Integration around the specified peak range.
 
-ControlMode
+DebugMode
 ~~~~~~~~~~~
 This provides a flexibility to monitor the snapshots of workspaces at different intermediate steps.
 If enabled, along with the reduced, left and right workspaces, many other workspaces will be created.
@@ -81,7 +81,7 @@ Note, that following Mantid standard, the ``Unit`` for energy transfer (``DeltaE
 Workflow
 --------
 
-.. diagram:: IndirectILLReduction-v1_wkflw.dot
+.. diagram:: IndirectILLReduction-v1_wkflw.dot 
 
 Usage
 -----
@@ -90,10 +90,9 @@ Usage
 
 .. testcode:: ExIndirectILLReduction
 
-    IndirectILLReduction(Run='146190.nxs')
-
-    print "Reduced workspace has %d spectra" % mtd['146190_red'].getNumberHistograms()
-    print "Reduced workspace has %d bins" % mtd['146190_red'].blocksize()
+    IndirectILLReduction(Run='146191.nxs')
+    print "Reduced workspace has %d spectra" % mtd['146191_red'].getNumberHistograms()
+    print "Reduced workspace has %d bins" % mtd['146191_red'].blocksize()
 
 Output:
 
@@ -106,7 +105,7 @@ Output:
 
 .. testcode:: ExIndirectILLReductionSingleRun
 
-    out = IndirectILLReduction(Run='146190.nxs')
+    out = IndirectILLReduction(Run='146191.nxs')
     print "out is now refers to a group workspace, which is called %s" % out.getName()
     print "it contains %d item, which is called %s" % (out.size(),out.getItem(0).getName())
 
@@ -115,13 +114,13 @@ Output:
 .. testoutput:: ExIndirectILLReductionSingleRun
 
     out is now refers to a group workspace, which is called out
-    it contains 1 item, which is called 146190_out
+    it contains 1 item, which is called 146191_out
 
 **Example - IndirectILLReduction : multiple runs**
 
 .. testcode:: ExIndirectILLReductionMultipleRun
 
-    result = IndirectILLReduction(Run='146190:146193.nxs',UnmirrorOption=3)
+    result = IndirectILLReduction(Run='146191,146192.nxs')
     print "result contains %d workspaces, one for each run" % result.size()
     print "first workspace is %s corresponding to run %i" % (result.getItem(0).getName(),result.getItem(0).getRunNumber())
 
@@ -129,8 +128,8 @@ Output:
 
 .. testoutput:: ExIndirectILLReductionMultipleRun
 
-    result contains 4 workspaces, one for each run
-    first workspace is 146190_result corresponding to run 146190
+    result contains 2 workspaces, one for each run
+    first workspace is 146191_result corresponding to run 146191
 
 .. categories::
 
