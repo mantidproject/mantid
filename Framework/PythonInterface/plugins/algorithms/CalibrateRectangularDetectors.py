@@ -211,9 +211,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
     def _loadData(self, runnumber, extension, filterWall=None):
         """
-            Load data
-            @param runnumber: run number (integer)
-            @param extension: file extension
+        Load data
+        @param runnumber: run number (integer)
+        @param extension: file extension
         """
         filterDict = {}
         if filterWall is not None:
@@ -237,6 +237,30 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             wksp = CompressEvents(wksp, OutputWorkspace=wksp.name(),
                                   Tolerance=COMPRESS_TOL_TOF) # 100ns
         return wksp
+
+    def _saveCalibration(self, wkspName, calibFilePrefix):
+        outfilename = None
+        if "dspacemap" in self._outTypes:
+            outfilename = calibFilePrefix.replace('_d', '_dspacemap_d') + '.dat'
+            if os.path.exists(outfilename):
+                os.unlink(outfilename)
+            #write Dspacemap file
+            SaveDspacemap(InputWorkspace=wkspName+"offset",
+                          DspacemapFile=outfilename)
+        if "calibration" in self._outTypes:
+            outfilename = calibFilePrefix + '.h5'
+            if os.path.exists(outfilename):
+                os.unlink(outfilename)
+            ConvertDiffCal(OffsetsWorkspace=wkspName+"offset",
+                           OutputWorkspace=wkspName+"cal")
+            SaveDiffCal(CalibrationWorkspace=wkspName+"cal",
+                        GroupingWorkspace=wkspName+"group",
+                        MaskWorkspace=wkspName+"mask",
+                        Filename=outfilename)
+
+        if outfilename is not None:
+            self.setProperty("OutputFilename", outfilename)
+
 
     #pylint: disable=too-many-branches
     def _cccalibrate(self, wksp, calib):
@@ -272,9 +296,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 refpixel = s
                 ymax = y_s[midBin]
         self.log().information("Reference spectra=%s" % refpixel)
-        # Remove old calibration files
-        cmd = "rm "+calib
-        os.system(cmd)
+
         # Cross correlate spectra using interval around peak at peakpos (d-Spacing)
         if self._lastpixel == 0:
             self._lastpixel = wksp.getNumberHistograms()-1
@@ -358,20 +380,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
         lcinst = str(self._instrument)
 
-        outfilename = None
-        if "dspacemap" in self._outTypes:
-            #write Dspacemap file
-            outfilename = self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat")
-            SaveDspacemap(InputWorkspace=str(wksp)+"offset",
-                          DspacemapFile=outfilename)
-        if "calibration" in self._outTypes:
-            outfilename = calib
-            SaveCalFile(OffsetsWorkspace=str(wksp)+"offset",
-                        GroupingWorkspace=str(wksp)+"group",
-                        MaskWorkspace=str(wksp)+"mask",Filename=calib)
-
-        if outfilename is not None:
-            self.setProperty("OutputFilename", outfilename)
+        self._saveCalibration(str(wksp), calib)
 
         return wksp
 
@@ -409,9 +418,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if len(self._smoothGroups) > 0:
             wksp = SmoothData(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
                               NPoints=self._smoothGroups, GroupingWorkspace=str(wksp)+"group")
-        # Remove old calibration files
-        cmd = "rm "+calib
-        os.system(cmd)
 
         # Get the fit window input workspace
         fitwinws = self.getProperty("FitwindowTableWorkspace").value
@@ -456,20 +462,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                      Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
         lcinst = str(self._instrument)
 
-        outfilename = None
-        if "dspacemap" in self._outTypes:
-            #write Dspacemap file
-            outfilename = self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat")
-            SaveDspacemap(InputWorkspace=str(wksp)+"offset",
-                          DspacemapFile=outfilename)
-        if "calibration" in self._outTypes:
-            SaveCalFile(OffsetsWorkspace=str(wksp)+"offset",
-                        GroupingWorkspace=str(wksp)+"group",
-                        MaskWorkspace=str(wksp)+"mask", Filename=calib)
-            outfilename = calib
-
-        if outfilename is not None:
-            self.setProperty("OutputFilename", outfilename)
+        self._saveCalibration(str(wksp), calib)
 
         return wksp
 
@@ -550,9 +543,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 backRuns = [0]*len(samRuns)
             else:
                 raise RuntimeError("Number of samples and backgrounds must match (%d!=%d)" % (len(samRuns), len(backRuns)))
-        lcinst = str(self._instrument)
-        calib = self._outDir+lcinst+"_calibrate_d"+str(samRuns[0])+strftime("_%Y_%m_%d.cal")
         filterWall = (self.getProperty("FilterByTimeMin").value, self.getProperty("FilterByTimeMax").value)
+
+        calib = str(self._instrument)+"_calibrate_d"+str(samRuns[0])+strftime("_%Y_%m_%d")
+        calib = os.path.join(self._outDir, calib)
 
         for (samNum, backNum) in zip(samRuns, backRuns):
             # first round of processing the sample
