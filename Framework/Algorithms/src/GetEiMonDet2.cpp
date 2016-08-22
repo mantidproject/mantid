@@ -87,59 +87,50 @@ void GetEiMonDet2::init() {
       boost::make_shared<MandatoryValidator<std::string>>();
   auto mandatoryDetectorIdProperty =
       boost::make_shared<MandatoryValidator<detid_t>>();
-  auto mustBePositive =
-      boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
 
   declareProperty(
       make_unique<WorkspaceProperty<>>(PropertyNames::DETECTOR_WORKSPACE, "",
                                        Direction::Input, tofWorkspace),
       "A workspace containing the detector spectra.");
-  declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>(
-          PropertyNames::DETECTOR_EPP_TABLE, "", Direction::Input),
-      "An EPP table corresponding to " + PropertyNames::DETECTOR_WORKSPACE +
-      ".");
-  const std::vector<std::string> indexTypes{
-    IndexTypes::DETECTOR_ID,
-    IndexTypes::SPECTRUM_NUMBER,
-    IndexTypes::WORKSPACE_INDEX
-  };
-  declareProperty(
-      PropertyNames::INDEX_TYPE, IndexTypes::DETECTOR_ID,
-        boost::make_shared<StringListValidator>(indexTypes),
-        "The type of indices " + PropertyNames::DETECTORS + " and " +
-        PropertyNames::MONITOR + " refer to.");
-  declareProperty(
-      PropertyNames::DETECTORS, "",
-        "A list of detector ids/spectrum number/workspace indices.",
-        mandatoryStringProperty);
-  declareProperty(
-      make_unique<WorkspaceProperty<>>(PropertyNames::MONITOR_WORKSPACE, "",
-                                       Direction::Input,
-                                       PropertyMode::Optional, tofWorkspace),
-      "A Workspace containing the monitor spectrum. If empty, " +
-        PropertyNames::DETECTOR_WORKSPACE + " will be used.");
-  declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>(
-          PropertyNames::MONITOR_EPP_TABLE,"" , Direction::Input,
-          PropertyMode::Optional),
-       "An EPP table corresponding to " + PropertyNames::MONITOR_WORKSPACE);
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      PropertyNames::DETECTOR_EPP_TABLE, "", Direction::Input),
+                  "An EPP table corresponding to " +
+                      PropertyNames::DETECTOR_WORKSPACE + ".");
+  const std::vector<std::string> indexTypes{IndexTypes::DETECTOR_ID,
+                                            IndexTypes::SPECTRUM_NUMBER,
+                                            IndexTypes::WORKSPACE_INDEX};
+  declareProperty(PropertyNames::INDEX_TYPE, IndexTypes::DETECTOR_ID,
+                  boost::make_shared<StringListValidator>(indexTypes),
+                  "The type of indices " + PropertyNames::DETECTORS + " and " +
+                      PropertyNames::MONITOR + " refer to.");
+  declareProperty(PropertyNames::DETECTORS, "",
+                  "A list of detector ids/spectrum number/workspace indices.",
+                  mandatoryStringProperty);
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      PropertyNames::MONITOR_WORKSPACE, "", Direction::Input,
+                      PropertyMode::Optional, tofWorkspace),
+                  "A Workspace containing the monitor spectrum. If empty, " +
+                      PropertyNames::DETECTOR_WORKSPACE + " will be used.");
+  declareProperty(make_unique<WorkspaceProperty<ITableWorkspace>>(
+                      PropertyNames::MONITOR_EPP_TABLE, "", Direction::Input,
+                      PropertyMode::Optional),
+                  "An EPP table corresponding to " +
+                      PropertyNames::MONITOR_WORKSPACE);
   setPropertySettings(PropertyNames::MONITOR_EPP_TABLE,
                       make_unique<EnabledWhenProperty>(
-                        PropertyNames::MONITOR_WORKSPACE, IS_NOT_DEFAULT));
-  declareProperty(
-      PropertyNames::MONITOR, EMPTY_INT(), mandatoryDetectorIdProperty,
-        "Monitor's detector id/spectrum number/workspace index.");
-  declareProperty(
-      PropertyNames::PULSE_INTERVAL, EMPTY_DBL(),
-        "Interval between neutron pulses, in microseconds.");
+                          PropertyNames::MONITOR_WORKSPACE, IS_NOT_DEFAULT));
+  declareProperty(PropertyNames::MONITOR, EMPTY_INT(),
+                  mandatoryDetectorIdProperty,
+                  "Monitor's detector id/spectrum number/workspace index.");
+  declareProperty(PropertyNames::PULSE_INTERVAL, EMPTY_DBL(),
+                  "Interval between neutron pulses, in microseconds.");
   declareProperty(
       PropertyNames::NOMINAL_ENERGY, EMPTY_DBL(), mustBePositive,
-        "Incident energy guess. Taken from the sample logs, if not specified.");
-  declareProperty(
-      PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositive,
-        "Calculated incident energy.", Direction::Output);
+      "Incident energy guess. Taken from the sample logs, if not specified.");
+  declareProperty(PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositive,
+                  "Calculated incident energy.", Direction::Output);
 }
 
 /** Executes the algorithm.
@@ -177,9 +168,8 @@ void GetEiMonDet2::exec() {
   const double velocity = flightLength / timeOfFlight * 1e6;
   const double energy = 0.5 * NeutronMass * velocity * velocity / meV;
   progress(1.0);
-  g_log.notice() << "Final time-of-flight:" << timeOfFlight <<
-                    " which gives " << energy << " as " <<
-                    PropertyNames::INCIDENT_ENERGY << ".\n";
+  g_log.notice() << "Final time-of-flight:" << timeOfFlight << " which gives "
+                 << energy << " as " << PropertyNames::INCIDENT_ENERGY << ".\n";
 
   setProperty(PropertyNames::INCIDENT_ENERGY, energy);
 }
@@ -217,8 +207,7 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
     const size_t index = detectorIndices[i];
     interruption_point();
     if (index >= peakPositionColumn->size()) {
-      throw std::runtime_error("Invalid value in " +
-                               PropertyNames::DETECTORS);
+      throw std::runtime_error("Invalid value in " + PropertyNames::DETECTORS);
     }
     if (fitStatusColumn->cell<std::string>(index) ==
         EPPTableLiterals::FIT_STATUS_SUCCESS) {
@@ -228,8 +217,8 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
                                  PropertyNames::DETECTORS + " found");
       }
       if (detector->isMonitor()) {
-        g_log.warning() << "Workspace index " << index <<
-                           " should be detector, but is marked as monitor.\n";
+        g_log.warning() << "Workspace index " << index
+                        << " should be detector, but is marked as monitor.\n";
       }
       if (!detector->isMasked()) {
         const double d = detector->getDistance(*sample);
@@ -237,18 +226,16 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
         const double epp = (*peakPositionColumn)[index];
         eppSum += epp;
         ++n;
-        g_log.debug() << "Including detector at workspace index " << index <<
-                         " - distance: " << d << " EPP: " << epp << ".\n";
+        g_log.debug() << "Including detector at workspace index " << index
+                      << " - distance: " << d << " EPP: " << epp << ".\n";
+      } else {
+        g_log.debug() << "Excluding masked detector at workspace index "
+                      << index << ".\n";
       }
-      else {
-        g_log.debug() << "Excluding masked detector at workspace index " <<
-                         index << ".\n";
-      }
-    }
-    else {
-      g_log.debug() <<
-          "Excluding detector with unsuccessful fit at workspace index " <<
-                       index << ".\n";
+    } else {
+      g_log.debug()
+          << "Excluding detector with unsuccessful fit at workspace index "
+          << index << ".\n";
     }
     PARALLEL_END_INTERUPT_REGION
   }
@@ -258,8 +245,8 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
                              PropertyNames::DETECTOR_EPP_TABLE);
   }
   sampleToDetectorDistance = distanceSum / static_cast<double>(n);
-  g_log.information() << "Average sample-to-detector distance: " <<
-                         sampleToDetectorDistance << ".\n";
+  g_log.information() << "Average sample-to-detector distance: "
+                      << sampleToDetectorDistance << ".\n";
   detectorEPP = eppSum / static_cast<double>(n);
   g_log.information() << "Average detector EPP: " << detectorEPP << ".\n";
 }
@@ -270,8 +257,7 @@ void GetEiMonDet2::averageDetectorDistanceAndTOF(
  *  @param monitorEPP The position of the monitor's elastic peak
  *  @return The time of flight between the monitor and the detectors
  */
-double GetEiMonDet2::computeTOF(const double distance,
-                                const double detectorEPP,
+double GetEiMonDet2::computeTOF(const double distance, const double detectorEPP,
                                 const double monitorEPP) {
   double timeOfFlight = detectorEPP - monitorEPP;
   double nominalIncidentEnergy = getProperty(PropertyNames::NOMINAL_ENERGY);
@@ -285,29 +271,27 @@ double GetEiMonDet2::computeTOF(const double distance,
   }
   // In microseconds.
   const double nominalTimeOfFlight =
-      distance / std::sqrt(2 * nominalIncidentEnergy * meV / NeutronMass) *
-      1e6;
+      distance / std::sqrt(2 * nominalIncidentEnergy * meV / NeutronMass) * 1e6;
   g_log.information() << "Nominal time-of-flight: " << nominalTimeOfFlight
                       << ".\n";
   // Check if the obtained time-of-flight makes any sense.
   const double energyTolerance = 20; // %'s of the nominal energy
-  const double toleranceLimit = 1 / std::sqrt(1 + energyTolerance) *
-      nominalTimeOfFlight;
+  const double toleranceLimit =
+      1 / std::sqrt(1 + energyTolerance) * nominalTimeOfFlight;
   const double pulseInterval = getProperty(PropertyNames::PULSE_INTERVAL);
   const double pulseIntervalLimit = nominalTimeOfFlight - pulseInterval / 2;
   const double lowerTimeLimit =
-      toleranceLimit > pulseIntervalLimit ?
-        toleranceLimit : pulseIntervalLimit;
+      toleranceLimit > pulseIntervalLimit ? toleranceLimit : pulseIntervalLimit;
   const double upperTimeLimit =
-      toleranceLimit > pulseIntervalLimit ?
-        1 / std::sqrt(1 - energyTolerance) * nominalTimeOfFlight :
-        nominalTimeOfFlight + pulseInterval / 2;
-  g_log.notice() << "Expecting a final time-of-flight between " <<
-                    lowerTimeLimit << " and " << upperTimeLimit << ".\n";
+      toleranceLimit > pulseIntervalLimit
+          ? 1 / std::sqrt(1 - energyTolerance) * nominalTimeOfFlight
+          : nominalTimeOfFlight + pulseInterval / 2;
+  g_log.notice() << "Expecting a final time-of-flight between "
+                 << lowerTimeLimit << " and " << upperTimeLimit << ".\n";
   g_log.notice() << "Calculated time-of-flight: " << timeOfFlight << ".\n";
   if (timeOfFlight <= lowerTimeLimit) {
-    g_log.notice() << "Calculated time-of-flight too small. " <<
-                      "Frame delay has to be taken into account.\n";
+    g_log.notice() << "Calculated time-of-flight too small. "
+                   << "Frame delay has to be taken into account.\n";
   }
   unsigned delayFrameCount = 0;
   while (timeOfFlight <= lowerTimeLimit) {
@@ -318,8 +302,7 @@ double GetEiMonDet2::computeTOF(const double distance,
                                " specified");
     }
     ++delayFrameCount;
-    timeOfFlight =
-        delayFrameCount * pulseInterval - monitorEPP + detectorEPP;
+    timeOfFlight = delayFrameCount * pulseInterval - monitorEPP + detectorEPP;
   }
   if (timeOfFlight > upperTimeLimit) {
     throw std::runtime_error("Calculated time-of-flight too large");
@@ -360,13 +343,13 @@ void GetEiMonDet2::monitorDistanceAndTOF(const size_t monitorIndex,
     throw std::runtime_error("Monitor spectrum is masked");
   }
   if (!monitor->isMonitor()) {
-    g_log.warning() << "The monitor spectrum is not actually marked " <<
-                       "as monitor.\n";
+    g_log.warning() << "The monitor spectrum is not actually marked "
+                    << "as monitor.\n";
   }
   const auto sample = m_detectorWs->getInstrument()->getSample();
   monitorToSampleDistance = monitor->getDistance(*sample);
-  g_log.information() << "Monitor-to-sample distance: " <<
-                         monitorToSampleDistance << ".\n";
+  g_log.information() << "Monitor-to-sample distance: "
+                      << monitorToSampleDistance << ".\n";
 
   // Monitor peak position.
   monitorEPP = (*peakPositionColumn)[monitorIndex];
@@ -383,22 +366,22 @@ void GetEiMonDet2::monitorDistanceAndTOF(const size_t monitorIndex,
  *  @param monitorIndex Output parameter for the monitor
  *         workspace indices
  */
-template<typename T, typename Map>
-void mapIndices(const std::vector<unsigned int>& detectors, const T monitor, const Map& detectorIndexMap, const Map& monitorIndexMap, std::vector<size_t>& detectorIndices, size_t& monitorIndex) {
+template <typename T, typename Map>
+void mapIndices(const std::vector<unsigned int> &detectors, const T monitor,
+                const Map &detectorIndexMap, const Map &monitorIndexMap,
+                std::vector<size_t> &detectorIndices, size_t &monitorIndex) {
   auto back = std::back_inserter(detectorIndices);
-  std::transform(detectors.cbegin(), detectors.cend(), back,
-                 [&detectorIndexMap](T i) {
-    try {
-      return detectorIndexMap.at(i);
-    }
-    catch (std::out_of_range& e) {
-      throw std::runtime_error(PropertyNames::DETECTORS + " out of range.");
-    }
-  });
+  std::transform(
+      detectors.cbegin(), detectors.cend(), back, [&detectorIndexMap](T i) {
+        try {
+          return detectorIndexMap.at(i);
+        } catch (std::out_of_range &e) {
+          throw std::runtime_error(PropertyNames::DETECTORS + " out of range.");
+        }
+      });
   try {
     monitorIndex = monitorIndexMap.at(monitor);
-  }
-  catch (std::out_of_range& e) {
+  } catch (std::out_of_range &e) {
     throw std::runtime_error(PropertyNames::MONITOR + " out of range.");
   }
 }
@@ -415,36 +398,29 @@ void GetEiMonDet2::parseIndices(std::vector<size_t> &detectorIndices,
   UserStringParser spectraListParser;
   const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);
   if (indexType == IndexTypes::DETECTOR_ID) {
-    const auto detectors =
-        VectorHelper::flattenVector(spectraListParser.parse(
-                                      getProperty(PropertyNames::DETECTORS)));
+    const auto detectors = VectorHelper::flattenVector(
+        spectraListParser.parse(getProperty(PropertyNames::DETECTORS)));
     const detid_t monitor = getProperty(PropertyNames::MONITOR);
     const auto detectorIndexMap =
         m_detectorWs->getDetectorIDToWorkspaceIndexMap();
     const auto monitorIndexMap =
         m_monitorWs->getDetectorIDToWorkspaceIndexMap();
-    mapIndices<detid_t>(detectors, monitor, detectorIndexMap,
-                        monitorIndexMap, detectorIndices, monitorIndex);
-  }
-  else if (indexType == IndexTypes::SPECTRUM_NUMBER) {
-    const auto detectors(
-          VectorHelper::flattenVector(spectraListParser.parse(
-                                        getProperty(
-                                          PropertyNames::DETECTORS))));
+    mapIndices<detid_t>(detectors, monitor, detectorIndexMap, monitorIndexMap,
+                        detectorIndices, monitorIndex);
+  } else if (indexType == IndexTypes::SPECTRUM_NUMBER) {
+    const auto detectors(VectorHelper::flattenVector(
+        spectraListParser.parse(getProperty(PropertyNames::DETECTORS))));
     const specnum_t monitor = getProperty(PropertyNames::MONITOR);
     const auto detectorIndexMap =
         m_detectorWs->getSpectrumToWorkspaceIndexMap();
-    const auto monitorIndexMap =
-        m_monitorWs->getSpectrumToWorkspaceIndexMap();
-    mapIndices<specnum_t>(detectors, monitor, detectorIndexMap,
-                          monitorIndexMap, detectorIndices, monitorIndex);
-  }
-  else {
+    const auto monitorIndexMap = m_monitorWs->getSpectrumToWorkspaceIndexMap();
+    mapIndices<specnum_t>(detectors, monitor, detectorIndexMap, monitorIndexMap,
+                          detectorIndices, monitorIndex);
+  } else {
     // There is a type mismatch between what UserStringParser returns
     // (unsigned int) and workspace index (size_t), thus the copying.
-    auto detectors =
-        VectorHelper::flattenVector(
-          spectraListParser.parse(getProperty(PropertyNames::DETECTORS)));
+    auto detectors = VectorHelper::flattenVector(
+        spectraListParser.parse(getProperty(PropertyNames::DETECTORS)));
     auto back = std::back_inserter(detectorIndices);
     std::copy(detectors.begin(), detectors.end(), back);
     monitorIndex = getProperty(PropertyNames::MONITOR);
@@ -458,18 +434,17 @@ void GetEiMonDet2::parseIndices(std::vector<size_t> &detectorIndices,
  */
 void GetEiMonDet2::sanitizeIndices(std::vector<size_t> &detectorIndices,
                                    size_t monitorIndex) const {
- std::sort(detectorIndices.begin(), detectorIndices.end());
- detectorIndices.erase(std::unique(detectorIndices.begin(),
-                                   detectorIndices.end()),
-                       detectorIndices.end());
- if (m_monitorWs == m_detectorWs) {
-   if (std::find(detectorIndices.begin(), detectorIndices.end(),
-                 monitorIndex) != detectorIndices.end()) {
-     throw std::runtime_error(PropertyNames::MONITOR +
-                              " is also listed in " +
-                              PropertyNames::DETECTORS);
-   }
- }
+  std::sort(detectorIndices.begin(), detectorIndices.end());
+  detectorIndices.erase(
+      std::unique(detectorIndices.begin(), detectorIndices.end()),
+      detectorIndices.end());
+  if (m_monitorWs == m_detectorWs) {
+    if (std::find(detectorIndices.begin(), detectorIndices.end(),
+                  monitorIndex) != detectorIndices.end()) {
+      throw std::runtime_error(PropertyNames::MONITOR + " is also listed in " +
+                               PropertyNames::DETECTORS);
+    }
+  }
 }
 
 } // namespace Algorithms

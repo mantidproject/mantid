@@ -35,9 +35,7 @@ constexpr double time_of_flight(const double velocity) {
 
 class GetEiMonDet2Test : public CxxTest::TestSuite {
 public:
-  static GetEiMonDet2Test *createSuite() {
-    return new GetEiMonDet2Test();
-  }
+  static GetEiMonDet2Test *createSuite() { return new GetEiMonDet2Test(); }
   static void destroySuite(GetEiMonDet2Test *suite) { delete suite; }
 
   void testName() {
@@ -58,7 +56,8 @@ public:
 
   void testSuccessOnMinimumInput() {
     const double realEi = 0.97 * EI;
-    const auto peaks = peakCentres(100, realEi, std::numeric_limits<double>::max());
+    const auto peaks =
+        peakCentres(100, realEi, std::numeric_limits<double>::max());
     std::vector<bool> successes(peaks.size(), true);
     auto eppTable = createEPPTable(peaks, successes);
     auto ws = createWorkspace();
@@ -66,25 +65,30 @@ public:
     setupSimple(ws, eppTable, algorithm);
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
-    TS_ASSERT_DELTA(static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")), realEi, 1e-6)
+    TS_ASSERT_DELTA(
+        static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")),
+        realEi, 1e-6)
   }
 
   void testSuccessOnComplexInput() {
     const double realEi = 1.18 * EI;
     const double pulseInterval = std::floor(time_of_flight(velocity(EI)) / 2);
     const double timeAtMonitor = 0.34 * pulseInterval;
-    auto detectorPeakCentres = peakCentres(timeAtMonitor, realEi, pulseInterval);
+    auto detectorPeakCentres =
+        peakCentres(timeAtMonitor, realEi, pulseInterval);
     detectorPeakCentres.erase(detectorPeakCentres.begin());
     std::vector<bool> successes(detectorPeakCentres.size(), true);
     auto detectorEPPTable = createEPPTable(detectorPeakCentres, successes);
     auto monitorPeakCentres = peakCentres(timeAtMonitor, realEi, pulseInterval);
-    monitorPeakCentres.erase(monitorPeakCentres.begin() + 1, monitorPeakCentres.end());
+    monitorPeakCentres.erase(monitorPeakCentres.begin() + 1,
+                             monitorPeakCentres.end());
     successes = std::vector<bool>(monitorPeakCentres.size(), true);
     auto monitorEPPTable = createEPPTable(monitorPeakCentres, successes);
     auto ws = createWorkspace();
     ws->mutableRun().removeProperty("Ei");
     // Break workspace into separate monitor and detector workspaces.
-    const std::string extractedWsName("GetEiMonDet2Test_testSuccessOnComplexInput_extracted");
+    const std::string extractedWsName(
+        "GetEiMonDet2Test_testSuccessOnComplexInput_extracted");
     ExtractSingleSpectrum spectrumExtraction;
     spectrumExtraction.initialize();
     spectrumExtraction.setChild(true);
@@ -92,32 +96,43 @@ public:
     spectrumExtraction.setProperty("WorkspaceIndex", 0);
     spectrumExtraction.setProperty("OutputWorkspace", extractedWsName);
     spectrumExtraction.execute();
-    MatrixWorkspace_sptr monitorWs = spectrumExtraction.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr monitorWs =
+        spectrumExtraction.getProperty("OutputWorkspace");
     spectrumExtraction.setProperty("InputWorkspace", ws);
     spectrumExtraction.setProperty("WorkspaceIndex", 1);
     spectrumExtraction.setProperty("OutputWorkspace", extractedWsName);
     spectrumExtraction.execute();
-    MatrixWorkspace_sptr detectorWs = spectrumExtraction.getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr detectorWs =
+        spectrumExtraction.getProperty("OutputWorkspace");
     GetEiMonDet2 algorithm;
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", detectorWs));
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorEPPTable", detectorEPPTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("IndexType", "SpectrumNumber"))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("DetectorWorkspace", detectorWs));
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("DetectorEPPTable", detectorEPPTable))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("IndexType", "SpectrumNumber"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "2"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("NominalIncidentEnergy", EI))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorWorkspace", monitorWs))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("MonitorEPPTable", monitorEPPTable))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("MonitorWorkspace", monitorWs))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("MonitorEPPTable", monitorEPPTable))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Monitor", 1))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("PulseInterval", pulseInterval))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("PulseInterval", pulseInterval))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
-    TS_ASSERT_DELTA(static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")), realEi, 1e-6)
+    TS_ASSERT_DELTA(
+        static_cast<decltype(realEi)>(algorithm.getProperty("IncidentEnergy")),
+        realEi, 1e-6)
   }
 
   void testFailureOnAllDetectorsMasked() {
     const double realEi = EI;
-    const auto peaks = peakCentres(100, realEi, std::numeric_limits<double>::max());
+    const auto peaks =
+        peakCentres(100, realEi, std::numeric_limits<double>::max());
     std::vector<bool> successes(peaks.size(), true);
     auto eppTable = createEPPTable(peaks, successes);
     auto ws = createWorkspace();
@@ -135,7 +150,8 @@ public:
 
   void testFailureOnMonitorMasked() {
     const double realEi = EI;
-    const auto peaks = peakCentres(100, realEi, std::numeric_limits<double>::max());
+    const auto peaks =
+        peakCentres(100, realEi, std::numeric_limits<double>::max());
     std::vector<bool> successes(peaks.size(), true);
     auto eppTable = createEPPTable(peaks, successes);
     auto ws = createWorkspace();
@@ -153,7 +169,8 @@ public:
 
   void testFailureOnEPPUnsuccessfulOnAllDetectors() {
     const double realEi = EI;
-    const auto peaks = peakCentres(100, realEi, std::numeric_limits<double>::max());
+    const auto peaks =
+        peakCentres(100, realEi, std::numeric_limits<double>::max());
     std::vector<bool> successes(peaks.size(), false);
     // Monitor should still say 'success'.
     successes.front() = true;
@@ -167,7 +184,8 @@ public:
 
   void testFailureOnEPPUnsuccessfulOnMonitor() {
     const double realEi = EI;
-    const auto peaks = peakCentres(100, realEi, std::numeric_limits<double>::max());
+    const auto peaks =
+        peakCentres(100, realEi, std::numeric_limits<double>::max());
     std::vector<bool> successes(peaks.size(), true);
     successes.front() = false;
     auto eppTable = createEPPTable(peaks, successes);
@@ -180,7 +198,8 @@ public:
 
   void testFailureOnMonitorDetectorIndexClash() {
     const double realEi = EI;
-    const auto peaks = peakCentres(100, realEi, std::numeric_limits<double>::max());
+    const auto peaks =
+        peakCentres(100, realEi, std::numeric_limits<double>::max());
     std::vector<bool> successes(peaks.size(), true);
     auto eppTable = createEPPTable(peaks, successes);
     auto ws = createWorkspace();
@@ -188,7 +207,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorEPPTable", eppTable))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("DetectorEPPTable", eppTable))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
@@ -197,7 +217,8 @@ public:
 
   void testFailuroOnNonexistentDetectorIndex() {
     const double realEi = EI;
-    const auto peaks = peakCentres(100, realEi, std::numeric_limits<double>::max());
+    const auto peaks =
+        peakCentres(100, realEi, std::numeric_limits<double>::max());
     std::vector<bool> successes(peaks.size(), true);
     auto eppTable = createEPPTable(peaks, successes);
     auto ws = createWorkspace();
@@ -205,7 +226,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorEPPTable", eppTable))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("DetectorEPPTable", eppTable))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "42"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "0"))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
@@ -214,7 +236,8 @@ public:
 
   void testFailuroOnNonexistentMonitorIndex() {
     const double realEi = EI;
-    const auto peaks = peakCentres(100, realEi, std::numeric_limits<double>::max());
+    const auto peaks =
+        peakCentres(100, realEi, std::numeric_limits<double>::max());
     std::vector<bool> successes(peaks.size(), true);
     auto eppTable = createEPPTable(peaks, successes);
     auto ws = createWorkspace();
@@ -222,7 +245,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorEPPTable", eppTable))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("DetectorEPPTable", eppTable))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "42"))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
@@ -230,13 +254,19 @@ public:
   }
 
 private:
-  ITableWorkspace_sptr createEPPTable(const std::vector<double> &peakCentres, const std::vector<bool> &fitSuccesses, const std::string& centresColumnName = "PeakCentre", const std::string& successesColumnName = "FitStatus") {
-    ITableWorkspace_sptr ws = boost::make_shared<TableWorkspace>(peakCentres.size());
+  ITableWorkspace_sptr
+  createEPPTable(const std::vector<double> &peakCentres,
+                 const std::vector<bool> &fitSuccesses,
+                 const std::string &centresColumnName = "PeakCentre",
+                 const std::string &successesColumnName = "FitStatus") {
+    ITableWorkspace_sptr ws =
+        boost::make_shared<TableWorkspace>(peakCentres.size());
     auto centreColumn = ws->addColumn("double", centresColumnName);
     auto statusColumn = ws->addColumn("str", successesColumnName);
-    for(size_t i = 0; i != peakCentres.size(); ++i) {
+    for (size_t i = 0; i != peakCentres.size(); ++i) {
       centreColumn->cell<double>(i) = peakCentres[i];
-      statusColumn->cell<std::string>(i) = fitSuccesses[i] ? "success" : "failed";
+      statusColumn->cell<std::string>(i) =
+          fitSuccesses[i] ? "success" : "failed";
     }
     return ws;
   }
@@ -254,7 +284,8 @@ private:
     detectorRs.emplace_back(-MONITOR_DISTANCE, 0, 0);
     // Add more detectors --- these should be treated as the real ones.
     detectorRs.emplace_back(0, DETECTOR_DISTANCE, 0);
-    createInstrumentForWorkspaceWithDistances(targetWs, sampleR, sourceR, detectorRs);
+    createInstrumentForWorkspaceWithDistances(targetWs, sampleR, sourceR,
+                                              detectorRs);
   }
 
   static MatrixWorkspace_sptr createWorkspace() {
@@ -267,7 +298,8 @@ private:
     return ws;
   }
 
-  static std::vector<double> peakCentres(double timeAtMonitor, double energy, double pulseInterval) {
+  static std::vector<double> peakCentres(double timeAtMonitor, double energy,
+                                         double pulseInterval) {
     std::vector<double> centres;
     centres.emplace_back(timeAtMonitor);
     double timeOfFlight = timeAtMonitor + time_of_flight(velocity(energy));
@@ -279,11 +311,13 @@ private:
   }
 
   // Mininum setup for GetEiMonDet2.
-  void setupSimple(MatrixWorkspace_sptr ws, ITableWorkspace_sptr eppTable, GetEiMonDet2 &algorithm) {
+  void setupSimple(MatrixWorkspace_sptr ws, ITableWorkspace_sptr eppTable,
+                   GetEiMonDet2 &algorithm) {
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorWorkspace", ws))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("DetectorEPPTable", eppTable))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("DetectorEPPTable", eppTable))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Detectors", "1"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setPropertyValue("Monitor", "0"))
   }
