@@ -144,7 +144,8 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, T workspace) {
   if (4 == workspace->getNumDims()) {
     stripMatrix(skewMatrix);
   }
-
+  skewMatrix.Invert();
+  
 }
 
 template <typename T> bool doRequiresSkewMatrix(T workspace) {
