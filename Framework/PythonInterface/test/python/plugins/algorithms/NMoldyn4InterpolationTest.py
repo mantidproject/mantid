@@ -32,7 +32,7 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
         self.assertNotEqual(len(inter_X), sim.getAxis(0).length())
         self.assertEqual(inter_Q_length, osiris_Q_length)
         self.assertNotEqual(inter_Q_length, sim.getNumberHistograms())
-        self.assertEqual(sample_Y_data[0], 0.020095312677012457)
+        self.assertAlmostEqual(sample_Y_data[0], 0.020095312677012457)
         self.assertEqual(sample_Y_data[30], 1.7310334927635238)
 
 
