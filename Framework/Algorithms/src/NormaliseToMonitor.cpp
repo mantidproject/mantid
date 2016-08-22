@@ -584,8 +584,7 @@ void NormaliseToMonitor::normaliseBinByBin(
     const auto &X = inputWorkspace->binEdges(i);
     // If not rebinning, just point to our monitor spectra, otherwise create new
     // vectors
-	//TODO TEST
-	m_commonBins = true;
+
     auto Y = (m_commonBins ? monY : Counts(specLength));
     auto E = (m_commonBins ? monE : CountStandardDeviations(specLength));
 
