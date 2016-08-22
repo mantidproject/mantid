@@ -15,15 +15,22 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         return "Simulation\\nMOLDYN"
 
     def summary(self):
-        return "Imports trajectory data from an nMoldyn-generated .nc file and calculates velocity cross-correlations between atomic species. The algorithm calculates the velocity cross-correlation of every pair of particles and averages the correlations according to the particles' atomic species. Timestep must be specified in femtoseconds."
+        return ("Imports trajectory data from an nMoldyn-generated .nc file and calculates velocity "
+                "cross-correlations between atomic species. The algorithm calculates the velocity cross-correlation "
+                "of every pair of particles and averages the correlations according to the particles' atomic species. "
+                "Timestep must be specified in femtoseconds.")
 
     def PyInit(self):
-        self.declareProperty(FileProperty('InputFile','',action=FileAction.Load),doc="Input .nc file with an MMTK trajectory")
+        self.declareProperty(FileProperty('InputFile', '', action = FileAction.Load),
+                                          doc = "Input .nc file with an MMTK trajectory")
 
-        self.declareProperty("Timestep","1.0",direction=Direction.Input,doc="Specify the timestep between trajectory points in the simulation, fs")
+        self.declareProperty("Timestep", "1.0", direction = Direction.Input,
+                             doc="Specify the timestep between trajectory points in the simulation, fs")
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace','',direction=Direction.Output),doc="Output workspace name")
 
+    # pylint disable=too-many-branches
+    # pylint disable=too-many-locals
     def PyExec(self):
 
         # Get file path
@@ -38,14 +45,15 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         # netcdf object containing the particle id numbers
         description=(trajectory.variables["description"])[:]
         # Convert description object to string via for loop. The original object has strange formatting
-        s=''
+        particleID = ''
         for i in description:
-            s+=i
-
+            particleID += i
         # Extract particle id's from string using regular expressions
-        p_atoms=re.findall(r"A\('[a-z]+\d+',\d+",s)
+        p_atoms=re.findall(r"A\('[a-z]+\d+',\d+", particleID)
 
-        # Many-to-one structures. Identify the set of atomic species present (list structure 'elements') in the simulation and repackage particles into a dictionary 'particles_to_species' with structure id number -> species
+        # Many-to-one structures. Identify the set of atomic species present (list structure 'elements')
+        # in the simulation and repackage particles into a dictionary
+        # 'particles_to_species' with structure id number -> species
         atoms_to_species={}
         species_to_atoms={}
         elements=[]
@@ -92,7 +100,8 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         # Box size for each timestep. Shape: timesteps x (3 consecutive 3-vectors)
         box_size=trajectory.variables["box_size"]
 
-        # Reshape the paralellepipeds into 3x3 tensors for coordinate transformations. Shape: timesteps x 3 vectors x (# of spatial dimensions)
+        # Reshape the paralellepipeds into 3x3 tensors for coordinate transformations.
+        # Shape: timesteps x 3 vectors x (# of spatial dimensions)
         box_size_tensors=np.array([box_size[j].reshape((3,3)) for j in range(n_timesteps)])
 
         # Copy the configuration object into a numpy array
@@ -117,7 +126,8 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         logger.information("Calculating velocities...")
         start_time=time.time()
 
-        # Initialise velocity arrray. Note that the first dimension is 2 elements shorter than the coordinate array. Use finite difference methods to evaluate the time-derivative to 1st order
+        # Initialise velocity arrray. Note that the first dimension is 2 elements shorter than the coordinate array.
+        # Use finite difference methods to evaluate the time-derivative to 1st order
         # Shape: (# of particles) x (timesteps-2) x (# of spatial dimensions)
         velocities=np.zeros((n_particles,n_timesteps-1,n_dimensions))
 
@@ -127,10 +137,10 @@ class VelocityCrossCorrelations(PythonAlgorithm):
                 v_temp1=scaled_coords[i,j+1]-scaled_coords[i,j]-np.round(scaled_coords[i,j+1]-scaled_coords[i,j])
                 v_temp2=scaled_coords[i,j+2]-scaled_coords[i,j+1]-np.round(scaled_coords[i,j+2]-scaled_coords[i,j+1])
                 velocities[i,j]=(v_temp1+v_temp2)/(2.0)
-        # velocities=np.array([[(cartesian_configuration[i][j+2]-cartesian_configuration[i][j])/(2.0*step) for j in range(n_timesteps-2)] for i in range(n_particles)])
 
         # Transform velocities (configuration array) back to Cartesian coordinates at each time step
-        velocities=np.array([[np.dot(box_size_tensors[j+1],np.transpose(velocities[i,j])) for j in range(n_timesteps-1)] for i in range(n_particles)])
+        velocities=np.array([[np.dot(box_size_tensors[j+1],np.transpose(velocities[i,j]))
+                            for j in range(n_timesteps-1)] for i in range(n_particles)])
         logger.information(str(time.time()-start_time) + " s")
 
 
@@ -261,8 +271,7 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         'np':10.55,
         'pu':None,
         'am':8.3,
-        'cm':9.5
-        }
+        'cm':9.5}
 
 
         logger.information("Averaging correlation Fourier transforms & scaling with the coherent neutron scattering lenghts...")

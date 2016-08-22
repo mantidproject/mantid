@@ -13,12 +13,16 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         return "Simulation\\nMOLDYN"
 
     def summary(self):
-        return "Calculates the angular auto-correlations of molecules in a simulation along two user-defined axes. The first axis is defined by the vector connecting the average position of species two and the average position of species one (user input). The second axis is perpendicular to axis 1 and is constructed by considering one arbitrary atom of species 3 (user input). Timestep must be specified in femtoseconds."
+        return ("Calculates the angular auto-correlations of molecules in a simulation along two user-defined axes. "
+        "The first axis is defined by the vector connecting the average position of species two and the average position "
+        "of species one (user input). The second axis is perpendicular to axis 1 and is constructed by considering one "
+        "arbitrary atom of species 3 (user input). Timestep must be specified in femtoseconds.")
 
     def PyInit(self):
         self.declareProperty(FileProperty('InputFile','',action=FileAction.Load),doc="Input .nc file with an MMTK trajectory")
 
-        self.declareProperty("Timestep","1.0",direction=Direction.Input,doc="Time step between two coordinates in the trajectory in femtoseconds")
+        self.declareProperty("Timestep", "1.0", direction=Direction.Input,
+                             doc="Time step between two coordinates in the trajectory in femtoseconds")
 
         self.declareProperty("SpeciesOne",'',direction=Direction.Input,doc="Specify the first species, e.g. H, He, Li...")
         self.declareProperty("SpeciesTwo",'',direction=Direction.Input,doc="Specify the second species, e.g. H, He, Li...")
@@ -27,14 +31,15 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace','',direction=Direction.Output),doc="Output workspace name")
         self.declareProperty(WorkspaceProperty('OutputWorkspaceFT','FT',direction=Direction.Output),doc="FT Output workspace name")
 
-    #pylint: disable=too-many-branches
+    # pylint disable=too-many-branches
+    # pylint disable=too-many-locals
     def PyExec(self):
         # Get file path
         file_name=self.getPropertyValue("InputFile")
 
         # Get the user-specified species
         type1=self.getPropertyValue("SpeciesOne")
-        type2=self.getPropertyValue("SpeciesTwo")   
+        type2=self.getPropertyValue("SpeciesTwo")
         type3=self.getPropertyValue("SpeciesThree")
 
         # Load trajectory file
@@ -48,20 +53,21 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         description=(trajectory.variables["description"])[:]
 
         # Convert description object to string via for loop. The original object has strange formatting
-        s=''
+        particleID = ''
         for i in description:
-            s+=i
+            particleID += i
 
         # Extract particle id's from string using regular expressions
-        p_atoms=re.findall(r"A\('[a-z]+\d+',\d+",s)
+        p_atoms=re.findall(r"A\('[a-z]+\d+',\d+", particleID)
 
         # Split the string s by molecules
-        molecules=s.split("AC")
+        molecules=particleID.split("AC")
 
         # Remove first item of molecule list (contains initialisation of variable 'description')
         del molecules[0]
 
-        # Many-to-one structures. Identify the set of atomic species present (list structure 'elements') in the simulation and repackage particles into a dictionary 'particles_to_species' with structure id number -> species
+        # Many-to-one structures. Identify the set of atomic species present (list structure 'elements')
+        # in the simulation and repackage particles into a dictionary 'particles_to_species' with structure id number -> species
         atoms_to_species={}
         species_to_atoms={}
         elements=[]
@@ -77,11 +83,11 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
         # Check wether user-specified species present in the trajectory file
         if type1.lower() not in elements:
-            raise("Species one not found in the trajectory file. Please try again...")
+            raise "Species one not found in the trajectory file. Please try again..."
         if type2.lower() not in elements:
-            raise("Species two not found in the trajectory file. Please try again...")
+            raise "Species two not found in the trajectory file. Please try again..."
         if type3.lower() not in elements:
-            raise("Species three not found in the trajectory file. Please try again...")
+            raise "Species three not found in the trajectory file. Please try again..."
 
         # Initialise lists in the species_to_particles dictionary
         for j in elements:
@@ -94,7 +100,8 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
             element=re.findall(r"[a-z]+",j)[0]
             species_to_atoms[element].append(key)
 
-        # Many-to-one structures. Assign atom indices to molecule indices using a dictionaries with structures atom id -> molecule id and molecule id -> list of atoms ids
+        # Many-to-one structures. Assign atom indices to molecule indices using a dictionaries
+        # with structures atom id -> molecule id and molecule id -> list of atoms ids
         atoms_to_molecules={}
         molecules_to_atoms={}
 
@@ -105,8 +112,8 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         # Populate the dictionaries with atoms & molecules
         for k in range(len(molecules)):
             r_atoms=re.findall(r"A\('[a-z]+\d+',\d+",molecules[k])
-            for l in r_atoms:
-                key=re.findall(r"',\d+",l)[0]
+            for i in r_atoms:
+                key=re.findall(r"',\d+",i)[0]
                 key=int(re.findall(r"\d+",key)[0])
                 atoms_to_molecules[key]=k
                 molecules_to_atoms[k].append(key)
@@ -135,7 +142,8 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         # Box size for each timestep. Shape: timesteps x (3 consecutive 3-vectors)
         box_size=trajectory.variables["box_size"]
 
-        # Reshape the paralellepipeds into 3x3 tensors for coordinate transformations. Shape: (# of timesteps) x (3-vectors) x (# of spatial dimensions)
+        # Reshape the paralellepipeds into 3x3 tensors for coordinate transformations.
+        # Shape: (# of timesteps) x (3-vectors) x (# of spatial dimensions)
         box_size_tensors=10.0*np.array([box_size[j].reshape((3,3)) for j in range(n_timesteps)])
 
         # Extract box dimensions (assuming orthorhombic simulation cell, diagonal matrix)
@@ -150,7 +158,8 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         configuration_copy=np.swapaxes(configuration_copy,0,1)
 
         # Transform particle trajectories (configuration array) to Cartesian coordinates at each time step.
-        cartesian_configuration=np.array([[np.dot(box_size_tensors[j],np.transpose(configuration_copy[i,j])) for j in range(n_timesteps)] for i in range(n_particles)])
+        cartesian_configuration=np.array([[np.dot(box_size_tensors[j],np.transpose(configuration_copy[i,j]))
+                                           for j in range(n_timesteps)] for i in range(n_particles)])
 
         logger.information(str(time.time()-start_time) + " s")
 
@@ -161,7 +170,7 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         # Initialise orientation vector array. Shape: (# of molecules) x (# of timesteps) x (# of dimensions)
         orientation_vectors1=np.zeros((n_molecules,n_timesteps,n_dimensions))
         orientation_vectors2=np.zeros((n_molecules,n_timesteps,n_dimensions))
-        
+
         for i in range(n_molecules):
             # Retrieve constituents of the ith molecule
             temp=molecules_to_atoms[i]
@@ -181,8 +190,8 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
             sum_position_species_two=np.zeros((n_timesteps,n_dimensions))
             for k in species_one:
                 sum_position_species_one+=cartesian_configuration[k]
-            for l in species_two:
-                sum_position_species_two+=cartesian_configuration[l]
+            for i in species_two:
+                sum_position_species_two+=cartesian_configuration[i]
             avg_position_species_one=1.0*sum_position_species_one/float(len(species_one))
             avg_position_species_two=1.0*sum_position_species_two/float(len(species_two))
             # Choose the 1st element of species_three to build the 2nd vector
@@ -194,51 +203,51 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
             # Find the vector to the third atom
             vectors2=position_species_three-avg_position_species_two
 
-            dx1=np.divide(vectors1[:,0],box_size_x)
-            dy1=np.divide(vectors1[:,1],box_size_y)
-            dz1=np.divide(vectors1[:,2],box_size_z)
+            diffX1=np.divide(vectors1[:,0],box_size_x)
+            diffY1=np.divide(vectors1[:,1],box_size_y)
+            diffZ1=np.divide(vectors1[:,2],box_size_z)
 
-            dx2=np.divide(vectors2[:,0],box_size_x)
-            dy2=np.divide(vectors2[:,1],box_size_y)
-            dz2=np.divide(vectors2[:,2],box_size_z)
+            diffX2=np.divide(vectors2[:,0],box_size_x)
+            diffY2=np.divide(vectors2[:,1],box_size_y)
+            diffZ2=np.divide(vectors2[:,2],box_size_z)
 
             # Wrapping the vectors
-            x1=np.array([(dx1[k]-round(dx1[k]))*box_size_x[k] for k in range(n_timesteps)])
-            y1=np.array([(dy1[k]-round(dy1[k]))*box_size_y[k] for k in range(n_timesteps)])
-            z1=np.array([(dz1[k]-round(dz1[k]))*box_size_z[k] for k in range(n_timesteps)])
+            vectorX1=np.array([(diffX1[k]-round(diffX1[k]))*box_size_x[k] for k in range(n_timesteps)])
+            vectorY1=np.array([(diffY1[k]-round(diffY1[k]))*box_size_y[k] for k in range(n_timesteps)])
+            vectorZ1=np.array([(diffZ1[k]-round(diffZ1[k]))*box_size_z[k] for k in range(n_timesteps)])
 
-            x2=np.array([(dx2[k]-round(dx2[k]))*box_size_x[k] for k in range(n_timesteps)])
-            y2=np.array([(dy2[k]-round(dy2[k]))*box_size_y[k] for k in range(n_timesteps)])
-            z2=np.array([(dz2[k]-round(dz2[k]))*box_size_z[k] for k in range(n_timesteps)])
+            vectorX2=np.array([(diffX2[k]-round(diffX2[k]))*box_size_x[k] for k in range(n_timesteps)])
+            vectorY2=np.array([(diffY2[k]-round(diffY2[k]))*box_size_y[k] for k in range(n_timesteps)])
+            vectorZ2=np.array([(diffZ2[k]-round(diffZ2[k]))*box_size_z[k] for k in range(n_timesteps)])
 
             # Normalisation
-            norm1=np.sqrt(x1*x1+y1*y1+z1*z1)
-            x1=np.divide(x1,norm1)
-            y1=np.divide(y1,norm1)
-            z1=np.divide(z1,norm1)
+            norm1=np.sqrt(vectorX1*vectorX1+vectorY1*vectorY1+vectorZ1*vectorZ1)
+            vectorX1=np.divide(vectorX1,norm1)
+            vectorY1=np.divide(vectorY1,norm1)
+            vectorZ1=np.divide(vectorZ1,norm1)
 
-            norm2=np.sqrt(x2*x2+y2*y2+z2*z2)
-            x2=np.divide(x2,norm2)
-            y2=np.divide(y2,norm2)
-            z2=np.divide(z2,norm2)
+            norm2=np.sqrt(vectorX2*vectorX2+vectorY2*vectorY2+vectorZ2*vectorZ2)
+            vectorX2=np.divide(vectorX2,norm2)
+            vectorY2=np.divide(vectorY2,norm2)
+            vectorZ2=np.divide(vectorZ2,norm2)
 
             # Dot product
-            cosine=np.multiply(x1,x2)+np.multiply(y1,y2)+np.multiply(z1,z2)
+            cosine=np.multiply(vectorX1,vectorX2)+np.multiply(vectorY1,vectorY2)+np.multiply(vectorZ1,vectorZ2)
 
             # Gram-Schmidt orthogonalisation process
-            x2=x2-np.divide(x1,cosine)
-            y2=y2-np.divide(y1,cosine)
-            z2=z2-np.divide(z1,cosine)
+            vectorX2=vectorX2-np.divide(vectorX1,cosine)
+            vectorY2=vectorY2-np.divide(vectorY1,cosine)
+            vectorZ2=vectorZ2-np.divide(vectorZ1,cosine)
 
             # Renormalisation of the 2nd vector
-            norm2=np.sqrt(x2*x2+y2*y2+z2*z2)
-            x2=np.divide(x2,norm2)
-            y2=np.divide(y2,norm2)
-            z2=np.divide(z2,norm2)
+            norm2=np.sqrt(vectorX2*vectorX2+vectorY2*vectorY2+vectorZ2*vectorZ2)
+            vectorX2=np.divide(vectorX2,norm2)
+            vectorY2=np.divide(vectorY2,norm2)
+            vectorZ2=np.divide(vectorZ2,norm2)
 
             # Store calculations in the orientation_vectors1 and orientation_vectors2 arrays
-            orientation_vectors1[i]=np.swapaxes(np.array([x1,y1,z1]),0,1)
-            orientation_vectors2[i]=np.swapaxes(np.array([x2,y2,z2]),0,1)
+            orientation_vectors1[i]=np.swapaxes(np.array([vectorX1,vectorY1,vectorZ1]),0,1)
+            orientation_vectors2[i]=np.swapaxes(np.array([vectorX2,vectorY2,vectorZ2]),0,1)
 
         logger.information(str(time.time()-start_time) + " s")
 
@@ -265,7 +274,6 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
         # Initialise & populate the output_ws workspace
         nrows=2
-        nbins=n_timesteps
         step=float(self.getPropertyValue("Timestep"))
         xvals=np.arange(0,np.ceil((n_timesteps)/2.0))*step/1000.0
         yvals=np.empty(0)
@@ -274,7 +282,8 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         evals=np.zeros(np.shape(yvals))
 
         output_name=self.getPropertyValue("OutputWorkspace")
-        output_ws=CreateWorkspace(OutputWorkspace=output_name,DataX=xvals,UnitX="ps",DataY=yvals,DataE=evals,NSpec=nrows,VerticalAxisUnit="Text",VerticalAxisValues=["Axis 1","Axis 2"])
+        output_ws=CreateWorkspace(OutputWorkspace=output_name,DataX=xvals,UnitX="ps",DataY=yvals,
+                                  DataE=evals,NSpec=nrows,VerticalAxisUnit="Text",VerticalAxisValues=["Axis 1","Axis 2"])
         # Set output workspace to output_ws
         self.setProperty('OutputWorkspace',output_ws)
 
@@ -287,30 +296,31 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
         xvals=np.arange(0,np.shape(yvals)[0])
 
         FT_output_name=self.getPropertyValue("OutputWorkspaceFT")
-        FT_output_ws=CreateWorkspace(OutputWorkspace=FT_output_name,DataX=xvals,UnitX="1/fs",DataY=yvals,DataE=evals,NSpec=nrows,VerticalAxisUnit="Text",VerticalAxisValues=["FT Axis 1","FT Axis 2"])
+        FT_output_ws=CreateWorkspace(OutputWorkspace=FT_output_name,DataX=xvals,UnitX="1/fs",
+                                     DataY=yvals,DataE=evals,NSpec=nrows,VerticalAxisUnit="Text",VerticalAxisValues=["FT Axis 1","FT Axis 2"])
         self.setProperty("OutputWorkspaceFT",FT_output_ws)
 
 
-    def auto_correlation(self,v):
+    def auto_correlation(self, vector):
         # Returns angular auto-correlation of a normalised time-dependent 3-vector
-        n=np.shape(v)[0]
-        norm=np.arange(np.ceil(n/2.0),n+1)
-        norm=np.append(norm,(np.arange(n/2+1,n)[::-1]))
+        num=np.shape(vector)[0]
+        norm=np.arange(np.ceil(num/2.0),num+1)
+        norm=np.append(norm,(np.arange(num/2+1,num)[::-1]))
 
         # x dimension
-        R=np.divide(np.correlate(v[:,0],v[:,0],"same"),norm)
+        autoCorr=np.divide(np.correlate(vector[:,0],vector[:,0],"same"),norm)
         # y dimension
-        R+=np.divide(np.correlate(v[:,1],v[:,1],"same"),norm)
+        autoCorr+=np.divide(np.correlate(vector[:,1],vector[:,1],"same"),norm)
         # z dimension
-        R+=np.divide(np.correlate(v[:,2],v[:,2],"same"),norm)
+        autoCorr+=np.divide(np.correlate(vector[:,2],vector[:,2],"same"),norm)
 
-        return R
+        return autoCorr
 
 
-    def fold_correlation(self,w):
+    def fold_correlation(self,omega):
         # Folds an array with symmetrical values into half by averaging values around the centre
-        right_half=w[len(w)/2:]
-        left_half=w[:int(np.ceil(len(w)/2.0))][::-1]
+        right_half=omega[len(omega)/2:]
+        left_half=omega[:int(np.ceil(len(omega)/2.0))][::-1]
 
         return (left_half+right_half)/2.0
 
