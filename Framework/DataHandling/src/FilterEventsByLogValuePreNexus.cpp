@@ -1254,16 +1254,8 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
 // (This is equivalent to
 // workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
 // (But should be faster as a bunch of these calls were cached.)
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
-        // This avoids a copy constructor call but is only available with GCC
-        // (requires variadic templates)
         arrayOfVectors[pixelid]->emplace_back(tof, pulsetime);
-#else
-        arrayOfVectors[pixelid]->push_back(TofEvent(tof, pulsetime));
-#endif
-
         ++local_numGoodEvents;
-
 #if 0
           if (fileOffset == 0 && numeventsprint < 10)
           {
@@ -2009,14 +2001,7 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
 // (This is equivalent to
 // workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
 // (But should be faster as a bunch of these calls were cached.)
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
-        // This avoids a copy constructor call but is only available with GCC
-        // (requires variadic templates)
         arrayOfVectors[pixelid]->emplace_back(tof, pulsetime);
-#else
-        arrayOfVectors[pixelid]->push_back(TofEvent(tof, pulsetime));
-#endif
-
         ++local_numGoodEvents;
 
 #ifdef DBOUT
