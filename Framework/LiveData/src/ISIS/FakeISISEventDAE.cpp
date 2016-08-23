@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidISISLiveData/FakeISISEventDAE.h"
-#include "MantidISISLiveData/TCPEventStreamDefs.h"
+#include "MantidLiveData/ISIS/FakeISISEventDAE.h"
+#include "MantidLiveData/ISIS/TCPEventStreamDefs.h"
 
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/Timer.h"
@@ -17,13 +17,14 @@
 #include <numeric>
 
 namespace Mantid {
-namespace ISISLiveData {
+namespace LiveData {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FakeISISEventDAE)
 
 using namespace Kernel;
 using namespace API;
 
+namespace {
 /**
 * Implements Poco TCPServerConnection and does the actual job of interpreting
 * commands
@@ -144,6 +145,7 @@ public:
                                     m_nEvents, m_prog);
   }
 };
+} // end anonymous
 
 /// (Empty) Constructor
 FakeISISEventDAE::FakeISISEventDAE() : m_server(nullptr) {}
