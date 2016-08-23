@@ -27,7 +27,7 @@ class AlignComponents(PythonAlgorithm):
         """
         Mantid required
         """
-        return "PythonAlgorithms;Diffraction"
+        return "Diffraction"
 
     def name(self):
         """

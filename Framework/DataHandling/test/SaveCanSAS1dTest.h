@@ -11,6 +11,13 @@
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/AutoPtr.h>
+#include <Poco/SAX/InputSource.h>
+#include <Poco/DOM/DOMParser.h>
 
 #include <fstream>
 #include <sstream>
@@ -84,6 +91,7 @@ public:
     TS_ASSERT(savealg.isInitialized());
     savealg.setPropertyValue("InputWorkspace", m_workspace1);
     savealg.setPropertyValue("Filename", m_filename);
+    savealg.setPropertyValue("Process", " Earth < Sun");
     TS_ASSERT_THROWS_NOTHING(savealg.execute());
     TS_ASSERT(savealg.isExecuted());
     // Get the full path to the file again
@@ -156,6 +164,9 @@ public:
     TS_ASSERT_EQUALS(fileLine, idataline);
 
     testFile.close();
+
+    // Check for the process note
+    doTestProcessNote();
 
     // no more tests on the file are possible after this
     if (Poco::File(m_filename).exists())
@@ -239,6 +250,20 @@ public:
   }
 
 private:
+  void doTestProcessNote() {
+    std::string xPath = "SASroot/SASentry/SASprocess/SASprocessnote";
+    std::ifstream in(m_filename);
+    Poco::XML::InputSource src(in);
+    Poco::XML::DOMParser parser;
+    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parse(&src);
+    Poco::XML::NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
+    Poco::XML::Node *pNode = it.root();
+    Poco::XML::Node *node = pNode->getNodeByPath(xPath);
+    auto innerText = node->innerText();
+    std::string expectedInnerText = "Earth < Sun";
+    TSM_ASSERT_EQUALS("Should find process note", innerText, expectedInnerText);
+  }
+
   std::string m_workspace1, m_workspace2, m_filename;
   std::string m_runNum;
   MatrixWorkspace_sptr ws;

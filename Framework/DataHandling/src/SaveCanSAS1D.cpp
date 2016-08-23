@@ -18,6 +18,37 @@
 #include <boost/shared_ptr.hpp>
 
 //-----------------------------------------------------------------------------
+namespace {
+void encode(std::string &data) {
+  std::string buffer;
+  buffer.reserve(data.size());
+
+  for (auto &element : data) {
+    switch (element) {
+    case '&':
+      buffer.append("&amp;");
+      break;
+    case '\"':
+      buffer.append("&quot;");
+      break;
+    case '\'':
+      buffer.append("&apos;");
+      break;
+    case '<':
+      buffer.append("&lt;");
+      break;
+    case '>':
+      buffer.append("&gt;");
+      break;
+    default:
+      buffer.push_back(element);
+    }
+  }
+
+  data.swap(buffer);
+}
+}
+
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -155,14 +186,6 @@ void SaveCanSAS1D::exec() {
   std::string sasProcess;
   createSASProcessElement(sasProcess);
   m_outFile << sasProcess;
-
-  // Reduction process, if available
-  const std::string process_xml = getProperty("Process");
-  if (process_xml.size() > 0) {
-    m_outFile << "\n\t\t<SASProcess>\n";
-    m_outFile << process_xml;
-    m_outFile << "\n\t\t</SASProcess>\n";
-  }
 
   std::string sasNote = "\n\t\t<SASnote>";
   sasNote += "\n\t\t</SASnote>";
@@ -601,7 +624,17 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
   // outFile<<sasProcuserfile;
   sasProcess += sasProcuserfile;
 
-  sasProcess += "\n\t\t\t<SASprocessnote/>";
+  // Reduction process note, if available
+  std::string process_xml = getProperty("Process");
+  if (!process_xml.empty()) {
+    std::string processNote = "\n\t\t\t<SASprocessnote>";
+    encode(process_xml);
+    processNote += process_xml;
+    processNote += "</SASprocessnote>";
+    sasProcess += processNote;
+  } else {
+    sasProcess += "\n\t\t\t<SASprocessnote/>";
+  }
 
   sasProcess += "\n\t\t</SASprocess>";
 }

@@ -49,13 +49,11 @@ set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} )
 ###########################################################################
 
 # Only available on Linux (specifically RedHat), and for a framework-only build
-if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
+if ( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
   set ( MPI_BUILD OFF CACHE BOOL "Enable MPI options" )
   if ( MPI_BUILD )
-  include ( MPISetup )
-        set ( MANTIDLIBS  ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES} )
-        find_package ( OpenGL REQUIRED )
-        find_package ( GSL REQUIRED )
+    include ( MPISetup )
+    set ( MANTIDLIBS  ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES} )
   endif ( MPI_BUILD )
 endif ()
 
@@ -131,7 +129,6 @@ endif ()
 add_subdirectory (MDAlgorithms)
 add_subdirectory (Doxygen)
 add_subdirectory (ScriptRepository)
-add_subdirectory (ISISLiveData)
 
 ###########################################################################
 # Add a custom target to build all of the Framework
@@ -142,7 +139,7 @@ set ( FRAMEWORK_LIBS Kernel HistogramData Geometry API DataObjects
                      PythonDataObjectsModule
                      DataHandling Nexus Algorithms CurveFitting ICat
                      Crystal MDAlgorithms WorkflowAlgorithms
-                     LiveData ISISLiveData RemoteAlgorithms RemoteJobManagers
+                     LiveData RemoteAlgorithms RemoteJobManagers
                      SINQ
 )
 

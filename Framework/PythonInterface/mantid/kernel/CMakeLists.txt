@@ -49,6 +49,7 @@ set ( EXPORT_FILES
   src/Exports/Memory.cpp
   src/Exports/ProgressBase.cpp
   src/Exports/Material.cpp
+  src/Exports/MaterialBuilder.cpp
   src/Exports/Statistics.cpp
   src/Exports/OptionalBool.cpp
   src/Exports/UsageService.cpp

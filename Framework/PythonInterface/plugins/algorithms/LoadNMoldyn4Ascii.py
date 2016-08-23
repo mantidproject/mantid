@@ -1,5 +1,6 @@
 #pylint: disable=no-init
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -104,7 +105,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
 
                 loaded_function_workspaces.append(func_name)
 
-            except ValueError, rerr:
+            except ValueError as rerr:
                 logger.warning('Failed to load function {0}. Error was: {1}'.format(func_name, str(rerr)))
 
         # Process the loaded workspaces

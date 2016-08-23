@@ -195,6 +195,29 @@ public:
                      std::invalid_argument);
   }
 
+  // Test that algorithm throws if input workspace does not contain number of
+  // good frames
+  void testNoGoodfrmPresent() {
+    MatrixWorkspace_sptr inputWs = loadDataFromFile();
+    auto deadTimes = makeDeadTimeTable(32);
+
+    auto &run = inputWs->mutableRun();
+    run.removeLogData("goodfrm");
+    TS_ASSERT(!run.hasProperty("goodfrm"));
+
+    ApplyDeadTimeCorr applyDeadTime;
+    applyDeadTime.initialize();
+    applyDeadTime.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(
+        applyDeadTime.setProperty("InputWorkspace", inputWs));
+    TS_ASSERT_THROWS_NOTHING(
+        applyDeadTime.setProperty("DeadTimeTable", deadTimes));
+    TS_ASSERT_THROWS_NOTHING(
+        applyDeadTime.setProperty("OutputWorkspace", "__NotUsed"));
+    TS_ASSERT_THROWS(applyDeadTime.execute(), std::invalid_argument);
+    TS_ASSERT(!applyDeadTime.isExecuted());
+  }
+
 private:
   /**
    * Generates a dead time table with the given number of spectra

@@ -92,7 +92,17 @@
           </property>
          </widget>
         </item>
-        <item>
+         <item>
+           <widget class="QCheckBox" name="ckLoadLogFiles">
+             <property name="text">
+               <string>Load Log Files</string>
+             </property>
+             <property name="checked">
+               <bool>false</bool>
+             </property>
+           </widget>
+         </item>
+         <item>
          <spacer name="horizontalSpacer_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>

@@ -4,9 +4,10 @@
 #include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
 #include "MantidQtMantidWidgets/InstrumentView/PeakMarker2D.h"
 
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidQtMantidWidgets/InputController.h"
 
 #include <QRgb>
@@ -714,6 +715,76 @@ void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
     m_width_max = udet.width;
   if (udet.height > m_height_max)
     m_height_max = udet.height;
+}
+
+/** Load unwrapped surface state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
+void UnwrappedSurface::loadFromProject(const std::string &lines) {
+  ProjectionSurface::loadFromProject(lines);
+  API::TSVSerialiser tsv(lines);
+
+  if (tsv.selectLine("Zoom")) {
+    double x0, y0, x1, y1;
+    tsv >> x0 >> y0 >> x1 >> y1;
+    RectF bounds(QPointF(x0, y0), QPointF(x1, y1));
+
+    m_zoomStack.push(m_viewRect);
+    m_viewRect = bounds;
+    updateView();
+    emit updateInfoText();
+  }
+
+  if (tsv.selectLine("PeaksWorkspaces")) {
+    size_t workspaceCount = tsv.values("PeaksWorkspaces").size();
+    for (size_t i = 0; i < workspaceCount; ++i) {
+      std::string name;
+      tsv >> name;
+      auto ws = retrievePeaksWorkspace(name);
+      if (ws)
+        setPeaksWorkspace(ws);
+    }
+  }
+}
+
+/**
+ * Get a peaks workspace from the ADS
+ * @param name :: name of the workspace to retrieve
+ * @return a shared pointer to the fond peaks workspace
+ */
+Mantid::API::IPeaksWorkspace_sptr
+UnwrappedSurface::retrievePeaksWorkspace(const std::string &name) const {
+  using namespace Mantid::API;
+  Workspace_sptr ws = nullptr;
+
+  try {
+    ws = AnalysisDataService::Instance().retrieve(name);
+  } catch (std::runtime_error) {
+    // couldn't find the workspace in the ADS for some reason
+    // just fail silently. There's nothing more we can do.
+    return nullptr;
+  }
+
+  return boost::dynamic_pointer_cast<IPeaksWorkspace>(ws);
+}
+
+/** Save the state of the unwrapped surface to a Mantid project file
+ * @return a string representing the state of the surface
+ */
+std::string UnwrappedSurface::saveToProject() const {
+  API::TSVSerialiser tsv;
+  tsv.writeRaw(ProjectionSurface::saveToProject());
+
+  tsv.writeLine("Zoom");
+  tsv << m_viewRect.x0() << m_viewRect.y0();
+  tsv << m_viewRect.x1() << m_viewRect.y1();
+
+  tsv.writeLine("PeaksWorkspaces");
+  for (auto overlay : m_peakShapes) {
+    tsv << overlay->getPeaksWorkspace()->name();
+  }
+
+  return tsv.outputLines();
 }
 
 } // MantidWidgets

@@ -5,10 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/Material.h"
 
 #include "BoundingBox.h"
 #include <map>
+#include <memory>
 
 namespace Mantid {
 //----------------------------------------------------------------------
@@ -81,7 +81,7 @@ public:
   int getName() const { return ObjNum; }      ///< Get Name
 
   void setMaterial(const Kernel::Material &material);
-  const Kernel::Material &material() const;
+  const Kernel::Material material() const;
 
   /// Return whether this object has a valid shape
   bool hasValidShape() const;
@@ -239,7 +239,7 @@ private:
   /// Optional string identifier
   std::string m_id;
   /// material composition
-  Kernel::Material m_material;
+  std::unique_ptr<Kernel::Material> m_material;
 
 protected:
   std::vector<const Surface *>

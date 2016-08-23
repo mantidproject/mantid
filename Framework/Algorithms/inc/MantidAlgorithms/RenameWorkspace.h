@@ -52,6 +52,8 @@ public:
   int version() const override { return (1); }
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Utility\\Workspaces"; }
+  /// Check that input params are valid
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   const std::string workspaceMethodName() const override { return "rename"; }

@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 # pylint: disable=no-init,invalid-name,bare-except
 from mantid.kernel import *
 from mantid.simpleapi import *

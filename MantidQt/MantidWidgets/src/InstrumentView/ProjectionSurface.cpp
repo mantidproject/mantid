@@ -3,6 +3,7 @@
 #include "MantidQtMantidWidgets/InstrumentView/GLColor.h"
 #include "MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h"
 #include "MantidQtMantidWidgets/InstrumentView/OpenGLError.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -716,5 +717,33 @@ QStringList ProjectionSurface::getPeaksWorkspaceNames() const {
   }
   return names;
 }
+
+/** Load projection surface state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
+void ProjectionSurface::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+
+  if (tsv.selectLine("BackgroundColor")) {
+    tsv >> m_backgroundColor;
+  }
+
+  if (tsv.selectSection("shapes")) {
+    std::string shapesLines;
+    tsv >> shapesLines;
+    m_maskShapes.loadFromProject(shapesLines);
+  }
+}
+
+/** Save the state of the projection surface to a Mantid project file
+ * @return a string representing the state of the projection surface
+ */
+std::string ProjectionSurface::saveToProject() const {
+  API::TSVSerialiser tsv;
+  tsv.writeLine("BackgroundColor") << m_backgroundColor;
+  tsv.writeSection("shapes", m_maskShapes.saveToProject());
+  return tsv.outputLines();
+}
+
 } // MantidWidgets
 } // MantidQt

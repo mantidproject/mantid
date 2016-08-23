@@ -193,6 +193,11 @@ public:
   void initMaskHelper() const;
   bool hasMaskWorkspace() const;
   bool hasBinMask() const;
+  /// Load the state of the actor from a Mantid project file.
+  void loadFromProject(const std::string &lines);
+  /// Save the state of the actor to a Mantid project file.
+  std::string saveToProject() const;
+
 signals:
   void colorMapChanged();
 
