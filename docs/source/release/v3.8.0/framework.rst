@@ -66,11 +66,16 @@ Improved
 
 - :ref:`ConvertUnits <algm-ConvertUnits>` will no longer corrupt an in place workspace if the algorithm fails.
 
+- :ref:`ConvertUnits <algm-ConvertUnits>` now has the option to take a workspace with Points as input.
+  A property has been added that will make the algorithm convert the workspace to Bins automatically. The output space will be converted back to Points.
+
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
 - :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
   now check if a Workspace with that name already exists in the ADS and gives
   the option to override it.
+
+- :ref:`FFT <algm-FFT>` deals correctly with histogram input data. Internally, it converts to point data, and the output is always a point data workspace. (It can be converted to histogram data using :ref:`ConvertToHistogram <algm-ConvertToHistogram>` if required).
 
 Deprecated
 ##########

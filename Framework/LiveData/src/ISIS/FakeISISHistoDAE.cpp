@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidLiveData/FakeISISHistoDAE.h"
+#include "MantidLiveData/ISIS/FakeISISHistoDAE.h"
 #include <numeric>
 
 #include <Poco/Net/TCPServer.h>
@@ -12,6 +12,8 @@ namespace Mantid {
 namespace LiveData {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FakeISISHistoDAE)
+
+namespace {
 
 typedef enum {
   ISISDSUnknown = 0,
@@ -306,6 +308,8 @@ public:
     return new TestServerConnection(socket, m_nPeriods, m_nSpectra, m_nBins);
   }
 };
+
+} // end anonymous
 
 using namespace Kernel;
 using namespace API;

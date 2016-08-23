@@ -755,7 +755,7 @@ MantidQt::MantidWidgets::InstrumentWidgetRenderTab::saveToProject() const {
   tab << surface->getShowPeakRelativeIntensityFlag();
 
   const auto colorMap = m_colorMapWidget->saveToProject();
-  tab.writeRaw(colorMap);
+  tab.writeSection("colormap", colorMap);
 
   API::TSVSerialiser tsv;
   tsv.writeSection("rendertab", tab.outputLines());
@@ -828,7 +828,11 @@ void InstrumentWidgetRenderTab::loadFromProject(const std::string &lines) {
   surface->setPeakLabelPrecision(labelPrecision);
   surface->setShowPeakRelativeIntensityFlag(showRelativeIntensity);
 
-  m_colorMapWidget->loadFromProject(lines);
+  if (tab.selectSection("colormap")) {
+    std::string colorMapLines;
+    tab >> colorMapLines;
+    m_colorMapWidget->loadFromProject(colorMapLines);
+  }
 }
 
 } // MantidWidgets
