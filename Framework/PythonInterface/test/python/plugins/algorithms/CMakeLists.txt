@@ -103,6 +103,7 @@ set ( TEST_PY_FILES
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
+  SelectNexusFilesByMetadataTest.py
   VesuvioDiffractionReductionTest.py
   VesuvioPreFitTest.py
   VesuvioResolutionTest.py
