@@ -5,50 +5,29 @@ label = "ReflectometryReductionOne High Level Flowchart"
 subgraph params {
  $param_style
   inputWS       [label="InputWorkspace"]
-  transWS       [label="TransmissionWorkspace"]
-  corrAlg       [label="CorrectionAlgorithm"]
-  thetaIn       [label="ThetaIn"]
-  thetaOut      [label="ThetaOut"]
-  outputWSWL    [label="OutputWorkspaceWavelength"]
-  outputWSMT    [label="OutputWorkspace"]
-  momTransMin   [label="MomentumTransferMinimum"]
-  momTransMax   [label="MomentumTransferMaximum"]
-  momTransStep  [label="MomentumTransferStep"]
-  outputWSFinal [label="OutputWorkspace"]
+  outputWSWL    [label="OutputWorkspace\nin wavelength"]
+  outputWSFinal [label="OutputWorkspace in\nmomentum transfer"]
 }
 
 subgraph decisions {
  $decision_style
   checkXUnit      [label="X axis in &lambda;?"]
   checkTransRun   [label="FirstTransmissionRun\ngiven?"]
-  checkCorrAlg    [label="CorrectionAlgorithm?"]
   checkThetaIn    [label="ThetaIn given?"]
-  checkCorDetPos  [label="Correct Detector Positions?"]
-  checkSrcPos     [label="Is Source in Correct Position?"]
-  checkRebinMin   [label="MomentumTransferMinimum given?"]
-  checkRebinMax   [label="MomentumTransferMaximum given?"]
-  checkRebinStep  [label="MomentumTransferStep given?"]
-  checkScale      [label="ScaleFactor given?"]
 }
 
 subgraph algorithms {
  $algorithm_style
-  divideTrans   [label="Divide\n(InputWorkspace / TransmissionWorkspace)"]
-  calcTheta     [label="SpecularReflectionCalculateTheta"]
-  specRefPosCor [label="SpecularReflectionPositionCorrect"]
-  convertToMT   [label="ConvertUnits\n(Momentum-transfer)"]
-  calcRes       [label="CalculateResolution"]
-  rebin         [label="Rebin"]
-  scale         [label="Scale"]
+  divideTrans   [label="Divide by\ntransmission run"]
+  corrAlg       [label="Apply correction algorithm\nif specified"]
+  calcTheta     [label="Calculate ThetaIn"]
+  corrDetPos    [label="Correct detector\npositions if necessary"]
+  convertMom    [label="Convert to momentum\ntransfer, rebin and scale"]
 }
 
 subgraph processes {
  $process_style
   convertUnits  [label="Convert to &lambda; and\ndivide Detectors\nby Monitors"]
-  corrAlgProc   [label="Apply polynomial or\nExponential correction"]
-  corrSrcPos    [label="Rotate source to\ncorrect position"]
-  compSrcRot    [label="Compensate for\nsource rotation, if\npreviously rotated"]
-  calcMomLambda [label="4&pi;sin(&theta;)/&lambda;"]
 }
 
 subgraph values {
@@ -60,52 +39,16 @@ checkXUnit      -> checkTransRun  [label="Yes"]
 checkXUnit      -> convertUnits   [label="No"]
 convertUnits    -> checkTransRun
 
-transWS         -> checkTransRun
 checkTransRun   -> divideTrans    [label="Yes"]
-checkTransRun   -> checkCorrAlg   [label="No"]
-corrAlg         -> checkCorrAlg
+checkTransRun   -> corrAlg        [label="No"]
 divideTrans     -> checkThetaIn
-checkCorrAlg    -> corrAlgProc    [label="Yes"]
-checkCorrAlg    -> checkThetaIn   [label="No"]
-corrAlgProc     -> checkThetaIn
-thetaIn         -> checkThetaIn
+corrAlg         -> checkThetaIn
 
-checkThetaIn    -> checkCorDetPos [label="Yes"]
+checkThetaIn    -> corrDetPos     [label="Yes"]
 checkThetaIn    -> calcTheta      [label="No"]
-calcTheta       -> thetaOut
-calcTheta       -> checkCorDetPos
+calcTheta       -> corrDetPos
+corrDetPos      -> outputWSWL
 
-checkCorDetPos  -> specRefPosCor  [label="Yes"]
-checkCorDetPos  -> outputWSWL     [label="No"]
-specRefPosCor   -> outputWSWL
-
-outputWSWL      -> checkSrcPos
-checkSrcPos     -> convertToMT    [label="Yes"]
-checkSrcPos     -> corrSrcPos     [label="No"]
-corrSrcPos      -> convertToMT
-convertToMT     -> compSrcRot
-compSrcRot      -> outputWSMT
-
-outputWSMT      -> checkRebinMin
-outputWSMT      -> checkRebinMax
-outputWSMT      -> checkRebinStep
-checkRebinMin   -> momTransMin    [label="Yes"]
-checkRebinMin   -> calcMomLambda  [label="No"]
-checkRebinMax   -> momTransMax    [label="Yes"]
-checkRebinMax   -> calcMomLambda  [label="No"]
-outputWSWL      -> calcMomLambda
-calcMomLambda   -> momTransMin
-calcMomLambda   -> momTransMax
-checkRebinStep  -> momTransStep   [label="Yes"]
-checkRebinStep  -> calcRes        [label="No"]
-calcRes         -> momTransStep
-momTransMin     -> rebin
-momTransMax     -> rebin
-momTransStep    -> rebin
-
-rebin           -> checkScale
-checkScale      -> scale          [label="Yes"]
-checkScale      -> outputWSFinal  [label="No"]
-scale           -> outputWSFinal
-
+outputWSWL      -> convertMom
+convertMom      -> outputWSFinal
 }
