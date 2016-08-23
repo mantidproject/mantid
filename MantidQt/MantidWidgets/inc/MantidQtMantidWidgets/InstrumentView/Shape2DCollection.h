@@ -85,6 +85,10 @@ public:
 
   /// Change border color of all shapes.
   void changeBorderColor(const QColor &color);
+  /// Load settings for the shape 2D collection from a project file
+  virtual void loadFromProject(const std::string &lines);
+  /// Save settings for the shape 2D collection to a project file
+  virtual std::string saveToProject() const override;
 
 signals:
 

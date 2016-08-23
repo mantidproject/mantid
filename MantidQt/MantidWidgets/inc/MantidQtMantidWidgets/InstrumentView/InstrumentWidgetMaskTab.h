@@ -4,7 +4,6 @@
 #include <MantidQtMantidWidgets/WidgetDllOption.h>
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTab.h"
 #include "MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h"
-
 #include "MantidGeometry/Instrument.h"
 
 #include <QFrame>
@@ -71,6 +70,10 @@ public:
   void initSurface() override;
   void setMode(Mode mode);
   void selectTool(Activity tool);
+  /// Load settings for the mask tab from a project file
+  virtual void loadFromProject(const std::string &lines) override;
+  /// Save settings for the mask tab to a project file
+  virtual std::string saveToProject() const override;
 
 signals:
   void executeAlgorithm(const QString &, const QString &);
@@ -114,7 +117,7 @@ protected:
   void clearProperties();
   void setProperties();
   boost::shared_ptr<Mantid::API::MatrixWorkspace>
-  createMaskWorkspace(bool invertMask, bool temp = false);
+  createMaskWorkspace(bool invertMask, bool temp = false) const;
   void saveMaskingToWorkspace(bool invertMask = false);
   void saveMaskingToFile(bool invertMask = false);
   void saveMaskingToCalFile(bool invertMask = false);
@@ -130,6 +133,16 @@ protected:
   /// Add a double property to the shape property browser
   QtProperty *addDoubleProperty(const QString &name) const;
 
+private:
+  /// Save masks applied to the view but not to the workspace
+  bool saveMaskViewToProject(const std::string &name) const;
+  /// Load masks applied to the view but not to the workspace
+  void loadMaskViewFromProject(const std::string &name);
+  /// Run the LoadMask algorithm to get a MaskWorkspace
+  boost::shared_ptr<Mantid::API::MatrixWorkspace>
+  loadMask(const std::string &fileName);
+
+protected:
   /// Is it used?
   Activity m_activity;
   /// True if there is a mask not applied to the data workspace

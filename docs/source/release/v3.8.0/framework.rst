@@ -22,7 +22,7 @@ Concepts
 
 - ``MatrixWorkspace`` : When masking bins or detectors with non-zero weights,
   undefined and infinite values and errors will be zeroed.
-- ``Lattice`` : Allow setting a UB matrix with negative determinant (improper rotation)  
+- ``Lattice`` : Allow setting a UB matrix with negative determinant (improper rotation)
 
 Algorithms
 ----------
@@ -40,6 +40,9 @@ New
   that the user has chosen and creates a background workspace out of them. It interpolates the
   points so the resulting background can be subtracted from the original data.
 
+- :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>` an algorithm which saves a TableWorkspace containing
+  diffraction fitting results as an ASCII file
+
 
 Improved
 ########
@@ -56,12 +59,15 @@ Improved
   plotly html files.
 
 - :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>`
-  had a bug where the table columns were in a reversed order in the dialogue's combo boxes. 
+  had a bug where the table columns were in a reversed order in the dialogue's combo boxes.
   This is now fixed and the order is correct.
 
 - :ref:`ConvertUnits <algm-ConvertUnits>` will no longer corrupt an in place workspace if the algorithm fails.
 
-- :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli 
+- :ref:`ConvertUnits <algm-ConvertUnits>` now has the option to take a workspace with Points as input.
+  A property has been added that will make the algorithm convert the workspace to Bins automatically. The output space will be converted back to Points.
+
+- :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
 - :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
   now check if a Workspace with that name already exists in the ADS and gives
@@ -69,15 +75,15 @@ Improved
 
 - :ref: `LoadILL <algm-LoadILL>` was renamed to `LoadILLINX <algm-LoadILLINX>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
 
+- :ref:`FFT <algm-FFT>` deals correctly with histogram input data. Internally, it converts to point data, and the output is always a point data workspace. (It can be converted to histogram data using :ref:`ConvertToHistogram <algm-ConvertToHistogram>` if required).
 
 Deprecated
 ##########
 
-- :ref: `LoadILL <algm-LoadILL>` is now deprecated, `LoadILLINX <algm-LoadILLINX>` should be used instead.
-
-
 MD Algorithms (VATES CLI)
 #########################
+
+- :ref:`MergeMD <algm-MergeMD>` now preserves the display normalization from the first workspace in the list
 
 Performance
 -----------
@@ -87,8 +93,8 @@ Performance
   If you experience unusual slowdowns, please contact the developer team.
 
 - :ref:`StripPeaks <algm-StripPeaks>` has a slight performance improvement from these changes.
-  
-  
+
+
 CurveFitting
 ------------
 
@@ -105,6 +111,7 @@ Python
   and :py:obj:`mantid.kernel.Material` has been modified to expose the
   individual atoms.
 - :py:obj:`mantid.geometry.OrientedLattice` set U with determinant -1 exposed to python
+- The setDisplayNormalization and setDisplayNormalizationHisto methods for MDEventWorkspaces are now exposed to Python
 
 Python Algorithms
 #################
