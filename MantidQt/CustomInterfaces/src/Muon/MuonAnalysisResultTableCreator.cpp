@@ -126,7 +126,7 @@ ITableWorkspace_sptr MuonAnalysisResultTableCreator::createTable() const {
   // Remove error columns if all errors are zero
   // (because these correspond to fixed parameters)
   removeFixedParameterErrors(table);
-      
+
   return table;
 }
 
@@ -546,27 +546,29 @@ void MuonAnalysisResultTableCreator::writeDataForMultipleFits(
     }
 
     // Parse column name - could be param name or f[n].param
-    const auto parseColumnName = [&paramsToDisplay](
-        const std::string &columnName) -> std::pair<int, std::string> {
-      if (paramsToDisplay.contains(QString::fromStdString(columnName))) {
-        return {0, columnName};
-      } else {
-        // column name is f[n].param
-        size_t pos = columnName.find_first_of('.');
-        if (pos != std::string::npos) {
-          try {
-            const auto &paramName = columnName.substr(pos + 1);
-            const auto wsIndex = std::stoi(columnName.substr(1, pos));
-            return {wsIndex, paramName};
-          } catch (const std::exception &ex) {
-            throw std::runtime_error("Failed to parse column name " +
-                                     columnName + ": " + ex.what());
+    const auto parseColumnName =
+        [&paramsToDisplay](
+            const std::string &columnName) -> std::pair<int, std::string> {
+          if (paramsToDisplay.contains(QString::fromStdString(columnName))) {
+            return {0, columnName};
+          } else {
+            // column name is f[n].param
+            size_t pos = columnName.find_first_of('.');
+            if (pos != std::string::npos) {
+              try {
+                const auto &paramName = columnName.substr(pos + 1);
+                const auto wsIndex = std::stoi(columnName.substr(1, pos));
+                return {wsIndex, paramName};
+              } catch (const std::exception &ex) {
+                throw std::runtime_error("Failed to parse column name " +
+                                         columnName + ": " + ex.what());
+              }
+            } else {
+              throw std::runtime_error("Failed to parse column name " +
+                                       columnName);
+            }
           }
-        } else {
-          throw std::runtime_error("Failed to parse column name " + columnName);
-        }
-      }
-    };
+        };
 
     // Add param values
     const auto &params = paramsByLabel[labelName];

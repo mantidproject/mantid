@@ -694,7 +694,8 @@ void MuonAnalysisResultTableTab::onCreateTableClicked() {
 
 /**
 * Creates the table using the information selected by the user in the tables
-* @param multipleFits :: [input] Whether table is for multiple fits or one single fit
+* @param multipleFits :: [input] Whether table is for multiple fits or one
+* single fit
 */
 void MuonAnalysisResultTableTab::createTable(bool multipleFits) {
   if (m_logValues.size() == 0) {
