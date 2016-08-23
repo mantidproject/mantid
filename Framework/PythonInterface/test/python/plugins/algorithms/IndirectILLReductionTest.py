@@ -81,7 +81,6 @@ class IndirectILLReductionTest(unittest.TestCase):
 
     def test_old_run(self):
         self._args['Run'] = self._old_run
-        self._args['MirrorSense'] = False
         self._args['UnmirrorOption'] = 0
 
         alg_test = run_algorithm('IndirectILLReduction', **self._args)

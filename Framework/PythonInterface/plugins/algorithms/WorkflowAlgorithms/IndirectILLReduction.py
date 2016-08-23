@@ -78,10 +78,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              defaultValue=False,
                              doc='Whether to sum all the input runs.')
 
-        self.declareProperty(name='MirrorSense',
-                             defaultValue=True,
-                             doc='Whether the input data has two wings.')
-
         self.declareProperty(name='UnmirrorOption',defaultValue=6,
                              validator=IntBoundedValidator(lower=0,upper=7),
                              doc='Unmirroring options: \n'
@@ -152,7 +148,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._analyser = self.getPropertyValue('Analyser')
         self._map_file = self.getPropertyValue('MapFile')
         self._reflection = self.getPropertyValue('Reflection')
-        self._mirror_sense = self.getProperty('MirrorSense').value
         self._debug_mode = self.getProperty('DebugMode').value
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
@@ -177,13 +172,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # this is run before setUp, so need to get properties also here!
         issues = dict()
         # Unmirror options 5 and 7 require a Vanadium run as input workspace
-        if self.getProperty('MirrorSense').value and \
-            (self.getProperty('UnmirrorOption').value == 5 or self.getProperty('UnmirrorOption').value == 7) \
+        if (self.getProperty('UnmirrorOption').value == 5 or self.getProperty('UnmirrorOption').value == 7) \
             and self.getPropertyValue('VanadiumRun') == "":
             issues['VanadiumRun'] = 'Given unmirror option requires vanadium run to be set'
-
-        if self.getProperty('MirrorSense').value is False and self.getProperty('UnmirrorOption').value > 0:
-            issues['MirrorSense'] = 'When MirrorSense is OFF, UnmirrorOption must be 0 (i.e. no unmirroring)'
 
         return issues
 
@@ -278,12 +269,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # call IndirectILLReduction for vanadium run with unmirror 1 and 2 to get left and right
 
         left_van = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
-                                        Reflection=self._reflection, SumRuns=True, MirrorSense=self._mirror_sense,
-                                        UnmirrorOption=1)
+                                        Reflection=self._reflection, SumRuns=True, UnmirrorOption=1)
 
         right_van = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
-                                         Reflection=self._reflection, SumRuns=True, MirrorSense=self._mirror_sense,
-                                         UnmirrorOption=2)
+                                         Reflection=self._reflection, SumRuns=True, UnmirrorOption=2)
 
         # note, that run number will be prepended, so need to rename
         RenameWorkspace(left_van.getItem(0).getName(),'left_van')
@@ -452,8 +441,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         if self._unmirror_option == 0:
             self.log().information('Unmirror 0: X-axis will not be converted to energy transfer if mirror sense is ON')
-            if not self._mirror_sense:
-                self._convert_to_energy(red)
+            self._convert_to_energy(red)
 
         elif self._unmirror_option == 1:
             self.log().information('Unmirror 1: return the left wing')

@@ -13,6 +13,8 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
     _peak_range = None
     _intensity_scale = None
     _mirror_sense = None
+    _unmirror_option = None
+
 
 
     def category(self):
@@ -28,9 +30,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
                                           action=FileAction.Load,
                                           extensions=['nxs']),
                              doc='List of input file (s)')
-
-        self.declareProperty(name='MirrorSense', defaultValue=True,
-                             doc='Whether or not raw data have two wings')
 
         self.declareProperty(FileProperty(name='MapFile', defaultValue='',
                                           action=FileAction.OptionalLoad,
@@ -52,19 +51,11 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
     def PyExec(self):
         self._setup()
 
-        if self._mirror_sense is True:
-            # Run requires to have two wings
-            unmirror_option = 3
-        else:
-            # Run can have one wing (or two wings -> set peak range accordingly)
-            unmirror_option = 0
-
         # Do an energy transfer reduction
         temp = IndirectILLReduction(Run=self._input_file,
                                     MapFile=self._map_file,
                                     SumRuns=True,DebugMode=False,
-                                    MirrorSense=self._mirror_sense,
-                                    UnmirrorOption=unmirror_option)
+                                    UnmirrorOption=self._unmirror_option)
 
         # Integrate within peak range
         number_histograms = temp.getItem(0).getNumberHistograms()

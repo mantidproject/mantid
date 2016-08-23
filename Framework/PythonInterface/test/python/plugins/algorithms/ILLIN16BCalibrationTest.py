@@ -20,7 +20,7 @@ class ILLIN16BCalibrationTest(unittest.TestCase):
 
     def test_happy_case_normal(self):
         calib_ws = ILLIN16BCalibration(Run='ILLIN16B_034745.nxs',
-                                       MirrorSense=False,
+                                       UnmirrorOption=0,
                                        PeakRange=[-0.001, 0.002])
 
         self.assertEqual(calib_ws.getNumberHistograms(), 18)
@@ -29,7 +29,7 @@ class ILLIN16BCalibrationTest(unittest.TestCase):
 
     def test_happy_case_mirror_mode(self):
         calib_ws = ILLIN16BCalibration(Run='ILLIN16B_034745.nxs',
-                                       MirrorSense=True,
+                                       UnmirrorOption=3,
                                        PeakRange=[-0.001, 0.002])
 
         self.assertEqual(calib_ws.getNumberHistograms(), 18)
