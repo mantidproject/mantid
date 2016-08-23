@@ -692,14 +692,12 @@ void SliceViewer::switchQWTRaster(
     Mantid::API::IMDWorkspace_sptr ws, size_t dimX, size_t dimY,
     bool useNonOrthogonal)
 {
-
-  
   if (useNonOrthogonal) {
 	  m_data = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
   } else {
 	  m_data = Kernel::make_unique<API::QwtRasterDataMD>();
   }
-
+  
   m_coordinateTransform = createCoordinateTransform(ws, m_dimX, m_dimY);
   m_data->setWorkspace(ws);
   this->setTransparentZeros(false);
@@ -716,18 +714,19 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 
   // If the workspace qualifies to be treated as a non-orthogonal workspace,
   // then we swap to a QwtRasterDataMDNonOrthogonal
-
-  if ((API::requiresSkewMatrix(ws)) &&
-      (API::isHKLDimensions(m_ws, m_dimX, m_dimY))) { // can probably also check
-                                                      // axis here just in case
-                                                      // it opens with non orth
+  bool requiresSkewMatrix = API::requiresSkewMatrix(ws);
+  bool isHKLDimensions = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
+  if ((requiresSkewMatrix) &&
+      (isHKLDimensions)) {
+                                                      
 	m_data = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
-   
   }
+  emit setNonOrthogonalbtn(requiresSkewMatrix, isHKLDimensions);
   m_coordinateTransform = createCoordinateTransform(ws, m_dimX, m_dimY);
   // disconnect and reconnect here
   QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
                    SLOT(checkForHKLDimension(size_t, size_t)));
+
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
 
@@ -1693,6 +1692,7 @@ void SliceViewer::checkForHKLDimension(
 		if (isHKL ^ isNonOrthogonalQWTRasterData) {
 			const auto useNonOrthogonal = isHKL;
 			switchQWTRaster(m_ws, dimX, dimY, useNonOrthogonal);
+			//Tell Nonorth whether to toggle or not here?
 		}
 	}
 	
@@ -2367,6 +2367,12 @@ void SliceViewer::autoRebinIfRequired() {
   if (isAutoRebinSet()) {
     rebinParamsChanged();
   }
+}
+/** NON ORTHOGONAL STUFF **/
+
+void SliceViewer::setNonOrthogonalbtn(bool nonOrthogonalWorkspace, bool displayRequiresSkew)
+{
+	ui.btnNonOrthogonalToggle->setDisabled(!nonOrthogonalWorkspace);
 }
 
 /**

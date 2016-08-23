@@ -144,7 +144,7 @@ void doProvideSkewMatrix(Mantid::Kernel::DblMatrix &skewMatrix, T workspace) {
   if (4 == workspace->getNumDims()) {
     stripMatrix(skewMatrix);
   }
-  skewMatrix.Invert();
+  skewMatrix.Invert(); //Current fix so skewed image displays in correct orientation
   
 }
 

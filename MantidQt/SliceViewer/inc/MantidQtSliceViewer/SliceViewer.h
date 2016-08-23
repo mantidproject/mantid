@@ -199,6 +199,8 @@ public slots:
   void saveImage(const QString &filename = QString());
   void copyImageToClipboard();
   void onPeaksViewerOverlayOptions();
+  //Non Orthogonal
+  void setNonOrthogonalbtn(bool nonOrthogonalWorkspace, bool displayRequiresSkew);
 
   // Synced checkboxes
   void LineMode_toggled(bool);
