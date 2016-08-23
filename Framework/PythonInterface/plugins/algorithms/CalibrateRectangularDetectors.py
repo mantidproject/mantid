@@ -279,32 +279,16 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     def _cccalibrate(self, wksp):
         if wksp is None:
             return None
-        LRef = self.getProperty("UnwrapRef").value
-        DIFCref = self.getProperty("LowResRef").value
-        if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
-            if LRef > 0:
-                wksp = UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp.name(), LRef=LRef)
-            if DIFCref > 0:
-                wksp = RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                       ReferenceDIFC=DIFCref)
-        if not self.getProperty("CompressOnRead").value:
-            wksp = CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                  Tolerance=COMPRESS_TOL_TOF) # 100ns
 
-        wksp = ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp.name(), Target="dSpacing")
-        SortEvents(InputWorkspace=wksp, SortBy="X Value")
-        # Sum pixelbin X pixelbin blocks of pixels
-        if self._xpixelbin*self._ypixelbin>1:
-            wksp = SumNeighbours(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                 SumX=self._xpixelbin, SumY=self._ypixelbin)
         # Bin events in d-Spacing
-        wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                     Params=str(self._peakmin)+","+str(abs(self._binning[1]))+","+str(self._peakmax))
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,
+              Params=str(self._peakmin)+","+str(abs(self._binning[1]))+","+str(self._peakmax))
+
         #Find good peak for reference
         ymax = 0
-        for s in range(0,wksp.getNumberHistograms()):
-            y_s = wksp.readY(s)
-            midBin = int(wksp.blocksize()/2)
+        for s in range(0,mtd[wksp].getNumberHistograms()):
+            y_s = mtd[wksp].readY(s)
+            midBin = int(mtd[wksp].blocksize()/2)
             if y_s[midBin] > ymax:
                 refpixel = s
                 ymax = y_s[midBin]
@@ -312,79 +296,79 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
         # Cross correlate spectra using interval around peak at peakpos (d-Spacing)
         if self._lastpixel == 0:
-            self._lastpixel = wksp.getNumberHistograms()-1
+            self._lastpixel = mtd[wksp].getNumberHistograms()-1
         else:
-            self._lastpixel = int(wksp.getNumberHistograms()*self._lastpixel/self._lastpixel3) - 1
+            self._lastpixel = int(mtd[wksp].getNumberHistograms()*self._lastpixel/self._lastpixel3) - 1
         self.log().information("Last pixel=%s" % self._lastpixel)
-        CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc",
+        CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=wksp+"cc",
                        ReferenceSpectra=refpixel, WorkspaceIndexMin=0,
                        WorkspaceIndexMax=self._lastpixel,
                        XMin=self._peakmin, XMax=self._peakmax)
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
-        GetDetectorOffsets(InputWorkspace=str(wksp)+"cc", OutputWorkspace=str(wksp)+"offset",
+        GetDetectorOffsets(InputWorkspace=wksp+"cc", OutputWorkspace=wksp+"offset",
                            Step=abs(self._binning[1]), DReference=self._peakpos1,
                            XMin=-self._ccnumber, XMax=self._ccnumber,
-                           MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask")
-        if AnalysisDataService.doesExist(str(wksp)+"cc"):
-            AnalysisDataService.remove(str(wksp)+"cc")
+                           MaxOffset=self._maxoffset, MaskWorkspace=wksp+"mask")
+        if AnalysisDataService.doesExist(wksp+"cc"):
+            AnalysisDataService.remove(wksp+"cc")
         if self._peakpos2 > 0.0:
-            wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,
                          Params=str(self._peakmin2)+","+str(abs(self._binning[1]))+","+str(self._peakmax2))
             #Find good peak for reference
             ymax = 0
-            for s in range(0,wksp.getNumberHistograms()):
-                y_s = wksp.readY(s)
-                midBin = int(wksp.blocksize()/2)
+            for s in range(0,mtd[wksp].getNumberHistograms()):
+                y_s = mtd[wksp].readY(s)
+                midBin = int(mtd[wksp].blocksize()/2)
                 if y_s[midBin] > ymax:
                     refpixel = s
                     ymax = y_s[midBin]
             msg = "Reference spectra = %s, lastpixel_3 = %s" % (refpixel, self._lastpixel3)
             self.log().information(msg)
-            self._lastpixel2 = int(wksp.getNumberHistograms()*self._lastpixel2/self._lastpixel3) - 1
-            CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc2",
+            self._lastpixel2 = int(mtd[wksp].getNumberHistograms()*self._lastpixel2/self._lastpixel3) - 1
+            CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=wksp+"cc2",
                            ReferenceSpectra=refpixel, WorkspaceIndexMin=self._lastpixel+1,
                            WorkspaceIndexMax=self._lastpixel2,
                            XMin=self._peakmin2, XMax=self._peakmax2)
             # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
-            GetDetectorOffsets(InputWorkspace=str(wksp)+"cc2", OutputWorkspace=str(wksp)+"offset2",
+            GetDetectorOffsets(InputWorkspace=wksp+"cc2", OutputWorkspace=wksp+"offset2",
                                Step=abs(self._binning[1]), DReference=self._peakpos2,
                                XMin=-self._ccnumber, XMax=self._ccnumber,
-                               MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask2")
-            Plus(LHSWorkspace=str(wksp)+"offset", RHSWorkspace=str(wksp)+"offset2",
-                 OutputWorkspace=str(wksp)+"offset")
-            Plus(LHSWorkspace=str(wksp)+"mask", RHSWorkspace=str(wksp)+"mask2",
-                 OutputWorkspace=str(wksp)+"mask")
-            for ws in [str(wksp)+"cc2", str(wksp)+"offset2", str(wksp)+"mask2"]:
+                               MaxOffset=self._maxoffset, MaskWorkspace=wksp+"mask2")
+            Plus(LHSWorkspace=wksp+"offset", RHSWorkspace=wksp+"offset2",
+                 OutputWorkspace=wksp+"offset")
+            Plus(LHSWorkspace=wksp+"mask", RHSWorkspace=wksp+"mask2",
+                 OutputWorkspace=wksp+"mask")
+            for ws in [wksp+"cc2", wksp+"offset2", wksp+"mask2"]:
                 if AnalysisDataService.doesExist(ws):
                     AnalysisDataService.remove(ws)
 
         if self._peakpos3 > 0.0:
-            wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,
                          Params=str(self._peakmin3)+","+str(abs(self._binning[1]))+","+str(self._peakmax3))
             #Find good peak for reference
             ymax = 0
-            for s in range(0,wksp.getNumberHistograms()):
-                y_s = wksp.readY(s)
-                midBin = wksp.blocksize()/2
+            for s in range(0,mtd[wksp].getNumberHistograms()):
+                y_s = mtd[wksp].readY(s)
+                midBin = mtd[wksp].blocksize()/2
                 if y_s[midBin] > ymax:
                     refpixel = s
                     ymax = y_s[midBin]
             self.log().information("Reference spectra=%s" % refpixel)
-            CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc3",
+            CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=wksp+"cc3",
                            ReferenceSpectra=refpixel,
                            WorkspaceIndexMin=self._lastpixel2+1,
-                           WorkspaceIndexMax=wksp.getNumberHistograms()-1,
+                           WorkspaceIndexMax=mtd[wksp].getNumberHistograms()-1,
                            XMin=self._peakmin3, XMax=self._peakmax3)
             # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
-            GetDetectorOffsets(InputWorkspace=str(wksp)+"cc3", OutputWorkspace=str(wksp)+"offset3",
+            GetDetectorOffsets(InputWorkspace=wksp+"cc3", OutputWorkspace=wksp+"offset3",
                                Step=abs(self._binning[1]), DReference=self._peakpos3,
                                XMin=-self._ccnumber, XMax=self._ccnumber,
-                               MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask3")
-            Plus(LHSWorkspace=str(wksp)+"offset", RHSWorkspace=str(wksp)+"offset3",
+                               MaxOffset=self._maxoffset, MaskWorkspace=wksp+"mask3")
+            Plus(LHSWorkspace=wksp+"offset", RHSWorkspace=wksp+"offset3",
                  OutputWorkspace=str(wksp)+"offset")
-            Plus(LHSWorkspace=str(wksp)+"mask", RHSWorkspace=str(wksp)+"mask3",
-                 OutputWorkspace=str(wksp)+"mask")
-            for ws in [str(wksp)+"cc3", str(wksp)+"offset3", str(wksp)+"mask3"]:
+            Plus(LHSWorkspace=wksp+"mask", RHSWorkspace=wksp+"mask3",
+                 OutputWorkspace=wksp+"mask")
+            for ws in [wksp+"cc3", wksp+"offset3", wksp+"mask3"]:
                 if AnalysisDataService.doesExist(ws):
                     AnalysisDataService.remove(ws)
 
@@ -394,33 +378,15 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     def _multicalibrate(self, wksp):
         if wksp is None:
             return None
-        LRef = self.getProperty("UnwrapRef").value
-        DIFCref = self.getProperty("LowResRef").value
-        if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
-            if LRef > 0:
-                wksp = UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp.name(), LRef=LRef)
-            if DIFCref > 0:
-                wksp = RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                       ReferenceDIFC=DIFCref)
-        if not self.getProperty("CompressOnRead").value and not "histo" in self.getProperty("Extension").value:
-            wksp = CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                  Tolerance=COMPRESS_TOL_TOF) # 100ns
 
-        wksp = ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp.name(), Target="dSpacing")
-        if not "histo" in self.getProperty("Extension").value:
-            SortEvents(InputWorkspace=wksp, SortBy="X Value")
-        # Sum pixelbin X pixelbin blocks of pixels
-        if self._xpixelbin*self._ypixelbin>1:
-            wksp = SumNeighbours(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                 SumX=self._xpixelbin, SumY=self._ypixelbin)
         # Bin events in d-Spacing
         if not "histo" in self.getProperty("Extension").value:
-            wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                         Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,
+                  Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
 
         if len(self._smoothGroups) > 0:
-            wksp = SmoothData(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                              NPoints=self._smoothGroups, GroupingWorkspace=str(wksp)+"group")
+            SmoothData(InputWorkspace=wksp, OutputWorkspace=wksp,
+                       NPoints=self._smoothGroups, GroupingWorkspace=wksp+"group")
 
         # Get the fit window input workspace
         fitwinws = self.getProperty("FitwindowTableWorkspace").value
@@ -443,14 +409,14 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             resupf = 0.0
 
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
-        GetDetOffsetsMultiPeaks(InputWorkspace=str(wksp), OutputWorkspace=str(wksp)+"offset",
+        GetDetOffsetsMultiPeaks(InputWorkspace=wksp, OutputWorkspace=wksp+"offset",
                                 DReference=self._peakpos,
                                 FitWindowMaxWidth=self.getProperty("PeakWindowMax").value,
                                 MinimumPeakHeight=self.getProperty("MinimumPeakHeight").value,
                                 MinimumPeakHeightObs=self.getProperty("MinimumPeakHeightObs").value,
                                 BackgroundType=self.getProperty("BackgroundType").value,
-                                MaxOffset=self._maxoffset, NumberPeaksWorkspace=str(wksp)+"peaks",
-                                MaskWorkspace=str(wksp)+"mask",
+                                MaxOffset=self._maxoffset, NumberPeaksWorkspace=wksp+"peaks",
+                                MaskWorkspace=wksp+"mask",
                                 FitwindowTableWorkspace = fitwinws,
                                 InputResolutionWorkspace=resws,
                                 MinimumResolutionFactor = reslowf,
@@ -458,11 +424,11 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
         #Fixed SmoothNeighbours for non-rectangular and rectangular
         if self._smoothoffsets and self._xpixelbin*self._ypixelbin>1: # Smooth data if it was summed
-            SmoothNeighbours(InputWorkspace=str(wksp)+"offset", OutputWorkspace=str(wksp)+"offset",
+            SmoothNeighbours(InputWorkspace=wksp+"offset", OutputWorkspace=wksp+"offset",
                              WeightedSum="Flat",
                              AdjX=self._xpixelbin, AdjY=self._ypixelbin)
-        wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                     Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,
+              Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
 
         return str(wksp)
 
@@ -476,8 +442,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if self._diffractionfocus:
             wksp = DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
                                         GroupingWorkspace=str(wksp)+"group")
-        if not "histo" in self.getProperty("Extension").value:
-            SortEvents(InputWorkspace=wksp, SortBy="X Value")
+
         wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(), Params=self._binning)
         return wksp
 
@@ -548,14 +513,35 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         for (samNum, backNum) in zip(samRuns, backRuns):
             # first round of processing the sample
             samRun = self._loadData(samNum, SUFFIX, filterWall)
+            samRun = str(samRun)
             if backNum > 0:
                 backRun = self._loadData(backNum, SUFFIX, filterWall)
-                samRun -= backRun
+                Minus(LHSWorkspace=samRun, RHSWorkspace=backRun,
+                      OutputWorkspace=samRun)
                 DeleteWorkspace(backRun)
-                samRun = CompressEvents(samRun, OutputWorkspace=samRun.name(),
+                CompressEvents(samRun, OutputWorkspace=samRun,
                                         Tolerance=COMPRESS_TOL_TOF) # 100ns
 
-            self._createGrouping(str(samRun))
+            self._createGrouping(samRun)
+
+            LRef = self.getProperty("UnwrapRef").value
+            DIFCref = self.getProperty("LowResRef").value
+            if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
+                if LRef > 0:
+                    UnwrapSNS(InputWorkspace=samRun, OutputWorkspace=samRun, LRef=LRef)
+                if DIFCref > 0:
+                    RemoveLowResTOF(InputWorkspace=samRun, OutputWorkspace=samRun,
+                                    ReferenceDIFC=DIFCref)
+            if not self.getProperty("CompressOnRead").value:
+                CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
+                                      Tolerance=COMPRESS_TOL_TOF) # 100ns
+
+            ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun, Target="dSpacing")
+
+            # Sum pixelbin X pixelbin blocks of pixels
+            if self._xpixelbin*self._ypixelbin>1:
+                SumNeighbours(InputWorkspace=samRun, OutputWorkspace=samRun,
+                              SumX=self._xpixelbin, SumY=self._ypixelbin)
 
             if self.getProperty("CrossCorrelation").value:
                 samRun = self._cccalibrate(samRun)
