@@ -696,7 +696,7 @@ void SliceViewer::switchQWTRaster(
   } else {
 	  m_data = Kernel::make_unique<API::QwtRasterDataMD>();
   }
-  setNonOrthogonalbtn();
+
   m_coordinateTransform = createCoordinateTransform(m_ws, m_dimX, m_dimY);
   m_data->setWorkspace(m_ws);
   this->setTransparentZeros(false);
@@ -718,7 +718,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
 	  SLOT(switchQWTRaster(bool)));
   QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
-	  SLOT(disableOrthogonalAnalysisTools(bool)));
+	  SLOT(setNonOrthogonalbtn()));
   
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
@@ -1683,7 +1683,6 @@ void SliceViewer::checkForHKLDimension() {
 		if (isHKL ^ isNonOrthogonalQWTRasterData) {
 			const auto useNonOrthogonal = isHKL;
 			switchQWTRaster(useNonOrthogonal);
-			//Tell Nonorth whether to toggle or not here?
 		}
 		emit setNonOrthogonalbtn();
 	}
