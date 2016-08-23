@@ -3,12 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "../../DataObjects/test/EventWorkspaceTest.h"
+#include "../../DataObjects/test/EventWorkspaceTest.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include <MantidDataObjects/EventWorkspace.h>
-#include "../../DataObjects/test/EventWorkspaceTest.h"
 #include <MantidAlgorithms/GeneralisedSecondDifference.h>
+#include <MantidDataObjects/EventWorkspace.h>
+#include <MantidDataObjects/EventWorkspace.h>
 
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
@@ -78,13 +80,12 @@ public:
     delete suite;
   }
 
-  void setUp() {
-    inputMatrix = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 1000);
-    inputEvent =
-        WorkspaceCreationHelper::CreateEventWorkspace(10000, 1000, 5000);
+  void setUp() override {
+    inputMatrix = WorkspaceCreationHelper::Create2DWorkspaceBinned(100, 100);
+    inputEvent = WorkspaceCreationHelper::CreateEventWorkspace(100, 100, 5);
   }
 
-  void tearDown() {
+  void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().remove("output");
     Mantid::API::AnalysisDataService::Instance().remove("output2");
   }
