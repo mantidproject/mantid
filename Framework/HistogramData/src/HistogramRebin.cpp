@@ -34,16 +34,14 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
   auto size_yold = yold.size();
   auto size_ynew = ynew.size();
   size_t iold = 0, inew = 0;
-  double owidth, nwidth;
-  double factor;
 
   while ((inew < size_ynew) && (iold < size_yold)) {
     auto xo_low = xold[iold];
     auto xo_high = xold[iold + 1];
     auto xn_low = xnew[inew];
     auto xn_high = xnew[inew + 1];
-    owidth = xo_high - xo_low;
-    nwidth = xn_high - xn_low;
+    auto owidth = xo_high - xo_low;
+    auto nwidth = xn_high - xn_low;
 
     if (owidth <= 0.0 || nwidth <= 0.0)
       throw std::runtime_error("Negative or zero bin widths not allowed.");
@@ -60,7 +58,7 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
       if (delta <= 0.0) {
         throw std::runtime_error("Negative or zero overlaps not allowed.");
       }
-      factor = 1 / owidth;
+      auto factor = 1 / owidth;
       ynew[inew] += yold[iold] * delta * factor;
       enew[inew] += eold[iold] * eold[iold] * delta * factor;
 
@@ -96,8 +94,6 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
   auto size_yold = yold.size();
   auto size_ynew = ynew.size();
   size_t iold = 0, inew = 0;
-  double owidth, nwidth;
-  double factor;
 
   while ((inew < size_ynew) && (iold < size_yold)) {
     auto xo_low = xold[iold];
@@ -105,8 +101,8 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
     auto xn_low = xnew[inew];
     auto xn_high = xnew[inew + 1];
 
-    owidth = xo_high - xo_low;
-    nwidth = xn_high - xn_low;
+    auto owidth = xo_high - xo_low;
+    auto nwidth = xn_high - xn_low;
 
     if (owidth <= 0.0 || nwidth <= 0.0)
       throw std::runtime_error("Negative or zero bin widths not allowed.");
@@ -130,7 +126,7 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
       if (xn_high > xo_high) {
         iold++;
       } else {
-        factor = 1 / nwidth;
+        auto factor = 1 / nwidth;
         ynew[inew] *= factor;
         enew[inew] = sqrt(enew[inew] * factor);
         inew++;
