@@ -103,6 +103,11 @@ Detector Grouping
 |       |                          |                                                                                         |
 |       |                          |                                                                                         |
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
+| **2** | **Alpha**                | This text box is only visible if a pair is selected. It corresponds to the pair alpha   |
+|       |                          | value used for asymmetry calculation. See :ref:`AsymmetryCalc <algm-AsymmetryCalc>` for |
+|       |                          | a broader explanation. The value is taken from the *Pair table* on the Grouping Options |
+|       |                          | tab for the selected pair and can be modified there only.                               |
++-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **3** | **Periods**              | Use the two text boxes to select the combination of periods you would like to plot.     |
 |       |                          | Each holds a comma-separated list of periods, and the periods in the list on the right  |
 |       |                          | will be subtracted from those on the left. For example, to plot the combination         |
