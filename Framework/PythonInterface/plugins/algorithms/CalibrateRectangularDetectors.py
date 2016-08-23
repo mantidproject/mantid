@@ -251,7 +251,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             # for the sake of legacy
             SaveCalFile(OffsetsWorkspace=wkspName+"offset",
                         GroupingWorkspace=wkspName+"group",
-                        MaskWorkspace=wkspName+"mask",Filename=calib + '.cal')
+                        MaskWorkspace=wkspName+"mask",Filename=calibFilePrefix + '.cal')
             # the real version
             outfilename = calibFilePrefix + '.h5'
             if os.path.exists(outfilename):
@@ -265,6 +265,14 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
         if outfilename is not None:
             self.setProperty("OutputFilename", outfilename)
+
+    def _createGrouping(self, wkspName):
+        (_, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wkspName,
+                                                                    GroupDetectorsBy=self._grouping,
+                                                                    OutputWorkspace=wkspName+"group")
+
+        if (numGroupedSpectra==0) or (numGroups==0):
+            raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
 
 
     #pylint: disable=too-many-branches
@@ -379,11 +387,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             for ws in [str(wksp)+"cc3", str(wksp)+"offset3", str(wksp)+"mask3"]:
                 if AnalysisDataService.doesExist(ws):
                     AnalysisDataService.remove(ws)
-        (dummy, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,\
-                                OutputWorkspace=str(wksp)+"group")
-        if (numGroupedSpectra==0) or (numGroups==0):
-            raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
-        lcinst = str(self._instrument)
 
         self._saveCalibration(str(wksp), calib)
 
@@ -416,10 +419,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if not "histo" in self.getProperty("Extension").value:
             wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
                          Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
-        (dummy, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,\
-                                OutputWorkspace=str(wksp)+"group")
-        if (numGroupedSpectra==0) or (numGroups==0):
-            raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
+
         if len(self._smoothGroups) > 0:
             wksp = SmoothData(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
                               NPoints=self._smoothGroups, GroupingWorkspace=str(wksp)+"group")
@@ -562,6 +562,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 DeleteWorkspace(backRun)
                 samRun = CompressEvents(samRun, OutputWorkspace=samRun.name(),
                                         Tolerance=COMPRESS_TOL_TOF) # 100ns
+
+            self._createGrouping(str(samRun))
+
             if self.getProperty("CrossCorrelation").value:
                 samRun = self._cccalibrate(samRun, calib)
             else:
