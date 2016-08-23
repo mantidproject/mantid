@@ -12,14 +12,11 @@ subgraph params {
 subgraph decisions {
  $decision_style
   checkXUnit      [label="X axis in &lambda;?"]
-  checkTransRun   [label="FirstTransmissionRun\ngiven?"]
   checkThetaIn    [label="ThetaIn given?"]
 }
 
 subgraph algorithms {
  $algorithm_style
-  divideTrans   [label="Divide by\ntransmission run"]
-  corrAlg       [label="Apply correction algorithm\nif specified"]
   calcTheta     [label="Calculate ThetaIn"]
   corrDetPos    [label="Correct detector\npositions if necessary"]
   convertMom    [label="Convert to momentum\ntransfer, rebin and scale"]
@@ -27,7 +24,8 @@ subgraph algorithms {
 
 subgraph processes {
  $process_style
-  convertUnits  [label="Convert to &lambda; and\ndivide Detectors\nby Monitors"]
+  convertUnits    [label="Convert to &lambda; and\ndivide Detectors\nby Monitors"]
+  applyCorrTrans  [label="Apply transmission\n correction"]
 }
 
 subgraph values {
@@ -35,14 +33,10 @@ subgraph values {
 }
 
 inputWS         -> checkXUnit
-checkXUnit      -> checkTransRun  [label="Yes"]
+checkXUnit      -> applyCorrTrans [label="Yes"]
 checkXUnit      -> convertUnits   [label="No"]
-convertUnits    -> checkTransRun
-
-checkTransRun   -> divideTrans    [label="Yes"]
-checkTransRun   -> corrAlg        [label="No"]
-divideTrans     -> checkThetaIn
-corrAlg         -> checkThetaIn
+convertUnits    -> applyCorrTrans
+applyCorrTrans  -> checkThetaIn
 
 checkThetaIn    -> corrDetPos     [label="Yes"]
 checkThetaIn    -> calcTheta      [label="No"]
