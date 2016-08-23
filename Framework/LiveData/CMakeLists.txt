@@ -56,8 +56,21 @@ set ( TEST_FILES
 
 find_package ( LibRDKafka )
 if ( LIBRDKAFKA_FOUND )
-  set ( SRC_FILES ${SRC_FILES} src/ISIS/ISISKafkaEventListener.cpp )
-  set ( INC_FILES ${INC_FILES} inc/MantidLiveData/ISIS/ISISKafkaEventListener.h )
+  set ( SRC_FILES 
+    ${SRC_FILES} 
+    src/ISIS/ISISKafkaEventListener.cpp
+    src/Kafka/KafkaTopicSubscriber.cpp
+  )
+  set ( INC_FILES 
+    ${INC_FILES}
+    inc/MantidLiveData/ISIS/ISISKafkaEventListener.h
+    inc/MantidLiveData/Kafka/IKafkaStreamSubscriber.h
+    inc/MantidLiveData/Kafka/KafkaTopicSubscriber.h
+  )
+  set ( TEST_FILES
+    ${TEST_FILES}
+    KafkaTopicSubscriberTest.h
+  )
 endif()
 
 if (COVERALLS)
@@ -92,7 +105,11 @@ if ( WIN32 )
   set ( WINSOCK ws2_32 )
 endif ()
 
-target_link_libraries ( LiveData LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${WINSOCK} )
+set ( PRIVATE_LINK_LIBRARIES ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${WINSOCK})
+if ( LIBRDKAFKA_FOUND )
+  set ( PRIVATE_LINK_LIBRARIES ${PRIVATE_LINK_LIBRARIES} ${LibRDKafka_LIBRARIES} )
+endif()
+target_link_libraries ( LiveData LINK_PRIVATE ${PRIVATE_LINK_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )
