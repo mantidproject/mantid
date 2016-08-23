@@ -37,8 +37,7 @@ class PG3Calibration(stresstesting.MantidStressTest):
                                                GroupDetectorsBy = 'All', DiffractionFocusWorkspace = False,
                                                Binning = '0.5, -0.0004, 2.5',
                                                MaxOffset=0.01, PeakPositions = '.6866,.7283,.8185,.8920,1.0758,1.2615,2.0599',
-                                               CrossCorrelation = False, Instrument = 'PG3', RunNumber = '2538',
-                                               Extension = '_event.nxs')
+                                               CrossCorrelation = False, RunNumber = 'PG3_2538')
 
         if isinstance(output, basestring):
             self.saved_cal_file = output.replace('.h5','.cal')
@@ -85,8 +84,7 @@ class PG3CCCalibration(stresstesting.MantidStressTest):
                                                GroupDetectorsBy = 'All', DiffractionFocusWorkspace = False,
                                                Binning = '0.5, -0.0004, 2.5',
                                                MaxOffset=0.01, PeakPositions = '0.7282933,1.261441',DetectorsPeaks = '17,6',
-                                               CrossCorrelation = True, Instrument = 'PG3', RunNumber = '2538',
-                                               Extension = '_event.nxs')
+                                               CrossCorrelation = True, RunNumber = 'PG3_2538')
 
         if isinstance(output, basestring):
             self.saved_cal_file = output.replace('.h5','.cal')
