@@ -17,15 +17,15 @@ subgraph decisions {
 
 subgraph algorithms {
  $algorithm_style
-  calcTheta     [label="Calculate ThetaIn"]
-  corrDetPos    [label="Correct detector\npositions if necessary"]
-  convertMom    [label="Convert to momentum\ntransfer, rebin and scale"]
 }
 
 subgraph processes {
  $process_style
   convertUnits    [label="Convert to &lambda; and\ndivide Detectors\nby Monitors"]
   applyCorrTrans  [label="Apply transmission\n correction"]
+  calcTheta       [label="Calculate ThetaIn"]
+  corrDetPos      [label="Correct detector\npositions if necessary"]
+  convertMom      [label="Convert to momentum\ntransfer, rebin and scale"]
 }
 
 subgraph values {
