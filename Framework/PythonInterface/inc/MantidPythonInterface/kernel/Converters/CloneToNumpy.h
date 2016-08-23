@@ -33,7 +33,6 @@ namespace Impl {
 // Forward declaration of implementations. Keeps numpy header out of this header
 template <typename ElementType>
 PyObject *clone1D(const std::vector<ElementType> &cvector);
-template <typename ElementType> PyObject *cloneEmpty(const ElementType *carray);
 template <typename ElementType>
 PyObject *cloneND(const ElementType *carray, const int ndims,
                   Py_intptr_t *dims);

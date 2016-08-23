@@ -19,12 +19,8 @@ namespace Impl {
  */
 template <typename ElementType>
 PyObject *clone1D(const std::vector<ElementType> &cvector) {
-  if (cvector.empty()) {
-    return cloneEmpty(cvector.data());
-  } else {
-    Py_intptr_t dims[1] = {static_cast<int>(cvector.size())};
-    return cloneND(cvector.data(), 1, dims);
-  }
+  Py_intptr_t dims[1] = {static_cast<int>(cvector.size())};
+  return cloneND(cvector.data(), 1, dims);
 }
 
 /**
@@ -43,18 +39,6 @@ template <> PyObject *clone1D(const std::vector<bool> &cvector) {
     PyArray_SETITEM(nparray, reinterpret_cast<char *>(itemPtr),
                     PyBool_FromLong(static_cast<long int>(cvector[i])));
   }
-  return reinterpret_cast<PyObject *>(nparray);
-}
-
-/**
- * Returns a newm empty numpy array. A specialization exists for strings so that
- * they simply create a standard python list.
- * @return empty array
- */
-template <typename ElementType> PyObject *cloneEmpty(const ElementType *) {
-  int datatype = NDArrayTypeIndex<ElementType>::typenum;
-  Py_intptr_t dims[1] = {0};
-  PyArrayObject *nparray = func_PyArray_NewFromDescr(datatype, 1, &dims[0]);
   return reinterpret_cast<PyObject *>(nparray);
 }
 
@@ -81,8 +65,9 @@ PyObject *cloneND(const ElementType *carray, const int ndims,
   }
   void *arrayData = PyArray_DATA(nparray);
   const void *data = static_cast<void *>(const_cast<ElementType *>(carray));
-  assert(data != nullptr);
-  std::memcpy(arrayData, data, PyArray_ITEMSIZE(nparray) * length);
+  if (dims[0] > 0) {
+    std::memcpy(arrayData, data, PyArray_ITEMSIZE(nparray) * length);
+  }
   return reinterpret_cast<PyObject *>(nparray);
 }
 
@@ -111,18 +96,6 @@ PyObject *cloneND(const std::string *carray, const int ndims,
   return rawptr;
 }
 
-/**
-  * Returns a new, empty python list of strings.
-  * @return empty list
-  */
-template <> PyObject *cloneEmpty(const std::string *) {
-  boost::python::list pystrs;
-  PyObject *rawptr = pystrs.ptr();
-  Py_INCREF(
-      rawptr); // Make sure it survives after the wrapper decrefs the count
-  return rawptr;
-}
-
 //-----------------------------------------------------------------------
 // Explicit instantiations
 //-----------------------------------------------------------------------
@@ -134,13 +107,9 @@ template <> PyObject *cloneEmpty(const std::string *) {
   template DLLExport PyObject *cloneND<ElementType>(                           \
       const ElementType *, const int ndims, Py_intptr_t *dims);
 
-#define INSTANTIATE_CLONEEMPTY(ElementType)                                    \
-  template DLLExport PyObject *cloneEmpty<ElementType>(const ElementType *);
-
 #define INSTANTIATE_CLONE(ElementType)                                         \
   INSTANTIATE_CLONE1D(ElementType)                                             \
-  INSTANTIATE_CLONEND(ElementType)                                             \
-  INSTANTIATE_CLONEEMPTY(ElementType)
+  INSTANTIATE_CLONEND(ElementType)
 
 ///@cond Doxygen doesn't seem to like this...
 INSTANTIATE_CLONE(int)
@@ -155,8 +124,6 @@ INSTANTIATE_CLONE(float)
 INSTANTIATE_CLONE1D(std::string)
 // Need further ND specialisation for bool
 INSTANTIATE_CLONEND(bool)
-INSTANTIATE_CLONEEMPTY(bool)
-
 ///@endcond
 }
 }
