@@ -10,10 +10,17 @@ from mantid import config
 from mantid.kernel import Direction
 
 COMPRESS_TOL_TOF = .01
+EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
+
+def getBasename(filename):
+    name = os.path.split(filename)[-1]
+    for extension in EXTENSIONS_NXS:
+        name = name.replace(extension, '')
+    return name
+
 #pylint: disable=too-many-instance-attributes
 class CalibrateRectangularDetectors(PythonAlgorithm):
 
-    _instrument = None
     _filterBadPulses = None
     _xpixelbin = None
     _ypixelbin = None
@@ -50,27 +57,13 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         return "Calibrate the detector pixels and write a calibration file"
 
     def PyInit(self):
-        sns = ConfigService.Instance().getFacility("SNS")
-
-        instruments = []
-        for instr in sns.instruments():
-            for tech in instr.techniques():
-                if "Neutron Diffraction" == str(tech):
-                    instruments.append(instr.shortName())
-                    break
-        self.declareProperty("Instrument", "PG3",
-                             StringListValidator(instruments))
-        validator = IntArrayBoundedValidator()
-        validator.setLower(0)
-        self.declareProperty(IntArrayProperty("RunNumber", values=[0], direction=Direction.Input,
-                                              validator=validator))
+        self.declareProperty(MultipleFileProperty(name="RunNumber",
+                                                  extensions=EXTENSIONS_NXS),
+                             "Event file")
         validator = IntArrayBoundedValidator()
         validator.setLower(0)
         self.declareProperty(IntArrayProperty("Background", values=[0], direction=Direction.Input,
                                               validator=validator))
-        extensions = [ "_event.nxs", "_runinfo.xml", ".nxs.h5"]
-        self.declareProperty("Extension", "_event.nxs",
-                             StringListValidator(extensions))
         self.declareProperty("CompressOnRead", False,
                              "Compress the event list when reading in the data")
         self.declareProperty("XPixelSum", 1,
@@ -164,79 +157,38 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
         return messages
 
-    def _loadPreNeXusData(self, runnumber, extension, **kwargs):
-        """
-            Load PreNexus data
-            @param runnumer: run number (integer)
-            @param extension: file extension
-        """
-        Logger("CalibrateRectangularDetector").warning("Loading PreNexus for run %s" % runnumber)
-        mykwargs = {}
-        if "FilterByTimeStart" in kwargs:
-            mykwargs["ChunkNumber"] = int(kwargs["FilterByTimeStart"])
-        if "FilterByTimeStop" in kwargs:
-            mykwargs["TotalChunks"] = int(kwargs["FilterByTimeStop"])
-
-        # generate the workspace name
-        name = "%s_%d" % (self._instrument, runnumber)
-        filename = name + extension
-
-        wksp = LoadPreNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
-
-        # add the logs to it
-        if str(self._instrument) == "SNAP":
-            LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
-
-        return wksp
-
-    def _loadEventNeXusData(self, runnumber, extension, **kwargs):
-        """
-            Load event Nexus data
-            @param runnumer: run number (integer)
-            @param extension: file extension
-        """
-        kwargs["Precount"] = False
-        if self.getProperty("CompressOnRead").value:
-            kwargs["CompressTolerance"] = .1
-        name = "%s_%d" % (self._instrument, runnumber)
-        filename = name + extension
-
-        wksp = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
-        # For NOMAD data before Aug 2012, use the updated geometry
-        if str(wksp.getInstrument().getValidFromDate()) == "1900-01-31T23:59:59" and str(self._instrument) == "NOMAD":
-            path=config["instrumentDefinition.directory"]
-            LoadInstrument(Workspace=wksp, Filename=path+'/'+"NOMAD_Definition_20120701-20120731.xml",
-                           RewriteSpectraMap=False)
-        return wksp
-
-    def _loadData(self, runnumber, extension, filterWall=None):
-        """
-        Load data
-        @param runnumber: run number (integer)
-        @param extension: file extension
-        """
-        filterDict = {}
-        if filterWall is not None:
-            if filterWall[0] > 0.:
-                filterDict["FilterByTimeStart"] = filterWall[0]
-            if filterWall[1] > 0.:
-                filterDict["FilterByTimeStop"] = filterWall[1]
-
-        if  runnumber is None or runnumber <= 0:
+    def _loadData(self, filename, filterWall=None):
+        if  filename is None or len(filename) <= 0:
             return None
 
-        if extension.endswith("_event.nxs") or extension.endswith(".nxs.h5"):
-            wksp = self._loadEventNeXusData(runnumber, extension, **filterDict)
-        else:
-            wksp = self._loadPreNeXusData(runnumber, extension, **filterDict)
+        kwargs = {"Precount":False}
+        if filterWall is not None:
+            if filterWall[0] > 0.:
+                kwargs["FilterByTimeStart"] = filterWall[0]
+            if filterWall[1] > 0.:
+                kwargs["FilterByTimeStop"] = filterWall[1]
+
+        if self.getProperty("CompressOnRead").value:
+            kwargs["CompressTolerance"] = .1
+
+        wkspName = getBasename(filename)
+
+        LoadEventNexus(Filename=filename, OutputWorkspace=wkspName, **kwargs)
+        # TODO should these next few lines be here
+        # For NOMAD data before Aug 2012, use the updated geometry
+        #if str(wksp.getInstrument().getValidFromDate()) == "1900-01-31T23:59:59" and str(self._instrument) == "NOMAD":
+        #    path=config["instrumentDefinition.directory"]
+        #    LoadInstrument(Workspace=wksp, Filename=path+'/'+"NOMAD_Definition_20120701-20120731.xml",
+        #                   RewriteSpectraMap=False)
 
         if self._filterBadPulses and not self.getProperty("CompressOnRead").value:
-            wksp = FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp.name())
+            FilterBadPulses(InputWorkspace=wkspName, OutputWorkspace=wkspName)
 
         if not self.getProperty("CompressOnRead").value:
-            wksp = CompressEvents(wksp, OutputWorkspace=wksp.name(),
-                                  Tolerance=COMPRESS_TOL_TOF) # 100ns
-        return wksp
+            CompressEvents(InputWorkspace=wkspName, OutputWorkspace=wkspName,
+                           Tolerance=COMPRESS_TOL_TOF) # 100ns
+
+        return wkspName
 
     def _saveCalibration(self, wkspName, calibFilePrefix):
         outfilename = None
@@ -380,9 +332,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             return None
 
         # Bin events in d-Spacing
-        if not "histo" in self.getProperty("Extension").value:
-            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,
-                  Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,
+              Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
 
         if len(self._smoothGroups) > 0:
             SmoothData(InputWorkspace=wksp, OutputWorkspace=wksp,
@@ -449,14 +400,12 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     #pylint: disable=too-many-branches
     def PyExec(self):
         # get generic information
-        SUFFIX = self.getProperty("Extension").value
         self._binning = self.getProperty("Binning").value
         if len(self._binning) != 1 and len(self._binning) != 3:
             raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(self._binning))
         if len(self._binning) == 3:
             if self._binning[0] == 0. and self._binning[1] == 0. and self._binning[2] == 0.:
                 raise RuntimeError("Failed to specify the binning")
-        self._instrument = self.getProperty("Instrument").value
         self._grouping = self.getProperty("GroupDetectorsBy").value
         self._xpixelbin = self.getProperty("XPixelSum").value
         self._ypixelbin = self.getProperty("YPixelSum").value
@@ -507,15 +456,19 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 raise RuntimeError("Number of samples and backgrounds must match (%d!=%d)" % (len(samRuns), len(backRuns)))
         filterWall = (self.getProperty("FilterByTimeMin").value, self.getProperty("FilterByTimeMax").value)
 
-        calib = str(self._instrument)+"_calibrate_d"+str(samRuns[0])+strftime("_%Y_%m_%d")
+        stuff = getBasename(samRuns[0])
+        stuff = stuff.split('_')
+        (instrument, runNumber) = ('_'.join(stuff[:-1]), stuff[-1])
+
+        calib = instrument+"_calibrate_d"+runNumber+strftime("_%Y_%m_%d")
         calib = os.path.join(self._outDir, calib)
 
         for (samNum, backNum) in zip(samRuns, backRuns):
             # first round of processing the sample
-            samRun = self._loadData(samNum, SUFFIX, filterWall)
+            samRun = self._loadData(samNum, filterWall)
             samRun = str(samRun)
             if backNum > 0:
-                backRun = self._loadData(backNum, SUFFIX, filterWall)
+                backRun = self._loadData(instrument+'_'+str(backNum), filterWall)
                 Minus(LHSWorkspace=samRun, RHSWorkspace=backRun,
                       OutputWorkspace=samRun)
                 DeleteWorkspace(backRun)
@@ -554,7 +507,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             if self._xpixelbin*self._ypixelbin>1 or len(self._smoothGroups) > 0:
                 if AnalysisDataService.doesExist(samRun):
                     AnalysisDataService.remove(samRun)
-                samRun = self._loadData(samNum, SUFFIX, filterWall)
+                samRun = self._loadData(samNum, filterWall)
                 LRef = self.getProperty("UnwrapRef").value
                 DIFCref = self.getProperty("LowResRef").value
                 if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
