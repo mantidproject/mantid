@@ -492,9 +492,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             if self._binning[0] == 0. and self._binning[1] == 0. and self._binning[2] == 0.:
                 raise RuntimeError("Failed to specify the binning")
         self._instrument = self.getProperty("Instrument").value
-        config = ConfigService.Instance()
-        config['default.facility'] = "SNS"
-        config['default.instrument'] = self._instrument
         self._grouping = self.getProperty("GroupDetectorsBy").value
         self._xpixelbin = self.getProperty("XPixelSum").value
         self._ypixelbin = self.getProperty("YPixelSum").value
