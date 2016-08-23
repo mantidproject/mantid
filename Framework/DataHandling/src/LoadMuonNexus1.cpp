@@ -676,7 +676,8 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
 
   localWorkspace->setX(hist, timeChannelsVec);
   localWorkspace->getSpectrum(hist).setSpectrumNo(specNo);
-
+  // Muon v1 files: always a one-to-one mapping between spectra and detectors
+  localWorkspace->getSpectrum(hist).setDetectorID(static_cast<detid_t>(specNo));
   // Clean up
   delete[] timeChannels;
 }

@@ -75,14 +75,14 @@ private:
   std::string m_instrumentName; ///< Name of the instrument
 
   // Variables describing the data in the detector
-  size_t m_numberOfTubes;             // number of tubes - X
-  size_t m_numberOfPixelsPerTube;     // number of pixels per tube - Y
-  size_t m_numberOfChannels;          // time channels - Z
-  size_t m_numberOfSimpleDetectors;   // number of simple detector
-  size_t m_numberOfHistograms;        // number of spectra
-  size_t m_numberOfMonitors;          // number of monitor spectra
-  std::set<int> m_activeSDIndices;    // set of Single Detector indices,
-                                      // that were actually active
+  size_t m_numberOfTubes;           // number of tubes - X
+  size_t m_numberOfPixelsPerTube;   // number of pixels per tube - Y
+  size_t m_numberOfChannels;        // time channels - Z
+  size_t m_numberOfSimpleDetectors; // number of simple detector
+  size_t m_numberOfHistograms;      // number of spectra
+  size_t m_numberOfMonitors;        // number of monitor spectra
+  std::set<int> m_activeSDIndices;  // set of Single Detector indices,
+                                    // that were actually active
 
   std::vector<std::string> m_supportedInstruments;
   LoadHelper m_loader;

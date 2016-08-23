@@ -1144,9 +1144,9 @@ public:
     delete suite;
   }
 
-  void setUp() { inputEvent = createEventWorkspaceIntLog(); }
+  void setUp() override { inputEvent = createEventWorkspaceIntLog(); }
 
-  void tearDown() {
+  void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().remove("output");
     Mantid::API::AnalysisDataService::Instance().remove("infoOutput");
   }

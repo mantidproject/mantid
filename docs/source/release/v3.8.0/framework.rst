@@ -30,9 +30,9 @@ Algorithms
 ----------
 
 New
-###
+### 
 
-- :ref:`ClearCache <algm-ClearCache>` an algorithm to simplify the clearance of several in memory or disk caches used in Mantid.
+-  :ref:`ClearCache <algm-ClearCache>` an algorithm to simplify the clearance of several in memory or disk caches used in Mantid.
 
 - :ref:`LoadPreNexusLive <algm-LoadPreNexusLive>` will load "live"
   data from file on legacy SNS DAS instruments.
@@ -68,9 +68,6 @@ Improved
 - :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
   now check if a Workspace with that name already exists in the ADS and gives
   the option to override it.
-
-- :ref:`LoadILLIndirect <algm-LoadILLIndirect>` now checks in the ``.nxs`` files which single detectors (SD) are
-  enabled, and loads only those instead of all.
 
 Deprecated
 ##########

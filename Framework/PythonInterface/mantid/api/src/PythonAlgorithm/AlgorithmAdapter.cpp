@@ -147,9 +147,9 @@ AlgorithmAdapter<BaseAlgorithm>::validateInputs() {
   std::map<std::string, std::string> resultMap;
 
   try {
+    Environment::GlobalInterpreterLock gil;
     dict resultDict = callMethod<dict>(getSelf(), "validateInputs");
     // convert to a map<string,string>
-    Environment::GlobalInterpreterLock gil;
     boost::python::list keys = resultDict.keys();
     size_t numItems = boost::python::len(keys);
     for (size_t i = 0; i < numItems; ++i) {
