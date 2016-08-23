@@ -198,9 +198,16 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
     std::string strFPath = pocoRunNumberPath.toString();
     // returns empty if no directory is found
+<<<<<<< HEAD
     // split directory if 'ENGINX_' found by '_.'
     std::vector<std::string> splitBaseName =
         m_view->splitFittingDirectory(strFPath);
+=======
+    std::vector<std::string> splitBaseName;
+    if (strFPath.find("ENGINX_") != std::string::npos) {
+      boost::split(splitBaseName, strFPath, boost::is_any_of("_."));
+    }
+>>>>>>> 17064_Engg_diff_iface_crash_on_invalid_focus_file
 
     // runNo when single focused file selected
     std::vector<std::string> runNoVec;
@@ -665,6 +672,29 @@ void EnggDiffFittingPresenter::inputChecksBeforeFitting(
                                 " is invalid, "
                                 "fitting process failed. Please try again!");
   }
+
+  // Check the filename is the format we expect
+  // As it contains details we need later in the algorithm
+  std::vector<std::string> vecFileSplit = splitFittingDirectory(focusedRunNo);
+  // The fit filenames are delimited by '_' and should be of
+  // format 'EnginX_<runNumber>_focused_bank_<bankNumber>'
+  // therefore we should always get 5 parts split in the vector
+  if (vecFileSplit.size() != 5) {
+    throw std::invalid_argument(
+        "Name doesn't match expected pattern."
+        " The focused EnginX  filename should be of form: "
+        " 'ENGINX_<Run Number>_focused_bank_<Bank Number>'.");
+  }
+}
+
+std::vector<std::string> EnggDiffFittingPresenter::splitFittingDirectory(
+    const std::string &selectedfPath) {
+
+  Poco::Path PocofPath(selectedfPath);
+  std::string selectedbankfName = PocofPath.getBaseName();
+  std::vector<std::string> splitBaseName;
+  boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
+  return splitBaseName;
 }
 
 std::string EnggDiffFittingPresenter::validateFittingexpectedPeaks(
@@ -719,12 +749,21 @@ void EnggDiffFittingPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
     if (!chunks.empty() && isNum) {
       try {
         bankID = boost::lexical_cast<size_t>(chunks.back());
+<<<<<<< HEAD
       } catch (std::runtime_error &re) {
         g_log.error()
             << "Unable to successfully apply DifcTzero to focused workspace. "
                "Error description: " +
                    static_cast<std::string>(re.what()) << '\n';
         throw;
+=======
+      } catch (boost::exception &) {
+        // If we get a bad cast or something goes wrong then
+        // the file is probably not what we were expecting
+        // so throw a runtime error
+        throw std::runtime_error(
+            "File data is bad. Is the file a focused EnginX file?");
+>>>>>>> 17064_Engg_diff_iface_crash_on_invalid_focus_file
       }
     }
   }
@@ -1380,7 +1419,7 @@ void EnggDiffFittingPresenter::setBankItems() {
         std::string strVecFile = vecFile.toString();
         // split the directory from m_fitting_runno_dir_vec
         std::vector<std::string> vecFileSplit =
-            m_view->splitFittingDirectory(strVecFile);
+            splitFittingDirectory(strVecFile);
 
         // get the last split in vector which will be bank
         std::string bankID = (vecFileSplit.back());
