@@ -478,9 +478,9 @@ void EnggDiffFittingPresenter::enableMultiRun(
         // rewrite the vector of run number which is available
         std::vector<std::string> foundRunNumber;
 
-        for (size_t i = 0; i < RunNumberVec.size(); i++) {
+        for (auto runNumber : RunNumberVec) {
           // save dir for every vector
-          updateFittingDirVec(focusDir, RunNumberVec[i], fittingRunNoDirVec,
+          updateFittingDirVec(focusDir, runNumber, fittingRunNoDirVec,
                               foundRunNumber);
         }
 
