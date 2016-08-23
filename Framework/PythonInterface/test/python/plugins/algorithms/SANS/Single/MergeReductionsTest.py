@@ -1,5 +1,6 @@
 import unittest
 import mantid
+import math
 from SANS.Single.MergeReductions import (MergeFactory, ISIS1DMerger)
 from SANS.Single.Bundles import OutputPartsBundle
 
@@ -111,8 +112,11 @@ class MergeReductionsTest(unittest.TestCase):
 
         scale = result.scale
         shift = result.shift
-        self.assertAlmostEqual(scale, scale_input, delta=1e-4)
-        self.assertAlmostEqual(shift, shift_input, delta=1e-4)
+
+        # using decimal 'places' keyword, as delta= is not supported on Python < 2.7
+        tol_places = round(-math.log10(1e-04), ndigits=0)
+        self.assertAlmostEqual(scale, scale_input, places=tol_places)
+        self.assertAlmostEqual(shift, shift_input, places=tol_places)
 
         # There is an overlap of two bins between HAB and LAB, the values are tested in SANSStitch
         self.assertTrue(merged_workspace.blocksize() == 2)

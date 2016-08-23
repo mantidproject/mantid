@@ -1,7 +1,7 @@
 import unittest
 import mantid
 from mantid.api import AlgorithmManager
-from SANS.Single.StripEndNans import strip_end_nans
+from SANS.Single.StripEndNansAndInfs import strip_end_nans
 
 
 class StripEndNansTest(unittest.TestCase):

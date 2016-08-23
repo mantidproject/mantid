@@ -129,7 +129,7 @@ class SANSBatchReductionTest(unittest.TestCase):
         self._compare_workspace(output_workspace, reference_file_name)
 
 
-class SANSReductionCoreRunnerTest(stresstesting.MantidStressTest):
+class SANSBatchReductionRunnerTest(stresstesting.MantidStressTest):
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
         self._success = False

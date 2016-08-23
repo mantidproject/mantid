@@ -76,7 +76,7 @@ class SANSStateReductionISIS(SANSStateReduction, SANSStateBase):
             bank_type = SANSConstants.high_angle_bank
         else:
             raise RuntimeError("SANStateReductionISIS: There is no detector available for the"
-                               " reduction mode {}.".format(reduction_mode))
+                               " reduction mode {0}.".format(reduction_mode))
         return self.detector_names[bank_type]
 
     def validate(self):

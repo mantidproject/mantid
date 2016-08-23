@@ -252,8 +252,8 @@ class SANSStitch(DataProcessorAlgorithm):
             scale_factor, shift_factor = self._run_fit(q_high_angle, q_low_angle,
                                                        scale_factor, shift_factor)
 
-        min_q = max(min(q_high_angle.dataX(0)), min(q_low_angle.dataX(0)))
-        max_q = min(max(q_high_angle.dataX(0)), max(q_low_angle.dataX(0)))
+        min_q = min(min(q_high_angle.dataX(0)), min(q_low_angle.dataX(0)))
+        max_q = max(max(q_high_angle.dataX(0)), max(q_low_angle.dataX(0)))
 
         # Crop our input workspaces
         cF = self._crop_to_x_range(cF, min_q, max_q)

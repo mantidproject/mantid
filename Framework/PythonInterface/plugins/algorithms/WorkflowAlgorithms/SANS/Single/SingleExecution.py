@@ -1,6 +1,6 @@
 from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
-from SANS.Single.StripEndNans import strip_end_nans
+from SANS.Single.StripEndNansAndInfs import strip_end_nans
 from SANS.Single.MergeReductions import (MergeFactory, is_sample, is_can)
 from SANS.Single.Bundles import (OutputBundle, OutputPartsBundle)
 from SANS2.Common.SANSEnumerations import (ISISReductionMode)
