@@ -207,8 +207,7 @@ void IndirectMoments::momentsAlgComplete(bool error) {
 void IndirectMoments::plotClicked() {
   QString outputWs =
       getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
-  bool plot = checkADSForPlotSaveWorkspace(outputWs.toStdString(), true);
-  if (plot) {
+  if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), true)) {
     plotSpectrum(outputWs + "_M0");
     plotSpectrum({outputWs + "_M0", outputWs + "_M2"});
   }
@@ -220,8 +219,7 @@ void IndirectMoments::plotClicked() {
 void IndirectMoments::saveClicked() {
   QString outputWs =
       getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
-  bool save = checkADSForPlotSaveWorkspace(outputWs.toStdString(), false);
-  if (save)
+  if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), false))
     addSaveWorkspaceToQueue(outputWs);
   m_batchAlgoRunner->executeBatchAsync();
 }

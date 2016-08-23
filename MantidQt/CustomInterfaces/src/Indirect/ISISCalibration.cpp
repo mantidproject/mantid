@@ -719,9 +719,9 @@ void ISISCalibration::plotClicked() {
   QStringList plotWorkspaces;
   if (m_uiForm.ckCreateResolution->isChecked()) {
     checkADSForPlotSaveWorkspace(m_outputResolutionName.toStdString(), true);
-    plotWorkspaces << m_outputResolutionName;
+    plotWorkspaces.append(m_outputResolutionName);
     if (m_uiForm.ckSmoothResolution->isChecked())
-      plotWorkspaces << m_outputResolutionName + "_pre_smooth";
+      plotWorkspaces.append(m_outputResolutionName + "_pre_smooth");
   }
   plotSpectrum(plotWorkspaces);
 }

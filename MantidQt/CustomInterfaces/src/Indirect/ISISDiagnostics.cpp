@@ -471,8 +471,7 @@ void ISISDiagnostics::pbRunFinished() {
  * Handles mantid plotting
  */
 void ISISDiagnostics::plotClicked() {
-  bool plot = checkADSForPlotSaveWorkspace(m_pythonExportWsName, true);
-  if (plot)
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
     plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 }
 
@@ -480,8 +479,7 @@ void ISISDiagnostics::plotClicked() {
  * Handles saving workspace
  */
 void ISISDiagnostics::saveClicked() {
-  bool save = checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
-  if (save)
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   m_batchAlgoRunner->executeBatchAsync();
 }

@@ -176,11 +176,10 @@ void IndirectSqw::plotContour() {
  */
 void IndirectSqw::plotClicked() {
   QString plotType = m_uiForm.cbPlotType->currentText();
-  checkADSForPlotSaveWorkspace(m_pythonExportWsName, true);
-  if (plotType == "Contour")
+  if (plotType == "Contour" && (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)))
     plot2D(QString::fromStdString(m_pythonExportWsName));
 
-  else if (plotType == "Spectra") {
+  else if (plotType == "Spectra" && (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))) {
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         m_pythonExportWsName);
     int numHist = static_cast<int>(ws->getNumberHistograms());
@@ -192,8 +191,7 @@ void IndirectSqw::plotClicked() {
  * Handles saving of workspaces
  */
 void IndirectSqw::saveClicked() {
-  bool save = checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
-  if (save)
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   m_batchAlgoRunner->executeBatch();
 }
