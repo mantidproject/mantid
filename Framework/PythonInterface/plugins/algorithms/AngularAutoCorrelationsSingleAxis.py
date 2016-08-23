@@ -269,7 +269,7 @@ class AngularAutoCorrelationsSingleAxis(PythonAlgorithm):
 
     def fold_correlation(self,omega):
         # Folds an array with symmetrical values into half by averaging values around the centre
-        right_half=omege[len(omega)/2:]
+        right_half=omega[len(omega)/2:]
         left_half=omega[:int(np.ceil(len(omega)/2.0))][::-1]
 
         return (left_half+right_half)/2.0
