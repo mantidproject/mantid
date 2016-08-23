@@ -71,7 +71,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         self.declareProperty(name='Reflection',
                              defaultValue='111',
-                             validator=StringListValidator(['111']),
+                             validator=StringListValidator(['111','311']),
                              doc='Analyser reflection.')
 
         self.declareProperty(name='SumRuns',
@@ -380,6 +380,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # Mask bins out of monitor range (zero bins) for left and right wings
         xmin_left, xmax_left = self._monitor_range('__left_mon')
         xmin_right, xmax_right = self._monitor_range('__right_mon')
+        # Delete the left and right monitors
+        DeleteWorkspace('__left_mon')
+        DeleteWorkspace('__right_mon')
         # Determine global bins for masking
         xmin = np.maximum(xmin_left, xmin_right)
         xmax = np.minimum(xmax_left, xmax_right)
@@ -405,10 +408,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             if xmax_right < size:
                 self.log().debug('Mask red ws bins larger than %d' % (xmax_right + int(size / 2)))
                 MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=xmax_right + int(size / 2), XMax=size)
-
-        # Delete the left and right monitors
-        DeleteWorkspace('__left_mon')
-        DeleteWorkspace('__right_mon')
 
         # Convert both to energy
         # which is needed for shift operations for unmirror > 3
