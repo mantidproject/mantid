@@ -1,6 +1,7 @@
 #ifndef MANTID_TSVSERIALISER_H_
 #define MANTID_TSVSERIALISER_H_
 
+#include "DllOption.h"
 #include "MantidKernel/CaseInsensitiveMap.h"
 
 #include <map>
@@ -9,6 +10,9 @@
 #include <vector>
 
 #include "qstring.h"
+#include <QPoint>
+#include <QColor>
+#include <QRect>
 
 /** Parses the formatting used in MantidPlot project files
 
@@ -36,7 +40,10 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
-class TSVSerialiser {
+namespace MantidQt {
+namespace API {
+
+class EXPORT_OPT_MANTIDQT_API TSVSerialiser {
 public:
   TSVSerialiser();
 
@@ -54,20 +61,30 @@ public:
   std::vector<std::string> sections(const std::string &name) const;
 
   std::string lineAsString(const std::string &name, const size_t i = 0) const;
+  QString lineAsQString(const std::string &name, const size_t i = 0) const;
 
   bool selectLine(const std::string &name, const size_t i = 0);
   bool selectSection(const std::string &name, const size_t i = 0);
 
   int asInt(const size_t i) const;
+  size_t asSize_t(const size_t i) const;
   double asDouble(const size_t i) const;
   float asFloat(const size_t i) const;
   std::string asString(const size_t i) const;
+  QString asQString(const size_t i) const;
+  bool asBool(const size_t i) const;
+  QRect asQRect(const size_t i) const;
+  QColor asQColor(const size_t i) const;
 
   TSVSerialiser &operator>>(int &val);
+  TSVSerialiser &operator>>(size_t &val);
   TSVSerialiser &operator>>(double &val);
   TSVSerialiser &operator>>(float &val);
   TSVSerialiser &operator>>(std::string &val);
   TSVSerialiser &operator>>(QString &val);
+  TSVSerialiser &operator>>(bool &val);
+  TSVSerialiser &operator>>(QRect &val);
+  TSVSerialiser &operator>>(QColor &val);
 
   TSVSerialiser &writeLine(const std::string &name);
 
@@ -76,6 +93,10 @@ public:
   TSVSerialiser &operator<<(const QString &val);
   TSVSerialiser &operator<<(const double &val);
   TSVSerialiser &operator<<(const int &val);
+  TSVSerialiser &operator<<(const size_t &val);
+  TSVSerialiser &operator<<(const bool &val);
+  TSVSerialiser &operator<<(const QRect &val);
+  TSVSerialiser &operator<<(const QColor &val);
 
   void writeRaw(const std::string &raw);
   void writeSection(const std::string &name, const std::string &body);
@@ -91,5 +112,7 @@ private:
   std::stringstream m_output;
   bool m_midLine;
 };
+}
+}
 
 #endif

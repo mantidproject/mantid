@@ -1,4 +1,4 @@
-#include "MantidLiveData/ISISLiveEventDataListener.h"
+#include "MantidLiveData/ISIS/ISISLiveEventDataListener.h"
 #include "MantidLiveData/Exception.h"
 
 #include "MantidAPI/Algorithm.h"
@@ -20,7 +20,7 @@
 GCC_DIAG_OFF(unused-variable)
 // clang-format on
 #endif
-#include "LoadDAE/idc.h"
+#include "DAE/idc.h"
 
 const char *PROTON_CHARGE_PROPERTY = "proton_charge";
 const char *RUN_NUMBER_PROPERTY = "run_number";

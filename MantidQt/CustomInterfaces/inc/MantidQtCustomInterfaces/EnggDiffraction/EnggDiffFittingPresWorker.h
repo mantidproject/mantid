@@ -40,14 +40,20 @@ class EnggDiffFittingWorker : public QObject {
 public:
   // for fitting (single peak fits)
   EnggDiffFittingWorker(EnggDiffFittingPresenter *pres,
-                        const std::string &focusedRunNo,
+                        const std::vector<std::string> &focusedRunNo,
                         const std::string &ExpectedPeaks)
-      : m_pres(pres), m_runNo(focusedRunNo), m_expectedPeaks(ExpectedPeaks) {}
+      : m_pres(pres), m_multiRunNo(focusedRunNo),
+        m_expectedPeaks(ExpectedPeaks) {}
 
 private slots:
 
   void fitting() {
-    m_pres->doFitting(m_runNo, m_expectedPeaks);
+
+    for (size_t i = 0; i < m_multiRunNo.size(); ++i) {
+
+      auto runNo = m_multiRunNo[i];
+      m_pres->doFitting(runNo, m_expectedPeaks);
+    }
     emit finished();
   }
 
@@ -58,7 +64,7 @@ private:
   EnggDiffFittingPresenter *m_pres;
 
   /// sample run to process
-  const std::string m_runNo;
+  const std::vector<std::string> m_multiRunNo;
   // parameters for fitting, list of peaks
   const std::string m_expectedPeaks;
 };

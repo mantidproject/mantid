@@ -42,6 +42,9 @@ New
   that the user has chosen and creates a background workspace out of them. It interpolates the
   points so the resulting background can be subtracted from the original data.
 
+- :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>` an algorithm which saves a TableWorkspace containing
+  diffraction fitting results as an ASCII file
+
 
 Improved
 ########
@@ -63,6 +66,9 @@ Improved
 
 - :ref:`ConvertUnits <algm-ConvertUnits>` will no longer corrupt an in place workspace if the algorithm fails.
 
+- :ref:`ConvertUnits <algm-ConvertUnits>` now has the option to take a workspace with Points as input.
+  A property has been added that will make the algorithm convert the workspace to Bins automatically. The output space will be converted back to Points.
+
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
 - :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
@@ -72,11 +78,15 @@ Improved
 - :ref:`LoadILLIndirect <algm-LoadILLIndirect>` now checks in the ``.nxs`` files which single detectors (SD) are
   enabled, and loads only those instead of all.
 
+- :ref:`FFT <algm-FFT>` deals correctly with histogram input data. Internally, it converts to point data, and the output is always a point data workspace. (It can be converted to histogram data using :ref:`ConvertToHistogram <algm-ConvertToHistogram>` if required).
+
 Deprecated
 ##########
 
 MD Algorithms (VATES CLI)
 #########################
+
+- :ref:`MergeMD <algm-MergeMD>` now preserves the display normalization from the first workspace in the list
 
 Performance
 -----------
@@ -104,6 +114,7 @@ Python
   and :py:obj:`mantid.kernel.Material` has been modified to expose the
   individual atoms.
 - :py:obj:`mantid.geometry.OrientedLattice` set U with determinant -1 exposed to python
+- The setDisplayNormalization and setDisplayNormalizationHisto methods for MDEventWorkspaces are now exposed to Python
 
 Python Algorithms
 #################
