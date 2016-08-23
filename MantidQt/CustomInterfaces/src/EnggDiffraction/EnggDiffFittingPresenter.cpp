@@ -389,45 +389,56 @@ void EnggDiffFittingPresenter::processSingleRun(
 }
 
 void EnggDiffFittingPresenter::updateFittingDirVec(
-    const std::string &focusDir, const std::string &runNumberVec,
-    std::vector<std::string> &fittingRunNoDirVec,
-    std::vector<std::string> &foundRunNumber) {
+    const std::string &directoryToSearch,
+    const std::string &baseFileNamesToFind,
+    std::vector<std::string> &foundFullFilePaths,
+    std::vector<std::string> &foundBaseNames) {
 
   try {
     bool found = false;
 
-    const std::string cwd(focusDir);
-    Poco::DirectoryIterator it(cwd);
-    Poco::DirectoryIterator end;
-    while (it != end) {
-      if (it->isFile()) {
-        std::string itFilePath = it->path();
-        Poco::Path itBankfPath(itFilePath);
+    // Ask for an iterator of all files/folders in 'directoryToSearch'
+    Poco::DirectoryIterator directoryIter(directoryToSearch);
+    Poco::DirectoryIterator directoryIterEnd;
 
-        std::string itbankFileName = itBankfPath.getBaseName();
-        // check if it not any other file.. e.g: texture
-        if (itbankFileName.find(runNumberVec) != std::string::npos) {
-          fittingRunNoDirVec.push_back(itFilePath);
+    // Walk through every file within that folder looking for required files
+    while (directoryIter != directoryIterEnd) {
+
+      // Get files and not folders (don't recurse down)
+      if (directoryIter->isFile()) {
+
+        // Store the full path so if we get a matching file we know its path
+        const std::string fullPathToCheck = directoryIter->path();
+
+        // Get base name e.g. (ENGINX0012345)
+        // Poco forces us to create a file from path to ask for base name
+        // There must be a better way of doing this
+        const Poco::Path PocoFileName = directoryIter->path();
+        const std::string baseFileName = PocoFileName.getBaseName();
+
+        // Look for the user input by comparing the base name of the
+        // current file with the user input
+        if (baseFileName.find(baseFileNamesToFind) != std::string::npos) {
+          foundFullFilePaths.push_back(fullPathToCheck);
           found = true;
 
           // if only first loop in Fitting Runno then add directory
           if (g_fitting_runno_counter == 1) {
-            g_multi_run_directories.push_back(itFilePath);
+            g_multi_run_directories.push_back(fullPathToCheck);
           }
         }
       }
-      ++it;
+      ++directoryIter;
     }
 
     if (found) {
-      foundRunNumber.push_back(runNumberVec);
+      foundBaseNames.push_back(baseFileNamesToFind);
     }
 
   } catch (std::runtime_error &re) {
     m_view->userWarning("Invalid file",
                         "File not found in the following directory; " +
-                            focusDir + ". " +
-                            static_cast<std::string>(re.what()));
+                            directoryToSearch + ". " + re.what());
   }
 }
 
@@ -1469,7 +1480,7 @@ void EnggDiffFittingPresenter::setDefaultBank(
 }
 
 bool EnggDiffFittingPresenter::isDigit(const std::string text) const {
-	return std::all_of(text.cbegin(), text.cend(), ::isdigit);
+  return std::all_of(text.cbegin(), text.cend(), ::isdigit);
 }
 
 void EnggDiffFittingPresenter::plotFitPeaksCurves() {
