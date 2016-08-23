@@ -317,7 +317,7 @@ void EnggDiffFittingPresenter::browsedFile(
     // selected vector
     // dummy vector not being used in this case
     std::vector<std::string> dummy;
-    updateFittingDirVec(bankFileDir, foc_file, runnoDirVector, dummy);
+    findFilePathsFromBaseName(bankFileDir, foc_file, runnoDirVector, dummy);
 
     m_view->setFittingRunNumVec(runnoDirVector);
 
@@ -373,7 +373,8 @@ void EnggDiffFittingPresenter::processSingleRun(
   // dummy vector will not be used
 
   std::vector<std::string> foundRunNumber;
-  updateFittingDirVec(focusDir, strFocusedFile, runnoDirVector, foundRunNumber);
+  findFilePathsFromBaseName(focusDir, strFocusedFile, runnoDirVector,
+                            foundRunNumber);
   m_view->setFittingRunNumVec(runnoDirVector);
 
   // add bank to the combo-box and list view
@@ -388,7 +389,7 @@ void EnggDiffFittingPresenter::processSingleRun(
   }
 }
 
-void EnggDiffFittingPresenter::updateFittingDirVec(
+void EnggDiffFittingPresenter::findFilePathsFromBaseName(
     const std::string &directoryToSearch,
     const std::string &baseFileNamesToFind,
     std::vector<std::string> &foundFullFilePaths,
@@ -479,7 +480,7 @@ void EnggDiffFittingPresenter::enableMultiRun(
             "Please try again");
       } else {
 
-        // clear previous directories set before updateFittingDirVec
+        // clear previous directories set before findFilePathsFromBaseName
         if (g_fitting_runno_counter == 0) {
           g_multi_run_directories.clear();
         }
@@ -491,8 +492,8 @@ void EnggDiffFittingPresenter::enableMultiRun(
 
         for (size_t i = 0; i < RunNumberVec.size(); i++) {
           // save dir for every vector
-          updateFittingDirVec(focusDir, RunNumberVec[i], fittingRunNoDirVec,
-                              foundRunNumber);
+          findFilePathsFromBaseName(focusDir, RunNumberVec[i],
+                                    fittingRunNoDirVec, foundRunNumber);
         }
 
         int diff = (lastNum - firstNum) + 1;
