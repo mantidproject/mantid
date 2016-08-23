@@ -101,7 +101,9 @@ public:
 
     for (size_t i = 0; i < outCounts.y().size(); i++) {
       TS_ASSERT_EQUALS(outCounts.y()[i], 5.0);
+      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(5), 1e5);
       TS_ASSERT_EQUALS(outFreq.y()[i], 12.0);
+      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
     }
   }
 
@@ -120,12 +122,14 @@ public:
     for (size_t i = 0; i < outCounts.y().size(); i++) {
       TS_ASSERT_EQUALS(outCounts.y()[i],
                        hist.y()[2 * i] + hist.y()[(2 * i) + 1]);
+      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e5);
       TS_ASSERT_EQUALS(outFreq.y()[i],
                        (histFreq.y()[2 * i] + histFreq.y()[(2 * i) + 1]) / 2);
+      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
     }
   }
 
-  void testSplitBinsAssymetric() {
+  void testSplitBinsAsymmetric() {
     // Handles the case where
     // |  |  |   becomes:
     // ||   ||
@@ -143,9 +147,14 @@ public:
     TS_ASSERT_EQUALS(outFreq.y()[0], histFreq.y()[0]);
     TS_ASSERT_EQUALS(outFreq.y()[1], (histFreq.y()[0] + histFreq.y()[1]) / 2);
     TS_ASSERT_EQUALS(outFreq.y()[2], histFreq.y()[1]);
+
+    for (size_t i = 0; i < outCounts.y().size(); i++) {
+      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e5);
+      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
+    }
   }
 
-  void testCombineBinsAssymetric() {
+  void testCombineBinsAsymmetric() {
     // Handles the case where
     // ||   ||   becomes:
     // |  |  |
@@ -161,9 +170,14 @@ public:
 
     TS_ASSERT_EQUALS(outFreq.y()[0], (histFreq.y()[0] + histFreq.y()[1]) / 2);
     TS_ASSERT_EQUALS(outFreq.y()[1], (histFreq.y()[1] + histFreq.y()[2]) / 2);
+
+    for (size_t i = 0; i < outCounts.y().size(); i++) {
+      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e5);
+      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
+    }
   }
 
-  void testSplitCombineBinsAssymetric() {
+  void testSplitCombineBinsAsymmetric() {
     // Handles the case where
     // | | | |   becomes:
     // ||   ||
@@ -184,9 +198,14 @@ public:
         outFreq.y()[1],
         ((histFreq.y()[0] / 2) + histFreq.y()[1] + (histFreq.y()[2] / 2)) / 2);
     TS_ASSERT_EQUALS(outFreq.y()[2], histFreq.y()[2]);
+
+    for (size_t i = 0; i < outCounts.y().size(); i++) {
+      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e5);
+      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
+    }
   }
 
-  void testSplitCombineBinsAssymetric2() {
+  void testSplitCombineBinsAsymmetric2() {
     // Handles the case where
     // ||   ||   becomes:
     // | | | |
@@ -204,6 +223,105 @@ public:
     TS_ASSERT_EQUALS(outFreq.y()[0], (histFreq.y()[0] + histFreq.y()[1]) / 2);
     TS_ASSERT_EQUALS(outFreq.y()[1], histFreq.y()[1]);
     TS_ASSERT_EQUALS(outFreq.y()[2], (histFreq.y()[1] + histFreq.y()[2]) / 2);
+
+    for (size_t i = 0; i < outCounts.y().size(); i++) {
+      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e5);
+      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
+    }
+  }
+
+  void testSmallerBinsAsymmetric() {
+    // Handles the case where
+    // | | | |   becomes:
+    //  | | |
+    Histogram hist(BinEdges{0, 1, 2, 3}, Counts{15, 35, 9});
+    Histogram histFreq(BinEdges{0, 1, 2, 3}, Frequencies{17, 8, 15});
+    BinEdges edges{0.5, 1.5, 2.5};
+
+    auto outCounts = rebin(hist, edges);
+    auto outFreq = rebin(histFreq, edges);
+
+    TS_ASSERT_EQUALS(outCounts.y()[0], (hist.y()[0] + hist.y()[1]) / 2);
+    TS_ASSERT_EQUALS(outCounts.y()[1], (hist.y()[1] + hist.y()[2]) / 2);
+
+    TS_ASSERT_EQUALS(outFreq.y()[0], (histFreq.y()[0] + histFreq.y()[1]) / 2);
+    TS_ASSERT_EQUALS(outFreq.y()[1], (histFreq.y()[1] + histFreq.y()[2]) / 2);
+
+    for (size_t i = 0; i < outCounts.y().size(); i++) {
+      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e5);
+      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
+    }
+  }
+
+  void testLargerRangeAsymmetric() {
+    // Handles the case where
+    //  | | |    becomes:
+    // | | | |
+    Histogram hist(BinEdges{0.5, 1.5, 2.5}, Counts{11, 23});
+    Histogram histFreq(BinEdges{0.5, 1.5, 2.5}, Frequencies{100, 14});
+    BinEdges edges{0, 1, 2, 3};
+
+    auto outCounts = rebin(hist, edges);
+    auto outFreq = rebin(histFreq, edges);
+
+    TS_ASSERT_EQUALS(outCounts.y()[0], hist.y()[0] / 2);
+    TS_ASSERT_EQUALS(outCounts.y()[1], (hist.y()[0] + hist.y()[1]) / 2);
+    TS_ASSERT_EQUALS(outCounts.y()[2], hist.y()[1] / 2);
+
+    TS_ASSERT_EQUALS(outFreq.y()[0], histFreq.y()[0] / 2);
+    TS_ASSERT_EQUALS(outFreq.y()[1], (histFreq.y()[0] + histFreq.y()[1]) / 2);
+    TS_ASSERT_EQUALS(outFreq.y()[2], histFreq.y()[1] / 2);
+
+    for (size_t i = 0; i < outCounts.y().size(); i++) {
+      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e5);
+      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
+    }
+  }
+
+  void testSmallerBinsSymmetric() {
+    // Handles the case where
+    //  | | | | becomes:
+    //	  | |
+    Histogram hist(BinEdges{0, 1, 2, 3}, Counts{15, 35, 9});
+    Histogram histFreq(BinEdges{0, 1, 2, 3}, Frequencies{17, 8, 15});
+    BinEdges edges{1, 2};
+
+    auto outCounts = rebin(hist, edges);
+    auto outFreq = rebin(histFreq, edges);
+
+    TS_ASSERT_EQUALS(outCounts.y()[0], hist.y()[1]);
+    TS_ASSERT_EQUALS(outCounts.e()[0], hist.e()[1]);
+
+    TS_ASSERT_EQUALS(outFreq.y()[0], histFreq.y()[1]);
+    TS_ASSERT_EQUALS(outFreq.e()[0], histFreq.e()[1]);
+  }
+
+  void testLargerBinsSymmetric() {
+    // Handles the case where
+    //  | |    becomes:
+    //| | | |
+    Histogram hist(BinEdges{1, 2}, Counts{20});
+    Histogram histFreq(BinEdges{1, 2}, Frequencies{13});
+    BinEdges edges{0, 1, 2, 3};
+
+    auto outCounts = rebin(hist, edges);
+    auto outFreq = rebin(histFreq, edges);
+
+    TS_ASSERT_EQUALS(outCounts.y()[0], 0);
+    TS_ASSERT_EQUALS(outCounts.y()[1], hist.y()[0]);
+    TS_ASSERT_EQUALS(outCounts.y()[2], 0);
+
+    TS_ASSERT_EQUALS(outCounts.e()[0], 0);
+    TS_ASSERT_DELTA(outCounts.e()[1], std::sqrt(outCounts.y()[1]), 1e5);
+    TS_ASSERT_EQUALS(outCounts.e()[2], 0);
+
+    TS_ASSERT_EQUALS(outFreq.y()[0], 0);
+    TS_ASSERT_EQUALS(outFreq.y()[1], histFreq.y()[0]);
+    TS_ASSERT_EQUALS(outFreq.y()[2], 0);
+
+    TS_ASSERT_EQUALS(outFreq.e()[0], 0);
+    TS_ASSERT_DELTA(outFreq.e()[1], std::sqrt(outFreq.y()[1]), 1e5);
+    TS_ASSERT_EQUALS(outFreq.e()[2], 0);
   }
 
 private:
@@ -243,22 +361,22 @@ public:
     setupOutput();
   }
 
-  void testrebinSmallerBins() {
+  void testRebinCountsSmallerBins() {
     for (int i = 0; i < nIters; i++)
       rebin(hist, smBins);
   }
 
-  void testrebinSmallerBins() {
+  void testRebinFrequenciesSmallerBins() {
     for (int i = 0; i < nIters; i++)
       rebin(histFreq, smBins);
   }
 
-  void testrebinLargerBins() {
+  void testRebinCountsLargerBins() {
     for (int i = 0; i < nIters; i++)
       rebin(hist, lgBins);
   }
 
-  void testrebinLargerBins() {
+  void testRebinFrequenciesLargerBins() {
     for (int i = 0; i < nIters; i++)
       rebin(histFreq, lgBins);
   }

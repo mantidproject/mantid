@@ -132,30 +132,30 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
       } else {
         factor = 1 / nwidth;
         ynew[inew] *= factor;
-        enew[inew] = sqrt(enew[inew]) * factor;
+        enew[inew] = sqrt(enew[inew] * factor);
         inew++;
       }
     }
   }
+
   return Histogram(binEdges, newFrequencies, newFrequencyStdDev);
 }
-}
+} // anonymous namespace
 
 namespace Mantid {
 namespace HistogramData {
 
 Histogram rebin(const Histogram &input, const BinEdges &binEdges) {
-  if (input.xMode != Histogram::XMode::BinEdges)
+  if (input.xMode() != Histogram::XMode::BinEdges)
     throw std::runtime_error(
         "XMode must be Histogram::XMode::BinEdges for input histogram");
-  if (input.yMode == Histogram::YMode::Counts)
+  if (input.yMode() == Histogram::YMode::Counts)
     return rebinCounts(input, binEdges);
-  else if (input.yMode == Histogram::YMode::Frequencies)
+  else if (input.yMode() == Histogram::YMode::Frequencies)
     return rebinFrequencies(input, binEdges);
   else
     throw std::runtime_error("YMode must be defined for input histogram.");
 }
-
 
 } // namespace HistogramData
 } // namespace Mantid
