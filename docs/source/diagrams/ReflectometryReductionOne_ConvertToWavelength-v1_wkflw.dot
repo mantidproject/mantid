@@ -1,0 +1,90 @@
+digraph ReflectometryReductionOne {
+label = "ReflectometryReductionOne ConvertToWavelength Flowchart"
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWS             [label="InputWorkspace"]
+  outputWS            [label="OutputWorkspace"]
+  wavMin              [label="WavelengthMin"]
+  wavMax              [label="WavelengthMax"]
+  detWS               [label="DetectorWorkspace"]
+  monStartWSIndex     [label="StartWorkspaceIndex"]
+  monEndWSIndex       [label="EndWorkspaceIndex"]
+  regionOfDirectBeam  [label="RegionOf-\nDirectBeam"]
+}
+
+subgraph decisions {
+ $decision_style
+  checkMonUnity     [label="Monitors?"]
+  monIntWavInterval [label="Monitor Integration\nWavelength Interval"]
+  checkNormDetMon   [label="Normalize by\nIntegrated Monitors?"]
+  checkBgMinMax     [label="Min or Max\nnon-zero?"]
+  checkMultDet      [label="Multidetector?"]
+}
+
+subgraph algorithms {
+ $algorithm_style
+  convertDet            [label="Convert Units\n(AlignBins = True)"]
+  convertMon            [label="Convert Units"]
+  groupDet              [label="Group Detectors"]
+  intMon                [label="Integrate"]
+  cropDetWS             [label="Crop Detector\nWorkspace"]
+  rebinDet              [label="Rebin Detectors"]
+  rebinToWS             [label="Rebin To\nWorkspace"]
+  cropMonWS             [label="Crop Monitor\nWorkspace"]
+  calcFlatBg            [label="Calculate Flat\nBackground"]
+  sumDirectBeam         [label="Sum Direct\nBeam"]
+  rebinByDirectBeam     [label="Rebin By\nDirect Beam"]
+  normalizeByDirectBeam [label="Normalize By\nDirect Beam"]
+}
+
+subgraph processes {
+ $process_style
+}
+
+subgraph values {
+ $value_style
+  valUnity        [label="I(1)"]
+  valMon          [label="I(&lambda;)"]
+  valIntegrated   [label="&Sigma; I(&lambda;)"]
+}
+
+inputWS               -> convertDet       [label="Detectors"]
+inputWS               -> checkMonUnity    [label="Monitors"]
+checkMonUnity         -> convertMon       [label="Yes"]
+checkMonUnity         -> valUnity         [label="No"]
+convertDet            -> valDet
+valDet                -> groupDet
+procCommands          -> groupDet
+convertMon            -> valMon
+monIntWavInterval     -> intMon
+checkNormDetMon       -> intMon           [label="Yes"]
+checkNormDetMon       -> outputWS         [label="No"]
+groupDet              -> cropDetWS
+wavMin                -> cropDetWS
+wavMax                -> cropDetWS
+cropDetWS             -> rebinDet
+wavStep               -> rebinDet
+rebinDet              -> detWS
+detWS                 -> rebinToWS
+valMon                -> cropMonWS
+monStartWSIndex       -> cropMonWS
+monEndWSIndex         -> cropMonWS
+cropMonWS             -> checkBgMinMax
+checkBgMinMax         -> calcFlatBg       [label="Yes"]
+checkBgMinMax         -> rebinToWS        [label="No"]
+calcFlatBg            -> rebinToWS
+rebinToWS             -> checkNormDetMon
+detWS                 -> checkMultDet
+valUnity              -> outputWS
+intMon                -> valIntegrated
+valIntegrated         -> outputWS
+checkMultDet          -> sumDirectBeam    [label="Yes"]
+checkMultDet          -> outputWS         [label="No"]
+regionOfDirectBeam    -> sumDirectBeam
+sumDirectBeam         -> rebinByDirectBeam
+rebinByDirectBeam     -> normalizeByDirectBeam
+normalizeByDirectBeam -> outputWS
+
+}
