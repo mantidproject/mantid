@@ -536,12 +536,17 @@
          </property>
          <item>
           <property name="text">
-           <string>None</string>
+           <string>Contour</string>
           </property>
          </item>
          <item>
           <property name="text">
            <string>Spectra</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Both</string>
           </property>
          </item>
         </widget>
