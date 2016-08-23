@@ -41,17 +41,17 @@ class PG3Calibration(stresstesting.MantidStressTest):
                                                Extension = '_event.nxs')
 
         if isinstance(output, basestring):
-            self.saved_cal_file = output
+            self.saved_cal_file = output.replace('.h5','.cal')
         else:
             raise NotImplementedError("Output from CalibrateRectangularDetectors is NOT string for calibration file name!")
 
         # load saved cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file, WorkspaceName="PG3_2538",
-                    MakeGroupingWorkspace=False)
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file,
+                    WorkspaceName="PG3_2538", MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_offsets",MaskedWorkspace="PG3_2538_mask")
         # load golden cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_golden.cal", WorkspaceName="PG3_2538_golden",
-                    MakeGroupingWorkspace=False)
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_golden.cal",
+                    WorkspaceName="PG3_2538_golden", MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_golden_offsets",MaskedWorkspace="PG3_2538_golden_mask")
 
     def validateMethod(self):
@@ -89,17 +89,17 @@ class PG3CCCalibration(stresstesting.MantidStressTest):
                                                Extension = '_event.nxs')
 
         if isinstance(output, basestring):
-            self.saved_cal_file = output
+            self.saved_cal_file = output.replace('.h5','.cal')
         else:
             raise NotImplementedError("Output from CalibrateRectangularDetectors is NOT string for calibration file name!")
 
         # load saved cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file, WorkspaceName="PG3_2538",
-                    MakeGroupingWorkspace=False)
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file,
+                    WorkspaceName="PG3_2538", MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_offsets",MaskedWorkspace="PG3_2538_mask")
         # load golden cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_goldenCC.cal", WorkspaceName="PG3_2538_golden",
-                    MakeGroupingWorkspace=False)
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_goldenCC.cal",
+                    WorkspaceName="PG3_2538_golden", MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_golden_offsets",MaskedWorkspace="PG3_2538_golden_mask")
 
     def validateMethod(self):
