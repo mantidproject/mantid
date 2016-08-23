@@ -64,8 +64,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         validator.setLower(0)
         self.declareProperty(IntArrayProperty("Background", values=[0], direction=Direction.Input,
                                               validator=validator))
-        self.declareProperty("CompressOnRead", False,
-                             "Compress the event list when reading in the data")
         self.declareProperty("XPixelSum", 1,
                              "Sum detector pixels in X direction.  Must be a factor of X total pixels.  Default is 1.")
         self.declareProperty("YPixelSum", 1,
@@ -168,25 +166,14 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             if filterWall[1] > 0.:
                 kwargs["FilterByTimeStop"] = filterWall[1]
 
-        if self.getProperty("CompressOnRead").value:
-            kwargs["CompressTolerance"] = .1
-
         wkspName = getBasename(filename)
 
         LoadEventNexus(Filename=filename, OutputWorkspace=wkspName, **kwargs)
-        # TODO should these next few lines be here
-        # For NOMAD data before Aug 2012, use the updated geometry
-        #if str(wksp.getInstrument().getValidFromDate()) == "1900-01-31T23:59:59" and str(self._instrument) == "NOMAD":
-        #    path=config["instrumentDefinition.directory"]
-        #    LoadInstrument(Workspace=wksp, Filename=path+'/'+"NOMAD_Definition_20120701-20120731.xml",
-        #                   RewriteSpectraMap=False)
 
-        if self._filterBadPulses and not self.getProperty("CompressOnRead").value:
-            FilterBadPulses(InputWorkspace=wkspName, OutputWorkspace=wkspName)
+        FilterBadPulses(InputWorkspace=wkspName, OutputWorkspace=wkspName)
 
-        if not self.getProperty("CompressOnRead").value:
-            CompressEvents(InputWorkspace=wkspName, OutputWorkspace=wkspName,
-                           Tolerance=COMPRESS_TOL_TOF) # 100ns
+        CompressEvents(InputWorkspace=wkspName, OutputWorkspace=wkspName,
+                       Tolerance=COMPRESS_TOL_TOF) # 100ns
 
         return wkspName
 
@@ -485,9 +472,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 if DIFCref > 0:
                     RemoveLowResTOF(InputWorkspace=samRun, OutputWorkspace=samRun,
                                     ReferenceDIFC=DIFCref)
-            if not self.getProperty("CompressOnRead").value:
-                CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
-                                      Tolerance=COMPRESS_TOL_TOF) # 100ns
 
             ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun, Target="dSpacing")
 
