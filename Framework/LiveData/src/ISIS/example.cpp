@@ -5,12 +5,12 @@
 #include "Poco/Net/StreamSocket.h"
 #include "Poco/Net/ServerSocket.h"
 
-#include "MantidISISLiveData/TCPEventStreamDefs.h"
+#include "MantidLiveData/ISIS/TCPEventStreamDefs.h"
 
 #include <iostream>
 
 namespace Mantid {
-namespace ISISLiveData {
+namespace LiveData {
 
 /// connect to an event mode control progam and read live events
 int liveData(const std::string &host) {

@@ -136,6 +136,10 @@ public:
   void requestRedraw(bool resetPeakVisibility = false);
   /// Enable lighting if the implementation allows it
   void enableLighting(bool on);
+  /// Load settings for the projection surface from a project file
+  virtual void loadFromProject(const std::string &lines);
+  /// Save settings for the projection surface to a project file
+  virtual std::string saveToProject() const;
 
   //-----------------------------------
   //    Mask methods

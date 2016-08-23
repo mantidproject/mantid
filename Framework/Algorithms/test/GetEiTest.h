@@ -297,7 +297,7 @@ public:
   }
   static void destroySuite(GetEiTestPerformance *suite) { delete suite; }
 
-  void setUp() {
+  void setUp() override {
     getEiTest = GetEiTest();
     inputWS1 = GetEiTestHelper::createTestWorkspaceWithMonitors();
     outputName1 = "eitest1";
@@ -310,7 +310,7 @@ public:
     // This algorithm needs a name attached to the workspace
   }
 
-  void tearDown() {
+  void tearDown() override {
     AnalysisDataService::Instance().remove(outputName1);
     AnalysisDataService::Instance().remove(outputName2);
   }

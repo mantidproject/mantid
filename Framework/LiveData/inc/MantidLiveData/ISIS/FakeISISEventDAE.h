@@ -1,5 +1,5 @@
-#ifndef MANTID_ISISLIVEDATA_FAKEISISHISTODAE_H_
-#define MANTID_ISISLIVEDATA_FAKEISISHISTODAE_H_
+#ifndef MANTID_LIVEDATA_FAKEISISEVENTDAE_H_
+#define MANTID_LIVEDATA_FAKEISISEVENTDAE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -15,7 +15,7 @@ class TCPServer;
 }
 
 namespace Mantid {
-namespace ISISLiveData {
+namespace LiveData {
 /**
     Simulates ISIS histogram DAE. It runs continuously until canceled and
    listens to port 6789 for
@@ -73,4 +73,4 @@ private:
 } // namespace LiveData
 } // namespace Mantid
 
-#endif /*MANTID_LIVEDATA_FAKEISISHISTODAE_H_*/
+#endif /*MANTID_LIVEDATA_FAKEEventSHISTODAE_H_*/

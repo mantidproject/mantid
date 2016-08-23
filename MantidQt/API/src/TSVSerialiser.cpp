@@ -1,4 +1,4 @@
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include "MantidKernel/Logger.h"
 
@@ -9,6 +9,8 @@
 namespace {
 Mantid::Kernel::Logger g_log("TSVSerialiser");
 }
+
+using namespace MantidQt::API;
 
 TSVSerialiser::TSVSerialiser() : m_curIndex(0), m_midLine(false) {}
 
@@ -149,6 +151,11 @@ std::string TSVSerialiser::lineAsString(const std::string &name,
   return lines[i];
 }
 
+QString TSVSerialiser::lineAsQString(const std::string &name,
+                                     const size_t i) const {
+  return QString::fromStdString(lineAsString(name, i));
+}
+
 bool TSVSerialiser::selectLine(const std::string &name, const size_t i) {
   if (!hasLine(name))
     return false;
@@ -188,6 +195,19 @@ int TSVSerialiser::asInt(const size_t i) const {
   return ret;
 }
 
+size_t TSVSerialiser::asSize_t(const size_t i) const {
+  if (i >= m_curValues.size())
+    return 0;
+
+  std::string valStr = m_curValues.at(i);
+
+  std::stringstream valSS(valStr);
+  size_t ret;
+  valSS >> ret;
+
+  return ret;
+}
+
 double TSVSerialiser::asDouble(const size_t i) const {
   if (i >= m_curValues.size())
     return 0.00;
@@ -214,6 +234,50 @@ float TSVSerialiser::asFloat(const size_t i) const {
   return ret;
 }
 
+bool TSVSerialiser::asBool(const size_t i) const {
+  if (i >= m_curValues.size())
+    return false;
+
+  std::string valStr = m_curValues.at(i);
+
+  std::stringstream valSS(valStr);
+  bool ret;
+  valSS >> ret;
+
+  return ret;
+}
+
+QRect TSVSerialiser::asQRect(const size_t i) const {
+  if (i + 3 >= m_curValues.size())
+    return QRect();
+
+  std::string valStr = m_curValues.at(i);
+
+  std::stringstream valSS(valStr);
+  int x0, y0, x1, y1;
+  valSS >> x0 >> y0 >> x1 >> y1;
+
+  QPoint point0(x0, y0);
+  QPoint point1(x1, y1);
+  QRect rect(point0, point1);
+
+  return rect;
+}
+
+QColor TSVSerialiser::asQColor(const size_t i) const {
+  if (i + 3 >= m_curValues.size())
+    return QColor();
+
+  std::string valStr = m_curValues.at(i);
+
+  std::stringstream valSS(valStr);
+  int r, g, b, a;
+  valSS >> r >> g >> b >> a;
+
+  QColor color(r, g, b, a);
+  return color;
+}
+
 std::string TSVSerialiser::asString(const size_t i) const {
   if (i >= m_curValues.size())
     return "";
@@ -221,8 +285,20 @@ std::string TSVSerialiser::asString(const size_t i) const {
   return m_curValues.at(i);
 }
 
+QString TSVSerialiser::asQString(const size_t i) const {
+  if (i >= m_curValues.size())
+    return "";
+
+  return QString::fromStdString(m_curValues.at(i));
+}
+
 TSVSerialiser &TSVSerialiser::operator>>(int &val) {
   val = asInt(m_curIndex++);
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator>>(size_t &val) {
+  val = asSize_t(m_curIndex++);
   return *this;
 }
 
@@ -243,6 +319,21 @@ TSVSerialiser &TSVSerialiser::operator>>(std::string &val) {
 
 TSVSerialiser &TSVSerialiser::operator>>(QString &val) {
   val = QString::fromUtf8(asString(m_curIndex++).c_str());
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator>>(bool &val) {
+  val = asBool(m_curIndex++);
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator>>(QRect &val) {
+  val = asQRect(m_curIndex++);
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator>>(QColor &val) {
+  val = asQColor(m_curIndex++);
   return *this;
 }
 
@@ -281,6 +372,31 @@ TSVSerialiser &TSVSerialiser::operator<<(const double &val) {
 
 TSVSerialiser &TSVSerialiser::operator<<(const int &val) {
   m_output << "\t" << val;
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator<<(const size_t &val) {
+  m_output << "\t" << val;
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator<<(const bool &val) {
+  m_output << "\t" << val;
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator<<(const QRect &val) {
+  auto point0 = val.topLeft();
+  auto point1 = val.bottomRight();
+  m_output << "\t" << point0.x() << "\t" << point0.y() << "\t" << point1.x()
+           << "\t" << point1.y();
+  return *this;
+}
+
+TSVSerialiser &TSVSerialiser::operator<<(const QColor &val) {
+
+  m_output << "\t" << val.red() << "\t" << val.green() << "\t" << val.blue()
+           << "\t" << val.alpha();
   return *this;
 }
 
