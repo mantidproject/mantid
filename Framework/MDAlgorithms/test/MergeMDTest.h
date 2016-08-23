@@ -82,9 +82,7 @@ public:
     // Name of the output workspace.
     std::string outWSName("MergeMDTest_OutputWS");
 
-    auto ws = execute_merge(outWSName);
-    if (!ws)
-      return;
+    auto ws = execute_merge(outWSName); // cannot be nullptr
 
     // Number of events is the sum of the 3 input ones.
     TS_ASSERT_EQUALS(ws->getNPoints(), 2 * 2 + 6 * 6 + 10 * 10);
@@ -109,9 +107,7 @@ public:
                                       "Dimensions", "Axis0,Axis1", "Extents",
                                       "0,10,0,20");
 
-    auto ws = execute_merge(outWSName);
-    if (!ws)
-      return;
+    auto ws = execute_merge(outWSName); // cannot be nullptr
 
     // Number of events is the sum of the 3 input ones, minus the masked events
     TS_ASSERT_EQUALS(ws->getNPoints(), 2 * 2 + 6 * 6 + 10 * 10 - 5 * 10);
@@ -135,9 +131,7 @@ public:
     ws0->setDisplayNormalization(API::MDNormalization::NoNormalization);
     ws0->setDisplayNormalizationHisto(
         API::MDNormalization::NumEventsNormalization);
-    auto ws = execute_merge(outWSName);
-    if (!ws)
-      return;
+    auto ws = execute_merge(outWSName); // cannot be nullptr
 
     TS_ASSERT_EQUALS(API::MDNormalization::NoNormalization,
                      ws->displayNormalization());
