@@ -170,7 +170,6 @@ void IndirectDiffractionReduction::algorithmComplete(bool error) {
   }
   // Enable plotting
   m_uiForm.pbPlot->setEnabled(true);
-  m_uiForm.cbPlotType->setEnabled(true);
 }
 
 /**
@@ -184,7 +183,7 @@ void IndirectDiffractionReduction::plotResults() {
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
-  QString plotType = m_uiForm.cbPlotType->currentText();
+  QString plotType = "Spectra";
 
   QString pyInput = "from mantidplot import plotSpectrum, plot2D\n";
 

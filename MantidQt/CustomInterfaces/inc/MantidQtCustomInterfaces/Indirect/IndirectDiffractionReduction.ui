@@ -557,7 +557,7 @@
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>Plot</string>
+          <string>Plot Spectra</string>
          </property>
         </widget>
        </item>
