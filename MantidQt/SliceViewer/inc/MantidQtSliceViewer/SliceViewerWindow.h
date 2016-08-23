@@ -102,7 +102,7 @@ protected:
   /// Width of the LineViewer last time it was open
   int m_lastLinerWidth;
 
-  /// Width of the PeaksViewer last tiem it was open
+  /// Width of the PeaksViewer last time it was open
   int m_lastPeaksViewerWidth;
 
   /// Window width
