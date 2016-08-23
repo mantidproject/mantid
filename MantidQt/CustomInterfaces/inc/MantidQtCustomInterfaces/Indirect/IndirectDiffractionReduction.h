@@ -32,11 +32,12 @@ public slots:
   void run();
   void openDirectoryDialog();
   void help();
-  void plotResults(bool error);
+  void plotResults();
   void runFilesChanged();
   void runFilesFinding();
   void runFilesFound();
   void individualGroupingToggled(int state);
+  void algorithmComplete(bool error);
 
 private:
   void initLayout() override;

@@ -90,6 +90,9 @@ void IndirectDiffractionReduction::initLayout() {
   connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this,
           SLOT(individualGroupingToggled(int)));
 
+  // Handle plotting
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotResults()));
+
   loadSettings();
 
   // Update invalid rebinning markers
@@ -136,21 +139,27 @@ void IndirectDiffractionReduction::run() {
 }
 
 /**
- * Handles plotting result spectra from algorithm chains.
+ * Handles completion of algorithm
  *
  * @param error True if the chain was stopped due to error
  */
-void IndirectDiffractionReduction::plotResults(bool error) {
+void IndirectDiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(plotResults(bool)));
+    SLOT(algorithmComplete(bool)));
 
-  // Nothing can be plotted
   if (error) {
     showInformationBox(
-        "Error running diffraction reduction.\nSee Results Log for details.");
+      "Error running diffraction reduction.\nSee Results Log for details.");
     return;
   }
+}
+
+/**
+ * Handles plotting result spectra from algorithm chains.
+ */
+void IndirectDiffractionReduction::plotResults() {
+
 
   // Ungroup the output workspace if generic reducer was used
   if (AnalysisDataService::Instance().doesExist(
@@ -319,7 +328,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
 
   // Handles completion of the diffraction algorithm chain
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(plotResults(bool)));
+          SLOT(algorithmComplete(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -436,7 +445,7 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
 
   // Handles completion of the diffraction algorithm chain
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(plotResults(bool)));
+          SLOT(algorithmComplete(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
 }
