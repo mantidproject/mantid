@@ -4,6 +4,8 @@
 
 #include <QMenu>
 #include <QClipboard>
+#include <QMessageBox>
+#include <limits>
 
 namespace {
 QString makeNumber(double d) { return QString::number(d, 'g', 16); }
@@ -292,7 +294,16 @@ void EditLocalParameterDialog::setValueToLog(int i) {
 
   const auto &logName = m_uiForm.logValueSelector->getLog();
   const auto &function = m_uiForm.logValueSelector->getFunction();
-  const double value = multifit->getLogValue(logName, function, i);
+
+  double value = std::numeric_limits<double>::quiet_NaN();
+  try {
+    value = multifit->getLogValue(logName, function, i);
+  } catch (const std::invalid_argument &err) {
+    const auto &message =
+        QString("Failed to get log value:\n\n %1").arg(err.what());
+    multifit->logWarning(message.toStdString());
+    QMessageBox::critical(this, "MantidPlot - Error", message);
+  }
   m_values[i] = value;
   m_uiForm.tableWidget->item(i, valueColumn)->setText(makeNumber(value));
   updateRoleColumn(i);
