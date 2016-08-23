@@ -2609,8 +2609,7 @@ void SliceViewer::applyColorScalingForCurrentSliceIfRequired() {
  * Load the state of the slice viewer from a Mantid project file
  * @param lines :: lines from the project file to load state from
  */
-void SliceViewer::loadFromProject(const std::string &lines)
-{
+void SliceViewer::loadFromProject(const std::string &lines) {
   API::TSVSerialiser tsv(lines);
 
   int dimX, dimY, aspectRatio, normalization;
@@ -2733,8 +2732,7 @@ void SliceViewer::loadDimensionWidgets(const std::string &lines) {
  * Save the state of th slice viewer to a Mantid project file
  * @return a string representing the current state
  */
-std::string SliceViewer::saveToProject() const
-{
+std::string SliceViewer::saveToProject() const {
   API::TSVSerialiser tsv;
 
   tsv.writeLine("LineMode") << m_lineOverlay->isShown();

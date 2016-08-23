@@ -59,8 +59,7 @@ public:
   std::vector<std::string> values(const std::string &name,
                                   const size_t i = 0) const;
 
-  template <typename T>
-  TSVSerialiser &operator>>(std::vector<T> &val) {
+  template <typename T> TSVSerialiser &operator>>(std::vector<T> &val) {
     val.reserve(m_curValues.size() - m_curIndex);
 
     for (size_t i = m_curIndex; i < m_curValues.size(); ++i) {

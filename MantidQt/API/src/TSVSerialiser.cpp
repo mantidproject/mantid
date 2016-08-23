@@ -302,7 +302,6 @@ QPointF TSVSerialiser::asQPointF(const size_t i) {
   return point;
 }
 
-
 std::string TSVSerialiser::asString(const size_t i) const {
   if (i >= m_curValues.size())
     return "";

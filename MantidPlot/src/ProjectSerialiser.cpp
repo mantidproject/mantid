@@ -672,14 +672,16 @@ void ProjectSerialiser::loadWsToMantidTree(const std::string &wsName) {
  * @param tsv :: the TSVSerialiser object for the project file
  * @param fileVersion :: the version of the project file
  */
-void ProjectSerialiser::loadAdditionalWindows(const std::string &lines, const int fileVersion) {
+void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
+                                              const int fileVersion) {
   TSVSerialiser tsv(lines);
 
   if (tsv.selectSection("SliceViewer")) {
     std::string sliceLines;
     tsv >> sliceLines;
 
-    auto win = SliceViewer::SliceViewerWindow::loadFromProject(sliceLines, window, fileVersion);
+    auto win = SliceViewer::SliceViewerWindow::loadFromProject(
+        sliceLines, window, fileVersion);
     window->addSerialisableWindow(dynamic_cast<QObject *>(win));
   }
 }

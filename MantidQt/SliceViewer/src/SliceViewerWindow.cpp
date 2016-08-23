@@ -467,46 +467,45 @@ void SliceViewerWindow::afterReplaceHandle(
   }
 }
 
-API::IProjectSerialisable *SliceViewerWindow::loadFromProject(const std::string &lines, ApplicationWindow *app, const int fileVersion)
-{
-    UNUSED_ARG(app);
-    UNUSED_ARG(fileVersion);
-    MantidQt::API::TSVSerialiser tsv(lines);
-    QString wsName, label;
-    QRect geometry;
+API::IProjectSerialisable *SliceViewerWindow::loadFromProject(
+    const std::string &lines, ApplicationWindow *app, const int fileVersion) {
+  UNUSED_ARG(app);
+  UNUSED_ARG(fileVersion);
+  MantidQt::API::TSVSerialiser tsv(lines);
+  QString wsName, label;
+  QRect geometry;
 
-    tsv.selectLine("geometry");
-    tsv >> geometry;
-    tsv.selectLine("Workspace");
-    tsv >> wsName;
-    tsv.selectLine("Label");
-    tsv >> label;
+  tsv.selectLine("geometry");
+  tsv >> geometry;
+  tsv.selectLine("Workspace");
+  tsv >> wsName;
+  tsv.selectLine("Label");
+  tsv >> label;
 
-    auto window = new SliceViewerWindow(wsName, label);
-    window->m_slicer->loadFromProject(lines);
+  auto window = new SliceViewerWindow(wsName, label);
+  window->m_slicer->loadFromProject(lines);
 
-    // Load state of line viewer
-    if (tsv.selectSection("lineviewer")) {
-      std::string lineViewerLines;
-      tsv >> lineViewerLines;
-      window->m_liner->loadFromProject(lineViewerLines);
-    }
+  // Load state of line viewer
+  if (tsv.selectSection("lineviewer")) {
+    std::string lineViewerLines;
+    tsv >> lineViewerLines;
+    window->m_liner->loadFromProject(lineViewerLines);
+  }
 
-    // Load state of peaks viewer
-    if (tsv.selectSection("peaksviewer")) {
-      std::string peaksViewerLines;
-      tsv >> peaksViewerLines;
-      window->showPeaksViewer(true);
-      window->m_peaksViewer->loadFromProject(peaksViewerLines);
-    }
+  // Load state of peaks viewer
+  if (tsv.selectSection("peaksviewer")) {
+    std::string peaksViewerLines;
+    tsv >> peaksViewerLines;
+    window->showPeaksViewer(true);
+    window->m_peaksViewer->loadFromProject(peaksViewerLines);
+  }
 
-    window->setGeometry(geometry);
-    window->show();
-    return window;
+  window->setGeometry(geometry);
+  window->show();
+  return window;
 }
 
-std::string SliceViewerWindow::saveToProject(ApplicationWindow *app)
-{
+std::string SliceViewerWindow::saveToProject(ApplicationWindow *app) {
   UNUSED_ARG(app);
   MantidQt::API::TSVSerialiser tsv, tab;
   tab.writeLine("geometry") << geometry();

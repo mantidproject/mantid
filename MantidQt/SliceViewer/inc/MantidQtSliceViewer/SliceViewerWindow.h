@@ -39,11 +39,10 @@ public:
   const QString &getLabel() const;
   /// Load the state of the slice viewer from a Mantid project file
   static API::IProjectSerialisable *loadFromProject(const std::string &lines,
-                                               ApplicationWindow *app,
-                                               const int fileVersion);
+                                                    ApplicationWindow *app,
+                                                    const int fileVersion);
   /// Save the state of the slice viewer to a Mantid project file
   virtual std::string saveToProject(ApplicationWindow *app) override;
-
 
 private:
   void setLineViewerValues(QPointF start2D, QPointF end2D, double width);
