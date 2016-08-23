@@ -388,6 +388,18 @@ void EnggDiffFittingPresenter::processSingleRun(
   }
 }
 
+/**
+  * Finds the full file paths (including extensions) and stores them
+  * in a vector that match the given base filename (without ext) in
+  * the given folder. 
+  *
+  * @param directoryToSearch The directory to search for these files
+  * @param baseFileNames The base filename to find in this folder
+  * @param foundFullFilePaths Holds the paths of all files which match
+  * the given base filename
+  *
+  * @return True if any files were found or false if none were
+  */
 bool EnggDiffFittingPresenter::findFilePathsFromBaseName(
     const std::string &directoryToSearch,
     const std::string &baseFileNamesToFind,
