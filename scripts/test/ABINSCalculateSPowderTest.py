@@ -81,7 +81,7 @@ class ABINSCalculateSPowderTest(unittest.TestCase):
         _good_data = self._get_good_data(filename=name)
         _good_tester = CalculateS(filename=name + ".phonon", temperature=self._temperature, sample_form=self._sample_form,
                                   abins_data=_good_data["DFT"], instrument_name=self._instrument_name)
-        calculated_data = _good_tester.getS()
+        calculated_data = _good_tester.getData()
 
         self._check_data(good_data=_good_data["S"], data=calculated_data.extract())
 

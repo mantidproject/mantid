@@ -34,7 +34,7 @@ class ABINSCalculateQTest(unittest.TestCase):
         _core = "../ExternalData/Testing/Data/UnitTest/"
         producer = InstrumentProducer()
         self._tosca_instrument = producer.produceInstrument("TOSCA")
-        self._filename = path.relpath(_core + "Si2-sc.phonon")
+        self._filename = path.relpath(_core + "Si2-sc_Q_test.phonon")
 
     def test_simple(self):
         """
