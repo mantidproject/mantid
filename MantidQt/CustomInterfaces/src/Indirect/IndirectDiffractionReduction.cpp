@@ -146,19 +146,19 @@ void IndirectDiffractionReduction::run() {
 void IndirectDiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-    SLOT(algorithmComplete(bool)));
+             SLOT(algorithmComplete(bool)));
 
   if (error) {
     showInformationBox(
-      "Error running diffraction reduction.\nSee Results Log for details.");
+        "Error running diffraction reduction.\nSee Results Log for details.");
     return;
   }
   // Ungroup the output workspace if generic reducer was used
   if (AnalysisDataService::Instance().doesExist(
-    "IndirectDiffraction_Workspaces")) {
+          "IndirectDiffraction_Workspaces")) {
     WorkspaceGroup_sptr diffResultsGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        "IndirectDiffraction_Workspaces");
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            "IndirectDiffraction_Workspaces");
 
     m_plotWorkspaces.clear();
     m_plotWorkspaces = diffResultsGroup->getNames();
@@ -176,9 +176,6 @@ void IndirectDiffractionReduction::algorithmComplete(bool error) {
  * Handles plotting result spectra from algorithm chains.
  */
 void IndirectDiffractionReduction::plotResults() {
-
-
-
 
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
