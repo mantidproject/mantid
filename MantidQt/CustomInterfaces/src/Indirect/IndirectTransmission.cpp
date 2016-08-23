@@ -137,8 +137,8 @@ void IndirectTransmission::instrumentSet() {
  */
 void IndirectTransmission::saveClicked() {
   QString outputWs = (m_uiForm.dsSampleInput->getCurrentDataName() + "_trans");
-  bool save = checkADSForPlotSaveWorkspace(outputWs.toStdString(), false);
-  if (save)
+
+  if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), false))
     addSaveWorkspaceToQueue(outputWs);
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -148,8 +148,7 @@ void IndirectTransmission::saveClicked() {
  */
 void IndirectTransmission::plotClicked() {
   QString outputWs = (m_uiForm.dsSampleInput->getCurrentDataName() + "_trans");
-  bool plot = checkADSForPlotSaveWorkspace(outputWs.toStdString(), true);
-  if (plot)
+  if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), true))
     plotSpectrum(outputWs);
 }
 } // namespace CustomInterfaces

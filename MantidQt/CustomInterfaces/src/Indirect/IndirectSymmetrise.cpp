@@ -523,8 +523,8 @@ void IndirectSymmetrise::xRangeMaxChanged(double value) {
 void IndirectSymmetrise::plotClicked() {
 
   QStringList workspaces;
-  workspaces << m_uiForm.dsInput->getCurrentDataName()
-             << QString::fromStdString(m_pythonExportWsName);
+  workspaces.append(m_uiForm.dsInput->getCurrentDataName());
+  workspaces.append(QString::fromStdString(m_pythonExportWsName));
   plotSpectrum(workspaces);
 }
 
@@ -532,8 +532,7 @@ void IndirectSymmetrise::plotClicked() {
  * Handles saving of workspace
  */
 void IndirectSymmetrise::saveClicked() {
-  bool save = checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
-  if (save)
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
     plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 }
 } // namespace CustomInterfaces
