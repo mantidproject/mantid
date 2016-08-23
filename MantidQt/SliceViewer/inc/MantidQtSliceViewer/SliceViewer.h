@@ -76,9 +76,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget,
 public:
   SliceViewer(QWidget *parent = 0);
   ~SliceViewer() override;
-  void SliceViewer::switchQWTRaster(Mantid::API::IMDWorkspace_sptr ws,
-                                    size_t dimX, size_t dimY,
-                                    bool useNonOrthogonal);
+  
   void setWorkspace(const QString &wsName);
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
   Mantid::API::IMDWorkspace_sptr getWorkspace();
@@ -171,7 +169,8 @@ public slots:
   void showInfoAt(double, double);
 
   // Change in view slots
-  void checkForHKLDimension(size_t dimX, size_t dimY);
+  void checkForHKLDimension();
+  void switchQWTRaster(bool useNonOrthogonal);
   void changedShownDim(int index, int dim, int oldDim);
   void updateDisplaySlot(int index, double value);
   void resetZoom();
@@ -200,8 +199,8 @@ public slots:
   void copyImageToClipboard();
   void onPeaksViewerOverlayOptions();
   //Non Orthogonal
-  void setNonOrthogonalbtn(bool nonOrthogonalWorkspace, bool displayRequiresSkew);
-
+  void setNonOrthogonalbtn();
+  void disableOrthogonalAnalysisTools(bool checked);
   // Synced checkboxes
   void LineMode_toggled(bool);
   void SnapToGrid_toggled(bool);

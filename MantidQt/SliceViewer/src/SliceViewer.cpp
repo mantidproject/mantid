@@ -689,17 +689,16 @@ void SliceViewer::updateDimensionSliceWidgets() {
 
 //------------------------------------------
 void SliceViewer::switchQWTRaster(
-    Mantid::API::IMDWorkspace_sptr ws, size_t dimX, size_t dimY,
     bool useNonOrthogonal)
 {
-  if (useNonOrthogonal) {
+  if (useNonOrthogonal && ui.btnNonOrthogonalToggle->isChecked()) {
 	  m_data = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
   } else {
 	  m_data = Kernel::make_unique<API::QwtRasterDataMD>();
   }
-  
-  m_coordinateTransform = createCoordinateTransform(ws, m_dimX, m_dimY);
-  m_data->setWorkspace(ws);
+  setNonOrthogonalbtn();
+  m_coordinateTransform = createCoordinateTransform(m_ws, m_dimX, m_dimY);
+  m_data->setWorkspace(m_ws);
   this->setTransparentZeros(false);
 
   updateDisplay();
@@ -712,21 +711,15 @@ void SliceViewer::switchQWTRaster(
 void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   m_ws = ws;
 
-  // If the workspace qualifies to be treated as a non-orthogonal workspace,
-  // then we swap to a QwtRasterDataMDNonOrthogonal
-  bool requiresSkewMatrix = API::requiresSkewMatrix(ws);
-  bool isHKLDimensions = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
-  if ((requiresSkewMatrix) &&
-      (isHKLDimensions)) {
-                                                      
-	m_data = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
-  }
-  emit setNonOrthogonalbtn(requiresSkewMatrix, isHKLDimensions);
   m_coordinateTransform = createCoordinateTransform(ws, m_dimX, m_dimY);
   // disconnect and reconnect here
   QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
-                   SLOT(checkForHKLDimension(size_t, size_t)));
-
+                   SLOT(checkForHKLDimension()));
+  QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
+	  SLOT(switchQWTRaster(bool)));
+  QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
+	  SLOT(disableOrthogonalAnalysisTools(bool)));
+  
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
 
@@ -1677,12 +1670,10 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim) {
   emit changedShownDim(m_dimX, m_dimY);
 }
 
-void SliceViewer::checkForHKLDimension(
-    size_t dimX,
-    size_t dimY) {  
+void SliceViewer::checkForHKLDimension() { 
 	if (API::requiresSkewMatrix(m_ws)) {
-		m_coordinateTransform->checkDimensionsForHKL(m_ws, dimX, dimY);
-		auto isHKL = API::isHKLDimensions(m_ws, dimX, dimY);
+		m_coordinateTransform->checkDimensionsForHKL(m_ws, m_dimX, m_dimY);
+		auto isHKL = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
 		auto isNonOrthogonalQWTRasterData = dynamic_cast<API::QwtRasterDataMDNonOrthogonal*>(m_data.get()) != nullptr;
 		// 4 cases to consider
 		// isHKL true and is isNonOrthgonalQWT true -> do nothing
@@ -1691,9 +1682,12 @@ void SliceViewer::checkForHKLDimension(
 		//isHKL true and isNonOrthgonalQWT false -> switch out new QWTRasterDataNonorthogonal 
 		if (isHKL ^ isNonOrthogonalQWTRasterData) {
 			const auto useNonOrthogonal = isHKL;
-			switchQWTRaster(m_ws, dimX, dimY, useNonOrthogonal);
+			switchQWTRaster(useNonOrthogonal);
 			//Tell Nonorth whether to toggle or not here?
 		}
+		//if (!ui.btnNonOrthogonalToggle->isChecked()) {
+		//	switchQWTRaster(!isHKL);
+		//}
 	}
 	
 }
@@ -2370,11 +2364,31 @@ void SliceViewer::autoRebinIfRequired() {
 }
 /** NON ORTHOGONAL STUFF **/
 
-void SliceViewer::setNonOrthogonalbtn(bool nonOrthogonalWorkspace, bool displayRequiresSkew)
+void SliceViewer::setNonOrthogonalbtn()
 {
-	ui.btnNonOrthogonalToggle->setDisabled(!nonOrthogonalWorkspace);
+	bool isNonOrthogonalWS = API::requiresSkewMatrix(m_ws);
+	bool canShowSkewedWS = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
+	ui.btnNonOrthogonalToggle->setDisabled(!canShowSkewedWS);
+	emit disableOrthogonalAnalysisTools(ui.btnNonOrthogonalToggle->isChecked());
+
 }
 
+void SliceViewer::disableOrthogonalAnalysisTools(bool checked) {
+	//REBIN FAULTS STILL, NEED BETTER CLOSE DOWN
+	//if enabling orthogonal an
+	if (ui.btnDoLine->isChecked()) {
+		ui.btnDoLine->toggle();
+	}
+	if (ui.btnRebinMode->isChecked()) {
+		ui.btnRebinMode->toggle();
+	}
+	ui.btnDoLine->setDisabled(checked);
+	ui.btnSnapToGrid->setDisabled(checked);
+	ui.btnClearLine->setDisabled(checked);
+	ui.btnRebinMode->setDisabled(checked);
+	ui.btnPeakOverlay->setDisabled(checked);
+
+}
 /**
  * Convenience function for removing all displayed peaks workspaces.
  */
