@@ -485,10 +485,19 @@ API::IProjectSerialisable *SliceViewerWindow::loadFromProject(const std::string 
     auto window = new SliceViewerWindow(wsName, label);
     window->m_slicer->loadFromProject(lines);
 
+    // Load state of line viewer
     if (tsv.selectSection("lineviewer")) {
       std::string lineViewerLines;
       tsv >> lineViewerLines;
       window->m_liner->loadFromProject(lineViewerLines);
+    }
+
+    // Load state of peaks viewer
+    if (tsv.selectSection("peaksviewer")) {
+      std::string peaksViewerLines;
+      tsv >> peaksViewerLines;
+      window->showPeaksViewer(true);
+      window->m_peaksViewer->loadFromProject(peaksViewerLines);
     }
 
     window->setGeometry(geometry);
@@ -504,7 +513,13 @@ std::string SliceViewerWindow::saveToProject(ApplicationWindow *app)
   tab.writeLine("Workspace") << m_ws->name();
   tab.writeLine("Label") << m_label;
   tab.writeRaw(m_slicer->saveToProject());
-  tab.writeSection("lineviewer", m_liner->saveToProject());
+
+  if (m_liner->isVisible())
+    tab.writeSection("lineviewer", m_liner->saveToProject());
+
+  if (m_peaksViewer->isVisible())
+    tab.writeSection("peaksviewer", m_peaksViewer->saveToProject());
+
   tsv.writeSection("sliceviewer", tab.outputLines());
   return tsv.outputLines();
 }

@@ -2676,6 +2676,26 @@ void SliceViewer::loadFromProject(const std::string &lines)
     m_lineOverlay->loadFromProject(overlayLines);
   }
 
+  // set any peak workspaces here
+  // this ensures the presenter and the slice viewer are linked properly
+  if (tsv.selectSection("peaksviewer")) {
+    std::string peaksViewerLines;
+    tsv >> peaksViewerLines;
+    API::TSVSerialiser peaks(peaksViewerLines);
+
+    QStringList names;
+    for (auto section : peaks.sections("peaksworkspace")) {
+      API::TSVSerialiser sec(section);
+      QString name;
+
+      sec.selectLine("Name");
+      sec >> name;
+      names << name;
+    }
+
+    setPeaksWorkspaces(names);
+  }
+
   // handle overlay workspace
   if (tsv.selectLine("OverlayWorkspace")) {
     std::string workspace_name;
