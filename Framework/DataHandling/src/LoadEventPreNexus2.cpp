@@ -1056,9 +1056,9 @@ void LoadEventPreNexus2::procEventsLinear(
       if (tof > local_longest_tof)
         local_longest_tof = tof;
 
-// This is equivalent to
-// workspace->getSpectrum(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
-// But should be faster as a bunch of these calls were cached.
+      // This is equivalent to
+      // workspace->getSpectrum(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
+      // But should be faster as a bunch of these calls were cached.
       arrayOfVectors[pid]->emplace_back(tof, pulsetime);
       ++local_num_good_events;
     } else {
