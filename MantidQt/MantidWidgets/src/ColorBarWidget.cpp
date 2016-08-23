@@ -453,7 +453,7 @@ void ColorBarWidget::loadFromProject(const std::string &lines) {
   tsv >> fileName;
 
   setAutoScale(autoScale);
-  ui.autoScaleForCurrentSlice->setChecked(true);
+  ui.autoScaleForCurrentSlice->setChecked(autoScaleSlice);
   setScale(scaleType);
   setMinimum(min);
   setMaximum(max);
