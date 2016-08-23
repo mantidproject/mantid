@@ -288,8 +288,8 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
 
     // Assign Y
     int *monitor_p = monitorsData[im].data();
-    m_localWorkspace->dataY(im).assign(monitor_p,
-                                       monitor_p + m_numberOfChannels);
+    m_localWorkspace->dataY(im)
+            .assign(monitor_p,monitor_p + m_numberOfChannels);
 
     progress.report();
   }
