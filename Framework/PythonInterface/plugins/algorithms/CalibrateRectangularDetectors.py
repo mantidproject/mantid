@@ -276,7 +276,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
 
     #pylint: disable=too-many-branches
-    def _cccalibrate(self, wksp, calib):
+    def _cccalibrate(self, wksp):
         if wksp is None:
             return None
         LRef = self.getProperty("UnwrapRef").value
@@ -388,12 +388,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 if AnalysisDataService.doesExist(ws):
                     AnalysisDataService.remove(ws)
 
-        self._saveCalibration(str(wksp), calib)
-
-        return wksp
+        return str(wksp)
 
     #pylint: disable=too-many-branches
-    def _multicalibrate(self, wksp, calib):
+    def _multicalibrate(self, wksp):
         if wksp is None:
             return None
         LRef = self.getProperty("UnwrapRef").value
@@ -465,18 +463,15 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              AdjX=self._xpixelbin, AdjY=self._ypixelbin)
         wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
                      Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
-        lcinst = str(self._instrument)
 
-        self._saveCalibration(str(wksp), calib)
+        return str(wksp)
 
-        return wksp
-
-    def _focus(self, wksp, dummy_calib):
+    def _focus(self, wksp):
         if wksp is None:
             return None
         MaskDetectors(Workspace=wksp, MaskedWorkspace=str(wksp)+"mask")
-        wksp = AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp.name(),\
-                       OffsetsWorkspace=str(wksp)+"offset")
+        wksp = AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
+                              CalibrationWorkspace=str(wksp)+"cal")
         # Diffraction focusing using new calibration file with offsets
         if self._diffractionfocus:
             wksp = DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
@@ -566,26 +561,30 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             self._createGrouping(str(samRun))
 
             if self.getProperty("CrossCorrelation").value:
-                samRun = self._cccalibrate(samRun, calib)
+                samRun = self._cccalibrate(samRun)
             else:
-                samRun = self._multicalibrate(samRun, calib)
+                samRun = self._multicalibrate(samRun)
+
+            self._saveCalibration(samRun, calib)
+
+
             if self._xpixelbin*self._ypixelbin>1 or len(self._smoothGroups) > 0:
-                if AnalysisDataService.doesExist(str(samRun)):
-                    AnalysisDataService.remove(str(samRun))
+                if AnalysisDataService.doesExist(samRun):
+                    AnalysisDataService.remove(samRun)
                 samRun = self._loadData(samNum, SUFFIX, filterWall)
                 LRef = self.getProperty("UnwrapRef").value
                 DIFCref = self.getProperty("LowResRef").value
                 if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
                     if LRef > 0:
-                        wksp = UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                         LRef=LRef)
+                        samRun = UnwrapSNS(InputWorkspace=samRun, OutputWorkspace=samRun,
+                                           LRef=LRef)
                     if DIFCref > 0:
-                        wksp = RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                               ReferenceDIFC=DIFCref)
+                        samRun = RemoveLowResTOF(InputWorkspace=samRun, OutputWorkspace=samRun,
+                                                 ReferenceDIFC=DIFCref)
             else:
-                samRun = ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun.name(),
+                samRun = ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun,
                                       Target="TOF")
-            samRun = self._focus(samRun, calib)
+            samRun = self._focus(samRun)
             RenameWorkspace(InputWorkspace=samRun, OutputWorkspace=str(samRun)+"_calibrated")
 
 AlgorithmFactory.subscribe(CalibrateRectangularDetectors)
