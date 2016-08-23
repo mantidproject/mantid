@@ -151,10 +151,9 @@ private:
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &expectedPeaks);
 
-  void updateFittingDirVec(const std::string &focusDir,
+  bool findFilePathsFromBaseName(const std::string &focusDir,
                            const std::string &runNumberVec,
-                           std::vector<std::string> &fittingRunNoDirVec,
-                           std::vector<std::string> &foundRunNumber);
+                           std::vector<std::string> &fittingRunNoDirVec);
 
   void enableMultiRun(std::string firstRun, std::string lastRun,
                       std::vector<std::string> &fittingRunNoDirVec);

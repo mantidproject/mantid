@@ -315,9 +315,7 @@ void EnggDiffFittingPresenter::browsedFile(
     // foc_file - vector holding the file name split
     // runnoDirVector - giving empty vector here holding directory of
     // selected vector
-    // dummy vector not being used in this case
-    std::vector<std::string> dummy;
-    findFilePathsFromBaseName(bankFileDir, foc_file, runnoDirVector, dummy);
+    findFilePathsFromBaseName(bankFileDir, foc_file, runnoDirVector);
 
     m_view->setFittingRunNumVec(runnoDirVector);
 
@@ -370,11 +368,8 @@ void EnggDiffFittingPresenter::processSingleRun(
 
   m_view->setFittingSingleRunMode(true);
 
-  // dummy vector will not be used
-
-  std::vector<std::string> foundRunNumber;
-  findFilePathsFromBaseName(focusDir, strFocusedFile, runnoDirVector,
-                            foundRunNumber);
+  bool wasFound =
+      findFilePathsFromBaseName(focusDir, strFocusedFile, runnoDirVector);
   m_view->setFittingRunNumVec(runnoDirVector);
 
   // add bank to the combo-box and list view
@@ -384,20 +379,23 @@ void EnggDiffFittingPresenter::processSingleRun(
   setDefaultBank(splitBaseName, strFocusedFile);
 
   auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
-  if (!fittingMultiRunMode) {
-    setRunNoItems(foundRunNumber, false);
+  if (!fittingMultiRunMode && wasFound) {
+    // Wrap the current run number in a vector and pass through
+    // We cant use an initializer list as MSVC doesn't support this yet
+    std::vector<std::string> strFocusedFileVector;
+    strFocusedFileVector.push_back(strFocusedFile);
+    setRunNoItems(strFocusedFileVector, false);
   }
 }
 
-void EnggDiffFittingPresenter::findFilePathsFromBaseName(
+bool EnggDiffFittingPresenter::findFilePathsFromBaseName(
     const std::string &directoryToSearch,
     const std::string &baseFileNamesToFind,
-    std::vector<std::string> &foundFullFilePaths,
-    std::vector<std::string> &foundBaseNames) {
+    std::vector<std::string> &foundFullFilePaths) {
+
+  bool found = false;
 
   try {
-    bool found = false;
-
     // Ask for an iterator of all files/folders in 'directoryToSearch'
     Poco::DirectoryIterator directoryIter(directoryToSearch);
     Poco::DirectoryIterator directoryIterEnd;
@@ -432,15 +430,13 @@ void EnggDiffFittingPresenter::findFilePathsFromBaseName(
       ++directoryIter;
     }
 
-    if (found) {
-      foundBaseNames.push_back(baseFileNamesToFind);
-    }
-
   } catch (std::runtime_error &re) {
     m_view->userWarning("Invalid file",
                         "File not found in the following directory; " +
                             directoryToSearch + ". " + re.what());
   }
+
+  return found;
 }
 
 void EnggDiffFittingPresenter::enableMultiRun(
@@ -490,10 +486,12 @@ void EnggDiffFittingPresenter::enableMultiRun(
         // rewrite the vector of run number which is available
         std::vector<std::string> foundRunNumber;
 
-        for (size_t i = 0; i < RunNumberVec.size(); i++) {
+        for (auto runNumber : RunNumberVec) {
           // save dir for every vector
-          findFilePathsFromBaseName(focusDir, RunNumberVec[i],
-                                    fittingRunNoDirVec, foundRunNumber);
+          if (findFilePathsFromBaseName(focusDir, runNumber,
+                                        fittingRunNoDirVec)) {
+            foundRunNumber.push_back(runNumber);
+          }
         }
 
         int diff = (lastNum - firstNum) + 1;
