@@ -1,7 +1,6 @@
 #ifndef SOFQWTEST_H_
 #define SOFQWTEST_H_
 
-#include <iostream>
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/Axis.h"
