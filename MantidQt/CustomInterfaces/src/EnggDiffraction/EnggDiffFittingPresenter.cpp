@@ -198,16 +198,11 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
     std::string strFPath = pocoRunNumberPath.toString();
     // returns empty if no directory is found
-<<<<<<< HEAD
     // split directory if 'ENGINX_' found by '_.'
-    std::vector<std::string> splitBaseName =
-        m_view->splitFittingDirectory(strFPath);
-=======
     std::vector<std::string> splitBaseName;
     if (strFPath.find("ENGINX_") != std::string::npos) {
       boost::split(splitBaseName, strFPath, boost::is_any_of("_."));
     }
->>>>>>> 17064_Engg_diff_iface_crash_on_invalid_focus_file
 
     // runNo when single focused file selected
     std::vector<std::string> runNoVec;
@@ -687,6 +682,16 @@ void EnggDiffFittingPresenter::inputChecksBeforeFitting(
   }
 }
 
+
+/**
+* Splits the file name in to sections of '_' and 'ENGINX' text
+* within the filename
+*
+* @param selectedfPath is the selected file's path
+*
+* @return std::vector<std::string> of splitted file name with run
+* number & bank
+*/
 std::vector<std::string> EnggDiffFittingPresenter::splitFittingDirectory(
     const std::string &selectedfPath) {
 
@@ -749,21 +754,12 @@ void EnggDiffFittingPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
     if (!chunks.empty() && isNum) {
       try {
         bankID = boost::lexical_cast<size_t>(chunks.back());
-<<<<<<< HEAD
-      } catch (std::runtime_error &re) {
-        g_log.error()
-            << "Unable to successfully apply DifcTzero to focused workspace. "
-               "Error description: " +
-                   static_cast<std::string>(re.what()) << '\n';
-        throw;
-=======
       } catch (boost::exception &) {
         // If we get a bad cast or something goes wrong then
         // the file is probably not what we were expecting
         // so throw a runtime error
         throw std::runtime_error(
             "File data is bad. Is the file a focused EnginX file?");
->>>>>>> 17064_Engg_diff_iface_crash_on_invalid_focus_file
       }
     }
   }
@@ -885,7 +881,7 @@ void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
                                std::string &filePath) {
 
   // split to get run number and bank
-  auto fileSplit = m_view->splitFittingDirectory(filePath);
+  auto fileSplit = splitFittingDirectory(filePath);
   // returns ['ENGINX', <RUN-NUMBER>, 'focused', `bank`, <BANK>, '.nxs']
   auto runNumber = fileSplit[1];
 

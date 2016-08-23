@@ -151,19 +151,10 @@ private:
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &expectedPeaks);
 
+  bool findFilePathsFromBaseName(const std::string &directoryToSearch,
+                                 const std::string &baseFileNamesToFind,
+                                 std::vector<std::string> &foundFullFilePaths);
 
-  bool findFilePathsFromBaseName(const std::string &focusDir,
-                           const std::string &runNumberVec,
-
-  /**
-  * Splits the file name in to sections of '_' and 'ENGINX' text
-  * within the filename
-  *
-  * @param selectedfPath is the selected file's path
-  *
-  * @return std::vector<std::string> of splitted file name with run
-  * number & bank
-  */
   std::vector<std::string>
   splitFittingDirectory(const std::string &selectedfPath);
 
