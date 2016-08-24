@@ -21,18 +21,22 @@ subgraph params {
   procCommands      [label="ProcessingCommands"]
   wavMax            [label="WavelengthMax"]
   wavMin            [label="WavelengthMin"]
+  wavMaxRDB         [label="WavelengthMax"]
+  wavMinRDB         [label="WavelengthMin"]
   wavStep           [label="WavelengthStep"]
-  monStartWSIndex   [label="StartWorkspaceIndex"]
-  monEndWSIndex     [label="EndWorkspaceIndex"]
+  wavStepRDB        [label="WavelengthStep"]
+  monitorIndex      [label="I0MonitorIndex"]
   detWS             [label="DetectorWorkspace"]
   regionOfDirectBeam [label="RegionOf-\nDirectBeam"]
   scaleFactor       [label="ScaleFactor"]
+  monIntWavMax      [label="MonitorIntegration-\nWavelengthMax"]
+  monIntWavMin      [label="MonitorIntegration-\nWavelengthMin"]
 }
 
 subgraph decisions {
  $decision_style
   checkXUnit      [label="X axis in &lambda;?"]
-  checkMultDet    [label="Multidetector?"]
+  checkMultRDB    [label="MultidetectorAnalysis and\nRegionOfDirectBeam given?"]
   checkTransRun   [label="FirstTransmissionRun\ngiven?"]
   checkTransUnits [label="X axis in &lambda;?"]
   checkThetaIn    [label="ThetaIn given?"]
@@ -46,8 +50,7 @@ subgraph decisions {
   checkRebinStep  [label="MomentumTransferStep given?"]
   checkScale      [label="ScaleFactor given?"]
   checkMonUnity   [label="Monitors?"]
-  checkBgMinMax   [label="Min or Max\nnon-zero?"]
-  monIntWavInterval [label="Monitor Integration\nWavelength Interval"]
+  checkBgMinMax   [label="Monitor background wavelength\nmin/max non-zero?"]
 }
 
 subgraph algorithms {
@@ -57,7 +60,7 @@ subgraph algorithms {
   createTransWS   [label="CreateTransmissionWorkspace"]
   divideDetMon    [label="Divide\n(Detectors / Monitors / Unity)"]
   divideTrans     [label="Divide\n(InputWorkspace / TransmissionWorkspace)"]
-  intMon          [label="Integrate"]
+  intMon          [label="Integration"]
   specRefPosCor   [label="SpecularReflectionPositionCorrect"]
   polyCorr        [label="PolynomialCorrection"]
   expCorr         [label="ExponentialCorrection"]
@@ -66,18 +69,20 @@ subgraph algorithms {
   rebin           [label="Rebin"]
   scale           [label="Scale"]
   calcResolution  [label="CalculateResolution"]
-  convertDet      [label="Convert Units\n(AlignBins = True)"]
-  convertMon      [label="Convert Units"]
-  groupDet        [label="Group Detectors"]
-  cropDetWS       [label="Crop Detector\nWorkspace"]
-  rebinDet        [label="Rebin Detectors"]
-  cropMonWS       [label="Crop Monitor\nWorkspace"]
-  calcFlatBg      [label="Calculate Flat\nBackground"]
-  rebinToWS       [label="Rebin To\nWorkspace"]
-  sumDirectBeam   [label="Sum Direct\nBeam"]
-  rebinByDirectBeam [label="Rebin By\nDirect Beam"]
-  normalizeByDirectBeam [label="Normalize By\nDirect Beam"]
-  rebinByTransWS  [label="Rebin By Transmission\nWorkspace"]
+  convertDet      [label="ConvertUnits\n(AlignBins = True)"]
+  convertDetRDB   [label="ConvertUnits\n(AlignBins = True)"]
+  convertMon      [label="ConvertUnits"]
+  groupDet        [label="GroupDetectors"]
+  groupDetRDB     [label="GroupDetectors"]
+  cropDetWS       [label="CropWorkspace"]
+  cropRDBWS       [label="CropWorkspace"]
+  rebinDet        [label="Rebin"]
+  cropMonWS       [label="CropWorkspace"]
+  calcFlatBg      [label="CalculateFlatBackground"]
+  rebinToWS       [label="Rebin"]
+  rebinByTransWS  [label="RebinToWorkspace"]
+  rebinRDB        [label="Rebin"]
+  rebinToWSRDB    [label="RebinToWorkspace"]
 }
 
 subgraph processes {
@@ -88,10 +93,10 @@ subgraph processes {
 
 subgraph values {
  $value_style
-  valMon          [label="I&#8320;(&lambda;)"]
+  valMon          [label="I(&lambda;)"]
   valDet          [label="I(&lambda;)"]
-  valIntegrated   [label="&Sigma; I&#8320;(&lambda;)"]
-  valTrans        [label="It(&lambda;) / &Sigma;I&#8320;t(&lambda;)"]
+  valIntegrated   [label="&Sigma; I(&lambda;)"]
+  valTrans        [label="It(&lambda;) / &Sigma;It(&lambda;)"]
   valUnity        [label="I(1)"]
 }
 
@@ -105,7 +110,8 @@ convertDet        -> valDet
 valDet            -> groupDet
 procCommands      -> groupDet
 convertMon        -> valMon
-monIntWavInterval -> intMon
+monIntWavMax      -> intMon
+monIntWavMin      -> intMon
 checkNormDetMon   -> intMon           [label="Yes"]
 checkNormDetMon   -> divideDetMon     [label="No"]
 groupDet          -> cropDetWS
@@ -116,23 +122,27 @@ wavStep           -> rebinDet
 rebinDet          -> detWS
 detWS             -> rebinToWS
 valMon            -> cropMonWS
-monStartWSIndex   -> cropMonWS
-monEndWSIndex     -> cropMonWS
+monitorIndex      -> cropMonWS
 cropMonWS         -> checkBgMinMax
 checkBgMinMax     -> calcFlatBg       [label="Yes"]
 checkBgMinMax     -> rebinToWS        [label="No"]
 calcFlatBg        -> rebinToWS
 rebinToWS         -> checkNormDetMon
-detWS             -> checkMultDet
+detWS             -> checkMultRDB
 valUnity          -> divideDetMon
 intMon            -> valIntegrated
 valIntegrated     -> divideDetMon
-checkMultDet      -> sumDirectBeam    [label="Yes"]
-checkMultDet      -> divideDetMon     [label="No"]
-regionOfDirectBeam -> sumDirectBeam
-sumDirectBeam     -> rebinByDirectBeam
-rebinByDirectBeam -> normalizeByDirectBeam
-normalizeByDirectBeam -> divideDetMon
+checkMultRDB      -> convertDetRDB    [label="Yes"]
+checkMultRDB      -> divideDetMon     [label="No"]
+convertDetRDB     -> groupDetRDB
+regionOfDirectBeam -> groupDetRDB
+groupDetRDB       -> cropRDBWS
+wavMinRDB         -> cropRDBWS
+wavMaxRDB         -> cropRDBWS
+cropRDBWS         -> rebinRDB
+wavStepRDB        -> rebinRDB
+rebinRDB          -> rebinToWSRDB
+rebinToWSRDB      -> divideDetMon
 divideDetMon      -> checkTransRun
 checkTransRun     -> checkCorrAlg     [label="No"]
 checkTransRun     -> rebinByTransWS   [label="Yes"]
@@ -153,7 +163,7 @@ divideTrans       -> checkThetaIn
 thetaIn           -> checkThetaIn
 checkThetaIn      -> checkCorDetPos   [label="Yes"]
 checkThetaIn      -> calcTheta        [label="No"]
-calcTheta         -> checkCorDetPos
+calcTheta         -> outputWorkspaceWL
 calcTheta         -> thetaOut
 checkCorDetPos    -> specRefPosCor    [label="Yes"]
 checkCorDetPos    -> outputWorkspaceWL[label="No"]

@@ -40,7 +40,7 @@ applyCorrTrans  -> checkThetaIn
 
 checkThetaIn    -> corrDetPos     [label="Yes"]
 checkThetaIn    -> calcTheta      [label="No"]
-calcTheta       -> corrDetPos
+calcTheta       -> outputWSWL
 corrDetPos      -> outputWSWL
 
 outputWSWL      -> convertMom
