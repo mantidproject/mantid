@@ -4,11 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <map>
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/MultiThreaded.h"
 
-#include <mutex>
+#include "tbb/concurrent_unordered_map.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -43,7 +42,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 template <class KEYTYPE, class VALUETYPE> class DLLExport Cache {
 public:
   /// No-arg Constructor
-  Cache() : m_cacheHit(0), m_cacheMiss(0), m_cacheMap(), m_mutex() {}
+  Cache() : m_cacheHit(0), m_cacheMiss(0), m_cacheMap() {}
 
   /**
    * Copy constructor (mutex cannot be copied)
@@ -51,7 +50,7 @@ public:
    */
   Cache(const Cache<KEYTYPE, VALUETYPE> &src)
       : m_cacheHit(src.m_cacheHit), m_cacheMiss(src.m_cacheMiss),
-        m_cacheMap(src.m_cacheMap), m_mutex() // New mutex which is unlocked
+        m_cacheMap(src.m_cacheMap) // New mutex which is unlocked
   {}
 
   /**
@@ -70,7 +69,6 @@ public:
 
   /// Clears the cache
   void clear() {
-    std::lock_guard<std::mutex> lock(m_mutex);
     m_cacheHit = 0;
     m_cacheMiss = 0;
     m_cacheMap.clear();
@@ -99,7 +97,6 @@ public:
    * @param value The new value for the key
    */
   void setCache(const KEYTYPE &key, const VALUETYPE &value) {
-    std::lock_guard<std::mutex> lock(m_mutex);
     m_cacheMap[key] = value;
   }
 
@@ -133,8 +130,7 @@ public:
    * @param key The key whose value should be removed
    */
   void removeCache(const KEYTYPE &key) {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_cacheMap.erase(key);
+    m_cacheMap.unsafe_erase(key);
   }
 
 private:
@@ -146,7 +142,6 @@ private:
    * @returns True if the value was found, false otherwise
    */
   bool getCacheNoStats(const KEYTYPE key, VALUETYPE &value) const {
-    std::lock_guard<std::mutex> lock(m_mutex);
     auto it_found = m_cacheMap.find(key);
     bool isValid = it_found != m_cacheMap.end();
 
@@ -163,13 +158,11 @@ private:
   /// information
   mutable int m_cacheMiss;
   /// internal cache map
-  std::map<KEYTYPE, VALUETYPE> m_cacheMap;
-  /// internal mutex
-  mutable std::mutex m_mutex;
+  tbb::concurrent_unordered_map<KEYTYPE, VALUETYPE> m_cacheMap;
   /// iterator typedef
-  typedef typename std::map<KEYTYPE, VALUETYPE>::iterator CacheMapIterator;
+  typedef typename tbb::concurrent_unordered_map<KEYTYPE, VALUETYPE>::iterator CacheMapIterator;
   /// const_iterator typedef
-  typedef typename std::map<KEYTYPE, VALUETYPE>::const_iterator
+  typedef typename tbb::concurrent_unordered_map<KEYTYPE, VALUETYPE>::const_iterator
       CacheMapConstIterator;
 };
 

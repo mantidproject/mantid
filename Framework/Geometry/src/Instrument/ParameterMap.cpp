@@ -345,7 +345,7 @@ void ParameterMap::add(const IComponent *comp,
   if (existing_par != m_map.end()) {
     existing_par->second = par;
     } else {
-      m_map.emplace(comp->getComponentID(), par);
+      m_map.insert(std::make_pair(comp->getComponentID(), par));
     }
     //}
 }
@@ -964,9 +964,9 @@ void ParameterMap::clearPositionSensitiveCaches() {
 void ParameterMap::setCachedLocation(const IComponent *comp,
                                      const V3D &location) const {
   // Call to setCachedLocation is a write so not thread-safe
-  PARALLEL_CRITICAL(positionCache) {
+  //PARALLEL_CRITICAL(positionCache) {
     m_cacheLocMap.setCache(comp->getComponentID(), location);
-  }
+  //}
 }
 
 /// Attempts to retrieve a location from the location cache
@@ -975,11 +975,11 @@ void ParameterMap::setCachedLocation(const IComponent *comp,
 /// @returns true if the location is in the map, otherwise false
 bool ParameterMap::getCachedLocation(const IComponent *comp,
                                      V3D &location) const {
-  bool inMap(false);
-  PARALLEL_CRITICAL(positionCache) {
-    inMap = m_cacheLocMap.getCache(comp->getComponentID(), location);
-  }
-  return inMap;
+  //bool inMap(false);
+  //PARALLEL_CRITICAL(positionCache) {
+  return m_cacheLocMap.getCache(comp->getComponentID(), location);
+  //}
+  //return inMap;
 }
 
 /// Sets a cached rotation on the rotation cache
@@ -988,9 +988,9 @@ bool ParameterMap::getCachedLocation(const IComponent *comp,
 void ParameterMap::setCachedRotation(const IComponent *comp,
                                      const Quat &rotation) const {
   // Call to setCachedRotation is a write so not thread-safe
-  PARALLEL_CRITICAL(rotationCache) {
+  // PARALLEL_CRITICAL(rotationCache) {
     m_cacheRotMap.setCache(comp->getComponentID(), rotation);
-  }
+  //}
 }
 
 /// Attempts to retrieve a rotation from the rotation cache
@@ -999,11 +999,11 @@ void ParameterMap::setCachedRotation(const IComponent *comp,
 /// @returns true if the rotation is in the map, otherwise false
 bool ParameterMap::getCachedRotation(const IComponent *comp,
                                      Quat &rotation) const {
-  bool inMap(false);
-  PARALLEL_CRITICAL(rotationCache) {
-    inMap = m_cacheRotMap.getCache(comp->getComponentID(), rotation);
-  }
-  return inMap;
+  //bool inMap(false);
+  //PARALLEL_CRITICAL(rotationCache) {
+  return m_cacheRotMap.getCache(comp->getComponentID(), rotation);
+  //}
+  //return inMap;
 }
 
 /// Sets a cached bounding box
@@ -1012,9 +1012,9 @@ bool ParameterMap::getCachedRotation(const IComponent *comp,
 void ParameterMap::setCachedBoundingBox(const IComponent *comp,
                                         const BoundingBox &box) const {
   // Call to setCachedRotation is a write so not thread-safe
-  PARALLEL_CRITICAL(boundingBoxCache) {
+  //PARALLEL_CRITICAL(boundingBoxCache) {
     m_boundingBoxMap.setCache(comp->getComponentID(), box);
-  }
+  //}
 }
 
 /// Attempts to retrieve a bounding box from the cache
@@ -1041,7 +1041,7 @@ void ParameterMap::copyFromParameterMap(const IComponent *oldComp,
   for (const auto &oldParameterName : oldParameterNames) {
     Parameter_sptr thisParameter = oldPMap->get(oldComp, oldParameterName);
     // Insert the fetched parameter in the m_map
-    m_map.emplace(newComp->getComponentID(), thisParameter);
+    m_map.insert(std::make_pair(newComp->getComponentID(), thisParameter));
   }
 }
 
