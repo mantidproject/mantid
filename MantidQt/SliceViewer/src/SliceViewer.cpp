@@ -38,6 +38,7 @@
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
+//#include "MantidQtSliceViewer/NonOrthogonalOverlay.h"
 #include "MantidQtSliceViewer/SnapToGridDialog.h"
 #include "MantidQtSliceViewer/XYLimitsDialog.h"
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
@@ -693,6 +694,8 @@ void SliceViewer::switchQWTRaster(
 {
   if (useNonOrthogonal && ui.btnNonOrthogonalToggle->isChecked()) {
 	  m_data = Kernel::make_unique<API::QwtRasterDataMDNonOrthogonal>();
+	  
+
   } else {
 	  m_data = Kernel::make_unique<API::QwtRasterDataMD>();
   }
@@ -1685,6 +1688,9 @@ void SliceViewer::checkForHKLDimension() {
 			switchQWTRaster(useNonOrthogonal);
 		}
 		emit setNonOrthogonalbtn();
+		//testing line thing here
+		m_nonOrthogonalOverlay = new NonOrthogonalOverlay(m_plot, m_plot->canvas(), &m_ws);
+
 	}
 	
 }

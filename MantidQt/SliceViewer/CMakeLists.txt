@@ -29,6 +29,7 @@ set ( SRC_FILES
 	src/SnapToGridDialog.cpp
 	src/XYLimitsDialog.cpp
 	src/LinePlotOptions.cpp
+	src/NonOrthogonalOverlay.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -44,6 +45,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/LinePlotOptions.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/NullPeaksPresenter.h
+	inc/MantidQtSliceViewer/NonOrthogonalOverlay.h
 	inc/MantidQtSliceViewer/PeakEditMode.h
         inc/MantidQtSliceViewer/PeakBoundingBox.h
         inc/MantidQtSliceViewer/PeakOverlayInteractive.h
@@ -82,6 +84,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/LinePlotOptions.h
+	inc/MantidQtSliceViewer/NonOrthogonalOverlay.h
         inc/MantidQtSliceViewer/PeakOverlayInteractive.h
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.h
 	inc/MantidQtSliceViewer/SliceViewer.h

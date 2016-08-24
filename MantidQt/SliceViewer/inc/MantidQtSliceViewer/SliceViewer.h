@@ -15,6 +15,7 @@
 #include "MantidQtAPI/SyncedCheckboxes.h"
 #include "MantidQtSliceViewer/CoordinateTransform.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
+#include "MantidQtSliceViewer/NonOrthogonalOverlay.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"
@@ -288,6 +289,11 @@ private:
 
   /// The LineOverlay widget for drawing the outline of the rebinned workspace
   LineOverlay *m_overlayWSOutline;
+
+  // PeakOverlay * m_peakOverlay;
+
+  //NonOrthogonal Overlay for drawing axes
+  NonOrthogonalOverlay *m_nonOrthogonalOverlay;
 
   /// Object for running algorithms in the background
   MantidQt::API::AlgorithmRunner *m_algoRunner;
