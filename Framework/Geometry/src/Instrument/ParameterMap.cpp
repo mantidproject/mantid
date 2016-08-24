@@ -262,7 +262,7 @@ void ParameterMap::clearParametersByName(const std::string &name) {
   // Key is component ID so have to search through whole lot
   for (auto itr = m_map.begin(); itr != m_map.end();) {
     if (itr->second->name() == name) {
-      PARALLEL_CRITICAL(unsafe_erase) { m_map.unsafe_erase(itr++); }
+      PARALLEL_CRITICAL(unsafe_erase) { itr = m_map.unsafe_erase(itr); }
     } else {
       ++itr;
     }
@@ -281,12 +281,12 @@ void ParameterMap::clearParametersByName(const std::string &name,
                                          const IComponent *comp) {
   if (!m_map.empty()) {
     const ComponentID id = comp->getComponentID();
-    auto it_found = m_map.find(id);
-    if (it_found != m_map.end()) {
-      if (it_found->second->name() == name) {
-        PARALLEL_CRITICAL(unsafe_erase) { m_map.unsafe_erase(it_found++); }
+    auto itrs = m_map.equal_range(id);
+    for (auto it = itrs.first; it != itrs.second;) {
+      if (it->second->name() == name) {
+        PARALLEL_CRITICAL(unsafe_erase) { it = m_map.unsafe_erase(it); }
       } else {
-        ++it_found;
+        ++it;
       }
     }
 
