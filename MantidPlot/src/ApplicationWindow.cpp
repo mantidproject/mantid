@@ -5931,11 +5931,6 @@ std::string ApplicationWindow::windowGeometryInfo(MdiSubWindow *w) {
   if (wrapper) {
     x = wrapper->x();
     y = wrapper->y();
-    if (w->getFloatingWindow()) {
-      QPoint pos = QPoint(x, y) - mdiAreaTopLeft();
-      x = pos.x();
-      y = pos.y();
-    }
   }
 
   tsv << x << y;
@@ -5962,7 +5957,7 @@ void ApplicationWindow::restoreWindowGeometry(ApplicationWindow *app,
   QString caption = w->objectName();
 
   if (s.contains("maximized")) {
-    w->setStatus(MdiSubWindow::Maximized);
+    w->setMaximized();
     app->setListView(caption, tr("Maximized"));
   } else {
     QStringList lst = s.split("\t");
@@ -5971,15 +5966,22 @@ void ApplicationWindow::restoreWindowGeometry(ApplicationWindow *app,
       int y = lst[2].toInt();
       int width = lst[3].toInt();
       int height = lst[4].toInt();
-      w->resize(width, height);
-      w->move(x, y);
+
+      QWidget *wrapper = w->getWrapperWindow();
+      if (wrapper) {
+        wrapper->resize(width, height);
+        wrapper->move(x, y);
+      } else {
+        w->resize(width, height);
+        w->move(x, y);
+      }
     }
 
     if (s.contains("minimized")) {
-      w->setStatus(MdiSubWindow::Minimized);
+      w->setMinimized();
       app->setListView(caption, tr("Minimized"));
     } else {
-      w->setStatus(MdiSubWindow::Normal);
+      w->setNormal();
       if (lst.count() > 5 && lst[5] == "hidden")
         app->hideWindow(w);
     }

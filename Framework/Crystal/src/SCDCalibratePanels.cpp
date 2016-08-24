@@ -96,22 +96,20 @@ void SCDCalibratePanels::Quat2RotxRotyRotz(const Quat Q, double &Rotx,
   @param  Edge         Number of edge points for each bank
   @return True if peak is on edge
 */
-bool SCDCalibratePanels::edgePixel(PeaksWorkspace_sptr ws, std::string bankName,
-                                   int col, int row, int Edge) {
+bool SCDCalibratePanels::edgePixel(const PeaksWorkspace &ws,
+                                   const std::string &bankName, int col,
+                                   int row, int Edge) {
   if (bankName.compare("None") == 0)
     return false;
-  Geometry::Instrument_const_sptr Iptr = ws->getInstrument();
-  boost::shared_ptr<const IComponent> parent =
-      Iptr->getComponentByName(bankName);
+  auto Iptr = ws.getInstrument();
+  auto parent = Iptr->getComponentByName(bankName);
   if (parent->type().compare("RectangularDetector") == 0) {
-    boost::shared_ptr<const RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
-
+    auto RDet = boost::dynamic_pointer_cast<const RectangularDetector>(parent);
     return col < Edge || col >= (RDet->xpixels() - Edge) || row < Edge ||
            row >= (RDet->ypixels() - Edge);
   } else {
     std::vector<Geometry::IComponent_const_sptr> children;
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+    auto asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
     int startI = 1;
@@ -119,11 +117,11 @@ bool SCDCalibratePanels::edgePixel(PeaksWorkspace_sptr ws, std::string bankName,
       startI = 0;
       parent = children[0];
       children.clear();
-      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+      auto asmb =
           boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
       asmb->getChildren(children, false);
     }
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
+    auto asmb2 =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
@@ -139,29 +137,27 @@ bool SCDCalibratePanels::edgePixel(PeaksWorkspace_sptr ws, std::string bankName,
 void SCDCalibratePanels::exec() {
   PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
   // We must sort the peaks
-  std::vector<std::pair<std::string, bool>> criteria;
-  criteria.push_back(std::pair<std::string, bool>("BankName", true));
+  std::vector<std::pair<std::string, bool>> criteria{{"BankName", true}};
   peaksWs->sort(criteria);
   // Remove peaks on edge
   int edge = this->getProperty("EdgePixels");
   if (edge > 0) {
-    for (int i = int(peaksWs->getNumberPeaks()) - 1; i >= 0; --i) {
-      const std::vector<Peak> &peaks = peaksWs->getPeaks();
-      if (edgePixel(peaksWs, peaks[i].getBankName(), peaks[i].getCol(),
-                    peaks[i].getRow(), edge)) {
-        peaksWs->removePeak(i);
-      }
-    }
+    std::vector<Peak> &peaks = peaksWs->getPeaks();
+    auto it = std::remove_if(
+        peaks.begin(), peaks.end(), [&peaksWs, edge, this](const Peak &pk) {
+          return this->edgePixel(*peaksWs, pk.getBankName(), pk.getCol(),
+                                 pk.getRow(), edge);
+        });
+    peaks.erase(it, peaks.end());
   }
   findU(peaksWs);
 
-  // Remove peaks that were not indexed
-  for (int i = static_cast<int>(peaksWs->getNumberPeaks()) - 1; i >= 0; --i) {
-    Peak peak = peaksWs->getPeak(i);
-    if (peak.getHKL() == V3D(0, 0, 0)) {
-      peaksWs->removePeak(i);
-    }
-  }
+  std::vector<Peak> &peaks = peaksWs->getPeaks();
+  auto it = std::remove_if(peaks.begin(), peaks.end(), [](const Peak &pk) {
+    return pk.getHKL() == V3D(0, 0, 0);
+  });
+  peaks.erase(it, peaks.end());
+
   int nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
   bool changeL1 = getProperty("ChangeL1");
   bool changeSize = getProperty("ChangePanelSize");
@@ -178,18 +174,16 @@ void SCDCalibratePanels::exec() {
   PARALLEL_FOR1(peaksWs)
   for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    boost::container::flat_set<string>::iterator it = MyBankNames.begin();
-    advance(it, i);
-    std::string iBank = *it;
+    const std::string &iBank = *std::next(MyBankNames.begin(), i);
     const std::string bankName = "__PWS_" + iBank;
     PeaksWorkspace_sptr local = peaksWs->clone();
     AnalysisDataService::Instance().addOrReplace(bankName, local);
-    for (int j = nPeaks - 1; j >= 0; --j) {
-      Peak peak = local->getPeak(j);
-      if (peak.getBankName() != iBank) {
-        local->removePeak(j);
-      }
-    }
+    std::vector<Peak> &localPeaks = local->getPeaks();
+    auto lit = std::remove_if(
+        localPeaks.begin(), localPeaks.end(),
+        [&iBank](const Peak &pk) { return pk.getBankName() != iBank; });
+    localPeaks.erase(lit, localPeaks.end());
+
     int nBankPeaks = local->getNumberPeaks();
     if (nBankPeaks < 6) {
       g_log.notice() << "Too few peaks for " << iBank << "\n";
@@ -348,7 +342,7 @@ void SCDCalibratePanels::exec() {
   string DetCalFileName = getProperty("DetCalFilename");
   saveIsawDetCal(inst, MyBankNames, 0.0, DetCalFileName);
   string XmlFileName = getProperty("XmlFilename");
-  saveXmlFile(XmlFileName, MyBankNames, inst);
+  saveXmlFile(XmlFileName, MyBankNames, *inst);
   // create table of theoretical vs calculated
   //----------------- Calculate & Create Calculated vs Theoretical
   // workspaces------------------,);
@@ -371,9 +365,7 @@ void SCDCalibratePanels::exec() {
   PARALLEL_FOR3(ColWksp, RowWksp, TofWksp)
   for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    boost::container::flat_set<string>::iterator it = MyBankNames.begin();
-    advance(it, i);
-    std::string bankName = *it;
+    const std::string &bankName = *std::next(MyBankNames.begin(), i);
     size_t k = bankName.find_last_not_of("0123456789");
     int bank = 0;
     if (k < bankName.length())
@@ -1017,9 +1009,9 @@ void writeXmlParameter(ofstream &ostream, const string &name,
 }
 
 void SCDCalibratePanels::saveXmlFile(
-    string const FileName,
-    boost::container::flat_set<string> const AllBankNames,
-    Instrument_const_sptr const instrument) const {
+    const string &FileName,
+    const boost::container::flat_set<string> &AllBankNames,
+    const Instrument &instrument) const {
   if (FileName.empty())
     return;
 
@@ -1028,19 +1020,18 @@ void SCDCalibratePanels::saveXmlFile(
   // create the file and add the header
   ofstream oss3(FileName.c_str());
   oss3 << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
-  oss3 << " <parameter-file instrument=\"" << instrument->getName()
-       << "\" valid-from=\"" << instrument->getValidFromDate().toISO8601String()
+  oss3 << " <parameter-file instrument=\"" << instrument.getName()
+       << "\" valid-from=\"" << instrument.getValidFromDate().toISO8601String()
        << "\">\n";
-  ParameterMap_sptr pmap = instrument->getParameterMap();
+  ParameterMap_sptr pmap = instrument.getParameterMap();
 
   // write out the detector banks
-  for (auto it = AllBankNames.rbegin(); it != AllBankNames.rend(); ++it) {
-    std::string bankName = *it;
-    if (instrument->getName().compare("CORELLI") == 0.0)
+  for (auto bankName : AllBankNames) {
+    if (instrument.getName().compare("CORELLI") == 0.0)
       bankName.append("/sixteenpack");
     oss3 << "<component-link name=\"" << bankName << "\">\n";
     boost::shared_ptr<const IComponent> bank =
-        instrument->getComponentByName(bankName);
+        instrument.getComponentByName(bankName);
 
     Quat RelRot = bank->getRelativeRot();
 
@@ -1080,10 +1071,10 @@ void SCDCalibratePanels::saveXmlFile(
   } // for each bank in the group
 
   // write out the source
-  IComponent_const_sptr source = instrument->getSource();
+  IComponent_const_sptr source = instrument.getSource();
 
   oss3 << "<component-link name=\"" << source->getName() << "\">\n";
-  IComponent_const_sptr sample = instrument->getSample();
+  IComponent_const_sptr sample = instrument.getSample();
   V3D sourceRelPos = source->getRelativePos();
 
   writeXmlParameter(oss3, "x", sourceRelPos.X());

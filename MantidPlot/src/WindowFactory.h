@@ -178,8 +178,6 @@ private:
   FactoryMap _map;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// WindowFactoryImpl
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
 template class Mantid::Kernel::SingletonHolder<WindowFactoryImpl>;
