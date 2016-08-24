@@ -145,7 +145,7 @@ protected slots:
   void fittingRunNoChanged();
 
 private:
-  bool isDigit(std::string text);
+  bool isDigit(const std::string text) const;
 
   // Methods related single peak fits
   virtual void
@@ -157,10 +157,10 @@ private:
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &expectedPeaks);
 
-  /**
-  * Splits the file name in to sections of '_' and 'ENGINX' text
-  * within the filename
-  *
+  void updateFittingDirVec(const std::string &focusDir,
+                           const std::string &runNumberVec,
+                           std::vector<std::string> &fittingRunNoDirVec,
+                           std::vector<std::string> &foundRunNumber);
   * @param selectedfPath is the selected file's path
   *
   * @return std::vector<std::string> of splitted file name with run
@@ -169,9 +169,6 @@ private:
   std::vector<std::string>
   splitFittingDirectory(const std::string &selectedfPath);
 
-  void updateFittingDirVec(const std::string &bankDir,
-                           const std::string &focusedFile,
-                           std::vector<std::string> &fittingRunNoDirVec);
 
   void enableMultiRun(std::string firstRun, std::string lastRun,
                       std::vector<std::string> &fittingRunNoDirVec);
@@ -198,8 +195,7 @@ private:
   void processSingleRun(const std::string &focusDir,
                         const std::string &strFocusedFile,
                         std::vector<std::string> &runnoDirVector,
-                        const std::vector<std::string> &splitBaseName,
-                        std::vector<std::string> &runNoVec);
+                        const std::vector<std::string> &splitBaseName);
 
   // whether to use AlignDetectors to convert units
   static const bool g_useAlignDetectors;
