@@ -2,6 +2,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/UsageService.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidQtSpectrumViewer/ColorMaps.h"
 #include "MantidQtSpectrumViewer/SVConnections.h"
 #include "MantidQtSpectrumViewer/SpectrumDisplay.h"
@@ -238,6 +239,122 @@ void SpectrumView::respondToTabCloseReqest(int tab) {
  */
 bool SpectrumView::isTrackingOn() const {
   return m_ui->tracking_always_on->isChecked();
+}
+
+API::IProjectSerialisable *SpectrumView::loadFromProject(const std::string &lines, ApplicationWindow *app, const int fileVersion)
+{
+  UNUSED_ARG(app);
+  UNUSED_ARG(fileVersion);
+  API::TSVSerialiser tsv(lines);
+
+  double min, max, step, efixed;
+  int emode, intensity, graphMax;
+  bool cursorTracking;
+
+  std::vector<std::string> workspaceNames;
+  tsv.selectLine("Workspaces");
+  tsv >> workspaceNames;
+
+  auto viewer = new SpectrumView(nullptr);
+  auto &ads = Mantid::API::AnalysisDataService::Instance();
+  for (auto &name : workspaceNames) {
+    auto ws = ads.retrieveWS<Mantid::API::MatrixWorkspace>(name);
+    if (ws)
+      viewer->renderWorkspace(ws);
+  }
+
+  tsv.selectLine("Range");
+  tsv >> min >> max >> step;
+  tsv.selectLine("Intensity");
+  tsv >> intensity;
+  tsv.selectLine("GraphMax");
+  tsv >> graphMax;
+  tsv.selectLine("CursorTracking");
+  tsv >> cursorTracking;
+  tsv.selectLine("EMode");
+  tsv >> emode;
+  tsv.selectLine("EFixed");
+  tsv >> efixed;
+
+  if (tsv.selectLine("ColorMapFileName")) {
+    QString fileName;
+    tsv >> fileName;
+    viewer->m_svConnections->loadColorMap(fileName);
+  } else if (tsv.selectLine("ColorScales")) {
+    int positive, negative;
+    tsv >> positive >> negative;
+    auto posScale = static_cast<ColorMaps::ColorScale>(positive);
+    auto negScale = static_cast<ColorMaps::ColorScale>(negative);
+    viewer->m_svConnections->setColorScale(posScale, negScale);
+  }
+
+  double x, y;
+  tsv.selectLine("SelectedPoint");
+  tsv >> x >> y;
+  int index = viewer->m_ui->imageTabs->currentIndex();
+  auto display = viewer->m_spectrumDisplay.at(index);
+  display->setPointedAtXY(x, y);
+
+  QPoint hPoint, vPoint;
+  tsv.selectLine("HorizontalPoint");
+  tsv >> hPoint;
+  tsv.selectLine("VerticalPoint");
+  tsv >> vPoint;
+
+  viewer->m_rangeHandler->setRange(min, max, step);
+  viewer->m_ui->intensity_slider->setValue(intensity);
+  viewer->m_ui->graph_max_slider->setValue(graphMax);
+  viewer->m_ui->tracking_always_on->setChecked(cursorTracking);
+  viewer->m_emodeHandler->setEMode(emode);
+  viewer->m_emodeHandler->setEFixed(efixed);
+  viewer->m_hGraph->setPointedAtPoint(hPoint);
+  viewer->m_vGraph->setPointedAtPoint(vPoint);
+  viewer->show();
+
+  return viewer;
+}
+
+std::string SpectrumView::saveToProject(ApplicationWindow *app)
+{
+  UNUSED_ARG(app);
+  API::TSVSerialiser tsv, spec;
+
+  double min, max, step;
+  m_rangeHandler->getRange(min, max, step);
+  spec.writeLine("Range") << min << max << step;
+  spec.writeLine("Intensity") << m_ui->intensity_slider->value();
+  spec.writeLine("GraphMax") << m_ui->graph_max_slider->value();
+  spec.writeLine("CursorTracking") << m_ui->tracking_always_on->isChecked();
+  spec.writeLine("EMode") << m_emodeHandler->getEMode();
+  spec.writeLine("EFixed") << m_ui->efixed_control->text();
+
+  auto colorScales = m_svConnections->getColorScales();
+  spec.writeLine("ColorScales");
+  spec << static_cast<int>(colorScales.first);
+  spec << static_cast<int>(colorScales.second);
+
+  auto colorMapFileName = m_svConnections->getColorMapFileName();
+  if (!colorMapFileName.isEmpty())
+    spec.writeLine("ColorMapFileName") << colorMapFileName;
+
+  spec.writeLine("Workspaces");
+  for(auto source : m_dataSource) {
+    spec << source->getWorkspace()->name();
+  }
+
+  int index = m_ui->imageTabs->currentIndex();
+  auto display = m_spectrumDisplay.at(index);
+  spec.writeLine("SelectedPoint");
+  spec << display->getPointedAtX();
+  spec << display->getPointedAtY();
+
+  auto hPoint = m_hGraph->getPointedAtPoint();
+  auto vPoint = m_vGraph->getPointedAtPoint();
+  spec.writeLine("HorizontalPoint") << hPoint;
+  spec.writeLine("VerticalPoint") << vPoint;
+
+  tsv.writeSection("spectrumviewer", spec.outputLines());
+  return tsv.outputLines();
 }
 
 void SpectrumView::changeTracking(bool on) {

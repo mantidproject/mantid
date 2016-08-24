@@ -471,6 +471,7 @@ void SVConnections::setColorScale(ColorMaps::ColorScale positive,
        displ != m_spectrumDisplays.end(); ++displ) {
     (**displ).setColorScales(positiveTable, negativeTable);
   }
+  m_colorScales = std::make_pair(positive, negative);
   showColorScale(positiveTable, negativeTable);
 }
 
@@ -533,8 +534,10 @@ void SVConnections::spectrumColorScale() {
 /**
  * Slot to handle loading a color map from file.
  */
-void SVConnections::loadColorMap() {
-  QString file_name = MantidColorMap::loadMapDialog("", m_svMainWindow);
+void SVConnections::loadColorMap(const QString &file_name) {
+  m_colorMapFileName = file_name;
+  if (m_colorMapFileName.isEmpty())
+    m_colorMapFileName = MantidColorMap::loadMapDialog("", m_svMainWindow);
 
   MantidColorMap *mantid_color_map =
       new MantidColorMap(file_name, GraphOptions::Linear);

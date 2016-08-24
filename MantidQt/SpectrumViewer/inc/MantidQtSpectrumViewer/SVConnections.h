@@ -65,6 +65,14 @@ public:
   void showColorScale(std::vector<QRgb> &positiveColorTable,
                       std::vector<QRgb> &negativeColorTable);
 
+  /// Get the applied color scales
+  std::pair<ColorMaps::ColorScale, ColorMaps::ColorScale>
+  getColorScales() const { return m_colorScales; }
+  /// Get the color map file name
+  QString getColorMapFileName() const { return m_colorMapFileName; }
+  void setColorScale(ColorMaps::ColorScale positive,
+                     ColorMaps::ColorScale negative);
+
 public slots:
   void closeViewer();
   void toggleHScroll();
@@ -77,7 +85,7 @@ public slots:
   void hGraphPickerMoved(const QPoint &point);
   void vGraphPickerMoved(const QPoint &point);
   void intensitySliderMoved();
-  void loadColorMap();
+  void loadColorMap(const QString &filename = "");
   void openOnlineHelp();
 
   void heatColorScale();
@@ -96,8 +104,6 @@ public slots:
 private:
   /// Event filter for mouse wheel capture
   bool eventFilter(QObject *object, QEvent *event) override;
-  void setColorScale(ColorMaps::ColorScale positive,
-                     ColorMaps::ColorScale negative);
 
   Ui_SpectrumViewer *m_svUI;
   SpectrumView *m_svMainWindow;
@@ -108,6 +114,8 @@ private:
   TrackingPicker *m_hGraphPicker;
   TrackingPicker *m_vGraphPicker;
   QActionGroup *m_colorGroup;
+  std::pair<ColorMaps::ColorScale, ColorMaps::ColorScale> m_colorScales;
+  QString m_colorMapFileName;
 
   /// Last known cursor position in the data (x-direction).
   int m_pickerX;

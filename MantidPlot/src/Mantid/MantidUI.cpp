@@ -817,6 +817,8 @@ void MantidUI::showSpectrumViewer() {
 
       viewer->show();
       viewer->renderWorkspace(wksp);
+      // Add to the list of serialisable windows
+      appWindow()->addSerialisableWindow(viewer);
     } else {
       g_log.information()
           << "Only event or matrix workspaces are currently supported.\n"
