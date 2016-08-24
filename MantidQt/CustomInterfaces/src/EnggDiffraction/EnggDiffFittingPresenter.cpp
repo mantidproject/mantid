@@ -546,10 +546,12 @@ void EnggDiffFittingPresenter::enableMultiRun(
         }
 
         int diff = (lastNum - firstNum) + 1;
-        size_t run_vec_size = foundRunNumber.size();
+        // TODO figure out why this is important for multi-runs
+        // and what this does/can it be moved/removed?
+        size_t run_vec_size = RunNumberVec.size();
 
         if (size_t(diff) == run_vec_size) {
-          setRunNoItems(foundRunNumber, true);
+          setRunNoItems(RunNumberVec, true);
           m_view->setBankEmit();
         } else {
           m_view->userWarning(
