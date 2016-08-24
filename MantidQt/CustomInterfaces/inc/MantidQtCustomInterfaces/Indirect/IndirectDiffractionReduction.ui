@@ -578,6 +578,9 @@
        </property>
        <item>
         <widget class="QCheckBox" name="ckGSS">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>GSS</string>
          </property>
@@ -585,6 +588,9 @@
        </item>
        <item>
         <widget class="QCheckBox" name="ckNexus">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Nexus</string>
          </property>
@@ -592,8 +598,21 @@
        </item>
        <item>
         <widget class="QCheckBox" name="ckAscii">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>ASCII (DAT)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pbSave">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Save</string>
          </property>
         </widget>
        </item>
