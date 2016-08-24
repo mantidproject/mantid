@@ -341,11 +341,11 @@ class TOFTOFScriptElement(BaseScriptElement):
 
             if self.vanRuns:
                 wsVanNorm = wsVan + 'Norm'
-                l("%s = Scale(%s, 1/%s, 'Multiply')" % (wsVanNorm, wsVan, logTime(wsVan)))
+                l("%s = Scale(%s, 1.0 / float(%s), 'Multiply')" % (wsVanNorm, wsVan, logTime(wsVan)))
 
             if self.ecRuns:
                 wsECNorm = wsEC + 'Norm'
-                l("%s = Scale(%s, 1/%s, 'Multiply')" % (wsECNorm, wsEC, logTime(wsEC)))
+                l("%s = Scale(%s, 1.0 / float(%s), 'Multiply')" % (wsECNorm, wsEC, logTime(wsEC)))
 
             l("names = []")
             l("for ws in %s:" % (gDataRuns))
