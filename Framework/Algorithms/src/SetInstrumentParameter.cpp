@@ -6,6 +6,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Strings.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -37,7 +38,7 @@ const std::string SetInstrumentParameter::category() const {
 /** Initialize the algorithm's properties.
  */
 void SetInstrumentParameter::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "Workspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "Workspace to add the log entry to");
@@ -64,7 +65,29 @@ void SetInstrumentParameter::init() {
  */
 void SetInstrumentParameter::exec() {
   // A pointer to the workspace to add a log to
-  MatrixWorkspace_sptr ws = getProperty("Workspace");
+  Workspace_sptr ws = getProperty("Workspace");
+  MatrixWorkspace_sptr inputW =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  DataObjects::PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+  // Get some stuff from the input workspace
+  Instrument_sptr inst;
+  if (inputW) {
+     inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+     if (!inst)
+           throw std::runtime_error("Could not get a valid instrument from the "
+                                    "MatrixWorkspace provided as input");
+  } else if (inputP) {
+     inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+     if (!inst)
+          throw std::runtime_error("Could not get a valid instrument from the "
+                                   "PeaksWorkspace provided as input");
+  } else {
+     if (!inst)
+          throw std::runtime_error("Could not get a valid instrument from the "
+                                   "workspace which does not seem to be valid as "
+                                   "input (must be either MatrixWorkspace or "
+                                   "PeaksWorkspace");
+  }
 
   // get the data that the user wants to add
   std::string cmptName = getProperty("ComponentName");
@@ -77,7 +100,6 @@ void SetInstrumentParameter::exec() {
   Strings::strip(paramName);
   Strings::strip(paramValue);
 
-  auto inst = ws->getInstrument();
   std::vector<IDetector_const_sptr> dets;
   std::vector<IComponent_const_sptr> cmptList;
   // set default to whole instrument
@@ -90,7 +112,8 @@ void SetInstrumentParameter::exec() {
     cmptList = inst->getAllComponentsWithName(cmptName);
   }
 
-  auto &paramMap = ws->instrumentParameters();
+  if(inputW) {
+  auto &paramMap = inputW->instrumentParameters();
   if (!dets.empty()) {
     for (auto &det : dets) {
       addParameter(paramMap, det.get(), paramName, paramType, paramValue);
@@ -103,6 +126,23 @@ void SetInstrumentParameter::exec() {
     } else {
       g_log.warning("Could not find the component requested.");
     }
+  }
+  }
+  if(inputP) {
+  auto &paramMap = inputP->instrumentParameters();
+  if (!dets.empty()) {
+    for (auto &det : dets) {
+      addParameter(paramMap, det.get(), paramName, paramType, paramValue);
+    }
+  } else {
+    if (!cmptList.empty()) {
+      for (auto &cmpt : cmptList) {
+        addParameter(paramMap, cmpt.get(), paramName, paramType, paramValue);
+      }
+    } else {
+      g_log.warning("Could not find the component requested.");
+    }
+  }
   }
 }
 
