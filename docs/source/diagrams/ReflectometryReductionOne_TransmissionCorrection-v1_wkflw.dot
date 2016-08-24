@@ -1,5 +1,5 @@
 digraph ReflectometryReductionOne {
-label = "ReflectometryReductionOne Transmission Corrections Flowchart"
+label = "ReflectometryReductionOne Transmission Correction Flowchart"
  $global_style
 
 subgraph params {
