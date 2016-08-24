@@ -30,12 +30,6 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit,
   QStringList wsNames;
   std::vector<size_t> wsIndices;
 
-  // Populate list of logs
-  auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
-  for (const auto &logName : multifit->getLogNames()) {
-    logCombo->addItem(QString::fromStdString(logName));
-  }
-
   for (int i = 0; i < n; ++i) {
     double value = multifit->getLocalParameterValue(parName, i);
     m_values.push_back(value);
@@ -46,6 +40,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit,
     wsNames.append(multifit->getWorkspaceName(i));
     wsIndices.push_back(multifit->getWorkspaceIndex(i));
   }
+
   doSetup(parName, wsNames, wsIndices);
 }
 
@@ -74,9 +69,6 @@ EditLocalParameterDialog::EditLocalParameterDialog(
     m_ties.push_back(tie);
   }
 
-  ///// TODO
-  throw std::runtime_error("Not implemented: populate log names combo box!");
-
   doSetup(parName, wsNames, wsIndices);
 }
 
@@ -92,6 +84,13 @@ EditLocalParameterDialog::EditLocalParameterDialog(
 void EditLocalParameterDialog::doSetup(const QString &parName,
                                        const QStringList &wsNames,
                                        const std::vector<size_t> &wsIndices) {
+  m_logFinder = Mantid::Kernel::make_unique<MDFLogValueFinder>(wsNames);
+  // Populate list of logs
+  auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
+  for (const auto &logName : m_logFinder->getLogNames()) {
+    logCombo->addItem(QString::fromStdString(logName));
+  }
+
   m_uiForm.logValueSelector->setCheckboxShown(true);
   connect(m_uiForm.logValueSelector, SIGNAL(logOptionsEnabled(bool)), this,
           SIGNAL(logOptionsChecked(bool)));
@@ -349,24 +348,20 @@ void EditLocalParameterDialog::setValueToLog(int i) {
   const auto &logName = m_uiForm.logValueSelector->getLog();
   const auto &function = m_uiForm.logValueSelector->getFunction();
 
-  if (const auto *multifit = static_cast<MultiDatasetFit *>(this->parent())) {
-    double value = std::numeric_limits<double>::quiet_NaN();
-    try {
-      value = multifit->getLogValue(logName, function, i);
-    }
-    catch (const std::invalid_argument &err) {
-      const auto &message =
+  double value = std::numeric_limits<double>::quiet_NaN();
+  try {
+    value = m_logFinder->getLogValue(logName, function, i);
+  } catch (const std::invalid_argument &err) {
+    const auto &message =
         QString("Failed to get log value:\n\n %1").arg(err.what());
+    if (const auto *multifit = static_cast<MultiDatasetFit *>(this->parent())) {
       multifit->logWarning(message.toStdString());
-      QMessageBox::critical(this, "MantidPlot - Error", message);
     }
-    m_values[i] = value;
-    m_uiForm.tableWidget->item(i, valueColumn)->setText(makeNumber(value));
-    updateRoleColumn(i);
-  } else {
-    //////// TODO
-    throw std::runtime_error("Not implemented: get log value somehow");
+    QMessageBox::critical(this, "MantidPlot - Error", message);
   }
+  m_values[i] = value;
+  m_uiForm.tableWidget->item(i, valueColumn)->setText(makeNumber(value));
+  updateRoleColumn(i);
 }
 
 /// Set value of each parameter to log value from respective workspace

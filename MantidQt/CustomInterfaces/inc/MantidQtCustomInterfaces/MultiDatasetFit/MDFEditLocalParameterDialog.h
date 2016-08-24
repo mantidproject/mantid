@@ -3,6 +3,7 @@
 
 #include "ui_EditLocalParameterDialog.h"
 #include "MantidQtMantidWidgets/IFunctionBrowser.h"
+#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFLogValueFinder.h"
 #include <QDialog>
 
 namespace MantidQt {
@@ -68,6 +69,8 @@ private:
   QList<bool> m_fixes;
   /// Cache for the ties
   QStringList m_ties;
+  /// Log value finder
+  std::unique_ptr<MDFLogValueFinder> m_logFinder;
 };
 
 } // MDF
