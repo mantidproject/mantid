@@ -92,6 +92,8 @@ void IndirectDiffractionReduction::initLayout() {
 
   // Handle plotting
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotResults()));
+  // Handle saving
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveReductions()));
 
   loadSettings();
 
@@ -166,10 +168,15 @@ void IndirectDiffractionReduction::algorithmComplete(bool error) {
     diffResultsGroup->removeAll();
     AnalysisDataService::Instance().remove("IndirectDiffraction_Workspaces");
 
-    saveGenericReductions();
   }
   // Enable plotting
   m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.cbPlotType->setEnabled(true);
+  // Enable saving
+  m_uiForm.ckAscii->setEnabled(true);
+  m_uiForm.ckGSS->setEnabled(true);
+  m_uiForm.ckNexus->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 /**
@@ -200,38 +207,53 @@ void IndirectDiffractionReduction::plotResults() {
 /**
  * Handles saving the reductions from the generic algorithm.
  */
-void IndirectDiffractionReduction::saveGenericReductions() {
+void IndirectDiffractionReduction::saveReductions() {
   for (auto it = m_plotWorkspaces.begin(); it != m_plotWorkspaces.end(); ++it) {
     std::string wsName = *it;
 
+    QString tofWsName = QString::fromStdString(wsName) + "_tof";
+    std::string instName = (m_uiForm.iicInstrumentConfiguration->getInstrumentName()).toStdString();
+    std::string mode = (m_uiForm.iicInstrumentConfiguration->getReflectionName()).toStdString();
+    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvUnitsProps;
+    inputFromConvUnitsProps["InputWorkspace"] = tofWsName.toStdString();
+    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromReductionProps;
+    inputFromReductionProps["InputWorkspace"] = (wsName + "_dRange");
+
     if (m_uiForm.ckGSS->isChecked()) {
-      std::string tofWsName = wsName + "_tof";
+      if (instName == "OSIRIS" && mode == "diffonly") {
 
-      // Convert to TOF for GSS
-      IAlgorithm_sptr convertUnits =
+        QString gssFilename = tofWsName + ".gss";
+        IAlgorithm_sptr saveGSS = AlgorithmManager::Instance().create("SaveGSS");
+        saveGSS->initialize();
+        saveGSS->setProperty("Filename", gssFilename.toStdString());
+        m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
+      }
+      else {
+
+        // Convert to TOF for GSS
+        IAlgorithm_sptr convertUnits =
           AlgorithmManager::Instance().create("ConvertUnits");
-      convertUnits->initialize();
-      convertUnits->setProperty("InputWorkspace", wsName);
-      convertUnits->setProperty("OutputWorkspace", tofWsName);
-      convertUnits->setProperty("Target", "TOF");
-      m_batchAlgoRunner->addAlgorithm(convertUnits);
+        convertUnits->initialize();
+        convertUnits->setProperty("InputWorkspace", wsName);
+        convertUnits->setProperty("OutputWorkspace", tofWsName.toStdString());
+        convertUnits->setProperty("Target", "TOF");
+        m_batchAlgoRunner->addAlgorithm(convertUnits);
 
-      BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvUnitsProps;
-      inputFromConvUnitsProps["InputWorkspace"] = tofWsName;
 
-      // Save GSS
-      std::string gssFilename = wsName + ".gss";
-      IAlgorithm_sptr saveGSS = AlgorithmManager::Instance().create("SaveGSS");
-      saveGSS->initialize();
-      saveGSS->setProperty("Filename", gssFilename);
-      m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
+        // Save GSS
+        std::string gssFilename = wsName + ".gss";
+        IAlgorithm_sptr saveGSS = AlgorithmManager::Instance().create("SaveGSS");
+        saveGSS->initialize();
+        saveGSS->setProperty("Filename", gssFilename);
+        m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
+      }
     }
 
     if (m_uiForm.ckNexus->isChecked()) {
       // Save NEXus using SaveNexusProcessed
       std::string nexusFilename = wsName + ".nxs";
       IAlgorithm_sptr saveNexus =
-          AlgorithmManager::Instance().create("SaveNexusProcessed");
+        AlgorithmManager::Instance().create("SaveNexusProcessed");
       saveNexus->initialize();
       saveNexus->setProperty("InputWorkspace", wsName);
       saveNexus->setProperty("Filename", nexusFilename);
@@ -242,7 +264,7 @@ void IndirectDiffractionReduction::saveGenericReductions() {
       // Save ASCII using SaveAscii version 1
       std::string asciiFilename = wsName + ".dat";
       IAlgorithm_sptr saveASCII =
-          AlgorithmManager::Instance().create("SaveAscii", 1);
+        AlgorithmManager::Instance().create("SaveAscii", 1);
       saveASCII->initialize();
       saveASCII->setProperty("InputWorkspace", wsName);
       saveASCII->setProperty("Filename", asciiFilename);
@@ -410,34 +432,6 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
   convertUnits->setProperty("Target", "TOF");
   m_batchAlgoRunner->addAlgorithm(convertUnits, inputFromReductionProps);
 
-  BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvUnitsProps;
-  inputFromConvUnitsProps["InputWorkspace"] = tofWsName.toStdString();
-
-  if (m_uiForm.ckGSS->isChecked()) {
-    QString gssFilename = tofWsName + ".gss";
-    IAlgorithm_sptr saveGSS = AlgorithmManager::Instance().create("SaveGSS");
-    saveGSS->initialize();
-    saveGSS->setProperty("Filename", gssFilename.toStdString());
-    m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
-  }
-
-  if (m_uiForm.ckNexus->isChecked()) {
-    QString nexusFilename = drangeWsName + ".nxs";
-    IAlgorithm_sptr saveNexus =
-        AlgorithmManager::Instance().create("SaveNexusProcessed");
-    saveNexus->initialize();
-    saveNexus->setProperty("Filename", nexusFilename.toStdString());
-    m_batchAlgoRunner->addAlgorithm(saveNexus, inputFromReductionProps);
-  }
-
-  if (m_uiForm.ckAscii->isChecked()) {
-    QString asciiFilename = drangeWsName + ".dat";
-    IAlgorithm_sptr saveASCII =
-        AlgorithmManager::Instance().create("SaveAscii");
-    saveASCII->initialize();
-    saveASCII->setProperty("Filename", asciiFilename.toStdString());
-    m_batchAlgoRunner->addAlgorithm(saveASCII, inputFromReductionProps);
-  }
 
   m_plotWorkspaces.clear();
   m_plotWorkspaces.push_back(tofWsName.toStdString());

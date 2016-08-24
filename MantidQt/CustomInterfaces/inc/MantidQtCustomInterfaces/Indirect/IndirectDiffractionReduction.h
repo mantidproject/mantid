@@ -33,6 +33,7 @@ public slots:
   void openDirectoryDialog();
   void help();
   void plotResults();
+  void saveReductions();
   void runFilesChanged();
   void runFilesFinding();
   void runFilesFound();
@@ -54,7 +55,6 @@ private:
                                                    std::string reflection = "");
 
   void runGenericReduction(QString instName, QString mode);
-  void saveGenericReductions();
   void runOSIRISdiffonlyReduction();
 
 private:
