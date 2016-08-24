@@ -130,7 +130,7 @@ public:
    * @param key The key whose value should be removed
    */
   void removeCache(const KEYTYPE &key) {
-    m_cacheMap.unsafe_erase(key);
+    PARALLEL_CRITICAL(unsafe_erase) { m_cacheMap.unsafe_erase(key); }
   }
 
 private:

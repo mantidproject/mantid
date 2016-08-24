@@ -262,7 +262,7 @@ void ParameterMap::clearParametersByName(const std::string &name) {
   // Key is component ID so have to search through whole lot
   for (auto itr = m_map.begin(); itr != m_map.end();) {
     if (itr->second->name() == name) {
-      m_map.unsafe_erase(itr++);
+      PARALLEL_CRITICAL(unsafe_erase) { m_map.unsafe_erase(itr++); }
     } else {
       ++itr;
     }
@@ -284,7 +284,7 @@ void ParameterMap::clearParametersByName(const std::string &name,
     auto it_found = m_map.find(id);
     if (it_found != m_map.end()) {
       if (it_found->second->name() == name) {
-        m_map.unsafe_erase(it_found++);
+        PARALLEL_CRITICAL(unsafe_erase) { m_map.unsafe_erase(it_found++); }
       } else {
         ++it_found;
       }
@@ -335,7 +335,6 @@ void ParameterMap::add(const IComponent *comp,
   if (pDescription)
     par->setDescription(*pDescription);
 
-  // PARALLEL_CRITICAL(m_mapAccess) {
   auto existing_par = positionOf(comp, par->name().c_str(), "");
   // As this is only an add method it should really throw if it already
   // exists.
@@ -344,10 +343,9 @@ void ParameterMap::add(const IComponent *comp,
   // add/replace-style function
   if (existing_par != m_map.end()) {
     existing_par->second = par;
-    } else {
-      m_map.insert(std::make_pair(comp->getComponentID(), par));
-    }
-    //}
+  } else {
+    m_map.insert(std::make_pair(comp->getComponentID(), par));
+  }
 }
 
 /** Create or adjust "pos" parameter for a component
@@ -723,11 +721,9 @@ boost::shared_ptr<Parameter> ParameterMap::get(const IComponent *comp,
   if (!comp)
     return result;
 
-  // PARALLEL_CRITICAL(m_mapAccess) {
   auto itr = positionOf(comp, name, type);
   if (itr != m_map.end())
     result = itr->second;
-  //}
   return result;
 }
 
@@ -802,7 +798,6 @@ component_map_cit ParameterMap::positionOf(const IComponent *comp,
 Parameter_sptr ParameterMap::getByType(const IComponent *comp,
                                        const std::string &type) const {
   Parameter_sptr result;
-  // PARALLEL_CRITICAL(m_mapAccess) {
   if (!m_map.empty()) {
     const ComponentID id = comp->getComponentID();
     auto it_found = m_map.find(id);
@@ -816,9 +811,8 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp,
         }
       }   // found->firdst
     }     // it_found != m_map.end()
-    }     //! m_map.empty()
-    ///}       // PARALLEL_CRITICAL(m_map_access)
-    return result;
+  }       //! m_map.empty()
+  return result;
 }
 
 /** Looks recursively upwards in the component tree for the first instance of a
@@ -963,10 +957,7 @@ void ParameterMap::clearPositionSensitiveCaches() {
 /// @param location :: The location
 void ParameterMap::setCachedLocation(const IComponent *comp,
                                      const V3D &location) const {
-  // Call to setCachedLocation is a write so not thread-safe
-  //PARALLEL_CRITICAL(positionCache) {
     m_cacheLocMap.setCache(comp->getComponentID(), location);
-  //}
 }
 
 /// Attempts to retrieve a location from the location cache
@@ -975,11 +966,7 @@ void ParameterMap::setCachedLocation(const IComponent *comp,
 /// @returns true if the location is in the map, otherwise false
 bool ParameterMap::getCachedLocation(const IComponent *comp,
                                      V3D &location) const {
-  //bool inMap(false);
-  //PARALLEL_CRITICAL(positionCache) {
   return m_cacheLocMap.getCache(comp->getComponentID(), location);
-  //}
-  //return inMap;
 }
 
 /// Sets a cached rotation on the rotation cache
@@ -987,10 +974,7 @@ bool ParameterMap::getCachedLocation(const IComponent *comp,
 /// @param rotation :: The rotation as a quaternion
 void ParameterMap::setCachedRotation(const IComponent *comp,
                                      const Quat &rotation) const {
-  // Call to setCachedRotation is a write so not thread-safe
-  // PARALLEL_CRITICAL(rotationCache) {
     m_cacheRotMap.setCache(comp->getComponentID(), rotation);
-  //}
 }
 
 /// Attempts to retrieve a rotation from the rotation cache
@@ -999,11 +983,7 @@ void ParameterMap::setCachedRotation(const IComponent *comp,
 /// @returns true if the rotation is in the map, otherwise false
 bool ParameterMap::getCachedRotation(const IComponent *comp,
                                      Quat &rotation) const {
-  //bool inMap(false);
-  //PARALLEL_CRITICAL(rotationCache) {
   return m_cacheRotMap.getCache(comp->getComponentID(), rotation);
-  //}
-  //return inMap;
 }
 
 /// Sets a cached bounding box
@@ -1011,10 +991,7 @@ bool ParameterMap::getCachedRotation(const IComponent *comp,
 /// @param box :: A reference to the bounding box
 void ParameterMap::setCachedBoundingBox(const IComponent *comp,
                                         const BoundingBox &box) const {
-  // Call to setCachedRotation is a write so not thread-safe
-  //PARALLEL_CRITICAL(boundingBoxCache) {
     m_boundingBoxMap.setCache(comp->getComponentID(), box);
-  //}
 }
 
 /// Attempts to retrieve a bounding box from the cache
