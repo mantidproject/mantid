@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 """ Utility for deleting a class file """
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import sys
-import os
 import argparse
 import datetime
+import os
 import re
+import sys
 from cmakelists_utils import *
-
 
 
 #======================================================================
 def delete_one(oldfilename):
     cmd = "git rm " + oldfilename
-    print "Running:", cmd
+    print("Running:", cmd)
     os.system(cmd)
 
 #======================================================================
@@ -26,7 +26,7 @@ def delete_all(subproject, classname, args):
     sourcefile = os.path.join(basedir, "src/" + args.source_subfolder + classname + ".cpp")
     testfile = os.path.join(basedir, "test/" + classname + "Test.h")
 
-    print
+    print()
     if args.header:
         delete_one(headerfile)
     if args.cpp:
@@ -37,8 +37,8 @@ def delete_all(subproject, classname, args):
     # Insert into the cmake list
     remove_from_cmake(subproject, classname, args, args.source_subfolder)
 
-    print "   Files were removed to Framework/%s/CMakeLists.txt !" % subproject
-    print
+    print("   Files were removed to Framework/%s/CMakeLists.txt !" % subproject)
+    print()
 
 
 

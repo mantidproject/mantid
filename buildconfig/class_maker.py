@@ -1,30 +1,30 @@
 #!/usr/bin/env python
 """ Utility for generating a class file, header, and test file """
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import sys
 import os
 try:
     import argparse
     useArgparse = True
-except ImportError, e:
+except ImportError as e:
     import optparse # deprecated in v2.7
     useArgparse = False
 import datetime
 import re
 import cmakelists_utils
 from cmakelists_utils import *
-import commands
 
 VERSION = "1.0"
 
 #======================================================================
 def write_header(subproject, classname, filename, args):
     """Write a class header file"""
-    print "Writing header file to %s" % filename
+    print("Writing header file to", filename)
     f = open(filename, 'w')
 
     subproject_upper = subproject.upper()
-    guard = "MANTID_%s_%s_H_" % (subproject_upper, classname.upper())
+    guard = "MANTID_{}_{}_H_".format(subproject_upper, classname.upper())
 
     # Create an Algorithm header; will not use it if not an algo
     algorithm_header = """
@@ -47,17 +47,18 @@ private:
         alg_include = ""
 
     # The full text
-    s = """#ifndef %s
-#define %s
+    s = r"""#ifndef {}
+#define {}
 
-%s
-#include "Mantid%s/DllConfig.h"
-namespace Mantid {
-namespace %s {
+#include "Mantid{}/DllConfig.h"
+{}
 
-/** %s : TODO: DESCRIPTION
+namespace Mantid {{
+namespace {} {{
 
-  Copyright &copy; %s ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+/** {} : TODO: DESCRIPTION
+
+  Copyright &copy; {} ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -78,13 +79,13 @@ namespace %s {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_%s_DLL %s%s {
-public:%s};
+class MANTID_{}_DLL {}{} {{
+public:{}}};
 
-} // namespace %s
-} // namespace Mantid
+}} // namespace {}
+}} // namespace Mantid
 
-#endif /* %s */""" % (guard, guard, subproject,
+#endif /* {} */""".format(guard, guard, subproject,
        alg_include, subproject, classname,
        datetime.datetime.now().date().year, subproject_upper, classname, alg_class_declare,
        algorithm_header, subproject, guard)
@@ -99,7 +100,7 @@ public:%s};
 #======================================================================
 def write_source(subproject, classname, filename, args):
     """Write a class source file"""
-    print "Writing source file to %s" % filename
+    print("Writing source file to", filename)
     f = open(filename, 'w')
 
     algorithm_top = """
@@ -107,32 +108,32 @@ using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(%s)
-""" % (classname)
+DECLARE_ALGORITHM({})
+""".format(classname)
 
     algorithm_source = """
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string %s::name() const { return "%s"; }
+const std::string {algname}::name() const {{ return "{algname}"; }}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int %s::version() const { return 1; }
+int {algname}::version() const {{ return 1; }}
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string %s::category() const {
+const std::string {algname}::category() const {{
   return "TODO: FILL IN A CATEGORY";
-}
+}}
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string %s::summary() const {
+const std::string {algname}::summary() const {{
   return "TODO: FILL IN A SUMMARY";
-}
+}}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void %s::init() {
+void {algname}::init() {{
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<API::Workspace>>("InputWorkspace", "",
                                                              Direction::Input),
@@ -141,29 +142,29 @@ void %s::init() {
       Kernel::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "",
                                                              Direction::Output),
       "An output workspace.");
-}
+}}
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void %s::exec() {
+void {algname}::exec() {{
   // TODO Auto-generated execute stub
-}
-""" % (classname, classname, classname, classname, classname, classname, classname)
+}}
+""".format(algname=classname)
 
     if not args.alg:
         algorithm_top = ""
         algorithm_source = ""
 
     # ------- Now the normal class text ------------------------------
-    s = """#include "Mantid%s/%s%s.h"
+    s = """#include "Mantid{}/{}{}.h"
 
-namespace Mantid {
-namespace %s {
-%s%s
-} // namespace %s
-} // namespace Mantid
-""" % (
+namespace Mantid {{
+namespace {} {{
+{}{}
+}} // namespace {}
+}} // namespace Mantid
+""".format(
         subproject, args.subfolder, classname, subproject, algorithm_top,
         algorithm_source, subproject)
     f.write(s)
@@ -174,24 +175,24 @@ namespace %s {
 #======================================================================
 def write_test(subproject, classname, filename, args):
     """Write a class test file"""
-    print "Writing test file to %s" % filename
+    print("Writing test file to",filename)
     f = open(filename, 'w')
 
-    guard = "MANTID_%s_%sTEST_H_" % (subproject.upper(), classname.upper())
+    guard = "MANTID_{}_{}TEST_H_".format(subproject.upper(), classname.upper())
     algorithm_test = """
   void test_Init()
-  {
-    %s alg;
+  {{
+    {algname} alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-  }
+  }}
 
   void test_exec()
-  {
+  {{
     // Create test input if necessary
     MatrixWorkspace_sptr inputWS = //-- Fill in appropriate code. Consider using TestHelpers/WorkspaceCreationHelpers.h --
 
-    %s alg;
+    {algname} alg;
     // Don't put output in ADS by default
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -207,39 +208,39 @@ def write_test(subproject, classname, filename, args):
     Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
     TS_FAIL("TODO: Check the results and remove this line");
-  }
-  """ % (classname,classname);
+  }}
+  """.format(algname=classname);
 
     if not args.alg:
         algorithm_test = ""
 
-    s = """#ifndef %s
-#define %s
+    s = """#ifndef {}
+#define {}
 
 #include <cxxtest/TestSuite.h>
 
-#include "Mantid%s/%s%s.h"
+#include "Mantid{}/{}{}.h"
 
-using Mantid::%s::%s;
+using Mantid::{}::{};
 
-class %sTest : public CxxTest::TestSuite {
+class {}Test : public CxxTest::TestSuite {{
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static %sTest *createSuite() { return new %sTest(); }
-  static void destroySuite( %sTest *suite ) { delete suite; }
+  static {}Test *createSuite() {{ return new {}Test(); }}
+  static void destroySuite( {}Test *suite ) {{ delete suite; }}
 
-%s
+{}
   void test_Something()
-  {
+  {{
     TS_FAIL( "You forgot to write a test!");
-  }
+  }}
 
 
-};
+}};
 
 
-#endif /* %s */""" % (
+#endif /* {} */""".format(
           guard, guard, subproject, args.subfolder, classname,
           subproject, classname, classname, classname, classname, classname,
           algorithm_test, guard)
@@ -254,7 +255,7 @@ public:
 #======================================================================
 def write_rst(subproject, classname, filename, args):
     """Write an algorithm rst documentation file"""
-    print "Writing rst file to %s" % filename
+    print("Writing rst file to", filename)
     f = open(filename, 'w')
 
     s = """
@@ -276,26 +277,26 @@ Usage
 -----
 ..  Try not to use files in your examples,
     but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
+    autotestdata\\UsageData and the following tag unindented
     .. include:: ../usagedata-note.txt
 
-**Example - %s**
+**Example - {algname}**
 
-.. testcode:: %sExample
+.. testcode:: {algname}Example
 
    # Create a host workspace
    ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
    or
    ws = CreateSampleWorkspace()
 
-   wsOut = %s()
+   wsOut = {algname}()
 
    # Print the result
    print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
 
 Output:
 
-.. testoutput:: %sExample
+.. testoutput:: {algname}Example
 
   The output workspace has ?? spectra
 
@@ -303,7 +304,7 @@ Output:
 
 .. sourcelink::
 
-""" % (classname,classname,classname,classname)
+""".format(algname=classname)
 
     f.write(s)
     f.close()
@@ -323,19 +324,19 @@ def generate(subproject, classname, overwrite, args):
     rstfile = os.path.join(mantiddir, "docs", "source", "algorithms", classname + "-v1.rst")
 
     if args.header and not overwrite and os.path.exists(headerfile):
-        print "\nError! Header file %s already exists. Use --force to overwrite.\n" % headerfile
+        print("\nError! Header file {} already exists. Use --force to overwrite.\n".format(headerfile))
         return
     if args.cpp and not overwrite and os.path.exists(sourcefile):
-        print "\nError! Source file %s already exists. Use --force to overwrite.\n" % sourcefile
+        print("\nError! Source file {} already exists. Use --force to overwrite.\n".format(sourcefile))
         return
     if args.test and not overwrite and os.path.exists(testfile):
-        print "\nError! Test file %s already exists. Use --force to overwrite.\n" % testfile
+        print("\nError! Test file {} already exists. Use --force to overwrite.\n".format(testfile))
         return
     if args.rst and args.alg and not overwrite and os.path.exists(rstfile):
-        print "\nError! Rst documentation file %s already exists. Use --force to overwrite.\n" % rstfile
+        print("\nError! Rst documentation file {} already exists. Use --force to overwrite.\n".format(rstfile))
         return
 
-    print
+    print()
     if args.header:
         write_header(subproject, classname, headerfile, args)
     if args.cpp:
@@ -348,13 +349,13 @@ def generate(subproject, classname, overwrite, args):
     # Insert into the cmake list if required
     if args.cmake:
         add_to_cmake(subproject, classname, args, args.subfolder)
-        print "\n   Files were added to Framework/%s/CMakeLists.txt !" % (subproject)
-    print
+        print("\n   Files were added to Framework/{}/CMakeLists.txt !".format(subproject))
+    print()
 
     if args.alg:
-        print "Note: if this is a WorkflowAlgorithm, please subclass DataProcessorAlgorithm"
-        print "Note: if this algorithm operates on a WorkspaceGroup, please override processGroups()"
-        print
+        print("Note: if this is a WorkflowAlgorithm, please subclass DataProcessorAlgorithm")
+        print("Note: if this algorithm operates on a WorkspaceGroup, please override processGroups()")
+        print()
 
 #======================================================================
 if __name__ == "__main__":

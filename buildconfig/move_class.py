@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 """ Utility for moving a class file to a different project."""
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import sys
-import os
 import argparse
 import datetime
+import os
 import re
+import sys
+
 from cmakelists_utils import *
-
-
 
 #======================================================================
 def move_one(subproject, classname, newproject, newclassname, oldfilename, newfilename, args):
@@ -20,7 +20,7 @@ def move_one(subproject, classname, newproject, newclassname, oldfilename, newfi
         cmd = cmd.replace("\\","/")
         if not args.no_vcs:
             cmd = "git " + cmd
-        print "Running:", cmd
+        print("Running:", cmd)
         retval = os.system(cmd)
         if retval != 0:
             raise RuntimeError("Error executing cmd '%s'" % cmd)
@@ -44,7 +44,7 @@ def move_one(subproject, classname, newproject, newclassname, oldfilename, newfi
         f = open(newfilename, 'w')
         f.write(text)
     except RuntimeError as err:
-        print err
+        print(err)
 
 
 
@@ -64,16 +64,16 @@ def move_all(subproject, classname, newproject, newclassname, args):
     newtestfile = os.path.join(newbasedir, "test/" + args.dest_subfolder + newclassname + "Test.h")
 
     if args.header and not overwrite and os.path.exists(newheaderfile):
-        print "\nError! Header file %s already exists. Use --force to overwrite.\n" % newheaderfile
+        print("\nError! Header file %s already exists. Use --force to overwrite.\n" % newheaderfile)
         return
     if args.cpp and not overwrite and os.path.exists(newsourcefile):
-        print "\nError! Source file %s already exists. Use --force to overwrite.\n" % newsourcefile
+        print("\nError! Source file %s already exists. Use --force to overwrite.\n" % newsourcefile)
         return
     if args.test and not overwrite and os.path.exists(newtestfile):
-        print "\nError! Test file %s already exists. Use --force to overwrite.\n" % newtestfile
+        print("\nError! Test file %s already exists. Use --force to overwrite.\n" % newtestfile)
         return
 
-    print
+    print()
     if args.header:
         move_one(subproject, classname, newproject, newclassname, headerfile, newheaderfile, args)
     if args.cpp:
@@ -85,15 +85,9 @@ def move_all(subproject, classname, newproject, newclassname, args):
     remove_from_cmake(subproject, classname, args, args.source_subfolder)
     add_to_cmake(newproject, newclassname, args, args.dest_subfolder)
 
-    print "   Files were removed to Framework/%s/CMakeLists.txt !" % subproject
-    print "   Files were added to Framework/%s/CMakeLists.txt !" % newproject
-    print
-#    if not test_only:
-#        print "\tsrc/%s.cpp" % (classname)
-#        print "\tinc/Mantid%s/%s.h" % (subproject, classname)
-#    print "\ttest/%sTest.h" % (classname)
-#    print
-
+    print("   Files were removed to Framework/%s/CMakeLists.txt !" % subproject)
+    print("   Files were added to Framework/%s/CMakeLists.txt !" % newproject)
+    print()
 
 #======================================================================
 if __name__ == "__main__":
