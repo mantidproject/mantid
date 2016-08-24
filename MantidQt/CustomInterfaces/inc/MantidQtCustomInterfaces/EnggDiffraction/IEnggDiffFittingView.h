@@ -263,6 +263,11 @@ public:
                              bool focused, bool plotSinglePeaks) = 0;
 
   /**
+   * resets the canvas to avoid multiple plotting
+   */
+  virtual void resetCanvas() = 0;
+
+  /**
    * Messages that this view wants to send to the logging system.
    *
    * @return list of messages to log, one by one.

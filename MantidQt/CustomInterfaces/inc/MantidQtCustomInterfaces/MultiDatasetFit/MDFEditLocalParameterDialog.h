@@ -29,6 +29,11 @@ public:
   bool areOthersFixed(int i) const;
   bool areAllOthersFixed(int i) const;
   bool areOthersTied(int i) const;
+  bool isLogCheckboxTicked() const;
+
+signals:
+  void logOptionsChecked(bool);
+
 private slots:
   void valueChanged(int, int);
   void setAllValues(double);
@@ -38,6 +43,8 @@ private slots:
   void setTieAll(QString);
   void copy();
   void paste();
+  void setValueToLog(int);
+  void setAllValuesToLog();
 
 private:
   bool eventFilter(QObject *obj, QEvent *ev) override;

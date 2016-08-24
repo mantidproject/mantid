@@ -121,6 +121,8 @@ public:
 
   void setBankEmit() override;
 
+  void resetCanvas() override;
+
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                      bool focused, bool plotSinglePeaks) override;
 
@@ -177,6 +179,7 @@ private slots:
   void setBankIdComboBox(int idx) override;
   void setPeakPick();
   void clearPeakList();
+  void loadClicked();
   void fitClicked();
   void fitAllClicked();
   void FittingRunNo();

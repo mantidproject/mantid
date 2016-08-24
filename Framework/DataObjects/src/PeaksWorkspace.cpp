@@ -190,7 +190,7 @@ const Peak &PeaksWorkspace::getPeak(const int peakNum) const {
  * @return a pointer to a new Peak object.
  */
 Geometry::IPeak *
-PeaksWorkspace::createPeak(Kernel::V3D QLabFrame,
+PeaksWorkspace::createPeak(const Kernel::V3D &QLabFrame,
                            boost::optional<double> detectorDistance) const {
   Geometry::Goniometer goniometer = this->run().getGoniometer();
 
@@ -222,7 +222,7 @@ PeaksWorkspace::createPeak(Kernel::V3D QLabFrame,
  *         value.
  */
 std::vector<std::pair<std::string, std::string>>
-PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
+PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
   std::vector<std::pair<std::string, std::string>> Result;
   std::ostringstream oss;
   oss << std::setw(12) << std::fixed << std::setprecision(3) << (qFrame.norm());
@@ -393,7 +393,7 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
  * @param HKL : reciprocal lattice vector coefficients
  * @return Fully formed peak.
  */
-Peak *PeaksWorkspace::createPeakHKL(V3D HKL) const {
+Peak *PeaksWorkspace::createPeakHKL(const V3D &HKL) const {
   /*
    The following allows us to add peaks where we have a single UB to work from.
    */
@@ -437,7 +437,8 @@ Peak *PeaksWorkspace::createPeakHKL(V3D HKL) const {
  *form for the corresponding
  *         value.
  */
-int PeaksWorkspace::peakInfoNumber(Kernel::V3D qFrame, bool labCoords) const {
+int PeaksWorkspace::peakInfoNumber(const Kernel::V3D &qFrame,
+                                   bool labCoords) const {
   std::vector<std::pair<std::string, std::string>> Result;
   std::ostringstream oss;
   oss << std::setw(12) << std::fixed << std::setprecision(3) << (qFrame.norm());
