@@ -290,13 +290,13 @@ public:
     TS_ASSERT_EQUALS(outFreq.y()[1], (histFreq.y()[0] + histFreq.y()[1]) / 2);
     TS_ASSERT_EQUALS(outFreq.y()[2], histFreq.y()[1] / 2);
 
-	TS_ASSERT_DELTA(outCounts.e()[0], std::sqrt(outCounts.y()[0]), 1e-5);
-	TS_ASSERT_DELTA(outCounts.e()[1], std::sqrt(outCounts.y()[1]), 1e-5);
-	TS_ASSERT_DELTA(outCounts.e()[2], std::sqrt(outCounts.y()[2]), 1e-5);
+    TS_ASSERT_DELTA(outCounts.e()[0], std::sqrt(outCounts.y()[0]), 1e-5);
+    TS_ASSERT_DELTA(outCounts.e()[1], std::sqrt(outCounts.y()[1]), 1e-5);
+    TS_ASSERT_DELTA(outCounts.e()[2], std::sqrt(outCounts.y()[2]), 1e-5);
 
-	TS_ASSERT_DELTA(outFreq.e()[0], std::sqrt(outFreq.y()[0]), 1e-5);
-	TS_ASSERT_DELTA(outFreq.e()[1], std::sqrt(outFreq.y()[1]), 1e-5);
-	TS_ASSERT_DELTA(outFreq.e()[2], outFreq.y()[2], 1e-5);
+    TS_ASSERT_DELTA(outFreq.e()[0], std::sqrt(outFreq.y()[0]), 1e-5);
+    TS_ASSERT_DELTA(outFreq.e()[1], std::sqrt(outFreq.y()[1]), 1e-5);
+    TS_ASSERT_DELTA(outFreq.e()[2], outFreq.y()[2], 1e-5);
   }
 
   void testSmallerBinsSymmetric() {
