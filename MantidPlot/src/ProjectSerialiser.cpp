@@ -690,8 +690,8 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
     std::string specLines;
     tsv >> specLines;
 
-    auto win = SpectrumView::SpectrumView::loadFromProject(
-        specLines, window, fileVersion);
+    auto win = SpectrumView::SpectrumView::loadFromProject(specLines, window,
+                                                           fileVersion);
     window->addSerialisableWindow(dynamic_cast<QObject *>(win));
   }
 }

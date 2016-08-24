@@ -67,7 +67,9 @@ public:
 
   /// Get the applied color scales
   std::pair<ColorMaps::ColorScale, ColorMaps::ColorScale>
-  getColorScales() const { return m_colorScales; }
+  getColorScales() const {
+    return m_colorScales;
+  }
   /// Get the color map file name
   QString getColorMapFileName() const { return m_colorMapFileName; }
   void setColorScale(ColorMaps::ColorScale positive,

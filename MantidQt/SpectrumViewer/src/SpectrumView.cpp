@@ -239,8 +239,9 @@ bool SpectrumView::isTrackingOn() const {
   return m_ui->tracking_always_on->isChecked();
 }
 
-API::IProjectSerialisable *SpectrumView::loadFromProject(const std::string &lines, ApplicationWindow *app, const int fileVersion)
-{
+API::IProjectSerialisable *
+SpectrumView::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                              const int fileVersion) {
   UNUSED_ARG(app);
   UNUSED_ARG(fileVersion);
   API::TSVSerialiser tsv(lines);
@@ -317,8 +318,7 @@ API::IProjectSerialisable *SpectrumView::loadFromProject(const std::string &line
   return viewer;
 }
 
-std::string SpectrumView::saveToProject(ApplicationWindow *app)
-{
+std::string SpectrumView::saveToProject(ApplicationWindow *app) {
   UNUSED_ARG(app);
   API::TSVSerialiser tsv, spec;
   spec.writeLine("geometry") << geometry();
@@ -342,7 +342,7 @@ std::string SpectrumView::saveToProject(ApplicationWindow *app)
     spec.writeLine("ColorMapFileName") << colorMapFileName;
 
   spec.writeLine("Workspaces");
-  for(auto source : m_dataSource) {
+  for (auto source : m_dataSource) {
     spec << source->getWorkspace()->name();
   }
 
