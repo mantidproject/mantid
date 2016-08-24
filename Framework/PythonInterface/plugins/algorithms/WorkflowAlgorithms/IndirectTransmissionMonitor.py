@@ -42,7 +42,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         trans_prog = Progress(self, start=0.05, end=0.04, nreports=2)
         trans_prog.report('Transforming monitor for Sample')
         self._trans_mon(ws_basename, 'Sam', self._sample_ws_in)
-        trans_prog.report('Transforming monitor for Contianer')
+        trans_prog.report('Transforming monitor for Container')
         self._trans_mon(ws_basename, 'Can', self._can_ws_in)
 
         workflow_prog = Progress(self, start=0.4, end=1.0, nreports=4)

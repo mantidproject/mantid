@@ -412,6 +412,9 @@
       </item>
       <item>
        <widget class="QComboBox" name="cbPlotType">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -426,11 +429,6 @@
         </property>
         <item>
          <property name="text">
-          <string>None</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
           <string>Contour</string>
          </property>
         </item>
@@ -439,6 +437,16 @@
           <string>Spectra</string>
          </property>
         </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbPlot">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Plot</string>
+        </property>
        </widget>
       </item>
       <item>
@@ -455,7 +463,10 @@
        </spacer>
       </item>
       <item>
-       <widget class="QCheckBox" name="ckSave">
+       <widget class="QPushButton" name="pbSave">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Save Result</string>
         </property>
@@ -483,7 +494,7 @@
   <tabstop>spEWidth</tabstop>
   <tabstop>spEHigh</tabstop>
   <tabstop>cbPlotType</tabstop>
-  <tabstop>ckSave</tabstop>
+  <tabstop>pbSave</tabstop>
  </tabstops>
  <resources/>
  <connections>

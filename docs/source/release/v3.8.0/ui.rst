@@ -88,6 +88,12 @@ Multi-dataset fitting interface improvements
 --------------------------------------------
 * Fitting a single dataset with a composite function no longer causes a crash
 
+.. figure::  ../../images/MDFSetToLog.png
+   :width: 487
+   :align: right
+
+* "Set to log" and "Set all to log" options have been added to the parameter editing dialog. These enable a parameter to be set to a value from a sample log for one or all spectra.
+
 |
 
 Full list of
