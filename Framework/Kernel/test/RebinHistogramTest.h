@@ -70,18 +70,20 @@ public:
   void testRebinSmaller() {
     auto size = smallerBinEdges.size() - 1;
     for (size_t i = 0; i < nIters; i++) {
+      std::vector<double> yout(size);
+      std::vector<double> eout(size);
       Mantid::Kernel::VectorHelper::rebinHistogram(
-          binEdges, counts, errors, smallerBinEdges, std::vector<double>(size),
-          std::vector<double>(size), false);
+          binEdges, counts, errors, smallerBinEdges, yout, eout, false);
     }
   }
 
   void testRebinLarger() {
     auto size = largerBinEdges.size() - 1;
     for (size_t i = 0; i < nIters; i++) {
+      std::vector<double> yout(size);
+      std::vector<double> eout(size);
       Mantid::Kernel::VectorHelper::rebinHistogram(
-          binEdges, counts, errors, largerBinEdges, std::vector<double>(size),
-          std::vector<double>(size), false);
+          binEdges, counts, errors, largerBinEdges, yout, eout, false);
     }
   }
 

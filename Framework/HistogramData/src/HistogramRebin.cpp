@@ -128,7 +128,7 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
       } else {
         auto factor = 1 / nwidth;
         ynew[inew] *= factor;
-        enew[inew] = sqrt(enew[inew] * factor);
+        enew[inew] = sqrt(enew[inew]) * factor;
         inew++;
       }
     }

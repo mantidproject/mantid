@@ -101,9 +101,11 @@ public:
 
     for (size_t i = 0; i < outCounts.y().size(); i++) {
       TS_ASSERT_EQUALS(outCounts.y()[i], 5.0);
-      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(5), 1e5);
+      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(5), 1e-5);
       TS_ASSERT_EQUALS(outFreq.y()[i], 12.0);
-      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
+      TS_ASSERT_DELTA(outFreq.e()[i],
+                      std::sqrt(outFreq.y()[i] / (edges[i + 1] - edges[i])),
+                      1e-5);
     }
   }
 
@@ -122,10 +124,10 @@ public:
     for (size_t i = 0; i < outCounts.y().size(); i++) {
       TS_ASSERT_EQUALS(outCounts.y()[i],
                        hist.y()[2 * i] + hist.y()[(2 * i) + 1]);
-      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e5);
+      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e-5);
       TS_ASSERT_EQUALS(outFreq.y()[i],
                        (histFreq.y()[2 * i] + histFreq.y()[(2 * i) + 1]) / 2);
-      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
+      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i] / 2), 1e-5);
     }
   }
 
@@ -149,8 +151,10 @@ public:
     TS_ASSERT_EQUALS(outFreq.y()[2], histFreq.y()[1]);
 
     for (size_t i = 0; i < outCounts.y().size(); i++) {
-      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e5);
-      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
+      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e-5);
+      TS_ASSERT_DELTA(outFreq.e()[i],
+                      std::sqrt(outFreq.y()[i] / (edges[i + 1] - edges[i])),
+                      1e-5);
     }
   }
 
@@ -171,10 +175,15 @@ public:
     TS_ASSERT_EQUALS(outFreq.y()[0], (histFreq.y()[0] + histFreq.y()[1]) / 2);
     TS_ASSERT_EQUALS(outFreq.y()[1], (histFreq.y()[1] + histFreq.y()[2]) / 2);
 
-    for (size_t i = 0; i < outCounts.y().size(); i++) {
-      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e5);
-      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
-    }
+    TS_ASSERT_DELTA(outCounts.e()[0], std::sqrt(outCounts.y()[0]), 1e-5);
+    TS_ASSERT_DELTA(outCounts.e()[1], std::sqrt(outCounts.y()[1]), 1e-5);
+
+    TS_ASSERT_DELTA(outFreq.e()[0],
+                    std::sqrt(((histFreq.y()[0] / 2) + histFreq.y()[1]) / 2),
+                    1e-5);
+    TS_ASSERT_DELTA(outFreq.e()[1],
+                    std::sqrt(((histFreq.y()[2] / 2) + histFreq.y()[1]) / 2),
+                    1e-5);
   }
 
   void testSplitCombineBinsAsymmetric() {
@@ -200,8 +209,10 @@ public:
     TS_ASSERT_EQUALS(outFreq.y()[2], histFreq.y()[2]);
 
     for (size_t i = 0; i < outCounts.y().size(); i++) {
-      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e5);
-      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
+      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e-5);
+      TS_ASSERT_DELTA(outFreq.e()[i],
+                      std::sqrt(outFreq.y()[i] / (edges[i + 1] - edges[i])),
+                      1e-5);
     }
   }
 
@@ -224,10 +235,17 @@ public:
     TS_ASSERT_EQUALS(outFreq.y()[1], histFreq.y()[1]);
     TS_ASSERT_EQUALS(outFreq.y()[2], (histFreq.y()[1] + histFreq.y()[2]) / 2);
 
-    for (size_t i = 0; i < outCounts.y().size(); i++) {
-      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e5);
-      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
-    }
+    TS_ASSERT_DELTA(outCounts.e()[0], std::sqrt(outCounts.y()[0]), 1e-5);
+    TS_ASSERT_DELTA(outCounts.e()[1], std::sqrt(outCounts.y()[1]), 1e-5);
+    TS_ASSERT_DELTA(outCounts.e()[2], std::sqrt(outCounts.y()[2]), 1e-5);
+
+    TS_ASSERT_DELTA(
+        outFreq.e()[0],
+        std::sqrt(((histFreq.y()[0] / 2) + (histFreq.y()[1] * 2)) / 2), 1e-5);
+    TS_ASSERT_DELTA(outFreq.e()[1], std::sqrt(histFreq.y()[1] * 2), 1e-5);
+    TS_ASSERT_DELTA(
+        outFreq.e()[2],
+        std::sqrt(((histFreq.y()[2] / 2) + (histFreq.y()[1] * 2)) / 2), 1e-5);
   }
 
   void testSmallerBinsAsymmetric() {
@@ -248,8 +266,8 @@ public:
     TS_ASSERT_EQUALS(outFreq.y()[1], (histFreq.y()[1] + histFreq.y()[2]) / 2);
 
     for (size_t i = 0; i < outCounts.y().size(); i++) {
-      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e5);
-      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
+      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e-5);
+      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e-5);
     }
   }
 
@@ -272,10 +290,13 @@ public:
     TS_ASSERT_EQUALS(outFreq.y()[1], (histFreq.y()[0] + histFreq.y()[1]) / 2);
     TS_ASSERT_EQUALS(outFreq.y()[2], histFreq.y()[1] / 2);
 
-    for (size_t i = 0; i < outCounts.y().size(); i++) {
-      TS_ASSERT_DELTA(outCounts.e()[i], std::sqrt(outCounts.y()[i]), 1e5);
-      TS_ASSERT_DELTA(outFreq.e()[i], std::sqrt(outFreq.y()[i]), 1e5);
-    }
+	TS_ASSERT_DELTA(outCounts.e()[0], std::sqrt(outCounts.y()[0]), 1e-5);
+	TS_ASSERT_DELTA(outCounts.e()[1], std::sqrt(outCounts.y()[1]), 1e-5);
+	TS_ASSERT_DELTA(outCounts.e()[2], std::sqrt(outCounts.y()[2]), 1e-5);
+
+	TS_ASSERT_DELTA(outFreq.e()[0], std::sqrt(outFreq.y()[0]), 1e-5);
+	TS_ASSERT_DELTA(outFreq.e()[1], std::sqrt(outFreq.y()[1]), 1e-5);
+	TS_ASSERT_DELTA(outFreq.e()[2], outFreq.y()[2], 1e-5);
   }
 
   void testSmallerBinsSymmetric() {
@@ -312,7 +333,7 @@ public:
     TS_ASSERT_EQUALS(outCounts.y()[2], 0);
 
     TS_ASSERT_EQUALS(outCounts.e()[0], 0);
-    TS_ASSERT_DELTA(outCounts.e()[1], std::sqrt(outCounts.y()[1]), 1e5);
+    TS_ASSERT_DELTA(outCounts.e()[1], std::sqrt(outCounts.y()[1]), 1e-5);
     TS_ASSERT_EQUALS(outCounts.e()[2], 0);
 
     TS_ASSERT_EQUALS(outFreq.y()[0], 0);
@@ -320,7 +341,7 @@ public:
     TS_ASSERT_EQUALS(outFreq.y()[2], 0);
 
     TS_ASSERT_EQUALS(outFreq.e()[0], 0);
-    TS_ASSERT_DELTA(outFreq.e()[1], std::sqrt(outFreq.y()[1]), 1e5);
+    TS_ASSERT_DELTA(outFreq.e()[1], std::sqrt(outFreq.y()[1]), 1e-5);
     TS_ASSERT_EQUALS(outFreq.e()[2], 0);
   }
 
@@ -362,22 +383,22 @@ public:
   }
 
   void testRebinCountsSmallerBins() {
-    for (int i = 0; i < nIters; i++)
+    for (size_t i = 0; i < nIters; i++)
       rebin(hist, smBins);
   }
 
   void testRebinFrequenciesSmallerBins() {
-    for (int i = 0; i < nIters; i++)
+    for (size_t i = 0; i < nIters; i++)
       rebin(histFreq, smBins);
   }
 
   void testRebinCountsLargerBins() {
-    for (int i = 0; i < nIters; i++)
+    for (size_t i = 0; i < nIters; i++)
       rebin(hist, lgBins);
   }
 
   void testRebinFrequenciesLargerBins() {
-    for (int i = 0; i < nIters; i++)
+    for (size_t i = 0; i < nIters; i++)
       rebin(histFreq, lgBins);
   }
 
