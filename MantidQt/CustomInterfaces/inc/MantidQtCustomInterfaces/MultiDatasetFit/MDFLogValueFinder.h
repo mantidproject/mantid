@@ -49,7 +49,7 @@ public:
 
 private:
   /// Workspace names
-  const QStringList wsNames;
+  const QStringList m_wsNames;
 };
 
 } // namespace CustomInterfaces
