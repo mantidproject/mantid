@@ -1,21 +1,20 @@
-#ifndef MANTID_LIVEDATA_KAFKAEVENTSUBSCRIBER_H_
-#define MANTID_LIVEDATA_KAFKAEVENTSUBSCRIBER_H_
+#ifndef MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODER_H_
+#define MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODER_H_
 
+#include "MantidLiveData/Kafka/IKafkaBroker.h"
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
-#include <memory>
 
-// -----------------------------------------------------------------------------
-// RdKafka forward declarations
-// -----------------------------------------------------------------------------
-namespace RdKafka {
-class KafkaConsumer;
-}
+#include <Poco/Runnable.h>
 
 namespace Mantid {
 namespace LiveData {
 
 /**
-  Interface to a named Kafka topic on a broker at a given address.
+  High-level interface to ISIS Kafka event system. It requires
+  3 topic names of the data streams.
+
+  It subclasses Poco::Runnable in order to be able to be run from a separate
+  thread.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -38,23 +37,20 @@ namespace LiveData {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport KafkaTopicSubscriber final : public IKafkaStreamSubscriber {
+class DLLExport ISISKafkaEventStreamDecoder : public Poco::Runnable {
 public:
-  KafkaTopicSubscriber(std::string broker, std::string topic);
-  ~KafkaTopicSubscriber();
-
-  const std::string topic() const;
-
-  virtual void subscribe() override;
-  virtual bool consumeMessage(std::string *payload) override;
+  ISISKafkaEventStreamDecoder(const IKafkaBroker &broker,
+                              std::string eventTopic, std::string runInfoTopic,
+                              std::string spDetTopic);
+  void run() override;
 
 private:
-  std::unique_ptr<RdKafka::KafkaConsumer> m_consumer;
-  std::string m_brokerAddr;
-  std::string m_topicName;
+  std::unique_ptr<IKafkaStreamSubscriber> m_eventStream;
+  std::unique_ptr<IKafkaStreamSubscriber> m_runInfoStream;
+  std::unique_ptr<IKafkaStreamSubscriber> m_spDetStream;
 };
 
 } // namespace LiveData
 } // namespace Mantid
 
-#endif /* MANTID_LIVEDATA_KAFKAEVENTSUBSCRIBER_H_ */
+#endif /* MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODER_H_ */

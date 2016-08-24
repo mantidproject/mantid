@@ -1,21 +1,15 @@
-#ifndef MANTID_LIVEDATA_KAFKAEVENTSUBSCRIBER_H_
-#define MANTID_LIVEDATA_KAFKAEVENTSUBSCRIBER_H_
+#ifndef MANTID_LIVEDATA_IKAFKABROKER_H_
+#define MANTID_LIVEDATA_IKAFKABROKER_H_
 
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
 #include <memory>
-
-// -----------------------------------------------------------------------------
-// RdKafka forward declarations
-// -----------------------------------------------------------------------------
-namespace RdKafka {
-class KafkaConsumer;
-}
 
 namespace Mantid {
 namespace LiveData {
 
 /**
-  Interface to a named Kafka topic on a broker at a given address.
+  Defines the interface used to communicate with a Kafka broker such as
+  subscribing to topics.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -38,23 +32,15 @@ namespace LiveData {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport KafkaTopicSubscriber final : public IKafkaStreamSubscriber {
+class DLLExport IKafkaBroker {
 public:
-  KafkaTopicSubscriber(std::string broker, std::string topic);
-  ~KafkaTopicSubscriber();
+  ~IKafkaBroker() = default;
 
-  const std::string topic() const;
-
-  virtual void subscribe() override;
-  virtual bool consumeMessage(std::string *payload) override;
-
-private:
-  std::unique_ptr<RdKafka::KafkaConsumer> m_consumer;
-  std::string m_brokerAddr;
-  std::string m_topicName;
+  virtual std::unique_ptr<IKafkaStreamSubscriber>
+  subscribe(const std::string &topic) const = 0;
 };
 
 } // namespace LiveData
 } // namespace Mantid
 
-#endif /* MANTID_LIVEDATA_KAFKAEVENTSUBSCRIBER_H_ */
+#endif /* MANTID_LIVEDATA_IKAFKABROKER_H_ */

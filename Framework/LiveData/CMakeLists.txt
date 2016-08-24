@@ -56,19 +56,26 @@ set ( TEST_FILES
 
 find_package ( LibRDKafka )
 if ( LIBRDKAFKA_FOUND )
-  set ( SRC_FILES 
-    ${SRC_FILES} 
+  set ( SRC_FILES
+    ${SRC_FILES}
     src/ISIS/ISISKafkaEventListener.cpp
+    src/ISIS/ISISKafkaEventStreamDecoder.cpp
+    src/Kafka/KafkaBroker.cpp
     src/Kafka/KafkaTopicSubscriber.cpp
   )
-  set ( INC_FILES 
+  set ( INC_FILES
     ${INC_FILES}
     inc/MantidLiveData/ISIS/ISISKafkaEventListener.h
+    inc/MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h
     inc/MantidLiveData/Kafka/IKafkaStreamSubscriber.h
+    inc/MantidLiveData/Kafka/IKafkaBroker.h
+    inc/MantidLiveData/Kafka/KafkaBroker.h
     inc/MantidLiveData/Kafka/KafkaTopicSubscriber.h
   )
   set ( TEST_FILES
     ${TEST_FILES}
+    ISISKafkaEventStreamDecoderTest.h
+    KafkaBrokerTest.h
     KafkaTopicSubscriberTest.h
   )
 endif()

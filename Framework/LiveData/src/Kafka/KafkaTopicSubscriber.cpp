@@ -1,15 +1,15 @@
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
-
 #include "MantidKernel/Logger.h"
 
 #include <librdkafka/rdkafkacpp.h>
 
-#include <iostream>
+#include <algorithm>
+#include <cassert>
 #include <sstream>
 
 namespace {
 /// Timeout for message consume
-const int CONSUME_TIMEOUT_MS = 1000;
+const int CONSUME_TIMEOUT_MS = 30000;
 
 Mantid::Kernel::Logger &LOGGER() {
   static Mantid::Kernel::Logger logger("KafkaTopicSubscriber");
@@ -31,7 +31,8 @@ namespace LiveData {
  */
 KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker,
                                            std::string topic)
-    : m_consumer(), m_brokerAddr(broker), m_topicName(topic) {}
+    : IKafkaStreamSubscriber(), m_consumer(), m_brokerAddr(broker),
+      m_topicName(topic) {}
 
 /// Destructor
 KafkaTopicSubscriber::~KafkaTopicSubscriber() {
@@ -57,16 +58,16 @@ const std::string KafkaTopicSubscriber::topic() const { return m_topicName; }
  * Setup the connection to the broker for the configured topic
  */
 void KafkaTopicSubscriber::subscribe() {
-  using RdKafka::Conf;
-  using RdKafka::KafkaConsumer;
+  using namespace RdKafka;
 
   auto globalConf = std::unique_ptr<Conf>(Conf::create(Conf::CONF_GLOBAL));
   std::string errorMsg;
   globalConf->set("metadata.broker.list", m_brokerAddr, errorMsg);
+  globalConf->set("session.timeout.ms", "10000", errorMsg);
+  globalConf->set("group.id", "mantid", errorMsg);
   globalConf->set("message.max.bytes", "10000000", errorMsg);
   globalConf->set("fetch.message.max.bytes", "10000000", errorMsg);
   globalConf->set("replica.fetch.max.bytes", "10000000", errorMsg);
-  globalConf->set("group.id", "mantid", errorMsg);
   auto topicConf = std::unique_ptr<Conf>(Conf::create(Conf::CONF_TOPIC));
   globalConf->set("default_topic_conf", topicConf.get(), errorMsg);
 
@@ -80,7 +81,28 @@ void KafkaTopicSubscriber::subscribe() {
   }
   LOGGER().debug() << "% Created consumer " << m_consumer->name() << std::endl;
 
-  if (auto error = m_consumer->subscribe({m_topicName})) {
+  Metadata *metadataRawPtr(nullptr);
+  // API requires address of a pointer to the struct but compiler won't allow
+  // &metadata.get() as it is an rvalue
+  m_consumer->metadata(true, nullptr, &metadataRawPtr, CONSUME_TIMEOUT_MS);
+  // Capture the pointer in an owning struct to take care of deletion
+  std::unique_ptr<Metadata> metadata(std::move(metadataRawPtr));
+  if (!metadata) {
+    throw std::runtime_error("Failed to query metadata from broker");
+  }
+  auto topics = metadata->topics();
+  auto iter = std::find_if(topics->cbegin(), topics->cend(),
+                           [this](const TopicMetadata *tpc) {
+                             return tpc->topic() == this->m_topicName;
+                           });
+  if(iter == topics->cend()) {
+    std::ostringstream os;
+    os << "Failed to find topic '" << m_topicName << "' on broker";
+    throw std::runtime_error(os.str());
+  }
+
+  auto error = m_consumer->subscribe({m_topicName});
+  if (error) {
     std::ostringstream os;
     os << "Failed to subscribe to topic: '" << RdKafka::err2str(error) << "'";
     throw std::runtime_error(os.str());
@@ -96,6 +118,7 @@ void KafkaTopicSubscriber::subscribe() {
  * @return True if the read was considered successful
  */
 bool KafkaTopicSubscriber::consumeMessage(std::string *payload) {
+  assert(m_consumer);
   using RdKafka::Message;
   auto kfMsg =
       std::unique_ptr<Message>(m_consumer->consume(CONSUME_TIMEOUT_MS));

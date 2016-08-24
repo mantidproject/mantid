@@ -20,33 +20,40 @@ public:
   // ---------------------------------------------------------------------------
   void test_Connection_Properties_Returned_As_Expected() {
     using Mantid::LiveData::KafkaTopicSubscriber;
-    std::string broker("badhost"), topic("SANS2Devent_data");
+    std::string broker("badhost"), topic("topicstring");
 
+    // This won't connect yet
     auto subscriber =
         Mantid::Kernel::make_unique<KafkaTopicSubscriber>(broker, topic);
 
     TS_ASSERT_EQUALS(topic, subscriber->topic());
   }
 
-  void test_Real_Connection_To_Test_Server() {
+  void xtest_Unknown_Topic_Throws_Error() {
     using Mantid::LiveData::KafkaTopicSubscriber;
-    std::string broker("sakura"), topic("SANS2Devent_data");
+    std::string broker("sakura"), topic("__NOT_A_TOPIC_LETS_NOT_FIND_THIS");
 
+    // This won't connect yet
     auto subscriber =
         Mantid::Kernel::make_unique<KafkaTopicSubscriber>(broker, topic);
 
-    TS_ASSERT_THROWS_NOTHING(subscriber->subscribe());
-    std::string data;
-    size_t msgCount(0);
-    while(msgCount < 100 && subscriber->consumeMessage(&data)) {
-      std::cerr << "received  " << data.size() << "bytes\n";
-      ++msgCount;
-    }
+    TS_ASSERT_THROWS(subscriber->subscribe(), std::runtime_error);
   }
+  
   
   // ---------------------------------------------------------------------------
   // Failure cases
   // ---------------------------------------------------------------------------
+  void xtest_BadHost_Throws_Error() {
+    using Mantid::LiveData::KafkaTopicSubscriber;
+    std::string broker("badhost"), topic("topic");
+
+    // This won't connect yet
+    auto subscriber =
+        Mantid::Kernel::make_unique<KafkaTopicSubscriber>(broker, topic);
+
+    TS_ASSERT_THROWS(subscriber->subscribe(), std::runtime_error);
+  }
 
 };
 
