@@ -1,7 +1,9 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDER_H_
 #define MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDER_H_
 
+#include "MantidKernel/Statistics.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include <QStringList>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -32,6 +34,22 @@ namespace CustomInterfaces {
 */
 class MANTIDQT_CUSTOMINTERFACES_DLL MDFLogValueFinder {
 public:
+  /// Constructor
+  explicit MDFLogValueFinder(const QStringList &wsNames);
+  /// Get log names from workspaces
+  std::vector<std::string> getLogNames() const;
+  /// Get log value from workspace position in list
+  double getLogValue(const QString &logName,
+                     const Mantid::Kernel::Math::StatisticType &function,
+                     int index) const;
+  /// Get log value from workspace name
+  double getLogValue(const QString &logName,
+                     const Mantid::Kernel::Math::StatisticType &function,
+                     const QString &wsName) const;
+
+private:
+  /// Workspace names
+  const QStringList wsNames;
 };
 
 } // namespace CustomInterfaces
