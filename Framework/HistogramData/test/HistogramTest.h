@@ -945,7 +945,7 @@ public:
     for (size_t i = 0; i < nHists; i++)
       hists.push_back(Histogram(BinEdges(histSize, LinearGenerator(0, 1))));
 
-	histsCopy = hists;
+    histsCopy = hists;
   }
 
   void test_copy_many_X() {

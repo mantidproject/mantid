@@ -208,10 +208,11 @@ public:
     input->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
-	inputEvent = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
-		10, 100, true);
-	inputEvent->getAxis(0)->unit() =
-		Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    inputEvent =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(10, 100,
+                                                                        true);
+    inputEvent->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("TOF");
   }
 
   void testExec() {

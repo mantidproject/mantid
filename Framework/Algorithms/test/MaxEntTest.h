@@ -584,7 +584,7 @@ public:
     alg->setPropertyValue("ReconstructedData", "data");
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
-	alg->execute();
+    alg->execute();
   }
 
   void testExecComplex() {
@@ -597,7 +597,7 @@ public:
     alg->setPropertyValue("ReconstructedData", "data");
     alg->setPropertyValue("EvolChi", "evolChi");
     alg->setPropertyValue("EvolAngle", "evolAngle");
-	alg->execute();
+    alg->execute();
   }
 
 private:
