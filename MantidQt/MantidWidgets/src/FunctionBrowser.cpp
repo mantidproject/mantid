@@ -166,6 +166,8 @@ void FunctionBrowser::createBrowser() {
           SLOT(attributeChanged(QtProperty *)));
   connect(m_filenameManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(attributeChanged(QtProperty *)));
+  connect(m_workspaceManager, SIGNAL(propertyChanged(QtProperty *)), this,
+          SLOT(attributeChanged(QtProperty *)));
   connect(m_attributeVectorDoubleManager, SIGNAL(propertyChanged(QtProperty *)),
           this, SLOT(attributeVectorDoubleChanged(QtProperty *)));
   connect(m_tieManager, SIGNAL(propertyChanged(QtProperty *)), this,

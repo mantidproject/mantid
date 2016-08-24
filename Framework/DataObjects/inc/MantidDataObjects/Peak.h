@@ -26,23 +26,35 @@ public:
   friend class PeakColumn;
 
   Peak();
-  Peak(Geometry::Instrument_const_sptr m_inst, Mantid::Kernel::V3D QLabFrame,
-       boost::optional<double> detectorDistance = boost::optional<double>());
-  Peak(Geometry::Instrument_const_sptr m_inst, Mantid::Kernel::V3D QSampleFrame,
-       Mantid::Kernel::Matrix<double> goniometer,
-       boost::optional<double> detectorDistance = boost::optional<double>());
-  Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
+  Peak(const Geometry::Instrument_const_sptr &m_inst,
+       const Mantid::Kernel::V3D &QLabFrame,
+       boost::optional<double> detectorDistance = boost::none);
+  Peak(const Geometry::Instrument_const_sptr &m_inst,
+       const Mantid::Kernel::V3D &QSampleFrame,
+       const Mantid::Kernel::Matrix<double> &goniometer,
+       boost::optional<double> detectorDistance = boost::none);
+  Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
        double m_Wavelength);
-  Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
-       double m_Wavelength, Mantid::Kernel::V3D HKL);
-  Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
-       double m_Wavelength, Mantid::Kernel::V3D HKL,
-       Mantid::Kernel::Matrix<double> goniometer);
-  Peak(Geometry::Instrument_const_sptr m_inst, double scattering,
+  Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
+       double m_Wavelength, const Mantid::Kernel::V3D &HKL);
+  Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID,
+       double m_Wavelength, const Mantid::Kernel::V3D &HKL,
+       const Mantid::Kernel::Matrix<double> &goniometer);
+  Peak(const Geometry::Instrument_const_sptr &m_inst, double scattering,
        double m_Wavelength);
 
   /// Copy constructor
   Peak(const Peak &other);
+// MSVC 2015 won't build with noexcept.
+// error C2610: 'Mantid::DataObjects::Peak::Peak(Mantid::DataObjects::Peak &&)
+// noexcept': is not a special member function which can be defaulted
+#if defined(_MSC_VER) && _MSC_VER <= 1900
+  Peak(Peak &&);
+  Peak &operator=(Peak &&);
+#else
+  Peak(Peak &&) noexcept;
+  Peak &operator=(Peak &&) noexcept;
+#endif
 
   // Construct a peak from a reference to the interface
 
@@ -54,7 +66,7 @@ public:
   void removeContributingDetector(const int id);
   const std::set<int> &getContributingDetIDs() const;
 
-  void setInstrument(Geometry::Instrument_const_sptr inst) override;
+  void setInstrument(const Geometry::Instrument_const_sptr &inst) override;
   Geometry::IDetector_const_sptr getDetector() const override;
   Geometry::Instrument_const_sptr getInstrument() const override;
 
@@ -75,7 +87,7 @@ public:
   void setL(double m_L) override;
   void setBankName(std::string m_bankName);
   void setHKL(double H, double K, double L) override;
-  void setHKL(Mantid::Kernel::V3D HKL) override;
+  void setHKL(const Mantid::Kernel::V3D &HKL) override;
   void resetHKL();
 
   Mantid::Kernel::V3D getQLabFrame() const override;
@@ -83,12 +95,12 @@ public:
   Mantid::Kernel::V3D getDetectorPosition() const override;
   Mantid::Kernel::V3D getDetectorPositionNoCheck() const override;
 
-  void setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
-                       boost::optional<double> detectorDistance =
-                           boost::optional<double>()) override;
-  void setQLabFrame(Mantid::Kernel::V3D QLabFrame,
-                    boost::optional<double> detectorDistance =
-                        boost::optional<double>()) override;
+  void setQSampleFrame(
+      const Mantid::Kernel::V3D &QSampleFrame,
+      boost::optional<double> detectorDistance = boost::none) override;
+  void
+  setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
+               boost::optional<double> detectorDistance = boost::none) override;
 
   void setWavelength(double wavelength) override;
   double getWavelength() const override;
@@ -111,8 +123,8 @@ public:
   void setBinCount(double m_binCount) override;
 
   Mantid::Kernel::Matrix<double> getGoniometerMatrix() const override;
-  void
-  setGoniometerMatrix(Mantid::Kernel::Matrix<double> goniometerMatrix) override;
+  void setGoniometerMatrix(
+      const Mantid::Kernel::Matrix<double> &goniometerMatrix) override;
 
   std::string getBankName() const override;
   int getRow() const override;

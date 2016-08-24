@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFFunctionPlotData.h"
+#include "MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h"
 #include "MantidQtMantidWidgets/ErrorCurve.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -48,7 +49,11 @@ MDFFunctionPlotData::~MDFFunctionPlotData() {
 void MDFFunctionPlotData::setDomain(double startX, double endX, size_t nX) {
   Mantid::API::FunctionDomain1DVector x(startX, endX, nX);
   Mantid::API::FunctionValues y(x);
-  m_function->function(x, y);
+  try {
+    m_function->function(x, y);
+  } catch (std::exception &e) {
+    MultiDatasetFit::logWarning(e.what());
+  }
   m_functionCurve->setData(x.getPointerAt(0), y.getPointerToCalculated(0),
                            static_cast<int>(x.size()));
 }

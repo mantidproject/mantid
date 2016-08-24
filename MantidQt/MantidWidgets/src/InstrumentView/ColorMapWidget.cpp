@@ -327,12 +327,11 @@ void ColorMapWidget::mouseReleaseEvent(QMouseEvent * /*e*/) {
  * @return string representing the current state of the color map widget.
  */
 std::string ColorMapWidget::saveToProject() const {
-  API::TSVSerialiser tsv, cm;
-  cm.writeLine("ScaleType") << getScaleType();
-  cm.writeLine("Power") << getNth_power();
-  cm.writeLine("MinValue") << getMinValue();
-  cm.writeLine("MaxValue") << getMaxValue();
-  tsv.writeSection("colormap", cm.outputLines());
+  API::TSVSerialiser tsv;
+  tsv.writeLine("ScaleType") << getScaleType();
+  tsv.writeLine("Power") << getNth_power();
+  tsv.writeLine("MinValue") << getMinValue();
+  tsv.writeLine("MaxValue") << getMaxValue();
   return tsv.outputLines();
 }
 
@@ -343,27 +342,22 @@ std::string ColorMapWidget::saveToProject() const {
  */
 void ColorMapWidget::loadFromProject(const std::string &lines) {
   API::TSVSerialiser tsv(lines);
-  if (tsv.selectSection("colormap")) {
-    std::string colorMapLines;
-    tsv >> colorMapLines;
-    API::TSVSerialiser cm(colorMapLines);
 
-    int scaleType;
-    double min, max, power;
-    cm.selectLine("ScaleType");
-    cm >> scaleType;
-    cm.selectLine("Power");
-    cm >> power;
-    cm.selectLine("MinValue");
-    cm >> min;
-    cm.selectLine("MaxValue");
-    cm >> max;
+  int scaleType;
+  double min, max, power;
+  tsv.selectLine("ScaleType");
+  tsv >> scaleType;
+  tsv.selectLine("Power");
+  tsv >> power;
+  tsv.selectLine("MinValue");
+  tsv >> min;
+  tsv.selectLine("MaxValue");
+  tsv >> max;
 
-    setScaleType(scaleType);
-    setNthPower(power);
-    setMinValue(min);
-    setMaxValue(max);
-  }
+  setScaleType(scaleType);
+  setNthPower(power);
+  setMinValue(min);
+  setMaxValue(max);
 }
 } // MantidWidgets
 } // MantidQt

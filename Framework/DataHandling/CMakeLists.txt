@@ -43,6 +43,8 @@ set ( SRC_FILES
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
 	src/LoadEventNexus.cpp
+	src/ProcessBankData.cpp
+	src/BankPulseTimes.cpp
 	src/LoadEventPreNexus.cpp
 	src/LoadEventPreNexus2.cpp
 	src/LoadFITS.cpp
@@ -218,6 +220,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEventNexus.h
+	inc/MantidDataHandling/ProcessBankData.h
+	inc/MantidDataHandling/BankPulseTimes.h
 	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadFITS.h
