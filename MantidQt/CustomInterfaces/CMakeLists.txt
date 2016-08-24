@@ -64,6 +64,7 @@ set ( SRC_FILES
 	src/MultiDatasetFit/MDFFunctionPlotData.cpp
 	src/MultiDatasetFit/MDFLocalParameterEditor.cpp
 	src/MultiDatasetFit/MDFLocalParameterItemDelegate.cpp
+	src/MultiDatasetFit/MDFLogValueFinder.cpp
 	src/MultiDatasetFit/MDFPlotController.cpp
 	src/MultiDatasetFit/MultiDatasetFit.cpp
 	src/Muon/ALCBaselineModellingModel.cpp
@@ -214,6 +215,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFFunctionPlotData.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h
+	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLogValueFinder.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFPlotController.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h
@@ -508,6 +510,7 @@ set ( TEST_FILES
 	IO_MuonGroupingTest.h
 	ImageROIPresenterTest.h
 	ImggFormatsConvertPresenterTest.h
+	MDFLogValueFinderTest.h
 	MeasurementItemTest.h
 	MuonAnalysisDataLoaderTest.h
 	MuonAnalysisFitDataPresenterTest.h
