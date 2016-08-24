@@ -35,6 +35,11 @@ Single Crystal Diffraction
   from PeaksWorkspace to peak. setGoniometer for a peak can be done from python and setQLabFrame and setQSampleFrame works
   correctly now with one argument.
 
+- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has been rewritten to calibrate the position and rotations of
+  each panel independently in parallel.  There are options to calibrate the panel size and the L1 for all the panels.
+  Only the U of the UB matrix is refined.  There is a script, scripts/SCD_Reduction/SCDCalibratePanelsResults.py, that takes the output of
+  this algorithm and plots the theoretical vs calculated position of each peak for each panel.  The RMSD in mm is
+  calculated and printed in a log file and on the plots.
 
 Engineering Diffraction
 -----------------------
@@ -51,6 +56,10 @@ Engineering Diffraction
   :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>` algorithm
   will be utilised to save *engggui_fitting_fitpeaks_param*
   TableWorkspace as a `csv` file.
+
+- New *Load* button on the Fitting Tab, will enable user to load the
+  focused file to the canvas, so that the user can select the peaks
+  manually beforehand
 
 Powder Diffraction
 ------------------
@@ -87,6 +96,13 @@ Imaging
 
 - An updated version of the IMAT instrument definition now includes
   prototype diffraction detector banks.
+
+
+Tomographic reconstruction graphical user interface
+###################################################
+
+- Fixed the submission of custom commands.
+
 
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_

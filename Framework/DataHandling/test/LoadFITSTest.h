@@ -6,9 +6,29 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/LoadFITS.h"
+#include <MantidAPI/FrameworkManager.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
+
+namespace {
+
+const std::string g_smallFname1 = "FITS_small_01.fits";
+const std::string g_smallFname2 = "FITS_small_02.fits";
+
+const std::string g_emptyFileName = "FITS_empty_file.fits";
+
+const size_t g_xdim = 512;
+const size_t g_ydim = 512;
+const size_t g_SPECTRA_COUNT = g_xdim * g_ydim;
+const size_t g_SPECTRA_COUNT_ASRECT = g_ydim;
+
+const std::string g_hdrSIMPLE = "T";
+const std::string g_hdrBITPIX = "16";
+const std::string g_hdrNAXIS = "2";
+const std::string g_hdrNAXIS1 = "512";
+const std::string g_hdrNAXIS2 = "512";
+}
 
 class LoadFITSTest : public CxxTest::TestSuite {
 public:
@@ -379,38 +399,56 @@ private:
 
   std::string inputFile;
   std::string outputSpace;
-  static const std::string g_smallFname1;
-  static const std::string g_smallFname2;
-
-  const static std::string g_emptyFileName;
-
-  const static size_t g_xdim;
-  const static size_t g_ydim;
-  const static size_t g_SPECTRA_COUNT;
-  const static size_t g_SPECTRA_COUNT_ASRECT;
-
-  // FITS headers
-  const static std::string g_hdrSIMPLE;
-  const static std::string g_hdrBITPIX;
-  const static std::string g_hdrNAXIS;
-  const static std::string g_hdrNAXIS1;
-  const static std::string g_hdrNAXIS2;
 };
 
-const std::string LoadFITSTest::g_smallFname1 = "FITS_small_01.fits";
-const std::string LoadFITSTest::g_smallFname2 = "FITS_small_02.fits";
+class LoadFITSTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadFITSTestPerformance *createSuite() {
+    return new LoadFITSTestPerformance();
+  }
+  static void destroySuite(LoadFITSTestPerformance *suite) { delete suite; }
 
-const std::string LoadFITSTest::g_emptyFileName = "FITS_empty_file.fits";
+  void setUp() override { FrameworkManager::Instance(); }
 
-const size_t LoadFITSTest::g_xdim = 512;
-const size_t LoadFITSTest::g_ydim = 512;
-const size_t LoadFITSTest::g_SPECTRA_COUNT = g_xdim * g_ydim;
-const size_t LoadFITSTest::g_SPECTRA_COUNT_ASRECT = g_ydim;
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().remove("FitsOutput");
+  }
 
-const std::string LoadFITSTest::g_hdrSIMPLE = "T";
-const std::string LoadFITSTest::g_hdrBITPIX = "16";
-const std::string LoadFITSTest::g_hdrNAXIS = "2";
-const std::string LoadFITSTest::g_hdrNAXIS1 = "512";
-const std::string LoadFITSTest::g_hdrNAXIS2 = "512";
+  void test_Load_Small_01() {
+    LoadFITS lf;
+    lf.initialize();
+    lf.setProperty("Filename", g_smallFname1);
+    lf.setPropertyValue("OutputWorkspace", "FitsOutput");
+    lf.setProperty("LoadAsRectImg", false);
+    TS_ASSERT(lf.execute());
+  }
+  void test_LoadAsRectImage_Small_01() {
+    LoadFITS lf;
+    lf.initialize();
+    lf.setProperty("Filename", g_smallFname1);
+    lf.setPropertyValue("OutputWorkspace", "FitsOutput");
+    lf.setProperty("LoadAsRectImg", true);
+    TS_ASSERT(lf.execute());
+  }
+
+  void test_Load_Small_02() {
+    LoadFITS lf;
+    lf.initialize();
+    lf.setProperty("Filename", g_smallFname2);
+    lf.setPropertyValue("OutputWorkspace", "FitsOutput");
+    lf.setProperty("LoadAsRectImg", false);
+    TS_ASSERT(lf.execute());
+  }
+  void test_LoadAsRectImage_Small_02() {
+    LoadFITS lf;
+    lf.initialize();
+    lf.setProperty("Filename", g_smallFname2);
+    lf.setPropertyValue("OutputWorkspace", "FitsOutput");
+    lf.setProperty("LoadAsRectImg", true);
+    TS_ASSERT(lf.execute());
+  }
+};
 
 #endif // MANTID_DATAHANDLING_LOADFITSTEST_H_
