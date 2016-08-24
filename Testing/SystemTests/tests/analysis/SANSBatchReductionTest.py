@@ -10,7 +10,7 @@ from SANS2.State.StateBuilder.SANSStateDataBuilder import get_data_builder
 from SANS2.Common.SANSEnumerations import SANSFacility
 from SANS2.Common.SANSConstants import SANSConstants
 from SANS2.Common.SANSFunctions import create_unmanaged_algorithm
-
+from mantid.api import AnalysisDataService
 
 # -----------------------------------------------
 # Tests for the SANSBatchReduction algorithm
@@ -20,14 +20,14 @@ class SANSBatchReductionTest(unittest.TestCase):
     def _run_batch_reduction(self, states, use_optimizations=False):
         batch_reduction_name = "SANSBatchReduction"
         batch_reduction_options = {"SANSStates": states,
-                                   "UseOptimizations": use_optimizations}
+                                   "UseOptimizations": use_optimizations,
+                                   "OutputMode": "PublishToADS"}
 
         batch_reduction_alg = create_unmanaged_algorithm(batch_reduction_name, **batch_reduction_options)
 
         # Act
         batch_reduction_alg.execute()
         self.assertTrue(batch_reduction_alg.isExecuted())
-        return batch_reduction_alg
 
     def _compare_workspace(self, workspace, reference_file_name):
         # Load the reference file
@@ -116,17 +116,16 @@ class SANSBatchReductionTest(unittest.TestCase):
 
         # Act
         states = {"1": state.property_manager}
-        batch_reduction_alg = self._run_batch_reduction(states, use_optimizations=False)
+        self._run_batch_reduction(states, use_optimizations=False)
 
-        self.assertTrue(batch_reduction_alg.getProperty("NumberOfOutputWorkspacesLAB").value == 1)
-        self.assertTrue(batch_reduction_alg.getProperty("NumberOfOutputWorkspacesHAB").value == 0)
-        self.assertTrue(batch_reduction_alg.getProperty("NumberOfOutputWorkspacesMerged").value == 0)
-
-        output_workspace = batch_reduction_alg.getProperty("OutputWorkspaceLAB_1").value
+        workspace_name = "34484rear_1D1.75_16.5"
+        output_workspace = AnalysisDataService.retrieve(workspace_name)
 
         # Evaluate it up to a defined point
         reference_file_name = "SANS2D_ws_D20_reference_after_masking"
         self._compare_workspace(output_workspace, reference_file_name)
+        if AnalysisDataService.doesExist(workspace_name):
+            AnalysisDataService.remove(workspace_name)
 
 
 class SANSBatchReductionRunnerTest(stresstesting.MantidStressTest):

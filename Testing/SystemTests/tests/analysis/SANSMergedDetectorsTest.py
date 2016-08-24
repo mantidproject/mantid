@@ -10,15 +10,15 @@ class SANSMergedDetectorsTest(stresstesting.MantidStressTest):
     def runTest(self):
         # Select instrument and user file
         i.SANS2DTUBES()
-        i.MaskFile(file_name = 'USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
+        i.MaskFile(file_name='USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
 
         # Setup detector positions
-        i.SetDetectorOffsets(bank = 'REAR', x = -16.0, y = 58.0, z = 0.0, rot = 0.0, radius = 0.0, side = 0.0)
+        i.SetDetectorOffsets(bank ='REAR', x = -16.0, y = 58.0, z = 0.0, rot = 0.0, radius = 0.0, side = 0.0)
         i.SetDetectorOffsets(bank = 'FRONT', x = -44.0, y = -20.0, z = 47.0, rot = 0.0, radius = 1.0, side = 1.0)
         i.Gravity(False)
 
         # Set the front detector fitting
-        i.SetFrontDetRescaleShift(scale = 1.0,shift = 0.0, fitScale = True, fitShift = True)
+        i.SetFrontDetRescaleShift(scale=1.0,shift=0.0, fitScale = True, fitShift = True)
         i.Set1D()
 
         # Assign data

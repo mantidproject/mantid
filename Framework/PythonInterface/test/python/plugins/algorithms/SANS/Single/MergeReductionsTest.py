@@ -62,9 +62,9 @@ class MergeReductionsTest(unittest.TestCase):
         data_y_lab_count = [2.]*10
         data_y_lab_norm = [1.] * 10
 
-        data_x_hab = range(8, 14)
-        data_y_hab_count = [3.] * 6
-        data_y_hab_norm = [4.] * 6
+        data_x_hab = range(0, 10)
+        data_y_hab_count = [3.] * 10
+        data_y_hab_norm = [4.] * 10
         sample_lab, sample_hab = MergeReductionsTest._create_workspaces(state, DataType.Sample, data_x_lab,
                                                                         data_y_lab_count, data_y_lab_norm,
                                                                         data_x_hab, data_y_hab_count, data_y_hab_norm)
@@ -74,9 +74,9 @@ class MergeReductionsTest(unittest.TestCase):
         data_y_lab_count = [5.]*10
         data_y_lab_norm = [6.] * 10
 
-        data_x_hab = range(8, 14)
-        data_y_hab_count = [7.] * 6
-        data_y_hab_norm = [8.] * 6
+        data_x_hab = range(0, 10)
+        data_y_hab_count = [7.] * 10
+        data_y_hab_norm = [8.] * 10
         can_lab, can_hab = MergeReductionsTest._create_workspaces(state, DataType.Can, data_x_lab,
                                                                   data_y_lab_count, data_y_lab_norm,
                                                                   data_x_hab, data_y_hab_count, data_y_hab_norm)
@@ -103,6 +103,7 @@ class MergeReductionsTest(unittest.TestCase):
         merger = merge_factory.create_merger(state)
 
         sample_lab, sample_hab, can_lab, can_hab = self._provide_data(state)
+
         bundles = {ISISReductionMode.Lab: [sample_lab, can_lab],
                    ISISReductionMode.Hab: [sample_hab, can_hab]}
 
@@ -112,14 +113,11 @@ class MergeReductionsTest(unittest.TestCase):
 
         scale = result.scale
         shift = result.shift
-
-        # using decimal 'places' keyword, as delta= is not supported on Python < 2.7
-        tol_places = round(-math.log10(1e-04), ndigits=0)
-        self.assertAlmostEqual(scale, scale_input, places=tol_places)
-        self.assertAlmostEqual(shift, shift_input, places=tol_places)
+        self.assertTrue(abs(scale - scale_input) < 1e-4)
+        self.assertTrue(abs(shift - shift_input) < 1e-4)
 
         # There is an overlap of two bins between HAB and LAB, the values are tested in SANSStitch
-        self.assertTrue(merged_workspace.blocksize() == 2)
+        self.assertTrue(merged_workspace.blocksize() == 10)
 
     def test_that_can_merge_fitting(self):
         # Arrange
@@ -138,17 +136,14 @@ class MergeReductionsTest(unittest.TestCase):
         result = merger.merge(bundles)
         merged_workspace = result.merged_workspace
 
-        # There is an overlap of two bins between HAB and LAB, the values are tested in SANSStitch
-        self.assertTrue(merged_workspace.blocksize() == 2)
+        self.assertTrue(merged_workspace.blocksize() == 10)
 
         scale = result.scale
         shift = result.shift
         self.assertTrue(scale != scale_input)
         self.assertTrue(shift != shift_input)
-        # Note that it makes sense that the fit finds a scale of 1, since we have flat data only a shift should
-        # be required.
-        self.assertAlmostEqual(scale, 1.0, delta=1e-4)
-        self.assertAlmostEqual(shift, 1.29166666667, delta=1e-4)
+        self.assertTrue(abs(scale - (-15.0)) < 1e-4)
+        self.assertTrue(abs(shift - 0.0472222222222) < 1e-4)
 
     def test_that_can_merge_with_shift_only_fitting(self):
         # Arrange
@@ -167,15 +162,14 @@ class MergeReductionsTest(unittest.TestCase):
         result = merger.merge(bundles)
         merged_workspace = result.merged_workspace
 
-        # There is an overlap of two bins between HAB and LAB, the values are tested in SANSStitch
-        self.assertTrue(merged_workspace.blocksize() == 2)
+        self.assertTrue(merged_workspace.blocksize() == 10)
 
         scale = result.scale
         shift = result.shift
 
         self.assertTrue(shift != shift_input)
-        self.assertAlmostEqual(scale, scale_input, delta=1e-4)
-        self.assertAlmostEqual(shift, 0.823602794411, delta=1e-4)
+        self.assertTrue(abs(scale - scale_input) < 1e-4)
+        self.assertTrue(abs(shift - 0.823602794411) < 1e-4)
 
     def test_that_can_merge_with_scale_only_fitting(self):
         # Arrange
@@ -194,15 +188,14 @@ class MergeReductionsTest(unittest.TestCase):
         result = merger.merge(bundles)
         merged_workspace = result.merged_workspace
 
-        # There is an overlap of two bins between HAB and LAB, the values are tested in SANSStitch
-        self.assertTrue(merged_workspace.blocksize() == 2)
+        self.assertTrue(merged_workspace.blocksize() == 10)
 
         scale = result.scale
         shift = result.shift
 
         self.assertTrue(scale != scale_input)
-        self.assertAlmostEqual(scale, 1.0, delta=1e-4)
-        self.assertAlmostEqual(shift, shift_input, delta=1e-4)
+        self.assertTrue(abs(scale - 1.0) < 1e-4)
+        self.assertTrue(abs(shift - shift_input) < 1e-4)
 
 
 if __name__ == '__main__':
