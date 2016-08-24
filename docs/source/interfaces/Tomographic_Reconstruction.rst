@@ -25,7 +25,7 @@ login and through its `web portal
 <https://portal.scarf.rl.ac.uk/>`_. This resource is available for
 ISIS users.
 
-.. warning:: This interface is undergoing heavy works. The tabs are 
+.. warning:: This interface is undergoing heavy works. The tabs are
 			 subject to changes and reorganization.New
              functionality is being added and the pre-post-processing
              and reconstruction workflow is being modified based on
@@ -200,7 +200,7 @@ These and related parameters can be inspected and modified in the
 **System** tab. Their default values are
 set for the current setup of the IMAT analysis machine. The "Reset
 all" button resets all these settings to their factory defaults.  Note
-that the **Reset all** button currently requires **no confirmation**. 
+that the **Reset all** button currently requires **no confirmation**.
 The **System** tab of the interface is currently a work in
 progress and it may change significantly as required during
 commissioning of IMAT.
@@ -260,7 +260,7 @@ through the images of the stack (using the slider or scroll bar).
 The center of rotation can be selected interactively by clicking on
 the select button and then clicking on an image pixel. To select the
 regions of interest or the area of normalization, just click on the
-respective "select" button and then click and drag with the mouse to
+respective "Select" button and then click and drag with the mouse to
 select a rectangle. The precise coordinates of the center and regions
 can be set via the boxes of the right panel as well.
 
@@ -268,9 +268,14 @@ Once you have selected or set one of the regions, or the center, they
 can be selected again by pushing the respective "Select" buttons
 and/or editing their coordinates manually.
 
+There is also the option to change the ColorMap that is used to show
+the images **locally**. This can be done by **double** clicking the ColorBar on
+the side and selecting a different ColorMap file. The changes are only local
+and will not affect the reconstruction.
+
 The default values, set in principle when a new stack of images is
-loaded, are as follows. The region of intererest is set to cover all
-the images. The regions of normalization is not set (empty), and the
+loaded, are as follows. The region of interest is set to cover all
+the images. The region of normalization is not set (empty), and the
 center of rotation is set to the center of the image. The option to
 find the center of rotation automatically is disabled at present.
 
@@ -412,6 +417,17 @@ process can be lengthy and demanding in terms of disk space when
 processing more than one or a small number of experiments (RB
 reference numbers), and especially so for wavelength dependent
 experiments.
+
+System
+------
+
+.. figure:: /images/tomo_tab8_system_options.png
+   :align: center
+   :scale: 60%
+
+In the System tab you can specify the input folder names 
+for the sample, flat, and dark images, and also the names of the output folders.
+
 
 Example
 -------
