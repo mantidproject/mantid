@@ -14,6 +14,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 class ErrorCurve;
+class LogValueSelector;
 }
 }
 

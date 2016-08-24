@@ -341,12 +341,14 @@ providing a list of dSpacing values where Bragg peaks are expected.
 The algorithm :ref:`EnggFitPeaks<algm-EnggFitPeaks>` is used to
 background fit peaks in those areas using a peak fitting function.
 
-To use the Fitting tab, user is required to provide:
+To use the Fitting tab, user is required to follow these steps:
 
 1. A focused file as Focus Run input by browsing or entering single/multi
-   run number
-2. List of expected peaks which can be either by browsing a (*CSV*) file
-   or entering within the text-field
+   run number, *User may click Load button to load the focused file to the
+   canvas*
+2. List of expected peaks which can be either by browsing a (*CSV*) file,
+   manually selecting peaks from the canvas using peak picker tool after
+   loading the focused file or by entering the peaks list within the text-field
 3. Next click on the *Fit* button if you would like to fit single focused
    file or you can click *Fit All* button which will enable user to
    batch-process all the runs and banks when a range of run number is given,
@@ -437,9 +439,9 @@ Preview
 ^^^^^^^
 Once the fitting process has completed and you are able to view a
 focused workspace with listed expected peaks on the data plot, the *Select
-Peak* button should also be enabled. If the fitting fails with
-the given peaks then the focused workspace will still be plotted so
-that user can select peaks manually.
+Peak* button should also be enabled. If the user choose to load the focus
+workspace or if fitting fails with the given peaks then the focused
+workspace will be plotted so that the user can select the peaks manually.
 
 By clicking Select Peak button the peak picker tool can be activated.
 To select a peak simply hold *Shift* key and left-click on the graph

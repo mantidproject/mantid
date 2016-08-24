@@ -86,6 +86,29 @@ public:
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(m_view.get()));
   }
 
+  void test_load_with_missing_param() {
+    testing::NiceMock<MockEnggDiffFittingView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView,
+                                                              nullptr, nullptr);
+
+    EXPECT_CALL(mockView, getFittingRunNo()).Times(1).WillOnce(Return(""));
+
+    EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
+
+    // No errors/1 warnings. There will be an error log from the algorithms
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffFittingPresenter::Load);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
+  }
+
   void test_fitting_with_missing_param() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView,
