@@ -145,7 +145,7 @@ protected slots:
   void fittingRunNoChanged();
 
 private:
-  bool isDigit(std::string text);
+  bool isDigit(const std::string text) const;
 
   // Methods related single peak fits
   virtual void
@@ -157,9 +157,10 @@ private:
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &expectedPeaks);
 
-  void updateFittingDirVec(const std::string &bankDir,
-                           const std::string &focusedFile,
-                           std::vector<std::string> &fittingRunNoDirVec);
+  void updateFittingDirVec(const std::string &focusDir,
+                           const std::string &runNumberVec,
+                           std::vector<std::string> &fittingRunNoDirVec,
+                           std::vector<std::string> &foundRunNumber);
 
   void enableMultiRun(std::string firstRun, std::string lastRun,
                       std::vector<std::string> &fittingRunNoDirVec);
@@ -186,8 +187,7 @@ private:
   void processSingleRun(const std::string &focusDir,
                         const std::string &strFocusedFile,
                         std::vector<std::string> &runnoDirVector,
-                        const std::vector<std::string> &splitBaseName,
-                        std::vector<std::string> &runNoVec);
+                        const std::vector<std::string> &splitBaseName);
 
   // whether to use AlignDetectors to convert units
   static const bool g_useAlignDetectors;
