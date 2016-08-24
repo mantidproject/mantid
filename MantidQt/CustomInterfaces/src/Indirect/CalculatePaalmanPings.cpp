@@ -426,9 +426,8 @@ void CalculatePaalmanPings::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
  */
 void CalculatePaalmanPings::saveClicked() {
 
-  checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
-  const auto outputWs = QString::fromStdString(m_pythonExportWsName);
-  addSaveWorkspaceToQueue(outputWs);
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -437,14 +436,16 @@ void CalculatePaalmanPings::saveClicked() {
  */
 void CalculatePaalmanPings::plotClicked() {
 
-  checkADSForPlotSaveWorkspace(m_pythonExportWsName, true);
   QString plotType = m_uiForm.cbPlotOutput->currentText();
 
-  if (plotType == "Both" || plotType == "Wavelength")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
 
-  if (plotType == "Both" || plotType == "Angle")
-    plotTimeBin(QString::fromStdString(m_pythonExportWsName));
+    if (plotType == "Both" || plotType == "Wavelength")
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+
+    if (plotType == "Both" || plotType == "Angle")
+      plotTimeBin(QString::fromStdString(m_pythonExportWsName));
+  }
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
