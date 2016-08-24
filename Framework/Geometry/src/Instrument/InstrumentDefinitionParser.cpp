@@ -2233,11 +2233,25 @@ void InstrumentDefinitionParser::setLogfile(
       description = pDescription->getAttribute("is");
     }
 
+    // Sample logs
+    std::vector<std::string> sampleLogNames;
+    std::string sampleLogMergeType;
+    std::vector<std::string> sampleLogDeltas;
+
+    Poco::AutoPtr<NodeList> pNLSampleLog = pParamElem->getElementsByTagName("samplelogmerge");
+    size_t numberSampleLog = pNLSampleLog->length();
+
+    for (size_t i = 0; i < numberSampleLog; i++) {
+      Element *pSampleLog = static_cast<Element *>(pNLSampleLog->item(i));
+      sampleLogNames.push_back(pSampleLog->getAttribute("sample-log"));
+      sampleLogDeltas.push_back(pSampleLog->getAttribute("sample-log-delta"));
+    }
+
     auto cacheKey = std::make_pair(paramName, comp);
     auto cacheValue = boost::make_shared<XMLInstrumentParameter>(
         logfileID, value, interpolation, formula, formulaUnit, resultUnit,
         paramName, type, tie, constraint, penaltyFactor, fittingFunction,
-        extractSingleValueAs, eq, comp, m_angleConvertConst, description);
+        extractSingleValueAs, eq, comp, m_angleConvertConst, description, sampleLogNames, sampleLogMergeType, sampleLogDeltas);
     auto inserted = logfileCache.emplace(cacheKey, cacheValue);
     if (!inserted.second) {
       logfileCache[cacheKey] = cacheValue;

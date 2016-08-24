@@ -30,6 +30,7 @@ const std::string BOOL_PARAM_NAME = "bool";
 const std::string STRING_PARAM_NAME = "string";
 const std::string V3D_PARAM_NAME = "V3D";
 const std::string QUAT_PARAM_NAME = "Quat";
+const std::string SLM_PARAM_NAME = "SampleLogMerge";
 
 // static logger reference
 Kernel::Logger g_log("ParameterMap");
@@ -75,6 +76,8 @@ const std::string &ParameterMap::pString() { return STRING_PARAM_NAME; }
 const std::string &ParameterMap::pV3D() { return V3D_PARAM_NAME; }
 
 const std::string &ParameterMap::pQuat() { return QUAT_PARAM_NAME; }
+
+const std::string &ParameterMap::pSampleLogMerge() { return SLM_PARAM_NAME; }
 
 /**
  * Compares the values in this object with that given for inequality
@@ -628,6 +631,24 @@ void ParameterMap::addQuat(const IComponent *comp, const std::string &name,
                            const Quat &value,
                            const std::string *const pDescription) {
   add(pQuat(), comp, name, value, pDescription);
+  clearPositionSensitiveCaches();
+}
+
+/**
+ * Adds a SampleLogMerge value to the parameter map.
+ * @param comp :: Component to which the new parameter is related
+ * @param name :: Name for the new parameter
+ * @param value :: Parameter value as a SampleLogMerge
+ * @param pDescription :: a pointer (may be NULL) to a string, containing
+ * parameter's description. If provided, the contents of the string is copied to the
+ * parameter's memory
+*/
+void ParameterMap::addSampleLogMerge(const IComponent *comp, const std::string &name,
+                           const std::string &sampleLog, const std::string &sampleLogType, const std::string &sampleLogDelta,
+                           const std::string *const pDescription) {
+  ParameterMap::stringPair logAndDelta = std::pair<std::string, std::string>(sampleLog, sampleLogDelta);
+  ParameterMap::SampleLogMerge sampleLogMerge = std::pair<std::string, ParameterMap::stringPair>(sampleLogType, logAndDelta);
+  add(pSampleLogMerge(), comp, name, sampleLogMerge, pDescription);
   clearPositionSensitiveCaches();
 }
 

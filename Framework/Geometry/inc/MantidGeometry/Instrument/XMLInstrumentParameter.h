@@ -64,7 +64,7 @@ public:
       const std::vector<std::string> &constraint, std::string &penaltyFactor,
       const std::string &fitFunc, const std::string &extractSingleValueAs,
       const std::string &eq, const Geometry::IComponent *comp,
-      double angleConvertConst, const std::string &description);
+      double angleConvertConst, const std::string &description, const std::vector<std::string> &sampleLogNames, const std::string sampleLogType, const std::vector<std::string> &sampleLogDeltas);
 
   // XML attributes from instrument definition file or instrument parameter file
   const std::string m_logfileID; ///< logfile id
@@ -107,6 +107,10 @@ public:
   double m_angleConvertConst;
   /// if present, contains help string, describing the parameter
   const std::string m_description;
+
+  const std::vector<std::string> m_sampleLogNames;
+  const std::string m_sampleLogType;
+  const std::vector<std::string> m_sampleLogDeltas;
 };
 
 } // namespace Geometry

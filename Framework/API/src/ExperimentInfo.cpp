@@ -1208,6 +1208,10 @@ void ExperimentInfo::populateWithParameter(
         << (*(paramInfo.m_interpolation));
     paramMap.add("fitting", paramInfo.m_component, name, str.str(),
                  pDescription);
+  } else if (category.compare("samplelogmerge") == 0) {
+    for (size_t i = 0; i < paramInfo.m_sampleLogNames.size(); i++) {
+      paramMap.addSampleLogMerge(paramInfo.m_component, name, paramInfo.m_sampleLogNames[i], paramInfo.m_sampleLogType, paramInfo.m_sampleLogDeltas[i], pDescription);
+    }
   } else if (category.compare("string") == 0) {
     paramMap.addString(paramInfo.m_component, name, paramInfo.m_value,
                        pDescription);

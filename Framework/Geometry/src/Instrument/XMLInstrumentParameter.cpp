@@ -52,14 +52,14 @@ XMLInstrumentParameter::XMLInstrumentParameter(
     const std::vector<std::string> &constraint, std::string &penaltyFactor,
     const std::string &fitFunc, const std::string &extractSingleValueAs,
     const std::string &eq, const Geometry::IComponent *comp,
-    double angleConvertConst, const std::string &description)
+    double angleConvertConst, const std::string &description, const std::vector<std::string> &sampleLogNames, const std::string sampleLogType, const std::vector<std::string> &sampleLogDeltas)
     : m_logfileID(logfileID), m_value(value), m_paramName(paramName),
       m_type(type), m_tie(tie), m_constraint(constraint),
       m_penaltyFactor(penaltyFactor), m_fittingFunction(fitFunc),
       m_formula(formula), m_formulaUnit(formulaUnit), m_resultUnit(resultUnit),
       m_interpolation(interpolation),
       m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp),
-      m_angleConvertConst(angleConvertConst), m_description("") {
+      m_angleConvertConst(angleConvertConst), m_description(""), m_sampleLogNames(sampleLogNames), m_sampleLogType(sampleLogType), m_sampleLogDeltas(sampleLogDeltas) {
   if (!description.empty()) { // remove multiple spaces
     boost::regex re("\\s+");
     std::string desc = boost::regex_replace(description, re, " ");

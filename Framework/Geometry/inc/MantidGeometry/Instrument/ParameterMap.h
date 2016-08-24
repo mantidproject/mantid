@@ -92,6 +92,7 @@ public:
   static const std::string &pString();
   static const std::string &pV3D();
   static const std::string &pQuat();
+  static const std::string &pSampleLogMerge();
 
   const std::string diff(const ParameterMap &rhs,
                          const bool &firstDiffOnly = false) const;
@@ -197,6 +198,13 @@ public:
   /// Adds a Kernel::Quat value to the parameter map.
   void addQuat(const IComponent *comp, const std::string &name,
                const Kernel::Quat &value,
+               const std::string *const pDescription = nullptr);
+
+  typedef std::pair<std::string, std::string> stringPair;
+  typedef std::pair<std::string, stringPair> SampleLogMerge;
+  /// Adds a Kernel::Quat value to the parameter map.
+  void addSampleLogMerge(const IComponent *comp, const std::string &name,
+               const std::string &sampleLog, const std::string &sampleLogType, const std::string &sampleLogDelta,
                const std::string *const pDescription = nullptr);
   //@}
 

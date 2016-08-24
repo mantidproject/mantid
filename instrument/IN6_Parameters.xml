@@ -20,26 +20,10 @@
 			<value val="exp(-0.0565/sqrt(e))*(1.0-exp(-3.284/sqrt(e)))" />
 		</parameter>
 
-        <parameter name="sample_logs_average" type="string">
-            <value val="sample.temperature, sample.pressure" />
-        </parameter>
-        <parameter name="sample_logs_min" type="string">
-            <value val="Detector.detrate" />
-        </parameter>
-        <parameter name="sample_logs_max" type="string">
-            <value val="Detector.detsum" />
-        </parameter>
-        <parameter name="sample_logs_sum" type="string">
-            <value val="monitor1.monrate" />
-        </parameter>
-        <parameter name="sample_logs_list" type="string">
-            <value val="run_number" />
-        </parameter>
-        <parameter name="sample_logs_warn" type="string">
-            <value val="Ei, end_time" />
-        </parameter>
-        <parameter name="sample_logs_fail" type="string">
-            <value val="EPP" />
+        <parameter name="sample_logs_average" type="samplelogmerge">
+            <value val="average" />
+            <samplelogmerge sample-log="sample.temperature" sample-log-delta="0"/>
+            <samplelogmerge sample-log="sample.pressure" sample-log-delta="1"/>
         </parameter>
 
 	</component-link>
