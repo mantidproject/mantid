@@ -208,12 +208,11 @@ void AnvredCorrection::exec() {
 
     Mantid::Kernel::Units::Wavelength wl;
     std::vector<double> timeflight;
-    int bank = 0;
     double depth = 0.2;
     double pathlength = 0.0;
     std::string bankName;
     if (m_useScaleFactors)
-      scale_init(det, inst, bank, L2, depth, pathlength, bankName);
+      scale_init(det, inst, L2, depth, pathlength, bankName);
 
     // Loop through the bins in the current spectrum
     for (int64_t j = 0; j < specSize; j++) {
@@ -320,12 +319,11 @@ void AnvredCorrection::execEvent() {
 
     Mantid::Kernel::Units::Wavelength wl;
     std::vector<double> timeflight;
-    int bank = 0;
     double depth = 0.2;
     double pathlength = 0.0;
     std::string bankName;
     if (m_useScaleFactors)
-      scale_init(det, inst, bank, L2, depth, pathlength, bankName);
+      scale_init(det, inst, L2, depth, pathlength, bankName);
 
     // multiplying an event list by a scalar value
     for (itev = events.begin(); itev != itev_end; ++itev) {
@@ -550,16 +548,10 @@ void AnvredCorrection::BuildLamdaWeights() {
   }
 }
 void AnvredCorrection::scale_init(IDetector_const_sptr det,
-                                  Instrument_const_sptr inst, int &bank,
+                                  Instrument_const_sptr inst,
                                   double &L2, double &depth, double &pathlength,
                                   std::string &bankName) {
   bankName = det->getParent()->getParent()->getName();
-  std::string bankNameStr = bankName;
-  // Take out the "bank" part of the bank name and convert to an int
-  bankNameStr.erase(remove_if(bankNameStr.begin(), bankNameStr.end(),
-                              not1(std::ptr_fun(::isdigit))),
-                    bankNameStr.end());
-  Strings::convert(bankNameStr, bank);
   // Distance to center of detector
   boost::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
   if (inst->getName().compare("CORELLI") ==
@@ -585,11 +577,13 @@ void AnvredCorrection::scale_exec(std::string &bankName, double &lambda,
       1.0 - std::exp(-mu * depth); // efficiency at center of detector
   double eff_R = 1.0 - exp(-mu * pathlength); // efficiency at point R
   value *= eff_center / eff_R;                // slant path efficiency ratio
+  // Take out the "bank" part of the bank name
+  bankName.erase(remove_if(bankName.begin(), bankName.end(),
+                           not1(std::ptr_fun(::isdigit))),
+                 bankName.end());
   if (inst->hasParameter("detScale" + bankName))
     value *=
         static_cast<double>(inst->getNumberParameter("detScale" + bankName)[0]);
-  std::cout << bankName << "  " << static_cast<double>(inst->getNumberParameter(
-                                       "detScale" + bankName)[0]) << "\n";
 }
 
 } // namespace Crystal

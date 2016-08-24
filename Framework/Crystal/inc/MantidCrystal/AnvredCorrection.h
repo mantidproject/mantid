@@ -124,7 +124,7 @@ private:
   void BuildLamdaWeights();
   double absor_sphere(double &twoth, double &wl);
   void scale_init(Geometry::IDetector_const_sptr det,
-                  Geometry::Instrument_const_sptr inst, int &bank, double &L2,
+                  Geometry::Instrument_const_sptr inst, double &L2,
                   double &depth, double &pathlength, std::string &bankName);
   void scale_exec(std::string &bankName, double &lambda, double &depth,
                   Geometry::Instrument_const_sptr inst, double &pathlength,
