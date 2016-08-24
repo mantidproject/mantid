@@ -3,31 +3,39 @@ label = "ReflectometryReductionOne Correct Detector Positions Flowchart"
  $global_style
 
 subgraph params {
-$param_style
- inputWorkspace    [label="InputWorkspace"]
- outputWorkspace   [label="OutputWorkspaceWavelength"]
- thetaOut          [label="ThetaOut"]
+ $param_style
+  inputWorkspace    [label="InputWorkspace"]
+  outputWorkspace   [label="OutputWorkspaceWavelength"]
+  thetaOut          [label="ThetaOut"]
 }
 
 subgraph decisions {
-$decision_style
+ $decision_style
+  checkThetaIn    [label="ThetaIn given?"]
+  checkCorDetPos  [label="Correct Detector Positions?"]
 }
 
 subgraph algorithms {
-$algorithm_style
- calcTheta       [label="SpecularReflectionCalculateTheta"]
-}
+ $algorithm_style
+  calcTheta       [label="SpecularReflectionCalculateTheta"]
+  specRefPosCor   [label="SpecularReflectionPositionCorrect"]
+ }
 
 subgraph processes {
-$process_style
+ $process_style
 }
 
 subgraph values {
-$value_style
+ $value_style
 }
 
-inputWorkspace    -> calcTheta
+inputWorkspace    -> checkThetaIn
+checkThetaIn      -> checkCorDetPos   [label="Yes"]
+checkThetaIn      -> calcTheta        [label="No"]
 calcTheta         -> outputWorkspace
 calcTheta         -> thetaOut
+checkCorDetPos    -> specRefPosCor    [label="Yes"]
+checkCorDetPos    -> outputWorkspace  [label="No"]
+specRefPosCor     -> outputWorkspace
 
 }
