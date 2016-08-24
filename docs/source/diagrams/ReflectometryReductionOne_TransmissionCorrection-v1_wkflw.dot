@@ -1,0 +1,59 @@
+digraph ReflectometryReductionOne {
+label = "ReflectometryReductionOne Transmission Corrections Flowchart"
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWorkspace    [label="InputWorkspace"]
+  outputWorkspace   [label="OutputWorkspace"]
+  corrAlg           [label="CorrectionAlgorithm"]
+  firstTransRun     [label="FirstTransmissionRun"]
+  secondTransRun    [label="SecondTransmissionRun"]
+}
+
+subgraph decisions {
+ $decision_style
+  checkTransRun   [label="FirstTransmissionRun\ngiven?"]
+  checkCorrAlg    [label="CorrectionAlgorithm?"]
+  checkTransRun   [label="FirstTransmissionRun\ngiven?"]
+  checkTransUnits [label="X axis in &lambda;?"]
+}
+
+subgraph algorithms {
+ $algorithm_style
+  rebinByTransWS  [label="RebinToWorkspace"]
+  polyCorr        [label="PolynomialCorrection"]
+  expCorr         [label="ExponentialCorrection"]
+  createTransWS   [label="CreateTransmissionWorkspace"]
+  rebinByTransWS  [label="RebinToWorkspace"]
+  divideTrans     [label="Divide\n(InputWorkspace / TransmissionWorkspace)"]
+}
+
+subgraph processes {
+ $process_style
+}
+
+subgraph values {
+ $value_style
+  valTrans        [label="It(&lambda;) / &Sigma;It(&lambda;)"]
+}
+
+inputWorkspace    -> checkTransRun
+checkTransRun     -> checkCorrAlg     [label="No"]
+checkTransRun     -> rebinByTransWS   [label="Yes"]
+corrAlg           -> checkCorrAlg
+checkCorrAlg      -> outputWorkspace  [label="None"]
+checkCorrAlg      -> polyCorr         [label="PolynomialCorrection"]
+checkCorrAlg      -> expCorr          [label="ExponentialCorrection"]
+polyCorr          -> outputWorkspace
+expCorr           -> outputWorkspace
+firstTransRun     -> checkTransUnits
+checkTransUnits   -> valTrans         [label="Yes"]
+checkTransUnits   -> createTransWS    [label="No"]
+secondTransRun    -> createTransWS
+createTransWS     -> valTrans
+valTrans          -> rebinByTransWS
+rebinByTransWS    -> divideTrans
+divideTrans       -> outputWorkspace
+
+}
