@@ -314,7 +314,7 @@ void AbsorptionCorrections::plotClicked() {
     }
     plotSpectrum(plotCorr, 0);
   }
-  IndirectTab::plotSpectrum(plotData, 0);
+  plotSpectrum(plotData, 0);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
