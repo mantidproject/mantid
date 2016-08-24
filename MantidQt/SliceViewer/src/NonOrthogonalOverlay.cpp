@@ -8,6 +8,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include <numeric>
 using namespace Mantid::Kernel;
 
 namespace MantidQt {
@@ -18,12 +19,21 @@ namespace MantidQt {
 		 */
 		NonOrthogonalOverlay::NonOrthogonalOverlay(QwtPlot *plot, QWidget *parent, Mantid::API::IMDWorkspace_sptr *ws)
 			: QWidget(parent), m_plot(plot), m_showLine(true) {
-
+			m_CompskewMatrix[0] = 1.0;
+			m_CompskewMatrix[1] = 0.0;
+			m_CompskewMatrix[2] = 0.0;
+			m_CompskewMatrix[3] = 0.0;
+			m_CompskewMatrix[4] = 1.0;
+			m_CompskewMatrix[5] = 0.0;
+			m_CompskewMatrix[6] = 0.0;
+			m_CompskewMatrix[7] = 0.0;
+			m_CompskewMatrix[8] = 1.0;
 			m_ws = ws;
+			
+			m_pointA = QPointF(0, 0);
+			m_pointB = QPointF(1 , 0);
+			m_pointC = QPointF(0, 1);
 			calculateAxesSkew();
-			m_pointA = QPointF(-4.0, -4.0);
-			m_pointB = QPointF(-4.0, 5.0);
-			m_pointC = QPointF(5.0, -4.0);
 			m_width = 0.1;
 
 		}
@@ -66,16 +76,57 @@ namespace MantidQt {
 			return QPointF(xA, yA);
 		}
 
+		void NonOrthogonalOverlay::setAxesPoints() { //set it to be actually whatever m_x and m_y are
+			auto ws = m_ws->get(); //assumes it is a square as well...
+			int dim0Max = ws->getDimension(0)->getMaximum();
+			m_pointA = QPointF(-(dim0Max), -(dim0Max));
+			m_pointB = QPointF(dim0Max, -(dim0Max));
+			m_pointC = QPointF(-(dim0Max), dim0Max);
+
+		}
+		double NonOrthogonalOverlay::getDotProductForGivenDim(int dim) {
+			Mantid::Kernel::DblMatrix skewMatrix(3, 3, true); //need to put this in constructer...
+			API::provideSkewMatrix(skewMatrix, *m_ws);
+			skewMatrix.Invert();
+			Mantid::coord_t coord_skewMatrix[3];
+			Mantid::coord_t testH[3];
+			std::size_t index = 0;
+			if (dim == 1) {m_startPoint = 0;}
+			if (dim == 2) {m_startPoint = 3;}
+			if (dim == 3) {m_startPoint = 6;}
+			for (std::size_t i = m_startPoint; i < m_startPoint + 3; ++i) {
+				coord_skewMatrix[index] = static_cast<Mantid::coord_t>(skewMatrix[index][dim-1]);
+				testH[index] = m_CompskewMatrix[i];
+				++index;
+			}
+			auto dotProduct = std::inner_product(std::begin(coord_skewMatrix), std::end(coord_skewMatrix), std::begin(testH), 0.0);
+			return dotProduct;
+		}
+
 		void NonOrthogonalOverlay::calculateAxesSkew() {
-			auto test = m_ws->get();
+			//to get the angle
+			// figure out which dims interested in. if H/X then compare first column of skew against 1, 0, 0 (find dot product)
+			// K/Y second column, then against 0, 1, 0
+			// L/ third column skew against 0, 0, 1
+			// then figure out cross product of the two chosen vectors
+			setAxesPoints();
+			// dimensions interested in currently hardcoded
+			int dimX = 1;
+			int dimY = 2;
+			auto dimXdot = getDotProductForGivenDim(dimX);
+			auto dimYdot = getDotProductForGivenDim(dimY);
+
+			//then do cross product
+
+
+
+
+
 			
 		}
 		//----------------------------------------------------------------------------------------------
 		/// Paint the overlay
 		void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
-			// Don't paint until created
-			// Also, don't paint while right-click dragging (panning) the underlying pic
-
 
 			QPainter painter(this);
 
@@ -84,19 +135,16 @@ namespace MantidQt {
 			double angle = atan2(diff.y(), diff.x()) + M_PI / 2.0;
 			QPointF widthOffset(m_width * cos(angle), m_width * sin(angle));
 
-			QPen boxPenDark(QColor(255, 215, 0, 200));
-			QPen centerPen(QColor(192, 192, 192, 128));
 
-			boxPenDark.setWidthF(4.0);
-
+			QPen centerPen(QColor(0, 0, 0, 200));
 			// Go back to normal drawing mode
-			painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+			//painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
 
 			// --- Draw the central line ---
 			if (m_showLine) {
-				centerPen.setWidth(2);
+				centerPen.setWidth(4);
 				centerPen.setCapStyle(Qt::FlatCap);
-				painter.setPen(boxPenDark);
+				painter.setPen(centerPen);
 				painter.drawLine(transform(m_pointA), transform(m_pointB));
 				painter.drawLine(transform(m_pointA), transform(m_pointC));
 			}

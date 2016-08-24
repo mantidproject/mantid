@@ -12,6 +12,8 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidQtAPI/NonOrthogonal.h"
+#include "MantidKernel/Matrix.h"
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -69,6 +71,11 @@ public:
 	int width() const;
 	void calculateAxesSkew();
 	Mantid::API::IMDWorkspace_sptr *m_ws;
+	void setAxesPoints();
+	Mantid::Kernel::DblMatrix m_skewMatrix;
+	double getDotProductForGivenDim(int dim);
+	Mantid::coord_t m_CompskewMatrix[9];
+	int m_startPoint;
 };
 
 } // namespace SliceViewer
