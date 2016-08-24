@@ -263,19 +263,113 @@ Pair table
 Data Analysis
 -------------
 
+.. _DataAnalysis:
+
 This tab is designed for the user to make a fit against the data just plotted.
+Since Mantid 3.8, this tab has been enhanced to include fits of multiple datasets at once.
 
 .. interface:: Muon Analysis
   :widget: fitBrowser
   :align: center
 
-Fit Property Browser
-^^^^^^^^^^^^^^^^^^^^
-The only thing that this tab contains is a specialised version of the
+Fit Function
+^^^^^^^^^^^^
+The tab is divided into three sections vertically. The uppermost of these is the *Fit Function* section, which is a
+FunctionBrowser just like in the *General/Multi dataset fitting* interface (and numerous other places in Mantid).
+Functions can be added by right-clicking. If more space is needed, this section can be expanded by dragging its lower edge downwards.
+
+The function browser has three columns - property, value and global.
+The values shown are those of the currently selected/plotted dataset.
+The global column contains a checkbox for each function parameter which, when checked, sets this parameter to be shared between all fits.
+
+Parameters can be fixed, tied and constrained by right-clicking. 
+In addition, just as in the general multi dataset fitting interface, when highlighting a non-global function parameter, a small button will appear next to its value.
+This button will open the "Edit local parameter values" dialog, which offers greater control of function parameters for each dataset.
+
+Data
+^^^^
+The central section of the tab is the data selector, which controls the dataset(s) that will be fitted.
+By default, this will be a single dataset, the same as the data loaded on the Home_ tab.
+The dataset(s) can be changed here and, if more than one is selected, they will all be fitted simultaneously.
+
+For a multi-dataset fit, the "Label" box is enabled.
+This allows the user to input a label for the simultaneous fit.
+
+The drop-down list shows all datasets currently selected, and the left and right buttons cycle through them.
+The currently selected dataset has its parameters shown in the *Fit Function* (upper) widget, and will be plotted.
+
+Fits can be done across runs, groups, periods or all three.
+From left to right, the options to select are:
+
+Runs
+""""
+A single run, or range (*e.g. 15189-91, 15193*) can be typed into the box here.
+The radio buttons below control whether the runs should be co-added together or fitted separately in a simultaneous fit.
+It is also possible to adjust the start and end time here.
+
+Groups
+""""""
+There is a checkbox in this section for each group defined in the GroupingOptions_ tab.
+One or multiple groups can be selected.
+
+Periods
+"""""""
+There is a checkbox in this section for each period of the data.
+(This section is only visible for multi-period data).
+One or multiple periods can be selected.
+In addition, the "Combination" option can be used to fit a sum or difference of periods.
+
+Examples/Use cases
+""""""""""""""""""
+1. Individual fit:
+
+   - One run selected in the box, or a range with the "Co-add" option set.
+   - One group selected
+   - (One period selected, if multi-period)
+   - In this case the "global" option is meaningless as only one dataset will be fitted.
+   - Example: MUSR15189, group *long*, period 1
+
+2. Simultaneous fit across runs:
+
+   - Range or selection of runs in box, with "Simultaneous" option set.
+   - One group selected
+   - (One period selected)
+   - Example: MUSR{15189, 15190, 15191}, group *long*, period 1
+
+3. Simultaneous fit across groups or periods:
+
+   - One run selected in the box, or a range with the "Co-add" option set.
+   - Multiple groups or periods selected
+   - Example: MUSR15189, groups {*fwd*, *bwd*}, period 1
+
+4. Sequential fit of simultaneous fits:
+
+   - One run only selected in the box.
+   - Multiple groups or periods selected
+   - Under "Fit", click "Sequential fit" and type a range of runs in the dialog. (See SequentialFitting_ below)
+     For each run in turn, a simultaneous fit of the selected groups/periods will be performed.
+
+5. Multiple options
+
+   - It is, of course, possible to select several runs, groups, periods all at once and a simultaneous fit will be performed across all the selected datasets.
+   - Example: MUSR{15189, 15190, 15191}, groups {*fwd*, *bwd*}, periods {1, 2}: 12 datasets in all.
+
+Options
+^^^^^^^
+The bottom of the tab contains selected fit options that can be adjusted, just as elsewhere in Mantid.
+The only option specific to the Muon Analysis interface is *Fit To Raw Data*.
+When this option is set to *True*, the fitting process is done using the raw (unbinned) data, even if the DataBinning_ is set.
+
+Compatibility mode
+^^^^^^^^^^^^^^^^^^
+To revert to the interface as it was pre-Mantid 3.8, use the checkbox for "Compatibility mode" on the Settings_ tab.
+
+In this case, the only thing that this tab will contain is a specialised version of the
 `Fit Property Browser <http://www.mantidproject.org/MantidPlot:_Data_Analysis_and_Curve_Fitting>`_.
 When the tab is open, this fit property browser is used by default within MantidPlot.
-The only extra option that is used within the Muon Analysis interface is *Fit To Raw Data*.
-When this option is set to *True*, the fitting process is done using the raw (unbinned) data, even if the DataBinning_ is set.
+
+Note that, in "Compatibility mode", simultaneous fits are not possible.
+The intention is that this mode could be useful for users who are accustomed to the existing UI, or if a bug is found in the new UI.
 
 Sequential fitting
 ^^^^^^^^^^^^^^^^^^
@@ -364,17 +458,21 @@ Fitting Results
 ^^^^^^^^^^^^^^^
 
 This table contains a list of fitted workspaces. You can choose whether you want to see
-individual fits only, or a specific sequential fit label (see SequentialFitting_ ).
+individual fits only, or a specific sequential (see SequentialFitting_ ) or simultaneous (see DataAnalysis_) fit label.
+
 Fitted parameters of the selected workspaces will be added to the results table.
 
 .. image:: ../images/MuonAnalysis_FittingResultsTable.png
   :align: center
 
-Workspaces might be coloured differently. Workspaces of the different colours have
+Workspaces might be coloured differently. Workspaces of different colours have
 different fitting models and therefore couldn't be included in the same Results table.
 
 .. image:: ../images/MuonAnalysis_FittingResultsColors.png
   :align: center
+
+As well as selecting workspaces, the fourth radio button - "Multiple" - can be used to create a table of multiple simultaneous fits, one row per label.
+In such a table, each global parameter gets one column and local parameters get one column per dataset.
 
 Table
 ^^^^^
@@ -484,33 +582,37 @@ General
   :widget: groupBox_13
   :align: center
 
-+-------+---------------------+---------------------------------------------------------------------+
-| **1** | **Plot Creation**   | - **Auto-Update**. When settings are changed on the interface,      |
-|       |                     |   the new plot is created automatically.                            |
-|       |                     |                                                                     |
-|       |                     | - **Overwrite**. When plotting, if the plot of the same type        |
-|       |                     |   exists already, it is overwritten instead of creating a new       |
-|       |                     |   one.                                                              |
-|       |                     |                                                                     |
-|       |                     | - **Auto-Update + Overwrite**. Both above settings at the same time |
-|       |                     |                                                                     |
-|       |                     | - **None**. None of the settings                                    |
-|       |                     |                                                                     |
-+-------+---------------------+---------------------------------------------------------------------+
-| **2** | **New plot policy** | - **Use previous window**. Each new plot will be drawn in the       |
-|       |                     |   same window. By default, the previous fit curve will remain       |
-|       |                     |   on the graph when the run is changed - the number of curves       |
-|       |                     |   to keep can be adjusted here (set to 0 to always clear            |
-|       |                     |   previous fits). The "clear fit curves" option on the Data         |
-|       |                     |   Analysis tab will clear any fit curves present.                   |
-|       |                     |                                                                     |
-|       |                     | - **Create new window**. When plotting a new run, it is             |
-|       |                     |   plotted in a new window each time.                                |
-|       |                     |                                                                     |
-+-------+---------------------+---------------------------------------------------------------------+
-| **3** | **Hide Toolbars**   | If enabled, opening the interface up hides the MantidPlot           |
-|       |                     | toolbars. This is useful on smaller screens.                        |
-+-------+---------------------+---------------------------------------------------------------------+
++-------+------------------------+---------------------------------------------------------------------+
+| **1** | **Plot Creation**      | - **Auto-Update**. When settings are changed on the interface,      |
+|       |                        |   the new plot is created automatically.                            |
+|       |                        |                                                                     |
+|       |                        | - **Overwrite**. When plotting, if the plot of the same type        |
+|       |                        |   exists already, it is overwritten instead of creating a new       |
+|       |                        |   one.                                                              |
+|       |                        |                                                                     |
+|       |                        | - **Auto-Update + Overwrite**. Both above settings at the same time |
+|       |                        |                                                                     |
+|       |                        | - **None**. None of the settings                                    |
+|       |                        |                                                                     |
++-------+------------------------+---------------------------------------------------------------------+
+| **2** | **New plot policy**    | - **Use previous window**. Each new plot will be drawn in the       |
+|       |                        |   same window. By default, the previous fit curve will remain       |
+|       |                        |   on the graph when the run is changed - the number of curves       |
+|       |                        |   to keep can be adjusted here (set to 0 to always clear            |
+|       |                        |   previous fits). The "clear fit curves" option on the Data         |
+|       |                        |   Analysis tab will clear any fit curves present.                   |
+|       |                        |                                                                     |
+|       |                        | - **Create new window**. When plotting a new run, it is             |
+|       |                        |   plotted in a new window each time.                                |
+|       |                        |                                                                     |
++-------+------------------------+---------------------------------------------------------------------+
+| **3** | **Hide Toolbars**      | If enabled, opening the interface up hides the MantidPlot           |
+|       |                        | toolbars. This is useful on smaller screens.                        |
++-------+------------------------+---------------------------------------------------------------------|
+| **4** | **Compatibility mode** | If enabled, the DataAnalysis_ tab will be reverted to the UI it had |
+|       |                        | in previous versions of Mantid (pre-3.8). Note that simultaneous    |
+|       |                        | fits are not possible in this mode.                                 |
++-------+---------------------+------------------------------------------------------------------------+
 
 Feedback & Comments
 -------------------
