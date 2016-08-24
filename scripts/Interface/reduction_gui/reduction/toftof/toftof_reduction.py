@@ -181,14 +181,14 @@ class TOFTOFScriptElement(BaseScriptElement):
         # must have vanadium for TOF correction
         if self.CORR_TOF_VAN == self.correctTof:
             if not self.vanRuns:
-                error('missing vanadium run')
+                error('missing vanadium runs')
 
         # must have vanadium and empty can for subtracting EC from van
         if self.subtractECVan:
             if not self.vanRuns:
-                error('missing vanadium run')
+                error('missing vanadium runs')
             if not self.ecRuns:
-                error('missing empty can run')
+                error('missing empty can runs')
 
         # binning parameters
         def checkBinningParams(start, step, end):
@@ -227,7 +227,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         l("config['default.facility'] = '%s'"   % (self.facility_name))
         l("config['default.instrument'] = '%s'" % (self.instrument_name))
         l()
-        l("config.appendDataSearchDir('%s')"    % (self.dataDir))
+        l("config.appendDataSearchDir(r'%s')"    % (self.dataDir))
         l()
 
         dataRawGroup = []
@@ -299,9 +299,11 @@ class TOFTOFScriptElement(BaseScriptElement):
         l()
 
         l("# Ei")
-        l("if CompareSampleLogs(%s, 'Ei', 0.001):" % (gAll))
-        l("    raise RuntimeError('Ei values do not match')")
-        l()
+        if len(allGroup) > 1:
+            l("if CompareSampleLogs(%s, 'Ei', 0.001):" % (gAll))
+            l("    raise RuntimeError('Ei values do not match')")
+            l()
+
         l("Ei = %s" % (logEi(wsData0)))
         l()
 
@@ -349,7 +351,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("for ws in %s:" % (gDataRuns))
             l("    name = ws.getName() + 'Norm'")
             l("    names.append(name)")
-            l("    Scale(ws, 1/%s, 'Multiply', OutputWorkspace=name)" % (logTime('ws')))
+            l("    Scale(ws, 1.0 / float(%s), 'Multiply', OutputWorkspace=name)" % (logTime('ws')))
             l()
             l("%s = GroupWorkspaces(names)" % (gDataNorm))
 
@@ -367,7 +369,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             gDataSubEC = gPrefix + 'DataSubEC'
             scaledEC   = self.prefix + 'ScaledEC'
             l("# subtract empty can")
-            l("ecFactor = '%f'" % (self.ecFactor))
+            l("ecFactor = %f" % (self.ecFactor))
             l("%s = Scale(%s, Factor=ecFactor, Operation='Multiply')" % (scaledEC, wsECNorm))
             l("%s = Minus(%s, %s)" % (gDataSubEC, gDataNorm, scaledEC))
             if self.subtractECVan:
