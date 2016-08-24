@@ -302,14 +302,14 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(sigma_l2, 0.023, places=tol_places)
         self.assertAlmostEqual(sigma_tof, 0.370, places=tol_places)
         if forward_scatter:
-            self.assertAlmostEqual(sigma_theta, 0.040, places=tol_places)
+            self.assertAlmostEqual(sigma_theta, 0.016, places=tol_places)
             if diff_mode == "DoubleDifference":
                 raise ValueError("Double difference is not compataible with forward scattering spectra")
             else:
                 self.assertAlmostEqual(sigma_gauss, 73, places=tol_places)
                 self.assertAlmostEqual(hwhm_lorentz, 24, places=tol_places)
         else:
-            self.assertAlmostEqual(sigma_theta, 0.0227, places=tol_places)
+            self.assertAlmostEqual(sigma_theta, 0.016, places=tol_places)
             if diff_mode == "DoubleDifference":
                 self.assertAlmostEqual(sigma_gauss, 88.7, places=tol_places)
                 self.assertAlmostEqual(hwhm_lorentz, 40.3, places=tol_places)

@@ -21,6 +21,15 @@ If :literal:`MonitorBackgroundWavelengthMin` and
 :literal:`MonitorBackgroundWavelengthMax` are both set to :literal:`0`, then
 background normalization will not be performed on the monitors.
 
+The properties of this algorithm should be manually selected by the user. If you wish
+to use the default values (found in the Instrument Defintion File) for the properties
+of this algorithm, you may want to consider using :ref:`algm-ReflectometryReductionOneAuto`.
+
+:ref:`algm-ReflectometryReductionOneAuto` also performs extra processing steps such as
+Background subtraction and :ref:`algm-PolarizationCorrection`. If you want to know how 
+these processing steps are used, please refer to the :ref:`algm-ReflectometryReductionOneAuto`
+documentation.
+
 Analysis Modes
 ##############
 

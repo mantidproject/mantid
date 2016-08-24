@@ -58,7 +58,7 @@ private:
 
   void setStructureFactorCalculatorFromSample(const API::Sample &sample);
 
-  void calculateQAndAddToOutput(Kernel::V3D &hkl,
+  void calculateQAndAddToOutput(const Kernel::V3D &hkl,
                                 const Kernel::DblMatrix &orientedUB,
                                 const Kernel::DblMatrix &goniometerMatrix);
 
@@ -72,8 +72,9 @@ private:
   Geometry::Instrument_const_sptr m_inst;
   /// Output peaks workspace
   Mantid::DataObjects::PeaksWorkspace_sptr m_pw;
-  std::string convention;
   Geometry::StructureFactorCalculator_sptr m_sfCalculator;
+
+  double m_qConventionFactor;
 };
 
 } // namespace Mantid

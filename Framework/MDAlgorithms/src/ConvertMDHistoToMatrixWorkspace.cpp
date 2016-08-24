@@ -143,7 +143,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   Mantid::Geometry::VecIMDDimension_const_sptr nonIntegDims =
       inputWorkspace->getNonIntegratedDimensions();
 
-  std::string alongDim = "";
+  std::string alongDim;
   if (!nonIntegDims.empty())
     alongDim = nonIntegDims[0]->getDimensionId();
   else
@@ -288,10 +288,11 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
     *ix = x;
   }
 
+  auto ptrX = outputWorkspace->refX(0);
   // set the y-values and errors
   for (size_t i = 0; i < ny; ++i) {
     if (i > 0)
-      outputWorkspace->setX(i, X);
+      outputWorkspace->setX(i, ptrX);
     auto &Y = outputWorkspace->dataY(i);
     auto &E = outputWorkspace->dataE(i);
 

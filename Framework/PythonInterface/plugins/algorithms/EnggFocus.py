@@ -1,4 +1,5 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 
@@ -115,11 +116,18 @@ class EnggFocus(PythonAlgorithm):
         spectra = self.getProperty(self.INDICES_PROP_NAME).value
         indices = EnggUtils.getWsIndicesFromInProperties(wks, bank, spectra)
 
-        prog = Progress(self, start=0, end=1, nreports=5)
+        detPos = self.getProperty("DetectorPositions").value
+        nreports = 5
+        if detPos:
+            nreports += 1
+        prog = Progress(self, start=0, end=1, nreports=nreports)
 
+        # Leave only the data for the bank/spectra list requested
         prog.report('Selecting spectra from input workspace')
-        # Leave the data for the bank/spectra list we are interested in only
         wks = EnggUtils.cropData(self, wks, indices)
+
+        prog.report('Masking some bins if requested')
+        self._mask_bins(wks, self.getProperty('MaskBinsXMins').value, self.getProperty('MaskBinsXMaxs').value)
 
         prog.report('Preparing input workspace with vanadium corrections')
         # Leave data for the same bank in the vanadium workspace too
@@ -129,7 +137,6 @@ class EnggFocus(PythonAlgorithm):
         EnggUtils.applyVanadiumCorrections(self, wks, indices, vanWS, vanIntegWS, vanCurvesWS)
 
     	# Apply calibration
-        detPos = self.getProperty("DetectorPositions").value
         if detPos:
             self._applyCalibration(wks, detPos)
 
@@ -147,9 +154,6 @@ class EnggFocus(PythonAlgorithm):
         prog.report('Normalizing input workspace if needed')
         if self.getProperty('NormaliseByCurrent').value:
             self._normalize_by_current(wks)
-
-        prog.report('Masking some bins if requested')
-        self._mask_bins(wks, self.getProperty('MaskBinsXMins').value, self.getProperty('MaskBinsXMaxs').value)
 
     	# OpenGenie displays distributions instead of pure counts (this is done implicitly when
     	# converting units), so I guess that's what users will expect

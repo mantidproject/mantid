@@ -54,7 +54,9 @@
         <file>delete_column.png</file>
         <file>insert_column.png</file>
         <file>delete_row.png</file>
+        <file>delete_group.png</file>
         <file>insert_row.png</file>
+        <file>insert_group.png</file>
         <file>set_label_col.png</file>
         <file>index.png</file>
         <file>exp.png</file>

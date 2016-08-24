@@ -1,4 +1,6 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -90,7 +92,7 @@ class BASISReduction(PythonAlgorithm):
 
         # Properties affected by the reflection selected
         titleReflection = "Reflection Selector"
-        available_reflections = REFLECTIONS_DICT.keys()
+        available_reflections = list(REFLECTIONS_DICT.keys())
         available_reflections.sort()  # preserve order in which they are presented
         default_reflection = REFLECTIONS_DICT["silicon111"]
         self.declareProperty("ReflectionType", default_reflection["name"],

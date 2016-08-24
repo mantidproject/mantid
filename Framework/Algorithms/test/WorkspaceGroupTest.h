@@ -20,6 +20,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 class WorkspaceGroupTest : public CxxTest::TestSuite {
 private:
@@ -183,11 +185,12 @@ public:
     work_in2->setInstrument(instr);
 
     // set some dead detectors
-    boost::shared_ptr<Mantid::MantidVec> yDead =
-        boost::make_shared<Mantid::MantidVec>(nHist, 0);
+    Counts yDead(nBins, 0);
+    CountStandardDeviations eDead(nBins, 0);
     for (int i = 0; i < nBins; i++) {
       if (i % 2 == 0) {
-        work_in1->setData(i, yDead, yDead);
+        work_in1->setCounts(i, yDead);
+        work_in1->setCountStandardDeviations(i, eDead);
       }
       work_in1->getSpectrum(i).setSpectrumNo(i);
       Mantid::Geometry::Detector *det =
@@ -198,7 +201,8 @@ public:
 
     for (int i = 0; i < nBins; i++) {
       if (i % 2 == 0) {
-        work_in2->setData(i, yDead, yDead);
+        work_in2->setCounts(i, yDead);
+        work_in2->setCountStandardDeviations(i, eDead);
       }
       work_in2->getSpectrum(i).setSpectrumNo(i);
     }

@@ -48,8 +48,6 @@ class QDoubleSpinBox;
 class ColorButton;
 class TextFormatButtons;
 
-using namespace Qwt3D;
-
 //! Surface plot options dialog
 class Plot3DDialog : public QDialog {
   Q_OBJECT

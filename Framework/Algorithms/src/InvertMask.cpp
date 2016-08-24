@@ -55,8 +55,6 @@ void InvertMask::exec() {
 
   // 3. Set
   this->setProperty("OutputWorkspace", outputws);
-
-  return;
 }
 
 } // namespace Mantid

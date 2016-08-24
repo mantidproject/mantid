@@ -28,17 +28,17 @@ def write_header(subproject, classname, filename, args):
 
     # Create an Algorithm header; will not use it if not an algo
     algorithm_header = """
-  const std::string name() const override final;
-  int version() const override final;
-  const std::string category() const override final;
-  const std::string summary() const override final;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  void init() override final;
-  void exec() override final;
+  void init() override;
+  void exec() override;
 """
 
-    alg_class_declare = " final : public API::Algorithm"
+    alg_class_declare = " : public API::Algorithm"
     alg_include = '#include "MantidAPI/Algorithm.h"'
 
     if not args.alg:
@@ -50,8 +50,8 @@ private:
     s = """#ifndef %s
 #define %s
 
-#include "Mantid%s/DllConfig.h"
 %s
+#include "Mantid%s/DllConfig.h"
 namespace Mantid {
 namespace %s {
 

@@ -19,12 +19,14 @@ public:
 
   void test_success() {
     auto ws = boost::make_shared<WorkspaceTester>();
+    ws->initialize(1, 1, 1);
     RawCountValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }
 
   void test_fail() {
     auto ws = boost::make_shared<WorkspaceTester>();
+    ws->initialize(1, 1, 1);
     ws->setDistribution(true);
     RawCountValidator validator;
     TS_ASSERT_EQUALS(

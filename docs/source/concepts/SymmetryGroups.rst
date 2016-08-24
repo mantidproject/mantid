@@ -19,7 +19,7 @@ A group :math:`(G, \cdot)` is defined as a set of elements :math:`G` with a bina
   2. **Associativity**: For all :math:`a, b` in :math:`G`, :math:`(a \cdot b) \cdot c` is equal to :math:`a \cdot (b \cdot c)`.
   3. **Identity element**: There exists an element :math:`e` in :math:`G` such that :math:`e \cdot a = a`.
   4. **Inverse element**: For each :math:`a` in :math:`G` there exists an element :math:`b` in :math:`G` such that :math:`a \cdot b = e`.
-   
+
 There are many examples for groups, for example the group defined by the set of signed integer numbers and the addition operation. Any two integers added result again in an integer, integer addition is associative, there is an identity element (the number 0) and for each integer there is an inverse element (the number with the same magnitude, but opposite sign). For describing symmetry, groups are required that consist of a set of symmetry operations and a binary operation that combines them. The next section describes how symmetry operations can be represented and how to work with them in Mantid.
 
 Symmetry operations
@@ -32,12 +32,12 @@ As symmetry operations are used for the definition of space groups, the mathemat
 
 .. math::
     O' = S \cdot O
-    
+
 For a coordinate :math:`\mathbf{x}` in three dimensions, any transformation can be described using a transformation matrix :math:`\mathbf{W}` and a translation vector :math:`\mathbf{w}`. This leads to the following equation:
 
 .. math::
     \mathbf{x}' = \mathbf{W} \cdot \mathbf{x} + \mathbf{w}
-    
+
 :math:`\mathbf{W}` is a :math:`3\times3`-matrix and for affine transformations, the determinant of the matrix is always equal to 1 or -1 (except for hexagonal coordinates, which are handled transparently in Mantid so this is not covered here).
 
 Coordinates :math:`x` are assumed to be fractional in terms of a unit cell, which defines the smallest unit of an infinite lattice that is repeated over and over.
@@ -51,7 +51,7 @@ For the definition of the group :math:`(G, \cdot)` this means that :math:`G` is 
 
 .. math::
     S_3 = S_1 \cdot S_2 = \left(\mathbf{W}_1 \cdot \mathbf{W}_2, \left[\mathbf{W}_1 \cdot \mathbf{w}_2\right] + \mathbf{w}_1\right)
-    
+
 While matrix and vector pairs are very well suited for modelling symmetry operaitions in a computer language, they are not very convenient for human language. A very common notation is the "Jones-faithful" system, which is for example used in the symmetry operations section in the space group descriptions in ITA. It uses :math:`(x,y,z)` triplets to describe the rows of the matrix (:math:`x` meaning :math:`1, 0, 0` and so on) and the translation vector (for example :math:`x,y,z+1/2` for a translation of half a unit cell vector in :math:`c`-direction). The following table shows some more examples:
 
 .. table:: Examples for symmetry operations in Jones-faithful notation.
@@ -65,14 +65,14 @@ While matrix and vector pairs are very well suited for modelling symmetry operai
     ``x,y,-z``      Mirror plane perpendicular to :math:`z`
     ``-x,-y,z+1/2`` :math:`2_1` screw axis along :math:`z`
     =============== ===================
-    
+
 There are several advantages to this notation. First of all it's very concise and secondly it directly shows how a point :math:`x` behaves under the symmetry transformation. As such this notation was chosen for generation of symmetry operations in Mantid.
 
 Last but not least, each symmetry operation has a so called order :math:`k`, which describes how many times the operation has to be chained together to arrive at identity:
 
 .. math::
     I = S^k = S \cdot S \cdot \dots \cdot S
-    
+
 The same is true for transforming coordinates as well. Applying a symmetry operation of order :math:`k` exactly :math:`k` times to a point :math:`x` will result in :math:`x` again, which is the definition of identity.
 
 Symmetry operations in Mantid
@@ -85,22 +85,22 @@ As described above, the operations are represented using the Jones-faithful nota
 .. testcode :: ExSymmetryOperationFactory
 
     from mantid.geometry import SymmetryOperationFactory
-    
+
     # This time the identifier is already normalized
     symOp = SymmetryOperationFactory.createSymOp("x,y,-z")
     print symOp.getIdentifier()
-    
+
     # This is an example for an identifier that changes
     symOp = SymmetryOperationFactory.createSymOp("1/2+x,y,z")
     print symOp.getIdentifier()
-    
+
 Executing the above code yields the following output, which shows how the operation identifier is modified in some cases:
 
 .. testoutput :: ExSymmetryOperationFactory
 
     x,y,-z
     x+1/2,y,z
-    
+
 For ease of use with multiple symmetry operations it's also possible to create multiple operations at once, using a semi-colon separated string of identifiers:
 
 .. testcode :: ExSymmetryOperationFactoryMultiple
@@ -109,13 +109,13 @@ For ease of use with multiple symmetry operations it's also possible to create m
 
     # Create a list of symmetry operations
     symOps = SymmetryOperationFactory.createSymOps("x,y,-z; -x,-y,-z; z,x,y")
-    
+
     print "Number of operations:", len(symOps)
     print "Operations:"
-    
+
     for op in symOps:
 	print op.getIdentifier()
-	
+
 This prints each identifier on a new line:
 
 .. testoutput :: ExSymmetryOperationFactoryMultiple
@@ -125,20 +125,20 @@ This prints each identifier on a new line:
     x,y,-z
     -x,-y,-z
     z,x,y
-    
+
 Symmetry operation objects can be used to transform coordinates or Miller indices, which are handled differently as detailed in the theory section above, so different methods exists for each of the two tasks.
 
 .. testcode :: ExSymmetryOperationPoint
 
     from mantid.geometry import SymmetryOperationFactory
-    
+
     symOp = SymmetryOperationFactory.createSymOp("x-y,x,z")
-    
+
     coordinates = [0.3, 0.4, 0.5]
     coordinatesPrime = symOp.transformCoordinates(coordinates)
-    
+
     print "Transformed coordinates:", coordinatesPrime
-    
+
 This script generates a symmetry operation that is used in hexagonal coordinate systems and uses it to transform the given coordinates:
 
 .. testoutput :: ExSymmetryOperationPoint
@@ -150,20 +150,20 @@ As transforming HKLs requires slightly different math, there is a special method
 .. testcode :: ExSymmetryOperationHKL
 
     from mantid.geometry import SymmetryOperationFactory
-    
+
     symOp = SymmetryOperationFactory.createSymOp("x,y,-z")
-    
+
     hkl = [1, -1, 3]
     hklPrime = symOp.transformHKL(hkl)
-    
+
     print "Transformed hkl:", hklPrime
-    
+
 The above code will print the transformed Miller index triplet:
 
 .. testoutput :: ExSymmetryOperationHKL
 
     Transformed hkl: [1,-1,-3]
-    
+
 It's also possible to query the order of a symmetry operation. The next example generates a fourfold rotation around the :math:`z`-axis and prints some information about it.
 
 .. testcode :: ExSymmetryOperationOrder
@@ -171,7 +171,7 @@ It's also possible to query the order of a symmetry operation. The next example 
     from mantid.geometry import SymmetryOperationFactory
 
     symOp = SymmetryOperationFactory.createSymOp("-y,x,z")
-    
+
     k = symOp.getOrder()
     print "Order of the symmetry operation:", k
 
@@ -180,7 +180,7 @@ It's also possible to query the order of a symmetry operation. The next example 
     for i in range(k):
         x = symOp.transformCoordinates(x)
         print "After", i + 1, "application(s):", x
-      
+
 .. testoutput :: ExSymmetryOperationOrder
 
     Order of the symmetry operation: 4
@@ -189,7 +189,7 @@ It's also possible to query the order of a symmetry operation. The next example 
     After 2 application(s): [-0.3,-0.4,0.5]
     After 3 application(s): [0.4,-0.3,0.5]
     After 4 application(s): [0.3,0.4,0.5]
-    
+
 Symmetry elements
 ~~~~~~~~~~~~~~~~~
 
@@ -206,16 +206,16 @@ Section 11.2 in the same book describes how to derive symmetry elements from mat
 
     print "The element corresponding to 'x,y,-z' has the following symbol:", element.getHMSymbol()
     print "The mirror plane is perpendicular to:", element.getAxis()
-    print "Sense of rotation (or None):", element.getRotationSense()
-    
+    print "Sense of rotation (or NoRotation):", element.getRotationSense()
+
 In this case, it's a mirror plane perpendicular to the :math:`z`-axis:
-    
+
 .. testoutput:: ExSymmetryElement
 
     The element corresponding to 'x,y,-z' has the following symbol: m
     The mirror plane is perpendicular to: [0,0,1]
-    Sense of rotation (or None): None
-    
+    Sense of rotation (or NoRotation): NoRotation
+
 Symmetry groups
 ---------------
 
@@ -223,7 +223,7 @@ In the previous section, symmetry operations and a binary operation combining th
 
 .. math::
     G = \left\{1\right\}
-    
+
 This group fulfills all four group axioms. The identity matrix multiplied with itself is again identity, so the group is closed. Associativity holds as well, since it does not matter in which order multiple identical operations are performed. Since the only element of the group is the identity, the third axiom is fulfilled as well. So is the fourth, since the inverse of the identity is again identity. This group exists as the point group :math:`1` and describes objects that do not show any symmetry except identity.
 
 As more operations are added to a group, it can be useful to display the group in terms of a group table, which makes it easy to check the group axioms. The following example group contains the symmetry operations :math:`1`, :math:`\bar{1}`, :math:`2` and :math:`m`, the latter two being characterized by the same axis. The cells of the group tables show the result of the binary operation combining the symmetry operations in the header row and header column:
@@ -231,8 +231,8 @@ As more operations are added to a group, it can be useful to display the group i
 .. list-table:: Group table example
     :header-rows: 1
     :stub-columns: 1
-    
-    * - 
+
+    * -
       - :math:`1`
       - :math:`\bar{1}`
       - :math:`2`

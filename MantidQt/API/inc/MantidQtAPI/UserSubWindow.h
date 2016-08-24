@@ -91,8 +91,6 @@ public:
 public:
   /// DefaultConstructor
   UserSubWindow(QWidget *parent = 0);
-  /// Destructor
-  ~UserSubWindow() override;
   /// Create the layout of the widget. Can only be called once.
   void initializeLayout();
   /// Run local Python init code. Calls overridable function in specialized

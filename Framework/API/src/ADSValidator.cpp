@@ -46,7 +46,7 @@ ADSValidator::checkValidity(const std::vector<std::string> &value) const {
   }
   auto &ads = AnalysisDataService::Instance();
   std::ostringstream os;
-  for (std::string wsName : value) {
+  for (const auto &wsName : value) {
     if (!ads.doesExist(wsName)) {
       os << "The workspace \"" << wsName
          << "\" is not in the workspace list.\n";
@@ -62,14 +62,13 @@ ADSValidator::checkValidity(const std::vector<std::string> &value) const {
 */
 std::vector<std::string> ADSValidator::allowedValues() const {
   // Get the list of workspaces currently in the ADS
-  auto vals = AnalysisDataService::Instance().getObjectNames();
+  auto vals = AnalysisDataService::Instance().getObjectNames(
+      Mantid::Kernel::DataServiceSort::Sorted);
   if (isOptional()) // Insert an empty option
   {
-    vals.insert("");
+    vals.push_back("");
   }
-  auto values = std::vector<std::string>(vals.begin(), vals.end());
-  std::sort(values.begin(), values.end());
-  return values;
+  return vals;
 }
 
 } // namespace API

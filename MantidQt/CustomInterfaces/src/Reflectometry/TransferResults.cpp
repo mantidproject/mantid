@@ -24,12 +24,7 @@ void TransferResults::addTransferRow(const COLUMN_MAP_TYPE &row) {
 }
 void TransferResults::addErrorRow(COLUMN_NAME_TYPE id,
                                   COLUMN_VALUE_TYPE error) {
-
-  COLUMN_MAP_TYPE row;
-  std::pair<COLUMN_NAME_TYPE, COLUMN_VALUE_TYPE> pair(id, error);
-  row.insert(pair);
-  m_errorRuns.push_back(row);
-  // m_errorRuns.push_back(row);
+  m_errorRuns.push_back({{id, error}});
 }
 }
 }

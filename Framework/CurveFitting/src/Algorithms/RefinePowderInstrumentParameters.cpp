@@ -126,8 +126,6 @@ void RefinePowderInstrumentParameters::init() {
 
   declareProperty("MonteCarloRandomSeed", 0,
                   "Random seed for Monte Carlo simulation. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -211,8 +209,6 @@ void RefinePowderInstrumentParameters::exec() {
   DataObjects::TableWorkspace_sptr fitparamws =
       genOutputInstrumentParameterTable();
   this->setProperty("OutputInstrumentParameterWorkspace", fitparamws);
-
-  return;
 }
 
 //------- Related to Fitting Instrument Geometry Function  -------------------
@@ -370,8 +366,6 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
         << setw(20) << zdiffy << setw(20) << diffy << '\n';
   }
   cout << "Zscore Survey: \b" << zss.str();
-
-  return;
 }
 
 /** Fit function to data
@@ -516,8 +510,6 @@ void RefinePowderInstrumentParameters::refineInstrumentParametersMC(
       newN[j] = vec_n[j];
     }
   }
-
-  return;
 }
 
 /** Core Monte Carlo random walk on parameter-space
@@ -778,8 +770,6 @@ void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(
              << ", GSL Chi^2 = " << m_BestFitChi2s[i].second << '\n';
   }
   g_log.notice() << mcresult.str();
-
-  return;
 }
 
 /** Get the names of the parameters of D-TOF conversion function
@@ -798,8 +788,6 @@ void RefinePowderInstrumentParameters::getD2TOFFuncParamNames(
 
   // 3. Copy
   parnames = funparamnames;
-
-  return;
 }
 
 /** Calcualte the function
@@ -934,8 +922,6 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
                         << newpeak.centre() << '\n';
 
   } // ENDFOR Each potential peak
-
-  return;
 }
 
 /** Import TableWorkspace containing the instrument parameters for fitting
@@ -979,8 +965,6 @@ void RefinePowderInstrumentParameters::importParametersFromTable(
       throw;
     }
   }
-
-  return;
 }
 
 /** Import the Monte Carlo related parameters from table
@@ -1076,8 +1060,6 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
     upperbounds.push_back(mcparvalues[1]);
     stepsizes.push_back(mcparvalues[2]);
   }
-
-  return;
 }
 
 /** Calculate thermal neutron's d-spacing
@@ -1114,8 +1096,6 @@ void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(
     double n = 0.5 * gsl_sf_erfc(width * (tcross - 1 / dh));
     vec_n.push_back(n);
   }
-
-  return;
 }
 
 //------- Related to Algorith's Output
@@ -1214,8 +1194,6 @@ void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
     m_dataWS->dataY(0)[i] = peakcenters[i].second.first;
     m_dataWS->dataE(0)[i] = peakcenters[i].second.second;
   }
-
-  return;
 }
 
 /** Generate a Monte Carlo result table containing the N best results

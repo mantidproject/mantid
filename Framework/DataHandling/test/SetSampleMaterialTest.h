@@ -6,6 +6,7 @@
 #include "MantidDataHandling/SetSampleMaterial.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -41,7 +42,52 @@ public:
     TS_ASSERT(setmat->isInitialized());
   }
 
-  void testExec() {
+  void testExecAl2O3() {
+    std::string wsName = "SetSampleMaterialTestWS";
+    IAlgorithm *setmat =
+        Mantid::API::FrameworkManager::Instance().createAlgorithm(
+            "SetSampleMaterial");
+    if (!setmat->isInitialized())
+      setmat->initialize();
+
+    // Create a small test workspace
+    MatrixWorkspace_sptr testWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
+    // Needs to have units of wavelength
+    testWS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+
+    // Register the workspace in the data service
+    AnalysisDataService::Instance().add(wsName, testWS);
+
+    TS_ASSERT_THROWS_NOTHING(
+        setmat->setPropertyValue("InputWorkspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(
+        setmat->setPropertyValue("ChemicalFormula", "Al2-O3"));
+    TS_ASSERT_THROWS_NOTHING(
+        setmat->setPropertyValue("SampleNumberDensity", "0.1183245"));
+    TS_ASSERT_THROWS_NOTHING(setmat->execute());
+    TS_ASSERT(setmat->isExecuted());
+
+    // can get away with holding pointer as it is an inout ws property
+    const auto sampleMaterial = testWS->sample().getMaterial();
+    TS_ASSERT_DELTA(sampleMaterial.numberDensity(), 0.1183245, 0.0001);
+    TS_ASSERT_DELTA(
+        sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda),
+        3.1404, 0.0001);
+    TS_ASSERT_DELTA(sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda),
+                    0.0925, 0.0001);
+    TS_ASSERT_DELTA(
+        sampleMaterial.cohScatterLength(NeutronAtom::ReferenceLambda), 4.8615,
+        0.0001);
+    TS_ASSERT_DELTA(
+        sampleMaterial.totalScatterLengthSqrd(NeutronAtom::ReferenceLambda),
+        24.9905, 0.0001);
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void testExecAl2O3overrides() {
     std::string wsName = "SetSampleMaterialTestWS";
     IAlgorithm *setmat =
         Mantid::API::FrameworkManager::Instance().createAlgorithm(
@@ -72,28 +118,69 @@ public:
     TS_ASSERT_THROWS_NOTHING(setmat->execute());
     TS_ASSERT(setmat->isExecuted());
 
-    // check some of the output properties
-    double value = setmat->getProperty("bAverage");
-    TS_ASSERT_DELTA(value, 1.8503, 0.0001);
-    value = setmat->getProperty("bSquaredAverage");
-    TS_ASSERT_DELTA(value, 9.1140, 0.0001);
-    value = setmat->getProperty("NormalizedLaue");
-    TS_ASSERT_DELTA(value, 1.6618, 0.0001);
-
     // can get away with holding pointer as it is an inout ws property
-    const Material *m_sampleMaterial = &(testWS->sample().getMaterial());
-    TS_ASSERT_DELTA(m_sampleMaterial->numberDensity(), 0.1183245, 0.0001);
+    const auto sampleMaterial = testWS->sample().getMaterial();
+    TS_ASSERT_DELTA(sampleMaterial.numberDensity(), 0.1183245, 0.0001);
     TS_ASSERT_DELTA(
-        m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda),
+        sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda),
         3.1404, 0.0001);
+    TS_ASSERT_DELTA(sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda),
+                    0.0925, 0.0001);
     TS_ASSERT_DELTA(
-        m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda), 0.0925,
+        sampleMaterial.cohScatterLength(NeutronAtom::ReferenceLambda), 4.9965,
         0.0001);
-
-    checkOutputProperties(setmat, m_sampleMaterial);
+    TS_ASSERT_DELTA(
+        sampleMaterial.totalScatterLengthSqrd(NeutronAtom::ReferenceLambda),
+        24.9905, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
+
+  void testExecBaTiO3() {
+    std::string wsName = "SetSampleMaterialTestWS";
+    IAlgorithm *setmat =
+        Mantid::API::FrameworkManager::Instance().createAlgorithm(
+            "SetSampleMaterial");
+    if (!setmat->isInitialized())
+      setmat->initialize();
+
+    // Create a small test workspace
+    MatrixWorkspace_sptr testWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
+    // Needs to have units of wavelength
+    testWS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+
+    // Register the workspace in the data service
+    AnalysisDataService::Instance().add(wsName, testWS);
+
+    TS_ASSERT_THROWS_NOTHING(
+        setmat->setPropertyValue("InputWorkspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(
+        setmat->setPropertyValue("ChemicalFormula", "Ba Ti O3"));
+    TS_ASSERT_THROWS_NOTHING(
+        setmat->setPropertyValue("SampleNumberDensity", "0.1183245")); // TODO
+    TS_ASSERT_THROWS_NOTHING(setmat->execute());
+    TS_ASSERT(setmat->isExecuted());
+
+    // can get away with holding pointer as it is an inout ws property
+    const auto sampleMaterial = testWS->sample().getMaterial();
+    TS_ASSERT_DELTA(sampleMaterial.numberDensity(), 0.1183245, 0.0001);
+    TS_ASSERT_DELTA(
+        sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda),
+        4.0852, 0.0001);
+    TS_ASSERT_DELTA(sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda),
+                    1.4381, 0.0001);
+    TS_ASSERT_DELTA(
+        sampleMaterial.cohScatterLength(NeutronAtom::ReferenceLambda), 5.1834,
+        0.0001);
+    TS_ASSERT_DELTA(
+        sampleMaterial.totalScatterLengthSqrd(NeutronAtom::ReferenceLambda),
+        32.5090, 0.0001);
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
   void testExecMat_Formula() {
 
     std::string wsName = "SetSampleMaterialTestWS_formula";
@@ -123,19 +210,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(setmat->execute());
     TS_ASSERT(setmat->isExecuted());
 
-    const Material *m_sampleMaterial = &(testWS->sample().getMaterial());
-    TS_ASSERT_DELTA(m_sampleMaterial->numberDensity(), 0.1183245, 0.0001);
+    const auto sampleMaterial = testWS->sample().getMaterial();
+    TS_ASSERT_DELTA(sampleMaterial.numberDensity(), 0.1183245, 0.0001);
     TS_ASSERT_DELTA(
-        m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda),
+        sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda),
         3.1404, 0.0001);
+    TS_ASSERT_DELTA(sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda),
+                    0.0925, 0.0001);
     TS_ASSERT_DELTA(
-        m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda), 0.0925,
+        sampleMaterial.cohScatterLength(NeutronAtom::ReferenceLambda), 4.8615,
         0.0001);
-
-    checkOutputProperties(setmat, m_sampleMaterial);
+    TS_ASSERT_DELTA(
+        sampleMaterial.totalScatterLengthSqrd(NeutronAtom::ReferenceLambda),
+        24.9905, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
+
   void testExecMat_OneAtom() {
 
     std::string wsName = "SetSampleMaterialTestWS_oneatom";
@@ -161,40 +252,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(setmat->execute());
     TS_ASSERT(setmat->isExecuted());
 
-    // check some of the output properties
-    double value = setmat->getProperty("bAverage");
-    TS_ASSERT_DELTA(value, 10.3, 0.0001);
-    value = setmat->getProperty("bSquaredAverage");
-    TS_ASSERT_DELTA(value, 106.09, 0.0001);
-    value = setmat->getProperty("NormalizedLaue");
-    TS_ASSERT_DELTA(value, 0., 0.0001);
-
-    const Material *m_sampleMaterial = &(testWS->sample().getMaterial());
-    TS_ASSERT_DELTA(m_sampleMaterial->numberDensity(), 0.0913375, 0.0001);
+    const auto sampleMaterial = testWS->sample().getMaterial();
+    TS_ASSERT_DELTA(sampleMaterial.numberDensity(), 0.0913375, 0.0001);
     TS_ASSERT_DELTA(
-        m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda),
-        18.5, 0.0001);
-    TS_ASSERT_DELTA(
-        m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda), 4.49,
+        sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda), 18.5,
         0.0001);
-
-    checkOutputProperties(setmat, m_sampleMaterial);
+    TS_ASSERT_DELTA(sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda),
+                    4.49, 0.0001);
+    TS_ASSERT_DELTA(
+        sampleMaterial.cohScatterLength(NeutronAtom::ReferenceLambda), 10.2877,
+        0.0001);
+    const double totScattLength =
+        sampleMaterial.totalScatterLength(NeutronAtom::ReferenceLambda);
+    TS_ASSERT_DELTA(
+        sampleMaterial.totalScatterLengthSqrd(NeutronAtom::ReferenceLambda),
+        totScattLength * totScattLength, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
-  }
-
-  void checkOutputProperties(const IAlgorithm *alg, const Material *material) {
-    // test output properties
-    double testvalue = alg->getProperty("AbsorptionXSectionResult");
-    TS_ASSERT_DELTA(material->absorbXSection(), testvalue, 0.0001);
-    testvalue = alg->getProperty("CoherentXSectionResult");
-    TS_ASSERT_DELTA(material->cohScatterXSection(), testvalue, 0.0001);
-    testvalue = alg->getProperty("IncoherentXSectionResult");
-    TS_ASSERT_DELTA(material->incohScatterXSection(), testvalue, 0.0001);
-    testvalue = alg->getProperty("TotalXSectionResult");
-    TS_ASSERT_DELTA(material->totalScatterXSection(), testvalue, 0.0001);
-    testvalue = alg->getProperty("SampleNumberDensityResult");
-    TS_ASSERT_DELTA(material->numberDensity(), testvalue, 0.0001);
   }
 };
 

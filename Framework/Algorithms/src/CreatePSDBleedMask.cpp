@@ -3,10 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CreatePSDBleedMask.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/NullValidator.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 
 #include <cfloat>
 #include <iterator>
@@ -227,10 +227,10 @@ bool CreatePSDBleedMask::performBleedTest(
   for (; top < topEnd; ++top, ++bot) {
     const int topIndex = tubeIndices[top];
     const int botIndex = tubeIndices[bot];
-    const MantidVec &topY = inputWS->readY(topIndex);
-    const MantidVec &botY = inputWS->readY(botIndex);
-    const MantidVec &topX = inputWS->readX(topIndex);
-    const MantidVec &botX = inputWS->readX(botIndex);
+    auto &topY = inputWS->y(topIndex);
+    auto &botY = inputWS->y(botIndex);
+    auto &topX = inputWS->x(topIndex);
+    auto &botX = inputWS->x(botIndex);
     for (int j = 0; j < numBins; ++j) {
       double topRate(topY[j]), botRate(botY[j]);
       if (isRawCounts) {
@@ -270,7 +270,7 @@ void CreatePSDBleedMask::maskTube(const std::vector<int> &tubeIndices,
                                   API::MatrixWorkspace_sptr workspace) {
   const double deadValue(1.0); // delete the data
   for (auto tubeIndice : tubeIndices) {
-    workspace->dataY(tubeIndice)[0] = deadValue;
+    workspace->mutableY(tubeIndice)[0] = deadValue;
   }
 }
 }

@@ -161,12 +161,7 @@ void OptimizeCrystalPlacement::exec() {
   //              ---------------
   std::vector<int> RunNumList;
   std::vector<V3D> ChiPhiOmega;
-  Mantid::MantidVecPtr pX;
-  Mantid::MantidVec &xRef = pX.access();
-  Mantid::MantidVecPtr yvals;
-  Mantid::MantidVecPtr errs;
-  Mantid::MantidVec &yvalB = yvals.access();
-  Mantid::MantidVec &errB = errs.access();
+  Mantid::MantidVec xRef;
 
   int nPeaksUsed = 0;
   double HKLintOffsetMax = getProperty("MaxIndexingError");
@@ -195,28 +190,20 @@ void OptimizeCrystalPlacement::exec() {
 
       Geometry::Goniometer Gon(peak.getGoniometerMatrix());
       std::vector<double> phichiOmega = Gon.getEulerAngles("YZY");
-      ChiPhiOmega.push_back(
-          V3D(phichiOmega[1], phichiOmega[2], phichiOmega[0]));
+      ChiPhiOmega.emplace_back(phichiOmega[1], phichiOmega[2], phichiOmega[0]);
     }
 
     if (use) // add to lists for workspace
     {
       nPeaksUsed++;
       xRef.push_back(static_cast<double>(i));
-      yvalB.push_back(0.0);
-      errB.push_back(1.0);
       xRef.push_back(static_cast<double>(i));
-      yvalB.push_back(0.0);
-      errB.push_back(1.0);
       xRef.push_back(static_cast<double>(i));
-      yvalB.push_back(0.0);
-      errB.push_back(1.0);
     }
   }
 
   g_log.notice() << "Number initially indexed = " << nPeaksUsed
                  << " at tolerance = " << HKLintOffsetMax << '\n';
-  MatrixWorkspace_sptr mwkspc;
 
   if (nPeaksUsed < 1) {
     g_log.error() << "Error in UB too large. 0 peaks indexed at "
@@ -225,10 +212,10 @@ void OptimizeCrystalPlacement::exec() {
   }
 
   int N = 3 * nPeaksUsed; // Peaks->getNumberPeaks();
-  mwkspc = WorkspaceFactory::Instance().create("Workspace2D",
-                                               static_cast<size_t>(1), N, N);
-  mwkspc->setX(0, pX);
-  mwkspc->setData(0, yvals, errs);
+  auto mwkspc = createWorkspace<Workspace2D>(1, N, N);
+  mwkspc->setPoints(0, xRef);
+  mwkspc->setCounts(0, N, 0.0);
+  mwkspc->setCountStandardDeviations(0, N, 1.0);
 
   std::string FuncArg = "name=PeakHKLErrors,PeakWorkspaceName=" +
                         getPropertyValue("PeaksWorkspace") + "";
@@ -238,7 +225,7 @@ void OptimizeCrystalPlacement::exec() {
   //--------- Setting Function and Constraint argumens to PeakHKLErrors
   //---------------
   std::vector<std::string> ChRunNumList;
-  std::string predChar = "";
+  std::string predChar;
   for (auto runNum : RunNumList) {
     auto it1 = NOoptimizeRuns.begin();
     for (; it1 != NOoptimizeRuns.end() && *it1 != runNum; ++it1) {
@@ -275,7 +262,7 @@ void OptimizeCrystalPlacement::exec() {
 
   int nParams = 3;
   double DegreeTol = getProperty("MaxAngularChange");
-  std::string startConstraint = "";
+  std::string startConstraint;
 
   for (size_t i = 0; i < RunNumList.size(); i++) {
     int runNum = RunNumList[i];
@@ -342,7 +329,7 @@ void OptimizeCrystalPlacement::exec() {
 
   fit_alg->setProperty("CreateOutput", true);
 
-  std::string Ties = "";
+  std::string Ties;
 
   if (!(bool)getProperty("AdjustSampleOffsets")) {
     std::ostringstream oss3(std::ostringstream::out);

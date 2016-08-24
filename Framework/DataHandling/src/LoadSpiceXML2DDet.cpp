@@ -77,8 +77,6 @@ void SpiceXMLNode::setParameters(const std::string &nodetype,
   // description
   if (nodedescription.size() > 0)
     m_description = nodedescription;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -254,8 +252,6 @@ void LoadSpiceXML2DDet::processInputs() {
     m_hasScanTable = false;
 
   m_ptNumber4Log = getProperty("PtNumber");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -394,9 +390,9 @@ LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename) {
                     << "\n";
 
       SpiceXMLNode xmlnode(nodename);
-      std::string nodetype("");
-      std::string nodeunit("");
-      std::string nodedescription("");
+      std::string nodetype;
+      std::string nodeunit;
+      std::string nodedescription;
 
       for (unsigned long j = 0; j < numattr; ++j) {
         std::string atttext = pNode->attributes()->item(j)->innerText();
@@ -619,8 +615,6 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
     g_log.warning() << "Pt. " << ptnumber
                     << " is not found.  Log is not loaded to output workspace."
                     << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -707,8 +701,6 @@ void LoadSpiceXML2DDet::setXtoLabQ(API::MatrixWorkspace_sptr dataws,
   }
 
   dataws->getAxis(0)->setUnit("Momentum");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -734,8 +726,6 @@ void LoadSpiceXML2DDet::loadInstrument(API::MatrixWorkspace_sptr matrixws,
     matrixws = loadinst->getProperty("Workspace");
   else
     g_log.error("Unable to load instrument to output workspace");
-
-  return;
 }
 
 } // namespace DataHandling

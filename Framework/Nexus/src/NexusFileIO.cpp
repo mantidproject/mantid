@@ -8,6 +8,9 @@
 
 #ifdef _WIN32
 #include <io.h>
+// Define the MAX_NAME macro for Windows
+// Maximum base file name size on modern windows systems is 260 characters
+#define NAME_MAX 260
 #endif /* _WIN32 */
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -22,6 +25,7 @@
 #include "MantidDataObjects/RebinnedOutput.h"
 
 #include <Poco/File.h>
+#include <Poco/Path.h>
 
 namespace Mantid {
 namespace NeXus {
@@ -99,6 +103,15 @@ void NexusFileIO::openNexusWrite(const std::string &fileName,
 
   /*Only create the file handle if needed.*/
   if (!m_filehandle) {
+    // The nexus or HDF5 libraries crash when the filename is greater than 255
+    // on OSX and Ubuntu.
+    Poco::Path path(fileName);
+    std::string baseName = path.getBaseName();
+    if (baseName.size() > NAME_MAX) {
+      std::string message = "Filename is too long. Unable to open file: ";
+      throw Exception::FileError(message, fileName);
+    }
+
     // open the file and copy the handle into the NeXus::File object
     NXstatus status = NXopen(fileName.c_str(), mode, &fileID);
     if (status == NX_ERROR) {
@@ -401,7 +414,7 @@ int NexusFileIO::writeNexusProcessedData2D(
       asize[1] = dims_array[1];
       for (size_t i = 0; i < nSpect; i++) {
         int s = spec[i];
-        NXputslab(fileID, localworkspace->readDx(s).data(), start, asize);
+        NXputslab(fileID, localworkspace->dx(s).rawData().data(), start, asize);
         start[0]++;
       }
     }

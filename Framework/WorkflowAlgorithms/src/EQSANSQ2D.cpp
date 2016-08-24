@@ -58,12 +58,12 @@ void EQSANSQ2D::exec() {
   if (run.hasProperty("is_frame_skipping")) {
     auto prop = run.getProperty("is_frame_skipping");
     const auto &typeInfo = *(prop->type_info());
-    if (typeInfo == typeid(long)) {
+    if (typeInfo == typeid(int64_t)) {
       frame_skipping =
-          (run.getPropertyValueAsType<long>("is_frame_skipping") == 1);
-    } else if (typeInfo == typeid(int)) {
+          (run.getPropertyValueAsType<int64_t>("is_frame_skipping") == 1);
+    } else if (typeInfo == typeid(int32_t)) {
       frame_skipping =
-          (run.getPropertyValueAsType<int>("is_frame_skipping") == 1);
+          (run.getPropertyValueAsType<int32_t>("is_frame_skipping") == 1);
     } else
       g_log.warning() << "Unknown property type for is_frame_skipping\n";
   }

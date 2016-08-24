@@ -65,8 +65,7 @@ void LoadRawSpectrum0::exec() {
   const int64_t total_specs = 1;
 
   // Get the time channel array(s) and store in a vector inside a shared pointer
-  std::vector<boost::shared_ptr<MantidVec>> timeChannelsVec =
-      getTimeChannels(m_noTimeRegimes, m_lengthIn);
+  auto timeChannelsVec = getTimeChannels(m_noTimeRegimes, m_lengthIn);
 
   double histTotal = static_cast<double>(total_specs * m_numberOfPeriods);
   int64_t histCurrent = -1;

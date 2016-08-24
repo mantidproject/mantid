@@ -40,9 +40,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-using namespace Mantid;
-using namespace Mantid::API;
-
 class MANTIDQT_CUSTOMINTERFACES_DLL MuonGroupingHelper {
 public:
   /// Constructor

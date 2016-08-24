@@ -37,8 +37,6 @@ void CreateLogTimeCorrection::init() {
   declareProperty(Kernel::make_unique<FileProperty>("OutputFilename", "",
                                                     FileProperty::OptionalSave),
                   "Name of the output time correction file.");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -176,8 +174,6 @@ void CreateLogTimeCorrection::writeCorrectionToFile(string filename) {
   } else {
     g_log.error() << "Unable to open file " << filename << " to write!\n";
   }
-
-  return;
 }
 
 } // namespace Algorithms

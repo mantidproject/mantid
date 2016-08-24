@@ -126,5 +126,25 @@ void InstrumentTreeWidget::sendComponentSelectedSignal(
   emit componentSelected(id);
 }
 
+/** Get a list of components that have been expanded
+ * @param parent :: the parent index to start searching from
+ * @return a list of component names as strings
+ */
+QStringList
+InstrumentTreeWidget::findExpandedComponents(const QModelIndex &parent) const {
+  QStringList retval;
+  int rowCount = model()->rowCount(parent);
+
+  for (int i = 0; i < rowCount; ++i) {
+    QModelIndex idx = model()->index(i, 0, parent);
+    if (idx.isValid() && isExpanded(idx)) {
+      retval << idx.data(Qt::DisplayRole).toString();
+      retval << findExpandedComponents(idx);
+    }
+  }
+
+  return retval;
+}
+
 } // MantidWidgets
 } // MantidQt

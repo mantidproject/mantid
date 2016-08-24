@@ -111,7 +111,6 @@ def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True):
         start_det_id = 1 + col_number * NUM_DET_ROW + start_row
         end_det_id = 1 + col_number * NUM_DET_ROW + end_row
         det_sub_xml += '%d-%d,' % (start_det_id, end_det_id)
-        print '[DB] Detector %d - %d' % (start_det_id, end_det_id)
     # END-FOR
     # remove last ','
     det_sub_xml = det_sub_xml[:-1]

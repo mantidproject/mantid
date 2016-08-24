@@ -4,6 +4,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Material.h"
 namespace Mantid {
 namespace Algorithms {
 
@@ -163,7 +164,7 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag,
     to.setEnvironment(new SampleEnvironment(from.getEnvironment()));
   if (shapeFlag) {
     auto rhsObject = from.getShape(); // copy
-    const auto &lhsMaterial = to.getMaterial();
+    const auto lhsMaterial = to.getMaterial();
     // reset to original lhs material
     if (!materialFlag) {
       rhsObject.setMaterial(lhsMaterial);

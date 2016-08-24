@@ -1,11 +1,14 @@
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidAPI/ScriptRepository.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include <boost/python/class.hpp>
 
 using Mantid::API::ScriptRepositoryFactoryImpl;
 using Mantid::API::ScriptRepositoryFactory;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(ScriptRepositoryFactoryImpl)
 
 namespace {
 ///@cond

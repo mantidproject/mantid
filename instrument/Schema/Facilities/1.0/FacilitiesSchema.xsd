@@ -102,6 +102,7 @@
             <xs:attribute name="zeropadding"/>
             <xs:attribute name="FileExtensions"/>
             <xs:attribute name="delimiter"/>
+            <xs:attribute name="nofileprefix"/>
           </xs:complexType>
         </xs:element>
       </xs:choice>

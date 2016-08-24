@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CorrectFlightPaths.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
@@ -92,24 +92,14 @@ void CorrectFlightPaths::exec() {
 
   PARALLEL_FOR2(m_inputWS, m_outputWS)
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
-    // for (int64_t i = 32000; i < 32256; ++i) {
     PARALLEL_START_INTERUPT_REGION
-
-    MantidVec &xOut = m_outputWS->dataX(i);
-    MantidVec &yOut = m_outputWS->dataY(i);
-    MantidVec &eOut = m_outputWS->dataE(i);
-    const MantidVec &xIn = m_inputWS->readX(i);
-    const MantidVec &yIn = m_inputWS->readY(i);
-    const MantidVec &eIn = m_inputWS->readE(i);
+    m_outputWS->setHistogram(i, m_outputWS->histogram(i));
     // Copy the energy transfer axis
     // TOF
-    //		MantidVec& xOut = m_outputWS->dataX(i);
-    //		const MantidVec& xIn = m_inputWS->readX(i);
 
     // subract the diference in l2
     IDetector_const_sptr det = m_inputWS->getDetector(i);
     double thisDetL2 = det->getDistance(*m_sample);
-    // if (!det->isMonitor() && thisDetL2 != m_l2) {
     double deltaL2 = std::abs(thisDetL2 - m_l2);
     double deltaTOF = calculateTOF(deltaL2);
     deltaTOF *= 1e6; // micro sec
@@ -123,16 +113,8 @@ void CorrectFlightPaths::exec() {
     ComponentHelper::moveComponent(*det, pmap, newPos,
                                    ComponentHelper::Absolute);
 
-    unsigned int j = 0;
-    for (; j < numberOfChannels; ++j) {
-      xOut[j] = xIn[j] - deltaTOF;
-      // there's probably a better way of copying this....
-      yOut[j] = yIn[j];
-      eOut[j] = eIn[j];
-    }
-    // last bin
-    xOut[numberOfChannels] = xIn[numberOfChannels] + deltaTOF;
-    //}
+    m_outputWS->mutableX(i) += -deltaTOF;
+
     prog.report("Aligning elastic line...");
     PARALLEL_END_INTERUPT_REGION
   } // end for i

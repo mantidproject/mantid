@@ -357,8 +357,8 @@ void PropertyManager::setPropertiesWithSimpleString(
     size_t n = pair.find('=');
     if (n != std::string::npos) {
       // Normal "PropertyName=value" string.
-      std::string propName = "";
-      std::string value = "";
+      std::string propName;
+      std::string value;
 
       // Extract the value string
       if (n < pair.size() - 1) {

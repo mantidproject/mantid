@@ -5,6 +5,7 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -296,15 +297,13 @@ public:
     TS_ASSERT_DELTA(p.getWavelength(), 1.5, 1e-4);
     TS_ASSERT_EQUALS(p.getRunNumber(), 1000.);
     TS_ASSERT_DELTA(p.getDSpacing(), 3.5933, 1e-4);
-    const Kernel::Material *m_sampleMaterial = &(wsout->sample().getMaterial());
-    if (m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) !=
+    const auto sampleMaterial = wsout->sample().getMaterial();
+    if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
         0.0) {
-      double rho = m_sampleMaterial->numberDensity();
-      smu =
-          m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) *
-          rho;
-      amu =
-          m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+      double rho = sampleMaterial.numberDensity();
+      smu = sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) *
+            rho;
+      amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
     } else {
       throw std::invalid_argument(
           "Could not retrieve LinearScatteringCoef from material");

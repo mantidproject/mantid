@@ -84,7 +84,6 @@ object.
   Origin.rotate(MA);
   Direct.rotate(MA);
   Direct.normalize();
-  return;
 }
 
 void Line::displace(const Kernel::V3D &Pt)
@@ -94,7 +93,6 @@ Apply a displacement Pt
 */
 {
   Origin += Pt;
-  return;
 }
 
 int Line::lambdaPair(
@@ -279,7 +277,6 @@ Print statement for debugging
 */
 {
   std::cout << "Line == " << Origin << " :: " << Direct << '\n';
-  return;
 }
 
 } // NAMESPACE MonteCarlo

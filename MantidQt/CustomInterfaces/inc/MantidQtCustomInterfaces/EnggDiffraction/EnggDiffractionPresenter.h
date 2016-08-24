@@ -5,10 +5,10 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
-
-// #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionModel.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionParam.h"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -22,8 +22,6 @@ class QThread;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
-struct GSASCalibrationParms;
 
 /**
 Presenter for the Enggineering Diffraction GUI (presenter as in the
@@ -55,12 +53,13 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 // needs to be dll-exported for the tests
 class MANTIDQT_CUSTOMINTERFACES_DLL EnggDiffractionPresenter
     : public QObject,
-      public IEnggDiffractionPresenter {
+      public IEnggDiffractionPresenter,
+      public IEnggDiffractionCalibration,
+      public IEnggDiffractionParam {
   // Q_OBJECT for 'connect' with thread/worker
   Q_OBJECT
 
 public:
-  /// Default constructor - normally used from the concrete view
   EnggDiffractionPresenter(IEnggDiffractionView *view);
   ~EnggDiffractionPresenter() override;
 
@@ -92,55 +91,6 @@ public:
   void doRebinningPulses(const std::string &runNo, size_t nperiods, double bin,
                          const std::string &outWSName);
 
-  /// the fitting hard work that a worker / thread will run
-  void doFitting(const std::string &focusedRunNo,
-                 const std::string &expectedPeaks);
-
-  void runFittingAlgs(std::string FocusedFitPeaksTableName,
-                      std::string FocusedWSName);
-
-  std::string
-  functionStrFactory(Mantid::API::ITableWorkspace_sptr &paramTableWS,
-                     std::string tableName, size_t row, std::string &startX,
-                     std::string &endX);
-
-  void plotFitPeaksCurves();
-
-  void runEvaluateFunctionAlg(const std::string &bk2BkExpFunction,
-                              const std::string &InputName,
-                              const std::string &OutputName,
-                              const std::string &startX,
-                              const std::string &endX);
-
-  void runCropWorkspaceAlg(std::string workspaceName);
-
-  void runAppendSpectraAlg(std::string workspace1Name,
-                           std::string workspace2Name);
-
-  void runRebinToWorkspaceAlg(std::string workspaceName);
-
-  void convertUnits(std::string workspaceName);
-  void runConvertUnitsAlg(std::string workspaceName);
-  void runAlignDetectorsAlg(std::string workspaceName);
-
-  void setDifcTzero(Mantid::API::MatrixWorkspace_sptr wks) const;
-  void getDifcTzero(Mantid::API::MatrixWorkspace_const_sptr wks, double &difc,
-                    double &difa, double &tzero) const;
-
-  void runCloneWorkspaceAlg(std::string inputWorkspace,
-                            const std::string &outputWorkspace);
-
-  void setDataToClonedWS(std::string &current_WS, const std::string &cloned_WS);
-
-  void setBankItems();
-
-  void setRunNoItems(std::vector<std::string> runNumVector, bool multiRun);
-
-  void setDefaultBank(std::vector<std::string> splittedBaseName,
-                      QString selectedFile);
-
-  bool isDigit(std::string text);
-
 protected:
   void initialize();
 
@@ -157,7 +107,6 @@ protected:
   void processResetFocus();
   void processRebinTime();
   void processRebinMultiperiod();
-  void processFitPeaks();
   void processLogMsg();
   void processInstChange();
   void processRBNumberChange();
@@ -168,8 +117,6 @@ protected slots:
   void calibrationFinished();
   void focusingFinished();
   void rebinningFinished();
-  void fittingFinished();
-  void fittingRunNoChanged();
 
 private:
   bool validateRBNumber(const std::string &rbn) const;
@@ -202,11 +149,19 @@ private:
                const std::string &ceriaNo, const std::string &outFilename,
                const std::string &specNos);
 
+  void appendCalibInstPrefix(const std::string vanNo,
+                             std::string &outVanName) const;
+
+  void appendCalibInstPrefix(const std::string vanNo, const std::string cerNo,
+                             std::string &outVanName,
+                             std::string &outCerName) const;
+
   std::string
   buildCalibrateSuggestedFilename(const std::string &vanNo,
                                   const std::string &ceriaNo,
                                   const std::string &bankName = "") const;
 
+  std::vector<GSASCalibrationParms> currentCalibration() const override;
   //@}
 
   /// @name Focusing related private methods
@@ -298,22 +253,6 @@ private:
                                                const std::string &outWSName);
   //@}
 
-  // Methods related single peak fits
-  virtual void startAsyncFittingWorker(const std::string &focusedRunNo,
-                                       const std::string &expectedPeaks);
-
-  std::string validateFittingexpectedPeaks(std::string &expectedPeaks) const;
-
-  void inputChecksBeforeFitting(const std::string &focusedRunNo,
-                                const std::string &expectedPeaks);
-
-  void updateFittingDirVec(const std::string &bankDir,
-                           const std::string &focusedFile, const bool multi_run,
-                           std::vector<std::string> &fittingRunNoDirVec);
-
-  void enableMultiRun(std::string firstRun, std::string lastRun,
-                      std::vector<std::string> &fittingRunNoDirVec);
-
   // plots workspace according to the user selection
   void plotFocusedWorkspace(std::string outWSName);
 
@@ -333,7 +272,7 @@ private:
 
   // returns a directory as a path, creating it if not found, and checking
   // errors
-  Poco::Path outFilesUserDir(const std::string &addToDir);
+  Poco::Path outFilesUserDir(const std::string &addToDir) override;
   Poco::Path outFilesGeneralDir(const std::string &addComponent);
   Poco::Path outFilesRootDir();
 
@@ -386,9 +325,6 @@ private:
   // name of the workspace with the vanadium (smoothed) curves
   static const std::string g_vanCurvesWSName;
 
-  // name of the workspace with the focused ws being used for fitting
-  static const std::string g_focusedFittingWSName;
-
   // for the GSAS parameters (difc, difa, tzero) of the banks
   static const std::string g_calibBanksParms;
 
@@ -422,11 +358,6 @@ private:
   bool m_focusFinishedOK;
   /// true if the last pre-processing/re-binning completed successfully
   bool m_rebinningFinishedOK;
-  /// true if the last fitting completed successfully
-  bool m_fittingFinishedOK;
-
-  // whether to use AlignDetectors to convert units
-  static bool g_useAlignDetectors;
 
   /// Counter for the cropped output files
   static int g_croppedCounter;

@@ -40,7 +40,7 @@ public:
         Mantid::Kernel::make_unique<TestSampleEnvSpecFinder>());
     SampleEnvironment_uptr env;
     TS_ASSERT_THROWS_NOTHING(
-        env = std::move(factory.create("facility", "inst", "CRYO001", "10mm")));
+        env = factory.create("facility", "inst", "CRYO001", "10mm"));
     TS_ASSERT_EQUALS("CRYO001", env->name());
     TS_ASSERT_EQUALS("10mm", env->containerID());
     TS_ASSERT_EQUALS(1, env->nelements());
@@ -101,7 +101,7 @@ private:
       auto spec = Mantid::Kernel::make_unique<SampleEnvironmentSpec>("CRYO001");
       spec->addContainer(small);
       spec->addContainer(large);
-      return std::move(spec);
+      return spec;
     }
   };
 };

@@ -100,7 +100,7 @@ void GeneratePythonScript::exec() {
     versionSpecificity = "all";
 
   ScriptBuilder builder(view, versionSpecificity);
-  std::string generatedScript = "";
+  std::string generatedScript;
   generatedScript += "#########################################################"
                      "#############\n";
   generatedScript +=

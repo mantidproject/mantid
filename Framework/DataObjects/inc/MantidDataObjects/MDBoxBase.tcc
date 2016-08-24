@@ -54,8 +54,7 @@ TMDE(MDBoxBase)::MDBoxBase(
 }
 
 //-----------------------------------------------------------------------------------------------
-/** Copy constructor. Copies the extents, depth, etc.
- * and recalculates the boxes' volume.
+/** Copy constructor. Copies the extents, volume, depth, etc.
  * @param box :: incoming box to copy.
  * @param otherBC :: if present, other (different from the current one) box
  * controller pointer

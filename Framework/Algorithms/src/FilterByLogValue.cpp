@@ -153,7 +153,7 @@ void FilterByLogValue::exec() {
         splitter.push_back(interval);
       }
       // And the last one
-      splitter.push_back(SplittingInterval(lastTime, run_stop, 0));
+      splitter.emplace_back(lastTime, run_stop, 0);
 
     } else {
       // ----- Filter by value ------

@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -153,8 +153,6 @@ void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
   V3D sourcepos = instrument->getSource()->getPos();
   m_L1 = samplepos.distance(sourcepos);
   g_log.notice() << "L1 = " << m_L1 << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -168,7 +166,6 @@ void EstimateResolutionDiffraction::createOutputWorkspace() {
   // Copy geometry over.
   API::WorkspaceFactory::Instance().initializeFromParent(m_inputWS, m_outputWS,
                                                          false);
-  return;
 }
 //----------------------------------------------------------------------------------------------
 /**
@@ -218,7 +215,6 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     double twotheta = m_inputWS->detectorTwoTheta(*det);
     double theta = 0.5 * twotheta;
 
-    // double solidangle = m_solidangleWS->readY(i)[0];
     double solidangle = det->solidAngle(samplepos);
     double deltatheta = sqrt(solidangle);
 
@@ -229,8 +225,8 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
 
     double resolution = sqrt(t1 * t1 + t2 * t2 + t3 * t3);
 
-    m_outputWS->dataX(i)[0] = static_cast<double>(i);
-    m_outputWS->dataY(i)[0] = resolution;
+    m_outputWS->mutableX(i)[0] = static_cast<double>(i);
+    m_outputWS->mutableY(i)[0] = resolution;
 
     if (twotheta > maxtwotheta)
       maxtwotheta = twotheta;
@@ -252,8 +248,6 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
   g_log.notice() << "t3 range: " << mint3 << ", " << maxt3 << "\n";
   g_log.notice() << "Number of detector having NO size information = "
                  << count_nodetsize << "\n";
-
-  return;
 }
 
 } // namespace Algorithms

@@ -17,7 +17,7 @@ namespace Converters {
 /// Macro to define mappings between the CType and Numpy enum
 #define DEFINE_TYPE_MAPPING(CType, NDTypeNum)                                  \
   template <> int NDArrayTypeIndex<CType>::typenum = NDTypeNum;                \
-  template PYTHON_KERNEL_DLL struct NDArrayTypeIndex<CType>;
+  template struct NDArrayTypeIndex<CType>;
 
 DEFINE_TYPE_MAPPING(int, NPY_INT)
 DEFINE_TYPE_MAPPING(long, NPY_LONG)

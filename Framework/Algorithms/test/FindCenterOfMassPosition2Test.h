@@ -41,9 +41,9 @@ public:
       for (int iy = 0; iy < SANSInstrumentCreationHelper::nBins; iy++) {
         int i = ix * SANSInstrumentCreationHelper::nBins + iy +
                 SANSInstrumentCreationHelper::nMonitors;
-        MantidVec &X = ws->dataX(i);
-        MantidVec &Y = ws->dataY(i);
-        MantidVec &E = ws->dataE(i);
+        auto &X = ws->mutableX(i);
+        auto &Y = ws->mutableY(i);
+        auto &E = ws->mutableE(i);
         X[0] = 1;
         X[1] = 2;
         double dx = (center_x - (double)ix);

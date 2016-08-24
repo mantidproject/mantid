@@ -260,7 +260,6 @@ class UBMatrixTable(tableBase.NTableWidget):
         Guarantees: return a 3 x 3 ndarray
         :return:
         """
-        # print '[DB] MatrixTable: _Matrix = ', self._matrix
         return self._matrix.copy()
 
     def get_matrix_str(self):
@@ -477,7 +476,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
     """
     TableSetup = [('Scan', 'int'),
                   ('Intensity', 'float'),
-                  ('Corrected Intensity', 'float'),
+                  ('Corrected', 'float'),
                   ('Status', 'str'),
                   ('Peak Centre', 'str'),
                   ('HKL', 'str'),
@@ -499,6 +498,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # some commonly used column index
         self._colIndexKIndex = None
         self._colIndexHKL = None
+        self._colIndexStatus = None
 
         return
 
@@ -558,11 +558,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert isinstance(scans, list)
 
         if allow_duplicate_scans is False:
-            scan_list = self.get_scan_list()
+            scan_list = self.get_scan_list(output_row_number=False)
         else:
             scan_list = list()
 
-        print '[DB...BAT] <append scans> in-table scans: ' % scan_list
+        print '[DB...BAT] Existing scan list: ', scan_list
 
         # set value as default
         # Append rows
@@ -633,10 +633,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return self.get_cell_value(i_row, j_col_merged)
 
-    def get_scan_list(self):
+    def get_scan_list(self, output_row_number=True):
         """
         Get all scans that are already listed in the table.
-        :return:
+        :param output_row_number:
+        :return: list of 2-tuple or integer according to value of output_row_number
         """
         scan_list = list()
         num_rows = self.rowCount()
@@ -644,7 +645,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         for i_row in xrange(num_rows):
             scan_num = self.get_cell_value(i_row, col_scan_index)
-            scan_list.append((scan_num, i_row))
+            if output_row_number:
+                scan_list.append((scan_num, i_row))
+            else:
+                scan_list.append(scan_num)
+        # END-FOR (i_row)
 
         return scan_list
 
@@ -685,6 +690,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # set up column index
         self._colIndexKIndex = self.TableSetup.index(('K-Index', 'int'))
         self._colIndexHKL = self.TableSetup.index(('HKL', 'str'))
+        self._colIndexStatus = self.TableSetup.index(('Status', 'str'))
 
         return
 
@@ -792,7 +798,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # END-IF
 
         if lorentz_corrected:
-            col_name = ('Corrected Intensity', 'float')
+            col_name = ('Corrected', 'float')
         else:
             col_name = ('Intensity', 'float')
         intensity_col_index = ProcessTableWidget.TableSetup.index(col_name)
@@ -828,7 +834,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         for i_row in xrange(num_rows):
             tmp_scan_no = self.get_cell_value(i_row, 0)
             if scan_no == tmp_scan_no:
-                self.update_cell_value(i_row, 2, status)
+                self.update_cell_value(i_row, self._colIndexStatus, status)
                 set_done = True
                 break
         # END-FOR
@@ -850,8 +856,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert isinstance(status, str), 'Status (description) must be a string, but not %s.' % str(type(status))
 
         # Set
-        i_status = self.TableSetup.index(('Status', 'str'))
-        self.update_cell_value(row_number, i_status, status)
+        self.update_cell_value(row_number, self._colIndexStatus, status)
 
         return
 

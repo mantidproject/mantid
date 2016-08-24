@@ -5,7 +5,6 @@
 #include <stdexcept>
 #include <iomanip>
 #include <ios>
-#include <iostream>
 #include <cfloat>
 
 #include <boost/lexical_cast.hpp>
@@ -512,7 +511,6 @@ void UnitCell::calculateG() {
   G[1][0] = G[0][1];
   G[2][0] = G[0][2];
   G[2][1] = G[1][2];
-  return;
 }
 
 /// Private function to calculate #Gstar matrix
@@ -526,7 +524,6 @@ void UnitCell::calculateGstar() {
   if (Gstar.Invert() == 0) {
     throw std::range_error("UnitCell not properly initialized");
   }
-  return;
 }
 
 /// Private function to calculate reciprocal lattice parameters
@@ -560,7 +557,6 @@ void UnitCell::calculateB() {
   /// Now let's cache the inverse B
   Binv = B;
   Binv.Invert();
-  return;
 }
 
 /// Recalculate lattice from reciprocal metric tensor (Gstar=transpose(UB)*UB)
@@ -585,7 +581,6 @@ void UnitCell::recalculateFromGstar(const DblMatrix &NewGstar) {
   da[4] = acos(G[0][2] / da[0] / da[2]); // beta
   da[5] = acos(G[0][1] / da[0] / da[1]); // gamma
   calculateB();
-  return;
 }
 
 std::ostream &operator<<(std::ostream &out, const UnitCell &unitCell) {

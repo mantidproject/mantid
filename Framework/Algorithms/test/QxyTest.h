@@ -74,7 +74,7 @@ public:
     TS_ASSERT_EQUALS(result->readX(0).size(), 101)
     TS_ASSERT_EQUALS(result->readX(0).front(), -0.1)
     TS_ASSERT_DELTA(result->readX(0)[64], 0.028, 0.01)
-    TS_ASSERT_EQUALS(result->readX(0).back(), 0.1)
+    TS_ASSERT_DELTA(result->readX(0).back(), 0.1, 1e-14)
 
     TS_ASSERT_DIFFERS(result->readY(0).front(), result->readY(0).front()) // NaN
     TS_ASSERT_DELTA(result->readY(28)[71], 229914.7, 1)

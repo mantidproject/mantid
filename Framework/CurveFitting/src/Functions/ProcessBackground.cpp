@@ -223,8 +223,6 @@ void ProcessBackground::init() {
   setPropertySettings("NumberOfFWHM",
                       Kernel::make_unique<VisibleWhenProperty>(
                           "Options", IS_EQUAL_TO, "RemovePeaks"));
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -273,8 +271,6 @@ void ProcessBackground::exec() {
 
   // 3. Set output
   setProperty("OutputWorkspace", m_outputWS);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -290,8 +286,6 @@ void ProcessBackground::setupDummyOutputWSes() {
   setPropertyValue("OutputBackgroundParameterWorkspace", "dummy1");
   TableWorkspace_sptr dummytbws = boost::make_shared<TableWorkspace>();
   setProperty("OutputBackgroundParameterWorkspace", dummytbws);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -348,8 +342,6 @@ void ProcessBackground::deleteRegion() {
 
   // Set up dummies
   setupDummyOutputWSes();
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -446,8 +438,6 @@ void ProcessBackground::addRegion() {
 
   // Write out dummy output workspaces
   setupDummyOutputWSes();
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -482,8 +472,6 @@ void ProcessBackground::selectBkgdPoints() {
   }
 
   m_outputWS->getAxis(0)->setUnit(m_dataWS->getAxis(0)->unit()->unitID());
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -557,8 +545,6 @@ void ProcessBackground::selectFromGivenXValues() {
     g_log.error(errss.str());
     throw runtime_error(errss.str());
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -592,8 +578,6 @@ void ProcessBackground::selectFromGivenFunction() {
 
   // Filter out
   m_outputWS = filterForBackground(bkgdfunc);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -877,8 +861,6 @@ void ProcessBackground::fitBackgroundFunction(std::string bkgdfunctiontype) {
     dataModel[i] = values[i];
     dataDiff[i] = vecY[i] - dataModel[i];
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -906,8 +888,6 @@ void ProcessBackground::removePeaks() {
 
   // Dummy outputs
   setupDummyOutputWSes();
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -923,8 +903,6 @@ void RemovePeaks::setup(TableWorkspace_sptr peaktablews) {
   else if (m_vecPeakCentre.empty())
     throw runtime_error(
         "There is not any peak entry in input table workspace.");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1018,8 +996,6 @@ void RemovePeaks::parsePeakTableWorkspace(TableWorkspace_sptr peaktablews,
     vec_peakcentre[i] = centre;
     vec_peakfwhm[i] = fwhm;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

@@ -1,7 +1,9 @@
 #pylint: disable=no-init,invalid-name,too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
 import os
+from six.moves import range # pylint: disable=redefined-builtin
 
 class ExportSampleLogsToCSVFile(PythonAlgorithm):
     """ Python algorithm to export sample logs to spread sheet file
@@ -201,7 +203,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             assert vec_time is not None, 'All logs are empty!'
 
             # Loop over all logs
-            for i in xrange(loglength):
+            for i in range(loglength):
                 # get absolute time and relative time
                 abstime = vec_time[i].totalNanoseconds() * 1.E-9 - localtimediff
                 reltime = abstime - init_abs_time
@@ -275,7 +277,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         wbuf = ""
         currtimeindexes = []
-        for dummy_i in xrange(len(logtimeslist)):
+        for dummy_i in range(len(logtimeslist)):
             currtimeindexes.append(0)
         nextlogindexes = []
 
@@ -337,7 +339,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         # Initialize
         nexttime = self._maxtime
 
-        for i in xrange(0, len(logtimeslist)):
+        for i in range(0, len(logtimeslist)):
             # skip the None log
             if logtimeslist[i] is None:
                 continue
@@ -383,7 +385,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         wbuf = "%.6f\t%.6f\t" % (abstime, reltime)
 
         # Log valuess
-        for i in xrange(len(logvaluelist)):
+        for i in range(len(logvaluelist)):
             timeindex = currtimeindexes[i]
             if not i in nexttimelogindexes:
                 timeindex -= 1
@@ -408,7 +410,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
     def _progressTimeIndexes(self, currtimeindexes, nexttimelogindexes):
         """ Progress index
         """
-        for i in xrange(len(currtimeindexes)):
+        for i in range(len(currtimeindexes)):
             if i in nexttimelogindexes:
                 currtimeindexes[i] += 1
 
@@ -445,19 +447,19 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         # ENDFOR
 
         # Check properties' size
-        loglength = sys.maxint
-        for i in xrange(len(self._sampleloglist)):
+        loglength = sys.maxsize
+        for i in range(len(self._sampleloglist)):
             if logtimesdict[self._sampleloglist[i]] is not None:
                 tmplength = len(logtimesdict[self._sampleloglist[i]])
                 if loglength != tmplength:
-                    if loglength != sys.maxint:
+                    if loglength != sys.maxsize:
                         self.log().warning("Log %s has different length from previous ones. " % (self._sampleloglist[i]))
                     loglength = min(loglength, tmplength)
                 # ENDIF
             # ENDIF
         # ENDFOR
 
-        if loglength == sys.maxint:
+        if loglength == sys.maxsize:
             self.log().warning("None of given log names is found in workspace. ")
             loglength = 0
         else:

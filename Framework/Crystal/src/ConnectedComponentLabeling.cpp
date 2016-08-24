@@ -143,7 +143,7 @@ size_t doConnectedComponentLabeling(IMDIterator *iterator,
            correcly provided for all neighbours until the end. We must store
            indexes instead.
            */
-          edgeIndexVec.push_back(EdgeIndexPair(currentIndex, neighIndex));
+          edgeIndexVec.emplace_back(currentIndex, neighIndex);
           continue;
         }
 

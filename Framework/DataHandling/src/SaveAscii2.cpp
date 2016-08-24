@@ -295,6 +295,7 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
   }
   file << '\n';
 
+  auto pointDeltas = m_ws->pointStandardDeviations(0);
   for (int bin = 0; bin < m_nBins; bin++) {
     if (!m_isCommonBins) // checking for ragged workspace
     {
@@ -317,15 +318,8 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
     file << m_sep;
     file << m_ws->readE(*spectraItr)[bin];
     if (m_writeDX) {
-      if (m_isHistogram) // bin centres
-      {
-        file << m_sep;
-        file << (m_ws->readDx(0)[bin] + m_ws->readDx(0)[bin + 1]) / 2;
-      } else // data points
-      {
-        file << m_sep;
-        file << m_ws->readDx(0)[bin];
-      }
+      file << m_sep;
+      file << pointDeltas[bin];
     }
     file << '\n';
   }
@@ -347,6 +341,7 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
   }
   file << '\n';
 
+  auto pointDeltas = m_ws->pointStandardDeviations(0);
   for (int bin = 0; bin < m_nBins; bin++) {
     if (m_isHistogram & m_isCommonBins) // bin centres,
     {
@@ -366,15 +361,8 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
     file << m_sep;
     file << m_ws->readE(spectraIndex)[bin];
     if (m_writeDX) {
-      if (m_isHistogram) // bin centres
-      {
-        file << m_sep;
-        file << (m_ws->readDx(0)[bin] + m_ws->readDx(0)[bin + 1]) / 2;
-      } else // data points
-      {
-        file << m_sep;
-        file << m_ws->readDx(0)[bin];
-      }
+      file << m_sep;
+      file << pointDeltas[bin];
     }
     file << '\n';
   }
