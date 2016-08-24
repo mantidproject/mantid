@@ -426,8 +426,13 @@ void LoadSpice2D::addRunProperty(const std::string &name, const T &value,
 
 /**
  * Sets the beam trap as Run Property
+ * There's several beamstrap position. We have to find the maximum of every
+ *motor above certain treshold.
+ * The maximum motor position will be the trap in use.
+ *
+ * Notes:
  * Resting positions:
- * GPSANS: 1.000049 / 1.0
+ * GPSANS: 1.0
  * BIOSANS: 9.999980
  *
  * Working positions:
@@ -537,7 +542,8 @@ void LoadSpice2D::setMetadataAsRunProperties(
  * BioSANS: distance = flange_det_dist + sample_to_flange!
  * For back compatibility I'm setting the offset to 0 and not reading it from
  * the file
- *
+ * Last Changes:
+ * If SDD tag is available in the metadata set that as sample detector distance
  * @return : sample_detector_distance
  */
 double

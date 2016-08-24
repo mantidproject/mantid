@@ -327,10 +327,13 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
 }
 
 /**
- *       nx_low,
-        nx_high,
-        ny_low,
-        ny_high,
+ * Mask edges of a RectangularDetector
+ * @param ws :: Input workspace
+ * @param left :: number of columns to mask left
+ * @param right :: number of columns to mask right
+ * @param high :: number of rows to mask top
+ * @param low :: number of rows to mask Bottom
+ * @param componentName :: Must be a RectangularDetector
  */
 void CalculateEfficiency::maskEdges(MatrixWorkspace_sptr ws, int left,
                                     int right, int high, int low,
@@ -350,7 +353,6 @@ void CalculateEfficiency::maskEdges(MatrixWorkspace_sptr ws, int left,
                   " to be a RectangularDetector. maskEdges not executed.");
     return;
   }
-
   if (!component) {
     g_log.warning("Component " + componentName +
                   " is not a RectangularDetector. MaskEdges not executed.");
@@ -358,7 +360,6 @@ void CalculateEfficiency::maskEdges(MatrixWorkspace_sptr ws, int left,
   }
 
   std::vector<int> IDs;
-  // left
   int i = 0;
 
   while (i < left * component->idstep()) {

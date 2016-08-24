@@ -37,7 +37,7 @@ void ClearMaskFlag::init() {
                   "Workspace to clear the mask flag of.");
   declareProperty("ComponentName", "",
                   "Specify the instrument component to clear the "
-                  "mask. If empty clears mask the flag for "
+                  "mask. If empty clears the mask flag for "
                   "the whole instrument.");
 }
 
@@ -56,7 +56,6 @@ void ClearMaskFlag::exec() {
     auto component = instrument->getComponentByName(componentName);
     boost::shared_ptr<const Geometry::ICompAssembly> componentAssembly =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
-
     std::vector<Geometry::IComponent_const_sptr> children;
     componentAssembly->getChildren(children, true);
     for (auto det : children) {
