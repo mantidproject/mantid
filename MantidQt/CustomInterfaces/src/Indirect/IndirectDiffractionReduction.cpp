@@ -187,7 +187,7 @@ void IndirectDiffractionReduction::plotResults() {
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
-  QString plotType = "Spectra";
+  QString plotType = m_uiForm.cbPlotType->currentText();
 
   QString pyInput = "from mantidplot import plotSpectrum, plot2D\n";
 
@@ -745,16 +745,16 @@ void IndirectDiffractionReduction::individualGroupingToggled(int state) {
 
   switch (state) {
   case Qt::Unchecked:
-    if (itemCount == 4) {
-      m_uiForm.cbPlotType->removeItem(3);
+    if (itemCount == 3) {
+      m_uiForm.cbPlotType->removeItem(1);
       m_uiForm.cbPlotType->removeItem(2);
     }
     break;
 
   case Qt::Checked:
-    if (itemCount == 2) {
-      m_uiForm.cbPlotType->insertItem(2, "Contour");
-      m_uiForm.cbPlotType->insertItem(3, "Both");
+    if (itemCount == 1) {
+      m_uiForm.cbPlotType->insertItem(1, "Contour");
+      m_uiForm.cbPlotType->insertItem(2, "Both");
     }
     break;
 

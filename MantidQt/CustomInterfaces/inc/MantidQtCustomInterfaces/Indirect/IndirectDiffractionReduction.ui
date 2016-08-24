@@ -534,21 +534,11 @@
          <property name="enabled">
           <bool>false</bool>
          </property>
-         <item>
-          <property name="text">
-           <string>Contour</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Spectra</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Both</string>
-          </property>
-         </item>
+          <item>
+            <property name="text">
+              <string>Spectra</string>
+            </property>
+          </item>
         </widget>
        </item>
        <item>
@@ -557,7 +547,7 @@
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>Plot Spectra</string>
+          <string>Plot</string>
          </property>
         </widget>
        </item>
