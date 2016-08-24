@@ -179,7 +179,7 @@ private:
 
   void fittingWriteFile(const std::string &fileDir);
 
-  void browsedFile(const std::string inputFullPath,
+  void getAllBrowsedFilePaths(const std::string inputFullPath,
                    std::vector<std::string> &runNoVec,
                    std::vector<std::string> &foundFullFilePaths);
 

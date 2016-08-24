@@ -242,7 +242,8 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
         std::string bankFileDir = bankDir.toString();
 
         // browse the file
-        browsedFile(inputRunNumber, runNoVec, runnoDirVector);
+		// TODO catch the throw from this method
+        getAllBrowsedFilePaths(inputRunNumber, runNoVec, runnoDirVector);
       }
       // if given a multi-run OR single number
     } else if (inputRunNumber.size() > 4) {
@@ -307,7 +308,18 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
   }
 }
 
-void EnggDiffFittingPresenter::browsedFile(
+/**
+  * Takes the full path of a file which has been selected through 
+  * browse, the run number the user has input and stores the
+  * full file paths of all files (specifically all banks) associated
+  * with that run number. Then updates the view to display all run
+  * numbers for multi-runs 
+  *
+  * @param inputFullPath The user inputted path in the view
+  * @param runNoVec Vector holding all run numbers to process
+  * @param foundFullFilePaths
+  */
+void EnggDiffFittingPresenter::getAllBrowsedFilePaths(
     const std::string inputFullPath, std::vector<std::string> &runNoVec,
     std::vector<std::string> &foundFullFilePaths) {
   // to track the FittingRunnoChanged loop number
@@ -359,8 +371,8 @@ void EnggDiffFittingPresenter::browsedFile(
   // Update the list of files found in the view
   m_view->setFittingRunNumVec(foundFullFilePaths);
 
-  auto multiRunMode = m_view->getFittingMultiRunMode();
-  auto singleRunMode = m_view->getFittingSingleRunMode();
+  bool multiRunMode = m_view->getFittingMultiRunMode();
+  bool singleRunMode = m_view->getFittingSingleRunMode();
   // if not run mode or bank mode: to avoid recreating widgets
   if (!multiRunMode && !singleRunMode) {
 
