@@ -458,8 +458,9 @@ void ContainerSubtraction::absCorComplete(bool error) {
 void ContainerSubtraction::saveClicked() {
 
   // Check workspace exists
-  IndirectTab::checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
-  addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 /**
@@ -468,13 +469,14 @@ void ContainerSubtraction::saveClicked() {
 void ContainerSubtraction::plotClicked() {
   QString plotType = m_uiForm.cbPlotOutput->currentText();
 
-  IndirectTab::checkADSForPlotSaveWorkspace(m_pythonExportWsName, true);
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
 
-  if (plotType == "Spectra" || plotType == "Both")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+    if (plotType == "Spectra" || plotType == "Both")
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 
-  if (plotType == "Contour" || plotType == "Both")
-    plot2D(QString::fromStdString(m_pythonExportWsName));
+    if (plotType == "Contour" || plotType == "Both")
+      plot2D(QString::fromStdString(m_pythonExportWsName));
+  }
 }
 
 } // namespace CustomInterfaces
