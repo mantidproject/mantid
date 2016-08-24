@@ -248,6 +248,10 @@ API::IProjectSerialisable *SpectrumView::loadFromProject(const std::string &line
   double min, max, step, efixed;
   int emode, intensity, graphMax;
   bool cursorTracking;
+  QRect geometry;
+
+  tsv.selectLine("geometry");
+  tsv >> geometry;
 
   std::vector<std::string> workspaceNames;
   tsv.selectLine("Workspaces");
@@ -307,6 +311,7 @@ API::IProjectSerialisable *SpectrumView::loadFromProject(const std::string &line
   viewer->m_emodeHandler->setEFixed(efixed);
   viewer->m_hGraph->setPointedAtPoint(hPoint);
   viewer->m_vGraph->setPointedAtPoint(vPoint);
+  viewer->setGeometry(geometry);
   viewer->show();
 
   return viewer;
@@ -316,6 +321,7 @@ std::string SpectrumView::saveToProject(ApplicationWindow *app)
 {
   UNUSED_ARG(app);
   API::TSVSerialiser tsv, spec;
+  spec.writeLine("geometry") << geometry();
 
   double min, max, step;
   m_rangeHandler->getRange(min, max, step);
