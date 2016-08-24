@@ -1,0 +1,33 @@
+digraph ReflectometryReductionOne {
+label = "ReflectometryReductionOne Correct Detector Positions Flowchart"
+ $global_style
+
+subgraph params {
+$param_style
+ inputWorkspace    [label="InputWorkspace"]
+ outputWorkspace   [label="OutputWorkspaceWavelength"]
+ thetaOut          [label="ThetaOut"]
+}
+
+subgraph decisions {
+$decision_style
+}
+
+subgraph algorithms {
+$algorithm_style
+ calcTheta       [label="SpecularReflectionCalculateTheta"]
+}
+
+subgraph processes {
+$process_style
+}
+
+subgraph values {
+$value_style
+}
+
+inputWorkspace    -> calcTheta
+calcTheta         -> outputWorkspace
+calcTheta         -> thetaOut
+
+}

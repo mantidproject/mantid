@@ -6,18 +6,15 @@ subgraph params {
  $param_style
   inputWorkspace    [label="InputWorkspace"]
   outputWorkspace   [label="OutputWorkspaceWavelength"]
-  thetaOut          [label="ThetaOut"]
 }
 
 subgraph decisions {
  $decision_style
-  checkThetaIn    [label="ThetaIn given?"]
   checkCorDetPos  [label="Correct Detector Positions?"]
 }
 
 subgraph algorithms {
  $algorithm_style
-  calcTheta       [label="SpecularReflectionCalculateTheta"]
   specRefPosCor   [label="SpecularReflectionPositionCorrect"]
 }
 
@@ -29,11 +26,7 @@ subgraph values {
  $value_style
 }
 
-inputWorkspace    -> checkThetaIn
-checkThetaIn      -> checkCorDetPos   [label="Yes"]
-checkThetaIn      -> calcTheta        [label="No"]
-calcTheta         -> outputWorkspace
-calcTheta         -> thetaOut
+inputWorkspace    -> checkCorDetPos
 checkCorDetPos    -> specRefPosCor    [label="Yes"]
 checkCorDetPos    -> outputWorkspace  [label="No"]
 specRefPosCor     -> outputWorkspace
