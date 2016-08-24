@@ -425,9 +425,16 @@ System
    :align: center
    :scale: 60%
 
-In the System tab you can specify the input folder names 
+In the System tab you can specify the input folder names
 for the sample, flat, and dark images, and also the names of the output folders.
-
+The base paths for the SCARF file system can also be set here. Two options
+are included. The first one specifies where the Tomography data is found in the
+cluster, and the second specifies where the reconstruction tools and scripts
+can be found.
+The path can be changed to point to your own specific data and scripts on the
+SCARF cluster, so it could be helpful to create different directories for
+different scripts rather than changing the default script located in the default
+directory.
 
 Example
 -------
