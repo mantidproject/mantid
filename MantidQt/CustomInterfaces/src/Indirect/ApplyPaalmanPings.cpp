@@ -369,25 +369,13 @@ void ApplyPaalmanPings::addInterpolationStep(MatrixWorkspace_sptr toInterpolate,
 void ApplyPaalmanPings::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
-  const bool useCan = m_uiForm.ckUseCan->isChecked();
   if (error) {
     emit showMessageBox(
         "Unable to apply corrections.\nSee Results Log for more details.");
     return;
   }
 
-  // Convert back to original sample units
-  if (m_originalSampleUnits != "Wavelength") {
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        m_pythonExportWsName);
-
-    std::string eMode("");
-    if (m_originalSampleUnits == "dSpacing")
-      eMode = "Elastic";
-    addConvertUnitsStep(ws, m_originalSampleUnits, "", eMode);
-  }
-
-  if (useCan) {
+  if (m_uiForm.ckUseCan->isChecked()) {
     if (m_uiForm.ckShiftCan->isChecked()) { // If container is shifted
       IAlgorithm_sptr shiftLog =
           AlgorithmManager::Instance().create("AddSampleLog");
@@ -580,8 +568,8 @@ void ApplyPaalmanPings::plotPreview(int wsIndex) {
  */
 void ApplyPaalmanPings::saveClicked() {
 
-  IndirectTab::checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
-  addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -592,13 +580,14 @@ void ApplyPaalmanPings::plotClicked() {
 
   QString plotType = m_uiForm.cbPlotOutput->currentText();
 
-  IndirectTab::checkADSForPlotSaveWorkspace(m_pythonExportWsName, true);
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
 
-  if (plotType == "Spectra" || plotType == "Both")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+    if (plotType == "Spectra" || plotType == "Both")
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 
-  if (plotType == "Contour" || plotType == "Both")
-    plot2D(QString::fromStdString(m_pythonExportWsName));
+    if (plotType == "Contour" || plotType == "Both")
+      plot2D(QString::fromStdString(m_pythonExportWsName));
+  }
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
