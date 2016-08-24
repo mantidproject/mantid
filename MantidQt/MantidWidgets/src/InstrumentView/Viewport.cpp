@@ -1,4 +1,5 @@
 #include "MantidQtMantidWidgets/InstrumentView/Viewport.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include <math.h>
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidKernel/V3D.h"
@@ -466,6 +467,40 @@ void Viewport::transform(Mantid::Kernel::V3D &pos) const {
   pos *= m_zoomFactor;
   m_quaternion.rotate(pos);
   pos += Mantid::Kernel::V3D(m_xTrans, m_yTrans, 0.0);
+}
+
+void Viewport::loadFromProject(const std::string &lines) {
+  reset();
+  API::TSVSerialiser tsv(lines);
+
+  tsv.selectLine("Translation");
+  double xTrans, yTrans;
+  tsv >> xTrans >> yTrans;
+  setTranslation(xTrans, yTrans);
+
+  tsv.selectLine("Zoom");
+  double zoom;
+  tsv >> zoom;
+  setZoom(zoom);
+
+  tsv.selectLine("Rotation");
+  double w, a, b, c;
+  tsv >> w >> a >> b >> c;
+  Mantid::Kernel::Quat quat(w, a, b, c);
+  setRotation(quat);
+}
+
+std::string Viewport::saveToProject() const {
+  API::TSVSerialiser tsv;
+  tsv.writeLine("Translation") << m_xTrans << m_yTrans;
+  tsv.writeLine("Zoom") << m_zoomFactor;
+
+  tsv.writeLine("Rotation");
+  for (int i = 0; i < 4; ++i) {
+    tsv << m_quaternion[i];
+  }
+
+  return tsv.outputLines();
 }
 } // MantidWidgets
 } // MantidQt

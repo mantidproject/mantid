@@ -23,8 +23,6 @@ loaded.
 
 -  TODO get XML descriptions of Muon instruments. This data is not in
    existing Muon Nexus files.
--  TODO load the spectra detector mapping. This may be very simple for
-   Muon instruments.
 
 Version Identification
 ######################
@@ -74,6 +72,7 @@ Here are more details of data loaded from the Nexus file:
 |                                  |                                            | as loaded by LoadInstrumentFromNexus   |
 +----------------------------------+--------------------------------------------+----------------------------------------+
 | Spectrum of each workspace index | [DET]``/spectrum_index``                   | Spectra-Detector mapping of workspace  |
+|                                  |                                            | (see below)                            |
 +----------------------------------+--------------------------------------------+----------------------------------------+
 | Title (optional)                 | ``title``                                  | ``title`` in workspace                 |
 +----------------------------------+--------------------------------------------+----------------------------------------+
@@ -94,7 +93,7 @@ Here are more details of data loaded from the Nexus file:
 
 Run Object
 ''''''''''
-LoadMuonNexus does not run LoadNexuslogs to load run logs. Information is loaded as follows:
+LoadMuonNexus does not run LoadNexusLogs to load run logs. Information is loaded as follows:
 
 +---------------------------+----------------------------------+
 | Nexus                     | Workspace run object             |
@@ -116,6 +115,20 @@ LoadMuonNexus does not run LoadNexuslogs to load run logs. Information is loaded
 
 
 (data) indicates that the number is got from the histogram data in an appropiate manner.
+
+Spectra-detector mapping
+''''''''''''''''''''''''
+Unlike muon v1 NeXus files, v2 files have the possibility that one spectrum maps to multiple detectors.
+This mapping is handled as follows:
+
+The spectrum numbers are in ``run/detector_fb/spectrum_index``.
+
+The spectrum ``spectrum_index[j]`` maps to ``detector_count[j]`` detectors.
+Their detector IDs are contained in ``detector_list``, starting at the index ``detector_index[j]``.
+
+If the above optional entries ``detector_count``, ``detector_list`` and ``detector_index`` are not present
+in the file, it is assumed that the mapping is one-to-one (spectrum number = detector ID). This is the case
+for most ISIS data at the moment.
 
 
 Child Algorithms used

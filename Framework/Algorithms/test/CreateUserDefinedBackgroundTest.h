@@ -243,7 +243,7 @@ public:
   void test_exec_distribution() {
     // Create test input
     const auto inputWS = createTestData(true);
-    const auto bgPoints = createTable();
+    const auto bgPoints = createTable(true);
     Mantid::API::WorkspaceHelpers::makeDistribution(inputWS);
 
     CreateUserDefinedBackground alg;
@@ -262,8 +262,10 @@ public:
     TS_ASSERT(outputWS);
 
     // The expected result
-    const auto expected = createExpectedResults(true, true);
-    TS_ASSERT(workspacesEqual(expected, outputWS, 5e-2));
+    const auto expected = createExpectedResults(true, false);
+    Mantid::API::WorkspaceHelpers::makeDistribution(expected);
+
+    TS_ASSERT(workspacesEqual(expected, outputWS, 0.1, true));
   }
 
 private:
@@ -274,14 +276,15 @@ private:
   }
 
   /// Create table containing user-selected background points
-  ITableWorkspace_sptr createTable() {
+  ITableWorkspace_sptr createTable(bool isDistribution = false) {
     auto table = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     table->addColumn("double", "X");
     table->addColumn("double", "Y");
+    double width = 0.1;
     for (int i = 0; i < 100; i++) {
-      const auto x = static_cast<double>(i) / 10.0;
+      const auto x = static_cast<double>(i) * width;
       Mantid::API::TableRow row = table->appendRow();
-      row << x << background(x);
+      row << x << (isDistribution ? background(x) / width : background(x));
     }
     return table;
   }

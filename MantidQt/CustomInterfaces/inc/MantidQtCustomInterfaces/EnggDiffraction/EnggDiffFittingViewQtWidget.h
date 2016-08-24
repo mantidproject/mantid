@@ -63,6 +63,7 @@ public:
       QWidget *parent, boost::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
       boost::shared_ptr<IEnggDiffractionSettings> mainSettings,
       boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+      boost::shared_ptr<IEnggDiffractionParam> mainParam,
       boost::shared_ptr<IEnggDiffractionPythonRunner> mainPyhonRunner);
   ~EnggDiffFittingViewQtWidget() override;
 
@@ -97,6 +98,8 @@ public:
   void setFittingRunNo(const std::string &path) override;
 
   std::string getFittingRunNo() const override;
+
+  void enableFitAllButton(bool enable) const override;
 
   void clearFittingComboBox() const override;
 
@@ -136,6 +139,10 @@ public:
 
   void setFittingMultiRunMode(bool mode) override;
 
+  bool getFittingSingleRunMode() override;
+
+  void setFittingSingleRunMode(bool mode) override;
+
   double getPeakCentre() const override;
 
   bool peakPickerEnabled() const override;
@@ -169,11 +176,12 @@ signals:
 private slots:
   // slot of the fitting peaks per part of the interface
   void browseFitFocusedRun();
-  void resetFittingMultiMode();
+  void resetFittingMode();
   void setBankIdComboBox(int idx) override;
   void setPeakPick();
   void clearPeakList();
   void fitClicked();
+  void fitAllClicked();
   void FittingRunNo();
   void addClicked();
   void browseClicked();
@@ -202,6 +210,9 @@ private:
 
   /// indentifier for fitting multi-run or single run input
   static bool m_fittingMutliRunMode;
+
+  /// indentifier for fitting multi-run or single run input
+  static bool m_fittingSingleRunMode;
 
   // vector holding directory of focused bank file
   static std::vector<std::string> m_fitting_runno_dir_vec;
