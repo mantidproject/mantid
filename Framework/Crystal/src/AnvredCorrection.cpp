@@ -548,8 +548,8 @@ void AnvredCorrection::BuildLamdaWeights() {
   }
 }
 void AnvredCorrection::scale_init(IDetector_const_sptr det,
-                                  Instrument_const_sptr inst,
-                                  double &L2, double &depth, double &pathlength,
+                                  Instrument_const_sptr inst, double &L2,
+                                  double &depth, double &pathlength,
                                   std::string &bankName) {
   bankName = det->getParent()->getParent()->getName();
   // Distance to center of detector
