@@ -207,12 +207,12 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
   try {
 
     // receive the run number from the text-field
-    auto inputRunNumber = m_view->getFittingRunNo();
+    auto userPathInput = m_view->getFittingRunNo();
 
     // file name
-    Poco::Path pocoRunNumberPath(inputRunNumber);
+    Poco::Path pocoRunNumberPath(userPathInput);
 
-    std::vector<std::string> runnoDirVector;
+    std::vector<std::string> foundFullFilePaths;
 
     std::string strFPath = pocoRunNumberPath.toString();
     // returns empty if no directory is found
@@ -221,9 +221,6 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     if (strFPath.find("ENGINX_") != std::string::npos) {
       boost::split(splitBaseName, strFPath, boost::is_any_of("_."));
     }
-
-    // runNo when single focused file selected
-    std::vector<std::string> runNoVec;
 
     // if input file is a directory and successfully splitBaseName
     // or when default bank is set or changed, the text-field is updated with
@@ -240,24 +237,48 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
       if (!splitBaseName.empty() && splitBaseName.size() > 3) {
 
         std::string bankFileDir = bankDir.toString();
+        std::vector<std::string> runNoVec;
 
-        // browse the file
-		// TODO catch the throw from this method
-        getAllBrowsedFilePaths(inputRunNumber, runNoVec, runnoDirVector);
+        // Handle files the user browsed to seperately
+        try {
+          runNoVec = getAllBrowsedFilePaths(userPathInput, foundFullFilePaths);
+        } catch (std::runtime_error &e) {
+          const std::string eMsg(e.what());
+          g_log.error("Error loading browsed file: " + eMsg);
+        }
+
+        // Update UI to reflect found files
+        // Update the list of files found in the view
+        m_view->setFittingRunNumVec(foundFullFilePaths);
+
+        bool multiRunMode = m_view->getFittingMultiRunMode();
+        bool singleRunMode = m_view->getFittingSingleRunMode();
+        // if not run mode or bank mode: to avoid recreating widgets
+        if (!multiRunMode && !singleRunMode) {
+
+          // add bank to the combo-box
+          setBankItems();
+          // set the bank widget according to selected bank file
+          setDefaultBank(splitBaseName, userPathInput);
+
+          // Skips this step if it is multiple run because widget already
+          // updated
+          setRunNoItems(runNoVec, false);
+        }
       }
       // if given a multi-run OR single number
-    } else if (inputRunNumber.size() > 4) {
+    } else if (userPathInput.size() > 4) {
 
       // if multi-run number string finds '-' to define run number
-      if (inputRunNumber.find("-") != std::string::npos) {
+      if (userPathInput.find("-") != std::string::npos) {
 
         // adds run number to list widget on right and changes text-field
         // to single run number and trigger FittingRunNo changed again
-        processMultiRun(inputRunNumber, runnoDirVector);
+        processMultiRun(userPathInput, foundFullFilePaths);
 
       } else {
         // true if string convertible to digit
-        bool isRunNumber = isDigit(inputRunNumber);
+        bool isRunNumber = isDigit(userPathInput);
         auto focusDir = m_view->focusingDir();
 
         // if not valid parent dir and not valid single run number
@@ -280,7 +301,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
         // else - given or hard-coded to a single run number
         else {
-          processSingleRun(focusDir, inputRunNumber, runnoDirVector,
+          processSingleRun(focusDir, userPathInput, foundFullFilePaths,
                            splitBaseName);
         }
       }
@@ -289,9 +310,9 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     // if single or multi run-number
     // set the text-field to directory here to the first in
     // the vector if its not empty
-    if (!runnoDirVector.empty() && !pocoRunNumberPath.isFile()) {
+    if (!foundFullFilePaths.empty() && !pocoRunNumberPath.isFile()) {
 
-      auto firstDir = runnoDirVector[0];
+      auto firstDir = foundFullFilePaths[0];
       m_view->setFittingRunNo(firstDir);
 
     } else if (m_view->getFittingRunNo().empty()) {
@@ -309,18 +330,19 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 }
 
 /**
-  * Takes the full path of a file which has been selected through 
+  * Takes the full path of a file which has been selected through
   * browse, the run number the user has input and stores the
   * full file paths of all files (specifically all banks) associated
   * with that run number. Then updates the view to display all run
-  * numbers for multi-runs 
+  * numbers for multi-runs
   *
   * @param inputFullPath The user inputted path in the view
-  * @param runNoVec Vector holding all run numbers to process
-  * @param foundFullFilePaths
+  * @param foundFullFilePaths The full paths of all associated files found
+  *
+  * @return
   */
-void EnggDiffFittingPresenter::getAllBrowsedFilePaths(
-    const std::string inputFullPath, std::vector<std::string> &runNoVec,
+std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
+    const std::string inputFullPath,
     std::vector<std::string> &foundFullFilePaths) {
   // to track the FittingRunnoChanged loop number
   if (g_fitting_runno_counter == 0) {
@@ -368,25 +390,10 @@ void EnggDiffFittingPresenter::getAllBrowsedFilePaths(
                              baseFilenamePrefix);
   }
 
-  // Update the list of files found in the view
-  m_view->setFittingRunNumVec(foundFullFilePaths);
+  std::vector<std::string> runNoVec;
+  runNoVec.push_back(splitBaseName[1]);
 
-  bool multiRunMode = m_view->getFittingMultiRunMode();
-  bool singleRunMode = m_view->getFittingSingleRunMode();
-  // if not run mode or bank mode: to avoid recreating widgets
-  if (!multiRunMode && !singleRunMode) {
-
-    // add bank to the combo-box
-    setBankItems();
-    // set the bank widget according to selected bank file
-    setDefaultBank(splitBaseName, inputFullPath);
-    runNoVec.clear();
-    runNoVec.push_back(splitBaseName[1]);
-
-    // Skips this step if it is multiple run because widget already
-    // updated
-    setRunNoItems(runNoVec, false);
-  }
+  return runNoVec;
 }
 
 void EnggDiffFittingPresenter::processMultiRun(

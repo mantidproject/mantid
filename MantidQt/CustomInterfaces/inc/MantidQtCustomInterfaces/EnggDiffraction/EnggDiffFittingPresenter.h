@@ -179,8 +179,7 @@ private:
 
   void fittingWriteFile(const std::string &fileDir);
 
-  void getAllBrowsedFilePaths(const std::string inputFullPath,
-                   std::vector<std::string> &runNoVec,
+  std::vector<std::string> getAllBrowsedFilePaths(const std::string inputFullPath,
                    std::vector<std::string> &foundFullFilePaths);
 
   void processMultiRun(const std::string strFocusedFile,
