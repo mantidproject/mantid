@@ -122,4 +122,38 @@ private:
   }
 };
 
+class ConvertToHistogramTestPerformance : public CxxTest::TestSuite {
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConvertToHistogramTestPerformance *createSuite() {
+    return new ConvertToHistogramTestPerformance();
+  }
+
+  static void destroySuite(ConvertToHistogramTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() {
+    inputWS =
+        WorkspaceCreationHelper::Create2DWorkspace123(20000, 10000, false);
+  }
+
+  void tearDown() {
+    Mantid::API::AnalysisDataService::Instance().remove("output");
+  }
+
+  void testPerformanceWS() {
+    ConvertToHistogram cth;
+    cth.initialize();
+    cth.setProperty("InputWorkspace", inputWS);
+    cth.setProperty("OutputWorkspace", "output");
+    cth.execute();
+  }
+
+private:
+  Workspace2D_sptr inputWS;
+};
+
 #endif // CONVERTTOHISTOGRAMTEST_H_
