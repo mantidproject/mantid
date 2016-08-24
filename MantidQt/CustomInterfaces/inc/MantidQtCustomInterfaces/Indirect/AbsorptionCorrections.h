@@ -30,8 +30,6 @@ private:
   void addShapeSpecificCanOptions(Mantid::API::IAlgorithm_sptr alg,
                                   QString shape);
 
-  QString m_outputFactorsWsName;
-
   Ui::AbsorptionCorrections m_uiForm;
   /// alg
   Mantid::API::IAlgorithm_sptr m_absCorAlgo;

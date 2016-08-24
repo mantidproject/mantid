@@ -117,11 +117,11 @@ void AbsorptionCorrections::run() {
 
   // Set the correction workspace to keep the factors if desired
   bool keepCorrectionFactors = m_uiForm.ckKeepFactors->isChecked();
-  QString m_outputFactorsWsName =
+  QString outputFactorsWsName =
       outputBaseName + "_" + sampleShape + "_Factors";
   if (keepCorrectionFactors)
     absCorAlgo->setProperty("CorrectionsWorkspace",
-                            m_outputFactorsWsName.toStdString());
+                            outputFactorsWsName.toStdString());
 
   // Add correction algorithm to batch
   m_batchAlgoRunner->addAlgorithm(absCorAlgo);
@@ -132,30 +132,6 @@ void AbsorptionCorrections::run() {
 
   // Set the result workspace for Python script export
   m_pythonExportWsName = outputWsName.toStdString();
-}
-
-/**
- * Configures the SaveNexusProcessed algorithm to save a workspace in the
- * default
- * save directory and adds the algorithm to the batch queue.
- *
- * @param wsName Name of workspace to save
- */
-void AbsorptionCorrections::addSaveWorkspace(QString wsName) {
-  QString filename = wsName + ".nxs";
-
-  // Setup the input workspace property
-  API::BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
-  saveProps["InputWorkspace"] = wsName.toStdString();
-
-  // Setup the algorithm
-  IAlgorithm_sptr saveAlgo =
-      AlgorithmManager::Instance().create("SaveNexusProcessed");
-  saveAlgo->initialize();
-  saveAlgo->setProperty("Filename", filename.toStdString());
-
-  // Add the save algorithm to the batch
-  m_batchAlgoRunner->addAlgorithm(saveAlgo, saveProps);
 }
 
 /**
@@ -307,12 +283,15 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
  */
 void AbsorptionCorrections::saveClicked() {
 
-  checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
-  addSaveWorkspace(QString::fromStdString(m_pythonExportWsName));
-  bool keepCorrectionFactors = m_uiForm.ckKeepFactors->isChecked();
-  checkADSForPlotSaveWorkspace(m_outputFactorsWsName.toStdString(), false);
-  if (keepCorrectionFactors)
-    addSaveWorkspace(m_outputFactorsWsName);
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+
+  if (m_uiForm.ckKeepFactors->isChecked()) {
+    std::string factorsWs = m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
+    if (checkADSForPlotSaveWorkspace(factorsWs, false))
+      addSaveWorkspaceToQueue(QString::fromStdString(factorsWs));
+  }
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 /**
