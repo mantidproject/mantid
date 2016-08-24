@@ -257,6 +257,9 @@ At any stage during the process of selecting the regions it is also
 possible to see how the selections fit different images by sliding
 through the images of the stack (using the slider or scroll bar).
 
+The angle of the image can be changed by changing the Rotate(clockwise)
+option. This will affect how the image is displayed locally and reconstructed.
+
 The center of rotation can be selected interactively by clicking on
 the select button and then clicking on an image pixel. To select the
 regions of interest or the area of normalization, just click on the
@@ -269,17 +272,18 @@ can be selected again by pushing the respective "Select" buttons
 and/or editing their coordinates manually.
 
 There is also the option to change the ColorMap that is used to show
-the images **locally**. This can be done by **double** clicking the ColorBar on
-the side and selecting a different ColorMap file. The changes are only local
-and will not affect the reconstruction.
+the images ONLY **locally**. This can be done by **double** clicking
+the ColorBar on the side and selecting a different ColorMap file.
+The changes are only local and will NOT affect the reconstruction.
 
 The default values, set in principle when a new stack of images is
-loaded, are as follows. The region of interest is set to cover all
-the images. The region of normalization is not set (empty), and the
-center of rotation is set to the center of the image. The option to
-find the center of rotation automatically is disabled at present.
+loaded, are as follows. The rotate angle is set to 0 degrees,
+the region of interest is set to cover all the images. The region
+of normalization is not set (empty), and the center of rotation is
+set to the center of the image. The option to find the center of
+rotation automatically is disabled at present.
 
-If when selection a region the mouse is moved outside of the images,
+While selecting a region, if the mouse is moved outside of the images,
 it is possible to continue the selection of the region (second corner)
 by clicking again inside the image. Alternatively, any selection can
 be reset at any point by using the "Reset" buttons.
