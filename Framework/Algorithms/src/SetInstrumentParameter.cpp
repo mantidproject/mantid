@@ -68,25 +68,26 @@ void SetInstrumentParameter::exec() {
   Workspace_sptr ws = getProperty("Workspace");
   MatrixWorkspace_sptr inputW =
       boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  DataObjects::PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+  DataObjects::PeaksWorkspace_sptr inputP =
+      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
   // Get some stuff from the input workspace
   Instrument_sptr inst;
   if (inputW) {
-     inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
-     if (!inst)
-           throw std::runtime_error("Could not get a valid instrument from the "
-                                    "MatrixWorkspace provided as input");
+    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "MatrixWorkspace provided as input");
   } else if (inputP) {
-     inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
-     if (!inst)
-          throw std::runtime_error("Could not get a valid instrument from the "
-                                   "PeaksWorkspace provided as input");
+    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "PeaksWorkspace provided as input");
   } else {
-     if (!inst)
-          throw std::runtime_error("Could not get a valid instrument from the "
-                                   "workspace which does not seem to be valid as "
-                                   "input (must be either MatrixWorkspace or "
-                                   "PeaksWorkspace");
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "workspace which does not seem to be valid as "
+                               "input (must be either MatrixWorkspace or "
+                               "PeaksWorkspace");
   }
 
   // get the data that the user wants to add
@@ -112,37 +113,37 @@ void SetInstrumentParameter::exec() {
     cmptList = inst->getAllComponentsWithName(cmptName);
   }
 
-  if(inputW) {
-  auto &paramMap = inputW->instrumentParameters();
-  if (!dets.empty()) {
-    for (auto &det : dets) {
-      addParameter(paramMap, det.get(), paramName, paramType, paramValue);
-    }
-  } else {
-    if (!cmptList.empty()) {
-      for (auto &cmpt : cmptList) {
-        addParameter(paramMap, cmpt.get(), paramName, paramType, paramValue);
+  if (inputW) {
+    auto &paramMap = inputW->instrumentParameters();
+    if (!dets.empty()) {
+      for (auto &det : dets) {
+        addParameter(paramMap, det.get(), paramName, paramType, paramValue);
       }
     } else {
-      g_log.warning("Could not find the component requested.");
+      if (!cmptList.empty()) {
+        for (auto &cmpt : cmptList) {
+          addParameter(paramMap, cmpt.get(), paramName, paramType, paramValue);
+        }
+      } else {
+        g_log.warning("Could not find the component requested.");
+      }
     }
   }
-  }
-  if(inputP) {
-  auto &paramMap = inputP->instrumentParameters();
-  if (!dets.empty()) {
-    for (auto &det : dets) {
-      addParameter(paramMap, det.get(), paramName, paramType, paramValue);
-    }
-  } else {
-    if (!cmptList.empty()) {
-      for (auto &cmpt : cmptList) {
-        addParameter(paramMap, cmpt.get(), paramName, paramType, paramValue);
+  if (inputP) {
+    auto &paramMap = inputP->instrumentParameters();
+    if (!dets.empty()) {
+      for (auto &det : dets) {
+        addParameter(paramMap, det.get(), paramName, paramType, paramValue);
       }
     } else {
-      g_log.warning("Could not find the component requested.");
+      if (!cmptList.empty()) {
+        for (auto &cmpt : cmptList) {
+          addParameter(paramMap, cmpt.get(), paramName, paramType, paramValue);
+        }
+      } else {
+        g_log.warning("Could not find the component requested.");
+      }
     }
-  }
   }
 }
 

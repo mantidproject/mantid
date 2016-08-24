@@ -552,7 +552,7 @@ void AnvredCorrection::BuildLamdaWeights() {
 void AnvredCorrection::scale_init(IDetector_const_sptr det,
                                   Instrument_const_sptr inst, int &bank,
                                   double &L2, double &depth, double &pathlength,
-                                  std::string& bankName) {
+                                  std::string &bankName) {
   bankName = det->getParent()->getParent()->getName();
   std::string bankNameStr = bankName;
   // Take out the "bank" part of the bank name and convert to an int
@@ -576,18 +576,20 @@ void AnvredCorrection::scale_init(IDetector_const_sptr det,
   double cosA = det0->getDistance(*sample) / L2;
   pathlength = depth / cosA;
 }
-void AnvredCorrection::scale_exec(std::string &bankName, double &lambda, double &depth,
-                                  Instrument_const_sptr inst,
+void AnvredCorrection::scale_exec(std::string &bankName, double &lambda,
+                                  double &depth, Instrument_const_sptr inst,
                                   double &pathlength, double &value) {
   // correct for the slant path throught the scintillator glass
   double mu = (9.614 * lambda) + 0.266; // mu for GS20 glass
   double eff_center =
       1.0 - std::exp(-mu * depth); // efficiency at center of detector
   double eff_R = 1.0 - exp(-mu * pathlength); // efficiency at point R
-  value *= eff_center / eff_R;       // slant path efficiency ratio
-  if (inst->hasParameter("detScale"+bankName))
-    value *= static_cast<double>(inst->getNumberParameter("detScale"+bankName)[0]);
-  std::cout << bankName <<"  "<<static_cast<double>(inst->getNumberParameter("detScale"+bankName)[0])<<"\n";
+  value *= eff_center / eff_R;                // slant path efficiency ratio
+  if (inst->hasParameter("detScale" + bankName))
+    value *=
+        static_cast<double>(inst->getNumberParameter("detScale" + bankName)[0]);
+  std::cout << bankName << "  " << static_cast<double>(inst->getNumberParameter(
+                                       "detScale" + bankName)[0]) << "\n";
 }
 
 } // namespace Crystal

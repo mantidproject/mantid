@@ -449,8 +449,9 @@ void SaveHKL::exec() {
           correc = scaleFactor * sinsqt * cmonx * sp_ratio /
                    (wl4 * spect * transmission);
 
-          if (inst->hasParameter("detScale"+bankName))
-            correc *= static_cast<double>(inst->getNumberParameter("detScale"+bankName)[0]);
+          if (inst->hasParameter("detScale" + bankName))
+            correc *= static_cast<double>(
+                inst->getNumberParameter("detScale" + bankName)[0]);
 
           // instrument background constant for sigma
           instBkg = 0. * 12.28 / cmonx * scaleFactor;
