@@ -1,11 +1,5 @@
-from __future__ import (absolute_import, division, print_function)
-
-import math
-import numpy as np
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, \
-    ITableWorkspaceProperty, FileAction, FileProperty, WorkspaceProperty, InstrumentValidator, Progress
-from mantid.kernel import Direction, FloatBoundedValidator, PropertyCriterion, EnabledWhenProperty, \
-    logger, Quat, V3D, StringArrayProperty, StringListValidator
+from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceProperty, InstrumentValidator
+from mantid.kernel import Direction, StringArrayProperty
 import mantid.simpleapi as api
 
 class SetDetScale(PythonAlgorithm):
@@ -47,9 +41,9 @@ class SetDetScale(PythonAlgorithm):
 
 
     def PyExec(self):
-        WS = self.getProperty("Workspace").value
+        ws = self.getProperty("Workspace").value
 
-        # Now input all the components 
+        # Now input all the components
         components = self.getProperty("DetScaleList").value
 
         listParse = []
@@ -57,8 +51,8 @@ class SetDetScale(PythonAlgorithm):
             comp, value = component.split(":")
             listParse.append({"ParameterName":"detScale"+comp, "Value":value})
 
-        for d in listParse:
-            api.SetInstrumentParameter(Workspace=WS,ParameterType="Number",**d)
-        
+        for dList in listParse:
+            api.SetInstrumentParameter(Workspace=ws,ParameterType="Number",**dList)
+
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(SetDetScale)
