@@ -10,7 +10,8 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Cache.h"
 
-#include <map>
+#include "tbb/concurrent_unordered_map.h"
+
 #include <vector>
 #include <typeinfo>
 
@@ -55,22 +56,24 @@ class NearestNeighbours;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 /// Parameter map iterator typedef
-typedef std::multimap<const ComponentID, boost::shared_ptr<Parameter>>::iterator
-    component_map_it;
-typedef std::multimap<const ComponentID,
-                      boost::shared_ptr<Parameter>>::const_iterator
+typedef tbb::concurrent_unordered_multimap<
+    ComponentID, boost::shared_ptr<Parameter>>::iterator component_map_it;
+typedef tbb::concurrent_unordered_multimap<
+    ComponentID, boost::shared_ptr<Parameter>>::const_iterator
     component_map_cit;
 
 class MANTID_GEOMETRY_DLL ParameterMap {
 public:
   /// Parameter map typedef
-  typedef std::multimap<const ComponentID, boost::shared_ptr<Parameter>> pmap;
+  typedef tbb::concurrent_unordered_multimap<ComponentID,
+                                             boost::shared_ptr<Parameter>>
+      pmap;
   /// Parameter map iterator typedef
-  typedef std::multimap<const ComponentID,
-                        boost::shared_ptr<Parameter>>::iterator pmap_it;
+  typedef tbb::concurrent_unordered_multimap<
+      ComponentID, boost::shared_ptr<Parameter>>::iterator pmap_it;
   /// Parameter map iterator typedef
-  typedef std::multimap<const ComponentID,
-                        boost::shared_ptr<Parameter>>::const_iterator pmap_cit;
+  typedef tbb::concurrent_unordered_multimap<
+      ComponentID, boost::shared_ptr<Parameter>>::const_iterator pmap_cit;
   /// Default constructor
   ParameterMap();
   /// Returns true if the map is empty, false otherwise

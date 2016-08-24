@@ -7,6 +7,8 @@
 #include <cstring>
 #include <boost/algorithm/string.hpp>
 
+#include "strings.h"
+
 namespace Mantid {
 namespace Geometry {
 using Kernel::V3D;
@@ -260,7 +262,7 @@ void ParameterMap::clearParametersByName(const std::string &name) {
   // Key is component ID so have to search through whole lot
   for (auto itr = m_map.begin(); itr != m_map.end();) {
     if (itr->second->name() == name) {
-      m_map.erase(itr++);
+      m_map.unsafe_erase(itr++);
     } else {
       ++itr;
     }
@@ -282,7 +284,7 @@ void ParameterMap::clearParametersByName(const std::string &name,
     auto it_found = m_map.find(id);
     if (it_found != m_map.end()) {
       if (it_found->second->name() == name) {
-        m_map.erase(it_found++);
+        m_map.unsafe_erase(it_found++);
       } else {
         ++it_found;
       }
@@ -333,19 +335,19 @@ void ParameterMap::add(const IComponent *comp,
   if (pDescription)
     par->setDescription(*pDescription);
 
-  PARALLEL_CRITICAL(m_mapAccess) {
-    auto existing_par = positionOf(comp, par->name().c_str(), "");
-    // As this is only an add method it should really throw if it already
-    // exists.
-    // However, this is old behavior and many things rely on this actually be
-    // an
-    // add/replace-style function
-    if (existing_par != m_map.end()) {
-      existing_par->second = par;
+  // PARALLEL_CRITICAL(m_mapAccess) {
+  auto existing_par = positionOf(comp, par->name().c_str(), "");
+  // As this is only an add method it should really throw if it already
+  // exists.
+  // However, this is old behavior and many things rely on this actually be
+  // an
+  // add/replace-style function
+  if (existing_par != m_map.end()) {
+    existing_par->second = par;
     } else {
       m_map.emplace(comp->getComponentID(), par);
     }
-  }
+    //}
 }
 
 /** Create or adjust "pos" parameter for a component
@@ -661,7 +663,7 @@ bool ParameterMap::contains(const IComponent *comp, const char *name,
   bool anytype = (strlen(type) == 0);
   for (auto itr = components.first; itr != components.second; ++itr) {
     const auto &param = itr->second;
-    if (boost::iequals(param->name(), name) &&
+    if (strcasecmp(param->nameAsCString(), name) == 0 &&
         (anytype || param->type() == type)) {
       return true;
     }
@@ -721,11 +723,11 @@ boost::shared_ptr<Parameter> ParameterMap::get(const IComponent *comp,
   if (!comp)
     return result;
 
-  PARALLEL_CRITICAL(m_mapAccess) {
-    auto itr = positionOf(comp, name, type);
-    if (itr != m_map.end())
-      result = itr->second;
-  }
+  // PARALLEL_CRITICAL(m_mapAccess) {
+  auto itr = positionOf(comp, name, type);
+  if (itr != m_map.end())
+    result = itr->second;
+  //}
   return result;
 }
 
@@ -749,7 +751,7 @@ component_map_it ParameterMap::positionOf(const IComponent *comp,
       auto itrs = m_map.equal_range(id);
       for (auto itr = itrs.first; itr != itrs.second; ++itr) {
         const auto &param = itr->second;
-        if (boost::iequals(param->nameAsCString(), name) &&
+        if (strcasecmp(param->nameAsCString(), name) == 0 &&
             (anytype || param->type() == type)) {
           result = itr;
           break;
@@ -781,7 +783,7 @@ component_map_cit ParameterMap::positionOf(const IComponent *comp,
       auto itrs = m_map.equal_range(id);
       for (auto itr = itrs.first; itr != itrs.second; ++itr) {
         const auto &param = itr->second;
-        if (boost::iequals(param->nameAsCString(), name) &&
+        if (strcasecmp(param->nameAsCString(), name) == 0 &&
             (anytype || param->type() == type)) {
           result = itr;
           break;
@@ -800,23 +802,23 @@ component_map_cit ParameterMap::positionOf(const IComponent *comp,
 Parameter_sptr ParameterMap::getByType(const IComponent *comp,
                                        const std::string &type) const {
   Parameter_sptr result;
-  PARALLEL_CRITICAL(m_mapAccess) {
-    if (!m_map.empty()) {
-      const ComponentID id = comp->getComponentID();
-      auto it_found = m_map.find(id);
-      if (it_found != m_map.end() && it_found->first) {
-        auto itrs = m_map.equal_range(id);
-        for (auto itr = itrs.first; itr != itrs.second; ++itr) {
-          const auto &param = itr->second;
-          if (boost::iequals(param->type(), type)) {
-            result = param;
-            break;
-          }
-        } // found->firdst
-      }   // it_found != m_map.end()
+  // PARALLEL_CRITICAL(m_mapAccess) {
+  if (!m_map.empty()) {
+    const ComponentID id = comp->getComponentID();
+    auto it_found = m_map.find(id);
+    if (it_found != m_map.end() && it_found->first) {
+      auto itrs = m_map.equal_range(id);
+      for (auto itr = itrs.first; itr != itrs.second; ++itr) {
+        const auto &param = itr->second;
+        if (strcasecmp(param->type().c_str(), type.c_str()) == 0) {
+          result = param;
+          break;
+        }
+      }   // found->firdst
+    }     // it_found != m_map.end()
     }     //! m_map.empty()
-  }       // PARALLEL_CRITICAL(m_map_access)
-  return result;
+    ///}       // PARALLEL_CRITICAL(m_map_access)
+    return result;
 }
 
 /** Looks recursively upwards in the component tree for the first instance of a
