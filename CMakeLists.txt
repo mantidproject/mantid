@@ -13,6 +13,8 @@ set ( SYSTEM_PACKAGE_TARGET "")
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 
+set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Switch for compiling the gui components")
+
 SET (CPACK_INSTALL_CMAKE_PROJECTS
      "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
 
@@ -52,7 +54,9 @@ include ( CommonSetup )
 ###########################################################################
 # Check for Qt (DarwinSetup below needs a variable from this)
 ###########################################################################
-find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg REQUIRED )
+if (ENABLE_MANTIDPLOT)
+  find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg REQUIRED )
+endif ()
 
 ###########################################################################
 # Find OpenGL
@@ -66,7 +70,9 @@ endif ()
 ###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
-include ( ParaViewSetup )
+if (ENABLE_MANTIDPLOT)
+  include ( ParaViewSetup )
+endif ()
 
 # We probably don't want this to run on every build.
 option(COVERALLS "Generate coveralls data" OFF)
@@ -79,18 +85,22 @@ endif()
 ###########################################################################
 # Find qwt. Needs to be version 5
 ###########################################################################
-find_package ( Qwt REQUIRED )
-if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR
-    QWT_VERSION VERSION_GREATER 6.0 )
-  message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT_VERSION}" )
+if (ENABLE_MANTIDPLOT)
+  find_package ( Qwt REQUIRED )
+  if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR
+      QWT_VERSION VERSION_GREATER 6.0 )
+    message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT_VERSION}" )
+  endif()
 endif()
 
 ###########################################################################
 # Find PyQt & sip
 ###########################################################################
-find_package ( PyQt4 REQUIRED )
-find_package ( SIP REQUIRED )
-separate_arguments ( PYQT4_SIP_FLAGS )
+if (ENABLE_MANTIDPLOT)
+  find_package ( PyQt4 REQUIRED )
+  find_package ( SIP REQUIRED )
+  separate_arguments ( PYQT4_SIP_FLAGS )
+endif()
 
 ###########################################################################
 # gsl is currently needed by Geometry, Algorithms, Curvefitting, & MantidPlot
@@ -100,7 +110,9 @@ find_package ( GSL REQUIRED )
 ###########################################################################
 # Add QtPropertyBrowser to build
 ###########################################################################
-add_subdirectory ( QtPropertyBrowser )
+if (ENABLE_MANTIDPLOT)
+  add_subdirectory ( QtPropertyBrowser )
+endif(ENABLE_MANTIDPLOT)
 
 ###########################################################################
 # Now add in all the components
@@ -118,7 +130,7 @@ set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to
 
 # VATES flag. Requires ParaView
 set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
-if (MAKE_VATES)
+if (ENABLE_MANTIDPLOT AND MAKE_VATES )
   find_package(ParaView)
   if(ParaView_FOUND)
     add_definitions ( -DMAKE_VATES )
@@ -134,20 +146,22 @@ include_directories ( Framework/API/inc )
 
 set ( CORE_MANTIDLIBS Kernel HistogramData Geometry API )
 
-# Add a target for all GUI tests
-add_custom_target ( GUITests )
-add_dependencies ( GUITests MantidWidgetsTest)
-add_dependencies ( check GUITests )
-# Collect all tests together
-add_custom_target ( AllTests )
-add_dependencies ( AllTests FrameworkTests GUITests )
+if (ENABLE_MANTIDPLOT)
+  # Add a target for all GUI tests
+  add_custom_target ( GUITests )
+  add_dependencies ( GUITests MantidWidgetsTest)
+  add_dependencies ( check GUITests )
+  # Collect all tests together
+  add_custom_target ( AllTests )
+  add_dependencies ( AllTests FrameworkTests GUITests )
+endif()
 
 if ( UNIX )
   #Experimental feature. Unix only at this point.
   set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
 endif ( UNIX )
 
-if ( MAKE_VATES )
+if (ENABLE_MANTIDPLOT AND MAKE_VATES )
   add_subdirectory ( Vates )
   if (NOT APPLE)
     LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
@@ -164,18 +178,23 @@ if ( MAKE_VATES )
     )
   endif()
 
-endif ( MAKE_VATES )
+endif ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 
 if ( MSVC )
   add_definitions ( -DQWT_DLL )
 endif ()
-add_subdirectory ( MantidQt )
 
-add_subdirectory ( MantidPlot )
+if (ENABLE_MANTIDPLOT)
+  add_subdirectory ( MantidQt )
+
+  add_subdirectory ( MantidPlot )
+endif()
 
 add_subdirectory ( scripts )
 
-add_subdirectory ( docs )
+if (ENABLE_MANTIDPLOT)
+  add_subdirectory ( docs )
+endif()
 
 # System test data target
 add_subdirectory ( Testing/SystemTests/scripts )
@@ -205,7 +224,7 @@ endif ()
 install ( DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
 
 # Install the files (.desktop and icon) to create a menu item, but only if installing to /opt/Mantid
-if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_INSTALL_PREFIX STREQUAL "/opt/Mantid" )
+if ( ENABLE_MANTIDPLOT AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_INSTALL_PREFIX STREQUAL "/opt/Mantid" )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/installers/LinuxInstaller/mantidplot.desktop
             DESTINATION /usr/share/applications )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/MantidPlot_Icon_32offset.png
@@ -216,6 +235,13 @@ endif()
 # THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See Framework/PostInstall/CMakeLists
 # for an explanation
 add_subdirectory( Framework/PostInstall )
+
+
+# Conda
+set ( ENABLE_CONDA CACHE BOOL "Switch to enable conda package generation")
+if ( ENABLE_CONDA )
+  include ( conda )
+endif ( ENABLE_CONDA )
 
 ###########################################################################
 # CPack settings
@@ -290,7 +316,7 @@ if ( ENABLE_CPACK )
                            "ipython-notebook,"
                            "python-matplotlib,"
                            "python-scipy,"
-                           "tbb,"
+                           "libtbb2,"
                            "libpocofoundation11,libpocoutil11,libpoconet11,libpoconetssl11,libpococrypto11,libpocoxml11,"
                            "python-pycifrw (>= 4.2.1)" )
         set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )

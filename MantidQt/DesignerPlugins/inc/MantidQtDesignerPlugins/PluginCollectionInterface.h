@@ -23,6 +23,7 @@
 #include "MantidQtMantidWidgets/PreviewPlot.h"
 #include "MantidQtMantidWidgets/DisplayCurveFit.h"
 #include "MantidQtMantidWidgets/MuonFitDataSelector.h"
+#include "MantidQtMantidWidgets/LogValueSelector.h"
 
 /**
 The PluginCollectionInterface implements the interface for the plugin library
@@ -158,5 +159,9 @@ DECLARE_WIDGET_PLUGIN(DisplayCurveFitPlugin,
 DECLARE_WIDGET_PLUGIN(MuonFitDataSelectorPlugin,
                       MantidQt::MantidWidgets::MuonFitDataSelector,
                       "Data selection for muon fits");
+
+DECLARE_WIDGET_PLUGIN(LogValueSelectorPlugin,
+                      MantidQt::MantidWidgets::LogValueSelector,
+                      "Select a log name and function");
 
 #endif

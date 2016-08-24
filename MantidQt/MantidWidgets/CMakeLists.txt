@@ -13,7 +13,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/DataProcessorWhiteList.cpp
 	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
 	src/DataProcessorUI/ParseKeyValueString.cpp
-    src/DataProcessorUI/QDataProcessorTreeModel.cpp
+	src/DataProcessorUI/QDataProcessorTreeModel.cpp
 	src/DataProcessorUI/QDataProcessorWidget.cpp
 	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
 	src/DataSelector.cpp
@@ -80,6 +80,7 @@ set ( SRC_FILES
 	src/InstrumentView/Viewport.cpp
 	src/InstrumentView/XIntegrationControl.cpp
 	src/LineEditWithClear.cpp
+	src/LogValueSelector.cpp
 	src/MWDiag.cpp
 	src/MWRunFiles.cpp
 	src/MWView.cpp
@@ -193,6 +194,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h
     inc/MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.h
 	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
+	inc/MantidQtMantidWidgets/LogValueSelector.h
 )
 
 # Add the include files are NOT already in MOC_FILES
@@ -200,14 +202,14 @@ set ( INC_FILES
 	${MOC_FILES}
 	inc/MantidQtMantidWidgets/AlgorithmHintStrategy.h
 	inc/MantidQtMantidWidgets/CatalogHelper.h
-    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h
-    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h
@@ -289,6 +291,7 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h
 	inc/MantidQtMantidWidgets/InstrumentView/Viewport.h
 	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
+	inc/MantidQtMantidWidgets/LogValueSelector.h
 	inc/MantidQtMantidWidgets/MuonFitDataSelector.h
 	inc/MantidQtMantidWidgets/MuonFunctionBrowser.h
 	inc/MantidQtMantidWidgets/ProgressPresenter.h
@@ -306,6 +309,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/ColorBarWidget.ui
     inc/MantidQtMantidWidgets/DisplayCurveFit.ui
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.ui
+	inc/MantidQtMantidWidgets/LogValueSelector.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui
     inc/MantidQtMantidWidgets/MWView.ui

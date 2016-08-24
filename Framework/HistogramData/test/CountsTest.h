@@ -26,6 +26,7 @@ public:
 #endif
     TS_ASSERT_THROWS_NOTHING(
         (dynamic_cast<detail::VectorOf<Counts, HistogramY> &>(data)));
+    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Addable<Counts> &>(data));
     TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Iterable<Counts> &>(data));
     TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Offsetable<Counts> &>(data));
     TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Scalable<Counts> &>(data));

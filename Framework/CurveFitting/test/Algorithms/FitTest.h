@@ -21,6 +21,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
+#include <gsl/gsl_version.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -1092,6 +1093,7 @@ public:
     fit.execute();
     TS_ASSERT(fit.isExecuted());
 
+#if GSL_MAJOR_VERSION < 2
     IFunction_sptr fun = fit.getProperty("Function");
     TS_ASSERT_DELTA(fun->getParameter("f0.A"), 0, 1e-8);
     TS_ASSERT_DELTA(fun->getParameter("f0.B"), 1, 1e-8);
@@ -1099,6 +1101,7 @@ public:
     TS_ASSERT_DELTA(fun->getParameter("f1.B"), 2, 1e-8);
     TS_ASSERT_DELTA(fun->getParameter("f2.A"), 2, 1e-8);
     TS_ASSERT_DELTA(fun->getParameter("f2.B"), 3, 1e-8);
+#endif
   }
 
   void test_function_Multidomain_one_function_to_two_parts_of_workspace() {

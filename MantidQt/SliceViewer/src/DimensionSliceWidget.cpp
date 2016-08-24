@@ -97,12 +97,6 @@ void DimensionSliceWidget::setShownDim(int dim) {
   /// Slice if dimension is not X or Y AND is not integrated
   bool slicing = (m_shownDim == -1 && !m_dim->getIsIntegrated());
 
-  // Use the minimum slice point for integrated dimensions
-  // otherwise high bin boundary can be selected and no data plotted
-  if (m_dim->getIsIntegrated()) {
-    this->setSlicePoint(m_dim->getMinimum());
-  }
-
   ui.horizontalSlider->setVisible(slicing);
   ui.doubleSpinBox->setVisible(slicing);
   ui.lblUnits->setVisible(slicing);
@@ -165,10 +159,10 @@ void DimensionSliceWidget::setMinMax(double min, double max) {
   ui.doubleSpinBox->setSingleStep(m_dim->getBinWidth());
 
   // Make sure the slice point is in range
-  if (m_slicePoint < m_dim->getMinimum())
-    m_slicePoint = m_dim->getMinimum();
-  if (m_slicePoint > m_dim->getMaximum())
-    m_slicePoint = m_dim->getMaximum();
+  if (m_slicePoint < min)
+    m_slicePoint = min;
+  if (m_slicePoint > max)
+    m_slicePoint = max;
   ui.doubleSpinBox->setValue(m_slicePoint);
 }
 
@@ -178,8 +172,11 @@ void DimensionSliceWidget::setDimension(
     int index, Mantid::Geometry::IMDDimension_const_sptr dim) {
   m_dim = dim;
   m_dimIndex = index;
-  double min = m_dim->getMinimum();
-  double max = m_dim->getMaximum(); //- m_dim->getBinWidth()/2.0;
+  // set the limits of the slider to be the bin centres and not
+  // the edges of the bins
+  double half_bin_width = m_dim->getBinWidth() * 0.5;
+  double min = m_dim->getMinimum() + half_bin_width;
+  double max = m_dim->getMaximum() - half_bin_width;
   this->setMinMax(min, max);
 }
 

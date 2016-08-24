@@ -4,6 +4,8 @@
 
 #include <QMenu>
 #include <QClipboard>
+#include <QMessageBox>
+#include <limits>
 
 namespace {
 QString makeNumber(double d) { return QString::number(d, 'g', 16); }
@@ -27,6 +29,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit,
   const int n = multifit->getNumberOfSpectra();
   QStringList wsNames;
   std::vector<size_t> wsIndices;
+
   for (int i = 0; i < n; ++i) {
     double value = multifit->getLocalParameterValue(parName, i);
     m_values.push_back(value);
@@ -79,11 +82,21 @@ EditLocalParameterDialog::EditLocalParameterDialog(
 void EditLocalParameterDialog::doSetup(const QString &parName,
                                        const QStringList &wsNames,
                                        const std::vector<size_t> &wsIndices) {
+  m_uiForm.logValueSelector->setCheckboxShown(true);
+  connect(m_uiForm.logValueSelector, SIGNAL(logOptionsEnabled(bool)), this,
+          SIGNAL(logOptionsChecked(bool)));
   QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
   header->setResizeMode(0, QHeaderView::Stretch);
   connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this,
           SLOT(valueChanged(int, int)));
   m_uiForm.lblParameterName->setText("Parameter: " + parName);
+  
+  // Populate list of logs
+  auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
+  for (const auto &logName : multifit->getLogNames()) {
+    logCombo->addItem(QString::fromStdString(logName));
+  }
+  
   assert(wsNames.size() == static_cast<int>(wsIndices.size()));
   for (int i = 0; i < wsNames.size(); i++) {
     m_uiForm.tableWidget->insertRow(i);
@@ -111,6 +124,8 @@ void EditLocalParameterDialog::doSetup(const QString &parName,
   connect(deleg, SIGNAL(setTie(int, QString)), this,
           SLOT(setTie(int, QString)));
   connect(deleg, SIGNAL(setTieAll(QString)), this, SLOT(setTieAll(QString)));
+  connect(deleg, SIGNAL(setValueToLog(int)), this, SLOT(setValueToLog(int)));
+  connect(deleg, SIGNAL(setAllValuesToLog()), this, SLOT(setAllValuesToLog()));
 
   m_uiForm.tableWidget->installEventFilter(this);
 }
@@ -255,13 +270,18 @@ void EditLocalParameterDialog::paste() {
   auto text = QApplication::clipboard()->text();
   auto vec = text.split(QRegExp("\\s|,"), QString::SkipEmptyParts);
   auto n = qMin(vec.size(), m_uiForm.tableWidget->rowCount());
+  // prepare for pasting data
+  auto deleg = static_cast<LocalParameterItemDelegate *>(
+      m_uiForm.tableWidget->itemDelegateForColumn(valueColumn));
+  deleg->prepareForPastedData();
+  // insert data into table
   for (int i = 0; i < n; ++i) {
     auto str = vec[i];
     bool ok;
     m_values[i] = str.toDouble(&ok);
     if (!ok)
       str = "0";
-    m_uiForm.tableWidget->item(i, 1)->setText(str);
+    m_uiForm.tableWidget->item(i, valueColumn)->setText(str);
   }
 }
 
@@ -315,6 +335,44 @@ bool EditLocalParameterDialog::areOthersTied(int i) const {
       return true;
   }
   return false;
+}
+
+/// Set value to log value
+/// @param i :: [input] Index of parameter to set
+void EditLocalParameterDialog::setValueToLog(int i) {
+  assert(i < m_values.size());
+  const auto *multifit = static_cast<MultiDatasetFit *>(this->parent());
+  assert(multifit);
+
+  const auto &logName = m_uiForm.logValueSelector->getLog();
+  const auto &function = m_uiForm.logValueSelector->getFunction();
+
+  double value = std::numeric_limits<double>::quiet_NaN();
+  try {
+    value = multifit->getLogValue(logName, function, i);
+  } catch (const std::invalid_argument &err) {
+    const auto &message =
+        QString("Failed to get log value:\n\n %1").arg(err.what());
+    multifit->logWarning(message.toStdString());
+    QMessageBox::critical(this, "MantidPlot - Error", message);
+  }
+  m_values[i] = value;
+  m_uiForm.tableWidget->item(i, valueColumn)->setText(makeNumber(value));
+  updateRoleColumn(i);
+}
+
+/// Set value of each parameter to log value from respective workspace
+void EditLocalParameterDialog::setAllValuesToLog() {
+  const int nValues = m_values.size();
+  for (int i = 0; i < nValues; ++i) {
+    setValueToLog(i);
+  }
+}
+
+/// Returns whether log checkbox is ticked or not
+/// @returns True if log options are enabled
+bool EditLocalParameterDialog::isLogCheckboxTicked() const {
+  return m_uiForm.logValueSelector->isCheckboxTicked();
 }
 
 } // MDF
