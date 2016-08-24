@@ -167,7 +167,6 @@ void IndirectDiffractionReduction::algorithmComplete(bool error) {
 
     diffResultsGroup->removeAll();
     AnalysisDataService::Instance().remove("IndirectDiffraction_Workspaces");
-
   }
   // Enable plotting
   m_uiForm.pbPlot->setEnabled(true);
@@ -212,8 +211,12 @@ void IndirectDiffractionReduction::saveReductions() {
     std::string wsName = *it;
 
     QString tofWsName = QString::fromStdString(wsName) + "_tof";
-    std::string instName = (m_uiForm.iicInstrumentConfiguration->getInstrumentName()).toStdString();
-    std::string mode = (m_uiForm.iicInstrumentConfiguration->getReflectionName()).toStdString();
+    std::string instName =
+        (m_uiForm.iicInstrumentConfiguration->getInstrumentName())
+            .toStdString();
+    std::string mode =
+        (m_uiForm.iicInstrumentConfiguration->getReflectionName())
+            .toStdString();
     BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvUnitsProps;
     inputFromConvUnitsProps["InputWorkspace"] = tofWsName.toStdString();
     BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromReductionProps;
@@ -223,26 +226,26 @@ void IndirectDiffractionReduction::saveReductions() {
       if (instName == "OSIRIS" && mode == "diffonly") {
 
         QString gssFilename = tofWsName + ".gss";
-        IAlgorithm_sptr saveGSS = AlgorithmManager::Instance().create("SaveGSS");
+        IAlgorithm_sptr saveGSS =
+            AlgorithmManager::Instance().create("SaveGSS");
         saveGSS->initialize();
         saveGSS->setProperty("Filename", gssFilename.toStdString());
         m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
-      }
-      else {
+      } else {
 
         // Convert to TOF for GSS
         IAlgorithm_sptr convertUnits =
-          AlgorithmManager::Instance().create("ConvertUnits");
+            AlgorithmManager::Instance().create("ConvertUnits");
         convertUnits->initialize();
         convertUnits->setProperty("InputWorkspace", wsName);
         convertUnits->setProperty("OutputWorkspace", tofWsName.toStdString());
         convertUnits->setProperty("Target", "TOF");
         m_batchAlgoRunner->addAlgorithm(convertUnits);
 
-
         // Save GSS
         std::string gssFilename = wsName + ".gss";
-        IAlgorithm_sptr saveGSS = AlgorithmManager::Instance().create("SaveGSS");
+        IAlgorithm_sptr saveGSS =
+            AlgorithmManager::Instance().create("SaveGSS");
         saveGSS->initialize();
         saveGSS->setProperty("Filename", gssFilename);
         m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
@@ -253,7 +256,7 @@ void IndirectDiffractionReduction::saveReductions() {
       // Save NEXus using SaveNexusProcessed
       std::string nexusFilename = wsName + ".nxs";
       IAlgorithm_sptr saveNexus =
-        AlgorithmManager::Instance().create("SaveNexusProcessed");
+          AlgorithmManager::Instance().create("SaveNexusProcessed");
       saveNexus->initialize();
       saveNexus->setProperty("InputWorkspace", wsName);
       saveNexus->setProperty("Filename", nexusFilename);
@@ -264,7 +267,7 @@ void IndirectDiffractionReduction::saveReductions() {
       // Save ASCII using SaveAscii version 1
       std::string asciiFilename = wsName + ".dat";
       IAlgorithm_sptr saveASCII =
-        AlgorithmManager::Instance().create("SaveAscii", 1);
+          AlgorithmManager::Instance().create("SaveAscii", 1);
       saveASCII->initialize();
       saveASCII->setProperty("InputWorkspace", wsName);
       saveASCII->setProperty("Filename", asciiFilename);
@@ -431,7 +434,6 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
   convertUnits->setProperty("OutputWorkspace", tofWsName.toStdString());
   convertUnits->setProperty("Target", "TOF");
   m_batchAlgoRunner->addAlgorithm(convertUnits, inputFromReductionProps);
-
 
   m_plotWorkspaces.clear();
   m_plotWorkspaces.push_back(tofWsName.toStdString());
