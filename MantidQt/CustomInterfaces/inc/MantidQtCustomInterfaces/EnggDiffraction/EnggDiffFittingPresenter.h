@@ -146,6 +146,8 @@ private:
   startAsyncFittingWorker(const std::vector<std::string> &focusedRunNo,
                           const std::string &expectedPeaks);
 
+  std::string getBaseNameFromStr(const std::string filePath) const;
+
   std::string validateFittingexpectedPeaks(std::string &expectedPeaks) const;
 
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
@@ -171,11 +173,9 @@ private:
 
   void fittingWriteFile(const std::string &fileDir);
 
-  void browsedFile(const std::string strFocusedFile,
-                   std::vector<std::string> &runnoDirVector,
-                   const std::vector<std::string> &splitBaseName,
+  void browsedFile(const std::string inputFullPath,
                    std::vector<std::string> &runNoVec,
-                   const std::string &bankFileDir);
+                   std::vector<std::string> &foundFullFilePaths);
 
   void processMultiRun(const std::string strFocusedFile,
                        std::vector<std::string> &runnoDirVector);

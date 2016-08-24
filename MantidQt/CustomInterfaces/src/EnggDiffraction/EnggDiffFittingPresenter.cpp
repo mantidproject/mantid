@@ -137,6 +137,20 @@ void EnggDiffFittingPresenter::startAsyncFittingWorker(
   m_workerThread->start();
 }
 
+/**
+  * Takes a full file path as a string and attempts to get the base name
+  * of the file at that location and return it
+  *
+  * @param filePath The full path to get the basename of
+  *
+  * @return The base name (without ext) of the file
+  */
+std::string
+EnggDiffFittingPresenter::getBaseNameFromStr(const std::string filePath) const {
+  Poco::Path pocoPath = filePath;
+  return pocoPath.getBaseName();
+}
+
 void EnggDiffFittingPresenter::fittingFinished() {
   if (!m_view)
     return;
@@ -224,8 +238,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
         std::string bankFileDir = bankDir.toString();
 
         // browse the file
-        browsedFile(inputRunNumber, runnoDirVector, splitBaseName, runNoVec,
-                    bankFileDir);
+        browsedFile(inputRunNumber, runNoVec, runnoDirVector);
       }
       // if given a multi-run OR single number
     } else if (inputRunNumber.size() > 4) {
@@ -291,9 +304,8 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 }
 
 void EnggDiffFittingPresenter::browsedFile(
-    const std::string inputFullPath, std::vector<std::string> &runnoDirVector,
-    const std::vector<std::string> &splitBaseName,
-    std::vector<std::string> &runNoVec, const std::string &workingDirectory) {
+    const std::string inputFullPath, std::vector<std::string> &runNoVec,
+    std::vector<std::string> &foundFullFilePaths) {
   // to track the FittingRunnoChanged loop number
   if (g_fitting_runno_counter == 0) {
     g_multi_run_directories.clear();
@@ -303,29 +315,45 @@ void EnggDiffFittingPresenter::browsedFile(
 
   // Files take the form 'ENGINX_123456_focused_bank_1' so create
   // a string similar to 'ENGINX_123456_focused_bank' to allow us
-  // to search for additional banks
+  // to search for additional banks]
+  const std::string baseName = getBaseNameFromStr(inputFullPath);
+  std::vector<std::string> splitBaseName = splitFittingDirectory(baseName);
+
+  // TODO look at removal of hard coded filename positions
   std::string baseFilenamePrefix = splitBaseName[0] + "_" + splitBaseName[1] +
                                    "_" + splitBaseName[2] + "_" +
                                    splitBaseName[3];
 
-  // if base directory of file is empty
-  if (workingDirectory.empty()) {
-    m_view->userWarning("Invalid Input",
-                        "Please check that a valid directory is "
-                        "set for Output Folder under Focusing Settings on the "
-                        "settings tab. "
-                        "Please try again");
+  Poco::Path pocoFullFilePath;
+  if (!pocoFullFilePath.tryParse(inputFullPath)) {
+    // File path isn't valid
+    m_view->userWarning("Bad file path entered",
+                        "The entered file path could not "
+                        " be opened. Please check the file and/or directory "
+                        "exists.");
 
-    return;
+    throw std::runtime_error(
+        "The file path entered could not be parsed"
+        " this usually indicates a syntax error or bad path input");
   }
 
-  // Find all files which match this baseFilenamePrefix - 
+  const std::string workingDirectory = pocoFullFilePath.parent().toString();
+
+  // Find all files which match this baseFilenamePrefix -
   // like a poor mans regular expression for files
-  findFilePathsFromBaseName(workingDirectory, baseFilenamePrefix,
-                            runnoDirVector);
+  if (!findFilePathsFromBaseName(workingDirectory, baseFilenamePrefix,
+                                 foundFullFilePaths)) {
+    // I can't see this ever being thrown if the user is browsing to files but
+    // better to be safe and give an informative message
+    m_view->userWarning("File not found",
+                        "Please check filename and directory and try again");
+    throw std::runtime_error("Could not find any files matching the generated"
+                             " pattern:" +
+                             baseFilenamePrefix);
+  }
 
   // Update the list of files found in the view
-  m_view->setFittingRunNumVec(runnoDirVector);
+  m_view->setFittingRunNumVec(foundFullFilePaths);
 
   auto multiRunMode = m_view->getFittingMultiRunMode();
   auto singleRunMode = m_view->getFittingSingleRunMode();
@@ -681,7 +709,6 @@ void EnggDiffFittingPresenter::inputChecksBeforeFitting(
         " 'ENGINX_<Run Number>_focused_bank_<Bank Number>'.");
   }
 }
-
 
 /**
 * Splits the file name in to sections of '_' and 'ENGINX' text
