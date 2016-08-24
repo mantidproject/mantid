@@ -420,8 +420,9 @@ public:
   void testRebinLarger() {
     auto size = largerBinEdges.size() - 1;
     for (size_t i = 0; i < nIters; i++) {
-      VectorHelper::rebin(binEdges, counts, errors, largerBinEdges,
-                          std::vector<double>(size), std::vector<double>(size),
+      std::vector<double> yout(size);
+      std::vector<double> eout(size);
+      VectorHelper::rebin(binEdges, counts, errors, largerBinEdges, yout, eout,
                           false, false);
     }
   }
