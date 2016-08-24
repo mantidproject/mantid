@@ -146,7 +146,6 @@ void ModeratorTzeroLinear::exec() {
     {
       const double scaling = L_i / (L_i + m_gradient);
       const double offset = (1 - scaling) * t_f - scaling * m_intercept;
-      auto &inbins = inputWS->x(i);
       auto &outbins = outputWS->mutableX(i);
       outbins *= scaling;
       outbins += offset;
