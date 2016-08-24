@@ -28,12 +28,13 @@ def find_basedir(project, subproject):
 
 #======================================================================================
 def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
-    """ Read the LINES of a file. Find "set ( cmake_tag",
+    """ Read the LINES of a file. Find first "set ( cmake_tag",
     read all the lines to get all the files,
     add your new line,
     sort them,
-    rewrite. Yay!"""
-
+    rewrite. Only touches first section found to avoid messing up any other set
+    sections in the rest of the file
+    """
     search_for1 = "set ( %s" % cmake_tag
     search_for2 = "set (%s" % cmake_tag
     # List of files in the thingie
@@ -41,6 +42,7 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
     lines_before = []
     lines_after = []
     section_num = 0
+    section_processed = False
     for line in lines:
         if line.strip().startswith(search_for1): section_num = 1
         if line.strip().startswith(search_for2): section_num = 1
@@ -48,7 +50,7 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
         if section_num == 0:
             # These are the lines before
             lines_before.append(line)
-        elif section_num == 1:
+        elif not section_processed and section_num == 1:
             #this is a line with the name of a file
             line = line.strip()
             # Take off the tag
@@ -57,6 +59,7 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
             # Did we reach the last one?
             if line.endswith(")"):
                 section_num = 2
+                section_processed = True
                 line = line[0:len(line) - 1].strip()
 
             if len(line) > 0:

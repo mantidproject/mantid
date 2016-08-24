@@ -345,25 +345,16 @@ def generate(subproject, classname, overwrite, args):
     if args.rst and args.alg:
         write_rst(subproject, classname, rstfile, args)
 
-    # Insert into the cmake list
-    add_to_cmake(subproject, classname, args, args.subfolder)
-
-    print "\n   Files were added to Framework/%s/CMakeLists.txt !" % (subproject)
+    # Insert into the cmake list if required
+    if args.cmake:
+        add_to_cmake(subproject, classname, args, args.subfolder)
+        print "\n   Files were added to Framework/%s/CMakeLists.txt !" % (subproject)
     print
 
     if args.alg:
         print "Note: if this is a WorkflowAlgorithm, please subclass DataProcessorAlgorithm"
         print "Note: if this algorithm operates on a WorkspaceGroup, please override processGroups()"
         print
-
-
-#    if not test_only:
-#        print "\tsrc/%s.cpp" % (classname)
-#        print "\tinc/Mantid%s/%s.h" % (subproject, classname)
-#    print "\ttest/%sTest.h" % (classname)
-#    print
-
-
 
 #======================================================================
 if __name__ == "__main__":
@@ -390,6 +381,9 @@ if __name__ == "__main__":
         parser.add_argument('--no-rst', dest='rst', action='store_const',
                             const=False, default=True,
                             help="Don't create the rst file")
+        parser.add_argument('--no-cmake', dest='cmake', action='store_const',
+                            const=False, default=True,
+                            help="Don't modify cmake files")
         parser.add_argument('--alg', dest='alg', action='store_const',
                             const=True, default=False,
                             help='Create an Algorithm stub. This adds some methods common to algorithms.')
@@ -417,6 +411,9 @@ if __name__ == "__main__":
         parser.add_option('--no-rst', dest='rst', action='store_const',
                             const=False, default=True,
                             help="Don't create the rst file")
+        parser.add_option('--no-cmake', dest='cmake', action='store_const',
+                            const=False, default=True,
+                            help="Don't modify cmake files")
         parser.add_option('--alg', dest='alg', action='store_const',
                             const=True, default=False,
                             help='Create an Algorithm stub. This adds some methods common to algorithms.')
