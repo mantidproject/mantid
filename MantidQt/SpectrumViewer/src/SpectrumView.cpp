@@ -31,7 +31,6 @@ SpectrumView::SpectrumView(QWidget *parent)
     : QMainWindow(parent), WorkspaceObserver(), m_ui(new Ui::SpectrumViewer()),
       m_sliderHandler(NULL), m_rangeHandler(NULL), m_emodeHandler(NULL) {
   m_ui->setupUi(this);
-  // m_ui->x_min_input->setValidator(new QDoubleValidator(this));
   connect(m_ui->imageTabs, SIGNAL(currentChanged(int)), this,
           SLOT(changeSpectrumDisplay(int)));
   connect(m_ui->imageTabs, SIGNAL(tabCloseRequested(int)), this,
@@ -90,7 +89,6 @@ void SpectrumView::renderWorkspace(
 
   // Connect WorkspaceObserver signals
   connect(this, SIGNAL(needToClose()), this, SLOT(closeWindow()));
-  // connect(this, SIGNAL(needToUpdate()), this, SLOT(updateWorkspace()));
 
   // Set the window title
   std::string windowTitle = "SpectrumView (" + wksp->getTitle() + ")";
