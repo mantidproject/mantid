@@ -88,7 +88,6 @@ void MSDFit::run() {
   msdAlg->setProperty("XEnd", xEnd);
   msdAlg->setProperty("SpecMin", specMin);
   msdAlg->setProperty("SpecMax", specMax);
-  msdAlg->setProperty("Plot", false);
   msdAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
 
   m_batchAlgoRunner->addAlgorithm(msdAlg);
