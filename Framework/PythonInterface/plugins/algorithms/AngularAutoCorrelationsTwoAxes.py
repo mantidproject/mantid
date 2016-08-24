@@ -11,7 +11,7 @@ import time
 class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
 
     def category(self):
-        return "Simulation\\nMOLDYN"
+        return "Simulation"
 
     def summary(self):
         return ("Calculates the angular auto-correlations of molecules in a simulation along two user-defined axes. "

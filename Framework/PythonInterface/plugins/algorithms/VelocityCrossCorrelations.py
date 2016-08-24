@@ -13,7 +13,7 @@ import os
 class VelocityCrossCorrelations(PythonAlgorithm):
 
     def category(self):
-        return "Simulation\\nMOLDYN"
+        return "Simulation"
 
     def summary(self):
         return ("Imports trajectory data from an nMoldyn-generated .nc file and calculates velocity "
