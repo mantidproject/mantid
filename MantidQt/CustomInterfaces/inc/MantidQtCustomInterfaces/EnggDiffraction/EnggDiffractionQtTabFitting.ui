@@ -68,6 +68,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_load">
+          <property name="text">
+           <string>Load</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item row="4" column="0">
