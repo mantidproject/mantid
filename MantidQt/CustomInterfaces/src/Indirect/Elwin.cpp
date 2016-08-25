@@ -499,15 +499,15 @@ void Elwin::saveClicked() {
       getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
 
   if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(),
-                                   true))
+                                   false))
     addSaveWorkspaceToQueue(workspaceBaseName + "_eq");
 
   if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(),
-                                   true))
+                                   false))
     addSaveWorkspaceToQueue(workspaceBaseName + "_eq2");
 
   if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(),
-                                   true))
+                                   false))
     addSaveWorkspaceToQueue(workspaceBaseName + "_elf");
 
   m_batchAlgoRunner->executeBatchAsync();
