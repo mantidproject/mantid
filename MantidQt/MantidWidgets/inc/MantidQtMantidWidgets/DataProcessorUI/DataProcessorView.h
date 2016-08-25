@@ -2,7 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORVIEW_H
 
 #include "MantidKernel/System.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 
 #include <map>
 #include <set>
@@ -48,7 +48,7 @@ public:
   virtual ~DataProcessorView(){};
 
   // Connect the model
-  virtual void showTable(QDataProcessorTreeModel_sptr model) = 0;
+  virtual void showTable(QDataProcessorTwoLevelTreeModel_sptr model) = 0;
 
   // Dialog/Prompt methods
   virtual std::string requestNotebookPath() = 0;

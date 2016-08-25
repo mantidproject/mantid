@@ -6,7 +6,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 #include <gmock/gmock.h>
 
 using namespace MantidQt::MantidWidgets;
@@ -54,7 +54,7 @@ public:
   MOCK_METHOD1(loadSettings, void(std::map<std::string, QVariant> &));
 
   // Calls we don't care about
-  void showTable(QDataProcessorTreeModel_sptr) override{};
+  void showTable(QDataProcessorTwoLevelTreeModel_sptr) override{};
   void saveSettings(const std::map<std::string, QVariant> &) override{};
   std::string getProcessInstrument() const override { return "FAKE"; }
 

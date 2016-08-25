@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "ui_DataProcessorWidget.h"
@@ -49,7 +49,7 @@ public:
   ~QDataProcessorWidget() override;
 
   // Connect the model
-  void showTable(QDataProcessorTreeModel_sptr model) override;
+  void showTable(QDataProcessorTwoLevelTreeModel_sptr model) override;
 
   // Dialog/Prompt methods
   std::string requestNotebookPath() override;
@@ -95,7 +95,7 @@ private:
   // the presenter
   std::unique_ptr<DataProcessorPresenter> m_presenter;
   // the models
-  QDataProcessorTreeModel_sptr m_model;
+  QDataProcessorTwoLevelTreeModel_sptr m_model;
   // the interface
   Ui::DataProcessorWidget ui;
   // the workspace the user selected to open

@@ -13,7 +13,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/DataProcessorWhiteList.cpp
 	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
 	src/DataProcessorUI/ParseKeyValueString.cpp
-	src/DataProcessorUI/QDataProcessorTreeModel.cpp
+	src/DataProcessorUI/QDataProcessorTwoLevelTreeModel.cpp
 	src/DataProcessorUI/QDataProcessorWidget.cpp
 	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
 	src/DataSelector.cpp
@@ -119,7 +119,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/CheckboxHeader.h
     inc/MantidQtMantidWidgets/ColorBarWidget.h
     inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h
-    inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h
     inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h
     inc/MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h
     inc/MantidQtMantidWidgets/DataSelector.h
@@ -336,7 +336,7 @@ set ( TEST_FILES
   DataProcessorUI/DataProcessorWhiteListTest.h
   DataProcessorUI/GenericDataProcessorPresenterTest.h
   DataProcessorUI/ParseKeyValueStringTest.h
-  DataProcessorUI/QDataProcessorTreeModelTest.h
+  DataProcessorUI/QDataProcessorTwoLevelTreeModelTest.h
 )
 
 find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
