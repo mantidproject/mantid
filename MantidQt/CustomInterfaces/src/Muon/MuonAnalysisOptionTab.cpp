@@ -73,7 +73,7 @@ void MuonAnalysisOptionTab::initLayout() {
   m_autoSaver.registerWidget(m_uiForm.hideGraphs, "hiddenGraphs", true);
   m_autoSaver.registerWidget(m_uiForm.spinBoxNPlotsToKeep, "fitsToKeep", 1);
   m_autoSaver.registerWidget(m_uiForm.chkCompatibilityMode, "compatibilityMode",
-                             false);
+                             true);
   m_autoSaver.endGroup();
 
   // Set validators for double fields

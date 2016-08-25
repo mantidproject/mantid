@@ -19,7 +19,7 @@ MuonAnalysisFitFunctionPresenter::MuonAnalysisFitFunctionPresenter(
     QObject *parent, IMuonFitFunctionControl *fitBrowser,
     IFunctionBrowser *funcBrowser)
     : QObject(parent), m_fitBrowser(fitBrowser), m_funcBrowser(funcBrowser),
-      m_compatibilityMode(false) {
+      m_compatibilityMode(true) {
   doConnect();
 }
 
