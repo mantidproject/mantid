@@ -78,8 +78,8 @@ public:
   void setClipboard(const std::string &text) override;
 
   // Accessor methods
-  std::map<int, std::set<int>> getSelectedRows() const override;
-  std::set<int> getSelectedGroups() const override;
+  std::map<int, std::set<int>> getSelectedChildren() const override;
+  std::set<int> getSelectedParents() const override;
   std::string getProcessInstrument() const override;
   std::string getWorkspaceToOpen() const override;
   std::string getClipboard() const override;

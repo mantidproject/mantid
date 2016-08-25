@@ -423,11 +423,11 @@ std::string QDataProcessorWidget::getProcessInstrument() const {
 }
 
 /**
-Get the indices of the highlighted runs (rows)
-@returns :: a map where keys are group indices and values are sets containing
-the highlighted row numbers
+Get the indices of the highlighted items that have a valid parent
+@returns :: a map where keys are parents of selected items and values are sets
+containing the highlighted children
 */
-std::map<int, std::set<int>> QDataProcessorWidget::getSelectedRows() const {
+std::map<int, std::set<int>> QDataProcessorWidget::getSelectedChildren() const {
   std::map<int, std::set<int>> rows;
   auto selectionModel = ui.viewTable->selectionModel();
   if (selectionModel) {
@@ -435,38 +435,31 @@ std::map<int, std::set<int>> QDataProcessorWidget::getSelectedRows() const {
     for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
 
       if (it->parent().isValid()) {
-        // This item is a run (row)
-        // Add run and corresponding group
-        int run = it->row();
-        int group = it->parent().row();
-        rows[group].insert(run);
+        int children = it->row();
+        int parent = it->parent().row();
+        rows[parent].insert(children);
       }
-      // else :
-      // A group was selected, selected groups can be retrieved using
-      // getSelectedGroups()
     }
   }
   return rows;
 }
 
 /**
-Get the indices of the highlighted groups
-@returns :: a sets containing
-the highlighted row numbers
+Get the indices of the highlighted items that have invalid parent
+@returns :: a set containing the highlighted item numbers
 */
-std::set<int> QDataProcessorWidget::getSelectedGroups() const {
-  std::set<int> groups;
+std::set<int> QDataProcessorWidget::getSelectedParents() const {
+  std::set<int> parents;
   auto selectionModel = ui.viewTable->selectionModel();
   if (selectionModel) {
     auto selectedRows = selectionModel->selectedRows();
     for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
       if (!it->parent().isValid()) {
-        // This group was selected
-        groups.insert(it->row());
+        parents.insert(it->row());
       }
     }
   }
-  return groups;
+  return parents;
 }
 
 /**

@@ -72,7 +72,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
       m_processor(processor), m_postprocessor(postprocessor), m_mainPresenter(),
-      m_tableDirty(false), m_colGroup(0) {
+      m_tableDirty(false) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -229,9 +229,9 @@ void GenericDataProcessorPresenter::process() {
   }
 
   // Selected groups
-  auto groups = m_view->getSelectedGroups();
+  auto groups = m_view->getSelectedParents();
   // Selected rows
-  auto rows = m_view->getSelectedRows();
+  auto rows = m_view->getSelectedChildren();
 
   if (groups.empty() && rows.empty()) {
     if (m_options["WarnProcessAll"].toBool()) {
@@ -846,8 +846,8 @@ is appended to that group. If nothing was selected, the new row is appended to
 the last group in the table.
 */
 void GenericDataProcessorPresenter::appendRow() {
-  auto selectedGroups = m_view->getSelectedGroups();
-  auto selectedRows = m_view->getSelectedRows();
+  auto selectedGroups = m_view->getSelectedParents();
+  auto selectedRows = m_view->getSelectedChildren();
 
   if (!selectedRows.empty()) {
     // Some rows were selected
@@ -886,7 +886,7 @@ void GenericDataProcessorPresenter::appendRow() {
 Insert a group after the last selected group
 */
 void GenericDataProcessorPresenter::appendGroup() {
-  auto selectedGroups = m_view->getSelectedGroups();
+  auto selectedGroups = m_view->getSelectedParents();
 
   if (selectedGroups.empty()) {
     // Append group at the end of the table
@@ -902,7 +902,7 @@ void GenericDataProcessorPresenter::appendGroup() {
 Delete row(s) from the model
 */
 void GenericDataProcessorPresenter::deleteRow() {
-  auto selectedRows = m_view->getSelectedRows();
+  auto selectedRows = m_view->getSelectedChildren();
   for (auto it = selectedRows.rbegin(); it != selectedRows.rend(); ++it) {
     const int groupId = it->first;
     auto rows = it->second;
@@ -917,7 +917,7 @@ void GenericDataProcessorPresenter::deleteRow() {
 Delete group(s) from the model
 */
 void GenericDataProcessorPresenter::deleteGroup() {
-  auto selectedGroups = m_view->getSelectedGroups();
+  auto selectedGroups = m_view->getSelectedParents();
   for (auto group = selectedGroups.rbegin(); group != selectedGroups.rend();
        ++group) {
     m_model->removeRow(*group);
@@ -935,7 +935,7 @@ void GenericDataProcessorPresenter::groupRows() {
   // If they don't, remove rows from their groups and add them to a
   // new group
 
-  const auto selectedRows = m_view->getSelectedRows();
+  const auto selectedRows = m_view->getSelectedChildren();
 
   if (selectedRows.empty()) {
     // no rows were selected
@@ -1255,7 +1255,7 @@ int GenericDataProcessorPresenter::numRowsInGroup(int group) const {
 void GenericDataProcessorPresenter::expandSelection() {
   std::set<int> groupIds;
 
-  auto items = m_view->getSelectedRows();
+  auto items = m_view->getSelectedChildren();
   if (items.empty())
     return;
 
@@ -1267,7 +1267,7 @@ void GenericDataProcessorPresenter::expandSelection() {
 
 /** Clear the currently selected rows */
 void GenericDataProcessorPresenter::clearSelected() {
-  const auto selectedRows = m_view->getSelectedRows();
+  const auto selectedRows = m_view->getSelectedChildren();
 
   for (const auto &item : selectedRows) {
     int group = item.first;
@@ -1285,7 +1285,7 @@ void GenericDataProcessorPresenter::clearSelected() {
 void GenericDataProcessorPresenter::copySelected() {
   std::vector<std::string> lines;
 
-  const auto selectedRows = m_view->getSelectedRows();
+  const auto selectedRows = m_view->getSelectedChildren();
 
   if (selectedRows.empty()) {
     m_view->setClipboard(std::string());
@@ -1333,7 +1333,7 @@ void GenericDataProcessorPresenter::pasteSelected() {
 
   // If we have rows selected, we'll overwrite them. If not, we'll append new
   // rows.
-  const auto selectedRows = m_view->getSelectedRows();
+  const auto selectedRows = m_view->getSelectedChildren();
   if (selectedRows.empty()) {
     // No rows were selected
     // Use group where rows in clipboard belong and paste new rows to it
@@ -1411,7 +1411,7 @@ void GenericDataProcessorPresenter::setInstrumentList(
 
 /** Plots any currently selected rows */
 void GenericDataProcessorPresenter::plotRow() {
-  auto selectedRows = m_view->getSelectedRows();
+  auto selectedRows = m_view->getSelectedChildren();
 
   if (selectedRows.empty())
     return;
@@ -1444,7 +1444,7 @@ void GenericDataProcessorPresenter::plotRow() {
 
 /** Plots any currently selected groups */
 void GenericDataProcessorPresenter::plotGroup() {
-  auto selectedGroups = m_view->getSelectedGroups();
+  auto selectedGroups = m_view->getSelectedParents();
 
   if (selectedGroups.empty())
     return;

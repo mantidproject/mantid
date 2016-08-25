@@ -73,8 +73,8 @@ public:
   virtual void setModel(const std::string &name) = 0;
 
   // Accessor methods
-  virtual std::map<int, std::set<int>> getSelectedRows() const = 0;
-  virtual std::set<int> getSelectedGroups() const = 0;
+  virtual std::map<int, std::set<int>> getSelectedChildren() const = 0;
+  virtual std::set<int> getSelectedParents() const = 0;
   virtual std::string getWorkspaceToOpen() const = 0;
   virtual std::string getClipboard() const = 0;
   virtual std::string getProcessInstrument() const = 0;

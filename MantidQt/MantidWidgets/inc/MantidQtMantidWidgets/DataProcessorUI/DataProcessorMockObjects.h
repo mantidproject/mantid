@@ -36,8 +36,8 @@ public:
 
   // IO
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
-  MOCK_CONST_METHOD0(getSelectedRows, std::map<int, std::set<int>>());
-  MOCK_CONST_METHOD0(getSelectedGroups, std::set<int>());
+  MOCK_CONST_METHOD0(getSelectedChildren, std::map<int, std::set<int>>());
+  MOCK_CONST_METHOD0(getSelectedParents, std::set<int>());
   MOCK_CONST_METHOD0(getClipboard, std::string());
   MOCK_METHOD0(getEnableNotebook, bool());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
