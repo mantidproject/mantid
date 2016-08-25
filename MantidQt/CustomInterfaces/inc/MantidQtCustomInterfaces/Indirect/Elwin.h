@@ -36,7 +36,6 @@ private slots:
   void plotClicked();
 
 private:
-
   Ui::Elwin m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
 };

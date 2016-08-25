@@ -249,7 +249,6 @@ void Elwin::unGroupInput(bool error) {
   m_uiForm.pbSave->setEnabled(true);
 }
 
-
 bool Elwin::validate() {
   UserInputValidator uiv;
 
@@ -475,15 +474,19 @@ void Elwin::updateRS(QtProperty *prop, double val) {
  */
 void Elwin::plotClicked() {
 
-  auto workspaceBaseName = getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
+  auto workspaceBaseName =
+      getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
 
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(), true))
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(),
+                                   true))
     plotSpectrum(workspaceBaseName + "_eq");
 
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(), true))
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(),
+                                   true))
     plotSpectrum(workspaceBaseName + "_eq2");
 
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(), true))
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(),
+                                   true))
     plotSpectrum((workspaceBaseName + "_elf"), 0, 9);
 }
 
@@ -492,15 +495,19 @@ void Elwin::plotClicked() {
  */
 void Elwin::saveClicked() {
 
-  auto workspaceBaseName = getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
+  auto workspaceBaseName =
+      getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
 
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(), true))
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(),
+                                   true))
     addSaveWorkspaceToQueue(workspaceBaseName + "_eq");
 
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(), true))
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(),
+                                   true))
     addSaveWorkspaceToQueue(workspaceBaseName + "_eq2");
 
-  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(), true))
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(),
+                                   true))
     addSaveWorkspaceToQueue(workspaceBaseName + "_elf");
 
   m_batchAlgoRunner->executeBatchAsync();
