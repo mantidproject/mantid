@@ -40,7 +40,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
       // Default start and end. Find the limits
       Mantid::Geometry::VecIMDDimension_const_sptr nonIntegDims =
           m_workspace->getNonIntegratedDimensions();
-      std::string alongDim = "";
+      std::string alongDim;
       if (!nonIntegDims.empty())
         alongDim = nonIntegDims[0]->getName();
       else
@@ -51,7 +51,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
       m_end = VMD(nd);
       for (size_t d = 0; d < nd; d++) {
         IMDDimension_const_sptr dim = m_workspace->getDimension(d);
-        if (dim->getDimensionId() == alongDim) {
+        if (dim->getName() == alongDim) {
           // All the way through in the single dimension
           m_start[d] = dim->getMinimum();
           m_end[d] = dim->getMaximum();
