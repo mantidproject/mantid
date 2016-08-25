@@ -263,7 +263,7 @@ void MaxEnt::exec() {
 
   nspec = complexData ? nspec / 2 : nspec;
   outImageWS =
-      WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
+      WorkspaceFactory::Instance().create(inWS, 2 * nspec, npoints, npoints);
   outDataWS =
       WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
   outEvolChi = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
