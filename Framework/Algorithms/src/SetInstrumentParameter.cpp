@@ -84,9 +84,9 @@ void SetInstrumentParameter::exec() {
                                "PeaksWorkspace provided as input");
   } else {
     throw std::runtime_error("Could not get a valid instrument from the "
-                               "workspace which does not seem to be valid as "
-                               "input (must be either MatrixWorkspace or "
-                               "PeaksWorkspace");
+                             "workspace which does not seem to be valid as "
+                             "input (must be either MatrixWorkspace or "
+                             "PeaksWorkspace");
   }
 
   // get the data that the user wants to add
