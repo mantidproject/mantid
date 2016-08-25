@@ -158,4 +158,37 @@ private:
   }
 };
 
+class ConvertToPointDataTestPerformance : public CxxTest::TestSuite {
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConvertToPointDataTestPerformance *createSuite() {
+    return new ConvertToPointDataTestPerformance();
+  }
+
+  static void destroySuite(ConvertToPointDataTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() {
+    inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(20000, 10000);
+  }
+
+  void tearDown() {
+    Mantid::API::AnalysisDataService::Instance().remove("output");
+  }
+
+  void testPerformanceWS() {
+    ConvertToPointData ctpd;
+    ctpd.initialize();
+    ctpd.setProperty("InputWorkspace", inputWS);
+    ctpd.setProperty("OutputWorkspace", "output");
+    ctpd.execute();
+  }
+
+private:
+  Workspace2D_sptr inputWS;
+};
+
 #endif // CONVERTTOPONTDATATEST_H_

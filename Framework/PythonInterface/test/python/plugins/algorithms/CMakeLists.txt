@@ -107,6 +107,7 @@ set ( TEST_PY_FILES
   PoldiMergeTest.py
   VelocityCrossCorrelationsTest.py
   VelocityAutoCorrelationsTest.py
+  SelectNexusFilesByMetadataTest.py
   VesuvioDiffractionReductionTest.py
   VesuvioPreFitTest.py
   VesuvioResolutionTest.py
