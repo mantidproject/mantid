@@ -104,7 +104,6 @@ void FindSXPeaks::exec() {
   Kernel::V3D source = localworkspace->getInstrument()->getSource()->getPos();
   Kernel::V3D L1 = sample - source;
   double l1 = L1.norm();
-  //
 
   peakvector entries;
   // Reserve 1000 peaks to make later push_back fast for first 1000 peaks, but
@@ -187,8 +186,6 @@ void FindSXPeaks::exec() {
 
     Mantid::Kernel::V3D L2 = det->getPos();
     L2 -= sample;
-    // std::cout << "r,th,phi,t: " << L2.norm() << "," << th2*180/M_PI << "," <<
-    // phi*180/M_PI << "," << tof << "\n";
 
     SXPeak peak(tof, th2, phi, *maxY, specs, l1 + L2.norm(), det->getID(), localworkspace->getInstrument());
     PARALLEL_CRITICAL(entries) { entries.push_back(peak); }
@@ -214,13 +211,6 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv) {
   peakvector finalv;
 
   for (const auto &currentPeak : pcv) {
-    /*for (auto & finalPeak : finalv) {
-      if (currentPeak.compare(finalPeak, resol)) {
-        finalPeak += currentPeak;
-        found = true;
-        break;
-      }
-    }*/
     auto pos = std::find_if(finalv.begin(), finalv.end(),
                             [&currentPeak, resol](SXPeak &peak) {
                               bool result = currentPeak.compare(peak, resol);
