@@ -813,9 +813,9 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp,
           result = param;
           break;
         }
-      }   // found->firdst
-    }     // it_found != m_map.end()
-  }       //! m_map.empty()
+      } // found->firdst
+    }   // it_found != m_map.end()
+  }     //! m_map.empty()
   return result;
 }
 
@@ -961,7 +961,7 @@ void ParameterMap::clearPositionSensitiveCaches() {
 /// @param location :: The location
 void ParameterMap::setCachedLocation(const IComponent *comp,
                                      const V3D &location) const {
-    m_cacheLocMap.setCache(comp->getComponentID(), location);
+  m_cacheLocMap.setCache(comp->getComponentID(), location);
 }
 
 /// Attempts to retrieve a location from the location cache
@@ -978,7 +978,7 @@ bool ParameterMap::getCachedLocation(const IComponent *comp,
 /// @param rotation :: The rotation as a quaternion
 void ParameterMap::setCachedRotation(const IComponent *comp,
                                      const Quat &rotation) const {
-    m_cacheRotMap.setCache(comp->getComponentID(), rotation);
+  m_cacheRotMap.setCache(comp->getComponentID(), rotation);
 }
 
 /// Attempts to retrieve a rotation from the rotation cache
@@ -995,7 +995,7 @@ bool ParameterMap::getCachedRotation(const IComponent *comp,
 /// @param box :: A reference to the bounding box
 void ParameterMap::setCachedBoundingBox(const IComponent *comp,
                                         const BoundingBox &box) const {
-    m_boundingBoxMap.setCache(comp->getComponentID(), box);
+  m_boundingBoxMap.setCache(comp->getComponentID(), box);
 }
 
 /// Attempts to retrieve a bounding box from the cache

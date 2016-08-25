@@ -66,8 +66,7 @@ class MANTID_GEOMETRY_DLL ParameterMap {
 public:
   /// Parameter map typedef
   typedef tbb::concurrent_unordered_multimap<ComponentID,
-                                             boost::shared_ptr<Parameter>>
-      pmap;
+                                             boost::shared_ptr<Parameter>> pmap;
   /// Parameter map iterator typedef
   typedef tbb::concurrent_unordered_multimap<
       ComponentID, boost::shared_ptr<Parameter>>::iterator pmap_it;

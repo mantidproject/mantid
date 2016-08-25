@@ -160,10 +160,12 @@ private:
   /// internal cache map
   tbb::concurrent_unordered_map<KEYTYPE, VALUETYPE> m_cacheMap;
   /// iterator typedef
-  typedef typename tbb::concurrent_unordered_map<KEYTYPE, VALUETYPE>::iterator CacheMapIterator;
+  typedef typename tbb::concurrent_unordered_map<KEYTYPE, VALUETYPE>::iterator
+      CacheMapIterator;
   /// const_iterator typedef
-  typedef typename tbb::concurrent_unordered_map<KEYTYPE, VALUETYPE>::const_iterator
-      CacheMapConstIterator;
+  typedef
+      typename tbb::concurrent_unordered_map<KEYTYPE, VALUETYPE>::const_iterator
+          CacheMapConstIterator;
 };
 
 } // namespace Kernel
