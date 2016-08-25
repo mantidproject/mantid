@@ -60,7 +60,7 @@ if __name__=="__main__":
     # run the test if only if the required package is present
     try:
         import h5py
+        unittest.main()
     except ImportError:
         pass
-    else:
-        unittest.main()
+
