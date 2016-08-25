@@ -31,7 +31,6 @@ class SetDetScale(PythonAlgorithm):
 
         self.declareProperty(WorkspaceProperty("Workspace", "",
                                                validator=InstrumentValidator(),
-                                               optional=PropertyMode.Optional,
                                                direction=Direction.InOut),
                              doc="MatrixWorkspace or PeaksWorkspace with instrument.")
 
