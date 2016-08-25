@@ -154,9 +154,13 @@ void FindSXPeaks::exec() {
     double background = 0.5 * (1.0 + Y.front() + Y.back());
     if (intensity < SB * background) // This is not a peak.
       continue;
-    MantidVec::difference_type d = std::distance(Y.begin(), maxY);
+
     // t.o.f. of the peak
-    double tof = 0.5 * (*(X.begin() + d) + *(X.begin() + d + 1));
+    MantidVec::difference_type d = std::distance(Y.begin(), maxY);
+    auto leftBinPosition = X.begin() + d;
+    double leftBinEdge = *leftBinPosition;
+    double rightBinEdge = *std::next(leftBinPosition);
+    double tof = 0.5 * (leftBinEdge + rightBinEdge);
 
     Geometry::IDetector_const_sptr det;
     try {
