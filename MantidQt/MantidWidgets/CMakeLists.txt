@@ -110,6 +110,9 @@ set ( SRC_FILES
     src/InstrumentView/UnwrappedSurface.cpp
     src/InstrumentView/Viewport.cpp
     src/InstrumentView/XIntegrationControl.cpp
+    src/WorkspacePresenter/WorkspacePresenter.cpp
+	src/WorkspacePresenter/ADSAdapter.cpp
+	src/WorkspacePresenter/WorkspaceDockView.cpp
 )
 
 # Header files with Q_OBJECT that qmake will "moc"
@@ -190,7 +193,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/InstrumentView/Shape2DCollection.h
     inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h
     inc/MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.h
-	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
+    inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
 )
 
 # Add the include files are NOT already in MOC_FILES
@@ -284,8 +287,16 @@ set ( INC_FILES
     inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h
     inc/MantidQtMantidWidgets/InstrumentView/Viewport.h
     inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
-	inc/MantidQtMantidWidgets/ProgressableView.h
-	inc/MantidQtMantidWidgets/ProgressPresenter.h
+    inc/MantidQtMantidWidgets/ProgressableView.h
+    inc/MantidQtMantidWidgets/ProgressPresenter.h
+    inc/MantidQtMantidWidgets/WorkspacePresenter/ViewNotifiable.h
+    inc/MantidQtMantidWidgets/WorkspacePresenter/ADSNotifiable.h
+    inc/MantidQtMantidWidgets/WorkspacePresenter/IWorkspacePresenter.h
+    inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/IADSAdapter.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceDockView.h
 )
 
 # QtDesigner UI files to process
@@ -333,6 +344,7 @@ set ( TEST_FILES
   DataProcessorUI/GenericDataProcessorPresenterTest.h
   DataProcessorUI/ParseKeyValueStringTest.h
   DataProcessorUI/QDataProcessorTreeModelTest.h
+  WorkspacePresenter/WorkspacePresenterTest.h
 )
 
 find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
