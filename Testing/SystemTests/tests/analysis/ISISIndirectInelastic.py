@@ -674,7 +674,7 @@ class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
 
         SofQWMoments(Sample=self.input_workspace, EnergyMin=self.e_min,
                      EnergyMax=self.e_max, Scale=self.scale,
-                     Plot=False, Save=False, OutputWorkspace=self.input_workspace + '_Moments')
+                     OutputWorkspace=self.input_workspace + '_Moments')
 
         self.result_names = [self.input_workspace + '_Moments']
 
@@ -741,7 +741,7 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
             Load(Filename=filename, OutputWorkspace=filename)
         GroupWorkspaces(InputWorkspaces=self.files, OutputWorkspace=elwin_input)
 
-        ElasticWindowMultiple(InputWorkspaces=elwin_input, Plot=False,
+        ElasticWindowMultiple(InputWorkspaces=elwin_input,
                               IntegrationRangeStart=self.eRange[0], IntegrationRangeEnd=self.eRange[1],
                               OutputInQ=elwin_results[0], OutputInQSquared=elwin_results[1],
                               OutputELF=elwin_results[2])
@@ -758,8 +758,7 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
         msdfit_result = MSDFit(InputWorkspace=eq2_file,
                                XStart=self.startX,
                                XEnd=self.endX,
-                               SpecMax=1,
-                               Plot=False)
+                               SpecMax=1)
 
         # Clean up the intermediate files.
         for filename in int_files:
