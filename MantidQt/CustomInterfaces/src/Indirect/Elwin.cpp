@@ -224,8 +224,6 @@ void Elwin::run() {
 
   // Set the result workspace for Python script export
   m_pythonExportWsName = qSquaredWorkspace;
-
-  m_elwinAlg = elwinMultAlg;
 }
 
 /**
