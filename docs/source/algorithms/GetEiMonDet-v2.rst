@@ -62,7 +62,7 @@ Usage
 	# that it actually is the monitor.
 
 	# First the spectra. They contain a single peak at peakPosition.
-	spectrum = 'name = Gaussian, PeakCentre = {}, Height = 500.0, Sigma = 30.0'.format(peakPosition)
+	spectrum = 'name = Gaussian, PeakCentre = {0}, Height = 500.0, Sigma = 30.0'.format(peakPosition)
 	# The workspace itself.
 	ws = CreateSampleWorkspace(WorkspaceType = 'Histogram', XUnit = 'TOF',\
 	XMin = 100.0, XMax = 1100.0, BinWidth = 10.0,\
@@ -81,9 +81,9 @@ Usage
 	Detectors = "100-199", Monitor = 200,\
 	NominalIncidentEnergy = E_i, PulseInterval = pulseInterval)
 
-	print('Nominal incident energy: {}'.format(E_i))
-	print('Calibrated energy: {}'.format(calibratedE_i))
-	print('Real energy: {}'.format(realE_i))
+	print('Nominal incident energy: {0}'.format(E_i))
+	print('Calibrated energy: {0}'.format(calibratedE_i))
+	print('Real energy: {0}'.format(realE_i))
 
 Output:
 
