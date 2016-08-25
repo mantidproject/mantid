@@ -387,7 +387,6 @@ set ( TEST_FILES
 	LoadAscii2Test.h
 	LoadAsciiTest.h
 	LoadBBYTest.h
-	LoadBankFromDiskTaskTest.h
 	LoadCalFileTest.h
 	LoadCanSAS1dTest.h
 	LoadDaveGrpTest.h
