@@ -36,13 +36,9 @@ private slots:
   void plotClicked();
 
 private:
-  void addSaveAlgorithm(const std::string &workspaceName,
-                        std::string filename = "");
 
   Ui::Elwin m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
-  // alg
-  Mantid::API::IAlgorithm_sptr m_elwinAlg;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

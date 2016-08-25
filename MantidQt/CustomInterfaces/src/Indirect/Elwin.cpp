@@ -475,23 +475,16 @@ void Elwin::updateRS(QtProperty *prop, double val) {
  */
 void Elwin::plotClicked() {
 
-  auto outputWs = m_elwinAlg->getPropertyValue("OutputInQ");
-  checkADSForPlotSaveWorkspace(outputWs, true);
-  plotSpectrum(QString::fromStdString(outputWs));
+  auto workspaceBaseName = getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
 
-  auto outputWsSquared = m_elwinAlg->getPropertyValue("OutputInQSquared");
-  checkADSForPlotSaveWorkspace(outputWsSquared, true);
-  plotSpectrum(QString::fromStdString(outputWsSquared));
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(), true))
+    plotSpectrum(workspaceBaseName + "_eq");
 
-  auto elfWs = m_elwinAlg->getPropertyValue("OutputELF");
-  checkADSForPlotSaveWorkspace(elfWs, true);
-  plotSpectrum(QString::fromStdString(elfWs), 0, 9);
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(), true))
+    plotSpectrum(workspaceBaseName + "_eq2");
 
-  if (m_blnManager->value(m_properties["Normalise"])) {
-    auto eltWs = m_elwinAlg->getPropertyValue("OutputELT");
-    checkADSForPlotSaveWorkspace(eltWs, true);
-    plotSpectrum(QString::fromStdString(eltWs), 0, 9);
-  }
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(), true))
+    plotSpectrum((workspaceBaseName + "_elf"), 0, 9);
 }
 
 /**
@@ -499,23 +492,17 @@ void Elwin::plotClicked() {
  */
 void Elwin::saveClicked() {
 
-  auto outputWs = m_elwinAlg->getPropertyValue("OutputInQ");
-  checkADSForPlotSaveWorkspace(outputWs, false);
-  addSaveWorkspaceToQueue(QString::fromStdString(outputWs));
+  auto workspaceBaseName = getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
 
-  auto outputWsSquared = m_elwinAlg->getPropertyValue("OutputInQSquared");
-  checkADSForPlotSaveWorkspace(outputWsSquared, true);
-  addSaveWorkspaceToQueue(QString::fromStdString(outputWsSquared));
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(), true))
+    addSaveWorkspaceToQueue(workspaceBaseName + "_eq");
 
-  auto elfWs = m_elwinAlg->getPropertyValue("OutputELF");
-  checkADSForPlotSaveWorkspace(elfWs, true);
-  addSaveWorkspaceToQueue(QString::fromStdString(elfWs));
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(), true))
+    addSaveWorkspaceToQueue(workspaceBaseName + "_eq2");
 
-  if (m_blnManager->value(m_properties["Normalise"])) {
-    auto eltWs = m_elwinAlg->getPropertyValue("OutputELT");
-    checkADSForPlotSaveWorkspace(eltWs, true);
-    addSaveWorkspaceToQueue(QString::fromStdString(eltWs));
-  }
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(), true))
+    addSaveWorkspaceToQueue(workspaceBaseName + "_elf");
+
   m_batchAlgoRunner->executeBatchAsync();
 }
 } // namespace IDA
