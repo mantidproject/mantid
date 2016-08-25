@@ -91,7 +91,7 @@ class ABINS(PythonAlgorithm):
 
         self.declareProperty(name="ScaleByCrossSection", defaultValue='Incoherent',
                              validator=StringListValidator(['Total', 'Incoherent', 'Coherent']),
-                             doc="Sum the partial dynamical structure factors by the scattering cross section.")
+                             doc="Scale the partial dynamical structure factors by the scattering cross section.")
 
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", '', Direction.Output),
@@ -251,6 +251,7 @@ class ABINS(PythonAlgorithm):
 
         return partial_workspaces
 
+
     def _create_partial_s_powder_sum_workspaces(self, atoms_symbol=None, s_data=None):
 
         """
@@ -366,7 +367,7 @@ class ABINS(PythonAlgorithm):
         self._set_workspace_units(wrk=_ws_name)
 
         # rebining
-        Rebin(Inputworkspace=_ws_name, Params=[AbinsParameters._bin_width], OutputWorkspace=_ws_name)
+        Rebin(InputWorkspace=_ws_name, Params=[AbinsParameters._bin_width], OutputWorkspace=_ws_name)
 
         # Add the sample material to the workspace
         SetSampleMaterial(InputWorkspace=_ws_name, ChemicalFormula=atom_name)
