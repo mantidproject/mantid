@@ -1,7 +1,7 @@
 #pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import (WorkspaceProperty, FileProperty, FileAction,
-                        DataProcessorAlgorithm, AlgorithmFactory, mtd)
+                        DataProcessorAlgorithm, AlgorithmFactory)
 from mantid.simpleapi import *
 
 
@@ -13,7 +13,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
     _peak_range = None
     _intensity_scale = None
     _mirror_sense = None
-    _unmirror_option = None
 
 
 
@@ -31,12 +30,17 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
                                           extensions=['nxs']),
                              doc='List of input file (s)')
 
+        self.declareProperty(name='MirrorSense',
+                             defaultValue=True,
+                             doc='If True (default), left and right wing will be summed \n'
+                                 'If False, no transformation of the workspace will be performed')
+
         self.declareProperty(FileProperty(name='MapFile', defaultValue='',
                                           action=FileAction.OptionalLoad,
                                           extensions=['xml']),
                              doc='Detector grouping map file')
 
-        self.declareProperty(FloatArrayProperty(name='PeakRange', values=[-0.01,0.01],
+        self.declareProperty(FloatArrayProperty(name='PeakRange', values=[-0.01, 0.01],
                                                 validator=FloatArrayMandatoryValidator()),
                              doc='Peak range in energy transfer in meV')
 
@@ -51,40 +55,48 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
     def PyExec(self):
         self._setup()
 
+        if self._mirror_sense is True:
+            # Run requires to have two wings
+            unmirror_option = 3
+        else:
+            # Run can have one wing (or two wings -> set peak range accordingly)
+            unmirror_option = 0
+
         # Do an energy transfer reduction
-        temp = IndirectILLReduction(Run=self._input_file,
-                                    MapFile=self._map_file,
-                                    SumRuns=True,DebugMode=False,
-                                    UnmirrorOption=self._unmirror_option)
+        __temp = IndirectILLReduction(Run=self._input_file,
+                                       MapFile=self._map_file,
+                                       SumRuns=True, DebugMode=False,
+                                       UnmirrorOption=unmirror_option)
 
         # Integrate within peak range
-        number_histograms = temp.getItem(0).getNumberHistograms()
-
-        ws_name = temp.getItem(0).getName()
-        Integration(InputWorkspace=ws_name,
-                    OutputWorkspace=ws_name,
+        __ws_name = __temp.getItem(0).getName()
+        __ws_name = Integration(InputWorkspace=__ws_name,
                     RangeLower=float(self._peak_range[0]),
                     RangeUpper=float(self._peak_range[1]))
 
-        ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=ws_name,
-                                                               OutputWorkspace='temp_ws_mask')
-        DeleteWorkspace(ws_mask)
-
         # Process automatic scaling
-        SumSpectra(InputWorkspace=ws_name,OutputWorkspace='temp_sum')
-        total = mtd['temp_sum'].readY(0)[0]
-        DeleteWorkspace('temp_sum')
+        if self._intensity_scale == 1:
+            number_histograms = __temp.getItem(0).getNumberHistograms()
 
-        if self._intensity_scale is None:
+            __ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=__ws_name)
+            DeleteWorkspace(__ws_mask)
+
+            __temp_sum = SumSpectra(InputWorkspace=__ws_name)
+
+            total = __temp_sum.readY(0)[0]
+            DeleteWorkspace(__temp_sum)
+
             self._intensity_scale = 1 / (total / (number_histograms - num_zero_spectra))
 
+        DeleteWorkspace(__temp)
+
         # Apply scaling factor
-        Scale(InputWorkspace=ws_name,
+        Scale(InputWorkspace=__ws_name,
               OutputWorkspace=self._out_ws,
               Factor=self._intensity_scale,
               Operation='Multiply')
 
-        DeleteWorkspace(ws_name)
+        DeleteWorkspace(__ws_name)
 
         self.setProperty('OutputWorkspace', self._out_ws)
 
@@ -101,8 +113,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         self._mirror_sense = self.getProperty('MirrorSense').value
 
         self._intensity_scale = self.getProperty('ScaleFactor').value
-        if self._intensity_scale == 1.0:
-            self._intensity_scale = None
 
     def validateInputs(self):
         """

@@ -9,6 +9,9 @@ from mantid.api import *
 from mantid import config, mtd
 from IndirectImport import import_mantidplot
 
+
+_ws_or_none = lambda s: mtd[s] if s != '' else None
+
 class IndirectILLReduction(DataProcessorAlgorithm):
 
     # Optional input calibration workspace
@@ -25,7 +28,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     _sum_runs = None
     _save = None
     _plot = None
-    _mirror_sense = None
 
     # Integer
     _unmirror_option = None
@@ -59,10 +61,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              doc='Filename of the detector grouping map file to use. \n'
                                  'If left blank the default will be used.')
         # Other inputs
-        self.declareProperty(MatrixWorkspaceProperty("CalibrationWorkspace", "",
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Input),
-                             doc="Workspace containing calibration intensities.")
+
+        self.declareProperty(MatrixWorkspaceProperty('CalibrationWorkspace', '',
+                                               direction=Direction.Input,
+                                               optional=PropertyMode.Optional),
+                             doc='Workspace containing calibration intensities for each detector')
 
         self.declareProperty(name='Analyser',
                              defaultValue='silicon',
@@ -79,11 +82,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              doc='Whether to sum all the input runs.')
 
         self.declareProperty(name='UnmirrorOption',defaultValue=6,
-                             validator=IntBoundedValidator(lower=0,upper=7),
+                             validator=IntBoundedValidator(lower=0, upper=7),
                              doc='Unmirroring options: \n'
                                  '0 no unmirroring\n'
-                                 '1 left\n '
-                                 '2 right\n '
+                                 '1 left\n'
+                                 '2 right\n'
                                  '3 sum of left and right\n'
                                  '4 shift right according to left and sum\n'
                                  '5 like 4, but use Vanadium run for peak positions\n'
@@ -147,6 +150,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._vanadium_file = self.getPropertyValue('VanadiumRun')
         self._analyser = self.getPropertyValue('Analyser')
         self._map_file = self.getPropertyValue('MapFile')
+        self._calib_ws = _ws_or_none(self.getPropertyValue('CalibrationWorkspace'))
         self._reflection = self.getPropertyValue('Reflection')
         self._debug_mode = self.getProperty('DebugMode').value
         self._plot = self.getProperty('Plot').value
@@ -159,7 +163,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._monitor_ws = self._red_ws + '_' + self.getPropertyValue('MonitorWorkspace')
         self._det_ws = self._red_ws + '_' + self.getPropertyValue('DetWorkspace')
         self._mnorm_ws = self._red_ws + '_' + self.getPropertyValue('MnormWorkspace')
-        self._vnorm_ws = self._red_ws + '_' + self.getPropertyValue('VnormWorkspace')
+        if self._calib_ws is not None:
+            self._vnorm_ws = self._red_ws + '_' + self.getPropertyValue('VnormWorkspace')
         self._left_ws = self._red_ws + '_' + self.getPropertyValue('LeftWorkspace')
         self._right_ws = self._red_ws + '_' + self.getPropertyValue('RightWorkspace')
 
@@ -280,12 +285,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     def _convert_to_energy(self, ws):
         """
-        Convert the input ws x-axis from channel # to energy transfer
+        Convert the input ws x-axis from channel to energy transfer
         @param ws     :: input workspace name
         """
-        # get energy formula from cache or compute if it is not yet set
-        formula = (self._energy_formula(ws) if self._formula is None else self._formula)
-        ConvertAxisByFormula(InputWorkspace=ws,OutputWorkspace=ws,Axis='X',Formula=formula)
+        # get energy formula
+        formula = self._energy_formula(ws)
+        ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=formula)
         mtd[ws].getAxis(0).setUnit('DeltaE') # in mev
         xnew = mtd[ws].readX(0)  # energy array
         self.log().information('Energy range : %f to %f' % (xnew[0], xnew[-1]))
@@ -297,22 +302,22 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         @return   :: formula to transform from time channel to energy transfer
         """
         x = mtd[ws].readX(0)
-        npt = len(x)
-        imid = float( npt / 2 + 1 )
+        size = len(x)
+        mid = float((size - 1) / 2)
         gRun = mtd[ws].getRun()
         energy = 0
-        scale = 1000. # from mev to micro ev
+        scale = 1.e-3  # from micro ev to milli ev
 
         if gRun.hasProperty('Doppler.maximum_delta_energy'):
-            energy = gRun.getLogData('Doppler.maximum_delta_energy').value / scale  # max energy in meV
-            self.log().information('Doppler max energy : %s' % energy)
+            energy = gRun.getLogData('Doppler.maximum_delta_energy').value # max energy in micro eV
+            self.log().information('Doppler max delta energy in micro eV : %s' % energy)
         elif gRun.hasProperty('Doppler.delta_energy'):
-            energy = gRun.getLogData('Doppler.delta_energy').value / scale # delta energy in meV
-            self.log().information('Doppler delta energy : %s' % energy)
+            energy = gRun.getLogData('Doppler.delta_energy').value # delta energy in micro eV
+            self.log().information('Doppler delta energy in micro eV : %s' % energy)
 
-        dele = 2.0 * energy / (npt - 1)
-        formula = '(x-%f)*%f' % (imid, dele)
-        self.log().information('Energy transform formula: '+formula)
+        formula = '(x-%f)*%f' % (mid, 2.0 * energy / (size - 1) * scale)
+
+        self.log().information('Energy transform formula: ' + formula)
         # set in the cache and return
         self._formula = formula
         return formula
@@ -330,31 +335,30 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         det = run + '_' + self._det_ws
         mon = run + '_' + self._monitor_ws
         mnorm = run + '_' + self._mnorm_ws
-        vnorm = run + '_' + self._vnorm_ws
         left = run + '_' + self._left_ws
         right = run + '_' + self._right_ws
 
         self._debug(red, raw)
 
         # Main reduction workflow
-        LoadParameterFile(Workspace=red,Filename=self._parameter_file)
+        LoadParameterFile(Workspace=red, Filename=self._parameter_file)
 
         ExtractSingleSpectrum(InputWorkspace=red, OutputWorkspace=mon, WorkspaceIndex=0)
 
-        GroupDetectors(InputWorkspace=red,OutputWorkspace=red,MapFile=self._map_file,Behaviour='Sum')
+        GroupDetectors(InputWorkspace=red, OutputWorkspace=red, MapFile=self._map_file, Behaviour='Sum')
 
         self._debug(red, det)
 
-        NormaliseToMonitor(InputWorkspace=red,OutputWorkspace=red,MonitorWorkspace=mon)
+        NormaliseToMonitor(InputWorkspace=red, OutputWorkspace=red, MonitorWorkspace=mon)
 
         self._debug(red, mnorm)
 
         # Calibrate to vanadium calibration workspace if specified
-        # note, this is a one-column calibration workspace, it is not extracted from VanadiumRun (maybe it should?)
+        # note, this is a one-column calibration workspace
         if self._calib_ws is not None:
             Divide(LHSWorkspace=red, RHSWorkspace=self._calib_ws, OutputWorkspace=red)
-
-        self._debug(red, vnorm)
+            vnorm = run + '_' + self._vnorm_ws
+            self._debug(red, vnorm)
 
         # Number of bins
         size = mtd[red].blocksize()
@@ -386,39 +390,46 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=xmax, XMax=size)
             MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=xmax, XMax=size)
 
-        # Mask bins of reduced workspace for unmirror_option 0
-        if self._unmirror_option == 0:
-            if xmin_left > 0:
-                self.log().debug('Mask red ws bins smaller than %d' % xmin_left)
-                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=0, XMax=xmin_left)
-            if xmin_right < size and xmax_left < size:
-                self.log().debug('Mask red ws bins between %d, %d' % (xmax_left, int(size / 2) + xmin_right - 1))
-                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=xmax_left, XMax=int(size / 2) + xmin_right)
-            if xmax_right < size:
-                self.log().debug('Mask red ws bins larger than %d' % (xmax_right + int(size / 2)))
-                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=xmax_right + int(size / 2), XMax=size)
-
-        # Convert both to energy
-        # which is needed for shift operations for unmirror > 3
-        self._convert_to_energy(left)
-        self._convert_to_energy(right)
-
         # Get new reduced workspace
         start_bin, end_bin = self._perform_unmirror(red, left, right)
+
+        # Energy transfer
+        self._convert_to_energy(left)
+        self._convert_to_energy(right)
+        self._convert_to_energy(red)
+
+        #
+        ConvertSpectrumAxis(InputWorkspace=left, OutputWorkspace=left, Target='Theta', EMode='Indirect')
+        ConvertSpectrumAxis(InputWorkspace=right, OutputWorkspace=right, Target='Theta', EMode='Indirect')
+        ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
 
         # Mask corrupted bins according to shifted workspaces
         # Reload X-values (now in meV)
         x = mtd[red].readX(0)
 
-        # Mask bins out of final energy range
-        if start_bin > 0:
-            self.log().debug('Mask bins smaller than %d and larger than %d' % (start_bin, end_bin - 1))
-            self.log().notice('Bins out of energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin - 1]))
-            MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[0], XMax=x[start_bin])
-        if end_bin < len(x) - 1:
-            self.log().debug('Mask bins smaller than %d and larger than %d' % (start_bin, end_bin - 1))
-            self.log().notice('Bins out of energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin - 1]))
-            MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[end_bin], XMax=x[len(x) - 1])
+        # Mask bins of reduced workspace
+        if self._unmirror_option == 0:
+            if xmin_left > 0:
+                self.log().debug('Mask red ws bins smaller than %d' % xmin_left)
+                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[0], XMax=x[xmin_left])
+            if xmin_right < size and xmax_left < size:
+                self.log().debug('Mask red ws bins between %d, %d' % (xmax_left, int(size / 2) + xmin_right - 1))
+                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xmax_left], XMax=x[int(size / 2) + xmin_right])
+            if xmax_right < size:
+                self.log().debug('Mask red ws bins larger than %d' % (xmax_right + int(size / 2) - 1))
+                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xmax_right + int(size / 2)], XMax=x[-1])
+        else:
+            # Mask bins out of final energy range
+            if start_bin > 0:
+                self.log().debug('Mask bins smaller than %d and larger than %d' % (start_bin, end_bin - 1))
+                self.log().notice(
+                    'Bins out of energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin - 1]))
+                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[0], XMax=x[start_bin])
+            if end_bin < len(x) - 1:
+                self.log().debug('Mask bins smaller than %d and larger than %d' % (start_bin, end_bin - 1))
+                self.log().notice(
+                    'Bins out of energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin - 1]))
+                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[end_bin], XMax=x[-1])
 
         # cleanup by-products if not needed
         if not self._debug_mode:
@@ -440,7 +451,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         end_bin = mtd[red].blocksize()
 
         if self._unmirror_option == 0:
-            self.log().information('Unmirror 0: X-axis will not be converted to energy transfer if mirror sense is ON')
+            self.log().information('Unmirror 0: X-axis in energy transfer will not be correct when workspace has two wings')
             self._convert_to_energy(red)
 
         elif self._unmirror_option == 1:
@@ -511,6 +522,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         for i in range(number_spectra):
 
             # Find peak positions in ws1
+            self.log().debug('Get peak position of spectrum %d' % i)
             peak_bin1 = self._get_peak_position(ws1, i)
 
             # If only one workspace is given as an input, this workspace will be shifted
@@ -577,7 +589,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             list_monitor = []
             list_det = []
             list_mnorm = []
-            list_vnorm = []
+            if self._calib_ws is not None:
+                list_vnorm = []
             list_right = []
             list_left = []
 
@@ -586,7 +599,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 list_monitor.append(run + '_' + self._monitor_ws)
                 list_det.append(run + '_' + self._det_ws)
                 list_mnorm.append(run + '_' + self._mnorm_ws)
-                list_vnorm.append(run + '_' + self._vnorm_ws)
+                if self._calib_ws is not None:
+                    list_vnorm.append(run + '_' + self._vnorm_ws)
                 list_right.append(run + '_' + self._right_ws)
                 list_left.append(run + '_' + self._left_ws)
 
@@ -594,7 +608,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 GroupWorkspaces(InputWorkspaces=list_monitor, OutputWorkspace=self._monitor_ws)
                 GroupWorkspaces(InputWorkspaces=list_det, OutputWorkspace=self._det_ws)
                 GroupWorkspaces(InputWorkspaces=list_mnorm, OutputWorkspace=self._mnorm_ws)
-                GroupWorkspaces(InputWorkspaces=list_vnorm, OutputWorkspace=self._vnorm_ws)
+                if self._calib_ws is not None:
+                    GroupWorkspaces(InputWorkspaces=list_vnorm, OutputWorkspace=self._vnorm_ws)
                 GroupWorkspaces(InputWorkspaces=list_right, OutputWorkspace=self._right_ws)
                 GroupWorkspaces(InputWorkspaces=list_left, OutputWorkspace=self._left_ws)
 
@@ -602,7 +617,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 self.setProperty('MonitorWorkspace', self._monitor_ws)
                 self.setProperty('DetWorkspace', self._det_ws)
                 self.setProperty('MnormWorkspace', self._mnorm_ws)
-                self.setProperty('VnormWorkspace', self._vnorm_ws)
+                if self._calib_ws is not None:
+                    self.setProperty('VnormWorkspace', self._vnorm_ws)
                 self.setProperty('RightWorkspace', self._right_ws)
                 self.setProperty('LeftWorkspace', self._left_ws)
 
@@ -639,11 +655,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         x = mtd[ws].readX(0)
         y = mtd[ws].readY(0)
         # mid x value in order to search for left and right monitor range delimiter
-        mid = int(len(x) / 2)
-        imin = np.argmax(np.array(y[0 : mid])) - 1
-        nch = len(y)
-        im = np.argmax(np.array(y[nch - mid : nch]))
-        imax = nch - mid + 1 + im + 1
+        size = len(x)
+        # Maximum search in left and right half of the workspace
+        mid = int(size / 2)
+        # Maximum position left
+        imin = np.argmax(np.array(y[0:mid])) - 1
+        # Maximum position right
+        imax = np.argmax(np.array(y[mid:size])) + 1 + mid + 1
         return x[imin], x[imax]
 
     @staticmethod
@@ -666,6 +684,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         @param i         :: spectrum index of input workspace
         @return          :: bin number of the peak position
         """
+
         __temp = ExtractSingleSpectrum(InputWorkspace=ws, WorkspaceIndex=i)
 
         __fit_table = FindEPP(InputWorkspace=__temp)
@@ -674,23 +693,23 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         mid_bin = int(__temp.blocksize() / 2)
 
         # Bin number, where Y has its maximum
-        y_values = np.array(__temp.readY(0))
+        y_values = __temp.readY(0)
+
+        # Delete unused single spectrum
+        DeleteWorkspace(__temp)
 
         # Bin range: difference between mid bin and peak bin should be in this range
         tolerance = int(mid_bin / 2)
 
-        # Peak bin in energy
-        peak_position = __fit_table.row(0)["PeakCentre"]
-        # Peak bin number
-        peak_bin = __temp.binIndexOf(peak_position)
-        # Delete unused single spectrum
-        DeleteWorkspace(__temp)
+        # Peak bin (not in energy)
+        peak_bin = __fit_table.row(0)["PeakCentre"]
 
         # Reliable check for peak bin
         fit_status = __fit_table.row(0)["FitStatus"]
-        if (fit_status != 'success') or \
-                (abs(peak_bin - mid_bin) > tolerance):
-            # Fit failed (too narrow peak)
+
+        if peak_bin < 0 or peak_bin > len(y_values) or \
+                (fit_status != 'success') or (abs(peak_bin - mid_bin) > tolerance):
+            # Fit failed (too narrow peak) or outside bin range
             if abs(np.argmax(y_values) - mid_bin) < tolerance:
                 # Take bin of maximum peak
                 peak_bin = np.argmax(y_values)

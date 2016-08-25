@@ -103,7 +103,6 @@ class IndirectILLReductionTest(unittest.TestCase):
         self._workspace_properties(mtd['red_right'])
         self._workspace_properties(mtd['red_monitor'])
         self._workspace_properties(mtd['red_mnorm'])
-        self._workspace_properties(mtd['red_vnorm'])
         self._workspace_properties(mtd['red_detgrouped'])
 
         # Further workspace characteristics
@@ -113,11 +112,24 @@ class IndirectILLReductionTest(unittest.TestCase):
         self.assertEqual(self._run.blocksize() / 2, mtd['red_right'].getItem(0).blocksize())
         self.assertEqual(self._run.blocksize()    , mtd['red_monitor'].getItem(0).blocksize())
         self.assertEqual(self._run.blocksize()    , mtd['red_mnorm'].getItem(0).blocksize())
-        self.assertEqual(self._run.blocksize()    , mtd['red_vnorm'].getItem(0).blocksize())
         self.assertEqual(self._run.blocksize()    , mtd['red_detgrouped'].getItem(0).blocksize())
 
         self.assertEqual(self._run.getNumberHistograms() , mtd['red_raw'].getItem(0).getNumberHistograms())
         self.assertEqual("Success!", CheckWorkspacesMatch(self._run, mtd['red_raw'].getItem(0)))
+
+    def test_debug_mode_with_calibration(self):
+
+        self.test_debug_mode()
+
+        self._args['Run'] = self._run_name
+        self._args['DebugMode'] = True
+        self._args['CalibrationWorkspace'] = ILLIN16BCalibration(self._run_name)
+
+        alg_test = run_algorithm('IndirectILLReduction', **self._args)
+
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction failed")
+        self._workspace_properties(mtd['red_vnorm'])
+        self.assertEqual(self._run.blocksize(), mtd['red_vnorm'].getItem(0).blocksize())
 
     def test_mapping_file_option(self):
         self._args['Run'] = self._run_name
