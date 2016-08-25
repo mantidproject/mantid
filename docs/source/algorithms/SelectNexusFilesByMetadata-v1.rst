@@ -17,7 +17,7 @@ Criteria could be any python logical expression involving the nexus entry names 
 Arbitrary number of criteria can be combined. The metadata entry should contain only one element.
 Note, that if the entry is of string type, string comparison will be performed.
 As a result, a plain comma separated list of fully resolved file names satisfying the criteria will be returned.
-Note, that this requires ``h5py`` package installed.
+Note, that this algorithm requires `h5py <https://pypi.python.org/pypi/h5py>`_ package installed.
 
 **Example - Running SelectNexusFilesByMetadata**
 

@@ -56,7 +56,7 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
         try:
             import h5py
         except ImportError:
-            raise RuntimeError('This algorithm requires h5py package')
+            raise RuntimeError('This algorithm requires h5py package. See https://pypi.python.org/pypi/h5py')
 
         outputfiles = []
         # for the purpose here + is meaningless, so they will be silently replaced with ,
