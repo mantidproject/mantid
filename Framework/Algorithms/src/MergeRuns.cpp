@@ -674,13 +674,28 @@ void MergeRuns::createSampleLogsMaps(const MatrixWorkspace_sptr &ws) {
   getSampleList(max, "sample_logs_max", ws);
   getSampleList(sum, "sample_logs_sum", ws);
   getSampleList(list, "sample_logs_list", ws);
-  getSampleList(warn, "sample_logs_warn", ws);
-  getSampleList(fail, "sample_logs_fail", ws);
+  getSampleList(warn, "sample_logs_warn", ws, "sample_logs_warn_delta");
+  getSampleList(fail, "sample_logs_fail", ws, "sample_logs_warn_delta");
 }
 
-void MergeRuns::getSampleList(const MergeLogType &sampleLogBehaviour, const std::string &parameterName, const MatrixWorkspace_sptr &ws) {
+void MergeRuns::getSampleList(const MergeLogType &sampleLogBehaviour, const std::string &parameterName, const MatrixWorkspace_sptr &ws, const std::string sampleLogDeltas) {
   std::string params = ws->getInstrument()->getParameterAsString(parameterName, false);
+  std::string paramsDelta = ws->getInstrument()->getParameterAsString(sampleLogDeltas, false);
   StringTokenizer tokenizer(params, ",", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
+  StringTokenizer tokenizerDelta(params, ",", StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
+
+  size_t numberNames = tokenizer.count();
+  size_t numberTolerances = tokenizer.count();
+
+  if (numberNames == numberTolerances) {
+    // pass
+  } else if (numberTolerances == 0) {
+    // pass
+  } else if (numberTolerances == 1) {
+    // pass
+  } else {
+    throw std::invalid_argument("Invalid length of tolerances, found " + std::to_string(numberTolerances) + " tolerance values but " + std::to_string(numberNames) + " names.");
+  }
 
   for (auto item : tokenizer.asVector()) {
     if (m_logMap.count(item) != 0) {

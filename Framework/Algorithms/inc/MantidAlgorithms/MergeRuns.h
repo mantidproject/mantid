@@ -161,7 +161,7 @@ private:
 
   /// Create and update sample logs according to instrument parameters
   void createSampleLogsMaps(const API::MatrixWorkspace_sptr &ws);
-  void getSampleList(const MergeLogType &, const std::string &parameterName, const API::MatrixWorkspace_sptr &ws);
+  void getSampleList(const MergeLogType &, const std::string &parameterName, const API::MatrixWorkspace_sptr &ws, const std::string sampleLogDeltas = "");
   void calculateUpdatedSampleLogs(const API::MatrixWorkspace_sptr &ws, const API::MatrixWorkspace_sptr &outWS, const int numberOfWSsAdded);
   void setUpdatedSampleLogs(const API::MatrixWorkspace_sptr &ws);
   void resetSampleLogs(const API::MatrixWorkspace_sptr &ws);
