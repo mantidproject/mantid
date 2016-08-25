@@ -76,13 +76,11 @@ public:
     std::string extractSingleValueAs;
     std::string eq;
     const double angleConvert(1.0);
-    std::vector<std::string> sampleLogNames;
-    std::vector<std::string> sampleLogDeltas;
 
     XMLInstrumentParameter testParamEntry(
         "", "1000.0", interpolation, "", "", "", "bob", "double", "",
         constraint, penaltyFactor, fitFunc, extractSingleValueAs, eq, comp,
-        angleConvert, "bla bla bla", sampleLogNames, "", sampleLogDeltas);
+        angleConvert, "bla bla bla");
 
     TimeSeriesProperty<double> *dummy = NULL;
     TS_ASSERT_DELTA(testParamEntry.createParamValue(dummy), 1000.0, 0.0001);

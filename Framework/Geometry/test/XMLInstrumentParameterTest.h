@@ -38,14 +38,11 @@ private:
     const std::string eq;
     const Geometry::IComponent *comp = NULL;
     double angleConvertConst = 0.0;
-    const std::vector<std::string> sampleLogNames;
-    const std::string sampleLogType;
-    const std::vector<std::string> sampleLogDeltas;
 
     return boost::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(
         logfileID, value, interpolation, formula, formulaUnit, resultUnit,
         paramName, type, tie, constraint, penaltyFactor, fitFunc, filterBy, eq,
-        comp, angleConvertConst, "", sampleLogNames, sampleLogType, sampleLogDeltas));
+        comp, angleConvertConst, ""));
   }
 
 public:
@@ -171,13 +168,11 @@ public:
   void test_help_string() {
     std::vector<std::string> constr;
     std::string penaltyFactor;
-    std::vector<std::string> sampleLogNames;
-    std::vector<std::string> sampleLogDeltas;
     XMLInstrumentParameter testPar(
         "logfileID", "value", boost::make_shared<Interpolation>(), "formula",
         "sourceFU", "resultFU", "testPar", "aType", "noTie", constr,
         penaltyFactor, "aFitFunc", "FilterBy", "eqTo", NULL, 0.0,
-        "test string.     Long test string.", sampleLogNames, "", sampleLogDeltas);
+        "test string.     Long test string.");
 
     TS_ASSERT_EQUALS(testPar.m_description, "test string. Long test string.");
   }
