@@ -12,6 +12,7 @@
 #include "MantidAlgorithms/FFT.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Interpolation.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -644,6 +645,71 @@ public:
     TS_ASSERT(Mantid::API::equals(rebinOne, rebinTwo, tolerance));
   }
 
+  /**
+   * Test suggested by instrument scientists
+   * Transform the same workspace, cropped to different lengths
+   * (Use a non-symmetrical function)
+   * Transforms should match (although with different point spacing)
+   */
+  void test_differentLength_croppedSections() {
+    const auto &inputWSOne = createComplicatedPulseWS(2000, 6.2 * 2.0 * M_PI,
+                                                      4.277321, 0.8, 0.1, 5.0);
+    const auto &inputWSTwo = doCrop(inputWSOne, -4.0, 3.0);
+    const auto &inputWSThree = doCrop(inputWSOne, -3.0, 4.0);
+    const auto &fftOne = doFFT(inputWSOne, true, true);
+    const auto &fftTwo = doFFT(inputWSTwo, true, true);
+    const auto &fftThree = doFFT(inputWSThree, true, true);
+    TS_ASSERT(Mantid::API::equals(fftTwo, fftThree, tolerance));
+
+    // fftOne and fftTwo have different point spacing:
+    // interpolate fftOne at the x values of fftTwo
+    const auto &x1 = fftOne->points(0);
+    const auto &y1 = fftOne->counts(0);
+    Mantid::Kernel::Interpolation interpol;
+    for (size_t i = 0; i < x1.size(); ++i) {
+      interpol.addPoint(x1[i], y1[i]);
+    }
+    const auto &x2 = fftTwo->points(0);
+    const auto &y2 = fftTwo->counts(0);
+    for (size_t i = 0; i < x2.size(); ++i) {
+      const double yp = interpol.value(x2[i]);
+      TS_ASSERT_DELTA(yp, y2[i],
+                      0.03); // 0.03 due to linear interpolation inaccuracies
+    }
+  }
+
+  /**
+   * Test suggested by instrument scientists
+   * A function that is symmetrical -- f(x) == f(-x) -- should give an entirely
+   * real transform
+   * (Test that this succeeds for histogram data)
+   */
+  void test_symmetricalFunction_realTransform_histo() {
+    const auto &inputWS =
+        createSymmetricalWorkspace(2000, 6.2 * 2.0 * M_PI, 4.277321, 0.8, true);
+    const auto &fft = doFFT(inputWS, false, true);
+    const auto &imagTransform = fft->y(4); // spectrum 4 is the imaginary one
+    for (const auto &y : imagTransform) {
+      TS_ASSERT_DELTA(y, 0.0, 1e-11);
+    }
+  }
+
+  /**
+ * Test suggested by instrument scientists
+ * A function that is symmetrical -- f(x) == f(-x) -- should give an entirely
+ * real transform
+ * (Test that this succeeds for point data)
+ */
+  void test_symmetricalFunction_realTransform_point() {
+    const auto &inputWS = createSymmetricalWorkspace(2000, 6.2 * 2.0 * M_PI,
+                                                     4.277321, 0.8, false);
+    const auto &fft = doFFT(inputWS, false, true);
+    const auto &imagTransform = fft->y(4); // spectrum 4 is the imaginary one
+    for (const auto &y : imagTransform) {
+      TS_ASSERT_DELTA(y, 0.0, 1e-12);
+    }
+  }
+
 private:
   MatrixWorkspace_sptr doRebin(MatrixWorkspace_sptr inputWS,
                                const std::string &params) {
@@ -811,6 +877,100 @@ private:
     create->setProperty("DataY", Y);
     create->setProperty("DataE", E);
     create->setProperty("NSpec", 2);
+    create->setPropertyValue("OutputWorkspace", "__NotUsed");
+    create->execute();
+    return create->getProperty("OutputWorkspace");
+  }
+
+  MatrixWorkspace_sptr
+  createComplicatedPulseWS(const size_t n, const double omega, const double x0,
+                           const double sigma, const double xc,
+                           const double ww) {
+    // Create bin edges
+    std::vector<double> X, Y, E;
+    const size_t xSize = 2 * n + 2, ySize = 2 * n;
+    X.reserve(xSize);
+    Y.reserve(ySize);
+    E.reserve(ySize);
+    for (size_t i = 0; i < 2; ++i) { // spectra
+      for (size_t j = 0; j < n + 1; ++j) {
+        const double x = ((10.0 * double(j)) / double(n)) - x0;
+        X.push_back(x);
+      }
+    }
+    HistogramData::Histogram histogram(HistogramData::BinEdges{X});
+    const auto &points = histogram.points();
+    // imaginary spectrum
+    for (size_t i = 0; i < n; ++i) {
+      const double x = points[i];
+      const double yImag =
+          sin(omega * x + ww * x * x) * exp(-pow(((x - xc) * sigma), 4));
+      Y.push_back(yImag);
+      E.push_back(0.1);
+    }
+    // real spectrum
+    for (size_t i = 0; i < n; ++i) {
+      const double x = points[i];
+      const double yReal =
+          cos(omega * x + ww * x * x) * exp(-pow(((x - xc) * sigma), 4));
+      Y.push_back(yReal);
+      E.push_back(0.1);
+    }
+    // create workspace
+    auto create =
+        FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    create->initialize();
+    create->setChild(true);
+    create->setProperty("DataX", X);
+    create->setProperty("DataY", Y);
+    create->setProperty("DataE", E);
+    create->setProperty("NSpec", 2);
+    create->setPropertyValue("OutputWorkspace", "__NotUsed");
+    create->execute();
+    return create->getProperty("OutputWorkspace");
+  }
+
+  MatrixWorkspace_sptr doCrop(MatrixWorkspace_sptr inputWS, double lower,
+                              double higher) {
+    auto crop = FrameworkManager::Instance().createAlgorithm("CropWorkspace");
+    crop->initialize();
+    crop->setChild(true);
+    crop->setProperty("InputWorkspace", inputWS);
+    crop->setPropertyValue("OutputWorkspace", "__NotUsed");
+    crop->setProperty("XMin", lower);
+    crop->setProperty("XMax", higher);
+    crop->execute();
+    return crop->getProperty("OutputWorkspace");
+  }
+
+  MatrixWorkspace_sptr createSymmetricalWorkspace(const size_t n,
+                                                  const double omega,
+                                                  const double x0,
+                                                  const double sigma,
+                                                  const bool isHisto) {
+    std::vector<double> X, Y;
+    const size_t xSize = isHisto ? n + 1 : n;
+    X.reserve(xSize);
+    Y.reserve(n);
+    // Bin edges
+    for (size_t i = 0; i < xSize; ++i) {
+      const double x = ((10.0 * double(i)) / double(n)) - x0;
+      X.push_back(x);
+    }
+    // Y values
+    for (size_t i = 0; i < n; ++i) {
+      const double xp = isHisto ? 0.5 * (X[i] + X[i + 1]) : X[i];
+      const double y = cos(omega * xp) * exp(-pow((xp * sigma), 4));
+      Y.push_back(y);
+    }
+    // create workspace
+    auto create =
+        FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    create->initialize();
+    create->setChild(true);
+    create->setProperty("DataX", X);
+    create->setProperty("DataY", Y);
+    create->setProperty("NSpec", 1);
     create->setPropertyValue("OutputWorkspace", "__NotUsed");
     create->execute();
     return create->getProperty("OutputWorkspace");

@@ -103,7 +103,7 @@ public:
   /// Returns the shape of the Object
   virtual const boost::shared_ptr<const Object> shape() const = 0;
   /// Returns the material of the Object
-  virtual const boost::shared_ptr<const Kernel::Material> material() const = 0;
+  virtual const Kernel::Material material() const = 0;
 
   /// Gets the GeometryHandler
   GeometryHandler *Handle() const { return handle; }
