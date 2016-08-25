@@ -108,8 +108,8 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
                       "or :math:`E_f` (EMode=Indirect) (meV).\nMust be set "
                       "here if not available in the instrument definition.");
   alg.declareProperty("ReplaceNaNs", false,
-                      "If true, replaces all NaNs in output workspace with "
-                      "zeroes.",
+                      "If true, all NaN values in the output workspace are "
+                      "replaced using the ReplaceSpecialValues algorithm.",
                       Direction::Input);
 }
 

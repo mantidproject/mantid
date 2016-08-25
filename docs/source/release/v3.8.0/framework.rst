@@ -22,7 +22,7 @@ Concepts
 
 - ``MatrixWorkspace`` : When masking bins or detectors with non-zero weights,
   undefined and infinite values and errors will be zeroed.
-- ``Lattice`` : Allow setting a UB matrix with negative determinant (improper rotation)  
+- ``Lattice`` : Allow setting a UB matrix with negative determinant (improper rotation)
 
 Algorithms
 ----------
@@ -54,16 +54,13 @@ Improved
 - :ref:`SofQW <algm-SofQW>` has option to replace any NaNs in output workspace
   with zeroes.
 
-- :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>` The input dialog
-  had a bug where the table columns were in a reversed order in the dialogue's combo boxes.
-
 - :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>`
-  had a bug where the table columns were in a reversed order in the dialogue's combo boxes. 
+  had a bug where the table columns were in a reversed order in the dialogue's combo boxes.
   This is now fixed and the order is correct.
 
 - :ref:`ConvertUnits <algm-ConvertUnits>` will no longer corrupt an in place workspace if the algorithm fails.
 
-- :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli 
+- :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
 
 
