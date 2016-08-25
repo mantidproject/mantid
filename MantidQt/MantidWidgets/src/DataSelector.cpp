@@ -16,7 +16,7 @@ namespace MantidWidgets {
 
 DataSelector::DataSelector(QWidget *parent)
     : API::MantidWidget(parent), m_algRunner(), m_autoLoad(true),
-      m_showLoad(true) {
+      m_showLoad(true), m_allowMultipleFiles(false) {
   m_uiForm.setupUi(this);
   connect(m_uiForm.cbInputType, SIGNAL(currentIndexChanged(int)), this,
           SLOT(handleViewChanged(int)));
@@ -33,7 +33,7 @@ DataSelector::DataSelector(QWidget *parent)
   connect(&m_algRunner, SIGNAL(algorithmComplete(bool)), this,
           SLOT(handleAutoLoadComplete(bool)));
   this->setAcceptDrops(true);
-  m_uiForm.rfFileInput->setAcceptDrops(false);
+  m_uiForm.rfFileInput->setAcceptDrops(false); 
 }
 
 DataSelector::~DataSelector() {}
@@ -43,7 +43,7 @@ DataSelector::~DataSelector() {}
  */
 void DataSelector::handleFileInput() {
   // Get filename and check it's not empty
-  QString filename = m_uiForm.rfFileInput->getFirstFilename();
+  QString filename = m_uiForm.rfFileInput->getUserInput().toString();
 
   if (filename.isEmpty()) {
     return;
@@ -101,7 +101,7 @@ bool DataSelector::isValid() {
       if (!AnalysisDataService::Instance().doesExist(wsName.toStdString())) {
         // attempt to reload if we can
         // don't use algorithm runner because we need to know instantly.
-        const QString filepath = m_uiForm.rfFileInput->getFirstFilename();
+        const QString filepath = m_uiForm.rfFileInput->getUserInput().toString();
         const Algorithm_sptr loadAlg =
             AlgorithmManager::Instance().createUnmanaged("Load");
         loadAlg->initialize();
@@ -231,7 +231,7 @@ void DataSelector::handleViewChanged(int index) {
  * @return The full file path
  */
 QString DataSelector::getFullFilePath() const {
-  return m_uiForm.rfFileInput->getFirstFilename();
+  return m_uiForm.rfFileInput->getUserInput().toString();
 }
 
 /**
@@ -253,8 +253,7 @@ QString DataSelector::getCurrentDataName() const {
   case 0:
     // the file selector is visible
     if (m_uiForm.rfFileInput->isValid()) {
-      QFileInfo qfio(m_uiForm.rfFileInput->getFirstFilename());
-      filename = qfio.completeBaseName();
+      filename = m_uiForm.rfFileInput->getUserInput().toString();
     }
     break;
   case 1:
@@ -426,6 +425,23 @@ void DataSelector::dragEnterEvent(QDragEnterEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   if (mimeData->hasText() || mimeData->hasUrls())
     de->acceptProposedAction();
+}
+
+/**
+* Return whether this widget allows multiple files to be specified within the
+* edit box
+* @returns True if multiple files can be specified, false otherwise
+*/
+bool DataSelector::allowMultipleFiles() const { return m_allowMultipleFiles; }
+
+/**
+* Set whether this widget allows multiple files to be specifed or not
+* @param allow :: If true then the widget will accept multiple files else only a
+* single file may be specified
+*/
+void DataSelector::allowMultipleFiles(const bool allow) {
+  m_allowMultipleFiles = allow;
+  m_uiForm.rfFileInput->allowMultipleFiles(m_allowMultipleFiles);
 }
 
 } /* namespace MantidWidgets */

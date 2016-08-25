@@ -57,6 +57,8 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataSelector
   Q_PROPERTY(bool showLoad READ willShowLoad WRITE setShowLoad)
   Q_PROPERTY(QString instrumentOverride READ getInstrumentOverride WRITE
                  setInstrumentOverride)
+  Q_PROPERTY(bool multipleFiles READ allowMultipleFiles WRITE
+                 allowMultipleFiles)
 
 public:
   DataSelector(QWidget *parent = 0);
@@ -102,6 +104,10 @@ public:
   QString getInstrumentOverride();
   /// Overrides the value of default instrument
   void setInstrumentOverride(const QString &instName);
+  /// Gets the allow multiple files
+  bool allowMultipleFiles() const;
+  /// Sets the allow multiple files
+  void allowMultipleFiles(bool);
 
 signals:
   /// Signal emitted when files were found but widget isn't autoloading
@@ -143,6 +149,8 @@ private:
   bool m_autoLoad;
   /// Flag to show or hide the load button. By default this is set to true.
   bool m_showLoad;
+  /// Allow multiple files
+  bool m_allowMultipleFiles;
 };
 
 } /* namespace MantidWidgets */
