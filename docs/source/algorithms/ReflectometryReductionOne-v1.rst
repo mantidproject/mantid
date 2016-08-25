@@ -30,25 +30,28 @@ Background subtraction and :ref:`algm-PolarizationCorrection`. If you want to kn
 these processing steps are used, please refer to the :ref:`algm-ReflectometryReductionOneAuto`
 documentation.
 
-Analysis Modes
-##############
+High-Level Workflow
+-------------------
+
+.. diagram:: ReflectometryReductionOne_HighLvl-v1_wkflw.dot
+
+Low-Level Workflow
+------------------
+
+Conversion to Wavelength
+########################
+
+.. diagram:: ReflectometryReductionOne_ConvertToWavelength-v1_wkflw.dot
 
 The default analysis mode is *PointDetectorAnalysis*. For PointAnalysisMode the
 analysis can be roughly reduced to IvsLam = DetectorWS / sum(I0) /
 TransmissionWS / sum(I0). For MultiDetectorAnalysis the analysis can be roughly reduced to
 IvsLam = DetectorWS / RegionOfDirectBeamWS / sum(I0) / TransmissionWS / sum(I0).
-The normalization by tranmission run(s) is optional.
-If necessary, input workspaces are converted to *Wavelength*
-first via :ref:`algm-ConvertUnits`.
 
-IvsQ is calculated via :ref:`algm-ConvertUnits` into units of
-*MomentumTransfer*. Corrections may be applied prior to the
-transformation to ensure that the detectors are in the correct location
-according to the input Theta value. Corrections are only enabled when a
-Theta input value has been provided.
+Transmission Correction
+#######################
 
-Transmission Runs
-#################
+.. diagram:: ReflectometryReductionOne_TransmissionCorrection-v1_wkflw.dot
 
 Transmission correction is a normalization step, which may be applied to both
 *PointDetectorAnalysis* and *MultiDetectorAnalysis* reduction.
@@ -60,9 +63,10 @@ parameters associated with the transmission runs will also be required.
 If a single Transmission run is provided, then no stitching parameters
 will be needed.
 
+The normalization by tranmission run(s) is optional.
 
 Polynomial Correction
-#####################
+=====================
 
 If no Transmission runs are provided, then polynomial correction can be
 performed instead. Polynomial correction is enabled by setting the
@@ -79,68 +83,95 @@ properties.
 Detector Position Correction
 ############################
 
+.. diagram:: ReflectometryReductionOne_CorrectDetectorPositions-v1_wkflw.dot
+
 Detector Position Correction is used for when the position of the detector
 is not aligned with the reflected beamline. The correction algorithm used is
 :ref:`algm-SpecularReflectionPositionCorrect-v1` which is a purely vertical
 position correction.
 
-Post-Processing Options
-#######################
+The detector positions in this process are corrected in terms of
+:literal:`ThetaIn`. In general, the detector posistions should always be
+corrected unless the :literal:`InputWorkspace` already has the detectors in the
+right positions. This can be achieved by running
+:literal:`MoveInstrumentComponent` before :literal:`ReflectometryReductionOne`.
 
-ReflectometryReductionOne contains 2 post-processing options that will be applied to the IvsQ workspace. These two options are `Scale` and `Rebin`.
+Convert To Momentum Transfer (Q)
+################################
+
+.. diagram:: ReflectometryReductionOne_ConvertToMomentum-v1_wkflw.dot
+
+ReflectometryReductionOne contains 2 post-processing options that will be
+applied to the IvsQ workspace. These two options are `Rebin` and `Scale`.
 
 Rebinning
 =========
-To Rebin your IvsQ workspace you will have to provide values for the following properties: `MomentumTransferMinimum`, `MomentumTransferStep` and `MomentumTransferMaximum`.
-These values will be appended to each other to form your :ref:`algm-Rebin` Params. These values correspond to your `MinimumExtent`, `BinWidth` and `MaximumExtent` respectively.
 
-If you provide a positive `MomentumTransferStep` value then the algorithm will automatically negate this value which will allow for Logarithmic Rebinning. Alternatively,
-a negative `MomentumTransferStep` will result in Linear Rebinning. More details about the Rebinning process can be found in the documentation for :ref:`algm-Rebin`.
+To Rebin your IvsQ workspace you will have to provide values for the following
+properties: `MomentumTransferMinimum`, `MomentumTransferStep` and
+`MomentumTransferMaximum`. These values will be appended to each other to form
+your :ref:`algm-Rebin` Params. These values correspond to your `MinimumExtent`,
+`BinWidth` and `MaximumExtent` respectively.
 
-If no values are provided for `MomentumTransferMinimum` and `MomentumTransferMaximum` then the algorithm will attempt to calculate these values
-by using the equations below:
+If you provide a positive `MomentumTransferStep` value then the algorithm will
+automatically negate this value which will allow for Logarithmic Rebinning.
+Alternatively, a negative `MomentumTransferStep` will result in Linear
+Rebinning. More details about the Rebinning process can be found in the
+documentation for :ref:`algm-Rebin`.
+
+If no values are provided for `MomentumTransferMinimum` and
+`MomentumTransferMaximum` then the algorithm will attempt to calculate these
+values by using the equations below:
 
     :math:`Q_{min} = 2 \, k \, sin \, \theta = \frac{4 \pi sin \theta}{\lambda_{max}}`
 
     :math:`Q_{max} = 2 \, k \, sin \, \theta = \frac{4 \pi sin \theta}{\lambda_{min}}`
 
-Where :math:`\lambda_{min}` is the minimum extent of the `IvsLambda` Workspace and :math:`\lambda_{max}` is the maximum extent of the `IvsLambda` Workspace.
+Where :math:`\lambda_{min}` is the minimum extent of the `IvsLambda` Workspace
+and :math:`\lambda_{max}` is the maximum extent of the `IvsLambda` Workspace.
 
-If you have not provided a value for `MomentumTransferStep` then the algorithm will use :ref:`algm-CalculateResolution` to calculate this value for you.
+If you have not provided a value for `MomentumTransferStep` then the algorithm
+will use :ref:`algm-CalculateResolution` to calculate this value for you.
 
 Scaling
 =======
-To apply a scaling to the IvsQ workspace that has been produced by the reduction, you will need to provide a value for the `ScaleFactor` property in the algorithm.
-The default for this value is 1.0 and thus no scaling is applied to the workspace. The scaling of the IvsQ workspace is performed in-place by the :ref:`algm-Scale` algorithm
-and your IvsQ workspace will be set to the product of this algorithm.
 
-Workflow
-########
-
-.. diagram:: ReflectometryReductionOne_HighLvl-v1_wkflw.dot
-
-.. diagram:: ReflectometryReductionOne_LowLvl-v1_wkflw.dot
-
+To apply a scaling to the IvsQ workspace that has been produced by the
+reduction, you will need to provide a value for the `ScaleFactor` property in
+the algorithm. The default for this value is 1.0 and thus no scaling is applied
+to the workspace. The scaling of the IvsQ workspace is performed in-place by the
+:ref:`algm-Scale` algorithm and your IvsQ workspace will be set to the product
+of this algorithm.
 
 Source Rotation
-###############
+===============
 
-In the workflow diagram above, after we produce the IvsLambda workspace, it may be necessary to rotate the position of the source to match the value of ThetaOut (:math:`\theta_f`).
+In the workflow diagram above, after we produce the IvsLambda workspace, it may
+be necessary to rotate the position of the source to match the value of
+ThetaOut (:math:`\theta_f`).
 
-Below we see the typical experimental setup for a Reflectometry instrument. The source direction (Beam vector) is along the horizon. This setup is defined in the Instrument Defintion File
-and this instrument setup will be attached to any workspaces associated with that instrument.
-When we pass the IvsLambda workspace to :ref:`algm-ConvertUnits` to produce an IvsQ workspace, :ref:`algm-ConvertUnits` will assume that :math:`2\theta` is the angle between the Beam vector and
-the sample-to-detector vector. When we have the typical setup seen below, :math:`2\theta` will be exactly half the value we wish it to be.
+Below we see the typical experimental setup for a Reflectometry instrument. The
+source direction (Beam vector) is along the horizon. This setup is defined in
+the Instrument Defintion File and this instrument setup will be attached to any
+workspaces associated with that instrument. When we pass the IvsLambda workspace
+to :ref:`algm-ConvertUnits` to produce an IvsQ workspace,
+:ref:`algm-ConvertUnits` will assume that :math:`2\theta` is the angle between
+the Beam vector and the sample-to-detector vector. When we have the typical
+setup seen below, :math:`2\theta` will be exactly half the value we wish it to
+be.
 
 .. figure:: /images/CurrentExperimentSetupForReflectometry.png
     :width: 650px
     :height: 250px
     :align: center
 
-We rotate the position of the Source (and therefore the Beam vector) in the Instrument Defintion associated with the IvsLambda workspace
-until the condition :math:`\theta_i = \theta_f` is satisfied. This will achieve the desired result for :math:`2\theta` (see below for rotated source diagram).
-After :ref:`algm-ConvertUnits` has produced our IvsQ workspace, we will rotate the position of the source back to its original position so that the experimental setup remains unchanged for other
-algorithms that may need to manipulate/use it.
+We rotate the position of the Source (and therefore the Beam vector) in the
+Instrument Defintion associated with the IvsLambda workspace until the condition
+:math:`\theta_i = \theta_f` is satisfied. This will achieve the desired result
+for :math:`2\theta` (see below for rotated source diagram). After
+:ref:`algm-ConvertUnits` has produced our IvsQ workspace, we will rotate the
+position of the source back to its original position so that the experimental
+setup remains unchanged for other algorithms that may need to manipulate/use it.
 
 .. figure:: /images/RotatedExperimentSetupForReflectometry.png
     :width: 650px
