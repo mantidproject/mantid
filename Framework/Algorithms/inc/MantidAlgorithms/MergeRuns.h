@@ -128,9 +128,6 @@ private:
     }
   }
 
-  typedef std::pair<Kernel::Property*, MergeLogType> propertyType;
-  std::map<const std::string, propertyType> m_logMap;
-
   // Methods called by exec()
   using Mantid::API::Algorithm::validateInputs;
   std::list<API::MatrixWorkspace_sptr>
@@ -159,12 +156,6 @@ private:
   /// Addition tables for event workspaces
   std::vector<boost::shared_ptr<AdditionTable>> m_tables;
 
-  /// Create and update sample logs according to instrument parameters
-  void createSampleLogsMaps(const API::MatrixWorkspace_sptr &ws);
-  void getSampleList(const MergeLogType &, const std::string &parameterName, const API::MatrixWorkspace_sptr &ws, const std::string sampleLogDeltas = "");
-  void calculateUpdatedSampleLogs(const API::MatrixWorkspace_sptr &ws, const API::MatrixWorkspace_sptr &outWS, const int numberOfWSsAdded);
-  void setUpdatedSampleLogs(const API::MatrixWorkspace_sptr &ws);
-  void resetSampleLogs(const API::MatrixWorkspace_sptr &ws);
 };
 
 } // namespace Algorithm
