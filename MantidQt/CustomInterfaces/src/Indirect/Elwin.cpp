@@ -249,29 +249,6 @@ void Elwin::unGroupInput(bool error) {
   m_uiForm.pbSave->setEnabled(true);
 }
 
-/**
- * Configures and adds a SaveNexus algorithm to the batch runner.
- *
- * @param workspaceName Name of the workspace to save
- * @param filename Name of the file to save it as
- */
-void Elwin::addSaveAlgorithm(const std::string &workspaceName,
-                             std::string filename) {
-  // Set a default filename if none provided
-  if (filename.length() == 0)
-    filename = workspaceName + ".nxs";
-
-  // Configure the algorithm
-  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("SaveNexus");
-  loadAlg->initialize();
-  loadAlg->setProperty("Filename", filename);
-
-  BatchAlgorithmRunner::AlgorithmRuntimeProps saveAlgProps;
-  saveAlgProps["InputWorkspace"] = workspaceName;
-
-  // Add it to the batch runner
-  m_batchAlgoRunner->addAlgorithm(loadAlg, saveAlgProps);
-}
 
 bool Elwin::validate() {
   UserInputValidator uiv;
