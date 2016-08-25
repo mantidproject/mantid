@@ -19,6 +19,9 @@ IndirectMolDyn::IndirectMolDyn(QWidget *parent)
           SLOT(setEnabled(bool)));
   connect(m_uiForm.cbVersion, SIGNAL(currentIndexChanged(const QString &)),
           this, SLOT(versionSelected(const QString &)));
+  // Handle plotting and saving
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
 void IndirectMolDyn::setup() {}
