@@ -9,6 +9,10 @@
 
 #include "strings.h"
 
+#ifdef _WIN32
+#define strcasecmp _stricmp
+#endif
+
 namespace Mantid {
 namespace Geometry {
 using Kernel::V3D;
