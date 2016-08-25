@@ -109,8 +109,6 @@ protected:
   DataProcessorMainPresenter *m_mainPresenter;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
-  // Index for column 'Group'
-  int m_colGroup;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
   // Post-process some rows
