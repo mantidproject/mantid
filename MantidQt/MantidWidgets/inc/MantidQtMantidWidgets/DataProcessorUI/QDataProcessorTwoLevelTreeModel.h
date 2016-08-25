@@ -1,5 +1,5 @@
-#ifndef MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTREEMODEL_H_
-#define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTREEMODEL_H_
+#ifndef MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODEL_H_
+#define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODEL_H_
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
@@ -12,8 +12,16 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-/** QDataProcessorTreeModel : Provides a QAbstractItemModel for a Mantid
-ITableWorkspace.
+/** QDataProcessorTwoLevelTreeModel : Provides a QAbstractItemModel for a
+DataProcessorUI with post-processing defined. The first argument to the
+constructor is a Mantid ITableWorkspace containing the values to use in the
+reduction. Each row corresponds to an independent reduction and the first column
+must contain the name of the group to which the corresponding row belongs. Rows
+in the same group will be post-processed together. The second argument is a
+WhiteList containing the header of the model, i.e. the name of the columns that
+will be displayed in the tree. As the group is not shown as a column but as a
+parent item, the table workspace must have one extra column with respect to the
+number of items in the WhiteList.
 
 Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -36,13 +44,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorTreeModel
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorTwoLevelTreeModel
     : public QAbstractItemModel {
   Q_OBJECT
 public:
-  QDataProcessorTreeModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
+  QDataProcessorTwoLevelTreeModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
                           const DataProcessorWhiteList &whitelist);
-  ~QDataProcessorTreeModel() override;
+  ~QDataProcessorTwoLevelTreeModel() override;
 
   // Functions to read data from the model
 
@@ -96,10 +104,10 @@ private:
   std::vector<std::vector<int>> m_rowsOfGroup;
 };
 
-/// Typedef for a shared pointer to \c QDataProcessorTreeModel
-typedef boost::shared_ptr<QDataProcessorTreeModel> QDataProcessorTreeModel_sptr;
+/// Typedef for a shared pointer to \c QDataProcessorTwoLevelTreeModel
+typedef boost::shared_ptr<QDataProcessorTwoLevelTreeModel> QDataProcessorTwoLevelTreeModel_sptr;
 
 } // namespace MantidWidgets
 } // namespace Mantid
 
-#endif /* MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTREEMODEL_H_ */
+#endif /* MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODEL_H_ */

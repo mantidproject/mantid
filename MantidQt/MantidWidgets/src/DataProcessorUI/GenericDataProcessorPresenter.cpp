@@ -37,7 +37,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
@@ -1085,7 +1085,7 @@ void GenericDataProcessorPresenter::newTable() {
       return;
 
   m_ws = createDefaultWorkspace();
-  m_model.reset(new QDataProcessorTreeModel(m_ws, m_whitelist));
+  m_model.reset(new QDataProcessorTwoLevelTreeModel(m_ws, m_whitelist));
   m_wsName.clear();
   m_view->showTable(m_model);
 
@@ -1125,7 +1125,7 @@ void GenericDataProcessorPresenter::openTable() {
   try {
     validateModel(newTable);
     m_ws = newTable;
-    m_model.reset(new QDataProcessorTreeModel(m_ws, m_whitelist));
+    m_model.reset(new QDataProcessorTwoLevelTreeModel(m_ws, m_whitelist));
     m_wsName = toOpen;
     m_view->showTable(m_model);
     m_tableDirty = false;
@@ -1392,7 +1392,7 @@ void GenericDataProcessorPresenter::transfer(
       newRow << row[m_whitelist.colNameFromColIndex(i)];
   }
 
-  m_model.reset(new QDataProcessorTreeModel(m_ws, m_whitelist));
+  m_model.reset(new QDataProcessorTwoLevelTreeModel(m_ws, m_whitelist));
   m_view->showTable(m_model);
 }
 

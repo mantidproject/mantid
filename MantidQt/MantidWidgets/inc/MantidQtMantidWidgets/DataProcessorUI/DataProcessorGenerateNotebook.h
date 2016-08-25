@@ -33,7 +33,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 
 #include <boost/tuple/tuple.hpp>
 #include <map>
@@ -49,14 +49,14 @@ splitByCommas(const std::string &names_string);
 
 std::string DLLExport plot1DString(const std::vector<std::string> &ws_names);
 
-std::string DLLExport tableString(QDataProcessorTreeModel_sptr model,
+std::string DLLExport tableString(QDataProcessorTwoLevelTreeModel_sptr model,
                                   const DataProcessorWhiteList &whitelist,
                                   const std::map<int, std::set<int>> &rows);
 
 std::string DLLExport titleString(const std::string &wsName);
 
 boost::tuple<std::string, std::string> DLLExport postprocessGroupString(
-    int group, const std::set<int> &rows, QDataProcessorTreeModel_sptr model,
+    int group, const std::set<int> &rows, QDataProcessorTwoLevelTreeModel_sptr model,
     const DataProcessorWhiteList &whitelist,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
@@ -69,13 +69,13 @@ plotsString(const std::vector<std::string> &output_ws,
 
 std::string DLLExport
 getReducedWorkspaceName(int groupNo, int rowNo,
-                        QDataProcessorTreeModel_sptr model,
+                        QDataProcessorTwoLevelTreeModel_sptr model,
                         const DataProcessorWhiteList &whitelist,
                         const std::string &prefix = "");
 
 boost::tuple<std::string, std::string> DLLExport reduceRowString(
     const int groupNo, const int rowNo, const std::string &instrument,
-    QDataProcessorTreeModel_sptr model, const DataProcessorWhiteList &whitelist,
+    QDataProcessorTwoLevelTreeModel_sptr model, const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
         preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
@@ -103,7 +103,7 @@ class DLLExport DataProcessorGenerateNotebook {
 
 public:
   DataProcessorGenerateNotebook(
-      std::string name, QDataProcessorTreeModel_sptr model,
+      std::string name, QDataProcessorTwoLevelTreeModel_sptr model,
       const std::string instrument, const DataProcessorWhiteList &whitelist,
       const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
           preprocessMap,
@@ -121,7 +121,7 @@ private:
   // The table ws name
   std::string m_wsName;
   // The model
-  QDataProcessorTreeModel_sptr m_model;
+  QDataProcessorTwoLevelTreeModel_sptr m_model;
   // The instrument
   const std::string m_instrument;
   // The whitelist defining the number of columns, their names and how they

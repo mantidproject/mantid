@@ -3,7 +3,7 @@
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 
 #include <QWidget>
@@ -87,7 +87,7 @@ void QDataProcessorWidget::setModel(const std::string &name) {
 Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
-void QDataProcessorWidget::showTable(QDataProcessorTreeModel_sptr model) {
+void QDataProcessorWidget::showTable(QDataProcessorTwoLevelTreeModel_sptr model) {
   m_model = model;
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),

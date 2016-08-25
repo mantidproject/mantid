@@ -8,7 +8,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 
 namespace MantidQt {
@@ -88,7 +88,7 @@ protected:
   // the workspace the model is currently representing
   Mantid::API::ITableWorkspace_sptr m_ws;
   // the model
-  QDataProcessorTreeModel_sptr m_model;
+  QDataProcessorTwoLevelTreeModel_sptr m_model;
   // the name of the workspace/table/model in the ADS, blank if unsaved
   std::string m_wsName;
   // the table view we're managing
