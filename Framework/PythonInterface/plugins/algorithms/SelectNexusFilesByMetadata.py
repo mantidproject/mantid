@@ -1,7 +1,6 @@
 #pylint: disable=eval-used
 from __future__ import (absolute_import, division, print_function)
 
-import h5py
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -52,6 +51,13 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
                              doc='Comma separated list of the fully resolved file names satisfying the given criteria.')
 
     def PyExec(self):
+
+        # run only if h5py is present
+        try:
+            import h5py
+        except ImportError:
+            raise RuntimeError('This algorithm requires h5py package')
+
         outputfiles = []
         # for the purpose here + is meaningless, so they will be silently replaced with ,
         for run in self.getPropertyValue('FileList').replace('+', ',').split(','):
