@@ -34,6 +34,10 @@ public:
   std::unique_ptr<SpecialWorkspace2D> clone() const {
     return std::unique_ptr<SpecialWorkspace2D>(doClone());
   }
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<SpecialWorkspace2D> cloneEmpty() const {
+    return std::unique_ptr<SpecialWorkspace2D>(doCloneEmpty());
+  }
   SpecialWorkspace2D &operator=(const SpecialWorkspace2D &) = delete;
   /** Gets the name of the workspace type
   @return Standard string name  */
@@ -58,6 +62,9 @@ public:
 private:
   SpecialWorkspace2D *doClone() const override {
     return new SpecialWorkspace2D(*this);
+  }
+  SpecialWorkspace2D *doCloneEmpty() const override {
+    return new SpecialWorkspace2D();
   }
   bool isCompatible(boost::shared_ptr<const SpecialWorkspace2D> ws);
 

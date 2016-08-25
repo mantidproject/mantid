@@ -47,6 +47,10 @@ public:
   std::unique_ptr<WorkspaceSingleValue> clone() const {
     return std::unique_ptr<WorkspaceSingleValue>(doClone());
   }
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<WorkspaceSingleValue> cloneEmpty() const {
+    return std::unique_ptr<WorkspaceSingleValue>(doCloneEmpty());
+  }
   WorkspaceSingleValue &operator=(const WorkspaceSingleValue &other) = delete;
   /// Returns the number of single indexable items in the workspace
   std::size_t size() const override { return 1; }
@@ -74,6 +78,9 @@ protected:
 private:
   WorkspaceSingleValue *doClone() const override {
     return new WorkspaceSingleValue(*this);
+  }
+  WorkspaceSingleValue *doCloneEmpty() const override {
+    return new WorkspaceSingleValue();
   }
 
   // allocates space in a new workspace - does nothing in this case

@@ -41,6 +41,10 @@ public:
   IEventWorkspace &operator=(const IEventWorkspace &) = delete;
   /// Returns a clone of the workspace
   IEventWorkspace_uptr clone() const { return IEventWorkspace_uptr(doClone()); }
+  /// Returns a default-initialized clone of the workspace
+  IEventWorkspace_uptr cloneEmpty() const {
+    return IEventWorkspace_uptr(doCloneEmpty());
+  }
 
   IEventList &getSpectrum(const size_t index) override = 0;
   const IEventList &getSpectrum(const size_t index) const override = 0;
@@ -71,6 +75,7 @@ protected:
 
 private:
   IEventWorkspace *doClone() const override = 0;
+  IEventWorkspace *doCloneEmpty() const override = 0;
 };
 }
 }

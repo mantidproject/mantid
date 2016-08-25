@@ -57,6 +57,11 @@ public:
     return std::unique_ptr<Workspace2D>(doClone());
   }
 
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<Workspace2D> cloneEmpty() const {
+    return std::unique_ptr<Workspace2D>(doCloneEmpty());
+  }
+
   /// Returns the histogram number
   std::size_t getNumberHistograms() const override;
 
@@ -110,6 +115,7 @@ protected:
 
 private:
   Workspace2D *doClone() const override { return new Workspace2D(*this); }
+  Workspace2D *doCloneEmpty() const override { return new Workspace2D(); }
 
   virtual std::size_t getHistogramNumberHelper() const;
 };

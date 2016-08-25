@@ -88,6 +88,11 @@ public:
   /// Returns a clone of the workspace
   MatrixWorkspace_uptr clone() const { return MatrixWorkspace_uptr(doClone()); }
 
+  /// Returns a default-initialized clone of the workspace
+  MatrixWorkspace_uptr cloneEmpty() const {
+    return MatrixWorkspace_uptr(doCloneEmpty());
+  }
+
   Indexing::IndexTranslator indexTranslator() const;
   void setIndexTranslator(const Indexing::IndexTranslator &translator);
 
@@ -596,6 +601,7 @@ protected:
 
 private:
   MatrixWorkspace *doClone() const override = 0;
+  virtual MatrixWorkspace *doCloneEmpty() const = 0;
 
   /// Create an MantidImage instance.
   MantidImage_sptr

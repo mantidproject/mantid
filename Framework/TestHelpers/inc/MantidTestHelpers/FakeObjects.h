@@ -160,6 +160,9 @@ private:
   WorkspaceTester *doClone() const override {
     throw std::runtime_error("Cloning of WorkspaceTester is not implemented.");
   }
+  WorkspaceTester *doCloneEmpty() const override {
+    throw std::runtime_error("Cloning of WorkspaceTester is not implemented.");
+  }
   std::vector<SpectrumTester> vec;
   size_t spec;
 };

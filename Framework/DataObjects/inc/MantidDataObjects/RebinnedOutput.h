@@ -45,6 +45,10 @@ public:
   std::unique_ptr<RebinnedOutput> clone() const {
     return std::unique_ptr<RebinnedOutput>(doClone());
   }
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<RebinnedOutput> cloneEmpty() const {
+    return std::unique_ptr<RebinnedOutput>(doCloneEmpty());
+  }
   RebinnedOutput &operator=(const RebinnedOutput &) = delete;
 
   /// Get the workspace ID.
@@ -80,6 +84,7 @@ protected:
 
 private:
   RebinnedOutput *doClone() const override { return new RebinnedOutput(*this); }
+  RebinnedOutput *doCloneEmpty() const override { return new RebinnedOutput(); }
 };
 
 /// shared pointer to the RebinnedOutput class
