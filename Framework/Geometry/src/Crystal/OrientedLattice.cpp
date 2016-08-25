@@ -321,10 +321,7 @@ void OrientedLattice::recalculate() {
       (da[5] > da[4] + da[3])) {
     throw std::invalid_argument("Invalid angles");
   }
-  UnitCell::calculateG();
-  UnitCell::calculateGstar();
-  UnitCell::calculateReciprocalLattice();
-  UnitCell::calculateB();
+  UnitCell::recalculate();
   UB = U * getB();
 }
 } // Namespace Geometry
