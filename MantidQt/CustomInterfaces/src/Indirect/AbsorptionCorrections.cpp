@@ -117,8 +117,7 @@ void AbsorptionCorrections::run() {
 
   // Set the correction workspace to keep the factors if desired
   bool keepCorrectionFactors = m_uiForm.ckKeepFactors->isChecked();
-  QString outputFactorsWsName =
-      outputBaseName + "_" + sampleShape + "_Factors";
+  QString outputFactorsWsName = outputBaseName + "_" + sampleShape + "_Factors";
   if (keepCorrectionFactors)
     absCorAlgo->setProperty("CorrectionsWorkspace",
                             outputFactorsWsName.toStdString());
@@ -287,7 +286,8 @@ void AbsorptionCorrections::saveClicked() {
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
 
   if (m_uiForm.ckKeepFactors->isChecked()) {
-    std::string factorsWs = m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
+    std::string factorsWs =
+        m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
     if (checkADSForPlotSaveWorkspace(factorsWs, false))
       addSaveWorkspaceToQueue(QString::fromStdString(factorsWs));
   }
