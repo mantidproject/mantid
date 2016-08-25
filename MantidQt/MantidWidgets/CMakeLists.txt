@@ -290,10 +290,9 @@ set ( INC_FILES
     inc/MantidQtMantidWidgets/ProgressableView.h
     inc/MantidQtMantidWidgets/ProgressPresenter.h
     inc/MantidQtMantidWidgets/WorkspacePresenter/ViewNotifiable.h
-    inc/MantidQtMantidWidgets/WorkspacePresenter/ADSNotifiable.h
-    inc/MantidQtMantidWidgets/WorkspacePresenter/IWorkspacePresenter.h
+    inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProviderNotifiable.h
     inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h
-	inc/MantidQtMantidWidgets/WorkspacePresenter/IADSAdapter.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProvider.h
 	inc/MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h
 	inc/MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h
 	inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceDockView.h

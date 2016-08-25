@@ -37,16 +37,16 @@ public:
 
   enum class Flag {
     LoadWorkspace,
-	RenameWorkspace,
+    RenameWorkspace,
     DeleteWorkspaces,
     GroupWorkspaces,
     SortWorkspaces,
     SaveWorkspaces
   };
 
-  virtual void notify(Flag flag) = 0;
+  virtual void notifyFromView(Flag flag) = 0;
 };
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif //MANTID_MANTIDWIDGETS_VIEWNOTIFIABLE_H_
+#endif // MANTID_MANTIDWIDGETS_VIEWNOTIFIABLE_H_

@@ -1,14 +1,19 @@
-#ifndef MANTID_MANTIDWIDGETS_IWORKSPACEPRESENTER_H_
-#define MANTID_MANTIDWIDGETS_IWORKSPACEPRESENTER_H_
+#ifndef MANTID_MANTIDWIDGETS_IADSADAPTER_H_
+#define MANTID_MANTIDWIDGETS_IADSADAPTER_H_
 
-#include "MantidQtMantidWidgets/WorkspacePresenter/ADSNotifiable.h"
-#include "MantidQtMantidWidgets/WorkspacePresenter/ViewNotifiable.h"
+#include <MantidAPI/Workspace_fwd.h>
+#include <boost/weak_ptr.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
+
+class WorkspaceProviderNotifiable;
+
+using Presenter_wptr = boost::weak_ptr<WorkspaceProviderNotifiable>;
+using StringList = std::vector<std::string>;
+
 /**
-\class  IWorkspacePresenter
-\brief  Interfact for Presenter class for Workspace dock in MantidPlot UI
+\class  WorkspaceProvider
 \author Lamar Moore
 \date   24-08-2016
 \version 1.0
@@ -34,12 +39,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-
-class IWorkspacePresenter : public ADSNotifiable, public ViewNotifiable {
+class WorkspaceProvider {
 public:
-	virtual ~IWorkspacePresenter() = default;
+  virtual ~WorkspaceProvider() = default;
+
+  virtual void registerPresenter(Presenter_wptr presenter) = 0;
+  virtual Mantid::API::Workspace_sptr
+  getWorkspace(const std::string &wsname) const = 0;
 };
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif //MANTID_MANTIDWIDGETS_IWORKSPACEPRESENTER_H_
+#endif // MANTID_MANTIDWIDGETS_IADSADAPTER_H_

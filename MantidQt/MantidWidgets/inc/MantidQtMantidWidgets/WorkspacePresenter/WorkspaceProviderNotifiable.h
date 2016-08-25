@@ -2,7 +2,7 @@
 #define MANTID_MANTIDWIDGETS_ADSNOTIFIABLE_H_
 
 /**
-\class  ADSNotifiable
+\class  WorkspaceProvider
 \brief  Mixin class allows ADS notifications
 \author Lamar Moore
 \date   24-08-2016
@@ -32,20 +32,20 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 namespace MantidQt {
 namespace MantidWidgets {
 
-class ADSNotifiable {
+class WorkspaceProviderNotifiable {
 public:
-  virtual ~ADSNotifiable() {}
+  virtual ~WorkspaceProviderNotifiable() {}
 
   enum class Flag {
     WorkspaceLoaded,
-	WorkspaceRenamed,
+    WorkspaceRenamed,
     WorkspaceDeleted,
     WorkspacesGrouped,
     WorkspacesSorted,
     WorkspacesSaved
   };
 
-  virtual void notify(Flag flag) = 0;
+  virtual void notifyFromWorkspaceProvider(Flag flag) = 0;
 };
 
 } // namespace MantidWidgets

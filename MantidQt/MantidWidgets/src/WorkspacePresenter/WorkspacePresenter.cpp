@@ -1,6 +1,6 @@
 #include "MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h"
 #include "MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h"
-#include "MantidQtMantidWidgets/WorkspacePresenter/IADSAdapter.h"
+#include "MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProvider.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -11,24 +11,25 @@ WorkspacePresenter::WorkspacePresenter(DockView_wptr view,
   m_adapter->registerPresenter(m_view.lock()->getPresenterWeakPtr());
 }
 
-void WorkspacePresenter::notify(ADSNotifiable::Flag flag) {
+void WorkspacePresenter::notifyFromWorkspaceProvider(
+    WorkspaceProviderNotifiable::Flag flag) {
   switch (flag) {
-  case ADSNotifiable::Flag::WorkspaceLoaded:
+  case WorkspaceProviderNotifiable::Flag::WorkspaceLoaded:
     break;
-  case ADSNotifiable::Flag::WorkspaceRenamed:
+  case WorkspaceProviderNotifiable::Flag::WorkspaceRenamed:
     break;
-  case ADSNotifiable::Flag::WorkspacesSaved:
+  case WorkspaceProviderNotifiable::Flag::WorkspacesSaved:
     break;
-  case ADSNotifiable::Flag::WorkspacesGrouped:
+  case WorkspaceProviderNotifiable::Flag::WorkspacesGrouped:
     break;
-  case ADSNotifiable::Flag::WorkspacesSorted:
+  case WorkspaceProviderNotifiable::Flag::WorkspacesSorted:
     break;
-  case ADSNotifiable::Flag::WorkspaceDeleted:
+  case WorkspaceProviderNotifiable::Flag::WorkspaceDeleted:
     break;
   }
 }
 
-void WorkspacePresenter::notify(ViewNotifiable::Flag flag) {
+void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   switch (flag) {
   case ViewNotifiable::Flag::LoadWorkspace:
     break;

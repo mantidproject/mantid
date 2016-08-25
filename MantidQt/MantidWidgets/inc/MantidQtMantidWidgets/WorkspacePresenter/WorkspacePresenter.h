@@ -1,18 +1,19 @@
 #ifndef MANTID_MANTIDWIDGETS_WORKSPACEPRESENTER_H_
 #define MANTID_MANTIDWIDGETS_WORKSPACEPRESENTER_H_
 
-#include "MantidQtMantidWidgets/WorkspacePresenter/IWorkspacePresenter.h"
-#include <memory>
+#include "MantidQtMantidWidgets/WorkspacePresenter/ViewNotifiable.h"
+#include "MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProviderNotifiable.h"
 #include <boost/weak_ptr.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace MantidWidgets {
 
 class IWorkspaceDockView;
-class IADSAdapter;
+class WorkspaceProvider;
 
 using DockView_wptr = boost::weak_ptr<IWorkspaceDockView>;
-using ADSAdapter_uptr = std::unique_ptr<IADSAdapter>;
+using ADSAdapter_uptr = std::unique_ptr<WorkspaceProvider>;
 /**
 \class  WorkspacePresenter
 \brief  Presenter class for Workspace dock in MantidPlot UI
@@ -41,32 +42,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class WorkspacePresenter : public IWorkspacePresenter {
+class WorkspacePresenter : public WorkspaceProviderNotifiable,
+                           public ViewNotifiable {
 public:
   explicit WorkspacePresenter(DockView_wptr view, ADSAdapter_uptr adapter);
   ~WorkspacePresenter() = default;
 
-  void notify(ADSNotifiable::Flag flag);
-  void notify(ViewNotifiable::Flag flag);
-
-protected:
-	void loadWorkspace();
-	void saveWorkspace();
-	void renameWorkspace();
-	void groupWorkspaces();
-	void sortWorkspaces();
-	void deleteWorkspaces();
-
-	void workspaceLoaded();
-	void workspaceSaved();
-	void workspaceRenamed();
-	void workspacesGrouped();
-	void workspacesSorted();
-	void workspacesDeleted();
+  void
+  notifyFromWorkspaceProvider(WorkspaceProviderNotifiable::Flag flag) override;
+  void notifyFromView(ViewNotifiable::Flag flag) override;
 
 private:
-	DockView_wptr m_view;
-	ADSAdapter_uptr m_adapter;
+  void loadWorkspace();
+  void saveWorkspace();
+  void renameWorkspace();
+  void groupWorkspaces();
+  void sortWorkspaces();
+  void deleteWorkspaces();
+
+  void workspaceLoaded();
+  void workspaceSaved();
+  void workspaceRenamed();
+  void workspacesGrouped();
+  void workspacesSorted();
+  void workspacesDeleted();
+
+private:
+  DockView_wptr m_view;
+  ADSAdapter_uptr m_adapter;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

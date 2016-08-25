@@ -5,9 +5,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class IWorkspacePresenter;
+class WorkspaceProviderNotifiable;
 
-using IWorkspacePresenter_wptr = boost::weak_ptr<IWorkspacePresenter>;
+using WorkspacePresenter_wptr = boost::weak_ptr<WorkspaceProviderNotifiable>;
 /**
 \class  IWorkspaceDockView
 \author Lamar Moore
@@ -37,8 +37,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class IWorkspaceDockView {
 public:
-	virtual ~IWorkspaceDockView() = default;
-	virtual IWorkspacePresenter_wptr getPresenterWeakPtr() = 0;
+  virtual ~IWorkspaceDockView() = default;
+  virtual WorkspacePresenter_wptr getPresenterWeakPtr() = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

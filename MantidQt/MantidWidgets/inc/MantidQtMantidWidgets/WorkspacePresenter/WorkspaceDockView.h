@@ -7,8 +7,8 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-
-using IWorkspacePresenter_sptr = boost::shared_ptr<IWorkspacePresenter>;
+class WorkspacePresenter;
+using WorkspacePresenter_sptr = boost::shared_ptr<WorkspacePresenter>;
 
 /**
 \class  WorkspaceDockView
@@ -44,12 +44,12 @@ public:
   explicit WorkspaceDockView();
   ~WorkspaceDockView() = default;
 
-  IWorkspacePresenter_wptr getPresenterWeakPtr() override;
+  WorkspacePresenter_wptr getPresenterWeakPtr() override;
 
 private:
-  IWorkspacePresenter_sptr presenter;
+  WorkspacePresenter_sptr presenter;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif //MANTID_MANTIDWIDGETS_WORKSPACEDOCKVIEW_H_
+#endif // MANTID_MANTIDWIDGETS_WORKSPACEDOCKVIEW_H_

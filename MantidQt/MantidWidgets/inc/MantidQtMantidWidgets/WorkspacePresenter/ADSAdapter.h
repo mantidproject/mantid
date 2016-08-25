@@ -1,7 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_ADSADAPTER_H_
 #define MANTID_MANTIDWIDGETS_ADSADAPTER_H_
 
-#include "MantidQtMantidWidgets/WorkspacePresenter/IADSAdapter.h"
+#include "MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProvider.h"
 #include <MantidQtAPI/WorkspaceObserver.h>
 
 namespace MantidQt {
@@ -33,10 +33,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class ADSAdapter : public IADSAdapter, public MantidQt::API::WorkspaceObserver {
+class ADSAdapter : public WorkspaceProvider,
+                   public MantidQt::API::WorkspaceObserver {
 public:
   void registerPresenter(Presenter_wptr presenter) override;
-  Mantid::API::Workspace_sptr getWorkspace(const std::string &wsname) const override;
+  Mantid::API::Workspace_sptr
+  getWorkspace(const std::string &wsname) const override;
 
 private:
   Presenter_wptr m_presenter;
@@ -44,4 +46,4 @@ private:
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif //MANTID_MANTIDWIDGETS_ADSADAPTER_H_
+#endif // MANTID_MANTIDWIDGETS_ADSADAPTER_H_
