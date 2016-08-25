@@ -57,6 +57,10 @@ Engineering Diffraction
   will be utilised to save *engggui_fitting_fitpeaks_param*
   TableWorkspace as a `csv` file.
 
+- New *Load* button on the Fitting Tab, will enable user to load the
+  focused file to the canvas, so that the user can select the peaks
+  manually beforehand
+
 Powder Diffraction
 ------------------
 

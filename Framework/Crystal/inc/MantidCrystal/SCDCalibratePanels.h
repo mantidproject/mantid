@@ -180,8 +180,8 @@ private:
                              const std::vector<double> &params,
                              const std::vector<double> &errs);
   /// Function to find peaks near detector edge
-  bool edgePixel(DataObjects::PeaksWorkspace_sptr ws, std::string bankName,
-                 int col, int row, int Edge);
+  bool edgePixel(const DataObjects::PeaksWorkspace &ws,
+                 const std::string &bankName, int col, int row, int Edge);
   /// Function to calculate U
   void findU(DataObjects::PeaksWorkspace_sptr peaksWs);
   /// save workspaces
@@ -207,9 +207,9 @@ private:
    * @param instrument   The instrument with the new values for the banks in
    *Groups
    */
-  void saveXmlFile(std::string const FileName,
-                   boost::container::flat_set<std::string> const AllBankNames,
-                   Geometry::Instrument_const_sptr const instrument) const;
+  void saveXmlFile(const std::string &FileName,
+                   const boost::container::flat_set<std::string> &AllBankNames,
+                   const Geometry::Instrument &instrument) const;
 };
 
 } // namespace Crystal
