@@ -287,8 +287,8 @@ void MSDFit::updateRS(QtProperty *prop, double val) {
  */
 void MSDFit::saveClicked() {
 
-  checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
-  addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -296,8 +296,8 @@ void MSDFit::saveClicked() {
  * Handles mantid plotting
  */
 void MSDFit::plotClicked() {
-  checkADSForPlotSaveWorkspace(m_pythonExportWsName + "_A1", true);
-  plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_A1");
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName + "_A1", true))
+    plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_A1");
 }
 
 } // namespace IDA
