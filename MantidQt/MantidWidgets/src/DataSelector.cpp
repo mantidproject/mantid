@@ -16,7 +16,7 @@ namespace MantidWidgets {
 
 DataSelector::DataSelector(QWidget *parent)
     : API::MantidWidget(parent), m_algRunner(), m_autoLoad(true),
-      m_showLoad(true), m_allowMultipleFiles(false) {
+      m_showLoad(true) {
   m_uiForm.setupUi(this);
   connect(m_uiForm.cbInputType, SIGNAL(currentIndexChanged(int)), this,
           SLOT(handleViewChanged(int)));
@@ -432,7 +432,7 @@ void DataSelector::dragEnterEvent(QDragEnterEvent *de) {
 * edit box
 * @returns True if multiple files can be specified, false otherwise
 */
-bool DataSelector::allowMultipleFiles() const { return m_allowMultipleFiles; }
+bool DataSelector::allowMultipleFiles() const { return m_uiForm.rfFileInput->m_allowMultipleFiles; }
 
 /**
 * Set whether this widget allows multiple files to be specifed or not
@@ -440,8 +440,7 @@ bool DataSelector::allowMultipleFiles() const { return m_allowMultipleFiles; }
 * single file may be specified
 */
 void DataSelector::allowMultipleFiles(const bool allow) {
-  m_allowMultipleFiles = allow;
-  m_uiForm.rfFileInput->allowMultipleFiles(m_allowMultipleFiles);
+  m_uiForm.rfFileInput->allowMultipleFiles(allow);
 }
 
 } /* namespace MantidWidgets */

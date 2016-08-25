@@ -149,8 +149,6 @@ private:
   bool m_autoLoad;
   /// Flag to show or hide the load button. By default this is set to true.
   bool m_showLoad;
-  /// Allow multiple files
-  bool m_allowMultipleFiles;
 };
 
 } /* namespace MantidWidgets */
