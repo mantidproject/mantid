@@ -43,42 +43,54 @@ class FindSXPeaksTest : public CxxTest::TestSuite {
 public:
   // Test out of bounds constuction arguments
   void testSXPeakConstructorThrowsIfNegativeIntensity() {
+    auto workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    auto instrument = workspace->getInstrument();
     double intensity = -1; // Negative intensity.
     std::vector<int> spectra(1, 1);
     double detectorDistance = 3;
-    TSM_ASSERT_THROWS(
-        "SXPeak: Should not construct with a negative intensity",
-        SXPeak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 1),
-        std::invalid_argument);
+    TSM_ASSERT_THROWS("SXPeak: Should not construct with a negative intensity",
+                      SXPeak(0.001, 0.02, 0.01, intensity, spectra,
+                             detectorDistance, 1, instrument),
+                      std::invalid_argument);
   }
 
   // Test out of bounds construction arguments.
   void testSXPeakConstructorThrowsIfSpectraSizeZero() {
+    auto workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    auto instrument = workspace->getInstrument();
     double intensity = 1;
     std::vector<int> spectra; // Zero size spectra list
     double detectorDistance = 3;
     TSM_ASSERT_THROWS(
         "SXPeak: Should not construct with a zero size specral list",
-        SXPeak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 1),
+        SXPeak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 1, instrument),
         std::invalid_argument);
   }
 
   // Test out of bounds construction arguments.
   void testSXPeakConstructorThrowsIfNegativeDetectorDistance() {
+    auto workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    auto instrument = workspace->getInstrument();
     double intensity = 1;
     std::vector<int> spectra(1, 1);
     double detectorDistance = -1; // Negative detector distance
     TSM_ASSERT_THROWS(
         "SXPeak: Should not construct with a zero size specral list",
-        SXPeak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 1),
+        SXPeak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 1, instrument),
         std::invalid_argument);
   }
 
   void testSXPeakGetters() {
+    auto workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    auto instrument = workspace->getInstrument();
     double intensity = 1;
     std::vector<int> spectra(1, 1);
     double detectorDistance = 3;
-    SXPeak peak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 2);
+    SXPeak peak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 2, instrument);
 
     TSM_ASSERT_EQUALS("Intensity getter is not wired-up correctly", 1,
                       peak.getIntensity());
@@ -195,7 +207,7 @@ public:
     // creates a workspace where all y-values are 2
     Workspace2D_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    // Stick three peaks in histoIndex = 1.
+    // Stick three peaks in different histograms.
     makeOnePeak(1, 40, 2, workspace);
     makeOnePeak(2, 60, 2, workspace);
     makeOnePeak(3, 45, 2, workspace); // This is the biggest!

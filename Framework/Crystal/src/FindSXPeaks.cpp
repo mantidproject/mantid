@@ -101,9 +101,8 @@ void FindSXPeaks::exec() {
 
   // Calculate the primary flight path.
   Kernel::V3D sample = localworkspace->getInstrument()->getSample()->getPos();
-  Kernel::V3D L1 =
-      sample - localworkspace->getInstrument()->getSource()->getPos();
-
+  Kernel::V3D source = localworkspace->getInstrument()->getSource()->getPos();
+  Kernel::V3D L1 = sample - source;
   double l1 = L1.norm();
   //
 
@@ -178,8 +177,7 @@ void FindSXPeaks::exec() {
       phi += 2.0 * M_PI;
     }
 
-    double th2 = det->getTwoTheta(Mantid::Kernel::V3D(0, 0, 0),
-                                  Mantid::Kernel::V3D(0, 0, 1));
+    double th2 = det->getTwoTheta(sample, L1);
 
     std::vector<int> specs(1, i);
 
@@ -188,7 +186,7 @@ void FindSXPeaks::exec() {
     // std::cout << "r,th,phi,t: " << L2.norm() << "," << th2*180/M_PI << "," <<
     // phi*180/M_PI << "," << tof << "\n";
 
-    SXPeak peak(tof, th2, phi, *maxY, specs, l1 + L2.norm(), det->getID());
+    SXPeak peak(tof, th2, phi, *maxY, specs, l1 + L2.norm(), det->getID(), localworkspace->getInstrument());
     PARALLEL_CRITICAL(entries) { entries.push_back(peak); }
     progress.report();
     PARALLEL_END_INTERUPT_REGION
