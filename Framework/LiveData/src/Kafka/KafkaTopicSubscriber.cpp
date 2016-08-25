@@ -7,13 +7,46 @@
 #include <cassert>
 #include <sstream>
 
+using RdKafka::Conf;
+using RdKafka::KafkaConsumer;
+using RdKafka::Metadata;
+using RdKafka::TopicMetadata;
+
 namespace {
 /// Timeout for message consume
 const int CONSUME_TIMEOUT_MS = 30000;
-
+/// A reference to the static logger
 Mantid::Kernel::Logger &LOGGER() {
   static Mantid::Kernel::Logger logger("KafkaTopicSubscriber");
   return logger;
+}
+
+/// Create and return the global configuration object
+std::unique_ptr<Conf> createGlobalConfiguration(const std::string &brokerAddr) {
+  auto conf = std::unique_ptr<Conf>(Conf::create(Conf::CONF_GLOBAL));
+  std::string errorMsg;
+  conf->set("metadata.broker.list", brokerAddr, errorMsg);
+  conf->set("session.timeout.ms", "10000", errorMsg);
+  conf->set("group.id", "mantid", errorMsg);
+  conf->set("message.max.bytes", "10000000", errorMsg);
+  conf->set("fetch.message.max.bytes", "10000000", errorMsg);
+  conf->set("replica.fetch.max.bytes", "10000000", errorMsg);
+  conf->set("enable.auto.commit", "false", errorMsg);
+  conf->set("enable.auto.offset.store", "false", errorMsg);
+  conf->set("offset.store.method", "none", errorMsg);
+  return conf;
+}
+
+/// Create and return a topic configuration object for a given global
+/// configuration
+std::unique_ptr<Conf> createTopicConfiguration(Conf *globalConf) {
+  auto conf = std::unique_ptr<Conf>(Conf::create(Conf::CONF_TOPIC));
+  std::string errorMsg;
+  conf->set("auto.offset.reset", "smallest", errorMsg);
+
+  // tie the global config to this topic configuration
+  globalConf->set("default_topic_conf", conf.get(), errorMsg);
+  return conf;
 }
 }
 
@@ -58,20 +91,12 @@ const std::string KafkaTopicSubscriber::topic() const { return m_topicName; }
  * Setup the connection to the broker for the configured topic
  */
 void KafkaTopicSubscriber::subscribe() {
-  using namespace RdKafka;
+  // configurations
+  auto globalConf = createGlobalConfiguration(m_brokerAddr);
+  auto topicConf = createTopicConfiguration(globalConf.get());
 
-  auto globalConf = std::unique_ptr<Conf>(Conf::create(Conf::CONF_GLOBAL));
+  // consumer
   std::string errorMsg;
-  globalConf->set("metadata.broker.list", m_brokerAddr, errorMsg);
-  globalConf->set("session.timeout.ms", "10000", errorMsg);
-  globalConf->set("group.id", "mantid", errorMsg);
-  globalConf->set("message.max.bytes", "10000000", errorMsg);
-  globalConf->set("fetch.message.max.bytes", "10000000", errorMsg);
-  globalConf->set("replica.fetch.max.bytes", "10000000", errorMsg);
-  auto topicConf = std::unique_ptr<Conf>(Conf::create(Conf::CONF_TOPIC));
-  globalConf->set("default_topic_conf", topicConf.get(), errorMsg);
-
-  // Create consumer using accumulated global configuration.
   m_consumer = std::unique_ptr<KafkaConsumer>(
       KafkaConsumer::create(globalConf.get(), errorMsg));
   if (!m_consumer) {
@@ -95,7 +120,7 @@ void KafkaTopicSubscriber::subscribe() {
                            [this](const TopicMetadata *tpc) {
                              return tpc->topic() == this->m_topicName;
                            });
-  if(iter == topics->cend()) {
+  if (iter == topics->cend()) {
     std::ostringstream os;
     os << "Failed to find topic '" << m_topicName << "' on broker";
     throw std::runtime_error(os.str());

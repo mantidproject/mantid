@@ -6,6 +6,8 @@
 #include "MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h"
 #include "MantidLiveData/Kafka/KafkaBroker.h"
 
+#include <thread>
+
 class ISISKafkaEventStreamDecoderTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -21,8 +23,14 @@ public:
     using namespace Mantid::LiveData;
 
     KafkaBroker broker("sakura");
-    ISISKafkaEventStreamDecoder streamer(broker, "SANS2Devent_data", "", "");
-    streamer.run();
+    ISISKafkaEventStreamDecoder streamer(broker, "SANS2Devent_data",
+                                         "SANS2Drun_data", "SANS2Dspdet_data");
+    streamer.startCapture();
+    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+    if(auto exc = streamer.exceptionHandled()) {
+      throw *exc;
+    }
+    streamer.stopCapture();
   }
 };
 

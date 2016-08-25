@@ -3,8 +3,10 @@
 
 #include "MantidLiveData/Kafka/IKafkaBroker.h"
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
-#include <Poco/Runnable.h>
+#include <atomic>
+#include <thread>
 
 namespace Mantid {
 namespace LiveData {
@@ -13,7 +15,7 @@ namespace LiveData {
   High-level interface to ISIS Kafka event system. It requires
   3 topic names of the data streams.
 
-  It subclasses Poco::Runnable in order to be able to be run from a separate
+  A call to capture() starts the process of capturing the stream on a separate
   thread.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -37,17 +39,54 @@ namespace LiveData {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ISISKafkaEventStreamDecoder : public Poco::Runnable {
+class DLLExport ISISKafkaEventStreamDecoder {
 public:
   ISISKafkaEventStreamDecoder(const IKafkaBroker &broker,
                               std::string eventTopic, std::string runInfoTopic,
                               std::string spDetTopic);
-  void run() override;
+  ~ISISKafkaEventStreamDecoder();
+  ISISKafkaEventStreamDecoder(const ISISKafkaEventStreamDecoder &) = delete;
+  ISISKafkaEventStreamDecoder &
+  operator=(const ISISKafkaEventStreamDecoder &) = delete;
+
+public:
+  ///@name Start/stop
+  ///@{
+  void startCapture() noexcept;
+  void stopCapture() noexcept;
+  ///@}
+
+  ///@name Querying
+  ///@{
+  bool isRunning() const noexcept { return m_capturing; }
+  boost::shared_ptr<std::runtime_error> exceptionHandled() const noexcept {
+    return m_exception;
+  }
+  ///@}
 
 private:
+  void captureImpl() noexcept;
+  void captureImplExcept();
+
+  void initLocalEventBuffer();
+
+  /// Flag indicating if user interruption has been requested
+  std::atomic<bool> m_interrupt;
+  /// Subscriber for the event stream
   std::unique_ptr<IKafkaStreamSubscriber> m_eventStream;
-  std::unique_ptr<IKafkaStreamSubscriber> m_runInfoStream;
+  /// Local event workspace buffer
+  DataObjects::EventWorkspace_sptr m_localEvents;
+  /// Subscriber for the run info stream
+  std::unique_ptr<IKafkaStreamSubscriber> m_runStream;
+  /// Subscriber for the run info stream
   std::unique_ptr<IKafkaStreamSubscriber> m_spDetStream;
+
+  /// Associated thread running the capture process
+  std::thread m_thread;
+  /// Flag indicating that the decoder is capturing
+  std::atomic<bool> m_capturing;
+  /// Exception object indicating there was an error
+  boost::shared_ptr<std::runtime_error> m_exception;
 };
 
 } // namespace LiveData
