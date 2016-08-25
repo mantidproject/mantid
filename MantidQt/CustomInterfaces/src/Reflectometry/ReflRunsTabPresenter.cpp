@@ -114,6 +114,9 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
     populateSearch(searchAlg);
   } break;
+  case IReflRunsTabPresenter::ExitFlag:
+    checkForUnsavedChangesOnExit();
+    break;
   case IReflRunsTabPresenter::TransferFlag:
     transfer();
     break;
@@ -146,6 +149,11 @@ void ReflRunsTabPresenter::pushCommands() {
   for (size_t i = rowCommStart; i < nCommands; i++)
     rowCommands.push_back(std::move(commands[i]));
   m_view->setRowCommands(std::move(rowCommands));
+}
+
+void ReflRunsTabPresenter::checkForUnsavedChangesOnExit() {
+  m_tablePresenter->notify(
+      DataProcessorPresenter::CheckUnsavedChangesOnExitFlag);
 }
 
 /** Searches for runs that can be used */

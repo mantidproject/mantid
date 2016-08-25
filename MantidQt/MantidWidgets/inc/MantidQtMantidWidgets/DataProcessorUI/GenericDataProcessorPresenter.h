@@ -135,6 +135,8 @@ protected:
   int numRowsInGroup(int groupId) const;
   // Validate rows
   bool rowsValid(const std::map<int, std::set<int>> &groups);
+  // Check for unsaved changes
+  void checkForUnsavedChanges();
   // Validate a row
   void validateRow(int groupNo, int rowNo) const;
   // insert a row in the model

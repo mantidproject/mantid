@@ -93,6 +93,8 @@ public:
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
 
+  void checkUnsavedChangesBeforeExit();
+
 private:
   /// initialise the interface
   void initLayout();

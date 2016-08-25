@@ -40,7 +40,6 @@ Initialise the Interface
 */
 void QtReflRunsTabView::initLayout() {
   ui.setupUi(this);
-
   ui.buttonTransfer->setDefaultAction(ui.actionTransfer);
 
   // Expand the process runs column at the expense of the search column
@@ -71,13 +70,24 @@ void QtReflRunsTabView::initLayout() {
   connect(qDataProcessorWidget,
           SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
-
+  // Needed to Import/Export TBL, plot row and plot group
+  connect(qDataProcessorWidget,
+          SIGNAL(runAsPythonScript(const QString &, bool)), this,
+          SIGNAL(runAsPythonScript(const QString &, bool)));
   // Create the presenter
   m_presenter = std::make_shared<ReflRunsTabPresenter>(
       this /* main view */,
       this /* Currently this concrete view is also responsible for prog reporting */,
       qDataProcessorWidget->getPresenter() /* The data processor presenter */);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
+}
+
+/**
+* Notifying m_presenter that user wishes to close the window
+* so we need to check for any unsaved changes in the processing table.
+*/
+void QtReflRunsTabView::checkUnsavedChangesBeforeExit() {
+  m_presenter->notify(IReflRunsTabPresenter::ExitFlag);
 }
 
 /**
