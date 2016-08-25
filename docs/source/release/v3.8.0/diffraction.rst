@@ -41,6 +41,13 @@ Single Crystal Diffraction
   this algorithm and plots the theoretical vs calculated position of each peak for each panel.  The RMSD in mm is
   calculated and printed in a log file and on the plots.
 
+- Given a PeaksWorkspace or MatrixWorkspace with an instrument,
+  :ref:`SetDetScale <algm-SetDetScale>` 
+  will set or change the detector bank scales that are used in SaveHKL and AnvredCorrection.  The input format is the same as
+  used in anvred3.py, so DetScaleList input can be pasted from the definition of detScale there.  The default values can be
+  set in the instrument parameter file. Default values are in the parameter file for the TOPAZ instrument.
+
+
 Engineering Diffraction
 -----------------------
 
