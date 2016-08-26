@@ -169,8 +169,8 @@ void SCDCalibratePanels::exec() {
     MyBankNames.insert(peaksWs->getPeak(i).getBankName());
   }
 
-  std::vector<std::string> fit_workspaces(MyBankNames.size(), "params_");
-  std::vector<std::string> parameter_workspaces(MyBankNames.size(), "fit_");
+  std::vector<std::string> fit_workspaces(MyBankNames.size(), "fit_");
+  std::vector<std::string> parameter_workspaces(MyBankNames.size(), "params_");
 
   PARALLEL_FOR1(peaksWs)
   for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
@@ -294,6 +294,15 @@ void SCDCalibratePanels::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  // remove skipped banks
+  fit_workspaces.erase(
+      std::remove(fit_workspaces.begin(), fit_workspaces.end(), "fit_"),
+      fit_workspaces.end());
+  parameter_workspaces.erase(std::remove(parameter_workspaces.begin(),
+                                         parameter_workspaces.end(), "params_"),
+                             parameter_workspaces.end());
+
   // Try again to optimize L1
   if (changeL1)
     findL1(nPeaks, peaksWs);
