@@ -93,10 +93,14 @@ Powder Diffraction
 - :ref:`CorelliCrossCorrelate <algm-CorelliCrossCorrelate>`: The
   weights applied to events have changed by a factor of the duty cycle
   (:math:`c\approx0.498`) as requested by the instrument scientists.
-  
-- :ref:`pearl-powder-diffraction-ref`: A workflow diagram for 
-  ``pearl_run_focus`` function has been created. 
 
+- :ref:`pearl-powder-diffraction-ref`: A workflow diagram for
+  ``pearl_run_focus`` function has been created.
+
+- :ref:`CalibrateRectangularDetectors
+  <algm-CalibrateRectangularDetectors>` has been modified to output
+  ``.h5`` formated calibration files as well as the other versions it
+  already supported.
 
 Imaging
 -------
