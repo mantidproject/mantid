@@ -36,7 +36,7 @@ namespace MuParserUtils {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-/// A map from constants to their names in the default parser.
+/// A map from constants to their muParser names.
 extern const MANTID_API_DLL std::map<double, std::string> MUPARSER_CONSTANTS;
 
 /// Add a set of default constants to a muParser.
