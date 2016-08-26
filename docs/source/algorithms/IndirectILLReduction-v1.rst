@@ -10,12 +10,12 @@ Description
 -----------
 
 A workflow algorithm to perform a data reduction for indirect **ILL** instruments. Currently only **IN16B** is supported.
-This algorithm perform QENS (Quasi-Elastic Neutron Scattering) type of reduction.
+This algorithm performs QENS (Quasi-Elastic Neutron Scattering) type of reduction.
 
 SumRuns
 ~~~~~~~~~~~~~~~~
 
-All runs will be summed before the reduction. The run number of the first run will be used for naming the single output workspace. The AlgorithmHistory contains full information about all input file names.
+All runs will be summed before the reduction. The run number of the first run will be used for naming the single output workspace.
 
 Unmirror Options
 ~~~~~~~~~~~~~~~~
@@ -28,9 +28,9 @@ For quasi-elastic neutron scattering scans (QENS), this algorithm will split the
 reduced independently and then summed according to ``UnmirrorOption`` as follows (after normalisation to monitor and optional calibration with input calibration workspace):
 
 0: No transformation, i.e. normalised, (calibrated) workspace will be returned as reduced workspace.
-If Doppler.mirror_sense=14 (in Sample Logs) the reduced workspace has two wings, which will not be converted to energy.
-If Doppler.mirror_sense=16 (in Sample Logs) the reduced workspace will be returned with x-axis in energy transfer.
-Else no energy transfer will take place and the input run should be checked (warning)
+If ``Doppler.mirror_sense=14`` in input ``.nxs`` files, the reduced workspace has two wings, so the x-axis will not be converted to energy.
+If ``Doppler.mirror_sense=16`` the reduced workspace will be returned with x-axis in energy transfer.
+If the nexus entry is not present no energy transfer will take place and corresponding warning will be thrown.
 
 1: Left wing will be returned as reduced workspace.
 
@@ -52,7 +52,7 @@ The options ``4-7`` rely on :ref:`FindEPP <algm-FindEPP>` algorithm to find the 
 
 These options are inherited identically from (and validated against) previous **LAMP** software, to enable smooth transition for the users.
 
-Energy transferred will be left, right and reduced workspaces (exception for UnmirrorOption=0) and corrupted bins due to normalisation are masked. All spectra of the reduced workspaces are converted to scattering angle
+Energy transferred will be left, right and reduced workspaces (exception for ``UnmirrorOption=0``) and corrupted bins due to normalisation and shift are masked. All spectra of the reduced workspaces are converted to scattering angle.
 
 Multiple File Reduction
 ~~~~~~~~~~~~~~~~~~~~~~~
