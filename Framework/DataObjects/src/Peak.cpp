@@ -234,6 +234,8 @@ Peak::Peak(const Geometry::IPeak &ipeak)
 #if defined(_MSC_VER) && _MSC_VER <= 1900
 Peak::Peak(Peak &&) = default;
 Peak &Peak::operator=(Peak &&) = default;
+#elif defined(__GNUC__) && (__GNUC__ == 5)
+// already defined in the header
 #else
 Peak::Peak(Peak &&) noexcept = default;
 Peak &Peak::operator=(Peak &&) noexcept = default;

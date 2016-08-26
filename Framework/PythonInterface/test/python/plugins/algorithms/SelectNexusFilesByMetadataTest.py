@@ -1,3 +1,4 @@
+#pylint: disable=unused-import
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -56,4 +57,10 @@ class SelectNexusFilesByMetadataTest(unittest.TestCase):
         self.assertTrue(outfiles[0].endswith('ILLD33_001030.nxs'),'Should be the file name')
 
 if __name__=="__main__":
-    unittest.main()
+    # run the test if only if the required package is present
+    try:
+        import h5py
+        unittest.main()
+    except ImportError:
+        pass
+
