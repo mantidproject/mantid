@@ -109,11 +109,12 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
       }
     }
 
-    // TODO: (Ticket #5774) Decide if we should do the same for output (see
-    // below) - Also do we need to do a similar thing for post-processing.
+    // TODO: https://github.com/mantidproject/mantid/issues/6620
+    // Decide if we should do the same for output (see below)
+    // Also do we need to do a similar thing for post-processing.
 
     /*  Leaving the following code in for the moment - will be removed as part
-    of trac ticket #5774.
+    of issue #6620.
 
           // Now look at the output workspace property
           if (alg->existsProperty("OutputWorkspace"))

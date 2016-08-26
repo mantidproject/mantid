@@ -51,6 +51,9 @@ public:
 #if defined(_MSC_VER) && _MSC_VER <= 1900
   Peak(Peak &&);
   Peak &operator=(Peak &&);
+#elif defined(__GNUC__) && (__GNUC__ == 5)
+  Peak(Peak &&) noexcept = default;
+  Peak &operator=(Peak &&) noexcept = default;
 #else
   Peak(Peak &&) noexcept;
   Peak &operator=(Peak &&) noexcept;
