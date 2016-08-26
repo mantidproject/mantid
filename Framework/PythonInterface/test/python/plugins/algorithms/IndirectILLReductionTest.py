@@ -4,7 +4,6 @@ import os, unittest, numpy as np
 from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup, AnalysisDataService
 from testhelpers import run_algorithm
-import IndirectILLReduction
 
 class IndirectILLReductionTest(unittest.TestCase):
 
@@ -73,9 +72,8 @@ class IndirectILLReductionTest(unittest.TestCase):
     def test_no_verbose(self):
         self._args['Run'] = self._run_name
 
-        alg_test = run_algorithm('IndirectILLReduction', **self._args)
+        IndirectILLReduction(**self._args)
 
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
         self.assertEqual(mtd['red'].size(), 1, "WorkspaceGroup red should contain one workspace")
         self._workspace_properties(mtd['red'])
 
@@ -117,9 +115,7 @@ class IndirectILLReductionTest(unittest.TestCase):
         self.assertEqual(self._run.getNumberHistograms() , mtd['red_raw'].getItem(0).getNumberHistograms())
         self.assertEqual("Success!", CheckWorkspacesMatch(self._run, mtd['red_raw'].getItem(0)))
 
-    def test_debug_mode_with_calibration(self):
-
-        self.test_debug_mode()
+    def test_debug_calibration(self):
 
         self._args['Run'] = self._run_name
         self._args['DebugMode'] = True

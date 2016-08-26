@@ -12,7 +12,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
     _map_file = None
     _peak_range = None
     _intensity_scale = None
-    _mirror_sense = None
 
 
 
@@ -29,11 +28,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
                                           action=FileAction.Load,
                                           extensions=['nxs']),
                              doc='List of input file (s)')
-
-        self.declareProperty(name='MirrorSense',
-                             defaultValue=True,
-                             doc='If True (default), left and right wing will be summed \n'
-                                 'If False, no transformation of the workspace will be performed')
 
         self.declareProperty(FileProperty(name='MapFile', defaultValue='',
                                           action=FileAction.OptionalLoad,
@@ -55,18 +49,34 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
     def PyExec(self):
         self._setup()
 
-        if self._mirror_sense is True:
-            # Run requires to have two wings
-            unmirror_option = 3
-        else:
-            # Run can have one wing (or two wings -> set peak range accordingly)
-            unmirror_option = 0
+        # Looking for mirror_sense: another possibility was to add an input option mirror_sense
+        __ws_in = Load(self._input_file)
+        gRun = __ws_in.getRun()
+        DeleteWorkspace(__ws_in)
 
-        # Do an energy transfer reduction
-        __temp = IndirectILLReduction(Run=self._input_file,
-                                       MapFile=self._map_file,
-                                       SumRuns=True, DebugMode=False,
-                                       UnmirrorOption=unmirror_option)
+        if gRun.hasProperty('Doppler.mirror_sense'):
+            # mirror_sense 14 : two wings
+            # mirror_sense 16 : one wing
+            if gRun.getLogData('Doppler.mirror_sense').value == 14:
+                unmirror_option = 3
+                self.log().information('Input run has two wings, using UnmirrorOption 3 (sum of left and right)')
+            else:
+                unmirror_option = 0
+                self.log().information('Input run has one wing, using UnmirrorOption 0')
+
+            # Do an energy transfer reduction
+            __temp = IndirectILLReduction(Run=self._input_file,
+                                          MapFile=self._map_file,
+                                          SumRuns=True, DebugMode=False,
+                                          UnmirrorOption=unmirror_option)
+        else:
+            self.log().warning('Input run (IN16B) has no property Doppler.mirror_sense. Check your input file.')
+            self.log().information('Input run has one wing, using UnmirrorOption 0')
+            __temp = IndirectILLReduction(Run=self._input_file,
+                                        MapFile=self._map_file,
+                                        SumRuns=True, DebugMode=False,
+                                        UnmirrorOption=0)
+
 
         # Integrate within peak range
         __ws_name = __temp.getItem(0).getName()
@@ -110,7 +120,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
 
         self._map_file = self.getPropertyValue('MapFile')
         self._peak_range = self.getProperty('PeakRange').value
-        self._mirror_sense = self.getProperty('MirrorSense').value
 
         self._intensity_scale = self.getProperty('ScaleFactor').value
 

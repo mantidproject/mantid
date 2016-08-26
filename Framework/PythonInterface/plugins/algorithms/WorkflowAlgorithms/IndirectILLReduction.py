@@ -1,4 +1,4 @@
-#pylint: disable=no-init,too-many-instance-attributes,invalid-name
+#pylint: disable=no-init,too-many-instance-attributes,invalid-name,too-many-branches
 from __future__ import (absolute_import, division, print_function)
 
 import os.path
@@ -50,7 +50,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(MultipleFileProperty('Run',extensions=['nxs']),
                              doc='File path of run (s).')
 
-        self.declareProperty(FileProperty('VanadiumRun','',
+        self.declareProperty(FileProperty('VanadiumRun', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['nxs']),
                              doc='File path of vanadium run. Used for UnmirrorOption=[5,7]')
@@ -314,11 +314,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         elif gRun.hasProperty('Doppler.delta_energy'):
             energy = gRun.getLogData('Doppler.delta_energy').value # delta energy in micro eV
             self.log().information('Doppler delta energy in micro eV : %s' % energy)
+        else:
+            self.log().warning('Input run (IN16B) has no property Doppler.mirror_sense. Check your input file.')
+            self.log().warning('Doppler maximum delta energy is 0 micro eV')
 
         formula = '(x-%f)*%f' % (mid, 2.0 * energy / (size - 1) * scale)
 
         self.log().information('Energy transform formula: ' + formula)
-        # set in the cache and return
+
         self._formula = formula
         return formula
 
@@ -451,37 +454,46 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         end_bin = mtd[red].blocksize()
 
         if self._unmirror_option == 0:
-            self.log().information('Unmirror 0: X-axis in energy transfer will not be correct when workspace has two wings')
-            self._convert_to_energy(red)
+            if mtd[red].getRun().hasProperty('Doppler.mirror_sense'):
+                # mirror_sense 14 : two wings
+                # mirror_sense 16 : one wing
+                if mtd[red].getRun().getLogData('Doppler.mirror_sense').value == 14:
+                    self.log().warning('Input run (IN16B) has two wings, no energy transfer will be performed')
+                else:
+                    self.log().information('Unmirror 0: Input run (IN16B) has one wing, perform energy transfer')
+                    self._convert_to_energy(red)
+            else:
+                self.log().warning('Input run (IN16B) has no property Doppler.mirror_sense. Check your input file.')
+                self._convert_to_energy(red)
 
         elif self._unmirror_option == 1:
-            self.log().information('Unmirror 1: return the left wing')
+            self.log().information('Unmirror 1: Return the left wing')
             CloneWorkspace(InputWorkspace=left,OutputWorkspace=red)
 
         elif self._unmirror_option == 2:
-            self.log().information('Unmirror 2: return the right wing')
+            self.log().information('Unmirror 2: Return the right wing')
             CloneWorkspace(InputWorkspace=right,OutputWorkspace=red)
 
         elif self._unmirror_option == 3:
-            self.log().information('Unmirror 3: sum the left and right wings')
+            self.log().information('Unmirror 3: Sum the left and right wings')
 
         elif self._unmirror_option == 4:
-            self.log().information('Unmirror 4: shift the right according to left')
+            self.log().information('Unmirror 4: Shift the right according to left')
             start_bin, end_bin = self._shift_spectra(right, left)
 
         elif self._unmirror_option == 5:
-            self.log().information('Unmirror 5: shift the right according to right of the vanadium and sum to left')
+            self.log().information('Unmirror 5: Shift the right according to right of the vanadium and sum to left')
             start_bin, end_bin = self._shift_spectra(right, 'right_van', True)
 
         elif self._unmirror_option == 6:
-            self.log().information('Unmirror 6: center both the right and the left')
+            self.log().information('Unmirror 6: Center both the right and the left')
             start_bin_left, endbin_left = self._shift_spectra(left)
             start_bin_right, endbin_right = self._shift_spectra(right)
             start_bin = np.maximum(start_bin_left, start_bin_right)
             end_bin = np.minimum(endbin_left, endbin_right)
 
         elif self._unmirror_option == 7:
-            self.log().information('Unmirror 7: shift both the right and the left according to vanadium and sum')
+            self.log().information('Unmirror 7: Shift both the right and the left according to vanadium and sum')
             start_bin_left, endbin_left = self._shift_spectra(left, 'left_van', True)
             start_bin_right, endbin_right = self._shift_spectra(right, 'right_van', True)
             start_bin = np.maximum(start_bin_left, start_bin_right)

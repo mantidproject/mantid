@@ -20,27 +20,15 @@ class ILLIN16BCalibrationTest(unittest.TestCase):
 
     def test_happy_case_normal(self):
         calib_ws = ILLIN16BCalibration(Run='ILL/IN16B/146191.nxs',
-                                       MirrorSense=False,
                                        PeakRange=[-0.001, 0.002])
 
         self.assertEqual(calib_ws.getNumberHistograms(), 18)
         self.assertEqual(calib_ws.blocksize(), 1)
-
-
-    def test_happy_case_mirror_mode(self):
-        calib_ws = ILLIN16BCalibration(Run='ILL/IN16B/146191.nxs',
-                                       MirrorSense=True,
-                                       PeakRange=[-0.001, 0.002])
-
-        self.assertEqual(calib_ws.getNumberHistograms(), 18)
-        self.assertEqual(calib_ws.blocksize(), 1)
-
 
     def test_map_file(self):
         temp_map = TemporaryFileHelper(SAMPLE_GROUPING_XML, extension='.xml')
 
         calib_ws = ILLIN16BCalibration(Run='ILL/IN16B/146191.nxs',
-                                       MirrorSense=True,
                                        MapFile=temp_map.getName(),
                                        PeakRange=[-0.001, 0.002])
 
