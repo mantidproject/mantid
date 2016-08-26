@@ -17,6 +17,7 @@ namespace MantidWidgets {
 class ProgressableView;
 class DataProcessorView;
 class DataProcessorCommand;
+class DataProcessorTreeManager;
 
 /** @class GenericDataProcessorPresenter
 
@@ -84,7 +85,9 @@ public:
                                             const std::set<int> &rows,
                                             const std::string &prefix = "");
 
-protected:
+private:
+  // the tree manager
+  std::unique_ptr<DataProcessorTreeManager> m_manager;
   // the workspace the model is currently representing
   Mantid::API::ITableWorkspace_sptr m_ws;
   // the model
@@ -174,6 +177,9 @@ protected:
   // options
   void showOptionsDialog();
   void initOptions();
+
+  // actions
+  void addActions();
 
   // List of workspaces the user can open
   std::set<std::string> m_workspaceList;

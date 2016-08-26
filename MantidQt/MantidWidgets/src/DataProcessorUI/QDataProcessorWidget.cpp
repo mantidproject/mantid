@@ -1,7 +1,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtAPI/FileDialogHandler.h"
-#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/MantidWidget.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
@@ -42,11 +42,6 @@ Initialise the Interface
 void QDataProcessorWidget::createTable() {
   ui.setupUi(this);
 
-  ui.buttonProcess->setDefaultAction(ui.actionProcess);
-
-  // Create a whats this button
-  ui.rowToolBar->addAction(QWhatsThis::createAction(this));
-
   // Allow rows and columns to be reordered
   QHeaderView *header = new QHeaderView(Qt::Horizontal);
   header->setMovable(true);
@@ -60,6 +55,23 @@ void QDataProcessorWidget::createTable() {
   // Custom context menu for table
   connect(ui.viewTable, SIGNAL(customContextMenuRequested(const QPoint &)),
           this, SLOT(showContextMenu(const QPoint &)));
+}
+
+/** Add actions to the toolbar
+* @param commands :: A vector of actions (commands)
+*/
+void QDataProcessorWidget::addActions(
+    std::vector<std::unique_ptr<DataProcessorCommand>> commands) {
+
+  // Put the commands in the toolbar
+  for (auto &command : commands) {
+    m_commands.push_back(
+        Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
+            ui.rowToolBar, std::move(command)));
+  }
+
+  // Add a whats this button
+  ui.rowToolBar->addAction(QWhatsThis::createAction(this));
 }
 
 /**
@@ -121,114 +133,6 @@ void QDataProcessorWidget::setTableList(const std::set<std::string> &tables) {
   }
 }
 
-/**
-This slot notifies the presenter that the "append row" button has been pressed
-*/
-void QDataProcessorWidget::on_actionAppendRow_triggered() {
-  m_presenter->notify(DataProcessorPresenter::AppendRowFlag);
-}
-
-/**
-This slot notifies the presenter that the "append group" button has been pressed
-*/
-void QDataProcessorWidget::on_actionAppendGroup_triggered() {
-  m_presenter->notify(DataProcessorPresenter::AppendGroupFlag);
-}
-
-/**
-This slot notifies the presenter that the "delete row" button has been pressed
-*/
-void QDataProcessorWidget::on_actionDeleteRow_triggered() {
-  m_presenter->notify(DataProcessorPresenter::DeleteRowFlag);
-}
-
-/**
-This slot notifies the presenter that the "delete group" button has been pressed
-*/
-void QDataProcessorWidget::on_actionDeleteGroup_triggered() {
-  m_presenter->notify(DataProcessorPresenter::DeleteGroupFlag);
-}
-
-/**
-This slot notifies the presenter that the "process" button has been pressed
-*/
-void QDataProcessorWidget::on_actionProcess_triggered() {
-  m_presenter->notify(DataProcessorPresenter::ProcessFlag);
-}
-
-/**
-This slot notifies the presenter that the "group rows" button has been pressed
-*/
-void QDataProcessorWidget::on_actionGroupRows_triggered() {
-  m_presenter->notify(DataProcessorPresenter::GroupRowsFlag);
-}
-
-/**
-This slot notifies the presenter that the "clear selected" button has been
-pressed
-*/
-void QDataProcessorWidget::on_actionClearSelected_triggered() {
-  m_presenter->notify(DataProcessorPresenter::ClearSelectedFlag);
-}
-
-/**
-This slot notifies the presenter that the "copy selection" button has been
-pressed
-*/
-void QDataProcessorWidget::on_actionCopySelected_triggered() {
-  m_presenter->notify(DataProcessorPresenter::CopySelectedFlag);
-}
-
-/**
-This slot notifies the presenter that the "cut selection" button has been
-pressed
-*/
-void QDataProcessorWidget::on_actionCutSelected_triggered() {
-  m_presenter->notify(DataProcessorPresenter::CutSelectedFlag);
-}
-
-/**
-This slot notifies the presenter that the "paste selection" button has been
-pressed
-*/
-void QDataProcessorWidget::on_actionPasteSelected_triggered() {
-  m_presenter->notify(DataProcessorPresenter::PasteSelectedFlag);
-}
-
-/**
-This slot notifies the presenter that the "expand selection" button has been
-pressed
-*/
-void QDataProcessorWidget::on_actionExpandSelection_triggered() {
-  m_presenter->notify(DataProcessorPresenter::ExpandSelectionFlag);
-}
-
-/**
-This slot opens the documentation when the "help" button has been pressed
-*/
-void QDataProcessorWidget::on_actionHelp_triggered() {
-  MantidQt::API::HelpWindow::showPage(
-      this,
-      QString(
-          "qthelp://org.mantidproject/doc/interfaces/ISIS_Reflectometry.html"));
-}
-
-/**
-This slot notifies the presenter that the "plot selected rows" button has been
-pressed
-*/
-void QDataProcessorWidget::on_actionPlotRow_triggered() {
-  m_presenter->notify(DataProcessorPresenter::PlotRowFlag);
-}
-
-/**
-This slot notifies the presenter that the "plot selected groups" button has been
-pressed
-*/
-void QDataProcessorWidget::on_actionPlotGroup_triggered() {
-  m_presenter->notify(DataProcessorPresenter::PlotGroupFlag);
-}
-
 /** This slot is used to update the instrument*/
 void QDataProcessorWidget::on_comboProcessInstrument_currentIndexChanged(
     int index) {
@@ -255,27 +159,28 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
   if (!ui.viewTable->indexAt(pos).isValid())
     return;
 
-  // parent widget takes ownership of QMenu
-  QMenu *menu = new QMenu(this);
-  menu->addAction(ui.actionProcess);
-  menu->addAction(ui.actionExpandSelection);
-  menu->addSeparator();
-  menu->addAction(ui.actionPlotRow);
-  menu->addAction(ui.actionPlotGroup);
-  menu->addSeparator();
-  menu->addAction(ui.actionAppendRow);
-  menu->addAction(ui.actionAppendGroup);
-  menu->addSeparator();
-  menu->addAction(ui.actionGroupRows);
-  menu->addAction(ui.actionCopySelected);
-  menu->addAction(ui.actionCutSelected);
-  menu->addAction(ui.actionPasteSelected);
-  menu->addAction(ui.actionClearSelected);
-  menu->addSeparator();
-  menu->addAction(ui.actionDeleteRow);
-  menu->addAction(ui.actionDeleteGroup);
+  // TODO
+  //// parent widget takes ownership of QMenu
+  //QMenu *menu = new QMenu(this);
+  //menu->addAction(ui.actionProcess);
+  //menu->addAction(ui.actionExpandSelection);
+  //menu->addSeparator();
+  //menu->addAction(ui.actionPlotRow);
+  //menu->addAction(ui.actionPlotGroup);
+  //menu->addSeparator();
+  //menu->addAction(ui.actionAppendRow);
+  //menu->addAction(ui.actionAppendGroup);
+  //menu->addSeparator();
+  //menu->addAction(ui.actionGroupRows);
+  //menu->addAction(ui.actionCopySelected);
+  //menu->addAction(ui.actionCutSelected);
+  //menu->addAction(ui.actionPasteSelected);
+  //menu->addAction(ui.actionClearSelected);
+  //menu->addSeparator();
+  //menu->addAction(ui.actionDeleteRow);
+  //menu->addAction(ui.actionDeleteGroup);
 
-  menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
+  //menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
 }
 
 /**

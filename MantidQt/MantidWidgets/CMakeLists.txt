@@ -10,6 +10,7 @@ set ( SRC_FILES
 	src/DataProcessorUI/DataProcessorPreprocessingAlgorithm.cpp
 	src/DataProcessorUI/DataProcessorProcessingAlgorithm.cpp
 	src/DataProcessorUI/DataProcessorProcessingAlgorithmBase.cpp
+	src/DataProcessorUI/DataProcessorTwoLevelTreeManager.cpp
 	src/DataProcessorUI/DataProcessorWhiteList.cpp
 	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
 	src/DataProcessorUI/ParseKeyValueString.cpp
@@ -228,6 +229,8 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableAsCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorTwoLevelTreeManager.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorVectorString.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h
@@ -333,6 +336,7 @@ set ( TEST_FILES
   DataProcessorUI/DataProcessorProcessingAlgorithmTest.h
   DataProcessorUI/DataProcessorCommandsTest.h
   DataProcessorUI/DataProcessorGenerateNotebookTest.h
+  DataProcessorUI/DataProcessorTwoLevelTreeManagerTest.h
   DataProcessorUI/DataProcessorWhiteListTest.h
   DataProcessorUI/GenericDataProcessorPresenterTest.h
   DataProcessorUI/ParseKeyValueStringTest.h

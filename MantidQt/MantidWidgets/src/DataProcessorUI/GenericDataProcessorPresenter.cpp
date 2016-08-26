@@ -11,29 +11,9 @@
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableAsCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
@@ -73,6 +53,9 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
       m_processor(processor), m_postprocessor(postprocessor), m_mainPresenter(),
       m_tableDirty(false) {
+
+  m_manager =
+      Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(this);
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -123,6 +106,9 @@ void GenericDataProcessorPresenter::acceptViews(
   // As soon as we are given a view, initialize everything
   m_view = tableView;
   m_progressView = progressView;
+
+  // Add actions to toolbar
+  addActions();
 
   // Initialise options
   // Load saved values from disk
@@ -1557,6 +1543,17 @@ void GenericDataProcessorPresenter::initOptions() {
   m_view->loadSettings(m_options);
 }
 
+/** Tells the view which of the actions should be added to the toolbar
+*/
+void GenericDataProcessorPresenter::addActions() {
+
+  auto commands = m_manager->publishCommands();
+  std::vector<std::unique_ptr<DataProcessorCommand>> commandsToShow;
+  for (size_t comm = 10; comm < commands.size(); comm++)
+    commandsToShow.push_back(std::move(commands.at(comm)));
+  m_view->addActions(std::move(commandsToShow));
+}
+
 /**
 * Tells the view to load a table workspace
 * @param name : [input] The workspace's name
@@ -1566,51 +1563,13 @@ void GenericDataProcessorPresenter::setModel(std::string name) {
 }
 
 /**
-* Adds a command to a vector of commands
-* @param commands : [input] The vector where the new command will be added
-* @param command : [input] The command to add
-*/
-void addToCommand(std::vector<DataProcessorCommand_uptr> &commands,
-                  DataProcessorCommand_uptr command) {
-  commands.push_back(std::move(command));
-}
-
-/**
 * Publishes a list of available commands
 * @return : The list of available commands
 */
-std::vector<DataProcessorCommand_uptr>
+std::vector<std::unique_ptr<DataProcessorCommand>>
 GenericDataProcessorPresenter::publishCommands() {
 
-  std::vector<DataProcessorCommand_uptr> commands;
-
-  addToCommand(commands, make_unique<DataProcessorOpenTableCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorNewTableCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorSaveTableCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorSaveTableAsCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorSeparatorCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorImportTableCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorExportTableCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorSeparatorCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorOptionsCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorSeparatorCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorProcessCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorExpandCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorSeparatorCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorPlotRowCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorPlotGroupCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorSeparatorCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorAppendRowCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorAppendGroupCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorSeparatorCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorGroupRowsCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorCopySelectedCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorCutSelectedCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorPasteSelectedCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorClearSelectedCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorSeparatorCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorDeleteRowCommand>(this));
-  addToCommand(commands, make_unique<DataProcessorDeleteGroupCommand>(this));
+  auto commands = m_manager->publishCommands();
 
   // "Open Table" needs the list of "child" commands, i.e. the list of
   // available workspaces in the ADS
@@ -1640,11 +1599,11 @@ GenericDataProcessorPresenter::getTableList() {
 
   // Create a command for each of the workspaces in the ADS
   for (auto it = m_workspaceList.begin(); it != m_workspaceList.end(); ++it) {
-    addToCommand(
-        workspaces,
-        Mantid::Kernel::make_unique<DataProcessorWorkspaceCommand>(this, *it));
+    workspaces.push_back(std::move(
+        Mantid::Kernel::make_unique<DataProcessorWorkspaceCommand>(this, *it)));
   }
   return workspaces;
 }
+
 }
 }

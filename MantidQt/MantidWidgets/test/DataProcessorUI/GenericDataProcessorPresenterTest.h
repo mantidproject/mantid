@@ -8,28 +8,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableAsCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ProgressableViewMockObject.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -327,6 +306,7 @@ public:
     // called
     EXPECT_CALL(mockDataProcessorView, setTableList(_)).Times(0);
     EXPECT_CALL(mockDataProcessorView, setOptionsHintStrategy(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, addActionsProxy()).Times(0);
     // Constructor
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
@@ -352,6 +332,8 @@ public:
         createReflectometryProcessor(), createReflectometryPostprocessor());
 
     // When the presenter accepts the views, expect the following:
+    // Expect that the list of actions is published
+    EXPECT_CALL(mockDataProcessorView, addActionsProxy()).Times(Exactly(1));
     // Expect that the list of settings is populated
     EXPECT_CALL(mockDataProcessorView, loadSettings(_)).Times(Exactly(1));
     // Expect that the list of tables is populated
@@ -2718,68 +2700,6 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
-  }
-
-  void testPublishCommands() {
-    // The mock view is not needed for this test
-    // We just want to test the list of commands returned by the presenter
-    NiceMock<MockDataProcessorView> mockDataProcessorView;
-    MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
-    GenericDataProcessorPresenter presenter(
-        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
-        createReflectometryProcessor(), createReflectometryPostprocessor());
-    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
-
-    // Actions (commands)
-    auto commands = presenter.publishCommands();
-    TS_ASSERT_EQUALS(commands.size(), 27);
-
-    TS_ASSERT(dynamic_cast<DataProcessorOpenTableCommand *>(commands[0].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorNewTableCommand *>(commands[1].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSaveTableCommand *>(commands[2].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorSaveTableAsCommand *>(commands[3].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(commands[4].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorImportTableCommand *>(commands[5].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorExportTableCommand *>(commands[6].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(commands[7].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorOptionsCommand *>(commands[8].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorSeparatorCommand *>(commands[9].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorProcessCommand *>(commands[10].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorExpandCommand *>(commands[11].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorSeparatorCommand *>(commands[12].get()));
-    TS_ASSERT(dynamic_cast<DataProcessorPlotRowCommand *>(commands[13].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorPlotGroupCommand *>(commands[14].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorSeparatorCommand *>(commands[15].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorAppendRowCommand *>(commands[16].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorAppendGroupCommand *>(commands[17].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorSeparatorCommand *>(commands[18].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorGroupRowsCommand *>(commands[19].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorCopySelectedCommand *>(commands[20].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorCutSelectedCommand *>(commands[21].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorPasteSelectedCommand *>(commands[22].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorClearSelectedCommand *>(commands[23].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorSeparatorCommand *>(commands[24].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorDeleteRowCommand *>(commands[25].get()));
-    TS_ASSERT(
-        dynamic_cast<DataProcessorDeleteGroupCommand *>(commands[26].get()));
   }
 
   void testWorkspaceNamesNoTrans() {

@@ -1,15 +1,17 @@
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORSEPARATORCOMMAND_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORSEPARATORCOMMAND_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEMANAGER_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEMANAGER_H
 
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h"
+#include <memory>
+#include <vector>
 
 namespace MantidQt {
 namespace MantidWidgets {
-/** @class DataProcessorSeparatorCommand
 
-DataProcessorSeparatorCommand defines a separator. It has no name, no icon and
-empty
-execute() method
+class DataProcessorCommand;
+
+/** @class DataProcessorTreeManager
+
+// TODO: Description
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -32,19 +34,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorSeparatorCommand : public DataProcessorCommandBase {
-public:
-  DataProcessorSeparatorCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  virtual ~DataProcessorSeparatorCommand(){};
 
-  void execute() override{};
-  std::string name() override { return std::string(); }
-  std::string icon() override { return std::string(); }
-  std::string tooltip() override { return std::string(); }
-  std::string whatsthis() override { return std::string(); }
-  std::string shortcut() override { return std::string(); }
+class DataProcessorTreeManager {
+public:
+  virtual ~DataProcessorTreeManager(){};
+
+  /// Actions/commands
+
+  /// Publish actions/commands
+  virtual std::vector<std::unique_ptr<DataProcessorCommand>>
+  publishCommands() = 0;
+
+protected:
+  /// Add a command to the list of available commands
+  void addCommand(std::vector<std::unique_ptr<DataProcessorCommand>> &commands,
+                  std::unique_ptr<DataProcessorCommand> command) {
+    commands.push_back(std::move(command));
+  }
 };
 }
 }
-#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORSEPARATORCOMMAND_H*/
+#endif /* MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEMANAGER_H */

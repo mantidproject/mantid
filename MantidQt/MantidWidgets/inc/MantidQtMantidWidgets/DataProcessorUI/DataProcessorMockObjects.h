@@ -53,12 +53,21 @@ public:
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<std::string, QVariant> &));
 
+  // Acctions/commands
+  // Gmock requires parameters and return values of mocked methods to be
+  // copyable which means we have to mock addActions() via a proxy method
+  void addActions(std::vector<DataProcessorCommand_uptr>) override {
+    addActionsProxy();
+  }
+  MOCK_METHOD0(addActionsProxy, void());
+
   // Calls we don't care about
   void showTable(QDataProcessorTwoLevelTreeModel_sptr) override{};
   void saveSettings(const std::map<std::string, QVariant> &) override{};
   std::string getProcessInstrument() const override { return "FAKE"; }
 
   DataProcessorPresenter *getPresenter() const override { return nullptr; }
+
 };
 
 class MockMainPresenter : public DataProcessorMainPresenter {

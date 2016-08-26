@@ -13,6 +13,8 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+class DataProcessorCommandAdapter;
+
 /** QDataProcessorWidget : Provides an interface for processing table
 data.
 
@@ -47,6 +49,10 @@ public:
   QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter,
                        QWidget *parent = 0);
   ~QDataProcessorWidget() override;
+
+  // Add actions to the toolbar
+  void QDataProcessorWidget::addActions(
+      std::vector<std::unique_ptr<DataProcessorCommand>> commands) override;
 
   // Connect the model
   void showTable(QDataProcessorTwoLevelTreeModel_sptr model) override;
@@ -101,6 +107,8 @@ private:
   // the workspace the user selected to open
   std::string m_toOpen;
   QSignalMapper *m_openMap;
+  // Command adapters
+  std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_commands;
 
 signals:
   void comboProcessInstrument_currentIndexChanged(int index);
@@ -109,21 +117,6 @@ public slots:
   void on_comboProcessInstrument_currentIndexChanged(int index);
 
 private slots:
-  void on_actionAppendRow_triggered();
-  void on_actionAppendGroup_triggered();
-  void on_actionDeleteRow_triggered();
-  void on_actionDeleteGroup_triggered();
-  void on_actionProcess_triggered();
-  void on_actionGroupRows_triggered();
-  void on_actionClearSelected_triggered();
-  void on_actionCopySelected_triggered();
-  void on_actionCutSelected_triggered();
-  void on_actionPasteSelected_triggered();
-  void on_actionExpandSelection_triggered();
-  void on_actionHelp_triggered();
-  void on_actionPlotRow_triggered();
-  void on_actionPlotGroup_triggered();
-
   void setModel(QString name);
   void tableUpdated(const QModelIndex &topLeft, const QModelIndex &bottomRight);
   void showContextMenu(const QPoint &pos);

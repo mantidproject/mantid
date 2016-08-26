@@ -7,6 +7,7 @@
 #include <QObject>
 #include <memory>
 #include <qmenu.h>
+#include <qtoolbar.h>
 #include <vector>
 
 namespace MantidQt {
@@ -45,6 +46,10 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataProcessorCommandAdapter
     : public QObject {
   Q_OBJECT
 public:
+  /** Constructor: Adds actions to a menu
+  * @param menu :: The menu where the actions will be added
+  * @param adaptee :: The action to add
+  */
   DataProcessorCommandAdapter(QMenu *menu, DataProcessorCommand_uptr adaptee)
       : m_adaptee(std::move(adaptee)) {
 
@@ -68,6 +73,30 @@ public:
       action->setIcon(QIcon(QString::fromStdString(m_adaptee->icon())));
       action->setSeparator(m_adaptee->isSeparator());
       menu->addAction(action);
+      connect(action, SIGNAL(triggered()), this, SLOT(call()));
+    }
+  };
+
+  /** Constructor: Adds actions to a toolbar
+  * @param toolbar :: The toolbar where actions will be added
+  * @param adaptee :: The action to add
+  */
+  DataProcessorCommandAdapter(QToolBar *toolbar,
+                              DataProcessorCommand_uptr adaptee)
+      : m_adaptee(std::move(adaptee)) {
+
+    if (!m_adaptee->hasChild()) {
+      // Sub-menus cannot be added to a toolbar
+
+      QAction *action =
+          new QAction(QString::fromStdString(m_adaptee->name()), this);
+      action->setIcon(QIcon(QString::fromStdString(m_adaptee->icon())));
+      action->setSeparator(m_adaptee->isSeparator());
+      action->setToolTip(QString::fromStdString(m_adaptee->tooltip()));
+      action->setWhatsThis(QString::fromStdString(m_adaptee->whatsthis()));
+      action->setShortcut(
+          QKeySequence(QString::fromStdString(m_adaptee->shortcut())));
+      toolbar->addAction(action);
       connect(action, SIGNAL(triggered()), this, SLOT(call()));
     }
   };
