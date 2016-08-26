@@ -13,16 +13,18 @@ public:
 
   void test_CreateDefaultMuParser_Gives_Whats_Promised() {
     const auto parser = MuParserUtils::createDefaultMuParser();
-    TS_ASSERT(constantsDefined(parser));
+    TS_ASSERT(defaultConstantsDefined(parser));
+    TS_ASSERT(noVariablesDefined(parser));
   }
 
   void test_AllocateDefaultMuParser_Gives_Whats_Promised() {
     const auto parser = MuParserUtils::allocateDefaultMuParser();
-    TS_ASSERT(constantsDefined(*parser));
+    TS_ASSERT(defaultConstantsDefined(*parser));
+    TS_ASSERT(noVariablesDefined(*parser));
   }
 
 private:
-  static bool constantsDefined(const mu::Parser &parser) {
+  static bool defaultConstantsDefined(const mu::Parser &parser) {
     const auto constantMap = parser.GetConst();
     // muParser defines two extra constants: "_e" and "_pi".
     size_t extraConstants = 0;
@@ -48,6 +50,10 @@ private:
     }
 
     return true;
+  }
+
+  static bool noVariablesDefined(const mu::Parser &parser) {
+    return parser.GetVar().size() == 0;
   }
 };
 
