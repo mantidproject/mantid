@@ -17,6 +17,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -64,6 +65,27 @@ public:
                        const size_t nData) override;
 
   void init() override;
+
+  /**
+     * Creates a new peak, matching the old peak except for a different
+    *instrument.
+     *
+     * The Time of flightis the same except offset by T0. L0 should be the L0
+    *for the new instrument.
+     * It is added as a parameter in case the instrument will have the initial
+    *flight path adjusted later.
+     *  NOTE: the wavelength is changed.
+     *
+     * @param peak_old - The old peak
+     * @param instrNew -The new instrument
+     * @param T0 :
+     * @param L0 :
+     * @return The new peak with the new instrument( adjusted with the
+    *parameters) and time adjusted.
+     */
+  static DataObjects::Peak createNewPeak(const Geometry::IPeak &peak_old,
+                                         Geometry::Instrument_sptr instrNew,
+                                         double T0, double L0);
 
   static void cLone(boost::shared_ptr<Geometry::ParameterMap> &pmap,
                     boost::shared_ptr<const Geometry::IComponent> component,

@@ -26,8 +26,7 @@ IPeak *createPeakHKL(IPeaksWorkspace &self, const object &data) {
 /// Create a peak via it's QLab value from a list or numpy array
 IPeak *createPeakQLab(IPeaksWorkspace &self, const object &data) {
   return self.createPeak(
-      Mantid::PythonInterface::Converters::PyObjectToV3D(data)(),
-      boost::optional<double>());
+      Mantid::PythonInterface::Converters::PyObjectToV3D(data)(), boost::none);
 }
 
 /// Create a peak via it's QLab value from a list or numpy array

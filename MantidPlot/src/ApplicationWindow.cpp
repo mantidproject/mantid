@@ -112,7 +112,7 @@
 #include "DataPickerTool.h"
 #include "TiledWindow.h"
 #include "DockedWindow.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "ProjectSerialiser.h"
 
 // TODO: move tool-specific code to an extension manager
@@ -207,6 +207,7 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -4572,6 +4573,14 @@ void ApplicationWindow::openRecentProject(QAction *action) {
     // Have to change the working directory here because that is used when
     // finding the nexus files to load
     workingDir = QFileInfo(f).absolutePath();
+
+    // store the working directory in the settings so it may be accessed
+    // elsewhere in the Qt layer.
+    QSettings settings;
+    settings.beginGroup("/Project");
+    settings.setValue("/WorkingDirectory", workingDir);
+    settings.endGroup();
+
     ApplicationWindow *a = open(fn, false, false);
     if (a && (fn.endsWith(".qti", Qt::CaseInsensitive) ||
               fn.endsWith(".qti~", Qt::CaseInsensitive) ||
@@ -4605,6 +4614,13 @@ ApplicationWindow *ApplicationWindow::openProject(const QString &filename,
                                                   const int fileVersion) {
   newProject();
   m_mantidmatrixWindows.clear();
+
+  // store the working directory in the settings so it may be accessed
+  // elsewhere in the Qt layer.
+  QSettings settings;
+  settings.beginGroup("/Project");
+  settings.setValue("/WorkingDirectory", workingDir);
+  settings.endGroup();
 
   projectname = filename;
   setWindowTitle("MantidPlot - " + filename);
@@ -5916,11 +5932,6 @@ std::string ApplicationWindow::windowGeometryInfo(MdiSubWindow *w) {
   if (wrapper) {
     x = wrapper->x();
     y = wrapper->y();
-    if (w->getFloatingWindow()) {
-      QPoint pos = QPoint(x, y) - mdiAreaTopLeft();
-      x = pos.x();
-      y = pos.y();
-    }
   }
 
   tsv << x << y;
@@ -5947,7 +5958,7 @@ void ApplicationWindow::restoreWindowGeometry(ApplicationWindow *app,
   QString caption = w->objectName();
 
   if (s.contains("maximized")) {
-    w->setStatus(MdiSubWindow::Maximized);
+    w->setMaximized();
     app->setListView(caption, tr("Maximized"));
   } else {
     QStringList lst = s.split("\t");
@@ -5956,15 +5967,22 @@ void ApplicationWindow::restoreWindowGeometry(ApplicationWindow *app,
       int y = lst[2].toInt();
       int width = lst[3].toInt();
       int height = lst[4].toInt();
-      w->resize(width, height);
-      w->move(x, y);
+
+      QWidget *wrapper = w->getWrapperWindow();
+      if (wrapper) {
+        wrapper->resize(width, height);
+        wrapper->move(x, y);
+      } else {
+        w->resize(width, height);
+        w->move(x, y);
+      }
     }
 
     if (s.contains("minimized")) {
-      w->setStatus(MdiSubWindow::Minimized);
+      w->setMinimized();
       app->setListView(caption, tr("Minimized"));
     } else {
-      w->setStatus(MdiSubWindow::Normal);
+      w->setNormal();
       if (lst.count() > 5 && lst[5] == "hidden")
         app->hideWindow(w);
     }
@@ -13325,7 +13343,7 @@ void ApplicationWindow::updateRecentFilesList(QString fname) {
       Mantid::API::MultipleFileProperty mfp("tester");
       mfp.setValue(recentFiles[i].toStdString());
       const std::vector<std::string> files =
-          Mantid::API::MultipleFileProperty::flattenFileNames(mfp());
+          Mantid::Kernel::VectorHelper::flattenVector(mfp());
       if (files.size() == 1) {
         ostr << "&" << menuCount << " " << files[0];
       } else if (files.size() > 1) {

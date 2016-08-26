@@ -169,6 +169,7 @@ void LoadSpice2D::init() {
 void LoadSpice2D::exec() {
 
   setInputPropertiesAsMemberProperties();
+  setTimes();
   std::map<std::string, std::string> metadata =
       m_xmlHandler.get_metadata("Detector");
   setWavelength(metadata);
@@ -283,6 +284,14 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
     from_string<double>(m_wavelength, s, std::dec);
     s = metadata["Header/wavelength_spread"];
     from_string<double>(m_dwavelength, s, std::dec);
+
+    // 20160720: New wavelength will be a ratio
+    // HUGLY HACK! Comparing dates...
+    DateAndTime changingDate("2016-07-20 00:00:00");
+    if (m_startTime >= changingDate) {
+      g_log.debug() << "Using wavelength spread as a ratio" << '\n';
+      m_dwavelength = m_wavelength * m_dwavelength;
+    }
 
     g_log.debug() << "setWavelength: " << m_wavelength << " , " << m_dwavelength
                   << '\n';
@@ -417,53 +426,85 @@ void LoadSpice2D::addRunProperty(const std::string &name, const T &value,
 
 /**
  * Sets the beam trap as Run Property
+ * There's several beamstrap position. We have to find the maximum of every
+ *motor above certain treshold.
+ * The maximum motor position will be the trap in use.
+ *
+ * Notes:
+ * Resting positions:
+ * GPSANS: 1.0
+ * BIOSANS: 9.999980
+ *
+ * Working positions:
+ * GPSANS: 548.999969
+ * BIOSANS: 544.999977
  */
 void LoadSpice2D::setBeamTrapRunProperty(
     std::map<std::string, std::string> &metadata) {
 
-  // Read in beam trap positions
-  double trap_pos = 0;
-  from_string<double>(trap_pos, metadata["Motor_Positions/trap_y_25mm"],
-                      std::dec);
+  std::vector<double> trapDiameters = {76.2, 50.8, 76.2, 101.6};
+  // default use the shortest trap
+  double trapDiameterInUse = trapDiameters[1];
 
-  double beam_trap_diam = 25.4;
+  std::vector<double> trapMotorPositions;
+  trapMotorPositions.push_back(
+      boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_25mm"]));
+  trapMotorPositions.push_back(
+      boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_50mm"]));
+  trapMotorPositions.push_back(
+      boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_76mm"]));
+  trapMotorPositions.push_back(
+      boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_101mm"]));
 
-  double highest_trap = 0;
-  from_string<double>(trap_pos, metadata["Motor_Positions/trap_y_101mm"],
-                      std::dec);
-
-  if (trap_pos > highest_trap) {
-    highest_trap = trap_pos;
-    beam_trap_diam = 101.6;
+  // Check how many traps are in use (store indexes):
+  std::vector<size_t> trapIndexInUse;
+  for (size_t i = 0; i < trapMotorPositions.size(); i++) {
+    if (trapMotorPositions[i] > 26.0) {
+      // Resting positions are below 25. Make sure we have one trap in use!
+      trapIndexInUse.push_back(i);
+    }
   }
 
-  from_string<double>(trap_pos, metadata["Motor_Positions/trap_y_50mm"],
-                      std::dec);
-  if (trap_pos > highest_trap) {
-    highest_trap = trap_pos;
-    beam_trap_diam = 50.8;
+  g_log.debug() << "trapIndexInUse length:" << trapIndexInUse.size() << "\n";
+
+  // store trap diameters in use
+  std::vector<double> trapDiametersInUse;
+  for (auto index : trapIndexInUse) {
+    trapDiametersInUse.push_back(trapDiameters[index]);
   }
 
-  from_string<double>(trap_pos, metadata["Motor_Positions/trap_y_76mm"],
-                      std::dec);
-  if (trap_pos > highest_trap) {
-    beam_trap_diam = 76.2;
-  }
+  g_log.debug() << "trapDiametersInUse length:" << trapDiametersInUse.size()
+                << "\n";
 
-  addRunProperty<double>("beam-trap-diameter", beam_trap_diam, "mm");
+  // The maximum value for the trapDiametersInUse is the trap in use
+  std::vector<double>::iterator trapDiameterInUseIt =
+      std::max_element(trapDiametersInUse.begin(), trapDiametersInUse.end());
+  if (trapDiameterInUseIt != trapDiametersInUse.end())
+    trapDiameterInUse = *trapDiameterInUseIt;
+
+  g_log.debug() << "trapDiameterInUse:" << trapDiameterInUse << "\n";
+
+  addRunProperty<double>("beam-trap-diameter", trapDiameterInUse, "mm");
 }
-void LoadSpice2D::setMetadataAsRunProperties(
-    std::map<std::string, std::string> &metadata) {
-  setBeamTrapRunProperty(metadata);
 
+void LoadSpice2D::setTimes() {
   // start_time
   std::map<std::string, std::string> attributes =
       m_xmlHandler.get_attributes_from_tag("/");
 
-  addRunProperty<std::string>(attributes, "start_time", "run_start", "");
+  m_startTime = DateAndTime(attributes["start_time"]);
+  m_endTime = DateAndTime(attributes["end_time"]);
+}
 
-  m_workspace->mutableRun().setStartAndEndTime(attributes["start_time"],
-                                               attributes["end_time"]);
+void LoadSpice2D::setMetadataAsRunProperties(
+    std::map<std::string, std::string> &metadata) {
+
+  setBeamTrapRunProperty(metadata);
+
+  addRunProperty<std::string>("start_time", m_startTime.toISO8601String(), "");
+  addRunProperty<std::string>("run_start", m_startTime.toISO8601String(), "");
+
+  m_workspace->mutableRun().setStartAndEndTime(m_startTime, m_endTime);
 
   // sample thickness
   addRunProperty<double>(metadata, "Header/Sample_Thickness",
@@ -501,7 +542,8 @@ void LoadSpice2D::setMetadataAsRunProperties(
  * BioSANS: distance = flange_det_dist + sample_to_flange!
  * For back compatibility I'm setting the offset to 0 and not reading it from
  * the file
- *
+ * Last Changes:
+ * If SDD tag is available in the metadata set that as sample detector distance
  * @return : sample_detector_distance
  */
 double
@@ -542,11 +584,28 @@ LoadSpice2D::detectorDistance(std::map<std::string, std::string> &metadata) {
         metadata, "Header/sample_to_flange", "sample-si-window-distance", "mm");
   }
 
-  // sample_detector_distances
+  double total_sample_detector_distance;
+  if (metadata.find("Motor_Positions/sdd") != metadata.end()) {
 
-  double total_sample_detector_distance = sample_detector_distance +
-                                          sample_detector_distance_offset +
-                                          sample_si_window_distance;
+    // When sdd exists overrides all the distances
+    from_string<double>(total_sample_detector_distance,
+                        metadata["Motor_Positions/sdd"], std::dec);
+    total_sample_detector_distance *= 1000.0;
+    sample_detector_distance = total_sample_detector_distance;
+
+    addRunProperty<double>("sample-detector-distance-offset", 0, "mm");
+    addRunProperty<double>("sample-detector-distance", sample_detector_distance,
+                           "mm");
+    addRunProperty<double>("sample-si-window-distance", 0, "mm");
+
+    g_log.debug() << "Sample-Detector-Distance from SDD tag = "
+                  << total_sample_detector_distance << '\n';
+
+  } else {
+    total_sample_detector_distance = sample_detector_distance +
+                                     sample_detector_distance_offset +
+                                     sample_si_window_distance;
+  }
   addRunProperty<double>("total-sample-detector-distance",
                          total_sample_detector_distance, "mm");
 

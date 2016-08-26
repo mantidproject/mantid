@@ -91,7 +91,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   boost::shared_ptr<EnggDiffractionViewQtGUI> sharedView(
       this, [](EnggDiffractionViewQtGUI *) {});
   m_fittingWidget = new EnggDiffFittingViewQtWidget(
-      m_ui.tabMain, sharedView, sharedView, fullPres, sharedView);
+      m_ui.tabMain, sharedView, sharedView, fullPres, fullPres, sharedView);
   m_ui.tabMain->addTab(m_fittingWidget, QString("Fitting"));
 
   QWidget *wSettings = new QWidget(m_ui.tabMain);
@@ -655,6 +655,14 @@ void EnggDiffractionViewQtGUI::enableCalibrateFocusFitUserActions(bool enable) {
 void EnggDiffractionViewQtGUI::enableTabs(bool enable) {
   for (int ti = 0; ti < m_ui.tabMain->count(); ++ti) {
     m_ui.tabMain->setTabEnabled(ti, enable);
+  }
+}
+
+void EnggDiffractionViewQtGUI::highlightRbNumber(bool isValid) {
+  if (!isValid) {
+    m_ui.label_RBNumber->setStyleSheet("background-color: red; color : white;");
+  } else {
+    m_ui.label_RBNumber->setStyleSheet("background-color: white");
   }
 }
 

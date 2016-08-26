@@ -1,4 +1,4 @@
-#include "MantidLiveData/ISISHistoDataListener.h"
+#include "MantidLiveData/ISIS/ISISHistoDataListener.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -23,7 +23,7 @@
 GCC_DIAG_OFF(unused-variable)
 // clang-format on
 #endif
-#include "LoadDAE/idc.h"
+#include "DAE/idc.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>

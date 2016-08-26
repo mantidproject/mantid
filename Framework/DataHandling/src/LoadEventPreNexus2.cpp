@@ -1056,17 +1056,10 @@ void LoadEventPreNexus2::procEventsLinear(
       if (tof > local_longest_tof)
         local_longest_tof = tof;
 
-// This is equivalent to
-// workspace->getSpectrum(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
-// But should be faster as a bunch of these calls were cached.
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
-      // This avoids a copy constructor call but is only available with GCC
-      // (requires variadic templates)
+      // This is equivalent to
+      // workspace->getSpectrum(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
+      // But should be faster as a bunch of these calls were cached.
       arrayOfVectors[pid]->emplace_back(tof, pulsetime);
-#else
-      arrayOfVectors[pid]->push_back(TofEvent(tof, pulsetime));
-#endif
-
       ++local_num_good_events;
     } else {
       // Special events/Wrong detector id
