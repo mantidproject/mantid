@@ -800,6 +800,11 @@ void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
         std::string propValue =
             alg->getPropertyValue(m_whitelist.algPropFromColIndex(i));
 
+        if (m_options["Round"].toBool()) {
+          propValue = propValue.substr(
+              0, propValue.find(".") + m_options["RoundPrecision"].toInt() + 1);
+        }
+
         m_model->setData(m_model->index(rowNo, i, m_model->index(groupNo, 0)),
                          QString::fromStdString(propValue));
       }
@@ -1530,14 +1535,8 @@ void GenericDataProcessorPresenter::initOptions() {
   m_options["WarnProcessAll"] = true;
   m_options["WarnDiscardChanges"] = true;
   m_options["WarnProcessPartialGroup"] = true;
-  m_options["RoundAngle"] = false;
-  m_options["RoundQMin"] = false;
-  m_options["RoundQMax"] = false;
-  m_options["RoundDQQ"] = false;
-  m_options["RoundAnglePrecision"] = 3;
-  m_options["RoundQMinPrecision"] = 3;
-  m_options["RoundQMaxPrecision"] = 3;
-  m_options["RoundDQQPrecision"] = 3;
+  m_options["Round"] = false;
+  m_options["RoundPrecision"] = 3;
 
   // Load saved values from disk
   m_view->loadSettings(m_options);
