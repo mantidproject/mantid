@@ -7,10 +7,10 @@
 #include <cstring>
 #include <boost/algorithm/string.hpp>
 
-#include "strings.h"
-
 #ifdef _WIN32
 #define strcasecmp _stricmp
+#else
+#include "strings.h"
 #endif
 
 namespace Mantid {
