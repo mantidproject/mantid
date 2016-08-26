@@ -29,11 +29,12 @@ private:
     if (constantMap.find("_pi") != constantMap.end()) {
       ++extraConstants;
     }
-    if (constantMap.size() - extraConstants != MuParserUtils::MUPARSER_CONSTANTS.size()) {
+    if (constantMap.size() - extraConstants !=
+        MuParserUtils::MUPARSER_CONSTANTS.size()) {
       return false;
     }
-    //Note: the keys in constantMap are values in MUPARSER_CONSTANTS and
-    //vice versa.
+    // Note: the keys in constantMap are values in MUPARSER_CONSTANTS and
+    // vice versa.
     for (const auto constant : MuParserUtils::MUPARSER_CONSTANTS) {
       const auto iterator = constantMap.find(constant.second);
       if (iterator == constantMap.end()) {
@@ -41,7 +42,7 @@ private:
       }
       if (iterator->second != constant.first) {
         return false;
-     }
+      }
     }
 
     return true;
