@@ -85,4 +85,97 @@ public:
   }
 };
 
+class CalculateZscoreTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static CalculateZscoreTestPerformance *createSuite() {
+    return new CalculateZscoreTestPerformance();
+  }
+  static void destroySuite(CalculateZscoreTestPerformance *suite) {
+    delete suite;
+  }
+
+  CalculateZscoreTestPerformance() {
+	  inWS_small = create2DWorkspace(50, 50);
+	  inWS_medium = create2DWorkspace(200, 200);
+	  inWS_large = create2DWorkspace(500, 500);
+  }
+  
+  void testPerformanceSmall() { runTest(inWS_small); }
+  void testPerformanceMedium() { runTest(inWS_medium); }
+  void testPerformanceLarge() { runTest(inWS_large); }
+
+private:
+  MatrixWorkspace_sptr inWS_small;
+  MatrixWorkspace_sptr inWS_medium;
+  MatrixWorkspace_sptr inWS_large;
+
+  void runTest(MatrixWorkspace_sptr inWS) {
+	  // 2. Create
+	  Algorithms::CalculateZscore alg;
+
+	  alg.initialize();
+	  TS_ASSERT(alg.isInitialized());
+
+	  alg.setProperty("InputWorkspace", inWS);
+	  alg.setProperty("OutputWorkspace", "Zscores");
+	  // no workspace index so that it runs on _ALL_ histograms
+	  //alg.setProperty("WorkspaceIndex", 1);
+
+	  alg.execute();
+	  TS_ASSERT(alg.isExecuted());
+  }
+
+  MatrixWorkspace_sptr create2DWorkspace(const int histSize = 200,
+	  const int pointSize = 200) {
+	  vector<double> data{};
+	  data.reserve(pointSize);
+	  for (int i = 0; i < pointSize; ++i) {
+		  data.push_back(theGiftThatKeepsOnGiving<double>());
+	  }
+
+	  auto Xsize = data.size(), Ysize = data.size();
+
+	  MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+		  WorkspaceFactory::Instance().create("Workspace2D", histSize, Xsize,
+			  Ysize));
+
+	  auto &histX = ws->mutableX(0);
+	  auto &histY = ws->mutableY(0);
+	  auto &histE = ws->mutableE(0);
+	  for (size_t i = 0; i < data.size(); ++i) {
+		  histX[i] = static_cast<double>(i);
+		  histY[i] = data[i];
+		  histE[i] = sqrt(data[i]);
+	  }
+
+	  auto sharedX = ws->sharedX(0);
+	  auto sharedY = ws->sharedY(0);
+	  auto sharedE = ws->sharedE(0);
+	  for (size_t i = 1; i < histSize; ++i) {
+		  ws->setSharedX(i, sharedX);
+		  ws->setSharedY(i, sharedY);
+		  ws->setSharedE(i, sharedE);
+	  }
+
+	  return ws;
+  }
+
+  /** Returns the same sequence of numbers forever	
+  */
+  template<typename T>
+  T theGiftThatKeepsOnGiving() {
+    static int m_dataLen = 20;
+    static T data[20] = {12, 13, 9,  18, 7,  9,  14, 16, 10, 12,
+                           7,  13, 14, 19, 10, 16, 12, 16, 19, 11};
+    static int dataMember = 0;
+
+	// it keeps on repeating the same numbers forever by resetting after
+	// reaching the last one
+    return (dataMember < m_dataLen) ? data[dataMember++]
+                                    : (dataMember = 0, data[dataMember]);
+  }
+};
+
 #endif /* MANTID_ALGORITHMS_CALCULATEZSCORETEST_H_ */
