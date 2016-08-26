@@ -313,7 +313,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         l("MaskDetectors(%s, MaskedWorkspace=%s)" % (gAll, gDetectorsToMask))
 
         if self.maskDetectors:
-            l("MaskDetectors(%s, '%s')" % (gAll, self.maskDetectors))
+            l("MaskDetectors(%s, DetectorList='%s')" % (gAll, self.maskDetectors))
 
         l()
 
