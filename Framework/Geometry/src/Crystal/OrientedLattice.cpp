@@ -317,10 +317,6 @@ bool OrientedLattice::GetABC(const DblMatrix &UB, V3D &a_dir, V3D &b_dir,
 /// Private function, called at initialization or whenever lattice parameters
 /// are changed
 void OrientedLattice::recalculate() {
-  if ((da[3] > da[4] + da[5]) || (da[4] > da[3] + da[5]) ||
-      (da[5] > da[4] + da[3])) {
-    throw std::invalid_argument("Invalid angles");
-  }
   UnitCell::recalculate();
   UB = U * getB();
 }
