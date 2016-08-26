@@ -58,6 +58,9 @@
         <property name="multipleFiles" stdset="0">
          <bool>true</bool>
         </property>
+        <property name="algorithmAndProperty" stdset="0">
+         <string>IndirectILLReduction|Run</string>
+        </property>
        </widget>
       </item>
       <item>
@@ -214,9 +217,6 @@
         <property name="showLoad" stdset="0">
          <bool>false</bool>
         </property>
-        <property name="multipleFiles" stdset="0">
-         <bool>true</bool>
-        </property>
        </widget>
       </item>
      </layout>
@@ -312,21 +312,9 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_6">
       <item>
-       <widget class="QCheckBox" name="ckMirrorSense">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>Use mirror sense</string>
-        </property>
+       <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Mirror Sense</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
+         <string>Unmirror Option</string>
         </property>
        </widget>
       </item>
@@ -374,8 +362,11 @@
         <property name="label" stdset="0">
          <string>Vanadium Run</string>
         </property>
-        <property name="multipleFiles" stdset="0">
+        <property name="isOptional" stdset="0">
          <bool>true</bool>
+        </property>
+        <property name="algorithmAndProperty" stdset="0">
+         <string>IndirectILLReduction|VanadiumRun</string>
         </property>
        </widget>
       </item>
@@ -650,41 +641,9 @@
     </hint>
    </hints>
   </connection>
-  <connection>
-   <sender>ckMirrorSense</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>sbUnmirrorOption</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>76</x>
-     <y>298</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>148</x>
-     <y>297</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckMirrorSense</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>rfVanadiumRun</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>76</x>
-     <y>298</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>375</x>
-     <y>297</y>
-    </hint>
-   </hints>
-  </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

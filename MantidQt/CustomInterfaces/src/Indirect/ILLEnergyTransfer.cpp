@@ -106,7 +106,6 @@ void ILLEnergyTransfer::run() {
   reductionAlg->setProperty("UnmirrorOption", uo);
   reductionAlg->setProperty("SumRuns", m_uiForm.ckSum->isChecked());
   reductionAlg->setProperty("DebugMode", m_uiForm.ckDebugMode->isChecked());
-  reductionAlg->setProperty("MirrorSense", m_uiForm.ckMirrorSense->isChecked());
   reductionAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
   reductionAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
 
