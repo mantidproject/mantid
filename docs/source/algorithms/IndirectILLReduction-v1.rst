@@ -51,7 +51,7 @@ The options ``4-7`` rely on :ref:`FindEPP <algm-FindEPP>` algorithm to find the 
 
 These options are inherited identically from (and validated against) previous **LAMP** software, to enable smooth transition for the users.
 
-Energy transferred will be left, right and reduced workspaces (exception for UnmirrorOption=0) and corrupted bins due to normalisation are masked.
+Energy transferred will be left, right and reduced workspaces (exception for UnmirrorOption=0) and corrupted bins due to normalisation are masked. All spectra of the reduced workspaces are converted to scattering angle
 
 Multiple File Reduction
 ~~~~~~~~~~~~~~~~~~~~~~~
