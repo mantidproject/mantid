@@ -10,6 +10,7 @@ Description
 -----------
 
 A workflow algorithm to perform a data reduction for indirect **ILL** instruments. Currently only **IN16B** is supported.
+This algorithm perform QENS (Quasi-Elastic Neutron Scattering) type of reduction.
 
 SumRuns
 ~~~~~~~~~~~~~~~~
