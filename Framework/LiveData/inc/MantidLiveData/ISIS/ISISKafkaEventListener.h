@@ -11,6 +11,7 @@
 
 namespace Mantid {
 namespace LiveData {
+class ISISKafkaEventStreamDecoder;
 
 /**
   Implementation of a live listener to consume messages from the Kafka system
@@ -64,13 +65,12 @@ public:
   //----------------------------------------------------------------------
   // State flags
   //----------------------------------------------------------------------
-  /// @copydoc ILiveListener::isConnected
-  bool isConnected() override { return m_connected; }
+  bool isConnected() override;
   ILiveListener::RunStatus runStatus() override;
   int runNumber() const override;
 
 private:
-  bool m_connected = false;
+  std::unique_ptr<ISISKafkaEventStreamDecoder> m_decoder = nullptr;
 };
 
 } // namespace LiveData

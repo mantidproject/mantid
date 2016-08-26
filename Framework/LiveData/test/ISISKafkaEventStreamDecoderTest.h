@@ -27,9 +27,6 @@ public:
                                          "SANS2Drun_data", "SANS2Dspdet_data");
     streamer.startCapture();
     std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-    if(auto exc = streamer.exceptionHandled()) {
-      throw *exc;
-    }
     streamer.stopCapture();
   }
 };

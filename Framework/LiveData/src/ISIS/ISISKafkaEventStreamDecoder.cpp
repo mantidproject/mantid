@@ -1,7 +1,12 @@
 #include "MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 GCC_DIAG_OFF(conversion)
@@ -15,16 +20,17 @@ GCC_DIAG_ON(conversion)
 #include <iostream>
 
 namespace {
-Mantid::Kernel::Logger &LOGGER() {
-  static Mantid::Kernel::Logger logger("ISISKafkaEventStreamDecoder");
-  return logger;
-}
+/// Logger
+Mantid::Kernel::Logger g_log("ISISKafkaEventStreamDecoder");
+
+std::string PROTON_CHARGE_PROPERTY = "proton_charge";
+std::string RUN_NUMBER_PROPERTY = "run_number";
 }
 
 namespace Mantid {
-using API::WorkspaceFactory;
-using DataObjects::EventWorkspace;
 namespace LiveData {
+using DataObjects::TofEvent;
+using Kernel::DateAndTime;
 
 // -----------------------------------------------------------------------------
 // Public members
@@ -40,8 +46,9 @@ ISISKafkaEventStreamDecoder::ISISKafkaEventStreamDecoder(
     const IKafkaBroker &broker, std::string eventTopic,
     std::string runInfoTopic, std::string spDetTopic)
     : m_interrupt(false), m_eventStream(broker.subscribe(eventTopic)),
-      m_localEvents(), m_runStream(broker.subscribe(runInfoTopic)),
-      m_spDetStream(broker.subscribe(spDetTopic)), m_thread(),
+      m_localEvents(), m_runStart(),
+      m_runStream(broker.subscribe(runInfoTopic)),
+      m_spDetStream(broker.subscribe(spDetTopic)), m_runNumber(-1), m_thread(),
       m_capturing(false), m_exception() {}
 
 /**
@@ -66,8 +73,38 @@ void ISISKafkaEventStreamDecoder::startCapture() noexcept {
 void ISISKafkaEventStreamDecoder::stopCapture() noexcept {
   // This will interrupt the "event" loop
   m_interrupt = true;
-  // wait until the function has completed
+  // Wait until the function has completed. The background thread
+  // will exit automatically
   while (m_capturing) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  };
+}
+
+/**
+ * Check for an exception thrown by the background thread and rethrow
+ * it if necessary. If no error occurred swap the current internal buffer
+ * for a fresh one and return the old buffer.
+ * @return A pointer to the data collected since the last call to this
+ * method
+ */
+API::Workspace_sptr ISISKafkaEventStreamDecoder::extractData() {
+  if (m_exception) {
+    throw * m_exception;
+  }
+  std::lock_guard<std::mutex> lock(m_mutex);
+  if (m_localEvents.size() == 1) {
+    DataObjects::EventWorkspace_sptr temp;
+    std::swap(m_localEvents[0], temp);
+    initLocalCaches();
+    return temp;
+  } else if (m_localEvents.size() > 1) {
+    // return a group
+    throw std::runtime_error(
+        "ISISKafkaEventStreamDecoder does not yet support multi-period data");
+  } else {
+    throw std::runtime_error("ISISKafkaEventStreamDecoder::extractData() - "
+                             "Local buffers not initialized, extractData() "
+                             "called too early.");
   }
 }
 
@@ -80,6 +117,7 @@ void ISISKafkaEventStreamDecoder::stopCapture() noexcept {
  * It catches all thrown exceptions.
  */
 void ISISKafkaEventStreamDecoder::captureImpl() noexcept {
+  m_capturing = true;
   try {
     captureImplExcept();
   } catch (std::exception &exc) {
@@ -88,40 +126,139 @@ void ISISKafkaEventStreamDecoder::captureImpl() noexcept {
     m_exception = boost::make_shared<std::runtime_error>(
         "ISISKafkaEventStreamDecoder: Unknown exception type caught.");
   }
+  m_capturing = false;
 }
 
 /**
- * Exception-throwing variant of captureImpl()
+ * Exception-throwing variant of captureImpl(). Do not call this directly
  */
 void ISISKafkaEventStreamDecoder::captureImplExcept() {
-  LOGGER().debug("Event capture starting");
-  // Use RAII for m_capturing...
-  m_capturing = true;
+  g_log.debug("Event capture starting");
+  initLocalCaches();
+  specnum_t spectrumMinOffset(0);
+  // Assume the mapping is the same for all periods
+  auto wkspIdx =
+      m_localEvents[0]->getSpectrumToWorkspaceIndexVector(spectrumMinOffset);
+
   m_interrupt = false;
-
+  std::string buffer;
   while (!m_interrupt) {
-    // pull in events
-  }
+    // Let another thread do something for a short while
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-  m_capturing = false;
-  LOGGER().debug("Event capture finished");
+    // Pull in events
+    m_eventStream->consumeMessage(&buffer);
+    auto evtMsg = ISISDAE::GetEventMessage(
+        reinterpret_cast<const uint8_t *>(buffer.c_str()));
+    if (evtMsg->message_type() == ISISDAE::MessageTypes_FramePart) {
+      auto frameData =
+          static_cast<const ISISDAE::FramePart *>(evtMsg->message());
+      DateAndTime pulseTime =
+          m_runStart + static_cast<double>(frameData->frame_time());
+      if (frameData->period() > 0) {
+        throw std::runtime_error(
+            "Found period number > 0. Multi-period data not yet supported.");
+      }
+      std::lock_guard<std::mutex> lock(m_mutex);
+      auto &periodBuffer = *m_localEvents[frameData->period()];
+      auto &mutableRunInfo = periodBuffer.mutableRun();
+      mutableRunInfo.getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
+          ->addValue(pulseTime, frameData->proton_charge());
+      const auto eventData = frameData->n_events();
+      const auto &tofData = *(eventData->tof());
+      const auto &specData = *(eventData->spec());
+      auto nevents = tofData.size();
+      for (decltype(nevents) i = 0; i < nevents; ++i) {
+        periodBuffer.getSpectrum(wkspIdx[specData[i] - spectrumMinOffset])
+            .addEventQuickly(TofEvent(tofData[i], pulseTime));
+      }
+    }
+  }
+  g_log.debug("Event capture finished");
 }
 
 /**
  * Pull information from the run & detector-spectrum stream and initialize
- * the internal EventWorkspace buffer. This includes loading the instrument.
+ * the internal EventWorkspace buffer + other cached information such as run
+ * start. This includes loading the instrument.
  * By the end of this method the local event buffer is ready to accept
  * events
  */
-void ISISKafkaEventStreamDecoder::initLocalEventBuffer() {
-  std::string buffer;
+void ISISKafkaEventStreamDecoder::initLocalCaches() {
+  std::string rawMsgBuffer;
+
+  // ---- Create workspace ----
   // Load spectra-detector mapping from stream
-  m_spDetStream->consumeMessage(&buffer);
-  auto messageData = ISISDAE::GetSpectraDetectorMapping(
-      reinterpret_cast<const uint8_t *>(buffer.c_str()));
-  m_localEvents = boost::static_pointer_cast<EventWorkspace>(
-      WorkspaceFactory::Instance().create("EventWorkspace",
-                                          messageData->spec()->size(), 2, 1));
+  m_spDetStream->consumeMessage(&rawMsgBuffer);
+  auto spDetMsg = ISISDAE::GetSpectraDetectorMapping(
+      reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
+  auto nspec = spDetMsg->spec()->size();
+  auto nudet = spDetMsg->det()->size();
+  if (nudet != nspec) {
+    std::ostringstream os;
+    os << "ISISKafkaEventStreamDecoder::initLocalEventBuffer - Invalid "
+          "spectra/detector mapping. Expected matched length arrays but "
+          "found nspec=" << nspec << ", ndet=" << nudet;
+    throw std::runtime_error(os.str());
+  }
+  auto eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
+      API::WorkspaceFactory::Instance().create("EventWorkspace", nspec, 2, 1));
+  // Set the units
+  eventBuffer->getAxis(0)->unit() =
+      Kernel::UnitFactory::Instance().create("TOF");
+  eventBuffer->setYUnit("Counts");
+  // Setup the spectra-detector mapping
+  eventBuffer->updateSpectraUsing(API::SpectrumDetectorMapping(
+      spDetMsg->spec()->data(), spDetMsg->det()->data(), nspec));
+  // Load the instrument if possibly but continue if we can't
+  m_runStream->consumeMessage(&rawMsgBuffer);
+  auto runMsg = ISISDAE::GetRunInfo(
+      reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
+  loadInstrument(runMsg->inst_name()->c_str(), eventBuffer);
+
+  // ---- Metadata ----
+  // Save the run start
+  m_runStart.set_from_time_t(runMsg->start_time());
+  // Save the run number locally and as a log
+  auto &mutableRun = eventBuffer->mutableRun();
+  m_runNumber = runMsg->run_number();
+  mutableRun.addProperty(RUN_NUMBER_PROPERTY, std::to_string(m_runNumber));
+  // Create the proton charge property
+  mutableRun.addProperty(
+      new Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));
+
+  // ---- Additional buffers per period ----
+  // Should be the number of periods. What is that?
+  m_localEvents.resize(1);
+  m_localEvents[0] = eventBuffer;
+}
+
+/**
+ * Run LoadInstrument for the given instrument name. If it cannot succeed it
+ * does nothing to the internal workspace
+ * @param name Name of an instrument to load
+ * @param workspace A pointer to the workspace receiving the instrument
+ */
+void ISISKafkaEventStreamDecoder::loadInstrument(
+    const std::string &name, DataObjects::EventWorkspace_sptr workspace) {
+  if (name.empty()) {
+    g_log.warning("Empty instrument name found");
+    return;
+  }
+  try {
+    auto alg =
+        API::AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
+    // Do not put the workspace in the ADS
+    alg->setChild(true);
+    alg->initialize();
+    alg->setPropertyValue("InstrumentName", name);
+    alg->setProperty("Workspace", workspace);
+    alg->setProperty("RewriteSpectraMap", Kernel::OptionalBool(false));
+    alg->execute();
+  } catch (std::exception &exc) {
+    g_log.warning() << "Error loading instrument '" << name
+                    << "': " << exc.what() << "\n";
+  }
 }
 }
 

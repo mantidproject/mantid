@@ -150,19 +150,24 @@ bool KafkaTopicSubscriber::consumeMessage(std::string *payload) {
 
   bool success = false;
   switch (kfMsg->err()) {
-  case RdKafka::ERR__TIMED_OUT:
-    // Not an error as the broker might come back
-    success = true;
-    break;
-
   case RdKafka::ERR_NO_ERROR:
     /* Real message */
     if (kfMsg->len() > 0) {
       success = true;
       payload->assign(static_cast<const char *>(kfMsg->payload()),
                       static_cast<int>(kfMsg->len()));
+    } else {
+      // If RdKafka indicates no error then we should always get a
+      // non-zero length message
+      success = false;
+      payload->clear();
     }
     break;
+  case RdKafka::ERR__TIMED_OUT:
+    // Not an error as the broker might come back
+    success = true;
+    break;
+
   case RdKafka::ERR__PARTITION_EOF:
     // End of stream - not an error as we just keep waiting
     payload->clear();
