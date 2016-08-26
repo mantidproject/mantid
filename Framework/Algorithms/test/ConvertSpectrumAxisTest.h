@@ -166,5 +166,61 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
   }
 };
+class ConvertSpectrumAxisTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConvertSpectrumAxisTestPerformance *createSuite() {
+    return new ConvertSpectrumAxisTestPerformance();
+  }
+  static void destroySuite(ConvertSpectrumAxisTestPerformance *suite) {
+    delete suite;
+  }
 
+  ConvertSpectrumAxisTestPerformance() {
+    bool startYNegative = true;
+
+    inputWS_manyBins =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            300, 3000, false, startYNegative);
+    inputWS_manyHistograms =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            2000, 300, false, startYNegative);
+  }
+  ~ConvertSpectrumAxisTestPerformance() override {
+    AnalysisDataService::Instance().remove(outputWS);
+  }
+
+  /** Bin length doesn't really matter with HistogramData
+   * because only the shared pointer is copied
+   */
+  void testManyBinsPerformace() {
+    Mantid::Algorithms::ConvertSpectrumAxis conv;
+
+    conv.initialize();
+    conv.setProperty("InputWorkspace", inputWS_manyBins);
+    conv.setPropertyValue("OutputWorkspace", outputWS);
+    conv.setPropertyValue("Target", "theta");
+    conv.setPropertyValue("EFixed", "10.0");
+    conv.execute();
+    conv.isExecuted();
+  }
+
+  void testManyHistogramsPerformace() {
+    Mantid::Algorithms::ConvertSpectrumAxis conv;
+
+    conv.initialize();
+    conv.setProperty("InputWorkspace", inputWS_manyHistograms);
+    conv.setPropertyValue("OutputWorkspace", outputWS);
+    conv.setPropertyValue("Target", "theta");
+    conv.setPropertyValue("EFixed", "10.0");
+    conv.execute();
+    conv.isExecuted();
+  }
+
+private:
+  MatrixWorkspace_sptr inputWS_manyBins;
+  MatrixWorkspace_sptr inputWS_manyHistograms;
+  const std::string outputWS = "outputWS";
+};
 #endif /*CONVERTSPECTRUMAXISTEST_H_*/
