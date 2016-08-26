@@ -35,6 +35,12 @@ class IndirectILLReductionTest(unittest.TestCase):
                 except IOError:
                     continue
 
+        if os.path.isfile('red.nxs'):
+            try:
+                os.remove('red.nxs')
+            except IOError:
+                pass
+
         #reset output workspaces list
         cls._output_workspaces = []
 
@@ -64,7 +70,7 @@ class IndirectILLReductionTest(unittest.TestCase):
         self._args['Save'] = True
 
         alg_test = run_algorithm('IndirectILLReduction', **self._args)
-        path = os.path.join(config['defaultsave.directory'], '146191_red.nxs')
+        path = os.path.join(config['defaultsave.directory'], 'red.nxs')
 
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
         self.assertTrue(os.path.isfile(path), path)
