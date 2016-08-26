@@ -31,32 +31,15 @@ const std::map<double, std::string> MUPARSER_CONSTANTS = {
   {StandardAtmosphere, "atm"}
 };
 
-/** Adds the constants from MUPARSER_CONSTANTS to the parser.
+/** The added constants are defined in MUPARSER_CONSTANTS.
  *  @param parser The parser to be initialized.
  */
-void initParser(mu::Parser& parser) {
+void DLLExport addDefaultConstants(mu::Parser& parser) {
   for (const auto constant : MUPARSER_CONSTANTS) {
     parser.DefineConst(constant.second, constant.first);
   }
 }
 
-/** Populates the parser with the default constants etc.
- *  @return A unique pointer to the default muParser.
- */
-std::unique_ptr<mu::Parser> DLLExport allocateDefaultMuParser() {
-  auto p = Kernel::make_unique<mu::Parser>();
-  initParser(*p);
-  return p;
-}
-
-/** Populates the parser with the default constants etc.
- *  @return A default muParser.
- */
-mu::Parser DLLExport createDefaultMuParser() {
-  mu::Parser p;
-  initParser(p);
-  return p;
-}
 } // namespace MuParserUtils
 } // namespace API
 } // namespace Mantid

@@ -11,16 +11,11 @@ public:
   static MuParserUtilsTest *createSuite() { return new MuParserUtilsTest(); }
   static void destroySuite(MuParserUtilsTest *suite) { delete suite; }
 
-  void test_CreateDefaultMuParser_Gives_Whats_Promised() {
-    const auto parser = MuParserUtils::createDefaultMuParser();
+  void test_addDefaultConstants_Only_MUPARSER_CONSTANTS_IsAdded() {
+    mu::Parser parser;
+    MuParserUtils::addDefaultConstants(parser);
     TS_ASSERT(defaultConstantsDefined(parser));
     TS_ASSERT(noVariablesDefined(parser));
-  }
-
-  void test_AllocateDefaultMuParser_Gives_Whats_Promised() {
-    const auto parser = MuParserUtils::allocateDefaultMuParser();
-    TS_ASSERT(defaultConstantsDefined(*parser));
-    TS_ASSERT(noVariablesDefined(*parser));
   }
 
 private:

@@ -39,11 +39,8 @@ namespace MuParserUtils {
 /// A map from constants to their names in the default parser.
 extern const MANTID_API_DLL std::map<double, std::string> MUPARSER_CONSTANTS;
 
-/// Allocates and initializes a default muParser.
-std::unique_ptr<mu::Parser> MANTID_API_DLL allocateDefaultMuParser();
-
-/// Returns a default muParser.
-mu::Parser MANTID_API_DLL createDefaultMuParser();
+/// Add a set of default constants to a muParser.
+void MANTID_API_DLL addDefaultConstants(mu::Parser &parser);
 
 } // namespace MuParserUtils
 } // namespace API
