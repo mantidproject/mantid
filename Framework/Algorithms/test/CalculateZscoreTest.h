@@ -166,15 +166,15 @@ private:
   */
   template<typename T>
   T theGiftThatKeepsOnGiving() {
-    static int m_dataLen = 20;
-    static T data[20] = {12, 13, 9,  18, 7,  9,  14, 16, 10, 12,
+    static std::vector<T> data = {12, 13, 9,  18, 7,  9,  14, 16, 10, 12,
                            7,  13, 14, 19, 10, 16, 12, 16, 19, 11};
-    static int dataMember = 0;
+    static auto dataSt = data.begin();
+	static auto dataEnd = data.end();
 
 	// it keeps on repeating the same numbers forever by resetting after
 	// reaching the last one
-    return (dataMember < m_dataLen) ? data[dataMember++]
-                                    : (dataMember = 0, data[dataMember]);
+    return (dataSt != dataEnd) ? *dataSt++
+                                    : (dataSt = data.begin(), *dataSt);
   }
 };
 

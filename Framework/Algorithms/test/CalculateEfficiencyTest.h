@@ -293,10 +293,12 @@ public:
   void tearDown() override {}
 
   void testExecPerformance() {
+    // Workspaces are removed in the test
     runExecTest(execTestInputWs, correction, performance);
   }
 
   void testValidatePerformance() {
+    // Workspaces are removed in the test
     runValidateTest(validateTestInputWs, correction, performance);
   }
 
