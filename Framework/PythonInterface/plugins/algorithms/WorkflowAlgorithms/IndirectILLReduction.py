@@ -43,7 +43,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         return "Workflow\\MIDAS;Inelastic\\Reduction"
 
     def summary(self):
-        return 'Performs an energy transfer reduction for ILL indirect geometry data, instrument IN16B.'
+        return 'Performs QENS energy transfer reduction for ILL indirect geometry data, instrument IN16B.'
 
     def PyInit(self):
         # File properties
@@ -63,8 +63,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # Other inputs
 
         self.declareProperty(MatrixWorkspaceProperty('CalibrationWorkspace', '',
-                                               direction=Direction.Input,
-                                               optional=PropertyMode.Optional),
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
                              doc='Workspace containing calibration intensities for each detector')
 
         self.declareProperty(name='Analyser',
@@ -106,6 +106,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         # Output workspace properties
         self.declareProperty(WorkspaceGroupProperty("OutputWorkspace", "red",
+                                                    optional=PropertyMode.Optional,
                                                     direction=Direction.Output),
                              doc="Group name for the reduced workspace(s).")
 
@@ -191,6 +192,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         self.log().information('Loaded .nxs file(s) : %s' % self._run_file)
         runlist = []
+        nonQENSrunlist = []
 
         # check if it is a workspace or workspace group and perform reduction correspondingly
         if isinstance(mtd[self._red_ws],WorkspaceGroup):
@@ -210,15 +212,18 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             # traverse over items in workspace group and reduce individually
             for i in range(0, mtd[self._red_ws].size()):
 
-                run = str(mtd[self._red_ws].getItem(i).getRunNumber())
-                runlist.append(run)
+                run = '{0:06d}'.format(mtd[self._red_ws].getItem(i).getRunNumber())
                 ws = run + '_' + self._red_ws
                 # prepend run number
                 RenameWorkspace(InputWorkspace = run, OutputWorkspace = ws)
 
                 progress.report("Reducing run #" + run)
-                # call reduction for each run
-                self._reduce_run(run)
+                # check if the run is QENS type and call reduction for each run
+                if self._check_QENS(ws):
+                    runlist.append(run)
+                    self._reduce_run(run)
+                else:
+                    nonQENSrunlist.append(run)
         else:
             # get instrument name and laod config files
             self._instrument = mtd[self._red_ws].getInstrument()
@@ -229,16 +234,26 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             if self._unmirror_option == 5 or self._unmirror_option == 7:
                 self._load_vanadium_run()
 
-            run = str(mtd[self._red_ws].getRunNumber())
-            runlist.append(run)
+            run = '{0:06d}'.format(mtd[self._red_ws].getRunNumber())
             ws = run + '_' + self._red_ws
             # prepend run number
             RenameWorkspace(InputWorkspace = self._red_ws, OutputWorkspace = ws)
 
-            # reduce
-            self._reduce_run(run)
+            # check if the run is QENS type and call reduction
+            if self._check_QENS(ws):
+                runlist.append(run)
+                self._reduce_run(run)
+            else:
+                nonQENSrunlist.append(run)
 
-        self._finalize(runlist)
+        # remove any loaded non-QENS type data if was given:
+        for nonQENS in nonQENSrunlist:
+            DeleteWorkspace(nonQENS + '_' + self._red_ws)
+
+        if not runlist:
+            self.log().warning('None of the given input files where of QENS type.')
+        else:
+            self._finalize(runlist)
 
     def _load_config_files(self):
         """
@@ -279,9 +294,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         right_van = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
                                          Reflection=self._reflection, SumRuns=True, UnmirrorOption=2)
 
-        # note, that run number will be prepended, so need to rename
-        RenameWorkspace(left_van.getItem(0).getName(),'left_van')
-        RenameWorkspace(right_van.getItem(0).getName(), 'right_van')
+        # if vanadium run is not of QENS type, output will be empty, exit with error
+        if not left_van or right_van:
+            self.log().error('Given vanadium run #%s is not of QENS type. Aborting.' % self._vanadium_file)
+        else:
+            # note, that run number will be prepended, so need to rename
+            RenameWorkspace(left_van.getItem(0).getName(),'left_van')
+            RenameWorkspace(right_van.getItem(0).getName(), 'right_van')
 
     def _convert_to_energy(self, ws):
         """
@@ -659,6 +678,47 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         """
         if self._debug_mode:
             CloneWorkspace(InputWorkspace=ws, OutputWorkspace=name)
+
+    def _check_QENS(self,ws):
+        """
+        Checks if the given ws is of QENS type
+        @param ws :: input ws name
+        @return   :: True if it is, False otherwise
+        """
+        runobject = mtd[ws].getRun()
+        runnumber = mtd[ws].getRunNumber()
+        result = True
+
+        if not runobject.hasProperty('Doppler.maximum_delta_energy'):
+            if not runobject.hasProperty('Doppler.velocity_profile'):
+                self.log().warning('Run #%s has no Doppler.velocity_profile neither '
+                                   'Doppler.maximum_delta_energy. Assuming QENS type.' % runnumber)
+            else:
+                profile = runobject.getLogData('Doppler.velocity_profile').value
+                if profile == 0:
+                    self.log().warning('Run #%s has no Doppler.maximum_delta_energy but '
+                                       'Doppler.velocity_profile is 0. Assuming QENS type.' % runnumber)
+                else:
+                    self.log().warning('Run #%s has no Doppler.maximum_delta_energy but '
+                                       'Doppler.velocity_profile is not 0. Not a QENS data. Skipping.' % runnumber)
+                    result = False
+        else:
+            energy = runobject.getLogData('Doppler.maximum_delta_energy').value
+            if energy == 0:
+                self.log().warning('Run #%s has Doppler.maximum_delta_energy 0. Not a QENS data. Skipping.' % runnumber)
+                result = False
+            else:
+                if not runobject.hasProperty('Doppler.velocity_profile'):
+                    self.log().warning('Run #%s has no Doppler.velocity_profile but '
+                                       'Doppler.maximum_delta_energy is not 0. Assuming QENS data.' % runnumber)
+                else:
+                    profile = runobject.getLogData('Doppler.velocity_profile').value
+                    if profile != 0:
+                        self.log().warning('Run #%s has Doppler.velocity_profile not 0. Not a QENS data. Skipping.'
+                                           % runnumber)
+                        result = False
+
+        return result
 
     # Static helper methods performing some generic manipulations
     @staticmethod
