@@ -4,8 +4,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
@@ -170,8 +170,8 @@ void LoadILLIndirect::loadDataDetails(NeXus::NXEntry &entry) {
         m_activeSDIndices.insert(i);
       }
     } catch (...) {
-        // if the flags are not present in the file (e.g. old format), load all
-        m_activeSDIndices.insert(i);
+      // if the flags are not present in the file (e.g. old format), load all
+      m_activeSDIndices.insert(i);
     }
   }
 
@@ -288,8 +288,8 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
 
     // Assign Y
     int *monitor_p = monitorsData[im].data();
-    m_localWorkspace->dataY(im)
-        .assign(monitor_p, monitor_p + m_numberOfChannels);
+    m_localWorkspace->dataY(im).assign(monitor_p,
+                                       monitor_p + m_numberOfChannels);
 
     progress.report();
   }
@@ -299,7 +299,8 @@ void LoadILLIndirect::loadDataIntoTheWorkSpace(
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
 
       // just copy the time binning axis to every spectra
-      m_localWorkspace->dataX(spec + m_numberOfMonitors) = m_localWorkspace->readX(0);
+      m_localWorkspace->dataX(spec + m_numberOfMonitors) =
+          m_localWorkspace->readX(0);
 
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);

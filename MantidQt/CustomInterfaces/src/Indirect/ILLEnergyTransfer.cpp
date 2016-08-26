@@ -56,6 +56,10 @@ bool ILLEnergyTransfer::validate() {
       !m_uiForm.rfVanadiumRun->isValid())
     uiv.addErrorMessage("Vanadium run is invalid.");
 
+  // Validate if the output workspace name is not empty
+  if (m_uiForm.leOutWS->text().toStdString().empty())
+    uiv.addErrorMessage("OutputWorkspace name is invalid.");
+
   // Show error message for errors
   if (!uiv.isAllInputValid())
     showMessageBox(uiv.generateErrorMessage());
