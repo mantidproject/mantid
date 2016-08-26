@@ -5,6 +5,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 
@@ -12,6 +13,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 // Forward dec
 class HintStrategy;
+class DataProcessorCommand;
 class DataProcessorPresenter;
 
 /** @class DataProcessorView
@@ -46,6 +48,10 @@ class DLLExport DataProcessorView {
 public:
   DataProcessorView(){};
   virtual ~DataProcessorView(){};
+
+  // Add actions to the toolbar
+  virtual void addActions(
+	  std::vector<std::unique_ptr<DataProcessorCommand>> commands) = 0;
 
   // Connect the model
   virtual void showTable(QDataProcessorTwoLevelTreeModel_sptr model) = 0;

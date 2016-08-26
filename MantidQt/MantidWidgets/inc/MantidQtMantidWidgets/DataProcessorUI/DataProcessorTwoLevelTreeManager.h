@@ -1,15 +1,18 @@
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORSEPARATORCOMMAND_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORSEPARATORCOMMAND_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGER_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGER_H
 
-#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
-/** @class DataProcessorSeparatorCommand
 
-DataProcessorSeparatorCommand defines a separator. It has no name, no icon and
-empty
-execute() method
+class DataProcessorPresenter;
+
+/** @class DataProcessorTwoLevelTreeManager
+
+// TODO: Description
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -32,19 +35,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorSeparatorCommand : public DataProcessorCommandBase {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataProcessorTwoLevelTreeManager
+    : public DataProcessorTreeManager {
 public:
-  DataProcessorSeparatorCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  virtual ~DataProcessorSeparatorCommand(){};
+  /// Constructor
+  DataProcessorTwoLevelTreeManager(DataProcessorPresenter *presenter);
+  /// Destructor
+  ~DataProcessorTwoLevelTreeManager() override;
 
-  void execute() override{};
-  std::string name() override { return std::string(); }
-  std::string icon() override { return std::string(); }
-  std::string tooltip() override { return std::string(); }
-  std::string whatsthis() override { return std::string(); }
-  std::string shortcut() override { return std::string(); }
+  /// Publish commands
+  std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
+
+private:
+  /// The DataProcessor presenter
+  DataProcessorPresenter *m_presenter;
 };
 }
 }
-#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORSEPARATORCOMMAND_H*/
+#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGER_H*/
