@@ -393,15 +393,30 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=xmax, XMax=size)
             MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=xmax, XMax=size)
 
-        # Get new reduced workspace
+        # Get new reduced workspaces
         start_bin, end_bin = self._perform_unmirror(red, left, right)
 
-        # Energy transfer
         self._convert_to_energy(left)
         self._convert_to_energy(right)
-        self._convert_to_energy(red)
 
-        #
+        # Energy transfer
+        if self._unmirror_option == 0:
+            # Get mirror_sense from run
+            mirror_sense = 0
+            if mtd[red].getRun().hasProperty('Doppler.mirror_sense'):
+                # mirror_sense 14 : two wings
+                # mirror_sense 16 : one wing
+                mirror_sense = mtd[red].getRun().getLogData('Doppler.mirror_sense').value
+                if mirror_sense == 14:
+                    self.log().warning('Input run (IN16B) has two wings, no energy transfer will be performed')
+                elif mirror_sense == 16:
+                    self.log().information('Unmirror 0: Input run (IN16B) has one wing, perform energy transfer')
+                    self._convert_to_energy(red)
+            else:
+                self.log().warning('Input run (IN16B) has no property Doppler.mirror_sense. Check your input file.')
+        else:
+            self._convert_to_energy(red)
+
         ConvertSpectrumAxis(InputWorkspace=left, OutputWorkspace=left, Target='Theta', EMode='Indirect')
         ConvertSpectrumAxis(InputWorkspace=right, OutputWorkspace=right, Target='Theta', EMode='Indirect')
         ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
@@ -411,7 +426,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         x = mtd[red].readX(0)
 
         # Mask bins of reduced workspace
-        if self._unmirror_option == 0:
+        if self._unmirror_option == 0 and mirror_sense == 16:
             if xmin_left > 0:
                 self.log().debug('Mask red ws bins smaller than %d' % xmin_left)
                 MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[0], XMax=x[xmin_left])
@@ -442,7 +457,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     def _perform_unmirror(self, red, left, right):
         """
-        Handling unmirror options and sum left and right wing if needed
+        Handling unmirror options > 0 and sum left and right wing if needed
         :param red:          reduced workspace, will be updated
         :param left:         left workspace
         :param right:        right workspace
@@ -454,17 +469,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         end_bin = mtd[red].blocksize()
 
         if self._unmirror_option == 0:
-            if mtd[red].getRun().hasProperty('Doppler.mirror_sense'):
-                # mirror_sense 14 : two wings
-                # mirror_sense 16 : one wing
-                if mtd[red].getRun().getLogData('Doppler.mirror_sense').value == 14:
-                    self.log().warning('Input run (IN16B) has two wings, no energy transfer will be performed')
-                else:
-                    self.log().information('Unmirror 0: Input run (IN16B) has one wing, perform energy transfer')
-                    self._convert_to_energy(red)
-            else:
-                self.log().warning('Input run (IN16B) has no property Doppler.mirror_sense. Check your input file.')
-                self._convert_to_energy(red)
+            self.log().information('Unmirror 0: Nothing to be done')
 
         elif self._unmirror_option == 1:
             self.log().information('Unmirror 1: Return the left wing')
