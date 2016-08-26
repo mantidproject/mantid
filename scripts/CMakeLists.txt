@@ -4,7 +4,6 @@ add_subdirectory(FilterEvents)
 add_subdirectory(HFIRPowderReduction)
 add_subdirectory(Interface/ui)
 add_subdirectory(lib1to2/gui)
-add_subdirectory(PyChop)
 add_subdirectory(TofConverter)
 add_subdirectory(HFIR_4Circle_Reduction)
 
@@ -12,7 +11,6 @@ add_subdirectory(HFIR_4Circle_Reduction)
 add_custom_target(CompilePyUI DEPENDS
   CompileUIFilterEvents
   CompileUIHFIRPowderReduction
-  CompileUIPyChop
   CompileUITofConverter
   CompileUIUI
   CompileUILib1To2
@@ -23,7 +21,6 @@ add_custom_target(CompilePyUI DEPENDS
 set_property ( TARGET CompilePyUI PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIFilterEvents PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIHFIRPowderReduction PROPERTY FOLDER "CompilePyUI" )
-set_property ( TARGET CompileUIPyChop PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUITofConverter PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIUI PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUILib1To2 PROPERTY FOLDER "CompilePyUI" )
