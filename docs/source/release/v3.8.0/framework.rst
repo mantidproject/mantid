@@ -55,6 +55,14 @@ Deprecated
 MD Algorithms (VATES CLI)
 #########################
 
+Interfaces
+----------
+
+New
+###
+
+- A workflow gui for TOFTOF data reduction. (#17075)
+
 Performance
 -----------
 
