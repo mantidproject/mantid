@@ -243,14 +243,17 @@
 
   <type name="bank_single_detectors">
     <component type="single_tube">
+      <location r="4.100000" t="10.940000" p="0.0" rot="147.142857" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_4" />
+      <location r="4.100000" t="16.800000" p="0.0" rot="162.857143" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_5" />
+
+      <!-- these numbers should be verified-->
       <location r="4.100000" t="10.000000" p="0.0" rot="100.000000" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_1" />
       <location r="4.100000" t="25.714286" p="0.0" rot="115.714286" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_2" />
       <location r="4.100000" t="41.428571" p="0.0" rot="131.428571" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_3" />
-      <location r="4.100000" t="57.142857" p="0.0" rot="147.142857" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_4" />
-      <location r="4.100000" t="72.857143" p="0.0" rot="162.857143" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_5" />
       <location r="4.100000" t="88.571429" p="0.0" rot="178.571429" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_6" />
       <location r="4.100000" t="104.285714" p="0.0" rot="194.285714" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_7" />
       <location r="4.100000" t="120.000000" p="0.0" rot="210.000000" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="single_tube_8" />
+
     </component>
   </type>
 

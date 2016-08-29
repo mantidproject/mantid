@@ -19,12 +19,13 @@
 
   <group name="tube4"> <ids val="2050"/> </group>
   <group name="tube5"> <ids val="2051"/> </group>
+
   <!-- There are 2 SD active, though 8 slots available
-  <group name="tube3"><detids val="2051"/></group>
-  <group name="tube4"><detids val="2052"/> </group>
-  <group name="tube5"><detids val="2053"/></group>
-  <group name="tube6"><detids val="2054"/> </group>
-  <group name="tube7"><detids val="2055"/></group>
-  <group name="tube8"><detids val="2056"/> </group>
+  <group name="tube3"><ids val="2052"/></group>
+  <group name="tube4"><ids val="2053"/> </group>
+  <group name="tube5"><ids val="2054"/></group>
+  <group name="tube6"><ids val="2055"/> </group>
+  <group name="tube7"><ids val="2056"/></group>
+  <group name="tube8"><ids val="2057"/> </group>
   -->
 </detector-grouping>
