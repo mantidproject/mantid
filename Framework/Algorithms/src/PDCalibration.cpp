@@ -148,7 +148,8 @@ void PDCalibration::init() {
 
   const std::vector<std::string> exts{"_event.nxs", ".nxs.h5", ".nxs"};
   declareProperty(make_unique<FileProperty>(
-                      "SignalFile", "", FileProperty::FileAction::Load, exts),
+                      "SignalFile", "", FileProperty::FileAction::OptionalLoad,
+                      exts),
                   "Calibration measurement");
   declareProperty(make_unique<FileProperty>("BackgroundFile", "",
                                             FileProperty::OptionalLoad, exts),
@@ -294,6 +295,7 @@ void PDCalibration::exec() {
   }
 
   const std::size_t NUMHIST = m_uncalibratedWS->getNumberHistograms();
+  API::Progress prog(this, 0, 1.0, NUMHIST);
 
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
@@ -302,6 +304,7 @@ void PDCalibration::exec() {
     if (isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) {
       // std::cout << "Empty event list at wkspIndex = " << wkspIndex <<
       // std::endl;
+      prog.report();
       continue;
     }
 
@@ -387,11 +390,11 @@ void PDCalibration::exec() {
       // Continue to identify whether this peak will be accepted
       // peak signal/noise ratio
       if (height * 2.0 * sqrt(2.0 * M_LN2) / width < 5.)
-	continue;
+        continue;
 
       // ban peaks that are not outside of error bars for the background
       if (height < 0.5 * std::sqrt(height + background))
-	continue;
+        continue;
 
       d_vec.push_back(peaks.inDPos[i]);
       tof_vec.push_back(centre);
@@ -404,10 +407,11 @@ void PDCalibration::exec() {
       double difc = tof_vec.front() / d_vec.front();
       setCalibrationValues(peaks.detid, difc, 0, 0);
     } else {
-      double difc = 0, t0 = 0, difa = 0;
+      double difc = 0., t0 = 0., difa = 0.;
       fitDIFCtZeroDIFA(d_vec, tof_vec, difc, t0, difa);
       setCalibrationValues(peaks.detid, difc, difa, t0);
     }
+    prog.report();
 
     PARALLEL_END_INTERUPT_REGION
   }
