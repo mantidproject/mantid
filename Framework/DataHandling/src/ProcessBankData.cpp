@@ -195,14 +195,7 @@ void ProcessBankData::run() { // override {
               alg->weightedEventVectors[periodIndex][detId];
           // NULL eventVector indicates a bad spectrum lookup
           if (eventVector) {
-#if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
-            // This avoids a copy constructor call but is only available with
-            // GCC (requires variadic templates)
             eventVector->emplace_back(tof, pulsetime, weight, errorSq);
-#else
-            eventVector->push_back(
-                WeightedEvent(tof, pulsetime, weight, errorSq));
-#endif
           } else {
             ++my_discarded_events;
           }
@@ -212,13 +205,7 @@ void ProcessBankData::run() { // override {
               alg->eventVectors[periodIndex][detId];
           // NULL eventVector indicates a bad spectrum lookup
           if (eventVector) {
-#if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
-            // This avoids a copy constructor call but is only available with
-            // GCC (requires variadic templates)
             eventVector->emplace_back(tof, pulsetime);
-#else
-            eventVector->push_back(TofEvent(tof, pulsetime));
-#endif
           } else {
             ++my_discarded_events;
           }

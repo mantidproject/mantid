@@ -135,12 +135,12 @@ public:
     delete suite;
   }
 
-  void setUp() {
+  void setUp() override {
     inputWS =
         WorkspaceCreationHelper::Create2DWorkspace123(20000, 10000, false);
   }
 
-  void tearDown() {
+  void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().remove("output");
   }
 
