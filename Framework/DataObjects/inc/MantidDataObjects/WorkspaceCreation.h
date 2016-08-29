@@ -11,10 +11,6 @@ namespace Mantid {
 namespace HistogramData {
 class Histogram;
 }
-namespace Indexing {
-class IndexTranslator;
-using IndexInfo = IndexTranslator;
-}
 namespace API {
 class MatrixWorkspace;
 class HistoWorkspace;
@@ -95,39 +91,35 @@ boost::shared_ptr<T> create(const P &parent, const IndexArg &indexArg,
   return std::move(ws);
 }
 
-template <class T>
-boost::shared_ptr<T> create(const size_t &numSpectra,
+template <class T, class IndexArg,
+          typename std::enable_if<
+              !std::is_base_of<API::MatrixWorkspace, IndexArg>::value>::type * =
+              nullptr>
+boost::shared_ptr<T> create(const IndexArg &indexArg,
                             const HistogramData::Histogram &histogram) {
   auto ws = Kernel::make_unique<T>();
-  ws->initialize(numSpectra, histogram);
+  ws->initialize(indexArg, histogram);
   return std::move(ws);
 }
 
-template <class T>
-boost::shared_ptr<T> create(const Indexing::IndexInfo &indexInfo,
-                            const HistogramData::Histogram &histogram) {
-  auto ws = Kernel::make_unique<T>();
-  ws->initialize(indexInfo, histogram);
-  return std::move(ws);
-}
-
-template <class T, class P, class = typename std::enable_if<std::is_base_of<
-                                API::MatrixWorkspace, P>::value>::type>
+template <class T, class P,
+          typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
+                                                  P>::value>::type * = nullptr>
 boost::shared_ptr<T> create(const P &parent) {
   // copy X??
   return create<T>(parent, detail::stripData(parent.histogram(0)));
 }
 
 template <class T, class P, class IndexArg,
-          class = typename std::enable_if<
-              std::is_base_of<API::MatrixWorkspace, P>::value>::type>
-boost::shared_ptr<T> create(const P &parent,
-                            const IndexArg &indexArg) {
+          typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
+                                                  P>::value>::type * = nullptr>
+boost::shared_ptr<T> create(const P &parent, const IndexArg &indexArg) {
   return create<T>(parent, indexArg, detail::stripData(parent.histogram(0)));
 }
 
-template <class T, class P, class = typename std::enable_if<std::is_base_of<
-                                API::MatrixWorkspace, P>::value>::type>
+template <class T, class P,
+          typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
+                                                  P>::value>::type * = nullptr>
 boost::shared_ptr<T> create(const P &parent,
                             const HistogramData::Histogram &histogram) {
   return create<T>(parent, parent.getNumberHistograms(), histogram);
