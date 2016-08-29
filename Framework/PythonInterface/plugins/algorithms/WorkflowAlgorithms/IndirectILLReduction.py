@@ -152,7 +152,6 @@ def get_peak_position(ws, i):
             # Take the center (i.e. do no shift the spectrum)
             peak_bin = mid_bin
 
-
     # Delete unused TableWorkspaces
     try:
         if 'EPPfit_NormalisedCovarianceMatrix':
