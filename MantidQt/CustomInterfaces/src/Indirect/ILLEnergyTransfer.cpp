@@ -42,8 +42,8 @@ bool ILLEnergyTransfer::validate() {
     uiv.addErrorMessage("Run File is invalid.");
 
   // Validate calibration file/workspace if it is being used
-  if (m_uiForm.ckUseCalibration->isChecked())
-    uiv.checkDataSelectorIsValid("Calibration", m_uiForm.dsCalibration);
+    if (m_uiForm.cbUseCalibration->isChecked())
+      uiv.checkDataSelectorIsValid("Calibration", m_uiForm.dsCalibration);
 
   // Validate map file if it is being used
   bool useMapFile = m_uiForm.rdGroupChoose->isChecked();
@@ -87,12 +87,16 @@ void ILLEnergyTransfer::run() {
   reductionAlg->setProperty("OutputWorkspace", outws.toStdString());
 
   // Handle calibration
-  bool useCalibration = m_uiForm.ckUseCalibration->isChecked();
+  bool useCalibration = m_uiForm.cbUseCalibration->isChecked();
   if (useCalibration) {
     QString calibrationWsName = m_uiForm.dsCalibration->getCurrentDataName();
     reductionAlg->setProperty("CalibrationWorkspace",
                               calibrationWsName.toStdString());
   }
+
+  // Handle background file
+  QString backgroundFilename = m_uiForm.rfBackgroundRun->getUserInput().toString();
+  reductionAlg->setProperty("BackgroundRun", backgroundFilename.toStdString());
 
   // Handle mapping file
   bool useMapFile = m_uiForm.rdGroupChoose->isChecked();

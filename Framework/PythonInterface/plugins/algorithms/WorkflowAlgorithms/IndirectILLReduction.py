@@ -154,12 +154,9 @@ def get_peak_position(ws, i):
 
     # Delete unused TableWorkspaces
     try:
-        if 'EPPfit_NormalisedCovarianceMatrix':
-            DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
-        if 'EPPfit_Parameters':
-            DeleteWorkspace('EPPfit_Parameters')
-        if __fit_table:
-            DeleteWorkspace(__fit_table)
+        DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
+        DeleteWorkspace('EPPfit_Parameters')
+        DeleteWorkspace(__fit_table)
     except ValueError:
         logger.debug('No Fit table available for deletion')
 
