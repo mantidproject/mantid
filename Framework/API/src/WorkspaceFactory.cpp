@@ -200,15 +200,5 @@ WorkspaceFactoryImpl::createPeaks(const std::string &className) const {
   return ws;
 }
 
-/*
-namespace detail {
-HistogramData::Histogram stripData(HistogramData::Histogram histogram) {
-  histogram.setSharedY(nullptr);
-  histogram.setSharedE(nullptr);
-  return histogram;
-}
-}
-*/
-
 } // namespace API
 } // Namespace Mantid
