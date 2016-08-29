@@ -1,7 +1,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidAPI/HistoWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
@@ -165,19 +165,6 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string &className,
   }
 
   ws->initialize(NVectors, XLength, YLength);
-  return ws;
-}
-
-MatrixWorkspace_sptr
-WorkspaceFactoryImpl::createNoInit(const std::string &className) const {
-  MatrixWorkspace_sptr ws =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(this->create(className));
-
-  if (!ws) {
-    g_log.error("Workspace was not created");
-    throw std::runtime_error("Workspace was not created");
-  }
-
   return ws;
 }
 
