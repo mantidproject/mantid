@@ -106,6 +106,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
         mass_values, profiles_strs = _create_profile_strs_and_mass_list(flags['masses'])
     background_str = _create_background_str(flags.get('background', None))
     intensity_constraints = _create_intensity_constraint_str(flags['intensity_constraints'])
+    ties = _create_user_defined_ties_str(flags['masses'])
 
     num_spec = sample_data.getNumberHistograms()
     pre_correct_pars_workspace = None
@@ -138,6 +139,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
                          MassProfiles=profiles,
                          Background=background_str,
                          IntensityConstraints=intensity_constraints,
+                         Ties=ties,
                          OutputWorkspace=corrections_fit_name,
                          FitParameters=pre_correction_pars_name,
                          MaxIterations=max_fit_iterations,
@@ -181,6 +183,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
                                       MassProfiles=profiles,
                                       Background=background_str,
                                       IntensityConstraints=intensity_constraints,
+                                      Ties=ties,
                                       OutputWorkspace=fit_ws_name,
                                       FitParameters=pars_name,
                                       MaxIterations=max_fit_iterations,
@@ -428,3 +431,23 @@ def _create_intensity_constraint_str(intensity_constraints):
         intensity_constraints_str = ""
 
     return intensity_constraints_str
+
+def _create_user_defined_ties_str(masses):
+    """
+    Creates the internal ties for each mass profile as defined by the user to be used when fitting the data
+    @param masses   :: The mass profiles for the data which contain the the ties
+    @return         :: A string to be passed as the Ties input to fitting
+    """
+    user_defined_ties = []
+    for index, mass in enumerate(masses):
+        if 'ties' in mass:
+           ties = mass['ties'].split(',')
+           function_dependant_ties= []
+           function_indentifier = 'f' + str(index) + '.'
+           for t in ties:
+               tie_str = function_indentifier + t
+               equal_pos = tie_str.index('=') + 1
+               tie_str = tie_str[:equal_pos] + function_indentifier + tie_str[equal_pos:]
+               user_defined_ties.append(tie_str)
+    user_defined_ties = ','.join(user_defined_ties)
+    return user_defined_ties

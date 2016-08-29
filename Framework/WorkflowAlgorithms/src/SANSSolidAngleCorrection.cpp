@@ -82,8 +82,8 @@ void SANSSolidAngleCorrection::exec() {
   }
 
   // If the solid angle algorithm isn't in the reduction properties, add it
-  if (!reductionManager->existsProperty("SolidAngleAlgorithm")) {
-    auto algProp = make_unique<AlgorithmProperty>("SolidAngleAlgorithm");
+  if (!reductionManager->existsProperty("SANSSolidAngleCorrection")) {
+    auto algProp = make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
     algProp->setValue(toString());
     reductionManager->declareProperty(std::move(algProp));
   }
@@ -153,8 +153,9 @@ void SANSSolidAngleCorrection::exec() {
       const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
       if (is_tube)
         corr = alpha_term * theta_term * theta_term;
-      else // if (is_wing) {
-        corr = alpha_term;
+      else { // is_wing
+        corr = alpha_term * alpha_term * alpha_term;
+      }
     } else {
       corr = theta_term * theta_term * theta_term;
     }

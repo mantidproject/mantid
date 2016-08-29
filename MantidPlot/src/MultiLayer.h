@@ -262,6 +262,9 @@ private:
 
   bool d_is_waterfall_plot;
   QColor d_waterfall_fill_color;
+
+  const int default_waterfall_width_offset = 10;
+  const int default_waterfall_height_offset = 20;
 };
 
 //! Button with layer number

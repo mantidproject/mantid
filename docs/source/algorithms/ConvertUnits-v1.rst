@@ -31,12 +31,16 @@ than is smaller than the input one. If the geometry is indirect then the
 value of EFixed will be taken, if available, from the instrument
 definition file.
 
+If ConvertFromPointData is true, an input workspace
+contains Point data will be converted using `ConvertToHistogram <http://www.mantidproject.org/ConvertToHistogram>`__
+and then the algorithm will be run on the converted workspace.
+
 Restrictions on the input workspace
 ###################################
 
 -  Naturally, the X values must have a unit set, and that unit must be
    known to the `Unit Factory <http://www.mantidproject.org/Units>`__.
--  Only histograms, not point data, can be handled at present.
+-  Histograms and Point data can be handled.
 -  The algorithm will also fail if the source-sample distance cannot be
    calculated (i.e. the :ref:`instrument <instrument>` has not been
    properly defined).
@@ -54,7 +58,7 @@ Usage
 **Example: Convert to wavelength**
 
 .. testcode:: ExConvertUnits
-             
+
     ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
     wsOut = ConvertUnits(ws,Target="Wavelength")
 

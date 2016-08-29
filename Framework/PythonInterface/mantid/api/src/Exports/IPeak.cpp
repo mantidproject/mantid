@@ -18,7 +18,7 @@ Mantid::Geometry::PeakShape_sptr getPeakShape(IPeak &peak) {
 }
 void setQLabFrame1(IPeak &peak, Mantid::Kernel::V3D qLabFrame) {
   // Set the q lab frame. No explicit detector distance.
-  return peak.setQLabFrame(qLabFrame, boost::optional<double>());
+  return peak.setQLabFrame(qLabFrame, boost::none);
 }
 void setQLabFrame2(IPeak &peak, Mantid::Kernel::V3D qLabFrame,
                    double distance) {
@@ -28,7 +28,7 @@ void setQLabFrame2(IPeak &peak, Mantid::Kernel::V3D qLabFrame,
 
 void setQSampleFrame1(IPeak &peak, Mantid::Kernel::V3D qSampleFrame) {
   // Set the qsample frame. No explicit detector distance.
-  return peak.setQSampleFrame(qSampleFrame, boost::optional<double>());
+  return peak.setQSampleFrame(qSampleFrame, boost::none);
 }
 
 void setQSampleFrame2(IPeak &peak, Mantid::Kernel::V3D qSampleFrame,

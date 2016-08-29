@@ -197,9 +197,9 @@ public:
   const std::string name() const override { return "FindSXPeaks"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Takes a 2D workspace as input and find the FindSXPeaksimum in each "
-           "1D spectrum. This is used in particular for single crystal as a "
-           "quick way to find strong peaks.";
+    return "Takes a 2D workspace as input and finds the highest intensity "
+           "point in each 1D spectrum. This is used in particular for single "
+           "crystal as a quick way to find strong peaks.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
