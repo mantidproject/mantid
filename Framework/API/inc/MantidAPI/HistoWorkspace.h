@@ -33,6 +33,9 @@ namespace API {
 */
 class MANTID_API_DLL HistoWorkspace : public MatrixWorkspace {
 public:
+  // Explicitly defined to avoid VS2015 compiler error.
+  ~HistoWorkspace() override{};
+
   /// Returns a clone of the workspace
   std::unique_ptr<HistoWorkspace> clone() const {
     return std::unique_ptr<HistoWorkspace>(doClone());
