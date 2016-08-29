@@ -556,7 +556,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 progress.report("Reducing run #" + run)
                 # check if the run is QENS type and call reduction for each run
                 if check_QENS(ws):
-                    self._reduce_run(run,out_ws_names)
+                    self._reduce_run(run, out_ws_names)
                 else:
                     nonQENSrunlist.append(run)
         else:
@@ -572,7 +572,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
             # check if the run is QENS type and call reduction
             if check_QENS(ws):
-                self._reduce_run(run,out_ws_names)
+                self._reduce_run(run, out_ws_names)
             else:
                 nonQENSrunlist.append(run)
 
@@ -837,9 +837,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # group optional ws in debug mode
         if self._debug_mode:
 
-            for i in range(1,7):
+            for i in range(1, 7):
                 GroupWorkspaces(InputWorkspaces=output[:, i], OutputWorkspace=self._out_suffixes[i])
-                self.setProperty('OutputWorkspace', self._out_suffixes[i])
+            self.setProperty('RawWorkspace', self._out_suffixes[1])
+            self.setProperty('DetWorkspace', self._out_suffixes[2])
+            self.setProperty('MonitorWorkspace', self._out_suffixes[3])
+            self.setProperty('MnormWorkspace', self._out_suffixes[4])
+            self.setProperty('LeftWorkspace', self._out_suffixes[5])
+            self.setProperty('RightWorkspace', self._out_suffixes[6])
 
             if self._background_file:
                 GroupWorkspaces(InputWorkspaces=output[:, 7], OutputWorkspace=self._out_suffixes[7])
