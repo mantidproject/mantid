@@ -7,14 +7,14 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidIndexing/DetectorIDs.h
 	inc/MantidIndexing/DllConfig.h
-        inc/MantidIndexing/IndexInfo.h
+	inc/MantidIndexing/IndexInfo.h
 	inc/MantidIndexing/MakeRange.h
 	inc/MantidIndexing/SpectrumNumbers.h
 )
 
 set ( TEST_FILES
 	DetectorIDsTest.h
-        IndexInfoTest.h
+	IndexInfoTest.h
 	MakeRangeTest.h
 	SpectrumNumbersTest.h
 )
