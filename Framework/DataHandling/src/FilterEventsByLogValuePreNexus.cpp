@@ -1246,24 +1246,17 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
         if (tof > local_m_longestTof)
           local_m_longestTof = tof;
 
-// The addEventQuickly method does not clear the cache, making things slightly
-// faster.
-// workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event);
+        // The addEventQuickly method does not clear the cache, making things
+        // slightly
+        // faster.
+        // workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event);
 
-// - Add event to data structure
-// (This is equivalent to
-// workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
-// (But should be faster as a bunch of these calls were cached.)
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
-        // This avoids a copy constructor call but is only available with GCC
-        // (requires variadic templates)
+        // - Add event to data structure
+        // (This is equivalent to
+        // workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
+        // (But should be faster as a bunch of these calls were cached.)
         arrayOfVectors[pixelid]->emplace_back(tof, pulsetime);
-#else
-        arrayOfVectors[pixelid]->push_back(TofEvent(tof, pulsetime));
-#endif
-
         ++local_numGoodEvents;
-
 #if 0
           if (fileOffset == 0 && numeventsprint < 10)
           {
@@ -2005,18 +1998,11 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
         if (tof > local_m_longestTof)
           local_m_longestTof = tof;
 
-// Add event to vector of events
-// (This is equivalent to
-// workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
-// (But should be faster as a bunch of these calls were cached.)
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
-        // This avoids a copy constructor call but is only available with GCC
-        // (requires variadic templates)
+        // Add event to vector of events
+        // (This is equivalent to
+        // workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
+        // (But should be faster as a bunch of these calls were cached.)
         arrayOfVectors[pixelid]->emplace_back(tof, pulsetime);
-#else
-        arrayOfVectors[pixelid]->push_back(TofEvent(tof, pulsetime));
-#endif
-
         ++local_numGoodEvents;
 
 #ifdef DBOUT

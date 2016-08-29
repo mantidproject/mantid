@@ -23,7 +23,8 @@ LocalParameterItemDelegate::createEditor(QWidget *parent,
   m_currentEditor = new LocalParameterEditor(
       parent, row, owner()->getValue(row), owner()->isFixed(row),
       owner()->getTie(row), owner()->areOthersFixed(row),
-      owner()->areAllOthersFixed(row), owner()->areOthersTied(row));
+      owner()->areAllOthersFixed(row), owner()->areOthersTied(row),
+      owner()->isLogCheckboxTicked());
   connect(m_currentEditor, SIGNAL(setAllValues(double)), this,
           SIGNAL(setAllValues(double)));
   connect(m_currentEditor, SIGNAL(fixParameter(int, bool)), this,
@@ -34,6 +35,12 @@ LocalParameterItemDelegate::createEditor(QWidget *parent,
           SIGNAL(setTie(int, QString)));
   connect(m_currentEditor, SIGNAL(setTieAll(QString)), this,
           SIGNAL(setTieAll(QString)));
+  connect(m_currentEditor, SIGNAL(setValueToLog(int)), this,
+          SLOT(doSetValueToLog(int)));
+  connect(m_currentEditor, SIGNAL(setAllValuesToLog()), this,
+          SLOT(doSetAllValuesToLog()));
+  connect(owner(), SIGNAL(logOptionsChecked(bool)), m_currentEditor,
+          SLOT(setLogOptionsEnabled(bool)));
   m_currentEditor->installEventFilter(
       const_cast<LocalParameterItemDelegate *>(this));
   return m_currentEditor;
@@ -84,6 +91,41 @@ void LocalParameterItemDelegate::paint(QPainter *painter,
 /// values and fixes.
 EditLocalParameterDialog *LocalParameterItemDelegate::owner() const {
   return static_cast<EditLocalParameterDialog *>(parent());
+}
+
+/**
+ * Slot: close the editor and re-emit the signal
+ * @param i :: [input] Index of row
+ */
+void LocalParameterItemDelegate::doSetValueToLog(int i) {
+  if (m_currentEditor) {
+    closeEditor(m_currentEditor);
+    m_currentEditor = nullptr;
+  }
+  emit setValueToLog(i);
+}
+
+/**
+ * Slot: close the editor and re-emit the signal
+ */
+void LocalParameterItemDelegate::doSetAllValuesToLog() {
+  if (m_currentEditor) {
+    closeEditor(m_currentEditor);
+    m_currentEditor = nullptr;
+  }
+  emit setAllValuesToLog();
+}
+
+/**
+ * Data is about to be pasted into the table.
+ * Prepare for this by:
+ *   - closing the editor (if one is open)
+ */
+void LocalParameterItemDelegate::prepareForPastedData() {
+  if (m_currentEditor) {
+    closeEditor(m_currentEditor);
+    m_currentEditor = nullptr;
+  }
 }
 
 } // MDF

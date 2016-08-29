@@ -22,7 +22,7 @@ public:
     TS_ASSERT(alg2.isInitialized());
 
     const std::vector<Property *> props = alg2.getProperties();
-    TS_ASSERT_EQUALS(props.size(), 4);
+    TS_ASSERT_EQUALS(props.size(), 5);
 
     TS_ASSERT_EQUALS(props[0]->name(), "InputWorkspaces");
     TS_ASSERT(props[0]->isDefault());
@@ -154,19 +154,19 @@ public:
     alg6.initialize();
     alg6.setPropertyValue("InputWorkspaces", "InputWS1, InputWS2");
     // Check throw if no workspace name set
-    TS_ASSERT_THROWS(alg6.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg6.execute(), std::runtime_error);
     // Check throw if conflicting workspace names are set
     alg6.setPropertyValue("WorkspaceNames", "NewName1, NewName2");
     alg6.setPropertyValue("Prefix", "A_");
-    TS_ASSERT_THROWS(alg6.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg6.execute(), std::runtime_error);
     alg6.setPropertyValue("Suffix", "_1");
-    TS_ASSERT_THROWS(alg6.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg6.execute(), std::runtime_error);
     alg6.setPropertyValue("Prefix", "");
-    TS_ASSERT_THROWS(alg6.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg6.execute(), std::runtime_error);
     // Check throw if duplicate workspace names are set
     alg6.setPropertyValue("Suffix", "");
     alg6.setPropertyValue("WorkspaceNames", "NewName3, NewName3");
-    TS_ASSERT_THROWS(alg6.execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg6.execute(), std::runtime_error);
 
     AnalysisDataService::Instance().remove("InputWS7");
     AnalysisDataService::Instance().remove("InputWS8");
@@ -207,6 +207,37 @@ public:
 
     AnalysisDataService::Instance().remove("A_InputWS9_1");
     AnalysisDataService::Instance().remove("A_InputWSA_1");
+  }
+
+  void testExecNameAlreadyExists() {
+    // Tests renaming a workspace to a name which is already used
+    AnalysisDataService::Instance().clear();
+    MatrixWorkspace_sptr inputWs = createWorkspace();
+    AnalysisDataService::Instance().add("ExistingWorkspace", inputWs);
+    // Create a workspace to rename
+    MatrixWorkspace_sptr toRename = createWorkspace();
+    AnalysisDataService::Instance().add("WorkspaceToRename", toRename);
+
+    // First test it fails with override existing set to false
+    Mantid::Algorithms::RenameWorkspaces renameAlgorithm;
+    renameAlgorithm.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
+        "InputWorkspaces", "WorkspaceToRename"));
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.setPropertyValue(
+        "WorkspaceNames", "ExistingWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(
+        renameAlgorithm.setProperty("OverwriteExisting", false));
+
+    // Try to rename it should throw exception
+    renameAlgorithm.setRethrows(true);
+    TS_ASSERT_THROWS(renameAlgorithm.execute(), std::runtime_error);
+    TS_ASSERT_EQUALS(renameAlgorithm.isExecuted(), false);
+
+    TS_ASSERT_THROWS_NOTHING(
+        renameAlgorithm.setProperty("OverwriteExisting", true));
+    TS_ASSERT_THROWS_NOTHING(renameAlgorithm.execute());
+    TS_ASSERT(renameAlgorithm.isExecuted());
   }
 
   void TestGroupExec() {

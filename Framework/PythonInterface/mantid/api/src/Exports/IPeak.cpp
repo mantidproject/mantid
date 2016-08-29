@@ -2,6 +2,8 @@
 #include "MantidGeometry/Crystal/IPeak.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
+#include <boost/optional.hpp>
 
 using Mantid::Geometry::IPeak;
 using namespace boost::python;
@@ -9,13 +11,14 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(IPeak)
 
 namespace {
+using namespace Mantid::PythonInterface;
 Mantid::Geometry::PeakShape_sptr getPeakShape(IPeak &peak) {
   // Use clone to make a copy of the PeakShape.
   return Mantid::Geometry::PeakShape_sptr(peak.getPeakShape().clone());
 }
 void setQLabFrame1(IPeak &peak, Mantid::Kernel::V3D qLabFrame) {
   // Set the q lab frame. No explicit detector distance.
-  return peak.setQLabFrame(qLabFrame, boost::optional<double>());
+  return peak.setQLabFrame(qLabFrame, boost::none);
 }
 void setQLabFrame2(IPeak &peak, Mantid::Kernel::V3D qLabFrame,
                    double distance) {
@@ -25,13 +28,17 @@ void setQLabFrame2(IPeak &peak, Mantid::Kernel::V3D qLabFrame,
 
 void setQSampleFrame1(IPeak &peak, Mantid::Kernel::V3D qSampleFrame) {
   // Set the qsample frame. No explicit detector distance.
-  return peak.setQSampleFrame(qSampleFrame, boost::optional<double>());
+  return peak.setQSampleFrame(qSampleFrame, boost::none);
 }
 
 void setQSampleFrame2(IPeak &peak, Mantid::Kernel::V3D qSampleFrame,
                       double distance) {
   // Set the qsample frame. Detector distance specified.
   return peak.setQSampleFrame(qSampleFrame, distance);
+}
+
+void setGoniometerMatrix(IPeak &self, const object &data) {
+  self.setGoniometerMatrix(Converters::PyObjectToMatrix(data)());
 }
 }
 
@@ -131,6 +138,9 @@ void export_IPeak() {
            "Return the # of counts in the bin at its peak")
       .def("setBinCount", &IPeak::setBinCount, (arg("self"), arg("bin_count")),
            "Set the # of counts in the bin at its peak")
+      .def("setGoniometerMatrix", &setGoniometerMatrix,
+           (arg("self"), arg("goniometerMatrix")),
+           "Set the goniometer of the peak")
       .def("getRow", &IPeak::getRow, arg("self"),
            "For RectangularDetectors only, returns "
            "the row (y) of the pixel of the "

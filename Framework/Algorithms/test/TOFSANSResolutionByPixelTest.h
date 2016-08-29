@@ -138,10 +138,10 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
   Mantid::API::MatrixWorkspace_sptr ws2d;
   if (isModerator) {
     ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        twos(), static_cast<int>(nhist), x0, x1, dx);
+        twos(), static_cast<int>(nhist), x0, x1, dx, true);
   } else {
     ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        ones(), static_cast<int>(nhist), x0, x1, dx);
+        ones(), static_cast<int>(nhist), x0, x1, dx, true);
   }
 
   // Set the units to Wavelength (is needed for both types of worspaces)

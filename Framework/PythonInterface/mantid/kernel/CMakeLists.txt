@@ -49,6 +49,7 @@ set ( EXPORT_FILES
   src/Exports/Memory.cpp
   src/Exports/ProgressBase.cpp
   src/Exports/Material.cpp
+  src/Exports/MaterialBuilder.cpp
   src/Exports/Statistics.cpp
   src/Exports/OptionalBool.cpp
   src/Exports/UsageService.cpp
@@ -84,6 +85,7 @@ set ( SRC_FILES
 set ( INC_FILES
   ${HEADER_DIR}/kernel/NdArray.h
   ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
+  ${HEADER_DIR}/kernel/Converters/CloneToNumpy.h
   ${HEADER_DIR}/kernel/Converters/MapToPyDictionary.h
   ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
   ${HEADER_DIR}/kernel/Converters/NumpyFunctions.h

@@ -30,6 +30,22 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
+namespace {
+int getGeometryID(const std::string &selection) {
+  int geometryID = 0;
+  if (selection == "Cylinder") {
+    geometryID = 1;
+  } else if (selection == "Flat plate") {
+    geometryID = 2;
+  } else if (selection == "Disc") {
+    geometryID = 3;
+  } else {
+    geometryID = 0;
+  }
+  return geometryID;
+}
+}
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -221,12 +237,19 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
       Y[vecindex] = d;
 
       // setting the error vector
+      // If there is no error of the intensity recorded, then
+      // it is assumed to be the sqare root of the intensity
       Element *idevElem = elem->getChildElement("Idev");
-      check(qElem, "Idev");
-      nodeVal = idevElem->innerText();
-      std::stringstream e(nodeVal);
-      e >> d;
-      E[vecindex] = d;
+      if (idevElem) {
+        check(qElem, "Idev");
+        nodeVal = idevElem->innerText();
+        std::stringstream e(nodeVal);
+        e >> d;
+        E[vecindex] = d;
+      } else {
+        E[vecindex] = std::sqrt(d);
+      }
+
       ++vecindex;
     }
   }
@@ -239,6 +262,9 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
   instname = nameElem->innerText();
   // run load instrument
   runLoadInstrument(instname, dataWS);
+
+  // Load the sample information
+  createSampleInformation(workspaceElem, dataWS);
 
   dataWS->getAxis(0)->setUnit("MomentumTransfer");
   if (isCommon)
@@ -334,6 +360,49 @@ void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
         }
       }
     }
+  }
+}
+
+void LoadCanSAS1D::createSampleInformation(
+    const Poco::XML::Element *const sasEntry,
+    Mantid::API::MatrixWorkspace_sptr wSpace) const {
+  auto &sample = wSpace->mutableSample();
+
+  // Get the thickness information
+  auto sasSampleElement = sasEntry->getChildElement("SASsample");
+  check(sasSampleElement, "<SASsample>");
+  auto thicknessElement = sasSampleElement->getChildElement("thickness");
+  if (thicknessElement) {
+    double thickness = std::stod(thicknessElement->innerText());
+    sample.setThickness(thickness);
+  }
+
+  auto sasInstrumentElement = sasEntry->getChildElement("SASinstrument");
+  check(sasInstrumentElement, "<SASinstrument>");
+  auto sasCollimationElement =
+      sasInstrumentElement->getChildElement("SAScollimation");
+  check(sasCollimationElement, "<SAScollimation>");
+
+  // Get the geometry information
+  auto geometryElement = sasCollimationElement->getChildElement("name");
+  if (geometryElement) {
+    auto geometry = geometryElement->innerText();
+    auto geometryID = getGeometryID(geometry);
+    sample.setGeometryFlag(geometryID);
+  }
+
+  // Get the thickness information
+  auto widthElement = sasCollimationElement->getChildElement("X");
+  if (widthElement) {
+    double width = std::stod(widthElement->innerText());
+    sample.setWidth(width);
+  }
+
+  // Get the thickness information
+  auto heightElement = sasCollimationElement->getChildElement("Y");
+  if (heightElement) {
+    double height = std::stod(heightElement->innerText());
+    sample.setHeight(height);
   }
 }
 }
