@@ -4,6 +4,11 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
 
+// Forward declarations
+namespace mu {
+class Parser;
+} // namespace mu
+
 namespace Mantid {
 
 namespace HistogramData {
@@ -61,13 +66,16 @@ private:
   void init() override;
   void exec() override;
   void retrieveProperties();
-  double calculateFormulaValue(const std::string &formula, double energy);
-  MantidVec calculateEfficiency(double eff0, const std::string &formula,
+  MantidVec calculateEfficiency(double eff0, double &e, mu::Parser &parser,
                                 const HistogramData::Points &xIn);
 
   HistogramData::Histogram
   applyDetEfficiency(const size_t nChans, const Mantid::MantidVec &effVec,
                      const HistogramData::Histogram &histogram);
+
+  double evaluate(const mu::Parser &parser) const;
+
+  mu::Parser generateParser(const std::string &formula, double *e) const;
 
   std::string retrieveFormula(const size_t workspaceIndex);
 

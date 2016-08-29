@@ -79,9 +79,12 @@ void DetectorEfficiencyCorUser::exec() {
     PARALLEL_START_INTERUPT_REGION
     const auto effFormula = retrieveFormula(i);
     // Calculate Efficiency for E = Ei
-    const double eff0 = calculateFormulaValue(effFormula, m_Ei);
+    double e;
+    auto parser = generateParser(effFormula, &e);
+    e = m_Ei;
+    const double eff0 = evaluate(parser);
     const auto effVec =
-        calculateEfficiency(eff0, effFormula, m_inputWS->points(i));
+        calculateEfficiency(eff0, e, parser, m_inputWS->points(i));
     // run this outside to benefit from parallel for (?)
     m_outputWS->setHistogram(i, applyDetEfficiency(numberOfChannels, effVec,
                                                    m_inputWS->histogram(i)));
@@ -117,23 +120,41 @@ Histogram DetectorEfficiencyCorUser::applyDetEfficiency(
 
   return outHist;
 }
+
 /**
- * Calculate the value of a formula
- * @param formula :: Formula
- * @param energy :: value to use in the formula
- * @return value calculated
+ * Calculate detector efficiency given a formula, the efficiency at the elastic
+ * line, and a vector with energies.
+ * Efficiency = f(Ei-DeltaE) / f(Ei)
+ * @param eff0 :: calculated eff0
+ * @param e :: reference to the parser's energy parameter
+ * @param parser :: muParser used to evalute f(e)
+ * @param xIn :: Energy bins vector (X axis)
+ * @return a vector with the efficiencies
+ */
+MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
+    double eff0, double &e, mu::Parser &parser, const Points &xIn) {
+  MantidVec effOut(xIn.size());
+
+  for (size_t i = 0; i < effOut.size(); ++i) {
+    e = m_Ei - xIn[i];
+    const double eff = evaluate(parser);
+    g_log.debug() << "Formula " << parser.GetExpr() << " with energy " << e
+                  << " evaluated to " << eff << '\n';
+    effOut[i] = eff / eff0;
+  }
+  return effOut;
+}
+
+/**
+ * Calculate the value of a formula parsed by muParser
+ * @param parser :: muParser object
+ * @return calculated value
+ * @throw InstrumentDefinitionError if parser throws during evaluation
  */
 double
-DetectorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
-                                                 double energy) {
+DetectorEfficiencyCorUser::evaluate(const mu::Parser &parser) const {
   try {
-    mu::Parser p;
-    p.DefineVar("e", &energy);
-    p.SetExpr(formula);
-    double eff = p.Eval();
-    g_log.debug() << "Formula: " << formula << " with: " << energy
-                  << "evaluated to: " << eff << '\n';
-    return eff;
+    return parser.Eval();
   } catch (mu::Parser::exception_type &e) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Error calculating formula from string. Muparser error message is: " +
@@ -141,38 +162,13 @@ DetectorEfficiencyCorUser::calculateFormulaValue(const std::string &formula,
   }
 }
 
-/**
- * Calculate detector efficiency given a formula, the efficiency at the elastic
- * line, and a vector with energies.
- * Efficiency = f(Ei-DeltaE) / f(Ei)
- * @param eff0 :: calculated eff0
- * @param formula :: formula to calculate efficiency (parsed from IDF)
- * @param xIn :: Energy bins vector (X axis)
- * @return a vector with the efficiencies
- */
-MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
-    double eff0, const std::string &formula, const Points &xIn) {
-  MantidVec effOut(xIn.size());
-
-  try {
-    double e;
-    mu::Parser p;
-    p.DefineVar("e", &e);
-    p.SetExpr(formula);
-
-    for (size_t i = 0; i < effOut.size(); ++i) {
-      // Cppcheck cannot see that e is accessed in p.Eval().
-      // cppcheck-suppress unreadVariable
-      e = m_Ei - xIn[i];
-      double eff = p.Eval();
-      effOut[i] = eff / eff0;
-    }
-    return effOut;
-  } catch (mu::Parser::exception_type &e) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Error calculating formula from string. Muparser error message is: " +
-        e.GetMsg());
-  }
+mu::Parser
+DetectorEfficiencyCorUser::generateParser(const std::string &formula,
+                                                 double *e) const {
+  mu::Parser p;
+  p.DefineVar("e", e);
+  p.SetExpr(formula);
+  return p;
 }
 
 /**
