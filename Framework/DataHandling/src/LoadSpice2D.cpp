@@ -287,7 +287,7 @@ void LoadSpice2D::setWavelength(std::map<std::string, std::string> &metadata) {
 
     // 20160720: New wavelength will be a ratio
     // HUGLY HACK! Comparing dates...
-    DateAndTime changingDate("2016-07-20 00:00:00");
+    DateAndTime changingDate("2016-06-13 00:00:00");
     if (m_startTime >= changingDate) {
       g_log.debug() << "Using wavelength spread as a ratio" << '\n';
       m_dwavelength = m_wavelength * m_dwavelength;
