@@ -19,7 +19,29 @@ namespace DataObjects {
 class EventWorkspace;
 class Workspace2D;
 
-/** WorkspaceCreation : TODO: DESCRIPTION
+/** Factory methods for creating workspaces. A template parameter specifies the
+  type of the created workspace (or a base type). If the parent passed as an
+  argument is an EventWorkspace but the template parameter is not, the methods
+  will attempt to create an adequate alternative. For example, a typical
+  use-case is to drop events and create a Workspace2D from an EventWorkspace.
+  This can be achieved as follows:
+
+  ~~~{.cpp}
+  auto ws = create<HistoWorkspace>(parent);
+  ~~~
+
+  This is equivalent to the old way of using WorkspaceFactory::create(parent).
+
+  Available variants are:
+
+  create(NumSpectra, Histogram)
+  create(IndexInfo,  Histogram)
+  create(ParentWS)
+  create(ParentWS, Histogram)
+  create(ParentWS, NumSpectra)
+  create(ParentWS, IndexInfo)
+  create(ParentWS, NumSpectra, Histogram)
+  create(ParentWS, IndexInfo, Histogram)
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -52,32 +74,31 @@ template <class T> std::unique_ptr<T> createHelper() {
 }
 
 template <>
-MANTID_DATAOBJECTS_DLL std::unique_ptr<EventWorkspace> createHelper();
-template <>
 MANTID_DATAOBJECTS_DLL std::unique_ptr<API::HistoWorkspace> createHelper();
+
+// Dummy specialization, should never be called, must exist for compilation.
+template <>
+MANTID_DATAOBJECTS_DLL std::unique_ptr<EventWorkspace> createHelper();
+// Dummy specialization, should never be called, must exist for compilation.
 template <>
 MANTID_DATAOBJECTS_DLL std::unique_ptr<API::MatrixWorkspace> createHelper();
 }
 
-
-// IndexArg can currently be size_t or IndexInfo (forwarded to
+// IndexArg can be size_t or IndexInfo (forwarded to
 // MatrixWorkspace::initialize).
 template <class T, class P, class IndexArg,
           class = typename std::enable_if<
               std::is_base_of<API::MatrixWorkspace, P>::value>::type>
 boost::shared_ptr<T> create(const P &parent, const IndexArg &indexArg,
                             const HistogramData::Histogram &histogram) {
-  // 1. Figure out (dynamic) target type:
+  // Figure out (dynamic) target type:
   // - Type is same as parent if T is base of parent
   // - If T is not base of parent, conversion may occur. Currently only
   //   supported for EventWorkspace
   boost::shared_ptr<T> ws;
   if (std::is_base_of<API::HistoWorkspace, T>::value &&
       parent.id() == "EventWorkspace") {
-    // drop events
-    // create Workspace2D or T, whichever is more derived?
-    // if T is more derived than Workspace2D there must be an error?
-    //ws = detail::createWorkspace2D();
+    // Drop events, create Workspace2D or T whichever is more derived.
     ws = detail::createHelper<T>();
   } else {
     // This may throw std::bad_cast.
@@ -106,7 +127,6 @@ template <class T, class P,
           typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
                                                   P>::value>::type * = nullptr>
 boost::shared_ptr<T> create(const P &parent) {
-  // copy X??
   return create<T>(parent, detail::stripData(parent.histogram(0)));
 }
 
