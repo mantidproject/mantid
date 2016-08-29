@@ -1,4 +1,5 @@
-#pylint: disable=too-many-instance-attributes
+#pylint: disable = too-many-instance-attributes, too-many-branches, too-many-public-methods
+#pylint: disable = W0622
 """
 TOFTOF reduction workflow gui.
 """

@@ -1,3 +1,4 @@
+#pylint: disable = R0923
 """
 TOFTOF reduction workflow gui.
 """

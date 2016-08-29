@@ -1,6 +1,7 @@
 #pylint: disable = too-many-instance-attributes, too-many-locals, too-many-branches
 #pylint: disable = attribute-defined-outside-init
 #pylint: disable = invalid-name
+#pylint: disable = W0622
 """
 TOFTOF reduction workflow gui.
 """

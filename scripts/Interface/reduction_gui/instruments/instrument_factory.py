@@ -1,3 +1,4 @@
+#pylint: disable = W0403
 """
     Instrument interface factory.
     This module is responsible for the association between an instrument name
