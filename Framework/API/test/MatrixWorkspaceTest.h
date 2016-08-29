@@ -79,10 +79,12 @@ public:
   void test_setIndexTranslator() {
     WorkspaceTester ws;
     ws.initialize(3, 1, 1);
-    IndexTranslator bad_translator({2, 4}, {{0}, {1}});
+    IndexTranslator bad_translator(2);
     TS_ASSERT_THROWS(ws.setIndexTranslator(std::move(bad_translator)),
                      std::runtime_error);
-    IndexTranslator translator({2, 4, 6}, {{0}, {1}, {2, 3}});
+    IndexTranslator translator(3);
+    translator.setSpectrumNumbers({2, 4, 6});
+    translator.setDetectorIDs({{0}, {1}, {2, 3}});
     TS_ASSERT_THROWS_NOTHING(ws.setIndexTranslator(std::move(translator)));
     TS_ASSERT_EQUALS(ws.getSpectrum(0).getSpectrumNo(), 2);
     TS_ASSERT_EQUALS(ws.getSpectrum(1).getSpectrumNo(), 4);

@@ -59,7 +59,7 @@ void ConvertToEventWorkspace::exec() {
           inWS->blocksize()));
 
   // Copy geometry, etc. over.
-  API::WorkspaceFactory::Instance().initializeFromParent(inWS, outWS, false);
+  API::WorkspaceFactory::Instance().initializeFromParent(*inWS, outWS, false);
 
   Progress prog(this, 0.0, 1.0, inWS->getNumberHistograms());
   PARALLEL_FOR1(inWS)

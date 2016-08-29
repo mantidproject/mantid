@@ -1,7 +1,8 @@
 #include "MantidAlgorithms/ResampleX.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -364,7 +365,7 @@ void ResampleX::exec() {
       g_log.information() << "Creating a Workspace2D from the EventWorkspace "
                           << inputEventWS->getName() << ".\n";
       outputWS = create<DataObjects::Workspace2D>(
-          inputWS, numSpectra,
+          *inputWS, numSpectra,
           HistogramData::Histogram{HistogramData::BinEdges(m_numBins)});
 
       // Initialize progress reporting.

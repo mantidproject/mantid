@@ -8,6 +8,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -165,8 +166,8 @@ void Rebin::exec() {
       //--------- Different output, OR you're inplace but not preserving Events
       g_log.information() << "Creating a Workspace2D from the EventWorkspace "
                           << eventInputWS->getName() << ".\n";
-      outputWS = create<DataObjects::Workspace2D>(
-          inputWS, histnumber, HistogramData::Histogram(XValues_new));
+      outputWS = DataObjects::create<DataObjects::Workspace2D>(
+          *inputWS, histnumber, HistogramData::Histogram(XValues_new));
 
       // Initialize progress reporting.
       Progress prog(this, 0.0, 1.0, histnumber);

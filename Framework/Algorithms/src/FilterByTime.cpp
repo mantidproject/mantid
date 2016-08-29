@@ -1,9 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/FilterByTime.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -112,7 +109,7 @@ void FilterByTime::exec() {
     throw std::invalid_argument(
         "The stop time should be larger than the start time.");
 
-  auto outputWS = create<EventWorkspace>(inputWS);
+  auto outputWS = DataObjects::create<EventWorkspace>(*inputWS);
   setProperty("OutputWorkspace", outputWS);
 
   size_t numberOfSpectra = inputWS->getNumberHistograms();

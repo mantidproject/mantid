@@ -684,7 +684,7 @@ void SmoothNeighbours::execWorkspace2D() {
   */
 void SmoothNeighbours::setupNewInstrument(MatrixWorkspace_sptr outws) {
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(inWS, outws, false);
+  API::WorkspaceFactory::Instance().initializeFromParent(*inWS, outws, false);
 
   // Go through all the output workspace
   size_t numberOfSpectra = outws->getNumberHistograms();
@@ -730,7 +730,7 @@ void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
   }
 
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(inWS, outws2, false);
+  API::WorkspaceFactory::Instance().initializeFromParent(*inWS, outws2, false);
   // Go through all the input workspace
   for (int outWIi = 0; outWIi < int(numberOfSpectra); outWIi++) {
     const auto &inSpec = inWS->getSpectrum(outWIi);
@@ -776,7 +776,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
       API::WorkspaceFactory::Instance().create(
           "EventWorkspace", numberOfSpectra, YLength + 1, YLength));
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(ws, outWS, false);
+  API::WorkspaceFactory::Instance().initializeFromParent(*ws, outWS, false);
   // Ensure thread-safety
   outWS->sortAll(TOF_SORT, nullptr);
 

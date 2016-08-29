@@ -31,7 +31,22 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL HistoWorkspace : public MatrixWorkspace {};
+class MANTID_API_DLL HistoWorkspace : public MatrixWorkspace {
+public:
+  /// Returns a clone of the workspace
+  std::unique_ptr<HistoWorkspace> clone() const {
+    return std::unique_ptr<HistoWorkspace>(doClone());
+  }
+
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<HistoWorkspace> cloneEmpty() const {
+    return std::unique_ptr<HistoWorkspace>(doCloneEmpty());
+  }
+
+private:
+  HistoWorkspace *doClone() const override = 0;
+  HistoWorkspace *doCloneEmpty() const override = 0;
+};
 
 } // namespace API
 } // namespace Mantid

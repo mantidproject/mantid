@@ -164,7 +164,7 @@ void EstimateResolutionDiffraction::createOutputWorkspace() {
   m_outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", numspec, 1, 1));
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(m_inputWS, m_outputWS,
+  API::WorkspaceFactory::Instance().initializeFromParent(*m_inputWS, m_outputWS,
                                                          false);
 }
 //----------------------------------------------------------------------------------------------

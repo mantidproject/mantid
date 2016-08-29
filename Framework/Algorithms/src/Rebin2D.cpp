@@ -1,12 +1,9 @@
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin2D.h"
 #include "MantidAPI/BinEdgeAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/FractionalRebinning.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Math/ConvexPolygon.h"
 #include "MantidGeometry/Math/PolygonIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
@@ -190,9 +187,9 @@ Rebin2D::createOutputWorkspace(MatrixWorkspace_const_sptr parent,
   HistogramData::Histogram histogram{HistogramData::BinEdges(newXBins)};
   MatrixWorkspace_sptr outputWS;
   if (!useFractionalArea) {
-    outputWS = create<MatrixWorkspace>(parent, newYSize - 1, histogram);
+    outputWS = create<MatrixWorkspace>(*parent, newYSize - 1, histogram);
   } else {
-    outputWS = create<RebinnedOutput>(parent, newYSize - 1, histogram);
+    outputWS = create<RebinnedOutput>(*parent, newYSize - 1, histogram);
   }
   Axis *const verticalAxis = new BinEdgeAxis(newYBins);
   // Meta data

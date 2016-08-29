@@ -41,7 +41,7 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
       "Workspace2D", totalHists, ws1->readX(0).size(), ws1->readY(0).size());
   // Copy over stuff from first input workspace. This will include the spectrum
   // masking
-  WorkspaceFactory::Instance().initializeFromParent(ws1, output, true);
+  WorkspaceFactory::Instance().initializeFromParent(*ws1, output, true);
 
   // Create the X values inside a cow pointer - they will be shared in the
   // output workspace
@@ -140,7 +140,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
                                           event_ws1->readX(0).size(),
                                           event_ws1->readY(0).size()));
   // Copy over geometry (but not data) from first input workspace
-  WorkspaceFactory::Instance().initializeFromParent(event_ws1, output, true);
+  WorkspaceFactory::Instance().initializeFromParent(*event_ws1, output, true);
 
   // Initialize the progress reporting object
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);

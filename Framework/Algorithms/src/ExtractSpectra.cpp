@@ -279,7 +279,7 @@ void ExtractSpectra::execEvent() {
   eventW->sortAll(TOF_SORT, nullptr);
   outputWorkspace->sortAll(TOF_SORT, nullptr);
   // Copy required stuff from it
-  API::WorkspaceFactory::Instance().initializeFromParent(m_inputWorkspace,
+  API::WorkspaceFactory::Instance().initializeFromParent(*m_inputWorkspace,
                                                          outputWorkspace, true);
 
   Progress prog(this, 0.0, 1.0, 2 * m_workspaceIndexList.size());

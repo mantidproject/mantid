@@ -265,7 +265,7 @@ void AnvredCorrection::execEvent() {
   correctionFactors->sortAll(TOF_SORT, nullptr);
   // Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(
-      m_inputWS, correctionFactors, true);
+      *m_inputWS, correctionFactors, true);
   bool inPlace = (this->getPropertyValue("InputWorkspace") ==
                   this->getPropertyValue("OutputWorkspace"));
   if (inPlace)

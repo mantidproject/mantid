@@ -1,8 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/FilterByLogValue.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -210,7 +207,7 @@ void FilterByLogValue::exec() {
     this->setProperty("OutputWorkspace", inputWS);
   } else {
     // Make a brand new EventWorkspace for the output
-    outputWS = create<EventWorkspace>(inputWS);
+    outputWS = create<EventWorkspace>(*inputWS);
 
     // Loop over the histograms (detector spectra)
     PARALLEL_FOR_NO_WSP_CHECK()

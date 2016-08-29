@@ -109,6 +109,8 @@ private:
   // map m_globalToLocal // can stay shared when changing specNums
 };
 
+using IndexInfo = IndexTranslator;
+
 } // namespace Indexing
 } // namespace Mantid
 

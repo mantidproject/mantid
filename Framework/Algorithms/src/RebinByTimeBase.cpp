@@ -3,6 +3,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -123,8 +124,8 @@ void RebinByTimeBase::exec() {
   std::transform(XValues_new->begin(), XValues_new->end(),
                  OutXValues_scaled.begin(), transformToRelativeT);
 
-  outputWS = create<DataObjects::Workspace2D>(
-      inWS, histnumber,
+  outputWS = DataObjects::create<DataObjects::Workspace2D>(
+      *inWS, histnumber,
       HistogramData::Histogram{HistogramData::BinEdges(*XValues_new)});
 
   // Copy all the axes

@@ -434,7 +434,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
       boost::dynamic_pointer_cast<EventWorkspace>(
           API::WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1));
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(localworkspace,
+  API::WorkspaceFactory::Instance().initializeFromParent(*localworkspace,
                                                          outputWorkspace, true);
 
   Progress progress(this, 0, 1, indices.size());

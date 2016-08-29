@@ -59,6 +59,7 @@ public:
   }
   const std::string id(void) const override { return ""; }
   void init(const size_t &, const size_t &, const size_t &) override {}
+  void init(const size_t &, const HistogramData::Histogram &) override {}
   void generateHistogram(const std::size_t, const MantidVec &, MantidVec &,
                          MantidVec &, bool) const override {}
 
@@ -70,6 +71,11 @@ public:
 
 private:
   CompositeFunctionTest_MocMatrixWorkspace *doClone() const override {
+    throw std::runtime_error("Cloning of "
+                             "CompositeFunctionTest_MocMatrixWorkspace is not "
+                             "implemented.");
+  }
+  CompositeFunctionTest_MocMatrixWorkspace *doCloneEmpty() const override {
     throw std::runtime_error("Cloning of "
                              "CompositeFunctionTest_MocMatrixWorkspace is not "
                              "implemented.");

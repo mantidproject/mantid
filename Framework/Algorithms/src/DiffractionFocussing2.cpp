@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidIndexing/IndexTranslator.h"
 
@@ -347,7 +348,7 @@ void DiffractionFocussing2::exec() {
  */
 void DiffractionFocussing2::execEvent() {
   // Create a new outputworkspace with not much in it
-  auto out = create<EventWorkspace>(m_matrixInputW, m_validGroups.size());
+  auto out = create<EventWorkspace>(*m_matrixInputW, m_validGroups.size());
 
   MatrixWorkspace_const_sptr outputWS = getProperty("OutputWorkspace");
   bool inPlace = (m_matrixInputW == outputWS);

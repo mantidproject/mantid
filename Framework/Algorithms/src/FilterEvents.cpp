@@ -8,6 +8,7 @@
 #include "MantidAlgorithms/TimeAtSampleStrategyIndirect.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -518,7 +519,7 @@ void FilterEvents::createOutputWorkspaces() {
         add2output = false;
     }
 
-    auto optws = create<DataObjects::EventWorkspace>(m_eventWS);
+    auto optws = create<DataObjects::EventWorkspace>(*m_eventWS);
     m_outputWS.emplace(wsgroup, optws);
 
     // Add information, including title and comment, to output workspace

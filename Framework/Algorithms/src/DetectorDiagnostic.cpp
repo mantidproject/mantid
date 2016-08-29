@@ -526,7 +526,7 @@ DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS) {
   // we copy over the instrument and current masking
   auto maskWS = boost::make_shared<DataObjects::MaskWorkspace>();
   maskWS->initialize(inputWS->getNumberHistograms(), 1, 1);
-  WorkspaceFactory::Instance().initializeFromParent(inputWS, maskWS, false);
+  WorkspaceFactory::Instance().initializeFromParent(*inputWS, maskWS, false);
   maskWS->setTitle(inputWS->getTitle());
 
   return maskWS;

@@ -515,7 +515,7 @@ void TOPAZLiveEventDataListener::initMonitorWorkspace() {
   auto monitors = m_eventBuffer->getInstrument()->getMonitors();
   auto monitorsBuffer = WorkspaceFactory::Instance().create(
       "EventWorkspace", monitors.size(), 1, 1);
-  WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer,
+  WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer,
                                                     monitorsBuffer, true);
   // Set the id numbers
   for (size_t i = 0; i < monitors.size(); ++i) {
@@ -577,7 +577,7 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
           "EventWorkspace", m_eventBuffer->getNumberHistograms(), 2, 1));
 
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer, temp,
+  API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, temp,
                                                          false);
 
   // Clear out the old logs, except for the most recent entry
@@ -596,7 +596,7 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
   auto monitorBuffer = m_eventBuffer->monitorWorkspace();
   auto newMonitorBuffer = WorkspaceFactory::Instance().create(
       "EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
-  WorkspaceFactory::Instance().initializeFromParent(monitorBuffer,
+  WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer,
                                                     newMonitorBuffer, false);
   temp->setMonitorWorkspace(newMonitorBuffer);
 

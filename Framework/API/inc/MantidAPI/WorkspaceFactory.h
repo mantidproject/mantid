@@ -86,7 +86,7 @@ public:
                               const size_t &YLength) const;
   MatrixWorkspace_sptr createNoInit(const std::string &className) const;
 
-  void initializeFromParent(const MatrixWorkspace_const_sptr &parent,
+  void initializeFromParent(const MatrixWorkspace &parent,
                             const MatrixWorkspace_sptr &child,
                             const bool differentSize) const;
   /// Create a ITableWorkspace

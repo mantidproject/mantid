@@ -5,8 +5,6 @@
 
 #include "MantidDataObjects/WorkspaceCreation.h"
 
-using Mantid::DataObjects::WorkspaceCreation;
-
 class WorkspaceCreationTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically

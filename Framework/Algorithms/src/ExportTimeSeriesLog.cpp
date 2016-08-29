@@ -286,7 +286,7 @@ void ExportTimeSeriesLog::setupEventWorkspace(
       API::WorkspaceFactory::Instance().create(
           "EventWorkspace", numberOfSpectra, YLength + 1, YLength));
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(m_inputWS, outEventWS,
+  API::WorkspaceFactory::Instance().initializeFromParent(*m_inputWS, outEventWS,
                                                          false);
 
   m_outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outEventWS);

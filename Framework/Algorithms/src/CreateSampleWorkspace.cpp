@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -28,14 +29,10 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
+using namespace HistogramData;
 using namespace Indexing;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
-using HistogramData::BinEdges;
-using HistogramData::Counts;
-using HistogramData::CountVariances;
-using HistogramData::CountStandardDeviations;
-using HistogramData::LinearGenerator;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSampleWorkspace)
@@ -305,21 +302,13 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
   CountStandardDeviations e(CountVariances(y.cbegin(), y.cend()));
 
-  auto retVal = createWorkspace<Workspace2D>(numPixels, numBins + 1, numBins);
-
-  auto translator = retVal->indexTranslator();
-  translator.setSpectrumNumbers(makeRange(1, numPixels));
-  translator.setDetectorIDs(
+  Indexing::IndexInfo indexInfo(numPixels);
+  indexInfo.setDetectorIDs(
       makeRange(start_at_pixelID, start_at_pixelID + numPixels - 1));
-  retVal->setIndexTranslator(translator);
+
+  auto retVal = create<Workspace2D>(indexInfo, Histogram(x,y,e));
 
   retVal->setInstrument(inst);
-
-  for (size_t wi = 0; wi < static_cast<size_t>(numPixels); wi++) {
-    retVal->setBinEdges(wi, x);
-    retVal->setCounts(wi, y);
-    retVal->setCountStandardDeviations(wi, e);
-  }
 
   return retVal;
 }
@@ -332,23 +321,17 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
     const std::string &functionString, bool isRandom) {
   DateAndTime run_start("2010-01-01T00:00:00");
 
+  Indexing::IndexInfo indexInfo(numPixels);
+  indexInfo.setDetectorIDs(
+      makeRange(start_at_pixelID, start_at_pixelID + numPixels - 1));
+
   // add one to the number of bins as this is histogram
   int numXBins = numBins + 1;
+  BinEdges x(numXBins, LinearGenerator(x0, binDelta));
 
-  auto retVal = boost::make_shared<EventWorkspace>();
-  retVal->initialize(numPixels, 1, 1);
-
-  auto translator = retVal->indexTranslator();
-  translator.setSpectrumNumbers(makeRange(1, numPixels));
-  translator.setDetectorIDs(
-      makeRange(start_at_pixelID, start_at_pixelID + numPixels - 1));
-  retVal->setIndexTranslator(translator);
+  auto retVal = create<EventWorkspace>(indexInfo, Histogram(x));
 
   retVal->setInstrument(inst);
-
-  // Set all the histograms at once.
-  BinEdges x(numXBins, LinearGenerator(x0, binDelta));
-  retVal->setAllX(x);
 
   std::vector<double> xValues(x.cbegin(), x.cend() - 1);
   std::vector<double> yValues =

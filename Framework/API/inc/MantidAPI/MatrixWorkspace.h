@@ -19,6 +19,7 @@ namespace Mantid {
 
 namespace Indexing {
 class IndexTranslator;
+using IndexInfo = IndexTranslator;
 }
 
 namespace Geometry {
@@ -80,6 +81,8 @@ public:
                   const std::size_t &YLength);
   void initialize(const std::size_t &NVectors,
                   const HistogramData::Histogram &histogram);
+  void initialize(const Indexing::IndexInfo &indexInfo,
+                  const HistogramData::Histogram &histogram);
 
   MatrixWorkspace &operator=(const MatrixWorkspace &other) = delete;
   /// Delete
@@ -93,6 +96,8 @@ public:
     return MatrixWorkspace_uptr(doCloneEmpty());
   }
 
+  Indexing::IndexInfo indexInfo() const;
+  void setIndexInfo(const Indexing::IndexInfo &indexInfo);
   Indexing::IndexTranslator indexTranslator() const;
   void setIndexTranslator(const Indexing::IndexTranslator &translator);
 

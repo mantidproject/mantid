@@ -391,7 +391,7 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
       "RebinnedOutput", yLength - 1, xLength, xLength - 1);
   RebinnedOutput_sptr outputWorkspace =
       boost::static_pointer_cast<RebinnedOutput>(temp);
-  WorkspaceFactory::Instance().initializeFromParent(inputWorkspace,
+  WorkspaceFactory::Instance().initializeFromParent(*inputWorkspace,
                                                     outputWorkspace, true);
 
   // Create a binned numeric axis to replace the default vertical one

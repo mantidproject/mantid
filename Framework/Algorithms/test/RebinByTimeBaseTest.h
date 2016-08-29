@@ -106,6 +106,10 @@ private:
     throw std::runtime_error(
         "Cloning of MockIEventWorkspace is not implemented.");
   }
+  MockIEventWorkspace *doCloneEmpty() const override {
+    throw std::runtime_error(
+        "Cloning of MockIEventWorkspace is not implemented.");
+  }
 };
 }
 

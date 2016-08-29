@@ -84,6 +84,14 @@ MatrixWorkspace::~MatrixWorkspace() {
   }
 }
 
+Indexing::IndexInfo MatrixWorkspace::indexInfo() const {
+  return indexTranslator();
+}
+
+void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
+  setIndexTranslator(indexInfo);
+}
+
 Indexing::IndexTranslator MatrixWorkspace::indexTranslator() const {
   // Workaround while IndexTranslator is not stored in MatrixWorkspace: build
   // translator based on data in ISpectrum.
@@ -210,6 +218,12 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
   // Indicate that this workspace has been initialized to prevent duplicate
   // attempts.
   m_isInitialized = true;
+}
+
+void MatrixWorkspace::initialize(const Indexing::IndexInfo &indexInfo,
+                                 const HistogramData::Histogram &histogram) {
+  initialize(indexInfo.size(), histogram);
+  setIndexTranslator(indexInfo);
 }
 
 //---------------------------------------------------------------------------------------
