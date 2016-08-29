@@ -1,20 +1,20 @@
 set ( SRC_FILES
 	src/DetectorIDs.cpp
-	src/IndexTranslator.cpp
+        src/IndexInfo.cpp
 	src/SpectrumNumbers.cpp
 )
 
 set ( INC_FILES
 	inc/MantidIndexing/DetectorIDs.h
 	inc/MantidIndexing/DllConfig.h
-	inc/MantidIndexing/IndexTranslator.h
+        inc/MantidIndexing/IndexInfo.h
 	inc/MantidIndexing/MakeRange.h
 	inc/MantidIndexing/SpectrumNumbers.h
 )
 
 set ( TEST_FILES
 	DetectorIDsTest.h
-	IndexTranslatorTest.h
+        IndexInfoTest.h
 	MakeRangeTest.h
 	SpectrumNumbersTest.h
 )

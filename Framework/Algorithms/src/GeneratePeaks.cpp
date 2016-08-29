@@ -1,7 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-
 #include "MantidAlgorithms/GeneratePeaks.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -14,7 +10,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidIndexing/IndexTranslator.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -780,9 +776,9 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
                   << " , " << specid << "\n";
     specNums.push_back(specid);
   }
-  auto translator = ws->indexTranslator();
-  translator.setSpectrumNumbers(std::move(specNums));
-  ws->setIndexTranslator(translator);
+  auto indexInfo = ws->indexInfo();
+  indexInfo.setSpectrumNumbers(std::move(specNums));
+  ws->setIndexInfo(indexInfo);
 
   return ws;
 }

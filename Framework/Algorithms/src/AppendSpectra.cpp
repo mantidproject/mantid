@@ -4,7 +4,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidIndexing/IndexTranslator.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/MakeRange.h"
 
 using namespace Mantid::Indexing;
@@ -133,12 +133,12 @@ void AppendSpectra::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
   if (ws2min > ws1max)
     return;
 
-  auto translator = output->indexTranslator();
+  auto indexInfo = output->indexInfo();
   // change the axis by adding the maximum existing spectrum number to the
   // current value
-  translator.setSpectrumNumbers(
+  indexInfo.setSpectrumNumbers(
       makeRange(0, static_cast<specnum_t>(output->getNumberHistograms() - 1)));
-  output->setIndexTranslator(translator);
+  output->setIndexInfo(indexInfo);
 }
 
 void AppendSpectra::combineLogs(const API::Run &lhs, const API::Run &rhs,

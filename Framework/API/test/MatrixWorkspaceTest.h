@@ -12,7 +12,7 @@
 #include "MantidKernel/make_cow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
-#include "MantidIndexing/IndexTranslator.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
@@ -33,7 +33,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace testing;
-using Mantid::Indexing::IndexTranslator;
+using Mantid::Indexing::IndexInfo;
 
 // Declare into the factory.
 DECLARE_WORKSPACE(WorkspaceTester)
@@ -76,16 +76,16 @@ public:
     ws->initialize(1, 1, 1);
   }
 
-  void test_setIndexTranslator() {
+  void test_setIndexInfo() {
     WorkspaceTester ws;
     ws.initialize(3, 1, 1);
-    IndexTranslator bad_translator(2);
-    TS_ASSERT_THROWS(ws.setIndexTranslator(std::move(bad_translator)),
+    IndexInfo bad_indices(2);
+    TS_ASSERT_THROWS(ws.setIndexInfo(std::move(bad_indices)),
                      std::runtime_error);
-    IndexTranslator translator(3);
-    translator.setSpectrumNumbers({2, 4, 6});
-    translator.setDetectorIDs({{0}, {1}, {2, 3}});
-    TS_ASSERT_THROWS_NOTHING(ws.setIndexTranslator(std::move(translator)));
+    IndexInfo indices(3);
+    indices.setSpectrumNumbers({2, 4, 6});
+    indices.setDetectorIDs({{0}, {1}, {2, 3}});
+    TS_ASSERT_THROWS_NOTHING(ws.setIndexInfo(std::move(indices)));
     TS_ASSERT_EQUALS(ws.getSpectrum(0).getSpectrumNo(), 2);
     TS_ASSERT_EQUALS(ws.getSpectrum(1).getSpectrumNo(), 4);
     TS_ASSERT_EQUALS(ws.getSpectrum(2).getSpectrumNo(), 6);

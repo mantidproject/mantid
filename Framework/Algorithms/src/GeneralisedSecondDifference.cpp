@@ -7,7 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidIndexing/IndexTranslator.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <numeric>
 #include <sstream>
@@ -93,13 +93,13 @@ void GeneralisedSecondDifference::exec() {
   MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create(
       inputWS, n_specs, n_points + 1, n_points);
 
-  const auto translatorInput = inputWS->indexTranslator();
+  const auto indexInput = inputWS->indexInfo();
   std::vector<specnum_t> specNums;
   for (int i = spec_min; i <= spec_max; i++)
-    specNums.push_back(translatorInput.spectrumNumber(i));
-  auto translatorOut = out->indexTranslator();
-  translatorOut.setSpectrumNumbers(std::move(specNums));
-  out->setIndexTranslator(translatorOut);
+    specNums.push_back(indexInput.spectrumNumber(i));
+  auto indexOut = out->indexInfo();
+  indexOut.setSpectrumNumbers(std::move(specNums));
+  out->setIndexInfo(indexOut);
 
   const int nsteps = 2 * n_av + 1;
 

@@ -13,7 +13,7 @@
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MDUnit.h"
-#include "MantidIndexing/IndexTranslator.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 
@@ -85,15 +85,7 @@ MatrixWorkspace::~MatrixWorkspace() {
 }
 
 Indexing::IndexInfo MatrixWorkspace::indexInfo() const {
-  return indexTranslator();
-}
-
-void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
-  setIndexTranslator(indexInfo);
-}
-
-Indexing::IndexTranslator MatrixWorkspace::indexTranslator() const {
-  // Workaround while IndexTranslator is not stored in MatrixWorkspace: build
+  // Workaround while IndexInfo is not stored in MatrixWorkspace: build
   // translator based on data in ISpectrum.
   std::vector<specnum_t> specNums;
   std::vector<std::vector<specnum_t>> detIDs;
@@ -105,19 +97,18 @@ Indexing::IndexTranslator MatrixWorkspace::indexTranslator() const {
   }
   // Note: This is the local size and the local vector of spectrum numbers and
   // detector IDs. This will not work in an MPI run.
-  Indexing::IndexTranslator t(getNumberHistograms());
+  Indexing::IndexInfo t(getNumberHistograms());
   t.setSpectrumNumbers(std::move(specNums));
   t.setDetectorIDs(std::move(detIDs));
   return t;
 }
 
-void MatrixWorkspace::setIndexTranslator(
-    const Indexing::IndexTranslator &translator) {
+void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &translator) {
   // Comparing the *local* size of the translator.
   if (translator.size() != getNumberHistograms())
-    throw std::runtime_error("MatrixWorkspace::setIndexTranslator: Translator "
-                             "size does not match number of histograms in "
-                             "workspace");
+    throw std::runtime_error(
+        "MatrixWorkspace::setIndexInfo: IndexInfo size "
+        "does not match number of histograms in workspace");
 
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
     auto &spectrum = getSpectrum(i);
@@ -223,7 +214,7 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
 void MatrixWorkspace::initialize(const Indexing::IndexInfo &indexInfo,
                                  const HistogramData::Histogram &histogram) {
   initialize(indexInfo.size(), histogram);
-  setIndexTranslator(indexInfo);
+  setIndexInfo(indexInfo);
 }
 
 //---------------------------------------------------------------------------------------

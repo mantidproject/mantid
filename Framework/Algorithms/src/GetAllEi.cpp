@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/GetAllEi.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -13,7 +10,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidIndexing/IndexTranslator.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
@@ -891,12 +888,12 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   auto working_ws =
       API::WorkspaceFactory::Instance().create(inputWS, 2, XLength, YLength);
   // copy detector mapping
-  const auto inputTranslator = inputWS->indexTranslator();
-  auto translator = working_ws->indexTranslator();
+  const auto inputIndices = inputWS->indexInfo();
+  auto translator = working_ws->indexInfo();
   translator.setSpectrumNumbers({specNum1, specNum2});
-  translator.setDetectorIDs({inputTranslator.detectorIDs(wsIndex0),
-                             inputTranslator.detectorIDs(wsIndex1)});
-  working_ws->setIndexTranslator(translator);
+  translator.setDetectorIDs(
+      {inputIndices.detectorIDs(wsIndex0), inputIndices.detectorIDs(wsIndex1)});
+  working_ws->setIndexInfo(translator);
   // copy data --> very bad as implicitly assigns pointer
   // to bins array and bins array have to exist out of this routine
   // scope.

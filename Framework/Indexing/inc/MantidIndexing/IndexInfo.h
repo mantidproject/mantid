@@ -1,5 +1,5 @@
-#ifndef MANTID_INDEXING_INDEXTRANSLATOR_H_
-#define MANTID_INDEXING_INDEXTRANSLATOR_H_
+#ifndef MANTID_INDEXING_INDEXINFO_H_
+#define MANTID_INDEXING_INDEXINFO_H_
 
 #include "MantidIndexing/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
@@ -13,7 +13,7 @@ using detid_t = int32_t;
 
 namespace Indexing {
 
-/** IndexTranslator : TODO: DESCRIPTION
+/** IndexInfo : TODO: DESCRIPTION
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -36,7 +36,7 @@ namespace Indexing {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_INDEXING_DLL IndexTranslator {
+class MANTID_INDEXING_DLL IndexInfo {
 public:
   // Create default translator. size is global size
   // Default implies 1:1 spectrum numbers and detector IDs, each defined as
@@ -44,8 +44,9 @@ public:
   //
   // Can we internally provide an optimization for the case of trivial mapping?
   // We want to avoid complicated maps if it is just a simple offset, i.e.,
-  // SpectrumNumber = WorkspaceIndex + 1 (will always be more complex with MPI?).
-  explicit IndexTranslator(const size_t globalSize);
+  // SpectrumNumber = WorkspaceIndex + 1 (will always be more complex with
+  // MPI?).
+  explicit IndexInfo(const size_t globalSize);
 
   /// The *local* size, i.e., the number of spectra in this partition.
   size_t size() const;
@@ -58,8 +59,10 @@ public:
     return (*m_detectorIDs)[index];
   }
 
-  // maybe this must be fixed at construction time? makes setting spectrum numbers etc. easier.
-  // but how do we create a translator from an existing one with different partitioning?
+  // maybe this must be fixed at construction time? makes setting spectrum
+  // numbers etc. easier.
+  // but how do we create a translator from an existing one with different
+  // partitioning?
   //
   // are we storing enough information for being able to change partitioning?
   // currently no: we do not have information about ordering of spectrum numbers
@@ -68,13 +71,13 @@ public:
 
   // arguments are for all ranks
   // usually this builds maps, finds out which indices are local, ...
-  void setSpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers) &;
-  //void setSpectrumNumbers(std::initializer_list<specnum_t> &&ilist) &;
+  void setSpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers) & ;
+  // void setSpectrumNumbers(std::initializer_list<specnum_t> &&ilist) &;
 
-  void setDetectorIDs(const std::vector<detid_t> &detectorIDs) &;
-  void setDetectorIDs(std::vector<std::vector<detid_t>> &&detectorIDs) &;
-  //void setDetectorIDs(std::vector<std::vector<detid_t>> &&detectorIDs) &;
-  //void setDetectorIDs(std::initializer_list<detid_t> &&ilist) &;
+  void setDetectorIDs(const std::vector<detid_t> &detectorIDs) & ;
+  void setDetectorIDs(std::vector<std::vector<detid_t>> &&detectorIDs) & ;
+  // void setDetectorIDs(std::vector<std::vector<detid_t>> &&detectorIDs) &;
+  // void setDetectorIDs(std::initializer_list<detid_t> &&ilist) &;
 
   // Do we have this info? Build from info in spectra. But this would be
   // *local*? Yes, can do better only once we moved things out of ISpectrum.
@@ -86,20 +89,20 @@ public:
   // where is this needed?
   // MatrixWorkspace can use it to set spectrum Numbers in ISpectra
   // this must return only *local* spectrum numbers
-  //std::vector<specnum_t> makeSpectrumNumberVector() const;
-  //std::vector<specnum_t>
-  //makeSpectrumNumberVector(const std::vector<size_t> &indices) const;
-  //SpectrumIndexSet makeSpectrumIndexSet() const;
-  //SpectrumIndexSet makeSpectrumIndexSet(specnum_t min, specnum_t max) const;
+  // std::vector<specnum_t> makeSpectrumNumberVector() const;
+  // std::vector<specnum_t>
+  // makeSpectrumNumberVector(const std::vector<size_t> &indices) const;
+  // SpectrumIndexSet makeSpectrumIndexSet() const;
+  // SpectrumIndexSet makeSpectrumIndexSet(specnum_t min, specnum_t max) const;
 
   // How to obtain a single spectrum number?
-  //specnum_t spectrumNumber(const size_t index) const;
-  //std::vector<detid_t> detectorIDs(const size_t index) const;
+  // specnum_t spectrumNumber(const size_t index) const;
+  // std::vector<detid_t> detectorIDs(const size_t index) const;
 
 private:
   // temporarily: friend class MatrixWorkspace?
-  //const std::vector<specnum_t> &spectrumNumbers() const &;
-  //const std::vector<std::vector<detid_t>> &detectorIDs() const &;
+  // const std::vector<specnum_t> &spectrumNumbers() const &;
+  // const std::vector<std::vector<detid_t>> &detectorIDs() const &;
 
   Kernel::cow_ptr<std::vector<specnum_t>> m_spectrumNumbers;
   Kernel::cow_ptr<std::vector<std::vector<detid_t>>> m_detectorIDs;
@@ -109,21 +112,18 @@ private:
   // map m_globalToLocal // can stay shared when changing specNums
 };
 
-using IndexInfo = IndexTranslator;
-
 } // namespace Indexing
 } // namespace Mantid
-
 
 /*
 auto translator = ws.translator();
 translator.setSpectrumNumbers({1,2,3,4});
-ws.setTranslator(translator);
+ws.setInfo(translator);
 
-Translator MatrixWorkspace::translator() {
-  // Workaround while Translator is not store in MatrixWorkspace:
+Info MatrixWorkspace::translator() {
+  // Workaround while Info is not store in MatrixWorkspace:
   // build translator based on data in ISpectra
-  Translator t(getNumberHistograms());
+  Info t(getNumberHistograms());
   std::vector<specnum_t> specNums;
   std::vector<std::vector<specnum_t>> specNums;
   for(size_t i=0; i<getNumberHistograms(); ++i) {
@@ -136,15 +136,17 @@ Translator MatrixWorkspace::translator() {
   return t;
 }
 
-void MatrixWorkspace::setTranslator(const Translator &) {
+void MatrixWorkspace::setInfo(const Info &) {
   // Workaround see MatrixWorkspace.cpp
 
   // Later:
   // How do we validate detector IDs? Can we require specific ordering of
-  // setting Translator and setting Instrument?
+  // setting Info and setting Instrument?
   //
-  // Translator defines detectorID -> detector index.
-  // Once we have indices, would we even notice bad detector IDs? Instrument does not know about IDs. Problems occur only when user input does not match information in Translator.
+  // Info defines detectorID -> detector index.
+  // Once we have indices, would we even notice bad detector IDs? Instrument
+does not know about IDs. Problems occur only when user input does not match
+information in Info.
   // That is, it may happen that things develop a mismatch between data in an
   // input file and a workspace. However, this would not break anything, apart
   // from displaying "wrong" detector IDs and having output files with wrong
@@ -158,8 +160,7 @@ void MatrixWorkspace::setTranslator(const Translator &) {
 
 // sharing data in translators
 auto translator = inputWS.translator();
-outputWS.setTranslator(translator);
+outputWS.setInfo(translator);
 */
 
-
-#endif /* MANTID_INDEXING_INDEXTRANSLATOR_H_ */
+#endif /* MANTID_INDEXING_INDEXINFO_H_ */

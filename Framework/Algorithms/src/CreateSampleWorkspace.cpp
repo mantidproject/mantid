@@ -15,7 +15,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidIndexing/IndexTranslator.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/MakeRange.h"
 
 #include <cmath>

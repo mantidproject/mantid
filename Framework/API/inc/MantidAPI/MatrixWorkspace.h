@@ -1,9 +1,6 @@
 #ifndef MANTID_API_MATRIXWORKSPACE_H_
 #define MANTID_API_MATRIXWORKSPACE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #ifndef Q_MOC_RUN
 #include <boost/scoped_ptr.hpp>
 #endif
@@ -18,8 +15,7 @@
 namespace Mantid {
 
 namespace Indexing {
-class IndexTranslator;
-using IndexInfo = IndexTranslator;
+class IndexInfo;
 }
 
 namespace Geometry {
@@ -98,8 +94,6 @@ public:
 
   Indexing::IndexInfo indexInfo() const;
   void setIndexInfo(const Indexing::IndexInfo &indexInfo);
-  Indexing::IndexTranslator indexTranslator() const;
-  void setIndexTranslator(const Indexing::IndexTranslator &translator);
 
   using IMDWorkspace::toString;
   /// String description of state

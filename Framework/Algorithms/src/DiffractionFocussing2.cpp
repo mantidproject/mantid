@@ -11,7 +11,7 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidIndexing/IndexTranslator.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <cfloat>
 #include <iterator>
@@ -327,10 +327,10 @@ void DiffractionFocussing2::exec() {
   } // end of loop for groups
   PARALLEL_CHECK_INTERUPT_REGION
 
-  auto translator = out->indexTranslator();
-  translator.setSpectrumNumbers(std::move(outSpecNums));
-  translator.setDetectorIDs(std::move(outDetIDs));
-  out->setIndexTranslator(translator);
+  auto indexInfo = out->indexInfo();
+  indexInfo.setSpectrumNumbers(std::move(outSpecNums));
+  indexInfo.setDetectorIDs(std::move(outDetIDs));
+  out->setIndexInfo(indexInfo);
 
   delete prog;
 
