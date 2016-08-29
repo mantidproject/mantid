@@ -44,29 +44,6 @@ public:
   /// No-arg Constructor
   Cache() : m_cacheHit(0), m_cacheMiss(0), m_cacheMap() {}
 
-  /**
-   * Copy constructor (mutex cannot be copied)
-   * @param src The object that this object shall be constructed from.
-   */
-  Cache(const Cache<KEYTYPE, VALUETYPE> &src)
-      : m_cacheHit(src.m_cacheHit), m_cacheMiss(src.m_cacheMiss),
-        m_cacheMap(src.m_cacheMap) // New mutex which is unlocked
-  {}
-
-  /**
-   * Copy-assignment operator as we have a non-default copy constructor
-   * @param rhs The object that is on the RHS of the assignment
-   */
-  Cache<KEYTYPE, VALUETYPE> &operator=(const Cache<KEYTYPE, VALUETYPE> &rhs) {
-    if (this == &rhs)
-      return *this; // handle self-assignment
-    m_cacheHit = rhs.m_cacheHit;
-    m_cacheMiss = rhs.m_cacheMiss;
-    m_cacheMap = rhs.m_cacheMap;
-    // mutex is untouched
-    return *this;
-  }
-
   /// Clears the cache
   void clear() {
     m_cacheHit = 0;
