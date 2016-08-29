@@ -2,7 +2,6 @@
 #define MANTID_DATAOBJECTS_WORKSPACECREATION_H_
 
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/DllConfig.h"
 
 #include <memory>
@@ -17,6 +16,7 @@ class IndexTranslator;
 using IndexInfo = IndexTranslator;
 }
 namespace API {
+class MatrixWorkspace;
 class HistoWorkspace;
 }
 namespace DataObjects {
