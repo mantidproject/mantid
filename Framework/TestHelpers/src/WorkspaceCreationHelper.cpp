@@ -633,15 +633,15 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
                             double binDelta, double xOffset) {
 
   auto retVal = boost::make_shared<EventWorkspace>();
-  retVal->initialize(1, 2, 1);
+  retVal->initialize(groups.size(), 2, 1);
 
   for (size_t g = 0; g < groups.size(); g++) {
-    retVal->getOrAddEventList(g).clearDetectorIDs();
+    retVal->getSpectrum(g).clearDetectorIDs();
     std::vector<int> dets = groups[g];
     for (auto det : dets) {
       for (int i = 0; i < numBins; i++)
-        retVal->getOrAddEventList(g) += TofEvent((i + 0.5) * binDelta, 1);
-      retVal->getOrAddEventList(g).addDetectorID(det);
+        retVal->getSpectrum(g) += TofEvent((i + 0.5) * binDelta, 1);
+      retVal->getSpectrum(g).addDetectorID(det);
     }
   }
 

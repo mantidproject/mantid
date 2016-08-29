@@ -136,7 +136,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
       event_ws1->getNumberHistograms() + event_ws2->getNumberHistograms();
   // Have the minimum # of histograms in the output.
   EventWorkspace_sptr output = boost::dynamic_pointer_cast<EventWorkspace>(
-      WorkspaceFactory::Instance().create("EventWorkspace", 1,
+      WorkspaceFactory::Instance().create("EventWorkspace", totalHists,
                                           event_ws1->readX(0).size(),
                                           event_ws1->readY(0).size()));
   // Copy over geometry (but not data) from first input workspace
@@ -147,13 +147,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
 
   const int64_t &nhist1 = event_ws1->getNumberHistograms();
   for (int64_t i = 0; i < nhist1; ++i) {
-    // Copy the events over
-    output->getOrAddEventList(i) =
-        event_ws1->getSpectrum(i); // Should fire the copy constructor
-    auto &outSpec = output->getSpectrum(i);
-    const auto &inSpec = event_ws1->getSpectrum(i);
-    outSpec.copyInfoFrom(inSpec);
-
+    output->getSpectrum(i) = event_ws1->getSpectrum(i);
     m_progress->report();
   }
 
@@ -162,12 +156,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
   for (int64_t j = 0; j < nhist2; ++j) {
     // This is the workspace index at which we assign in the output
     int64_t output_wi = j + nhist1;
-    // Copy the events over
-    output->getOrAddEventList(output_wi) =
-        event_ws2->getSpectrum(j); // Should fire the copy constructor
-    auto &outSpec = output->getSpectrum(output_wi);
-    const auto &inSpec = event_ws2->getSpectrum(j);
-    outSpec.copyInfoFrom(inSpec);
+    output->getSpectrum(output_wi) = event_ws2->getSpectrum(j);
 
     // Propagate spectrum masking. First workspace will have been done by the
     // factory

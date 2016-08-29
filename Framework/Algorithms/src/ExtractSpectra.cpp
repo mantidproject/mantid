@@ -291,7 +291,7 @@ void ExtractSpectra::execEvent() {
     auto i = m_workspaceIndexList[j];
     const EventList &el = eventW->getSpectrum(i);
     // The output event list
-    EventList &outEL = outputWorkspace->getOrAddEventList(j);
+    EventList &outEL = outputWorkspace->getSpectrum(j);
     //    // left side of the crop - will erase 0 -> endLeft
     //    std::size_t endLeft;
     //    // right side of the crop - will erase endRight->numEvents+1
