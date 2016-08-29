@@ -65,11 +65,11 @@ private:
   MantidVec calculateEfficiency(double eff0, const std::string &formula,
                                 const HistogramData::Points &xIn);
 
-  std::string getValFromInstrumentDef(const std::string &parameterName);
-
   HistogramData::Histogram
   applyDetEfficiency(const size_t nChans, const Mantid::MantidVec &effVec,
                      const HistogramData::Histogram &histogram);
+
+  std::string retrieveFormula(const size_t workspaceIndex);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr m_inputWS;

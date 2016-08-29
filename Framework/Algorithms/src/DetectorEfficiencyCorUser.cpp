@@ -65,12 +65,6 @@ void DetectorEfficiencyCorUser::exec() {
   // get input properties (WSs, Ei)
   retrieveProperties();
 
-  // get Efficiency formula from the IDF
-  const std::string effFormula = getValFromInstrumentDef("formula_eff");
-
-  // Calculate Efficiency for E = Ei
-  const double eff0 = calculateFormulaValue(effFormula, m_Ei);
-
   const size_t numberOfChannels = this->m_inputWS->blocksize();
   // Calculate the number of spectra in this workspace
   const int numberOfSpectra =
@@ -83,7 +77,9 @@ void DetectorEfficiencyCorUser::exec() {
   PARALLEL_FOR2(m_outputWS, m_inputWS)
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     PARALLEL_START_INTERUPT_REGION
-
+    const auto effFormula = retrieveFormula(i);
+    // Calculate Efficiency for E = Ei
+    const double eff0 = calculateFormulaValue(effFormula, m_Ei);
     const auto effVec =
         calculateEfficiency(eff0, effFormula, m_inputWS->points(i));
     // run this outside to benefit from parallel for (?)
@@ -180,25 +176,24 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(
 }
 
 /**
- * Returns the value associated to a parameter name in the IDF
- * @param parameterName :: parameter name in the IDF
- * @return the value associated to the parameter name
+ * Returns the efficiency correction formula associated to a detector
+ * @param workspaceIndex detector's workspace index
+ * @return the efficiency correction formula
  */
-std::string DetectorEfficiencyCorUser::getValFromInstrumentDef(
-    const std::string &parameterName) {
-  const ParameterMap &pmap = m_inputWS->constInstrumentParameters();
-  Instrument_const_sptr instrument = m_inputWS->getInstrument();
-  Parameter_sptr par =
-      pmap.getRecursive(instrument->getChild(0).get(), parameterName);
-  if (par) {
-    std::string ret = par->asString();
-    g_log.debug() << "Parsed parameter " << parameterName << ": " << ret
-                  << "\n";
-    return ret;
-  } else {
+std::string DetectorEfficiencyCorUser::retrieveFormula(
+    const size_t workspaceIndex) {
+  const std::string formulaParamName("formula_eff");
+  const auto &paramMap = m_inputWS->constInstrumentParameters();
+  auto det = m_inputWS->getDetector(workspaceIndex);
+  auto param = paramMap.getRecursive(det.get(), formulaParamName, "string");
+  if (!param) {
     throw Kernel::Exception::InstrumentDefinitionError(
-        "There is no <" + parameterName + "> in the instrument definition!");
+        "There is no <" + formulaParamName + "> in the instrument definition!");
   }
+  const auto ret = param->asString();
+  g_log.debug() << "Found formula for workspace index " << workspaceIndex
+                << ": " << ret << "\n";
+  return ret;
 }
 
 /** Loads and checks the values passed to the algorithm
