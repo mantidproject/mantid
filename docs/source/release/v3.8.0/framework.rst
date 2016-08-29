@@ -109,6 +109,13 @@ CurveFitting
 Improved
 ########
 
+Interfaces
+----------
+
+New
+###
+
+- A workflow gui for TOFTOF data reduction. (#17075)
 
 Python
 ------
@@ -123,14 +130,6 @@ Python Algorithms
 #################
 
 - New algorithm :ref:`SelectNexusFilesByMetadata <algm-SelectNexusFilesByMetadata>` provides quick filtering of nexus files based on criteria imposed on metadata.
-
-Interfaces
-----------
-
-New
-###
-
-- A workflow gui for TOFTOF data reduction. (#17075)
 
 Bug Fixes
 ---------
