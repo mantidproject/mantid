@@ -1,4 +1,7 @@
-from interface import InstrumentInterface
+"""
+TOFTOF reduction workflow gui.
+"""
+from reduction_gui.instruments.interface import InstrumentInterface
 
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFReductionScripter
 from reduction_gui.widgets.toftof.toftof_setup       import TOFTOFSetupWidget

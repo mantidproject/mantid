@@ -1,9 +1,15 @@
-from reduction_gui.reduction.scripter import BaseScriptElement, BaseReductionScripter
+#pylint: disable = too-many-instance-attributes, too-many-locals, too-many-branches
+#pylint: disable = attribute-defined-outside-init
+#pylint: disable = invalid-name
+"""
+TOFTOF reduction workflow gui.
+"""
+import xml.dom.minidom
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui  import *
 
-import xml.dom.minidom
+from reduction_gui.reduction.scripter import BaseScriptElement, BaseReductionScripter
 
 #-------------------------------------------------------------------------------
 
@@ -79,10 +85,10 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.correctTof    = self.DEF_correctTof
 
     def to_xml(self):
-        xml = ['']
+        res = ['']
 
         def put(tag, val):
-            xml[0] += '  <%s>%s</%s>\n' % (tag, str(val), tag)
+            res[0] += '  <%s>%s</%s>\n' % (tag, str(val), tag)
 
         put('prefix',      self.prefix)
         put('data_dir',    self.dataDir)
@@ -113,9 +119,9 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('normalise',      self.normalise)
         put('correct_tof',    self.correctTof)
 
-        xml = '<%s>\n%s</%s>\n' % (self.XML_TAG, xml[0], self.XML_TAG)
+        res = '<%s>\n%s</%s>\n' % (self.XML_TAG, res[0], self.XML_TAG)
 
-        return xml
+        return res
 
     def from_xml(self, xmlString):
         self.reset()
@@ -126,50 +132,50 @@ class TOFTOFScriptElement(BaseScriptElement):
         if els:
             dom = els[0]
 
-            def getStr(tag, default = ''):
+            def get_str(tag, default = ''):
                 return BaseScriptElement.getStringElement(dom, tag, default=default)
 
-            def getInt(tag, default):
+            def get_int(tag, default):
                 return BaseScriptElement.getIntElement(dom, tag, default=default)
 
-            def getFlt(tag, default):
+            def get_flt(tag, default):
                 return BaseScriptElement.getFloatElement(dom, tag, default=default)
 
-            def getStrLst(tag):
+            def get_strlst(tag):
                 return BaseScriptElement.getStringList(dom, tag)
 
-            def getBol(tag, default):
+            def get_bol(tag, default):
                 return BaseScriptElement.getBoolElement(dom, tag, default=default)
 
-            self.prefix   = getStr('prefix', self.DEF_prefix)
-            self.dataDir  = getStr('data_dir')
+            self.prefix   = get_str('prefix', self.DEF_prefix)
+            self.dataDir  = get_str('data_dir')
 
-            self.vanRuns  = getStr('van_runs')
-            self.vanCmnt  = getStr('van_comment')
+            self.vanRuns  = get_str('van_runs')
+            self.vanCmnt  = get_str('van_comment')
 
-            self.ecRuns   = getStr('ec_runs')
-            self.ecFactor = getFlt('ec_factor', self.DEF_ecFactor)
+            self.ecRuns   = get_str('ec_runs')
+            self.ecFactor = get_flt('ec_factor', self.DEF_ecFactor)
 
-            dataRuns = getStrLst('data_runs')
-            dataCmts = getStrLst('data_comment')
+            dataRuns = get_strlst('data_runs')
+            dataCmts = get_strlst('data_comment')
             for i in range(min(len(dataRuns), len(dataCmts))):
                 self.dataRuns.append((dataRuns[i], dataCmts[i]))
 
-            self.binEon    = getBol('rebin_energy_on',    self.DEF_binEon)
-            self.binEstart = getFlt('rebin_energy_start', self.DEF_binEstart)
-            self.binEstep  = getFlt('rebin_energy_step',  self.DEF_binEstep)
-            self.binEend   = getFlt('rebin_energy_end',   self.DEF_binEend)
+            self.binEon    = get_bol('rebin_energy_on',    self.DEF_binEon)
+            self.binEstart = get_flt('rebin_energy_start', self.DEF_binEstart)
+            self.binEstep  = get_flt('rebin_energy_step',  self.DEF_binEstep)
+            self.binEend   = get_flt('rebin_energy_end',   self.DEF_binEend)
 
-            self.binQon    = getBol('rebin_q_on',         self.DEF_binQon)
-            self.binQstart = getFlt('rebin_q_start',      self.DEF_binQstart)
-            self.binQstep  = getFlt('rebin_q_step',       self.DEF_binQstep)
-            self.binQend   = getFlt('rebin_q_end',        self.DEF_binQend)
+            self.binQon    = get_bol('rebin_q_on',         self.DEF_binQon)
+            self.binQstart = get_flt('rebin_q_start',      self.DEF_binQstart)
+            self.binQstep  = get_flt('rebin_q_step',       self.DEF_binQstep)
+            self.binQend   = get_flt('rebin_q_end',        self.DEF_binQend)
 
-            self.maskDetectors = getStr('mask_detectors')
+            self.maskDetectors = get_str('mask_detectors')
 
-            self.subtractECVan = getBol('subtract_ecvan', self.DEF_subECVan)
-            self.normalise     = getInt('normalise',      self.DEF_normalise)
-            self.correctTof    = getInt('correct_tof',    self.DEF_correctTof)
+            self.subtractECVan = get_bol('subtract_ecvan', self.DEF_subECVan)
+            self.normalise     = get_int('normalise',      self.DEF_normalise)
+            self.correctTof    = get_int('correct_tof',    self.DEF_correctTof)
 
     def to_script(self):
 
@@ -191,14 +197,14 @@ class TOFTOFScriptElement(BaseScriptElement):
                 error('missing empty can runs')
 
         # binning parameters
-        def checkBinningParams(start, step, end):
-            if not (start < end and 0 < step and start + step <= end):
+        def check_bin_params(start, step, end):
+            if not (start < end and step > 0 and start + step <= end):
                 error('incorrect binning parameters')
 
         if self.binEon:
-            checkBinningParams(self.binEstart, self.binEstep, self.binEend)
+            check_bin_params(self.binEstart, self.binEstep, self.binEend)
         if self.binQon:
-            checkBinningParams(self.binQstart, self.binQstep, self.binQend)
+            check_bin_params(self.binQstart, self.binQstep, self.binQend)
 
         # must have some data runs
         if not self.dataRuns:
@@ -212,15 +218,16 @@ class TOFTOFScriptElement(BaseScriptElement):
         script = ['']
 
         # helper: add a line to the script
-        def l(s = ''):
-            script[0] += (s + '\n')
+        def l(line = ''):
+            script[0] += (line + '\n')
+
         # helpers
-        def logData(ws,tag):
-            return "%s.getRun().getLogData('%s').value" % (ws, tag)
-        def logEi(ws):
-            return logData(ws, 'Ei')
-        def logTime(ws):
-            return logData(ws, 'duration')
+        def get_log(workspace, tag):
+            return "%s.getRun().getLogData('%s').value" % (workspace, tag)
+        def get_ei(workspace):
+            return get_log(workspace, 'Ei')
+        def get_time(workspace):
+            return get_log(workspace, 'duration')
 
         l("import numpy as np")
         l()
@@ -281,11 +288,11 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("%s.setComment('%s')"      % (wsData, cmnt))
             l()
 
-            if 0 == i:
+            if i == 0:
                 wsData0 = wsData
 
-        def gr(list, postfix = ''):
-            return ('[' + ', '.join(list) + ']' + postfix) if list else ''
+        def group_list(listVal, postfix = ''):
+            return ('[' + ', '.join(listVal) + ']' + postfix) if listVal else ''
 
         gPrefix = 'g' + self.prefix
         gDataRuns    = gPrefix + 'DataRuns'
@@ -293,9 +300,9 @@ class TOFTOFScriptElement(BaseScriptElement):
         gAll         = gPrefix + 'All'
 
         l("# grouping")
-        l("%s = GroupWorkspaces(%s)" % (gDataRawRuns, gr(dataRawGroup)))
-        l("%s = GroupWorkspaces(%s)" % (gDataRuns,    gr(dataGroup)))
-        l("%s = GroupWorkspaces(%s)" % (gAll,         gr(allGroup)))
+        l("%s = GroupWorkspaces(%s)" % (gDataRawRuns, group_list(dataRawGroup)))
+        l("%s = GroupWorkspaces(%s)" % (gDataRuns,    group_list(dataGroup)))
+        l("%s = GroupWorkspaces(%s)" % (gAll,         group_list(allGroup)))
         l()
 
         l("# Ei")
@@ -304,7 +311,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("    raise RuntimeError('Ei values do not match')")
             l()
 
-        l("Ei = %s" % (logEi(wsData0)))
+        l("Ei = %s" % (get_ei(wsData0)))
         l()
 
         gDetectorsToMask = gPrefix + 'DetectorsToMask'
@@ -336,22 +343,23 @@ class TOFTOFScriptElement(BaseScriptElement):
         elif self.NORM_TIME == self.normalise:
             gDataNorm = gPrefix + 'Norm'
 
-            # TODO (ask Wiebke how to do it best)
             l("# normalise to time")
 
             if self.vanRuns:
                 wsVanNorm = wsVan + 'Norm'
-                l("%s = Scale(%s, 1.0 / float(%s), 'Multiply')" % (wsVanNorm, wsVan, logTime(wsVan)))
+                l("%s = Scale(%s, 1.0 / float(%s), 'Multiply')" \
+                    % (wsVanNorm, wsVan, get_time(wsVan)))
 
             if self.ecRuns:
                 wsECNorm = wsEC + 'Norm'
-                l("%s = Scale(%s, 1.0 / float(%s), 'Multiply')" % (wsECNorm, wsEC, logTime(wsEC)))
+                l("%s = Scale(%s, 1.0 / float(%s), 'Multiply')" \
+                    % (wsECNorm, wsEC, get_time(wsEC)))
 
             l("names = []")
             l("for ws in %s:" % (gDataRuns))
             l("    name = ws.getName() + 'Norm'")
             l("    names.append(name)")
-            l("    Scale(ws, 1.0 / float(%s), 'Multiply', OutputWorkspace=name)" % (logTime('ws')))
+            l("    Scale(ws, 1.0 / float(%s), 'Multiply', OutputWorkspace=name)" % (get_time('ws')))
             l()
             l("%s = GroupWorkspaces(names)" % (gDataNorm))
 
@@ -382,7 +390,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         gData = gPrefix + 'Data'
         if self.vanRuns:
             wsVanNorm = wsVanSubEC if self.subtractECVan else wsVanNorm
-            l("%s = GroupWorkspaces(%slist(%s.getNames()))" % (gData, gr([wsVanNorm], ' + '), gDataSource))
+            l("%s = GroupWorkspaces(%slist(%s.getNames()))" % (gData, group_list([wsVanNorm], ' + '), gDataSource))
         else:
             l("%s = CloneWorkspace(%s)" % (gData, gDataSource))
         l()

@@ -1,8 +1,12 @@
-from reduction_gui.widgets.base_widget import BaseWidget
-from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement
-
+#pylint: disable=too-many-instance-attributes
+"""
+TOFTOF reduction workflow gui.
+"""
 from PyQt4.QtCore import *
 from PyQt4.QtGui  import *
+
+from reduction_gui.widgets.base_widget import BaseWidget
+from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFScriptElement
 
 #-------------------------------------------------------------------------------
 
@@ -24,8 +28,8 @@ class TOFTOFSetupWidget(BaseWidget):
             return self.dataRuns[row] if row < self._numRows() else ('', '')
 
         def _isRowEmpty(self, row):
-            (t1, t2) = self._getRow(row)
-            return not t1.strip() and not t2.strip()
+            (runs, comment) = self._getRow(row)
+            return not runs.strip() and not comment.strip()
 
         def _removeTrailingEmptyRows(self):
             for row in reversed(range(self._numRows())):
@@ -43,7 +47,7 @@ class TOFTOFSetupWidget(BaseWidget):
             (runText, comment) = self.dataRuns[row]
 
             text = text.strip()
-            if 0 == col:
+            if col == 0:
                 runText = text
             else:
                 comment = text
@@ -58,11 +62,11 @@ class TOFTOFSetupWidget(BaseWidget):
         headers    = ('Data runs', 'Comment')
         selectCell = pyqtSignal(int, int)
 
-        def rowCount(self, index = QModelIndex()):
+        def rowCount(self, _ = QModelIndex()):
             # one additional row for new data
             return self._numRows() + 1
 
-        def columnCount(self, index = QModelIndex()):
+        def columnCount(self, _ = QModelIndex()):
             return 2
 
         def headerData(self, section, orientation, role):
@@ -77,7 +81,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
             return None
 
-        def setData(self, index, text, role):
+        def setData(self, index, text, _):
             row = index.row()
             col = index.column()
 
@@ -99,7 +103,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
             return True
 
-        def flags(self, index):
+        def flags(self, _):
             return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
 
     # tooltips
@@ -142,15 +146,15 @@ class TOFTOFSetupWidget(BaseWidget):
 
         inf = float('inf')
 
-        def setSpin(spin, min = -inf, max = +inf):
-            spin.setRange(min, max)
+        def set_spin(spin, minVal = -inf, maxVal = +inf):
+            spin.setRange(minVal, maxVal)
             spin.setDecimals(3)
             spin.setSingleStep(0.01)
 
         def tip(widget, text):
-          if text:
-            widget.setToolTip(text)
-          return widget
+            if text:
+                widget.setToolTip(text)
+            return widget
 
         # ui data elements
         self.prefix    = tip(QLineEdit(), self.TIP_prefix)
@@ -162,25 +166,25 @@ class TOFTOFSetupWidget(BaseWidget):
         self.ecRuns    = tip(QLineEdit(), self.TIP_ecRuns)
         self.ecFactor  = tip(QDoubleSpinBox(), self.TIP_ecFactor)
 
-        setSpin(self.ecFactor, 0, 1)
+        set_spin(self.ecFactor, 0, 1)
 
         self.binEon    = tip(QCheckBox(),      self.TIP_binEon)
         self.binEstart = tip(QDoubleSpinBox(), self.TIP_binEstart)
         self.binEstep  = tip(QDoubleSpinBox(), self.TIP_binEstep)
         self.binEend   = tip(QDoubleSpinBox(), self.TIP_binEend)
 
-        setSpin(self.binEstart)
-        setSpin(self.binEstep)
-        setSpin(self.binEend)
+        set_spin(self.binEstart)
+        set_spin(self.binEstep)
+        set_spin(self.binEend)
 
         self.binQon    = tip(QCheckBox(),      self.TIP_binQon)
         self.binQstart = tip(QDoubleSpinBox(), self.TIP_binQstart)
         self.binQstep  = tip(QDoubleSpinBox(), self.TIP_binQstep)
         self.binQend   = tip(QDoubleSpinBox(), self.TIP_binQend)
 
-        setSpin(self.binQstart)
-        setSpin(self.binQstep)
-        setSpin(self.binQend)
+        set_spin(self.binQstart)
+        set_spin(self.binQstep)
+        set_spin(self.binQend)
 
         self.maskDetectors = tip(QLineEdit(), self.TIP_maskDetectors)
 
@@ -207,13 +211,13 @@ class TOFTOFSetupWidget(BaseWidget):
         # ui layout
         def _box(cls, widgets):
             box = cls()
-            for w in widgets:
-                if isinstance(w, QLayout):
-                    box.addLayout(w)
-                elif isinstance(w, QWidget):
-                    box.addWidget(w)
+            for wgt in widgets:
+                if isinstance(wgt, QLayout):
+                    box.addLayout(wgt)
+                elif isinstance(wgt, QWidget):
+                    box.addWidget(wgt)
                 else:
-                    box.addStretch(w)
+                    box.addStretch(wgt)
             return box
 
         def hbox(widgets):
@@ -223,10 +227,10 @@ class TOFTOFSetupWidget(BaseWidget):
             return _box(QVBoxLayout, widgets)
 
         def label(text, tip):
-            l = QLabel(text)
+            label = QLabel(text)
             if tip:
-                l.setToolTip(tip)
-            return l
+                label.setToolTip(tip)
+            return label
 
         gbDataDir = QGroupBox('Data search directory')
         gbPrefix  = QGroupBox('Workspace prefix')
@@ -318,13 +322,13 @@ class TOFTOFSetupWidget(BaseWidget):
         if dirname:
             self.dataDir.setText(dirname)
 
-    def _onBinEon(self, on):
+    def _onBinEon(self, onVal):
         for widget in (self.binEstart, self.binEstep, self.binEend):
-            widget.setEnabled(on)
+            widget.setEnabled(onVal)
 
-    def _onBinQon(self, on):
+    def _onBinQon(self, onVal):
         for widget in (self.binQstart, self.binQstep, self.binQend):
-            widget.setEnabled(on)
+            widget.setEnabled(onVal)
 
     def _onSelectedCell(self, row, col):
         index = self.runDataModel.index(row, col)
@@ -332,88 +336,92 @@ class TOFTOFSetupWidget(BaseWidget):
         self.dataRunsView.setFocus()
 
     def get_state(self):
-        el = TOFTOFScriptElement()
+        elem = TOFTOFScriptElement()
 
-        def getText(lineEdit):
+        def line_text(lineEdit):
             return lineEdit.text().strip()
 
-        el.facility_name   = self._settings.facility_name
-        el.instrument_name = self._settings.instrument_name
+        elem.facility_name   = self._settings.facility_name
+        elem.instrument_name = self._settings.instrument_name
 
-        el.prefix        = getText(self.prefix)
-        el.dataDir       = getText(self.dataDir)
+        elem.prefix        = line_text(self.prefix)
+        elem.dataDir       = line_text(self.dataDir)
 
-        el.vanRuns       = getText(self.vanRuns)
-        el.vanCmnt       = getText(self.vanCmnt)
+        elem.vanRuns       = line_text(self.vanRuns)
+        elem.vanCmnt       = line_text(self.vanCmnt)
 
-        el.ecRuns        = getText(self.ecRuns)
-        el.ecFactor      = self.ecFactor.value()
+        elem.ecRuns        = line_text(self.ecRuns)
+        elem.ecFactor      = self.ecFactor.value()
 
-        el.dataRuns      = self.runDataModel.dataRuns
+        elem.dataRuns      = self.runDataModel.dataRuns
 
-        el.binEon        = self.binEon.isChecked()
-        el.binEstart     = self.binEstart.value()
-        el.binEstep      = self.binEstep.value()
-        el.binEend       = self.binEend.value()
+        elem.binEon        = self.binEon.isChecked()
+        elem.binEstart     = self.binEstart.value()
+        elem.binEstep      = self.binEstep.value()
+        elem.binEend       = self.binEend.value()
 
-        el.binQon        = self.binQon.isChecked()
-        el.binQstart     = self.binQstart.value()
-        el.binQstep      = self.binQstep.value()
-        el.binQend       = self.binQend.value()
+        elem.binQon        = self.binQon.isChecked()
+        elem.binQstart     = self.binQstart.value()
+        elem.binQstep      = self.binQstep.value()
+        elem.binQend       = self.binQend.value()
 
-        el.maskDetectors = getText(self.maskDetectors)
+        elem.maskDetectors = line_text(self.maskDetectors)
 
-        el.subtractECVan = self.chkSubtractECVan.isChecked()
+        elem.subtractECVan = self.chkSubtractECVan.isChecked()
 
-        el.normalise     = el.NORM_MONITOR    if self.rbtNormaliseMonitor.isChecked() else \
-                           el.NORM_TIME       if self.rbtNormaliseTime.isChecked()    else \
-                           el.NORM_NONE
+        elem.normalise     = elem.NORM_MONITOR    if self.rbtNormaliseMonitor.isChecked() else \
+                             elem.NORM_TIME       if self.rbtNormaliseTime.isChecked()    else \
+                             elem.NORM_NONE
 
-        el.correctTof    = el.CORR_TOF_VAN    if self.rbtCorrectTOFVan.isChecked()    else \
-                           el.CORR_TOF_SAMPLE if self.rbtCorrectTOFSample.isChecked() else \
-                           el.CORR_TOF_NONE
-        return el
+        elem.correctTof    = elem.CORR_TOF_VAN    if self.rbtCorrectTOFVan.isChecked()    else \
+                             elem.CORR_TOF_SAMPLE if self.rbtCorrectTOFSample.isChecked() else \
+                             elem.CORR_TOF_NONE
+        return elem
 
     def set_state(self, toftofScriptElement):
-        el = toftofScriptElement
+        elem = toftofScriptElement
 
-        self.prefix.setText(el.prefix)
+        self.prefix.setText(elem.prefix)
 
-        self.dataDir.setText(el.dataDir)
+        self.dataDir.setText(elem.dataDir)
 
-        self.vanRuns.setText(el.vanRuns)
-        self.vanCmnt.setText(el.vanCmnt)
+        self.vanRuns.setText(elem.vanRuns)
+        self.vanCmnt.setText(elem.vanCmnt)
 
-        self.ecRuns.setText(el.ecRuns)
-        self.ecFactor.setValue(el.ecFactor)
+        self.ecRuns.setText(elem.ecRuns)
+        self.ecFactor.setValue(elem.ecFactor)
 
-        self.runDataModel.dataRuns = el.dataRuns
+        self.runDataModel.dataRuns = elem.dataRuns
         self.runDataModel.reset()
 
-        self.binEon.setChecked(el.binEon); self._onBinEon(el.binEon)
-        self.binEstart.setValue(el.binEstart)
-        self.binEstep.setValue(el.binEstep)
-        self.binEend.setValue(el.binEend)
+        self.binEon.setChecked(elem.binEon)
+        self._onBinEon(elem.binEon)
 
-        self.binQon.setChecked(el.binQon); self._onBinQon(el.binQon)
-        self.binQstart.setValue(el.binQstart)
-        self.binQstep.setValue(el.binQstep)
-        self.binQend.setValue(el.binQend)
+        self.binEstart.setValue(elem.binEstart)
+        self.binEstep.setValue(elem.binEstep)
+        self.binEend.setValue(elem.binEend)
 
-        self.maskDetectors.setText(el.maskDetectors)
+        self.binQon.setChecked(elem.binQon)
+        self._onBinQon(elem.binQon)
 
-        self.chkSubtractECVan.setChecked(el.subtractECVan)
+        self.binQstart.setValue(elem.binQstart)
+        self.binQstep.setValue(elem.binQstep)
+        self.binQend.setValue(elem.binQend)
 
-        if el.normalise == el.NORM_MONITOR:
+        self.maskDetectors.setText(elem.maskDetectors)
+
+        self.chkSubtractECVan.setChecked(elem.subtractECVan)
+
+        if elem.normalise == elem.NORM_MONITOR:
             self.rbtNormaliseMonitor.setChecked(True)
-        elif el.normalise == el.NORM_TIME:
+        elif elem.normalise == elem.NORM_TIME:
             self.rbtNormaliseTime.setChecked(True)
         else:
             self.rbtNormaliseNone.setChecked(True)
 
-        if el.correctTof == el.CORR_TOF_VAN:
+        if elem.correctTof == elem.CORR_TOF_VAN:
             self.rbtCorrectTOFVan.setChecked(True)
-        elif el.correctTof == el.CORR_TOF_SAMPLE:
+        elif elem.correctTof == elem.CORR_TOF_SAMPLE:
             self.rbtCorrectTOFSample.setChecked(True)
         else:
             self.rbtCorrectTOFNone.setChecked(True)
