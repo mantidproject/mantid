@@ -101,7 +101,7 @@ void Workspace2D::init(const std::size_t &NVectors,
   data.resize(m_noVectors);
 
   HistogramData::Histogram initializedHistogram(histogram);
-  if(!histogram.sharedY()) {
+  if (!histogram.sharedY()) {
     initializedHistogram.setCounts(histogram.size(), 0.0);
     initializedHistogram.setCountStandardDeviations(histogram.size(), 0.0);
   }

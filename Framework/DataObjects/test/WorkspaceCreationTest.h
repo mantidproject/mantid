@@ -17,17 +17,19 @@ class WorkspaceCreationTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static WorkspaceCreationTest *createSuite() { return new WorkspaceCreationTest(); }
-  static void destroySuite( WorkspaceCreationTest *suite ) { delete suite; }
+  static WorkspaceCreationTest *createSuite() {
+    return new WorkspaceCreationTest();
+  }
+  static void destroySuite(WorkspaceCreationTest *suite) { delete suite; }
 
   void test_create_size_histogram() {
     auto ws = create<Workspace2D>(2, Histogram(BinEdges(3)));
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws->x(0).size(), 3);
-    TS_ASSERT_EQUALS(ws->y(0).rawData(), std::vector<double>({0,0}));
-    TS_ASSERT_EQUALS(ws->y(1).rawData(), std::vector<double>({0,0}));
-    TS_ASSERT_EQUALS(ws->e(0).rawData(), std::vector<double>({0,0}));
-    TS_ASSERT_EQUALS(ws->e(1).rawData(), std::vector<double>({0,0}));
+    TS_ASSERT_EQUALS(ws->y(0).rawData(), std::vector<double>({0, 0}));
+    TS_ASSERT_EQUALS(ws->y(1).rawData(), std::vector<double>({0, 0}));
+    TS_ASSERT_EQUALS(ws->e(0).rawData(), std::vector<double>({0, 0}));
+    TS_ASSERT_EQUALS(ws->e(1).rawData(), std::vector<double>({0, 0}));
   }
 
   void test_create_drop_events() {
@@ -35,9 +37,6 @@ public:
     auto ws = create<HistoWorkspace>(*eventWS);
     TS_ASSERT_EQUALS(ws->id(), "Workspace2D");
   }
-
-
 };
-
 
 #endif /* MANTID_DATAOBJECTS_WORKSPACECREATIONTEST_H_ */

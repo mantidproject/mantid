@@ -770,7 +770,7 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
   }
   // Set spectrum numbers
   std::vector<specnum_t> specNums;
-  for(const auto &item : m_SpectrumMap) {
+  for (const auto &item : m_SpectrumMap) {
     specnum_t specid = item.first;
     g_log.debug() << "Build WorkspaceIndex-Spectrum  " << specNums.size()
                   << " , " << specid << "\n";

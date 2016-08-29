@@ -91,8 +91,8 @@ void WorkspaceFactoryImpl::initializeFromParent(
   child->setTitle(parent.getTitle());
   child->setComment(parent.getComment());
   child->setInstrument(parent.getInstrument()); // This call also copies the
-                                                 // SHARED POINTER to the
-                                                 // parameter map
+                                                // SHARED POINTER to the
+                                                // parameter map
   // This call will (should) perform a COPY of the parameter map.
   child->instrumentParameters();
   child->m_sample = parent.m_sample;

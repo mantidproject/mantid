@@ -12,9 +12,7 @@ HistogramData::Histogram stripData(HistogramData::Histogram histogram) {
   return histogram;
 }
 
-template <> std::unique_ptr<EventWorkspace> createHelper() {
-  return {nullptr};
-}
+template <> std::unique_ptr<EventWorkspace> createHelper() { return {nullptr}; }
 
 template <> std::unique_ptr<API::HistoWorkspace> createHelper() {
   return Kernel::make_unique<Workspace2D>();

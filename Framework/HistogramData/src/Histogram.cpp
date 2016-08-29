@@ -162,7 +162,7 @@ void Histogram::setSharedY(const Kernel::cow_ptr<HistogramY> &y) & {
   if (yMode() == YMode::Uninitialized)
     throw std::logic_error(
         "Histogram::setSharedY: YMode is not set and cannot be determined");
-  if(y)
+  if (y)
     checkSize(*y);
   m_y = y;
 }
@@ -171,7 +171,7 @@ void Histogram::setSharedY(const Kernel::cow_ptr<HistogramY> &y) & {
 
   Throws if the size does not match the current size. */
 void Histogram::setSharedE(const Kernel::cow_ptr<HistogramE> &e) & {
-  if(e)
+  if (e)
     checkSize(*e);
   m_e = e;
 }

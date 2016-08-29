@@ -306,7 +306,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   indexInfo.setDetectorIDs(
       makeRange(start_at_pixelID, start_at_pixelID + numPixels - 1));
 
-  auto retVal = create<Workspace2D>(indexInfo, Histogram(x,y,e));
+  auto retVal = create<Workspace2D>(indexInfo, Histogram(x, y, e));
 
   retVal->setInstrument(inst);
 
