@@ -16,8 +16,8 @@ namespace //<unnamed>
 using namespace Mantid::PythonInterface;
 
 /// Set the U vector via a numpy array
-void setU(OrientedLattice &self, const object &data) {
-  self.setU(Converters::PyObjectToMatrix(data)());
+void setU(OrientedLattice &self, const object &data, const bool force) {
+  self.setU(Converters::PyObjectToMatrix(data)(), force);
 }
 
 /// Set the U vector via a numpy array
@@ -58,7 +58,7 @@ void export_OrientedLattice() {
       .def("getuVector", (&OrientedLattice::getuVector), arg("self"))
       .def("getvVector", (&OrientedLattice::getvVector), arg("self"))
       .def("getU", &OrientedLattice::getU, arg("self"), return_readonly_numpy())
-      .def("setU", &setU, (arg("self"), arg("newU")))
+      .def("setU", &setU, (arg("self"), arg("newU"), arg("force") = true))
       .def("getUB", &OrientedLattice::getUB, arg("self"),
            return_readonly_numpy())
       .def("setUB", &setUB, (arg("self"), arg("newUB")))

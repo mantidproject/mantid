@@ -408,7 +408,7 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   double dy = m_end[m_freeDimY] - m_start[m_freeDimY];
   // Angle of the line
   double angle = atan2(dy, dx);
-  double perpAngle = angle + M_PI / 2.0;
+  double perpAngle = angle + M_PI_2;
 
   // Check if this is a axis-aligned cut of a histogram workspace with at most
   // 5 dimensions. If so, we'll use IntegrateMDHistoWorkspace.
@@ -478,7 +478,7 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   // If we are rebinning from an existing MDHistoWorkspace, and that workspace
   // has been created with basis vectors normalized, then we reapply that
   // setting here.
-  if (boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)) {
+  if (m_ws->isMDHistoWorkspace()) {
     alg->setProperty("NormalizeBasisVectors", m_ws->allBasisNormalized());
   }
 

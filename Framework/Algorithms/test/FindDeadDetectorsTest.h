@@ -107,7 +107,7 @@ public:
             "testdead_out"));
 
     for (int i = 0; i < sizey; i++) {
-      const double val = work_out->readY(i)[0];
+      const double val = work_out->y(i)[0];
       double valExpected = 1;
       if (i % 2 == 0) {
         valExpected = 2;
@@ -133,7 +133,7 @@ public:
             AnalysisDataService::Instance().retrieve("testdead_out")))
     // Check the dead detectors found agrees with what was setup above
     for (int i = 0; i < sizey; i++) {
-      const double val = work_out->readY(i)[0];
+      const double val = work_out->y(i)[0];
       double valExpected = boost::lexical_cast<double>(liveVal);
       // i%2 == 0 is the veryDead i%3 == 0 is the TooDead
       if (i % 2 == 0 || i % 3 == 0)
@@ -152,7 +152,7 @@ public:
             AnalysisDataService::Instance().retrieve("testdead_out")))
     // Check the dead detectors found agrees with what was setup above
     for (int i = 0; i < sizey; i++) {
-      const double val = work_out->readY(i)[0];
+      const double val = work_out->y(i)[0];
       double valExpected = boost::lexical_cast<double>(liveVal);
       // i%2 == 0 is the veryDead i%3 == 0 is the TooDead i == 19 is the strange
       if (i % 2 == 0 || i % 3 == 0 || i == 19)

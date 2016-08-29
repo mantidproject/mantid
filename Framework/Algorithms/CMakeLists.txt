@@ -34,6 +34,7 @@ set ( SRC_FILES
 	src/ChangeTimeZero.cpp
 	src/CheckWorkspacesMatch.cpp
 	src/ChopData.cpp
+	src/ClearCache.cpp
 	src/ClearInstrumentParameters.cpp
 	src/ClearMaskFlag.cpp
 	src/CloneWorkspace.cpp
@@ -76,6 +77,7 @@ set ( SRC_FILES
 	src/CreateSingleValuedWorkspace.cpp
 	src/CreateTransmissionWorkspace.cpp
 	src/CreateTransmissionWorkspaceAuto.cpp
+	src/CreateUserDefinedBackground.cpp
 	src/CreateWorkspace.cpp
 	src/CropToComponent.cpp
 	src/CropWorkspace.cpp
@@ -136,6 +138,7 @@ set ( SRC_FILES
 	src/GetDetectorOffsets.cpp
 	src/GetEi.cpp
 	src/GetEi2.cpp
+	src/GetEiMonDet2.cpp
 	src/GetTimeSeriesLogInformation.cpp
 	src/GravitySANSHelper.cpp
 	src/GroupWorkspaces.cpp
@@ -332,6 +335,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ChangeTimeZero.h
 	inc/MantidAlgorithms/CheckWorkspacesMatch.h
 	inc/MantidAlgorithms/ChopData.h
+	inc/MantidAlgorithms/ClearCache.h
 	inc/MantidAlgorithms/ClearInstrumentParameters.h
 	inc/MantidAlgorithms/ClearMaskFlag.h
 	inc/MantidAlgorithms/CloneWorkspace.h
@@ -374,6 +378,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateSingleValuedWorkspace.h
 	inc/MantidAlgorithms/CreateTransmissionWorkspace.h
 	inc/MantidAlgorithms/CreateTransmissionWorkspaceAuto.h
+	inc/MantidAlgorithms/CreateUserDefinedBackground.h
 	inc/MantidAlgorithms/CreateWorkspace.h
 	inc/MantidAlgorithms/CropToComponent.h
 	inc/MantidAlgorithms/CropWorkspace.h
@@ -435,6 +440,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GetDetectorOffsets.h
 	inc/MantidAlgorithms/GetEi.h
 	inc/MantidAlgorithms/GetEi2.h
+	inc/MantidAlgorithms/GetEiMonDet2.h
 	inc/MantidAlgorithms/GetTimeSeriesLogInformation.h
 	inc/MantidAlgorithms/GravitySANSHelper.h
 	inc/MantidAlgorithms/GroupWorkspaces.h
@@ -644,6 +650,7 @@ set ( TEST_FILES
 	ChangeTimeZeroTest.h
 	CheckWorkspacesMatchTest.h
 	ChopDataTest.h
+	ClearCacheTest.h
 	ClearInstrumentParametersTest.h
 	ClearMaskFlagTest.h
 	CloneWorkspaceTest.h
@@ -686,6 +693,7 @@ set ( TEST_FILES
 	CreateSingleValuedWorkspaceTest.h
 	CreateTransmissionWorkspaceAutoTest.h
 	CreateTransmissionWorkspaceTest.h
+	CreateUserDefinedBackgroundTest.h
 	CreateWorkspaceTest.h
 	CropToComponentTest.h
 	CropWorkspaceTest.h
@@ -738,6 +746,7 @@ set ( TEST_FILES
 	GetAllEiTest.h
 	GetDetOffsetsMultiPeaksTest.h
 	GetDetectorOffsetsTest.h
+	GetEiMonDet2Test.h
 	GetEiTest.h
 	GetEiV1Test.h
 	GetTimeSeriesLogInformationTest.h

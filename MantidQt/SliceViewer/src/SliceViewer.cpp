@@ -670,6 +670,13 @@ void SliceViewer::updateDimensionSliceWidgets() {
     if (w > maxUnitsWidth)
       maxUnitsWidth = w;
 
+    // if the workspace is already binned, update the interface with the
+    // existing number of bins
+    if (m_ws->isMDHistoWorkspace()) {
+      auto dim = m_ws->getDimension(d);
+      int numBins = static_cast<int>(dim->getNBins());
+      widget->setNumBins(numBins);
+    }
     widget->blockSignals(false);
   }
 
@@ -1115,8 +1122,9 @@ void SliceViewer::SnapToGrid_toggled(bool checked) {
 //------------------------------------------------------------------------------
 /** Slot called when going into or out of dynamic rebinning mode */
 void SliceViewer::RebinMode_toggled(bool checked) {
-  for (size_t d = 0; d < m_dimWidgets.size(); d++)
+  for (size_t d = 0; d < m_dimWidgets.size(); d++) {
     m_dimWidgets[d]->showRebinControls(checked);
+  }
   ui.btnRebinRefresh->setEnabled(checked);
   m_syncAutoRebin->setEnabled(checked);
   m_actionRefreshRebin->setEnabled(checked);
@@ -2159,7 +2167,7 @@ void SliceViewer::rebinParamsChanged() {
   // If we are rebinning from an existing MDHistoWorkspace, and that workspace
   // has been created with basis vectors normalized, then we reapply that
   // setting here.
-  if (boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)) {
+  if (m_ws->isMDHistoWorkspace()) {
     alg->setProperty("NormalizeBasisVectors", m_ws->allBasisNormalized());
   }
 
@@ -2174,7 +2182,15 @@ void SliceViewer::rebinParamsChanged() {
     double min = 0;
     double max = 1;
     int numBins = 1;
-    if (widget->getShownDim() < 0) {
+    if (m_ws->isMDHistoWorkspace()) {
+      // If rebinning from an existing MDHistoWorkspaces we should take exents
+      // from the existing workspace.
+      auto dim = m_ws->getDimension(d);
+      min = dim->getMinimum();
+      max = dim->getMaximum();
+      // And the user-entered number of bins
+      numBins = widget->getNumBins();
+    } else if (widget->getShownDim() < 0) {
       // Slice point. So integrate with a thickness
       min = widget->getSlicePoint() - widget->getThickness();
       max = widget->getSlicePoint() + widget->getThickness();
@@ -2591,7 +2607,7 @@ void SliceViewer::setColorBarAutoScale(bool autoscale) {
 */
 void SliceViewer::applyColorScalingForCurrentSliceIfRequired() {
   auto useAutoColorScaleforCurrentSlice =
-      m_colorBar->getAutoColorScaleforCurrentSlice();
+      m_colorBar->getAutoScaleforCurrentSlice();
   if (useAutoColorScaleforCurrentSlice) {
     setColorScaleAutoSlice();
   }
