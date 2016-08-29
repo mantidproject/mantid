@@ -20,6 +20,8 @@ Muon Analysis
 
 - *run_start* and *run_end* are now available as log values to use in the results table. They can be inserted either as text (ISO-formatted date strings) or as seconds since the start of the first run.
 
+- Documentation has been moved to the Mantid help system.
+
 Algorithms
 ----------
 
