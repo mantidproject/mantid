@@ -389,8 +389,8 @@ void PDCalibration::exec() {
 
       // Continue to identify whether this peak will be accepted
       // peak signal/noise ratio
-      if (height * 2.0 * sqrt(2.0 * M_LN2) / width < 5.)
-        continue;
+      //if (height * 2.0 * sqrt(2.0 * M_LN2) / width < 5.)
+      //  continue;
 
       // ban peaks that are not outside of error bars for the background
       if (height < 0.5 * std::sqrt(height + background))
