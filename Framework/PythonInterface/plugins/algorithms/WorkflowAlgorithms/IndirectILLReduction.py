@@ -152,12 +152,16 @@ def get_peak_position(ws, i):
             # Take the center (i.e. do no shift the spectrum)
             peak_bin = mid_bin
 
-    if fit_status == 'success':
-        # Cleanup unused FindEPP tables
-        DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
-        DeleteWorkspace('EPPfit_Parameters')
-
-    DeleteWorkspace(__fit_table)
+    # Delete unused TableWorkspaces
+    try:
+        if 'EPPfit_NormalisedCovarianceMatrix':
+            DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
+        if 'EPPfit_Parameters':
+            DeleteWorkspace('EPPfit_Parameters')
+        if __fit_table:
+            DeleteWorkspace(__fit_table)
+    except ValueError:
+        logger.debug('No Fit table available for deletion')
 
     return peak_bin
 
@@ -739,10 +743,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         convert_to_energy(right)
 
         # Energy transfer
+        mirror_sense = 0
         if self._unmirror_option == 0:
             # Get mirror_sense from run
-            mirror_sense = 0
-
             if mtd[red].getRun().hasProperty('Doppler.mirror_sense'):
                 # mirror_sense 14 : two wings
                 # mirror_sense 16 : one wing
@@ -753,8 +756,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     self.log().information('Input run #%s has one wing, perform energy transfer' % run)
                     convert_to_energy(red)
             else:
-                self.log().warning('Input run #%s has no property Doppler.mirror_sense. '
-                                   'Energy transfer might be affected.' % run)
+                self.log().warning('Input run #%s has no property Doppler.mirror_sense. ' % run)
         else:
             convert_to_energy(red)
 
@@ -767,7 +769,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         x = mtd[red].readX(0)
 
         # Mask bins of reduced workspace
-        if self._unmirror_option == 0 and mirror_sense == 16:
+        if self._unmirror_option == 0 and mirror_sense == 14:
             if xmin_left > 0:
                 self.log().debug('Mask red ws bins smaller than %d' % xmin_left)
                 MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[0], XMax=x[xmin_left])
