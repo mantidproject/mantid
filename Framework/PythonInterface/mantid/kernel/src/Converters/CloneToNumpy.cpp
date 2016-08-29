@@ -65,7 +65,9 @@ PyObject *cloneND(const ElementType *carray, const int ndims,
   }
   void *arrayData = PyArray_DATA(nparray);
   const void *data = static_cast<void *>(const_cast<ElementType *>(carray));
-  std::memcpy(arrayData, data, PyArray_ITEMSIZE(nparray) * length);
+  if (dims[0] > 0) {
+    std::memcpy(arrayData, data, PyArray_ITEMSIZE(nparray) * length);
+  }
   return reinterpret_cast<PyObject *>(nparray);
 }
 
