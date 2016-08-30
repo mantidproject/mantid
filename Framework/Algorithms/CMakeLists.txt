@@ -614,8 +614,6 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 set ( TEST_FILES
-	# CountEventsInPulsesTest.h
-	# UpdatePeakParameterTableTest.h
 	AddLogDerivativeTest.h
 	AddNoteTest.h
 	AddPeakTest.h
