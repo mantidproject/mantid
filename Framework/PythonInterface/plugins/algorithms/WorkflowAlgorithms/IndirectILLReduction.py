@@ -721,6 +721,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         if self._background_file:
             Minus(LHSWorkspace=red, RHSWorkspace='background', OutputWorkspace=red)
             self._debug(red, bsub)
+            # check the integral after subtraction
+            __temp = ReplaceSpecialValues(InputWorkspace=red,NaNValue='0')
+            __temp = Integration(InputWorkspace=__temp)
+            for i in range(__temp.getNumberHistograms()):
+                if __temp.dataY(i)[0] < 0:
+                    self.log().warning('Integral of spectrum #%d is negative after background subtraction.'
+                                       'Check the background run' %i)
+            DeleteWorkspace(__temp)
 
         # Calibrate to vanadium calibration workspace if specified
         # note, this is a one-column calibration workspace
@@ -791,13 +799,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             xmin = np.maximum(xmin, start_bin)
             xmax = np.minimum(xmax, end_bin)
         elif mirror_sense == 14 and self._unmirror_option == 0:
-            # Unmirror=0 two wings
             xmin = xmin_left
             xmax = xmax_right + int(x[-1] / 2)
             if xmin_right < size and xmax_left < size:
                 # Mask mid bins
                 self.log().debug('Mask red ws bins between %d, %d' % (xmax_left, int(size / 2) + xmin_right - 1))
                 MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xmax_left], XMax=x[int(size / 2) + xmin_right])
+        elif mirror_sense == 14 and self._unmirror_option > 0:
+            xmin = np.maximum(xmin_left, xmin_right)
+            xmax = np.minimum(xmax_left, xmax_right)
         elif mirror_sense == 16:
             # One wing, no right workspace
             xmin, xmax = monitor_range(mon)
