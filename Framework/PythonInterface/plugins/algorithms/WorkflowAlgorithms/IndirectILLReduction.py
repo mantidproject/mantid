@@ -1,4 +1,4 @@
-#pylint: disable=no-init,too-many-instance-attributes,invalid-name,too-many-branches
+#pylint: disable=no-init,too-many-instance-attributes,invalid-name
 from __future__ import (absolute_import, division, print_function)
 
 import os.path
@@ -232,6 +232,25 @@ def shift_spectra(ws1, ws2=None, shift_option=False, masking=False):
         MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=x[end_bin], XMax=x[end])
 
     return start_bin, end_bin
+
+def mask_reduced_ws(red, x, xstart, xend):
+    """
+    Args:
+        red:      reduced workspace
+        x:        x-values of the workspace (energy transfer)
+        xstart:   MaskBins between 0 and xstart
+        xend:     MaskBins between xend and x[-1]
+
+    """
+
+    if xstart > 0:
+        logger.debug('Mask bins smaller than %d' % (xstart + 1))
+        MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[0], XMax=x[xstart])
+    if xend < len(x) - 1:
+        logger.debug('Mask bins larger than %d' % (xend - 1))
+        MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xend], XMax=x[-1])
+
+    logger.notice('Bins out of energy range [%f %f] meV are masked' % (x[xstart], x[xend - 1]))
 
 def convert_to_energy(ws):
     """
@@ -725,75 +744,65 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # Delete the left and right monitors
         DeleteWorkspace('__left_mon')
         DeleteWorkspace('__right_mon')
-        # Determine global bins for masking
-        xmin = np.maximum(xmin_left, xmin_right)
-        xmax = np.minimum(xmax_left, xmax_right)
 
-        # Masking bins according to their bin numbers
-        if xmin > 0:
-            self.log().debug('Mask bins (left ws and right ws) smaller than %d' % xmin)
-            MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=0, XMax=xmin)
-            MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=0, XMax=xmin)
-        if xmax < size:
-            self.log().debug('Mask bins (left ws and right ws) larger than %d' % (xmax - 1))
-            MaskBins(InputWorkspace=left, OutputWorkspace=left, XMin=xmax, XMax=size)
-            MaskBins(InputWorkspace=right, OutputWorkspace=right, XMin=xmax, XMax=size)
+        # Check mirror_sense
+        mirror_sense = 0
+        if mtd[red].getRun().hasProperty('Doppler.mirror_sense'):
+            # Get mirror_sense from run
+            # mirror_sense 14 : two wings
+            # mirror_sense 16 : one wing
+            mirror_sense = mtd[red].getRun().getLogData('Doppler.mirror_sense').value
 
-        # Get new reduced workspaces
-        start_bin, end_bin = perform_unmirror(red, left, right, self._unmirror_option)
+        # Energy transfer according to mirror_sense and unmirror_option
+        start_bin = 0
+        end_bin = 0
+        if mirror_sense == 14 and self._unmirror_option == 0:
+            self.log().warning('Input run #%s has two wings, no energy transfer can be performed' % run)
+        elif mirror_sense == 14 and self._unmirror_option > 0:
+            start_bin, end_bin = perform_unmirror(red, left, right, self._unmirror_option)
+            convert_to_energy(red)
+        elif mirror_sense == 16:
+            self.log().information('Input run #%s has one wing, perform energy transfer' % run)
+            convert_to_energy(red)
+        else:
+            self.log().warning('Input run #%s: no Doppler.mirror_sense defined' % run)
+            convert_to_energy(red)
 
         convert_to_energy(left)
         convert_to_energy(right)
-
-        # Energy transfer
-        mirror_sense = 0
-        if self._unmirror_option == 0:
-            # Get mirror_sense from run
-            if mtd[red].getRun().hasProperty('Doppler.mirror_sense'):
-                # mirror_sense 14 : two wings
-                # mirror_sense 16 : one wing
-                mirror_sense = mtd[red].getRun().getLogData('Doppler.mirror_sense').value
-                if mirror_sense == 14:
-                    self.log().warning('Input run #%s has two wings, no energy transfer can be performed' % run)
-                elif mirror_sense == 16:
-                    self.log().information('Input run #%s has one wing, perform energy transfer' % run)
-                    convert_to_energy(red)
-            else:
-                self.log().warning('Input run #%s has no property Doppler.mirror_sense. ' % run)
-        else:
-            convert_to_energy(red)
 
         ConvertSpectrumAxis(InputWorkspace=left, OutputWorkspace=left, Target='Theta', EMode='Indirect')
         ConvertSpectrumAxis(InputWorkspace=right, OutputWorkspace=right, Target='Theta', EMode='Indirect')
         ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
 
-        # Mask corrupted bins according to shifted workspaces
-        # Reload X-values (now in meV)
+        # Mask corrupted bins according to shifted workspaces or monitor range
+        # Reload X-values (now in meV, except for unmirror=0 and mirro_sense=14)
         x = mtd[red].readX(0)
 
-        # Mask bins of reduced workspace
-        if self._unmirror_option == 0 and mirror_sense == 14:
-            if xmin_left > 0:
-                self.log().debug('Mask red ws bins smaller than %d' % xmin_left)
-                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[0], XMax=x[xmin_left])
+        # Initialisation, please note that masking with these values does not work
+        xmin = 0
+        xmax = len(x) - 1
+
+        # Mask bins out of final energy or monitor range
+        if start_bin != 0 and end_bin != 0:
+            xmin = np.maximum(xmin_left, xmin_right)
+            xmax = np.minimum(xmax_left, xmax_right)
+            # Shifted workspaces
+            xmin = np.maximum(xmin, start_bin)
+            xmax = np.minimum(xmax, end_bin)
+        elif mirror_sense == 14 and self._unmirror_option == 0:
+            # Unmirror=0 two wings
+            xmin = xmin_left
+            xmax = xmax_right + int(x[-1] / 2)
             if xmin_right < size and xmax_left < size:
+                # Mask mid bins
                 self.log().debug('Mask red ws bins between %d, %d' % (xmax_left, int(size / 2) + xmin_right - 1))
                 MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xmax_left], XMax=x[int(size / 2) + xmin_right])
-            if xmax_right < size:
-                self.log().debug('Mask red ws bins larger than %d' % (xmax_right + int(size / 2) - 1))
-                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xmax_right + int(size / 2)], XMax=x[-1])
-        else:
-            # Mask bins out of final energy range
-            if start_bin > 0:
-                self.log().debug('Mask bins smaller than %d and larger than %d' % (start_bin, end_bin - 1))
-                self.log().notice(
-                    'Bins out of energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin - 1]))
-                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[0], XMax=x[start_bin])
-            if end_bin < len(x) - 1:
-                self.log().debug('Mask bins smaller than %d and larger than %d' % (start_bin, end_bin - 1))
-                self.log().notice(
-                    'Bins out of energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin - 1]))
-                MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[end_bin], XMax=x[-1])
+        elif mirror_sense == 16:
+            # One wing, no right workspace
+            xmin, xmax = monitor_range(mon)
+
+        mask_reduced_ws(red, x, xmin, xmax)
 
         # cleanup by-products if not needed
         if not self._debug_mode:
