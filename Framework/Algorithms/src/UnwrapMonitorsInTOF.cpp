@@ -13,6 +13,11 @@
 
 namespace
 {
+  const double specialWavelengthCutoff = -1.0;
+  const double specialTimeOfFlightCutoff = -1.0;
+  const int specialIndex = -1;
+
+
 
 struct MinAndMaxTof {
   MinAndMaxTof(double minTof, double maxTof): minTof(minTof), maxTof(maxTof) {}
@@ -21,9 +26,9 @@ struct MinAndMaxTof {
 };
 
 struct MinAndMaxIndex {
-  MinAndMaxIndex(size_t minIndex, size_t maxIndex): minIndex(minIndex), maxIndex(maxIndex) {}
-  size_t minIndex;
-  size_t maxIndex;
+  MinAndMaxIndex(int minIndex, int maxIndex): minIndex(minIndex), maxIndex(maxIndex) {}
+  int minIndex;
+  int maxIndex;
 };
 
 /**
@@ -44,8 +49,8 @@ MinAndMaxTof getMinAndMaxTofForDistanceFromSoure(double distanceFromSource, doub
   const double microsecondConversion = 1e6;
   const double conversionConstant = (distanceFromSource*Mantid::PhysicalConstants::NeutronMass*microsecondConversion)/
                                      (Mantid::PhysicalConstants::h*angstromConversion);
-  const double minTof = conversionConstant*lowerWavelengthLimit;
-  const double maxTof = conversionConstant*upperWavelengthLimit;
+  const double minTof = lowerWavelengthLimit == specialWavelengthCutoff ? specialTimeOfFlightCutoff : conversionConstant*lowerWavelengthLimit;
+  const double maxTof = upperWavelengthLimit == specialWavelengthCutoff ? specialTimeOfFlightCutoff : conversionConstant*upperWavelengthLimit;
   return MinAndMaxTof(minTof, maxTof);
 }
 
@@ -99,11 +104,11 @@ Mantid::HistogramData::Points getPoints(Mantid::API::MatrixWorkspace* workspace,
 }
 
 MinAndMaxIndex getMinAndMaxIndex(const MinAndMaxTof& minMaxTof, const Mantid::HistogramData::Points& points) {
-  size_t minIndex = 0;
-  size_t maxIndex = 0;
+  int minIndex = specialIndex;
+  int maxIndex = specialIndex;
   const auto minCutOff = minMaxTof.minTof;
   const auto maxCutOff = minMaxTof.maxTof;
-  size_t index = 0;
+  int index = 0;
   for (const auto& element : points) {
     if (element < minCutOff) {
       minIndex = index;
@@ -117,21 +122,25 @@ MinAndMaxIndex getMinAndMaxIndex(const MinAndMaxTof& minMaxTof, const Mantid::Hi
     ++index;
   }
 
-  // We have to take care since the maxIndex can be 0 for two reasons
-  // 1. The maxCutOff is smaller than the smallest time of flight value of the workspace, then the 0 index is correct
+  // We have to take care since the maxIndex can be a special index for two reasons
+  // 1. The maxCutOff is smaller than the smallest time of flight value of the workspace, then the special index index is correct
   // 2. The maxCutOff is larger then the largest time of flight value of the workspace, then the last index is correct
-  if (maxIndex == 0) {
+  if (maxIndex == specialIndex) {
     if (points[points.size() -1 ] <  maxCutOff) {
-        maxIndex = points.size() - 1;
+        maxIndex = static_cast<int>(points.size()) - 1;
     }
   }
+
+  // The min index is the index which is the largest lower bound index which is not in the TOF region, hence we need index + 1 as the
+  // lower bound index
+  minIndex += 1;
 
   return MinAndMaxIndex(minIndex, maxIndex);
 }
 
 
-void setTofBelowLowerBoundToZero(std::vector<double>& doubledData, size_t minIndex) {
-  if (minIndex == 0) {
+void setTofBelowLowerBoundToZero(std::vector<double>& doubledData, int minIndex) {
+  if (minIndex == specialIndex) {
     return;
   }
   auto begin = doubledData.begin();
@@ -141,7 +150,7 @@ void setTofBelowLowerBoundToZero(std::vector<double>& doubledData, size_t minInd
 }
 
 
-void setTofAboveUpperBoundToZero(std::vector<double>& doubledData, size_t maxIndex) {
+void setTofAboveUpperBoundToZero(std::vector<double>& doubledData, int maxIndex) {
   if (maxIndex >= doubledData.size() - 1) {
     return;
   }
@@ -174,8 +183,13 @@ Mantid::HistogramData::Counts getCounts(Mantid::API::MatrixWorkspace* workspace,
 
   // Now set everything to zero entires which correspond to TOF which is less than minTof and more than maxTof
   auto minAndMaxIndex = getMinAndMaxIndex(minMaxTof, points);
-  setTofBelowLowerBoundToZero(doubledData, minAndMaxIndex.minIndex);
-  setTofAboveUpperBoundToZero(doubledData, minAndMaxIndex.maxIndex);
+  if (minMaxTof.minTof != specialTimeOfFlightCutoff) {
+    setTofBelowLowerBoundToZero(doubledData, minAndMaxIndex.minIndex);
+  }
+
+  if (minMaxTof.maxTof != specialTimeOfFlightCutoff) {
+    setTofAboveUpperBoundToZero(doubledData, minAndMaxIndex.maxIndex);
+  }
   return Mantid::HistogramData::Counts(doubledData);
 }
 
@@ -209,6 +223,46 @@ std::vector<size_t> getWorkspaceIndicesForMonitors(Mantid::API::MatrixWorkspace*
   }
   return workspaceIndices;
 }
+
+/**
+ * We step through the BinEdges object and make sure that each bin width is the same
+ * This is done via a pair of moving iterators which are spaced by one BinEdge entry.
+ *
+ * @param binEdges a handle to the bin edges object.
+ * @returns true if the bin edges are linear spaced else false.
+ **/
+bool areBinEdgesLinearlySpaced(const Mantid::HistogramData::BinEdges& binEdges) {
+  auto binEdgesAreLinearlySpaced = true;
+  auto lowerBinEdge = binEdges.cbegin();
+  auto upperBinEge = binEdges.cbegin();
+  ++upperBinEge;
+  auto firstBinWidth = *upperBinEge - *lowerBinEdge;
+  for (; upperBinEge != binEdges.cend(); ++lowerBinEdge, ++upperBinEge) {
+    auto binWidth = *upperBinEge - *lowerBinEdge;
+    auto difference = std::abs(binWidth - firstBinWidth);
+    // The tolerance of the difference is set such that it must be within a microsecond
+    if (difference > 1e-6) {
+      binEdgesAreLinearlySpaced = false;
+      break;
+    }
+  }
+  return binEdgesAreLinearlySpaced;
+}
+
+bool isLinearlySpaced(Mantid::API::MatrixWorkspace_sptr workspace, const std::vector<size_t>& monitorWorkspaceIndices) {
+  // Check for each monitor that the spectrum is linearly spaced
+  auto isLinearlySpaced = true;
+  for (const auto& workspaceIndex : monitorWorkspaceIndices) {
+    auto histogram = workspace->histogram(workspaceIndex);
+    auto binEdges = histogram.binEdges();
+    if (!areBinEdgesLinearlySpaced(binEdges)) {
+      isLinearlySpaced = false;
+      break;
+    }
+  }
+  return isLinearlySpaced;
+}
+
 }
 
 namespace Mantid {
@@ -250,8 +304,8 @@ void UnwrapMonitorsInTOF::init() {
       Kernel::make_unique<WorkspaceProperty<Mantid::API::MatrixWorkspace>>("OutputWorkspace", "",
                                                              Direction::Output),
       "An output workspace.");
-  declareProperty<double>("WavelengthMin", -1.0,  "A lower bound of the wavelength range.");
-  declareProperty<double>("WavelengthMax", -1.0, "An upper bound of the wavelength range.");
+  declareProperty<double>("WavelengthMin", specialWavelengthCutoff,  "A lower bound of the wavelength range.");
+  declareProperty<double>("WavelengthMax", specialWavelengthCutoff, "An upper bound of the wavelength range.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -268,6 +322,12 @@ void UnwrapMonitorsInTOF::exec() {
 
   auto outputWorkspace = Mantid::API::MatrixWorkspace_sptr(inputWorkspace->clone());
   const auto workspaceIndices = getWorkspaceIndicesForMonitors(outputWorkspace.get());
+
+  // At the moment we can only support linearly spaced monitor data. If the data is
+  // logarithmic we might have to rebin.
+  if (!isLinearlySpaced(outputWorkspace, workspaceIndices)) {
+    throw std::runtime_error("Monitor data which is not linearly binned is currently not supported.");
+  }
 
   for (const auto& workspaceIndex : workspaceIndices) {
       auto minMaxTof = getMinAndMaxTof(outputWorkspace.get(), workspaceIndex,
@@ -290,15 +350,16 @@ std::map<std::string, std::string> UnwrapMonitorsInTOF::validateInputs() {
   // The lower wavelength boundary needs to be smaller than the upper wavelength boundary
   double lowerWavelengthLimit = getProperty("WavelengthMin");
   double upperWavelengthLimit = getProperty("WavelengthMax");
-  if (lowerWavelengthLimit != -1.0 && lowerWavelengthLimit < 0.0) {
+  if (lowerWavelengthLimit != specialWavelengthCutoff && lowerWavelengthLimit < 0.0) {
       invalidProperties["WavelengthMin"] = "The lower wavelength limit must be set to a positive value.";
   }
 
-  if (upperWavelengthLimit != -1.0 && upperWavelengthLimit < 0.0) {
+  if (upperWavelengthLimit != specialWavelengthCutoff && upperWavelengthLimit < 0.0) {
       invalidProperties["WavelengthMax"] = "The upper wavelength limit must be set to a positive value.";
   }
 
-  if (lowerWavelengthLimit != -1.0  && upperWavelengthLimit != -1.0 && lowerWavelengthLimit >= upperWavelengthLimit) {
+  if (lowerWavelengthLimit != specialWavelengthCutoff  && upperWavelengthLimit != specialWavelengthCutoff 
+    && lowerWavelengthLimit >= upperWavelengthLimit) {
       invalidProperties["WavelengthMin"] = "The lower wavelength limit must be smaller than the upper wavelnegth limit.";
       invalidProperties["WavelengthMax"] = "The lower wavelength limit must be smaller than the upper wavelnegth limit.";
   }
