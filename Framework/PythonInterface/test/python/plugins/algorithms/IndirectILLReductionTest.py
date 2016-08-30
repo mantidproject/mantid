@@ -1,6 +1,8 @@
+#pylint:disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-import os, unittest, numpy as np
+import os
+import unittest
 from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup, AnalysisDataService
 from testhelpers import run_algorithm

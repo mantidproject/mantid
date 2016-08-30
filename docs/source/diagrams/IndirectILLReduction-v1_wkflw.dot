@@ -17,7 +17,8 @@ digraph IndirectILLReduction {
   subgraph descision {
     $decision_style   
     Save          
-    HaveCalibrationWorkspace  
+    HaveCalibrationWorkspace
+    HaveBackgroundRun
     UnmirrorOption
   }
 
@@ -27,6 +28,7 @@ digraph IndirectILLReduction {
   	VanadiumRun
   	MapFile
   	CalibrationWorkspace
+  	BackgroundRun
   	Analyser
   	Reflection
   	UnmirrorOption
@@ -49,6 +51,7 @@ digraph IndirectILLReduction {
     Divide
     Plus
     Scale
+    Minus
   }
 
   subgraph processes {
@@ -70,7 +73,11 @@ digraph IndirectILLReduction {
   GroupDetectors -> NormaliseToMonitor
   NormaliseToMonitor -> M_MaskBins
   MaskingRange -> M_MaskBins
-  M_MaskBins -> HaveCalibrationWorkspace
+  M_MaskBins -> HaveBackgroundRun
+  HaveBackgroundRun -> Minus [label="Yes"]
+  HaveBackgroundRun -> HaveCalibrationWorkspace [label="No"]
+  BackgroundRun -> HaveBackgroundRun
+  Minus -> HaveCalibrationWorkspace
   HaveCalibrationWorkspace -> ExtractWorkspace [label="No"]
   HaveCalibrationWorkspace -> Divide [label="Yes"]
   CalibrationWorkspace -> Divide
