@@ -702,6 +702,14 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         if self._background_file:
             Minus(LHSWorkspace=red, RHSWorkspace='background', OutputWorkspace=red)
             self._debug(red, bsub)
+            # check the integral after subtraction
+            __temp = ReplaceSpecialValues(InputWorkspace=red,NaNValue='0')
+            __temp = Integration(InputWorkspace=__temp)
+            for i in range(__temp.getNumberHistograms()):
+                if __temp.dataY(i)[0] < 0:
+                    self.log().warning('Integral of spectrum #%d is negative after background subtraction.'
+                                       'Check the background run' %i)
+            DeleteWorkspace(__temp_integral)
 
         # Calibrate to vanadium calibration workspace if specified
         # note, this is a one-column calibration workspace
