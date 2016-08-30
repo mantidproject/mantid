@@ -228,6 +228,7 @@ vtkFiltersSources
 ${vtkjsoncpp_LIBRARIES}
 vtkPVVTKExtensionsDefault
 ${QWT_LIBRARIES}
+Qt4::QtCore
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
 ${NEXUS_LIBRARIES}
