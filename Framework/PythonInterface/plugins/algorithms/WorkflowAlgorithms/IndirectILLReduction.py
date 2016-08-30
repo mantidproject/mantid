@@ -790,9 +790,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                     'Bins out of energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin - 1]))
                 MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[0], XMax=x[start_bin])
             if end_bin < len(x) - 1:
-                self.log().debug('Mask bins smaller than %d and larger than %d' % (start_bin, end_bin - 1))
-                self.log().notice(
-                    'Bins out of energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin - 1]))
+
                 MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[end_bin], XMax=x[-1])
 
         # cleanup by-products if not needed
