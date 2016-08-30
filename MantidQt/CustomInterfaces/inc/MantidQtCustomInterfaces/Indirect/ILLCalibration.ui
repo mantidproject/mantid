@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>344</height>
+    <width>543</width>
+    <height>294</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -39,6 +39,9 @@
         </property>
         <property name="label" stdset="0">
          <string>Run File</string>
+        </property>
+        <property name="algorithmAndProperty" stdset="0">
+         <string>IndirectILLReduction|Run</string>
         </property>
        </widget>
       </item>
@@ -122,6 +125,9 @@
               <string>.xml</string>
              </stringlist>
             </property>
+            <property name="algorithmAndProperty" stdset="0">
+             <string>ILLIN16BCalibration|MapFile</string>
+            </property>
            </widget>
           </item>
          </layout>
@@ -137,76 +143,21 @@
       <string>Calibration</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="1" alignment="Qt::AlignRight">
-       <widget class="QLabel" name="lbScaleFactor">
+      <item row="0" column="7">
+       <widget class="QDoubleSpinBox" name="spScaleFactor">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scale factor&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="text">
-         <string>Scale factor:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="5">
-       <widget class="QDoubleSpinBox" name="spPeakUpper">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Peak integration range&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="suffix">
-         <string> meV</string>
         </property>
         <property name="decimals">
          <number>3</number>
         </property>
-        <property name="minimum">
-         <double>-99.989999999999995</double>
-        </property>
         <property name="singleStep">
-         <double>0.001000000000000</double>
+         <double>0.100000000000000</double>
         </property>
         <property name="value">
-         <double>0.010000000000000</double>
+         <double>1.000000000000000</double>
         </property>
        </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="ckMirrorSense">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mirror Sense&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string>Mirror Sense</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" alignment="Qt::AlignLeft">
-       <widget class="QLabel" name="lbPeakRange">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Peak integration range&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="text">
-         <string>Peak range:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="7">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
       <item row="0" column="1" alignment="Qt::AlignLeft">
        <widget class="QDoubleSpinBox" name="spPeakLower">
@@ -240,19 +191,61 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="5">
-       <widget class="QDoubleSpinBox" name="spScaleFactor">
+      <item row="0" column="5">
+       <widget class="QDoubleSpinBox" name="spPeakUpper">
         <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scale factor&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Peak integration range&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="suffix">
+         <string> meV</string>
         </property>
         <property name="decimals">
          <number>3</number>
         </property>
+        <property name="minimum">
+         <double>-99.989999999999995</double>
+        </property>
         <property name="singleStep">
-         <double>0.100000000000000</double>
+         <double>0.001000000000000</double>
         </property>
         <property name="value">
-         <double>1.000000000000000</double>
+         <double>0.010000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="8">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="0" alignment="Qt::AlignLeft">
+       <widget class="QLabel" name="lbPeakRange">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Peak integration range&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Peak range:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="6">
+       <widget class="QLabel" name="lbScaleFactor">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scale factor&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>Scale factor:</string>
         </property>
        </widget>
       </item>
@@ -267,7 +260,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>40</height>
+       <height>10</height>
       </size>
      </property>
     </spacer>

@@ -545,10 +545,16 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             # traverse over items in workspace group and reduce individually
             for i in range(0, mtd[self._red_ws].size()):
 
+                # get the run number (if it is summed the run number of the first ws will be for the sum)
                 run = '{0:06d}'.format(mtd[self._red_ws].getItem(i).getRunNumber())
+
+                # get the name of the ws (it won't be the same as run, if there is a sum,
+                # since the loader will concatenate run numbers in the name, e.g. RUN1_RUN2_...
+                name = mtd[self._red_ws].getItem(i).getName()
+
                 ws = run + '_' + self._red_ws
                 # prepend run number
-                RenameWorkspace(InputWorkspace = run, OutputWorkspace = ws)
+                RenameWorkspace(InputWorkspace = name, OutputWorkspace = ws)
 
                 progress.report("Reducing run #" + run)
                 # check if the run is QENS type and call reduction for each run

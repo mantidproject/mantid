@@ -42,10 +42,6 @@ void ILLCalibration::run() {
   QString runFilename = m_uiForm.rfRunFile->getFirstFilename();
   calibrationAlg->setProperty("Run", runFilename.toStdString());
 
-  // Set options
-  bool mirrorSense = m_uiForm.ckMirrorSense->isChecked();
-  calibrationAlg->setProperty("MirrorSense", mirrorSense);
-
   bool useMapFile = m_uiForm.rdChoose->isChecked();
   if (useMapFile) {
     QString mapFilename = m_uiForm.rfMapFile->getFirstFilename();
