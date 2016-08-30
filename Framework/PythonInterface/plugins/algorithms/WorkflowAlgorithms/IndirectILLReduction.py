@@ -709,7 +709,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                 if __temp.dataY(i)[0] < 0:
                     self.log().warning('Integral of spectrum #%d is negative after background subtraction.'
                                        'Check the background run' %i)
-            DeleteWorkspace(__temp_integral)
+            DeleteWorkspace(__temp)
 
         # Calibrate to vanadium calibration workspace if specified
         # note, this is a one-column calibration workspace
