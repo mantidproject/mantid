@@ -121,8 +121,6 @@ public:
   void padSpectra();
   // Pad pixels in the workspace using specList. Requires a non-empty vector
   virtual void padSpectra(const std::vector<int32_t> &specList);
-  // Remove pixels in the workspace that do not contain events.
-  void deleteEmptyLists();
 
   //------------------------------------------------------------
   // The total number of events across all of the spectra.

@@ -514,23 +514,6 @@ void EventWorkspace::padSpectra(const std::vector<int32_t> &specList) {
   }
 }
 
-void EventWorkspace::deleteEmptyLists() {
-  // copy over the data
-  std::vector<EventList *> notEmpty;
-  for (auto &eventList : this->data) {
-    if (!eventList->empty())
-      notEmpty.push_back(eventList);
-    else
-      delete eventList;
-  }
-
-  // replace the old vector
-  this->data.swap(notEmpty);
-
-  // Clearing the MRU list is a good idea too.
-  this->clearMRU();
-}
-
 /// Deprecated, use mutableX() instead. Return the data X vector at a given
 /// workspace index
 /// @param index :: the workspace index to return
