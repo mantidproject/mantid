@@ -40,7 +40,6 @@ using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::LinearGenerator;
 
-//==========================================================================================
 class EventWorkspaceTest : public CxxTest::TestSuite {
 private:
   EventWorkspace_sptr ew;
@@ -112,36 +111,10 @@ public:
    */
   EventWorkspace_sptr createFlatEventWorkspace() {
     return createEventWorkspace(1, 1, true);
-    //    EventWorkspace_sptr retVal(new EventWorkspace);
-    //    retVal->initialize(NUMPIXELS,1,1);
-    //    //Make fake eventscreateEventWorkspace
-    //    for (int pix=0; pix<NUMPIXELS; pix++)
-    //    {
-    //      for (int i=0; i<NUMBINS-1; i++)
-    //      {
-    //        //Two events per bin
-    //        retVal->getSpectrum(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
-    //        retVal->getSpectrum(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
-    //      }
-    //      retVal->getSpectrum(pix).addDetectorID(pix);
-    //      retVal->getSpectrum(pix).setSpectrumNo(pix);
-    //    }
-    //
-    //    //Create the x-axis for histogramming.
-    //    Kernel::cow_ptr<MantidVec> axis;
-    //    MantidVec& xRef = axis.access();
-    //    xRef.resize(NUMBINS);
-    //    for (int i = 0; i < NUMBINS; ++i)
-    //      xRef[i] = i*BIN_DELTA;
-    //    //Set all the histograms at once.
-    //    retVal->setAllX(axis);
-    //    return retVal;
   }
 
-  //------------------------------------------------------------------------------
   void setUp() override { ew = createEventWorkspace(1, 1); }
 
-  //------------------------------------------------------------------------------
   void test_constructor() {
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), NUMPIXELS);
     TS_ASSERT_EQUALS(ew->blocksize(), NUMBINS - 1);
@@ -184,20 +157,6 @@ public:
                      ew2->readY(1)[0], 4.0, 1e-5);
   }
 
-  //------------------------------------------------------------------------------
-  void testgetOrAddEventList() {
-    // Pick some workspace index
-    EventList &el = ew->getOrAddEventList(1023);
-    // Now you got lots more histograms
-    TS_ASSERT_EQUALS(ew->getNumberHistograms(), 1023 + 1);
-    TS_ASSERT_EQUALS(el.getNumberEvents(), 0);
-    TS_ASSERT_EQUALS(el.getDetectorIDs().size(), 0);
-    TS_ASSERT(!el.hasDetectorID(1023));
-
-    TS_ASSERT_EQUALS(ew->getAxis(1)->length(), 1023 + 1);
-  }
-
-  //------------------------------------------------------------------------------
   void test_getMemorySize() {
     // Because of the way vectors allocate, we can only know the minimum amount
     // of memory that can be used.
@@ -206,13 +165,11 @@ public:
     TS_ASSERT_LESS_THAN_EQUALS(min_memory, ew->getMemorySize());
   }
 
-  //------------------------------------------------------------------------------
   void test_destructor() {
     EventWorkspace *ew2 = new EventWorkspace();
     delete ew2;
   }
 
-  //------------------------------------------------------------------------------
   void test_constructor_setting_default_x() {
     // Do the workspace, but don't set x explicity
     ew = createEventWorkspace(1, 0);
@@ -254,7 +211,6 @@ public:
     }
   }
 
-  //------------------------------------------------------------------------------
   void test_padSpectra() {
     bool timing = false;
     ew = createEventWorkspace(true, false);
@@ -283,7 +239,6 @@ public:
     }
   }
 
-  //------------------------------------------------------------------------------
   void test_uneven_pixel_ids() {
     EventWorkspace_sptr uneven(new EventWorkspace);
     uneven->initialize(NUMPIXELS / 10, 1, 1);
@@ -333,7 +288,6 @@ public:
     TS_ASSERT_THROWS(uneven->dataX(NUMPIXELS / 10), std::range_error);
   }
 
-  //------------------------------------------------------------------------------
   void test_data_access() {
     // Non-const access throws errors for Y & E - not for X
     TS_ASSERT_THROWS_NOTHING(ew->dataX(1));
@@ -348,7 +302,6 @@ public:
     // Can't try the const access; copy constructors are not allowed.
   }
 
-  //------------------------------------------------------------------------------
   void test_setX_individually() {
     // Create A DIFFERENT x-axis for histogramming.
     auto axis = Kernel::make_cow<HistogramData::HistogramX>(
@@ -408,7 +361,6 @@ public:
     }
   }
 
-  //------------------------------------------------------------------------------
   void test_histogram_cache() {
     // Try caching and most-recently-used MRU list.
     EventWorkspace_const_sptr ew2 =
@@ -466,7 +418,6 @@ public:
     TS_ASSERT_EQUALS(ew2->MRUSize(), 0);
   }
 
-  //------------------------------------------------------------------------------
   void test_histogram_cache_dataE() {
     // Try caching and most-recently-used MRU list.
     EventWorkspace_const_sptr ew2 = ew;
@@ -621,7 +572,6 @@ public:
     */
   }
 
-  //------------------------------------------------------------------------------
   void test_droppingOffMRU() {
     // Try caching and most-recently-used MRU list.
     EventWorkspace_const_sptr ew2 =
@@ -647,7 +597,6 @@ public:
     TS_ASSERT_EQUALS(ew2->MRUSize(), 50);
   }
 
-  //------------------------------------------------------------------------------
   void test_sortAll_TOF() {
     EventWorkspace_sptr test_in =
         WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);

@@ -111,9 +111,6 @@ public:
   // Set the x-axis data (histogram bins) for all pixels
   virtual void setAllX(const HistogramData::BinEdges &x);
 
-  // Get or add an EventList
-  EventList &getOrAddEventList(const std::size_t workspace_index);
-
   // Resizes the workspace to contain the number of spectra/event lists given
   virtual void resizeTo(const std::size_t numSpectra);
   // Pad pixels in the workspace using the loaded spectra. Requires a non-empty

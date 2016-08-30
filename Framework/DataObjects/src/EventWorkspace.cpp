@@ -427,35 +427,6 @@ size_t EventWorkspace::getMemorySize() const {
   return total;
 }
 
-/** Either return an existing EventList from the list, or
- * create a new one if needed and expand the list.
- *  to finalize the stuff that needs to.
- **
- * @param workspace_index :: The workspace index number.
- * @return An event list (new or existing) at the index provided
- */
-EventList &
-EventWorkspace::getOrAddEventList(const std::size_t workspace_index) {
-  size_t old_size = data.size();
-  if (workspace_index >= old_size) {
-    // Increase the size of the eventlist lists.
-    for (size_t wi = old_size; wi <= workspace_index; wi++) {
-      // Need to make a new one!
-      auto newel = new EventList(mru, specnum_t(wi));
-      // Add to list
-      this->data.push_back(newel);
-    }
-  }
-
-  // Now it should be safe to return the value
-  EventList *result = data[workspace_index];
-  if (!result)
-    throw std::runtime_error(
-        "EventWorkspace::getOrAddEventList: NULL EventList found.");
-  else
-    return *result;
-}
-
 /** Resizes the workspace to contain the number of spectra/events lists given.
  *  Any existing eventlists will be cleared first.
  *  Spectrum numbers will be set to count from 1
