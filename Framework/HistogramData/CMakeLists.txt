@@ -8,8 +8,6 @@ set ( SRC_FILES
 	src/FrequencyVariances.cpp
 	src/Histogram.cpp
 	src/HistogramMath.cpp
-	src/PointStandardDeviations.cpp
-	src/PointVariances.cpp
 	src/Points.cpp
 )
 
