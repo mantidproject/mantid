@@ -69,9 +69,6 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
                 with h5py.File(run, 'r') as nexusfile:
                     if self.checkCriteria(run, nexusfile):
                         filestosum += run + '+'
-                    else:
-                        filestosum = ''
-                        break
 
             if filestosum:
                 # trim the last +
