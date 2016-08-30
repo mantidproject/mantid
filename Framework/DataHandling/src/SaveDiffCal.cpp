@@ -122,8 +122,8 @@ void SaveDiffCal::writeIntFieldFromSVWS(
   // output array defaults to all one (one group, use the pixel)
   std::vector<int32_t> values(m_numValues, 1);
 
-  int32_t value;
   if (bool(ws)) {
+    int32_t value;
     for (size_t i = 0; i < m_numValues; ++i) {
       auto &ids = ws->getSpectrum(i).getDetectorIDs();
       auto found = m_detidToIndex.find(*(ids.begin()));
