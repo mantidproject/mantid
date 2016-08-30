@@ -150,6 +150,8 @@ private:
   std::list<API::MatrixWorkspace_sptr> m_inMatrixWS;
   /// Addition tables for event workspaces
   std::vector<AdditionTable> m_tables;
+  /// Total number of histograms in the output workspace
+  size_t m_outputSize;
 };
 
 } // namespace Algorithm

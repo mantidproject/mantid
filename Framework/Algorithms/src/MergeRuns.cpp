@@ -137,6 +137,8 @@ void MergeRuns::buildAdditionTables() {
     // exist
   }
 
+  m_outputSize = m_inEventWS[0]->getNumberHistograms();
+
   for (size_t workspaceNum = 1; workspaceNum < m_inEventWS.size();
        workspaceNum++) {
     // Get the workspace
@@ -191,6 +193,7 @@ void MergeRuns::buildAdditionTables() {
         } else {
           // Did not find it!
           outWI = -1; // Marker to mean its not in the LHS.
+          ++m_outputSize;
         }
         table.emplace_back(inWI, outWI);
         done = true; // Great, we did it.
@@ -224,6 +227,7 @@ void MergeRuns::buildAdditionTables() {
 
         // So we need to add it as a new workspace index
         table.emplace_back(inWI, -1);
+        ++m_outputSize;
       }
     }
 
@@ -249,17 +253,21 @@ void MergeRuns::execEvent() {
 
   // Create a new output event workspace, by copying the first WS in the list
   EventWorkspace_sptr inputWS = m_inEventWS[0];
-  EventWorkspace_sptr outWS(inputWS->clone());
+  auto outWS = createWorkspace<EventWorkspace>(
+      m_outputSize, inputWS->x(0).size(), inputWS->y(0).size());
+  WorkspaceFactory::Instance().initializeFromParent(inputWS, outWS, false);
+  const auto inputSize = inputWS->getNumberHistograms();
+  for(size_t i=0; i<inputSize; ++i)
+    outWS->getSpectrum(i) = inputWS->getSpectrum(i);
 
   int64_t n = m_inEventWS.size() - 1;
   m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, n);
 
   // Note that we start at 1, since we already have the 0th workspace
+  auto current = inputSize;
   for (size_t workspaceNum = 1; workspaceNum < m_inEventWS.size();
        workspaceNum++) {
-    // You are adding this one here
-    EventWorkspace_sptr addee = m_inEventWS[workspaceNum];
-
+    const auto &addee = *m_inEventWS[workspaceNum];
     const auto &table = m_tables[workspaceNum - 1];
 
     // Add all the event lists together as the table says to do
@@ -267,16 +275,15 @@ void MergeRuns::execEvent() {
       int64_t inWI = WI.first;
       int64_t outWI = WI.second;
       if (outWI >= 0) {
-        outWS->getSpectrum(outWI) += addee->getSpectrum(inWI);
+        outWS->getSpectrum(outWI) += addee.getSpectrum(inWI);
       } else {
-        // Add an entry to list
-        outWS->getOrAddEventList(outWS->getNumberHistograms()) +=
-            addee->getSpectrum(inWI);
+        outWS->getSpectrum(current) = addee.getSpectrum(inWI);
+        ++current;
       }
     }
 
     // Now we add up the runs
-    outWS->mutableRun() += addee->mutableRun();
+    outWS->mutableRun() += addee.run();
 
     m_progress->report();
   }
