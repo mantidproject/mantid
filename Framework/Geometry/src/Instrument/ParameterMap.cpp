@@ -1025,7 +1025,7 @@ void ParameterMap::copyFromParameterMap(const IComponent *oldComp,
   auto oldParameterNames = oldPMap->names(oldComp);
   for (const auto &oldParameterName : oldParameterNames) {
     Parameter_sptr thisParameter = oldPMap->get(oldComp, oldParameterName);
-    // Insert the fetched parameter in the m_map
+// Insert the fetched parameter in the m_map
 #if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4
     m_map.emplace(newComp->getComponentID(), thisParameter);
 #else
