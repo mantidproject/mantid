@@ -83,6 +83,8 @@ Improved
 
 - :ref:`FFT <algm-FFT>` deals correctly with histogram input data. Internally, it converts to point data, and the output is always a point data workspace. (It can be converted to histogram data using :ref:`ConvertToHistogram <algm-ConvertToHistogram>` if required).
 
+- :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` now also accepts a workspace name as input, as an alternative to an instrument definition xml file.
+
 Deprecated
 ##########
 
