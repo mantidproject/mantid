@@ -20,6 +20,7 @@ from mantid.simpleapi import AnalysisDataService
 VanadiumPeakPositions = [0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,
                          0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401]
 
+
 class PDRManager(object):
     """ Powder diffraction reduction workspace manager
     """
@@ -884,7 +885,6 @@ class HFIRPDRedControl(object):
 
         return True
 
-
     def retrieveCorrectionData(self, instrument, exp, scan, localdatadir):
         """ Retrieve including dowloading and/or local locating
         powder diffraction's correction files
@@ -898,7 +898,6 @@ class HFIRPDRedControl(object):
         """
         if instrument.upper() == 'HB2A':
             # For HFIR HB2A only
-
             try:
                 wsmanager = self._myWorkspaceDict[(exp, scan)]
             except KeyError as e:
@@ -945,9 +944,7 @@ class HFIRPDRedControl(object):
             # Other instruments
             raise NotImplementedError("Instrument %s is not supported to retrieve correction file." % (instrument))
 
-
-        return (True, [wavelength, localdetefffname, localexcldetfname])
-
+        return True, [wavelength, localdetefffname, localexcldetfname]
 
     def saveMergedScan(self, sfilename, mergeindex):
         """ Save the current merged scan
@@ -962,7 +959,6 @@ class HFIRPDRedControl(object):
                            Filename=sfilename)
 
         return
-
 
     def savePDFile(self, exp, scan, filetype, sfilename):
         """ Save a reduced workspace to gsas/fullprof/topaz data file
@@ -1147,6 +1143,40 @@ class HFIRPDRedControl(object):
 
         return rvalue
 
+    def download_spice_file(self, exp_number, scan_number):
+        """
+        Download SPICE file from HB2A data server
+        Args:
+            exp_number:
+            scan_number:
+
+        Returns: 2-tuple: boolean, string (file name or error message)
+
+        """
+        # FIXME/TODO/NOW : make this part work!
+
+        fullurl = "%s%s/exp%d/Datafiles/%s_exp%04d_scan%04d.dat" % (self._serverAddress,
+                    self._instrument.lower(), exp, self._instrument.upper(), exp, scan)
+        print "[DB] SPICE file URL: ", fullurl
+
+        cachedir = str(self.ui.lineEdit_cache.text()).strip()
+        if os.path.exists(cachedir) is False:
+            invalidcache = cachedir
+            cachedir = os.getcwd()
+            self.ui.lineEdit_cache.setText(cachedir)
+            self._logWarning("Cache directory %s is not valid. "
+                                 "Using current workspace directory %s as cache." % (invalidcache, cachedir) )
+
+
+        filename = '%s_exp%04d_scan%04d.dat' % (self._instrument.upper(), exp, scan)
+        srcFileName = os.path.join(cachedir, filename)
+        status, errmsg = downloadFile(fullurl, srcFileName)
+        if status is False:
+            self._logError(errmsg)
+            srcFileName = None
+        else:
+            rvalue = True
+
 #-------------------------------------------------------------------------------
 # External Methods
 #-------------------------------------------------------------------------------
@@ -1157,6 +1187,11 @@ def downloadFile(url, localfilepath):
     Arguments:
      - localfilepath :: local data file name with full path.
     """
+    # TODO/NOW/FIXME - Replace this by mantid.simpleapi.
+    # DownloadFile(Address='http://www.abc.com/a.dat', Filename='blabla.txt')
+    # ---------------------------------------------------------------------------
+    # RuntimeError
+
     # open URL
     try:
         response = urllib2.urlopen(url)

@@ -1,34 +1,63 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-class DateDialog(QDialog):
-    def __init__(self, parent = None):
-        super(DateDialog, self).__init__(parent)
 
+class SortOrderDialog(QDialog):
+    """
+
+    """
+    # TODO/FIXME/NOW - Make this dialog class work!
+    def __init__(self, parent=None):
+        """
+
+        Args:
+            parent:
+        """
+        super(SortOrderDialog, self).__init__(parent)
+
+        # set up layout
         layout = QVBoxLayout(self)
 
-        # nice widget for editing the date
-        self.datetime = QDateTimeEdit(self)
-        self.datetime.setCalendarPopup(True)
-        self.datetime.setDateTime(QDateTime.currentDateTime())
-        layout.addWidget(self.datetime)
+        # define widget for order
+        self.col_item0 = QComboBox(self)
+        self.col_item1 = QComboBox(self)
 
-        # OK and Cancel buttons
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
-            Qt.Horizontal, self)
+        # add to layout
+        layout.addWidget(self.col_item0)
+        layout.addWidget(self.col_item1)
+
+        # OK and cancel buttons
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
+                                   Qt.Horizontal, self)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
 
-    # get current date and time from the dialog
-    def dateTime(self):
-        return self.datetime.dateTime()
+        # ...
+        self._order = None
+
+        return
+
+    def get_result(self):
+        """
+
+        Returns:
+
+        """
+        return self._order
 
     # static method to create the dialog and return (date, time, accepted)
     @staticmethod
-    def getDateTime(parent = None):
-        dialog = DateDialog(parent)
+    def get_sort_order(parent=None):
+        """
+
+        Args:
+            parent:
+
+        Returns: Order True/False (for accept or reject)
+
+        """
+        dialog = SortOrderDialog(parent)
         result = dialog.exec_()
-        date = dialog.dateTime()
-        return (date.date(), date.time(), result == QDialog.Accepted)
+        order = dialog.get_result()
+        return order, result == QDialog.Accepted

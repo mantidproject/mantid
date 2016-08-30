@@ -1547,7 +1547,7 @@ class MainWindow(QtGui.QMainWindow):
             raise run_err
 
         # Download and load the first run
-        status, ret_obj = self._myControl.download_spice_file(exp_number, scan_number)
+        status, ret_obj = downloadFile(exp_number, scan_number)
         if not status:
             err_msg = ret_obj
             self.pop_error_message(err_msg)
@@ -1581,9 +1581,11 @@ class MainWindow(QtGui.QMainWindow):
         """
         # FIXME/TODO/NOW: Implement from prototype
         import InfoTableSortDialog
-        date, time, ok = InfoTableSortDialog.DateDialog.getDateTime()
+        #  date, time, ok = InfoTableSortDialog.DateDialog.getDateTime()
 
-        print date, time, ok
+        ret_obj = InfoTableSortDialog.SortOrderDialog.get_sort_order()
+
+        print ret_obj
 
     # pysignal: 
     def signal_info_setup_done(self, val):
@@ -2189,29 +2191,8 @@ class MainWindow(QtGui.QMainWindow):
 
         rvalue = False
         if self._srcFromServer is True:
-            # Use server: build the URl to download data
-            if self._serverAddress.endswith('/') is False:
-                self._serverAddress += '/'
-            fullurl = "%s%s/exp%d/Datafiles/%s_exp%04d_scan%04d.dat" % (self._serverAddress,
-                    self._instrument.lower(), exp, self._instrument.upper(), exp, scan)
-            print "URL: ", fullurl
-
-            cachedir = str(self.ui.lineEdit_cache.text()).strip()
-            if os.path.exists(cachedir) is False:
-                invalidcache = cachedir
-                cachedir = os.getcwd()
-                self.ui.lineEdit_cache.setText(cachedir)
-                self._logWarning("Cache directory %s is not valid. "
-                                 "Using current workspace directory %s as cache." % (invalidcache, cachedir) )
-
-            filename = '%s_exp%04d_scan%04d.dat' % (self._instrument.upper(), exp, scan)
-            srcFileName = os.path.join(cachedir, filename)
-            status, errmsg = downloadFile(fullurl, srcFileName)
-            if status is False:
-                self._logError(errmsg)
-                srcFileName = None
-            else:
-                rvalue = True
+            # download SPICE scan data file
+            status, ret_obj = self._myControl.download_spice_file()
 
         elif self._srcAtLocal is True:
             # Data from local
