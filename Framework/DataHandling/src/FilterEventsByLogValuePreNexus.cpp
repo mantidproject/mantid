@@ -583,7 +583,15 @@ FilterEventsByLogValuePreNexus::setupOutputEventWorkspace() {
   // if (!mapping_filename.empty())
   loadPixelMap(mapping_filename);
 
-  return tempworkspace;
+  // Create workspace of correct size
+  // Number of non-monitors in instrument
+  size_t nSpec = tempworkspace->getInstrument()->getDetectorIDs(true).size();
+  if (!this->m_spectraList.empty())
+    nSpec = this->m_spectraList.size();
+  auto ws = createWorkspace<EventWorkspace>(nSpec, 2, 1);
+  WorkspaceFactory::Instance().initializeFromParent(tempworkspace, ws, true);
+
+  return ws;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -825,15 +833,23 @@ void FilterEventsByLogValuePreNexus::procEvents(
   // Set to zero
   this->m_pixelToWkspindex.assign(m_detid_max + 1, 0);
   size_t workspaceIndex = 0;
+  specnum_t spectrumNumber = 1;
   for (it = detector_map.begin(); it != detector_map.end(); it++) {
     if (!it->second->isMonitor()) {
-      // Add non-monitor detector ID
-      this->m_pixelToWkspindex[it->first] = workspaceIndex;
-      EventList &spec = workspace->getOrAddEventList(workspaceIndex);
-      spec.addDetectorID(it->first);
-      // Start the spectrum number at 1
-      spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
-      workspaceIndex += 1;
+      if (!m_loadOnlySomeSpectra ||
+          (spectraLoadMap.find(it->first) != spectraLoadMap.end())) {
+        // Add non-monitor detector ID
+        this->m_pixelToWkspindex[it->first] = workspaceIndex;
+        EventList &spec = workspace->getSpectrum(workspaceIndex);
+        spec.addDetectorID(it->first);
+        // Start the spectrum number at 1
+        spec.setSpectrumNo(spectrumNumber);
+        workspaceIndex += 1;
+        ++workspaceIndex;
+      } else {
+        this->m_pixelToWkspindex[it->first] = -1;
+      }
+      ++spectrumNumber;
     }
   }
 
@@ -1044,10 +1060,6 @@ void FilterEventsByLogValuePreNexus::procEvents(
     m_prog->resetNumSteps(3, 0.94, 1.00);
 
     // finalize loading
-    m_prog->report("Deleting Empty Lists");
-    if (m_loadOnlySomeSpectra)
-      workspace->deleteEmptyLists();
-
     m_prog->report("Setting proton charge");
     this->setProtonCharge(workspace);
     g_log.debug() << tim << " to set the proton charge log.\n";
@@ -1549,7 +1561,10 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       for (detid_t j = 0; j < m_detid_max + 1; j++) {
         size_t wi = m_pixelToWkspindex[j];
         // Save a POINTER to the vector<tofEvent>
-        theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
+        if (wi != static_cast<size_t>(-1))
+          theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
+        else
+          theseEventVectors[j] = nullptr;
       }
     } // END FOR [Threads]
 
@@ -1657,10 +1672,6 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
     m_prog->resetNumSteps(3, 0.94, 1.00);
 
     // finalize loading
-    m_prog->report("Deleting Empty Lists");
-    if (m_loadOnlySomeSpectra)
-      m_localWorkspace->deleteEmptyLists();
-
     m_prog->report("Setting proton charge");
     this->setProtonCharge(m_localWorkspace);
     g_log.debug() << tim << " to set the proton charge log.\n";
@@ -2127,14 +2138,13 @@ size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(
   size_t workspaceIndex = 0;
   for (it = detector_map.begin(); it != detector_map.end(); it++) {
     if (!it->second->isMonitor()) {
-      // Add non-monitor detector ID
-      this->m_pixelToWkspindex[it->first] = workspaceIndex;
-
-      // EventList & spec = workspace->getOrAddEventList(workspaceIndex);
-      // spec.addDetectorID(it->first);
-      // Start the spectrum number at 1
-      // spec.setSpectrumNo(specnum_t(workspaceIndex+1));
-      workspaceIndex += 1;
+      if (!m_loadOnlySomeSpectra ||
+          (spectraLoadMap.find(it->first) != spectraLoadMap.end())) {
+        this->m_pixelToWkspindex[it->first] = workspaceIndex;
+        ++workspaceIndex;
+      } else {
+        this->m_pixelToWkspindex[it->first] = -1;
+      }
     }
   }
 
@@ -2153,15 +2163,19 @@ void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
   eventws->getInstrument()->getDetectors(detector_map);
 
   // Set up
+  specnum_t spectrumNumber = 1;
   for (auto &det : detector_map) {
     if (!det.second->isMonitor()) {
-      // Add non-monitor detector ID
-      size_t workspaceIndex = m_pixelToWkspindex[det.first];
-      // this->m_pixelToWkspindex[it->first] = workspaceIndex;
-      EventList &spec = eventws->getOrAddEventList(workspaceIndex);
-      spec.addDetectorID(det.first);
-      // Start the spectrum number at 1
-      spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
+      if (!m_loadOnlySomeSpectra ||
+          (spectraLoadMap.find(det.first) != spectraLoadMap.end())) {
+        // Add non-monitor detector ID
+        size_t workspaceIndex = m_pixelToWkspindex[det.first];
+        EventList &spec = eventws->getSpectrum(workspaceIndex);
+        spec.addDetectorID(det.first);
+        // Start the spectrum number at 1
+        spec.setSpectrumNo(spectrumNumber);
+      }
+      ++spectrumNumber;
     }
   }
 }
