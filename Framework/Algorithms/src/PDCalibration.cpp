@@ -402,10 +402,6 @@ void PDCalibration::exec() {
 
     if (d_vec.size() == 0) {
       continue;
-    } else if (d_vec.size() == 1) {
-      // If only 1 peak found just calculate and set difc
-      double difc = tof_vec.front() / d_vec.front();
-      setCalibrationValues(peaks.detid, difc, 0, 0);
     } else {
       double difc = 0., t0 = 0., difa = 0.;
       fitDIFCtZeroDIFA(d_vec, tof_vec, difc, t0, difa);
@@ -462,7 +458,7 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
   // DIFC only
   double difc0 = sumXY / sumX2;
   // Get out early if only DIFC is needed.
-  if (calParams == "DIFC") {
+  if (calParams == "DIFC" || sum < 3) {
     difc = difc0;
     return;
   }
@@ -494,12 +490,7 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
 
   // Select difc, t0 depending on CalibrationParameters chosen and
   // number of peaks fitted.
-  if (sum == 2) {
-    // use 'difc+t0' because it should be an exact fit
-    difc = difc1;
-    t0 = tZero1;
-    return;
-  } else if (calParams == "DIFC+TZERO") {
+  if (calParams == "DIFC+TZERO" || sum == 3) {
     // choose best one according to chi-squared
     if (chisq0 < chisq1) {
       difc = difc0;
@@ -542,24 +533,15 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
 
   // Select difc, t0 and difa depending on CalibrationParameters chosen and
   // number of peaks fitted.
-  if (sum == 3) {
-    // use 'difc+t0+difa' because it should be an exact fit
+  if ((chisq0 < chisq1) && (chisq0 < chisq2)) {
+    difc = difc0;
+  } else if ((chisq1 < chisq0) && (chisq1 < chisq2)) {
+    difc = difc1;
+    t0 = tZero1;
+  } else {
     difc = difc2;
     t0 = tZero2;
     difa = difa2;
-  } else {
-    // look for solution with DIFC + TZERO + DIFA
-    // choose best one according to chi-squared between all three
-    if ((chisq0 < chisq1) && (chisq0 < chisq2)) {
-      difc = difc0;
-    } else if ((chisq1 < chisq0) && (chisq1 < chisq2)) {
-      difc = difc1;
-      t0 = tZero1;
-    } else {
-      difc = difc2;
-      t0 = tZero2;
-      difa = difa2;
-    }
   }
 }
 
