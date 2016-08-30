@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/MergeRuns.h"
 
 #include "MantidAPI/Axis.h"
@@ -9,6 +6,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidAPI/ADSValidator.h"
 
 namespace Mantid {
@@ -21,15 +19,7 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-/// Default constructor
-MergeRuns::MergeRuns()
-    : MultiPeriodGroupAlgorithm(), m_progress(nullptr), m_inEventWS(),
-      m_inMatrixWS(), m_tables() {}
 
-/// Destructor
-MergeRuns::~MergeRuns() { delete m_progress; }
-
-//------------------------------------------------------------------------------------------------
 /// Initialisation method
 void MergeRuns::init() {
   // declare arbitrary number of input workspaces as a list of strings at the
@@ -45,18 +35,15 @@ void MergeRuns::init() {
                   "Name of the output workspace");
 }
 
-//------------------------------------------------------------------------------------------------
 // @return the name of the property used to supply in input workspace(s).
 std::string MergeRuns::fetchInputPropertyName() const {
   return "InputWorkspaces";
 }
 
-//------------------------------------------------------------------------------------------------
 // @returns true since "InputWorkspaces" is a non-workspace array property taken
 // to be the input.
 bool MergeRuns::useCustomInputPropertyName() const { return true; }
 
-//------------------------------------------------------------------------------------------------
 /** Executes the algorithm
  *  @throw Exception::NotFoundError If an input workspace doesn't exist
  *  @throw std::invalid_argument If the input workspaces are not compatible
@@ -99,7 +86,7 @@ void MergeRuns::exec() {
     // Take the first input workspace as the first argument to the addition
     MatrixWorkspace_sptr outWS = m_inMatrixWS.front();
     int64_t n = m_inMatrixWS.size() - 1;
-    m_progress = new Progress(this, 0.0, 1.0, n);
+    m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, n);
     // Note that the iterator is incremented before first pass so that 1st
     // workspace isn't added to itself
     for (++it; it != m_inMatrixWS.end(); ++it) {
@@ -159,12 +146,11 @@ void MergeRuns::buildAdditionTables() {
     //  First int = workspace index in the EW being added
     //  Second int = workspace index to which it will be added in the OUTPUT EW.
     //  -1 if it should add a new entry at the end.
-    boost::shared_ptr<AdditionTable> table =
-        boost::make_shared<AdditionTable>();
+    AdditionTable table;
 
     // Loop through the input workspace indices
     std::size_t nhist = ews->getNumberHistograms();
-    table->reserve(nhist);
+    table.reserve(nhist);
     for (int inWI = 0; inWI < static_cast<int>(nhist); inWI++) {
       // Get the set of detectors in the output
       auto &inDets = ews->getSpectrum(inWI).getDetectorIDs();
@@ -182,7 +168,7 @@ void MergeRuns::buildAdditionTables() {
         if (std::includes(outDets.begin(), outDets.end(), inDets.begin(),
                           inDets.end())) {
           // We found the workspace index right away. No need to keep looking
-          table->emplace_back(inWI, outWI);
+          table.emplace_back(inWI, outWI);
           done = true;
         }
       }
@@ -206,7 +192,7 @@ void MergeRuns::buildAdditionTables() {
           // Did not find it!
           outWI = -1; // Marker to mean its not in the LHS.
         }
-        table->emplace_back(inWI, outWI);
+        table.emplace_back(inWI, outWI);
         done = true; // Great, we did it.
       }
 
@@ -222,7 +208,7 @@ void MergeRuns::buildAdditionTables() {
           if (std::includes(outDets2.begin(), outDets2.end(), inDets.begin(),
                             inDets.end())) {
             // This one is right. Now we can stop looking.
-            table->emplace_back(inWI, outWI);
+            table.emplace_back(inWI, outWI);
             done = true;
             continue;
           }
@@ -237,7 +223,7 @@ void MergeRuns::buildAdditionTables() {
         // this one?
 
         // So we need to add it as a new workspace index
-        table->emplace_back(inWI, -1);
+        table.emplace_back(inWI, -1);
       }
     }
 
@@ -266,7 +252,7 @@ void MergeRuns::execEvent() {
   EventWorkspace_sptr outWS(inputWS->clone());
 
   int64_t n = m_inEventWS.size() - 1;
-  m_progress = new Progress(this, 0.0, 1.0, n);
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, n);
 
   // Note that we start at 1, since we already have the 0th workspace
   for (size_t workspaceNum = 1; workspaceNum < m_inEventWS.size();
@@ -274,10 +260,10 @@ void MergeRuns::execEvent() {
     // You are adding this one here
     EventWorkspace_sptr addee = m_inEventWS[workspaceNum];
 
-    boost::shared_ptr<AdditionTable> table = m_tables[workspaceNum - 1];
+    const auto &table = m_tables[workspaceNum - 1];
 
     // Add all the event lists together as the table says to do
-    for (auto &WI : *table) {
+    for (auto &WI : table) {
       int64_t inWI = WI.first;
       int64_t outWI = WI.second;
       if (outWI >= 0) {
