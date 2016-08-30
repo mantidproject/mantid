@@ -7,10 +7,14 @@ set ( SRC_FILES
 	src/FrequencyStandardDeviations.cpp
 	src/FrequencyVariances.cpp
 	src/Histogram.cpp
+	src/HistogramMath.cpp
+	src/PointStandardDeviations.cpp
+	src/PointVariances.cpp
 	src/Points.cpp
 )
 
 set ( INC_FILES
+	inc/MantidHistogramData/Addable.h
 	inc/MantidHistogramData/BinEdges.h
 	inc/MantidHistogramData/CountStandardDeviations.h
 	inc/MantidHistogramData/CountVariances.h
@@ -23,6 +27,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/Histogram.h
 	inc/MantidHistogramData/HistogramDx.h
 	inc/MantidHistogramData/HistogramE.h
+	inc/MantidHistogramData/HistogramMath.h
 	inc/MantidHistogramData/HistogramX.h
 	inc/MantidHistogramData/HistogramY.h
 	inc/MantidHistogramData/Iterable.h
@@ -42,6 +47,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	AddableTest.h
 	BinEdgesTest.h
 	CountStandardDeviationsTest.h
 	CountVariancesTest.h
@@ -53,6 +59,7 @@ set ( TEST_FILES
 	FrequencyVariancesTest.h
 	HistogramDxTest.h
 	HistogramETest.h
+	HistogramMathTest.h
 	HistogramTest.h
 	HistogramXTest.h
 	HistogramYTest.h

@@ -331,14 +331,14 @@ public:
       // Copy-construct a temporary workspace property to test the validity of
       // each workspace
       WorkspaceProperty<TYPE> tester(*this);
-      for (auto it = vals.begin(); it != vals.end();) {
-        // Remove any workspace that's not valid for this algorithm
-        if (!tester.setValue(*it).empty()) {
-          vals.erase(
-              it++); // Post-fix so that it erase the previous when returned
-        } else
-          ++it;
-      }
+
+      // Remove any workspace that's not valid for this algorithm
+      auto eraseIter = remove_if(vals.begin(), vals.end(),
+                                 [&tester](const std::string &wsName) {
+                                   return !tester.setValue(wsName).empty();
+                                 });
+      // Erase everything past returned iterator afterwards for readability
+      vals.erase(eraseIter, vals.end());
       return vals;
     } else {
       // For output workspaces, just return an empty set

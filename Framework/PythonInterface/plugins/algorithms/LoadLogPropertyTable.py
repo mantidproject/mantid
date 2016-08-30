@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import time
 import datetime
 import numbers
@@ -45,7 +46,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
         try:
             v=ws.getRun().getProperty(name)
         except:
-            possibleLogs = ws.getRun().keys()
+            possibleLogs = list(ws.getRun().keys())
             possibleLogs.insert(0,'comment')
             message =  "The log name '" + name + "' was not found, possible choices are: " + str(possibleLogs)
             raise ValueError(message)
@@ -55,7 +56,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
                 v=v.unfiltered()
             for tt in v.times:
                 times2.append((datetime.datetime(*(time.strptime(str(tt),"%Y-%m-%dT%H:%M:%S")[0:6]))-begin).total_seconds())
-        except StandardError:
+        except: #pylint: disable=bare-except
             # print "probably not a time series"
             pass
         if name[0:8]=="Beamlog_" and (name.find("Counts")>0 or name.find("Frames")>0):

@@ -520,6 +520,7 @@ void createInstrumentForWorkspaceWithDistances(
     instrument->markAsDetector(det);
 
     // Link it to the workspace
+    workspace->getSpectrum(i).clearDetectorIDs();
     workspace->getSpectrum(i).addDetectorID(det->getID());
   }
 }
