@@ -19,7 +19,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-
 /// Initialisation method
 void MergeRuns::init() {
   // declare arbitrary number of input workspaces as a list of strings at the
@@ -257,7 +256,7 @@ void MergeRuns::execEvent() {
       m_outputSize, inputWS->x(0).size(), inputWS->y(0).size());
   WorkspaceFactory::Instance().initializeFromParent(inputWS, outWS, false);
   const auto inputSize = inputWS->getNumberHistograms();
-  for(size_t i=0; i<inputSize; ++i)
+  for (size_t i = 0; i < inputSize; ++i)
     outWS->getSpectrum(i) = inputWS->getSpectrum(i);
 
   int64_t n = m_inEventWS.size() - 1;
