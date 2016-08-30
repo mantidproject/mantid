@@ -107,19 +107,9 @@ public:
                                   MantidVec &Y, MantidVec &E,
                                   bool skipError = false) const;
 
-  //------------------------------------------------------------
   // Set the x-axis data (histogram bins) for all pixels
   virtual void setAllX(const HistogramData::BinEdges &x);
 
-  // Resizes the workspace to contain the number of spectra/event lists given
-  virtual void resizeTo(const std::size_t numSpectra);
-  // Pad pixels in the workspace using the loaded spectra. Requires a non-empty
-  // spectra-detector map
-  void padSpectra();
-  // Pad pixels in the workspace using specList. Requires a non-empty vector
-  virtual void padSpectra(const std::vector<int32_t> &specList);
-
-  //------------------------------------------------------------
   // The total number of events across all of the spectra.
   std::size_t getNumberEvents() const override;
 

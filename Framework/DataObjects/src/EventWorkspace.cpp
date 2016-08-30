@@ -427,64 +427,6 @@ size_t EventWorkspace::getMemorySize() const {
   return total;
 }
 
-/** Resizes the workspace to contain the number of spectra/events lists given.
- *  Any existing eventlists will be cleared first.
- *  Spectrum numbers will be set to count from 1
- *  @param numSpectra The number of spectra to resize the workspace to
- */
-void EventWorkspace::resizeTo(const std::size_t numSpectra) {
-  // Remove all old EventLists and resize the vector
-  this->clearData();
-  data.resize(numSpectra);
-  for (size_t i = 0; i < numSpectra; ++i) {
-    data[i] = new EventList(mru, static_cast<specnum_t>(i + 1));
-  }
-
-  // Put on a default set of X vectors, with one bin of 0 & extremely close to
-  // zero
-  HistogramData::BinEdges edges{0.0, std::numeric_limits<double>::min()};
-  this->setAllX(edges);
-
-  // Clearing the MRU list is a good idea too.
-  this->clearMRU();
-}
-
-/** Expands the workspace to a number of spectra corresponding to the number of
- *  pixels/detectors (not including monitors) contained in the instrument
- * attached
- *  to the workspace.
- *  All events lists will be empty after calling this method. Spectrum numbers
- * will
- *  count from 1 and detector IDs will be ordered as they are in the instrument.
- */
-void EventWorkspace::padSpectra() {
-  const std::vector<detid_t> pixelIDs = getInstrument()->getDetectorIDs(true);
-
-  resizeTo(pixelIDs.size());
-
-  for (size_t i = 0; i < pixelIDs.size(); ++i) {
-    getSpectrum(i).setDetectorID(pixelIDs[i]);
-  }
-}
-
-/** Expands the workspace to a number of spectra corresponding to the number of
-*  pixels/detectors contained in specList.
-*  All events lists will be empty after calling this method.
-*/
-void EventWorkspace::padSpectra(const std::vector<int32_t> &specList) {
-  if (specList.empty()) {
-    padSpectra();
-  } else {
-    resizeTo(specList.size());
-    for (size_t i = 0; i < specList.size(); ++i) {
-      // specList ranges from 1, ..., N
-      // detector ranges from 0, ..., N-1
-      getSpectrum(i).setDetectorID(specList[i] - 1);
-      getSpectrum(i).setSpectrumNo(specList[i]);
-    }
-  }
-}
-
 /// Deprecated, use mutableX() instead. Return the data X vector at a given
 /// workspace index
 /// @param index :: the workspace index to return

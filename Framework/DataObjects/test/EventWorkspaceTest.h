@@ -199,46 +199,6 @@ public:
     TS_ASSERT_EQUALS(ws->getSpectrum(2).getNumberEvents(), 0);
   }
 
-  void test_resizeTo() {
-    ew = createEventWorkspace(false, false);
-    TS_ASSERT_EQUALS(ew->getNumberHistograms(), 1);
-    ew->resizeTo(3);
-    TS_ASSERT_EQUALS(ew->getNumberHistograms(), 3);
-    for (size_t i = 0; i < ew->getNumberHistograms(); ++i) {
-      TS_ASSERT_EQUALS(ew->getSpectrum(i).getSpectrumNo(), i + 1);
-      // TS_ASSERT( ew->getSpectrum(i).empty() );
-      TS_ASSERT_EQUALS(ew->readX(i).size(), 2);
-    }
-  }
-
-  void test_padSpectra() {
-    bool timing = false;
-    ew = createEventWorkspace(true, false);
-
-    int numpixels = timing ? 900000 : 1800;
-    // Make an instrument with lots of pixels
-    ew->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(
-        numpixels / 9));
-
-    Timer timer;
-    ew->padSpectra();
-    if (timing)
-      std::cout << "\n" << timer.elapsed() << " seconds for padSpectra().\n";
-
-    TS_ASSERT_EQUALS(ew->getNumberHistograms(), numpixels);
-    int badcount = 0;
-    for (int i = 0; i < numpixels; i++) {
-      auto &spec = ew->getSpectrum(i);
-      bool b = spec.hasDetectorID(i + 1);
-      TSM_ASSERT("Workspace i has the given detector id i+1", b);
-      TSM_ASSERT_EQUALS("Matching detector ID and spectrum number.",
-                        spec.getSpectrumNo(), i + 1);
-      if (b)
-        if (badcount++ > 40)
-          break;
-    }
-  }
-
   void test_uneven_pixel_ids() {
     EventWorkspace_sptr uneven(new EventWorkspace);
     uneven->initialize(NUMPIXELS / 10, 1, 1);
