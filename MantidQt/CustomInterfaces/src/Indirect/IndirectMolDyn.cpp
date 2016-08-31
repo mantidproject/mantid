@@ -76,8 +76,8 @@ void IndirectMolDyn::run() {
                          m_uiForm.leFunctionNames->text().toStdString());
   molDynAlg->setProperty("SymmetriseEnergy",
                          m_uiForm.ckSymmetrise->isChecked());
-  molDynAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
-  molDynAlg->setProperty("Plot", m_uiForm.cbPlot->currentText().toStdString());
+  molDynAlg->setProperty("Save", false);
+  molDynAlg->setProperty("Plot", false);
   molDynAlg->setProperty("OutputWorkspace", baseName.toStdString());
 
   // Set energy crop option
@@ -114,6 +114,31 @@ void IndirectMolDyn::versionSelected(const QString &version) {
   bool version4(version == "4");
   m_uiForm.mwRun->isForDirectory(version4);
 }
+/**
+ *
+ */
+void IndirectMolDyn::plotClicked() {
+
+	QString filename = m_uiForm.mwRun->getFirstFilename();
+	QFileInfo fi(filename);
+	QString baseName = fi.baseName();
+
+	WorkspaceGroup_sptr diffResultsGroup =
+		AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(baseName.toStdString());
+
+	auto names = diffResultsGroup->getNames();
+	auto plotType = m_uiForm.cbPlot->currentText();
+
+	for (auto it = names.begin(); it != names.end(); ++it) {
+		std::string wsName = *it;
+
+		if (plotType == "Spectra" || plotType == "Both")
+			plotSpectrum(QString::fromStdString(wsName));
+	}
+	if (plotType == "Contour" || plotType == "Both")
+		plot2D(QString::fromStdString(m_pythonExportWsName));
+}
+
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
