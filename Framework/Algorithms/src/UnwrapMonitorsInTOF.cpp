@@ -151,7 +151,7 @@ void setTofBelowLowerBoundToZero(std::vector<double>& doubledData, int minIndex)
 
 
 void setTofAboveUpperBoundToZero(std::vector<double>& doubledData, int maxIndex) {
-  if (maxIndex >= doubledData.size() - 1) {
+  if (maxIndex >= static_cast<int>(doubledData.size()) - 1) {
     return;
   }
   auto begin = doubledData.begin();
@@ -224,45 +224,6 @@ std::vector<size_t> getWorkspaceIndicesForMonitors(Mantid::API::MatrixWorkspace*
   return workspaceIndices;
 }
 
-/**
- * We step through the BinEdges object and make sure that each bin width is the same
- * This is done via a pair of moving iterators which are spaced by one BinEdge entry.
- *
- * @param binEdges a handle to the bin edges object.
- * @returns true if the bin edges are linear spaced else false.
- **/
-bool areBinEdgesLinearlySpaced(const Mantid::HistogramData::BinEdges& binEdges) {
-  auto binEdgesAreLinearlySpaced = true;
-  auto lowerBinEdge = binEdges.cbegin();
-  auto upperBinEge = binEdges.cbegin();
-  ++upperBinEge;
-  auto firstBinWidth = *upperBinEge - *lowerBinEdge;
-  for (; upperBinEge != binEdges.cend(); ++lowerBinEdge, ++upperBinEge) {
-    auto binWidth = *upperBinEge - *lowerBinEdge;
-    auto difference = std::abs(binWidth - firstBinWidth);
-    // The tolerance of the difference is set such that it must be within a microsecond
-    if (difference > 1e-6) {
-      binEdgesAreLinearlySpaced = false;
-      break;
-    }
-  }
-  return binEdgesAreLinearlySpaced;
-}
-
-bool isLinearlySpaced(Mantid::API::MatrixWorkspace_sptr workspace, const std::vector<size_t>& monitorWorkspaceIndices) {
-  // Check for each monitor that the spectrum is linearly spaced
-  auto isLinearlySpaced = true;
-  for (const auto& workspaceIndex : monitorWorkspaceIndices) {
-    auto histogram = workspace->histogram(workspaceIndex);
-    auto binEdges = histogram.binEdges();
-    if (!areBinEdgesLinearlySpaced(binEdges)) {
-      isLinearlySpaced = false;
-      break;
-    }
-  }
-  return isLinearlySpaced;
-}
-
 }
 
 namespace Mantid {
@@ -322,12 +283,6 @@ void UnwrapMonitorsInTOF::exec() {
 
   auto outputWorkspace = Mantid::API::MatrixWorkspace_sptr(inputWorkspace->clone());
   const auto workspaceIndices = getWorkspaceIndicesForMonitors(outputWorkspace.get());
-
-  // At the moment we can only support linearly spaced monitor data. If the data is
-  // logarithmic we might have to rebin.
-  if (!isLinearlySpaced(outputWorkspace, workspaceIndices)) {
-    throw std::runtime_error("Monitor data which is not linearly binned is currently not supported.");
-  }
 
   for (const auto& workspaceIndex : workspaceIndices) {
       auto minMaxTof = getMinAndMaxTof(outputWorkspace.get(), workspaceIndex,

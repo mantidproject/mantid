@@ -29,8 +29,7 @@ public:
   void test_that_linear_workspace_has_the_monitors_duplicated_if_no_wavelength_limits_are_set()
   {
     // Arrange
-    auto isLinear = true;
-    auto workspace = provideTestWorkspace(true, isLinear);
+    auto workspace = provideTestWorkspace(true);
     std::string outputName = "test_output_unwrap_monitors";
 
     // Act
@@ -78,8 +77,7 @@ public:
 
   void test_that_linear_workspace_selects_time_ranges_around_monitor() {
     // Arrange
-    auto isLinear = true;
-    auto workspace = provideTestWorkspace(true, isLinear);
+    auto workspace = provideTestWorkspace(true);
     std::string outputName = "test_output_unwrap_monitors";
     const double wavelengthMin = 5.0; // Angstrom
     const double wavelengthMax = 15.0; // Angstrom
@@ -101,7 +99,6 @@ public:
     // For a wavelength cutoff range in from 5 to 15 Angstrom we expect a TOF range of: 13902mus - 41708mus
     // Every count outside of this range is expected to have been set to 0. Note that the time is compared to Points no BinEdges
     const double tolerance = 1e-8;
-    std::array<size_t, 2> indicesToCheck = { 3,4 };
     Mantid::HistogramData::BinEdges expectedBinEdges{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
     expectedBinEdges *= 1e4;
     Mantid::HistogramData::Counts expectedCounts3{ 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -137,25 +134,9 @@ public:
     }
   }
 
-  void test_that_non_linear_monitor_worspace_throws() {
-    // Arrange
-    auto isLinear = false;
-    auto workspace = provideTestWorkspace(true, isLinear);
-    std::string outputName = "test_output_unwrap_monitors";
-
-                                       // Act
-    UnwrapMonitorsInTOF alg;
-    alg.initialize();
-    alg.setRethrows(true);
-    alg.setProperty("InputWorkspace", workspace);
-    alg.setProperty("OutputWorkspace", outputName);
-    TSM_ASSERT_THROWS("Non linear time in monitor should throw runtime error.", alg.execute(), std::runtime_error);
-  }
-
   void test_that_negative_wavelengths_are_not_allowed() {
     // Arrange
-    auto isLinear = false;
-    auto workspace = provideTestWorkspace(true, isLinear);
+    auto workspace = provideTestWorkspace(true);
     std::string outputName = "test_output_unwrap_monitors";
     const double wavelengthMin = -5.0; // Angstrom
     const double wavelengthMax = -15.0; // Angstrom
@@ -181,7 +162,7 @@ private:
    * The monitor are worksapce index 5 is at 18m
    * 
   */
-  Mantid::API::MatrixWorkspace_sptr provideTestWorkspace(bool includeMonitors, bool isLinear) {
+  Mantid::API::MatrixWorkspace_sptr provideTestWorkspace(bool includeMonitors) {
     const int numberOfBins = 10;
     const int numberOfHistograms = 5;
     auto intialWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numberOfHistograms, numberOfBins, 
@@ -199,15 +180,6 @@ private:
         Mantid::HistogramData::Histogram newHistogram(binEdges, counts);
         workspace->setHistogram(index, newHistogram);
       }
-    }
-
-    if (!isLinear) {
-      Mantid::HistogramData::Counts counts{ 2,2,2,2,2,1,1,1,1,1 };
-      Mantid::HistogramData::BinEdges binEdges{ 0, 1, 3, 7, 9, 12, 15, 16, 19, 23, 27 };
-      binEdges *= 1e4;
-      Mantid::HistogramData::Histogram newHistogram(binEdges, counts);
-      workspace->setHistogram(3, newHistogram);
-      workspace->setHistogram(4, newHistogram);
     }
 
     return workspace;
