@@ -147,6 +147,12 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
   snappedPMax += offset;
   snappedPMin += offset;
 
+  if (snappedPMin < dimension->getMinimum())
+    snappedPMin = dimension->getMinimum();
+
+  if (snappedPMax > dimension->getMaximum())
+    snappedPMax = dimension->getMaximum();
+
   if (pMin != snappedPMin) {
     std::stringstream buffer;
     buffer << "Rounding min from: " << pMin
