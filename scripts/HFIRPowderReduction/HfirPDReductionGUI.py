@@ -1551,8 +1551,9 @@ class MainWindow(QtGui.QMainWindow):
         except RuntimeError as run_err:
             raise run_err
 
-        # Download and load the first run
-        status, ret_obj = download_file(exp_number, scan_number)
+        # Download and load the first run 
+        cache_dir = self._get_cache_dir()
+        status, ret_obj = self._myControl.download_spice_file(exp_number, scan_number, cache_dir) #download_ # download_file(exp_number, scan_number)
         if not status:
             err_msg = ret_obj
             self.pop_error_message(err_msg)
@@ -1561,13 +1562,14 @@ class MainWindow(QtGui.QMainWindow):
             spice_file_name = ret_obj
 
         # Load data
-        status, ret_obj = self._myControl.do_load_spice_file(exp_number=exp_number, scan_number=scan_number,
-                                                             datafilename=spice_file_name)
-        if not status:
-            self.pop_error_message(err_msg)
+        try:
+            self._myControl.do_load_spice_file(exp_number=exp_number, scan_number=scan_number)
+        except RuntimeError as run_err:
+            self.pop_error_message('Unable to load Exp %d Scan %d due to %s.' % (exp_number, scan_number, str(run_err)))
             return
 
         # get information
+        # FIXME/TODO/NOW - implement get_log_names()
         spice_log_list, spice_col_list = self._myControl.get_log_names(exp_number, scan_number)
 
         # load
@@ -2177,6 +2179,21 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def _get_cache_dir(self):
+        """
+        """
+        # get directory for cache
+        cache_dir = str(self.ui.lineEdit_cache.text()).strip()
+        if os.path.exists(cache_dir) is False:
+            # if cache directory does not exist, then use the current working directory
+            bad_input_dir = cache_dir
+            cache_dir = os.getcwd()
+            self.ui.lineEdit_cache.setText(cache_dir)
+            self._logWarning('Cache directory %s is not valid. Using current workspace directory %s as '
+                             'cache.' % (bad_input_dir, cache_dir))
+
+        return cache_dir
+
 
     def _uiDownloadDataFile(self, exp, scan):
         """ Download data file according to its exp and scan
@@ -2198,16 +2215,7 @@ class MainWindow(QtGui.QMainWindow):
 
         if self._srcFromServer is True:
             # download SPICE scan data file
-
-            # get directory for cache
-            cache_dir = str(self.ui.lineEdit_cache.text()).strip()
-            if os.path.exists(cache_dir) is False:
-                # if cache directory does not exist, then use the current working directory
-                bad_input_dir = cache_dir
-                cache_dir = os.getcwd()
-                self.ui.lineEdit_cache.setText(cache_dir)
-                self._logWarning('Cache directory %s is not valid. Using current workspace directory %s as '
-                                 'cache.' % (bad_input_dir, cache_dir))
+            cache_dir = self._get_cache_dir()
 
             # download file
             status, ret_obj = self._myControl.download_spice_file(exp, scan, cache_dir)
@@ -2643,6 +2651,7 @@ class MainWindow(QtGui.QMainWindow):
         """ Pop up a dialog with error message
         """
         # TODO/NOW - ASAP
+        print error_message
 
         return
 

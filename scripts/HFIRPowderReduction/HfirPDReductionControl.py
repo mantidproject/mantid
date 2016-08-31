@@ -21,6 +21,12 @@ VanadiumPeakPositions = [0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768
                          0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401]
 
 
+""" default configuration """
+DEFAULT_SERVER = 'http://neutron.ornl.gov/user_data/'
+DEFAULT_INSTRUMENT = 'hb2a'
+DEFAULT_WAVELENGTH = 2.4100
+
+
 class PDRManager(object):
     """ Powder diffraction reduction workspace manager
     """
@@ -231,8 +237,8 @@ class HFIRPDRedControl(object):
 
         self._lastWkspToMerge = []
 
-        self._serverAddress = None
-        self._instrument = None
+        self._serverAddress = DEFAULT_SERVER
+        self._instrument = DEFAULT_INSTRUMENT
 
         # spice file manager/lookup table
         self._spiceFileManager = dict()
