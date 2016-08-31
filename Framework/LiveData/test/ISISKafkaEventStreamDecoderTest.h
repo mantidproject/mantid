@@ -85,7 +85,7 @@ public:
     // Data
     TS_ASSERT_EQUALS(5, eventWksp->getNumberHistograms());
     // A timer-based test so only check we actually got something
-    TS_ASSERT(eventWksp->getNumberEvents() > 0);
+    TS_ASSERT_EQUALS(5, eventWksp->getNumberEvents());
   }
 
   void test_Empty_Event_Stream_Waits() {
