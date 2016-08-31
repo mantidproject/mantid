@@ -45,6 +45,8 @@ New
 - :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>` an algorithm which saves a TableWorkspace containing
   diffraction fitting results as an ASCII file
 
+- :ref:`UnwrapMonitorsInTOF <algm-UnwrapMonitorsInTOF>` handles the data which was collected beyond the end of a frame.
+
 
 Improved
 ########

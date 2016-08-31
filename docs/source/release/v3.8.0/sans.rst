@@ -11,6 +11,7 @@ Features
 - :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of component names.
 - Detect missing Bench_Rot for LARMOR and provide meaningful error message
 - Add sort option to :ref:`CropToComponent <algm-CropToComponent>`
+- :ref:`UnwrapMonitorsInTOF <algm-UnwrapMonitorsInTOF>` handles the data which was collected beyond the end of a frame.
 
 Bug Fixes
 ---------
