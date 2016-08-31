@@ -77,14 +77,14 @@ public:
   /// The date-and-time will be stored as the Mantid::Kernel::DateAndTime type
   explicit AlgorithmHistory(
       const Algorithm *const alg,
-      const Kernel::DateAndTime &start = Kernel::DateAndTime::defaultTime(),
+      const Kernel::DateAndTime &start = Kernel::DateAndTime::getCurrentTime(),
       const double &duration = -1.0, std::size_t uexeccount = 0);
   ~AlgorithmHistory();
   AlgorithmHistory &operator=(const AlgorithmHistory &);
   AlgorithmHistory(const AlgorithmHistory &);
   AlgorithmHistory(
       const std::string &name, int vers,
-      const Kernel::DateAndTime &start = Kernel::DateAndTime::defaultTime(),
+      const Kernel::DateAndTime &start = Kernel::DateAndTime::getCurrentTime(),
       const double &duration = -1.0, std::size_t uexeccount = 0);
   void addExecutionInfo(const Kernel::DateAndTime &start,
                         const double &duration);
@@ -141,7 +141,7 @@ public:
   /// Set data on history after it is created
   void fillAlgorithmHistory(
       const Algorithm *const alg,
-      const Kernel::DateAndTime &start = Kernel::DateAndTime::defaultTime(),
+      const Kernel::DateAndTime &start = Kernel::DateAndTime::getCurrentTime(),
       const double &duration = -1.0, std::size_t uexeccount = 0);
   // Allow Algorithm::execute to change the exec count & duration after the
   // algorithm was executed
