@@ -73,6 +73,12 @@ Improved
 
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
+- :ref:`ConvertToHistogram <algm-ConvertToHistogram>`: Performance improvement using new HistogramData module,
+  3x to 4x speedup.
+
+- :ref:`ConvertToPointData <algm-ConvertToPointData>`: Performance improvement using new HistogramData module,
+  3x to 4x speedup.
+
 - :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
   now check if a Workspace with that name already exists in the ADS and gives
   the option to override it.
@@ -117,6 +123,8 @@ Python
 
 Python Algorithms
 #################
+
+- New algorithm :ref:`SelectNexusFilesByMetadata <algm-SelectNexusFilesByMetadata>` provides quick filtering of nexus files based on criteria imposed on metadata.
 
 Bug Fixes
 ---------

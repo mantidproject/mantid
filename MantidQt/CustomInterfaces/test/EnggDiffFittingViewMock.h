@@ -144,6 +144,9 @@ public:
   MOCK_METHOD3(setDataVector,
                void(std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
                     bool plotSinglePeaks));
+
+  // virtual void resetCanvas
+  MOCK_METHOD0(resetCanvas, void());
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

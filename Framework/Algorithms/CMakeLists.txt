@@ -138,6 +138,7 @@ set ( SRC_FILES
 	src/GetDetectorOffsets.cpp
 	src/GetEi.cpp
 	src/GetEi2.cpp
+	src/GetEiMonDet2.cpp
 	src/GetTimeSeriesLogInformation.cpp
 	src/GravitySANSHelper.cpp
 	src/GroupWorkspaces.cpp
@@ -440,6 +441,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GetDetectorOffsets.h
 	inc/MantidAlgorithms/GetEi.h
 	inc/MantidAlgorithms/GetEi2.h
+	inc/MantidAlgorithms/GetEiMonDet2.h
 	inc/MantidAlgorithms/GetTimeSeriesLogInformation.h
 	inc/MantidAlgorithms/GravitySANSHelper.h
 	inc/MantidAlgorithms/GroupWorkspaces.h
@@ -746,6 +748,7 @@ set ( TEST_FILES
 	GetAllEiTest.h
 	GetDetOffsetsMultiPeaksTest.h
 	GetDetectorOffsetsTest.h
+	GetEiMonDet2Test.h
 	GetEiTest.h
 	GetEiV1Test.h
 	GetTimeSeriesLogInformationTest.h

@@ -10,8 +10,11 @@ Features
 
 - :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of component names.
 - Detect missing Bench_Rot for LARMOR and provide meaningful error message
+- Enable the CanSAS1D algorithms to handle geometry inforamtion.
 - Add sort option to :ref:`CropToComponent <algm-CropToComponent>`
+- Provide warning when users try to use a 2D reduction together with a merged reduction selection.
 - :ref:`UnwrapMonitorsInTOF <algm-UnwrapMonitorsInTOF>` handles the data which was collected beyond the end of a frame.
+
 
 Bug Fixes
 ---------
