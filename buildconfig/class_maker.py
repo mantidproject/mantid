@@ -47,18 +47,18 @@ private:
         alg_include = ""
 
     # The full text
-    s = r"""#ifndef {}
-#define {}
+    s = r"""#ifndef {guard}
+#define {guard}
 
-#include "Mantid{}/DllConfig.h"
-{}
+#include "Mantid{subproject}/DllConfig.h"
+{alg_include}
 
 namespace Mantid {{
-namespace {} {{
+namespace {subproject} {{
 
-/** {} : TODO: DESCRIPTION
+/** {classname} : TODO: DESCRIPTION
 
-  Copyright &copy; {} ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  Copyright &copy; {today} ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -79,22 +79,19 @@ namespace {} {{
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_{}_DLL {}{} {{
-public:{}}};
+class MANTID_{subproject_upper}_DLL {classname}{alg_class_declare} {{
+public:{algorithm_header}}};
 
-}} // namespace {}
+}} // namespace {subproject}
 }} // namespace Mantid
 
-#endif /* {} */""".format(guard, guard, subproject,
-       alg_include, subproject, classname,
-       datetime.datetime.now().date().year, subproject_upper, classname, alg_class_declare,
-       algorithm_header, subproject, guard)
+#endif /* {guard} */""".format(guard=guard, subproject=subproject,
+       alg_include=alg_include, classname=classname,
+       today=datetime.datetime.now().date().year, subproject_upper=subproject_upper,
+       alg_class_declare=alg_class_declare, algorithm_header=algorithm_header)
 
     f.write(s)
     f.close()
-
-
-
 
 
 #======================================================================
@@ -157,16 +154,16 @@ void {algname}::exec() {{
         algorithm_source = ""
 
     # ------- Now the normal class text ------------------------------
-    s = """#include "Mantid{}/{}{}.h"
+    s = """#include "Mantid{subproject}/{subfolder}{classname}.h"
 
 namespace Mantid {{
-namespace {} {{
-{}{}
-}} // namespace {}
+namespace {subproject} {{
+{algorithm_top}{algorithm_source}
+}} // namespace {subproject}
 }} // namespace Mantid
 """.format(
-        subproject, args.subfolder, classname, subproject, algorithm_top,
-        algorithm_source, subproject)
+        subproject=subproject, subfolder=args.subfolder, classname=classname, algorithm_top=algorithm_top,
+        algorithm_source=algorithm_source)
     f.write(s)
     f.close()
 
@@ -214,23 +211,23 @@ def write_test(subproject, classname, filename, args):
     if not args.alg:
         algorithm_test = ""
 
-    s = """#ifndef {}
-#define {}
+    s = """#ifndef {guard}
+#define {guard}
 
 #include <cxxtest/TestSuite.h>
 
-#include "Mantid{}/{}{}.h"
+#include "Mantid{subproject}/{subfolder}{classname}.h"
 
-using Mantid::{}::{};
+using Mantid::{subproject}::{classname};
 
-class {}Test : public CxxTest::TestSuite {{
+class {classname}Test : public CxxTest::TestSuite {{
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static {}Test *createSuite() {{ return new {}Test(); }}
-  static void destroySuite( {}Test *suite ) {{ delete suite; }}
+  static {classname}Test *createSuite() {{ return new {classname}Test(); }}
+  static void destroySuite( {classname}Test *suite ) {{ delete suite; }}
 
-{}
+{algorithm_test}
   void test_Something()
   {{
     TS_FAIL( "You forgot to write a test!");
@@ -240,10 +237,9 @@ public:
 }};
 
 
-#endif /* {} */""".format(
-          guard, guard, subproject, args.subfolder, classname,
-          subproject, classname, classname, classname, classname, classname,
-          algorithm_test, guard)
+#endif /* {guard} */""".format(
+          guard=guard, subproject=subproject, subfolder=args.subfolder, classname=classname,
+          algorithm_test=algorithm_test)
     f.write(s)
     f.close()
 
