@@ -9,10 +9,14 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 class DataProcessorPresenter;
+class DataProcessorWhiteList;
+class QDataProcessorTwoLevelTreeModel;
 
 /** @class DataProcessorTwoLevelTreeManager
 
-// TODO: Description
+DataProcessorTwoLevelTreeManager is a concrete implementation of a
+DataProcessorTreeManager that handles a two-level tree view (which corresponds
+to a DataProcessorUI with a post-processing algorithm defined).
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -39,16 +43,75 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataProcessorTwoLevelTreeManager
     : public DataProcessorTreeManager {
 public:
   /// Constructor
-  DataProcessorTwoLevelTreeManager(DataProcessorPresenter *presenter);
+  DataProcessorTwoLevelTreeManager(DataProcessorPresenter *presenter,
+                                   Mantid::API::ITableWorkspace_sptr table,
+                                   const DataProcessorWhiteList &whitelist);
+  /// Constructor (no table ws given)
+  DataProcessorTwoLevelTreeManager(DataProcessorPresenter *presenter,
+                                   const DataProcessorWhiteList &whitelist);
   /// Destructor
   ~DataProcessorTwoLevelTreeManager() override;
 
   /// Publish commands
   std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
+  /// Append a row
+  void appendRow() override;
+  /// Append a group to the model
+  void appendGroup() override;
+  /// Delete a row
+  void deleteRow() override;
+  /// Delete a group
+  void deleteGroup() override;
+  /// Group rows
+  void groupRows() override;
+  /// Expand selection
+  std::set<int> expandSelection() override;
+  /// Clear selected
+  void clearSelected() override;
+  /// Copy selected
+  std::string copySelected() override;
+  /// Paste selected
+  void pasteSelected(const std::string &text) override;
+  /// Blank table
+  void newTable(const DataProcessorWhiteList &whitelist) override;
+  /// New table
+  void newTable(Mantid::API::ITableWorkspace_sptr table,
+                const DataProcessorWhiteList &whitelist) override;
+
+  /// Return selected data
+  std::map<int, std::set<std::vector<std::string>>>
+  selectedData(bool prompt) override;
+  /// Transfer new data to model
+  void transfer(const std::vector<std::map<std::string, std::string>> &runs,
+	  const DataProcessorWhiteList &whitelist) override;
+
+  /// Validate a table workspace
+  bool isValidModel(Mantid::API::Workspace_sptr ws,
+                    size_t whitelistColumns) const override;
+
+  /// Return the model
+  boost::shared_ptr<QAbstractItemModel> getModel() override;
+  /// Return the table workspace
+  Mantid::API::ITableWorkspace_sptr getTableWorkspace() override;
 
 private:
   /// The DataProcessor presenter
   DataProcessorPresenter *m_presenter;
+  /// The model
+  boost::shared_ptr<QDataProcessorTwoLevelTreeModel> m_model;
+  /// The workspace the model is currently representing
+  Mantid::API::ITableWorkspace_sptr m_ws;
+
+  /// Insert a row in the model
+  void insertRow(int groupIndex, int rowIndex);
+  /// Insert a group in the model
+  void insertGroup(int groupIndex);
+  /// Get the number of rows in a group
+  int numRowsInGroup(int groupId) const;
+  /// Create a default table workspace
+  Mantid::API::ITableWorkspace_sptr
+	  createDefaultWorkspace(const DataProcessorWhiteList &whitelist);
+
 };
 }
 }

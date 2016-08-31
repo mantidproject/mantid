@@ -2,12 +2,13 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORVIEW_H
 
 #include "MantidKernel/System.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
+
+class QAbstractItemModel;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -54,7 +55,7 @@ public:
 	  std::vector<std::unique_ptr<DataProcessorCommand>> commands) = 0;
 
   // Connect the model
-  virtual void showTable(QDataProcessorTwoLevelTreeModel_sptr model) = 0;
+  virtual void showTable(boost::shared_ptr<QAbstractItemModel> model) = 0;
 
   // Dialog/Prompt methods
   virtual std::string requestNotebookPath() = 0;

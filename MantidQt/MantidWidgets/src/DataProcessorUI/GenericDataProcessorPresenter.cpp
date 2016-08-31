@@ -55,7 +55,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_tableDirty(false) {
 
   m_manager =
-      Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(this);
+      Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(this, whitelist);
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -123,8 +123,10 @@ void GenericDataProcessorPresenter::acceptViews(
   for (auto const &name : items) {
     Workspace_sptr ws = ads.retrieve(name);
 
-    if (isValidModel(ws))
-      m_workspaceList.insert(name);
+	if (m_manager->isValidModel(
+		boost::dynamic_pointer_cast<ITableWorkspace>(ws),
+		m_whitelist.size()))
+		m_workspaceList.insert(name);
   }
   observeAdd();
   observePostDelete();
@@ -145,138 +147,59 @@ void GenericDataProcessorPresenter::acceptViews(
 }
 
 /**
-* Validates a table workspace
-* @param model : [input] The table workspace to validate
-* @throws std::runtime_error if the model is not valid
-*/
-void GenericDataProcessorPresenter::validateModel(ITableWorkspace_sptr model) {
-  if (!model)
-    throw std::runtime_error("Null pointer");
-
-  int columns = static_cast<int>(model->columnCount());
-  if (columns != m_columns + 1)
-    // Table workspace must have one extra column corresponding to the group
-    throw std::runtime_error("Selected table has the incorrect number of "
-                             "columns to be used as a data processor table.");
-
-  try {
-    // All columns must be strings
-    size_t ncols = model->columnCount();
-    for (size_t i = 0; i < ncols; i++)
-      model->String(0, i);
-  } catch (const std::runtime_error &) {
-    throw std::runtime_error("Selected table does not meet the specifications "
-                             "to become a model for this interface.");
-  }
-}
-
-/**
-* Checks if a model is valid
-* @param model : [input] The table workspace to validate
-* @returns : True if the model is valid. False otherwise
-*/
-bool GenericDataProcessorPresenter::isValidModel(Workspace_sptr model) {
-  try {
-    validateModel(boost::dynamic_pointer_cast<ITableWorkspace>(model));
-  } catch (...) {
-    return false;
-  }
-  return true;
-}
-
-/**
-* Creates a default model using the whitelist supplied to this presenter
-* @returns : The new model
-*/
-ITableWorkspace_sptr GenericDataProcessorPresenter::createDefaultWorkspace() {
-  ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-
-  // First column is group
-  auto column = ws->addColumn("str", "Group");
-  column->setPlotType(0);
-
-  for (int col = 0; col < m_columns; col++) {
-    // The columns provided to this presenter
-    auto column = ws->addColumn("str", m_whitelist.colNameFromColIndex(col));
-    column->setPlotType(0);
-  }
-  ws->appendRow();
-  return ws;
-}
-
-/**
-Process selected rows
+Process selected data
 */
 void GenericDataProcessorPresenter::process() {
-  if (m_model->rowCount() == 0) {
-    m_mainPresenter->giveUserWarning("Cannot process an empty Table",
-                                     "Warning");
-    return;
+
+  const auto items = m_manager->selectedData(true);
+
+  // Progress: each group and each row within count as a progress step.
+  int progress = 0;
+  int maxProgress = (int)(items.size());
+  for (const auto subitem : items) {
+    maxProgress += (int)(subitem.second.size());
   }
+  ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
+                                     m_progressView);
 
-  // Selected groups
-  auto groups = m_view->getSelectedParents();
-  // Selected rows
-  auto rows = m_view->getSelectedChildren();
+  for (const auto &item : items) {
 
-  if (groups.empty() && rows.empty()) {
-    if (m_options["WarnProcessAll"].toBool()) {
-      // Does the user want to abort?
-      if (!m_mainPresenter->askUserYesNo(
-              "This will process all rows in the table. Continue?",
-              "Process all rows?"))
+    // Reduce rows sequentially
+    int row = 0;
+
+    for (const auto &data : item.second) {
+      // item.second -> set of vectors containing data
+
+      try {
+        auto newData = reduceRow(data);
+		// TODO: m_manager must update empty columns with default values used
+        progressReporter.report();
+
+      } catch (std::exception &ex) {
+        m_mainPresenter->giveUserCritical(ex.what(), "Error");
+        progressReporter.clear();
         return;
+      }
+
+      // Post-process (if needed)
+      if (item.second.size() > 1) {
+        try {
+          postProcessGroup(item.second);
+        } catch (std::exception &ex) {
+          m_mainPresenter->giveUserCritical(ex.what(), "Error");
+          progressReporter.clear();
+          return;
+        }
+      }
+      progressReporter.report();
     }
-
-    // They want to process all rows, so populate rows and groups with every
-    // index in the model
-    for (int idxGroup = 0; idxGroup < m_model->rowCount(); ++idxGroup) {
-      groups.insert(idxGroup);
-      for (int idxRun = 0;
-           idxRun < m_model->rowCount(m_model->index(idxGroup, 0)); ++idxRun)
-        rows[idxGroup].insert(idxRun);
-    }
-  } else {
-    // They may have selected a group, in this case we want to process and
-    // post-process the whole group, so populate group with every row
-    for (const auto &group : groups) {
-      for (int row = 0; row < numRowsInGroup(group); row++)
-        rows[group].insert(row);
-    }
-  }
-
-  // Check each group and warn if we're only partially processing it
-  for (const auto &item : rows) {
-
-    const int &groupId = item.first;
-    const std::set<int> &rowIds = item.second;
-
-    // Are we only partially processing a group?
-    if (static_cast<int>(rowIds.size()) < numRowsInGroup(groupId) &&
-        m_options["WarnProcessPartialGroup"].toBool()) {
-      const std::string groupName =
-          m_model->data(m_model->index(groupId, 0)).toString().toStdString();
-      std::stringstream err;
-      err << "You have only selected " << rowIds.size() << " of the ";
-      err << numRowsInGroup(groupId) << " rows in group '" << groupName << "'.";
-      err << " Are you sure you want to continue?";
-      if (!m_mainPresenter->askUserYesNo(err.str(), "Continue Processing?"))
-        return;
-    }
-  }
-
-  if (!rowsValid(rows)) {
-    return;
-  }
-
-  if (!processGroups(groups, rows)) {
-    return;
   }
 
   // If "Output Notebook" checkbox is checked then create an ipython notebook
-  if (m_view->getEnableNotebook()) {
-    saveNotebook(groups, rows);
-  }
+  // TODO: enable notebook
+  //if (m_view->getEnableNotebook()) {
+  //  saveNotebook(groups, rows);
+  //}
 }
 
 /**
@@ -303,16 +226,17 @@ void GenericDataProcessorPresenter::saveNotebook(
   const std::string postprocessingOptions =
       m_mainPresenter->getPostprocessingOptions();
 
-  auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
-      m_wsName, m_model, m_view->getProcessInstrument(), m_whitelist,
-      m_preprocessMap, m_processor, m_postprocessor, preprocessingOptionsMap,
-      processingOptions, postprocessingOptions);
-  std::string generatedNotebook = notebook->generateNotebook(groups, rows);
+  // TODO: fix this
+  //auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
+  //    m_wsName, m_model, m_view->getProcessInstrument(), m_whitelist,
+  //    m_preprocessMap, m_processor, m_postprocessor, preprocessingOptionsMap,
+  //    processingOptions, postprocessingOptions);
+  //std::string generatedNotebook = notebook->generateNotebook(groups, rows);
 
-  std::ofstream file(filename.c_str(), std::ofstream::trunc);
-  file << generatedNotebook;
-  file.flush();
-  file.close();
+  //std::ofstream file(filename.c_str(), std::ofstream::trunc);
+  //file << generatedNotebook;
+  //file.flush();
+  //file.close();
 }
 
 /**
@@ -321,25 +245,21 @@ Post-processes the workspaces created by the given rows together.
 @param rows : the list of rows
 */
 void GenericDataProcessorPresenter::postProcessGroup(
-    int group, const std::set<int> &rows) {
-
-  // If we can get away with doing nothing, do.
-  if (rows.size() < 2)
-    return;
+    const std::set<std::vector<std::string>> &data) {
 
   // The input workspace names
   std::vector<std::string> inputNames;
 
   // The name to call the post-processed ws
   const std::string outputWSName =
-      getPostprocessedWorkspaceName(group, rows, m_postprocessor.prefix());
+      getPostprocessedWorkspaceName(data, m_postprocessor.prefix());
 
   // Go through each row and get the input ws names
-  for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
+  for (const auto &row : data) {
 
     // The name of the reduced workspace for this row
     const std::string inputWSName =
-        getReducedWorkspaceName(group, *rowIt, m_processor.prefix(0));
+        getReducedWorkspaceName(row, m_processor.prefix(0));
 
     if (AnalysisDataService::Instance().doesExist(inputWSName)) {
 
@@ -377,113 +297,6 @@ void GenericDataProcessorPresenter::postProcessGroup(
 
   if (!alg->isExecuted())
     throw std::runtime_error("Failed to post-process workspaces.");
-}
-
-/**
-Process rows and groups
-@param groups : groups of rows to post-process
-@param rows : rows to process
-@returns true if successful, otherwise false
-*/
-bool GenericDataProcessorPresenter::processGroups(
-    const std::set<int> &groups, const std::map<int, std::set<int>> &rows) {
-
-  int progress = 0;
-  // Each group and each row within count as a progress step.
-  int maxProgress = (int)(groups.size());
-  for (const auto row : rows) {
-    maxProgress += (int)(row.second.size());
-  }
-  ProgressPresenter progressReporter(progress, maxProgress, maxProgress,
-                                     m_progressView);
-
-  for (auto it = rows.begin(); it != rows.end(); ++it) {
-    const int groupId = it->first;
-    auto rows = it->second;
-
-    // Reduce each row
-    for (const auto &row : rows) {
-      try {
-        reduceRow(groupId, row);
-        progressReporter.report();
-      } catch (std::exception &ex) {
-        const std::string rowNo =
-            Mantid::Kernel::Strings::toString<int>(row + 1);
-        const std::string groupNo =
-            Mantid::Kernel::Strings::toString<int>(groupId);
-        const std::string message = "Error encountered while processing row " +
-                                    rowNo + " in group " + groupNo + ":\n";
-        m_mainPresenter->giveUserCritical(message + ex.what(), "Error");
-        progressReporter.clear();
-        return false;
-      }
-    }
-
-    // Post-process if group was selected
-    if (groups.find(groupId) != groups.end()) {
-      try {
-        postProcessGroup(groupId, rows);
-        progressReporter.report();
-      } catch (std::exception &ex) {
-        const std::string groupNo =
-            Mantid::Kernel::Strings::toString<int>(groupId);
-        const std::string message =
-            "Error encountered while stitching group " + groupNo + ":\n";
-        m_mainPresenter->giveUserCritical(message + ex.what(), "Error");
-        progressReporter.clear();
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-/**
-Validate rows.
-@param groups : A map in which keys are groups and values sets or rows
-@returns true if all rows are valid and false otherwise
-*/
-bool GenericDataProcessorPresenter::rowsValid(
-    const std::map<int, std::set<int>> &groups) {
-
-  for (auto group = groups.begin(); group != groups.end(); ++group) {
-
-    const std::string groupNo =
-        Mantid::Kernel::Strings::toString<int>(group->first + 1);
-
-    auto runs = group->second;
-    for (auto it = runs.begin(); it != runs.end(); ++it) {
-      try {
-        validateRow(group->first, *it);
-      } catch (std::exception &ex) {
-        // Allow two theta to be blank
-        if (ex.what() ==
-            std::string("Value for two theta could not be found in log."))
-          continue;
-
-        const std::string rowNo =
-            Mantid::Kernel::Strings::toString<int>(*it + 1);
-        m_mainPresenter->giveUserCritical("Error found in group " + groupNo +
-                                              ", row " + rowNo + ":\n" +
-                                              ex.what(),
-                                          "Error");
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-/**
-Validate a row.
-A row may pass validation, but it is not necessarily ready for processing.
-@param groupNo : The group to which the row belongs
-@param rowNo : The row in the model to validate
-@throws std::invalid_argument if the row fails validation
-*/
-void GenericDataProcessorPresenter::validateRow(int groupNo, int rowNo) const {
-  if (rowNo >= numRowsInGroup(groupNo))
-    throw std::invalid_argument("Invalid row");
 }
 
 /**
@@ -568,24 +381,23 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 
 /**
 Returns the name of the reduced workspace for a given row
-@param group : The group to which the specified row belongs
-@param row : The row
+@param data :: [input] The data for this row
 @param prefix : A prefix to be appended to the generated ws name
 @throws std::runtime_error if the workspace could not be prepared
 @returns : The name of the workspace
 */
 std::string GenericDataProcessorPresenter::getReducedWorkspaceName(
-    int group, int row, const std::string &prefix) {
+    const std::vector<std::string> &data, const std::string &prefix) {
 
   /* This method calculates, for a given row, the name of the output (processed)
-   * workspace. This is done using the white list, which contains information
-   * about the columns that should be included to create the ws name. In
-   * Reflectometry for example, we want to include values in the 'Run(s)' and
-   * 'Transmission Run(s)' columns. We may also use a prefix associated with
-   * the column when specified. Finally, to construct the ws name we may also
-   * use a 'global' prefix associated with the processing algorithm (for
-   * instance 'IvsQ_' in Reflectometry) this is given by the second argument to
-   * this method */
+  * workspace. This is done using the white list, which contains information
+  * about the columns that should be included to create the ws name. In
+  * Reflectometry for example, we want to include values in the 'Run(s)' and
+  * 'Transmission Run(s)' columns. We may also use a prefix associated with
+  * the column when specified. Finally, to construct the ws name we may also
+  * use a 'global' prefix associated with the processing algorithm (for
+  * instance 'IvsQ_' in Reflectometry) this is given by the second argument to
+  * this method */
 
   // Temporary vector of strings to construct the name
   std::vector<std::string> names;
@@ -596,10 +408,7 @@ std::string GenericDataProcessorPresenter::getReducedWorkspaceName(
     if (m_whitelist.showValue(col)) {
 
       // Get what's in the column
-      const std::string valueStr =
-          m_model->data(m_model->index(row, col, m_model->index(group, 0)))
-              .toString()
-              .toStdString();
+      const std::string valueStr = data.at(col);
 
       // If it's not empty, use it
       if (!valueStr.empty()) {
@@ -628,15 +437,16 @@ Returns the name of the reduced workspace for a given row
 @returns : The name of the workspace
 */
 std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
-    int group, const std::set<int> &rows, const std::string &prefix) {
+    const std::set<std::vector<std::string>> &rowData,
+    const std::string &prefix) {
 
   /* This method calculates, for a given set of rows, the name of the output
-   * (post-processed) workspace */
+  * (post-processed) workspace */
 
   std::vector<std::string> outputNames;
 
-  for (auto itRow = rows.begin(); itRow != rows.end(); ++itRow) {
-    outputNames.push_back(getReducedWorkspaceName(group, *itRow));
+  for (const auto &data : rowData) {
+    outputNames.push_back(getReducedWorkspaceName(data));
   }
   return prefix + boost::join(outputNames, "_");
 }
@@ -692,11 +502,13 @@ GenericDataProcessorPresenter::loadRun(const std::string &run,
 
 /**
 Reduce a row
-@param groupNo : The group to which the row belongs
-@param rowNo : The row in the model to reduce
+@param data :: [input] The data in this row as a vector where elements
+correspond to column contents
 @throws std::runtime_error if reduction fails
+@return :: Data updated after running the algorithm
 */
-void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
+std::vector<std::string>
+GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
   /* Create the processing algorithm */
 
@@ -722,10 +534,7 @@ void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
     if (m_preprocessMap.count(columnName)) {
       // This column needs pre-processing
 
-      const std::string runStr =
-          m_model->data(m_model->index(rowNo, i, m_model->index(groupNo, 0)))
-              .toString()
-              .toStdString();
+      const std::string runStr = data.at(i);
 
       if (!runStr.empty()) {
 
@@ -739,11 +548,8 @@ void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
         alg->setProperty(propertyName, runWS->name());
       }
     } else {
-      // No pre-processing needed, read from the table
-      auto propertyValue =
-          m_model->data(m_model->index(rowNo, i, m_model->index(groupNo, 0)))
-              .toString()
-              .toStdString();
+      // No pre-processing needed
+      auto propertyValue = data.at(i);
       if (!propertyValue.empty())
         alg->setPropertyValue(propertyName, propertyValue);
     }
@@ -764,10 +570,8 @@ void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
   }
 
   /* Now deal with 'Options' column */
-  options = m_model->data(m_model->index(rowNo, m_model->columnCount() - 1,
-                                         m_model->index(groupNo, 0)))
-                .toString()
-                .toStdString();
+  options = data.back();
+
   // Parse and set any user-specified options
   optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
@@ -781,111 +585,45 @@ void GenericDataProcessorPresenter::reduceRow(int groupNo, int rowNo) {
 
   /* We need to give a name to the output workspaces */
   for (size_t i = 0; i < m_processor.numberOfOutputProperties(); i++) {
-    alg->setProperty(
-        m_processor.outputPropertyName(i),
-        getReducedWorkspaceName(groupNo, rowNo, m_processor.prefix(i)));
+    alg->setProperty(m_processor.outputPropertyName(i),
+                     getReducedWorkspaceName(data, m_processor.prefix(i)));
   }
 
   /* Now run the processing algorithm */
   alg->execute();
 
+  auto newData = data;
   if (alg->isExecuted()) {
 
     /* The reduction is complete, try to populate the columns */
     for (int i = 0; i < m_columns - 1; i++) {
-      if (m_model->data(m_model->index(rowNo, i, m_model->index(groupNo, 0)))
-              .toString()
-              .isEmpty()) {
+      if (data.at(i).empty()) {
 
         std::string propValue =
             alg->getPropertyValue(m_whitelist.algPropFromColIndex(i));
 
-        if (m_options["Round"].toBool()) {
-          propValue = propValue.substr(
-              0, propValue.find(".") + m_options["RoundPrecision"].toInt() + 1);
-        }
-
-        m_model->setData(m_model->index(rowNo, i, m_model->index(groupNo, 0)),
-                         QString::fromStdString(propValue));
+        newData[i] = propValue;
       }
     }
   }
+  return newData;
 }
 
 /**
-Inserts a new row to the specified group in the specified location
-@param groupIndex :: The index to insert the new row after
-@param rowIndex :: The index to insert the new row after
-*/
-void GenericDataProcessorPresenter::insertRow(int groupIndex, int rowIndex) {
-
-  m_model->insertRow(rowIndex, m_model->index(groupIndex, 0));
-}
-
-/**
-Inserts a new group in the specified location
-@param groupIndex :: The index to insert the new row after
-*/
-void GenericDataProcessorPresenter::insertGroup(int groupIndex) {
-
-  m_model->insertRow(groupIndex);
-}
-
-/**
-Insert a row after the last selected row. If a group was selected, the new row
-is appended to that group. If nothing was selected, the new row is appended to
-the last group in the table.
+Insert a new row
 */
 void GenericDataProcessorPresenter::appendRow() {
-  auto selectedGroups = m_view->getSelectedParents();
-  auto selectedRows = m_view->getSelectedChildren();
 
-  if (!selectedRows.empty()) {
-    // Some rows were selected
-    // Insert a row after last selected row
-
-    int groupId = selectedRows.rbegin()->first;
-    int lastSelectedRow = *(selectedRows[groupId].rbegin());
-    insertRow(groupId, lastSelectedRow + 1);
-
-  } else if (!selectedGroups.empty()) {
-    // No rows were selected, but some groups were selected
-    // Append row to last selected group
-
-    int lastSelectedGroup = *(selectedGroups.rbegin());
-    insertRow(lastSelectedGroup,
-              m_model->rowCount(m_model->index(lastSelectedGroup, 0)));
-
-  } else {
-    // Nothing was selected
-
-    if (m_model->rowCount() == 0) {
-      // Model is empty, we cannot add a row
-      return;
-    }
-
-    int groupId = m_model->rowCount() - 1;
-    int rowId = m_model->rowCount(m_model->index(groupId, 0));
-
-    // Add a new row to last group
-    insertRow(groupId, rowId);
-  }
+  m_manager->appendRow();
   m_tableDirty = true;
 }
 
 /**
-Insert a group after the last selected group
+Insert a new group
 */
 void GenericDataProcessorPresenter::appendGroup() {
-  auto selectedGroups = m_view->getSelectedParents();
 
-  if (selectedGroups.empty()) {
-    // Append group at the end of the table
-    insertGroup(m_model->rowCount());
-  } else {
-    // Append group after last selected group
-    insertGroup(*(selectedGroups.rbegin()) + 1);
-  }
+  m_manager->appendGroup();
   m_tableDirty = true;
 }
 
@@ -893,14 +631,8 @@ void GenericDataProcessorPresenter::appendGroup() {
 Delete row(s) from the model
 */
 void GenericDataProcessorPresenter::deleteRow() {
-  auto selectedRows = m_view->getSelectedChildren();
-  for (auto it = selectedRows.rbegin(); it != selectedRows.rend(); ++it) {
-    const int groupId = it->first;
-    auto rows = it->second;
-    for (auto row = rows.rbegin(); row != rows.rend(); ++row) {
-      m_model->removeRow(*row, m_model->index(groupId, 0));
-    }
-  }
+
+  m_manager->deleteRow();
   m_tableDirty = true;
 }
 
@@ -908,11 +640,7 @@ void GenericDataProcessorPresenter::deleteRow() {
 Delete group(s) from the model
 */
 void GenericDataProcessorPresenter::deleteGroup() {
-  auto selectedGroups = m_view->getSelectedParents();
-  for (auto group = selectedGroups.rbegin(); group != selectedGroups.rend();
-       ++group) {
-    m_model->removeRow(*group);
-  }
+  m_manager->deleteGroup();
   m_tableDirty = true;
 }
 
@@ -921,48 +649,7 @@ Group rows together
 */
 void GenericDataProcessorPresenter::groupRows() {
 
-  // Find if rows belong to the same group
-  // If they do, do nothing
-  // If they don't, remove rows from their groups and add them to a
-  // new group
-
-  const auto selectedRows = m_view->getSelectedChildren();
-
-  if (selectedRows.empty()) {
-    // no rows were selected
-    return;
-  }
-
-  // Append a new group where selected rows will be pasted (this will append a
-  // group with an empty row)
-  int groupId = m_model->rowCount();
-  appendGroup();
-  // Append as many rows as the number of selected rows minus one
-  int rowsToAppend = -1;
-  for (const auto &row : selectedRows)
-    rowsToAppend += static_cast<int>(row.second.size());
-  for (int i = 0; i < rowsToAppend; i++)
-    insertRow(groupId, i);
-
-  // Now we just have to set the data
-  int rowIndex = 0;
-  for (const auto &item : selectedRows) {
-    int oldGroupId = item.first;
-    auto rows = item.second;
-    for (const auto &row : rows) {
-      for (int col = 0; col < m_columns; col++) {
-        auto value = m_model->data(
-            m_model->index(row, col, m_model->index(oldGroupId, 0)));
-        m_model->setData(
-            m_model->index(rowIndex, col, m_model->index(groupId, 0)), value);
-      }
-      rowIndex++;
-    }
-  }
-
-  // Now delete the rows
-  deleteRow();
-
+  m_manager->groupRows();
   m_tableDirty = true;
 }
 
@@ -1045,7 +732,8 @@ Press changes to the same item in the ADS
 void GenericDataProcessorPresenter::saveTable() {
   if (!m_wsName.empty()) {
     AnalysisDataService::Instance().addOrReplace(
-        m_wsName, boost::shared_ptr<ITableWorkspace>(m_ws->clone().release()));
+        m_wsName, boost::shared_ptr<ITableWorkspace>(
+                      m_manager->getTableWorkspace()->clone().release()));
     m_tableDirty = false;
   } else {
     saveTableAs();
@@ -1075,10 +763,9 @@ void GenericDataProcessorPresenter::newTable() {
             "Start New Table?"))
       return;
 
-  m_ws = createDefaultWorkspace();
-  m_model.reset(new QDataProcessorTwoLevelTreeModel(m_ws, m_whitelist));
+  m_manager->newTable(m_whitelist);
   m_wsName.clear();
-  m_view->showTable(m_model);
+  m_view->showTable(m_manager->getModel());
 
   m_tableDirty = false;
 }
@@ -1114,12 +801,11 @@ void GenericDataProcessorPresenter::openTable() {
   ITableWorkspace_sptr newTable =
       boost::shared_ptr<ITableWorkspace>(origTable->clone().release());
   try {
-    validateModel(newTable);
-    m_ws = newTable;
-    m_model.reset(new QDataProcessorTwoLevelTreeModel(m_ws, m_whitelist));
-    m_wsName = toOpen;
-    m_view->showTable(m_model);
-    m_tableDirty = false;
+	  m_manager->isValidModel(newTable, m_whitelist.size());
+	  m_manager->newTable(newTable, m_whitelist);
+	  m_wsName = toOpen;
+	  m_view->showTable(m_manager->getModel());
+	  m_tableDirty = false;
   } catch (std::runtime_error &e) {
     m_mainPresenter->giveUserCritical(
         "Could not open workspace: " + std::string(e.what()), "Error");
@@ -1173,7 +859,7 @@ void GenericDataProcessorPresenter::addHandle(
           name))
     return;
 
-  if (!isValidModel(workspace))
+  if (!m_manager->isValidModel(workspace, m_columns))
     return;
 
   m_workspaceList.insert(name);
@@ -1225,82 +911,29 @@ void GenericDataProcessorPresenter::afterReplaceHandle(
   m_workspaceList.erase(name);
 
   // If it's a table workspace, bring it back
-  if (isValidModel(workspace))
+  if (m_manager->isValidModel(workspace, m_columns))
     m_workspaceList.insert(name);
 
   m_view->setTableList(m_workspaceList);
 }
 
-/** Returns how many rows there are in a given group
-@param group : The group to count the rows of
-@returns The number of rows in the group
-*/
-int GenericDataProcessorPresenter::numRowsInGroup(int group) const {
-
-  return m_model->rowCount(m_model->index(group, 0));
-}
-
-/** Expands the current selection to all the rows in the selected groups, this
- * effectively means selecting the parent item (i.e. the group to which the
- * selected rows belong) */
+/** Expands the current selection */
 void GenericDataProcessorPresenter::expandSelection() {
-  std::set<int> groupIds;
 
-  auto items = m_view->getSelectedChildren();
-  if (items.empty())
-    return;
-
-  for (auto group = items.begin(); group != items.end(); ++group)
-    groupIds.insert(group->first);
-
-  m_view->setSelection(groupIds);
+	m_view->setSelection(m_manager->expandSelection());
 }
 
-/** Clear the currently selected rows */
+/** Clear current selection */
 void GenericDataProcessorPresenter::clearSelected() {
-  const auto selectedRows = m_view->getSelectedChildren();
 
-  for (const auto &item : selectedRows) {
-    int group = item.first;
-    auto rows = item.second;
-    for (const auto &row : rows) {
-      for (auto col = 0; col < m_model->columnCount(); col++)
-        m_model->setData(m_model->index(row, col, m_model->index(group, 0)),
-                         "");
-    }
-  }
+  m_manager->clearSelected();
   m_tableDirty = true;
 }
 
-/** Copy the currently selected rows to the clipboard */
+/** Copy current selection to clipboard */
 void GenericDataProcessorPresenter::copySelected() {
-  std::vector<std::string> lines;
 
-  const auto selectedRows = m_view->getSelectedChildren();
-
-  if (selectedRows.empty()) {
-    m_view->setClipboard(std::string());
-    return;
-  }
-
-  for (const auto &item : selectedRows) {
-    const int group = item.first;
-    auto rows = item.second;
-
-    for (const auto &row : rows) {
-      std::vector<std::string> line;
-      line.push_back(std::to_string(group));
-
-      for (int col = 0; col < m_columns; ++col) {
-        line.push_back(
-            m_model->data(m_model->index(row, col, m_model->index(group, 0)))
-                .toString()
-                .toStdString());
-      }
-      lines.push_back(boost::algorithm::join(line, "\t"));
-    }
-  }
-  m_view->setClipboard(boost::algorithm::join(lines, "\n"));
+  m_view->setClipboard(m_manager->copySelected());
 }
 
 /** Copy currently selected rows to the clipboard, and then delete them. */
@@ -1309,60 +942,14 @@ void GenericDataProcessorPresenter::cutSelected() {
   deleteRow();
 }
 
-/** Paste the contents of the clipboard into the currently selected rows, or
-* append new rows */
+/** Paste the contents of the clipboard */
 void GenericDataProcessorPresenter::pasteSelected() {
   const std::string text = m_view->getClipboard();
 
   if (text.empty())
     return;
 
-  // Contains the data to paste plus the original group index in the first
-  // element
-  std::vector<std::string> lines;
-  boost::split(lines, text, boost::is_any_of("\n"));
-
-  // If we have rows selected, we'll overwrite them. If not, we'll append new
-  // rows.
-  const auto selectedRows = m_view->getSelectedChildren();
-  if (selectedRows.empty()) {
-    // No rows were selected
-    // Use group where rows in clipboard belong and paste new rows to it
-    // Add as many new rows as required
-    for (size_t i = 0; i < lines.size(); ++i) {
-      std::vector<std::string> values;
-      boost::split(values, lines[i], boost::is_any_of("\t"));
-
-      int groupId = boost::lexical_cast<int>(values.front());
-      int rowId = numRowsInGroup(groupId);
-      insertRow(groupId, rowId);
-      for (int col = 0; col < m_columns; col++) {
-        m_model->setData(m_model->index(rowId, col, m_model->index(groupId, 0)),
-                         QString::fromStdString(values[col + 1]));
-      }
-    }
-  } else {
-    // Some rows were selected
-    // Iterate over rows and lines simultaneously, stopping when we reach the
-    // end of either
-    auto lineIt = lines.begin();
-    for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
-      const int groupId = it->first;
-      auto rows = it->second;
-      auto rowIt = rows.begin();
-      for (; rowIt != rows.end() && lineIt != lines.end(); rowIt++, lineIt++) {
-        std::vector<std::string> values;
-        boost::split(values, *lineIt, boost::is_any_of("\t"));
-
-        // Paste as many columns as we can from this line
-        for (int col = 0;
-             col < m_columns && col < static_cast<int>(values.size()); ++col)
-          m_model->setData(
-              m_model->index(*rowIt, col, m_model->index(groupId, 0)),
-              QString::fromStdString(values[col + 1]));
-      }
-    }
-  }
+  m_manager->pasteSelected(text);
 }
 
 /** Transfers the selected runs in the search results to the processing table
@@ -1371,20 +958,8 @@ void GenericDataProcessorPresenter::pasteSelected() {
 void GenericDataProcessorPresenter::transfer(
     const std::vector<std::map<std::string, std::string>> &runs) {
 
-  auto newRows = runs;
-
-  // Loop over the rows (vector elements)
-  for (auto rowsIt = newRows.begin(); rowsIt != newRows.end(); ++rowsIt) {
-    auto &row = *rowsIt;
-
-    TableRow newRow = m_ws->appendRow();
-    newRow << row["Group"];
-    for (int i = 0; i < m_columns; i++)
-      newRow << row[m_whitelist.colNameFromColIndex(i)];
-  }
-
-  m_model.reset(new QDataProcessorTwoLevelTreeModel(m_ws, m_whitelist));
-  m_view->showTable(m_model);
+  m_manager->transfer(runs, m_whitelist);
+  m_view->showTable(m_manager->getModel());
 }
 
 /**
@@ -1402,18 +977,20 @@ void GenericDataProcessorPresenter::setInstrumentList(
 
 /** Plots any currently selected rows */
 void GenericDataProcessorPresenter::plotRow() {
-  auto selectedRows = m_view->getSelectedChildren();
 
-  if (selectedRows.empty())
-    return;
+  // Set of workspaces to plot
+  std::set<std::string> workspaces;
+  // Set of workspaces not found in the ADS
+  std::set<std::string> notFound;
 
-  std::set<std::string> workspaces, notFound;
-  for (auto it = selectedRows.begin(); it != selectedRows.end(); ++it) {
-    const int groupIdx = it->first;
-    auto rows = it->second;
-    for (auto row = rows.begin(); row != rows.end(); ++row) {
+  const auto items = m_manager->selectedData();
+
+  for (const auto &item : items) {
+    for (const auto &run : item.second) {
+
       const std::string wsName =
-          getReducedWorkspaceName(groupIdx, *row, m_processor.prefix(0));
+          getReducedWorkspaceName(run, m_processor.prefix(0));
+
       if (AnalysisDataService::Instance().doesExist(wsName))
         workspaces.insert(wsName);
       else
@@ -1423,11 +1000,11 @@ void GenericDataProcessorPresenter::plotRow() {
 
   if (!notFound.empty())
     m_mainPresenter->giveUserWarning(
-        "The following workspaces were not plotted because "
-        "they were not found:\n" +
+        "The following workspaces were not plotted because they were not "
+        "found:\n" +
             boost::algorithm::join(notFound, "\n") +
-            "\n\nPlease check that the rows you are trying "
-            "to plot have been fully processed.",
+            "\n\nPlease check that the rows you are trying to plot have been "
+            "fully processed.",
         "Error plotting rows.");
 
   plotWorkspaces(workspaces);
@@ -1435,42 +1012,37 @@ void GenericDataProcessorPresenter::plotRow() {
 
 /** Plots any currently selected groups */
 void GenericDataProcessorPresenter::plotGroup() {
-  auto selectedGroups = m_view->getSelectedParents();
+  // Set of workspaces to plot
+  std::set<std::string> workspaces;
+  // Set of workspaces not found in the ADS
+  std::set<std::string> notFound;
 
-  if (selectedGroups.empty())
-    return;
+  const auto items = m_manager->selectedData();
 
-  std::set<std::string> workspaces, notFound;
+  for (const auto &item : items) {
 
-  // Now, get the rows belonging to the specified groups
-  for (auto it = selectedGroups.begin(); it != selectedGroups.end(); ++it) {
-
-    const int groupId = *it;
-    const int numRows = numRowsInGroup(groupId);
-
-    std::set<int> rows;
-    for (int row = 0; row < numRows; ++row) {
-      // Add this row to group 'group'
-      rows.insert(row);
+    if (item.second.size() > 1) {
     }
+    for (const auto &run : item.second) {
 
-    const std::string wsName =
-        getPostprocessedWorkspaceName(groupId, rows, m_postprocessor.prefix());
+      const std::string wsName =
+          getReducedWorkspaceName(run, m_processor.prefix(0));
 
-    if (AnalysisDataService::Instance().doesExist(wsName))
-      workspaces.insert(wsName);
-    else
-      notFound.insert(wsName);
+      if (AnalysisDataService::Instance().doesExist(wsName))
+        workspaces.insert(wsName);
+      else
+        notFound.insert(wsName);
+    }
   }
 
   if (!notFound.empty())
     m_mainPresenter->giveUserWarning(
-        "The following workspaces were not plotted because "
-        "they were not found:\n" +
+        "The following workspaces were not plotted because they were not "
+        "found:\n" +
             boost::algorithm::join(notFound, "\n") +
-            "\n\nPlease check that the groups you are "
-            "trying to plot have been fully processed.",
-        "Error plotting groups.");
+            "\n\nPlease check that the rows you are trying to plot have been "
+            "fully processed.",
+        "Error plotting rows.");
 
   plotWorkspaces(workspaces);
 }
@@ -1604,5 +1176,40 @@ GenericDataProcessorPresenter::getTableList() {
   return workspaces;
 }
 
+/** Asks the view for selected parent items
+ * @return :: the selected parent items
+ */
+std::set<int> GenericDataProcessorPresenter::selectedParents() const {
+  return m_view->getSelectedParents();
+}
+
+/** Asks the view for selected child items
+ * @return :: the selected child items
+ */
+std::map<int, std::set<int>>
+GenericDataProcessorPresenter::selectedChildren() const {
+  return m_view->getSelectedChildren();
+}
+
+/** Ask user for Yes/No
+ * @param prompt :: the question to ask
+ * @param title :: the title
+ * @return :: Yes/No
+ */
+bool GenericDataProcessorPresenter::askUserYesNo(
+    const std::string &prompt, const std::string &title) const {
+
+  return m_mainPresenter->askUserYesNo(prompt, title);
+}
+
+/** Print warning message
+ * @param prompt :: the message
+ * @param title :: the title
+ */
+void GenericDataProcessorPresenter::giveUserWarning(
+    const std::string &prompt, const std::string &title) const {
+
+  m_mainPresenter->giveUserWarning(prompt, title);
+}
 }
 }
