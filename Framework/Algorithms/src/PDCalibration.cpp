@@ -4,8 +4,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -149,10 +149,10 @@ void PDCalibration::init() {
                   "");
 
   const std::vector<std::string> exts{"_event.nxs", ".nxs.h5", ".nxs"};
-  declareProperty(make_unique<FileProperty>(
-                      "SignalFile", "", FileProperty::FileAction::OptionalLoad,
-                      exts),
-                  "Calibration measurement");
+  declareProperty(
+      make_unique<FileProperty>("SignalFile", "",
+                                FileProperty::FileAction::OptionalLoad, exts),
+      "Calibration measurement");
   declareProperty(make_unique<FileProperty>("BackgroundFile", "",
                                             FileProperty::OptionalLoad, exts),
                   "Calibration background");
@@ -232,16 +232,13 @@ void PDCalibration::init() {
                   boost::make_shared<StringListValidator>(modes),
                   "Select calibration parameters to fit.");
 
-  //  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
-  //                    "RefTOFTable", "", Direction::Output),
-  //                  "");
   declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputCalibrationTable", "", Direction::Output),
                   "An output workspace containing the Calibration Table");
 
-  declareProperty(make_unique<WorkspaceProperty<>>(
-                      "MaskWorkspace", "", Direction::Output),
-                  "An output workspace containing the mask");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("MaskWorkspace", "", Direction::Output),
+      "An output workspace containing the mask");
 
   // make group for FindPeak properties
   std::string findPeaksGroup("Peak finding properties");
@@ -300,7 +297,8 @@ void PDCalibration::exec() {
     createNewCalTable();
   }
 
-  MaskWorkspace_sptr maskWS = boost::make_shared<DataObjects::MaskWorkspace>(m_uncalibratedWS->getInstrument());
+  MaskWorkspace_sptr maskWS = boost::make_shared<DataObjects::MaskWorkspace>(
+      m_uncalibratedWS->getInstrument());
   setProperty("MaskWorkspace", maskWS);
 
   const std::size_t NUMHIST = m_uncalibratedWS->getNumberHistograms();
@@ -324,13 +322,6 @@ void PDCalibration::exec() {
     if (peaks.inTofPos.empty())
       continue;
 
-    //       std::cout << "****************************** detid = " <<
-    //       peaks.detid
-    //                 << " wkspIndex = " << wkspIndex
-    //                 << " numPeaks = " << peaks.inTofPos.size() << std::endl;
-    //       std::cout << "--> TOFRANGE " << peaks.tofMin << " -> " <<
-    //       peaks.tofMax << std::endl;
-
     auto alg = createChildAlgorithm("FindPeaks");
     alg->setProperty("InputWorkspace", m_uncalibratedWS);
     alg->setProperty("WorkspaceIndex", static_cast<int>(wkspIndex));
@@ -343,33 +334,21 @@ void PDCalibration::exec() {
                                   getProperty("BackgroundType"));
     alg->setProperty<bool>("HighBackground", getProperty("HighBackground"));
     alg->setProperty<int>("MinGuessedPeakWidth",
-                             getProperty("MinGuessedPeakWidth"));
+                          getProperty("MinGuessedPeakWidth"));
     alg->setProperty<int>("MaxGuessedPeakWidth",
-                             getProperty("MaxGuessedPeakWidth"));
+                          getProperty("MaxGuessedPeakWidth"));
     alg->setProperty<double>("MinimumPeakHeight",
                              getProperty("MinimumPeakHeight"));
     alg->setProperty<bool>("StartFromObservedPeakCentre",
                            getProperty("StartFromObservedPeakCentre"));
     alg->executeAsChildAlg();
     API::ITableWorkspace_sptr fittedTable = alg->getProperty("PeaksList");
-    //       std::cout << "fitted rowcount " << fittedTable->rowCount() <<
-    //       std::endl;
 
-    //       std::cout << "old: ";
-    //       for (auto tof: peaks.inTofPos) {
-    //         std::cout << tof << " ";
-    //       }
-    //       std::cout << std::endl;
-
-    //       std::cout << "------------------------------" << std::endl;
-    // double difc_cumm = 0.;
-    // size_t difc_count = 0;
     std::vector<double> d_vec;
     std::vector<double> tof_vec;
     for (size_t i = 0; i < fittedTable->rowCount(); ++i) {
       // Get peak value
       double centre = fittedTable->getRef<double>("centre", i);
-      //double width = fittedTable->getRef<double>("width", i);
       double height = fittedTable->getRef<double>("height", i);
       double chi2 = fittedTable->getRef<double>("chi2", i);
 
@@ -390,16 +369,12 @@ void PDCalibration::exec() {
       }
 
       // background value
-      double back_intercept = fittedTable->getRef<double>("backgroundintercept", i);
+      double back_intercept =
+          fittedTable->getRef<double>("backgroundintercept", i);
       double back_slope = fittedTable->getRef<double>("backgroundslope", i);
       double back_quad = fittedTable->getRef<double>("A2", i);
       double background =
-	back_intercept + back_slope * centre + back_quad * centre * centre;
-
-      // Continue to identify whether this peak will be accepted
-      // peak signal/noise ratio
-      //if (height * 2.0 * sqrt(2.0 * M_LN2) / width < 5.)
-      //  continue;
+          back_intercept + back_slope * centre + back_quad * centre * centre;
 
       // ban peaks that are not outside of error bars for the background
       if (height < 0.5 * std::sqrt(height + background))
