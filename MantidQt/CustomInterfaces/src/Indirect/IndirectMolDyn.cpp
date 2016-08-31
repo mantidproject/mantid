@@ -115,7 +115,7 @@ void IndirectMolDyn::versionSelected(const QString &version) {
   m_uiForm.mwRun->isForDirectory(version4);
 }
 /**
- *
+ * Handle plotting of mantid workspace
  */
 void IndirectMolDyn::plotClicked() {
 
@@ -139,6 +139,14 @@ void IndirectMolDyn::plotClicked() {
 		plot2D(QString::fromStdString(m_pythonExportWsName));
 }
 
+/**
+ * Handle saving workspaces
+ */
+void IndirectMolDyn::saveClicked() {
+	if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+		addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+	m_batchAlgoRunner->executeBatchAsync();
+}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
