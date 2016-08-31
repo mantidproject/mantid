@@ -211,8 +211,10 @@ void AlgorithmHistory::printSelf(std::ostream &os, const int indent) const {
 
   os << std::string(indent, ' ')
      << "Execution Date: " << m_executionDate.toFormattedString() << '\n';
-  os << std::string(indent, ' ')
-     << "Execution Duration: " << m_executionDuration << " seconds\n";
+  if (m_executionDuration > 0.) {
+    os << std::string(indent, ' ')
+       << "Execution Duration: " << m_executionDuration << " seconds\n";
+  }
 
   os << std::string(indent, ' ') << "Parameters:\n";
 
