@@ -83,6 +83,8 @@ Improved
 
 - :ref:`FFT <algm-FFT>` deals correctly with histogram input data. Internally, it converts to point data, and the output is always a point data workspace. (It can be converted to histogram data using :ref:`ConvertToHistogram <algm-ConvertToHistogram>` if required).
 
+-  :ref:`StartLiveDataClearCache <algm-StartLiveData>` has additional properties for specifying scripts to run for processing and post-processing.
+
 Deprecated
 ##########
 
