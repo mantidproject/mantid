@@ -136,18 +136,24 @@ void IndirectMolDyn::plotClicked() {
 		std::string wsName = *it;
 
 		if (plotType == "Spectra" || plotType == "Both")
-			plotSpectrum(QString::fromStdString(wsName),0 , 10);
+			plotSpectrum(QString::fromStdString(wsName));
+
+		if (plotType == "Contour" || plotType == "Both")
+			plot2D(QString::fromStdString(wsName));
 	}
-	if (plotType == "Contour" || plotType == "Both")
-		plot2D(QString::fromStdString(m_pythonExportWsName));
 }
 
 /**
  * Handle saving workspaces
  */
 void IndirectMolDyn::saveClicked() {
-	if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
-		addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+
+	QString filename = m_uiForm.mwRun->getFirstFilename();
+	QFileInfo fi(filename);
+	QString baseName = fi.baseName();
+
+	if (checkADSForPlotSaveWorkspace(baseName.toStdString(), false))
+		addSaveWorkspaceToQueue(baseName);
 	m_batchAlgoRunner->executeBatchAsync();
 }
 
