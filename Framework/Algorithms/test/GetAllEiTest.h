@@ -8,10 +8,104 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <MantidHistogramData/LinearGenerator.h>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
+using namespace HistogramData;
+
+namespace {
+DataObjects::Workspace2D_sptr createTestingWS(bool noLogs = false) {
+  double delay(2000), chopSpeed(100), inital_chop_phase(-3000);
+  auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+      2, 1000, true);
+  auto pInstrument = ws->getInstrument();
+  auto chopper = pInstrument->getComponentByName("chopper-position");
+
+  // add chopper parameters
+  auto &paramMap = ws->instrumentParameters();
+  const std::string description(
+      "The initial rotation phase of the disk used to calculate the time"
+      " for neutrons arriving at the chopper according to the formula time = "
+      "delay + initial_phase/Speed");
+  paramMap.add<double>("double", chopper.get(), "initial_phase",
+                       inital_chop_phase, &description);
+  paramMap.add<std::string>("string", chopper.get(), "ChopperDelayLog",
+                            "fermi_delay");
+  paramMap.add<std::string>("string", chopper.get(), "ChopperSpeedLog",
+                            "fermi_speed");
+  paramMap.add<std::string>("string", chopper.get(), "FilterBaseLog",
+                            "is_running");
+  paramMap.add<bool>("bool", chopper.get(), "filter_with_derivative", false);
+
+  // test instrument parameters (obtained from workspace):
+  auto moderator = pInstrument->getSource();
+  auto detector1 = ws->getDetector(0);
+  auto detector2 = ws->getDetector(1);
+  double l_chop = chopper->getDistance(*moderator);
+  double l_mon1 = detector1->getDistance(*moderator);
+  double l_mon2 = detector2->getDistance(*moderator);
+  //,l_mon1(20-9),l_mon2(20-2);
+  double t_chop(delay + inital_chop_phase / chopSpeed);
+  double Period =
+      (0.5 * 1.e+6) / chopSpeed; // 0.5 because some choppers open twice.
+
+  ws->setBinEdges(0, BinEdges(ws->x(0).size(), LinearGenerator(5, 10)));
+
+  // signal at first monitor
+  double t1 = t_chop * l_mon1 / l_chop;
+  double t2 = (t_chop + Period) * l_mon1 / l_chop;
+
+  // temporary vars, to avoid redeclaring
+  double tm1(0.0);
+  double tm2(0.0);
+
+  auto t = ws->points(0);
+  std::transform(t.cbegin(), t.cend(), ws->mutableY(0).begin(),
+                 [t1, t2, &tm1, &tm2](const double t) {
+                   tm1 = t - t1;
+                   tm2 = t - t2;
+                   return (10000 * std::exp(-tm1 * tm1 / 1000.) +
+                           20000 * std::exp(-tm2 * tm2 / 1000.));
+                 });
+
+  // signal at second monitor
+  t1 = t_chop * l_mon2 / l_chop;
+  t2 = (t_chop + Period) * l_mon2 / l_chop;
+
+  std::transform(t.cbegin(), t.cend(), ws->mutableY(1).begin(),
+                 [t1, t2, &tm1, &tm2](const double t) {
+                   tm1 = t - t1;
+                   tm2 = t - t2;
+                   return (100 * std::exp(-tm1 * tm1 / 1000.) +
+                           200 * std::exp(-tm2 * tm2 / 1000.));
+                 });
+
+  if (noLogs)
+    return ws;
+
+  auto chopDelayLog =
+      Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Delay");
+  auto chopSpeedLog =
+      Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("Chopper_Speed");
+  auto isRunning =
+      Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("is_running");
+
+  for (int i = 0; i < 10; i++) {
+    auto time = Kernel::DateAndTime(10 * i, 0);
+    chopDelayLog->addValue(time, delay);
+    chopSpeedLog->addValue(time, chopSpeed);
+    isRunning->addValue(time, 1.);
+  }
+
+  ws->mutableRun().addLogData(chopSpeedLog.release());
+  ws->mutableRun().addLogData(chopDelayLog.release());
+  ws->mutableRun().addLogData(isRunning.release());
+
+  return ws;
+}
+}
 
 class GetAllEiTester : public GetAllEi {
 public:
@@ -36,7 +130,7 @@ public:
                       size_t &wsIndex0) {
     return GetAllEi::buildWorkspaceToFit(inputWS, wsIndex0);
   }
-  void findBinRanges(const MantidVec &eBins, const MantidVec &signal,
+  void findBinRanges(const HistogramX &eBins, const HistogramY &signal,
                      const std::vector<double> &guess_energies,
                      double Eresolution, std::vector<size_t> &irangeMin,
                      std::vector<size_t> &irangeMax,
@@ -76,7 +170,7 @@ public:
   //
   void test_validators_work() {
 
-    MatrixWorkspace_sptr ws = this->createTestingWS(true);
+    MatrixWorkspace_sptr ws = createTestingWS(true);
 
     m_getAllEi.initialize();
     m_getAllEi.setProperty("Workspace", ws);
@@ -130,7 +224,7 @@ public:
   //
   void test_get_chopper_speed() {
 
-    MatrixWorkspace_sptr ws = this->createTestingWS(true);
+    MatrixWorkspace_sptr ws = createTestingWS(true);
 
     m_getAllEi.initialize();
     m_getAllEi.setProperty("Workspace", ws);
@@ -225,7 +319,7 @@ public:
   }
   void test_get_chopper_speed_filter_derivative() {
 
-    MatrixWorkspace_sptr ws = this->createTestingWS(true);
+    MatrixWorkspace_sptr ws = createTestingWS(true);
 
     m_getAllEi.initialize();
     m_getAllEi.setProperty("Workspace", ws);
@@ -345,8 +439,8 @@ public:
                       "should coincide",
                       *(detID2.begin()),
                       (*wws->getSpectrum(1).getDetectorIDs().begin()));
-    auto Xsp1 = wws->getSpectrum(0).dataX();
-    auto Xsp2 = wws->getSpectrum(1).dataX();
+    auto Xsp1 = wws->getSpectrum(0).mutableX();
+    auto Xsp2 = wws->getSpectrum(1).mutableX();
     size_t nSpectra = Xsp2.size();
     TS_ASSERT_EQUALS(nSpectra, 101);
     TS_ASSERT(boost::math::isinf(Xsp1[nSpectra - 1]));
@@ -453,9 +547,10 @@ public:
   }
 
   void test_getAllEi() {
-    auto ws = createTestingWS();
+    auto ws = createTestingWS(false);
+    API::MatrixWorkspace_sptr out_ws;
 
-    m_getAllEi.initialize();
+    TS_ASSERT_THROWS_NOTHING(m_getAllEi.initialize());
     m_getAllEi.setProperty("Workspace", ws);
     m_getAllEi.setProperty("OutputWorkspace", "monitor_peaks");
     m_getAllEi.setProperty("Monitor1SpecID", 1);
@@ -467,7 +562,8 @@ public:
     m_getAllEi.setProperty("OutputWorkspace", "allEiWs");
 
     TS_ASSERT_THROWS_NOTHING(m_getAllEi.execute());
-    API::MatrixWorkspace_sptr out_ws;
+    TSM_ASSERT_EQUALS("GetAllEi Algorithms should be executed",
+                      m_getAllEi.isExecuted(), true);
     TS_ASSERT_THROWS_NOTHING(
         out_ws = API::AnalysisDataService::Instance()
                      .retrieveWS<API::MatrixWorkspace>("allEiWs"));
@@ -478,7 +574,7 @@ public:
     if (!wso)
       return;
 
-    auto &x = wso->dataX(0);
+    auto &x = wso->mutableX(0);
     TSM_ASSERT_EQUALS("Second peak should be filtered by monitor ranges",
                       x.size(), 1);
     TS_ASSERT_DELTA(x[0], 134.316, 1.e-3)
@@ -486,97 +582,40 @@ public:
 
 private:
   GetAllEiTester m_getAllEi;
-
-  DataObjects::Workspace2D_sptr createTestingWS(bool noLogs = false) {
-    double delay(2000), chopSpeed(100), inital_chop_phase(-3000);
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        2, 1000, true);
-    auto pInstrument = ws->getInstrument();
-    auto chopper = pInstrument->getComponentByName("chopper-position");
-
-    // add chopper parameters
-    auto &paramMap = ws->instrumentParameters();
-    const std::string description(
-        "The initial rotation phase of the disk used to calculate the time"
-        " for neutrons arriving at the chopper according to the formula time = "
-        "delay + initial_phase/Speed");
-    paramMap.add<double>("double", chopper.get(), "initial_phase",
-                         inital_chop_phase, &description);
-    paramMap.add<std::string>("string", chopper.get(), "ChopperDelayLog",
-                              "fermi_delay");
-    paramMap.add<std::string>("string", chopper.get(), "ChopperSpeedLog",
-                              "fermi_speed");
-    paramMap.add<std::string>("string", chopper.get(), "FilterBaseLog",
-                              "is_running");
-    paramMap.add<bool>("bool", chopper.get(), "filter_with_derivative", false);
-
-    // test instrument parameters (obtained from workspace):
-    auto moderator = pInstrument->getSource();
-    auto detector1 = ws->getDetector(0);
-    auto detector2 = ws->getDetector(1);
-    double l_chop = chopper->getDistance(*moderator);
-    double l_mon1 = detector1->getDistance(*moderator);
-    double l_mon2 = detector2->getDistance(*moderator);
-    //,l_mon1(20-9),l_mon2(20-2);
-    double t_chop(delay + inital_chop_phase / chopSpeed);
-    double Period =
-        (0.5 * 1.e+6) / chopSpeed; // 0.5 because some choppers open twice.
-    auto &x = ws->dataX(0);
-    for (size_t i = 0; i < x.size(); i++) {
-      x[i] = 5 + double(i) * 10;
-    }
-    // signal at first monitor
-    double t1 = t_chop * l_mon1 / l_chop;
-    double t2 = (t_chop + Period) * l_mon1 / l_chop;
-    {
-      auto &y = ws->dataY(0);
-      for (size_t i = 0; i < y.size(); i++) {
-        double t = 0.5 * (x[i] + x[i + 1]);
-        double tm1 = t - t1;
-        double tm2 = t - t2;
-        y[i] = (10000 * std::exp(-tm1 * tm1 / 1000.) +
-                20000 * std::exp(-tm2 * tm2 / 1000.));
-        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<'\n';
-      }
-    }
-    // signal at second monitor
-    t1 = t_chop * l_mon2 / l_chop;
-    t2 = (t_chop + Period) * l_mon2 / l_chop;
-    {
-      auto &y = ws->dataY(1);
-      for (size_t i = 0; i < y.size(); i++) {
-        double t = 0.5 * (x[i] + x[i + 1]);
-        double tm1 = t - t1;
-        double tm2 = t - t2;
-        y[i] = (100 * std::exp(-tm1 * tm1 / 1000.) +
-                200 * std::exp(-tm2 * tm2 / 1000.));
-        // std::cout<<"t="<<t<<" signal="<<y[i]<<" ind="<<i<<'\n';
-      }
-    }
-
-    if (noLogs)
-      return ws;
-
-    auto chopDelayLog = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
-        "Chopper_Delay");
-    auto chopSpeedLog = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
-        "Chopper_Speed");
-    auto isRunning =
-        Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("is_running");
-
-    for (int i = 0; i < 10; i++) {
-      auto time = Kernel::DateAndTime(10 * i, 0);
-      chopDelayLog->addValue(time, delay);
-      chopSpeedLog->addValue(time, chopSpeed);
-      isRunning->addValue(time, 1.);
-    }
-
-    ws->mutableRun().addLogData(chopSpeedLog.release());
-    ws->mutableRun().addLogData(chopDelayLog.release());
-    ws->mutableRun().addLogData(isRunning.release());
-
-    return ws;
-  }
 };
 
+class GetAllEiTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static GetAllEiTestPerformance *createSuite() {
+    return new GetAllEiTestPerformance();
+  }
+  static void destroySuite(GetAllEiTestPerformance *suite) { delete suite; }
+
+  void setUp() override { inputMatrix = createTestingWS(false); }
+
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().remove("monitor_peaks");
+  }
+
+  void testPerformance() {
+    GetAllEi getAllEi;
+    getAllEi.initialize();
+
+    getAllEi.setProperty("Workspace", inputMatrix);
+    getAllEi.setProperty("OutputWorkspace", "monitor_peaks");
+    getAllEi.setProperty("Monitor1SpecID", 1);
+    getAllEi.setProperty("Monitor2SpecID", 2);
+    getAllEi.setPropertyValue("ChopperSpeedLog", "Chopper_Speed");
+    getAllEi.setPropertyValue("ChopperDelayLog", "Chopper_Delay");
+    getAllEi.setPropertyValue("FilterBaseLog", "is_running");
+    getAllEi.setProperty("FilterWithDerivative", false);
+
+    TS_ASSERT_THROWS_NOTHING(getAllEi.execute());
+  }
+
+private:
+  Mantid::API::MatrixWorkspace_sptr inputMatrix;
+};
 #endif

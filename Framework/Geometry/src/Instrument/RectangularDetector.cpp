@@ -6,6 +6,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/BitmapGeometryHandler.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Material.h"
 #include <algorithm>
 #include <ostream>
 #include <stdexcept>
@@ -715,6 +716,10 @@ const boost::shared_ptr<const Object> RectangularDetector::shape() const {
       shapeCreator.createShape(xmlCuboidShape);
 
   return cuboidShape;
+}
+
+const Kernel::Material RectangularDetector::material() const {
+  return Kernel::Material();
 }
 
 //-------------------------------------------------------------------------------------------------

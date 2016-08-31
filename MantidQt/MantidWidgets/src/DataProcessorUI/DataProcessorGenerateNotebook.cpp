@@ -74,11 +74,12 @@ DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
 
 /**
   Generate an ipython notebook
+  @param groups : groups that were post-processed
   @param rows : rows that were reduced
   @returns ipython notebook string
   */
 std::string DataProcessorGenerateNotebook::generateNotebook(
-    const std::map<int, std::set<int>> &rows) {
+    const std::set<int> &groups, const std::map<int, std::set<int>> &rows) {
 
   auto notebook = Mantid::Kernel::make_unique<Mantid::API::NotebookWriter>();
 
@@ -119,11 +120,15 @@ std::string DataProcessorGenerateNotebook::generateNotebook(
     }
     notebook->codeCell(code_string.str());
 
-    /** Post-process group **/
-
-    boost::tuple<std::string, std::string> postprocess_string =
-        postprocessGroupString(rowSet, m_model, m_whitelist, m_processor,
-                               m_postprocessor, m_postprocessingOptions);
+    /** Post-process string **/
+    boost::tuple<std::string, std::string> postprocess_string;
+    if (groups.find(groupId) != groups.end()) {
+      // The row to which rows belong was post-process only if it is in the set
+      // of groups. If it is not, it means that runs were not post-processed
+      postprocess_string = postprocessGroupString(
+          groupId, rowSet, m_model, m_whitelist, m_processor, m_postprocessor,
+          m_postprocessingOptions);
+    }
     notebook->codeCell(boost::get<0>(postprocess_string));
 
     /** Draw plots **/
@@ -286,8 +291,9 @@ std::string tableString(QDataProcessorTreeModel_sptr model,
 }
 
 /**
-  Create string of python code to post-process workspaces in the same group
-  @param groups : groups that were post-processed
+  Create string of python code to post-process rows in the same group
+  @param group : group to which rows belong
+  @param rows : rows that were reduced and post-processed together
   @param model : table model containing details of runs and processing settings
   @param whitelist : the whitelist
   @param processor : the reduction algorithm
@@ -298,7 +304,7 @@ std::string tableString(QDataProcessorTreeModel_sptr model,
   @return tuple containing the python code string and the output workspace name
   */
 boost::tuple<std::string, std::string> postprocessGroupString(
-    const std::set<int> &groups, QDataProcessorTreeModel_sptr model,
+    int group, const std::set<int> &rows, QDataProcessorTreeModel_sptr model,
     const DataProcessorWhiteList &whitelist,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
@@ -314,19 +320,15 @@ boost::tuple<std::string, std::string> postprocessGroupString(
   std::vector<std::string> outputName;
 
   // Go through each row and prepare the input and output properties
-  for (const auto &group : groups) {
+  for (const auto &row : rows) {
 
-    int nrows = model->rowCount(model->index(group, 0));
+    // The reduced ws name without prefix (for example 'TOF_13460_13462')
+    auto suffix = getReducedWorkspaceName(group, row, model, whitelist);
 
-    for (int row = 0; row < nrows; row++) {
-      // The reduced ws name without prefix (for example 'TOF_13460_13462')
-      auto suffix = getReducedWorkspaceName(group, row, model, whitelist);
-
-      // The reduced ws name: 'IvsQ_TOF_13460_13462'
-      inputNames.emplace_back(processor.prefix(0) + suffix);
-      // Add the suffix (i.e. 'TOF_13460_13462') to the output ws name
-      outputName.emplace_back(suffix);
-    }
+    // The reduced ws name: 'IvsQ_TOF_13460_13462'
+    inputNames.emplace_back(processor.prefix(0) + suffix);
+    // Add the suffix (i.e. 'TOF_13460_13462') to the output ws name
+    outputName.emplace_back(suffix);
   }
 
   std::string outputWSName =
@@ -396,7 +398,7 @@ std::string getReducedWorkspaceName(int groupNo, int rowNo,
 
         // But we may have things like '1+2' which we want to replace with '1_2'
         std::vector<std::string> value;
-        boost::split(value, valueStr, boost::is_any_of("+"));
+        boost::split(value, valueStr, boost::is_any_of("+,"));
 
         names.push_back(whitelist.prefix(col) +
                         boost::algorithm::join(value, "_"));
@@ -425,7 +427,9 @@ std::string getReducedWorkspaceName(int groupNo, int rowNo,
  @param preprocessingOptionsMap : a map containing the pre-processing options
  @param processingOptions : the pre-processing options specified via hinting
  line edit
- @return tuple containing the python string and the output workspace names
+ @return tuple containing the python string and the output workspace names.
+ First item in the tuple is the python code that performs the reduction, and
+ second item are the names of the output workspaces.
 */
 boost::tuple<std::string, std::string> reduceRowString(
     const int groupNo, const int rowNo, const std::string &instrument,

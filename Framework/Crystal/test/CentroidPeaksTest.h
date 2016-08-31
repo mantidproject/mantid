@@ -1,6 +1,7 @@
 #ifndef MANTID_CRYSTAL_CentroidPeaksTEST_H_
 #define MANTID_CRYSTAL_CentroidPeaksTEST_H_
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidCrystal/CentroidPeaks.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
@@ -28,6 +29,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::LinearGenerator;
 
 class CentroidPeaksTest : public CxxTest::TestSuite {
 public:
@@ -111,13 +113,8 @@ public:
     for (size_t d = 0; d < nd; ++d)
       delete gens[d];
 
-    // Create the x-axis for histogramming.
-    BinEdges x1(numBins);
-    int i = 0;
-    std::generate(begin(x1), end(x1), [&] { return i++ * binDelta; });
-
     // Set all the histograms at once.
-    retVal->setAllX(x1);
+    retVal->setAllX(BinEdges(numBins, LinearGenerator(0.0, binDelta)));
 
     // Some sanity checks
     TS_ASSERT_EQUALS(retVal->getInstrument()->getName(), "MINITOPAZ");

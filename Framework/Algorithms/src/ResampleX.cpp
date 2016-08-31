@@ -15,6 +15,7 @@ namespace Algorithms {
 using namespace API;
 using namespace DataObjects;
 using namespace Kernel;
+using HistogramData::BinEdges;
 using std::map;
 using std::pair;
 using std::string;
@@ -331,7 +332,7 @@ void ResampleX::exec() {
 
       if (common_limits) {
         // get the delta from the first since they are all the same
-        HistogramData::BinEdges xValues(0);
+        BinEdges xValues(0);
         double delta = this->determineBinning(xValues.mutableRawData(),
                                               xmins[0], xmaxs[0]);
         g_log.debug() << "delta = " << delta << "\n";
@@ -344,13 +345,13 @@ void ResampleX::exec() {
         PARALLEL_FOR2(inputEventWS, outputWS)
         for (int wkspIndex = 0; wkspIndex < numSpectra; ++wkspIndex) {
           PARALLEL_START_INTERUPT_REGION
-          MantidVec xValues;
-          double delta = this->determineBinning(xValues, xmins[wkspIndex],
-                                                xmaxs[wkspIndex]);
+          BinEdges xValues(0);
+          double delta = this->determineBinning(
+              xValues.mutableRawData(), xmins[wkspIndex], xmaxs[wkspIndex]);
           g_log.debug() << "delta[wkspindex=" << wkspIndex << "] = " << delta
                         << " xmin=" << xmins[wkspIndex]
                         << " xmax=" << xmaxs[wkspIndex] << "\n";
-          outputEventWS->setBinEdges(wkspIndex, xValues);
+          outputEventWS->setHistogram(wkspIndex, xValues);
           prog.report(name()); // Report progress
           PARALLEL_END_INTERUPT_REGION
         }

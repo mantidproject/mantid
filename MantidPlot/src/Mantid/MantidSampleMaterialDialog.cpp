@@ -7,6 +7,7 @@
 
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Material.h"
 
 #include <QTreeWidgetItem>
 #include <QTreeWidget>

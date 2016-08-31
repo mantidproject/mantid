@@ -10,6 +10,7 @@
 #include "MantidAlgorithms/DetectorEfficiencyVariation.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
@@ -108,11 +109,7 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", Nhist, NXs, NXs - 1);
     Workspace2D_sptr inputA = boost::dynamic_pointer_cast<Workspace2D>(spaceA);
     Workspace2D_sptr inputB = boost::dynamic_pointer_cast<Workspace2D>(spaceB);
-    BinEdges x(NXs);
-    auto &xData = x.mutableData();
-    for (int i = 0; i < NXs; ++i) {
-      xData[i] = i * 1000;
-    }
+    BinEdges x(NXs, HistogramData::LinearGenerator(0.0, 1000.0));
     // random numbers that will be copied into the workspace spectra
     const short ySize = NXs - 1;
     double yArray[ySize] = {

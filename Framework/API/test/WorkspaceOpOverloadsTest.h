@@ -155,7 +155,7 @@ public:
     auto ws = boost::make_shared<WorkspaceTester>();
     ws->init(2, 2, 1);
     ws->dataX(0)[1] = 3.0;
-    ws->dataX(1)[1] = 0.5;
+    ws->dataX(1)[1] = 1.5;
     TS_ASSERT(!ws->isDistribution());
 
     TS_ASSERT_THROWS_NOTHING(WorkspaceHelpers::makeDistribution(ws));
@@ -163,7 +163,7 @@ public:
     TS_ASSERT_EQUALS(ws->readX(0)[0], 1.0)
     TS_ASSERT_EQUALS(ws->readX(0)[1], 3.0)
     TS_ASSERT_EQUALS(ws->readX(1)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readX(1)[1], 0.5)
+    TS_ASSERT_EQUALS(ws->readX(1)[1], 1.5)
     TS_ASSERT_EQUALS(ws->readY(0)[0], 0.5)
     TS_ASSERT_EQUALS(ws->readY(1)[0], 2.0)
     TS_ASSERT_EQUALS(ws->readE(0)[0], 0.5)
@@ -175,7 +175,7 @@ public:
     TS_ASSERT_EQUALS(ws->readX(0)[0], 1.0)
     TS_ASSERT_EQUALS(ws->readX(0)[1], 3.0)
     TS_ASSERT_EQUALS(ws->readX(1)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readX(1)[1], 0.5)
+    TS_ASSERT_EQUALS(ws->readX(1)[1], 1.5)
     TS_ASSERT_EQUALS(ws->readY(0)[0], 0.5)
     TS_ASSERT_EQUALS(ws->readY(1)[0], 2.0)
     TS_ASSERT_EQUALS(ws->readE(0)[0], 0.5)
@@ -187,7 +187,7 @@ public:
     TS_ASSERT_EQUALS(ws->readX(0)[0], 1.0)
     TS_ASSERT_EQUALS(ws->readX(0)[1], 3.0)
     TS_ASSERT_EQUALS(ws->readX(1)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readX(1)[1], 0.5)
+    TS_ASSERT_EQUALS(ws->readX(1)[1], 1.5)
     TS_ASSERT_EQUALS(ws->readY(0)[0], 1.0)
     TS_ASSERT_EQUALS(ws->readY(1)[0], 1.0)
     TS_ASSERT_EQUALS(ws->readE(0)[0], 1.0)
@@ -199,7 +199,7 @@ public:
     TS_ASSERT_EQUALS(ws->readX(0)[0], 1.0)
     TS_ASSERT_EQUALS(ws->readX(0)[1], 3.0)
     TS_ASSERT_EQUALS(ws->readX(1)[0], 1.0)
-    TS_ASSERT_EQUALS(ws->readX(1)[1], 0.5)
+    TS_ASSERT_EQUALS(ws->readX(1)[1], 1.5)
     TS_ASSERT_EQUALS(ws->readY(0)[0], 1.0)
     TS_ASSERT_EQUALS(ws->readY(1)[0], 1.0)
     TS_ASSERT_EQUALS(ws->readE(0)[0], 1.0)

@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/Regroup.h"
@@ -16,6 +17,7 @@ using namespace Mantid::Algorithms;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
 
 class RegroupTest : public CxxTest::TestSuite {
 public:
@@ -67,17 +69,11 @@ private:
   }
 
   Workspace2D_sptr Create2DWorkspace(int xlen, int ylen) {
-    BinEdges x1(xlen, 0.0);
+    BinEdges x1(xlen, LinearGenerator(0.5, 0.75));
     Counts y1(xlen - 1, 3.0);
     CountStandardDeviations e1(xlen - 1, sqrt(3.0));
 
     auto retVal = createWorkspace<Workspace2D>(ylen, xlen, xlen - 1);
-    double j = 1.0;
-
-    for (auto &x : x1) {
-      x = j * 0.5;
-      j += 1.5;
-    }
 
     for (int i = 0; i < ylen; i++) {
       retVal->setBinEdges(i, x1);

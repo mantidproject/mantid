@@ -109,7 +109,7 @@ public:
   std::vector<std::string> newCeriaNo() const override;
 
   int currentCropCalibBankName() const override {
-    return m_currentCropCalibBankName;
+    return g_currentCropCalibBankName;
   }
 
   std::string currentCalibSpecNos() const override;
@@ -122,6 +122,8 @@ public:
   std::string enggRunPythonCode(const std::string &pyCode) override;
 
   void enableTabs(bool enable) override;
+
+  void highlightRbNumber(bool isValid) override;
 
   void enableCalibrateFocusFitUserActions(bool enable) override;
 
@@ -165,9 +167,9 @@ public:
 
   bool saveFocusedOutputFiles() const override;
 
-  int currentPlotType() const override { return m_currentType; }
+  int currentPlotType() const override { return g_currentType; }
 
-  int currentMultiRunMode() const override { return m_currentRunMode; }
+  int currentMultiRunMode() const override { return g_currentRunMode; }
 
 signals:
   void getBanks();
@@ -239,6 +241,9 @@ private:
   /// save settings (before closing)
   void saveSettings() const override;
 
+  // when the interface is shown
+  void showEvent(QShowEvent *) override;
+
   // window (custom interface) close
   void closeEvent(QCloseEvent *ev) override;
 
@@ -273,14 +278,18 @@ private:
   /// setting the instrument prefix ahead of the run number
   void setPrefix(std::string prefix);
 
+  // TODO: The values of these three next static members (bank name,
+  // type, run mode) can be obtained from widgets when requested/required.  They
+  // shouldn't need to be cached in data members. Remove them.
+
   // current bank number used for cropped calibration
-  int static m_currentCropCalibBankName;
+  int static g_currentCropCalibBankName;
 
   // plot data representation type selected
-  int static m_currentType;
+  int static g_currentType;
 
   // multi-run focus mode type selected
-  int static m_currentRunMode;
+  int static g_currentRunMode;
 
   /// calibration settings - from/to the 'settings' tab
   EnggDiffCalibSettings m_calibSettings;

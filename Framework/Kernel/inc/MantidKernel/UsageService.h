@@ -79,7 +79,8 @@ public:
   bool isEnabled() const;
   /// Sets whether the UsageReporter is enabled
   void setEnabled(const bool enabled);
-
+  /// clear any buffers without sending any outstanding usage reports
+  void clear();
   /// flushes any buffers and sends any outstanding usage reports
   void flush();
   void shutdown();
