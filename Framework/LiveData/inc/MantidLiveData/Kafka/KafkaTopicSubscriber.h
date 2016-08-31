@@ -46,7 +46,7 @@ public:
   const std::string topic() const;
 
   virtual void subscribe() override;
-  virtual bool consumeMessage(std::string *payload) override;
+  virtual void consumeMessage(std::string *payload) override;
 
 private:
   std::unique_ptr<RdKafka::KafkaConsumer> m_consumer;

@@ -137,46 +137,51 @@ void KafkaTopicSubscriber::subscribe() {
 }
 
 /**
- * Consume a message from the stream and indicate if there is anything
- * further to read
- * @param payload Output parameter filled with message payload
- * @return True if the read was considered successful
+ * Consume a message from the stream. A runtime_error is raised if
+ *   - kafka indicates no error but the msg is empty
+ *   - kafka indicates anything other than a timeout or end of partition error
+ * A timeout or EOF are not treated as exceptional so that the client may keep
+ * polling without having to catch all errors.
+ * @param payload Output parameter filled with message payload. This is cleared
+ * on entry into the method
  */
-bool KafkaTopicSubscriber::consumeMessage(std::string *payload) {
-  assert(m_consumer);
+void KafkaTopicSubscriber::consumeMessage(std::string *payload) {
   using RdKafka::Message;
+  using RdKafka::err2str;
+  assert(m_consumer);
+  assert(payload);
+
+  payload->clear();
   auto kfMsg =
       std::unique_ptr<Message>(m_consumer->consume(CONSUME_TIMEOUT_MS));
 
-  bool success = false;
   switch (kfMsg->err()) {
   case RdKafka::ERR_NO_ERROR:
-    /* Real message */
+    // Real message
     if (kfMsg->len() > 0) {
-      success = true;
       payload->assign(static_cast<const char *>(kfMsg->payload()),
                       static_cast<int>(kfMsg->len()));
     } else {
       // If RdKafka indicates no error then we should always get a
       // non-zero length message
-      success = false;
-      payload->clear();
+      throw std::runtime_error("KafkaTopicSubscriber::consumeMessage() - Kafka "
+                               "indicated no error but a zero-length payload "
+                               "was received");
     }
     break;
+
   case RdKafka::ERR__TIMED_OUT:
-    // Not an error as the broker might come back
-    success = true;
+  case RdKafka::ERR__PARTITION_EOF:
+    // Not errors as the broker might come back or more data might be pushed
     break;
 
-  case RdKafka::ERR__PARTITION_EOF:
-    // End of stream - not an error as we just keep waiting
-    payload->clear();
-    success = true;
   default:
-    /* Errors */
-    success = false;
+    /* All other errors */
+    std::ostringstream os;
+    os << "KafkaTopicSubscriber::consumeMessage() - "
+       << RdKafka::err2str(kfMsg->err());
+    throw std::runtime_error(os.str());
   }
-  return success;
 }
 }
 }

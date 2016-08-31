@@ -35,7 +35,7 @@ class DLLExport IKafkaStreamSubscriber {
 public:
   virtual ~IKafkaStreamSubscriber() = default;
   virtual void subscribe() = 0;
-  virtual bool consumeMessage(std::string *message) = 0;
+  virtual void consumeMessage(std::string *message) = 0;
 };
 
 } // namespace LiveData

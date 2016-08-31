@@ -25,6 +25,7 @@ Mantid::Kernel::Logger g_log("ISISKafkaEventStreamDecoder");
 
 std::string PROTON_CHARGE_PROPERTY = "proton_charge";
 std::string RUN_NUMBER_PROPERTY = "run_number";
+std::string RUN_START_PROPERTY = "run_start";
 }
 
 namespace Mantid {
@@ -148,6 +149,10 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
 
     // Pull in events
     m_eventStream->consumeMessage(&buffer);
+    // No events, wait for some to come along...
+    if (buffer.empty())
+      continue;
+
     auto evtMsg = ISISDAE::GetEventMessage(
         reinterpret_cast<const uint8_t *>(buffer.c_str()));
     if (evtMsg->message_type() == ISISDAE::MessageTypes_FramePart) {
@@ -190,13 +195,18 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
   // ---- Create workspace ----
   // Load spectra-detector mapping from stream
   m_spDetStream->consumeMessage(&rawMsgBuffer);
+  if (rawMsgBuffer.empty()) {
+    throw std::runtime_error("ISISKafkaEventStreamDecoder::initLocalCaches() - "
+                             "Empty message received from spectrum-detector "
+                             "topic. Unable to continue");
+  }
   auto spDetMsg = ISISDAE::GetSpectraDetectorMapping(
       reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
   auto nspec = spDetMsg->spec()->size();
   auto nudet = spDetMsg->det()->size();
   if (nudet != nspec) {
     std::ostringstream os;
-    os << "ISISKafkaEventStreamDecoder::initLocalEventBuffer - Invalid "
+    os << "ISISKafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
           "spectra/detector mapping. Expected matched length arrays but "
           "found nspec=" << nspec << ", ndet=" << nudet;
     throw std::runtime_error(os.str());
@@ -212,15 +222,29 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
       spDetMsg->spec()->data(), spDetMsg->det()->data(), nspec));
   // Load the instrument if possibly but continue if we can't
   m_runStream->consumeMessage(&rawMsgBuffer);
+  if (rawMsgBuffer.empty()) {
+    throw std::runtime_error("ISISKafkaEventStreamDecoder::initLocalCaches() - "
+                             "Empty message received from run info "
+                             "topic. Unable to continue");
+  }
   auto runMsg = ISISDAE::GetRunInfo(
       reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-  loadInstrument(runMsg->inst_name()->c_str(), eventBuffer);
+  auto instName = runMsg->inst_name();
+  if (instName && instName->size() > 0)
+    loadInstrument(instName->c_str(), eventBuffer);
+  else
+    g_log.warning(
+        "Empty instrument name recieved. Continuing without instrument");
 
-  // ---- Metadata ----
-  // Save the run start
-  m_runStart.set_from_time_t(runMsg->start_time());
-  // Save the run number locally and as a log
+  // ---- Run metadata ----
   auto &mutableRun = eventBuffer->mutableRun();
+  // Run start. Cache locally for computing frame times
+  time_t runStartTime = runMsg->start_time();
+  char timeString[32];
+  strftime(timeString, 32, "%Y-%m-%dT%H:%M:%S", localtime(&runStartTime));
+  m_runStart.setFromISO8601(timeString, false);
+  // Run number
+  mutableRun.addProperty(RUN_START_PROPERTY, std::string(timeString));
   m_runNumber = runMsg->run_number();
   mutableRun.addProperty(RUN_NUMBER_PROPERTY, std::to_string(m_runNumber));
   // Create the proton charge property
