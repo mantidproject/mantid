@@ -226,7 +226,7 @@ void PDCalibration::init() {
   declareProperty("StartFromObservedPeakCentre", true,
                   "Use observed value as the starting value of peak centre. ");
 
-  declareProperty("CalibrationParameters", "DIFC+TZERO+DIFA",
+  declareProperty("CalibrationParameters", "DIFC",
                   boost::make_shared<StringListValidator>(modes),
                   "Select calibration parameters to fit.");
 
