@@ -27,8 +27,6 @@ class CalculateS(IOmodule):
         @param instrument_name: name of instrument (str)
 
         """
-
-
         if not (isinstance(temperature, float) or isinstance(temperature, int)):
             raise ValueError("Invalid value of the temperature. Number was expected.")
         if temperature < 0:
@@ -60,12 +58,12 @@ class CalculateS(IOmodule):
         _instrument = _instrument_producer.produceInstrument(name=self._instrument_name)
 
         # Calculate Q
-        _q_calculator = CalculateQ(filename=self._input_filename, instrument=_instrument, sample_form=self._sample_form)
-        _q_vectors = None
-        if self._instrument_name != "None":
+        _q_calculator = CalculateQ(filename=self._input_filename,
+                                   instrument=_instrument,
+                                   sample_form=self._sample_form,
+                                   k_points_data=self._abins_data.getKpointsData())
 
-            _q_calculator.collectFrequencies(k_points_data=self._abins_data.getKpointsData())
-            _q_vectors = _q_calculator.getData()
+        _q_vectors = _q_calculator.getData()
 
         # Powder case: calculate MSD and DW
         if self._sample_form == "Powder":
@@ -199,10 +197,6 @@ class CalculateS(IOmodule):
         # TODO: implement calculation of S for the single crystal scenario
 
 
-
-
-
-
     def calculateData(self):
         """
         Calculates dynamical structure factor S.
@@ -219,9 +213,6 @@ class CalculateS(IOmodule):
         self.save()
 
         return data
-
-
-
 
 
     def loadData(self):

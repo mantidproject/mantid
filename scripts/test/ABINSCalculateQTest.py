@@ -35,6 +35,16 @@ class ABINSCalculateQTest(unittest.TestCase):
         producer = InstrumentProducer()
         self._tosca_instrument = producer.produceInstrument("TOSCA")
         self._filename = path.relpath(_core + "Si2-sc_Q_test.phonon")
+        self._sample_form = "Powder"
+        self._raw_data = KpointsData(num_k=1, num_atoms=2)
+        self._raw_data.set({"k_vectors":np.asarray([[0.2, 0.1, 0.2]]),
+                            "weights":np.asarray([0.3]),
+                            "frequencies":np.asarray([[1.0, 2.0, 3.0, 4.0,  5.0, 6.0]]),  # 6 frequencies
+                            "atomic_displacements":np.asarray([[[[1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0],
+                                                                 [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]],
+                                                                [[1.0,1.0,1.0],[1.0,1.0,111.0],[1.0,1.0,1.0],
+                                                                 [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]]]]).astype(complex)}) # 12 atomic displacements
+
 
     def test_simple(self):
         """
@@ -43,37 +53,37 @@ class ABINSCalculateQTest(unittest.TestCase):
 
         # wrong file name
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=1, instrument=self._tosca_instrument, sample_form="Powder")
+            poor_q_calculator = CalculateQ(filename=1,
+                                           instrument=self._tosca_instrument,
+                                           sample_form=self._sample_form,
+                                           k_points_data=self._raw_data)
 
         # wrong instrument
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=self._filename, instrument="Different_instrument", sample_form="Powder")
+            poor_q_calculator = CalculateQ(filename=self._filename,
+                                           instrument="Different_instrument",
+                                           sample_form=self._sample_form,
+                                           k_points_data=self._raw_data)
 
         # wrong sample form
         with self.assertRaises(ValueError):
-            poor_q_calculator = CalculateQ(filename=self._filename, instrument=self._tosca_instrument, sample_form="Solid")
+            poor_q_calculator = CalculateQ(filename=self._filename,
+                                           instrument=self._tosca_instrument,
+                                           sample_form="Solid",
+                                           k_points_data=self._raw_data)
 
-        # no frequencies required for the case when Q vectors do not depend on frequencies
-        poor_q_calculator = CalculateQ(filename=self._filename, sample_form="Powder")
+        # no k_points_data
         with self.assertRaises(ValueError):
-            poor_q_calculator.collectFrequencies(k_points_data=np.array([1, 2, 3, 4]))
-
+            poor_q_calculator = CalculateQ(filename=self._filename,
+                                           sample_form=self._sample_form,
+                                           instrument=self._tosca_instrument)
 
     _core = "../ExternalData/Testing/Data/UnitTest/"
 
     # Use case: TOSCA
     def test_TOSCA(self):
 
-        raw_data = KpointsData(num_k=1, num_atoms=2)
 
-        raw_data.set({"k_vectors":np.asarray([[0.2, 0.1, 0.2]]),
-                      "weights":np.asarray([0.3]),
-                      "frequencies":np.asarray([[1.0, 2.0, 3.0, 4.0,  5.0, 6.0]]),  # 6 frequencies
-                      "atomic_displacements":np.asarray([[[[1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0],
-                                                         [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]],
-
-                                                         [[1.0,1.0,1.0],[1.0,1.0,111.0],[1.0,1.0,1.0],
-                                                         [1.0,1.0,1.0],[1.0,1.0,1.0],  [1.0,1.0,1.0]]]]).astype(complex)}) # 12 atomic displacements
         extracted_raw_data = raw_data.extract()
         correct_q_data = ((extracted_raw_data["frequencies"][0] / AbinsParameters.cm1_2_hartree) *
                           (extracted_raw_data["frequencies"][0] / AbinsParameters.cm1_2_hartree) /
@@ -83,21 +93,18 @@ class ABINSCalculateQTest(unittest.TestCase):
         tosca_instrument = producer.produceInstrument("TOSCA")
         q_calculator = CalculateQ(filename=self._filename,
                                   instrument=self._tosca_instrument,
-                                  sample_form="Powder")
-        q_calculator.collectFrequencies(k_points_data=raw_data)
+                                  sample_form=self._sample_form,
+                                  k_points_data=self._raw_data)
         q_vectors = q_calculator.calculateData()
 
         # noinspection PyTypeChecker
-        self.assertEqual(True,np.allclose(correct_q_data, q_vectors.extract()))
+        self.assertEqual(True, np.allclose(correct_q_data, q_vectors.extract()))
 
+        # check loading data
         loaded_q = q_calculator.loadData()
 
         # noinspection PyTypeChecker
-        self.assertEqual(True,np.allclose(correct_q_data, loaded_q.extract()))
-
-        # here we have a list not a KpointsData
-        with self.assertRaises(ValueError):
-            q_calculator.collectFrequencies([1,2,3])
+        self.assertEqual(True, np.allclose(correct_q_data, loaded_q.extract()))
 
 
     # Helper functions
