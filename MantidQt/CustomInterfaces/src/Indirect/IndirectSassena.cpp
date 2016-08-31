@@ -38,7 +38,6 @@ void IndirectSassena::run() {
   QString inputFileName = m_uiForm.mwInputFile->getFirstFilename();
   QFileInfo inputFileInfo(inputFileName);
   m_outWsName = inputFileInfo.baseName();
-  bool save = m_uiForm.chkSave->isChecked();
 
   // If the workspace group already exists then remove it
   if (AnalysisDataService::Instance().doesExist(m_outWsName.toStdString()))
@@ -57,17 +56,6 @@ void IndirectSassena::run() {
 
   BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromSassenaAlg;
   inputFromSassenaAlg["InputWorkspace"] = m_outWsName.toStdString();
-
-  if (save) {
-    QString saveFilename = m_outWsName + ".nxs";
-
-    IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus");
-    saveAlg->initialize();
-
-    saveAlg->setProperty("Filename", saveFilename.toStdString());
-
-    m_batchAlgoRunner->addAlgorithm(saveAlg, inputFromSassenaAlg);
-  }
 
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -103,6 +91,14 @@ void IndirectSassena::plotClicked() {
 		plotSpectrum(m_outWsName);
 }
 
+/**
+* Handle saving of workspace
+*/
+void IndirectSassena::saveClicked() {
+	if (checkADSForPlotSaveWorkspace(m_outWsName.toStdString(), false))
+		addSaveWorkspaceToQueue(m_outWsName);
+	m_batchAlgoRunner->executeBatchAsync();
+}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
