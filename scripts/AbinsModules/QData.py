@@ -18,6 +18,8 @@ class QData(GeneralData):
 
         if isinstance(items, np.ndarray):
             self._data = items
+        else:
+            raise ValueError("Improper format of Q data. Two dimentional array is expected.")
 
 
     def extract(self):

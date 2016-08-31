@@ -42,7 +42,8 @@ class CalculateQ(IOmodule):
         """
         Calculates Q vectors for the given instrument.
         """
-        self._Qvectors = QData()
+        num_k = self._k_points_data.extract()["k_vectors"].shape[0]
+        self._Qvectors = QData(num_k=num_k)
         self._instrument.collect_K_data(k_points_data=self._k_points_data)
         if self._sample_form == "Powder":
             self._Qvectors.set(self._instrument.calculate_q_powder())

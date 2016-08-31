@@ -84,7 +84,7 @@ class ABINSCalculateQTest(unittest.TestCase):
     def test_TOSCA(self):
 
 
-        extracted_raw_data = raw_data.extract()
+        extracted_raw_data = self._raw_data.extract()
         correct_q_data = ((extracted_raw_data["frequencies"][0] / AbinsParameters.cm1_2_hartree) *
                           (extracted_raw_data["frequencies"][0] / AbinsParameters.cm1_2_hartree) /
                           16.0)

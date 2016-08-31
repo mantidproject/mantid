@@ -12,7 +12,7 @@ class ABINSQvectorsTEST(unittest.TestCase):
     def runTest(self):
         # Wrong items to extract -- wrong first dimension
         vectors_Q = QData(num_k=2)
-        vectors_Q._append(item=self._good_array)
+        vectors_Q.set(items=self._good_array)
         with self.assertRaises(ValueError):
              wrong_data = vectors_Q.extract()
 
@@ -22,9 +22,9 @@ class ABINSQvectorsTEST(unittest.TestCase):
 
         # Wrong shape of data
         vectors_Q = QData(num_k=1)
-
+        vectors_Q.set(np.asarray([1.0,3.0,2.0,0.0])) # should be 2D array not 1D array
         with self.assertRaises(ValueError):
-            vectors_Q.set(np.asarray([1.0,3.0,2.0,0.0])) # should be 2D array not 1D array
+            wrong_data = vectors_Q.extract()
 
         # Wrong data to set
         vectors_Q = QData(num_k=1)

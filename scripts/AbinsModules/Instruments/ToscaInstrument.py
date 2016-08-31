@@ -3,6 +3,7 @@ import math
 
 from Instrument import  Instrument
 from AbinsModules import AbinsParameters
+from AbinsModules.KpointsData import  KpointsData
 
 class ToscaInstrument(Instrument):
     """
