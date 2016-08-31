@@ -89,7 +89,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         res = ['']
 
         def put(tag, val):
-            res[0] += '  <%s>%s</%s>\n' % (tag, str(val), tag)
+            res[0] += '  <{0}>{1}</{0}>\n'.format(tag, str(val))
 
         put('prefix',      self.prefix)
         put('data_dir',    self.dataDir)
@@ -120,9 +120,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('normalise',      self.normalise)
         put('correct_tof',    self.correctTof)
 
-        res = '<%s>\n%s</%s>\n' % (self.XML_TAG, res[0], self.XML_TAG)
-
-        return res
+        return '<{0}>\n{1}</{0}>\n'.format(self.XML_TAG, res[0])
 
     def from_xml(self, xmlString):
         self.reset()
@@ -220,11 +218,11 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         # helper: add a line to the script
         def l(line = ''):
-            script[0] += (line + '\n')
+            script[0] += line + '\n'
 
         # helpers
         def get_log(workspace, tag):
-            return "%s.getRun().getLogData('%s').value" % (workspace, tag)
+            return "{}.getRun().getLogData('{}').value".format(workspace, tag)
         def get_ei(workspace):
             return get_log(workspace, 'Ei')
         def get_time(workspace):
@@ -232,10 +230,10 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         l("import numpy as np")
         l()
-        l("config['default.facility'] = '%s'"   % (self.facility_name))
-        l("config['default.instrument'] = '%s'" % (self.instrument_name))
+        l("config['default.facility'] = '{}'"   .format(self.facility_name))
+        l("config['default.instrument'] = '{}'" .format(self.instrument_name))
         l()
-        l("config.appendDataSearchDir(r'%s')"    % (self.dataDir))
+        l("config.appendDataSearchDir(r'{}')"   .format(self.dataDir))
         l()
 
         dataRawGroup = []
@@ -248,9 +246,9 @@ class TOFTOFScriptElement(BaseScriptElement):
             wsVan    = self.prefix + 'Van'
 
             l("# vanadium runs")
-            l("%s = Load(Filename='%s')" % (wsRawVan, self.vanRuns))
-            l("%s = TOFTOFMergeRuns(%s)" % (wsVan, wsRawVan))
-            l("%s.setComment('%s')"      % (wsVan, self.vanCmnt))
+            l("{} = Load(Filename='{}')" .format(wsRawVan, self.vanRuns))
+            l("{} = TOFTOFMergeRuns({})" .format(wsVan, wsRawVan))
+            l("{}.setComment('{}')"      .format(wsVan, self.vanCmnt))
             l()
 
             allGroup.append(wsVan)
@@ -261,8 +259,8 @@ class TOFTOFScriptElement(BaseScriptElement):
             wsEC    = self.prefix + 'EC'
 
             l("# empty can runs")
-            l("%s = Load(Filename='%s')" % (wsRawEC, self.ecRuns))
-            l("%s = TOFTOFMergeRuns(%s)" % (wsEC, wsRawEC))
+            l("{} = Load(Filename='{}')" .format(wsRawEC, self.ecRuns))
+            l("{} = TOFTOFMergeRuns({})" .format(wsEC, wsRawEC))
             l()
 
             allGroup.append(wsEC)
@@ -283,10 +281,10 @@ class TOFTOFScriptElement(BaseScriptElement):
             dataGroup.append(wsData)
             allGroup.append(wsData)
 
-            l("# data runs %s" % (postfix))
-            l("%s = Load(Filename='%s')" % (wsRawData, runs))
-            l("%s = TOFTOFMergeRuns(%s)" % (wsData, wsRawData))
-            l("%s.setComment('%s')"      % (wsData, cmnt))
+            l("# data runs {}"           .format(postfix))
+            l("{} = Load(Filename='{}')" .format(wsRawData, runs))
+            l("{} = TOFTOFMergeRuns({})" .format(wsData, wsRawData))
+            l("{}.setComment('{}')"      .format(wsData, cmnt))
             l()
 
             if i == 0:
@@ -301,27 +299,27 @@ class TOFTOFScriptElement(BaseScriptElement):
         gAll         = gPrefix + 'All'
 
         l("# grouping")
-        l("%s = GroupWorkspaces(%s)" % (gDataRawRuns, group_list(dataRawGroup)))
-        l("%s = GroupWorkspaces(%s)" % (gDataRuns,    group_list(dataGroup)))
-        l("%s = GroupWorkspaces(%s)" % (gAll,         group_list(allGroup)))
+        l("{} = GroupWorkspaces({})" .format(gDataRawRuns, group_list(dataRawGroup)))
+        l("{} = GroupWorkspaces({})" .format(gDataRuns,    group_list(dataGroup)))
+        l("{} = GroupWorkspaces({})" .format(gAll,         group_list(allGroup)))
         l()
 
         l("# Ei")
         if len(allGroup) > 1:
-            l("if CompareSampleLogs(%s, 'Ei', 0.001):" % (gAll))
+            l("if CompareSampleLogs({}, 'Ei', 0.001):" .format(gAll))
             l("    raise RuntimeError('Ei values do not match')")
             l()
 
-        l("Ei = %s" % (get_ei(wsData0)))
+        l("Ei = {}" .format(get_ei(wsData0)))
         l()
 
         gDetectorsToMask = gPrefix + 'DetectorsToMask'
         l("# mask detectors")
-        l("(%s, numberOfFailures) = FindDetectorsOutsideLimits(%s)" % (gDetectorsToMask, gAll))
-        l("MaskDetectors(%s, MaskedWorkspace=%s)" % (gAll, gDetectorsToMask))
+        l("({}, numberOfFailures) = FindDetectorsOutsideLimits({})" .format(gDetectorsToMask, gAll))
+        l("MaskDetectors({}, MaskedWorkspace={})" .format(gAll, gDetectorsToMask))
 
         if self.maskDetectors:
-            l("MaskDetectors(%s, DetectorList='%s')" % (gAll, self.maskDetectors))
+            l("MaskDetectors({}, DetectorList='{}')" .format(gAll, self.maskDetectors))
 
         l()
 
@@ -332,13 +330,13 @@ class TOFTOFScriptElement(BaseScriptElement):
 
             if self.vanRuns:
                 wsVanNorm = wsVan + 'Norm'
-                l("%s = MonitorEfficiencyCorUser(%s)" % (wsVanNorm, wsVan))
+                l("{} = MonitorEfficiencyCorUser({})" .format(wsVanNorm, wsVan))
 
             if self.ecRuns:
                 wsECNorm = wsEC + 'Norm'
-                l("%s = MonitorEfficiencyCorUser(%s)" % (wsECNorm, wsEC))
+                l("{} = MonitorEfficiencyCorUser({})" .format(wsECNorm, wsEC))
 
-            l("%s = MonitorEfficiencyCorUser(%s)" % (gDataNorm, gDataRuns))
+            l("{} = MonitorEfficiencyCorUser({})"     .format(gDataNorm, gDataRuns))
             l()
 
         elif self.NORM_TIME == self.normalise:
@@ -348,21 +346,22 @@ class TOFTOFScriptElement(BaseScriptElement):
 
             if self.vanRuns:
                 wsVanNorm = wsVan + 'Norm'
-                l("%s = Scale(%s, 1.0 / float(%s), 'Multiply')" \
-                    % (wsVanNorm, wsVan, get_time(wsVan)))
+                l("{} = Scale({}, 1.0 / float({}), 'Multiply')" \
+                    .format(wsVanNorm, wsVan, get_time(wsVan)))
 
             if self.ecRuns:
                 wsECNorm = wsEC + 'Norm'
-                l("%s = Scale(%s, 1.0 / float(%s), 'Multiply')" \
-                    % (wsECNorm, wsEC, get_time(wsEC)))
+                l("{} = Scale({}, 1.0 / float({}), 'Multiply')" \
+                    .format(wsECNorm, wsEC, get_time(wsEC)))
 
             l("names = []")
-            l("for ws in %s:" % (gDataRuns))
+            l("for ws in {}:" .format(gDataRuns))
             l("    name = ws.getName() + 'Norm'")
             l("    names.append(name)")
-            l("    Scale(ws, 1.0 / float(%s), 'Multiply', OutputWorkspace=name)" % (get_time('ws')))
+            l("    Scale(ws, 1.0 / float({}), 'Multiply', OutputWorkspace=name)" \
+                .format(get_time('ws')))
             l()
-            l("%s = GroupWorkspaces(names)" % (gDataNorm))
+            l("{} = GroupWorkspaces(names)" .format(gDataNorm))
 
             l()
 
@@ -378,12 +377,13 @@ class TOFTOFScriptElement(BaseScriptElement):
             gDataSubEC = gPrefix + 'DataSubEC'
             scaledEC   = self.prefix + 'ScaledEC'
             l("# subtract empty can")
-            l("ecFactor = %f" % (self.ecFactor))
-            l("%s = Scale(%s, Factor=ecFactor, Operation='Multiply')" % (scaledEC, wsECNorm))
-            l("%s = Minus(%s, %s)" % (gDataSubEC, gDataNorm, scaledEC))
+            l("ecFactor = {:.3f}" .format(self.ecFactor))
+            l("{} = Scale({}, Factor=ecFactor, Operation='Multiply')" \
+                .format(scaledEC, wsECNorm))
+            l("{} = Minus({}, {})" .format(gDataSubEC, gDataNorm, scaledEC))
             if self.subtractECVan:
                 wsVanSubEC = wsVan + 'SubEC'
-                l("%s = Minus(%s, %s)" % (wsVanSubEC, wsVanNorm, scaledEC))
+                l("{} = Minus({}, {})" .format(wsVanSubEC, wsVanNorm, scaledEC))
             l()
 
         l("# group data for processing") # without empty can
@@ -391,9 +391,10 @@ class TOFTOFScriptElement(BaseScriptElement):
         gData = gPrefix + 'Data'
         if self.vanRuns:
             wsVanNorm = wsVanSubEC if self.subtractECVan else wsVanNorm
-            l("%s = GroupWorkspaces(%slist(%s.getNames()))" % (gData, group_list([wsVanNorm], ' + '), gDataSource))
+            l("{} = GroupWorkspaces({}list({}.getNames()))" \
+                .format(gData, group_list([wsVanNorm], ' + '), gDataSource))
         else:
-            l("%s = CloneWorkspace(%s)" % (gData, gDataSource))
+            l("{} = CloneWorkspace({})" .format(gData, gDataSource))
         l()
 
         if self.vanRuns:
@@ -401,29 +402,30 @@ class TOFTOFScriptElement(BaseScriptElement):
             detCoeffs = self.prefix + 'DetCoeffs'
             eppTable  = self.prefix + 'EppTable'
             l("# normalise to vanadium")
-            l("%s = FindEPP(%s)" % (eppTable, wsVanNorm))
-            l("%s = ComputeCalibrationCoefVan(%s, %s)" % (detCoeffs, wsVanNorm, eppTable))
-            l("badDetectors = np.where(np.array(%s.extractY()).flatten() <= 0)[0]" % (detCoeffs))
-            l("MaskDetectors(%s, DetectorList=badDetectors)" % (gData))
-            l("%s = Divide(%s, %s)" % (gDataCorr, gData, detCoeffs))
+            l("{} = FindEPP({})" .format(eppTable, wsVanNorm))
+            l("{} = ComputeCalibrationCoefVan({}, {})" .format(detCoeffs, wsVanNorm, eppTable))
+            l("badDetectors = np.where(np.array({}.extractY()).flatten() <= 0)[0]" .format(detCoeffs))
+            l("MaskDetectors({}, DetectorList=badDetectors)" .format(gData))
+            l("{} = Divide({}, {})" .format(gDataCorr, gData, detCoeffs))
             l()
 
         gDataCleanFrame = gData + 'CleanFrame'
         l("# remove half-filled time bins (clean frame)")
-        l("%s = TOFTOFCropWorkspace(%s)" % (gDataCleanFrame, gDataCorr if self.vanRuns else gData))
+        l("{} = TOFTOFCropWorkspace({})" \
+            .format(gDataCleanFrame, gDataCorr if self.vanRuns else gData))
         l()
 
         gData2 = gData + 'TofCorr'
         if self.CORR_TOF_VAN == self.correctTof:
             l("# apply vanadium TOF correction")
-            l("%s = CorrectTOF(%s, %s)" % (gData2, gDataCleanFrame, eppTable))
+            l("{} = CorrectTOF({}, {})" .format(gData2, gDataCleanFrame, eppTable))
             l()
 
         elif self.CORR_TOF_SAMPLE == self.correctTof:
             eppTables  = self.prefix + 'EppTables'
             l("# apply sample TOF correction")
-            l("%s = FindEPP(%s)" % (eppTables, gData))
-            l("%s = CorrectTOF(%s, %s)" % (gData2, gDataCleanFrame, eppTables))
+            l("{} = FindEPP({})" .format(eppTables, gData))
+            l("{} = CorrectTOF({}, {})" .format(gData2, gDataCleanFrame, eppTables))
             l()
 
         else:
@@ -431,45 +433,52 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         gDataDeltaE = gData + 'DeltaE'
         l("# convert units")
-        l("%s = ConvertUnits(%s, Target='DeltaE', EMode='Direct', EFixed=Ei)" % (gDataDeltaE, gData2))
-        l("ConvertToDistribution(%s)" % (gDataDeltaE))
+        l("{} = ConvertUnits({}, Target='DeltaE', EMode='Direct', EFixed=Ei)" \
+            .format(gDataDeltaE, gData2))
+        l("ConvertToDistribution({})" .format(gDataDeltaE))
         l()
 
         gDataCorrDeltaE = gData + 'CorrDeltaE'
         l("# correct for energy dependent detector efficiency")
-        l("%s = DetectorEfficiencyCorUser(%s)" % (gDataCorrDeltaE, gDataDeltaE))
+        l("{} = DetectorEfficiencyCorUser({})" .format(gDataCorrDeltaE, gDataDeltaE))
         l()
 
         gDataS = gData + 'S'
         l("# calculate S (Ki/kF correction)")
-        l("%s = CorrectKiKf(%s)" % (gDataS, gDataCorrDeltaE))
+        l("{} = CorrectKiKf({})" .format(gDataS, gDataCorrDeltaE))
         l()
 
         gLast = gDataS
         if self.binEon:
             gDataBinE = gData + 'BinE'
             l("# energy binning")
-            l("rebinEnergy = '%f, %f, %f'" % (self.binEstart, self.binEstep, self.binEend))
-            l("%s = Rebin(%s, Params=rebinEnergy)" % (gDataBinE, gLast))
+            l("rebinEnergy = '{:.3f}, {:.3f}, {:.3f}'" \
+                .format(self.binEstart, self.binEstep, self.binEend))
+            l("{} = Rebin({}, Params=rebinEnergy)" .format(gDataBinE, gLast))
             l()
             gLast = gDataBinE
 
         if self.binQon:
             gDataBinQ = gData + 'SQW'
             l("# calculate momentum transfer Q for sample data")
-            l("rebinQ = '%f, %f, %f'" % (self.binQstart, self.binQstep, self.binQend))
-            l("%s = SofQW3(%s, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei)" % (gDataBinQ, gLast))
+            l("rebinQ = '{:.3f}, {:.3f}, {:.3f}'" \
+                .format(self.binQstart, self.binQstep, self.binQend))
+            l("{} = SofQW3({}, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei)" \
+                .format(gDataBinQ, gLast))
             l()
 
         l("# make nice workspace names")
-        l("for ws in %s:" % (gDataS))
-        l("    RenameWorkspace(ws, OutputWorkspace='%s_S_' + ws.getComment())" % (self.prefix))
+        l("for ws in {}:" .format(gDataS))
+        l("    RenameWorkspace(ws, OutputWorkspace='{}_S_' + ws.getComment())" \
+            .format(self.prefix))
         if self.binEon:
-            l("for ws in %s:" % (gDataBinE))
-            l("    RenameWorkspace(ws, OutputWorkspace='%s_E_' + ws.getComment())" % (self.prefix))
+            l("for ws in {}:" .format(gDataBinE))
+            l("    RenameWorkspace(ws, OutputWorkspace='{}_E_' + ws.getComment())" \
+                .format(self.prefix))
         if self.binQon:
-            l("for ws in %s:" % (gDataBinQ))
-            l("    RenameWorkspace(ws, OutputWorkspace='%s_SQW_' + ws.getComment())" % (self.prefix))
+            l("for ws in {}:" .format(gDataBinQ))
+            l("    RenameWorkspace(ws, OutputWorkspace='{}_SQW_' + ws.getComment())" \
+                .format(self.prefix))
 
         return script[0]
 
