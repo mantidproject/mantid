@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -78,8 +79,8 @@ void SofQWNormalisedPolygon::exec() {
   const size_t nHistos = inputWS->getNumberHistograms();
 
   // Holds the spectrum-detector mapping
-  std::vector<specnum_t> specNumberMapping;
-  std::vector<detid_t> detIDMapping;
+  std::vector<std::vector<detid_t>> detIDMapping(
+      outputWS->getNumberHistograms());
 
   // Progress reports & cancellation
   const size_t nreports(nHistos * nEnergyBins);
@@ -102,6 +103,8 @@ void SofQWNormalisedPolygon::exec() {
 
   const MantidVec &X = inputWS->readX(0);
   int emode = m_EmodeProperties.m_emode;
+
+  const auto &inputIndices = inputWS->indexInfo();
 
   PARALLEL_FOR2(inputWS, outputWS)
   for (int64_t i = 0; i < static_cast<int64_t>(nHistos);
@@ -130,7 +133,7 @@ void SofQWNormalisedPolygon::exec() {
     const double phiUpper = phi + phiHalfWidth;
 
     const double efixed = m_EmodeProperties.getEFixed(*detector);
-    const specnum_t specNo = inputWS->getSpectrum(i).getSpectrumNo();
+    const specnum_t specNo = inputIndices.spectrumNumber(i);
     std::stringstream logStream;
     for (size_t j = 0; j < nEnergyBins; ++j) {
       m_progress->report("Computing polygon intersections");
@@ -167,9 +170,7 @@ void SofQWNormalisedPolygon::exec() {
       if (qIndex != 0 && qIndex < static_cast<int>(m_Qout.size())) {
         // Add this spectra-detector pair to the mapping
         PARALLEL_CRITICAL(SofQWNormalisedPolygon_spectramap) {
-          specNumberMapping.push_back(
-              outputWS->getSpectrum(qIndex - 1).getSpectrumNo());
-          detIDMapping.push_back(detector->getID());
+          detIDMapping[qIndex - 1].push_back(detector->getID());
         }
       }
     }
@@ -185,8 +186,9 @@ void SofQWNormalisedPolygon::exec() {
   FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress);
 
   // Set the output spectrum-detector mapping
-  SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
-  outputWS->updateSpectraUsing(outputDetectorMap);
+  auto outputIndices = outputWS->indexInfo();
+  outputIndices.setDetectorIDs(std::move(detIDMapping));
+  outputWS->setIndexInfo(outputIndices);
 }
 
 /**
