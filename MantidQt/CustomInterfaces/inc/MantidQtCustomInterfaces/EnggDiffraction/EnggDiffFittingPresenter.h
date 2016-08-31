@@ -161,14 +161,9 @@ private:
                            const std::string &runNumberVec,
                            std::vector<std::string> &fittingRunNoDirVec,
                            std::vector<std::string> &foundRunNumber);
-  * @param selectedfPath is the selected file's path
-  *
-  * @return std::vector<std::string> of splitted file name with run
-  * number & bank
-  */
+
   std::vector<std::string>
   splitFittingDirectory(const std::string &selectedfPath);
-
 
   void enableMultiRun(std::string firstRun, std::string lastRun,
                       std::vector<std::string> &fittingRunNoDirVec);
