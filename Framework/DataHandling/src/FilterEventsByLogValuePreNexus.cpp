@@ -931,13 +931,9 @@ void FilterEventsByLogValuePreNexus::procEvents(
 
       if (m_parallelProcessing) {
         m_prog->report("Creating Partial Workspace");
-        // Create a partial workspace
-        partWS = EventWorkspace_sptr(new EventWorkspace());
-        // Make sure to initialize.
-        partWS->initialize(1, 1, 1);
-        // Copy all the spectra numbers and stuff (no actual events to copy
-        // though).
-        partWS->copyDataFrom(*workspace);
+        // Create a partial workspace, copy all the spectra numbers and stuff
+        // (no actual events to copy though).
+        partWS = workspace->clone();
         // Push it in the array
         partWorkspaces[i] = partWS;
       } else
@@ -1539,13 +1535,9 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
 
       if (m_parallelProcessing) {
         m_prog->report("Creating Partial Workspace");
-        // Create a partial workspace
-        partWS = EventWorkspace_sptr(new EventWorkspace());
-        // Make sure to initialize.
-        partWS->initialize(1, 1, 1);
-        // Copy all the spectra numbers and stuff (no actual events to copy
-        // though).
-        partWS->copyDataFrom(*m_localWorkspace);
+        // Create a partial workspace, copy all the spectra numbers and stuff
+        // (no actual events to copy though).
+        partWS = m_localWorkspace->clone();
         // Push it in the array
         partWorkspaces[i] = partWS;
       } else
