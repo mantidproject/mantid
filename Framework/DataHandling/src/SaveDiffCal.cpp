@@ -123,12 +123,11 @@ void SaveDiffCal::writeIntFieldFromSVWS(
   std::vector<int32_t> values(m_numValues, 1);
 
   if (bool(ws)) {
-    int32_t value;
     for (size_t i = 0; i < m_numValues; ++i) {
       auto &ids = ws->getSpectrum(i).getDetectorIDs();
       auto found = m_detidToIndex.find(*(ids.begin()));
       if (found != m_detidToIndex.end()) {
-        value = static_cast<int32_t>(ws->getValue(found->first));
+        int32_t value = static_cast<int32_t>(ws->getValue(found->first));
         // in maskworkspace 0=use, 1=dontuse - backwards from the file
         if (isMask) {
           if (value == 0)
