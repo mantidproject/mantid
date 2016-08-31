@@ -577,7 +577,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Load SPICE data to raw table (step 1)
         try:
-            execstatus = self._myControl.loadSpicePDData(expno, scanno, datafilename)
+            execstatus = self._myControl.do_load_spice_file(expno, scanno, datafilename)
             if execstatus is False:
                 cause = "Load data failed."
             else:
@@ -1336,9 +1336,14 @@ class MainWindow(QtGui.QMainWindow):
             self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=True)
 
             # plot vanadium peaks
-            vanpeakpos = self._myControl.getVanadiumPeaksPos(expno, scanno)
-            self.ui.lineEdit_stripVPeaks.setText(str(vanpeakpos))
-            self._plotPeakIndicators(self.ui.graphicsView_vanPeaks, vanpeakpos)
+            status, ret_obj = van_peak_positions = self._myControl.get_vanadium_peak_positions(expno, scanno)
+            if status:
+                van_peak_positions = ret_obj
+            else:
+                error_msg = ret_obj
+                self._logError(error_msg)
+            self.ui.lineEdit_stripVPeaks.setText(str(van_peak_positions))
+            self._plotPeakIndicators(self.ui.graphicsView_vanPeaks, van_peak_positions)
 
         return good
 
@@ -1547,7 +1552,7 @@ class MainWindow(QtGui.QMainWindow):
             raise run_err
 
         # Download and load the first run
-        status, ret_obj = downloadFile(exp_number, scan_number)
+        status, ret_obj = download_file(exp_number, scan_number)
         if not status:
             err_msg = ret_obj
             self.pop_error_message(err_msg)
@@ -1556,8 +1561,8 @@ class MainWindow(QtGui.QMainWindow):
             spice_file_name = ret_obj
 
         # Load data
-        status, ret_obj = self._myControl.loadSpicePDData(expno=exp_number, scanno=scan_number,
-                datafilename=spice_file_name)
+        status, ret_obj = self._myControl.do_load_spice_file(exp_number=exp_number, scan_number=scan_number,
+                                                             datafilename=spice_file_name)
         if not status:
             self.pop_error_message(err_msg)
             return
@@ -1622,7 +1627,7 @@ class MainWindow(QtGui.QMainWindow):
         for scan_number in scan_list:
             # load data
             data_file_name = self._myControl.get_data_file(exp_number, scan_number)
-            self._myControl.loadSpicePDData(exp_number, scan_number, data_file_name)
+            self._myControl.do_load_spice_file(exp_number, scan_number, data_file_name)
             log_info_dict = self._myControl.summarize_log_info(exp_number, scan_number)
             log_inof_dict['Scan'] = scan_number
             self.ui.tableWidget_scanInfoTable.add_scan_info(log_info_dict)
@@ -2190,21 +2195,42 @@ class MainWindow(QtGui.QMainWindow):
         # ENDIF
 
         rvalue = False
+
         if self._srcFromServer is True:
             # download SPICE scan data file
-            status, ret_obj = self._myControl.download_spice_file()
+
+            # get directory for cache
+            cache_dir = str(self.ui.lineEdit_cache.text()).strip()
+            if os.path.exists(cache_dir) is False:
+                # if cache directory does not exist, then use the current working directory
+                bad_input_dir = cache_dir
+                cache_dir = os.getcwd()
+                self.ui.lineEdit_cache.setText(cache_dir)
+                self._logWarning('Cache directory %s is not valid. Using current workspace directory %s as '
+                                 'cache.' % (bad_input_dir, cache_dir))
+
+            # download file
+            status, ret_obj = self._myControl.download_spice_file(exp, scan, cache_dir)
+            if not status:
+                err_msg = str(ret_obj)
+                self._logError(err_msg)
+            else:
+                rvalue = True
 
         elif self._srcAtLocal is True:
             # Data from local
-            srcFileName = os.path.join(self._localSrcDataDir, "%s/Exp%d_Scan%04d.dat" % (self._instrument, exp, scan))
-            if os.path.exists(srcFileName) is True:
+            status, ret_obj = self._myControl.locate_local_spice_file(exp, scan, self._localSrcDataDir)
+            if status:
                 rvalue = True
+            else:
+                err_msg = str(ret_obj)
+                self._logError(err_msg)
 
         else:
             raise NotImplementedError("Logic error.  Neither downloaded from server.\
                 Nor from local drive")
 
-        return (rvalue,srcFileName)
+        return rvalue
 
 
     def _uiGetBinningParams(self, itab):

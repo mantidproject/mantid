@@ -231,6 +231,12 @@ class HFIRPDRedControl(object):
 
         self._lastWkspToMerge = []
 
+        self._serverAddress = None
+        self._instrument = None
+
+        # spice file manager/lookup table
+        self._spiceFileManager = dict()
+
         return
 
     def applySmoothVanadium(self, expno, scanno, applysmooth):
@@ -238,7 +244,7 @@ class HFIRPDRedControl(object):
         """
         if self._myWorkspaceDict.has_key((expno, scanno)) is False:
             raise NotImplementedError("Exp %d Scan %d does not have reduced \
-                    workspace." % (exp, scan))
+                    workspace." % (expno, scanno))
         else:
             rmanager = self._myWorkspaceDict[(expno, scanno)]
             rmanager.applySmoothVanadium(applysmooth)
@@ -344,7 +350,7 @@ class HFIRPDRedControl(object):
         # check
         if self._myWorkspaceDict.has_key((expno, scanno)) is False:
             raise NotImplementedError("Exp %d Scan %d does not have reduced \
-                    workspace." % (exp, scan))
+                    workspace." % (expno, scanno))
 
         # get data
         rmanager = self._myWorkspaceDict[(expno, scanno)]
@@ -465,8 +471,7 @@ class HFIRPDRedControl(object):
 
         return (vecx, vecy)
 
-
-    def getVanadiumPeaksPos(self, exp, scan):
+    def get_vanadium_peak_positions(self, exp, scan):
         """ Convert vanadium peaks from d-spacing to 2theta
         Arguments
          - exp
@@ -476,9 +481,9 @@ class HFIRPDRedControl(object):
         """
         wsmanager = self.getWorkspace(exp, scan, raiseexception=True)
         if wsmanager.datamdws is None:
-            self._logError("Unable to rebin the data for exp=%d, scan=%d because either data MD workspace and \
-                monitor MD workspace is not present."  % (exp, scan))
-            return False
+            err_msg = 'Unable to rebin the data for exp=%d, scan=%d because ' \
+                      'either data MD workspace and monitor MD workspace is not present.' % (exp, scan)
+            return False, err_msg
 
         wavelength = wsmanager.getWavelength()
 
@@ -495,7 +500,7 @@ class HFIRPDRedControl(object):
         vanpeakpos2theta = sorted(vanpeakpos2theta)
         wsmanager.setVanadiumPeaks(vanpeakpos2theta)
 
-        return vanpeakpos2theta
+        return True, vanpeakpos2theta
 
     def getWavelength(self, exp, scan):
         """ Get wavelength
@@ -580,32 +585,63 @@ class HFIRPDRedControl(object):
 
         return True
 
-
-    def loadSpicePDData(self, expno, scanno, datafilename):
-        """ Load SPICE powder diffraction data to MDEventsWorkspaces
+    def get_spice_table_ws(self, exp_number, scan_number):
         """
+        Get SPICE table workspace
+        Args:
+            exp_number:
+            scan_number:
+
+        Returns:
+
+        """
+        return self._myWorkspaceDict[(exp_number, scan_number)].get_spice_table()
+
+    def do_load_spice_file(self, exp_number, scan_number):
+        """
+        Load SPICE powder diffraction data to MDEventsWorkspaces
+        Args:
+            exp_number:
+            scan_number:
+
+        Returns:
+
+        """
+        # check input's validity
+        assert isinstance(exp_number, int), 'Experiment number %s must be an integer but not of %s.' \
+                                            '' % (str(exp_number), type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number %s must be an integer but not %s.' \
+                                             '' % (str(exp_number), type(exp_number))
+        assert (exp_number, scan_number) in self._spiceFileManager, \
+            'Exp %d Scan %d spice file has not been downloaded.' % (exp_number, scan_number)
+
+        # get data file
+        spice_file_name = self._spiceFileManager[(exp_number, scan_number)]
+
         # Create base workspace name
         try:
-            basewsname = os.path.basename(datafilename).split(".")[0]
+            base_ws_name = os.path.basename(spice_file_name).split(".")[0]
         except AttributeError as e:
-            raise NotImplementedError("Unable to parse data file name due to %s." % (str(e)))
+            raise RuntimeError("Unable to parse data file name due to %s." % (str(e)))
+        else:
+            table_ws_name = base_ws_name + "_RawTable"
+            info_ws_name  = base_ws_name + "ExpInfo"
 
-        # load SPICE
-        tablewsname = basewsname + "_RawTable"
-        infowsname  = basewsname + "ExpInfo"
-        api.LoadSpiceAscii(Filename=datafilename,
-                           OutputWorkspace=tablewsname, RunInfoWorkspace=infowsname)
+        # load file
+        api.LoadSpiceAscii(Filename=spice_file_name,
+                           OutputWorkspace=table_ws_name,
+                           RunInfoWorkspace=info_ws_name)
 
-        tablews = AnalysisDataService.retrieve(tablewsname)
-        infows  = AnalysisDataService.retrieve(infowsname)
+        tablews = AnalysisDataService.retrieve(table_ws_name)
+        infows  = AnalysisDataService.retrieve(info_ws_name)
         if tablews is None or infows is None:
             raise NotImplementedError('Unable to retrieve either spice table workspace %s or log workspace %s' % (
-                tablewsname, infowsname))
+                table_ws_name, info_ws_name))
 
         # Create a reduction manager and add workspaces to it
-        wsmanager = PDRManager(expno, scanno)
-        wsmanager.set_raw_workspaces(tablews, infows)
-        self._myWorkspaceDict[(int(expno), int(scanno))] = wsmanager
+        ws_manager = PDRManager(exp_number, scan_number)
+        ws_manager.set_raw_workspaces(tablews, infows)
+        self._myWorkspaceDict[(exp_number, scan_number)] = ws_manager
 
         return
 
@@ -916,7 +952,7 @@ class HFIRPDRedControl(object):
                 localdetefffname = os.path.join(localdatadir, detefffname)
                 print "[DB] Detector efficiency file name: %s From %s" % (detefffname, deteffurl)
                 if os.path.exists(localdetefffname) is False:
-                    downloadFile(deteffurl, localdetefffname)
+                    download_file(deteffurl, localdetefffname)
                 else:
                     print "[Info] Detector efficiency file %s exists in directory %s." % (detefffname, localdatadir)
             else:
@@ -928,7 +964,7 @@ class HFIRPDRedControl(object):
             localexcldetfname = os.path.join(localdatadir, excldetfname)
             print "[DB] Excluded det file name: %s From %s" % (excldetfname, exclurl)
             if os.path.exists(localexcldetfname) is False:
-                downloadstatus, errmsg = downloadFile(exclurl, localexcldetfname)
+                downloadstatus, errmsg = download_file(exclurl, localexcldetfname)
                 if downloadstatus is False:
                     localexcldetfname = None
                     print "[Error] %s" % (errmsg)
@@ -1143,74 +1179,90 @@ class HFIRPDRedControl(object):
 
         return rvalue
 
-    def download_spice_file(self, exp_number, scan_number):
+    def download_spice_file(self, exp_number, scan_number, cache_dir):
         """
         Download SPICE file from HB2A data server
         Args:
             exp_number:
             scan_number:
+            cache_dir:
 
         Returns: 2-tuple: boolean, string (file name or error message)
 
         """
-        # FIXME/TODO/NOW : make this part work!
+        # check
+        assert os.path.exists(cache_dir), 'Cache file directory %s does not exist.' % cache_dir
 
-        fullurl = "%s%s/exp%d/Datafiles/%s_exp%04d_scan%04d.dat" % (self._serverAddress,
-                    self._instrument.lower(), exp, self._instrument.upper(), exp, scan)
-        print "[DB] SPICE file URL: ", fullurl
+        spice_url = "%s%s/exp%d/Datafiles/%s_exp%04d_scan%04d.dat" % (self._serverAddress,
+                                                                      self._instrument.lower(),
+                                                                      exp_number,
+                                                                      self._instrument.upper(),
+                                                                      exp_number,
+                                                                      scan_number)
+        print "[DB] SPICE file URL: ", spice_url
 
-        cachedir = str(self.ui.lineEdit_cache.text()).strip()
-        if os.path.exists(cachedir) is False:
-            invalidcache = cachedir
-            cachedir = os.getcwd()
-            self.ui.lineEdit_cache.setText(cachedir)
-            self._logWarning("Cache directory %s is not valid. "
-                                 "Using current workspace directory %s as cache." % (invalidcache, cachedir) )
+        spice_base_name = '%s_exp%04d_scan%04d.dat' % (self._instrument.upper(), exp_number, scan_number)
+        spice_full_path = os.path.join(cache_dir, spice_base_name)
+        status, errmsg = download_file(spice_url, spice_full_path)
 
-
-        filename = '%s_exp%04d_scan%04d.dat' % (self._instrument.upper(), exp, scan)
-        srcFileName = os.path.join(cachedir, filename)
-        status, errmsg = downloadFile(fullurl, srcFileName)
-        if status is False:
-            self._logError(errmsg)
-            srcFileName = None
+        if status:
+            self._spiceFileManager[(exp_number, scan_number)] = spice_full_path
         else:
+            self._spiceFileManager[(exp_number, scan_number)] = None
+
+        return status, errmsg
+
+    def locate_local_spice_file(self, exp_number, scan_number, local_dir):
+        """
+        Locate the local-stored SPICE file
+        Args:
+            exp_number:
+            scan_number:
+            local_dir:
+
+        Returns:
+
+        """
+        assert isinstance(local_dir, str), 'Local data file directory %s must be a string but not %s.' \
+                                           '' % (str(local_dir), type(local_dir))
+
+        # assemble the full path to the SPICE file
+        spice_file_path =  os.path.join(local_dir, "%s/Exp%d_Scan%04d.dat" % (self._instrument, exp_number,
+                                                                              scan_number))
+        if os.path.exists(spice_file_path) is True:
             rvalue = True
+            self._spiceFileManager[(exp_number, scan_number)] = spice_file_path
+        else:
+            rvalue = False
+            self._spiceFileManager[(exp_number, scan_number)] = None
+
+        return rvalue
+
 
 #-------------------------------------------------------------------------------
 # External Methods
 #-------------------------------------------------------------------------------
-def downloadFile(url, localfilepath):
+def download_file(url, file_name):
     """
     Test: 'http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400_scan0001.dat'
+    Args:
+        url:
+        file_name:
 
-    Arguments:
-     - localfilepath :: local data file name with full path.
+    Returns: 2-tuple as (boolean, string)
+
     """
-    # TODO/NOW/FIXME - Replace this by mantid.simpleapi.
-    # DownloadFile(Address='http://www.abc.com/a.dat', Filename='blabla.txt')
-    # ---------------------------------------------------------------------------
-    # RuntimeError
+    # check input
+    assert isinstance(url, str), 'URl %s must be a string but not %s.' \
+                                 '' % (str(url), type(url))
+    assert isinstance(file_name, str), 'File name %s must be a string but not %s.' \
+                                       '' % (str(file_name), type(file_name))
 
-    # open URL
     try:
-        response = urllib2.urlopen(url)
-        wbuf = response.read()
-    except urllib2.HTTPError as e:
-        # Unable to download file
-        if str(e).count('HTTP Error 404') == 1:
-            return (False, str(e))
-        else:
-            raise NotImplementedError("Unable to download file from %s\n\tCause: %s." % (url, str(e)))
-    # ENDIFELSE
+        api.DownloadFile(Address=url, Filename=file_name)
+    except RuntimeError as run_err:
+        return False, 'Unable to download file from %s: %s' % (url, str(run_err))
 
-    if wbuf.count('not found') > 0:
-        return (False, "File cannot be found at %s." % (url))
-
-    ofile = open(localfilepath, 'w')
-    ofile.write(wbuf)
-    ofile.close()
-
-    return (True, "")
+    return True, ''
 
 
