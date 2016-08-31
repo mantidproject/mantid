@@ -72,6 +72,8 @@ Improved
   now check if a Workspace with that name already exists in the ADS and gives
   the option to override it.
 
+- :ref:`FindSXPeaks <algm-FindSXPeaks>`: Fixed a bug where peaks with an incorrect TOF would stored for some intrument geometries.
+
 Deprecated
 ##########
 
