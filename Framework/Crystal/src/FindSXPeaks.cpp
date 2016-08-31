@@ -187,7 +187,8 @@ void FindSXPeaks::exec() {
     Mantid::Kernel::V3D L2 = det->getPos();
     L2 -= sample;
 
-    SXPeak peak(tof, th2, phi, *maxY, specs, l1 + L2.norm(), det->getID(), localworkspace->getInstrument());
+    SXPeak peak(tof, th2, phi, *maxY, specs, l1 + L2.norm(), det->getID(),
+                localworkspace->getInstrument());
     PARALLEL_CRITICAL(entries) { entries.push_back(peak); }
     progress.report();
     PARALLEL_END_INTERUPT_REGION

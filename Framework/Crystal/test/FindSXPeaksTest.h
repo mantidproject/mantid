@@ -65,7 +65,8 @@ public:
     double detectorDistance = 3;
     TSM_ASSERT_THROWS(
         "SXPeak: Should not construct with a zero size specral list",
-        SXPeak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 1, instrument),
+        SXPeak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 1,
+               instrument),
         std::invalid_argument);
   }
 
@@ -79,7 +80,8 @@ public:
     double detectorDistance = -1; // Negative detector distance
     TSM_ASSERT_THROWS(
         "SXPeak: Should not construct with a zero size specral list",
-        SXPeak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 1, instrument),
+        SXPeak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 1,
+               instrument),
         std::invalid_argument);
   }
 
@@ -90,7 +92,8 @@ public:
     double intensity = 1;
     std::vector<int> spectra(1, 1);
     double detectorDistance = 3;
-    SXPeak peak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 2, instrument);
+    SXPeak peak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 2,
+                instrument);
 
     TSM_ASSERT_EQUALS("Intensity getter is not wired-up correctly", 1,
                       peak.getIntensity());

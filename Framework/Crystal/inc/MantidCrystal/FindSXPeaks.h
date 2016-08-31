@@ -26,7 +26,8 @@ public:
   */
   SXPeak(double t, double th2, double phi, double intensity,
          const std::vector<int> &spectral, double Ltot,
-         Mantid::detid_t detectorId, Mantid::Geometry::Instrument_const_sptr inst)
+         Mantid::detid_t detectorId,
+         Mantid::Geometry::Instrument_const_sptr inst)
       : _t(t), _th2(th2), _phi(phi), _intensity(intensity), _Ltot(Ltot),
         _detectorId(detectorId), _inst(inst) {
     // Sanity checks
