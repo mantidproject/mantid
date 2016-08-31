@@ -134,20 +134,6 @@ void DensityOfStates::run() {
 
   m_batchAlgoRunner->addAlgorithm(dosAlgo);
 
-  // Setup save algorithm if needed
-  if (m_uiForm.ckSave->isChecked()) {
-    BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
-    saveProps["InputWorkspace"] = m_outputWsName.toStdString();
-
-    const auto filename = (m_outputWsName + ".nxs").toStdString();
-
-    IAlgorithm_sptr saveAlgo =
-        AlgorithmManager::Instance().create("SaveNexusProcessed");
-    saveAlgo->setProperty("Filename", filename);
-
-    m_batchAlgoRunner->addAlgorithm(saveAlgo, saveProps);
-  }
-
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(dosAlgoComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
@@ -259,6 +245,15 @@ void DensityOfStates::loadSettings(const QSettings &settings) {
 void DensityOfStates::plotClicked() {
 	if (checkADSForPlotSaveWorkspace(m_outputWsName.toStdString(), true))
 		plotSpectrum(m_outputWsName);
+}
+
+/**
+* Handle saving of workspace
+*/
+void DensityOfStates::saveClicked() {
+	if (checkADSForPlotSaveWorkspace(m_outputWsName.toStdString(), false))
+		addSaveWorkspaceToQueue(m_outputWsName);
+	m_batchAlgoRunner->executeBatchAsync();
 }
 
 } // namespace CustomInterfaces
