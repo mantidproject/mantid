@@ -20,6 +20,9 @@ simply calls :ref:`algm-LoadLiveData` at a fixed interval.
    For details on the way to specify the data processing steps, see
    `LoadLiveData <LoadLiveData#Description>`__.
 
+Instructions for setting up a "fake" data stream are found `here
+<http://www.mantidproject.org/MBC_Live_Data_Simple_Examples>`__.
+
 Live Plots
 ##########
 
