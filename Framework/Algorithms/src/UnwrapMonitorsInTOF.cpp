@@ -56,13 +56,13 @@ MinAndMaxTof getMinAndMaxTofForDistanceFromSoure(double distanceFromSource, doub
 
 
 double getDistanceFromSourceForWorkspaceIndex(Mantid::API::MatrixWorkspace* workspace, size_t workspaceIndex) {
-  auto detector = workspace->getDetector(workspaceIndex);
+  const auto detector = workspace->getDetector(workspaceIndex);
   return detector->getDistance(*(workspace->getInstrument()->getSource()));
 }
 
 MinAndMaxTof getMinAndMaxTof(Mantid::API::MatrixWorkspace*workspace, size_t workspaceIndex,
                              double lowerWavelengthLimit, double upperWavelengthLimit) {
-  auto distanceFromSource = getDistanceFromSourceForWorkspaceIndex(workspace, workspaceIndex);
+  const auto distanceFromSource = getDistanceFromSourceForWorkspaceIndex(workspace, workspaceIndex);
   return getMinAndMaxTofForDistanceFromSoure(distanceFromSource, lowerWavelengthLimit, upperWavelengthLimit);
 }
 
@@ -245,12 +245,17 @@ int UnwrapMonitorsInTOF::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string UnwrapMonitorsInTOF::category() const {
-  return "TODO: FILL IN A CATEGORY";
+  return "CorrectionFunctions\\InstrumentCorrections";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string UnwrapMonitorsInTOF::summary() const {
-  return "TODO: FILL IN A SUMMARY";
+  return "Takes a TOF input workspace that contains 'raw' data and unwraps monitor data "
+         "according to a specified wavelength range. The monitor spectra are essentially "
+         "doubled and then trimmed to the specified wavelength range. If no wavelength "
+         "range is specified (-1), then the doubled data is not trimmed. The units of the output "
+         "workspace is in TOF. Note that currently only workspaces with linearly binned monitor data "
+         "can be handled correctly.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -285,7 +290,7 @@ void UnwrapMonitorsInTOF::exec() {
   const auto workspaceIndices = getWorkspaceIndicesForMonitors(outputWorkspace.get());
 
   for (const auto& workspaceIndex : workspaceIndices) {
-      auto minMaxTof = getMinAndMaxTof(outputWorkspace.get(), workspaceIndex,
+      const auto minMaxTof = getMinAndMaxTof(outputWorkspace.get(), workspaceIndex,
                                        lowerWavelengthLimit, upperWavelengthLimit);
       auto points = getPoints(outputWorkspace.get(), workspaceIndex);
       auto counts = getCounts(outputWorkspace.get(), workspaceIndex, minMaxTof, points);
@@ -303,8 +308,8 @@ void UnwrapMonitorsInTOF::exec() {
 std::map<std::string, std::string> UnwrapMonitorsInTOF::validateInputs() {
   std::map<std::string, std::string> invalidProperties;
   // The lower wavelength boundary needs to be smaller than the upper wavelength boundary
-  double lowerWavelengthLimit = getProperty("WavelengthMin");
-  double upperWavelengthLimit = getProperty("WavelengthMax");
+  const double lowerWavelengthLimit = getProperty("WavelengthMin");
+  const double upperWavelengthLimit = getProperty("WavelengthMax");
   if (lowerWavelengthLimit != specialWavelengthCutoff && lowerWavelengthLimit < 0.0) {
       invalidProperties["WavelengthMin"] = "The lower wavelength limit must be set to a positive value.";
   }
