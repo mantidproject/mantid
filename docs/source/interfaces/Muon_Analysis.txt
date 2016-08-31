@@ -1,4 +1,5 @@
 .. THIS FILE IS CAUSING THE OSX DOCS BUILD TO SEGFAULT. CHANGE IT BACK TO .rst WHEN THIS IS FIXED
+.. _Muon_Analysis-ref:
 
 Muon Analysis
 =============
