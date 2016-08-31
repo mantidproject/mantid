@@ -37,8 +37,8 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
     rewrite. Only touches first section found to avoid messing up any other set
     sections in the rest of the file
     """
-    search_for1 = "set ( %s" % cmake_tag
-    search_for2 = "set (%s" % cmake_tag
+    search_for1 = "set ( " + cmake_tag
+    search_for2 = "set (" + cmake_tag
     # List of files in the thingie
     files = []
     lines_before = []
@@ -89,7 +89,7 @@ def redo_cmake_section(lines, cmake_tag, add_this_line, remove_this_line=""):
     files.sort()
 
     lines = lines_before
-    lines.append("set ( %s" % cmake_tag)
+    lines.append("set ( " + cmake_tag)
     for file in files:
         lines.append("\t" + file)
     lines.append(")") # close the parentheses

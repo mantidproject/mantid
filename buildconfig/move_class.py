@@ -23,7 +23,7 @@ def move_one(subproject, classname, newproject, newclassname, oldfilename, newfi
         print("Running:", cmd)
         retval = os.system(cmd)
         if retval != 0:
-            raise RuntimeError("Error executing cmd '%s'" % cmd)
+            raise RuntimeError("Error executing cmd '{}'".format(cmd))
 
         f = open(newfilename, 'r')
         text = f.read()
@@ -34,8 +34,8 @@ def move_one(subproject, classname, newproject, newclassname, oldfilename, newfi
                             "Mantid" + newproject + "/" + args.dest_subfolder + newclassname + ".h")
 
         #Replace the guard
-        old_guard = "MANTID_%s_%s_H_" % (subproject.upper(), classname.upper())
-        new_guard = "MANTID_%s_%s_H_" % (newproject.upper(), newclassname.upper())
+        old_guard = "MANTID_{}_{}_H_".format(subproject.upper(), classname.upper())
+        new_guard = "MANTID_{}_{}_H_".format(newproject.upper(), newclassname.upper())
         text = text.replace(old_guard, new_guard)
 
         # Replace the namespace declaration
@@ -64,13 +64,13 @@ def move_all(subproject, classname, newproject, newclassname, args):
     newtestfile = os.path.join(newbasedir, "test/" + args.dest_subfolder + newclassname + "Test.h")
 
     if args.header and not overwrite and os.path.exists(newheaderfile):
-        print("\nError! Header file %s already exists. Use --force to overwrite.\n" % newheaderfile)
+        print("\nError! Header file {} already exists. Use --force to overwrite.\n".format(newheaderfile))
         return
     if args.cpp and not overwrite and os.path.exists(newsourcefile):
-        print("\nError! Source file %s already exists. Use --force to overwrite.\n" % newsourcefile)
+        print("\nError! Source file {} already exists. Use --force to overwrite.\n".format(newsourcefile))
         return
     if args.test and not overwrite and os.path.exists(newtestfile):
-        print("\nError! Test file %s already exists. Use --force to overwrite.\n" % newtestfile)
+        print("\nError! Test file {} already exists. Use --force to overwrite.\n".format(newtestfile))
         return
 
     print()
@@ -85,8 +85,8 @@ def move_all(subproject, classname, newproject, newclassname, args):
     remove_from_cmake(subproject, classname, args, args.source_subfolder)
     add_to_cmake(newproject, newclassname, args, args.dest_subfolder)
 
-    print("   Files were removed to Framework/%s/CMakeLists.txt !" % subproject)
-    print("   Files were added to Framework/%s/CMakeLists.txt !" % newproject)
+    print("   Files were removed to Framework/{}/CMakeLists.txt !".format(subproject))
+    print("   Files were added to Framework/{}/CMakeLists.txt !".format(newproject))
     print()
 
 #======================================================================

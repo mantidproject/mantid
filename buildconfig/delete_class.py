@@ -37,7 +37,7 @@ def delete_all(subproject, classname, args):
     # Insert into the cmake list
     remove_from_cmake(subproject, classname, args, args.source_subfolder)
 
-    print("   Files were removed to Framework/%s/CMakeLists.txt !" % subproject)
+    print("   Files were removed to Framework/{}/CMakeLists.txt !".format(subproject))
     print()
 
 
