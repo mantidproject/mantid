@@ -44,10 +44,6 @@ public:
   void init(const std::size_t &, const std::size_t &,
             const std::size_t &) override;
 
-  void copyDataFrom(const EventWorkspace &source,
-                    std::size_t sourceStartWorkspaceIndex = 0,
-                    std::size_t sourceEndWorkspaceIndex = size_t(-1));
-
   bool threadSafe() const override;
 
   //------------------------------------------------------------
@@ -126,8 +122,6 @@ public:
   std::size_t MRUSize() const;
 
   void clearMRU() const override;
-
-  void clearData();
 
   EventSortType getSortType() const;
 

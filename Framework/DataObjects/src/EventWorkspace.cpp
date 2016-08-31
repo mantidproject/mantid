@@ -39,11 +39,18 @@ EventWorkspace::EventWorkspace() : mru(new EventWorkspaceMRU) {}
 
 EventWorkspace::EventWorkspace(const EventWorkspace &other)
     : IEventWorkspace(other), mru(new EventWorkspaceMRU) {
-  copyDataFrom(other);
+  for (const auto &el : other.data) {
+    // Create a new event list, copying over the events
+    auto newel = new EventList(*el);
+    // Make sure to update the MRU to point to THIS event workspace.
+    newel->setMRU(this->mru);
+    this->data.push_back(newel);
+  }
 }
 
 EventWorkspace::~EventWorkspace() {
-  clearData();
+  for (auto &eventList : data)
+    delete eventList;
   delete mru;
 }
 
@@ -91,54 +98,6 @@ void EventWorkspace::init(const std::size_t &NVectors,
   m_axes.resize(2);
   m_axes[0] = new API::RefAxis(XLength, this);
   m_axes[1] = new API::SpectraAxis(this);
-}
-
-/**
- * Copy all of the data (event lists) from the source workspace to this
- *workspace.
- *
- * @param source: EventWorkspace from which we are taking data.
- * @param sourceStartWorkspaceIndex: index in the workspace of source where we
- *start
- *          copying the data. This index will be 0 in the "this" workspace.
- *          Default: -1, meaning copy all.
- * @param sourceEndWorkspaceIndex: index in the workspace of source where we
- *stop.
- *          It is inclusive = source[sourceEndWorkspaceIndex[ WILL be copied.
- *          Default: -1, meaning copy all.
- *
- */
-void EventWorkspace::copyDataFrom(const EventWorkspace &source,
-                                  std::size_t sourceStartWorkspaceIndex,
-                                  std::size_t sourceEndWorkspaceIndex) {
-  // Start with nothing.
-  this->clearData(); // properly de-allocates memory!
-
-  // Copy the vector of EventLists
-  const auto &source_data = source.data;
-  auto it_start = source_data.begin();
-  auto it_end = source_data.end();
-  size_t source_data_size = source_data.size();
-
-  // Do we copy only a range?
-  if (sourceEndWorkspaceIndex == size_t(-1))
-    sourceEndWorkspaceIndex = source_data_size - 1;
-  if ((sourceStartWorkspaceIndex < source_data_size) &&
-      (sourceEndWorkspaceIndex < source_data_size) &&
-      (sourceEndWorkspaceIndex >= sourceStartWorkspaceIndex)) {
-    it_start += sourceStartWorkspaceIndex;
-    it_end = source_data.begin() + sourceEndWorkspaceIndex + 1;
-  }
-
-  for (auto it = it_start; it != it_end; ++it) {
-    // Create a new event list, copying over the events
-    auto newel = new EventList(**it);
-    // Make sure to update the MRU to point to THIS event workspace.
-    newel->setMRU(this->mru);
-    this->data.push_back(newel);
-  }
-
-  this->clearMRU();
 }
 
 /// The total size of the workspace
@@ -399,15 +358,6 @@ size_t EventWorkspace::MRUSize() const { return mru->MRUSize(); }
 
 /** Clears the MRU lists */
 void EventWorkspace::clearMRU() const { mru->clear(); }
-
-/** Clear the data[] vector and delete
- * any EventList objects in it
- */
-void EventWorkspace::clearData() {
-  for (auto &eventList : data)
-    delete eventList;
-  data.clear();
-}
 
 /// Returns the amount of memory used in bytes
 size_t EventWorkspace::getMemorySize() const {

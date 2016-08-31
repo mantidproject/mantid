@@ -130,33 +130,6 @@ public:
     TS_ASSERT(el.hasDetectorID(1));
   }
 
-  void test_copyDataFrom() {
-    EventWorkspace_sptr ew1 = createFlatEventWorkspace();
-    TS_ASSERT_DELTA(ew1->readY(0)[0], 2.0, 1e-5);
-    TS_ASSERT_DELTA(ew1->readY(1)[0], 2.0, 1e-5);
-
-    EventWorkspace_sptr ew2(new EventWorkspace);
-    ew2->initialize(2, 2, 2);
-    ew2->copyDataFrom(*ew1);
-    TS_ASSERT_EQUALS(ew2->getNumberHistograms(), ew1->getNumberHistograms());
-    TS_ASSERT_EQUALS(ew2->getNumberEvents(), ew1->getNumberEvents());
-
-    // Double # of events in the copied workspace
-    ew2->getSpectrum(0) += ew2->getSpectrum(0);
-    ew2->getSpectrum(1) += ew2->getSpectrum(1);
-
-    // Original is still 2.0
-    TS_ASSERT_DELTA(ew1->readY(0)[0], 2.0, 1e-5);
-    TS_ASSERT_DELTA(ew1->readY(1)[0], 2.0, 1e-5);
-    // New one is 4.0
-    TSM_ASSERT_DELTA("Copied workspace's Y values are properly refreshed "
-                     "thanks to a correct MRU.",
-                     ew2->readY(0)[0], 4.0, 1e-5);
-    TSM_ASSERT_DELTA("Copied workspace's Y values are properly refreshed "
-                     "thanks to a correct MRU.",
-                     ew2->readY(1)[0], 4.0, 1e-5);
-  }
-
   void test_getMemorySize() {
     // Because of the way vectors allocate, we can only know the minimum amount
     // of memory that can be used.
