@@ -164,10 +164,6 @@ void DensityOfStates::dosAlgoComplete(bool error) {
 
   if (error)
     return;
-
-  // Handle spectra plotting
-  if (m_uiForm.ckPlot->isChecked())
-    plotSpectrum(m_outputWsName);
 }
 
 /**
@@ -255,6 +251,14 @@ void DensityOfStates::ionLoadComplete(bool error) {
  */
 void DensityOfStates::loadSettings(const QSettings &settings) {
   m_uiForm.mwInputFile->readSettings(settings.group());
+}
+
+/**
+* Handle mantid plotting of workspace
+*/
+void DensityOfStates::plotClicked() {
+	if (checkADSForPlotSaveWorkspace(m_outputWsName.toStdString(), true))
+		plotSpectrum(m_outputWsName);
 }
 
 } // namespace CustomInterfaces
