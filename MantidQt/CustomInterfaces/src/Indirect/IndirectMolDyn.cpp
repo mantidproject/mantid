@@ -122,25 +122,26 @@ void IndirectMolDyn::versionSelected(const QString &version) {
  */
 void IndirectMolDyn::plotClicked() {
 
-	QString filename = m_uiForm.mwRun->getFirstFilename();
-	QFileInfo fi(filename);
-	QString baseName = fi.baseName();
+  QString filename = m_uiForm.mwRun->getFirstFilename();
+  QFileInfo fi(filename);
+  QString baseName = fi.baseName();
 
-	WorkspaceGroup_sptr diffResultsGroup =
-		AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(baseName.toStdString());
+  WorkspaceGroup_sptr diffResultsGroup =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+          baseName.toStdString());
 
-	auto names = diffResultsGroup->getNames();
-	auto plotType = m_uiForm.cbPlot->currentText();
+  auto names = diffResultsGroup->getNames();
+  auto plotType = m_uiForm.cbPlot->currentText();
 
-	for (auto it = names.begin(); it != names.end(); ++it) {
-		std::string wsName = *it;
+  for (auto it = names.begin(); it != names.end(); ++it) {
+    std::string wsName = *it;
 
-		if (plotType == "Spectra" || plotType == "Both")
-			plotSpectrum(QString::fromStdString(wsName));
+    if (plotType == "Spectra" || plotType == "Both")
+      plotSpectrum(QString::fromStdString(wsName));
 
-		if (plotType == "Contour" || plotType == "Both")
-			plot2D(QString::fromStdString(wsName));
-	}
+    if (plotType == "Contour" || plotType == "Both")
+      plot2D(QString::fromStdString(wsName));
+  }
 }
 
 /**
@@ -148,13 +149,13 @@ void IndirectMolDyn::plotClicked() {
  */
 void IndirectMolDyn::saveClicked() {
 
-	QString filename = m_uiForm.mwRun->getFirstFilename();
-	QFileInfo fi(filename);
-	QString baseName = fi.baseName();
+  QString filename = m_uiForm.mwRun->getFirstFilename();
+  QFileInfo fi(filename);
+  QString baseName = fi.baseName();
 
-	if (checkADSForPlotSaveWorkspace(baseName.toStdString(), false))
-		addSaveWorkspaceToQueue(baseName);
-	m_batchAlgoRunner->executeBatchAsync();
+  if (checkADSForPlotSaveWorkspace(baseName.toStdString(), false))
+    addSaveWorkspaceToQueue(baseName);
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 } // namespace CustomInterfaces

@@ -74,7 +74,6 @@ void IndirectSassena::handleAlgorithmFinish(bool error) {
   // Enable plot and save
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
-
 }
 
 /**
@@ -91,17 +90,17 @@ void IndirectSassena::loadSettings(const QSettings &settings) {
  * Handle mantid plotting of workspace
  */
 void IndirectSassena::plotClicked() {
-	if (checkADSForPlotSaveWorkspace(m_outWsName.toStdString(), true))
-		plotSpectrum(m_outWsName);
+  if (checkADSForPlotSaveWorkspace(m_outWsName.toStdString(), true))
+    plotSpectrum(m_outWsName);
 }
 
 /**
 * Handle saving of workspace
 */
 void IndirectSassena::saveClicked() {
-	if (checkADSForPlotSaveWorkspace(m_outWsName.toStdString(), false))
-		addSaveWorkspaceToQueue(m_outWsName);
-	m_batchAlgoRunner->executeBatchAsync();
+  if (checkADSForPlotSaveWorkspace(m_outWsName.toStdString(), false))
+    addSaveWorkspaceToQueue(m_outWsName);
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 } // namespace CustomInterfaces
