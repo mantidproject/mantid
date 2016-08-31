@@ -13,9 +13,15 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
-#include <unordered_set>
 
 #include <mutex>
+#include <unordered_set>
+
+#ifdef _WIN32
+#define strcasecmp _stricmp
+#else
+#include "Strings.h"
+#endif
 
 namespace Mantid {
 namespace Kernel {
@@ -27,6 +33,13 @@ enum class DataServiceSort { Sorted, Unsorted };
  * Auto queries the class to determine this behavior
  */
 enum class DataServiceHidden { Auto, Include, Exclude };
+
+// Case-insensitive comparison functor for std::map
+struct CaseInsensitiveCmp {
+  bool operator()(const std::string &lhs, const std::string &rhs) const {
+    return strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
+  }
+};
 
 /** DataService stores instances of a given type.
     This is a templated class, designed to be implemented as a
@@ -63,7 +76,8 @@ enum class DataServiceHidden { Auto, Include, Exclude };
 template <typename T> class DLLExport DataService {
 private:
   /// Typedef for the map holding the names of and pointers to the data objects
-  typedef std::map<std::string, boost::shared_ptr<T>> svcmap;
+  typedef std::map<std::string, boost::shared_ptr<T>, CaseInsensitiveCmp>
+      svcmap;
   /// Iterator for the data store map
   typedef typename svcmap::iterator svc_it;
   /// Const iterator for the data store map
@@ -210,7 +224,7 @@ public:
     // that's already in the map with a pointer to a different object).
     // Also, there's nothing to stop the same object from being added
     // more than once with different names.
-    if (!datamap.insert(typename svcmap::value_type(name, Tobject)).second) {
+    if (!datamap.insert(std::make_pair(name, Tobject)).second) {
       std::string error =
           " add : Unable to insert Data Object : '" + name + "'";
       g_log.error(error);
@@ -240,18 +254,16 @@ public:
     m_mutex.lock();
 
     // find if the Tobject already exists
-    std::string foundName;
-    auto it = findNameWithCaseSearch(name, foundName);
+    auto it = datamap.find(name);
     if (it != datamap.end()) {
-      g_log.debug("Data Object '" + foundName +
-                  "' replaced in data service.\n");
+      g_log.debug("Data Object '" + name + "' replaced in data service.\n");
       m_mutex.unlock();
 
       notificationCenter.postNotification(
           new BeforeReplaceNotification(name, it->second, Tobject));
 
       m_mutex.lock();
-      datamap[foundName] = Tobject;
+      datamap[name] = Tobject;
       m_mutex.unlock();
 
       notificationCenter.postNotification(
@@ -270,8 +282,7 @@ public:
     // Make DataService access thread-safe
     m_mutex.lock();
 
-    std::string foundName;
-    auto it = findNameWithCaseSearch(name, foundName);
+    auto it = datamap.find(name);
     if (it == datamap.end()) {
       g_log.debug(" remove '" + name + "' cannot be found");
       m_mutex.unlock();
@@ -287,16 +298,14 @@ public:
     // Do NOT use "it" iterator after this point. Other threads may modify the
     // map
     m_mutex.unlock();
-    notificationCenter.postNotification(
-        new PreDeleteNotification(foundName, data));
+    notificationCenter.postNotification(new PreDeleteNotification(name, data));
     m_mutex.lock();
 
     data.reset(); // DataService now has no references to the object
-    g_log.information("Data Object '" + foundName +
-                      "' deleted from data service.");
+    g_log.information("Data Object '" + name + "' deleted from data service.");
 
     m_mutex.unlock();
-    notificationCenter.postNotification(new PostDeleteNotification(foundName));
+    notificationCenter.postNotification(new PostDeleteNotification(name));
   }
 
   //--------------------------------------------------------------------------
@@ -310,8 +319,7 @@ public:
     // Make DataService access thread-safe
     m_mutex.lock();
 
-    std::string foundName;
-    auto it = findNameWithCaseSearch(oldName, foundName);
+    auto it = datamap.find(oldName);
     if (it == datamap.end()) {
       g_log.warning(" rename '" + oldName + "' cannot be found");
       m_mutex.unlock();
@@ -331,14 +339,14 @@ public:
     }
 
     // insert the old object with the new name
-    if (!datamap.insert(typename svcmap::value_type(newName, object)).second) {
+    if (!datamap.insert(std::make_pair(newName, object)).second) {
       std::string error =
           " add : Unable to insert Data Object : '" + newName + "'";
       g_log.error(error);
       m_mutex.unlock();
       throw std::runtime_error(error);
     }
-    g_log.information("Data Object '" + foundName + "' renamed to '" + newName +
+    g_log.information("Data Object '" + oldName + "' renamed to '" + newName +
                       "'");
 
     m_mutex.unlock();
@@ -368,8 +376,7 @@ public:
     // Make DataService access thread-safe
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
-    std::string foundName;
-    auto it = findNameWithCaseSearch(name, foundName);
+    auto it = datamap.find(name);
     if (it != datamap.end()) {
       return it->second;
     } else {
@@ -385,8 +392,7 @@ public:
     // Make DataService access thread-safe
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
-    std::string foundName;
-    auto it = findNameWithCaseSearch(name, foundName);
+    auto it = datamap.find(name);
     return it != datamap.end();
   }
 
@@ -433,12 +439,14 @@ public:
     if (hiddenState == DataServiceHidden::Include) {
       // Getting hidden items
       std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+      foundNames.reserve(datamap.size());
       for (const auto &item : datamap) {
         foundNames.push_back(item.first);
       }
       // Lock released at end of scope here
     } else {
       std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+      foundNames.reserve(datamap.size());
       for (const auto &item : datamap) {
         if (!isHiddenDataServiceObject(item.first)) {
           // This item is not hidden add it
@@ -519,54 +527,6 @@ private:
       g_log.debug() << error << '\n';
       throw std::runtime_error(error);
     }
-  }
-
-  /**
-   * Find a name in the map and return an iterator pointing to it. This takes
-   * the string and if it does not find it then it looks for a match
-   * disregarding
-   * the case (const version)
-   * @param name The string name to search for
-   * @param foundName [Output] Stores the name here if one was found. It will be
-   * empty if not
-   * @returns An iterator pointing at the element or the end iterator
-   */
-  svc_it findNameWithCaseSearch(const std::string &name,
-                                std::string &foundName) const {
-    const svcmap &constdata = datamap;
-    svcmap &data = const_cast<svcmap &>(constdata);
-    if (name.empty())
-      return data.end();
-
-    // Exact match
-    foundName = name;
-    auto match = data.find(name);
-    if (match != data.end())
-      return match;
-
-    // Try UPPER case
-    std::transform(foundName.begin(), foundName.end(), foundName.begin(),
-                   toupper);
-    match = data.find(foundName);
-    if (match != data.end())
-      return match;
-
-    // Try lower case
-    std::transform(foundName.begin(), foundName.end(), foundName.begin(),
-                   tolower);
-    match = data.find(foundName);
-    if (match != data.end())
-      return match;
-
-    // Try Sentence case
-    foundName = name;
-    // Upper cases the first letter
-    std::transform(foundName.begin(), foundName.begin() + 1, foundName.begin(),
-                   toupper);
-    match = data.find(foundName);
-    if (match == data.end())
-      foundName = "";
-    return match;
   }
 
   /// DataService name. This is set only at construction. DataService name
