@@ -254,7 +254,7 @@ void MergeRuns::execEvent() {
   EventWorkspace_sptr inputWS = m_inEventWS[0];
   auto outWS = createWorkspace<EventWorkspace>(
       m_outputSize, inputWS->x(0).size(), inputWS->y(0).size());
-  WorkspaceFactory::Instance().initializeFromParent(inputWS, outWS, false);
+  WorkspaceFactory::Instance().initializeFromParent(*inputWS, outWS, false);
   const auto inputSize = inputWS->getNumberHistograms();
   for (size_t i = 0; i < inputSize; ++i)
     outWS->getSpectrum(i) = inputWS->getSpectrum(i);
