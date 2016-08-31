@@ -4,6 +4,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/MersenneTwister.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -85,13 +86,10 @@ createTestWorkspace(const size_t nhist, const double x0, const double x1,
   }
 
   // Link workspace with detector
-  for (size_t i = 0; i < nhist; ++i) {
-    const Mantid::specnum_t specID = static_cast<Mantid::specnum_t>(id + i);
-    auto &spec = ws2d->getSpectrum(i);
-    spec.setSpectrumNo(specID);
-    spec.clearDetectorIDs();
-    spec.addDetectorID(id);
-  }
+  Mantid::Indexing::IndexInfo indexInfo(nhist);
+  indexInfo.setDetectorIDs(std::vector<Mantid::detid_t>(nhist, id));
+  ws2d->setIndexInfo(indexInfo);
+
   return ws2d;
 }
 

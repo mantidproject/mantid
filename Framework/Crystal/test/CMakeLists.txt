@@ -17,6 +17,7 @@ if ( CXXTEST_FOUND )
             DataObjects
             Geometry
             HistogramData
+            Indexing
             Kernel
             MDAlgorithms
             ${Boost_LIBRARIES}
