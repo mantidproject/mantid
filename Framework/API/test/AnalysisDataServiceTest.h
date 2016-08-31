@@ -63,13 +63,12 @@ public:
     ads.setIllegalCharacterList("");
   }
 
-  void
-  test_Retrieve_Case_Insensitive() {
+  void test_Retrieve_Case_Insensitive() {
     addToADS("z");
     TS_ASSERT_THROWS_NOTHING(ads.retrieve("z"));
     TS_ASSERT_THROWS_NOTHING(ads.retrieve("Z"));
 
-    ads.remove("Z");                             //
+    ads.remove("Z");
     TS_ASSERT_THROWS(ads.retrieve("z"), Exception::NotFoundError);
   }
 
