@@ -2182,6 +2182,8 @@ class CWSCDReductionControl(object):
         # Output workspace
         scan_sum_list = list()
 
+        error_message = ''
+
         # Download and
         for scan_number in xrange(start_scan, end_scan):
             # check whether file exists
@@ -2210,6 +2212,12 @@ class CWSCDReductionControl(object):
                                    RunInfoWorkspace='TempInfo')
                 spice_table_ws = AnalysisDataService.retrieve(spice_table_ws_name)
                 num_rows = spice_table_ws.rowCount()
+
+                if num_rows == 0:
+                    # it is an empty table
+                    error_message = 'Scan %d: empty spice table.\n' % scan_number
+                    continue
+
                 col_name_list = spice_table_ws.getColumnNames()
                 h_col_index = col_name_list.index('h')
                 k_col_index = col_name_list.index('k')
@@ -2251,8 +2259,10 @@ class CWSCDReductionControl(object):
                 return False, str(e)
             except ValueError as e:
                 return False, 'Unable to locate column h, k, or l. See %s.' % str(e)
-
         # END-FOR (scan_number)
+
+        if error_message != '':
+            print 'Error!\n%s' % error_message
 
         self._scanSummaryList = scan_sum_list
 
