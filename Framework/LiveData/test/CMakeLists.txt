@@ -23,7 +23,7 @@ if ( CXXTEST_FOUND )
             LiveData
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
-            )
+            ${GMOCK_LIBRARIES} )
   add_dependencies ( LiveDataTest DataHandling Algorithms MDAlgorithms )
   add_dependencies ( FrameworkTests LiveDataTest )
   # Test data
