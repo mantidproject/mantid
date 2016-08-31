@@ -114,8 +114,14 @@ class ABINSTest(unittest.TestCase):
         # overtones cannot be set in case we have single crystal (don't know expansion of S in terms of overtones for SingleCrystal case)
         self.assertRaises(RuntimeError, ABINS, PhononFile=self._benzene_phonon_file, SampleForm="SingleCrystal", Overtones=True, OutputWorkspace=self._workspace_name)
 
-
     # test if intermediate results are consistent
+    def test_non_unique_atoms(self):
+        """Test scenario in which a user specifies non unique atoms (for example in squaricn that would be "C,C,H").
+           In that case ABINS should terminate and print a meaningful message.
+        """
+        self.assertRaises(RuntimeError, ABINS, PhononFile=self._squaricn_phonon_file, Atoms="C,C,H", OutputWorkspace=self._workspace_name)
+
+
     def test_non_existing_atoms(self):
         """Test scenario in which  a user requests to create workspaces for atoms which do not exist in the system.
            In that case ABINS should terminate and give a user a meaningful message about wrong atoms to analyse.
