@@ -119,9 +119,6 @@ public:
 
   void setPeakList(const std::string &peakList) const override;
 
-  std::vector<std::string>
-  splitFittingDirectory(std::string &selectedfPath) override;
-
   void setBankEmit() override;
 
   void resetCanvas() override;
