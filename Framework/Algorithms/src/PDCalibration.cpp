@@ -5,6 +5,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -23,6 +24,7 @@ using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::EventWorkspace;
+using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::ArrayBoundedValidator;
 using Mantid::Kernel::BoundedValidator;
@@ -235,7 +237,11 @@ void PDCalibration::init() {
   //                  "");
   declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputCalibrationTable", "", Direction::Output),
-                  "");
+                  "An output workspace containing the Calibration Table");
+
+  declareProperty(make_unique<WorkspaceProperty<>>(
+                      "MaskWorkspace", "", Direction::Output),
+                  "An output workspace containing the mask");
 
   // make group for FindPeak properties
   std::string findPeaksGroup("Peak finding properties");
@@ -293,6 +299,9 @@ void PDCalibration::exec() {
   } else {
     createNewCalTable();
   }
+
+  MaskWorkspace_sptr maskWS = boost::make_shared<DataObjects::MaskWorkspace>(m_uncalibratedWS->getInstrument());
+  setProperty("MaskWorkspace", maskWS);
 
   const std::size_t NUMHIST = m_uncalibratedWS->getNumberHistograms();
   API::Progress prog(this, 0, 1.0, NUMHIST);
@@ -360,7 +369,7 @@ void PDCalibration::exec() {
     for (size_t i = 0; i < fittedTable->rowCount(); ++i) {
       // Get peak value
       double centre = fittedTable->getRef<double>("centre", i);
-      double width = fittedTable->getRef<double>("width", i);
+      //double width = fittedTable->getRef<double>("width", i);
       double height = fittedTable->getRef<double>("height", i);
       double chi2 = fittedTable->getRef<double>("chi2", i);
 
@@ -401,6 +410,7 @@ void PDCalibration::exec() {
     }
 
     if (d_vec.size() == 0) {
+      maskWS->setMaskedIndex(wkspIndex, true);
       continue;
     } else {
       double difc = 0., t0 = 0., difa = 0.;
