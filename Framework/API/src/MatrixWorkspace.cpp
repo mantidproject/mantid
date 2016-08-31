@@ -86,7 +86,7 @@ MatrixWorkspace::~MatrixWorkspace() {
 
 Indexing::IndexInfo MatrixWorkspace::indexInfo() const {
   // Workaround while IndexInfo is not stored in MatrixWorkspace: build
-  // translator based on data in ISpectrum.
+  // IndexInfo based on data in ISpectrum.
   std::vector<specnum_t> specNums;
   std::vector<std::vector<specnum_t>> detIDs;
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
@@ -103,17 +103,17 @@ Indexing::IndexInfo MatrixWorkspace::indexInfo() const {
   return t;
 }
 
-void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &translator) {
-  // Comparing the *local* size of the translator.
-  if (translator.size() != getNumberHistograms())
-    throw std::runtime_error(
-        "MatrixWorkspace::setIndexInfo: IndexInfo size "
-        "does not match number of histograms in workspace");
+void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
+  // Comparing the *local* size of the indexInfo.
+  if (indexInfo.size() != getNumberHistograms())
+    throw std::runtime_error("MatrixWorkspace::setIndexInfo: IndexInfo size "
+                             "does not match number of histograms in "
+                             "workspace");
 
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
     auto &spectrum = getSpectrum(i);
-    spectrum.setSpectrumNo(translator.spectrumNumber(i));
-    auto ids = translator.detectorIDs(i);
+    spectrum.setSpectrumNo(indexInfo.spectrumNumber(i));
+    auto ids = indexInfo.detectorIDs(i);
     spectrum.setDetectorIDs(std::set<detid_t>(ids.begin(), ids.end()));
   }
 }
