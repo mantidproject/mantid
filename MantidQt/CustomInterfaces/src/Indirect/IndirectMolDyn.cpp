@@ -133,7 +133,7 @@ void IndirectMolDyn::plotClicked() {
 		std::string wsName = *it;
 
 		if (plotType == "Spectra" || plotType == "Both")
-			plotSpectrum(QString::fromStdString(wsName));
+			plotSpectrum(QString::fromStdString(wsName),0 , 10);
 	}
 	if (plotType == "Contour" || plotType == "Both")
 		plot2D(QString::fromStdString(m_pythonExportWsName));
