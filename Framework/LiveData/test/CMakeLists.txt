@@ -24,6 +24,7 @@ if ( CXXTEST_FOUND )
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${GMOCK_LIBRARIES} )
+  target_include_directories ( LiveDataTest PRIVATE ../src/ )
   add_dependencies ( LiveDataTest DataHandling Algorithms MDAlgorithms )
   add_dependencies ( FrameworkTests LiveDataTest )
   # Test data

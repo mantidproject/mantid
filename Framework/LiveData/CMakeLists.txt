@@ -71,6 +71,10 @@ if ( LIBRDKAFKA_FOUND )
     inc/MantidLiveData/Kafka/IKafkaBroker.h
     inc/MantidLiveData/Kafka/KafkaBroker.h
     inc/MantidLiveData/Kafka/KafkaTopicSubscriber.h
+    src/ISIS/private/Kafka/Schema/flatbuffers/flatbuffers.h
+    src/ISIS/private/Kafka/Schema/det_spec_mapping_schema_generated.h
+    src/ISIS/private/Kafka/Schema/event_schema_generated.h
+    src/ISIS/private/Kafka/Schema/run_info_schema_generated.h
   )
   set ( TEST_FILES
     ${TEST_FILES}

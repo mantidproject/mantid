@@ -27,6 +27,11 @@
     <livedata listener="FakeEventDataListener" address="127.0.0.1:0" />
   </instrument>
 
+  <instrument name="HRPDTEST">
+    <technique>Test Listener</technique>
+    <livedata listener="ISISKafkaEventListener" address="127.0.0.1:0" />
+  </instrument>
+
 </facility>
 
 </facilities>
