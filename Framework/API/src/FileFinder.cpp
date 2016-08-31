@@ -492,7 +492,9 @@ FileFinderImpl::findRun(const std::string &hintstr,
     filename = hint.substr(0, hint.rfind(extension));
   if (hintPath.depth() == 0) {
     try {
-      filename = makeFileName(filename, instrument);
+      if (!facility.noFilePrefix()) {
+        filename = makeFileName(filename, instrument);
+      }
     } catch (std::invalid_argument &) {
       if (filename.length() >= hint.length()) {
         g_log.information() << "Could not form filename from standard rules '"

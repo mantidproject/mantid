@@ -58,6 +58,9 @@ protected slots:
   void updateProperties(QtProperty *prop, double val);
   /// Called when the algorithm completes to update preview plot
   void momentsAlgComplete(bool error);
+  /// Slots for plot and save
+  void saveClicked();
+  void plotClicked();
 
 private:
   Ui::IndirectMoments m_uiForm;

@@ -31,6 +31,7 @@ class HFIRReductionAPIv2(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         SetTransmission(0.51944, 0.011078)
@@ -58,6 +59,7 @@ class HFIRAbsoluteScalingReference(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         SolidAngle(detector_tubes=True)
         MonitorNormalization()
         AzimuthalAverage(binning="0.01,0.001,0.2")
@@ -87,6 +89,7 @@ class HFIRAbsoluteScalingValue(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         SolidAngle(detector_tubes=True)
         MonitorNormalization()
         AzimuthalAverage(binning="0.01,0.001,0.2")
