@@ -170,8 +170,8 @@ void DiffractionFocussing2::exec() {
   // is irrelevant
   MantidVec weights_default(1, 1.0), emptyVec(1, 0.0), EOutDummy(nPoints);
 
-  std::vector<specnum_t> outSpecNums;
-  std::vector<std::vector<detid_t>> outDetIDs;
+  std::vector<specnum_t> outSpecNums(m_validGroups.size());
+  std::vector<std::vector<detid_t>> outDetIDs(m_validGroups.size());
 
   Progress *prog;
   prog = new API::Progress(this, 0.2, 1.00,
@@ -221,7 +221,7 @@ void DiffractionFocussing2::exec() {
       auto &Ein = inSpec.e();
 
       auto &newIDs = inSpec.getDetectorIDs();
-      outSpecDetIDs.insert(outSpecDetIDs.begin(), newIDs.begin(), newIDs.end());
+      outSpecDetIDs.insert(outSpecDetIDs.end(), newIDs.begin(), newIDs.end());
       try {
         // TODO This should be implemented in Histogram as rebin
         Mantid::Kernel::VectorHelper::rebinHistogram(
@@ -292,8 +292,8 @@ void DiffractionFocussing2::exec() {
       prog->report();
     } // end of loop for input spectra
     // Set the spectrum number to the group number
-    outSpecNums.push_back(group);
-    outDetIDs.push_back(std::move(outSpecDetIDs));
+    outSpecNums[outWorkspaceIndex] = group;
+    outDetIDs[outWorkspaceIndex] = outSpecDetIDs;
 
     // Calculate the bin widths
     std::vector<double> widths(Xout.size());
