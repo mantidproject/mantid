@@ -110,11 +110,10 @@ Mantid::HistogramData::Points getPoints(Mantid::API::MatrixWorkspace *workspace,
     lastElementToNewElementSpacing = doubledData[1] - doubledData[0];
   }
 
-  double newValue = 0.0;
   for (auto pointsIterator = points.begin();
        doubledDataIterator != doubledData.end();
        ++doubledDataIterator, ++pointsIterator) {
-    newValue =
+    auto newValue =
         lastTof + lastElementToNewElementSpacing + (*pointsIterator - firstTof);
     *doubledDataIterator = newValue;
   }
