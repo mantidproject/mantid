@@ -78,13 +78,11 @@ void IndirectSassena::run() {
  * @param error If the batch was stopped due to error
  */
 void IndirectSassena::handleAlgorithmFinish(bool error) {
-  bool plot = m_uiForm.chkPlot->isChecked();
 
-  // Nothing to do if the algorithm failed or we do not want to plot
-  if (error || !plot)
+  // Nothing to do if the algorithm failed
+  if (error)
     return;
 
-  plotSpectrum(m_outWsName);
 }
 
 /**
@@ -96,6 +94,15 @@ void IndirectSassena::handleAlgorithmFinish(bool error) {
 void IndirectSassena::loadSettings(const QSettings &settings) {
   m_uiForm.mwInputFile->readSettings(settings.group());
 }
+
+/**
+ * Handle mantid plotting of workspace
+ */
+void IndirectSassena::plotClicked() {
+	if (checkADSForPlotSaveWorkspace(m_outWsName.toStdString(), true))
+		plotSpectrum(m_outWsName);
+}
+
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
