@@ -59,7 +59,6 @@ template <typename T> inline T &SingletonHolder<T>::Instance() {
                                                     CreateUsingNew<T>::Destroy};
   return *instance;
 }
-
 }
 }
 
