@@ -8,6 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -155,6 +156,8 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
   resTab->addColumn("double", "Asymmetry");
   resTab->addColumn("double", "Phase");
 
+  auto indexInfo = ws->indexInfo();
+
   // Loop through fitting all spectra individually
   const static std::string success = "success";
   for (int wsIndex = 0; wsIndex < nhist; wsIndex++) {
@@ -182,8 +185,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
     // Now we have our fitting results stored in tab
     // but we need to extract the relevant information, i.e.
     // the detector phases (parameter 'p') and asymmetries ('A')
-    const auto &spectrum = ws->getSpectrum(static_cast<size_t>(wsIndex));
-    extractDetectorInfo(tab, resTab, spectrum.getSpectrumNo());
+    extractDetectorInfo(tab, resTab, indexInfo.spectrumNumber(wsIndex));
   }
 }
 
