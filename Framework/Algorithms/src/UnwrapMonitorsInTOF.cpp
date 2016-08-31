@@ -104,13 +104,13 @@ Mantid::HistogramData::Points getPoints(Mantid::API::MatrixWorkspace *workspace,
   auto lastTof = points.back();
   auto doubledDataIterator = doubledData.begin();
   std::advance(doubledDataIterator, points.size());
-  double newValue = 0.0;
 
   double lastElementToNewElementSpacing = 0.0;
   if (doubledData.size() > 1) {
     lastElementToNewElementSpacing = doubledData[1] - doubledData[0];
   }
 
+  double newValue = 0.0;
   for (auto pointsIterator = points.begin();
        doubledDataIterator != doubledData.end();
        ++doubledDataIterator, ++pointsIterator) {
