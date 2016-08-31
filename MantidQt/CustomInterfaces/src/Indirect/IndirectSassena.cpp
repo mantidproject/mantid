@@ -71,6 +71,10 @@ void IndirectSassena::handleAlgorithmFinish(bool error) {
   if (error)
     return;
 
+  // Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+
 }
 
 /**

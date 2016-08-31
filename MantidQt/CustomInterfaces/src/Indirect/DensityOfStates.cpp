@@ -227,6 +227,9 @@ void DensityOfStates::ionLoadComplete(bool error) {
 
   // Select all ions by default
   m_uiForm.lwIons->selectAll();
+  // Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 /**

@@ -22,7 +22,7 @@ public:
 private slots:
   /// Handle completion of the algorithm batch
   void handleAlgorithmFinish(bool error);
-  // Handle plotting and saving
+  /// Handle plotting and saving
   void plotClicked();
   void saveClicked();
 

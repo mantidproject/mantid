@@ -124,7 +124,7 @@ class MolDyn(PythonAlgorithm):
                     logger.information('Ignoring workspace %s in convolution step' % ws_name)
 
             # Remove the generated resolution workspace
-            DeleteWorkspace(resolution_ws))
+            DeleteWorkspace(resolution_ws)
 
         # Set the output workspace
         self.setProperty('OutputWorkspace', output_ws_name)

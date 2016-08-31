@@ -76,8 +76,6 @@ void IndirectMolDyn::run() {
                          m_uiForm.leFunctionNames->text().toStdString());
   molDynAlg->setProperty("SymmetriseEnergy",
                          m_uiForm.ckSymmetrise->isChecked());
-  molDynAlg->setProperty("Save", false);
-  molDynAlg->setProperty("Plot", false);
   molDynAlg->setProperty("OutputWorkspace", baseName.toStdString());
 
   // Set energy crop option
@@ -93,6 +91,11 @@ void IndirectMolDyn::run() {
         m_uiForm.dsResolution->getCurrentDataName().toStdString());
 
   runAlgorithm(molDynAlg);
+
+  // Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+  m_uiForm.cbPlot->setEnabled(true);
 }
 
 /**
