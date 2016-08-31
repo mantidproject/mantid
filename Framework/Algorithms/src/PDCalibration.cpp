@@ -456,13 +456,8 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
 
   for (size_t i = 0; i < d.size(); ++i) {
     sum++;
-    sumX += d[i];
-    sumY += tof[i];
     sumX2 += d[i] * d[i];
     sumXY += d[i] * tof[i];
-    sumX2Y += d[i] * d[i] * tof[i];
-    sumX3 += d[i] * d[i] * d[i];
-    sumX4 += d[i] * d[i] * d[i] * d[i];
   }
 
   // DIFC only
@@ -474,6 +469,11 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
   }
 
   // DIFC and t0
+  for (size_t i = 0; i < d.size(); ++i) {
+    sumX += d[i];
+    sumY += tof[i];
+  }
+
   double difc1 = 0;
   double tZero1 = 0;
   double determinant = sum * sumX2 - sumX * sumX;
@@ -512,6 +512,12 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
   }
 
   // DIFC, t0 and DIFA
+  for (size_t i = 0; i < d.size(); ++i) {
+    sumX2Y += d[i] * d[i] * tof[i];
+    sumX3 += d[i] * d[i] * d[i];
+    sumX4 += d[i] * d[i] * d[i] * d[i];
+  }
+
   double tZero2 = 0;
   double difc2 = 0;
   double difa2 = 0;
