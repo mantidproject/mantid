@@ -73,6 +73,7 @@ Output:
 .. testoutput:: UnwrapMonitorsInTOFExample
 
   The number of bins is 20 and is expected to be 20.
+  The 1st entry is 0.0.
   The 9th entry is 5.0.
   The 13th entry is 1.0.
 
