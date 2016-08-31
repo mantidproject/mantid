@@ -23,6 +23,9 @@ DensityOfStates::DensityOfStates(QWidget *parent)
 
   connect(m_uiForm.mwInputFile, SIGNAL(filesFound()), this,
           SLOT(handleFileChange()));
+  // Handle plot and save
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
   m_uiForm.lwIons->setSelectionMode(QAbstractItemView::MultiSelection);
 }
@@ -57,7 +60,7 @@ bool DensityOfStates::validate() {
 }
 
 /**
- * Configures and executes the LoadSassena algorithm.
+ * Configures and executes the DensityOfStates algorithm.
  */
 void DensityOfStates::run() {
   // Get the SimulatedDensityOfStates algorithm
