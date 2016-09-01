@@ -40,10 +40,10 @@ void ParamFunction::setParameter(size_t i, const double &value,
   if (std::isnan(value)) {
     // Check for NaN or -NaN
     std::stringstream errmsg;
-    errmsg << "Trying to set a NaN value (" << value
-           << ") to parameter " << this->parameterName(i);
+    errmsg << "Trying to set a NaN value (" << value << ") to parameter "
+           << this->parameterName(i);
     g_log.warning(errmsg.str());
-    } else if (std::isinf(value)) {
+  } else if (std::isinf(value)) {
     // Infinity value
     std::stringstream errmsg;
     errmsg << "Trying to set an infinity value (" << value << ") to parameter "
@@ -163,8 +163,7 @@ double ParamFunction::getParameter(const std::string &name) const {
  * @return the index of the named parameter
  */
 size_t ParamFunction::parameterIndex(const std::string &name) const {
-  auto it =
-      std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
+  auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
   if (it == m_parameterNames.cend()) {
     std::ostringstream msg;
     msg << "ParamFunction " << this->name() << " does not have parameter ("
