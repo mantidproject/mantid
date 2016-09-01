@@ -18,7 +18,7 @@ class PyChop2Tests(unittest.TestCase):
             chopobj = PyChop2(instname)
             # Checks that initialisations instanciates the correct submodule
             # which does the actual calculations. PyChop2 is just a wrapper.
-            self.assertIn(modulenames[inc], chopobj.getObject().__module__)
+            self.assertTrue(modulenames[inc] in chopobj.getObject().__module__)
             # Code should give an error if the chopper settings and Ei have
             # not been set.
             with self.assertRaises(ValueError):
