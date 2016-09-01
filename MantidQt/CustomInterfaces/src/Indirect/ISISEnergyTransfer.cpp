@@ -43,6 +43,7 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
           SLOT(pbRunFinished()));
   // Handle plotting and saving
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   // Update UI widgets to show default values
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());

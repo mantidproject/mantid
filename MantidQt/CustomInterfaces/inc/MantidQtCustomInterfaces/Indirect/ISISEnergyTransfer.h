@@ -62,7 +62,9 @@ private slots:
   // files.
   void plotRawComplete(
       bool error); //< Called when the Plot Raw algorithmm chain completes
+  /// Handles plotting and saving
   void plotClicked();
+  void saveClicked();
 
 private:
   Ui::ISISEnergyTransfer m_uiForm;
