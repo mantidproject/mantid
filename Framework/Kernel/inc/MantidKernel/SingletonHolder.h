@@ -23,7 +23,7 @@
 // initalization in C++11
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <MantidKernel/System.h>
+#include <MantidKernel/DllConfig.h>
 
 #include <memory>
 
@@ -54,7 +54,7 @@ private:
 /// Return a reference to the Singleton instance, creating it if it does not
 /// already exist
 /// Creation is done using the CreateUsingNew policy at the moment
-template <typename T> inline T &SingletonHolder<T>::Instance() {
+template <typename T> MANTID_KERNEL_DLL T &SingletonHolder<T>::Instance() {
   static std::unique_ptr<T, void (*)(T *)> instance{CreateUsingNew<T>::Create(),
                                                     CreateUsingNew<T>::Destroy};
   return *instance;
