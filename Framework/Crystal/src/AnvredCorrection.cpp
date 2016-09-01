@@ -340,8 +340,6 @@ void AnvredCorrection::execEvent() {
     }
     correctionFactors->getSpectrum(i) += events;
 
-    auto &dets = eventW->getSpectrum(i).getDetectorIDs();
-    correctionFactors->getSpectrum(i).addDetectorIDs(dets);
     // When focussing in place, you can clear out old memory from the input one!
     if (inPlace) {
       eventW->getSpectrum(i).clear();

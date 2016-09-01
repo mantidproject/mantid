@@ -219,7 +219,6 @@ void makeTestWorkspace(const int ndets, const int nbins,
     space2D->setCounts(j, nbins, j + 1);
     space2D->setCountStandardDeviations(j, errors);
     auto &spec = space2D->getSpectrum(j);
-    spec.setSpectrumNo(j + 1);
     spec.setDetectorID(j);
   }
 

@@ -64,10 +64,6 @@ public:
       // the same for each bin
       space2D->setCounts(j, NBINS, j + 1);
       space2D->setCountStandardDeviations(j, errors);
-      space2D->getSpectrum(j).setSpectrumNo(j + 1); // spectra numbers are also
-                                                    // 1 + index_numbers
-                                                    // because this is the
-                                                    // tradition
       space2D->getSpectrum(j).setDetectorID(j);
     }
 
