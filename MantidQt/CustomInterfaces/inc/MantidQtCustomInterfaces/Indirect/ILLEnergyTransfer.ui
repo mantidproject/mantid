@@ -65,8 +65,8 @@
           <string>_calib.nxs</string>
          </stringlist>
         </property>
-        <property name="multipleFiles" stdset="0">
-         <bool>true</bool>
+        <property name="workspaceSuffixes" stdset="0">
+         <string>_calib</string>
         </property>
        </widget>
       </item>

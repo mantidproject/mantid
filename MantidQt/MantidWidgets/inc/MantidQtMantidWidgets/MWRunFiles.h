@@ -67,8 +67,6 @@ private:
   bool m_isOptional;
 };
 
-
-
 /**
 This class defines a widget for file searching. It allows either single or
 multiple files
