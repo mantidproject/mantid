@@ -58,8 +58,8 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
             # mirror_sense 14 : two wings
             # mirror_sense 16 : one wing
             if gRun.getLogData('Doppler.mirror_sense').value == 14:
-                unmirror_option = 3
-                self.log().information('Input run has two wings, using UnmirrorOption 3 (sum of left and right)')
+                unmirror_option = 1
+                self.log().information('Input run has two wings, using UnmirrorOption 1 (sum of left and right)')
             else:
                 unmirror_option = 0
                 self.log().information('Input run has one wing, using UnmirrorOption 0')
@@ -70,7 +70,7 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
                                           SumRuns=True, DebugMode=False,
                                           UnmirrorOption=unmirror_option)
         else:
-            self.log().warning('Input run (IN16B) has no property Doppler.mirror_sense. Check your input file.')
+            self.log().warning('Input run (IN16B) has no property Doppler.mirror_sense. Check input data.')
             self.log().information('Input run has one wing, using UnmirrorOption 0')
             __temp = IndirectILLReduction(Run=self._input_file,
                                         MapFile=self._map_file,

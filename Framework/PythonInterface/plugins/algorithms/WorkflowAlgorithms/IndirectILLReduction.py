@@ -164,14 +164,14 @@ def get_peak_position(ws, i):
 
 def shift_spectra(ws1, ws2=None, shift_option=False, masking=False):
     """
-    If only ws1 is given, each single spectrum will be centered around 0 meV
+    If only ws1 is given, each single spectrum will be centered
     If in addition ws2 is given and shift_option is False, ws1 will be shifted to match the peak positions of ws2
     If in addition ws2 is given and shift_option is True, ws1 will be shifted by the
     number of bins that is required for ws2 to be centered
     @param ws1                         ::   input workspace that will be shifted
     @param ws2                         ::   optional workspace according to which ws1 will be shifted
     @param shift_option                ::   option to shift ws1 by number of bins (ws2 to center)
-    @return                            ::   bins before and after masking are proposed to take place
+    @return                            ::   bin numbers for masking
     """
     number_spectra = mtd[ws1].getNumberHistograms()
     size = mtd[ws1].blocksize()
@@ -222,26 +222,18 @@ def shift_spectra(ws1, ws2=None, shift_option=False, masking=False):
         else:
             logger.debug('Shifting does not result in a new range for masking')
 
-    # Mask bins to the left of the final bin range
-    if masking is True:
-        # Mask corrupted bins according to shifted workspaces
-        logger.debug('Mask bin numbers smaller than %d and larger than %d' % (start_bin, end_bin - 1))
-        logger.notice('Bins out of energy range [%f %f] meV will be masked' % (x[start_bin], x[end_bin - 1]))
-        # Mask bins to the left and right of the final bin range
-        MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=x[0], XMax=x[start_bin])
-        MaskBins(InputWorkspace=ws1, OutputWorkspace=ws1, XMin=x[end_bin], XMax=x[end])
-
+    logger.debug('Range after bin shift [%d %d]' % (start_bin, end_bin))
     return start_bin, end_bin
 
-def mask_reduced_ws(red, x, xstart, xend):
+def mask_reduced_ws(red, xstart, xend):
     """
     Args:
         red:      reduced workspace
-        x:        x-values of the workspace (energy transfer)
         xstart:   MaskBins between 0 and xstart
         xend:     MaskBins between xend and x[-1]
 
     """
+    x = mtd[red].readX(0)
 
     if xstart > 0:
         logger.debug('Mask bins smaller than %d' % (xstart + 1))
@@ -250,7 +242,7 @@ def mask_reduced_ws(red, x, xstart, xend):
         logger.debug('Mask bins larger than %d' % (xend - 1))
         MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xend], XMax=x[-1])
 
-    logger.notice('Bins out of energy range [%f %f] meV are masked' % (x[xstart], x[xend - 1]))
+    logger.notice('Bins out of range [%f %f] [Unit of X-axis] are masked' % (x[xstart], x[xend - 1]))
 
 def convert_to_energy(ws):
     """
@@ -274,20 +266,20 @@ def energy_formula(ws):
     size = len(x)
     mid = float((size - 1) / 2)
     gRun = mtd[ws].getRun()
-    energy = 0
+    delta_energy = 0
     scale = 1.e-3  # from micro ev to milli ev
 
     if gRun.hasProperty('Doppler.maximum_delta_energy'):
-        energy = gRun.getLogData('Doppler.maximum_delta_energy').value  # max energy in micro eV
-        logger.information('Doppler max delta energy in micro eV : %s' % energy)
+        delta_energy = gRun.getLogData('Doppler.maximum_delta_energy').value  # max energy in micro eV
+        logger.information('Doppler max delta energy in micro eV : %s' % delta_energy)
     elif gRun.hasProperty('Doppler.delta_energy'):
-        energy = gRun.getLogData('Doppler.delta_energy').value  # delta energy in micro eV
-        logger.information('Doppler delta energy in micro eV : %s' % energy)
+        delta_energy = gRun.getLogData('Doppler.delta_energy').value  # delta energy in micro eV
+        logger.information('Doppler delta energy in micro eV : %s' % delta_energy)
     else:
         logger.warning('Input run has no property Doppler.mirror_sense. Check your input file.')
         logger.warning('Doppler maximum delta energy is 0 micro eV')
 
-    formula = '(x-%f)*%f' % (mid, 2.0 * energy / (size - 1) * scale)
+    formula = '(x-%f)*%f' % (mid, delta_energy / mid * scale)
 
     logger.information('Energy transform formula: ' + formula)
 
@@ -311,15 +303,15 @@ def perform_unmirror(red, left, right, option):
         logger.information('Unmirror 0: Nothing to be done')
 
     elif option == 1:
-        logger.information('Unmirror 1: Return the left wing')
-        CloneWorkspace(InputWorkspace=left, OutputWorkspace=red)
+        logger.information('Unmirror 1: Sum the left and right wings')
 
     elif option == 2:
-        logger.information('Unmirror 2: Return the right wing')
-        CloneWorkspace(InputWorkspace=right, OutputWorkspace=red)
+        logger.information('Unmirror 2: Return the left wing')
+        CloneWorkspace(InputWorkspace=left, OutputWorkspace=red)
 
     elif option == 3:
-        logger.information('Unmirror 3: Sum the left and right wings')
+        logger.information('Unmirror 3: Return the right wing')
+        CloneWorkspace(InputWorkspace=right, OutputWorkspace=red)
 
     elif option == 4:
         logger.information('Unmirror 4: Shift the right according to left')
@@ -343,7 +335,7 @@ def perform_unmirror(red, left, right, option):
         start_bin = np.maximum(start_bin_left, start_bin_right)
         end_bin = np.minimum(endbin_left, endbin_right)
 
-    if option > 2:
+    if option > 3 or option == 1:
         # Perform unmirror option by summing left and right workspaces
         Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=red)
         Scale(InputWorkspace=red, OutputWorkspace=red, Factor=0.5, Operation='Multiply')
@@ -394,7 +386,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(FileProperty('VanadiumRun', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['nxs']),
-                             doc='File path of vanadium run. Used for UnmirrorOption=[5,7]')
+                             doc='File path of vanadium run. Used for UnmirrorOption=[5, 7]')
 
         self.declareProperty(FileProperty('BackgroundRun', '',
                                           action=FileAction.OptionalLoad,
@@ -430,9 +422,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              validator=IntBoundedValidator(lower=0, upper=7),
                              doc='Unmirroring options: \n'
                                  '0 no unmirroring\n'
-                                 '1 left\n'
-                                 '2 right\n'
-                                 '3 sum of left and right\n'
+                                 '1 sum of left and right\n'
+                                 '2 left\n'
+                                 '3 right\n'
                                  '4 shift right according to left and sum\n'
                                  '5 like 4, but use Vanadium run for peak positions\n'
                                  '6 center both left and right at zero and sum\n'
@@ -647,13 +639,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         Note the recursion!
         """
         self.log().notice('Loading vanadium run #%s' % self._vanadium_file)
-        # call IndirectILLReduction for vanadium run with unmirror 1 and 2 to get left and right
+        # call IndirectILLReduction for vanadium run with unmirror 2 and 3 to get left and right
 
         left_van = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
-                                        Reflection=self._reflection, SumRuns=True, UnmirrorOption=1)
+                                        Reflection=self._reflection, SumRuns=True, UnmirrorOption=2)
 
         right_van = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
-                                         Reflection=self._reflection, SumRuns=True, UnmirrorOption=2)
+                                         Reflection=self._reflection, SumRuns=True, UnmirrorOption=3)
 
         # if vanadium run is not of QENS type, output will be empty, exit with error
         if not left_van or not right_van:
@@ -722,7 +714,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             Minus(LHSWorkspace=red, RHSWorkspace='background', OutputWorkspace=red)
             self._debug(red, bsub)
             # check the integral after subtraction
-            __temp = ReplaceSpecialValues(InputWorkspace=red,NaNValue='0')
+            __temp = ReplaceSpecialValues(InputWorkspace=red, NaNValue='0')
             __temp = Integration(InputWorkspace=__temp)
             for i in range(__temp.getNumberHistograms()):
                 if __temp.dataY(i)[0] < 0:
@@ -779,8 +771,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         convert_to_energy(left)
         convert_to_energy(right)
 
-        ConvertSpectrumAxis(InputWorkspace=left, OutputWorkspace=left, Target='Theta', EMode='Indirect')
-        ConvertSpectrumAxis(InputWorkspace=right, OutputWorkspace=right, Target='Theta', EMode='Indirect')
+        #ConvertSpectrumAxis(InputWorkspace=left, OutputWorkspace=left, Target='Theta', EMode='Indirect')
+        #ConvertSpectrumAxis(InputWorkspace=right, OutputWorkspace=right, Target='Theta', EMode='Indirect')
         ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
 
         # Mask corrupted bins according to shifted workspaces or monitor range
@@ -792,7 +784,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         xmax = len(x) - 1
 
         # Mask bins out of final energy or monitor range
-        if start_bin != 0 and end_bin != 0:
+        if start_bin != 0 or end_bin != 0:
             xmin = np.maximum(xmin_left, xmin_right)
             xmax = np.minimum(xmax_left, xmax_right)
             # Shifted workspaces
@@ -812,7 +804,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             # One wing, no right workspace
             xmin, xmax = monitor_range(mon)
 
-        mask_reduced_ws(red, x, xmin, xmax)
+        mask_reduced_ws(red, xmin, xmax)
 
         # cleanup by-products if not needed
         if not self._debug_mode:

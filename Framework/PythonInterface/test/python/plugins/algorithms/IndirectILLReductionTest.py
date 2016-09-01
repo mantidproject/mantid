@@ -111,16 +111,18 @@ class IndirectILLReductionTest(unittest.TestCase):
         self._workspace_properties(mtd['red_mnorm'])
         self._workspace_properties(mtd['red_detgrouped'])
 
-        # Further workspace characteristics
-        self.assertEqual(self._run.blocksize() / 2, mtd['red'].getItem(0).blocksize())
-        self.assertEqual(self._run.blocksize()    , mtd['red_raw'].getItem(0).blocksize())
-        self.assertEqual(self._run.blocksize() / 2, mtd['red_left'].getItem(0).blocksize())
-        self.assertEqual(self._run.blocksize() / 2, mtd['red_right'].getItem(0).blocksize())
-        self.assertEqual(self._run.blocksize()    , mtd['red_monitor'].getItem(0).blocksize())
-        self.assertEqual(self._run.blocksize()    , mtd['red_mnorm'].getItem(0).blocksize())
-        self.assertEqual(self._run.blocksize()    , mtd['red_detgrouped'].getItem(0).blocksize())
+        size = self._run.blocksize()
 
-        self.assertEqual(self._run.getNumberHistograms() , mtd['red_raw'].getItem(0).getNumberHistograms())
+        # Further workspace characteristics
+        self.assertEqual(size / 2, mtd['red'].getItem(0).blocksize())
+        self.assertEqual(size    , mtd['red_raw'].getItem(0).blocksize())
+        self.assertEqual(size / 2, mtd['red_left'].getItem(0).blocksize())
+        self.assertEqual(size / 2, mtd['red_right'].getItem(0).blocksize())
+        self.assertEqual(size    , mtd['red_monitor'].getItem(0).blocksize())
+        self.assertEqual(size    , mtd['red_mnorm'].getItem(0).blocksize())
+        self.assertEqual(size    , mtd['red_detgrouped'].getItem(0).blocksize())
+
+        self.assertEqual(self._run.getNumberHistograms(), mtd['red_raw'].getItem(0).getNumberHistograms())
         self.assertEqual("Success!", CheckWorkspacesMatch(self._run, mtd['red_raw'].getItem(0)))
 
     def test_debug_calibration(self):
