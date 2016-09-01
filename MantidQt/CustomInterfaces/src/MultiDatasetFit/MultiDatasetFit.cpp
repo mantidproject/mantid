@@ -27,6 +27,7 @@ Mantid::Kernel::Logger g_log("MultiDatasetFit");
 
 namespace MantidQt {
 namespace CustomInterfaces {
+using Mantid::Kernel::Math::StatisticType;
 
 // Register the class with the factory
 DECLARE_SUBWINDOW(MultiDatasetFit)
@@ -712,6 +713,31 @@ void MultiDatasetFit::showParameterPlot() {
 
 void MultiDatasetFit::updateGuessFunction(const QString &, const QString &) {
   m_plotController->updateGuessFunction(*m_functionBrowser->getFunction());
+}
+
+/**
+ * Returns list of log names from the first workspace
+ * @return :: list of log names
+ */
+std::vector<std::string> MultiDatasetFit::getLogNames() const {
+  if (getNumberOfSpectra() > 0) {
+    return m_dataController->getWorkspaceLogNames(0);
+  }
+
+  return std::vector<std::string>();
+}
+
+/**
+ * Get value of the named log from workspace for spectrum i
+ * @param logName :: [input] Name of log
+ * @param function :: [input] Function to apply to log (e.g. mean, min, max...)
+ * @param i :: [input] Spectrum number
+ * @returns :: Value of the named log for given spectrum
+ */
+double MultiDatasetFit::getLogValue(const QString &logName,
+                                    const StatisticType &function,
+                                    int i) const {
+  return m_dataController->getLogValue(logName, function, i);
 }
 
 /// Log a warning

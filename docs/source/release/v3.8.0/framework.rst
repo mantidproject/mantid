@@ -71,9 +71,17 @@ Improved
 
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
+- :ref:`ConvertToHistogram <algm-ConvertToHistogram>`: Performance improvement using new HistogramData module,
+  3x to 4x speedup.
+
+- :ref:`ConvertToPointData <algm-ConvertToPointData>`: Performance improvement using new HistogramData module,
+  3x to 4x speedup.
+
 - :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
   now check if a Workspace with that name already exists in the ADS and gives
   the option to override it.
+
+- :ref:`FindSXPeaks <algm-FindSXPeaks>`: Fixed a bug where peaks with an incorrect TOF would stored for some intrument geometries.
 
 - :ref:`FFT <algm-FFT>` deals correctly with histogram input data. Internally, it converts to point data, and the output is always a point data workspace. (It can be converted to histogram data using :ref:`ConvertToHistogram <algm-ConvertToHistogram>` if required).
 
@@ -115,6 +123,8 @@ Python
 
 Python Algorithms
 #################
+
+- New algorithm :ref:`SelectNexusFilesByMetadata <algm-SelectNexusFilesByMetadata>` provides quick filtering of nexus files based on criteria imposed on metadata.
 
 Bug Fixes
 ---------

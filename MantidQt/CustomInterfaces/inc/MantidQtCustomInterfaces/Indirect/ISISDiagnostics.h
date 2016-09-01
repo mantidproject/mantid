@@ -78,6 +78,8 @@ private slots:
   void pbRunFinding();  //< Called when the FileFinder starts finding the files.
   void pbRunFinished(); //< Called when the FileFinder has finished finding the
   // files.
+  void saveClicked();
+  void plotClicked();
 
 private:
   Ui::ISISDiagnostics m_uiForm;

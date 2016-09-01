@@ -423,7 +423,7 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   V3D q = orientedUB * hkl * (2.0 * M_PI * m_qConventionFactor);
 
   // Create the peak using the Q in the lab framewith all its info:
-  Peak p(m_inst, q, boost::optional<double>());
+  Peak p(m_inst, q);
 
   /* The constructor calls setQLabFrame, which already calls findDetector, which
      is expensive. It's not necessary to call it again, instead it's enough to
