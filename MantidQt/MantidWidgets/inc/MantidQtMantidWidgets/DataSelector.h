@@ -53,34 +53,34 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataSelector
   Q_OBJECT
 
   // These are properties of the file browser sub-widget
-  Q_PROPERTY(
-      QStringList fileBrowserSuffixes READ getFBSuffixes WRITE setFBSuffixes)
+  Q_PROPERTY(QStringList fileBrowserSuffixes READ getFBSuffixes WRITE
+                 setFBSuffixes)
   Q_PROPERTY(bool showLoad READ willShowLoad WRITE setShowLoad)
   Q_PROPERTY(QString instrumentOverride READ getInstrumentOverride WRITE
                  setInstrumentOverride)
-  Q_PROPERTY(
-      bool multipleFiles READ allowMultipleFiles WRITE allowMultipleFiles)
+  Q_PROPERTY(bool multipleFiles READ allowMultipleFiles WRITE
+                 allowMultipleFiles)
   Q_PROPERTY(bool findRunFiles READ isForRunFiles WRITE isForRunFiles)
   Q_PROPERTY(bool findDirectory READ isForDirectory WRITE isForDirectory)
   Q_PROPERTY(QString label READ getLabelText WRITE setLabelText)
   Q_PROPERTY(bool multiEntry READ doMultiEntry WRITE doMultiEntry)
   Q_PROPERTY(QString algorithmAndProperty READ getAlgorithmProperty WRITE
                  setAlgorithmProperty)
-  Q_PROPERTY(
-      bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
+  Q_PROPERTY(bool extsAsSingleOption READ extsAsSingleOption WRITE
+                 extsAsSingleOption)
   Q_PROPERTY(ButtonOpts buttonOpts READ doButtonOpt WRITE doButtonOpt)
-  Q_PROPERTY(
-      LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
+  Q_PROPERTY(LiveButtonOpts liveButton READ liveButtonState WRITE
+                 liveButtonState)
   Q_ENUMS(ButtonOpts)
   Q_ENUMS(LiveButtonOpts)
 
   // These are properties of the workspace selector sub-widget
-  Q_PROPERTY(
-      QStringList workspaceSuffixes READ getWSSuffixes WRITE setWSSuffixes)
-  Q_PROPERTY(
-      QStringList WorkspaceTypes READ getWorkspaceTypes WRITE setWorkspaceTypes)
-  Q_PROPERTY(
-      bool ShowHidden READ showHiddenWorkspaces WRITE showHiddenWorkspaces)
+  Q_PROPERTY(QStringList workspaceSuffixes READ getWSSuffixes WRITE
+                 setWSSuffixes)
+  Q_PROPERTY(QStringList WorkspaceTypes READ getWorkspaceTypes WRITE
+                 setWorkspaceTypes)
+  Q_PROPERTY(bool ShowHidden READ showHiddenWorkspaces WRITE
+                 showHiddenWorkspaces)
   Q_PROPERTY(QString Algorithm READ getValidatingAlgorithm WRITE
                  setValidatingAlgorithm)
 
@@ -90,7 +90,6 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataSelector
   Q_PROPERTY(QString loadLabelText READ getLoadBtnText WRITE setLoadBtnText)
 
 public:
-
   DataSelector(QWidget *parent = 0);
   ~DataSelector() override;
 
@@ -133,11 +132,14 @@ public:
   * edit box
   * @returns True if multiple files can be specified, false otherwise
   */
-  bool allowMultipleFiles() const { return m_uiForm.rfFileInput->allowMultipleFiles(); }
+  bool allowMultipleFiles() const {
+    return m_uiForm.rfFileInput->allowMultipleFiles();
+  }
 
   /**
   * Set whether this widget allows multiple files to be specifed or not
-  * @param allow :: If true then the widget will accept multiple files else only a
+  * @param allow :: If true then the widget will accept multiple files else only
+  * a
   * single file may be specified
   */
   void allowMultipleFiles(const bool allow) {
@@ -154,7 +156,9 @@ public:
   * Sets whether this widget is for run file searching or not
   * @param mode :: True if this widget searches for run files, false otherwise
   */
-  void isForRunFiles(const bool mode) { m_uiForm.rfFileInput->isForRunFiles(mode); }
+  void isForRunFiles(const bool mode) {
+    m_uiForm.rfFileInput->isForRunFiles(mode);
+  }
 
   /**
    * Returns if this widget is for selecting a directory or not.
@@ -221,7 +225,9 @@ public:
    * as multiple items
    * @return boolean
    */
-  bool extsAsSingleOption() const { return m_uiForm.rfFileInput->extsAsSingleOption(); }
+  bool extsAsSingleOption() const {
+    return m_uiForm.rfFileInput->extsAsSingleOption();
+  }
 
   /**
    * Sets whether the file dialog should display the exts as a single list or as
@@ -269,7 +275,6 @@ public:
     m_uiForm.rfFileInput->setInstrumentOverride(instName);
   }
 
-
   /**
   * Returns the preference for how the dialog control should be
   * @return the setting
@@ -296,7 +301,7 @@ public:
   }
 
   void liveButtonState(const LiveButtonOpts option) {
-   m_uiForm.rfFileInput->liveButtonState(option);
+    m_uiForm.rfFileInput->liveButtonState(option);
   }
 
   // These are accessors/modifiers of the child WorkspaceSelector

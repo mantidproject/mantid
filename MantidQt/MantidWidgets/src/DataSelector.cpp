@@ -117,7 +117,8 @@ bool DataSelector::isValid() {
       if (!AnalysisDataService::Instance().doesExist(wsName.toStdString())) {
         // attempt to reload if we can
         // don't use algorithm runner because we need to know instantly.
-        const QString filepath = m_uiForm.rfFileInput->getUserInput().toString();
+        const QString filepath =
+            m_uiForm.rfFileInput->getUserInput().toString();
         const Algorithm_sptr loadAlg =
             AlgorithmManager::Instance().createUnmanaged("Load");
         loadAlg->initialize();
@@ -300,7 +301,9 @@ void DataSelector::setAutoLoad(bool load) { m_autoLoad = load; }
  *
  * @return The text on the load button
  */
-QString DataSelector::getLoadBtnText() const { return m_uiForm.pbLoadFile->text(); }
+QString DataSelector::getLoadBtnText() const {
+  return m_uiForm.pbLoadFile->text();
+}
 
 /**
  * Sets the text shown on the load button.
