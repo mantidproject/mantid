@@ -282,7 +282,7 @@ void SANSRunWindow::initLayout() {
   m_runFiles.push_back(m_uiForm.dirCan);
   std::vector<MWRunFiles *>::const_iterator it = m_runFiles.begin();
   for (; it != m_runFiles.end(); ++it) {
-    (*it)->doButtonOpt(Icon);
+    (*it)->doButtonOpt(MWRunFiles::Icon);
   }
 
   connectFirstPageSignals();
@@ -3397,13 +3397,13 @@ bool SANSRunWindow::assignMonitorRun(MantidWidgets::MWRunFiles &trans,
   assignCom.append(", r'" + direct.getFirstFilename() + "'");
 
   int period = trans.getEntryNum();
-  if (period != ALL_ENTRIES) {
+  if (period != MWRunFiles::ALL_ENTRIES) {
     assignCom.append(", period_t=" + QString::number(period));
   }
 
   period = direct.getEntryNum();
   // we can only do single period reductions now
-  if (period != ALL_ENTRIES) {
+  if (period != MWRunFiles::ALL_ENTRIES) {
     assignCom.append(", period_d=" + QString::number(period));
   }
   assignCom.append(")");
@@ -3445,7 +3445,7 @@ bool SANSRunWindow::assignDetBankRun(MantidWidgets::MWRunFiles &runFile,
   assignCom.append(", reload = True");
   int period = runFile.getEntryNum();
 
-  if (period != ALL_ENTRIES) {
+  if (period != MWRunFiles::ALL_ENTRIES) {
     assignCom.append(", period = " + QString::number(period));
   }
 

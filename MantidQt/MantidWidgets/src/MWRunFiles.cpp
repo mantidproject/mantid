@@ -350,14 +350,14 @@ void MWRunFiles::isOptional(const bool optional) {
 * Returns the preference for how the dialog control should be
 * @return the setting
 */
-ButtonOpts MWRunFiles::doButtonOpt() const { return m_buttonOpt; }
+MWRunFiles::ButtonOpts MWRunFiles::doButtonOpt() const { return m_buttonOpt; }
 
 /**
 * Set how the browse should appear
 * @param buttonOpt the preference for the control, if there will be one, to
 * activate the dialog box
 */
-void MWRunFiles::doButtonOpt(const ButtonOpts buttonOpt) {
+void MWRunFiles::doButtonOpt(const MWRunFiles::ButtonOpts buttonOpt) {
   m_buttonOpt = buttonOpt;
   if (buttonOpt == None) {
     m_uiForm.browseBtn->hide();
@@ -441,7 +441,7 @@ void MWRunFiles::extsAsSingleOption(const bool value) {
 }
 
 /// Returns whether the live button is being shown;
-LiveButtonOpts MWRunFiles::liveButtonState() const {
+MWRunFiles::LiveButtonOpts MWRunFiles::liveButtonState() const {
   return m_liveButtonState;
 }
 

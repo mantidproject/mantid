@@ -67,25 +67,6 @@ private:
   bool m_isOptional;
 };
 
-/// options for bringing up the load file dialog
-enum ButtonOpts {
-  Text, ///< use a button (normally labelled "Browse")
-  Icon, ///< use an icon
-  None  ///< disable the load file dialog
-};
-/// Flags for workspace entries
-enum {
-  NO_ENTRY_NUM = -1, ///< error in the entry number setting
-  ALL_ENTRIES = -2   ///< use all entries (i.e. entry number was left blank)
-};
-/// Options for the live button
-enum LiveButtonOpts {
-  Hide,       ///< Don't use the live button
-  AlwaysShow, ///< Show whether a connection is possible or not (will be
-  /// disabled)
-  ShowIfCanConnect ///< Only show if able to connect to the live data server
-};
-
 /**
 This class defines a widget for file searching. It allows either single or
 multiple files
@@ -143,6 +124,24 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWRunFiles : public API::MantidWidget {
   friend class DataSelector;
 
 public:
+  /// options for bringing up the load file dialog
+  enum ButtonOpts {
+    Text, ///< use a button (normally labelled "Browse")
+    Icon, ///< use an icon
+    None  ///< disable the load file dialog
+  };
+  /// Flags for workspace entries
+  enum {
+    NO_ENTRY_NUM = -1, ///< error in the entry number setting
+    ALL_ENTRIES = -2   ///< use all entries (i.e. entry number was left blank)
+  };
+  /// Options for the live button
+  enum LiveButtonOpts {
+    Hide,       ///< Don't use the live button
+    AlwaysShow, ///< Show whether a connection is possible or not (will be
+    /// disabled)
+    ShowIfCanConnect ///< Only show if able to connect to the live data server
+  };
 
   /// Default constructor
   MWRunFiles(QWidget *parent = NULL);

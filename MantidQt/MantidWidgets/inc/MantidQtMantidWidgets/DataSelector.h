@@ -64,11 +64,13 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataSelector
                  setAlgorithmProperty)
   Q_PROPERTY(
       bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
-  Q_PROPERTY(ButtonOpts buttonOpts READ doButtonOpt WRITE doButtonOpt)
-  Q_PROPERTY(
-      LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
-  Q_ENUMS(ButtonOpts)
-  Q_ENUMS(LiveButtonOpts)
+  // Q_PROPERTY(MWRunFiles::ButtonOpts buttonOpts READ doButtonOpt WRITE
+  // doButtonOpt)
+  // Q_PROPERTY(
+  //    MWRunFiles::LiveButtonOpts liveButton READ liveButtonState WRITE
+  //    liveButtonState)
+  // Q_ENUMS(MWRunFiles::ButtonOpts)
+  // Q_ENUMS(MWRunFiles::LiveButtonOpts)
 
   // These are properties of the workspace selector sub-widget
   Q_PROPERTY(
@@ -86,7 +88,6 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataSelector
   Q_PROPERTY(QString loadLabelText READ getLoadBtnText WRITE setLoadBtnText)
 
 public:
-
   DataSelector(QWidget *parent = 0);
   ~DataSelector() override;
 
@@ -265,23 +266,6 @@ public:
     m_uiForm.rfFileInput->setInstrumentOverride(instName);
   }
 
-
-  /**
-  * Returns the preference for how the dialog control should be
-  * @return the setting
-  */
-  ButtonOpts doButtonOpt() const { return m_uiForm.rfFileInput->doButtonOpt(); }
-
-  /**
-  * Set how the browse should appear
-  * @param buttonOpt the preference for the control, if there will be one, to
-  * activate the dialog box
-  */
-
-  void doButtonOpt(const ButtonOpts buttonOpt) {
-    m_uiForm.rfFileInput->doButtonOpt(buttonOpt);
-  }
-
   // These are accessors/modifiers of the child WorkspaceSelector
   /**
    * Gets the suffixes allowed by the workspace selector
@@ -353,19 +337,6 @@ public:
    */
   void setValidatingAlgorithm(const QString &algName) {
     m_uiForm.wsWorkspaceInput->setValidatingAlgorithm(algName);
-  }
-
-  /**
-   * Sets the validating algorithm of workspace selector
-   *
-   * @param validating algorithm
-   */
-  LiveButtonOpts liveButtonState() const {
-    return m_uiForm.rfFileInput->liveButtonState();
-  }
-
-  void liveButtonState(const LiveButtonOpts option) {
-   m_uiForm.rfFileInput->liveButtonState(option);
   }
 
 signals:

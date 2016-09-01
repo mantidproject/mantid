@@ -29,7 +29,7 @@
         <bool>true</bool>
        </property>
        <property name="buttonOpt" stdset="0">
-        <enum>MantidQt::MantidWidgets::Text</enum>
+        <enum>MantidQt::MantidWidgets::MWRunFiles::Text</enum>
        </property>
        <property name="fileExtensions">
         <stringlist>
@@ -37,7 +37,7 @@
         </stringlist>
        </property>
        <property name="liveButton" stdset="0">
-        <enum>MantidQt::MantidWidgets::AlwaysShow</enum>
+        <enum>MantidQt::MantidWidgets::MWRunFiles::AlwaysShow</enum>
        </property>
       </widget>
      </item>
