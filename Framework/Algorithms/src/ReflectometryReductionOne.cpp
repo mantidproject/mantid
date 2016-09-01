@@ -278,6 +278,50 @@ void ReflectometryReductionOne::init() {
                   Direction::Input);
 }
 
+//----------------------------------------------------------------------------------------------
+/** Validate the input properties.
+*/
+std::map<std::string, std::string> ReflectometryReductionOne::validateInputs() {
+
+  std::map<std::string, std::string> result;
+
+  MatrixWorkspace_sptr decWS = getProperty("DetectorEfficiencyCorrection");
+  MatrixWorkspace_sptr runWS = getProperty("InputWorkspace");
+
+  if (!decWS) {
+    return result;
+  }
+
+  if (decWS->getAxis(0)->unit()->unitID() != "Wavelength") {
+    result["DetectorEfficiencyCorrection"] = "Detector Efficiency Correction "
+      "workspace x-units must be in wavelength";
+  }
+  else if (decWS->getNumberHistograms() > 1 &&
+      decWS->getNumberHistograms() < runWS->getNumberHistograms()) {
+    result["DetectorEfficiencyCorrection"] = "The number of spectra in the "
+      "Detector Efficiency Correction workspace must either be 1 or equal to "
+      "the number of spectra in the input workspace";
+  } else {
+    double firstVal = decWS->y(0)[0];
+    if (firstVal == 0) {
+      result["DetectorEfficiencyCorrection"] = "Detector Efficiency Correction "
+        "workspace cannot contain any zero values.";
+    } else {
+      for (size_t i = 1; i < decWS->getNumberHistograms(); i++) {
+        if (decWS->y(i)[0] != firstVal) {
+          result["DetectorEfficiencyCorrection"] = "All values in the Detector "
+            "Efficiciency Correction Workspace must be equal";
+          break;
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+//----------------------------------------------------------------------------------------------
+
 /**
 * Correct the position of the detectors based on the input theta value.
 * @param toCorrect : Workspace to correct detector positions on.
@@ -522,20 +566,6 @@ void ReflectometryReductionOne::exec() {
   OptionalMatrixWorkspace_sptr detectorEfficiencyCorrection;
   MatrixWorkspace_sptr decTemp = getProperty("DetectorEfficiencyCorrection");
   if (decTemp) {
-    if (decTemp->getAxis(0)->unit()->unitID() != "Wavelength") {
-      throw std::invalid_argument(
-          "Detector Efficiency Correction workspace x-units must be in "
-          "wavelength");
-    }
-    for (size_t i = 0; i < decTemp->getNumberHistograms(); i++) {
-      for (size_t j = 0; j < decTemp->blocksize(); j++) {
-        if (decTemp->y(i)[j] == 0) {
-          throw std::invalid_argument(
-              "The DetectorEfficiencyCorrection  "
-              "workspace cannot contain any zero values.");
-        }
-      }
-    }
     detectorEfficiencyCorrection = decTemp;
   }
 
@@ -584,37 +614,16 @@ void ReflectometryReductionOne::exec() {
   } else if (xUnitID == "TOF") {
     // If the input workspace is in TOF, do some corrections and generate IvsLam
     // from it.
+    if (detectorEfficiencyCorrection.is_initialized()) {
+      // Normalize by the direct beam.
+      runWS = divide(runWS, *detectorEfficiencyCorrection);
+    }
+
     DetectorMonitorWorkspacePair inLam =
-        toLam(runWS, processingCommands, i0MonitorIndex, wavelengthInterval,
-              monitorBackgroundWavelengthInterval, wavelengthStep);
+      toLam(runWS, processingCommands, i0MonitorIndex, wavelengthInterval,
+        monitorBackgroundWavelengthInterval, wavelengthStep);
     auto detectorWS = inLam.get<0>();
     auto monitorWS = inLam.get<1>();
-
-    if (detectorEfficiencyCorrection.is_initialized()) {
-      MatrixWorkspace_sptr decWS = *detectorEfficiencyCorrection;
-      if (decWS->blocksize() > 1) {
-        // If using separate normalization constants for each spectra, rebin
-        // to the detector workspace
-        if (decWS->blocksize() < detectorWS->blocksize()) {
-          throw std::invalid_argument("The number of y-values in the detector "
-                                      "efficiency correction workspace must be "
-                                      "greater than or equal to "
-                                      "those in the detector workspace");
-        }
-
-        auto rebinToWorkspaceAlg =
-            this->createChildAlgorithm("RebinToWorkspace");
-        rebinToWorkspaceAlg->initialize();
-        rebinToWorkspaceAlg->setProperty("WorkspaceToRebin",
-                                         *detectorEfficiencyCorrection);
-        rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", detectorWS);
-        rebinToWorkspaceAlg->execute();
-        decWS = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
-      }
-
-      // Normalize by the direct beam.
-      detectorWS = divide(detectorWS, decWS);
-    }
 
     const bool normalizeByIntMon = getProperty("NormalizeByIntegratedMonitors");
     if (normalizeByIntMon) {

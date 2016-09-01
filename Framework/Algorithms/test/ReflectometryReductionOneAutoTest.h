@@ -60,6 +60,8 @@ public:
   MatrixWorkspace_sptr m_decWorkspaceTOF;
   MatrixWorkspace_sptr m_decWorkspaceZero;
   MatrixWorkspace_sptr m_decWorkspaceNoZero;
+  MatrixWorkspace_sptr m_decWorkspaceMixed;
+  MatrixWorkspace_sptr m_decWorkspace_2;
   WorkspaceGroup_sptr m_multiDetectorWorkspace;
   const std::string outWSQName;
   const std::string outWSLamName;
@@ -71,9 +73,14 @@ public:
         outWSLamName("ReflectometryReductionOneAutoTest_OutputWS_Lam"),
         inWSName("ReflectometryReductionOneAutoTest_InputWS"),
         transWSName("ReflectometryReductionOneAutoTest_TransWS") {
-    MantidVec xData = {0, 0, 0, 0};
-    MantidVec yData = {0, 0, 0};
-    MantidVec yDataNoZero = {1, 1, 1};
+    MantidVec xData(4, 0);
+    MantidVec yData(3, 0);
+    MantidVec xDecData(3, 0);
+    MantidVec yDataNoZero(3, 1);
+    MantidVec xDataMixed(5, 1);
+    MantidVec yDataMixed = {1, 1, 2, 2, 1};
+    MantidVec xData_2 = {1, 2, 3, 4, 5};
+    MantidVec yData_2 = {2, 2, 2, 2, 2};
 
     auto createWorkspace =
         AlgorithmManager::Instance().create("CreateWorkspace");
@@ -96,29 +103,55 @@ public:
     m_TOF = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TOF");
 
     createWorkspace->setProperty("UnitX", "TOF");
-    createWorkspace->setProperty("DataX", xData);
+    createWorkspace->setProperty("DataX", xDecData);
     createWorkspace->setProperty("DataY", yData);
+    createWorkspace->setProperty("NSpec", 3);
     createWorkspace->setProperty("OutputWorkspace", "DECTOF");
     createWorkspace->execute();
     m_decWorkspaceTOF =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECTOF");
 
     createWorkspace->setProperty("UnitX", "Wavelength");
-    createWorkspace->setProperty("DataX", xData);
+    createWorkspace->setProperty("DataX", xDecData);
     createWorkspace->setProperty("DataY", yData);
+    createWorkspace->setProperty("NSpec", 3);
     createWorkspace->setProperty("OutputWorkspace", "DECZero");
     createWorkspace->execute();
     m_decWorkspaceZero =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECZero");
 
+    //-------------------------------------------------------------------------
     createWorkspace->setProperty("UnitX", "Wavelength");
-    createWorkspace->setProperty("DataX", xData);
+    createWorkspace->setProperty("DataX", xDecData);
     createWorkspace->setProperty("DataY", yDataNoZero);
+    createWorkspace->setProperty("NSpec", 3);
     createWorkspace->setProperty("OutputWorkspace", "DECNoZero");
     createWorkspace->execute();
     m_decWorkspaceNoZero =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "DECNoZero");
+    //-------------------------------------------------------------------------
+
+    createWorkspace->setProperty("UnitX", "Wavelength");
+    createWorkspace->setProperty("DataX", xDataMixed);
+    createWorkspace->setProperty("DataY", yDataMixed);
+    createWorkspace->setProperty("NSpec", 5);
+    createWorkspace->setProperty("OutputWorkspace", "DECMixed");
+    createWorkspace->execute();
+    m_decWorkspaceMixed =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "DECMixed");
+
+    // ------------------------------------------------------------------------
+    createWorkspace->setProperty("UnitX", "Wavelength");
+    createWorkspace->setProperty("DataX", xData_2);
+    createWorkspace->setProperty("DataY", yData_2);
+    createWorkspace->setProperty("NSpec", 5);
+    createWorkspace->setProperty("OutputWorkspace", "DEC_2");
+    createWorkspace->execute();
+    m_decWorkspace_2 =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DEC_2");
+    // ------------------------------------------------------------------------
 
     IAlgorithm_sptr lAlg = AlgorithmManager::Instance().create("Load");
     lAlg->setChild(true);
@@ -289,21 +322,28 @@ public:
     auto alg = construct_standard_algorithm();
     alg->setProperty("InputWorkspace", m_dataWorkspace);
     alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspaceTOF);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void test_detector_efficiency_correction_zero_values_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("InputWorkspace", m_dataWorkspace);
     alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspaceZero);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
-  void test_detector_efficiency_correction_too_few_y_values_throws() {
+  void test_detector_efficiency_correction_too_few_values_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("InputWorkspace", m_dataWorkspace);
     alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspaceNoZero);
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+  }
+
+  void test_detector_efficiency_correction_mixed_values_throws() {
+    auto alg = construct_standard_algorithm();
+    alg->setProperty("InputWorkspace", m_dataWorkspace);
+    alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspaceMixed);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void test_bad_detector_component_name_throws() {
@@ -316,6 +356,26 @@ public:
     auto alg = construct_standard_algorithm();
     alg->setProperty("SampleComponentName", "made-up");
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+  }
+
+  void test_exec_new() {
+    IAlgorithm_sptr alg =
+      AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+    alg->setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg->initialize());
+    TS_ASSERT_THROWS_NOTHING(
+      alg->setProperty("InputWorkspace", m_dataWorkspace));
+    TS_ASSERT_THROWS_NOTHING(
+      alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspace_2));
+    TS_ASSERT_THROWS_NOTHING(
+      alg->setProperty("AnalysisMode", "PointDetectorAnalysis"));
+    TS_ASSERT_THROWS_NOTHING(
+      alg->setPropertyValue("OutputWorkspace", outWSQName));
+    TS_ASSERT_THROWS_NOTHING(
+      alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("MomentumTransferStep", 0.1));
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
   }
 
   void test_exec() {
