@@ -90,6 +90,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataSelector
   Q_PROPERTY(QString loadLabelText READ getLoadBtnText WRITE setLoadBtnText)
 
 public:
+
   DataSelector(QWidget *parent = 0);
   ~DataSelector() override;
 
@@ -132,14 +133,11 @@ public:
   * edit box
   * @returns True if multiple files can be specified, false otherwise
   */
-  bool allowMultipleFiles() const {
-    return m_uiForm.rfFileInput->allowMultipleFiles();
-  }
+  bool allowMultipleFiles() const { return m_uiForm.rfFileInput->allowMultipleFiles(); }
 
   /**
   * Set whether this widget allows multiple files to be specifed or not
-  * @param allow :: If true then the widget will accept multiple files else only
-  * a
+  * @param allow :: If true then the widget will accept multiple files else only a
   * single file may be specified
   */
   void allowMultipleFiles(const bool allow) {
@@ -156,9 +154,7 @@ public:
   * Sets whether this widget is for run file searching or not
   * @param mode :: True if this widget searches for run files, false otherwise
   */
-  void isForRunFiles(const bool mode) {
-    m_uiForm.rfFileInput->isForRunFiles(mode);
-  }
+  void isForRunFiles(const bool mode) { m_uiForm.rfFileInput->isForRunFiles(mode); }
 
   /**
    * Returns if this widget is for selecting a directory or not.
@@ -225,9 +221,7 @@ public:
    * as multiple items
    * @return boolean
    */
-  bool extsAsSingleOption() const {
-    return m_uiForm.rfFileInput->extsAsSingleOption();
-  }
+  bool extsAsSingleOption() const { return m_uiForm.rfFileInput->extsAsSingleOption(); }
 
   /**
    * Sets whether the file dialog should display the exts as a single list or as
@@ -275,6 +269,7 @@ public:
     m_uiForm.rfFileInput->setInstrumentOverride(instName);
   }
 
+
   /**
   * Returns the preference for how the dialog control should be
   * @return the setting
@@ -289,6 +284,19 @@ public:
 
   void doButtonOpt(const ButtonOpts buttonOpt) {
     m_uiForm.rfFileInput->doButtonOpt(buttonOpt);
+  }
+
+  /**
+   * Sets the validating algorithm of workspace selector
+   *
+   * @param validating algorithm
+   */
+  LiveButtonOpts liveButtonState() const {
+    return m_uiForm.rfFileInput->liveButtonState();
+  }
+
+  void liveButtonState(const LiveButtonOpts option) {
+   m_uiForm.rfFileInput->liveButtonState(option);
   }
 
   // These are accessors/modifiers of the child WorkspaceSelector
@@ -362,19 +370,6 @@ public:
    */
   void setValidatingAlgorithm(const QString &algName) {
     m_uiForm.wsWorkspaceInput->setValidatingAlgorithm(algName);
-  }
-
-  /**
-   * Sets the validating algorithm of workspace selector
-   *
-   * @param validating algorithm
-   */
-  LiveButtonOpts liveButtonState() const {
-    return m_uiForm.rfFileInput->liveButtonState();
-  }
-
-  void liveButtonState(const LiveButtonOpts option) {
-    m_uiForm.rfFileInput->liveButtonState(option);
   }
 
 signals:
