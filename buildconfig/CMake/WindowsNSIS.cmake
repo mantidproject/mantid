@@ -80,6 +80,10 @@ set ( MISC_CORE_DIST_DLLS
     libNeXusCPP-0.dll
     ssleay32.dll
     szip.dll
+    tbb.dll
+    tbbmalloc.dll
+    tbbmalloc_proxy.dll
+    tbb_preview.dll
     zlib.dll
 )
 set ( QT_DIST_DLLS
