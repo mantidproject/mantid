@@ -95,6 +95,12 @@ void EnggDiffractionPresenter::cleanup() {
     delete m_workerThread;
     m_workerThread = nullptr;
   }
+
+  // Remove the workspace which is loaded when the interface starts
+  auto &ADS = Mantid::API::AnalysisDataService::Instance();
+  if (ADS.doesExist(g_calibBanksParms)) {
+	  ADS.remove(g_calibBanksParms);
+  }
 }
 
 void EnggDiffractionPresenter::notify(
