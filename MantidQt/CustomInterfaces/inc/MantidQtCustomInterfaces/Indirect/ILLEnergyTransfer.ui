@@ -112,7 +112,7 @@
           <item>
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfMapFile" native="true">
             <property name="label" stdset="0">
-             <string/>
+             <string></string>
             </property>
             <property name="fileExtensions" stdset="0">
              <stringlist>
