@@ -37,9 +37,7 @@ ParamFunction::~ParamFunction() {
  */
 void ParamFunction::setParameter(size_t i, const double &value,
                                  bool explicitlySet) {
-  // Cppcheck confused by the check for NaN
-
-    if (std::isnan(value)) {
+  if (std::isnan(value)) {
     // Check for NaN or -NaN
     std::stringstream errmsg;
     errmsg << "Trying to set a NaN value (" << value
@@ -141,7 +139,7 @@ double ParamFunction::getParameter(const std::string &name) const {
   if (it == m_parameterNames.cend()) {
     std::ostringstream msg;
     msg << "ParamFunction tries to get value of non-existing parameter ("
-        << ucName << ") "
+        << name << ") "
         << "to function " << this->name();
     msg << "\nAllowed parameters: ";
     for (const auto &parameterName : m_parameterNames)
@@ -230,16 +228,15 @@ void ParamFunction::setError(size_t i, double err) {
  */
 void ParamFunction::declareParameter(const std::string &name, double initValue,
                                      const std::string &description) {
-  std::vector<std::string>::const_iterator it =
-      std::find(m_parameterNames.begin(), m_parameterNames.end(), name);
-  if (it != m_parameterNames.end()) {
+  auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
+  if (it != m_parameterNames.cend()) {
     std::ostringstream msg;
     msg << "ParamFunction parameter (" << name << ") already exists.";
     throw std::invalid_argument(msg.str());
   }
 
   m_isFixed.push_back(false);
-  m_parameterNames.push_back(ucName);
+  m_parameterNames.push_back(name);
   m_parameterDescriptions.push_back(description);
   m_parameters.push_back(initValue);
   m_errors.push_back(0.0);
