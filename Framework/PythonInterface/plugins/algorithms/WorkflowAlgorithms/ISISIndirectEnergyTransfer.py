@@ -32,7 +32,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
     _grouping_ws = None
     _grouping_map_file = None
     _output_x_units = None
-    _plot_type = None
     _save_formats = None
     _output_ws = None
     _sum_files = None
@@ -112,9 +111,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                              doc='X axis units for the result workspace.')
         self.declareProperty(StringArrayProperty(name='SaveFormats'),
                              doc='Comma seperated list of save formats')
-        self.declareProperty(name='Plot', defaultValue='None',
-                             validator=StringListValidator(['None', 'Spectra', 'Contour', 'Both']),
-                             doc='Type of plot to output after reduction.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
@@ -134,8 +130,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                                              group_spectra,
                                              fold_chopped,
                                              rename_reduction,
-                                             save_reduction,
-                                             plot_reduction)
+                                             save_reduction)
 
         self._setup()
         load_prog = Progress(self, start=0.0, end=0.10, nreports=2)
@@ -284,11 +279,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         self.setProperty('OutputWorkspace', mtd[self._output_ws])
 
-        # Plot result workspaces
-        if self._plot_type != 'None':
-            summary_prog.report('Plotting')
-            for ws_name in mtd[self._output_ws].getNames():
-                plot_reduction(ws_name, self._plot_type)
         summary_prog.report('Algorithm complete')
 
 
@@ -377,7 +367,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._grouping_map_file = _str_or_none(self.getPropertyValue('MapFile'))
 
         self._output_x_units = self.getPropertyValue('UnitX')
-        self._plot_type = self.getPropertyValue('Plot')
         self._save_formats = _elems_or_none(self.getProperty('SaveFormats').value)
 
         self._output_ws = self.getPropertyValue('OutputWorkspace')
