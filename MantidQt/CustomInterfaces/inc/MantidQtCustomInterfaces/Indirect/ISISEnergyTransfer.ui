@@ -778,9 +778,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="pbPlotTime">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="toolTip">
          <string>Plot raw time values.</string>
         </property>
@@ -918,11 +915,6 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
-          <item>
-           <property name="text">
-            <string>None</string>
-           </property>
-          </item>
           <item>
            <property name="text">
             <string>Spectra</string>
