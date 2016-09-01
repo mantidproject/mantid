@@ -269,8 +269,6 @@ void ISISEnergyTransfer::run() {
     reductionAlg->setProperty("MapFile", grouping.second.toStdString());
 
   reductionAlg->setProperty("FoldMultipleFrames", m_uiForm.ckFold->isChecked());
-  reductionAlg->setProperty("Plot",
-                            m_uiForm.cbPlotType->currentText().toStdString());
   reductionAlg->setProperty("SaveFormats", getSaveFormats());
   reductionAlg->setProperty("OutputWorkspace",
                             "IndirectEnergyTransfer_Workspaces");
