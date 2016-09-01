@@ -182,13 +182,13 @@ Fitting to histogram data
 #########################
 
 If the input MatrixWorkspace contains histogram data then there are two
-way to evalue the fit function on it and it can be set via the `EvaluationType`
+ways to evaluate the fit function on it and it can be set via the `EvaluationType`
 property. If `EvaluationType` is "CentrePoint" (which is the default) the
 function is evaluated at the centre of the bin. If `EvaluationType` is set to
 "Histogram" then the function is integrated within each bin and these integrals
 are used to evaluate the cost function.
 
-The "Histogram" evaluation type can give more accurate results when fitting
+The "Histogram" evaluation type will typically give more accurate results when fitting
 histograms with very large bins. It also less sensitive to a particular binning.
 
 For the next example a spectrum was generated and rebinned to different bin sizes.

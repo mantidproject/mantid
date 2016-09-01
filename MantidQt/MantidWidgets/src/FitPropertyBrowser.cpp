@@ -214,9 +214,13 @@ void FitPropertyBrowser::init() {
   m_parameterManager->setErrorsEnabled(showParamErrors);
 
   m_evaluationType = m_enumManager->addProperty("Evaluate Function As");
+  m_evaluationType->setToolTip(
+      "Consider using Histogram fit which may produce more accurate results.");
   m_evaluationTypes << "CentrePoint"
                     << "Histogram";
   m_enumManager->setEnumNames(m_evaluationType, m_evaluationTypes);
+  int evaluationType = settings.value(m_evaluationType->propertyName(), 0).toInt();
+  m_enumManager->setValue(m_evaluationType, evaluationType);
 
   m_xColumn = m_columnManager->addProperty("XColumn");
   m_yColumn = m_columnManager->addProperty("YColumn");
@@ -1110,6 +1114,9 @@ bool FitPropertyBrowser::convolveMembers() const {
 
 /// Get "HistogramFit" option
 bool FitPropertyBrowser::isHistogramFit() const {
+  if (!m_evaluationType->isEnabled()) {
+    return false;
+  }
   int i = m_enumManager->value(m_evaluationType);
   return m_evaluationTypes[i].toStdString() == "Histogram";
 }
@@ -1157,6 +1164,7 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
   if (!m_changeSlotsEnabled)
     return;
 
+  bool storeSettings = false;
   if (prop == m_workspace) {
     workspaceChange(QString::fromStdString(workspaceName()));
     setWorkspaceProperties();
@@ -1177,6 +1185,15 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
     emit functionChanged();
   } else if (prop == m_minimizer) {
     minimizerChanged();
+  } else if (prop == m_evaluationType) {
+    storeSettings = true;
+  }
+
+  if (storeSettings) {
+    QSettings settings;
+    settings.beginGroup("Mantid/FitBrowser");
+    auto val = m_enumManager->value(prop);
+    settings.setValue(prop->propertyName(), val);
   }
 }
 
@@ -2703,13 +2720,22 @@ void FitPropertyBrowser::setWorkspaceProperties() {
   }
   if (!ws)
     return;
+
+  m_settingsGroup->property()->removeSubProperty(m_evaluationType);
+  m_evaluationType->setEnabled(false);
   // if it is a MatrixWorkspace insert WorkspaceIndex
   auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
-  if (mws &&
-      !m_settingsGroup->property()->subProperties().contains(
-          m_workspaceIndex)) {
-    m_settingsGroup->property()->insertSubProperty(m_workspaceIndex,
-                                                   m_workspace);
+  if (mws) {
+    if (!m_settingsGroup->property()->subProperties().contains(
+            m_workspaceIndex)) {
+      m_settingsGroup->property()->insertSubProperty(m_workspaceIndex,
+                                                     m_workspace);
+    }
+    auto isHistogram = mws->isHistogramData();
+    m_evaluationType->setEnabled(isHistogram);
+    if (isHistogram) {
+      m_settingsGroup->property()->addSubProperty(m_evaluationType);
+    }
     return;
   }
 
