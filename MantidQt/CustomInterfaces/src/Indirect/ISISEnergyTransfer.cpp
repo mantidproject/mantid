@@ -700,10 +700,32 @@ void ISISEnergyTransfer::plotClicked() {
 			pyInput += "plot_reduction('";
 			pyInput += QString::fromStdString(wsName) + "', '";
 			pyInput += plotType + "')\n";
-			std::string output = pyInput.toStdString();
 			m_pythonRunner.runPythonCode(pyInput);
 		}
 	}
 }
+
+/**
+ * Handle saving of workspaces
+ */
+void ISISEnergyTransfer::saveClicked() {
+  auto saveFormats = getSaveFormats();
+  QString pyInput = "from IndirectReductionCommon import save_reduction\n";
+  pyInput += "save_reduction([";
+  for (auto it = outputWorkspaces.begin(); it != outputWorkspaces.end(); ++it) {
+    std::string wsName = *it;
+    pyInput += "'" + QString::fromStdString(wsName) + "', ";
+  }
+  pyInput += "], [";
+  for (auto it = saveFormats.begin(); it != saveFormats.end(); ++it) {
+    std::string save = *it;
+    pyInput += "'" + QString::fromStdString(save) + "', ";
+  }
+  pyInput += "])\n";
+
+  std::string output = pyInput.toStdString();
+  m_pythonRunner.runPythonCode(pyInput);
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid
