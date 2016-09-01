@@ -116,8 +116,8 @@ class CalculateS(IOmodule):
 
         _factorials = [np.math.factorial(n) for n in range(AbinsParameters.overtones_num)]
 
-        _value = np.zeros((AbinsParameters._pkt_per_peak * _num_freq, AbinsParameters.overtones_num + 1), dtype=AbinsParameters.float_type)
-        _frequencies = np.zeros(AbinsParameters._pkt_per_peak * _num_freq, dtype=AbinsParameters.float_type)
+        _value = np.zeros((AbinsParameters.pkt_per_peak * _num_freq, AbinsParameters.overtones_num + 1), dtype=AbinsParameters.float_type)
+        _frequencies = np.zeros(AbinsParameters.pkt_per_peak * _num_freq, dtype=AbinsParameters.float_type)
 
         _value_dft = np.zeros(_num_freq, dtype=AbinsParameters.float_type) # DFT discrete peaks
         _s_sum = AbinsParameters.overtones_num
@@ -145,7 +145,6 @@ class CalculateS(IOmodule):
                     # convolve value with instrumental resolution; resulting spectrum has broadened peaks with Gaussian-like shape
                     np.add(instrument.convolve_with_resolution_function(frequencies= np.multiply(_k_points_data["frequencies"][k], 1.0 / AbinsParameters.cm1_2_hartree),
                                                                         s_dft=_value_dft,
-                                                                        points_per_peak=AbinsParameters._pkt_per_peak,
                                                                         start=start),
                            _value[:, overtone],
                            _value[:, overtone])
@@ -167,7 +166,6 @@ class CalculateS(IOmodule):
 
             np.add(_frequencies,
                    np.multiply(instrument.produce_abscissa(frequencies=np.multiply(_k_points_data["frequencies"][k], 1.0 / AbinsParameters.cm1_2_hartree),
-                                                           points_per_peak=AbinsParameters._pkt_per_peak,
                                                            start=start),
                                _k_points_data["weights"][k]),
                    _frequencies)

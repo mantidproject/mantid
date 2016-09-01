@@ -1,8 +1,8 @@
 import multiprocessing
 import numpy as np
 
-from mantid.api import AlgorithmFactory,  FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
-from mantid.simpleapi import  CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, RenameWorkspace, SetSampleMaterial, DeleteWorkspace, Rebin, Load, SaveAscii
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
+from mantid.simpleapi import CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, SetSampleMaterial, DeleteWorkspace, Rebin, Load, SaveAscii
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty
 
 from AbinsModules import LoadCASTEP, CalculateS, AbinsParameters
@@ -80,7 +80,7 @@ class ABINS(PythonAlgorithm):
                              doc="Name of an instrument for which analysis should be performed.")
 
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
-                             doc="List of atoms to use to calculate partial S." \
+                             doc="List of atoms to use to calculate partial S."
                                  "If left blank, S for all types of atoms will be calculated")
 
         self.declareProperty(name="SumContributions", defaultValue=False,
@@ -168,24 +168,24 @@ class ABINS(PythonAlgorithm):
         prog_reporter.report("Dynamical structure factors have been determined.")
 
         # 4) get atoms for which S should be plotted
-        _data  = dft_data.getAtomsData().extract()
+        _data = dft_data.getAtomsData().extract()
         all_atoms_symbols = set([atom["symbol"] for atom in _data])
 
-        if len(self._atoms) == 0: # case: all atoms
+        if len(self._atoms) == 0:  # case: all atoms
             atoms_symbol = all_atoms_symbols
-        else: # case selected atoms
-            if len(self._atoms) != len(set(self._atoms)): # only different types
+        else:  # case selected atoms
+            if len(self._atoms) != len(set(self._atoms)):  # only different types
                 raise ValueError("Not all user defined atoms are unique.")
 
             for atom_symbol in self._atoms:
-                if not atom_symbol in all_atoms_symbols:
+                if atom_symbol not in all_atoms_symbols:
                     raise ValueError("User defined atom not present in the system.")
             atoms_symbol = self._atoms
         prog_reporter.report("Atoms, for which dynamical structure factors should be plotted, have been determined.")
 
         # at the moment only types of atom, e.g, for  benzene three options -> 1) C, H;  2) C; 3) H
         # 5) create workspaces for atoms in interest
-        _workspaces=None
+        _workspaces = None
         if self._sampleForm == "Powder":
             _workspaces = self._create_partial_s_powder_workspaces(atoms_symbol=atoms_symbol, s_data=s_data)
             if self._overtones:
@@ -211,7 +211,7 @@ class ABINS(PythonAlgorithm):
         num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
         for wrk_num in range(num_workspaces):
             wrk = mtd[self._out_ws_name].getItem(wrk_num)
-            SaveAscii(InputWorkspace=wrk, Filename=wrk.getName()+".dat", Separator="Space", WriteSpectrumID=False)
+            SaveAscii(InputWorkspace=wrk, Filename=wrk.getName() + ".dat", Separator="Space", WriteSpectrumID=False)
         prog_reporter.report("All workspaces have been saved to ASCII files.")
 
         # 9) set  OutputWorkspace
@@ -230,8 +230,8 @@ class ABINS(PythonAlgorithm):
         s_data_extracted = s_data.extract()
         freq = s_data_extracted["convoluted_frequencies"]
         dim = freq.shape[0]
-        s_atom_data = np.zeros((dim, AbinsParameters.overtones_num), dtype=AbinsParameters.float_type) # stores all overtones for the particular type of atom
-        s_all_atoms  = s_data_extracted["atoms_data"]
+        s_atom_data = np.zeros((dim, AbinsParameters.overtones_num), dtype=AbinsParameters.float_type)  # stores all overtones for the particular type of atom
+        s_all_atoms = s_data_extracted["atoms_data"]
         num_atoms = len(s_all_atoms)
 
         partial_workspaces = []
@@ -240,7 +240,7 @@ class ABINS(PythonAlgorithm):
             s_atom_data.fill(0.0)
             for num_atom in range(num_atoms):
                 if s_all_atoms[num_atom]["symbol"] == atom_symbol:
-                    np.add(s_atom_data, s_all_atoms[num_atom]["value"][:, :AbinsParameters.overtones_num], s_atom_data) # we sum S for all overtones over the atoms of the same type
+                    np.add(s_atom_data, s_all_atoms[num_atom]["value"][:, :AbinsParameters.overtones_num], s_atom_data)  # we sum S for all overtones over the atoms of the same type
 
             # all overtones of  S for the given atom
             partial_workspaces.append(self._set_workspace(atom_name=atom_symbol,
@@ -264,7 +264,7 @@ class ABINS(PythonAlgorithm):
         freq = s_data_extracted["convoluted_frequencies"]
         dim = freq.shape[0]
         s_atom_data = np.zeros(dim, dtype=AbinsParameters.float_type)
-        s_all_atoms  = s_data_extracted["atoms_data"]
+        s_all_atoms = s_data_extracted["atoms_data"]
         num_atoms = len(s_all_atoms)
 
         partial_workspaces = []
@@ -274,7 +274,7 @@ class ABINS(PythonAlgorithm):
             s_atom_data.fill(0.0)
             for num_atom in range(num_atoms):
                 if s_all_atoms[num_atom]["symbol"] == atom_symbol:
-                    np.add(s_atom_data, s_all_atoms[num_atom]["value"][:, AbinsParameters.overtones_num], s_atom_data) # we sum total S over the atoms of the same type
+                    np.add(s_atom_data, s_all_atoms[num_atom]["value"][:, AbinsParameters.overtones_num], s_atom_data)  # we sum total S over the atoms of the same type
 
             # total S for the given atom
             partial_workspaces.append(self._set_workspace(atom_name=atom_symbol,
@@ -359,7 +359,7 @@ class ABINS(PythonAlgorithm):
         @return: workspace for the given frequency and S data
 
         """
-        _ws_name = self._out_ws_name + "_" +  atom_name + postfix
+        _ws_name = self._out_ws_name + "_" + atom_name + postfix
 
         self._create_s_workspace(freq=frequencies, s_points=np.copy(s_points), workspace=_ws_name)
 
@@ -367,7 +367,7 @@ class ABINS(PythonAlgorithm):
         self._set_workspace_units(wrk=_ws_name)
 
         # rebining
-        Rebin(InputWorkspace=_ws_name, Params=[AbinsParameters._bin_width], OutputWorkspace=_ws_name)
+        Rebin(InputWorkspace=_ws_name, Params=[AbinsParameters.bin_width], OutputWorkspace=_ws_name)
 
         # Add the sample material to the workspace
         SetSampleMaterial(InputWorkspace=_ws_name, ChemicalFormula=atom_name)
@@ -441,7 +441,7 @@ class ABINS(PythonAlgorithm):
         logger.information("Validate CASTEP phonon file: ")
 
         output = {"Invalid": False, "Comment": ""}
-        msg_err = "Invalid %s file. " %filename
+        msg_err = "Invalid %s file. " % filename
         msg_rename = "Please rename your file and try again."
 
 
@@ -462,7 +462,7 @@ class ABINS(PythonAlgorithm):
         with open(filename, "r") as castep_file:
 
             line = self._get_one_line(castep_file)
-            if not self._compare_one_line(line, "beginheader"): # first line is BEGIN header
+            if not self._compare_one_line(line, "beginheader"):  # first line is BEGIN header
                 return dict(Invalid=True, Comment=msg_err + "The first line should be 'BEGIN header'.")
 
 
@@ -522,7 +522,7 @@ class ABINS(PythonAlgorithm):
         self._phononFile = self.getProperty("PhononFile").value
         self._experimentalFile = self.getProperty("ExperimentalFile").value
         self._temperature = self.getProperty("Temperature").value
-        self._scale =  self.getProperty("Scale").value
+        self._scale = self.getProperty("Scale").value
         self._sampleForm = self.getProperty("SampleForm").value
         self._instrument = self.getProperty("Instrument").value
         self._atoms = self.getProperty("Atoms").value

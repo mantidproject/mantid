@@ -19,7 +19,7 @@ algorithms and data objects that are:
 
 
 
-from IOmodule import  IOmodule
+from IOmodule import IOmodule
 
 # Loading modules
 from GeneralDFTProgram import GeneralDFTProgram
@@ -34,14 +34,14 @@ from CalculateS import CalculateS
 
 # Data
 from GeneralData import GeneralData
-from QData import  QData
+from QData import QData
 from KpointsData import KpointsData
 from AtomsData import AtomsDaTa
-from AbinsData import  AbinsData
-from DwCrystalData import  DwCrystalData
+from AbinsData import AbinsData
+from DwCrystalData import DwCrystalData
 from CrystalData import CrystalData
 from PowderData import PowderData
 from SData import SData
 
 # Instruments
-from InstrumentProducer import  InstrumentProducer
+from InstrumentProducer import InstrumentProducer

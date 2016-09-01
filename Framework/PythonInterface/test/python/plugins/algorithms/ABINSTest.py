@@ -1,8 +1,7 @@
 import unittest
 from mantid import logger
-from mantid.simpleapi import  mtd
-from mantid.simpleapi import ABINS, Scale, CompareWorkspaces, LoadAscii, GroupWorkspaces, Load
-from AbinsModules import AbinsParameters
+from mantid.simpleapi import mtd
+from mantid.simpleapi import ABINS, Scale, CompareWorkspaces, Load
 
 import os
 
@@ -20,74 +19,64 @@ except ImportError:
 
 class ABINSTest(unittest.TestCase):
 
-    def tearDown(self):
-        # remove hdf files
-        filenames = [self._benzene_phonon_file[:self._benzene_phonon_file.find(".")] + ".hdf5",
-                     self._squaricn_phonon_file[:self._squaricn_phonon_file.find(".")] + ".hdf5"]
-
-        for filename in filenames:
-            try :
+    def remove_hdf_files(self):
+        files = os.listdir(os.getcwd())
+        for filename in files:
+            if self.Si2 in filename or self.Squaricn in filename or "benzene" in filename:
                 os.remove(filename)
-            except OSError:
-                pass
+
+
+    def tearDown(self):
+        self.remove_hdf_files()
 
 
     def setUp(self):
 
         # set all parameters for tests
         self._dft_program = "CASTEP"
-        self._benzene_phonon_file = "benzene.phonon" # use case of one-k point
-        self._squaricn_phonon_file = "squaricn_no_sum.phonon" # many k-points
+        self.Si2 = "Si2-sc"
+        self.Squaricn = "squaricn_sum"
         self._experimental_file = ""
-        self._temperature = 10.0 # temperature 10 K
+        self._temperature = 10.0  # temperature 10 K
         self._scale = 1.0
         self._sample_form = "Powder"
         self._instrument = "TOSCA"
-        self._atoms = "" # if no atoms is spcefied all atoms are taken into account
+        self._atoms = ""  # if no atoms are specified then all atoms are taken into account
         self._sum_contributions = True
         self._overtones = True
         self._cross_section_factor = "Incoherent"
         self._workspace_name = "output_workspace"
-        AbinsParameters._pkt_per_peak = 50 # lower internal ABINS parameter for the purpose of this benchmark
         self._tolerance = 0.0001
 
         # produce reference data
-        self._ref_wrk = {self._benzene_phonon_file:ABINS(DFTprogram=self._dft_program,
-                                                         PhononFile=self._benzene_phonon_file,
-                                                         ExperimentalFile=self._experimental_file,
-                                                         Temperature=self._temperature,
-                                                         SampleForm=self._sample_form,
-                                                         Instrument=self._instrument,
-                                                         Atoms=self._atoms,
-                                                         Scale=self._scale,
-                                                         SumContributions=self._sum_contributions,
-                                                         Overtones=self._overtones,
-                                                         ScaleByCrossSection=self._cross_section_factor,
-                                                         OutputWorkspace="benzene_ref"),
+        self._ref_wrk = {self.Si2: ABINS(DFTprogram=self._dft_program,
+                                         PhononFile=self.Si2 + ".phonon",
+                                         ExperimentalFile=self._experimental_file,
+                                         Temperature=self._temperature,
+                                         SampleForm=self._sample_form,
+                                         Instrument=self._instrument,
+                                         Atoms=self._atoms,
+                                         Scale=self._scale,
+                                         SumContributions=self._sum_contributions,
+                                         Overtones=self._overtones,
+                                         ScaleByCrossSection=self._cross_section_factor,
+                                         OutputWorkspace="benzene_ref"),
 
-                         self._squaricn_phonon_file: ABINS(DFTprogram=self._dft_program,
-                                                           PhononFile=self._squaricn_phonon_file,
-                                                           ExperimentalFile=self._experimental_file,
-                                                           Temperature=self._temperature,
-                                                           SampleForm=self._sample_form,
-                                                           Instrument=self._instrument,
-                                                           Atoms=self._atoms,
-                                                           Scale=self._scale,
-                                                           SumContributions=self._sum_contributions,
-                                                           Overtones=self._overtones,
-                                                           ScaleByCrossSection=self._cross_section_factor,
-                                                           OutputWorkspace="squaricn_ref")
+                         self.Squaricn: ABINS(DFTprogram=self._dft_program,
+                                                   PhononFile=self.Squaricn + ".phonon",
+                                                   ExperimentalFile=self._experimental_file,
+                                                   Temperature=self._temperature,
+                                                   SampleForm=self._sample_form,
+                                                   Instrument=self._instrument,
+                                                   Atoms=self._atoms,
+                                                   Scale=self._scale,
+                                                   SumContributions=self._sum_contributions,
+                                                   Overtones=self._overtones,
+                                                   ScaleByCrossSection=self._cross_section_factor,
+                                                   OutputWorkspace="squaricn_ref")
                          }
 
-        # remove hdf files
-        filenames = [self._benzene_phonon_file[:self._benzene_phonon_file.find(".")] + ".hdf5",
-                     self._squaricn_phonon_file[:self._squaricn_phonon_file.find(".")] + ".hdf5"]
-
-        for filename in filenames:
-            try :
-                os.remove(filename)
-            except OSError:
-                pass
+        self.remove_hdf_files()
 
 
     def test_wrong_input(self):
@@ -103,31 +92,31 @@ class ABINSTest(unittest.TestCase):
         self.assertRaises(RuntimeError, ABINS, PhononFile="Si2.sc.phonon", OutputWorkspace=self._workspace_name)
 
         # no name for workspace
-        self.assertRaises(RuntimeError, ABINS, PhononFile=self._benzene_phonon_file, Temperature=self._temperature)
+        self.assertRaises(RuntimeError, ABINS, PhononFile=self.Si2 + ".phonon", Temperature=self._temperature)
 
         # negative temperature in K
-        self.assertRaises(RuntimeError, ABINS, PhononFile=self._benzene_phonon_file, Temperature=-1.0, OutputWorkspace=self._workspace_name)
+        self.assertRaises(RuntimeError, ABINS, PhononFile=self.Si2 + ".phonon", Temperature=-1.0, OutputWorkspace=self._workspace_name)
 
         # negative scale
-        self.assertRaises(RuntimeError, ABINS, PhononFile=self._benzene_phonon_file, Scale=-0.2, OutputWorkspace=self._workspace_name)
+        self.assertRaises(RuntimeError, ABINS, PhononFile=self.Si2 + ".phonon", Scale=-0.2, OutputWorkspace=self._workspace_name)
 
         # overtones cannot be set in case we have single crystal (don't know expansion of S in terms of overtones for SingleCrystal case)
-        self.assertRaises(RuntimeError, ABINS, PhononFile=self._benzene_phonon_file, SampleForm="SingleCrystal", Overtones=True, OutputWorkspace=self._workspace_name)
+        self.assertRaises(RuntimeError, ABINS, PhononFile=self.Si2 + ".phonon", SampleForm="SingleCrystal", Overtones=True, OutputWorkspace=self._workspace_name)
 
     # test if intermediate results are consistent
     def test_non_unique_atoms(self):
         """Test scenario in which a user specifies non unique atoms (for example in squaricn that would be "C,C,H").
            In that case ABINS should terminate and print a meaningful message.
         """
-        self.assertRaises(RuntimeError, ABINS, PhononFile=self._squaricn_phonon_file, Atoms="C,C,H", OutputWorkspace=self._workspace_name)
+        self.assertRaises(RuntimeError, ABINS, PhononFile=self.Squaricn + ".phonon", Atoms="C,C,H", OutputWorkspace=self._workspace_name)
 
 
     def test_non_existing_atoms(self):
         """Test scenario in which  a user requests to create workspaces for atoms which do not exist in the system.
            In that case ABINS should terminate and give a user a meaningful message about wrong atoms to analyse.
         """
-        # In benzene there is no O atoms
-        self.assertRaises(RuntimeError, ABINS, PhononFile=self._benzene_phonon_file, Atoms="O", OutputWorkspace=self._workspace_name)
+        # In Si2 there is no C atoms
+        self.assertRaises(RuntimeError, ABINS, PhononFile=self.Si2 + ".phonon", Atoms="C", OutputWorkspace=self._workspace_name)
 
 
     def test_scale(self):
@@ -136,7 +125,7 @@ class ABINSTest(unittest.TestCase):
         @return:
         """
         wrk = ABINS(DFTprogram=self._dft_program,
-                    PhononFile=self._squaricn_phonon_file,
+                    PhononFile=self.Squaricn + ".phonon",
                     Temperature=self._temperature,
                     SampleForm=self._sample_form,
                     Instrument=self._instrument,
@@ -145,11 +134,11 @@ class ABINSTest(unittest.TestCase):
                     Overtones=self._overtones,
                     Scale=10,
                     ScaleByCrossSection=self._cross_section_factor,
-                    OutputWorkspace= "squaricn_no_scale")
+                    OutputWorkspace="squaricn_no_scale")
 
-        ref = Scale(self._ref_wrk[self._squaricn_phonon_file], Factor=10)
+        ref = Scale(self._ref_wrk[self.Squaricn], Factor=10)
 
-        (result, messages) = CompareWorkspaces(wrk, ref,  Tolerance=self._tolerance)
+        (result, messages) = CompareWorkspaces(wrk, ref, Tolerance=self._tolerance)
         self.assertEqual(result, True)
 
 
@@ -158,18 +147,18 @@ class ABINSTest(unittest.TestCase):
         Tests if experimental data is loaded correctly.
         @return:
         """
-        wrk = ABINS(DFTprogram=self._dft_program,
-                    PhononFile=self._benzene_phonon_file,
-                    ExperimentalFile="benzene.dat",
-                    Temperature=self._temperature,
-                    SampleForm=self._sample_form,
-                    Instrument=self._instrument,
-                    Atoms=self._atoms,
-                    Scale=self._scale,
-                    SumContributions=self._sum_contributions,
-                    Overtones=self._overtones,
-                    ScaleByCrossSection=self._cross_section_factor,
-                    OutputWorkspace="benzene_exp")
+        ABINS(DFTprogram=self._dft_program,
+              PhononFile="benzene.phonon",
+              ExperimentalFile="benzene.dat",
+              Temperature=self._temperature,
+              SampleForm=self._sample_form,
+              Instrument=self._instrument,
+              Atoms=self._atoms,
+              Scale=self._scale,
+              SumContributions=self._sum_contributions,
+              Overtones=self._overtones,
+              ScaleByCrossSection=self._cross_section_factor,
+              OutputWorkspace="benzene_exp")
 
         # load experimental data
         Load(Filename="benzene.dat", OutputWorkspace="benzene_only_exp")
@@ -183,13 +172,13 @@ class ABINSTest(unittest.TestCase):
 
     def test_partial(self):
         # By default workspaces for all atoms should be created. Test this default behaviour.
-        wks_all_atoms_explicitly = ABINS(PhononFile=self._squaricn_phonon_file,
+        wks_all_atoms_explicitly = ABINS(PhononFile=self.Squaricn + ".phonon",
                                          Atoms="H, C, O",
                                          SumContributions=self._sum_contributions,
                                          Overtones=self._overtones,
                                          OutputWorkspace="explicit")
 
-        wsk_all_atoms_default = ABINS(PhononFile=self._squaricn_phonon_file,
+        wsk_all_atoms_default = ABINS(PhononFile=self.Squaricn + ".phonon",
                                       SumContributions=self._sum_contributions,
                                       Overtones=self._overtones,
                                       OutputWorkspace="default")
@@ -197,7 +186,7 @@ class ABINSTest(unittest.TestCase):
         (result, messages) = CompareWorkspaces(wks_all_atoms_explicitly, wsk_all_atoms_default, Tolerance=self._tolerance)
         self.assertEqual(result, True)
 
-        (result, messages) = CompareWorkspaces(self._ref_wrk[self._squaricn_phonon_file], wsk_all_atoms_default, Tolerance=self._tolerance)
+        (result, messages) = CompareWorkspaces(self._ref_wrk[self.Squaricn], wsk_all_atoms_default, Tolerance=self._tolerance)
         self.assertEqual(result, True)
 
     # main tests
@@ -206,14 +195,14 @@ class ABINSTest(unittest.TestCase):
         Test case when simulation is started from scratch
         @return:
         """
-        self._good_case_from_scratch(self._squaricn_phonon_file)
-        self._good_case_from_scratch(self._benzene_phonon_file)
+        self._good_case_from_scratch(self.Squaricn)
+        self._good_case_from_scratch(self.Si2)
 
 
     def _good_case_from_scratch(self, filename):
         # calculate workspaces
         wrk_calculated = ABINS(DFTprogram=self._dft_program,
-                               PhononFile=filename,
+                               PhononFile=filename+ ".phonon",
                                Temperature=self._temperature,
                                SampleForm=self._sample_form,
                                Instrument=self._instrument,
@@ -221,15 +210,15 @@ class ABINSTest(unittest.TestCase):
                                SumContributions=self._sum_contributions,
                                Overtones=self._overtones,
                                ScaleByCrossSection=self._cross_section_factor,
-                               OutputWorkspace=filename+"_scratch")
+                               OutputWorkspace=filename + "_scratch")
 
         (result, messages) = CompareWorkspaces(self._ref_wrk[filename], wrk_calculated, Tolerance=self._tolerance)
         self.assertEqual(True, result)
 
 
     def test_good_cases_restart(self):
-        self._good_case_restart(self._squaricn_phonon_file)
-        self._good_case_restart(self._benzene_phonon_file)
+        self._good_case_restart(self.Squaricn)
+        self._good_case_restart(self.Si2)
 
 
     def _good_case_restart(self, filename):
@@ -244,11 +233,11 @@ class ABINSTest(unittest.TestCase):
         """
 
         # restart without any changes
-        temperature_for_test = 20 # 20K
-        wrk_name = filename[:filename.find(".")]
+        temperature_for_test = 20  # 20K
+        wrk_name = filename
 
         wrk_initial = ABINS(DFTprogram=self._dft_program,
-                            PhononFile=filename,
+                            PhononFile=filename + ".phonon",
                             Temperature=temperature_for_test,
                             SampleForm=self._sample_form,
                             Instrument=self._instrument,
@@ -259,7 +248,7 @@ class ABINSTest(unittest.TestCase):
                             OutputWorkspace=wrk_name + "init")
 
         wrk_mod = ABINS(DFTprogram=self._dft_program,
-                        PhononFile=filename,
+                        PhononFile=filename + ".phonon",
                         Temperature=self._temperature,
                         SampleForm=self._sample_form,
                         Instrument=self._instrument,
@@ -270,7 +259,7 @@ class ABINSTest(unittest.TestCase):
                         OutputWorkspace=wrk_name + "_mod")
 
         wrk_restart = ABINS(DFTprogram=self._dft_program,
-                            PhononFile=filename,
+                            PhononFile=filename + ".phonon",
                             Temperature=temperature_for_test,
                             SampleForm=self._sample_form,
                             Instrument=self._instrument,
@@ -288,5 +277,5 @@ class ABINSTest(unittest.TestCase):
         self.assertEqual(True, result)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()
