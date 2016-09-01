@@ -139,10 +139,9 @@ public:
   // Set the execution count
   void setExecCount(std::size_t execCount) { m_execCount = execCount; }
   /// Set data on history after it is created
-  void fillAlgorithmHistory(
-      const Algorithm *const alg,
-      const Kernel::DateAndTime &start = Kernel::DateAndTime::getCurrentTime(),
-      const double &duration = -1.0, std::size_t uexeccount = 0);
+  void fillAlgorithmHistory(const Algorithm *const alg,
+                            const Kernel::DateAndTime &start,
+                            const double &duration, std::size_t uexeccount);
   // Allow Algorithm::execute to change the exec count & duration after the
   // algorithm was executed
   friend class Algorithm;
