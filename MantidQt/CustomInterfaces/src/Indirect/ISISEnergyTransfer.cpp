@@ -270,7 +270,6 @@ void ISISEnergyTransfer::run() {
     reductionAlg->setProperty("MapFile", grouping.second.toStdString());
 
   reductionAlg->setProperty("FoldMultipleFrames", m_uiForm.ckFold->isChecked());
-  reductionAlg->setProperty("SaveFormats", getSaveFormats());
   reductionAlg->setProperty("OutputWorkspace",
                             "IndirectEnergyTransfer_Workspaces");
 
@@ -721,9 +720,10 @@ void ISISEnergyTransfer::saveClicked() {
     std::string save = *it;
     pyInput += "'" + QString::fromStdString(save) + "', ";
   }
-  pyInput += "])\n";
-
-  std::string output = pyInput.toStdString();
+  pyInput += "]";
+  if (m_uiForm.ckCm1Units->isChecked())
+    pyInput += ", 'DeltaE_inWavenumber'";
+  pyInput += ")\n";
   m_pythonRunner.runPythonCode(pyInput);
 }
 
