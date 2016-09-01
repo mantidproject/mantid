@@ -32,14 +32,14 @@ class PyChop2Tests(unittest.TestCase):
             flux.append(ff)
         # Checks that the flux should be highest for LET, then MERLIN, MARI
         # and MAPS in that order
-        self.assertGreater(flux[0], flux[3])
-        self.assertGreater(flux[3], flux[2])
-        self.assertGreater(flux[2], flux[1])
+        self.assertTrue(flux[0] > flux[3])
+        self.assertTrue(flux[3] > flux[2])
+        self.assertTrue(flux[2] > flux[1])
         # Checks that the resolution should be best for LET, then MARI, MAPS
         # and MERLIN in that order
-        self.assertLess(res[0][0], res[2][0])
-        self.assertLess(res[2][0], res[1][0])
-        self.assertLess(res[1][0], res[3][0]) 
+        self.assertTrue(res[0][0] < res[2][0])
+        self.assertTrue(res[2][0] < res[1][0])
+        self.assertTrue(res[1][0] < res[3][0]) 
         # Now tests the standalone function
         for inc, instname in enumerate(instnames):
             if 'Fermi' in modulenames[inc]:
