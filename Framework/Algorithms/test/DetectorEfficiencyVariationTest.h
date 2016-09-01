@@ -146,10 +146,6 @@ public:
       inputB->setCounts(j, std::move(forInputB));
       inputA->setCountStandardDeviations(j, errors);
       inputB->setCountStandardDeviations(j, errors);
-      // Just set the spectrum number to match the index, spectra numbers and
-      // detector maps must be indentical for both
-      inputA->getSpectrum(j).setSpectrumNo(j + 1);
-      inputB->getSpectrum(j).setSpectrumNo(j + 1);
     }
 
     // Register the input workspaces to the ADS where they can be accessed by

@@ -71,7 +71,6 @@ public:
     input =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_IWSName);
     TS_ASSERT(input);
-    // TS_ASSERT(input->getInstrument()->isDetectorMasked(input->getSpectrum(THEMASKED).getDetectorIDs()));
 
     MatrixWorkspace_sptr outputMat =
         boost::dynamic_pointer_cast<MatrixWorkspace>(output);
@@ -213,8 +212,6 @@ public:
 
       m_2DWS->setCounts(j, spectrum);
       m_2DWS->setCountStandardDeviations(j, errors);
-      // Just set the spectrum number to match the index
-      m_2DWS->getSpectrum(j).setSpectrumNo(j + 1);
     }
 
     // Register the workspace in the data service

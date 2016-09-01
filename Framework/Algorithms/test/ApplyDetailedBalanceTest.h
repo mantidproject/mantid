@@ -160,7 +160,6 @@ private:
       ws2D->setX(i, cow_xv);
       ws2D->dataY(i) = {1, 2, 3, 4, 5};
       ws2D->dataE(i) = {sqrt(1), sqrt(2), sqrt(3), sqrt(4), sqrt(5)};
-      ws2D->getSpectrum(i).setSpectrumNo(i);
     }
 
     AnalysisDataService::Instance().add(inputWSname, ws2D);
