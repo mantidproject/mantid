@@ -87,6 +87,7 @@ public:
     for (size_t j = 0; j < 10; ++j) {
       TS_ASSERT_EQUALS(h[j], x[j + 1]);
     }
+    TS_ASSERT_EQUALS(h.leftBoundary(), x[0]);
   }
 
   void test_Lorentzian() {

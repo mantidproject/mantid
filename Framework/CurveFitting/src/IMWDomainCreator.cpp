@@ -72,7 +72,7 @@ IMWDomainCreator::IMWDomainCreator(Kernel::IPropertyManager *fit,
     : API::IDomainCreator(
           fit, std::vector<std::string>(1, workspacePropertyName), domainType),
       m_workspaceIndex(-1), m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()),
-      /*m_maxSize(0), m_normalise(false),*/ m_startIndex(0) {
+      m_startIndex(0) {
   if (m_workspacePropertyNames.empty()) {
     throw std::runtime_error("Cannot create FitMW: no workspace given");
   }
@@ -241,19 +241,19 @@ IMWDomainCreator::createEmptyResultWS(const size_t nhistograms,
   auto tAxis = new API::TextAxis(nhistograms);
   ws->replaceAxis(1, tAxis);
 
-  const MantidVec &inputX = m_matrixWorkspace->readX(m_workspaceIndex);
-  const MantidVec &inputY = m_matrixWorkspace->readY(m_workspaceIndex);
-  const MantidVec &inputE = m_matrixWorkspace->readE(m_workspaceIndex);
+  auto &inputX = m_matrixWorkspace->x(m_workspaceIndex);
+  auto &inputY = m_matrixWorkspace->y(m_workspaceIndex);
+  auto &inputE = m_matrixWorkspace->e(m_workspaceIndex);
   // X values for all
   for (size_t i = 0; i < nhistograms; i++) {
-    ws->dataX(i).assign(inputX.begin() + m_startIndex,
-                        inputX.begin() + m_startIndex + nxvalues);
+    ws->mutableX(i).assign(inputX.begin() + m_startIndex,
+                           inputX.begin() + m_startIndex + nxvalues);
   }
   // Data values for the first histogram
-  ws->dataY(0).assign(inputY.begin() + m_startIndex,
-                      inputY.begin() + m_startIndex + nyvalues);
-  ws->dataE(0).assign(inputE.begin() + m_startIndex,
-                      inputE.begin() + m_startIndex + nyvalues);
+  ws->mutableY(0).assign(inputY.begin() + m_startIndex,
+                         inputY.begin() + m_startIndex + nyvalues);
+  ws->mutableE(0).assign(inputE.begin() + m_startIndex,
+                         inputE.begin() + m_startIndex + nyvalues);
 
   return ws;
 }

@@ -194,7 +194,8 @@ histograms with very large bins. It also less sensitive to a particular binning.
 For the next example a spectrum was generated and rebinned to different bin sizes.
 Each binned spectrum was fitted using both "CentrePoint" (left column) and "Histogram" 
 evaluation (right column). As it can be seen form the plots the "Histogram" fitting
-gives more consistent results which are also closer to the correct values.
+gives more consistent results which are also closer to the correct values (Amplitude=20.0,
+PeakCentre=0.0, FWHM=1.0).
 
 .. figure:: /images/HistogramFit.png
 

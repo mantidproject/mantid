@@ -282,10 +282,8 @@ void PlotPeakByLogValue::exec() {
         API::IAlgorithm_sptr fit =
             AlgorithmManager::Instance().createUnmanaged("Fit");
         fit->initialize();
-        if (histogramFit) {
-          fit->setPropertyValue("EvaluationType",
-                                getPropertyValue("EvaluationType"));
-        }
+        fit->setPropertyValue("EvaluationType",
+                              getPropertyValue("EvaluationType"));
         fit->setProperty("Function", ifun);
         fit->setProperty("InputWorkspace", data.ws);
         fit->setProperty("WorkspaceIndex", j);

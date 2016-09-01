@@ -563,23 +563,14 @@ public:
     double x0 = -10.0;
     double x1 = 10.0;
     double dx = (x1 - x0) / static_cast<double>(nbins);
-    for (size_t i = 0; i < nbins; ++i) {
-      auto x = x0 + double(i) * dx;
-      ws->dataX(0)[i] = x;
-      ws->dataX(1)[i] = x;
-      ws->dataX(2)[i] = x;
-    }
-    ws->dataX(0).back() = x1;
-    ws->dataX(1).back() = x1;
-    ws->dataX(2).back() = x1;
+    ws->setBinEdges(0, nbins + 1, HistogramData::LinearGenerator(x0, dx));
+    ws->setSharedX(1, ws->sharedX(0));
+    ws->setSharedX(2, ws->sharedX(0));
+
     std::vector<double> amps{20.0, 30.0, 25.0};
     std::vector<double> cents{0.0, 0.1, -1.0};
     std::vector<double> fwhms{1.0, 1.1, 0.6};
     for (size_t i = 0; i < 3; ++i) {
-      // std::string fun = "name=FlatBackground,A0=2;name=Lorentzian,Amplitude="
-      // + std::to_string(amps[i]) +
-      //  ",PeakCentre=" + std::to_string(cents[i]) + ",FWHM=" +
-      //  std::to_string(fwhms[i]);
       std::string fun = "name=FlatBackground,A0=" + std::to_string(fwhms[i]);
       auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
       alg->initialize();

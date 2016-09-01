@@ -83,7 +83,7 @@ protected:
   /// Calculate histogram data for the given bin boundaries.
   virtual void histogram1D(double *out, double left, const double *right,
                            const size_t nBins) const;
-  /// Devivatives of the histogram.
+  /// Derivatives of the histogram1D with respect to active parameters.
   virtual void histogramDerivative1D(Jacobian *jacobian, double left,
                                      const double *right,
                                      const size_t nBins) const;

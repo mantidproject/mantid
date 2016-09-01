@@ -131,13 +131,8 @@ FunctionDomain1DSpectrum::FunctionDomain1DSpectrum(
 /// @param bins :: A vector with bin boundaries.
 FunctionDomain1DHistogram::FunctionDomain1DHistogram(
     const std::vector<double> &bins)
-    : FunctionDomain1D(nullptr, 0), m_bins(bins) {
-  if (bins.size() < 2) {
-    throw std::runtime_error("Cannot initialize FunctionDomain1DHistogram with "
-                             "less than 2 bin boundaries.");
-  }
-  resetData(&m_bins[1], m_bins.size() - 1);
-}
+    : FunctionDomain1DHistogram(bins.begin(), bins.end()) {}
+
 /**
   * Create a domain from a part of a vector.
   * @param from :: Iterator to start copying values from.
