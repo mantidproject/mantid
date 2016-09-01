@@ -60,18 +60,13 @@
         <property name="showLoad" stdset="0">
          <bool>false</bool>
         </property>
-        <property name="workspaceSuffixes" stdset="0">
-         <stringlist>
-          <string>_calib</string>
-         </stringlist>
-        </property>
         <property name="fileBrowserSuffixes" stdset="0">
          <stringlist>
           <string>_calib.nxs</string>
          </stringlist>
         </property>
         <property name="multipleFiles" stdset="0">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
        </widget>
       </item>
