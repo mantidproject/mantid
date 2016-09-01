@@ -219,7 +219,8 @@ void FitPropertyBrowser::init() {
   m_evaluationTypes << "CentrePoint"
                     << "Histogram";
   m_enumManager->setEnumNames(m_evaluationType, m_evaluationTypes);
-  int evaluationType = settings.value(m_evaluationType->propertyName(), 0).toInt();
+  int evaluationType =
+      settings.value(m_evaluationType->propertyName(), 0).toInt();
   m_enumManager->setValue(m_evaluationType, evaluationType);
 
   m_xColumn = m_columnManager->addProperty("XColumn");
