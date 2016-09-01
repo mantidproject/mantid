@@ -7,19 +7,14 @@ spectrometers, by T G Perring. Python implementation by R A Ewings, after a Matl
 The theory is based on the formulism developed by Carlile, Taylor, Perring et al., in a series of
 technical reports:
 
-[1] RAL-85-029: Absolute neutronic performance of SNS from gold foil activation
-    T G Perring
-    http://www.yocto.me/ral-85-029.pdf
-[2] RAL-85-052: MARS - a Multi-Angle Rotor Spectrometer for the SNS
+[1] RAL-85-052: MARS - a Multi-Angle Rotor Spectrometer for the SNS
     C J Carlile, A D Taylor and W G Williams
     http://purl.org/net/epubs/manifestation/12308488
-[3] RALT-028-94: High energy magnetic excitations in hexagonal cobalt
+[2] RALT-028-94: High energy magnetic excitations in hexagonal cobalt
     T G Perring, Ph.D. Thesis, University of Cambridge (1991)
-[4] RAL-94-025: The resolution function of the chopper spectrometer HET at ISIS
+[3] RAL-94-025: The resolution function of the chopper spectrometer HET at ISIS
     T G Perring, Proceedings of ICANS XII (1993)
     http://www.neutronresearch.com/parch/1993/01/199301013280.pdf
-
-A summary is available at: http://www.yocto.me/chop_equations.pdf
 """
 
 import numpy as np
@@ -119,7 +114,7 @@ def tikeda(S1, S2, B1, B2, Emod, Ei):
 
 def tchi(delta, Ei):
     """
-    ! Calculates the moderator time width based on the Chi distribution
+    ! Calculates the moderator time width based on the Chi^2 distribution
     """
     vel = 437.392 * np.sqrt(Ei)
     tausqr = ((delta/1.96)/ vel)**2
@@ -127,7 +122,7 @@ def tchi(delta, Ei):
 
 def tchi_2(delta_0, delta_G, Ei):
     """
-    ! Calculates the moderator time width based on the Chi^2 distribution
+    ! Calculates the moderator time width based on a modified Chi^2 distribution
     """
     vel = 437.392 * np.sqrt(Ei)
     tausqr = (((delta_0+delta_G*np.sqrt(Ei))/1.96) / vel)**2

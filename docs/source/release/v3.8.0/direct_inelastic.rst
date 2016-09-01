@@ -18,6 +18,12 @@ Improvements
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Direct+Inelastic%22>`_
 
+PyChop
+------
+
+- :ref:`PyChop <PyChop>` has been fixed and updated with a new Python commandline interface and a new GUI. Flux and resolution calculations for LET are now fully integrated into a single interface, and there is also support for calculating the resolution, flux and allowed :math:`E_i` in multi-rep mode.
+
+
 Crystal Field
 -------------
 
