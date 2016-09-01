@@ -293,24 +293,27 @@ std::map<std::string, std::string> ReflectometryReductionOne::validateInputs() {
   }
 
   if (decWS->getAxis(0)->unit()->unitID() != "Wavelength") {
-    result["DetectorEfficiencyCorrection"] = "Detector Efficiency Correction "
-      "workspace x-units must be in wavelength";
-  }
-  else if (decWS->getNumberHistograms() > 1 &&
-      decWS->getNumberHistograms() < runWS->getNumberHistograms()) {
-    result["DetectorEfficiencyCorrection"] = "The number of spectra in the "
-      "Detector Efficiency Correction workspace must either be 1 or equal to "
-      "the number of spectra in the input workspace";
+    result["DetectorEfficiencyCorrection"] =
+        "Detector Efficiency Correction "
+        "workspace x-units must be in wavelength";
+  } else if (decWS->getNumberHistograms() > 1 &&
+             decWS->getNumberHistograms() < runWS->getNumberHistograms()) {
+    result["DetectorEfficiencyCorrection"] =
+        "The number of spectra in the "
+        "Detector Efficiency Correction workspace must either be 1 or equal to "
+        "the number of spectra in the input workspace";
   } else {
     double firstVal = decWS->y(0)[0];
     if (firstVal == 0) {
-      result["DetectorEfficiencyCorrection"] = "Detector Efficiency Correction "
-        "workspace cannot contain any zero values.";
+      result["DetectorEfficiencyCorrection"] =
+          "Detector Efficiency Correction "
+          "workspace cannot contain any zero values.";
     } else {
       for (size_t i = 1; i < decWS->getNumberHistograms(); i++) {
         if (decWS->y(i)[0] != firstVal) {
-          result["DetectorEfficiencyCorrection"] = "All values in the Detector "
-            "Efficiciency Correction Workspace must be equal";
+          result["DetectorEfficiencyCorrection"] =
+              "All values in the Detector "
+              "Efficiciency Correction Workspace must be equal";
           break;
         }
       }
@@ -620,8 +623,8 @@ void ReflectometryReductionOne::exec() {
     }
 
     DetectorMonitorWorkspacePair inLam =
-      toLam(runWS, processingCommands, i0MonitorIndex, wavelengthInterval,
-        monitorBackgroundWavelengthInterval, wavelengthStep);
+        toLam(runWS, processingCommands, i0MonitorIndex, wavelengthInterval,
+              monitorBackgroundWavelengthInterval, wavelengthStep);
     auto detectorWS = inLam.get<0>();
     auto monitorWS = inLam.get<1>();
 

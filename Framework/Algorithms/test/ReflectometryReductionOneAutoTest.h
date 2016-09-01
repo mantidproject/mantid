@@ -136,8 +136,7 @@ public:
     createWorkspace->setProperty("OutputWorkspace", "DECMixed");
     createWorkspace->execute();
     m_decWorkspaceMixed =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "DECMixed");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECMixed");
 
     IAlgorithm_sptr lAlg = AlgorithmManager::Instance().create("Load");
     lAlg->setChild(true);
