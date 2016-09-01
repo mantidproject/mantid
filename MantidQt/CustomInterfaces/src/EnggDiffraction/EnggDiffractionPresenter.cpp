@@ -1063,11 +1063,13 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   // save vanIntegWS and vanCurvesWS as open genie
   // see where spec number comes from
 
-  loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
-                               vanCurvesWS, cs.m_forceRecalcOverwrite, specNos);
-
   const std::string instStr = m_view->currentInstrument();
   try {
+
+    loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
+                                 vanCurvesWS, cs.m_forceRecalcOverwrite,
+                                 specNos);
+
     auto load =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
     load->initialize();
@@ -1128,43 +1130,33 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   for (size_t i = 0; i < difc.size(); i++) {
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
         "EnggCalibrate");
-    try {
-      alg->initialize();
-      alg->setProperty("InputWorkspace", ceriaWS);
-      alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
-      alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
-      if (specNumUsed) {
-        alg->setPropertyValue(g_calibCropIdentifier,
-                              boost::lexical_cast<std::string>(specNos));
-      } else {
-        alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
-      }
-      const std::string outFitParamsTblName =
-          outFitParamsTblNameGenerator(specNos, i);
-      alg->setPropertyValue("FittedPeaks", outFitParamsTblName);
-      alg->setPropertyValue("OutputParametersTableName", outFitParamsTblName);
-      alg->execute();
-    } catch (std::runtime_error &re) {
+
+    alg->initialize();
+    alg->setProperty("InputWorkspace", ceriaWS);
+    alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
+    alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
+    if (specNumUsed) {
+      alg->setPropertyValue(g_calibCropIdentifier,
+                            boost::lexical_cast<std::string>(specNos));
+    } else {
+      alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
+    }
+    const std::string outFitParamsTblName =
+        outFitParamsTblNameGenerator(specNos, i);
+    alg->setPropertyValue("FittedPeaks", outFitParamsTblName);
+    alg->setPropertyValue("OutputParametersTableName", outFitParamsTblName);
+    alg->execute();
+    if (!alg->isExecuted()) {
       g_log.error() << "Error in calibration. ",
-          "Could not run the algorithm EnggCalibrate succesfully for bank " +
-              boost::lexical_cast<std::string>(i) + ". Error description: " +
-              re.what() + " Please check also the log messages for details.";
-      throw;
+          "Could not run the algorithm EnggCalibrate successfully for bank " +
+              boost::lexical_cast<std::string>(i);
+      throw std::runtime_error("EnggCalibrate failed");
     }
 
-    try {
       difc[i] = alg->getProperty("DIFC");
       tzero[i] = alg->getProperty("TZERO");
-    } catch (std::runtime_error &rexc) {
-      g_log.error() << "Error in calibration. ",
-          "The calibration algorithm EnggCalibrate run succesfully but could "
-          "not retrieve the outputs DIFC and TZERO. Error description: " +
-              std::string(rexc.what()) +
-              " Please check also the log messages for additional details.";
-      throw;
-    }
 
-    g_log.notice() << " * Bank " << i + 1 << " calibrated, "
+    g_log.information() << " * Bank " << i + 1 << " calibrated, "
                    << "difc: " << difc[i] << ", zero: " << tzero[i] << '\n';
   }
 
