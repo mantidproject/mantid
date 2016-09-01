@@ -208,7 +208,7 @@ MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
     }
     dimensions[i] = outDim;
   }
-  return MDHistoWorkspace_sptr(new MDHistoWorkspace(dimensions));
+  return boost::make_shared<MDHistoWorkspace>(dimensions);
 }
 
 /**

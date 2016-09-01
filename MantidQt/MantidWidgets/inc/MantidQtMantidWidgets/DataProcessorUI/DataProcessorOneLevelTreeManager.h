@@ -1,0 +1,110 @@
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORONELEVELTREEMANAGER_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORONELEVELTREEMANAGER_H
+
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
+
+namespace MantidQt {
+namespace MantidWidgets {
+
+class DataProcessorPresenter;
+class DataProcessorWhiteList;
+class QDataProcessorOneLevelTreeModel;
+
+/** @class DataProcessorOneLevelTreeManager
+
+DataProcessorOneLevelTreeManager is a concrete implementation of a
+DataProcessorTreeManager that handles a one-level tree view (which corresponds
+to a DataProcessorUI with no post-processing algorithm defined).
+
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
+
+This file is part of Mantid.
+
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+File change history is stored at: <https://github.com/mantidproject/mantid>.
+Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataProcessorOneLevelTreeManager
+    : public DataProcessorTreeManager {
+public:
+  /// Constructor
+  DataProcessorOneLevelTreeManager(DataProcessorPresenter *presenter,
+                                   Mantid::API::ITableWorkspace_sptr table,
+                                   const DataProcessorWhiteList &whitelist);
+  /// Constructor (no table ws given)
+  DataProcessorOneLevelTreeManager(DataProcessorPresenter *presenter,
+                                   const DataProcessorWhiteList &whitelist);
+  /// Destructor
+  ~DataProcessorOneLevelTreeManager() override;
+
+  /// Publish commands
+  std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
+  /// Append a row
+  void appendRow() override;
+  /// Append a group to the model
+  void appendGroup() override;
+  /// Delete a row
+  void deleteRow() override;
+  /// Delete a group
+  void deleteGroup() override;
+  /// Group rows
+  void groupRows() override;
+  /// Expand selection
+  std::set<int> expandSelection() override;
+  /// Clear selected
+  void clearSelected() override;
+  /// Copy selected
+  std::string copySelected() override;
+  /// Paste selected
+  void pasteSelected(const std::string &text) override;
+
+
+  /// Return selected data
+  std::map<int, std::set<std::vector<std::string>>>
+  selectedData(bool prompt) override;
+  /// Transfer new data to model
+  void transfer(const std::vector<std::map<std::string, std::string>> &runs,
+	  const DataProcessorWhiteList &whitelist) override;
+
+  /// Validate a table workspace
+  bool isValidModel(Mantid::API::Workspace_sptr ws,
+                    size_t whitelistColumns) const override;
+
+  /// Return the model
+  boost::shared_ptr<QAbstractItemModel> getModel() override;
+  /// Return the table workspace
+  Mantid::API::ITableWorkspace_sptr getTableWorkspace() override;
+
+private:
+  /// The DataProcessor presenter
+  DataProcessorPresenter *m_presenter;
+  /// The model
+  boost::shared_ptr<QDataProcessorOneLevelTreeModel> m_model;
+  /// The workspace the model is currently representing
+  Mantid::API::ITableWorkspace_sptr m_ws;
+
+  /// Insert a row in the model
+  void insertRow(int rowIndex);
+  /// Create a default table workspace
+  Mantid::API::ITableWorkspace_sptr
+	  createDefaultWorkspace(const DataProcessorWhiteList &whitelist);
+
+};
+}
+}
+#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORONELEVELTREEMANAGER_H*/
