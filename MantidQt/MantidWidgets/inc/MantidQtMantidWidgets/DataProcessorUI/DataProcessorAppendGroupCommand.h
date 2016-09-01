@@ -42,13 +42,6 @@ public:
   };
   std::string name() override { return std::string("Insert Group After"); }
   std::string icon() override { return std::string("://insert_group.png"); }
-  std::string tooltip() override { return std::string("Inserts group after"); }
-  std::string whatsthis() override {
-    return std::string("Inserts a new group after the first selected group. If "
-                       "no groups are selected then a new group is added at "
-                       "the end of the table");
-  }
-  std::string shortcut() override { return std::string(); }
 };
 }
 }

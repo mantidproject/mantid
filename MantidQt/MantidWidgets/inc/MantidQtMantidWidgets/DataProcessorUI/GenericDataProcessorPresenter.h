@@ -8,7 +8,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 
 namespace MantidQt {
@@ -17,7 +17,6 @@ namespace MantidWidgets {
 class ProgressableView;
 class DataProcessorView;
 class DataProcessorCommand;
-class DataProcessorTreeManager;
 
 /** @class GenericDataProcessorPresenter
 
@@ -78,23 +77,18 @@ public:
   // Get the whitelist
   DataProcessorWhiteList getWhiteList() const { return m_whitelist; };
   // Get the name of the reduced workspace for a given row
-  std::string getReducedWorkspaceName(const std::vector<std::string> &data,
+  std::string getReducedWorkspaceName(int group, int row,
                                       const std::string &prefix = "");
   // Get the name of a post-processed workspace
-  std::string getPostprocessedWorkspaceName(
-      const std::set<std::vector<std::string>> &rowData,
-      const std::string &prefix = "");
+  std::string getPostprocessedWorkspaceName(int groupID,
+                                            const std::set<int> &rows,
+                                            const std::string &prefix = "");
 
-  std::set<int> selectedParents() const override;
-  std::map<int, std::set<int>> selectedChildren() const override;
-  bool askUserYesNo(const std::string &prompt,
-                    const std::string &title) const override;
-  void giveUserWarning(const std::string &prompt,
-                       const std::string &title) const override;
-
-private:
-  // the tree manager
-  std::unique_ptr<DataProcessorTreeManager> m_manager;
+protected:
+  // the workspace the model is currently representing
+  Mantid::API::ITableWorkspace_sptr m_ws;
+  // the model
+  QDataProcessorTreeModel_sptr m_model;
   // the name of the workspace/table/model in the ADS, blank if unsaved
   std::string m_wsName;
   // the table view we're managing
@@ -115,14 +109,19 @@ private:
   DataProcessorMainPresenter *m_mainPresenter;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
+  // Index for column 'Group'
+  int m_colGroup;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
   // Post-process some rows
-  void postProcessGroup(const std::set<std::vector<std::string>> &data);
+  void postProcessGroup(int groupId, const std::set<int> &rows);
   // process selected rows
   void process();
+  // process groups of rows
+  bool processGroups(const std::set<int> &groups,
+                     const std::map<int, std::set<int>> &rows);
   // Reduce a row
-  std::vector<std::string> reduceRow(const std::vector<std::string> &data);
+  void reduceRow(int groupNo, int rowNo);
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const std::string &run,
@@ -132,6 +131,16 @@ private:
   Mantid::API::Workspace_sptr loadRun(const std::string &run,
                                       const std::string &instrument,
                                       const std::string &prefix); // change
+  // get the number of rows in a group
+  int numRowsInGroup(int groupId) const;
+  // Validate rows
+  bool rowsValid(const std::map<int, std::set<int>> &groups);
+  // Validate a row
+  void validateRow(int groupNo, int rowNo) const;
+  // insert a row in the model
+  void insertRow(int groupIndex, int rowIndex);
+  // insert a group in the model
+  void insertGroup(int groupIndex);
   // add row(s) to the model
   void appendRow();
   // add group(s) to the model
@@ -168,9 +177,6 @@ private:
   void showOptionsDialog();
   void initOptions();
 
-  // actions
-  void addActions();
-
   // List of workspaces the user can open
   std::set<std::string> m_workspaceList;
 
@@ -185,6 +191,10 @@ private:
   void saveNotebook(const std::set<int> &groups,
                     const std::map<int, std::set<int>> &rows);
   std::vector<std::unique_ptr<DataProcessorCommand>> getTableList();
+
+  void validateModel(Mantid::API::ITableWorkspace_sptr model);
+  bool isValidModel(Mantid::API::Workspace_sptr model);
+  Mantid::API::ITableWorkspace_sptr createDefaultWorkspace();
 };
 }
 }

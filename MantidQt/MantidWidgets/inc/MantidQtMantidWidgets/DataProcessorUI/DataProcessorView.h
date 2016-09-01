@@ -2,19 +2,16 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORVIEW_H
 
 #include "MantidKernel/System.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 
 #include <map>
-#include <memory>
 #include <set>
 #include <string>
-
-class QAbstractItemModel;
 
 namespace MantidQt {
 namespace MantidWidgets {
 // Forward dec
 class HintStrategy;
-class DataProcessorCommand;
 class DataProcessorPresenter;
 
 /** @class DataProcessorView
@@ -50,12 +47,8 @@ public:
   DataProcessorView(){};
   virtual ~DataProcessorView(){};
 
-  // Add actions to the toolbar
-  virtual void addActions(
-	  std::vector<std::unique_ptr<DataProcessorCommand>> commands) = 0;
-
   // Connect the model
-  virtual void showTable(boost::shared_ptr<QAbstractItemModel> model) = 0;
+  virtual void showTable(QDataProcessorTreeModel_sptr model) = 0;
 
   // Dialog/Prompt methods
   virtual std::string requestNotebookPath() = 0;
@@ -80,8 +73,8 @@ public:
   virtual void setModel(const std::string &name) = 0;
 
   // Accessor methods
-  virtual std::map<int, std::set<int>> getSelectedChildren() const = 0;
-  virtual std::set<int> getSelectedParents() const = 0;
+  virtual std::map<int, std::set<int>> getSelectedRows() const = 0;
+  virtual std::set<int> getSelectedGroups() const = 0;
   virtual std::string getWorkspaceToOpen() const = 0;
   virtual std::string getClipboard() const = 0;
   virtual std::string getProcessInstrument() const = 0;

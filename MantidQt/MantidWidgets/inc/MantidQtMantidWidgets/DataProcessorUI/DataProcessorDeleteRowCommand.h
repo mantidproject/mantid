@@ -42,11 +42,6 @@ public:
   };
   std::string name() override { return std::string("Delete Row"); }
   std::string icon() override { return std::string("://delete_row.png"); }
-  std::string tooltip() override { return std::string("Deletes a row"); }
-  std::string whatsthis() override {
-    return std::string("Deletes the selected row");
-  }
-  std::string shortcut() override { return std::string(); }
 };
 }
 }

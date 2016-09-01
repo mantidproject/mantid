@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "ui_DataProcessorWidget.h"
@@ -11,8 +12,6 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-
-class DataProcessorCommandAdapter;
 
 /** QDataProcessorWidget : Provides an interface for processing table
 data.
@@ -49,12 +48,8 @@ public:
                        QWidget *parent = 0);
   ~QDataProcessorWidget() override;
 
-  // Add actions to the toolbar
-  void QDataProcessorWidget::addActions(
-      std::vector<std::unique_ptr<DataProcessorCommand>> commands) override;
-
   // Connect the model
-  void showTable(boost::shared_ptr<QAbstractItemModel> model) override;
+  void showTable(QDataProcessorTreeModel_sptr model) override;
 
   // Dialog/Prompt methods
   std::string requestNotebookPath() override;
@@ -83,8 +78,8 @@ public:
   void setClipboard(const std::string &text) override;
 
   // Accessor methods
-  std::map<int, std::set<int>> getSelectedChildren() const override;
-  std::set<int> getSelectedParents() const override;
+  std::map<int, std::set<int>> getSelectedRows() const override;
+  std::set<int> getSelectedGroups() const override;
   std::string getProcessInstrument() const override;
   std::string getWorkspaceToOpen() const override;
   std::string getClipboard() const override;
@@ -100,14 +95,12 @@ private:
   // the presenter
   std::unique_ptr<DataProcessorPresenter> m_presenter;
   // the models
-  boost::shared_ptr<QAbstractItemModel> m_model;
+  QDataProcessorTreeModel_sptr m_model;
   // the interface
   Ui::DataProcessorWidget ui;
   // the workspace the user selected to open
   std::string m_toOpen;
   QSignalMapper *m_openMap;
-  // Command adapters
-  std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_commands;
 
 signals:
   void comboProcessInstrument_currentIndexChanged(int index);
@@ -116,6 +109,21 @@ public slots:
   void on_comboProcessInstrument_currentIndexChanged(int index);
 
 private slots:
+  void on_actionAppendRow_triggered();
+  void on_actionAppendGroup_triggered();
+  void on_actionDeleteRow_triggered();
+  void on_actionDeleteGroup_triggered();
+  void on_actionProcess_triggered();
+  void on_actionGroupRows_triggered();
+  void on_actionClearSelected_triggered();
+  void on_actionCopySelected_triggered();
+  void on_actionCutSelected_triggered();
+  void on_actionPasteSelected_triggered();
+  void on_actionExpandSelection_triggered();
+  void on_actionHelp_triggered();
+  void on_actionPlotRow_triggered();
+  void on_actionPlotGroup_triggered();
+
   void setModel(QString name);
   void tableUpdated(const QModelIndex &topLeft, const QModelIndex &bottomRight);
   void showContextMenu(const QPoint &pos);

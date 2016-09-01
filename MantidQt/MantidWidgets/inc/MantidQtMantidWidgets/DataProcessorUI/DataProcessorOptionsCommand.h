@@ -41,11 +41,6 @@ public:
   };
   std::string name() override { return std::string("Options"); }
   std::string icon() override { return std::string("://configure.png"); }
-  std::string tooltip() override { return std::string("Options"); }
-  std::string whatsthis() override {
-    return std::string("Opens a dialog with some options for the table");
-  }
-  std::string shortcut() override { return std::string(); }
 };
 }
 }

@@ -11,7 +11,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorVectorString.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
@@ -121,14 +121,14 @@ private:
   }
 
   // Creates a reflectometry tree model
-  QDataProcessorTwoLevelTreeModel_sptr reflModel() {
-    return boost::shared_ptr<QDataProcessorTwoLevelTreeModel>(
-        new QDataProcessorTwoLevelTreeModel(reflWorkspace(), reflWhitelist()));
+  QDataProcessorTreeModel_sptr reflModel() {
+    return boost::shared_ptr<QDataProcessorTreeModel>(
+        new QDataProcessorTreeModel(reflWorkspace(), reflWhitelist()));
   }
 
   std::string m_wsName;
   std::string m_instrument;
-  QDataProcessorTwoLevelTreeModel_sptr m_model;
+  QDataProcessorTreeModel_sptr m_model;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -371,8 +371,8 @@ public:
         << "1000+1001"
         << "0.5";
     // Create the model
-    auto model = boost::shared_ptr<QDataProcessorTwoLevelTreeModel>(
-        new QDataProcessorTwoLevelTreeModel(ws, whitelist));
+    auto model = boost::shared_ptr<QDataProcessorTreeModel>(
+        new QDataProcessorTreeModel(ws, whitelist));
     // Create a pre-process map
     std::map<std::string, DataProcessorPreprocessingAlgorithm> preprocessMap = {
         {"Run", DataProcessorPreprocessingAlgorithm("Plus", "RUN_",
@@ -461,9 +461,9 @@ public:
         << "2000,2001";
 
     // Create a tree model
-    QDataProcessorTwoLevelTreeModel_sptr model =
-        boost::shared_ptr<QDataProcessorTwoLevelTreeModel>(
-            new QDataProcessorTwoLevelTreeModel(ws, whitelist));
+    QDataProcessorTreeModel_sptr model =
+        boost::shared_ptr<QDataProcessorTreeModel>(
+            new QDataProcessorTreeModel(ws, whitelist));
 
     std::string name = getReducedWorkspaceName(0, 0, model, whitelist, "IvsQ_");
     TS_ASSERT_EQUALS(name, "IvsQ_run_1000_1001")
@@ -490,9 +490,9 @@ public:
         << "2000,2001";
 
     // Create a tree model
-    QDataProcessorTwoLevelTreeModel_sptr model =
-        boost::shared_ptr<QDataProcessorTwoLevelTreeModel>(
-            new QDataProcessorTwoLevelTreeModel(ws, whitelist));
+    QDataProcessorTreeModel_sptr model =
+        boost::shared_ptr<QDataProcessorTreeModel>(
+            new QDataProcessorTreeModel(ws, whitelist));
 
     std::string name =
         getReducedWorkspaceName(0, 0, model, whitelist, "Prefix_");
@@ -520,9 +520,9 @@ public:
         << "2000+2001";
 
     // Create a tree model
-    QDataProcessorTwoLevelTreeModel_sptr model =
-        boost::shared_ptr<QDataProcessorTwoLevelTreeModel>(
-            new QDataProcessorTwoLevelTreeModel(ws, whitelist));
+    QDataProcessorTreeModel_sptr model =
+        boost::shared_ptr<QDataProcessorTreeModel>(
+            new QDataProcessorTreeModel(ws, whitelist));
 
     std::string name =
         getReducedWorkspaceName(0, 0, model, whitelist, "Prefix_");
