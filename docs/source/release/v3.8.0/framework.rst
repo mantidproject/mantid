@@ -9,6 +9,10 @@ Framework Changes
 
 - A cmake parameter ``ENABLE_MANTIDPLOT`` (default ``True``) was added to facilitate framework only builds.
 
+- The case search in ``DataService`` has been replaced with a case-insensitive comparison function. Behavior
+  is almost identical, but a small number cases (such as adding the workspaces ``Z`` and ``z``) will function
+  in a more predictable manner.
+
 HistogramData
 -------------
 
