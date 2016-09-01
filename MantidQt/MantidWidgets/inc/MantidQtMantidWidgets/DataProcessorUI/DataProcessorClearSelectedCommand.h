@@ -41,11 +41,6 @@ public:
   };
   std::string name() override { return std::string("Clear Selected"); }
   std::string icon() override { return std::string("://erase.png"); }
-  std::string tooltip() override { return std::string("Clear selected"); }
-  std::string whatsthis() override {
-    return std::string("Clears the contents of the selected rows");
-  }
-  std::string shortcut() override { return std::string(); }
 };
 }
 }

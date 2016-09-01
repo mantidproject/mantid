@@ -32,6 +32,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
 
 using namespace MantidQt::MantidWidgets;
+// using namespace Mantid::API;
 using namespace testing;
 
 //=====================================================================================

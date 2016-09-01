@@ -50,7 +50,7 @@ specified via the corresponding hinting line edit in the view
 @returns ipython notebook string
 */
 DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
-    std::string name, QDataProcessorTwoLevelTreeModel_sptr model,
+    std::string name, QDataProcessorTreeModel_sptr model,
     const std::string instrument, const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
         preprocessMap,
@@ -245,7 +245,7 @@ std::string plotsString(const std::vector<std::string> &output_ws,
   @param rows : rows from full table to include
   @return string containing the markdown code
   */
-std::string tableString(QDataProcessorTwoLevelTreeModel_sptr model,
+std::string tableString(QDataProcessorTreeModel_sptr model,
                         const DataProcessorWhiteList &whitelist,
                         const std::map<int, std::set<int>> &rows) {
   std::ostringstream table_string;
@@ -304,7 +304,7 @@ std::string tableString(QDataProcessorTwoLevelTreeModel_sptr model,
   @return tuple containing the python code string and the output workspace name
   */
 boost::tuple<std::string, std::string> postprocessGroupString(
-    int group, const std::set<int> &rows, QDataProcessorTwoLevelTreeModel_sptr model,
+    int group, const std::set<int> &rows, QDataProcessorTreeModel_sptr model,
     const DataProcessorWhiteList &whitelist,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
@@ -374,7 +374,7 @@ std::string plot1DString(const std::vector<std::string> &ws_names) {
  @return : the workspace name
 */
 std::string getReducedWorkspaceName(int groupNo, int rowNo,
-                                    QDataProcessorTwoLevelTreeModel_sptr model,
+                                    QDataProcessorTreeModel_sptr model,
                                     const DataProcessorWhiteList &whitelist,
                                     const std::string &prefix) {
 
@@ -433,7 +433,7 @@ std::string getReducedWorkspaceName(int groupNo, int rowNo,
 */
 boost::tuple<std::string, std::string> reduceRowString(
     const int groupNo, const int rowNo, const std::string &instrument,
-    QDataProcessorTwoLevelTreeModel_sptr model, const DataProcessorWhiteList &whitelist,
+    QDataProcessorTreeModel_sptr model, const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
         preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,

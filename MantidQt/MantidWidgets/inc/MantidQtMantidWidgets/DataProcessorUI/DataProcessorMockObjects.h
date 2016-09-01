@@ -6,7 +6,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTreeModel.h"
 #include <gmock/gmock.h>
 
 using namespace MantidQt::MantidWidgets;
@@ -36,8 +36,8 @@ public:
 
   // IO
   MOCK_CONST_METHOD0(getWorkspaceToOpen, std::string());
-  MOCK_CONST_METHOD0(getSelectedChildren, std::map<int, std::set<int>>());
-  MOCK_CONST_METHOD0(getSelectedParents, std::set<int>());
+  MOCK_CONST_METHOD0(getSelectedRows, std::map<int, std::set<int>>());
+  MOCK_CONST_METHOD0(getSelectedGroups, std::set<int>());
   MOCK_CONST_METHOD0(getClipboard, std::string());
   MOCK_METHOD0(getEnableNotebook, bool());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
@@ -53,21 +53,12 @@ public:
   // Settings
   MOCK_METHOD1(loadSettings, void(std::map<std::string, QVariant> &));
 
-  // Acctions/commands
-  // Gmock requires parameters and return values of mocked methods to be
-  // copyable which means we have to mock addActions() via a proxy method
-  void addActions(std::vector<DataProcessorCommand_uptr>) override {
-    addActionsProxy();
-  }
-  MOCK_METHOD0(addActionsProxy, void());
-
   // Calls we don't care about
-  void showTable(QDataProcessorTwoLevelTreeModel_sptr) override{};
+  void showTable(QDataProcessorTreeModel_sptr) override{};
   void saveSettings(const std::map<std::string, QVariant> &) override{};
   std::string getProcessInstrument() const override { return "FAKE"; }
 
   DataProcessorPresenter *getPresenter() const override { return nullptr; }
-
 };
 
 class MockMainPresenter : public DataProcessorMainPresenter {

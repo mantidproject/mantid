@@ -27,6 +27,23 @@
                  <property name="styleSheet">
                    <string>QToolBar{border: none;}</string>
                  </property>
+                 <addaction name="actionProcess"/>
+                 <addaction name="actionExpandSelection"/>
+                 <addaction name="separator"/>
+                 <addaction name="actionPlotRow"/>
+                 <addaction name="actionPlotGroup"/>
+                 <addaction name="separator"/>
+                 <addaction name="actionAppendRow"/>
+                 <addaction name="actionAppendGroup"/>
+                 <addaction name="actionDeleteRow"/>
+                 <addaction name="actionDeleteGroup"/>
+                 <addaction name="separator"/>
+                 <addaction name="actionGroupRows"/>
+                 <addaction name="actionCopySelected"/>
+                 <addaction name="actionCutSelected"/>
+                 <addaction name="actionPasteSelected"/>
+                 <addaction name="actionClearSelected"/>
+                 <addaction name="actionHelp"/>
                </widget>
              </item>
              <item>
@@ -143,6 +160,218 @@
        </iconset>
      </property>
    </widget>
+   <action name="actionProcess">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/stat_rows.png</normaloff>:/stat_rows.png</iconset>
+   </property>
+   <property name="text">
+    <string>Process</string>
+   </property>
+   <property name="whatsThis">
+    <string>Processes the selected rows/groups. Selected rows are reduced sequentially and independently. When a group is selected, rows are in addition post-processed together. If nothing is selected the behaviour is as if all groups were selected.</string>
+   </property>
+  </action>
+   <action name="actionExpandSelection">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/fit_frame.png</normaloff>:/fit_frame.png</iconset>
+   </property>
+   <property name="text">
+    <string>Expand Selection</string>
+   </property>
+   <property name="toolTip">
+    <string>Select an entire group</string>
+   </property>
+   <property name="whatsThis">
+    <string>Expands the current selection to include any rows that are in the same group as any selected row. This effectively means selecting the group to which the selected row belongs.</string>
+   </property>
+  </action>
+   <action name="actionPlotRow">
+     <property name="icon">
+       <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+         <normaloff>:/graph.png</normaloff>:/graph.png
+       </iconset>
+     </property>
+     <property name="text">
+       <string>Plot Selected Rows</string>
+     </property>
+     <property name="toolTip">
+       <string>Plot the selected rows</string>
+     </property>
+     <property name="whatsThis">
+       <string>Creates a plot of the reduced workspaces produced by the selected rows.</string>
+     </property>
+   </action>
+   <action name="actionPlotGroup">
+     <property name="icon">
+       <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+         <normaloff>:/trajectory.png</normaloff>:/trajectory.png
+       </iconset>
+     </property>
+     <property name="text">
+       <string>Plot Selected Groups</string>
+     </property>
+     <property name="toolTip">
+       <string>Plot the selected groups</string>
+     </property>
+     <property name="whatsThis">
+       <string>Creates a plot of the post-processed workspaces produced by any groups any selected rows are in.</string>
+     </property>
+   </action>
+   <action name="actionAppendRow">
+     <property name="icon">
+       <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+         <normaloff>:/insert_row.png</normaloff>:/insert_row.png
+       </iconset>
+     </property>
+     <property name="text">
+       <string>Insert Row After</string>
+     </property>
+     <property name="toolTip">
+       <string>Insert Row After</string>
+     </property>
+     <property name="whatsThis">
+       <string>Inserts a new row after the last selected row.
+               If a group is selected, the new row is appended to the selected group.
+               If nothing is selected then a new row is added to the last group.</string>
+     </property>
+   </action>
+   <action name="actionAppendGroup">
+     <property name="icon">
+       <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+         <normaloff>:/insert_group.png</normaloff>:/insert_group.png
+       </iconset>
+     </property>
+     <property name="text">
+       <string>Insert Group After</string>
+     </property>
+     <property name="toolTip">
+       <string>Insert Group After</string>
+     </property>
+     <property name="whatsThis">
+       <string>Inserts a new group after the first selected group. If no groups are selected then a new group is added at the end of the table.</string>
+     </property>
+   </action>
+   <action name="actionDeleteRow">
+     <property name="icon">
+       <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+         <normaloff>:/delete_row.png</normaloff>:/delete_row.png
+       </iconset>
+     </property>
+     <property name="text">
+       <string>Delete Row</string>
+     </property>
+     <property name="whatsThis">
+       <string>Deletes the selected rows.</string>
+     </property>
+   </action>
+   <action name="actionDeleteGroup">
+     <property name="icon">
+       <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+         <normaloff>:/delete_group.png</normaloff>:/delete_group.png
+       </iconset>
+     </property>
+     <property name="text">
+       <string>Delete Row</string>
+     </property>
+     <property name="whatsThis">
+       <string>Deletes the selected groups.</string>
+     </property>
+   </action>
+   <action name="actionGroupRows">
+     <property name="icon">
+       <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+         <normaloff>:/drag_curves.png</normaloff>:/drag_curves.png
+       </iconset>
+     </property>
+     <property name="text">
+       <string>Group Selected</string>
+     </property>
+     <property name="whatsThis">
+       <string>Places all of the selected rows into the same group.</string>
+     </property>
+   </action>
+   <action name="actionCopySelected">
+     <property name="icon">
+       <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+         <normaloff>:/copy.png</normaloff>:/copy.png
+       </iconset>
+     </property>
+     <property name="text">
+       <string>Copy Selected</string>
+     </property>
+     <property name="whatsThis">
+       <string>Copies the selected rows to the clipboard. Each row is placed on a new line, and each cell is separated by a tab.</string>
+     </property>
+     <property name="shortcut">
+       <string>Ctrl+C</string>
+     </property>
+   </action>
+   <action name="actionCutSelected">
+     <property name="icon">
+       <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+         <normaloff>:/cut.png</normaloff>:/cut.png
+       </iconset>
+     </property>
+     <property name="text">
+       <string>Cut Selected</string>
+     </property>
+     <property name="whatsThis">
+       <string>Copies the selected rows to the clipboard, and then deletes them. Each row is placed on a new line, and each cell is separated by a tab.</string>
+     </property>
+     <property name="shortcut">
+       <string>Ctrl+X</string>
+     </property>
+   </action>
+   <action name="actionPasteSelected">
+     <property name="icon">
+       <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+         <normaloff>:/paste.png</normaloff>:/paste.png
+       </iconset>
+     </property>
+     <property name="text">
+       <string>Paste Selected</string>
+     </property>
+     <property name="whatsThis">
+       <string>Pastes the contents of the clipboard into the selected rows. If no rows are selected, new ones are added at the end of the group.</string>
+     </property>
+     <property name="shortcut">
+       <string>Ctrl+V</string>
+     </property>
+   </action>
+   <action name="actionClearSelected">
+     <property name="icon">
+       <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+         <normaloff>:/erase.png</normaloff>:/erase.png
+       </iconset>
+     </property>
+     <property name="text">
+       <string>Clear Selected</string>
+     </property>
+     <property name="whatsThis">
+       <string>Clears the contents of the selected rows.</string>
+     </property>
+   </action>
+   <action name="actionHelp">
+     <property name="icon">
+       <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+         <normaloff>:/help.png</normaloff>:/help.png
+       </iconset>
+     </property>
+     <property name="text">
+       <string>Help</string>
+     </property>
+     <property name="toolTip">
+       <string>Opens the documentation.</string>
+     </property>
+     <property name="whatsThis">
+       <string>Opens the interface's documentation in the Qt Help Browser.</string>
+     </property>
+     <property name="shortcut">
+       <string>F1</string>
+     </property>
+   </action>
  </widget>
  <tabstops>
   <tabstop>viewTable</tabstop>

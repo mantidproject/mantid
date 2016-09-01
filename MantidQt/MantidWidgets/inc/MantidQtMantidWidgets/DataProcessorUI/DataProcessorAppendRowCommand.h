@@ -42,14 +42,6 @@ public:
   };
   std::string name() override { return std::string("Insert Row After"); }
   std::string icon() override { return std::string("://insert_row.png"); }
-  std::string tooltip() override { return std::string("Inserts row after"); }
-  std::string whatsthis() override {
-    return std::string("Inserts a new row after the last selected row. If "
-                       "groups exist and a group is selected, the new row is "
-                       "appended to the selected group. If nothing is selected "
-                       "then a new row is added to the last group");
-  }
-  std::string shortcut() override { return std::string(); }
 };
 }
 }

@@ -41,14 +41,6 @@ public:
   };
   std::string name() override { return std::string("Plot Selected Groups"); }
   std::string icon() override { return std::string("://trajectory.png"); }
-  std::string tooltip() override {
-    return std::string("Plots the selected group");
-  }
-  std::string whatsthis() override {
-    return std::string("Creates a plot of the post-processed workspaces "
-                       "produced by any groups any selected runs are in");
-  }
-  std::string shortcut() override { return std::string(); }
 };
 }
 }

@@ -41,11 +41,6 @@ public:
   };
   std::string name() override { return std::string("Save Table"); }
   std::string icon() override { return std::string("://filesave.png"); }
-  std::string tooltip() override { return std::string("Save Table"); }
-  std::string whatsthis() override {
-    return std::string("Saves current table as a table workspace");
-  }
-  std::string shortcut() override { return std::string(); }
 };
 }
 }
