@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>330</height>
+    <height>358</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -70,6 +70,9 @@
           <string>_calib.nxs</string>
          </stringlist>
         </property>
+        <property name="multipleFiles" stdset="0">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
      </layout>
@@ -112,7 +115,7 @@
           <item>
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfMapFile" native="true">
             <property name="label" stdset="0">
-             <string></string>
+             <string/>
             </property>
             <property name="fileExtensions" stdset="0">
              <stringlist>

@@ -33,10 +33,25 @@ DataSelector::DataSelector(QWidget *parent)
   connect(&m_algRunner, SIGNAL(algorithmComplete(bool)), this,
           SLOT(handleAutoLoadComplete(bool)));
   this->setAcceptDrops(true);
-  m_uiForm.rfFileInput->setAcceptDrops(false); 
+  m_uiForm.rfFileInput->setAcceptDrops(false);
 }
 
 DataSelector::~DataSelector() {}
+
+/**
+* Return whether empty input is allowed
+*/
+bool DataSelector::isOptional() const { return m_isOptional; }
+
+/**
+* Sets if the text field is optional
+* @param optional :: Set the optional status of the text field
+*/
+void DataSelector::isOptional(const bool optional) {
+  m_isOptional = optional;
+  m_uiForm.rfFileInput->isOptional(optional);
+  m_uiForm.wsWorkspaceInput->setOptional(optional);
+}
 
 /**
  * Handle signals when files are found or the user manually clicks load.
@@ -270,7 +285,7 @@ QString DataSelector::getCurrentDataName() const {
  *
  * @return Whether the widget will auto load
  */
-bool DataSelector::willAutoLoad() { return m_autoLoad; }
+bool DataSelector::willAutoLoad() const { return m_autoLoad; }
 
 /**
  * Sets whether the widget will attempt to auto load files.
@@ -284,7 +299,7 @@ void DataSelector::setAutoLoad(bool load) { m_autoLoad = load; }
  *
  * @return The text on the load button
  */
-QString DataSelector::getLoadBtnText() { return m_uiForm.pbLoadFile->text(); }
+QString DataSelector::getLoadBtnText() const { return m_uiForm.pbLoadFile->text(); }
 
 /**
  * Sets the text shown on the load button.
@@ -293,42 +308,6 @@ QString DataSelector::getLoadBtnText() { return m_uiForm.pbLoadFile->text(); }
  */
 void DataSelector::setLoadBtnText(const QString &text) {
   m_uiForm.pbLoadFile->setText(text);
-}
-
-/**
- * Gets the suffixes allowed by the workspace selector
- *
- * @return List of suffixes allowed by the workspace selector
- */
-QStringList DataSelector::getWSSuffixes() {
-  return m_uiForm.wsWorkspaceInput->getSuffixes();
-}
-
-/**
- * Sets the suffixes allowed by the workspace selector
- *
- * @param suffixes :: List of suffixes allowed by the workspace selector
- */
-void DataSelector::setWSSuffixes(const QStringList &suffixes) {
-  m_uiForm.wsWorkspaceInput->setSuffixes(suffixes);
-}
-
-/**
- * Gets the suffixes allowed by the file browser
- *
- * @return List of suffixes allowed by the file browser
- */
-QStringList DataSelector::getFBSuffixes() {
-  return m_uiForm.rfFileInput->getFileExtensions();
-}
-
-/**
- * Sets the suffixes allowed by the file browser
- *
- * @param suffixes :: List of suffixes allowed by the file browser
- */
-void DataSelector::setFBSuffixes(const QStringList &suffixes) {
-  m_uiForm.rfFileInput->setFileExtensions(suffixes);
 }
 
 /**
@@ -367,34 +346,6 @@ void DataSelector::setShowLoad(bool load) {
 }
 
 /**
- * Gets the instrument currently set by the override property.
- *
- * If no override is set then the instrument set by default instrument
- * configurtion
- * option will be used and this function returns an empty string.
- *
- * @return Name of instrument, empty if not set
- */
-QString DataSelector::getInstrumentOverride() {
-  return m_uiForm.rfFileInput->getInstrumentOverride();
-}
-
-/**
- * Sets an instrument to fix the widget to.
- *
- * If an instrument name is geven then the widget will only look for files for
- * that
- * instrument, providing na empty string will remove this restriction and will
- * search
- * using the default instrument.
- *
- * @param instName Name of instrument, empty to disable override
- */
-void DataSelector::setInstrumentOverride(const QString &instName) {
-  m_uiForm.rfFileInput->setInstrumentOverride(instName);
-}
-
-/**
  * Called when an item is dropped
  * @param de :: the drop event data package
  */
@@ -425,22 +376,6 @@ void DataSelector::dragEnterEvent(QDragEnterEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   if (mimeData->hasText() || mimeData->hasUrls())
     de->acceptProposedAction();
-}
-
-/**
-* Return whether this widget allows multiple files to be specified within the
-* edit box
-* @returns True if multiple files can be specified, false otherwise
-*/
-bool DataSelector::allowMultipleFiles() const { return m_uiForm.rfFileInput->m_allowMultipleFiles; }
-
-/**
-* Set whether this widget allows multiple files to be specifed or not
-* @param allow :: If true then the widget will accept multiple files else only a
-* single file may be specified
-*/
-void DataSelector::allowMultipleFiles(const bool allow) {
-  m_uiForm.rfFileInput->allowMultipleFiles(allow);
 }
 
 } /* namespace MantidWidgets */
