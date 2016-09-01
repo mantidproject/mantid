@@ -306,7 +306,7 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
 
   // Set workspace for Python export as the first result workspace
   m_pythonExportWsName = energyTransferOutputGroup->getNames()[0];
-
+  outputWorkspaces = energyTransferOutputGroup->getNames();
   // Ungroup the output workspace
   energyTransferOutputGroup->removeAll();
   AnalysisDataService::Instance().remove("IndirectEnergyTransfer_Workspaces");
@@ -689,6 +689,22 @@ void ISISEnergyTransfer::pbRunFinished() {
 
   m_uiForm.dsRunFiles->setEnabled(true);
 }
-
+/**
+ * Handle mantid plotting of workspaces
+ */
+void ISISEnergyTransfer::plotClicked() {
+	for (auto it = outputWorkspaces.begin(); it != outputWorkspaces.end(); ++it) {
+		std::string wsName = *it;
+		if (checkADSForPlotSaveWorkspace(wsName, true)) {
+			const auto plotType = m_uiForm.cbPlotType->currentText();
+			QString pyInput = "from IndirectReductionCommon import plot_reduction\n";
+			pyInput += "plot_reduction('";
+			pyInput += QString::fromStdString(wsName) + "', '";
+			pyInput += plotType + "')\n";
+			std::string output = pyInput.toStdString();
+			m_pythonRunner.runPythonCode(pyInput);
+		}
+	}
+}
 } // namespace CustomInterfaces
 } // namespace Mantid
