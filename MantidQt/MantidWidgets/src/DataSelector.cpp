@@ -40,6 +40,7 @@ DataSelector::~DataSelector() {}
 
 /**
 * Return whether empty input is allowed
+* @return :: Flag if is optional
 */
 bool DataSelector::isOptional() const { return m_isOptional; }
 
@@ -47,7 +48,7 @@ bool DataSelector::isOptional() const { return m_isOptional; }
 * Sets if the text field is optional
 * @param optional :: Set the optional status of the text field
 */
-void DataSelector::isOptional(const bool optional) {
+void DataSelector::isOptional(bool optional) {
   m_isOptional = optional;
   m_uiForm.rfFileInput->isOptional(optional);
   m_uiForm.wsWorkspaceInput->setOptional(optional);

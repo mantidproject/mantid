@@ -11,6 +11,10 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+
+using ButtonOpts = MWRunFiles::ButtonOpts;
+using LiveButtonOpts = MWRunFiles::LiveButtonOpts;
+
 /**
 This class defines a widget for selecting a workspace of file path by using a
 combination
@@ -64,13 +68,11 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataSelector
                  setAlgorithmProperty)
   Q_PROPERTY(
       bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
-  // Q_PROPERTY(MWRunFiles::ButtonOpts buttonOpts READ doButtonOpt WRITE
-  // doButtonOpt)
-  // Q_PROPERTY(
-  //    MWRunFiles::LiveButtonOpts liveButton READ liveButtonState WRITE
-  //    liveButtonState)
-  // Q_ENUMS(MWRunFiles::ButtonOpts)
-  // Q_ENUMS(MWRunFiles::LiveButtonOpts)
+  Q_PROPERTY(ButtonOpts buttonOpts READ doButtonOpt WRITE doButtonOpt)
+  Q_PROPERTY(
+      LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
+  Q_ENUMS(ButtonOpts)
+  Q_ENUMS(LiveButtonOpts)
 
   // These are properties of the workspace selector sub-widget
   Q_PROPERTY(
@@ -130,11 +132,14 @@ public:
   * edit box
   * @returns True if multiple files can be specified, false otherwise
   */
-  bool allowMultipleFiles() const { return m_uiForm.rfFileInput->allowMultipleFiles(); }
+  bool allowMultipleFiles() const {
+    return m_uiForm.rfFileInput->allowMultipleFiles();
+  }
 
   /**
   * Set whether this widget allows multiple files to be specifed or not
-  * @param allow :: If true then the widget will accept multiple files else only a
+  * @param allow :: If true then the widget will accept multiple files else only
+  * a
   * single file may be specified
   */
   void allowMultipleFiles(const bool allow) {
@@ -151,7 +156,9 @@ public:
   * Sets whether this widget is for run file searching or not
   * @param mode :: True if this widget searches for run files, false otherwise
   */
-  void isForRunFiles(const bool mode) { m_uiForm.rfFileInput->isForRunFiles(mode); }
+  void isForRunFiles(const bool mode) {
+    m_uiForm.rfFileInput->isForRunFiles(mode);
+  }
 
   /**
    * Returns if this widget is for selecting a directory or not.
@@ -218,7 +225,9 @@ public:
    * as multiple items
    * @return boolean
    */
-  bool extsAsSingleOption() const { return m_uiForm.rfFileInput->extsAsSingleOption(); }
+  bool extsAsSingleOption() const {
+    return m_uiForm.rfFileInput->extsAsSingleOption();
+  }
 
   /**
    * Sets whether the file dialog should display the exts as a single list or as
@@ -264,6 +273,22 @@ public:
    */
   void setInstrumentOverride(const QString &instName) {
     m_uiForm.rfFileInput->setInstrumentOverride(instName);
+  }
+
+  /**
+  * Returns the preference for how the dialog control should be
+  * @return the setting
+  */
+  ButtonOpts doButtonOpt() const { return m_uiForm.rfFileInput->doButtonOpt(); }
+
+  /**
+  * Set how the browse should appear
+  * @param buttonOpt the preference for the control, if there will be one, to
+  * activate the dialog box
+  */
+
+  void doButtonOpt(const ButtonOpts buttonOpt) {
+    m_uiForm.rfFileInput->doButtonOpt(buttonOpt);
   }
 
   // These are accessors/modifiers of the child WorkspaceSelector
@@ -337,6 +362,19 @@ public:
    */
   void setValidatingAlgorithm(const QString &algName) {
     m_uiForm.wsWorkspaceInput->setValidatingAlgorithm(algName);
+  }
+
+  /**
+   * Sets the validating algorithm of workspace selector
+   *
+   * @param validating algorithm
+   */
+  LiveButtonOpts liveButtonState() const {
+    return m_uiForm.rfFileInput->liveButtonState();
+  }
+
+  void liveButtonState(const LiveButtonOpts option) {
+    m_uiForm.rfFileInput->liveButtonState(option);
   }
 
 signals:
