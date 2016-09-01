@@ -10,8 +10,21 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+This algorithm calibrates the detector pixels and creates a
+:ref:`diffraction calibration workspace
+<DiffractionCalibrationWorkspace>`. Unlike
+:ref:`algm-CalibrateRectangularDetectors` the peak fitting and
+calibration is done in TOF not d spacing. The peak d values are
+converted to TOF based on either the old calibration or the instrument
+geometry. The results are then fitted with up to difc, t_zero and
+difa.
 
+A mask workspace is created, named "OutputCalibrationTable" + '_mask',
+with uncalibrated pixels masked.
+
+The resulting calibration table can be saved with
+:ref:`algm-SaveDiffCal`, loaded with :ref:`algm-LoadDiffCal` and
+applied to a workspace with :ref:`algm-AlignDetectors`.
 
 Usage
 -----
@@ -22,23 +35,29 @@ Usage
 
 **Example - PDCalibration**
 
-.. testcode:: PDCalibrationExample
+.. code-block:: python
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+   # If you have a old calibration it can be used as the starting point
+   oldCal = 'NOM_calibrate_d72460_2016_05_23.h5'
 
-   wsOut = PDCalibration()
+   # list of d values for diamond
+   dvalues = (0.3117,0.3257,0.3499,0.4205,0.4645,0.4768,0.4996,0.5150,0.5441,0.5642,0.5947,0.6307,.6866,.7283,.8185,.8920,1.0758,1.2615,2.0599)
+
+   PDCalibration(UncalibratedWorkspace='uncalibrated',
+                 SignalFile='NOM_72460',
+                 TofBinning=[300,-.001,16666.7],
+                 PreviousCalibration=oldCal,
+                 PeakPositions=dvalues,
+                 OutputCalibrationTable='cal')
 
    # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+   print("The calibrated difc at detid {detid} is {difc}".format(**mtd['cal'].row(40000)))
 
 Output:
 
-.. testoutput:: PDCalibrationExample
+.. code-block:: PDCalibrationExample
 
-  The output workspace has ?? spectra
+  The calibrated difc at detid 40896 is 5522.64160156
 
 .. categories::
 

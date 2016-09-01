@@ -137,7 +137,7 @@ const std::string PDCalibration::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string PDCalibration::summary() const {
-  return "Calibrate the detector pixels and write a calibration file";
+  return "Calibrate the detector pixels and create a calibration table";
 }
 
 //----------------------------------------------------------------------------------------------
