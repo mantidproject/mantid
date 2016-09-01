@@ -100,6 +100,8 @@ public:
   /// Extract workspaces from group and move up a level
   void extractFittedWorkspaces(const std::string &baseName,
                                const std::string &groupName = "") const;
+  /// Set selected workspace
+  void setSelectedWorkspace(const QString &wsName);
 
 public slots:
   /// Transforms fit results when a simultaneous fit finishes
@@ -139,6 +141,8 @@ private:
   void doConnect();
   /// Checks if current fit is simultaneous
   bool isSimultaneousFit() const;
+  /// Set up UI based on workspace
+  void setUpDataSelector(const QString &wsName);
   /// Fit browser to update (non-owning pointer)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Data selector to get input from (non-owning pointer)

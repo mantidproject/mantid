@@ -2345,6 +2345,9 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_dataSelector->setEndTime(xmax);
     }
 
+    // Set input of data selector to selected workspace
+    m_fitDataPresenter->setSelectedWorkspace(m_currentDataName);
+
     // Show connected plot and attach PP tool to it (if has been assigned)
     if (m_currentDataName != NOT_AVAILABLE)
       selectMultiPeak(m_currentDataName);

@@ -165,26 +165,7 @@ void MuonAnalysisFitDataPresenter::setAssignedFirstRun(const QString &wsName) {
     return;
 
   m_PPAssignedFirstRun = wsName;
-  // Parse workspace name here for run number and instrument name
-  const auto wsParams =
-      MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
-  const QString instRun = QString::fromStdString(wsParams.label);
-  const int firstZero = instRun.indexOf("0");
-  const QString numberString = instRun.right(instRun.size() - firstZero);
-  m_dataSelector->setWorkspaceDetails(
-      numberString, QString::fromStdString(wsParams.instrument));
-  m_dataSelector->setWorkspaceIndex(0u); // always has only one spectrum
-  // Check for multiple runs
-  if (wsParams.runs.size() > 1) {
-    m_fitBrowser->allowSequentialFits(false);
-  } else {
-    m_fitBrowser->allowSequentialFits(
-        true); // will still be forbidden if no function
-  }
-
-  // Set selected groups/pairs and periods here too
-  m_dataSelector->setChosenGroup(QString::fromStdString(wsParams.itemName));
-  m_dataSelector->setChosenPeriod(QString::fromStdString(wsParams.periods));
+  setUpDataSelector(wsName);
 }
 
 /**
@@ -676,6 +657,44 @@ bool MuonAnalysisFitDataPresenter::isSimultaneousFit() const {
     return m_dataSelector->getChosenGroups().size() > 1 ||
            m_dataSelector->getPeriodSelections().size() > 1;
   }
+}
+
+/**
+ * Called by Muon Analysis when tab changes from Home to Data Analysis.
+ * Resets the input of the data selector to the workspace that's selected on the
+ * Home tab.
+ * @param wsName :: [input] Current workspace name
+ */
+void MuonAnalysisFitDataPresenter::setSelectedWorkspace(const QString &wsName) {
+  updateWorkspaceNames(std::vector<std::string>{wsName.toStdString()});
+  setUpDataSelector(wsName);
+}
+
+/**
+ * Based on the given workspace name, set UI of data selector
+ * @param wsName :: [input] Workspace name
+ */
+void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName) {
+  // Parse workspace name here for run number and instrument name
+  const auto wsParams =
+      MuonAnalysisHelper::parseWorkspaceName(wsName.toStdString());
+  const QString instRun = QString::fromStdString(wsParams.label);
+  const int firstZero = instRun.indexOf("0");
+  const QString numberString = instRun.right(instRun.size() - firstZero);
+  m_dataSelector->setWorkspaceDetails(
+      numberString, QString::fromStdString(wsParams.instrument));
+  m_dataSelector->setWorkspaceIndex(0u); // always has only one spectrum
+  // Check for multiple runs
+  if (wsParams.runs.size() > 1) {
+    m_fitBrowser->allowSequentialFits(false);
+  } else {
+    m_fitBrowser->allowSequentialFits(
+        true); // will still be forbidden if no function
+  }
+
+  // Set selected groups/pairs and periods here too
+  m_dataSelector->setChosenGroup(QString::fromStdString(wsParams.itemName));
+  m_dataSelector->setChosenPeriod(QString::fromStdString(wsParams.periods));
 }
 
 } // namespace CustomInterfaces
