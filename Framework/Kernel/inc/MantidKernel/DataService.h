@@ -353,10 +353,11 @@ public:
   //--------------------------------------------------------------------------
   /// Empty the service
   void clear() {
-    // Make DataService access thread-safe
-    std::unique_lock<std::recursive_mutex> lock(m_mutex);
-    datamap.clear();
-    lock.unlock();
+    {
+      // Make DataService access thread-safe
+      std::lock_guard<std::recursive_mutex> lock(m_mutex);
+      datamap.clear();
+    }
     notificationCenter.postNotification(new ClearNotification());
     g_log.debug() << typeid(this).name() << " cleared.\n";
   }
