@@ -308,6 +308,18 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
   // Ungroup the output workspace
   energyTransferOutputGroup->removeAll();
   AnalysisDataService::Instance().remove("IndirectEnergyTransfer_Workspaces");
+
+  // Enable plotting and saving
+  m_uiForm.pbPlotTime->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.cbPlotType->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+  m_uiForm.ckSaveAclimax->setEnabled(true);
+  m_uiForm.ckSaveASCII->setEnabled(true);
+  m_uiForm.ckSaveDaveGrp->setEnabled(true);
+  m_uiForm.ckSaveNexus->setEnabled(true);
+  m_uiForm.ckSaveNXSPE->setEnabled(true);
+  m_uiForm.ckSaveSPE->setEnabled(true);
 }
 
 /**
