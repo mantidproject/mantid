@@ -691,17 +691,17 @@ void ISISEnergyTransfer::pbRunFinished() {
  * Handle mantid plotting of workspaces
  */
 void ISISEnergyTransfer::plotClicked() {
-	for (auto it = outputWorkspaces.begin(); it != outputWorkspaces.end(); ++it) {
-		std::string wsName = *it;
-		if (checkADSForPlotSaveWorkspace(wsName, true)) {
-			const auto plotType = m_uiForm.cbPlotType->currentText();
-			QString pyInput = "from IndirectReductionCommon import plot_reduction\n";
-			pyInput += "plot_reduction('";
-			pyInput += QString::fromStdString(wsName) + "', '";
-			pyInput += plotType + "')\n";
-			m_pythonRunner.runPythonCode(pyInput);
-		}
-	}
+  for (auto it = outputWorkspaces.begin(); it != outputWorkspaces.end(); ++it) {
+    std::string wsName = *it;
+    if (checkADSForPlotSaveWorkspace(wsName, true)) {
+      const auto plotType = m_uiForm.cbPlotType->currentText();
+      QString pyInput = "from IndirectReductionCommon import plot_reduction\n";
+      pyInput += "plot_reduction('";
+      pyInput += QString::fromStdString(wsName) + "', '";
+      pyInput += plotType + "')\n";
+      m_pythonRunner.runPythonCode(pyInput);
+    }
+  }
 }
 
 /**
