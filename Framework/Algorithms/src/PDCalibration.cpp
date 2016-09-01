@@ -236,10 +236,6 @@ void PDCalibration::init() {
                       "OutputCalibrationTable", "", Direction::Output),
                   "An output workspace containing the Calibration Table");
 
-  declareProperty(
-      make_unique<WorkspaceProperty<>>("MaskWorkspace", "", Direction::Output),
-      "An output workspace containing the mask");
-
   // make group for FindPeak properties
   std::string findPeaksGroup("Peak finding properties");
   setPropertyGroup("PeakPositions", findPeaksGroup);
@@ -296,6 +292,12 @@ void PDCalibration::exec() {
   } else {
     createNewCalTable();
   }
+
+  std::string maskWSName = getPropertyValue("OutputCalibrationTable");
+  maskWSName += "_mask";
+  declareProperty(make_unique<WorkspaceProperty<>>("MaskWorkspace", maskWSName,
+                                                   Direction::Output),
+                  "An output workspace containing the mask");
 
   MaskWorkspace_sptr maskWS = boost::make_shared<DataObjects::MaskWorkspace>(
       m_uncalibratedWS->getInstrument());
