@@ -84,8 +84,9 @@ public:
         eventWksp->run().getPropertyValueAsType<std::string>("run_start"));
     // Data
     TS_ASSERT_EQUALS(5, eventWksp->getNumberHistograms());
-    // A timer-based test so only check we actually got something
-    TS_ASSERT_EQUALS(5, eventWksp->getNumberEvents());
+    // A timer-based test and each message contains 6 events so the total should
+    // be divisible by 6
+    TS_ASSERT(eventWksp->getNumberEvents() % 6 == 0);
   }
 
   void test_Empty_Event_Stream_Waits() {

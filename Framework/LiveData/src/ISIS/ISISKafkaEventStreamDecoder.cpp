@@ -1,7 +1,6 @@
 #include "MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/Logger.h"
@@ -17,7 +16,7 @@ GCC_DIAG_ON(conversion)
 #include <boost/make_shared.hpp>
 
 #include <functional>
-#include <iostream>
+#include <map>
 
 namespace {
 /// Logger
@@ -137,7 +136,8 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
   g_log.debug("Event capture starting");
   initLocalCaches();
   specnum_t spectrumMinOffset(0);
-  // Assume the mapping is the same for all periods
+  // Events are tagged with spectrum number and we need to look up the
+  // corresponding workspace index
   auto wkspIdx =
       m_localEvents[0]->getSpectrumToWorkspaceIndexVector(spectrumMinOffset);
 
@@ -174,8 +174,9 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
       const auto &specData = *(eventData->spec());
       auto nevents = tofData.size();
       for (decltype(nevents) i = 0; i < nevents; ++i) {
-        periodBuffer.getSpectrum(wkspIdx[specData[i] - spectrumMinOffset])
-            .addEventQuickly(TofEvent(tofData[i], pulseTime));
+        auto &spectrum =
+            periodBuffer.getSpectrum(wkspIdx[specData[i] + spectrumMinOffset]);
+        spectrum.addEventQuickly(TofEvent(tofData[i], pulseTime));
       }
     }
   }
@@ -211,15 +212,8 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
           "found nspec=" << nspec << ", ndet=" << nudet;
     throw std::runtime_error(os.str());
   }
-  auto eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
-      API::WorkspaceFactory::Instance().create("EventWorkspace", nspec, 2, 1));
-  // Set the units
-  eventBuffer->getAxis(0)->unit() =
-      Kernel::UnitFactory::Instance().create("TOF");
-  eventBuffer->setYUnit("Counts");
-  // Setup the spectra-detector mapping
-  eventBuffer->updateSpectraUsing(API::SpectrumDetectorMapping(
-      spDetMsg->spec()->data(), spDetMsg->det()->data(), nspec));
+  auto eventBuffer = createBufferWorkspace(spDetMsg->spec()->data(),
+                                           spDetMsg->det()->data(), nudet);
   // Load the instrument if possibly but continue if we can't
   m_runStream->consumeMessage(&rawMsgBuffer);
   if (rawMsgBuffer.empty()) {
@@ -227,6 +221,8 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
                              "Empty message received from run info "
                              "topic. Unable to continue");
   }
+
+  // ---- Run metadata ----
   auto runMsg = ISISDAE::GetRunInfo(
       reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
   auto instName = runMsg->inst_name();
@@ -236,7 +232,6 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
     g_log.warning(
         "Empty instrument name recieved. Continuing without instrument");
 
-  // ---- Run metadata ----
   auto &mutableRun = eventBuffer->mutableRun();
   // Run start. Cache locally for computing frame times
   time_t runStartTime = runMsg->start_time();
@@ -255,6 +250,52 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
   // Should be the number of periods. What is that?
   m_localEvents.resize(1);
   m_localEvents[0] = eventBuffer;
+}
+
+/**
+ * Create a buffer workspace of the correct size based on the spectra-detector
+ * mapping
+ * @param spec An array of length ndet specifying the spectrum number of each
+ * detector
+ * @param udet An array of length ndet specifying the detector ID of each
+ * detector
+ * @param ndet The length of the input arrays
+ * @return A new workspace of the appropriate size
+ */
+DataObjects::EventWorkspace_sptr
+ISISKafkaEventStreamDecoder::createBufferWorkspace(const int32_t *spec,
+                                                   const int32_t *udet,
+                                                   uint32_t ndet) {
+  // Order is important here
+  std::map<int32_t, std::set<int32_t>> spdetMap;
+  for (uint32_t i = 0; i < ndet; ++i) {
+    auto specNo = spec[i];
+    auto detId = udet[i];
+    auto search = spdetMap.find(specNo);
+    if (search != spdetMap.end()) {
+      search->second.insert(detId);
+    } else {
+      spdetMap.insert({specNo, {detId}});
+    }
+  }
+  const auto nspectra = spdetMap.size();
+  // Create event workspace
+  auto eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
+      API::WorkspaceFactory::Instance().create("EventWorkspace", nspectra, 2,
+                                               1));
+  // Set the units
+  eventBuffer->getAxis(0)->unit() =
+      Kernel::UnitFactory::Instance().create("TOF");
+  eventBuffer->setYUnit("Counts");
+  // Setup spectra-detector mapping.
+  size_t wsIdx(0);
+  for (const auto &spIter : spdetMap) {
+    auto &spectrum = eventBuffer->getSpectrum(wsIdx);
+    spectrum.setSpectrumNo(spIter.first);
+    spectrum.addDetectorIDs(spIter.second);
+    ++wsIdx;
+  }
+  return eventBuffer;
 }
 
 /**

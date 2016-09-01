@@ -73,6 +73,9 @@ private:
   void captureImplExcept();
 
   void initLocalCaches();
+  DataObjects::EventWorkspace_sptr createBufferWorkspace(const int32_t *spec,
+                                                         const int32_t *udet,
+                                                         uint32_t ndet);
   void loadInstrument(const std::string &name,
                       DataObjects::EventWorkspace_sptr workspace);
 
