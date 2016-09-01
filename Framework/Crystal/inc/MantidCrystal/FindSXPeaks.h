@@ -23,6 +23,7 @@ public:
   @param spectral : contributing spectra
   @param Ltot : detector-sample absolute distance
   @param detectorId : id of the contributing detector
+  @param inst: geometry of the instrument 
   */
   SXPeak(double t, double th2, double phi, double intensity,
          const std::vector<int> &spectral, double Ltot,
