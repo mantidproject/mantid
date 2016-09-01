@@ -36,11 +36,18 @@ class MANTID_ALGORITHMS_DLL SampleLogsBehaviour {
 public:
   enum MergeLogType { average, min, max, sum, list, warn, fail };
 
+  typedef struct
+  {
+    MergeLogType type;
+    Kernel::Property *property;
+    double tolerance;
+    bool isNumeric;
+  } SampleLogBehaviour;
+
   SampleLogsBehaviour(Kernel::Logger &logger);
   Kernel::Logger &m_logger;
 
-  typedef std::pair<Kernel::Property *, MergeLogType> propertyType;
-  std::map<const std::string, propertyType> m_logMap;
+  std::map<const std::string, SampleLogBehaviour> m_logMap;
 
   /// Create and update sample logs according to instrument parameters
   void createSampleLogsMaps(const API::MatrixWorkspace_sptr &ws);
@@ -53,7 +60,7 @@ public:
 private:
   void getSampleList(const MergeLogType &, const std::string &parameterName,
                      const API::MatrixWorkspace_sptr &ws,
-                     const std::string sampleLogDeltas = "");
+                     const std::string sampleLogTolerances = "");
 };
 
 } // namespace Algorithms

@@ -897,7 +897,7 @@ public:
 
     Property *prop;
 
-    TS_ASSERT_EQUALS(output->getSpectrum(0).dataY().front(), 2.0 * filesMerged);
+    TS_ASSERT_EQUALS(output->y(0).front(), 2.0 * filesMerged);
 
     if (mergeType.compare("sample_logs_list") == 0) {
       prop = output->mutableRun().getLogData("prop_list");
@@ -973,11 +973,13 @@ public:
   }
 
   void test_mergeSampleLogs_non_numeric_property_fails_to_merge() {
-    // Fails two merge as one, two not numbers
     std::string mergeType = "sample_logs_average";
-    do_test_mergeSampleLogs(create_workspace_with_sample_logs<std::string>(mergeType, "one", "two"), mergeType, "one", 1);
     do_test_mergeSampleLogs(create_workspace_with_sample_logs<std::string>(mergeType, "1", "two"), mergeType, "1", 1);
-    do_test_mergeSampleLogs(create_workspace_with_sample_logs<std::string>(mergeType, "one", "2"), mergeType, "one", 1);
+  }
+
+  void test_mergeSampleLogs_non_numeric_property_in_first_ws_skips_merging_parameter() {
+    std::string mergeType = "sample_logs_average";
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<std::string>(mergeType, "one", "two"), mergeType, "one", 2);
   }
 
 private:

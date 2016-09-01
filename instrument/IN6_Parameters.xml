@@ -41,6 +41,12 @@
         <parameter name="sample_logs_fail" type="string">
             <value val="EPP" />
         </parameter>
+        <parameter name="sample_logs_warn_tolerance" type="string">
+            <value val="0.1, 0.2" />
+        </parameter>
+        <parameter name="sample_logs_fail_tolerance" type="string">
+            <value val="0.3" />
+        </parameter>
 
 	</component-link>
 
