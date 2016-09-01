@@ -165,14 +165,13 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
   moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex,
                scaley, m_bank, m_workspace);
 
-  DataObjects::PeaksWorkspace_sptr inputP =
+  auto inputP =
       boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(m_workspace);
-  Geometry::Instrument_sptr inst =
-      boost::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
+  auto inst = inputP->getInstrument();
   Geometry::OrientedLattice lattice =
       inputP->mutableSample().getOrientedLattice();
   for (int i = 0; i < inputP->getNumberPeaks(); i++) {
-    DataObjects::Peak peak = inputP->getPeak(i);
+    const DataObjects::Peak &peak = inputP->getPeak(i);
     V3D hkl =
         V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
             boost::math::iround(peak.getL()));
