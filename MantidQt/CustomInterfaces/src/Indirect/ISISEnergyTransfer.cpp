@@ -41,6 +41,8 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
   // Reverts run button back to normal when file finding has finished
   connect(m_uiForm.dsRunFiles, SIGNAL(fileFindingFinished()), this,
           SLOT(pbRunFinished()));
+  // Handle plotting and saving
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
   // Update UI widgets to show default values
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
@@ -310,7 +312,6 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
   AnalysisDataService::Instance().remove("IndirectEnergyTransfer_Workspaces");
 
   // Enable plotting and saving
-  m_uiForm.pbPlotTime->setEnabled(true);
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.cbPlotType->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
