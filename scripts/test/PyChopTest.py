@@ -21,8 +21,7 @@ class PyChop2Tests(unittest.TestCase):
             self.assertTrue(modulenames[inc] in chopobj.getObject().__module__)
             # Code should give an error if the chopper settings and Ei have
             # not been set.
-            with self.assertRaises(ValueError):
-                chopobj.getResolution()
+            self.assertRaises(ValueError, chopobj.getResolution)
             if 'Fermi' in modulenames[inc]:
                 chopobj.setChopper('s', 200)
             else:
