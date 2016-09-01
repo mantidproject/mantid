@@ -180,4 +180,4 @@ Settings
     it defaults to `C:\\EnginX_Mantid\\Focus` or `~/EnginX_Mantid/Focus` but can be changed to 
     suit the users needs.
 
-
+.. categories:: Interfaces Diffraction
