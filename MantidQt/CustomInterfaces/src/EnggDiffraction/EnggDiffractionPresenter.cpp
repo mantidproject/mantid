@@ -99,7 +99,7 @@ void EnggDiffractionPresenter::cleanup() {
   // Remove the workspace which is loaded when the interface starts
   auto &ADS = Mantid::API::AnalysisDataService::Instance();
   if (ADS.doesExist(g_calibBanksParms)) {
-	  ADS.remove(g_calibBanksParms);
+    ADS.remove(g_calibBanksParms);
   }
 }
 
@@ -1077,11 +1077,6 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                vanCurvesWS, cs.m_forceRecalcOverwrite, specNos);
 
   try {
-
-    loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
-                                 vanCurvesWS, cs.m_forceRecalcOverwrite,
-                                 specNos);
-
     auto load =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
     load->initialize();
@@ -1165,11 +1160,12 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
       throw std::runtime_error("EnggCalibrate failed");
     }
 
-      difc[i] = alg->getProperty("DIFC");
-      tzero[i] = alg->getProperty("TZERO");
+    difc[i] = alg->getProperty("DIFC");
+    tzero[i] = alg->getProperty("TZERO");
 
     g_log.information() << " * Bank " << i + 1 << " calibrated, "
-                   << "difc: " << difc[i] << ", zero: " << tzero[i] << '\n';
+                        << "difc: " << difc[i] << ", zero: " << tzero[i]
+                        << '\n';
   }
 
   // Creates appropriate output directory
