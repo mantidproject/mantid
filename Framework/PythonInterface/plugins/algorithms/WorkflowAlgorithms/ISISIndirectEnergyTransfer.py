@@ -32,7 +32,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
     _grouping_ws = None
     _grouping_map_file = None
     _output_x_units = None
-    _save_formats = None
     _output_ws = None
     _sum_files = None
     _ipf_filename = None
@@ -109,8 +108,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(name='UnitX', defaultValue='DeltaE',
                              validator=StringListValidator(['DeltaE', 'DeltaE_inWavenumber']),
                              doc='X axis units for the result workspace.')
-        self.declareProperty(StringArrayProperty(name='SaveFormats'),
-                             doc='Comma seperated list of save formats')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
@@ -129,8 +126,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                                              rebin_reduction,
                                              group_spectra,
                                              fold_chopped,
-                                             rename_reduction,
-                                             save_reduction)
+                                             rename_reduction)
 
         self._setup()
         load_prog = Progress(self, start=0.0, end=0.10, nreports=2)
@@ -265,13 +261,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         summary_prog = Progress(self, start=0.9, end=1.0, nreports=4)
 
-        # Save result workspaces
-        if self._save_formats is not None:
-            summary_prog.report('saving')
-            save_reduction(output_workspace_names,
-                           self._save_formats,
-                           self._output_x_units)
-
         # Group result workspaces
         summary_prog.report('grouping workspaces')
         GroupWorkspaces(InputWorkspaces=output_workspace_names,
@@ -324,14 +313,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         if grouping_method == 'Workspace' and grouping_ws is None:
             issues['GroupingWorkspace'] = 'Must select a grouping workspace for current GroupingWorkspace'
 
-        # Validate save formats
-        save_formats = self.getProperty('SaveFormats').value
-        valid_formats = ['nxs', 'ascii', 'spe', 'nxspe', 'aclimax', 'davegrp']
-        for format_name in save_formats:
-            if format_name not in valid_formats:
-                issues['SaveFormats'] = '%s is not a valid save format' % format_name
-                break
-
         efixed = self.getProperty('Efixed').value
         if efixed != Property.EMPTY_DBL and instrument_name not in ['IRIS', 'OSIRIS']:
             issues['Efixed'] = 'Can only override Efixed on IRIS and OSIRIS'
@@ -367,7 +348,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._grouping_map_file = _str_or_none(self.getPropertyValue('MapFile'))
 
         self._output_x_units = self.getPropertyValue('UnitX')
-        self._save_formats = _elems_or_none(self.getProperty('SaveFormats').value)
 
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 
