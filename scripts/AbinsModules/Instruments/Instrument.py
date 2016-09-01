@@ -2,10 +2,19 @@ class Instrument(object):
 
     _name  = None
 
-    def calculate_q(self, frequencies=None):
+    def calculate_q_powder(self):
         """
+        Calculates q vectors.
+        @return:  numpy array with Q data
+        """
+        ""
+        return None
 
-        @param frequencies:  frequencies for which Q data should be calculated (frequencies in cm-1)
+
+    def collect_K_data(self, k_points_data=None):
+        """
+        Collects k-points data from DFT calculations.
+        @param k_points_data: object of type KpointsData with data from DFT calculations
         """
         return None
 
@@ -14,13 +23,14 @@ class Instrument(object):
         """
         Convolves discrete spectrum with the  resolution function for the particular instrument.
 
-        @param frequencies:   frequencies for which resolution function should be calculated (frequencies in cm-1)
+        @param frequencies: frequencies for which resolution function should be calculated (frequencies in cm-1)
         @param s_dft:  discrete S calculated directly from DFT
         @param points_per_peak: number of points for each peak
         @param start: 3 if acoustic modes at Gamma point, otherwise this should be set to zero
 
        """
         return None
+
 
     def produce_abscissa(self, frequencies=None, points_per_peak=None, start=None):
         """
@@ -34,4 +44,8 @@ class Instrument(object):
 
 
     def __str__(self):
+        return self._name
+
+
+    def getName(self):
         return self._name

@@ -3,6 +3,7 @@ import math
 
 from Instrument import  Instrument
 from AbinsModules import AbinsParameters
+from AbinsModules.KpointsData import  KpointsData
 
 class ToscaInstrument(Instrument):
     """
@@ -10,13 +11,33 @@ class ToscaInstrument(Instrument):
     """
     def __init__(self, name):
         self._name = name
+        self._k_points_data=None
 
-    def calculate_q(self, frequencies=None):
+
+    def calculate_q_powder(self):
         """
-        @param frequencies:   DFT frequencies for which resolution function should be calculated (frequencies in cm-1)
         Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
         """
-        return  np.multiply(np.multiply(frequencies, frequencies), AbinsParameters.TOSCA_constant)
+        _k_data = self._k_points_data.extract()
+        num_k = _k_data["frequencies"].shape[0]
+        num_freq = _k_data["frequencies"].shape[1]
+        frequencies = np.multiply(_k_data["frequencies"], 1.0 / AbinsParameters.cm1_2_hartree)
+        q_vectors = np.zeros((num_k, num_freq), dtype=AbinsParameters.float_type)
+        q_vectors = np.multiply(np.multiply(frequencies, frequencies), AbinsParameters.TOSCA_constant)
+
+        return q_vectors
+
+
+    def collect_K_data(self, k_points_data=None):
+        """
+        Collect k-points data from DFT calculations.
+        @param k_points_data: object of type KpointsData with data from DFT calculations
+        """
+
+        if not isinstance(k_points_data, KpointsData):
+            raise ValueError("Invalid value of k-points data.")
+
+        self._k_points_data = k_points_data
 
 
     def convolve_with_resolution_function(self, frequencies=None, s_dft=None, points_per_peak=None, start=None):

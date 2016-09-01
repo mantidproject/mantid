@@ -187,7 +187,7 @@ class ABINS(PythonAlgorithm):
         # 5) create workspaces for atoms in interest
         _workspaces=None
         if self._sampleForm == "Powder":
-            _workspaces = self._create_partial_s_powder_sum_workspaces(atoms_symbol=atoms_symbol, s_data=s_data)
+            _workspaces = self._create_partial_s_powder_workspaces(atoms_symbol=atoms_symbol, s_data=s_data)
             if self._overtones:
                 _workspaces.extend(self._create_partial_s_overtones_workspaces(atoms_symbol=atoms_symbol, s_data=s_data))
         prog_reporter.report("Workspaces with partial dynamical structure factors have been constructed.")
@@ -252,7 +252,7 @@ class ABINS(PythonAlgorithm):
         return partial_workspaces
 
 
-    def _create_partial_s_powder_sum_workspaces(self, atoms_symbol=None, s_data=None):
+    def _create_partial_s_powder_workspaces(self, atoms_symbol=None, s_data=None):
 
         """
         Creates workspaces for all types of atoms. Each workspace stores total S for the given atom.
