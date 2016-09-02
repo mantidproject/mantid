@@ -340,7 +340,7 @@ public:
   /**
    * Sets the workspace types allowed by the workspace selector
    *
-   * @param List of workspace types allowed by the workspace selector
+   * @param types :: List of workspace types allowed by the workspace selector
    */
   void setWorkspaceTypes(const QStringList &types) {
     m_uiForm.wsWorkspaceInput->setWorkspaceTypes(types);
