@@ -364,9 +364,10 @@ void DataProcessorTwoLevelTreeManager::newTable(
 void DataProcessorTwoLevelTreeManager::newTable(
     ITableWorkspace_sptr table, const DataProcessorWhiteList &whitelist) {
 
-  if (isValidModel(table, whitelist.size()))
+  if (isValidModel(table, whitelist.size())) {
+    m_ws = table;
     m_model.reset(new QDataProcessorTwoLevelTreeModel(table, whitelist));
-  else
+  } else
     throw std::runtime_error("Selected table has the incorrect number of "
                              "columns to be used as a data processor table.");
 }
@@ -543,6 +544,7 @@ DataProcessorTwoLevelTreeManager::getModel() {
 * @return :: The table workspace
 */
 ITableWorkspace_sptr DataProcessorTwoLevelTreeManager::getTableWorkspace() {
+
   return m_ws;
 }
 

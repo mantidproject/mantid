@@ -7,6 +7,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 class QAbstractItemModel;
 

@@ -1095,13 +1095,18 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
+    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
+        .Times(1)
+        .WillRepeatedly(Return(true));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .Times(1)
+        .WillOnce(Return("Params = \"0.1\""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillRepeatedly(Return(false));
@@ -1117,7 +1122,7 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12346"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12346"));
     TS_ASSERT(
-        !AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345_TOF_12346"));
+        AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345_TOF_12346"));
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -1127,6 +1132,7 @@ public:
     AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
     AnalysisDataService::Instance().remove("TOF_12346");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -2588,7 +2594,9 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
         .WillRepeatedly(Return(rowlist));
-    EXPECT_CALL(mockDataProcessorView, getSelectedParents()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(std::set<int>()));
     presenter.notify(DataProcessorPresenter::PlotRowFlag);
 
     // Tidy up
@@ -2613,7 +2621,7 @@ public:
         .Times(2)
         .WillRepeatedly(Return(rowlist));
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(1)
+        .Times(2)
         .WillRepeatedly(Return(std::set<int>()));
     EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _));
     // Append an empty row to our table
@@ -2645,7 +2653,7 @@ public:
     std::set<int> grouplist;
     grouplist.insert(0);
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
-        .Times(1)
+        .Times(2)
         .WillRepeatedly(Return(rowlist));
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(2)
@@ -2687,7 +2695,9 @@ public:
     // We should be warned
     EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _));
     // The user hits "plot groups" with the first row selected
-    EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(grouplist));
@@ -2721,20 +2731,25 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
+    std::vector<std::string> row0 = {"12345", "0.5",  "",  "0.1",
+                                     "0.3",   "0.04", "1", ""};
+    std::vector<std::string> row1 = {"12346", "0.5",  "",  "0.1",
+                                     "0.3",   "0.04", "1", ""};
+    std::map<int, std::vector<std::string>> group = {{0, row0}, {1, row1}};
+
     // Test the names of the reduced workspaces
-    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(0, 0, "prefix_1_"),
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(row0, "prefix_1_"),
                      "prefix_1_TOF_12345");
-    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(0, 1, "prefix_2_"),
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(row1, "prefix_2_"),
                      "prefix_2_TOF_12346");
-    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(1, 0), "TOF_24681");
-    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(1, 1), "TOF_24682");
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(row0), "TOF_12345");
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(row1), "TOF_12346");
     // Test the names of the post-processed ws
-    TS_ASSERT_EQUALS(presenter.getPostprocessedWorkspaceName(
-                         0, std::set<int>{0, 1}, "new_prefix_"),
-                     "new_prefix_TOF_12345_TOF_12346");
     TS_ASSERT_EQUALS(
-        presenter.getPostprocessedWorkspaceName(1, std::set<int>{0, 1}),
-        "TOF_24681_TOF_24682");
+        presenter.getPostprocessedWorkspaceName(group, "new_prefix_"),
+        "new_prefix_TOF_12345_TOF_12346");
+    TS_ASSERT_EQUALS(presenter.getPostprocessedWorkspaceName(group),
+                     "TOF_12345_TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -2760,22 +2775,60 @@ public:
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
 
+    std::vector<std::string> row0 = {"12345", "0.5",  "11115", "0.1",
+                                     "0.3",   "0.04", "1",     ""};
+    std::vector<std::string> row1 = {"12346", "0.5",  "11116", "0.1",
+                                     "0.3",   "0.04", "1",     ""};
+    std::map<int, std::vector<std::string>> group = {{0, row0}, {1, row1}};
+
     // Test the names of the reduced workspaces
-    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(0, 0, "prefix_1_"),
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(row0, "prefix_1_"),
                      "prefix_1_TOF_12345_TRANS_11115");
-    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(0, 1, "prefix_2_"),
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(row1, "prefix_2_"),
                      "prefix_2_TOF_12346_TRANS_11116");
-    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(1, 0),
-                     "TOF_24681_TRANS_22221");
-    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(1, 1),
-                     "TOF_24682_TRANS_22222");
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(row0),
+                     "TOF_12345_TRANS_11115");
+    TS_ASSERT_EQUALS(presenter.getReducedWorkspaceName(row1),
+                     "TOF_12346_TRANS_11116");
     // Test the names of the post-processed ws
-    TS_ASSERT_EQUALS(presenter.getPostprocessedWorkspaceName(
-                         0, std::set<int>{0, 1}, "new_prefix_"),
-                     "new_prefix_TOF_12345_TRANS_11115_TOF_12346_TRANS_11116");
     TS_ASSERT_EQUALS(
-        presenter.getPostprocessedWorkspaceName(1, std::set<int>{0, 1}),
-        "TOF_24681_TRANS_22221_TOF_24682_TRANS_22222");
+        presenter.getPostprocessedWorkspaceName(group, "new_prefix_"),
+        "new_prefix_TOF_12345_TRANS_11115_TOF_12346_TRANS_11116");
+    TS_ASSERT_EQUALS(presenter.getPostprocessedWorkspaceName(group),
+                     "TOF_12345_TRANS_11115_TOF_12346_TRANS_11116");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testWorkspaceNameWrongData() {
+
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    createPrefilledWorkspaceWithTrans("TestWorkspace",
+                                      presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+
+    std::vector<std::string> row0 = {"12345", "0.5"};
+    std::vector<std::string> row1 = {"12346", "0.5"};
+    std::map<int, std::vector<std::string>> group = {{0, row0}, {1, row1}};
+
+    // Test the names of the reduced workspaces
+    TS_ASSERT_THROWS_ANYTHING(presenter.getReducedWorkspaceName(row0));
+    TS_ASSERT_THROWS_ANYTHING(presenter.getPostprocessedWorkspaceName(group));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));

@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
@@ -28,7 +29,9 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableAsCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
 
+using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 using namespace testing;
 
@@ -50,7 +53,7 @@ public:
 
   void test_publish_commands() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    DataProcessorTwoLevelTreeManager manager(&presenter);
+    DataProcessorTwoLevelTreeManager manager(&presenter, DataProcessorWhiteList());
 
     auto comm = manager.publishCommands();
 

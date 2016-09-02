@@ -180,25 +180,27 @@ void GenericDataProcessorPresenter::process() {
         return;
       }
 
-      // Post-process (if needed)
-      if (item.second.size() > 1) {
-        try {
-          postProcessGroup(item.second);
-        } catch (std::exception &ex) {
-          m_mainPresenter->giveUserCritical(ex.what(), "Error");
-          progressReporter.clear();
-          return;
-        }
-      }
       progressReporter.report();
+    }
+
+    // Post-process (if needed)
+    if (item.second.size() > 1) {
+      try {
+        postProcessGroup(item.second);
+        progressReporter.report();
+      } catch (std::exception &ex) {
+        m_mainPresenter->giveUserCritical(ex.what(), "Error");
+        progressReporter.clear();
+        return;
+      }
     }
   }
 
   // If "Output Notebook" checkbox is checked then create an ipython notebook
-  // TODO: enable notebook
-  //if (m_view->getEnableNotebook()) {
-  //  saveNotebook(groups, rows);
-  //}
+  if (m_view->getEnableNotebook()) {
+    // TODO: fix notebook
+    saveNotebook(std::set<int>(), std::map<int, std::set<int>>());
+  }
 }
 
 /**
@@ -387,6 +389,9 @@ Returns the name of the reduced workspace for a given row
 */
 std::string GenericDataProcessorPresenter::getReducedWorkspaceName(
     const std::vector<std::string> &data, const std::string &prefix) {
+
+  if (static_cast<int>(data.size() != m_columns))
+    throw std::invalid_argument("Can't find reduced workspace name");
 
   /* This method calculates, for a given row, the name of the output (processed)
   * workspace. This is done using the white list, which contains information
@@ -924,7 +929,10 @@ void GenericDataProcessorPresenter::afterReplaceHandle(
 /** Expands the current selection */
 void GenericDataProcessorPresenter::expandSelection() {
 
-	m_view->setSelection(m_manager->expandSelection());
+  auto selection = m_manager->expandSelection();
+
+  if (!selection.empty())
+    m_view->setSelection(selection);
 }
 
 /** Clear current selection */

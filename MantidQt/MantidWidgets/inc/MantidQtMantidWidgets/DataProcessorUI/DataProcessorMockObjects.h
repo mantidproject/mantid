@@ -62,7 +62,7 @@ public:
   MOCK_METHOD0(addActionsProxy, void());
 
   // Calls we don't care about
-  void showTable(QDataProcessorTwoLevelTreeModel_sptr) override{};
+  void showTable(boost::shared_ptr<QAbstractItemModel>) override{};
   void saveSettings(const std::map<std::string, QVariant> &) override{};
   std::string getProcessInstrument() const override { return "FAKE"; }
 
@@ -104,6 +104,12 @@ public:
   MOCK_METHOD1(notify, void(DataProcessorPresenter::Flag));
   MOCK_METHOD1(setModel, void(std::string name));
   MOCK_METHOD1(accept, void(DataProcessorMainPresenter *));
+  MOCK_CONST_METHOD0(selectedParents, std::set<int>());
+  MOCK_CONST_METHOD0(selectedChildren, std::map<int, std::set<int>>());
+  MOCK_CONST_METHOD2(askUserYesNo,
+                     bool(const std::string &prompt, const std::string &title));
+  MOCK_CONST_METHOD2(giveUserWarning,
+                     void(const std::string &prompt, const std::string &title));
 
 private:
   // Calls we don't care about
