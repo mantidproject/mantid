@@ -167,7 +167,7 @@ namespace {subproject} {{
 #======================================================================
 def write_test(subproject, classname, filename, args):
     """Write a class test file"""
-    print("Writing test file to",filename)
+    print("Writing test file to", filename)
     f = open(filename, 'w')
 
     guard = "MANTID_{}_{}TEST_H_".format(subproject.upper(), classname.upper())
