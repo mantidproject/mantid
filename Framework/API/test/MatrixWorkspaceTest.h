@@ -1548,7 +1548,7 @@ public:
     m_pos = Mantid::Kernel::V3D(1, 1, 1);
   }
 
-  /// This test is equivalent to GeometryInfoFactoryTestPerformance, see there.
+  /// This test is equivalent to SpectrumInfoTestPerformance, see there.
   void test_typical() {
     auto instrument = m_workspace.getInstrument();
     auto source = instrument->getSource();
@@ -1561,7 +1561,7 @@ public:
       result += detector->getDistance(*sample);
       result += m_workspace.detectorTwoTheta(*detector);
     }
-    // We are computing an using the result to fool the optimizer.
+    // We are computing and using the result to fool the optimizer.
     TS_ASSERT_DELTA(result, 5214709.740869, 1e-6);
   }
 

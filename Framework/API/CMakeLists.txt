@@ -46,8 +46,6 @@ set ( SRC_FILES
 	src/FunctionParameterDecorator.cpp
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
-	src/GeometryInfo.cpp
-	src/GeometryInfoFactory.cpp
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
 	src/GroupingLoader.cpp
@@ -95,12 +93,12 @@ set ( SRC_FILES
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
 	src/ModeratorModel.cpp
+	src/MuParserUtils.cpp
 	src/MultiDomainFunction.cpp
 	src/MultiPeriodGroupAlgorithm.cpp
 	src/MultiPeriodGroupWorker.cpp
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
-	src/MuParserUtils.cpp
 	src/NotebookBuilder.cpp
 	src/NotebookWriter.cpp
 	src/NullCoordTransform.cpp
@@ -202,8 +200,6 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionParameterDecorator.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
-	inc/MantidAPI/GeometryInfo.h
-	inc/MantidAPI/GeometryInfoFactory.h
 	inc/MantidAPI/GridDomain.h
 	inc/MantidAPI/GridDomain1D.h
 	inc/MantidAPI/GroupingLoader.h
@@ -280,12 +276,12 @@ set ( INC_FILES
 	inc/MantidAPI/MatrixWorkspaceValidator.h
 	inc/MantidAPI/MatrixWorkspace_fwd.h
 	inc/MantidAPI/ModeratorModel.h
+	inc/MantidAPI/MuParserUtils.h
 	inc/MantidAPI/MultiDomainFunction.h
 	inc/MantidAPI/MultiPeriodGroupAlgorithm.h
 	inc/MantidAPI/MultiPeriodGroupWorker.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
-	inc/MantidAPI/MuParserUtils.h
 	inc/MantidAPI/NotebookBuilder.h
 	inc/MantidAPI/NotebookWriter.h
 	inc/MantidAPI/NullCoordTransform.h
@@ -367,8 +363,6 @@ set ( TEST_FILES
 	FunctionPropertyTest.h
 	FunctionTest.h
 	FunctionValuesTest.h
-	GeometryInfoFactoryTest.h
-	GeometryInfoTest.h
 	GroupingLoaderTest.h
 	HistogramValidatorTest.h
 	HistoryItemTest.h
@@ -393,12 +387,12 @@ set ( TEST_FILES
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
 	ModeratorModelTest.h
+	MuParserUtilsTest.h
 	MultiDomainFunctionTest.h
 	MultiPeriodGroupAlgorithmTest.h
 	MultiPeriodGroupWorkerTest.h
 	MultipleExperimentInfosTest.h
 	MultipleFilePropertyTest.h
-	MuParserUtilsTest.h
 	NotebookBuilderTest.h
 	NotebookWriterTest.h
 	NumericAxisTest.h
