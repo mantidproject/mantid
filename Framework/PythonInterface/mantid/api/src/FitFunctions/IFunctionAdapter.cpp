@@ -114,6 +114,7 @@ PyObject *IFunctionAdapter::getAttributeValue(IFunction &self,
 PyObject *
 IFunctionAdapter::getAttributeValue(IFunction &self,
                                     const API::IFunction::Attribute &attr) {
+  UNUSED_ARG(self);
   std::string type = attr.type();
   PyObject *result(nullptr);
   if (type == "int")
