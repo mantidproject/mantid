@@ -99,7 +99,7 @@ void EditLocalParameterDialog::doSetup(const QString &parName,
   connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this,
           SLOT(valueChanged(int, int)));
   m_uiForm.lblParameterName->setText("Parameter: " + parName);
-    
+
   assert(wsNames.size() == static_cast<int>(wsIndices.size()));
   for (int i = 0; i < wsNames.size(); i++) {
     m_uiForm.tableWidget->insertRow(i);

@@ -358,6 +358,10 @@ When this option is set to *True*, the fitting process is done using the raw (un
 
 Compatibility mode
 ^^^^^^^^^^^^^^^^^^
+
+.. image::  ../images/MuonAnalysisDataAnalysis.png
+   :align: right
+
 To revert to the interface as it was pre-Mantid 3.8, use the checkbox for "Compatibility mode" on the Settings_ tab.
 
 In this case, the only thing that this tab will contain is a specialised version of the
@@ -596,11 +600,11 @@ General
 +-------+------------------------+---------------------------------------------------------------------+
 | **3** | **Hide Toolbars**      | If enabled, opening the interface up hides the MantidPlot           |
 |       |                        | toolbars. This is useful on smaller screens.                        |
-+-------+------------------------+---------------------------------------------------------------------|
++-------+------------------------+---------------------------------------------------------------------+
 | **4** | **Compatibility mode** | If enabled, the DataAnalysis_ tab will be reverted to the UI it had |
 |       |                        | in previous versions of Mantid (pre-3.8). Note that simultaneous    |
 |       |                        | fits are not possible in this mode.                                 |
-+-------+---------------------+------------------------------------------------------------------------+
++-------+------------------------+---------------------------------------------------------------------+
 
 Feedback & Comments
 -------------------

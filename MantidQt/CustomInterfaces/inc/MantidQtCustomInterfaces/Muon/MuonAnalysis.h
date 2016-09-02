@@ -518,7 +518,7 @@ private:
   /// Cached value of config setting
   std::string m_cachedPeakRadius;
   static const std::string PEAK_RADIUS_CONFIG;
-  
+
   /// Function browser widget for fit tab
   MantidQt::MantidWidgets::FunctionBrowser *m_functionBrowser;
 
