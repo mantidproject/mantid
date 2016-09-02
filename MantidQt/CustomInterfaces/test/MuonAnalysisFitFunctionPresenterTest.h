@@ -89,6 +89,7 @@ public:
     m_fitBrowser = new NiceMock<MockFitFunctionControl>();
     m_presenter = new MuonAnalysisFitFunctionPresenter(nullptr, m_fitBrowser,
                                                        m_funcBrowser);
+    m_presenter->setCompatibilityMode(false);
   }
 
   /// Run after each test to check expectations and remove mocks
