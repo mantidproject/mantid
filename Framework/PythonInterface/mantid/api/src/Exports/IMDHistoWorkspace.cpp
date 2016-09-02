@@ -18,8 +18,18 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(IMDHistoWorkspace)
 
+namespace Mantid {
+namespace PythonInterface {
+namespace Converters {
+extern template int NDArrayTypeIndex<float>::typenum;
+extern template int NDArrayTypeIndex<double>::typenum;
+}
+}
+}
+
 namespace {
 /**
+
  * Determine the sizes of each dimensions
  * @param array :: the C++ array
  * @param dims :: the dimensions vector (Py_intptr_t type)
