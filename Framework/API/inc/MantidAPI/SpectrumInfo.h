@@ -61,6 +61,8 @@ public:
   double twoTheta(const size_t index) const;
   double signedTwoTheta(const size_t index) const;
 
+  double l1() const;
+
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
   void updateCachedDetector(const size_t index) const;
@@ -68,7 +70,6 @@ private:
   const Geometry::IComponent &getSample() const;
   Kernel::V3D getSourcePos() const;
   Kernel::V3D getSamplePos() const;
-  double getL1() const;
 
   // These cache init functions are not thread-safe! Use only in combination
   // with std::call_once!

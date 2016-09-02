@@ -39,7 +39,7 @@ double SpectrumInfo::l2(const size_t index) const {
   if (!isMonitor(index))
     return getDetector(index).getDistance(getSample());
   else
-    return getDetector(index).getDistance(getSource()) - getL1();
+    return getDetector(index).getDistance(getSource()) - l1();
 }
 
 /// Returns 2 theta (angle w.r.t. to beam direction).
@@ -75,6 +75,12 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
       m_instrument->getReferenceFrame()->vecPointingUp();
   return getDetector(index)
       .getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
+}
+
+/// Returns L1 (distance from source to sample).
+double SpectrumInfo::l1() const {
+  std::call_once(m_L1Cached, &SpectrumInfo::cacheL1, this);
+  return m_L1;
 }
 
 const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
@@ -136,12 +142,6 @@ Kernel::V3D SpectrumInfo::getSourcePos() const {
 Kernel::V3D SpectrumInfo::getSamplePos() const {
   std::call_once(m_sampleCached, &SpectrumInfo::cacheSample, this);
   return m_samplePos;
-}
-
-/// Returns L1 (distance from source to sample).
-double SpectrumInfo::getL1() const {
-  std::call_once(m_L1Cached, &SpectrumInfo::cacheL1, this);
-  return m_L1;
 }
 
 void SpectrumInfo::cacheSource() const {
