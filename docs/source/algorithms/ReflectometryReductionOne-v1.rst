@@ -21,17 +21,23 @@ If :literal:`MonitorBackgroundWavelengthMin` and
 :literal:`MonitorBackgroundWavelengthMax` are both set to :literal:`0`, then
 background normalization will not be performed on the monitors.
 
-The properties of this algorithm should be manually selected by the user. If you wish
-to use the default values (found in the Instrument Defintion File) for the properties
-of this algorithm, you may want to consider using :ref:`algm-ReflectometryReductionOneAuto`.
+The properties of this algorithm should be manually selected by the user. If you
+wish to use the default values (found in the Instrument Defintion File) for the
+properties of this algorithm, you may want to consider using
+:ref:`algm-ReflectometryReductionOneAuto`.
 
-:ref:`algm-ReflectometryReductionOneAuto` also performs extra processing steps such as
-Background subtraction and :ref:`algm-PolarizationCorrection`. If you want to know how
-these processing steps are used, please refer to the :ref:`algm-ReflectometryReductionOneAuto`
-documentation.
+:ref:`algm-ReflectometryReductionOneAuto` also performs extra processing steps
+such as Background subtraction and :ref:`algm-PolarizationCorrection`. If you
+want to know how these processing steps are used, please refer to the
+:ref:`algm-ReflectometryReductionOneAuto` documentation.
 
 High-Level Workflow
 -------------------
+
+The diagram below displays a high-level version of the algorithm workflow,
+illustrating the main steps taking place in the ReflectometryReductionOne
+algorithm. These individual steps are described in more detail in the next
+sections.
 
 .. diagram:: ReflectometryReductionOne_HighLvl-v1_wkflw.dot
 
@@ -41,15 +47,23 @@ Low-Level Workflow
 Conversion to Wavelength
 ########################
 
+The following diagram describes the steps taken in converting the input
+workspace into units of wavelength and dividing its constituent detectors by
+monitors.
+
 .. diagram:: ReflectometryReductionOne_ConvertToWavelength-v1_wkflw.dot
 
 The default analysis mode is *PointDetectorAnalysis*. For PointAnalysisMode the
 analysis can be roughly reduced to IvsLam = DetectorWS / sum(I0) /
-TransmissionWS / sum(I0). For MultiDetectorAnalysis the analysis can be roughly reduced to
-IvsLam = DetectorWS / RegionOfDirectBeamWS / sum(I0) / TransmissionWS / sum(I0).
+TransmissionWS / sum(I0). For MultiDetectorAnalysis the analysis can be roughly
+reduced to IvsLam = DetectorWS / RegionOfDirectBeamWS / sum(I0) / TransmissionWS
+/ sum(I0).
 
 Transmission Correction
 #######################
+
+This diagram shows how the resultant workspace of the previous step is corrected
+by either by provided transmission runs or by a specific correction algorithm.
 
 .. diagram:: ReflectometryReductionOne_TransmissionCorrection-v1_wkflw.dot
 
@@ -64,6 +78,14 @@ If a single Transmission run is provided, then no stitching parameters
 will be needed.
 
 The normalization by tranmission run(s) is optional.
+
+The input workspace provided to the workflow in this instance is the original
+:literal:`InputWorkspace` after conversion to wavelength and normalization by
+monitors, as shown in the previous :literal:`Conversion To Wavelength` diagram.
+
+The output workspace given is not the output to the whole algorithm. Rather it
+will serve as the input workspace to the :literal:`Polynomial Correction`
+workflow, where further steps will be applied to it.
 
 Polynomial Correction
 =====================
@@ -83,6 +105,9 @@ properties.
 Detector Position Correction
 ############################
 
+The diagram below describes how the input workspace is then corrected by
+detector positions after transmission correction.
+
 .. diagram:: ReflectometryReductionOne_CorrectDetectorPositions-v1_wkflw.dot
 
 Detector Position Correction is used for when the position of the detector
@@ -98,6 +123,9 @@ right positions. This can be achieved by running
 
 Convert To Momentum Transfer (Q)
 ################################
+
+The last diagram describes the steps involved in converting the input workspace
+from units of wavelength into momentum transfer (Q).
 
 .. diagram:: ReflectometryReductionOne_ConvertToMomentum-v1_wkflw.dot
 

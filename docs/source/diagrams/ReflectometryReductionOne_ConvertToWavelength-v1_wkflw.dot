@@ -1,5 +1,6 @@
 digraph ReflectometryReductionOne {
 label = "ReflectometryReductionOne ConvertToWavelength Flowchart"
+rankdir = TB;
  $global_style
 
 subgraph params {
@@ -24,8 +25,8 @@ subgraph decisions {
  $decision_style
   checkMonUnity   [label="Monitors?"]
   checkNormDetMon [label="Normalize by\nIntegrated Monitors?"]
-  checkBgMinMax   [label="Monitor background wavelength\nmin/max non-zero?"]
-  checkMultRDB    [label="MultidetectorAnalysis and\nRegionOfDirectBeam given?"]
+  checkBgMinMax   [label="Monitor background\nwavelength\nmin/max non-zero?"]
+  checkMultRDB    [label="MultidetectorAnalysis\nand\nRegionOfDirectBeam\ngiven?"]
 }
 
 subgraph algorithms {
@@ -36,7 +37,7 @@ subgraph algorithms {
   intMon        [label="Integration"]
   cropDetWS     [label="CropWorkspace"]
   rebinDet      [label="Rebin"]
-  rebinToWS     [label="Rebin"]
+  rebinToWS     [label="RebinToWorkspace"]
   cropMonWS     [label="CropWorkspace"]
   calcFlatBg    [label="CalculateFlatBackground"]
   groupDetRDB   [label="GroupDetectors"]
@@ -101,5 +102,9 @@ wavStepRDB          -> rebinRDB
 rebinRDB            -> rebinToWSRDB
 rebinToWSRDB        -> divideDetMon
 divideDetMon        -> outputWS
+
+{rank = same; convertDet; convertMon}
+{rank = same; valUnity; valDet; valMon}
+{rank = same; cropDetWS; cropMonWS}
 
 }
