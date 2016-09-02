@@ -733,56 +733,6 @@ void SlicingAlgorithm::createTransform() {
     m_inWS = m_originalWS;
   }
 
-  //
-  //    if (m_inWS->hasOriginalWorkspace())
-  //    {
-  //      // A was transformed to B
-  //      // Now we transform B to C
-  //      // So we come up with the A -> C transformation
-  //
-  //      IMDWorkspace_sptr origWS = m_inWS->getOriginalWorkspace();
-  //      g_log.notice() << "Performing " << this->name() << " on the original
-  //      workspace, '" << origWS->getName() << "'\n";
-  //
-  //      if (origWS->getNumDims() != m_inWS->getNumDims())
-  //        throw std::runtime_error("SlicingAlgorithm::createTransform():
-  //        Cannot propagate a transformation if the number of dimensions has
-  //        changed.");
-  //
-  //      // A->C transformation
-  //      CoordTransform * fromOrig =
-  //      CoordTransformAffine::combineTransformations(
-  //      m_inWS->getTransformFromOriginal(), m_transformFromOriginal );
-  //      // C->A transformation
-  //      CoordTransform * toOrig =
-  //      CoordTransformAffine::combineTransformations( m_transformToOriginal,
-  //      m_inWS->getTransformToOriginal() );
-  //      // A->C binning transformation
-  //      CoordTransform * binningTransform =
-  //      CoordTransformAffine::combineTransformations(
-  //      m_inWS->getTransformFromOriginal(), m_transform );
-  //
-  //      // Replace the transforms
-  //      delete m_transformFromOriginal;
-  //      delete m_transformToOriginal;
-  //      delete m_transform;
-  //      m_transformFromOriginal = fromOrig;
-  //      m_transformToOriginal = toOrig;
-  //      m_transform = binningTransform;
-  //
-  //      coord_t in[2] = {0,0};
-  //      coord_t out[2] = {0,0};
-  //      m_transform->apply(in, out);
-  //      std::cout << "0,0 gets binningTransformed to  " << VMD(2, out) <<
-  //      '\n';
-  //      in[0] = 10; in[1] = 10;
-  //      m_transform->apply(in, out);
-  //      std::cout << "10,10 gets binningTransformed to  " << VMD(2, out) <<
-  //      '\n';
-  //
-  //      // Replace the input workspace
-  //      m_inWS = origWS;
-  //    }
 }
 
 //----------------------------------------------------------------------------------------------
