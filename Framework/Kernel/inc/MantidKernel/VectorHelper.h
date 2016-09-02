@@ -70,6 +70,26 @@ convertToBinBoundary(const std::vector<double> &bin_centers,
 
 bool MANTID_KERNEL_DLL isConstantValue(const std::vector<double> &arra);
 
+/**
+ * A convenience function to "flatten" the given vector of vectors
+ * into a single vector.  For example:
+ *
+ * ((1), (2, 3), (4), (5, 6)) becomes (1, 2, 3, 4, 5, 6)
+ *
+ * @param v :: the vector of vectors to be flattened.
+ * @return a single vector containing all elements in v.
+ */
+template <typename T>
+std::vector<T> flattenVector(const std::vector<std::vector<T>> &v) {
+  std::vector<T> flattened;
+
+  for (const auto &subVector : v) {
+    flattened.insert(flattened.end(), subVector.begin(), subVector.end());
+  }
+
+  return flattened;
+}
+
 template <typename NumT>
 MANTID_KERNEL_DLL std::vector<NumT>
 splitStringIntoVector(std::string listString);

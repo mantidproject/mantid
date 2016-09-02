@@ -207,6 +207,7 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -13342,7 +13343,7 @@ void ApplicationWindow::updateRecentFilesList(QString fname) {
       Mantid::API::MultipleFileProperty mfp("tester");
       mfp.setValue(recentFiles[i].toStdString());
       const std::vector<std::string> files =
-          Mantid::API::MultipleFileProperty::flattenFileNames(mfp());
+          Mantid::Kernel::VectorHelper::flattenVector(mfp());
       if (files.size() == 1) {
         ostr << "&" << menuCount << " " << files[0];
       } else if (files.size() > 1) {

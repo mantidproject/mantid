@@ -81,6 +81,7 @@ Mantid::Kernel::Logger g_log("MuonAnalysis");
 const QString MuonAnalysis::NOT_AVAILABLE("N/A");
 const QString MuonAnalysis::TIME_ZERO_DEFAULT("0.2");
 const QString MuonAnalysis::FIRST_GOOD_BIN_DEFAULT("0.3");
+const std::string MuonAnalysis::PEAK_RADIUS_CONFIG("curvefitting.peakRadius");
 
 //----------------------
 // Public member functions
@@ -297,10 +298,6 @@ void MuonAnalysis::initLayout() {
   connectAutoUpdate();
 
   connectAutoSave();
-
-  // Muon scientists never fits peaks, hence they want the following parameter,
-  // set to a high number
-  ConfigService::Instance().setString("curvefitting.peakRadius", "99");
 
   connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this,
           SLOT(onDeadTimeTypeChanged(int)));
@@ -2480,6 +2477,9 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     // Say MantidPlot to use default fit prop. browser
     emit setFitPropertyBrowser(NULL);
 
+    // Reset cached config option
+    ConfigService::Instance().setString(PEAK_RADIUS_CONFIG, m_cachedPeakRadius);
+
     // Remove PP tool from any plots it was attached to
     disableAllTools();
 
@@ -2498,6 +2498,12 @@ void MuonAnalysis::changeTab(int newTabIndex) {
 
     // Say MantidPlot to use Muon Analysis fit prop. browser
     emit setFitPropertyBrowser(m_uiForm.fitBrowser);
+
+    // Muon scientists never fit peaks, hence they want the following
+    // parameter set to a high number
+    m_cachedPeakRadius =
+        ConfigService::Instance().getString(PEAK_RADIUS_CONFIG);
+    ConfigService::Instance().setString(PEAK_RADIUS_CONFIG, "99");
 
     // Show connected plot and attach PP tool to it (if has been assigned)
     if (m_currentDataName != NOT_AVAILABLE)
