@@ -4,10 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAlgorithms/CreateSampleWorkspace.h"
-#include "MantidAlgorithms/PDCalibration.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidAlgorithms/PDCalibration.h"
 
 using Mantid::Algorithms::PDCalibration;
 using Mantid::API::Workspace_sptr;
@@ -66,34 +66,113 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakWindow", "1"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputCalibrationTable", "cal"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "PeakPositions", "9.523809523809524, 22.22222222222222, "
-                         "38.095238095238095, 47.61904761904762"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakPositions",
+                                                  "9.523809, 22.222222, "
+                                                  "38.095238, 47.619047"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     ITableWorkspace_sptr calTable =
-      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("cal");
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("cal");
 
     TS_ASSERT(calTable);
     TS_ASSERT_DELTA(calTable->cell<double>(180, 1), 31.5, 0.05); // difc
-    TS_ASSERT_EQUALS(calTable->cell<double>(180, 2), 0); // difa
-    TS_ASSERT_EQUALS(calTable->cell<double>(180, 3), 0); // tzero
+    TS_ASSERT_EQUALS(calTable->cell<double>(180, 2), 0);         // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(180, 3), 0);         // tzero
     TS_ASSERT_DELTA(calTable->cell<double>(181, 1), 31.5, 0.05); // difc
-    TS_ASSERT_EQUALS(calTable->cell<double>(181, 2), 0); // difa
-    TS_ASSERT_EQUALS(calTable->cell<double>(181, 3), 0); // tzero
-    TS_ASSERT_DELTA(calTable->cell<double>(182, 1), 31.5, 0.05); // difc
-    TS_ASSERT_EQUALS(calTable->cell<double>(182, 2), 0); // difa
-    TS_ASSERT_EQUALS(calTable->cell<double>(182, 3), 0); // tzero
+    TS_ASSERT_EQUALS(calTable->cell<double>(181, 2), 0);         // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(181, 3), 0);         // tzero
 
     MatrixWorkspace_const_sptr mask =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("cal_mask");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("cal_mask");
 
-    //TS_ASSERT(mask->getInstrument()->getDetector(279)->isMasked());
+    // TS_ASSERT(mask->getInstrument()->getDetector(279)->isMasked());
     TS_ASSERT(!mask->getInstrument()->getDetector(280)->isMasked());
     TS_ASSERT(!mask->getInstrument()->getDetector(281)->isMasked());
     TS_ASSERT(!mask->getInstrument()->getDetector(282)->isMasked());
-    //TS_ASSERT(mask->getInstrument()->getDetector(283)->isMasked());
+    // TS_ASSERT(mask->getInstrument()->getDetector(283)->isMasked());
+  }
+  void test_exec_difc_tzero() {
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("UncalibratedWorkspace", "PDCalibrationTest_WS"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("TofBinning", "200,1.0,2000"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakWindow", "1"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputCalibrationTable", "cal"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakPositions",
+                                                  "9.476190, 22.174603, "
+                                                  "38.047619, 47.571429"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("CalibrationParameters", "DIFC+TZERO"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    ITableWorkspace_sptr calTable =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("cal");
+
+    TS_ASSERT(calTable);
+    TS_ASSERT_DELTA(calTable->cell<double>(156, 1), 31.5, 0.01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(156, 2), 0);         // difa
+    TS_ASSERT_DELTA(calTable->cell<double>(156, 3), 2, 0.01);    // tzero
+    TS_ASSERT_DELTA(calTable->cell<double>(165, 1), 31.5, 0.01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(165, 2), 0);         // difa
+    TS_ASSERT_DELTA(calTable->cell<double>(165, 3), 2, 0.01);    // tzero
+
+    MatrixWorkspace_const_sptr mask =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("cal_mask");
+
+    // TS_ASSERT(mask->getInstrument()->getDetector(155)->isMasked());
+    TS_ASSERT(!mask->getInstrument()->getDetector(156)->isMasked());
+    // TS_ASSERT(mask->getInstrument()->getDetector(157)->isMasked());
+    TS_ASSERT(!mask->getInstrument()->getDetector(282)->isMasked());
+    // TS_ASSERT(mask->getInstrument()->getDetector(283)->isMasked());
+  }
+
+  void test_exec_difc_tzero_difa() {
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("UncalibratedWorkspace", "PDCalibrationTest_WS"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("TofBinning", "200,1.0,2000"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakWindow", "2"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputCalibrationTable", "cal"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakPositions",
+                                                  "9.207078, 20.801010,"
+                                                  "34.310453, 41.977442"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("CalibrationParameters", "DIFC+TZERO+DIFA"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    ITableWorkspace_sptr calTable =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("cal");
+
+    TS_ASSERT(calTable);
+    TS_ASSERT_DELTA(calTable->cell<double>(182, 1), 35.9, 0.1);  // difc
+    TS_ASSERT_DELTA(calTable->cell<double>(182, 2), 0.0, 0.01);  // difa
+    TS_ASSERT_DELTA(calTable->cell<double>(182, 3), -35.4, 0.1); // tzero
+    TS_ASSERT_DELTA(calTable->cell<double>(183, 1), 31.5, 0.1);  // difc
+    TS_ASSERT_DELTA(calTable->cell<double>(183, 2), 0.1, 0.01);  // difa
+    TS_ASSERT_DELTA(calTable->cell<double>(183, 3), 2, 0.2);     // tzero
+    TS_ASSERT_DELTA(calTable->cell<double>(184, 1), 31.5, 0.1);  // difc
+    TS_ASSERT_DELTA(calTable->cell<double>(184, 2), 0.1, 0.01);  // difa
+    TS_ASSERT_DELTA(calTable->cell<double>(184, 3), 2, 0.2);     // tzero
+
+    MatrixWorkspace_const_sptr mask =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("cal_mask");
+
+    TS_ASSERT(!mask->getInstrument()->getDetector(282)->isMasked());
+    TS_ASSERT(!mask->getInstrument()->getDetector(283)->isMasked());
+    TS_ASSERT(!mask->getInstrument()->getDetector(284)->isMasked());
+    TS_ASSERT(!mask->getInstrument()->getDetector(285)->isMasked());
+    // TS_ASSERT(mask->getInstrument()->getDetector(286)->isMasked());
   }
 };
 
