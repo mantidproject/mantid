@@ -5,7 +5,6 @@
 
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace;
-using Mantid::Kernel::Math::StatisticType;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -50,9 +49,9 @@ std::vector<std::string> MDFLogValueFinder::getLogNames() const {
  * @throws std::runtime_error if log cannot be found or cast
  * @throws std::invalid_argument if index is not in range
  */
-double MDFLogValueFinder::getLogValue(const QString &logName,
-                                      const StatisticType &function,
-                                      int index) const {
+double MDFLogValueFinder::getLogValue(
+    const QString &logName, const Mantid::Kernel::Math::StatisticType &function,
+    int index) const {
   if (index > m_wsNames.size() - 1 || index < 0) {
     std::ostringstream message;
     message << "Index " << index
@@ -72,9 +71,9 @@ double MDFLogValueFinder::getLogValue(const QString &logName,
  * @throws std::runtime_error if log cannot be found or cast
  * @throws std::invalid_argument if workspace not found
  */
-double MDFLogValueFinder::getLogValue(const QString &logName,
-                                      const StatisticType &function,
-                                      const QString &wsName) const {
+double MDFLogValueFinder::getLogValue(
+    const QString &logName, const Mantid::Kernel::Math::StatisticType &function,
+    const QString &wsName) const {
   auto &ads = AnalysisDataService::Instance();
   const auto &workspace = wsName.toStdString();
   if (ads.doesExist(workspace)) {

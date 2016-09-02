@@ -1,3 +1,4 @@
+#include "MantidKernel/make_unique.h"
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h"
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h"
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h"

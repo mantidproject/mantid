@@ -338,7 +338,7 @@ QStringList MuonAnalysisResultTableCreator::addParameterColumns(
     ITableWorkspace_sptr &table,
     const QMap<QString, WSParameterList> &paramsByLabel) const {
   QStringList paramsToDisplay;
-  auto &paramNames = paramsByLabel.begin()->begin()->keys();
+  auto paramNames = paramsByLabel.begin()->begin()->keys();
   // Remove the errors and cost function - just want the parameters
   paramNames.erase(std::remove_if(paramNames.begin(), paramNames.end(),
                                   [](const QString &qs) {

@@ -1070,7 +1070,7 @@ std::string generateWorkspaceName(const Muon::DatasetParams &params) {
  * Colors: black, red, green, blue, orange, purple (if more, use black as
  * default).
  *
- * @param wsList :: Vector of either workspace groups (containing parameter
+ * @param workspaces :: Vector of either workspace groups (containing parameter
  * tables) or parameter tables themselves
  * @return :: List of colors with the key being position in input vector.
  */
@@ -1114,7 +1114,7 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
   if (fitProperties.size() > 1) {
     FitProp firstProps = fitProperties.front();
 
-    while (colors.size() < fitProperties.size()) {
+    while (static_cast<size_t>(colors.size()) < fitProperties.size()) {
       // Go through and assign same color to all similar sets
       for (size_t i = 1; i < fitProperties.size(); ++i) {
         if (fitProperties[i] == firstProps) {

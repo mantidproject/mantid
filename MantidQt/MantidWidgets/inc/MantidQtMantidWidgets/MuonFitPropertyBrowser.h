@@ -75,7 +75,7 @@ public:
     emit userChangedDatasetIndex(index);
   }
   /// Set "compatibility mode" on or off
-  void setCompatibilityMode(bool enabled);
+  void setCompatibilityMode(bool enabled) override;
 
 public slots:
   /// Perform the fit algorithm
