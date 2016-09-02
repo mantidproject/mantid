@@ -82,7 +82,7 @@ public:
                                       const std::string &prefix = "");
   // Get the name of a post-processed workspace
   std::string getPostprocessedWorkspaceName(
-      const std::set<std::vector<std::string>> &rowData,
+      const std::map<int, std::vector<std::string>> &rowData,
       const std::string &prefix = "");
 
   std::set<int> selectedParents() const override;
@@ -118,7 +118,7 @@ private:
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
   // Post-process some rows
-  void postProcessGroup(const std::set<std::vector<std::string>> &data);
+  void postProcessGroup(const std::map<int, std::vector<std::string>> &data);
   // process selected rows
   void process();
   // Reduce a row

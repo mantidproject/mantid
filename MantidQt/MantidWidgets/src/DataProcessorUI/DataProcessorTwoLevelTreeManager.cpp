@@ -405,10 +405,9 @@ int DataProcessorTwoLevelTreeManager::numRowsInGroup(int group) const {
 * @return :: Selected data as a map where keys are units of post-processing and
 * values are
 */
-std::map<int, std::set<std::vector<std::string>>>
-DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
+SelectedData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
 
-  std::map<int, std::set<std::vector<std::string>>> selectedData;
+  SelectedData selectedData;
 
   auto options = m_presenter->options();
 
@@ -480,16 +479,12 @@ DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
     for (const auto &row : item.second) {
 
       std::vector<std::string> data;
-
-      int ncols = m_model->columnCount();
-
-      for (int i = 0; i < ncols; i++)
+      for (int i = 0; i < m_model->columnCount(); i++)
         data.push_back(
             m_model->data(m_model->index(row, i, m_model->index(group, 0)))
                 .toString()
                 .toStdString());
-
-      selectedData[group].insert(data);
+	  selectedData[group][row] = data;
     }
   }
   return selectedData;
@@ -518,6 +513,22 @@ void DataProcessorTwoLevelTreeManager::transfer(
   }
 
   m_model.reset(new QDataProcessorTwoLevelTreeModel(m_ws, whitelist));
+}
+
+/** Updates a row with new data
+* @param parent :: the parent item of the row
+* @param child :: the row
+* @param data :: the data
+*/
+void DataProcessorTwoLevelTreeManager::update(int parent, int child,
+	const std::vector<std::string> &data) {
+
+  if (static_cast<int>(data.size()) != m_model->columnCount())
+    throw std::invalid_argument("Can't update tree with given data");
+
+  for (int col = 0; col < m_model->columnCount(); col++)
+    m_model->setData(m_model->index(child, col, m_model->index(parent, 0)),
+                     QString::fromStdString(data[col]));
 }
 
 /** Return a shared ptr to the model

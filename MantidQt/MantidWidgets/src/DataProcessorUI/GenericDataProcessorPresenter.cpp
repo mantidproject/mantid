@@ -165,14 +165,13 @@ void GenericDataProcessorPresenter::process() {
   for (const auto &item : items) {
 
     // Reduce rows sequentially
-    int row = 0;
 
     for (const auto &data : item.second) {
       // item.second -> set of vectors containing data
 
       try {
-        auto newData = reduceRow(data);
-		// TODO: m_manager must update empty columns with default values used
+        auto newData = reduceRow(data.second);
+		m_manager->update(item.first, data.first, newData);
         progressReporter.report();
 
       } catch (std::exception &ex) {
@@ -245,7 +244,7 @@ Post-processes the workspaces created by the given rows together.
 @param rows : the list of rows
 */
 void GenericDataProcessorPresenter::postProcessGroup(
-    const std::set<std::vector<std::string>> &data) {
+    const std::map<int, std::vector<std::string>> &data) {
 
   // The input workspace names
   std::vector<std::string> inputNames;
@@ -259,7 +258,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
 
     // The name of the reduced workspace for this row
     const std::string inputWSName =
-        getReducedWorkspaceName(row, m_processor.prefix(0));
+        getReducedWorkspaceName(row.second, m_processor.prefix(0));
 
     if (AnalysisDataService::Instance().doesExist(inputWSName)) {
 
@@ -437,7 +436,7 @@ Returns the name of the reduced workspace for a given row
 @returns : The name of the workspace
 */
 std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
-    const std::set<std::vector<std::string>> &rowData,
+    const std::map<int, std::vector<std::string>> &rowData,
     const std::string &prefix) {
 
   /* This method calculates, for a given set of rows, the name of the output
@@ -446,7 +445,7 @@ std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
   std::vector<std::string> outputNames;
 
   for (const auto &data : rowData) {
-    outputNames.push_back(getReducedWorkspaceName(data));
+    outputNames.push_back(getReducedWorkspaceName(data.second));
   }
   return prefix + boost::join(outputNames, "_");
 }
@@ -601,6 +600,11 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
         std::string propValue =
             alg->getPropertyValue(m_whitelist.algPropFromColIndex(i));
+
+        if (m_options["Round"].toBool()) {
+          propValue = propValue.substr(
+              0, propValue.find(".") + m_options["RoundPrecision"].toInt() + 1);
+        }
 
         newData[i] = propValue;
       }
@@ -989,7 +993,7 @@ void GenericDataProcessorPresenter::plotRow() {
     for (const auto &run : item.second) {
 
       const std::string wsName =
-          getReducedWorkspaceName(run, m_processor.prefix(0));
+          getReducedWorkspaceName(run.second, m_processor.prefix(0));
 
       if (AnalysisDataService::Instance().doesExist(wsName))
         workspaces.insert(wsName);
@@ -1026,7 +1030,7 @@ void GenericDataProcessorPresenter::plotGroup() {
     for (const auto &run : item.second) {
 
       const std::string wsName =
-          getReducedWorkspaceName(run, m_processor.prefix(0));
+          getReducedWorkspaceName(run.second, m_processor.prefix(0));
 
       if (AnalysisDataService::Instance().doesExist(wsName))
         workspaces.insert(wsName);

@@ -79,11 +79,13 @@ public:
                 const DataProcessorWhiteList &whitelist) override;
 
   /// Return selected data
-  std::map<int, std::set<std::vector<std::string>>>
-  selectedData(bool prompt) override;
+  SelectedData selectedData(bool prompt) override;
   /// Transfer new data to model
   void transfer(const std::vector<std::map<std::string, std::string>> &runs,
 	  const DataProcessorWhiteList &whitelist) override;
+  /// Update row with new data
+  void update(int parent, int child,
+              const std::vector<std::string> &data) override;
 
   /// Validate a table workspace
   bool isValidModel(Mantid::API::Workspace_sptr ws,

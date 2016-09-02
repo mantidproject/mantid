@@ -14,6 +14,8 @@ namespace MantidWidgets {
 class DataProcessorCommand;
 class DataProcessorWhiteList;
 
+using SelectedData = std::map<int, std::map<int, std::vector<std::string>>>;
+
 /** @class DataProcessorTreeManager
 
 DataProcessorTreeManager is an abstract base class defining some methods meant
@@ -79,12 +81,14 @@ public:
   /// Read/write data
 
   /// Return selected data
-  virtual std::map<int, std::set<std::vector<std::string>>>
-  selectedData(bool prompt = false) = 0;
+  virtual SelectedData selectedData(bool prompt = false) = 0;
   /// Transfer new data to model
   virtual void
   transfer(const std::vector<std::map<std::string, std::string>> &runs,
            const DataProcessorWhiteList &whitelist) = 0;
+  /// Update row with new data
+  virtual void update(int parent, int child,
+                      const std::vector<std::string> &data) = 0;
 
   /// Validate a table workspace
   virtual bool isValidModel(Mantid::API::Workspace_sptr ws, size_t whitelistColumns) const = 0;
