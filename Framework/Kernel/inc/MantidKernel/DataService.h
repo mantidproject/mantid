@@ -255,8 +255,8 @@ public:
     // find if the Tobject already exists
     auto it = datamap.find(name);
     if (it != datamap.end()) {
-      g_log.debug("Data Object '" + name + "' replaced in data service.\n");
       lock.unlock();
+      g_log.debug("Data Object '" + name + "' replaced in data service.\n");
 
       notificationCenter.postNotification(
           new BeforeReplaceNotification(name, it->second, Tobject));
@@ -497,6 +497,10 @@ public:
   /// using Poco::NotificationCenter::addObserver(...)
   ///@return nothing
   Poco::NotificationCenter notificationCenter;
+  /// Deleted copy constructor
+  DataService(const DataService &) = delete;
+  /// Deleted copy assignment operator
+  DataService &operator=(const DataService &) = delete;
 
 protected:
   /// Protected constructor (singleton)
@@ -504,11 +508,6 @@ protected:
   virtual ~DataService() = default;
 
 private:
-  /// Private, unimplemented copy constructor
-  DataService(const DataService &);
-  /// Private, unimplemented copy assignment operator
-  DataService &operator=(const DataService &);
-
   void checkForEmptyName(const std::string &name) {
     if (name.empty()) {
       const std::string error = "Add Data Object with empty name";
