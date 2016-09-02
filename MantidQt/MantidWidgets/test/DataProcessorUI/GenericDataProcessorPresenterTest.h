@@ -1072,8 +1072,8 @@ public:
     auto ws =
         createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     ws->String(0, QMinCol) = "";
-	ws->String(1, ScaleCol) = "";
-	EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+    ws->String(1, ScaleCol) = "";
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
@@ -1117,7 +1117,7 @@ public:
     TS_ASSERT_EQUALS(ws->String(0, RunCol), "12345");
     TS_ASSERT_EQUALS(ws->String(1, RunCol), "12346");
     TS_ASSERT(ws->String(0, QMinCol) != "");
-	TS_ASSERT(ws->String(1, ScaleCol) != "");
+    TS_ASSERT(ws->String(1, ScaleCol) != "");
 
     // Check output workspaces were created as expected
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345"));
@@ -3013,6 +3013,102 @@ public:
     AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
     AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
     AnalysisDataService::Instance().remove("12346");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testPlotRowPythonCode() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    MockProgressableView mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+    createTOFWorkspace("IvsQ_TOF_12345", "12345");
+    createTOFWorkspace("IvsQ_TOF_12346", "12346");
+
+    std::map<int, std::set<int>> rowlist;
+    rowlist[0].insert(0);
+    rowlist[0].insert(1);
+
+    // We should be warned
+    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(0);
+    // The user hits "plot rows" with the first row selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(rowlist));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(std::set<int>()));
+
+    std::string pythonCode =
+        "base_graph = None\nbase_graph = "
+        "plotSpectrum(\"IvsQ_TOF_12345\", 0, True, window = "
+        "base_graph)\nbase_graph = plotSpectrum(\"IvsQ_TOF_12346\", 0, "
+        "True, window = "
+        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
+
+    EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
+    presenter.notify(DataProcessorPresenter::PlotRowFlag);
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testPlotGroupPythonCode() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    MockProgressableView mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+    createTOFWorkspace("IvsQ_TOF_12345_TOF_12346");
+
+    std::set<int> group = {0};
+
+    // We should be warned
+    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(0);
+    // The user hits "plot rows" with the first row selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(group));
+
+    std::string pythonCode =
+        "base_graph = None\nbase_graph = "
+        "plotSpectrum(\"IvsQ_TOF_12345_TOF_12346\", 0, True, window = "
+        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
+
+    EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
+    presenter.notify(DataProcessorPresenter::PlotGroupFlag);
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));

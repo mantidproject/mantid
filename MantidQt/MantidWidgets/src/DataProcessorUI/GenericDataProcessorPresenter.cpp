@@ -1034,11 +1034,9 @@ void GenericDataProcessorPresenter::plotGroup() {
   for (const auto &item : items) {
 
     if (item.second.size() > 1) {
-    }
-    for (const auto &run : item.second) {
 
       const std::string wsName =
-          getReducedWorkspaceName(run.second, m_processor.prefix(0));
+          getPostprocessedWorkspaceName(item.second, m_postprocessor.prefix());
 
       if (AnalysisDataService::Instance().doesExist(wsName))
         workspaces.insert(wsName);
@@ -1052,7 +1050,7 @@ void GenericDataProcessorPresenter::plotGroup() {
         "The following workspaces were not plotted because they were not "
         "found:\n" +
             boost::algorithm::join(notFound, "\n") +
-            "\n\nPlease check that the rows you are trying to plot have been "
+            "\n\nPlease check that the groups you are trying to plot have been "
             "fully processed.",
         "Error plotting rows.");
 
