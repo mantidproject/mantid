@@ -34,7 +34,7 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL SampleLogsBehaviour {
 public:
-  enum MergeLogType { average, min, max, sum, list, warn, fail };
+  enum MergeLogType { time_series, average, min, max, sum, list, warn, fail };
 
   typedef struct
   {

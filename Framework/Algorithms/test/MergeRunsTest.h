@@ -930,6 +930,11 @@ public:
     do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 0.0, 0.0), "prop1", mergeType, "1.5", 2);
   }
 
+  void test_mergeSampleLogs_average_multiple() {
+    std::string mergeType = "sample_logs_average";
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, "prop1, prop2", 1.0, 2.0, 3.0, 4.0), "prop2", mergeType, "3.5", 2);
+  }
+
   void test_mergeSampleLogs_min() {
     std::string mergeType = "sample_logs_min";
     do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 0.0, 0.0), "prop1", mergeType, "1", 2);
@@ -955,14 +960,10 @@ public:
     do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 0.0, 0.0), "prop1", mergeType, "1", 2);
   }
 
-  void test_mergeSampleLogs_average_multiple() {
-    std::string mergeType = "sample_logs_average";
-    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, "prop1, prop2", 1.0, 2.0, 3.0, 4.0), "prop2", mergeType, "3.5", 2);
-  }
-
   void test_mergeSampleLogs_fail_where_params_are_equal_succeeds() {
     std::string mergeType = "sample_logs_fail";
     do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 1.0, 0.0, 0.0), "prop1", mergeType, "1", 2);
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<int>(mergeType, "prop1", 1, 1, 2, 2), "prop1", mergeType, "1", 2);
   }
 
   void test_mergeSampleLogs_fail_where_params_are_different_fails() {
@@ -972,13 +973,13 @@ public:
 
   void test_mergeSampleLogs_fail_where_params_are_different_but_inside_tolerance_succeeds() {
     std::string mergeType = "sample_logs_fail";
-    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 0.0, 0.0, "0.5");
+    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 0.0, 0.0, "2.0");
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 2);
   }
 
   void test_mergeSampleLogs_fail_where_params_are_different_but_outside_tolerance_fails() {
     std::string mergeType = "sample_logs_fail";
-    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 0.0, 0.0, "2.0");
+    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 0.0, 0.0, "0.5");
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 1);
   }
 

@@ -20,7 +20,7 @@
 			<value val="exp(-0.0565/sqrt(e))*(1.0-exp(-3.284/sqrt(e)))" />
 		</parameter>
 
-        <parameter name="sample_logs_average" type="string">
+        <parameter name="sample_logs_time_series" type="string">
             <value val="sample.temperature, sample.pressure" />
         </parameter>
         <parameter name="sample_logs_min" type="string">
@@ -38,14 +38,14 @@
         <parameter name="sample_logs_warn" type="string">
             <value val="Ei, end_time" />
         </parameter>
-        <parameter name="sample_logs_fail" type="string">
-            <value val="EPP" />
-        </parameter>
         <parameter name="sample_logs_warn_tolerance" type="string">
             <value val="0.1, 0.2" />
         </parameter>
+        <parameter name="sample_logs_fail" type="string">
+            <value val="EPP" />
+        </parameter>
         <parameter name="sample_logs_fail_tolerance" type="string">
-            <value val="0.3" />
+            <value val="1" />
         </parameter>
 
 	</component-link>

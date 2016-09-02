@@ -1,5 +1,6 @@
 #include <MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h>
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -25,6 +26,7 @@ std::string generateDifferenceMessage(std::string item, std::string wsName,
 SampleLogsBehaviour::SampleLogsBehaviour(Logger &g_log) : m_logger(g_log) {}
 
 void SampleLogsBehaviour::createSampleLogsMaps(const MatrixWorkspace_sptr &ws) {
+  getSampleList(time_series, "sample_logs_time_series", ws);
   getSampleList(average, "sample_logs_average", ws);
   getSampleList(min, "sample_logs_min", ws);
   getSampleList(max, "sample_logs_max", ws);
@@ -93,7 +95,14 @@ void SampleLogsBehaviour::getSampleList(const MergeLogType &sampleLogBehaviour,
                          << "\", does not exist in workspace!" << std::endl;
       continue;
     }
-    if (sampleLogBehaviour == list) {
+
+    if (sampleLogBehaviour == time_series) {
+      std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(new TimeSeriesProperty<double>(item + "_time_series"));
+      std::string startTime = ws->mutableRun().startTime().toISO8601String();
+      double value = ws->mutableRun().getLogAsSingleValue(item);
+      timeSeriesProp->addValue(startTime, value);
+      ws->mutableRun().addLogData(std::unique_ptr<Kernel::Property>(std::move(timeSeriesProp)));
+    } else if (sampleLogBehaviour == list) {
       ws->mutableRun().addProperty(item + "_list", prop->value());
       prop = ws->getLog(item + "_list");
     }
@@ -104,7 +113,7 @@ void SampleLogsBehaviour::getSampleList(const MergeLogType &sampleLogBehaviour,
       isNumeric = true;
     } catch (std::invalid_argument) {
       isNumeric = false;
-      if (sampleLogBehaviour == average || sampleLogBehaviour == min || sampleLogBehaviour == max || sampleLogBehaviour == sum) {
+      if (sampleLogBehaviour == time_series || sampleLogBehaviour == average || sampleLogBehaviour == min || sampleLogBehaviour == max || sampleLogBehaviour == sum) {
         m_logger.error() << item << " could not be converted to a numeric type";
         continue;
       }
@@ -134,6 +143,13 @@ void SampleLogsBehaviour::calculateUpdatedSampleLogs(
     }
 
     switch (item.second.type) {
+    case time_series: {
+      auto timeSeriesProp = outWS->mutableRun().getTimeSeriesProperty<double>(item.first + "_time_series");
+      Kernel::DateAndTime startTime = ws->mutableRun().startTime();
+      double value = ws->mutableRun().getLogAsSingleValue(item.first);
+      timeSeriesProp->addValue(startTime, value);
+      break;
+    }
     case average: {
       double value = (wsNumber + outWSNumber) *
                      ((numberOfWSsAdded) / (double)(numberOfWSsAdded + 1));
@@ -159,7 +175,7 @@ void SampleLogsBehaviour::calculateUpdatedSampleLogs(
       break;
     case warn:
       if (item.second.isNumeric && item.second.tolerance > 0.0) {
-        if (std::abs(wsNumber - outWSNumber) <= item.second.tolerance + std::numeric_limits<double>::min()) {
+        if (std::abs(wsNumber - outWSNumber) > item.second.tolerance + std::numeric_limits<double>::min()) {
           m_logger.warning() << generateDifferenceMessage(
               item.first, ws->name(), wsProperty->value(),
               item.second.property->value());
@@ -174,7 +190,7 @@ void SampleLogsBehaviour::calculateUpdatedSampleLogs(
       break;
     case fail:
       if (item.second.isNumeric && item.second.tolerance > 0.0) {
-        if (std::abs(wsNumber - outWSNumber) < item.second.tolerance) {
+        if (std::abs(wsNumber - outWSNumber) > item.second.tolerance) {
           throw std::invalid_argument(generateDifferenceMessage(
               item.first, ws->name(), wsProperty->value(),
               item.second.property->value()));
