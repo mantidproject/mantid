@@ -35,7 +35,7 @@ void SpectrumInfo::updateCachedInfo(const size_t index) const {
   if (m_lastIndex[thread] == index)
     return;
   m_lastIndex[thread] = index;
-  m_info[thread] = std::make_unique<GeometryInfo>(m_factory->create(index));
+  m_info[thread] = Kernel::make_unique<GeometryInfo>(m_factory->create(index));
 }
 
 } // namespace API
