@@ -126,6 +126,7 @@ set ( SRC_FILES
 	src/SpectraAxis.cpp
 	src/SpectraAxisValidator.cpp
 	src/SpectrumDetectorMapping.cpp
+	src/SpectrumInfo.cpp
 	src/TableRow.cpp
 	src/TextAxis.cpp
 	src/TransformScaleFactory.cpp
@@ -312,6 +313,7 @@ set ( INC_FILES
 	inc/MantidAPI/SpectraAxis.h
 	inc/MantidAPI/SpectraAxisValidator.h
 	inc/MantidAPI/SpectrumDetectorMapping.h
+	inc/MantidAPI/SpectrumInfo.h
 	inc/MantidAPI/TableRow.h
 	inc/MantidAPI/TextAxis.h
 	inc/MantidAPI/TransformScaleFactory.h
@@ -417,6 +419,7 @@ set ( TEST_FILES
 	SpectraAxisTest.h
 	SpectraAxisValidatorTest.h
 	SpectrumDetectorMappingTest.h
+	SpectrumInfoTest.h
 	TextAxisTest.h
 	VectorParameterParserTest.h
 	VectorParameterTest.h
