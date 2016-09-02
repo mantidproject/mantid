@@ -19,42 +19,16 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Simplified from the original code, to just work for simple singletons
 // Removed all the code relating to the creation/destruction, threading and
-// lifetime policies.
+// lifetime policies. Simplified to take advantage of thread-safe static
+// initalization in C++11
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <cstdlib>
-#include <cassert>
-#include <stdexcept>
-#include <typeinfo>
-#include <string>
 #include <MantidKernel/DllConfig.h>
+
+#include <memory>
 
 namespace Mantid {
 namespace Kernel {
-
-/// prototype for function passed to atexit()
-typedef void (*atexit_func_t)();
-
-extern MANTID_KERNEL_DLL void CleanupSingletons();
-extern MANTID_KERNEL_DLL void AddSingleton(atexit_func_t func);
-
-/// class to manage an instance of an object as a singleton
-template <typename T> class SingletonHolder {
-public:
-  /// Allow users to access to the type returned by Instance()
-  typedef T HeldType;
-
-  static T &Instance();
-
-private:
-  static void DestroySingleton();
-  /// default constructor marked private so only access is via the Instance()
-  /// method
-  SingletonHolder();
-
-  static T *pInstance;
-  static bool destroyed;
-};
 
 /// Implementation of the SingletonHolder create policy using the new and delete
 /// operators
@@ -67,39 +41,24 @@ template <typename T> struct CreateUsingNew {
   static void Destroy(T *p) { delete p; }
 };
 
+/// class to manage an instance of an object as a singleton
+template <typename T> class SingletonHolder {
+public:
+  /// Allow users to access to the type returned by Instance()
+  typedef T HeldType;
+  static T &Instance();
+
+private:
+};
+
 /// Return a reference to the Singleton instance, creating it if it does not
 /// already exist
 /// Creation is done using the CreateUsingNew policy at the moment
-template <typename T> inline T &SingletonHolder<T>::Instance() {
-  if (destroyed) {
-    std::string s("Attempt to use destroyed singleton ");
-    s += typeid(T).name();
-    throw std::runtime_error(s.c_str());
-  }
-  if (!pInstance) {
-    //		std::cerr << "creating singleton " << typeid(T).name() <<
-    // '\n';
-    pInstance = CreateUsingNew<T>::Create();
-    AddSingleton(&DestroySingleton);
-    // atexit(&CleanupSingletons);
-  }
-  return *pInstance;
+template <typename T> MANTID_KERNEL_DLL T &SingletonHolder<T>::Instance() {
+  static std::unique_ptr<T, void (*)(T *)> instance{CreateUsingNew<T>::Create(),
+                                                    CreateUsingNew<T>::Destroy};
+  return *instance;
 }
-
-/// Destroy the singleton
-template <typename T> void SingletonHolder<T>::DestroySingleton() {
-  // std::cerr << "destroying singleton " << typeid(T).name() << '\n';
-  assert(!destroyed);
-  CreateUsingNew<T>::Destroy(pInstance);
-  pInstance = nullptr;
-  destroyed = true;
-}
-
-/// global variable holding pointer to singleton instance
-template <typename T> T *SingletonHolder<T>::pInstance = nullptr;
-
-/// variable to allow trapping of attempts to destroy a singleton more than once
-template <typename T> bool SingletonHolder<T>::destroyed = false;
 }
 }
 

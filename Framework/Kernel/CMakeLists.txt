@@ -91,7 +91,6 @@ set ( SRC_FILES
 	src/RebinParamsValidator.cpp
 	src/RegexStrings.cpp
 	src/RemoteJobManager.cpp
-	src/SingletonHolder.cpp
 	src/SobolSequence.cpp
 	src/StartsWithValidator.cpp
 	src/Statistics.cpp
