@@ -265,7 +265,7 @@ Data Analysis
 This tab is designed for the user to make a fit against the data just plotted.
 Since Mantid 3.8, this tab has been enhanced to include fits of multiple datasets at once.
 
-.. image::  ../images/MuonAnalysisDataAnalysis.png
+.. image::  ../images/MuonAnalysisDataAnalysis3.8.png
    :align: right
 
 Fit Function
@@ -465,6 +465,7 @@ Fitted parameters of the selected workspaces will be added to the results table.
 
 Workspaces might be coloured differently. Workspaces of different colours have
 different fitting models and therefore couldn't be included in the same Results table.
+(If looking at simultaneous fits, different colours could also indicate that the fits had different numbers of datasets).
 
 .. image:: ../images/MuonAnalysis_FittingResultsColors.png
   :align: center
