@@ -57,14 +57,6 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
   m_manager =
       Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(this, whitelist);
 
-  // TODO: The above should be replaced with something like
-  //if (postprocess)
-  //  m_manager = Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(
-  //      this, whitelist);
-  //else
-  //  m_manager = Mantid::Kernel::make_unique<DataProcessorOneLevelTreeManager>(
-  //      this, whitelist);
-
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
                          "<b>Override <samp>" + processor.name() +
