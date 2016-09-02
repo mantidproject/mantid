@@ -949,6 +949,43 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
     vectors.push_back(t);
     func->addPlane(MDPlane(vectors, o1, insidePoint));
     func->addPlane(MDPlane(vectors, o2, insidePoint));
+  } else if (boxDim == 4 && nd == 4) {
+
+    // 8 planes defined by 4 basis vectors, in 4D world. (General to
+    // non-orthogonal basis vectors)
+
+    std::vector<VMD> vectors;
+
+    // XY plane
+    vectors.clear();
+    vectors.push_back(x);
+    vectors.push_back(y);
+    vectors.push_back(z);
+    func->addPlane(MDPlane(vectors, o1, insidePoint));
+    func->addPlane(MDPlane(vectors, o2, insidePoint));
+
+    // XZ plane
+    vectors.clear();
+    vectors.push_back(x);
+    vectors.push_back(z);
+    vectors.push_back(t);
+    func->addPlane(MDPlane(vectors, o1, insidePoint));
+    func->addPlane(MDPlane(vectors, o2, insidePoint));
+
+    // YZ plane
+    vectors.clear();
+    vectors.push_back(y);
+    vectors.push_back(z);
+    vectors.push_back(t);
+    func->addPlane(MDPlane(vectors, o1, insidePoint));
+    func->addPlane(MDPlane(vectors, o2, insidePoint));
+
+    vectors.clear();
+    vectors.push_back(x);
+    vectors.push_back(y);
+    vectors.push_back(t);
+    func->addPlane(MDPlane(vectors, o1, insidePoint));
+    func->addPlane(MDPlane(vectors, o2, insidePoint));
   } else {
     // Last-resort, totally general case
     // 2*N planes defined by N basis vectors, in any dimensionality workspace.
