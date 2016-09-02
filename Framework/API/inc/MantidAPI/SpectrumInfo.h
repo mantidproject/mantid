@@ -61,6 +61,8 @@ public:
   double twoTheta(const size_t index) const;
   double signedTwoTheta(const size_t index) const;
 
+  // This does not really belong into SpectrumInfo, but it seems to be useful
+  // while Instrument-2.0 does not exist.
   double l1() const;
 
 private:
