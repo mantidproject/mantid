@@ -267,9 +267,9 @@ public:
   }
 
   /**
-   * Gets the instrument override
+   * Sets the instrument override
    *
-   * @return List of instrument override
+   * @param instName :: name of instrument override
    */
   void setInstrumentOverride(const QString &instName) {
     m_uiForm.rfFileInput->setInstrumentOverride(instName);
@@ -283,7 +283,7 @@ public:
 
   /**
   * Set how the browse should appear
-  * @param buttonOpt the preference for the control, if there will be one, to
+  * @param buttonOpt :: the preference for the control, if there will be one, to
   * activate the dialog box
   */
 
@@ -292,14 +292,19 @@ public:
   }
 
   /**
-   * Sets the validating algorithm of workspace selector
-   *
-   * @param validating algorithm
-   */
+  * Gets the live button state
+  *
+  * @return live button option
+  */
   LiveButtonOpts liveButtonState() const {
     return m_uiForm.rfFileInput->liveButtonState();
   }
 
+  /**
+   * Sets the live button state
+   *
+   * @param option :: livebutton option
+   */
   void liveButtonState(const LiveButtonOpts option) {
     m_uiForm.rfFileInput->liveButtonState(option);
   }
@@ -353,7 +358,7 @@ public:
   /**
    * Sets if the workspace selector shows hidden workspaces
    *
-   * @param Boolean flag if hidden workspaces are shown
+   * @param show :: Boolean flag if hidden workspaces are shown
    */
   void showHiddenWorkspaces(bool show) {
     m_uiForm.wsWorkspaceInput->showHiddenWorkspaces(show);
@@ -371,7 +376,7 @@ public:
   /**
    * Sets the validating algorithm of workspace selector
    *
-   * @param validating algorithm
+   * @param algName :: validating algorithm
    */
   void setValidatingAlgorithm(const QString &algName) {
     m_uiForm.wsWorkspaceInput->setValidatingAlgorithm(algName);
