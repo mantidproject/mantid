@@ -37,16 +37,20 @@ bool doesNotContainWildCard(const std::string &ext) {
 namespace Mantid {
 namespace API {
 /**
- * Constructor
+ * Default constructor with action
  *
- * @param name :: The name of the property
- * @param exts ::  The allowed/suggested extensions
+ * @param name   :: The name of the property
+ * @param action :: File action
+ * @param exts   ::  The allowed/suggested extensions
  */
 MultipleFileProperty::MultipleFileProperty(const std::string &name,
+                                           unsigned int action,
                                            const std::vector<std::string> &exts)
     : PropertyWithValue<std::vector<std::vector<std::string>>>(
           name, std::vector<std::vector<std::string>>(),
-          boost::make_shared<MultiFileValidator>(exts), Direction::Input),
+          boost::make_shared<MultiFileValidator>(
+              exts, (action != FileProperty::OptionalLoad)),
+          Direction::Input),
       m_multiFileLoadingEnabled(), m_exts(), m_parser(), m_defaultExt("") {
   std::string allowMultiFileLoading =
       Kernel::ConfigService::Instance().getString("loading.multifile");
@@ -60,6 +64,16 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
     if (doesNotContainWildCard(ext))
       m_exts.push_back(ext);
 }
+
+/**
+ * Alternative constructor with no action
+ *
+ * @param name :: The name of the property
+ * @param exts ::  The allowed/suggested extensions
+ */
+MultipleFileProperty::MultipleFileProperty(const std::string &name,
+                                           const std::vector<std::string> &exts)
+    : MultipleFileProperty(name, FileProperty::Load, exts) {}
 
 /**
  * Convert the given propValue into a comma and plus separated list of full
