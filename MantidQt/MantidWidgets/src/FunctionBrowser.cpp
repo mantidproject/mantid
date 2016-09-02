@@ -2228,11 +2228,7 @@ void FunctionBrowser::updateMultiDatasetParameters(
         throw std::invalid_argument(
             "Multiple datasets, but function is single-domain");
       }
-      for (int j = 0; j < localParameters.size(); ++j) {
-        setLocalParameterValue(
-            localParameters[j], 0,
-            cfun->getParameter(localParameters[j].toStdString()));
-      }
+      updateParameters(*cfun);
     }
   } else {
     updateParameters(fun);
