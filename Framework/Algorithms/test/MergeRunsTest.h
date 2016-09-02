@@ -153,6 +153,12 @@ private:
     a->mutableRun().addLogData(prop3);
     b->mutableRun().addLogData(prop4);
 
+    // add start times
+    Property *time1 = new PropertyWithValue<std::string>("start_time", "2013-06-25T10:59:15");
+    Property *time2 = new PropertyWithValue<std::string>("start_time", "2013-06-25T11:59:15");
+    a->mutableRun().addLogData(time1);
+    b->mutableRun().addLogData(time2);
+
     a->instrumentParameters().addString(a->getInstrument()->getComponentID(), merge_type, merge_list);
     b->instrumentParameters().addString(b->getInstrument()->getComponentID(), merge_type, merge_list);
 
@@ -907,7 +913,10 @@ public:
 
     TS_ASSERT_EQUALS(output->y(0).front(), 2.0 * filesMerged);
 
-    if (mergeType.compare("sample_logs_list") == 0) {
+    if (mergeType.compare("sample_logs_time_series") == 0) {
+      prop = output->mutableRun().getTimeSeriesProperty<double>(propertyName + "_time_series");
+      TS_ASSERT_EQUALS(prop->value(), result);
+    } else if (mergeType.compare("sample_logs_list") == 0) {
       prop = output->mutableRun().getLogData(propertyName + "_list");
       TS_ASSERT_EQUALS(prop->value(), result);
     } else {
@@ -923,6 +932,16 @@ public:
     AnalysisDataService::Instance().remove("b1");
     AnalysisDataService::Instance().remove("group1");
     AnalysisDataService::Instance().remove("outWS");
+  }
+
+  void test_mergeSampleLogs_time_series() {
+    std::string mergeType = "sample_logs_time_series";
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 0.0, 0.0), "prop1", mergeType, "2013-Jun-25 10:59:15  1\n2013-Jun-25 11:59:15  2\n", 2);
+  }
+
+  void test_mergeSampleLogs_time_series_multiple() {
+    std::string mergeType = "sample_logs_time_series";
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, "prop1, prop2", 1.0, 2.0, 3.0, 4.0), "prop2", mergeType, "2013-Jun-25 10:59:15  3\n2013-Jun-25 11:59:15  4\n", 2);
   }
 
   void test_mergeSampleLogs_average() {
