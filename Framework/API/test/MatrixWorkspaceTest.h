@@ -26,6 +26,7 @@
 #include <boost/make_shared.hpp>
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <functional>
 #include <numeric>
@@ -291,7 +292,7 @@ public:
   void testWholeSpectraMasking_SpectrumInfo() {
     // Workspace has 3 spectra, each 1 in length
     const int numHist(3);
-    auto workspace = makeWorkspaceWithDetectors(3, 1);
+    auto workspace = makeWorkspaceWithDetectors(numHist, 1);
     workspace->maskWorkspaceIndex(1);
     workspace->maskWorkspaceIndex(2);
 
@@ -305,6 +306,36 @@ public:
       }
       TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), expectedMasked);
     }
+  }
+
+  void test_spectrumInfo_works_unthreaded() {
+    const int numHist(3);
+    auto workspace = makeWorkspaceWithDetectors(numHist, 1);
+    std::atomic<bool> parallelException{false};
+    for (int i = 0; i < numHist; ++i) {
+      try {
+        static_cast<void>(workspace->spectrumInfo());
+      } catch (...) {
+        parallelException = true;
+      }
+    }
+    TS_ASSERT(!parallelException);
+  }
+
+  void test_spectrumInfo_fails_threaded() {
+    const int numHist(3);
+    auto workspace = makeWorkspaceWithDetectors(numHist, 1);
+    std::atomic<bool> parallelException{false};
+    PARALLEL_FOR1(workspace)
+    for (int i = 0; i < numHist; ++i) {
+      // Note: Cannot use INTERUPT_REGION macros since not inside an Algorithm.
+      try {
+        static_cast<void>(workspace->spectrumInfo());
+      } catch (...) {
+        parallelException = true;
+      }
+    }
+    TS_ASSERT(parallelException);
   }
 
   void testFlagMasked() {

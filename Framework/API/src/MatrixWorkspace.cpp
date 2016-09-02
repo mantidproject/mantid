@@ -189,6 +189,11 @@ const std::string MatrixWorkspace::getTitle() const {
  * by calling this method again.
  */
 const SpectrumInfo &MatrixWorkspace::spectrumInfo() const {
+  if(PARALLEL_THREAD_NUMBER != 0)
+    throw std::runtime_error("MatrixWorkspace::spectrumInfo(): Thread ID is "
+                             "not 0. This indicates that the method is called "
+                             "in a threaded context. This is not allowed.");
+
   // For now we *always* create a new SpectrumInfo since the instrument or
   // parameters may have changed.
   m_spectrumInfo = Kernel::make_unique<SpectrumInfo>(*this);
