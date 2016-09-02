@@ -79,6 +79,10 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
       .getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
 }
 
+bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
+  return m_workspace.getSpectrum(index).getDetectorIDs().size() == 1;
+}
+
 /// Returns L1 (distance from source to sample).
 double SpectrumInfo::l1() const {
   std::call_once(m_L1Cached, &SpectrumInfo::cacheL1, this);
