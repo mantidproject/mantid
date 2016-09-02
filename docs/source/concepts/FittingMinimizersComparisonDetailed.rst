@@ -91,3 +91,5 @@ Run time for individual NIST problems, "higher" difficulty
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. include:: minimizers_comparison/v3.7.0/comparison_unweighted_v3.7_runtime_nist_higher.txt
+
+.. categories:: Concepts
