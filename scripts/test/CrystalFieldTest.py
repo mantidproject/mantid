@@ -450,7 +450,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(cf, InputWorkspace=[ws0, ws1])
         fit.fit()
 
-        self.assertLess(cf.chi2, chi2)
+        self.assertTrue(cf.chi2 < chi2)
 
         # Fit outputs are different on different platforms.
         # The following assertions are not for testing but to illustrate
@@ -572,7 +572,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(cf, InputWorkspace=[ws0, ws1])
         fit.fit()
 
-        self.assertLess(cf.chi2, chi2)
+        self.assertTrue(cf.chi2 < chi2)
 
         # Fit outputs are different on different platforms.
         # The following assertions are not for testing but to illustrate
@@ -608,7 +608,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
         fit.fit()
 
-        self.assertLess(cf.chi2, chi2)
+        self.assertTrue(cf.chi2 < chi2)
 
         # Fit outputs are different on different platforms.
         # The following assertions are not for testing but to illustrate
@@ -650,7 +650,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws1, ws2])
         fit.fit()
 
-        self.assertLess(cf.chi2, chi2)
+        self.assertTrue(cf.chi2 < chi2)
 
         # Fit outputs are different on different platforms.
         # The following assertions are not for testing but to illustrate
