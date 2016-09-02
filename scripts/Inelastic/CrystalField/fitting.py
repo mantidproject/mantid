@@ -158,6 +158,7 @@ class CrystalField(object):
         self._plot_window = {}
 
         self._setDefaultTies()
+        self.chi2 = None
 
     def makePeaksFunction(self, i):
         """Form a definition string for the CrystalFieldPeaks function
@@ -795,6 +796,7 @@ class CrystalFieldFit(object):
         alg.execute()
         function = alg.getProperty('Function').value
         self.model.update(function)
+        self.model.chi2 = alg.getProperty('OutputChi2overDoF').value
 
     def _fit_multi(self):
         """
@@ -815,7 +817,9 @@ class CrystalFieldFit(object):
         alg.execute()
         function = alg.getProperty('Function').value
         self.model.update_multi(function)
+        self.model.chi2 = alg.getProperty('OutputChi2overDoF').value
 
     def _set_fit_properties(self, alg):
         for prop in self._fit_properties.items():
             alg.setProperty(*prop)
+

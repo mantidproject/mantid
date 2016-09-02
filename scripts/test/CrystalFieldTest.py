@@ -6,6 +6,7 @@ import numpy as np
 # Import mantid to setup the python paths to the bundled scripts
 import mantid
 from CrystalField.energies import energies
+from mantid.simpleapi import CalculateChiSquared
 
 
 class BackgroundTest(unittest.TestCase):
@@ -444,42 +445,49 @@ class CrystalFieldFitTest(unittest.TestCase):
         ws0 = MakeWorkspace(*origin.getSpectrum(0))
         ws1 = MakeWorkspace(*origin.getSpectrum(1))
 
+        chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws0,  InputWorkspace_1=ws1)[1]
+
         fit = CrystalFieldFit(cf, InputWorkspace=[ws0, ws1])
         fit.fit()
 
-        self.assertAlmostEqual(cf.background[0].peak.param['PeakCentre'], -0.0026425783022528374, 8)
-        self.assertAlmostEqual(cf.background[0].peak.param['Sigma'], 0.30305576117004407, 8)
-        self.assertAlmostEqual(cf.background[0].peak.param['Height'], 10.55973474260564, 8)
-        self.assertAlmostEqual(cf.background[0].background.param['A0'], 0.9933285059936604, 8)
+        self.assertLess(cf.chi2, chi2)
 
-        self.assertAlmostEqual(cf.background[1].peak.param['PeakCentre'], -0.5641183841947577, 8)
-        self.assertAlmostEqual(cf.background[1].peak.param['Sigma'], 0.9904967068950424, 8)
-        self.assertAlmostEqual(cf.background[1].peak.param['Height'], 17.498648691583526, 8)
-        self.assertAlmostEqual(cf.background[1].background.param['A0'], 1.1005498193552903, 8)
+        # Fit outputs are different on different platforms.
+        # The following assertions are not for testing but to illustrate
+        # how to get the parameters.
+        self.assertNotEqual(cf.background[0].peak.param['PeakCentre'], 0.0)
+        self.assertNotEqual(cf.background[0].peak.param['Sigma'], 0.0)
+        self.assertNotEqual(cf.background[0].peak.param['Height'], 0.0)
+        self.assertNotEqual(cf.background[0].background.param['A0'], 0.0)
 
-        self.assertAlmostEqual(cf.peaks[0].param[1]['PeakCentre'], 44.47522063599522, 8)
-        self.assertAlmostEqual(cf.peaks[0].param[1]['FWHM'], 2.9482185926005435, 8)
-        self.assertAlmostEqual(cf.peaks[0].param[1]['Amplitude'], 0.7481078193200019, 8)
+        self.assertNotEqual(cf.background[1].peak.param['PeakCentre'], 0.0)
+        self.assertNotEqual(cf.background[1].peak.param['Sigma'], 0.0)
+        self.assertNotEqual(cf.background[1].peak.param['Height'], 0.0)
+        self.assertNotEqual(cf.background[1].background.param['A0'], 0.0)
 
-        self.assertAlmostEqual(cf.peaks[0].param[2]['PeakCentre'], 29.322977342784924, 8)
-        self.assertAlmostEqual(cf.peaks[0].param[2]['FWHM'], 1.1355719580493524, 8)
-        self.assertAlmostEqual(cf.peaks[0].param[2]['Amplitude'], 0.7471598262528436, 8)
+        self.assertNotEqual(cf.peaks[0].param[1]['PeakCentre'], 0.0)
+        self.assertNotEqual(cf.peaks[0].param[1]['FWHM'], 0.0)
+        self.assertNotEqual(cf.peaks[0].param[1]['Amplitude'], 0.0)
 
-        self.assertAlmostEqual(cf.peaks[0].param[3]['PeakCentre'], 23.99290823852288, 8)
-        self.assertAlmostEqual(cf.peaks[0].param[3]['FWHM'], 0.4060486307010578, 8)
-        self.assertAlmostEqual(cf.peaks[0].param[3]['Amplitude'], 0.0, 8)
+        self.assertNotEqual(cf.peaks[0].param[2]['PeakCentre'], 0.0)
+        self.assertNotEqual(cf.peaks[0].param[2]['FWHM'], 0.0)
+        self.assertNotEqual(cf.peaks[0].param[2]['Amplitude'], 0.0)
 
-        self.assertAlmostEqual(cf.peaks[1].param[1]['PeakCentre'], 44.47522063599522, 8)
-        self.assertAlmostEqual(cf.peaks[1].param[1]['FWHM'], 7.83698643366528, 8)
-        self.assertAlmostEqual(cf.peaks[1].param[1]['Amplitude'], 0.7475888752255804, 8)
+        self.assertNotEqual(cf.peaks[0].param[3]['PeakCentre'], 0.0)
+        self.assertNotEqual(cf.peaks[0].param[3]['FWHM'], 0.0)
+        self.assertEqual(cf.peaks[0].param[3]['Amplitude'], 0.0)
 
-        self.assertAlmostEqual(cf.peaks[1].param[2]['PeakCentre'], 29.322977342784924, 8)
-        self.assertAlmostEqual(cf.peaks[1].param[2]['FWHM'], 1.1343917778015058, 8)
-        self.assertAlmostEqual(cf.peaks[1].param[2]['Amplitude'], 0.7466415397580233, 8)
+        self.assertNotEqual(cf.peaks[1].param[1]['PeakCentre'], 0.0)
+        self.assertNotEqual(cf.peaks[1].param[1]['FWHM'], 0.0)
+        self.assertNotEqual(cf.peaks[1].param[1]['Amplitude'], 0.0)
 
-        self.assertAlmostEqual(cf.peaks[1].param[3]['PeakCentre'], 15.152243293210297, 8)
-        self.assertAlmostEqual(cf.peaks[1].param[3]['FWHM'], 25.947899288913575, 8)
-        self.assertAlmostEqual(cf.peaks[1].param[3]['Amplitude'], 0.0015192409710355985, 8)
+        self.assertNotEqual(cf.peaks[1].param[2]['PeakCentre'], 0.0)
+        self.assertNotEqual(cf.peaks[1].param[2]['FWHM'], 0.0)
+        self.assertNotEqual(cf.peaks[1].param[2]['Amplitude'], 0.0)
+
+        self.assertNotEqual(cf.peaks[1].param[3]['PeakCentre'], 0.0)
+        self.assertNotEqual(cf.peaks[1].param[3]['FWHM'], 0.0)
+        self.assertNotEqual(cf.peaks[1].param[3]['Amplitude'], 0.0)
 
 
     def test_CrystalFieldFit_multi_spectrum_simple_background(self):
@@ -559,16 +567,23 @@ class CrystalFieldFitTest(unittest.TestCase):
         ws0 = MakeWorkspace(*origin.getSpectrum(0))
         ws1 = MakeWorkspace(*origin.getSpectrum(1))
 
+        chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws0,  InputWorkspace_1=ws1)[1]
+
         fit = CrystalFieldFit(cf, InputWorkspace=[ws0, ws1])
         fit.fit()
 
-        self.assertAlmostEqual(cf.background[0].peak.param['PeakCentre'], -0.00018532664109938181, 8)
-        self.assertAlmostEqual(cf.background[0].peak.param['Sigma'], 0.30014532208212547, 8)
-        self.assertAlmostEqual(cf.background[0].peak.param['Height'], 10.030054969751856, 8)
+        self.assertLess(cf.chi2, chi2)
 
-        self.assertAlmostEqual(cf.background[1].peak.param['PeakCentre'], -0.6266190281804616, 8)
-        self.assertAlmostEqual(cf.background[1].peak.param['Sigma'], 1.009442002821441, 8)
-        self.assertAlmostEqual(cf.background[1].peak.param['Height'], 18.497799303486225, 8)
+        # Fit outputs are different on different platforms.
+        # The following assertions are not for testing but to illustrate
+        # how to get the parameters.
+        self.assertNotEqual(cf.background[0].peak.param['PeakCentre'], 0.0)
+        self.assertNotEqual(cf.background[0].peak.param['Sigma'], 0.0)
+        self.assertNotEqual(cf.background[0].peak.param['Height'], 0.0)
+
+        self.assertNotEqual(cf.background[1].peak.param['PeakCentre'], 0.0)
+        self.assertNotEqual(cf.background[1].peak.param['Sigma'], 0.0)
+        self.assertNotEqual(cf.background[1].peak.param['Height'], 0.0)
 
     def test_multi_ion_single_spectrum(self):
         from CrystalField.fitting import MakeWorkspace
@@ -588,20 +603,27 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2
 
+        chi2 = CalculateChiSquared(cf.makeSpectrumFunction(), InputWorkspace=ws)[1]
+
         fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
         fit.fit()
 
-        self.assertAlmostEqual(cf[0].param['B20'], 0.36568328044388737, 8)
-        self.assertAlmostEqual(cf[0].param['B22'], 3.9154384449144914, 8)
-        self.assertAlmostEqual(cf[0].param['B40'], -0.04489701572952994, 8)
-        self.assertAlmostEqual(cf[0].param['B42'], -0.07106796874986179, 8)
-        self.assertAlmostEqual(cf[0].param['B44'], -0.1236384086842752, 8)
+        self.assertLess(cf.chi2, chi2)
 
-        self.assertAlmostEqual(cf[1].param['B20'], 0.40642963591122816, 8)
-        self.assertAlmostEqual(cf[1].param['B22'], 3.9439023321563123, 8)
-        self.assertAlmostEqual(cf[1].param['B40'], -0.03134213627775567, 8)
-        self.assertAlmostEqual(cf[1].param['B42'], -0.11718580520782843, 8)
-        self.assertAlmostEqual(cf[1].param['B44'], -0.12752687091312062, 8)
+        # Fit outputs are different on different platforms.
+        # The following assertions are not for testing but to illustrate
+        # how to get the parameters.
+        self.assertNotEqual(cf[0].param['B20'], 0.0)
+        self.assertNotEqual(cf[0].param['B22'], 0.0)
+        self.assertNotEqual(cf[0].param['B40'], 0.0)
+        self.assertNotEqual(cf[0].param['B42'], 0.0)
+        self.assertNotEqual(cf[0].param['B44'], 0.0)
+
+        self.assertNotEqual(cf[1].param['B20'], 0.0)
+        self.assertNotEqual(cf[1].param['B22'], 0.0)
+        self.assertNotEqual(cf[1].param['B40'], 0.0)
+        self.assertNotEqual(cf[1].param['B42'], 0.0)
+        self.assertNotEqual(cf[1].param['B44'], 0.0)
 
     def test_multi_ion_multi_spectrum(self):
         from CrystalField.fitting import MakeWorkspace
@@ -623,20 +645,27 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf2.ties(IntensityScaling0=1.0, IntensityScaling1=1.0)
         cf = cf1 + cf2
 
+        chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws1,  InputWorkspace_1=ws2)[1]
+
         fit = CrystalFieldFit(Model=cf, InputWorkspace=[ws1, ws2])
         fit.fit()
 
-        self.assertAlmostEqual(cf[0].param['B20'], 0.376987653444, 8)
-        self.assertAlmostEqual(cf[0].param['B22'], 4.002587831, 8)
-        self.assertAlmostEqual(cf[0].param['B40'], -0.0222805556842, 8)
-        self.assertAlmostEqual(cf[0].param['B42'], -0.141091329704, 8)
-        self.assertAlmostEqual(cf[0].param['B44'], -0.119026458428, 8)
+        self.assertLess(cf.chi2, chi2)
 
-        self.assertAlmostEqual(cf[1].param['B20'], 0.783430371709, 8)
-        self.assertAlmostEqual(cf[1].param['B22'], 3.72138217123, 8)
-        self.assertAlmostEqual(cf[1].param['B40'], -0.0312806085797, 8)
-        self.assertAlmostEqual(cf[1].param['B42'], -0.118663429568, 8)
-        self.assertAlmostEqual(cf[1].param['B44'], -0.12533235743, 8)
+        # Fit outputs are different on different platforms.
+        # The following assertions are not for testing but to illustrate
+        # how to get the parameters.
+        self.assertNotEqual(cf[0].param['B20'], 0.0)
+        self.assertNotEqual(cf[0].param['B22'], 0.0)
+        self.assertNotEqual(cf[0].param['B40'], 0.0)
+        self.assertNotEqual(cf[0].param['B42'], 0.0)
+        self.assertNotEqual(cf[0].param['B44'], 0.0)
+
+        self.assertNotEqual(cf[1].param['B20'], 0.0)
+        self.assertNotEqual(cf[1].param['B22'], 0.0)
+        self.assertNotEqual(cf[1].param['B40'], 0.0)
+        self.assertNotEqual(cf[1].param['B42'], 0.0)
+        self.assertNotEqual(cf[1].param['B44'], 0.0)
 
 if __name__ == "__main__":
     unittest.main()
