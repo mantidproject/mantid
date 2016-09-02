@@ -4,6 +4,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -13,6 +14,7 @@
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 
@@ -177,6 +179,20 @@ const std::string MatrixWorkspace::getTitle() const {
     return title;
   } else
     return Workspace::getTitle();
+}
+
+/** Return a reference to the SpectrumInfo object. NOT THREAD-SAFE!
+ *
+ * Currently this method is not thread-safe, and any modifications of the
+ * instrument or instrument parameters such as mask flags will not be visible in
+ * existing SpectrumInfo references. After modification, obtain a new reference
+ * by calling this method again.
+ */
+const SpectrumInfo &MatrixWorkspace::spectrumInfo() const {
+  // For now we *always* create a new SpectrumInfo since the instrument or
+  // parameters may have changed.
+  m_spectrumInfo = Kernel::make_unique<SpectrumInfo>(*this);
+  return *m_spectrumInfo;
 }
 
 void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {

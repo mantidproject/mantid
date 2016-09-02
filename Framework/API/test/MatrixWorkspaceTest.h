@@ -6,6 +6,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument.h"
@@ -284,6 +285,25 @@ public:
       } else {
         TS_FAIL("No detector defined");
       }
+    }
+  }
+
+  void testWholeSpectraMasking_SpectrumInfo() {
+    // Workspace has 3 spectra, each 1 in length
+    const int numHist(3);
+    auto workspace = makeWorkspaceWithDetectors(3, 1);
+    workspace->maskWorkspaceIndex(1);
+    workspace->maskWorkspaceIndex(2);
+
+    const auto &spectrumInfo = workspace->spectrumInfo();
+    for (int i = 0; i < numHist; ++i) {
+      bool expectedMasked(false);
+      if (i == 0) {
+        expectedMasked = false;
+      } else {
+        expectedMasked = true;
+      }
+      TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), expectedMasked);
     }
   }
 
