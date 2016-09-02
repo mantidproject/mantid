@@ -22,10 +22,12 @@ SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace)
 // Defined as default in source for forward declaration with std::unique_ptr.
 SpectrumInfo::~SpectrumInfo() = default;
 
+/// Returns true if the detector(s) associated with the spectrum are monitors.
 bool SpectrumInfo::isMonitor(const size_t index) const {
   return getDetector(index).isMonitor();
 }
 
+/// Returns true if the detector(s) associated with the spectrum are masked.
 bool SpectrumInfo::isMasked(const size_t index) const {
   return getDetector(index).isMasked();
 }
@@ -84,15 +86,10 @@ double SpectrumInfo::l1() const {
 }
 
 const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
-  updateCachedDetector(index);
-  size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
-  return *m_detectors[thread];
-}
-
-void SpectrumInfo::updateCachedDetector(const size_t index) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   if (m_lastIndex[thread] == index)
-    return;
+    return *m_detectors[thread];
+
   m_lastIndex[thread] = index;
 
   // Note: This function body has big overlap with the method
@@ -114,6 +111,8 @@ void SpectrumInfo::updateCachedDetector(const size_t index) const {
     m_detectors[thread] = Geometry::IDetector_const_sptr(
         new Geometry::DetectorGroup(dets_ptr, false));
   }
+
+  return *m_detectors[thread];
 }
 
 /// Returns a reference to the source component. The value is cached, so calling

@@ -24,6 +24,9 @@ class MatrixWorkspace;
   such that we can start refactoring existing code before the full-blown
   implementation of Instrument-2.0 is available.
 
+  SpectrumInfo provides easy access to commonly used parameters, such as mask
+  and monitor flags, L1, L2, and 2-theta.
+
   This class is thread safe with OpenMP BUT NOT WITH ANY OTHER THREADING LIBRARY
   such as Poco threads or Intel TBB.
 
@@ -67,7 +70,6 @@ public:
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
-  void updateCachedDetector(const size_t index) const;
   const Geometry::IComponent &getSource() const;
   const Geometry::IComponent &getSample() const;
   Kernel::V3D getSourcePos() const;
