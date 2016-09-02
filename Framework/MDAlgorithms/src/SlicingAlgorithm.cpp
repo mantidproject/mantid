@@ -791,11 +791,8 @@ void SlicingAlgorithm::createTransform() {
  * This needs to be in the space of the INPUT MDEventWorkspace.
  *
  * In the most general case, this function assumes ORTHOGONAL BASIS VECTORS!
- * However, the following cases handle non-orthogonal vectors:
- *  2 bases in 2D space
- *  2 bases in 3D space
- *  3 bases in 3D space
- *  3 bases in 4D space
+ * However, in the case of N dimensions with N or N-1 bases then non-orthogonal
+ * basis vectors are allowed.
  *
  * @param chunkMin :: the minimum index in each dimension to consider "valid"
  *(inclusive).
@@ -819,7 +816,7 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
   VMD o2 = m_translation;
   // And this the list of basis vectors. Each vertex is given by o1+bases[i].
   std::vector<VMD> bases;
-  VMD x, y, z, t;
+  VMD x;
 
   for (size_t d = 0; d < m_bases.size(); d++) {
     double xMin = m_binDimensions[d]->getMinimum();
@@ -832,164 +829,63 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
     // Offset the origin by the position along the basis vector
     o1 += (m_bases[d] * xMin);
     o2 += (m_bases[d] * xMax);
+
     VMD thisBase = m_bases[d] * (xMax - xMin);
     bases.push_back(thisBase);
     if (d == 0)
       x = thisBase;
-    if (d == 1)
-      y = thisBase;
-    if (d == 2)
-      z = thisBase;
-    if (d == 3)
-      t = thisBase;
   }
 
   // Dimensionality of the box
   size_t boxDim = bases.size();
 
-  // Create a Z vector by doing the cross-product of X and Y
-  if (boxDim == 2 && nd == 3) {
-    z = x.cross_prod(y);
-    z.normalize();
-  }
-
   // Point that is sure to be inside the volume of interest
   VMD insidePoint = (o1 + o2) / 2.0;
-  VMD normal = bases[0];
 
   if (boxDim == 1) {
     // 2 planes defined by 1 basis vector
     // Your normal = the x vector
     func->addPlane(MDPlane(x, o1));
     func->addPlane(MDPlane(x * -1.0, o2));
-  } else if (boxDim == 2 && nd == 2) {
-    // 4 planes defined by 2 basis vectors (general to non-orthogonal basis
-    // vectors)
-    std::vector<VMD> vectors;
-    // X plane
-    vectors.clear();
-    vectors.push_back(x);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
-
-    // Y plane
-    vectors.clear();
-    vectors.push_back(y);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
-  } else if (boxDim == 2 && nd == 3) {
-    // 4 planes defined by 2 basis vectors (general to non-orthogonal basis
-    // vectors)
-    // The vertical = cross-product of X and Y basis vectors
-    z = x.cross_prod(y);
+  } else if (boxDim == nd || boxDim == nd - 1) {
+    // Create a pair of planes for each base supplied. This is general to non-
+    // orthogonal bases. If we have bases (x y z t) then we create the planes
+    //
+    // y z t
+    // x z t
+    // x y t
+    // x y z
+    //
+    // Note: the last plane may or may not be created depending on the number
+    // of bases supplied to the slicing algorithm relative to the number
+    // of dimensions. i.e. if 3 bases were supplied and we have 4 dimensions
+    // then 6 planes are created instead of 8.
     std::vector<VMD> vectors;
 
-    // X plane
-    vectors.clear();
-    vectors.push_back(x);
-    vectors.push_back(z);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
+    for (size_t ignoreIndex = 0; ignoreIndex < boxDim; ++ignoreIndex) {
+      vectors.clear();
+      // Create a list of vectors that excludes the "current" basis
+      for (size_t baseIndex = 0; baseIndex < boxDim; ++baseIndex) {
+        if (baseIndex != ignoreIndex)
+          vectors.push_back(bases[baseIndex]);
+      }
 
-    // Y plane
-    vectors.clear();
-    vectors.push_back(y);
-    vectors.push_back(z);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
-  } else if (boxDim == 3 && nd == 3) {
-    // 6 planes defined by 3 basis vectors (general to non-orthogonal basis
-    // vectors)
-    VMD xyNormal = x.cross_prod(y);
-    // Flip the normal if the input bases were NOT right-handed.
-    if (!MDPlane(xyNormal, o1).isPointBounded(insidePoint))
-      xyNormal *= -1.0;
-    func->addPlane(MDPlane(xyNormal, o1));
-    func->addPlane(MDPlane(xyNormal * -1.0, o2));
-    VMD xzNormal = z.cross_prod(x);
-    if (!MDPlane(xzNormal, o1).isPointBounded(insidePoint))
-      xzNormal *= -1.0;
-    func->addPlane(MDPlane(xzNormal, o1));
-    func->addPlane(MDPlane(xzNormal * -1.0, o2));
-    VMD yzNormal = y.cross_prod(z);
-    if (!MDPlane(yzNormal, o1).isPointBounded(insidePoint))
-      yzNormal *= -1.0;
-    func->addPlane(MDPlane(yzNormal, o1));
-    func->addPlane(MDPlane(yzNormal * -1.0, o2));
-  } else if (boxDim == 3 && nd == 4) {
-    // 6 planes defined by 3 basis vectors, in 4D world. (General to
-    // non-orthogonal basis vectors)
+      // if we have fewer basis vectors than dimensions
+      // create a normal for the final dimension
+      if (boxDim == nd - 1)
+        vectors.push_back(VMD::getNormalVector(bases));
 
-    // Get a vector (in 4D) that is normal to all 3 other bases.
-    t = VMD::getNormalVector(bases);
-    // All the planes will have "t" in their plane.
-
-    std::vector<VMD> vectors;
-
-    // XY plane
-    vectors.clear();
-    vectors.push_back(x);
-    vectors.push_back(y);
-    vectors.push_back(t);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
-
-    // XZ plane
-    vectors.clear();
-    vectors.push_back(x);
-    vectors.push_back(z);
-    vectors.push_back(t);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
-
-    // YZ plane
-    vectors.clear();
-    vectors.push_back(y);
-    vectors.push_back(z);
-    vectors.push_back(t);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
-  } else if (boxDim == 4 && nd == 4) {
-
-    // 8 planes defined by 4 basis vectors, in 4D world. (General to
-    // non-orthogonal basis vectors)
-
-    std::vector<VMD> vectors;
-
-    // XY plane
-    vectors.clear();
-    vectors.push_back(x);
-    vectors.push_back(y);
-    vectors.push_back(z);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
-
-    // XZ plane
-    vectors.clear();
-    vectors.push_back(x);
-    vectors.push_back(z);
-    vectors.push_back(t);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
-
-    // YZ plane
-    vectors.clear();
-    vectors.push_back(y);
-    vectors.push_back(z);
-    vectors.push_back(t);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
-
-    vectors.clear();
-    vectors.push_back(x);
-    vectors.push_back(y);
-    vectors.push_back(t);
-    func->addPlane(MDPlane(vectors, o1, insidePoint));
-    func->addPlane(MDPlane(vectors, o2, insidePoint));
+      // Add two planes for each set of vectors
+      func->addPlane(MDPlane(vectors, o1, insidePoint));
+      func->addPlane(MDPlane(vectors, o2, insidePoint));
+    }
   } else {
     // Last-resort, totally general case
     // 2*N planes defined by N basis vectors, in any dimensionality workspace.
     // Assumes orthogonality!
+    g_log.warning("SlicingAlgorithm given " + std::to_string(boxDim) +
+                  " bases and " + std::to_string(nd) + " dimensions and " +
+                  "therefore will assume orthogonality");
     for (auto &base : bases) {
       // For each basis vector, make two planes, perpendicular to it and facing
       // inwards
