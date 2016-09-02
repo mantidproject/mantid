@@ -944,31 +944,6 @@ public:
     do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, "prop1, prop2", 1.0, 2.0, 3.0, 4.0), "prop2", mergeType, "2013-Jun-25 10:59:15  3\n2013-Jun-25 11:59:15  4\n", 2);
   }
 
-  void test_mergeSampleLogs_average() {
-    std::string mergeType = "sample_logs_average";
-    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 0.0, 0.0), "prop1", mergeType, "1.5", 2);
-  }
-
-  void test_mergeSampleLogs_average_multiple() {
-    std::string mergeType = "sample_logs_average";
-    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, "prop1, prop2", 1.0, 2.0, 3.0, 4.0), "prop2", mergeType, "3.5", 2);
-  }
-
-  void test_mergeSampleLogs_min() {
-    std::string mergeType = "sample_logs_min";
-    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 0.0, 0.0), "prop1", mergeType, "1", 2);
-  }
-
-  void test_mergeSampleLogs_max() {
-    std::string mergeType = "sample_logs_max";
-    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 0.0, 0.0), "prop1", mergeType, "2", 2);
-  }
-
-  void test_mergeSampleLogs_sum() {
-    std::string mergeType = "sample_logs_sum";
-    do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 0.0, 0.0), "prop1", mergeType, "3", 2);
-  }
-
   void test_mergeSampleLogs_list() {
     std::string mergeType = "sample_logs_list";
     do_test_mergeSampleLogs(create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 0.0, 0.0), "prop1", mergeType, "1, 2", 2);
@@ -1021,32 +996,34 @@ public:
   }
 
   void test_mergeSampleLogs_non_existent_log_is_ignored() {
-    std::string mergeType = "sample_logs_average";
+    std::string mergeType = "sample_logs_time_series";
     WorkspaceGroup_sptr gws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 0.0, 0.0);
     MatrixWorkspace_sptr a = boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
     a->instrumentParameters().addString(a->getInstrument()->getComponentID(), mergeType, "prop1, non_existent");
-    do_test_mergeSampleLogs(gws, "prop1", mergeType, "1.5", 2);
+    do_test_mergeSampleLogs(gws, "prop1", mergeType, "2013-Jun-25 10:59:15  1\n2013-Jun-25 11:59:15  2\n", 2);
   }
 
   void test_mergeSampleLogs_log_used_twice_throws_error() {
-    std::string mergeTypeAverage = "sample_logs_average";
-    std::string mergeTypeSum = "sample_logs_sum";
-    WorkspaceGroup_sptr gws = create_workspace_with_sample_logs<double>(mergeTypeAverage, "prop1", 1.0, 2.0, 0.0, 0.0);
+    std::string mergeTypeTimeSeries = "sample_logs_time_series";
+    std::string mergeTypeList = "sample_logs_list";
+    WorkspaceGroup_sptr gws = create_workspace_with_sample_logs<double>(mergeTypeTimeSeries, "prop1", 1.0, 2.0, 0.0, 0.0);
     MatrixWorkspace_sptr a = boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
-    a->instrumentParameters().addString(a->getInstrument()->getComponentID(), mergeTypeSum, "prop1");
+    a->instrumentParameters().addString(a->getInstrument()->getComponentID(), mergeTypeList, "prop1");
 
     // Error is caught by Algorithm, but check no output workspace created
-    do_test_mergeSampleLogs(gws, "prop1", mergeTypeAverage, "1.5", 1, true);
+    do_test_mergeSampleLogs(gws, "prop1", mergeTypeTimeSeries, "", 1, true);
   }
 
   void test_mergeSampleLogs_non_numeric_property_fails_to_merge() {
-    std::string mergeType = "sample_logs_average";
-    do_test_mergeSampleLogs(create_workspace_with_sample_logs<std::string>(mergeType, "prop1", "1", "two", "", ""), "prop1", mergeType, "1", 1);
+    std::string mergeType = "sample_logs_time_series";
+    do_test_mergeSampleLogs(create_workspace_with_sample_logs<std::string>(mergeType, "prop1", "1", "two", "", ""), "prop1", mergeType, "2013-Jun-25 10:59:15  1\n", 1);
   }
 
   void test_mergeSampleLogs_non_numeric_property_in_first_ws_skips_merging_parameter() {
-    std::string mergeType = "sample_logs_average";
-    do_test_mergeSampleLogs(create_workspace_with_sample_logs<std::string>(mergeType, "prop1", "one", "two", "", ""), "prop1", mergeType, "one", 2);
+    std::string mergeType = "sample_logs_time_series";
+    auto ws = create_workspace_with_sample_logs<std::string>(mergeType, "prop1", "one", "two", "", "");
+    // should get stuck when looking for "prop1_time_series"
+    TS_ASSERT_THROWS(do_test_mergeSampleLogs(ws, "prop1", mergeType, "2013-Jun-25 10:59:15  1\n", 2), Mantid::Kernel::Exception::NotFoundError);
   }
 
 private:

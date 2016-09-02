@@ -101,7 +101,6 @@ void MergeRuns::exec() {
     std::list<boost::shared_ptr<Mantid::API::MatrixWorkspace>>::iterator it = m_inMatrixWS.begin();
 
     size_t numberOfWSs = m_inMatrixWS.size();
-    int numberOfWSsAdded = 1;
 
     // Take the first input workspace as the first argument to the addition
     MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
@@ -128,9 +127,8 @@ void MergeRuns::exec() {
       // Add the current workspace to the total
       // Update the sample logs
       try {
-        sampleLogsBehaviour.calculateUpdatedSampleLogs(*it, outWS, numberOfWSsAdded);
+        sampleLogsBehaviour.calculateUpdatedSampleLogs(*it, outWS);
         outWS = outWS + addee;
-        ++numberOfWSsAdded;
         sampleLogsBehaviour.setUpdatedSampleLogs(outWS);
       } catch (std::invalid_argument e) {
         g_log.error() << "Could not merge run: " << it->get()->name() << ". Reason: \"" << e.what() << "\".";

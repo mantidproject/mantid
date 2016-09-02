@@ -34,7 +34,7 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL SampleLogsBehaviour {
 public:
-  enum MergeLogType { time_series, average, min, max, sum, list, warn, fail };
+  enum MergeLogType { time_series, list, warn, fail };
 
   typedef struct
   {
@@ -52,8 +52,7 @@ public:
   /// Create and update sample logs according to instrument parameters
   void createSampleLogsMaps(const API::MatrixWorkspace_sptr &ws);
   void calculateUpdatedSampleLogs(const API::MatrixWorkspace_sptr &ws,
-                                  const API::MatrixWorkspace_sptr &outWS,
-                                  const int numberOfWSsAdded);
+                                  const API::MatrixWorkspace_sptr &outWS);
   void setUpdatedSampleLogs(const API::MatrixWorkspace_sptr &ws);
   void resetSampleLogs(const API::MatrixWorkspace_sptr &ws);
 

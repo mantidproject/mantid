@@ -23,15 +23,6 @@
         <parameter name="sample_logs_time_series" type="string">
             <value val="sample.temperature, sample.pressure" />
         </parameter>
-        <parameter name="sample_logs_min" type="string">
-            <value val="Detector.detrate" />
-        </parameter>
-        <parameter name="sample_logs_max" type="string">
-            <value val="Detector.detsum" />
-        </parameter>
-        <parameter name="sample_logs_sum" type="string">
-            <value val="monitor1.monrate" />
-        </parameter>
         <parameter name="sample_logs_list" type="string">
             <value val="run_number" />
         </parameter>

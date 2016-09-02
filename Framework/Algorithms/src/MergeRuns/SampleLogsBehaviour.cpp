@@ -27,10 +27,6 @@ SampleLogsBehaviour::SampleLogsBehaviour(Logger &g_log) : m_logger(g_log) {}
 
 void SampleLogsBehaviour::createSampleLogsMaps(const MatrixWorkspace_sptr &ws) {
   getSampleList(time_series, "sample_logs_time_series", ws);
-  getSampleList(average, "sample_logs_average", ws);
-  getSampleList(min, "sample_logs_min", ws);
-  getSampleList(max, "sample_logs_max", ws);
-  getSampleList(sum, "sample_logs_sum", ws);
   getSampleList(list, "sample_logs_list", ws);
   getSampleList(warn, "sample_logs_warn", ws, "sample_logs_warn_tolerance");
   getSampleList(fail, "sample_logs_fail", ws, "sample_logs_fail_tolerance");
@@ -96,10 +92,25 @@ void SampleLogsBehaviour::getSampleList(const MergeLogType &sampleLogBehaviour,
       continue;
     }
 
+    m_logger.error() << "here" << std::endl;
+
+    bool isNumeric;
+    double value = 0.0;
+    try {
+      value = ws->getLogAsSingleValue(item);
+      isNumeric = true;
+    } catch (std::invalid_argument) {
+      isNumeric = false;
+      if (sampleLogBehaviour == time_series) {
+        m_logger.error() << item << " could not be converted to a numeric type";
+        continue;
+      }
+    }
+
     if (sampleLogBehaviour == time_series) {
+      m_logger.error() << "here?" << std::endl;
       std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(new TimeSeriesProperty<double>(item + "_time_series"));
       std::string startTime = ws->mutableRun().startTime().toISO8601String();
-      double value = ws->mutableRun().getLogAsSingleValue(item);
       timeSeriesProp->addValue(startTime, value);
       ws->mutableRun().addLogData(std::unique_ptr<Kernel::Property>(std::move(timeSeriesProp)));
     } else if (sampleLogBehaviour == list) {
@@ -107,25 +118,11 @@ void SampleLogsBehaviour::getSampleList(const MergeLogType &sampleLogBehaviour,
       prop = ws->getLog(item + "_list");
     }
 
-    bool isNumeric;
-    try {
-      ws->getLogAsSingleValue(item);
-      isNumeric = true;
-    } catch (std::invalid_argument) {
-      isNumeric = false;
-      if (sampleLogBehaviour == time_series || sampleLogBehaviour == average || sampleLogBehaviour == min || sampleLogBehaviour == max || sampleLogBehaviour == sum) {
-        m_logger.error() << item << " could not be converted to a numeric type";
-        continue;
-      }
-    }
-
     m_logMap[item] = {sampleLogBehaviour, prop, tolerance, isNumeric};
   }
 }
 
-void SampleLogsBehaviour::calculateUpdatedSampleLogs(
-    const MatrixWorkspace_sptr &ws, const MatrixWorkspace_sptr &outWS,
-    const int numberOfWSsAdded) {
+void SampleLogsBehaviour::calculateUpdatedSampleLogs(const MatrixWorkspace_sptr &ws, const MatrixWorkspace_sptr &outWS) {
   for (auto item : m_logMap) {
     Property *wsProperty = ws->getLog(item.first);
 
@@ -144,29 +141,14 @@ void SampleLogsBehaviour::calculateUpdatedSampleLogs(
 
     switch (item.second.type) {
     case time_series: {
+      m_logger.error() << "here1a" << std::endl;
       auto timeSeriesProp = outWS->mutableRun().getTimeSeriesProperty<double>(item.first + "_time_series");
+      m_logger.error() << "here1b" << std::endl;
       Kernel::DateAndTime startTime = ws->mutableRun().startTime();
       double value = ws->mutableRun().getLogAsSingleValue(item.first);
       timeSeriesProp->addValue(startTime, value);
       break;
     }
-    case average: {
-      double value = (wsNumber + outWSNumber) *
-                     ((numberOfWSsAdded) / (double)(numberOfWSsAdded + 1));
-      item.second.property->setValue(std::to_string(value));
-      break;
-    }
-    case min:
-      item.second.property->setValue(
-          std::to_string(std::min(wsNumber, outWSNumber)));
-      break;
-    case max:
-      item.second.property->setValue(
-          std::to_string(std::max(wsNumber, outWSNumber)));
-      break;
-    case sum:
-      item.second.property->setValue(std::to_string(wsNumber + outWSNumber));
-      break;
     case list:
       item.second.property->setValue(item.second.property->value() + ", " +
                                   wsProperty->value());
