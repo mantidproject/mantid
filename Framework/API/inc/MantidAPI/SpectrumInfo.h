@@ -2,14 +2,21 @@
 #define MANTID_API_SPECTRUMINFO_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/V3D.h"
 
-#include <memory>
+#include <boost/shared_ptr.hpp>
+
+#include <mutex>
+
 
 namespace Mantid {
+namespace Geometry {
+class IComponent;
+class IDetector;
+class Instrument;
+}
 namespace API {
 
-class GeometryInfo;
-class GeometryInfoFactory;
 class MatrixWorkspace;
 
 /** API::SpectrumInfo is an intermediate step towards a SpectrumInfo that is
@@ -50,12 +57,39 @@ public:
 
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;
+  double l2(const size_t index) const;
+  double twoTheta(const size_t index) const;
+  double signedTwoTheta(const size_t index) const;
 
 private:
-  const GeometryInfo &getInfo(const size_t index) const;
-  void updateCachedInfo(const size_t index) const;
-  std::unique_ptr<GeometryInfoFactory> m_factory;
-  mutable std::vector<std::unique_ptr<GeometryInfo>> m_info;
+  const Geometry::IDetector &getDetector(const size_t index) const;
+  void updateCachedDetector(const size_t index) const;
+  const Geometry::IComponent &getSource() const;
+  const Geometry::IComponent &getSample() const;
+  Kernel::V3D getSourcePos() const;
+  Kernel::V3D getSamplePos() const;
+  double getL1() const;
+
+  // These cache init functions are not thread-safe! Use only in combination
+  // with std::call_once!
+  void cacheSource() const;
+  void cacheSample() const;
+  void cacheL1() const;
+
+  const MatrixWorkspace &m_workspace;
+  boost::shared_ptr<const Geometry::Instrument> m_instrument;
+  // The following variables are mutable, since they are initialized (cached)
+  // only on demand, by const getters.
+  mutable boost::shared_ptr<const Geometry::IComponent> m_source;
+  mutable boost::shared_ptr<const Geometry::IComponent> m_sample;
+  mutable Kernel::V3D m_sourcePos;
+  mutable Kernel::V3D m_samplePos;
+  mutable double m_L1;
+  mutable std::once_flag m_sourceCached;
+  mutable std::once_flag m_sampleCached;
+  mutable std::once_flag m_L1Cached;
+
+  mutable std::vector<boost::shared_ptr<const Geometry::IDetector>> m_detectors;
   mutable std::vector<size_t> m_lastIndex;
 };
 
