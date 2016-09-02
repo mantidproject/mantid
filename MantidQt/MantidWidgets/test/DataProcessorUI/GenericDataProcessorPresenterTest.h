@@ -1059,6 +1059,90 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
+  void testTreeUpdatedAfterProcess() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    auto ws =
+        createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    ws->String(0, QMinCol) = "";
+	ws->String(1, ScaleCol) = "";
+	EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+
+    std::set<int> grouplist;
+    grouplist.insert(0);
+
+    createTOFWorkspace("TOF_12345", "12345");
+    createTOFWorkspace("TOF_12346", "12346");
+
+    // We should not receive any errors
+    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+
+    // The user hits the "process" button with the first group selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(2)
+        .WillRepeatedly(Return(""));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .Times(1)
+        .WillOnce(Return("Params = \"0.1\""));
+    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+        .Times(1)
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
+
+    presenter.notify(DataProcessorPresenter::ProcessFlag);
+    presenter.notify(DataProcessorPresenter::SaveFlag);
+
+    ws = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+        "TestWorkspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 4);
+    TS_ASSERT_EQUALS(ws->String(0, RunCol), "12345");
+    TS_ASSERT_EQUALS(ws->String(1, RunCol), "12346");
+    TS_ASSERT(ws->String(0, QMinCol) != "");
+	TS_ASSERT(ws->String(1, ScaleCol) != "");
+
+    // Check output workspaces were created as expected
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12345"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12345"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_12346"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_12346"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12346"));
+    TS_ASSERT(
+        AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345_TOF_12346"));
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
+    AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
+    AnalysisDataService::Instance().remove("TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
+    AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
+    AnalysisDataService::Instance().remove("TOF_12346");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
   void testProcessOnlyRowsSelected() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
