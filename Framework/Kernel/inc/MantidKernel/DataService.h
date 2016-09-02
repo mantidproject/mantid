@@ -262,7 +262,7 @@ public:
           new BeforeReplaceNotification(name, it->second, Tobject));
 
       lock.lock();
-      datamap[name] = Tobject;
+      it->second = Tobject;
       lock.unlock();
 
       notificationCenter.postNotification(
@@ -290,16 +290,14 @@ public:
     // The map is shared across threads so the item is erased from the map
     // before unlocking the mutex and is held in a local stack variable.
     // This protects it from being modified by another thread.
-    auto data = it->second;
+    auto data = std::move(it->second);
     datamap.erase(it);
 
     // Do NOT use "it" iterator after this point. Other threads may modify the
     // map
     lock.unlock();
     notificationCenter.postNotification(new PreDeleteNotification(name, data));
-    lock.lock();
     data.reset(); // DataService now has no references to the object
-    lock.unlock();
     g_log.information("Data Object '" + name + "' deleted from data service.");
     notificationCenter.postNotification(new PostDeleteNotification(name));
   }
@@ -323,29 +321,28 @@ public:
     }
 
     // delete the object with the old name
-    auto object = it->second;
+    auto object = std::move(it->second);
     datamap.erase(it);
 
     // if there is another object which has newName delete it
-    it = datamap.find(newName);
-    if (it != datamap.end()) {
+    auto it2 = datamap.find(newName);
+    if (it2 != datamap.end()) {
       notificationCenter.postNotification(
           new AfterReplaceNotification(newName, object));
-      datamap.erase(it);
+      it2->second = std::move(object);
+    } else {
+      if (!(datamap.emplace(newName, std::move(object)).second)) {
+        // should never happen
+        lock.unlock();
+        std::string error =
+            " add : Unable to insert Data Object : '" + newName + "'";
+        g_log.error(error);
+        throw std::runtime_error(error);
+      }
     }
-
-    // insert the old object with the new name
-    if (!datamap.insert(std::make_pair(newName, object)).second) {
-      lock.unlock();
-      std::string error =
-          " add : Unable to insert Data Object : '" + newName + "'";
-      g_log.error(error);
-      throw std::runtime_error(error);
-    }
+    lock.unlock();
     g_log.information("Data Object '" + oldName + "' renamed to '" + newName +
                       "'");
-
-    lock.unlock();
     notificationCenter.postNotification(
         new RenameNotification(oldName, newName));
   }
@@ -387,7 +384,6 @@ public:
   bool doesExist(const std::string &name) const {
     // Make DataService access thread-safe
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-
     auto it = datamap.find(name);
     return it != datamap.end();
   }
