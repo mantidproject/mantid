@@ -800,7 +800,9 @@ void MantidUI::showSpectrumViewer() {
                       << "\n";
         throw std::runtime_error(e);
       }
-      viewer->setAttribute(Qt::WA_DeleteOnClose, false);
+      // Delete on close so we don't hold a shared pointer to a workspace
+      // which has been deleted in the ADS and is "inaccessible"
+      viewer->setAttribute(Qt::WA_DeleteOnClose, true);
       viewer->resize(1050, 800);
       connect(m_appWindow, SIGNAL(shutting_down()), viewer, SLOT(close()));
 
