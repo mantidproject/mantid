@@ -9,6 +9,8 @@ Framework Changes
 
 - A cmake parameter ``ENABLE_MANTIDPLOT`` (default ``True``) was added to facilitate framework only builds.
 
+- A race condition when accessing a singleton from multiple threads was fixed. 
+
 HistogramData
 -------------
 
