@@ -38,11 +38,12 @@ namespace Mantid {
 namespace VATES {
 
 template <class Scalar>
-class vtkMDHWSignalArray : public vtkTypeTemplate<vtkMDHWSignalArray<Scalar>,
-                                                  vtkMappedDataArray<Scalar>> {
+class vtkMDHWSignalArray : public vtkMappedDataArray<Scalar> {
 public:
-  vtkMappedDataArrayNewInstanceMacro(
-      vtkMDHWSignalArray<Scalar>) static vtkMDHWSignalArray *New();
+  vtkAbstractTemplateTypeMacro(vtkMDHWSignalArray<Scalar>,
+                               vtkMappedDataArray<Scalar>)
+      vtkMappedDataArrayNewInstanceMacro(
+          vtkMDHWSignalArray<Scalar>) static vtkMDHWSignalArray *New();
   void PrintSelf(ostream &os, vtkIndent indent) override;
 
   void InitializeArray(
