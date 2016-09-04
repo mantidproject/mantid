@@ -25,8 +25,6 @@
 #define vtkMDHWSignalArray_h
 
 #include "vtkMappedDataArray.h"
-
-#include "vtkTypeTemplate.h"  // For templated vtkObject API
 #include "vtkObjectFactory.h" // for vtkStandardNewMacro
 #include "vtkIdList.h"
 #include "vtkVariant.h"
