@@ -40,10 +40,12 @@ namespace VATES {
 template <class Scalar>
 class vtkMDHWSignalArray : public vtkMappedDataArray<Scalar> {
 public:
+  // clang-format off
   vtkAbstractTemplateTypeMacro(vtkMDHWSignalArray<Scalar>,
                                vtkMappedDataArray<Scalar>)
-      vtkMappedDataArrayNewInstanceMacro(
-          vtkMDHWSignalArray<Scalar>) static vtkMDHWSignalArray *New();
+  vtkMappedDataArrayNewInstanceMacro(vtkMDHWSignalArray<Scalar>)
+  static vtkMDHWSignalArray *New();
+  // clang-format on
   void PrintSelf(ostream &os, vtkIndent indent) override;
 
   void InitializeArray(
