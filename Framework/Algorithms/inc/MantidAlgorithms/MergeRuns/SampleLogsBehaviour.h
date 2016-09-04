@@ -44,22 +44,23 @@ public:
     bool isNumeric;
   } SampleLogBehaviour;
 
-  SampleLogsBehaviour(Kernel::Logger &logger);
+  SampleLogsBehaviour(const API::MatrixWorkspace_sptr &ws, Kernel::Logger &logger, const std::string sampleLogsTimeSeries, const std::string sampleLogsList, const std::string sampleLogsWarn, const std::string sampleLogsWarnTolerances, const std::string sampleLogsFail, const std::string sampleLogsFailTolerances);
   Kernel::Logger &m_logger;
 
-  std::map<const std::string, SampleLogBehaviour> m_logMap;
+  typedef std::map<const std::string, SampleLogBehaviour> SampleLogsMap;
+  SampleLogsMap m_logMap;
 
   /// Create and update sample logs according to instrument parameters
-  void createSampleLogsMaps(const API::MatrixWorkspace_sptr &ws);
+  void createSampleLogsMapsFromInstrumentParams(SampleLogsMap &instrumentMap, const API::MatrixWorkspace_sptr &ws);
   void calculateUpdatedSampleLogs(const API::MatrixWorkspace_sptr &ws,
                                   const API::MatrixWorkspace_sptr &outWS);
   void setUpdatedSampleLogs(const API::MatrixWorkspace_sptr &ws);
   void resetSampleLogs(const API::MatrixWorkspace_sptr &ws);
 
 private:
-  void getSampleList(const MergeLogType &, const std::string &parameterName,
+  void updateSampleMap(SampleLogsMap &map, const MergeLogType &, const std::string &params,
                      const API::MatrixWorkspace_sptr &ws,
-                     const std::string sampleLogTolerances = "");
+                     const std::string paramsTolerances = "", const bool skipIfInPrimaryMap = false);
 };
 
 } // namespace Algorithms

@@ -44,6 +44,12 @@ void MergeRuns::init() {
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
+  declareProperty("SampleLogsTimeSeries", "", "The sample logs to merge into a time series. The initial times are taken as the start times for the run, and the merged sample log is suffixed with \"_time_series\". Sample logs must be numeric.");
+  declareProperty("SampleLogsList", "", "The sample logs to merge into a list. The merged sample log is suffixed with \"_time_series\". ");
+  declareProperty("SampleLogsWarn", "", "The sample logs to warn if different when merging.");
+  declareProperty("SampleLogsWarnTolerances", "", "The tolerances for warning if sample logs are different.");
+  declareProperty("SampleLogsFail", "", "The sample logs to fail if different when merging. If there is a difference the run is not merged.");
+  declareProperty("SampleLogsFailTolerances", "", "The tolerances for failing if sample logs are different.");
 }
 
 //------------------------------------------------------------------------------------------------
@@ -66,7 +72,12 @@ void MergeRuns::exec() {
   // Check that all input workspaces exist and match in certain important ways
   const std::vector<std::string> inputs_orig = getProperty("InputWorkspaces");
 
-  Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(g_log);
+  const std::string sampleLogsTimeSeries = getProperty("SampleLogsTimeSeries");
+  const std::string sampleLogsList = getProperty("SampleLogsList");
+  const std::string sampleLogsWarn = getProperty("SampleLogsWarn");
+  const std::string sampleLogsWarnTolerances = getProperty("SampleLogsWarnTolerances");
+  const std::string sampleLogsFail = getProperty("SampleLogsFail");
+  const std::string sampleLogsFailTolerances = getProperty("SampleLogsFailTolerances");
 
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs;
@@ -104,7 +115,7 @@ void MergeRuns::exec() {
 
     // Take the first input workspace as the first argument to the addition
     MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
-    sampleLogsBehaviour.createSampleLogsMaps(outWS);
+    Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(outWS, g_log, sampleLogsTimeSeries, sampleLogsList, sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail, sampleLogsFailTolerances);
 
     m_progress = new Progress(this, 0.0, 1.0, numberOfWSs - 1);
     // Note that the iterator is incremented before first pass so that 1st

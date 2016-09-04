@@ -891,22 +891,20 @@ public:
     TS_ASSERT(alg.useCustomInputPropertyName());
   }
 
-  void do_test_mergeSampleLogs(WorkspaceGroup_sptr input, std::string propertyName, std::string mergeType, std::string result, int filesMerged, bool noOutput = false) {
+  void do_test_mergeSampleLogs_modified_alg(MergeRuns &alg, WorkspaceGroup_sptr input, std::string propertyName, std::string mergeType, std::string result, int filesMerged, bool noOutput = false) {
     MatrixWorkspace_sptr input0 = boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0));
     MatrixWorkspace_sptr input1 = boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(1));
 
-    MergeRuns alg;
-    alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspaces", input0->name() + "," + input1->name()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outWS"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr output;
     if (noOutput) {
-        TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"), Mantid::Kernel::Exception::NotFoundError);
-        return;
+      TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"), Mantid::Kernel::Exception::NotFoundError);
+      return;
     } else {
-        TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"));
+      TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS"));
     }
 
     Property *prop;
@@ -925,6 +923,13 @@ public:
     }
 
     sample_logs_teardown();
+  }
+
+  void do_test_mergeSampleLogs(WorkspaceGroup_sptr input, std::string propertyName, std::string mergeType, std::string result, int filesMerged, bool noOutput = false) {
+    MergeRuns alg;
+    alg.initialize();
+
+    do_test_mergeSampleLogs_modified_alg(alg, input, propertyName, mergeType, result, filesMerged, noOutput);
   }
 
   void sample_logs_teardown() {
@@ -1024,6 +1029,15 @@ public:
     auto ws = create_workspace_with_sample_logs<std::string>(mergeType, "prop1", "one", "two", "", "");
     // should get stuck when looking for "prop1_time_series"
     TS_ASSERT_THROWS(do_test_mergeSampleLogs(ws, "prop1", mergeType, "2013-Jun-25 10:59:15  1\n", 2), Mantid::Kernel::Exception::NotFoundError);
+  }
+
+  void test_mergeSampleLogs_time_series_overwriting_in_algorithm() {
+    std::string mergeType = "sample_logs_time_series";
+    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 0.0, 0.0);
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("SampleLogsList", "prop1");
+    do_test_mergeSampleLogs_modified_alg(alg, ws, "prop1", "sample_logs_list", "1, 2", 2);
   }
 
 private:
