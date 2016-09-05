@@ -187,6 +187,10 @@ public:
     int numEvents = 20;
     EventWorkspace_sptr input = WorkspaceCreationHelper::CreateEventWorkspace(
         numPixels, numBins, numEvents);
+    // We have no instrument so we clear the detector IDs
+    for(int i=0; i<numPixels; ++i)
+      input->getSpectrum(i).setDetectorIDs(std::set<detid_t>{});
+
     AnalysisDataService::Instance().addOrReplace(inName, input);
 
     Mantid::Algorithms::SumSpectra alg2;
@@ -221,6 +225,9 @@ public:
     AnalysisDataService::Instance().clear();
     RebinnedOutput_sptr ws =
         WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
+    // We have no instrument so we clear the detector IDs
+    for(size_t i=0; i<ws->getNumberHistograms(); ++i)
+      ws->getSpectrum(i).setDetectorIDs(std::set<detid_t>{});
     std::string inName = "rebinTest";
     std::string outName = "rebin_sum";
 
@@ -347,6 +354,9 @@ public:
 
     MatrixWorkspace_sptr tws =
         WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist, nBins);
+    // We have no instrument so we clear the detector IDs
+    for(size_t i=0; i<tws->getNumberHistograms(); ++i)
+      tws->getSpectrum(i).setDetectorIDs(std::set<detid_t>{});
     std::string inName = "rebinTest";
     std::string outName = "sumWS";
 
