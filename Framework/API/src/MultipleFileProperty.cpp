@@ -51,7 +51,8 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
           boost::make_shared<MultiFileValidator>(
               exts, (action != FileProperty::OptionalLoad)),
           Direction::Input),
-      m_multiFileLoadingEnabled(), m_exts(), m_parser(), m_defaultExt("") {
+      m_multiFileLoadingEnabled(), m_exts(), m_parser(), m_defaultExt(""),
+      m_action(action) {
   std::string allowMultiFileLoading =
       Kernel::ConfigService::Instance().getString("loading.multifile");
 
@@ -76,6 +77,25 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
     : MultipleFileProperty(name, FileProperty::Load, exts) {}
 
 /**
+* Check if this property is optional
+* @returns True if the property is optinal, false otherwise
+*/
+bool MultipleFileProperty::isOptional() const {
+  return (m_action == FileProperty::OptionalLoad);
+}
+
+/**
+ * @returns a string depending on whether an empty value is valid
+ */
+std::string MultipleFileProperty::isEmptyValueValid() const {
+  if (isOptional()) {
+    return "";
+  } else {
+    return "No file specified.";
+  }
+}
+
+/**
  * Convert the given propValue into a comma and plus separated list of full
  *filenames, and pass to the parent's
  * setValue method to store as a vector of vector of strings.
@@ -88,8 +108,11 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
  *An empty string indicates success.
  */
 std::string MultipleFileProperty::setValue(const std::string &propValue) {
-  // No empty value is allowed.
-  if (propValue.empty())
+  // No empty value is allowed, unless optional.
+  // This is yet aditional check that is beyond the underlying
+  // MultiFileValidator,
+  // so isOptional needs to be inspected here as well
+  if (propValue.empty() && !isOptional())
     return "No file(s) specified.";
 
   // If multiple file loading is disabled, then set value assuming it is a

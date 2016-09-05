@@ -139,6 +139,8 @@ public:
   std::string setValue(const std::string &propValue) override;
   std::string value() const override;
   std::string getDefault() const override;
+  /// Checks if this property is optional
+  bool isOptional() const;
 
   /// @return the vector of suggested extensions. For use in GUIs showing files.
   std::vector<std::string> getExts() const { return m_exts; }
@@ -151,6 +153,8 @@ public:
   operator=;
 
 private:
+  /// Returns a string depending on whether an empty value is valid
+  std::string isEmptyValueValid() const;
   std::string setValueAsSingleFile(const std::string &propValue);
   std::string setValueAsMultipleFiles(const std::string &propValue);
   /// Whether or not the user has turned on multifile loading.
@@ -163,6 +167,8 @@ private:
   /// The default file extension associated with the type of file this property
   /// will handle
   std::string m_defaultExt;
+  /// The action type of this property, Load (dafault) or OptionalLoad are supported
+  unsigned int m_action;
 };
 
 } // namespace API
