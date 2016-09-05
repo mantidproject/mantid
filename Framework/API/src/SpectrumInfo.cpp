@@ -79,6 +79,10 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
       .getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
 }
 
+bool SpectrumInfo::hasDetectors(const size_t index) const {
+  return m_workspace.getSpectrum(index).getDetectorIDs().size() > 0;
+}
+
 bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
   return m_workspace.getSpectrum(index).getDetectorIDs().size() == 1;
 }
