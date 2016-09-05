@@ -78,9 +78,8 @@ class ABINSCalculateQToscaTest(unittest.TestCase):
                                            sample_form=self._sample_form,
                                            instrument=self._tosca_instrument)
 
-    _core = "../ExternalData/Testing/Data/UnitTest/"
 
-    # Use case: TOSCA
+    # Use case: TOSCA instrument
     def test_TOSCA(self):
 
 
@@ -105,26 +104,6 @@ class ABINSCalculateQToscaTest(unittest.TestCase):
 
         # noinspection PyTypeChecker
         self.assertEqual(True, np.allclose(correct_q_data, loaded_q.extract()))
-
-
-    # Helper functions
-    def _prepare_data(self, name=None):
-        """Reads a corrects values from ASCII file."""
-        correct_data = None
-        with open(self._core+"CalculateQ_"+name+"_data.txt") as data_file:
-            correct_data = json.loads(data_file.read().replace("\n"," ").
-                                      replace("array","").
-                                      replace("([","[").
-                                      replace("])","]").
-                                      replace(".,",".0,").
-                                      replace(".]",".0]").
-                                      replace(". ",".0").
-                                      replace("'",'"'))
-
-
-
-        return np.array(correct_data)
-
 
 
 if __name__ == '__main__':
