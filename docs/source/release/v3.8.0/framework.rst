@@ -26,6 +26,8 @@ Concepts
   undefined and infinite values and errors will be zeroed.
 - ``Lattice`` : Allow setting a UB matrix with negative determinant (improper rotation)
 
+- ``MultipleFileProperty`` : will now support also ``OptionalLoad`` ``FileAction`` (similar to ``FileProperty``).
+
 Algorithms
 ----------
 
