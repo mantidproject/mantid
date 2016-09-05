@@ -1,4 +1,4 @@
-from Instruments import ToscaInstrument
+from Instruments import ToscaInstrument, NoneInstrument
 from AbinsModules import AbinsParameters
 
 class InstrumentProducer(object):
@@ -11,4 +11,7 @@ class InstrumentProducer(object):
             raise ValueError("Unknown instrument: %s"%name)
         elif name == "TOSCA":
             return ToscaInstrument("TOSCA")
+        elif name == "None":
+            return NoneInstrument("None")
+
 
