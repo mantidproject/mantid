@@ -135,7 +135,7 @@ void HFIRLoad::exec() {
   const std::string fileName = getPropertyValue("Filename");
 
   // Output log
-  std::string output_message = "";
+  std::string output_message;
   const double wavelength_input = getProperty("Wavelength");
   const double wavelength_spread_input = getProperty("WavelengthSpread");
 
@@ -193,7 +193,7 @@ void HFIRLoad::exec() {
                   << " from the Algorithm input property.\n";
     sdd = sample_det_dist;
   } else {
-    const std::string sddName = "sample-detector-distance";
+    const std::string sddName = "total-sample-detector-distance";
     Mantid::Kernel::Property *prop = dataWS->run().getProperty(sddName);
     Mantid::Kernel::PropertyWithValue<double> *dp =
         dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);

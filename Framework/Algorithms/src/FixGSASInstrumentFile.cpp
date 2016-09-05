@@ -45,8 +45,6 @@ void FixGSASInstrumentFile::init() {
                                         FileProperty::Save, exts),
       "Name of the output GSAS instrument parameter file to have format "
       "fixed. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -98,8 +96,6 @@ void FixGSASInstrumentFile::exec() {
   }
 
   ofile.close();
-
-  return;
 }
 
 } // namespace Algorithms

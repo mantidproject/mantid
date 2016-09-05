@@ -380,14 +380,10 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     return;
   }
 
-  // Make a shared pointer
-  MantidVecPtr Xptr;
-  MantidVec &X = Xptr.access();
-  X.resize(tof.size(), 0);
-  X.assign(tof.begin(), tof.end());
+  HistogramData::BinEdges X(tof.begin(), tof.end());
 
   // Load the data. Coerce ints into double.
-  std::string errorsField = "";
+  std::string errorsField;
   std::vector<double> data;
   file->openData(m_dataField);
   file->getDataCoerce(data);
@@ -432,7 +428,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     spec.setSpectrumNo(specnum_t(wi + 1));
     spec.setDetectorID(pixel_id[i - iPart]);
     // Set the shared X pointer
-    spec.setX(X);
+    spec.setBinEdges(X);
 
     // Extract the Y
     MantidVec &Y = spec.dataY();

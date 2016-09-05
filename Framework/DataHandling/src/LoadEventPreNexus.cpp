@@ -645,11 +645,7 @@ void LoadEventPreNexus::procEvents(
   workspace->clearMRU();
 
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef.resize(2);
-  xRef[0] = shortest_tof - 1; // Just to make sure the bins hold it all
-  xRef[1] = longest_tof + 1;
+  auto axis = HistogramData::BinEdges{shortest_tof - 1, longest_tof + 1};
   workspace->setAllX(axis);
   this->pixel_to_wkspindex.clear();
 
@@ -937,9 +933,8 @@ void LoadEventPreNexus::readPulseidFile(const std::string &filename,
   if (num_pulses > 0) {
     this->pulsetimes.reserve(num_pulses);
     for (const auto &pulse : pulses) {
-      this->pulsetimes.push_back(
-          DateAndTime(static_cast<int64_t>(pulse.seconds),
-                      static_cast<int64_t>(pulse.nanoseconds)));
+      this->pulsetimes.emplace_back(static_cast<int64_t>(pulse.seconds),
+                                    static_cast<int64_t>(pulse.nanoseconds));
       this->event_indices.push_back(pulse.event_index);
 
       temp = pulse.pCurrent;

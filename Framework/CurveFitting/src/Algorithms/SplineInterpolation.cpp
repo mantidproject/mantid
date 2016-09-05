@@ -105,7 +105,7 @@ void SplineInterpolation::exec() {
 
     // compare the data set against our spline
     calculateSpline(mwspt, outputWorkspace, i);
-    outputWorkspace->setX(i, mws->readX(0));
+    outputWorkspace->setX(i, mws->refX(0));
 
     // check if we want derivatives
     if (order > 0) {
@@ -115,7 +115,7 @@ void SplineInterpolation::exec() {
       // calculate the derivatives for each order chosen
       for (int j = 0; j < order; ++j) {
         vAxis->setValue(j, j + 1);
-        derivs[i]->setX(j, mws->readX(0));
+        derivs[i]->setX(j, mws->refX(0));
         calculateDerivatives(mwspt, derivs[i], j + 1);
       }
 

@@ -6,6 +6,8 @@
 
 #include <gmock/gmock.h>
 
+class QwtData;
+
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 // This is a simple mock for the tomo interface view when using SCARF.
@@ -90,14 +92,21 @@ public:
   MOCK_METHOD3(newCalibLoaded, void(const std::string &, const std::string &,
                                     const std::string &));
 
+  // virtual std::vector<GSASCalibrationParms> currentCalibration() const
+  MOCK_CONST_METHOD0(
+      currentCalibration,
+      std::vector<MantidQt::CustomInterfaces::GSASCalibrationParms>());
+
   // virtual std::string enggRunPythonCode(const std::string &pyCode)
   MOCK_METHOD1(enggRunPythonCode, std::string(const std::string &));
 
   // virtual void enableTabs(bool enable);
   MOCK_METHOD1(enableTabs, void(bool));
 
-  // virtual void enableCalibrateAndFocusActions(bool enable);
-  MOCK_METHOD1(enableCalibrateAndFocusActions, void(bool));
+  MOCK_METHOD1(highlightRbNumber, void(bool));
+
+  // virtual void enableCalibrateFocusFitUserActions(bool enable);
+  MOCK_METHOD1(enableCalibrateFocusFitUserActions, void(bool));
 
   // virtual std::string focusingDir() const;
   MOCK_CONST_METHOD0(focusingDir, std::string());
@@ -135,74 +144,8 @@ public:
   // virtual double rebinningPulsesPerPeriod() const;
   MOCK_CONST_METHOD0(rebinningPulsesTime, double());
 
-  // virtual std::string fittingRunNo() const;
-  MOCK_CONST_METHOD0(getFittingRunNo, std::string());
-
-  // virtual std::string fittingPeaksData() const;
-  MOCK_CONST_METHOD0(fittingPeaksData, std::string());
-
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
-
-  // virtual Splits the fitting directory if the ENGINX found
-  MOCK_METHOD1(splitFittingDirectory,
-               std::vector<std::string>(std::string &selectedfPath));
-
-  // adds the number of banks to the combo-box widget on the interface
-  MOCK_METHOD1(addBankItem, void(std::string bankID));
-
-  // adds the run number to the list view widget on the interface
-  MOCK_METHOD1(addRunNoItem, void(std::string runNo));
-
-  // emits the signal within view when run number / bank changed
-  MOCK_METHOD0(setBankEmit, void());
-
-  // sets the bank combo-box according to given index
-  MOCK_METHOD1(setBankIdComboBox, void(int idx));
-
-  // deletes all items from the fitting combo-box widget
-  MOCK_CONST_METHOD0(clearFittingComboBox, void());
-
-  // enables or disables the fitting combo-box
-  MOCK_CONST_METHOD1(enableFittingComboBox, void(bool enable));
-
-  // gets the index of the bank according to text found
-  MOCK_CONST_METHOD1(getFittingComboIdx, int(std::string bank));
-
-  // deletes all items from the fitting list widget
-  MOCK_CONST_METHOD0(clearFittingListWidget, void());
-
-  // enables or disables the fitting list widget
-  MOCK_CONST_METHOD1(enableFittingListWidget, void(bool enable));
-
-  // return idx of current selected row of list widget
-  MOCK_CONST_METHOD0(getFittingListWidgetCurrentRow, int());
-
-  // sets the current row of the fitting list widget
-  MOCK_CONST_METHOD1(setFittingListWidgetCurrentRow, void(int idx));
-
-  // sets the peak list according to the QString given
-  MOCK_CONST_METHOD1(setPeakList, void(std::string peakList));
-
-  // gets the set focus directory within the setting tab
-  MOCK_METHOD0(getFocusDir, std::string());
-
-  // gets the global vector in view containing focused file directory
-  MOCK_METHOD0(getFittingRunNumVec, std::vector<std::string>());
-
-  // sets the global vector in view containing focused file directory
-  MOCK_METHOD1(setFittingRunNumVec, void(std::vector<std::string> assignVec));
-
-  // sets the fitting run number according to path
-  MOCK_METHOD1(setFittingRunNo, void(QString path));
-
-  // To determine whether the current loop is multi-run or single to avoid
-  // regenerating the list - view widget when not required
-  MOCK_METHOD0(getFittingMultiRunMode, bool());
-
-  // sets the fitting mode to multi-run or single to avoid
-  // regenerating the list - view widget when not required
-  MOCK_METHOD1(setFittingMultiRunMode, void(bool mode));
 
   // virtual bool plotCalibWorkspace
   MOCK_CONST_METHOD0(plotCalibWorkspace, bool());

@@ -715,8 +715,8 @@ void ConfigDialog::initMantidPage() {
 
   // Populate boxes
   auto faclist = cfgSvc.getFacilityNames();
-  for (auto it = faclist.begin(); it != faclist.end(); ++it) {
-    facility->addItem(QString::fromStdString(*it));
+  for (auto it : faclist) {
+    facility->addItem(QString::fromStdString(it));
   }
 
   // Set default property
@@ -983,7 +983,9 @@ void ConfigDialog::initMantidOptionsTab() {
   treeCategories->setColumnCount(1);
   treeCategories->setSortingEnabled(false);
   treeCategories->setHeaderLabel("Show Algorithm Categories");
-
+  // Connect this item's signal to check box SLOT
+  connect(treeCategories, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this,
+          SLOT(tickBoxClickedSlot(QTreeWidgetItem *, int)));
   grid->addWidget(treeCategories, 2, 0);
   refreshTreeCategories();
 
@@ -1185,17 +1187,22 @@ void ConfigDialog::populateProgramTree() {
 
 void ConfigDialog::updateProgramTree() {
   // Store into a map ready to go into config service when apply is clicked
-  std::map<std::string, std::map<std::string, std::string>>::const_iterator
-      itr = m_sendToSettings.begin();
-  for (; itr != m_sendToSettings.end(); ++itr) {
+  for (const auto itr : m_sendToSettings) {
     // creating the map of kvps needs to happen first as createing the item
     // requires them.
-    std::map<std::string, std::string> programKeysAndDetails = itr->second;
+    std::map<std::string, std::string> programKeysAndDetails = itr.second;
+
+    Qt::CheckState checkStatus = Qt::Unchecked;
+    auto checkStatusIter = programKeysAndDetails.find("visible");
+    // Check that found the iterator before dereferencing it
+    if (checkStatusIter != programKeysAndDetails.end() &&
+        checkStatusIter->second == "Yes") {
+      checkStatus = Qt::Checked;
+    }
 
     // Populate list
-    QTreeWidgetItem *program = createCheckedTreeItem(
-        QString::fromStdString(itr->first),
-        (programKeysAndDetails.find("visible")->second == "Yes"));
+    QTreeWidgetItem *program =
+        createCheckedTreeItem(QString::fromStdString(itr.first), checkStatus);
     treePrograms->addTopLevelItem(program);
     updateChildren(programKeysAndDetails, program);
   }
@@ -1206,14 +1213,12 @@ void ConfigDialog::updateChildren(
     QTreeWidgetItem *program) {
   program->takeChildren();
   // get the current program's (itr) keys and values (pItr)
-  std::map<std::string, std::string>::const_iterator pItr =
-      programKeysAndDetails.begin();
-  for (; pItr != programKeysAndDetails.end(); ++pItr) {
+  for (const auto pItr : programKeysAndDetails) {
     QTreeWidgetItem *item = new QTreeWidgetItem(program);
     QString itemText = QString("   ")
-                           .append(QString::fromStdString(pItr->first))
+                           .append(QString::fromStdString(pItr.first))
                            .append(" --- ")
-                           .append(QString::fromStdString(pItr->second));
+                           .append(QString::fromStdString(pItr.second));
     item->setText(0, itemText);
     program->addChild(item);
   }
@@ -1224,31 +1229,26 @@ void ConfigDialog::updateSendToTab() {
       Mantid::Kernel::ConfigService::Instance();
 
   // Add new values to the config service
-  std::map<std::string, std::map<std::string, std::string>>::const_iterator
-      itr = m_sendToSettings.begin();
   std::vector<std::string> programNames =
       cfgSvc.getKeys("workspace.sendto.name");
 
-  for (; itr != m_sendToSettings.end(); ++itr) {
+  for (const auto itr : m_sendToSettings) {
     for (size_t i = 0; i < programNames.size(); ++i) {
-      if (programNames[i] == itr->first) {
+      if (programNames[i] == itr.first) {
         // The selected program hasn't been deleted so set to blank string (all
         // those left without blank strings are to be deleted
         programNames[i] = "";
       }
     }
 
-    cfgSvc.setString("workspace.sendto.name." + itr->first, "0");
+    cfgSvc.setString("workspace.sendto.name." + itr.first, "0");
 
-    std::map<std::string, std::string> programKeysAndDetails = itr->second;
+    std::map<std::string, std::string> programKeysAndDetails = itr.second;
 
-    std::map<std::string, std::string>::const_iterator pItr =
-        programKeysAndDetails.begin();
-
-    for (; pItr != programKeysAndDetails.end(); ++pItr) {
-      if (pItr->second != "")
-        cfgSvc.setString("workspace.sendto." + itr->first + "." + pItr->first,
-                         pItr->second);
+    for (const auto pItr : programKeysAndDetails) {
+      if (pItr.second != "")
+        cfgSvc.setString("workspace.sendto." + itr.first + "." + pItr.first,
+                         pItr.second);
     }
   }
 
@@ -1267,59 +1267,223 @@ void ConfigDialog::updateSendToTab() {
   }
 }
 
+typedef std::map<std::string, bool> categoriesType;
+typedef QMap<QString, QTreeWidgetItem *> widgetMap;
+
 void ConfigDialog::refreshTreeCategories() {
   treeCategories->clear();
 
-  typedef std::map<std::string, bool> categoriesType;
   categoriesType categoryMap =
       Mantid::API::AlgorithmFactory::Instance().getCategoriesWithState();
 
-  QMap<QString, QTreeWidgetItem *>
-      categories; // keeps track of categories added to the tree
+  widgetMap categories; // Keeps track of categories added to the tree
 
-  for (categoriesType::const_iterator i = categoryMap.begin();
-       i != categoryMap.end(); ++i) {
-    QString catName = QString::fromStdString(i->first);
-    bool isHidden = i->second;
-    QStringList subCats = catName.split('\\');
-    if (subCats.size() == 1) {
-      QTreeWidgetItem *catItem = createCheckedTreeItem(catName, !isHidden);
-      categories.insert(catName, catItem);
-      treeCategories->addTopLevelItem(catItem);
-    } else {
-      QString cn = subCats[0];
-      QTreeWidgetItem *catItem = 0;
-      int n = subCats.size();
-      for (int j = 0; j < n; j++) {
-        if (categories.contains(cn)) {
-          catItem = categories[cn];
-        } else {
-          QTreeWidgetItem *newCatItem =
-              createCheckedTreeItem(subCats[j], !isHidden);
-          categories.insert(cn, newCatItem);
-          if (!catItem) {
-            treeCategories->addTopLevelItem(newCatItem);
-          } else {
-            catItem->addChild(newCatItem);
-          }
-          catItem = newCatItem;
-        }
-        if (j != n - 1)
-          cn += "\\" + subCats[j + 1];
-      }
-    }
+  // Loop over all categories loaded into Mantid
+  for (const auto i : categoryMap) {
+
+    QString catNames = QString::fromStdString(i.first);
+    // Start recursion down building tree from names
+    buildTreeCategoryStructure(catNames, i.second, categories);
   }
 }
 
-QTreeWidgetItem *ConfigDialog::createCheckedTreeItem(QString name,
-                                                     bool checkBoxState) {
+void ConfigDialog::buildTreeCategoryStructure(const QString &catNames,
+                                              const bool isHidden,
+                                              widgetMap &seenCategories) {
+  // Some categories come as standalone and some are discovered
+  // via their subcategory. E.g. Arithmetic vs Crystal\\Cell
+  // If standalone it has its own isHidden attribute otherwise
+  // we have to figure out its state from its subcategories status
+
+  // Split the categories whose name is delimited by '\\'
+  QStringList splitCats = catNames.split('\\');
+
+  // Create a unique key for storing into the mapping
+  QString catKey(catNames);
+
+  // We need to remove delimiter as top level categories do not come with it
+  catKey.remove('\\');
+
+  // We are safe to do this as the Category name makes up the key
+  // of the map so must be >= 1
+  int splitCatIndex = splitCats.size();
+
+  // We wont be using the last element (null) of the array so decrement 1
+  splitCatIndex--;
+
+  // Finally create tick status
+  Qt::CheckState tickStatus = Qt::Unchecked;
+  if (!isHidden) {
+    tickStatus = Qt::Checked;
+  }
+
+  if (splitCatIndex == 0) {
+    // This is a top level category and standalone
+    QTreeWidgetItem *catWidget =
+        createCheckedTreeItem(splitCats[0], tickStatus);
+    treeCategories->addTopLevelItem(catWidget);
+    seenCategories.insert(catKey, catWidget);
+  } else {
+    // We need to determine if we have seen this category before
+    // and get any pointers to its parent(s) and set their tick status
+    int prevElement = splitCatIndex - 1;
+    QTreeWidgetItem *parentWidgetPtr = walkBackwardsThroughCategories(
+        catNames, prevElement, seenCategories, tickStatus);
+
+    // At this point we now all parent categories have been created
+    // So lets create the child
+    QTreeWidgetItem *newChildCat =
+        createCheckedTreeItem(splitCats[splitCatIndex], tickStatus);
+    parentWidgetPtr->addChild(newChildCat);
+    seenCategories.insert(catKey, newChildCat);
+  }
+
+  // We have built tree now fix any ticks or make partial ticks
+  int topLevelCats = treeCategories->topLevelItemCount();
+  for (int i = 0; i < topLevelCats; i++) {
+    correctTreePatrialTicks(*(treeCategories->topLevelItem(i)));
+  }
+}
+
+QTreeWidgetItem *ConfigDialog::walkBackwardsThroughCategories(
+    const QString &catNames, int elementToCheck, widgetMap &seenCategories,
+    Qt::CheckState childTickState) {
+
+  // Split the categories whose name is delimited by '\\'
+  QStringList splitCats = catNames.split('\\');
+  // Build a unique key only from the elements we should check
+  // Element to check is always 1 minus so check last element as well
+  QString catKey = "";
+  for (int i = 0; i <= elementToCheck; i++) {
+    catKey += splitCats[i];
+  }
+
+  QTreeWidgetItem *parentWidgetPtr = nullptr;
+
+  // Walk backwards through a string list discovering any missed categories
+  // If a parent category already exists we exit returning the most
+  // right category pointer
+  if (!seenCategories.contains(catKey)) {
+    // We have not see this parent category check any other parents first
+    // From the array of categories
+    if (elementToCheck > 0) {
+      int prevElement = elementToCheck - 1;
+      parentWidgetPtr = walkBackwardsThroughCategories(
+          catNames, prevElement, seenCategories, childTickState);
+    }
+    // Now deal with this category
+    if (!parentWidgetPtr) {
+      // We are the most top level category which is ticked or visible
+      QTreeWidgetItem *catWidget =
+          createCheckedTreeItem(splitCats[elementToCheck], childTickState);
+      treeCategories->addTopLevelItem(catWidget);
+      seenCategories.insert(catKey, catWidget);
+      // Assign pointer to return for caller
+      parentWidgetPtr = catWidget;
+    } else {
+      // We need to create a child which is ticked or visible
+      QTreeWidgetItem *childWidget =
+          createCheckedTreeItem(splitCats[elementToCheck], childTickState);
+      parentWidgetPtr->addChild(childWidget);
+      seenCategories.insert(catKey, childWidget);
+      // Make the child the parent for caller
+      parentWidgetPtr = childWidget;
+    }
+  } else {
+    // The category has already been created - lets return it
+    parentWidgetPtr = seenCategories.value(catKey);
+  }
+
+  return parentWidgetPtr;
+}
+
+void ConfigDialog::tickBoxClickedSlot(QTreeWidgetItem *widgetPtr, int column) {
+  int numberOfChildren = widgetPtr->childCount();
+  Qt::CheckState newState = widgetPtr->checkState(column);
+
+  // Now we have new state lets update children to reflect this
+  for (int i = 0; i < numberOfChildren; i++) {
+    updateChildTickStatuses(*(widgetPtr->child(i)), newState);
+  }
+
+  // Next walk upwards to find very top level
+  bool hasReachedTop = false;
+  QTreeWidgetItem *parentPtr = widgetPtr;
+  do {
+    if (parentPtr->parent()) {
+      // Check a parent actually exists before assigning
+      parentPtr = parentPtr->parent();
+    } else {
+      // We are top level as no parent
+      hasReachedTop = true;
+    }
+  } while (!hasReachedTop);
+
+  // Now update any partial ticks if needed
+  correctTreePatrialTicks((*parentPtr));
+}
+
+void ConfigDialog::updateChildTickStatuses(QTreeWidgetItem &widgetPtr,
+                                           const Qt::CheckState newState) {
+  int numberOfChildren = widgetPtr.childCount();
+
+  // Check if there are additional sub levels
+  for (int i = 0; i < numberOfChildren; i++) {
+    updateChildTickStatuses(*(widgetPtr.child(i)), newState);
+  }
+
+  // Set all children tick statuses to match parent
+  widgetPtr.setCheckState(0, newState);
+}
+
+void ConfigDialog::correctTreePatrialTicks(QTreeWidgetItem &topLevelCat) {
+  // Check all children for a tick and untick we need to do this
+  // as some parents come with their own tick status which we might
+  // need to override
+  bool hasUntickedChildren = false;
+  bool hasTickedChildren = false;
+  bool hasPartialTickedChildren = false;
+  bool hasChildren = false;
+
+  int childCount = topLevelCat.childCount();
+  for (int i = 0; i < childCount; i++) {
+    hasChildren = true;
+    // Check for nested children and deal with them
+    correctTreePatrialTicks(*(topLevelCat.child(i)));
+
+    QTreeWidgetItem *child = topLevelCat.child(i);
+    // Now actually check this ptr's children for their tick status
+    if (child->checkState(0) == Qt::Checked) {
+      hasTickedChildren = true;
+    } else if (child->checkState(0) == Qt::Unchecked) {
+      hasUntickedChildren = true;
+    } else {
+      // Partial ticked
+      hasPartialTickedChildren = true;
+    }
+  } // Checked all children now set parent
+
+  if (hasChildren && hasPartialTickedChildren) {
+    // A partial tick has to propagate upwards so deal with it first
+    topLevelCat.setCheckState(0, Qt::PartiallyChecked);
+  } else if (hasChildren && hasUntickedChildren && hasTickedChildren) {
+    // Next check that the for children unticked and ticked for partial
+    topLevelCat.setCheckState(0, Qt::PartiallyChecked);
+  } else if (hasChildren && hasTickedChildren && !hasUntickedChildren) {
+    // All are ticked so set this state to checked
+    topLevelCat.setCheckState(0, Qt::Checked);
+  } else if (hasChildren) {
+    // Everything is unticked at this point
+    topLevelCat.setCheckState(0, Qt::Unchecked);
+  }
+}
+
+QTreeWidgetItem *
+ConfigDialog::createCheckedTreeItem(QString name,
+                                    Qt::CheckState checkBoxState) {
   QTreeWidgetItem *item = new QTreeWidgetItem(QStringList(name));
   item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-  if (checkBoxState) {
-    item->setCheckState(0, Qt::Checked);
-  } else {
-    item->setCheckState(0, Qt::Unchecked);
-  }
+  item->setCheckState(0, checkBoxState);
   return item;
 }
 
@@ -2698,9 +2862,8 @@ QStringList ConfigDialog::buildHiddenCategoryString(QTreeWidgetItem *parent) {
     }
 
     QStringList childResults = buildHiddenCategoryString(item);
-    for (QStringList::ConstIterator it = childResults.begin();
-         it != childResults.end(); ++it) {
-      results.append(item->text(0) + "\\" + *it);
+    for (const auto it : childResults) {
+      results.append(item->text(0) + "\\" + it);
     }
   }
   return results;

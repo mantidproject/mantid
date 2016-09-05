@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -8,10 +10,17 @@ from mantid import config
 from mantid.kernel import Direction
 
 COMPRESS_TOL_TOF = .01
+EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
+
+def getBasename(filename):
+    name = os.path.split(filename)[-1]
+    for extension in EXTENSIONS_NXS:
+        name = name.replace(extension, '')
+    return name
+
 #pylint: disable=too-many-instance-attributes
 class CalibrateRectangularDetectors(PythonAlgorithm):
 
-    _instrument = None
     _filterBadPulses = None
     _xpixelbin = None
     _ypixelbin = None
@@ -48,29 +57,13 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         return "Calibrate the detector pixels and write a calibration file"
 
     def PyInit(self):
-        sns = ConfigService.Instance().getFacility("SNS")
-
-        instruments = []
-        for instr in sns.instruments():
-            for tech in instr.techniques():
-                if "Neutron Diffraction" == str(tech):
-                    instruments.append(instr.shortName())
-                    break
-        self.declareProperty("Instrument", "PG3",
-                             StringListValidator(instruments))
-        validator = IntArrayBoundedValidator()
-        validator.setLower(0)
-        self.declareProperty(IntArrayProperty("RunNumber", values=[0], direction=Direction.Input,
-                                              validator=validator))
+        self.declareProperty(MultipleFileProperty(name="RunNumber",
+                                                  extensions=EXTENSIONS_NXS),
+                             "Event file")
         validator = IntArrayBoundedValidator()
         validator.setLower(0)
         self.declareProperty(IntArrayProperty("Background", values=[0], direction=Direction.Input,
                                               validator=validator))
-        extensions = [ "_event.nxs", "_runinfo.xml", ".nxs.h5"]
-        self.declareProperty("Extension", "_event.nxs",
-                             StringListValidator(extensions))
-        self.declareProperty("CompressOnRead", False,
-                             "Compress the event list when reading in the data")
         self.declareProperty("XPixelSum", 1,
                              "Sum detector pixels in X direction.  Must be a factor of X total pixels.  Default is 1.")
         self.declareProperty("YPixelSum", 1,
@@ -162,253 +155,176 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
         return messages
 
-    def _loadPreNeXusData(self, runnumber, extension, **kwargs):
-        """
-            Load PreNexus data
-            @param runnumer: run number (integer)
-            @param extension: file extension
-        """
-        Logger("CalibrateRectangularDetector").warning("Loading PreNexus for run %s" % runnumber)
-        mykwargs = {}
-        if kwargs.has_key("FilterByTimeStart"):
-            mykwargs["ChunkNumber"] = int(kwargs["FilterByTimeStart"])
-        if kwargs.has_key("FilterByTimeStop"):
-            mykwargs["TotalChunks"] = int(kwargs["FilterByTimeStop"])
+    def _loadData(self, filename, filterWall=None):
+        if  filename is None or len(filename) <= 0:
+            return None
 
-        # generate the workspace name
-        name = "%s_%d" % (self._instrument, runnumber)
-        filename = name + extension
-
-        wksp = LoadPreNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
-
-        # add the logs to it
-        if str(self._instrument) == "SNAP":
-            LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
-
-        return wksp
-
-    def _loadEventNeXusData(self, runnumber, extension, **kwargs):
-        """
-            Load event Nexus data
-            @param runnumer: run number (integer)
-            @param extension: file extension
-        """
-        kwargs["Precount"] = False
-        if self.getProperty("CompressOnRead").value:
-            kwargs["CompressTolerance"] = .1
-        name = "%s_%d" % (self._instrument, runnumber)
-        filename = name + extension
-
-        wksp = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
-        # For NOMAD data before Aug 2012, use the updated geometry
-        if str(wksp.getInstrument().getValidFromDate()) == "1900-01-31T23:59:59" and str(self._instrument) == "NOMAD":
-            path=config["instrumentDefinition.directory"]
-            LoadInstrument(Workspace=wksp, Filename=path+'/'+"NOMAD_Definition_20120701-20120731.xml",
-                           RewriteSpectraMap=False)
-        return wksp
-
-    def _loadData(self, runnumber, extension, filterWall=None):
-        """
-            Load data
-            @param runnumber: run number (integer)
-            @param extension: file extension
-        """
-        filterDict = {}
+        kwargs = {"Precount":False}
         if filterWall is not None:
             if filterWall[0] > 0.:
-                filterDict["FilterByTimeStart"] = filterWall[0]
+                kwargs["FilterByTimeStart"] = filterWall[0]
             if filterWall[1] > 0.:
-                filterDict["FilterByTimeStop"] = filterWall[1]
+                kwargs["FilterByTimeStop"] = filterWall[1]
 
-        if  runnumber is None or runnumber <= 0:
-            return None
+        wkspName = getBasename(filename)
 
-        if extension.endswith("_event.nxs") or extension.endswith(".nxs.h5"):
-            wksp = self._loadEventNeXusData(runnumber, extension, **filterDict)
-        else:
-            wksp = self._loadPreNeXusData(runnumber, extension, **filterDict)
+        LoadEventNexus(Filename=filename, OutputWorkspace=wkspName, **kwargs)
 
-        if self._filterBadPulses and not self.getProperty("CompressOnRead").value:
-            wksp = FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp.name())
+        FilterBadPulses(InputWorkspace=wkspName, OutputWorkspace=wkspName)
 
-        if not self.getProperty("CompressOnRead").value:
-            wksp = CompressEvents(wksp, OutputWorkspace=wksp.name(),
-                                  Tolerance=COMPRESS_TOL_TOF) # 100ns
-        return wksp
+        CompressEvents(InputWorkspace=wkspName, OutputWorkspace=wkspName,
+                       Tolerance=COMPRESS_TOL_TOF) # 100ns
+
+        return wkspName
+
+    def _saveCalibration(self, wkspName, calibFilePrefix):
+        outfilename = None
+        if "dspacemap" in self._outTypes:
+            outfilename = calibFilePrefix.replace('_d', '_dspacemap_d') + '.dat'
+            if os.path.exists(outfilename):
+                os.unlink(outfilename)
+            #write Dspacemap file
+            SaveDspacemap(InputWorkspace=wkspName+"offset",
+                          DspacemapFile=outfilename)
+        if "calibration" in self._outTypes:
+            # for the sake of legacy
+            SaveCalFile(OffsetsWorkspace=wkspName+"offset",
+                        GroupingWorkspace=wkspName+"group",
+                        MaskWorkspace=wkspName+"mask",Filename=calibFilePrefix + '.cal')
+            # the real version
+            outfilename = calibFilePrefix + '.h5'
+            if os.path.exists(outfilename):
+                os.unlink(outfilename)
+            ConvertDiffCal(OffsetsWorkspace=wkspName+"offset",
+                           OutputWorkspace=wkspName+"cal")
+            SaveDiffCal(CalibrationWorkspace=wkspName+"cal",
+                        GroupingWorkspace=wkspName+"group",
+                        MaskWorkspace=wkspName+"mask",
+                        Filename=outfilename)
+
+        if outfilename is not None:
+            self.setProperty("OutputFilename", outfilename)
+
+    def _createGrouping(self, wkspName):
+        (_, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wkspName,
+                                                                    GroupDetectorsBy=self._grouping,
+                                                                    OutputWorkspace=wkspName+"group")
+
+        if (numGroupedSpectra==0) or (numGroups==0):
+            raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
+
 
     #pylint: disable=too-many-branches
-    def _cccalibrate(self, wksp, calib):
+    def _cccalibrate(self, wksp):
         if wksp is None:
             return None
-        LRef = self.getProperty("UnwrapRef").value
-        DIFCref = self.getProperty("LowResRef").value
-        if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
-            if LRef > 0:
-                wksp = UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp.name(), LRef=LRef)
-            if DIFCref > 0:
-                wksp = RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                       ReferenceDIFC=DIFCref)
-        if not self.getProperty("CompressOnRead").value:
-            wksp = CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                  Tolerance=COMPRESS_TOL_TOF) # 100ns
 
-        wksp = ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp.name(), Target="dSpacing")
-        SortEvents(InputWorkspace=wksp, SortBy="X Value")
-        # Sum pixelbin X pixelbin blocks of pixels
-        if self._xpixelbin*self._ypixelbin>1:
-            wksp = SumNeighbours(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                 SumX=self._xpixelbin, SumY=self._ypixelbin)
         # Bin events in d-Spacing
-        wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                     Params=str(self._peakmin)+","+str(abs(self._binning[1]))+","+str(self._peakmax))
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,
+              Params=str(self._peakmin)+","+str(abs(self._binning[1]))+","+str(self._peakmax))
+
         #Find good peak for reference
         ymax = 0
-        for s in range(0,wksp.getNumberHistograms()):
-            y_s = wksp.readY(s)
-            midBin = wksp.blocksize()/2
+        for s in range(0,mtd[wksp].getNumberHistograms()):
+            y_s = mtd[wksp].readY(s)
+            midBin = int(mtd[wksp].blocksize()/2)
             if y_s[midBin] > ymax:
                 refpixel = s
                 ymax = y_s[midBin]
         self.log().information("Reference spectra=%s" % refpixel)
-        # Remove old calibration files
-        cmd = "rm "+calib
-        os.system(cmd)
+
         # Cross correlate spectra using interval around peak at peakpos (d-Spacing)
         if self._lastpixel == 0:
-            self._lastpixel = wksp.getNumberHistograms()-1
+            self._lastpixel = mtd[wksp].getNumberHistograms()-1
         else:
-            self._lastpixel = wksp.getNumberHistograms()*self._lastpixel/self._lastpixel3-1
-        CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc",
+            self._lastpixel = int(mtd[wksp].getNumberHistograms()*self._lastpixel/self._lastpixel3) - 1
+        self.log().information("Last pixel=%s" % self._lastpixel)
+        CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=wksp+"cc",
                        ReferenceSpectra=refpixel, WorkspaceIndexMin=0,
                        WorkspaceIndexMax=self._lastpixel,
                        XMin=self._peakmin, XMax=self._peakmax)
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
-        GetDetectorOffsets(InputWorkspace=str(wksp)+"cc", OutputWorkspace=str(wksp)+"offset",
+        GetDetectorOffsets(InputWorkspace=wksp+"cc", OutputWorkspace=wksp+"offset",
                            Step=abs(self._binning[1]), DReference=self._peakpos1,
                            XMin=-self._ccnumber, XMax=self._ccnumber,
-                           MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask")
-        if AnalysisDataService.doesExist(str(wksp)+"cc"):
-            AnalysisDataService.remove(str(wksp)+"cc")
+                           MaxOffset=self._maxoffset, MaskWorkspace=wksp+"mask")
+        if AnalysisDataService.doesExist(wksp+"cc"):
+            AnalysisDataService.remove(wksp+"cc")
         if self._peakpos2 > 0.0:
-            wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,
                          Params=str(self._peakmin2)+","+str(abs(self._binning[1]))+","+str(self._peakmax2))
             #Find good peak for reference
             ymax = 0
-            for s in range(0,wksp.getNumberHistograms()):
-                y_s = wksp.readY(s)
-                midBin = wksp.blocksize()/2
+            for s in range(0,mtd[wksp].getNumberHistograms()):
+                y_s = mtd[wksp].readY(s)
+                midBin = int(mtd[wksp].blocksize()/2)
                 if y_s[midBin] > ymax:
                     refpixel = s
                     ymax = y_s[midBin]
             msg = "Reference spectra = %s, lastpixel_3 = %s" % (refpixel, self._lastpixel3)
             self.log().information(msg)
-            self._lastpixel2 = wksp.getNumberHistograms()*self._lastpixel2/self._lastpixel3-1
-            CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc2",
+            self._lastpixel2 = int(mtd[wksp].getNumberHistograms()*self._lastpixel2/self._lastpixel3) - 1
+            CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=wksp+"cc2",
                            ReferenceSpectra=refpixel, WorkspaceIndexMin=self._lastpixel+1,
                            WorkspaceIndexMax=self._lastpixel2,
                            XMin=self._peakmin2, XMax=self._peakmax2)
             # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
-            GetDetectorOffsets(InputWorkspace=str(wksp)+"cc2", OutputWorkspace=str(wksp)+"offset2",
+            GetDetectorOffsets(InputWorkspace=wksp+"cc2", OutputWorkspace=wksp+"offset2",
                                Step=abs(self._binning[1]), DReference=self._peakpos2,
                                XMin=-self._ccnumber, XMax=self._ccnumber,
-                               MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask2")
-            Plus(LHSWorkspace=str(wksp)+"offset", RHSWorkspace=str(wksp)+"offset2",
-                 OutputWorkspace=str(wksp)+"offset")
-            Plus(LHSWorkspace=str(wksp)+"mask", RHSWorkspace=str(wksp)+"mask2",
-                 OutputWorkspace=str(wksp)+"mask")
-            for ws in [str(wksp)+"cc2", str(wksp)+"offset2", str(wksp)+"mask2"]:
+                               MaxOffset=self._maxoffset, MaskWorkspace=wksp+"mask2")
+            Plus(LHSWorkspace=wksp+"offset", RHSWorkspace=wksp+"offset2",
+                 OutputWorkspace=wksp+"offset")
+            Plus(LHSWorkspace=wksp+"mask", RHSWorkspace=wksp+"mask2",
+                 OutputWorkspace=wksp+"mask")
+            for ws in [wksp+"cc2", wksp+"offset2", wksp+"mask2"]:
                 if AnalysisDataService.doesExist(ws):
                     AnalysisDataService.remove(ws)
 
         if self._peakpos3 > 0.0:
-            wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,
                          Params=str(self._peakmin3)+","+str(abs(self._binning[1]))+","+str(self._peakmax3))
             #Find good peak for reference
             ymax = 0
-            for s in range(0,wksp.getNumberHistograms()):
-                y_s = wksp.readY(s)
-                midBin = wksp.blocksize()/2
+            for s in range(0,mtd[wksp].getNumberHistograms()):
+                y_s = mtd[wksp].readY(s)
+                midBin = mtd[wksp].blocksize()/2
                 if y_s[midBin] > ymax:
                     refpixel = s
                     ymax = y_s[midBin]
             self.log().information("Reference spectra=%s" % refpixel)
-            CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc3",
+            CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=wksp+"cc3",
                            ReferenceSpectra=refpixel,
                            WorkspaceIndexMin=self._lastpixel2+1,
-                           WorkspaceIndexMax=wksp.getNumberHistograms()-1,
+                           WorkspaceIndexMax=mtd[wksp].getNumberHistograms()-1,
                            XMin=self._peakmin3, XMax=self._peakmax3)
             # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
-            GetDetectorOffsets(InputWorkspace=str(wksp)+"cc3", OutputWorkspace=str(wksp)+"offset3",
+            GetDetectorOffsets(InputWorkspace=wksp+"cc3", OutputWorkspace=wksp+"offset3",
                                Step=abs(self._binning[1]), DReference=self._peakpos3,
                                XMin=-self._ccnumber, XMax=self._ccnumber,
-                               MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask3")
-            Plus(LHSWorkspace=str(wksp)+"offset", RHSWorkspace=str(wksp)+"offset3",
+                               MaxOffset=self._maxoffset, MaskWorkspace=wksp+"mask3")
+            Plus(LHSWorkspace=wksp+"offset", RHSWorkspace=wksp+"offset3",
                  OutputWorkspace=str(wksp)+"offset")
-            Plus(LHSWorkspace=str(wksp)+"mask", RHSWorkspace=str(wksp)+"mask3",
-                 OutputWorkspace=str(wksp)+"mask")
-            for ws in [str(wksp)+"cc3", str(wksp)+"offset3", str(wksp)+"mask3"]:
+            Plus(LHSWorkspace=wksp+"mask", RHSWorkspace=wksp+"mask3",
+                 OutputWorkspace=wksp+"mask")
+            for ws in [wksp+"cc3", wksp+"offset3", wksp+"mask3"]:
                 if AnalysisDataService.doesExist(ws):
                     AnalysisDataService.remove(ws)
-        (dummy, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,\
-                                OutputWorkspace=str(wksp)+"group")
-        if (numGroupedSpectra==0) or (numGroups==0):
-            raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
-        lcinst = str(self._instrument)
 
-        outfilename = None
-        if "dspacemap" in self._outTypes:
-            #write Dspacemap file
-            outfilename = self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat")
-            SaveDspacemap(InputWorkspace=str(wksp)+"offset",
-                          DspacemapFile=outfilename)
-        if "calibration" in self._outTypes:
-            outfilename = calib
-            SaveCalFile(OffsetsWorkspace=str(wksp)+"offset",
-                        GroupingWorkspace=str(wksp)+"group",
-                        MaskWorkspace=str(wksp)+"mask",Filename=calib)
-
-        if outfilename is not None:
-            self.setProperty("OutputFilename", outfilename)
-
-        return wksp
+        return str(wksp)
 
     #pylint: disable=too-many-branches
-    def _multicalibrate(self, wksp, calib):
+    def _multicalibrate(self, wksp):
         if wksp is None:
             return None
-        LRef = self.getProperty("UnwrapRef").value
-        DIFCref = self.getProperty("LowResRef").value
-        if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
-            if LRef > 0:
-                wksp = UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp.name(), LRef=LRef)
-            if DIFCref > 0:
-                wksp = RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                       ReferenceDIFC=DIFCref)
-        if not self.getProperty("CompressOnRead").value and not "histo" in self.getProperty("Extension").value:
-            wksp = CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                  Tolerance=COMPRESS_TOL_TOF) # 100ns
 
-        wksp = ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp.name(), Target="dSpacing")
-        if not "histo" in self.getProperty("Extension").value:
-            SortEvents(InputWorkspace=wksp, SortBy="X Value")
-        # Sum pixelbin X pixelbin blocks of pixels
-        if self._xpixelbin*self._ypixelbin>1:
-            wksp = SumNeighbours(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                 SumX=self._xpixelbin, SumY=self._ypixelbin)
         # Bin events in d-Spacing
-        if not "histo" in self.getProperty("Extension").value:
-            wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                         Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
-        (dummy, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,\
-                                OutputWorkspace=str(wksp)+"group")
-        if (numGroupedSpectra==0) or (numGroups==0):
-            raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,
+              Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
+
         if len(self._smoothGroups) > 0:
-            wksp = SmoothData(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                              NPoints=self._smoothGroups, GroupingWorkspace=str(wksp)+"group")
-        # Remove old calibration files
-        cmd = "rm "+calib
-        os.system(cmd)
+            SmoothData(InputWorkspace=wksp, OutputWorkspace=wksp,
+                       NPoints=self._smoothGroups, GroupingWorkspace=wksp+"group")
 
         # Get the fit window input workspace
         fitwinws = self.getProperty("FitwindowTableWorkspace").value
@@ -431,14 +347,14 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             resupf = 0.0
 
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
-        GetDetOffsetsMultiPeaks(InputWorkspace=str(wksp), OutputWorkspace=str(wksp)+"offset",
+        GetDetOffsetsMultiPeaks(InputWorkspace=wksp, OutputWorkspace=wksp+"offset",
                                 DReference=self._peakpos,
                                 FitWindowMaxWidth=self.getProperty("PeakWindowMax").value,
                                 MinimumPeakHeight=self.getProperty("MinimumPeakHeight").value,
                                 MinimumPeakHeightObs=self.getProperty("MinimumPeakHeightObs").value,
                                 BackgroundType=self.getProperty("BackgroundType").value,
-                                MaxOffset=self._maxoffset, NumberPeaksWorkspace=str(wksp)+"peaks",
-                                MaskWorkspace=str(wksp)+"mask",
+                                MaxOffset=self._maxoffset, NumberPeaksWorkspace=wksp+"peaks",
+                                MaskWorkspace=wksp+"mask",
                                 FitwindowTableWorkspace = fitwinws,
                                 InputResolutionWorkspace=resws,
                                 MinimumResolutionFactor = reslowf,
@@ -446,59 +362,37 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
         #Fixed SmoothNeighbours for non-rectangular and rectangular
         if self._smoothoffsets and self._xpixelbin*self._ypixelbin>1: # Smooth data if it was summed
-            SmoothNeighbours(InputWorkspace=str(wksp)+"offset", OutputWorkspace=str(wksp)+"offset",
+            SmoothNeighbours(InputWorkspace=wksp+"offset", OutputWorkspace=wksp+"offset",
                              WeightedSum="Flat",
                              AdjX=self._xpixelbin, AdjY=self._ypixelbin)
-        wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                     Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
-        lcinst = str(self._instrument)
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,
+              Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
 
-        outfilename = None
-        if "dspacemap" in self._outTypes:
-            #write Dspacemap file
-            outfilename = self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat")
-            SaveDspacemap(InputWorkspace=str(wksp)+"offset",
-                          DspacemapFile=outfilename)
-        if "calibration" in self._outTypes:
-            SaveCalFile(OffsetsWorkspace=str(wksp)+"offset",
-                        GroupingWorkspace=str(wksp)+"group",
-                        MaskWorkspace=str(wksp)+"mask", Filename=calib)
-            outfilename = calib
+        return str(wksp)
 
-        if outfilename is not None:
-            self.setProperty("OutputFilename", outfilename)
-
-        return wksp
-
-    def _focus(self, wksp, dummy_calib):
+    def _focus(self, wksp):
         if wksp is None:
             return None
         MaskDetectors(Workspace=wksp, MaskedWorkspace=str(wksp)+"mask")
-        wksp = AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp.name(),\
-                       OffsetsWorkspace=str(wksp)+"offset")
+        wksp = AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
+                              CalibrationWorkspace=str(wksp)+"cal")
         # Diffraction focusing using new calibration file with offsets
         if self._diffractionfocus:
             wksp = DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
                                         GroupingWorkspace=str(wksp)+"group")
-        if not "histo" in self.getProperty("Extension").value:
-            SortEvents(InputWorkspace=wksp, SortBy="X Value")
+
         wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(), Params=self._binning)
         return wksp
 
     #pylint: disable=too-many-branches
     def PyExec(self):
         # get generic information
-        SUFFIX = self.getProperty("Extension").value
         self._binning = self.getProperty("Binning").value
         if len(self._binning) != 1 and len(self._binning) != 3:
             raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(self._binning))
         if len(self._binning) == 3:
             if self._binning[0] == 0. and self._binning[1] == 0. and self._binning[2] == 0.:
                 raise RuntimeError("Failed to specify the binning")
-        self._instrument = self.getProperty("Instrument").value
-        config = ConfigService.Instance()
-        config['default.facility'] = "SNS"
-        config['default.instrument'] = self._instrument
         self._grouping = self.getProperty("GroupDetectorsBy").value
         self._xpixelbin = self.getProperty("XPixelSum").value
         self._ypixelbin = self.getProperty("YPixelSum").value
@@ -547,40 +441,70 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 backRuns = [0]*len(samRuns)
             else:
                 raise RuntimeError("Number of samples and backgrounds must match (%d!=%d)" % (len(samRuns), len(backRuns)))
-        lcinst = str(self._instrument)
-        calib = self._outDir+lcinst+"_calibrate_d"+str(samRuns[0])+strftime("_%Y_%m_%d.cal")
         filterWall = (self.getProperty("FilterByTimeMin").value, self.getProperty("FilterByTimeMax").value)
+
+        stuff = getBasename(samRuns[0])
+        stuff = stuff.split('_')
+        (instrument, runNumber) = ('_'.join(stuff[:-1]), stuff[-1])
+
+        calib = instrument+"_calibrate_d"+runNumber+strftime("_%Y_%m_%d")
+        calib = os.path.join(self._outDir, calib)
 
         for (samNum, backNum) in zip(samRuns, backRuns):
             # first round of processing the sample
-            samRun = self._loadData(samNum, SUFFIX, filterWall)
+            samRun = self._loadData(samNum, filterWall)
+            samRun = str(samRun)
             if backNum > 0:
-                backRun = self._loadData(backNum, SUFFIX, filterWall)
-                samRun -= backRun
+                backRun = self._loadData(instrument+'_'+str(backNum), filterWall)
+                Minus(LHSWorkspace=samRun, RHSWorkspace=backRun,
+                      OutputWorkspace=samRun)
                 DeleteWorkspace(backRun)
-                samRun = CompressEvents(samRun, OutputWorkspace=samRun.name(),
+                CompressEvents(samRun, OutputWorkspace=samRun,
                                         Tolerance=COMPRESS_TOL_TOF) # 100ns
+
+            self._createGrouping(samRun)
+
+            LRef = self.getProperty("UnwrapRef").value
+            DIFCref = self.getProperty("LowResRef").value
+            if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
+                if LRef > 0:
+                    UnwrapSNS(InputWorkspace=samRun, OutputWorkspace=samRun, LRef=LRef)
+                if DIFCref > 0:
+                    RemoveLowResTOF(InputWorkspace=samRun, OutputWorkspace=samRun,
+                                    ReferenceDIFC=DIFCref)
+
+            ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun, Target="dSpacing")
+
+            # Sum pixelbin X pixelbin blocks of pixels
+            if self._xpixelbin*self._ypixelbin>1:
+                SumNeighbours(InputWorkspace=samRun, OutputWorkspace=samRun,
+                              SumX=self._xpixelbin, SumY=self._ypixelbin)
+
             if self.getProperty("CrossCorrelation").value:
-                samRun = self._cccalibrate(samRun, calib)
+                samRun = self._cccalibrate(samRun)
             else:
-                samRun = self._multicalibrate(samRun, calib)
+                samRun = self._multicalibrate(samRun)
+
+            self._saveCalibration(samRun, calib)
+
+
             if self._xpixelbin*self._ypixelbin>1 or len(self._smoothGroups) > 0:
-                if AnalysisDataService.doesExist(str(samRun)):
-                    AnalysisDataService.remove(str(samRun))
-                samRun = self._loadData(samNum, SUFFIX, filterWall)
+                if AnalysisDataService.doesExist(samRun):
+                    AnalysisDataService.remove(samRun)
+                samRun = self._loadData(samNum, filterWall)
                 LRef = self.getProperty("UnwrapRef").value
                 DIFCref = self.getProperty("LowResRef").value
                 if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
                     if LRef > 0:
-                        wksp = UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                         LRef=LRef)
+                        samRun = UnwrapSNS(InputWorkspace=samRun, OutputWorkspace=samRun,
+                                           LRef=LRef)
                     if DIFCref > 0:
-                        wksp = RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                                               ReferenceDIFC=DIFCref)
+                        samRun = RemoveLowResTOF(InputWorkspace=samRun, OutputWorkspace=samRun,
+                                                 ReferenceDIFC=DIFCref)
             else:
-                samRun = ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun.name(),
+                samRun = ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun,
                                       Target="TOF")
-            samRun = self._focus(samRun, calib)
+            samRun = self._focus(samRun)
             RenameWorkspace(InputWorkspace=samRun, OutputWorkspace=str(samRun)+"_calibrated")
 
 AlgorithmFactory.subscribe(CalibrateRectangularDetectors)

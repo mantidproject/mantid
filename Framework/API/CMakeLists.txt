@@ -111,7 +111,6 @@ set ( SRC_FILES
 	src/PeakFunctionIntegrator.cpp
 	src/Progress.cpp
 	src/Projection.cpp
-	src/PropertyNexus.cpp
 	src/RawCountValidator.cpp
 	src/RefAxis.cpp
 	src/RemoteJobManagerFactory.cpp
@@ -295,7 +294,6 @@ set ( INC_FILES
 	inc/MantidAPI/PeakFunctionIntegrator.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/Projection.h
-	inc/MantidAPI/PropertyNexus.h
 	inc/MantidAPI/RawCountValidator.h
 	inc/MantidAPI/RefAxis.h
 	inc/MantidAPI/RemoteJobManagerFactory.h
@@ -405,7 +403,6 @@ set ( TEST_FILES
 	ParameterTieTest.h
 	PeakFunctionIntegratorTest.h
 	ProjectionTest.h
-	PropertyNexusTest.h
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h
 	RunTest.h

@@ -36,7 +36,7 @@ public:
   /// @returns A string containing a deprecation message if the algorithm is
   /// deprecated, empty string otherwise
   const std::string isDeprecated() const {
-    std::string deprecMessage = "";
+    std::string deprecMessage;
     DeprecatedAlgorithm *depr =
         dynamic_cast<DeprecatedAlgorithm *>(m_alg.get());
     if (depr)

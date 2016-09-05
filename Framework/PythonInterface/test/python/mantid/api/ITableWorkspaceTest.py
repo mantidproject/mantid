@@ -81,7 +81,8 @@ class ITableWorkspaceTest(unittest.TestCase):
         table.addRow(nextrow)
         self.assertEquals(len(table), 1)
         insertedrow = table.row(0)
-        self.assertEquals(insertedrow, nextrow)
+        self.assertEquals(1, insertedrow['index'])
+        self.assertEquals('10', insertedrow['value'])
 
         incorrect_type = {'index':1, 'value':10}
         self.assertRaises(TypeError, table.addRow, incorrect_type)
@@ -96,12 +97,12 @@ class ITableWorkspaceTest(unittest.TestCase):
         table.addColumn(type="str",name="value")
         self.assertEquals(table.columnCount(), 2)
 
-        nextrow = {'index':1, 'value':'10'}
-        values = nextrow.values()
+        values = [1, '10']
         table.addRow(values)
         self.assertEquals(len(table), 1)
         insertedrow = table.row(0)
-        self.assertEquals(insertedrow, nextrow)
+        self.assertEquals(1, insertedrow['index'])
+        self.assertEquals('10', insertedrow['value'])
 
         incorrect_type = [1, 10]
         self.assertRaises(TypeError, table.addRow, incorrect_type)
@@ -113,12 +114,12 @@ class ITableWorkspaceTest(unittest.TestCase):
         table.addColumn(type="str",name="value")
         self.assertEquals(table.columnCount(), 2)
 
-        nextrow = {'index':1, 'value':'10'}
-        values = tuple(nextrow.values())
+        values = (1, '10')
         table.addRow(values)
         self.assertEquals(len(table), 1)
         insertedrow = table.row(0)
-        self.assertEquals(insertedrow, nextrow)
+        self.assertEquals(1, insertedrow['index'])
+        self.assertEquals('10', insertedrow['value'])
 
         incorrect_type = (1, 10)
         self.assertRaises(TypeError, table.addRow, incorrect_type)
@@ -130,19 +131,21 @@ class ITableWorkspaceTest(unittest.TestCase):
         table.addColumn(type="int",name="value")
         self.assertEquals(table.columnCount(), 2)
 
-        nextrow = {'index': 1, 'value': 10}
-        values32 = numpy.array(nextrow.values()).astype(numpy.int32)
-        values64 = numpy.array(nextrow.values()).astype(numpy.int64)
+        nextrow = [1, 10]
+        values32 = numpy.array(nextrow).astype(numpy.int32)
+        values64 = numpy.array(nextrow).astype(numpy.int64)
 
         table.addRow(values32)
         self.assertEquals(len(table), 1)
         insertedrow = table.row(0)
-        self.assertEquals(insertedrow, nextrow)
+        self.assertEquals(1, insertedrow['index'])
+        self.assertEquals(10, insertedrow['value'])
 
         table.addRow(values64)
         self.assertEquals(len(table), 2)
         insertedrow = table.row(1)
-        self.assertEquals(insertedrow, nextrow)
+        self.assertEquals(1, insertedrow['index'])
+        self.assertEquals(10, insertedrow['value'])
 
         incorrect_type = numpy.array(['1', '10'])
         self.assertRaises(TypeError, table.addRow, incorrect_type)

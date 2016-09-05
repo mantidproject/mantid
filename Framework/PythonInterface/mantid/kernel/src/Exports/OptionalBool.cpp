@@ -17,7 +17,11 @@ void export_OptionalBoolValue() {
   boost::python::enum_<OptionalBool::Value>("OptionalBoolValue")
       .value(OptionalBool::StrUnset.c_str(), OptionalBool::Unset)
       .value(OptionalBool::StrTrue.c_str(), OptionalBool::True)
-      .value(OptionalBool::StrFalse.c_str(), OptionalBool::False);
+      .value(OptionalBool::StrFalse.c_str(), OptionalBool::False)
+      // Python 3 does not allow .True/.False. It gives a syntax error
+      // so use an underscore after the name
+      .value((OptionalBool::StrTrue + "_").c_str(), OptionalBool::True)
+      .value((OptionalBool::StrFalse + "_").c_str(), OptionalBool::False);
 }
 
 namespace {

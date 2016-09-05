@@ -9,6 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/UsageService.h"
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/MdConstants.h"
 #include "MantidQtAPI/MdSettings.h"
@@ -305,7 +306,8 @@ void MdViewerWidget::connectLoadDataReaction(QAction *action) {
 }
 
 /**
- * This function creates the requested view on the main window.
+ * This function creates the requested view on the main window. It also
+ * registers a usage of the view with the UsageService.
  * @param container the UI widget to associate the view mode with
  * @param v the view mode to set on the main window
  * @return the requested view
@@ -314,27 +316,35 @@ ViewBase *
 MdViewerWidget::createAndSetMainViewWidget(QWidget *container,
                                            ModeControlWidget::Views v) {
   ViewBase *view;
+  std::string featureName("VSI:");
   switch (v) {
   case ModeControlWidget::STANDARD: {
     view = new StandardView(container, &m_rebinnedSourcesManager);
+    featureName += "StandardView";
   } break;
   case ModeControlWidget::THREESLICE: {
     view = new ThreeSliceView(container, &m_rebinnedSourcesManager);
+    featureName += "ThreeSliceView";
   } break;
   case ModeControlWidget::MULTISLICE: {
     view = new MultiSliceView(container, &m_rebinnedSourcesManager);
+    featureName += "MultiSliceView";
   } break;
   case ModeControlWidget::SPLATTERPLOT: {
     view = new SplatterPlotView(container, &m_rebinnedSourcesManager);
+    featureName += "SplatterPlotView";
   } break;
   default:
-    view = NULL;
+    view = nullptr;
     break;
   }
 
   // Set the colorscale lock
   view->setColorScaleLock(&m_colorScaleLock);
 
+  using Mantid::Kernel::UsageService;
+  UsageService::Instance().registerFeatureUsage("Interface", featureName,
+                                                false);
   return view;
 }
 

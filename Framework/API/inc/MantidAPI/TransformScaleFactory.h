@@ -67,18 +67,17 @@ private:
   // Do not use default methods
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// TransformScaleFactoryImpl (needed for dllexport/dllimport) and a typedef for
-/// it.
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<TransformScaleFactoryImpl>;
-#endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<
-    TransformScaleFactoryImpl> TransformScaleFactory;
+typedef Mantid::Kernel::SingletonHolder<TransformScaleFactoryImpl>
+    TransformScaleFactory;
 
 } // namespace API
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::TransformScaleFactoryImpl>;
+}
+}
 
 #endif /* MANTID_API_TRANSFORMSCALEFACTORY_H_ */

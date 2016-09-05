@@ -155,7 +155,6 @@ void Plane::rotate(const Kernel::Matrix<double> &MA)
   NormV.rotate(MA);
   NormV.normalize();
   Quadratic::rotate(MA);
-  return;
 }
 
 void Plane::displace(const Kernel::V3D &Sp)
@@ -167,7 +166,6 @@ void Plane::displace(const Kernel::V3D &Sp)
 {
   Dist += NormV.scalar_prod(Sp);
   Quadratic::displace(Sp);
-  return;
 }
 
 double Plane::distance(const Kernel::V3D &A) const
@@ -236,7 +234,6 @@ void Plane::print() const
 {
   Quadratic::print();
   std::cout << "NormV == " << NormV << " : " << Dist << '\n';
-  return;
 }
 
 std::size_t Plane::planeType() const
@@ -268,7 +265,6 @@ void Plane::setBaseEqn() {
   BaseEqn[7] = NormV[1]; // H y
   BaseEqn[8] = NormV[2]; // J z
   BaseEqn[9] = -Dist;    // K const
-  return;
 }
 
 /**
@@ -291,7 +287,6 @@ void Plane::write(std::ostream &OX) const {
        << "xyz"[ptype - 1] << " " << Dist;
 
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
-  return;
 }
 
 /**

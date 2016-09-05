@@ -4,6 +4,7 @@ import unittest
 from mantid.api import Projection
 from mantid.kernel import V3D
 from mantid.simpleapi import mtd
+import numpy as np
 
 class ProjectionTest(unittest.TestCase):
 
@@ -38,6 +39,26 @@ class ProjectionTest(unittest.TestCase):
         self.assertEqual(p.getType(0), 'r')
         self.assertEqual(p.getType(1), 'a')
         self.assertEqual(p.getType(2), 'r')
+
+    def test_setaxis_with_numpy_float(self):
+        p = Projection();
+
+        p.setAxis(0, np.array([0,1,2], dtype='float64'))
+        p.setAxis(1, np.array([3,4,5], dtype='float64'))
+        p.setAxis(2, np.array([6,7,8], dtype='float64'))
+        self.assertEqual(p.getAxis(0), V3D(0,1,2))
+        self.assertEqual(p.getAxis(1), V3D(3,4,5))
+        self.assertEqual(p.getAxis(2), V3D(6,7,8))
+
+    def test_setaxis_with_numpy_int64(self):
+        p = Projection();
+    
+        p.setAxis(0, np.array([1,2,3], dtype='int64'))
+        p.setAxis(1, np.array([3,4,5], dtype='int64'))
+        p.setAxis(2, np.array([6,7,8], dtype='int64'))
+        self.assertEqual(p.getAxis(0), V3D(1,2,3))
+        self.assertEqual(p.getAxis(1), V3D(3,4,5))
+        self.assertEqual(p.getAxis(2), V3D(6,7,8))
 
     def test_uvw(self):
         p = Projection();

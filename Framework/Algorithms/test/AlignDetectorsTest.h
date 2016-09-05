@@ -1,13 +1,13 @@
 #ifndef ALIGNDETECTORSTEST_H_
 #define ALIGNDETECTORSTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAPI/Axis.h"
-#include "MantidDataHandling/LoadNexus.h"
+#include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
+#include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 using namespace Mantid::Algorithms;
@@ -71,9 +71,9 @@ public:
     TS_ASSERT_EQUALS(outWS->size(), inWS->size());
     TS_ASSERT_EQUALS(outWS->blocksize(), inWS->blocksize());
 
-    TS_ASSERT_DELTA(outWS->dataX(2)[50], 0.7223, 0.0001);
-    TS_ASSERT_EQUALS(outWS->dataY(2)[50], inWS->dataY(1)[50]);
-    TS_ASSERT_EQUALS(outWS->dataY(2)[50], inWS->dataY(1)[50]);
+    TS_ASSERT_DELTA(outWS->x(2)[50], 0.7223, 0.0001);
+    TS_ASSERT_EQUALS(outWS->y(2)[50], inWS->y(1)[50]);
+    TS_ASSERT_EQUALS(outWS->y(2)[50], inWS->y(1)[50]);
 
     for (size_t i = 0; i < outWS->getNumberHistograms(); i++) {
       TS_ASSERT_EQUALS(outWS->getSpectrum(i).getSpectrumNo(),

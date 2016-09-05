@@ -185,6 +185,20 @@ public:
     TS_ASSERT_EQUALS(vals.size(), 1)
   }
 
+  void testInvalidAllowedValues() {
+    std::vector<std::string> vals;
+    WorkspaceProperty<TableWorkspaceTester> testTblProperty(
+        "Table Mismatch test", "ws3", Direction::Input);
+    WorkspaceProperty<WorkspaceGroup> testGroupProperty(
+        "Group Mismatch test", "ws1", Direction::Input);
+
+    TS_ASSERT_THROWS_NOTHING(vals = testTblProperty.allowedValues());
+    TS_ASSERT_EQUALS(vals.size(), 0);
+
+    TS_ASSERT_THROWS_NOTHING(vals = testGroupProperty.allowedValues());
+    TS_ASSERT_EQUALS(vals.size(), 0);
+  }
+
   void testCreateHistory() {
     PropertyHistory history = wsp1->createHistory();
     TS_ASSERT_EQUALS(history.name(), "workspace1")

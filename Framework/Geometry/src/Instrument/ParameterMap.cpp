@@ -135,7 +135,7 @@ bool ParameterMap::operator==(const ParameterMap &rhs) const {
 const std::string ParameterMap::getDescription(const std::string &compName,
                                                const std::string &name) const {
   pmap_cit it;
-  std::string result("");
+  std::string result;
   for (it = m_map.begin(); it != m_map.end(); ++it) {
     if (compName.compare(((const IComponent *)(*it).first)->getName()) == 0) {
       boost::shared_ptr<Parameter> param =
@@ -160,11 +160,10 @@ const std::string
 ParameterMap::getShortDescription(const std::string &compName,
                                   const std::string &name) const {
   pmap_cit it;
-  std::string result("");
+  std::string result;
   for (it = m_map.begin(); it != m_map.end(); ++it) {
-    if (compName.compare(((const IComponent *)(*it).first)->getName()) == 0) {
-      boost::shared_ptr<Parameter> param =
-          get((const IComponent *)(*it).first, name);
+    if (compName.compare(it->first->getName()) == 0) {
+      boost::shared_ptr<Parameter> param = get(it->first, name);
       if (param) {
         result = param->getShortDescription();
         if (!result.empty())
@@ -642,8 +641,6 @@ void ParameterMap::addQuat(const IComponent *comp, const std::string &name,
  */
 bool ParameterMap::contains(const IComponent *comp, const std::string &name,
                             const std::string &type) const {
-  if (m_map.empty())
-    return false;
   return contains(comp, name.c_str(), type.c_str());
 }
 
@@ -663,7 +660,7 @@ bool ParameterMap::contains(const IComponent *comp, const char *name,
   std::pair<pmap_cit, pmap_cit> components = m_map.equal_range(id);
   bool anytype = (strlen(type) == 0);
   for (auto itr = components.first; itr != components.second; ++itr) {
-    boost::shared_ptr<Parameter> param = itr->second;
+    const auto &param = itr->second;
     if (boost::iequals(param->name(), name) &&
         (anytype || param->type() == type)) {
       return true;
@@ -685,9 +682,8 @@ bool ParameterMap::contains(const IComponent *comp,
   const ComponentID id = comp->getComponentID();
   auto it_found = m_map.find(id);
   if (it_found != m_map.end()) {
-    auto itr = m_map.lower_bound(id);
-    auto itr_end = m_map.upper_bound(id);
-    for (; itr != itr_end; ++itr) {
+    auto itrs = m_map.equal_range(id);
+    for (auto itr = itrs.first; itr != itrs.second; ++itr) {
       const Parameter_sptr &param = itr->second;
       if (*param == parameter)
         return true;
@@ -750,10 +746,9 @@ component_map_it ParameterMap::positionOf(const IComponent *comp,
     const ComponentID id = comp->getComponentID();
     auto it_found = m_map.find(id);
     if (it_found != m_map.end()) {
-      auto itr = m_map.lower_bound(id);
-      auto itr_end = m_map.upper_bound(id);
-      for (; itr != itr_end; ++itr) {
-        Parameter_sptr param = itr->second;
+      auto itrs = m_map.equal_range(id);
+      for (auto itr = itrs.first; itr != itrs.second; ++itr) {
+        const auto &param = itr->second;
         if (boost::iequals(param->nameAsCString(), name) &&
             (anytype || param->type() == type)) {
           result = itr;
@@ -783,10 +778,9 @@ component_map_cit ParameterMap::positionOf(const IComponent *comp,
     const ComponentID id = comp->getComponentID();
     auto it_found = m_map.find(id);
     if (it_found != m_map.end()) {
-      auto itr = m_map.lower_bound(id);
-      auto itr_end = m_map.upper_bound(id);
-      for (; itr != itr_end; ++itr) {
-        Parameter_sptr param = itr->second;
+      auto itrs = m_map.equal_range(id);
+      for (auto itr = itrs.first; itr != itrs.second; ++itr) {
+        const auto &param = itr->second;
         if (boost::iequals(param->nameAsCString(), name) &&
             (anytype || param->type() == type)) {
           result = itr;
@@ -805,21 +799,18 @@ component_map_cit ParameterMap::positionOf(const IComponent *comp,
 */
 Parameter_sptr ParameterMap::getByType(const IComponent *comp,
                                        const std::string &type) const {
-  Parameter_sptr result = Parameter_sptr();
+  Parameter_sptr result;
   PARALLEL_CRITICAL(m_mapAccess) {
     if (!m_map.empty()) {
       const ComponentID id = comp->getComponentID();
       auto it_found = m_map.find(id);
-      if (it_found != m_map.end()) {
-        if (it_found->first) {
-          auto itr = m_map.lower_bound(id);
-          auto itr_end = m_map.upper_bound(id);
-          for (; itr != itr_end; ++itr) {
-            Parameter_sptr param = itr->second;
-            if (boost::iequals(param->type(), type)) {
-              result = param;
-              break;
-            }
+      if (it_found != m_map.end() && it_found->first) {
+        auto itrs = m_map.equal_range(id);
+        for (auto itr = itrs.first; itr != itrs.second; ++itr) {
+          const auto &param = itr->second;
+          if (boost::iequals(param->type(), type)) {
+            result = param;
+            break;
           }
         } // found->firdst
       }   // it_found != m_map.end()
@@ -922,9 +913,8 @@ std::set<std::string> ParameterMap::names(const IComponent *comp) const {
     return paramNames;
   }
 
-  auto itr = m_map.lower_bound(id);
-  auto itr_end = m_map.upper_bound(id);
-  for (auto it = itr; it != itr_end; ++it) {
+  auto itrs = m_map.equal_range(id);
+  for (auto it = itrs.first; it != itrs.second; ++it) {
     paramNames.insert(it->second->name());
   }
 
@@ -942,11 +932,11 @@ std::string ParameterMap::asString() const {
   for (const auto &mappair : m_map) {
     const boost::shared_ptr<Parameter> &p = mappair.second;
     if (p && mappair.first) {
-      const IComponent *comp = (const IComponent *)(mappair.first);
+      const IComponent *comp = dynamic_cast<const IComponent *>(mappair.first);
       const IDetector *det = dynamic_cast<const IDetector *>(comp);
       if (det) {
         out << "detID:" << det->getID();
-      } else {
+      } else if (comp) {
         out << comp->getFullName(); // Use full path name to ensure unambiguous
                                     // naming
       }

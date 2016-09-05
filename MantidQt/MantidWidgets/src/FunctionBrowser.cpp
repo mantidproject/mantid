@@ -166,6 +166,8 @@ void FunctionBrowser::createBrowser() {
           SLOT(attributeChanged(QtProperty *)));
   connect(m_filenameManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(attributeChanged(QtProperty *)));
+  connect(m_workspaceManager, SIGNAL(propertyChanged(QtProperty *)), this,
+          SLOT(attributeChanged(QtProperty *)));
   connect(m_attributeVectorDoubleManager, SIGNAL(propertyChanged(QtProperty *)),
           this, SLOT(attributeVectorDoubleChanged(QtProperty *)));
   connect(m_tieManager, SIGNAL(propertyChanged(QtProperty *)), this,
@@ -2091,11 +2093,9 @@ Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction() {
         continue;
       auto tie = fun1->getTie(j);
       if (tie) {
-        // If parameter has a tie at this stage then it gets it form the
-        // currently
-        // displayed function. But the i-th local parameters may not have this
-        // tie,
-        // so remove it
+        // If parameter has a tie at this stage then it gets it from the
+        // currently displayed function. But the i-th local parameters may not
+        // have this tie, so remove it
         fun1->removeTie(j);
       }
       if (isLocalParameterFixed(parName, i)) {
@@ -2190,20 +2190,38 @@ void FunctionBrowser::updateMultiDatasetParameters(
     const Mantid::API::IFunction &fun) {
   auto cfun = dynamic_cast<const Mantid::API::CompositeFunction *>(&fun);
   if (cfun && cfun->nFunctions() > 0) {
-    auto qLocalParameters = getLocalParameters();
-    std::vector<std::string> localParameters;
-    foreach (QString par, qLocalParameters) {
-      localParameters.push_back(par.toStdString());
-    }
-    size_t currentIndex = static_cast<size_t>(m_currentDataset);
-    for (size_t i = 0; i < cfun->nFunctions(); ++i) {
-      auto sfun = cfun->getFunction(i);
-      if (i == currentIndex) {
-        updateParameters(*sfun);
+    const auto localParameters = getLocalParameters();
+
+    // Multiple datasets
+    if (const auto *multiFun =
+            dynamic_cast<const Mantid::API::MultiDomainFunction *>(cfun)) {
+      // Check the function has the correct number of domains
+      if (multiFun->getNumberDomains() !=
+          static_cast<size_t>(m_numberOfDatasets)) {
+        throw std::invalid_argument("Function has incorrect number of domains");
       }
-      for (int j = 0; j < qLocalParameters.size(); ++j) {
-        setLocalParameterValue(qLocalParameters[j], static_cast<int>(i),
-                               sfun->getParameter(localParameters[j]));
+      // update function
+      size_t currentIndex = static_cast<size_t>(m_currentDataset);
+      for (size_t i = 0; i < multiFun->nFunctions(); ++i) {
+        auto sfun = multiFun->getFunction(i);
+        if (i == currentIndex) {
+          updateParameters(*sfun);
+        }
+        for (int j = 0; j < localParameters.size(); ++j) {
+          setLocalParameterValue(
+              localParameters[j], static_cast<int>(i),
+              sfun->getParameter(localParameters[j].toStdString()));
+        }
+      }
+    } else { // composite function, 1 domain only
+      if (m_numberOfDatasets != 1) {
+        throw std::invalid_argument(
+            "Multiple datasets, but function is single-domain");
+      }
+      for (int j = 0; j < localParameters.size(); ++j) {
+        setLocalParameterValue(
+            localParameters[j], 0,
+            cfun->getParameter(localParameters[j].toStdString()));
       }
     }
   } else {

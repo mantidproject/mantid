@@ -40,10 +40,6 @@
 #include <vector>
 #include "tree.hh"
 
-// Russell Taylor, 23/07/10: Remove evil import - caused clash with
-// std::tr1::function
-// using namespace std;
-
 struct rect {
   short left;
   short top;

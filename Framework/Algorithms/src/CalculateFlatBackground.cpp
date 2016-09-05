@@ -7,16 +7,17 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidHistogramData/Histogram.h"
 #include <algorithm>
+#include <boost/lexical_cast.hpp>
 #include <climits>
 #include <numeric>
-#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -117,9 +118,7 @@ void CalculateFlatBackground::exec() {
     PARALLEL_FOR2(inputWS, outputWS)
     for (int i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
-      outputWS->dataX(i) = inputWS->readX(i);
-      outputWS->dataY(i) = inputWS->readY(i);
-      outputWS->dataE(i) = inputWS->readE(i);
+      outputWS->setHistogram(i, inputWS->histogram(i));
       m_progress->report();
       PARALLEL_END_INTERUPT_REGION
     }
@@ -179,7 +178,7 @@ void CalculateFlatBackground::exec() {
         backgroundTotal += background;
       }
 
-      MantidVec &E = outputWS->dataE(currentSpec);
+      auto &E = outputWS->mutableE(currentSpec);
       // only the Mean() function calculates the variance
       // cppcheck-suppress knownConditionTrueFalse
       if (variance > 0) {
@@ -189,7 +188,7 @@ void CalculateFlatBackground::exec() {
             std::bind2nd(VectorHelper::AddVariance<double>(), variance));
       }
       // Get references to the current spectrum
-      MantidVec &Y = outputWS->dataY(currentSpec);
+      auto &Y = outputWS->mutableY(currentSpec);
       // Now subtract the background from the data
       for (int j = 0; j < blocksize; ++j) {
         if (removeBackground) {
@@ -253,9 +252,9 @@ void CalculateFlatBackground::convertToDistribution(
                            ? 1
                            : workspace->getNumberHistograms();
 
-  MantidVec adjacents(workspace->readX(0).size() - 1);
+  MantidVec adjacents(workspace->x(0).size() - 1);
   for (std::size_t i = 0; i < total; ++i) {
-    MantidVec X = workspace->readX(i);
+    auto &X = workspace->x(i);
     // Calculate bin widths
     std::adjacent_difference(X.begin() + 1, X.end(), adjacents.begin());
     // the first entry from adjacent difference is just a copy of the first
@@ -342,8 +341,9 @@ double CalculateFlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS,
                                      const int wsInd, const double startX,
                                      const double endX,
                                      double &variance) const {
-  const MantidVec &XS = WS->readX(wsInd), &YS = WS->readY(wsInd);
-  const MantidVec &ES = WS->readE(wsInd);
+  auto &XS = WS->x(wsInd);
+  auto &YS = WS->y(wsInd);
+  auto &ES = WS->e(wsInd);
   // the function checkRange should already have checked that startX <= endX,
   // but we still need to check values weren't out side the ranges
   if (endX > XS.back() || startX < XS.front()) {

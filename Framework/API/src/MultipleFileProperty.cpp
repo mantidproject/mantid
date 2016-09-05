@@ -7,6 +7,7 @@
 #include "MantidKernel/MultiFileValidator.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
@@ -126,36 +127,6 @@ std::string MultipleFileProperty::getDefault() const {
 }
 
 /**
- * A convenience function for the cases where we dont use the MultiFileProperty
- *to
- * *add* workspaces - only to list them.  It "flattens" the given vector of
- *vectors
- * into a single vector which is much easier to traverse.  For example:
- *
- * ((1), (2), (30), (31), (32), (100), (102)) becomes (1, 2, 30, 31, 32, 100,
- *102)
- *
- * Used on a vector of vectors that *has* added filenames, the following
- *behaviour is observed:
- *
- * ((1), (2), (30, 31, 32), (100), (102)) becomes (1, 2, 30, 31, 32, 100, 102)
- *
- * @param fileNames :: a vector of vectors, containing all the file names.
- * @return a single vector containing all the file names.
- */
-std::vector<std::string> MultipleFileProperty::flattenFileNames(
-    const std::vector<std::vector<std::string>> &fileNames) {
-  std::vector<std::string> flattenedFileNames;
-
-  for (const auto &fileName : fileNames) {
-    flattenedFileNames.insert(flattenedFileNames.end(), fileName.begin(),
-                              fileName.end());
-  }
-
-  return flattenedFileNames;
-}
-
-/**
  * Called by setValue in the case where a user has disabled multiple file
  *loading.
  *
@@ -262,7 +233,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       // load a single (and possibly existing) file within a token, but which
       // has unexpected zero
       // padding, or some other anomaly.
-      if (flattenFileNames(f).empty())
+      if (VectorHelper::flattenVector(f).empty())
         f.push_back(std::vector<std::string>(1, *plusTokenString));
 
       if (plusTokenStrings.size() > 1) {
@@ -296,8 +267,8 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   // First, find the default extension.  Flatten all the unresolved filenames
   // first, to make this easier.
   std::vector<std::string> flattenedAllUnresolvedFileNames =
-      flattenFileNames(allUnresolvedFileNames);
-  std::string defaultExt = "";
+      VectorHelper::flattenVector(allUnresolvedFileNames);
+  std::string defaultExt;
   auto unresolvedFileName = flattenedAllUnresolvedFileNames.begin();
   for (; unresolvedFileName != flattenedAllUnresolvedFileNames.end();
        ++unresolvedFileName) {
@@ -345,7 +316,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
         useDefaultExt = false;
       }
 
-      std::string fullyResolvedFile = "";
+      std::string fullyResolvedFile;
 
       if (!useDefaultExt) {
         FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts,

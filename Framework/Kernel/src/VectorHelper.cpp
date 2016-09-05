@@ -216,8 +216,6 @@ void rebin(const std::vector<double> &xold, const std::vector<double> &yold,
       std::transform(enew.begin(), enew.end(), enew.begin(), uf);
     }
   }
-
-  return; // without problems
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -328,8 +326,6 @@ void rebinHistogram(const std::vector<double> &xold,
     pf uf = std::sqrt;
     std::transform(enew.begin(), enew.end(), enew.begin(), uf);
   }
-
-  return;
 }
 
 //-------------------------------------------------------------------------------------------------

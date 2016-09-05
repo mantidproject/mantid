@@ -29,6 +29,9 @@ class MainWindow(QtGui.QMainWindow):
         self.inst=config['default.instrument']
         self.chop=''
         self.ei=0.0
+        
+        #register startup
+        mantid.UsageService.registerFeatureUsage("Interface","PyChop",False)
 
     def set_inst(self,name):
         self.inst=name

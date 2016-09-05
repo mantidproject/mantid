@@ -35,7 +35,7 @@ AnalysisDataServiceImpl::GroupUpdatedNotification::getWorkspaceGroup() const {
 */
 const std::string
 AnalysisDataServiceImpl::isValid(const std::string &name) const {
-  std::string error("");
+  std::string error;
   const std::string &illegal = illegalCharacters();
   if (illegal.empty())
     return error; // Quick route out.

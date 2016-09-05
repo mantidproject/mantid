@@ -19,7 +19,8 @@ private:
   void run() override;
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
-  void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
+  void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
+                            const QPair<double, double> &range);
   void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);
 
 private slots:
@@ -33,7 +34,8 @@ private slots:
   void unGroupInput(bool error);
 
 private:
-  void addSaveAlgorithm(QString workspaceName, QString filename = "");
+  void addSaveAlgorithm(const std::string &workspaceName,
+                        std::string filename = "");
 
   Ui::Elwin m_uiForm;
   QtTreePropertyBrowser *m_elwTree;

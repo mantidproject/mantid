@@ -51,8 +51,6 @@ void LoadMappingTable::exec() {
   localWorkspace->updateSpectraUsing(
       SpectrumDetectorMapping(iraw->spec, iraw->udet, number_spectra));
   progress(1);
-
-  return;
 }
 
 } // Namespace DataHandling

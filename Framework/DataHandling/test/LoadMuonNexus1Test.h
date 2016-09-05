@@ -339,6 +339,7 @@ public:
   void testPartialSpectraLoading() {
     LoadMuonNexus1 alg1;
     LoadMuonNexus1 alg2;
+    inputFile = "emu00006473.nxs";
 
     const std::string deadTimeWSName = "LoadMuonNexus1Test_DeadTimes";
     const std::string groupingWSName = "LoadMuonNexus1Test_Grouping";
@@ -434,6 +435,41 @@ public:
     testVec.push_back(31);
     TS_ASSERT_EQUALS(groupingTable->cell<std::vector<int>>(1, 0), testVec);
     AnalysisDataService::Instance().remove(groupingWSName);
+  }
+
+  void testPartialSpectraLoading_spectrumNumbers_detectorIDs() {
+    LoadMuonNexus1 alg;
+
+    // It will only load some spectra
+    try {
+      alg.initialize();
+      alg.setChild(true);
+      alg.setPropertyValue("Filename", "emu00006473.nxs");
+      alg.setPropertyValue("OutputWorkspace", "__NotUsed");
+      alg.setPropertyValue("SpectrumList", "29,31");
+      alg.setPropertyValue("SpectrumMin", "5");
+      alg.setPropertyValue("SpectrumMax", "10");
+      alg.execute();
+    } catch (const std::exception &ex) {
+      TS_FAIL(std::string("Loading failed: ") + ex.what());
+    }
+
+    Workspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    const auto loadedWS = boost::dynamic_pointer_cast<Workspace2D>(outWS);
+    TS_ASSERT(loadedWS);
+
+    // Check the right spectra have been loaded
+    const std::vector<Mantid::specnum_t> expectedSpectra{5, 6,  7,  8,
+                                                         9, 10, 29, 31};
+    TS_ASSERT_EQUALS(loadedWS->getNumberHistograms(), expectedSpectra.size());
+    for (size_t i = 0; i < loadedWS->getNumberHistograms(); ++i) {
+      const auto spec = loadedWS->getSpectrum(i);
+      TS_ASSERT_EQUALS(spec.getSpectrumNo(), expectedSpectra[i]);
+      // detector ID = spectrum number for muon Nexus v1
+      const auto detIDs = spec.getDetectorIDs();
+      TS_ASSERT_EQUALS(detIDs.size(), 1);
+      TS_ASSERT_EQUALS(*detIDs.begin(), static_cast<int>(spec.getSpectrumNo()));
+    }
   }
 
   void test_loadingDeadTimes_singlePeriod() {
@@ -925,6 +961,32 @@ public:
       }
     } else {
       TS_FAIL("Loaded grouping was null");
+    }
+  }
+
+  /**
+   * Some old data does not have run/instrument/beam/frames_good.
+   * Test that we can use run/instrument/beam/frames in this case to get a
+   * goodfrm value.
+   * Example file: MUT53591
+   */
+  void test_loadingNumGoodFrames_notPresent() {
+    LoadMuonNexus1 alg;
+    ScopedWorkspace outWsEntry;
+    try {
+      alg.initialize();
+      alg.setPropertyValue("Filename", "MUT00053591.NXS");
+      alg.setPropertyValue("OutputWorkspace", outWsEntry.name());
+      alg.execute();
+    } catch (const std::exception &error) {
+      TS_FAIL(error.what());
+    }
+    Workspace_sptr outWs = outWsEntry.retrieve();
+    TS_ASSERT(outWs);
+    const auto matrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>(outWs);
+    TS_ASSERT(matrixWs);
+    if (matrixWs) {
+      checkProperty(matrixWs->run(), "goodfrm", 65500);
     }
   }
 

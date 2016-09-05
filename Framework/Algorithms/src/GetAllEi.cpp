@@ -22,6 +22,7 @@
 namespace Mantid {
 namespace Algorithms {
 
+using namespace HistogramData;
 DECLARE_ALGORITHM(GetAllEi)
 
 /// Empty default constructor
@@ -299,7 +300,7 @@ void GetAllEi::exec() {
   std::vector<bool> guessValid;
   // preprocess first monitors peaks;
   g_log.debug() << "*Looking for real energy peaks on first monitor\n";
-  findBinRanges(monitorWS->readX(0), monitorWS->readY(0), guess_ei,
+  findBinRanges(monitorWS->x(0), monitorWS->y(0), guess_ei,
                 this->m_min_Eresolution / (2. * std::sqrt(2. * M_LN2)),
                 irange_min, irange_max, guessValid);
 
@@ -310,7 +311,7 @@ void GetAllEi::exec() {
   std::vector<size_t> irange1_min, irange1_max;
   if (!this->getProperty("IgnoreSecondMonitor")) {
     g_log.debug() << "*Looking for real energy peaks on second monitor\n";
-    findBinRanges(monitorWS->readX(1), monitorWS->readY(1), guess_ei,
+    findBinRanges(monitorWS->x(1), monitorWS->y(1), guess_ei,
                   this->m_min_Eresolution / (2. * std::sqrt(2. * M_LN2)),
                   irange1_min, irange1_max, guessValid);
     removeInvalidValues<double>(guessValid, guess_ei);
@@ -340,7 +341,7 @@ void GetAllEi::exec() {
     bool found = findMonitorPeak(monitorWS, guess_ei[i], monsRangeMin,
                                  monsRangeMax, energy, height, twoSigma);
     if (found) {
-      peaks.push_back(peakKeeper(energy, height, 0.5 * twoSigma));
+      peaks.emplace_back(energy, height, 0.5 * twoSigma);
       if (peaks.back().energy > maxPeakEnergy)
         maxPeakEnergy = peaks.back().energy;
     }
@@ -376,15 +377,18 @@ void GetAllEi::exec() {
   auto result_ws = API::WorkspaceFactory::Instance().create("Workspace2D", 1,
                                                             nPeaks, nPeaks);
 
-  MantidVec peaks_positions;
-  MantidVec &Signal = result_ws->dataY(0);
-  MantidVec &Error = result_ws->dataE(0);
-  for (size_t i = 0; i < nPeaks; i++) {
-    peaks_positions.push_back(peaks[i].position);
-    Signal[i] = peaks[i].height;
-    Error[i] = peaks[i].sigma;
-  }
-  result_ws->setX(0, peaks_positions);
+  HistogramX peaks_positions(peaks.size());
+  std::transform(peaks.cbegin(), peaks.cend(), peaks_positions.begin(),
+                 [](peakKeeper peak) { return peak.position; });
+  auto &Signal = result_ws->mutableY(0);
+  std::transform(peaks.cbegin(), peaks.cend(), Signal.begin(),
+                 [](peakKeeper peak) { return peak.height; });
+
+  auto &Error = result_ws->mutableE(0);
+  std::transform(peaks.cbegin(), peaks.cend(), Error.begin(),
+                 [](peakKeeper peak) { return peak.sigma; });
+
+  result_ws->setPoints(0, peaks_positions);
 
   setProperty("OutputWorkspace", result_ws);
 }
@@ -478,8 +482,8 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
   double xOfMax(0), dXmax(0);
   double Intensity(0);
 
-  auto X = inputWS->readX(index);
-  auto S = inputWS->readY(index);
+  const auto &X = inputWS->x(index);
+  const auto &S = inputWS->y(index);
   size_t ind_min = monsRangeMin[index];
   size_t ind_max = monsRangeMax[index];
   // interval too small -- not interested in a peak there
@@ -512,8 +516,9 @@ bool GetAllEi::peakGuess(const API::MatrixWorkspace_sptr &inputWS, size_t index,
   double SmoothRange = 2 * maxSigma;
 
   std::vector<double> SAvrg, binsAvrg;
-  Kernel::VectorHelper::smoothInRange(S, SAvrg, SmoothRange, &X, ind_min,
-                                      ind_max, &binsAvrg);
+  Kernel::VectorHelper::smoothInRange(S.rawData(), SAvrg, SmoothRange,
+                                      &X.rawData(), ind_min, ind_max,
+                                      &binsAvrg);
 
   double realPeakPos(xOfMax); // this position is less shifted
   // due to the skew in averaging formula
@@ -736,27 +741,28 @@ size_t GetAllEi::calcDerivativeAndCountZeros(const std::vector<double> &bins,
 }
 namespace { // for lambda extracted from findBinRanges
 // get bin range corresponding to the energy range
-void getBinRange(const MantidVec &eBins, double eMin, double eMax,
-                 size_t &index_min, size_t &index_max) {
+void getBinRange(const HistogramData::HistogramX &eBins, double eMin,
+                 double eMax, size_t &index_min, size_t &index_max) {
 
-  size_t nBins = eBins.size();
-  if (eMin <= eBins[0]) {
+  auto &bins = eBins.rawData();
+  size_t nBins = bins.size();
+  if (eMin <= bins[0]) {
     index_min = 0;
   } else {
-    index_min = Kernel::VectorHelper::getBinIndex(eBins, eMin);
+    index_min = Kernel::VectorHelper::getBinIndex(bins, eMin);
   }
 
   if (eMax >= eBins[nBins - 1]) {
     index_max = nBins - 1;
   } else {
-    index_max = Kernel::VectorHelper::getBinIndex(eBins, eMax) + 1;
+    index_max = Kernel::VectorHelper::getBinIndex(bins, eMax) + 1;
     if (index_max >= nBins)
       index_max = nBins - 1; // last bin range anyway. Should not happen
   }
 }
 
 // refine bin range. May need better procedure for this.
-bool refineEGuess(const MantidVec &eBins, const MantidVec &signal,
+bool refineEGuess(const HistogramX &eBins, const HistogramY &signal,
                   double &eGuess, size_t index_min, size_t index_max) {
 
   size_t ind_Emax = index_min;
@@ -796,7 +802,7 @@ struct peakKeeper2 {
 *@param guessValid -- output boolean vector, which specifies if guess energies
 *                     in guess_energy vector are valid or not
 */
-void GetAllEi::findBinRanges(const MantidVec &eBins, const MantidVec &signal,
+void GetAllEi::findBinRanges(const HistogramX &eBins, const HistogramY &signal,
                              const std::vector<double> &guess_energy,
                              double eResolution, std::vector<size_t> &irangeMin,
                              std::vector<size_t> &irangeMax,
@@ -881,9 +887,9 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   auto &pSpectr2 = inputWS->getSpectrum(wsIndex1);
   // assuming equally binned ws.
   // auto bins       = inputWS->dataX(wsIndex0);
-  auto bins = pSpectr1.dataX();
-  size_t XLength = bins.size();
-  size_t YLength = inputWS->dataY(wsIndex0).size();
+  auto bins = pSpectr1.ptrX();
+  size_t XLength = bins->size();
+  size_t YLength = inputWS->y(wsIndex0).size();
   auto working_ws =
       API::WorkspaceFactory::Instance().create(inputWS, 2, XLength, YLength);
   // copy data --> very bad as implicitly assigns pointer
@@ -892,23 +898,25 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   // This does not matter in this case as below we convert units
   // which should decouple cow_pointer but very scary operation in
   // general.
-  working_ws->setX(0, bins);
-  working_ws->setX(1, bins);
-  MantidVec &Signal1 = working_ws->dataY(0);
-  MantidVec &Error1 = working_ws->dataE(0);
-  MantidVec &Signal2 = working_ws->dataY(1);
-  MantidVec &Error2 = working_ws->dataE(1);
-  for (size_t i = 0; i < YLength; i++) {
-    Signal1[i] = inputWS->dataY(wsIndex0)[i];
-    Error1[i] = inputWS->dataE(wsIndex0)[i];
-    Signal2[i] = inputWS->dataY(wsIndex1)[i];
-    Error2[i] = inputWS->dataE(wsIndex1)[i];
-  }
+
+  working_ws->setSharedX(0, bins);
+  working_ws->setSharedX(1, bins);
+
+  // signal 1
+  working_ws->setSharedY(0, inputWS->sharedY(wsIndex0));
+  // signal 2
+  working_ws->setSharedY(1, inputWS->sharedY(wsIndex1));
+  // error 1
+  working_ws->setSharedE(0, inputWS->sharedE(wsIndex0));
+  // error 2
+  working_ws->setSharedE(1, inputWS->sharedE(wsIndex1));
+
   // copy detector mapping
   auto &spectrum1 = working_ws->getSpectrum(0);
   spectrum1.setSpectrumNo(specNum1);
   spectrum1.clearDetectorIDs();
   spectrum1.addDetectorIDs(pSpectr1.getDetectorIDs());
+
   auto &spectrum2 = working_ws->getSpectrum(1);
   spectrum2.setSpectrumNo(specNum2);
   spectrum2.clearDetectorIDs();

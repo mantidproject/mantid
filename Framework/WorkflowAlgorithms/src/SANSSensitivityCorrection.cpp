@@ -19,6 +19,7 @@
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/ArrayProperty.h"
 namespace Mantid {
 namespace WorkflowAlgorithms {
 
@@ -54,6 +55,13 @@ void SANSSensitivityCorrection::init() {
       "MaxEfficiency", EMPTY_DBL(), positiveDouble,
       "Maximum efficiency for a pixel to be considered (default: no maximum).");
 
+  declareProperty("FloodTransmissionValue", EMPTY_DBL(), positiveDouble,
+                  "Transmission value for the flood field material "
+                  "(default: no transmission).");
+  declareProperty("FloodTransmissionError", 0.0, positiveDouble,
+                  "Transmission error for the flood field material "
+                  "(default: no transmission).");
+
   declareProperty("BeamCenterX", EMPTY_DBL(),
                   "Beam position in X pixel coordinates (optional: otherwise "
                   "sample beam center is used)");
@@ -62,6 +70,12 @@ void SANSSensitivityCorrection::init() {
                   "sample beam center is used)");
   declareProperty("MaskedFullComponent", "",
                   "Component Name to fully mask according to the IDF file.");
+  declareProperty(
+      make_unique<ArrayProperty<int>>("MaskedEdges"),
+      "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
+  declareProperty(
+      "MaskedComponent", "",
+      "Component Name to mask the edges according to the IDF file.");
 
   declareProperty(make_unique<WorkspaceProperty<>>(
       "OutputWorkspace", "", Direction::Output, PropertyMode::Optional));
@@ -137,12 +151,16 @@ void SANSSensitivityCorrection::exec() {
     floodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
     m_output_message += "   |Using " + wsName + "\n";
-    g_log.debug() << "Using sensitivity worspace " << wsName << "\n";
+    g_log.debug()
+        << "SANSSensitivityCorrection :: Using sensitivity workspace: "
+        << wsName << "\n";
   } else {
     // Load the flood field if we don't have it already
     // First, try to determine whether we need to load data or a sensitivity
     // workspace...
     if (!floodWS && fileCheck(fileName)) {
+      g_log.debug() << "SANSSensitivityCorrection :: Loading sensitivity file: "
+                    << fileName << "\n";
       IAlgorithm_sptr loadAlg = createChildAlgorithm("Load", 0.1, 0.3);
       loadAlg->setProperty("Filename", fileName);
       loadAlg->executeAsChildAlg();
@@ -220,7 +238,7 @@ void SANSSensitivityCorrection::exec() {
         const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
 
         // Look for a dark current subtraction algorithm
-        std::string dark_result = "";
+        std::string dark_result;
         if (reductionManager->existsProperty("DarkCurrentAlgorithm")) {
           IAlgorithm_sptr darkAlg =
               reductionManager->getProperty("DarkCurrentAlgorithm");
@@ -272,9 +290,9 @@ void SANSSensitivityCorrection::exec() {
             "   |" + Poco::replace(dark_result, "\n", "\n   |") + "\n";
 
         // Look for solid angle correction algorithm
-        if (reductionManager->existsProperty("SolidAngleAlgorithm")) {
+        if (reductionManager->existsProperty("SANSSolidAngleCorrection")) {
           IAlgorithm_sptr solidAlg =
-              reductionManager->getProperty("SolidAngleAlgorithm");
+              reductionManager->getProperty("SANSSolidAngleCorrection");
           solidAlg->setChild(true);
           solidAlg->setProperty("InputWorkspace", rawFloodWS);
           solidAlg->setProperty("OutputWorkspace", rawFloodWS);
@@ -286,17 +304,41 @@ void SANSSensitivityCorrection::exec() {
               "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";
         }
 
+        // Apply transmission correction as needed
+        double floodTransmissionValue = getProperty("FloodTransmissionValue");
+        double floodTransmissionError = getProperty("FloodTransmissionError");
+
+        if (!isEmpty(floodTransmissionValue)) {
+          g_log.debug() << "SANSSensitivityCorrection :: Applying transmission "
+                           "to flood field\n";
+          IAlgorithm_sptr transAlg =
+              createChildAlgorithm("ApplyTransmissionCorrection");
+          transAlg->setProperty("InputWorkspace", rawFloodWS);
+          transAlg->setProperty("OutputWorkspace", rawFloodWS);
+          transAlg->setProperty("TransmissionValue", floodTransmissionValue);
+          transAlg->setProperty("TransmissionError", floodTransmissionError);
+          transAlg->setProperty("ThetaDependent", true);
+          transAlg->execute();
+          rawFloodWS = transAlg->getProperty("OutputWorkspace");
+          m_output_message += "   |Applied transmission to flood field\n";
+        }
+
         // Calculate detector sensitivity
         IAlgorithm_sptr effAlg = createChildAlgorithm("CalculateEfficiency");
         effAlg->setProperty("InputWorkspace", rawFloodWS);
 
         const double minEff = getProperty("MinEfficiency");
         const double maxEff = getProperty("MaxEfficiency");
-        const std::string maskComponent =
+        const std::string maskFullComponent =
             getPropertyValue("MaskedFullComponent");
+        const std::string maskEdges = getPropertyValue("MaskedEdges");
+        const std::string maskComponent = getPropertyValue("MaskedComponent");
+
         effAlg->setProperty("MinEfficiency", minEff);
         effAlg->setProperty("MaxEfficiency", maxEff);
-        effAlg->setProperty("MaskedFullComponent", maskComponent);
+        effAlg->setProperty("MaskedFullComponent", maskFullComponent);
+        effAlg->setProperty("MaskedEdges", maskEdges);
+        effAlg->setProperty("MaskedComponent", maskComponent);
         effAlg->execute();
         floodWS = effAlg->getProperty("OutputWorkspace");
       } else {

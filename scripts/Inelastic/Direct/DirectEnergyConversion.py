@@ -30,7 +30,7 @@ def setup_reducer(inst_name,reload_instrument=False):
         raise RuntimeError('Unknown instrument "%s" or wrong IDF file for this instrument, cannot continue' % inst_name)
 
 #How could it be that abstract class is not referenced R0921? What it means?
-#pylint: disable=too-many-instance-attributes,R0921
+#pylint: disable=too-many-instance-attributes
 class DirectEnergyConversion(object):
     """
     Performs a convert to energy assuming the provided instrument is

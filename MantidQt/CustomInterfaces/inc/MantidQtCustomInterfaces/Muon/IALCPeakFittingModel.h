@@ -9,8 +9,6 @@
 
 #include <QObject>
 
-using namespace Mantid::API;
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -44,18 +42,18 @@ public:
   /**
    * @return Last fitted peaks
    */
-  virtual IFunction_const_sptr fittedPeaks() const = 0;
+  virtual Mantid::API::IFunction_const_sptr fittedPeaks() const = 0;
 
   /**
    * @return Data we are fitting peaks to
    */
-  virtual MatrixWorkspace_const_sptr data() const = 0;
+  virtual Mantid::API::MatrixWorkspace_const_sptr data() const = 0;
 
   /**
    * Fit specified peaks to the data of the model
    * @param peaks :: Function representing peaks to fit
    */
-  virtual void fitPeaks(IFunction_const_sptr peaks) = 0;
+  virtual void fitPeaks(Mantid::API::IFunction_const_sptr peaks) = 0;
 
 signals:
 

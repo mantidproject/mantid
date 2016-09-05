@@ -1,4 +1,5 @@
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
@@ -8,6 +9,8 @@
 using namespace Mantid::API;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IMDWorkspace)
 
 void export_IMDWorkspace() {
   boost::python::enum_<Mantid::API::MDNormalization>("MDNormalization")
@@ -32,6 +35,8 @@ void export_IMDWorkspace() {
       .def("getSpecialCoordinateSystem",
            &IMDWorkspace::getSpecialCoordinateSystem, arg("self"),
            "Returns the special coordinate system of the workspace")
+      .def("isMDHistoWorkspace", &IMDWorkspace::isMDHistoWorkspace, arg("self"),
+           "Returns True if this is considered to be binned data.")
       .def("displayNormalization", &IMDWorkspace::displayNormalization,
            args("self"), "Returns the visual normalization of the workspace.")
       .def("displayNormalizationHisto",

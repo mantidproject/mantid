@@ -118,7 +118,7 @@ void SplineSmoothing::smoothSpectrum(int index) {
   performAdditionalFitting(m_inputWorkspacePointData, index);
 
   // compare the data set against our spline
-  m_outputWorkspace->setX(index, m_inputWorkspace->readX(index));
+  m_outputWorkspace->setX(index, m_inputWorkspace->refX(index));
   calculateSmoothing(m_inputWorkspacePointData, m_outputWorkspace, index);
 }
 
@@ -133,7 +133,7 @@ void SplineSmoothing::calculateSpectrumDerivatives(int index, int order) {
         setupOutputWorkspace(m_inputWorkspace, order);
 
     for (int j = 0; j < order; ++j) {
-      derivs->setX(j, m_inputWorkspace->readX(index));
+      derivs->setX(j, m_inputWorkspace->refX(index));
       calculateDerivatives(m_inputWorkspacePointData, derivs, j + 1, index);
     }
 

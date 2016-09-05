@@ -23,11 +23,6 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-using namespace Mantid;
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
-using namespace Mantid::Geometry;
-
 namespace Muon {
 // Tab classes
 class MuonAnalysisOptionTab;
@@ -35,9 +30,9 @@ class MuonAnalysisFitDataTab;
 class MuonAnalysisResultTableTab;
 
 struct LoadResult {
-  Workspace_sptr loadedWorkspace;
-  Workspace_sptr loadedGrouping;
-  Workspace_sptr loadedDeadTimes;
+  Mantid::API::Workspace_sptr loadedWorkspace;
+  Mantid::API::Workspace_sptr loadedGrouping;
+  Mantid::API::Workspace_sptr loadedDeadTimes;
   std::string mainFieldDirection;
   double timeZero;
   double firstGoodData;
@@ -49,8 +44,6 @@ struct GroupResult {
   boost::shared_ptr<Mantid::API::Grouping> groupingUsed;
 };
 }
-
-using namespace Muon;
 
 /**
 This is the main class for the MuonAnalysis interface
@@ -278,11 +271,11 @@ private:
   void inputFileChanged(const QStringList &filenames);
 
   /// Loads the given list of files
-  boost::shared_ptr<LoadResult> load(const QStringList &files) const;
+  boost::shared_ptr<Muon::LoadResult> load(const QStringList &files) const;
 
   /// Get grouping for the loaded workspace
-  boost::shared_ptr<GroupResult>
-  getGrouping(boost::shared_ptr<LoadResult> loadResult) const;
+  boost::shared_ptr<Muon::GroupResult>
+  getGrouping(boost::shared_ptr<Muon::LoadResult> loadResult) const;
 
   /// Set whether the loading buttons and MWRunFiles widget are enabled.
   void allowLoading(bool enabled);
@@ -294,8 +287,10 @@ private:
   void plotItem(ItemType itemType, int tableRow, PlotType plotType);
 
   /// Creates workspace ready for analysis and plotting
-  Workspace_sptr createAnalysisWorkspace(ItemType itemType, int tableRow,
-                                         PlotType type, bool isRaw = false);
+  Mantid::API::Workspace_sptr createAnalysisWorkspace(ItemType itemType,
+                                                      int tableRow,
+                                                      PlotType type,
+                                                      bool isRaw = false);
 
   /// Returns PlotType as chosen using given selector
   PlotType parsePlotType(QComboBox *selector);
@@ -333,18 +328,19 @@ private:
   std::string deadTimeFilename() const;
 
   /// Loads dead time table (group of tables) from the file.
-  Workspace_sptr loadDeadTimes(const std::string &filename) const;
+  Mantid::API::Workspace_sptr loadDeadTimes(const std::string &filename) const;
 
   /// Convert dead times workspace to table workspace
-  ITableWorkspace_sptr deadTimesToTable(const Workspace_sptr &deadTimes) const;
+  Mantid::API::ITableWorkspace_sptr
+  deadTimesToTable(const Mantid::API::Workspace_sptr &deadTimes) const;
 
   /// Gets table of dead time corrections from the loaded workspace
-  ITableWorkspace_sptr
-  getDeadTimeCorrection(boost::shared_ptr<LoadResult> loadResult) const;
+  Mantid::API::ITableWorkspace_sptr
+  getDeadTimeCorrection(boost::shared_ptr<Muon::LoadResult> loadResult) const;
 
   /// Creates and algorithm with all the properties set according to widget
   /// values on the interface
-  Algorithm_sptr createLoadAlgorithm();
+  Mantid::API::Algorithm_sptr createLoadAlgorithm();
 
   /// Plots specific WS spectrum (used by plotPair and plotGroup)
   void plotSpectrum(const QString &wsName, bool logScale = false);
@@ -430,7 +426,7 @@ private:
 
   /// Returns params string which can be passed to Rebin, according to what user
   /// specified
-  std::string rebinParams(Workspace_sptr wsForRebin);
+  std::string rebinParams(Mantid::API::Workspace_sptr wsForRebin);
 
   /// title of run
   std::string m_title;
@@ -485,14 +481,15 @@ private:
   void loadWidgetValue(QWidget *target, const QVariant &defaultValue);
 
   /// Groups the workspace
-  Workspace_sptr groupWorkspace(const std::string &wsName,
-                                const std::string &groupingName) const;
+  Mantid::API::Workspace_sptr
+  groupWorkspace(const std::string &wsName,
+                 const std::string &groupingName) const;
 
   /// Groups loaded workspace using information from Grouping Options tab
   void groupLoadedWorkspace();
 
   /// Parses grouping information from the UI table.
-  ITableWorkspace_sptr parseGrouping();
+  Mantid::API::ITableWorkspace_sptr parseGrouping();
 
   /// When no data loaded set various buttons etc to inactive
   void noDataAvailable();
@@ -530,13 +527,17 @@ private:
   size_t m_numPeriods;
 
   /// Grouping helper class
-  MuonGroupingHelper m_groupingHelper;
+  Muon::MuonGroupingHelper m_groupingHelper;
 
   /// Get period number string in summed set
   std::string getSummedPeriods() const;
 
   /// Get period number string in subtracted set
   std::string getSubtractedPeriods() const;
+
+  /// Cached value of config setting
+  std::string m_cachedPeakRadius;
+  static const std::string PEAK_RADIUS_CONFIG;
 };
 }
 }

@@ -23,6 +23,10 @@ Reflectometry Reduction Interface
 ISIS Reflectometry (Polref)
 ###########################
 
+- Interface now displays information in a tree where groups are parent items and runs are children. For more details, please check the updated documentation.
+- Global settings have been moved to a separate tab ("Settings")
+- Transfer progress bar no longer gives impression of running when clicked if no runs are selected
+
 ISIS Reflectometry
 ##################
 

@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -5,6 +6,8 @@
 using Mantid::Geometry::ICompAssembly;
 using Mantid::Geometry::IComponent;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(ICompAssembly)
 
 void export_ICompAssembly() {
   register_ptr_to_python<boost::shared_ptr<ICompAssembly>>();

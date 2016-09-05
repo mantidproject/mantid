@@ -12,6 +12,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h"
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces::Muon;
 

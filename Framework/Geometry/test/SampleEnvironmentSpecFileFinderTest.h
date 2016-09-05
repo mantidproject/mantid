@@ -85,7 +85,7 @@ public:
 
     SampleEnvironmentSpec_uptr spec;
     TS_ASSERT_THROWS_NOTHING(
-        spec = std::move(finder.find(m_facilityName, m_instName, m_envName)));
+        spec = finder.find(m_facilityName, m_instName, m_envName));
 
     // Does it look right
     TS_ASSERT_EQUALS(m_envName, spec->name());

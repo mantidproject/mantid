@@ -109,55 +109,6 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
       }
     }
 
-    // TODO: (Ticket #5774) Decide if we should do the same for output (see
-    // below) - Also do we need to do a similar thing for post-processing.
-
-    /*  Leaving the following code in for the moment - will be removed as part
-    of trac ticket #5774.
-
-          // Now look at the output workspace property
-          if (alg->existsProperty("OutputWorkspace"))
-          {
-              g_log.debug() << "Using OutputWorkspace as the output workspace
-    property name.\n";
-              alg->setPropertyValue("OutputWorkspace", outputName);
-          }
-          else
-          {
-              // Look for the first Workspace property that is marked OUTPUT.
-              std::vector<Property*> proplist = alg->getProperties();
-              g_log.debug() << "Processing algorithm (" << alg->name() << ") has
-    " << proplist.size() << " properties.\n";
-              bool outputPropertyWorkspaceFound = false;
-              for (size_t i=0; i<proplist.size(); ++i)
-              {
-                  Property * prop = proplist[i];
-                  if ((prop->direction() == 1) && (outputPropertyWorkspaceFound
-    == false))
-                  {
-                      g_log.information() << "*** " <<
-    outputPropertyWorkspaceFound << '\n';
-                      if (prop->type() == "MatrixWorkspace")
-                      {
-                          g_log.information() << "Using " << prop->name() << "
-    as the input property.\n";
-                          alg->setPropertyValue(prop->name(), outputName);
-                          outputPropertyWorkspaceFound = true;
-                      }
-                  }
-
-    //              g_log.debug() << "Propery #" << i << '\n';
-    //              g_log.debug() << "\tName: " << prop->name() << '\n';
-    //              g_log.debug() << "\tDirection: " << prop->direction() <<
-    '\n';
-    //              g_log.debug() << "\tType: " << prop->type() << '\n';
-    //              g_log.debug() << "\tType_Info: " << prop->type_info() <<
-    '\n';
-
-              }
-          }
-    */
-
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setChild(true);
     alg->execute();

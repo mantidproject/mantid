@@ -25,6 +25,8 @@ IndirectTransmission::IndirectTransmission(IndirectDataReduction *idrUI,
           SLOT(dataLoaded()));
   connect(m_uiForm.dsCanInput, SIGNAL(dataReady(QString)), this,
           SLOT(dataLoaded()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -48,10 +50,6 @@ void IndirectTransmission::run() {
   transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
 
   m_batchAlgoRunner->addAlgorithm(transAlg);
-
-  if (m_uiForm.ckSave->isChecked())
-    addSaveWorkspaceToQueue(outWsName);
-
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -103,9 +101,6 @@ void IndirectTransmission::transAlgDone(bool error) {
   QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
   QString outWsName = sampleWsName + "_trans";
 
-  if (m_uiForm.ckPlot->isChecked())
-    plotSpectrum(outWsName);
-
   WorkspaceGroup_sptr resultWsGroup =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
           outWsName.toStdString());
@@ -123,6 +118,10 @@ void IndirectTransmission::transAlgDone(bool error) {
   m_uiForm.ppPlot->addSpectrum(
       "Transmission", QString::fromStdString(resultWsNames[2]), 0, Qt::green);
   m_uiForm.ppPlot->resizeX();
+
+  // Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 void IndirectTransmission::instrumentSet() {
@@ -133,5 +132,24 @@ void IndirectTransmission::instrumentSet() {
   m_uiForm.dsCanInput->setInstrumentOverride(instDetails["instrument"]);
 }
 
+/**
+ * Handle saving of workspace
+ */
+void IndirectTransmission::saveClicked() {
+  QString outputWs = (m_uiForm.dsSampleInput->getCurrentDataName() + "_trans");
+
+  if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), false))
+    addSaveWorkspaceToQueue(outputWs);
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Handle mantid plotting
+ */
+void IndirectTransmission::plotClicked() {
+  QString outputWs = (m_uiForm.dsSampleInput->getCurrentDataName() + "_trans");
+  if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), true))
+    plotSpectrum(outputWs);
+}
 } // namespace CustomInterfaces
 } // namespace Mantid

@@ -117,7 +117,7 @@ std::unique_ptr<Kernel::Property> SequenceTypeHandler<ContainerType>::create(
 //-----------------------------------------------------------------------
 ///@cond
 #define INSTANTIATE(ElementType)                                               \
-  template DLLExport struct SequenceTypeHandler<std::vector<ElementType>>;
+  template struct DLLExport SequenceTypeHandler<std::vector<ElementType>>;
 
 INSTANTIATE(int)
 INSTANTIATE(long)

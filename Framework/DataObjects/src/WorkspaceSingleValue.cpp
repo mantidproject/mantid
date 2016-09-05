@@ -14,9 +14,9 @@ WorkspaceSingleValue::WorkspaceSingleValue(double value, double error)
     : API::MatrixWorkspace() {
   // Set the "histogram" to the single value
   data.dataX().resize(1, 0.0);
-  data.dataY().resize(1, value);
-  data.dataE().resize(1, error);
-  data.dataDx().resize(1, 0.0);
+  data.setCounts(1, value);
+  data.setCountStandardDeviations(1, error);
+  data.setPointStandardDeviations(1, 0.0);
 
   setDistribution(true);
 }
@@ -73,8 +73,8 @@ size_t WorkspaceSingleValue::getNumDims() const { return 0; }
 
 ///\cond TEMPLATE
 
-template DLLExport class Mantid::API::WorkspaceProperty<
-    Mantid::DataObjects::WorkspaceSingleValue>;
+template class DLLExport
+    Mantid::API::WorkspaceProperty<Mantid::DataObjects::WorkspaceSingleValue>;
 
 namespace Mantid {
 namespace Kernel {

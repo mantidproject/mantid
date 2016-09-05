@@ -5,12 +5,11 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="TOPAZ" valid-from   ="2016-04-06 16:24:01"
-              valid-to     ="2100-12-31 23:59:59"
-                     last-modified="2016-04-06 13:45:00">
+              valid-to     ="2016-07-13 23:59:59"
+                     last-modified="2016-07-16 18:35:00">
 
   <!--Created by Vickie Lynch-->
   <!--Modified by Vickie Lynch using the TOPAZ.py script from the Translation Service calibration/geometry/ code. -->
-  <!--Modified valid-to by A.Savici-->
   <!--DEFAULTS-->
   <defaults>
     <length unit="metre"/>

@@ -4,9 +4,7 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmPropertiesWidget.h"
 
-using namespace MantidQt::API;
-
-class SmoothNeighboursDialog : public AlgorithmDialog {
+class SmoothNeighboursDialog : public MantidQt::API::AlgorithmDialog {
   Q_OBJECT
 
 public:
@@ -33,7 +31,7 @@ private:
   void initLayout() override;
 
   /// Widget for all the PropertyWidgets
-  AlgorithmPropertiesWidget *m_propertiesWidget;
+  MantidQt::API::AlgorithmPropertiesWidget *m_propertiesWidget;
 
   /// Main layout for the dialog
   QVBoxLayout *m_dialogLayout;

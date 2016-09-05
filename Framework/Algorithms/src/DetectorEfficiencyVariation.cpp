@@ -230,18 +230,18 @@ int DetectorEfficiencyVariation::doDetectorTests(
         continue;
       if (instrument->isDetectorMasked(detids)) {
         // Ensure it is masked on the output
-        maskWS->dataY(i)[0] = deadValue;
+        maskWS->mutableY(i)[0] = deadValue;
         continue;
       }
     }
 
-    const double signal1 = counts1->readY(i)[0];
-    const double signal2 = counts2->readY(i)[0];
+    const double signal1 = counts1->y(i)[0];
+    const double signal2 = counts2->y(i)[0];
 
     // Mask out NaN and infinite
     if (boost::math::isinf(signal1) || boost::math::isnan(signal1) ||
         boost::math::isinf(signal2) || boost::math::isnan(signal2)) {
-      maskWS->dataY(i)[0] = deadValue;
+      maskWS->mutableY(i)[0] = deadValue;
       PARALLEL_ATOMIC
       ++numFailed;
       continue;
@@ -250,7 +250,7 @@ int DetectorEfficiencyVariation::doDetectorTests(
     // Check the ratio is within the given range
     const double ratio = signal1 / signal2;
     if (ratio < lowest || ratio > largest) {
-      maskWS->dataY(i)[0] = deadValue;
+      maskWS->mutableY(i)[0] = deadValue;
       PARALLEL_ATOMIC
       ++numFailed;
     }

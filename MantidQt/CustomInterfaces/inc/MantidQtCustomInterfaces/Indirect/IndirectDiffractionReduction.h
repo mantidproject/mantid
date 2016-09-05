@@ -47,6 +47,7 @@ private:
 
   bool validateRebin();
   bool validateVanCal();
+  bool validateCalOnly();
 
   Mantid::API::MatrixWorkspace_sptr loadInstrument(std::string instrumentName,
                                                    std::string reflection = "");

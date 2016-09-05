@@ -119,7 +119,6 @@ void FitParameter::printSelf(std::ostream &os) const {
      << m_constraintPenaltyFactor << " , " << m_tie << " , " << m_formula
      << " , " << m_formulaUnit << " , " << m_resultUnit << " , "
      << m_lookUpTable;
-  return;
 }
 
 /**

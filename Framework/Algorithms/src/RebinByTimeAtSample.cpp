@@ -58,6 +58,8 @@ void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS,
 
   TimeAtSampleStrategyElastic strategy(inWS);
 
+  auto x = Kernel::make_cow<HistogramData::HistogramX>(OutXValues_scaled);
+
   // Go through all the histograms and set the data
   PARALLEL_FOR2(inWS, outputWS)
   for (int i = 0; i < histnumber; ++i) {
@@ -74,7 +76,7 @@ void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS,
                                      tofOffset);
 
     // Set the X axis for each output histogram
-    outputWS->setX(i, OutXValues_scaled);
+    outputWS->setX(i, x);
 
     // Copy the data over.
     outputWS->dataY(i).assign(y_data.begin(), y_data.end());
