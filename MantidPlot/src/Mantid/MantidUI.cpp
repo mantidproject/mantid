@@ -770,6 +770,8 @@ void MantidUI::showVatesSimpleInterface() {
         m_vatesSubWindow->setWidget(vsui);
         m_vatesSubWindow->widget()->show();
         vsui->renderWorkspace(wsName, wsType, instrumentName);
+        // Keep and handle to the window for later serialisation
+        appWindow()->addSerialisableWindow(vsui);
       } else {
         delete m_vatesSubWindow;
         m_vatesSubWindow = NULL;

@@ -5,20 +5,21 @@
 #include <boost/shared_ptr.hpp>
 
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidKernel/DynamicFactory.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/MdConstants.h"
 #include "MantidQtAPI/MdSettings.h"
-#include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorMapEditorPanel.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
+#include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h"
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
@@ -921,6 +922,29 @@ void MdViewerWidget::setupPluginMode() {
   this->setupUiAndConnections();
   this->createMenus();
   this->setupMainView();
+}
+
+/**
+ * Load the state of the Vates window from a Mantid project file
+ *
+ * @param lines :: a string representing the state of the Vates window
+ */
+void MdViewerWidget::loadFromProject(const std::string &lines) {}
+
+/**
+ * Save the state of the Vates window to a Mantid project file
+ *
+ * @param app :: handle to the main application window instance
+ * @return a string representing the current state of the window
+ */
+std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
+  UNUSED_ARG(app);
+  TSVSerialiser tsv, contents;
+
+  contents.writeLine("Workspace") << this->currentView->getWorkspaceName();
+  tsv.writeSection("vates", contents.outputLines());
+
+  return tsv.outputLines();
 }
 
 /**
