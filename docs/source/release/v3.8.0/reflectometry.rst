@@ -8,10 +8,13 @@ Reflectometry Changes
 ReflectometryReductionOne
 -------------------------
 
+The default value of the CorrectDetectorPositions to False by request of scientists `#16650 <https://github.com/mantidproject/mantid/pull/16650>`__
+
 ReflectometryReductionOneAuto
 -----------------------------
 
-The scaling step has now been added to the Workflow diagram of ReflectometryReductionOneAuto `#16671 <https://github.com/mantidproject/mantid/pull/16671>`__   
+- The default value of the CorrectDetectorPositions to False by request of scientists `#16650 <https://github.com/mantidproject/mantid/pull/16650>`__ 
+- The scaling step has now been added to the Workflow diagram of ReflectometryReductionOneAuto `#16671 <https://github.com/mantidproject/mantid/pull/16671>`__   
 
 ConvertToReflectometryQ
 -----------------------

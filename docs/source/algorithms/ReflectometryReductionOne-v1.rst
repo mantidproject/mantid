@@ -216,7 +216,7 @@ Usage
    run = Load(Filename='INTER00013460.nxs')
    # Basic reduction with no transmission run
    IvsQ, IvsLam, thetaOut = ReflectometryReductionOne(InputWorkspace=run, ThetaIn=0.7, I0MonitorIndex=2, ProcessingInstructions='3:4',
-   WavelengthMin=1.0, WavelengthMax=17.0, WavelengthStep=0.05,
+   WavelengthMin=1.0, WavelengthMax=17.0, WavelengthStep=0.05, CorrectDetectorPositions=True,
    MonitorBackgroundWavelengthMin=15.0, MonitorBackgroundWavelengthMax=17.0,
    MonitorIntegrationWavelengthMin=4.0, MonitorIntegrationWavelengthMax=10.0 )
 

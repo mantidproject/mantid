@@ -218,6 +218,7 @@ public:
     alg->setProperty("InputWorkspace", inWS);
     alg->setProperty("ScaleFactor", 1.0);
     alg->setProperty("ThetaIn", 1.5);
+    alg->setProperty("CorrectDetectorPositions", true);
     alg->setProperty("OutputWorkspace", "Test");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     MatrixWorkspace_sptr nonScaledWS = alg->getProperty("OutputWorkspace");
