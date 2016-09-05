@@ -11,7 +11,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorVectorString.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
@@ -63,6 +62,24 @@ private:
     whitelist.addElement("Scale", "ScaleFactor", "");
     whitelist.addElement("Options", "Options", "");
     return whitelist;
+  }
+
+  // Creates reflectometry data
+  std::map<int, std::map<int, std::vector<std::string>>> reflData() {
+
+    std::map<int, std::map<int, std::vector<std::string>>> data;
+    std::vector<std::string> vecData;
+
+    vecData = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", ""};
+    data[0][0] = vecData;
+    vecData = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
+    data[0][1] = vecData;
+    vecData = {"24681", "0.5", "", "0.1", "1.6", "0.04", "1", ""};
+    data[1][0] = vecData;
+    vecData = {"24682", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
+    data[1][1] = vecData;
+
+    return data;
   }
 
   // Creates a reflectometry table ws
@@ -120,15 +137,8 @@ private:
     return ws;
   }
 
-  // Creates a reflectometry tree model
-  QDataProcessorTwoLevelTreeModel_sptr reflModel() {
-    return boost::shared_ptr<QDataProcessorTwoLevelTreeModel>(
-        new QDataProcessorTwoLevelTreeModel(reflWorkspace(), reflWhitelist()));
-  }
-
   std::string m_wsName;
   std::string m_instrument;
-  QDataProcessorTwoLevelTreeModel_sptr m_model;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -146,19 +156,18 @@ public:
   void setUp() override {
     m_wsName = "TESTWORKSPACE";
     m_instrument = "INSTRUMENT";
-    m_model = reflModel();
   }
 
   void testGenerateNotebookFirstLines() {
 
     auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
-        m_wsName, m_model, m_instrument, reflWhitelist(),
+        m_wsName, m_instrument, reflWhitelist(),
         std::map<std::string, DataProcessorPreprocessingAlgorithm>(),
         reflProcessor(), DataProcessorPostprocessingAlgorithm(),
         std::map<std::string, std::string>(), "", "");
 
     std::string generatedNotebook = notebook->generateNotebook(
-        std::set<int>(), std::map<int, std::set<int>>());
+        std::map<int, std::map<int, std::vector<std::string>>>());
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
@@ -212,7 +221,7 @@ public:
     std::map<int, std::set<int>> rows;
     rows[1].insert(1);
 
-    std::string output = tableString(reflModel(), reflWhitelist(), rows);
+    std::string output = tableString(reflData(), reflWhitelist());
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, output, boost::is_any_of("\n"));
@@ -238,7 +247,7 @@ public:
     rows[0].insert(1);
     rows[1].insert(0);
     rows[1].insert(1);
-    std::string output = tableString(m_model, reflWhitelist(), rows);
+    std::string output = tableString(reflData(), reflWhitelist());
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, output, boost::is_any_of("\n"));
@@ -331,8 +340,11 @@ public:
     std::map<std::string, std::string> userPreProcessingOptions = {
         {"Run(s)", ""}, {"Transmission Run(s)", ""}};
 
+    const std::vector<std::string> data = {"12346", "1.5",  "",  "1.4",
+                                                "2.9",   "0.04", "1", ""};
+
     boost::tuple<std::string, std::string> output = reduceRowString(
-        0, 1, m_instrument, m_model, reflWhitelist(), reflPreprocessMap("TOF_"),
+        data, m_instrument, reflWhitelist(), reflPreprocessMap("TOF_"),
         reflProcessor(), userPreProcessingOptions, "");
 
     const std::string result[] = {
@@ -361,19 +373,8 @@ public:
     DataProcessorWhiteList whitelist;
     whitelist.addElement("Run", "InputWorkspace", "", true);
     whitelist.addElement("Angle", "ThetaIn", "", true, "angle_");
-    // Create a table workspace
-    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-    ws->addColumn("str", "Group");
-    ws->addColumn("str", "Run");
-    ws->addColumn("str", "Angle");
-    TableRow row = ws->appendRow();
-    row << "0"
-        << "1000+1001"
-        << "0.5";
-    // Create the model
-    auto model = boost::shared_ptr<QDataProcessorTwoLevelTreeModel>(
-        new QDataProcessorTwoLevelTreeModel(ws, whitelist));
-    // Create a pre-process map
+
+	// Create a pre-process map
     std::map<std::string, DataProcessorPreprocessingAlgorithm> preprocessMap = {
         {"Run", DataProcessorPreprocessingAlgorithm("Plus", "RUN_",
                                                     std::set<std::string>())}};
@@ -381,8 +382,11 @@ public:
     std::map<std::string, std::string> userPreProcessingOptions = {
         {"Run", "Property=prop"}};
 
+    const std::vector<std::string> data = {"1000", "0.5",  "",  "1.4",
+                                           "2.9",  "0.04", "1", ""};
+
     boost::tuple<std::string, std::string> output =
-        reduceRowString(0, 0, "INST", model, whitelist, preprocessMap,
+        reduceRowString(data, "INST", whitelist, preprocessMap,
                         reflProcessor(), userPreProcessingOptions, "");
 
     const std::string result[] = {
@@ -415,9 +419,12 @@ public:
         emptyPreProcessMap;
     std::map<std::string, std::string> emptyPreProcessingOptions;
 
-    boost::tuple<std::string, std::string> output = reduceRowString(
-        0, 1, m_instrument, m_model, reflWhitelist(), emptyPreProcessMap,
-        reflProcessor(), emptyPreProcessingOptions, "");
+    const std::vector<std::string> data = {"12346", "1.5",  "",  "1.4",
+                                           "2.9",   "0.04", "1", ""};
+
+    boost::tuple<std::string, std::string> output =
+        reduceRowString(data, m_instrument, reflWhitelist(), emptyPreProcessMap,
+                        reflProcessor(), emptyPreProcessingOptions, "");
 
     const std::string result[] = {
         "IvsQ_TOF_12346, IvsLam_TOF_12346, _ = "
@@ -448,24 +455,10 @@ public:
     whitelist.addElement("Angle", "", "", false, "");
     whitelist.addElement("Trans", "", "", false, "");
 
-    // Create a table ws
-    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-    ws->addColumn("str", "Group");
-    ws->addColumn("str", "Run");
-    ws->addColumn("str", "Angle");
-    ws->addColumn("str", "Trans");
-    TableRow row = ws->appendRow();
-    row << "0"
-        << "1000,1001"
-        << "0.5"
-        << "2000,2001";
+    const std::vector<std::string> data = {
+        "1000,1001", "0.5", "2000,2001", "1.4", "2.9", "0.04", "1", ""};
 
-    // Create a tree model
-    QDataProcessorTwoLevelTreeModel_sptr model =
-        boost::shared_ptr<QDataProcessorTwoLevelTreeModel>(
-            new QDataProcessorTwoLevelTreeModel(ws, whitelist));
-
-    std::string name = getReducedWorkspaceName(0, 0, model, whitelist, "IvsQ_");
+    std::string name = getReducedWorkspaceName(data, whitelist, "IvsQ_");
     TS_ASSERT_EQUALS(name, "IvsQ_run_1000_1001")
   }
 
@@ -477,25 +470,10 @@ public:
     whitelist.addElement("Angle", "", "", false, "");
     whitelist.addElement("Trans", "", "", true, "trans_");
 
-    // Create a table ws
-    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-    ws->addColumn("str", "Group");
-    ws->addColumn("str", "Run");
-    ws->addColumn("str", "Angle");
-    ws->addColumn("str", "Trans");
-    TableRow row = ws->appendRow();
-    row << "0"
-        << "1000,1001"
-        << "0.5"
-        << "2000,2001";
+    const std::vector<std::string> data = {
+        "1000,1001", "0.5", "2000,2001", "1.4", "2.9", "0.04", "1", ""};
 
-    // Create a tree model
-    QDataProcessorTwoLevelTreeModel_sptr model =
-        boost::shared_ptr<QDataProcessorTwoLevelTreeModel>(
-            new QDataProcessorTwoLevelTreeModel(ws, whitelist));
-
-    std::string name =
-        getReducedWorkspaceName(0, 0, model, whitelist, "Prefix_");
+    std::string name = getReducedWorkspaceName(data, whitelist, "Prefix_");
     TS_ASSERT_EQUALS(name, "Prefix_run_1000_1001_trans_2000_2001")
   }
 
@@ -507,25 +485,10 @@ public:
     whitelist.addElement("Angle", "", "", false, "");
     whitelist.addElement("Trans", "", "", true, "");
 
-    // Create a table ws
-    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-    ws->addColumn("str", "Group");
-    ws->addColumn("str", "Run");
-    ws->addColumn("str", "Angle");
-    ws->addColumn("str", "Trans");
-    TableRow row = ws->appendRow();
-    row << "0"
-        << "1000,1001"
-        << "0.5"
-        << "2000+2001";
+    const std::vector<std::string> data = {
+        "1000,1001", "0.5", "2000+2001", "1.4", "2.9", "0.04", "1", ""};
 
-    // Create a tree model
-    QDataProcessorTwoLevelTreeModel_sptr model =
-        boost::shared_ptr<QDataProcessorTwoLevelTreeModel>(
-            new QDataProcessorTwoLevelTreeModel(ws, whitelist));
-
-    std::string name =
-        getReducedWorkspaceName(0, 0, model, whitelist, "Prefix_");
+    std::string name = getReducedWorkspaceName(data, whitelist, "Prefix_");
     TS_ASSERT_EQUALS(name, "Prefix_2000_2001")
   }
 
@@ -533,13 +496,13 @@ public:
     std::string userOptions = "Params = '0.1, -0.04, 2.9', StartOverlaps = "
                               "'1.4, 0.1, 1.4', EndOverlaps = '1.6, 2.9, 1.6'";
 
-    // All rows in first group
+    std::vector<std::string> rowData0 = {"12345", "", "", "", "", "", "", ""};
+    std::vector<std::string> rowData1 = {"12346", "", "", "", "", "", "", ""};
+    std::map<int, std::vector<std::string>> groupData = {{0, rowData0},
+                                                         {1, rowData1}};
 
-    std::set<int> rows;
-    rows.insert(0);
-    rows.insert(1);
     boost::tuple<std::string, std::string> output = postprocessGroupString(
-        0, rows, m_model, reflWhitelist(), reflProcessor(),
+        groupData, reflWhitelist(), reflProcessor(),
         DataProcessorPostprocessingAlgorithm(), userOptions);
 
     std::vector<std::string> result = {
@@ -562,12 +525,12 @@ public:
 
     // All rows in second group
 
-    rows.clear();
-    rows.insert(0);
-    rows.insert(1);
-    output = postprocessGroupString(
-        1, rows, m_model, reflWhitelist(), reflProcessor(),
-        DataProcessorPostprocessingAlgorithm(), userOptions);
+    rowData0 = {"24681", "", "", "", "", "", "", ""};
+    rowData1 = {"24682", "", "", "", "", "", "", ""};
+    groupData = {{0, rowData0}, {1, rowData1}};
+    output = postprocessGroupString(groupData, reflWhitelist(), reflProcessor(),
+                                    DataProcessorPostprocessingAlgorithm(),
+                                    userOptions);
 
     result = {"#Post-process workspaces",
               "IvsQ_TOF_24681_TOF_24682, _ = "
@@ -703,7 +666,6 @@ public:
     // A reflectometry case
 
     auto whitelist = reflWhitelist();
-    auto model = reflModel();
     auto preprocessMap = reflPreprocessMap();
     auto processor = reflProcessor();
     auto postProcessor = DataProcessorPostprocessingAlgorithm();
@@ -713,22 +675,23 @@ public:
     auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
     auto postprocessingOptions = "Params=0.04";
 
+    std::vector<std::string> rowData0 = {"12345", "0.5",  "",  "0.1",
+                                         "1.6",   "0.04", "1", ""};
+    std::vector<std::string> rowData1 = {"12346", "1.5",  "",  "1.4",
+                                         "2.9",   "0.04", "1", ""};
+    std::vector<std::string> rowData2 = {"24681", "0.5",  "",  "0.1",
+                                         "1.6",   "0.04", "1", ""};
+    std::vector<std::string> rowData3 = {"24682", "1.5",  "",  "1.4",
+                                         "2.9",   "0.04", "1", ""};
+	std::map<int, std::map<int, std::vector<std::string>>> treeData = {
+		{0, {{0, rowData0}, {1, rowData1}}}, {1, {{0, rowData2}, {1, rowData3}}} };
+
     auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
-        "TableName", model, "INTER", whitelist, preprocessMap, processor,
+        "TableName", "INTER", whitelist, preprocessMap, processor,
         postProcessor, preprocessingOptions, processingOptions,
         postprocessingOptions);
 
-    // Both groups, both rows
-    std::set<int> groups;
-    groups.insert(0);
-    groups.insert(1);
-    std::map<int, std::set<int>> rows;
-    rows[0].insert(0);
-    rows[0].insert(1);
-    rows[1].insert(0);
-    rows[1].insert(1);
-
-    std::string generatedNotebook = notebook->generateNotebook(groups, rows);
+    std::string generatedNotebook = notebook->generateNotebook(treeData);
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
@@ -814,7 +777,6 @@ public:
   void testGenerateNotebookReflectometryNoPostProcessing() {
 
     auto whitelist = reflWhitelist();
-    auto model = reflModel();
     auto preprocessMap = reflPreprocessMap();
     auto processor = reflProcessor();
     auto postProcessor = DataProcessorPostprocessingAlgorithm();
@@ -825,7 +787,7 @@ public:
     auto postprocessingOptions = "Params=0.04";
 
     auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
-        "TableName", model, "INTER", whitelist, preprocessMap, processor,
+        "TableName", "INTER", whitelist, preprocessMap, processor,
         postProcessor, preprocessingOptions, processingOptions,
         postprocessingOptions);
 
@@ -835,7 +797,14 @@ public:
     rows[0].insert(0);
     rows[0].insert(1);
 
-    std::string generatedNotebook = notebook->generateNotebook(groups, rows);
+    std::vector<std::string> rowData0 = {"12345", "0.5",  "",  "0.1",
+                                         "1.6",   "0.04", "1", ""};
+    std::vector<std::string> rowData1 = {"12346", "1.5",  "",  "1.4",
+                                         "2.9",   "0.04", "1", ""};
+    std::map<int, std::map<int, std::vector<std::string>>> treeData = {
+        {0, {{0, rowData0}, {1, rowData1}}}};
+
+    std::string generatedNotebook = notebook->generateNotebook(treeData);
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));

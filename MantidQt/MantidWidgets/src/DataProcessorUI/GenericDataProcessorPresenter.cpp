@@ -198,19 +198,17 @@ void GenericDataProcessorPresenter::process() {
 
   // If "Output Notebook" checkbox is checked then create an ipython notebook
   if (m_view->getEnableNotebook()) {
-    // TODO: fix notebook
-    saveNotebook(std::set<int>(), std::map<int, std::set<int>>());
+    saveNotebook(items);
   }
 }
 
 /**
 Display a dialog to choose save location for notebook, then save the notebook
 there
-@param groups : groups that need post-processing
-@param rows : rows to reduce
+@param data : the processed data
 */
 void GenericDataProcessorPresenter::saveNotebook(
-    const std::set<int> &groups, const std::map<int, std::set<int>> &rows) {
+    const std::map<int, std::map<int, std::vector<std::string>>> &data) {
 
   std::string filename = m_view->requestNotebookPath();
   if (filename == "") {
@@ -227,17 +225,16 @@ void GenericDataProcessorPresenter::saveNotebook(
   const std::string postprocessingOptions =
       m_mainPresenter->getPostprocessingOptions();
 
-  // TODO: fix this
-  //auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
-  //    m_wsName, m_model, m_view->getProcessInstrument(), m_whitelist,
-  //    m_preprocessMap, m_processor, m_postprocessor, preprocessingOptionsMap,
-  //    processingOptions, postprocessingOptions);
-  //std::string generatedNotebook = notebook->generateNotebook(groups, rows);
+  auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
+      m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessMap,
+      m_processor, m_postprocessor, preprocessingOptionsMap, processingOptions,
+      postprocessingOptions);
+  std::string generatedNotebook = notebook->generateNotebook(data);
 
-  //std::ofstream file(filename.c_str(), std::ofstream::trunc);
-  //file << generatedNotebook;
-  //file.flush();
-  //file.close();
+  std::ofstream file(filename.c_str(), std::ofstream::trunc);
+  file << generatedNotebook;
+  file.flush();
+  file.close();
 }
 
 /**
