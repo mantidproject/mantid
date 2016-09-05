@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/Q1D2.h"
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidAPI/Axis.h"
@@ -8,6 +5,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Histogram1D.h"
@@ -146,28 +144,19 @@ void Q1D2::exec() {
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec + 1);
 
+  const auto &spectrumInfo = m_dataWS->spectrumInfo();
   PARALLEL_FOR3(m_dataWS, outputWS, pixelAdj)
   for (int i = 0; i < numSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    // Get the pixel relating to this spectrum
-    IDetector_const_sptr det;
-    try {
-      det = m_dataWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
+    if(!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i << " (SpectrumIndex = "
                       << m_dataWS->getSpectrum(i).getSpectrumNo()
                       << ") has no detector assigned to it - discarding\n";
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found or if detector is masked shouldn't be included skip
-    // onto the next spectrum
-    if (!det || det->isMonitor() || det->isMasked()) {
       continue;
     }
+    // Skip if we have a monitor or if the detector is masked.
+    if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
+      continue;
 
     // get the bins that are included inside the RadiusCut/WaveCutcut off, those
     // to calculate for
