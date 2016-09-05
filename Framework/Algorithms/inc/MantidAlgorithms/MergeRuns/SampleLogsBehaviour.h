@@ -36,34 +36,51 @@ class MANTID_ALGORITHMS_DLL SampleLogsBehaviour {
 public:
   enum MergeLogType { time_series, list, warn, fail };
 
+  static const std::string TIME_SERIES_MERGE;
+  static const std::string LIST_MERGE;
+  static const std::string WARN_MERGE;
+  static const std::string FAIL_MERGE;
+  static const std::string WARN_MERGE_TOLERANCES;
+  static const std::string FAIL_MERGE_TOLERANCES;
+
   static const std::string TIME_SERIES_SUFFIX;
   static const std::string LIST_SUFFIX;
 
-  typedef struct
-  {
+  typedef struct {
     MergeLogType type;
     Kernel::Property *property;
     double tolerance;
     bool isNumeric;
   } SampleLogBehaviour;
 
-  SampleLogsBehaviour(const API::MatrixWorkspace_sptr &ws, Kernel::Logger &logger, const std::string sampleLogsTimeSeries, const std::string sampleLogsList, const std::string sampleLogsWarn, const std::string sampleLogsWarnTolerances, const std::string sampleLogsFail, const std::string sampleLogsFailTolerances);
+  SampleLogsBehaviour(const API::MatrixWorkspace_sptr &ws,
+                      Kernel::Logger &logger,
+                      const std::string sampleLogsTimeSeries,
+                      const std::string sampleLogsList,
+                      const std::string sampleLogsWarn,
+                      const std::string sampleLogsWarnTolerances,
+                      const std::string sampleLogsFail,
+                      const std::string sampleLogsFailTolerances);
   Kernel::Logger &m_logger;
 
   typedef std::map<const std::string, SampleLogBehaviour> SampleLogsMap;
   SampleLogsMap m_logMap;
 
   /// Create and update sample logs according to instrument parameters
-  void createSampleLogsMapsFromInstrumentParams(SampleLogsMap &instrumentMap, const API::MatrixWorkspace_sptr &ws);
+  void
+  createSampleLogsMapsFromInstrumentParams(SampleLogsMap &instrumentMap,
+                                           const API::MatrixWorkspace_sptr &ws);
   void calculateUpdatedSampleLogs(const API::MatrixWorkspace_sptr &ws,
                                   const API::MatrixWorkspace_sptr &outWS);
   void setUpdatedSampleLogs(const API::MatrixWorkspace_sptr &ws);
   void resetSampleLogs(const API::MatrixWorkspace_sptr &ws);
 
 private:
-  void updateSampleMap(SampleLogsMap &map, const MergeLogType &, const std::string &params,
-                     const API::MatrixWorkspace_sptr &ws,
-                     const std::string paramsTolerances = "", const bool skipIfInPrimaryMap = false);
+  void updateSampleMap(SampleLogsMap &map, const MergeLogType &,
+                       const std::string &params,
+                       const API::MatrixWorkspace_sptr &ws,
+                       const std::string paramsTolerances = "",
+                       const bool skipIfInPrimaryMap = false);
 };
 
 } // namespace Algorithms

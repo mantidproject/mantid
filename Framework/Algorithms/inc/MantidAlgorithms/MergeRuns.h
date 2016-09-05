@@ -155,7 +155,6 @@ private:
   std::list<API::MatrixWorkspace_sptr> m_inMatrixWS;
   /// Addition tables for event workspaces
   std::vector<boost::shared_ptr<AdditionTable>> m_tables;
-
 };
 
 } // namespace Algorithm
