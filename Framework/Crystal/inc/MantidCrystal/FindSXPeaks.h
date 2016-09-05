@@ -23,12 +23,14 @@ public:
   @param spectral : contributing spectra
   @param Ltot : detector-sample absolute distance
   @param detectorId : id of the contributing detector
+  @param inst: geometry of the instrument
   */
   SXPeak(double t, double th2, double phi, double intensity,
          const std::vector<int> &spectral, double Ltot,
-         Mantid::detid_t detectorId)
+         Mantid::detid_t detectorId,
+         Mantid::Geometry::Instrument_const_sptr inst)
       : _t(t), _th2(th2), _phi(phi), _intensity(intensity), _Ltot(Ltot),
-        _detectorId(detectorId) {
+        _detectorId(detectorId), _inst(inst) {
     // Sanity checks
     if (intensity < 0) {
       throw std::invalid_argument("SXPeak: Cannot have an intensity < 0");
@@ -67,20 +69,29 @@ public:
   @return q vector
   */
   Mantid::Kernel::V3D getQ() const {
-    double Qx = -sin(_th2) * cos(_phi);
-    double Qy = -sin(_th2) * sin(_phi);
-    double Qz = 1.0 - cos(_th2);
-    // Neutron velocity vi ( speed in m/s )
+    auto samplePos = _inst->getSample()->getPos();
+    auto sourcePos = _inst->getSource()->getPos();
+    auto detPos = _inst->getDetector(_detectorId)->getPos();
+
+    // Normalized beam direction
+    auto beamDir = samplePos - sourcePos;
+    beamDir /= beamDir.norm();
+    // Normalized detector direction
+    auto detDir = (detPos - samplePos);
+    detDir /= detDir.norm();
+
     double vi = _Ltot / (_t * 1e-6);
-    // wavelength = h / mv
-    double wi = PhysicalConstants::h / (PhysicalConstants::NeutronMass * vi);
+    // wavenumber = h_bar / mv
+    double wi =
+        PhysicalConstants::h_bar / (PhysicalConstants::NeutronMass * vi);
     // in angstroms
     wi *= 1e10;
-    // wavevector=1/wavelength
+    // wavevector=1/wavenumber = 2pi/wavelength
     double wvi = 1.0 / wi;
-    // Scale the scattered direction by the wavevector
-    return Mantid::Kernel::V3D(Qx * wvi, Qy * wvi, Qz * wvi);
+    // Now calculate the wavevector of the scattered neutron
+    return (beamDir - detDir) * wvi;
   }
+
   /**
   Operator addition overload
   @param rhs : Right hand slide peak for addition.
@@ -140,6 +151,7 @@ private:
   Mantid::detid_t _detectorId;
   /// Number of contributing pixels
   int npixels;
+  Mantid::Geometry::Instrument_const_sptr _inst;
 };
 
 typedef std::vector<SXPeak> peakvector;
