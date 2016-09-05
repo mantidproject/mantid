@@ -135,7 +135,7 @@ public:
 
   void testPassesOnNonExistingFiles() {
     std::vector<std::string> vec{"foo"};
-    MultiFileValidator file_val(vec,false);
+    MultiFileValidator file_val(vec, false);
     std::vector<std::vector<std::string>> file{{"myJunkFile.foo"}};
     TS_ASSERT(file_val.isValid(file).empty());
   }
