@@ -455,17 +455,26 @@ SelectedData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
     }
 
   } else {
+    // They have selected some rows but no groups
 
-    // They have selected some rows but no groups. This means that rows will not
-    // be post-processed
+    for (const auto &item : rows) {
 
-    if (options["WarnProcessPartialGroup"].toBool() && prompt) {
-      std::stringstream err;
-      err << "Some of the rows you have selected will not be fully "
-             "processed.";
-      err << " Are you sure you want to continue?";
-      if (!m_presenter->askUserYesNo(err.str(), "Continue Processing?"))
-        return selectedData;
+      int group = item.first;
+      auto rowSet = item.second;
+
+      if (rowSet.size() != numRowsInGroup(group)) {
+        // Some groups will not be fully processed
+
+        if (options["WarnProcessPartialGroup"].toBool() && prompt) {
+          std::stringstream err;
+          err << "Some groups will not be fully processed.";
+          err << " Are you sure you want to continue?";
+          if (!m_presenter->askUserYesNo(err.str(), "Continue Processing?"))
+            return selectedData;
+          else
+            break;
+        }
+      }
     }
   }
 
