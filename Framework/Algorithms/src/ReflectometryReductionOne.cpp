@@ -297,27 +297,15 @@ std::map<std::string, std::string> ReflectometryReductionOne::validateInputs() {
         "Detector Efficiency Correction "
         "workspace x-units must be in wavelength";
   } else if (decWS->getNumberHistograms() > 1 &&
-             decWS->getNumberHistograms() < runWS->getNumberHistograms()) {
+             decWS->getNumberHistograms() != runWS->getNumberHistograms()) {
     result["DetectorEfficiencyCorrection"] =
         "The number of spectra in the "
         "Detector Efficiency Correction workspace must either be 1 or equal to "
         "the number of spectra in the input workspace";
-  } else {
-    double firstVal = decWS->y(0)[0];
-    if (firstVal == 0) {
-      result["DetectorEfficiencyCorrection"] =
-          "Detector Efficiency Correction "
-          "workspace cannot contain any zero values.";
-    } else {
-      for (size_t i = 1; i < decWS->getNumberHistograms(); i++) {
-        if (decWS->y(i)[0] != firstVal) {
-          result["DetectorEfficiencyCorrection"] =
-              "All values in the Detector "
-              "Efficiciency Correction Workspace must be equal";
-          break;
-        }
-      }
-    }
+  } else if (decWS->blocksize() > 1) {
+    result["DetectorEfficiencyCorrection"] =
+        "Each spectra in Detector Efficiency Correction workspace must hold "
+        "only one value each";
   }
 
   return result;

@@ -58,9 +58,8 @@ public:
   MatrixWorkspace_sptr m_transWorkspace1;
   MatrixWorkspace_sptr m_transWorkspace2;
   MatrixWorkspace_sptr m_decWorkspaceTOF;
-  MatrixWorkspace_sptr m_decWorkspaceZero;
-  MatrixWorkspace_sptr m_decWorkspaceNoZero;
-  MatrixWorkspace_sptr m_decWorkspaceMixed;
+  MatrixWorkspace_sptr m_decWorkspaceWrongNumSpectra;
+  MatrixWorkspace_sptr m_decWorkspaceWrongNumValues;
   WorkspaceGroup_sptr m_multiDetectorWorkspace;
   const std::string outWSQName;
   const std::string outWSLamName;
@@ -75,11 +74,9 @@ public:
     MantidVec xData(4, 0);
     MantidVec yData(3, 0);
     MantidVec xDecData(3, 0);
-    MantidVec yDataNoZero(3, 1);
-    MantidVec xDataMixed(5, 1);
-    MantidVec yDataMixed = {1, 1, 2, 2, 1};
-    MantidVec xData_2 = {1, 2, 3, 4, 5};
-    MantidVec yData_2 = {2, 2, 2, 2, 2};
+    MantidVec yDecData(3, 1);
+    MantidVec xDecDataDouble(10, 0);
+    MantidVec yDecDataDouble(10, 1);
 
     auto createWorkspace =
         AlgorithmManager::Instance().create("CreateWorkspace");
@@ -103,7 +100,7 @@ public:
 
     createWorkspace->setProperty("UnitX", "TOF");
     createWorkspace->setProperty("DataX", xDecData);
-    createWorkspace->setProperty("DataY", yData);
+    createWorkspace->setProperty("DataY", yDecData);
     createWorkspace->setProperty("NSpec", 3);
     createWorkspace->setProperty("OutputWorkspace", "DECTOF");
     createWorkspace->execute();
@@ -112,31 +109,23 @@ public:
 
     createWorkspace->setProperty("UnitX", "Wavelength");
     createWorkspace->setProperty("DataX", xDecData);
-    createWorkspace->setProperty("DataY", yData);
+    createWorkspace->setProperty("DataY", yDecData);
     createWorkspace->setProperty("NSpec", 3);
-    createWorkspace->setProperty("OutputWorkspace", "DECZero");
+    createWorkspace->setProperty("OutputWorkspace", "DECWrongNumSpectra");
     createWorkspace->execute();
-    m_decWorkspaceZero =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECZero");
-
-    createWorkspace->setProperty("UnitX", "Wavelength");
-    createWorkspace->setProperty("DataX", xDecData);
-    createWorkspace->setProperty("DataY", yDataNoZero);
-    createWorkspace->setProperty("NSpec", 3);
-    createWorkspace->setProperty("OutputWorkspace", "DECNoZero");
-    createWorkspace->execute();
-    m_decWorkspaceNoZero =
+    m_decWorkspaceWrongNumSpectra =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "DECNoZero");
+            "DECWrongNumSpectra");
 
     createWorkspace->setProperty("UnitX", "Wavelength");
-    createWorkspace->setProperty("DataX", xDataMixed);
-    createWorkspace->setProperty("DataY", yDataMixed);
+    createWorkspace->setProperty("DataX", xDecDataDouble);
+    createWorkspace->setProperty("DataY", yDecDataDouble);
     createWorkspace->setProperty("NSpec", 5);
-    createWorkspace->setProperty("OutputWorkspace", "DECMixed");
+    createWorkspace->setProperty("OutputWorkspace", "DECWrongNumValues");
     createWorkspace->execute();
-    m_decWorkspaceMixed =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECMixed");
+    m_decWorkspaceWrongNumValues =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "DECWrongNumValues");
 
     IAlgorithm_sptr lAlg = AlgorithmManager::Instance().create("Load");
     lAlg->setChild(true);
@@ -310,24 +299,19 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
-  void test_detector_efficiency_correction_zero_values_throws() {
+  void test_detector_efficiency_correction_wrong_num_of_spectra_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("InputWorkspace", m_dataWorkspace);
-    alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspaceZero);
+    alg->setProperty("DetectorEfficiencyCorrection",
+      m_decWorkspaceWrongNumSpectra);
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
-  void test_detector_efficiency_correction_too_few_values_throws() {
+  void test_detector_efficiency_correction_more_than_one_value_per_spectra_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("InputWorkspace", m_dataWorkspace);
-    alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspaceNoZero);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
-  }
-
-  void test_detector_efficiency_correction_mixed_values_throws() {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("InputWorkspace", m_dataWorkspace);
-    alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspaceMixed);
+    alg->setProperty("DetectorEfficiencyCorrection",
+      m_decWorkspaceWrongNumValues);
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
