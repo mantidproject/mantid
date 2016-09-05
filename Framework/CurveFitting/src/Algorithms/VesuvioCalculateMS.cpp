@@ -1,6 +1,3 @@
-//-----------------------------------------------------------------------------
-// Includes
-//-----------------------------------------------------------------------------
 #include "MantidCurveFitting/Algorithms/VesuvioCalculateMS.h"
 // Use helpers for storing detector/resolution parameters
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
@@ -9,6 +6,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SampleShapeValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
@@ -44,10 +42,6 @@ const size_t MAX_SCATTER_PT_TRIES = 500;
 const double MASS_TO_MEV =
     0.5 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;
 } // end anonymous namespace
-
-//-------------------------------------------------------------------------
-// Member functions
-//-------------------------------------------------------------------------
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(VesuvioCalculateMS)
@@ -151,6 +145,7 @@ void VesuvioCalculateMS::exec() {
   // Setup progress
   const size_t nhist = m_inputWS->getNumberHistograms();
   m_progress = new API::Progress(this, 0.0, 1.0, nhist * m_nruns * 2);
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
   for (size_t i = 0; i < nhist; ++i) {
 
     // Copy over the X-values
@@ -159,13 +154,7 @@ void VesuvioCalculateMS::exec() {
     multsc->dataX(i) = xValues;
 
     // Final detector position
-    Geometry::IDetector_const_sptr detector;
-    try {
-      detector = m_inputWS->getDetector(i);
-    } catch (Kernel::Exception::NotFoundError &) {
-      // intel compiler doesn't like continue in a catch inside an OMP loop
-    }
-    if (!detector) {
+    if(!spectrumInfo.hasDetectors(i)) {
       std::ostringstream os;
       os << "No valid detector object found for spectrum at workspace index '"
          << i << "'. No correction calculated.";
