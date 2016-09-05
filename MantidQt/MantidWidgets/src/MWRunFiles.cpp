@@ -2,6 +2,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
@@ -173,7 +174,7 @@ void FindFilesThread::getFilesFromAlgorithm() {
     std::vector<std::vector<std::string>> filenames =
         algorithm->getProperty(propName);
     std::vector<std::string> flattenedNames =
-        MultipleFileProperty::flattenFileNames(filenames);
+        VectorHelper::flattenVector(filenames);
 
     for (auto filename = flattenedNames.begin();
          filename != flattenedNames.end(); ++filename) {

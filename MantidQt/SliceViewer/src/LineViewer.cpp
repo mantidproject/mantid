@@ -409,7 +409,7 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   double dy = m_end[m_freeDimY] - m_start[m_freeDimY];
   // Angle of the line
   double angle = atan2(dy, dx);
-  double perpAngle = angle + M_PI / 2.0;
+  double perpAngle = angle + M_PI_2;
 
   // Check if this is a axis-aligned cut of a histogram workspace with at most
   // 5 dimensions. If so, we'll use IntegrateMDHistoWorkspace.
