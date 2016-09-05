@@ -271,21 +271,21 @@ class BayesQuasi(PythonAlgorithm):
             reals = [efix, theta[m], rscl, bnorm]
 
             if prog == 'QLr':
-                workflow_prog.report('Processing Sample number %i as Lorentzian' % nsam)
+                workflow_prog.report('Processing Sample number %i as Lorentzian' % m)
                 nd,xout,yout,eout,yfit,yprob=QLr.qlres(numb,Xv,Yv,Ev,reals,fitOp,
                                                        Xdat,Xb,Yb,Wy,We,dtn,xsc,
                                                        wrks,wrkr,lwrk)
                 message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
                 logger.information(message)
             if prog == 'QLd':
-                workflow_prog.report('Processing Sample number %i' % nsam)
+                workflow_prog.report('Processing Sample number %i' % m)
                 nd,xout,yout,eout,yfit,yprob=QLd.qldata(numb,Xv,Yv,Ev,reals,fitOp,
                                                         Xdat,Xb,Yb,Eb,Wy,We,
                                                         wrks,wrkr,lwrk)
                 message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
                 logger.information(message)
             if prog == 'QSe':
-                workflow_prog.report('Processing Sample number %i as Stretched Exp' % nsam)
+                workflow_prog.report('Processing Sample number %i as Stretched Exp' % m)
                 nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,\
                                                         Xdat,Xb,Yb,Wy,We,dtn,xsc,\
                                                         wrks,wrkr,lwrk)
