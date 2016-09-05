@@ -54,6 +54,7 @@ all_symbols = ["Ac", "Ag", "Al", "Am", "Ar",  "As", "At" , "Au" , "B"  , "Ba", "
                "Rg", "Rh", "Rn", "Ru", "S" ,  "Sb", "Sc" , "Se" , "Sg" , "Si", "Sm", "Sn", "Sr", "Ta", "Tb", "Tc", "Te",
                "Th", "Ti", "Tl", "Tm", "U" , "Uuo", "Uup", "Uus", "Uut", "V" , "W" , "Xe", "Y" , "Yb", "Zn", "Zr",
                ]
+
 pkt_per_peak = 500  # number of points for each broadened peak
 bin_width = 0.2  # defines width of bins used in rebining
 
@@ -72,6 +73,7 @@ fwhm = 3.0  # approximate value for the full width at half maximum for Gaussian 
 
 # None instrument
 delta_width = 0.0005  # width of narrow Gaussian which approximates Dirac delta
+q_mesh = [10, 10, 10] # Q grid
 
 # TOSCA instrument
 TOSCA_constant = 1 / 16.0  # magic number for TOSCA...

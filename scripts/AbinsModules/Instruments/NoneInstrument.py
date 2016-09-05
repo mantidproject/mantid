@@ -26,9 +26,62 @@ class NoneInstrument(Instrument):
 
     def calculate_q_powder(self):
         """
-        Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
+        Calculates squared Q vectors for None instrument.
+        """
+        q_points = self._make_q_point_mesh()
+        return np.multiply(q_points, q_points)
+
+
+    def _make_q_point_mesh(self):
+        """
+        Constructs Q vectors from Q grid.
+        @return:
         """
 
+        if  AbinsParameters.q_mesh[0] % 2 :
+            i1min = - (AbinsParameters.q_mesh[0] - 1) / 2
+            i1max = (AbinsParameters.q_mesh[0] - 1) / 2
+        else:
+            i1min = -(AbinsParameters.q_mesh[0] / 2 - 1)
+        i1max = AbinsParameters.q_mesh[0] / 2
+
+
+        if  AbinsParameters.q_mesh[1] % 2 :
+            i2min = - (AbinsParameters.q_mesh[1] - 1) / 2
+            i2max = (AbinsParameters.q_mesh[1] - 1) / 2
+        else:
+            i2min = -(AbinsParameters.q_mesh[1] / 2 - 1)
+            i2max = AbinsParameters.q_mesh[1] / 2
+
+
+        if  AbinsParameters.q_mesh[2] % 2 :
+            i3min = - (AbinsParameters.q_mesh[2] - 1) / 2
+            i3max = (AbinsParameters.q_mesh[2] - 1) / 2
+
+        else:
+            i3min = -(AbinsParameters.q_mesh[2] / 2 - 1)
+            i3max = AbinsParameters.q_mesh[2] / 2
+
+        _dimensions = 3
+        _total_q_num = AbinsParameters.q_mesh[0] * AbinsParameters.q_mesh[1] * AbinsParameters.q_mesh[2]
+        _q_point_mesh = np.zeros((_total_q_num, _dimensions), dtype=AbinsParameters.float_type)
+        _n_q = 0
+
+        for _i1 in range(i1min, i1max + 1):
+            for _i2 in range(i2min, i2max + 1):
+                for _i3 in range(i3min, i3max + 1):
+                    _q_point_mesh[_n_q, :] =[float(_i1) / float(AbinsParameters.q_mesh[0]),
+                                             float(_i2) / float(AbinsParameters.q_mesh[1]),
+                                             float(_i3) / float(AbinsParameters.q_mesh[2])]
+                _n_q += 1
+
+        _num_k = self._k_points_data.extract()["frequencies"].shape[0]
+        q_points = np.zeros((_num_k, _total_q_num, _dimensions ), dtype=AbinsParameters.float_type)
+
+        for _k in range(_num_k):
+            q_points[_k,:,:] = _q_point_mesh # no need to use np.copy here
+
+        return q_points
 
 
     def convolve_with_resolution_function(self, frequencies=None, s_dft=None, points_per_peak=None, start=None):
@@ -92,4 +145,5 @@ class NoneInstrument(Instrument):
 
         sigma_factor = 2.0 * self._sigma * self._sigma
 
+        # noinspection PyTypeChecker
         return 1.0 / math.sqrt(sigma_factor * np.pi) * np.exp(-np.power(points - center, 2) / sigma_factor)

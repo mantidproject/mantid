@@ -28,7 +28,7 @@ from AbinsModules.InstrumentProducer import InstrumentProducer
 from AbinsModules import AbinsParameters
 
 
-class ABINSCalculateQTest(unittest.TestCase):
+class ABINSCalculateQToscaTest(unittest.TestCase):
 
     def setUp(self):
         _core = "../ExternalData/Testing/Data/UnitTest/"

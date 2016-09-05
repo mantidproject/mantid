@@ -56,7 +56,7 @@ set ( TEST_PY_FILES
       test/ReductionSettingsTest.py
       test/ABINSIOmoduleTest.py
       test/ABINSLoadCASTEPTest.py
-      test/ABINSCalculateQTest.py
+      test/ABINSCalculateQToscaTestaTest.py
       test/ABINSQDataTest.py
       test/ABINSKpointsDataTest.py
       test/ABINSAtomsDataTest.py
