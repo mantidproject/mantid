@@ -1517,11 +1517,15 @@ public:
   /*
    * Rotate a bank in the workspace and read the positions out again. Very typical.
    */
-  void test_rotate_bank_and_read_positions() {
+  void test_rotate_bank_and_read_positions_x10() {
 
     using namespace Mantid::Geometry;
     using namespace Mantid::Kernel;
 
+    int count = 0;
+    // Repeated execution to improve statistics and for comparison purposes with
+    // future updates
+    while (count < 10) {
     // Rotate the bank
     ComponentHelper::rotateComponent(
         *m_sansBank, *m_paramMap, m_zRotation,
@@ -1529,19 +1533,24 @@ public:
 
     V3D pos;
     for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
-
       pos += m_workspaceSans.getDetector(i)->getPos();
+    }
+    ++count;
     }
   }
 
   /*
    * Move a bank in the workspace and read the positions out again. Very typical.
    */
-  void test_move_bank_and_read_positions() {
+  void test_move_bank_and_read_positions_x10() {
 
     using namespace Mantid::Geometry;
     using namespace Mantid::Kernel;
 
+    int count = 0;
+    // Repeated execution to improve statistics and for comparison purposes with
+    // future updates
+    while (count < 10) {
     // move the bank
     ComponentHelper::moveComponent(*m_sansBank, *m_paramMap, m_pos,
                                    Mantid::Geometry::ComponentHelper::Relative);
@@ -1549,6 +1558,8 @@ public:
     V3D pos;
     for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
       pos += m_workspaceSans.getDetector(i)->getPos();
+    }
+    ++count;
     }
   }
 
