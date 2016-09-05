@@ -1458,8 +1458,7 @@ public:
     delete suite;
   }
 
-  MatrixWorkspaceTestPerformance()
-      : m_workspace(nullptr), m_sansTestWorkspace(nullptr) {
+  MatrixWorkspaceTestPerformance() {
     size_t numberOfHistograms = 10000;
     size_t numberOfBins = 1;
     m_workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
@@ -1468,8 +1467,6 @@ public:
     const std::string instrumentName("SimpleFakeInstrument");
     InstrumentCreationHelper::addFullInstrumentToWorkspace(
         m_workspace, includeMonitors, startYNegative, instrumentName);
-
-    constructSANSWorkspace(numberOfBins, numberOfHistograms);
   }
 
   /**
@@ -1494,11 +1491,10 @@ public:
 
     m_sansTestWorkspace.setInstrument(instrumentParameterized);
     m_sansTestWorkspace.getAxis(0)->setUnit("TOF");
-    for (size_t wi = 0; wi < m_sansTestWorkspace.getNumberHistograms(); ++wi) {
-      m_sansTestWorkspace.getSpectrum(wi).setDetectorID(detid_t(wi + 1));
-      m_sansTestWorkspace.getSpectrum(wi).setSpectrumNo(specnum_t(wi));
-    }
+    m_sansTestWorkspace.rebuildSpectraMapping();
   }
+
+  void setUp() { constructSANSWorkspace(); }
 
   /// This test is equivalent to GeometryInfoFactoryTestPerformance, see there.
   void test_typical() {
@@ -1529,6 +1525,28 @@ public:
     for (size_t i = 0; i < m_sansTestWorkspace.getNumberHistograms(); ++i) {
       auto detector = m_sansTestWorkspace.getDetector(i);
       l2 += detector->getDistance(*sample);
+    }
+    // Prevent optimization
+    TS_ASSERT(l2 > 0);
+  }
+
+  void test_calculateL2_x10() {
+
+    /*
+     * Simulate the L2 calculation performed via the Workspace/Instrument
+     * interface. Repeat several times to benchmark any caching/optmisation that
+     * might be taken place in parameter maps.
+     */
+    auto instrument = m_sansTestWorkspace.getInstrument();
+    auto sample = instrument->getSample();
+    double l2 = 0;
+    int count = 0;
+    while (count < 10) {
+      for (size_t i = 0; i < m_sansTestWorkspace.getNumberHistograms(); ++i) {
+        auto detector = m_sansTestWorkspace.getDetector(i);
+        l2 += detector->getDistance(*sample);
+      }
+      ++count;
     }
     // Prevent optimization
     TS_ASSERT(l2 > 0);
