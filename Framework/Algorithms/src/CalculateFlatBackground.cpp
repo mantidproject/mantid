@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -137,18 +135,12 @@ void CalculateFlatBackground::exec() {
   std::vector<int>::const_iterator specIt;
   // local cache for global variable
   bool skipMonitors(m_skipMonitors);
+  const auto &spectrumInfo = outputWS->spectrumInfo();
   for (specIt = wsInds.begin(); specIt != wsInds.end(); ++specIt) {
     const int currentSpec = *specIt;
     try {
-      if (skipMonitors) { // this will fail in Windows ReleaseWithDebug info
-                          // mode if the loop above made parallel. MS2012
-                          // Compiler bug.
-        // the remedy in this case would be to extract the code within internal
-        // true into separate routine.
-        try {
-          if (outputWS->getDetector(currentSpec)->isMonitor())
-            continue;
-        } catch (...) {
+      if (skipMonitors) {
+        if (!spectrumInfo.hasDetectors(currentSpec)) {
           // Do nothing.
           // not every spectra is the monitor or detector, some spectra have no
           // instrument components attached.
@@ -156,6 +148,8 @@ void CalculateFlatBackground::exec() {
                             std::to_string(currentSpec) +
                             " Processing background anyway\n");
         }
+        if (spectrumInfo.isMonitor(currentSpec))
+          continue;
       }
 
       // Only if Mean() is called will variance be changed
