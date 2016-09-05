@@ -4,6 +4,8 @@
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DynamicFactory.h"
@@ -929,7 +931,64 @@ void MdViewerWidget::setupPluginMode() {
  *
  * @param lines :: a string representing the state of the Vates window
  */
-void MdViewerWidget::loadFromProject(const std::string &lines) {}
+void MdViewerWidget::loadFromProject(const std::string &lines) {
+  setupPluginMode();
+
+  TSVSerialiser tsv(lines);
+
+  if (!tsv.selectLine("Workspace"))
+    return;
+
+  std::string wsName;
+  tsv >> wsName;
+
+  auto success = setupWorkspaceFromProject(wsName);
+  if (!success)
+    return;
+}
+
+/**
+ * Setup a workspace from a Mantid project file and render it
+ *
+ * This will figure out the type of workspace to show and find the instrument
+ * name. If it fails at any point this method will return false.
+ *
+ * @param wsName :: the name of the workspace to render
+ * @return false if the workspace could not be rendered
+ */
+bool MdViewerWidget::setupWorkspaceFromProject(const std::string &wsName) {
+  auto &ads = AnalysisDataService::Instance();
+  if (!ads.doesExist(wsName))
+    return false;
+
+  auto ws = ads.retrieve(wsName);
+  auto pws = boost::dynamic_pointer_cast<IPeaksWorkspace>(ws);
+  auto ews = boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
+  auto hws = boost::dynamic_pointer_cast<IMDHistoWorkspace>(ws);
+
+  WorkspaceType type = PEAKS;
+  std::string instrumentName;
+
+  if (pws) {
+    type = PEAKS;
+    instrumentName = pws->getInstrument()->getFullName();
+  } else if (ews) {
+    type = MDEW;
+    if (ews->getNumExperimentInfo() > 0)
+      instrumentName =
+          ews->getExperimentInfo(0)->getInstrument()->getFullName();
+  } else if (hws) {
+    type = MDHW;
+    if (hws->getNumExperimentInfo() > 0)
+      instrumentName =
+          hws->getExperimentInfo(0)->getInstrument()->getFullName();
+  } else {
+    return false;
+  }
+
+  renderWorkspace(QString::fromStdString(wsName), type, instrumentName);
+  return true;
+}
 
 /**
  * Save the state of the Vates window to a Mantid project file
@@ -941,7 +1000,7 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   UNUSED_ARG(app);
   TSVSerialiser tsv, contents;
 
-  contents.writeLine("Workspace") << this->currentView->getWorkspaceName();
+  contents.writeLine("Workspace") << currentView->getWorkspaceName();
   tsv.writeSection("vates", contents.outputLines());
 
   return tsv.outputLines();

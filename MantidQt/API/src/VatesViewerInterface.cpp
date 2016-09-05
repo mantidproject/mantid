@@ -41,7 +41,6 @@ IProjectSerialisable *VatesViewerInterface::loadFromProject(
     return nullptr;
 
   vsui->loadFromProject(lines);
-  vsui->setupPluginMode();
   return vsui;
 }
 
