@@ -79,6 +79,10 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
       .getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
 }
 
+Kernel::V3D SpectrumInfo::position(const size_t index) const {
+  return getDetector(index).getPos();
+}
+
 bool SpectrumInfo::hasDetectors(const size_t index) const {
   return m_workspace.getSpectrum(index).getDetectorIDs().size() > 0;
 }
