@@ -43,7 +43,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-using TreeData = std::map<int, std::map<int, std::vector<std::string>>>;
+using RowData = std::vector<std::string>;
+using GroupData = std::map<int, RowData>;
+using TreeData = std::map<int, GroupData>;
 
 std::vector<std::string> DLLExport
 splitByCommas(const std::string &names_string);
@@ -56,8 +58,7 @@ tableString(const TreeData &treeData, const DataProcessorWhiteList &whitelist);
 std::string DLLExport titleString(const std::string &wsName);
 
 boost::tuple<std::string, std::string> DLLExport postprocessGroupString(
-    const std::map<int, std::vector<std::string>> &rowMap,
-    const DataProcessorWhiteList &whitelist,
+    const GroupData &rowMap, const DataProcessorWhiteList &whitelist,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::string &postprocessingOptions);
@@ -68,12 +69,12 @@ plotsString(const std::vector<std::string> &output_ws,
             const DataProcessorProcessingAlgorithm &processor);
 
 std::string DLLExport
-getReducedWorkspaceName(const std::vector<std::string> &data,
+getReducedWorkspaceName(const RowData &data,
                         const DataProcessorWhiteList &whitelist,
                         const std::string &prefix = "");
 
 boost::tuple<std::string, std::string> DLLExport reduceRowString(
-    const std::vector<std::string> &data, const std::string &instrument,
+    const RowData &data, const std::string &instrument,
     const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
         preprocessMap,

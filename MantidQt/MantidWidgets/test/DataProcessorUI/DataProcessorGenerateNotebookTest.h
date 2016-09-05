@@ -6,15 +6,11 @@
 #include <gtest/gtest.h>
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorVectorString.h"
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
-using namespace Mantid::Kernel;
 using namespace testing;
 
 class DataProcessorGenerateNotebookTest : public CxxTest::TestSuite {
@@ -65,76 +61,21 @@ private:
   }
 
   // Creates reflectometry data
-  std::map<int, std::map<int, std::vector<std::string>>> reflData() {
+  TreeData reflData() {
 
-    std::map<int, std::map<int, std::vector<std::string>>> data;
-    std::vector<std::string> vecData;
+    TreeData treeData;
+    RowData rowData;
 
-    vecData = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", ""};
-    data[0][0] = vecData;
-    vecData = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
-    data[0][1] = vecData;
-    vecData = {"24681", "0.5", "", "0.1", "1.6", "0.04", "1", ""};
-    data[1][0] = vecData;
-    vecData = {"24682", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
-    data[1][1] = vecData;
+    rowData = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", ""};
+    treeData[0][0] = rowData;
+    rowData = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
+    treeData[0][1] = rowData;
+    rowData = {"24681", "0.5", "", "0.1", "1.6", "0.04", "1", ""};
+    treeData[1][0] = rowData;
+    rowData = {"24682", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
+    treeData[1][1] = rowData;
 
-    return data;
-  }
-
-  // Creates a reflectometry table ws
-  ITableWorkspace_sptr reflWorkspace() {
-    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-    ws->addColumn("str", "Group");
-    ws->addColumn("str", "Run(s)");
-    ws->addColumn("str", "Angle");
-    ws->addColumn("str", "Transmission Run(s)");
-    ws->addColumn("str", "MomentumTransferMinimum");
-    ws->addColumn("str", "MomentumTransferMaximum");
-    ws->addColumn("str", "MomentumTransferStep");
-    ws->addColumn("str", "Scale");
-    ws->addColumn("str", "Options");
-    TableRow row = ws->appendRow();
-    row << "0"
-        << "12345"
-        << "0.5"
-        << ""
-        << "0.1"
-        << "1.6"
-        << "0.04"
-        << "1"
-        << "";
-    row = ws->appendRow();
-    row << "0"
-        << "12346"
-        << "1.5"
-        << ""
-        << "1.4"
-        << "2.9"
-        << "0.04"
-        << "1"
-        << "";
-    row = ws->appendRow();
-    row << "1"
-        << "24681"
-        << "0.5"
-        << ""
-        << "0.1"
-        << "1.6"
-        << "0.04"
-        << "1"
-        << "";
-    row = ws->appendRow();
-    row << "1"
-        << "24682"
-        << "1.5"
-        << ""
-        << "1.4"
-        << "2.9"
-        << "0.04"
-        << "1"
-        << "";
-    return ws;
+    return treeData;
   }
 
   std::string m_wsName;
@@ -166,8 +107,7 @@ public:
         reflProcessor(), DataProcessorPostprocessingAlgorithm(),
         std::map<std::string, std::string>(), "", "");
 
-    std::string generatedNotebook = notebook->generateNotebook(
-        std::map<int, std::map<int, std::vector<std::string>>>());
+    std::string generatedNotebook = notebook->generateNotebook(TreeData());
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
@@ -216,12 +156,25 @@ public:
     }
   }
 
+  void testTableStringWrongData() {
+    // Whitelist and data incompatible
+
+    DataProcessorWhiteList whitelist;
+    whitelist.addElement("Run", "Run", "");
+    whitelist.addElement("Angle", "Angle", "");
+
+    TreeData treeData = reflData();
+
+    TS_ASSERT_THROWS_ANYTHING(tableString(treeData, whitelist));
+  }
+
   void testTableStringOneRow() {
 
-    std::map<int, std::set<int>> rows;
-    rows[1].insert(1);
+    // Create some tree data
+    RowData rowData = {"24682", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
+    TreeData treeData = {{1, {{0, rowData}}}};
 
-    std::string output = tableString(reflData(), reflWhitelist());
+    std::string output = tableString(treeData, reflWhitelist());
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, output, boost::is_any_of("\n"));
@@ -242,11 +195,6 @@ public:
 
   void testTableStringAllRows() {
 
-    std::map<int, std::set<int>> rows;
-    rows[0].insert(0);
-    rows[0].insert(1);
-    rows[1].insert(0);
-    rows[1].insert(1);
     std::string output = tableString(reflData(), reflWhitelist());
 
     std::vector<std::string> notebookLines;
@@ -333,6 +281,16 @@ public:
     TS_ASSERT_EQUALS(boost::get<1>(output), "RUN1_RUN2_RUN3");
   }
 
+  void testReduceRowStringWrongData() {
+    // Whitelist and data differ in size
+
+    RowData rowData = {"12345", "1.5"};
+
+    TS_ASSERT_THROWS_ANYTHING(reduceRowString(
+        rowData, m_instrument, reflWhitelist(), reflPreprocessMap("TOF_"),
+        reflProcessor(), std::map<std::string, std::string>(), ""));
+  }
+
   void testReduceRowString() {
     // Reduce a single row, no pre-processing is needed because there's
     // only one run in the 'Run(s)' column and no transmission runs
@@ -340,8 +298,7 @@ public:
     std::map<std::string, std::string> userPreProcessingOptions = {
         {"Run(s)", ""}, {"Transmission Run(s)", ""}};
 
-    const std::vector<std::string> data = {"12346", "1.5",  "",  "1.4",
-                                                "2.9",   "0.04", "1", ""};
+    const RowData data = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
 
     boost::tuple<std::string, std::string> output = reduceRowString(
         data, m_instrument, reflWhitelist(), reflPreprocessMap("TOF_"),
@@ -373,8 +330,14 @@ public:
     DataProcessorWhiteList whitelist;
     whitelist.addElement("Run", "InputWorkspace", "", true);
     whitelist.addElement("Angle", "ThetaIn", "", true, "angle_");
+    whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "");
+    whitelist.addElement("Q min", "MomentumTransferMinimum", "");
+    whitelist.addElement("Q max", "MomentumTransferMaximum", "");
+    whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
+    whitelist.addElement("Scale", "ScaleFactor", "");
+    whitelist.addElement("Options", "Options", "");
 
-	// Create a pre-process map
+    // Create a pre-process map
     std::map<std::string, DataProcessorPreprocessingAlgorithm> preprocessMap = {
         {"Run", DataProcessorPreprocessingAlgorithm("Plus", "RUN_",
                                                     std::set<std::string>())}};
@@ -382,12 +345,12 @@ public:
     std::map<std::string, std::string> userPreProcessingOptions = {
         {"Run", "Property=prop"}};
 
-    const std::vector<std::string> data = {"1000", "0.5",  "",  "1.4",
-                                           "2.9",  "0.04", "1", ""};
+    // Create some data
+    const RowData data = {"1000+1001", "0.5", "", "", "", "", "", ""};
 
     boost::tuple<std::string, std::string> output =
-        reduceRowString(data, "INST", whitelist, preprocessMap,
-                        reflProcessor(), userPreProcessingOptions, "");
+        reduceRowString(data, "INST", whitelist, preprocessMap, reflProcessor(),
+                        userPreProcessingOptions, "");
 
     const std::string result[] = {
         "RUN_1000 = Load(Filename = 'INST1000')", "RUN_1000_1001 = RUN_1000",
@@ -395,7 +358,8 @@ public:
         "RUN_1000_1001 = Plus(LHSWorkspace = 'RUN_1000_1001', RHSWorkspace = "
         "'RUN_1001', Property=prop)",
         "IvsQ_1000_1001_angle_0.5, IvsLam_1000_1001_angle_0.5, _ = "
-        "ReflectometryReductionOneAuto(InputWorkspace = 'RUN_1000_1001')",
+        "ReflectometryReductionOneAuto(InputWorkspace = 'RUN_1000_1001', "
+        "ThetaIn = 0.5)",
         ""};
 
     // Check the names of the reduced workspaces
@@ -419,8 +383,7 @@ public:
         emptyPreProcessMap;
     std::map<std::string, std::string> emptyPreProcessingOptions;
 
-    const std::vector<std::string> data = {"12346", "1.5",  "",  "1.4",
-                                           "2.9",   "0.04", "1", ""};
+    const RowData data = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
 
     boost::tuple<std::string, std::string> output =
         reduceRowString(data, m_instrument, reflWhitelist(), emptyPreProcessMap,
@@ -447,7 +410,8 @@ public:
     }
   }
 
-  void testReducedWorkspaceNameOnlyRun() {
+  void testReducedWorkspaceNameWrong() {
+    // Whitelist and data differ in size
 
     // Create a whitelist
     DataProcessorWhiteList whitelist;
@@ -455,8 +419,30 @@ public:
     whitelist.addElement("Angle", "", "", false, "");
     whitelist.addElement("Trans", "", "", false, "");
 
-    const std::vector<std::string> data = {
-        "1000,1001", "0.5", "2000,2001", "1.4", "2.9", "0.04", "1", ""};
+    // Create some data
+    const RowData data = {"1000,1001", "0.5",  "2000,2001", "1.4",
+                          "2.9",       "0.04", "1",         ""};
+
+    TS_ASSERT_THROWS_ANYTHING(
+        getReducedWorkspaceName(data, whitelist, "IvsQ_"));
+  }
+
+  void testReducedWorkspaceNameOnlyRun() {
+
+    // Create a whitelist
+    DataProcessorWhiteList whitelist;
+    whitelist.addElement("Run", "", "", true, "run_");
+    whitelist.addElement("Angle", "", "", false, "");
+    whitelist.addElement("Trans", "", "", false, "");
+    whitelist.addElement("Q min", "MomentumTransferMinimum", "");
+    whitelist.addElement("Q max", "MomentumTransferMaximum", "");
+    whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
+    whitelist.addElement("Scale", "ScaleFactor", "");
+    whitelist.addElement("Options", "Options", "");
+
+    // Create some data
+    const RowData data = {"1000,1001", "0.5",  "2000,2001", "1.4",
+                          "2.9",       "0.04", "1",         ""};
 
     std::string name = getReducedWorkspaceName(data, whitelist, "IvsQ_");
     TS_ASSERT_EQUALS(name, "IvsQ_run_1000_1001")
@@ -469,9 +455,15 @@ public:
     whitelist.addElement("Run", "", "", true, "run_");
     whitelist.addElement("Angle", "", "", false, "");
     whitelist.addElement("Trans", "", "", true, "trans_");
+    whitelist.addElement("Q min", "MomentumTransferMinimum", "");
+    whitelist.addElement("Q max", "MomentumTransferMaximum", "");
+    whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
+    whitelist.addElement("Scale", "ScaleFactor", "");
+    whitelist.addElement("Options", "Options", "");
 
-    const std::vector<std::string> data = {
-        "1000,1001", "0.5", "2000,2001", "1.4", "2.9", "0.04", "1", ""};
+    // Create some data
+    const RowData data = {"1000,1001", "0.5",  "2000,2001", "1.4",
+                          "2.9",       "0.04", "1",         ""};
 
     std::string name = getReducedWorkspaceName(data, whitelist, "Prefix_");
     TS_ASSERT_EQUALS(name, "Prefix_run_1000_1001_trans_2000_2001")
@@ -484,9 +476,14 @@ public:
     whitelist.addElement("Run", "", "", false, "");
     whitelist.addElement("Angle", "", "", false, "");
     whitelist.addElement("Trans", "", "", true, "");
+    whitelist.addElement("Q min", "MomentumTransferMinimum", "");
+    whitelist.addElement("Q max", "MomentumTransferMaximum", "");
+    whitelist.addElement("dQ/Q", "MomentumTransferStep", "");
+    whitelist.addElement("Scale", "ScaleFactor", "");
+    whitelist.addElement("Options", "Options", "");
 
-    const std::vector<std::string> data = {
-        "1000,1001", "0.5", "2000+2001", "1.4", "2.9", "0.04", "1", ""};
+    const RowData data = {"1000,1001", "0.5",  "2000+2001", "1.4",
+                          "2.9",       "0.04", "1",         ""};
 
     std::string name = getReducedWorkspaceName(data, whitelist, "Prefix_");
     TS_ASSERT_EQUALS(name, "Prefix_2000_2001")
@@ -496,10 +493,9 @@ public:
     std::string userOptions = "Params = '0.1, -0.04, 2.9', StartOverlaps = "
                               "'1.4, 0.1, 1.4', EndOverlaps = '1.6, 2.9, 1.6'";
 
-    std::vector<std::string> rowData0 = {"12345", "", "", "", "", "", "", ""};
-    std::vector<std::string> rowData1 = {"12346", "", "", "", "", "", "", ""};
-    std::map<int, std::vector<std::string>> groupData = {{0, rowData0},
-                                                         {1, rowData1}};
+    RowData rowData0 = {"12345", "", "", "", "", "", "", ""};
+    RowData rowData1 = {"12346", "", "", "", "", "", "", ""};
+    GroupData groupData = {{0, rowData0}, {1, rowData1}};
 
     boost::tuple<std::string, std::string> output = postprocessGroupString(
         groupData, reflWhitelist(), reflProcessor(),
@@ -675,23 +671,12 @@ public:
     auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
     auto postprocessingOptions = "Params=0.04";
 
-    std::vector<std::string> rowData0 = {"12345", "0.5",  "",  "0.1",
-                                         "1.6",   "0.04", "1", ""};
-    std::vector<std::string> rowData1 = {"12346", "1.5",  "",  "1.4",
-                                         "2.9",   "0.04", "1", ""};
-    std::vector<std::string> rowData2 = {"24681", "0.5",  "",  "0.1",
-                                         "1.6",   "0.04", "1", ""};
-    std::vector<std::string> rowData3 = {"24682", "1.5",  "",  "1.4",
-                                         "2.9",   "0.04", "1", ""};
-	std::map<int, std::map<int, std::vector<std::string>>> treeData = {
-		{0, {{0, rowData0}, {1, rowData1}}}, {1, {{0, rowData2}, {1, rowData3}}} };
-
     auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
         "TableName", "INTER", whitelist, preprocessMap, processor,
         postProcessor, preprocessingOptions, processingOptions,
         postprocessingOptions);
 
-    std::string generatedNotebook = notebook->generateNotebook(treeData);
+    std::string generatedNotebook = notebook->generateNotebook(reflData());
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
@@ -791,18 +776,9 @@ public:
         postProcessor, preprocessingOptions, processingOptions,
         postprocessingOptions);
 
-    // No groups, only first two runs
-    std::set<int> groups;
-    std::map<int, std::set<int>> rows;
-    rows[0].insert(0);
-    rows[0].insert(1);
-
-    std::vector<std::string> rowData0 = {"12345", "0.5",  "",  "0.1",
-                                         "1.6",   "0.04", "1", ""};
-    std::vector<std::string> rowData1 = {"12346", "1.5",  "",  "1.4",
-                                         "2.9",   "0.04", "1", ""};
-    std::map<int, std::map<int, std::vector<std::string>>> treeData = {
-        {0, {{0, rowData0}, {1, rowData1}}}};
+    RowData rowData0 = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", ""};
+    RowData rowData1 = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", ""};
+    TreeData treeData = {{0, {{0, rowData0}}}, {1, {{0, rowData1}}}};
 
     std::string generatedNotebook = notebook->generateNotebook(treeData);
 
@@ -810,9 +786,11 @@ public:
     boost::split(notebookLines, generatedNotebook, boost::is_any_of("\n"));
 
     // Only 75 lines because we only analyzed the first two runs
-    TS_ASSERT_EQUALS(notebookLines.size(), 75);
+    TS_ASSERT_EQUALS(notebookLines.size(), 104);
 
-    const std::string loadAndReduceString =
+    // First group
+
+    std::string loadAndReduceString =
         "               \"input\" : \"#Load and reduce\\n12345 = "
         "Load(Filename = \'INTER12345\')\\nIvsQ_TOF_12345, "
         "IvsLam_TOF_12345, _ = "
@@ -820,7 +798,26 @@ public:
         "ThetaIn = 0.5, MomentumTransferMinimum = 0.1, "
         "MomentumTransferMaximum = 1.6, MomentumTransferStep = "
         "0.04, ScaleFactor = 1, AnalysisMode = "
-        "MultiDetectorAnalysis)\\n#Load and reduce\\n12346 = "
+        "MultiDetectorAnalysis)\\n\",";
+    TS_ASSERT_EQUALS(notebookLines[48], loadAndReduceString);
+
+    std::string postProcessString = "               \"input\" : \"\",";
+    TS_ASSERT_EQUALS(notebookLines[56], postProcessString);
+
+    std::string groupWorkspacesString =
+        "               \"input\" : \"#Group workspaces to be plotted on same "
+        "axes\\nIvsQ_groupWS = GroupWorkspaces(InputWorkspaces = "
+        "\'IvsQ_TOF_12345\')\\nIvsLam_groupWS = "
+        "GroupWorkspaces(InputWorkspaces = \'IvsLam_TOF_12345\')\\n#Plot "
+        "workspaces\\nfig = plots([IvsQ_groupWS, IvsLam_groupWS, ], "
+        "title=[\'IvsQ_groupWS\', \'IvsLam_groupWS\', \'\'], "
+        "legendLocation=[1, 1, 4])\\n\",";
+    TS_ASSERT_EQUALS(notebookLines[64], groupWorkspacesString);
+
+    // Second group
+
+    loadAndReduceString =
+        "               \"input\" : \"#Load and reduce\\n12346 = "
         "Load(Filename = \'INTER12346\')\\nIvsQ_TOF_12346, "
         "IvsLam_TOF_12346, _ = "
         "ReflectometryReductionOneAuto(InputWorkspace = \'12346\', "
@@ -828,23 +825,20 @@ public:
         "MomentumTransferMaximum = 2.9, MomentumTransferStep = "
         "0.04, ScaleFactor = 1, AnalysisMode = "
         "MultiDetectorAnalysis)\\n\",";
-    TS_ASSERT_EQUALS(notebookLines[48], loadAndReduceString);
+    TS_ASSERT_EQUALS(notebookLines[77], loadAndReduceString);
 
-    const std::string postProcessString = "               \"input\" : \"\",";
-    TS_ASSERT_EQUALS(notebookLines[56], postProcessString);
+    postProcessString = "               \"input\" : \"\",";
+    TS_ASSERT_EQUALS(notebookLines[85], postProcessString);
 
-    const std::string groupWorkspacesString =
-        "               \"input\" : \"#Group workspaces to be "
-        "plotted on same "
+    groupWorkspacesString =
+        "               \"input\" : \"#Group workspaces to be plotted on same "
         "axes\\nIvsQ_groupWS = GroupWorkspaces(InputWorkspaces = "
-        "\'IvsQ_TOF_12345, IvsQ_TOF_12346\')\\nIvsLam_groupWS = "
-        "GroupWorkspaces(InputWorkspaces = \'IvsLam_TOF_12345, "
-        "IvsLam_TOF_12346\')\\n#Plot workspaces\\nfig = "
-        "plots([IvsQ_groupWS, "
-        "IvsLam_groupWS, ], title=[\'IvsQ_groupWS\', "
-        "\'IvsLam_groupWS\', \'\'], legendLocation=[1, 1, "
-        "4])\\n\",";
-    TS_ASSERT_EQUALS(notebookLines[64], groupWorkspacesString);
+        "\'IvsQ_TOF_12346\')\\nIvsLam_groupWS = "
+        "GroupWorkspaces(InputWorkspaces = \'IvsLam_TOF_12346\')\\n#Plot "
+        "workspaces\\nfig = plots([IvsQ_groupWS, IvsLam_groupWS, ], "
+        "title=[\'IvsQ_groupWS\', \'IvsLam_groupWS\', \'\'], "
+        "legendLocation=[1, 1, 4])\\n\",";
+    TS_ASSERT_EQUALS(notebookLines[93], groupWorkspacesString);
   }
 };
 

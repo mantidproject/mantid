@@ -243,6 +243,7 @@ std::string plotsString(const std::vector<std::string> &output_ws,
   */
 std::string tableString(const TreeData &treeData,
                         const DataProcessorWhiteList &whitelist) {
+
   std::ostringstream table_string;
 
   const int ncols = static_cast<int>(whitelist.size());
@@ -269,10 +270,14 @@ std::string tableString(const TreeData &treeData,
 		std::vector<std::string> values;
 		values.push_back(std::to_string(groupId));
 
+		if (row.second.size() != whitelist.size())
+			throw std::invalid_argument("Can't generate table for notebook");
+
 		for (const auto &datum : row.second)
 			values.push_back(datum);
 
 		table_string << boost::algorithm::join(values, " | ");
+		table_string << "\n";
     }
   }
   return table_string.str();
@@ -291,7 +296,7 @@ std::string tableString(const TreeData &treeData,
   @return tuple containing the python code string and the output workspace name
   */
 boost::tuple<std::string, std::string> postprocessGroupString(
-    const std::map<int, std::vector<std::string>> &rowMap,
+    const GroupData &rowMap,
     const DataProcessorWhiteList &whitelist,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
@@ -358,7 +363,7 @@ std::string plot1DString(const std::vector<std::string> &ws_names) {
  @param prefix : wheter to return the name with the prefix or not
  @return : the workspace name
 */
-std::string getReducedWorkspaceName(const std::vector<std::string> &data,
+std::string getReducedWorkspaceName(const RowData &data,
                                     const DataProcessorWhiteList &whitelist,
                                     const std::string &prefix) {
 
@@ -413,7 +418,7 @@ std::string getReducedWorkspaceName(const std::vector<std::string> &data,
  second item are the names of the output workspaces.
 */
 boost::tuple<std::string, std::string> reduceRowString(
-    const std::vector<std::string> &data, const std::string &instrument,
+    const RowData &data, const std::string &instrument,
     const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
         preprocessMap,
