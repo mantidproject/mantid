@@ -4,7 +4,6 @@
 #include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
 #include <boost/python/class.hpp>
-#include <boost/python/enum.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/str.hpp>
