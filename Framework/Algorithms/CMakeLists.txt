@@ -776,7 +776,6 @@ set ( TEST_FILES
 	MayersSampleCorrectionStrategyTest.h
 	MayersSampleCorrectionTest.h
 	MedianDetectorTestTest.h
-	MergeRuns/SampleLogsBehaviourTest.h
 	MergeRunsTest.h
 	MinusTest.h
 	ModeratorTzeroLinearTest.h
