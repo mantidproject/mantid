@@ -1488,7 +1488,7 @@ public:
     // See component creation helper for instrument definition
     m_sansBank = sansInstrument->getComponentByName("Bank1");
 
-    numberOfHistograms = 60000;
+    numberOfHistograms = sansInstrument->getNumberDetectors();
     m_workspaceSans.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
     m_workspaceSans.setInstrument(sansInstrument);
     m_zRotation =
