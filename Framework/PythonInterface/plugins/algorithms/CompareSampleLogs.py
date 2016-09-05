@@ -15,6 +15,8 @@ class CompareSampleLogs(PythonAlgorithm):
         Init
         """
         PythonAlgorithm.__init__(self)
+        self.tolerance = 0.0
+        self.wslist = []
 
     def category(self):
         """
@@ -39,8 +41,8 @@ class CompareSampleLogs(PythonAlgorithm):
 
         self.declareProperty(StringArrayProperty(name="SampleLogs", direction=Direction.Input, validator=validator),
                              doc="Comma separated list of sample logs to compare.")
-        self.declareProperty("Tolerance", 1e-3, validator=FloatBoundedValidator(lower=1e-7, upper=1.0),
-                             doc="Tolerance for comparison of double values.")
+        self.declareProperty("Tolerance", 1e-3, validator=FloatBoundedValidator(lower=1e-7, upper=100.0),
+                             doc="Tolerance for comparison of numeric values.")
         self.declareProperty("Result", "A string that will be empty if all the logs match, "
                              "otherwise will contain a comma separated list of  not matching logs", Direction.Output)
 
@@ -77,75 +79,91 @@ class CompareSampleLogs(PythonAlgorithm):
 
         return input_workspaces
 
-    def compare_properties(self, wslist, plist, tolerance):
+    def do_match(self, pname, properties, isnum):
+        wsnum = len(self.wslist)
+        nprop = len(properties)
+        # if some workspaces do not have this property, return False
+        if nprop != wsnum:
+            message = "Number of properties " + str(nprop) + " for property " + pname +\
+                      " is not equal to number of workspaces " + str(wsnum)
+            self.log().information(message)
+            return False
+
+        match = True
+        if isnum:
+            if max(properties) - min(properties) > self.tolerance:
+                match = False
+        else:
+            pvalue = properties[0]
+            if properties.count(pvalue) != nprop:
+                match = False
+        if not match:
+            message = "Sample log " + pname + " is not identical in the given list of workspaces. \n" +\
+                      "Workspaces: " + ", ".join(self.wslist) + "\n Values: " + str(properties)
+            self.log().information(message)
+        return match
+
+    def compare_properties(self, plist):
         """
         Compares properties which are required to be the same.
         Produces error message and throws exception if difference is observed
         or if one of the sample logs is not found.
         Important: exits after the first difference is observed. No further check is performed.
-            @param wslist  List of workspaces
             @param plist   List of properties to compare
-            @param tolerance  Tolerance for comparison of the double values.
         """
         # retrieve the workspaces, form dictionary {wsname: run}
         runs = {}
         does_not_match = []
-        for wsname in wslist:
+        for wsname in self.wslist:
             wks = api.AnalysisDataService.retrieve(wsname)
             runs[wsname] = wks.getRun()
 
         for prop in plist:
             properties = []
             isnum = False
-            for wsname in wslist:
+            for wsname in self.wslist:
                 run = runs[wsname]
                 if not run.hasProperty(prop):
                     message = "Workspace " + wsname + " does not have sample log " + prop
                     self.log().warning(message)
                 else:
                     curprop = run.getProperty(prop)
-                    if curprop.type == 'string':
+                    if curprop.type == 'string' or curprop.type == 'number':
                         properties.append(curprop.value)
-                    elif curprop.type == 'number':
-                        properties.append(int(curprop.value/tolerance))
-                        isnum = True
+
                     else:
-                        message = "Comparison of " + str(curprop.type) + " properties is not yes supported. Property " +\
+                        message = "Comparison of " + str(curprop.type) + " properties is not yet supported. Property " +\
                             prop + " in the workspace " + wsname
                         self.log().warning(message)
 
+            # sometimes numbers are presented as strings
+            try:
+                properties = [float(val) for val in properties]
+            except ValueError:
+                pass
+            else:
+                isnum = True
+
             # check whether number of properties and workspaces match
-            nprop = len(properties)
-            if nprop != len(wslist):
-                message = "Number of properties " + str(nprop) + " for property " + prop +\
-                    " is not equal to number of workspaces " + str(len(wslist))
-                self.log().warning(message)
+            match = self.do_match(prop, properties, isnum)
+            if not match:
                 does_not_match.append(prop)
 
-            else:
-                pvalue = properties[0]
-                if properties.count(pvalue) != nprop:
-                    if isnum:
-                        properties = [tolerance*value for value in properties]
-                    message = "Sample log " + prop + " is not identical in the given list of workspaces. \n" +\
-                        "Workspaces: " + ", ".join(wslist) + "\n Values: " + str(properties)
-                    self.log().warning(message)
-                    does_not_match.append(prop)
         return does_not_match
 
     def PyExec(self):
-        wslist = self._expand_groups()
+        self.wslist = self._expand_groups()
 
         # no sence to compare sample logs for one workspace
-        if len(wslist) < 2:
+        if len(self.wslist) < 2:
             message = "At least 2 workspaces must be given as an input."
             self.log().error(message)
             raise RuntimeError(message)
 
         lognames = self.getProperty("SampleLogs").value
-        tolerance = self.getProperty("Tolerance").value
+        self.tolerance = self.getProperty("Tolerance").value
         result = ''
-        do_not_match = self.compare_properties(wslist, lognames, tolerance)
+        do_not_match = self.compare_properties(lognames)
 
         # return list of not matching properties
         if len(do_not_match) > 0:
