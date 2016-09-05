@@ -17,6 +17,7 @@ class ConjoinSpectraTest(unittest.TestCase):
 
             createWSAlg = run_algorithm( "CreateWorkspace", DataX=dataX, DataY=dataY, DataE=dataE, NSpec=1,UnitX="Wavelength", OutputWorkspace="single_spectra_ws")
             self._aWS = createWSAlg.getPropertyValue("OutputWorkspace")
+            mtd[self._aWS].getSpectrum(0).clearDetectorIDs()
 
 
     def test_basicRun(self):

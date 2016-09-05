@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
 #include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
@@ -148,9 +149,15 @@ public:
     int numPixels = 10;
     int numBins = 20;
     ws1 = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins);
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws1, false, false,
+                                                           "");
+    ws1->rebuildSpectraMapping();
     const std::string ws1_name = "ConjoinWorkspaces_testDoCheckForOverlap";
     AnalysisDataService::Instance().add(ws1_name, ws1);
     ws2 = WorkspaceCreationHelper::CreateEventWorkspace(5, numBins);
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws2, false, false,
+                                                           "");
+    ws2->rebuildSpectraMapping();
 
     ConjoinWorkspaces conj;
     conj.initialize();
@@ -169,7 +176,6 @@ public:
       auto &spec = ws2->getSpectrum(i);
       spec.setSpectrumNo(start + i);
       spec.clearDetectorIDs();
-      spec.addDetectorID(start + i);
     }
 
     TS_ASSERT_THROWS_NOTHING(conj.setProperty("InputWorkspace2", ws2));
@@ -186,7 +192,7 @@ public:
                      ws1->getSpectrum(0).getSpectrumNo());
     // and the joining point
     TS_ASSERT_EQUALS(output->getSpectrum(10).getSpectrumNo(), start);
-    TS_ASSERT(!output->getSpectrum(11).getDetectorIDs().empty());
+    TS_ASSERT(output->getSpectrum(11).getDetectorIDs().empty());
 
     AnalysisDataService::Instance().remove(ws1_name);
   }
@@ -203,6 +209,12 @@ public:
       ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, numBins);
       ws2 = WorkspaceCreationHelper::Create2DWorkspace(5, numBins);
     }
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws1, false, false,
+                                                           "");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws2, false, false,
+                                                           "");
+    ws1->rebuildSpectraMapping();
+    ws2->rebuildSpectraMapping();
     AnalysisDataService::Instance().addOrReplace(ws1Name, ws1);
     AnalysisDataService::Instance().addOrReplace(ws2Name, ws2);
 
