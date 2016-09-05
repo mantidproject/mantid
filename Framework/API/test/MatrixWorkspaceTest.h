@@ -7,6 +7,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/make_cow.h"
@@ -15,6 +16,7 @@
 #include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
 
@@ -1450,6 +1452,7 @@ private:
 };
 
 class MatrixWorkspaceTestPerformance : public CxxTest::TestSuite {
+
 public:
   static MatrixWorkspaceTestPerformance *createSuite() {
     return new MatrixWorkspaceTestPerformance();
@@ -1459,6 +1462,8 @@ public:
   }
 
   MatrixWorkspaceTestPerformance() : m_workspace(nullptr) {
+    using namespace Mantid::Geometry;
+
     size_t numberOfHistograms = 10000;
     size_t numberOfBins = 1;
     m_workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
@@ -1467,6 +1472,29 @@ public:
     const std::string instrumentName("SimpleFakeInstrument");
     InstrumentCreationHelper::addFullInstrumentToWorkspace(
         m_workspace, includeMonitors, startYNegative, instrumentName);
+
+    Mantid::Kernel::V3D sourcePos(0, 0, 0);
+    Mantid::Kernel::V3D samplePos(0, 0, 1);
+    Mantid::Kernel::V3D trolley1Pos(0, 0, 3);
+    Mantid::Kernel::V3D trolley2Pos(0, 0, 6);
+    m_paramMap = boost::make_shared<Mantid::Geometry::ParameterMap>();
+
+    auto baseInstrument = ComponentCreationHelper::sansInstrument(
+        sourcePos, samplePos, trolley1Pos, trolley2Pos);
+
+    auto sansInstrument =
+        boost::make_shared<Instrument>(baseInstrument, m_paramMap);
+
+    // See component creation helper for instrument definition
+    m_sansBank = sansInstrument->getComponentByName("Bank1");
+
+    numberOfHistograms = 60000;
+    m_workspaceSans.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+    m_workspaceSans.setInstrument(sansInstrument);
+    m_zRotation =
+        Mantid::Kernel::Quat(180, V3D(0, 0, 1)); // rotate 180 degrees around z
+
+    m_pos = Mantid::Kernel::V3D(1, 1, 1);
   }
 
   /// This test is equivalent to GeometryInfoFactoryTestPerformance, see there.
@@ -1486,8 +1514,51 @@ public:
     TS_ASSERT_DELTA(result, 5214709.740869, 1e-6);
   }
 
+  /*
+   * Rotate a bank in the workspace and read the positions out again. Very typical.
+   */
+  void test_rotate_bank_and_read_positions() {
+
+    using namespace Mantid::Geometry;
+    using namespace Mantid::Kernel;
+
+    // Rotate the bank
+    ComponentHelper::rotateComponent(
+        *m_sansBank, *m_paramMap, m_zRotation,
+        Mantid::Geometry::ComponentHelper::Relative);
+
+    V3D pos;
+    for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
+
+      pos += m_workspaceSans.getDetector(i)->getPos();
+    }
+  }
+
+  /*
+   * Move a bank in the workspace and read the positions out again. Very typical.
+   */
+  void test_move_bank_and_read_positions() {
+
+    using namespace Mantid::Geometry;
+    using namespace Mantid::Kernel;
+
+    // move the bank
+    ComponentHelper::moveComponent(*m_sansBank, *m_paramMap, m_pos,
+                                   Mantid::Geometry::ComponentHelper::Relative);
+
+    V3D pos;
+    for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
+      pos += m_workspaceSans.getDetector(i)->getPos();
+    }
+  }
+
 private:
   WorkspaceTester m_workspace;
+  WorkspaceTester m_workspaceSans;
+  Mantid::Kernel::Quat m_zRotation;
+  Mantid::Kernel::V3D m_pos;
+  Mantid::Geometry::IComponent_const_sptr m_sansBank;
+  boost::shared_ptr<Mantid::Geometry::ParameterMap> m_paramMap;
 };
 
 #endif /*WORKSPACETEST_H_*/
