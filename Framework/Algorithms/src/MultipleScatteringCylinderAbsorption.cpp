@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/MultipleScatteringCylinderAbsorption.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -167,15 +165,15 @@ void MultipleScatteringCylinderAbsorption::exec() {
     out_WSevent->switchEventType(API::WEIGHTED_NOTIME);
 
     // now do the correction
+    const auto &spectrumInfo = out_WSevent->spectrumInfo();
     PARALLEL_FOR1(out_WSevent)
     for (int64_t index = 0; index < NUM_HIST; ++index) {
       PARALLEL_START_INTERUPT_REGION
-      IDetector_const_sptr det = out_WSevent->getDetector(index);
-      if (det == nullptr)
+      if (!spectrumInfo.hasDetectors(index))
         throw std::runtime_error("Failed to find detector");
-      if (det->isMasked())
+      if (spectrumInfo.isMasked(index))
         continue;
-      const double tth_rad = out_WSevent->detectorTwoTheta(*det);
+      const double tth_rad = spectrumInfo.twoTheta(index);
 
       EventList &eventList = out_WSevent->getSpectrum(index);
       vector<double> tof_vec, y_vec, err_vec;
@@ -204,13 +202,13 @@ void MultipleScatteringCylinderAbsorption::exec() {
     MatrixWorkspace_sptr out_WS = WorkspaceFactory::Instance().create(
         in_WS, NUM_HIST, in_WS->readX(0).size(), in_WS->readY(0).size());
 
+    const auto &spectrumInfo = in_WS->spectrumInfo();
     for (int64_t index = 0; index < NUM_HIST; ++index) {
-      IDetector_const_sptr det = in_WS->getDetector(index);
-      if (det == nullptr)
+      if (!spectrumInfo.hasDetectors(index))
         throw std::runtime_error("Failed to find detector");
-      if (det->isMasked())
+      if (spectrumInfo.isMasked(index))
         continue;
-      const double tth_rad = in_WS->detectorTwoTheta(*det);
+      const double tth_rad = spectrumInfo.twoTheta(index);
 
       MantidVec tof_vec = in_WS->readX(index);
       MantidVec y_vec = in_WS->readY(index);
