@@ -83,6 +83,7 @@ Test 5: sequential fit of simultaneous fits
 Test 6: simultaneous fit across periods
 ---------------------------------------
 The data used so far is single period, so here we will use MUSR data from the unit test data.
+
 - *Home* tab: set instrument to MUSR
 - Load run 15189 and switch to *Data Analysis* tab
 - (Use *Display/Clear Fit Curves* to remove any old fits from the graph)
