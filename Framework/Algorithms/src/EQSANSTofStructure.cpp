@@ -1,7 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/EQSANSTofStructure.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/EventList.h"
@@ -128,33 +126,21 @@ void EQSANSTofStructure::execEvent(
   }
   const double SDD = *dp / 1000.0;
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  const auto l1 = spectrumInfo.l1();
+
   // Loop through the spectra and apply correction
   PARALLEL_FOR1(inputWS)
   for (int64_t ispec = 0; ispec < int64_t(numHists); ++ispec) {
+    PARALLEL_START_INTERUPT_REGION
 
-    IDetector_const_sptr det;
-    try {
-      det = inputWS->getDetector(ispec);
-    } catch (Exception::NotFoundError &) {
+    if(!spectrumInfo.hasDetectors(ispec)) {
       g_log.warning() << "Workspace index " << ispec
                       << " has no detector assigned to it - discarding\n";
-      // 'continue' statement moved outside catch block because Mac Intel
-      // compiler has a problem with it being here in an openmp block.
-    }
-    if (!det)
       continue;
-
-    // Get the flight path from the sample to the detector pixel
-    const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
-    const V3D scattered_flight_path = det->getPos() - samplePos;
-
-    // Sample-to-source distance
-    const V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
-    const V3D SSD = samplePos - sourcePos;
-    double tof_factor =
-        (SSD.norm() + scattered_flight_path.norm()) / (SSD.norm() + SDD);
-
-    PARALLEL_START_INTERUPT_REGION
+    }
+    const auto l2 = spectrumInfo.l2(ispec);
+    double tof_factor = (l1 + l2) / (l1 + SDD);
 
     // Get the pointer to the output event list
     std::vector<TofEvent> &events = inputWS->getSpectrum(ispec).getEvents();
