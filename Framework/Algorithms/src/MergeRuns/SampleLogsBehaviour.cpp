@@ -23,6 +23,9 @@ std::string generateDifferenceMessage(std::string item, std::string wsName,
 }
 }
 
+const std::string SampleLogsBehaviour::TIME_SERIES_SUFFIX = "_time_series";
+const std::string SampleLogsBehaviour::LIST_SUFFIX = "_list";
+
 SampleLogsBehaviour::SampleLogsBehaviour(const MatrixWorkspace_sptr &ws, Logger &g_log, std::string sampleLogsTimeSeries, std::string sampleLogsList, std::string sampleLogsWarn, std::string sampleLogsWarnTolerances, std::string sampleLogsFail, std::string sampleLogsFailTolerances) : m_logger(g_log) {
   updateSampleMap(m_logMap, time_series, sampleLogsTimeSeries, ws, "");
   updateSampleMap(m_logMap, list, sampleLogsList, ws, "");
@@ -45,11 +48,11 @@ void SampleLogsBehaviour::createSampleLogsMapsFromInstrumentParams(SampleLogsMap
 
   params = ws->getInstrument()->getParameterAsString("sample_logs_warn", false);
   std::string paramsTolerances;
-  paramsTolerances = ws->getInstrument()->getParameterAsString("sample_logs_warn_tolerance", false);
+  paramsTolerances = ws->getInstrument()->getParameterAsString("sample_logs_warn_tolerances", false);
   updateSampleMap(map, warn, params, ws, paramsTolerances, true);
 
   params = ws->getInstrument()->getParameterAsString("sample_logs_fail", false);
-  paramsTolerances = ws->getInstrument()->getParameterAsString("sample_logs_fail_tolerance", false);
+  paramsTolerances = ws->getInstrument()->getParameterAsString("sample_logs_fail_tolerances", false);
   updateSampleMap(map, fail, params, ws, paramsTolerances, true);
 }
 
@@ -124,7 +127,7 @@ void SampleLogsBehaviour::updateSampleMap(SampleLogsMap &map, const MergeLogType
     }
 
     if (sampleLogBehaviour == time_series) {
-      std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(new TimeSeriesProperty<double>(item + "_time_series"));
+      std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(new TimeSeriesProperty<double>(item + TIME_SERIES_SUFFIX));
       std::string startTime = ws->mutableRun().startTime().toISO8601String();
       timeSeriesProp->addValue(startTime, value);
       ws->mutableRun().addLogData(std::unique_ptr<Kernel::Property>(std::move(timeSeriesProp)));
@@ -156,7 +159,7 @@ void SampleLogsBehaviour::calculateUpdatedSampleLogs(const MatrixWorkspace_sptr 
 
     switch (item.second.type) {
     case time_series: {
-      auto timeSeriesProp = outWS->mutableRun().getTimeSeriesProperty<double>(item.first + "_time_series");
+      auto timeSeriesProp = outWS->mutableRun().getTimeSeriesProperty<double>(item.first + TIME_SERIES_SUFFIX);
       Kernel::DateAndTime startTime = ws->mutableRun().startTime();
       double value = ws->mutableRun().getLogAsSingleValue(item.first);
       timeSeriesProp->addValue(startTime, value);

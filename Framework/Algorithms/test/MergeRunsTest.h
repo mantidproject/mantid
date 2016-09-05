@@ -15,6 +15,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -170,10 +171,10 @@ private:
 
     // add tolerances
     a->instrumentParameters().addString(a->getInstrument()->getComponentID(),
-                                        "sample_logs_fail_tolerance",
+                                        "sample_logs_fail_tolerances",
                                         tolerances);
     b->instrumentParameters().addString(b->getInstrument()->getComponentID(),
-                                        "sample_logs_fail_tolerance",
+                                        "sample_logs_fail_tolerances",
                                         tolerances);
 
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
@@ -934,11 +935,10 @@ public:
     TS_ASSERT_EQUALS(output->y(0).front(), 2.0 * filesMerged);
 
     if (mergeType.compare("sample_logs_time_series") == 0) {
-      prop = output->mutableRun().getTimeSeriesProperty<double>(propertyName +
-                                                                "_time_series");
+      prop = output->mutableRun().getTimeSeriesProperty<double>(propertyName + SampleLogsBehaviour::TIME_SERIES_SUFFIX);
       TS_ASSERT_EQUALS(prop->value(), result);
     } else if (mergeType.compare("sample_logs_list") == 0) {
-      prop = output->mutableRun().getLogData(propertyName + "_list");
+      prop = output->mutableRun().getLogData(propertyName + SampleLogsBehaviour::LIST_SUFFIX);
       TS_ASSERT_EQUALS(prop->value(), result);
     } else {
       prop = output->mutableRun().getLogData(propertyName);

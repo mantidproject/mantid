@@ -29,13 +29,13 @@
         <parameter name="sample_logs_warn" type="string">
             <value val="Ei, end_time" />
         </parameter>
-        <parameter name="sample_logs_warn_tolerance" type="string">
+        <parameter name="sample_logs_warn_tolerances" type="string">
             <value val="0.1, 0.2" />
         </parameter>
         <parameter name="sample_logs_fail" type="string">
             <value val="EPP" />
         </parameter>
-        <parameter name="sample_logs_fail_tolerance" type="string">
+        <parameter name="sample_logs_fail_tolerances" type="string">
             <value val="1" />
         </parameter>
 

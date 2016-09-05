@@ -36,6 +36,9 @@ class MANTID_ALGORITHMS_DLL SampleLogsBehaviour {
 public:
   enum MergeLogType { time_series, list, warn, fail };
 
+  static const std::string TIME_SERIES_SUFFIX;
+  static const std::string LIST_SUFFIX;
+
   typedef struct
   {
     MergeLogType type;
