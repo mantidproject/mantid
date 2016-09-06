@@ -149,7 +149,7 @@ double ParamFunction::getParameter(const std::string &name) const {
 
   double parvalue = m_parameters[it - m_parameterNames.cbegin()];
 
-  if (!std::isfinite(parvalue)) {
+  if (parvalue != parvalue || !(parvalue > -DBL_MAX && parvalue < DBL_MAX)) {
     g_log.warning() << "Parameter " << name << " has a NaN or infinity value "
                     << '\n';
   }
