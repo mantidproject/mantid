@@ -670,11 +670,6 @@ def readPeakFile(file_name):
 
     """
     loaded_file = []
-    # split the entries to the main values:
-    # For example:
-    # MERLIN/door1/tube_1_1 [34.199347724575574, 525.5864438725401, 1001.7456248836971]
-    # Will be splited as:
-    # ['MERLIN/door1/tube_1_1', '', '34.199347724575574', '', '525.5864438725401', '', '1001.7456248836971', '', '', '']
     pattern = re.compile(r'[\[\],\s\r]')
     saveDirectory = config['defaultsave.directory']
     pfile = os.path.join(saveDirectory, file_name)
@@ -690,7 +685,8 @@ def readPeakFile(file_name):
         try:
             f_values = [float(v) for v in line_vals[1:] if v != '']
         except ValueError:
-            # print 'Wrong format: we expected only numbers, but receive this line ',str(line_vals[1:])
+            # print 'Wrong format: we expected only numbers,
+            # but receive this line ',str(line_vals[1:])
             continue
 
         loaded_file.append((id_, f_values))
@@ -700,13 +696,13 @@ def readPeakFile(file_name):
 def saveCalibration(table_name, out_path):
     """Save the calibration table to file
 
-    This creates a CSV file for the calibration TableWorkspace. The first 
+    This creates a CSV file for the calibration TableWorkspace. The first
     column is the detector number and the second column is the detector position
 
     Example of usage:
 
     .. code-block:: python
-       
+
        saveCalibration('CalibTable','/tmp/myCalibTable.txt')
 
     :param table_name: name of the TableWorkspace to save
@@ -717,7 +713,7 @@ def saveCalibration(table_name, out_path):
     POS = 'Detector Position'
     with open(out_path, 'w') as file_p:
         table = mtd[table_name]
-        for row in table: 
+        for row in table:
             row_data = [row[DET], row[POS]]
             line = ','.join(map(str, row_data)) + '\n'
             file_p.write(line)
@@ -731,16 +727,16 @@ def readCalibrationFile(table_name, in_path):
     Example of usage:
 
     .. code-block:: python
-       
+
        saveCalibration('CalibTable','/tmp/myCalibTable.txt')
 
     :param table_name: name to call the TableWorkspace
-    :param in_path: the path to the calibration file 
+    :param in_path: the path to the calibration file
 
     """
     DET = 'Detector ID'
     POS = 'Detector Position'
-    re_float = re.compile("[+-]? *(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?")
+    re_float = re.compile(r"[+-]? *(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?")
     calibTable = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
     calibTable.addColumn(type='int', name=DET)
     calibTable.addColumn(type='V3D', name=POS)
@@ -752,8 +748,8 @@ def readCalibrationFile(table_name, in_path):
                 continue
 
             nextRow = {
-                DET: int(values[0]), 
-                POS: V3D(float(values[1]), float(values[2]), float(values[3])) 
+                DET: int(values[0]),
+                POS: V3D(float(values[1]), float(values[2]), float(values[3]))
             }
 
             calibTable.addRow(nextRow)
