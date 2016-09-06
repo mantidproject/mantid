@@ -1,5 +1,5 @@
 import h5py
-import numpy
+import numpy as np 
 import subprocess
 import shutil
 import hashlib
@@ -144,7 +144,7 @@ class IOmodule(object):
         @param group: group to which attributes should be saved.
         """
         for name in self._attributes:
-            if isinstance(self._attributes[name], (numpy.int64, int, numpy.float64, float, str, bytes)):
+            if isinstance(self._attributes[name], (np.int64, int, np.float64, float, str, bytes)):
                 group.attrs[name] = self._attributes[name]
             else:
                 raise ValueError("Invalid value of attribute. String, int or bytes was expected! (invalid type : %s)" %type(self._attributes[name]))
@@ -160,11 +160,11 @@ class IOmodule(object):
 
         for key, item in dic.items():
             folder = path + key
-            if isinstance(item, (numpy.int64, int, numpy.float64, float, str, bytes)):
+            if isinstance(item, (np.int64, int, np.float64, float, str, bytes)):
                 if folder in hdf_file:
                     del hdf_file[folder]
                 hdf_file[folder] = item
-            elif isinstance(item, numpy.ndarray):
+            elif isinstance(item, np.ndarray):
                 if folder in hdf_file:
                     del hdf_file[folder]
                 hdf_file.create_dataset(name=folder, data=item, compression="gzip", compression_opts=9)
@@ -199,7 +199,7 @@ class IOmodule(object):
         @param group: group to which datasets should be saved.
         """
         for name in self._numpy_datasets:
-            if isinstance(self._numpy_datasets[name], numpy.ndarray):
+            if isinstance(self._numpy_datasets[name], np.ndarray):
                 if name in group:
                     del group[name]
                     group.create_dataset(name=name, data=self._numpy_datasets[name], compression="gzip", compression_opts=9)
@@ -251,7 +251,7 @@ class IOmodule(object):
         Loads collection of attributes from the given group.
         @param list_of_attributes:
         @param group:
-        @return:
+        @return: dictionary with attributes
         """
 
         results = {}
@@ -299,7 +299,7 @@ class IOmodule(object):
         if not name in group:
             raise ValueError("Dataset %s in not present in %s file!" % (name, self._hdf_filename))
         else:
-            return numpy.copy(group[name])
+            return group[name].value
 
 
     def _load_structured_datasets(self, hdf_file=None, list_of_structured_datasets=None, group=None):
@@ -380,7 +380,7 @@ class IOmodule(object):
         if not isinstance(name, str): raise ValueError("Invalid name of the dataset!")
 
         if name in group:
-           _hdf_group= group[name]
+           _hdf_group = group[name]
         else:
             raise ValueError("Invalid name of the dataset!")
 
