@@ -55,7 +55,7 @@ private slots:
       auto runNo = m_multiRunNo[i];
       try {
         m_pres->doFitting(runNo, m_expectedPeaks);
-      } catch (std::runtime_error &e) {
+      } catch (std::exception &e) {
         // If we catch any sort of exception throw we should break
         // the loop to ensure we don't continue and emit
         // the finished signal to Qt and replay the error to log

@@ -174,7 +174,8 @@ void EnggDiffFittingPresenter::fittingFinished() {
 
   } else {
     // Fitting failed log and tidy up
-    g_log.warning() << "The single peak fitting did not finish correctly.\n";
+    g_log.warning() << "The single peak fitting did not finish correctly. "
+                       "Please check a focused file was selected.";
     if (m_workerThread) {
       delete m_workerThread;
       m_workerThread = nullptr;
@@ -246,7 +247,6 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
       } else {
         // true if string convertible to digit
-        bool isRunNumber = isDigit(strFocusedFile);
         auto focusDir = m_view->focusingDir();
 
         // if not valid parent dir and not valid single run number
@@ -259,7 +259,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
               "folder. ");
 
           m_view->enableFitAllButton(false);
-        } else if (!isRunNumber) {
+        } else if (!isDigit(strFocusedFile)) {
 
           m_view->userWarning("Invalid Run Number",
                               "Invalid format of run number has been entered. "
@@ -826,24 +826,15 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
     }
     enggFitPeaks->setProperty("FittedPeaks", focusedFitPeaksTableName);
     enggFitPeaks->execute();
-  } catch (std::exception &re) {
-    g_log.error() << "Could not run the algorithm EnggFitPeaks "
-                     "successfully for bank, "
-                     // bank name
-                     "Error description: " +
-                         static_cast<std::string>(re.what()) +
-                         " Please check also the log message for detail.\n";
+
+  } catch (std::exception) {
+    throw std::runtime_error(
+        "Could not run the algorithm EnggFitPeaks successfully.");
   }
 
   auto fPath = focusedRunNo;
-  try {
-    runSaveDiffFittingAsciiAlg(focusedFitPeaksTableName, fPath);
-    runFittingAlgs(focusedFitPeaksTableName, g_focusedFittingWSName);
-
-  } catch (std::invalid_argument &ia) {
-    g_log.error() << "Error, Fitting could not finish off correctly - " +
-                         std::string(ia.what()) << '\n';
-  }
+  runSaveDiffFittingAsciiAlg(focusedFitPeaksTableName, fPath);
+  runFittingAlgs(focusedFitPeaksTableName, g_focusedFittingWSName);
 }
 
 void EnggDiffFittingPresenter::runLoadAlg(
@@ -880,11 +871,11 @@ void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
   // returns ['ENGINX', <RUN-NUMBER>, 'focused', `bank`, <BANK>, '.nxs']
   if (fileSplit.size() == 1) {
     // The user probably has input just `ENGINX012345.nxs`
-    g_log.error("File name does not contain any '_' characters"
-                " - expected file name is "
-                "'<Instrument>_<Run-Number>_focused_bank_<bankNumber>.nxs");
-    throw std::invalid_argument("Could not save fitting ASCII as"
-                                " filename was not of expected format");
+    throw std::invalid_argument(
+        "Could not save fitting ASCII as"
+        " file name does not contain any '_' characters"
+        " - expected file name is "
+        "'<Instrument>_<Run-Number>_focused_bank_<bankNumber>.nxs \n");
   }
 
   auto runNumber = fileSplit[1];
@@ -912,22 +903,13 @@ void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
   auto saveDiffFit = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "SaveDiffFittingAscii");
 
-  try {
-    saveDiffFit->initialize();
-    saveDiffFit->setProperty("InputWorkspace", tableWorkspace);
-    saveDiffFit->setProperty("Filename", dir.toString());
-    saveDiffFit->setProperty("RunNumber", runNumber);
-    saveDiffFit->setProperty("Bank", bank);
-    saveDiffFit->setProperty("OutMode", "AppendToExistingFile");
-    saveDiffFit->execute();
-  } catch (std::exception &re) {
-    g_log.error() << "Could not run the algorithm SaveDiffFittingAscii "
-                     "successfully for bank, "
-                     // bank name
-                     "Error description: " +
-                         static_cast<std::string>(re.what()) +
-                         " Please check also the log message for detail.\n";
-  }
+  saveDiffFit->initialize();
+  saveDiffFit->setProperty("InputWorkspace", tableWorkspace);
+  saveDiffFit->setProperty("Filename", dir.toString());
+  saveDiffFit->setProperty("RunNumber", runNumber);
+  saveDiffFit->setProperty("Bank", bank);
+  saveDiffFit->setProperty("OutMode", "AppendToExistingFile");
+  saveDiffFit->execute();
 }
 
 void EnggDiffFittingPresenter::runFittingAlgs(
