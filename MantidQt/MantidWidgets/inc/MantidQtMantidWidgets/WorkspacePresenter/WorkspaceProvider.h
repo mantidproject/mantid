@@ -10,7 +10,6 @@ namespace MantidWidgets {
 class WorkspaceProviderNotifiable;
 
 using Presenter_wptr = boost::weak_ptr<WorkspaceProviderNotifiable>;
-using StringList = std::vector<std::string>;
 
 /**
 \class  WorkspaceProvider

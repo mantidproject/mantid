@@ -12,6 +12,7 @@ namespace MantidWidgets {
 class IWorkspaceDockView;
 class WorkspaceProvider;
 
+using DockView_sptr = boost::shared_ptr<IWorkspaceDockView>;
 using DockView_wptr = boost::weak_ptr<IWorkspaceDockView>;
 using ADSAdapter_uptr = std::unique_ptr<WorkspaceProvider>;
 /**

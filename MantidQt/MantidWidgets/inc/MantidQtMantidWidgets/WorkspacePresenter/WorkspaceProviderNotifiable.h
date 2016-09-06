@@ -1,8 +1,8 @@
-#ifndef MANTID_MANTIDWIDGETS_ADSNOTIFIABLE_H_
-#define MANTID_MANTIDWIDGETS_ADSNOTIFIABLE_H_
+#ifndef MANTID_MANTIDWIDGETS_WORKSPACEPROVIDERNOTIFIABLE_H_
+#define MANTID_MANTIDWIDGETS_WORKSPACEPROVIDERNOTIFIABLE_H_
 
 /**
-\class  WorkspaceProvider
+\class  WorkspaceProviderNotifiable
 \brief  Mixin class allows ADS notifications
 \author Lamar Moore
 \date   24-08-2016

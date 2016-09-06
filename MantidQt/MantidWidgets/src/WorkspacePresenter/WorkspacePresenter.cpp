@@ -59,6 +59,5 @@ void WorkspacePresenter::workspaceRenamed() {}
 void WorkspacePresenter::workspacesGrouped() {}
 void WorkspacePresenter::workspacesSorted() {}
 void WorkspacePresenter::workspacesDeleted() {}
-
 } // namespace MantidQt
 } // namespace MantidWidgets
