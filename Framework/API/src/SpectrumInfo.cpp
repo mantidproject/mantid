@@ -84,10 +84,12 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
       .getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
 }
 
+/// Returns the position of the spectrum with given index.
 Kernel::V3D SpectrumInfo::position(const size_t index) const {
   return getDetector(index).getPos();
 }
 
+/// Returns true if the spectrum is associated with detectors in the instrument.
 bool SpectrumInfo::hasDetectors(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.
@@ -101,6 +103,7 @@ bool SpectrumInfo::hasDetectors(const size_t index) const {
   return false;
 }
 
+/// Returns true if the spectrum is associated with exactly one detector.
 bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
   size_t count = 0;
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
