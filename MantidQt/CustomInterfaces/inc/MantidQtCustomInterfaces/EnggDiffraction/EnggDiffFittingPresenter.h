@@ -166,6 +166,7 @@ private:
   std::vector<std::string>
   splitFittingDirectory(const std::string &selectedfPath);
 
+
   void enableMultiRun(std::string firstRun, std::string lastRun,
                       std::vector<std::string> &fittingRunNoDirVec);
 
@@ -185,10 +186,11 @@ private:
   void processMultiRun(const std::string strFocusedFile,
                        std::vector<std::string> &runnoDirVector);
 
-  void processSingleRun(const std::string &focusDir,
-                        const std::string &strFocusedFile,
+  void processSingleRun(const std::string &userInputBasename,
                         std::vector<std::string> &runnoDirVector,
                         const std::vector<std::string> &splitBaseName);
+
+  void processFullPathInput(const Poco::Path &pocoFilePath, const std::vector<std::string> &splitBaseName);
 
   // whether to use AlignDetectors to convert units
   static const bool g_useAlignDetectors;
