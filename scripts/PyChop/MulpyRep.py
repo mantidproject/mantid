@@ -118,7 +118,7 @@ def calcRes(ei, chop_times, lastChopDist, samDist, detDist):
         modwid.append(mod_width)
     return res, percent, chwid, modwid
 
-def calcFlux(Ei, freq1, percent):
+def calcFlux(Ei, freq1, percent, slot):
     """
     Looks up flux at a give Ei and resolution (frequency) from a table of measured flux
     """
@@ -126,6 +126,7 @@ def calcFlux(Ei, freq1, percent):
     # here are some constants (hahaha) relating to the instrument
     intRef = 0.885 # the flux at 5meV
     freqRef = 150. # the frequency this corresponds to
+    refSlot = 20.  # reference disk slot width in mm
     fluxProf = [0.0889, 0.1003, 0.1125, 0.1213, 0.1274, 0.1358, 0.1455, 0.1562, 0.1702,
                 0.1902, 0.2149, 0.2496, 0.2938, 0.3537, 0.4315, 0.5244, 0.6415, 0.7856,
                 0.9341, 1.0551, 1.1437, 1.1955, 1.2004, 1.1903, 1.1662, 1.1428, 1.1176,
@@ -146,9 +147,9 @@ def calcFlux(Ei, freq1, percent):
         i = (abs(fluxLamba-lamba[j])).argmin()
         intensity = fluxProf[i]
         if percent[j] < 0.02:
-            flux.append(5.6e4*intensity/intRef*(freqRef/freq1)**2)
+            flux.append(5.6e4*intensity/intRef*(slot/refSlot)*(freqRef/freq1)**2)
         else:
-            flux.append(5.6e4*intensity/intRef*(freqRef/freq1))
+            flux.append(5.6e4*intensity/intRef*(slot/refSlot)*(freqRef/freq1))
     return flux
 
 

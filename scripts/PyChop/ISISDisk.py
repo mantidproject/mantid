@@ -32,32 +32,27 @@ class ISISDisk:
         instname = instname.upper()
         if 'LET' in instname:
             self.instname = 'LET'
-            # instname='LET3' means with chopper 3 - default is without chopper 3.
-            # variant = either 'With chopper 3' or 'Without chopper 3' - variant takes precendent of instname
-            withoutChopper3 = True if '3' not in instname else False
-            if variant is not None:
-                withoutChopper3 = True if 'out' in variant else False
-            if withoutChopper3:
-                self.dist = [7.83, 8.4, 15.66, 23.5]              # distance to each chopper in m
-                self.nslot = [6, 1, 6, 2]                         # number of slots in each chopper. Assumed equally spaced
-                self.slot_width = [40, 890, 52, 10]               # width of chopper slots in mm
-                self.guide_width = [40, 40, 40, 10]               # width of the guide in mm
-                self.radius = [290, 545, 290, 290]                # radius in mm of each disk at centre of window
-                self.numDisk = [2, 1, 1, 2]                       # whether double or single disks
-                self.variant = 'Without chopper 3'
+            # Sets parameters which are the same for all configurations
+            self.dist = [7.83,8.4,11.75, 15.66, 23.5]          # distance to each chopper in m (same for all conf)
+            self.nslot = [6, 1, 2, 6, 2]                       # number of slots in each chopper. Assumed equally spaced
+            self.guide_width = [40, 40, 40, 40, 20]            # width of the guide in mm 
+            self.radius = [290, 545, 290, 290, 290]            # radius in mm of each disk at centre of window 
+            self.numDisk = [2, 1, 1, 1, 2]                     # whether double or single disks
+            # possible instname: ['LET', 'LETHIGH', 'LETMEDIUM', 'LETLOW'] - corresponds to different configurations
+            if 'HI' in instname or (variant is not None and 'HI' in variant.upper()):
+                self.slot_width = [40, 890, 56, 52, 31]        # width of chopper slots in mm
+                self.variant = 'High flux'
+            elif 'LO' in instname or (variant is not None and 'LO' in variant.upper()):
+                self.slot_width = [40, 890, 56, 52, 20]        # width of chopper slots in mm
+                self.variant = 'Low flux'
             else:
-                self.dist = [7.83, 8.4, 11.75, 15.66, 23.5]
-                self.nslot = [6, 1, 2, 6, 1]
-                self.slot_width = [40, 890, 56, 52, 10]
-                self.guide_width = [40, 40, 40, 40, 10]
-                self.radius = [290, 545, 290, 290, 290]
-                self.numDisk = [2, 1, 1, 1, 2]
-                self.variant = 'With chopper 3'
+                self.slot_width = [40, 890, 56, 52, 20]        # width of chopper slots in mm
+                self.variant = 'Medium flux'
             self.ph_ind = 1        # index of chopper with user-determined phase
             self.samp_det = 3.5    # sample to detector distance in m
             self.chop_samp = 1.5   # final chopper to sample distance
             self.source_rep = 10   # rep rate of source
-            self.tmod = 1000       # maximimum emmision window from moderator in us
+            self.tmod = 3500       # maximimum emmision window from moderator in us
             self.frac_ei = 0.90    # fraction of Ei to plot energy loss lines
             self.Chop2Phase = 5    # Phase delay time in usec for chopper 2 (T0/frame overlap chopper)
         elif 'MERLIN' in instname:
@@ -97,30 +92,42 @@ class ISISDisk:
         If scalar, sets the resolution chopper freq to this and the pulse remover to freq/2
         """
         if 'LET' in self.instname:
-            if 'Without chopper 3' in self.variant:
+            if 'HI' in self.variant.upper():
                 if hasattr(frequency, "__len__"):
                     if len(frequency) == 1:
-                        self.freq = [frequency[0]/4., 10., frequency[0]/2., frequency[0]]
+                        self.freq = [frequency[0]/4., 10., frequency[0]/4., frequency[0]/2., frequency[0]]
                     elif len(frequency) == 2:
-                        self.freq = [frequency[1]/2., 10., frequency[0]/2., frequency[0]]
-                    elif len(frequency) == 4:
-                        self.freq = frequency
-                    else:
-                        raise ValueError('Frequency must be a 1-, 2- or 4-element list/array')
-                else:
-                    self.freq = [frequency/4., 10., frequency/2., frequency]
-            else:
-                if hasattr(frequency, "__len__"):
-                    if len(frequency) == 1:
-                        self.freq = [frequency[0], 10., frequency[0]/2., frequency[0]/2., frequency[0]]
-                    elif len(frequency) == 2:
-                        self.freq = [frequency[0], 10., frequency[1], frequency[0]/2., frequency[0]]
+                        self.freq = [frequency[1]/2., 10., frequency[1]/2., frequency[0]/2., frequency[0]]
                     elif len(frequency) == 5:
                         self.freq = frequency
                     else:
                         raise ValueError('Frequency must be a 1-, 2- or 5-element list/array')
                 else:
-                    self.freq = [frequency, 10., frequency/2., frequency/2., frequency]
+                    self.freq = [frequency/4., 10., frequency/4., frequency/2., frequency]
+            elif 'LO' in self.variant.upper():
+                if hasattr(frequency, "__len__"):
+                    if len(frequency) == 1:
+                        self.freq = [frequency[0]/2., 10., frequency[0]/2., frequency[0]/2., frequency[0]]
+                    elif len(frequency) == 2:
+                        self.freq = [frequency[0]/2., 10., frequency[1], frequency[0]/2., frequency[0]]
+                    elif len(frequency) == 5:
+                        self.freq = frequency
+                    else:
+                        raise ValueError('Frequency must be a 1-, 2- or 5-element list/array')
+                else:
+                    self.freq = [frequency/2., 10., frequency/2., frequency/2., frequency]
+            else:
+                if hasattr(frequency, "__len__"):
+                    if len(frequency) == 1:
+                        self.freq = [frequency[0]/4., 10., frequency[0]/2., frequency[0]/2., frequency[0]]
+                    elif len(frequency) == 2:
+                        self.freq = [frequency[1]/2., 10., frequency[1], frequency[0]/2., frequency[0]]
+                    elif len(frequency) == 5:
+                        self.freq = frequency
+                    else:
+                        raise ValueError('Frequency must be a 1-, 2- or 5-element list/array')
+                else:
+                    self.freq = [frequency/4., 10., frequency/2., frequency/2., frequency]
             if 'Chopper2Phase' in kwargs.keys():
                 self.Chop2Phase = kwargs['Chopper2Phase']
         elif 'MERLIN' in self.instname:
@@ -245,7 +252,7 @@ class ISISDisk:
             self.setFrequency(frequency)
         if 'LET' in self.instname:
             _, _, _, percent, ie_list = self.__LETgetResolution(True, 0., Ei)
-            flux = MulpyRep.calcFlux(Ei, self.freq[-1], [percent[ie_list[0]]])[0]
+            flux = MulpyRep.calcFlux(Ei, self.freq[-1], [percent[ie_list[0]]], self.slot_width[-1])[0]
         elif 'MERLIN' in self.instname:
             merlin = ISISFermi('Merlin', self.variant, self.freq[-1])
             flux = merlin.getFlux(Ei)
@@ -311,7 +318,7 @@ class ISISDisk:
             self.setFrequency(frequency)
         if 'LET' in self.instname:
             Eis, _, _, percent, _ = self.__LETgetResolution(False, 0., Ei)
-            flux = MulpyRep.calcFlux(Eis, self.freq[-1], percent)
+            flux = MulpyRep.calcFlux(Eis, self.freq[-1], percent, self.slot_width[-1])
         elif 'MERLIN' in self.instname:
             Eis, _, _, percent, _ = self.__LETgetResolution(False, 0., Ei)
             merlin = ISISFermi('Merlin', self.variant, self.freq[-1])

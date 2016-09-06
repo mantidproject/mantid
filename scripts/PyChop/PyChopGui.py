@@ -27,7 +27,7 @@ class PyChopGui(QtGui.QMainWindow):
         'MAPS':['A', 'S'],
         'MARI':['A', 'B', 'R', 'G', 'S'],
         'MERLIN':['G', 'S'],
-        'LET':['Without chopper 3', 'With chopper 3']
+        'LET':['High Flux', 'Medium Flux', 'Low Flux']
     }
     minE = {'MAPS':0.1, 'MARI':0.1, 'MERLIN':0.1, 'LET':0.1}
     maxE = {'MAPS':1000, 'MARI':1000, 'MERLIN':1000, 'LET':100}
@@ -301,11 +301,10 @@ class PyChopGui(QtGui.QMainWindow):
             enmr = np.linspace(0, 0.95, 10)
             resmr = obj.getMultiRepResolution(enmr)
             if not hasattr(resmr, '__len__'): resmr = [[resmr]]
-            freqrm = freqs[0]*2 if 'Without chopper 3' in chtyp else freqs[2]
             txt = '# ------------------------------------------------------------- #\n'
             txt += '# Resolution calculation for LET %s\n' % (chtyp)
             txt += '#   with the resolution chopper at %3i Hz,\n' % (freqs[-1])
-            txt += '#   and the pulse remover chopper at %3i Hz\n' % (freqrm)
+            txt += '#   and the pulse remover chopper at %3i Hz\n' % (freqs[2])
             txt += '# ------------------------------------------------------------- #\n'
             txt += '# Ei = %6.2f meV\n' % (ei_in)
             txt += '#  EN (meV)   dE (meV)\n'

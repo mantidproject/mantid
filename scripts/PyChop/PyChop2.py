@@ -16,14 +16,18 @@ class PyChop2:
     """
 
     __Classes = {
-        'LET': ISISDisk,     # LET without chopper 3
-        'LET3': ISISDisk,    # LET with all choppers
+        'LET': ISISDisk,       # LET default
+        'LETHIGH': ISISDisk,   # LET, high flux configuration
+        'LETMEDIUM': ISISDisk, # LET, medium flux configuration
+        'LETLOW': ISISDisk,    # LET, low flux configuration
         'MAPS': ISISFermi,
         'MARI': ISISFermi,
         'MERLIN': ISISFermi}
     __MultiRepClasses = {
-        'LET': ISISDisk,     # LET without chopper 3
-        'LET3': ISISDisk,    # LET with all choppers
+        'LET': ISISDisk,       # LET default
+        'LETHIGH': ISISDisk,   # LET, high flux configuration
+        'LETMEDIUM': ISISDisk, # LET, medium flux configuration
+        'LETLOW': ISISDisk,    # LET, low flux configuration
         'MERLIN': ISISDisk}
 
     def __init__(self, instname, *args):
@@ -159,12 +163,12 @@ class PyChop2:
         """
         ! Calculates the resolution and flux directly (without setting up a PyChop2 object)
         !
-        ! PyChop2.calculate('mari', 's', 250., 55.)    # Instname, Chopper Type, Freq, Ei in order
-        ! PyChop2.calculate('let', 180, 2.2)           # For LET, chopper type is not needed.
-        ! PyChop2.calculate('let', [160., 80.], 1.)    # For LET, specify resolution and pulse remover freq
-        ! PyChop2.calculate('let', 'With Chopper 3', 80, 2.2)  # LET default is without chopper 3
+        ! PyChop2.calculate('mari', 's', 250., 55.)      # Instname, Chopper Type, Freq, Ei in order
+        ! PyChop2.calculate('let', 180, 2.2)             # For LET, chopper type is not needed.
+        ! PyChop2.calculate('let', [160., 80.], 1.)      # For LET, specify resolution and pulse remover freq
+        ! PyChop2.calculate('let', 'High flux', 80, 2.2) # LET default is medium flux configuration
         ! PyChop2.calculate(inst='mari', chtyp='s', freq=250., ei=55.) # With keyword arguments
-        ! PyChop2.calculate(inst='let', variant='With Chopper 3', freq=[160., 80.], ei=2.2)
+        ! PyChop2.calculate(inst='let', variant='Low flux', freq=[160., 80.], ei=2.2)
         !
         ! For LET, the allowed variant names are:
         !   'With Chopper 3'
