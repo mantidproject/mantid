@@ -5,7 +5,6 @@
 #include "MantidAPI/Axis.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/AppendSpectra.h"
 
@@ -171,12 +170,6 @@ public:
       ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, numBins);
       ws2 = WorkspaceCreationHelper::Create2DWorkspace(5, numBins);
     }
-    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws1, false, false,
-                                                           "");
-    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws2, false, false,
-                                                           "");
-    ws1->rebuildSpectraMapping();
-    ws2->rebuildSpectraMapping();
 
     auto ws1Log = new TimeSeriesProperty<std::string>("aLog");
     ws1Log->addValue(DateAndTime("2014-06-19T16:40:00"), "Hello");

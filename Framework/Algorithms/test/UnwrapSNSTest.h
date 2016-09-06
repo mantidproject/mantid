@@ -34,8 +34,6 @@ private:
     test_in->setInstrument(
         ComponentCreationHelper::createTestInstrumentCylindrical(NUMPIXELS /
                                                                  9));
-    // Remove references to non-existant pixel from workspace.
-    test_in->getSpectrum(0).setDetectorIDs({});
     // Add it to the workspace
     AnalysisDataService::Instance().add(wsName, test_in);
   }
