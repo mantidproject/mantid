@@ -13,6 +13,8 @@ Framework Changes
   is almost identical, but a small number of cases (such as adding the workspaces ``Z`` and ``z``) will work
   in a more predictable manner.
 
+- A race condition when accessing a singleton from multiple threads was fixed. 
+
 HistogramData
 -------------
 
@@ -115,9 +117,23 @@ CurveFitting
 ------------
 
 - Added two new minimizers belonging to the trust region family of algorithms: DTRS and More-Sorensen.
+- Added new property `EvaluationType` to Fit algorithm. If set to "Histogram" and the input dataset 
+is a histogram with large bins it can improve accuracy of the fit.
 
 Improved
 ########
+
+Interfaces
+----------
+
+New
+###
+
+- A workflow gui for TOFTOF data reduction (#17075).
+  The gui is accessible through the ``Interfaces / Direct / DGS Reduction`` menu.
+  The first time the user is presented with a choice of facilites and instruments -
+  choose MLZ / TOFTOF. The choice can be changed later from (any) reduction gui by
+  ``Tools / Change instrument ...``.
 
 
 Python

@@ -348,7 +348,10 @@ void ParameterMap::add(const IComponent *comp,
   if (existing_par != m_map.end()) {
     existing_par->second = par;
   } else {
-#if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4
+// When using Clang & Linux, TBB 4.4 doesn't detect C++11 features.
+// https://software.intel.com/en-us/forums/intel-threading-building-blocks/topic/641658
+#define CLANG_ON_LINUX defined(__clang__) && !defined(__APPLE__)
+#if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
     m_map.emplace(comp->getComponentID(), par);
 #else
     m_map.insert(std::make_pair(comp->getComponentID(), par));
@@ -1026,7 +1029,7 @@ void ParameterMap::copyFromParameterMap(const IComponent *oldComp,
   for (const auto &oldParameterName : oldParameterNames) {
     Parameter_sptr thisParameter = oldPMap->get(oldComp, oldParameterName);
 // Insert the fetched parameter in the m_map
-#if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4
+#if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
     m_map.emplace(newComp->getComponentID(), thisParameter);
 #else
     m_map.insert(std::make_pair(newComp->getComponentID(), thisParameter));
