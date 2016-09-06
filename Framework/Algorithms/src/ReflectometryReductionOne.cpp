@@ -293,7 +293,7 @@ std::map<std::string, std::string> ReflectometryReductionOne::validateInputs() {
   }
 
   if (decWS->getNumberHistograms() > 1 &&
-             decWS->getNumberHistograms() != runWS->getNumberHistograms()) {
+      decWS->getNumberHistograms() != runWS->getNumberHistograms()) {
     result["DetectorEfficiencyCorrection"] =
         "The number of spectra in the "
         "Detector Efficiency Correction workspace must either be 1 or equal to "

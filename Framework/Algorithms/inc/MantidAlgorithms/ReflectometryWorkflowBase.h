@@ -64,8 +64,7 @@ public:
   API::MatrixWorkspace_sptr
   toLamDetector(const std::string &processingCommands,
                 const API::MatrixWorkspace_sptr &inputWS,
-                const MinMax &wavelengthMinMax,
-                const double &wavelengthStep);
+                const MinMax &wavelengthMinMax, const double &wavelengthStep);
 
 protected:
   /// Determine if the property has it's default value.

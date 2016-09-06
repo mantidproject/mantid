@@ -114,8 +114,8 @@ public:
     createWorkspace->setProperty("OutputWorkspace", "DECWrongNumValues");
     createWorkspace->execute();
     m_decWorkspaceWrongNumValues =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "DECWrongNumValues");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "DECWrongNumValues");
 
     IAlgorithm_sptr lAlg = AlgorithmManager::Instance().create("Load");
     lAlg->setChild(true);
@@ -286,15 +286,16 @@ public:
     auto alg = construct_standard_algorithm();
     alg->setProperty("InputWorkspace", m_dataWorkspace);
     alg->setProperty("DetectorEfficiencyCorrection",
-      m_decWorkspaceWrongNumSpectra);
+                     m_decWorkspaceWrongNumSpectra);
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
-  void test_detector_efficiency_correction_more_than_one_value_per_spectra_throws() {
+  void
+  test_detector_efficiency_correction_more_than_one_value_per_spectra_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("InputWorkspace", m_dataWorkspace);
     alg->setProperty("DetectorEfficiencyCorrection",
-      m_decWorkspaceWrongNumValues);
+                     m_decWorkspaceWrongNumValues);
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 

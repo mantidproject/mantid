@@ -309,13 +309,12 @@ void ReflectometryWorkflowBase::getTransmissionRunInfo(
 /**
  * Crops input workspace to the monitorIndex and applying flat background
  * correction as part of the process.
- * @param inputWS : Input workspace 
+ * @param inputWS : Input workspace
  * @param monitorIndex : Monitor index to crop to
  * @param backgroundMinMax : Min and Max Lambda range for Flat background
  * correction.
  */
-MatrixWorkspace_sptr
-ReflectometryWorkflowBase::toLamMonitor(
+MatrixWorkspace_sptr ReflectometryWorkflowBase::toLamMonitor(
     const MatrixWorkspace_sptr &inputWS, const OptionalInteger monitorIndex,
     const OptionalMinMax &backgroundMinMax) {
 
@@ -356,11 +355,9 @@ ReflectometryWorkflowBase::toLamMonitor(
  * @param wavelengthMinMax : Wavelength minmax to keep. Crop out the rest.
  * @param wavelengthStep : Wavelength step for rebinning
  */
-MatrixWorkspace_sptr
-ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
-                                         const MatrixWorkspace_sptr &inputWS,
-                                         const MinMax &wavelengthMinMax,
-                                         const double &wavelengthStep) {
+MatrixWorkspace_sptr ReflectometryWorkflowBase::toLamDetector(
+    const std::string &processingCommands, const MatrixWorkspace_sptr &inputWS,
+    const MinMax &wavelengthMinMax, const double &wavelengthStep) {
 
   // Process the input workspace according to the processingCommands to get a
   // detector workspace
@@ -432,7 +429,7 @@ ReflectometryWorkflowBase::toLam(const MatrixWorkspace_sptr inputWS,
                                  const double &wavelengthStep) {
   // Detector Workspace Processing
   MatrixWorkspace_sptr detectorWS = toLamDetector(
-    processingCommands, inputWS, wavelengthMinMax, wavelengthStep);
+      processingCommands, inputWS, wavelengthMinMax, wavelengthStep);
 
   MatrixWorkspace_sptr monitorWS;
   if (monitorIndex.is_initialized() && backgroundMinMax.is_initialized()) {
