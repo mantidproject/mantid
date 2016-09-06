@@ -216,6 +216,14 @@ public:
                          const bool showError, MultiLayer *plotWindow = NULL,
                          bool clearWindow = false);
 
+  /// Plot a "tiled" plot (with subplots)
+  MultiLayer *
+  plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
+               bool spectrumPlot,
+               MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+               bool errs = false, MultiLayer *plotWindow = NULL,
+               bool clearWindow = false);
+
 public slots:
   // Create a 1d graph form specified MatrixWorkspace and index
   MultiLayer *

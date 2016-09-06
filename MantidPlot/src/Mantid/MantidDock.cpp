@@ -1356,12 +1356,14 @@ void MantidDockWidget::doPlotSpectra(bool errors) {
   constexpr bool spectrumPlot(true), clearWindow(false);
   MultiLayer *window(NULL);
 
-  if (!userInput.tiled) {
+  if (userInput.tiled) {
+    m_mantidUI->plotSubplots(userInput.plots, spectrumPlot,
+                             MantidQt::DistributionDefault, errors, window,
+                             clearWindow);
+  } else {
     m_mantidUI->plot1D(userInput.plots, spectrumPlot,
                        MantidQt::DistributionDefault, errors, window,
                        clearWindow, userInput.waterfall);
-  } else {
-    throw std::runtime_error("TODO: implement tiled plots on right-click!");
   }
 }
 

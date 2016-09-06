@@ -3358,6 +3358,28 @@ MultiLayer *MantidUI::plotSelectedColumns(const MantidMatrix *const m,
                 errs);
 }
 
+/**
+ * Plot a "tiled" plot (with subplots).
+ * Ask user for confirmation if lots of plots are chosen.
+ * If just one workspace, put each spectrum in its own subplot
+ * If multiple workspaces, each ws gets its own subplot
+ * @param toPlot :: Map of form ws -> [spectra_list]
+ * @param spectrumPlot :: True if indices should be interpreted as row indices
+ * @param distr :: if true, workspace plot as distribution (y data/bin width)
+ * @param errs :: if true, plot the errors on the graph
+ * @param plotWindow :: Window to plot to. If null a new one will be created
+ * @param clearWindow :: Whether to clear specified plotWindow before plotting.
+ * Ignored if plotWindow is null.
+ * @return created MultiLayer, or null on failure
+ */
+MultiLayer *MantidUI::plotSubplots(
+    const QMultiMap<QString, std::set<int>> &toPlot, bool spectrumPlot,
+    MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+    bool errs = false, MultiLayer *plotWindow = NULL,
+    bool clearWindow = false) {
+  throw std::runtime_error("TODO: implement this!");
+}
+
 Table *MantidUI::createTableFromBins(
     const QString &wsName, Mantid::API::MatrixWorkspace_const_sptr workspace,
     const QList<int> &bins, bool errs, int fromRow, int toRow) {
