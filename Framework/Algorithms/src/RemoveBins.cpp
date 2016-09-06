@@ -269,7 +269,7 @@ void RemoveBins::calculateDetectorPosition(const int index, double &l1,
                                            double &l2, double &twoTheta) {
   l1 = m_spectrumInfo->l1();
   l2 = m_spectrumInfo->l2(index);
-  if(m_spectrumInfo->isMonitor(index))
+  if (m_spectrumInfo->isMonitor(index))
     twoTheta = 0.0;
   else
     twoTheta = m_spectrumInfo->twoTheta(index);

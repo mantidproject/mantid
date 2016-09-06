@@ -104,7 +104,7 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
       }
     }
     // Propagate spectrum masking
-    if(spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j))
+    if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j))
       output->maskWorkspaceIndex(nhist1 + j);
 
     m_progress->report();
@@ -164,7 +164,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
 
     // Propagate spectrum masking. First workspace will have been done by the
     // factory
-    if(spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j))
+    if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j))
       output->maskWorkspaceIndex(output_wi);
 
     m_progress->report();

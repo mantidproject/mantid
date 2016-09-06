@@ -154,7 +154,7 @@ void VesuvioCalculateMS::exec() {
     multsc->dataX(i) = xValues;
 
     // Final detector position
-    if(!spectrumInfo.hasDetectors(i)) {
+    if (!spectrumInfo.hasDetectors(i)) {
       std::ostringstream os;
       os << "No valid detector object found for spectrum at workspace index '"
          << i << "'. No correction calculated.";

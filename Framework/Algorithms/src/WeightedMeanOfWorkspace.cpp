@@ -60,7 +60,7 @@ void WeightedMeanOfWorkspace::exec() {
   double weightSum = 0.0;
   const auto &spectrumInfo = inputWS->spectrumInfo();
   for (std::size_t i = 0; i < numHists; ++i) {
-    if(spectrumInfo.hasDetectors(i))
+    if (spectrumInfo.hasDetectors(i))
       if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
         continue;
     MantidVec y = inputWS->dataY(i);

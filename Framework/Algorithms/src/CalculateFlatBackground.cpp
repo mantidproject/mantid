@@ -147,9 +147,10 @@ void CalculateFlatBackground::exec() {
           g_log.information(" Can not find detector for spectra N: " +
                             std::to_string(currentSpec) +
                             " Processing background anyway\n");
+        } else {
+          if (spectrumInfo.isMonitor(currentSpec))
+            continue;
         }
-        if (spectrumInfo.isMonitor(currentSpec))
-          continue;
       }
 
       // Only if Mean() is called will variance be changed

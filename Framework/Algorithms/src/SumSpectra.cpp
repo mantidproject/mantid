@@ -348,6 +348,10 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   numMasked = 0;
   numZeros = 0;
 
+  // Careful: SumSpectra is called in an OpenMP by other algorithms (on distinct
+  // workspaces) so we manually disable the thread context check here. This will
+  // go wrong if clients call SumSpectra on the same workspace in different
+  // threads at the same time.
   const auto &spectrumInfo =
       localworkspace->spectrumInfo(ThreadedContextCheck::Skip);
   // Loop over spectra

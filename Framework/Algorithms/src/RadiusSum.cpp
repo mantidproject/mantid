@@ -114,7 +114,7 @@ std::vector<double> RadiusSum::processInstrumentRadiusSum() {
       // it may occur because there is no detector assigned, but it does not
       // cause problem. Hence, continue the loop.
       g_log.information() << "Spectrum " << i << " has no detector assigned.\n";
-          continue;
+      continue;
     }
     if (spectrumInfo.isMonitor(i))
       continue;
