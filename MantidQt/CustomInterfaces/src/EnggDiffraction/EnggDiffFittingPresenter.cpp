@@ -231,7 +231,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     // if given a multi-run
   } else if (userPathInput.find("-") != std::string::npos) {
     foundFullFilePaths = processMultiRun(userPathInput);
-	// try to process using single run
+    // try to process using single run
   } else {
     processSingleRun(userPathInput, foundFullFilePaths, splitBaseName);
   }
@@ -262,40 +262,40 @@ void EnggDiffFittingPresenter::processFullPathInput(
     const Poco::Path &pocoFilePath,
     const std::vector<std::string> &splitBaseName) {
 
-	// Gets current working directory - expands any path variables
+  // Gets current working directory - expands any path variables
   // such as '~' into their full paths
   const std::string workingDirectory =
       pocoFilePath.expand(pocoFilePath.parent().toString());
 
-    std::vector<std::string> foundRunNumbers;
-    std::vector<std::string> foundFullFilePaths;
+  std::vector<std::string> foundRunNumbers;
+  std::vector<std::string> foundFullFilePaths;
 
-    // Handle files the user browsed to separately
-    try {
-      foundRunNumbers =
-          getAllBrowsedFilePaths(pocoFilePath.toString(), foundFullFilePaths);
-    } catch (std::runtime_error &e) {
-      const std::string eMsg(e.what());
-      g_log.error("Error loading browsed file: " + eMsg);
-    }
+  // Handle files the user browsed to separately
+  try {
+    foundRunNumbers =
+        getAllBrowsedFilePaths(pocoFilePath.toString(), foundFullFilePaths);
+  } catch (std::runtime_error &e) {
+    const std::string eMsg(e.what());
+    g_log.error("Error loading browsed file: " + eMsg);
+  }
 
-    // Update UI to reflect found files
-    // Update the list of files found in the view
-    m_view->setFittingRunNumVec(foundFullFilePaths);
+  // Update UI to reflect found files
+  // Update the list of files found in the view
+  m_view->setFittingRunNumVec(foundFullFilePaths);
 
-    const bool multiRunMode = m_view->getFittingMultiRunMode();
-    const bool singleRunMode = m_view->getFittingSingleRunMode();
-    // if not run mode or bank mode: to avoid recreating widgets
-    if (!multiRunMode && !singleRunMode) {
+  const bool multiRunMode = m_view->getFittingMultiRunMode();
+  const bool singleRunMode = m_view->getFittingSingleRunMode();
+  // if not run mode or bank mode: to avoid recreating widgets
+  if (!multiRunMode && !singleRunMode) {
 
-      // add bank to the combo-box
-      setBankItems();
-      // set the bank widget according to selected bank file
-      setDefaultBank(splitBaseName, pocoFilePath.toString());
+    // add bank to the combo-box
+    setBankItems();
+    // set the bank widget according to selected bank file
+    setDefaultBank(splitBaseName, pocoFilePath.toString());
 
-      // Skips this step if it is multiple run because widget already
-      // updated
-      setRunNoItems(foundRunNumbers, false);
+    // Skips this step if it is multiple run because widget already
+    // updated
+    setRunNoItems(foundRunNumbers, false);
   }
 }
 
@@ -349,8 +349,9 @@ std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
 
   // Find all files which match this baseFilenamePrefix -
   // like a poor mans regular expression for files
-  if (!findFilePathsFromBaseName(workingDirectory, baseFilenamePrefix,
-                                 foundFullFilePaths)) {
+  std::string foundFullFilePath;
+  if (!findFilePathFromBaseName(workingDirectory, baseFilenamePrefix,
+                                foundFullFilePath)) {
     // I can't see this ever being thrown if the user is browsing to files but
     // better to be safe and give an informative message
     m_view->userWarning("File not found",
@@ -360,6 +361,10 @@ std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
                              baseFilenamePrefix);
   }
 
+  // Append the found file path for return
+  foundFullFilePaths.push_back(foundFullFilePath);
+
+  // Store the run number as found
   std::vector<std::string> runNoVec;
   runNoVec.push_back(splitBaseName[1]);
 
@@ -374,26 +379,23 @@ std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
   *
   * @return List of found full file paths for the files specified
   */
-std::vector<std::string> EnggDiffFittingPresenter::processMultiRun(
-    const std::string userInput) {
+std::vector<std::string>
+EnggDiffFittingPresenter::processMultiRun(const std::string userInput) {
 
-	// Split user input into the first and last run number
+  // Split user input into the first and last run number
   std::vector<std::string> firstLastRunNoVec;
   boost::split(firstLastRunNoVec, userInput, boost::is_any_of("-"));
 
   // Then store them in their own strings
-  std::string firstRun = 0;
-  std::string lastRun = 0;
+  std::string firstRun;
+  std::string lastRun;
   if (!firstLastRunNoVec.empty()) {
     firstRun = firstLastRunNoVec[0];
     lastRun = firstLastRunNoVec[1];
 
     m_view->setFittingMultiRunMode(true);
-
-    
   }
   return enableMultiRun(firstRun, lastRun);
-
 }
 
 void EnggDiffFittingPresenter::processSingleRun(
@@ -435,17 +437,13 @@ void EnggDiffFittingPresenter::processSingleRun(
   // Inform the view we are using single run mode
   m_view->setFittingSingleRunMode(true);
 
+  std::string foundFilePath;
   const bool wasFound =
-      findFilePathsFromBaseName(focusDir, userInputBasename, runnoDirVector);
+      findFilePathFromBaseName(focusDir, userInputBasename, foundFilePath);
 
-  // Update the list of found runs shown in the view
-  m_view->setFittingRunNumVec(runnoDirVector);
-
-  // add bank to the combo-box and list view
-  // recreates bank widget for every run (multi-run) depending on
-  // number of banks file found for given run number in folder
-  setBankItems();
-  setDefaultBank(splitBaseName, userInputBasename);
+  if (wasFound) {
+    runnoDirVector.push_back(foundFilePath);
+  }
 
   auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
   if (!fittingMultiRunMode && wasFound) {
@@ -455,24 +453,31 @@ void EnggDiffFittingPresenter::processSingleRun(
     strFocusedFileVector.push_back(userInputBasename);
     setRunNoItems(strFocusedFileVector, false);
   }
+
+  // Update the list of found runs shown in the view
+  m_view->setFittingRunNumVec(runnoDirVector);
+
+  // add bank to the combo-box and list view
+  // recreates bank widget for every run (multi-run) depending on
+  // number of banks file found for given run number in folder
+  setBankItems();
+  setDefaultBank(splitBaseName, userInputBasename);
 }
 
 /**
-  * Finds the full file paths (including extensions) and stores them
-  * in a vector that match the given base filename (without ext) in
-  * the given folder.
+  * Finds the full file path (including extensions) for files that
+  * match the given base filename (without ext) in the given folder.
   *
   * @param directoryToSearch The directory to search for these files
   * @param baseFileNames The base filename to find in this folder
-  * @param foundFullFilePaths Holds the paths of all files which match
-  * the given base filename
+  * @param foundFullFilePath Holds the path of a file if one was found
+  * which matched the given base filename
   *
   * @return True if any files were found or false if none were
   */
-bool EnggDiffFittingPresenter::findFilePathsFromBaseName(
+bool EnggDiffFittingPresenter::findFilePathFromBaseName(
     const std::string &directoryToSearch,
-    const std::string &baseFileNamesToFind,
-    std::vector<std::string> &foundFullFilePaths) {
+    const std::string &baseFileNamesToFind, std::string &foundFullFilePath) {
 
   bool found = false;
 
@@ -482,7 +487,7 @@ bool EnggDiffFittingPresenter::findFilePathsFromBaseName(
     Poco::DirectoryIterator directoryIterEnd;
 
     // Walk through every file within that folder looking for required files
-    while (directoryIter != directoryIterEnd) {
+    while (!found && directoryIter != directoryIterEnd) {
 
       // Get files and not folders (don't recurse down)
       if (directoryIter->isFile()) {
@@ -499,7 +504,7 @@ bool EnggDiffFittingPresenter::findFilePathsFromBaseName(
         // Look for the user input by comparing the base name of the
         // current file with the user input
         if (baseFileName.find(baseFileNamesToFind) != std::string::npos) {
-          foundFullFilePaths.push_back(fullPathToCheck);
+          foundFullFilePath = fullPathToCheck;
           found = true;
 
           // if only first loop in Fitting Runno then add directory
@@ -520,91 +525,109 @@ bool EnggDiffFittingPresenter::findFilePathsFromBaseName(
   return found;
 }
 
-std::vector<std::string> EnggDiffFittingPresenter::enableMultiRun(
-    std::string firstRun, std::string lastRun) {
+std::vector<std::string>
+EnggDiffFittingPresenter::enableMultiRun(std::string firstRun,
+                                         std::string lastRun) {
 
-	std::vector<std::string> fittingRunNoDirVec;
+  std::vector<std::string> fittingRunNoDirVec;
 
-  const bool firstDig = isDigit(firstRun);
-  const bool lastDig = isDigit(lastRun);
+  // Perform input checks first
+  bool isInputValid = true;
 
-  std::vector<std::string> RunNumberVec;
-  if (firstDig && lastDig) {
-    int firstNum = std::stoi(firstRun);
-    int lastNum = std::stoi(lastRun);
-
-    if ((lastNum - firstNum) > 200) {
-      m_view->userWarning(
-          "Please try again",
-          "The specified run number range is "
-          "far to big, please try a smaller range of consecutive run numbers.");
-    }
-
-    else if (firstNum <= lastNum) {
-
-      for (int i = firstNum; i <= lastNum; i++) {
-        // push run number to vector so can be
-        // used to search for directories with given run no
-        RunNumberVec.push_back(std::to_string(i));
-      }
-
-      auto focusDir = m_view->focusingDir();
-      if (focusDir.empty()) {
-        m_view->userWarning(
-            "Invalid Input",
-            "Please check that a valid directory is "
-            "set for Output Folder under Focusing Settings on the "
-            "settings tab. "
-            "Please try again");
-      } else {
-
-        // clear previous directories set before findFilePathsFromBaseName
-        if (g_fitting_runno_counter == 0) {
-          g_multi_run_directories.clear();
-        }
-        // to track the FittingRunnoChanged loop number
-        g_fitting_runno_counter++;
-
-        // rewrite the vector of run number which is available
-        std::vector<std::string> foundRunNumber;
-
-        for (auto runNumber : RunNumberVec) {
-          // save dir for every vector
-          if (findFilePathsFromBaseName(focusDir, runNumber,
-                                        fittingRunNoDirVec)) {
-            foundRunNumber.push_back(runNumber);
-          }
-        }
-
-        int diff = (lastNum - firstNum) + 1;
-        // TODO figure out why this is important for multi-runs
-        // and what this does/can it be moved/removed?
-        size_t run_vec_size = RunNumberVec.size();
-
-        if (size_t(diff) == run_vec_size) {
-          setRunNoItems(RunNumberVec, true);
-          m_view->setBankEmit();
-        } else {
-          m_view->userWarning(
-              "Run Number Not Found",
-              "The multi-run number specified could not be located "
-              "in the focused output directory. Please check that the "
-              "correct directory is set for Output Folder under Focusing "
-              "Settings "
-              "on the settings tab.");
-        }
-      }
-    } else {
-      m_view->userWarning("Invalid Run Number",
-                          "Invalid multi-run number range has been provided. "
-                          "Please try again");
-      m_view->enableFitAllButton(false);
-    }
-  } else {
+  // Are both values either side of '-' the user input digits
+  if (!isDigit(firstRun) || !isDigit(lastRun)) {
     m_view->userWarning("Invalid Run Number",
                         "Invalid format of multi-run number has been entered. "
                         "Please try again");
     m_view->enableFitAllButton(false);
+    // TODO catch this
+    throw std::invalid_argument("Both values are not numerical entries");
+  }
+
+  // Convert strings to integers for remainder of function
+  const int firstNum = std::stoi(firstRun);
+  const int lastNum = std::stoi(lastRun);
+  const int range = abs(firstNum - lastNum);
+
+  // Cap the maximum number of runs we can process at 200
+  constexpr int maximumNumberOfRuns = 200;
+
+  if (range > maximumNumberOfRuns) {
+    m_view->userWarning("Range too large",
+                        "The specified run number range is too large."
+                        " A maximum of 200 entries can be processed a time.");
+    m_view->enableFitAllButton(false);
+    // TODO catch this
+    throw std::invalid_argument("Number of runs is greater than 200");
+  }
+
+  // By performing this check we can make optimizations and assumptions
+  // about the ordering of values
+  if (firstNum < lastNum) {
+    m_view->userWarning("Range not ascending",
+                        "The range specified"
+                        " was not ascending. This last run number needs to be"
+                        " larger than the start run number");
+    throw std::invalid_argument("Run range is not ascending");
+  }
+
+  std::string workingDirectory = m_view->focusingDir();
+
+  if (workingDirectory.empty()) {
+    m_view->userWarning("Invalid Input",
+                        "Please check that a valid directory is "
+                        "set for Output Folder under Focusing Settings on the "
+                        "settings tab. "
+                        "Please try again");
+    throw std::invalid_argument("Focus directory not set correctly");
+  }
+
+  // --- All checks complete lets process the multi run input ---
+
+  // Reserve the number of elements needed so we don't allocate multiple times
+  std::vector<std::string> RunNumberVec;
+  RunNumberVec.reserve(range);
+
+  for (int i = firstNum; i <= lastNum; i++) {
+    // Populate vector with list of runs
+    RunNumberVec.push_back(std::to_string(i));
+  }
+
+  // clear previous directories set before findFilePathsFromBaseName
+  if (g_fitting_runno_counter == 0) {
+    g_multi_run_directories.clear();
+  }
+  // to track the FittingRunnoChanged loop number
+  g_fitting_runno_counter++;
+
+  // rewrite the vector of run number which is available
+  std::vector<std::string> foundRunNumber;
+
+  for (const auto runNumber : RunNumberVec) {
+    // Get full path for every run selected
+    std::string foundFileName;
+    if (findFilePathFromBaseName(workingDirectory, runNumber, foundFileName)) {
+      foundRunNumber.push_back(runNumber);
+      fittingRunNoDirVec.push_back(foundFileName);
+    }
+  }
+
+  int diff = (lastNum - firstNum) + 1;
+  // TODO figure out why this is important for multi-runs
+  // and what this does/can it be moved/removed?
+  size_t run_vec_size = RunNumberVec.size();
+
+  if (size_t(diff) == run_vec_size) {
+    setRunNoItems(RunNumberVec, true);
+    m_view->setBankEmit();
+  } else {
+    m_view->userWarning(
+        "Run Number Not Found",
+        "The multi-run number specified could not be located "
+        "in the focused output directory. Please check that the "
+        "correct directory is set for Output Folder under Focusing "
+        "Settings "
+        "on the settings tab.");
   }
 
   return fittingRunNoDirVec;

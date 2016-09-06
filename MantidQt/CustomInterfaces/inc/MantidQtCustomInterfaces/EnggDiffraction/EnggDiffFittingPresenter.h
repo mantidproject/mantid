@@ -159,9 +159,9 @@ private:
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &expectedPeaks);
 
-  bool findFilePathsFromBaseName(const std::string &directoryToSearch,
+  bool findFilePathFromBaseName(const std::string &directoryToSearch,
                                  const std::string &baseFileNamesToFind,
-                                 std::vector<std::string> &foundFullFilePaths);
+                                 std::string &foundFullFilePath);
 
   std::vector<std::string>
   splitFittingDirectory(const std::string &selectedfPath);
