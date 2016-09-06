@@ -44,12 +44,17 @@ Other Useful Methods
 
 .. autofunction:: tube.readPeakFile
 
+.. autofunction:: tube.saveCalibration
+
+.. autofunction:: tube.readCalibrationFile
+
 """
 
 import numpy
 import os
 import re
 
+from mantid.kernel import V3D
 from mantid.api import (MatrixWorkspace, ITableWorkspace)
 from mantid.simpleapi import (mtd, CreateEmptyTableWorkspace, DeleteWorkspace, config)
 from tube_spec import TubeSpec
@@ -690,3 +695,65 @@ def readPeakFile(file_name):
 
         loaded_file.append((id_, f_values))
     return loaded_file
+
+
+def saveCalibration(table_name, out_path):
+    """Save the calibration table to file
+
+    This creates a CSV file for the calibration TableWorkspace. The first 
+    column is the detector number and the second column is the detector position
+
+    Example of usage:
+
+    .. code-block:: python
+       
+       saveCalibration('CalibTable','/tmp/myCalibTable.txt')
+
+    :param table_name: name of the TableWorkspace to save
+    :param out_path: location to save the file
+
+    """
+    DET = 'Detector ID'
+    POS = 'Detector Position'
+    with open(out_path, 'w') as file_p:
+        table = mtd[table_name]
+        for row in table: 
+            row_data = [row[DET], row[POS]]
+            line = ','.join(map(str, row_data)) + '\n'
+            file_p.write(line)
+
+
+def readCalibrationFile(table_name, in_path):
+    """Read a calibration table from file
+
+    This loads a calibration TableWorkspace from a CSV file.
+
+    Example of usage:
+
+    .. code-block:: python
+       
+       saveCalibration('CalibTable','/tmp/myCalibTable.txt')
+
+    :param table_name: name to call the TableWorkspace
+    :param in_path: the path to the calibration file 
+
+    """
+    DET = 'Detector ID'
+    POS = 'Detector Position'
+    re_float = re.compile("[+-]? *(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?")
+    calibTable = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
+    calibTable.addColumn(type='int', name=DET)
+    calibTable.addColumn(type='V3D', name=POS)
+
+    with open(in_path, 'r') as file_p:
+        for line in file_p:
+            values = re.findall(re_float, line)
+            if len(values) != 4:
+                continue
+
+            nextRow = {
+                DET: int(values[0]), 
+                POS: V3D(float(values[1]), float(values[2]), float(values[3])) 
+            }
+
+            calibTable.addRow(nextRow)
