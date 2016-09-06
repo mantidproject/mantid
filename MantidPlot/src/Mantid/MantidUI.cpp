@@ -102,6 +102,9 @@ Mantid::Kernel::Logger g_log("MantidUI");
 bool isOfType(const QObject *obj, const char *toCompare) {
   return strcmp(obj->metaObject()->className(), toCompare) == 0;
 }
+
+/// Number of subplots above which user confirmation will be required
+constexpr size_t REASONABLE_NUM_SUBPLOTS(12);
 }
 
 MantidUI::MantidUI(ApplicationWindow *aw)
@@ -534,11 +537,10 @@ void MantidUI::importWorkspace(const QString &wsName, bool showDlg,
                                bool makeVisible) {
   MantidMatrix *mm =
       importMatrixWorkspace(wsName, -1, -1, showDlg, makeVisible);
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  ScopedOverrideCursor waitCursor;
   if (!mm) {
     importTableWorkspace(wsName, showDlg, makeVisible);
   }
-  QApplication::restoreOverrideCursor();
 }
 
 /**  Import the selected workspace, if any. Displays the import dialog.
@@ -551,7 +553,7 @@ void MantidUI::importWorkspace() {
 /**  Import the selected table workspace transposed.
 */
 void MantidUI::importTransposed() {
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  ScopedOverrideCursor waitCursor;
   QString wsName = getSelectedWorkspaceName();
   ITableWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString())) {
@@ -559,7 +561,6 @@ void MantidUI::importTransposed() {
         wsName.toStdString());
     importTableWorkspace(wsName, true, true, true);
   }
-  QApplication::restoreOverrideCursor();
 }
 
 /**  Create a TableWorkspace of box data from the MDEventWorkspace
@@ -621,8 +622,7 @@ MantidUI::plotMDList(const QStringList &wsNames, const int plotAxis,
                      const Mantid::API::MDNormalization normalization,
                      const bool showErrors, MultiLayer *plotWindow,
                      bool clearWindow) {
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
+  ScopedOverrideCursor waitCursor;
   auto firstName = wsNames.at(0);
 
   bool isGraphNew = false;
@@ -664,7 +664,6 @@ MantidUI::plotMDList(const QStringList &wsNames, const int plotAxis,
   // Check if window does not contain any curves and should be closed
   ml->maybeNeedToClose();
 
-  QApplication::restoreOverrideCursor();
 
   return ml;
 }
@@ -1966,10 +1965,9 @@ InstrumentWindow *MantidUI::getInstrumentView(const QString &wsName, int tab) {
       boost::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(wsName));
   if (!ws)
     return NULL;
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  ScopedOverrideCursor waitCursor;
   Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
   if (!instr || instr->getName().empty()) {
-    QApplication::restoreOverrideCursor();
     QMessageBox::critical(appWindow(), "MantidPlot - Error",
                           "Instrument view cannot be opened");
     return NULL;
@@ -1986,10 +1984,8 @@ InstrumentWindow *MantidUI::getInstrumentView(const QString &wsName, int tab) {
 
     appWindow()->addMdiSubWindow(insWin);
 
-    QApplication::restoreOverrideCursor();
     return insWin;
   } catch (const std::exception &e) {
-    QApplication::restoreOverrideCursor();
     QString errorMessage =
         "Instrument view cannot be created:\n\n" + QString(e.what());
     QMessageBox::critical(appWindow(), "MantidPlot - Error", errorMessage);
@@ -3012,7 +3008,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
   if ((NULL == plotWindow || clearWindow) && toPlot.size() == 1)
     waterfallPlot = false;
 
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  ScopedOverrideCursor waitCursor;
 
   const QString &firstWsName = toPlot.constBegin().key();
   ;
@@ -3089,7 +3085,6 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
     g->replot();
   } else {
     if (!firstCurve) {
-      QApplication::restoreOverrideCursor();
       return NULL;
     }
 
@@ -3115,7 +3110,6 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
   // Check if window does not contain any curves and should be closed
   ml->maybeNeedToClose();
 
-  QApplication::restoreOverrideCursor();
   return ml;
 }
 
@@ -3248,7 +3242,7 @@ MultiLayer *MantidUI::drawSingleColorFillPlot(const QString &wsName,
   if (!workspace)
     return NULL;
 
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  ScopedOverrideCursor waitCursor;
 
   bool reusePlots = workspacesDockPlot1To1();
   if ((!reusePlots && NULL == window) ||
@@ -3302,7 +3296,6 @@ MultiLayer *MantidUI::drawSingleColorFillPlot(const QString &wsName,
   if (!appWindow()->autoscale2DPlots)
     plot->enableAutoscaling(false);
 
-  QApplication::restoreOverrideCursor();
   return window;
 }
 
@@ -3377,7 +3370,81 @@ MultiLayer *MantidUI::plotSubplots(
     MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
     bool errs = false, MultiLayer *plotWindow = NULL,
     bool clearWindow = false) {
-  throw std::runtime_error("TODO: implement this!");
+  // Check if nothing to plot
+  if (toPlot.size() == 0)
+    return nullptr;
+
+  // If one workspace, each spectrum goes in its own subplot.
+  // Otherwise, there is one subplot per workspace.
+  const size_t nSubplots = [&toPlot]() {
+    const auto nWorkspaces = toPlot.size();
+    if (nWorkspaces == 1) {
+      return toPlot.begin()->size(); // number of spectra
+    } else {
+      return static_cast<size_t>(nWorkspaces);
+    }
+  }();
+
+  // If user has selected a large number, check if they want to plot that many
+  if (nSubplots > REASONABLE_NUM_SUBPLOTS) {
+    const auto &answer = QMessageBox::question(
+        appWindow(), "MantidPlot",
+        "Are you sure you want to plot " + QString::number(nSubplots) +
+            " subplots?",
+        QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
+    if (answer != QMessageBox::Ok) {
+      return nullptr;
+    }
+  }
+
+  // Set the wait cursor while we are plotting
+  ScopedOverrideCursor waitCursor;
+
+  // Get title. If this is a wsGroup, use name of that
+  const QString &firstWsName = toPlot.constBegin().key();
+
+
+  //auto graph = 
+
+  throw std::runtime_error("TODO");
+
+
+}
+
+/**
+ * Plot a "tiled" plot (with subplots).
+ * Ask user for confirmation if lots of plots are chosen.
+ * If just one workspace, put each spectrum in its own subplot
+ * If multiple workspaces, each ws gets its own subplot
+ * @param toPlot :: A list of workspace/spectra to be shown in the graph
+ * @param spectrumPlot :: True if indices should be interpreted as row indices
+ * @param distr :: if true, workspace plot as distribution (y data/bin width)
+ * @param errs :: if true, plot the errors on the graph
+ * @param plotWindow :: Window to plot to. If null a new one will be created
+ * @param clearWindow :: Whether to clear specified plotWindow before plotting.
+ * Ignored if plotWindow is null.
+ * @return created MultiLayer, or null on failure
+ */
+MultiLayer *MantidUI::plotSubplots(
+    const QMultiMap<QString, int> &toPlot, bool spectrumPlot,
+    MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+    bool errs = false, MultiLayer *plotWindow = NULL,
+    bool clearWindow = false) {
+
+  // Convert the input map into a map of workspace->spectra
+  QMultiMap<QString, std::set<int>> spectraByWorkspace;
+  for (auto it = toPlot.constBegin(); it != toPlot.constEnd(); ++it) {
+    if (spectraByWorkspace.contains(it.key())) { // append to existing entry
+      auto entry = spectraByWorkspace.find(it.key());
+      entry.value().insert(it.value());
+    } else { // add a new entry
+      spectraByWorkspace[it.key] = std::set<int>{it.value()};
+    }
+  }
+
+  // Pass over to the overloaded method
+  return plotSubplots(spectraByWorkspace, spectrumPlot, distr, errs, plotWindow,
+                      clearWindow);
 }
 
 Table *MantidUI::createTableFromBins(

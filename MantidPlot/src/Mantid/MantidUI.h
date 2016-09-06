@@ -224,6 +224,12 @@ public:
                bool errs = false, MultiLayer *plotWindow = NULL,
                bool clearWindow = false);
 
+  MultiLayer *
+  plotSubplots(const QMultiMap<QString, int> &toPlot, bool spectrumPlot,
+               MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+               bool errs = false, MultiLayer *plotWindow = NULL,
+               bool clearWindow = false);
+
 public slots:
   // Create a 1d graph form specified MatrixWorkspace and index
   MultiLayer *
@@ -656,6 +662,18 @@ private:
 
   // prevents some repeated code realtating to log names
   void formatLogName(QString &label, const QString &wsName);
+};
+
+/**
+ * This object sets the "busy" cursor while it is in scope, then restores the
+ * original cursor when destroyed.
+ */
+class ScopedOverrideCursor {
+public:
+  /// Constructor sets wait cursor
+  ScopedOverrideCursor() { QApplication::setOverrideCursor(Qt::WaitCursor); }
+  /// Destructor restores original cursor
+  virtual ~ScopedOverrideCursor() { QApplication::restoreOverrideCursor(); }
 };
 
 #endif
