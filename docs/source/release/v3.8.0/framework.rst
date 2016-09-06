@@ -149,7 +149,7 @@ Bug Fixes
 - Scripts generated from history including algorithms that added dynamic properties at run time (for example Fit, and Load) will not not include those dynamic properties in their script.  This means they will execute without warnings.
 - Cloning a ``MultiDomainFunction``, or serializing to a string and recreating it, now preserves the domains.
 - :ref:`EvaluateFunction <algm-EvaluateFunction>` now works from its dialog in the GUI as well as from a script
-
+- :ref:`LoadNXSPE <algm-LoadNXSPE>` LoadNXSPE will now change psi to 0 if its value in the .nxspe file was NaN. Now ConvertToMD will work on powder diffraction data stored in .nxspe files
 
 |
 
