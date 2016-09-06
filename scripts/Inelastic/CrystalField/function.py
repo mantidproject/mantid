@@ -1,3 +1,8 @@
+import re
+
+parNamePattern = re.compile(r'([a-zA-Z][\w.]+)')
+
+
 class Function(object):
     """A helper object that simplifies getting and setting parameters of a simple named function."""
 
@@ -85,9 +90,32 @@ class Function(object):
         return out
 
     def paramString(self, prefix):
+        """Create a string with only parameters and attributes settings.
+            The prefix is prepended to all attribute names.
+        """
         attrib = ['%s%s=%s' % ((prefix,) + item) for item in self._attrib.items()] + \
                  ['%s%s=%s' % ((prefix,) + item) for item in self._params.items()]
         return ','.join(attrib)
+
+    def tiesString(self, prefix):
+        """Create a string with only ties settings.
+            The prefix is prepended to all parameter names.
+        """
+        ties = ['%s%s=%s' % ((prefix,) + item) for item in self._ties.items()]
+        return ','.join(ties)
+
+    def constraintsString(self, prefix):
+        """Create a string with only constraints settings.
+            The prefix is prepended to all parameter names.
+        """
+        if len(prefix) > 0:
+            constraints = []
+            for constraint in self._constraints:
+                constraint = re.sub(parNamePattern, prefix + '\\1', constraint)
+                constraints.append(constraint)
+        else:
+            constraints = self._constraints
+        return ','.join(constraints)
 
     def update(self, func):
         """
@@ -232,15 +260,13 @@ class PeaksFunction(object):
         for tie in tie_dict:
             self._ties[tie] = tie_dict[tie]
 
-    def constraints(self, constraints):
+    def constraints(self, *constraints):
         """
         Set constraints for the peak parameters.
 
         @param constraints: A list of constraints. For example:
-                ['f0.Sigma > 0', '0.1 < f1.Sigma < 0.9']
+                constraints('f0.Sigma > 0', '0.1 < f1.Sigma < 0.9')
         """
-        if not isinstance(constraints, list):
-            raise RuntimeError('Constraints argument must be a list.')
         self._constraints += constraints
 
     def nPeaks(self):
@@ -293,14 +319,16 @@ class PeaksFunction(object):
             return '%s,%s' % (self._attrib.toCompositeString(prefix, shift),
                               self._params.toCompositeString(prefix, shift))
 
-    def tiesString(self):
+    def tiesString(self, prefix=''):
         if len(self._ties) > 0:
-            return 'ties=(%s)' % ','.join(['%s=%s' % item for item in self._ties.items()])
+            ties = ','.join(['%s=%s' % item for item in self._ties.items()])
+            return 'ties=(%s)' % re.sub(parNamePattern, prefix + '\\1', ties)
         return ''
 
-    def constraintsString(self):
+    def constraintsString(self, prefix=''):
         if len(self._constraints) > 0:
-            return 'constraints=(%s)' % ','.join(self._constraints)
+            constraints = ','.join(self._constraints)
+            return 'constraints=(%s)' % re.sub(parNamePattern, prefix + '\\1', constraints)
         return ''
 
 
@@ -363,6 +391,38 @@ class Background(object):
         if self.background is None:
             return self.peak.paramString(prefix)
         return '%s,%s' % (self.peak.paramString(prefix + 'f0.'), self.background.paramString(prefix + 'f1.'))
+
+    def tiesString(self, prefix):
+        if self.peak is None and self.background is None:
+            return ''
+        if self.peak is None:
+            return self.background.tiesString(prefix)
+        if self.background is None:
+            return self.peak.tiesString(prefix)
+        peakString = self.peak.tiesString(prefix + 'f0.')
+        backgroundString = self.background.tiesString(prefix + 'f1.')
+        if len(peakString) == 0:
+            return backgroundString
+        elif len(backgroundString) == 0:
+            return peakString
+        else:
+            return '%s,%s' % (peakString, backgroundString)
+
+    def constraintsString(self, prefix):
+        if self.peak is None and self.background is None:
+            return ''
+        if self.peak is None:
+            return self.background.constraintsString(prefix)
+        if self.background is None:
+            return self.peak.constraintsString(prefix)
+        peakString = self.peak.constraintsString(prefix + 'f0.')
+        backgroundString = self.background.constraintsString(prefix + 'f1.')
+        if len(peakString) == 0:
+            return backgroundString
+        elif len(backgroundString) == 0:
+            return peakString
+        else:
+            return '%s,%s' % (peakString, backgroundString)
 
     def update(self, func1, func2=None):
         """

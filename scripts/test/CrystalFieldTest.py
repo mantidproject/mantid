@@ -667,5 +667,147 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertNotEqual(cf[1].param['B42'], 0.0)
         self.assertNotEqual(cf[1].param['B44'], 0.0)
 
+    def test_constraints_single_spectrum(self):
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+        from mantid.simpleapi import FunctionFactory
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=50, FWHM=0.9)
+        cf.setPeaks('Lorentzian')
+        cf.setBackground(peak=Function('Gaussian', Height=10, Sigma=0.3),
+                         background=Function('LinearBackground', A0=1.0))
+
+        cf.constraints('IntensityScaling > 0', 'B22 < 4')
+        cf.peaks.constraints('f0.FWHM < 2.2', 'f1.FWHM >= 0.1')
+        # ties have to be put into a dictionary
+        cf.peaks.ties({'f2.FWHM': '2*f1.FWHM', 'f3.FWHM': '2*f2.FWHM'})
+        cf.background.peak.ties(Height=10.1)
+        cf.background.peak.constraints('Sigma > 0')
+        cf.background.background.ties(A0=0.1)
+        cf.background.background.constraints('A1 > 0')
+
+        s = cf.makeSpectrumFunction()
+        self.assertTrue('IntensityScaling > 0' in s)
+        self.assertTrue('B22 < 4' in s)
+        self.assertTrue('f0.FWHM < 2.2' in s)
+        self.assertTrue('f1.FWHM >= 0.1' in s)
+        self.assertTrue('' in s)
+        self.assertTrue('Sigma > 0' in s)
+        self.assertTrue('A1 > 0' in s)
+        self.assertTrue('f2.FWHM=2*f1.FWHM' in s)
+        self.assertTrue('f3.FWHM=2*f2.FWHM' in s)
+        self.assertTrue('Height=10.1' in s)
+        self.assertTrue('A0=0.1' in s)
+
+        # Test that ties and constraints are correctly defined
+        fun = FunctionFactory.createInitialized(s)
+        self.assertTrue(fun is not None)
+
+    def test_constraints_multi_spectrum(self):
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+        from mantid.simpleapi import FunctionFactory
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=[44.0, 50], FWHM=[1.1, 0.9])
+        cf.setPeaks('Lorentzian')
+        cf.setBackground(peak=Function('Gaussian', Height=10, Sigma=0.3),
+                         background=Function('FlatBackground', A0=1.0))
+        cf.constraints('IntensityScaling0 > 0', '0 < IntensityScaling1 < 2', 'B22 < 4')
+        cf.background[0].peak.ties(Height=10.1)
+        cf.background[0].peak.constraints('Sigma > 0.1')
+        cf.background[1].peak.ties(Height=20.2)
+        cf.background[1].peak.constraints('Sigma > 0.2')
+
+        cf.peaks[1].ties({'f2.FWHM': '2*f1.FWHM', 'f3.FWHM': '2*f2.FWHM'})
+        cf.peaks[0].constraints('f1.FWHM < 2.2')
+        cf.peaks[1].constraints('f1.FWHM > 1.1', '1 < f4.FWHM < 2.2')
+
+        s = cf.makeMultiSpectrumFunction()
+
+        self.assertTrue('IntensityScaling0 > 0' in s)
+        self.assertTrue('IntensityScaling1 < 2' in s)
+        self.assertTrue('f0.f0.f0.Height=10.1' in s)
+        self.assertTrue('f1.f0.f0.Height=20.2' in s)
+        self.assertTrue('f0.f0.f0.Sigma > 0.1' in s)
+        self.assertTrue('f1.f0.f0.Sigma > 0.2' in s)
+        self.assertTrue('f0.f1.FWHM < 2.2' in s)
+        self.assertTrue('f1.f1.FWHM > 1.1' in s)
+        self.assertTrue('1 < f1.f4.FWHM < 2.2' in s)
+        self.assertTrue('f1.f2.FWHM=2*f1.f1.FWHM' in s)
+        self.assertTrue('f1.f3.FWHM=2*f1.f2.FWHM' in s)
+
+        fun = FunctionFactory.createInitialized(s)
+
+
+    def test_constraints_multi_ion_multi_spectrum(self):
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+        from CrystalField.fitting import MakeWorkspace
+        from mantid.simpleapi import FunctionFactory
+
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
+                  'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}
+        cf1 = CrystalField('Ce', 'C2v', **params)
+        cf2 = CrystalField('Pr', 'C2v', **params)
+        cf = cf1 + cf2
+        ws1 = MakeWorkspace(*cf.getSpectrum(0))
+        ws2 = MakeWorkspace(*cf.getSpectrum(1))
+
+        params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
+                  'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}
+        cf1 = CrystalField('Ce', 'C2v', **params)
+        cf2 = CrystalField('Pr', 'C2v', **params)
+        cf = cf1 + cf2
+
+        cf1.setPeaks('Lorentzian')
+        cf1.setBackground(peak=Function('Gaussian', Height=10, Sigma=0.3),
+                         background=Function('FlatBackground', A0=1.0))
+        cf1.constraints('IntensityScaling0 > 0', '0 < IntensityScaling1 < 2', 'B22 < 4')
+        cf1.background[0].peak.ties(Height=10.1)
+        cf1.background[0].peak.constraints('Sigma > 0.1')
+        cf1.background[1].peak.ties(Height=20.2)
+        cf1.background[1].peak.constraints('Sigma > 0.2')
+
+        cf1.peaks[1].ties({'f2.FWHM': '2*f1.FWHM', 'f3.FWHM': '2*f2.FWHM'})
+        cf1.peaks[0].constraints('f1.FWHM < 2.2')
+        cf1.peaks[1].constraints('f1.FWHM > 1.1', '1 < f4.FWHM < 2.2')
+
+        cf2.setPeaks('Gaussian')
+        cf2.setBackground(peak=Function('Lorentzian', Amplitude=8, FWHM=0.33),
+                         background=Function('FlatBackground', A0=1.0))
+        cf2.background[0].peak.ties(Amplitude=8.1)
+        cf2.background[0].peak.constraints('FWHM > 0.1')
+        cf2.background[1].peak.ties(Amplitude=16.2)
+        cf2.background[1].peak.constraints('FWHM > 0.2')
+        cf2.peaks[1].ties({'f2.Sigma': '2*f1.Sigma', 'f3.Sigma': '2*f2.Sigma'})
+        cf2.peaks[0].constraints('f1.Sigma < 2.2')
+        cf2.peaks[1].constraints('f1.Sigma > 1.1', '1 < f4.Sigma < 2.2')
+
+        s = cf.makeMultiSpectrumFunction()
+
+        self.assertTrue('IntensityScaling0 > 0' in s)
+        self.assertTrue('IntensityScaling1 < 2' in s)
+        self.assertTrue('f0.f0.f0.Height=10.1' in s)
+        self.assertTrue('f1.f0.f0.Height=20.2' in s)
+        self.assertTrue('f0.f0.f0.Sigma > 0.1' in s)
+        self.assertTrue('f1.f0.f0.Sigma > 0.2' in s)
+        self.assertTrue('f0.f1.FWHM < 2.2' in s)
+        self.assertTrue('f1.f1.FWHM > 1.1' in s)
+        self.assertTrue('1 < f1.f4.FWHM < 2.2' in s)
+        self.assertTrue('f1.f2.FWHM=2*f1.f1.FWHM' in s)
+        self.assertTrue('f1.f3.FWHM=2*f1.f2.FWHM' in s)
+
+        self.assertTrue('f0.f0.f0.Amplitude=8.1' in s)
+        self.assertTrue('f1.f0.f0.Amplitude=16.2' in s)
+        self.assertTrue('f0.f0.f0.FWHM > 0.1' in s)
+        self.assertTrue('f1.f0.f0.FWHM > 0.2' in s)
+        self.assertTrue('f1.f2.Sigma=2*f1.f1.Sigma' in s)
+        self.assertTrue('f1.f3.Sigma=2*f1.f2.Sigma' in s)
+        self.assertTrue('f0.f1.Sigma < 2.2' in s)
+        self.assertTrue('f1.f1.Sigma > 1.1' in s)
+        self.assertTrue('1 < f1.f4.Sigma < 2.2' in s)
+
+        fun = FunctionFactory.createInitialized(s)
+
+
 if __name__ == "__main__":
     unittest.main()

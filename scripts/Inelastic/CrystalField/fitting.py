@@ -218,23 +218,44 @@ class CrystalField(object):
             out += ',FWHMs=(%s)' % ','.join(map(str, self._FWHM))
         out += ',%s' % ','.join(['%s=%s' % item for item in self._fieldParameters.items()])
 
+        tieList = []
+        constraintsList = []
         if self.background is not None:
             i = 0
             for background in self.background:
-                bgOut = background.paramString('f%s.f0.' % i)
+                prefix = 'f%s.f0.' % i
+                bgOut = background.paramString(prefix)
                 if len(bgOut) > 0:
                     out += ',%s' % bgOut
+                tieOut = background.tiesString(prefix)
+                if len(tieOut) > 0:
+                    tieList.append(tieOut)
+                constraintsOut = background.constraintsString(prefix)
+                if len(constraintsOut) > 0:
+                    constraintsList.append(constraintsOut)
                 i += 1
         i = 0
         for peaks in self.peaks:
             parOut = peaks.paramString('f%s.' % i, 1)
             if len(parOut) > 0:
                 out += ',%s' % parOut
+            tiesOut = peaks.tiesString('f%s.' % i)
+            if len(tiesOut) > 0:
+                out += ',%s' % tiesOut
+            constraintsOut = peaks.constraintsString('f%s.' % i)
+            if len(constraintsOut) > 0:
+                out += ',%s' % constraintsOut
             i += 1
         ties = self.getFieldTies()
         if len(ties) > 0:
+            tieList.append(ties)
+        ties = ','.join(tieList)
+        if len(ties) > 0:
             out += ',ties=(%s)' % ties
         constraints = self.getFieldConstraints()
+        if len(constraints) > 0:
+            constraintsList.append(constraints)
+        constraints = ','.join(constraintsList)
         if len(constraints) > 0:
             out += ',constraints=(%s)' % constraints
         return out
