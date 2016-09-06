@@ -80,7 +80,7 @@ public:
   }
 
   void checkPG3(ITableWorkspace_sptr &wksp) {
-    TS_ASSERT_EQUALS(wksp->columnCount(), 10);
+    TS_ASSERT_EQUALS(wksp->columnCount(), 12);
     TS_ASSERT_EQUALS(wksp->rowCount(), 6);
 
     // check all of the contents of row 0
@@ -161,7 +161,7 @@ public:
     runAlg(alg, wksp, CHAR_FILE);
 
     // test the table workspace
-    TS_ASSERT_EQUALS(wksp->columnCount(), 10);
+    TS_ASSERT_EQUALS(wksp->columnCount(), 12);
     TS_ASSERT_EQUALS(wksp->rowCount(), 1);
 
     // check all of the contents of row 0
@@ -189,7 +189,7 @@ public:
     runAlg(alg, wksp, CHAR_FILE);
 
     // test the table workspace
-    TS_ASSERT_EQUALS(wksp->columnCount(), 10);
+    TS_ASSERT_EQUALS(wksp->columnCount(), 12);
     TS_ASSERT_EQUALS(wksp->rowCount(), 0);
 
     // test the other output properties

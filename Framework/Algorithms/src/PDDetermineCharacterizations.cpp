@@ -47,20 +47,23 @@ const std::string PDDetermineCharacterizations::summary() const {
 /**
  * These should match those in LoadPDCharacterizations
  * - "frequency" double
- * -  "wavelength" (double)
- * -  "bank" (integer)
- * -  "container" (string)
- * -  "vanadium" (string)
- * -  "empty" (string)
- * -  "d_min" (string)
- * -  "d_max" (string)
- * -  "tof_min" (double)
- * -  "tof_max" (double)
+ * - "wavelength" (double)
+ * - "bank" (integer)
+ * - "container" (string)
+ * - "vanadium" (string)
+ * - "empty" (string)
+ * - "d_min" (string)
+ * - "d_max" (string)
+ * - "tof_min" (double)
+ * - "tof_max" (double)
+ * - "wavelength_min" (double)
+ * - "wavelength_max" (double)
  * @return The list of expected column names
  */
 std::vector<std::string> getColumnNames() {
-  return {"frequency", "wavelength", "bank",  "container", "vanadium",
-          "empty",     "d_min",      "d_max", "tof_min",   "tof_max"};
+  return {"frequency", "wavelength", "bank",           "container",
+          "vanadium",  "empty",      "d_min",          "d_max",
+          "tof_min",   "tof_max",    "wavelength_min", "wavelength_max"};
 }
 
 /// More intesive input checking. @see Algorithm::validateInputs
@@ -163,16 +166,35 @@ void PDDetermineCharacterizations::getInformationFromTable(
 
     if (closeEnough(frequency, rowFrequency) &&
         closeEnough(wavelength, rowWavelength)) {
+
+      // declare how the row was chosen
       g_log.information() << "Using information from row " << i
                           << " with frequency = " << rowFrequency
                           << " and wavelength = " << rowWavelength << "\n";
-
       m_propertyManager->setProperty("frequency", frequency);
       m_propertyManager->setProperty("wavelength", wavelength);
 
+      // what bank number this should be called - only used at POWGEN
       m_propertyManager->setProperty(
           "bank", m_characterizations->getRef<int>("bank", i));
 
+      // data ranges
+      m_propertyManager->setPropertyValue(
+          "d_min", m_characterizations->getRef<std::string>("d_min", i));
+      m_propertyManager->setPropertyValue(
+          "d_max", m_characterizations->getRef<std::string>("d_max", i));
+      m_propertyManager->setProperty(
+          "tof_min", m_characterizations->getRef<double>("tof_min", i));
+      m_propertyManager->setProperty(
+          "tof_max", m_characterizations->getRef<double>("tof_max", i));
+      m_propertyManager->setProperty(
+          "wavelength_min",
+          m_characterizations->getRef<double>("wavelength_min", i));
+      m_propertyManager->setProperty(
+          "wavelength_max",
+          m_characterizations->getRef<double>("wavelength_max", i));
+
+      // characterization run numbers
       m_propertyManager->setProperty(
           "vanadium", m_characterizations->getRef<std::string>("vanadium", i));
       m_propertyManager->setProperty(
@@ -181,15 +203,6 @@ void PDDetermineCharacterizations::getInformationFromTable(
       m_propertyManager->setProperty(
           "empty", m_characterizations->getRef<std::string>("empty", i));
 
-      m_propertyManager->setPropertyValue(
-          "d_min", m_characterizations->getRef<std::string>("d_min", i));
-      m_propertyManager->setPropertyValue(
-          "d_max", m_characterizations->getRef<std::string>("d_max", i));
-
-      m_propertyManager->setProperty(
-          "tof_min", m_characterizations->getRef<double>("tof_min", i));
-      m_propertyManager->setProperty(
-          "tof_max", m_characterizations->getRef<double>("tof_max", i));
       return;
     }
   }
@@ -257,22 +270,12 @@ void PDDetermineCharacterizations::setDefaultsInPropManager() {
     m_propertyManager->declareProperty(
         Kernel::make_unique<PropertyWithValue<double>>("wavelength", 0.));
   }
+
   if (!m_propertyManager->existsProperty("bank")) {
     m_propertyManager->declareProperty(
         Kernel::make_unique<PropertyWithValue<int>>("bank", 1));
   }
-  if (!m_propertyManager->existsProperty("vanadium")) {
-    m_propertyManager->declareProperty(
-        Kernel::make_unique<ArrayProperty<int32_t>>("vanadium", "0"));
-  }
-  if (!m_propertyManager->existsProperty("container")) {
-    m_propertyManager->declareProperty(
-        Kernel::make_unique<ArrayProperty<int32_t>>("container", "0"));
-  }
-  if (!m_propertyManager->existsProperty("empty")) {
-    m_propertyManager->declareProperty(
-        Kernel::make_unique<ArrayProperty<int32_t>>("empty", "0"));
-  }
+
   if (!m_propertyManager->existsProperty("d_min")) {
     m_propertyManager->declareProperty(
         Kernel::make_unique<ArrayProperty<double>>("d_min"));
@@ -288,6 +291,27 @@ void PDDetermineCharacterizations::setDefaultsInPropManager() {
   if (!m_propertyManager->existsProperty("tof_max")) {
     m_propertyManager->declareProperty(
         Kernel::make_unique<PropertyWithValue<double>>("tof_max", 0.));
+  }
+  if (!m_propertyManager->existsProperty("wavelength_min")) {
+    m_propertyManager->declareProperty(
+        Kernel::make_unique<PropertyWithValue<double>>("wavelength_min", 0.));
+  }
+  if (!m_propertyManager->existsProperty("wavelength_max")) {
+    m_propertyManager->declareProperty(
+        Kernel::make_unique<PropertyWithValue<double>>("wavelength_max", 0.));
+  }
+
+  if (!m_propertyManager->existsProperty("vanadium")) {
+    m_propertyManager->declareProperty(
+        Kernel::make_unique<ArrayProperty<int32_t>>("vanadium", "0"));
+  }
+  if (!m_propertyManager->existsProperty("container")) {
+    m_propertyManager->declareProperty(
+        Kernel::make_unique<ArrayProperty<int32_t>>("container", "0"));
+  }
+  if (!m_propertyManager->existsProperty("empty")) {
+    m_propertyManager->declareProperty(
+        Kernel::make_unique<ArrayProperty<int32_t>>("empty", "0"));
   }
 }
 

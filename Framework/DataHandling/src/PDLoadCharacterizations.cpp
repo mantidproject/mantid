@@ -117,6 +117,8 @@ void PDLoadCharacterizations::exec() {
   wksp->addColumn("str", "d_max"); // b/c it is an array for NOMAD
   wksp->addColumn("double", "tof_min");
   wksp->addColumn("double", "tof_max");
+  wksp->addColumn("double", "wavelength_min");
+  wksp->addColumn("double", "wavelength_max");
   this->readCharInfo(file, wksp);
 
   // optional exp.ini file for NOMAD
@@ -207,7 +209,7 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     std::vector<std::string> splitted;
     boost::split(splitted, line, boost::is_any_of("\t "),
                  boost::token_compress_on);
-    while (splitted.size() < 10)
+    while (splitted.size() < 12)
       splitted.push_back(ZERO); // extra values default to zero
 
     // add the row
@@ -222,6 +224,8 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     row << splitted[7];                               // d_max
     row << boost::lexical_cast<double>(splitted[8]);  // tof_min
     row << boost::lexical_cast<double>(splitted[9]);  // tof_max
+    row << boost::lexical_cast<double>(splitted[10]); // wavelength_min
+    row << boost::lexical_cast<double>(splitted[11]); // wavelength_max
   }
 }
 
