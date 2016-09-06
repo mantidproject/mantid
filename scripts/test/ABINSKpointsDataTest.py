@@ -128,9 +128,8 @@ class KpointsDataTest(unittest.TestCase):
 
                                                             [[1., 1.0, 1.0],[1., 1., 11.],     [1., 1.,  11.],
                                                             [1., 1.0, 1.0],[1., 1., 11.],     [1., 1.,  11.]]],
-
-                                                   self._good_data["atomic_displacements"][1],
-                                                   self._good_data["atomic_displacements"][2]]
+                                                   self._good_data["atomic_displacements"][0,0],
+                                                   self._good_data["atomic_displacements"][0,1]]
                                                   )}
         with self.assertRaises(ValueError):
             self.tester.set(items=wrong_items)
