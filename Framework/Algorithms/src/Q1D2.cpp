@@ -148,7 +148,7 @@ void Q1D2::exec() {
   PARALLEL_FOR3(m_dataWS, outputWS, pixelAdj)
   for (int i = 0; i < numSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    if(!spectrumInfo.hasDetectors(i)) {
+    if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i << " (SpectrumIndex = "
                       << m_dataWS->getSpectrum(i).getSpectrumNo()
                       << ") has no detector assigned to it - discarding\n";

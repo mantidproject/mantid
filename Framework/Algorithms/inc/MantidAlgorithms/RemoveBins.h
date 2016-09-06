@@ -90,8 +90,8 @@ private:
 
   API::MatrixWorkspace_const_sptr m_inputWorkspace; ///< The input workspace
   const API::SpectrumInfo *m_spectrumInfo;
-  double m_startX;                                  ///< The range start point
-  double m_endX;                                    ///< The range end point
+  double m_startX;               ///< The range start point
+  double m_endX;                 ///< The range end point
   Kernel::Unit_sptr m_rangeUnit; ///< The unit in which the above range is given
   bool m_interpolate; ///< Whether removed bins should be interpolated
 };

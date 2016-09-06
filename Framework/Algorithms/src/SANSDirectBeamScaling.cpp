@@ -101,7 +101,7 @@ void SANSDirectBeamScaling::exec() {
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
-    if(!spectrumInfo.hasDetectors(i)) {
+    if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i
                       << " has no detector assigned to it - discarding\n";
       continue;

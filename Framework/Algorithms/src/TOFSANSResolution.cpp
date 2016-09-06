@@ -138,7 +138,7 @@ void TOFSANSResolution::exec() {
   PARALLEL_FOR2(reducedWS, iqWS)
   for (int i = 0; i < numberOfSpectra; i++) {
     PARALLEL_START_INTERUPT_REGION
-    if(!spectrumInfo.hasDetectors(i)) {
+    if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i
                       << " has no detector assigned to it - discarding\n";
       continue;

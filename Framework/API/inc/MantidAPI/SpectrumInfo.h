@@ -9,7 +9,6 @@
 #include <mutex>
 #include <vector>
 
-
 namespace Mantid {
 using detid_t = int32_t;
 namespace Geometry {

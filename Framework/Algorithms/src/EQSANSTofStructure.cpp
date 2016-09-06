@@ -134,7 +134,7 @@ void EQSANSTofStructure::execEvent(
   for (int64_t ispec = 0; ispec < int64_t(numHists); ++ispec) {
     PARALLEL_START_INTERUPT_REGION
 
-    if(!spectrumInfo.hasDetectors(ispec)) {
+    if (!spectrumInfo.hasDetectors(ispec)) {
       g_log.warning() << "Workspace index " << ispec
                       << " has no detector assigned to it - discarding\n";
       continue;
