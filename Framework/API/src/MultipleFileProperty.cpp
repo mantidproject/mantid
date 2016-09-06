@@ -49,10 +49,17 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
     : PropertyWithValue<std::vector<std::vector<std::string>>>(
           name, std::vector<std::vector<std::string>>(),
           boost::make_shared<MultiFileValidator>(
-              exts, (action != FileProperty::OptionalLoad)),
+              exts, (action == FileProperty::Load)),
           Direction::Input),
       m_multiFileLoadingEnabled(), m_exts(), m_parser(), m_defaultExt(""),
-      m_action(action) {
+      m_action() {
+  if (action != FileProperty::Load && action != FileProperty::OptionalLoad) {
+    /// raise error for unsupported actions
+    throw std::runtime_error(
+        "Specified action is not supported for MultipleFileProperty");
+  } else {
+    m_action = action;
+  }
   std::string allowMultiFileLoading =
       Kernel::ConfigService::Instance().getString("loading.multifile");
 
