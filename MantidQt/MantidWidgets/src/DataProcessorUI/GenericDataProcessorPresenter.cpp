@@ -54,9 +54,6 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_processor(processor), m_postprocessor(postprocessor), m_mainPresenter(),
       m_tableDirty(false) {
 
-  m_manager =
-      Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(this, whitelist);
-
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
                          "<b>Override <samp>" + processor.name() +
@@ -72,6 +69,9 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "via the <b>Process</b> line edit, the former "
                              "prevail.");
   m_columns = static_cast<int>(m_whitelist.size());
+
+  m_manager =
+	  Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(this, m_whitelist);
 }
 
 /**

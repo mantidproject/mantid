@@ -298,6 +298,9 @@ std::string DataProcessorTwoLevelTreeManager::copySelected() {
 */
 void DataProcessorTwoLevelTreeManager::pasteSelected(const std::string &text) {
 
+  if (text.empty())
+    return;
+
   // Contains the data to paste plus the original group index in the first
   // element
   std::vector<std::string> lines;
@@ -511,15 +514,22 @@ void DataProcessorTwoLevelTreeManager::transfer(
   // Loop over the rows (vector elements)
   for (const auto &row : runs) {
 
-    if (row.size() != whitelist.size() + 1)
-      throw std::invalid_argument(
-          "Data cannot be transferred to the processing table.");
-
     TableRow newRow = m_ws->appendRow();
-    newRow << row.at("Group");
+    try {
+      newRow << row.at("Group");
+    } catch (std::out_of_range &) {
+      throw std::invalid_argument("Data cannot be transferred to the "
+                                  "processing table. Group information is "
+                                  "missing.");
+    }
 
-    for (int i = 0; i < static_cast<int>(whitelist.size()); i++)
-      newRow << row.at(whitelist.colNameFromColIndex(i));
+    try {
+      for (int i = 0; i < static_cast<int>(whitelist.size()); i++)
+        newRow << row.at(whitelist.colNameFromColIndex(i));
+    } catch (std::out_of_range &) {
+		// OK, this column will not be populated
+      continue;
+    }
   }
 
   m_model.reset(new QDataProcessorTwoLevelTreeModel(m_ws, whitelist));
