@@ -57,13 +57,13 @@ private:
   std::function<double(double)> getDSpacingToTof(const detid_t detid);
   std::vector<double> dSpacingWindows(const std::vector<double> &centres,
                                       const double widthMax);
-  std::vector<double> getTOFminmax(const double difc,
-				   const double difa,
-				   const double tzero);
+  std::vector<double> getTOFminmax(const double difc, const double difa,
+                                   const double tzero);
   void setCalibrationValues(const detid_t detid, const double difc,
                             const double difa, const double tzero);
-  void fitDIFCtZeroDIFA(const std::vector<double> &d, const std::vector<double> &tof,
-			double &difc, double &t0, double &difa);
+  void fitDIFCtZeroDIFA(const std::vector<double> &d,
+                        const std::vector<double> &tof, double &difc,
+                        double &t0, double &difa);
   API::MatrixWorkspace_sptr m_uncalibratedWS;
   API::ITableWorkspace_sptr m_calibrationTable;
   std::vector<double> m_peaksInDspacing;
