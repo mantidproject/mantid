@@ -1179,9 +1179,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
-        .Times(1)
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _)).Times(0);
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
