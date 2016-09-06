@@ -2,6 +2,7 @@
 
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/GeneralDomainCreator.h"
+#include "MantidCurveFitting/HistogramDomainCreator.h"
 #include "MantidCurveFitting/LatticeDomainCreator.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
@@ -42,7 +43,13 @@ IDomainCreator *createDomainCreator(const IFunction *fun,
   } else if (auto gfun = dynamic_cast<const IFunctionGeneral *>(fun)) {
     creator = new GeneralDomainCreator(*gfun, *manager, workspacePropertyName);
   } else {
-    creator = new FitMW(manager, workspacePropertyName, domainType);
+    bool histogramFit =
+        manager->getPropertyValue("EvaluationType") == "Histogram";
+    if (histogramFit) {
+      creator = new HistogramDomainCreator(*manager, workspacePropertyName);
+    } else {
+      creator = new FitMW(manager, workspacePropertyName, domainType);
+    }
   }
   return creator;
 }
@@ -74,6 +81,16 @@ void IFittingAlgorithm::init() {
           new Kernel::ListValidator<std::string>(domainTypes)),
       "The type of function domain to use: Simple, Sequential, or Parallel.",
       Kernel::Direction::Input);
+
+  std::vector<std::string> evaluationTypes{"CentrePoint", "Histogram"};
+  declareProperty("EvaluationType", "CentrePoint",
+                  Kernel::IValidator_sptr(
+                      new Kernel::ListValidator<std::string>(evaluationTypes)),
+                  "The way the function is evaluated on histogram data sets. "
+                  "If value is \"CentrePoint\" then function is evaluated at "
+                  "centre of each bin. If it is \"Histogram\" then function is "
+                  "integrated within the bin and the integrals returned.",
+                  Kernel::Direction::Input);
 
   initConcrete();
 }
