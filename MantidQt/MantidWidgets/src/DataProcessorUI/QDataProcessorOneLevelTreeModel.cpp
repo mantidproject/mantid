@@ -51,7 +51,8 @@ QVariant QDataProcessorOneLevelTreeModel::data(const QModelIndex &index,
   return QString::fromStdString(m_tWS->String(index.row(), index.column()));
 }
 
-Qt::ItemFlags QDataProcessorOneLevelTreeModel::flags(const QModelIndex &index) const {
+Qt::ItemFlags
+QDataProcessorOneLevelTreeModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
     return 0;
 
@@ -64,9 +65,8 @@ Qt::ItemFlags QDataProcessorOneLevelTreeModel::flags(const QModelIndex &index) c
 * @param role : The role
 * @return : The column name
 */
-QVariant QDataProcessorOneLevelTreeModel::headerData(int section,
-                                             Qt::Orientation orientation,
-                                             int role) const {
+QVariant QDataProcessorOneLevelTreeModel::headerData(
+    int section, Qt::Orientation orientation, int role) const {
 
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     return QString::fromStdString(m_whitelist.colNameFromColIndex(section));
@@ -112,17 +112,17 @@ bool QDataProcessorOneLevelTreeModel::insertRows(int position, int count,
 
   // Incorrect position
   if (position < 0 || position > rowCount())
-	  return false;
+    return false;
 
   // Incorrect number of rows
   if (count < 1)
-	  return false;
+    return false;
 
   beginInsertRows(QModelIndex(), position, position + count - 1);
 
   // Update the table workspace
   for (int pos = position; pos < position + count; pos++) {
-	  m_tWS->insertRow(position);
+    m_tWS->insertRow(position);
   }
 
   endInsertRows();
@@ -138,24 +138,24 @@ bool QDataProcessorOneLevelTreeModel::insertRows(int position, int count,
 * not
 */
 bool QDataProcessorOneLevelTreeModel::removeRows(int position, int count,
-                                         const QModelIndex &parent) {
+                                                 const QModelIndex &parent) {
 
   if (parent.isValid())
-	  return false;
+    return false;
 
   // Incorrect position
   if (position < 0 || position >= rowCount())
-	  return false;
+    return false;
 
   // Incorrect number of rows
   if (count < 1 || position + count > rowCount())
-	  return false;
+    return false;
 
   beginRemoveRows(QModelIndex(), position, position + count - 1);
 
   // Update the table workspace
   for (int pos = position; pos < position + count; pos++) {
-	  m_tWS->removeRow(position);
+    m_tWS->removeRow(position);
   }
 
   endRemoveRows();

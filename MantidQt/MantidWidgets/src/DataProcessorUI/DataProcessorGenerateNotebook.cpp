@@ -49,7 +49,8 @@ specified via the corresponding hinting line edit in the view
 @returns ipython notebook string
 */
 DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
-    std::string name, const std::string instrument, const DataProcessorWhiteList &whitelist,
+    std::string name, const std::string instrument,
+    const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
         preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
@@ -57,9 +58,9 @@ DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
     const std::map<std::string, std::string> preprocessingOptionsMap,
     const std::string processingOptions,
     const std::string postprocessingOptions)
-    : m_wsName(name), m_instrument(instrument),
-      m_whitelist(whitelist), m_preprocessMap(preprocessMap),
-      m_processor(processor), m_postprocessor(postprocessor),
+    : m_wsName(name), m_instrument(instrument), m_whitelist(whitelist),
+      m_preprocessMap(preprocessMap), m_processor(processor),
+      m_postprocessor(postprocessor),
       m_preprocessingOptionsMap(preprocessingOptionsMap),
       m_processingOptions(processingOptions),
       m_postprocessingOptions(postprocessingOptions) {
@@ -75,8 +76,8 @@ DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
   @param data : the processed data
   @returns ipython notebook string
   */
-std::string DataProcessorGenerateNotebook::generateNotebook(
-	const TreeData &data) {
+std::string
+DataProcessorGenerateNotebook::generateNotebook(const TreeData &data) {
 
   auto notebook = Mantid::Kernel::make_unique<Mantid::API::NotebookWriter>();
 
@@ -267,17 +268,17 @@ std::string tableString(const TreeData &treeData,
 
     for (const auto &row : rowMap) {
 
-		std::vector<std::string> values;
-		values.push_back(std::to_string(groupId));
+      std::vector<std::string> values;
+      values.push_back(std::to_string(groupId));
 
-		if (row.second.size() != whitelist.size())
-			throw std::invalid_argument("Can't generate table for notebook");
+      if (row.second.size() != whitelist.size())
+        throw std::invalid_argument("Can't generate table for notebook");
 
-		for (const auto &datum : row.second)
-			values.push_back(datum);
+      for (const auto &datum : row.second)
+        values.push_back(datum);
 
-		table_string << boost::algorithm::join(values, " | ");
-		table_string << "\n";
+      table_string << boost::algorithm::join(values, " | ");
+      table_string << "\n";
     }
   }
   return table_string.str();
@@ -296,8 +297,7 @@ std::string tableString(const TreeData &treeData,
   @return tuple containing the python code string and the output workspace name
   */
 boost::tuple<std::string, std::string> postprocessGroupString(
-    const GroupData &rowMap,
-    const DataProcessorWhiteList &whitelist,
+    const GroupData &rowMap, const DataProcessorWhiteList &whitelist,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::string &postprocessingOptions) {

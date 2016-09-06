@@ -52,8 +52,8 @@ public:
   virtual ~DataProcessorView(){};
 
   // Add actions to the toolbar
-  virtual void addActions(
-	  std::vector<std::unique_ptr<DataProcessorCommand>> commands) = 0;
+  virtual void
+  addActions(std::vector<std::unique_ptr<DataProcessorCommand>> commands) = 0;
 
   // Connect the model
   virtual void showTable(boost::shared_ptr<QAbstractItemModel> model) = 0;

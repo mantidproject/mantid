@@ -91,7 +91,8 @@ public:
                       const std::vector<std::string> &data) = 0;
 
   /// Validate a table workspace
-  virtual bool isValidModel(Mantid::API::Workspace_sptr ws, size_t whitelistColumns) const = 0;
+  virtual bool isValidModel(Mantid::API::Workspace_sptr ws,
+                            size_t whitelistColumns) const = 0;
 
   /// Return member variables
 

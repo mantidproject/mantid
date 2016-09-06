@@ -312,7 +312,7 @@ public:
     auto data = manager.selectedData(false);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 
-	TS_ASSERT_EQUALS(data.size(), 2);
+    TS_ASSERT_EQUALS(data.size(), 2);
     TS_ASSERT_EQUALS(data[0][0], firstRow);
     TS_ASSERT_EQUALS(data[0][1], secondRow);
     TS_ASSERT_EQUALS(data[1][0], thirdRow);
@@ -418,12 +418,12 @@ public:
 
     std::vector<std::string> newRow = {"0", "1", "2", "3", "4", "5", "6", "7"};
 
-	TS_ASSERT_THROWS_NOTHING(manager.newTable(reflTable(), reflWhitelist()));
+    TS_ASSERT_THROWS_NOTHING(manager.newTable(reflTable(), reflWhitelist()));
     TS_ASSERT_THROWS_NOTHING(manager.update(0, 0, newRow));
-	TS_ASSERT_THROWS_NOTHING(manager.update(0, 1, newRow));
-	TS_ASSERT_THROWS_NOTHING(manager.update(1, 0, newRow));
-	TS_ASSERT_THROWS_NOTHING(manager.update(1, 1, newRow));
-	// Check that runs have been updated correctly
+    TS_ASSERT_THROWS_NOTHING(manager.update(0, 1, newRow));
+    TS_ASSERT_THROWS_NOTHING(manager.update(1, 0, newRow));
+    TS_ASSERT_THROWS_NOTHING(manager.update(1, 1, newRow));
+    // Check that runs have been updated correctly
     EXPECT_CALL(presenter, selectedParents())
         .Times(1)
         .WillOnce(Return(std::set<int>()));
@@ -433,10 +433,10 @@ public:
     auto data = manager.selectedData(false);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter));
 
-	TS_ASSERT_EQUALS(data[0][0], newRow);
-	TS_ASSERT_EQUALS(data[0][1], newRow);
-	TS_ASSERT_EQUALS(data[1][0], newRow);
-	TS_ASSERT_EQUALS(data[1][1], newRow);
+    TS_ASSERT_EQUALS(data[0][0], newRow);
+    TS_ASSERT_EQUALS(data[0][1], newRow);
+    TS_ASSERT_EQUALS(data[1][0], newRow);
+    TS_ASSERT_EQUALS(data[1][1], newRow);
   }
 };
 #endif /* MANTID_MANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGERTEST_H */

@@ -70,8 +70,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "prevail.");
   m_columns = static_cast<int>(m_whitelist.size());
 
-  m_manager =
-	  Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(this, m_whitelist);
+  m_manager = Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(
+      this, m_whitelist);
 }
 
 /**
@@ -123,10 +123,10 @@ void GenericDataProcessorPresenter::acceptViews(
   for (auto const &name : items) {
     Workspace_sptr ws = ads.retrieve(name);
 
-	if (m_manager->isValidModel(
-		boost::dynamic_pointer_cast<ITableWorkspace>(ws),
-		m_whitelist.size()))
-		m_workspaceList.insert(name);
+    if (m_manager->isValidModel(
+            boost::dynamic_pointer_cast<ITableWorkspace>(ws),
+            m_whitelist.size()))
+      m_workspaceList.insert(name);
   }
   observeAdd();
   observePostDelete();
@@ -171,7 +171,7 @@ void GenericDataProcessorPresenter::process() {
 
       try {
         auto newData = reduceRow(data.second);
-		m_manager->update(item.first, data.first, newData);
+        m_manager->update(item.first, data.first, newData);
         progressReporter.report();
 
       } catch (std::exception &ex) {
@@ -807,11 +807,11 @@ void GenericDataProcessorPresenter::openTable() {
   ITableWorkspace_sptr newTable =
       boost::shared_ptr<ITableWorkspace>(origTable->clone().release());
   try {
-	  m_manager->isValidModel(newTable, m_whitelist.size());
-	  m_manager->newTable(newTable, m_whitelist);
-	  m_wsName = toOpen;
-	  m_view->showTable(m_manager->getModel());
-	  m_tableDirty = false;
+    m_manager->isValidModel(newTable, m_whitelist.size());
+    m_manager->newTable(newTable, m_whitelist);
+    m_wsName = toOpen;
+    m_view->showTable(m_manager->getModel());
+    m_tableDirty = false;
   } catch (std::runtime_error &e) {
     m_mainPresenter->giveUserCritical(
         "Could not open workspace: " + std::string(e.what()), "Error");

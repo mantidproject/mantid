@@ -48,8 +48,9 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorTwoLevelTreeModel
     : public QAbstractItemModel {
   Q_OBJECT
 public:
-  QDataProcessorTwoLevelTreeModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
-                          const DataProcessorWhiteList &whitelist);
+  QDataProcessorTwoLevelTreeModel(
+      Mantid::API::ITableWorkspace_sptr tableWorkspace,
+      const DataProcessorWhiteList &whitelist);
   ~QDataProcessorTwoLevelTreeModel() override;
 
   // Functions to read data from the model
@@ -105,7 +106,8 @@ private:
 };
 
 /// Typedef for a shared pointer to \c QDataProcessorTwoLevelTreeModel
-typedef boost::shared_ptr<QDataProcessorTwoLevelTreeModel> QDataProcessorTwoLevelTreeModel_sptr;
+typedef boost::shared_ptr<QDataProcessorTwoLevelTreeModel>
+    QDataProcessorTwoLevelTreeModel_sptr;
 
 } // namespace MantidWidgets
 } // namespace Mantid

@@ -76,20 +76,20 @@ public:
   void newTable(const DataProcessorWhiteList &whitelist) override;
   /// New table
   void newTable(Mantid::API::ITableWorkspace_sptr table,
-	  const DataProcessorWhiteList &whitelist) override;
+                const DataProcessorWhiteList &whitelist) override;
 
   /// Return selected data
   SelectedData selectedData(bool prompt) override;
   /// Transfer new data to model
   void transfer(const std::vector<std::map<std::string, std::string>> &runs,
-	  const DataProcessorWhiteList &whitelist) override;
+                const DataProcessorWhiteList &whitelist) override;
   /// Update row with new data
   void update(int parent, int child,
-	  const std::vector<std::string> &data) override;
+              const std::vector<std::string> &data) override;
 
   /// Validate a table workspace
   bool isValidModel(Mantid::API::Workspace_sptr ws,
-	  size_t whitelistColumns) const override;
+                    size_t whitelistColumns) const override;
 
   /// Return the model
   boost::shared_ptr<QAbstractItemModel> getModel() override;
@@ -108,7 +108,7 @@ private:
   void insertRow(int rowIndex);
   /// Create a default table workspace
   Mantid::API::ITableWorkspace_sptr
-	  createDefaultWorkspace(const DataProcessorWhiteList &whitelist);
+  createDefaultWorkspace(const DataProcessorWhiteList &whitelist);
   /// Validate a table workspace
   void validateModel(Mantid::API::ITableWorkspace_sptr ws,
                      size_t whitelistColumns) const;

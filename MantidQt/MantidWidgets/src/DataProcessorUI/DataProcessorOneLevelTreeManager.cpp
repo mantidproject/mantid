@@ -132,7 +132,7 @@ void DataProcessorOneLevelTreeManager::deleteRow() {
     return;
 
   for (const auto &row : selectedRows) {
-	  m_model->removeRow(row);
+    m_model->removeRow(row);
   }
 }
 
@@ -193,7 +193,7 @@ std::string DataProcessorOneLevelTreeManager::copySelected() {
       line.push_back(
           m_model->data(m_model->index(row, col)).toString().toStdString());
     }
-	lines.push_back(boost::algorithm::join(line, "\t"));
+    lines.push_back(boost::algorithm::join(line, "\t"));
   }
   return boost::algorithm::join(lines, "\n");
 }
@@ -354,19 +354,18 @@ void DataProcessorOneLevelTreeManager::transfer(
 * @param child :: the row
 * @param data :: the data
 */
-void DataProcessorOneLevelTreeManager::update(int parent, int child,
-	const std::vector<std::string> &data) {
+void DataProcessorOneLevelTreeManager::update(
+    int parent, int child, const std::vector<std::string> &data) {
 
-	UNUSED_ARG(child);
+  UNUSED_ARG(child);
 
-	if (static_cast<int>(data.size()) != m_model->columnCount())
-		throw std::invalid_argument("Can't update tree with given data");
+  if (static_cast<int>(data.size()) != m_model->columnCount())
+    throw std::invalid_argument("Can't update tree with given data");
 
-	for (int col = 0; col < m_model->columnCount(); col++)
-		m_model->setData(m_model->index(parent, col),
-			QString::fromStdString(data[col]));
+  for (int col = 0; col < m_model->columnCount(); col++)
+    m_model->setData(m_model->index(parent, col),
+                     QString::fromStdString(data[col]));
 }
-
 
 /** Return a shared ptr to the model
 * @return :: A shared ptr to the model

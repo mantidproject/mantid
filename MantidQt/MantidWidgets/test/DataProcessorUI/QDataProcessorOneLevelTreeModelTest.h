@@ -134,8 +134,8 @@ public:
 
     TS_ASSERT_EQUALS(model.parent(model.index(0, 0)), QModelIndex());
     TS_ASSERT_EQUALS(model.parent(model.index(1, 0)), QModelIndex());
-	TS_ASSERT_EQUALS(model.parent(model.index(2, 0)), QModelIndex());
-	TS_ASSERT_EQUALS(model.parent(model.index(3, 0)), QModelIndex());
+    TS_ASSERT_EQUALS(model.parent(model.index(2, 0)), QModelIndex());
+    TS_ASSERT_EQUALS(model.parent(model.index(3, 0)), QModelIndex());
   }
 
   void testSetData() {

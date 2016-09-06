@@ -99,7 +99,8 @@ void QDataProcessorWidget::setModel(const std::string &name) {
 Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
-void QDataProcessorWidget::showTable(boost::shared_ptr<QAbstractItemModel> model) {
+void QDataProcessorWidget::showTable(
+    boost::shared_ptr<QAbstractItemModel> model) {
   m_model = model;
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),
@@ -161,26 +162,26 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
 
   // TODO
   //// parent widget takes ownership of QMenu
-  //QMenu *menu = new QMenu(this);
-  //menu->addAction(ui.actionProcess);
-  //menu->addAction(ui.actionExpandSelection);
-  //menu->addSeparator();
-  //menu->addAction(ui.actionPlotRow);
-  //menu->addAction(ui.actionPlotGroup);
-  //menu->addSeparator();
-  //menu->addAction(ui.actionAppendRow);
-  //menu->addAction(ui.actionAppendGroup);
-  //menu->addSeparator();
-  //menu->addAction(ui.actionGroupRows);
-  //menu->addAction(ui.actionCopySelected);
-  //menu->addAction(ui.actionCutSelected);
-  //menu->addAction(ui.actionPasteSelected);
-  //menu->addAction(ui.actionClearSelected);
-  //menu->addSeparator();
-  //menu->addAction(ui.actionDeleteRow);
-  //menu->addAction(ui.actionDeleteGroup);
+  // QMenu *menu = new QMenu(this);
+  // menu->addAction(ui.actionProcess);
+  // menu->addAction(ui.actionExpandSelection);
+  // menu->addSeparator();
+  // menu->addAction(ui.actionPlotRow);
+  // menu->addAction(ui.actionPlotGroup);
+  // menu->addSeparator();
+  // menu->addAction(ui.actionAppendRow);
+  // menu->addAction(ui.actionAppendGroup);
+  // menu->addSeparator();
+  // menu->addAction(ui.actionGroupRows);
+  // menu->addAction(ui.actionCopySelected);
+  // menu->addAction(ui.actionCutSelected);
+  // menu->addAction(ui.actionPasteSelected);
+  // menu->addAction(ui.actionClearSelected);
+  // menu->addSeparator();
+  // menu->addAction(ui.actionDeleteRow);
+  // menu->addAction(ui.actionDeleteGroup);
 
-  //menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
+  // menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
 }
 
 /**

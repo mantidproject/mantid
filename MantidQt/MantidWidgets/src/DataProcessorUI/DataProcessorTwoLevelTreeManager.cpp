@@ -73,10 +73,13 @@ DataProcessorTwoLevelTreeManager::publishCommands() {
   addCommand(commands, make_unique<DataProcessorOpenTableCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorNewTableCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSaveTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSaveTableAsCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorSaveTableAsCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorImportTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorExportTableCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorImportTableCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorExportTableCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorOptionsCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
@@ -87,16 +90,22 @@ DataProcessorTwoLevelTreeManager::publishCommands() {
   addCommand(commands, make_unique<DataProcessorPlotGroupCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorAppendRowCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorAppendGroupCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorAppendGroupCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorGroupRowsCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorCopySelectedCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorCutSelectedCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorPasteSelectedCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorClearSelectedCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorCopySelectedCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorCutSelectedCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorPasteSelectedCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorClearSelectedCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<DataProcessorDeleteRowCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorDeleteGroupCommand>(m_presenter));
+  addCommand(commands,
+             make_unique<DataProcessorDeleteGroupCommand>(m_presenter));
   return commands;
 }
 
@@ -185,47 +194,47 @@ Group rows together
 */
 void DataProcessorTwoLevelTreeManager::groupRows() {
 
-	// Find if rows belong to the same group
-	// If they do, do nothing
-	// If they don't, remove rows from their groups and add them to a
-	// new group
+  // Find if rows belong to the same group
+  // If they do, do nothing
+  // If they don't, remove rows from their groups and add them to a
+  // new group
 
-	const auto selectedRows = m_presenter->selectedChildren();
+  const auto selectedRows = m_presenter->selectedChildren();
 
-	if (selectedRows.empty()) {
-		// no rows were selected
-		return;
-	}
+  if (selectedRows.empty()) {
+    // no rows were selected
+    return;
+  }
 
-	// Append a new group where selected rows will be pasted (this will append a
-	// group with an empty row)
-	int groupId = m_model->rowCount();
-	appendGroup();
-	// Append as many rows as the number of selected rows minus one
-	int rowsToAppend = -1;
-	for (const auto &row : selectedRows)
-		rowsToAppend += static_cast<int>(row.second.size());
-	for (int i = 0; i < rowsToAppend; i++)
-		insertRow(groupId, i);
+  // Append a new group where selected rows will be pasted (this will append a
+  // group with an empty row)
+  int groupId = m_model->rowCount();
+  appendGroup();
+  // Append as many rows as the number of selected rows minus one
+  int rowsToAppend = -1;
+  for (const auto &row : selectedRows)
+    rowsToAppend += static_cast<int>(row.second.size());
+  for (int i = 0; i < rowsToAppend; i++)
+    insertRow(groupId, i);
 
-	// Now we just have to set the data
-	int rowIndex = 0;
-	for (const auto &item : selectedRows) {
-		int oldGroupId = item.first;
-		auto rows = item.second;
-		for (const auto &row : rows) {
-			for (int col = 0; col < m_model->columnCount() - 1; col++) {
-				auto value = m_model->data(
-					m_model->index(row, col, m_model->index(oldGroupId, 0)));
-				m_model->setData(
-					m_model->index(rowIndex, col, m_model->index(groupId, 0)), value);
-			}
-			rowIndex++;
-		}
-	}
+  // Now we just have to set the data
+  int rowIndex = 0;
+  for (const auto &item : selectedRows) {
+    int oldGroupId = item.first;
+    auto rows = item.second;
+    for (const auto &row : rows) {
+      for (int col = 0; col < m_model->columnCount() - 1; col++) {
+        auto value = m_model->data(
+            m_model->index(row, col, m_model->index(oldGroupId, 0)));
+        m_model->setData(
+            m_model->index(rowIndex, col, m_model->index(groupId, 0)), value);
+      }
+      rowIndex++;
+    }
+  }
 
-	// Now delete the rows
-	deleteRow();
+  // Now delete the rows
+  deleteRow();
 }
 
 /** Expands the current selection to all the rows in the selected groups, this
@@ -234,16 +243,16 @@ void DataProcessorTwoLevelTreeManager::groupRows() {
 * @return :: Groups containing selected rows
 */
 std::set<int> DataProcessorTwoLevelTreeManager::expandSelection() {
-	std::set<int> groupIds;
+  std::set<int> groupIds;
 
-	auto items = m_presenter->selectedChildren();
-	if (items.empty())
-		return groupIds;
+  auto items = m_presenter->selectedChildren();
+  if (items.empty())
+    return groupIds;
 
-	for (auto group = items.begin(); group != items.end(); ++group)
-		groupIds.insert(group->first);
+  for (auto group = items.begin(); group != items.end(); ++group)
+    groupIds.insert(group->first);
 
-	return groupIds;
+  return groupIds;
 }
 
 /** Clear the currently selected rows */
@@ -400,7 +409,7 @@ void DataProcessorTwoLevelTreeManager::insertGroup(int groupIndex) {
 */
 int DataProcessorTwoLevelTreeManager::numRowsInGroup(int group) const {
 
-	return m_model->rowCount(m_model->index(group, 0));
+  return m_model->rowCount(m_model->index(group, 0));
 }
 
 /**
@@ -497,7 +506,7 @@ SelectedData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
             m_model->data(m_model->index(row, i, m_model->index(group, 0)))
                 .toString()
                 .toStdString());
-	  selectedData[group][row] = data;
+      selectedData[group][row] = data;
     }
   }
   return selectedData;
@@ -527,7 +536,7 @@ void DataProcessorTwoLevelTreeManager::transfer(
       for (int i = 0; i < static_cast<int>(whitelist.size()); i++)
         newRow << row.at(whitelist.colNameFromColIndex(i));
     } catch (std::out_of_range &) {
-		// OK, this column will not be populated
+      // OK, this column will not be populated
       continue;
     }
   }
@@ -540,8 +549,8 @@ void DataProcessorTwoLevelTreeManager::transfer(
 * @param child :: the row
 * @param data :: the data
 */
-void DataProcessorTwoLevelTreeManager::update(int parent, int child,
-	const std::vector<std::string> &data) {
+void DataProcessorTwoLevelTreeManager::update(
+    int parent, int child, const std::vector<std::string> &data) {
 
   if (static_cast<int>(data.size()) != m_model->columnCount())
     throw std::invalid_argument("Can't update tree with given data");
@@ -633,6 +642,5 @@ bool DataProcessorTwoLevelTreeManager::isValidModel(
   }
   return true;
 }
-
 }
 }

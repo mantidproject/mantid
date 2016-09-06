@@ -67,7 +67,6 @@ public:
   std::string getProcessInstrument() const override { return "FAKE"; }
 
   DataProcessorPresenter *getPresenter() const override { return nullptr; }
-
 };
 
 class MockMainPresenter : public DataProcessorMainPresenter {
