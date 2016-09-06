@@ -58,10 +58,13 @@ void convertToVector(const std::vector<T> &singles,
                      const std::vector<T> &ranges,
                      std::vector<T> &tot_signles) {
 
+  // find the size of the final vector of masked values
   size_t n_total(singles.size() + tot_signles.size());
   for (size_t i = 0; i < ranges.size(); i += 2) {
     n_total += ranges[i + 1] - ranges[i] + 1;
   }
+  // reserve space for all masked spectra
+  // for efficient memory operations
   tot_signles.reserve(n_total);
   // add singles to the existing singles
   tot_signles.insert(tot_signles.end(), singles.begin(), singles.end());
@@ -359,7 +362,7 @@ void LoadMask::exec() {
   // unmasking is not implemented
   // g_log.information() << "To UnMask: \n";
 
-  // As m_uMaskCompIdSingle os empty, this never works
+  // As m_uMaskCompIdSingle is empty, this never works
   this->bankToDetectors(m_uMaskCompIdSingle, m_unMaskDetID);
 
   // convert spectra ID to corresponet det-id-s
