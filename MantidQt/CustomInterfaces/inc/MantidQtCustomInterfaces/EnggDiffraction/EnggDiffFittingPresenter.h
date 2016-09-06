@@ -167,8 +167,7 @@ private:
   splitFittingDirectory(const std::string &selectedfPath);
 
 
-  void enableMultiRun(std::string firstRun, std::string lastRun,
-                      std::vector<std::string> &fittingRunNoDirVec);
+  std::vector<std::string> enableMultiRun(std::string firstRun, std::string lastRun);
 
   void browsePeaksToFit();
 
@@ -183,8 +182,7 @@ private:
   std::vector<std::string> getAllBrowsedFilePaths(const std::string inputFullPath,
                    std::vector<std::string> &foundFullFilePaths);
 
-  void processMultiRun(const std::string strFocusedFile,
-                       std::vector<std::string> &runnoDirVector);
+  std::vector<std::string> processMultiRun(const std::string userInput);
 
   void processSingleRun(const std::string &userInputBasename,
                         std::vector<std::string> &runnoDirVector,

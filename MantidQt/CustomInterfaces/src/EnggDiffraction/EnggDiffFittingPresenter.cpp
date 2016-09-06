@@ -230,7 +230,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
     // if given a multi-run
   } else if (userPathInput.find("-") != std::string::npos) {
-    processMultiRun(userPathInput, foundFullFilePaths);
+    foundFullFilePaths = processMultiRun(userPathInput);
 	// try to process using single run
   } else {
     processSingleRun(userPathInput, foundFullFilePaths, splitBaseName);
@@ -366,20 +366,34 @@ std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
   return runNoVec;
 }
 
-void EnggDiffFittingPresenter::processMultiRun(
-    const std::string strFocusedFile,
-    std::vector<std::string> &runnoDirVector) {
+/**
+  * Processes a multi run input to the interface
+  * such as '12345-12350' by splitting it into '12345' to '12350'
+  * then calling enableMultiRun
+  * @param userInput The user input from the view
+  *
+  * @return List of found full file paths for the files specified
+  */
+std::vector<std::string> EnggDiffFittingPresenter::processMultiRun(
+    const std::string userInput) {
+
+	// Split user input into the first and last run number
   std::vector<std::string> firstLastRunNoVec;
-  boost::split(firstLastRunNoVec, strFocusedFile, boost::is_any_of("-"));
-  std::string firstRun;
-  std::string lastRun;
+  boost::split(firstLastRunNoVec, userInput, boost::is_any_of("-"));
+
+  // Then store them in their own strings
+  std::string firstRun = 0;
+  std::string lastRun = 0;
   if (!firstLastRunNoVec.empty()) {
     firstRun = firstLastRunNoVec[0];
     lastRun = firstLastRunNoVec[1];
 
     m_view->setFittingMultiRunMode(true);
-    enableMultiRun(firstRun, lastRun, runnoDirVector);
+
+    
   }
+  return enableMultiRun(firstRun, lastRun);
+
 }
 
 void EnggDiffFittingPresenter::processSingleRun(
@@ -418,10 +432,13 @@ void EnggDiffFittingPresenter::processSingleRun(
   // to track the FittingRunnoChanged loop number
   g_fitting_runno_counter++;
 
+  // Inform the view we are using single run mode
   m_view->setFittingSingleRunMode(true);
 
   const bool wasFound =
       findFilePathsFromBaseName(focusDir, userInputBasename, runnoDirVector);
+
+  // Update the list of found runs shown in the view
   m_view->setFittingRunNumVec(runnoDirVector);
 
   // add bank to the combo-box and list view
@@ -503,12 +520,13 @@ bool EnggDiffFittingPresenter::findFilePathsFromBaseName(
   return found;
 }
 
-void EnggDiffFittingPresenter::enableMultiRun(
-    std::string firstRun, std::string lastRun,
-    std::vector<std::string> &fittingRunNoDirVec) {
+std::vector<std::string> EnggDiffFittingPresenter::enableMultiRun(
+    std::string firstRun, std::string lastRun) {
 
-  bool firstDig = isDigit(firstRun);
-  bool lastDig = isDigit(lastRun);
+	std::vector<std::string> fittingRunNoDirVec;
+
+  const bool firstDig = isDigit(firstRun);
+  const bool lastDig = isDigit(lastRun);
 
   std::vector<std::string> RunNumberVec;
   if (firstDig && lastDig) {
@@ -588,6 +606,8 @@ void EnggDiffFittingPresenter::enableMultiRun(
                         "Please try again");
     m_view->enableFitAllButton(false);
   }
+
+  return fittingRunNoDirVec;
 }
 
 void EnggDiffFittingPresenter::processStart() {}
