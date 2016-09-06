@@ -836,15 +836,13 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
   }
 
   auto fPath = focusedRunNo;
-  runSaveDiffFittingAsciiAlg(focusedFitPeaksTableName, fPath);
-
   try {
+    runSaveDiffFittingAsciiAlg(focusedFitPeaksTableName, fPath);
     runFittingAlgs(focusedFitPeaksTableName, g_focusedFittingWSName);
 
   } catch (std::invalid_argument &ia) {
-    g_log.error() << "Error, Fitting could not finish off correctly, " +
+    g_log.error() << "Error, Fitting could not finish off correctly - " +
                          std::string(ia.what()) << '\n';
-    throw;
   }
 }
 
@@ -880,6 +878,15 @@ void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
   // split to get run number and bank
   auto fileSplit = splitFittingDirectory(filePath);
   // returns ['ENGINX', <RUN-NUMBER>, 'focused', `bank`, <BANK>, '.nxs']
+  if (fileSplit.size() == 1) {
+    // The user probably has input just `ENGINX012345.nxs`
+    g_log.error("File name does not contain any '_' characters"
+                " - expected file name is "
+                "'<Instrument>_<Run-Number>_focused_bank_<bankNumber>.nxs");
+    throw std::invalid_argument("Could not save fitting ASCII as"
+                                " filename was not of expected format");
+  }
+
   auto runNumber = fileSplit[1];
 
   // if a normal focused file assign bank number otherwise 'customised'
