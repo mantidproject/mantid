@@ -135,6 +135,10 @@ void LoadNXSPE::exec() {
     file.getData(temporary);
     psi = temporary.at(0);
     file.closeData();
+	if (!isfinite(psi)) {
+		psi = 0;
+		g_log.warning() << "Value of psi found in file was NaN, changing to 0" << "\n";
+	}
   }
 
   int kikfscaling = 0;
