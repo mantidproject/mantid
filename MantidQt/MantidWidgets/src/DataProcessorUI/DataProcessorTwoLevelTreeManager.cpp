@@ -590,7 +590,12 @@ ITableWorkspace_sptr DataProcessorTwoLevelTreeManager::createDefaultWorkspace(
   return ws;
 }
 
-void validateModel(ITableWorkspace_sptr ws, size_t whitelistColumns) {
+/** Validate a table workspace
+* @param ws :: the table workspace
+* @param whitelistColumns :: the number of columns as specified in a whitelist
+*/
+void DataProcessorTwoLevelTreeManager::validateModel(
+    ITableWorkspace_sptr ws, size_t whitelistColumns) const {
 
   if (!ws)
     throw std::runtime_error("Null pointer");

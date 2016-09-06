@@ -1,5 +1,5 @@
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGER_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGER_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORONELEVELTREEMANAGER_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORONELEVELTREEMANAGER_H
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
@@ -10,13 +10,13 @@ namespace MantidWidgets {
 
 class DataProcessorPresenter;
 class DataProcessorWhiteList;
-class QDataProcessorTwoLevelTreeModel;
+class QDataProcessorOneLevelTreeModel;
 
-/** @class DataProcessorTwoLevelTreeManager
+/** @class DataProcessorOneLevelTreeManager
 
-DataProcessorTwoLevelTreeManager is a concrete implementation of a
-DataProcessorTreeManager that handles a two-level tree view (which corresponds
-to a DataProcessorUI with a post-processing algorithm defined).
+DataProcessorOneLevelTreeManager is a concrete implementation of a
+DataProcessorTreeManager that handles a one-level tree view (which corresponds
+to a DataProcessorUI with no post-processing algorithm defined).
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -39,18 +39,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataProcessorTwoLevelTreeManager
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DataProcessorOneLevelTreeManager
     : public DataProcessorTreeManager {
 public:
   /// Constructor
-  DataProcessorTwoLevelTreeManager(DataProcessorPresenter *presenter,
+  DataProcessorOneLevelTreeManager(DataProcessorPresenter *presenter,
                                    Mantid::API::ITableWorkspace_sptr table,
                                    const DataProcessorWhiteList &whitelist);
   /// Constructor (no table ws given)
-  DataProcessorTwoLevelTreeManager(DataProcessorPresenter *presenter,
+  DataProcessorOneLevelTreeManager(DataProcessorPresenter *presenter,
                                    const DataProcessorWhiteList &whitelist);
   /// Destructor
-  ~DataProcessorTwoLevelTreeManager() override;
+  ~DataProcessorOneLevelTreeManager() override;
 
   /// Publish commands
   std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
@@ -76,7 +76,7 @@ public:
   void newTable(const DataProcessorWhiteList &whitelist) override;
   /// New table
   void newTable(Mantid::API::ITableWorkspace_sptr table,
-                const DataProcessorWhiteList &whitelist) override;
+	  const DataProcessorWhiteList &whitelist) override;
 
   /// Return selected data
   SelectedData selectedData(bool prompt) override;
@@ -85,11 +85,11 @@ public:
 	  const DataProcessorWhiteList &whitelist) override;
   /// Update row with new data
   void update(int parent, int child,
-              const std::vector<std::string> &data) override;
+	  const std::vector<std::string> &data) override;
 
   /// Validate a table workspace
   bool isValidModel(Mantid::API::Workspace_sptr ws,
-                    size_t whitelistColumns) const override;
+	  size_t whitelistColumns) const override;
 
   /// Return the model
   boost::shared_ptr<QAbstractItemModel> getModel() override;
@@ -100,16 +100,12 @@ private:
   /// The DataProcessor presenter
   DataProcessorPresenter *m_presenter;
   /// The model
-  boost::shared_ptr<QDataProcessorTwoLevelTreeModel> m_model;
+  boost::shared_ptr<QDataProcessorOneLevelTreeModel> m_model;
   /// The workspace the model is currently representing
   Mantid::API::ITableWorkspace_sptr m_ws;
 
   /// Insert a row in the model
-  void insertRow(int groupIndex, int rowIndex);
-  /// Insert a group in the model
-  void insertGroup(int groupIndex);
-  /// Get the number of rows in a group
-  int numRowsInGroup(int groupId) const;
+  void insertRow(int rowIndex);
   /// Create a default table workspace
   Mantid::API::ITableWorkspace_sptr
 	  createDefaultWorkspace(const DataProcessorWhiteList &whitelist);
@@ -119,4 +115,4 @@ private:
 };
 }
 }
-#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGER_H*/
+#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORONELEVELTREEMANAGER_H*/
