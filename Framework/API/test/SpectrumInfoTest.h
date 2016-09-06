@@ -136,6 +136,73 @@ public:
                      m_workspace.detectorSignedTwoTheta(*det));
   }
 
+  void test_position() {
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.position(0), V3D(0.0, -0.1, 5.0));
+    TS_ASSERT_EQUALS(spectrumInfo.position(1), V3D(0.0, 0.0, 5.0));
+    TS_ASSERT_EQUALS(spectrumInfo.position(2), V3D(0.0, 0.1, 5.0));
+    TS_ASSERT_EQUALS(spectrumInfo.position(3), V3D(0.0, 0.0, -9.0));
+    TS_ASSERT_EQUALS(spectrumInfo.position(4), V3D(0.0, 0.0, -2.0));
+  }
+
+  void test_hasDetectors() {
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    TS_ASSERT(spectrumInfo.hasDetectors(1));
+    TS_ASSERT(spectrumInfo.hasDetectors(2));
+    TS_ASSERT(spectrumInfo.hasDetectors(3));
+    TS_ASSERT(spectrumInfo.hasDetectors(4));
+
+    // Add second ID, we still have detectors.
+    m_workspace.getSpectrum(1).addDetectorID(1);
+    TS_ASSERT(spectrumInfo.hasDetectors(1));
+
+    // Clear all IDs, no detectors
+    m_workspace.getSpectrum(1).clearDetectorIDs();
+    TS_ASSERT(!spectrumInfo.hasDetectors(1));
+
+    // Restore old value
+    m_workspace.getSpectrum(1).setDetectorID(2);
+  }
+
+  void test_hasDetectors_ignores_bad_IDs() {
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    // Set bad value - Ids in instrument start at 1, 0 is out of range.
+    m_workspace.getSpectrum(1).setDetectorID(0);
+    TS_ASSERT(!spectrumInfo.hasDetectors(1));
+    // Restore old value
+    m_workspace.getSpectrum(1).setDetectorID(2);
+  }
+
+  void test_hasUniqueDetector() {
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(0));
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(1));
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(2));
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(3));
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(4));
+
+    // Add second ID, should not be unique anymore.
+    m_workspace.getSpectrum(1).addDetectorID(1);
+    TS_ASSERT(!spectrumInfo.hasUniqueDetector(1));
+
+    // Clear all IDs, also not unique.
+    m_workspace.getSpectrum(1).clearDetectorIDs();
+    TS_ASSERT(!spectrumInfo.hasUniqueDetector(1));
+
+    // Restore old value
+    m_workspace.getSpectrum(1).setDetectorID(2);
+  }
+
+  void test_hasUniqueDetector_ignores_bad_IDs() {
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    // Add second *bad* ID, should still be unique.
+    m_workspace.getSpectrum(1).addDetectorID(0);
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(1));
+    // Restore old value
+    m_workspace.getSpectrum(1).setDetectorID(2);
+  }
+
 private:
   WorkspaceTester m_workspace;
   WorkspaceTester m_workspaceNoInstrument;

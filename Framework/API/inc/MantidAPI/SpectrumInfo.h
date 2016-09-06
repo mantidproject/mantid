@@ -57,7 +57,6 @@ class MatrixWorkspace;
 class MANTID_API_DLL SpectrumInfo {
 public:
   SpectrumInfo(const MatrixWorkspace &workspace);
-  SpectrumInfo(SpectrumInfo &&other);
   ~SpectrumInfo();
 
   bool isMonitor(const size_t index) const;
