@@ -7,9 +7,11 @@
 #include <boost/shared_ptr.hpp>
 
 #include <mutex>
+#include <vector>
 
 
 namespace Mantid {
+using detid_t = int32_t;
 namespace Geometry {
 class IComponent;
 class IDetector;
@@ -86,6 +88,7 @@ private:
 
   const MatrixWorkspace &m_workspace;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
+  std::vector<detid_t> m_validDetectorIDs;
   // The following variables are mutable, since they are initialized (cached)
   // only on demand, by const getters.
   mutable boost::shared_ptr<const Geometry::IComponent> m_source;

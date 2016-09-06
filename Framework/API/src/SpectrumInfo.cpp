@@ -5,6 +5,8 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/MultiThreaded.h"
 
+#include <algorithm>
+
 namespace Mantid {
 namespace API {
 
@@ -17,6 +19,9 @@ SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace)
   if (!m_instrument)
     throw std::runtime_error("Workspace " + workspace.getName() +
                              " does not contain an instrument!");
+  const bool skipMonitors = false;
+  m_validDetectorIDs = m_instrument->getDetectorIDs(skipMonitors);
+  std::sort(m_validDetectorIDs.begin(), m_validDetectorIDs.end());
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -84,11 +89,28 @@ Kernel::V3D SpectrumInfo::position(const size_t index) const {
 }
 
 bool SpectrumInfo::hasDetectors(const size_t index) const {
-  return m_workspace.getSpectrum(index).getDetectorIDs().size() > 0;
+  // Workspaces can contain invalid detector IDs. Those IDs will be silently
+  // ignored here until this is fixed.
+  for (const auto &id : m_workspace.getSpectrum(index).getDetectorIDs()) {
+    if (std::lower_bound(m_validDetectorIDs.cbegin(), m_validDetectorIDs.cend(),
+                         id) != m_validDetectorIDs.cend()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
-  return m_workspace.getSpectrum(index).getDetectorIDs().size() == 1;
+  size_t count = 0;
+  // Workspaces can contain invalid detector IDs. Those IDs will be silently
+  // ignored here until this is fixed.
+  for (const auto &id : m_workspace.getSpectrum(index).getDetectorIDs()) {
+    if (std::lower_bound(m_validDetectorIDs.cbegin(), m_validDetectorIDs.cend(),
+                         id) != m_validDetectorIDs.cend()) {
+      ++count;
+    }
+  }
+  return count == 1;
 }
 
 /// Returns L1 (distance from source to sample).
