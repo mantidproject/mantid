@@ -57,7 +57,6 @@ public:
   MatrixWorkspace_sptr m_dataWorkspace;
   MatrixWorkspace_sptr m_transWorkspace1;
   MatrixWorkspace_sptr m_transWorkspace2;
-  MatrixWorkspace_sptr m_decWorkspaceTOF;
   MatrixWorkspace_sptr m_decWorkspaceWrongNumSpectra;
   MatrixWorkspace_sptr m_decWorkspaceWrongNumValues;
   WorkspaceGroup_sptr m_multiDetectorWorkspace;
@@ -97,15 +96,6 @@ public:
     createWorkspace->setPropertyValue("OutputWorkspace", "TOF");
     createWorkspace->execute();
     m_TOF = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("TOF");
-
-    createWorkspace->setProperty("UnitX", "TOF");
-    createWorkspace->setProperty("DataX", xDecData);
-    createWorkspace->setProperty("DataY", yDecData);
-    createWorkspace->setProperty("NSpec", 3);
-    createWorkspace->setProperty("OutputWorkspace", "DECTOF");
-    createWorkspace->execute();
-    m_decWorkspaceTOF =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("DECTOF");
 
     createWorkspace->setProperty("UnitX", "Wavelength");
     createWorkspace->setProperty("DataX", xDecData);
@@ -290,13 +280,6 @@ public:
     alg->setProperty("InputWorkspace", m_TOF);
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
     m_TOF->setInstrument(tempInst);
-  }
-
-  void test_detector_efficiency_correction_bad_xunits_throws() {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("InputWorkspace", m_dataWorkspace);
-    alg->setProperty("DetectorEfficiencyCorrection", m_decWorkspaceTOF);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void test_detector_efficiency_correction_wrong_num_of_spectra_throws() {

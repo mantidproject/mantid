@@ -292,11 +292,7 @@ std::map<std::string, std::string> ReflectometryReductionOne::validateInputs() {
     return result;
   }
 
-  if (decWS->getAxis(0)->unit()->unitID() != "Wavelength") {
-    result["DetectorEfficiencyCorrection"] =
-        "Detector Efficiency Correction "
-        "workspace x-units must be in wavelength";
-  } else if (decWS->getNumberHistograms() > 1 &&
+  if (decWS->getNumberHistograms() > 1 &&
              decWS->getNumberHistograms() != runWS->getNumberHistograms()) {
     result["DetectorEfficiencyCorrection"] =
         "The number of spectra in the "
@@ -554,10 +550,10 @@ void ReflectometryReductionOne::exec() {
                          stitchingStart, stitchingDelta, stitchingEnd,
                          stitchingStartOverlap, stitchingEndOverlap);
 
-  OptionalMatrixWorkspace_sptr detectorEfficiencyCorrection;
+  OptionalMatrixWorkspace_sptr decWS;
   MatrixWorkspace_sptr decTemp = getProperty("DetectorEfficiencyCorrection");
   if (decTemp) {
-    detectorEfficiencyCorrection = decTemp;
+    decWS = decTemp;
   }
 
   OptionalDouble theta;
@@ -605,9 +601,31 @@ void ReflectometryReductionOne::exec() {
   } else if (xUnitID == "TOF") {
     // If the input workspace is in TOF, do some corrections and generate IvsLam
     // from it.
-    if (detectorEfficiencyCorrection.is_initialized()) {
+
+    // Convert input workspace units to wavelength
+    auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
+    convertUnitsAlg->initialize();
+    convertUnitsAlg->setProperty("InputWorkspace", runWS);
+    convertUnitsAlg->setProperty("Target", "Wavelength");
+    convertUnitsAlg->setProperty("AlignBins", true);
+    convertUnitsAlg->execute();
+    runWS = convertUnitsAlg->getProperty("OutputWorkspace");
+
+    if (decWS.is_initialized()) {
+      // Convert flood workspace units to wavelength, if units are not already
+      // in that form
+      auto decXUnitID = decWS.get()->getAxis(0)->unit()->unitID();
+      if (decXUnitID != "Wavelength") {
+        auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
+        convertUnitsAlg->initialize();
+        convertUnitsAlg->setProperty("InputWorkspace", *decWS);
+        convertUnitsAlg->setProperty("Target", "Wavelength");
+        convertUnitsAlg->execute();
+        decWS = convertUnitsAlg->getProperty("OutputWorkspace");
+      }
+
       // Normalize by the direct beam.
-      runWS = divide(runWS, *detectorEfficiencyCorrection);
+      runWS = divide(runWS, *decWS);
     }
 
     DetectorMonitorWorkspacePair inLam =

@@ -52,19 +52,20 @@ public:
                    Mantid::API::MatrixWorkspace_sptr>;
   using OptionalInteger = boost::optional<int>;
 
-  /// Convert the input workspace to wavelength, splitting according to the
-  /// properties provided.
+  /// Splits the input workspace into detector and monitor workpsaces according
+  /// to the properties provided.
   DetectorMonitorWorkspacePair
   toLam(Mantid::API::MatrixWorkspace_sptr toConvert,
         const std::string &processingCommands,
         const OptionalInteger monitorIndex, const MinMax &wavelengthMinMax,
         const OptionalMinMax &backgroundMinMax, const double &wavelengthStep);
 
-  /// Convert the detector spectrum of the input workspace to wavelength
+  /// Retrieves the detector spectrum of the input workspace
   API::MatrixWorkspace_sptr
   toLamDetector(const std::string &processingCommands,
-                const API::MatrixWorkspace_sptr &toConvert,
-                const MinMax &wavelengthMinMax, const double &wavelengthStep);
+                const API::MatrixWorkspace_sptr &inputWS,
+                const MinMax &wavelengthMinMax,
+                const double &wavelengthStep);
 
 protected:
   /// Determine if the property has it's default value.
@@ -110,9 +111,9 @@ private:
   /// Validate the the first transmission workspace.
   bool validateFirstTransmissionInputs() const;
 
-  /// Convert the monitor parts of the input workspace to wavelength
+  /// Retrieves the monitor spectrum of the input workspace
   API::MatrixWorkspace_sptr
-  toLamMonitor(const API::MatrixWorkspace_sptr &toConvert,
+  toLamMonitor(const API::MatrixWorkspace_sptr &inputWS,
                const OptionalInteger monitorIndex,
                const OptionalMinMax &backgroundMinMax);
 
