@@ -14,6 +14,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/make_unique.h"
 #include <cassert>
 
 namespace Mantid {
@@ -33,7 +34,6 @@ using Mantid::Kernel::Direction;
 using Mantid::Kernel::MandatoryValidator;
 using Mantid::Kernel::RebinParamsValidator;
 using Mantid::Kernel::StringListValidator;
-using Mantid::Kernel::make_unique;
 using Mantid::Geometry::Instrument_const_sptr;
 using std::vector;
 
@@ -144,17 +144,17 @@ const std::string PDCalibration::summary() const {
 /** Initialize the algorithm's properties.
  */
 void PDCalibration::init() {
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "UncalibratedWorkspace", "", Direction::Output),
                   "");
 
   const std::vector<std::string> exts{"_event.nxs", ".nxs.h5", ".nxs"};
   declareProperty(
-      make_unique<FileProperty>("SignalFile", "",
-                                FileProperty::FileAction::OptionalLoad, exts),
+      Kernel::make_unique<FileProperty>(
+          "SignalFile", "", FileProperty::FileAction::OptionalLoad, exts),
       "Calibration measurement");
-  declareProperty(make_unique<FileProperty>("BackgroundFile", "",
-                                            FileProperty::OptionalLoad, exts),
+  declareProperty(Kernel::make_unique<FileProperty>(
+                      "BackgroundFile", "", FileProperty::OptionalLoad, exts),
                   "Calibration background");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
@@ -168,15 +168,16 @@ void PDCalibration::init() {
   declareProperty("FilterBadPulses", 95., range,
                   "The percentage of the average to use as the lower bound");
 
-  declareProperty(make_unique<ArrayProperty<double>>(
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
                       "TofBinning", boost::make_shared<RebinParamsValidator>()),
                   "Min, Step, and Max of time-of-flight bins. "
                   "Logarithmic binning is used if Step is negative.");
 
   const std::vector<std::string> exts2{".h5", ".cal"};
 
-  declareProperty(make_unique<FileProperty>("PreviousCalibration", "",
-                                            FileProperty::OptionalLoad, exts2),
+  declareProperty(Kernel::make_unique<FileProperty>("PreviousCalibration", "",
+                                                    FileProperty::OptionalLoad,
+                                                    exts2),
                   "Calibration measurement");
 
   auto peaksValidator = boost::make_shared<CompositeValidator>();
@@ -186,9 +187,9 @@ void PDCalibration::init() {
   peaksValidator->add(mustBePosArr);
   peaksValidator->add(
       boost::make_shared<MandatoryValidator<std::vector<double>>>());
-  declareProperty(
-      make_unique<ArrayProperty<double>>("PeakPositions", peaksValidator),
-      "Comma delimited d-space positions of reference peaks.");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakPositions",
+                                                             peaksValidator),
+                  "Comma delimited d-space positions of reference peaks.");
 
   declareProperty(
       "PeakWindow", 0.1, mustBePositive,
@@ -232,7 +233,7 @@ void PDCalibration::init() {
                   boost::make_shared<StringListValidator>(modes),
                   "Select calibration parameters to fit.");
 
-  declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputCalibrationTable", "", Direction::Output),
                   "An output workspace containing the Calibration Table");
 
@@ -295,20 +296,20 @@ void PDCalibration::exec() {
 
   std::string maskWSName = getPropertyValue("OutputCalibrationTable");
   maskWSName += "_mask";
-  declareProperty(make_unique<WorkspaceProperty<>>("MaskWorkspace", maskWSName,
-                                                   Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+                      "MaskWorkspace", maskWSName, Direction::Output),
                   "An output workspace containing the mask");
 
   MaskWorkspace_sptr maskWS = boost::make_shared<DataObjects::MaskWorkspace>(
       m_uncalibratedWS->getInstrument());
   setProperty("MaskWorkspace", maskWS);
 
-  const std::size_t NUMHIST = m_uncalibratedWS->getNumberHistograms();
+  int NUMHIST = static_cast<int>(m_uncalibratedWS->getNumberHistograms());
   API::Progress prog(this, 0, 1.0, NUMHIST);
 
   // cppcheck-suppress syntaxError
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-  for (std::size_t wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
+  for (int wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
     PARALLEL_START_INTERUPT_REGION
     if (isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) {
       // std::cout << "Empty event list at wkspIndex = " << wkspIndex <<
