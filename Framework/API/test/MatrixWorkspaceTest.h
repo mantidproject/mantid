@@ -1471,7 +1471,7 @@ public:
 
   /**
    * Create a workspace around the benchmarking SANS type instrument with
-   * 6E^5 detectors.
+   * 6E^4 detectors.
    */
   void constructSANSWorkspace() {
     Mantid::Kernel::V3D sourcePos(0, 0, 0);
