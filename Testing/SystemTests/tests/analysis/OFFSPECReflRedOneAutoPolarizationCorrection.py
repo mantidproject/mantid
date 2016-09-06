@@ -17,7 +17,7 @@ class OFFSPECReflRedOneAutoPolarizationCorrection(stresstesting.MantidStressTest
         transWorkspace = CreateTransmissionWorkspaceAuto(transmissionGroup,
                                                          AnalysisMode="MultiDetectorAnalysis",
                                                          ProcessingInstructions="110-120",
-                                                         WavelengthMax=12.0)
+                                                         WavelengthMin=2.0, WavelengthMax=12.0)
         # set up our efficiency constants
         CRho=[1]
         CAlpha=[1]
