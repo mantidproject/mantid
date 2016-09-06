@@ -86,11 +86,11 @@ public:
     MatrixWorkspace_const_sptr mask =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("cal_mask");
 
-    // TS_ASSERT(mask->getInstrument()->getDetector(279)->isMasked());
-    TS_ASSERT(!mask->getInstrument()->getDetector(280)->isMasked());
-    TS_ASSERT(!mask->getInstrument()->getDetector(281)->isMasked());
-    TS_ASSERT(!mask->getInstrument()->getDetector(282)->isMasked());
-    // TS_ASSERT(mask->getInstrument()->getDetector(283)->isMasked());
+    TS_ASSERT_EQUALS(mask->y(179)[0], 1);
+    TS_ASSERT_EQUALS(mask->y(180)[0], 0);
+    TS_ASSERT_EQUALS(mask->y(181)[0], 0);
+    TS_ASSERT_EQUALS(mask->y(182)[0], 0);
+    TS_ASSERT_EQUALS(mask->y(183)[0], 1);
   }
   void test_exec_difc_tzero() {
     PDCalibration alg;
@@ -125,11 +125,11 @@ public:
     MatrixWorkspace_const_sptr mask =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("cal_mask");
 
-    // TS_ASSERT(mask->getInstrument()->getDetector(155)->isMasked());
-    TS_ASSERT(!mask->getInstrument()->getDetector(156)->isMasked());
-    // TS_ASSERT(mask->getInstrument()->getDetector(157)->isMasked());
-    TS_ASSERT(!mask->getInstrument()->getDetector(282)->isMasked());
-    // TS_ASSERT(mask->getInstrument()->getDetector(283)->isMasked());
+    TS_ASSERT_EQUALS(mask->y(155)[0], 1);
+    TS_ASSERT_EQUALS(mask->y(156)[0], 0);
+    TS_ASSERT_EQUALS(mask->y(157)[0], 1);
+    TS_ASSERT_EQUALS(mask->y(158)[0], 1);
+    TS_ASSERT_EQUALS(mask->y(159)[0], 1);
   }
 
   void test_exec_difc_tzero_difa() {
@@ -168,11 +168,11 @@ public:
     MatrixWorkspace_const_sptr mask =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("cal_mask");
 
-    TS_ASSERT(!mask->getInstrument()->getDetector(282)->isMasked());
-    TS_ASSERT(!mask->getInstrument()->getDetector(283)->isMasked());
-    TS_ASSERT(!mask->getInstrument()->getDetector(284)->isMasked());
-    TS_ASSERT(!mask->getInstrument()->getDetector(285)->isMasked());
-    // TS_ASSERT(mask->getInstrument()->getDetector(286)->isMasked());
+    TS_ASSERT_EQUALS(mask->y(182)[0], 0);
+    TS_ASSERT_EQUALS(mask->y(183)[0], 0);
+    TS_ASSERT_EQUALS(mask->y(184)[0], 0);
+    TS_ASSERT_EQUALS(mask->y(185)[0], 0);
+    TS_ASSERT_EQUALS(mask->y(186)[0], 1);
   }
 };
 
