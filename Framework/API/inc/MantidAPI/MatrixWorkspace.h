@@ -34,6 +34,9 @@ typedef boost::shared_ptr<MantidImage> MantidImage_sptr;
 /// shared pointer to const MantidImage
 typedef boost::shared_ptr<const MantidImage> MantidImage_const_sptr;
 
+/// Helper for MatrixWorkspace::spectrumInfo()
+enum class ThreadedContextCheck { Check, Skip };
+
 //----------------------------------------------------------------------
 /** Base MatrixWorkspace Abstract Class.
 
@@ -87,7 +90,8 @@ public:
   /// String description of state
   const std::string toString() const override;
 
-  const SpectrumInfo &spectrumInfo() const;
+  const SpectrumInfo &spectrumInfo(
+      ThreadedContextCheck contextCheck = ThreadedContextCheck::Check) const;
 
   /**@name Instrument queries */
   //@{

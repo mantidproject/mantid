@@ -238,7 +238,8 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
   numMasked = 0;
   numZeros = 0;
 
-  const auto &spectrumInfo = localworkspace->spectrumInfo();
+  const auto &spectrumInfo =
+      localworkspace->spectrumInfo(ThreadedContextCheck::Skip);
   // Loop over spectra
   for (const auto i : this->m_indices) {
     // Don't go outside the range.
@@ -347,7 +348,8 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   numMasked = 0;
   numZeros = 0;
 
-  const auto &spectrumInfo = localworkspace->spectrumInfo();
+  const auto &spectrumInfo =
+      localworkspace->spectrumInfo(ThreadedContextCheck::Skip);
   // Loop over spectra
   for (const auto i : m_indices) {
     // Don't go outside the range.
@@ -436,7 +438,8 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   outEL.setSpectrumNo(m_outSpecNum);
   outEL.clearDetectorIDs();
 
-  const auto &spectrumInfo = localworkspace->spectrumInfo();
+  const auto &spectrumInfo =
+      localworkspace->spectrumInfo(ThreadedContextCheck::Skip);
   // Loop over spectra
   size_t numSpectra(0);
   size_t numMasked(0);
