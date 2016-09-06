@@ -261,22 +261,18 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 void EnggDiffFittingPresenter::processFullPathInput(
     const Poco::Path &pocoFilePath,
     const std::vector<std::string> &splitBaseName) {
-  Poco::Path pocoWorkingDirectory;
-  pocoWorkingDirectory = pocoFilePath.expand(pocoFilePath.parent().toString());
 
-  // if vector is not empty and correct focus format file is selected
+	// Gets current working directory - expands any path variables
+  // such as '~' into their full paths
+  const std::string workingDirectory =
+      pocoFilePath.expand(pocoFilePath.parent().toString());
 
-  // TODO what does this do - why does it need to be > 3 or not empty
-  if (!splitBaseName.empty() && splitBaseName.size() > 3) {
-
-    std::string workingDirectory = pocoWorkingDirectory.toString();
-    std::vector<std::string> runNoVec;
-
+    std::vector<std::string> foundRunNumbers;
     std::vector<std::string> foundFullFilePaths;
 
     // Handle files the user browsed to separately
     try {
-      runNoVec =
+      foundRunNumbers =
           getAllBrowsedFilePaths(pocoFilePath.toString(), foundFullFilePaths);
     } catch (std::runtime_error &e) {
       const std::string eMsg(e.what());
@@ -287,8 +283,8 @@ void EnggDiffFittingPresenter::processFullPathInput(
     // Update the list of files found in the view
     m_view->setFittingRunNumVec(foundFullFilePaths);
 
-    bool multiRunMode = m_view->getFittingMultiRunMode();
-    bool singleRunMode = m_view->getFittingSingleRunMode();
+    const bool multiRunMode = m_view->getFittingMultiRunMode();
+    const bool singleRunMode = m_view->getFittingSingleRunMode();
     // if not run mode or bank mode: to avoid recreating widgets
     if (!multiRunMode && !singleRunMode) {
 
@@ -299,8 +295,7 @@ void EnggDiffFittingPresenter::processFullPathInput(
 
       // Skips this step if it is multiple run because widget already
       // updated
-      setRunNoItems(runNoVec, false);
-    }
+      setRunNoItems(foundRunNumbers, false);
   }
 }
 
@@ -314,7 +309,7 @@ void EnggDiffFittingPresenter::processFullPathInput(
   * @param inputFullPath The user inputted path in the view
   * @param foundFullFilePaths The full paths of all associated files found
   *
-  * @return
+  * @return Vector of all run numbers for which a full file path was found
   */
 std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
     const std::string inputFullPath,
