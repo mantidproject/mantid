@@ -92,8 +92,9 @@ bool SpectrumInfo::hasDetectors(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.
   for (const auto &id : m_workspace.getSpectrum(index).getDetectorIDs()) {
-    if (std::lower_bound(m_validDetectorIDs.cbegin(), m_validDetectorIDs.cend(),
-                         id) != m_validDetectorIDs.cend()) {
+    const auto &it = std::lower_bound(m_validDetectorIDs.cbegin(),
+                                      m_validDetectorIDs.cend(), id);
+    if (it != m_validDetectorIDs.cend() && *it == id) {
       return true;
     }
   }
@@ -105,8 +106,9 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.
   for (const auto &id : m_workspace.getSpectrum(index).getDetectorIDs()) {
-    if (std::lower_bound(m_validDetectorIDs.cbegin(), m_validDetectorIDs.cend(),
-                         id) != m_validDetectorIDs.cend()) {
+    const auto &it = std::lower_bound(m_validDetectorIDs.cbegin(),
+                                      m_validDetectorIDs.cend(), id);
+    if (it != m_validDetectorIDs.cend() && *it == id) {
       ++count;
     }
   }
