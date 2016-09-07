@@ -732,7 +732,6 @@ void SlicingAlgorithm::createTransform() {
     // for future binning
     m_inWS = m_originalWS;
   }
-
 }
 
 //----------------------------------------------------------------------------------------------
