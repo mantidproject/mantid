@@ -1,7 +1,6 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGER_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORTWOLEVELTREEMANAGER_H
 
-#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 
@@ -79,7 +78,7 @@ public:
                 const DataProcessorWhiteList &whitelist) override;
 
   /// Return selected data
-  SelectedData selectedData(bool prompt) override;
+  TreeData selectedData(bool prompt) override;
   /// Transfer new data to model
   void transfer(const std::vector<std::map<std::string, std::string>> &runs,
                 const DataProcessorWhiteList &whitelist) override;

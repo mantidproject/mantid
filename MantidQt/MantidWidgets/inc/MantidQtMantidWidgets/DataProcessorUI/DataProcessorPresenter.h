@@ -3,6 +3,7 @@
 
 #include <QVariant>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 

@@ -2,9 +2,11 @@
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORTREEMANAGER_H
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include <memory>
-#include <vector>
+#include "MantidAPI/Workspace_fwd.h"
 #include <map>
+#include <memory>
+#include <set>
+#include <vector>
 
 class QAbstractItemModel;
 
@@ -14,7 +16,7 @@ namespace MantidWidgets {
 class DataProcessorCommand;
 class DataProcessorWhiteList;
 
-using SelectedData = std::map<int, std::map<int, std::vector<std::string>>>;
+using TreeData = std::map<int, std::map<int, std::vector<std::string>>>;
 
 /** @class DataProcessorTreeManager
 
@@ -81,7 +83,7 @@ public:
   /// Read/write data
 
   /// Return selected data
-  virtual SelectedData selectedData(bool prompt = false) = 0;
+  virtual TreeData selectedData(bool prompt = false) = 0;
   /// Transfer new data to model
   virtual void
   transfer(const std::vector<std::map<std::string, std::string>> &runs,

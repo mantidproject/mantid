@@ -50,7 +50,7 @@ public:
   ~QDataProcessorWidget() override;
 
   // Add actions to the toolbar
-  void QDataProcessorWidget::addActions(
+  void addActions(
       std::vector<std::unique_ptr<DataProcessorCommand>> commands) override;
 
   // Connect the model

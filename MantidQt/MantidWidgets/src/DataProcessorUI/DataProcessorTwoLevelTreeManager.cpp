@@ -25,6 +25,8 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 #include "MantidKernel/make_unique.h"
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -418,9 +420,9 @@ int DataProcessorTwoLevelTreeManager::numRowsInGroup(int group) const {
 * @return :: Selected data as a map where keys are units of post-processing and
 * values are
 */
-SelectedData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
+TreeData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
 
-  SelectedData selectedData;
+  TreeData selectedData;
 
   auto options = m_presenter->options();
 
@@ -474,7 +476,7 @@ SelectedData DataProcessorTwoLevelTreeManager::selectedData(bool prompt) {
       int group = item.first;
       auto rowSet = item.second;
 
-      if (rowSet.size() != numRowsInGroup(group)) {
+      if (static_cast<int>(rowSet.size()) != numRowsInGroup(group)) {
         // Some groups will not be fully processed
 
         if (options["WarnProcessPartialGroup"].toBool() && prompt) {
@@ -590,7 +592,7 @@ ITableWorkspace_sptr DataProcessorTwoLevelTreeManager::createDefaultWorkspace(
   auto column = ws->addColumn("str", "Group");
   column->setPlotType(0);
 
-  for (auto col = 0; col < whitelist.size(); col++) {
+  for (int col = 0; col < static_cast<int>(whitelist.size()); col++) {
     // The columns provided to this presenter
     auto column = ws->addColumn("str", whitelist.colNameFromColIndex(col));
     column->setPlotType(0);

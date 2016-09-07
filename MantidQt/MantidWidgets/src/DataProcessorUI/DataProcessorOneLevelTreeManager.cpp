@@ -20,6 +20,8 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorOneLevelTreeModel.h"
 #include "MantidKernel/make_unique.h"
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -279,9 +281,9 @@ void DataProcessorOneLevelTreeManager::insertRow(int rowIndex) {
 * @return :: Selected data as a map where keys are units of post-processing and
 * values are
 */
-SelectedData DataProcessorOneLevelTreeManager::selectedData(bool prompt) {
+TreeData DataProcessorOneLevelTreeManager::selectedData(bool prompt) {
 
-  SelectedData selectedData;
+  TreeData selectedData;
 
   auto options = m_presenter->options();
 
@@ -392,7 +394,7 @@ ITableWorkspace_sptr DataProcessorOneLevelTreeManager::createDefaultWorkspace(
   ITableWorkspace_sptr ws =
       Mantid::API::WorkspaceFactory::Instance().createTable();
 
-  for (auto col = 0; col < whitelist.size(); col++) {
+  for (int col = 0; col < static_cast<int>(whitelist.size()); col++) {
     // The columns provided to this presenter
     auto column = ws->addColumn("str", whitelist.colNameFromColIndex(col));
     column->setPlotType(0);

@@ -108,7 +108,7 @@ void GenericDataProcessorPresenter::acceptViews(
   m_progressView = progressView;
 
   // Add actions to toolbar
-  addActions();
+  addCommands();
 
   // Initialise options
   // Load saved values from disk
@@ -239,21 +239,20 @@ void GenericDataProcessorPresenter::saveNotebook(
 
 /**
 Post-processes the workspaces created by the given rows together.
-@param group : the group to which the list of rows belongs
-@param rows : the list of rows
+@param groupData : the data in a given group as received from the tree manager
 */
 void GenericDataProcessorPresenter::postProcessGroup(
-    const std::map<int, std::vector<std::string>> &data) {
+    const GroupData &groupData) {
 
   // The input workspace names
   std::vector<std::string> inputNames;
 
   // The name to call the post-processed ws
   const std::string outputWSName =
-      getPostprocessedWorkspaceName(data, m_postprocessor.prefix());
+      getPostprocessedWorkspaceName(groupData, m_postprocessor.prefix());
 
   // Go through each row and get the input ws names
-  for (const auto &row : data) {
+  for (const auto &row : groupData) {
 
     // The name of the reduced workspace for this row
     const std::string inputWSName =
@@ -387,7 +386,7 @@ Returns the name of the reduced workspace for a given row
 std::string GenericDataProcessorPresenter::getReducedWorkspaceName(
     const std::vector<std::string> &data, const std::string &prefix) {
 
-  if (static_cast<int>(data.size() != m_columns))
+  if (static_cast<int>(data.size()) != m_columns)
     throw std::invalid_argument("Can't find reduced workspace name");
 
   /* This method calculates, for a given row, the name of the output (processed)
@@ -432,13 +431,12 @@ std::string GenericDataProcessorPresenter::getReducedWorkspaceName(
 
 /**
 Returns the name of the reduced workspace for a given row
-@param group : The id of the group to post-process
-@param rows : The set of rows that belong to the same group
+@param groupData : The data in a given group
 @param prefix : A prefix to be appended to the generated ws name
 @returns : The name of the workspace
 */
 std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
-    const std::map<int, std::vector<std::string>> &rowData,
+    const GroupData &groupData,
     const std::string &prefix) {
 
   /* This method calculates, for a given set of rows, the name of the output
@@ -446,7 +444,7 @@ std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
 
   std::vector<std::string> outputNames;
 
-  for (const auto &data : rowData) {
+  for (const auto &data : groupData) {
     outputNames.push_back(getReducedWorkspaceName(data.second));
   }
   return prefix + boost::join(outputNames, "_");
@@ -1123,7 +1121,7 @@ void GenericDataProcessorPresenter::initOptions() {
 
 /** Tells the view which of the actions should be added to the toolbar
 */
-void GenericDataProcessorPresenter::addActions() {
+void GenericDataProcessorPresenter::addCommands() {
 
   auto commands = m_manager->publishCommands();
   std::vector<std::unique_ptr<DataProcessorCommand>> commandsToShow;

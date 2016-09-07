@@ -11,6 +11,10 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 
+#include <set>
+
+using GroupData = std::map<int, std::vector<std::string>>;
+
 namespace MantidQt {
 namespace MantidWidgets {
 // Forward decs
@@ -82,7 +86,7 @@ public:
                                       const std::string &prefix = "");
   // Get the name of a post-processed workspace
   std::string getPostprocessedWorkspaceName(
-      const std::map<int, std::vector<std::string>> &rowData,
+      const GroupData &groupData,
       const std::string &prefix = "");
 
   std::set<int> selectedParents() const override;
@@ -118,7 +122,7 @@ private:
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
   // Post-process some rows
-  void postProcessGroup(const std::map<int, std::vector<std::string>> &data);
+  void postProcessGroup(const GroupData &data);
   // process selected rows
   void process();
   // Reduce a row
@@ -168,8 +172,8 @@ private:
   void showOptionsDialog();
   void initOptions();
 
-  // actions
-  void addActions();
+  // actions/commands
+  void addCommands();
 
   // List of workspaces the user can open
   std::set<std::string> m_workspaceList;
