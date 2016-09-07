@@ -6,7 +6,7 @@
 #include "MultiTabScriptInterpreter.h"
 #include "ScriptingEnv.h"
 #include "ScriptFileInterpreter.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "pixmaps.h"
 
 // Mantid
@@ -435,7 +435,7 @@ void ScriptingWindow::loadFromProject(const std::string &lines,
                                       const int fileVersion) {
   Q_UNUSED(fileVersion);
 
-  TSVSerialiser sTSV(lines);
+  MantidQt::API::TSVSerialiser sTSV(lines);
   QStringList files;
 
   setWindowTitle("MantidPlot: " + app->scriptingEnv()->languageName() +
@@ -455,14 +455,10 @@ void ScriptingWindow::loadFromProject(const std::string &lines,
  * @param files :: List of file names to oepn
  */
 void ScriptingWindow::loadFromFileList(const QStringList &files) {
-  // The first time we don't use a new tab, to re-use the blank script tab
-  // on further iterations we open a new tab
-  bool newTab = false;
   for (auto file = files.begin(); file != files.end(); ++file) {
     if (file->isEmpty())
       continue;
-    open(*file, newTab);
-    newTab = true;
+    openUnique(*file);
   }
 }
 

@@ -44,7 +44,7 @@
 #include "MantidQtAPI/QwtRasterDataMD.h"
 #include "MantidQtAPI/SignalRange.h"
 
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include <numeric>
 
@@ -1015,7 +1015,7 @@ QImage Spectrogram::renderImage(const QwtScaleMap &xMap,
 void Spectrogram::loadFromProject(const std::string &lines) {
   using namespace Mantid::Kernel;
 
-  TSVSerialiser tsv(lines);
+  MantidQt::API::TSVSerialiser tsv(lines);
 
   if (tsv.hasSection("ColorPolicy")) {
     std::string policyStr = tsv.sections("ColorPolicy").front();
@@ -1027,34 +1027,45 @@ void Spectrogram::loadFromProject(const std::string &lines) {
       setDefaultColorMap();
   } else if (tsv.hasSection("ColorMap")) {
     const std::string cmStr = tsv.sections("ColorMap").front();
-    TSVSerialiser cm(cmStr);
+    MantidQt::API::TSVSerialiser cm(cmStr);
 
     std::string filename;
     if (cm.selectLine("FileName"))
       cm >> filename;
 
-    const std::string modeStr = cm.sections("Mode")[0];
-    const std::string minColStr = cm.sections("MinColor")[0];
-    const std::string maxColStr = cm.sections("MaxColor")[0];
-    std::vector<std::string> stopVec = cm.sections("Stop");
+    if (!filename.empty()) {
+      // color map will revert to the default color map if
+      // the file path is invalid
+      MantidColorMap colorMap(QString::fromStdString(filename),
+                              GraphOptions::Linear);
+      mCurrentColorMap = colorMap.getFilePath();
+      mColorMap = colorMap;
+      setCustomColorMap(colorMap);
+    } else {
+      const std::string modeStr = cm.sections("Mode")[0];
+      const std::string minColStr = cm.sections("MinColor")[0];
+      const std::string maxColStr = cm.sections("MaxColor")[0];
+      std::vector<std::string> stopVec = cm.sections("Stop");
 
-    int mode;
-    Mantid::Kernel::Strings::convert<int>(modeStr, mode);
-    QColor c1(QString::fromStdString(minColStr));
-    QColor c2(QString::fromStdString(maxColStr));
+      int mode;
+      Mantid::Kernel::Strings::convert<int>(modeStr, mode);
+      QColor c1(QString::fromStdString(minColStr));
+      QColor c2(QString::fromStdString(maxColStr));
 
-    QwtLinearColorMap colorMap(c1, c2);
-    colorMap.setMode((QwtLinearColorMap::Mode)mode);
+      QwtLinearColorMap colorMap(c1, c2);
+      colorMap.setMode((QwtLinearColorMap::Mode)mode);
 
-    for (auto it = stopVec.begin(); it != stopVec.end(); ++it) {
-      std::vector<std::string> stopParts;
-      double pos;
-      boost::split(stopParts, *it, boost::is_any_of("\t"));
-      Mantid::Kernel::Strings::convert<double>(stopParts[0], pos);
-      colorMap.addColorStop(pos, QColor(QString::fromStdString(stopParts[1])));
+      for (auto &part : stopVec) {
+        std::vector<std::string> stopParts;
+        double pos;
+        boost::split(stopParts, part, boost::is_any_of("\t"));
+        Mantid::Kernel::Strings::convert<double>(stopParts[0], pos);
+        colorMap.addColorStop(pos,
+                              QColor(QString::fromStdString(stopParts[1])));
+      }
+
+      setCustomColorMap(colorMap);
     }
-
-    setCustomColorMap(colorMap);
   }
 
   if (tsv.hasSection("Image")) {
@@ -1073,7 +1084,7 @@ void Spectrogram::loadFromProject(const std::string &lines) {
 
   if (tsv.hasSection("ColorBar")) {
     const std::string cbStr = tsv.sections("ColorBar").front();
-    TSVSerialiser cb(cbStr);
+    MantidQt::API::TSVSerialiser cb(cbStr);
 
     std::string axisStr = cb.sections("axis")[0];
     std::string widthStr = cb.sections("width")[0];
@@ -1105,7 +1116,7 @@ void Spectrogram::loadFromProject(const std::string &lines) {
 
 std::string Spectrogram::saveToProject() {
   using namespace Mantid::Kernel;
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
   tsv.writeRaw("<spectrogram>");
   if (!d_wsName.empty())
     tsv.writeLine("workspace") << d_wsName;
@@ -1116,7 +1127,7 @@ std::string Spectrogram::saveToProject() {
     tsv.writeInlineSection("ColorPolicy",
                            Strings::toString<int>(color_map_policy));
   else {
-    TSVSerialiser cm;
+    MantidQt::API::TSVSerialiser cm;
     if (!mCurrentColorMap.isEmpty())
       cm.writeLine("FileName") << mCurrentColorMap.toStdString();
     cm.writeInlineSection("Mode", Strings::toString<int>(color_map.mode()));
@@ -1143,7 +1154,7 @@ std::string Spectrogram::saveToProject() {
 
   QwtScaleWidget *colorAxis = plot()->axisWidget(color_axis);
   if (colorAxis && colorAxis->isColorBarEnabled()) {
-    TSVSerialiser cb;
+    MantidQt::API::TSVSerialiser cb;
     cb.writeInlineSection("axis", Strings::toString<int>(color_axis));
     cb.writeInlineSection("width",
                           Strings::toString<int>(colorAxis->colorBarWidth()));

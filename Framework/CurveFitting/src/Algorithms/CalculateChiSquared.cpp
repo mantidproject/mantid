@@ -540,7 +540,7 @@ void CalculateChiSquared::estimateErrors() {
   // If parameters are correlated the found deviations
   // most likely underestimate the true values.
   unfixParameters();
-  GSLJacobian J(m_function, values->size());
+  GSLJacobian J(*m_function, values->size());
   m_function->functionDeriv(*domain, J);
   refixParameters();
   // Calculate the hessian at the current point.

@@ -193,7 +193,7 @@ void HFIRLoad::exec() {
                   << " from the Algorithm input property.\n";
     sdd = sample_det_dist;
   } else {
-    const std::string sddName = "sample-detector-distance";
+    const std::string sddName = "total-sample-detector-distance";
     Mantid::Kernel::Property *prop = dataWS->run().getProperty(sddName);
     Mantid::Kernel::PropertyWithValue<double> *dp =
         dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);

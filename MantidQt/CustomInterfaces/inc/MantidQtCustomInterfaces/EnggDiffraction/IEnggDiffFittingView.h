@@ -90,11 +90,18 @@ public:
   virtual void addBankItem(std::string bankID) = 0;
 
   /**
-   * adds the run number to the list view widget on the interface
+   * enables the Fit All button when multi-run number given
    *
-   * @param runNo run number which needs to be added to
-   * the list widget
+   * @param enable the button to Fit multi-run number
    */
+  virtual void enableFitAllButton(bool enable) const = 0;
+
+  /**
+  * adds the run number to the list view widget on the interface
+  *
+  * @param runNo run number which needs to be added to
+  * the list widget
+  */
   virtual void addRunNoItem(std::string runNo) = 0;
 
   /**
@@ -242,6 +249,22 @@ public:
   virtual void setFittingMultiRunMode(bool mode) = 0;
 
   /**
+  * to determine whether the current loop is multi-run or single to avoid
+  * regenerating the list-view widget when not required
+  *
+  * @return bool whether given multi-run or singular file
+  */
+  virtual bool getFittingSingleRunMode() = 0;
+
+  /**
+  * sets the fitting mode to multi-run or single to avoid
+  * regenerating the list-view widget when not required
+  *
+  * @param mode true if its multi-run
+  */
+  virtual void setFittingSingleRunMode(bool mode) = 0;
+
+  /**
    * generates and sets the curves on the fitting tab
    *
    * @param data of the workspace to be passed as QwtData
@@ -250,6 +273,11 @@ public:
    */
   virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                              bool focused, bool plotSinglePeaks) = 0;
+
+  /**
+   * resets the canvas to avoid multiple plotting
+   */
+  virtual void resetCanvas() = 0;
 
   /**
    * Messages that this view wants to send to the logging system.

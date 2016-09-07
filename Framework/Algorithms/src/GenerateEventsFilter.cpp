@@ -3,12 +3,10 @@
 //----------------------------------------------------------------------
 
 #include "MantidAlgorithms/GenerateEventsFilter.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/Column.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 
@@ -1748,12 +1746,12 @@ void GenerateEventsFilter::generateSplittersInMatrixWorkspace() {
 
   m_filterWS =
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
-  MantidVec &dataX = m_filterWS->dataX(0);
+  auto &dataX = m_filterWS->mutableX(0);
   for (size_t i = 0; i < sizex; ++i) {
     dataX[i] = static_cast<double>(m_vecSplitterTime[i].totalNanoseconds());
   }
 
-  MantidVec &dataY = m_filterWS->dataY(0);
+  auto &dataY = m_filterWS->mutableY(0);
   for (size_t i = 0; i < sizey; ++i) {
     dataY[i] = static_cast<double>(m_vecSplitterGroup[i]);
   }
@@ -1781,8 +1779,8 @@ void GenerateEventsFilter::generateSplittersInMatrixWorkspaceParallel() {
 
   m_filterWS =
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
-  MantidVec &dataX = m_filterWS->dataX(0);
-  MantidVec &dataY = m_filterWS->dataY(0);
+  auto &dataX = m_filterWS->mutableX(0);
+  auto &dataY = m_filterWS->mutableY(0);
 
   size_t index = 0;
   for (size_t i = 0; i < numThreads; ++i) {

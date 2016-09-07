@@ -1,3 +1,5 @@
+.. _Engineering_Diffraction-ref:
+
 Engineering Diffraction
 =======================
 
@@ -6,11 +8,10 @@ Engineering Diffraction
 
 Overview
 --------
-
 This custom interface integrates several tasks related to engineering
 diffraction. It provides functionality for calibration, focusing, and
 pre-processing of event mode data. Further extensions can be expected
-for next releases as it is under active development. Feedback is very
+for future releases as it is under active development. Feedback is very
 much welcome. The following sections describe the different tabs or
 functionality areas of the interface.
 
@@ -36,7 +37,7 @@ Close
   Close the interface
 
 Status at the bottom of the interface
-  Here there will be a short message that indicates whether the last
+  A short message will be displayed which indicates whether the last
   important calculations finished successfully, and when the interface
   is busy calculating (calibrating, focusing, fitting, etc.).
 
@@ -55,27 +56,30 @@ visualize them.
 
 It is possible to:
 
-- generate a new calibration file (which becomes the new current
+- Generate a new calibration file (which becomes the new current
   calibration)
-- load an existing calibration from a GSAS instrument
+- Load an existing calibration from a GSAS instrument
   parameters file previously generated
 
 For the current calibration, the following parameters are displayed:
-the vanadium run number, the calibration sample run number, and the
-path to the output calibration file. This output calibration file is a
-GSAS instrument parameters file (IPARM/PAR/PRM). The interface
-produces a "all_banks" calibration file and in addition a calibration
-file for every individual bank. All the calibration files are writen
+
+- The vanadium run number
+- The calibration sample run number
+- The path to the output calibration file. 
+
+This calibration file output is a GSAS instrument parameters file (IPARM/PAR/PRM). The interface
+produces a calibration file containing all banks and in addition a calibration
+file for every individual bank. All the calibration files are written
 in the same directory.
 
 With the help of Cropped Calibration user can also calibrate according
-to bank or by setting the Spectrum Numbers once the Cropped Calibration group
+to specific banks or by setting the Spectrum Numbers once the Cropped Calibration group
 box has been enabled.
 
 The plot Calibrated Workspace check-box will enable user to plot
 vanadium curves and Ceria peaks. For Ceria peaks there will be two
-workspace generated and plotted, one for each bank, whereas for
-cropped calibration there will only be only one workspace generate
+workspaces generated and plotted, one for each bank, whereas for a
+cropped calibration there will only be one workspace generated
 and plotted, depending on the selected bank or provided Spectrum
 IDs. The workspace contains difc and tzero data which is then
 utilised to plot the Ceria peaks per bank, the graph will plot Peaks
@@ -85,12 +89,19 @@ regarding the fit peaks can be found on the
 
 The calibration files are written into two different output
 directories. First, they are written to a user specific directory
-which for the ENGIN-X instrument on Windows systems is
-`C:/EnginX_Mantid/User/<RBNumber>/Calibration`. On other platforms
-this is found under the home directory rather than `C:`. They are also
-copied into a general (all) output directory:
-`C:/EnginX_Mantid/Calibration` on Windows or
-`~/EnginX_Mantid/Calibration` on other platforms.
+which for the ENGIN-X instrument on Windows systems is:
+
+`C:\\EnginX_Mantid\\<Username>\\<RBNumber>\\Calibration`
+
+On UNIX based platforms this path is:
+
+`~/EnginX_Mantid/<Username>/<RBNumber>/Calibration`
+
+They are also copied into a general (all) output directory:
+
+`C:\\EnginX_Mantid\\Calibration` on Windows or
+
+`~/EnginX_Mantid/Calibration` on UNIX platforms.
 
 The calibration parameters for each bank are made available for user
 inspection in a workspace named
@@ -113,13 +124,12 @@ Calibration sample #
 Bank Name:
   This parameter is only required when Cropped Calibration is being
   carried out. The bank name can be selected from a drop down list with
-  option of "North" and "South", which are equivalently to 1 and 2
-  respectively. However the Bank Name drop down list is set to
-  "Enable Spectrum-Nos" by default. This option cannot be used together
-  with Spectrum Nos, as they overlap. For the convenience of users, the
-  GUI will only enable Spectrum Numbers and Customise Bank Name text-fields
-  when Bank Name drop down list is set to "Enable Spectrum-Nos"
-
+  option of "North" and "South", which are equivalent to 1 and 2
+  respectively. 
+  Custom bank mappings can be created by setting the Bank Name option
+  to `Use spectrum numbers`. When the option *Use Spectrum Numbers* is 
+  set a bank name must be specified in *Customise Bank Name*.
+  
 Spectrum Numbers:
   This parameter is only required when Cropped Calibration is being
   carried out, the parameter will set the spectrum numbers of the
@@ -131,13 +141,12 @@ Spectrum Numbers:
 Customise Bank Name:
   This parameter is only required when Cropped Calibration is being
   carried out with Spectrum Numbers, the parameter will set the workspace
-  and .his file name according to this Bank Name provided by the user.
+  and `.his` file name according to this Bank Name provided by the user.
   However if the user does not provide a personalised name, the
   interface will use "cropped" as a default bank name.
 
 The calibration process depends on several additional parameters and
-settings which can be modified in the *Settings* section (tab), see
-below for details.
+settings which can be modified in the *Settings* tab, see :ref:`setting-Engineering_Diffraction-ref` for details.
 
 .. _focus-Engineering_Diffraction-ref:
 
@@ -168,18 +177,23 @@ Three focusing alternatives are provided:
    in a Detector Grouping File.
 
 Depending on the alternative chosen, the focusing operation will
-include different banks and/or combinations of spectra (detectors). In
-the firs option, normal focusing, all the selected banks and all the
-spectra present in the input runs are considered. In the second
-alternative, cropped focusing, all the banks are considered in
+include different banks and/or combinations of spectra (detectors). 
+The behavior for each option is as follows:
+
+1. *Normal focusing* - All the selected banks and spectra present
+in the input runs are considered. The output focused workspace will 
+be named with suffixes such as *_bank_1, _bank_2*, and so on
+ 
+2. *Cropped Focusing* - All the banks are considered in
 principle but only a list of spectra provided manually are
-processed. In the third option, *texture focusing*, the banks are
-defined by a user-defined list of banks and corresponding spectrum Nos
-provided in a file. For these alternatives, the output focused
-workspace will take different suffixes: *_bank_1, _bank_2*, and so on
-for normal focusing, *_cropped* for cropped focusing, and
-*_texture_bank_1, _texture_bank_2*, and so on for texture focusing
-(using the bank IDs given in the detector grouping file).
+processed. The output focused workspace will be named with 
+the suffix *_cropped*.
+
+3. *Texture Focusing* - The banks are selected by a user-defined
+list of banks and corresponding spectrum numbers provided in a file. 
+The output workspaces will be named with suffixes such as *_texture_bank_1,
+_texture_bank_2*, and so on. These suffixes are determined by the 
+bank IDs given in the detector grouping file.
 
 Cropped focusing and Texture focusing have been disabled by default to
 declutter the interface, but each section can be enabled simply by
@@ -205,10 +219,10 @@ number of focus runs that could not be processed.
 The focused data files are saved in NeXus format into the user
 specific and general directories (as with the calibration output
 files). That is the files are written into
-`C:/EnginX_Mantid/User/<RBNumber>/Calibration` and
-`C:/EnginX_Mantid/Calibration` on Windows, or
+`C:\\EnginX_Mantid\\User\\<RBNumber>\\Calibration` and
+`C:\\EnginX_Mantid\\Calibration` on Windows, or
 `~/EnginX_Mantid/User/<RBNumber>/Calibration` and
-`~/EnginX_Mantid/Calibration` on other platforms.  See below for
+`~/EnginX_Mantid/Calibration` on UNIX platforms.  See below for
 additional, optional outputs.
 
 Run Number
@@ -234,31 +248,38 @@ Output
 ^^^^^^
 
 Under the output section, the user is provided with an option of
-plotting data in three different formats. One Window - Replacing
-Plots: will replace the previous graph and plot a new graph on top.
-One Window - Waterfall: will plot all the generated focused
-workspace graphs in one window which can be useful while comparing
-various graphs. The Multiple Windows: will plot graph in
-separate windows. However, user may also change the Plot Data
-Representation drop-down box while a run is being carried out. This
-will update the interface and plot workspace according to the new
-given input. For example, if a user has selected One Window -
-Replacing Plots and then decides to change it to One Window -
-Waterfall during a run, the interface will carry on by plotting
+plotting data in three different formats. 
+
+- One Window - Replacing Plots: will replace the previous graph and plot a new graph on top.
+
+- One Window - Waterfall: will plot all the generated focused workspace graphs in one window 
+  which can be useful while comparing various graphs. 
+
+- Multiple Windows - will plot graph in separate windows. 
+
+However, user may also change the Plot Data representation drop-down box while a run is being carried out. This
+will update the interface and plot workspace according to the new given input. 
+For example, if a user has selected *One Window - Replacing Plots* and then decides to change it to *One Window -
+Waterfall* during a run, the interface will carry on by plotting
 Waterfall within the same window.
 
 The user also has an option of saving GSS, XYE and OpenGenie formatted
-file by clicking the Output Files checkbox. This will generate three
+files by clicking the Output Files checkbox. This will generate three
 different files for each focused output workspace in Mantid. These
-files can be found with appropriate name at location:
-`C:\EnginX_Mantid\User\<RBNumber>\Focus` on Windows, the `EnginX_Mantid`
-folder can be found on the home directory on other platforms. The
-files are also copied to the general (all) output directory, that is
-`C:\EnginX_Mantid\Focus` on Windows and `EnginX_Mantid\Focus` under
-the user home on other platforms.
+files can be found with appropriate name within:
 
-The Multiple Runs Focus Mode combo-box enables two alternative
-focus mode. `Focus Individual Run Files Separately` is the default
+`C:\\EnginX_Mantid\\<User>\\<RBNumber>\\Focus` on Windows or
+
+`~/EnginX_Mantid/Foxus` on UNIX systems.
+
+The files are also copied to the general (all) output directory which is
+
+`C:\\EnginX_Mantid\\Focus` on Windows
+
+`~/EnginX_Mantid/Focus` under on UNIX systems
+
+`The Multiple Runs Focus Mode` combo-box enables two alternative
+focus modes. `Focus Individual Run Files Separately` is the default
 option set, which allows user to run focus with multi-run files.
 Whereas the `Focus Sum Of Files` option merges all the multi-run
 number files together and applies the Focus Process to the merged
@@ -300,7 +321,7 @@ convention:
 
 - *engggui_preproc_by_pulse_time_ws*
 
-This tab uses the algorithms :ref:`Rebin <algm-Rebin>` and :ref:`Rebin
+Focussing uses the algorithms :ref:`Rebin <algm-Rebin>` and :ref:`RebinByPulseTimes
 <algm-RebinByPulseTimes>` to bin the data in different ways when
 converting event data into histogram data.
 
@@ -310,19 +331,29 @@ Fitting
 .. warning:: This is a new capability that is currently in a very
              early stage of definition and implementation. Not all
              options may be supported and/or consistent at the moment.
+			 
+.. warning:: The input workspace must be converted into a focused file
+			 first. The steps to complete this are found here: :ref:`focus-Engineering_Diffraction-ref`
 
 The Fitting tab provides a graphical interface which fits an expected
-diffraction pattern and visualises them. The pastern is specified by
+diffraction pattern and visualises them. The pattern is specified by
 providing a list of dSpacing values where Bragg peaks are expected.
-The algorithm :ref:`EnggFitPeaks<algm-EnggFitPeaks>` used in the
+The algorithm :ref:`EnggFitPeaks<algm-EnggFitPeaks>` is used to
 background fit peaks in those areas using a peak fitting function.
 
-To use the Fitting tab, user is required to provide:
+To use the Fitting tab, user is required to follow these steps:
 
 1. A focused file as Focus Run input by browsing or entering single/multi
-   run number
-2. List of expected peaks which can be either by browsing a (*CSV*) file
-   or entering within the text-field simply click on the Fit button.
+   run number, *User may click Load button to load the focused file to the
+   canvas*
+2. List of expected peaks which can be either by browsing a (*CSV*) file,
+   manually selecting peaks from the canvas using peak picker tool after
+   loading the focused file or by entering the peaks list within the text-field
+3. Next click on the *Fit* button if you would like to fit single focused
+   file or you can click *Fit All* button which will enable user to
+   batch-process all the runs and banks when a range of run number is given,
+   *Fit All* process may also be used when when a single run number is given
+   or a file is browsed
 
 .. _ExpectedPeaks-Engineering_Diffraction-ref:
 
@@ -332,15 +363,17 @@ Parameters
 These parameters are required to process Fitting successfully:
 
 Focused Run #:
-  Focused workspace directory or selected with the help of browse button.
-  User may also select the file/s by simply entering the file run number
+  Focused workspace directory or selected using the browse button.
+  Users may also select the file/s by simply entering the file run number
   or a range of consecutive run number separated by dash (`-`), for
-  example: "194547-194550" or "241391-241399". It is  compulsory for
-  these file/s to be located within the focused output directory.
+  example: "194547-194550" or "241391-241399". 
+  
+  It is  compulsory for these file/s to be located within the focused output directory.
   Focused workspace can be generated with the help of
   :ref:`focus-Engineering_Diffraction-ref` tab, the output folder
   directory can be set in the :ref:`setting-Engineering_Diffraction-ref`
   tab under the *Focusing settings* section.
+  
   When a valid range of consecutive run numbers is given, the interface will
   automatically import and add the run number/s to the list on the right side
   of the graph, from where each run number can be selected from by click on it.
@@ -361,15 +394,15 @@ Plot Bank/Bank List:
 Output
 ^^^^^^
 
-Once the Fit button has been clicked, wait until the Fitting process has
-completed and upon completion you should be able to view on the Fitting
-tab:
+Once the Fit button has been clicked Mantid will process the data. Please wait
+until the Fitting process has completed. Upon completion you should be able to
+view on the Fitting tab which will contain:
 
 - The focused workspace plotted in the background in gray crosses.
 - The expected peaks plotted in various colours over lapping the
   focused workspace peaks.
 
-Within the :ref:`Preview-Engineering_Diffraction-ref` section user is
+Within the :ref:`Preview-Engineering_Diffraction-ref` section a user is
 able to zoom-in or zoom-out as well as select, add and save peaks.
 
 The interface will also generate workspaces that can be inspected in the
@@ -379,8 +412,12 @@ workspaces window:
    with the parameters of the peaks found and fitted.
 2. The *engggui_fitting_focused_ws* Focused workspace also loaded
    so the fitted data can be compared with focused data
-3. The *engggui_fitting_single_peaks* workspace within each workspace
+3. The *engggui_fitting_single_peaks* workspace with each workspace
    index representing individual expected peak.
+
+During the Fit process, :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>`
+algorithm will be utilised to save *engggui_fitting_fitpeaks_param*
+TableWorkspace as a `csv` file.
 
 In the plots, the x or abscissa axis is in d-spacing units, which are
 more convenient for peak fitting than time-of-flight. However the run
@@ -401,10 +438,10 @@ calculated by the algorithm :ref:`AlignDetectors
 Preview
 ^^^^^^^
 Once the fitting process has completed and you are able to view a
-focused workspace with listed expected peaks on the data plot, Select
-Peak button should should also be enabled. If the fitting fails with
-the given peaks then the focused workspace will still be plotted so
-that user can select peaks manually.
+focused workspace with listed expected peaks on the data plot, the *Select
+Peak* button should also be enabled. If the user choose to load the focus
+workspace or if fitting fails with the given peaks then the focused
+workspace will be plotted so that the user can select the peaks manually.
 
 By clicking Select Peak button the peak picker tool can be activated.
 To select a peak simply hold *Shift* key and left-click on the graph
@@ -412,11 +449,11 @@ near the peak's center.
 
 To get help selecting the center of the peak, you may set the peak
 width by left-click and drag horizontally, while holding *Ctrl* key
-as well. User may also zoom-in to the graph by holding left-click
-and dragging on the plot, whereas zoom-out by simple left-click on
+as well. Users may also zoom-in to the graph by holding left-click
+and dragging a box on the plot, and zoom-out by left-clicking on
 the plot.
 
-When user is satisfied with the center position of the peak, you may
+When user is happy with the center position of the peak, you may
 add the selected peak to :ref:`ExpectedPeaks-Engineering_Diffraction-ref`
 list by clicking Add Peak button. User may rerun Fit process by
 clearing peaks list using Clear button and manually selecting peaking
@@ -489,7 +526,7 @@ prefix *Engg*). This includes :ref:`EnggCalibrate
 <algm-EnggCalibrateFull>`, :ref:`EnggVanadiumCorrections
 <algm-EnggVanadiumCorrections>`, :ref:`EnggFocus <algm-EnggFocus>`,
 :ref:`EnggFitPeaks<algm-EnggFitPeaks>`
-and several other algorithms, explained in detail in the Mantid
-algorithms documentation.
+and several other algorithms, explained in detail in the following Mantid
+algorithms documentation pages.
 
 .. categories:: Interfaces Diffraction

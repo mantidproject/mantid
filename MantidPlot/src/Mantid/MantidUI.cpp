@@ -800,7 +800,9 @@ void MantidUI::showSpectrumViewer() {
                       << "\n";
         throw std::runtime_error(e);
       }
-      viewer->setAttribute(Qt::WA_DeleteOnClose, false);
+      // Delete on close so we don't hold a shared pointer to a workspace
+      // which has been deleted in the ADS and is "inaccessible"
+      viewer->setAttribute(Qt::WA_DeleteOnClose, true);
       viewer->resize(1050, 800);
       connect(m_appWindow, SIGNAL(shutting_down()), viewer, SLOT(close()));
 
@@ -1245,9 +1247,14 @@ Table *MantidUI::createDetectorTable(
       // Need to get R, theta through these methods to be correct for grouped
       // detectors
       R = det->getDistance(*sample);
-      theta = showSignedTwoTheta ? ws->detectorSignedTwoTheta(*det)
-                                 : ws->detectorTwoTheta(*det);
-      theta *= 180.0 / M_PI; // To degrees
+      try {
+        theta = showSignedTwoTheta ? ws->detectorSignedTwoTheta(*det)
+                                   : ws->detectorTwoTheta(*det);
+        theta *= 180.0 / M_PI; // To degrees
+      } catch (const Mantid::Kernel::Exception::InstrumentDefinitionError &ex) {
+        // Log the error and leave theta as it is
+        g_log.error(ex.what());
+      }
       QString isMonitor = det->isMonitor() ? "yes" : "no";
 
       colValues << QVariant(specNo) << QVariant(detIds);
