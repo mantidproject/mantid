@@ -9,7 +9,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 WorkspaceDockView::WorkspaceDockView() {
   presenter = boost::make_shared<WorkspacePresenter>(
-      shared_from_this(), Mantid::Kernel::make_unique<ADSAdapter>());
+      shared_from_this());
 }
 
 WorkspacePresenter_wptr WorkspaceDockView::getPresenterWeakPtr() {

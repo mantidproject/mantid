@@ -46,7 +46,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 class WorkspacePresenter : public WorkspaceProviderNotifiable,
                            public ViewNotifiable {
 public:
-  explicit WorkspacePresenter(DockView_wptr view, ADSAdapter_uptr adapter);
+  explicit WorkspacePresenter(DockView_wptr view);
   ~WorkspacePresenter() = default;
 
   void

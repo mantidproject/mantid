@@ -111,8 +111,8 @@ set ( SRC_FILES
     src/InstrumentView/Viewport.cpp
     src/InstrumentView/XIntegrationControl.cpp
     src/WorkspacePresenter/WorkspacePresenter.cpp
-	src/WorkspacePresenter/ADSAdapter.cpp
-	src/WorkspacePresenter/WorkspaceDockView.cpp
+    src/WorkspacePresenter/ADSAdapter.cpp
+    src/WorkspacePresenter/WorkspaceDockView.cpp
 )
 
 # Header files with Q_OBJECT that qmake will "moc"
@@ -292,10 +292,10 @@ set ( INC_FILES
     inc/MantidQtMantidWidgets/WorkspacePresenter/ViewNotifiable.h
     inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProviderNotifiable.h
     inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h
-	inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProvider.h
-	inc/MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h
-	inc/MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h
-	inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceDockView.h
+    inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProvider.h
+    inc/MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h
+    inc/MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h
+    inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceDockView.h
 )
 
 # QtDesigner UI files to process
