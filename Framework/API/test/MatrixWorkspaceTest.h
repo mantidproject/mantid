@@ -326,16 +326,23 @@ public:
     const int numHist(3);
     auto workspace = makeWorkspaceWithDetectors(numHist, 1);
     std::atomic<bool> parallelException{false};
+    std::atomic<int> threadCount{1};
     PARALLEL_FOR1(workspace)
     for (int i = 0; i < numHist; ++i) {
       // Note: Cannot use INTERUPT_REGION macros since not inside an Algorithm.
+      threadCount = PARALLEL_NUMBER_OF_THREADS;
       try {
         static_cast<void>(workspace->spectrumInfo());
       } catch (...) {
         parallelException = true;
       }
     }
-    TS_ASSERT(parallelException);
+    // If we actually had more than one thread this should throw.
+    if (threadCount > 1) {
+      TS_ASSERT(parallelException);
+    } else {
+      TS_ASSERT(!parallelException);
+    }
   }
 
   void testFlagMasked() {
