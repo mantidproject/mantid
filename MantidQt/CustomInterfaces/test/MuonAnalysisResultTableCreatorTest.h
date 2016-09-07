@@ -547,7 +547,8 @@ private:
         static_cast<double>(m_firstStart_sec + base * m_startDiff_sec) * 1.e9;
     const double end = start + 1.e10;
     const auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    ws->mutableRun().setStartAndEndTime(start, end);
+    ws->mutableRun().setStartAndEndTime(static_cast<int64_t>(start),
+                                        static_cast<int64_t>(end));
     return ws;
   }
 

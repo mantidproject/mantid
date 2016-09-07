@@ -599,7 +599,7 @@ public:
     ads.addToGroup("GroupOne", "MuonSimulFit_Label_MUSR15190_Workspace");
 
     const auto &tableTwo = createResultsTable({"A0", "A1"});
-    ads.add("MuonSimulFit_Label#2_Parameters", tableOne);
+    ads.add("MuonSimulFit_Label#2_Parameters", tableTwo);
     const auto &wsThree = createWs("MUSR", 15191);
     ads.add("MuonSimulFit_Label#2_MUSR15191_Workspace", wsThree);
     const auto &wsFour = createWs("MUSR", 15192);
@@ -637,7 +637,7 @@ public:
     ads.addToGroup("GroupOne", "MuonSimulFit_Label_MUSR15191_Workspace");
 
     const auto &tableTwo = createResultsTable({"A0", "A1"});
-    ads.add("MuonSimulFit_Label#2_Parameters", tableOne);
+    ads.add("MuonSimulFit_Label#2_Parameters", tableTwo);
     const auto &wsFour = createWs("MUSR", 15192);
     ads.add("MuonSimulFit_Label#2_MUSR15192_Workspace", wsFour);
     const auto &wsFive = createWs("MUSR", 15193);
