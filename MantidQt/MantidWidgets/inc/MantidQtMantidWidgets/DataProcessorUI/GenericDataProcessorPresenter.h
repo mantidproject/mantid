@@ -8,7 +8,6 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
-#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 
 #include <set>
@@ -89,8 +88,8 @@ public:
       const GroupData &groupData,
       const std::string &prefix = "");
 
-  std::set<int> selectedParents() const override;
-  std::map<int, std::set<int>> selectedChildren() const override;
+  ParentItems selectedParents() const override;
+  ChildItems selectedChildren() const override;
   bool askUserYesNo(const std::string &prompt,
                     const std::string &title) const override;
   void giveUserWarning(const std::string &prompt,

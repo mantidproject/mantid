@@ -208,7 +208,7 @@ there
 @param data : the processed data
 */
 void GenericDataProcessorPresenter::saveNotebook(
-    const std::map<int, std::map<int, std::vector<std::string>>> &data) {
+    const TreeData &data) {
 
   std::string filename = m_view->requestNotebookPath();
   if (filename == "") {
@@ -1184,14 +1184,14 @@ GenericDataProcessorPresenter::getTableList() {
 /** Asks the view for selected parent items
  * @return :: the selected parent items
  */
-std::set<int> GenericDataProcessorPresenter::selectedParents() const {
+ParentItems GenericDataProcessorPresenter::selectedParents() const {
   return m_view->getSelectedParents();
 }
 
 /** Asks the view for selected child items
  * @return :: the selected child items
  */
-std::map<int, std::set<int>>
+ChildItems
 GenericDataProcessorPresenter::selectedChildren() const {
   return m_view->getSelectedChildren();
 }
