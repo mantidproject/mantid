@@ -142,6 +142,8 @@ def get_peak_position(ws, i):
     # Reliable check for peak bin
     fit_status = fit_table.row(0)["FitStatus"]
 
+    DeleteWorkspace(fit_table)
+
     if peak_bin < 0 or peak_bin > len(y_values) or \
             (fit_status != 'success') or (abs(peak_bin - mid_bin) > tolerance):
         # Fit failed (too narrow peak) or outside bin range
@@ -154,11 +156,14 @@ def get_peak_position(ws, i):
 
     # Delete unused TableWorkspaces
     try:
-        DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
         DeleteWorkspace('EPPfit_Parameters')
-        DeleteWorkspace(fit_table)
     except ValueError:
-        logger.debug('No Fit table available for deletion')
+        logger.debug('No EPPfit_Parameters table available for deletion')
+
+    try:
+        DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
+    except ValueError:
+        logger.debug('No EPPfit_NormalisedCovarianceMatrix table available for deletion')
 
     return peak_bin
 
