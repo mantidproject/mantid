@@ -221,19 +221,24 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     boost::split(splitBaseName, parsedUserInput, boost::is_any_of("_."));
   }
 
-  // if input file is a directory and successfully splitBaseName
-  // or when default bank is set or changed, the text-field is updated with
-  // selected bank directory which would trigger this function again
-  if (pocoUserPathInput.isFile() && !splitBaseName.empty()) {
-
-    processFullPathInput(pocoUserPathInput, splitBaseName);
-
-    // if given a multi-run
-  } else if (userPathInput.find("-") != std::string::npos) {
-    foundFullFilePaths = processMultiRun(userPathInput);
-    // try to process using single run
-  } else {
-    processSingleRun(userPathInput, foundFullFilePaths, splitBaseName);
+  try {
+    // if input file is a directory and successfully splitBaseName
+    // or when default bank is set or changed, the text-field is updated with
+    // selected bank directory which would trigger this function again
+    if (pocoUserPathInput.isFile() && !splitBaseName.empty()) {
+      processFullPathInput(pocoUserPathInput, splitBaseName);
+      // if given a multi-run
+    } else if (userPathInput.find("-") != std::string::npos) {
+      foundFullFilePaths = processMultiRun(userPathInput);
+      // try to process using single run
+    } else {
+      processSingleRun(userPathInput, foundFullFilePaths, splitBaseName);
+    }
+  } catch (std::invalid_argument &ia) {
+    // If something went wrong stop and print error only
+    g_log.error("Failed to process user input. Error was: ");
+    g_log.error(ia.what());
+    return;
   }
 
   // if single or multi run-number
@@ -525,6 +530,18 @@ bool EnggDiffFittingPresenter::findFilePathFromBaseName(
   return found;
 }
 
+/**
+  * Tests the user input for a multi run is valid and generates
+  * all values between that range (e.g. 1-10 produces 1,2,3...)
+  * to then look up those runs in the focus directory and find
+  * their full file paths. Additionally it updates the GUI to reflect
+  * if all runs were found or not
+  *
+  * @param firstRun The first run number of the range as a string
+  * @param lastRun The last run number of the range as a string
+  *
+  * @return A vector containing all file paths which were found
+  */
 std::vector<std::string>
 EnggDiffFittingPresenter::enableMultiRun(std::string firstRun,
                                          std::string lastRun) {
@@ -540,7 +557,6 @@ EnggDiffFittingPresenter::enableMultiRun(std::string firstRun,
                         "Invalid format of multi-run number has been entered. "
                         "Please try again");
     m_view->enableFitAllButton(false);
-    // TODO catch this
     throw std::invalid_argument("Both values are not numerical entries");
   }
 
@@ -557,7 +573,6 @@ EnggDiffFittingPresenter::enableMultiRun(std::string firstRun,
                         "The specified run number range is too large."
                         " A maximum of 200 entries can be processed a time.");
     m_view->enableFitAllButton(false);
-    // TODO catch this
     throw std::invalid_argument("Number of runs is greater than 200");
   }
 
