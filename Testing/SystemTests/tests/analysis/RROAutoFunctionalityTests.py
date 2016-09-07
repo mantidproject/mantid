@@ -114,6 +114,7 @@ class RROAutoFunctionalityTest(stresstesting.MantidStressTest):
         alg.set_DetectorComponentName('lineardetector')
         alg.set_ProcessingInstructions("10") # Fictional values
         alg.set_CorrectDetectorPositions(False)
+        alg.set_RegionOfDirectBeam("20, 30") # Fictional values
         alg.set_ThetaIn(0.1) # Fictional values
 
         out_ws_q, out_ws_lam, theta =  alg.execute()
@@ -132,6 +133,7 @@ class RROAutoFunctionalityTest(stresstesting.MantidStressTest):
         alg.set_DetectorComponentName('lineardetector')
         alg.set_ProcessingInstructions("73") # Fictional values
         alg.set_CorrectDetectorPositions(True)
+        alg.set_RegionOfDirectBeam("28, 29") # Fictional values
         alg.set_ThetaIn(0.49) # Fictional values
 
         out_ws_q, out_ws_lam, theta =  alg.execute()

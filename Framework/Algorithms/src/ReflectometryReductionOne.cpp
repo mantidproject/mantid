@@ -134,6 +134,10 @@ void ReflectometryReductionOne::init() {
                   "Indices of the spectra a pair (lower, upper) that mark the "
                   "ranges that correspond to the region of interest (reflected "
                   "beam) in multi-detector mode.");
+  declareProperty(make_unique<ArrayProperty<int>>("RegionOfDirectBeam"),
+                  "Indices of the spectra a pair (lower, upper) that mark the "
+                  "ranges that correspond to the direct beam in multi-detector "
+                  "mode.");
 
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "DetectorEfficiencyCorrection", "", Direction::Input,
@@ -258,6 +262,11 @@ void ReflectometryReductionOne::init() {
                       Kernel::make_unique<Kernel::EnabledWhenProperty>(
                           "FirstTransmissionRun", IS_NOT_DEFAULT));
 
+  // Only use region of direct beam when in multi-detector analysis mode.
+  setPropertySettings(
+      "RegionOfDirectBeam",
+      Kernel::make_unique<Kernel::EnabledWhenProperty>(
+          "AnalysisMode", IS_EQUAL_TO, "MultiDetectorAnalysis"));
   declareProperty("ScaleFactor", Mantid::EMPTY_DBL(),
                   "Factor you wish to scale Q workspace by.", Direction::Input);
   declareProperty("MomentumTransferMinimum", Mantid::EMPTY_DBL(),
@@ -564,12 +573,18 @@ void ReflectometryReductionOne::exec() {
   const std::string strAnalysisMode = getProperty("AnalysisMode");
   const bool isPointDetector =
       (pointDetectorAnalysis.compare(strAnalysisMode) == 0);
+  const bool isMultiDetector =
+    (multiDetectorAnalysis.compare(strAnalysisMode) == 0);
 
   const MinMax wavelengthInterval =
       this->getMinMax("WavelengthMin", "WavelengthMax");
   const double wavelengthStep = getProperty("WavelengthStep");
 
   const std::string processingCommands = getWorkspaceIndexList();
+
+  OptionalWorkspaceIndexes directBeam;
+  fetchOptionalLowerUpperPropertyValue("RegionOfDirectBeam", isPointDetector,
+    directBeam);
 
   auto instrument = runWS->getInstrument();
 
@@ -633,6 +648,31 @@ void ReflectometryReductionOne::exec() {
               monitorBackgroundWavelengthInterval, wavelengthStep);
     auto detectorWS = inLam.get<0>();
     auto monitorWS = inLam.get<1>();
+
+    if (isMultiDetector) {
+      if (directBeam.is_initialized()) {
+        // Sum over the direct beam.
+        WorkspaceIndexList db = directBeam.get();
+        std::stringstream buffer;
+        buffer << db.front() << "-" << db.back();
+        MatrixWorkspace_sptr regionOfDirectBeamWS = this->toLamDetector(
+          buffer.str(), runWS, wavelengthInterval, wavelengthStep);
+
+        // Rebin to the detector workspace
+        auto rebinToWorkspaceAlg =
+          this->createChildAlgorithm("RebinToWorkspace");
+        rebinToWorkspaceAlg->initialize();
+        rebinToWorkspaceAlg->setProperty("WorkspaceToRebin",
+          regionOfDirectBeamWS);
+        rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", detectorWS);
+        rebinToWorkspaceAlg->execute();
+        regionOfDirectBeamWS =
+          rebinToWorkspaceAlg->getProperty("OutputWorkspace");
+
+        // Normalize by the direct beam.
+        detectorWS = divide(detectorWS, regionOfDirectBeamWS);
+      }
+    }
 
     const bool normalizeByIntMon = getProperty("NormalizeByIntegratedMonitors");
     if (normalizeByIntMon) {

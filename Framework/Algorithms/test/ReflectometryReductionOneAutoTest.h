@@ -299,6 +299,32 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
+  void
+    test_cannot_set_direct_beam_region_of_interest_without_multidetector_run() {
+    auto alg = construct_standard_algorithm();
+    alg->setProperty("AnalysisMode", "PointDetectorAnalysis");
+    std::vector<int> RegionOfDirectBeam = { 1, 2 };
+    alg->setProperty("RegionOfDirectBeam", RegionOfDirectBeam);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+  }
+
+  void test_region_of_direct_beam_indexes_cannot_be_negative_or_throws() {
+    auto alg = construct_standard_algorithm();
+    alg->setProperty("AnalysisMode", "MultiDetectorAnalysis");
+    std::vector<int> RegionOfDirectBeam = { 0, -1 };
+    alg->setProperty("RegionOfDirectBeam", RegionOfDirectBeam);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+  }
+
+  void
+    test_region_of_direct_beam_indexes_must_be_provided_as_min_max_order_or_throws() {
+    auto alg = construct_standard_algorithm();
+    alg->setProperty("AnalysisMode", "MultiDetectorAnalysis");
+    std::vector<int> RegionOfDirectBeam = { 1, 0 };
+    alg->setProperty("RegionOfDirectBeam", RegionOfDirectBeam);
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+  }
+
   void test_bad_detector_component_name_throws() {
     auto alg = construct_standard_algorithm();
     alg->setProperty("DetectorComponentName", "made-up");

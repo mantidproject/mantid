@@ -70,6 +70,11 @@ void ReflectometryReductionOneAuto::init() {
   auto analysis_mode_validator =
       boost::make_shared<StringListValidator>(analysis_modes);
 
+  declareProperty(
+      make_unique<ArrayProperty<int>>("RegionOfDirectBeam", Direction::Input),
+      "Indices of the spectra a pair (lower, upper) that mark the ranges that "
+      "correspond to the direct beam in multi-detector mode.");
+
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "DetectorEfficiencyCorrection", "", Direction::Input,
                       PropertyMode::Optional),
@@ -358,6 +363,7 @@ void ReflectometryReductionOneAuto::exec() {
   auto detector_component_name = isSet<std::string>("DetectorComponentName");
   auto sample_component_name = isSet<std::string>("SampleComponentName");
   auto theta_in = isSet<double>("ThetaIn");
+  auto region_of_direct_beam = isSet<std::vector<int>>("RegionOfDirectBeam");
 
   bool correct_positions = this->getProperty("CorrectDetectorPositions");
   bool strict_spectrum_checking = this->getProperty("StrictSpectrumChecking");
@@ -488,6 +494,10 @@ void ReflectometryReductionOneAuto::exec() {
 
     if (wavelength_step.is_initialized()) {
       refRedOne->setProperty("WavelengthStep", wavelength_step.get());
+    }
+
+    if (region_of_direct_beam.is_initialized()) {
+      refRedOne->setProperty("RegionOfDirectBeam", region_of_direct_beam.get());
     }
 
     if (detector_component_name.is_initialized()) {
