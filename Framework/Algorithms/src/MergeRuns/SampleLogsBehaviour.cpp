@@ -202,8 +202,8 @@ void SampleLogsBehaviour::calculateUpdatedSampleLogs(
       if (item.second.isNumeric && item.second.tolerance > 0.0) {
         if (std::abs(wsNumber - outWSNumber) > item.second.tolerance) {
           m_logger.warning() << generateDifferenceMessage(
-                                    item.first, ws->name(), wsProperty->value(),
-                                    item.second.property->value()) << std::endl;
+              item.first, ws->name(), wsProperty->value(),
+              item.second.property->value());
         }
       } else {
         if (item.second.property->value().compare(wsProperty->value()) != 0) {
