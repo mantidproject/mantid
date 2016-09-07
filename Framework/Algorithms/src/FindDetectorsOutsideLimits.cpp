@@ -137,9 +137,9 @@ void FindDetectorsOutsideLimits::exec() {
     }
 
     if (checkForMask) {
-      if (spectrumInfo.isMonitor(i))
+      if (spectrumInfo.isMonitor(countsInd))
         continue; // do include or exclude from mask
-      if (spectrumInfo.isMasked(i))
+      if (spectrumInfo.isMasked(countsInd))
         keepData = false;
     }
 
