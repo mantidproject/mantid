@@ -3341,10 +3341,10 @@ MultiLayer *MantidUI::plotSelectedColumns(const MantidMatrix *const m,
  * @param plotWindow :: Window to plot to. If null a new one will be created
  * @return created MultiLayer, or null on failure
  */
-MultiLayer *MantidUI::plotSubplots(
-    const QMultiMap<QString, std::set<int>> &toPlot, bool spectrumPlot,
-    MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-    bool errs = false, MultiLayer *plotWindow) {
+MultiLayer *
+MantidUI::plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
+                       bool spectrumPlot, MantidQt::DistributionFlag distr,
+                       bool errs, MultiLayer *plotWindow) {
   // Check if nothing to plot
   if (toPlot.size() == 0)
     return nullptr;
@@ -3397,7 +3397,7 @@ MultiLayer *MantidUI::plotSubplots(
     const auto &wsName = toPlot.begin().key();
     const auto &spectra = toPlot.begin().value();
     for (const int spec : spectra) {
-      auto *layer = multi->layer(layerIndex++);
+      auto *layer = multi->layer(++layerIndex);
       layer->insertCurve(wsName, spec, errs, Graph::Unspecified,
                          plotAsDistribution);
       QString legendText = wsName + '\n';
@@ -3410,12 +3410,13 @@ MultiLayer *MantidUI::plotSubplots(
     for (auto iter = toPlot.constBegin(); iter != toPlot.constEnd(); ++iter) {
       const auto &wsName = iter.key();
       const auto &spectra = iter.value();
-      auto *layer = multi->layer(layerIndex++);
+      auto *layer = multi->layer(++layerIndex);
       QString legendText = wsName + '\n';
+      int curveIndex(0);
       for (const int spec : spectra) {
         layer->insertCurve(wsName, spec, errs, Graph::Unspecified,
                            plotAsDistribution);
-        legendText += "\\l(" + QString::number(layerIndex) + ") " +
+        legendText += "\\l(" + QString::number(++curveIndex) + ") " +
                       getLegendKey(wsName, spec) + "\n";
       }
       layer->newLegend(legendText);
@@ -3441,10 +3442,10 @@ MultiLayer *MantidUI::plotSubplots(
  * @param plotWindow :: Window to plot to. If null a new one will be created
  * @return created MultiLayer, or null on failure
  */
-MultiLayer *MantidUI::plotSubplots(
-    const QMultiMap<QString, int> &toPlot, bool spectrumPlot,
-    MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-    bool errs = false, MultiLayer *plotWindow) {
+MultiLayer *MantidUI::plotSubplots(const QMultiMap<QString, int> &toPlot,
+                                   bool spectrumPlot,
+                                   MantidQt::DistributionFlag distr, bool errs,
+                                   MultiLayer *plotWindow) {
 
   // Convert the input map into a map of workspace->spectra
   QMultiMap<QString, std::set<int>> spectraByWorkspace;
@@ -3453,7 +3454,7 @@ MultiLayer *MantidUI::plotSubplots(
       auto entry = spectraByWorkspace.find(it.key());
       entry.value().insert(it.value());
     } else { // add a new entry
-      spectraByWorkspace[it.key] = std::set<int>{it.value()};
+      spectraByWorkspace.insert(it.key(), std::set<int>{it.value()});
     }
   }
 

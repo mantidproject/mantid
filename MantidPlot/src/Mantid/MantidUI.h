@@ -24,6 +24,7 @@
 
 #include <Poco/NObserver.h>
 
+#include <QApplication>
 #include <QDockWidget>
 #include <QTreeWidget>
 #include <QProgressDialog>

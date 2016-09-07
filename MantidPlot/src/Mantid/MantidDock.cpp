@@ -1358,8 +1358,7 @@ void MantidDockWidget::doPlotSpectra(bool errors) {
 
   if (userInput.tiled) {
     m_mantidUI->plotSubplots(userInput.plots, spectrumPlot,
-                             MantidQt::DistributionDefault, errors, window,
-                             clearWindow);
+                             MantidQt::DistributionDefault, errors, window);
   } else {
     m_mantidUI->plot1D(userInput.plots, spectrumPlot,
                        MantidQt::DistributionDefault, errors, window,
