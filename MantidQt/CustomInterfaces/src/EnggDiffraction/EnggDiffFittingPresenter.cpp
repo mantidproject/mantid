@@ -547,10 +547,10 @@ EnggDiffFittingPresenter::enableMultiRun(std::string firstRun,
   // Convert strings to integers for remainder of function
   const int firstNum = std::stoi(firstRun);
   const int lastNum = std::stoi(lastRun);
-  const int range = abs(firstNum - lastNum);
+  const size_t range = abs(lastNum - firstNum);
 
   // Cap the maximum number of runs we can process at 200
-  constexpr int maximumNumberOfRuns = 200;
+  constexpr size_t maximumNumberOfRuns = 200;
 
   if (range > maximumNumberOfRuns) {
     m_view->userWarning("Range too large",
@@ -563,7 +563,7 @@ EnggDiffFittingPresenter::enableMultiRun(std::string firstRun,
 
   // By performing this check we can make optimizations and assumptions
   // about the ordering of values
-  if (firstNum < lastNum) {
+  if (firstNum > lastNum) {
     m_view->userWarning("Range not ascending",
                         "The range specified"
                         " was not ascending. This last run number needs to be"
@@ -612,18 +612,17 @@ EnggDiffFittingPresenter::enableMultiRun(std::string firstRun,
     }
   }
 
-  int diff = (lastNum - firstNum) + 1;
-  // TODO figure out why this is important for multi-runs
-  // and what this does/can it be moved/removed?
-  size_t run_vec_size = RunNumberVec.size();
+  // Check we have found all of the elements requested
+  const size_t diff = range + 1;
+  const size_t run_vec_size = RunNumberVec.size();
 
-  if (size_t(diff) == run_vec_size) {
+  if (diff == run_vec_size) {
     setRunNoItems(RunNumberVec, true);
     m_view->setBankEmit();
   } else {
     m_view->userWarning(
         "Run Number Not Found",
-        "The multi-run number specified could not be located "
+        "Some of the runs in the range specified could not be located "
         "in the focused output directory. Please check that the "
         "correct directory is set for Output Folder under Focusing "
         "Settings "
