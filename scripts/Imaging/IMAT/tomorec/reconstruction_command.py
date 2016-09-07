@@ -874,8 +874,9 @@ class ReconstructionCommand(object):
         # slices along the vertical (z) axis
         # output_dir = 'output_recon_tomopy'
         output_dir = cfg.postproc_cfg.output_dir
-        print "* Saving slices of the reconstructed volume in: {0}".format(output_dir)
-        tomoio.save_recon_as_vertical_slices(recon_data, output_dir,
+        out_recon_dir = os.path.join(output_dir, 'reconstructed')
+        print "* Saving slices of the reconstructed volume in: {0}".format(out_recon_dir)
+        tomoio.save_recon_as_vertical_slices(recon_data, out_recon_dir,
                                              name_prefix=self._OUT_SLICES_FILENAME_PREFIX,
                                              img_format=cfg.preproc_cfg.out_img_format)
 

@@ -134,6 +134,52 @@ public:
     TS_ASSERT_DELTA(bin_edges[2], 2.0, 1e-12);
   }
 
+  void test_flattenContainer_EmptyInputVector() {
+    const std::vector<std::vector<int>> emptyInput;
+    const auto result = VectorHelper::flattenVector<int>(emptyInput);
+    TS_ASSERT(result.empty());
+  }
+
+  void test_flattenContainer_SingleSubvectorWithMultipleValues() {
+    std::vector<std::vector<int>> input;
+    input.emplace_back(std::vector<int>{3, 1, -1, -3, -5});
+    const std::vector<int> expected{3, 1, -1, -3, -5};
+    const auto result = VectorHelper::flattenVector(input);
+    TS_ASSERT_EQUALS(result.size(), expected.size());
+    for (size_t i = 0; i < result.size(); ++i) {
+      TS_ASSERT_EQUALS(result[i], expected[i]);
+    }
+  }
+
+  void test_flattenContainer_MultipleSubvectorsWithSingleValues() {
+    std::vector<std::vector<int>> input;
+    input.emplace_back(std::vector<int>{3});
+    input.emplace_back(std::vector<int>{1});
+    input.emplace_back(std::vector<int>{-1});
+    input.emplace_back(std::vector<int>{-3});
+    input.emplace_back(std::vector<int>{-5});
+    const std::vector<int> expected{3, 1, -1, -3, -5};
+    const auto result = VectorHelper::flattenVector(input);
+    TS_ASSERT_EQUALS(result.size(), expected.size());
+    for (size_t i = 0; i < result.size(); ++i) {
+      TS_ASSERT_EQUALS(result[i], expected[i]);
+    }
+  }
+
+  void test_flattenContainer_VariableSizedSubvectors() {
+    std::vector<std::vector<int>> input;
+    input.emplace_back(std::vector<int>{3, 1});
+    input.emplace_back(std::vector<int>{});
+    input.emplace_back(std::vector<int>{-1});
+    input.emplace_back(std::vector<int>{-3, -5});
+    const std::vector<int> expected{3, 1, -1, -3, -5};
+    const auto result = VectorHelper::flattenVector(input);
+    TS_ASSERT_EQUALS(result.size(), expected.size());
+    for (size_t i = 0; i < result.size(); ++i) {
+      TS_ASSERT_EQUALS(result[i], expected[i]);
+    }
+  }
+
   // TODO: More tests of other methods
 
   void test_splitStringIntoVector() {

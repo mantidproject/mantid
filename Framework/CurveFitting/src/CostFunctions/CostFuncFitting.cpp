@@ -98,7 +98,7 @@ void CostFuncFitting::checkValidity() const {
 void CostFuncFitting::calActiveCovarianceMatrix(GSLMatrix &covar,
                                                 double epsrel) {
   // construct the jacobian
-  GSLJacobian J(m_function, m_values->size());
+  GSLJacobian J(*m_function, m_values->size());
   size_t na = this->nParams(); // number of active parameters
   assert(J.getJ()->size2 == na);
   covar.resize(na, na);

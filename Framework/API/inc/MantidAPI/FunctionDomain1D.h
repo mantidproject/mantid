@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/FunctionDomain.h"
+#include "MantidKernel/ClassMacros.h"
 
 #include <vector>
 
@@ -136,6 +137,25 @@ public:
 private:
   /// The workspace index
   size_t m_workspaceIndex;
+};
+
+/// Implements FunctionDomain1D as a set of bins for a histogram.
+/// operator[i] returns the right boundary of i-th bin.
+/// The left boundary of the first bin (#0) is returned by leftBoundary()
+/// method.
+class MANTID_API_DLL FunctionDomain1DHistogram : public FunctionDomain1D {
+public:
+  /// Constructor.
+  FunctionDomain1DHistogram(const std::vector<double> &bins);
+  /// Constructor.
+  FunctionDomain1DHistogram(std::vector<double>::const_iterator from,
+                            std::vector<double>::const_iterator to);
+  /// Get the leftmost boundary
+  double leftBoundary() const;
+
+protected:
+  DISABLE_COPY_AND_ASSIGN(FunctionDomain1DHistogram)
+  std::vector<double> m_bins; ///< vector of bin boundaries
 };
 
 /// typedef for a shared pointer to a FunctionDomain1D

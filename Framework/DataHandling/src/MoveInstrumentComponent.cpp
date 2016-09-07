@@ -5,6 +5,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -23,7 +24,7 @@ MoveInstrumentComponent::MoveInstrumentComponent() {}
 void MoveInstrumentComponent::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace for which the new instrument "
                   "configuration will have an effect. Any other workspaces "
@@ -50,8 +51,32 @@ void MoveInstrumentComponent::init() {
  *  @throw std::runtime_error Thrown with Workspace problems
  */
 void MoveInstrumentComponent::exec() {
-  // Get the workspace
-  MatrixWorkspace_sptr WS = getProperty("Workspace");
+  // Get the input workspace
+  Workspace_sptr ws = getProperty("Workspace");
+  MatrixWorkspace_sptr inputW =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  DataObjects::PeaksWorkspace_sptr inputP =
+      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
+
+  // Get some stuff from the input workspace
+  Instrument_const_sptr inst;
+  if (inputW) {
+    inst = inputW->getInstrument();
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "MatrixWorkspace provided as input");
+  } else if (inputP) {
+    inst = inputP->getInstrument();
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "PeaksWorkspace provided as input");
+  } else {
+    if (!inst)
+      throw std::runtime_error("Could not get a valid instrument from the "
+                               "workspace and it does not seem to be valid as "
+                               "input (must be either MatrixWorkspace or "
+                               "PeaksWorkspace");
+  }
   const std::string ComponentName = getProperty("ComponentName");
   const int DetID = getProperty("DetectorID");
   const double X = getProperty("X");
@@ -59,12 +84,7 @@ void MoveInstrumentComponent::exec() {
   const double Z = getProperty("Z");
   const bool relativePosition = getProperty("RelativePosition");
 
-  // Get the ParameterMap reference before the instrument so that
-  // we avoid a copy
-  Geometry::ParameterMap &pmap = WS->instrumentParameters();
-  Instrument_const_sptr inst = WS->getInstrument();
   IComponent_const_sptr comp;
-
   // Find the component to move
   if (DetID != -1) {
     comp = inst->getDetector(DetID);
@@ -92,8 +112,15 @@ void MoveInstrumentComponent::exec() {
   TransformType positionType = Absolute;
   if (relativePosition)
     positionType = Relative;
-  Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(X, Y, Z),
-                                           positionType);
+  if (inputW) {
+    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
+    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(X, Y, Z),
+                                             positionType);
+  } else if (inputP) {
+    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
+    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(X, Y, Z),
+                                             positionType);
+  }
 }
 
 } // namespace DataHandling
