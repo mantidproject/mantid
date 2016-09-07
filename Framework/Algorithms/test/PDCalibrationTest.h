@@ -60,7 +60,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("UncalibratedWorkspace", "PDCalibrationTest_WS"));
+        alg.setProperty("SignalWorkspace", "PDCalibrationTest_WS"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("TofBinning", "200,1.0,2000"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakWindow", "1"));
@@ -97,7 +97,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("UncalibratedWorkspace", "PDCalibrationTest_WS"));
+        alg.setProperty("SignalWorkspace", "PDCalibrationTest_WS"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("TofBinning", "200,1.0,2000"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakWindow", "1"));
@@ -137,7 +137,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("UncalibratedWorkspace", "PDCalibrationTest_WS"));
+        alg.setProperty("SignalWorkspace", "PDCalibrationTest_WS"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("TofBinning", "200,1.0,2000"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakWindow", "2"));

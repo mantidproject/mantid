@@ -145,8 +145,9 @@ const std::string PDCalibration::summary() const {
  */
 void PDCalibration::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "UncalibratedWorkspace", "", Direction::Output),
-                  "");
+                      "SignalWorkspace", "", Direction::InOut),
+                  "Input signal workspace.\nIf the workspace does not exist it "
+                  "will read it from the SignalFile into this workspace.");
 
   const std::vector<std::string> exts{"_event.nxs", ".nxs.h5", ".nxs"};
   declareProperty(
@@ -237,6 +238,16 @@ void PDCalibration::init() {
                       "OutputCalibrationTable", "", Direction::Output),
                   "An output workspace containing the Calibration Table");
 
+  // make group for Input properties
+  std::string inputGroup("Input Options");
+  setPropertyGroup("SignalWorkspace", inputGroup);
+  setPropertyGroup("SignalFile", inputGroup);
+  setPropertyGroup("BackgroundFile", inputGroup);
+  setPropertyGroup("MaxChunkSize", inputGroup);
+  setPropertyGroup("FilterBadPulses", inputGroup);
+  setPropertyGroup("TofBinning", inputGroup);
+  setPropertyGroup("PreviousCalibration", inputGroup);
+
   // make group for FindPeak properties
   std::string findPeaksGroup("Peak finding properties");
   setPropertyGroup("PeakPositions", findPeaksGroup);
@@ -281,7 +292,7 @@ void PDCalibration::exec() {
   calParams = getPropertyValue("CalibrationParameters");
 
   m_uncalibratedWS = loadAndBin();
-  setProperty("UncalibratedWorkspace", m_uncalibratedWS);
+  setProperty("SignalWorkspace", m_uncalibratedWS);
 
   auto uncalibratedEWS =
       boost::dynamic_pointer_cast<EventWorkspace>(m_uncalibratedWS);
@@ -644,7 +655,7 @@ MatrixWorkspace_sptr PDCalibration::load(const std::string filename) {
 }
 
 MatrixWorkspace_sptr PDCalibration::loadAndBin() {
-  m_uncalibratedWS = getProperty("UncalibratedWorkspace");
+  m_uncalibratedWS = getProperty("SignalWorkspace");
 
   if (bool(m_uncalibratedWS)) {
     return rebin(m_uncalibratedWS);
