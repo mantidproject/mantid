@@ -520,7 +520,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inWSName));
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("NormalizeByIntegratedMonitors", false));
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("WavelengthStep", 1.0));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("MomentumTransferStep", 0.1));
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", outWSQName));
@@ -600,7 +599,6 @@ public:
         alg->setProperty("InputWorkspace", m_dataWorkspace));
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("I0MonitorIndex", Mantid::EMPTY_INT()));
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("WavelengthStep", 1.0));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("MomentumTransferStep", 0.1));
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", outWSQName));
