@@ -104,7 +104,7 @@ bool isOfType(const QObject *obj, const char *toCompare) {
 }
 
 /// Number of subplots above which user confirmation will be required
-constexpr size_t REASONABLE_NUM_SUBPLOTS(12);
+constexpr int REASONABLE_NUM_SUBPLOTS(12);
 }
 
 MantidUI::MantidUI(ApplicationWindow *aw)
@@ -3339,12 +3339,12 @@ MultiLayer *MantidUI::plotSubplots(
 
   // If one workspace, each spectrum goes in its own subplot.
   // Otherwise, there is one subplot per workspace.
-  const size_t nSubplots = [&toPlot]() {
-    const auto nWorkspaces = toPlot.size();
+  const int nWorkspaces = toPlot.size();
+  const int nSubplots = [&toPlot, &nWorkspaces]() {
     if (nWorkspaces == 1) {
-      return toPlot.begin()->size(); // number of spectra
+      return static_cast<int>(toPlot.begin()->size()); // number of spectra
     } else {
-      return static_cast<size_t>(nWorkspaces);
+      return nWorkspaces;
     }
   }();
 
@@ -3379,47 +3379,37 @@ MultiLayer *MantidUI::plotSubplots(
   multi->setCloseOnEmpty(true);
   multi->arrangeLayers(true, true);
 
-
-
+  // Case for each spectrum getting its own subplot
+  int layerIndex(0);
+  if (nWorkspaces == 1) {
+    const auto &wsName = toPlot.begin().key();
+    const auto &spectra = toPlot.begin().value();
+    for (const int spec : spectra) {
+      auto *layer = multi->layer(layerIndex++);
+      layer->insertCurve(wsName, spec, errs); ///////////// what about distribution?
+      layer->newLegend(wsName); ///////////////
+      setInitialAutoscale(layer);
+    }
+  } else {
+    // Case for each workspace getting its own subplot
+    for (auto iter = toPlot.constBegin(); iter != toPlot.constEnd(); ++iter) {
+      const auto &wsName = iter.key();
+      const auto &spectra = iter.value();
+      auto *layer = multi->layer(layerIndex++);
+      for (const int spec : spectra) {
+        layer->insertCurve(wsName, spec, errs);
+      }
+      layer->newLegend(wsName); ////////////////////
+      setInitialAutoscale(layer);
+    }
+  }
 
   throw std::runtime_error("TODO");
 
-
-  // Try to add curves to the plot
-  //Graph *g = ml->activeGraph();
-  //MantidMatrixCurve::IndexDir indexType =
-  //    (spectrumPlot) ? MantidMatrixCurve::Spectrum : MantidMatrixCurve::Bin;
-  //MantidMatrixCurve *firstCurve(NULL);
-  //for (QMultiMap<QString, int>::const_iterator it = toPlot.begin();
-  //     it != toPlot.end(); ++it) {
-  //  try {
-  //    auto *wsCurve = new MantidMatrixCurve(it.key(), g, it.value(), indexType,
-  //                                          errs, plotAsDistribution, style);
-  //    if (!firstCurve) {
-  //      firstCurve = wsCurve;
-  //      g->setNormalizable(firstCurve->isNormalizable());
-  //      g->setDistribution(firstCurve->isDistribution());
-  //    }
-  //  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-  //    g_log.warning() << "Workspace " << it.key().toStdString()
-  //                    << " not found\n";
-  //  } catch (std::exception &ex) {
-  //    g_log.warning() << ex.what() << '\n';
-  //  }
-  //}
-
-    if (!firstCurve) {
-      return NULL;
-    }
-    // Ensure plot encompasses all data points
-    setInitialAutoscale(g);
-    // This deals with the case where the X-values are not in order
-    g->checkValuesInAxisRange(firstCurve);
-
   // Check if window does not contain any curves and should be closed
-  ml->maybeNeedToClose();
+  multi->maybeNeedToClose();
 
-  return ml;
+  return multi;
 }
 
 /**
