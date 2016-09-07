@@ -54,12 +54,10 @@ public:
 
   /// Splits the input workspace into detector and monitor workpsaces according
   /// to the properties provided.
-  DetectorMonitorWorkspacePair
-  splitDetectorsMonitors(const Mantid::API::MatrixWorkspace_sptr inputWS,
-                         const std::string &processingCommands,
-                         const OptionalInteger monitorIndex,
-                         const MinMax &wavelengthMinMax,
-                         const OptionalMinMax &backgroundMinMax);
+  DetectorMonitorWorkspacePair splitDetectorsMonitors(
+      const Mantid::API::MatrixWorkspace_sptr inputWS,
+      const std::string &processingCommands, const OptionalInteger monitorIndex,
+      const MinMax &wavelengthMinMax, const OptionalMinMax &backgroundMinMax);
 
   /// Retrieves the detector spectrum of the input workspace
   API::MatrixWorkspace_sptr

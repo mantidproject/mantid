@@ -395,10 +395,8 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase::retrieveMonitorWS(
  * @param wavelengthMinMax : Wavelength minmax to keep. Crop out the rest.
  * @return Detector workspace
  */
-MatrixWorkspace_sptr
-ReflectometryWorkflowBase::retrieveDetectorWS(
-    const std::string &processingCommands,
-    const MatrixWorkspace_sptr &inputWS,
+MatrixWorkspace_sptr ReflectometryWorkflowBase::retrieveDetectorWS(
+    const std::string &processingCommands, const MatrixWorkspace_sptr &inputWS,
     const MinMax &wavelengthMinMax) {
 
   auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
