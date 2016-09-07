@@ -24,6 +24,7 @@
 #include "../TiledWindow.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -105,6 +106,17 @@ bool isOfType(const QObject *obj, const char *toCompare) {
 
 /// Number of subplots above which user confirmation will be required
 constexpr int REASONABLE_NUM_SUBPLOTS(12);
+
+/// Get graph legend key given workspace name and spectrum number
+QString getLegendKey(const QString &wsName, const int spectrum) {
+  const auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      wsName.toStdString());
+  if (ws) {
+    const auto axis = ws->getAxis(1); // y
+    return QString::fromStdString(axis->label(spectrum));
+  }
+  return QString();
+}
 }
 
 MantidUI::MantidUI(ApplicationWindow *aw)
@@ -3386,8 +3398,11 @@ MultiLayer *MantidUI::plotSubplots(
     const auto &spectra = toPlot.begin().value();
     for (const int spec : spectra) {
       auto *layer = multi->layer(layerIndex++);
-      layer->insertCurve(wsName, spec, errs); ///////////// what about distribution?
-      layer->newLegend(wsName); ///////////////
+      layer->insertCurve(wsName, spec, errs, Graph::Unspecified,
+                         plotAsDistribution);
+      QString legendText = wsName + '\n';
+      legendText += "\\l(1) " + getLegendKey(wsName, spec) + "\n";
+      layer->newLegend(legendText);
       setInitialAutoscale(layer);
     }
   } else {
@@ -3396,15 +3411,17 @@ MultiLayer *MantidUI::plotSubplots(
       const auto &wsName = iter.key();
       const auto &spectra = iter.value();
       auto *layer = multi->layer(layerIndex++);
+      QString legendText = wsName + '\n';
       for (const int spec : spectra) {
-        layer->insertCurve(wsName, spec, errs);
+        layer->insertCurve(wsName, spec, errs, Graph::Unspecified,
+                           plotAsDistribution);
+        legendText += "\\l(" + QString::number(layerIndex) + ") " +
+                      getLegendKey(wsName, spec) + "\n";
       }
-      layer->newLegend(wsName); ////////////////////
+      layer->newLegend(legendText);
       setInitialAutoscale(layer);
     }
   }
-
-  throw std::runtime_error("TODO");
 
   // Check if window does not contain any curves and should be closed
   multi->maybeNeedToClose();
