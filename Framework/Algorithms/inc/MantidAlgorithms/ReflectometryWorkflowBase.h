@@ -55,16 +55,17 @@ public:
   /// Splits the input workspace into detector and monitor workpsaces according
   /// to the properties provided.
   DetectorMonitorWorkspacePair
-  toLam(Mantid::API::MatrixWorkspace_sptr toConvert,
-        const std::string &processingCommands,
-        const OptionalInteger monitorIndex, const MinMax &wavelengthMinMax,
-        const OptionalMinMax &backgroundMinMax);
+  splitDetectorsMonitors(const Mantid::API::MatrixWorkspace_sptr inputWS,
+                         const std::string &processingCommands,
+                         const OptionalInteger monitorIndex,
+                         const MinMax &wavelengthMinMax,
+                         const OptionalMinMax &backgroundMinMax);
 
   /// Retrieves the detector spectrum of the input workspace
   API::MatrixWorkspace_sptr
-  toLamDetector(const std::string &processingCommands,
-                const API::MatrixWorkspace_sptr &toConvert,
-                const MinMax &wavelengthMinMax);
+  retrieveDetectorWS(const std::string &processingCommands,
+                     const API::MatrixWorkspace_sptr &toConvert,
+                     const MinMax &wavelengthMinMax);
 
 protected:
   /// Determine if the property has it's default value.
@@ -112,9 +113,9 @@ private:
 
   /// Retrieves the monitor spectrum of the input workspace
   API::MatrixWorkspace_sptr
-  toLamMonitor(const API::MatrixWorkspace_sptr &inputWS,
-               const OptionalInteger monitorIndex,
-               const OptionalMinMax &backgroundMinMax);
+  retrieveMonitorWS(const API::MatrixWorkspace_sptr &inputWS,
+                    const OptionalInteger monitorIndex,
+                    const OptionalMinMax &backgroundMinMax);
 
   /// Make a unity workspace
   API::MatrixWorkspace_sptr makeUnityWorkspace(const std::vector<double> &x);
