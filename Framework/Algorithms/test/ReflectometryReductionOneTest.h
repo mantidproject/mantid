@@ -63,16 +63,15 @@ public:
     const double backgroundWavelengthMax = 20;
 
     // Convert input workspace units to wavelength
-    auto convertUnitsAlg =
-      AlgorithmManager::Instance().create("ConvertUnits");
+    auto convertUnitsAlg = AlgorithmManager::Instance().create("ConvertUnits");
     convertUnitsAlg->initialize();
     convertUnitsAlg->setProperty("InputWorkspace", toConvert);
     convertUnitsAlg->setProperty("Target", "Wavelength");
     convertUnitsAlg->setProperty("AlignBins", true);
     convertUnitsAlg->setProperty("OutputWorkspace", "Converted");
     convertUnitsAlg->execute();
-    toConvert =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Converted");
+    toConvert = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "Converted");
 
     ReflectometryReductionOne alg;
 
