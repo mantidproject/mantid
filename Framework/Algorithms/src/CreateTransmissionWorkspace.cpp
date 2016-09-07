@@ -159,6 +159,16 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
     const OptionalDouble &stitchingEndOverlap, const double &wavelengthStep) {
   /*make struct of optional inputs to refactor method arguments*/
   /*make a using statements defining OptionalInteger for MonitorIndex*/
+
+  // Convert first transmission workspace units to wavelength
+  auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
+  convertUnitsAlg->initialize();
+  convertUnitsAlg->setProperty("InputWorkspace", firstTransmissionRun);
+  convertUnitsAlg->setProperty("Target", "Wavelength");
+  convertUnitsAlg->setProperty("AlignBins", true);
+  convertUnitsAlg->execute();
+  firstTransmissionRun = convertUnitsAlg->getProperty("OutputWorkspace");
+
   auto trans1InLam = toLam(firstTransmissionRun, processingCommands,
                            i0MonitorIndex, wavelengthInterval,
                            wavelengthMonitorBackgroundInterval, wavelengthStep);
@@ -182,6 +192,15 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
     auto transRun2 = secondTransmissionRun.get();
     g_log.debug(
         "Extracting second transmission run workspace indexes from spectra");
+
+    // Convert second transmission workspace units to wavelength
+    auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
+    convertUnitsAlg->initialize();
+    convertUnitsAlg->setProperty("InputWorkspace", transRun2);
+    convertUnitsAlg->setProperty("Target", "Wavelength");
+    convertUnitsAlg->setProperty("AlignBins", true);
+    convertUnitsAlg->execute();
+    transRun2 = convertUnitsAlg->getProperty("OutputWorkspace");
 
     auto trans2InLam =
         toLam(transRun2, processingCommands, i0MonitorIndex, wavelengthInterval,
