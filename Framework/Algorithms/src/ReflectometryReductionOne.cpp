@@ -574,7 +574,7 @@ void ReflectometryReductionOne::exec() {
   const bool isPointDetector =
       (pointDetectorAnalysis.compare(strAnalysisMode) == 0);
   const bool isMultiDetector =
-    (multiDetectorAnalysis.compare(strAnalysisMode) == 0);
+      (multiDetectorAnalysis.compare(strAnalysisMode) == 0);
 
   const MinMax wavelengthInterval =
       this->getMinMax("WavelengthMin", "WavelengthMax");
@@ -584,7 +584,7 @@ void ReflectometryReductionOne::exec() {
 
   OptionalWorkspaceIndexes directBeam;
   fetchOptionalLowerUpperPropertyValue("RegionOfDirectBeam", isPointDetector,
-    directBeam);
+                                       directBeam);
 
   auto instrument = runWS->getInstrument();
 
@@ -656,18 +656,18 @@ void ReflectometryReductionOne::exec() {
         std::stringstream buffer;
         buffer << db.front() << "-" << db.back();
         MatrixWorkspace_sptr regionOfDirectBeamWS = this->toLamDetector(
-          buffer.str(), runWS, wavelengthInterval, wavelengthStep);
+            buffer.str(), runWS, wavelengthInterval, wavelengthStep);
 
         // Rebin to the detector workspace
         auto rebinToWorkspaceAlg =
-          this->createChildAlgorithm("RebinToWorkspace");
+            this->createChildAlgorithm("RebinToWorkspace");
         rebinToWorkspaceAlg->initialize();
         rebinToWorkspaceAlg->setProperty("WorkspaceToRebin",
-          regionOfDirectBeamWS);
+                                         regionOfDirectBeamWS);
         rebinToWorkspaceAlg->setProperty("WorkspaceToMatch", detectorWS);
         rebinToWorkspaceAlg->execute();
         regionOfDirectBeamWS =
-          rebinToWorkspaceAlg->getProperty("OutputWorkspace");
+            rebinToWorkspaceAlg->getProperty("OutputWorkspace");
 
         // Normalize by the direct beam.
         detectorWS = divide(detectorWS, regionOfDirectBeamWS);

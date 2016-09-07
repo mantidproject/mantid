@@ -136,25 +136,25 @@ const std::string ReflectometryWorkflowBase::getWorkspaceIndexList() const {
 * @param optionalUpperLower : Object to set min and max on.
 */
 void ReflectometryWorkflowBase::fetchOptionalLowerUpperPropertyValue(
-  const std::string &propertyName, bool isPointDetector,
-  OptionalWorkspaceIndexes &optionalUpperLower) const {
+    const std::string &propertyName, bool isPointDetector,
+    OptionalWorkspaceIndexes &optionalUpperLower) const {
   if (!isPropertyDefault(propertyName)) {
     // Validation of property inputs.
     if (isPointDetector) {
       throw std::invalid_argument(
-        "Cannot have a region of interest property in point detector mode.");
+          "Cannot have a region of interest property in point detector mode.");
     }
     std::vector<int> temp = this->getProperty(propertyName);
     if (temp.size() != 2) {
       const std::string message =
-        propertyName + " requires a lower and upper boundary";
+          propertyName + " requires a lower and upper boundary";
       throw std::invalid_argument(message);
     }
     if (temp[0] > temp[1]) {
       throw std::invalid_argument("Min must be <= Max index");
     }
     if (std::find_if(temp.begin(), temp.end(), checkNotPositive) !=
-      temp.end()) {
+        temp.end()) {
       const std::string message = propertyName + " contains negative indexes";
       throw std::invalid_argument(message);
     }
