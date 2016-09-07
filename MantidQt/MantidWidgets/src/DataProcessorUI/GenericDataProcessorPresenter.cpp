@@ -242,8 +242,7 @@ Display a dialog to choose save location for notebook, then save the notebook
 there
 @param data : the processed data
 */
-void GenericDataProcessorPresenter::saveNotebook(
-    const TreeData &data) {
+void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
 
   std::string filename = m_view->requestNotebookPath();
   if (filename == "") {
@@ -474,8 +473,7 @@ Returns the name of the reduced workspace for a given row
 @returns : The name of the workspace
 */
 std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
-    const GroupData &groupData,
-    const std::string &prefix) {
+    const GroupData &groupData, const std::string &prefix) {
 
   if (!m_postprocess)
     throw std::runtime_error("Cannot retrieve post-processed workspace name");
@@ -1238,8 +1236,7 @@ ParentItems GenericDataProcessorPresenter::selectedParents() const {
 /** Asks the view for selected child items
  * @return :: the selected child items
  */
-ChildItems
-GenericDataProcessorPresenter::selectedChildren() const {
+ChildItems GenericDataProcessorPresenter::selectedChildren() const {
   return m_view->getSelectedChildren();
 }
 

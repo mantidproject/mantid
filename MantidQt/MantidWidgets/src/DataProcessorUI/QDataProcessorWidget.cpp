@@ -164,7 +164,7 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
   for (const auto &command : m_commands) {
     menu->addAction(command->getAction());
   }
-   menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
+  menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
 }
 
 /**

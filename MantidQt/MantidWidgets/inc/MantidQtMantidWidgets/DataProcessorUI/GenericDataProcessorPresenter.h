@@ -96,9 +96,8 @@ public:
   std::string getReducedWorkspaceName(const std::vector<std::string> &data,
                                       const std::string &prefix = "");
   // Get the name of a post-processed workspace
-  std::string getPostprocessedWorkspaceName(
-      const GroupData &groupData,
-      const std::string &prefix = "");
+  std::string getPostprocessedWorkspaceName(const GroupData &groupData,
+                                            const std::string &prefix = "");
 
   ParentItems selectedParents() const override;
   ChildItems selectedChildren() const override;
