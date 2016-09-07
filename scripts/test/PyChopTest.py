@@ -41,7 +41,7 @@ class PyChop2Tests(unittest.TestCase):
 
     # Tests the different variants of LET
     def test_pychop_let(self):
-        variants = ['High flux', 'Medium flux', 'Low flux']
+        variants = ['High flux', 'Intermediate', 'High resolution']
         res = []
         flux = []
         for inc, variant in enumerate(variants):
@@ -59,10 +59,10 @@ class PyChop2Tests(unittest.TestCase):
             rr, ff = chopobj.getResFlux(np.linspace(0,17,10))
             res.append(rr)
             flux.append(ff)
-        # Checks that the flux should be highest for 'High flux', then 'Medium flux' then 'Low flux'
+        # Checks that the flux should be highest for 'High flux', then 'Intermediate', 'High resolution'
         self.assertTrue(flux[0] > flux[1])
         self.assertTrue(flux[1] >= flux[2])
-        # Checks that the resolution should be best for 'Low flux', then 'Medium flux' then 'High flux'
+        # Checks that the resolution should be best for 'High resolution', then 'Intermediate', 'High flux'
         self.assertTrue(res[2][0] <= res[1][0])
         self.assertTrue(res[1][0] <= res[0][0]) 
         # Now tests the standalone function
