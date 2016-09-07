@@ -17,7 +17,6 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 
 #include <boost/regex.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <map>
 #include <sstream>
