@@ -43,7 +43,7 @@ void ParamFunction::setParameter(size_t i, const double &value,
     errmsg << "Trying to set a NaN value (" << value << ") to parameter "
            << this->parameterName(i);
     g_log.warning(errmsg.str());
-  } else if (std::isinf(value)) {
+  } else if (value <= -DBL_MAX || value >= DBL_MAX) {
     // Infinity value
     std::stringstream errmsg;
     errmsg << "Trying to set an infinity value (" << value << ") to parameter "
