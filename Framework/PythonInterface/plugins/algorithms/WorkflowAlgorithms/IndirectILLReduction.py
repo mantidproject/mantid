@@ -120,27 +120,27 @@ def get_peak_position(ws, i):
     @param i         :: spectrum index of input workspace
     @return          :: bin number of the peak position
     """
-    __temp = ExtractSingleSpectrum(InputWorkspace=ws, WorkspaceIndex=i)
+    temp = ExtractSingleSpectrum(InputWorkspace=ws, WorkspaceIndex=i)
 
-    __fit_table = FindEPP(InputWorkspace=__temp)
+    fit_table = FindEPP(InputWorkspace=temp)
 
     # Mid bin number
-    mid_bin = int(__temp.blocksize() / 2)
+    mid_bin = int(temp.blocksize() / 2)
 
     # Bin number, where Y has its maximum
-    y_values = __temp.readY(0)
-
-    # Delete unused single spectrum
-    DeleteWorkspace(__temp)
+    y_values = temp.readY(0)
 
     # Bin range: difference between mid bin and peak bin should be in this range
     tolerance = int(mid_bin / 2)
 
     # Peak bin (not in energy)
-    peak_bin = __fit_table.row(0)["PeakCentre"]
+    peak_bin = temp.binIndexOf(fit_table.row(0)["PeakCentre"])
+
+    # Delete unused single spectrum
+    DeleteWorkspace(temp)
 
     # Reliable check for peak bin
-    fit_status = __fit_table.row(0)["FitStatus"]
+    fit_status = fit_table.row(0)["FitStatus"]
 
     if peak_bin < 0 or peak_bin > len(y_values) or \
             (fit_status != 'success') or (abs(peak_bin - mid_bin) > tolerance):
@@ -156,7 +156,7 @@ def get_peak_position(ws, i):
     try:
         DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
         DeleteWorkspace('EPPfit_Parameters')
-        DeleteWorkspace(__fit_table)
+        DeleteWorkspace(fit_table)
     except ValueError:
         logger.debug('No Fit table available for deletion')
 
@@ -206,6 +206,7 @@ def shift_spectra(ws1, ws2=None, shift_option=False, masking=False):
             else:
                 # ws1 will be shifted according to centered peak of ws2
                 to_shift = peak_bin2 - mid_bin
+
 
         # Shift Y and E values of spectrum i by a number of to_shift bins
         # Note the - sign, since np.roll shifts right if the argument is positive
