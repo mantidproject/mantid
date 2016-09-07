@@ -221,14 +221,12 @@ public:
   plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
                bool spectrumPlot,
                MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-               bool errs = false, MultiLayer *plotWindow = NULL,
-               bool clearWindow = false);
+               bool errs = false, MultiLayer *plotWindow = NULL);
 
   MultiLayer *
   plotSubplots(const QMultiMap<QString, int> &toPlot, bool spectrumPlot,
                MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-               bool errs = false, MultiLayer *plotWindow = NULL,
-               bool clearWindow = false);
+               bool errs = false, MultiLayer *plotWindow = NULL);
 
 public slots:
   // Create a 1d graph form specified MatrixWorkspace and index
@@ -609,6 +607,12 @@ private:
   // The name comes from: these plots are normally opened from the context menu
   // of the workspaces dock window
   bool workspacesDockPlot1To1();
+
+  /// Get the title to use for a plot - name of selected group
+  QString getSelectedGroupName() const;
+
+  /// Set initial autoscale for graph, then reset user autoscale option
+  void setInitialAutoscale(Graph *graph);
 
   // Private variables
 

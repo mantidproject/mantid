@@ -3010,30 +3010,13 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
 
   ScopedOverrideCursor waitCursor;
 
-  const QString &firstWsName = toPlot.constBegin().key();
-  ;
-  QString plotTitle;
   // If the first workspace selected in the tree is a WorkspaceGroup,
   // use its name directly, rather than the first in the list 'toPlot'
   // (which will be the first workspace included in the group - not
   // the best title).
-  const QString &sel = m_exploreMantid->getSelectedWorkspaceName();
-  WorkspaceGroup_const_sptr gWs;
-  if (!sel.isEmpty() &&
-      AnalysisDataService::Instance().doesExist(sel.toStdString())) {
-    try {
-      gWs = boost::dynamic_pointer_cast<const WorkspaceGroup>(
-          Mantid::API::AnalysisDataService::Instance().retrieve(
-              sel.toStdString()));
-    } catch (std::exception &) {
-      // can happen, nothing to worry about
-      gWs = WorkspaceGroup_const_sptr(); // make sure, anyway
-    }
-  }
-  if (gWs) {
-    plotTitle = sel;
-  } else {
-    plotTitle = firstWsName;
+  QString plotTitle = getSelectedGroupName();
+  if (plotTitle.isEmpty()) {
+    plotTitle = toPlot.constBegin().key();
   }
 
   // Limit to 1 window for this type of plot -> reuse plot/graph window
@@ -3088,17 +3071,8 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
       return NULL;
     }
 
-    g->setAutoScale();
-    /* The 'setAutoScale' above is needed to make sure that the plot initially
-     * encompasses all the
-     * data points. However, this has the side-effect suggested by its name: all
-     * the axes become
-     * auto-scaling if the data changes. If, in the plot preferences,
-     * autoscaling has been disabled
-     * the the next line re-fixes the axes
-     */
-    if (!appWindow()->autoscale2DPlots)
-      g->enableAutoscaling(false);
+    // Ensure plot encompasses all data points
+    setInitialAutoscale(g);
 
     // This deals with the case where the X-values are not in order. In general,
     // this shouldn't
@@ -3286,15 +3260,7 @@ MultiLayer *MantidUI::drawSingleColorFillPlot(const QString &wsName,
           Qt::QueuedConnection);
 
   appWindow()->setSpectrogramTickStyle(plot);
-  plot->setAutoScale();
-  /* The 'setAutoScale' above is needed to make sure that the plot initially
-   * encompasses all the data points. However, this has the side-effect
-   * suggested by its name: all the axes become auto-scaling if the data
-   * changes. If, in the plot preferences, autoscaling has been disabled then
-   * the next line re-fixes the axes
-   */
-  if (!appWindow()->autoscale2DPlots)
-    plot->enableAutoscaling(false);
+  setInitialAutoscale(plot);
 
   return window;
 }
@@ -3361,15 +3327,12 @@ MultiLayer *MantidUI::plotSelectedColumns(const MantidMatrix *const m,
  * @param distr :: if true, workspace plot as distribution (y data/bin width)
  * @param errs :: if true, plot the errors on the graph
  * @param plotWindow :: Window to plot to. If null a new one will be created
- * @param clearWindow :: Whether to clear specified plotWindow before plotting.
- * Ignored if plotWindow is null.
  * @return created MultiLayer, or null on failure
  */
 MultiLayer *MantidUI::plotSubplots(
     const QMultiMap<QString, std::set<int>> &toPlot, bool spectrumPlot,
     MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-    bool errs = false, MultiLayer *plotWindow = NULL,
-    bool clearWindow = false) {
+    bool errs = false, MultiLayer *plotWindow) {
   // Check if nothing to plot
   if (toPlot.size() == 0)
     return nullptr;
@@ -3397,18 +3360,66 @@ MultiLayer *MantidUI::plotSubplots(
     }
   }
 
+  // Get title. If this is a wsGroup, use name of that
+  QString plotTitle = getSelectedGroupName();
+  if (plotTitle.isEmpty()) {
+    plotTitle = toPlot.constBegin().key();
+  }
+
+  // Do we plot as distribution?
+  const bool plotAsDistribution = distr == MantidQt::DistributionDefault
+                                      ? appWindow()->autoDistribution1D
+                                      : distr == MantidQt::DistributionTrue;
+
   // Set the wait cursor while we are plotting
   ScopedOverrideCursor waitCursor;
 
-  // Get title. If this is a wsGroup, use name of that
-  const QString &firstWsName = toPlot.constBegin().key();
+  // Create window with correct number of layers
+  auto *multi = appWindow()->multilayerPlot(plotTitle, nSubplots, 1, nSubplots);
+  multi->setCloseOnEmpty(true);
+  multi->arrangeLayers(true, true);
 
 
-  //auto graph = 
+
 
   throw std::runtime_error("TODO");
 
 
+  // Try to add curves to the plot
+  //Graph *g = ml->activeGraph();
+  //MantidMatrixCurve::IndexDir indexType =
+  //    (spectrumPlot) ? MantidMatrixCurve::Spectrum : MantidMatrixCurve::Bin;
+  //MantidMatrixCurve *firstCurve(NULL);
+  //for (QMultiMap<QString, int>::const_iterator it = toPlot.begin();
+  //     it != toPlot.end(); ++it) {
+  //  try {
+  //    auto *wsCurve = new MantidMatrixCurve(it.key(), g, it.value(), indexType,
+  //                                          errs, plotAsDistribution, style);
+  //    if (!firstCurve) {
+  //      firstCurve = wsCurve;
+  //      g->setNormalizable(firstCurve->isNormalizable());
+  //      g->setDistribution(firstCurve->isDistribution());
+  //    }
+  //  } catch (Mantid::Kernel::Exception::NotFoundError &) {
+  //    g_log.warning() << "Workspace " << it.key().toStdString()
+  //                    << " not found\n";
+  //  } catch (std::exception &ex) {
+  //    g_log.warning() << ex.what() << '\n';
+  //  }
+  //}
+
+    if (!firstCurve) {
+      return NULL;
+    }
+    // Ensure plot encompasses all data points
+    setInitialAutoscale(g);
+    // This deals with the case where the X-values are not in order
+    g->checkValuesInAxisRange(firstCurve);
+
+  // Check if window does not contain any curves and should be closed
+  ml->maybeNeedToClose();
+
+  return ml;
 }
 
 /**
@@ -3421,15 +3432,12 @@ MultiLayer *MantidUI::plotSubplots(
  * @param distr :: if true, workspace plot as distribution (y data/bin width)
  * @param errs :: if true, plot the errors on the graph
  * @param plotWindow :: Window to plot to. If null a new one will be created
- * @param clearWindow :: Whether to clear specified plotWindow before plotting.
- * Ignored if plotWindow is null.
  * @return created MultiLayer, or null on failure
  */
 MultiLayer *MantidUI::plotSubplots(
     const QMultiMap<QString, int> &toPlot, bool spectrumPlot,
     MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-    bool errs = false, MultiLayer *plotWindow = NULL,
-    bool clearWindow = false) {
+    bool errs = false, MultiLayer *plotWindow) {
 
   // Convert the input map into a map of workspace->spectra
   QMultiMap<QString, std::set<int>> spectraByWorkspace;
@@ -3443,8 +3451,8 @@ MultiLayer *MantidUI::plotSubplots(
   }
 
   // Pass over to the overloaded method
-  return plotSubplots(spectraByWorkspace, spectrumPlot, distr, errs, plotWindow,
-                      clearWindow);
+  return plotSubplots(spectraByWorkspace, spectrumPlot, distr, errs,
+                      plotWindow);
 }
 
 Table *MantidUI::createTableFromBins(
@@ -3551,6 +3559,49 @@ bool MantidUI::workspacesDockPlot1To1() {
   return "On" ==
          Mantid::Kernel::ConfigService::Instance().getString(
              "MantidOptions.ReusePlotInstances");
+}
+
+/**
+ * If a workspace group is selected, return its name
+ * @returns :: Name of selected workspace group, or empty if no group selected
+ */
+QString MantidUI::getSelectedGroupName() const {
+  const QString &sel = m_exploreMantid->getSelectedWorkspaceName();
+  WorkspaceGroup_const_sptr gWs;
+  if (!sel.isEmpty() &&
+      AnalysisDataService::Instance().doesExist(sel.toStdString())) {
+    try {
+      gWs = boost::dynamic_pointer_cast<const WorkspaceGroup>(
+          Mantid::API::AnalysisDataService::Instance().retrieve(
+              sel.toStdString()));
+    } catch (std::exception &) {
+      // can happen, nothing to worry about
+      gWs = WorkspaceGroup_const_sptr(); // make sure, anyway
+    }
+  }
+  if (gWs) {
+    return sel;
+  } else {
+    return "";
+  }
+}
+
+/**
+ * Sets graph to encompass all data points, then resets user's plot preference
+ *
+ * The 'setAutoScale' method is used to make sure that the plot initially
+ * encompasses all the data points. However, this has the side-effect suggested
+ * by its name: all the axes become auto-scaling if the data changes. If, in the
+ * plot preferences, autoscaling has been disabled, then the axes are re-fixed.
+ *
+ * @param graph :: [input, output] Graph to set initial autoscale for
+ */
+void MantidUI::setInitialAutoscale(Graph *graph) {
+  // Set axes to include all data points
+  graph->setAutoScale();
+  // If option disabled, re-fix the axes
+  if (!appWindow()->autoscale2DPlots)
+    graph->enableAutoscaling(false);
 }
 
 //=========================================================================
