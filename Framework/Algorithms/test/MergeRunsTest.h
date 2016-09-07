@@ -902,19 +902,26 @@ public:
     TS_ASSERT(alg.useCustomInputPropertyName());
   }
 
+  void do_test_mergeSampleLogs(WorkspaceGroup_sptr input,
+                               std::string propertyName, std::string mergeType,
+                               std::string result, int filesMerged,
+                               bool noOutput = false) {
+    MergeRuns alg;
+    alg.initialize();
+
+    do_test_mergeSampleLogs_modified_alg(alg, input, propertyName, mergeType,
+                                         result, filesMerged, noOutput);
+  }
+
   void do_test_mergeSampleLogs_modified_alg(MergeRuns &alg,
                                             WorkspaceGroup_sptr input,
                                             std::string propertyName,
                                             std::string mergeType,
                                             std::string result, int filesMerged,
                                             bool noOutput = false) {
-    MatrixWorkspace_sptr input0 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0));
-    MatrixWorkspace_sptr input1 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(1));
 
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "InputWorkspaces", input0->name() + "," + input1->name()));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspaces", input->name()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outWS"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -950,20 +957,10 @@ public:
     sample_logs_teardown();
   }
 
-  void do_test_mergeSampleLogs(WorkspaceGroup_sptr input,
-                               std::string propertyName, std::string mergeType,
-                               std::string result, int filesMerged,
-                               bool noOutput = false) {
-    MergeRuns alg;
-    alg.initialize();
-
-    do_test_mergeSampleLogs_modified_alg(alg, input, propertyName, mergeType,
-                                         result, filesMerged, noOutput);
-  }
-
   void sample_logs_teardown() {
     AnalysisDataService::Instance().remove("a1");
     AnalysisDataService::Instance().remove("b1");
+    AnalysisDataService::Instance().remove("c1");
     AnalysisDataService::Instance().remove("group1");
     AnalysisDataService::Instance().remove("outWS");
   }
@@ -1045,7 +1042,7 @@ public:
   test_mergeSampleLogs_fail_where_params_with_both_tolerances_outside_fails() {
     std::string mergeType = SampleLogsBehaviour::FAIL_MERGE;
     auto ws = create_workspace_with_sample_logs<double>(
-        mergeType, "prop1, prop2", 1.0, 2.0, 3.0, 4.0, "1.5");
+        mergeType, "prop1, prop2", 1.0, 2.0, 3.0, 4.0, "0.5");
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 1);
   }
 
@@ -1172,6 +1169,53 @@ public:
     alg.setPropertyValue("SampleLogsFail", "prop1");
     alg.setPropertyValue("SampleLogsFailTolerances", "2.0");
     do_test_mergeSampleLogs_modified_alg(alg, ws, "prop1", mergeType, "1", 2);
+  }
+
+  void test_mergeSampleLogs_time_series_and_error_skips_merging_second_file() {
+    auto ws = create_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::TIME_SERIES_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0,
+        "0.5");
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("SampleLogsFail", "prop2");
+    alg.setPropertyValue("SampleLogsFailTolerances", "0.5");
+    do_test_mergeSampleLogs_modified_alg(alg, ws, "prop1",
+                                         SampleLogsBehaviour::TIME_SERIES_MERGE,
+                                         "2013-Jun-25 10:59:15  1\n", 1);
+  }
+
+  void test_merging_three_workspace_with_time_series() {
+    std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
+
+    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
+                                                        2.0, 3.0, 4.0);
+
+    MatrixWorkspace_sptr c =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1000,
+                                                                     true);
+
+    Property *prop5 = new PropertyWithValue<double>("prop1", 5.0);
+    Property *prop6 = new PropertyWithValue<double>("prop2", 6.0);
+
+    c->mutableRun().addLogData(prop5);
+    c->mutableRun().addLogData(prop6);
+
+    // add start times
+    Property *time3 =
+        new PropertyWithValue<std::string>("start_time", "2013-06-25T12:59:15");
+    c->mutableRun().addLogData(time3);
+
+    c->instrumentParameters().addString(c->getInstrument()->getComponentID(),
+                                        mergeType, "prop1");
+
+    AnalysisDataService::Instance().addOrReplace("c1", c);
+    ws->addWorkspace(c);
+
+    do_test_mergeSampleLogs(ws, "prop1", mergeType,
+                            "2013-Jun-25 10:59:15  1\n2013-Jun-25 11:59:15  "
+                            "2\n2013-Jun-25 12:59:15  5\n",
+                            3);
   }
 
 private:

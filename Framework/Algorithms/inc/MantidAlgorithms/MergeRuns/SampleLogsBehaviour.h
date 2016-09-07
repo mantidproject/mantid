@@ -48,7 +48,7 @@ public:
 
   typedef struct {
     MergeLogType type;
-    Kernel::Property *property;
+    std::shared_ptr<Kernel::Property> property;
     double tolerance;
     bool isNumeric;
   } SampleLogBehaviour;
@@ -61,6 +61,7 @@ public:
                       const std::string sampleLogsWarnTolerances,
                       const std::string sampleLogsFail,
                       const std::string sampleLogsFailTolerances);
+
   Kernel::Logger &m_logger;
 
   typedef std::map<const std::string, SampleLogBehaviour> SampleLogsMap;
