@@ -15,9 +15,9 @@ std::string generateDifferenceMessage(std::string item, std::string wsName,
                                       std::string firstValue) {
   std::stringstream stringstream;
   stringstream << "Item \"" << item
-               << "\" has different values in files! Found: " << wsValue
-               << " in file " << wsName
-               << " but value in first file value was: " << firstValue << "."
+               << "\" has different values in workspaces! Found: " << wsValue
+               << " in workspace " << wsName
+               << " but value in first workspace value was: " << firstValue << "."
                << std::endl;
   return stringstream.str();
 }

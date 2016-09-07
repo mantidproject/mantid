@@ -45,22 +45,31 @@ void MergeRuns::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
   declareProperty("SampleLogsTimeSeries", "",
-                  "The sample logs to merge into a time series. The initial "
-                  "times are taken as the start times for the run, and the "
-                  "merged sample log is suffixed with \"_time_series\". Sample "
-                  "logs must be numeric.");
-  declareProperty("SampleLogsList", "", "The sample logs to merge into a list. "
-                                        "The merged sample log is suffixed "
-                                        "with \"_time_series\". ");
-  declareProperty("SampleLogsWarn", "",
-                  "The sample logs to warn if different when merging.");
+                  "A comma separated list of the sample logs to merge into a "
+                  "time series. The initial times are taken as the start times "
+                  "for the run, and the merged sample log is suffixed with "
+                  "\"_time_series\". Sample logs must be numeric.");
+  declareProperty("SampleLogsList", "",
+                  "A comma separated list of the sample logs to merge into a "
+                  "list. The merged sample log is suffixed with \"_list\". ");
+  declareProperty("SampleLogsWarn", "", "A comma separated list of the sample "
+                                        "logs to generate a warning if "
+                                        "different when merging.");
   declareProperty("SampleLogsWarnTolerances", "",
-                  "The tolerances for warning if sample logs are different.");
+                  "The tolerances for warning if sample logs are different. "
+                  "Can either be empty for a comparison of the strings, a "
+                  "single value for all tolerances specified, or a comma "
+                  "separated list of values (must be the same length as "
+                  "SampleLogsWarn).");
   declareProperty("SampleLogsFail", "", "The sample logs to fail if different "
                                         "when merging. If there is a "
-                                        "difference the run is not merged.");
+                                        "difference the run is skipped.");
   declareProperty("SampleLogsFailTolerances", "",
-                  "The tolerances for failing if sample logs are different.");
+                  "The tolerances for failing if sample logs are different. "
+                  "Can either be empty for a comparison of the strings, a "
+                  "single value for all tolerances specified, or a comma "
+                  "separated list of values (must be the same length as "
+                  "SampleLogsFail).");
 }
 
 //------------------------------------------------------------------------------------------------

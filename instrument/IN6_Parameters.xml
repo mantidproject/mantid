@@ -27,16 +27,16 @@
             <value val="run_number" />
         </parameter>
         <parameter name="sample_logs_warn" type="string">
-            <value val="Ei, end_time" />
+            <value val="EPP, Fermi.phase" />
         </parameter>
         <parameter name="sample_logs_warn_tolerances" type="string">
-            <value val="0.1, 0.2" />
+            <value val="5, 0.001" />
         </parameter>
         <parameter name="sample_logs_fail" type="string">
-            <value val="EPP" />
+            <value val="experiment_identifier, Ei, Fermi.rotation_speed" />
         </parameter>
         <parameter name="sample_logs_fail_tolerances" type="string">
-            <value val="1" />
+            <value val="0, 0.1, 2" />
         </parameter>
 
 	</component-link>

@@ -60,13 +60,41 @@ If group workspaces are provided that are not multi-period, this
 algorithm will merge across all nested workspaces, to give a singe
 output matrix workspace.
 
+Merging Sample Logs
+###################
+
+Sample logs are optionally merged when running this algorithm. The behaviour when merging us defined in the instrument parameters, but the behaviour can be added to or overridden or via this algorithm.
+Definitions in the XML file are given as shown in the example below. See the usage examples at the end of this document for examples of overriding the behaviour defined in the XML file.
+
+.. code-block:: xml
+
+    <parameter name="sample_logs_time_series" type="string">
+        <value val="sample.temperature, sample.pressure" />
+    </parameter>
+    <parameter name="sample_logs_list" type="string">
+        <value val="run_number" />
+    </parameter>
+    <parameter name="sample_logs_warn" type="string">
+        <value val="EPP, Fermi.phase" />
+    </parameter>
+    <parameter name="sample_logs_warn_tolerances" type="string">
+        <value val="5, 0.001" />
+    </parameter>
+    <parameter name="sample_logs_fail" type="string">
+        <value val="experiment_identifier, Ei, Fermi.rotation_speed" />
+    </parameter>
+    <parameter name="sample_logs_fail_tolerances" type="string">
+        <value val="0, 0.1, 2" />
+    </parameter>
+
+
 ChildAlgorithms used
 ####################
 
 The :ref:`algm-Rebin` algorithm is used, if neccessary, to put all the
 input workspaces onto a common binning.
 
-The :ref:`algm-Plus` algorithm is used to combine each of the workspaces 
+The :ref:`algm-Plus` algorithm is used to combine each of the workspaces
 together one pair at a time.
 
 Usage
@@ -82,11 +110,13 @@ Usage
    a = CreateWorkspace(dataX, dataY)
    b = CreateWorkspace(dataX, dataY)
 
-   merged = MergeRuns(InputWorkspaces="a, b")  
+   merged = MergeRuns(InputWorkspaces="a, b")
 
    print "a      = " + str(a.readY(0))
    print "b      = " + str(b.readY(0))
    print "merged = " + str(merged.readY(0))
+
+Output:
 
 .. testoutput:: ExWs
 
@@ -119,6 +149,8 @@ Usage
 
    print "merged   = " + str(merged.readY(0))
 
+Output:
+
 .. testoutput:: ExWsGroup
 
    group_1 = [[  6.  15.  21.   9.],
@@ -126,6 +158,79 @@ Usage
    group_2 = [[  6.  15.  21.   9.],
               [  6.  15.  21.   9.]]
    merged   = [ 24.  60.  84.  36.]
+
+.. include:: ../usagedata-note.txt
+
+**Example: Merge Workspace Combining Sample Logs as a TimeSeries**
+
+.. testcode:: MergeSampleLogs
+
+  Load(Filename='MUSR00015189.nxs, MUSR00015190.nxs', OutputWorkspace='gws')
+
+  merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
+                     SampleLogsTimeSeries='sample_magn_field')
+
+  print merged.run().getLogData('sample_magn_field_time_series').valueAsString().rstrip()
+
+Output:
+
+.. testoutput:: MergeSampleLogs
+
+  2007-Nov-27 17:10:35  1350
+  2007-Nov-27 17:12:30  1360
+
+**Example: Merge Workspace Combining Sample Logs as a List**
+
+.. testcode:: MergeSampleLogs
+
+  Load(Filename='MUSR00015189.nxs, MUSR00015190.nxs', OutputWorkspace='gws')
+
+  merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
+                     SampleLogsList='sample_magn_field')
+
+  print merged.run().getLogData('sample_magn_field_list').value
+
+Output:
+
+.. testoutput:: MergeSampleLogs
+
+  1350, 1360
+
+**Example: Merge Workspace Combining Sample Logs with a Warnining if Different**
+
+.. testcode:: MergeSampleLogs
+
+  Load(Filename='MUSR00015189.nxs, MUSR00015190.nxs', OutputWorkspace='gws')
+
+  merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
+                     SampleLogsTimeSeries='sample_temp',
+                     SampleLogsWarn='sample_magn_field', SampleLogsWarnTolerances='0')
+
+  print merged.run().getLogData('sample_temp_time_series').size()
+
+Output:
+
+.. testoutput:: MergeSampleLogs
+
+  2
+
+**Example: Merge Workspace Combining Sample Logs with an Error if Different**
+
+.. testcode:: MergeSampleLogs
+
+  Load(Filename='MUSR00015189.nxs, MUSR00015190.nxs', OutputWorkspace='gws')
+
+  merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
+                     SampleLogsTimeSeries='sample_temp',
+                     SampleLogsFail='sample_magn_field', SampleLogsFailTolerances='0')
+
+  print merged.run().getLogData('sample_temp_time_series').size()
+
+Output:
+
+.. testoutput:: MergeSampleLogs
+
+  1
 
 .. categories::
 
