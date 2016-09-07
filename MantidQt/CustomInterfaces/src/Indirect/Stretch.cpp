@@ -203,7 +203,6 @@ void Stretch::saveWorkspaces() {
  */
 void Stretch::plotWorkspaces() {
 
-
   WorkspaceGroup_sptr fitWorkspace;
   fitWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
       m_fitWorkspaceName);
