@@ -1624,6 +1624,42 @@ public:
     }
   }
 
+  // As test_rotate_bank_and_read_positions_x10 but based on SpectrumInfo.
+  void test_rotate_bank_and_read_positions_SpectrumInfo_x10() {
+    int count = 0;
+    while (count < 10) {
+      // Rotate the bank
+      ComponentHelper::rotateComponent(
+          *m_sansBank, *m_paramMap, m_zRotation,
+          Mantid::Geometry::ComponentHelper::Relative);
+
+      V3D pos;
+      const auto &spectrumInfo = m_workspaceSans.spectrumInfo();
+      for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
+        pos += spectrumInfo.position(i);
+      }
+      ++count;
+    }
+  }
+
+  // As test_move_bank_and_read_positions_x10 but based on SpectrumInfo.
+  void test_move_bank_and_read_positions_SpectrumInfo_x10() {
+    int count = 0;
+    while (count < 10) {
+      // move the bank
+      ComponentHelper::moveComponent(
+          *m_sansBank, *m_paramMap, m_pos,
+          Mantid::Geometry::ComponentHelper::Relative);
+
+      V3D pos;
+      const auto &spectrumInfo = m_workspaceSans.spectrumInfo();
+      for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
+        pos += spectrumInfo.position(i);
+      }
+      ++count;
+    }
+  }
+
 private:
   WorkspaceTester m_workspace;
   WorkspaceTester m_workspaceSans;
