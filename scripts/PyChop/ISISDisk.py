@@ -38,16 +38,16 @@ class ISISDisk:
             self.guide_width = [40, 40, 40, 40, 20]            # width of the guide in mm 
             self.radius = [290, 545, 290, 290, 290]            # radius in mm of each disk at centre of window 
             self.numDisk = [2, 1, 1, 1, 2]                     # whether double or single disks
-            # possible instname: ['LET', 'LETHIGH', 'LETMEDIUM', 'LETLOW'] - corresponds to different configurations
-            if 'HI' in instname or (variant is not None and 'HI' in variant.upper()):
+            # possible instname: ['LET', 'LETHIFLUX', 'LETINTERMED', 'LETHIRES'] - corresponds to different configurations
+            if 'FLUX' in instname or (variant is not None and 'FLUX' in variant.upper()):
                 self.slot_width = [40, 890, 56, 52, 31]        # width of chopper slots in mm
                 self.variant = 'High flux'
-            elif 'LO' in instname or (variant is not None and 'LO' in variant.upper()):
+            elif 'RES' in instname or (variant is not None and 'RES' in variant.upper()):
                 self.slot_width = [40, 890, 56, 52, 20]        # width of chopper slots in mm
-                self.variant = 'Low flux'
+                self.variant = 'High resolution'
             else:
                 self.slot_width = [40, 890, 56, 52, 20]        # width of chopper slots in mm
-                self.variant = 'Medium flux'
+                self.variant = 'Intermediate'
             self.ph_ind = 1        # index of chopper with user-determined phase
             self.samp_det = 3.5    # sample to detector distance in m
             self.chop_samp = 1.5   # final chopper to sample distance
@@ -92,7 +92,7 @@ class ISISDisk:
         If scalar, sets the resolution chopper freq to this and the pulse remover to freq/2
         """
         if 'LET' in self.instname:
-            if 'HI' in self.variant.upper():
+            if 'FLUX' in self.variant.upper():
                 if hasattr(frequency, "__len__"):
                     if len(frequency) == 1:
                         self.freq = [frequency[0]/4., 10., frequency[0]/4., frequency[0]/2., frequency[0]]
@@ -104,7 +104,7 @@ class ISISDisk:
                         raise ValueError('Frequency must be a 1-, 2- or 5-element list/array')
                 else:
                     self.freq = [frequency/4., 10., frequency/4., frequency/2., frequency]
-            elif 'LO' in self.variant.upper():
+            elif 'RES' in self.variant.upper():
                 if hasattr(frequency, "__len__"):
                     if len(frequency) == 1:
                         self.freq = [frequency[0]/2., 10., frequency[0]/2., frequency[0]/2., frequency[0]]

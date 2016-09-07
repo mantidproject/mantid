@@ -27,7 +27,7 @@ class PyChopGui(QtGui.QMainWindow):
         'MAPS':['A', 'S'],
         'MARI':['A', 'B', 'R', 'G', 'S'],
         'MERLIN':['G', 'S'],
-        'LET':['High Flux', 'Medium Flux', 'Low Flux']
+        'LET':['High Flux', 'Intermediate', 'High Resolution']
     }
     minE = {'MAPS':0.1, 'MARI':0.1, 'MERLIN':0.1, 'LET':0.1}
     maxE = {'MAPS':1000, 'MARI':1000, 'MERLIN':1000, 'LET':100}
