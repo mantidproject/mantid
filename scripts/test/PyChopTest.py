@@ -9,43 +9,65 @@ from PyChop import PyChop2
 
 class PyChop2Tests(unittest.TestCase):
 
-    def test_pychop2(self):
-        instnames = ['let', 'maps', 'mari', 'merlin']
-        modulenames = ['ISISDisk', 'ISISFermi', 'ISISFermi', 'ISISFermi']
+    # Tests the Fermi chopper instruments
+    def test_pychop_fermi(self):
+        instnames = ['maps', 'mari', 'merlin']
         res = []
         flux = []
         for inc, instname in enumerate(instnames):
             chopobj = PyChop2(instname)
             # Checks that initialisations instanciates the correct submodule
             # which does the actual calculations. PyChop2 is just a wrapper.
-            self.assertTrue(modulenames[inc] in chopobj.getObject().__module__)
+            self.assertTrue('ISISFermi' in chopobj.getObject().__module__)
             # Code should give an error if the chopper settings and Ei have
             # not been set.
             self.assertRaises(ValueError, chopobj.getResolution)
-            if 'Fermi' in modulenames[inc]:
-                chopobj.setChopper('s', 200)
-            else:
-                chopobj.setFrequency(200)
+            chopobj.setChopper('s', 200)
             chopobj.setEi(18)
             rr, ff = chopobj.getResFlux(np.linspace(0,17,10))
             res.append(rr)
             flux.append(ff)
-        # Checks that the flux should be highest for LET, then MERLIN, MARI
-        # and MAPS in that order
-        self.assertTrue(flux[0] > flux[3])
-        self.assertTrue(flux[3] > flux[2])
+        # Checks that the flux should be highest for MERLIN, MARI and MAPS in that order
         self.assertTrue(flux[2] > flux[1])
-        # Checks that the resolution should be best for LET, then MARI, MAPS
-        # and MERLIN in that order
-        self.assertTrue(res[0][0] < res[2][0])
-        self.assertTrue(res[2][0] < res[1][0])
-        self.assertTrue(res[1][0] < res[3][0]) 
+        self.assertTrue(flux[1] > flux[0])
+        # Checks that the resolution should be best for MARI, MAPS and MERLIN in that order
+        self.assertTrue(res[1][0] < res[0][0])
+        self.assertTrue(res[0][0] < res[2][0]) 
         # Now tests the standalone function
         for inc, instname in enumerate(instnames):
-            if 'Fermi' in modulenames[inc]:
-                rr, ff = PyChop2.calculate(instname, 's', 200, 18, 0)
-            else:
-                rr, ff = PyChop2.calculate(instname, 200, 18, 0)
+            rr, ff = PyChop2.calculate(instname, 's', 200, 18, 0)
+            self.assertAlmostEqual(rr[0], res[inc][0], places=7)
+            self.assertAlmostEqual(ff, flux[inc], places=7)
+
+    # Tests the different variants of LET
+    def test_pychop_let(self):
+        variants = ['High flux', 'Medium flux', 'Low flux']
+        res = []
+        flux = []
+        for inc, variant in enumerate(variants):
+            chopobj = PyChop2('LET', variant)
+            # Checks that initialisations instanciates the correct submodule
+            # which does the actual calculations. PyChop2 is just a wrapper.
+            self.assertTrue('ISISDisk' in chopobj.getObject().__module__)
+            # Checks that it instanciates the correct variant
+            self.assertTrue(variant in chopobj.getChopper())
+            # Code should give an error if the chopper settings and Ei have
+            # not been set.
+            self.assertRaises(ValueError, chopobj.getResolution)
+            chopobj.setFrequency(200)
+            chopobj.setEi(18)
+            rr, ff = chopobj.getResFlux(np.linspace(0,17,10))
+            res.append(rr)
+            flux.append(ff)
+        # Checks that the flux should be highest for 'High flux', then 'Medium flux' then 'Low flux'
+        self.assertTrue(flux[0] > flux[1])
+        self.assertTrue(flux[1] >= flux[2])
+        # Checks that the resolution should be best for 'Low flux', then 'Medium flux' then 'High flux'
+        self.assertTrue(res[2][0] <= res[1][0])
+        self.assertTrue(res[1][0] <= res[0][0]) 
+        # Now tests the standalone function
+        for inc, variant in enumerate(variants):
+            rr, ff = PyChop2.calculate('LET', variant, 200, 18, 0)
             self.assertAlmostEqual(rr[0], res[inc][0], places=7)
             self.assertAlmostEqual(ff, flux[inc], places=7)
 
