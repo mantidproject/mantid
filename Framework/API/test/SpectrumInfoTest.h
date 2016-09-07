@@ -47,6 +47,7 @@ public:
   void test_constructor() {
     auto ws = makeWorkspace(3);
     TS_ASSERT_THROWS_NOTHING(SpectrumInfo(*ws));
+    static_cast<void>(ws);
   }
 
   void test_l1() { TS_ASSERT_EQUALS(m_workspace.spectrumInfo().l1(), 20.0); }
@@ -78,8 +79,8 @@ public:
     size_t count = 1000;
     auto ws = makeWorkspace(count);
     SpectrumInfo info(*ws);
-    for (size_t i = 0; i < count; ++i)
-      TS_ASSERT_EQUALS(info.isMasked(i), i % 2 == 0);
+    for (int i = 0; i < count; ++i)
+      TS_ASSERT_EQUALS(info.isMasked(static_cast<size_t>(i)), i % 2 == 0);
   }
 
   void test_isMasked_threaded() {
