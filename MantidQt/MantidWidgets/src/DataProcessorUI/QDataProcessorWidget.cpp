@@ -160,28 +160,11 @@ void QDataProcessorWidget::showContextMenu(const QPoint &pos) {
   if (!ui.viewTable->indexAt(pos).isValid())
     return;
 
-  // TODO
-  //// parent widget takes ownership of QMenu
-  // QMenu *menu = new QMenu(this);
-  // menu->addAction(ui.actionProcess);
-  // menu->addAction(ui.actionExpandSelection);
-  // menu->addSeparator();
-  // menu->addAction(ui.actionPlotRow);
-  // menu->addAction(ui.actionPlotGroup);
-  // menu->addSeparator();
-  // menu->addAction(ui.actionAppendRow);
-  // menu->addAction(ui.actionAppendGroup);
-  // menu->addSeparator();
-  // menu->addAction(ui.actionGroupRows);
-  // menu->addAction(ui.actionCopySelected);
-  // menu->addAction(ui.actionCutSelected);
-  // menu->addAction(ui.actionPasteSelected);
-  // menu->addAction(ui.actionClearSelected);
-  // menu->addSeparator();
-  // menu->addAction(ui.actionDeleteRow);
-  // menu->addAction(ui.actionDeleteGroup);
-
-  // menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
+  QMenu *menu = new QMenu(this);
+  for (const auto &command : m_commands) {
+    menu->addAction(command->getAction());
+  }
+   menu->popup(ui.viewTable->viewport()->mapToGlobal(pos));
 }
 
 /**

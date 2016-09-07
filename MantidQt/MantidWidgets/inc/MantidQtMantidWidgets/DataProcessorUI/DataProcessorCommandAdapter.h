@@ -68,12 +68,8 @@ public:
       }
     } else {
       // We are dealing with an action
-      QAction *action =
-          new QAction(QString::fromStdString(m_adaptee->name()), this);
-      action->setIcon(QIcon(QString::fromStdString(m_adaptee->icon())));
-      action->setSeparator(m_adaptee->isSeparator());
+      QAction *action = getAction();
       menu->addAction(action);
-      connect(action, SIGNAL(triggered()), this, SLOT(call()));
     }
   };
 
@@ -88,23 +84,31 @@ public:
     if (!m_adaptee->hasChild()) {
       // Sub-menus cannot be added to a toolbar
 
-      QAction *action =
-          new QAction(QString::fromStdString(m_adaptee->name()), this);
-      action->setIcon(QIcon(QString::fromStdString(m_adaptee->icon())));
-      action->setSeparator(m_adaptee->isSeparator());
-      action->setToolTip(QString::fromStdString(m_adaptee->tooltip()));
-      action->setWhatsThis(QString::fromStdString(m_adaptee->whatsthis()));
-      action->setShortcut(
-          QKeySequence(QString::fromStdString(m_adaptee->shortcut())));
+      QAction *action = getAction();
       toolbar->addAction(action);
-      connect(action, SIGNAL(triggered()), this, SLOT(call()));
     }
+  };
+
+  /** Returns the action */
+  QAction *getAction() {
+    QAction *action =
+        new QAction(QString::fromStdString(m_adaptee->name()), this);
+    action->setIcon(QIcon(QString::fromStdString(m_adaptee->icon())));
+    action->setSeparator(m_adaptee->isSeparator());
+    action->setToolTip(QString::fromStdString(m_adaptee->tooltip()));
+    action->setWhatsThis(QString::fromStdString(m_adaptee->whatsthis()));
+    action->setShortcut(
+        QKeySequence(QString::fromStdString(m_adaptee->shortcut())));
+	connect(action, SIGNAL(triggered()), this, SLOT(call()));
+
+    return action;
   };
 
 public slots:
   void call() { m_adaptee->execute(); }
 
 private:
+  
   // The adaptee
   DataProcessorCommand_uptr m_adaptee;
   std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_adapter;
