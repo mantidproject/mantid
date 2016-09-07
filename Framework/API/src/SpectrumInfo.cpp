@@ -54,8 +54,8 @@ double SpectrumInfo::twoTheta(const size_t index) const {
   // Note: This function has big overlap with the method
   // MatrixWorkspace::detectorTwoTheta(). The plan is to eventually remove the
   // latter, once SpectrumInfo is in widespread use.
-  const Kernel::V3D samplePos = getSamplePos();
-  const Kernel::V3D beamLine = samplePos - getSourcePos();
+  const Kernel::V3D samplePos = samplePosition();
+  const Kernel::V3D beamLine = samplePos - sourcePosition();
 
   if (beamLine.nullVector()) {
     throw Kernel::Exception::InstrumentDefinitionError(
@@ -70,8 +70,8 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
   // Note: This function has big overlap with the method
   // MatrixWorkspace::detectorSignedTwoTheta(). The plan is to eventually remove
   // the latter, once SpectrumInfo is in widespread use.
-  const Kernel::V3D samplePos = getSamplePos();
-  const Kernel::V3D beamLine = samplePos - getSourcePos();
+  const Kernel::V3D samplePos = samplePosition();
+  const Kernel::V3D beamLine = samplePos - sourcePosition();
 
   if (beamLine.nullVector()) {
     throw Kernel::Exception::InstrumentDefinitionError(
@@ -116,6 +116,18 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
     }
   }
   return count == 1;
+}
+
+/// Returns the source position.
+Kernel::V3D SpectrumInfo::sourcePosition() const {
+  std::call_once(m_sourceCached, &SpectrumInfo::cacheSource, this);
+  return m_sourcePos;
+}
+
+/// Returns the sample position.
+Kernel::V3D SpectrumInfo::samplePosition() const {
+  std::call_once(m_sampleCached, &SpectrumInfo::cacheSample, this);
+  return m_samplePos;
 }
 
 /// Returns L1 (distance from source to sample).
@@ -166,20 +178,6 @@ const Geometry::IComponent &SpectrumInfo::getSource() const {
 const Geometry::IComponent &SpectrumInfo::getSample() const {
   std::call_once(m_sampleCached, &SpectrumInfo::cacheSample, this);
   return *m_sample;
-}
-
-/// Returns the source position. The value is cached, so calling it repeatedly
-/// is cheap.
-Kernel::V3D SpectrumInfo::getSourcePos() const {
-  std::call_once(m_sourceCached, &SpectrumInfo::cacheSource, this);
-  return m_sourcePos;
-}
-
-/// Returns the sample position. The value is cached, so calling it repeatedly
-/// is cheap.
-Kernel::V3D SpectrumInfo::getSamplePos() const {
-  std::call_once(m_sampleCached, &SpectrumInfo::cacheSample, this);
-  return m_samplePos;
 }
 
 void SpectrumInfo::cacheSource() const {

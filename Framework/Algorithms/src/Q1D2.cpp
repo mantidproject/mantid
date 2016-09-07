@@ -1,3 +1,4 @@
+#include "MantidAlgorithms/GravitySANSHelper.h"
 #include "MantidAlgorithms/Q1D2.h"
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidAPI/Axis.h"
@@ -186,7 +187,8 @@ void Q1D2::exec() {
                            binNormEs, norms, normETo2s);
 
     // now read the data from the input workspace, calculate Q for each bin
-    convertWavetoQ(i, doGravity, wavStart, QIn, getProperty("ExtraLength"));
+    convertWavetoQ(spectrumInfo, i, doGravity, wavStart, QIn,
+                   getProperty("ExtraLength"));
 
     // Pointers to the counts data and it's error
     auto YIn = m_dataWS->readY(i).cbegin() + wavStart;
@@ -538,6 +540,7 @@ void Q1D2::normToMask(const size_t offSet, const size_t wsIndex,
 /** Fills a vector with the Q values calculated from the wavelength bin centers
 * from the input workspace and
 *  the workspace geometry as Q = 4*pi*sin(theta)/lambda
+*  @param[in] spectrumInfo SpectrumInfo for workspace
 *  @param[in] wsInd the spectrum to calculate
 *  @param[in] doGravity if to include gravity in the calculation of Q
 *  @param[in] offset index number of the first input bin to use
@@ -547,19 +550,18 @@ void Q1D2::normToMask(const size_t offSet, const size_t wsIndex,
 *  @throw NotFoundError if the detector associated with the spectrum is not
 * found in the instrument definition
 */
-void Q1D2::convertWavetoQ(const size_t wsInd, const bool doGravity,
-                          const size_t offset, MantidVec::iterator Qs,
+void Q1D2::convertWavetoQ(const SpectrumInfo &spectrumInfo, const size_t wsInd,
+                          const bool doGravity, const size_t offset,
+                          MantidVec::iterator Qs,
                           const double extraLength) const {
   static const double FOUR_PI = 4.0 * M_PI;
-
-  IDetector_const_sptr det = m_dataWS->getDetector(wsInd);
 
   // wavelengths (lamda) to be converted to Q
   auto waves = m_dataWS->readX(wsInd).cbegin() + offset;
   // going from bin boundaries to bin centered x-values the size goes down one
   const MantidVec::const_iterator end = m_dataWS->readX(wsInd).end() - 1;
   if (doGravity) {
-    GravitySANSHelper grav(m_dataWS, det, extraLength);
+    GravitySANSHelper grav(spectrumInfo, wsInd, extraLength);
     for (; waves != end; ++Qs, ++waves) {
       // the HistogramValidator at the start should ensure that we have one more
       // bin on the input wavelengths
@@ -574,7 +576,7 @@ void Q1D2::convertWavetoQ(const size_t wsInd, const bool doGravity,
     // Calculate the Q values for the current spectrum, using Q =
     // 4*pi*sin(theta)/lambda
     const double factor =
-        2.0 * FOUR_PI * sin(m_dataWS->detectorTwoTheta(*det) * 0.5);
+        2.0 * FOUR_PI * sin(spectrumInfo.twoTheta(wsInd) * 0.5);
     for (; waves != end; ++Qs, ++waves) {
       // the HistogramValidator at the start should ensure that we have one more
       // bin on the input wavelengths

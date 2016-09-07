@@ -48,6 +48,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(SpectrumInfo(*makeWorkspace(3)));
   }
 
+  void test_sourcePosition() {
+    TS_ASSERT_EQUALS(m_workspace.spectrumInfo().sourcePosition(),
+                     V3D(0.0, 0.0, -20.0));
+  }
+
+  void test_samplePosition() {
+    TS_ASSERT_EQUALS(m_workspace.spectrumInfo().samplePosition(),
+                     V3D(0.0, 0.0, 0.0));
+  }
+
   void test_l1() { TS_ASSERT_EQUALS(m_workspace.spectrumInfo().l1(), 20.0); }
 
   void test_l1_no_instrument() {

@@ -72,14 +72,14 @@ public:
 
   // This does not really belong into SpectrumInfo, but it seems to be useful
   // while Instrument-2.0 does not exist.
+  Kernel::V3D sourcePosition() const;
+  Kernel::V3D samplePosition() const;
   double l1() const;
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
   const Geometry::IComponent &getSource() const;
   const Geometry::IComponent &getSample() const;
-  Kernel::V3D getSourcePos() const;
-  Kernel::V3D getSamplePos() const;
 
   // These cache init functions are not thread-safe! Use only in combination
   // with std::call_once!
