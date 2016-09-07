@@ -167,7 +167,8 @@ private:
   /// The default file extension associated with the type of file this property
   /// will handle
   std::string m_defaultExt;
-  /// The action type of this property, Load (dafault) or OptionalLoad are supported
+  /// The action type of this property
+  /// Load (dafault) or OptionalLoad are supported
   unsigned int m_action;
 };
 
