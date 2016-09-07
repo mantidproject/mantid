@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -25,6 +26,7 @@ using Mantid::specnum_t;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
 
 class GroupDetectorsTest : public CxxTest::TestSuite {
 public:
@@ -35,7 +37,7 @@ public:
     // Set up a small workspace for testing
     auto space2D = createWorkspace<Workspace2D>(5, 6, 5);
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    BinEdges x(6, 10.0);
+    BinEdges x(6, LinearGenerator(10.0, 1.0));
     Counts y(5, 1.0);
     CountStandardDeviations e(5, 1.0);
     for (int j = 0; j < 5; ++j) {
@@ -111,7 +113,7 @@ public:
     MatrixWorkspace_sptr outputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "GroupTestWS");
-    std::vector<double> tens(6, 10.0);
+    std::vector<double> tens{10, 11, 12, 13, 14, 15};
     std::vector<double> ones(5, 1.0);
     std::vector<double> threes(5, 3.0);
     std::vector<double> zeroes(5, 0.0);

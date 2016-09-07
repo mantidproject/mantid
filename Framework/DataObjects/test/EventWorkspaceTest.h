@@ -14,6 +14,7 @@
 
 #include <string>
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -37,6 +38,7 @@ using namespace boost::posix_time;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::LinearGenerator;
 
 //==========================================================================================
 class EventWorkspaceTest : public CxxTest::TestSuite {
@@ -91,10 +93,7 @@ public:
 
     if (setX) {
       // Create the x-axis for histogramming.
-      BinEdges axis(NUMBINS);
-      auto &xRef = axis.mutableData();
-      for (int i = 0; i < NUMBINS; ++i)
-        xRef[i] = i * BIN_DELTA;
+      BinEdges axis(NUMBINS, LinearGenerator(0.0, BIN_DELTA));
 
       // Try setting a single axis, make sure it doesn't throw
       retVal->setX(2, axis.cowData());
@@ -300,13 +299,8 @@ public:
       wi++;
     }
 
-    // Create the x-axis for histogramming.
-    BinEdges axis(NUMBINS);
-    auto &xRef = axis.mutableData();
-    for (int i = 0; i < NUMBINS; ++i)
-      xRef[i] = i * BIN_DELTA;
     // Set all the histograms at once.
-    uneven->setAllX(axis);
+    uneven->setAllX(BinEdges(NUMBINS, LinearGenerator(0.0, BIN_DELTA)));
 
     TS_ASSERT_EQUALS(uneven->getNumberHistograms(), NUMPIXELS / 10);
     TS_ASSERT_EQUALS(uneven->blocksize(), (NUMBINS - 1));
@@ -357,10 +351,8 @@ public:
   //------------------------------------------------------------------------------
   void test_setX_individually() {
     // Create A DIFFERENT x-axis for histogramming.
-    auto axis = Kernel::make_cow<HistogramData::HistogramX>(NUMBINS / 2);
-    auto &xRef = axis.access();
-    for (int i = 0; i < NUMBINS / 2; ++i)
-      xRef[i] = i * BIN_DELTA * 2;
+    auto axis = Kernel::make_cow<HistogramData::HistogramX>(
+        NUMBINS / 2, LinearGenerator(0.0, 2.0 * BIN_DELTA));
 
     ew->setX(0, axis);
     const EventList el(ew->getSpectrum(0));
@@ -467,11 +459,7 @@ public:
     // Yes, our eventworkspace MRU is full
     TS_ASSERT_EQUALS(ew->MRUSize(), 50);
     TS_ASSERT_EQUALS(ew2->MRUSize(), 50);
-    BinEdges axis(10);
-    auto &xRef = axis.mutableData();
-    for (int i = 0; i < 10; ++i)
-      xRef[i] = i * BIN_DELTA;
-    ew->setAllX(axis);
+    ew->setAllX(BinEdges(10, LinearGenerator(0.0, BIN_DELTA)));
 
     // MRU should have been cleared now
     TS_ASSERT_EQUALS(ew->MRUSize(), 0);
@@ -525,15 +513,14 @@ public:
                       std::range_error);
   }
 
-  void do_test_binning(EventWorkspace_sptr ws,
-                       const HistogramData::HistogramX &X, const BinEdges &axis,
+  void do_test_binning(EventWorkspace_sptr ws, const BinEdges &axis,
                        size_t expected_occupancy_per_bin) {
     MantidVec Y(NUMBINS - 1);
     MantidVec E(NUMBINS - 1);
     // Required since we are rebinning in place.
     ws->setAllX(axis);
     // perform binning
-    ws->generateHistogramPulseTime(0, X.rawData(), Y, E);
+    ws->generateHistogramPulseTime(0, axis.rawData(), Y, E);
     // Check results
     for (size_t j = 0; j < Y.size(); ++j) {
       TS_ASSERT_EQUALS(expected_occupancy_per_bin, Y[j]);
@@ -549,34 +536,22 @@ public:
                                                  // BIN_DELTA/2
 
     // Create bin steps = 4*BIN_DELTA.
-    BinEdges axis1(NUMBINS / 4);
-    auto &X1 = axis1.mutableData();
-    for (size_t i = 0; i < X1.size(); ++i) {
-      X1[i] = double(i) * BIN_DELTA * 4;
-    }
+    BinEdges axis1(NUMBINS / 4, LinearGenerator(0.0, 4.0 * BIN_DELTA));
     size_t expected_occupancy = 8; // Because there are two events with
                                    // pulse_time in each BIN_DELTA interval.
-    do_test_binning(ws, X1, axis1, expected_occupancy);
+    do_test_binning(ws, axis1, expected_occupancy);
 
     // Create bin steps = 2*BIN_DELTA.
-    BinEdges axis2(NUMBINS / 2);
-    auto &X2 = axis2.mutableData();
-    for (size_t i = 0; i < X2.size(); ++i) {
-      X2[i] = double(i) * BIN_DELTA * 2;
-    }
+    BinEdges axis2(NUMBINS / 2, LinearGenerator(0.0, 2.0 * BIN_DELTA));
     expected_occupancy = 4; // Because there are two events with pulse_time in
                             // each BIN_DELTA interval.
-    do_test_binning(ws, X2, axis2, expected_occupancy);
+    do_test_binning(ws, axis2, expected_occupancy);
 
     // Create bin steps = BIN_DELTA.
-    BinEdges axis3(NUMBINS);
-    auto &X3 = axis3.mutableData();
-    for (size_t i = 0; i < X3.size(); ++i) {
-      X3[i] = double(i) * BIN_DELTA;
-    }
+    BinEdges axis3(NUMBINS, LinearGenerator(0.0, BIN_DELTA));
     expected_occupancy = 2; // Because there are two events with pulse_time in
                             // each BIN_DELTA interval.
-    do_test_binning(ws, X3, axis3, expected_occupancy);
+    do_test_binning(ws, axis3, expected_occupancy);
   }
 
   void test_get_pulse_time_max() {

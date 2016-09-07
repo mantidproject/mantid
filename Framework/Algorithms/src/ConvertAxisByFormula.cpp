@@ -1,14 +1,18 @@
 #include "MantidAlgorithms/ConvertAxisByFormula.h"
 #include "MantidAPI/CommonBinsValidator.h"
-#include "MantidAPI/IncreasingAxisValidator.h"
+#include "MantidAPI/GeometryInfoFactory.h"
+#include "MantidAPI/GeometryInfo.h"
 #include "MantidAPI/RefAxis.h"
+#include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <sstream>
+#include <algorithm>
 
 namespace Mantid {
 namespace Algorithms {
@@ -49,7 +53,9 @@ void ConvertAxisByFormula::init() {
 
   declareProperty("Formula", "", "The formula to use to convert the values, x "
                                  "or y may be used to refer to the axis "
-                                 "values");
+                                 "values.  l1, l2, twotheta and signedtwotheta"
+                                 "may be used to provide values from the "
+                                 "instrument geometry.");
   declareProperty(
       "AxisTitle", "",
       "The label of he new axis. If not set then the title will not change.");
@@ -84,102 +90,224 @@ void ConvertAxisByFormula::exec() {
     setProperty("OutputWorkspace", outputWs);
   }
 
-  // Get the axis
-  int axisIndex = 0; // assume X
+  // Get the axes - assume X
+  Axis *axisPtr = outputWs->getAxis(0);
+  Axis *otherAxisPtr = outputWs->getAxis(1);
   if (axis == "Y") {
-    axisIndex = 1;
+    std::swap(axisPtr, otherAxisPtr);
   }
-  Axis *axisPtr = outputWs->getAxis(axisIndex);
 
   if (!axisPtr->isNumeric()) {
     throw std::invalid_argument("This algorithm only operates on numeric axes");
   }
 
+  bool isRaggedBins = false;
   bool isRefAxis = false;
   RefAxis *refAxisPtr = dynamic_cast<RefAxis *>(axisPtr);
   if (refAxisPtr != nullptr) {
     CommonBinsValidator sameBins;
     if (sameBins.isValid(outputWs) != "") {
-      throw std::invalid_argument("Axes must have common bins for this "
-                                  "algorithm to work - try Rebin first");
+      isRaggedBins = true;
     }
     isRefAxis = true;
   }
 
-  double axisValue(0);
-  // Create muparser
-  try {
-    mu::Parser p;
-    // set parameter lookups for the axis value, allow both cases
-    p.DefineVar("y", &axisValue);
-    p.DefineVar("x", &axisValue);
-    p.DefineVar("Y", &axisValue);
-    p.DefineVar("X", &axisValue);
-    p.SetExpr(formula);
-    try {
-      if (isRefAxis) {
-        int64_t numberOfSpectra_i = static_cast<int64_t>(
-            outputWs->getNumberHistograms()); // cast to make openmp happy
-        // Calculate the new (common) X values
-        MantidVec::iterator iter;
-        for (iter = outputWs->dataX(0).begin();
-             iter != outputWs->dataX(0).end(); ++iter) {
-          axisValue = *iter;
-          double result = p.Eval();
-          *iter = result;
-        }
+  // validate - if formula contains geometry variables then the other axis must
+  // be a spectraAxis
+  SpectraAxis *spectrumAxisPtr = dynamic_cast<SpectraAxis *>(otherAxisPtr);
+  std::vector<Variable_ptr> variables;
+  variables.reserve(8);
+  // axis value lookups
+  variables.push_back(boost::make_shared<Variable>("x", false));
+  variables.push_back(boost::make_shared<Variable>("X", false));
+  variables.push_back(boost::make_shared<Variable>("y", false));
+  variables.push_back(boost::make_shared<Variable>("Y", false));
+  // geometry lookups
+  variables.push_back(boost::make_shared<Variable>("twotheta", true));
+  variables.push_back(boost::make_shared<Variable>("signedtwotheta", true));
+  variables.push_back(boost::make_shared<Variable>("l1", true));
+  variables.push_back(boost::make_shared<Variable>("l2", true));
 
-        auto xVals = outputWs->refX(0);
-        Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
-        PARALLEL_FOR1(outputWs)
-        for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
-          PARALLEL_START_INTERUPT_REGION
-          outputWs->setX(j, xVals);
-          prog.report();
-          PARALLEL_END_INTERUPT_REGION
+  bool isGeometryRequired = false;
+  for (auto variablesIter = variables.begin();
+       variablesIter != variables.end();) {
+    if (formula.find((*variablesIter)->name) != std::string::npos) {
+      if ((*variablesIter)->isGeometric) {
+        if (!spectrumAxisPtr) {
+          throw std::invalid_argument("To use geometry values in the equation, "
+                                      "the axis not being converted must be a "
+                                      "Spectra Axis.");
         }
-        PARALLEL_CHECK_INTERUPT_REGION
-      } else {
-        size_t axisLength = axisPtr->length();
-        for (size_t i = 0; i < axisLength; ++i) {
-          // cppcheck cannot see that this is used by reference by muparser
-          // cppcheck-suppress unreadVariable
-          axisValue = axisPtr->getValue(i);
-          double result = p.Eval();
-          axisPtr->setValue(i, result);
-        }
+        isGeometryRequired = true;
       }
-    } catch (mu::Parser::exception_type &e) {
-      std::stringstream ss;
-      ss << "Failed while processing axis values"
-         << ". Muparser error message is: " << e.GetMsg();
-      throw std::invalid_argument(ss.str());
+      ++variablesIter;
+    } else {
+      // remove those that are not used
+      variablesIter = variables.erase(variablesIter);
     }
+  }
+
+  // Create muparser
+  mu::Parser p;
+  try {
+    // set parameter lookups for the axis value
+    for (auto variable : variables) {
+      p.DefineVar(variable->name, &(variable->value));
+    }
+    // set some constants
+    double pi = M_PI;
+    p.DefineVar("pi", &pi);
+    double h = PhysicalConstants::h;
+    p.DefineVar("h", &h);
+    double hBar = PhysicalConstants::h_bar;
+    p.DefineVar("h_bar", &hBar);
+    double g = PhysicalConstants::g;
+    p.DefineVar("g", &g);
+    double mN = PhysicalConstants::NeutronMass;
+    p.DefineVar("mN", &mN);
+    double mNAMU = PhysicalConstants::NeutronMassAMU;
+    p.DefineVar("mNAMU", &mNAMU);
+
+    p.SetExpr(formula);
   } catch (mu::Parser::exception_type &e) {
     std::stringstream ss;
     ss << "Cannot process the formula"
        << ". Muparser error message is: " << e.GetMsg();
     throw std::invalid_argument(ss.str());
   }
+  if (isRefAxis) {
+    if ((isRaggedBins) || (isGeometryRequired)) {
+      // ragged bins or geometry used - we have to calculate for every spectra
+      size_t numberOfSpectra_i = outputWs->getNumberHistograms();
+      GeometryInfoFactory geometryFactory(*outputWs);
 
-  IncreasingAxisValidator incAxis;
-  std::string incAxisResult = incAxis.isValid(outputWs);
+      size_t failedDetectorCount = 0;
+      Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
+      for (size_t i = 0; i < numberOfSpectra_i; ++i) {
+        try {
+          GeometryInfo geomInfo =
+              GeometryInfo(geometryFactory, outputWs->getSpectrum(i));
+          MantidVec &vec = outputWs->dataX(i);
+          setGeometryValues(geomInfo, variables);
+          calculateValues(p, vec, variables);
+        } catch (std::runtime_error &)
+        // two possible exceptions runtime error and NotFoundError
+        // both handled the same way
+        {
+          // could not find the geometry info for this spectra
+          outputWs->maskWorkspaceIndex(i);
+          failedDetectorCount++;
+        }
+        prog.report();
+      }
+      if (failedDetectorCount != 0) {
+        g_log.information()
+            << "Unable to calculate sample-detector distance for "
+            << failedDetectorCount << " spectra. Masking spectrum.\n";
+      }
+    } else {
+      // common bins - we only have to calculate once
 
-  if (incAxisResult != "")
-    g_log.warning(
-        incAxisResult +
-        ".\n"
-        "Some of the Mantid algorithms might not use the workspace correctly.");
+      // Calculate the new (common) X values
+      MantidVec &vec = outputWs->dataX(0);
+      calculateValues(p, vec, variables);
 
-  if ((axisUnits != "") || (axisTitle != "")) {
-    if (axisTitle == "") {
-      axisTitle = axisPtr->unit()->caption();
+      // copy xVals to every spectra
+      int64_t numberOfSpectra_i = static_cast<int64_t>(
+          outputWs->getNumberHistograms()); // cast to make openmp happy
+      auto xVals = outputWs->refX(0);
+      Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
+      PARALLEL_FOR1(outputWs)
+      for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
+        PARALLEL_START_INTERUPT_REGION
+        outputWs->setX(j, xVals);
+        prog.report();
+        PARALLEL_END_INTERUPT_REGION
+      }
+      PARALLEL_CHECK_INTERUPT_REGION
     }
-    if (axisUnits == "") {
-      axisUnits = axisPtr->unit()->label();
+  } else {
+    size_t axisLength = axisPtr->length();
+    for (size_t i = 0; i < axisLength; ++i) {
+      setAxisValue(axisPtr->getValue(i), variables);
+      axisPtr->setValue(i, evaluateResult(p));
     }
-    axisPtr->unit() = boost::make_shared<Units::Label>(axisTitle, axisUnits);
   }
+
+  // If the units conversion has flipped the ascending direction of X, reverse
+  // all the vectors
+  size_t midSpectra = outputWs->getNumberHistograms() / 2;
+  if (!outputWs->dataX(0).empty() &&
+      (outputWs->dataX(0).front() > outputWs->dataX(0).back() ||
+       outputWs->dataX(midSpectra).front() >
+           outputWs->dataX(midSpectra).back())) {
+    g_log.information("Reversing data within the workspace to keep the axes in "
+                      "increasing order.");
+    this->reverse(outputWs);
+  }
+
+  // Set the Unit of the Axis
+  if ((axisUnits != "") || (axisTitle != "")) {
+    try {
+      axisPtr->unit() = UnitFactory::Instance().create(axisUnits);
+    } catch (Exception::NotFoundError &) {
+      if (axisTitle == "") {
+        axisTitle = axisPtr->unit()->caption();
+      }
+      if (axisUnits == "") {
+        axisUnits = axisPtr->unit()->label();
+      }
+      axisPtr->unit() = boost::make_shared<Units::Label>(axisTitle, axisUnits);
+    }
+  }
+}
+
+void ConvertAxisByFormula::setAxisValue(const double &value,
+                                        std::vector<Variable_ptr> &variables) {
+  for (auto variable : variables) {
+    if (!variable->isGeometric) {
+      variable->value = value;
+    }
+  }
+}
+
+void ConvertAxisByFormula::calculateValues(
+    mu::Parser &p, MantidVec &vec, std::vector<Variable_ptr> variables) {
+  MantidVec::iterator iter;
+  for (iter = vec.begin(); iter != vec.end(); ++iter) {
+    setAxisValue(*iter, variables);
+    *iter = evaluateResult(p);
+  }
+}
+
+void ConvertAxisByFormula::setGeometryValues(
+    API::GeometryInfo &geomInfo, std::vector<Variable_ptr> &variables) {
+  for (auto variable : variables) {
+    if (variable->isGeometric) {
+      if (variable->name == "twotheta") {
+        variable->value = geomInfo.getTwoTheta();
+      } else if (variable->name == "signedtwotheta") {
+        variable->value = geomInfo.getSignedTwoTheta();
+      } else if (variable->name == "l1") {
+        variable->value = geomInfo.getL1();
+      } else if (variable->name == "l2") {
+        variable->value = geomInfo.getL2();
+      }
+    }
+  }
+}
+
+double ConvertAxisByFormula::evaluateResult(mu::Parser &p) {
+  double result;
+  try {
+    result = p.Eval();
+  } catch (mu::Parser::exception_type &e) {
+    std::stringstream ss;
+    ss << "Failed while processing axis values"
+       << ". Muparser error message is: " << e.GetMsg();
+    throw std::invalid_argument(ss.str());
+  }
+  return result;
 }
 
 } // namespace Algorithms

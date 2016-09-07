@@ -22,8 +22,8 @@ class ScalableTester : public VectorOf<ScalableTester, HistogramX>,
 };
 
 // Does Scalable also work with FixedLengthVector instead of VectorOf?
-class ScalableTester2 : public FixedLengthVector<ScalableTester2>,
-                        public Scalable<ScalableTester2> {
+struct ScalableTester2 : public FixedLengthVector<ScalableTester2>,
+                         public Scalable<ScalableTester2> {
   using FixedLengthVector<ScalableTester2>::FixedLengthVector;
 };
 

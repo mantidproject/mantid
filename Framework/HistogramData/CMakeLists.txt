@@ -21,6 +21,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/CountStandardDeviations.h
 	inc/MantidHistogramData/CountVariances.h
 	inc/MantidHistogramData/Counts.h
+	inc/MantidHistogramData/EValidation.h
 	inc/MantidHistogramData/FixedLengthVector.h
 	inc/MantidHistogramData/Frequencies.h
 	inc/MantidHistogramData/FrequencyStandardDeviations.h
@@ -31,14 +32,19 @@ set ( INC_FILES
 	inc/MantidHistogramData/HistogramX.h
 	inc/MantidHistogramData/HistogramY.h
 	inc/MantidHistogramData/Iterable.h
+	inc/MantidHistogramData/LinearGenerator.h
+	inc/MantidHistogramData/LogarithmicGenerator.h
 	inc/MantidHistogramData/Offsetable.h
 	inc/MantidHistogramData/PointStandardDeviations.h
 	inc/MantidHistogramData/PointVariances.h
 	inc/MantidHistogramData/Points.h
 	inc/MantidHistogramData/Scalable.h
 	inc/MantidHistogramData/StandardDeviationVectorOf.h
+	inc/MantidHistogramData/Validation.h
 	inc/MantidHistogramData/VarianceVectorOf.h
 	inc/MantidHistogramData/VectorOf.h
+	inc/MantidHistogramData/XValidation.h
+	inc/MantidHistogramData/YValidation.h
 )
 
 set ( TEST_FILES
@@ -48,6 +54,7 @@ set ( TEST_FILES
 	CountStandardDeviationsTest.h
 	CountVariancesTest.h
 	CountsTest.h
+	EValidationTest.h
 	FixedLengthVectorTest.h
 	FrequenciesTest.h
 	FrequencyStandardDeviationsTest.h
@@ -58,6 +65,8 @@ set ( TEST_FILES
 	HistogramXTest.h
 	HistogramYTest.h
 	IterableTest.h
+	LinearGeneratorTest.h
+	LogarithmicGeneratorTest.h
 	OffsetableTest.h
 	PointStandardDeviationsTest.h
 	PointVariancesTest.h
@@ -66,6 +75,8 @@ set ( TEST_FILES
 	StandardDeviationVectorOfTest.h
 	VarianceVectorOfTest.h
 	VectorOfTest.h
+	XValidationTest.h
+	YValidationTest.h
 )
 
 if (COVERALLS)

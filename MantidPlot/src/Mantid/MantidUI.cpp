@@ -3451,27 +3451,6 @@ void MantidUI::loadWSFromFile(const std::string &wsName,
   }
 }
 
-MantidMatrix *MantidUI::openMatrixWorkspace(const std::string &wsName,
-                                            int lower, int upper) {
-  MatrixWorkspace_sptr ws;
-
-  if (AnalysisDataService::Instance().doesExist(wsName))
-    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
-
-  if (!ws)
-    return 0;
-
-  MantidMatrix *w = new MantidMatrix(
-      ws, appWindow(), "Mantid", QString::fromStdString(wsName), lower, upper);
-
-  if (!w)
-    return 0;
-
-  appWindow()->addMdiSubWindow(w);
-
-  return w;
-}
-
 bool MantidUI::workspacesDockPlot1To1() {
   return "On" ==
          Mantid::Kernel::ConfigService::Instance().getString(

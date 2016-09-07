@@ -26,9 +26,9 @@ DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 
 const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 
-int EnggDiffractionViewQtGUI::m_currentType = 0;
-int EnggDiffractionViewQtGUI::m_currentRunMode = 0;
-int EnggDiffractionViewQtGUI::m_currentCropCalibBankName = 0;
+int EnggDiffractionViewQtGUI::g_currentType = 0;
+int EnggDiffractionViewQtGUI::g_currentRunMode = 0;
+int EnggDiffractionViewQtGUI::g_currentCropCalibBankName = 0;
 
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
     "GSAS instrument parameters, IPARM file: PRM, PAR, IPAR, IPARAM "
@@ -58,8 +58,8 @@ const std::string EnggDiffractionViewQtGUI::g_settingsGroup =
 * @param parent Parent window (most likely the Mantid main app window).
 */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGINX"),
-      m_splashMsg(nullptr), m_presenter(nullptr) {}
+    : UserSubWindow(parent), IEnggDiffractionView(), m_fittingWidget(nullptr),
+      m_currentInst("ENGINX"), m_splashMsg(nullptr), m_presenter(nullptr) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
 
@@ -116,7 +116,11 @@ void EnggDiffractionViewQtGUI::initLayout() {
   doSetupTabSettings();
 
   m_presenter->notify(IEnggDiffractionPresenter::Start);
-  m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
+  // We need to delay the RB-number check for the pop-up (splash message)
+  // as it will be shown very early (before the interface
+  // window itself is shown) and that will cause a crash in Qt code on
+  // some platforms (windows 10, and 7 sometimes).
+  // so perform the check in the showEvent method to check on start up
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabCalib() {
@@ -984,11 +988,11 @@ void EnggDiffractionViewQtGUI::calibspecNoChanged(int /*idx*/) {
   QComboBox *BankName = m_uiTabCalib.comboBox_calib_cropped_bank_name;
   if (!BankName)
     return;
-  m_currentCropCalibBankName = BankName->currentIndex();
+  g_currentCropCalibBankName = BankName->currentIndex();
 }
 
 void EnggDiffractionViewQtGUI::enableSpecNos() {
-  if (m_currentCropCalibBankName == 0) {
+  if (g_currentCropCalibBankName == 0) {
     m_uiTabCalib.lineEdit_cropped_spec_nos->setEnabled(true);
     m_uiTabCalib.lineEdit_cropped_customise_bank_name->setEnabled(true);
   } else {
@@ -1010,14 +1014,14 @@ void EnggDiffractionViewQtGUI::multiRunModeChanged(int /*idx*/) {
   QComboBox *plotType = m_uiTabFocus.comboBox_Multi_Runs;
   if (!plotType)
     return;
-  m_currentRunMode = plotType->currentIndex();
+  g_currentRunMode = plotType->currentIndex();
 }
 
 void EnggDiffractionViewQtGUI::plotRepChanged(int /*idx*/) {
   QComboBox *plotType = m_uiTabFocus.comboBox_PlotData;
   if (!plotType)
     return;
-  m_currentType = plotType->currentIndex();
+  g_currentType = plotType->currentIndex();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
@@ -1049,6 +1053,11 @@ void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
 
   // rebin tab
   m_uiTabPreproc.MWRunFiles_preproc_run_num->setInstrumentOverride(prefixInput);
+}
+
+void EnggDiffractionViewQtGUI::showEvent(QShowEvent *) {
+  // make sure that the RB number is checked on interface startup/show
+  m_presenter->notify(IEnggDiffractionPresenter::RBNumberChange);
 }
 
 void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {

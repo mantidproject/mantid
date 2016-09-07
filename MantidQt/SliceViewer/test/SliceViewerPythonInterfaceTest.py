@@ -444,18 +444,90 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     #==========================================================================
     #======================= Dynamic Rebinning ================================
     #==========================================================================
-    def test_DynamicRebinning(self):
-        sv = self.sv
+    def test_DynamicRebinningWithMDEventWorkspace(self):
+        svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().createSliceViewerWindow("mdw", "")
+        sv = svw.getSlicer()
+
         sv.setRebinThickness(2, 1.0)
         sv.setRebinNumBins(50, 200)
         sv.refreshRebin()
         sv.setRebinMode(True)
+
         time.sleep(1)
-        self.assertTrue(mtd.doesExist('uniform_rebinned'), 'Dynamically rebinned workspace was created.')
-        ws = mtd['uniform_rebinned']
+        self.assertTrue(mtd.doesExist('mdw_rebinned'), 'Dynamically rebinned workspace was not created.')
+        ws = mtd['mdw_rebinned']
         self.assertEqual(ws.getNumDims(), 3)
+        self.assertEqual(ws.getDimension(0).getNBins(), 50)
+        self.assertEqual(ws.getDimension(1).getNBins(), 200)
+        self.assertEqual(ws.getDimension(2).getNBins(), 1)
         self.assertEqual(ws.getNPoints(), 50*200*1)
 
+        svw.deleteLater()
+
+    def test_DynamicRebinningWithMDHistoWorkspace(self):
+        svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().createSliceViewerWindow("uniform", "")
+        sv = svw.getSlicer()
+
+        sv.setRebinThickness(2, 1.0)
+        sv.setRebinNumBins(10, 10)
+        sv.refreshRebin()
+        sv.setRebinMode(True)
+
+        time.sleep(1)
+        self.assertTrue(mtd.doesExist('uniform_rebinned'), 'Dynamically rebinned workspace was not created.')
+        ws = mtd['uniform_rebinned']
+        self.assertEqual(ws.getNumDims(), 3)
+        self.assertEqual(ws.getDimension(0).getNBins(), 10)
+        self.assertEqual(ws.getDimension(1).getNBins(), 10)
+        self.assertEqual(ws.getDimension(2).getNBins(), 30)
+        self.assertEqual(ws.getNPoints(), 10*10*30)
+
+        svw.deleteLater()
+
+    def test_DynamicRebinningWithMDHistoWorkspaceFromMDEventWorkspace(self):
+        # First create a slice viewer window for the event workspace
+        svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().createSliceViewerWindow("mdw", "")
+        sv = svw.getSlicer()
+
+        # rebin the workspace
+        sv.setRebinThickness(2, 1.0)
+        sv.setRebinNumBins(50, 200)
+        sv.refreshRebin()
+        sv.setRebinMode(True)
+
+        # check that the first rebin was successful
+        time.sleep(1)
+        self.assertTrue(mtd.doesExist('mdw_rebinned'), 'Dynamically rebinned workspace was not created.')
+        ws = mtd['mdw_rebinned']
+        self.assertEqual(ws.getNumDims(), 3)
+        self.assertEqual(ws.getDimension(0).getNBins(), 50)
+        self.assertEqual(ws.getDimension(1).getNBins(), 200)
+        self.assertEqual(ws.getDimension(2).getNBins(), 1)
+        self.assertEqual(ws.getNPoints(), 50*200*1)
+
+
+        svw.deleteLater()
+        # create a slice viewer window for the new histogram workspace
+        svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().createSliceViewerWindow("mdw_rebinned", "")
+        sv = svw.getSlicer()
+
+        # rebin the second (MDHisto) workspace
+        sv.setRebinThickness(2, 1.0)
+        sv.setRebinNumBins(30, 100)
+        sv.refreshRebin()
+        sv.setRebinMode(True)
+
+        # check rebinning was successful
+        time.sleep(1)
+        self.assertTrue(mtd.doesExist('mdw_rebinned_rebinned'), 'Dynamically rebinned workspace was not created.')
+        ws = mtd['mdw_rebinned_rebinned']
+        self.assertEqual(ws.getNumDims(), 3)
+        self.assertEqual(ws.getDimension(0).getNBins(), 30)
+        self.assertEqual(ws.getDimension(1).getNBins(), 100)
+        self.assertEqual(ws.getDimension(2).getNBins(), 1)
+        self.assertEqual(ws.getNPoints(), 30*100*1)
+
+        svw.deleteLater()
 
 if __name__ == '__main__':
     unittest.main()

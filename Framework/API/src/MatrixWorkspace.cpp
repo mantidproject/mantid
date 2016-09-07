@@ -1067,8 +1067,16 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
   // this is the actual result of the masking that most algorithms and plotting
   // implementations will see, the bin mask flags defined above are used by only
   // some algorithms
-  this->dataY(workspaceIndex)[binIndex] *= (1 - weight);
-  this->dataE(workspaceIndex)[binIndex] *= (1 - weight);
+  // If the weight is 0, nothing more needs to be done after flagMasked above
+  // (i.e. NaN and Inf will also stay intact)
+  // If the weight is not 0, NaN and Inf values are set to 0,
+  // whereas other values are scaled by (1 - weight)
+  if (weight != 0.) {
+    double &y = this->mutableY(workspaceIndex)[binIndex];
+    (std::isnan(y) || std::isinf(y)) ? y = 0. : y *= (1 - weight);
+    double &e = this->mutableE(workspaceIndex)[binIndex];
+    (std::isnan(e) || std::isinf(e)) ? e = 0. : e *= (1 - weight);
+  }
 }
 
 /** Writes the masking weight to m_masks (doesn't alter y-values). Contains a
@@ -1561,7 +1569,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(
   }
 
   if (wi < nhist) {
-    const MantidVec &X = this->readX(wi);
+    const auto &X = this->binEdges(wi);
     auto it = std::lower_bound(X.cbegin(), X.cend(), x);
     if (it == X.end()) {
       // Out of range

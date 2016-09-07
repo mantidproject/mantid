@@ -322,10 +322,11 @@ public:
     if (this->direction() == Kernel::Direction::Input ||
         this->direction() == Kernel::Direction::InOut) {
       // If an input workspace, get the list of workspaces currently in the ADS
-      auto vals = AnalysisDataService::Instance().getObjectNames();
+      auto vals = AnalysisDataService::Instance().getObjectNames(
+          Mantid::Kernel::DataServiceSort::Sorted);
       if (isOptional()) // Insert an empty option
       {
-        vals.insert("");
+        vals.push_back("");
       }
       // Copy-construct a temporary workspace property to test the validity of
       // each workspace
@@ -338,9 +339,7 @@ public:
         } else
           ++it;
       }
-      auto values = std::vector<std::string>(vals.begin(), vals.end());
-      std::sort(values.begin(), values.end());
-      return values;
+      return vals;
     } else {
       // For output workspaces, just return an empty set
       return std::vector<std::string>();

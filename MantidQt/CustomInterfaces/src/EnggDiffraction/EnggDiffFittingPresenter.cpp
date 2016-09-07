@@ -7,6 +7,7 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresWorker.h"
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
+#include <fstream>
 #include <boost/lexical_cast.hpp>
 
 #include <Poco/DirectoryIterator.h>
@@ -75,6 +76,18 @@ void EnggDiffFittingPresenter::notify(
 
   case IEnggDiffFittingPresenter::FitPeaks:
     processFitPeaks();
+    break;
+
+  case IEnggDiffFittingPresenter::addPeaks:
+    addPeakToList();
+    break;
+
+  case IEnggDiffFittingPresenter::browsePeaks:
+    browsePeaksToFit();
+    break;
+
+  case IEnggDiffFittingPresenter::savePeaks:
+    savePeakList();
     break;
 
   case IEnggDiffFittingPresenter::ShutDown:
@@ -709,6 +722,121 @@ std::string EnggDiffFittingPresenter::functionStrFactory(
   return functionStr;
 }
 
+void EnggDiffFittingPresenter::browsePeaksToFit() {
+  try {
+    auto prevPath = m_view->focusingDir();
+    if (prevPath.empty()) {
+      prevPath = m_view->getPreviousDir();
+    }
+    std::string path = m_view->getOpenFile(prevPath);
+    if (path.empty()) {
+      return;
+    }
+
+    m_view->setPreviousDir(path);
+    std::string peaksData = readPeaksFile(path);
+    m_view->setPeakList(peaksData);
+
+  } catch (std::runtime_error &re) {
+    m_view->userWarning(
+        "Unable to import the peaks from a file: ",
+        "File corrupted or could not be opened. Please try again" +
+            static_cast<std::string>(re.what()) + '\n');
+    return;
+  }
+}
+
+void EnggDiffFittingPresenter::addPeakToList() {
+
+  if (m_view->peakPickerEnabled()) {
+    auto peakCentre = m_view->getPeakCentre();
+
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(4) << peakCentre;
+    auto strPeakCentre = stream.str();
+
+    auto curExpPeaksList = m_view->fittingPeaksData();
+
+    std::string comma = ",";
+
+    if (!curExpPeaksList.empty()) {
+      // when further peak added to list
+
+      std::string lastTwoChr =
+          curExpPeaksList.substr(curExpPeaksList.size() - 2);
+      auto lastChr = curExpPeaksList.back();
+      if (lastChr == ',' || lastTwoChr == ", ") {
+        curExpPeaksList.append(strPeakCentre);
+      } else {
+        curExpPeaksList.append(comma + strPeakCentre);
+      }
+      m_view->setPeakList(curExpPeaksList);
+    } else {
+      // when new peak given when list is empty
+      curExpPeaksList.append(strPeakCentre);
+      curExpPeaksList.append(comma);
+      m_view->setPeakList(curExpPeaksList);
+    }
+  }
+}
+
+void EnggDiffFittingPresenter::savePeakList() {
+  try {
+    QString prevPath = QString::fromStdString(m_view->focusingDir());
+    if (prevPath.isEmpty()) {
+      prevPath = QString::fromStdString(m_view->getPreviousDir());
+    }
+
+    std::string path = m_view->getSaveFile(prevPath.toStdString());
+
+    if (path.empty()) {
+      return;
+    }
+
+    fittingWriteFile(path);
+  } catch (std::runtime_error &re) {
+    m_view->userWarning(
+        "Unable to save the peaks file: ",
+        "Invalid file path or could not be saved. Error description : " +
+            static_cast<std::string>(re.what()) + '\n');
+    return;
+  }
+}
+
+std::string EnggDiffFittingPresenter::readPeaksFile(std::string fileDir) {
+  std::string fileData = "";
+  std::string line;
+  std::string comma = ", ";
+
+  std::ifstream peakFile(fileDir);
+
+  if (peakFile.is_open()) {
+    while (std::getline(peakFile, line)) {
+      fileData += line;
+      if (!peakFile.eof())
+        fileData += comma;
+    }
+    peakFile.close();
+  }
+
+  else
+    fileData = "";
+
+  return fileData;
+}
+
+void EnggDiffFittingPresenter::fittingWriteFile(const std::string &fileDir) {
+  std::ofstream outfile(fileDir.c_str());
+  if (!outfile) {
+    m_view->userWarning("File not found",
+                        "File " + fileDir +
+                            " , could not be found. Please try again!");
+  } else {
+    auto expPeaks = m_view->fittingPeaksData();
+    outfile << expPeaks;
+  }
+}
+
 void EnggDiffFittingPresenter::runEvaluateFunctionAlg(
     const std::string &bk2BkExpFunction, const std::string &InputName,
     const std::string &OutputName, const std::string &startX,
@@ -998,7 +1126,7 @@ void EnggDiffFittingPresenter::setBankItems() {
 }
 
 void EnggDiffFittingPresenter::setRunNoItems(
-    std::vector<std::string> runNumVector, bool multiRun) {
+    const std::vector<std::string> &runNumVector, bool multiRun) {
   try {
     if (!runNumVector.empty()) {
 

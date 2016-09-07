@@ -1,12 +1,11 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingViewQtWidget.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h"
 #include "MantidQtMantidWidgets/PeakPicker.h"
 
 #include <array>
-#include <fstream>
 #include <iomanip>
 #include <random>
 #include <sstream>
@@ -99,17 +98,17 @@ void EnggDiffFittingViewQtWidget::doSetup() {
           SLOT(setBankDir(int)));
 
   connect(m_ui.pushButton_fitting_browse_peaks, SIGNAL(released()), this,
-          SLOT(browsePeaksToFit()));
+          SLOT(browseClicked()));
 
   connect(m_ui.pushButton_fit, SIGNAL(released()), this, SLOT(fitClicked()));
 
   // add peak by clicking the button
   connect(m_ui.pushButton_select_peak, SIGNAL(released()), SLOT(setPeakPick()));
 
-  connect(m_ui.pushButton_add_peak, SIGNAL(released()), SLOT(addPeakToList()));
+  connect(m_ui.pushButton_add_peak, SIGNAL(released()), SLOT(addClicked()));
 
   connect(m_ui.pushButton_save_peak_list, SIGNAL(released()),
-          SLOT(savePeakList()));
+          SLOT(saveClicked()));
 
   connect(m_ui.pushButton_clear_peak_list, SIGNAL(released()),
           SLOT(clearPeakList()));
@@ -217,6 +216,18 @@ void EnggDiffFittingViewQtWidget::FittingRunNo() {
   m_presenter->notify(IEnggDiffFittingPresenter::FittingRunNo);
 }
 
+void EnggDiffFittingViewQtWidget::addClicked() {
+  m_presenter->notify(IEnggDiffFittingPresenter::addPeaks);
+}
+
+void EnggDiffFittingViewQtWidget::browseClicked() {
+  m_presenter->notify(IEnggDiffFittingPresenter::browsePeaks);
+}
+
+void EnggDiffFittingViewQtWidget::saveClicked() {
+  m_presenter->notify(IEnggDiffFittingPresenter::savePeaks);
+}
+
 void EnggDiffFittingViewQtWidget::setBankDir(int idx) {
 
   if (m_fitting_runno_dir_vec.size() >= size_t(idx)) {
@@ -245,40 +256,6 @@ void EnggDiffFittingViewQtWidget::resetFittingMultiMode() {
   // resets the global variable so the list view widgets
   // adds the run number to for single runs too
   m_fittingMutliRunMode = false;
-}
-
-std::string EnggDiffFittingViewQtWidget::fittingRunNoFactory(
-    std::string bank, std::string fileName, std::string &bankDir,
-    std::string fileDir) {
-
-  std::string genDir = fileName.substr(0, fileName.size() - 1);
-  Poco::Path bankFile(genDir + bank + ".nxs");
-  if (bankFile.isFile()) {
-    bankDir = fileDir + genDir + bank + ".nxs";
-  }
-  return bankDir;
-}
-
-std::string EnggDiffFittingViewQtWidget::readPeaksFile(std::string fileDir) {
-  std::string fileData = "";
-  std::string line;
-  std::string comma = ", ";
-
-  std::ifstream peakFile(fileDir);
-
-  if (peakFile.is_open()) {
-    while (std::getline(peakFile, line)) {
-      fileData += line;
-      if (!peakFile.eof())
-        fileData += comma;
-    }
-    peakFile.close();
-  }
-
-  else
-    fileData = "";
-
-  return fileData;
 }
 
 void EnggDiffFittingViewQtWidget::setDataVector(
@@ -390,15 +367,8 @@ double EnggDiffFittingViewQtWidget::getPeakCentre() const {
   return centre;
 }
 
-void EnggDiffFittingViewQtWidget::fittingWriteFile(const std::string &fileDir) {
-  std::ofstream outfile(fileDir.c_str());
-  if (!outfile) {
-    userWarning("File not found",
-                "File " + fileDir + " , could not be found. Please try again!");
-  } else {
-    auto expPeaks = m_ui.lineEdit_fitting_peaks->text();
-    outfile << expPeaks.toStdString();
-  }
+bool EnggDiffFittingViewQtWidget::peakPickerEnabled() const {
+  return m_peakPicker->isEnabled();
 }
 
 void EnggDiffFittingViewQtWidget::setZoomTool(bool enabled) {
@@ -415,36 +385,37 @@ void EnggDiffFittingViewQtWidget::resetView() {
   m_zoomTool->setZoomBase(true);
 }
 
-void EnggDiffFittingViewQtWidget::browsePeaksToFit() {
+std::string EnggDiffFittingViewQtWidget::getPreviousDir() const {
 
-  // TODO: the logic, checks and decision on what message to show should be
-  // moved to the presenter
+  QString prevPath =
+      MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
 
-  try {
-    QString prevPath = QString::fromStdString(focusingDir());
-    if (prevPath.isEmpty()) {
-      prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
-                     .getPreviousDirectory();
-    }
+  return prevPath.toStdString();
+}
 
-    QString path(
-        QFileDialog::getOpenFileName(this, tr("Open Peaks To Fit"), prevPath,
-                                     QString::fromStdString(g_peaksListExt)));
+void EnggDiffFittingViewQtWidget::setPreviousDir(const std::string &path) {
+  QString qPath = QString::fromStdString(path);
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(qPath);
+}
 
-    if (path.isEmpty()) {
-      return;
-    }
+std::string
+EnggDiffFittingViewQtWidget::getOpenFile(const std::string &prevPath) {
 
-    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
+  QString path(QFileDialog::getOpenFileName(
+      this, tr("Open Peaks To Fit"), QString::fromStdString(prevPath),
+      QString::fromStdString(g_peaksListExt)));
 
-    std::string peaksData = readPeaksFile(path.toStdString());
+  return path.toStdString();
+}
 
-    m_ui.lineEdit_fitting_peaks->setText(QString::fromStdString(peaksData));
-  } catch (...) {
-    userWarning("Unable to import the peaks from a file: ",
-                "File corrupted or could not be opened. Please try again");
-    return;
-  }
+std::string
+EnggDiffFittingViewQtWidget::getSaveFile(const std::string &prevPath) {
+
+  QString path(QFileDialog::getSaveFileName(
+      this, tr("Save Expected Peaks List"), QString::fromStdString(prevPath),
+      QString::fromStdString(g_peaksListExt)));
+
+  return path.toStdString();
 }
 
 void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
@@ -595,67 +566,6 @@ void EnggDiffFittingViewQtWidget::setPeakPick() {
   // set the peak to BackToBackExponential function
   setPeakPicker(bk2bkFunc);
   setPeakPickerEnabled(true);
-}
-
-void EnggDiffFittingViewQtWidget::addPeakToList() {
-
-  if (m_peakPicker->isEnabled()) {
-    auto peakCentre = getPeakCentre();
-
-    std::stringstream stream;
-    stream << std::fixed << std::setprecision(4) << peakCentre;
-    auto strPeakCentre = stream.str();
-
-    auto curExpPeaksList = m_ui.lineEdit_fitting_peaks->text();
-    QString comma = ",";
-
-    if (!curExpPeaksList.isEmpty()) {
-      // when further peak added to list
-      std::string expPeakStr = curExpPeaksList.toStdString();
-      std::string lastTwoChr = expPeakStr.substr(expPeakStr.size() - 2);
-      auto lastChr = expPeakStr.back();
-      if (lastChr == ',' || lastTwoChr == ", ") {
-        curExpPeaksList.append(QString::fromStdString(strPeakCentre));
-      } else {
-        curExpPeaksList.append(comma + QString::fromStdString(strPeakCentre));
-      }
-      m_ui.lineEdit_fitting_peaks->setText(curExpPeaksList);
-    } else {
-      // when new peak given when list is empty
-      curExpPeaksList.append(QString::fromStdString(strPeakCentre));
-      curExpPeaksList.append(comma);
-      m_ui.lineEdit_fitting_peaks->setText(curExpPeaksList);
-    }
-  }
-}
-
-void EnggDiffFittingViewQtWidget::savePeakList() {
-  // call function in EnggPresenter..
-
-  // TODO: the logic, checks and decision on what message to show should be
-  // moved to the presenter
-
-  try {
-    QString prevPath = QString::fromStdString(focusingDir());
-    if (prevPath.isEmpty()) {
-      prevPath = MantidQt::API::AlgorithmInputHistory::Instance()
-                     .getPreviousDirectory();
-    }
-
-    QString path(QFileDialog::getSaveFileName(
-        this, tr("Save Expected Peaks List"), prevPath,
-        QString::fromStdString(g_peaksListExt)));
-
-    if (path.isEmpty()) {
-      return;
-    }
-    const std::string strPath = path.toStdString();
-    fittingWriteFile(strPath);
-  } catch (...) {
-    userWarning("Unable to save the peaks file: ",
-                "Invalid file path or or could not be saved. Please try again");
-    return;
-  }
 }
 
 void EnggDiffFittingViewQtWidget::clearPeakList() {

@@ -91,6 +91,13 @@ public:
     TS_ASSERT_EQUALS(testee[1], 0.3);
   }
 
+  void test_generator_constructor() {
+    FixedLengthVectorTester testee(2, []() { return 0.1; });
+    TS_ASSERT_EQUALS(testee.size(), 2);
+    TS_ASSERT_EQUALS(testee[0], 0.1);
+    TS_ASSERT_EQUALS(testee[1], 0.1);
+  }
+
   void test_iterator_constructor_special_case() {
     // Used like this, we might think that the (count, value) constructor is
     // called. However, that would require converting the second int to a

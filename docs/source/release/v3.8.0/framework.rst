@@ -17,6 +17,12 @@ A new module for dealing with histogram data has been added, it is now being use
   However, to ensure data consistency and to reduce the risk of bugs, histograms now enforce length limitations. For example, there must be one bin edge more than data (Y and E) values.
   If you experience trouble, in particular exceptions about size mismatch, please refer to the section `Dealing with problems <http://docs.mantidproject.org/nightly/concepts/HistogramData.html#dealing-with-problems>`_.
 
+Concepts
+--------
+
+- ``MatrixWorkspace`` : When masking bins or detectors with non-zero weights,
+  undefined and infinite values and errors will be zeroed.
+- ``Lattice`` : Allow setting a UB matrix with negative determinant (improper rotation)  
 
 Algorithms
 ----------
@@ -30,6 +36,9 @@ New
   data from file on legacy SNS DAS instruments.
 
 - :ref:`CropToComponent <algm-CropToComponent>` allows for cropping a workspace to a list of component names.
+- :ref:`CreateUserDefinedBackground <algm-CreateUserDefinedBackground>` takes a set of points
+  that the user has chosen and creates a background workspace out of them. It interpolates the
+  points so the resulting background can be subtracted from the original data.
 
 
 Improved
@@ -41,6 +50,7 @@ Improved
 - :ref:`FilterEvents <algm-FilterEvents>` now produces output
   workspaces with the same workspace numbers as specified by the
   ``SplittersWorkspace``.
+- :ref:`ConvertAxisByFormula <algm-ConvertAxisByFormula>` now supports instrument geometry vairables and several constants within the formula.  Axes are now reversed if the need to be to maintain increasing axis values.
 
 - :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
   plotly html files.
@@ -53,6 +63,9 @@ Improved
 
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli 
 
+- :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
+  now check if a Workspace with that name already exists in the ADS and gives
+  the option to override it.
 
 Deprecated
 ##########
@@ -67,6 +80,9 @@ Performance
   A moderate number of algorithms should experience a speedup and reduced memory consumption.
   If you experience unusual slowdowns, please contact the developer team.
 
+- :ref:`StripPeaks <algm-StripPeaks>` has a slight performance improvement from these changes.
+  
+  
 CurveFitting
 ------------
 
@@ -82,6 +98,7 @@ Python
 - :py:obj:`mantid.kernel.MaterialBuilder` has been exposed to python
   and :py:obj:`mantid.kernel.Material` has been modified to expose the
   individual atoms.
+- :py:obj:`mantid.geometry.OrientedLattice` set U with determinant -1 exposed to python
 
 Python Algorithms
 #################
@@ -89,6 +106,7 @@ Python Algorithms
 Bug Fixes
 ---------
 - Scripts generated from history including algorithms that added dynamic properties at run time (for example Fit, and Load) will not not include those dynamic properties in their script.  This means they will execute without warnings.
+- Cloning a ``MultiDomainFunction``, or serializing to a string and recreating it, now preserves the domains.
 
 
 |

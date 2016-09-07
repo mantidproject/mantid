@@ -117,9 +117,11 @@ void ApplyDeadTimeCorr::exec() {
         throw std::invalid_argument("Can't divide by 0");
       }
     } else {
-      g_log.error() << "To calculate Muon deadtime requires that goodfrm "
-                       "(number of good frames) "
-                    << "is stored in InputWorkspace Run object\n";
+      const std::string message = "To calculate Muon deadtime requires that "
+                                  "goodfrm (number of good frames) is stored "
+                                  "in InputWorkspace Run object\n";
+      g_log.error() << message;
+      throw std::invalid_argument(message);
     }
   } else {
     g_log.error()
