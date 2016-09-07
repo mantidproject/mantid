@@ -53,16 +53,28 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS GenericDataProcessorPresenter
     : public DataProcessorPresenter,
       public MantidQt::API::WorkspaceObserver {
 public:
+  // Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
       const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
           preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor);
+  // Constructor: no pre-processing, post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor);
+  // Constructor: pre-processing, no post-processing
+  GenericDataProcessorPresenter(
+      const DataProcessorWhiteList &whitelist,
+      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+          preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor);
+  // Constructor: no pre-processing, no post-processing
+  GenericDataProcessorPresenter(
+      const DataProcessorWhiteList &whitelist,
+      const DataProcessorProcessingAlgorithm &processor);
   ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<std::string, QVariant> &options() const override;
@@ -112,6 +124,8 @@ private:
   DataProcessorProcessingAlgorithm m_processor;
   // Post-processing algorithm
   DataProcessorPostprocessingAlgorithm m_postprocessor;
+  // A boolean indicating whether a post-processing algorithm has been defined
+  bool m_postprocess;
   // The number of columns
   int m_columns;
   // A workspace receiver we want to notify

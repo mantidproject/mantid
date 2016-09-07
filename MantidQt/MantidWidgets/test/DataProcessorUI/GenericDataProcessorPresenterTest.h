@@ -66,7 +66,9 @@ private:
 
   DataProcessorPostprocessingAlgorithm createReflectometryPostprocessor() {
 
-    return DataProcessorPostprocessingAlgorithm();
+    return DataProcessorPostprocessingAlgorithm(
+        "Stitch1DMany", "IvsQ_",
+        std::set<std::string>{"InputWorkspaces", "OutputWorkspace"});
   }
 
   ITableWorkspace_sptr
@@ -3111,6 +3113,34 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testNoPostProcessing() {
+    // Test very basic functionality of the presenter when no post-processing
+    // algorithm is defined
+
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    MockProgressableView mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenter presenter(createReflectometryWhiteList(),
+                                            createReflectometryProcessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    // Calls that should throw
+    TS_ASSERT_THROWS_ANYTHING(
+        presenter.notify(DataProcessorPresenter::AppendGroupFlag));
+    TS_ASSERT_THROWS_ANYTHING(
+        presenter.notify(DataProcessorPresenter::DeleteGroupFlag));
+    TS_ASSERT_THROWS_ANYTHING(
+        presenter.notify(DataProcessorPresenter::GroupRowsFlag));
+    TS_ASSERT_THROWS_ANYTHING(
+        presenter.notify(DataProcessorPresenter::ExpandSelectionFlag));
+    TS_ASSERT_THROWS_ANYTHING(
+        presenter.notify(DataProcessorPresenter::PlotGroupFlag));
+    TS_ASSERT_THROWS(presenter.getPostprocessedWorkspaceName(
+                         std::map<int, std::vector<std::string>>()),
+                     std::runtime_error);
   }
 };
 

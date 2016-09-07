@@ -51,8 +51,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const DataProcessorPostprocessingAlgorithm &postprocessor)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_whitelist(whitelist), m_preprocessMap(preprocessMap),
-      m_processor(processor), m_postprocessor(postprocessor), m_mainPresenter(),
-      m_tableDirty(false) {
+      m_processor(processor), m_postprocessor(postprocessor),
+      m_postprocess(true), m_mainPresenter(), m_tableDirty(false) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -70,8 +70,14 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "prevail.");
   m_columns = static_cast<int>(m_whitelist.size());
 
-  m_manager = Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(
-      this, m_whitelist);
+  if (m_postprocessor.name().empty()) {
+    m_postprocess = false;
+    m_manager = Mantid::Kernel::make_unique<DataProcessorOneLevelTreeManager>(
+        this, m_whitelist);
+  } else {
+    m_manager = Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(
+        this, m_whitelist);
+  }
 }
 
 /**
@@ -89,6 +95,35 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
           whitelist,
           std::map<std::string, DataProcessorPreprocessingAlgorithm>(),
           processor, postprocessor) {}
+
+/**
+* Delegating constructor (no post-processing needed)
+* @param whitelist : The set of properties we want to show as columns
+* @param preprocessMap : A map containing instructions for pre-processing
+* @param processor : A DataProcessorProcessingAlgorithm
+* workspaces
+*/
+GenericDataProcessorPresenter::GenericDataProcessorPresenter(
+    const DataProcessorWhiteList &whitelist,
+    const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
+        preprocessMap,
+    const DataProcessorProcessingAlgorithm &processor)
+    : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
+                                    DataProcessorPostprocessingAlgorithm()) {}
+
+/**
+* Delegating constructor (no pre-processing needed, no post-processing needed)
+* @param whitelist : The set of properties we want to show as columns
+* @param processor : A DataProcessorProcessingAlgorithm
+* workspaces
+*/
+GenericDataProcessorPresenter::GenericDataProcessorPresenter(
+    const DataProcessorWhiteList &whitelist,
+    const DataProcessorProcessingAlgorithm &processor)
+    : GenericDataProcessorPresenter(
+          whitelist,
+          std::map<std::string, DataProcessorPreprocessingAlgorithm>(),
+          processor, DataProcessorPostprocessingAlgorithm()) {}
 
 /**
 * Destructor
@@ -243,6 +278,9 @@ Post-processes the workspaces created by the given rows together.
 */
 void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
+
+  if (!m_postprocess)
+    throw std::runtime_error("Cannot post-process workspaces");
 
   // The input workspace names
   std::vector<std::string> inputNames;
@@ -438,6 +476,9 @@ Returns the name of the reduced workspace for a given row
 std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
     const GroupData &groupData,
     const std::string &prefix) {
+
+  if (!m_postprocess)
+    throw std::runtime_error("Cannot retrieve post-processed workspace name");
 
   /* This method calculates, for a given set of rows, the name of the output
   * (post-processed) workspace */
@@ -1019,6 +1060,12 @@ void GenericDataProcessorPresenter::plotRow() {
 
 /** Plots any currently selected groups */
 void GenericDataProcessorPresenter::plotGroup() {
+
+  // This method shouldn't be called if a post-processing algorithm is not
+  // defined
+  if (!m_postprocess)
+    throw std::runtime_error("Can't plot group.");
+
   // Set of workspaces to plot
   std::set<std::string> workspaces;
   // Set of workspaces not found in the ADS

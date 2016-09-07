@@ -10,7 +10,6 @@
 #include <gmock/gmock.h>
 
 using namespace MantidQt::MantidWidgets;
-using namespace Mantid::API;
 
 // Clean column ids for use within tests (they refer to the table workspace
 // only)

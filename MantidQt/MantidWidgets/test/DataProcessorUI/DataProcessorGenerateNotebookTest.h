@@ -43,6 +43,12 @@ private:
                               "FirstTransmissionRun", "SecondTransmissionRun"});
   }
 
+  DataProcessorPostprocessingAlgorithm reflPostprocessor() {
+    return DataProcessorPostprocessingAlgorithm(
+        "Stitch1DMany", "IvsQ_",
+        std::set<std::string>{"InputWorkspaces", "OutputWorkspace"});
+  }
+
   // Creates a reflectometry whitelist
   DataProcessorWhiteList reflWhitelist() {
 
@@ -104,7 +110,7 @@ public:
     auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
         m_wsName, m_instrument, reflWhitelist(),
         std::map<std::string, DataProcessorPreprocessingAlgorithm>(),
-        reflProcessor(), DataProcessorPostprocessingAlgorithm(),
+        reflProcessor(), reflPostprocessor(),
         std::map<std::string, std::string>(), "", "");
 
     std::string generatedNotebook = notebook->generateNotebook(TreeData());
@@ -497,9 +503,9 @@ public:
     RowData rowData1 = {"12346", "", "", "", "", "", "", ""};
     GroupData groupData = {{0, rowData0}, {1, rowData1}};
 
-    boost::tuple<std::string, std::string> output = postprocessGroupString(
-        groupData, reflWhitelist(), reflProcessor(),
-        DataProcessorPostprocessingAlgorithm(), userOptions);
+    boost::tuple<std::string, std::string> output =
+        postprocessGroupString(groupData, reflWhitelist(), reflProcessor(),
+                               reflPostprocessor(), userOptions);
 
     std::vector<std::string> result = {
         "#Post-process workspaces",
@@ -525,8 +531,7 @@ public:
     rowData1 = {"24682", "", "", "", "", "", "", ""};
     groupData = {{0, rowData0}, {1, rowData1}};
     output = postprocessGroupString(groupData, reflWhitelist(), reflProcessor(),
-                                    DataProcessorPostprocessingAlgorithm(),
-                                    userOptions);
+                                    reflPostprocessor(), userOptions);
 
     result = {"#Post-process workspaces",
               "IvsQ_TOF_24681_TOF_24682, _ = "
@@ -664,7 +669,7 @@ public:
     auto whitelist = reflWhitelist();
     auto preprocessMap = reflPreprocessMap();
     auto processor = reflProcessor();
-    auto postProcessor = DataProcessorPostprocessingAlgorithm();
+    auto postProcessor = reflPostprocessor();
     auto preprocessingOptions = std::map<std::string, std::string>{
         {"Run(s)", "PlusProperty=PlusValue"},
         {"Transmission Run(s)", "Property=Value"}};
@@ -764,7 +769,7 @@ public:
     auto whitelist = reflWhitelist();
     auto preprocessMap = reflPreprocessMap();
     auto processor = reflProcessor();
-    auto postProcessor = DataProcessorPostprocessingAlgorithm();
+    auto postProcessor = reflPostprocessor();
     auto preprocessingOptions = std::map<std::string, std::string>{
         {"Run(s)", "PlusProperty=PlusValue"},
         {"Transmission Run(s)", "Property=Value"}};
