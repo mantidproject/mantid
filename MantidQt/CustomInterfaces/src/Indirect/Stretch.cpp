@@ -203,8 +203,6 @@ void Stretch::saveWorkspaces() {
  */
 void Stretch::plotWorkspaces() {
 
-  // Check workspace exists
-  IndirectTab::checkADSForPlotSaveWorkspace(m_fitWorkspaceName, false);
 
   WorkspaceGroup_sptr fitWorkspace;
   fitWorkspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
@@ -212,27 +210,29 @@ void Stretch::plotWorkspaces() {
 
   auto sigma = QString::fromStdString(fitWorkspace->getItem(0)->getName());
   auto beta = QString::fromStdString(fitWorkspace->getItem(1)->getName());
+  // Check Sigma and Beta workspaces exist
   if (sigma.right(5).compare("Sigma") == 0) {
     if (beta.right(4).compare("Beta") == 0) {
+
+      // Plot Beta workspace
+      QString pyInput = "from mantidplot import plot2D\n";
+      if (m_plotType.compare("All") == 0 || m_plotType.compare("Beta") == 0) {
+        pyInput += "importMatrixWorkspace('";
+        pyInput += beta;
+        pyInput += "').plotGraph2D()\n";
+      }
+      // Plot Sigma workspace
+      if (m_plotType.compare("All") == 0 || m_plotType.compare("Sigma") == 0) {
+        pyInput += "importMatrixWorkspace('";
+        pyInput += sigma;
+        pyInput += "').plotGraph2D()\n";
+      }
+      m_pythonRunner.runPythonCode(pyInput);
     }
   } else {
     g_log.error(
         "Beta and Sigma workspace were not found and could not be plotted.");
   }
-
-  QString pyInput = "from mantidplot import plot2D\n";
-  if (m_plotType.compare("All") == 0 || m_plotType.compare("Beta") == 0) {
-    pyInput += "importMatrixWorkspace('";
-    pyInput += beta;
-    pyInput += "').plotGraph2D()\n";
-  }
-  if (m_plotType.compare("All") == 0 || m_plotType.compare("Sigma") == 0) {
-    pyInput += "importMatrixWorkspace('";
-    pyInput += sigma;
-    pyInput += "').plotGraph2D()\n";
-  }
-
-  m_pythonRunner.runPythonCode(pyInput);
 }
 
 /**
