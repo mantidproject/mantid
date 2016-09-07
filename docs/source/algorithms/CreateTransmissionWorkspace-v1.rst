@@ -46,7 +46,6 @@ Usage
       I0MonitorIndex = 2,
       ProcessingInstructions = '3,4',
       WavelengthMin = 1,
-      WavelengthStep=0.05,
       WavelengthMax = 17,
       MonitorBackgroundWavelengthMin = 15,
       MonitorBackgroundWavelengthMax = 17,
@@ -62,10 +61,10 @@ Output:
 .. testoutput:: ExCreateTransWSSimple
 
     The first four transWS Y values are:
-    0.0223
-    0.0602
-    0.1020
-    0.1207
+    0.0255
+    0.0758
+    0.1322
+    0.1422
 
 **Example - Create a transmission run from two runs**
 
@@ -82,7 +81,6 @@ Output:
       I0MonitorIndex = 2,
       ProcessingInstructions = '3,4',
       WavelengthMin = 1,
-      WavelengthStep=0.05,
       WavelengthMax = 17,
       MonitorBackgroundWavelengthMin = 15,
       MonitorBackgroundWavelengthMax = 17,
@@ -98,10 +96,10 @@ Output:
 .. testoutput:: ExCreateTransWSTwo
 
     The first four transWS Y values are:
-    0.0567
-    0.0575
-    0.0577
-    0.0580
+    0.0572
+    0.0574
+    0.0584
+    0.0584
 
 .. categories::
 
