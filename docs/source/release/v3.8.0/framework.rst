@@ -140,6 +140,7 @@ Python
   individual atoms.
 - :py:obj:`mantid.geometry.OrientedLattice` set U with determinant -1 exposed to python
 - The setDisplayNormalization and setDisplayNormalizationHisto methods for MDEventWorkspaces are now exposed to Python
+- Tube calibration now has ``saveCalibration`` and ``readCalibrationFile`` functions similar to ``savePeak`` and ``readPeakFile``.
 
 Python Algorithms
 #################
