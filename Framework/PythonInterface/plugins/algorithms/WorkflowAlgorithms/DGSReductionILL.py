@@ -482,4 +482,4 @@ class DGSReductionILL(DataProcessorAlgorithm):
         self.setProperty(PROP_OUTPUT_WORKSPACE, outputWorkspace)
 
 
-AlgorithmFactory.subscribe(DGSReductionILL2)
+AlgorithmFactory.subscribe(DGSReductionILL)
