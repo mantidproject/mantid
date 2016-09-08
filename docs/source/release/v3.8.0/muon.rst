@@ -26,8 +26,6 @@ Results tables of these new kinds of fit can also be created.
 As this is a new change for this release, please report any bugs, or requests for enhancements, to the development team. 
 If you find a bug that stops you working, or would simply prefer to stick with the previous UI, just check the "Compatibility mode" box on the *Settings* tab and this will revert the interface to how it was in Mantid 3.7.
 
-Note that, by default, "Compatibility mode" is turned ON - so the interface will look the same as before. To enable the new features, turn "Compatibility mode" off.
-
 Other fixes and enhancements:
 *****************************
 
