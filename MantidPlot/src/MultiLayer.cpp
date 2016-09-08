@@ -43,6 +43,7 @@
 #include <QSpinBox>
 #include <QSize>
 
+#include <limits>
 #include <set>
 
 #if QT_VERSION >= 0x040300
@@ -81,6 +82,10 @@ using namespace Mantid;
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MultiLayer");
+
+const double MAXIMUM = std::numeric_limits<double>::max();
+const double MINIMUM = std::numeric_limits<double>::min();
+constexpr int AXIS_X(0), AXIS_Y(1);
 }
 
 LayerButton::LayerButton(const QString &text, QWidget *parent)
@@ -1871,4 +1876,34 @@ std::string MultiLayer::saveToProject(ApplicationWindow *app) {
   tsv.writeRaw("</multiLayer>");
 
   return tsv.outputLines();
+}
+
+/**
+ * Sets axes for all layers to the same scales, which are set to encompass the
+ * widest range of data.
+ */
+void MultiLayer::setCommonAxisScales() {
+  double lowestX(MAXIMUM), lowestY(MAXIMUM), highestX(MINIMUM),
+      highestY(MINIMUM);
+
+  // Find the lowest, highest X and Y values
+  // N.B. Layers are 1-indexed
+  for (int i = 1; i < layers() + 1; ++i) {
+    const auto *plot = layer(i)->plotWidget();
+    const auto xmin = plot->axisScaleDiv(AXIS_X)->lowerBound();
+    const auto xmax = plot->axisScaleDiv(AXIS_X)->upperBound();
+    const auto ymin = plot->axisScaleDiv(AXIS_Y)->lowerBound();
+    const auto ymax = plot->axisScaleDiv(AXIS_Y)->upperBound();
+    lowestX = xmin < lowestX ? xmin : lowestX;
+    highestX = xmax < highestX ? highestX : xmax;
+    lowestY = ymin < lowestY ? ymin : lowestY;
+    highestY = ymax < highestY ? highestY : ymax;
+  }
+
+  // Set axes for all layers
+  for (int i = 1; i < layers() + 1; ++i) {
+    auto *plot = layer(i)->plotWidget();
+    plot->setAxisScale(AXIS_X, lowestX, highestX);
+    plot->setAxisScale(AXIS_Y, lowestY, highestY);
+  }
 }

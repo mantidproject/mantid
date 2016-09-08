@@ -3452,6 +3452,7 @@ MantidUI::plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
     }
   }
 
+  multi->setCommonAxisScales();
   multi->arrangeLayers(true, true);
   // Check if window does not contain any curves and should be closed
   multi->maybeNeedToClose();
