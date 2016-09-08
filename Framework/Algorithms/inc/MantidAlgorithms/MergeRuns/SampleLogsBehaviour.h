@@ -71,7 +71,7 @@ public:
   void
   createSampleLogsMapsFromInstrumentParams(SampleLogsMap &instrumentMap,
                                            const API::MatrixWorkspace_sptr &ws);
-  void calculateUpdatedSampleLogs(const API::MatrixWorkspace_sptr &ws,
+  void calculateUpdatedSampleLogs(const API::MatrixWorkspace_sptr &addeeWS,
                                   const API::MatrixWorkspace_sptr &outWS);
   void setUpdatedSampleLogs(const API::MatrixWorkspace_sptr &ws);
   void resetSampleLogs(const API::MatrixWorkspace_sptr &ws);

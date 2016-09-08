@@ -149,17 +149,28 @@ void SampleLogsBehaviour::updateSampleMap(
     }
 
     if (sampleLogBehaviour == time_series) {
-      std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(
-          new TimeSeriesProperty<double>(item + TIME_SERIES_SUFFIX));
-      std::string startTime = ws->mutableRun().startTime().toISO8601String();
-      timeSeriesProp->addValue(startTime, value);
-      ws->mutableRun().addLogData(
-          std::unique_ptr<Kernel::Property>(std::move(timeSeriesProp)));
-      prop = std::shared_ptr<Property>(
-          ws->getLog(item + TIME_SERIES_SUFFIX)->clone());
+      try {
+        // See if property exists already - merging an output of MergeRuns
+        prop = std::shared_ptr<Property>(ws->getLog(item + TIME_SERIES_SUFFIX)->clone());
+      } catch (std::invalid_argument e) {
+        // Property does not already exist
+        std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(
+            new TimeSeriesProperty<double>(item + TIME_SERIES_SUFFIX));
+        std::string startTime = ws->mutableRun().startTime().toISO8601String();
+        timeSeriesProp->addValue(startTime, value);
+        ws->mutableRun().addLogData(
+            std::unique_ptr<Kernel::Property>(std::move(timeSeriesProp)));
+        prop = std::shared_ptr<Property>(
+            ws->getLog(item + TIME_SERIES_SUFFIX)->clone());
+      }
     } else if (sampleLogBehaviour == list) {
-      ws->mutableRun().addProperty(item + LIST_SUFFIX, prop->value());
-      prop = std::shared_ptr<Property>(ws->getLog(item + LIST_SUFFIX)->clone());
+      try {
+        // See if property exists already - merging an output of MergeRuns
+        prop = std::shared_ptr<Property>(ws->getLog(item + LIST_SUFFIX)->clone());
+      } catch (std::invalid_argument e) {
+        ws->mutableRun().addProperty(item + LIST_SUFFIX, prop->value());
+        prop = std::shared_ptr<Property>(ws->getLog(item + LIST_SUFFIX)->clone());
+      }
     }
 
     map[item] = {sampleLogBehaviour, prop, tolerance, isNumeric};
@@ -167,15 +178,15 @@ void SampleLogsBehaviour::updateSampleMap(
 }
 
 void SampleLogsBehaviour::calculateUpdatedSampleLogs(
-    const MatrixWorkspace_sptr &ws, const API::MatrixWorkspace_sptr &outWS) {
+    const MatrixWorkspace_sptr &addeeWS, const API::MatrixWorkspace_sptr &outWS) {
   for (auto item : m_logMap) {
-    Property *wsProperty = ws->getLog(item.first);
+    Property *wsProperty = addeeWS->getLog(item.first);
 
     double wsNumber = 0;
     double outWSNumber = 0;
 
     try {
-      wsNumber = ws->getLogAsSingleValue(item.first);
+      wsNumber = addeeWS->getLogAsSingleValue(item.first);
       outWSNumber = outWS->getLogAsSingleValue(item.first);
     } catch (std::invalid_argument) {
       if (item.second.isNumeric) {
@@ -186,29 +197,41 @@ void SampleLogsBehaviour::calculateUpdatedSampleLogs(
 
     switch (item.second.type) {
     case time_series: {
-      auto timeSeriesProp = outWS->mutableRun().getTimeSeriesProperty<double>(
-          item.first + TIME_SERIES_SUFFIX);
-      Kernel::DateAndTime startTime = ws->mutableRun().startTime();
-      double value = ws->mutableRun().getLogAsSingleValue(item.first);
-      timeSeriesProp->addValue(startTime, value);
+      try {
+        // If this already exists we do not need to do anything, Time Series Logs are combined when adding workspaces.
+        addeeWS->getLog(item.first + TIME_SERIES_SUFFIX);
+      } catch (std::invalid_argument e) {
+        auto timeSeriesProp = outWS->mutableRun().getTimeSeriesProperty<double>(
+            item.first + TIME_SERIES_SUFFIX);
+        Kernel::DateAndTime startTime = addeeWS->mutableRun().startTime();
+        double value = addeeWS->mutableRun().getLogAsSingleValue(item.first);
+        timeSeriesProp->addValue(startTime, value);
+      }
       break;
     }
     case list: {
-      auto property = outWS->mutableRun().getProperty(item.first + LIST_SUFFIX);
-      property->setValue(property->value() + ", " + wsProperty->value());
+      try {
+        // If this already exists we combine the two strings.
+        auto propertyAddeeWS = addeeWS->getLog(item.first + LIST_SUFFIX);
+        auto propertyOutWS = outWS->mutableRun().getProperty(item.first + LIST_SUFFIX);
+        propertyOutWS->setValue(propertyOutWS->value() + ", " + propertyAddeeWS->value());
+      } catch (std::invalid_argument e) {
+        auto property = outWS->mutableRun().getProperty(item.first + LIST_SUFFIX);
+        property->setValue(property->value() + ", " + wsProperty->value());
+      }
       break;
     }
     case warn:
       if (item.second.isNumeric && item.second.tolerance > 0.0) {
         if (std::abs(wsNumber - outWSNumber) > item.second.tolerance) {
           m_logger.warning() << generateDifferenceMessage(
-              item.first, ws->name(), wsProperty->value(),
+              item.first, addeeWS->name(), wsProperty->value(),
               item.second.property->value());
         }
       } else {
         if (item.second.property->value().compare(wsProperty->value()) != 0) {
           m_logger.warning() << generateDifferenceMessage(
-              item.first, ws->name(), wsProperty->value(),
+              item.first, addeeWS->name(), wsProperty->value(),
               item.second.property->value());
         }
       }
@@ -217,13 +240,13 @@ void SampleLogsBehaviour::calculateUpdatedSampleLogs(
       if (item.second.isNumeric && item.second.tolerance > 0.0) {
         if (std::abs(wsNumber - outWSNumber) > item.second.tolerance) {
           throw std::invalid_argument(generateDifferenceMessage(
-              item.first, ws->name(), wsProperty->value(),
+              item.first, addeeWS->name(), wsProperty->value(),
               item.second.property->value()));
         }
       } else {
         if (item.second.property->value().compare(wsProperty->value()) != 0) {
           throw std::invalid_argument(generateDifferenceMessage(
-              item.first, ws->name(), wsProperty->value(),
+              item.first, addeeWS->name(), wsProperty->value(),
               item.second.property->value()));
         }
       }

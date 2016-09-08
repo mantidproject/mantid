@@ -136,7 +136,7 @@ private:
   }
 
   template <typename T>
-  WorkspaceGroup_sptr create_workspace_with_sample_logs(
+  WorkspaceGroup_sptr create_group_workspace_with_sample_logs(
       std::string merge_type, std::string merge_list, T value_1, T value_2,
       T value_3, T value_4, std::string tolerances = "") {
     MatrixWorkspace_sptr a =
@@ -185,6 +185,35 @@ private:
     AnalysisDataService::Instance().addOrReplace("b1", b);
     AnalysisDataService::Instance().addOrReplace("group1", group);
     return group;
+  }
+
+  template <typename T>
+  MatrixWorkspace_sptr create_workspace_with_sample_logs(std::string merge_type,
+                                                         std::string merge_list,
+                                                         T value_1,
+                                                         T value_2,
+                                                         std::string tolerances = "") {
+    MatrixWorkspace_sptr c =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1000,
+                                                                     true);
+
+    Property *prop5 = new PropertyWithValue<T>("prop1", value_1);
+    Property *prop6 = new PropertyWithValue<T>("prop2", value_2);
+
+    c->mutableRun().addLogData(prop5);
+    c->mutableRun().addLogData(prop6);
+
+    // add start times
+    Property *time3 = new PropertyWithValue<std::string>("start_time", "2013-06-25T12:59:15");
+    c->mutableRun().addLogData(time3);
+
+    c->instrumentParameters().addString(c->getInstrument()->getComponentID(), merge_type, merge_list);
+
+    c->instrumentParameters().addString(c->getInstrument()->getComponentID(), SampleLogsBehaviour::FAIL_MERGE_TOLERANCES, tolerances);
+
+    AnalysisDataService::Instance().addOrReplace("c1", c);
+
+    return c;
   }
 
   void do_test_treat_as_non_period_groups(WorkspaceGroup_sptr input) {
@@ -963,12 +992,15 @@ public:
     AnalysisDataService::Instance().remove("c1");
     AnalysisDataService::Instance().remove("group1");
     AnalysisDataService::Instance().remove("outWS");
+    AnalysisDataService::Instance().remove("outWS1");
+    AnalysisDataService::Instance().remove("outWS2");
+
   }
 
   void test_mergeSampleLogs_time_series() {
     std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
-    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
-                                                        2.0, 0.0, 0.0);
+    auto ws = create_group_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
+                                                              2.0, 0.0, 0.0);
     do_test_mergeSampleLogs(
         ws, "prop1", mergeType,
         "2013-Jun-25 10:59:15  1\n2013-Jun-25 11:59:15  2\n", 2);
@@ -976,7 +1008,7 @@ public:
 
   void test_mergeSampleLogs_time_series_multiple() {
     std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
-    auto ws = create_workspace_with_sample_logs<double>(
+    auto ws = create_group_workspace_with_sample_logs<double>(
         mergeType, "prop1, prop2", 1.0, 2.0, 3.0, 4.0);
     do_test_mergeSampleLogs(
         ws, "prop2", mergeType,
@@ -985,55 +1017,55 @@ public:
 
   void test_mergeSampleLogs_list() {
     std::string mergeType = SampleLogsBehaviour::LIST_MERGE;
-    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
-                                                        2.0, 0.0, 0.0);
+    auto ws = create_group_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
+                                                              2.0, 0.0, 0.0);
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "1, 2", 2);
   }
 
   void test_mergeSampleLogs_warn() {
     std::string mergeType = SampleLogsBehaviour::WARN_MERGE;
-    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
-                                                        2.0, 0.0, 0.0);
+    auto ws = create_group_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
+                                                              2.0, 0.0, 0.0);
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 2);
   }
 
   void test_mergeSampleLogs_fail_where_params_are_equal_succeeds() {
     std::string mergeType = SampleLogsBehaviour::FAIL_MERGE;
-    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
-                                                        1.0, 0.0, 0.0);
+    auto ws = create_group_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
+                                                              1.0, 0.0, 0.0);
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 2);
     do_test_mergeSampleLogs(
-        create_workspace_with_sample_logs<int>(mergeType, "prop1", 1, 1, 2, 2),
+        create_group_workspace_with_sample_logs<int>(mergeType, "prop1", 1, 1, 2, 2),
         "prop1", mergeType, "1", 2);
   }
 
   void test_mergeSampleLogs_fail_where_params_are_different_fails() {
     std::string mergeType = SampleLogsBehaviour::FAIL_MERGE;
-    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
-                                                        2.0, 0.0, 0.0);
+    auto ws = create_group_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
+                                                              2.0, 0.0, 0.0);
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 1);
   }
 
   void
   test_mergeSampleLogs_fail_where_params_are_different_but_inside_tolerance_succeeds() {
     std::string mergeType = SampleLogsBehaviour::FAIL_MERGE;
-    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
-                                                        2.0, 0.0, 0.0, "2.0");
+    auto ws = create_group_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
+                                                              2.0, 0.0, 0.0, "2.0");
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 2);
   }
 
   void
   test_mergeSampleLogs_fail_where_params_are_different_but_outside_tolerance_fails() {
     std::string mergeType = SampleLogsBehaviour::FAIL_MERGE;
-    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
-                                                        2.0, 0.0, 0.0, "0.5");
+    auto ws = create_group_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
+                                                              2.0, 0.0, 0.0, "0.5");
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 1);
   }
 
   void
   test_mergeSampleLogs_fail_where_params_with_one_outside_tolerance_fails_multiple_tolerances() {
     std::string mergeType = SampleLogsBehaviour::FAIL_MERGE;
-    auto ws = create_workspace_with_sample_logs<double>(
+    auto ws = create_group_workspace_with_sample_logs<double>(
         mergeType, "prop1, prop2", 1.0, 2.0, 3.0, 4.0, "0.5, 1.5");
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 1);
   }
@@ -1041,24 +1073,24 @@ public:
   void
   test_mergeSampleLogs_fail_where_params_with_both_tolerances_outside_fails() {
     std::string mergeType = SampleLogsBehaviour::FAIL_MERGE;
-    auto ws = create_workspace_with_sample_logs<double>(
+    auto ws = create_group_workspace_with_sample_logs<double>(
         mergeType, "prop1, prop2", 1.0, 2.0, 3.0, 4.0, "0.5");
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 1);
   }
 
   void test_mergeSampleLogs_fail() {
     std::string mergeType = SampleLogsBehaviour::FAIL_MERGE;
-    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
-                                                        2.0, 0.0, 0.0);
+    auto ws = create_group_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
+                                                              2.0, 0.0, 0.0);
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 1);
-    ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 1.0,
-                                                   0.0, 0.0);
+    ws = create_group_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 1.0,
+                                                         0.0, 0.0);
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 2);
   }
 
   void test_mergeSampleLogs_non_existent_log_is_ignored() {
     std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
-    WorkspaceGroup_sptr gws = create_workspace_with_sample_logs<double>(
+    WorkspaceGroup_sptr gws = create_group_workspace_with_sample_logs<double>(
         mergeType, "prop1", 1.0, 2.0, 0.0, 0.0);
     MatrixWorkspace_sptr a =
         boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
@@ -1072,7 +1104,7 @@ public:
   void test_mergeSampleLogs_log_used_twice_throws_error() {
     std::string mergeTypeTimeSeries = SampleLogsBehaviour::TIME_SERIES_MERGE;
     std::string mergeTypeList = SampleLogsBehaviour::LIST_MERGE;
-    WorkspaceGroup_sptr gws = create_workspace_with_sample_logs<double>(
+    WorkspaceGroup_sptr gws = create_group_workspace_with_sample_logs<double>(
         mergeTypeTimeSeries, "prop1", 1.0, 2.0, 0.0, 0.0);
     MatrixWorkspace_sptr a =
         boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
@@ -1085,15 +1117,15 @@ public:
 
   void test_mergeSampleLogs_non_numeric_property_fails_to_merge() {
     std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
-    do_test_mergeSampleLogs(create_workspace_with_sample_logs<std::string>(
-                                mergeType, "prop1", "1", "two", "", ""),
+    do_test_mergeSampleLogs(create_group_workspace_with_sample_logs<std::string>(
+        mergeType, "prop1", "1", "two", "", ""),
                             "prop1", mergeType, "2013-Jun-25 10:59:15  1\n", 1);
   }
 
   void
   test_mergeSampleLogs_non_numeric_property_in_first_ws_skips_merging_parameter() {
     std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
-    auto ws = create_workspace_with_sample_logs<std::string>(
+    auto ws = create_group_workspace_with_sample_logs<std::string>(
         mergeType, "prop1", "one", "two", "", "");
     // should get stuck when looking for "prop1_time_series"
     TS_ASSERT_THROWS(do_test_mergeSampleLogs(ws, "prop1", mergeType,
@@ -1102,7 +1134,7 @@ public:
   }
 
   void test_mergeSampleLogs_with_additional_time_series_property() {
-    WorkspaceGroup_sptr ws = create_workspace_with_sample_logs<double>(
+    WorkspaceGroup_sptr ws = create_group_workspace_with_sample_logs<double>(
         SampleLogsBehaviour::TIME_SERIES_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0);
 
     MergeRuns alg;
@@ -1114,7 +1146,7 @@ public:
   }
 
   void test_mergeSampleLogs_with_additional_list_property() {
-    WorkspaceGroup_sptr ws = create_workspace_with_sample_logs<double>(
+    WorkspaceGroup_sptr ws = create_group_workspace_with_sample_logs<double>(
         SampleLogsBehaviour::TIME_SERIES_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0);
 
     MergeRuns alg;
@@ -1125,7 +1157,7 @@ public:
   }
 
   void test_mergeSampleLogs_with_additional_warn_property() {
-    WorkspaceGroup_sptr ws = create_workspace_with_sample_logs<double>(
+    WorkspaceGroup_sptr ws = create_group_workspace_with_sample_logs<double>(
         SampleLogsBehaviour::TIME_SERIES_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0);
 
     MergeRuns alg;
@@ -1136,7 +1168,7 @@ public:
   }
 
   void test_mergeSampleLogs_with_additional_fail_property() {
-    WorkspaceGroup_sptr ws = create_workspace_with_sample_logs<double>(
+    WorkspaceGroup_sptr ws = create_group_workspace_with_sample_logs<double>(
         SampleLogsBehaviour::TIME_SERIES_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0);
 
     MergeRuns alg;
@@ -1150,8 +1182,8 @@ public:
   void
   test_mergeSampleLogs_time_series_overwriting_in_merge_behaviour_in_algorithm() {
     std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
-    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
-                                                        2.0, 0.0, 0.0);
+    auto ws = create_group_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
+                                                              2.0, 0.0, 0.0);
     MergeRuns alg;
     alg.initialize();
     alg.setPropertyValue("SampleLogsList", "prop1");
@@ -1161,8 +1193,8 @@ public:
 
   void test_mergeSampleLogs_time_series_overwriting_tolerance_in_algorithm() {
     std::string mergeType = SampleLogsBehaviour::FAIL_MERGE;
-    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
-                                                        2.0, 0.0, 0.0, "0.5");
+    auto ws = create_group_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
+                                                              2.0, 0.0, 0.0, "0.5");
 
     MergeRuns alg;
     alg.initialize();
@@ -1172,7 +1204,7 @@ public:
   }
 
   void test_mergeSampleLogs_time_series_and_error_skips_merging_second_file() {
-    auto ws = create_workspace_with_sample_logs<double>(
+    auto ws = create_group_workspace_with_sample_logs<double>(
         SampleLogsBehaviour::TIME_SERIES_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0,
         "0.5");
 
@@ -1188,34 +1220,78 @@ public:
   void test_merging_three_workspace_with_time_series() {
     std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
 
-    auto ws = create_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
-                                                        2.0, 3.0, 4.0);
+    auto ws = create_group_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0,
+                                                              2.0, 3.0, 4.0);
 
-    MatrixWorkspace_sptr c =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1000,
-                                                                     true);
-
-    Property *prop5 = new PropertyWithValue<double>("prop1", 5.0);
-    Property *prop6 = new PropertyWithValue<double>("prop2", 6.0);
-
-    c->mutableRun().addLogData(prop5);
-    c->mutableRun().addLogData(prop6);
-
-    // add start times
-    Property *time3 =
-        new PropertyWithValue<std::string>("start_time", "2013-06-25T12:59:15");
-    c->mutableRun().addLogData(time3);
-
-    c->instrumentParameters().addString(c->getInstrument()->getComponentID(),
-                                        mergeType, "prop1");
-
-    AnalysisDataService::Instance().addOrReplace("c1", c);
+    MatrixWorkspace_sptr c = create_workspace_with_sample_logs<double>(mergeType, "prop1", 5.0, 6.0);
     ws->addWorkspace(c);
 
     do_test_mergeSampleLogs(ws, "prop1", mergeType,
                             "2013-Jun-25 10:59:15  1\n2013-Jun-25 11:59:15  "
                             "2\n2013-Jun-25 12:59:15  5\n",
                             3);
+  }
+
+  void do_test_merge_two_workspaces_then_third(std::string mergeType, std::string result) {
+    auto ws = create_group_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 3.0, 4.0);
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspaces", ws->name());
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    MatrixWorkspace_sptr c = create_workspace_with_sample_logs<double>(mergeType, "prop1", 5.0, 6.0);
+    ws->removeAll();
+
+    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    ws->addWorkspace(outWS);
+    ws->addWorkspace(c);
+
+    do_test_mergeSampleLogs(ws, "prop1", mergeType, result, 3);
+  }
+
+  void test_merging_two_workspace_then_third_with_time_series() {
+    do_test_merge_two_workspaces_then_third(SampleLogsBehaviour::TIME_SERIES_MERGE, "2013-Jun-25 10:59:15  1\n2013-Jun-25 11:59:15  2\n2013-Jun-25 12:59:15  5\n");
+  }
+
+  void test_merging_two_workspace_then_third_with_list() {
+    do_test_merge_two_workspaces_then_third(SampleLogsBehaviour::LIST_MERGE, "1, 2, 5");
+  }
+
+  void do_test_merging_two_workspaces_both_already_merged(std::string mergeType, std::string result) {
+    auto ws = create_group_workspace_with_sample_logs<double>(mergeType, "prop1", 1.0, 2.0, 3.0, 4.0);
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspaces", ws->name());
+    alg.setPropertyValue("OutputWorkspace", "outWS1");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    auto ws2 = create_group_workspace_with_sample_logs<double>(mergeType, "prop1", 6.0, 7.0, 8.0, 9.0);
+
+    MergeRuns alg2;
+    alg2.initialize();
+    alg2.setPropertyValue("InputWorkspaces", ws2->name());
+    alg2.setPropertyValue("OutputWorkspace", "outWS2");
+    TS_ASSERT_THROWS_NOTHING(alg2.execute());
+
+    MatrixWorkspace_sptr outWS1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS1");
+    MatrixWorkspace_sptr outWS2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS2");
+    WorkspaceGroup_sptr groupWS = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("group1");
+    groupWS->removeAll();
+    groupWS->addWorkspace(outWS1);
+    groupWS->addWorkspace(outWS2);
+
+    do_test_mergeSampleLogs(groupWS, "prop1", mergeType, result, 4);
+  }
+
+  void test_merging_two_workspace_then_two_already_merged_with_time_series() {
+    do_test_merging_two_workspaces_both_already_merged(SampleLogsBehaviour::TIME_SERIES_MERGE, "2013-Jun-25 10:59:15  1\n2013-Jun-25 10:59:15  6\n2013-Jun-25 11:59:15  2\n2013-Jun-25 11:59:15  7\n");
+  }
+
+  void test_merging_two_workspace_then_two_already_merged_with_list() {
+    do_test_merging_two_workspaces_both_already_merged(SampleLogsBehaviour::LIST_MERGE, "1, 2, 6, 7");
   }
 
 private:
