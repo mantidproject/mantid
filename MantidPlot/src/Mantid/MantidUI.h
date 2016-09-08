@@ -499,7 +499,8 @@ public slots:
 
   // Plot a spectrum in response from a InstrumentWindow signal
   MultiLayer *plotInstrumentSpectrum(const QString &, int);
-  MultiLayer *plotInstrumentSpectrumList(const QString &, std::set<int>);
+  MultiLayer *plotInstrumentSpectrumList(const QString &,
+                                         const std::set<int> &);
 
   void importString(const QString &logName, const QString &data);
   void importString(const QString &logName, const QString &data,

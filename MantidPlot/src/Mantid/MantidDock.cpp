@@ -1353,7 +1353,7 @@ void MantidDockWidget::doPlotSpectra(bool errors) {
   if (userInput.plots.empty())
     return;
 
-  constexpr bool spectrumPlot(true), clearWindow(false);
+  constexpr bool spectrumPlot(true);
   MultiLayer *window(NULL);
 
   if (userInput.tiled) {
@@ -1361,8 +1361,8 @@ void MantidDockWidget::doPlotSpectra(bool errors) {
                              MantidQt::DistributionDefault, errors, window);
   } else {
     m_mantidUI->plot1D(userInput.plots, spectrumPlot,
-                       MantidQt::DistributionDefault, errors, window,
-                       clearWindow, userInput.waterfall);
+                       MantidQt::DistributionDefault, errors, window, false,
+                       userInput.waterfall);
   }
 }
 

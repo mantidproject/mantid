@@ -2173,7 +2173,7 @@ MultiLayer *MantidUI::plotInstrumentSpectrum(const QString &wsName, int spec) {
 
 /// Catches the signal from InstrumentWindow to plot a spectrum.
 MultiLayer *MantidUI::plotInstrumentSpectrumList(const QString &wsName,
-                                                 std::set<int> spec) {
+                                                 const std::set<int> &spec) {
   return plot1D(wsName, spec, true, MantidQt::DistributionDefault, false);
 }
 
