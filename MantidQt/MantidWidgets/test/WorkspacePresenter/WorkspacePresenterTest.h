@@ -83,6 +83,28 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
+  void testRenameWorkspaceFromDock() {
+    EXPECT_CALL(*mockView.get(), renameWorkspace()).Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::RenameWorkspace);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testRenameWorkspaceExternal() {
+    auto wksp = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+
+    AnalysisDataService::Instance().add("wksp", wksp);
+
+    EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
+
+    AnalysisDataService::Instance().rename("wksp", "myWorkspace");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    AnalysisDataService::Instance().clear();
+  }
+
 private:
   boost::shared_ptr<NiceMock<MockWorkspaceDockView>> mockView;
   boost::shared_ptr<WorkspacePresenter> presenter;

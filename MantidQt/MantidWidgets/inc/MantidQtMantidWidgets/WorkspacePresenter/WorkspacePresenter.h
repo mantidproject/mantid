@@ -74,6 +74,7 @@ private:
   void workspacesDeleted();
 
   DockView_sptr lockView();
+  void updateView();
 
 private:
   DockView_wptr m_view;

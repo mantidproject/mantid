@@ -27,6 +27,7 @@ public:
   MOCK_METHOD0(showLoadDialog, void());
   MOCK_CONST_METHOD0(deleteConfirmation, bool());
   MOCK_METHOD0(deleteWorkspaces, void());
+  MOCK_METHOD0(renameWorkspace, void());
   MOCK_METHOD1(
       updateTree,
       void(const std::map<std::string, Mantid::API::Workspace_sptr> &items));

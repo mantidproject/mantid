@@ -33,6 +33,7 @@ void WorkspaceDockView::showLoadDialog() {}
 
 bool WorkspaceDockView::deleteConfirmation() const { return false; }
 void WorkspaceDockView::deleteWorkspaces() {}
+void WorkspaceDockView::renameWorkspace() {}
 
 void WorkspaceDockView::updateTree(
     const std::map<std::string, Mantid::API::Workspace_sptr> &items) {}

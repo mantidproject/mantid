@@ -51,10 +51,11 @@ public:
   virtual void init() = 0;
   virtual WorkspacePresenter_wptr getPresenterWeakPtr() = 0;
   virtual WorkspacePresenter_sptr getPresenterSharedPtr() = 0;
- 
+
   virtual void showLoadDialog() = 0;
   virtual bool deleteConfirmation() const = 0;
   virtual void deleteWorkspaces() = 0;
+  virtual void renameWorkspace() = 0;
   virtual std::string getSelectedWorkspaceName() const = 0;
   virtual Mantid::API::Workspace_sptr getSelectedWorkspace() const = 0;
   virtual void updateTree(

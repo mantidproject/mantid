@@ -45,6 +45,8 @@ public:
   virtual ~WorkspaceProvider() = default;
 
   virtual void registerPresenter(Presenter_wptr presenter) = 0;
+  virtual void renameWorkspace(const std::string &oldName,
+                               const std::string &newName) = 0;
   virtual Mantid::API::Workspace_sptr
   getWorkspace(const std::string &wsname) const = 0;
   virtual std::map<std::string, Mantid::API::Workspace_sptr>

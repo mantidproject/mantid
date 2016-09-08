@@ -41,7 +41,6 @@ namespace {
 /// static logger for dock widget
 Mantid::Kernel::Logger docklog("MantidDockWidget");
 
-
 WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
 }
 

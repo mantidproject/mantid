@@ -39,6 +39,8 @@ public:
   explicit ADSAdapter();
   ~ADSAdapter() override;
   void registerPresenter(Presenter_wptr presenter) override;
+  void renameWorkspace(const std::string &oldName,
+                       const std::string &newName) override;
   Mantid::API::Workspace_sptr
   getWorkspace(const std::string &wsname) const override;
 
@@ -63,6 +65,10 @@ private:
   void handleClearADS(Mantid::API::ClearADSNotification_ptr pNf);
   Poco::NObserver<ADSAdapter, Mantid::API::ClearADSNotification>
       m_clearADSObserver;
+
+  void handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr pNf);
+  Poco::NObserver<ADSAdapter, Mantid::API::WorkspaceRenameNotification>
+      m_renameObserver;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

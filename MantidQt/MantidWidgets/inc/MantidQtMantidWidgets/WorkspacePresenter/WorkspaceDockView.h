@@ -49,6 +49,7 @@ public:
   void showLoadDialog() override;
   bool deleteConfirmation() const override;
   void deleteWorkspaces() override;
+  void renameWorkspace() override;
   void updateTree(
       const std::map<std::string, Mantid::API::Workspace_sptr> &items) override;
 

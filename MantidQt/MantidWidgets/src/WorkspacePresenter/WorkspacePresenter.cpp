@@ -70,7 +70,12 @@ void WorkspacePresenter::loadWorkspace() {
 }
 
 void WorkspacePresenter::saveWorkspace() {}
-void WorkspacePresenter::renameWorkspace() {}
+
+void WorkspacePresenter::renameWorkspace() {
+  auto view = lockView();
+  view->renameWorkspace();
+}
+
 void WorkspacePresenter::groupWorkspaces() {}
 void WorkspacePresenter::sortWorkspaces() {}
 
@@ -81,20 +86,16 @@ void WorkspacePresenter::deleteWorkspaces() {
     view->deleteWorkspaces();
 }
 
-void WorkspacePresenter::workspaceLoaded() {
-  auto view = lockView();
-  view->updateTree(m_adapter->topLevelItems());
-}
+void WorkspacePresenter::workspaceLoaded() { updateView(); }
 
 void WorkspacePresenter::workspaceSaved() {}
-void WorkspacePresenter::workspaceRenamed() {}
+
+void WorkspacePresenter::workspaceRenamed() { updateView(); }
+
 void WorkspacePresenter::workspacesGrouped() {}
 void WorkspacePresenter::workspacesSorted() {}
 
-void WorkspacePresenter::workspacesDeleted() {
-  auto view = lockView();
-  view->updateTree(m_adapter->topLevelItems());
-}
+void WorkspacePresenter::workspacesDeleted() { updateView(); }
 
 DockView_sptr WorkspacePresenter::lockView() {
   auto view_sptr = m_view.lock();
@@ -103,6 +104,11 @@ DockView_sptr WorkspacePresenter::lockView() {
     throw std::runtime_error("Could not obtain pointer to DockView.");
 
   return std::move(view_sptr);
+}
+
+void WorkspacePresenter::updateView() {
+  auto view = lockView();
+  view->updateTree(m_adapter->topLevelItems());
 }
 
 } // namespace MantidQt
