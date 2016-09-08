@@ -30,6 +30,7 @@ class HFIREffAPIv2(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         SetTransmission(0.51944, 0.011078)
@@ -58,6 +59,7 @@ class HFIRSensitivityDirectBeamCenter(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         SetTransmission(0.51944, 0.011078)
@@ -88,6 +90,7 @@ class HFIRSensitivityScatteringBeamCenter(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         SetTransmission(0.51944, 0.011078)

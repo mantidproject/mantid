@@ -541,7 +541,6 @@ void EnggDiffFittingViewQtWidget::setPeakList(
   m_ui.lineEdit_fitting_peaks->setText(QString::fromStdString(peakList));
 }
 
-
 void EnggDiffFittingViewQtWidget::setBankEmit() { emit setBank(); }
 
 void EnggDiffFittingViewQtWidget::setBankIdComboBox(int idx) {

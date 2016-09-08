@@ -552,18 +552,79 @@ public:
       TS_ASSERT_EQUALS((*prop)->value(),
                        "Levenberg-Marquardt,AbsError=0.01,RelError=1");
     }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_histogram_fit() {
+    size_t nbins = 10;
+    auto ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 3, nbins + 1, nbins);
+    double x0 = -10.0;
+    double x1 = 10.0;
+    double dx = (x1 - x0) / static_cast<double>(nbins);
+    ws->setBinEdges(0, nbins + 1, HistogramData::LinearGenerator(x0, dx));
+    ws->setSharedX(1, ws->sharedX(0));
+    ws->setSharedX(2, ws->sharedX(0));
+
+    std::vector<double> amps{20.0, 30.0, 25.0};
+    std::vector<double> cents{0.0, 0.1, -1.0};
+    std::vector<double> fwhms{1.0, 1.1, 0.6};
+    for (size_t i = 0; i < 3; ++i) {
+      std::string fun = "name=FlatBackground,A0=" + std::to_string(fwhms[i]);
+      auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
+      alg->initialize();
+      alg->setProperty("EvaluationType", "Histogram");
+      alg->setProperty("Function", fun);
+      alg->setProperty("InputWorkspace", ws);
+      alg->setProperty("OutputWorkspace", "out");
+      alg->execute();
+      auto calc =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+      ws->dataY(i) = calc->readY(1);
+    }
+    AnalysisDataService::Instance().addOrReplace("InputWS", ws);
+
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setProperty("EvaluationType", "Histogram");
+    alg.setPropertyValue("Input", "InputWS,v1:3");
+    alg.setPropertyValue("OutputWorkspace", "out");
+    alg.setProperty("CreateOutput", true);
+    alg.setPropertyValue("Function", "name=FlatBackground,A0=2");
+    alg.execute();
+
+    {
+      auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+          "InputWS_0_Parameters");
+      TS_ASSERT_DELTA(params->Double(0, 1), 1.0, 1e-15);
+    }
+
+    {
+      auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+          "InputWS_1_Parameters");
+      TS_ASSERT_DELTA(params->Double(0, 1), 1.1, 1e-15);
+    }
+
+    {
+      auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+          "InputWS_2_Parameters");
+      TS_ASSERT_DELTA(params->Double(0, 1), 0.6, 1e-15);
+    }
+
+    AnalysisDataService::Instance().clear();
   }
 
 private:
   WorkspaceGroup_sptr m_wsg;
 
-  void createData() {
+  void createData(bool hist = false) {
     m_wsg.reset(new WorkspaceGroup);
     AnalysisDataService::Instance().add("PlotPeakGroup", m_wsg);
     const int N = 3;
     for (int iWS = 0; iWS < N; ++iWS) {
       auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-          PlotPeak_Expression(iWS), 3, 0, 10, 0.005);
+          PlotPeak_Expression(iWS), 3, 0, 10, 0.005, hist);
       for (int i = 0; i < 3; ++i) {
         ws->getSpectrum(i).setSpectrumNo(0);
       }

@@ -41,6 +41,13 @@ Single Crystal Diffraction
   this algorithm and plots the theoretical vs calculated position of each peak for each panel.  The RMSD in mm is
   calculated and printed in a log file and on the plots.
 
+- Given a PeaksWorkspace or MatrixWorkspace with an instrument,
+  :ref:`SetDetScale <algm-SetDetScale>`
+  will set or change the detector bank scales that are used in SaveHKL and AnvredCorrection.  The input format is the same as
+  used in anvred3.py, so DetScaleList input can be pasted from the definition of detScale there.  The default values can be
+  set in the instrument parameter file. Default values are in the parameter file for the TOPAZ instrument.
+
+
 Engineering Diffraction
 -----------------------
 
@@ -71,7 +78,10 @@ Powder Diffraction
   well. There were also a variety of bugfixes related to the output
   workspaces. While it did not affect the saved data files, the output
   workspaces were not always correctly normalized or in the requested
-  units.
+  units. There is also an additional ``GroupingFile`` parameter which
+  allows overriding the grouping that is specified in the
+  ``CalibrationFile``. The documentation for this algorithm has been
+  greatly expanded as well.
 
 - :ref:`PDFFourierTransformSNSPowderReduction
   <algm-PDFFourierTransformSNSPowderReduction>` has been modified to
@@ -86,10 +96,14 @@ Powder Diffraction
 - :ref:`CorelliCrossCorrelate <algm-CorelliCrossCorrelate>`: The
   weights applied to events have changed by a factor of the duty cycle
   (:math:`c\approx0.498`) as requested by the instrument scientists.
-  
-- :ref:`pearl-powder-diffraction-ref`: A workflow diagram for 
-  ``pearl_run_focus`` function has been created. 
 
+- :ref:`pearl-powder-diffraction-ref`: A workflow diagram for
+  ``pearl_run_focus`` function has been created.
+
+- :ref:`CalibrateRectangularDetectors
+  <algm-CalibrateRectangularDetectors>` has been modified to output
+  ``.h5`` formated calibration files as well as the other versions it
+  already supported.
 
 Imaging
 -------

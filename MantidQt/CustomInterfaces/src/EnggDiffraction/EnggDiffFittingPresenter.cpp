@@ -159,8 +159,37 @@ void EnggDiffFittingPresenter::fittingFinished() {
   if (!m_view)
     return;
 
-  if (!m_fittingFinishedOK) {
-    g_log.warning() << "The single peak fitting did not finish correctly.\n";
+  if (m_fittingFinishedOK) {
+
+    g_log.notice() << "The single peak fitting finished - the output "
+                      "workspace is ready.\n";
+
+    m_view->showStatus("Single peak fitting process finished. Ready");
+
+    try {
+      // should now plot the focused workspace when single peak fitting
+      // process fails
+      plotFitPeaksCurves();
+
+    } catch (std::runtime_error &re) {
+      g_log.error() << "Unable to finish the plotting of the graph for "
+                       "engggui_fitting_focused_fitpeaks workspace. Error "
+                       "description: " +
+                           static_cast<std::string>(re.what()) +
+                           " Please check also the log message for detail.";
+    }
+    g_log.notice() << "EnggDiffraction GUI: plotting of peaks for single peak "
+                      "fits has completed. \n";
+
+    if (m_workerThread) {
+      delete m_workerThread;
+      m_workerThread = nullptr;
+    }
+
+  } else {
+    // Fitting failed log and tidy up
+    g_log.warning() << "The single peak fitting did not finish correctly. "
+                       "Please check a focused file was selected.";
     if (m_workerThread) {
       delete m_workerThread;
       m_workerThread = nullptr;
@@ -168,33 +197,7 @@ void EnggDiffFittingPresenter::fittingFinished() {
 
     m_view->showStatus(
         "Single peak fitting process did not complete successfully");
-  } else {
-    g_log.notice() << "The single peak fitting finished - the output "
-                      "workspace is ready.\n";
-
-    m_view->showStatus("Single peak fittin process finished. Ready");
-    if (m_workerThread) {
-      delete m_workerThread;
-      m_workerThread = nullptr;
-    }
   }
-
-  try {
-    // should now plot the focused workspace when single peak fitting
-    // process fails
-    plotFitPeaksCurves();
-
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Unable to finish the plotting of the graph for "
-                     "engggui_fitting_focused_fitpeaks workspace. Error "
-                     "description: " +
-                         static_cast<std::string>(re.what()) +
-                         " Please check also the log message for detail.";
-    throw;
-  }
-  g_log.notice() << "EnggDiffraction GUI: plotting of peaks for single peak "
-                    "fits has completed. \n";
-
   // Reset once whole process is completed
   g_multi_run.clear();
   // enable the GUI
@@ -804,19 +807,6 @@ void EnggDiffFittingPresenter::inputChecksBeforeFitting(
                                 " is invalid, "
                                 "fitting process failed. Please try again!");
   }
-
-  // Check the filename is the format we expect
-  // As it contains details we need later in the algorithm
-  std::vector<std::string> vecFileSplit = splitFittingDirectory(focusedRunNo);
-  // The fit filenames are delimited by '_' and should be of
-  // format 'EnginX_<runNumber>_focused_bank_<bankNumber>'
-  // therefore we should always get 5 parts split in the vector
-  if (vecFileSplit.size() != 5) {
-    throw std::invalid_argument(
-        "Name doesn't match expected pattern."
-        " The focused EnginX  filename should be of form: "
-        " 'ENGINX_<Run Number>_focused_bank_<Bank Number>'.");
-  }
 }
 
 /**
@@ -895,7 +885,8 @@ void EnggDiffFittingPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
         // the file is probably not what we were expecting
         // so throw a runtime error
         throw std::runtime_error(
-            "File data is bad. Is the file a focused EnginX file?");
+            "Failed to fit file: The data was not what is expected. "
+            "Does the file contain focused EnginX workspace?");
       }
     }
   }
@@ -947,7 +938,6 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
 
   // load the focused workspace file to perform single peak fits
   runLoadAlg(focusedRunNo, focusedWS);
-
   // apply calibration to the focused workspace
   setDifcTzero(focusedWS);
 
@@ -972,26 +962,15 @@ void EnggDiffFittingPresenter::doFitting(const std::string &focusedRunNo,
     }
     enggFitPeaks->setProperty("FittedPeaks", focusedFitPeaksTableName);
     enggFitPeaks->execute();
-  } catch (std::exception &re) {
-    g_log.error() << "Could not run the algorithm EnggFitPeaks "
-                     "successfully for bank, "
-                     // bank name
-                     "Error description: " +
-                         static_cast<std::string>(re.what()) +
-                         " Please check also the log message for detail.\n";
+
+  } catch (std::exception) {
+    throw std::runtime_error(
+        "Could not run the algorithm EnggFitPeaks successfully.");
   }
 
   auto fPath = focusedRunNo;
   runSaveDiffFittingAsciiAlg(focusedFitPeaksTableName, fPath);
-
-  try {
-    runFittingAlgs(focusedFitPeaksTableName, g_focusedFittingWSName);
-
-  } catch (std::invalid_argument &ia) {
-    g_log.error() << "Error, Fitting could not finish off correctly, " +
-                         std::string(ia.what()) << '\n';
-    return;
-  }
+  runFittingAlgs(focusedFitPeaksTableName, g_focusedFittingWSName);
 }
 
 void EnggDiffFittingPresenter::runLoadAlg(
@@ -1026,6 +1005,15 @@ void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
   // split to get run number and bank
   auto fileSplit = splitFittingDirectory(filePath);
   // returns ['ENGINX', <RUN-NUMBER>, 'focused', `bank`, <BANK>, '.nxs']
+  if (fileSplit.size() == 1) {
+    // The user probably has input just `ENGINX012345.nxs`
+    throw std::invalid_argument(
+        "Could not save fitting ASCII as"
+        " file name does not contain any '_' characters"
+        " - expected file name is "
+        "'<Instrument>_<Run-Number>_focused_bank_<bankNumber>.nxs \n");
+  }
+
   auto runNumber = fileSplit[1];
 
   // if a normal focused file assign bank number otherwise 'customised'
@@ -1051,22 +1039,13 @@ void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
   auto saveDiffFit = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "SaveDiffFittingAscii");
 
-  try {
-    saveDiffFit->initialize();
-    saveDiffFit->setProperty("InputWorkspace", tableWorkspace);
-    saveDiffFit->setProperty("Filename", dir.toString());
-    saveDiffFit->setProperty("RunNumber", runNumber);
-    saveDiffFit->setProperty("Bank", bank);
-    saveDiffFit->setProperty("OutMode", "AppendToExistingFile");
-    saveDiffFit->execute();
-  } catch (std::exception &re) {
-    g_log.error() << "Could not run the algorithm SaveDiffFittingAscii "
-                     "successfully for bank, "
-                     // bank name
-                     "Error description: " +
-                         static_cast<std::string>(re.what()) +
-                         " Please check also the log message for detail.\n";
-  }
+  saveDiffFit->initialize();
+  saveDiffFit->setProperty("InputWorkspace", tableWorkspace);
+  saveDiffFit->setProperty("Filename", dir.toString());
+  saveDiffFit->setProperty("RunNumber", runNumber);
+  saveDiffFit->setProperty("Bank", bank);
+  saveDiffFit->setProperty("OutMode", "AppendToExistingFile");
+  saveDiffFit->execute();
 }
 
 void EnggDiffFittingPresenter::runFittingAlgs(

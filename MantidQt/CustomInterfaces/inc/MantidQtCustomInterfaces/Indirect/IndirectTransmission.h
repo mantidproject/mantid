@@ -54,6 +54,8 @@ private slots:
   void previewPlot();
   void transAlgDone(bool error);
   void instrumentSet();
+  void plotClicked();
+  void saveClicked();
 
 private:
   Ui::IndirectTransmission m_uiForm;
