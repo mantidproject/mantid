@@ -23,7 +23,7 @@ class IndirectILLReductionTest(unittest.TestCase):
     @classmethod
     def setUp(cls):
         # set instrument and append datasearch directory
-        config.setFacility('ILL')
+        #config.setFacility('ILL')
         #config.appendDataSearchSubdirs('ILL/IN16B')
 
         cls._run_name = 'ILL/IN16B/146191.nxs'
@@ -37,8 +37,8 @@ class IndirectILLReductionTest(unittest.TestCase):
     @classmethod
     def tearDown(cls):
         # set cached facility and datasearch directory
-        config.setFacility(cls._def_fac)
-        config.setDataSearchDirs(cls._data_dirs)
+        #config.setFacility(cls._def_fac)
+        #config.setDataSearchDirs(cls._data_dirs)
         #reset output workspaces list
         cls._output_workspaces = []
 

@@ -49,34 +49,10 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
     def PyExec(self):
         self._setup()
 
-        # Looking for mirror_sense: another possibility was to add an input option mirror_sense
-        __ws_in = Load(self._input_file)
-        gRun = __ws_in.getRun()
-        DeleteWorkspace(__ws_in)
-
-        if gRun.hasProperty('Doppler.mirror_sense'):
-            # mirror_sense 14 : two wings
-            # mirror_sense 16 : one wing
-            if gRun.getLogData('Doppler.mirror_sense').value == 14:
-                unmirror_option = 1
-                self.log().information('Input run has two wings, using UnmirrorOption 1 (sum of left and right)')
-            else:
-                unmirror_option = 0
-                self.log().information('Input run has one wing, using UnmirrorOption 0')
-
-            # Do an energy transfer reduction
-            __temp = IndirectILLReduction(Run=self._input_file,
-                                          MapFile=self._map_file,
-                                          SumRuns=True, DebugMode=False,
-                                          UnmirrorOption=unmirror_option)
-        else:
-            self.log().warning('Input run (IN16B) has no property Doppler.mirror_sense. Check input data.')
-            self.log().information('Input run has one wing, using UnmirrorOption 0')
-            __temp = IndirectILLReduction(Run=self._input_file,
-                                        MapFile=self._map_file,
-                                        SumRuns=True, DebugMode=False,
-                                        UnmirrorOption=0)
-
+        __temp = IndirectILLReduction(Run=self._input_file,
+                              MapFile=self._map_file,
+                              SumRuns=True,
+                              UnmirrorOption=1)
 
         # Integrate within peak range
         __ws_name = __temp.getItem(0).getName()
