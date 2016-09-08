@@ -7,38 +7,10 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
 from mantid import config, mtd, logger
-from IndirectImport import import_mantidplot
 
 # first the helpers
 
 _ws_or_none = lambda s: mtd[s] if s != '' else None
-
-# plot and save to move to GUI
-def save_ws(ws):
-    """
-    Saves given workspace in default save directory
-    @param ws : input workspace or workspace group name
-    """
-    filename = mtd[ws].getName() + '.nxs'
-    workdir = config['defaultsave.directory']
-    file_path = os.path.join(workdir, filename)
-    SaveNexusProcessed(InputWorkspace=ws, Filename=file_path)
-
-def plot_ws(ws):
-    """
-    plots the given workspace
-    @param ws : input workspace name
-    """
-    # think about getting the unit and label from ws
-    # x_unit = mtd[ws].getAxis(0).getUnit()
-    x_label = 'Energy Transfer [mev]'
-    mtd_plot = import_mantidplot()
-    graph = mtd_plot.newGraph()
-    mtd_plot.plotSpectrum(ws, 0, window=graph)
-    layer = graph.activeLayer()
-    layer.setAxisTitle(mtd_plot.Layer.Bottom, x_label)
-    layer.setAxisTitle(mtd_plot.Layer.Left, 'Intensity [a.u.]')
-    layer.setTitle('')
 
 def extract_workspace(ws, ws_out, x_start, x_end):
     """
@@ -136,13 +108,8 @@ def get_peak_position(ws, i):
     # Peak bin (not in energy)
     peak_bin = temp.binIndexOf(fit_table.row(0)["PeakCentre"])
 
-    # Delete unused single spectrum
-    DeleteWorkspace(temp)
-
     # Reliable check for peak bin
     fit_status = fit_table.row(0)["FitStatus"]
-
-    DeleteWorkspace(fit_table)
 
     if peak_bin < 0 or peak_bin > len(y_values) or \
             (fit_status != 'success') or (abs(peak_bin - mid_bin) > tolerance):
@@ -153,6 +120,10 @@ def get_peak_position(ws, i):
         else:
             # Take the center (i.e. do no shift the spectrum)
             peak_bin = mid_bin
+
+    # Clean-up
+    DeleteWorkspace(temp)
+    DeleteWorkspace(fit_table)
 
     # Delete unused TableWorkspaces
     try:
@@ -363,8 +334,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     # Bool flags
     _debug_mode = None
     _sum_runs = None
-    _save = None
-    _plot = None
 
     # Integer
     _unmirror_option = None
@@ -424,6 +393,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              defaultValue=False,
                              doc='Whether to sum all the input runs.')
 
+        self.declareProperty(name='DebugMode',
+                             defaultValue=False,
+                             doc='Whether to output the workspaces in intermediate steps.')
+
         self.declareProperty(name='UnmirrorOption',defaultValue=6,
                              validator=IntBoundedValidator(lower=0, upper=7),
                              doc='Unmirroring options: \n'
@@ -435,17 +408,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                                  '5 like 4, but use Vanadium run for peak positions\n'
                                  '6 center both left and right at zero and sum\n'
                                  '7 like 6, but use Vanadium run for peak positions')
-
-        # Output options
-        self.declareProperty(name='Save',defaultValue=False,
-                             doc='Whether to save the reduced workpsace to nxs file.')
-
-        self.declareProperty(name='Plot',defaultValue=False,
-                             doc='Whether to plot the reduced workspace.')
-
-        self.declareProperty(name='DebugMode',
-                             defaultValue=False,
-                             doc='Whether to output the workspaces in intermediate steps.')
 
         # Output workspace properties
         self.declareProperty(WorkspaceGroupProperty("OutputWorkspace", "red",
@@ -515,8 +477,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._calib_ws = _ws_or_none(self.getPropertyValue('CalibrationWorkspace'))
         self._reflection = self.getPropertyValue('Reflection')
         self._debug_mode = self.getProperty('DebugMode').value
-        self._plot = self.getProperty('Plot').value
-        self._save = self.getProperty('Save').value
         self._sum_runs = self.getProperty('SumRuns').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
 
@@ -873,18 +833,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             if self._calib_ws is not None:
                 GroupWorkspaces(InputWorkspaces=output[:, 8], OutputWorkspace=self._out_suffixes[8])
                 self.setProperty('VnormWorkspace', self._out_suffixes[8])
-
-        # Save if needed
-        if self._save:
-            save_ws(self._red_ws)
-
-        if self._plot:
-            if len(output[:, 0]) > 1:
-                self.log().warning('Automatic plotting for multiple files is disabled.')
-            else:
-                SumSpectra(InputWorkspace=output[0, 0], OutputWorkspace='sum_to_plot')
-                plot_ws('sum_to_plot')
-                # do not delete summed spectra while the plot is open
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReduction)

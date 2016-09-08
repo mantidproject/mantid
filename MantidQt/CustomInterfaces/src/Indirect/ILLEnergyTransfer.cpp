@@ -110,8 +110,6 @@ void ILLEnergyTransfer::run() {
   reductionAlg->setProperty("UnmirrorOption", uo);
   reductionAlg->setProperty("SumRuns", m_uiForm.ckSum->isChecked());
   reductionAlg->setProperty("DebugMode", m_uiForm.ckDebugMode->isChecked());
-  reductionAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
-  reductionAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
 
   // Vanadium run
   if (uo == 5 || uo == 7) {
@@ -131,9 +129,43 @@ void ILLEnergyTransfer::run() {
 void ILLEnergyTransfer::algorithmComplete(bool error) {
   if (error)
     return;
+  else {
+    if (m_uiForm.ckSave->isChecked()) {
+      save();
+    }
+    if (m_uiForm.ckPlot->isChecked()) {
+      plot();
+    }
+  }
 
   // Nothing to do here
 }
+
+/**
+ * Handles plotting of the reduced ws.
+ */
+void ILLEnergyTransfer::plot() {
+  QString pyInput = "from mantid import mtd\n"
+                    "from IndirectReductionCommon import plot_reduction\n";
+  pyInput += "plot_reduction(mtd[\"";
+  pyInput += m_uiForm.leOutWS->text();
+  pyInput += "\"].getItem(0).getName(),\"Contour\")\n";
+  m_pythonRunner.runPythonCode(pyInput);
+}
+
+/**
+ * Handles saving of the reduced ws.
+ */
+void ILLEnergyTransfer::save() {
+  QString pyInput;
+  pyInput += "SaveNexusProcessed(\"";
+  pyInput += m_uiForm.leOutWS->text();
+  pyInput += "\",\"";
+  pyInput += m_uiForm.leOutWS->text();
+  pyInput += ".nxs\")\n";
+  m_pythonRunner.runPythonCode(pyInput);
+}
+
 
 /**
  * Called when the instrument has changed, used to update default values.

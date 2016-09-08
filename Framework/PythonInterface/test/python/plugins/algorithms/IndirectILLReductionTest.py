@@ -28,21 +28,6 @@ class IndirectILLReductionTest(unittest.TestCase):
 
     @classmethod
     def tearDown(cls):
-        #clean up any files we made
-        for ws in cls._output_workspaces[1:]:
-            path = os.path.join(config['defaultsave.directory'], ws.name() + '.nxs')
-            if os.path.isfile(path):
-                try:
-                    os.remove(path)
-                except IOError:
-                    continue
-
-        if os.path.isfile('red.nxs'):
-            try:
-                os.remove('red.nxs')
-            except IOError:
-                pass
-
         #reset output workspaces list
         cls._output_workspaces = []
 
@@ -66,16 +51,6 @@ class IndirectILLReductionTest(unittest.TestCase):
         self.assertEqual(mtd['red'].size(), 1, "WorkspaceGroup red should contain one workspace")
 
         self._workspace_properties(mtd['red'])
-
-    def test_save_results(self):
-        self._args['Run'] = self._run_name
-        self._args['Save'] = True
-
-        alg_test = run_algorithm('IndirectILLReduction', **self._args)
-        path = os.path.join(config['defaultsave.directory'], 'red.nxs')
-
-        self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
-        self.assertTrue(os.path.isfile(path), path)
 
     def test_no_verbose(self):
         self._args['Run'] = self._run_name

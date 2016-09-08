@@ -40,6 +40,9 @@ public:
   ILLEnergyTransfer(IndirectDataReduction *idrUI, QWidget *parent = 0);
   ~ILLEnergyTransfer() override;
 
+  void save();
+  void plot();
+
   void setup() override;
   void run() override;
 
