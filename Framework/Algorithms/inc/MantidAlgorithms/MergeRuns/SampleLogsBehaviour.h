@@ -82,6 +82,29 @@ private:
                        const API::MatrixWorkspace_sptr &ws,
                        const std::string paramsTolerances = "",
                        const bool skipIfInPrimaryMap = false);
+
+  std::vector<double>
+  createTolerancesVector(const std::vector<std::string> &names,
+                         const std::vector<std::string> &tolerances,
+                         const std::string paramsTolerances);
+
+  void updateTimeSeriesProperty(const API::MatrixWorkspace_sptr &addeeWS,
+                                const API::MatrixWorkspace_sptr &outWS,
+                                const std::string name);
+  void updateListProperty(const API::MatrixWorkspace_sptr &addeeWS,
+                          const API::MatrixWorkspace_sptr &outWS,
+                          Kernel::Property *addeeWSProperty,
+                          const std::string name);
+  void checkWarnProperty(const API::MatrixWorkspace_sptr &addeeWS,
+                         Kernel::Property *addeeWSProperty,
+                         const SampleLogBehaviour &behaviour,
+                         const double addeeWSNumber, const double outWSNumber,
+                         const std::string name);
+  void checkErrorProperty(const API::MatrixWorkspace_sptr &addeeWS,
+                          Kernel::Property *addeeWSProperty,
+                          const SampleLogBehaviour &behaviour,
+                          const double addeeWSNumber, const double outWSNumber,
+                          const std::string name);
 };
 
 } // namespace Algorithms

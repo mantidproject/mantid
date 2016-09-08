@@ -87,27 +87,10 @@ void SampleLogsBehaviour::updateSampleMap(
                                       StringTokenizer::TOK_TRIM |
                                           StringTokenizer::TOK_IGNORE_EMPTY);
 
-  size_t numberNames = tokenizer.count();
-  size_t numberTolerances = tokenizerTolerances.count();
   auto tolerancesStringVector = tokenizerTolerances.asVector();
 
-  std::vector<double> tolerancesVector(numberNames);
-
-  if (numberNames == numberTolerances) {
-    std::transform(tolerancesStringVector.begin(), tolerancesStringVector.end(),
-                   tolerancesVector.begin(),
-                   [](const std::string &val) { return std::stod(val); });
-  } else if (paramsTolerances.empty()) {
-    std::fill(tolerancesVector.begin(), tolerancesVector.end(), -1.0);
-  } else if (numberTolerances == 1) {
-    double value = std::stod(tolerancesStringVector.front());
-    std::fill(tolerancesVector.begin(), tolerancesVector.end(), value);
-  } else {
-    throw std::invalid_argument("Invalid length of tolerances, found " +
-                                std::to_string(numberTolerances) +
-                                " tolerance values but " +
-                                std::to_string(numberNames) + " names.");
-  }
+  std::vector<double> tolerancesVector = createTolerancesVector(
+      tokenizer.asVector(), tolerancesStringVector, paramsTolerances);
 
   StringTokenizer::Iterator i = tokenizer.begin();
   std::vector<double>::iterator j = tolerancesVector.begin();
@@ -151,7 +134,8 @@ void SampleLogsBehaviour::updateSampleMap(
     if (sampleLogBehaviour == time_series) {
       try {
         // See if property exists already - merging an output of MergeRuns
-        prop = std::shared_ptr<Property>(ws->getLog(item + TIME_SERIES_SUFFIX)->clone());
+        prop = std::shared_ptr<Property>(
+            ws->getLog(item + TIME_SERIES_SUFFIX)->clone());
       } catch (std::invalid_argument e) {
         // Property does not already exist
         std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(
@@ -166,10 +150,12 @@ void SampleLogsBehaviour::updateSampleMap(
     } else if (sampleLogBehaviour == list) {
       try {
         // See if property exists already - merging an output of MergeRuns
-        prop = std::shared_ptr<Property>(ws->getLog(item + LIST_SUFFIX)->clone());
+        prop =
+            std::shared_ptr<Property>(ws->getLog(item + LIST_SUFFIX)->clone());
       } catch (std::invalid_argument e) {
         ws->mutableRun().addProperty(item + LIST_SUFFIX, prop->value());
-        prop = std::shared_ptr<Property>(ws->getLog(item + LIST_SUFFIX)->clone());
+        prop =
+            std::shared_ptr<Property>(ws->getLog(item + LIST_SUFFIX)->clone());
       }
     }
 
@@ -177,16 +163,45 @@ void SampleLogsBehaviour::updateSampleMap(
   }
 }
 
-void SampleLogsBehaviour::calculateUpdatedSampleLogs(
-    const MatrixWorkspace_sptr &addeeWS, const API::MatrixWorkspace_sptr &outWS) {
-  for (auto item : m_logMap) {
-    Property *wsProperty = addeeWS->getLog(item.first);
+std::vector<double> SampleLogsBehaviour::createTolerancesVector(
+    const std::vector<std::string> &names,
+    const std::vector<std::string> &tolerances,
+    const std::string paramsTolerances) {
+  size_t numberNames = names.size();
+  size_t numberTolerances = tolerances.size();
 
-    double wsNumber = 0;
+  std::vector<double> tolerancesVector(numberNames);
+
+  if (numberNames == numberTolerances) {
+    std::transform(tolerances.begin(), tolerances.end(),
+                   tolerancesVector.begin(),
+                   [](const std::string &val) { return std::stod(val); });
+  } else if (paramsTolerances.empty()) {
+    std::fill(tolerancesVector.begin(), tolerancesVector.end(), -1.0);
+  } else if (numberTolerances == 1) {
+    double value = std::stod(tolerances.front());
+    std::fill(tolerancesVector.begin(), tolerancesVector.end(), value);
+  } else {
+    throw std::invalid_argument("Invalid length of tolerances, found " +
+                                std::to_string(numberTolerances) +
+                                " tolerance values but " +
+                                std::to_string(numberNames) + " names.");
+  }
+
+  return tolerancesVector;
+}
+
+void SampleLogsBehaviour::calculateUpdatedSampleLogs(
+    const MatrixWorkspace_sptr &addeeWS,
+    const API::MatrixWorkspace_sptr &outWS) {
+  for (auto item : m_logMap) {
+    Property *addeeWSProperty = addeeWS->getLog(item.first);
+
+    double addeeWSNumber = 0;
     double outWSNumber = 0;
 
     try {
-      wsNumber = addeeWS->getLogAsSingleValue(item.first);
+      addeeWSNumber = addeeWS->getLogAsSingleValue(item.first);
       outWSNumber = outWS->getLogAsSingleValue(item.first);
     } catch (std::invalid_argument) {
       if (item.second.isNumeric) {
@@ -197,60 +212,92 @@ void SampleLogsBehaviour::calculateUpdatedSampleLogs(
 
     switch (item.second.type) {
     case time_series: {
-      try {
-        // If this already exists we do not need to do anything, Time Series Logs are combined when adding workspaces.
-        addeeWS->getLog(item.first + TIME_SERIES_SUFFIX);
-      } catch (std::invalid_argument e) {
-        auto timeSeriesProp = outWS->mutableRun().getTimeSeriesProperty<double>(
-            item.first + TIME_SERIES_SUFFIX);
-        Kernel::DateAndTime startTime = addeeWS->mutableRun().startTime();
-        double value = addeeWS->mutableRun().getLogAsSingleValue(item.first);
-        timeSeriesProp->addValue(startTime, value);
-      }
+      this->updateTimeSeriesProperty(addeeWS, outWS, item.first);
       break;
     }
     case list: {
-      try {
-        // If this already exists we combine the two strings.
-        auto propertyAddeeWS = addeeWS->getLog(item.first + LIST_SUFFIX);
-        auto propertyOutWS = outWS->mutableRun().getProperty(item.first + LIST_SUFFIX);
-        propertyOutWS->setValue(propertyOutWS->value() + ", " + propertyAddeeWS->value());
-      } catch (std::invalid_argument e) {
-        auto property = outWS->mutableRun().getProperty(item.first + LIST_SUFFIX);
-        property->setValue(property->value() + ", " + wsProperty->value());
-      }
+      this->updateListProperty(addeeWS, outWS, addeeWSProperty, item.first);
       break;
     }
     case warn:
-      if (item.second.isNumeric && item.second.tolerance > 0.0) {
-        if (std::abs(wsNumber - outWSNumber) > item.second.tolerance) {
-          m_logger.warning() << generateDifferenceMessage(
-              item.first, addeeWS->name(), wsProperty->value(),
-              item.second.property->value());
-        }
-      } else {
-        if (item.second.property->value().compare(wsProperty->value()) != 0) {
-          m_logger.warning() << generateDifferenceMessage(
-              item.first, addeeWS->name(), wsProperty->value(),
-              item.second.property->value());
-        }
-      }
+      this->checkWarnProperty(addeeWS, addeeWSProperty, item.second,
+                              addeeWSNumber, outWSNumber, item.first);
       break;
     case fail:
-      if (item.second.isNumeric && item.second.tolerance > 0.0) {
-        if (std::abs(wsNumber - outWSNumber) > item.second.tolerance) {
-          throw std::invalid_argument(generateDifferenceMessage(
-              item.first, addeeWS->name(), wsProperty->value(),
-              item.second.property->value()));
-        }
-      } else {
-        if (item.second.property->value().compare(wsProperty->value()) != 0) {
-          throw std::invalid_argument(generateDifferenceMessage(
-              item.first, addeeWS->name(), wsProperty->value(),
-              item.second.property->value()));
-        }
-      }
+      this->checkErrorProperty(addeeWS, addeeWSProperty, item.second,
+                               addeeWSNumber, outWSNumber, item.first);
       break;
+    }
+  }
+}
+
+void SampleLogsBehaviour::updateTimeSeriesProperty(
+    const MatrixWorkspace_sptr &addeeWS, const MatrixWorkspace_sptr &outWS,
+    const std::string name) {
+  try {
+    // If this already exists we do not need to do anything, Time Series Logs
+    // are combined when adding workspaces.
+    addeeWS->getLog(name + TIME_SERIES_SUFFIX);
+  } catch (std::invalid_argument e) {
+    auto timeSeriesProp = outWS->mutableRun().getTimeSeriesProperty<double>(
+        name + TIME_SERIES_SUFFIX);
+    Kernel::DateAndTime startTime = addeeWS->mutableRun().startTime();
+    double value = addeeWS->mutableRun().getLogAsSingleValue(name);
+    timeSeriesProp->addValue(startTime, value);
+  }
+}
+
+void SampleLogsBehaviour::updateListProperty(
+    const MatrixWorkspace_sptr &addeeWS, const MatrixWorkspace_sptr &outWS,
+    Property *addeeWSProperty, const std::string name) {
+  try {
+    // If this already exists we combine the two strings.
+    auto propertyAddeeWS = addeeWS->getLog(name + LIST_SUFFIX);
+    auto propertyOutWS = outWS->mutableRun().getProperty(name + LIST_SUFFIX);
+    propertyOutWS->setValue(propertyOutWS->value() + ", " +
+                            propertyAddeeWS->value());
+  } catch (std::invalid_argument e) {
+    auto property = outWS->mutableRun().getProperty(name + LIST_SUFFIX);
+    property->setValue(property->value() + ", " + addeeWSProperty->value());
+  }
+}
+
+void SampleLogsBehaviour::checkWarnProperty(const MatrixWorkspace_sptr &addeeWS,
+                                            Property *addeeWSProperty,
+                                            const SampleLogBehaviour &behaviour,
+                                            const double addeeWSNumber,
+                                            const double outWSNumber,
+                                            const std::string name) {
+  if (behaviour.isNumeric && behaviour.tolerance > 0.0) {
+    if (std::abs(addeeWSNumber - outWSNumber) > behaviour.tolerance) {
+      m_logger.warning() << generateDifferenceMessage(
+          name, addeeWS->name(), addeeWSProperty->value(),
+          behaviour.property->value());
+    }
+  } else {
+    if (behaviour.property->value().compare(addeeWSProperty->value()) != 0) {
+      m_logger.warning() << generateDifferenceMessage(
+          name, addeeWS->name(), addeeWSProperty->value(),
+          behaviour.property->value());
+    }
+  }
+}
+
+void SampleLogsBehaviour::checkErrorProperty(
+    const MatrixWorkspace_sptr &addeeWS, Property *addeeWSProperty,
+    const SampleLogBehaviour &behaviour, const double addeeWSNumber,
+    const double outWSNumber, const std::string name) {
+  if (behaviour.isNumeric && behaviour.tolerance > 0.0) {
+    if (std::abs(addeeWSNumber - outWSNumber) > behaviour.tolerance) {
+      throw std::invalid_argument(generateDifferenceMessage(
+          name, addeeWS->name(), addeeWSProperty->value(),
+          behaviour.property->value()));
+    }
+  } else {
+    if (behaviour.property->value().compare(addeeWSProperty->value()) != 0) {
+      throw std::invalid_argument(generateDifferenceMessage(
+          name, addeeWS->name(), addeeWSProperty->value(),
+          behaviour.property->value()));
     }
   }
 }
