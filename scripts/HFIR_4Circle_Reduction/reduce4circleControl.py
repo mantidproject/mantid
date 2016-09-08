@@ -2170,10 +2170,10 @@ class CWSCDReductionControl(object):
         :param exp_number: experiment number
         :param start_scan:
         :param end_scan:
-        :return: a list. first item is max_count
+        :return: 3-tuple (status, scan_summary list, error message)
         """
         # Check
-        assert isinstance(exp_number, int)
+        assert isinstance(exp_number, int), 'Experiment number must be an integer but not %s.' % type(exp_number)
         if isinstance(start_scan, int) is False:
             start_scan = 1
         if isinstance(end_scan , int) is False:
@@ -2215,7 +2215,7 @@ class CWSCDReductionControl(object):
 
                 if num_rows == 0:
                     # it is an empty table
-                    error_message = 'Scan %d: empty spice table.\n' % scan_number
+                    error_message += 'Scan %d: empty spice table.\n' % scan_number
                     continue
 
                 col_name_list = spice_table_ws.getColumnNames()
@@ -2224,10 +2224,12 @@ class CWSCDReductionControl(object):
                 l_col_index = col_name_list.index('l')
                 col_2theta_index = col_name_list.index('2theta')
                 m1_col_index = col_name_list.index('m1')
+                tsample_col_index = col_name_list.index('tsample')
 
                 max_count = 0
                 max_row = 0
                 max_h = max_k = max_l = 0
+                max_tsample = 0.
 
                 two_theta = m1 = -1
 
@@ -2240,6 +2242,7 @@ class CWSCDReductionControl(object):
                         max_k = spice_table_ws.cell(i_row, k_col_index)
                         max_l = spice_table_ws.cell(i_row, l_col_index)
                         two_theta = spice_table_ws.cell(i_row, col_2theta_index)
+                        max_tsample = spice_table_ws.cell(i_row, tsample_col_index)
                         m1 = spice_table_ws.cell(i_row, m1_col_index)
                 # END-FOR
 
@@ -2252,13 +2255,14 @@ class CWSCDReductionControl(object):
 
                 # appending to list
                 scan_sum_list.append([max_count, scan_number, max_row, max_h, max_k, max_l,
-                                      q_range])
+                                      q_range, max_tsample])
 
             except RuntimeError as e:
                 print e
                 return False, str(e)
             except ValueError as e:
-                return False, 'Unable to locate column h, k, or l. See %s.' % str(e)
+                # Unable to import a SPICE file without necessary information
+                error_message += 'Scan %d: unable to locate column h, k, or l. See %s.' % (scan_number, str(e))
         # END-FOR (scan_number)
 
         if error_message != '':
@@ -2266,7 +2270,7 @@ class CWSCDReductionControl(object):
 
         self._scanSummaryList = scan_sum_list
 
-        return True, scan_sum_list
+        return True, scan_sum_list, error_message
 
 
 def convert_spice_ub_to_mantid(spice_ub):
