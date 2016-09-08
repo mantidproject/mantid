@@ -48,11 +48,21 @@ public:
 private:
   Presenter_wptr m_presenter;
 
+  Presenter_sptr lockPresenter();
+
+  // ADS Notification Handlers
   void handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr pNf);
   Poco::NObserver<ADSAdapter, Mantid::API::WorkspaceAddNotification>
       m_addObserver;
 
-  Presenter_sptr lockPresenter();
+  void
+  handleDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr pNf);
+  Poco::NObserver<ADSAdapter, Mantid::API::WorkspacePostDeleteNotification>
+      m_deleteObserver;
+
+  void handleClearADS(Mantid::API::ClearADSNotification_ptr pNf);
+  Poco::NObserver<ADSAdapter, Mantid::API::ClearADSNotification>
+      m_clearADSObserver;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

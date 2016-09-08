@@ -9,15 +9,23 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 ADSAdapter::ADSAdapter()
-    : m_addObserver(*this, &ADSAdapter::handleAddWorkspace) {
+    : m_addObserver(*this, &ADSAdapter::handleAddWorkspace),
+      m_deleteObserver(*this, &ADSAdapter::handleDeleteWorkspace),
+      m_clearADSObserver(*this, &ADSAdapter::handleClearADS) {
 
   AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
   dataStore.notificationCenter.addObserver(m_addObserver);
+  dataStore.notificationCenter.addObserver(m_deleteObserver);
+  dataStore.notificationCenter.addObserver(m_clearADSObserver);
 }
 
 ADSAdapter::~ADSAdapter() {
   Mantid::API::AnalysisDataService::Instance()
       .notificationCenter.removeObserver(m_addObserver);
+  Mantid::API::AnalysisDataService::Instance()
+      .notificationCenter.removeObserver(m_deleteObserver);
+  Mantid::API::AnalysisDataService::Instance()
+      .notificationCenter.removeObserver(m_clearADSObserver);
 }
 
 void ADSAdapter::registerPresenter(Presenter_wptr presenter) {
@@ -48,6 +56,19 @@ void ADSAdapter::handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspaceLoaded);
+}
+
+void ADSAdapter::handleDeleteWorkspace(
+    Mantid::API::WorkspacePostDeleteNotification_ptr pNf) {
+  auto presenter = lockPresenter();
+  presenter->notifyFromWorkspaceProvider(
+      WorkspaceProviderNotifiable::Flag::WorkspaceDeleted);
+}
+
+void ADSAdapter::handleClearADS(Mantid::API::ClearADSNotification_ptr pNf) {
+  auto presenter = lockPresenter();
+  presenter->notifyFromWorkspaceProvider(
+      WorkspaceProviderNotifiable::Flag::WorkspaceDeleted);
 }
 
 } // namespace MantidQt

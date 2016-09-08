@@ -22,12 +22,15 @@ public:
   }
   static void destroySuite(WorkspacePresenterTest *suite) { delete suite; }
 
-  void testLoadWorkspaceFromDock() {
-    auto mockView = boost::make_shared<NiceMock<MockWorkspaceDockView>>();
+  void setUp() {
+    mockView.reset();
+    mockView = boost::make_shared<NiceMock<MockWorkspaceDockView>>();
     mockView->init();
 
-    auto presenter = mockView->getPresenterSharedPtr();
+    presenter = mockView->getPresenterSharedPtr();
+  }
 
+  void testLoadWorkspaceFromDock() {
     EXPECT_CALL(*mockView.get(), showLoadDialog()).Times(1);
 
     presenter->notifyFromView(ViewNotifiable::Flag::LoadWorkspace);
@@ -36,11 +39,6 @@ public:
   }
 
   void testLoadWorkspaceExternal() {
-    auto mockView = boost::make_shared<NiceMock<MockWorkspaceDockView>>();
-    mockView->init();
-
-    auto presenter = mockView->getPresenterSharedPtr();
-
     auto wksp = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
 
     EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
@@ -52,5 +50,40 @@ public:
     AnalysisDataService::Instance().remove("wksp");
   }
 
-  void testSomething() { TS_FAIL("Create tests for WorkspacePresenter"); }
+  void testDeleteWorkspacesFromDock() {
+    EXPECT_CALL(*mockView.get(), deleteConfirmation()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), deleteWorkspaces()).Times(AtLeast(0));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testDeleteWorkspacesExternal() {
+    auto wksp = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+
+    AnalysisDataService::Instance().add("wksp", wksp);
+
+    EXPECT_CALL(*mockView.get(), updateTree(_)).Times(Exactly(1));
+
+    AnalysisDataService::Instance().remove("wksp");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testADSCleared() {
+    auto wksp = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+
+    AnalysisDataService::Instance().add("wksp", wksp);
+
+    EXPECT_CALL(*mockView.get(), updateTree(_)).Times(Exactly(1));
+
+    AnalysisDataService::Instance().clear();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+private:
+  boost::shared_ptr<NiceMock<MockWorkspaceDockView>> mockView;
+  boost::shared_ptr<WorkspacePresenter> presenter;
 };

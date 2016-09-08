@@ -56,7 +56,7 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other) const {
   }
 
   // If both should be sorted, and the scheme is set to ByName ...
-  if (m_parent->getSortScheme() == ByName) {
+  if (m_parent->getSortScheme() == MantidItemSortScheme::ByName) {
     if (QString::compare(text(0), other.text(0), Qt::CaseInsensitive) < 0)
       return true;
     return false;

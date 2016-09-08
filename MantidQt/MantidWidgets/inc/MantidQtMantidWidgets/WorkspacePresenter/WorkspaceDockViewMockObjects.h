@@ -25,13 +25,14 @@ public:
   }
 
   MOCK_METHOD0(showLoadDialog, void());
+  MOCK_CONST_METHOD0(deleteConfirmation, bool());
+  MOCK_METHOD0(deleteWorkspaces, void());
   MOCK_METHOD1(
       updateTree,
       void(const std::map<std::string, Mantid::API::Workspace_sptr> &items));
-  MOCK_METHOD2(populateTopLevel,
-               void(const std::map<std::string, Mantid::API::Workspace_sptr>
-                        &topLevelItems,
-                    const StringList &expanded));
+
+  MOCK_CONST_METHOD0(getSelectedWorkspaceName, std::string());
+  MOCK_CONST_METHOD0(getSelectedWorkspace, Mantid::API::Workspace_sptr());
 
   // Methods which are not to be mocked
   WorkspacePresenter_wptr getPresenterWeakPtr() override { return presenter; }

@@ -73,7 +73,13 @@ void WorkspacePresenter::saveWorkspace() {}
 void WorkspacePresenter::renameWorkspace() {}
 void WorkspacePresenter::groupWorkspaces() {}
 void WorkspacePresenter::sortWorkspaces() {}
-void WorkspacePresenter::deleteWorkspaces() {}
+
+void WorkspacePresenter::deleteWorkspaces() {
+  auto view = lockView();
+
+  if (view->deleteConfirmation())
+    view->deleteWorkspaces();
+}
 
 void WorkspacePresenter::workspaceLoaded() {
   auto view = lockView();
@@ -84,7 +90,11 @@ void WorkspacePresenter::workspaceSaved() {}
 void WorkspacePresenter::workspaceRenamed() {}
 void WorkspacePresenter::workspacesGrouped() {}
 void WorkspacePresenter::workspacesSorted() {}
-void WorkspacePresenter::workspacesDeleted() {}
+
+void WorkspacePresenter::workspacesDeleted() {
+  auto view = lockView();
+  view->updateTree(m_adapter->topLevelItems());
+}
 
 DockView_sptr WorkspacePresenter::lockView() {
   auto view_sptr = m_view.lock();

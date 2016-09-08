@@ -51,13 +51,14 @@ public:
   virtual void init() = 0;
   virtual WorkspacePresenter_wptr getPresenterWeakPtr() = 0;
   virtual WorkspacePresenter_sptr getPresenterSharedPtr() = 0;
-
+ 
   virtual void showLoadDialog() = 0;
+  virtual bool deleteConfirmation() const = 0;
+  virtual void deleteWorkspaces() = 0;
+  virtual std::string getSelectedWorkspaceName() const = 0;
+  virtual Mantid::API::Workspace_sptr getSelectedWorkspace() const = 0;
   virtual void updateTree(
       const std::map<std::string, Mantid::API::Workspace_sptr> &items) = 0;
-  virtual void populateTopLevel(
-      const std::map<std::string, Mantid::API::Workspace_sptr> &topLevelItems,
-      const StringList &expanded) = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
