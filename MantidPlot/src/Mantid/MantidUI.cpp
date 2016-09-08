@@ -676,7 +676,6 @@ MantidUI::plotMDList(const QStringList &wsNames, const int plotAxis,
   // Check if window does not contain any curves and should be closed
   ml->maybeNeedToClose();
 
-
   return ml;
 }
 
