@@ -9,6 +9,8 @@ Framework Changes
 
 - A cmake parameter ``ENABLE_MANTIDPLOT`` (default ``True``) was added to facilitate framework only builds.
 
+- A race condition when accessing a singleton from multiple threads was fixed. 
+
 HistogramData
 -------------
 
@@ -138,6 +140,7 @@ Python
   individual atoms.
 - :py:obj:`mantid.geometry.OrientedLattice` set U with determinant -1 exposed to python
 - The setDisplayNormalization and setDisplayNormalizationHisto methods for MDEventWorkspaces are now exposed to Python
+- Tube calibration now has ``saveCalibration`` and ``readCalibrationFile`` functions similar to ``savePeak`` and ``readPeakFile``.
 
 Python Algorithms
 #################
