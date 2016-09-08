@@ -472,7 +472,7 @@ void EnggDiffFittingPresenter::processSingleRun(
   * match the given base filename (without ext) in the given folder.
   *
   * @param directoryToSearch The directory to search for these files
-  * @param baseFileNames The base filename to find in this folder
+  * @param baseFileNamesToFind The base filename to find in this folder
   * @param foundFullFilePath Holds the path of a file if one was found
   * which matched the given base filename
   *
