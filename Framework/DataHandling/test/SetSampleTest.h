@@ -10,6 +10,7 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"

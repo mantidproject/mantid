@@ -84,7 +84,7 @@ void GeneralisedSecondDifference::exec() {
   computePrefactors();
 
   const int n_specs = spec_max - spec_min + 1;
-  const int n_points = static_cast<int>(inputWS->dataY(0).size()) - 2 * n_av;
+  const int n_points = static_cast<int>(inputWS->y(0).size()) - 2 * n_av;
   if (n_points < 1) {
     throw std::invalid_argument("Invalid (M,Z) values");
   }
@@ -100,14 +100,16 @@ void GeneralisedSecondDifference::exec() {
     int out_index = i - spec_min;
     out->getSpectrum(out_index)
         .setSpectrumNo(inputWS->getSpectrum(i).getSpectrumNo());
-    const MantidVec &refX = inputWS->readX(i);
-    const MantidVec &refY = inputWS->readY(i);
-    const MantidVec &refE = inputWS->readE(i);
-    MantidVec &outX = out->dataX(out_index);
-    MantidVec &outY = out->dataY(out_index);
-    MantidVec &outE = out->dataE(out_index);
+
+    const auto &refX = inputWS->x(i);
+    const auto &refY = inputWS->y(i);
+    const auto &refE = inputWS->e(i);
+    auto &outX = out->mutableX(out_index);
+    auto &outY = out->mutableY(out_index);
+    auto &outE = out->mutableE(out_index);
 
     std::copy(refX.begin() + n_av, refX.end() - n_av, outX.begin());
+
     auto itInY = refY.cbegin();
     auto itOutY = outY.begin();
     auto itInE = refE.cbegin();
@@ -139,9 +141,9 @@ void GeneralisedSecondDifference::computePrefactors() {
   if (m_z == 0) //
   {
     m_Cij.resize(3);
-    std::copy(previous.begin(), previous.end(), m_Cij.begin());
+    m_Cij.assign(previous.begin(), previous.end());
     m_Cij2.resize(3);
-    std::transform(m_Cij.begin(), m_Cij.end(), m_Cij2.begin(),
+    std::transform(m_Cij.cbegin(), m_Cij.cend(), m_Cij2.begin(),
                    VectorHelper::Squares<double>());
     return;
   }
@@ -161,16 +163,15 @@ void GeneralisedSecondDifference::computePrefactors() {
           next[i] += previous[index];
       }
     }
-    previous.resize(n_el);
-    std::copy(next.begin(), next.end(), previous.begin());
+    previous = next;
     max_index_prev = max_index;
     n_el_prev = n_el;
   } while (zz != m_z);
 
   m_Cij.resize(2 * m_z * m_m + 3);
-  std::copy(previous.begin(), previous.end(), m_Cij.begin());
+  m_Cij.assign(previous.begin(), previous.end());
   m_Cij2.resize(2 * m_z * m_m + 3);
-  std::transform(m_Cij.begin(), m_Cij.end(), m_Cij2.begin(),
+  std::transform(m_Cij.cbegin(), m_Cij.cend(), m_Cij2.begin(),
                  VectorHelper::Squares<double>());
 }
 

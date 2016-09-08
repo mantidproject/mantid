@@ -215,6 +215,28 @@ Matrix<T> &Matrix<T>::operator=(const Matrix<T> &A)
 }
 
 template <typename T>
+Matrix<T>::Matrix(Matrix<T> &&other) noexcept : nx(other.nx),
+                                                ny(other.ny),
+                                                V(other.V) {
+  other.nx = 0;
+  other.ny = 0;
+  other.V = nullptr;
+}
+
+template <typename T>
+Matrix<T> &Matrix<T>::operator=(Matrix<T> &&other) noexcept {
+  nx = other.nx;
+  ny = other.ny;
+  V = other.V;
+
+  other.nx = 0;
+  other.ny = 0;
+  other.V = nullptr;
+
+  return *this;
+}
+
+template <typename T>
 Matrix<T>::~Matrix()
 /**
   Delete operator :: removes memory for

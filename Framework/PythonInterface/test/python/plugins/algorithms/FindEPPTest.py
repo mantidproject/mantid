@@ -6,6 +6,9 @@ from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService, WorkspaceGroup
 import numpy as np
 
+
+
+
 class FindEPPTest(unittest.TestCase):
 
     def setUp(self):
@@ -59,6 +62,10 @@ class FindEPPTest(unittest.TestCase):
         self.assertAlmostEqual(89.3249, wsoutput.column(3)[1], places=4)
         run_algorithm("DeleteWorkspace", Workspace=wsoutput)
 
+    def _float_values_for_row(self, wks, idx):
+        """ gets in a list the float values in a row of a table workspace """
+        return [val for key, val in wks.row(idx).items() if isinstance(val, float)]
+
     def testFitFailedLinear(self):
         # tests failed fit
         ws_linear = CreateSampleWorkspace(Function="User Defined",UserDefinedFunction="name=LinearBackground,A0=0.0;",
@@ -71,8 +78,8 @@ class FindEPPTest(unittest.TestCase):
         self.assertEqual(['failed', 'failed'], wsoutput.column(8))
         self.assertEqual([0, 1], wsoutput.column(0))
         zeros = np.zeros(7)
-        self.assertTrue(np.allclose(zeros, np.array(wsoutput.row(0).values()[1:-1])))
-        self.assertTrue(np.allclose(zeros, np.array(wsoutput.row(1).values()[1:-1])))
+        self.assertTrue(np.allclose(zeros, self._float_values_for_row(wsoutput, 0)))
+        self.assertTrue(np.allclose(zeros, self._float_values_for_row(wsoutput, 1)))
 
         run_algorithm("DeleteWorkspace", Workspace=wsoutput)
         run_algorithm("DeleteWorkspace", Workspace=ws_linear)
@@ -89,8 +96,8 @@ class FindEPPTest(unittest.TestCase):
         self.assertEqual(['failed', 'failed'], wsoutput.column(8))
         self.assertEqual([0, 1], wsoutput.column(0))
         zeros = np.zeros(7)
-        self.assertTrue(np.allclose(zeros, np.array(wsoutput.row(0).values()[1:-1])))
-        self.assertTrue(np.allclose(zeros, np.array(wsoutput.row(1).values()[1:-1])))
+        self.assertTrue(np.allclose(zeros, self._float_values_for_row(wsoutput, 0)))
+        self.assertTrue(np.allclose(zeros, self._float_values_for_row(wsoutput, 1)))
 
         run_algorithm("DeleteWorkspace", Workspace=wsoutput)
         run_algorithm("DeleteWorkspace", Workspace=ws_narrow)

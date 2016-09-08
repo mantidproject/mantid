@@ -7,6 +7,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 
 #include <boost/algorithm/string/case_conv.hpp>
@@ -278,7 +279,7 @@ void SetSample::setSampleShape(API::MatrixWorkspace_sptr &workspace,
       auto shapeObject = can->createSampleShape(shapeArgs);
       // Set the object directly on the sample ensuring we preserve the
       // material
-      const auto &mat = workspace->sample().getMaterial();
+      const auto mat = workspace->sample().getMaterial();
       shapeObject->setMaterial(mat);
       workspace->mutableSample().setShape(*shapeObject);
     } else {

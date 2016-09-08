@@ -64,7 +64,7 @@ public:
    * form.
    */
   Base *loadFromProject(const std::string &lines, ApplicationWindow *app,
-                        const int fileVersion = -1) const {
+                        const int fileVersion = -1) const override {
     return C::loadFromProject(lines, app, fileVersion);
   }
 };
@@ -178,8 +178,6 @@ private:
   FactoryMap _map;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
 template class Mantid::Kernel::SingletonHolder<WindowFactoryImpl>;

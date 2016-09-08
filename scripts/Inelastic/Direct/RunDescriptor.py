@@ -313,6 +313,7 @@ class RunList(object):
 #--------------------------------------------------------------------------------------------------
 #pylint: disable=too-many-instance-attributes
 #pylint: disable=too-many-public-methods
+#pylint: disable=attribute-defined-outside-init
 class RunDescriptor(PropDescriptor):
     """Descriptor to work with a run or list of runs specified
        either as run number (run file) or as
@@ -793,7 +794,7 @@ class RunDescriptor(PropDescriptor):
         self.synchronize_ws(value)
 
 #--------------------------------------------------------------------------------------------------------------------
-#pylint: disable=too-many-arguments
+#pylint: disable=too-many-arguments,redefined-outer-name
     def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
         """Chop part of the original workspace and sets it up to this run as new original.
 
@@ -1516,7 +1517,7 @@ class RunDescriptorDependent(RunDescriptor):
         else:
             return self._host.get_ws_clone(clone_name)
 #pylint: disable=too-many-arguments
-#pylint: disable=too-many-public-methods
+#pylint: disable=too-many-public-methods,redefined-outer-name
     def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
         if self._has_own_value:
             return super(RunDescriptorDependent,self).chop_ws_part(origin,tof_range,rebin,chunk_num,n_chunks)

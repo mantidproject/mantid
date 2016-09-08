@@ -110,13 +110,6 @@ bool compareEventPulseTimeTOF(const TofEvent &e1, const TofEvent &e2) {
   return false;
 }
 
-//==========================================================================
-// ---------------------- EventList stuff ----------------------------------
-//==========================================================================
-
-// --- Constructors
-// -------------------------------------------------------------------
-
 /// Constructor (empty)
 // EventWorkspace is always histogram data and so is thus EventList
 EventList::EventList()
@@ -138,8 +131,7 @@ EventList::EventList(EventWorkspaceMRU *mru, specnum_t specNo)
 EventList::EventList(const EventList &rhs)
     : IEventList(rhs), m_histogram(HistogramData::Histogram::XMode::BinEdges,
                                    HistogramData::Histogram::YMode::Counts),
-      mru(rhs.mru) {
-  // Call the copy operator to do the job,
+      mru{nullptr} {
   this->operator=(rhs);
 }
 
@@ -289,6 +281,7 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
  * @return reference to this
  * */
 EventList &EventList::operator=(const EventList &rhs) {
+  // Note that we are NOT copying the MRU pointer.
   IEventList::operator=(rhs);
   m_histogram = rhs.m_histogram;
   events = rhs.events;
@@ -472,10 +465,7 @@ EventList &EventList::operator+=(const EventList &more_events) {
   // No guaranteed order
   this->order = UNSORTED;
   // Do a union between the detector IDs of both lists
-  std::set<detid_t>::const_iterator it;
-  for (it = more_events.detectorIDs.begin();
-       it != more_events.detectorIDs.end(); ++it)
-    this->detectorIDs.insert(*it);
+  addDetectorIDs(more_events.getDetectorIDs());
 
   return *this;
 }
@@ -852,6 +842,8 @@ EventList::getWeightedEventsNoTime() const {
  * associated detector ID's.
  * */
 void EventList::clear(const bool removeDetIDs) {
+  if (mru)
+    mru->deleteIndex(this);
   this->events.clear();
   std::vector<TofEvent>().swap(this->events); // STL Trick to release memory
   this->weightedEvents.clear();
@@ -861,7 +853,7 @@ void EventList::clear(const bool removeDetIDs) {
   std::vector<WeightedEventNoTime>().swap(
       this->weightedEventsNoTime); // STL Trick to release memory
   if (removeDetIDs)
-    this->detectorIDs.clear();
+    this->clearDetectorIDs();
 }
 
 /** Clear any unused event lists (the ones that do not
@@ -893,9 +885,6 @@ void EventList::clearData() { this->clear(false); }
  * @param newMRU :: new MRU for the workspace containing this EventList
  */
 void EventList::setMRU(EventWorkspaceMRU *newMRU) { mru = newMRU; }
-
-/** Return the MRU list for this event list */
-EventWorkspaceMRU *EventList::getMRU() { return mru; }
 
 /** Reserve a certain number of entries in the (NOT-WEIGHTED) event list. Do NOT
  *call
@@ -1429,7 +1418,7 @@ size_t EventList::histogram_size() const {
 void EventList::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
   m_histogram.setX(X);
   if (mru)
-    mru->deleteIndex(this->m_specNo);
+    mru->deleteIndex(this);
 }
 
 /** Deprecated, use mutableX() instead. Returns a reference to the x data.
@@ -1437,7 +1426,7 @@ void EventList::setX(const Kernel::cow_ptr<HistogramData::HistogramX> &X) {
  */
 MantidVec &EventList::dataX() {
   if (mru)
-    mru->deleteIndex(this->m_specNo);
+    mru->deleteIndex(this);
   return m_histogram.dataX();
 }
 
@@ -1544,7 +1533,7 @@ Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
   // Is the data in the mrulist?
   if (mru) {
     mru->ensureEnoughBuffersY(thread);
-    yData = mru->findY(thread, this->m_specNo);
+    yData = mru->findY(thread, this);
   }
 
   if (!yData) {
@@ -1557,10 +1546,10 @@ Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
 
     // Lets save it in the MRU
     if (mru) {
-      mru->insertY(thread, yData, this->m_specNo);
+      mru->insertY(thread, yData, this);
       auto eData = Kernel::make_cow<HistogramData::HistogramE>(std::move(E));
       mru->ensureEnoughBuffersE(thread);
-      mru->insertE(thread, eData, this->m_specNo);
+      mru->insertE(thread, eData, this);
     }
   }
   return yData;
@@ -1574,7 +1563,7 @@ Kernel::cow_ptr<HistogramData::HistogramE> EventList::sharedE() const {
   // Is the data in the mrulist?
   if (mru) {
     mru->ensureEnoughBuffersE(thread);
-    eData = mru->findE(thread, this->m_specNo);
+    eData = mru->findE(thread, this);
   }
 
   if (!eData) {
@@ -1586,7 +1575,7 @@ Kernel::cow_ptr<HistogramData::HistogramE> EventList::sharedE() const {
 
     // Lets save it in the MRU
     if (mru)
-      mru->insertE(thread, eData, this->m_specNo);
+      mru->insertE(thread, eData, this);
   }
   return eData;
 }
@@ -3759,9 +3748,8 @@ void EventList::filterByPulseTime(DateAndTime start, DateAndTime stop,
   output.clear();
   // Has to match the given type
   output.switchTo(eventType);
-  // Copy the detector IDs
-  output.detectorIDs = this->detectorIDs;
-  output.setX(this->ptrX());
+  output.setDetectorIDs(this->getDetectorIDs());
+  output.setHistogram(m_histogram);
 
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {
@@ -3793,9 +3781,8 @@ void EventList::filterByTimeAtSample(Kernel::DateAndTime start,
   output.clear();
   // Has to match the given type
   output.switchTo(eventType);
-  // Copy the detector IDs
-  output.detectorIDs = this->detectorIDs;
-  output.setX(this->ptrX());
+  output.setDetectorIDs(this->getDetectorIDs());
+  output.setHistogram(m_histogram);
 
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {
@@ -4000,8 +3987,8 @@ void EventList::splitByTime(Kernel::TimeSplitterType &splitter,
   size_t numOutputs = outputs.size();
   for (size_t i = 0; i < numOutputs; i++) {
     outputs[i]->clear();
-    outputs[i]->detectorIDs = this->detectorIDs;
-    outputs[i]->setX(this->ptrX());
+    outputs[i]->setDetectorIDs(this->getDetectorIDs());
+    outputs[i]->setHistogram(m_histogram);
     // Match the output event type.
     outputs[i]->switchTo(eventType);
   }
@@ -4143,8 +4130,8 @@ void EventList::splitByFullTime(Kernel::TimeSplitterType &splitter,
   for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter) {
     EventList *opeventlist = outiter->second;
     opeventlist->clear();
-    opeventlist->detectorIDs = this->detectorIDs;
-    opeventlist->setX(this->ptrX());
+    opeventlist->setDetectorIDs(this->getDetectorIDs());
+    opeventlist->setHistogram(m_histogram);
     // Match the output event type.
     opeventlist->switchTo(eventType);
   }
@@ -4271,8 +4258,8 @@ std::string EventList::splitByFullTimeMatrixSplitter(
        outiter != vec_outputEventList.end(); ++outiter) {
     EventList *opeventlist = outiter->second;
     opeventlist->clear();
-    opeventlist->detectorIDs = this->detectorIDs;
-    opeventlist->setX(this->ptrX());
+    opeventlist->setDetectorIDs(this->getDetectorIDs());
+    opeventlist->setHistogram(m_histogram);
     // Match the output event type.
     opeventlist->switchTo(eventType);
   }
@@ -4391,8 +4378,8 @@ void EventList::splitByPulseTime(Kernel::TimeSplitterType &splitter,
   for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter) {
     EventList *opeventlist = outiter->second;
     opeventlist->clear();
-    opeventlist->detectorIDs = this->detectorIDs;
-    opeventlist->setX(this->ptrX());
+    opeventlist->setDetectorIDs(this->getDetectorIDs());
+    opeventlist->setHistogram(m_histogram);
     // Match the output event type.
     opeventlist->switchTo(eventType);
   }
@@ -4564,7 +4551,7 @@ void EventList::convertUnitsQuickly(const double &factor, const double &power) {
 
 HistogramData::Histogram &EventList::mutableHistogramRef() {
   if (mru)
-    mru->deleteIndex(this->m_specNo);
+    mru->deleteIndex(this);
   return m_histogram;
 }
 
