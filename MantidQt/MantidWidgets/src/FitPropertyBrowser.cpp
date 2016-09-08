@@ -2690,12 +2690,16 @@ void FitPropertyBrowser::processMultiBGResults() {
  */
 void FitPropertyBrowser::setWorkspaceProperties() {
   // remove old properties
-  if (m_settingsGroup->property()->subProperties().contains(m_workspaceIndex)) {
-    m_settingsGroup->property()->removeSubProperty(m_workspaceIndex);
-  } else if (m_settingsGroup->property()->subProperties().contains(m_xColumn)) {
-    m_settingsGroup->property()->removeSubProperty(m_xColumn);
-    m_settingsGroup->property()->removeSubProperty(m_yColumn);
-    m_settingsGroup->property()->removeSubProperty(m_errColumn);
+  if (m_browser->isItemVisible(m_settingsGroup)) {
+    if (m_settingsGroup->property()->subProperties().contains(
+            m_workspaceIndex)) {
+      m_settingsGroup->property()->removeSubProperty(m_workspaceIndex);
+    } else if (m_settingsGroup->property()->subProperties().contains(
+                   m_xColumn)) {
+      m_settingsGroup->property()->removeSubProperty(m_xColumn);
+      m_settingsGroup->property()->removeSubProperty(m_yColumn);
+      m_settingsGroup->property()->removeSubProperty(m_errColumn);
+    }
   }
 
   Mantid::API::Workspace_sptr ws;
@@ -2707,13 +2711,15 @@ void FitPropertyBrowser::setWorkspaceProperties() {
   if (!ws)
     return;
   // if it is a MatrixWorkspace insert WorkspaceIndex
-  auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
-  if (mws &&
-      !m_settingsGroup->property()->subProperties().contains(
-          m_workspaceIndex)) {
-    m_settingsGroup->property()->insertSubProperty(m_workspaceIndex,
-                                                   m_workspace);
-    return;
+  if (m_browser->isItemVisible(m_settingsGroup)) {
+    auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+    if (mws &&
+        !m_settingsGroup->property()->subProperties().contains(
+            m_workspaceIndex)) {
+      m_settingsGroup->property()->insertSubProperty(m_workspaceIndex,
+                                                     m_workspace);
+      return;
+    }
   }
 
   // if it is a TableWorkspace insert the column properties
