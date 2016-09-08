@@ -5,13 +5,11 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 #include <boost/shared_ptr.hpp>
 
-#include <QDesktopServices>
-#include <QUrl>
 //-----------------------------------------------------------------------------
 
 namespace MantidQt {
@@ -32,8 +30,8 @@ void MuonAnalysisFitDataTab::init() {
 * Muon Analysis Data Analysis help (slot)
 */
 void MuonAnalysisFitDataTab::muonAnalysisHelpDataAnalysisClicked() {
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-                                 "MuonAnalysisDataAnalysis"));
+  MantidQt::API::HelpWindow::showCustomInterface(
+      nullptr, QString("Muon_Analysis"), QString("data-analysis"));
 }
 
 /**

@@ -21,6 +21,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
@@ -55,8 +56,6 @@
 #include <QHeaderView>
 #include <QApplication>
 #include <QTemporaryFile>
-#include <QDesktopServices>
-#include <QUrl>
 
 #include <fstream>
 
@@ -328,16 +327,16 @@ void MuonAnalysis::initLayout() {
 * Muon Analysis help (slot)
 */
 void MuonAnalysis::muonAnalysisHelpClicked() {
-  QDesktopServices::openUrl(
-      QUrl(QString("http://www.mantidproject.org/") + "MuonAnalysis"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
+                                                 QString("Muon_Analysis"));
 }
 
 /**
 * Muon Analysis Grouping help (slot)
 */
 void MuonAnalysis::muonAnalysisHelpGroupingClicked() {
-  QDesktopServices::openUrl(
-      QUrl(QString("http://www.mantidproject.org/") + "MuonAnalysisGrouping"));
+  MantidQt::API::HelpWindow::showCustomInterface(
+      nullptr, QString("Muon_Analysis"), QString("grouping-options"));
 }
 
 /**
