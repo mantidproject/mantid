@@ -270,11 +270,6 @@ void EnggDiffFittingPresenter::processFullPathInput(
     const Poco::Path &pocoFilePath,
     const std::vector<std::string> &splitBaseName) {
 
-  // Gets current working directory - expands any path variables
-  // such as '~' into their full paths
-  const std::string workingDirectory =
-      pocoFilePath.expand(pocoFilePath.parent().toString());
-
   std::vector<std::string> foundRunNumbers;
   std::vector<std::string> foundFullFilePaths;
 
