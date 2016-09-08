@@ -47,8 +47,8 @@ boost::shared_ptr<Run> Run::clone() {
   for (auto property : this->m_manager.getProperties()) {
     clone->addProperty(property->clone());
   }
-  m_goniometer = this->m_goniometer;
-  m_histoBins = this->m_histoBins;
+  clone->m_goniometer = this->m_goniometer;
+  clone->m_histoBins = this->m_histoBins;
   return clone;
 }
 
