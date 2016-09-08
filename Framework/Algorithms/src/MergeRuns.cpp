@@ -166,7 +166,7 @@ void MergeRuns::exec() {
         sampleLogsBehaviour.calculateUpdatedSampleLogs(*it, outWS);
         outWS = outWS + addee;
         sampleLogsBehaviour.setUpdatedSampleLogs(outWS);
-      } catch (std::invalid_argument e) {
+      } catch (std::invalid_argument &e) {
         g_log.error() << "Could not merge run: " << it->get()->name()
                       << ". Reason: \"" << e.what() << "\".";
         sampleLogsBehaviour.resetSampleLogs(outWS);
