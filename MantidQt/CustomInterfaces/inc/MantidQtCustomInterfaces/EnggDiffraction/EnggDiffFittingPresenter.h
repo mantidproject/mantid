@@ -160,13 +160,14 @@ private:
                                 const std::string &expectedPeaks);
 
   bool findFilePathFromBaseName(const std::string &directoryToSearch,
-                                 const std::string &baseFileNamesToFind,
-                                 std::string &foundFullFilePath);
+                                const std::string &baseFileNamesToFind,
+                                std::string &foundFullFilePath);
 
   std::vector<std::string>
   splitFittingDirectory(const std::string &selectedfPath);
 
-  std::vector<std::string> enableMultiRun(std::string firstRun, std::string lastRun);
+  std::vector<std::string> enableMultiRun(std::string firstRun,
+                                          std::string lastRun);
 
   void browsePeaksToFit();
 
@@ -178,8 +179,9 @@ private:
 
   void fittingWriteFile(const std::string &fileDir);
 
-  std::vector<std::string> getAllBrowsedFilePaths(const std::string inputFullPath,
-                   std::vector<std::string> &foundFullFilePaths);
+  std::vector<std::string>
+  getAllBrowsedFilePaths(const std::string inputFullPath,
+                         std::vector<std::string> &foundFullFilePaths);
 
   std::vector<std::string> processMultiRun(const std::string userInput);
 
@@ -187,7 +189,8 @@ private:
                         std::vector<std::string> &runnoDirVector,
                         const std::vector<std::string> &splitBaseName);
 
-  void processFullPathInput(const Poco::Path &pocoFilePath, const std::vector<std::string> &splitBaseName);
+  void processFullPathInput(const Poco::Path &pocoFilePath,
+                            const std::vector<std::string> &splitBaseName);
 
   // whether to use AlignDetectors to convert units
   static const bool g_useAlignDetectors;
