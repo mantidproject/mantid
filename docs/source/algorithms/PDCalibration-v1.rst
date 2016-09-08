@@ -16,8 +16,13 @@ This algorithm calibrates the detector pixels and creates a
 :ref:`algm-CalibrateRectangularDetectors` the peak fitting and
 calibration is done in TOF not d spacing. The peak d values are
 converted to TOF based on either the old calibration or the instrument
-geometry. The results are then fitted with up to difc, t_zero and
-difa.
+geometry. The SignalFile or SignalWorkspace contains the data from a
+standard sample. The results are then fitted with up to difc, t_zero
+and difa, these values are details in :ref:`algm-AlignDetectors`.
+
+The peak fitting properties are explained in
+:ref:`algm-FindPeaks`. This also uses the same criteria on peaks as
+:ref:`algm-GetDetOffsetsMultiPeaks`.
 
 A mask workspace is created, named "OutputCalibrationTable" + '_mask',
 with uncalibrated pixels masked.
@@ -43,7 +48,7 @@ Usage
    # list of d values for diamond
    dvalues = (0.3117,0.3257,0.3499,0.4205,0.4645,0.4768,0.4996,0.5150,0.5441,0.5642,0.5947,0.6307,.6866,.7283,.8185,.8920,1.0758,1.2615,2.0599)
 
-   PDCalibration(UncalibratedWorkspace='uncalibrated',
+   PDCalibration(SignalWorkspace='uncalibrated',
                  SignalFile='NOM_72460',
                  TofBinning=[300,-.001,16666.7],
                  PreviousCalibration=oldCal,
