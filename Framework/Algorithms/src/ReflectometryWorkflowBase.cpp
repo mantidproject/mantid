@@ -348,7 +348,7 @@ void ReflectometryWorkflowBase::getTransmissionRunInfo(
 /**
  * Crops input workspace to the monitorIndex and applying flat background
  * correction as part of the process.
- * @param inputWS : Input workspace
+ * @param inputWS : Input workspace to extract monitor workspace from.
  * @param monitorIndex : Monitor index to crop to
  * @param backgroundMinMax : Min and Max Lambda range for Flat background
  * correction.
@@ -391,7 +391,7 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase::retrieveMonitorWS(
  * Retrieves detector workspace from an input workspace.
  * @param processingCommands : Commands to apply to crop and add spectra of the
  * detector workspace.
- * @param inputWS : TOF wavelength to convert.
+ * @param inputWS : Input workspace to extract detector workspace from.
  * @param wavelengthMinMax : Wavelength minmax to keep. Crop out the rest.
  * @return Detector workspace
  */
@@ -451,7 +451,7 @@ ReflectometryWorkflowBase::makeUnityWorkspace(const std::vector<double> &x) {
  * Splits an input workspace into its constituent detector and monitor
  * workspace components. Input workspace is expected to be in units of
  * wavelength.
- * @param toConvert: TOF workspace to convert
+ * @param inputWS: Input workspace to split
  * @param processingCommands : Detector index ranges
  * @param monitorIndex : Monitor index
  * @param wavelengthMinMax : Wavelength min max for detector workspace

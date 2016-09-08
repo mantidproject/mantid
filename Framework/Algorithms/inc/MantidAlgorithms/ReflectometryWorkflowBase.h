@@ -62,7 +62,7 @@ public:
   /// Retrieves the detector spectrum of the input workspace
   API::MatrixWorkspace_sptr
   retrieveDetectorWS(const std::string &processingCommands,
-                     const API::MatrixWorkspace_sptr &toConvert,
+                     const API::MatrixWorkspace_sptr &inputWS,
                      const MinMax &wavelengthMinMax);
 
 protected:
