@@ -87,10 +87,9 @@ void export_ConfigService() {
            arg("self"), return_value_policy<reference_existing_object>(),
            "Returns the default facility")
 
-      .def("getFacility",
-           (const FacilityInfo &(ConfigServiceImpl::*)(const std::string &)
-                const) &
-               ConfigServiceImpl::getFacility,
+      .def("getFacility", (const FacilityInfo &(
+                              ConfigServiceImpl::*)(const std::string &)const) &
+                              ConfigServiceImpl::getFacility,
            (arg("self"), arg("facilityName")),
            return_value_policy<reference_existing_object>(),
            "Returns the named facility. Raises an RuntimeError if it does not "
@@ -133,6 +132,11 @@ void export_ConfigService() {
       .def("appendDataSearchDir", &ConfigServiceImpl::appendDataSearchDir,
            (arg("self"), arg("path")),
            "Append a directory to the current list of data search paths")
+
+      .def("appendDataSearchSubDir", &ConfigServiceImpl::appendDataSearchSubDir,
+           (arg("self"), arg("subdir")),
+           "Appends a sub-directory to each data search directory "
+           "and appends the new paths back to datasearch directories")
 
       .def("setDataSearchDirs",
            (void (ConfigServiceImpl::*)(const std::string &)) &
