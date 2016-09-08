@@ -11,6 +11,7 @@
 import csv
 import math
 import random
+import os
 
 from fourcircle_utility import *
 from peakprocesshelper import PeakProcessHelper
@@ -358,6 +359,10 @@ class CWSCDReductionControl(object):
         # Check file exist?
         if os.path.exists(local_xml_file_name) is False:
             return False, "Unable to locate downloaded file %s." % local_xml_file_name
+
+        # FIXME/TODO - This is a temporary fix for unsupported strings in XML
+        if True:
+            os.system("sed -i -e 's/0<x<1/0 x 1/g' %s" % local_xml_file_name)
 
         return True, local_xml_file_name
 

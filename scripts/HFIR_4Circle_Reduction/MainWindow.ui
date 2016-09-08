@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1528</width>
+    <width>1536</width>
     <height>918</height>
    </rect>
   </property>
@@ -193,7 +193,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>6</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1048,7 +1048,7 @@ p, li { white-space: pre-wrap; }
                        </property>
                       </widget>
                      </item>
-                     <item row="2" column="0">
+                     <item row="3" column="0">
                       <widget class="QCheckBox" name="checkBox_sortDescending">
                        <property name="font">
                         <font>
@@ -1057,6 +1057,18 @@ p, li { white-space: pre-wrap; }
                        </property>
                        <property name="text">
                         <string>Descending</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="0">
+                      <widget class="QRadioButton" name="radioButton_sortByTemp">
+                       <property name="font">
+                        <font>
+                         <pointsize>9</pointsize>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>Sample Temperature</string>
                        </property>
                       </widget>
                      </item>
@@ -3836,7 +3848,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1528</width>
+     <width>1536</width>
      <height>25</height>
     </rect>
    </property>
