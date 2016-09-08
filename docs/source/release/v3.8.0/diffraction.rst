@@ -105,6 +105,9 @@ Powder Diffraction
   ``.h5`` formated calibration files as well as the other versions it
   already supported.
 
+- New algorithm :ref:`PDCalibration <algm-PDCalibration>` for
+  pixel-by-pixel calibration in time-of-flight space.
+
 Imaging
 -------
 
