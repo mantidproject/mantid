@@ -5,7 +5,9 @@ import os
 import unittest
 from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup, AnalysisDataService
+from mantid import config
 from testhelpers import run_algorithm
+
 
 class IndirectILLReductionTest(unittest.TestCase):
 
@@ -14,12 +16,18 @@ class IndirectILLReductionTest(unittest.TestCase):
     _run_name = None
     _run_path = None
     _run = None
+    # cache the def instrument and data search dirs
+    _def_fac = config['default.facility']
+    _data_dirs = config['datasearch.directories']
 
     @classmethod
     def setUp(cls):
+        # set instrument and append datasearch directory
+        config.setFacility('ILL')
+        #config.appendDataSearchSubdirs('ILL/IN16B')
+
         cls._run_name = 'ILL/IN16B/146191.nxs'
         cls._multi_runs = 'ILL/IN16B/146191.nxs,ILL/IN16B/146192.nxs'
-
         cls._old_run = 'ILLIN16B_034745.nxs'
 
         # Reference workspace after loading (comparisons using blocksize(), getNumberHistograms(), ( SampleLogs, ...))
@@ -28,6 +36,9 @@ class IndirectILLReductionTest(unittest.TestCase):
 
     @classmethod
     def tearDown(cls):
+        # set cached facility and datasearch directory
+        config.setFacility(cls._def_fac)
+        config.setDataSearchDirs(cls._data_dirs)
         #reset output workspaces list
         cls._output_workspaces = []
 
