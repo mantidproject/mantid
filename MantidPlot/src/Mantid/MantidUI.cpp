@@ -3390,40 +3390,69 @@ MantidUI::plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
   auto *multi = appWindow()->multilayerPlot(plotTitle, nSubplots, 1, nSubplots);
   multi->setCloseOnEmpty(true);
   multi->arrangeLayers(true, true);
+  const int nRows = multi->getRows();
+  const int nCols = multi->getCols();
 
   // Case for each spectrum getting its own subplot
   int layerIndex(0);
   if (nWorkspaces == 1) {
     const auto &wsName = toPlot.begin().key();
     const auto &spectra = toPlot.begin().value();
-    for (const int spec : spectra) {
-      auto *layer = multi->layer(++layerIndex);
-      layer->insertCurve(wsName, spec, errs, Graph::Unspecified,
-                         plotAsDistribution);
-      QString legendText = wsName + '\n';
-      legendText += "\\l(1) " + getLegendKey(wsName, spec) + "\n";
-      layer->newLegend(legendText);
-      setInitialAutoscale(layer);
+    auto specIter = spectra.cbegin();
+    for (int row = 0; row < nRows; ++row) {
+      const bool drawXAxisLabel = row == nRows - 1;
+      for (int col = 0; col < nCols; ++col) {
+        assert(specIter != spectra.end());
+        const bool drawYAxisLabel = col == 0;
+        auto *layer = multi->layer(++layerIndex);
+        layer->insertCurve(wsName, *specIter, errs, Graph::Unspecified,
+                           plotAsDistribution);
+        QString legendText = wsName + '\n';
+        legendText += "\\l(1) " + getLegendKey(wsName, *specIter) + "\n";
+        layer->newLegend(legendText);
+        setInitialAutoscale(layer);
+        if (!drawXAxisLabel) {
+          layer->setXAxisTitle(QString::null);
+        }
+        if (!drawYAxisLabel) {
+          layer->setYAxisTitle(QString::null);
+        }
+        ++specIter;
+      }
     }
   } else {
     // Case for each workspace getting its own subplot
-    for (auto iter = toPlot.constBegin(); iter != toPlot.constEnd(); ++iter) {
-      const auto &wsName = iter.key();
-      const auto &spectra = iter.value();
-      auto *layer = multi->layer(++layerIndex);
-      QString legendText = wsName + '\n';
-      int curveIndex(0);
-      for (const int spec : spectra) {
-        layer->insertCurve(wsName, spec, errs, Graph::Unspecified,
-                           plotAsDistribution);
-        legendText += "\\l(" + QString::number(++curveIndex) + ") " +
-                      getLegendKey(wsName, spec) + "\n";
+    auto iter = toPlot.constBegin();
+    for (int row = 0; row < nRows; ++row) {
+      const bool drawXAxisLabel = row == nRows - 1;
+      for (int col = 0; col < nCols; ++col) {
+        assert(iter != toPlot.constEnd());
+        const bool drawYAxisLabel = col == 0;
+        const auto &wsName = iter.key();
+        const auto &spectra = iter.value();
+        auto *layer = multi->layer(++layerIndex);
+        QString legendText = wsName + '\n';
+        int curveIndex(0);
+        for (const int spec : spectra) {
+          layer->insertCurve(wsName, spec, errs, Graph::Unspecified,
+                             plotAsDistribution);
+          legendText += "\\l(" + QString::number(++curveIndex) + ") " +
+                        getLegendKey(wsName, spec) + "\n";
+        }
+        layer->newLegend(legendText);
+        setInitialAutoscale(layer);
+        if (!drawXAxisLabel) {
+          layer->setXAxisTitle(QString::null);
+        }
+        if (!drawYAxisLabel) {
+          layer->setYAxisTitle(QString::null);
+        }
+        ++iter;
       }
-      layer->newLegend(legendText);
-      setInitialAutoscale(layer);
     }
   }
 
+  multi->arrangeLayers(true, true);
   // Check if window does not contain any curves and should be closed
   multi->maybeNeedToClose();
 
