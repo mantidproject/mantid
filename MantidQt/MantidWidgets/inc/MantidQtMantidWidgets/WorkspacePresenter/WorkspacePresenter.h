@@ -1,7 +1,9 @@
 #ifndef MANTID_MANTIDWIDGETS_WORKSPACEPRESENTER_H_
 #define MANTID_MANTIDWIDGETS_WORKSPACEPRESENTER_H_
 
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "MantidQtMantidWidgets/WorkspacePresenter/ViewNotifiable.h"
+#include "MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProvider.h"
 #include "MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProviderNotifiable.h"
 #include <boost/weak_ptr.hpp>
 #include <memory>
@@ -43,11 +45,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class WorkspacePresenter : public WorkspaceProviderNotifiable,
-                           public ViewNotifiable {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS WorkspacePresenter
+    : public WorkspaceProviderNotifiable,
+      public ViewNotifiable {
 public:
   explicit WorkspacePresenter(DockView_wptr view);
   ~WorkspacePresenter() = default;
+
+  void init();
 
   void
   notifyFromWorkspaceProvider(WorkspaceProviderNotifiable::Flag flag) override;
@@ -67,6 +72,8 @@ private:
   void workspacesGrouped();
   void workspacesSorted();
   void workspacesDeleted();
+
+  DockView_sptr lockView();
 
 private:
   DockView_wptr m_view;

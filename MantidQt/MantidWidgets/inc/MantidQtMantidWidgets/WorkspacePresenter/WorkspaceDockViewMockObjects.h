@@ -3,7 +3,11 @@
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h"
+#include <MantidAPI/Workspace.h>
+#include <MantidQtMantidWidgets/WorkspacePresenter/WorkspaceDockView.h>
+#include <MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h>
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/make_shared.hpp>
 #include <gmock/gmock.h>
 
 using namespace MantidQt::MantidWidgets;
@@ -15,12 +19,24 @@ public:
   MockWorkspaceDockView() {}
   ~MockWorkspaceDockView() override {}
 
-  // Methods which are not to be mocked
-  WorkspacePresenter_wptr getPresenterWeakPtr() override {
-    return WorkspacePresenter_wptr();
+  void init() override {
+    presenter = boost::make_shared<WorkspacePresenter>(shared_from_this());
+    presenter->init();
   }
+
+  MOCK_METHOD0(showLoadDialog, void());
+  MOCK_METHOD1(
+      updateTree,
+      void(const std::map<std::string, Mantid::API::Workspace_sptr> &items));
+
+  // Methods which are not to be mocked
+  WorkspacePresenter_wptr getPresenterWeakPtr() override { return presenter; }
+  WorkspacePresenter_sptr getPresenterSharedPtr() override { return presenter; }
+
+private:
+  WorkspacePresenter_sptr presenter;
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
 
-#endif //MANTID_MANTIDWIDGETS_WORKSPACEDOCKVIEWMOCKOBJECTS_H
+#endif // MANTID_MANTIDWIDGETS_WORKSPACEDOCKVIEWMOCKOBJECTS_H

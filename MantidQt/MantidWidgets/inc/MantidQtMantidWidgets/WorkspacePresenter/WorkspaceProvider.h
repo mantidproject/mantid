@@ -2,6 +2,7 @@
 #define MANTID_MANTIDWIDGETS_IADSADAPTER_H_
 
 #include <MantidAPI/Workspace_fwd.h>
+#include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
 namespace MantidQt {
@@ -9,6 +10,7 @@ namespace MantidWidgets {
 
 class WorkspaceProviderNotifiable;
 
+using Presenter_sptr = boost::shared_ptr<WorkspaceProviderNotifiable>;
 using Presenter_wptr = boost::weak_ptr<WorkspaceProviderNotifiable>;
 
 /**
@@ -45,6 +47,7 @@ public:
   virtual void registerPresenter(Presenter_wptr presenter) = 0;
   virtual Mantid::API::Workspace_sptr
   getWorkspace(const std::string &wsname) const = 0;
+  virtual std::map<std::string, Mantid::API::Workspace_sptr> topLevelItems() const = 0;
 };
 
 } // namespace MantidWidgets

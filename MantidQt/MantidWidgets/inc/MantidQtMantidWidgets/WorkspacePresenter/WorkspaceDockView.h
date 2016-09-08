@@ -2,13 +2,10 @@
 #define MANTID_MANTIDWIDGETS_WORKSPACEDOCKVIEW_H_
 
 #include "MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h"
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
-class WorkspacePresenter;
-using WorkspacePresenter_sptr = boost::shared_ptr<WorkspacePresenter>;
 
 /**
 \class  WorkspaceDockView
@@ -37,14 +34,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class WorkspaceDockView
-    : public IWorkspaceDockView,
-      public boost::enable_shared_from_this<WorkspaceDockView> {
+class WorkspaceDockView : public IWorkspaceDockView {
 public:
   explicit WorkspaceDockView();
   ~WorkspaceDockView() = default;
 
+  void init() override;
   WorkspacePresenter_wptr getPresenterWeakPtr() override;
+  WorkspacePresenter_sptr getPresenterSharedPtr() override;
+
+  void showLoadDialog() override;
+  void updateTree(
+      const std::map<std::string, Mantid::API::Workspace_sptr> &items) override;
 
 private:
   WorkspacePresenter_sptr presenter;

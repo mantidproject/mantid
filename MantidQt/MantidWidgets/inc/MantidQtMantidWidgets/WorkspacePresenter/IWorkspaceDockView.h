@@ -1,13 +1,21 @@
 #ifndef MANTID_MANTIDWIDGETS_IWORKSPACEDOCKVIEW_H_
 #define MANTID_MANTIDWIDGETS_IWORKSPACEDOCKVIEW_H_
 
+#include <MantidAPI/Workspace_fwd.h>
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include <map>
+
 namespace MantidQt {
 namespace MantidWidgets {
 
 class WorkspaceProviderNotifiable;
+class WorkspacePresenter;
 
 using WorkspacePresenter_wptr = boost::weak_ptr<WorkspaceProviderNotifiable>;
+using WorkspacePresenter_sptr = boost::shared_ptr<WorkspacePresenter>;
+using StringList = std::vector<std::string>;
 /**
 \class  IWorkspaceDockView
 \author Lamar Moore
@@ -35,10 +43,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class IWorkspaceDockView {
+class IWorkspaceDockView
+    : public boost::enable_shared_from_this<IWorkspaceDockView> {
 public:
   virtual ~IWorkspaceDockView() = default;
+
+  virtual void init() = 0;
   virtual WorkspacePresenter_wptr getPresenterWeakPtr() = 0;
+  virtual WorkspacePresenter_sptr getPresenterSharedPtr() = 0;
+
+  virtual void showLoadDialog() = 0;
+  virtual void updateTree(
+      const std::map<std::string, Mantid::API::Workspace_sptr> &items) = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

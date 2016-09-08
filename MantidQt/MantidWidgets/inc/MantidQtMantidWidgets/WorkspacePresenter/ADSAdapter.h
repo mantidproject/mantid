@@ -3,6 +3,7 @@
 
 #include "MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProvider.h"
 #include <MantidQtAPI/WorkspaceObserver.h>
+#include <Poco/NObserver.h>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -33,15 +34,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class ADSAdapter : public WorkspaceProvider,
-                   public MantidQt::API::WorkspaceObserver {
+class ADSAdapter : public WorkspaceProvider {
 public:
+  explicit ADSAdapter();
+  ~ADSAdapter() override;
   void registerPresenter(Presenter_wptr presenter) override;
   Mantid::API::Workspace_sptr
   getWorkspace(const std::string &wsname) const override;
 
+  std::map<std::string, Mantid::API::Workspace_sptr>
+  topLevelItems() const override;
+
 private:
   Presenter_wptr m_presenter;
+
+  void handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr pNf);
+  Poco::NObserver<ADSAdapter, Mantid::API::WorkspaceAddNotification>
+      m_addObserver;
+
+  Presenter_sptr lockPresenter();
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
