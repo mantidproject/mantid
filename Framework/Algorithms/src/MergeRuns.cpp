@@ -58,7 +58,7 @@ void MergeRuns::init() {
   declareProperty("SampleLogsWarnTolerances", "",
                   "The tolerances for warning if sample logs are different. "
                   "Can either be empty for a comparison of the strings, a "
-                  "single value for all tolerances specified, or a comma "
+                  "single value for all warn sample logs, or a comma "
                   "separated list of values (must be the same length as "
                   "SampleLogsWarn).");
   declareProperty("SampleLogsFail", "", "The sample logs to fail if different "
@@ -67,7 +67,7 @@ void MergeRuns::init() {
   declareProperty("SampleLogsFailTolerances", "",
                   "The tolerances for failing if sample logs are different. "
                   "Can either be empty for a comparison of the strings, a "
-                  "single value for all tolerances specified, or a comma "
+                  "single value for all fail sample logs, or a comma "
                   "separated list of values (must be the same length as "
                   "SampleLogsFail).");
 }

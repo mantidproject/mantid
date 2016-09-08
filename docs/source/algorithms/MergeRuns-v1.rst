@@ -63,8 +63,14 @@ output matrix workspace.
 Merging Sample Logs
 ###################
 
-Sample logs are optionally merged when running this algorithm. The behaviour when merging us defined in the instrument parameters, but the behaviour can be added to or overridden or via this algorithm.
-Definitions in the XML file are given as shown in the example below. See the usage examples at the end of this document for examples of overriding the behaviour defined in the XML file.
+Sample logs are optionally merged when running this algorithm. The behaviour
+when merging is defined in the instrument parameter file, but can be added to
+or overridden or via this algorithm. Definitions in the XML file are given as
+shown in the example below. See the usage examples at the end of this document
+for examples of overriding the behaviour defined in the XML file.
+
+**Note:** this currently only works when the underying workspaces being merged are
+Matrix Workspaces.
 
 .. code-block:: xml
 
@@ -204,7 +210,7 @@ Output:
 
   merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
                      SampleLogsTimeSeries='sample_temp',
-                     SampleLogsWarn='sample_magn_field', SampleLogsWarnTolerances='0')
+                     SampleLogsWarn='sample_magn_field')
 
   print merged.run().getLogData('sample_temp_time_series').size()
 
@@ -222,7 +228,8 @@ Output:
 
   merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
                      SampleLogsTimeSeries='sample_temp',
-                     SampleLogsFail='sample_magn_field', SampleLogsFailTolerances='0')
+                     SampleLogsFail='sample_magn_field, nspectra',
+                     SampleLogsFailTolerances='5, 0')
 
   print merged.run().getLogData('sample_temp_time_series').size()
 
