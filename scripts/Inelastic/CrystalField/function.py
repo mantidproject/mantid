@@ -212,7 +212,7 @@ class PeaksFunction(object):
         # Collection of all parameters
         self._params = CompositeProperties()
         # Ties
-        self._ties = {}
+        self._ties = []
         # Constraints
         self._constraints = []
 
@@ -248,17 +248,13 @@ class PeaksFunction(object):
         """
         return self._params
 
-    def ties(self, tie_dict):
+    def ties(self, *ties):
         """Set ties on the peak parameters.
 
-        @param tie_dict: A dictionary of ties: the key is a parameter name in CompositeFunction convention,
-            the value is a tie string or a number. For example:
-                {'f1.Sigma': 0.1, 'f2.Sigma': '2*f0.Sigma'}
+        @param ties: A list of ties. For example:
+                ties('f1.Sigma=0.1', 'f2.Sigma=2*f0.Sigma')
         """
-        if not isinstance(tie_dict, dict):
-            raise RuntimeError('Tie argument must be a dict.')
-        for tie in tie_dict:
-            self._ties[tie] = tie_dict[tie]
+        self._ties += ties
 
     def constraints(self, *constraints):
         """
@@ -321,7 +317,7 @@ class PeaksFunction(object):
 
     def tiesString(self, prefix=''):
         if len(self._ties) > 0:
-            ties = ','.join(['%s=%s' % item for item in self._ties.items()])
+            ties = ','.join(self._ties)
             return 'ties=(%s)' % re.sub(parNamePattern, prefix + '\\1', ties)
         return ''
 
