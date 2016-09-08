@@ -88,9 +88,9 @@ void export_ConfigService() {
            "Returns the default facility")
 
       .def("getFacility",
-                       (const FacilityInfo &(ConfigServiceImpl::*)(const std::string &)
-                            const) &
-                           ConfigServiceImpl::getFacility,
+           (const FacilityInfo &(ConfigServiceImpl::*)(const std::string &)
+                const) &
+               ConfigServiceImpl::getFacility,
            (arg("self"), arg("facilityName")),
            return_value_policy<reference_existing_object>(),
            "Returns the named facility. Raises an RuntimeError if it does not "
