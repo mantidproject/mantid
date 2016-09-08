@@ -411,8 +411,6 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase::retrieveDetectorWS(
   // Process the input workspace according to the processingCommands to get a
   // detector workspace
 
-  MatrixWorkspace_sptr detectorWS = inputWS;
-
   auto performIndexAlg = this->createChildAlgorithm("GroupDetectors");
   performIndexAlg->initialize();
   performIndexAlg->setProperty("GroupingPattern", processingCommands);

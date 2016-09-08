@@ -642,11 +642,11 @@ void ReflectometryReductionOne::exec() {
       runWS = divide(runWS, *decWS);
     }
 
-    DetectorMonitorWorkspacePair inLam =
-        toLam(runWS, processingCommands, i0MonitorIndex, wavelengthInterval,
-              monitorBackgroundWavelengthInterval);
-    auto detectorWS = inLam.get<0>();
-    auto monitorWS = inLam.get<1>();
+    DetectorMonitorWorkspacePair detMonPair =
+        splitDetectorsMonitors(runWS, processingCommands, i0MonitorIndex,
+              wavelengthInterval, monitorBackgroundWavelengthInterval);
+    auto detectorWS = detMonPair.get<0>();
+    auto monitorWS = detMonPair.get<1>();
 
     if (isMultiDetector) {
       if (directBeam.is_initialized()) {
@@ -655,7 +655,7 @@ void ReflectometryReductionOne::exec() {
         std::stringstream buffer;
         buffer << db.front() << "-" << db.back();
         MatrixWorkspace_sptr regionOfDirectBeamWS =
-            this->toLamDetector(buffer.str(), runWS, wavelengthInterval);
+            this->retrieveDetectorWS(buffer.str(), runWS, wavelengthInterval);
 
         // Rebin to the detector workspace
         auto rebinToWorkspaceAlg =
