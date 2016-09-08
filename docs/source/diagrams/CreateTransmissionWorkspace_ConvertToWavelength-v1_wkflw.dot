@@ -1,0 +1,95 @@
+
+digraph CreateTransmissionWorkspaceWavelength {
+label = ""
+ $global_style
+
+subgraph params {
+ $param_style
+  firstRun            [label="TransmissionRun"]
+  monitorIndex        [label="I0MonitorIndex"]
+  processingInst      [label="ProcessingInstructions"]
+  wavMin              [label="WavelengthMin"]
+  wavMax              [label="WavelengthMax"]
+  wavStep             [label="WavelengthStep"]
+  monIntWavMin        [label="MonitorIntegration-\nWavelengthMin"]
+  monIntWavMax        [label="MonitorIntegration-\nWavelengthMax"]
+  outputWS            [label="TransmissionRun\nin wavelength"]
+
+  detWS               [label="DetectorWorkspace"]
+  monWS		      [label="MonitorWorkspace"]
+}
+
+subgraph decisions {
+ $decision_style
+  checkMon        [label="Monitors?"]
+  checkBgMinMax   [label="MonitorBackground-\nWavelength\nMin/Max non-zero?"]
+}
+
+subgraph algorithms {
+ $algorithm_style
+  convertDet    [label="ConvertUnits\n(AlignBins = True)"]
+  groupDet      [label="GroupDetectors"]
+  cropDet       [label="CropWorkspace"]
+  rebinDet      [label="Rebin"]
+
+  convertMon    [label="ConvertUnits\n(AlignBins = False)"]
+  cropMon       [label="CropWorkspace"]
+  calcFlatBg    [label="CalculateFlatBackground"]
+  rebinToWS     [label="RebinToWorkspace"]
+  intMon        [label="Integration"]
+
+  divideDetMon  [label="Divide\n(Detectors / Monitors / Unity)"]
+
+}
+
+subgraph processes {
+ $process_style
+}
+
+subgraph values {
+ $value_style
+  valDet        [label="I(&lambda;)"]
+  valMon        [label="I(&lambda;)"]
+  valUnity      [label="I(1)"]
+}
+
+firstRun             -> convertDet     [label="Detectors"]
+convertDet           -> valDet
+valDet		     -> groupDet
+valDet		     -> processingInst	[style=invis]
+processingInst       -> groupDet
+groupDet             -> cropDet
+wavMin               -> cropDet
+wavMax               -> cropDet
+cropDet              -> rebinDet
+wavStep              -> rebinDet
+rebinDet             -> detWS
+
+firstRun	     -> checkMon	[label="Monitors"]
+checkMon             -> convertMon      [label="Yes"]
+convertMon	     -> valMon
+valMon		     -> cropMon
+monitorIndex	     -> cropMon
+cropMon		     -> checkBgMinMax
+checkBgMinMax	     -> calcFlatBg	[label="Yes"]
+calcFlatBg	     -> rebinToWS
+checkBgMinMax	     -> rebinToWS	[label="No"]
+detWS		     -> rebinToWS
+rebinToWS	     -> intMon
+monIntWavMin	     -> intMon
+monIntWavMax	     -> intMon
+rebinToWS	     -> monIntWavMin	[style=invis]
+monIntWavMin	     -> monIntWavMax	[style=invis]
+intMon		     -> monWS
+checkMon	     -> valUnity	[label="No"]
+
+valUnity	     -> divideDetMon
+detWS		     -> divideDetMon
+monWS		     -> divideDetMon
+
+divideDetMon	     -> outputWS
+
+{rank = same; convertDet; convertMon}
+{rank = same; valDet; valMon; valUnity}
+{rank = same; detWS; rebinToWS}
+}
