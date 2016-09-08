@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name,bare-except
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -41,18 +41,14 @@ class SANSMask(PythonAlgorithm):
         self.declareProperty(
             IntArrayProperty(
                 "MaskedEdges",
-                values=[
-                    0,
-                    0,
-                    0,
-                    0],
+                values=[0, 0, 0, 0],
                 direction=Direction.Input),
             "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high")
 
         self.declareProperty(
             "MaskedComponent",
             "",
-            doc="Component Name to mask Edges. Consult the IDF!")
+            doc="Component Name to mask Edges or Front/Back. Consult the IDF!")
 
         self.declareProperty(
             "MaskedFullComponent",
@@ -70,16 +66,16 @@ class SANSMask(PythonAlgorithm):
     def PyExec(self):
         workspace = self.getProperty("Workspace").value
         facility = self.getProperty("Facility").value
+        component_name = self.getProperty("MaskedComponent").value
 
         # Apply saved mask as needed
         self._apply_saved_mask(workspace, facility)
 
         # Mask a detector side
-        self._mask_detector_side(workspace, facility)
+        self._mask_detector_side(workspace, facility, component_name)
 
         # Mask edges
         edges = self.getProperty("MaskedEdges").value
-        component_name = self.getProperty("MaskedComponent").value
         if len(edges) == 4:
             if facility.upper() == "HFIR":
                 masked_ids = hfir_instrument.get_masked_ids(
@@ -149,7 +145,7 @@ class SANSMask(PythonAlgorithm):
                     Logger("SANSMask").error(str(sys.exc_info()[1]))
             self._mask_pixels(masked_pixels, workspace, facility)
 
-    def _mask_detector_side(self, workspace, facility):
+    def _mask_detector_side(self, workspace, facility, component_name):
         """
             Mask the back side or front side as needed
         """
@@ -161,28 +157,48 @@ class SANSMask(PythonAlgorithm):
         else:
             return
 
-        if not workspace.getInstrument().hasParameter("number-of-x-pixels") \
-                and not workspace.getInstrument().hasParameter("number-of-y-pixels"):
-            Logger("SANSMask").error(
-                "Could not find number of pixels: skipping side masking")
-            return
+        instrument = workspace.getInstrument()
 
-        nx = int(workspace.getInstrument().getNumberParameter(
-            "number-of-x-pixels")[0])
-        ny = int(workspace.getInstrument().getNumberParameter(
-            "number-of-y-pixels")[0])
-        id_side = []
+        if facility.upper() == "HFIR":
+            ids = []
+            # Get the default from the parameters file
+            if component_name is None or component_name == "":
+                component_name = instrument.getStringParameter('detector-name')[0]
+            component = instrument.getComponentByName(component_name)
+            if component.type() == 'RectangularDetector':
+                # id's at the bottom on every pixel
+                ids_at_the_bottom = range(side_to_mask * component.idstep() + component.idstart(),
+                                          component.idstart() + component.idstep() * component.nelements(),
+                                          component.idstep() * 2)
+                ids = [range(i, i + component.idstep()) for i in ids_at_the_bottom]
+                ids = [item for sublist in ids for item in sublist]  # flat list
+            elif component.type() == 'CompAssembly' or component.type() == 'ObjCompAssembly' or component.type() == 'DetectorComponent':
+                number_of_tubes = component.nelements()
+                number_of_pixels_per_tube = component[0].nelements()
+                idx_at_the_bottom = range(side_to_mask, number_of_tubes, 2)
+                ids = [component[i][j].getID() for i in idx_at_the_bottom for j in range(number_of_pixels_per_tube)]
+            else:
+                Logger("SANSMask").warning("No Front/Back tubes masked for HFIR!")
+                return
+            self._mask_ids(list(ids), workspace)
+        else:  # I'm at SNS
+            if not instrument.hasParameter("number-of-x-pixels") \
+                    and not workspace.getInstrument().hasParameter("number-of-y-pixels"):
+                Logger("SANSMask").error(
+                    "Could not find number of pixels: skipping side masking")
+                return
 
-        for iy in range(ny):
-            for ix in range(side_to_mask, nx + side_to_mask, 2):
-                # For some odd reason the HFIR format has the x,y coordinates
-                # inverted
-                if facility.upper() == "HFIR":
-                    id_side.append([iy, ix])
-                else:
+            nx = int(workspace.getInstrument().getNumberParameter(
+                "number-of-x-pixels")[0])
+            ny = int(workspace.getInstrument().getNumberParameter(
+                "number-of-y-pixels")[0])
+            id_side = []
+
+            for iy in range(ny):
+                for ix in range(side_to_mask, nx + side_to_mask, 2):
                     id_side.append([ix, iy])
 
-        self._mask_pixels(id_side, workspace, facility)
+            self._mask_pixels(id_side, workspace, facility)
 
     def _mask_component(self, workspace, component_name):
         '''
@@ -193,8 +209,7 @@ class SANSMask(PythonAlgorithm):
             component = instrument.getComponentByName(component_name)
         except:
             Logger("SANSMask").error(
-                "Component not valid! %s" %
-                component_name)
+                "Component not valid! %s" % component_name)
             return
 
         masked_detectors = []

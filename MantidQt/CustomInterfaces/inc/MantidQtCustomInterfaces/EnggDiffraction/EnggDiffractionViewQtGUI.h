@@ -123,6 +123,8 @@ public:
 
   void enableTabs(bool enable) override;
 
+  void highlightRbNumber(bool isValid) override;
+
   void enableCalibrateFocusFitUserActions(bool enable) override;
 
   std::string focusingDir() const override;

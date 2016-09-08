@@ -503,6 +503,7 @@ set ( TEST_FILES
 	ReflRunsTabPresenterTest.h
 	ReflSettingsTabPresenterTest.h
 	StackOfImagesDirsTest.h
+	TomographyIfaceModelTest.h
 	TomographyIfacePresenterTest.h
 	UserInputValidatorTest.h
 )

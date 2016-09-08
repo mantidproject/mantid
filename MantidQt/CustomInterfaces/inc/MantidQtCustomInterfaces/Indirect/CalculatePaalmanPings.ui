@@ -626,11 +626,9 @@
       </item>
       <item>
        <widget class="QComboBox" name="cbPlotOutput">
-        <item>
-         <property name="text">
-          <string>None</string>
-         </property>
-        </item>
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <item>
          <property name="text">
           <string>Wavelength</string>
@@ -649,6 +647,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pbPlot">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Plot</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -662,7 +670,10 @@
        </spacer>
       </item>
       <item>
-       <widget class="QCheckBox" name="ckSave">
+       <widget class="QPushButton" name="pbSave">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Save Result</string>
         </property>
@@ -703,7 +714,7 @@
   <tabstop>spCanNumberDensity</tabstop>
   <tabstop>leCanChemicalFormula</tabstop>
   <tabstop>cbPlotOutput</tabstop>
-  <tabstop>ckSave</tabstop>
+  <tabstop>pbSave</tabstop>
  </tabstops>
  <resources/>
  <connections>

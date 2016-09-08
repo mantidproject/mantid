@@ -112,6 +112,7 @@ private:
   double detectorTranslation(std::map<std::string, std::string> &metadata);
   void setMetadataAsRunProperties(std::map<std::string, std::string> &metadata);
   void rotateDetector(const double &);
+  void setTimes();
 
   // Member variables:
   DataObjects::Workspace2D_sptr m_workspace;
@@ -120,6 +121,8 @@ private:
   Mantid::DataHandling::XmlHandler m_xmlHandler;
   double m_wavelength{0.0};
   double m_dwavelength{0.0};
+  Mantid::Kernel::DateAndTime m_startTime;
+  Mantid::Kernel::DateAndTime m_endTime;
 };
 } // namespace DataHandling
 } // namespace Mantid

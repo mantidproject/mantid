@@ -34,6 +34,8 @@ ApplyPaalmanPings::ApplyPaalmanPings(QWidget *parent) : CorrectionsTab(parent) {
           SLOT(updateContainer()));
   connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), this,
           SLOT(updateContainer()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   m_uiForm.spPreviewSpec->setMinimum(0);
   m_uiForm.spPreviewSpec->setMaximum(0);
@@ -151,17 +153,7 @@ void ApplyPaalmanPings::run() {
   MatrixWorkspace_sptr sampleWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           m_sampleWorkspaceName);
-  m_originalSampleUnits = sampleWs->getAxis(0)->unit()->unitID();
-
-  // If not in wavelength then do conversion
-  if (m_originalSampleUnits != "Wavelength") {
-    g_log.information(
-        "Sample workspace not in wavelength, need to convert to continue.");
-    absCorProps["SampleWorkspace"] =
-        addConvertUnitsStep(sampleWs, "Wavelength");
-  } else {
-    absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
-  }
+  absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
   const bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
@@ -178,25 +170,6 @@ void ApplyPaalmanPings::run() {
     clone->setProperty("Outputworkspace", cloneName);
     clone->execute();
 
-    const bool useShift = m_uiForm.ckShiftCan->isChecked();
-    if (useShift) {
-      IAlgorithm_sptr scaleX = AlgorithmManager::Instance().create("ScaleX");
-      scaleX->initialize();
-      scaleX->setLogging(false);
-      scaleX->setProperty("InputWorkspace", cloneName);
-      scaleX->setProperty("OutputWorkspace", cloneName);
-      scaleX->setProperty("Factor", m_uiForm.spCanShift->value());
-      scaleX->setProperty("Operation", "Add");
-      scaleX->execute();
-      IAlgorithm_sptr rebin =
-          AlgorithmManager::Instance().create("RebinToWorkspace");
-      rebin->initialize();
-      rebin->setLogging(false);
-      rebin->setProperty("WorkspaceToRebin", cloneName);
-      rebin->setProperty("WorkspaceToMatch", m_sampleWorkspaceName);
-      rebin->setProperty("OutputWorkspace", cloneName);
-      rebin->execute();
-    }
     canClone =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(cloneName);
     // Check for same binning across sample and container
@@ -221,20 +194,16 @@ void ApplyPaalmanPings::run() {
       }
     }
 
-    // If not in wavelength then do conversion
-    std::string originalCanUnits = canClone->getAxis(0)->unit()->unitID();
-    if (originalCanUnits != "Wavelength") {
-      g_log.information("Container workspace not in wavelength, need to "
-                        "convert to continue.");
-      absCorProps["CanWorkspace"] = addConvertUnitsStep(canClone, "Wavelength");
-    } else {
-      absCorProps["CanWorkspace"] = cloneName;
-    }
+    absCorProps["CanWorkspace"] = cloneName;
 
     const bool useCanScale = m_uiForm.ckScaleCan->isChecked();
     if (useCanScale) {
       const double canScaleFactor = m_uiForm.spCanScale->value();
       applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
+    }
+    if (m_uiForm.ckShiftCan->isChecked()) { // If container is shifted
+      const double canShiftFactor = m_uiForm.spCanShift->value();
+      applyCorrAlg->setProperty("canShiftFactor", canShiftFactor);
     }
   }
 
@@ -400,31 +369,14 @@ void ApplyPaalmanPings::addInterpolationStep(MatrixWorkspace_sptr toInterpolate,
 void ApplyPaalmanPings::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(absCorComplete(bool)));
-  const bool useCan = m_uiForm.ckUseCan->isChecked();
-  const bool useShift = m_uiForm.ckShiftCan->isChecked();
   if (error) {
     emit showMessageBox(
         "Unable to apply corrections.\nSee Results Log for more details.");
     return;
   }
 
-  // Convert back to original sample units
-  if (m_originalSampleUnits != "Wavelength") {
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        m_pythonExportWsName);
-
-    std::string eMode("");
-    if (m_originalSampleUnits == "dSpacing")
-      eMode = "Elastic";
-    addConvertUnitsStep(ws, m_originalSampleUnits, "", eMode);
-  }
-
-  // Add save algorithms if required
-  bool save = m_uiForm.ckSave->isChecked();
-  if (save)
-    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
-  if (useCan) {
-    if (useShift) {
+  if (m_uiForm.ckUseCan->isChecked()) {
+    if (m_uiForm.ckShiftCan->isChecked()) { // If container is shifted
       IAlgorithm_sptr shiftLog =
           AlgorithmManager::Instance().create("AddSampleLog");
       shiftLog->initialize();
@@ -458,17 +410,13 @@ void ApplyPaalmanPings::postProcessComplete(bool error) {
     return;
   }
 
+  // Enable post processing plot and save
+  m_uiForm.cbPlotOutput->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+
   // Handle preview plot
   plotPreview(m_uiForm.spPreviewSpec->value());
-
-  // Handle Mantid plotting
-  QString plotType = m_uiForm.cbPlotOutput->currentText();
-
-  if (plotType == "Spectra" || plotType == "Both")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
-
-  if (plotType == "Contour" || plotType == "Both")
-    plot2D(QString::fromStdString(m_pythonExportWsName));
 
   // Clean up unwanted workspaces
   IAlgorithm_sptr deleteAlg =
@@ -615,6 +563,31 @@ void ApplyPaalmanPings::plotPreview(int wsIndex) {
         Qt::red);
   }
 }
+/**
+ * Handles saving of the workspace
+ */
+void ApplyPaalmanPings::saveClicked() {
 
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Handles mantid plotting of workspace
+ */
+void ApplyPaalmanPings::plotClicked() {
+
+  QString plotType = m_uiForm.cbPlotOutput->currentText();
+
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
+
+    if (plotType == "Spectra" || plotType == "Both")
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+
+    if (plotType == "Contour" || plotType == "Both")
+      plot2D(QString::fromStdString(m_pythonExportWsName));
+  }
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

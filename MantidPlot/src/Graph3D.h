@@ -42,7 +42,7 @@
 
 #include "Table.h"
 #include "Matrix.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 class MantidMatrix;
 class UserFunction2D;
@@ -416,13 +416,15 @@ signals:
   void modified();
 
 private:
-  Graph3D::SurfaceFunctionParams readSurfaceFunction(TSVSerialiser &tsv);
+  Graph3D::SurfaceFunctionParams
+  readSurfaceFunction(MantidQt::API::TSVSerialiser &tsv);
   Graph3D::SurfaceFunctionType
   readSurfaceFunctionType(const std::string &formula);
   MantidMatrix *readWorkspaceForPlot(ApplicationWindow *app,
-                                     TSVSerialiser &tsv);
-  int read3DPlotStyle(TSVSerialiser &tsv);
-  void setupMantidMatrixPlot3D(ApplicationWindow *app, TSVSerialiser &tsv);
+                                     MantidQt::API::TSVSerialiser &tsv);
+  int read3DPlotStyle(MantidQt::API::TSVSerialiser &tsv);
+  void setupMantidMatrixPlot3D(ApplicationWindow *app,
+                               MantidQt::API::TSVSerialiser &tsv);
   void setupPlot3D(ApplicationWindow *app, const QString &caption,
                    const SurfaceFunctionParams &params);
   void setupPlotXYZ(ApplicationWindow *app, const QString &caption,

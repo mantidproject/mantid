@@ -1,8 +1,8 @@
 #ifndef MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
 #define MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
 
-#include "MantidLiveData/ISISHistoDataListener.h"
-#include "MantidLiveData/FakeISISHistoDAE.h"
+#include "MantidLiveData/ISIS/ISISHistoDataListener.h"
+#include "MantidLiveData/ISIS/FakeISISHistoDAE.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
