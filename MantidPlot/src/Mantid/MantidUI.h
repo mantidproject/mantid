@@ -616,6 +616,12 @@ private:
   /// Set initial autoscale for graph, then reset user autoscale option
   void setInitialAutoscale(Graph *graph);
 
+  /// Plot a layer in a multilayer plot
+  void plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
+                             const bool plotDist, int &row, int &col,
+                             const QString &wsName,
+                             const std::set<int> &spectra);
+
   // Private variables
 
   ApplicationWindow *m_appWindow;    // QtiPlot main ApplicationWindow

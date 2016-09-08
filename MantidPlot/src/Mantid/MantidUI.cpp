@@ -3389,65 +3389,21 @@ MantidUI::plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
   auto *multi = appWindow()->multilayerPlot(plotTitle, nSubplots, 1, nSubplots);
   multi->setCloseOnEmpty(true);
   multi->arrangeLayers(true, true);
-  const int nRows = multi->getRows();
-  const int nCols = multi->getCols();
 
-  // Case for each spectrum getting its own subplot
-  int layerIndex(0);
+  int row(0), col(0);
   if (nWorkspaces == 1) {
+    // One workspace, each spectrum in its own subplot
     const auto &wsName = toPlot.begin().key();
     const auto &spectra = toPlot.begin().value();
-    auto specIter = spectra.cbegin();
-    for (int row = 0; row < nRows; ++row) {
-      const bool drawXAxisLabel = row == nRows - 1;
-      for (int col = 0; col < nCols; ++col) {
-        assert(specIter != spectra.end());
-        const bool drawYAxisLabel = col == 0;
-        auto *layer = multi->layer(++layerIndex);
-        layer->insertCurve(wsName, *specIter, errs, Graph::Unspecified,
-                           plotAsDistribution);
-        QString legendText = wsName + '\n';
-        legendText += "\\l(1) " + getLegendKey(wsName, *specIter) + "\n";
-        layer->newLegend(legendText);
-        setInitialAutoscale(layer);
-        if (!drawXAxisLabel) {
-          layer->setXAxisTitle(QString::null);
-        }
-        if (!drawYAxisLabel) {
-          layer->setYAxisTitle(QString::null);
-        }
-        ++specIter;
-      }
+    for (const auto &spec : spectra) {
+      plotLayerOfMultilayer(multi, errs, plotAsDistribution, row, col, wsName,
+                            std::set<int>{spec});
     }
   } else {
-    // Case for each workspace getting its own subplot
-    auto iter = toPlot.constBegin();
-    for (int row = 0; row < nRows; ++row) {
-      const bool drawXAxisLabel = row == nRows - 1;
-      for (int col = 0; col < nCols; ++col) {
-        assert(iter != toPlot.constEnd());
-        const bool drawYAxisLabel = col == 0;
-        const auto &wsName = iter.key();
-        const auto &spectra = iter.value();
-        auto *layer = multi->layer(++layerIndex);
-        QString legendText = wsName + '\n';
-        int curveIndex(0);
-        for (const int spec : spectra) {
-          layer->insertCurve(wsName, spec, errs, Graph::Unspecified,
-                             plotAsDistribution);
-          legendText += "\\l(" + QString::number(++curveIndex) + ") " +
-                        getLegendKey(wsName, spec) + "\n";
-        }
-        layer->newLegend(legendText);
-        setInitialAutoscale(layer);
-        if (!drawXAxisLabel) {
-          layer->setXAxisTitle(QString::null);
-        }
-        if (!drawYAxisLabel) {
-          layer->setYAxisTitle(QString::null);
-        }
-        ++iter;
-      }
+    // Each workspace in its own subplot
+    for (auto iter = toPlot.constBegin(); iter != toPlot.constEnd(); ++iter) {
+      plotLayerOfMultilayer(multi, errs, plotAsDistribution, row, col,
+                            iter.key(), iter.value());
     }
   }
 
@@ -3457,6 +3413,63 @@ MantidUI::plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
   multi->maybeNeedToClose();
 
   return multi;
+}
+
+/**
+ * Plot a single layer of a multilayer plot.
+ * Data comes from the specified spectra of the named workspace.
+ *
+ * @param multi :: [input, output] Multilayer to plot graph onto
+ * @param plotErrors :: [input] Whether to plot errors
+ * @param plotDist :: [input] Whether to plot as distribution
+ * @param row :: [input, output] Row counter - will be incremented
+ * @param col :: [input, output] Column counter - will be incremented
+ * @param wsName :: [input] Workspace name to plot from
+ * @param spectra :: [input] Spectra from workspace to plot in the layer
+ */
+void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
+                                     const bool plotDist, int &row, int &col,
+                                     const QString &wsName,
+                                     const std::set<int> &spectra) {
+  const int nRows = multi->getRows();
+  const int nCols = multi->getCols();
+
+  // Lambda to increment row, column counters
+  const auto incrementCounters = [&nRows, &nCols](int &row, int &col) {
+    if (col < nCols - 1) {
+      ++col;
+    } else if (row < nRows - 1) {
+      col = 0;
+      ++row;
+    }
+  };
+
+  // Lambda to set legend and axis label hiding
+  const auto formatPlot = [&nRows](Graph *layer, const QString &legendText,
+                                   const int row, const int col) {
+    const bool drawXAxisLabel = row == nRows - 1;
+    const bool drawYAxisLabel = col == 0;
+    layer->newLegend(legendText);
+    if (!drawXAxisLabel) {
+      layer->setXAxisTitle(QString::null);
+    }
+    if (!drawYAxisLabel) {
+      layer->setYAxisTitle(QString::null);
+    }
+  };
+
+  const int layerIndex = row * nCols + col + 1; // layers numbered from 1
+  auto *layer = multi->layer(layerIndex);
+  QString legendText = wsName + '\n';
+  int curveIndex(0);
+  for (const int spec : spectra) {
+    layer->insertCurve(wsName, spec, plotErrors, Graph::Unspecified, plotDist);
+    legendText += "\\l(" + QString::number(++curveIndex) + ")" +
+                  getLegendKey(wsName, spec) + "\n";
+  }
+  setInitialAutoscale(layer);
+  formatPlot(layer, legendText, row, col);
+  incrementCounters(row, col);
 }
 
 /**
