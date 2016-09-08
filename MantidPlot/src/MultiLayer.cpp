@@ -43,6 +43,7 @@
 #include <QSpinBox>
 #include <QSize>
 
+#include <cmath>
 #include <limits>
 #include <set>
 
@@ -588,32 +589,19 @@ QSize MultiLayer::arrangeLayers(bool userSize) {
   return size;
 }
 
+/**
+ * Find best layout for a multilayer plot, given the number of layers
+ * @param d_rows :: [output] Number of rows
+ * @param d_cols :: [output] Number of columns
+ */
 void MultiLayer::findBestLayout(int &d_rows, int &d_cols) {
-  int NumGraph = graphsList.size();
-  if (NumGraph % 2 == 0) // NumGraph is an even number
-  {
-    if (NumGraph <= 2)
-      d_cols = NumGraph / 2 + 1;
-    else if (NumGraph > 2)
-      d_cols = NumGraph / 2;
-
-    if (NumGraph < 8)
-      d_rows = NumGraph / 4 + 1;
-    if (NumGraph >= 8)
-      d_rows = NumGraph / 4;
-  } else if (NumGraph % 2 != 0) // NumGraph is an odd number
-  {
-    int Num = NumGraph + 1;
-
-    if (Num <= 2)
-      d_cols = 1;
-    else if (Num > 2)
-      d_cols = Num / 2;
-
-    if (Num < 8)
-      d_rows = Num / 4 + 1;
-    if (Num >= 8)
-      d_rows = Num / 4;
+  const int numGraphs = graphsList.size();
+  const int root =
+      static_cast<int>(std::ceil(std::sqrt(static_cast<double>(numGraphs))));
+  d_rows = root;
+  d_cols = root;
+  if (d_rows * d_cols - numGraphs > d_rows) {
+    --d_rows;
   }
 }
 
