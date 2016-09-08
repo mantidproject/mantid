@@ -77,10 +77,10 @@ public:
     // Run the conversion.
     ReflectometryWorkflowBase::DetectorMonitorWorkspacePair detMonPair =
         alg.splitDetectorsMonitors(
-                  toConvert, detectorIndexRangesStr, monitorIndex,
-                  boost::tuple<double, double>(wavelengthMin, wavelengthMax),
-                  boost::tuple<double, double>(backgroundWavelengthMin,
-                                               backgroundWavelengthMax));
+            toConvert, detectorIndexRangesStr, monitorIndex,
+            boost::tuple<double, double>(wavelengthMin, wavelengthMax),
+            boost::tuple<double, double>(backgroundWavelengthMin,
+                                         backgroundWavelengthMax));
 
     // Unpack the results
     MatrixWorkspace_sptr detectorWS = detMonPair.get<0>();

@@ -166,10 +166,9 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
   convertUnitsAlg->execute();
   firstTransmissionRun = convertUnitsAlg->getProperty("OutputWorkspace");
 
-  auto trans1DetMonPair =
-      splitDetectorsMonitors(firstTransmissionRun, processingCommands,
-            i0MonitorIndex, wavelengthInterval,
-            wavelengthMonitorBackgroundInterval);
+  auto trans1DetMonPair = splitDetectorsMonitors(
+      firstTransmissionRun, processingCommands, i0MonitorIndex,
+      wavelengthInterval, wavelengthMonitorBackgroundInterval);
   MatrixWorkspace_sptr trans1Detector = trans1DetMonPair.get<0>();
   MatrixWorkspace_sptr trans1Monitor = trans1DetMonPair.get<1>();
 
@@ -200,9 +199,9 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
     convertUnitsAlg->execute();
     transRun2 = convertUnitsAlg->getProperty("OutputWorkspace");
 
-    auto trans2DetMonPair =
-        splitDetectorsMonitors(transRun2, processingCommands, i0MonitorIndex,
-              wavelengthInterval, wavelengthMonitorBackgroundInterval);
+    auto trans2DetMonPair = splitDetectorsMonitors(
+        transRun2, processingCommands, i0MonitorIndex, wavelengthInterval,
+        wavelengthMonitorBackgroundInterval);
 
     // Unpack the conversion results.
     MatrixWorkspace_sptr trans2Detector = trans2DetMonPair.get<0>();

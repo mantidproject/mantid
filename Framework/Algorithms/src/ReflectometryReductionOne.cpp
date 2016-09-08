@@ -642,9 +642,9 @@ void ReflectometryReductionOne::exec() {
       runWS = divide(runWS, *decWS);
     }
 
-    DetectorMonitorWorkspacePair detMonPair =
-        splitDetectorsMonitors(runWS, processingCommands, i0MonitorIndex,
-              wavelengthInterval, monitorBackgroundWavelengthInterval);
+    DetectorMonitorWorkspacePair detMonPair = splitDetectorsMonitors(
+        runWS, processingCommands, i0MonitorIndex, wavelengthInterval,
+        monitorBackgroundWavelengthInterval);
     auto detectorWS = detMonPair.get<0>();
     auto monitorWS = detMonPair.get<1>();
 
