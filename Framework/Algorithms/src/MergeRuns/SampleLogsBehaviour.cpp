@@ -10,7 +10,8 @@ using namespace API;
 // using namespace Geometry;
 
 namespace {
-std::string generateDifferenceMessage(const std::string &item, const std::string &wsName,
+std::string generateDifferenceMessage(const std::string &item,
+                                      const std::string &wsName,
                                       const std::string &wsValue,
                                       const std::string &firstValue) {
   std::stringstream stringstream;
