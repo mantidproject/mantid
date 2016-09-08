@@ -8,6 +8,7 @@ using namespace Mantid::Kernel;
 namespace MantidQt {
 namespace MantidWidgets {
 WorkspaceDockView::WorkspaceDockView() {}
+WorkspaceDockView::~WorkspaceDockView() {}
 
 void WorkspaceDockView::init() {
   presenter = boost::make_shared<WorkspacePresenter>(shared_from_this());
@@ -26,6 +27,10 @@ void WorkspaceDockView::showLoadDialog() {}
 
 void WorkspaceDockView::updateTree(
     const std::map<std::string, Mantid::API::Workspace_sptr> &items) {}
+
+void WorkspaceDockView::populateTopLevel(
+    const std::map<std::string, Mantid::API::Workspace_sptr> &topLevelItems,
+    const StringList &expanded) {}
 
 } // namespace MantidQt
 } // namespace MantidWidgets

@@ -55,6 +55,9 @@ public:
   virtual void showLoadDialog() = 0;
   virtual void updateTree(
       const std::map<std::string, Mantid::API::Workspace_sptr> &items) = 0;
+  virtual void populateTopLevel(
+      const std::map<std::string, Mantid::API::Workspace_sptr> &topLevelItems,
+      const StringList &expanded) = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

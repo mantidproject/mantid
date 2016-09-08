@@ -50,7 +50,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS WorkspacePresenter
       public ViewNotifiable {
 public:
   explicit WorkspacePresenter(DockView_wptr view);
-  ~WorkspacePresenter() = default;
+  ~WorkspacePresenter() override;
 
   void init();
 

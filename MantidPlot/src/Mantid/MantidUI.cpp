@@ -4,6 +4,7 @@
 #include "MantidUI.h"
 #include "MantidMatrix.h"
 #include "MantidDock.h"
+#include "AlgorithmDockWidget.h"
 #include "ImportWorkspaceDlg.h"
 #include "AlgorithmMonitor.h"
 #include "MantidSampleLogDialog.h"

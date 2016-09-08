@@ -28,6 +28,10 @@ public:
   MOCK_METHOD1(
       updateTree,
       void(const std::map<std::string, Mantid::API::Workspace_sptr> &items));
+  MOCK_METHOD2(populateTopLevel,
+               void(const std::map<std::string, Mantid::API::Workspace_sptr>
+                        &topLevelItems,
+                    const StringList &expanded));
 
   // Methods which are not to be mocked
   WorkspacePresenter_wptr getPresenterWeakPtr() override { return presenter; }

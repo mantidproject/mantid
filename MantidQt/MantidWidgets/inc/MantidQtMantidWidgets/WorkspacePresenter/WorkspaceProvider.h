@@ -1,5 +1,5 @@
-#ifndef MANTID_MANTIDWIDGETS_IADSADAPTER_H_
-#define MANTID_MANTIDWIDGETS_IADSADAPTER_H_
+#ifndef MANTID_MANTIDWIDGETS_WORKSPACEPROVIDER_H_
+#define MANTID_MANTIDWIDGETS_WORKSPACEPROVIDER_H_
 
 #include <MantidAPI/Workspace_fwd.h>
 #include <boost/shared_ptr.hpp>
@@ -47,9 +47,10 @@ public:
   virtual void registerPresenter(Presenter_wptr presenter) = 0;
   virtual Mantid::API::Workspace_sptr
   getWorkspace(const std::string &wsname) const = 0;
-  virtual std::map<std::string, Mantid::API::Workspace_sptr> topLevelItems() const = 0;
+  virtual std::map<std::string, Mantid::API::Workspace_sptr>
+  topLevelItems() const = 0;
 };
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTID_MANTIDWIDGETS_IADSADAPTER_H_
+#endif // MANTID_MANTIDWIDGETS_WORKSPACEPROVIDER_H_

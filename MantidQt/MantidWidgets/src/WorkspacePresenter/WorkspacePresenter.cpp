@@ -11,6 +11,8 @@ namespace MantidWidgets {
 WorkspacePresenter::WorkspacePresenter(DockView_wptr view)
     : m_view(view), m_adapter(Kernel::make_unique<ADSAdapter>()) {}
 
+WorkspacePresenter::~WorkspacePresenter() {}
+
 void WorkspacePresenter::init() {
   m_adapter->registerPresenter(std::move(m_view.lock()->getPresenterWeakPtr()));
 }

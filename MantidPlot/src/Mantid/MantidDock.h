@@ -9,11 +9,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 
-#include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
-
-#include "Mantid/MantidWSIndexDialog.h"
-#include "Mantid/MantidSurfacePlotDialog.h"
-
 #include <QActionGroup>
 #include <QAtomicInt>
 #include <QComboBox>
@@ -33,6 +28,7 @@ class ApplicationWindow;
 class MantidTreeWidgetItem;
 class MantidTreeWidget;
 class QLabel;
+class QFileDialog;
 class QMenu;
 class QPushButton;
 class QTreeWidget;
@@ -162,92 +158,4 @@ private:
   /// Keep a map of renamed workspaces between updates
   QMap<QString, QString> m_renameMap;
 };
-
-class MantidTreeWidget : public QTreeWidget {
-  Q_OBJECT
-
-public:
-  MantidTreeWidget(MantidDockWidget *w, MantidUI *mui);
-  void mousePressEvent(QMouseEvent *e) override;
-  void mouseMoveEvent(QMouseEvent *e) override;
-  void mouseDoubleClickEvent(QMouseEvent *e) override;
-
-  QStringList getSelectedWorkspaceNames() const;
-  MantidWSIndexWidget::UserInput
-  chooseSpectrumFromSelected(bool showWaterfallOpt = true,
-                             bool showPlotAll = true) const;
-  void setSortScheme(MantidItemSortScheme);
-  void setSortOrder(Qt::SortOrder);
-  MantidItemSortScheme getSortScheme() const;
-  Qt::SortOrder getSortOrder() const;
-  void logWarningMessage(const std::string &);
-  void disableNodes(bool);
-  void sort();
-  void dropEvent(QDropEvent *de) override;
-  QList<boost::shared_ptr<const Mantid::API::MatrixWorkspace>>
-  getSelectedMatrixWorkspaces() const;
-  MantidSurfacePlotDialog::UserInputSurface
-  chooseSurfacePlotOptions(int nWorkspaces) const;
-  MantidSurfacePlotDialog::UserInputSurface
-  chooseContourPlotOptions(int nWorkspaces) const;
-
-protected:
-  void dragMoveEvent(QDragMoveEvent *de) override;
-  void dragEnterEvent(QDragEnterEvent *de) override;
-  MantidSurfacePlotDialog::UserInputSurface
-  choosePlotOptions(const QString &type, int nWorkspaces) const;
-
-private:
-  QPoint m_dragStartPosition;
-  MantidDockWidget *m_dockWidget;
-  MantidUI *m_mantidUI;
-  Mantid::API::AnalysisDataServiceImpl &m_ads;
-  MantidItemSortScheme m_sortScheme;
-  Qt::SortOrder m_sortOrder;
-};
-
-/**A class derived from QTreeWidgetItem, to accomodate
- * sorting on the items in a MantidTreeWidget.
- */
-class MantidTreeWidgetItem : public QTreeWidgetItem {
-public:
-  explicit MantidTreeWidgetItem(MantidTreeWidget *);
-  MantidTreeWidgetItem(QStringList, MantidTreeWidget *);
-  void disableIfNode(bool);
-  void setSortPos(int o) { m_sortPos = o; }
-  int getSortPos() const { return m_sortPos; }
-
-private:
-  bool operator<(const QTreeWidgetItem &other) const override;
-  MantidTreeWidget *m_parent;
-  static Mantid::Kernel::DateAndTime getLastModified(const QTreeWidgetItem *);
-  int m_sortPos;
-};
-
-class AlgorithmDockWidget : public QDockWidget {
-  Q_OBJECT
-public:
-  AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w);
-public slots:
-  void update();
-  void updateProgress(void *alg, const double p, const QString &msg,
-                      double estimatedTime, int progressPrecision);
-  void algorithmStarted(void *alg);
-  void algorithmFinished(void *alg);
-
-protected:
-  void showProgressBar();
-  void hideProgressBar();
-
-  MantidQt::MantidWidgets::AlgorithmSelectorWidget *m_selector;
-  QPushButton *m_runningButton;
-  QProgressBar *m_progressBar;
-  QHBoxLayout *m_runningLayout;
-  QList<void *> m_algID;
-  friend class MantidUI;
-
-private:
-  MantidUI *m_mantidUI;
-};
-
 #endif

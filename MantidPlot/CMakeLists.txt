@@ -159,7 +159,8 @@ if ( CMAKE_COMPILER_IS_GNUCXX )
                                 PROPERTIES COMPILE_FLAGS -Wno-cast-qual )
 endif ()
 
-set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
+set ( MANTID_SRCS  src/Mantid/AlgorithmDockWidget.cpp
+				   src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/AlgorithmHistoryWindow.cpp
                    src/Mantid/ErrorBarSettings.cpp
                    src/Mantid/FirstTimeSetup.cpp
@@ -190,6 +191,8 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
 				   src/Mantid/MantidGroupPlotGenerator.cpp
                    src/Mantid/MantidUI.cpp
                    src/Mantid/MantidTable.cpp
+				   src/Mantid/MantidTreeWidget.cpp
+				   src/Mantid/MantidTreeWidgetItem.cpp
                    src/Mantid/MantidWSIndexDialog.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
@@ -352,7 +355,8 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.h
 )
 
-set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
+set ( MANTID_HDRS  src/Mantid/AlgorithmDockWidget.h
+                   src/Mantid/AlgorithmMonitor.h
                    src/Mantid/AlgorithmHistoryWindow.h
                    src/Mantid/ErrorBarSettings.h
                    src/Mantid/FirstTimeSetup.h
@@ -387,6 +391,8 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/MantidUI.h
                    src/Mantid/MantidWSIndexDialog.h
                    src/Mantid/MantidTable.h
+				   src/Mantid/MantidTreeWidget.h
+				   src/Mantid/MantidTreeWidgetItem.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h

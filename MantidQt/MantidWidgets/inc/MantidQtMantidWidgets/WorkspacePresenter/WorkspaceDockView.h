@@ -2,6 +2,7 @@
 #define MANTID_MANTIDWIDGETS_WORKSPACEDOCKVIEW_H_
 
 #include "MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h"
+#include <QDockWidget>
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
@@ -34,10 +35,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class WorkspaceDockView : public IWorkspaceDockView {
+class WorkspaceDockView : public IWorkspaceDockView, public QDockWidget {
 public:
   explicit WorkspaceDockView();
-  ~WorkspaceDockView() = default;
+  ~WorkspaceDockView() override;
 
   void init() override;
   WorkspacePresenter_wptr getPresenterWeakPtr() override;
@@ -46,6 +47,10 @@ public:
   void showLoadDialog() override;
   void updateTree(
       const std::map<std::string, Mantid::API::Workspace_sptr> &items) override;
+
+  void populateTopLevel(
+      const std::map<std::string, Mantid::API::Workspace_sptr> &topLevelItems,
+      const StringList &expanded) override;
 
 private:
   WorkspacePresenter_sptr presenter;
