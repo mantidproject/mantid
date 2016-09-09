@@ -25,6 +25,13 @@ class ILLIN16BCalibrationTest(unittest.TestCase):
         self.assertEqual(calib_ws.getNumberHistograms(), 18)
         self.assertEqual(calib_ws.blocksize(), 1)
 
+    def test_multiple_files(self):
+        calib_ws = ILLIN16BCalibration(Run='ILL/IN16B/146191,ILL/IN16B/146192.nxs',
+                                       PeakRange=[-0.001, 0.002])
+
+        self.assertEqual(calib_ws.getNumberHistograms(), 18)
+        self.assertEqual(calib_ws.blocksize(), 1)
+
     def test_map_file(self):
         temp_map = TemporaryFileHelper(SAMPLE_GROUPING_XML, extension='.xml')
 

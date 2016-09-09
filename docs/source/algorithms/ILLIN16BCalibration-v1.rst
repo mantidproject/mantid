@@ -38,7 +38,7 @@ Output:
 
 .. testoutput:: ExILLIN16BCalibration
 
-    Calibration workspace has 24 spectra and 1 bin(s)
+    Calibration workspace has 18 spectra and 1 bin(s)
 
 .. categories::
 

@@ -1,6 +1,6 @@
 #pylint: disable=no-init
 from mantid.kernel import *
-from mantid.api import (WorkspaceProperty, FileProperty, FileAction,
+from mantid.api import (WorkspaceProperty, FileProperty, MultipleFileProperty, FileAction,
                         DataProcessorAlgorithm, AlgorithmFactory)
 from mantid.simpleapi import *
 
@@ -24,9 +24,7 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(FileProperty(name='Run',defaultValue='',
-                                          action=FileAction.Load,
-                                          extensions=['nxs']),
+        self.declareProperty(MultipleFileProperty(name='Run',extensions=['nxs']),
                              doc='List of input file (s)')
 
         self.declareProperty(FileProperty(name='MapFile', defaultValue='',
@@ -91,13 +89,16 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         """
         Gets properties.
         """
-        self._input_file = self.getProperty('Run').value
+        self._input_file = self.getPropertyValue('Run')
         self._out_ws = self.getPropertyValue('OutputWorkspace')
 
         self._map_file = self.getPropertyValue('MapFile')
         self._peak_range = self.getProperty('PeakRange').value
 
         self._intensity_scale = self.getProperty('ScaleFactor').value
+
+        # automatic summing
+        self._input_file = self._input_file.replace(',','+')
 
     def validateInputs(self):
         """
