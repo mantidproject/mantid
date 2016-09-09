@@ -184,38 +184,56 @@ ILL Energy Transfer
 
 This tab handles the reduction of data from the IN16B instrument at the ILL.
 
-This will output the raw (*_raw*) data read from the file and reduced (*_red*)
-workspace by default, with mirror mode enabled you will also get the left
-(*_left*) and right (*_right*) hand components of the data as separate
-workspaces.
-
-Note that when using a calibration workspace the grouping of the calibration
-workspace must match that being used in the energy transfer reduction, i.e. both
-processes use the same grouping file (or both use the default grouping).
-
 Options
 ~~~~~~~
 
-Input
-  Used to select the raw data in *.nxs* format
+Input File
+  Used to select the raw data in *.nxs* format. Note that multiple files can be specified following
+  `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_ instructions. If *Sum Runs* is checked,
+  all the input runs will be summed while loading.
 
-Calibration
-  Gives the option of applying a calibration workspace or NeXus file created
-  with the ILL Calibration tab or :ref:`ILLIN16BCalibration
-  <algm-ILLIN16BCalibration>` algorithm.
+Reduction Type
+  There are two reduction types of IN16B data: Quasi-Elastic Neutron Scattering (QENS) or Fixed Window Scans (FWS),
+  which can be either Elastic (EFWS) or Inelastic (IFWS). In case of the FWS, an observable can be specified that will be
+  the x-axis on the final reduced workspace. If one or another reduction type is checked, the input files will be
+  automatically filtered according to velocity profile (0 for QENS, 1 for FWS) and the corresponding algorithm will be run.
 
-Grouping
+Detector Grouping
   Used to switch between grouping as per the IDF (*Default*) or grouping using a
-  mapping file (*Map File*).
+  mapping file (*Map File*). This defines e.g. the summing of the 128 vertical pixels per PSDs.
 
-Use Mirror Mode
-  Enable to reduce data that has been captured with mirror mode enabled.
+Background Subtraction
+  Used to specify a background (i.e. empty can) subtraction. If multiple files are given, they will be automatically
+  summed.
+
+Detector Calibration
+  Gives the option of applying workspace of calibration constants produced
+  with the ILL Calibration tab or :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>` algorithm.
+  If file option is selected, one can choose directly the calibration
+  files, and then first :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>` algorithm
+  will be run over the files to produce the constants, which will then be seeded into the
+  main reduction workflow. If multiple files are given they will be automatically summed.
+
+Unmirror Options
+  This is used to choose the option of summing og the left and right wings of the data, when recorded in mirror sense.
+  See :ref:`IndirectILLReduction <algm-IndirectILLReduction>` for full details. Unmirror option 5 and 7 require vanadium run.
+  Note, that this is not necessarily the same as the file used to derive the calibration constants. Vanadium run will be used
+  only for left and right wing peak alignment for unmirror options 5 and 7. If multiple files are specified, they will be
+  automatically summed.
+
+Output Name
+  This will be the name of the resulting reduced workspace group, that will contain workspaces for each individual run
+  bearing run numbers as prefix.
 
 Plot
-  If enabled will plot the result as a spectra plot.
+  If enabled will plot the result (of the first run) as a contour plot.
+
+Debug Mode
+  If enabled, a set of auxiliary control workspaces will be created to monitor the reduction workflow at various pre-defined
+  intermediate steps.
 
 Save
-  If enabled the result will be saved as a NeXus file in the default save
+  If enabled the reduced workspace will be saved as a NeXus file in the default save
   directory.
 
 ISIS Calibration & Resolution
@@ -298,18 +316,18 @@ algorithm.
 Options
 ~~~~~~~
 
+Input Files
+  File for the calibration (e.g. vanadium) run. If multiple specified, they will be automatically summed.
+
 Grouping
   Used to switch between grouping as per the IDF (*Default*) or grouping using a
   mapping file (*Map File*).
 
 Peak Range
-  Sets the integreation range over the peak in :math:`meV`
+  Sets the integration range over the peak in :math:`meV`
 
 Scale Factor
   Override the calculated scale factor
-
-Mirror Mode
-  Enable of the data uses mirror mode
 
 ISIS Diagnostics
 ----------------

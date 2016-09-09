@@ -369,9 +369,9 @@
         <property name="toolTip">
          <string>Unmirroring options:
 0 no unmirroring
-1 left
-2 right
-3 sum of left and right
+1 sum of left and right
+2 left
+3 right
 4 shift right according to left and sum
 5 shift right according to Vanadium run for peak positions
 6 center both left and right at zero and sum
@@ -685,7 +685,7 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>
