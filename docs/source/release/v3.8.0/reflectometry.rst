@@ -8,6 +8,8 @@ Reflectometry Changes
 ReflectometryReductionOne
 -------------------------
 
+- The rebinning in wavelength has been removed
+
 ReflectometryReductionOneAuto
 -----------------------------
 
@@ -17,6 +19,7 @@ CreateTransmissionWorkspace
 ---------------------------
 
 - A workflow diagram has been added to the documentation.
+- The rebinning in wavelength has been removed
 
 ConvertToReflectometryQ
 -----------------------
