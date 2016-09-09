@@ -51,10 +51,15 @@ public:
   }
 
   void testDeleteWorkspacesFromDock() {
-    EXPECT_CALL(*mockView.get(), deleteConfirmation()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), deleteWorkspaces()).Times(AtLeast(0));
+	ON_CALL(*mockView.get(), deleteConfirmation()).WillByDefault(Return(true));
+    EXPECT_CALL(*mockView.get(), deleteConfirmation()).Times(Exactly(2));
+    EXPECT_CALL(*mockView.get(), deleteWorkspaces()).Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
+
+	ON_CALL(*mockView.get(), deleteConfirmation()).WillByDefault(Return(false));
+
+	presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
