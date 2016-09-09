@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable = invalid-name
 """
     This class holds all the necessary information to create a reduction script.
 """

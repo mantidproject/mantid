@@ -171,11 +171,11 @@ public:
     delete suite;
   }
 
-  void setUp() {
+  void setUp() override {
     inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(20000, 10000);
   }
 
-  void tearDown() {
+  void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().remove("output");
   }
 

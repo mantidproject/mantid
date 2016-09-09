@@ -11,7 +11,12 @@ ReflectometryReductionOne
 ReflectometryReductionOneAuto
 -----------------------------
 
-The scaling step has now been added to the Workflow diagram of ReflectometryReductionOneAuto `#16671 <https://github.com/mantidproject/mantid/pull/16671>`__   
+- The scaling step has now been added to the Workflow diagram of ReflectometryReductionOneAuto `#16671 <https://github.com/mantidproject/mantid/pull/16671>`__   
+
+CreateTransmissionWorkspace
+---------------------------
+
+- A workflow diagram has been added to the documentation.
 
 ConvertToReflectometryQ
 -----------------------
@@ -25,6 +30,7 @@ ISIS Reflectometry (Polref)
 
 - Interface now displays information in a tree where groups are parent items and runs are children. For more details, please check the updated documentation.
 - Global settings have been moved to a separate tab ("Settings")
+- Transfer progress bar no longer gives impression of running when clicked if no runs are selected
 
 ISIS Reflectometry
 ##################

@@ -547,7 +547,7 @@ public:
         boost::make_shared<Instrument>(m_instrumentNotParameterized, map);
   }
 
-  void test_access_non_parameterized() {
+  void test_access_pos_non_parameterized() {
 
     const detid_t nPixels = 100 * 100 * 6;
     double pos_x = 0;
@@ -556,12 +556,30 @@ public:
     }
   }
 
-  void test_access_parameterized() {
+  void test_access_pos_parameterized() {
 
     const detid_t nPixels = 100 * 100 * 6;
     double pos_x = 0;
     for (detid_t i = 1; i <= nPixels; i++) {
       pos_x += m_instrumentParameterized->getDetector(i)->getPos().X();
+    }
+  }
+
+  void test_access_rotate_non_parameterized() {
+
+    const detid_t nPixels = 100 * 100 * 6;
+    Kernel::Quat rot;
+    for (detid_t i = 1; i <= nPixels; i++) {
+      rot += m_instrumentNotParameterized->getDetector(i)->getRotation();
+    }
+  }
+
+  void test_access_rotate_parameterized() {
+
+    const detid_t nPixels = 100 * 100 * 6;
+    Kernel::Quat rot;
+    for (detid_t i = 1; i <= nPixels; i++) {
+      rot += m_instrumentParameterized->getDetector(i)->getRotation();
     }
   }
 
