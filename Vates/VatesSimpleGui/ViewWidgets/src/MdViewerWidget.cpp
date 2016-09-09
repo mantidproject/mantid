@@ -376,10 +376,6 @@ void MdViewerWidget::setParaViewComponentsForView() {
   QObject::connect(activeObjects, SIGNAL(viewChanged(pqView *)),
                    this->ui.propertiesPanel, SLOT(setView(pqView *)));
 
-  // this->ui.propertiesPanel->setOutputPort(activeObjects->activePort());
-  // this->ui.propertiesPanel->setView(this->currentView->getView());
-  // this->ui.propertiesPanel->setRepresentation(activeObjects->activeRepresentation());
-
   QObject::connect(this->currentView, SIGNAL(triggerAccept()),
                    this->ui.propertiesPanel, SLOT(apply()));
   QObject::connect(this->ui.propertiesPanel, SIGNAL(applied()), this,
@@ -1092,16 +1088,6 @@ void MdViewerWidget::renderAndFinalSetup() {
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
   this->currentView->checkView(this->initialView);
   this->currentView->updateAnimationControls();
-  pqPipelineSource *source = this->currentView->origSrc;
-  // suppress unused variable;
-  (void)source;
-  pqPipelineRepresentation *repr = this->currentView->origRep;
-  // suppress unused variable;
-  (void)repr;
-  // this->ui.proxiesPanel->clear();
-  // this->ui.proxiesPanel->addProxy(source->getProxy(),"datasource",QStringList(),true);
-  // this->ui.proxiesPanel->addProxy(repr->getProxy(),"display",QStringList("CubeAxesVisibility"),true);
-  // this->ui.proxiesPanel->updateLayout();
   this->setDestroyedListener();
   this->currentView->setVisibilityListener();
   this->currentView->onAutoScale(this->ui.colorSelectionWidget);
