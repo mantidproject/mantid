@@ -905,57 +905,71 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
 
   TSVSerialiser tsv(lines);
 
-  if (!tsv.selectLine("Workspace"))
-    return;
-
+  int viewType;
+  size_t viewIdSizet, sourceIdSizet;
   std::string wsName;
   tsv >> wsName;
-
-
-  int viewType;
+  tsv.selectLine("ViewId");
+  tsv >> viewIdSizet;
+  tsv.selectLine("SourceId");
+  tsv >> sourceIdSizet;
   tsv.selectLine("ViewType");
   tsv >> viewType;
 
   auto vtype = static_cast<ModeControlWidget::Views>(viewType);
+  auto viewId = static_cast<vtkTypeUInt32>(viewIdSizet);
+  auto sourceId = static_cast<vtkTypeUInt32>(sourceIdSizet);
 
+  // Set the view type on the widget
   this->ui.modeControlWidget->blockSignals(true);
   this->ui.modeControlWidget->setToSelectedView(vtype);
   this->ui.modeControlWidget->blockSignals(false);
 
+  // Load the state of VSI from the XML dump
   QSettings settings;
   auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
   auto fileName = workingDir.toStdString() + "/VATES.xml";
   auto proxyManager = pqActiveObjects::instance().activeServer()->proxyManager();
-  proxyManager->LoadXMLState(fileName.c_str());
 
+  // We cannot directly load the XML using LoadXMLState(filename) because
+  // there is no option to retain global IDs with that method.
+  // So here we do the same thing but pass the desired option
+  auto *parser = vtkPVXMLParser::New();
+  parser->SetFileName(fileName.c_str());
+  parser->Parse();
+  proxyManager->LoadXMLState(parser->GetRootElement(), NULL, true);
+  parser->Delete();
+
+  // Get the active objects from the last session
   auto model = pqApplicationCore::instance()->getServerManagerModel();
-  auto view = model->findItem<pqView*>("RenderView3");
-  auto source = model->findItem<pqPipelineSource *>("MDHWSource1");
-  auto representation = model->findItem<pqPipelineRepresentation *>("StructuredGridRepresentation1");
+  auto view = model->findItem<pqView *>(viewId);
+  auto source = model->findItem<pqPipelineSource *>(sourceId);
 
-  this->currentView = this->createAndSetMainViewWidget(
-      this->ui.viewWidget, vtype);
-  this->initialView = vtype;
-  this->currentView->installEventFilter(this);
+  // Initilise the current view to something and setup
+  currentView = createAndSetMainViewWidget(ui.viewWidget, vtype);
+  initialView = vtype;
+  currentView->installEventFilter(this);
+  viewLayout = new QHBoxLayout(ui.viewWidget);
+  viewLayout->setMargin(0);
+  viewLayout->setStretch(0, 1);
+  viewLayout->addWidget(currentView);
 
-  // Create a layout to manage the view properly
-  this->viewLayout = new QHBoxLayout(this->ui.viewWidget);
-  this->viewLayout->setMargin(0);
-  this->viewLayout->setStretch(0, 1);
-  this->viewLayout->addWidget(this->currentView);
-
+  // Swap out the existing view for the newly loaded source and representation
   currentView->origSrc = qobject_cast<pqPipelineSource*>(source);
-  currentView->origRep = qobject_cast<pqPipelineRepresentation *>(representation);
   currentView->setView(qobject_cast<pqRenderView*>(view));
-
   setParaViewComponentsForView();
 
+  // Set the active objects. This will trigger events to update the properties
+  // panel and the pipeline viewer
   auto & activeObjects = pqActiveObjects::instance();
   activeObjects.setActiveView(view);
   activeObjects.setActiveSource(source);
   activeObjects.setActivePort(source->getOutputPort(0));
 
   currentView->show();
+
+  // Don't call render on ViewBase here as that will reset the camera.
+  // Instead just directly render the view proxy using render all.
   this->currentView->renderAll();
 }
 
@@ -1014,8 +1028,6 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   UNUSED_ARG(app);
   TSVSerialiser tsv, contents;
 
-  contents.writeLine("Workspace") << currentView->getWorkspaceName();
-
   QSettings settings;
   auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
   auto fileName = workingDir.toStdString() + "/VATES.xml";
@@ -1025,6 +1037,16 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
 
   auto vtype = currentView->getViewType();
   contents.writeLine("ViewType") << static_cast<int>(vtype);
+
+  auto &activeObjects = pqActiveObjects::instance();
+  auto view = activeObjects.activeView()->getProxy();
+  auto source = activeObjects.activeSource()->getProxy();
+  auto viewId = view->GetGlobalIDAsString();
+  auto sourceId = source->GetGlobalIDAsString();
+
+  contents.writeLine("ViewID") << viewId;
+  contents.writeLine("SourceID") << sourceId;
+
   tsv.writeSection("vates", contents.outputLines());
 
   return tsv.outputLines();
