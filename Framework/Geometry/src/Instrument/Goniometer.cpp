@@ -75,7 +75,13 @@ const Kernel::DblMatrix &Goniometer::getR() const { return R; }
 void Goniometer::setR(Kernel::DblMatrix rot) { R = rot; }
 
 /// Function reports if the goniometer is defined
-bool Goniometer::isDefined() const { return initFromR || (!motors.empty()); }
+bool Goniometer::isDefined() const {
+	bool r_contains_nan = false;
+	std::vector<double> vec = R.getVector();
+	for (std::vector<double>::iterator it = vec.begin(); it != vec.end(); ++it)
+		r_contains_nan = r_contains_nan || (!std::isfinite(*it));
+	return (!r_contains_nan) && ( initFromR || (!motors.empty())); 
+}
 
 /// Return information about axes.
 /// @return str :: string that contains on each line one motor information (axis
