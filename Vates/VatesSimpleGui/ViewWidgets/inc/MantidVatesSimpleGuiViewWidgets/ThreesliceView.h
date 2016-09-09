@@ -90,6 +90,9 @@ public:
    */
   void resetDisplay() override;
 
+  /// @see ViewBase::setView
+  void setView(pqRenderView *view) override;
+
 private:
   Q_DISABLE_COPY(ThreeSliceView)
 

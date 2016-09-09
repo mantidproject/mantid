@@ -92,6 +92,11 @@ void ThreeSliceView::renderAll() { this->m_mainView->render(); }
 
 void ThreeSliceView::resetDisplay() { this->m_mainView->resetDisplay(); }
 
+void ThreeSliceView::setView(pqRenderView *view)
+{
+  this->m_mainView = view;
+}
+
 /*
 void ThreeSliceView::correctVisibility()
 {

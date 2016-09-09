@@ -98,12 +98,20 @@ void MultiSliceView::render() {
   this->origSrc = pqActiveObjects::instance().activeSource();
   this->checkSliceViewCompat();
   this->setupData();
-  this->resetDisplay();
+  //this->resetDisplay();
 }
 
 void MultiSliceView::renderAll() { this->m_mainView->render(); }
 
 void MultiSliceView::resetDisplay() { this->m_mainView->resetDisplay(); }
+
+void MultiSliceView::setView(pqRenderView *view)
+{
+  this->m_mainView = qobject_cast<pqMultiSliceView *>(view);
+  QObject::connect(this->m_mainView,
+                   SIGNAL(sliceClicked(int, double, int, int)), this,
+                   SLOT(checkSliceClicked(int, double, int, int)));
+}
 
 void MultiSliceView::resetCamera() { this->m_mainView->resetCamera(); }
 

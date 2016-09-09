@@ -61,12 +61,14 @@
 #include <vtkMathTextUtilities.h>
 #include <vtkPVOrthographicSliceView.h>
 #include <vtkPVXMLElement.h>
+#include <vtkPVXMLParser.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxyManager.h>
 #include <vtkSMProxy.h>
 #include <vtkSMReaderFactory.h>
 #include <vtkSMRenderViewProxy.h>
+#include <vtkSMSessionProxyManager.h>
 #include <vtkSMSourceProxy.h>
 #include <vtkSMViewProxy.h>
 #include <vtksys/SystemTools.hxx>
@@ -366,10 +368,10 @@ void MdViewerWidget::setParaViewComponentsForView() {
                    this->ui.propertiesPanel,
                    SLOT(setOutputPort(pqOutputPort *)));
 
-  // QObject::connect(activeObjects,
-  // SIGNAL(representationChanged(pqRepresentation*)),
-  //                 this->ui.propertiesPanel,
-  //                 SLOT(setRepresentation(pqRepresentation*)));
+   QObject::connect(activeObjects,
+   SIGNAL(representationChanged(pqDataRepresentation*)),
+                   this->ui.propertiesPanel,
+                   SLOT(setRepresentation(pqDataRepresentation*)));
 
   QObject::connect(activeObjects, SIGNAL(viewChanged(pqView *)),
                    this->ui.propertiesPanel, SLOT(setView(pqView *)));
@@ -932,7 +934,9 @@ void MdViewerWidget::setupPluginMode() {
  * @param lines :: a string representing the state of the Vates window
  */
 void MdViewerWidget::loadFromProject(const std::string &lines) {
-  setupPluginMode();
+  this->useCurrentColorSettings = false;
+  this->setupUiAndConnections();
+  this->createMenus();
 
   TSVSerialiser tsv(lines);
 
@@ -942,9 +946,52 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
   std::string wsName;
   tsv >> wsName;
 
-  auto success = setupWorkspaceFromProject(wsName);
-  if (!success)
-    return;
+
+  int viewType;
+  tsv.selectLine("ViewType");
+  tsv >> viewType;
+
+  auto vtype = static_cast<ModeControlWidget::Views>(viewType);
+
+  this->ui.modeControlWidget->blockSignals(true);
+  this->ui.modeControlWidget->setToSelectedView(vtype);
+  this->ui.modeControlWidget->blockSignals(false);
+
+  QSettings settings;
+  auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
+  auto fileName = workingDir.toStdString() + "/VATES.xml";
+  auto proxyManager = pqActiveObjects::instance().activeServer()->proxyManager();
+  proxyManager->LoadXMLState(fileName.c_str());
+
+  auto model = pqApplicationCore::instance()->getServerManagerModel();
+  auto view = model->findItem<pqView*>("RenderView3");
+  auto source = model->findItem<pqPipelineSource *>("MDHWSource1");
+  auto representation = model->findItem<pqPipelineRepresentation *>("StructuredGridRepresentation1");
+
+  this->currentView = this->createAndSetMainViewWidget(
+      this->ui.viewWidget, vtype);
+  this->initialView = vtype;
+  this->currentView->installEventFilter(this);
+
+  // Create a layout to manage the view properly
+  this->viewLayout = new QHBoxLayout(this->ui.viewWidget);
+  this->viewLayout->setMargin(0);
+  this->viewLayout->setStretch(0, 1);
+  this->viewLayout->addWidget(this->currentView);
+
+  currentView->origSrc = qobject_cast<pqPipelineSource*>(source);
+  currentView->origRep = qobject_cast<pqPipelineRepresentation *>(representation);
+  currentView->setView(qobject_cast<pqRenderView*>(view));
+
+  setParaViewComponentsForView();
+
+  auto & activeObjects = pqActiveObjects::instance();
+  activeObjects.setActiveView(view);
+  activeObjects.setActiveSource(source);
+  activeObjects.setActivePort(source->getOutputPort(0));
+
+  currentView->show();
+  this->currentView->renderAll();
 }
 
 /**
@@ -983,6 +1030,8 @@ bool MdViewerWidget::setupWorkspaceFromProject(const std::string &wsName) {
       instrumentName =
           hws->getExperimentInfo(0)->getInstrument()->getFullName();
   } else {
+    // workspace doesn't seem to be of any expected type
+    // we can't do any more so give up
     return false;
   }
 
@@ -1001,6 +1050,30 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   TSVSerialiser tsv, contents;
 
   contents.writeLine("Workspace") << currentView->getWorkspaceName();
+
+  QSettings settings;
+  auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
+  auto fileName = workingDir.toStdString() + "/VATES.xml";
+  auto session = pqActiveObjects::instance().activeServer()->proxyManager();
+  session->SaveXMLState(fileName.c_str());
+  contents.writeLine("FileName") << fileName;
+
+  ModeControlWidget::Views vtype;
+  if (dynamic_cast<StandardView *>(currentView))
+    vtype = ModeControlWidget::STANDARD;
+  else if (dynamic_cast<MultiSliceView *>(currentView))
+    vtype = ModeControlWidget::MULTISLICE;
+  else if (dynamic_cast<ThreeSliceView *>(currentView))
+    vtype = ModeControlWidget::THREESLICE;
+  else if (dynamic_cast<SplatterPlotView *>(currentView))
+    vtype = ModeControlWidget::SPLATTERPLOT;
+  else {
+    g_log.warning() << "Trying to save the state of a view of unknown type. "
+                       "This seems to indicate a "
+                       "severe state inconsistency.";
+  }
+
+  contents.writeLine("ViewType") << static_cast<int>(vtype);
   tsv.writeSection("vates", contents.outputLines());
 
   return tsv.outputLines();

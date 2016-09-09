@@ -97,6 +97,9 @@ public:
    */
   void destroyAllSourcesInView() override;
 
+  /// @see ViewBase::setView
+  void setView(pqRenderView *view) override;
+
 signals:
   /// Reset to the Standard View
   void resetToStandardView();

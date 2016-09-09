@@ -287,6 +287,26 @@ void StandardView::updateView() { this->m_cameraReset = true; }
 
 void StandardView::closeSubWindows() {}
 
+void StandardView::setView(pqRenderView *view)
+{
+  QLayout* layout = this->m_ui.renderFrame->layout();
+   if (layout) {
+     QLayoutItem *item;
+     while ((item = layout->takeAt(0)) != nullptr)
+       layout->removeItem(item);
+     delete layout;
+   }
+
+  this->m_view = view;
+
+  QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.renderFrame);
+  hbox->setMargin(0);
+  hbox->addWidget(m_view->widget());
+
+  QObject::connect(this->m_view.data(), SIGNAL(endRender()), this,
+                   SLOT(onRenderDone()));
+}
+
 /**
  * Check if the rebin and unbin buttons should be visible
  * Note that for a rebin button to be visible there may be no

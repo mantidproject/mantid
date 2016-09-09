@@ -76,6 +76,8 @@ public:
   void updateView() override;
   /// @see ViewBase::closeSubWindows
   void closeSubWindows() override;
+  /// @see ViewBase::setView
+  void setView(pqRenderView* view) override;
 
 public slots:
   /// Listen to a change in the active source.

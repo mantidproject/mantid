@@ -633,6 +633,11 @@ void SplatterPlotView::destroyAllSourcesInView() {
   builder->destroySources();
 }
 
+void SplatterPlotView::setView(pqRenderView *view)
+{
+  this->m_view = view;
+}
+
 void SplatterPlotView::destroyFiltersForSplatterPlotView() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   if (this->m_peaksFilter) {
