@@ -14,7 +14,9 @@ spectrometer at the ILL.
 
 This first reduces the data using the :ref:`IndirectILLReduction
 <algm-IndirectILLReduction>` algorithm and then integrates each spectrum within
-the peak range.
+the given peak range.
+
+It accepts multiple files, that will be automatically summed.
 
 Workflow
 --------
