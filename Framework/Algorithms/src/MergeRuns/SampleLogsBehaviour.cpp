@@ -333,7 +333,6 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(
 void SampleLogsBehaviour::updateListProperty(
     const MatrixWorkspace_sptr &addeeWS, const MatrixWorkspace_sptr &outWS,
     Property *addeeWSProperty, const std::string name) {
-  Property *propertyAddeeWS;
   try {
     // If this already exists we combine the two strings.
     auto propertyAddeeWS = addeeWS->getLog(name + LIST_SUFFIX);
@@ -342,7 +341,7 @@ void SampleLogsBehaviour::updateListProperty(
                             propertyAddeeWS->value());
   } catch (std::invalid_argument &) {
     auto property = outWS->mutableRun().getProperty(name + LIST_SUFFIX);
-    property->setValue(property->value() + ", " + propertyAddeeWS->value());
+    property->setValue(property->value() + ", " + addeeWSProperty->value());
   }
 }
 
