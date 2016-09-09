@@ -304,7 +304,7 @@ void ISISEnergyTransfer::algorithmComplete(bool error) {
 
   // Set workspace for Python export as the first result workspace
   m_pythonExportWsName = energyTransferOutputGroup->getNames()[0];
-  outputWorkspaces = energyTransferOutputGroup->getNames();
+  m_outputWorkspaces = energyTransferOutputGroup->getNames();
   // Ungroup the output workspace
   energyTransferOutputGroup->removeAll();
   AnalysisDataService::Instance().remove("IndirectEnergyTransfer_Workspaces");
@@ -691,8 +691,7 @@ void ISISEnergyTransfer::pbRunFinished() {
  * Handle mantid plotting of workspaces
  */
 void ISISEnergyTransfer::plotClicked() {
-  for (auto it = outputWorkspaces.begin(); it != outputWorkspaces.end(); ++it) {
-    std::string wsName = *it;
+  for (const auto wsName : m_outputWorkspaces) {
     if (checkADSForPlotSaveWorkspace(wsName, true)) {
       const auto plotType = m_uiForm.cbPlotType->currentText();
       QString pyInput = "from IndirectReductionCommon import plot_reduction\n";
@@ -711,13 +710,11 @@ void ISISEnergyTransfer::saveClicked() {
   auto saveFormats = getSaveFormats();
   QString pyInput = "from IndirectReductionCommon import save_reduction\n";
   pyInput += "save_reduction([";
-  for (auto it = outputWorkspaces.begin(); it != outputWorkspaces.end(); ++it) {
-    std::string wsName = *it;
+  for (const auto wsName : m_outputWorkspaces) {
     pyInput += "'" + QString::fromStdString(wsName) + "', ";
   }
   pyInput += "], [";
-  for (auto it = saveFormats.begin(); it != saveFormats.end(); ++it) {
-    std::string save = *it;
+  for (const auto save : saveFormats) {
     pyInput += "'" + QString::fromStdString(save) + "', ";
   }
   pyInput += "]";

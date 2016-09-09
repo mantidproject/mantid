@@ -74,7 +74,7 @@ private:
           groupType); ///< create the mapping file with which to group results
   std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
   std::vector<std::string>
-      outputWorkspaces; ///< get a vector of workspaces to plot
+      m_outputWorkspaces; ///< get a vector of workspaces to plot
 };
 } // namespace CustomInterfaces
 } // namespace Mantid
