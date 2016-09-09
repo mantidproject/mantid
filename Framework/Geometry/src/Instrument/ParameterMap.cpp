@@ -346,15 +346,20 @@ void ParameterMap::add(const IComponent *comp,
   // an
   // add/replace-style function
   if (existing_par != m_map.end()) {
-    existing_par->second = par;
+    existing_par->second = boost::atomic_load(&par);
   } else {
 // When using Clang & Linux, TBB 4.4 doesn't detect C++11 features.
 // https://software.intel.com/en-us/forums/intel-threading-building-blocks/topic/641658
-#define CLANG_ON_LINUX defined(__clang__) && !defined(__APPLE__)
-#if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
-    m_map.emplace(comp->getComponentID(), par);
+#if defined(__clang__) && !defined(__APPLE__)
+#define CLANG_ON_LINUX true
 #else
-    m_map.insert(std::make_pair(comp->getComponentID(), par));
+#define CLANG_ON_LINUX false
+#endif
+#if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
+    m_map.emplace(comp->getComponentID(), boost::atomic_load(&par));
+#else
+    m_map.insert(
+        std::make_pair(comp->getComponentID(), boost::atomic_load(&par)));
 #endif
   }
 }
@@ -734,7 +739,7 @@ boost::shared_ptr<Parameter> ParameterMap::get(const IComponent *comp,
 
   auto itr = positionOf(comp, name, type);
   if (itr != m_map.end())
-    result = itr->second;
+    result = boost::atomic_load(&itr->second);
   return result;
 }
 
@@ -817,7 +822,7 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp,
       for (auto itr = itrs.first; itr != itrs.second; ++itr) {
         const auto &param = itr->second;
         if (strcasecmp(param->type().c_str(), type.c_str()) == 0) {
-          result = param;
+          result = boost::atomic_load(&param);
           break;
         }
       } // found->firdst
@@ -1030,9 +1035,10 @@ void ParameterMap::copyFromParameterMap(const IComponent *oldComp,
     Parameter_sptr thisParameter = oldPMap->get(oldComp, oldParameterName);
 // Insert the fetched parameter in the m_map
 #if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
-    m_map.emplace(newComp->getComponentID(), thisParameter);
+    m_map.emplace(newComp->getComponentID(), std::move(thisParameter));
 #else
-    m_map.insert(std::make_pair(newComp->getComponentID(), thisParameter));
+    m_map.insert(
+        std::make_pair(newComp->getComponentID(), std::move(thisParameter)));
 #endif
   }
 }
