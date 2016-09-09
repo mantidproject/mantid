@@ -220,14 +220,13 @@ public:
   /// Plot a "tiled" plot (with subplots)
   MultiLayer *
   plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
-               bool spectrumPlot,
                MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-               bool errs = false, MultiLayer *plotWindow = NULL);
+               bool errs = false);
 
   MultiLayer *
-  plotSubplots(const QMultiMap<QString, int> &toPlot, bool spectrumPlot,
+  plotSubplots(const QMultiMap<QString, int> &toPlot,
                MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
-               bool errs = false, MultiLayer *plotWindow = NULL);
+               bool errs = false);
 
 public slots:
   // Create a 1d graph form specified MatrixWorkspace and index
