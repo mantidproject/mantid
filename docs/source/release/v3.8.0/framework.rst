@@ -88,6 +88,7 @@ Performance
 
 - :ref:`ModeratorTzeroLinear <algm-ModeratorTzeroLinear>` 38% faster execution.
 
+- :ref:`MaxEnt <algm-MaxEnt>` slight improvement of 5% faster execution.
 
 CurveFitting
 ------------
