@@ -17,6 +17,7 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 
 #include <boost/regex.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <map>
 #include <sstream>
@@ -244,18 +245,10 @@ void LoadNXSPE::exec() {
   outputWS->mutableRun().addLogData(new PropertyWithValue<std::string>(
       "ki_over_kf_scaling", kikfscaling == 1 ? "true" : "false"));
 
-  // Set Goniometer if psi is not nan
-      if (boost::math::isfinite(psi)) {
-		  Geometry::Goniometer gm;
-		  gm.pushAxis("psi", 0, 1, 0, psi);
-		  outputWS->mutableRun().setGoniometer(gm, true);
-    }
-	  else {
-		  g_log.warning() << "Value of psi found in file was NaN. The goniometer was not set"<<'\n';
-	  }
-
-
-
+  // Set Goniometer
+  Geometry::Goniometer gm;
+  gm.pushAxis("psi", 0, 1, 0, psi);
+  outputWS->mutableRun().setGoniometer(gm, true);
 
   // generate instrument
   Geometry::Instrument_sptr instrument(new Geometry::Instrument("NXSPE"));
