@@ -49,9 +49,9 @@ def calculate_upphi(omg0, theta2ave, chiave, phiave):
 
 def calculate_usphi(omg0, theta2ave, chiave, phiave):
     usphi=[ ]
-    usphi(1)=numpy.sin(theta2ave/2-omg0).*numpy.cos(chiave).*cos(phiave)-cos(theta2ave/2-omg0).*sin(phiave)
-    usphi(2)=numpy.sin(theta2ave/2-omg0).*numpy.cos(chiave).*sin(phiave)+cos(theta2ave/2-omg0).*cos(phiave)
-    usphi(3)=numpy.sin(theta2ave/2-omg0).*numpy.sin(chiave)
+    usphi[0] =numpy.sin(theta2ave/2-omg0).*numpy.cos(chiave).*cos(phiave)-cos(theta2ave/2-omg0).*sin(phiave)
+    usphi[1] =numpy.sin(theta2ave/2-omg0).*numpy.cos(chiave).*sin(phiave)+cos(theta2ave/2-omg0).*cos(phiave)
+    usphi[2] =numpy.sin(theta2ave/2-omg0).*numpy.sin(chiave)
 
     return usphi
 
