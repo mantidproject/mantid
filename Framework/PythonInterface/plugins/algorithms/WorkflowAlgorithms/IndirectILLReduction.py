@@ -143,7 +143,7 @@ def get_peak_position(ws, i):
 
     return peak_bin
 
-def shift_spectra(ws1, ws2=None, shift_option=False, masking=False):
+def shift_spectra(ws1, ws2=None, shift_option=False):
     """
     If only ws1 is given, each single spectrum will be centered
     If in addition ws2 is given and shift_option is False, ws1 will be shifted to match the peak positions of ws2
