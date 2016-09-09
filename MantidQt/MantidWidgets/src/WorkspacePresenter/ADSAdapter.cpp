@@ -36,11 +36,6 @@ void ADSAdapter::registerPresenter(Presenter_wptr presenter) {
   m_presenter = std::move(presenter);
 }
 
-void ADSAdapter::renameWorkspace(const std::string &oldName,
-                                 const std::string &newName) {
-  AnalysisDataService::Instance().rename(oldName, newName);
-}
-
 Mantid::API::Workspace_sptr
 ADSAdapter::getWorkspace(const std::string &wsname) const {
   return AnalysisDataService::Instance().retrieve(wsname);

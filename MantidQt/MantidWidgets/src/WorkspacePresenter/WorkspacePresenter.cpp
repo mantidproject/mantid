@@ -73,7 +73,8 @@ void WorkspacePresenter::saveWorkspace() {}
 
 void WorkspacePresenter::renameWorkspace() {
   auto view = lockView();
-  view->renameWorkspace();
+  auto selected = view->getSelectedWorkspaceNames();
+  view->showRenameDialog(selected);
 }
 
 void WorkspacePresenter::groupWorkspaces() {}

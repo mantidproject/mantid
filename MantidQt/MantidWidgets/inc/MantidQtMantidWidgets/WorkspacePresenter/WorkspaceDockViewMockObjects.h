@@ -27,12 +27,12 @@ public:
   MOCK_METHOD0(showLoadDialog, void());
   MOCK_CONST_METHOD0(deleteConfirmation, bool());
   MOCK_METHOD0(deleteWorkspaces, void());
-  MOCK_METHOD0(renameWorkspace, void());
+  MOCK_CONST_METHOD1(showRenameDialog, void(const StringList &names));
   MOCK_METHOD1(
       updateTree,
       void(const std::map<std::string, Mantid::API::Workspace_sptr> &items));
 
-  MOCK_CONST_METHOD0(getSelectedWorkspaceName, std::string());
+  MOCK_CONST_METHOD0(getSelectedWorkspaceNames, StringList());
   MOCK_CONST_METHOD0(getSelectedWorkspace, Mantid::API::Workspace_sptr());
 
   // Methods which are not to be mocked

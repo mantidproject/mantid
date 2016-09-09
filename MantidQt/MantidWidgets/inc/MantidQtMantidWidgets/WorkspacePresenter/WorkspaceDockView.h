@@ -44,12 +44,12 @@ public:
   WorkspacePresenter_wptr getPresenterWeakPtr() override;
   WorkspacePresenter_sptr getPresenterSharedPtr() override;
 
-  std::string getSelectedWorkspaceName() const override;
+  StringList getSelectedWorkspaceNames() const override;
   Mantid::API::Workspace_sptr getSelectedWorkspace() const override;
   void showLoadDialog() override;
+  void showRenameDialog(const StringList &names) const override;
   bool deleteConfirmation() const override;
   void deleteWorkspaces() override;
-  void renameWorkspace() override;
   void updateTree(
       const std::map<std::string, Mantid::API::Workspace_sptr> &items) override;
 

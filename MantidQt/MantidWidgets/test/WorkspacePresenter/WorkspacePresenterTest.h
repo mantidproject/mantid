@@ -84,7 +84,8 @@ public:
   }
 
   void testRenameWorkspaceFromDock() {
-    EXPECT_CALL(*mockView.get(), renameWorkspace()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), showRenameDialog(_)).Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::RenameWorkspace);
 

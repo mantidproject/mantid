@@ -53,10 +53,10 @@ public:
   virtual WorkspacePresenter_sptr getPresenterSharedPtr() = 0;
 
   virtual void showLoadDialog() = 0;
+  virtual void showRenameDialog(const StringList &names) const = 0;
   virtual bool deleteConfirmation() const = 0;
   virtual void deleteWorkspaces() = 0;
-  virtual void renameWorkspace() = 0;
-  virtual std::string getSelectedWorkspaceName() const = 0;
+  virtual StringList getSelectedWorkspaceNames() const = 0;
   virtual Mantid::API::Workspace_sptr getSelectedWorkspace() const = 0;
   virtual void updateTree(
       const std::map<std::string, Mantid::API::Workspace_sptr> &items) = 0;

@@ -23,7 +23,9 @@ WorkspacePresenter_sptr WorkspaceDockView::getPresenterSharedPtr() {
   return presenter;
 }
 
-std::string WorkspaceDockView::getSelectedWorkspaceName() const { return ""; }
+StringList WorkspaceDockView::getSelectedWorkspaceNames() const {
+  return StringList();
+}
 
 Mantid::API::Workspace_sptr WorkspaceDockView::getSelectedWorkspace() const {
   return nullptr;
@@ -33,7 +35,7 @@ void WorkspaceDockView::showLoadDialog() {}
 
 bool WorkspaceDockView::deleteConfirmation() const { return false; }
 void WorkspaceDockView::deleteWorkspaces() {}
-void WorkspaceDockView::renameWorkspace() {}
+void WorkspaceDockView::showRenameDialog(const StringList &names) const {}
 
 void WorkspaceDockView::updateTree(
     const std::map<std::string, Mantid::API::Workspace_sptr> &items) {}

@@ -39,8 +39,6 @@ public:
   explicit ADSAdapter();
   ~ADSAdapter() override;
   void registerPresenter(Presenter_wptr presenter) override;
-  void renameWorkspace(const std::string &oldName,
-                       const std::string &newName) override;
   Mantid::API::Workspace_sptr
   getWorkspace(const std::string &wsname) const override;
 
