@@ -163,7 +163,7 @@ void MergeRuns::exec() {
       // Add the current workspace to the total
       // Update the sample logs
       try {
-        sampleLogsBehaviour.calculateUpdatedSampleLogs(*it, outWS);
+        sampleLogsBehaviour.mergeSampleLogs(*it, outWS);
         outWS = outWS + addee;
         sampleLogsBehaviour.setUpdatedSampleLogs(outWS);
       } catch (std::invalid_argument &e) {

@@ -9,7 +9,7 @@ namespace Algorithms {
 
 /** MergeRunsSampleLogsBehaviour : This class holds information relating to the
   behaviour of the sample log merging. It holds a map of all the sample log
-  parameters to merge, how to merge them, and the associated tolerance.
+  parameters to merge, how to merge them, and the associated tolerances.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -68,23 +68,24 @@ public:
   SampleLogsMap m_logMap;
 
   /// Create and update sample logs according to instrument parameters
-  void
-  createSampleLogsMapsFromInstrumentParams(SampleLogsMap &instrumentMap,
-                                           const API::MatrixWorkspace_sptr &ws);
-  void calculateUpdatedSampleLogs(const API::MatrixWorkspace_sptr &addeeWS,
-                                  const API::MatrixWorkspace_sptr &outWS);
+  void mergeSampleLogs(const API::MatrixWorkspace_sptr &addeeWS,
+                       const API::MatrixWorkspace_sptr &outWS);
   void setUpdatedSampleLogs(const API::MatrixWorkspace_sptr &ws);
   void resetSampleLogs(const API::MatrixWorkspace_sptr &ws);
 
 private:
-  void updateSampleMap(SampleLogsMap &map, const MergeLogType &,
-                       const std::string &params,
-                       const API::MatrixWorkspace_sptr &ws,
-                       const std::string paramsTolerances = "",
-                       const bool skipIfInPrimaryMap = false);
+  void
+  createSampleLogsMapsFromInstrumentParams(SampleLogsMap &instrumentMap,
+                                           const API::MatrixWorkspace_sptr &ws);
+
+  void setSampleMap(SampleLogsMap &map, const MergeLogType &,
+                    const std::string &params,
+                    const API::MatrixWorkspace_sptr &ws,
+                    const std::string paramsTolerances = "",
+                    bool skipIfInPrimaryMap = false);
 
   std::vector<double>
-  createTolerancesVector(const std::vector<std::string> &names,
+  createTolerancesVector(const size_t numberNames,
                          const std::vector<std::string> &tolerances,
                          const std::string paramsTolerances);
 
