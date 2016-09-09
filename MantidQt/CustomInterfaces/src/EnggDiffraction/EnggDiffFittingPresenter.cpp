@@ -281,13 +281,13 @@ void EnggDiffFittingPresenter::processFullPathInput(
     const std::string eMsg(e.what());
     g_log.error("Error loading browsed file: " + eMsg);
 
-	m_view->userWarning(
-		"Run Number Not Found",
-		"The run number specified could not be located "
-		"in the focused output directory. Please check that the "
-		"correct directory is set for Output Folder under Focusing Settings "
-		"on the settings tab and that the input is correct");
-	return;
+    m_view->userWarning(
+        "Run Number Not Found",
+        "The run number specified could not be located "
+        "in the focused output directory. Please check that the "
+        "correct directory is set for Output Folder under Focusing Settings "
+        "on the settings tab and that the input is correct");
+    return;
   }
 
   // Update UI to reflect found files
