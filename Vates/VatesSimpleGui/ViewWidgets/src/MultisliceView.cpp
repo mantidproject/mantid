@@ -107,7 +107,11 @@ void MultiSliceView::resetDisplay() { this->m_mainView->resetDisplay(); }
 
 void MultiSliceView::setView(pqRenderView *view)
 {
+  clearRenderLayout(this->m_ui.renderFrame);
   this->m_mainView = qobject_cast<pqMultiSliceView *>(view);
+  QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.renderFrame);
+  hbox->setMargin(0);
+  hbox->addWidget(m_mainView->widget());
   QObject::connect(this->m_mainView,
                    SIGNAL(sliceClicked(int, double, int, int)), this,
                    SLOT(checkSliceClicked(int, double, int, int)));

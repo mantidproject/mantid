@@ -94,19 +94,17 @@ void ThreeSliceView::resetDisplay() { this->m_mainView->resetDisplay(); }
 
 void ThreeSliceView::setView(pqRenderView *view)
 {
+  clearRenderLayout(this->m_ui.mainRenderFrame);
   this->m_mainView = view;
+  QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.mainRenderFrame);
+  hbox->setMargin(0);
+  hbox->addWidget(m_mainView->widget());
 }
 
 ModeControlWidget::Views ThreeSliceView::getViewType() {
   return ModeControlWidget::Views::THREESLICE;
 }
 
-/*
-void ThreeSliceView::correctVisibility()
-{
-  //this->correctColorScaleRange();
-}
-*/
 void ThreeSliceView::correctColorScaleRange() {
   QPair<double, double> range =
       this->origRep->getLookupTable()->getScalarRange();

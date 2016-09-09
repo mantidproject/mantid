@@ -246,6 +246,8 @@ protected:
 
   /// Set the Axes Grid
   void setAxesGrid();
+  /// Clear the render layout completely
+  void clearRenderLayout(QFrame* frame);
 
 private:
   Q_DISABLE_COPY(ViewBase)

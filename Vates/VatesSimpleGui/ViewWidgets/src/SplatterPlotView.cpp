@@ -635,7 +635,12 @@ void SplatterPlotView::destroyAllSourcesInView() {
 
 void SplatterPlotView::setView(pqRenderView *view)
 {
+  clearRenderLayout(this->m_ui.renderFrame);
   this->m_view = view;
+
+  QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.renderFrame);
+  hbox->setMargin(0);
+  hbox->addWidget(m_view->widget());
 }
 
 ModeControlWidget::Views SplatterPlotView::getViewType() {

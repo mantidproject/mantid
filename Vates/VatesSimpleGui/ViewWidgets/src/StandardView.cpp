@@ -289,13 +289,7 @@ void StandardView::closeSubWindows() {}
 
 void StandardView::setView(pqRenderView *view)
 {
-  QLayout* layout = this->m_ui.renderFrame->layout();
-   if (layout) {
-     QLayoutItem *item;
-     while ((item = layout->takeAt(0)) != nullptr)
-       layout->removeItem(item);
-     delete layout;
-   }
+  clearRenderLayout(this->m_ui.renderFrame);
 
   this->m_view = view;
 
