@@ -568,8 +568,8 @@ QSize MultiLayer::arrangeLayers(bool userSize) {
       gr->setAutoscaleFonts(false);
     }
 
-    gr->setGeometry(QRect(x, y, w, h));
-    gr->plotWidget()->resize(QSize(w, h));
+    gr->setGeometry(QRect(x, y, std::abs(w), std::abs(h)));
+    gr->plotWidget()->resize(QSize(std::abs(w), std::abs(h)));
 
     if (!userSize)
       gr->setAutoscaleFonts(autoscaleFonts); // restore user settings
