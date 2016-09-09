@@ -81,17 +81,17 @@ Usage
 	Detectors = "100-199", Monitor = 200,\
 	NominalIncidentEnergy = E_i, PulseInterval = pulseInterval)
 
-	print('Nominal incident energy: {0}'.format(E_i))
-	print('Calibrated energy: {0}'.format(calibratedE_i))
-	print('Real energy: {0}'.format(realE_i))
+	print('Nominal incident energy: {0:.5f}'.format(E_i))
+	print('Calibrated energy: {0:.5f}'.format(calibratedE_i))
+	print('Real energy: {0:.5f}'.format(realE_i))
 
 Output:
 
 .. testoutput:: ExGetEiMonDet
 
-	Nominal incident energy: 55.0
-	Calibrated energy: 53.9096784666
-	Real energy: 53.9
+	Nominal incident energy: 55.00000
+	Calibrated energy: 53.90968
+	Real energy: 53.90000
 
 Previous versions
 -----------------
