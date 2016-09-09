@@ -1064,6 +1064,7 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   else if (dynamic_cast<SplatterPlotView *>(currentView))
     vtype = ModeControlWidget::SPLATTERPLOT;
   else {
+    vtype = ModeControlWidget::STANDARD;
     g_log.warning() << "Trying to save the state of a view of unknown type. "
                        "This seems to indicate a "
                        "severe state inconsistency.";
