@@ -198,6 +198,17 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     // receive the run number from the text-field
     auto strFocusedFile = m_view->getFittingRunNo();
 
+    if (m_previousInput == strFocusedFile) {
+      // Short circuit the checks and skip any warnings
+      // or errors as the user has not changed anything
+      // just clicked the box. Additionally this resolves an
+      // issue where QT will return the cursor and produce a new
+      // warning when the current warning is closed
+      return;
+    } else {
+      m_previousInput = strFocusedFile;
+    }
+
     // file name
     Poco::Path selectedfPath(strFocusedFile);
     Poco::Path bankDir;
