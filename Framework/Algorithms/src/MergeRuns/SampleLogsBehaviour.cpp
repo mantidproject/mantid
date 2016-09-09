@@ -7,7 +7,6 @@ namespace Algorithms {
 
 using namespace Kernel;
 using namespace API;
-// using namespace Geometry;
 
 namespace {
 std::string generateDifferenceMessage(const std::string &item,
@@ -113,7 +112,7 @@ void SampleLogsBehaviour::updateSampleMap(
     std::shared_ptr<Property> prop;
     try {
       prop = std::shared_ptr<Property>(ws->getLog(item)->clone());
-    } catch (std::invalid_argument &e) {
+    } catch (std::invalid_argument &) {
       m_logger.warning() << "Could not merge sample log \"" << item
                          << "\", does not exist in workspace!" << std::endl;
       continue;
@@ -124,7 +123,7 @@ void SampleLogsBehaviour::updateSampleMap(
     try {
       value = ws->getLogAsSingleValue(item);
       isNumeric = true;
-    } catch (std::invalid_argument) {
+    } catch (std::invalid_argument &) {
       isNumeric = false;
       if (sampleLogBehaviour == time_series) {
         m_logger.error() << item << " could not be converted to a numeric type";
@@ -137,7 +136,7 @@ void SampleLogsBehaviour::updateSampleMap(
         // See if property exists already - merging an output of MergeRuns
         prop = std::shared_ptr<Property>(
             ws->getLog(item + TIME_SERIES_SUFFIX)->clone());
-      } catch (std::invalid_argument &e) {
+      } catch (std::invalid_argument &) {
         // Property does not already exist
         std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(
             new TimeSeriesProperty<double>(item + TIME_SERIES_SUFFIX));
@@ -153,7 +152,7 @@ void SampleLogsBehaviour::updateSampleMap(
         // See if property exists already - merging an output of MergeRuns
         prop =
             std::shared_ptr<Property>(ws->getLog(item + LIST_SUFFIX)->clone());
-      } catch (std::invalid_argument &e) {
+      } catch (std::invalid_argument &) {
         ws->mutableRun().addProperty(item + LIST_SUFFIX, prop->value());
         prop =
             std::shared_ptr<Property>(ws->getLog(item + LIST_SUFFIX)->clone());
@@ -204,7 +203,7 @@ void SampleLogsBehaviour::calculateUpdatedSampleLogs(
     try {
       addeeWSNumber = addeeWS->getLogAsSingleValue(item.first);
       outWSNumber = outWS->getLogAsSingleValue(item.first);
-    } catch (std::invalid_argument) {
+    } catch (std::invalid_argument &) {
       if (item.second.isNumeric) {
         throw std::invalid_argument(
             item.first + " could not be converted to a numeric type");
@@ -239,7 +238,7 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(
     // If this already exists we do not need to do anything, Time Series Logs
     // are combined when adding workspaces.
     addeeWS->getLog(name + TIME_SERIES_SUFFIX);
-  } catch (std::invalid_argument &e) {
+  } catch (std::invalid_argument &) {
     auto timeSeriesProp = outWS->mutableRun().getTimeSeriesProperty<double>(
         name + TIME_SERIES_SUFFIX);
     Kernel::DateAndTime startTime = addeeWS->mutableRun().startTime();
@@ -257,7 +256,7 @@ void SampleLogsBehaviour::updateListProperty(
     auto propertyOutWS = outWS->mutableRun().getProperty(name + LIST_SUFFIX);
     propertyOutWS->setValue(propertyOutWS->value() + ", " +
                             propertyAddeeWS->value());
-  } catch (std::invalid_argument &e) {
+  } catch (std::invalid_argument &) {
     auto property = outWS->mutableRun().getProperty(name + LIST_SUFFIX);
     property->setValue(property->value() + ", " + addeeWSProperty->value());
   }
