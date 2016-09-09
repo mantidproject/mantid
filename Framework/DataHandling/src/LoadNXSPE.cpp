@@ -134,11 +134,6 @@ void LoadNXSPE::exec() {
     file.getData(temporary);
     psi = temporary.at(0);
     file.closeData();
-    if (!boost::math::isfinite(psi)) {
-      psi = 0;
-      g_log.warning() << "Value of psi found in file was NaN, changing to 0"
-                      << "\n";
-    }
   }
 
   int kikfscaling = 0;
@@ -249,10 +244,18 @@ void LoadNXSPE::exec() {
   outputWS->mutableRun().addLogData(new PropertyWithValue<std::string>(
       "ki_over_kf_scaling", kikfscaling == 1 ? "true" : "false"));
 
-  // Set Goniometer
-  Geometry::Goniometer gm;
-  gm.pushAxis("psi", 0, 1, 0, psi);
-  outputWS->mutableRun().setGoniometer(gm, true);
+  // Set Goniometer if psi is not nan
+      if (boost::math::isfinite(psi)) {
+		  Geometry::Goniometer gm;
+		  gm.pushAxis("psi", 0, 1, 0, psi);
+		  outputWS->mutableRun().setGoniometer(gm, true);
+    }
+	  else {
+		  g_log.warning() << "Value of psi found in file was NaN. The goniometer was not set"<<'\n';
+	  }
+
+
+
 
   // generate instrument
   Geometry::Instrument_sptr instrument(new Geometry::Instrument("NXSPE"));
