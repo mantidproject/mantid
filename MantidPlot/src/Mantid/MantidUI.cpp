@@ -117,6 +117,19 @@ QString getLegendKey(const QString &wsName, const int spectrum) {
   }
   return QString();
 }
+
+/// Decide whether this graph in a multilayer plot should have an X axis label
+bool drawXAxisLabel(const int row, const int col, const int nRows,
+                    const int nCols, const int nPlots) {
+  if (row == nRows - 1) {
+    return true; // last row
+  } else if (row == nRows - 2) {
+    // Needs a label if there is no subplot below it
+    return ((row + 1) * nCols) + col + 1 > nPlots;
+  } else {
+    return false;
+  }
+}
 }
 
 MantidUI::MantidUI(ApplicationWindow *aw)
@@ -3340,10 +3353,10 @@ MultiLayer *MantidUI::plotSelectedColumns(const MantidMatrix *const m,
  * @param plotWindow :: Window to plot to. If null a new one will be created
  * @return created MultiLayer, or null on failure
  */
-MultiLayer *
-MantidUI::plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
-                       bool spectrumPlot, MantidQt::DistributionFlag distr,
-                       bool errs, MultiLayer *plotWindow) {
+MultiLayer *MantidUI::plotSubplots(const QMultiMap<QString, set<int>> &toPlot,
+                                   bool spectrumPlot,
+                                   MantidQt::DistributionFlag distr, bool errs,
+                                   MultiLayer *plotWindow) {
   // Check if nothing to plot
   if (toPlot.size() == 0)
     return nullptr;
@@ -3433,6 +3446,7 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
                                      const std::set<int> &spectra) {
   const int nRows = multi->getRows();
   const int nCols = multi->getCols();
+  const int nPlots = multi->layers();
 
   // Lambda to increment row, column counters
   const auto incrementCounters = [&nRows, &nCols](int &row, int &col) {
@@ -3445,12 +3459,11 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
   };
 
   // Lambda to set legend and axis label hiding
-  const auto formatPlot = [&nRows](Graph *layer, const QString &legendText,
-                                   const int row, const int col) {
-    const bool drawXAxisLabel = row == nRows - 1;
+  const auto formatPlot = [&nRows, &nCols, &nPlots](
+      Graph *layer, const QString &legendText, const int row, const int col) {
     const bool drawYAxisLabel = col == 0;
     layer->newLegend(legendText);
-    if (!drawXAxisLabel) {
+    if (!drawXAxisLabel(row, col, nRows, nCols, nPlots)) {
       layer->setXAxisTitle(QString::null);
     }
     if (!drawYAxisLabel) {
