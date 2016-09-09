@@ -84,6 +84,9 @@ public:
   }
 
   void testRenameWorkspaceFromDock() {
+    // Instruct gmock to return empty StringList
+    ::testing::DefaultValue<StringList>::Set(StringList(StringList()));
+
     EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
     EXPECT_CALL(*mockView.get(), showRenameDialog(_)).Times(Exactly(1));
 
