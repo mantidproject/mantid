@@ -587,8 +587,8 @@ public:
     TS_ASSERT(output->getSpectrum(1).hasDetectorID(1));
     TS_ASSERT(output->getSpectrum(1).hasDetectorID(2));
     TS_ASSERT(output->getSpectrum(2).hasDetectorID(15));
-    TS_ASSERT(output->getSpectrum(3).hasDetectorID(
-        5)); // Leftover from the ev1 workspace
+    TS_ASSERT(output->getSpectrum(3)
+                  .hasDetectorID(5)); // Leftover from the ev1 workspace
 
     EventTeardown();
   }
