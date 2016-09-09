@@ -116,7 +116,9 @@ public:
     bool nanFound = false;
 
     for (size_t i = 0; i < result->getNumberHistograms(); i++) {
-      if ((nanFound = isNanInHistogram(*result, i))) {
+      if (std::find_if(result->y(i).begin(), result->y(i).end(),
+          [](double v) { return isnan(v); }) != result->y(i).end()) {
+        nanFound = true;
         break; // NaN found in workspace, no need to keep searching
       }
     }
@@ -132,19 +134,6 @@ private:
     const auto &lastAlg = wsHistory.getAlgorithmHistory(wsHistory.size() - 1);
     const auto child = lastAlg->getChildAlgorithmHistory(0);
     return (child->name() == name);
-  }
-
-  bool isNanInHistogram(const Mantid::API::MatrixWorkspace &result,
-                        const size_t index) {
-    bool nanFound = false;
-    for (size_t i = 0; i < result.blocksize(); i++) {
-      if (isnan(result.y(index)[i]) || isnan(result.e(index)[i])) {
-        nanFound = true;
-        break; // NaN found in histogram, no need to keep searching
-      }
-    }
-
-    return nanFound;
   }
 };
 
