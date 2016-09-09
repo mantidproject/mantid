@@ -84,6 +84,10 @@ Performance
 
 - :ref:`StripPeaks <algm-StripPeaks>` has a slight performance improvement from these changes.
 
+- :ref:`ModeratorTzero <algm-ModeratorTzero>` 29% faster execution.
+
+- :ref:`ModeratorTzeroLinear <algm-ModeratorTzeroLinear>` 38% faster execution.
+
 
 CurveFitting
 ------------
