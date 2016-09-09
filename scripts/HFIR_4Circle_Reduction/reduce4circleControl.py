@@ -2290,3 +2290,20 @@ def convert_spice_ub_to_mantid(spice_ub):
         mantid_ub[2][i] = -1.*spice_ub[1][i]
 
     return mantid_ub
+
+
+def convert_mantid_ub_to_spice(mantid_ub):
+    """
+    """
+    spice_ub = numpy.ndarray((3, 3), 'float')
+    # row 0
+    for i in range(3):
+        spice_ub[0, i] = mantid_ub[0, i]
+    # row 1
+    for i in range(3):
+        spice_ub[2, i] = mantid_ub[1, i]
+    # row 2
+    for i in range(3):
+        spice_ub[1, i] = -1.*mantid_ub[2, i]
+
+    return spice_ub

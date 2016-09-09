@@ -30,7 +30,7 @@ except ImportError as e:
 else:
     NO_SCROLL = False
 
-# import reduce4circleControl as r4c
+import reduce4circleControl as r4c
 import guiutility as gutil
 import fourcircle_utility as hb3a
 import plot3dwindow
@@ -995,6 +995,8 @@ class MainWindow(QtGui.QMainWindow):
             column_name = 'Scan'
         elif self.ui.radioButton_sortByCounts.isChecked():
             column_name = 'Max Counts'
+        elif self.ui.radioButton_sortByTemp.isChecked():
+            column_name = 'Sample Temp'
         else:
             self.pop_one_button_dialog('No column is selected to sort.')
             return
