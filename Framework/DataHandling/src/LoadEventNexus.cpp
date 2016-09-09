@@ -810,6 +810,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   }
 
+  // FIXME - shall SNS instrument skip this one?
   loadSampleDataISIScompatibility(*m_file, *m_ws);
 
   // Close the 'top entry' group (raw_data_1 for NexusProcessed, etc.)
