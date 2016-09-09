@@ -86,6 +86,8 @@ public:
 
   /// @see ViewBase::setView
   void setView(pqRenderView *view) override;
+  /// @see ViewBase::getViewType
+  ModeControlWidget::Views getViewType() override;
 
 protected slots:
   /// Determine if slice is to be shown in SliceViewer.

@@ -23,6 +23,7 @@ namespace Mantid {
 namespace Vates {
 namespace SimpleGui {
 
+class ModeControlWidget;
 class ColorSelectionWidget;
 class RebinnedSourcesManager;
 
@@ -149,6 +150,8 @@ public:
   bool hasActiveSource();
   /// Set the underlying view directly
   virtual void setView(pqRenderView* view) = 0;
+  /// Get the view type of the current widget
+  virtual ModeControlWidget::Views getViewType() = 0;
 
 public slots:
   /// Set the color scale back to the original bounds.

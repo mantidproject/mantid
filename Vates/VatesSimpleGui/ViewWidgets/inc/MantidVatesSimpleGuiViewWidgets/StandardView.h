@@ -78,6 +78,8 @@ public:
   void closeSubWindows() override;
   /// @see ViewBase::setView
   void setView(pqRenderView* view) override;
+  /// @see ViewBase::getViewType
+  ModeControlWidget::Views getViewType() override;
 
 public slots:
   /// Listen to a change in the active source.

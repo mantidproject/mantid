@@ -97,6 +97,10 @@ void ThreeSliceView::setView(pqRenderView *view)
   this->m_mainView = view;
 }
 
+ModeControlWidget::Views ThreeSliceView::getViewType() {
+  return ModeControlWidget::Views::THREESLICE;
+}
+
 /*
 void ThreeSliceView::correctVisibility()
 {

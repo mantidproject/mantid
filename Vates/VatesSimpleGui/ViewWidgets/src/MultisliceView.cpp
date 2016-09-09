@@ -113,6 +113,10 @@ void MultiSliceView::setView(pqRenderView *view)
                    SLOT(checkSliceClicked(int, double, int, int)));
 }
 
+ModeControlWidget::Views MultiSliceView::getViewType() {
+  return ModeControlWidget::Views::MULTISLICE;
+}
+
 void MultiSliceView::resetCamera() { this->m_mainView->resetCamera(); }
 
 /**

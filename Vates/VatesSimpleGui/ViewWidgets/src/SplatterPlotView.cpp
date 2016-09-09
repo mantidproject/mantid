@@ -638,6 +638,10 @@ void SplatterPlotView::setView(pqRenderView *view)
   this->m_view = view;
 }
 
+ModeControlWidget::Views SplatterPlotView::getViewType() {
+  return ModeControlWidget::Views::SPLATTERPLOT;
+}
+
 void SplatterPlotView::destroyFiltersForSplatterPlotView() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   if (this->m_peaksFilter) {

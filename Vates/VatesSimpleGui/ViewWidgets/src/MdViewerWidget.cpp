@@ -748,36 +748,9 @@ void MdViewerWidget::resetCurrentView(int workspaceType,
   // type and the instrument
   ModeControlWidget::Views initialView =
       getInitialView(workspaceType, instrumentName);
+  auto currentViewType = currentView->getViewType();
 
-  bool isSetToCorrectInitialView = false;
-
-  switch (initialView) {
-  case ModeControlWidget::STANDARD: {
-    isSetToCorrectInitialView =
-        dynamic_cast<StandardView *>(this->currentView) != 0;
-  } break;
-
-  case ModeControlWidget::MULTISLICE: {
-    isSetToCorrectInitialView =
-        dynamic_cast<MultiSliceView *>(this->currentView) != 0;
-  } break;
-
-  case ModeControlWidget::THREESLICE: {
-    isSetToCorrectInitialView =
-        dynamic_cast<ThreeSliceView *>(this->currentView) != 0;
-  } break;
-
-  case ModeControlWidget::SPLATTERPLOT: {
-    isSetToCorrectInitialView =
-        dynamic_cast<SplatterPlotView *>(this->currentView) != 0;
-  } break;
-
-  default:
-    isSetToCorrectInitialView = false;
-    break;
-  }
-
-  if (isSetToCorrectInitialView == false) {
+  if (initialView == currentViewType) {
     this->ui.modeControlWidget->setToSelectedView(initialView);
   } else {
     this->currentView->show();
@@ -1054,22 +1027,7 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   session->SaveXMLState(fileName.c_str());
   contents.writeLine("FileName") << fileName;
 
-  ModeControlWidget::Views vtype;
-  if (dynamic_cast<StandardView *>(currentView))
-    vtype = ModeControlWidget::STANDARD;
-  else if (dynamic_cast<MultiSliceView *>(currentView))
-    vtype = ModeControlWidget::MULTISLICE;
-  else if (dynamic_cast<ThreeSliceView *>(currentView))
-    vtype = ModeControlWidget::THREESLICE;
-  else if (dynamic_cast<SplatterPlotView *>(currentView))
-    vtype = ModeControlWidget::SPLATTERPLOT;
-  else {
-    vtype = ModeControlWidget::STANDARD;
-    g_log.warning() << "Trying to save the state of a view of unknown type. "
-                       "This seems to indicate a "
-                       "severe state inconsistency.";
-  }
-
+  auto vtype = currentView->getViewType();
   contents.writeLine("ViewType") << static_cast<int>(vtype);
   tsv.writeSection("vates", contents.outputLines());
 
@@ -1436,9 +1394,9 @@ void MdViewerWidget::connectDialogs() { this->connectRotationPointDialog(); }
  * like menus, menu items, buttons, views etc.
  */
 void MdViewerWidget::updateAppState() {
-  ThreeSliceView *tsv = dynamic_cast<ThreeSliceView *>(this->currentView);
-  SplatterPlotView *spv = dynamic_cast<SplatterPlotView *>(this->currentView);
-  if (NULL != tsv || NULL != spv) {
+  auto type = currentView->getViewType();
+  if (type == ModeControlWidget::THREESLICE ||
+      type == ModeControlWidget::SPLATTERPLOT) {
     this->currentView->onLodThresholdChange(false, this->lodThreshold);
     this->lodAction->setChecked(false);
   } else {
@@ -1589,7 +1547,7 @@ void MdViewerWidget::handleDragAndDropPeaksWorkspaces(QEvent *e, QString text,
     QString candidate = text.mid(startIndex, endIndex - startIndex);
     // Only append the candidate if SplattorPlotView is selected and an
     // MDWorkspace is loaded.
-    if (dynamic_cast<SplatterPlotView *>(this->currentView) &&
+    if (currentView->getViewType() == ModeControlWidget::Views::SPLATTERPLOT &&
         otherWorkspacePresent()) {
       if (boost::dynamic_pointer_cast<IPeaksWorkspace>(
               AnalysisDataService::Instance().retrieve(
@@ -1639,36 +1597,21 @@ void MdViewerWidget::saveViewState(ViewBase *view) {
   if (!view)
     return;
 
-  ModeControlWidget::Views vtype;
-  if (dynamic_cast<StandardView *>(view))
-    vtype = ModeControlWidget::STANDARD;
-  else if (dynamic_cast<MultiSliceView *>(view))
-    vtype = ModeControlWidget::MULTISLICE;
-  else if (dynamic_cast<ThreeSliceView *>(view))
-    vtype = ModeControlWidget::THREESLICE;
-  else if (dynamic_cast<SplatterPlotView *>(view))
-    vtype = ModeControlWidget::SPLATTERPLOT;
-  else {
-    g_log.warning() << "Trying to save the state of a view of unknown type. "
-                       "This seems to indicate a "
-                       "severe state inconsistency.";
-    return;
-  }
-
+  auto vtype = currentView->getViewType();
   switch (vtype) {
-  case ModeControlWidget::STANDARD: {
+  case ModeControlWidget::Views::STANDARD: {
     m_allViews.stateStandard.TakeReference(
         view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
   } break;
-  case ModeControlWidget::THREESLICE: {
+  case ModeControlWidget::Views::THREESLICE: {
     m_allViews.stateThreeSlice.TakeReference(
         view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
   } break;
-  case ModeControlWidget::MULTISLICE: {
+  case ModeControlWidget::Views::MULTISLICE: {
     m_allViews.stateMulti.TakeReference(
         view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
   } break;
-  case ModeControlWidget::SPLATTERPLOT: {
+  case ModeControlWidget::Views::SPLATTERPLOT: {
     m_allViews.stateSplatter.TakeReference(
         view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
   } break;

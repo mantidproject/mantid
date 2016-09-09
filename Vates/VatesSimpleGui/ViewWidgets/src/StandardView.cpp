@@ -307,6 +307,10 @@ void StandardView::setView(pqRenderView *view)
                    SLOT(onRenderDone()));
 }
 
+ModeControlWidget::Views StandardView::getViewType() {
+  return ModeControlWidget::Views::STANDARD;
+}
+
 /**
  * Check if the rebin and unbin buttons should be visible
  * Note that for a rebin button to be visible there may be no
