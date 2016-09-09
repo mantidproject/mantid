@@ -37,9 +37,9 @@ def monitor_range(ws):
     # Maximum search in left and right half of the workspace
     mid = int(size / 2)
     # Maximum position left
-    imin = np.argmax(np.array(y[0:mid])) - 1
+    imin = np.nanargmax(np.array(y[0:mid])) - 1
     # Maximum position right
-    imax = np.argmax(np.array(y[mid:size])) + 1 + mid + 1
+    imax = np.nanargmax(np.array(y[mid:size])) + 1 + mid + 1
     return x[imin], x[imax]
 
 # possibility to replace by the use of SelectNexusFilesByMetadata
@@ -101,12 +101,17 @@ def get_peak_position(ws, i):
 
     # Bin number, where Y has its maximum
     y_values = temp.readY(0)
+    x_values = temp.readX(0)
 
     # Bin range: difference between mid bin and peak bin should be in this range
     tolerance = int(mid_bin / 2)
 
     # Peak bin (not in energy)
-    peak_bin = temp.binIndexOf(fit_table.row(0)["PeakCentre"])
+    if fit_table.row(0)["PeakCentre"] < x_values[0] or\
+       fit_table.row(0)["PeakCentre"] > x_values[temp.blocksize()]:
+        peak_bin = -1
+    else:
+        peak_bin = temp.binIndexOf(fit_table.row(0)["PeakCentre"])
 
     # Reliable check for peak bin
     fit_status = fit_table.row(0)["FitStatus"]
@@ -114,9 +119,9 @@ def get_peak_position(ws, i):
     if peak_bin < 0 or peak_bin > len(y_values) or \
             (fit_status != 'success') or (abs(peak_bin - mid_bin) > tolerance):
         # Fit failed (too narrow peak) or outside bin range
-        if abs(np.argmax(y_values) - mid_bin) < tolerance:
+        if abs(np.nanargmax(y_values) - mid_bin) < tolerance:
             # Take bin of maximum peak
-            peak_bin = np.argmax(y_values)
+            peak_bin = np.nanargmax(y_values)
         else:
             # Take the center (i.e. do no shift the spectrum)
             peak_bin = mid_bin
@@ -719,6 +724,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             # mirror_sense 16 : one wing
             mirror_sense = mtd[red].getRun().getLogData('Doppler.mirror_sense').value
 
+        # left and right must be masked here, such that perform_unmirror will work ok
+        mask_reduced_ws(left, xmin_left, xmax_left)
+        mask_reduced_ws(right, xmin_right, xmax_right)
+
         # Energy transfer according to mirror_sense and unmirror_option
         start_bin = 0
         end_bin = 0
@@ -737,8 +746,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         convert_to_energy(left)
         convert_to_energy(right)
 
-        #ConvertSpectrumAxis(InputWorkspace=left, OutputWorkspace=left, Target='Theta', EMode='Indirect')
-        #ConvertSpectrumAxis(InputWorkspace=right, OutputWorkspace=right, Target='Theta', EMode='Indirect')
+
         ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
 
         # Mask corrupted bins according to shifted workspaces or monitor range
