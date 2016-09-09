@@ -337,6 +337,7 @@ void PDCalibration::exec() {
       continue;
 
     auto alg = createChildAlgorithm("FindPeaks");
+    alg->setLoggingOffset(2);
     alg->setProperty("InputWorkspace", m_uncalibratedWS);
     alg->setProperty("WorkspaceIndex", static_cast<int>(wkspIndex));
     alg->setProperty("PeakPositions", peaks.inTofPos);
