@@ -140,17 +140,16 @@ void ModeratorTzeroLinear::exec() {
     size_t wsIndex = static_cast<size_t>(i);
     calculateTfLi(inputWS, wsIndex, t_f, L_i);
 
-	outputWS->setHistogram(i, inputWS->histogram(i));
+    outputWS->setHistogram(i, inputWS->histogram(i));
     // shift the time of flights
     if (t_f >= 0) // t_f < 0 when no detector info is available
     {
       const double scaling = L_i / (L_i + m_gradient);
       const double offset = (1 - scaling) * t_f - scaling * m_intercept;
-      auto &inbins = inputWS->x(i);
       auto &outbins = outputWS->mutableX(i);
-	  outbins *= scaling;
-	  outbins += offset;
-    } 
+      outbins *= scaling;
+      outbins += offset;
+    }
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }
