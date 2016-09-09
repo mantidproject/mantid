@@ -971,8 +971,8 @@ public:
   }
 
 private:
-  const size_t nHists = 100'000;
-  const size_t histSize = 10'000;
+  const size_t nHists = 100000;
+  const size_t histSize = 10000;
   std::vector<Histogram> hists;
   std::vector<Histogram> hists2;
   std::vector<Histogram> histsCopy;
