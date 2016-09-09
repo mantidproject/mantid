@@ -969,7 +969,18 @@ class MainWindow(QtGui.QMainWindow):
         # write
         user_header = str(self.ui.lineEdit_fpHeader.text())
         try:
-            status, file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list,
+            # TODO/NOW/ - Need to make lattice parameter a better place to go
+            import absorption
+
+            a = float(self.ui.lineEdit_aUnitCell.text())
+            b = float(self.ui.lineEdit_bUnitCell.text())
+            c = float(self.ui.lineEdit_cUnitCell.text())
+            alpha = float(self.ui.lineEdit_alphaUnitCell.text())
+            beta = float(self.ui.lineEdit_betaUnitCell.text())
+            gamma = float(self.ui.lineEdit_gammaUnitCell.text())
+            lattice = absorption.Lattice(a, b, c, alpha, beta, gamma)
+
+            status, file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list, lattice,
                                                                       user_header, fp_name)
             self.ui.plainTextEdit_fpContent.setPlainText(file_content)
             if status is False:

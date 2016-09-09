@@ -558,14 +558,12 @@ class CWSCDReductionControl(object):
 
         return move_tup[1]
 
-    def export_to_fullprof(self, exp_number, scan_number_list, user_header,
+    def export_to_fullprof(self, exp_number, scan_number_list, lattice, user_header,
                            fullprof_file_name):
         """
         Export peak intensities to Fullprof data file
         :param exp_number:
         :param scan_number_list:
-        :param scan_kindex_dict:
-        :param k_shift_dict:
         :param user_header:
         :param fullprof_file_name:
         :return: 2-tuples. status and return object (file content or error message)
@@ -603,6 +601,11 @@ class CWSCDReductionControl(object):
         # form peaks
         peaks = list()
         no_shift = len(scan_kindex_dict) == 0
+
+        # get ub matrix
+        ub_matrix = self.get_ub_matrix(exp_number)
+        print '[DB...BAT] UB matrix is of type ', type(ub_matrix)
+
         for scan_number in scan_number_list:
             peak_dict = dict()
             try:
@@ -616,7 +619,18 @@ class CWSCDReductionControl(object):
                 peak_dict['kindex'] = 0
             else:
                 peak_dict['kindex'] = scan_kindex_dict[scan_number]
-            peaks.append(peak_dict)
+
+            if True:
+                # FIXME/TODO/NOW - must be an option!
+                # calculate absorption correction
+                import absorption
+
+                up_cart, us_cart = absorption.calculate_absorption_correction_spice(
+                    exp_number, scan_number, lattice, ub_matrix)
+                peak_dict['up'] = up_cart
+                peak_dict['us'] = us_cart
+
+                peaks.append(peak_dict)
         # END-FOR (scan_number)
 
         try:
