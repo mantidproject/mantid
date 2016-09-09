@@ -129,8 +129,8 @@ void IndirectMolDyn::plotClicked() {
   if (checkADSForPlotSaveWorkspace(baseName.toStdString(), true)) {
 
     WorkspaceGroup_sptr diffResultsGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        baseName.toStdString());
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            baseName.toStdString());
 
     auto names = diffResultsGroup->getNames();
     auto plotType = m_uiForm.cbPlot->currentText();
