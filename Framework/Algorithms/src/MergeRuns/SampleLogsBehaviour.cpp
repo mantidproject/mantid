@@ -42,7 +42,7 @@ const std::string SampleLogsBehaviour::LIST_SUFFIX = "_list";
  * calling MergeRuns.
  *
  * @param ws the base workspace that the other workspaces are merged into
- * @param g_log the logger from the parent algorithm
+ * @param logger the logger from the parent algorithm
  * @param sampleLogsTimeSeries a string with a comma separated list of the logs
  * for the time series merge
  * @param sampleLogsList a string with a comma separated list of the logs for a
@@ -59,11 +59,11 @@ const std::string SampleLogsBehaviour::LIST_SUFFIX = "_list";
  * from the IPF and parent algorithm
  */
 SampleLogsBehaviour::SampleLogsBehaviour(
-    const MatrixWorkspace_sptr &ws, Logger &g_log,
+    const MatrixWorkspace_sptr &ws, Logger &logger,
     std::string sampleLogsTimeSeries, std::string sampleLogsList,
     std::string sampleLogsWarn, std::string sampleLogsWarnTolerances,
     std::string sampleLogsFail, std::string sampleLogsFailTolerances)
-    : m_logger(g_log) {
+    : m_logger(logger) {
   setSampleMap(m_logMap, time_series, sampleLogsTimeSeries, ws, "");
   setSampleMap(m_logMap, list, sampleLogsList, ws, "");
   setSampleMap(m_logMap, warn, sampleLogsWarn, ws, sampleLogsWarnTolerances);
