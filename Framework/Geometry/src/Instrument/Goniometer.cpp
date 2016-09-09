@@ -17,6 +17,8 @@ using Kernel::DblMatrix;
 using Kernel::V3D;
 using Kernel::Quat;
 
+Mantid::Kernel::Logger g_log("Goniometer");
+
 void GoniometerAxis::saveNexus(::NeXus::File *file,
                                const std::string &group) const {
   file->makeGroup(group, "NXmotor", true);
@@ -75,13 +77,7 @@ const Kernel::DblMatrix &Goniometer::getR() const { return R; }
 void Goniometer::setR(Kernel::DblMatrix rot) { R = rot; }
 
 /// Function reports if the goniometer is defined
-bool Goniometer::isDefined() const {
-  bool r_contains_nan = false;
-  std::vector<double> vec = R.getVector();
-  for (std::vector<double>::iterator it = vec.begin(); it != vec.end(); ++it)
-    r_contains_nan = r_contains_nan || (!std::isfinite(*it));
-  return (!r_contains_nan) && (initFromR || (!motors.empty()));
-}
+bool Goniometer::isDefined() const { return initFromR || (!motors.empty()); }
 
 /// Return information about axes.
 /// @return str :: string that contains on each line one motor information (axis
@@ -128,6 +124,15 @@ void Goniometer::pushAxis(std::string name, double axisx, double axisy,
     throw std::runtime_error(
         "Initialized from a rotation matrix, so no axes can be pushed.");
   } else {
+    if (!boost::math::isfinite(axisx) || !boost::math::isfinite(axisy) ||
+        !boost::math::isfinite(axisz) || !boost::math::isfinite(angle)) {
+      g_log.warning() << "NaN encountered while trying to push axis to "
+                         "goniometer, Operation aborted"
+                      << "\naxis name" << name << "\naxisx" << axisx
+                      << "\naxisy" << axisx << "\naxisz" << axisz << "\nangle"
+                      << angle;
+      return;
+    }
     std::vector<GoniometerAxis>::iterator it;
     // check if such axis is already defined
     for (it = motors.begin(); it < motors.end(); ++it) {
