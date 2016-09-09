@@ -74,6 +74,7 @@ Bugs Resolved
 - Floating windows now always stay on top of the main window in OSX
 - The sliceviewer will now rebin an existing binned workspace correctly.
 - 2D plots now display correctly for point data workspaces as well as for histogram data
+- Cuts aligned with an axis no longer generate an empty integrated line plot.
 
 SliceViewer Improvements
 ------------------------
@@ -87,6 +88,12 @@ VSI Improvements
 Multi-dataset fitting interface improvements
 --------------------------------------------
 * Fitting a single dataset with a composite function no longer causes a crash
+
+.. figure::  ../../images/MDFSetToLog.png
+   :width: 487
+   :align: right
+
+* "Set to log" and "Set all to log" options have been added to the parameter editing dialog. These enable a parameter to be set to a value from a sample log for one or all spectra.
 
 |
 

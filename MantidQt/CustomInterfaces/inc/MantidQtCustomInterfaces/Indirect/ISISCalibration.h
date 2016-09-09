@@ -62,6 +62,9 @@ private slots:
   void pbRunFinding();  //< Called when the FileFinder starts finding the files.
   void pbRunFinished(); //< Called when the FileFinder has finished finding the
   // files.
+  /// Handles saving and plotting
+  void saveClicked();
+  void plotClicked();
 
 private:
   void createRESfile(const QString &file);

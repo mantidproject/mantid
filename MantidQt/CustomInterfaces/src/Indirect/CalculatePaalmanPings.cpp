@@ -37,6 +37,10 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
           SLOT(validateChemical()));
   connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this,
           SLOT(validateChemical()));
+  // Connect slots for plot and save
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+
   UserInputValidator uiv;
   if (uiv.checkFieldIsNotEmpty("Can Chemical Formula",
                                m_uiForm.leCanChemicalFormula,
@@ -146,10 +150,6 @@ void CalculatePaalmanPings::run() {
   // Add corrections algorithm to queue
   m_batchAlgoRunner->addAlgorithm(absCorAlgo, absCorProps);
 
-  // Add save algorithms if required
-  if (m_uiForm.ckSave->isChecked())
-    addSaveWorkspaceToQueue(outputWsName);
-
   // Run algorithm queue
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(absCorComplete(bool)));
@@ -226,7 +226,7 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
           "Sample and can workspaces must contain the same type of data.");
   }
 
-  // Show error mssage if needed
+  // Show error message if needed
   if (!uiv.isAllInputValid() && !silent)
     emit showMessageBox(uiv.generateErrorMessage());
 
@@ -302,14 +302,10 @@ void CalculatePaalmanPings::postProcessComplete(bool error) {
     return;
   }
 
-  // Handle Mantid plotting
-  QString plotType = m_uiForm.cbPlotOutput->currentText();
-
-  if (plotType == "Both" || plotType == "Wavelength")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
-
-  if (plotType == "Both" || plotType == "Angle")
-    plotTimeBin(QString::fromStdString(m_pythonExportWsName));
+  // Enable post processing plot and save
+  m_uiForm.cbPlotOutput->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 void CalculatePaalmanPings::loadSettings(const QSettings &settings) {
@@ -425,5 +421,31 @@ void CalculatePaalmanPings::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
   }
 }
 
+/**
+ * Handles saving of workspace
+ */
+void CalculatePaalmanPings::saveClicked() {
+
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Handles mantid plotting of workspace
+ */
+void CalculatePaalmanPings::plotClicked() {
+
+  QString plotType = m_uiForm.cbPlotOutput->currentText();
+
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
+
+    if (plotType == "Both" || plotType == "Wavelength")
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+
+    if (plotType == "Both" || plotType == "Angle")
+      plotTimeBin(QString::fromStdString(m_pythonExportWsName));
+  }
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

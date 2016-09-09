@@ -31,7 +31,7 @@ Usage
 
     trans = Load(Filename='INTER00013463.nxs')
     # Reduction overriding the default values for MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax which would otherwise be retirieved from the workspace
-    transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans, WavelengthStep=0.05)
+    transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans)
 
     print "The first four transWS Y values are:"
     for i in range (4):
@@ -43,10 +43,10 @@ Output:
 .. testoutput:: ExCreateTransWSAutoSimple
 
     The first four transWS Y values are:
-    0.0223
-    0.0602
-    0.1020
-    0.1207
+    0.0255
+    0.0758
+    0.1322
+    0.1422
 
     
 **Example - Create a transmission run, overloading default parameters**
@@ -55,7 +55,7 @@ Output:
 
     trans = Load(Filename='INTER00013463.nxs')
     # Reduction overriding the default values for MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax which would otherwise be retirieved from the workspace
-    transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0, WavelengthStep=0.05)
+    transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
 
     print "The first four transWS Y values are:"
     for i in range (4):
@@ -66,10 +66,10 @@ Output:
 .. testoutput:: ExCreateTransWSAutoOverload
 
     The first four transWS Y values are:
-    0.0221
-    0.0598
-    0.1013
-    0.1198
+    0.0253
+    0.0752
+    0.1312
+    0.1412
 
     
 **Example - Create a transmission run from two runs**
@@ -79,7 +79,7 @@ Output:
     trans1 = Load(Filename='INTER00013463.nxs')
     trans2 = Load(Filename='INTER00013464.nxs')
     # Reduction overriding the default values for MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax which would otherwise be retirieved from the workspace
-    transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, SecondTransmissionRun=trans2, WavelengthStep=0.05, Params=[1.5,0.02,17], StartOverlap=10.0, EndOverlap=12.0)
+    transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, SecondTransmissionRun=trans2, Params=[1.5,0.02,17], StartOverlap=10.0, EndOverlap=12.0)
 
     print "The first four transWS Y values are:"
     for i in range (4):
@@ -90,10 +90,10 @@ Output:
 .. testoutput:: ExCreateTransWSAutoTwo
 
     The first four transWS Y values are:
-    0.0567
-    0.0575
-    0.0577
-    0.0580
+    0.0572
+    0.0574
+    0.0584
+    0.0584
 
 
 .. categories::

@@ -86,6 +86,29 @@ public:
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(m_view.get()));
   }
 
+  void test_load_with_missing_param() {
+    testing::NiceMock<MockEnggDiffFittingView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView,
+                                                              nullptr, nullptr);
+
+    EXPECT_CALL(mockView, getFittingRunNo()).Times(1).WillOnce(Return(""));
+
+    EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
+
+    // No errors/1 warnings. There will be an error log from the algorithms
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffFittingPresenter::Load);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
+  }
+
   void test_fitting_with_missing_param() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     MantidQt::CustomInterfaces::EnggDiffFittingPresenter pres(&mockView,
@@ -184,10 +207,6 @@ public:
         .Times(1)
         .WillOnce(Return(m_ex_run_number));
 
-    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
-        .Times(1)
-        .WillOnce(Return(m_ex_run_number));
-
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
@@ -211,10 +230,6 @@ public:
         .Times(1)
         .WillOnce(Return(m_ex_run_number));
 
-    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
-        .Times(1)
-        .WillOnce(Return(m_ex_run_number));
-
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
@@ -225,7 +240,7 @@ public:
     pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
   }
 
-  void test_fitting_runno_multiple_run() {
+  void test_fitting_file_not_found_with_multiple_runs() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     EnggDiffFittingPresenterNoThread pres(&mockView);
     // 23931-23934
@@ -247,9 +262,7 @@ public:
         .Times(1)
         .WillOnce(Return(RunNumDir));
 
-    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
-        .Times(1)
-        .WillOnce(Return(splittedFileVec));
+    // SplitFittingDir()
 
     // could possibly feature to create unique path
     EXPECT_CALL(mockView, focusingDir()).Times(1);
@@ -286,10 +299,6 @@ public:
     EXPECT_CALL(mockView, getFittingRunNumVec())
         .Times(1)
         .WillOnce(Return(RunNumDir));
-
-    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
-        .Times(1)
-        .WillOnce(Return(splittedFileVec));
 
     EXPECT_CALL(mockView, getFittingMultiRunMode())
         .Times(1)
@@ -335,10 +344,6 @@ public:
     EXPECT_CALL(mockView, getFittingRunNumVec())
         .Times(1)
         .WillOnce(Return(RunNumDir));
-
-    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
-        .Times(1)
-        .WillOnce(Return(splittedFileVec));
 
     EXPECT_CALL(mockView, getFittingMultiRunMode()).Times(0);
 
@@ -621,7 +626,6 @@ public:
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
     EXPECT_CALL(mockView, getFittingRunNo()).Times(0);
     EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
-    EXPECT_CALL(mockView, splitFittingDirectory(testing::_)).Times(0);
     EXPECT_CALL(mockView, focusingDir()).Times(0);
 
     EXPECT_CALL(mockView, getFittingMultiRunMode()).Times(0);

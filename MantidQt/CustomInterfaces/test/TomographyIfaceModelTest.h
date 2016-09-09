@@ -172,7 +172,7 @@ public:
 
     TSM_ASSERT_THROWS("Exception not thrown as expected - submit local",
                       model.doSubmitReconstructionJob("Local"),
-                      std::runtime_error);
+                      std::invalid_argument);
   }
 
   void test_submitFailWrongResource() {
@@ -183,7 +183,7 @@ public:
     model.usingTool("TomoPy");
     TSM_ASSERT_THROWS("Exception not thrown as expected - submit local",
                       model.doSubmitReconstructionJob("Local"),
-                      std::runtime_error);
+                      std::invalid_argument);
   }
 
   void test_cancelFail() {

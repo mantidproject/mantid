@@ -103,6 +103,8 @@ void EnggDiffFittingViewQtWidget::doSetup() {
   connect(m_ui.pushButton_fitting_browse_peaks, SIGNAL(released()), this,
           SLOT(browseClicked()));
 
+  connect(m_ui.pushButton_load, SIGNAL(released()), this, SLOT(loadClicked()));
+
   connect(m_ui.pushButton_fit, SIGNAL(released()), this, SLOT(fitClicked()));
 
   connect(m_ui.pushButton_fit_all, SIGNAL(released()), this,
@@ -171,6 +173,7 @@ void EnggDiffFittingViewQtWidget::saveSettings() const {
 
 void EnggDiffFittingViewQtWidget::enable(bool enable) {
   m_ui.pushButton_fitting_browse_run_num->setEnabled(enable);
+  m_ui.pushButton_load->setEnabled(enable);
   m_ui.lineEdit_pushButton_run_num->setEnabled(enable);
   m_ui.pushButton_fitting_browse_peaks->setEnabled(enable);
   m_ui.lineEdit_fitting_peaks->setEnabled(enable);
@@ -212,6 +215,10 @@ std::string EnggDiffFittingViewQtWidget::focusingDir() const {
 std::string
 EnggDiffFittingViewQtWidget::enggRunPythonCode(const std::string &pyCode) {
   return m_mainPythonRunner->enggRunPythonCode(pyCode);
+}
+
+void EnggDiffFittingViewQtWidget::loadClicked() {
+  m_presenter->notify(IEnggDiffFittingPresenter::Load);
 }
 
 void EnggDiffFittingViewQtWidget::fitClicked() {
@@ -269,27 +276,33 @@ void EnggDiffFittingViewQtWidget::resetFittingMode() {
   m_fittingSingleRunMode = false;
 }
 
+void EnggDiffFittingViewQtWidget::resetCanvas() {
+  // clear vector and detach curves to avoid plot crash
+  // when only plotting focused workspace
+  for (auto curves : m_fittedDataVector) {
+    if (curves) {
+      curves->detach();
+      delete curves;
+    }
+  }
+
+  if (m_fittedDataVector.size() > 0)
+    m_fittedDataVector.clear();
+
+  // set it as false as there will be no valid workspace to plot
+  m_ui.pushButton_plot_separate_window->setEnabled(false);
+}
+
 void EnggDiffFittingViewQtWidget::setDataVector(
     std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
     bool plotSinglePeaks) {
 
   if (!plotSinglePeaks) {
     // clear vector and detach curves to avoid plot crash
-    // when only plotting focused workspace
-    for (auto curves : m_fittedDataVector) {
-      if (curves) {
-        curves->detach();
-        delete curves;
-      }
-    }
-
-    if (m_fittedDataVector.size() > 0)
-      m_fittedDataVector.clear();
-
-    // set it as false as there will be no valid workspace to plot
-    m_ui.pushButton_plot_separate_window->setEnabled(false);
+    resetCanvas();
   }
 
+  // when only plotting focused workspace
   if (focused) {
     dataCurvesFactory(data, m_focusedDataVector, focused);
   } else {
@@ -526,20 +539,6 @@ std::string EnggDiffFittingViewQtWidget::fittingPeaksData() const {
 void EnggDiffFittingViewQtWidget::setPeakList(
     const std::string &peakList) const {
   m_ui.lineEdit_fitting_peaks->setText(QString::fromStdString(peakList));
-}
-
-std::vector<std::string>
-EnggDiffFittingViewQtWidget::splitFittingDirectory(std::string &selectedfPath) {
-
-  Poco::Path PocofPath(selectedfPath);
-  std::string selectedbankfName = PocofPath.getBaseName();
-  std::vector<std::string> splitBaseName;
-  if (selectedbankfName.find("ENGINX_") != std::string::npos) {
-    // splits file by _ and .
-    // vector of (ENGINX, RUN-NUMBER, FOCUSED, BANK, NXS)
-    boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
-  }
-  return splitBaseName;
 }
 
 void EnggDiffFittingViewQtWidget::setBankEmit() { emit setBank(); }
