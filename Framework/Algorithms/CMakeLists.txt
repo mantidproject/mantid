@@ -184,6 +184,7 @@ set ( SRC_FILES
 	src/NormaliseToMonitor.cpp
 	src/NormaliseToUnity.cpp
 	src/OneMinusExponentialCor.cpp
+	src/PDCalibration.cpp
 	src/PDDetermineCharacterizations.cpp
 	src/PDFFourierTransform.cpp
 	src/Pause.cpp
@@ -490,6 +491,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/NormaliseToMonitor.h
 	inc/MantidAlgorithms/NormaliseToUnity.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
+	inc/MantidAlgorithms/PDCalibration.h
 	inc/MantidAlgorithms/PDDetermineCharacterizations.h
 	inc/MantidAlgorithms/PDFFourierTransform.h
 	inc/MantidAlgorithms/Pause.h
@@ -793,6 +795,7 @@ set ( TEST_FILES
 	NormaliseByDetectorTest.h
 	NormaliseToMonitorTest.h
 	OneMinusExponentialCorTest.h
+	PDCalibrationTest.h
 	PDDetermineCharacterizationsTest.h
 	PDFFourierTransformTest.h
 	PauseTest.h
