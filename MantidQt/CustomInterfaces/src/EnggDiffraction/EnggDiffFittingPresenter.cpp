@@ -280,6 +280,14 @@ void EnggDiffFittingPresenter::processFullPathInput(
   } catch (std::runtime_error &e) {
     const std::string eMsg(e.what());
     g_log.error("Error loading browsed file: " + eMsg);
+
+	m_view->userWarning(
+		"Run Number Not Found",
+		"The run number specified could not be located "
+		"in the focused output directory. Please check that the "
+		"correct directory is set for Output Folder under Focusing Settings "
+		"on the settings tab and that the input is correct");
+	return;
   }
 
   // Update UI to reflect found files
@@ -357,10 +365,8 @@ std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
                                 foundFullFilePath)) {
     // I can't see this ever being thrown if the user is browsing to files but
     // better to be safe and give an informative message
-    m_view->userWarning("File not found",
-                        "Please check filename and directory and try again");
     throw std::runtime_error("Could not find any files matching the generated"
-                             " pattern:" +
+                             " pattern: " +
                              baseFilenamePrefix);
   }
 
@@ -422,12 +428,14 @@ void EnggDiffFittingPresenter::processSingleRun(
 
   // Next check input is a run number only as this is currently all
   // that we can handle
-  if (!isDigit(userInputBasename)) {
+  if (userInputBasename.size() == 0 || !isDigit(userInputBasename)) {
 
     m_view->userWarning("Invalid Run Number",
                         "Invalid format of run number has been entered. "
                         "Please try again");
     m_view->enableFitAllButton(false);
+    throw std::invalid_argument("User input was blank or contained"
+                                " non-numeric characters");
   }
 
   if (g_fitting_runno_counter == 0) {
@@ -1520,7 +1528,8 @@ void EnggDiffFittingPresenter::setDataToClonedWS(std::string &current_WS,
 
 void EnggDiffFittingPresenter::setBankItems() {
   try {
-    auto fitting_runno_vector = m_view->getFittingRunNumVec();
+    std::vector<std::string> fitting_runno_vector =
+        m_view->getFittingRunNumVec();
 
     if (!fitting_runno_vector.empty()) {
 

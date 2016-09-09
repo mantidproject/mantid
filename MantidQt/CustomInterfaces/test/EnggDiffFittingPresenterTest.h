@@ -203,9 +203,7 @@ public:
         .Times(2)
         .WillRepeatedly(Return(std::string(g_focusedBankFile)));
 
-    EXPECT_CALL(mockView, getFittingRunNumVec())
-        .Times(1)
-        .WillOnce(Return(m_ex_run_number));
+    EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
@@ -223,19 +221,16 @@ public:
 
     // inputs from user - empty run number given
     EXPECT_CALL(mockView, getFittingRunNo())
-        .Times(2)
-        .WillRepeatedly(Return(std::string("")));
-
-    EXPECT_CALL(mockView, getFittingRunNumVec())
         .Times(1)
-        .WillOnce(Return(m_ex_run_number));
+        .WillOnce(Return(std::string("")));
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+    EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
 
     // No errors/1 warnings. There will be an warning for invalid run number
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(2);
 
     pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
   }
@@ -255,12 +250,10 @@ public:
 
     // inputs from user - given multiple run
     EXPECT_CALL(mockView, getFittingRunNo())
-        .Times(2)
-        .WillRepeatedly(Return(g_focusedFittingRunNo));
-
-    EXPECT_CALL(mockView, getFittingRunNumVec())
         .Times(1)
-        .WillOnce(Return(RunNumDir));
+        .WillOnce(Return(g_focusedFittingRunNo));
+
+    EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
 
     // SplitFittingDir()
 
@@ -341,9 +334,7 @@ public:
         .Times(2)
         .WillRepeatedly(Return(g_focusedBankFile));
 
-    EXPECT_CALL(mockView, getFittingRunNumVec())
-        .Times(1)
-        .WillOnce(Return(RunNumDir));
+    EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
 
     EXPECT_CALL(mockView, getFittingMultiRunMode()).Times(0);
 
