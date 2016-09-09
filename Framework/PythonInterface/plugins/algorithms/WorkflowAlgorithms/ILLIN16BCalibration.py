@@ -48,31 +48,15 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         self._setup()
 
         __temp = IndirectILLReduction(Run=self._input_file,
-                              MapFile=self._map_file,
-                              SumRuns=True,
-                              UnmirrorOption=1)
+                                      MapFile=self._map_file,
+                                      SumRuns=True,
+                                      UnmirrorOption=1)
 
         # Integrate within peak range
         __ws_name = __temp.getItem(0).getName()
         __ws_name = Integration(InputWorkspace=__ws_name,
-                    RangeLower=float(self._peak_range[0]),
-                    RangeUpper=float(self._peak_range[1]))
-
-        # Process automatic scaling
-        if self._intensity_scale == 1:
-            number_histograms = __temp.getItem(0).getNumberHistograms()
-
-            __ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=__ws_name)
-            DeleteWorkspace(__ws_mask)
-
-            __temp_sum = SumSpectra(InputWorkspace=__ws_name)
-
-            total = __temp_sum.readY(0)[0]
-            DeleteWorkspace(__temp_sum)
-
-            self._intensity_scale = 1 / (total / (number_histograms - num_zero_spectra))
-
-        DeleteWorkspace(__temp)
+                                RangeLower=float(self._peak_range[0]),
+                                RangeUpper=float(self._peak_range[1]))
 
         # Apply scaling factor
         Scale(InputWorkspace=__ws_name,
@@ -96,9 +80,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         self._peak_range = self.getProperty('PeakRange').value
 
         self._intensity_scale = self.getProperty('ScaleFactor').value
-
-        # automatic summing
-        self._input_file = self._input_file.replace(',','+')
 
     def validateInputs(self):
         """
