@@ -126,21 +126,22 @@ void IndirectMolDyn::plotClicked() {
   QFileInfo fi(filename);
   QString baseName = fi.baseName();
 
-  WorkspaceGroup_sptr diffResultsGroup =
+  if (checkADSForPlotSaveWorkspace(baseName.toStdString(), true)) {
+
+    WorkspaceGroup_sptr diffResultsGroup =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          baseName.toStdString());
+        baseName.toStdString());
 
-  auto names = diffResultsGroup->getNames();
-  auto plotType = m_uiForm.cbPlot->currentText();
+    auto names = diffResultsGroup->getNames();
+    auto plotType = m_uiForm.cbPlot->currentText();
 
-  for (auto it = names.begin(); it != names.end(); ++it) {
-    std::string wsName = *it;
+    for (const auto wsName : names) {
+      if (plotType == "Spectra" || plotType == "Both")
+        plotSpectrum(QString::fromStdString(wsName));
 
-    if (plotType == "Spectra" || plotType == "Both")
-      plotSpectrum(QString::fromStdString(wsName));
-
-    if (plotType == "Contour" || plotType == "Both")
-      plot2D(QString::fromStdString(wsName));
+      if (plotType == "Contour" || plotType == "Both")
+        plot2D(QString::fromStdString(wsName));
+    }
   }
 }
 
