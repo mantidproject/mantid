@@ -1,19 +1,19 @@
 #ifndef MERGERUNSTEST_H_
 #define MERGERUNSTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 #include <stdarg.h>
 
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAlgorithms/MergeRuns.h"
-#include "MantidAlgorithms/GroupWorkspaces.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidAlgorithms/MergeRuns.h"
+#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -587,8 +587,8 @@ public:
     TS_ASSERT(output->getSpectrum(1).hasDetectorID(1));
     TS_ASSERT(output->getSpectrum(1).hasDetectorID(2));
     TS_ASSERT(output->getSpectrum(2).hasDetectorID(15));
-    TS_ASSERT(output->getSpectrum(3)
-                  .hasDetectorID(5)); // Leftover from the ev1 workspace
+    TS_ASSERT(output->getSpectrum(3).hasDetectorID(
+        5)); // Leftover from the ev1 workspace
 
     EventTeardown();
   }
@@ -645,7 +645,7 @@ public:
     TS_ASSERT(!merge2.isExecuted());
     MatrixWorkspace_sptr badIn =
         WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
-    badIn->mutableX(0).assign(11, 2.0);
+    badIn->mutableX(0) = 2.0;
     AnalysisDataService::Instance().add("badIn", badIn);
     TS_ASSERT_THROWS_ANYTHING(
         merge.setPropertyValue("InputWorkspaces", "ws1,badIn"));

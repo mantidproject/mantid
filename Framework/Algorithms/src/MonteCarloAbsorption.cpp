@@ -165,7 +165,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     auto &errors = outputWS->mutableE(i);
     // The input was cloned so clear the errors out
     // Y values are all overwritten later
-    errors.assign(errors.size(), 0.0);
+    errors = 0.0;
 
     // Final detector position
     IDetector_const_sptr detector;

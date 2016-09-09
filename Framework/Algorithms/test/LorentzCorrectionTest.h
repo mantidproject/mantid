@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/LorentzCorrection.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/LorentzCorrection.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 
 using Mantid::Algorithms::LorentzCorrection;
@@ -106,8 +106,7 @@ public:
 
   void test_throws_if_wavelength_zero() {
     auto ws_lam = this->create_workspace(2 /*nBins*/);
-    ws_lam->mutableX(0)[0] = 0; // Make wavelength zero
-    ws_lam->mutableX(0)[1] = 0; // Make wavelength zero
+    ws_lam->mutableX(0) = 0; // Make wavelength zero
     LorentzCorrection alg;
     alg.setChild(true);
     alg.setRethrows(true);

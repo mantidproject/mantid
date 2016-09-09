@@ -945,17 +945,28 @@ public:
     for (size_t i = 0; i < nHists; i++)
       hists.push_back(Histogram(BinEdges(histSize, LinearGenerator(0, 1))));
 
-	histsCopy = hists;
+    BinEdges edges(histSize, LinearGenerator(0, 2));
+
+    for (size_t i = 0; i < nHists; i++)
+      hists2.push_back(Histogram(edges));
+
+    // hists is stored to avoid benchmarking deallocation
+    histsCopy = hists;
   }
 
-  void test_copy_many_X() {
+  void test_copy_X() {
     for (auto &i : hists)
       i.mutableX() = copy;
   }
 
-  void test_share_many_X() {
+  void test_share_X_with_deallocation() {
     hists[0].mutableX() = copy;
     for (auto &i : hists)
+      i.setSharedX(hists[0].sharedX());
+  }
+
+  void test_share_X() {
+    for (auto &i : hists2)
       i.setSharedX(hists[0].sharedX());
   }
 
@@ -963,6 +974,7 @@ private:
   const size_t nHists = 100'000;
   const size_t histSize = 10'000;
   std::vector<Histogram> hists;
+  std::vector<Histogram> hists2;
   std::vector<Histogram> histsCopy;
   HistogramX copy;
 };
