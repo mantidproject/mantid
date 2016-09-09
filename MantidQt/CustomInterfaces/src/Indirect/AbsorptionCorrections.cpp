@@ -27,6 +27,9 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   // Handle algorithm completion
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
+  // Handle plotting and saving
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 }
 
 void AbsorptionCorrections::setup() {}
@@ -122,43 +125,12 @@ void AbsorptionCorrections::run() {
   // Add correction algorithm to batch
   m_batchAlgoRunner->addAlgorithm(absCorAlgo);
 
-  // Add save algorithms if needed
-  bool save = m_uiForm.ckSave->isChecked();
-  if (save) {
-    addSaveWorkspace(outputWsName);
-    if (keepCorrectionFactors)
-      addSaveWorkspace(outputFactorsWsName);
-  }
   m_absCorAlgo = absCorAlgo;
   // Run algorithm batch
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
   m_pythonExportWsName = outputWsName.toStdString();
-}
-
-/**
- * Configures the SaveNexusProcessed algorithm to save a workspace in the
- * default
- * save directory and adds the algorithm to the batch queue.
- *
- * @param wsName Name of workspace to save
- */
-void AbsorptionCorrections::addSaveWorkspace(QString wsName) {
-  QString filename = wsName + ".nxs";
-
-  // Setup the input workspace property
-  API::BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
-  saveProps["InputWorkspace"] = wsName.toStdString();
-
-  // Setup the algorithm
-  IAlgorithm_sptr saveAlgo =
-      AlgorithmManager::Instance().create("SaveNexusProcessed");
-  saveAlgo->initialize();
-  saveAlgo->setProperty("Filename", filename.toStdString());
-
-  // Add the save algorithm to the batch
-  m_batchAlgoRunner->addAlgorithm(saveAlgo, saveProps);
 }
 
 /**
@@ -301,29 +273,48 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
                                          m_uiForm.spCanShift->value()));
     shiftLog->execute();
   }
-  // Plot output
+  // Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+}
+/**
+ * Handle saving of workspace
+ */
+void AbsorptionCorrections::saveClicked() {
 
-  bool plot = m_uiForm.ckPlot->isChecked();
-  if (plot) {
-    QStringList plotData = {QString::fromStdString(m_pythonExportWsName),
-                            m_uiForm.dsSampleInput->getCurrentDataName()};
-    auto outputFactorsWsName =
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+
+  if (m_uiForm.ckKeepFactors->isChecked()) {
+    std::string factorsWs =
         m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
-    if (m_uiForm.ckKeepFactors->isChecked()) {
-      QStringList plotCorr = {QString::fromStdString(outputFactorsWsName) +
-                              "_ass"};
-      if (m_uiForm.ckUseCanCorrections->isChecked()) {
-        plotCorr.push_back(QString::fromStdString(outputFactorsWsName) +
-                           "_acc");
-        QString shiftedWs = QString::fromStdString(
-            m_absCorAlgo->getPropertyValue("CanWorkspace"));
-        plotData.push_back(shiftedWs);
-      }
-      plotSpectrum(plotCorr, 0);
-    }
-    IndirectTab::plotSpectrum(plotData, 0);
+    if (checkADSForPlotSaveWorkspace(factorsWs, false))
+      addSaveWorkspaceToQueue(QString::fromStdString(factorsWs));
   }
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
+/**
+ * Handle mantid plotting
+ */
+void AbsorptionCorrections::plotClicked() {
+
+  QStringList plotData = {QString::fromStdString(m_pythonExportWsName),
+                          m_uiForm.dsSampleInput->getCurrentDataName()};
+  auto outputFactorsWsName =
+      m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
+  if (m_uiForm.ckKeepFactors->isChecked()) {
+    QStringList plotCorr = {QString::fromStdString(outputFactorsWsName) +
+                            "_ass"};
+    if (m_uiForm.ckUseCanCorrections->isChecked()) {
+      plotCorr.push_back(QString::fromStdString(outputFactorsWsName) + "_acc");
+      QString shiftedWs = QString::fromStdString(
+          m_absCorAlgo->getPropertyValue("CanWorkspace"));
+      plotData.push_back(shiftedWs);
+    }
+    plotSpectrum(plotCorr, 0);
+  }
+  plotSpectrum(plotData, 0);
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

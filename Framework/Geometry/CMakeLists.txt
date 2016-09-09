@@ -450,7 +450,7 @@ if ( APPLE )
   add_definitions ( -DHAVE_IOSTREAM -DHAVE_LIMITS -DHAVE_IOMANIP )
 endif ()
 
-include_directories ( ${OPENGL_INCLUDE_DIR} )
+include_directories ( ${OPENGL_INCLUDE_DIR} ${TBB_INCLUDE_DIRS} )
 include_directories ( ${GSL_INCLUDE_DIR} )
 
 
@@ -475,6 +475,8 @@ endif ()
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries ( Geometry LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}  ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${JSONCPP_LIBRARIES} )
+
+target_link_libraries ( Geometry LINK_PUBLIC ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES} )
 
 if (ENABLE_OPENCASCADE)
   target_link_libraries ( Geometry LINK_PRIVATE ${OPENCASCADE_LIBRARIES} )
