@@ -116,8 +116,9 @@ public:
     bool nanFound = false;
 
     for (size_t i = 0; i < result->getNumberHistograms(); i++) {
-      if (std::find_if(result->y(i).begin(), result->y(i).end(),
-          [](double v) { return isnan(v); }) != result->y(i).end()) {
+      if (std::find_if(result->y(i).begin(), result->y(i).end(), [](double v) {
+            return isnan(v);
+          }) != result->y(i).end()) {
         nanFound = true;
         break; // NaN found in workspace, no need to keep searching
       }
