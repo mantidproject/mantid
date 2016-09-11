@@ -603,7 +603,7 @@ constexpr double j_Am7[4][8] = {
 /// Values of 5d ions from Kobayashi et al., Acta. Cryst. A67, 473480 (2011)
 /// Needs an extra two parameters, and no <j6> (d-electrons, l=2)
 /// Last parameter is total deviation of the analytical formular from free ion calculations.
-/// For some valences, there are multiple possible configurations (e.g. for neutron tungsten
+/// For some valences, there are multiple possible configurations (e.g. for neutral tungsten
 /// we could have: 6s0 5d6, 6s1 5d5 or 6s2 5d4. The one used is noted in a comment.
 /// The configuration chosen is that obtained by filling the s-shell first.
 constexpr double j_Hf2[3][10] = {
