@@ -35,7 +35,7 @@ double MagneticFormFactorTable::value(const double qsqr) const {
 //-------------------------------------------------------------------------------------------------------
 
 /**
- * Setup the (dipole approximation) form factor table with the 
+ * Setup the (dipole approximation) form factor table with the
  * values for the given ion.
  * @param ion :: A reference to the required ion
  */
