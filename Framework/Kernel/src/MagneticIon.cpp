@@ -88,9 +88,9 @@ double MagneticIon::getJLofQsqr(const double qsqr, const uint16_t l) const {
  * @return
  */
 double MagneticIon::analyticalFormFactor(const double qsqr) const {
-  double j0exp, j2exp = 0.;
-  const double q2 = qsqr / (16.0 * M_PI * M_PI);
   if (qsqr < MagneticIon::formFactorCutOff()) {
+    const double q2 = qsqr / (16.0 * M_PI * M_PI);
+    double j0exp, j2exp = 0.;
     j0exp = j0[0] * std::exp(-j0[1] * q2) + j0[2] * std::exp(-j0[3] * q2) +
             j0[4] * std::exp(-j0[5] * q2);
     if (g != 2.) {
