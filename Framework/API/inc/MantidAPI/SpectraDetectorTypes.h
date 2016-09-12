@@ -5,6 +5,7 @@
 //------------------------------------------------------------------------------
 #include "MantidGeometry/IDTypes.h"
 #include <unordered_map>
+#include <vector>
 
 namespace Mantid {
 
