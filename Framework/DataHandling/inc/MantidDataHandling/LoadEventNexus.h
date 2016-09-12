@@ -14,7 +14,11 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 
+#ifdef _WIN32 // fixing windows issue causing conflict between
+// winnt char and nexus char
 #undef CHAR
+#endif
+
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 
