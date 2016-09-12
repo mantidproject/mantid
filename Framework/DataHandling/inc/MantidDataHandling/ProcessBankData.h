@@ -1,7 +1,6 @@
 #ifndef MANTID_DATAHANDLING_PROCESSBANKDATA_H
 #define MANTID_DATAHANDLING_PROCESSBANKDATA_H
 
-
 // #include "MantidAPI/IFileLoader.h"
 #include "MantidGeometry/IDTypes.h"
 // Process bank data
