@@ -76,6 +76,11 @@ AlgorithmDialog *InterfaceManager::createDialog(
   Qt::WindowFlags flags = 0;
   flags |= Qt::Dialog;
   flags |= Qt::WindowContextHelpButtonHint;
+#ifdef Q_OS_MAC
+  // Work around to ensure that floating windows remain on top of the main
+  // application window, but below other applications on Mac
+  flags |= Qt::Tool;
+#endif
   dlg->setWindowFlags(flags);
 
   // Set the content
