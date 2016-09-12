@@ -120,7 +120,7 @@ StandardView::StandardView(QWidget *parent,
   QObject::connect(this->m_ui.scaleButton, SIGNAL(clicked()), this,
                    SLOT(onScaleButtonClicked()));
 
-  if(createRenderProxy) {
+  if (createRenderProxy) {
     this->m_view = this->createRenderView(this->m_ui.renderFrame);
 
     QObject::connect(this->m_view.data(), SIGNAL(endRender()), this,
@@ -290,8 +290,7 @@ void StandardView::updateView() { this->m_cameraReset = true; }
 
 void StandardView::closeSubWindows() {}
 
-void StandardView::setView(pqRenderView *view)
-{
+void StandardView::setView(pqRenderView *view) {
   clearRenderLayout(this->m_ui.renderFrame);
 
   this->m_view = view;

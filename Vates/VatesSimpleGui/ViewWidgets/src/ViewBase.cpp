@@ -150,15 +150,14 @@ void ViewBase::setAutoColorScale() {
 /**
  * Clear the render layout completely
  */
-void ViewBase::clearRenderLayout(QFrame* frame)
-{
-  QLayout* layout = frame->layout();
-   if (layout) {
-     QLayoutItem *item;
-     while ((item = layout->takeAt(0)) != nullptr)
-       layout->removeItem(item);
-     delete layout;
-   }
+void ViewBase::clearRenderLayout(QFrame *frame) {
+  QLayout *layout = frame->layout();
+  if (layout) {
+    QLayoutItem *item;
+    while ((item = layout->takeAt(0)) != nullptr)
+      layout->removeItem(item);
+    delete layout;
+  }
 }
 
 /**

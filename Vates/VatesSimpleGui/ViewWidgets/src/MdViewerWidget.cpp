@@ -313,27 +313,30 @@ void MdViewerWidget::connectLoadDataReaction(QAction *action) {
  * @param v the view mode to set on the main window
  * @return the requested view
  */
-ViewBase *
-MdViewerWidget::createAndSetMainViewWidget(QWidget *container,
-                                           ModeControlWidget::Views v,
-                                           bool createRenderProxy) {
+ViewBase *MdViewerWidget::createAndSetMainViewWidget(QWidget *container,
+                                                     ModeControlWidget::Views v,
+                                                     bool createRenderProxy) {
   ViewBase *view;
   std::string featureName("VSI:");
   switch (v) {
   case ModeControlWidget::STANDARD: {
-    view = new StandardView(container, &m_rebinnedSourcesManager, createRenderProxy);
+    view = new StandardView(container, &m_rebinnedSourcesManager,
+                            createRenderProxy);
     featureName += "StandardView";
   } break;
   case ModeControlWidget::THREESLICE: {
-    view = new ThreeSliceView(container, &m_rebinnedSourcesManager, createRenderProxy);
+    view = new ThreeSliceView(container, &m_rebinnedSourcesManager,
+                              createRenderProxy);
     featureName += "ThreeSliceView";
   } break;
   case ModeControlWidget::MULTISLICE: {
-    view = new MultiSliceView(container, &m_rebinnedSourcesManager, createRenderProxy);
+    view = new MultiSliceView(container, &m_rebinnedSourcesManager,
+                              createRenderProxy);
     featureName += "MultiSliceView";
   } break;
   case ModeControlWidget::SPLATTERPLOT: {
-    view = new SplatterPlotView(container, &m_rebinnedSourcesManager, createRenderProxy);
+    view = new SplatterPlotView(container, &m_rebinnedSourcesManager,
+                                createRenderProxy);
     featureName += "SplatterPlotView";
   } break;
   default:
@@ -365,10 +368,10 @@ void MdViewerWidget::setParaViewComponentsForView() {
                    this->ui.propertiesPanel,
                    SLOT(setOutputPort(pqOutputPort *)));
 
-   QObject::connect(activeObjects,
-   SIGNAL(representationChanged(pqDataRepresentation*)),
+  QObject::connect(activeObjects,
+                   SIGNAL(representationChanged(pqDataRepresentation *)),
                    this->ui.propertiesPanel,
-                   SLOT(setRepresentation(pqDataRepresentation*)));
+                   SLOT(setRepresentation(pqDataRepresentation *)));
 
   QObject::connect(activeObjects, SIGNAL(viewChanged(pqView *)),
                    this->ui.propertiesPanel, SLOT(setView(pqView *)));
@@ -999,8 +1002,8 @@ void MdViewerWidget::setupViewFromProject(ModeControlWidget::Views vtype,
   viewLayout->addWidget(currentView);
 
   // Swap out the existing view for the newly loaded source and representation
-  currentView->origSrc = qobject_cast<pqPipelineSource*>(source);
-  currentView->setView(qobject_cast<pqRenderView*>(view));
+  currentView->origSrc = qobject_cast<pqPipelineSource *>(source);
+  currentView->setView(qobject_cast<pqRenderView *>(view));
   setParaViewComponentsForView();
 }
 
@@ -1013,7 +1016,7 @@ void MdViewerWidget::setupViewFromProject(ModeControlWidget::Views vtype,
  */
 void MdViewerWidget::setActiveObjects(pqView *view, pqPipelineSource *source) {
 
-  auto & activeObjects = pqActiveObjects::instance();
+  auto &activeObjects = pqActiveObjects::instance();
   activeObjects.setActiveView(view);
   activeObjects.setActiveSource(source);
   activeObjects.setActivePort(source->getOutputPort(0));

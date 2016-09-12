@@ -35,11 +35,12 @@ Kernel::Logger g_log("ThreeSliceView");
 }
 
 ThreeSliceView::ThreeSliceView(QWidget *parent,
-                               RebinnedSourcesManager *rebinnedSourcesManager, bool createRenderProxy)
+                               RebinnedSourcesManager *rebinnedSourcesManager,
+                               bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager), m_mainView(), m_ui() {
   this->m_ui.setupUi(this);
 
-  if(createRenderProxy) {
+  if (createRenderProxy) {
     this->m_mainView = this->createRenderView(this->m_ui.mainRenderFrame,
                                               QString("OrthographicSliceView"));
     pqActiveObjects::instance().setActiveView(this->m_mainView);
@@ -95,8 +96,7 @@ void ThreeSliceView::renderAll() { this->m_mainView->render(); }
 
 void ThreeSliceView::resetDisplay() { this->m_mainView->resetDisplay(); }
 
-void ThreeSliceView::setView(pqRenderView *view)
-{
+void ThreeSliceView::setView(pqRenderView *view) {
   clearRenderLayout(this->m_ui.mainRenderFrame);
   this->m_mainView = view;
   QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.mainRenderFrame);

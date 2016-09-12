@@ -149,7 +149,7 @@ public:
   /// Has active source
   bool hasActiveSource();
   /// Set the underlying view directly
-  virtual void setView(pqRenderView* view) = 0;
+  virtual void setView(pqRenderView *view) = 0;
   /// Get the view type of the current widget
   virtual ModeControlWidget::Views getViewType() = 0;
 
@@ -247,7 +247,7 @@ protected:
   /// Set the Axes Grid
   void setAxesGrid();
   /// Clear the render layout completely
-  void clearRenderLayout(QFrame* frame);
+  void clearRenderLayout(QFrame *frame);
 
 private:
   Q_DISABLE_COPY(ViewBase)

@@ -64,7 +64,7 @@ MultiSliceView::MultiSliceView(QWidget *parent,
                                bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager) {
   this->m_ui.setupUi(this);
-  if(createRenderProxy) {
+  if (createRenderProxy) {
     pqRenderView *tmp =
         this->createRenderView(this->m_ui.renderFrame, QString("MultiSlice"));
 
@@ -102,15 +102,14 @@ void MultiSliceView::render() {
   this->origSrc = pqActiveObjects::instance().activeSource();
   this->checkSliceViewCompat();
   this->setupData();
-  //this->resetDisplay();
+  // this->resetDisplay();
 }
 
 void MultiSliceView::renderAll() { this->m_mainView->render(); }
 
 void MultiSliceView::resetDisplay() { this->m_mainView->resetDisplay(); }
 
-void MultiSliceView::setView(pqRenderView *view)
-{
+void MultiSliceView::setView(pqRenderView *view) {
   clearRenderLayout(this->m_ui.renderFrame);
   this->m_mainView = qobject_cast<pqMultiSliceView *>(view);
   QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.renderFrame);

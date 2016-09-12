@@ -54,7 +54,8 @@ Mantid::Kernel::Logger g_log("SplatterPlotView");
 }
 
 SplatterPlotView::SplatterPlotView(
-    QWidget *parent, RebinnedSourcesManager *rebinnedSourcesManager, bool createRenderProxy)
+    QWidget *parent, RebinnedSourcesManager *rebinnedSourcesManager,
+    bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager),
       m_cameraManager(boost::make_shared<CameraManager>()),
       m_peaksTableController(NULL), m_peaksWorkspaceNameDelimiter(";") {
@@ -83,7 +84,7 @@ SplatterPlotView::SplatterPlotView(
   QObject::connect(this->m_ui.pickModeButton, SIGNAL(toggled(bool)), this,
                    SLOT(onPickModeToggled(bool)));
 
-  if(createRenderProxy)
+  if (createRenderProxy)
     this->m_view = this->createRenderView(this->m_ui.renderFrame);
 
   this->installEventFilter(this);
@@ -635,8 +636,7 @@ void SplatterPlotView::destroyAllSourcesInView() {
   builder->destroySources();
 }
 
-void SplatterPlotView::setView(pqRenderView *view)
-{
+void SplatterPlotView::setView(pqRenderView *view) {
   clearRenderLayout(this->m_ui.renderFrame);
   this->m_view = view;
 
