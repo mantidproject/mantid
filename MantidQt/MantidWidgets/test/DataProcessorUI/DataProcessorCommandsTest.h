@@ -54,7 +54,7 @@ public:
 
     // The presenter should be notified with the OpenTableFlag
     EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::OpenTableFlag))
-        .Times(Exactly(1));
+        .Times(Exactly(0));
     // Execute the command
     command.execute();
     // Verify expectations
