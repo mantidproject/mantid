@@ -691,12 +691,12 @@ void ISISEnergyTransfer::pbRunFinished() {
  * Handle mantid plotting of workspaces
  */
 void ISISEnergyTransfer::plotClicked() {
-  for (const auto wsName : m_outputWorkspaces) {
-    if (checkADSForPlotSaveWorkspace(wsName, true)) {
+  for (const auto & it : m_outputWorkspaces) {
+    if (checkADSForPlotSaveWorkspace(it, true)) {
       const auto plotType = m_uiForm.cbPlotType->currentText();
       QString pyInput = "from IndirectReductionCommon import plot_reduction\n";
       pyInput += "plot_reduction('";
-      pyInput += QString::fromStdString(wsName) + "', '";
+      pyInput += QString::fromStdString(it) + "', '";
       pyInput += plotType + "')\n";
       m_pythonRunner.runPythonCode(pyInput);
     }
@@ -710,12 +710,12 @@ void ISISEnergyTransfer::saveClicked() {
   auto saveFormats = getSaveFormats();
   QString pyInput = "from IndirectReductionCommon import save_reduction\n";
   pyInput += "save_reduction([";
-  for (const auto wsName : m_outputWorkspaces) {
-    pyInput += "'" + QString::fromStdString(wsName) + "', ";
+  for (const auto & it : m_outputWorkspaces) {
+    pyInput += "'" + QString::fromStdString(it) + "', ";
   }
   pyInput += "], [";
-  for (const auto save : saveFormats) {
-    pyInput += "'" + QString::fromStdString(save) + "', ";
+  for (const auto & it : saveFormats) {
+    pyInput += "'" + QString::fromStdString(it) + "', ";
   }
   pyInput += "]";
   if (m_uiForm.ckCm1Units->isChecked())
