@@ -687,7 +687,7 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
     window->addSerialisableWindow(dynamic_cast<QObject *>(win));
   }
 
-  if (tsv.selectSection("vates")) {
+  if (tsv.selectSection("vsi")) {
     std::string vatesLines;
     tsv >> vatesLines;
 

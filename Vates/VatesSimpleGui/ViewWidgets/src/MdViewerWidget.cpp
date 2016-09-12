@@ -1054,7 +1054,7 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
 
   // Now serialise the color map
   contents.writeSection("colormap", ui.colorSelectionWidget->saveToProject());
-  tsv.writeSection("vates", contents.outputLines());
+  tsv.writeSection("vsi", contents.outputLines());
 
   return tsv.outputLines();
 }
