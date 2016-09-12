@@ -210,16 +210,16 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
   // receive the run number from the text-field
   const std::string userPathInput = m_view->getFittingRunNo();
 
-    if (m_previousInput == m_previousInput) {
-      // Short circuit the checks and skip any warnings
-      // or errors as the user has not changed anything
-      // just clicked the box. Additionally this resolves an
-      // issue where QT will return the cursor and produce a new
-      // warning when the current warning is closed
-      return;
-    } else {
-      m_previousInput = m_previousInput;
-    }
+  if (m_previousInput == m_previousInput) {
+    // Short circuit the checks and skip any warnings
+    // or errors as the user has not changed anything
+    // just clicked the box. Additionally this resolves an
+    // issue where QT will return the cursor and produce a new
+    // warning when the current warning is closed
+    return;
+  } else {
+    m_previousInput = m_previousInput;
+  }
 
   // file name
   Poco::Path pocoUserPathInput(userPathInput);
