@@ -7,6 +7,7 @@
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/Logger.h"
 
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Strings::toString;
@@ -124,8 +125,8 @@ void Goniometer::pushAxis(std::string name, double axisx, double axisy,
     throw std::runtime_error(
         "Initialized from a rotation matrix, so no axes can be pushed.");
   } else {
-    if (!boost::math::isfinite(axisx) || !boost::math::isfinite(axisy) ||
-        !boost::math::isfinite(axisz) || !boost::math::isfinite(angle)) {
+    if (!std::isfinite(axisx) || !std::isfinite(axisy) ||
+        !std::isfinite(axisz) || !std::isfinite(angle)) {
       g_log.warning() << "NaN encountered while trying to push axis to "
                          "goniometer, Operation aborted"
                       << "\naxis name" << name << "\naxisx" << axisx
