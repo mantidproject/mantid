@@ -4,7 +4,7 @@ from mantid.api import AlgorithmFactory, AnalysisDataServiceImpl, DataProcessorA
 from mantid.kernel import Direct, Direction, UnitConversion
 from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
                              CloneWorkspace, ComputeCalibrationCoefVan,\
-                             ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, DetectorEfficiencyCorUser, Divide, ExtractSpectra,\
+                             ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DetectorEfficiencyCorUser, Divide, ExtractSpectra,\
                              FindDetectorsOutsideLimits, FindEPP, GetEiMonDet, GroupWorkspaces, Integration, Load,\
                              MaskDetectors, Minus, NormaliseToMonitor, Rebin
 import numpy
@@ -16,36 +16,34 @@ INDEX_TYPE_WORKSPACE_INDEX = 'WorkspaceIndex'
 NORM_METHOD_MONITOR = 'Monitor'
 NORM_METHOD_TIME    = 'AcquisitionTime'
 
-PROP_BINNING_Q                    = 'QBinning'
-PROP_BINNING_W                    = 'WBinning'
-PROP_CD_WORKSPACE                 = 'CadmiumWorkspace'
-PROP_DETECTORS_FOR_EI_CALIBRATION = 'IncidentEnergyCalibrationDetectors'
-PROP_EC_WORKSPACE                 = 'EmptyCanWorkspace'
-PROP_EPP_FROM                     = 'ElasticPeakPositionsFrom'
-PROP_EPP_WORKSPACE                = 'ElasticPeakPositionWorkspace'
-PROP_FLAT_BACKGROUND_FIT_BEGIN    = 'FlatBackgroundFitBegin'
-PROP_FLAT_BACKGROUND_FIT_END      = 'FlatBackgroundFitEnd'
-PROP_FLAT_BACKGROUND_FROM         = 'FlatBackgroundFrom'
-PROP_FLAT_BACKGROUND_WORKSPACE    = 'FlatBackgroundWorkspace'
-PROP_INDEX_TYPE                   = 'IndexType'
-PROP_INPUT_FILE                   = 'InputFile'
-PROP_MONITOR_INDEX                = 'MonitorIndex'
-PROP_NORMALISATION                = 'Normalisation'
-PROP_OUTPUT_SUFFIX                = 'OutputSuffix'
-PROP_OUTPUT_WORKSPACE             = 'OutputWorkspace'
-PROP_REDUCTION_TYPE               = 'ReductionType'
-PROP_TRANSMISSION                 = 'Transmission'
-PROP_USER_MASK                    = 'Spectrum mask'
-PROP_VANADIUM_WORKSPACE           = 'VanadiumWorkspace'
+PROP_BINNING_Q                        = 'QBinning'
+PROP_BINNING_W                        = 'WBinning'
+PROP_CD_WORKSPACE                     = 'CadmiumWorkspace'
+PROP_DETECTORS_FOR_EI_CALIBRATION     = 'IncidentEnergyCalibrationDetectors'
+PROP_EC_WORKSPACE                     = 'EmptyCanWorkspace'
+PROP_EPP_WORKSPACE                    = 'EPPWorkspace'
+PROP_FLAT_BACKGROUND_FIT_BEGIN        = 'FlatBackgroundFitBegin'
+PROP_FLAT_BACKGROUND_FIT_END          = 'FlatBackgroundFitEnd'
+PROP_FLAT_BACKGROUND_WORKSPACE        = 'FlatBackgroundWorkspace'
+PROP_INDEX_TYPE                       = 'IndexType'
+PROP_INPUT_FILE                       = 'InputFile'
+PROP_MONITOR_EPP_WORKSPACE            = 'MonitorEPPWorkspace'
+PROP_MONITOR_INDEX                    = 'MonitorIndex'
+PROP_NORMALISATION                    = 'Normalisation'
+PROP_OUTPUT_EPP_WORKSPACE             = 'OutputEPPWorkspace'
+PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE = 'OutputFlatBackgroundWorkspace'
+PROP_OUTPUT_MONITOR_EPP_WORKSPACE     = 'OutputMonitorEPPWorkspace'
+PROP_OUTPUT_SUFFIX                    = 'OutputPrefix'
+PROP_OUTPUT_WORKSPACE                 = 'OutputWorkspace'
+PROP_REDUCTION_TYPE                   = 'ReductionType'
+PROP_TRANSMISSION                     = 'Transmission'
+PROP_USER_MASK                        = 'SpectrumMask'
+PROP_VANADIUM_WORKSPACE               = 'VanadiumWorkspace'
 
 REDUCTION_TYPE_CD = 'Empty can/cadmium'
 REDUCTION_TYPE_EC = REDUCTION_TYPE_CD
 REDUCTION_TYPE_SAMPLE = 'Sample'
 REDUCTION_TYPE_VANADIUM = 'Vanadium'
-
-FROM_NOWHERE = 'Skip'
-FROM_OTHER = 'AnotherWorkspace'
-FROM_SELF = 'ThisReduction'
 
 def backgroundWorkspaceName(token):
     return token + '_bkg'
@@ -102,10 +100,6 @@ def guessIncidentEnergyWorkspaceName(eppWorkspace):
     splits = eppWorkspace.getName().split('_')
     return ''.join(splits[:-1]) + '_ie'
 
-def guessMonitorEppWorkspaceName(workspace):
-    splits = workspace.getName().split('_')
-    return ''.join(splits[:-1]) + '_monepp'
-
 def stringListToArray(string):
     return eval('[' + string + ']')
 
@@ -136,6 +130,7 @@ class DGSReductionILL(DataProcessorAlgorithm):
         outWs = rawWorkspaceName(identifier)
         workspace = Load(Filename=inputFilename,
                          OutputWorkspace=outWs)
+        # TODO Merge runs
         # Extract monitors to a separate workspace
         monitors = list()
         notMonitors = list()
@@ -159,19 +154,35 @@ class DGSReductionILL(DataProcessorAlgorithm):
 
         # Fit time-independent background
         # ATM monitor background is ignored
-        bkgFrom = self.getProperty(PROP_FLAT_BACKGROUND_FROM).value
-        if bkgFrom == FROM_SELF:
+        bkgInWs = self.getProperty(PROP_FLAT_BACKGROUND_WORKSPACE).value
+        bkgOutWs = self.getPropertyValue(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE)
+        # Fit background regardless of where it actually comes from.
+        # The output needs to be set anyhow.
+        if bkgOutWs or not bkgInWs:
+            if not bkgOutWs:
+                bkgOutWs = backgroundWorkspaceName(identifier)
             begin = self.getProperty(PROP_FLAT_BACKGROUND_FIT_BEGIN).value
             end = self.getProperty(PROP_FLAT_BACKGROUND_FIT_END).value
-            outWs = backgroundWorkspaceName(identifier)
             bkgWorkspace = CalculateFlatBackground(InputWorkspace=workspace,
-                                                   OutputWorkspace=outWs,
+                                                   OutputWorkspace=bkgOutWs,
                                                    StartX=begin,
                                                    EndX=end,
                                                    OutputMode='Return Background',
                                                    NullifyNegativeValues=False)
-        else:
+            self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgOutWs)
+        if bkgInWs:
             bkgWorkspace = self.getProperty(PROP_FLAT_BACKGROUND_WORKSPACE).value
+            # TODO: test if outputting empty workspaces is really needed.
+            if not bkgOutWs:
+                # Even if no background was fitted, we need to set some
+                # output.
+                bkgOutWs = "dummy_output"
+                emptyOutput = CreateWorkspace(OutputWorkspace=bkgOutWs,
+                                              DataX="",
+                                              DataY="",
+                                              DataE="",
+                                              NSpec=0)
+                self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgOutWs)
         # Subtract time-independent background
         outWs = backgroundSubtractedWorkspaceName(identifier)
         workspace = Minus(LHSWorkspace=workspace,
@@ -179,17 +190,29 @@ class DGSReductionILL(DataProcessorAlgorithm):
                           OutputWorkspace=outWs)
 
         # Find elastic peak positions
-        eppFrom = self.getProperty(PROP_EPP_FROM).value
-        if eppFrom == FROM_SELF:
-            outWs = eppWorkspaceName(identifier)
+        eppInWs = self.getProperty(PROP_EPP_WORKSPACE).value
+        monitorEppInWs = self.getProperty(PROP_MONITOR_EPP_WORKSPACE).value
+        eppOutWs = self.getPropertyValue(PROP_OUTPUT_EPP_WORKSPACE)
+        monitorEppOutWs = self.getPropertyValue(PROP_OUTPUT_MONITOR_EPP_WORKSPACE)
+        if eppOutWs or not eppInWs:
+            if not eppOutWs:
+                eppOutWs = eppWorkspaceName(identifier)
+                monitorEppOutWs = monitorEppWorkspaceName(identifier)
             eppWorkspace = FindEPP(InputWorkspace = workspace, 
-                                   OutputWorkspace = outWs)
-            outWs = monitorEppWorkspaceName(identifier)
+                                   OutputWorkspace = eppOutWs)
             monitorEppWorkspace = FindEPP(InputWorkspace = monitorWorkspace,
-                                          OutputWorkspace = outWs)
-        else:
+                                          OutputWorkspace = monitorEppOutWs)
+            self.setProperty(PROP_OUTPUT_EPP_WORKSPACE, eppWorkspace)
+            self.setProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE, monitorEppWorkspace)
+        if eppInWs:
             eppWorkspace = self.getProperty(PROP_EPP_WORKSPACE).value
-            monitorEppWorkspace = mtd[guessMonitorEppWorkspaceName(eppWorkspace)]
+            monitorEppWorkspace = self.getProperty(PROP_MONITOR_EPP_WORKSPACE).value
+            if not eppOutWs:
+                eppOutWs = "dummy_output"
+                emptyOutput = CreateSingleValuedWorkspace(OutputWorkspace=bkgOutWs,
+                                                          DataValue = 0)
+                self.setProperty(PROP_OUTPUT_EPP_WORKSPACE, eppOutWs)
+                self.setProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE, eppOutWs)
         
         # Identify bad detectors & include user mask
         userMask = stringListToArray(self.getProperty(PROP_USER_MASK).value)
@@ -265,30 +288,31 @@ class DGSReductionILL(DataProcessorAlgorithm):
 
         # Normalisation to monitor/time
         normalisationMethod = self.getProperty(PROP_NORMALISATION).value
-        if normalisationMethod == NORM_METHOD_MONITOR:
-            outWs = normalisedWorkspaceName(identifier)
-            eppRow = eppWorkspace.row(monitorIndex)
-            sigma = eppRow['Sigma']
-            centre = eppRow['PeakCentre']
-            begin = centre - 3 * sigma
-            end = centre + 3 * sigma
-            workspace, normFactor = NormaliseToMonitor(InputWorkspace=workspace,
-                                                       OutputWorkspace=outWs,
-                                                       MonitorWorkspace=monitorWorkspace,
-                                                       MonitorWorkspaceIndex=monitorIndex,
-                                                       IntegrationRangeMin=begin,
-                                                       IntegrationRangeMax=end)
-        elif normalisationMethod == NORM_METHOD_TIME:
-            outWs = normalisedWorkspaceName(identifier)
-            tempWsName = '__actual_time_for_' + outWs
-            time = CreateSingleValuedWorkspace(OutputWorkspace=tempWsName,
-                                               DataValue=inWs.getLogData('actual_time').value)
-            workspace = Divide(LHSWorkspace=workspace,
-                               RHSWorkspace=tempWsName,
-                               OutputWorkspace=outWs)
-            DeleteWorkspace(Workspace=time)
-        else:
-            raise RuntimeError('Uknonwn normalisation method')
+        if normalisationMethod:
+            if normalisationMethod == NORM_METHOD_MONITOR:
+                outWs = normalisedWorkspaceName(identifier)
+                eppRow = monitorEppWorkspace.row(monitorIndex)
+                sigma = eppRow['Sigma']
+                centre = eppRow['PeakCentre']
+                begin = centre - 3 * sigma
+                end = centre + 3 * sigma
+                workspace, normFactor = NormaliseToMonitor(InputWorkspace=workspace,
+                                                           OutputWorkspace=outWs,
+                                                           MonitorWorkspace=monitorWorkspace,
+                                                           MonitorWorkspaceIndex=monitorIndex,
+                                                           IntegrationRangeMin=begin,
+                                                           IntegrationRangeMax=end)
+            elif normalisationMethod == NORM_METHOD_TIME:
+                outWs = normalisedWorkspaceName(identifier)
+                tempWsName = '__actual_time_for_' + outWs
+                time = CreateSingleValuedWorkspace(OutputWorkspace=tempWsName,
+                                                   DataValue=inWs.getLogData('actual_time').value)
+                workspace = Divide(LHSWorkspace=workspace,
+                                   RHSWorkspace=tempWsName,
+                                   OutputWorkspace=outWs)
+                DeleteWorkspace(Workspace=time)
+            else:
+                raise RuntimeError('Unknonwn normalisation method ' + normalisationMethod)
 
         # Reduction for empty can and cadmium ends here.
         if reductionType == REDUCTION_TYPE_CD or reductionType == REDUCTION_TYPE_EC:
@@ -331,7 +355,7 @@ class DGSReductionILL(DataProcessorAlgorithm):
 
         # Reduction for vanadium ends here.
         if reductionType == REDUCTION_TYPE_VANADIUM:
-            outWs = self.getProperty(PROP_OUTPUT_WORKSPACE).value
+            outWs = self.getPropertyValue(PROP_OUTPUT_WORKSPACE)
             workspace = ComputeCalibrationCoefVan(VanadiumWorkspace=workspace,
                                                   EPPTable=eppWorkspace,
                                                   OutputWorkspace=outWs)
@@ -406,19 +430,16 @@ class DGSReductionILL(DataProcessorAlgorithm):
                                                      Direction.Input,
                                                      PropertyMode.Optional),
                              doc='Reduced cadmium workspace')
-        self.declareProperty(PROP_EPP_FROM,
-                             FROM_SELF,
-                             direction=Direction.Input,
-                             doc='Which input data to use with the FindEPP algorithm')
         self.declareProperty(ITableWorkspaceProperty(PROP_EPP_WORKSPACE,
                                                      '',
                                                      Direction.Input,
                                                      PropertyMode.Optional),
-                             doc='Optional table workspace containing results from the FindEPP algorithm')
-        self.declareProperty(PROP_FLAT_BACKGROUND_FROM,
-                             FROM_SELF,
-                             direction=Direction.Input,
-                             doc='Where to get flat background data')
+                             doc='Table workspace containing results from the FindEPP algorithm')
+        self.declareProperty(ITableWorkspaceProperty(PROP_MONITOR_EPP_WORKSPACE,
+                                                     '',
+                                                     Direction.Input,
+                                                     PropertyMode.Optional),
+                             doc='Table workspace containing results from the FindEPP algorithm for the monitor workspace')
         self.declareProperty(PROP_FLAT_BACKGROUND_FIT_BEGIN,
                              0.0,
                              direction=Direction.Input,
@@ -461,10 +482,25 @@ class DGSReductionILL(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Type of numbers in ' + PROP_MONITOR_INDEX + ' and ' + PROP_DETECTORS_FOR_EI_CALIBRATION + ' properties')
         # Output
+        self.declareProperty(ITableWorkspaceProperty(PROP_OUTPUT_EPP_WORKSPACE,
+                             '',
+                             direction=Direction.Output,
+                             optional=PropertyMode.Optional),
+                             doc='Output workspace for elastic peak positions')
+        self.declareProperty(ITableWorkspaceProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE,
+                             '',
+                             direction=Direction.Output,
+                             optional=PropertyMode.Optional),
+                             doc='Output workspace for elastic peak positions')
+        self.declareProperty(WorkspaceProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE,
+                             '',
+                             direction=Direction.Output,
+                             optional=PropertyMode.Optional),
+                             doc='Output workspace for flat background')
         self.declareProperty(WorkspaceProperty(PROP_OUTPUT_WORKSPACE,
                              '',
                              direction=Direction.Output),
-                             doc='The output of the algorithm.')
+                             doc='The output of the algorithm')
 
     def _convertToWorkspaceIndex(self, i, workspace):
         indexType = self.getProperty(PROP_INDEX_TYPE).value
@@ -480,6 +516,7 @@ class DGSReductionILL(DataProcessorAlgorithm):
 
     def _finalize(self, outputWorkspace):
         self.setProperty(PROP_OUTPUT_WORKSPACE, outputWorkspace)
+        self.log().debug('Finished')
 
 
 AlgorithmFactory.subscribe(DGSReductionILL)
