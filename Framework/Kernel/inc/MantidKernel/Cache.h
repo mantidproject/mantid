@@ -116,7 +116,7 @@ public:
       m_cacheMap.emplace(key, value);
 #else
       std::lock_guard<std::mutex> lock(m_mutex);
-      m_map.insert(std::make_pair(key, value));
+      m_cacheMap.insert(std::make_pair(key, value));
 #endif
     }
   }
