@@ -6,7 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/MultiThreaded.h"
-#include <map>
+
+#include "tbb/concurrent_unordered_map.h"
 
 #include <mutex>
 
@@ -70,7 +71,6 @@ public:
 
   /// Clears the cache
   void clear() {
-    std::lock_guard<std::mutex> lock(m_mutex);
     m_cacheHit = 0;
     m_cacheMiss = 0;
     m_cacheMap.clear();
@@ -99,8 +99,14 @@ public:
    * @param value The new value for the key
    */
   void setCache(const KEYTYPE &key, const VALUETYPE &value) {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_cacheMap[key] = value;
+    //
+    auto where = m_cacheMap.find(key);
+    if (where != m_cacheMap.end()) {
+      std::lock_guard<std::mutex> lock(m_mutex);
+      where->second = value;
+    } else {
+      m_cacheMap.emplace(key, value);
+    }
   }
 
   /**
@@ -133,8 +139,7 @@ public:
    * @param key The key whose value should be removed
    */
   void removeCache(const KEYTYPE &key) {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    m_cacheMap.erase(key);
+    PARALLEL_CRITICAL(unsafe_erase) { m_cacheMap.unsafe_erase(key); }
   }
 
 private:
@@ -146,11 +151,11 @@ private:
    * @returns True if the value was found, false otherwise
    */
   bool getCacheNoStats(const KEYTYPE key, VALUETYPE &value) const {
-    std::lock_guard<std::mutex> lock(m_mutex);
     auto it_found = m_cacheMap.find(key);
     bool isValid = it_found != m_cacheMap.end();
 
     if (isValid) {
+      std::lock_guard<std::mutex> lock(m_mutex);
       value = it_found->second;
     }
 
@@ -163,14 +168,16 @@ private:
   /// information
   mutable int m_cacheMiss;
   /// internal cache map
-  std::map<KEYTYPE, VALUETYPE> m_cacheMap;
+  tbb::concurrent_unordered_map<KEYTYPE, VALUETYPE> m_cacheMap;
   /// internal mutex
   mutable std::mutex m_mutex;
   /// iterator typedef
-  typedef typename std::map<KEYTYPE, VALUETYPE>::iterator CacheMapIterator;
+  typedef typename tbb::concurrent_unordered_map<KEYTYPE, VALUETYPE>::iterator
+      CacheMapIterator;
   /// const_iterator typedef
-  typedef typename std::map<KEYTYPE, VALUETYPE>::const_iterator
-      CacheMapConstIterator;
+  typedef
+      typename tbb::concurrent_unordered_map<KEYTYPE, VALUETYPE>::const_iterator
+          CacheMapConstIterator;
 };
 
 } // namespace Kernel
