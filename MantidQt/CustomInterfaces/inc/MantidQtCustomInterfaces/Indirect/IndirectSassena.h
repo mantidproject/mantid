@@ -22,6 +22,9 @@ public:
 private slots:
   /// Handle completion of the algorithm batch
   void handleAlgorithmFinish(bool error);
+  /// Handle plotting and saving
+  void plotClicked();
+  void saveClicked();
 
 private:
   /// The ui form
