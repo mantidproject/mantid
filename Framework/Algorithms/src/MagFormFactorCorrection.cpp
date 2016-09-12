@@ -8,7 +8,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-
 using namespace Mantid::PhysicalConstants;
 
 namespace Mantid {
@@ -22,19 +21,17 @@ using namespace API;
 using namespace PhysicalConstants;
 
 void MagFormFactorCorrection::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
-      "InputWorkspace", "", Direction::Input),
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
       "Workspace must have one axes with units of Q");
-  declareProperty(make_unique<WorkspaceProperty<>>(
-      "OutputWorkspace", "", Direction::Output),
-      "Output workspace name.");
-  declareProperty(
-      "IonName", "",
-      "The name of the ion: an element symbol with a number indicating the valence, e.g. Fe2");
-  declareProperty(
-      "FormFactorWorkspace", "",
-      "If specified the algorithm will create a 1D workspace with the form factor vs Q"
-      "with a name given by this field.");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Output workspace name.");
+  declareProperty("IonName", "", "The name of the ion: an element symbol with "
+                                 "a number indicating the valence, e.g. Fe2");
+  declareProperty("FormFactorWorkspace", "",
+                  "If specified the algorithm will create a 1D workspace with "
+                  "the form factor vs Q with a name given by this field.");
 }
 
 void MagFormFactorCorrection::exec() {
@@ -54,22 +51,21 @@ void MagFormFactorCorrection::exec() {
 
   // Checks that there is a |Q| axis.
   numAxes = inputWS->axes();
-  for (iax=0; iax<numAxes; iax++) {
+  for (iax = 0; iax < numAxes; iax++) {
     QAxis = inputWS->getAxis(iax);
     unitID = QAxis->unit()->unitID();
-    if (unitID=="MomentumTransfer") {
+    if (unitID == "MomentumTransfer") {
       hasQ = true;
       // Gets the list of Q values
-      if (isHist || iax>0) {
+      if (isHist || iax > 0) {
         nQ = QAxis->length() - 1;
-        for (iQ=0; iQ<nQ; iQ++) {
-          Qvals.push_back(0.5 * (QAxis->getValue(static_cast<size_t>(iQ)) + 
-                          QAxis->getValue(static_cast<size_t>(iQ+1))));
+        for (iQ = 0; iQ < nQ; iQ++) {
+          Qvals.push_back(0.5 * (QAxis->getValue(static_cast<size_t>(iQ)) +
+                                 QAxis->getValue(static_cast<size_t>(iQ + 1))));
         }
-      }
-      else {
+      } else {
         nQ = QAxis->length();
-        for (iQ=0; iQ<nQ; iQ++) {
+        for (iQ = 0; iQ < nQ; iQ++) {
           Qvals.push_back(QAxis->getValue(static_cast<size_t>(iQ)));
         }
       }
@@ -86,12 +82,12 @@ void MagFormFactorCorrection::exec() {
   const MagneticIon ion = getMagneticIon(ionNameStr);
   // Gets the vector of form factor values
   FF.reserve(nQ);
-  for (iQ=0; iQ<nQ; iQ++) {
-    FF.push_back(ion.analyticalFormFactor(Qvals[iQ]*Qvals[iQ], 0, 0));
+  for (iQ = 0; iQ < nQ; iQ++) {
+    FF.push_back(ion.analyticalFormFactor(Qvals[iQ] * Qvals[iQ], 0, 0));
   }
   if (!ffwsStr.empty()) {
     MatrixWorkspace_sptr ffws = API::WorkspaceFactory::Instance().create(
-	    "Workspace2D", 1, Qvals.size(), FF.size());
+        "Workspace2D", 1, Qvals.size(), FF.size());
     ffws->mutableX(0).assign(Qvals.begin(), Qvals.end());
     ffws->mutableY(0).assign(FF.begin(), FF.end());
     API::AnalysisDataService::Instance().addOrReplace(ffwsStr, ffws);
@@ -99,11 +95,11 @@ void MagFormFactorCorrection::exec() {
 
   // Does the actual scaling.
   outputWS = inputWS->clone();
-  for (int64_t i=0; i<numHists; i++) {
+  for (int64_t i = 0; i < numHists; i++) {
     auto &Y = outputWS->mutableY(i);
     auto &E = outputWS->mutableE(i);
-    for (int64_t j=0; j<specSize; j++) {
-      ff = (iax==0) ? FF[j] : FF[i];
+    for (int64_t j = 0; j < specSize; j++) {
+      ff = (iax == 0) ? FF[j] : FF[i];
       Y[j] /= ff;
       E[j] /= ff;
     }

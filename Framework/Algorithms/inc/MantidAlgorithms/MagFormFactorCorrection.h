@@ -16,7 +16,8 @@ namespace Algorithms {
     <LI> InputWorkspace  - The name of the input workspace. </LI>
     <LI> OutputWorkspace - The name of the output workspace. Can be the same as
    the input one. </LI>
-    <LI> MagneticIon     - The name of the magnetic ion (e.g. Fe2 for Fe2+) </LI>
+    <LI> MagneticIon     - The name of the magnetic ion (e.g. Fe2 for Fe2+)
+   </LI>
     </UL>
 
     @author Manh Duc Le, STFC
@@ -49,16 +50,15 @@ public:
   const std::string name() const override { return "MagFormFactorCorrection"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "MagFormFactorCorrection corrects a workspace for the magnetic form factor F(Q)"
+    return "MagFormFactorCorrection corrects a workspace for the magnetic form "
+           "factor F(Q)"
            "by dividing S(Q,w) by F(Q).";
   }
 
   /// Algorithm's version
   int version() const override { return (1); }
   /// Algorithm's category for identification
-  const std::string category() const override {
-    return "CorrectionFunctions";
-  }
+  const std::string category() const override { return "CorrectionFunctions"; }
 
 private:
   /// Initialisation code
