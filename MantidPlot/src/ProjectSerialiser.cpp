@@ -709,7 +709,6 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
 
     window->mantidUI->setVatesSubWindow(subWindow);
     window->addSerialisableWindow(dynamic_cast<QObject *>(win));
-
   }
 }
 
