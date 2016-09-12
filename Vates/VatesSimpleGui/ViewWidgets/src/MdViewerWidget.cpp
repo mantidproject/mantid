@@ -967,6 +967,12 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
   activeObjects.setActiveSource(source);
   activeObjects.setActivePort(source->getOutputPort(0));
 
+  if (tsv.selectSection("colormap")) {
+    std::string colorMapLines;
+    tsv >> colorMapLines;
+    ui.colorSelectionWidget->loadFromProject(colorMapLines);
+  }
+
   currentView->show();
 
   // Don't call render on ViewBase here as that will reset the camera.
@@ -1036,6 +1042,7 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   session->SaveXMLState(fileName.c_str());
   contents.writeLine("FileName") << fileName;
 
+  // Save the view type. e.g. Splatterplot, Multislice...
   auto vtype = currentView->getViewType();
   contents.writeLine("ViewType") << static_cast<int>(vtype);
 
@@ -1048,6 +1055,8 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   contents.writeLine("ViewID") << viewId;
   contents.writeLine("SourceID") << sourceId;
 
+  // Now serialise the color map
+  contents.writeSection("colormap", ui.colorSelectionWidget->saveToProject());
   tsv.writeSection("vates", contents.outputLines());
 
   return tsv.outputLines();
