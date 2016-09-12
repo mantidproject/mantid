@@ -94,7 +94,7 @@ void MSDFit::run() {
   m_batchAlgoRunner->executeBatchAsync();
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-    SLOT(algorithmComplete(bool)));
+          SLOT(algorithmComplete(bool)));
 }
 
 void MSDFit::singleFit() {
@@ -156,7 +156,7 @@ void MSDFit::loadSettings(const QSettings &settings) {
  */
 void MSDFit::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-    SLOT(algorithmComplete(bool)));
+             SLOT(algorithmComplete(bool)));
 
   if (error)
     return;
@@ -208,7 +208,7 @@ void MSDFit::plotFit(QString wsName, int specNo) {
       }
     }
   }
- }
+}
 
 /**
  * Called when new data has been loaded by the data selector.
@@ -219,7 +219,7 @@ void MSDFit::plotFit(QString wsName, int specNo) {
  */
 void MSDFit::newDataLoaded(const QString wsName) {
   auto ws = Mantid::API::AnalysisDataService::Instance()
-    .retrieveWS<const MatrixWorkspace>(wsName.toStdString());
+                .retrieveWS<const MatrixWorkspace>(wsName.toStdString());
   int maxWsIndex = static_cast<int>(ws->getNumberHistograms()) - 1;
 
   m_uiForm.spPlotSpectrum->setMaximum(maxWsIndex);
@@ -317,7 +317,8 @@ void MSDFit::saveClicked() {
  */
 void MSDFit::plotClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName + "_Workspaces", true))
-    plotSpectrum((QString::fromStdString(m_pythonExportWsName) + "_Workspaces"), 0, 2);
+    plotSpectrum((QString::fromStdString(m_pythonExportWsName) + "_Workspaces"),
+                 0, 2);
 }
 
 } // namespace IDA
