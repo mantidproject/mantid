@@ -88,6 +88,7 @@ QMap<QString, QString> StandardView::g_actionToAlgName;
  * buttons and creates the rendering view.
  * @param parent the parent widget for the standard view
  * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
+ * @param createRenderProxy :: whether to create a render proxy for the view
  */
 StandardView::StandardView(QWidget *parent,
                            RebinnedSourcesManager *rebinnedSourcesManager,

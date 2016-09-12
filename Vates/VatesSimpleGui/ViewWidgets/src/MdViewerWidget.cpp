@@ -311,6 +311,8 @@ void MdViewerWidget::connectLoadDataReaction(QAction *action) {
  * registers a usage of the view with the UsageService.
  * @param container the UI widget to associate the view mode with
  * @param v the view mode to set on the main window
+ * @param createRenderProxy :: whether to create a default render proxy for
+ * the view
  * @return the requested view
  */
 ViewBase *MdViewerWidget::createAndSetMainViewWidget(QWidget *container,

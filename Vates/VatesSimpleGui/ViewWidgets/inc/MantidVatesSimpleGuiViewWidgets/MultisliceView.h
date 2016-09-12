@@ -53,6 +53,7 @@ public:
    * Default constructor.
    * @param parent the parent widget of the multislice view widget
    * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
+   * @param createRenderProxy :: Whether to create a render proxy for this view
    */
   MultiSliceView(QWidget *parent = 0,
                  RebinnedSourcesManager *rebinnedSourcesManager = 0,
