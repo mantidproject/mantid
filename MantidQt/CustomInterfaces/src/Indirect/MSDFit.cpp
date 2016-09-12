@@ -316,8 +316,8 @@ void MSDFit::saveClicked() {
  * Handles mantid plotting
  */
 void MSDFit::plotClicked() {
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName + "_A1", true))
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_A1");
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName + "_Workspaces", true))
+    plotSpectrum((QString::fromStdString(m_pythonExportWsName) + "_Workspaces"), 0, 2);
 }
 
 } // namespace IDA
