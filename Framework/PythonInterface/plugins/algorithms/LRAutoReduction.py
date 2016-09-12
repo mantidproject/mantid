@@ -491,7 +491,7 @@ class LRAutoReduction(PythonAlgorithm):
         for i in range(int(run_number) - int(first_run_of_set) + 1):
             if i >= len(self.data_series_template.data_sets):
                 logger.notice("Sequence is corrupted: run=%s, first run of set=%s" % (str(run_number),
-                                                                                      str(first_run_of_set))
+                                                                                      str(first_run_of_set)))
                 break
             d = self.data_series_template.data_sets[i]
             d.data_files = [int(first_run_of_set) + i]
