@@ -500,8 +500,8 @@ bool EnggDiffFittingPresenter::findFilePathFromBaseName(
     directoryIter = directoryToSearch;
   } catch (Poco::FileNotFoundException) {
     // UNIX will throw if the directory is blank however Windows
-	// will continue then fail to find the file in a non existent
-	// directory - this ultimately results in the same thing.
+    // will continue then fail to find the file in a non existent
+    // directory - this ultimately results in the same thing.
     return false;
   }
 
