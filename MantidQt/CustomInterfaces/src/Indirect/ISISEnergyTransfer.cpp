@@ -691,7 +691,7 @@ void ISISEnergyTransfer::pbRunFinished() {
  * Handle mantid plotting of workspaces
  */
 void ISISEnergyTransfer::plotClicked() {
-  for (const auto & it : m_outputWorkspaces) {
+  for (const auto &it : m_outputWorkspaces) {
     if (checkADSForPlotSaveWorkspace(it, true)) {
       const auto plotType = m_uiForm.cbPlotType->currentText();
       QString pyInput = "from IndirectReductionCommon import plot_reduction\n";
@@ -710,11 +710,11 @@ void ISISEnergyTransfer::saveClicked() {
   auto saveFormats = getSaveFormats();
   QString pyInput = "from IndirectReductionCommon import save_reduction\n";
   pyInput += "save_reduction([";
-  for (const auto & it : m_outputWorkspaces) {
+  for (const auto &it : m_outputWorkspaces) {
     pyInput += "'" + QString::fromStdString(it) + "', ";
   }
   pyInput += "], [";
-  for (const auto & it : saveFormats) {
+  for (const auto &it : saveFormats) {
     pyInput += "'" + QString::fromStdString(it) + "', ";
   }
   pyInput += "]";
