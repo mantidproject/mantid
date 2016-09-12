@@ -356,7 +356,7 @@ void ParameterMap::add(const IComponent *comp,
 #define CLANG_ON_LINUX false
 #endif
 #if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
-    m_map.emplace(comp->getComponentID(), boost::atomic_load(&par));
+    m_map.emplace(comp->getComponentID(), par);
 #else
     m_map.insert(
         std::make_pair(comp->getComponentID(), boost::atomic_load(&par)));

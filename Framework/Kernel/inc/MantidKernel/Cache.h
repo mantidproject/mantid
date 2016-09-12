@@ -105,7 +105,18 @@ public:
       std::lock_guard<std::mutex> lock(m_mutex);
       where->second = value;
     } else {
+// When using Clang & Linux, TBB 4.4 doesn't detect C++11 features.
+// https://software.intel.com/en-us/forums/intel-threading-building-blocks/topic/641658
+#if defined(__clang__) && !defined(__APPLE__)
+#define CLANG_ON_LINUX true
+#else
+#define CLANG_ON_LINUX false
+#endif
+#if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
       m_cacheMap.emplace(key, value);
+#else
+      m_map.insert(std::make_pair(key, value));
+#endif
     }
   }
 
