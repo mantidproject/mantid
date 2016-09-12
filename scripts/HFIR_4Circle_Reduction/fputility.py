@@ -63,10 +63,10 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
         # k index
         if num_k_vectors > 0:
             k_index = peak_dict['kindex']
-            if k_index < 1 and num_k_vectors > 0:
-                raise RuntimeError('Exporting file with k-vector shift. But a peak without information on shift '
-                                   'k-vector is found.')
-            part2 = '%4d' % k_index
+            if k_index > 0:
+                part2 = '%4d' % k_index
+            else:
+                part2 = ''
         else:
             part2 = ''
         # END-IF-ELSE

@@ -197,6 +197,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_set_peaks_hkl)
         self.connect(self.ui.pushButton_applyKShift, QtCore.SIGNAL('clicked()'),
                      self.do_apply_k_shift)
+        self.connect(self.ui.pushButton_clearMergeScanTable, QtCore.SIGNAL('clicked()'),
+                     self.do_clear_merge_table)
 
         # Tab 'Integrate Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
@@ -311,6 +313,9 @@ class MainWindow(QtGui.QMainWindow):
         """ Initialize the table widgets
         :return:
         """
+        self._baseTitle = str(self.windowTitle())
+        self.setWindowTitle('%s: No Scan Is Set' % self._baseTitle)
+
         # Table widgets
         self.ui.tableWidget_peaksCalUB.setup()
         self.ui.tableWidget_ubMatrix.setup()
@@ -342,6 +347,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.comboBox_mode.setCurrentIndex(0)
         self.ui.lineEdit_localSpiceDir.setEnabled(True)
         self.ui.pushButton_browseLocalDataDir.setEnabled(True)
+
+        # progress bars
+        self.ui.progressBar_mergeScans.setRange(0, 20)
+        self.ui.progressBar_mergeScans.setValue(0)
 
         return
 
@@ -769,6 +778,14 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(error_message)
 
         return
+
+    def do_clear_merge_table(self):
+        """
+        Clear the merge/peak-integration table
+        :return:
+        """
+        # clear
+        self.ui.tableWidget_mergeScans.remove_all_rows()
 
     def do_clear_survey(self):
         """
@@ -2038,6 +2055,8 @@ class MainWindow(QtGui.QMainWindow):
                                            ' in Mantid manually.' % (exp_number, curr_exp_number))
             self._myControl.set_exp_number(exp_number)
             self.ui.lineEdit_exp.setStyleSheet('color: black')
+
+            self.setWindowTitle('%s: Scan %d' % (self._baseTitle, exp_number))
         else:
             err_msg = ret_obj
             self.pop_one_button_dialog('Unable to set experiment as %s' % err_msg)
