@@ -19,7 +19,7 @@ MagneticIon::MagneticIon()
  * @param j2i :: Form factor coefficients for l = 2
  * @param j4i :: Form factor coefficients for l = 4
  * @param j6i :: Form factor coefficients for l = 6
- * @param g :: The Lande g-factor of this ion
+ * @param gi :: The Lande g-factor of this ion
  */
 MagneticIon::MagneticIon(const char *symbol, const uint16_t charge,
                          const double j0i[8], const double j2i[8],
@@ -35,7 +35,7 @@ MagneticIon::MagneticIon(const char *symbol, const uint16_t charge,
  * @param j0i :: Form factor coefficients for l = 0
  * @param j2i :: Form factor coefficients for l = 2
  * @param j4i :: Form factor coefficients for l = 4
- * @param g :: The Lande g-factor of this ion
+ * @param gi :: The Lande g-factor of this ion
  */
 MagneticIon::MagneticIon(const char *symbol, const uint16_t charge,
                          const double j0i[9], const double j2i[9],
