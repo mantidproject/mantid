@@ -492,11 +492,20 @@ bool EnggDiffFittingPresenter::findFilePathFromBaseName(
 
   bool found = false;
 
-  try {
-    // Ask for an iterator of all files/folders in 'directoryToSearch'
-    Poco::DirectoryIterator directoryIter(directoryToSearch);
-    Poco::DirectoryIterator directoryIterEnd;
+  // Ask for an iterator of all files/folders in 'directoryToSearch'
+  Poco::DirectoryIterator directoryIter;
+  Poco::DirectoryIterator directoryIterEnd;
 
+  try {
+    directoryIter = directoryToSearch;
+  } catch (Poco::FileNotFoundException) {
+    m_view->userWarning("Bad input directory",
+                        "Could not open directory: '" + directoryToSearch +
+                            "'. Please check the browsed file input.");
+    return false;
+  }
+
+  try {
     // Walk through every file within that folder looking for required files
     while (!found && directoryIter != directoryIterEnd) {
 
