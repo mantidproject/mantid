@@ -193,11 +193,12 @@ void IndirectDiffractionReduction::plotResults() {
   if (plotType == "Spectra" || plotType == "Both") {
     for (const auto &it : m_plotWorkspaces) {
       const auto workspaceExists =
-        AnalysisDataService::Instance().doesExist(it);
+          AnalysisDataService::Instance().doesExist(it);
       if (workspaceExists)
         pyInput += "plotSpectrum('" + QString::fromStdString(it) + "', 0)\n";
       else
-        showInformationBox(QString::fromStdString("Workspace '" + it + "' not found\nUnable to plot workspace"));
+        showInformationBox(QString::fromStdString(
+            "Workspace '" + it + "' not found\nUnable to plot workspace"));
     }
   }
 
@@ -208,7 +209,8 @@ void IndirectDiffractionReduction::plotResults() {
       if (workspaceExists)
         pyInput += "plot2D('" + QString::fromStdString(it) + "')\n";
       else
-        showInformationBox(QString::fromStdString("Workspace '" + it + "' not found\nUnable to plot workspace"));
+        showInformationBox(QString::fromStdString(
+            "Workspace '" + it + "' not found\nUnable to plot workspace"));
     }
   }
 
@@ -221,16 +223,16 @@ void IndirectDiffractionReduction::plotResults() {
 void IndirectDiffractionReduction::saveReductions() {
   for (const auto wsName : m_plotWorkspaces) {
     const auto workspaceExists =
-      AnalysisDataService::Instance().doesExist(wsName);
+        AnalysisDataService::Instance().doesExist(wsName);
     if (workspaceExists) {
 
       QString tofWsName = QString::fromStdString(wsName) + "_tof";
       std::string instName =
-        (m_uiForm.iicInstrumentConfiguration->getInstrumentName())
-        .toStdString();
+          (m_uiForm.iicInstrumentConfiguration->getInstrumentName())
+              .toStdString();
       std::string mode =
-        (m_uiForm.iicInstrumentConfiguration->getReflectionName())
-        .toStdString();
+          (m_uiForm.iicInstrumentConfiguration->getReflectionName())
+              .toStdString();
       BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvUnitsProps;
       inputFromConvUnitsProps["InputWorkspace"] = tofWsName.toStdString();
       BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromReductionProps;
@@ -241,16 +243,15 @@ void IndirectDiffractionReduction::saveReductions() {
 
           QString gssFilename = tofWsName + ".gss";
           IAlgorithm_sptr saveGSS =
-            AlgorithmManager::Instance().create("SaveGSS");
+              AlgorithmManager::Instance().create("SaveGSS");
           saveGSS->initialize();
           saveGSS->setProperty("Filename", gssFilename.toStdString());
           m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
-        }
-        else {
+        } else {
 
           // Convert to TOF for GSS
           IAlgorithm_sptr convertUnits =
-            AlgorithmManager::Instance().create("ConvertUnits");
+              AlgorithmManager::Instance().create("ConvertUnits");
           convertUnits->initialize();
           convertUnits->setProperty("InputWorkspace", wsName);
           convertUnits->setProperty("OutputWorkspace", tofWsName.toStdString());
@@ -260,7 +261,7 @@ void IndirectDiffractionReduction::saveReductions() {
           // Save GSS
           std::string gssFilename = wsName + ".gss";
           IAlgorithm_sptr saveGSS =
-            AlgorithmManager::Instance().create("SaveGSS");
+              AlgorithmManager::Instance().create("SaveGSS");
           saveGSS->initialize();
           saveGSS->setProperty("Filename", gssFilename);
           m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
@@ -271,7 +272,7 @@ void IndirectDiffractionReduction::saveReductions() {
         // Save NEXus using SaveNexusProcessed
         std::string nexusFilename = wsName + ".nxs";
         IAlgorithm_sptr saveNexus =
-          AlgorithmManager::Instance().create("SaveNexusProcessed");
+            AlgorithmManager::Instance().create("SaveNexusProcessed");
         saveNexus->initialize();
         saveNexus->setProperty("InputWorkspace", wsName);
         saveNexus->setProperty("Filename", nexusFilename);
@@ -282,15 +283,15 @@ void IndirectDiffractionReduction::saveReductions() {
         // Save ASCII using SaveAscii version 1
         std::string asciiFilename = wsName + ".dat";
         IAlgorithm_sptr saveASCII =
-          AlgorithmManager::Instance().create("SaveAscii", 1);
+            AlgorithmManager::Instance().create("SaveAscii", 1);
         saveASCII->initialize();
         saveASCII->setProperty("InputWorkspace", wsName);
         saveASCII->setProperty("Filename", asciiFilename);
         m_batchAlgoRunner->addAlgorithm(saveASCII);
       }
-    }
-    else
-      showInformationBox(QString::fromStdString("Workspace '" + wsName + "' not found\nUnable to plot workspace"));
+    } else
+      showInformationBox(QString::fromStdString(
+          "Workspace '" + wsName + "' not found\nUnable to plot workspace"));
   }
   m_batchAlgoRunner->executeBatchAsync();
 }
