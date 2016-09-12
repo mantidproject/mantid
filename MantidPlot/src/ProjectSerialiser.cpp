@@ -700,10 +700,16 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
     win->connect(win, SIGNAL(requestClose()), subWindow, SLOT(close()));
     win->setParent(subWindow);
 
+    QRect geometry;
+    TSVSerialiser tsv2(vatesLines);
+    tsv2.selectLine("geometry");
+    tsv2 >> geometry;
+    subWindow->setGeometry(geometry);
+    subWindow->widget()->show();
+
     window->mantidUI->setVatesSubWindow(subWindow);
     window->addSerialisableWindow(dynamic_cast<QObject *>(win));
 
-    subWindow->widget()->show();
   }
 }
 

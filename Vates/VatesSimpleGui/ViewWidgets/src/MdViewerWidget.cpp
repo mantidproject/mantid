@@ -913,8 +913,6 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
 
   int viewType;
   size_t viewIdSizet, sourceIdSizet;
-  std::string wsName;
-  tsv >> wsName;
   tsv.selectLine("ViewId");
   tsv >> viewIdSizet;
   tsv.selectLine("SourceId");
@@ -1033,6 +1031,9 @@ void MdViewerWidget::setActiveObjects(pqView *view, pqPipelineSource *source) {
 std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   UNUSED_ARG(app);
   TSVSerialiser tsv, contents;
+
+  // save window position & size
+  contents.writeLine("geometry") << parentWidget()->geometry();
 
   QSettings settings;
   auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
