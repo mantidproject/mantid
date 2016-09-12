@@ -72,9 +72,13 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint,
 
 #ifdef Q_OS_MAC
   // Work around to ensure that floating windows remain on top of the main
-  // application window, but below other applications on Mac
+  // application window, but below other applications on Mac.
+  // Note: Qt::Tool cannot have both a max and min button on OSX
   flags |= Qt::Tool;
-  flags |= Qt::WindowMinMaxButtonsHint;
+  flags |= Qt::Dialog;
+  flags |= Qt::CustomizeWindowHint;
+  flags |= Qt::WindowMinimizeButtonHint;
+  flags |= Qt::WindowCloseButtonHint;
   setWindowFlags(flags);
 #endif
 }
@@ -314,8 +318,13 @@ void ScriptingWindow::updateWindowFlags() {
   }
 #ifdef Q_OS_MAC
   // Work around to ensure that floating windows remain on top of the main
-  // application window, but below other applications on Mac
+  // application window, but below other applications on Mac.
+  // Note: Qt::Tool cannot have both a max and min button on OSX
   flags |= Qt::Tool;
+  flags |= Qt::CustomizeWindowHint;
+  flags |= Qt::WindowMinimizeButtonHint;
+  flags |= Qt::WindowCloseButtonHint;
+  setWindowFlags(flags);
 #endif
   setWindowFlags(flags);
   // This is necessary due to the setWindowFlags function reparenting the window
