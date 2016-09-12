@@ -12,12 +12,12 @@ class SeparateMonitorSpectra(DataProcessorAlgorithm):
                                                      direction=Direction.Input),
                              doc='A workspace with detectors and monitors')
 
-        self.declareProperty(MatrixWorkspaceProperty('DetectorsWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('DetectorWorkspace', '',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
                              doc='The output workspace with detectors only')
 
-        self.declareProperty(MatrixWorkspaceProperty('MonitorsWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('MonitorWorkspace', '',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
                              doc='The output workspace with monitors only')
@@ -25,21 +25,21 @@ class SeparateMonitorSpectra(DataProcessorAlgorithm):
     def validateInputs(self):
         issues = {}
 
-        if not self.getProperty("DetectorsWorkspace").valueAsStr and not self.getProperty("MonitorsWorkspace").valueAsStr:
+        if not self.getProperty("DetectorWorkspace").valueAsStr and not self.getProperty("MonitorWorkspace").valueAsStr:
             msg = "Must specify one of DetectorsWorkspace or MonitorsWorkspace"
-            issues["DetectorsWorkspace"] = msg
-            issues["MonitorsWorkspace"] = msg
-        elif self.getProperty("DetectorsWorkspace").valueAsStr == self.getProperty("MonitorsWorkspace").valueAsStr:
-            msg = "DetectorsWorkspace and MonitorsWorkspace must be different"
-            issues["DetectorsWorkspace"] = msg
-            issues["MonitorsWorkspace"] = msg
+            issues["DetectorWorkspace"] = msg
+            issues["MonitorWorkspace"] = msg
+        elif self.getProperty("DetectorWorkspace").valueAsStr == self.getProperty("MonitorWorkspace").valueAsStr:
+            msg = "DetectorWorkspace and MonitorWorkspace must be different"
+            issues["DetectorWorkspace"] = msg
+            issues["MonitorWorkspace"] = msg
 
         return issues
 
     def PyExec(self):
         ws = self.getProperty("InputWorkspace").value
-        detector_ws_name = self.getProperty("DetectorsWorkspace").valueAsStr
-        monitor_ws_name = self.getProperty("MonitorsWorkspace").valueAsStr
+        detector_ws_name = self.getProperty("DetectorWorkspace").valueAsStr
+        monitor_ws_name = self.getProperty("MonitorWorkspace").valueAsStr
 
         try:
             mon = ws.getMonitorWorkspace()
@@ -50,12 +50,21 @@ class SeparateMonitorSpectra(DataProcessorAlgorithm):
         monitors = []
         detectors = []
         for i in range(ws.getNumberHistograms()):
-            monitors.append(i) if ws.getDetector(i).isMonitor() else detectors.append(i)
-        print(detectors, monitors)
-        detector_ws = ExtractSpectra(InputWorkspace=ws, OutputWorkspace=detector_ws_name, WorkspaceIndexList=detectors)
-        monitor_ws = ExtractSpectra(InputWorkspace=ws, OutputWorkspace=monitor_ws_name,  WorkspaceIndexList=monitors)
+            try:
+                monitors.append(i) if ws.getDetector(i).isMonitor() else detectors.append(i)
+            except RuntimeError:
+                self.log().warning("Missing detector at " + str(i))
 
-        self.setProperty("DetectorsWorkspace", detector_ws)
-        self.setProperty("MonitorsWorkspace", monitor_ws)
+
+        if self.getProperty("DetectorWorkspace").valueAsStr:
+            detector_ws = ExtractSpectra(InputWorkspace=ws, OutputWorkspace=detector_ws_name, WorkspaceIndexList=detectors)
+            self.setProperty("DetectorWorkspace", detector_ws)
+
+        if self.getProperty("MonitorWorkspace").valueAsStr:
+            monitor_ws = ExtractSpectra(InputWorkspace=ws, OutputWorkspace=monitor_ws_name,  WorkspaceIndexList=monitors)
+            self.setProperty("MonitorWorkspace", monitor_ws)
+
+        if self.getProperty("DetectorWorkspace").valueAsStr and self.getProperty("MonitorWorkspace").valueAsStr:
+            detector_ws.setMonitorWorkspace(monitor_ws)
 
 AlgorithmFactory.subscribe(SeparateMonitorSpectra)
