@@ -69,6 +69,14 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint,
 
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
   setWindowTitle("MantidPlot: " + env->languageName() + " Window");
+
+#ifdef Q_OS_MAC
+  // Work around to ensure that floating windows remain on top of the main
+  // application window, but below other applications on Mac
+  flags |= Qt::Tool;
+  flags |= Qt::WindowMinMaxButtonsHint;
+  setWindowFlags(flags);
+#endif
 }
 
 /**
@@ -304,6 +312,11 @@ void ScriptingWindow::updateWindowFlags() {
   if (m_alwaysOnTop->isChecked()) {
     flags |= Qt::WindowStaysOnTopHint;
   }
+#ifdef Q_OS_MAC
+  // Work around to ensure that floating windows remain on top of the main
+  // application window, but below other applications on Mac
+  flags |= Qt::Tool;
+#endif
   setWindowFlags(flags);
   // This is necessary due to the setWindowFlags function reparenting the window
   // and causing is
