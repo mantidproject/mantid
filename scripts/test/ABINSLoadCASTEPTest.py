@@ -129,7 +129,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
         for atom in correct_data["rearranged_data"]["atoms_data"]:
             atom["mass"] = atom["mass"] * AbinsParameters.m_2_hartree
-        for atom in correct_data["structured_datasets"]["atoms"]:
+        for atom in correct_data["datasets"]["atoms"]:
             atom["mass"] = atom["mass"] * AbinsParameters.m_2_hartree
 
 
@@ -165,12 +165,13 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
 
 
         # check datasets
-        for item in correct_data["datasets"]:
+        items = ["weights","k_vectors", "frequencies", "unit_cell" ]
+        for item in items:
             self.assertEqual(True, np.allclose(np.array(correct_data["datasets"][item]), data["datasets"][item]))
 
         # check structured_data
-        _correct_atoms = correct_data["structured_datasets"]["atoms"]
-        _atoms = data["structured_datasets"]["atoms"]
+        _correct_atoms = correct_data["datasets"]["atoms"]
+        _atoms = data["datasets"]["atoms"]
 
         for item in range(len(_correct_atoms)):
 
@@ -198,7 +199,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         self.assertEqual(True, np.allclose(_correct_items["weights"], _items["weights"]))
 
         # atoms
-        _correct_atoms = correct_data["structured_datasets"]["atoms"]
+        _correct_atoms = correct_data["datasets"]["atoms"]
         _atoms = _loaded_data["atoms_data"]
 
         for item in range(len(_correct_atoms)):
@@ -213,9 +214,9 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
     def _get_reader_data(self, castep_reader=None):
         abins_type_data = castep_reader.readPhononFile()
         data = {"rearranged_data": abins_type_data.extract(),
-                "datasets": castep_reader._numpy_datasets,
+                "datasets": castep_reader._data,
                 "attributes": castep_reader._attributes,
-                "structured_datasets": castep_reader._structured_datasets}
+                }
         return data
 
 if __name__ == '__main__':

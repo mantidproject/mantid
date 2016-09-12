@@ -109,19 +109,18 @@ class GeneralDFTProgram(IOmodule):
         Loads data from hdf file.
         @return:
         """
-        _data = self.load(list_of_numpy_datasets=["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell"],
-                          list_of_structured_datasets=["atoms"])
+        _data = self.load(list_of_datasets=["frequencies", "weights", "k_vectors",
+                                            "atomic_displacements", "unit_cell", "atoms"])
         _datasets = _data["datasets"]
-        _atoms_data = _data["structured_datasets"]["atoms"]
         self._num_k = _datasets["k_vectors"].shape[0]
-        self._num_atoms = len(_atoms_data)
+        self._num_atoms = len(_datasets["atoms"])
 
         _loaded_data = {"frequencies":_datasets["frequencies"],
                         "weights": _datasets["weights"],
                         "k_vectors":_datasets["k_vectors"],
                         "atomic_displacements": _datasets["atomic_displacements"],
                         "unit_cell": _datasets["unit_cell"],
-                        "atoms":_atoms_data
+                        "atoms":_datasets["atoms"]
                         }
 
         return self._rearrange_data(data=_loaded_data)

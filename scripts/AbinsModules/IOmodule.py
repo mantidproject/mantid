@@ -21,25 +21,24 @@ class IOmodule(object):
                 logger.error(str(err))
 
             # extract name of file from its path.
-            begin=0
+            begin = 0
             while input_filename.find("/") != -1:
                 begin = input_filename.find("/") + 1
                 input_filename = input_filename[begin:]
 
             if input_filename == "": raise ValueError("Name of the file cannot be an empty string!")
 
-            _cropped_input_filename = input_filename
         else: raise ValueError("Invalid name of hdf file. String was expected!")
 
         if  isinstance(group_name, str): self._group_name = group_name
         else: raise ValueError("Invalid name of the group. String was expected!")
 
-        core_name = _cropped_input_filename[0:_cropped_input_filename.find(".")]
+        core_name = input_filename[0:input_filename.find(".")]
         self._hdf_filename = core_name + ".hdf5" # name of hdf file
         self._attributes = {} # attributes for group
-        self._numpy_datasets = {} # numpy datasets for group; they are expected to be numpy arrays
-        self._structured_datasets = {} # complex data sets which have the form of Python dictionaries or list of Python
-                                       # dictionaries
+        self._data = {} # data  for group; they are expected to be numpy arrays or
+                        # complex data sets which have the form of Python dictionaries or list of Python
+                        # dictionaries
 
         # Fields which have a form of empty dictionaries have to be set by an inheriting class.
 
@@ -56,22 +55,22 @@ class IOmodule(object):
 
     def loadData(self):
         """
-        Method which loads data from an hdf file. Method which has to be implemented by inheriting class.
+        Method which loads data from an hdf file. Method which has to be implemented by an inheriting class.
         """
         return None
 
 
     def calculateData(self):
         """
-        Method which evaluates data in case loading failed. Method which has to be implemented by inheriting class.
+        Method which evaluates data in case loading failed. Method which has to be implemented by an inheriting class.
         """
         return None
 
 
     def getData(self):
         """
-        Method Obtain data
-        @return:
+        Method to obtain data
+        @return: obtained data
         """
         _data = None
 
@@ -80,14 +79,12 @@ class IOmodule(object):
             self.validData()
             _data = self.loadData()
             logger.notice(str(_data) + " has been loaded from the HDF file.")
-            
 
         except (IOError, ValueError) as err:
 
             logger.notice("Warning: "+ str(err) + " Data has to be calculated.")
             _data = self.calculateData()
             logger.notice(str(_data) + " has been calculated.")
-            
 
         return _data
 
@@ -119,28 +116,20 @@ class IOmodule(object):
         self.addAttribute("filename", self._input_filename)
 
 
-    def addStructuredDataset(self, name=None, value=None):
+    def addData(self, name=None, value=None):
         """
-        Adds data in the form of dictionary or a list of dictionaries into the collection of structured datasets.
+        Adds data  to the dictionary with the collection of other datasets.
         @param name: name of dataset
-        @param value: dictionary or list of dictionaries is expected
+        @param value: value of dataset. Numpy array is expected or complex data sets which have the form of Python
+                      dictionaries or list of Python dictionaries. More about dataset at:
+                      http://docs.h5py.org/en/latest/high/dataset.html
         """
-        self._structured_datasets[name] = value
-
-
-    def addNumpyDataset(self, name=None, value=None):
-        """
-        Adds dataset in the form of numpy array to the dictionary with the collection of other datasets.
-        @param name: name of dataset
-        @param value: value of dataset. Numpy array is expected. More about dataset at:
-        http://docs.h5py.org/en/latest/high/dataset.html
-        """
-        self._numpy_datasets[name] = value
+        self._data[name] = value
 
 
     def _save_attributes(self, group=None):
         """
-        Saves attributes to hdf file.
+        Saves attributes to an hdf file.
         @param group: group to which attributes should be saved.
         """
         for name in self._attributes:
@@ -174,39 +163,30 @@ class IOmodule(object):
                 raise ValueError('Cannot save %s type'%type(item))
 
 
-    def _save_structured_datasets(self, hdf_file=None, group_name=None):
+    def _save_data(self, hdf_file=None, group=None):
         """
-        Saves structured data in the form of dictionary or list of dictionaries.
-        @param hdf_file: hdf file to which data should be saved
-        @param group_name: name of the main group.
+        Saves  data in the form of numpy array, dictionary or list of dictionaries. In case data in group already exist
+        it will be overridden.
+        @param hdf_file: hdf file object to which data should be saved
+        @param group: group to which data should be saved.
 
         """
 
-        for item in self._structured_datasets:
-            if isinstance(self._structured_datasets[item], list):
-                num_el = len(self._structured_datasets[item])
+        for item in self._data:
+            # case data to save is a simple numpy array
+            if isinstance(self._data[item], np.ndarray):
+                if item in group: del group[item]
+                group.create_dataset(name=item, data=self._data[item], compression="gzip", compression_opts=9)
+            # case data to save has form of list
+            elif isinstance(self._data[item], list):
+                num_el = len(self._data[item])
                 for el in range(num_el):
-                    self._recursively_save_structured_data_to_group(hdf_file=hdf_file, path=group_name + "/" + item + "/%s/" % el, dic=self._structured_datasets[item][el])
-            elif isinstance(self._structured_datasets[item], dict):
-                self._recursively_save_structured_data_to_group(hdf_file=hdf_file, path=group_name + "/" + item + "/", dic=self._structured_datasets[item])
+                    self._recursively_save_structured_data_to_group(hdf_file=hdf_file, path=group.name + "/" + item + "/%s/" % el, dic=self._data[item][el])
+            # case data has a form of dictionary
+            elif isinstance(self._data[item], dict):
+                self._recursively_save_structured_data_to_group(hdf_file=hdf_file, path=group.name + "/" + item + "/", dic=self._data[item])
             else:
                 raise ValueError('Invalid structured dataset. Cannot save %s type'%type(item))
-
-
-    def _save_numpy_datasets(self, group=None):
-        """
-        Saves datasets to hdf file.
-        @param group: group to which datasets should be saved.
-        """
-        for name in self._numpy_datasets:
-            if isinstance(self._numpy_datasets[name], np.ndarray):
-                if name in group:
-                    del group[name]
-                    group.create_dataset(name=name, data=self._numpy_datasets[name], compression="gzip", compression_opts=9)
-                else:
-                    group.create_dataset(name=name, data=self._numpy_datasets[name], compression="gzip", compression_opts=9)
-            else:
-                raise ValueError("Invalid dataset. Numpy array was expected!")
 
 
     def save(self):
@@ -219,16 +199,15 @@ class IOmodule(object):
                 hdf_file.create_group(self._group_name)
             group = hdf_file[self._group_name]
 
-            if len(self._structured_datasets.keys())>0: self._save_structured_datasets(hdf_file=hdf_file, group_name=self._group_name)
             if len(self._attributes.keys())>0: self._save_attributes(group=group)
-            if len(self._numpy_datasets.keys())>0: self._save_numpy_datasets(group=group)
+            if len(self._data.keys())>0: self._save_data(hdf_file=hdf_file, group=group)
 
         # Repack if possible to reclaim disk space
         try:
             subprocess.check_call(["h5repack","-i%s"%self._hdf_filename, "-otemphgfrt.hdf5"])
             shutil.move("temphgfrt.hdf5", self._hdf_filename)
         except OSError:
-         pass # repacking failed: no h5repack installed in the system... but we proceed
+            pass # repacking failed: no h5repack installed in the system... but we proceed
 
 
     def _list_of_str(self, list_str=None):
@@ -274,46 +253,18 @@ class IOmodule(object):
             return group.attrs[name]
 
 
-    def _load_numpy_datasets(self, list_of_numpy_datasets=None, group=None):
+    def _load_datasets(self, hdf_file=None, list_of_datasets=None, group=None):
         """
-        Loads collection datasets from the given group.
-        @param group:  group in hdf file
-        @param list_of_numpy_datasets: list with names of numpy datasets to be loaded
-        @return: dictionary with collection of datasets.
-        """
-
-        results = {}
-        for item in list_of_numpy_datasets:
-            results[item] = self._load_numpy_dataset(name=item, group=group)
-
-        return results
-
-
-    def _load_numpy_dataset(self, name=None, group=None):
-        """
-        Loads dataset.
-        @param name: name of dataset (dataset is expected to be a numpy array)
-        @param group: group in hdf file
-        @return: value of dataset
-        """
-        if not name in group:
-            raise ValueError("Dataset %s in not present in %s file!" % (name, self._hdf_filename))
-        else:
-            return group[name].value
-
-
-    def _load_structured_datasets(self, hdf_file=None, list_of_structured_datasets=None, group=None):
-        """
-        Loads structured dataset which has a form of Python dictionary directly from hdf file.
+        Loads structured dataset which has a form of Python dictionary directly from an hdf file.
         @param hdf_file: hdf file object from which data should be loaded
-        @param list_of_structured_datasets:
+        @param list_of_datasets:  list with names of  datasets to be loaded
         @param group:
         @return:
         """
 
         results={}
-        for item in list_of_structured_datasets:
-            results[item] = self._load_structured_dataset(hdf_file=hdf_file, name=item, group=group)
+        for item in list_of_datasets:
+            results[item] = self._load_dataset(hdf_file=hdf_file, name=item, group=group)
 
         return results
 
@@ -369,7 +320,7 @@ class IOmodule(object):
         return objectToCheck
 
 
-    def _load_structured_dataset(self, hdf_file=None, name=None, group=None):
+    def _load_dataset(self, hdf_file=None, name=None, group=None):
         """
         Loads one structured dataset.
         @param hdf_file:  hdf file object from which structured dataset should be loaded.
@@ -384,8 +335,9 @@ class IOmodule(object):
         else:
             raise ValueError("Invalid name of the dataset!")
 
-
-        if all([self._get_subgrp_name(path=_hdf_group[el].name).isdigit() for el in _hdf_group.keys()]):
+        if isinstance(_hdf_group, h5py._hl.dataset.Dataset):
+            return _hdf_group.value
+        elif all([self._get_subgrp_name(path=_hdf_group[el].name).isdigit() for el in _hdf_group.keys()]):
             _structured_dataset_list = []
             # here we make an assumption about keys which have a numeric values; we assume that always : 1, 2, 3... Max
             _num_keys = len(_hdf_group.keys())
@@ -413,15 +365,13 @@ class IOmodule(object):
         return ans
 
 
-    def load(self, list_of_attributes=None, list_of_numpy_datasets=None, list_of_structured_datasets=None):
+    def load(self, list_of_attributes=None, list_of_datasets=None):
         """
         Loads all necessary data.
         @param list_of_attributes: list of attributes to load (list of strings with names of attributes)
-        @param list_of_numpy_datasets: list of datasets to load. It is a list of strings with names of datasets.
-                                       Datasets have a form of numpy arrays.
-        @param list_of_structured_datasets: list of structured datasets. It is a list of strings with names of datasets.
-                                            Structured datasets have a form of Python dictionary or list of Python
-                                            dictionaries.
+        @param list_of_datasets: list of datasets to load. It is a list of strings with names of datasets.
+                                       Datasets have a form of numpy arrays. Datasets can also have a form of Python
+                                       dictionary or list of Python dictionaries.
         @return: dictionary with both datasets and attributes
 
         """
@@ -433,15 +383,13 @@ class IOmodule(object):
 
             group = hdf_file[self._group_name]
 
-            if self._list_of_str(list_str=list_of_structured_datasets):
-                results["structured_datasets"] = self._load_structured_datasets(hdf_file=hdf_file,
-                                                                               list_of_structured_datasets=list_of_structured_datasets,
-                                                                               group=group)
             if self._list_of_str(list_str=list_of_attributes):
                 results["attributes"] = self._load_attributes(list_of_attributes=list_of_attributes, group=group)
 
-            if self._list_of_str(list_str=list_of_numpy_datasets):
-                results["datasets"] = self._load_numpy_datasets(list_of_numpy_datasets=list_of_numpy_datasets, group=group)
+            if self._list_of_str(list_str=list_of_datasets):
+                results["datasets"] = self._load_datasets(hdf_file=hdf_file,
+                                                          list_of_datasets=list_of_datasets,
+                                                          group=group)
 
         return results
 

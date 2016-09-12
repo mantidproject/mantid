@@ -61,7 +61,7 @@ class CalculateQ(IOmodule):
         else:
             raise ValueError("General case of Q data not implemented yet.")
 
-        self.addNumpyDataset("data", self._Qvectors.extract()) # Q vectors in the form of numpy array
+        self.addData("data", self._Qvectors.extract()) # Q vectors in the form of numpy array
         self.addFileAttributes()
         self.save()
 
@@ -73,7 +73,7 @@ class CalculateQ(IOmodule):
         Loads  Q data from hdf file.
         @return: QData object
         """
-        data = self.load(list_of_numpy_datasets=["data"])
+        data = self.load(list_of_datasets=["data"])
         results = QData(num_k=data["datasets"]["data"].shape[0])
         results.set(data["datasets"]["data"])
 

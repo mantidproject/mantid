@@ -247,13 +247,9 @@ class LoadCASTEP(GeneralDFTProgram):
         self._recoverSymmetryPoints(data=file_data)
 
         # save stuff to hdf file
-        _numpy_datasets_to_save=["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell"]
-        for name in _numpy_datasets_to_save:
-            self.addNumpyDataset(name, file_data[name])
-
-        _structured_datasets=["atoms"]
-        for item in _structured_datasets:
-            self.addStructuredDataset(name=item, value=file_data[item])
+        _data_to_save = ["frequencies", "weights", "k_vectors", "atomic_displacements", "unit_cell", "atoms"]
+        for name in _data_to_save:
+            self.addData(name=name, value=file_data[name])
 
         self.addFileAttributes()
         self.addAttribute("DFT_program", "CASTEP")

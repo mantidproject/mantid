@@ -205,8 +205,8 @@ class CalculateS(IOmodule):
 
         self.addFileAttributes()
         extracted_data = data.extract()
-        self.addStructuredDataset("atoms_data", extracted_data["atoms_data"])
-        self.addNumpyDataset("convoluted_frequencies", extracted_data["convoluted_frequencies"])
+        self.addData("atoms_data", extracted_data["atoms_data"])
+        self.addData("convoluted_frequencies", extracted_data["convoluted_frequencies"])
 
         self.save()
 
@@ -218,11 +218,10 @@ class CalculateS(IOmodule):
         Loads S from an hdf file.
         @return: object of type SData.
         """
-        _data = self.load(list_of_structured_datasets=["atoms_data"],
-                          list_of_numpy_datasets=["convoluted_frequencies"],
+        _data = self.load(list_of_datasets=["convoluted_frequencies", "atoms_data" ],
                           list_of_attributes=["filename"])
         _s_data = SData(temperature=self._temperature, sample_form=self._sample_form)
-        _s_data.set(items=dict(atoms_data=_data["structured_datasets"]["atoms_data"],
+        _s_data.set(items=dict(atoms_data=_data["datasets"]["atoms_data"],
                                convoluted_frequencies=_data["datasets"]["convoluted_frequencies"]))
 
         return _s_data

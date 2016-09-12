@@ -19,19 +19,21 @@ class ABINSIOmoduleTest(unittest.TestCase):
         saver.addAttribute("Fuel", 100)
         saver.addAttribute("Speed", 200)
 
-        # add some datasets
-        saver.addNumpyDataset("Passengers", np.array([4]))
-        saver.addNumpyDataset("FireExtinguishers", np.array([2]))
 
-        # add some structured data sets
+        # add some datasets
+        saver.addData("Passengers", np.array([4]))
+        saver.addData("FireExtinguishers", np.array([2]))
+
+        # add some mode complex data sets
         wheels = [{"Winter":False, "Punctured":False, "Brand":"Mercedes", "Age":2},
                 {"Winter":False, "Punctured":False, "Brand":"Mercedes", "Age":3},
                 {"Winter":False, "Punctured":False, "Brand":"Mercedes", "Age":5},
                 {"Winter":False, "Punctured":True, "Brand":"Mercedes", "Age":7}]
         chairs = {"AdjustableHeadrests":True, "ExtraPadding":True}
 
-        saver.addStructuredDataset("wheels",wheels)
-        saver.addStructuredDataset("chairs", chairs)
+        saver.addData("wheels", wheels)
+        saver.addData("chairs", chairs)
+
 
         # save attributes and datasets
         saver.save()
@@ -46,16 +48,9 @@ class ABINSIOmoduleTest(unittest.TestCase):
 
     def _save_wrong_dataset(self):
         _poor_saver = IOmodule(input_filename="BadCars.foo", group_name="Volksvagen")
-        _poor_saver.addNumpyDataset("BadPassengers", 4)
+        _poor_saver.addData("BadPassengers", 4)
         with self.assertRaises(ValueError):
             _poor_saver.save()
-
-
-    def _save_wrong_structured_dataset(self):
-        _poor_saver = IOmodule(input_filename="BadCars.foo", group_name="Volksvagen")
-        _poor_saver.addStructuredDataset("BadPassengers", 4)
-        with self.assertRaises(ValueError):
-           _poor_saver.save()
 
 
     def _wrong_filename(self):
@@ -75,7 +70,7 @@ class ABINSIOmoduleTest(unittest.TestCase):
 
 
     def _loading_attributes(self):
-        data=self.loader.load(list_of_attributes = ["Fuel", "Speed"])
+        data = self.loader.load(list_of_attributes = ["Fuel", "Speed"])
         attr_data = data["attributes"]
 
         self.assertEqual(100, attr_data["Fuel"])
@@ -92,39 +87,42 @@ class ABINSIOmoduleTest(unittest.TestCase):
 
 
     def _loading_datasets(self):
-        data = self.loader.load(list_of_numpy_datasets=["Passengers", "FireExtinguishers"])
+        data = self.loader.load(list_of_datasets=["Passengers", "FireExtinguishers"])
  
         self.assertEqual(np.array([4]), data["datasets"]["Passengers"])
         self.assertEqual(np.array([2]), data["datasets"]["FireExtinguishers"])
 
         with self.assertRaises(ValueError):
-            self.loader.load(list_of_numpy_datasets=["NicePassengers"])
+            self.loader.load(list_of_datasets=["NicePassengers"])
 
         with self.assertRaises(ValueError):
-            self.loader.load(list_of_numpy_datasets=1)
+            self.loader.load(list_of_datasets=1)
 
         with self.assertRaises(ValueError):
-            self.loader.load(list_of_numpy_datasets=[1, "Passengers"])
+            self.loader.load(list_of_datasets=[1, "Passengers"])
 
- 
+
     def _loading_structured_datasets(self):
+        """
+        Loads more complicated data from the hdf file.
+        """
 
-        data = self.loader.load(list_of_structured_datasets=["wheels", "chairs"])
+        data = self.loader.load(list_of_datasets=["wheels", "chairs"])
 
         self.assertEqual([{"Winter":False, "Punctured":False, "Brand":"Mercedes", "Age":2},
                           {"Winter":False, "Punctured":False, "Brand":"Mercedes", "Age":3},
                           {"Winter":False, "Punctured":False, "Brand":"Mercedes", "Age":5},
                           {"Winter":False, "Punctured":True, "Brand":"Mercedes", "Age":7}],
-                         data["structured_datasets"]["wheels"])
+                         data["datasets"]["wheels"])
 
         self.assertEqual({"AdjustableHeadrests":True, "ExtraPadding":True},
-                         data["structured_datasets"]["chairs"])
+                         data["datasets"]["chairs"])
 
         with self.assertRaises(ValueError):
-            self.loader.load(list_of_structured_datasets=["WrongDataSet"])
+            self.loader.load(list_of_datasets=["WrongDataSet"])
 
         with self.assertRaises(ValueError):
-            self.loader.load(list_of_structured_datasets=1)
+            self.loader.load(list_of_datasets=1)
 
 
     def runTest(self):
@@ -133,7 +131,6 @@ class ABINSIOmoduleTest(unittest.TestCase):
 
         self._save_wrong_attribute()
         self._save_wrong_dataset()
-        self._save_wrong_structured_dataset()
 
         self.loader = IOmodule(input_filename="Cars.foo", group_name="Volksvagen")
 
