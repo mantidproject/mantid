@@ -12,6 +12,8 @@ subgraph params {
   wavMax              [label="WavelengthMax"]
   monIntWavMin        [label="MonitorIntegration-\nWavelengthMin"]
   monIntWavMax        [label="MonitorIntegration-\nWavelengthMax"]
+  monBgWavMax         [label="MonitorBackground-\nWavelengthMax"]
+  monBgWavMin         [label="MonitorBackground-\nWavelengthMin"]
   outputWS            [label="TransmissionRun\nin wavelength"]
 
   detWS               [label="DetectorWorkspace"]
@@ -68,6 +70,8 @@ convertMon	     -> valMon
 valMon		     -> cropMon
 monitorIndex	     -> cropMon
 cropMon		     -> checkBgMinMax
+monBgWavMax    -> checkBgMinMax
+monBgWavMin    -> checkBgMinMax
 checkBgMinMax	     -> calcFlatBg	[label="Yes"]
 calcFlatBg	     -> rebinToWS
 checkBgMinMax	     -> rebinToWS	[label="No"]

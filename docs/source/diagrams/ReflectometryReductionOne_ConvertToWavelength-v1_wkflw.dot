@@ -15,6 +15,8 @@ subgraph params {
   regionOfDirectBeam  [label="RegionOf-\nDirectBeam"]
   monIntWavMax        [label="MonitorIntegration-\nWavelengthMax"]
   monIntWavMin        [label="MonitorIntegration-\nWavelengthMin"]
+  monBgWavMax         [label="MonitorBackground-\nWavelengthMax"]
+  monBgWavMin         [label="MonitorBackground-\nWavelengthMin"]
   wavMaxRDB           [label="WavelengthMax"]
   wavMinRDB           [label="WavelengthMin"]
 }
@@ -77,6 +79,8 @@ detWS               -> rebinToWS
 valMon              -> cropMonWS
 monitorIndex        -> cropMonWS
 cropMonWS           -> checkBgMinMax
+monBgWavMax         -> checkBgMinMax
+monBgWavMin         -> checkBgMinMax
 checkBgMinMax       -> calcFlatBg     [label="Yes"]
 checkBgMinMax       -> rebinToWS      [label="No"]
 calcFlatBg          -> rebinToWS
