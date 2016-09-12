@@ -52,7 +52,7 @@ MagneticIon::MagneticIon(const char *symbol, const uint16_t charge,
  * @return
  */
 double MagneticIon::getJLofQsqr(const double qsqr, const uint16_t l) const {
-  if (l < 0 || l > 6 || (l % 2) == 1) {
+  if (l > 6 || (l % 2) == 1) {
     throw std::out_of_range(
         "MagneticIon::analyticalFormFactor - j must be 0, 2, 4, or 6.");
   }
