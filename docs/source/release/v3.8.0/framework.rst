@@ -66,16 +66,19 @@ Improved
 - :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
   plotly html files.
 
+- :ref:`SofQW <algm-SofQW>` has option to replace any NaNs in output workspace
+  with zeroes.
+
 - :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>`
   had a bug where the table columns were in a reversed order in the dialogue's combo boxes.
   This is now fixed and the order is correct.
 
 - :ref:`ConvertUnits <algm-ConvertUnits>` will no longer corrupt an in place workspace if the algorithm fails.
 
+- :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
+
 - :ref:`ConvertUnits <algm-ConvertUnits>` now has the option to take a workspace with Points as input.
   A property has been added that will make the algorithm convert the workspace to Bins automatically. The output space will be converted back to Points.
-
-- :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
 - :ref:`ConvertToHistogram <algm-ConvertToHistogram>`: Performance improvement using new HistogramData module,
   3x to 4x speedup.
