@@ -1,12 +1,8 @@
-.. THIS FILE IS CAUSING THE OSX DOCS BUILD TO SEGFAULT. CHANGE IT BACK TO .rst WHEN THIS IS FIXED
-
 Muon Analysis
 =============
 
-.. interface:: Muon Analysis
-  :widget: centralwidget
-  :align: right
-  :width: 550
+.. image::  ../images/MuonAnalysisHome3.6.jpg
+   :align: right
 
 .. contents:: Table of Contents
   :local:
@@ -34,8 +30,8 @@ Instrument
 
 .. _HomeInstrument:
 
-.. interface:: Muon Analysis
-  :widget: groupBox
+.. image::  ../images/MuonAnalysisHomeInstrument.png
+   :align: center
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **1** | **Instrument**           | Selection of instrument that the experiments were run on.                               |
@@ -70,8 +66,8 @@ Instrument
 Data Files
 ^^^^^^^^^^
 
-.. interface:: Muon Analysis
-  :widget: groupBox_2
+.. image::  ../images/MuonAnalysisHomeDataFiles.png
+   :align: center
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **1** | **Load current run**     | Attempt to load current run for the instrument specified (ISIS only)                    |
@@ -96,8 +92,8 @@ Data Files
 Detector Grouping
 ^^^^^^^^^^^^^^^^^
 
-.. interface:: Muon Analysis
-  :widget: groupBox_3
+.. image::  ../images/MuonAnalysisHomeDetectorGrouping.png
+   :align: center
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **1** | **Group/ Group Pair**    | A group or a pair which will be plotted.                                                |
@@ -122,8 +118,8 @@ Detector Grouping
 Plot Data
 ^^^^^^^^^
 
-.. interface:: Muon Analysis
-  :widget: groupBox_4
+.. image::  ../images/MuonAnalysisHomePlotData.png
+   :align: center
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **1** | **Plot Type**            | Type of the plot. Available choices are:                                                |
@@ -145,8 +141,8 @@ Plot Data
 Run Information etc.
 ^^^^^^^^^^^^^^^^^^^^
 
-.. interface:: Muon Analysis
-  :widget: groupBox_5
+.. image::  ../images/MuonAnalysisHomeRunInfoEtc.png
+   :align: center
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **1** | **Run Information**      | Information about the loaded run.                                                       |
@@ -163,10 +159,8 @@ Run Information etc.
 Grouping Options
 ----------------
 
-.. interface:: Muon Analysis
-  :widget: GroupingOptions
-  :align: right
-  :width: 400
+.. image::  ../images/MuonAnalysisGrouping.png
+   :align: right
 
 .. _GroupingOptions:
 
@@ -205,8 +199,8 @@ Controls and description
 Group table
 ^^^^^^^^^^^
 
-.. interface:: Muon Analysis
-  :widget: groupBox_8
+.. image::  ../images/MuonAnalysisGroupingGroupTable.png
+   :align: center
 
 +-------+--------------------------+-----------------------------------------------------------------------------------------+
 | **1** | **Group (Name)**         | The name of the group. Should be unique.                                                |
@@ -232,8 +226,8 @@ Group table
 Pair table
 ^^^^^^^^^^
 
-.. interface:: Muon Analysis
-  :widget: groupBox_9
+.. image::  ../images/MuonAnalysisGroupingPairTable.png
+   :align: center
 
 +-------+---------------------------+-----------------------------------------------------------------------------------------+
 | **1** | **Group Pair (Name)**     | Name of the pair. Should be unique.                                                     |
@@ -267,9 +261,8 @@ Data Analysis
 
 This tab is designed for the user to make a fit against the data just plotted.
 
-.. interface:: Muon Analysis
-  :widget: fitBrowser
-  :align: center
+.. image::  ../images/MuonAnalysisDataAnalysis.png
+   :align: right
 
 Fit Property Browser
 ^^^^^^^^^^^^^^^^^^^^
@@ -341,10 +334,8 @@ Results Table
 
 .. _ResultsTable:
 
-.. interface:: Muon Analysis
-  :widget: ResultsTable
-  :align: right
-  :width: 300
+.. image::  ../images/MuonAnalysisResultsTable.png
+   :align: right
 
 This tab allows users to export the fitting results alongside log values as a table.
 
@@ -384,9 +375,6 @@ Table
 This allows you to specify the name of the resulting table and create it using the log
 values and workspaces you've selected.
 
-.. interface:: Muon Analysis
-  :widget: groupBox_37
-  :align: center
 
 Settings
 --------
@@ -398,8 +386,7 @@ This tab allows users to specify various plotting style options, loaded data bin
 Data Plot Style
 ^^^^^^^^^^^^^^^
 
-.. interface:: Muon Analysis
-  :widget: groupBox_6
+.. image:: ../images/MuonAnalysisSettingsPlotStyle.png
   :align: center
 
 These options control the style of the plot. They will be applied to all new plots.
@@ -450,8 +437,7 @@ Data Binning
 
 .. _DataBinning:
 
-.. interface:: Muon Analysis
-  :widget: groupBox_7
+.. image:: ../images/MuonAnalysisSettingsBinning.png
   :align: center
 
 +-------+------------------------+---------------------------------------------------------------+
@@ -482,8 +468,7 @@ Data Binning
 General
 ^^^^^^^
 
-.. interface:: Muon Analysis
-  :widget: groupBox_13
+.. image:: ../images/MuonAnalysisSettingsGeneral.png
   :align: center
 
 +-------+---------------------+---------------------------------------------------------------------+

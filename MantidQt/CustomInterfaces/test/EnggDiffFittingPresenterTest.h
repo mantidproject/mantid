@@ -207,10 +207,6 @@ public:
         .Times(1)
         .WillOnce(Return(m_ex_run_number));
 
-    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
-        .Times(1)
-        .WillOnce(Return(m_ex_run_number));
-
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
@@ -234,10 +230,6 @@ public:
         .Times(1)
         .WillOnce(Return(m_ex_run_number));
 
-    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
-        .Times(1)
-        .WillOnce(Return(m_ex_run_number));
-
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
@@ -248,7 +240,7 @@ public:
     pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
   }
 
-  void test_fitting_runno_multiple_run() {
+  void test_fitting_file_not_found_with_multiple_runs() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     EnggDiffFittingPresenterNoThread pres(&mockView);
     // 23931-23934
@@ -270,9 +262,7 @@ public:
         .Times(1)
         .WillOnce(Return(RunNumDir));
 
-    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
-        .Times(1)
-        .WillOnce(Return(splittedFileVec));
+    // SplitFittingDir()
 
     // could possibly feature to create unique path
     EXPECT_CALL(mockView, focusingDir()).Times(1);
@@ -309,10 +299,6 @@ public:
     EXPECT_CALL(mockView, getFittingRunNumVec())
         .Times(1)
         .WillOnce(Return(RunNumDir));
-
-    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
-        .Times(1)
-        .WillOnce(Return(splittedFileVec));
 
     EXPECT_CALL(mockView, getFittingMultiRunMode())
         .Times(1)
@@ -358,10 +344,6 @@ public:
     EXPECT_CALL(mockView, getFittingRunNumVec())
         .Times(1)
         .WillOnce(Return(RunNumDir));
-
-    EXPECT_CALL(mockView, splitFittingDirectory(testing::_))
-        .Times(1)
-        .WillOnce(Return(splittedFileVec));
 
     EXPECT_CALL(mockView, getFittingMultiRunMode()).Times(0);
 
@@ -644,7 +626,6 @@ public:
     EXPECT_CALL(mockView, setPeakList(testing::_)).Times(0);
     EXPECT_CALL(mockView, getFittingRunNo()).Times(0);
     EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
-    EXPECT_CALL(mockView, splitFittingDirectory(testing::_)).Times(0);
     EXPECT_CALL(mockView, focusingDir()).Times(0);
 
     EXPECT_CALL(mockView, getFittingMultiRunMode()).Times(0);
