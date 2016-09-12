@@ -1,13 +1,14 @@
 #ifndef MANTID_DATAHANDLING_PROCESSBANKDATA_H
 #define MANTID_DATAHANDLING_PROCESSBANKDATA_H
 
-// Process bank data
-#include "MantidKernel/Task.h"
+
 // #include "MantidAPI/IFileLoader.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidDataHandling/BankPulseTimes.h"
-#include "MantidDataHandling/LoadEventNexus.h"
+// Process bank data
+#include "MantidKernel/Task.h"
 #include "MantidKernel/Timer.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/BankPulseTimes.h"
 
 #include <boost/shared_array.hpp>
 
@@ -15,7 +16,6 @@ namespace Mantid {
 namespace DataHandling {
 
 using namespace Mantid;
-
 //==============================================================================================
 // Class ProcessBankData
 //==============================================================================================
