@@ -35,12 +35,15 @@ Kernel::Logger g_log("ThreeSliceView");
 }
 
 ThreeSliceView::ThreeSliceView(QWidget *parent,
-                               RebinnedSourcesManager *rebinnedSourcesManager)
+                               RebinnedSourcesManager *rebinnedSourcesManager, bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager), m_mainView(), m_ui() {
   this->m_ui.setupUi(this);
-  this->m_mainView = this->createRenderView(this->m_ui.mainRenderFrame,
-                                            QString("OrthographicSliceView"));
-  pqActiveObjects::instance().setActiveView(this->m_mainView);
+
+  if(createRenderProxy) {
+    this->m_mainView = this->createRenderView(this->m_ui.mainRenderFrame,
+                                              QString("OrthographicSliceView"));
+    pqActiveObjects::instance().setActiveView(this->m_mainView);
+  }
 }
 
 ThreeSliceView::~ThreeSliceView() {}

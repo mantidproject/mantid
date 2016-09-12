@@ -90,7 +90,8 @@ QMap<QString, QString> StandardView::g_actionToAlgName;
  * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
 StandardView::StandardView(QWidget *parent,
-                           RebinnedSourcesManager *rebinnedSourcesManager)
+                           RebinnedSourcesManager *rebinnedSourcesManager,
+                           bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager), m_binMDAction(NULL),
       m_sliceMDAction(NULL), m_cutMDAction(NULL), m_unbinAction(NULL) {
   this->m_ui.setupUi(this);
@@ -119,10 +120,12 @@ StandardView::StandardView(QWidget *parent,
   QObject::connect(this->m_ui.scaleButton, SIGNAL(clicked()), this,
                    SLOT(onScaleButtonClicked()));
 
-  this->m_view = this->createRenderView(this->m_ui.renderFrame);
+  if(createRenderProxy) {
+    this->m_view = this->createRenderView(this->m_ui.renderFrame);
 
-  QObject::connect(this->m_view.data(), SIGNAL(endRender()), this,
-                   SLOT(onRenderDone()));
+    QObject::connect(this->m_view.data(), SIGNAL(endRender()), this,
+                     SLOT(onRenderDone()));
+  }
 }
 
 StandardView::~StandardView() {}

@@ -54,7 +54,7 @@ Mantid::Kernel::Logger g_log("SplatterPlotView");
 }
 
 SplatterPlotView::SplatterPlotView(
-    QWidget *parent, RebinnedSourcesManager *rebinnedSourcesManager)
+    QWidget *parent, RebinnedSourcesManager *rebinnedSourcesManager, bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager),
       m_cameraManager(boost::make_shared<CameraManager>()),
       m_peaksTableController(NULL), m_peaksWorkspaceNameDelimiter(";") {
@@ -83,7 +83,9 @@ SplatterPlotView::SplatterPlotView(
   QObject::connect(this->m_ui.pickModeButton, SIGNAL(toggled(bool)), this,
                    SLOT(onPickModeToggled(bool)));
 
-  this->m_view = this->createRenderView(this->m_ui.renderFrame);
+  if(createRenderProxy)
+    this->m_view = this->createRenderView(this->m_ui.renderFrame);
+
   this->installEventFilter(this);
 
   setupVisiblePeaksButtons();

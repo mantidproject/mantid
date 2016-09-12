@@ -54,7 +54,8 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS StandardView
 public:
   /// Default constructor.
   StandardView(QWidget *parent = 0,
-               RebinnedSourcesManager *rebinnedSourcesManager = 0);
+               RebinnedSourcesManager *rebinnedSourcesManager = 0,
+               bool createRenderProxy = true);
   /// Default destructor.
   ~StandardView() override;
 

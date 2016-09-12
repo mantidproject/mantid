@@ -60,15 +60,19 @@ static void GetOrientations(vtkSMSourceProxy *producer,
 }
 
 MultiSliceView::MultiSliceView(QWidget *parent,
-                               RebinnedSourcesManager *rebinnedSourcesManager)
+                               RebinnedSourcesManager *rebinnedSourcesManager,
+                               bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager) {
   this->m_ui.setupUi(this);
-  pqRenderView *tmp =
-      this->createRenderView(this->m_ui.renderFrame, QString("MultiSlice"));
-  this->m_mainView = qobject_cast<pqMultiSliceView *>(tmp);
-  QObject::connect(this->m_mainView,
-                   SIGNAL(sliceClicked(int, double, int, int)), this,
-                   SLOT(checkSliceClicked(int, double, int, int)));
+  if(createRenderProxy) {
+    pqRenderView *tmp =
+        this->createRenderView(this->m_ui.renderFrame, QString("MultiSlice"));
+
+    this->m_mainView = qobject_cast<pqMultiSliceView *>(tmp);
+    QObject::connect(this->m_mainView,
+                     SIGNAL(sliceClicked(int, double, int, int)), this,
+                     SLOT(checkSliceClicked(int, double, int, int)));
+  }
 }
 
 MultiSliceView::~MultiSliceView() {}

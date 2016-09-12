@@ -56,7 +56,8 @@ public:
    * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
    */
   ThreeSliceView(QWidget *parent = 0,
-                 RebinnedSourcesManager *rebinnedSourcesManager = 0);
+                 RebinnedSourcesManager *rebinnedSourcesManager = 0,
+                 bool createRenderProxy = true);
   /// Default destructor.
   ~ThreeSliceView() override;
 

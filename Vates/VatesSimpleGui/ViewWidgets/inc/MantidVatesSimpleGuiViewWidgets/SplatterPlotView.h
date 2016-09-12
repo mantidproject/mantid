@@ -64,7 +64,8 @@ public:
    * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
    */
   explicit SplatterPlotView(QWidget *parent = 0,
-                            RebinnedSourcesManager *rebinnedSourcesManager = 0);
+                            RebinnedSourcesManager *rebinnedSourcesManager = 0,
+                            bool createRenderProxy = true);
   /// Default destructor
   ~SplatterPlotView() override;
 

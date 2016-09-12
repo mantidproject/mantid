@@ -219,7 +219,8 @@ private:
   void setupUiAndConnections();
   /// Create the requested view.
   ViewBase *createAndSetMainViewWidget(QWidget *container,
-                                       ModeControlWidget::Views v);
+                                       ModeControlWidget::Views v,
+                                       bool createRenderProxy = true);
   /// Helper function to swap current and hidden view pointers.
   void swapViews();
   /// Update the state of application widgets.

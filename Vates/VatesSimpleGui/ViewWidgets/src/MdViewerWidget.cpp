@@ -315,24 +315,25 @@ void MdViewerWidget::connectLoadDataReaction(QAction *action) {
  */
 ViewBase *
 MdViewerWidget::createAndSetMainViewWidget(QWidget *container,
-                                           ModeControlWidget::Views v) {
+                                           ModeControlWidget::Views v,
+                                           bool createRenderProxy) {
   ViewBase *view;
   std::string featureName("VSI:");
   switch (v) {
   case ModeControlWidget::STANDARD: {
-    view = new StandardView(container, &m_rebinnedSourcesManager);
+    view = new StandardView(container, &m_rebinnedSourcesManager, createRenderProxy);
     featureName += "StandardView";
   } break;
   case ModeControlWidget::THREESLICE: {
-    view = new ThreeSliceView(container, &m_rebinnedSourcesManager);
+    view = new ThreeSliceView(container, &m_rebinnedSourcesManager, createRenderProxy);
     featureName += "ThreeSliceView";
   } break;
   case ModeControlWidget::MULTISLICE: {
-    view = new MultiSliceView(container, &m_rebinnedSourcesManager);
+    view = new MultiSliceView(container, &m_rebinnedSourcesManager, createRenderProxy);
     featureName += "MultiSliceView";
   } break;
   case ModeControlWidget::SPLATTERPLOT: {
-    view = new SplatterPlotView(container, &m_rebinnedSourcesManager);
+    view = new SplatterPlotView(container, &m_rebinnedSourcesManager, createRenderProxy);
     featureName += "SplatterPlotView";
   } break;
   default:
@@ -746,7 +747,7 @@ void MdViewerWidget::resetCurrentView(int workspaceType,
       getInitialView(workspaceType, instrumentName);
   auto currentViewType = currentView->getViewType();
 
-  if (initialView == currentViewType) {
+  if (initialView != currentViewType) {
     this->ui.modeControlWidget->setToSelectedView(initialView);
   } else {
     this->currentView->show();
@@ -946,7 +947,7 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
   auto source = model->findItem<pqPipelineSource *>(sourceId);
 
   // Initilise the current view to something and setup
-  currentView = createAndSetMainViewWidget(ui.viewWidget, vtype);
+  currentView = createAndSetMainViewWidget(ui.viewWidget, vtype, false);
   initialView = vtype;
   currentView->installEventFilter(this);
   viewLayout = new QHBoxLayout(ui.viewWidget);
