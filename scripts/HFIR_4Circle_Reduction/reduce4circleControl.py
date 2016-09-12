@@ -625,8 +625,9 @@ class CWSCDReductionControl(object):
                 # calculate absorption correction
                 import absorption
 
-                up_cart, us_cart = absorption.calculate_absorption_correction_spice(
-                    exp_number, scan_number, lattice, ub_matrix)
+                spice_ub = convert_mantid_ub_to_spice(ub_matrix)
+                up_cart, us_cart = absorption.calculate_absorption_correction_2(
+                    exp_number, scan_number, lattice, spice_ub)
                 peak_dict['up'] = up_cart
                 peak_dict['us'] = us_cart
 
