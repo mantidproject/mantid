@@ -120,6 +120,11 @@
                      <property name="text">
                        <string>Process</string>
                      </property>
+                     <property name="icon">
+                       <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+                         <normaloff>:/stat_rows.png</normaloff>:/stat_rows.png
+                       </iconset>
+                     </property>
                      <property name="toolButtonStyle">
                        <enum>Qt::ToolButtonTextBesideIcon</enum>
                      </property>
