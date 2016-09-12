@@ -93,8 +93,8 @@ private:
 
     std::vector<double> X, Y;
     for (int64_t i = 0; i < nbins; i++) {
-      X.push_back(i * 0.5);
-      Y.push_back(std::exp(-i * invfourPiSqr));
+      X.push_back((double)i * 0.5);
+      Y.push_back(std::exp(-(double)i * invfourPiSqr));
     }
     if (isHistogram) {
       X.push_back(nbins + 0.5);
