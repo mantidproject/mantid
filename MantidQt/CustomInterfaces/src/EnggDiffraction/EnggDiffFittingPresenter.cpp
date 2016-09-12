@@ -210,7 +210,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
   // receive the run number from the text-field
   const std::string userPathInput = m_view->getFittingRunNo();
 
-  if (m_previousInput == m_previousInput) {
+  if (m_previousInput == userPathInput) {
     // Short circuit the checks and skip any warnings
     // or errors as the user has not changed anything
     // just clicked the box. Additionally this resolves an
@@ -218,7 +218,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     // warning when the current warning is closed
     return;
   } else {
-    m_previousInput = m_previousInput;
+    m_previousInput = userPathInput;
   }
 
   // file name
