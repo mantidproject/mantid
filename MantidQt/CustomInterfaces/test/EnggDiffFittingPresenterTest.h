@@ -210,7 +210,7 @@ public:
 
     // No errors/0 warnings. There will be no errors or warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(2);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
   }
@@ -352,7 +352,7 @@ public:
 
     // No errors/1 warnings. File entered is not found
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(2);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
   }

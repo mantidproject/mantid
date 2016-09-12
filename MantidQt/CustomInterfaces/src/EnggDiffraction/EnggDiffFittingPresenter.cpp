@@ -499,9 +499,9 @@ bool EnggDiffFittingPresenter::findFilePathFromBaseName(
   try {
     directoryIter = directoryToSearch;
   } catch (Poco::FileNotFoundException) {
-    m_view->userWarning("Bad input directory",
-                        "Could not open directory: '" + directoryToSearch +
-                            "'. Please check the browsed file input.");
+    // UNIX will throw if the directory is blank however Windows
+	// will continue then fail to find the file in a non existent
+	// directory - this ultimately results in the same thing.
     return false;
   }
 
