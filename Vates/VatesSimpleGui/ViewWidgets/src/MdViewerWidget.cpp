@@ -930,22 +930,65 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
   QSettings settings;
   auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
   auto fileName = workingDir.toStdString() + "/VSI.xml";
-  auto proxyManager = pqActiveObjects::instance().activeServer()->proxyManager();
-
-  // We cannot directly load the XML using LoadXMLState(filename) because
-  // there is no option to retain global IDs with that method.
-  // So here we do the same thing but pass the desired option
-  auto *parser = vtkPVXMLParser::New();
-  parser->SetFileName(fileName.c_str());
-  parser->Parse();
-  proxyManager->LoadXMLState(parser->GetRootElement(), NULL, true);
-  parser->Delete();
+  auto success = loadVSIState(fileName);
+  if (!success)
+    return; // state could not be loaded. There's nothin left to do!
 
   // Get the active objects from the last session
   auto model = pqApplicationCore::instance()->getServerManagerModel();
   auto view = model->findItem<pqView *>(viewId);
   auto source = model->findItem<pqPipelineSource *>(sourceId);
+  setupViewFromProject(vtype, view, source);
+  setActiveObjects(view, source);
 
+  if (tsv.selectSection("colormap")) {
+    std::string colorMapLines;
+    tsv >> colorMapLines;
+    ui.colorSelectionWidget->loadFromProject(colorMapLines);
+  }
+
+  currentView->show();
+
+  // Don't call render on ViewBase here as that will reset the camera.
+  // Instead just directly render the view proxy using render all.
+  this->currentView->renderAll();
+}
+
+/**
+ * Load the state of VSI from an XML file.
+ *
+ * @param fileName
+ * @return true if the state was successfully loaded
+ */
+bool MdViewerWidget::loadVSIState(const std::string &fileName) {
+  auto proxyManager =
+      pqActiveObjects::instance().activeServer()->proxyManager();
+  // We cannot directly load the XML using LoadXMLState(filename) because
+  // there is no option to retain global IDs with that method.
+  // So here we do the same thing but pass the desired option
+  auto *parser = vtkPVXMLParser::New();
+  parser->SetFileName(fileName.c_str());
+  int error = parser->Parse();
+  if (!error)
+    return false;
+  proxyManager->LoadXMLState(parser->GetRootElement(), NULL, true);
+  parser->Delete();
+  return true;
+}
+
+/**
+ * Setup the current view from a project file.
+ *
+ * There's need to create an entirely new view as it already exists in the
+ * loaded project state.
+ *
+ * @param vtype :: the type of view to be created (e.g. Multislice)
+ * @param view :: the view display
+ * @param source :: the source used by the view
+ */
+void MdViewerWidget::setupViewFromProject(ModeControlWidget::Views vtype,
+                                          pqView *view,
+                                          pqPipelineSource *source) {
   // Initilise the current view to something and setup
   currentView = createAndSetMainViewWidget(ui.viewWidget, vtype, false);
   initialView = vtype;
@@ -959,25 +1002,21 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
   currentView->origSrc = qobject_cast<pqPipelineSource*>(source);
   currentView->setView(qobject_cast<pqRenderView*>(view));
   setParaViewComponentsForView();
+}
 
-  // Set the active objects. This will trigger events to update the properties
-  // panel and the pipeline viewer
+/**
+ * Set the active objects. This will trigger events to update the properties
+ * panel and the pipeline viewer.
+ *
+ * @param view :: the view to set as currently active
+ * @param source :: the source to set as currently active
+ */
+void MdViewerWidget::setActiveObjects(pqView *view, pqPipelineSource *source) {
+
   auto & activeObjects = pqActiveObjects::instance();
   activeObjects.setActiveView(view);
   activeObjects.setActiveSource(source);
   activeObjects.setActivePort(source->getOutputPort(0));
-
-  if (tsv.selectSection("colormap")) {
-    std::string colorMapLines;
-    tsv >> colorMapLines;
-    ui.colorSelectionWidget->loadFromProject(colorMapLines);
-  }
-
-  currentView->show();
-
-  // Don't call render on ViewBase here as that will reset the camera.
-  // Instead just directly render the view proxy using render all.
-  this->currentView->renderAll();
 }
 
 /**
