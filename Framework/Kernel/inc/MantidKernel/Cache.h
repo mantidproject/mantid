@@ -115,6 +115,7 @@ public:
 #if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
       m_cacheMap.emplace(key, value);
 #else
+      std::lock_guard<std::mutex> lock(m_mutex);
       m_map.insert(std::make_pair(key, value));
 #endif
     }
