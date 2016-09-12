@@ -456,6 +456,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/InvertMask.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/LorentzCorrection.h
+	inc/MantidAlgorithms/MagFormFactorCorrection.h
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskBinsFromTable.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
@@ -765,6 +766,7 @@ set ( TEST_FILES
 	LorentzCorrectionTest.h
 	MCAbsorptionStrategyTest.h
 	MCInteractionVolumeTest.h
+	MagFormFactorCorrectionTest.h
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
 	MaxEnt/MaxentCalculatorTest.h

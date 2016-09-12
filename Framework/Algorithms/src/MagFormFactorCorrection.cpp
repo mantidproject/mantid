@@ -87,22 +87,21 @@ void MagFormFactorCorrection::exec() {
   // Gets the vector of form factor values
   FF.reserve(nQ);
   for (iQ=0; iQ<nQ; iQ++) {
-    FF.push_back(ion.analyticalFormFactor(Qvals[iQ]*Qvals[iQ]));
+    FF.push_back(ion.analyticalFormFactor(Qvals[iQ]*Qvals[iQ], 0, 0));
   }
   if (!ffwsStr.empty()) {
     MatrixWorkspace_sptr ffws = API::WorkspaceFactory::Instance().create(
 	    "Workspace2D", 1, Qvals.size(), FF.size());
     ffws->mutableX(0).assign(Qvals.begin(), Qvals.end());
     ffws->mutableY(0).assign(FF.begin(), FF.end());
-    API::AnalysisDataServiceImpl &data_store = API::AnalysisDataService::Instance();
-    data_store.addOrReplace(ffwsStr, ffws);
+    API::AnalysisDataService::Instance().addOrReplace(ffwsStr, ffws);
   }
 
   // Does the actual scaling.
   outputWS = inputWS->clone();
   for (int64_t i=0; i<numHists; i++) {
-    auto &Y = outputWS->dataY(i);
-    auto &E = outputWS->dataY(i);
+    auto &Y = outputWS->mutableY(i);
+    auto &E = outputWS->mutableE(i);
     for (int64_t j=0; j<specSize; j++) {
       ff = (iax==0) ? FF[j] : FF[i];
       Y[j] /= ff;

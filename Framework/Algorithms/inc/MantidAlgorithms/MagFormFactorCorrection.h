@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_SCALE_H_
-#define MANTID_ALGORITHMS_SCALE_H_
+#ifndef MANTID_ALGORITHMS_MAGFORMFACTORCORRECTION_H_
+#define MANTID_ALGORITHMS_MAGFORMFACTORCORRECTION_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -70,4 +70,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_SCALE_H_*/
+#endif /*MANTID_ALGORITHMS_MAGFORMFACTORCORRECTION_H_*/
