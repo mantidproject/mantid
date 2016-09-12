@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceGroup, MatrixWorkspace
 from mantid.kernel import Direction, StringArrayLengthValidator, StringArrayProperty, FloatBoundedValidator
 import mantid.simpleapi as api
+import numpy as np
 
 
 class CompareSampleLogs(PythonAlgorithm):
@@ -41,7 +42,7 @@ class CompareSampleLogs(PythonAlgorithm):
 
         self.declareProperty(StringArrayProperty(name="SampleLogs", direction=Direction.Input, validator=validator),
                              doc="Comma separated list of sample logs to compare.")
-        self.declareProperty("Tolerance", 1e-3, validator=FloatBoundedValidator(lower=1e-7, upper=100.0),
+        self.declareProperty("Tolerance", 1e-3, validator=FloatBoundedValidator(lower=1e-7),
                              doc="Tolerance for comparison of numeric values.")
         self.declareProperty("Result", "A string that will be empty if all the logs match, "
                              "otherwise will contain a comma separated list of  not matching logs", Direction.Output)
@@ -91,6 +92,14 @@ class CompareSampleLogs(PythonAlgorithm):
 
         match = True
         if isnum:
+            # check for nan
+            idx_nan = np.where(np.isnan(properties))[0]
+            if len(idx_nan) > 0:
+                message = "Sample log " + pname + " contains nan values. \n" +\
+                          "Workspaces: " + ", ".join(self.wslist) + "\n Values: " + str(properties)
+                self.log().information(message)
+                return False
+
             if max(properties) - min(properties) > self.tolerance:
                 match = False
         else:
