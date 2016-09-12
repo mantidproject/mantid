@@ -564,8 +564,6 @@ EnggDiffFittingPresenter::enableMultiRun(std::string firstRun,
   std::vector<std::string> fittingRunNoDirVec;
 
   // Perform input checks first
-  bool isInputValid = true;
-
   // Are both values either side of '-' the user input digits
   if (!isDigit(firstRun) || !isDigit(lastRun)) {
     m_view->userWarning("Invalid Run Number",
