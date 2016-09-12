@@ -929,7 +929,7 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
   // Load the state of VSI from the XML dump
   QSettings settings;
   auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
-  auto fileName = workingDir.toStdString() + "/VATES.xml";
+  auto fileName = workingDir.toStdString() + "/VSI.xml";
   auto proxyManager = pqActiveObjects::instance().activeServer()->proxyManager();
 
   // We cannot directly load the XML using LoadXMLState(filename) because
@@ -992,7 +992,9 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
 
   QSettings settings;
   auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
-  auto fileName = workingDir.toStdString() + "/VATES.xml";
+  auto fileName = workingDir.toStdString() + "/VSI.xml";
+
+  // Dump the state of VSI to a XML file
   auto session = pqActiveObjects::instance().activeServer()->proxyManager();
   session->SaveXMLState(fileName.c_str());
   contents.writeLine("FileName") << fileName;
@@ -1004,11 +1006,12 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   auto &activeObjects = pqActiveObjects::instance();
   auto view = activeObjects.activeView()->getProxy();
   auto source = activeObjects.activeSource()->getProxy();
-  auto viewId = view->GetGlobalIDAsString();
-  auto sourceId = source->GetGlobalIDAsString();
 
-  contents.writeLine("ViewID") << viewId;
-  contents.writeLine("SourceID") << sourceId;
+  // These two IDs let use retrieve the source & view currently
+  // being looked at in VSI. Note: the XML must be reloaded with the option to
+  // use the same global IDs.
+  contents.writeLine("ViewID") << view->GetGlobalIDAsString();
+  contents.writeLine("SourceID") << source->GetGlobalIDAsString();
 
   // Now serialise the color map
   contents.writeSection("colormap", ui.colorSelectionWidget->saveToProject());
