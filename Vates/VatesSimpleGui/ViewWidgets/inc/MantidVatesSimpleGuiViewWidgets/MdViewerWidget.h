@@ -272,8 +272,6 @@ private:
   void restoreViewState(ViewBase *view, ModeControlWidget::Views vtype);
   /// Get the current grid axes setting
   bool areGridAxesOn();
-  /// Setup a workspace from a Mantid project file
-  bool setupWorkspaceFromProject(const std::string &wsName);
 };
 
 } // SimpleGui
