@@ -16,7 +16,7 @@ namespace MantidWidgets {
 class DataProcessorCommand;
 class DataProcessorWhiteList;
 
-using TreeData = std::map<int, std::map<int, std::vector<std::string>>>;
+typedef std::map<int, std::map<int, std::vector<std::string>>> TreeData;
 
 /** @class DataProcessorTreeManager
 
