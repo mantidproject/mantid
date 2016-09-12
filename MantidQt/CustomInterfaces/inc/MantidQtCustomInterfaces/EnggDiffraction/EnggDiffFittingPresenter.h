@@ -162,6 +162,9 @@ private:
                            std::vector<std::string> &fittingRunNoDirVec,
                            std::vector<std::string> &foundRunNumber);
 
+  std::vector<std::string>
+  splitFittingDirectory(const std::string &selectedfPath);
+
   void enableMultiRun(std::string firstRun, std::string lastRun,
                       std::vector<std::string> &fittingRunNoDirVec);
 

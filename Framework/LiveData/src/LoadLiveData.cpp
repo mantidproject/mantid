@@ -153,7 +153,12 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
  */
 Mantid::API::Workspace_sptr
 LoadLiveData::processChunk(Mantid::API::Workspace_sptr chunkWS) {
-  return runProcessing(chunkWS, false);
+  try {
+    return runProcessing(chunkWS, false);
+  } catch (...) {
+    g_log.error("While processing chunk:");
+    throw;
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -162,7 +167,12 @@ LoadLiveData::processChunk(Mantid::API::Workspace_sptr chunkWS) {
  * Sets the m_outputWS member to the processed result.
  */
 void LoadLiveData::runPostProcessing() {
-  m_outputWS = runProcessing(m_accumWS, true);
+  try {
+    m_outputWS = runProcessing(m_accumWS, true);
+  } catch (...) {
+    g_log.error("While post processing:");
+    throw;
+  }
 }
 
 //----------------------------------------------------------------------------------------------

@@ -48,6 +48,8 @@ private slots:
   void unFixItem();
   void singleFitComplete(bool error);
   void algorithmComplete(bool error);
+  void plotWorkspace();
+  void saveResult();
 
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
@@ -63,8 +65,6 @@ private:
   std::string constructBaseName(const std::string &inputName,
                                 const std::string &fitType, const bool &multi,
                                 const long &specMin, const long &specMax);
-  void plotWorkspace();
-  void saveResult();
 
   Ui::IqtFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
