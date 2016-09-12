@@ -55,6 +55,8 @@ void QDataProcessorWidget::createTable() {
   // Custom context menu for table
   connect(ui.viewTable, SIGNAL(customContextMenuRequested(const QPoint &)),
           this, SLOT(showContextMenu(const QPoint &)));
+  // Process button
+  connect(ui.buttonProcess, SIGNAL(clicked()), this, SLOT(processClicked()));
 }
 
 /** Add actions to the toolbar
@@ -72,6 +74,14 @@ void QDataProcessorWidget::addActions(
 
   // Add a whats this button
   ui.rowToolBar->addAction(QWhatsThis::createAction(this));
+}
+
+/** This slot notifies the presenter that the 'Process' button has been
+ * clicked
+ */
+void QDataProcessorWidget::processClicked() {
+
+  m_presenter->notify(DataProcessorPresenter::ProcessFlag);
 }
 
 /**
