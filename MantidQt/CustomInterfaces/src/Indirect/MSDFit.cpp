@@ -92,6 +92,9 @@ void MSDFit::run() {
 
   m_batchAlgoRunner->addAlgorithm(msdAlg);
   m_batchAlgoRunner->executeBatchAsync();
+
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+    SLOT(algorithmComplete(bool)));
 }
 
 void MSDFit::singleFit() {
@@ -147,6 +150,23 @@ void MSDFit::loadSettings(const QSettings &settings) {
 }
 
 /**
+ * Handles the completion of the MSDFit algorithm
+ *
+ * @param error If the algorithm chain failed
+ */
+void MSDFit::algorithmComplete(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+    SLOT(algorithmComplete(bool)));
+
+  if (error)
+    return;
+
+  // Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+}
+
+/**
  * Plots fitted data on the mini plot.
  *
  * @param wsName Name of fit _Workspaces workspace group (defaults to
@@ -188,7 +208,7 @@ void MSDFit::plotFit(QString wsName, int specNo) {
       }
     }
   }
-}
+ }
 
 /**
  * Called when new data has been loaded by the data selector.
@@ -199,7 +219,7 @@ void MSDFit::plotFit(QString wsName, int specNo) {
  */
 void MSDFit::newDataLoaded(const QString wsName) {
   auto ws = Mantid::API::AnalysisDataService::Instance()
-                .retrieveWS<const MatrixWorkspace>(wsName.toStdString());
+    .retrieveWS<const MatrixWorkspace>(wsName.toStdString());
   int maxWsIndex = static_cast<int>(ws->getNumberHistograms()) - 1;
 
   m_uiForm.spPlotSpectrum->setMaximum(maxWsIndex);
