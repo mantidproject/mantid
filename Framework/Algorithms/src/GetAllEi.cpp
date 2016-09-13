@@ -1,7 +1,9 @@
 #include "MantidAlgorithms/GetAllEi.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -10,6 +12,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidIndexing/Extract.h"
 #include "MantidIndexing/IndexInfo.h"
 
 #include <boost/format.hpp>
@@ -881,27 +884,12 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   wsIndex0 = inputWS->getIndexFromSpectrumNumber(specNum1);
   specnum_t specNum2 = getProperty("Monitor2SpecID");
   size_t wsIndex1 = inputWS->getIndexFromSpectrumNumber(specNum2);
+
   // assuming equally binned ws.
-  auto bins = inputWS->sharedX(wsIndex0);
-  size_t XLength = bins->size();
-  size_t YLength = inputWS->y(wsIndex0).size();
-  auto working_ws =
-      API::WorkspaceFactory::Instance().create(inputWS, 2, XLength, YLength);
-  // copy detector mapping
-  const auto &inputIndices = inputWS->indexInfo();
-  auto translator = working_ws->indexInfo();
-  translator.setSpectrumNumbers({specNum1, specNum2});
-  translator.setDetectorIDs(
-      {inputIndices.detectorIDs(wsIndex0), inputIndices.detectorIDs(wsIndex1)});
-  working_ws->setIndexInfo(translator);
-  // copy data --> very bad as implicitly assigns pointer
-  // to bins array and bins array have to exist out of this routine
-  // scope.
-  // This does not matter in this case as below we convert units
-  // which should decouple cow_pointer but very scary operation in
-  // general.
-  working_ws->setSharedX(0, bins);
-  working_ws->setSharedX(1, bins);
+  auto working_ws = DataObjects::create<API::HistoWorkspace>(
+      *inputWS, Indexing::extract(inputWS->indexInfo(),
+                                  std::vector<size_t>{wsIndex0, wsIndex1}),
+      inputWS->histogram(wsIndex0));
 
   // signal 1
   working_ws->setSharedY(0, inputWS->sharedY(wsIndex0));
