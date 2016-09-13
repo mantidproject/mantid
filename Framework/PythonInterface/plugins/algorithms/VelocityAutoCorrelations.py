@@ -7,7 +7,6 @@ from scipy.io import netcdf
 import numpy as np
 import re
 import time
-import os
 
 
 class VelocityAutoCorrelations(PythonAlgorithm):
