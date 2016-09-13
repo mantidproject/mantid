@@ -93,9 +93,9 @@ public:
     Kernel::Matrix<double> ZMat(Gon);
 
     Kernel::Matrix<double> Rotx =
-        PeakHKLErrors::RotationMatrixAboutRegAxis(1, 'x');
+        PeakHKLErrors::RotationMatrixAboutRegAxis(0.5, 'x');
     Kernel::Matrix<double> Roty =
-        PeakHKLErrors::RotationMatrixAboutRegAxis(-2, 'y');
+        PeakHKLErrors::RotationMatrixAboutRegAxis(-1, 'y');
 
     for (int i = 0; i < peaks1->getNumberPeaks(); ++i)
       if (peaks1->getPeak(i).getRunNumber() == 5638) {
@@ -135,8 +135,7 @@ public:
         d = GonAngles5638[2] - table->Double(i, 1);
       else if (nm == "omega5638")
         d = GonAngles5638[0] - table->Double(i, 1);
-      // This was 0.3 degrees for gsl1, but gsl2 needs larger delta
-      TS_ASSERT_DELTA(d, 0, 1.1);
+      TS_ASSERT_DELTA(d, 0, .3);
     }
 #endif
   }
