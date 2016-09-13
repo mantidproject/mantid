@@ -289,6 +289,7 @@ set ( SRC_FILES
 	src/WeightedMeanOfWorkspace.cpp
 	src/WeightingStrategy.cpp
 	src/WienerSmooth.cpp
+	src/WorkflowAlgorithmRunner.cpp
 	src/WorkspaceJoiners.cpp
 	src/XDataConverter.cpp
 )
@@ -599,6 +600,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
 	inc/MantidAlgorithms/WeightingStrategy.h
 	inc/MantidAlgorithms/WienerSmooth.h
+	inc/MantidAlgorithms/WorkflowAlgorithmRunner.h
 	inc/MantidAlgorithms/WorkspaceJoiners.h
 	inc/MantidAlgorithms/XDataConverter.h
 )
@@ -882,6 +884,7 @@ set ( TEST_FILES
 	WeightedMeanTest.h
 	WeightingStrategyTest.h
 	WienerSmoothTest.h
+	WorkflowAlgorithmRunnerTest.h
 	WorkspaceCreationHelperTest.h
 	WorkspaceGroupTest.h
 )
