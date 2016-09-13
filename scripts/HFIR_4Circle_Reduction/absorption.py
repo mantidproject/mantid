@@ -1,13 +1,25 @@
 import numpy
-import numpy as np
-import mantid
+import numpy.linalg
 import math
 from mantid.api import AnalysisDataService
 
 # Do absorption correction
 
+
 class Lattice(object):
+    """
+    A simple structure-styled class to hold lattice or lattice*
+    """
     def __init__(self, a, b, c, alpha, beta, gamma):
+        """
+        Initialization
+        :param a:
+        :param b:
+        :param c:
+        :param alpha:
+        :param beta:
+        :param gamma:
+        """
         self.a = a
         self.b = b
         self.c = c
@@ -18,135 +30,173 @@ class Lattice(object):
         return
         
     def __str__(self):
+        """
+        Customized output
+        :return:
+        """
         return '%f, %f, %f, %f, %f, %f' % (self.a, self.b, self.c, self.alpha, self.beta, self.gamma)
-        
-        
-def multiply(m1, m2):
+
+
+def m_sin(degree):
     """
+    sin function on degree
+    :param degree:
+    :return:
     """
-    m3 = numpy.ndarray(shape=(3,3), dtype='float')
+    return numpy.sin(degree / 180. * numpy.pi)
+
+
+def m_cos(degree):
+    """
+    cosine function on degree
+    :param degree:
+    :return:
+    """
+    return numpy.cos(degree / 180. * numpy.pi)
+
+        
+def multiply_matrices(m1, m2):
+    """
+    multiply 2 matrices: same as numpy.dot()
+    :param m1:
+    :param m2:
+    :return:
+    """
+    m3 = numpy.ndarray(shape=(3, 3), dtype='float')
     
     for i in range(3):
         for j in range(3):
-            m3[i,j] = 0.
+            m3[i, j] = 0.
             for k in range(3):
-                m3[i,j] += m1[i][k] * m2[k][j]
+                m3[i, j] += m1[i][k] * m2[k][j]
                 
     return m3
+
     
-def multiply_2_1(med_matrix, upphi):
+def multiply_matrix_vector(matrix, vector):
+    """
+    multiply matrix and vector: same as numpy.dot()
+    :param matrix:
+    :param vector:
+    :return:
+    """
     out = numpy.ndarray(shape=(3,))
     for i in range(3):
         out[i] = 0
         for j in range(3):
-            out[i] += med_matrix[i,j]*upphi[j]
+            out[i] += matrix[i, j] * vector[j]
             
     return out
 
 
-def invert_matrix(np_matrix):
+def invert_matrix(matrix):
     """
+
+    :param matrix:
+    :return:
     """
-    import numpy
-    assert isinstance(np_matrix,  numpy.ndarray), 'must be a numpy array but not %s.' % type(np_matrix)
-    assert np_matrix.shape == (3, 3)
+    # check
+    assert isinstance(matrix, numpy.ndarray), 'Input must be a numpy array but not %s.' % type(matrix)
+    assert matrix.shape == (3, 3)
 
-    import numpy.linalg
+    # invert matrix
+    inv_matrix = numpy.linalg.inv(matrix)
 
-    inv_matrix = numpy.linalg.inv(np_matrix)
-    
-    print '[DB...TEST] Inverted * Original = ', numpy.linalg.det(numpy.dot(inv_matrix, np_matrix))
-    
-        
-    # FIXME - delete this another test
-    print '[DB...TEST] Local multiply = ',  numpy.linalg.det(multiply(np_matrix, inv_matrix))
- 
+    # test
+    assert abs(numpy.linalg.det(numpy.dot(inv_matrix, matrix)) - 1.0) < 0.00001
 
     return inv_matrix
 
 
-def calculate_matrix(a, b, c, alpha, beta, gamma, spice_ub):
+def calculate_reciprocal_lattice(lattice):
     """
-    """
-    lattice = Lattice(a, b, c, alpha, beta, gamma)
 
-    matrix_B = calculate_B_matrix(lattice)
+    :param lattice:
+    :return:
+    """
+    # check
+    assert isinstance(lattice, Lattice)
 
-    return matrix_B
-    
-    
-def m_sin(degree):
-    """
-    """
-    return numpy.sin(degree / 180. * numpy.pi)
-    
- 
-def m_cos(degree):
-    """   0   0   2   12.10    3.48   1   -0.94    0.98   -0.19    0.20    0.27    0.00
+    # calculate reciprocal lattice
+    lattice_star = Lattice(1, 1, 1, 0, 0, 0)
 
-    """
-    return numpy.cos(degree / 180. * numpy.pi)
+    # calculate volume
+    volume = 2 * lattice.a * lattice.b * lattice.c * numpy.sqrt(
+        m_sin((lattice.alpha + lattice.beta + lattice.gamma) / 2) *
+        m_sin((-lattice.alpha + lattice.beta + lattice.gamma) / 2) *
+        m_sin((lattice.alpha - lattice.beta + lattice.gamma) / 2) *
+        m_sin((lattice.alpha + lattice.beta - lattice.gamma) / 2))
+    #  v_start = (2 * numpy.pi) ** 3. / volume
+
+    # calculate a*, b*, c*
+    lattice_star.a = 2 * numpy.pi * lattice.b * lattice.c * m_sin(lattice.alpha) / volume
+    lattice_star.b = 2 * numpy.pi * lattice.a * lattice.c * m_sin(lattice.beta) / volume
+    lattice_star.c = 2 * numpy.pi * lattice.b * lattice.a * m_sin(lattice.gamma) / volume
+
+    lattice_star.alpha = math.acos((m_cos(lattice.beta) * m_cos(lattice.gamma) - m_cos(lattice.alpha)) /
+                                   (m_sin(lattice.beta) * m_sin(lattice.gamma))) * 180. / numpy.pi
+    lattice_star.beta = math.acos((m_cos(lattice.alpha) * m_cos(lattice.gamma) - m_cos(lattice.beta)) /
+                                  (m_sin(lattice.alpha) * m_sin(lattice.gamma))) * 180. / numpy.pi
+    lattice_star.gamma = math.acos((m_cos(lattice.alpha) * m_cos(lattice.beta) - m_cos(lattice.gamma)) /
+                                   (m_sin(lattice.alpha) * m_sin(lattice.beta))) * 180. / numpy.pi
+
+    return lattice_star
 
 
-def calculate_B_matrix(lattice):
+def calculate_b_matrix(lattice):
     """
+    calculate B matrix
+    :param lattice:
+    :return:
     """
-    # FIXME - why there are /(2*pi) terms in the original formula
-    
-    latticestar = Lattice(1,1,1,0,0,0)
-    
-    # calculaste lattice *
-    V=2*lattice.a*lattice.b*lattice.c*numpy.sqrt(m_sin((lattice.alpha+lattice.beta+lattice.gamma)/2)*m_sin((-lattice.alpha+lattice.beta+lattice.gamma)/2)*m_sin((lattice.alpha-lattice.beta+lattice.gamma)/2)*m_sin((lattice.alpha+lattice.beta-lattice.gamma)/2))
-    Vstar=(2*numpy.pi)**3./V;
-    latticestar.a=2*numpy.pi*lattice.b*lattice.c*m_sin(lattice.alpha)/V
-    latticestar.b=2*numpy.pi*lattice.a*lattice.c*m_sin(lattice.beta)/V
-    latticestar.c=2*numpy.pi*lattice.b*lattice.a*m_sin(lattice.gamma)/V
-    print 'XXX: ', (m_cos(lattice.beta)*m_cos(lattice.gamma)-m_cos(lattice.alpha))/(m_sin(lattice.beta)*m_sin(lattice.gamma)) 
-    latticestar.alpha=math.acos( (m_cos(lattice.beta)*m_cos(lattice.gamma)-m_cos(lattice.alpha))/(m_sin(lattice.beta)*m_sin(lattice.gamma)) ) * 180./numpy.pi
-    latticestar.beta= math.acos( (m_cos(lattice.alpha)*m_cos(lattice.gamma)-m_cos(lattice.beta))/(m_sin(lattice.alpha)*m_sin(lattice.gamma)) ) * 180./numpy.pi
-    latticestar.gamma=math.acos( (m_cos(lattice.alpha)*m_cos(lattice.beta)-m_cos(lattice.gamma))/(m_sin(lattice.alpha)*m_sin(lattice.beta)) ) * 180./numpy.pi
-    
-    print 'Lattice * = ', latticestar
- 
-    B = numpy.ndarray(shape=(3,3), dtype='float')
-    
-    B[0, 0] = latticestar.a/(0.5*numpy.pi)
-    B[0, 1] = latticestar.b*m_cos(latticestar.gamma)/(0.5*numpy.pi)
-    B[0, 2] = latticestar.c*m_cos(latticestar.beta)/(0.5*numpy.pi)
-    B[1, 0] = 0
-    B[1, 1] = latticestar.b*m_sin(latticestar.gamma)/(0.5*numpy.pi)
-    B[1, 2] = -latticestar.c*m_sin(latticestar.beta)*m_cos(latticestar.alpha)/(0.5*numpy.pi)
-    B[2, 0] = 0
-    B[2, 1] = 0
-    B[2, 2] = 1/lattice.c
-    
-    print '[DB...TEST] B matrix: determination = ',  np.linalg.det(B), '\n', B
- 
-    return B 
+    # check
+    assert isinstance(lattice, Lattice)
+
+    # reciprocal lattice
+    lattice_star = calculate_reciprocal_lattice(lattice)
+    # print 'Lattice * = ', lattice_star
+
+    b_matrix = numpy.ndarray(shape=(3, 3), dtype='float')
+
+    b_matrix[0, 0] = lattice_star.a / (0.5 * numpy.pi)
+    b_matrix[0, 1] = lattice_star.b * m_cos(lattice_star.gamma) / (0.5 * numpy.pi)
+    b_matrix[0, 2] = lattice_star.c * m_cos(lattice_star.beta) / (0.5 * numpy.pi)
+    b_matrix[1, 0] = 0
+    b_matrix[1, 1] = lattice_star.b * m_sin(lattice_star.gamma) / (0.5 * numpy.pi)
+    b_matrix[1, 2] = -lattice_star.c * m_sin(lattice_star.beta) * m_cos(lattice_star.alpha) / (0.5 * numpy.pi)
+    b_matrix[2, 0] = 0
+    b_matrix[2, 1] = 0
+    b_matrix[2, 2] = 1 / lattice.c
+
+    #  print '[DB...TEST] B matrix: determination = ', numpy.linalg.det(b_matrix), '\n', b_matrix
+
+    return b_matrix
+
 
 def calculate_upphi(omg0, theta2ave, chiave, phiave):
     """ Equation 58 busing paper
     """
-    upphi = numpy.ndarray(shape=(3,), dtype='float')
-    upphi[0] = m_sin(theta2ave*0.5+omg0)*m_cos(chiave)*m_cos(phiave)+m_cos(theta2ave*0.5+omg0)*m_sin(phiave)
-    upphi[1] = m_sin(theta2ave*0.5+omg0)*m_cos(chiave)*m_sin(phiave)-m_cos(theta2ave*0.5+omg0)*m_cos(phiave)
-    upphi[2] = m_sin(theta2ave*0.5+omg0)*m_sin(chiave)
+    up_phi = numpy.ndarray(shape=(3,), dtype='float')
+    up_phi[0] = m_sin(theta2ave*0.5+omg0)*m_cos(chiave)*m_cos(phiave)+m_cos(theta2ave*0.5+omg0)*m_sin(phiave)
+    up_phi[1] = m_sin(theta2ave*0.5+omg0)*m_cos(chiave)*m_sin(phiave)-m_cos(theta2ave*0.5+omg0)*m_cos(phiave)
+    up_phi[2] = m_sin(theta2ave*0.5+omg0)*m_sin(chiave)
     
-    print '[DB...TEST] UP PHI = ', upphi, '|UP PHI| = ', numpy.dot(upphi, upphi)
+    print '[DB...TEST] UP PHI = ', up_phi, '|UP PHI| = ', numpy.dot(up_phi, up_phi)
 
-    return upphi
+    return up_phi
+
 
 def calculate_usphi(omg0, theta2ave, chiave, phiave):
     """ Equation 58 busing paper
     """
-    usphi=numpy.ndarray(shape=(3,), dtype='float')
-    usphi[0] =m_sin(theta2ave*0.5-omg0)*m_cos(chiave)*m_cos(phiave)-m_cos(theta2ave*0.5-omg0)*m_sin(phiave)
-    usphi[1] =m_sin(theta2ave*0.5-omg0)*m_cos(chiave)*m_sin(phiave)+m_cos(theta2ave*0.5-omg0)*m_cos(phiave)
-    usphi[2] =m_sin(theta2ave*0.5-omg0)*m_sin(chiave)
+    us_phi = numpy.ndarray(shape=(3,), dtype='float')
+    us_phi[0] = m_sin(theta2ave*0.5-omg0)*m_cos(chiave)*m_cos(phiave)-m_cos(theta2ave*0.5-omg0)*m_sin(phiave)
+    us_phi[1] = m_sin(theta2ave*0.5-omg0)*m_cos(chiave)*m_sin(phiave)+m_cos(theta2ave*0.5-omg0)*m_cos(phiave)
+    us_phi[2] = m_sin(theta2ave*0.5-omg0)*m_sin(chiave)
     
-    print '[DB...TEST] US PHI = ', usphi, '|US PHI| = ', numpy.dot(usphi, usphi)
+    print '[DB...TEST] US PHI = ', us_phi, '|US PHI| = ', numpy.dot(us_phi, us_phi)
 
-    return usphi
+    return us_phi
 
 
 def calculate_absorption_correction_spice(exp_number, scan_number, lattice, ub_matrix):
@@ -167,14 +217,14 @@ def calculate_absorption_correction_spice(exp_number, scan_number, lattice, ub_m
     upphi = calculate_upphi(omg0, theta2ave, chiave, phiave)
     usphi = calculate_usphi(omg0, theta2ave, chiave, phiave)
     
-    matrix_B = calculate_B_matrix(lattice)
+    matrix_B = calculate_b_matrix(lattice)
 
     invUB = invert_matrix(ub_matrix)
 
     # upcart = numpy.dot(numpy.dot(matrix_B, invUB), upphi)
-    med_matrix = multiply(matrix_B, invUB)
-    upcart = multiply_2_1(med_matrix, upphi)
-    multiply_2_1(med_matrix, upphi)
+    med_matrix = multiply_matrices(matrix_B, invUB)
+    upcart = multiply_matrix_vector(med_matrix, upphi)
+    multiply_matrix_vector(med_matrix, upphi)
     
     uscart = numpy.dot(numpy.dot(matrix_B, invUB), usphi)
 
@@ -201,10 +251,46 @@ def get_average_spice_table(exp_number, scan_number, col_name):
     return avg_value
 
 
+def get_average_omega(exp_number, scan_number):
+    """
+    Get average omega (omega-theta)
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    # get table workspace
+    # FIXME - this is very vulnerable for hardcode the workspace's name
+    spice_table_name = 'HB3A_Exp%d_%04d_SpiceTable' % (exp_number, scan_number)
+    spice_table = AnalysisDataService.retrieve(spice_table_name)
+
+    # column index
+    col_omega_index = spice_table.getColumnNames().index('omega')
+    col_2theta_index = spice_table.getColumnNames().index('2theta')
+
+    # get the vectors
+    vec_size = spice_table.rowCount()
+    vec_omega = numpy.ndarray(shape=(vec_size, ), dtype='float')
+    vec_2theta = numpy.ndarray(shape=(vec_size, ), dtype='float')
+
+    for i_row in range(vec_size):
+        vec_omega[i_row] = spice_table.cell(i_row, col_omega_index)
+        vec_2theta[i_row] = spice_table.cell(i_row, col_2theta_index)
+    # END-FOR
+
+    vec_omega -= vec_2theta * 0.5
+
+    return numpy.sum(vec_omega)
+
+
 def convert_mantid_ub_to_spice(mantid_ub):
     """
+    Convert Mantid UB matrix to SPICE ub matrix
+    :param mantid_ub:
+    :return:
     """
+    # create SPICE UB
     spice_ub = numpy.ndarray((3, 3), 'float')
+
     # row 0
     for i in range(3):
         spice_ub[0, i] = mantid_ub[0, i]
@@ -218,66 +304,56 @@ def convert_mantid_ub_to_spice(mantid_ub):
     return spice_ub
     
     
-def calculate_absorption_correction_2(exp_number, scan_number, lattice, ub_matrix):
+def calculate_absorption_correction_2(exp_number, scan_number, spice_ub_matrix):
     """
-    SPICE ub matrix -0.1482003, -0.0376897, 0.0665967, 
-                             -0.0494848, 0.2256107, 0.0025953, 
-                             -0.1702423, -0.0327691, -0.0587285, 
+    Second approach to calculate absorption correction factor without calculating B matrix
+    :param exp_number:
+    :param scan_number:
+    :param spice_ub_matrix:
+    :return:
     """
-
     # process angles from SPICE table
     theta2ave = get_average_spice_table(exp_number, scan_number, '2theta')  # sum(theta2(:))/length(theta2);
-    chiave = get_average_spice_table(exp_number, scan_number, 'chi') # sum(chi(:))/length(chi);
-    phiave = get_average_spice_table(exp_number, scan_number, 'phi') # sum(phi(:))/length(phi);
-    omg0 = theta2ave * 0.5
+    chiave = get_average_spice_table(exp_number, scan_number, 'chi')  # sum(chi(:))/length(chi);
+    phiave = get_average_spice_table(exp_number, scan_number, 'phi')  # sum(phi(:))/length(phi);
+    avg_omega = get_average_omega(exp_number, scan_number)
     
-    print '[DB...TEST] Exp = %d Scan = %d:\n2theta = %f, chi = %f, phi = %f, omega = %f' % (exp_number, scan_number, theta2ave, chiave, phiave, omg0)
+    print '[DB...TEST] Exp = %d Scan = %d:\n2theta = %f, chi = %f, phi = %f, omega = %f' % (exp_number, scan_number, theta2ave, chiave, phiave, avg_omega)
 
-    upphi = calculate_upphi(omg0, theta2ave, chiave, phiave)
-    usphi = calculate_usphi(omg0, theta2ave, chiave, phiave)
+    up_phi = calculate_upphi(avg_omega, theta2ave, chiave, phiave)
+    us_phi = calculate_usphi(avg_omega, theta2ave, chiave, phiave)
     
-    Q=numpy.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-    Qc=numpy.dot(ub_matrix, Q)
-    print Qc
-    h1c=Qc[:,0] 
-    h2c=Qc[:,1] 
-    h3c=Qc[:,2]    
+    vec_q = numpy.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+    matrix_q = numpy.dot(spice_ub_matrix, vec_q)
+    h1c = matrix_q[:, 0]
+    h2c = matrix_q[:, 1]
+    h3c = matrix_q[:, 2]
  
-    t1c=h1c/(math.sqrt(h1c[1]**2+h1c[2]**2+h1c[0]**2))
-    t2c=h2c/(math.sqrt(h2c[1]**2+h2c[2]**2+h2c[0]**2))
-    t3c=h3c/(math.sqrt(h3c[1]**2+h3c[2]**2+h3c[0]**2))
+    t1c = h1c/(math.sqrt(h1c[1]**2+h1c[2]**2+h1c[0]**2))
+    t2c = h2c/(math.sqrt(h2c[1]**2+h2c[2]**2+h2c[0]**2))
+    t3c = h3c/(math.sqrt(h3c[1]**2+h3c[2]**2+h3c[0]**2))
 
-    upcart = numpy.ndarray(shape=(3,))
-    upcart[0]=numpy.dot(upphi, t1c)
-    upcart[1]=numpy.dot(upphi, t2c) 
-    upcart[2]=numpy.dot(upphi, t3c)
+    up_cart = numpy.ndarray(shape=(3,))
+    up_cart[0] = numpy.dot(up_phi, t1c)
+    up_cart[1] = numpy.dot(up_phi, t2c)
+    up_cart[2] = numpy.dot(up_phi, t3c)
     
-    uscart = numpy.ndarray(shape=(3,))
-    uscart[0]=numpy.dot(usphi, t1c)
-    uscart[1]=numpy.dot(usphi, t2c)
-    uscart[2]=numpy.dot(usphi, t3c)
-
-    # matrix_B = calculate_B_matrix(lattice)
-    # invUB = invert_matrix(ub_matrix)
-
-    # upcart = numpy.dot(numpy.dot(matrix_B, invUB), upphi)
-    # med_matrix = multiply(matrix_B, invUB)
-    # upcart = multiply_2_1(med_matrix, upphi)
-    # multiply_2_1(med_matrix, upphi)
+    us_cart = numpy.ndarray(shape=(3,))
+    us_cart[0] = numpy.dot(us_phi, t1c)
+    us_cart[1] = numpy.dot(us_phi, t2c)
+    us_cart[2] = numpy.dot(us_phi, t3c)
     
-    # uscart = numpy.dot(numpy.dot(matrix_B, invUB), usphi)
-
-    print '[DB...BAT] ', upcart, uscart
-    
-    return upcart, uscart
+    return up_cart, us_cart
     
 # Test ... ...
 
-lattice = Lattice(4.32765, 4.32765, 11.25736, 90., 90., 90.)
+test_lattice = Lattice(4.32765, 4.32765, 11.25736, 90., 90., 90.)
 ub_matrix = numpy.array([[-0.1482003, -0.0376897, 0.0665967], [-0.0494848, 0.2256107, 0.0025953],[-0.1702423, -0.0327691, -0.0587285]])
-spice_ub = convert_mantid_ub_to_spice(ub_matrix)
-spice_ub = numpy.array([[ -0.149514, -0.036502, 0.066258], [0.168508, 0.028803, 0.059636],  [-0.045800, 0.225134, 0.003113]])
-upcart, uscart = calculate_absorption_correction_2(522, 52, lattice, spice_ub)
+# ub_matrix_5k = convert_mantid_ub_to_spice(ub_matrix)
+ub_matrix_5k = numpy.array([[-0.149514, -0.036502, 0.066258], [0.168508, 0.028803, 0.059636], [-0.045800, 0.225134, 0.003113]])
+upcart, uscart = calculate_absorption_correction_2(522, 52,  ub_matrix_5k)
+print upcart
+print uscart
 
 
 

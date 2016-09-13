@@ -496,9 +496,11 @@ class CWSCDReductionControl(object):
         """
         # check
         assert isinstance(exp_number, int), 'Experiment number must be an integer but not %s.' % str(type(exp_number))
-        assert exp_number in self._myUBMatrixDict, 'Experiment number %d has no UB matrix set up. Here ' \
-                                                   'are list of experiments that have UB matrix set up: ' \
-                                                   '%s.' % (exp_number, str(self._myUBMatrixDict.keys()))
+        if exp_number not in self._myUBMatrixDict:
+            err_msg = 'Experiment number %d has no UB matrix set up. Here ' \
+                      'are list of experiments that have UB matrix set up: %s.' \
+                      '' % (exp_number, str(self._myUBMatrixDict.keys()))
+            raise KeyError(err_msg)
 
         return self._myUBMatrixDict[exp_number]
 

@@ -30,13 +30,10 @@ except ImportError as e:
 else:
     NO_SCROLL = False
 
-import reduce4circleControl as r4c
 import guiutility as gutil
 import fourcircle_utility as hb3a
 import plot3dwindow
 from multi_threads_helpers import *
-
-
 
 # import line for the UI python class
 from ui_MainWindow import Ui_MainWindow
@@ -314,7 +311,7 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         self._baseTitle = str(self.windowTitle())
-        self.setWindowTitle('%s: No Scan Is Set' % self._baseTitle)
+        self.setWindowTitle('%s: No Experiment Is Set' % self._baseTitle)
 
         # Table widgets
         self.ui.tableWidget_peaksCalUB.setup()
@@ -2056,7 +2053,7 @@ class MainWindow(QtGui.QMainWindow):
             self._myControl.set_exp_number(exp_number)
             self.ui.lineEdit_exp.setStyleSheet('color: black')
 
-            self.setWindowTitle('%s: Scan %d' % (self._baseTitle, exp_number))
+            self.setWindowTitle('%s: Experiment %d' % (self._baseTitle, exp_number))
         else:
             err_msg = ret_obj
             self.pop_one_button_dialog('Unable to set experiment as %s' % err_msg)
@@ -2087,7 +2084,12 @@ class MainWindow(QtGui.QMainWindow):
                 hkl_i = self._myControl.get_peak_info(exp_number, scan_number=scan_i).get_spice_hkl()
             else:
                 # calculate HKL from SPICE
-                ub_matrix = self._myControl.get_ub_matrix(exp_number)
+                try:
+                    ub_matrix = self._myControl.get_ub_matrix(exp_number)
+                except KeyError as key_err:
+                    print 'Error to get UB matrix: %s' % str(key_err)
+                    self.pop_one_button_dialog('Unable to get UB matrix.\nCheck whether UB matrix is set.')
+                    return
                 index_status, ret_tup = self._myControl.index_peak(ub_matrix, scan_i)
                 if index_status:
                     hkl_i = ret_tup[0]
