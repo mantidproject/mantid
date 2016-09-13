@@ -28,11 +28,14 @@ class SeparateMonitorSpectra(DataProcessorAlgorithm):
     def validateInputs(self):
         issues = {}
 
-        if not self.getProperty("DetectorWorkspace").valueAsStr and not self.getProperty("MonitorWorkspace").valueAsStr:
+        detector_ws_name = self.getProperty("DetectorWorkspace").valueAsStr
+        monitor_ws_name = self.getProperty("MonitorWorkspace").valueAsStr
+
+        if not detector_ws_name and not monitor_ws_name:
             msg = "Must specify one of DetectorsWorkspace or MonitorsWorkspace"
             issues["DetectorWorkspace"] = msg
             issues["MonitorWorkspace"] = msg
-        elif self.getProperty("DetectorWorkspace").valueAsStr == self.getProperty("MonitorWorkspace").valueAsStr:
+        elif detector_ws_name == monitor_ws_name:
             msg = "DetectorWorkspace and MonitorWorkspace must be different"
             issues["DetectorWorkspace"] = msg
             issues["MonitorWorkspace"] = msg
@@ -58,16 +61,21 @@ class SeparateMonitorSpectra(DataProcessorAlgorithm):
             except RuntimeError:
                 self.log().warning("Missing detector at " + str(i))
 
+        if detector_ws_name:
+            if detectors:
+                detector_ws = ExtractSpectra(InputWorkspace=ws, OutputWorkspace=detector_ws_name, WorkspaceIndexList=detectors)
+                self.setProperty("DetectorWorkspace", detector_ws)
+            else:
+                self.log().error("No detectors found in input workspace. No detector output workspace created.")
 
-        if self.getProperty("DetectorWorkspace").valueAsStr:
-            detector_ws = ExtractSpectra(InputWorkspace=ws, OutputWorkspace=detector_ws_name, WorkspaceIndexList=detectors)
-            self.setProperty("DetectorWorkspace", detector_ws)
+        if monitor_ws_name:
+            if monitors:
+                monitor_ws = ExtractSpectra(InputWorkspace=ws, OutputWorkspace=monitor_ws_name,  WorkspaceIndexList=monitors)
+                self.setProperty("MonitorWorkspace", monitor_ws)
+            else:
+                self.log().error("No monitors found in input workspace. No monitor output workspace created.")
 
-        if self.getProperty("MonitorWorkspace").valueAsStr:
-            monitor_ws = ExtractSpectra(InputWorkspace=ws, OutputWorkspace=monitor_ws_name,  WorkspaceIndexList=monitors)
-            self.setProperty("MonitorWorkspace", monitor_ws)
-
-        if self.getProperty("DetectorWorkspace").valueAsStr and self.getProperty("MonitorWorkspace").valueAsStr:
+        if detector_ws_name and detectors and monitor_ws_name and monitors:
             detector_ws.setMonitorWorkspace(monitor_ws)
 
 AlgorithmFactory.subscribe(SeparateMonitorSpectra)
