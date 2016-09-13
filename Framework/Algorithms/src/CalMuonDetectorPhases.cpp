@@ -156,7 +156,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
   resTab->addColumn("double", "Asymmetry");
   resTab->addColumn("double", "Phase");
 
-  auto indexInfo = ws->indexInfo();
+  const auto &indexInfo = ws->indexInfo();
 
   // Loop through fitting all spectra individually
   const static std::string success = "success";

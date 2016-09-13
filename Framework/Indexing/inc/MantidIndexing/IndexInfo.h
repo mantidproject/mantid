@@ -4,6 +4,8 @@
 #include "MantidIndexing/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
+#include <functional>
+#include <set>
 #include <vector>
 
 namespace Mantid {
@@ -47,15 +49,29 @@ public:
   // SpectrumNumber = WorkspaceIndex + 1 (will always be more complex with
   // MPI?).
   explicit IndexInfo(const size_t globalSize);
+  IndexInfo(std::vector<specnum_t> &&spectrumNumbers,
+            std::vector<std::vector<detid_t>> &&detectorIDs);
+  IndexInfo(
+      const size_t globalSize,
+      std::function<specnum_t(const size_t)> getSpectrumNumber,
+      std::function<const std::set<specnum_t> &(const size_t)> getDetectorIDs);
+
+  IndexInfo(const IndexInfo &other);
 
   /// The *local* size, i.e., the number of spectra in this partition.
   size_t size() const;
 
   specnum_t spectrumNumber(const size_t index) const {
+    if (m_isLegacy)
+      return m_getSpectrumNumber(index);
     return (*m_spectrumNumbers)[index];
   }
 
   std::vector<detid_t> detectorIDs(const size_t index) const {
+    if (m_isLegacy) {
+      const auto &ids = m_getDetectorIDs(index);
+      return std::vector<detid_t>(ids.begin(), ids.end());
+    }
     return (*m_detectorIDs)[index];
   }
 
@@ -100,6 +116,11 @@ public:
   // std::vector<detid_t> detectorIDs(const size_t index) const;
 
 private:
+  bool m_isLegacy{false};
+  size_t m_legacySize;
+  std::function<specnum_t(const size_t)> m_getSpectrumNumber;
+  std::function<const std::set<specnum_t> &(const size_t)> m_getDetectorIDs;
+
   // temporarily: friend class MatrixWorkspace?
   // const std::vector<specnum_t> &spectrumNumbers() const &;
   // const std::vector<std::vector<detid_t>> &detectorIDs() const &;

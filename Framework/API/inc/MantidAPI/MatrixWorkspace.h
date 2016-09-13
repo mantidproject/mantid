@@ -92,7 +92,7 @@ public:
     return MatrixWorkspace_uptr(doCloneEmpty());
   }
 
-  Indexing::IndexInfo indexInfo() const;
+  const Indexing::IndexInfo &indexInfo() const;
   void setIndexInfo(const Indexing::IndexInfo &indexInfo);
 
   using IMDWorkspace::toString;
@@ -610,6 +610,13 @@ private:
   /// Copy data from an image.
   void setImage(MantidVec &(MatrixWorkspace::*dataVec)(const std::size_t),
                 const MantidImage &image, size_t start, bool parallelExecution);
+
+  // Helper functions for IndexInfo, as a workaround while spectrum numbers and
+  // detector IDs are still stored in ISpectrum.
+  specnum_t spectrumNumber(const size_t index) const;
+  const std::set<detid_t> &detectorIDs(const size_t index) const;
+
+  std::unique_ptr<Indexing::IndexInfo> m_indexInfo;
 
   /// Has this workspace been initialised?
   bool m_isInitialized;

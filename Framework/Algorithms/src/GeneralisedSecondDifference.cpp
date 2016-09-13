@@ -93,7 +93,7 @@ void GeneralisedSecondDifference::exec() {
   MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create(
       inputWS, n_specs, n_points + 1, n_points);
 
-  const auto indexInput = inputWS->indexInfo();
+  const auto &indexInput = inputWS->indexInfo();
   std::vector<specnum_t> specNums;
   for (int i = spec_min; i <= spec_max; i++)
     specNums.push_back(indexInput.spectrumNumber(i));

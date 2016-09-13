@@ -90,7 +90,7 @@ void FindDeadDetectors::exec() {
   int64_t iprogress_step = numSpec / 100;
   if (iprogress_step == 0)
     iprogress_step = 1;
-  auto indexInfo = integratedWorkspace->indexInfo();
+  const auto &indexInfo = integratedWorkspace->indexInfo();
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
     // Spectrum in the integratedWorkspace
     double &y = integratedWorkspace->mutableY(i)[0];

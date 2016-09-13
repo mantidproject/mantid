@@ -888,7 +888,7 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   auto working_ws =
       API::WorkspaceFactory::Instance().create(inputWS, 2, XLength, YLength);
   // copy detector mapping
-  const auto inputIndices = inputWS->indexInfo();
+  const auto &inputIndices = inputWS->indexInfo();
   auto translator = working_ws->indexInfo();
   translator.setSpectrumNumbers({specNum1, specNum2});
   translator.setDetectorIDs(

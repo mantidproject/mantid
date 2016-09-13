@@ -13,10 +13,12 @@
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidIndexing/IndexInfo.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 
+#include <functional>
 #include <numeric>
 
 using Mantid::Kernel::DateAndTime;
@@ -84,23 +86,8 @@ MatrixWorkspace::~MatrixWorkspace() {
   }
 }
 
-Indexing::IndexInfo MatrixWorkspace::indexInfo() const {
-  // Workaround while IndexInfo is not stored in MatrixWorkspace: build
-  // IndexInfo based on data in ISpectrum.
-  std::vector<specnum_t> specNums;
-  std::vector<std::vector<specnum_t>> detIDs;
-  for (size_t i = 0; i < getNumberHistograms(); ++i) {
-    const auto &spec = getSpectrum(i);
-    specNums.push_back(spec.getSpectrumNo());
-    auto set = spec.getDetectorIDs();
-    detIDs.emplace_back(set.begin(), set.end());
-  }
-  // Note: This is the local size and the local vector of spectrum numbers and
-  // detector IDs. This will not work in an MPI run.
-  Indexing::IndexInfo t(getNumberHistograms());
-  t.setSpectrumNumbers(std::move(specNums));
-  t.setDetectorIDs(std::move(detIDs));
-  return t;
+const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
+  return *m_indexInfo;
 }
 
 void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
@@ -173,6 +160,11 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
   if (m_isInitialized)
     return;
 
+  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(
+      NVectors,
+      std::bind(&MatrixWorkspace::spectrumNumber, this, std::placeholders::_1),
+      std::bind(&MatrixWorkspace::detectorIDs, this, std::placeholders::_1));
+
   // Invoke init() method of the derived class inside a try/catch clause
   try {
     this->init(NVectors, XLength, YLength);
@@ -197,6 +189,11 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
   // Bypass the initialization if the workspace has already been initialized.
   if (m_isInitialized)
     return;
+
+  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(
+      NVectors,
+      std::bind(&MatrixWorkspace::spectrumNumber, this, std::placeholders::_1),
+      std::bind(&MatrixWorkspace::detectorIDs, this, std::placeholders::_1));
 
   // Invoke init() method of the derived class inside a try/catch clause
   try {
@@ -2113,6 +2110,15 @@ void MatrixWorkspace::setImageY(const MantidImage &image, size_t start,
 void MatrixWorkspace::setImageE(const MantidImage &image, size_t start,
                                 bool parallelExecution) {
   setImage(&MatrixWorkspace::dataE, image, start, parallelExecution);
+}
+
+specnum_t MatrixWorkspace::spectrumNumber(const size_t index) const {
+  return getSpectrum(index).getSpectrumNo();
+}
+
+const std::set<detid_t> &
+MatrixWorkspace::detectorIDs(const size_t index) const {
+  return getSpectrum(index).getDetectorIDs();
 }
 
 } // namespace API

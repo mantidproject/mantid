@@ -6,6 +6,8 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidIndexing/Extract.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <algorithm>
 
@@ -95,6 +97,9 @@ void ExtractSpectra::init() {
 void ExtractSpectra::exec() {
   // Get the input workspace
   m_inputWorkspace = getProperty("InputWorkspace");
+  m_histogram = m_inputWorkspace->isHistogramData();
+  // Check for common boundaries in input workspace
+  m_commonBoundaries = WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace);
   if (eventW != nullptr) {
@@ -108,10 +113,6 @@ void ExtractSpectra::exec() {
 
 /// Execute the algorithm in case of a histogrammed data.
 void ExtractSpectra::execHistogram() {
-  m_histogram = m_inputWorkspace->isHistogramData();
-  // Check for common boundaries in input workspace
-  m_commonBoundaries = WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
-
   // Retrieve and validate the input properties
   this->checkProperties();
 
@@ -119,6 +120,8 @@ void ExtractSpectra::execHistogram() {
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       m_inputWorkspace, m_workspaceIndexList.size(), m_maxX - m_minX,
       m_maxX - m_minX - m_histogram);
+  outputWorkspace->setIndexInfo(
+      Indexing::extract(m_inputWorkspace->indexInfo(), m_workspaceIndexList));
 
   // If this is a Workspace2D, get the spectra axes for copying in the spectraNo
   // later
@@ -178,11 +181,8 @@ void ExtractSpectra::execHistogram() {
       } else if (outNumAxis) {
         outNumAxis->setValue(j, inAxis1->operator()(i));
       }
-      // spectra axis is handled by copyInfoFrom line
+      // spectra axis is implicit in workspace creation
     }
-    // Copy spectrum number & detectors
-    outputWorkspace->getSpectrum(j)
-        .copyInfoFrom(m_inputWorkspace->getSpectrum(i));
 
     if (!m_commonBoundaries)
       this->cropRagged(outputWorkspace, static_cast<int>(i), j);
@@ -233,16 +233,12 @@ void copyEventsHelper(const std::vector<T> &inputEvents,
  * input workspace
  */
 void ExtractSpectra::execEvent() {
-  m_histogram = m_inputWorkspace->isHistogramData();
   double minX_val = getProperty("XMin");
   double maxX_val = getProperty("XMax");
   if (isEmpty(minX_val))
     minX_val = eventW->getTofMin();
   if (isEmpty(maxX_val))
     maxX_val = eventW->getTofMax();
-
-  // Check for common boundaries in input workspace
-  m_commonBoundaries = WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
 
   // Retrieve and validate the input properties
   this->checkProperties();
@@ -281,6 +277,8 @@ void ExtractSpectra::execEvent() {
   // Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(*m_inputWorkspace,
                                                          outputWorkspace, true);
+  outputWorkspace->setIndexInfo(
+      Indexing::extract(m_inputWorkspace->indexInfo(), m_workspaceIndexList));
 
   Progress prog(this, 0.0, 1.0, 2 * m_workspaceIndexList.size());
   eventW->sortAll(Mantid::DataObjects::TOF_SORT, &prog);
@@ -322,9 +320,6 @@ void ExtractSpectra::execEvent() {
     }
     }
     outEL.setSortOrder(el.getSortType());
-
-    // Copy spectrum number & detector IDs
-    outEL.copyInfoFrom(el);
 
     bool hasDx = eventW->hasDx(i);
 

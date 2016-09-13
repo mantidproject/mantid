@@ -132,7 +132,7 @@ void DiffractionFocussing::exec() {
       tmpW, resultIndeces.size(), newSize + 1, newSize);
 
   std::vector<specnum_t> specNums;
-  const auto tmpIndices = tmpW->indexInfo();
+  const auto &tmpIndices = tmpW->indexInfo();
   for (int64_t hist = 0; hist < static_cast<int64_t>(resultIndeces.size());
        hist++) {
     int64_t i = resultIndeces[hist];

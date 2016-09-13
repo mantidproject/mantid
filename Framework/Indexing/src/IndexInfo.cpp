@@ -20,6 +20,37 @@ IndexInfo::IndexInfo(const size_t globalSize) {
     detIDs.emplace_back(1, static_cast<detid_t>(i));
 }
 
+IndexInfo::IndexInfo(std::vector<specnum_t> &&spectrumNumbers,
+                     std::vector<std::vector<detid_t>> &&detectorIDs) {
+  m_spectrumNumbers.access() = std::move(spectrumNumbers);
+  m_detectorIDs.access() = std::move(detectorIDs);
+}
+
+IndexInfo::IndexInfo(
+    const size_t globalSize,
+    std::function<specnum_t(const size_t)> getSpectrumNumber,
+    std::function<const std::set<specnum_t> &(const size_t)> getDetectorIDs)
+    : m_isLegacy{true}, m_legacySize(globalSize),
+      m_getSpectrumNumber(getSpectrumNumber), m_getDetectorIDs(getDetectorIDs) {
+}
+
+IndexInfo::IndexInfo(const IndexInfo &other) {
+  if (m_isLegacy) {
+    // Workaround while IndexInfo is not holding index data stored in
+    // MatrixWorkspace: build IndexInfo based on data in ISpectrum.
+    auto &specNums = m_spectrumNumbers.access();
+    auto &detIDs = m_detectorIDs.access();
+    for (size_t i = 0; i < other.m_legacySize; ++i) {
+      specNums.push_back(other.m_getSpectrumNumber(i));
+      const auto &set = other.m_getDetectorIDs(i);
+      detIDs.emplace_back(set.begin(), set.end());
+    }
+  } else {
+    m_spectrumNumbers = other.m_spectrumNumbers;
+    m_detectorIDs = other.m_detectorIDs;
+  }
+}
+
 void IndexInfo::setSpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers) & {
   if (m_spectrumNumbers->size() != spectrumNumbers.size())
     throw std::runtime_error(
