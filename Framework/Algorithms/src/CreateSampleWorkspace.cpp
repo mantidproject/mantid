@@ -129,6 +129,9 @@ void CreateSampleWorkspace::init() {
   declareProperty("NumBanks", 2,
                   boost::make_shared<BoundedValidator<int>>(0, 100),
                   "The Number of banks in the instrument (default:2)");
+  declareProperty("NumMonitors", 0,
+                  boost::make_shared<BoundedValidator<int>>(0, 100),
+                  "The number of monitors in the instrument (default:0)");
   declareProperty("BankPixelWidth", 10,
                   boost::make_shared<BoundedValidator<int>>(0, 10000),
                   "The number of pixels in horizontally and vertically in a "
@@ -169,6 +172,7 @@ void CreateSampleWorkspace::exec() {
   const std::string preDefinedFunction = getProperty("Function");
   const std::string userDefinedFunction = getProperty("UserDefinedFunction");
   const int numBanks = getProperty("NumBanks");
+  const int numMonitors = getProperty("NumMonitors");
   const int bankPixelWidth = getProperty("BankPixelWidth");
   const int numEvents = getProperty("NumEvents");
   const bool isRandom = getProperty("Random");
@@ -210,14 +214,14 @@ void CreateSampleWorkspace::exec() {
     m_randGen = new Kernel::MersenneTwister(seedValue);
   }
 
-  int numPixels = numBanks * bankPixelWidth * bankPixelWidth;
+  int numPixels = numBanks * bankPixelWidth * bankPixelWidth + numMonitors;
 
   Progress progress(this, 0, 1, numBanks);
 
   // Create an instrument with one or more rectangular banks.
   Instrument_sptr inst = createTestInstrumentRectangular(
-      progress, numBanks, bankPixelWidth, pixelSpacing, bankDistanceFromSample,
-      sourceSampleDistance);
+      progress, numBanks, numMonitors, bankPixelWidth, pixelSpacing,
+      bankDistanceFromSample, sourceSampleDistance);
 
   int num_bins = static_cast<int>((xMax - xMin) / binWidth);
 
@@ -457,8 +461,9 @@ void CreateSampleWorkspace::replaceAll(std::string &str,
  * @returns A shared pointer to the generated instrument
  */
 Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
-    API::Progress &progress, int num_banks, int pixels, double pixelSpacing,
-    const double bankDistanceFromSample, const double sourceSampleDistance) {
+    API::Progress &progress, int num_banks, int numMonitors, int pixels,
+    double pixelSpacing, const double bankDistanceFromSample,
+    const double sourceSampleDistance) {
   auto testInst = boost::make_shared<Instrument>("basic_rect");
   // The instrument is going to be set up with z as the beam axis and y as the
   // vertical axis.
@@ -482,19 +487,50 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
                      pixelSpacing, banknum * pixels * pixels, true, pixels);
 
     // Mark them all as detectors
-    for (int x = 0; x < pixels; x++)
+    for (int x = 0; x < pixels; x++) {
       for (int y = 0; y < pixels; y++) {
         boost::shared_ptr<Detector> detector = bank->getAtXY(x, y);
-        if (detector)
+        if (detector) {
           // Mark it as a detector (add to the instrument cache)
           testInst->markAsDetector(detector.get());
+        }
       }
+    }
 
     testInst->add(bank);
     // Set the bank along the z-axis of the instrument. (beam direction).
     bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample * banknum));
 
     progress.report();
+  }
+
+  int monitorsStart = (num_banks + 1) * pixels * pixels;
+
+  Object_sptr monitorShape =
+      createCappedCylinder(0.1, 0.1, V3D(0.0, -cylHeight / 2.0, 0.0),
+                           V3D(0., 1.0, 0.), "monitor-shape");
+
+  for (int monitorNumber = monitorsStart;
+       monitorNumber <= monitorsStart + numMonitors; monitorNumber++) {
+    // Make a new bank
+    std::ostringstream monitorName;
+    monitorName << "monitor" << monitorNumber;
+
+    RectangularDetector *bank = new RectangularDetector(monitorName.str());
+    bank->initialize(pixelShape, 1, 0.0, pixelSpacing, 1, 0.0, pixelSpacing,
+                     monitorNumber, true, 1);
+
+    // Mark them all as detectors
+    boost::shared_ptr<Detector> detector = bank->getAtXY(0, 0);
+    if (detector) {
+      // Mark it as a monitor (add to the instrument cache)
+      testInst->markAsMonitor(detector.get());
+    }
+
+    testInst->add(bank);
+    // Set the bank along the z-axis of the instrument, between the detectors.
+    bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample *
+                                   (monitorsStart - monitorNumber + 0.5)));
   }
 
   // Define a source component

@@ -452,6 +452,63 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
+
+  void test_histogram_monitors() {
+    // Name of the output workspace.
+    CreateSampleWorkspace alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.setProperty("NumMonitors", 2);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT(!outWS->getDetector(199)->isMonitor());
+    TS_ASSERT_DELTA(outWS->readY(199)[40], 0.3, 0.0001);
+    TS_ASSERT_DELTA(outWS->readY(199)[50], 10.3, 0.0001);
+
+    TS_ASSERT(outWS->getDetector(200)->isMonitor());
+    TS_ASSERT_DELTA(outWS->readY(200)[40], 0.3, 0.0001);
+    TS_ASSERT_DELTA(outWS->readY(200)[50], 10.3, 0.0001);
+
+    TS_ASSERT(outWS->getDetector(201)->isMonitor());
+    TS_ASSERT_DELTA(outWS->readY(200)[40], 0.3, 0.0001);
+    TS_ASSERT_DELTA(outWS->readY(200)[50], 10.3, 0.0001);
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove("outWS");
+  }
+
+  void test_event_monitors() {
+    // Name of the output workspace.
+    CreateSampleWorkspace alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.setPropertyValue("WorkspaceType", "Event");
+    alg.setProperty("NumMonitors", 2);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    EventWorkspace_sptr ews =
+        boost::dynamic_pointer_cast<EventWorkspace>(outWS);
+
+    TS_ASSERT_EQUALS(ews->getNumberEvents(), 191900);
+
+    TS_ASSERT(!ews->getDetector(199)->isMonitor());
+    TS_ASSERT_DELTA(ews->readY(199)[50], 257, 0.0001);
+    TS_ASSERT_DELTA(ews->readY(199)[60], 7, 0.0001);
+
+    TS_ASSERT(ews->getDetector(200)->isMonitor());
+    TS_ASSERT_DELTA(ews->readY(200)[50], 257, 0.0001);
+    TS_ASSERT_DELTA(ews->readY(200)[60], 7, 0.0001);
+
+    TS_ASSERT(ews->getDetector(201)->isMonitor());
+    TS_ASSERT_DELTA(ews->readY(201)[50], 257, 0.0001);
+    TS_ASSERT_DELTA(ews->readY(201)[60], 7, 0.0001);
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove("outWS");
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_CREATESAMPLEWORKSPACETEST_H_ */
