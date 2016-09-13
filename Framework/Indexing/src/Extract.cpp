@@ -14,5 +14,15 @@ IndexInfo extract(const IndexInfo &source, const std::vector<size_t> &indices) {
   return {std::move(specNums), std::move(detIDs)};
 }
 
+IndexInfo extract(const IndexInfo &source, const size_t minIndex, const size_t maxIndex) {
+  std::vector<specnum_t> specNums;
+  std::vector<std::vector<detid_t>> detIDs;
+  for (size_t i = minIndex; i <= maxIndex; ++i) {
+    specNums.emplace_back(source.spectrumNumber(i));
+    detIDs.emplace_back(source.detectorIDs(i));
+  }
+  return {std::move(specNums), std::move(detIDs)};
+}
+
 } // namespace Indexing
 } // namespace Mantid

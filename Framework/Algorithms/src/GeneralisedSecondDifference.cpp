@@ -1,12 +1,11 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/GeneralisedSecondDifference.h"
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidIndexing/Extract.h"
 #include "MantidIndexing/IndexInfo.h"
 
 #include <numeric>
@@ -84,22 +83,14 @@ void GeneralisedSecondDifference::exec() {
   // Calculate the Cij and Cij^2 coefficients
   computePrefactors();
 
-  const int n_specs = spec_max - spec_min + 1;
   const int n_points = static_cast<int>(inputWS->y(0).size()) - 2 * n_av;
   if (n_points < 1) {
     throw std::invalid_argument("Invalid (M,Z) values");
   }
   // Create OuputWorkspace
-  MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create(
-      inputWS, n_specs, n_points + 1, n_points);
-
-  const auto &indexInput = inputWS->indexInfo();
-  std::vector<specnum_t> specNums;
-  for (int i = spec_min; i <= spec_max; i++)
-    specNums.push_back(indexInput.spectrumNumber(i));
-  auto indexOut = out->indexInfo();
-  indexOut.setSpectrumNumbers(std::move(specNums));
-  out->setIndexInfo(indexOut);
+  auto out = DataObjects::create<HistoWorkspace>(
+      *inputWS, Indexing::extract(inputWS->indexInfo(), spec_min, spec_max),
+      HistogramData::Histogram(HistogramData::BinEdges(n_points + 1)));
 
   const int nsteps = 2 * n_av + 1;
 

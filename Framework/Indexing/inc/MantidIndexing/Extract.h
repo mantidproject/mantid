@@ -34,6 +34,8 @@ class IndexInfo;
 */
 MANTID_INDEXING_DLL IndexInfo
 extract(const IndexInfo &source, const std::vector<size_t> &indices);
+MANTID_INDEXING_DLL IndexInfo
+extract(const IndexInfo &source, const size_t minIndex, const size_t maxIndex);
 //IndexInfo extract(const IndexInfo &source, const std::vector<SpectrumNumber> &spectrumNumbers);
 //IndexInfo extract(const IndexInfo &source, const std::vector<GlobalSpectrumIndex> &globalSpectrumIndices);
 
