@@ -79,6 +79,7 @@ set ( TEST_PY_FILES
   SavePlot1DTest.py
   SavePlot1DAsJsonTest.py
   SaveVulcanGSSTest.py
+  SeparateMonitorSpectraTest.py
   SetDetScaleTest.py
   SimulatedDensityOfStatesTest.py
   SortByQVectorsTest.py
