@@ -1,5 +1,6 @@
 #include "MantidDataHandling/PDLoadCharacterizations.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -26,6 +27,11 @@ static const std::string ZERO("0.");
 static const std::string EXP_INI_VAN_KEY("Vana");
 static const std::string EXP_INI_EMPTY_KEY("VanaBg");
 static const std::string EXP_INI_CAN_KEY("MTc");
+// in the filenames vector, each index has a unique location
+static const int F_INDEX_V0 = 0;
+static const int F_INDEX_V1 = 1;
+static const int F_INDEX_EXPINI = 2;
+static const int F_INDEX_SIZE = 3;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -46,9 +52,9 @@ const std::string PDLoadCharacterizations::category() const {
 /** Initialize the algorithm's properties.
  */
 void PDLoadCharacterizations::init() {
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".txt"),
-      "Characterizations file");
+  declareProperty(make_unique<MultipleFileProperty>(
+                      "Filename", std::vector<std::string>({".txt"})),
+                  "Characterizations file");
   declareProperty(make_unique<FileProperty>("ExpIniFilename", "",
                                             FileProperty::OptionalLoad, "ini"),
                   "(Optional) exp.ini file used at NOMAD");
@@ -86,25 +92,12 @@ void PDLoadCharacterizations::init() {
 /** Execute the algorithm.
  */
 void PDLoadCharacterizations::exec() {
-  // open the file for reading
-  std::string filename = this->getProperty("Filename");
-  std::ifstream file(filename.c_str());
-  if (!file) {
-    throw Exception::FileError("Unable to open file", filename);
+  auto filenames = this->getFilenames();
+
+  for (const auto filename : filenames) {
+    std::cout << filename << std::endl;
   }
 
-  // read the first line and decide what to do
-  std::string firstLine = Strings::getLine(file);
-  if (firstLine.substr(0, IPARM_KEY.size()) == IPARM_KEY) {
-    firstLine = Strings::strip(firstLine.substr(IPARM_KEY.size()));
-    this->setProperty("IParmFilename", firstLine);
-    this->readFocusInfo(file);
-  } else {
-    // things expect the L1 to be zero if it isn't set
-    this->setProperty("PrimaryFlightPath", 0.);
-  }
-
-  // now the rest of the file
   // setup the default table workspace for the characterization runs
   ITableWorkspace_sptr wksp = WorkspaceFactory::Instance().createTable();
   wksp->addColumn("double", "frequency");
@@ -112,22 +105,60 @@ void PDLoadCharacterizations::exec() {
   wksp->addColumn("int", "bank");
   wksp->addColumn("str", "vanadium");
   wksp->addColumn("str", "container");
-  wksp->addColumn("str", "empty");
+  wksp->addColumn("str", "empty_environment");
+  wksp->addColumn("str", "empty_instrument");
   wksp->addColumn("str", "d_min"); // b/c it is an array for NOMAD
   wksp->addColumn("str", "d_max"); // b/c it is an array for NOMAD
   wksp->addColumn("double", "tof_min");
   wksp->addColumn("double", "tof_max");
   wksp->addColumn("double", "wavelength_min");
   wksp->addColumn("double", "wavelength_max");
-  this->readCharInfo(file, wksp);
+
+  // first file is assumed to be version 0
+  this->readVersion0(filenames[F_INDEX_V0], wksp);
+
+  // optional second file has container dependent information
+  this->readVersion1(filenames[F_INDEX_V1], wksp);
+
+  // optional exp.ini file for NOMAD
+  this->readExpIni(filenames[F_INDEX_EXPINI], wksp);
+
+  this->setProperty("OutputWorkspace", wksp);
+}
+
+/**
+ * This ignores the traditional interpretation of
+ * Mantid::API::MultipleFileProperty
+ * and flattens the array into a simple list of filenames.
+ */
+std::vector<std::string> PDLoadCharacterizations::getFilenames() {
+  // get the values from the "Filename" property
+  std::vector<std::string> filenamesFromPropertyUnraveld;
+  std::vector<std::vector<std::string>> filenamesFromProperty =
+      this->getProperty("Filename");
+  for (auto outer : filenamesFromProperty) {
+    for (auto inner : outer) {
+      filenamesFromPropertyUnraveld.push_back(inner);
+    }
+  }
+  // error check that something sensible was supplied
+  if (filenamesFromPropertyUnraveld.size() > 2) {
+    throw std::runtime_error("Can only specify up to 2 characterization files");
+  }
+
+  // fill the output array - TODO
+  // <<<<<<<<<<<<<<<<<<<<<==================================
+  std::vector<std::string> filenames(F_INDEX_SIZE);
+  filenames[F_INDEX_V0] = filenamesFromPropertyUnraveld[0];
+  if (filenamesFromPropertyUnraveld.size() > 1)
+    filenames[F_INDEX_V1] = filenamesFromPropertyUnraveld[1];
 
   // optional exp.ini file for NOMAD
   std::string iniFilename = this->getProperty("ExpIniFilename");
   if (!iniFilename.empty()) {
-    this->readExpIni(iniFilename, wksp);
+    filenames[F_INDEX_EXPINI] = iniFilename;
   }
-
-  this->setProperty("OutputWorkspace", wksp);
+  return filenames;
 }
 
 /**
@@ -219,7 +250,8 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     row << boost::lexical_cast<int32_t>(splitted[2]); // bank
     row << splitted[3];                               // vanadium
     row << splitted[4];                               // container
-    row << splitted[5];                               // empty
+    row << "0";                                      // empty_environment - TODO
+    row << splitted[5];                              // empty_instrument
     row << splitted[6];                               // d_min
     row << splitted[7];                               // d_max
     row << boost::lexical_cast<double>(splitted[8]);  // tof_min
@@ -229,6 +261,50 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
   }
 }
 
+void PDLoadCharacterizations::readVersion0(const std::string &filename,
+                                           API::ITableWorkspace_sptr &wksp) {
+  // don't bother if there isn't a filename
+  if (filename.empty())
+    return;
+
+  std::ifstream file(filename.c_str());
+  if (!file) {
+    throw Exception::FileError("Unable to open file", filename);
+  }
+
+  // read the first line and decide what to do
+  std::string firstLine = Strings::getLine(file);
+  if (firstLine.substr(0, IPARM_KEY.size()) == IPARM_KEY) {
+    firstLine = Strings::strip(firstLine.substr(IPARM_KEY.size()));
+    this->setProperty("IParmFilename", firstLine);
+    this->readFocusInfo(file);
+  } else {
+    // things expect the L1 to be zero if it isn't set
+    this->setProperty("PrimaryFlightPath", 0.);
+  }
+
+  // now the rest of the file
+  this->readCharInfo(file, wksp);
+
+  file.close();
+}
+
+void PDLoadCharacterizations::readVersion1(const std::string &filename,
+                                           API::ITableWorkspace_sptr &wksp) {
+  // don't bother if there isn't a filename
+  if (filename.empty())
+    return;
+
+  std::ifstream file(filename.c_str());
+  if (!file) {
+    throw Exception::FileError("Unable to open file", filename);
+  }
+
+  // TODO
+
+  file.close();
+}
+
 /**
  * Parse the (optional) exp.ini file found on NOMAD
  * @param filename full path to a exp.ini file
@@ -236,6 +312,11 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
  */
 void PDLoadCharacterizations::readExpIni(const std::string &filename,
                                          API::ITableWorkspace_sptr &wksp) {
+  // don't bother if there isn't a filename
+  if (filename.empty())
+    return;
+
+  std::cout << "readExpIni(" << filename << ")" << std::endl;
   if (wksp->rowCount() == 0)
     throw std::runtime_error("Characterizations file does not have any "
                              "characterizations information");
@@ -268,7 +349,7 @@ void PDLoadCharacterizations::readExpIni(const std::string &filename,
     } else if (splitted[0] == EXP_INI_EMPTY_KEY) {
       wksp->getRef<std::string>("container", 0) = splitted[1];
     } else if (splitted[0] == EXP_INI_CAN_KEY) {
-      wksp->getRef<std::string>("empty", 0) = splitted[1];
+      wksp->getRef<std::string>("empty_instrument", 0) = splitted[1];
     }
   }
 }

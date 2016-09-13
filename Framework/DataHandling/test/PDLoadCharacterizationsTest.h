@@ -26,7 +26,7 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     // run the algorithm
-    alg.setProperty("Filename", filename);
+    alg.setPropertyValue("Filename", filename);
     alg.setPropertyValue("OutputWorkspace", filename);
     TS_ASSERT(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -80,7 +80,7 @@ public:
   }
 
   void checkPG3(ITableWorkspace_sptr &wksp) {
-    TS_ASSERT_EQUALS(wksp->columnCount(), 12);
+    TS_ASSERT_EQUALS(wksp->columnCount(), 13); // TODO + add one coluimn for
     TS_ASSERT_EQUALS(wksp->rowCount(), 6);
 
     // check all of the contents of row 0
@@ -90,10 +90,11 @@ public:
     TS_ASSERT_EQUALS(wksp->String(0, 3), "15030");
     TS_ASSERT_EQUALS(wksp->String(0, 4), "15039");
     TS_ASSERT_EQUALS(wksp->String(0, 5), "0");
-    TS_ASSERT_EQUALS(wksp->String(0, 6), "0.20");
-    TS_ASSERT_EQUALS(wksp->String(0, 7), "4.12");
-    TS_ASSERT_EQUALS(wksp->Double(0, 8), 4700.);
-    TS_ASSERT_EQUALS(wksp->Double(0, 9), 21200.);
+    TS_ASSERT_EQUALS(wksp->String(0, 6), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 7), "0.20");
+    TS_ASSERT_EQUALS(wksp->String(0, 8), "4.12");
+    TS_ASSERT_EQUALS(wksp->Double(0, 9), 4700.);
+    TS_ASSERT_EQUALS(wksp->Double(0, 10), 21200.);
 
     // check all of the contents of row 5
     TS_ASSERT_EQUALS(wksp->Double(5, 0), 10.);
@@ -102,10 +103,43 @@ public:
     TS_ASSERT_EQUALS(wksp->String(5, 3), "15033");
     TS_ASSERT_EQUALS(wksp->String(5, 4), "15042");
     TS_ASSERT_EQUALS(wksp->String(5, 5), "0");
-    TS_ASSERT_EQUALS(wksp->String(5, 6), "0.05");
-    TS_ASSERT_EQUALS(wksp->String(5, 7), "15.40");
-    TS_ASSERT_EQUALS(wksp->Double(5, 8), 0.);
-    TS_ASSERT_EQUALS(wksp->Double(5, 9), 100000.);
+    TS_ASSERT_EQUALS(wksp->String(5, 6), "0");
+    TS_ASSERT_EQUALS(wksp->String(5, 7), "0.05");
+    TS_ASSERT_EQUALS(wksp->String(5, 8), "15.40");
+    TS_ASSERT_EQUALS(wksp->Double(5, 9), 0.);
+    TS_ASSERT_EQUALS(wksp->Double(5, 10), 100000.);
+  }
+
+  void checkPG3WithContainers(ITableWorkspace_sptr &wksp) {
+    TS_ASSERT_EQUALS(wksp->columnCount(), 16);
+    TS_ASSERT_EQUALS(wksp->rowCount(), 8);
+
+    /*
+    // check all of the contents of row 0
+    TS_ASSERT_EQUALS(wksp->Double(0, 0), 60.);
+    TS_ASSERT_EQUALS(wksp->Double(0, 1), 0.900);
+    TS_ASSERT_EQUALS(wksp->Int(0, 2), 1);
+    TS_ASSERT_EQUALS(wksp->String(0, 3), "15030");
+    TS_ASSERT_EQUALS(wksp->String(0, 4), "15039");
+    TS_ASSERT_EQUALS(wksp->String(0, 5), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 6), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 7), "0.20");
+    TS_ASSERT_EQUALS(wksp->String(0, 8), "4.12");
+    TS_ASSERT_EQUALS(wksp->Double(0, 9), 4700.);
+    TS_ASSERT_EQUALS(wksp->Double(0,10), 21200.);
+
+    // check all of the contents of row 5
+    TS_ASSERT_EQUALS(wksp->Double(5, 0), 10.);
+    TS_ASSERT_EQUALS(wksp->Double(5, 1), 3.198);
+    TS_ASSERT_EQUALS(wksp->Int(5, 2), 1);
+    TS_ASSERT_EQUALS(wksp->String(5, 3), "15033");
+    TS_ASSERT_EQUALS(wksp->String(5, 4), "15042");
+    TS_ASSERT_EQUALS(wksp->String(5, 5), "0");
+    TS_ASSERT_EQUALS(wksp->String(5, 6), "0");
+    TS_ASSERT_EQUALS(wksp->String(5, 7), "0.05");
+    TS_ASSERT_EQUALS(wksp->String(5, 8), "15.40");
+    TS_ASSERT_EQUALS(wksp->Double(5, 9), 0.);
+    TS_ASSERT_EQUALS(wksp->Double(5,10), 100000.);*/
   }
 
   void test_Init() {
@@ -161,7 +195,7 @@ public:
     runAlg(alg, wksp, CHAR_FILE);
 
     // test the table workspace
-    TS_ASSERT_EQUALS(wksp->columnCount(), 12);
+    TS_ASSERT_EQUALS(wksp->columnCount(), 13);
     TS_ASSERT_EQUALS(wksp->rowCount(), 1);
 
     // check all of the contents of row 0
@@ -171,10 +205,13 @@ public:
     TS_ASSERT_EQUALS(wksp->String(0, 3), "0");
     TS_ASSERT_EQUALS(wksp->String(0, 4), "0");
     TS_ASSERT_EQUALS(wksp->String(0, 5), "0");
-    TS_ASSERT_EQUALS(wksp->String(0, 6), ".31,.25,.13,.13,.13,.42");
-    TS_ASSERT_EQUALS(wksp->String(0, 7), "13.66,5.83,3.93,2.09,1.57,31.42");
-    TS_ASSERT_EQUALS(wksp->Double(0, 8), 300.00);
-    TS_ASSERT_EQUALS(wksp->Double(0, 9), 16666.67);
+    TS_ASSERT_EQUALS(wksp->String(0, 6), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 7), ".31,.25,.13,.13,.13,.42");
+    TS_ASSERT_EQUALS(wksp->String(0, 8), "13.66,5.83,3.93,2.09,1.57,31.42");
+    TS_ASSERT_EQUALS(wksp->Double(0, 9), 300.00);
+    TS_ASSERT_EQUALS(wksp->Double(0, 10), 16666.67);
+    TS_ASSERT_EQUALS(wksp->Double(0, 11), .1);
+    TS_ASSERT_EQUALS(wksp->Double(0, 12), 2.9);
 
     // test the other output properties
     checkNOMAD(alg);
@@ -189,7 +226,7 @@ public:
     runAlg(alg, wksp, CHAR_FILE);
 
     // test the table workspace
-    TS_ASSERT_EQUALS(wksp->columnCount(), 12);
+    TS_ASSERT_EQUALS(wksp->columnCount(), 13);
     TS_ASSERT_EQUALS(wksp->rowCount(), 0);
 
     // test the other output properties
@@ -249,7 +286,8 @@ public:
     TS_ASSERT_EQUALS(wksp->rowCount(), 1);
     TS_ASSERT_EQUALS(wksp->String(0, 3), "49258"); // vanadium
     TS_ASSERT_EQUALS(wksp->String(0, 4), "49086"); // container
-    TS_ASSERT_EQUALS(wksp->String(0, 5), "49257"); // empty
+    TS_ASSERT_EQUALS(wksp->String(0, 5), "0");     // empty_environment
+    TS_ASSERT_EQUALS(wksp->String(0, 6), "49257"); // empty_instrument
   }
 
   void test_ExpIni_failing() {
@@ -267,6 +305,26 @@ public:
     alg.setRethrows(true); // so the exception can be seen by testing
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
     TS_ASSERT(!alg.isExecuted());
+  }
+
+  void test_version2_withOld() {
+    const std::string CHAR_FILES("Test_characterizations_char.txt,/home/pf9/"
+                                 "Dropbox/2016/characterization_design/new/"
+                                 "PG3_char_2016_02_15-PAC-alt.txt");
+  }
+
+  void test_version2_2files() {
+    const std::string CHAR_FILES(
+        "/home/pf9/Dropbox/2016/characterization_design/new/"
+        "PG3_char_2016_02_15-general.txt,/home/pf9/Dropbox/2016/"
+        "characterization_design/new/PG3_char_2016_02_15-PAC-alt.txt");
+  }
+
+  void test_version2_wrongOrder() {
+    const std::string CHAR_FILES(
+        "/home/pf9/Dropbox/2016/characterization_design/new/"
+        "PG3_char_2016_02_15-general.txt,/home/pf9/Dropbox/2016/"
+        "characterization_design/new/PG3_char_2016_02_15-PAC-alt.txt");
   }
 };
 

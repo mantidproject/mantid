@@ -67,16 +67,17 @@ public:
   }
 
   void addRow(ITableWorkspace_sptr wksp, double freq, double wl, int bank,
-              std::string van, std::string can, std::string empty,
-              std::string dmin, std::string dmax, double tofmin, double tofmax,
-              double wlmin, double wlmax) {
+              std::string van, std::string can, std::string empty_env,
+              std::string empty_inst, std::string dmin, std::string dmax,
+              double tofmin, double tofmax, double wlmin, double wlmax) {
     Mantid::API::TableRow row = wksp->appendRow();
     row << freq;
     row << wl;
     row << bank;
     row << van;
     row << can;
-    row << empty;
+    row << empty_env;
+    row << empty_inst;
     row << dmin;
     row << dmax;
     row << tofmin;
@@ -92,7 +93,8 @@ public:
     wksp->addColumn("int", "bank");
     wksp->addColumn("str", "vanadium");
     wksp->addColumn("str", "container");
-    wksp->addColumn("str", "empty");
+    wksp->addColumn("str", "empty_environment");
+    wksp->addColumn("str", "empty_instrument");
     wksp->addColumn("str", "d_min"); // b/c it is an array for NOMAD
     wksp->addColumn("str", "d_max"); // b/c it is an array for NOMAD
     wksp->addColumn("double", "tof_min");
@@ -106,13 +108,13 @@ public:
   ITableWorkspace_sptr createTableWkspPG3() {
     ITableWorkspace_sptr wksp = createEmptyTableWksp();
 
-    addRow(wksp, 60., 0.533, 1, "17702", "17711", "0", "0.05", "2.20", 0000.00,
-           16666.67, 0., 0.);
-    addRow(wksp, 60., 1.333, 3, "17703", "17712", "0", "0.43", "5.40", 12500.00,
-           29166.67, 0., 0.);
-    addRow(wksp, 60., 2.665, 4, "17704", "17713", "0", "1.15", "9.20", 33333.33,
-           50000.00, 0., 0.);
-    addRow(wksp, 60., 4.797, 5, "17705", "17714", "0", "2.00", "15.35",
+    addRow(wksp, 60., 0.533, 1, "17702", "17711", "0", "0", "0.05", "2.20",
+           0000.00, 16666.67, 0., 0.);
+    addRow(wksp, 60., 1.333, 3, "17703", "17712", "0", "0", "0.43", "5.40",
+           12500.00, 29166.67, 0., 0.);
+    addRow(wksp, 60., 2.665, 4, "17704", "17713", "0", "0", "1.15", "9.20",
+           33333.33, 50000.00, 0., 0.);
+    addRow(wksp, 60., 4.797, 5, "17705", "17714", "0", "0", "2.00", "15.35",
            66666.67, 83333.67, 0., 0.);
 
     return wksp;
@@ -121,7 +123,7 @@ public:
   ITableWorkspace_sptr createTableWkspNOM() {
     ITableWorkspace_sptr wksp = createEmptyTableWksp();
 
-    addRow(wksp, 60., 1.4, 1, "0", "0", "0", ".31,.25,.13,.13,.13,.42",
+    addRow(wksp, 60., 1.4, 1, "0", "0", "0", "0", ".31,.25,.13,.13,.13,.42",
            "13.66,5.83,3.93,2.09,1.57,31.42", 300.00, 16666.67, 0., 0.);
 
     return wksp;
@@ -130,7 +132,7 @@ public:
   ITableWorkspace_sptr createTableWkspNOM_withwl() {
     ITableWorkspace_sptr wksp = createEmptyTableWksp();
 
-    addRow(wksp, 60., 1.4, 1, "0", "0", "0", ".31,.25,.13,.13,.13,.42",
+    addRow(wksp, 60., 1.4, 1, "0", "0", "0", "0", ".31,.25,.13,.13,.13,.42",
            "13.66,5.83,3.93,2.09,1.57,31.42", 300.00, 16666.67, .9, 2.1);
 
     return wksp;

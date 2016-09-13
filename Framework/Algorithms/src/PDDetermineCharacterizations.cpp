@@ -61,9 +61,11 @@ const std::string PDDetermineCharacterizations::summary() const {
  * @return The list of expected column names
  */
 std::vector<std::string> getColumnNames() {
-  return {"frequency", "wavelength", "bank",           "container",
-          "vanadium",  "empty",      "d_min",          "d_max",
-          "tof_min",   "tof_max",    "wavelength_min", "wavelength_max"};
+  return {"frequency",        "wavelength", "bank",
+          "container",        "vanadium",   "empty_environment",
+          "empty_instrument", "d_min",      "d_max",
+          "tof_min",          "tof_max",    "wavelength_min",
+          "wavelength_max"};
 }
 
 /// More intesive input checking. @see Algorithm::validateInputs
@@ -201,7 +203,8 @@ void PDDetermineCharacterizations::getInformationFromTable(
           "container",
           m_characterizations->getRef<std::string>("container", i));
       m_propertyManager->setProperty(
-          "empty", m_characterizations->getRef<std::string>("empty", i));
+          "empty",
+          m_characterizations->getRef<std::string>("empty_instrument", i));
 
       return;
     }
