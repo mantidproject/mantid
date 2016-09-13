@@ -346,7 +346,7 @@ void ParameterMap::add(const IComponent *comp,
   // an
   // add/replace-style function
   if (existing_par != m_map.end()) {
-    existing_par->second = boost::atomic_load(&par);
+    boost::atomic_store(&(existing_par->second), par);
   } else {
 // When using Clang & Linux, TBB 4.4 doesn't detect C++11 features.
 // https://software.intel.com/en-us/forums/intel-threading-building-blocks/topic/641658
@@ -358,8 +358,7 @@ void ParameterMap::add(const IComponent *comp,
 #if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
     m_map.emplace(comp->getComponentID(), par);
 #else
-    m_map.insert(
-        std::make_pair(comp->getComponentID(), boost::atomic_load(&par)));
+    m_map.insert(std::make_pair(comp->getComponentID(), par));
 #endif
   }
 }
