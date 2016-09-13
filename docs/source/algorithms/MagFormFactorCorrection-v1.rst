@@ -63,7 +63,7 @@ of the build system where the above datafiles do not exist.
         qv = ( (Q[i]+Q[i+1])*0.5 ) / 4 / np.pi
         y = ws.dataY(i)
         y *= np.exp(-16*qv*qv)
-    ws_corr = MagFormFactorCorrection(ws_sqw, IonName='Fe3', FormFactorWorkspace='Fe3FF')
+    ws_corr = MagFormFactorCorrection(ws, IonName='Fe3', FormFactorWorkspace='Fe3FF')
 
 Output
 
