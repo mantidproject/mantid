@@ -818,7 +818,7 @@ void createIonLookup(IonIndex &ion_map) {
                                j_Yb3[1], j_Yb3[2], j_Yb3[3]);
   ion_map["Yb3"] = Yb3;
   static const MagneticIon Pr3("Pr", static_cast<uint16_t>(3), j_Pr3[0],
-                              j_Pr3[1], j_Pr3[2], j_Pr3[3]);
+                               j_Pr3[1], j_Pr3[2], j_Pr3[3]);
   ion_map["Pr3"] = Pr3;
   static const MagneticIon U3("U", static_cast<uint16_t>(3), j_U3[0], j_U3[1],
                               j_U3[2], j_U3[3]);
@@ -951,7 +951,7 @@ std::vector<std::string> getMagneticIonList() {
   const IonIndex &ionIndex = ionMap();
   std::vector<std::string> keys;
   keys.reserve(ionIndex.size());
-  for(auto kv : ionIndex) {
+  for (auto kv : ionIndex) {
     keys.push_back(kv.first);
   }
   return keys;
