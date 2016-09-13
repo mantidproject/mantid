@@ -53,6 +53,7 @@ of the build system where the above datafiles do not exist.
 
 .. testcode:: ExGenerated
 
+    import numpy as np
     ws = CreateSampleWorkspace(binWidth = 0.1, XMin = 0, XMax = 50, XUnit = 'DeltaE')
     ws = ScaleX(ws, -15, "Add")
     LoadInstrument(ws, InstrumentName='MARI', RewriteSpectraMap = True)

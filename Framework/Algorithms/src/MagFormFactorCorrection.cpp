@@ -85,7 +85,7 @@ void MagFormFactorCorrection::exec() {
   // Gets the vector of form factor values
   std::vector<double> FF;
   FF.reserve(Qvals.size());
-  for (int64_t iQ = 0; iQ < Qvals.size(); iQ++) {
+  for (int64_t iQ = 0; iQ < (int64_t)Qvals.size(); iQ++) {
     FF.push_back(ion.analyticalFormFactor(Qvals[iQ] * Qvals[iQ], 0, 0));
   }
   if (!ffwsStr.empty()) {
