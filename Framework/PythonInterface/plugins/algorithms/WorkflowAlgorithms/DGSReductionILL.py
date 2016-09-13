@@ -45,6 +45,8 @@ REDUCTION_TYPE_EC = REDUCTION_TYPE_CD
 REDUCTION_TYPE_SAMPLE = 'Sample'
 REDUCTION_TYPE_VANADIUM = 'Vanadium'
 
+# Name generators for temporary workspaces.
+# TODO We may want to hide these and delete afterwards.
 def backgroundWorkspaceName(token):
     return token + '_bkg'
 
@@ -97,6 +99,7 @@ def vanadiumNormalisedWorkspaceName(token):
     return token + '_vnorm'
 
 def guessIncidentEnergyWorkspaceName(eppWorkspace):
+    # This can be considered a bit of a hack.
     splits = eppWorkspace.getName().split('_')
     return ''.join(splits[:-1]) + '_ie'
 
@@ -128,10 +131,13 @@ class DGSReductionILL(DataProcessorAlgorithm):
         # Load data
         inputFilename = self.getProperty(PROP_INPUT_FILE).value
         outWs = rawWorkspaceName(identifier)
+        # The variable 'workspace' shall hold the current 'main' data
+        # throughout the algorithm.
         workspace = Load(Filename=inputFilename,
                          OutputWorkspace=outWs)
         # TODO Merge runs
         # Extract monitors to a separate workspace
+        # TODO use dedicated algorithm
         monitors = list()
         notMonitors = list()
         for i in range(workspace.getNumberHistograms()):
@@ -140,6 +146,8 @@ class DGSReductionILL(DataProcessorAlgorithm):
                 monitors.append(i)
             else:
                 notMonitors.append(i)
+        # The variable 'monitorWorkspace' shall hold the monitor
+        # data throughout the algorithm.
         monitorWorkspace = monitorWorkspaceName(identifier)
         monitorWorkspace = ExtractSpectra(InputWorkspace=workspace,
                                           OutputWorkspace=monitorWorkspace,
@@ -157,7 +165,6 @@ class DGSReductionILL(DataProcessorAlgorithm):
         bkgInWs = self.getProperty(PROP_FLAT_BACKGROUND_WORKSPACE).value
         bkgOutWs = self.getPropertyValue(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE)
         # Fit background regardless of where it actually comes from.
-        # The output needs to be set anyhow.
         if bkgOutWs or not bkgInWs:
             if not bkgOutWs:
                 bkgOutWs = backgroundWorkspaceName(identifier)
@@ -192,6 +199,8 @@ class DGSReductionILL(DataProcessorAlgorithm):
         monitorEppInWs = self.getProperty(PROP_MONITOR_EPP_WORKSPACE).value
         eppOutWs = self.getPropertyValue(PROP_OUTPUT_EPP_WORKSPACE)
         monitorEppOutWs = self.getPropertyValue(PROP_OUTPUT_MONITOR_EPP_WORKSPACE)
+        # Same as with time-independent backgrounds: the EPP table may
+        # came from outside. Otherwise make our own.
         if eppOutWs or not eppInWs:
             if not eppOutWs:
                 eppOutWs = eppWorkspaceName(identifier)
@@ -206,6 +215,7 @@ class DGSReductionILL(DataProcessorAlgorithm):
             eppWorkspace = self.getProperty(PROP_EPP_WORKSPACE).value
             monitorEppWorkspace = self.getProperty(PROP_MONITOR_EPP_WORKSPACE).value
             if not eppOutWs:
+                # In any case, some output is required.
                 eppOutWs = "dummy_output"
                 emptyOutput = CreateSingleValuedWorkspace(OutputWorkspace=bkgOutWs,
                                                           DataValue = 0)
@@ -233,10 +243,12 @@ class DGSReductionILL(DataProcessorAlgorithm):
 
         # Get calibrated incident energy from somewhere
         # It should come from the same place as the epp workspace.
+        # Or should it?
         instrument = workspace.getInstrument().getName()
         if instrument in ['IN4', 'IN6']:
             eiWsName = guessIncidentEnergyWorkspaceName(eppWorkspace)
             if not AnalysisDataServiceImpl.Instance().doesExist(eiWsName):
+                # TODO this should go into the LoadILL algorithm.
                 eiCalibrationDets = self.getProperty(PROP_DETECTORS_FOR_EI_CALIBRATION).value
                 instrument = workspace.getInstrument().getName()
                 if instrument == 'IN4':
@@ -317,6 +329,8 @@ class DGSReductionILL(DataProcessorAlgorithm):
             self._finalize(workspace)
             return
 
+        # Continuing with vanadium and sample reductions.
+
         # Empty can subtraction
         ecWs = self.getProperty(PROP_EC_WORKSPACE).value
         if ecWs:
@@ -353,12 +367,19 @@ class DGSReductionILL(DataProcessorAlgorithm):
 
         # Reduction for vanadium ends here.
         if reductionType == REDUCTION_TYPE_VANADIUM:
+            # We output an integrated vanadium, ready to be used for
+            # normalization.
             outWs = self.getPropertyValue(PROP_OUTPUT_WORKSPACE)
+            # TODO For the time being, we may just want to integrate
+            # the vanadium data as `ComputeCalibrationCoef` does not do
+            # the best possible Debye-Waller correction.
             workspace = ComputeCalibrationCoefVan(VanadiumWorkspace=workspace,
                                                   EPPTable=eppWorkspace,
                                                   OutputWorkspace=outWs)
             self._finalize(workspace)
             return
+
+        # Continuing with sample reduction.
 
         # Vanadium normalisation
         vanadiumNormFactors = self.getProperty(PROP_VANADIUM_WORKSPACE).value
@@ -380,6 +401,7 @@ class DGSReductionILL(DataProcessorAlgorithm):
                                 OutputWorkspace = outWs)
 
         # Rebinning
+        # TODO automatize binning in w. Do we need rebinning in q as well?
         params = self.getProperty(PROP_BINNING_W).value
         outWs = rebinnedWorkspaceName(identifier)
         workspace = Rebin(InputWorkspace = workspace,
@@ -391,11 +413,12 @@ class DGSReductionILL(DataProcessorAlgorithm):
         workspace = DetectorEfficiencyCorUser(InputWorkspace = workspace,
                                               OutputWorkspace = outWs)
 
-        # TODO: Self-shielding corrections
+        # TODO Self-shielding corrections
 
         self._finalize(workspace)
 
     def PyInit(self):
+        # TODO Property validation.
         # Inputs
         self.declareProperty(PROP_INPUT_FILE,
                              '',
