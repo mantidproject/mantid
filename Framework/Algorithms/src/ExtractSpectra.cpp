@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/ExtractSpectra.h"
 
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -248,16 +249,12 @@ void ExtractSpectra::execEvent() {
     XValues_new =
         HistogramData::BinEdges(oldX.begin() + m_minX, oldX.begin() + m_maxX);
   }
-  size_t ntcnew = m_maxX - m_minX;
 
-  if (ntcnew < 2) {
+  if (m_maxX - m_minX < 2) {
     // create new output X axis
-    std::vector<double> rb_params;
-    rb_params.push_back(minX_val);
-    rb_params.push_back(maxX_val - minX_val);
-    rb_params.push_back(maxX_val);
-    ntcnew = VectorHelper::createAxisFromRebinParams(
-        rb_params, XValues_new.mutableRawData());
+    std::vector<double> rb_params{minX_val, maxX_val - minX_val, maxX_val};
+    static_cast<void>(VectorHelper::createAxisFromRebinParams(
+        rb_params, XValues_new.mutableRawData()));
   }
 
   // run inplace branch if appropriate
@@ -267,18 +264,12 @@ void ExtractSpectra::execEvent() {
     g_log.debug("Cropping EventWorkspace in-place.");
 
   // Create the output workspace
-  EventWorkspace_sptr outputWorkspace =
-      boost::dynamic_pointer_cast<EventWorkspace>(
-          API::WorkspaceFactory::Instance().create(
-              "EventWorkspace", m_workspaceIndexList.size(), ntcnew,
-              ntcnew - m_histogram));
   eventW->sortAll(TOF_SORT, nullptr);
+  auto outputWorkspace = create<EventWorkspace>(
+      *m_inputWorkspace,
+      Indexing::extract(m_inputWorkspace->indexInfo(), m_workspaceIndexList),
+      HistogramData::Histogram(XValues_new));
   outputWorkspace->sortAll(TOF_SORT, nullptr);
-  // Copy required stuff from it
-  API::WorkspaceFactory::Instance().initializeFromParent(*m_inputWorkspace,
-                                                         outputWorkspace, true);
-  outputWorkspace->setIndexInfo(
-      Indexing::extract(m_inputWorkspace->indexInfo(), m_workspaceIndexList));
 
   Progress prog(this, 0.0, 1.0, 2 * m_workspaceIndexList.size());
   eventW->sortAll(Mantid::DataObjects::TOF_SORT, &prog);
@@ -290,10 +281,6 @@ void ExtractSpectra::execEvent() {
     const EventList &el = eventW->getSpectrum(i);
     // The output event list
     EventList &outEL = outputWorkspace->getSpectrum(j);
-    //    // left side of the crop - will erase 0 -> endLeft
-    //    std::size_t endLeft;
-    //    // right side of the crop - will erase endRight->numEvents+1
-    //    std::size_t endRight;
 
     switch (el.getEventType()) {
     case TOF: {
@@ -329,8 +316,7 @@ void ExtractSpectra::execEvent() {
       outEL.setX(el.ptrX());
       outEL.setSharedDx(el.sharedDx());
     } else {
-      // Common bin boundaries get all set to the same value
-      outEL.setX(XValues_new.cowData());
+      // X is already set in workspace creation, just set Dx if necessary.
       if (hasDx) {
         auto &oldDx = m_inputWorkspace->dx(i);
         outEL.setBinEdgeStandardDeviations(oldDx.begin() + m_minX,
