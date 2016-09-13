@@ -2,9 +2,6 @@ import numpy as np
 import re
 from mantid.kernel import ConfigService
 
-# This is to make sure that Lorentzians get evaluated properly
-ConfigService.setString('curvefitting.peakRadius', str(100))
-
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma.
 fnPattern = re.compile('f(\\d+)\\.(.+)')
 
@@ -106,6 +103,9 @@ class CrystalField(object):
                         FWHM: A default value for the full width at half maximum of the peaks.
                         Temperature: A temperature "of the spectrum" in Kelvin
         """
+        # This is to make sure that Lorentzians get evaluated properly
+        ConfigService.setString('curvefitting.peakRadius', str(100))
+
         from .function import PeaksFunction
         self._ion = Ion
         self._symmetry = Symmetry

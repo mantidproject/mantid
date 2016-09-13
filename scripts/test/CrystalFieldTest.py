@@ -7,9 +7,17 @@ import numpy as np
 import mantid
 from CrystalField.energies import energies
 from mantid.simpleapi import CalculateChiSquared
+from mantid.kernel import ConfigService
 
 
 class BackgroundTest(unittest.TestCase):
+
+    def setUp(self):
+        self.peakRadius = ConfigService.getString('curvefitting.peakRadius')
+
+    def tearDown(self):
+        ConfigService.setString('curvefitting.peakRadius', self.peakRadius)
+
     def test_mul(self):
         from CrystalField import Background, Function
         b = Background(peak=Function('PseudoVoigt', Height=10, FWHM=1, Mixing=0.5),
@@ -688,7 +696,6 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.background.background.constraints('A1 > 0')
 
         s = cf.makeSpectrumFunction()
-        print s
         self.assertTrue('IntensityScaling > 0' in s)
         self.assertTrue('B22 < 4' in s)
         self.assertTrue('f0.FWHM < 2.2' in s)
