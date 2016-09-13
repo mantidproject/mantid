@@ -3,14 +3,15 @@
 
 #include <string>
 
-#include "MantidQtCustomInterfaces/Reflectometry/IReflPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 /** @class IReflSearcher
 
-IReflSearcher is an interface for search implementations used by IReflPresenter
+IReflSearcher is an interface for search implementations used by
+IReflRunsTabPresenter
 implementations.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge

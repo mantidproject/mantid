@@ -1,4 +1,6 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range #pylint: disable=redefined-builtin
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -101,14 +103,14 @@ class SaveVulcanGSS(PythonAlgorithm):
                 continue
 
             terms = line.split()
-            for it in xrange(len(terms)):
+            for it in range(len(terms)):
                 x = float(terms[it])
                 vecX.append(x)
             # ENDFOR
         # ENDFOR
 
         vecPow10X = []
-        for i in xrange(len(vecX)):
+        for i in range(len(vecX)):
             p10x = math.pow(10, vecX[i])
             vecPow10X.append(p10x)
 
@@ -123,7 +125,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         """
         # Create a complicated bin parameter
         params = []
-        for ibin in xrange(len(vec_refT)-1):
+        for ibin in range(len(vec_refT)-1):
             x0 = vec_refT[ibin]
             xf = vec_refT[ibin+1]
             dx = xf-x0
@@ -143,11 +145,11 @@ class SaveVulcanGSS(PythonAlgorithm):
         newvecx = []
         newvecy = []
         newvece = []
-        for iws in xrange(numhist):
+        for iws in range(numhist):
             vecx = tempws.readX(iws)
             vecy = tempws.readY(iws)
             vece = tempws.readE(iws)
-            for i in xrange( len(vecx)-1 ):
+            for i in range( len(vecx)-1 ):
                 newvecx.append(int(vecx[i]*10)/10.)
                 newvecy.append(vecy[i])
                 newvece.append(vece[i])
@@ -311,7 +313,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         wbuf = "%-80s\n" % (newbankline)
 
         # data
-        for i in xrange(1, len(banklines)):
+        for i in range(1, len(banklines)):
             cline = banklines[i]
 
             terms = cline.split()

@@ -42,6 +42,10 @@ public:
   void subtractIntegratedSpectra(const Mantid::API::MatrixWorkspace &workspace,
                                  std::vector<double> &spectraIntgrs) const;
   void clear();
+  /// Load the state of the bin masks from a Mantid project file.
+  void loadFromProject(const std::string &lines);
+  /// Save the state of the bin masks to a Mantid project file.
+  std::string saveToProject() const;
 
 private:
   /// Range of x values to mask in a spectrum. (Using MaskBins)

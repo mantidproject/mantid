@@ -8,11 +8,40 @@
 #include "MantidAlgorithms/RebinToWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <numeric>
+
 class RebinToWorkspaceTest : public CxxTest::TestSuite {
 public:
   void testInit() {
     TS_ASSERT_THROWS_NOTHING(rebinToWS.initialize());
     TS_ASSERT(rebinToWS.isInitialized());
+  }
+
+  void testPointDataWorkspacesAreRejected() {
+    using namespace Mantid::API;
+    using namespace Mantid::DataObjects;
+    using Mantid::HistogramData::Points;
+
+    Mantid::Algorithms::RebinToWorkspace alg;
+    alg.initialize();
+
+    // Creates a workspace with 10 points
+    const int numYPoints(10);
+    const int numSpectra(2);
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace123(
+        numSpectra, numYPoints, false);
+    // Reset the X data to something reasonable
+    Points x(numYPoints);
+    std::iota(begin(x), end(x), 0.0);
+    for (int i = 0; i < numSpectra; ++i) {
+      testWS->setPoints(i, x);
+    }
+
+    TS_ASSERT_EQUALS(testWS->isHistogramData(), false);
+    TS_ASSERT_THROWS_ANYTHING(
+        alg.setProperty<MatrixWorkspace_sptr>("WorkspaceToMatch", testWS));
+    TS_ASSERT_THROWS_ANYTHING(
+        alg.setProperty<MatrixWorkspace_sptr>("WorkspaceToRebin", testWS));
   }
 
   void testExec() {

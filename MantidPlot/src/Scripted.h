@@ -46,7 +46,6 @@ public:
   ScriptingEnv *scriptingEnv() { return m_scriptEnv; }
 
 private:
-  Scripted();
   /// A pointer to the current environment
   ScriptingEnv *m_scriptEnv;
 };

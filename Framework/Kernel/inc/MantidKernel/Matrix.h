@@ -68,6 +68,8 @@ public:
 
   Matrix(const Matrix<T> &);
   Matrix<T> &operator=(const Matrix<T> &);
+  Matrix(Matrix<T> &&) noexcept;
+  Matrix<T> &operator=(Matrix<T> &&) noexcept;
   ~Matrix();
 
   /// const Array accessor

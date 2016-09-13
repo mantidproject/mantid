@@ -8,9 +8,9 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
 #include <QObject>
-#include <qwt_data.h>
-
 #include <boost/optional.hpp>
+
+class QwtData;
 
 namespace MantidQt {
 namespace CustomInterfaces {

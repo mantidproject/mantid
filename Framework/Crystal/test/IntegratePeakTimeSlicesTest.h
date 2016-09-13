@@ -13,6 +13,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -48,6 +49,7 @@ using namespace API;
 using namespace Mantid::Crystal;
 using namespace std;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::LinearGenerator;
 
 class IntegratePeakTimeSlicesTest : public CxxTest::TestSuite {
 public:
@@ -77,10 +79,7 @@ public:
     wsPtr->getAxis(0)->setUnit("TOF");
 
     // Set times;
-    BinEdges x_vals(NTimes + 1);
-    int i = 0;
-    std::generate(begin(x_vals), end(x_vals),
-                  [&i] { return 18000.0 + i++ * 100; });
+    BinEdges x_vals(NTimes + 1, LinearGenerator(18000.0, 100.0));
 
     for (size_t k = 0; k < wsPtr->getNumberHistograms(); k++)
       wsPtr->setBinEdges(k, x_vals);

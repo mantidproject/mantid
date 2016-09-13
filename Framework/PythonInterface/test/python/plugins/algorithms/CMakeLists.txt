@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
   AlignComponentsTest.py
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
+  BayesStretchTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
@@ -43,6 +44,7 @@ set ( TEST_PY_FILES
   IndirectCylinderAbsorptionTest.py
   IndirectFlatPlateAbsorptionTest.py
   IndirectILLReductionTest.py
+  IndirectResolutionTest.py
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
   ILLIN16BCalibrationTest.py
@@ -77,6 +79,7 @@ set ( TEST_PY_FILES
   SavePlot1DTest.py
   SavePlot1DAsJsonTest.py
   SaveVulcanGSSTest.py
+  SetDetScaleTest.py
   SimulatedDensityOfStatesTest.py
   SortByQVectorsTest.py
   SofQWMomentsTest.py
@@ -101,6 +104,7 @@ set ( TEST_PY_FILES
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
+  SelectNexusFilesByMetadataTest.py
   VesuvioDiffractionReductionTest.py
   VesuvioPreFitTest.py
   VesuvioResolutionTest.py

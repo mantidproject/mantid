@@ -5,7 +5,6 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
-#include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -14,17 +13,13 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
 
-#include <cfloat>
 #include <numeric>
-#include <limits>
 
 namespace Mantid {
 namespace Algorithms {
@@ -48,7 +43,6 @@ ConvertUnits::ConvertUnits()
 void ConvertUnits::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>();
-  wsValidator->add<HistogramValidator>();
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "Name of the input workspace");
@@ -80,18 +74,32 @@ void ConvertUnits::init() {
                   "have identical bin boundaries. This option is not "
                   "recommended (see "
                   "http://www.mantidproject.org/ConvertUnits).");
+
+  declareProperty(
+      "ConvertFromPointData", true,
+      "When checked, if the Input Workspace contains Points\n"
+      "the algorithm ConvertToHistogram will be run to convert\n"
+      "the Points to Bins. The Output Workspace will contains Bins.");
 }
 
 /** Executes the algorithm
- *  @throw std::runtime_error If the input workspace has not had its unit set
- *  @throw NotImplementedError If the input workspace contains point (not
- * histogram) data
- *  @throw InstrumentDefinitionError If unable to calculate source-sample
- * distance
- */
+*  @throw std::runtime_error :: Thrown in the following cases:
+*   - If the input workspace has not had its unit set
+*   - If the input workspace contains Points, but ConvertFromPointData
+*       has not been enabled.
+*   - If ConvertFromPointData has been enabled, but the conversion to Bins
+*       or back to Points fails.
+*  @throw InstrumentDefinitionError If unable to calculate source-sample
+* distance
+*/
 void ConvertUnits::exec() {
   // Get the workspaces
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  const bool acceptPointData = getProperty("ConvertFromPointData");
+  bool workspaceWasConverted = false;
+
+  // we can do that before anything else, because it doesn't
+  // setup any blocksize, which is the one that changes with conversion
   this->setupMemberVariables(inputWS);
 
   // Check that the input workspace doesn't already have the desired unit.
@@ -122,9 +130,74 @@ void ConvertUnits::exec() {
     }
   }
 
+  // Holder for the correctWS, because if we're converting from
+  // PointData a new workspace is created
+  MatrixWorkspace_sptr correctWS;
+  if (!inputWS->isHistogramData()) {
+    if (acceptPointData) {
+      workspaceWasConverted = true;
+      g_log.information(
+          "ConvertFromPointData is checked. Running ConvertToHistogram\n");
+      // not histogram data
+      // ConvertToHistogram
+      IAlgorithm_sptr convToHist = createChildAlgorithm("ConvertToHistogram");
+      convToHist->setProperty("InputWorkspace", inputWS);
+      convToHist->execute();
+      MatrixWorkspace_sptr temp = convToHist->getProperty("OutputWorkspace");
+      correctWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+
+      if (!correctWS->isHistogramData()) {
+        throw std::runtime_error(
+            "Failed to convert workspace from Points to Bins");
+      }
+    } else {
+      throw std::runtime_error("Workspace contains points, you can either run "
+                               "ConvertToHistogram on it, or set "
+                               "ConvertFromPointData to enabled");
+    }
+  } else {
+    correctWS = inputWS;
+  }
+
+  MatrixWorkspace_sptr outputWS = executeUnitConversion(correctWS);
+
+  // If InputWorkspace contained point data, convert back
+  if (workspaceWasConverted) {
+    g_log.information(
+        "ConvertUnits is completed. Running ConvertToPointData.\n");
+    IAlgorithm_sptr convtoPoints = createChildAlgorithm("ConvertToPointData");
+    convtoPoints->setProperty("InputWorkspace", outputWS);
+    convtoPoints->execute();
+    MatrixWorkspace_sptr temp = convtoPoints->getProperty("OutputWorkspace");
+    outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+
+    if (outputWS->isHistogramData()) {
+      throw std::runtime_error(
+          "Failed to convert workspace from Bins to Points");
+    }
+  }
+
+  // Point the output property to the right place.
+  // Do right at end (workspace could could change in removeUnphysicalBins or
+  // alignBins methods)
+  setProperty("OutputWorkspace", outputWS);
+}
+
+/**Executes the main part of the algorithm that handles the conversion of the
+* units
+* @param inputWS :: the input workspace that will be converted
+* @throw std::runtime_error :: If the workspace has invalid X axis binning
+* @return A pointer to a MatrixWorkspace_sptr that contains the converted units
+*/
+MatrixWorkspace_sptr
+ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
+
+  // A WS holding BinEdges cannot have less than 2 values, as a bin has
+  // 2 edges, having less than 2 values would mean that the WS contains Points
   if (inputWS->x(0).size() < 2) {
     std::stringstream msg;
-    msg << "Input workspace has invalid X axis binning parameters. Should have "
+    msg << "Input workspace has invalid X axis binning parameters. Should "
+           "have "
            "at least 2 values. Found " << inputWS->x(0).size() << ".";
     throw std::runtime_error(msg.str());
   }
@@ -138,7 +211,8 @@ void ConvertUnits::exec() {
   // Check whether there is a quick conversion available
   double factor, power;
   if (m_inputUnit->quickConversion(*m_outputUnit, factor, power))
-  // If test fails, could also check whether a quick conversion in the opposite
+  // If test fails, could also check whether a quick conversion in the
+  // opposite
   // direction has been entered
   {
     outputWS = this->convertQuickly(inputWS, factor, power);
@@ -159,7 +233,7 @@ void ConvertUnits::exec() {
   // Don't do for EventWorkspaces, where you can easily rebin to recover the
   // situation without losing information
   /* This is an ugly test - could be made more general by testing for DBL_MAX
-     values at the ends of all spectra, but that would be less efficient */
+  values at the ends of all spectra, but that would be less efficient */
   if (m_outputUnit->unitID().find("Delta") == 0 && !m_inputEvents)
     outputWS = this->removeUnphysicalBins(outputWS);
 
@@ -174,19 +248,16 @@ void ConvertUnits::exec() {
     this->putBackBinWidth(outputWS);
   }
 
-  // Point the output property to the right place.
-  // Do right at end (workspace could could change in removeUnphysicalBins or
-  // alignBins methods)
-  setProperty("OutputWorkspace", outputWS);
+  return outputWS;
 }
-
 /** Initialise the member variables
- *  @param inputWS The input workspace
- */
+*  @param inputWS The input workspace
+*/
 void ConvertUnits::setupMemberVariables(
     const API::MatrixWorkspace_const_sptr inputWS) {
   m_numberOfSpectra = inputWS->getNumberHistograms();
-  // In the context of this algorithm, we treat things as a distribution if the
+  // In the context of this algorithm, we treat things as a distribution if
+  // the
   // flag is set
   // AND the data are not dimensionless
   m_distribution = inputWS->isDistribution() && !inputWS->YUnit().empty();
@@ -199,15 +270,17 @@ void ConvertUnits::setupMemberVariables(
   m_outputUnit = UnitFactory::Instance().create(targetUnit);
 }
 
-/** Create an output workspace of the appropriate (histogram or event) type and
- * copy over the data
- *  @param inputWS The input workspace
- */
+/** Create an output workspace of the appropriate (histogram or event) type
+* and
+* copy over the data
+*  @param inputWS The input workspace
+*/
 API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
     const API::MatrixWorkspace_const_sptr inputWS) {
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
-  // If input and output workspaces are NOT the same, create a new workspace for
+  // If input and output workspaces are NOT the same, create a new workspace
+  // for
   // the output
   if (outputWS != inputWS) {
     outputWS = inputWS->clone();
@@ -246,19 +319,19 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
 }
 
 /** Convert the workspace units according to a simple output = a * (input^b)
- * relationship
- *  @param inputWS :: the input workspace
- *  @param factor :: the conversion factor a to apply
- *  @param power :: the Power b to apply to the conversion
- *  @returns A shared pointer to the output workspace
- */
+* relationship
+*  @param inputWS :: the input workspace
+*  @param factor :: the conversion factor a to apply
+*  @param power :: the Power b to apply to the conversion
+*  @returns A shared pointer to the output workspace
+*/
 MatrixWorkspace_sptr
 ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
                              const double &factor, const double &power) {
   Progress prog(this, 0.2, 1.0, m_numberOfSpectra);
   int64_t numberOfSpectra_i =
       static_cast<int64_t>(m_numberOfSpectra); // cast to make openmp happy
-  // create the output workspace
+                                               // create the output workspace
   MatrixWorkspace_sptr outputWS = this->setupOutputWorkspace(inputWS);
   // See if the workspace has common bins - if so the X vector can be common
   // First a quick check using the validator
@@ -292,7 +365,8 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
       boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
-  // If we get to here then the bins weren't aligned and each spectrum is unique
+  // If we get to here then the bins weren't aligned and each spectrum is
+  // unique
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR1(outputWS)
   for (int64_t k = 0; k < numberOfSpectra_i; ++k) {
@@ -359,7 +433,8 @@ bool ConvertUnits::getDetectorValues(
                             << " EFixed: " << efixed << "\n";
             }
           } catch (std::runtime_error &) { /* Throws if a DetectorGroup, use
-                                                single provided value */
+                                                                       single
+                                              provided value */
           }
         }
       }
@@ -382,11 +457,11 @@ bool ConvertUnits::getDetectorValues(
 }
 
 /** Convert the workspace units using TOF as an intermediate step in the
- * conversion
- * @param fromUnit :: The unit of the input workspace
- * @param inputWS :: The input workspace
- * @returns A shared pointer to the output workspace
- */
+* conversion
+* @param fromUnit :: The unit of the input workspace
+* @param inputWS :: The input workspace
+* @returns A shared pointer to the output workspace
+*/
 MatrixWorkspace_sptr
 ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
                             API::MatrixWorkspace_const_sptr inputWS) {
@@ -431,7 +506,8 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   else if (emodeStr == "Indirect")
     emode = 2;
 
-  // Not doing anything with the Y vector in to/fromTOF yet, so just pass empty
+  // Not doing anything with the Y vector in to/fromTOF yet, so just pass
+  // empty
   // vector
   std::vector<double> emptyVec;
   const bool needEfixed =
@@ -498,9 +574,7 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
   // Loop over the histograms (detector spectra)
-  PARALLEL_FOR1(outputWS)
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
-    PARALLEL_START_INTERUPT_REGION
     double efixed = efixedProp;
 
     // Now get the detector object for this histogram
@@ -540,9 +614,7 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     }
 
     prog.report("Convert to " + m_outputUnit->unitID());
-    PARALLEL_END_INTERUPT_REGION
   } // loop over spectra
-  PARALLEL_CHECK_INTERUPT_REGION
 
   if (failedDetectorCount != 0) {
     g_log.information() << "Unable to calculate sample-detector distance for "
@@ -612,22 +684,20 @@ const std::vector<double> ConvertUnits::calculateRebinParams(
 }
 
 /** Reverses the workspace if X values are in descending order
- *  @param WS The workspace to operate on
- */
+*  @param WS The workspace to operate on
+*/
 void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
   bool isInputEvents = static_cast<bool>(eventWS);
   size_t numberOfSpectra = WS->getNumberHistograms();
   if (WorkspaceHelpers::commonBoundaries(WS) && !isInputEvents) {
-    std::reverse(WS->mutableX(0).begin(), WS->mutableX(0).end());
-    std::reverse(WS->mutableY(0).begin(), WS->mutableY(0).end());
-    std::reverse(WS->mutableE(0).begin(), WS->mutableE(0).end());
+    auto reverseX = make_cow<HistogramData::HistogramX>(WS->x(0).crbegin(),
+                                                        WS->x(0).crend());
 
-    auto xVals = WS->sharedX(0);
-    for (size_t j = 1; j < m_numberOfSpectra; ++j) {
-      WS->setSharedX(j, xVals);
-      std::reverse(WS->mutableY(j).begin(), WS->mutableY(j).end());
-      std::reverse(WS->mutableE(j).begin(), WS->mutableE(j).end());
+    for (size_t j = 0; j < numberOfSpectra; ++j) {
+      WS->setSharedX(j, reverseX);
+      std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());
+      std::reverse(WS->dataE(j).begin(), WS->dataE(j).end());
       if (j % 100 == 0)
         interruption_point();
     }
@@ -651,21 +721,21 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
 }
 
 /** Unwieldy method which removes bins which lie in a physically inaccessible
- * region.
- *  This presently only occurs in conversions to energy transfer, where the
- * initial
- *  unit conversion sets them to +/-DBL_MAX. This method removes those bins,
- * leading
- *  to a workspace which is smaller than the input one.
- *  As presently implemented, it unfortunately requires testing for and
- * knowledge of
- *  aspects of the particular units conversion instead of keeping all that in
- * the
- *  units class. It could be made more general, but that would be less
- * efficient.
- *  @param workspace :: The workspace after initial unit conversion
- *  @return The workspace after bins have been removed
- */
+* region.
+*  This presently only occurs in conversions to energy transfer, where the
+* initial
+*  unit conversion sets them to +/-DBL_MAX. This method removes those bins,
+* leading
+*  to a workspace which is smaller than the input one.
+*  As presently implemented, it unfortunately requires testing for and
+* knowledge of
+*  aspects of the particular units conversion instead of keeping all that in
+* the
+*  units class. It could be made more general, but that would be less
+* efficient.
+*  @param workspace :: The workspace after initial unit conversion
+*  @return The workspace after bins have been removed
+*/
 API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
     const Mantid::API::MatrixWorkspace_const_sptr workspace) {
   MatrixWorkspace_sptr result;
@@ -756,8 +826,8 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
 }
 
 /** Divide by the bin width if workspace is a distribution
- *  @param outputWS The workspace to operate on
- */
+*  @param outputWS The workspace to operate on
+*/
 void ConvertUnits::putBackBinWidth(const API::MatrixWorkspace_sptr outputWS) {
   const size_t outSize = outputWS->blocksize();
 

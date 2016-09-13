@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h"
+#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h"
 
 #include <QHBoxLayout>
 #include <QLineEdit>
@@ -22,10 +23,12 @@ namespace MDF {
 /// @param othersFixed :: True if some other local parameters are fixed.
 /// @param allOthersFixed :: True if all other local parameters are fixed.
 /// @param othersTied :: True if there are other tied parameters.
+/// @param logOptionsEnabled :: True if the log checkbox is ticked.
 LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
                                            double value, bool fixed,
                                            QString tie, bool othersFixed,
-                                           bool allOthersFixed, bool othersTied)
+                                           bool allOthersFixed, bool othersTied,
+                                           bool logOptionsEnabled)
     : QWidget(parent), m_index(index), m_value(QString::number(value, 'g', 16)),
       m_fixed(fixed), m_tie(tie), m_othersFixed(othersFixed),
       m_allOthersFixed(allOthersFixed), m_othersTied(othersTied) {
@@ -52,46 +55,61 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index,
 
   m_setAllAction = new QAction("Set to all", this);
   m_setAllAction->setToolTip("Set all parameters to this value");
-  connect(m_setAllAction, SIGNAL(activated()), this, SLOT(setAll()));
+  connect(m_setAllAction, SIGNAL(triggered()), this, SLOT(setAll()));
   setMenu->addAction(m_setAllAction);
 
   setMenu->addSeparator();
   m_fixAction = new QAction(m_fixed ? "Unfix" : "Fix", this);
   m_fixAction->setToolTip("Fix value of this parameter");
-  connect(m_fixAction, SIGNAL(activated()), this, SLOT(fixParameter()));
+  connect(m_fixAction, SIGNAL(triggered()), this, SLOT(fixParameter()));
   setMenu->addAction(m_fixAction);
 
   m_fixAllAction = new QAction("Fix all", this);
   m_fixAllAction->setToolTip("Fix all parameters.");
-  connect(m_fixAllAction, SIGNAL(activated()), this, SLOT(fixAll()));
+  connect(m_fixAllAction, SIGNAL(triggered()), this, SLOT(fixAll()));
   setMenu->addAction(m_fixAllAction);
 
   m_unfixAllAction = new QAction("Unfix all", this);
   m_unfixAllAction->setToolTip("Unfix all parameters.");
-  connect(m_unfixAllAction, SIGNAL(activated()), this, SLOT(unfixAll()));
+  connect(m_unfixAllAction, SIGNAL(triggered()), this, SLOT(unfixAll()));
   setMenu->addAction(m_unfixAllAction);
 
   setMenu->addSeparator();
   m_setTieAction = new QAction("Set tie", this);
   m_setTieAction->setToolTip("Set a tie for this parameter.");
-  connect(m_setTieAction, SIGNAL(activated()), this, SLOT(setTie()));
+  connect(m_setTieAction, SIGNAL(triggered()), this, SLOT(setTie()));
   setMenu->addAction(m_setTieAction);
 
   m_removeTieAction = new QAction("Remove tie", this);
   m_removeTieAction->setToolTip("Remove the tie for this parameter.");
-  connect(m_removeTieAction, SIGNAL(activated()), this, SLOT(removeTie()));
+  connect(m_removeTieAction, SIGNAL(triggered()), this, SLOT(removeTie()));
   setMenu->addAction(m_removeTieAction);
 
   m_setTieToAllAction = new QAction("Set tie to all", this);
   m_setTieToAllAction->setToolTip("Set this tie for all parameters.");
-  connect(m_setTieToAllAction, SIGNAL(activated()), this, SLOT(setTieAll()));
+  connect(m_setTieToAllAction, SIGNAL(triggered()), this, SLOT(setTieAll()));
   setMenu->addAction(m_setTieToAllAction);
 
   m_removeAllTiesAction = new QAction("Remove all ties", this);
   m_removeAllTiesAction->setToolTip("Remove ties for all parameters.");
-  connect(m_removeAllTiesAction, SIGNAL(activated()), this,
+  connect(m_removeAllTiesAction, SIGNAL(triggered()), this,
           SLOT(removeAllTies()));
   setMenu->addAction(m_removeAllTiesAction);
+
+  setMenu->addSeparator();
+  m_setToLogAction = new QAction("Set to log", this);
+  m_setToLogAction->setToolTip("Set this parameter to a log value.");
+  connect(m_setToLogAction, SIGNAL(triggered()), this, SLOT(setToLog()));
+  setMenu->addAction(m_setToLogAction);
+  m_setToLogAction->setEnabled(logOptionsEnabled);
+
+  m_setAllToLogAction = new QAction("Set all to log", this);
+  m_setAllToLogAction->setToolTip(
+      "Set all parameters to log value from the relevant workspace");
+  connect(m_setAllToLogAction, SIGNAL(triggered()), this,
+          SIGNAL(setAllValuesToLog()));
+  setMenu->addAction(m_setAllToLogAction);
+  m_setAllToLogAction->setEnabled(logOptionsEnabled);
 
   m_button->setMenu(setMenu);
 
@@ -162,13 +180,16 @@ void LocalParameterEditor::setTieAll() {
   setEditorState();
 }
 
-/// Remove ties form all parameters
+/// Remove ties from all parameters
 void LocalParameterEditor::removeAllTies() {
   m_tie = "";
   m_othersTied = false;
   emit setTieAll("");
   setEditorState();
 }
+
+/// Send a signal to set value to log
+void LocalParameterEditor::setToLog() { emit setValueToLog(m_index); }
 
 /// Filter events in the line editor to emulate a shortcut (F to fix/unfix).
 bool LocalParameterEditor::eventFilter(QObject *, QEvent *evn) {
@@ -237,6 +258,15 @@ void LocalParameterEditor::updateValue(const QString &value) {
   m_value = value;
 }
 
+/**
+ * Slot: when log checkbox state changes, enable/disable the "set to log" and
+ * "set all to log" options
+ * @param enabled :: [input] Whether to enable or disable options
+ */
+void LocalParameterEditor::setLogOptionsEnabled(bool enabled) {
+  m_setToLogAction->setEnabled(enabled);
+  m_setAllToLogAction->setEnabled(enabled);
+}
 } // MDF
 } // CustomInterfaces
 } // MantidQt

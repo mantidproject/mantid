@@ -1,4 +1,6 @@
 #pylint: disable=no-init
+# This __future__ import is for Python 2/3 compatibility
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
 
