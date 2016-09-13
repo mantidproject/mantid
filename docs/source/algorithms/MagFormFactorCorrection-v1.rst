@@ -9,7 +9,7 @@
 Description
 -----------
 
-Scales the `InputWorkspace` by :math:`1/F(Q|)` where :math:`F(Q)` is
+Scales the `InputWorkspace` by :math:`1/|F(Q)|^2` where :math:`F(Q)` is
 the magnetic form factor for the ion specified in `IonName`.
 
 `IonName` must be specified as a string with the element name followed

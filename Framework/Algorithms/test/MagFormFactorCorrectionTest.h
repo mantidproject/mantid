@@ -121,7 +121,8 @@ private:
       auto &Y1 = out->y(i);
       auto &Y0 = in->y(i);
       for (int64_t j = 0; j < nbins; j++) {
-        df = Y0[j] - Y1[j] * FF[j];
+        // Magnetic intensity is proportional to |F(Q)|^2
+        df = Y0[j] - Y1[j] * FF[j] * FF[j];
         if (std::isfinite(df)) {
           df2 += pow(df, 2.);
         }
