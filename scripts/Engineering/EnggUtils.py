@@ -10,7 +10,6 @@ ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]
 ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]
 
-print("EnggUtils running")
 
 def default_ceria_expected_peaks():
 
@@ -29,7 +28,6 @@ def default_ceria_expected_peaks():
                              0.637740216, 0.624855346, 0.620730846, 0.605013529
                             ]
 
-    print("EnggUtils running")
     return _CERIA_EXPECTED_PEAKS
 
 def read_in_expected_peaks(filename, expectedGiven):
