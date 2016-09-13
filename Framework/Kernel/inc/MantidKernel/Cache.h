@@ -4,10 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <map>
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/MultiThreaded.h"
-
-#include "tbb/concurrent_unordered_map.h"
 
 #include <mutex>
 
@@ -71,6 +70,7 @@ public:
 
   /// Clears the cache
   void clear() {
+    std::lock_guard<std::mutex> lock(m_mutex);
     m_cacheHit = 0;
     m_cacheMiss = 0;
     m_cacheMap.clear();
@@ -99,26 +99,8 @@ public:
    * @param value The new value for the key
    */
   void setCache(const KEYTYPE &key, const VALUETYPE &value) {
-    //
-    auto where = m_cacheMap.find(key);
-    if (where != m_cacheMap.end()) {
-      std::lock_guard<std::mutex> lock(m_mutex);
-      where->second = value;
-    } else {
-// When using Clang & Linux, TBB 4.4 doesn't detect C++11 features.
-// https://software.intel.com/en-us/forums/intel-threading-building-blocks/topic/641658
-#if defined(__clang__) && !defined(__APPLE__)
-#define CLANG_ON_LINUX true
-#else
-#define CLANG_ON_LINUX false
-#endif
-#if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
-      m_cacheMap.emplace(key, value);
-#else
-      std::lock_guard<std::mutex> lock(m_mutex);
-      m_cacheMap.insert(std::make_pair(key, value));
-#endif
-    }
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_cacheMap[key] = value;
   }
 
   /**
@@ -151,7 +133,8 @@ public:
    * @param key The key whose value should be removed
    */
   void removeCache(const KEYTYPE &key) {
-    PARALLEL_CRITICAL(unsafe_erase) { m_cacheMap.unsafe_erase(key); }
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_cacheMap.erase(key);
   }
 
 private:
@@ -163,11 +146,11 @@ private:
    * @returns True if the value was found, false otherwise
    */
   bool getCacheNoStats(const KEYTYPE key, VALUETYPE &value) const {
+    std::lock_guard<std::mutex> lock(m_mutex);
     auto it_found = m_cacheMap.find(key);
     bool isValid = it_found != m_cacheMap.end();
 
     if (isValid) {
-      std::lock_guard<std::mutex> lock(m_mutex);
       value = it_found->second;
     }
 
@@ -180,16 +163,14 @@ private:
   /// information
   mutable int m_cacheMiss;
   /// internal cache map
-  tbb::concurrent_unordered_map<KEYTYPE, VALUETYPE> m_cacheMap;
+  std::map<KEYTYPE, VALUETYPE> m_cacheMap;
   /// internal mutex
   mutable std::mutex m_mutex;
   /// iterator typedef
-  typedef typename tbb::concurrent_unordered_map<KEYTYPE, VALUETYPE>::iterator
-      CacheMapIterator;
+  typedef typename std::map<KEYTYPE, VALUETYPE>::iterator CacheMapIterator;
   /// const_iterator typedef
-  typedef
-      typename tbb::concurrent_unordered_map<KEYTYPE, VALUETYPE>::const_iterator
-          CacheMapConstIterator;
+  typedef typename std::map<KEYTYPE, VALUETYPE>::const_iterator
+      CacheMapConstIterator;
 };
 
 } // namespace Kernel
