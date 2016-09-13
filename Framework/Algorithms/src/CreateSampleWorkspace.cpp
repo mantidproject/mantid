@@ -530,7 +530,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     testInst->add(bank);
     // Set the bank along the z-axis of the instrument, between the detectors.
     bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample *
-                                   (monitorsStart - monitorNumber + 0.5)));
+                                   (monitorNumber - monitorsStart + 0.5)));
   }
 
   // Define a source component
