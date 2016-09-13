@@ -52,7 +52,8 @@ void MagFormFactorCorrection::exec() {
   int64_t numAxes = inputWS->axes();
   bool hasQ = false;
   std::vector<double> Qvals;
-  for (int64_t iax = 0; iax < numAxes; iax++) {
+  int64_t iax;
+  for (iax = 0; iax < numAxes; iax++) {
     Axis *QAxis = inputWS->getAxis(iax);
     std::string unitID = QAxis->unit()->unitID();
     if (unitID == "MomentumTransfer") {
@@ -101,7 +102,7 @@ void MagFormFactorCorrection::exec() {
     auto &Y = outputWS->mutableY(i);
     auto &E = outputWS->mutableE(i);
     for (int64_t j = 0; j < specSize; j++) {
-      double ff = (numAxes == 1) ? FF[j] : FF[i];
+      double ff = (iax == 0) ? FF[j] : FF[i];
       // Sometimes ff can be negative due to analytical approximation to the
       // exact calculation. Catch these, and also case of ff=0 (where there
       // should be no magnetic scattering).
