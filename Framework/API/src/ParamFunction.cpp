@@ -7,11 +7,9 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
 
-#include <boost/lexical_cast.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
-
-#include <sstream>
+#include <cmath>
 #include <limits>
+#include <sstream>
 
 namespace Mantid {
 namespace API {
@@ -39,22 +37,18 @@ ParamFunction::~ParamFunction() {
  */
 void ParamFunction::setParameter(size_t i, const double &value,
                                  bool explicitlySet) {
-  // Cppcheck confused by the check for NaN
-
-  if (boost::math::isnan(value)) {
+  if (std::isnan(value)) {
     // Check for NaN or -NaN
     std::stringstream errmsg;
-    errmsg << "Trying to set a NaN or infinity value (" << value
-           << ") to parameter " << this->parameterName(i);
+    errmsg << "Trying to set a NaN value (" << value << ") to parameter "
+           << this->parameterName(i);
     g_log.warning(errmsg.str());
-    // throw std::runtime_error(errmsg.str());
-  } else if (value <= -DBL_MAX || value >= DBL_MAX) {
+  } else if (std::isinf(value)) {
     // Infinity value
     std::stringstream errmsg;
     errmsg << "Trying to set an infinity value (" << value << ") to parameter "
            << this->parameterName(i);
     g_log.warning(errmsg.str());
-    // throw std::runtime_error(errmsg.str());
   }
 
   if (i >= nParams()) {
@@ -98,16 +92,14 @@ double ParamFunction::getParameter(size_t i) const {
  */
 void ParamFunction::setParameter(const std::string &name, const double &value,
                                  bool explicitlySet) {
-  std::string ucName(name);
-  std::vector<std::string>::const_iterator it =
-      std::find(m_parameterNames.begin(), m_parameterNames.end(), ucName);
-  if (it == m_parameterNames.end()) {
+  auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
+  if (it == m_parameterNames.cend()) {
     std::ostringstream msg;
-    msg << "ParamFunction tries to set value to non-exist parameter (" << ucName
+    msg << "ParamFunction tries to set value to non-exist parameter (" << name
         << ") "
         << "of function " << this->name();
     msg << "\nAllowed parameters: ";
-    for (auto &parameterName : m_parameterNames) {
+    for (const auto &parameterName : m_parameterNames) {
       msg << parameterName << ", ";
     }
     throw std::invalid_argument(msg.str());
@@ -123,16 +115,13 @@ void ParamFunction::setParameter(const std::string &name, const double &value,
  */
 void ParamFunction::setParameterDescription(const std::string &name,
                                             const std::string &description) {
-  std::string ucName(name);
-  // std::transform(name.begin(), name.end(), ucName.begin(), toupper);
-  std::vector<std::string>::const_iterator it =
-      std::find(m_parameterNames.begin(), m_parameterNames.end(), ucName);
-  if (it == m_parameterNames.end()) {
+  auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
+  if (it == m_parameterNames.cend()) {
     std::ostringstream msg;
     msg << "ParamFunction tries to set description to non-exist parameter ("
-        << ucName << "). ";
+        << name << "). ";
     msg << "\nAllowed parameters: ";
-    for (auto &parameterName : m_parameterNames)
+    for (const auto &parameterName : m_parameterNames)
       msg << parameterName << ", ";
     throw std::invalid_argument(msg.str());
   }
@@ -146,14 +135,11 @@ void ParamFunction::setParameterDescription(const std::string &name,
  * @return the value of the named parameter
  */
 double ParamFunction::getParameter(const std::string &name) const {
-  std::string ucName(name);
-  // std::transform(name.begin(), name.end(), ucName.begin(), toupper);
-  auto it =
-      std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), ucName);
+  auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
   if (it == m_parameterNames.cend()) {
     std::ostringstream msg;
     msg << "ParamFunction tries to get value of non-existing parameter ("
-        << ucName << ") "
+        << name << ") "
         << "to function " << this->name();
     msg << "\nAllowed parameters: ";
     for (const auto &parameterName : m_parameterNames)
@@ -163,7 +149,7 @@ double ParamFunction::getParameter(const std::string &name) const {
 
   double parvalue = m_parameters[it - m_parameterNames.cbegin()];
 
-  if (parvalue != parvalue || !(parvalue > -DBL_MAX && parvalue < DBL_MAX)) {
+  if (!std::isfinite(parvalue)) {
     g_log.warning() << "Parameter " << name << " has a NaN or infinity value "
                     << '\n';
   }
@@ -177,14 +163,11 @@ double ParamFunction::getParameter(const std::string &name) const {
  * @return the index of the named parameter
  */
 size_t ParamFunction::parameterIndex(const std::string &name) const {
-  std::string ucName(name);
-  // std::transform(name.begin(), name.end(), ucName.begin(), toupper);
-  auto it =
-      std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), ucName);
+  auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
   if (it == m_parameterNames.cend()) {
     std::ostringstream msg;
     msg << "ParamFunction " << this->name() << " does not have parameter ("
-        << ucName << ").";
+        << name << ").";
     throw std::invalid_argument(msg.str());
   }
   return std::distance(m_parameterNames.cbegin(), it);
@@ -244,18 +227,15 @@ void ParamFunction::setError(size_t i, double err) {
  */
 void ParamFunction::declareParameter(const std::string &name, double initValue,
                                      const std::string &description) {
-  std::string ucName(name);
-  // std::transform(name.begin(), name.end(), ucName.begin(), toupper);
-  std::vector<std::string>::const_iterator it =
-      std::find(m_parameterNames.begin(), m_parameterNames.end(), ucName);
-  if (it != m_parameterNames.end()) {
+  auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
+  if (it != m_parameterNames.cend()) {
     std::ostringstream msg;
-    msg << "ParamFunction parameter (" << ucName << ") already exists.";
+    msg << "ParamFunction parameter (" << name << ") already exists.";
     throw std::invalid_argument(msg.str());
   }
 
   m_isFixed.push_back(false);
-  m_parameterNames.push_back(ucName);
+  m_parameterNames.push_back(name);
   m_parameterDescriptions.push_back(description);
   m_parameters.push_back(initValue);
   m_errors.push_back(0.0);
@@ -317,7 +297,7 @@ void ParamFunction::addTie(ParameterTie *tie) {
  */
 void ParamFunction::applyTies() {
   for (auto &m_tie : m_ties) {
-    (*m_tie).eval();
+    m_tie->eval();
   }
 }
 

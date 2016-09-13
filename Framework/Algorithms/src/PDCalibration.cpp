@@ -281,9 +281,9 @@ void PDCalibration::exec() {
       dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
 
   for (std::size_t i = 0; i < m_peaksInDspacing.size(); ++i) {
-    std::cout << "[" << i << "] " << windowsInDSpacing[2 * i] << " < "
-              << m_peaksInDspacing[i] << " < " << windowsInDSpacing[2 * i + 1]
-              << std::endl;
+    g_log.information() << "[" << i << "] " << windowsInDSpacing[2 * i] << " < "
+                        << m_peaksInDspacing[i] << " < "
+                        << windowsInDSpacing[2 * i + 1] << std::endl;
   }
 
   double minPeakHeight = getProperty("MinimumPeakHeight");
@@ -323,8 +323,6 @@ void PDCalibration::exec() {
   for (int wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
     PARALLEL_START_INTERUPT_REGION
     if (isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) {
-      // std::cout << "Empty event list at wkspIndex = " << wkspIndex <<
-      // std::endl;
       prog.report();
       continue;
     }
@@ -337,6 +335,7 @@ void PDCalibration::exec() {
       continue;
 
     auto alg = createChildAlgorithm("FindPeaks");
+    alg->setLoggingOffset(2);
     alg->setProperty("InputWorkspace", m_uncalibratedWS);
     alg->setProperty("WorkspaceIndex", static_cast<int>(wkspIndex));
     alg->setProperty("PeakPositions", peaks.inTofPos);

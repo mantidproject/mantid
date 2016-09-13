@@ -198,6 +198,17 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     // receive the run number from the text-field
     auto strFocusedFile = m_view->getFittingRunNo();
 
+    if (m_previousInput == strFocusedFile) {
+      // Short circuit the checks and skip any warnings
+      // or errors as the user has not changed anything
+      // just clicked the box. Additionally this resolves an
+      // issue where QT will return the cursor and produce a new
+      // warning when the current warning is closed
+      return;
+    } else {
+      m_previousInput = strFocusedFile;
+    }
+
     // file name
     Poco::Path selectedfPath(strFocusedFile);
     Poco::Path bankDir;
@@ -551,10 +562,12 @@ void EnggDiffFittingPresenter::processLoad() {
                           "Please select a focused file to load");
       m_view->showStatus("Error while plotting the focused workspace");
     }
-  } catch (std::invalid_argument) {
+  } catch (std::invalid_argument &ia) {
     m_view->userWarning(
         "Error loading file",
         "Unable to load the selected focused file, Please try again.");
+    g_log.error("Failed to load file. Error message: ");
+    g_log.error(ia.what());
   }
 }
 
@@ -1534,6 +1547,19 @@ void EnggDiffFittingPresenter::plotFocusedFile(bool plotSinglePeaks) {
     auto focusedPeaksWS =
         ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
     auto focusedData = ALCHelper::curveDataFromWs(focusedPeaksWS);
+
+    // Check that the number of curves to plot isn't excessive
+    // lets cap it at 20 to begin with - this number could need
+    // raising but each curve creates about ~5 calls on the stack
+    // so keep the limit low. This will stop users using unfocused
+    // files which have 200+ curves to plot and will "freeze" Mantid
+    constexpr int maxCurves = 20;
+
+    if (focusedData.size() > maxCurves) {
+      throw std::invalid_argument("Too many curves to plot."
+                                  " Is this a focused file?");
+    }
+
     m_view->setDataVector(focusedData, true, plotSinglePeaks);
 
   } catch (std::runtime_error &re) {
