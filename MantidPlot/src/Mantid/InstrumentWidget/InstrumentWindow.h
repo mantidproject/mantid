@@ -10,6 +10,8 @@
 #include <boost/shared_ptr.hpp>
 
 class ApplicationWindow;
+class MantidUI;
+
 namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentWidget;
@@ -17,8 +19,7 @@ class InstrumentWidgetTab;
 }
 }
 
-class InstrumentWindow : public MdiSubWindow,
-                         public Mantid::IProjectSerialisable {
+class InstrumentWindow : public MdiSubWindow {
   Q_OBJECT
 public:
   explicit InstrumentWindow(const QString &wsName,
@@ -27,8 +28,11 @@ public:
                             const QString &name = QString());
   ~InstrumentWindow() override;
 
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion) override;
+  /// Load the state of the instrument window for a Mantid project file
+  static IProjectSerialisable *loadFromProject(const std::string &lines,
+                                               ApplicationWindow *app,
+                                               const int fileVersion);
+  /// Save the state of the instrument window to a Mantid project file
   std::string saveToProject(ApplicationWindow *app) override;
   void selectTab(int tab);
   MantidQt::MantidWidgets::InstrumentWidgetTab *

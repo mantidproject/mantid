@@ -2,6 +2,7 @@
 #include "MantidCrystal/LoadHKL.h"
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/Utils.h"
 #include <fstream>
 

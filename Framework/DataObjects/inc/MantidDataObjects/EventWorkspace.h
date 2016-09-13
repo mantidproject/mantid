@@ -1,10 +1,6 @@
 #ifndef MANTID_DATAOBJECTS_EVENTWORKSPACE_H_
 #define MANTID_DATAOBJECTS_EVENTWORKSPACE_H_ 1
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidDataObjects/EventList.h"
@@ -13,9 +9,6 @@
 #include <string>
 
 namespace Mantid {
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
 namespace API {
 class Progress;
 }
@@ -23,11 +16,6 @@ class Progress;
 namespace DataObjects {
 class EventWorkspaceMRU;
 
-/// EventList objects, with the detector ID as the index.
-typedef std::vector<EventList *> EventListVector;
-
-//============================================================================
-//============================================================================
 /** \class EventWorkspace
 
     This class is intended to fulfill the design specified in
@@ -177,10 +165,7 @@ private:
   /** A vector that holds the event list for each spectrum; the key is
    * the workspace index, which is not necessarily the pixelid.
    */
-  EventListVector data;
-
-  /// The number of vectors in the workspace
-  std::size_t m_noVectors;
+  std::vector<EventList *> data;
 
   /// Container for the MRU lists of the event lists contained.
   mutable EventWorkspaceMRU *mru;
@@ -192,7 +177,6 @@ typedef boost::shared_ptr<EventWorkspace> EventWorkspace_sptr;
 typedef boost::shared_ptr<const EventWorkspace> EventWorkspace_const_sptr;
 
 } /// namespace DataObjects
-
 } /// namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_EVENTWORKSPACE_H_ */
