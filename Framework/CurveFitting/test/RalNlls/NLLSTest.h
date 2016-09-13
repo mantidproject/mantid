@@ -55,7 +55,8 @@ public:
     AnalysisDataService::Instance().remove("out");
     Fit fit;
     fit.initialize();
-    fit.setPropertyValue("Function", "name=UserFunction,Formula=b1*(1-exp(-b2*x)),b1=1,b2=1");
+    fit.setPropertyValue(
+        "Function", "name=UserFunction,Formula=b1*(1-exp(-b2*x)),b1=1,b2=1");
     fit.setProperty("InputWorkspace", ws);
     fit.setProperty("Minimizer", "DTRS");
     fit.setRethrows(true);
