@@ -1217,7 +1217,7 @@ std::vector<DataProcessorCommand_uptr>
 GenericDataProcessorPresenter::getTableList() {
 
   std::vector<DataProcessorCommand_uptr> workspaces;
-
+  workspaces.reserve(m_workspaceList.size());
   // Create a command for each of the workspaces in the ADS
   for (const auto &name : m_workspaceList) {
     workspaces.push_back(
