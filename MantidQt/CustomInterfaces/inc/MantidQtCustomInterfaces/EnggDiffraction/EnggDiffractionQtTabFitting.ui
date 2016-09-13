@@ -410,28 +410,24 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QLabel" name="picker_tooltip">
+          <widget class="QPushButton" name="pushButton_tooltip">
            <property name="font">
             <font>
              <pointsize>10</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
             </font>
            </property>
            <property name="toolTip">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Shift+ Left Click&lt;/span&gt; to select peak then click &lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Add Peak &lt;/span&gt;to add to list of peaks.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Left Click+Drag &lt;/span&gt;to zoom into an area within the peak display.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Left Click&lt;/span&gt; to return to original zoom size.&lt;/p&gt;&lt;p&gt;Selected peaks can be removed from the top of the interface&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
-           <property name="autoFillBackground">
-            <bool>false</bool>
-           </property>
            <property name="styleSheet">
-            <string notr="true">background-color: rgb(179, 214, 255)</string>
+            <string notr="true">border: 0px;
+background-color: rgb(179, 214, 255)</string>
            </property>
            <property name="text">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;How to use&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>How to use</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
+           <property name="flat">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
