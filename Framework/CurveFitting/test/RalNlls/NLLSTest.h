@@ -42,6 +42,26 @@ public:
     TS_ASSERT_DELTA(fun->getParameter(1), 2.16815, 0.00001);
   }
 
+  void test_no_NaNs() {
+    std::vector<double> x{1, 2, 3, 5, 7, 10};
+    std::vector<double> y{109, 149, 149, 191, 213, 224};
+    auto alg = AlgorithmFactory::Instance().create("CreateWorkspace", -1);
+    alg->initialize();
+    alg->setProperty("DataX", x);
+    alg->setProperty("DataY", y);
+    alg->setProperty("OutputWorkspace", "out");
+    alg->execute();
+    auto ws = AnalysisDataService::Instance().retrieveWS<Workspace>("out");
+    AnalysisDataService::Instance().remove("out");
+    Fit fit;
+    fit.initialize();
+    fit.setPropertyValue("Function", "name=UserFunction,Formula=b1*(1-exp(-b2*x)),b1=1,b2=1");
+    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("Minimizer", "DTRS");
+    fit.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(fit.execute());
+  }
+
 private:
   Workspace_sptr make_exp_decay_workspace() {
     std::vector<double> y({62, 48, 51, 36, 35, 22, 23, 17, 22, 10, 12, 12, 14,
