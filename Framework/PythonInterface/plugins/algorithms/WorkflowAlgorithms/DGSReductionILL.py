@@ -248,12 +248,12 @@ class DGSReductionILL(DataProcessorAlgorithm):
                     if abs(backgroundChopper1Speed - backgroundChopper2Speed) > 1:
                         raise RuntimeError('background choppers 1 and 2 have different speeds')
                     n = fermiChopperSpeed / backgroundChopper1Speed / 4
-                    pulseInterval = 60.0 / (2 * fermiChopperSpeed * n)
+                    pulseInterval = 60.0 / (2 * fermiChopperSpeed) * n
                 elif instrument == 'IN6':
                     fermiChopperSpeed = workspace.run().getLogData('Fermi.rotation_speed').value
                     suppressorSpeed = workspace.run().getLogData('Suppressor.rotation_speed').value
                     n = fermiChopperSpeed / suppressorSpeed
-                    pulseInterval = 60.0 / (2 * fermiChopperSpeed * n)
+                    pulseInterval = 60.0 / (2 * fermiChopperSpeed) * n
                 energy = GetEiMonDet(DetectorWorkspace=workspace,
                                      DetectorEPPTable=eppWorkspace,
                                      IndexType=indexType,
