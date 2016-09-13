@@ -18,6 +18,14 @@ Velocity auto-correlations calculated for sodium fluoride.
 .. image:: ../images/VelocityAutoCorrelations.png
     :align: center
 
+Usage
+-------
+
+.. code-block:: python
+
+    AutoCorr = VelocityAutoCorrelations(InputFile = 'trajectories.nc',
+                                                            Timestep = '2.0')
+
 .. categories::
 
 .. sourcelink::

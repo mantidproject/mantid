@@ -18,6 +18,14 @@ Velocity cross-correlations calculated for sodium fluoride.
 .. image:: ../images/VelocityCrossCorrelations.png
     :align: center
 
+Usage
+-------
+
+.. code-block:: python
+
+    CrossCorr = VelocityCrossCorrelations(InputFile = 'trajectories.nc',
+                                                               Timestep = '2.0')
+
 .. categories::
 
 .. sourcelink::
