@@ -4,9 +4,9 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="POLREF" valid-from   ="1901-01-01 00:01:00"
-                          valid-to     ="2016-06-27 23:59:59"
-		          last-modified="2012-07-16 23:59:59">
+ name="POLREF" valid-from   ="2016-06-28 00:01:00"
+                          valid-to     ="2100-01-31 23:59:59"
+		          last-modified="2016-06-29 23:59:59">
 
   <defaults>
     <length unit="meter" />
@@ -144,7 +144,7 @@
     We may actually want to draw in the table for clarity.
     -->
     <parameter name="z">
-      <logfile id="stheta" eq="2.6*sin(2*value*0.0174533)" extract-single-value-as="last_value" />
+      <logfile id="Theta" eq="2.6*sin(2*value*0.0174533)" extract-single-value-as="last_value" /> <!-- Theta was changed from Stheta for historical data -->
     </parameter>
     
   </component>   
