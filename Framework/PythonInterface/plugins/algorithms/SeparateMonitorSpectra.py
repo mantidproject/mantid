@@ -7,6 +7,9 @@ class SeparateMonitorSpectra(DataProcessorAlgorithm):
     def category(self):
         return 'Utility\\Workspaces'
 
+    def summary(self):
+        return 'Separates the monitors and/or detectors into separate workspaces.'
+
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
                                                      direction=Direction.Input),
