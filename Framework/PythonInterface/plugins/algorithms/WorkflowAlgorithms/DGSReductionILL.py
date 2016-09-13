@@ -6,7 +6,7 @@ from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
                              CloneWorkspace, ComputeCalibrationCoefVan,\
                              ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DetectorEfficiencyCorUser, Divide, ExtractSpectra,\
                              FindDetectorsOutsideLimits, FindEPP, GetEiMonDet, GroupWorkspaces, Integration, Load,\
-                             MaskDetectors, Minus, NormaliseToMonitor, Rebin
+                             MaskDetectors, Minus, NormaliseToMonitor, Rebin, Scale
 import numpy
 
 INDEX_TYPE_DETECTOR_ID     = 'DetectorID'
@@ -22,8 +22,8 @@ PROP_CD_WORKSPACE                     = 'CadmiumWorkspace'
 PROP_DETECTORS_FOR_EI_CALIBRATION     = 'IncidentEnergyCalibrationDetectors'
 PROP_EC_WORKSPACE                     = 'EmptyCanWorkspace'
 PROP_EPP_WORKSPACE                    = 'EPPWorkspace'
-PROP_FLAT_BACKGROUND_FIT_BEGIN        = 'FlatBackgroundFitBegin'
-PROP_FLAT_BACKGROUND_FIT_END          = 'FlatBackgroundFitEnd'
+PROP_FLAT_BACKGROUND_SCALING          = 'FlatBackgroundScaling'
+PROP_FLAT_BACKGROUND_WINDOW           = 'FlatBackgroundAveragingWindow'
 PROP_FLAT_BACKGROUND_WORKSPACE        = 'FlatBackgroundWorkspace'
 PROP_INDEX_TYPE                       = 'IndexType'
 PROP_INPUT_FILE                       = 'InputFile'
@@ -161,14 +161,12 @@ class DGSReductionILL(DataProcessorAlgorithm):
         if bkgOutWs or not bkgInWs:
             if not bkgOutWs:
                 bkgOutWs = backgroundWorkspaceName(identifier)
-            begin = self.getProperty(PROP_FLAT_BACKGROUND_FIT_BEGIN).value
-            end = self.getProperty(PROP_FLAT_BACKGROUND_FIT_END).value
-            bkgWorkspace = CalculateFlatBackground(InputWorkspace=workspace,
-                                                   OutputWorkspace=bkgOutWs,
-                                                   StartX=begin,
-                                                   EndX=end,
-                                                   OutputMode='Return Background',
-                                                   NullifyNegativeValues=False)
+            bkgWindow = self.getProperty(PROP_FLAT_BACKGROUND_WINDOW).value
+            bkgScaling = self.getProperty(PROP_FLAT_BACKGROUND_SCALING).value
+            bkgWorkspace = self._calculateFlatBackground(workspace, bkgOutWs, bkgWindow)
+            bkgWorkspace = Scale(InputWorkspace = bkgWorkspace,
+                                 OutputWorkspace = bkgWorkspace,
+                                 Factor = bkgScaling)
             self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgOutWs)
         if bkgInWs:
             bkgWorkspace = self.getProperty(PROP_FLAT_BACKGROUND_WORKSPACE).value
@@ -440,14 +438,14 @@ class DGSReductionILL(DataProcessorAlgorithm):
                                                      Direction.Input,
                                                      PropertyMode.Optional),
                              doc='Table workspace containing results from the FindEPP algorithm for the monitor workspace')
-        self.declareProperty(PROP_FLAT_BACKGROUND_FIT_BEGIN,
-                             0.0,
+        self.declareProperty(PROP_FLAT_BACKGROUND_SCALING,
+                             1.0,
                              direction=Direction.Input,
-                             doc='Beginning of background fitting range')
-        self.declareProperty(PROP_FLAT_BACKGROUND_FIT_END,
-                             1000.0,
+                             doc='Flat background scaling constant')
+        self.declareProperty(PROP_FLAT_BACKGROUND_WINDOW,
+                             30,
                              direction=Direction.Input,
-                             doc='End of background fitting range')
+                             doc='Running average window width (in bins) for flat background')
         self.declareProperty(MatrixWorkspaceProperty(PROP_FLAT_BACKGROUND_WORKSPACE,
                                                      '',
                                                      Direction.Input,
@@ -502,6 +500,14 @@ class DGSReductionILL(DataProcessorAlgorithm):
                              direction=Direction.Output),
                              doc='The output of the algorithm')
 
+    def _calculateFlatBackground(self, ws, bkgWsName, window):
+        # TODO this functionality should be moved to CalculateFlatBackground
+        # algorithm some day
+        bkgWs = CloneWorkspace(InputWorkspace=ws,OutputWorkspace=bkgWsName)
+        for i in range(ws.getNumberHistograms()):
+            bkgWs.dataY(i).fill(self._runningMeanMinimum(ws.readY(i), window))
+        return bkgWs
+
     def _convertToWorkspaceIndex(self, i, workspace):
         indexType = self.getProperty(PROP_INDEX_TYPE).value
         if indexType == INDEX_TYPE_WORKSPACE_INDEX:
@@ -518,5 +524,15 @@ class DGSReductionILL(DataProcessorAlgorithm):
         self.setProperty(PROP_OUTPUT_WORKSPACE, outputWorkspace)
         self.log().debug('Finished')
 
+    def _runningMeanMinimum(self, x, window):
+        # TODO this functionality should be moved to CalculateFlatBackground
+        # algorithm some day
+        # Does not handle NaNs.
+        dx = window / 2 + 1
+        minimum = numpy.min(x[:dx])
+        for i in range(len(x) - window):
+            minimum = min(minimum, numpy.mean(x[i:i+window]))
+        minEnd = numpy.min(x[-dx:])
+        return min(minimum, minEnd)
 
 AlgorithmFactory.subscribe(DGSReductionILL)
