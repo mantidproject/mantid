@@ -470,6 +470,12 @@ constexpr double j_Yb3[4][8] = {
     {0.157, 18.555, 0.8484, 6.54, 0.888, 2.037, 0.0318, 0.0498},      // <j2>
     {-0.2121, 8.197, 0.0325, 3.153, 0.1975, 0.884, 0.0093, 0.0435},   // <j4>
     {-0.0345, 5.007, -0.0677, 2.02, 0.0985, 0.549, -0.0076, 0.0359}}; // <j6>
+/// From ILL data booklet. https://www.ill.eu/sites/ccsl/ffacts/ffachtml.html
+constexpr double j_Pr3[4][8] = {
+    {0.0504, 24.9989, 0.2572, 12.0377, 0.7142, 5.0039, -0.0219, -1.}, // <j0>
+    {0.8734, 18.9876, 1.5594, 6.0872, 0.8142, 2.4150, 0.0111, -1.},   // <j2>
+    {-0.3970, 10.9919, 0.0818, 5.9897, 0.3656, 1.5021, 0.0110, -1.},  // <j4>
+    {-0.0224, 7.9931, -0.1202, 3.9406, 0.1299, 0.8938, 0.0051, -1.}}; // <j6>
 constexpr double j_U3[4][8] = {
     {0.5058, 23.288, 1.3464, 7.003, -0.8724, 4.868, 0.0192, 0.1507}, // <j0>
     {4.1582, 16.534, 2.4675, 5.952, -0.0252, 0.765, 0.0057, 0.0822}, // <j2>
@@ -811,6 +817,9 @@ void createIonLookup(IonIndex &ion_map) {
   static const MagneticIon Yb3("Yb", static_cast<uint16_t>(3), j_Yb3[0],
                                j_Yb3[1], j_Yb3[2], j_Yb3[3]);
   ion_map["Yb3"] = Yb3;
+  static const MagneticIon Pr3("Pr", static_cast<uint16_t>(3), j_Pr3[0],
+                              j_Pr3[1], j_Pr3[2], j_Pr3[3]);
+  ion_map["Pr3"] = Pr3;
   static const MagneticIon U3("U", static_cast<uint16_t>(3), j_U3[0], j_U3[1],
                               j_U3[2], j_U3[3]);
   ion_map["U3"] = U3;
@@ -931,6 +940,21 @@ std::vector<double> getJL(const std::string &symbol, const uint16_t charge,
     throw std::runtime_error(msg.str());
   }
   return v;
+}
+
+/**
+ * Returns a std::vector<std::string> of the keys of ion_map
+ * (a list of all ions programmed into this class)
+ * @return
+ */
+std::vector<std::string> getMagneticIonList() {
+  const IonIndex &ionIndex = ionMap();
+  std::vector<std::string> keys;
+  keys.reserve(ionIndex.size());
+  for(auto kv : ionIndex) {
+    keys.push_back(kv.first);
+  }
+  return keys;
 }
 
 } // namespace PhysicalConstants

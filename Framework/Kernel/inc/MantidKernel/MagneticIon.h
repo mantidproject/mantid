@@ -55,6 +55,10 @@ MANTID_KERNEL_DLL const MagneticIon &getMagneticIon(const std::string &symbol);
 MANTID_KERNEL_DLL std::vector<double>
 getJL(const std::string &symbol, const uint16_t charge, const uint16_t l = 0);
 
+/// Returns a list of all ions
+MANTID_KERNEL_DLL std::vector<std::string> getMagneticIonList();
+
+
 } // namespace PhysicalConstants
 } // namespace Mantid
 

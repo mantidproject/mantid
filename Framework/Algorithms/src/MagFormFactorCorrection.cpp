@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MagFormFactorCorrection.h"
 #include "MantidKernel/MagneticIon.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -22,27 +23,28 @@ using namespace PhysicalConstants;
 
 void MagFormFactorCorrection::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input),
-      "Workspace must have one axes with units of Q");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
-                  "Output workspace name.");
-  declareProperty("IonName", "", "The name of the ion: an element symbol with "
-                                 "a number indicating the valence, e.g. Fe2");
-  declareProperty("FormFactorWorkspace", "",
-                  "If specified the algorithm will create a 1D workspace with "
-                  "the form factor vs Q with a name given by this field.");
+      make_unique<WorkspaceProperty<>>(
+      "InputWorkspace", "", Direction::Input),
+      "Workspace must have one axis with units of Q");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>(
+      "OutputWorkspace", "", Direction::Output),
+      "Output workspace name.");
+  std::vector<std::string> keys = getMagneticIonList();
+  declareProperty(
+      "IonName", "Cu2", 
+      boost::make_shared<StringListValidator>(keys),
+      "The name of the ion: an element symbol with a number "
+      "indicating the valence, e.g. Fe2 for Fe2+ / Fe(II)");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>(
+      "FormFactorWorkspace", "", Direction::Output, PropertyMode::Optional),
+      "If specified the algorithm will create a 1D workspace with "
+      "the form factor vs Q with a name given by this field.");
 }
 
 void MagFormFactorCorrection::exec() {
-  int64_t iax, numAxes, nQ, iQ;
-  bool hasQ = false;
-  std::string unitID;
-  Axis *QAxis;
-  std::vector<double> Qvals, FF;
-  double ff;
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   const std::string ionNameStr = getProperty("IonName");
   const std::string ffwsStr = getProperty("FormFactorWorkspace");
   const bool isHist = inputWS->isHistogramData();
@@ -50,22 +52,24 @@ void MagFormFactorCorrection::exec() {
   const int64_t specSize = inputWS->blocksize();
 
   // Checks that there is a |Q| axis.
-  numAxes = inputWS->axes();
-  for (iax = 0; iax < numAxes; iax++) {
-    QAxis = inputWS->getAxis(iax);
-    unitID = QAxis->unit()->unitID();
+  int64_t numAxes = inputWS->axes();
+  bool hasQ = false;
+  std::vector<double> Qvals;
+  for (int64_t iax = 0; iax < numAxes; iax++) {
+    Axis *QAxis = inputWS->getAxis(iax);
+    std::string unitID = QAxis->unit()->unitID();
     if (unitID == "MomentumTransfer") {
       hasQ = true;
       // Gets the list of Q values
       if (isHist || iax > 0) {
-        nQ = QAxis->length() - 1;
-        for (iQ = 0; iQ < nQ; iQ++) {
+        int64_t nQ = QAxis->length() - 1;
+        for (int64_t iQ = 0; iQ < nQ; iQ++) {
           Qvals.push_back(0.5 * (QAxis->getValue(static_cast<size_t>(iQ)) +
                                  QAxis->getValue(static_cast<size_t>(iQ + 1))));
         }
       } else {
-        nQ = QAxis->length();
-        for (iQ = 0; iQ < nQ; iQ++) {
+        int64_t nQ = QAxis->length();
+        for (int64_t iQ = 0; iQ < nQ; iQ++) {
           Qvals.push_back(QAxis->getValue(static_cast<size_t>(iQ)));
         }
       }
@@ -81,8 +85,9 @@ void MagFormFactorCorrection::exec() {
   // Parses the ion name and get handle to MagneticIon object
   const MagneticIon ion = getMagneticIon(ionNameStr);
   // Gets the vector of form factor values
-  FF.reserve(nQ);
-  for (iQ = 0; iQ < nQ; iQ++) {
+  std::vector<double> FF;
+  FF.reserve(Qvals.size());
+  for (int64_t iQ = 0; iQ < Qvals.size(); iQ++) {
     FF.push_back(ion.analyticalFormFactor(Qvals[iQ] * Qvals[iQ], 0, 0));
   }
   if (!ffwsStr.empty()) {
@@ -94,14 +99,22 @@ void MagFormFactorCorrection::exec() {
   }
 
   // Does the actual scaling.
-  outputWS = inputWS->clone();
+  MatrixWorkspace_sptr outputWS = inputWS->clone();
   for (int64_t i = 0; i < numHists; i++) {
     auto &Y = outputWS->mutableY(i);
     auto &E = outputWS->mutableE(i);
     for (int64_t j = 0; j < specSize; j++) {
-      ff = (iax == 0) ? FF[j] : FF[i];
-      Y[j] /= ff;
-      E[j] /= ff;
+      double ff = (numAxes == 1) ? FF[j] : FF[i];
+      // Sometimes ff can be negative due to analytical approximation to the
+      // exact calculation. Catch these, and also case of ff=0 (where there
+      // should be no magnetic scattering).
+      if (ff < 0.01) {
+        Y[j] = NAN;
+        E[j] = NAN;
+      } else {
+        Y[j] /= (ff * ff); // Magnetic intensity proportional |F(Q)|^2
+        E[j] /= (ff * ff);
+      }
     }
   }
 
