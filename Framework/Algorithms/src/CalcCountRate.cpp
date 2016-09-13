@@ -71,7 +71,7 @@ void CalcCountRate::init() {
   std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
   declareProperty("EMode", "Elastic",
                   boost::make_shared<Kernel::StringListValidator>(propOptions),
-                  "The energy conversion mode (default: elastic)");
+                  "The range units above conversion mode (default: elastic)");
 
   // Used logs group
   std::string used_logs_mode("Used normalization logs");
@@ -250,11 +250,12 @@ void CalcCountRate::setOutLogParameters(
 }
 
 /* Retrieve and define data search ranges from input workspace parameters and
- *algorithm properties
- *@param InputWorkspace -- event workspace to process. Also get access to
- *algorithm properties
+ * algorithm properties
+ *
+ *@param InputWorkspace -- event workspace to process. Also retrieves algorithm 
+ *                         properties, relevant to the workspace.
  *@return -- the input workspace cropped accoding to XMin-XMax ranges in units,
- *requested by
+ *           requested by the user
  *
 */
 void CalcCountRate::setWSDataRanges(
@@ -267,14 +268,13 @@ void CalcCountRate::setWSDataRanges(
   } else {
     m_rangeExplicit = true;
   }
-  auto axis = InputWorkspace->getAxis(0);
   if (!m_rangeExplicit) {
-    m_XRangeMin = axis->getMin();
-    m_XRangeMax = axis->getMax();
+    InputWorkspace->getEventXMinMax(m_XRangeMin, m_XRangeMax);
     return;
   }
   // Search wihin partial range;
   std::string RangeUnits = getProperty("RangeUnits");
+  auto axis = InputWorkspace->getAxis(0);
   const auto unit = axis->unit();
 
   API::MatrixWorkspace_sptr wst;
@@ -290,6 +290,7 @@ void CalcCountRate::setWSDataRanges(
     conv->setPropertyValue("OutputWorkspace", wsName);
     std::string Emode = getProperty("Emode");
     conv->setProperty("Emode", Emode);
+    conv->setProperty("Target", RangeUnits);
 
     conv->execute();
     wst = conv->getProperty("OutputWorkspace");
@@ -297,18 +298,36 @@ void CalcCountRate::setWSDataRanges(
   } else {
     wst = InputWorkspace;
   }
+  auto wste  =
+      boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(wst);
+  if(!wste) {
+    throw std::runtime_error(
+    "SetWSDataRanges:Can not retrieve EventWorkspace after converting units");
+   }
   // here the ranges have been changed so both will newer remain defaults
-  axis = wst->getAxis(0);
+  double realMin, realMax;
+  wste->getEventXMinMax(realMin, realMax);
+
   if (m_XRangeMin == EMPTY_DBL()) {
-    m_XRangeMin = axis->getMin();
+    m_XRangeMin = realMin;
   }
   if (m_XRangeMax == EMPTY_DBL()) {
-    m_XRangeMax = axis->getMax();
+    m_XRangeMax = realMax;
+  }
+  if (m_XRangeMin < realMin) {
+      g_log.debug()<<"Workspace constrain min range changed from: "
+      << m_XRangeMin << " To: " << realMin << std::endl;
+      m_XRangeMin = realMin;
+  }
+  if (m_XRangeMax > realMax) {
+      g_log.debug() << "Workspace constrain max range changed from: "
+          << m_XRangeMax  << " To: " << realMax << std::endl;
+      m_XRangeMax = realMax;
   }
 
   //
   auto crop = createChildAlgorithm("CropWorkspace", 0, 1);
-  crop->setProperty("InputWorkspace", wst);
+  crop->setProperty("InputWorkspace", wste);
   crop->setProperty("OutputWorkspace", wsName);
   crop->setProperty("XMin", m_XRangeMin);
   crop->setProperty("XMax", m_XRangeMax);

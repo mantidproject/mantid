@@ -5,6 +5,8 @@
 
 #include "MantidAlgorithms/CalcCountRate.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
+
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
@@ -77,6 +79,14 @@ public:
     TS_ASSERT_DELTA(std::get<0>(ranget), 1., 1.e-8);
     TS_ASSERT_DELTA(std::get<1>(ranget), 30., 1.e-8);
     TS_ASSERT(std::get<2>(ranget));
+
+    double XRangeMin, XRangeMax;
+    sws->getEventXMinMax(XRangeMin,XRangeMax);
+
+    TS_ASSERT(std::get<0>(ranget) < XRangeMin);
+    TS_ASSERT(std::get<1>(ranget) > XRangeMax);
+
+
   }
 };
 
