@@ -10,7 +10,10 @@ ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]
 ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]
 
+print("EnggUtils running")
+
 def default_ceria_expected_peaks():
+
     """
     Get the list of expected Ceria peaks, which can be a good default for the expected peaks
     properties of algorithms like EnggCalibrate and EnggCalibrateFull
@@ -26,6 +29,7 @@ def default_ceria_expected_peaks():
                              0.637740216, 0.624855346, 0.620730846, 0.605013529
                             ]
 
+    print("EnggUtils running")
     return _CERIA_EXPECTED_PEAKS
 
 def read_in_expected_peaks(filename, expectedGiven):
@@ -95,8 +99,10 @@ def getWsIndicesFromInProperties(ws, bank, detIndices):
                          "'DetectorIndices', as they overlap. Please use either of them. Got Bank: '%s', "
                          "and DetectorIndices: '%s'"%(bank, detIndices))
     elif bank:
-        bankAliases = {'North': '1', 'South': '2', 'Both: North, South': '-1'}
-        bank = bankAliases.get(bank, bank)
+        # Handle banks as a list, we have bank 1, 2, or both [1, 2]
+        bankAliases = {'North': [1], 'South': [2], 'Both: North, South': [1, 2]}
+        # if not found in dictionary convert input to int list as well
+        bank = bankAliases.get(bank, [int(bank)])
         indices = getWsIndicesForBank(ws, bank)
         if not indices:
             raise RuntimeError("Unable to find a meaningful list of workspace indices for the "
@@ -187,9 +193,8 @@ def getDetIDsForBank(bank):
 
     detIDs = set()
 
-    bank_int = int(bank)
     for i in range(grouping.getNumberHistograms()):
-        if bank_int < 0 or grouping.readY(i)[0] == bank_int:
+        if grouping.readY(i)[0] in bank:
             detIDs.add(grouping.getDetector(i).getID())
 
     sapi.DeleteWorkspace(grouping)
