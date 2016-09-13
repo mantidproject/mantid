@@ -251,26 +251,66 @@ public:
     TSM_ASSERT_EQUALS("Hidden entries should not be returned", names.size(), 3);
     TSM_ASSERT_EQUALS("Hidden entries should not be returned", objects.size(),
                       3);
-    TS_ASSERT_DIFFERS(names.find("One"), names.end());
-    TS_ASSERT_DIFFERS(names.find("Two"), names.end());
-    TS_ASSERT_DIFFERS(names.find("TwoAgain"), names.end());
-    TS_ASSERT_EQUALS(names.find("__Three"), names.end());
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "One"),
+                      names.end());
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "Two"),
+                      names.end());
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "TwoAgain"),
+                      names.end());
+    TS_ASSERT_EQUALS(std::find(names.cbegin(), names.cend(), "__Three"),
+                     names.end());
     TSM_ASSERT_EQUALS("Hidden entries should not be returned",
-                      names.find("__Three"), names.end());
+                      std::find(names.cbegin(), names.cend(), "__Three"),
+                      names.end());
     TS_ASSERT_EQUALS(objects.at(0), one);
     TS_ASSERT_EQUALS(objects.at(1), two);
     TS_ASSERT_EQUALS(objects.at(2), two);
 
-    auto allNamesSize = svc.getObjectNamesInclHidden().size();
+    auto allNamesSize = svc.getObjectNames().size();
     ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
                                         "1");
-    TS_ASSERT_EQUALS(allNamesSize, svc.getObjectNamesInclHidden().size())
+    TS_ASSERT_EQUALS(allNamesSize, 3)
     names = svc.getObjectNames();
     objects = svc.getObjects();
     TS_ASSERT_EQUALS(names.size(), 4);
     TS_ASSERT_EQUALS(objects.size(), 4);
-    TS_ASSERT_DIFFERS(names.find("__Three"), names.end());
-    TS_ASSERT_EQUALS(objects.at(3), three);
+    auto cit = std::find(names.cbegin(), names.cend(), "__Three");
+    TS_ASSERT_DIFFERS(cit, names.cend());
+    TS_ASSERT_EQUALS(objects.at(std::distance(names.cbegin(), cit)), three);
+  }
+
+  void test_sortedAndHiddenGetNames() {
+    auto one = boost::make_shared<int>(1);
+    auto two = boost::make_shared<int>(2);
+    auto three = boost::make_shared<int>(3);
+    auto four = boost::make_shared<int>(4);
+    // This time add them in a random order
+    svc.add("One", one);
+    svc.add("__Three", three);
+    svc.add("Four", four);
+    svc.add("Two", two);
+
+    typedef Mantid::Kernel::DataServiceSort sortedEnum;
+    typedef Mantid::Kernel::DataServiceHidden hiddenEnum;
+
+    // First assert that sort does not impact size
+    TS_ASSERT_EQUALS(svc.getObjectNames(sortedEnum::Sorted).size(),
+                     svc.getObjectNames(sortedEnum::Unsorted).size());
+
+    // Get unsorted and sort the manually
+    auto sortReference = svc.getObjectNames();
+    std::sort(sortReference.begin(), sortReference.end());
+
+    TS_ASSERT_EQUALS(svc.getObjectNames(sortedEnum::Sorted), sortReference);
+
+    // Next assert that Hidden flags behave
+    TS_ASSERT_EQUALS(
+        svc.getObjectNames(sortedEnum::Unsorted, hiddenEnum::Exclude).size(),
+        3);
+
+    TS_ASSERT_EQUALS(
+        svc.getObjectNames(sortedEnum::Unsorted, hiddenEnum::Include).size(),
+        4);
   }
 
   void test_threadSafety() {

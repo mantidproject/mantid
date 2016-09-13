@@ -77,14 +77,14 @@ public:
   /// The date-and-time will be stored as the Mantid::Kernel::DateAndTime type
   explicit AlgorithmHistory(
       const Algorithm *const alg,
-      const Kernel::DateAndTime &start = Kernel::DateAndTime::defaultTime(),
+      const Kernel::DateAndTime &start = Kernel::DateAndTime::getCurrentTime(),
       const double &duration = -1.0, std::size_t uexeccount = 0);
   ~AlgorithmHistory();
   AlgorithmHistory &operator=(const AlgorithmHistory &);
   AlgorithmHistory(const AlgorithmHistory &);
   AlgorithmHistory(
       const std::string &name, int vers,
-      const Kernel::DateAndTime &start = Kernel::DateAndTime::defaultTime(),
+      const Kernel::DateAndTime &start = Kernel::DateAndTime::getCurrentTime(),
       const double &duration = -1.0, std::size_t uexeccount = 0);
   void addExecutionInfo(const Kernel::DateAndTime &start,
                         const double &duration);
@@ -108,6 +108,8 @@ public:
   const Mantid::Kernel::PropertyHistories &getProperties() const {
     return m_properties;
   }
+  /// get the string representation of a specified property
+  const std::string &getPropertyValue(const std::string &name) const;
   /// get the child histories of this history object
   const AlgorithmHistories &getChildHistories() const {
     return m_childHistories;
@@ -137,10 +139,9 @@ public:
   // Set the execution count
   void setExecCount(std::size_t execCount) { m_execCount = execCount; }
   /// Set data on history after it is created
-  void fillAlgorithmHistory(
-      const Algorithm *const alg,
-      const Kernel::DateAndTime &start = Kernel::DateAndTime::defaultTime(),
-      const double &duration = -1.0, std::size_t uexeccount = 0);
+  void fillAlgorithmHistory(const Algorithm *const alg,
+                            const Kernel::DateAndTime &start,
+                            const double &duration, std::size_t uexeccount);
   // Allow Algorithm::execute to change the exec count & duration after the
   // algorithm was executed
   friend class Algorithm;

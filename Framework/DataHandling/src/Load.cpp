@@ -51,7 +51,7 @@ bool isSingleFile(const std::vector<std::vector<std::string>> &fileNames) {
  *names.
  */
 std::string generateWsNameFromFileNames(std::vector<std::string> filenames) {
-  std::string wsName("");
+  std::string wsName;
 
   for (auto &filename : filenames) {
     if (!wsName.empty())

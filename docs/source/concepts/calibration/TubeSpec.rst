@@ -15,6 +15,8 @@ Constructor
 The construct TubeSpec takes one argument, which is a workspace that
 contains the instrument with tubes to be selected.
 
+.. _tubespec-setTubeSpecByString:
+
 setTubeSpecByString
 -------------------
 
@@ -38,8 +40,8 @@ SetTubeSpecByStringArray
 This function allows you to calibrate a set of tubes that is not defined
 by a single component. For example a set of windows. It takes an array
 of strings as its argument. Each string specifies a component such as a
-window or a single tube in the same manner as for 
-:ref:`setTubeSpecByString <setTubeSpecByString>`. The components must be
+window or a single tube in the same manner as for
+:ref:`setTubeSpecByString <tubespec-setTubeSpecByString>`. The components must be
 disjoint.
 
 Getting Information about the Tube Specification
@@ -74,4 +76,3 @@ calib <tube_calib>`.
 Tubes are currently ordered in the specification in the same order as
 they appear in the IDF. This may differ from the order they
 appear in the workspace indices.
-

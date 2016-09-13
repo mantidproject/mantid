@@ -10,11 +10,12 @@ Description
 -----------
 
 This algorithm allows users to adjust the axes of a workspace by a user
-defined math formula. It will NOT adjust or rearrange the data values
-(other than in one case the X values) of a workspace. Therefore
-alterations that will rearrange the order of the axes are not
-recommended. This only works for MatrixWorkspaces, so will not work on
-Multi Dimensional Workspaces or Table Workspaces. Like the
+defined math formula. It will adjust the data values
+(other than in one case the X values) of a workspace, although it will 
+reverse the spectra if needed to keep the X values increasing across the workspace.
+This only works for MatrixWorkspaces, so will not work on
+Multi Dimensional Workspaces or Table Workspaces. If you specify one of the known Units from the `Unit Factory <http://www.mantidproject.org/Units>`__ then that will be the resulting unit,
+otherwise like the
 :ref:`algm-ConvertSpectrumAxis` algorithm the result of
 this algorithm will have custom units defined for the axis you have
 altered, and as such may not work in all other algorithms.
@@ -38,6 +39,30 @@ The formula is defined in a simple math syntax. For example:
 * Absolute value - *abs(y-100)*
 
 *x* and *y* can be used interchangeably to refer to the current axis value.
+
+Using Constants
+###############
+
+The following constants are predeined for use in your equations:
+
+* pi - The ratio of a circle's circumference to its diameter
+* h - Planck constant in J*s
+* h_bar - Planck constant in J*s, divided by 2 PI
+* g - Standard acceleration due to gravity. Precise value in ms\ :sup:`-2`
+* mN - Mass of the neutron in kg
+* mNAMU -  Mass of the neutron in AMU
+
+Using geometry variables
+########################
+
+If the axis you are not transforming is a spectrum axis (the axis used as the Y axis on newly loaded
+Raw data). Then you may also include geometry variables in your formula and they will be correctly interpreted by the algorithm.
+
+The algorithm supports the following geometry variables:
+* l1 - the distance between the source and sample
+* l2 - the distance between the sample and detector
+* signedtwotheta - the exit angle from the sample when it is determined with respect to the extended incoming beam
+* twotheta - abs(signedtwotheta)
 
 Refer to the
 `muparser page <http://muparser.beltoforion.de/mup_features.html#idDef2>`_
@@ -110,6 +135,28 @@ Output:
    New Y values: [  2.   4.   6.   8.  10.]
    New Y units: y*2
    New Y title: Doubled Y
+
+**Example - Converting from Wavelength to Momentum Transfer:**
+
+.. testcode:: ExWv2MT
+
+   wsWavelength = CreateSampleWorkspace(XUnit='Wavelength', XMin=2, XMax=6, BinWidth=0.05)
+   # Convert to momentum transfer
+   # directly using a formula
+   wsMTbyFormula = ConvertAxisByFormula(InputWorkspace=wsWavelength,  Formula='(4*pi*sin(twotheta/2))/x', AxisUnits='MomentumTransfer')
+   # using convert units (this will convert via time of flight)
+   wsMTbyConvertUnits = ConvertUnits(InputWorkspace=wsWavelength, Target='MomentumTransfer')
+
+   #check they are the same
+   isMatched, messageTable = CompareWorkspaces(wsMTbyFormula,wsMTbyConvertUnits,0.00001,checkAxes=True, CheckType=True)
+   if isMatched:
+       print "Both methods create matching workspaces."
+
+Output:
+
+.. testoutput:: ExWv2MT
+
+   Both methods create matching workspaces.
 
 .. categories::
 

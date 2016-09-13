@@ -42,8 +42,11 @@ class PropertyWithValueTest(unittest.TestCase):
         self.assertEquals(self._integration.getProperty("StartWorkspaceIndex").value, 5)
 
     def test_set_int_property_python_long_py2(self):
-        self._integration.setProperty("StartWorkspaceIndex", long(5))
-        self.assertEquals(self._integration.getProperty("StartWorkspaceIndex").value, 5)
+        if sys.version_info[0] < 3:
+            self._integration.setProperty("StartWorkspaceIndex", long(5))
+            self.assertEquals(self._integration.getProperty("StartWorkspaceIndex").value, 5)
+        else:
+            pass
 
     def test_set_property_float(self):
         self._integration.setProperty("RangeLower", 100.5)

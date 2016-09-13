@@ -9,7 +9,7 @@ namespace MantidWidgets {
 
 DataProcessorCopySelectedCommand defines the action "Copy Selected"
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -41,6 +41,13 @@ public:
   };
   std::string name() override { return std::string("Copy Selected"); }
   std::string icon() override { return std::string("://copy.png"); }
+  std::string tooltip() override { return std::string("Copy selected"); }
+  std::string whatsthis() override {
+    return std::string("Copies the selected rows to the clipboard. Each row is "
+                       "placed on a new line, and each cell is separated by a "
+                       "tab");
+  }
+  std::string shortcut() override { return std::string("Ctrl+C"); }
 };
 }
 }

@@ -10,7 +10,7 @@ namespace MantidWidgets {
 
 DataProcessorAppendRowCommand defines the action "Insert Row After"
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -42,6 +42,14 @@ public:
   };
   std::string name() override { return std::string("Insert Row After"); }
   std::string icon() override { return std::string("://insert_row.png"); }
+  std::string tooltip() override { return std::string("Inserts row after"); }
+  std::string whatsthis() override {
+    return std::string("Inserts a new row after the last selected row. If "
+                       "groups exist and a group is selected, the new row is "
+                       "appended to the selected group. If nothing is selected "
+                       "then a new row is added to the last group");
+  }
+  std::string shortcut() override { return std::string(); }
 };
 }
 }

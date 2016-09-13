@@ -42,6 +42,10 @@ ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(handleAlgorithmComplete(bool)));
+
+  // Post Plot and Save
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 }
 
 void ResNorm::setup() {}
@@ -130,12 +134,6 @@ void ResNorm::run() {
   resNorm->setProperty("OutputWorkspaceTable",
                        (outputWsName + "_Fit").toStdString());
   m_batchAlgoRunner->addAlgorithm(resNorm);
-
-  // Handle saving
-  const auto save(m_uiForm.ckSave->isChecked());
-  if (save)
-    addSaveWorkspaceToQueue(outputWsName);
-
   m_pythonExportWsName = outputWsName.toStdString();
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -149,22 +147,10 @@ void ResNorm::handleAlgorithmComplete(bool error) {
   if (error)
     return;
 
-  WorkspaceGroup_sptr fitWorkspaces =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          m_pythonExportWsName + "_Fit_Workspaces");
-  QString fitWsName("");
-  if (fitWorkspaces)
-    fitWsName =
-        QString::fromStdString(fitWorkspaces->getItem(m_previewSpec)->name());
-
-  // MantidPlot plotting
-  QString plotOptions(m_uiForm.cbPlot->currentText());
-  if (plotOptions == "Intensity" || plotOptions == "All")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Intensity");
-  if (plotOptions == "Stretch" || plotOptions == "All")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Stretch");
-  if (plotOptions == "Fit" || plotOptions == "All")
-    plotSpectrum(fitWsName, 0, 1);
+  // Enable plot and save
+  m_uiForm.cbPlot->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 
   // Update preview plot
   previewSpecChanged(m_previewSpec);
@@ -302,8 +288,9 @@ void ResNorm::previewSpecChanged(int value) {
               fitWsName);
 
       MatrixWorkspace_sptr fit = WorkspaceFactory::Instance().create(fitWs, 1);
-      fit->setX(0, fitWs->readX(1));
-      fit->getSpectrum(0).setData(fitWs->readY(1), fitWs->readE(1));
+      fit->setX(0, fitWs->refX(1));
+      fit->dataY(0) = fitWs->readY(1);
+      fit->dataE(0) = fitWs->readE(1);
 
       for (size_t i = 0; i < fit->blocksize(); i++)
         fit->dataY(0)[i] /= scaleFactors->cell<double>(m_previewSpec);
@@ -311,6 +298,48 @@ void ResNorm::previewSpecChanged(int value) {
       m_uiForm.ppPlot->addSpectrum("Fit", fit, 0, Qt::red);
     }
   }
+}
+
+/**
+* Handles saving when button is clicked
+*/
+
+void ResNorm::saveClicked() {
+
+  const auto resWsName(m_uiForm.dsResolution->getCurrentDataName());
+  const auto outputWsName = getWorkspaceBasename(resWsName) + "_ResNorm";
+  addSaveWorkspaceToQueue(outputWsName);
+
+  m_pythonExportWsName = outputWsName.toStdString();
+  // Check workspace exists
+  IndirectTab::checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+
+  addSaveWorkspaceToQueue(outputWsName);
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+* Handles plotting when button is clicked
+*/
+
+void ResNorm::plotClicked() {
+  WorkspaceGroup_sptr fitWorkspaces =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+          m_pythonExportWsName + "_Fit_Workspaces");
+
+  QString fitWsName("");
+
+  if (fitWorkspaces)
+    fitWsName =
+        QString::fromStdString(fitWorkspaces->getItem(m_previewSpec)->name());
+
+  QString plotOptions(m_uiForm.cbPlot->currentText());
+  if (plotOptions == "Intensity" || plotOptions == "All")
+    plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Intensity");
+  if (plotOptions == "Stretch" || plotOptions == "All")
+    plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Stretch");
+  if (plotOptions == "Fit" || plotOptions == "All")
+    plotSpectrum(fitWsName, 0, 1);
 }
 
 } // namespace CustomInterfaces

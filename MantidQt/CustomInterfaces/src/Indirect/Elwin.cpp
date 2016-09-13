@@ -98,6 +98,9 @@ void Elwin::setup() {
           SLOT(newPreviewFileSelected(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(plotInput()));
+  // Handle plot and save
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
   // Set any default values
   m_dblManager->setValue(m_properties["IntegrationStart"], -0.02);
@@ -115,17 +118,43 @@ void Elwin::run() {
   std::string inputGroupWsName = "IDA_Elwin_Input";
 
   QFileInfo firstFileInfo(inputFilenames[0]);
-  QString filename = firstFileInfo.baseName();
-  QString workspaceBaseName =
-      filename.left(filename.lastIndexOf("_")) + "_elwin_";
+  const auto filename = firstFileInfo.baseName();
 
-  QString qWorkspace = workspaceBaseName + "eq";
-  QString qSquaredWorkspace = workspaceBaseName + "eq2";
-  QString elfWorkspace = workspaceBaseName + "elf";
-  QString eltWorkspace = workspaceBaseName + "elt";
+  auto workspaceBaseName = filename.left(filename.lastIndexOf("_"));
+
+  if (inputFilenames.size() > 1) {
+    QFileInfo fileInfo(inputFilenames[inputFilenames.length() - 1]);
+    auto runNumber = fileInfo.baseName().toStdString();
+    runNumber = runNumber.substr(0, runNumber.find_first_of("_"));
+    size_t runNumberStart = 0;
+    const auto strLength = runNumber.length();
+    for (size_t i = 0; i < strLength; i++) {
+      if (std::isdigit(runNumber[i])) {
+        runNumberStart = i;
+        break;
+      }
+    }
+    // reassemble workspace base name with additional run number
+    runNumber = runNumber.substr(runNumberStart, strLength);
+    auto baseName = firstFileInfo.baseName();
+    const auto prefix = baseName.left(baseName.indexOf("_"));
+    auto testPre = prefix.toStdString();
+    const auto suffix =
+        baseName.right(baseName.length() - baseName.indexOf("_"));
+    auto testsuf = suffix.toStdString();
+    workspaceBaseName =
+        prefix + QString::fromStdString("-" + runNumber) + suffix;
+  }
+
+  workspaceBaseName += "_elwin_";
+
+  const auto qWorkspace = (workspaceBaseName + "eq").toStdString();
+  const auto qSquaredWorkspace = (workspaceBaseName + "eq2").toStdString();
+  const auto elfWorkspace = (workspaceBaseName + "elf").toStdString();
+  const auto eltWorkspace = (workspaceBaseName + "elt").toStdString();
 
   // Load input files
-  std::vector<std::string> inputWorkspaceNames;
+  std::string inputWorkspacesString;
 
   for (auto it = inputFilenames.begin(); it != inputFilenames.end(); ++it) {
     QFileInfo inputFileInfo(*it);
@@ -137,29 +166,27 @@ void Elwin::run() {
     loadAlg->setProperty("OutputWorkspace", workspaceName);
 
     m_batchAlgoRunner->addAlgorithm(loadAlg);
-    inputWorkspaceNames.push_back(workspaceName);
+    inputWorkspacesString += workspaceName + ",";
   }
 
   // Group input workspaces
   IAlgorithm_sptr groupWsAlg =
       AlgorithmManager::Instance().create("GroupWorkspaces");
   groupWsAlg->initialize();
-  groupWsAlg->setProperty("InputWorkspaces", inputWorkspaceNames);
+  API::BatchAlgorithmRunner::AlgorithmRuntimeProps runTimeProps;
+  runTimeProps["InputWorkspaces"] = inputWorkspacesString;
   groupWsAlg->setProperty("OutputWorkspace", inputGroupWsName);
 
-  m_batchAlgoRunner->addAlgorithm(groupWsAlg);
+  m_batchAlgoRunner->addAlgorithm(groupWsAlg, runTimeProps);
 
   // Configure ElasticWindowMultiple algorithm
   IAlgorithm_sptr elwinMultAlg =
       AlgorithmManager::Instance().create("ElasticWindowMultiple");
   elwinMultAlg->initialize();
 
-  elwinMultAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
-
-  elwinMultAlg->setProperty("OutputInQ", qWorkspace.toStdString());
-  elwinMultAlg->setProperty("OutputInQSquared",
-                            qSquaredWorkspace.toStdString());
-  elwinMultAlg->setProperty("OutputELF", elfWorkspace.toStdString());
+  elwinMultAlg->setProperty("OutputInQ", qWorkspace);
+  elwinMultAlg->setProperty("OutputInQSquared", qSquaredWorkspace);
+  elwinMultAlg->setProperty("OutputELF", elfWorkspace);
 
   elwinMultAlg->setProperty("SampleEnvironmentLogName",
                             m_uiForm.leLogName->text().toStdString());
@@ -183,7 +210,7 @@ void Elwin::run() {
   }
 
   if (m_blnManager->value(m_properties["Normalise"])) {
-    elwinMultAlg->setProperty("OutputELT", eltWorkspace.toStdString());
+    elwinMultAlg->setProperty("OutputELT", eltWorkspace);
   }
 
   BatchAlgorithmRunner::AlgorithmRuntimeProps elwinInputProps;
@@ -191,22 +218,12 @@ void Elwin::run() {
 
   m_batchAlgoRunner->addAlgorithm(elwinMultAlg, elwinInputProps);
 
-  // Configure Save algorithms
-  if (m_uiForm.ckSave->isChecked()) {
-    addSaveAlgorithm(qWorkspace);
-    addSaveAlgorithm(qSquaredWorkspace);
-    addSaveAlgorithm(elfWorkspace);
-
-    if (m_blnManager->value(m_properties["Normalise"]))
-      addSaveAlgorithm(eltWorkspace);
-  }
-
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(unGroupInput(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
-  m_pythonExportWsName = qSquaredWorkspace.toStdString();
+  m_pythonExportWsName = qSquaredWorkspace;
 }
 
 /**
@@ -224,29 +241,10 @@ void Elwin::unGroupInput(bool error) {
     ungroupAlg->setProperty("InputWorkspace", "IDA_Elwin_Input");
     ungroupAlg->execute();
   }
-}
 
-/**
- * Configures and adds a SaveNexus algorithm to the batch runner.
- *
- * @param workspaceName Name of the workspace to save
- * @param filename Name of the file to save it as
- */
-void Elwin::addSaveAlgorithm(QString workspaceName, QString filename) {
-  // Set a default filename if none provided
-  if (filename.isEmpty())
-    filename = workspaceName + ".nxs";
-
-  // Configure the algorithm
-  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("SaveNexus");
-  loadAlg->initialize();
-  loadAlg->setProperty("Filename", filename.toStdString());
-
-  BatchAlgorithmRunner::AlgorithmRuntimeProps saveAlgProps;
-  saveAlgProps["InputWorkspace"] = workspaceName.toStdString();
-
-  // Add it to the batch runner
-  m_batchAlgoRunner->addAlgorithm(loadAlg, saveAlgProps);
+  // Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 bool Elwin::validate() {
@@ -279,7 +277,8 @@ void Elwin::loadSettings(const QSettings &settings) {
   m_uiForm.dsInputFiles->readSettings(settings.group());
 }
 
-void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws) {
+void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
+                                 const QPair<double, double> &range) {
   auto inst = ws->getInstrument();
   auto analyser = inst->getStringParameter("analyser");
 
@@ -295,6 +294,9 @@ void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws) {
 
       m_dblManager->setValue(m_properties["BackgroundStart"], -10 * res);
       m_dblManager->setValue(m_properties["BackgroundEnd"], -9 * res);
+    } else {
+      m_dblManager->setValue(m_properties["IntegrationStart"], range.first);
+      m_dblManager->setValue(m_properties["IntegrationEnd"], range.second);
     }
   }
 }
@@ -396,16 +398,17 @@ void Elwin::plotInput() {
 
   int specNo = m_uiForm.spPreviewSpec->value();
 
-  setDefaultResolution(ws);
-  setDefaultSampleLog(ws);
-
-  m_uiForm.ppPlot->clear();
-  m_uiForm.ppPlot->addSpectrum("Sample", ws, specNo);
-
   try {
+    m_uiForm.ppPlot->clear();
+    m_uiForm.ppPlot->addSpectrum("Sample", ws, specNo);
     QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
-    m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange")
-        ->setRange(range.first, range.second);
+    auto rangeSelector =
+        m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
+    setPlotPropertyRange(rangeSelector, m_properties["IntegrationStart"],
+                         m_properties["IntegrationEnd"], range);
+
+    setDefaultResolution(ws, range);
+    setDefaultSampleLog(ws);
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }
@@ -464,6 +467,49 @@ void Elwin::updateRS(QtProperty *prop, double val) {
     backgroundRangeSelector->setMaximum(val);
 }
 
+/**
+ * Handles mantid plotting
+ */
+void Elwin::plotClicked() {
+
+  auto workspaceBaseName =
+      getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
+
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(),
+                                   true))
+    plotSpectrum(workspaceBaseName + "_eq");
+
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(),
+                                   true))
+    plotSpectrum(workspaceBaseName + "_eq2");
+
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(),
+                                   true))
+    plotSpectrum((workspaceBaseName + "_elf"), 0, 9);
+}
+
+/**
+ * Handles saving of workspaces
+ */
+void Elwin::saveClicked() {
+
+  auto workspaceBaseName =
+      getWorkspaceBasename(QString::fromStdString(m_pythonExportWsName));
+
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq").toStdString(),
+                                   false))
+    addSaveWorkspaceToQueue(workspaceBaseName + "_eq");
+
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_eq2").toStdString(),
+                                   false))
+    addSaveWorkspaceToQueue(workspaceBaseName + "_eq2");
+
+  if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elf").toStdString(),
+                                   false))
+    addSaveWorkspaceToQueue(workspaceBaseName + "_elf");
+
+  m_batchAlgoRunner->executeBatchAsync();
+}
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

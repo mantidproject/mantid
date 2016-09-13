@@ -139,7 +139,7 @@ Documentation
   :ref:`LoadNexusLogs <algm-LoadNexusLogs>`.
   Also :ref:`LoadNexus <algm-LoadNexus>` documentation now explains how it determines which load algorithm to run.
 
-- The documentation for all calibration approaches has been pulled together, improved and expanded :ref:`here<Calibration>`.
+- The documentation for all calibration approaches has been pulled together, improved and expanded :ref:`here <Calibration Intro>`.
 
 
 

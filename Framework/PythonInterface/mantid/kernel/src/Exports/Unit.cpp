@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidKernel/Unit.h"
 
 #include <boost/python/class.hpp>
@@ -7,6 +8,8 @@
 using Mantid::Kernel::Unit;
 using Mantid::Kernel::Unit_sptr;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(Unit)
 
 namespace {
 /**

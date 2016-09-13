@@ -8,16 +8,37 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <boost/algorithm/string/predicate.hpp> //for ends_with
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
+using namespace Mantid::Kernel;
 
 class LoadTest : public CxxTest::TestSuite {
+
+private:
+  std::vector<std::string> m_dataSearchDirs;
+  std::string m_instName;
+
 public:
-  void tearDown() override { AnalysisDataService::Instance().clear(); }
+  void setUp() override {
+
+    m_dataSearchDirs = ConfigService::Instance().getDataSearchDirs();
+
+    m_instName = ConfigService::Instance().getString("default.instrument");
+  }
+
+  void tearDown() override {
+
+    ConfigService::Instance().setDataSearchDirs(m_dataSearchDirs);
+
+    ConfigService::Instance().setString("default.instrument", m_instName);
+
+    AnalysisDataService::Instance().clear();
+  }
 
   void testViaProxy() {
     IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
@@ -231,6 +252,56 @@ public:
     const std::string second = foundFiles[1][0];
     TSM_ASSERT(std::string("Incorrect second file has been found") + second,
                boost::algorithm::ends_with(second, "CSP79590.raw"));
+  }
+
+  /*
+   * This test loads and sums 2 IN4 runs from ILL
+   * without instrument prefix in the file names.
+   */
+  void test_ILLLoadMultipleFilesNoPrefix() {
+
+    ConfigService::Instance().setString("default.instrument", "IN4");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/IN4/");
+
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "084446+084447.nxs");
+
+    std::string outputWS = "LoadTest_out";
+    loader.setPropertyValue("OutputWorkspace", outputWS);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    MatrixWorkspace_sptr output =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS);
+    MatrixWorkspace_sptr output2D =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+
+    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 397);
+  }
+
+  /*
+   * This test loads and sums 2 IN4 runs from ILL
+   * without instrument prefix and extension in the file names.
+   */
+  void test_ILLLoadMultipleFilesNoPrefixNoExt() {
+
+    ConfigService::Instance().setString("default.instrument", "IN4");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/IN4/");
+
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "084446-084447");
+
+    std::string outputWS = "LoadTest_out";
+    loader.setPropertyValue("OutputWorkspace", outputWS);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    MatrixWorkspace_sptr output =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS);
+    MatrixWorkspace_sptr output2D =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+
+    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 397);
   }
 
   void test_EventPreNeXus_WithNoExecute() {

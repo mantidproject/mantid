@@ -5,6 +5,7 @@
 #include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -30,6 +31,12 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using Mantid::detid_t;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
 
 class GroupDetectors2Test : public CxxTest::TestSuite {
 public:
@@ -47,20 +54,16 @@ public:
     // which is a Child Algorithm of GroupDetectors)
     FrameworkManager::Instance();
     // Set up a small workspace for testing
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create(
-        "Workspace2D", NHIST, NBINS + 1, NBINS);
-    space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    Mantid::MantidVecPtr xs, errors, data[NHIST];
-    xs.access().resize(NBINS + 1, 10.0);
-    errors.access().resize(NBINS, 1.0);
+    auto space2D = createWorkspace<Workspace2D>(NHIST, NBINS + 1, NBINS);
+    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    BinEdges xs(NBINS + 1, LinearGenerator(10.0, 1.0));
+    CountStandardDeviations errors(NBINS, 1.0);
     for (int j = 0; j < NHIST; ++j) {
-      space2D->setX(j, xs);
-      data[j].access().resize(NBINS, j + 1); // the y values will be different
-                                             // for each spectra
-                                             // (1+index_number) but the same
-                                             // for each bin
-      space2D->setData(j, data[j], errors);
+      space2D->setBinEdges(j, xs);
+      // the y values will be different for each spectra (1+index_number) but
+      // the same for each bin
+      space2D->setCounts(j, NBINS, j + 1);
+      space2D->setCountStandardDeviations(j, errors);
       space2D->getSpectrum(j).setSpectrumNo(j + 1); // spectra numbers are also
                                                     // 1 + index_numbers
                                                     // because this is the
@@ -73,10 +76,10 @@ public:
       Detector *d = new Detector("det", i, 0);
       instr->markAsDetector(d);
     }
-    space->setInstrument(instr);
+    space2D->setInstrument(instr);
 
     // Register the workspace in the data service
-    AnalysisDataService::Instance().add(inputWS, space);
+    AnalysisDataService::Instance().add(inputWS, space2D);
   }
 
   ~GroupDetectors2Test() override {
@@ -133,7 +136,7 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
-    std::vector<double> tens(NBINS + 1, 10.0);
+    std::vector<double> tens{10, 11, 12, 13, 14};
     std::vector<double> ones(NBINS, 1.0);
     TS_ASSERT_EQUALS(outputWS->dataX(0), tens);
     TS_ASSERT_EQUALS(outputWS->dataY(0), std::vector<double>(NBINS, 1 + 4));
@@ -168,7 +171,7 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
-    std::vector<double> tens(NBINS + 1, 10.0);
+    std::vector<double> tens{10, 11, 12, 13, 14};
     std::vector<double> ones(NBINS, 1.0);
     TS_ASSERT_EQUALS(outputWS->dataX(0), tens);
     TS_ASSERT_EQUALS(outputWS->dataY(0),
@@ -201,7 +204,7 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
-    std::vector<double> tens(NBINS + 1, 10.0);
+    std::vector<double> tens{10, 11, 12, 13, 14};
     std::vector<double> ones(NBINS, 1.0);
     TS_ASSERT_EQUALS(outputWS->dataX(0), tens);
     TS_ASSERT_EQUALS(outputWS->dataY(0),
@@ -240,7 +243,7 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NHIST - 1);
-    std::vector<double> tens(NBINS + 1, 10.0);
+    std::vector<double> tens{10, 11, 12, 13, 14};
     std::vector<double> ones(NBINS, 1.0);
     // check the two grouped spectra
     TS_ASSERT_EQUALS(outputWS->dataX(0), tens);
@@ -317,7 +320,7 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NHIST - 3);
-    std::vector<double> tens(NBINS + 1, 10.0);
+    std::vector<double> tens{10, 11, 12, 13, 14};
     std::vector<double> ones(NBINS, 1.0);
     // check the first grouped spectrum
     TS_ASSERT_EQUALS(outputWS->dataX(0), tens);
@@ -614,14 +617,8 @@ public:
 
     // Create an axis for each pixel.
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
-      cow_ptr<Mantid::MantidVec> axis;
-      Mantid::MantidVec &xRef = axis.access();
-      xRef.resize(5);
-      for (int i = 0; i < 5; ++i)
-        xRef[i] = static_cast<double>(1) + i * 1.0;
-      xRef[4] = 1e6;
-      // Set an X-axis
-      inputW->setX(pix, axis);
+      inputW->setX(pix, make_cow<HistogramX>(
+                            std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
       inputW->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
     }
 
@@ -726,14 +723,8 @@ public:
 
     // Create an axis for each pixel.
     for (size_t pix = 0; pix < inputW->getNumberHistograms(); pix++) {
-      cow_ptr<Mantid::MantidVec> axis;
-      Mantid::MantidVec &xRef = axis.access();
-      xRef.resize(5);
-      for (int i = 0; i < 5; ++i)
-        xRef[i] = static_cast<double>(1) + i * 1.0;
-      xRef[4] = 1e6;
-      // Set an X-axis
-      inputW->setX(pix, axis);
+      inputW->setX(pix, make_cow<HistogramX>(
+                            std::vector<double>{1.0, 2.0, 3.0, 4.0, 1e6}));
       inputW->getSpectrum(pix).addEventQuickly(TofEvent(1000.0));
     }
 

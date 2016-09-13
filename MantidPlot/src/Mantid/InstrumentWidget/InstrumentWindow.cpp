@@ -1,19 +1,29 @@
 #include "ApplicationWindow.h"
+#include "Mantid/MantidUI.h"
 #include "InstrumentWindow.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
-#include "TSVSerialiser.h"
+#include "MantidKernel/UsageService.h"
+#include "MantidQtAPI/TSVSerialiser.h"
+
+#include <QApplication>
+#include <QMessageBox>
 
 #include <MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h>
 #include <MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h>
 
+// Register the window into the WindowFactory
+DECLARE_WINDOW(InstrumentWindow)
+
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
 InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
                                    ApplicationWindow *parent,
                                    const QString &name)
-    : MdiSubWindow(parent, label, name) {
+    : MdiSubWindow(parent, label, name, 0) {
 
   m_instrumentWidget = new InstrumentWidget(wsName, this);
   this->setWidget(m_instrumentWidget);
@@ -24,30 +34,82 @@ InstrumentWindow::InstrumentWindow(const QString &wsName, const QString &label,
           SLOT(closeSafely()));
   connect(m_instrumentWidget, SIGNAL(clearingHandle()), this,
           SLOT(closeSafely()));
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Interface", "InstrumentView", false);
 }
 
 InstrumentWindow::~InstrumentWindow() {}
 
-void InstrumentWindow::loadFromProject(const std::string &lines,
-                                       ApplicationWindow *app,
-                                       const int fileVersion) {
+/**
+ * Load instrument window state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ * @param app :: handle to the application window
+ * @param fileVersion :: version of the Mantid project file
+ * @return handle to the created instrument window
+ */
+IProjectSerialisable *InstrumentWindow::loadFromProject(
+    const std::string &lines, ApplicationWindow *app, const int fileVersion) {
   Q_UNUSED(fileVersion);
 
-  TSVSerialiser tsv(lines);
-  if (tsv.hasLine("geometry")) {
-    const QString geometry =
-        QString::fromStdString(tsv.lineAsString("geometry"));
-    app->restoreWindowGeometry(app, this, geometry);
+  MantidQt::API::TSVSerialiser tsv(lines);
+
+  if (!tsv.selectLine("WorkspaceName"))
+    return nullptr;
+
+  const auto name = tsv.asQString(1);
+  const auto workspace = app->mantidUI->getWorkspace(name);
+  const auto ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
+
+  if (!ws)
+    return nullptr;
+
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+  auto instr = ws->getInstrument();
+  if (!instr || instr->getName().empty()) {
+    QApplication::restoreOverrideCursor();
+    QMessageBox::critical(app, "MantidPlot - Error",
+                          "Instrument view cannot be opened");
+    return nullptr;
   }
+
+  // Create a new window
+  const QString windowName("InstrumentWindow:" + name);
+  auto iw = new InstrumentWindow(name, "Instrument", app, windowName);
+
+  // Populate window properties
+  try {
+    if (tsv.hasLine("geometry")) {
+      const auto geometry = tsv.lineAsQString("geometry");
+      app->restoreWindowGeometry(app, iw, geometry);
+    }
+
+    iw->m_instrumentWidget->loadFromProject(lines);
+    app->addMdiSubWindow(iw);
+
+    QApplication::restoreOverrideCursor();
+    return iw;
+  } catch (const std::exception &e) {
+    QApplication::restoreOverrideCursor();
+    QString errorMessage =
+        "Instrument view cannot be created:\n\n" + QString(e.what());
+    QMessageBox::critical(app, "MantidPlot - Error", errorMessage);
+  }
+
+  return nullptr;
 }
 
+/**
+ * Save the state of the instrument window to a Mantid project file
+ * @param app :: handle to the current application window instance
+ * @return a string representing the state of the instrument window
+ */
 std::string InstrumentWindow::saveToProject(ApplicationWindow *app) {
-  TSVSerialiser tsv;
-  tsv.writeRaw("<instrumentwindow>");
-  tsv.writeLine("WorkspaceName")
-      << m_instrumentWidget->getWorkspaceNameStdString();
-  tsv.writeRaw(app->windowGeometryInfo(this));
-  tsv.writeRaw("</instrumentwindow>");
+  MantidQt::API::TSVSerialiser tsv, window;
+  window.writeRaw(app->windowGeometryInfo(this));
+  auto widgetContents = m_instrumentWidget->saveToProject();
+  window.writeRaw(widgetContents);
+  tsv.writeSection("instrumentwindow", window.outputLines());
   return tsv.outputLines();
 }
 

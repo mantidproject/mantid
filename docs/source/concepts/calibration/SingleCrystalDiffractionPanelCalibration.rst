@@ -2,7 +2,7 @@
 
 Single Crystal Diffraction Panel Calibration
 ============================================
-  
+
 .. contents::
   :local:
 
@@ -14,7 +14,7 @@ Notes
 #####
 
 * This approach has been imported from ISAW (SCD Calibration)
-* Only works for :ref:`RectangularDetectors`
+* Only works for :ref:`RectangularDetector`
 
 Data Required
 #############
@@ -30,6 +30,6 @@ Steps for rectangular detector based instruments
 Applying your calibration
 #########################
 
-After calibration, you can save the workspace to Nexus (or Nexus processed) and get it back by loading in a later Mantid session. You can copy the calibration to another workspace using the same instrument by means of the :ref:`CopyInstrumentParameters<alg-CopyInstrumentParameters>` algorithm. To do so select the workspace, which you have calibrated as the InputWorkspace and the workspace you want to copy the calibration to, the OutputWorkspace.
+After calibration, you can save the workspace to Nexus (or Nexus processed) and get it back by loading in a later Mantid session. You can copy the calibration to another workspace using the same instrument by means of the :ref:`CopyInstrumentParameters <algm-CopyInstrumentParameters>` algorithm. To do so select the workspace, which you have calibrated as the InputWorkspace and the workspace you want to copy the calibration to, the OutputWorkspace.
 
 .. categories:: Calibration

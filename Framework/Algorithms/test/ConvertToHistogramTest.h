@@ -1,6 +1,7 @@
 #ifndef CONVERTTOHISTOGRAMTEST_H_
 #define CONVERTTOHISTOGRAMTEST_H_
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/ConvertToHistogram.h"
 #include <cxxtest/TestSuite.h>
 
@@ -12,6 +13,8 @@ using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::Algorithms::ConvertToHistogram;
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::MantidVecPtr;
+using Mantid::HistogramData::LinearGenerator;
+using Mantid::HistogramData::Points;
 
 class ConvertToHistogramTest : public CxxTest::TestSuite {
 
@@ -45,13 +48,9 @@ public:
     Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace123(
         numSpectra, numYPoints, false);
     // Reset the X data to something reasonable
-    MantidVecPtr x;
-    x.access().resize(numYPoints);
-    for (int i = 0; i < numYPoints; ++i) {
-      x.access()[i] = (double)i;
-    }
+    Points x(numYPoints, LinearGenerator(0.0, 1.0));
     for (int i = 0; i < numSpectra; ++i) {
-      testWS->setX(i, x);
+      testWS->setPoints(i, x);
     }
 
     TS_ASSERT_EQUALS(testWS->isHistogramData(), false);
@@ -121,6 +120,40 @@ private:
 
     return outputWS;
   }
+};
+
+class ConvertToHistogramTestPerformance : public CxxTest::TestSuite {
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConvertToHistogramTestPerformance *createSuite() {
+    return new ConvertToHistogramTestPerformance();
+  }
+
+  static void destroySuite(ConvertToHistogramTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    inputWS =
+        WorkspaceCreationHelper::Create2DWorkspace123(20000, 10000, false);
+  }
+
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().remove("output");
+  }
+
+  void testPerformanceWS() {
+    ConvertToHistogram cth;
+    cth.initialize();
+    cth.setProperty("InputWorkspace", inputWS);
+    cth.setProperty("OutputWorkspace", "output");
+    cth.execute();
+  }
+
+private:
+  Workspace2D_sptr inputWS;
 };
 
 #endif // CONVERTTOHISTOGRAMTEST_H_

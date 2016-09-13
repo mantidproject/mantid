@@ -11,7 +11,8 @@ from ..kernel.funcinspect import lhs_info, customise_func
 from . import _api
 
 import inspect as _inspect
-from six import iteritems, get_function_code
+from six import get_function_code, Iterator, iteritems
+import sys
 
 #------------------------------------------------------------------------------
 # Binary Ops
@@ -36,13 +37,20 @@ def attach_binary_operators_to_workspace():
         "Plus":("__add__", "__radd__","__iadd__"),
         "Minus":("__sub__", "__rsub__","__isub__"),
         "Multiply":("__mul__", "__rmul__","__imul__"),
-        "Divide":("__div__", "__div__","__idiv__"),
         "LessThan":"__lt__",
         "GreaterThan":"__gt__",
         "Or":"__or__",
         "And":"__and__",
         "Xor":"__xor__"
     }
+    # The division operator changed in Python 3
+    divops = ["__truediv__", "__rtruediv__","__itruediv__"]
+    if sys.version_info[0] < 3:
+        # For Python 2 add the older methods so that modules without __future__
+        # still work
+        divops.extend(["__div__", "__rdiv__","__idiv__"])
+    operations["Divide"] = divops
+    
     # Loop through and add each one in turn
     for alg, attributes in iteritems(operations):
         if type(attributes) == str: attributes = [attributes]
@@ -176,12 +184,13 @@ def _do_unary_operation(op, self, lhs_vars):
 def attach_tableworkspaceiterator():
     """Attaches the iterator code to a table workspace."""
     def __iter_method(self):
-        class ITableWorkspaceIter:
+        class ITableWorkspaceIter(Iterator):
             def __init__(self, wksp):
                 self.__wksp = wksp
                 self.__pos = 0
                 self.__max = wksp.rowCount()
-            def next(self):
+
+            def __next__(self):
                 if self.__pos + 1 > self.__max:
                     raise StopIteration
                 self.__pos += 1

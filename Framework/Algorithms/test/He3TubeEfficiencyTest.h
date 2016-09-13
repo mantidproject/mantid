@@ -20,6 +20,9 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace std;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 class He3TubeEfficiencyTest : public CxxTest::TestSuite {
 public:
@@ -166,25 +169,17 @@ private:
     const int nspecs(4);
     const int nbins(5);
 
-    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create(
-        "Workspace2D", nspecs, nbins + 1, nbins);
-    space->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
+    auto space2D = createWorkspace<Workspace2D>(nspecs, nbins + 1, nbins);
+    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 
-    Mantid::MantidVecPtr x, y, e;
-    x.access().resize(nbins + 1, 0.0);
-    y.access().resize(nbins, 0.0);
-    e.access().resize(nbins, 0.0);
-    for (int i = 0; i < nbins; ++i) {
-      x.access()[i] = static_cast<double>((1. + i) / 10.);
-      y.access()[i] = 10.0;
-      e.access()[i] = sqrt(5.0);
-    }
-    x.access()[nbins] = static_cast<double>((1. + nbins) / 10.);
+    BinEdges x{0.1, 0.2, 0.3, 0.4, 0.5, 0.6};
+    Counts y(nbins, 10.0);
+    CountStandardDeviations e(nbins, sqrt(5.0));
 
     for (int i = 0; i < nspecs; i++) {
-      space2D->setX(i, x);
-      space2D->setData(i, y, e);
+      space2D->setBinEdges(i, x);
+      space2D->setCounts(i, y);
+      space2D->setCountStandardDeviations(i, e);
       space2D->getSpectrum(i).setSpectrumNo(i);
     }
 

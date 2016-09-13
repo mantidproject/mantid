@@ -1,11 +1,11 @@
 #ifndef LOADTBLTEST_H_
 #define LOADTBLTEST_H_
 
-#include "cxxtest/TestSuite.h"
-#include "MantidDataHandling/LoadTBL.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataHandling/LoadTBL.h"
+#include "cxxtest/TestSuite.h"
 #include <Poco/File.h>
 #include <fstream>
 
@@ -59,49 +59,49 @@ public:
 
     // test the first three rows, equivalent to the first two rows of the file.
     TableRow row = outputWS->getRow(0);
-    TS_ASSERT_EQUALS(row.cell<std::string>(0), "13460");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(1)), 0.7,
+    TS_ASSERT_EQUALS(row.cell<std::string>(1), "13460");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 0.7,
                     0.01);
-    TS_ASSERT_EQUALS(row.cell<std::string>(2), "13463");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(3)), 0.01,
+    TS_ASSERT_EQUALS(row.cell<std::string>(3), "13463");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.01,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.06,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.06,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.04,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2,
                     0.01);
-    TS_ASSERT_EQUALS(row.cell<int>(7), 1);
+    TS_ASSERT_EQUALS(boost::lexical_cast<double>(row.cell<std::string>(0)), 1);
 
     row = outputWS->getRow(1);
-    TS_ASSERT_EQUALS(row.cell<std::string>(0), "13469");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(1)), 0.7,
+    TS_ASSERT_EQUALS(row.cell<std::string>(1), "13469");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 0.7,
                     0.01);
-    TS_ASSERT_EQUALS(row.cell<std::string>(2), "13463");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(3)), 0.01,
+    TS_ASSERT_EQUALS(row.cell<std::string>(3), "13463");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.01,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.06,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.06,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.04,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2,
                     0.01);
-    TS_ASSERT_EQUALS(row.cell<int>(7), 2);
+    TS_ASSERT_EQUALS(boost::lexical_cast<double>(row.cell<std::string>(0)), 2);
 
     row = outputWS->getRow(2);
-    TS_ASSERT_EQUALS(row.cell<std::string>(0), "13470");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(1)), 2.3,
+    TS_ASSERT_EQUALS(row.cell<std::string>(1), "13470");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 2.3,
                     0.01);
-    TS_ASSERT_EQUALS(row.cell<std::string>(2), "13463");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(3)),
+    TS_ASSERT_EQUALS(row.cell<std::string>(3), "13463");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)),
                     0.035, 0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.3,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.3,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.04,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2,
                     0.01);
-    TS_ASSERT_EQUALS(row.cell<int>(7), 2);
+    TS_ASSERT_EQUALS(boost::lexical_cast<double>(row.cell<std::string>(0)), 2);
 
     cleanupafterwards();
   }
@@ -143,49 +143,49 @@ public:
 
     // test the first three rows, equivalent to the first two rows of the file.
     TableRow row = outputWS->getRow(0);
-    TS_ASSERT_EQUALS(row.cell<std::string>(0), "13460");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(1)), 0.7,
+    TS_ASSERT_EQUALS(row.cell<std::string>(1), "13460");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 0.7,
                     0.01);
-    TS_ASSERT_EQUALS(row.cell<std::string>(2), "13463,13464");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(3)), 0.01,
+    TS_ASSERT_EQUALS(row.cell<std::string>(3), "13463,13464");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.01,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.06,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.06,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.04,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2,
                     0.01);
-    TS_ASSERT_EQUALS(row.cell<int>(7), 1);
+    TS_ASSERT_EQUALS(boost::lexical_cast<double>(row.cell<std::string>(0)), 1);
 
     row = outputWS->getRow(1);
-    TS_ASSERT_EQUALS(row.cell<std::string>(0), "13469");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(1)), 0.7,
+    TS_ASSERT_EQUALS(row.cell<std::string>(1), "13469");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 0.7,
                     0.01);
-    TS_ASSERT_EQUALS(row.cell<std::string>(2), "13463,13464");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(3)), 0.01,
+    TS_ASSERT_EQUALS(row.cell<std::string>(3), "13463,13464");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.01,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.06,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.06,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.04,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2,
                     0.01);
-    TS_ASSERT_EQUALS(row.cell<int>(7), 2);
+    TS_ASSERT_EQUALS(boost::lexical_cast<double>(row.cell<std::string>(0)), 2);
 
     row = outputWS->getRow(2);
-    TS_ASSERT_EQUALS(row.cell<std::string>(0), "13470");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(1)), 2.3,
+    TS_ASSERT_EQUALS(row.cell<std::string>(1), "13470");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(2)), 2.3,
                     0.01);
-    TS_ASSERT_EQUALS(row.cell<std::string>(2), "13463,13464");
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(3)),
+    TS_ASSERT_EQUALS(row.cell<std::string>(3), "13463,13464");
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)),
                     0.035, 0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(4)), 0.3,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.3,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(5)), 0.04,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 0.04,
                     0.001);
-    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(6)), 2,
+    TS_ASSERT_DELTA(boost::lexical_cast<double>(row.cell<std::string>(7)), 2,
                     0.01);
-    TS_ASSERT_EQUALS(row.cell<int>(7), 2);
+    TS_ASSERT_EQUALS(boost::lexical_cast<double>(row.cell<std::string>(0)), 2);
 
     cleanupafterwards();
   }
@@ -272,6 +272,8 @@ public:
   }
 
   void testTBLWithColumnHeadingsRowAndData() {
+    // "New" TBL file with column headings
+
     std::ofstream file(m_filename.c_str());
     file << "Runs,Angle,QMin,QMax,Group,Options\n"
          << "14456,0.7,1.443,8.992,1,\n"
@@ -313,6 +315,8 @@ public:
   }
 
   void testTBLWithColumnHeadingsRowOnly() {
+    // "New" TBL file with column headings
+
     std::ofstream file(m_filename.c_str());
     file << "Runs,Angle,Transmission,Energy,Spin,Group,Options\n";
     file.close();

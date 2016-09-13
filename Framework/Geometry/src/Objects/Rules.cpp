@@ -507,7 +507,6 @@ void Rule::makeParents()
       }
     }
   }
-  return;
 }
 
 int Rule::checkParents() const

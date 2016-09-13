@@ -18,8 +18,6 @@ Inputs
 The algorithms takes 2 mandatory input workspaces and 1 optional workspace:
 
 -  A MDEventWorkspace containing the events in multi-dimensional space.
-   This would be the output of
-   :ref:`algm-???`.
 -  A PeaksWorkspace containing the peaks to be integrated.
 -  An optional MaskWorkspace to mask the pixels on the detector
 
@@ -33,7 +31,7 @@ diffractometer (aka. 4-circle).
 Simple Peak Integration
 =======================
 
-Integration is performed by summing the signal from all MDEvents that 
+Integration is performed by summing the signal from all MDEvents that
 are not masked.
 The integrated value will be normalized by the monitor counts.
 
@@ -65,7 +63,7 @@ There are two approaches that are proposed to estimate integrated background.
 
     * Assuming that :math:`r_p` and :math:`r_b` are defined for the radius of peak and background respectively.
     * Calculate :math:`I_p` by integrating the signals within :math:`r_p`;
-    * Calculate :math:`I_pb` by integrating the signals within :math:`r_b';
+    * Calculate :math:`I_pb` by integrating the signals within :math:`r_b`;
     * Then integrated background :math:`I_b = I_pb - I_p`;
 
 
@@ -83,7 +81,7 @@ Here are some values to be output.
 Masking
 #######
 
-Algorithm IntegratePeaksCWSD supports masking detectors. 
+Algorithm IntegratePeaksCWSD supports masking detectors.
 An optional MaskWorkspace will define all the detectors that will be masked.
 
 Because the reactor-based single crystal diffratometer may have a moving detector,

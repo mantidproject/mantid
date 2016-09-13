@@ -63,7 +63,6 @@ void Surface::print() const
 */
 {
   std::cout << "Surf == " << Name << '\n';
-  return;
 }
 
 void Surface::writeHeader(std::ostream &OX) const
@@ -74,7 +73,6 @@ void Surface::writeHeader(std::ostream &OX) const
 */
 {
   OX << Name << " ";
-  return;
 }
 
 void Surface::write(std::ostream &out) const

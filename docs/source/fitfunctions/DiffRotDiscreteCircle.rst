@@ -41,12 +41,15 @@ the two fundamental fitting parameters of the structure factor
    \tau_l^{-1} = 4 \tau^{-1} sin^2(\frac{\pi l}{N})
 
 The transition rate, expressed in units of energy is :math:`h\tau^{-1}`,
-with h = 4.135665616 meV THz.
+with h = 4.135665616 meV ps.
 
-When using InelasticDiffRotDiscreteCircle, he value of Q can be obained either
-though the Q attribute or can be calucated from the input workspace using the
+This function is a composite of :ref:`ElasticDiffRotDiscreteCircle <func-ElasticDiffRotDiscreteCircle>` and
+:ref:`InelasticDiffRotDiscreteCircle <func-InelasticDiffRotDiscreteCircle>`.
+
+When using DiffRotDiscreteCircle, the value of Q can be obtained either
+though the Q attribute or can be calculated from the input workspace using the
 WorkspaceIndex property. The value calculated using the workspace is used
-whenever the Q attibute is empty.
+whenever the Q attribute is empty.
 
 Example: Methyl Rotations
 -------------------------
@@ -77,6 +80,9 @@ Then:
 
 .. attributes::
 
+:math:`N` (integer, default=3) number of sites -
+:math:`NumDeriv` (boolean, default=true) carry out numerical derivative -
+:math:`Q` (double, default=0.5) Momentum transfer
 .. properties::
 
 .. categories::

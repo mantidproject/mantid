@@ -128,12 +128,12 @@ public:
   void testAccordingToSize() {
     MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = WorkspaceFactory::Instance().create("Workspace2DTest", 1, 2, 3));
+        ws = WorkspaceFactory::Instance().create("Workspace2DTest", 1, 3, 2));
     TS_ASSERT(!ws->id().compare("Workspace2DTest"));
     Workspace2DTest &space = dynamic_cast<Workspace2DTest &>(*ws);
     TS_ASSERT_EQUALS(space.size[0], 1);
-    TS_ASSERT_EQUALS(space.size[1], 2);
-    TS_ASSERT_EQUALS(space.size[2], 3);
+    TS_ASSERT_EQUALS(space.size[1], 3);
+    TS_ASSERT_EQUALS(space.size[2], 2);
 
     TS_ASSERT_THROWS_NOTHING(
         ws = WorkspaceFactory::Instance().create("Workspace1DTest", 1, 1, 1));

@@ -77,8 +77,7 @@ private:
   /// Creates an output workspace.
   API::MatrixWorkspace_sptr
   createOutputWorkspace(API::Progress &progress, const std::string &targetUnit,
-                        API::MatrixWorkspace_sptr &inputWS, size_t nHist,
-                        size_t nBins, size_t nxBins);
+                        API::MatrixWorkspace_sptr &inputWS, size_t nHist);
 
   // Map to which the conversion to the unit is stored.
   std::multimap<double, size_t> m_indexMap;

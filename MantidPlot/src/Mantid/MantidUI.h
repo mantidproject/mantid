@@ -6,6 +6,7 @@
 //----------------------------------
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
+#include "Mantid/IProjectSerialisable.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
@@ -340,9 +341,6 @@ public:
 
   void loadWSFromFile(const std::string &wsname, const std::string &fileName);
 
-  MantidMatrix *openMatrixWorkspace(const std::string &wsName, int lower,
-                                    int upper);
-
   void saveProject(bool save);
   void enableSaveNexus(const QString &wsName);
   void disableSaveNexus();
@@ -502,7 +500,6 @@ public slots:
   void clearAllMemory(const bool prompt = true);
   // Ticket #672
   void saveNexusWorkspace();
-  QString saveToString(const std::string &workingDir);
 
 #ifdef _WIN32
 public:

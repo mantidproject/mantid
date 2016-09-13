@@ -1,5 +1,6 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include <boost/python/class.hpp>
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
@@ -7,6 +8,8 @@ using Mantid::API::IPeaksWorkspace;
 using Mantid::DataObjects::PeaksWorkspace;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(PeaksWorkspace)
 
 void export_PeaksWorkspace() {
 

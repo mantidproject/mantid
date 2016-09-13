@@ -144,7 +144,7 @@ void DgsProcessDetectorVanadium::exec() {
   if (reductionManager->existsProperty("SaveProcessedDetVan")) {
     bool saveProc = reductionManager->getProperty("SaveProcessedDetVan");
     if (saveProc) {
-      std::string outputFile("");
+      std::string outputFile;
       if (reductionManager->existsProperty("SaveProcDetVanFilename")) {
         outputFile =
             reductionManager->getPropertyValue("SaveProcDetVanFilename");

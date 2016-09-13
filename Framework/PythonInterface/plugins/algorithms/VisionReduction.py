@@ -7,6 +7,7 @@ from mantid.kernel import *
 from mantid.simpleapi import *
 import csv
 import os
+from string import ascii_letters, digits # pylint: disable=deprecated-module
 
 ######################################################################
 # Remove artifacts such as prompt pulse
@@ -44,7 +45,7 @@ class VisionReduction(PythonAlgorithm):
     binE='-2,0.005,5,-0.001,1000'
 
     def FormatFilename(self,s):
-        valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+        valid_chars = "-_.() %s%s" % (ascii_letters, digits)
         outfilename = ''.join(c for c in s if c in valid_chars)
         outfilename = outfilename.replace(' ','_')
         return outfilename
@@ -59,7 +60,7 @@ class VisionReduction(PythonAlgorithm):
         return "This algorithm reduces the inelastic detectors on VISION. ** Under Development **"
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "", action=FileAction.Load, extensions=["*.nxs.h5"]))
+        self.declareProperty(FileProperty("Filename", "", action=FileAction.Load, extensions=[".nxs.h5"]))
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
 
     #pylint: disable=too-many-locals
@@ -120,7 +121,7 @@ class VisionReduction(PythonAlgorithm):
         bank_list = ["bank%d" % i for i in range(1, 15)]
         bank_property = ",".join(bank_list)
         LoadEventNexus(Filename=NexusFile, BankName=bank_property, OutputWorkspace='__IED_T', LoadMonitors='0')
-        LoadInstrument(Workspace='__IED_T',Filename='/SNS/VIS/shared/autoreduce/VISION_Definition_no_efixed.xml')
+        LoadInstrument(Workspace='__IED_T',Filename='/SNS/VIS/shared/autoreduce/VISION_Definition_no_efixed.xml',RewriteSpectraMap=True)
         MaskDetectors(Workspace='__IED_T', DetectorList=MaskPX)
 
         print "Title:", mtd['__IED_T'].getTitle()

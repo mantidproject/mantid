@@ -290,7 +290,8 @@ void LoadISISNexus2::exec() {
     // Get the X data
     NXFloat timeBins = entry.openNXFloat("detector_1/time_of_flight");
     timeBins.load();
-    m_tof_data.reset(new MantidVec(timeBins(), timeBins() + x_length));
+    m_tof_data = boost::make_shared<HistogramData::HistogramX>(
+        timeBins(), timeBins() + x_length);
   }
   int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
   loadPeriodData(firstentry, entry, local_workspace, m_load_selected_spectra);

@@ -34,7 +34,6 @@ std::vector<std::string> splitByCommas(const std::string &names_string) {
 /**
 Constructor
 @param name : the name of the table workspace used for the reduction
-@param model : the model associated with the table
 @param instrument : the instrument
 @param whitelist : the white list defining the columns
 @param preprocessMap : a map indicating which columns were pre-processed and the
@@ -50,8 +49,8 @@ specified via the corresponding hinting line edit in the view
 @returns ipython notebook string
 */
 DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
-    std::string name, QDataProcessorTableModel_sptr model,
-    const std::string instrument, const DataProcessorWhiteList &whitelist,
+    std::string name, const std::string instrument,
+    const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
         preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
@@ -59,9 +58,9 @@ DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
     const std::map<std::string, std::string> preprocessingOptionsMap,
     const std::string processingOptions,
     const std::string postprocessingOptions)
-    : m_wsName(name), m_model(model), m_instrument(instrument),
-      m_whitelist(whitelist), m_preprocessMap(preprocessMap),
-      m_processor(processor), m_postprocessor(postprocessor),
+    : m_wsName(name), m_instrument(instrument), m_whitelist(whitelist),
+      m_preprocessMap(preprocessMap), m_processor(processor),
+      m_postprocessor(postprocessor),
       m_preprocessingOptionsMap(preprocessingOptionsMap),
       m_processingOptions(processingOptions),
       m_postprocessingOptions(postprocessingOptions) {
@@ -74,27 +73,27 @@ DataProcessorGenerateNotebook::DataProcessorGenerateNotebook(
 
 /**
   Generate an ipython notebook
-  @param groups : groups of rows which were stitched
-  @param rows : rows which were processed
+  @param data : the processed data
   @returns ipython notebook string
   */
-std::string DataProcessorGenerateNotebook::generateNotebook(
-    std::map<int, std::set<int>> groups, std::set<int> rows) {
+std::string
+DataProcessorGenerateNotebook::generateNotebook(const TreeData &data) {
 
   auto notebook = Mantid::Kernel::make_unique<Mantid::API::NotebookWriter>();
 
   notebook->markdownCell(titleString(m_wsName));
 
-  notebook->markdownCell(tableString(m_model, m_whitelist, rows));
+  notebook->markdownCell(tableString(data, m_whitelist));
 
-  int groupNo = 1;
-  for (auto gIt = groups.begin(); gIt != groups.end(); ++gIt, ++groupNo) {
-    const std::set<int> groupRows = gIt->second;
+  for (const auto &item : data) {
+
+    const int groupId = item.first;
+    const auto rowMap = item.second;
 
     /** Announce the stitch group in the notebook **/
 
     std::ostringstream group_title_string;
-    group_title_string << "Group " << groupNo;
+    group_title_string << "Group " << groupId;
     notebook->markdownCell(group_title_string.str());
 
     /**  Reduce all rows **/
@@ -106,12 +105,13 @@ std::string DataProcessorGenerateNotebook::generateNotebook(
     // workspaces
     std::vector<std::string> output_ws;
 
-    for (auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt) {
+    for (const auto &row : rowMap) {
       code_string << "#Load and reduce\n";
 
       auto reduce_row_string = reduceRowString(
-          *rIt, m_instrument, m_model, m_whitelist, m_preprocessMap,
-          m_processor, m_preprocessingOptionsMap, m_processingOptions);
+          row.second, m_instrument, m_whitelist, m_preprocessMap, m_processor,
+          m_preprocessingOptionsMap, m_processingOptions);
+
       // The reduction code
       code_string << boost::get<0>(reduce_row_string);
       // The output workspace names
@@ -119,11 +119,14 @@ std::string DataProcessorGenerateNotebook::generateNotebook(
     }
     notebook->codeCell(code_string.str());
 
-    /** Post-process group **/
-
-    boost::tuple<std::string, std::string> postprocess_string =
-        postprocessGroupString(groupRows, m_model, m_whitelist, m_processor,
-                               m_postprocessor, m_postprocessingOptions);
+    /** Post-process string **/
+    boost::tuple<std::string, std::string> postprocess_string;
+    if (rowMap.size() > 1) {
+      // If there was only one run selected, it could not be post-processed
+      postprocess_string =
+          postprocessGroupString(rowMap, m_whitelist, m_processor,
+                                 m_postprocessor, m_postprocessingOptions);
+    }
     notebook->codeCell(boost::get<0>(postprocess_string));
 
     /** Draw plots **/
@@ -211,7 +214,7 @@ std::string plotsString(const std::vector<std::string> &output_ws,
     std::vector<std::string> wsNames;
 
     // Iterate through the elements of output_ws
-    for (auto &outws : output_ws) {
+    for (const auto &outws : output_ws) {
 
       auto workspaces = splitByCommas(outws);
 
@@ -235,18 +238,18 @@ std::string plotsString(const std::vector<std::string> &output_ws,
 
 /**
   Create string of markdown code to display a table of data from the GUI
-  @param model : tablemodel for the full table
+  @param treeData : the processed data
   @param whitelist : the whitelist defining the table columns
-  @param rows : rows from full table to include
   @return string containing the markdown code
   */
-std::string tableString(QDataProcessorTableModel_sptr model,
-                        const DataProcessorWhiteList &whitelist,
-                        const std::set<int> &rows) {
+std::string tableString(const TreeData &treeData,
+                        const DataProcessorWhiteList &whitelist) {
+
   std::ostringstream table_string;
 
   const int ncols = static_cast<int>(whitelist.size());
 
+  table_string << "Group | ";
   for (int i = 0; i < ncols - 1; i++) {
     table_string << whitelist.colNameFromColIndex(i) << " | ";
   }
@@ -258,25 +261,33 @@ std::string tableString(QDataProcessorTableModel_sptr model,
   table_string << "---"
                << "\n";
 
-  for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
+  for (const auto &group : treeData) {
 
-    for (int col = 0; col < ncols - 1; col++)
-      table_string
-          << model->data(model->index(*rowIt, col)).toString().toStdString()
-          << " | ";
+    auto groupId = group.first;
+    auto rowMap = group.second;
 
-    table_string
-        << model->data(model->index(*rowIt, ncols - 1)).toString().toStdString()
-        << "\n";
+    for (const auto &row : rowMap) {
+
+      std::vector<std::string> values;
+      values.push_back(std::to_string(groupId));
+
+      if (row.second.size() != whitelist.size())
+        throw std::invalid_argument("Can't generate table for notebook");
+
+      for (const auto &datum : row.second)
+        values.push_back(datum);
+
+      table_string << boost::algorithm::join(values, " | ");
+      table_string << "\n";
+    }
   }
-
   return table_string.str();
 }
 
 /**
-  Create string of python code to post-process workspaces in the same group
-  @param rows : rows in the group
-  @param model : table model containing details of runs and processing settings
+  Create string of python code to post-process rows in the same group
+  @param rowMap : map where keys are row indices and values are vectors
+  containing the data
   @param whitelist : the whitelist
   @param processor : the reduction algorithm
   @param postprocessor : the algorithm responsible for post-processing
@@ -286,18 +297,13 @@ std::string tableString(QDataProcessorTableModel_sptr model,
   @return tuple containing the python code string and the output workspace name
   */
 boost::tuple<std::string, std::string> postprocessGroupString(
-    const std::set<int> &rows, QDataProcessorTableModel_sptr model,
-    const DataProcessorWhiteList &whitelist,
+    const GroupData &rowMap, const DataProcessorWhiteList &whitelist,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
     const std::string &postprocessingOptions) {
   std::ostringstream stitch_string;
 
   stitch_string << "#Post-process workspaces\n";
-
-  // If we can get away with doing nothing, do.
-  if (rows.size() < 2)
-    return boost::make_tuple("", "");
 
   // Properties for post-processing algorithm
   // Vector containing the list of input workspaces
@@ -306,10 +312,10 @@ boost::tuple<std::string, std::string> postprocessGroupString(
   std::vector<std::string> outputName;
 
   // Go through each row and prepare the input and output properties
-  for (auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
+  for (const auto &row : rowMap) {
 
     // The reduced ws name without prefix (for example 'TOF_13460_13462')
-    auto suffix = getReducedWorkspaceName(*rowIt, model, whitelist);
+    auto suffix = getReducedWorkspaceName(row.second, whitelist);
 
     // The reduced ws name: 'IvsQ_TOF_13460_13462'
     inputNames.emplace_back(processor.prefix(0) + suffix);
@@ -352,36 +358,37 @@ std::string plot1DString(const std::vector<std::string> &ws_names) {
 
 /**
  Constructs the name for the reduced workspace
- @param rowNo : the row
- @param model : tablemodel for the full table
+ @param data : vector containing the data used in the reduction
  @param whitelist : the whitelist
  @param prefix : wheter to return the name with the prefix or not
  @return : the workspace name
 */
-std::string getReducedWorkspaceName(int rowNo,
-                                    QDataProcessorTableModel_sptr model,
+std::string getReducedWorkspaceName(const RowData &data,
                                     const DataProcessorWhiteList &whitelist,
                                     const std::string &prefix) {
+
+  if (data.size() != whitelist.size())
+    throw std::invalid_argument(
+        "Can't write output workspace name to notebook");
 
   std::vector<std::string> names;
 
   int ncols = static_cast<int>(whitelist.size());
 
-  for (int col = 0; col < ncols; col++) {
+  for (int col = 0; col < ncols - 1; col++) {
 
     // Do we want to use this column to generate the name of the output ws?
     if (whitelist.showValue(col)) {
 
       // Get what's in the column
-      const std::string valueStr =
-          model->data(model->index(rowNo, col)).toString().toStdString();
+      const std::string valueStr = data.at(col);
 
       // If it's not empty, use it
       if (!valueStr.empty()) {
 
         // But we may have things like '1+2' which we want to replace with '1_2'
         std::vector<std::string> value;
-        boost::split(value, valueStr, boost::is_any_of("+"));
+        boost::split(value, valueStr, boost::is_any_of("+,"));
 
         names.push_back(whitelist.prefix(col) +
                         boost::algorithm::join(value, "_"));
@@ -398,28 +405,30 @@ std::string getReducedWorkspaceName(int rowNo,
 /**
  Create string of python code to run pre-processing and reduction algorithms on
  the specified row
- @param rowNo : the row in the model to run the pre-processing and reduction
- algorithms on
+ @param data : the data used in the reduction
  @param instrument : name of the instrument
- @param model : table model containing details of runs and processing settings
- @param whitelist : the whitelist containing information about the model columns
- and how they relate to the algorithm properties
+ @param whitelist : the whitelist
  @param preprocessMap : the pre-processing instructions as a map
  @param processor : the processing algorithm
  @param preprocessingOptionsMap : a map containing the pre-processing options
  @param processingOptions : the pre-processing options specified via hinting
  line edit
- @return tuple containing the python string and the output workspace names
+ @return tuple containing the python string and the output workspace names.
+ First item in the tuple is the python code that performs the reduction, and
+ second item are the names of the output workspaces.
 */
 boost::tuple<std::string, std::string> reduceRowString(
-    const int rowNo, const std::string &instrument,
-    QDataProcessorTableModel_sptr model,
+    const RowData &data, const std::string &instrument,
     const DataProcessorWhiteList &whitelist,
     const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
         preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const std::map<std::string, std::string> &preprocessingOptionsMap,
     const std::string &processingOptions) {
+
+  if (whitelist.size() != data.size()) {
+    throw std::invalid_argument("Can't generate notebook");
+  }
 
   std::ostringstream preprocess_string;
 
@@ -432,8 +441,8 @@ boost::tuple<std::string, std::string> reduceRowString(
 
   int ncols = static_cast<int>(whitelist.size());
 
-  // Run through columns, excluding 'Group' and 'Options'
-  for (int col = 0; col < ncols - 2; col++) {
+  // Run through columns, excluding 'Options'
+  for (int col = 0; col < ncols - 1; col++) {
 
     // The column's name
     const std::string colName = whitelist.colNameFromColIndex(col);
@@ -445,8 +454,7 @@ boost::tuple<std::string, std::string> reduceRowString(
       // instructions
 
       // Get the runs
-      const std::string runStr =
-          model->data(model->index(rowNo, col)).toString().toStdString();
+      const std::string runStr = data.at(col);
 
       if (!runStr.empty()) {
         // Some runs were given for pre-processing
@@ -470,8 +478,8 @@ boost::tuple<std::string, std::string> reduceRowString(
       // No pre-processing
 
       // Just read the property value from the table
-      const std::string propStr =
-          model->data(model->index(rowNo, col)).toString().toStdString();
+      const std::string propStr = data.at(col);
+
       if (!propStr.empty()) {
         // If it was not empty, we used it as an input property to the reduction
         // algorithm
@@ -482,8 +490,7 @@ boost::tuple<std::string, std::string> reduceRowString(
 
   // 'Options' specified either via 'Options' column or HintinLineEdit
   auto options = parseKeyValueString(processingOptions);
-  const std::string optionsStr =
-      model->data(model->index(rowNo, ncols - 1)).toString().toStdString();
+  const std::string optionsStr = data.back();
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(optionsStr);
   // Options specified via 'Options' column will be preferred
@@ -500,8 +507,8 @@ boost::tuple<std::string, std::string> reduceRowString(
   // 'IvsLam_TOF_13460_13462
   std::vector<std::string> output_properties;
   for (size_t prop = 0; prop < processor.numberOfOutputProperties(); prop++) {
-    output_properties.push_back(getReducedWorkspaceName(
-        rowNo, model, whitelist, processor.prefix(prop)));
+    output_properties.push_back(
+        getReducedWorkspaceName(data, whitelist, processor.prefix(prop)));
   }
 
   std::string outputPropertiesStr =
@@ -546,8 +553,8 @@ loadWorkspaceString(const std::string &runStr, const std::string &instrument,
   std::ostringstream load_strings;
 
   // Remove leading/trailing whitespace from each run
-  for (auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
-    boost::trim(*runIt);
+  for (auto &run : runs)
+    boost::trim(run);
 
   const std::string prefix = preprocessor.prefix();
   const std::string outputName = prefix + boost::algorithm::join(runs, "_");

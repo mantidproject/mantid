@@ -34,11 +34,14 @@ set ( SRC_FILES
 	src/FuncMinimizers/DerivMinimizer.cpp
 	src/FuncMinimizers/FABADAMinimizer.cpp
 	src/FuncMinimizers/FRConjugateGradientMinimizer.cpp
+	src/FuncMinimizers/DTRSMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMDMinimizer.cpp
 	src/FuncMinimizers/LevenbergMarquardtMinimizer.cpp
+	src/FuncMinimizers/MoreSorensenMinimizer.cpp
 	src/FuncMinimizers/PRConjugateGradientMinimizer.cpp
 	src/FuncMinimizers/SimplexMinimizer.cpp
 	src/FuncMinimizers/SteepestDescentMinimizer.cpp
+	src/FuncMinimizers/TrustRegionMinimizer.cpp
 	src/FunctionDomain1DSpectrumCreator.cpp
 	src/Functions/Abragam.cpp
 	src/Functions/BSpline.cpp
@@ -54,31 +57,38 @@ set ( SRC_FILES
 	src/Functions/Convolution.cpp
 	src/Functions/CrystalElectricField.cpp
 	src/Functions/CrystalFieldPeaks.cpp
+	src/Functions/CrystalFieldPeaksBase.cpp
+	src/Functions/CrystalFieldMultiSpectrum.cpp
 	src/Functions/CrystalFieldSpectrum.cpp
 	src/Functions/CubicSpline.cpp
 	src/Functions/DeltaFunction.cpp
 	src/Functions/DiffRotDiscreteCircle.cpp
 	src/Functions/DiffSphere.cpp
 	src/Functions/DynamicKuboToyabe.cpp
+	src/Functions/ElasticDiffRotDiscreteCircle.cpp
+	src/Functions/ElasticDiffSphere.cpp
 	src/Functions/EndErfc.cpp
 	src/Functions/ExpDecay.cpp
 	src/Functions/ExpDecayMuon.cpp
 	src/Functions/ExpDecayOsc.cpp
 	src/Functions/FlatBackground.cpp
 	src/Functions/FullprofPolynomial.cpp
+	src/Functions/FunctionGenerator.cpp
 	src/Functions/GausDecay.cpp
 	src/Functions/GausOsc.cpp
 	src/Functions/Gaussian.cpp
 	src/Functions/GaussianComptonProfile.cpp
 	src/Functions/GramCharlierComptonProfile.cpp
 	src/Functions/IkedaCarpenterPV.cpp
+	src/Functions/InelasticDiffRotDiscreteCircle.cpp
+	src/Functions/InelasticDiffSphere.cpp
     src/Functions/Keren.cpp
 	src/Functions/LinearBackground.cpp
 	src/Functions/LogNormal.cpp
 	src/Functions/Lorentzian.cpp
 	src/Functions/Lorentzian1D.cpp
 	src/Functions/MuonFInteraction.cpp
-        src/Functions/MultivariateGaussianComptonProfile.cpp
+	src/Functions/MultivariateGaussianComptonProfile.cpp
 	src/Functions/NeutronBk2BkExpConvPVoigt.cpp
 	src/Functions/PawleyFunction.cpp
 	src/Functions/PeakParameterFunction.cpp
@@ -112,13 +122,17 @@ set ( SRC_FILES
 	src/GSLMatrix.cpp
 	src/GSLVector.cpp
 	src/GeneralDomainCreator.cpp
+	src/HistogramDomainCreator.cpp
 	src/IFittingAlgorithm.cpp
+	src/IMWDomainCreator.cpp
 	src/LatticeDomainCreator.cpp
 	src/LatticeFunction.cpp
 	src/MSVesuvioHelpers.cpp
 	src/MultiDomainCreator.cpp
 	src/ParDomain.cpp
 	src/ParameterEstimator.cpp
+	src/RalNlls/TrustRegion.cpp
+	src/RalNlls/Workspaces.cpp
 	src/SeqDomain.cpp
 	src/SeqDomainSpectrumCreator.cpp
 	src/SpecialFunctionHelper.cpp
@@ -166,11 +180,14 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FuncMinimizers/DerivMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/FRConjugateGradientMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/DTRSMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMDMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/LevenbergMarquardtMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SimplexMinimizer.h
 	inc/MantidCurveFitting/FuncMinimizers/SteepestDescentMinimizer.h
+	inc/MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h
 	inc/MantidCurveFitting/FunctionDomain1DSpectrumCreator.h
 	inc/MantidCurveFitting/Functions/Abragam.h
 	inc/MantidCurveFitting/Functions/BSpline.h
@@ -186,31 +203,38 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/Convolution.h
 	inc/MantidCurveFitting/Functions/CrystalElectricField.h
 	inc/MantidCurveFitting/Functions/CrystalFieldPeaks.h
+	inc/MantidCurveFitting/Functions/CrystalFieldPeaksBase.h
+	inc/MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h
 	inc/MantidCurveFitting/Functions/CrystalFieldSpectrum.h
 	inc/MantidCurveFitting/Functions/CubicSpline.h
 	inc/MantidCurveFitting/Functions/DeltaFunction.h
 	inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h
 	inc/MantidCurveFitting/Functions/DiffSphere.h
 	inc/MantidCurveFitting/Functions/DynamicKuboToyabe.h
+	inc/MantidCurveFitting/Functions/ElasticDiffRotDiscreteCircle.h
+	inc/MantidCurveFitting/Functions/ElasticDiffSphere.h
 	inc/MantidCurveFitting/Functions/EndErfc.h
 	inc/MantidCurveFitting/Functions/ExpDecay.h
 	inc/MantidCurveFitting/Functions/ExpDecayMuon.h
 	inc/MantidCurveFitting/Functions/ExpDecayOsc.h
 	inc/MantidCurveFitting/Functions/FlatBackground.h
 	inc/MantidCurveFitting/Functions/FullprofPolynomial.h
+	inc/MantidCurveFitting/Functions/FunctionGenerator.h
 	inc/MantidCurveFitting/Functions/GausDecay.h
 	inc/MantidCurveFitting/Functions/GausOsc.h
 	inc/MantidCurveFitting/Functions/Gaussian.h
 	inc/MantidCurveFitting/Functions/GaussianComptonProfile.h
 	inc/MantidCurveFitting/Functions/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/Functions/IkedaCarpenterPV.h
+	inc/MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h
+	inc/MantidCurveFitting/Functions/InelasticDiffSphere.h
     inc/MantidCurveFitting/Functions/Keren.h
 	inc/MantidCurveFitting/Functions/LinearBackground.h
 	inc/MantidCurveFitting/Functions/LogNormal.h
 	inc/MantidCurveFitting/Functions/Lorentzian.h
 	inc/MantidCurveFitting/Functions/Lorentzian1D.h
 	inc/MantidCurveFitting/Functions/MuonFInteraction.h
-        inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
+	inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
 	inc/MantidCurveFitting/Functions/NeutronBk2BkExpConvPVoigt.h
 	inc/MantidCurveFitting/Functions/PawleyFunction.h
 	inc/MantidCurveFitting/Functions/PeakParameterFunction.h
@@ -240,13 +264,17 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/UserFunction1D.h
 	inc/MantidCurveFitting/Functions/VesuvioResolution.h
 	inc/MantidCurveFitting/Functions/Voigt.h
+	inc/MantidCurveFitting/RalNlls/TrustRegion.h
+	inc/MantidCurveFitting/RalNlls/Workspaces.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
 	inc/MantidCurveFitting/GSLVector.h
 	inc/MantidCurveFitting/GeneralDomainCreator.h
+	inc/MantidCurveFitting/HistogramDomainCreator.h
 	inc/MantidCurveFitting/HalfComplex.h
 	inc/MantidCurveFitting/IFittingAlgorithm.h
+	inc/MantidCurveFitting/IMWDomainCreator.h
 	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LatticeDomainCreator.h
 	inc/MantidCurveFitting/LatticeFunction.h
@@ -318,6 +346,7 @@ set ( TEST_FILES
 	Functions/CrystalFieldEnergiesTest.h
 	Functions/CrystalFieldPeaksTest.h
 	Functions/CrystalFieldTest.h
+	Functions/CrystalFieldMultiSpectrumTest.h
 	Functions/CrystalFieldSpectrumTest.h
 	Functions/CubicSplineTest.h
 	Functions/DeltaFunctionTest.h
@@ -342,7 +371,7 @@ set ( TEST_FILES
 	Functions/Lorentzian1DTest.h
 	Functions/LorentzianTest.h
 	Functions/MuonFInteractionTest.h
-        Functions/MultivariateGaussianComptonProfileTest.h
+	Functions/MultivariateGaussianComptonProfileTest.h
 	Functions/NeutronBk2BkExpConvPVoigtTest.h
 	Functions/PawleyFunctionTest.h
 	Functions/PeakParameterFunctionTest.h
@@ -372,9 +401,11 @@ set ( TEST_FILES
 	Functions/UserFunctionTest.h
 	Functions/VesuvioResolutionTest.h
 	Functions/VoigtTest.h
+	RalNlls/NLLSTest.h
 	GSLMatrixTest.h
 	GSLVectorTest.h
 	GeneralDomainCreatorTest.h
+	HistogramDomainCreatorTest.h
 	IPeakFunctionCentreParameterNameTest.h
 	IPeakFunctionIntensityTest.h
 	LatticeDomainCreatorTest.h

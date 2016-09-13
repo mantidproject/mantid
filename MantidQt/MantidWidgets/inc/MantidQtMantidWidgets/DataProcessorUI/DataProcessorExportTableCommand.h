@@ -11,7 +11,7 @@ DataProcessorExportTableCommand defines the action "Export .TBL"
 
 processor interface presenter needs to support.
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -43,6 +43,11 @@ public:
   };
   std::string name() override { return std::string("Export .TBL"); }
   std::string icon() override { return std::string("://save_template.png"); }
+  std::string tooltip() override { return std::string("Export .TBL file"); }
+  std::string whatsthis() override {
+    return std::string("Opens a dialog to export a table as .TBL file");
+  }
+  std::string shortcut() override { return std::string(); }
 };
 }
 }

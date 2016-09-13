@@ -1,3 +1,4 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
@@ -12,6 +13,8 @@ using Mantid::Geometry::Group;
 using Mantid::Geometry::PointGroup;
 
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(PointGroup)
 
 namespace //<unnamed>
     {

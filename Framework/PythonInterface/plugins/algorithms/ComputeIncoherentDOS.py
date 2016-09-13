@@ -1,4 +1,6 @@
 #pylint: disable = no-init, invalid-name, line-too-long, eval-used, unused-argument, too-many-locals, too-many-branches, too-many-statements
+from __future__ import (absolute_import, division, print_function)
+
 import numpy as np
 from scipy import constants
 from mantid.kernel import CompositeValidator, Direction, FloatBoundedValidator
@@ -34,7 +36,7 @@ class ComputeIncoherentDOS(PythonAlgorithm):
     # Based on code in PySlice by Jon Taylor
 
     def category(self):
-        return 'Inelastic;PythonAlgorithms'
+        return 'Inelastic'
 
     def name(self):
         return 'ComputeIncoherentDOS'
@@ -195,7 +197,7 @@ class ComputeIncoherentDOS(PythonAlgorithm):
             dos1d = ScaleX(dos1d, 1/mev2cm)
 
         if absunits:
-            print "Converting to states/energy"
+            print("Converting to states/energy")
             # cross-section information is given in barns, but data is in milibarns.
             sigma = atoms[0].neutron()['tot_scatt_xs'] * 1000
             mass = atoms[0].mass

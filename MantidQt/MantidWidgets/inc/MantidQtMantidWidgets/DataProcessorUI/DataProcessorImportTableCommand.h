@@ -9,7 +9,7 @@ namespace MantidWidgets {
 
 DataProcessorImportTableCommand defines the action "Import .TBL"
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -41,6 +41,11 @@ public:
   };
   std::string name() override { return std::string("Import .TBL"); }
   std::string icon() override { return std::string("://open_template.png"); }
+  std::string tooltip() override { return std::string("Import .TBL file"); }
+  std::string whatsthis() override {
+    return std::string("Opens a dialog to select a .TBL file to import");
+  }
+  std::string shortcut() override { return std::string(); }
 };
 }
 }

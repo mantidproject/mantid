@@ -671,12 +671,13 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
   auto timeChannels = new float[lengthIn + 1]();
   nxload.getTimeChannels(timeChannels, static_cast<const int>(lengthIn + 1));
   // Put the read in array into a vector (inside a shared pointer)
-  boost::shared_ptr<MantidVec> timeChannelsVec(
-      new MantidVec(timeChannels, timeChannels + lengthIn + 1));
+  auto timeChannelsVec = boost::make_shared<HistogramData::HistogramX>(
+      timeChannels, timeChannels + lengthIn + 1);
 
   localWorkspace->setX(hist, timeChannelsVec);
   localWorkspace->getSpectrum(hist).setSpectrumNo(specNo);
-
+  // Muon v1 files: always a one-to-one mapping between spectra and detectors
+  localWorkspace->getSpectrum(hist).setDetectorID(static_cast<detid_t>(specNo));
   // Clean up
   delete[] timeChannels;
 }
@@ -811,7 +812,14 @@ void LoadMuonNexus1::addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
     try {
 
       handle.openPath("run/instrument/beam");
-      handle.openData("frames_good");
+      try {
+        handle.openData("frames_good");
+      } catch (::NeXus::Exception &) {
+        // If it's not there, read "frames" instead and assume they are good
+        g_log.warning("Could not read /run/instrument/beam/frames_good");
+        handle.openData("frames");
+        g_log.warning("Using run/instrument/beam/frames instead");
+      }
 
       // read frames_period_daq
       boost::scoped_array<int> dataVals(new int[1]);
@@ -821,7 +829,7 @@ void LoadMuonNexus1::addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
       run.addProperty("goodfrm", dataVals[0]);
 
     } catch (::NeXus::Exception &) {
-      g_log.warning("Could not read /run/instrument/beam/frames_good");
+      g_log.warning("Could not read number of good frames");
     }
 
   } else {

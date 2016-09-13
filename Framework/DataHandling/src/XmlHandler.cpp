@@ -56,7 +56,7 @@ std::string XmlHandler::get_text_from_tag(const std::string &xpath) {
   Poco::XML::NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
   Poco::XML::Node *pNode = it.nextNode();
   Poco::XML::Node *detectorNode = pNode->getNodeByPath(xpath);
-  std::string value("");
+  std::string value;
   if (detectorNode)
     value = detectorNode->innerText();
   return value;

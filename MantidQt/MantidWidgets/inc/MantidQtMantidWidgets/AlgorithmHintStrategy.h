@@ -4,8 +4,6 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtMantidWidgets/HintStrategy.h"
 
-using namespace Mantid::API;
-
 namespace MantidQt {
 namespace MantidWidgets {
 /** AlgorithmHintStrategy : Produces hints using a given algorithm's properties.
@@ -33,7 +31,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class AlgorithmHintStrategy : public HintStrategy {
 public:
-  AlgorithmHintStrategy(IAlgorithm_sptr algorithm,
+  AlgorithmHintStrategy(Mantid::API::IAlgorithm_sptr algorithm,
                         std::set<std::string> blacklist)
       : m_algorithm(algorithm), m_blacklist(blacklist) {}
 
@@ -55,7 +53,7 @@ public:
   }
 
 private:
-  IAlgorithm_sptr m_algorithm;
+  Mantid::API::IAlgorithm_sptr m_algorithm;
   std::set<std::string> m_blacklist;
 };
 }

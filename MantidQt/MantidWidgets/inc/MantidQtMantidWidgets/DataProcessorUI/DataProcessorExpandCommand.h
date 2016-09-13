@@ -9,7 +9,7 @@ namespace MantidWidgets {
 
 DataProcessorExpandCommand defines the action "Expand Selection"
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -41,6 +41,16 @@ public:
   };
   std::string name() override { return std::string("Expand Selection"); }
   std::string icon() override { return std::string("://fit_frame.png"); }
+  std::string tooltip() override {
+    return std::string("Selects an entire group");
+  }
+  std::string whatsthis() override {
+    return std::string("Expands the current selection to include any runs that "
+                       "are in the same group as any selected run. This "
+                       "effectively means selecting the group to which the "
+                       "selected run belongs");
+  }
+  std::string shortcut() override { return std::string(); }
 };
 }
 }

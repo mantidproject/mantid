@@ -3,6 +3,7 @@
 #include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeaksTableColumnsDialog.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidKernel/UsageService.h"
 #include <QBoxLayout>
 #include <QLayoutItem>
 
@@ -11,6 +12,8 @@ namespace SliceViewer {
 /// Constructor
 PeaksViewer::PeaksViewer(QWidget *parent) : QWidget(parent) {
   this->setMinimumWidth(500);
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Feature", "SliceViewer->PeaksViewer", false);
 }
 
 void PeaksViewer::setPeaksWorkspaces(const SetPeaksWorkspaces &) {}

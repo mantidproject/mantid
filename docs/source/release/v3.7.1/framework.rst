@@ -167,7 +167,7 @@ Python
 
 - V3D is now iterable in Python, which makes it possible to easily construct numpy arrays like this ``np.array(V3D(1,2, 3))``.
 
-- Two new attributes available on all python algorithms ``startProgress`` and ``endProgress`. Added to an algorithm call, it will allow for passing control of the progress bar to child algorithms.
+- Two new attributes available on all python algorithms ``startProgress`` and ``endProgress``. Added to an algorithm call, it will allow for passing control of the progress bar to child algorithms.
 
 
 Full list of

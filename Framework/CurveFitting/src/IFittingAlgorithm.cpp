@@ -2,6 +2,7 @@
 
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/GeneralDomainCreator.h"
+#include "MantidCurveFitting/HistogramDomainCreator.h"
 #include "MantidCurveFitting/LatticeDomainCreator.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
@@ -12,7 +13,6 @@
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/ILatticeFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MultiDomainFunction.h"
 
 #include "MantidKernel/ListValidator.h"
 
@@ -43,7 +43,13 @@ IDomainCreator *createDomainCreator(const IFunction *fun,
   } else if (auto gfun = dynamic_cast<const IFunctionGeneral *>(fun)) {
     creator = new GeneralDomainCreator(*gfun, *manager, workspacePropertyName);
   } else {
-    creator = new FitMW(manager, workspacePropertyName, domainType);
+    bool histogramFit =
+        manager->getPropertyValue("EvaluationType") == "Histogram";
+    if (histogramFit) {
+      creator = new HistogramDomainCreator(*manager, workspacePropertyName);
+    } else {
+      creator = new FitMW(manager, workspacePropertyName, domainType);
+    }
   }
   return creator;
 }
@@ -75,6 +81,16 @@ void IFittingAlgorithm::init() {
           new Kernel::ListValidator<std::string>(domainTypes)),
       "The type of function domain to use: Simple, Sequential, or Parallel.",
       Kernel::Direction::Input);
+
+  std::vector<std::string> evaluationTypes{"CentrePoint", "Histogram"};
+  declareProperty("EvaluationType", "CentrePoint",
+                  Kernel::IValidator_sptr(
+                      new Kernel::ListValidator<std::string>(evaluationTypes)),
+                  "The way the function is evaluated on histogram data sets. "
+                  "If value is \"CentrePoint\" then function is evaluated at "
+                  "centre of each bin. If it is \"Histogram\" then function is "
+                  "integrated within the bin and the integrals returned.",
+                  Kernel::Direction::Input);
 
   initConcrete();
 }
@@ -112,26 +128,13 @@ void IFittingAlgorithm::setDomainType() {
   } else {
     m_domainType = IDomainCreator::Simple;
   }
-  // Kernel::Property *prop = getPointerToProperty("Minimizer");
-  // auto minimizerProperty =
-  //    dynamic_cast<Kernel::PropertyWithValue<std::string> *>(prop);
-  // std::vector<std::string> minimizerOptions =
-  //    API::FuncMinimizerFactory::Instance().getKeys();
-  // if (m_domainType != IDomainCreator::Simple) {
-  //  auto it = std::find(minimizerOptions.begin(), minimizerOptions.end(),
-  //                      "Levenberg-Marquardt");
-  //  minimizerOptions.erase(it);
-  //}
-  // minimizerProperty->replaceValidator(Kernel::IValidator_sptr(
-  //    new Kernel::StartsWithValidator(minimizerOptions)));
 }
 
 void IFittingAlgorithm::setFunction() {
   // get the function
   m_function = getProperty("Function");
-  auto mdf = boost::dynamic_pointer_cast<API::MultiDomainFunction>(m_function);
-  if (mdf) {
-    size_t ndom = mdf->getMaxIndex() + 1;
+  size_t ndom = m_function->getNumberDomains();
+  if (ndom > 1) {
     m_workspacePropertyNames.resize(ndom);
     m_workspacePropertyNames[0] = "InputWorkspace";
     for (size_t i = 1; i < ndom; ++i) {
@@ -180,8 +183,7 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
       // names of the sort InputWorkspace_#
       setFunction();
     }
-    auto multiFun = boost::dynamic_pointer_cast<API::MultiDomainFunction>(fun);
-    if (multiFun) {
+    if (fun->getNumberDomains() > 1) {
       auto multiCreator =
           new MultiDomainCreator(this, m_workspacePropertyNames);
       multiCreator->setCreator(index, creator);
@@ -192,18 +194,22 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
       creator->declareDatasetProperties(suffix, addProperties);
     }
   } else {
-    boost::shared_ptr<MultiDomainCreator> multiCreator =
-        boost::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
-    if (!multiCreator) {
-      auto &reference = *m_domainCreator;
-      throw std::runtime_error(
-          std::string("MultiDomainCreator expected, found ") +
-          typeid(reference).name());
-    }
-    if (!multiCreator->hasCreator(index)) {
+    if (fun->getNumberDomains() > 1) {
+      boost::shared_ptr<MultiDomainCreator> multiCreator =
+          boost::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
+      if (!multiCreator) {
+        auto &reference = *m_domainCreator;
+        throw std::runtime_error(
+            std::string("MultiDomainCreator expected, found ") +
+            typeid(reference).name());
+      }
+      if (!multiCreator->hasCreator(index)) {
+        creator->declareDatasetProperties(suffix, addProperties);
+      }
+      multiCreator->setCreator(index, creator);
+    } else {
       creator->declareDatasetProperties(suffix, addProperties);
     }
-    multiCreator->setCreator(index, creator);
   }
 }
 
@@ -213,9 +219,7 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
  */
 void IFittingAlgorithm::addWorkspaces() {
   setDomainType();
-  auto multiFun =
-      boost::dynamic_pointer_cast<API::MultiDomainFunction>(m_function);
-  if (multiFun) {
+  if (m_function->getNumberDomains() > 1) {
     m_domainCreator.reset(
         new MultiDomainCreator(this, m_workspacePropertyNames));
   }

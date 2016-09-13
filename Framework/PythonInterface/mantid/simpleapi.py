@@ -168,7 +168,7 @@ def Load(*args, **kwargs):
     lhs_args = _get_args_from_lhs(lhs, algm)
     final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
     # Check for any properties that aren't known and warn they will not be used
-    for key in final_keywords.keys():
+    for key in list(final_keywords.keys()):
         if key not in algm:
             logger.warning("You've passed a property (%s) to Load() that doesn't apply to this file type." % key)
             del final_keywords[key]
@@ -237,6 +237,9 @@ def fitting_algorithm(f):
         # Create and execute
         algm = _create_algorithm_object(function_name)
         _set_logging_option(algm, kwargs)
+        if 'EvaluationType' in kwargs:
+            algm.setProperty('EvaluationType', kwargs['EvaluationType'])
+            del kwargs['EvaluationType']
         algm.setProperty('Function', Function) # Must be set first
         if InputWorkspace is not None:
             algm.setProperty('InputWorkspace', InputWorkspace)
@@ -244,14 +247,14 @@ def fitting_algorithm(f):
             del algm['InputWorkspace']
 
         # Set all workspace properties before others
-        for key in kwargs.keys():
+        for key in list(kwargs.keys()):
             if key.startswith('InputWorkspace_'):
                 algm.setProperty(key, kwargs[key])
                 del kwargs[key]
 
         lhs = _lhs_info()
         # Check for any properties that aren't known and warn they will not be used
-        for key in kwargs.keys():
+        for key in list(kwargs.keys()):
             if key not in algm:
                 logger.warning("You've passed a property (%s) to %s() that doesn't apply to any of the input workspaces." % (key,function_name))
                 del kwargs[key]
@@ -1139,7 +1142,8 @@ def _translate():
             # Create the algorithm object
             algm_object = algorithm_mgr.createUnmanaged(name, max(versions))
             algm_object.initialize()
-        except Exception:
+        except Exception as exc:
+            logger.warning("Error initializing {0} on registration: '{1}'".format(name, str(exc)))
             continue
 
         algorithm_wrapper = _create_algorithm_function(name, max(versions), algm_object)

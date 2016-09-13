@@ -17,6 +17,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using Mantid::HistogramData::BinEdges;
 
 namespace {
 class PropertyFinder {
@@ -391,26 +392,17 @@ public:
   void test_normalize_by_detmon() {
     // Prepare workspace
     //-----------------
-    MantidVecPtr x, e, detData, monData;
-
     // Single bin from 1->2
-    x.access().resize(2);
-    x.access()[0] = 1;
-    x.access()[1] = 2;
-    // No error at all
-    e.access().resize(1, 0.0);
+    BinEdges x{1, 2};
 
-    // Set the detector and monitor y values
-    detData.access().resize(1, 10);
-    monData.access().resize(1, 5);
-
-    auto tinyWS = MatrixWorkspace_sptr(new Workspace2D());
     // 2 spectra, 2 x values, 1 y value per spectra
-    tinyWS->initialize(2, 2, 1);
-    tinyWS->setX(0, x);
-    tinyWS->setX(1, x);
-    tinyWS->setData(0, detData, e);
-    tinyWS->setData(1, monData, e);
+    auto tinyWS = createWorkspace<Workspace2D>(2, 2, 1);
+    tinyWS->setBinEdges(0, x);
+    tinyWS->setBinEdges(1, x);
+    tinyWS->setCounts(0, 1, 10.0);
+    tinyWS->setCountStandardDeviations(0, 1, 0.0);
+    tinyWS->setCounts(1, 1, 5.0);
+    tinyWS->setCountStandardDeviations(1, 1, 0.0);
 
     tinyWS->setTitle("Test histogram");
     tinyWS->getAxis(0)->setUnit("Wavelength");
@@ -483,7 +475,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inWSName));
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("NormalizeByIntegratedMonitors", false));
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("WavelengthStep", 1.0));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("MomentumTransferStep", 0.1));
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", outWSQName));
@@ -563,7 +554,6 @@ public:
         alg->setProperty("InputWorkspace", m_dataWorkspace));
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("I0MonitorIndex", Mantid::EMPTY_INT()));
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("WavelengthStep", 1.0));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("MomentumTransferStep", 0.1));
     TS_ASSERT_THROWS_NOTHING(
         alg->setPropertyValue("OutputWorkspace", outWSQName));

@@ -157,6 +157,46 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
+    def test_reduction_with_cal_file_osiris_diffspec(self):
+        """
+        Test to ensure that cal file is used correctly for osiris diffspec runs with cal files
+        """
+        wks = ISISIndirectDiffractionReduction(InputFiles=['osi89813.raw'],
+                                               Instrument='OSIRIS',
+                                               Mode='diffspec',
+                                               CalFile='osiris_041_RES10.cal',
+                                               SpectraRange=[100, 150])
+
+        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(len(wks), 1)
+        self.assertEqual(wks.getNames()[0], 'osiris89813_diffspec_red')
+
+        red_ws = wks[0]
+        self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
+        self.assertEqual(red_ws.getNumberHistograms(), 1)
+
+    # ------------------------------------------Failure cases------------------------------------------
+    def test_reduction_with_cal_file_osiris_diffonly_fails(self):
+        """
+        Test to ensure cal file can not be used in diffonly mode
+        """
+        self.assertRaises(RuntimeError, ISISIndirectDiffractionReduction, InputFiles=['osi89813.raw'],
+                          Instrument='OSIRIS',
+                          Mode='diffonly',
+                          CalFile='osi_041_RES10.cal',
+                          OutputWorkspace='wks',
+                          SpectraRange=[100, 150])
+
+    def test_reduction_with_cal_file_iris_fail(self):
+        """
+        Test to ensure cal file can not be used on a different instrument other than OSIRIS
+        """
+        self.assertRaises(RuntimeError, ISISIndirectDiffractionReduction, InputFiles=['IRS26176.RAW'],
+                          Instrument='IRIS',
+                          Mode='diffspec',
+                          CalFile='osi_041_RES10.cal',
+                          OutputWorkspace='wks',
+                          SpectraRange=[105, 112])
 
 if __name__ == '__main__':
     unittest.main()

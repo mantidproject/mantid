@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ExtractSpectra.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/ExtractSpectra.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/UnitFactory.h"
@@ -44,13 +44,13 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
 
-    TS_ASSERT_EQUALS(ws->readX(0)[0], 0.0);
-    TS_ASSERT_EQUALS(ws->readX(0)[1], 1.0);
-    TS_ASSERT_EQUALS(ws->readX(0)[2], 2.0);
-    TS_ASSERT_EQUALS(ws->readX(0)[3], 3.0);
-    TS_ASSERT_EQUALS(ws->readX(0)[4], 4.0);
-    TS_ASSERT_EQUALS(ws->readX(0)[5], 5.0);
-    TS_ASSERT_EQUALS(ws->readX(0)[6], 6.0);
+    TS_ASSERT_EQUALS(ws->x(0)[0], 0.0);
+    TS_ASSERT_EQUALS(ws->x(0)[1], 1.0);
+    TS_ASSERT_EQUALS(ws->x(0)[2], 2.0);
+    TS_ASSERT_EQUALS(ws->x(0)[3], 3.0);
+    TS_ASSERT_EQUALS(ws->x(0)[4], 4.0);
+    TS_ASSERT_EQUALS(ws->x(0)[5], 5.0);
+    TS_ASSERT_EQUALS(ws->x(0)[6], 6.0);
   }
 
   // ---- test histo ----
@@ -266,8 +266,8 @@ public:
     // this is a bit unexpected but at least no crash
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
     TS_ASSERT_EQUALS(ws->blocksize(), 1);
-    TS_ASSERT_EQUALS(ws->readX(0)[0], 2);
-    TS_ASSERT_EQUALS(ws->readX(0)[1], 1);
+    TS_ASSERT_EQUALS(ws->x(0)[0], 2);
+    TS_ASSERT_EQUALS(ws->x(0)[1], 1);
   }
 
   void test_invalid_index_range_event() {
@@ -417,10 +417,10 @@ private:
         "Workspace2D", nSpec, nBins + 1, nBins);
     for (size_t j = 0; j < nSpec; ++j) {
       for (size_t k = 0; k <= nBins; ++k) {
-        space->dataX(j)[k] = double(k);
+        space->mutableX(j)[k] = double(k);
       }
-      space->dataY(j).assign(nBins, double(j));
-      space->dataE(j).assign(nBins, sqrt(double(j)));
+      space->mutableY(j) = HistogramData::HistogramY(nBins, double(j));
+      space->mutableE(j) = HistogramData::HistogramE(nBins, sqrt(double(j)));
     }
     return space;
   }
@@ -429,9 +429,10 @@ private:
     auto ws = createInputWorkspaceHisto();
     // Add the delta x values
     for (size_t j = 0; j < nSpec; ++j) {
+      ws->setBinEdgeStandardDeviations(j, nBins + 1);
       for (size_t k = 0; k <= nBins; ++k) {
         // Add a constant error to all spectra
-        ws->dataDx(j)[k] = sqrt(double(k));
+        ws->mutableDx(j)[k] = sqrt(double(k));
       }
     }
     return ws;
@@ -442,11 +443,12 @@ private:
     MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create(
         "Workspace2D", nSpec, nBins + 1, nBins);
     for (size_t j = 0; j < nSpec; ++j) {
+      auto &X = space->mutableX(j);
       for (size_t k = 0; k <= nBins; ++k) {
-        space->dataX(j)[k] = double(j + k);
+        X[k] = double(j + k);
       }
-      space->dataY(j).assign(nBins, double(j + 1));
-      space->dataE(j).assign(nBins, sqrt(double(j + 1)));
+      space->mutableY(j).assign(nBins, double(j + 1));
+      space->mutableE(j).assign(nBins, sqrt(double(j + 1)));
     }
     return space;
   }
@@ -466,14 +468,13 @@ private:
   MatrixWorkspace_sptr createInputWorkspaceEventWithDx() const {
     auto ws = createInputWorkspaceEvent();
     // Add the delta x values
+    auto dXvals = HistogramData::BinEdgeStandardDeviations(nBins + 1, 0.0);
+    auto &dX = dXvals.mutableData();
+    for (size_t k = 0; k <= nBins; ++k) {
+      dX[k] = sqrt(double(k)) + 1;
+    }
     for (size_t j = 0; j < nSpec; ++j) {
-      Mantid::MantidVecPtr dXvals;
-      Mantid::MantidVec &dX = dXvals.access();
-      dX.resize(nBins + 1, 0.0);
-      for (size_t k = 0; k <= nBins; ++k) {
-        dX[k] = sqrt(double(k)) + 1;
-      }
-      ws->setDx(j, dXvals);
+      ws->setBinEdgeStandardDeviations(j, dXvals);
     }
     return ws;
   }
@@ -519,36 +520,36 @@ private:
     void testXRange(const MatrixWorkspace &ws) const {
       if (wsType == "histo-ragged") {
         TS_ASSERT_EQUALS(ws.blocksize(), 6);
-        TS_ASSERT_EQUALS(ws.readY(0)[0], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(0)[1], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(0)[2], 1.0);
-        TS_ASSERT_EQUALS(ws.readY(0)[3], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(0)[4], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(0)[5], 0.0);
+        TS_ASSERT_EQUALS(ws.y(0)[0], 0.0);
+        TS_ASSERT_EQUALS(ws.y(0)[1], 0.0);
+        TS_ASSERT_EQUALS(ws.y(0)[2], 1.0);
+        TS_ASSERT_EQUALS(ws.y(0)[3], 0.0);
+        TS_ASSERT_EQUALS(ws.y(0)[4], 0.0);
+        TS_ASSERT_EQUALS(ws.y(0)[5], 0.0);
 
-        TS_ASSERT_EQUALS(ws.readY(1)[0], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(1)[1], 2.0);
-        TS_ASSERT_EQUALS(ws.readY(1)[2], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(1)[3], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(1)[4], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(1)[5], 0.0);
+        TS_ASSERT_EQUALS(ws.y(1)[0], 0.0);
+        TS_ASSERT_EQUALS(ws.y(1)[1], 2.0);
+        TS_ASSERT_EQUALS(ws.y(1)[2], 0.0);
+        TS_ASSERT_EQUALS(ws.y(1)[3], 0.0);
+        TS_ASSERT_EQUALS(ws.y(1)[4], 0.0);
+        TS_ASSERT_EQUALS(ws.y(1)[5], 0.0);
 
-        TS_ASSERT_EQUALS(ws.readY(2)[0], 3.0);
-        TS_ASSERT_EQUALS(ws.readY(2)[1], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(2)[2], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(2)[3], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(2)[4], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(2)[5], 0.0);
+        TS_ASSERT_EQUALS(ws.y(2)[0], 3.0);
+        TS_ASSERT_EQUALS(ws.y(2)[1], 0.0);
+        TS_ASSERT_EQUALS(ws.y(2)[2], 0.0);
+        TS_ASSERT_EQUALS(ws.y(2)[3], 0.0);
+        TS_ASSERT_EQUALS(ws.y(2)[4], 0.0);
+        TS_ASSERT_EQUALS(ws.y(2)[5], 0.0);
 
-        TS_ASSERT_EQUALS(ws.readY(3)[0], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(3)[1], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(3)[2], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(3)[3], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(3)[4], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(3)[5], 0.0);
+        TS_ASSERT_EQUALS(ws.y(3)[0], 0.0);
+        TS_ASSERT_EQUALS(ws.y(3)[1], 0.0);
+        TS_ASSERT_EQUALS(ws.y(3)[2], 0.0);
+        TS_ASSERT_EQUALS(ws.y(3)[3], 0.0);
+        TS_ASSERT_EQUALS(ws.y(3)[4], 0.0);
+        TS_ASSERT_EQUALS(ws.y(3)[5], 0.0);
       } else {
         TS_ASSERT_EQUALS(ws.blocksize(), 1);
-        TS_ASSERT_EQUALS(ws.readX(0)[0], 2.0);
+        TS_ASSERT_EQUALS(ws.x(0)[0], 2.0);
       }
     }
 
@@ -561,9 +562,9 @@ private:
     void testIndexRange(const MatrixWorkspace &ws) const {
       TS_ASSERT_EQUALS(ws.getNumberHistograms(), 3);
       if (wsType == "histo") {
-        TS_ASSERT_EQUALS(ws.readY(0)[0], 1.0);
-        TS_ASSERT_EQUALS(ws.readY(1)[0], 2.0);
-        TS_ASSERT_EQUALS(ws.readY(2)[0], 3.0);
+        TS_ASSERT_EQUALS(ws.y(0)[0], 1.0);
+        TS_ASSERT_EQUALS(ws.y(1)[0], 2.0);
+        TS_ASSERT_EQUALS(ws.y(2)[0], 3.0);
       } else if (wsType == "event") {
         TS_ASSERT_EQUALS(ws.getDetector(0)->getID(), 2);
         TS_ASSERT_EQUALS(ws.getDetector(1)->getID(), 3);
@@ -582,9 +583,9 @@ private:
     void testWorkspaceIndexList(const MatrixWorkspace &ws) const {
       TS_ASSERT_EQUALS(ws.getNumberHistograms(), 3);
       if (wsType == "histo") {
-        TS_ASSERT_EQUALS(ws.readY(0)[0], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(1)[0], 2.0);
-        TS_ASSERT_EQUALS(ws.readY(2)[0], 4.0);
+        TS_ASSERT_EQUALS(ws.y(0)[0], 0.0);
+        TS_ASSERT_EQUALS(ws.y(1)[0], 2.0);
+        TS_ASSERT_EQUALS(ws.y(2)[0], 4.0);
       } else if (wsType == "event") {
         TS_ASSERT_EQUALS(ws.getDetector(0)->getID(), 1);
         TS_ASSERT_EQUALS(ws.getDetector(1)->getID(), 3);
@@ -603,9 +604,9 @@ private:
     void testDetectorList(const MatrixWorkspace &ws) const {
       TS_ASSERT_EQUALS(ws.getNumberHistograms(), 3);
       if (wsType == "histo-detector") {
-        TS_ASSERT_EQUALS(ws.readY(0)[0], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(1)[0], 2.0);
-        TS_ASSERT_EQUALS(ws.readY(2)[0], 4.0);
+        TS_ASSERT_EQUALS(ws.y(0)[0], 0.0);
+        TS_ASSERT_EQUALS(ws.y(1)[0], 2.0);
+        TS_ASSERT_EQUALS(ws.y(2)[0], 4.0);
       } else if (wsType == "event-detector") {
         TS_ASSERT_EQUALS(ws.getDetector(0)->getID(), 1);
         TS_ASSERT_EQUALS(ws.getDetector(1)->getID(), 3);
@@ -631,21 +632,21 @@ private:
     void testDx(const MatrixWorkspace &ws) const {
       if (wsType == "histo-dx") {
         TS_ASSERT(ws.hasDx(0));
-        TS_ASSERT_EQUALS(ws.readDx(0)[0], 0.0);
-        TS_ASSERT_EQUALS(ws.readDx(0)[1], 1.0);
-        TS_ASSERT_EQUALS(ws.readDx(0)[2], M_SQRT2);
-        TS_ASSERT_EQUALS(ws.readDx(0)[3], sqrt(3.0));
+        TS_ASSERT_EQUALS(ws.dx(0)[0], 0.0);
+        TS_ASSERT_EQUALS(ws.dx(0)[1], 1.0);
+        TS_ASSERT_EQUALS(ws.dx(0)[2], M_SQRT2);
+        TS_ASSERT_EQUALS(ws.dx(0)[3], sqrt(3.0));
         // Check that the length of x and dx is the same
-        auto x = ws.readX(0);
-        auto dX = ws.readDx(0);
+        auto &x = ws.x(0);
+        auto dX = ws.dx(0);
         TS_ASSERT_EQUALS(x.size(), dX.size());
 
       } else if (wsType == "event-dx") {
         TS_ASSERT(ws.hasDx(0));
-        TS_ASSERT_EQUALS(ws.readDx(0)[0], 0.0 + 1.0);
-        TS_ASSERT_EQUALS(ws.readDx(0)[1], 1.0 + 1.0);
-        TS_ASSERT_EQUALS(ws.readDx(0)[2], M_SQRT2 + 1.0);
-        TS_ASSERT_EQUALS(ws.readDx(0)[3], sqrt(3.0) + 1.0);
+        TS_ASSERT_EQUALS(ws.dx(0)[0], 0.0 + 1.0);
+        TS_ASSERT_EQUALS(ws.dx(0)[1], 1.0 + 1.0);
+        TS_ASSERT_EQUALS(ws.dx(0)[2], M_SQRT2 + 1.0);
+        TS_ASSERT_EQUALS(ws.dx(0)[3], sqrt(3.0) + 1.0);
       } else {
         TSM_ASSERT("Should never reach here", false);
       }

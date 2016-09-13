@@ -4,8 +4,7 @@
 Definition of Calibration
 =========================
 
-.. autofunction:: calibrate(ws, tubeSet, knownPositions, funcForm, [fitPar, margin, rangeList, calibTable, plotTube,
-excludeShorTubes, overridePeaks, fitPolyn, outputPeak ] )
+.. autofunction:: tube.calibrate(ws, tubeSet, knownPositions, funcForm, [fitPar, margin, rangeList, calibTable, plotTube, excludeShorTubes, overridePeaks, fitPolyn, outputPeak])
 
 =========
 Use Cases
@@ -37,13 +36,17 @@ Examples
 
 .. automodule:: Examples
 
-=====================
-Other Usefull Methods
-=====================
+====================
+Other Useful Methods
+====================
 
 .. autofunction:: tube.savePeak
 
 .. autofunction:: tube.readPeakFile
+
+.. autofunction:: tube.saveCalibration
+
+.. autofunction:: tube.readCalibrationFile
 
 """
 
@@ -51,6 +54,7 @@ import numpy
 import os
 import re
 
+from mantid.kernel import V3D
 from mantid.api import (MatrixWorkspace, ITableWorkspace)
 from mantid.simpleapi import (mtd, CreateEmptyTableWorkspace, DeleteWorkspace, config)
 from tube_spec import TubeSpec
@@ -61,182 +65,178 @@ from tube_calib import getCalibration
 
 def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     """
+    Define the calibrated positions of the detectors inside the tubes defined
+    in tubeSet.
 
-      Define the calibrated positions of the detectors inside the tubes defined
-      in tubeSet.
+    Tubes may be considered a list of detectors alined that may be considered
+    as pixels for the analogy when they values are displayed.
 
-      Tubes may be considered a list of detectors alined that may be considered
-      as pixels for the analogy when they values are displayed.
+    The position of these pixels are provided by the manufactor, but its real
+    position depends on the electronics inside the tube and varies slightly
+    from tube to tube. The calibrate method, aims to find the real positions
+    of the detectors (pixels) inside the tube.
 
-      The position of these pixels are provided by the manufactor, but its real
-      position depends on the electronics inside the tube and varies slightly
-      from tube to tube. The calibrate method, aims to find the real positions
-      of the detectors (pixels) inside the tube.
-
-      For this, it will receive an Integrated workspace, where a special
-      measurement was performed so to have a
-      pattern of peaks or through. Where gaussian peaks or edges can be found.
-
-
-      The calibration follows the following steps
-
-      1. Finding the peaks on each tube
-      2. Fitting the peaks agains the Known Positions
-      3. Defining the new position for the pixels(detectors)
-
-      Let's consider the simplest way of calling calibrate:
-
-      .. code-block:: python
-
-         from tube import calibrate
-         ws = Load('WISH17701')
-         ws = Integration(ws)
-         known_pos = [-0.41,-0.31,-0.21,-0.11,-0.02, 0.09, 0.18, 0.28, 0.39 ]
-         peaks_form = 9*[1] # all the peaks are gaussian peaks
-         calibTable = calibrate(ws,'WISH/panel03',known_pos, peaks_form)
-
-      In this example, the calibrate framework will consider all the
-      tubes (152) from WISH/panel03.
-      You may decide to look for a subset of the tubes, by passing the
-      **rangeList** option.
-
-      .. code-block:: python
-
-         # This code will calibrate only the tube indexed as number 3
-         # (usually tube0004)
-         calibTable = calibrate(ws,'WISH/panel03',known_pos,
-                                peaks_form, rangeList=[3])
-
-      **Finding the peaks on each tube**
-
-      * Dynamically fitting peaks
-
-       The framework expects that for each tube, it will find a peak pattern
-       around the pixels corresponding to the known_pos positions.
-
-       The way it will work out the estimated peak position (in pixel) is
-
-       1. Get the length of the tube: distance(first_detector,last_detector) in the tube.
-       2. Get the number of detectors in the tube (nDets)
-       3. It will be assumed that the center of the tube correspond to the origin (0)
-
-       .. code-block:: python
-
-          centre_pixel = known_pos * nDets/tube_length + nDets/2
-
-       It will them look for the real peak around the estimated value as:
-
-       .. code-block:: python
-
-          # consider tube_values the array of counts, and peak the estimated
-          # position for the peak
-          real_peak_pos = argmax(tube_values[peak-margin:peak+margin])
-
-       After finding the real_peak_pos, it will try to fit the region around
-       the peak to find the best expected position of the peak in a continuous
-       space. It will do this by fitting the region around the peak to a
-       Gaussian Function, and them extract the PeakCentre returned by the
-       Fitting.
-
-       .. code-block:: python
-
-          centre = real_peak_pos
-          fit_start, fit_stop = centre-margin, centre+margin
-          values = tube_values[fit_start,fit_stop]
-          background = min(values)
-          peak = max(values) - background
-          width = len(where(values > peak/2+background))
-          # It will fit to something like:
-          # Fit(function=LinerBackground,A0=background;Gaussian,
-          # Height=peak, PeakCentre=centre, Sigma=width,fit_start,fit_end)
-
-      * Force Fitting Parameters
+    For this, it will receive an Integrated workspace, where a special
+    measurement was performed so to have a
+    pattern of peaks or through. Where gaussian peaks or edges can be found.
 
 
-       These dinamically values can be avoided by defining the **fitPar** for
-       the calibrate function
+    The calibration follows the following steps
 
-       .. code-block:: python
+    1. Finding the peaks on each tube
+    2. Fitting the peaks agains the Known Positions
+    3. Defining the new position for the pixels(detectors)
 
-          eP = [57.5, 107.0, 156.5, 206.0, 255.5, 305.0, 354.5, 404.0, 453.5]
-          # Expected Height of Gaussian Peaks (initial value of fit parameter)
-          ExpectedHeight = 1000.0
-          # Expected width of Gaussian peaks in pixels
-          # (initial value of fit parameter)
-          ExpectedWidth = 10.0
-          fitPar = TubeCalibFitParams( eP, ExpectedHeight, ExpectedWidth )
-          calibTable = calibrate(ws, 'WISH/panel03', known_pos, peaks_form, fitPar=fitPar)
+    Let's consider the simplest way of calling calibrate:
 
-       Different Function Factors
+    .. code-block:: python
+
+       from tube import calibrate
+       ws = Load('WISH17701')
+       ws = Integration(ws)
+       known_pos = [-0.41,-0.31,-0.21,-0.11,-0.02, 0.09, 0.18, 0.28, 0.39 ]
+       peaks_form = 9*[1] # all the peaks are gaussian peaks
+       calibTable = calibrate(ws,'WISH/panel03',known_pos, peaks_form)
+
+    In this example, the calibrate framework will consider all the
+    tubes (152) from WISH/panel03.
+    You may decide to look for a subset of the tubes, by passing the
+    **rangeList** option.
+
+    .. code-block:: python
+
+       # This code will calibrate only the tube indexed as number 3
+       # (usually tube0004)
+       calibTable = calibrate(ws,'WISH/panel03',known_pos,
+                              peaks_form, rangeList=[3])
+
+    **Finding the peaks on each tube**
+
+    **Dynamically fitting peaks**
+
+    The framework expects that for each tube, it will find a peak pattern
+    around the pixels corresponding to the known_pos positions.
+
+    The way it will work out the estimated peak position (in pixel) is:
+
+    1. Get the length of the tube: distance(first_detector,last_detector) in the tube.
+    2. Get the number of detectors in the tube (nDets)
+    3. It will be assumed that the center of the tube correspond to the origin (0)
+
+    .. code-block:: python
+
+      centre_pixel = known_pos * nDets/tube_length + nDets/2
+
+    It will them look for the real peak around the estimated value as:
+
+    .. code-block:: python
+
+       # consider tube_values the array of counts, and peak the estimated
+       # position for the peak
+       real_peak_pos = argmax(tube_values[peak-margin:peak+margin])
+
+    After finding the real_peak_pos, it will try to fit the region around
+    the peak to find the best expected position of the peak in a continuous
+    space. It will do this by fitting the region around the peak to a
+    Gaussian Function, and them extract the PeakCentre returned by the
+    Fitting.
+
+    .. code-block:: python
+
+       centre = real_peak_pos
+       fit_start, fit_stop = centre-margin, centre+margin
+       values = tube_values[fit_start,fit_stop]
+       background = min(values)
+       peak = max(values) - background
+       width = len(where(values > peak/2+background))
+       # It will fit to something like:
+       # Fit(function=LinerBackground,A0=background;Gaussian,
+       # Height=peak, PeakCentre=centre, Sigma=width,fit_start,fit_end)
+
+    **Force Fitting Parameters**
+
+    These dynamically values can be avoided by defining the **fitPar** for
+    the calibrate function
+
+    .. code-block:: python
+
+       eP = [57.5, 107.0, 156.5, 206.0, 255.5, 305.0, 354.5, 404.0, 453.5]
+       # Expected Height of Gaussian Peaks (initial value of fit parameter)
+       ExpectedHeight = 1000.0
+       # Expected width of Gaussian peaks in pixels
+       # (initial value of fit parameter)
+       ExpectedWidth = 10.0
+       fitPar = TubeCalibFitParams( eP, ExpectedHeight, ExpectedWidth )
+       calibTable = calibrate(ws, 'WISH/panel03', known_pos, peaks_form, fitPar=fitPar)
+
+    **Different Function Factors**
+
+    Although the examples consider only Gaussian peaks, it is possible to
+    change the function factors to edges by passing the index of the
+    known_position through the **funcForm**. Hence, considering three special
+    points, where there are one gaussian peak and thow edges, the calibrate
+    could be configured as
+
+    .. code-block:: python
+
+       known_pos = [-0.1 2 2.3]
+       # gaussian peak followed by two edges (through)
+       form_factor = [1 2 2]
+       calibTable = calibrate(ws,'WISH/panel03',known_pos, form_factor)
 
 
-       Although the examples consider only Gaussian peaks, it is possible to
-       change the function factors to edges by passing the index of the
-       known_position through the **funcForm**. Hence, considering three special
-       points, where there are one gaussian peak and thow edges, the calibrate
-       could be configured as:
+    **Override Peaks**
 
-       .. code-block:: python
+    It is possible to scape the finding peaks position steps by providing the
+    peaks through the **overridePeaks** parameters. The example below tests
+    the calibration of a single tube (30) but skips the finding peaks step.
 
-          known_pos = [-0.1 2 2.3]
-          # gaussian peak followed by two edges (through)
-          form_factor = [1 2 2]
-          calibTable = calibrate(ws,'WISH/panel03',known_pos,
-                                 form_factor)
+    .. code-block:: python
 
-      * Override Peaks
+       known_pos = [-0.41,-0.31,-0.21,-0.11,-0.02, 0.09, 0.18, 0.28, 0.39 ]
+       define_peaks = [57.5, 107.0, 156.5, 206.0, 255.5, 305.0, 354.5,
+                      404.0, 453.5]
+       calibTable = calibrate(ws, 'WISH/panel03', known_pos, peaks_form,
+                        overridePeaks={30:define_peaks}, rangeList=[30])
 
+    **Output Peaks Positions**
 
-       It is possible to scape the finding peaks position steps by providing the
-       peaks through the **overridePeaks** parameters. The example below tests
-       the calibration of a single tube (30) but scapes the finding peaks step.
+    Enabling the option **outputPeak** a WorkspaceTable will be produced with
+    the first column as tube name and the following columns with the position
+    where corresponding peaks were found. Like the table below.
 
-       .. code-block:: python
+    +-------+-------+-----+-------+
+    |TubeId | Peak1 | ... | PeakM |
+    +=======+=======+=====+=======+
+    |tube0  | 15.5  | ... | 370.3 |
+    +-------+-------+-----+-------+
+    |  ...  |  ...  | ... |  ...  |
+    +-------+-------+-----+-------+
+    |tubeN  | 14.9  | ... | 371.2 |
+    +-------+-------+-----+-------+
 
-          known_pos = [-0.41,-0.31,-0.21,-0.11,-0.02, 0.09, 0.18, 0.28, 0.39 ]
-          define_peaks = [57.5, 107.0, 156.5, 206.0, 255.5, 305.0, 354.5,
-                         404.0, 453.5]
-          calibTable = calibrate(ws, 'WISH/panel03', known_pos, peaks_form,
-                           overridePeaks={30:define_peaks}, rangeList=[30])
+    The signature changes to::
 
-      * Output Peaks Positions
+    .. code-block:: python
 
-       Enabling the option **outputPeak** a WorkspaceTable will be produced with
-       the first column as tube name and the following columns with the position
-       where corresponding peaks were found. Like the table below.
+       calibTable, peakTable = calibrate(...)
 
-       +-------+-------+-----+-------+
-       |TubeId | Peak1 | ... | PeakM |
-       +=======+=======+=====+=======+
-       |tube0  | 15.5  | ... | 370.3 |
-       +-------+-------+-----+-------+
-       |  ...  |  ...  | ... |  ...  |
-       +-------+-------+-----+-------+
-       |tubeN  | 14.9  | ... | 371.2 |
-       +-------+-------+-----+-------+
+    It is possible to give a peakTable directly to the **outputPeak** option,
+    which will make the calibration to append the peaks to the given table.
 
-       The signature changes to:
+    .. hint::
 
-       .. code-block:: python
+      It is possible to save the peakTable to a file using the
+      :meth:`savePeak` method.
 
-          calibTable, peakTable = calibrate(...)
-
-       It is possible to give a peakTable directly to the **outputPeak** option,
-       which will make the calibration to append the peaks to the given table.
-
-       .. hint::
-
-         It is possible to save the peakTable to a file using the
-         :meth:`savePeak` method.
-
-      **Find the correct position along the tube**
+    **Find the correct position along the tube**
 
 
-       The second step of the calibration is to define the correct position of
-       pixels along the tube. This is done by fitting the peaks positions found
-       at the previous step against the known_positions provided.
+    The second step of the calibration is to define the correct position of
+    pixels along the tube. This is done by fitting the peaks positions found
+    at the previous step against the known_positions provided.
 
-       ::
+    ::
 
         known       |              *
         positions   |           *
@@ -245,123 +245,123 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
                     |________________
                       pixels positions
 
-       The default operation is to fit the pixels positions against the known
-       positions with a quadratic function in order to define an operation to
-       move all the pixels to their real positions. If necessary, the user may
-       select to fit using a polinomial of 3rd order, through the parameter
-       **fitPolyn**.
+    The default operation is to fit the pixels positions against the known
+    positions with a quadratic function in order to define an operation to
+    move all the pixels to their real positions. If necessary, the user may
+    select to fit using a polinomial of 3rd order, through the parameter
+    **fitPolyn**.
 
-       .. note::
+    .. note::
 
-         The known positions are given in the same unit as the spacial position
-         (3D) and having the center of the tube as the origin.
+      The known positions are given in the same unit as the spacial position
+      (3D) and having the center of the tube as the origin.
 
-       Hence, this section will define a function that:
+    Hence, this section will define a function that:
 
-       .. math:: F(pix) = RealRelativePosition
+    .. math:: F(pix) = RealRelativePosition
 
-      **Define the new position for the detectors**
+    **Define the new position for the detectors**
 
-       Finally, the position of the detectors are defined as a vector operation
-       like
+    Finally, the position of the detectors are defined as a vector operation
+    like
 
-       .. math::
+    .. math::
 
-         \\vec{p} = \\vec{c} + v \\vec{u}
+      \\vec{p} = \\vec{c} + v \\vec{u}
 
-       Where :math:`\\vec{p}` is the position in the 3D space, **v** is the
-       RealRelativePosition deduced from the last session, and finally,
-       :math:`\\vec{u}` is the unitary vector in the direction of the tube.
-
-
-
-      :param ws: Integrated workspace with tubes to be calibrated.
-      :param tubeSet: Specification of Set of tubes to be calibrated. If a string is passed, a TubeSpec will be created
-      passing the string as the setTubeSpecByString.
-
-       This will be the case for TubeSpec as string
-
-       .. code-block:: python
-
-         self.tube_spec = TubeSpec(ws)
-         self.tube_spec.setTubeSpecByString(tubeSet)
-
-       If a list of strings is passed, the TubeSpec will be created with this list:
-
-       .. code-block:: python
-
-          self.tube_spec = TubeSpec(ws)
-          self.tube_spec.setTubeSpecByStringArray(tubeSet)
-
-       If a :class:`~tube_spec.TubeSpec` object is passed, it will be used as it is.
+    Where :math:`\\vec{p}` is the position in the 3D space, **v** is the
+    RealRelativePosition deduced from the last session, and finally,
+    :math:`\\vec{u}` is the unitary vector in the direction of the tube.
 
 
-      :param knownPositions: The defined position for the peaks/edges, taking the center as the origin and having the
-      same units as the tube length in the 3D space.
 
-      :param funcForm: list with special values to define the format of the peaks/edge (peaks=1, edge=2). If it is not
-      provided, it will be assumed that all the knownPositions are peaks.
+    :param ws: Integrated workspace with tubes to be calibrated.
+    :param tubeSet: Specification of Set of tubes to be calibrated. If a string is passed, a TubeSpec will be created \
+    passing the string as the setTubeSpecByString.
 
+    This will be the case for TubeSpec as string
 
-      Optionals parameters to tune the calibration:
+    .. code-block:: python
 
-      :param fitPar: Define the parameters to be used in the fit as a :class:`~tube_calib_fit_params.TubeCalibFitParams`.
-       If not provided, the dynamic mode is used. See :py:func:`~Examples.TubeCalibDemoMaps_All.provideTheExpectedValue`
+      self.tube_spec = TubeSpec(ws)
+      self.tube_spec.setTubeSpecByString(tubeSet)
 
-      :param margin: value in pixesl that will be used around the peaks/edges to fit them. Default = 15. See the code of
-      :py:mod:`~Examples.TubeCalibDemoMerlin` where **margin** is used to calibrate small tubes.
+    If a list of strings is passed, the TubeSpec will be created with this list:
 
-       .. code-block:: python
+    .. code-block:: python
 
-          fit_start, fit_end = centre - margin, centre + margin
+       self.tube_spec = TubeSpec(ws)
+       self.tube_spec.setTubeSpecByStringArray(tubeSet)
 
-      :param rangeList: list of tubes indexes that will be calibrated. As in the following code
-      (see: :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationSingleTube`):
-
-       .. code-block:: python
-
-          for index in rangelist:
-              do_calibrate(tubeSet.getTube(index))
-
-      :param calibTable: Pass the calibration table, it will them append the values to the provided one and return it.
-      (see: :py:mod:`~Examples.TubeCalibDemoMerlin`)
-
-      :param plotTube: If given, the tube whose index is in plotTube will be ploted as well as its fitted peaks, it can
-      receive a list of indexes to plot.(see: :py:func:`~Examples.TubeCalibDemoMaps_All.changeMarginAndExpectedValue`)
-
-      :param excludeShortTubes: Do not calibrate tubes whose length is smaller than given value. (see at:
-      Examples/TubeCalibDemoMerlin_Adjustable.py)
-
-      :param overridePeaks: dictionary that defines an array of peaks positions (in pixels) to be used for the specific
-      tube(key). (see: :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationSingleTube`)
-
-       .. code-block:: python
-
-          for index in rangelist:
-            if overridePeaks.has_key(index):
-              use_this_peaks = overridePeaks[index]
-              # skip finding peaks
-              fit_peaks_to_position()
-
-      :param fitPolyn: Define the order of the polinomial to fit the pixels positions agains the known positions. The
-      acceptable values are 1, 2 or 3. Default = 2.
+    If a :class:`~tube_spec.TubeSpec` object is passed, it will be used as it is.
 
 
-      :param outputPeak: Enable the calibrate to output the peak table, relating the tubes with the pixels positions. It
-      may be passed as a boolean value (outputPeak=True) or as a peakTable value. The later case is to inform calibrate
-      to append the new values to the given peakTable. This is usefull when you have to operate in subsets of tubes.
-      (see :py:mod:`~Examples.TubeCalibDemoMerlin` that shows a nice inspection on this table).
+    :param knownPositions: The defined position for the peaks/edges, taking the center as the origin and having the \
+    same units as the tube length in the 3D space.
 
-       .. code-block:: python
+    :param funcForm: list with special values to define the format of the peaks/edge (peaks=1, edge=2). If it is not \
+    provided, it will be assumed that all the knownPositions are peaks.
 
-         calibTable, peakTable = calibrate(ws, (omitted), rangeList=[1],
-                  outputPeak=True)
-         # appending the result to peakTable
-         calibTable, peakTable = calibrate(ws, (omitted), rangeList=[2],
-                  outputPeak=peakTable)
-         # now, peakTable has information for tube[1] and tube[2]
 
-      :rtype: calibrationTable, a TableWorkspace with two columns DetectorID(int) and DetectorPositions(V3D).
+    Optionals parameters to tune the calibration:
+
+    :param fitPar: Define the parameters to be used in the fit as a :class:`~tube_calib_fit_params.TubeCalibFitParams`. \
+    If not provided, the dynamic mode is used. See :py:func:`~Examples.TubeCalibDemoMaps_All.provideTheExpectedValue`
+
+    :param margin: value in pixesl that will be used around the peaks/edges to fit them. Default = 15. See the code of \
+    :py:mod:`~Examples.TubeCalibDemoMerlin` where **margin** is used to calibrate small tubes.
+
+    .. code-block:: python
+
+       fit_start, fit_end = centre - margin, centre + margin
+
+    :param rangeList: list of tubes indexes that will be calibrated. As in the following code \
+    (see: :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationSingleTube`):
+
+    .. code-block:: python
+
+       for index in rangelist:
+           do_calibrate(tubeSet.getTube(index))
+
+    :param calibTable: Pass the calibration table, it will them append the values to the provided one and return it. \
+    (see: :py:mod:`~Examples.TubeCalibDemoMerlin`)
+
+    :param plotTube: If given, the tube whose index is in plotTube will be ploted as well as its fitted peaks, it can \
+    receive a list of indexes to plot.(see: :py:func:`~Examples.TubeCalibDemoMaps_All.changeMarginAndExpectedValue`)
+
+    :param excludeShortTubes: Do not calibrate tubes whose length is smaller than given value. (see at \
+    Examples/TubeCalibDemoMerlin_Adjustable.py)
+
+    :param overridePeaks: dictionary that defines an array of peaks positions (in pixels) to be used for the specific \
+    tube(key). (see: :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationSingleTube`)
+
+    .. code-block:: python
+
+       for index in rangelist:
+         if overridePeaks.has_key(index):
+           use_this_peaks = overridePeaks[index]
+           # skip finding peaks
+           fit_peaks_to_position()
+
+    :param fitPolyn: Define the order of the polinomial to fit the pixels positions agains the known positions. The \
+    acceptable values are 1, 2 or 3. Default = 2.
+
+
+    :param outputPeak: Enable the calibrate to output the peak table, relating the tubes with the pixels positions. It \
+    may be passed as a boolean value (outputPeak=True) or as a peakTable value. The later case is to inform calibrate \
+    to append the new values to the given peakTable. This is usefull when you have to operate in subsets of tubes. \
+    (see :py:mod:`~Examples.TubeCalibDemoMerlin` that shows a nice inspection on this table).
+
+    .. code-block:: python
+
+      calibTable, peakTable = calibrate(ws, (omitted), rangeList=[1],
+               outputPeak=True)
+      # appending the result to peakTable
+      calibTable, peakTable = calibrate(ws, (omitted), rangeList=[2],
+               outputPeak=peakTable)
+      # now, peakTable has information for tube[1] and tube[2]
+
+    :rtype: calibrationTable, a TableWorkspace with two columns DetectorID(int) and DetectorPositions(V3D).
 
     """
     FITPAR = 'fitPar'
@@ -670,11 +670,6 @@ def readPeakFile(file_name):
 
     """
     loaded_file = []
-    # split the entries to the main values:
-    # For example:
-    # MERLIN/door1/tube_1_1 [34.199347724575574, 525.5864438725401, 1001.7456248836971]
-    # Will be splited as:
-    # ['MERLIN/door1/tube_1_1', '', '34.199347724575574', '', '525.5864438725401', '', '1001.7456248836971', '', '', '']
     pattern = re.compile(r'[\[\],\s\r]')
     saveDirectory = config['defaultsave.directory']
     pfile = os.path.join(saveDirectory, file_name)
@@ -690,8 +685,71 @@ def readPeakFile(file_name):
         try:
             f_values = [float(v) for v in line_vals[1:] if v != '']
         except ValueError:
-            # print 'Wrong format: we expected only numbers, but receive this line ',str(line_vals[1:])
+            # print 'Wrong format: we expected only numbers,
+            # but receive this line ',str(line_vals[1:])
             continue
 
         loaded_file.append((id_, f_values))
     return loaded_file
+
+
+def saveCalibration(table_name, out_path):
+    """Save the calibration table to file
+
+    This creates a CSV file for the calibration TableWorkspace. The first
+    column is the detector number and the second column is the detector position
+
+    Example of usage:
+
+    .. code-block:: python
+
+       saveCalibration('CalibTable','/tmp/myCalibTable.txt')
+
+    :param table_name: name of the TableWorkspace to save
+    :param out_path: location to save the file
+
+    """
+    DET = 'Detector ID'
+    POS = 'Detector Position'
+    with open(out_path, 'w') as file_p:
+        table = mtd[table_name]
+        for row in table:
+            row_data = [row[DET], row[POS]]
+            line = ','.join(map(str, row_data)) + '\n'
+            file_p.write(line)
+
+
+def readCalibrationFile(table_name, in_path):
+    """Read a calibration table from file
+
+    This loads a calibration TableWorkspace from a CSV file.
+
+    Example of usage:
+
+    .. code-block:: python
+
+       saveCalibration('CalibTable','/tmp/myCalibTable.txt')
+
+    :param table_name: name to call the TableWorkspace
+    :param in_path: the path to the calibration file
+
+    """
+    DET = 'Detector ID'
+    POS = 'Detector Position'
+    re_float = re.compile(r"[+-]? *(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?")
+    calibTable = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
+    calibTable.addColumn(type='int', name=DET)
+    calibTable.addColumn(type='V3D', name=POS)
+
+    with open(in_path, 'r') as file_p:
+        for line in file_p:
+            values = re.findall(re_float, line)
+            if len(values) != 4:
+                continue
+
+            nextRow = {
+                DET: int(values[0]),
+                POS: V3D(float(values[1]), float(values[2]), float(values[3]))
+            }
+
+            calibTable.addRow(nextRow)

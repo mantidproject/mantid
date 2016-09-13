@@ -1,5 +1,6 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include <boost/python/class.hpp>
@@ -12,6 +13,8 @@ using namespace Mantid::API;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 using namespace boost::python;
 
+GET_POINTER_SPECIALIZATION(IPeaksWorkspace)
+
 namespace {
 
 /// Create a peak via it's HKL value from a list or numpy array
@@ -23,8 +26,7 @@ IPeak *createPeakHKL(IPeaksWorkspace &self, const object &data) {
 /// Create a peak via it's QLab value from a list or numpy array
 IPeak *createPeakQLab(IPeaksWorkspace &self, const object &data) {
   return self.createPeak(
-      Mantid::PythonInterface::Converters::PyObjectToV3D(data)(),
-      boost::optional<double>());
+      Mantid::PythonInterface::Converters::PyObjectToV3D(data)(), boost::none);
 }
 
 /// Create a peak via it's QLab value from a list or numpy array

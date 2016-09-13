@@ -34,8 +34,6 @@ class QDropEvent;
 class QStackedLayout;
 class QSettings;
 
-using namespace Mantid::API;
-
 namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentActor;
@@ -126,8 +124,16 @@ public:
   QString getInstrumentSettingsGroupName() const;
 
   bool hasWorkspace(const std::string &wsName) const;
-  void handleWorkspaceReplacement(const std::string &wsName,
-                                  const boost::shared_ptr<Workspace> workspace);
+  void handleWorkspaceReplacement(
+      const std::string &wsName,
+      const boost::shared_ptr<Mantid::API::Workspace> workspace);
+
+  /// Get the currently selected tab index
+  int getCurrentTab() const;
+  /// Load the widget from a Mantid project file.
+  void loadFromProject(const std::string &lines);
+  /// Save the widget to a Mantid projecy file.
+  std::string saveToProject() const;
 
 signals:
   void enableLighting(bool);
@@ -281,6 +287,11 @@ private:
   void renameHandle(const std::string &oldName,
                     const std::string &newName) override;
   void clearADSHandle() override;
+
+  /// Load tabs on the widget form a project file
+  void loadTabs(const std::string &lines) const;
+  /// Save tabs on the widget to a string
+  std::string saveTabs() const;
 };
 
 } // MantidWidgets

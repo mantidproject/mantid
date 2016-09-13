@@ -15,12 +15,12 @@ class OptionalBoolTest(unittest.TestCase):
         self.assertEquals(OptionalBoolValue.Unset, obj.getValue())
 
     def test_construction_false(self):
-        obj = OptionalBool(OptionalBoolValue.False)
-        self.assertEquals(OptionalBoolValue.False, obj.getValue())
+        obj = OptionalBool(OptionalBoolValue.False_)
+        self.assertEquals(OptionalBoolValue.False_, obj.getValue())
 
     def test_construction_true(self):
-        obj = OptionalBool(OptionalBoolValue.True)
-        self.assertEquals(OptionalBoolValue.True, obj.getValue())
+        obj = OptionalBool(OptionalBoolValue.True_)
+        self.assertEquals(OptionalBoolValue.True_, obj.getValue())
 
 
 if __name__ == '__main__':

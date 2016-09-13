@@ -62,15 +62,13 @@ void RemoveLogs::exec() {
       localWorkspace->run().getLogData();
   std::vector<std::string> keepLogs = getProperty("KeepLogs");
   std::vector<std::string> logNames;
-  auto pEnd = logData.end();
-  for (auto pItr = logData.begin(); pItr != pEnd; ++pItr) {
-    logNames.push_back((*pItr)->name().c_str());
+  for (const auto property : logData) {
+    logNames.push_back(property->name());
   }
-  for (std::vector<std::string>::const_iterator it = logNames.begin();
-       it != logNames.end(); ++it) {
-    auto location = std::find(keepLogs.begin(), keepLogs.end(), (*it));
-    if (location == keepLogs.end()) {
-      localWorkspace->mutableRun().removeLogData(*it);
+  for (const auto &name : logNames) {
+    auto location = std::find(keepLogs.cbegin(), keepLogs.cend(), name);
+    if (location == keepLogs.cend()) {
+      localWorkspace->mutableRun().removeLogData(name);
     }
   }
 

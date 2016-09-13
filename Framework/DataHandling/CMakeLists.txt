@@ -43,6 +43,8 @@ set ( SRC_FILES
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
 	src/LoadEventNexus.cpp
+	src/ProcessBankData.cpp
+	src/BankPulseTimes.cpp
 	src/LoadEventPreNexus.cpp
 	src/LoadEventPreNexus2.cpp
 	src/LoadFITS.cpp
@@ -133,6 +135,7 @@ set ( SRC_FILES
 	src/SaveDaveGrp.cpp
 	src/SaveDetectorsGrouping.cpp
 	src/SaveDiffCal.cpp
+	src/SaveDiffFittingAscii.cpp
 	src/SaveDspacemap.cpp
 	src/SaveFITS.cpp
 	src/SaveFocusedXYE.cpp
@@ -217,6 +220,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEventNexus.h
+	inc/MantidDataHandling/ProcessBankData.h
+	inc/MantidDataHandling/BankPulseTimes.h
 	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadFITS.h
@@ -303,6 +308,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveDaveGrp.h
 	inc/MantidDataHandling/SaveDetectorsGrouping.h
 	inc/MantidDataHandling/SaveDiffCal.h
+	inc/MantidDataHandling/SaveDiffFittingAscii.h
 	inc/MantidDataHandling/SaveDspacemap.h
 	inc/MantidDataHandling/SaveFITS.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
@@ -532,7 +538,7 @@ set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 target_include_directories ( DataHandling PUBLIC inc ../Nexus/inc)
 target_include_directories ( DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
 
-target_link_libraries ( DataHandling LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES} ${JSONCPP_LIBRARIES} )
+target_link_libraries ( DataHandling LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${JSONCPP_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

@@ -70,6 +70,7 @@ target_link_libraries ( PythonDataObjectsModule LINK_PRIVATE ${TCMALLOC_LIBRARIE
             API
             DataObjects
             Kernel
+            HistogramData
             Geometry
             ${PYTHON_LIBRARIES}
             ${POCO_LIBRARIES}

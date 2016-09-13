@@ -76,8 +76,8 @@ private:
   /// Names of the non-timeseries logs we should display
   static const QStringList NON_TIMESERIES_LOGS;
 
-  /// "run_number" log string
-  static const QString RUN_NUMBER_LOG;
+  /// "run_number", "run_start", "run_end" log strings
+  static const QString RUN_NUMBER_LOG, RUN_START_LOG, RUN_END_LOG;
 
   /// LessThan function used to sort log names
   static bool logNameLessThan(const QString &logName1, const QString &logName2);
@@ -133,7 +133,6 @@ private:
   QMap<int, int> getWorkspaceColors(const QStringList &wsList);
 
   Ui::MuonAnalysis &m_uiForm;
-  int m_numLogsdisplayed;
 
   // Log values for all the fitted workspaces
   QMap<QString, QMap<QString, QVariant>> m_logValues;

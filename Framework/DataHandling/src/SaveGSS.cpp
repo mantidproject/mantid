@@ -126,8 +126,6 @@ void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
 
   difc = ((2.0 * PhysicalConstants::NeutronMass * sin(tth * 0.5) * (l1 + l2)) /
           (PhysicalConstants::h * 1.e4));
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -186,8 +184,6 @@ void SaveGSS::exec() {
 
   writeGSASFile(filename, append, bank, MultiplyByBinWidth, split,
                 outputFormat);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -252,7 +248,7 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
                   << "\n";
 
     bool writeheader = false;
-    std::string splitfilename("");
+    std::string splitfilename;
     if (!split && iws == 0 && !append) {
       // Non-split mode and first spectrum and in non-append mode
       writeheader = true;
@@ -332,8 +328,6 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
     out.write(outbuffer.str().c_str(), outbuffer.str().length());
     out.close();
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -399,8 +393,6 @@ void writeLogValue(std::ostream &os, const Run &runinfo,
   std::string units = prop->units();
   if (!units.empty())
     os << " " << units;
-
-  return;
 }
 
 //--------------------------------------------------------------------------------------------
@@ -487,8 +479,6 @@ void SaveGSS::writeHeaders(const std::string &format, std::stringstream &os,
   }
 
   os.flags(fflags);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -561,8 +551,6 @@ void SaveGSS::writeRALFdata(const int bank, const bool MultiplyByBinWidth,
     // The error
     out << std::fixed << std::setprecision(8) << std::setw(18) << Epos << "\n";
   }
-
-  return;
 }
 
 //--------------------------------------------------------------------------------------------
@@ -613,8 +601,6 @@ void SaveGSS::writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
         << "\n"; // let it flush its own buffer
   }
   out << std::flush;
-
-  return;
 }
 
 } // namespace DataHandling

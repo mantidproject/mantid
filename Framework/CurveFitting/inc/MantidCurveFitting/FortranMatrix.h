@@ -56,6 +56,10 @@ public:
   void allocate(const int iFrom, const int iTo, const int jFrom, const int jTo);
   /// Resize the matrix.
   void allocate(const int nx, const int ny);
+  /// Get the size along the first dimension as an int.
+  int len1() const;
+  /// Get the size along the second dimension as an int.
+  int len2() const;
   /// Index operator
   ElementConstType operator()(int i, int j) const;
   ElementRefType operator()(int i, int j);
@@ -151,6 +155,16 @@ operator()(int i, int j) {
 template <class MatrixClass>
 MatrixClass FortranMatrix<MatrixClass>::moveToBaseMatrix() {
   return this->move();
+}
+
+/// Get the size along the first dimension as an int.
+template <class MatrixClass> int FortranMatrix<MatrixClass>::len1() const {
+  return static_cast<int>(this->size1());
+}
+
+/// Get the size along the second dimension as an int.
+template <class MatrixClass> int FortranMatrix<MatrixClass>::len2() const {
+  return static_cast<int>(this->size2());
 }
 
 } // namespace CurveFitting

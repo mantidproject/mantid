@@ -84,7 +84,7 @@ void LoadRawBin0::exec() {
   m_total_specs = calculateWorkspaceSize();
 
   // no real X values for bin 0,so initialize this to zero
-  auto channelsVec = boost::make_shared<MantidVec>(1, 0);
+  auto channelsVec = boost::make_shared<HistogramData::HistogramX>(1, 0);
   m_timeChannelsVec.push_back(channelsVec);
 
   double histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);

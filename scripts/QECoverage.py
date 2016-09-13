@@ -198,6 +198,9 @@ class QECoverageGUI(QtGui.QWidget):
         # Matplotlib does seem to rescale x-axis properly after axes.clear()
         self.xlim = 0
 
+        #register startup
+        mantid.UsageService.registerFeatureUsage("Interface","QECoverage",False)
+
     def onHelp(self):
         from pymantidplot.proxies import showCustomInterfaceHelp
         showCustomInterfaceHelp("QECoverage")

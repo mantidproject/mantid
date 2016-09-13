@@ -10,10 +10,9 @@ namespace MantidWidgets {
 /** @class DataProcessorCommand
 
 DataProcessorCommand is an interface which defines the functions any data
-processor
-action needs to support.
+processor action needs to support.
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -42,6 +41,9 @@ public:
   virtual void execute() = 0;
   virtual std::string name() = 0;
   virtual std::string icon() = 0;
+  virtual std::string tooltip() = 0;
+  virtual std::string whatsthis() = 0;
+  virtual std::string shortcut() = 0;
   virtual bool hasChild() final { return !m_child.empty(); };
   virtual void
   setChild(std::vector<std::unique_ptr<DataProcessorCommand>> child) final {

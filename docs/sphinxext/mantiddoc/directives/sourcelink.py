@@ -1,4 +1,4 @@
-from base import AlgorithmBaseDirective
+from base import AlgorithmBaseDirective #pylint: disable=unused-import
 import mantid
 import os
 
@@ -138,7 +138,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             direc = os.path.join(direc, "..", "..") # assume root is two levels up
             direc = os.path.abspath(direc)
 
-            self.__source_root = direc
+            self.__source_root = direc #pylint: disable=protected-access
         return self.__source_root
 
     def parse_source_tree(self):

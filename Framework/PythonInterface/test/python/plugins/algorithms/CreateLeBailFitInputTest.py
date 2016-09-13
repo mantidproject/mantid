@@ -6,7 +6,7 @@ from mantid.kernel import *
 from mantid.api import *
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
-
+from six.moves import range
 import os
 
 class CreateLeBailFitInputTest(unittest.TestCase):
@@ -42,7 +42,7 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         #self.assertEqual(numrowgood, paramws.rowCount())
 
         paramnames = []
-        for i in xrange(paramws.rowCount()):
+        for i in range(paramws.rowCount()):
             paramname = paramws.cell(i, 0)
             paramnames.append(paramname)
         self.assertEqual(paramnames.count("LatticeConstant"), 1)
@@ -91,7 +91,7 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         #self.assertEqual(numrowgood, paramws.rowCount())
 
         paramnames = []
-        for i in xrange(paramws.rowCount()):
+        for i in range(paramws.rowCount()):
             paramname = paramws.cell(i, 0)
             paramnames.append(paramname)
         self.assertEqual(paramnames.count("LatticeConstant"), 1)

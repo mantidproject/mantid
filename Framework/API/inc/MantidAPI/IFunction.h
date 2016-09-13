@@ -505,7 +505,11 @@ public:
   virtual void setUpForFit() = 0;
   /// Get number of values for a given domain.
   virtual size_t getValuesSize(const FunctionDomain &domain) const;
-
+  /// Get number of domains required by this function
+  virtual size_t getNumberDomains() const;
+  /// Split this function (if needed) into a list of independent functions.
+  virtual std::vector<boost::shared_ptr<IFunction>>
+  createEquivalentFunctions() const;
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian);
   /// Set the covariance matrix

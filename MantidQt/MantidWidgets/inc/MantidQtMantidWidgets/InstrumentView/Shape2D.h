@@ -2,6 +2,7 @@
 #define MANTIDPLOT_SHAPE2D_H_
 
 #include "RectF.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include <QColor>
 #include <QPointF>
@@ -97,6 +98,8 @@ public:
   virtual QColor getColor() const { return m_color; }
   /// Set fill color.
   virtual void setFillColor(const QColor &color) { m_fill_color = color; }
+  /// Get fill color.
+  virtual QColor getFillColor() const { return m_fill_color; }
 
   // --- Public methods --- //
 
@@ -117,6 +120,10 @@ public:
   void setSelected(bool on) { m_selected = on; }
   /// Is shape selected?
   bool isSelected() const { return m_selected; }
+  /// Load settings for the widget tab from a project file
+  static Shape2D *loadFromProject(const std::string &lines);
+  /// Save settings for the widget tab to a project file
+  virtual std::string saveToProject() const;
 
   // --- Properties. for gui interaction --- //
 
@@ -171,6 +178,11 @@ protected:
   bool m_editing;  ///< shape is being edited
   bool m_selected; ///< shape is selected
   bool m_visible;  ///< flag to show or hide the shape
+
+private:
+  /// Instantiate specifc shapes from a type string
+  static Shape2D *loadShape2DFromType(const std::string &type,
+                                      const std::string &lines);
 };
 
 /**
@@ -195,6 +207,10 @@ public:
   QStringList getPointNames() const override { return QStringList("center"); }
   QPointF getPoint(const QString &prop) const override;
   void setPoint(const QString &prop, const QPointF &value) override;
+  /// Load state for the shape from a project file
+  static Shape2D *loadFromProject(const std::string &lines);
+  /// Save state for the shape to a project file
+  virtual std::string saveToProject() const override;
 
 protected:
   void drawShape(QPainter &painter) const override;
@@ -217,6 +233,10 @@ public:
     return m_boundingRect.contains(p);
   }
   void addToPath(QPainterPath &path) const override;
+  /// Load state for the shape from a project file
+  static Shape2D *loadFromProject(const std::string &lines);
+  /// Save state for the shape to a project file
+  virtual std::string saveToProject() const override;
 
 protected:
   void drawShape(QPainter &painter) const override;
@@ -248,6 +268,11 @@ public:
   void setPoint(const QString &prop, const QPointF &value) override;
   void setColor(const QColor &color) override;
   QColor getColor() const override { return m_outer_shape->getColor(); }
+  const Shape2D *getOuterShape() const { return m_outer_shape; }
+  /// Load state for the shape from a project file
+  static Shape2D *loadFromProject(const std::string &lines);
+  /// Save state for the shape to a project file
+  virtual std::string saveToProject() const override;
 
 protected:
   void drawShape(QPainter &painter) const override;
@@ -272,12 +297,17 @@ protected:
 class Shape2DFree : public Shape2D {
 public:
   explicit Shape2DFree(const QPointF &p);
+  explicit Shape2DFree(const QPolygonF &polygon);
   Shape2D *clone() const override { return new Shape2DFree(*this); }
   bool selectAt(const QPointF &p) const override;
   bool contains(const QPointF &p) const override;
   void addToPath(QPainterPath &path) const override;
   void addPolygon(const QPolygonF &polygon);
   void subtractPolygon(const QPolygonF &polygon);
+  /// Load state for the shape from a project file
+  static Shape2D *loadFromProject(const std::string &lines);
+  /// Save state for the shape to a project file
+  virtual std::string saveToProject() const override;
 
 protected:
   void drawShape(QPainter &painter) const override;

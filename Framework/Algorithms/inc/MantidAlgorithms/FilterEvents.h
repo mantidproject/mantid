@@ -123,7 +123,7 @@ private:
   /// Flag to use matrix splitters or table splitters
   bool m_useTableSplitters;
 
-  std::unordered_set<int> m_workGroupIndexes;
+  std::set<int> m_workGroupIndexes;
   Kernel::TimeSplitterType m_splitters;
   std::map<int, DataObjects::EventWorkspace_sptr> m_outputWS;
   std::vector<std::string> m_wsNames;

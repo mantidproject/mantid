@@ -35,6 +35,7 @@
 #include <QTreeWidget>
 
 #include "MdiSubWindow.h"
+#include "Mantid/IProjectSerialisable.h"
 
 class FolderListItem;
 class Table;
@@ -126,6 +127,15 @@ public:
   void clearLogInfo() { d_log_info = QString(); };
 
   bool isEmpty() const;
+
+private:
+  /// Save header information about the folder
+  QString saveFolderHeader(bool isCurrentFolder);
+  /// Recursively save subwindows and subfolders
+  QString saveFolderSubWindows(ApplicationWindow *app, Folder *,
+                               int &windowCount);
+  /// Save footer infromation about the folder
+  QString saveFolderFooter();
 
 public slots:
   /// Mantid: made this a slot for use with script messages when there is no

@@ -123,7 +123,7 @@ The results are, Uncalibrated MERLIN instrument:
 
 Calibrated MERLIN instrument:
 
-.. image:: ../../images/CalibratedMantidMerlin.png 
+.. image:: ../../images/calibratedMantidMerlin.png
 			:width: 500px
 
 

@@ -479,6 +479,13 @@ void SANSRunWindow::saveWorkspacesDialog() {
   // Connect to change in the zero-error removal checkbox
   connect(m_uiForm.zeroErrorCheckBox, SIGNAL(stateChanged(int)),
           m_saveWorkspaces, SLOT(onSaveAsZeroErrorFreeChanged(int)));
+  // Connect the transfer of geometry inforamtion
+  connect(m_saveWorkspaces, SIGNAL(updateGeometryInformation()), this,
+          SLOT(onUpdateGeometryRequest()));
+  connect(this, SIGNAL(sendGeometryInformation(QString &, QString &, QString &,
+                                               QString &)),
+          m_saveWorkspaces, SLOT(onUpdateGeomtryInformation(
+                                QString &, QString &, QString &, QString &)));
 
   m_uiForm.saveSel_btn->setEnabled(false);
   m_saveWorkspaces->show();
@@ -2383,7 +2390,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
   const States type = typeStr == "1D" ? OneD : TwoD;
 
   // Make sure that all settings are valid
-  if (!areSettingsValid()) {
+  if (!areSettingsValid(type)) {
     return;
   }
 
@@ -2943,7 +2950,17 @@ void SANSRunWindow::handleDefSaveClick() {
           }
         }
       }
-      // finish the saveCommand for SaveCanSAS1D
+
+      // Add the sample information to the output
+      auto sampleWidth = m_uiForm.sample_width->text();
+      auto sampleHeight = m_uiForm.sample_height->text();
+      auto sampleThickness = m_uiForm.sample_thick->text();
+      auto geometryID = m_uiForm.sample_geomid->currentText();
+      // Remove the first three characters, since they are unwanted
+      auto geometryName = geometryID.mid(3);
+      saveCommand += ", Geometry='" + geometryName + "', SampleHeight=" +
+                     sampleHeight + ", SampleWidth=" + sampleWidth +
+                     ", SampleThickness=" + sampleThickness;
       saveCommand += ")\n";
     } else
       saveCommand += (*alg) + "('" + m_outputWS + "','" + fname + "')\n";
@@ -4412,10 +4429,19 @@ void SANSRunWindow::resetToM3IfNecessary() {
  * Check tha the Settings are valid. We need to do this for inputs which cannot
  * be checked with simple validators
  */
-bool SANSRunWindow::areSettingsValid() {
+bool SANSRunWindow::areSettingsValid(States type) {
   bool isValid = true;
   QString message;
   // ------------ GUI INPUT CHECKS ------------
+
+  // We currently do not allow a 2D reduction with a merged flag
+  auto isMergedReduction = m_uiForm.detbank_sel->currentIndex() == 3;
+  if (type == States::TwoD && isMergedReduction) {
+    isValid = false;
+    message +=
+        "A merged Detector Bank selection is currently not supported for 2D "
+        "reductions.\n";
+  }
 
   // R_MAX -- can be only >0 or -1
   auto r_max = m_uiForm.rad_max->text().simplified().toDouble();
@@ -5070,5 +5096,17 @@ void SANSRunWindow::updateIDFFilePath() {
     m_uiForm.current_idf_path->setText(resultIdf);
   }
 }
+
+void SANSRunWindow::onUpdateGeometryRequest() {
+  auto sampleWidth = m_uiForm.sample_width->text();
+  auto sampleHeight = m_uiForm.sample_height->text();
+  auto sampleThickness = m_uiForm.sample_thick->text();
+  auto geometryID = m_uiForm.sample_geomid->currentText();
+  auto geometryName = geometryID.mid(3);
+
+  emit sendGeometryInformation(geometryName, sampleHeight, sampleWidth,
+                               sampleThickness);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

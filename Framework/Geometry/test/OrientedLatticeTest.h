@@ -23,8 +23,10 @@ public:
     TS_ASSERT_DELTA(u2.b1(), 1. / 3., 1e-10);
     TS_ASSERT_DELTA(u2.alphastar(), 90, 1e-10);
     TS_ASSERT_DELTA(u4.volume(), 1. / u2.recVolume(), 1e-10);
-    u2.seta(3);
-    TS_ASSERT_DELTA(u2.a(), 3, 1e-10);
+    TS_ASSERT_DELTA(u2.getUB()[0][0], 1. / 3., 1e-10);
+    u2.seta(13);
+    TS_ASSERT_DELTA(u2.a(), 13, 1e-10);
+    TS_ASSERT_DELTA(u2.getUB()[0][0], 1. / 13., 1e-10);
   }
 
   void test_hklFromQ() {

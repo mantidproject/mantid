@@ -92,7 +92,7 @@ void FindDeadDetectors::exec() {
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
     // Spectrum in the integratedWorkspace
     auto &spec = integratedWorkspace->getSpectrum(i);
-    double &y = spec.dataY()[0];
+    double &y = spec.mutableY()[0];
     if (y > deadThreshold) {
       y = liveValue;
     } else {
@@ -129,7 +129,6 @@ void FindDeadDetectors::exec() {
 
   // Close the output file
   file.close();
-  return;
 }
 
 /// Run Integration as a Child Algorithm

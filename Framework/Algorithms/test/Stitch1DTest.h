@@ -580,8 +580,10 @@ public:
     LinearSequence<MantidVec::value_type> sequenceX(xstart, xstep);
     std::generate(x.begin(), x.end(), sequenceX);
 
-    auto y = MantidVec(nspectrum * (x.size() - 1), 1);
-    auto e = MantidVec(nspectrum * (x.size() - 1), 1); // Non zero errors
+    // Note: The size for y and e previously contained a factor nspectrum, but
+    // it is unclear why, so I removed it.
+    auto y = MantidVec(x.size() - 1, 1);
+    auto e = MantidVec(x.size() - 1, 1); // Non zero errors
 
     MatrixWorkspace_sptr ws =
         createWorkspace(x, y, e, static_cast<int>(nspectrum));

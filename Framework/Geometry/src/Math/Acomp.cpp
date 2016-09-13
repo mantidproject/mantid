@@ -44,7 +44,6 @@ positive value
     S = -1;
     V = -A;
   }
-  return;
 }
 
 //
@@ -294,7 +293,6 @@ Deletes everything in Composite
 */
 {
   Comp.clear();
-  return;
 }
 
 void Acomp::addComp(const Acomp &AX)
@@ -335,7 +333,6 @@ Assumes that the component is sorted and inserts appropiately.
   cpt = std::lower_bound(Comp.begin(), Comp.end(), AX);
   if (cpt == Comp.end() || *cpt != AX) // Only insert if new
     Comp.insert(cpt, AX);
-  return;
 }
 
 void Acomp::addUnitItem(const int Item)
@@ -349,7 +346,6 @@ Adds a unit to the Unit list (if it doesn't exist).
   ipt = std::lower_bound(Units.begin(), Units.end(), Item);
   if (ipt == Units.end() || *ipt != Item) // Only insert if new
     Units.insert(ipt, Item);
-  return;
 }
 
 void Acomp::processIntersection(const std::string &Ln)
@@ -415,7 +411,6 @@ must not contain a toplevel +
       }
     }
   }
-  return;
 }
 
 void Acomp::processUnion(const std::string &Ln)
@@ -474,7 +469,6 @@ Units are sorted after this function is returned.
     }
     addComp(AX); // add component
   }
-  return;
 }
 
 int Acomp::copySimilar(const Acomp &A)
@@ -523,7 +517,6 @@ adds it to the main Units object.
     }
   }
   std::sort(Units.begin(), Units.end());
-  return;
 }
 
 void Acomp::assignDNF(const std::vector<int> &Index, const std::vector<BnId> &A)
@@ -553,7 +546,6 @@ A. This will make the form DNF.
     Px.addUnit(Index, *vc);
     addComp(Px);
   }
-  return;
 }
 
 void Acomp::assignCNF(const std::vector<int> &Index, const std::vector<BnId> &A)
@@ -586,7 +578,6 @@ A. This will make the form DNF.
     Px.addUnit(Index, X);
     addComp(Px);
   }
-  return;
 }
 
 // -------------------------------------
@@ -604,7 +595,6 @@ Decends down the Comp Tree.
   std::for_each(Comp.begin(), Comp.end(), std::mem_fun_ref(&Acomp::Sort));
   // use the sorted components to sort our component list
   std::sort(Comp.begin(), Comp.end());
-  return;
 }
 
 int Acomp::makeReadOnce()
@@ -731,7 +721,6 @@ literals
   std::vector<Acomp>::const_iterator cc;
   for (cc = Comp.begin(); cc != Comp.end(); ++cc)
     cc->getAbsLiterals(literalMap);
-  return;
 }
 
 void Acomp::getLiterals(std::map<int, int> &literalMap) const
@@ -759,7 +748,6 @@ literals
   // Doesn't work because literal map is a reference
   //  for_each(Comp.begin(),Comp.end(),
   // std::bind2nd(std::mem_fun(&Acomp::getLiterals),literalMap));
-  return;
 }
 
 int Acomp::isSimple() const
@@ -1476,7 +1464,6 @@ given a inner bracket expand that etc.
   else
     processUnion(Ln);
   sort(Units.begin(), Units.end()); /// Resort the list.
-  return;
 }
 
 std::pair<int, int> Acomp::size() const
@@ -1528,7 +1515,6 @@ ab -> a'+b'
 
   for_each(Comp.begin(), Comp.end(), std::mem_fun_ref(&Acomp::complement));
   sort(Comp.begin(), Comp.end());
-  return;
 }
 
 void Acomp::writeFull(std::ostream &OXF, const int Indent) const
@@ -1549,7 +1535,6 @@ Real pretty print out statement  :-)
   for (vc = Comp.begin(); vc != Comp.end(); ++vc) {
     vc->writeFull(OXF, Indent + 2);
   }
-  return;
 }
 
 std::string Acomp::display() const
@@ -1642,7 +1627,6 @@ PI and Grid :
       std::cerr << ((Grid[pc][ic]) ? " 1" : " 0");
     std::cerr << '\n';
   }
-  return;
 }
 
 } // NAMESPACE Geometry

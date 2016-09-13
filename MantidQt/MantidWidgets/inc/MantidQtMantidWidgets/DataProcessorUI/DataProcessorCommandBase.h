@@ -11,7 +11,7 @@ class DataProcessorPresenter;
 ReflCommandBase is an interface which defines the functions any data processor
 action needs to support. Defines a IReflTablePresenter that will be notified.
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.

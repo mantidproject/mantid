@@ -340,8 +340,6 @@ void FilterEventsByLogValuePreNexus::init() {
 
   declareProperty("DBPixelID", EMPTY_INT(),
                   "ID of the pixel (detector) for debug output. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -423,8 +421,6 @@ void FilterEventsByLogValuePreNexus::exec() {
 
   // -1. Cleanup
   delete m_prog;
-
-  return;
 } // exec()
 
 //----------------------------------------------------------------------------------------------
@@ -529,8 +525,6 @@ void FilterEventsByLogValuePreNexus::processProperties() {
   }
 
   m_corretctTOF = getProperty("CorrectTOFtoSample");
-
-  return;
 } // END of processProperties
 
 //----------------------------------------------------------------------------------------------
@@ -653,8 +647,6 @@ void FilterEventsByLogValuePreNexus::processEventLogs() {
     setProperty("EventLogTableWorkspace",
                 boost::dynamic_pointer_cast<ITableWorkspace>(evtablews));
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -687,8 +679,6 @@ void FilterEventsByLogValuePreNexus::addToWorkspaceLog(std::string logtitle,
   g_log.information() << "Size of Property " << property->name() << " = "
                       << property->size() << " vs Original Log Size = " << nbins
                       << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -754,8 +744,6 @@ void FilterEventsByLogValuePreNexus::doStatToEventLog(size_t mindex) {
 
   g_log.information() << "Number of zero-interval eveng log = " << numzeros
                       << "\n";
-
-  return;
 }
 
 //-----------------------------------------------------------------------------
@@ -1068,11 +1056,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
     workspace->clearMRU();
 
     // Now, create a default X-vector for histogramming, with just 2 bins.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec &xRef = axis.access();
-    xRef.resize(2);
-    xRef[0] = m_shortestTof - 1; // Just to make sure the bins hold it all
-    xRef[1] = m_longestTof + 1;
+    auto axis = HistogramData::BinEdges{m_shortestTof - 1, m_longestTof + 1};
     workspace->setAllX(axis);
     this->m_pixelToWkspindex.clear();
 
@@ -1099,8 +1083,6 @@ void FilterEventsByLogValuePreNexus::procEvents(
       g_log.notice() << "Pixel " << tmpid << ":  Total number of events = "
                      << this->wrongdetid_pulsetimes[vindex].size() << '\n';
     }
-
-    return;
 } // End of procEvents
 
 //----------------------------------------------------------------------------------------------
@@ -1264,24 +1246,17 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
         if (tof > local_m_longestTof)
           local_m_longestTof = tof;
 
-// The addEventQuickly method does not clear the cache, making things slightly
-// faster.
-// workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event);
+        // The addEventQuickly method does not clear the cache, making things
+        // slightly
+        // faster.
+        // workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event);
 
-// - Add event to data structure
-// (This is equivalent to
-// workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
-// (But should be faster as a bunch of these calls were cached.)
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
-        // This avoids a copy constructor call but is only available with GCC
-        // (requires variadic templates)
+        // - Add event to data structure
+        // (This is equivalent to
+        // workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
+        // (But should be faster as a bunch of these calls were cached.)
         arrayOfVectors[pixelid]->emplace_back(tof, pulsetime);
-#else
-        arrayOfVectors[pixelid]->push_back(TofEvent(tof, pulsetime));
-#endif
-
         ++local_numGoodEvents;
-
 #if 0
           if (fileOffset == 0 && numeventsprint < 10)
           {
@@ -1382,8 +1357,6 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
                    << " bad event indexes"
                    << "\n";
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1469,8 +1442,6 @@ void FilterEventsByLogValuePreNexus::unmaskVetoEventIndexes() {
     g_log.notice() << "Number of veto pulses = " << numveto
                    << ", Number of error-event-index pulses = " << numerror
                    << "\n";
-
-    return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1698,11 +1669,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
     m_localWorkspace->clearMRU();
 
     // Now, create a default X-vector for histogramming, with just 2 bins.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec &xRef = axis.access();
-    xRef.resize(2);
-    xRef[0] = m_shortestTof - 1; // Just to make sure the bins hold it all
-    xRef[1] = m_longestTof + 1;
+    auto axis = HistogramData::BinEdges{m_shortestTof - 1, m_longestTof + 1};
     m_localWorkspace->setAllX(axis);
     this->m_pixelToWkspindex.clear();
 
@@ -1724,8 +1691,6 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       g_log.notice() << "Pixel " << tmpid << ":  Total number of events = "
                      << this->wrongdetid_pulsetimes[vindex].size() << '\n';
     }
-
-    return;
 } // End of filterEvents
 
 //----------------------------------------------------------------------------------------------
@@ -2033,18 +1998,11 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
         if (tof > local_m_longestTof)
           local_m_longestTof = tof;
 
-// Add event to vector of events
-// (This is equivalent to
-// workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
-// (But should be faster as a bunch of these calls were cached.)
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
-        // This avoids a copy constructor call but is only available with GCC
-        // (requires variadic templates)
+        // Add event to vector of events
+        // (This is equivalent to
+        // workspace->getSpectrum(this->m_pixelToWkspindex[pid]).addEventQuickly(event))
+        // (But should be faster as a bunch of these calls were cached.)
         arrayOfVectors[pixelid]->emplace_back(tof, pulsetime);
-#else
-        arrayOfVectors[pixelid]->push_back(TofEvent(tof, pulsetime));
-#endif
-
         ++local_numGoodEvents;
 
 #ifdef DBOUT
@@ -2137,8 +2095,6 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
 
   g_log.notice() << "Encountered " << numbadeventindex << " bad event indexes"
                  << "\n";
-
-  return;
 } // FilterEventsLinearly
 
 //----------------------------------------------------------------------------------------------
@@ -2208,8 +2164,6 @@ void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
       spec.setSpectrumNo(specnum_t(workspaceIndex + 1));
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -2283,8 +2237,6 @@ void FilterEventsByLogValuePreNexus::setProtonCharge(
   double integ = run.getProtonCharge();
   this->g_log.information() << "Total proton charge of " << integ
                             << " microAmp*hours found by integrating.\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -2327,8 +2279,6 @@ void FilterEventsByLogValuePreNexus::loadPixelMap(const std::string &filename) {
   // Let's assume that the # of pixels in the instrument matches the mapping
   // file length.
   this->m_numPixel = static_cast<uint32_t>(pixelmapFile.getNumElements());
-
-  return;
 }
 
 //-----------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -9,6 +10,8 @@
 using Mantid::API::ExperimentInfo;
 using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(ExperimentInfo)
 
 #ifdef __clang__
 #pragma clang diagnostic push

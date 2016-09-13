@@ -9,7 +9,7 @@ namespace MantidWidgets {
 
 DataProcessorSaveTableCommand defines the action "Save Table"
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -41,6 +41,11 @@ public:
   };
   std::string name() override { return std::string("Save Table"); }
   std::string icon() override { return std::string("://filesave.png"); }
+  std::string tooltip() override { return std::string("Save Table"); }
+  std::string whatsthis() override {
+    return std::string("Saves current table as a table workspace");
+  }
+  std::string shortcut() override { return std::string(); }
 };
 }
 }

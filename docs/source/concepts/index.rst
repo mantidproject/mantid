@@ -17,4 +17,4 @@
    :maxdepth: 1
 
    *
-   calibration/index.rst
+   calibration/index

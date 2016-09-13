@@ -216,7 +216,14 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
     cfun->addFunction(fun);
     size_t i = cfun->nFunctions() - 1;
     for (auto &pAttribute : pAttributes) {
-      cfun->setLocalAttributeValue(i, pAttribute.first, pAttribute.second);
+      // Apply parent attributes of the child function to this function. If this
+      // function doesn't have those attributes, they get passed up the chain to
+      // this function's parent.
+      if (cfun->hasLocalAttribute(pAttribute.first)) {
+        cfun->setLocalAttributeValue(i, pAttribute.first, pAttribute.second);
+      } else {
+        parentAttributes[pAttribute.first] = pAttribute.second;
+      }
     }
   }
 

@@ -9,7 +9,7 @@ namespace MantidWidgets {
 
 DataProcessorOpenTableCommand defines the action "Open Table"
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -36,11 +36,18 @@ public:
       : DataProcessorCommandBase(tablePresenter){};
   virtual ~DataProcessorOpenTableCommand(){};
 
-  void execute() override {
-    m_presenter->notify(DataProcessorPresenter::OpenTableFlag);
+  void execute() override{
+      // This action should do nothing
   };
   std::string name() override { return std::string("Open Table"); }
   std::string icon() override { return std::string("://multiload.png"); }
+  std::string tooltip() override { return std::string("Open Table"); }
+  std::string whatsthis() override {
+    return std::string("Loads a table into the interface. Table must exist in "
+                       "the ADS and be compatible in terms of the number and "
+                       "type of columns");
+  }
+  std::string shortcut() override { return std::string(); }
 };
 }
 }

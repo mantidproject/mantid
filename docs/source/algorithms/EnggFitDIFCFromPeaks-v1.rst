@@ -20,7 +20,7 @@ from a list of peaks fitted to a diffraction pattern. The peaks can be
 fitted to a Mantid workspace spectrum using the algorithm
 :ref:`EnggFitPeaks <algm-EnggFitPeaks>` which produces a table with
 parameter values for peaks in time-of-flight (TOF, see
-:ref:`UnitFactory <algm-UnitFactory>`). The table is the essential
+:ref:`Unit Factory <Unit Factory>`). The table is the essential
 input to this algorithm.
 
 This algorithm fits the adjusted peak time-of-fligth value positions

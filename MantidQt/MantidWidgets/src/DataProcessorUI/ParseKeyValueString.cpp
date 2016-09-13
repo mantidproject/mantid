@@ -35,7 +35,7 @@ std::map<std::string, std::string> parseKeyValueString(const std::string &str) {
       // to be part of the value
       std::string key = valVec[0];
       // Drop the key from the values vector
-      valVec.erase(valVec.begin());
+      valVec.begin() = valVec.erase(valVec.begin());
       // Join the remaining sections,
       std::string value = boost::algorithm::join(valVec, "=");
 

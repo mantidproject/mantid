@@ -85,17 +85,18 @@ private:
   BraggScattererFactoryImpl();
 };
 
-// This is taken from FuncMinimizerFactory
-#ifdef _WIN32
-template class MANTID_GEOMETRY_DLL
-    Mantid::Kernel::SingletonHolder<BraggScattererFactoryImpl>;
-#endif
-
 typedef Mantid::Kernel::SingletonHolder<BraggScattererFactoryImpl>
     BraggScattererFactory;
 
 } // namespace Geometry
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
+    SingletonHolder<Mantid::Geometry::BraggScattererFactoryImpl>;
+}
+}
 
 #define DECLARE_BRAGGSCATTERER(classname)                                      \
   namespace {                                                                  \

@@ -1225,11 +1225,14 @@ bool Algorithm::processGroups() {
     }
   }
 
+  double progress_proportion = 1.0 / static_cast<double>(m_groupSize);
   // Go through each entry in the input group(s)
   for (size_t entry = 0; entry < m_groupSize; entry++) {
     // use create Child Algorithm that look like this one
     Algorithm_sptr alg_sptr = this->createChildAlgorithm(
-        this->name(), -1, -1, this->isLogging(), this->version());
+        this->name(), progress_proportion * static_cast<double>(entry),
+        progress_proportion * (1 + static_cast<double>(entry)),
+        this->isLogging(), this->version());
     // Don't make the new algorithm a child so that it's workspaces are stored
     // correctly
     alg_sptr->setChild(false);
@@ -1240,7 +1243,7 @@ bool Algorithm::processGroups() {
     // Set all non-workspace properties
     this->copyNonWorkspaceProperties(alg, int(entry) + 1);
 
-    std::string outputBaseName = "";
+    std::string outputBaseName;
 
     // ---------- Set all the input workspaces ----------------------------
     for (size_t iwp = 0; iwp < m_groups.size(); iwp++) {

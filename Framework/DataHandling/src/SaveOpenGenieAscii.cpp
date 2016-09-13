@@ -131,7 +131,6 @@ void SaveOpenGenieAscii::exec() {
   writeSampleLogs(outfile);
 
   progress.report();
-  return;
 }
 
 // -----------------------------------------------------------------------------
@@ -163,7 +162,7 @@ std::string SaveOpenGenieAscii::getAxisHeader(const std::string alpha,
                                               const std::string singleSpc,
                                               const std::string fourspc,
                                               int nBins) {
-  std::string outStr = "";
+  std::string outStr;
   const std::string GXR = "GXRealarray";
   const std::string banknum = "1";
   const std::string twospc = " ";
@@ -216,7 +215,7 @@ void SaveOpenGenieAscii::axisToFile(const std::string alpha,
    */
 std::string SaveOpenGenieAscii::getAxisValues(std::string alpha, int bin,
                                               const std::string singleSpc) {
-  std::string output = "";
+  std::string output;
   if (alpha == "\"e\"") {
     output += boost::lexical_cast<std::string>(ws->readE(0)[bin]) + singleSpc;
   }
@@ -326,7 +325,7 @@ void SaveOpenGenieAscii::writeSampleLogs(std::ofstream &outfile) {
    *  @param nBins ::  Number of bins
    */
 void SaveOpenGenieAscii::addNtc(const std::string fourspc, int nBins) {
-  std::string outStr = "";
+  std::string outStr;
   std::string ntc = "ntc";
 
   outStr += ("  \"" + ntc + "\"" + "\n" + fourspc + "Integer" + "\n" + fourspc +

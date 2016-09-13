@@ -42,7 +42,7 @@ class SymmetryElementTest(unittest.TestCase):
         symOpNone = SymmetryOperationFactory.createSymOp("-x,-y,-z")
         symEleNone = SymmetryElementFactory.createSymElement(symOpNone)
 
-        self.assertEquals(symEleNone.getRotationSense(), SymmetryElement.RotationSense.None)
+        self.assertEquals(symEleNone.getRotationSense(), SymmetryElement.RotationSense.NoRotation)
 
 
 if __name__ == '__main__':

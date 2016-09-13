@@ -32,6 +32,7 @@ set ( SRC_FILES
 	src/FilteredTimeSeriesProperty.cpp
 	src/FloatingPointComparison.cpp
 	src/FreeBlock.cpp
+	src/GitHubApiHelper.cpp
 	src/Glob.cpp
 	src/ICatalogInfo.cpp
 	src/IPropertyManager.cpp
@@ -80,7 +81,8 @@ set ( SRC_FILES
 	src/PropertyManager.cpp
 	src/PropertyManagerDataService.cpp
 	src/PropertyManagerOwner.cpp
-	src/PropertyManagerProperty.cpp
+    	src/PropertyManagerProperty.cpp
+    	src/PropertyNexus.cpp
 	src/PropertyWithValue.cpp
 	src/ProxyInfo.cpp
 	src/PseudoRandomNumberGenerator.cpp
@@ -129,7 +131,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
         src/PropertyManager.cpp
         src/Unit.cpp
         src/System.cpp
-        )
+)
 
 set ( INC_FILES
 	inc/MantidKernel/ANN/ANN.h
@@ -179,6 +181,7 @@ set ( INC_FILES
 	inc/MantidKernel/FloatingPointComparison.h
 	inc/MantidKernel/FreeBlock.h
 	inc/MantidKernel/FunctionTask.h
+	inc/MantidKernel/GitHubApiHelper.h
 	inc/MantidKernel/Glob.h
 	inc/MantidKernel/ICatalogInfo.h
 	inc/MantidKernel/IPropertyManager.h
@@ -240,6 +243,7 @@ set ( INC_FILES
 	inc/MantidKernel/PropertyManagerOwner.h
 	inc/MantidKernel/PropertyManagerProperty.h
 	inc/MantidKernel/PropertyManager_fwd.h
+    	inc/MantidKernel/PropertyNexus.h
 	inc/MantidKernel/PropertyWithValue.h
 	inc/MantidKernel/ProxyInfo.h
 	inc/MantidKernel/PseudoRandomNumberGenerator.h
@@ -289,7 +293,8 @@ set ( INC_FILES
 	inc/MantidKernel/WarningSuppressions.h
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
-	inc/MantidKernel/cow_ptr.h
+  inc/MantidKernel/CaseInsensitiveMap.h
+  inc/MantidKernel/cow_ptr.h
 	inc/MantidKernel/make_cow.h
 	inc/MantidKernel/make_unique.h
 )
@@ -379,6 +384,7 @@ set ( TEST_FILES
 	PropertyManagerDataServiceTest.h
 	PropertyManagerPropertyTest.h
 	PropertyManagerTest.h
+    	PropertyNexusTest.h
 	PropertyTest.h
 	PropertyWithValueTest.h
 	ProxyInfoTest.h
@@ -465,7 +471,7 @@ set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
  target_link_libraries ( Kernel LINK_PRIVATE stdc++ )
 endif()
-target_link_libraries ( Kernel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${NEXUS_LIBRARIES} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} )
+target_link_libraries ( Kernel LINK_PUBLIC ${NEXUS_LIBRARIES} LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} ${TBB_LIBRARIES} ${TBB_MALLOC_LIBRARIES})
 
 if (WITH_ASAN)
   target_link_libraries ( Kernel LINK_PRIVATE -lasan )
@@ -504,6 +510,20 @@ configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h.in
 ###########################################################################
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp.in
                  ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp
+)
+###########################################################################
+# This section deals with creating the GithubApiHelper implementation
+###########################################################################
+
+if ( WIN32 )
+  set ( GITHUB_AUTHORIZATION_TOKEN "8ec7afc857540ee60af78cba1cf7779a6ed0b6b9")
+elseif ( APPLE )
+  set ( GITHUB_AUTHORIZATION_TOKEN "9f1c1acd61ecb87b21ad0382f6b403c8294992c5")
+else()
+  set ( GITHUB_AUTHORIZATION_TOKEN "ccacbaf39a7ad8151fca03b4ea99a29b28f0993b")
+endif()
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h.in
+                 ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h
 )
 
 ###########################################################################
@@ -604,14 +624,7 @@ else ()
   set ( MANTID_ROOT .. )
 endif ()
 
-# Whether or not to check for updates is tied to a patch version being defined
-# nighly/unstable is basically ISO8601 so it will be longer than 8 char.
-# This affects Mantid.properties.install only.
-string( LENGTH "VERSION_PATCH ${VERSION_PATCH}" VERSION_PATCH_LENGTH)
-set (ENABLE_WEB_UPDATES 0)
-if (${VERSION_PATCH_LENGTH} LESS 8)
-  set (ENABLE_WEB_UPDATES 1)
-endif()
+set (ENABLE_WEB_UPDATES 1)
 
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )

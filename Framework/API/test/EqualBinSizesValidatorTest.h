@@ -40,7 +40,7 @@ public:
     auto ws = boost::make_shared<WorkspaceTester>();
     ws->init(2, 3, 3);
     Mantid::MantidVec xData{1, 2, 3};
-    ws->setX(1, xData);
+    ws->setPoints(1, xData);
     EqualBinSizesValidator val(0.1);
     TS_ASSERT_EQUALS(
         val.isValid(ws),
@@ -58,7 +58,7 @@ public:
     auto ws = boost::make_shared<WorkspaceTester>();
     ws->init(1, 3, 3);
     Mantid::MantidVec xData{1, 2, 5};
-    ws->setX(0, xData);
+    ws->setPoints(0, xData);
     EqualBinSizesValidator val(0.1);
     TS_ASSERT_EQUALS(
         val.isValid(ws),

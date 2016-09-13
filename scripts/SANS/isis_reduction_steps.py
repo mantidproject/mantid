@@ -341,11 +341,11 @@ class LoadRun(object):
             return workspace
         if len(groupW) < period:
             raise ValueError('Period number ' + str(period) + ' doesn\'t exist in workspace ' + groupW.getName())
-        ws_name = groupW[period].name()
+        ws_name = groupW[period - 1].name()
 
         # If we are dealing with event data, then we also want to extract and rename the according monitor data set
         monitor_name = ""
-        if isEventWorkspace(groupW[period]):
+        if isEventWorkspace(groupW[period - 1]):
             # Check if the monitor ws exists and extract it
             expected_mon_name = ws_name + appendix
             expected_mon_group_name = groupW.name() + appendix

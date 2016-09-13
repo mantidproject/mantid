@@ -79,8 +79,6 @@ void EditInstrumentGeometry::init() {
   declareProperty("InstrumentName", "",
                   "Name of the newly built instrument.  If left empty, "
                   "the original instrument will be used. ");
-
-  return;
 }
 
 template <typename NumT>
@@ -337,8 +335,6 @@ void EditInstrumentGeometry::exec() {
     instrument->markAsDetector(detector);
 
   } // ENDFOR workspace index
-
-  return;
 }
 
 } // namespace Mantid

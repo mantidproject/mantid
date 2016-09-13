@@ -101,11 +101,9 @@ void FindSXPeaks::exec() {
 
   // Calculate the primary flight path.
   Kernel::V3D sample = localworkspace->getInstrument()->getSample()->getPos();
-  Kernel::V3D L1 =
-      sample - localworkspace->getInstrument()->getSource()->getPos();
-
+  Kernel::V3D source = localworkspace->getInstrument()->getSource()->getPos();
+  Kernel::V3D L1 = sample - source;
   double l1 = L1.norm();
-  //
 
   peakvector entries;
   // Reserve 1000 peaks to make later push_back fast for first 1000 peaks, but
@@ -155,9 +153,13 @@ void FindSXPeaks::exec() {
     double background = 0.5 * (1.0 + Y.front() + Y.back());
     if (intensity < SB * background) // This is not a peak.
       continue;
-    MantidVec::difference_type d = std::distance(Y.begin(), maxY);
+
     // t.o.f. of the peak
-    double tof = 0.5 * (*(X.begin() + d) + *(X.begin() + d + 1));
+    MantidVec::difference_type d = std::distance(Y.begin(), maxY);
+    auto leftBinPosition = X.begin() + d;
+    double leftBinEdge = *leftBinPosition;
+    double rightBinEdge = *std::next(leftBinPosition);
+    double tof = 0.5 * (leftBinEdge + rightBinEdge);
 
     Geometry::IDetector_const_sptr det;
     try {
@@ -178,17 +180,15 @@ void FindSXPeaks::exec() {
       phi += 2.0 * M_PI;
     }
 
-    double th2 = det->getTwoTheta(Mantid::Kernel::V3D(0, 0, 0),
-                                  Mantid::Kernel::V3D(0, 0, 1));
+    double th2 = det->getTwoTheta(sample, L1);
 
     std::vector<int> specs(1, i);
 
     Mantid::Kernel::V3D L2 = det->getPos();
     L2 -= sample;
-    // std::cout << "r,th,phi,t: " << L2.norm() << "," << th2*180/M_PI << "," <<
-    // phi*180/M_PI << "," << tof << "\n";
 
-    SXPeak peak(tof, th2, phi, *maxY, specs, l1 + L2.norm(), det->getID());
+    SXPeak peak(tof, th2, phi, *maxY, specs, l1 + L2.norm(), det->getID(),
+                localworkspace->getInstrument());
     PARALLEL_CRITICAL(entries) { entries.push_back(peak); }
     progress.report();
     PARALLEL_END_INTERUPT_REGION
@@ -200,7 +200,6 @@ void FindSXPeaks::exec() {
 
   setProperty("OutputWorkspace", m_peaks);
   progress.report();
-  return;
 }
 
 /**
@@ -213,13 +212,6 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv) {
   peakvector finalv;
 
   for (const auto &currentPeak : pcv) {
-    /*for (auto & finalPeak : finalv) {
-      if (currentPeak.compare(finalPeak, resol)) {
-        finalPeak += currentPeak;
-        found = true;
-        break;
-      }
-    }*/
     auto pos = std::find_if(finalv.begin(), finalv.end(),
                             [&currentPeak, resol](SXPeak &peak) {
                               bool result = currentPeak.compare(peak, resol);

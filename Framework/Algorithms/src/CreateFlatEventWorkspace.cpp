@@ -138,11 +138,8 @@ void CreateFlatEventWorkspace::exec() {
 
   // Need to reset the matrixworkspace/histogram representation to be the
   // whole xrange (rather than just the extracted chunk).
-  MantidVecPtr xnew;
   outputEWS->getEventXMinMax(dataMin, dataMax);
-  xnew.access().push_back(dataMin);
-  xnew.access().push_back(dataMax);
-  outputEWS->setAllX(xnew);
+  outputEWS->setAllX(HistogramData::BinEdges{dataMin, dataMax});
 
   this->setProperty("OutputWorkspace", outputWS);
 }

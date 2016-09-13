@@ -14,7 +14,8 @@
 namespace Mantid {
 namespace PythonInterface {
 using namespace boost::python;
-using Environment::CallMethod0;
+using Environment::callMethod;
+using Environment::UndefinedAttributeError;
 
 /**
  * Construct the "wrapper" and stores the reference to the PyObject
@@ -24,13 +25,9 @@ template <typename BaseAlgorithm>
 AlgorithmAdapter<BaseAlgorithm>::AlgorithmAdapter(PyObject *self)
     : BaseAlgorithm(), m_self(self), m_isRunningObj(nullptr),
       m_wikiSummary("") {
-  // Cache the isRunning call to save the lookup each time it is called
-  // as it is most likely called in a loop
-
-  // If the derived class type has isRunning then use that.
-  // A standard PyObject_HasAttr will check the whole inheritance
-  // hierarchy and always return true because IAlgorithm::isRunning is present.
-  // We just want to look at the Python class
+  // Only cache the isRunning attribute if it is overridden by the
+  // inheriting type otherwise we end up with an infinite recursive call
+  // as isRunning always exists from the interface
   if (Environment::typeHasAttribute(self, "isRunning"))
     m_isRunningObj = PyObject_GetAttrString(self, "isRunning");
 }
@@ -49,17 +46,11 @@ const std::string AlgorithmAdapter<BaseAlgorithm>::name() const {
  */
 template <typename BaseAlgorithm>
 int AlgorithmAdapter<BaseAlgorithm>::version() const {
-  return CallMethod0<int>::dispatchWithDefaultReturn(getSelf(), "version",
-                                                     defaultVersion());
-}
-
-/**
- * Returns the default version of the algorithm. If not overridden
- * it returns 1
- */
-template <typename BaseAlgorithm>
-int AlgorithmAdapter<BaseAlgorithm>::defaultVersion() const {
-  return 1;
+  try {
+    return callMethod<int>(getSelf(), "version");
+  } catch (UndefinedAttributeError &) {
+    return 1;
+  }
 }
 
 /**
@@ -69,16 +60,11 @@ int AlgorithmAdapter<BaseAlgorithm>::defaultVersion() const {
  */
 template <typename BaseAlgorithm>
 bool AlgorithmAdapter<BaseAlgorithm>::checkGroups() {
-  return CallMethod0<bool>::dispatchWithDefaultReturn(getSelf(), "checkGroups",
-                                                      checkGroupsDefault());
-}
-
-/**
- * Returns the default checkGroup (calls base class)
- */
-template <typename BaseAlgorithm>
-bool AlgorithmAdapter<BaseAlgorithm>::checkGroupsDefault() {
-  return BaseAlgorithm::checkGroups();
+  try {
+    return callMethod<bool>(getSelf(), "checkGroups");
+  } catch (UndefinedAttributeError &) {
+    return BaseAlgorithm::checkGroups();
+  }
 }
 
 /**
@@ -87,30 +73,20 @@ bool AlgorithmAdapter<BaseAlgorithm>::checkGroupsDefault() {
  */
 template <typename BaseAlgorithm>
 const std::string AlgorithmAdapter<BaseAlgorithm>::category() const {
-  const std::string algDefaultCategory = defaultCategory();
-  const std::string algCategory =
-      CallMethod0<std::string>::dispatchWithDefaultReturn(getSelf(), "category",
-                                                          algDefaultCategory);
-  if (algCategory == algDefaultCategory) {
+  const static std::string defaultCategory = "PythonAlgorithms";
+  std::string category = defaultCategory;
+  try {
+    category = callMethod<std::string>(getSelf(), "category");
+  } catch (UndefinedAttributeError &) {
+  }
+  if (category == defaultCategory) {
     // output a warning
-    const std::string &name = getSelf()->ob_type->tp_name;
-    int version = CallMethod0<int>::dispatchWithDefaultReturn(
-        getSelf(), "version", defaultVersion());
     this->getLogger().warning()
-        << "Python Algorithm " << name << " v" << version
+        << "Python Algorithm " << this->name() << " v" << this->version()
         << " does not have a category defined. See "
            "http://www.mantidproject.org/Basic_PythonAlgorithm_Structure\n";
   }
-  return algCategory;
-}
-
-/**
- * A default category, chosen if there is no override
- * @returns A default category
- */
-template <typename BaseAlgorithm>
-std::string AlgorithmAdapter<BaseAlgorithm>::defaultCategory() const {
-  return "PythonAlgorithms";
+  return category;
 }
 
 /**
@@ -119,17 +95,11 @@ std::string AlgorithmAdapter<BaseAlgorithm>::defaultCategory() const {
  */
 template <typename BaseAlgorithm>
 const std::string AlgorithmAdapter<BaseAlgorithm>::summary() const {
-  return CallMethod0<std::string>::dispatchWithDefaultReturn(
-      getSelf(), "summary", defaultSummary());
-}
-
-/**
- * A default summary, chosen if there is no override
- * @returns A default summary
- */
-template <typename BaseAlgorithm>
-std::string AlgorithmAdapter<BaseAlgorithm>::defaultSummary() const {
-  return m_wikiSummary;
+  try {
+    return callMethod<std::string>(getSelf(), "summary");
+  } catch (UndefinedAttributeError &) {
+    return m_wikiSummary;
+  }
 }
 
 /**
@@ -143,7 +113,7 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
     Environment::GlobalInterpreterLock gil;
     PyObject *result = PyObject_CallObject(m_isRunningObj, nullptr);
     if (PyErr_Occurred())
-      Environment::throwRuntimeError(true);
+      throw Environment::PythonException();
     if (PyBool_Check(result)) {
 #if PY_MAJOR_VERSION >= 3
       return static_cast<bool>(PyLong_AsLong(result));
@@ -152,7 +122,7 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
 #endif
     } else
       throw std::runtime_error(
-          "AlgorithmAdapter.isRunning - Expected bool return type.");
+          "Algorithm.isRunning - Expected bool return type.");
   }
 }
 
@@ -160,12 +130,11 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
  */
 template <typename BaseAlgorithm>
 void AlgorithmAdapter<BaseAlgorithm>::cancel() {
-  // No real need for eye on performance here. Use standard methods
-  if (Environment::typeHasAttribute(getSelf(), "cancel")) {
-    Environment::GlobalInterpreterLock gil;
-    CallMethod0<void>::dispatchWithException(getSelf(), "cancel");
-  } else
+  try {
+    return callMethod<void>(getSelf(), "cancel");
+  } catch (UndefinedAttributeError &) {
     SuperClass::cancel();
+  }
 }
 
 /**
@@ -174,43 +143,35 @@ void AlgorithmAdapter<BaseAlgorithm>::cancel() {
 template <typename BaseAlgorithm>
 std::map<std::string, std::string>
 AlgorithmAdapter<BaseAlgorithm>::validateInputs() {
-  // variables that are needed further down
-  boost::python::dict resultDict;
+  using boost::python::dict;
   std::map<std::string, std::string> resultMap;
 
-  // this is a modified version of CallMethod0::dispatchWithDefaultReturn
-  Environment::GlobalInterpreterLock gil;
-  if (Environment::typeHasAttribute(getSelf(), "validateInputs")) {
-    try {
-      resultDict = boost::python::call_method<boost::python::dict>(
-          getSelf(), "validateInputs");
-
-      if (!bool(resultDict))
-        return resultMap;
-    } catch (boost::python::error_already_set &) {
-      Environment::throwRuntimeError();
-    }
-  }
-
-  // convert to a map<string,string>
-  boost::python::list keys = resultDict.keys();
-  size_t numItems = boost::python::len(keys);
-  for (size_t i = 0; i < numItems; ++i) {
-    boost::python::object value = resultDict[keys[i]];
-    if (value) {
-      try {
-        std::string key = boost::python::extract<std::string>(keys[i]);
-        std::string value =
-            boost::python::extract<std::string>(resultDict[keys[i]]);
-        resultMap[key] = value;
-      } catch (boost::python::error_already_set &) {
-        this->getLogger().error()
-            << "In validateInputs(self): Invalid type for key/value pair "
-            << "detected in dict.\n"
-            << "All keys and values must be strings\n";
+  try {
+    Environment::GlobalInterpreterLock gil;
+    dict resultDict = callMethod<dict>(getSelf(), "validateInputs");
+    // convert to a map<string,string>
+    boost::python::list keys = resultDict.keys();
+    size_t numItems = boost::python::len(keys);
+    for (size_t i = 0; i < numItems; ++i) {
+      boost::python::object value = resultDict[keys[i]];
+      if (value) {
+        try {
+          std::string key = boost::python::extract<std::string>(keys[i]);
+          std::string value =
+              boost::python::extract<std::string>(resultDict[keys[i]]);
+          resultMap[key] = value;
+        } catch (boost::python::error_already_set &) {
+          this->getLogger().error()
+              << "In validateInputs(self): Invalid type for key/value pair "
+              << "detected in dict.\n"
+              << "All keys and values must be strings\n";
+        }
       }
     }
+  } catch (UndefinedAttributeError &) {
+    return resultMap;
   }
+
   return resultMap;
 }
 
@@ -251,7 +212,8 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
 }
 
 /**
- * Declare a property using the type of the defaultValue, a documentation string
+ * Declare a property using the type of the defaultValue, a documentation
+ * string
  * and validator
  * @param self A reference to the calling Python object
  * @param name :: The name of the new property
@@ -320,7 +282,7 @@ void AlgorithmAdapter<BaseAlgorithm>::declarePyAlgProperty(
  * overridden in the subclass by a function named PyInit
  */
 template <typename BaseAlgorithm> void AlgorithmAdapter<BaseAlgorithm>::init() {
-  CallMethod0<void>::dispatchWithException(getSelf(), "PyInit");
+  callMethod<void>(getSelf(), "PyInit");
 }
 
 /**
@@ -328,7 +290,7 @@ template <typename BaseAlgorithm> void AlgorithmAdapter<BaseAlgorithm>::init() {
  * overridden in the subclass by a function named PyExec
  */
 template <typename BaseAlgorithm> void AlgorithmAdapter<BaseAlgorithm>::exec() {
-  CallMethod0<void>::dispatchWithException(getSelf(), "PyExec");
+  callMethod<void>(getSelf(), "PyExec");
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------

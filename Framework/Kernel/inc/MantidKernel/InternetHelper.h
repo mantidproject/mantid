@@ -130,7 +130,7 @@ public:
   const std::string &getHeader(const std::string &key);
   void clearHeaders();
   StringToStringMap &headers();
-  void reset();
+  virtual void reset();
 
   // Proxy methods
   Kernel::ProxyInfo &getProxy(const std::string &url);
@@ -147,15 +147,16 @@ protected:
                                std::ostream &responseStream);
   virtual int sendHTTPRequest(const std::string &url,
                               std::ostream &responseStream);
+  virtual void processResponseHeaders(const Poco::Net::HTTPResponse &res);
   virtual int processErrorStates(const Poco::Net::HTTPResponse &res,
                                  std::istream &rs, const std::string &url);
+  virtual int sendRequestAndProcess(Poco::Net::HTTPClientSession &session,
+                                    Poco::URI &uri,
+                                    std::ostream &responseStream);
 
-private:
   void setupProxyOnSession(Poco::Net::HTTPClientSession &session,
                            const std::string &proxyUrl);
   void createRequest(Poco::URI &uri);
-  int sendRequestAndProcess(Poco::Net::HTTPClientSession &session,
-                            Poco::URI &uri, std::ostream &responseStream);
   int processRelocation(const Poco::Net::HTTPResponse &response,
                         std::ostream &responseStream);
   bool isRelocated(const int response);

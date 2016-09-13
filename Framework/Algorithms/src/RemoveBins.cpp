@@ -204,8 +204,6 @@ void RemoveBins::checkProperties() {
 
   const std::string interpolation = getProperty("Interpolation");
   m_interpolate = (interpolation == "Linear");
-
-  return;
 }
 
 /// Calls CropWorkspace as a Child Algorithm to remove bins from the start or
@@ -223,7 +221,6 @@ void RemoveBins::crop(const double &start, const double &end) {
   // Assign the result to the output workspace property
   MatrixWorkspace_sptr outputWS = childAlg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outputWS);
-  return;
 }
 
 /** Convert the X range given into the unit of the input workspace
@@ -260,7 +257,6 @@ void RemoveBins::transformRangeUnit(const int &index, double &startX,
 
   g_log.debug() << "For index " << index << ", X range given corresponds to "
                 << startX << "-" << endX << " in workspace's unit\n";
-  return;
 }
 
 /** Retrieves the detector postion for a given spectrum
@@ -298,7 +294,6 @@ void RemoveBins::calculateDetectorPosition(const int &index, double &l1,
   }
   g_log.debug() << "Detector for index " << index << " has L1+L2=" << l1 + l2
                 << " & 2theta= " << twoTheta << '\n';
-  return;
 }
 
 /** Finds the index in an ordered vector which follows the given value
@@ -329,8 +324,6 @@ void RemoveBins::RemoveFromEnds(int start, int end, MantidVec &Y,
     Y[j] = 0.0;
     E[j] = 0.0;
   }
-
-  return;
 }
 
 /** Removes bins in the middle of the data (Y/E).
@@ -383,8 +376,6 @@ void RemoveBins::RemoveFromMiddle(const int &start, const int &end,
       E[j] = aveE;
     }
   }
-
-  return;
 }
 
 } // namespace Algorithm

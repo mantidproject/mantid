@@ -63,9 +63,9 @@ void ConvertTableToMatrixWorkspaceDialog::fillColumnNames(
   for (std::vector<std::string>::const_iterator column = columns.begin();
        column != columns.end(); ++column) {
     QString qName = QString::fromStdString(*column);
-    m_form.cbColumnX->insertItem(-1, qName);
-    m_form.cbColumnY->insertItem(-1, qName);
-    m_form.cbColumnE->insertItem(-1, qName);
+    m_form.cbColumnX->addItem(qName);
+    m_form.cbColumnY->addItem(qName);
+    m_form.cbColumnE->addItem(qName);
     Mantid::API::Column_sptr col = tws->getColumn(*column);
     if (col->getPlotType() == 1 && defaultXColumn.isEmpty()) // type X
     {

@@ -376,7 +376,8 @@ void LoadRawHelper::setWorkspaceProperty(const std::string &propertyName,
  */
 void LoadRawHelper::setWorkspaceData(
     DataObjects::Workspace2D_sptr newWorkspace,
-    const std::vector<boost::shared_ptr<MantidVec>> &timeChannelsVec,
+    const std::vector<boost::shared_ptr<HistogramData::HistogramX>> &
+        timeChannelsVec,
     int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
     int64_t lengthIn, int64_t binStart) {
   if (!newWorkspace)
@@ -466,20 +467,20 @@ bool LoadRawHelper::isAscii(FILE *file) const {
  *  @return The vector(s) containing the time channel boundaries, in a vector of
  * shared ptrs
  */
-std::vector<boost::shared_ptr<MantidVec>>
+std::vector<boost::shared_ptr<HistogramData::HistogramX>>
 LoadRawHelper::getTimeChannels(const int64_t &regimes,
                                const int64_t &lengthIn) {
   auto const timeChannels = new float[lengthIn];
   isisRaw->getTimeChannels(timeChannels, static_cast<int>(lengthIn));
 
-  std::vector<boost::shared_ptr<MantidVec>> timeChannelsVec;
+  std::vector<boost::shared_ptr<HistogramData::HistogramX>> timeChannelsVec;
   if (regimes >= 2) {
     g_log.debug() << "Raw file contains " << regimes << " time regimes\n";
     // If more than 1 regime, create a timeChannelsVec for each regime
     for (int64_t i = 0; i < regimes; ++i) {
       // Create a vector with the 'base' time channels
-      boost::shared_ptr<MantidVec> channelsVec(
-          new MantidVec(timeChannels, timeChannels + lengthIn));
+      boost::shared_ptr<HistogramData::HistogramX> channelsVec(
+          new HistogramData::HistogramX(timeChannels, timeChannels + lengthIn));
       const double shift = isisRaw->daep.tr_shift[i];
       g_log.debug() << "Time regime " << i + 1 << " shifted by " << shift
                     << " microseconds\n";
@@ -502,8 +503,8 @@ LoadRawHelper::getTimeChannels(const int64_t &regimes,
     }
   } else // Just need one in this case
   {
-    boost::shared_ptr<MantidVec> channelsVec(
-        new MantidVec(timeChannels, timeChannels + lengthIn));
+    boost::shared_ptr<HistogramData::HistogramX> channelsVec(
+        new HistogramData::HistogramX(timeChannels, timeChannels + lengthIn));
     timeChannelsVec.push_back(channelsVec);
   }
   // Done with the timeChannels C array so clean up
@@ -1072,7 +1073,7 @@ void LoadRawHelper::calculateWorkspacesizes(
 void LoadRawHelper::loadSpectra(
     FILE *file, const int &period, const int &total_specs,
     DataObjects::Workspace2D_sptr ws_sptr,
-    std::vector<boost::shared_ptr<MantidVec>> timeChannelsVec) {
+    std::vector<boost::shared_ptr<HistogramData::HistogramX>> timeChannelsVec) {
   double progStart = m_prog;
   double progEnd = 1.0; // Assume this function is called last
 
@@ -1180,7 +1181,7 @@ LoadRawHelper::searchForLogFiles(const std::string &pathToRawFile) {
     // ones.
 
     // strip out the raw data file identifier
-    std::string l_rawID("");
+    std::string l_rawID;
     size_t idx = l_filenamePart.rfind('.');
 
     if (idx != std::string::npos) {

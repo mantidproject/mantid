@@ -32,8 +32,10 @@
 
 #ifdef IN_MANTID_ICAT
 #define MANTID_ICAT_DLL DLLExport
+#define EXTERN_MANTID_ICAT
 #else
 #define MANTID_ICAT_DLL DLLImport
+#define EXTERN_MANTID_ICAT EXTERN_IMPORT
 #endif /* IN_MANTID_ICAT */
 
 #endif // MANTID_ICAT_DLLCONFIG_H_

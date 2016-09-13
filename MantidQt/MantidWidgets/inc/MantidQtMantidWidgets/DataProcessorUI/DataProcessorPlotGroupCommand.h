@@ -9,7 +9,7 @@ namespace MantidWidgets {
 
 DataProcessorPlotGroupCommand defines the action "Plot Selected Groups"
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -41,6 +41,14 @@ public:
   };
   std::string name() override { return std::string("Plot Selected Groups"); }
   std::string icon() override { return std::string("://trajectory.png"); }
+  std::string tooltip() override {
+    return std::string("Plots the selected group");
+  }
+  std::string whatsthis() override {
+    return std::string("Creates a plot of the post-processed workspaces "
+                       "produced by any groups any selected runs are in");
+  }
+  std::string shortcut() override { return std::string(); }
 };
 }
 }
