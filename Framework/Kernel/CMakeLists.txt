@@ -593,11 +593,15 @@ if ( MPI_BUILD )
   set ( PV_PLUGINS "" )
   set ( IGNORE_PARAVIEW "1" )
 else ()
+  option ( ENABLE_FILE_LOGGING "Enable logging to file for development builds. It is always enabled for packages" ON )
+  if ( ENABLE_FILE_LOGGING )
+    set ( FILELOGGER_CHANNEL fileFilterChannel )
+  else ()
+    set ( FILELOGGER_CHANNEL "" )
+  endif ()
   set ( CONSOLEPATTERN "%s-[%p] %t" )
 endif ()
 
-# Do not log to file for development builds
-set ( FILELOGGER_CHANNEL "" )
 set ( CONSOLECHANNELCLASS "ConsoleChannel" )
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
