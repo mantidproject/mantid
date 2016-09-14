@@ -55,7 +55,7 @@ set ( SRC_FILES
 	src/LoadIDFFromNexus.cpp
 	src/LoadILL.cpp
 	src/LoadILLIndirect.cpp
-	src/LoadILLINX.cpp
+	src/LoadILLTOF.cpp
 	src/LoadILLReflectometry.cpp
 	src/LoadILLSANS.cpp
 	src/LoadISISNexus2.cpp
@@ -233,7 +233,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadIDFFromNexus.h
 	inc/MantidDataHandling/LoadILL.h
 	inc/MantidDataHandling/LoadILLIndirect.h
-	inc/MantidDataHandling/LoadILLINX.h
+	inc/MantidDataHandling/LoadILLTOF.h
 	inc/MantidDataHandling/LoadILLReflectometry.h
 	inc/MantidDataHandling/LoadILLSANS.h
 	inc/MantidDataHandling/LoadISISNexus2.h
@@ -404,7 +404,7 @@ set ( TEST_FILES
 	LoadGSSTest.h
 	LoadIDFFromNexusTest.h
 	LoadILLIndirectTest.h
-	LoadILLINXTest.h
+	LoadILLTOFTest.h
 	LoadILLReflectometryTest.h
 	LoadILLSANSTest.h
 	LoadISISNexusTest.h

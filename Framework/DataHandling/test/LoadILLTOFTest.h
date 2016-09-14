@@ -1,33 +1,33 @@
-#ifndef LOADILLINXTEST_H_
-#define LOADILLINXTEST_H_
+#ifndef LOADILLTOFTEST_H_
+#define LOADILLTOFTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/LoadILLINX.h"
+#include "MantidDataHandling/LoadILLTOF.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::API;
-using Mantid::DataHandling::LoadILLINX;
+using Mantid::DataHandling::LoadILLTOF;
 
-class LoadILLINXTest : public CxxTest::TestSuite {
+class LoadILLTOFTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadILLINXTest *createSuite() { return new LoadILLINXTest(); }
-  static void destroySuite(LoadILLINXTest *suite) { delete suite; }
+  static LoadILLTOFTest *createSuite() { return new LoadILLTOFTest(); }
+  static void destroySuite(LoadILLTOFTest *suite) { delete suite; }
 
   void testName() {
-    LoadILLINX loader;
-    TS_ASSERT_EQUALS(loader.name(), "LoadILLINX");
+    LoadILLTOF loader;
+    TS_ASSERT_EQUALS(loader.name(), "LoadILLTOF");
   }
 
   void testVersion() {
-    LoadILLINX loader;
+    LoadILLTOF loader;
     TS_ASSERT_EQUALS(loader.version(), 1);
   }
 
   void testInit() {
-    LoadILLINX loader;
+    LoadILLTOF loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
   }
@@ -37,11 +37,11 @@ public:
    * The elastic peak is obtained on the fly from the sample data.
    */
   void loadDataFile(const std::string dataFile, const int numberOfHistograms) {
-    LoadILLINX loader;
+    LoadILLTOF loader;
     loader.initialize();
     loader.setPropertyValue("Filename", dataFile);
 
-    std::string outputSpace = "LoadILLINXTest_out";
+    std::string outputSpace = "LoadILLTOFTest_out";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
@@ -65,12 +65,12 @@ public:
 // Performance test
 //------------------------------------------------------------------------------
 
-class LoadILLINXTestPerformance : public CxxTest::TestSuite {
+class LoadILLTOFTestPerformance : public CxxTest::TestSuite {
 public:
-  LoadILLINXTestPerformance() : m_dataFile("ILL/IN5/104007.nxs") {}
+  LoadILLTOFTestPerformance() : m_dataFile("ILL/IN5/104007.nxs") {}
 
   void testDefaultLoad() {
-    Mantid::DataHandling::LoadILLINX loader;
+    Mantid::DataHandling::LoadILLTOF loader;
     loader.initialize();
     loader.setPropertyValue("Filename", m_dataFile);
     loader.setPropertyValue("OutputWorkspace", "ws");
@@ -81,4 +81,4 @@ private:
   std::string m_dataFile;
 };
 
-#endif /*LoadILLINXTEST_H_*/
+#endif /*LOADILLTOFTEST_H_*/

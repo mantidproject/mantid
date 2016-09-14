@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LOADILLINX_H_
-#define MANTID_DATAHANDLING_LOADILLINX_H_
+#ifndef MANTID_DATAHANDLING_LOADILLTOF_H_
+#define MANTID_DATAHANDLING_LOADILLTOF_H_
 
 //---------------------------------------------------
 // Includes
@@ -34,12 +34,12 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadILLINX : public API::IFileLoader<Kernel::NexusDescriptor> {
+class DLLExport LoadILLTOF : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Constructor
-  LoadILLINX();
+  LoadILLTOF();
   /// Algorithm's name
-  const std::string name() const override { return "LoadILLINX"; }
+  const std::string name() const override { return "LoadILLTOF"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Loads an ILL ToF NeXus file.";
@@ -111,4 +111,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_DATAHANDLING_LoadILLINX_H_*/
+#endif /*MANTID_DATAHANDLING_LOADILLTOF_H_*/

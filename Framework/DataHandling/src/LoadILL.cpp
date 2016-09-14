@@ -10,7 +10,7 @@ namespace DataHandling {
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILL)
 
 /// Constructor
-LoadILL::LoadILL() : LoadILLINX() { this->useAlgorithm("LoadILLINX", 1); }
+LoadILL::LoadILL() : LoadILLTOF() { this->useAlgorithm("LoadILLTOF", 1); }
 
 /**
  * Return the confidence with with this algorithm can load the file

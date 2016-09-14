@@ -5,7 +5,7 @@
 #include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidDataHandling/LoadILLINX.h"
+#include "MantidDataHandling/LoadILLTOF.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -33,7 +33,7 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadILL : public LoadILLINX, public API::DeprecatedAlgorithm {
+class DLLExport LoadILL : public LoadILLTOF, public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   LoadILL();
