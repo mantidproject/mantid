@@ -51,6 +51,9 @@ void SaveLauenorm::init() {
   declareProperty("WidthBorder", EMPTY_INT(), "Width of border of detectors");
   declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive,
                   "The minimum Intensity");
+  declareProperty("UseDetScale", false,
+                  "Scale intensity and sigI by scale factor of detector if set in SetDetScale.\n"
+                  "If false, no change (default).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -101,18 +104,20 @@ void SaveLauenorm::exec() {
   std::string convention = ConfigService::Instance().getString("Q.convention");
   if (convention == "Crystallography")
     qSign = 1.0;
-
+  // scaleDet scales intensity and sigI for detector banks
+  bool scaleDet = getProperty("UseDetScale");
+  auto inst = ws->getInstrument();
   // Go through each peak at this run / bank
   for (int wi = 0; wi < ws->getNumberPeaks(); wi++) {
 
     Peak &p = peaks[wi];
-    if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) ||
-        boost::math::isnan(p.getSigmaIntensity()))
+    double intensity=p.getIntensity();
+    double sigI = p.getSigmaIntensity();
+    if (intensity == 0.0 || boost::math::isnan(intensity) ||
+        boost::math::isnan(sigI))
       continue;
     if (minIsigI != EMPTY_DBL() &&
-        p.getIntensity() < std::abs(minIsigI * p.getSigmaIntensity()))
-      continue;
-    if (minIntensity != EMPTY_DBL() && p.getIntensity() < minIntensity)
+        intensity < std::abs(minIsigI * sigI))
       continue;
     int sequence = p.getRunNumber();
     std::string bankName = p.getBankName();
@@ -123,14 +128,24 @@ void SaveLauenorm::exec() {
          p.getCol() > (nCols - widthBorder) ||
          p.getRow() > (nRows - widthBorder)))
       continue;
+    // Take out the "bank" part of the bank name and convert to an int
+    bankName.erase(remove_if(bankName.begin(), bankName.end(),
+                             not1(std::ptr_fun(::isdigit))),
+                   bankName.end());
     if (type.compare(0, 2, "Ru") != 0) {
-      // Take out the "bank" part of the bank name and convert to an int
-      bankName.erase(remove_if(bankName.begin(), bankName.end(),
-                               not1(std::ptr_fun(::isdigit))),
-                     bankName.end());
       Strings::convert(bankName, sequence);
     }
-
+    if(scaleDet) {
+      if (inst->hasParameter("detScale" + bankName))
+      {
+        double correc = static_cast<double>(
+            inst->getNumberParameter("detScale" + bankName)[0]);
+        intensity *= correc;
+        sigI *= correc;
+      }
+    }
+    if (minIntensity != EMPTY_DBL() && intensity < minIntensity)
+      continue;
     // Two-theta = polar angle = scattering angle = between +Z vector and the
     // scattered beam
     double scattering = p.getScattering();
@@ -173,18 +188,18 @@ void SaveLauenorm::exec() {
 
     // SHELX can read data without the space between the l and intensity
     if (p.getDetectorID() != -1) {
-      double ckIntensity = scaleFactor * p.getIntensity();
+      double ckIntensity = scaleFactor * intensity;
       if (ckIntensity > 999999999.985)
         g_log.warning() << "Scaled intensity, " << ckIntensity
                         << " is too large for format.  Decrease ScalePeaks.\n";
       out << std::setw(10) << Utils::round(ckIntensity);
 
-      out << std::setw(10) << Utils::round(scaleFactor * p.getSigmaIntensity());
+      out << std::setw(10) << Utils::round(scaleFactor * sigI);
     } else {
       // This is data from LoadLauenorm which is already corrected
-      out << std::setw(10) << Utils::round(p.getIntensity());
+      out << std::setw(10) << Utils::round(intensity);
 
-      out << std::setw(10) << Utils::round(p.getSigmaIntensity());
+      out << std::setw(10) << Utils::round(sigI);
     }
 
     out << '\n';
