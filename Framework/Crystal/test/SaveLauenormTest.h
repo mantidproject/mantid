@@ -80,37 +80,37 @@ public:
       }
     }
 
-      auto &paramMap = ws->instrumentParameters();
-      paramMap.addDouble(inst.get(), "detScale1", 0.5);
+    auto &paramMap = ws->instrumentParameters();
+    paramMap.addDouble(inst.get(), "detScale1", 0.5);
 
-      SaveLauenorm alg2;
-      TS_ASSERT_THROWS_NOTHING(alg2.initialize())
-      TS_ASSERT(alg2.isInitialized())
-      TS_ASSERT_THROWS_NOTHING(alg2.setProperty("InputWorkspace", ws));
-      TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("Filename", outfile));
-      TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("UseDetScale", "true"));
-      TS_ASSERT_THROWS_NOTHING(alg2.execute(););
-      TS_ASSERT(alg2.isExecuted());
-      // Get the file
-      outfile = alg2.getPropertyValue("Filename") + "001";
-      fileExists = false;
-      TS_ASSERT(fileExists = Poco::File(outfile).exists());
+    SaveLauenorm alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize())
+    TS_ASSERT(alg2.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("InputWorkspace", ws));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("Filename", outfile));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("UseDetScale", "true"));
+    TS_ASSERT_THROWS_NOTHING(alg2.execute(););
+    TS_ASSERT(alg2.isExecuted());
+    // Get the file
+    outfile = alg2.getPropertyValue("Filename") + "001";
+    fileExists = false;
+    TS_ASSERT(fileExists = Poco::File(outfile).exists());
 
-      if (fileExists) {
+    if (fileExists) {
 
-        std::ifstream in(outfile.c_str());
+      std::ifstream in(outfile.c_str());
 
-        double d1, d2, d3, d4, d5, d6, d7;
-        if (numPeaksPerBank > 0) {
-          in >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7;
-          TS_ASSERT_EQUALS(d1, -1);
-          TS_ASSERT_EQUALS(d2, -1);
-          TS_ASSERT_EQUALS(d3, -1);
-          TS_ASSERT_EQUALS(d6, 1);
-          TS_ASSERT_EQUALS(d7, 1);
-          TS_ASSERT_EQUALS(d4, 1.5*0.5);
-          TS_ASSERT_DELTA(d5, 0.21025*0.5, 1e-4);
-        }
+      double d1, d2, d3, d4, d5, d6, d7;
+      if (numPeaksPerBank > 0) {
+        in >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7;
+        TS_ASSERT_EQUALS(d1, -1);
+        TS_ASSERT_EQUALS(d2, -1);
+        TS_ASSERT_EQUALS(d3, -1);
+        TS_ASSERT_EQUALS(d6, 1);
+        TS_ASSERT_EQUALS(d7, 1);
+        TS_ASSERT_EQUALS(d4, 1.5 * 0.5);
+        TS_ASSERT_DELTA(d5, 0.21025 * 0.5, 1e-4);
+      }
     }
 
     if (Poco::File(outfile).exists())

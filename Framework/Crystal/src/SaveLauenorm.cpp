@@ -51,9 +51,10 @@ void SaveLauenorm::init() {
   declareProperty("WidthBorder", EMPTY_INT(), "Width of border of detectors");
   declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive,
                   "The minimum Intensity");
-  declareProperty("UseDetScale", false,
-                  "Scale intensity and sigI by scale factor of detector if set in SetDetScale.\n"
-                  "If false, no change (default).");
+  declareProperty("UseDetScale", false, "Scale intensity and sigI by scale "
+                                        "factor of detector if set in "
+                                        "SetDetScale.\n"
+                                        "If false, no change (default).");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -111,13 +112,12 @@ void SaveLauenorm::exec() {
   for (int wi = 0; wi < ws->getNumberPeaks(); wi++) {
 
     Peak &p = peaks[wi];
-    double intensity=p.getIntensity();
+    double intensity = p.getIntensity();
     double sigI = p.getSigmaIntensity();
     if (intensity == 0.0 || boost::math::isnan(intensity) ||
         boost::math::isnan(sigI))
       continue;
-    if (minIsigI != EMPTY_DBL() &&
-        intensity < std::abs(minIsigI * sigI))
+    if (minIsigI != EMPTY_DBL() && intensity < std::abs(minIsigI * sigI))
       continue;
     int sequence = p.getRunNumber();
     std::string bankName = p.getBankName();
@@ -135,9 +135,8 @@ void SaveLauenorm::exec() {
     if (type.compare(0, 2, "Ru") != 0) {
       Strings::convert(bankName, sequence);
     }
-    if(scaleDet) {
-      if (inst->hasParameter("detScale" + bankName))
-      {
+    if (scaleDet) {
+      if (inst->hasParameter("detScale" + bankName)) {
         double correc = static_cast<double>(
             inst->getNumberParameter("detScale" + bankName)[0]);
         intensity *= correc;

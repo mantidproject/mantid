@@ -47,6 +47,11 @@ Single Crystal Diffraction
   used in anvred3.py, so DetScaleList input can be pasted from the definition of detScale there.  The default values can be
   set in the instrument parameter file. Default values are in the parameter file for the TOPAZ instrument.
 
+- :ref:`SaveLauenorm <algm-SaveLauenorm>`
+  was modified to use the detector bank scales in the instrument parameters. The default values can be
+  set in the instrument parameter file or by
+  :ref:`SetDetScale <algm-SetDetScale>`.
+
 
 Engineering Diffraction
 -----------------------
