@@ -116,33 +116,8 @@ public:
     alg.setPropertyValue("SpectrumMin", "2");
     alg.setPropertyValue("SpectrumMax", "4");
 
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
-
-    // Test some aspects of the file
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(
-        workspace = AnalysisDataService::Instance().retrieve(output_ws));
-    TS_ASSERT(workspace.get());
-
-    MatrixWorkspace_sptr matrix_ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
-    TS_ASSERT(matrix_ws.get());
-
-    // Testing the number of histograms
-    TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(), 3);
-    // Test spectrum numbers are as expected
-    size_t index(0);
-    for (auto spectrum : {3, 4, 5}) {
-      TS_ASSERT_EQUALS(matrix_ws->getSpectrum(index).getSpectrumNo(), spectrum);
-      index++;
-    }
-    doHistoryTest(matrix_ws);
-
-    boost::shared_ptr<const Mantid::Geometry::Instrument> inst =
-        matrix_ws->getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "GEM");
-    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
+    const std::vector<int> expectedSpectra = {3, 4, 5};
+    doSpectrumListTests(alg, expectedSpectra);
   }
 
   void testNexusProcessed_List() {
@@ -155,35 +130,8 @@ public:
     alg.setPropertyValue("OutputWorkspace", output_ws);
     alg.setPropertyValue("SpectrumList", "1,2,3,4");
 
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
-
-    // Test some aspects of the file
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(
-        workspace = AnalysisDataService::Instance().retrieve(output_ws));
-    TS_ASSERT(workspace.get());
-
-    MatrixWorkspace_sptr matrix_ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
-    TS_ASSERT(matrix_ws.get());
-
-    // Testing the number of histograms
-    TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(), 4);
-    // Test spectrum numbers
-    size_t index(0);
-    for (auto spectrum : {2, 3, 4, 5}) {
-      TS_ASSERT_EQUALS(matrix_ws->getSpectrum(index).getSpectrumNo(), spectrum);
-      index++;
-    }
-
-    // Test history
-    doHistoryTest(matrix_ws);
-
-    boost::shared_ptr<const Mantid::Geometry::Instrument> inst =
-        matrix_ws->getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "GEM");
-    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
+    const std::vector<int> expectedSpectra = {2, 3, 4, 5};
+    doSpectrumListTests(alg, expectedSpectra);
   }
 
   void testNexusProcessed_Min_Max_List() {
@@ -198,34 +146,8 @@ public:
     alg.setPropertyValue("SpectrumMax", "3");
     alg.setPropertyValue("SpectrumList", "4,5");
 
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-
-    // Test some aspects of the file
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(
-        workspace = AnalysisDataService::Instance().retrieve(output_ws));
-    TS_ASSERT(workspace.get());
-
-    MatrixWorkspace_sptr matrix_ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
-    TS_ASSERT(matrix_ws.get());
-
-    // Testing the number of histograms
-    TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(), 5);
-    // Test spectrum numbers
-    size_t index(0);
-    for (auto spectrum : {2, 3, 4, 5, 6}) {
-      TS_ASSERT_EQUALS(matrix_ws->getSpectrum(index).getSpectrumNo(), spectrum);
-      index++;
-    }
-
-    // Test history
-    doHistoryTest(matrix_ws);
-
-    boost::shared_ptr<const Mantid::Geometry::Instrument> inst =
-        matrix_ws->getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "GEM");
-    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
+    const std::vector<int> expectedSpectra = {2, 3, 4, 5, 6};
+    doSpectrumListTests(alg, expectedSpectra);
   }
 
   void testNexusProcessed_Min() {
@@ -238,28 +160,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", output_ws);
     alg.setPropertyValue("SpectrumMin", "4");
 
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-
-    // Test some aspects of the file
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(
-        workspace = AnalysisDataService::Instance().retrieve(output_ws));
-    TS_ASSERT(workspace.get());
-
-    MatrixWorkspace_sptr matrix_ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
-    TS_ASSERT(matrix_ws.get());
-
-    // Testing the number of histograms
-    TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(), 3);
-
-    // Test history
-    doHistoryTest(matrix_ws);
-
-    boost::shared_ptr<const Mantid::Geometry::Instrument> inst =
-        matrix_ws->getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "GEM");
-    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
+    doSpectrumMinOrMaxTest(alg, 3);
   }
 
   void testNexusProcessed_Max() {
@@ -272,28 +173,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", output_ws);
     alg.setPropertyValue("SpectrumMax", "3");
 
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-
-    // Test some aspects of the file
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING(
-        workspace = AnalysisDataService::Instance().retrieve(output_ws));
-    TS_ASSERT(workspace.get());
-
-    MatrixWorkspace_sptr matrix_ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
-    TS_ASSERT(matrix_ws.get());
-
-    // Testing the number of histograms
-    TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(), 3);
-
-    // Test history
-    doHistoryTest(matrix_ws);
-
-    boost::shared_ptr<const Mantid::Geometry::Instrument> inst =
-        matrix_ws->getInstrument();
-    TS_ASSERT_EQUALS(inst->getName(), "GEM");
-    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
+    doSpectrumMinOrMaxTest(alg, 3);
   }
 
   // Saving and reading masking correctly
@@ -1145,6 +1025,83 @@ private:
     TS_ASSERT_EQUALS(ews->getNumberHistograms(), nSpectra);
 
     TS_ASSERT_EQUALS(ews->getHistory().size(), nHistory);
+  }
+
+  /*
+   * Does a few common checks for using a single spectra property
+   * such as spectrumMin or spectrumMax. Expects the algorithm
+   * passed in to be configured for the test
+   *
+   * @param alg The configured algorithm to be executed
+   * @param expectedSize The number of spectra which should be present
+   */
+  void doSpectrumMinOrMaxTest(LoadNexusProcessed &alg,
+                              const size_t expectedSize) {
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Test some aspects of the file
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(
+        workspace = AnalysisDataService::Instance().retrieve(output_ws));
+    TS_ASSERT(workspace.get());
+
+    MatrixWorkspace_sptr matrix_ws =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    TS_ASSERT(matrix_ws.get());
+
+    // Testing the number of histograms
+    TS_ASSERT_EQUALS(matrix_ws->getNumberHistograms(), expectedSize);
+
+    // Test history
+    doHistoryTest(matrix_ws);
+
+    boost::shared_ptr<const Mantid::Geometry::Instrument> inst =
+        matrix_ws->getInstrument();
+    TS_ASSERT_EQUALS(inst->getName(), "GEM");
+    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
+  }
+
+  /**
+    * Does a few common checks for using spectra lists with/without
+        * spectrum min and/or max being set. Expects the algorithm
+        * passed in to be configured for this test.
+        *
+        * @param alg The configured algorithm to executed
+        * @param expectedSpectra The IDs of the spectrum loaded which should
+        * be present
+        */
+  void doSpectrumListTests(LoadNexusProcessed &alg,
+                           const std::vector<int> expectedSpectra) {
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Test some aspects of the file
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(
+        workspace = AnalysisDataService::Instance().retrieve(output_ws));
+    TS_ASSERT(workspace.get());
+
+    MatrixWorkspace_sptr matrix_ws =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    TS_ASSERT(matrix_ws.get());
+
+    // Test spectrum numbers are as expected
+    size_t index(0);
+    int seenSpectra(0);
+    for (const auto spectrum : expectedSpectra) {
+      TS_ASSERT_EQUALS(matrix_ws->getSpectrum(index).getSpectrumNo(), spectrum);
+      ++index;
+      ++seenSpectra;
+    }
+
+    TS_ASSERT_EQUALS(seenSpectra, expectedSpectra.size());
+
+    doHistoryTest(matrix_ws);
+
+    boost::shared_ptr<const Mantid::Geometry::Instrument> inst =
+        matrix_ws->getInstrument();
+    TS_ASSERT_EQUALS(inst->getName(), "GEM");
+    TS_ASSERT_EQUALS(inst->getSource()->getPos().Z(), -17);
   }
 
   void writeTmpEventNexus() {

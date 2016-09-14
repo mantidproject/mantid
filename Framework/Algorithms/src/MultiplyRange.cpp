@@ -74,13 +74,9 @@ void MultiplyRange::exec() {
   PARALLEL_FOR2(inputWS, outputWS)
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    // Copy over the bin boundaries
-    outputWS->setX(i, inputWS->refX(i));
-    // Copy over the data
-    outputWS->dataY(i) = inputWS->readY(i);
-    outputWS->dataE(i) = inputWS->readE(i);
-    MantidVec &newY = outputWS->dataY(i);
-    MantidVec &newE = outputWS->dataE(i);
+    outputWS->setHistogram(i, inputWS->histogram(i));
+    auto &newY = outputWS->mutableY(i);
+    auto &newE = outputWS->mutableE(i);
 
     // Now multiply the requested range
     std::transform(newY.begin() + startBin, newY.begin() + endBin + 1,
