@@ -207,7 +207,6 @@ void parseISISStringToVector(const std::string &ins,
       tocontinue = false;
   } // END-WHILE
 
-  splitstrings.clear();
 }
 /*
 * Load and parse an ISIS masking file
