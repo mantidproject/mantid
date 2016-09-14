@@ -10,6 +10,9 @@ IndirectSassena::IndirectSassena(QWidget *parent)
   m_uiForm.setupUi(parent);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(handleAlgorithmFinish(bool)));
+  // Handle plotting and saving
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 }
 
 void IndirectSassena::setup() {}
@@ -35,7 +38,6 @@ void IndirectSassena::run() {
   QString inputFileName = m_uiForm.mwInputFile->getFirstFilename();
   QFileInfo inputFileInfo(inputFileName);
   m_outWsName = inputFileInfo.baseName();
-  bool save = m_uiForm.chkSave->isChecked();
 
   // If the workspace group already exists then remove it
   if (AnalysisDataService::Instance().doesExist(m_outWsName.toStdString()))
@@ -55,17 +57,6 @@ void IndirectSassena::run() {
   BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromSassenaAlg;
   inputFromSassenaAlg["InputWorkspace"] = m_outWsName.toStdString();
 
-  if (save) {
-    QString saveFilename = m_outWsName + ".nxs";
-
-    IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus");
-    saveAlg->initialize();
-
-    saveAlg->setProperty("Filename", saveFilename.toStdString());
-
-    m_batchAlgoRunner->addAlgorithm(saveAlg, inputFromSassenaAlg);
-  }
-
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -75,13 +66,14 @@ void IndirectSassena::run() {
  * @param error If the batch was stopped due to error
  */
 void IndirectSassena::handleAlgorithmFinish(bool error) {
-  bool plot = m_uiForm.chkPlot->isChecked();
 
-  // Nothing to do if the algorithm failed or we do not want to plot
-  if (error || !plot)
+  // Nothing to do if the algorithm failed
+  if (error)
     return;
 
-  plotSpectrum(m_outWsName);
+  // Enable plot and save
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 /**
@@ -92,6 +84,23 @@ void IndirectSassena::handleAlgorithmFinish(bool error) {
  */
 void IndirectSassena::loadSettings(const QSettings &settings) {
   m_uiForm.mwInputFile->readSettings(settings.group());
+}
+
+/**
+ * Handle mantid plotting of workspace
+ */
+void IndirectSassena::plotClicked() {
+  if (checkADSForPlotSaveWorkspace(m_outWsName.toStdString(), true))
+    plotSpectrum(m_outWsName);
+}
+
+/**
+* Handle saving of workspace
+*/
+void IndirectSassena::saveClicked() {
+  if (checkADSForPlotSaveWorkspace(m_outWsName.toStdString(), false))
+    addSaveWorkspaceToQueue(m_outWsName);
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 } // namespace CustomInterfaces

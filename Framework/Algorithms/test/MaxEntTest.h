@@ -13,6 +13,9 @@
 
 using namespace Mantid::API;
 using Mantid::MantidVec;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 /**
  * This is a test class that exists to test the method validateInputs()
@@ -152,10 +155,10 @@ public:
     TS_ASSERT(angle);
 
     // Test some values
-    TS_ASSERT_EQUALS(data->readY(0).size(), 50);
-    TS_ASSERT_DELTA(data->readY(0)[25], 0.3112, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[26], 0.4893, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[27], 0.6485, 0.0001);
+    TS_ASSERT_EQUALS(data->y(0).size(), 50);
+    TS_ASSERT_DELTA(data->y(0)[25], 0.3112, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[26], 0.4893, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[27], 0.6485, 0.0001);
   }
 
   void test_sine() {
@@ -186,9 +189,9 @@ public:
     TS_ASSERT(angle);
 
     // Test some values
-    TS_ASSERT_DELTA(data->readY(0)[25], 0.8961, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[26], 0.8257, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[27], 0.7218, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[25], 0.8961, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[26], 0.8257, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[27], 0.7218, 0.0001);
   }
 
   void test_sine_cosine_neg() {
@@ -215,12 +218,12 @@ public:
     TS_ASSERT(data);
 
     // Test some values
-    TS_ASSERT_DELTA(data->readY(0)[35], 0.8489, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[36], 0.6727, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[37], 0.4058, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[35], 0.3288, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[36], 0.6133, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[37], 0.8149, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[35], 0.8489, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[36], 0.6727, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[37], 0.4058, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[35], 0.3288, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[36], 0.6133, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[37], 0.8149, 0.0001);
   }
 
   void test_sine_cosine_pos() {
@@ -248,12 +251,12 @@ public:
     TS_ASSERT(data);
 
     // Test some values
-    TS_ASSERT_DELTA(data->readY(0)[35], 0.8295, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[36], 0.6735, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[37], 0.3935, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[35], 0.3266, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[36], 0.6101, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[37], 0.8074, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[35], 0.8295, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[36], 0.6735, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[37], 0.3935, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[35], 0.3266, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[36], 0.6101, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[37], 0.8074, 0.0001);
   }
 
   void test_sine_cosine_real_image() {
@@ -282,12 +285,12 @@ public:
 
     // Test some values (should be close to those obtained in the previous two
     // tests)
-    TS_ASSERT_DELTA(data->readY(0)[35], 0.8071, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[36], 0.6858, 0.0001);
-    TS_ASSERT_DELTA(data->readY(0)[37], 0.4156, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[35], 0.3305, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[36], 0.6008, 0.0001);
-    TS_ASSERT_DELTA(data->readY(1)[37], 0.7955, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[35], 0.8071, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[36], 0.6858, 0.0001);
+    TS_ASSERT_DELTA(data->y(0)[37], 0.4156, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[35], 0.3305, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[36], 0.6008, 0.0001);
+    TS_ASSERT_DELTA(data->y(1)[37], 0.7955, 0.0001);
   }
 
   void test_resolution_factor() {
@@ -323,11 +326,11 @@ public:
     TS_ASSERT_EQUALS(image->getNumberHistograms(), 2);
 
     // Test some values
-    TS_ASSERT_DELTA(image->readY(0)[70], 6.7631, 0.0001);
+    TS_ASSERT_DELTA(image->y(0)[70], 6.7631, 0.0001);
     // Fails on RHEL and Ubuntu with delta 0.0001
-    TS_ASSERT_DELTA(image->readY(0)[71], 1.3452, 0.001);
-    TS_ASSERT_DELTA(image->readY(1)[78], 0.2293, 0.0001);
-    TS_ASSERT_DELTA(image->readY(1)[79], 0.8566, 0.0001);
+    TS_ASSERT_DELTA(image->y(0)[71], 1.3452, 0.001);
+    TS_ASSERT_DELTA(image->y(1)[78], 0.2293, 0.0001);
+    TS_ASSERT_DELTA(image->y(1)[79], 0.8566, 0.0001);
   }
 
   void test_output_label() {
@@ -469,12 +472,12 @@ public:
 
     // outWS and outWSOffsetted are shifted by ~pi -> there should be a factor
     // ~(-1) between them
-    TS_ASSERT_DELTA(outWS->readY(0)[28], -outWSOffsetted->readY(0)[28], 0.1)
+    TS_ASSERT_DELTA(outWS->y(0)[28], -outWSOffsetted->y(0)[28], 0.1)
   }
 
   void test_unevenlySpacedInputData() {
     auto ws = createWorkspaceReal(3, 0.0);
-    Mantid::MantidVec xData{0, 1, 5};
+    Points xData{0, 1, 5};
     ws->setPoints(0, xData);
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -490,14 +493,14 @@ public:
     // Frequency of the oscillations
     double w = 1.6;
 
-    MantidVec X;
-    MantidVec Y;
-    MantidVec E;
+    MantidVec X(maxt);
+    MantidVec Y(maxt);
+    MantidVec E(maxt);
     for (size_t t = 0; t < maxt; t++) {
       double x = 2. * M_PI * static_cast<double>(t) / static_cast<double>(maxt);
-      X.push_back(x);
-      Y.push_back(cos(w * x + phase));
-      E.push_back(0.1);
+      X[t] = x;
+      Y[t] = cos(w * x + phase);
+      E[t] = 0.1;
     }
     auto createWS = AlgorithmManager::Instance().create("CreateWorkspace");
     createWS->initialize();
@@ -516,46 +519,90 @@ public:
 
     const size_t size = 51;
 
-    // x = 2 * pi * i / N
-    std::array<double, 51> vecx = {
-        {0.0000, 0.1232, 0.2464, 0.3696, 0.4928, 0.6160, 0.7392, 0.8624, 0.9856,
-         1.1088, 1.2320, 1.3552, 1.4784, 1.6016, 1.7248, 1.8480, 1.9712, 2.0944,
-         2.2176, 2.3408, 2.4640, 2.5872, 2.7104, 2.8336, 2.9568, 3.0800, 3.2032,
-         3.3264, 3.4496, 3.5728, 3.6960, 3.8192, 3.9424, 4.0656, 4.1888, 4.3120,
-         4.4352, 4.5584, 4.6816, 4.8048, 4.9280, 5.0512, 5.1744, 5.2976, 5.4208,
-         5.5440, 5.6672, 5.7904, 5.9136, 6.0368, 6.1600}};
-    std::array<double, 51> vecyRe = {
-        {1.07, 0.95, 0.84, 0.51, -0.04, -0.42, -0.47, -0.98, -0.96, -1.03,
-         -0.71, -0.70, -0.13, -0.04, 0.59, 0.84, 0.91, 0.93, 1.03, 0.75, 0.40,
-         0.18, -0.24, -0.48, -0.78, -0.95, -0.94, -0.87, -0.46, -0.19, 0.13,
-         0.35, 0.88, 1.01, 0.92, 0.79, 0.80, 0.44, 0.15, -0.26, -0.49, -0.79,
-         -0.84, -1.04, -0.80, -0.73, -0.26, 0.09, 0.45, 0.67, 0.92}};
-    std::array<double, 51> vecyIm = {
-        {0.07, 0.25, 0.82, 0.75, 1.08, 0.84, 0.82, 0.62, 0.33, -0.20, -0.58,
-         -0.88, -0.85, -1.10, -0.77, -0.59, -0.36, 0.13, 0.39, 0.62, 0.87, 1.03,
-         0.82, 0.94, 0.47, 0.30, -0.22, -0.39, -0.86, -0.91, -0.88, -0.84,
-         -0.59, -0.27, 0.14, 0.36, 0.69, 0.98, 0.98, 0.95, 0.71, 0.41, 0.32,
-         -0.13, -0.53, -0.74, -0.82, -0.91, -0.82, -0.60, -0.32}};
-    std::array<double, 51> vece = {
-        {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
-         0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
-         0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
-         0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1}};
-
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 2, size, size));
 
-    for (size_t i = 0; i < size; i++) {
-      ws->dataX(0)[i] = vecx[i];
-      ws->dataX(1)[i] = vecx[i];
-      ws->dataY(0)[i] = vecyRe[i];
-      ws->dataY(1)[i] = vecyIm[i];
-      ws->dataE(0)[i] = vece[i];
-      ws->dataE(1)[i] = vece[i];
-    }
+    // x = 2 * pi * i / N
+    // Real
+    ws->setHistogram(
+        0,
+        Points{0.0000, 0.1232, 0.2464, 0.3696, 0.4928, 0.6160, 0.7392, 0.8624,
+               0.9856, 1.1088, 1.2320, 1.3552, 1.4784, 1.6016, 1.7248, 1.8480,
+               1.9712, 2.0944, 2.2176, 2.3408, 2.4640, 2.5872, 2.7104, 2.8336,
+               2.9568, 3.0800, 3.2032, 3.3264, 3.4496, 3.5728, 3.6960, 3.8192,
+               3.9424, 4.0656, 4.1888, 4.3120, 4.4352, 4.5584, 4.6816, 4.8048,
+               4.9280, 5.0512, 5.1744, 5.2976, 5.4208, 5.5440, 5.6672, 5.7904,
+               5.9136, 6.0368, 6.1600},
+        Counts{1.07, 0.95, 0.84, 0.51, -0.04, -0.42, -0.47, -0.98, -0.96, -1.03,
+               -0.71, -0.70, -0.13, -0.04, 0.59, 0.84, 0.91, 0.93, 1.03, 0.75,
+               0.40, 0.18, -0.24, -0.48, -0.78, -0.95, -0.94, -0.87, -0.46,
+               -0.19, 0.13, 0.35, 0.88, 1.01, 0.92, 0.79, 0.80, 0.44, 0.15,
+               -0.26, -0.49, -0.79, -0.84, -1.04, -0.80, -0.73, -0.26, 0.09,
+               0.45, 0.67, 0.92},
+        CountStandardDeviations{0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+                                0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+                                0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+                                0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+                                0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1,
+                                0.1, 0.1, 0.1, 0.1, 0.1, 0.1});
+
+    // Imaginary
+    ws->setHistogram(1, ws->points(0),
+                     Counts{0.07, 0.25, 0.82, 0.75, 1.08, 0.84, 0.82, 0.62,
+                            0.33, -0.20, -0.58, -0.88, -0.85, -1.10, -0.77,
+                            -0.59, -0.36, 0.13, 0.39, 0.62, 0.87, 1.03, 0.82,
+                            0.94, 0.47, 0.30, -0.22, -0.39, -0.86, -0.91, -0.88,
+                            -0.84, -0.59, -0.27, 0.14, 0.36, 0.69, 0.98, 0.98,
+                            0.95, 0.71, 0.41, 0.32, -0.13, -0.53, -0.74, -0.82,
+                            -0.91, -0.82, -0.60, -0.32},
+                     ws->countStandardDeviations(0));
 
     return ws;
   }
+};
+
+class MaxEntTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MaxEntTestPerformance *createSuite() {
+    return new MaxEntTestPerformance();
+  }
+  static void destroySuite(MaxEntTestPerformance *suite) { delete suite; }
+
+  MaxEntTestPerformance() {
+    input = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 100);
+    alg = AlgorithmManager::Instance().create("MaxEnt");
+  }
+
+  void testExecReal() {
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", input);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+    alg->execute();
+  }
+
+  void testExecComplex() {
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", input);
+    alg->setPropertyValue("MaxIterations", "1");
+    alg->setProperty("ComplexData", true);
+    alg->setPropertyValue("ReconstructedImage", "image");
+    alg->setPropertyValue("ReconstructedData", "data");
+    alg->setPropertyValue("EvolChi", "evolChi");
+    alg->setPropertyValue("EvolAngle", "evolAngle");
+    alg->execute();
+  }
+
+private:
+  MatrixWorkspace_sptr input;
+  IAlgorithm_sptr alg;
 };
 
 #endif /* MANTID_ALGORITHMS_MAXENTTEST_H_ */
