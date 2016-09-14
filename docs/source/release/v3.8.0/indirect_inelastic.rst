@@ -74,6 +74,12 @@ Load nMoldyn
 
 - New algorithm :ref:`LoadNMoldyn4Ascii1D <algm-LoadNMoldyn4Ascii1D>` has been added to allow 1D nmoldyn data to be loaded in Mantid
 
+Correlations
+~~~~~~~~~~~~
+
+- New algorithms :ref:`VelocityCrossCorrelations <algm-VelocityCrossCorrelations>` and :ref:`VelocityAutoCorrelations <VelocityAutoCorrelations>`
+- New algorithms :ref:`AngularAutoCorrelationsSingleAxis <AngularAutoCorrelationsSingleAxis>` and :ref:`AngularAutoCorrelationsTwoAxes <AngularAutoCorrelationsTwoAxes>`
+
 VESUVIO
 #######
 
@@ -81,7 +87,6 @@ VESUVIO
   Ties can be added within the defintion of the mass profile with the following:
     flags['masses'] = [{'value':1.0079, 'function': 'MultivariateGaussian', 'SigmaX': 5, 'SigmaY': 5, 'SigmaZ': 5, 'ties': 'SigmaX=SigmaY'}]
   The above will tie SigmaX to SigmaY for this MultivariateGaussian in the driver script
-
 
 Improvements
 ------------

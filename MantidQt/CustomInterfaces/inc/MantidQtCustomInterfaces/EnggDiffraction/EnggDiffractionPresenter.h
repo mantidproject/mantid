@@ -368,6 +368,9 @@ private:
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffractionView *const m_view;
 
+  /// Tracks if the view has started to shut down following a close signal
+  bool m_viewHasClosed;
+
   /// Associated model for this presenter (MVP pattern)
   // const boost::scoped_ptr<EnggDiffractionModel> m_model;
 };

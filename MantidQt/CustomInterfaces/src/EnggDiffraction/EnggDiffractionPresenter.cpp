@@ -66,12 +66,12 @@ std::string EnggDiffractionPresenter::g_sumOfFilesFocus = "";
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(nullptr), m_calibFinishedOK(false),
-      m_focusFinishedOK(false), m_rebinningFinishedOK(false),
-      m_view(view) /*, m_model(new EnggDiffractionModel()), */ {
+      m_focusFinishedOK(false), m_rebinningFinishedOK(false), m_view(view),
+      m_viewHasClosed(false) {
   if (!m_view) {
     throw std::runtime_error(
         "Severe inconsistency found. Presenter created "
-        "with an empty/null view (engineeering diffraction interface). "
+        "with an empty/null view (Engineering diffraction interface). "
         "Cannot continue.");
   }
 }
@@ -105,6 +105,15 @@ void EnggDiffractionPresenter::cleanup() {
 
 void EnggDiffractionPresenter::notify(
     IEnggDiffractionPresenter::Notification notif) {
+
+  // Check the view is valid - QT can send multiple notification
+  // signals in any order at any time. This means that it is possible
+  // to receive a shutdown signal and subsequently an input example
+  // for example. As we can't guarantee the state of the viewer
+  // after calling shutdown instead we shouldn't do anything after
+  if (m_viewHasClosed) {
+    return;
+  }
 
   switch (notif) {
 
@@ -614,6 +623,10 @@ void EnggDiffractionPresenter::processRBNumberChange() {
 }
 
 void EnggDiffractionPresenter::processShutDown() {
+  // Set that the view has closed in case QT attempts to fire another
+  // signal whilst we are shutting down. This stops notify before
+  // it hits the switch statement as the view could be in any state.
+  m_viewHasClosed = true;
   m_view->showStatus("Closing...");
   m_view->saveSettings();
   cleanup();

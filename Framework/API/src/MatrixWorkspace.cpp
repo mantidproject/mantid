@@ -827,7 +827,6 @@ double MatrixWorkspace::detectorTwoTheta(const Geometry::IDetector &det) const {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Source and sample are at same position!");
   }
-
   return det.getTwoTheta(samplePos, beamLine);
 }
 
