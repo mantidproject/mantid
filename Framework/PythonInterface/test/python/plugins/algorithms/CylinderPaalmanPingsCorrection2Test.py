@@ -21,6 +21,7 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
                                        XMin=6.8,
                                        XMax=7.9,
                                        BinWidth=0.1)
+
         self._sample_ws = sample
 
         can = Scale(InputWorkspace=sample, Factor=1.2)
@@ -103,7 +104,7 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
         """
         Test simple run with sample workspace only for direct mode
         """
-    
+
         CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
                                        SampleWorkspace=self._sample_ws,
                                        SampleChemicalFormula='H2-O',
@@ -111,7 +112,7 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
                                        SampleOuterRadius=0.1,
                                        Emode='Direct',
                                        Efixed=1.845)
-    
+
         ass_ws_name = self._corrections_ws_name + '_ass'
         self._verify_workspace(ass_ws_name)
 
@@ -159,15 +160,12 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
         CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
                                        SampleWorkspace=self._sample_ws,
                                        SampleChemicalFormula='H2-O',
-                                       SampleDensityType='Number'
-                                       SampleDensity=0.5,
+                                       UseSampleMassDensity=False,
+                                       SampleNumberDensity=0.5,
                                        CanWorkspace=self._can_ws,
                                        CanChemicalFormula='V',
-                                       ContainerDensityType='Number'
-                                       ContainerDensity=0.5)
-                                       
-        # Check sample material
-        
+                                       UseCanMassDensity=False,
+                                       CanNumberDensity=0.5)
 
 
     def test_mass_density_for_sample_can(self):
@@ -178,12 +176,12 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
         CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
                                        SampleWorkspace=self._sample_ws,
                                        SampleChemicalFormula='H2-O',
-                                       SampleDensityType='Mass'
-                                       SampleDenisty=0.5,
+                                       UseSampleMassDensity=True,
+                                       SampleMassDensity=0.5,
                                        CanWorkspace=self._can_ws,
                                        CanChemicalFormula='V',
-                                       ContainerDensityType='Mass'
-                                       ContainerDesnity=0.5)
+                                       UseCanMassDensity=True,
+                                       CanMassDensity=0.5)
 
 
     def test_InterpolateDisabled(self):

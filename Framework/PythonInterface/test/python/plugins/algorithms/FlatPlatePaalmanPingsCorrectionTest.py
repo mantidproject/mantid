@@ -103,7 +103,7 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
         """
         Test simple run with sample workspace only for direct mode
         """
-    
+
         FlatPlatePaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
                                         SampleWorkspace=self._sample_ws,
                                         SampleChemicalFormula='H2-O',
@@ -112,7 +112,7 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
                                         NumberWavelengths=10,
                                         Emode='Direct',
                                         Efixed=1.845)
-    
+
         ass_ws_name = self._corrections_ws_name + '_ass'
         self. _verify_workspace(ass_ws_name)
 
@@ -150,6 +150,37 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
                                         CanChemicalFormula='V')
 
         self._verify_workspaces_for_can()
+
+    def test_number_density_for_sample_can(self):
+        """
+        Test simple run with sample and can workspace and number density for both
+        """
+
+        FlatPlatePaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                       SampleWorkspace=self._sample_ws,
+                                       SampleChemicalFormula='H2-O',
+                                       UseSampleMassDensity=False,
+                                       SampleNumberDensity=0.5,
+                                       CanWorkspace=self._can_ws,
+                                       CanChemicalFormula='V',
+                                       UseCanMassDensity=False,
+                                       CanNumberDensity=0.5)
+
+
+    def test_mass_density_for_sample_can(self):
+        """
+        Test simple run with sample and can workspace and mass density for both
+        """
+
+        FlatPlatePaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                       SampleWorkspace=self._sample_ws,
+                                       SampleChemicalFormula='H2-O',
+                                       UseSampleMassDensity=True,
+                                       SampleMassDensity=0.5,
+                                       CanWorkspace=self._can_ws,
+                                       CanChemicalFormula='V',
+                                       UseCanMassDensity=True,
+                                       CanMassDensity=0.5)
 
 
     def test_InterpolateDisabled(self):
