@@ -11,7 +11,6 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Matrix.h"
 
-//#include "MantidNexus/NexusClasses.h"
 #include "MantidAPI/FileFinder.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -430,7 +429,7 @@ public:
 
   void test_Setting_Group_Lookup_To_Empty_Map_Does_Not_Throw() {
     ExperimentInfo expt;
-    std::map<Mantid::detid_t, std::vector<Mantid::detid_t>> mappings;
+    Mantid::det2group_map mappings;
 
     TS_ASSERT_THROWS_NOTHING(expt.cacheDetectorGroupings(mappings));
   }
@@ -444,7 +443,7 @@ public:
   void
   test_Setting_Group_Lookup_To_Non_Empty_Map_Allows_Retrieval_Of_Correct_IDs() {
     ExperimentInfo expt;
-    std::map<Mantid::detid_t, std::vector<Mantid::detid_t>> mappings;
+    Mantid::det2group_map mappings;
     mappings.emplace(1, std::vector<Mantid::detid_t>(1, 2));
     expt.cacheDetectorGroupings(mappings);
 
