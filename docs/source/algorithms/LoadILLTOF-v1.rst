@@ -25,7 +25,7 @@ Usage
 -----
 
 **Example - Load a regular histogram Nexus file:**
-(see :ref:`algm-LoadILLINX` for more options)
+(see :ref:`algm-LoadILLTOF` for more options)
 
 .. code-block:: python
 
@@ -45,7 +45,7 @@ Output:
 
 **Example - Load a histogram Nexus file where the dispersion peak is higher than the elastic peak.
 An auxiliary vanadium file is needed to locate the elastic peak.:**
-(see :ref:`algm-LoadILLINX` for more options)
+(see :ref:`algm-LoadILLTOF` for more options)
 
 .. code-block:: python
 
@@ -65,7 +65,7 @@ Output:
    This workspace has 2 dimensions and has 98305 histograms.
 
 **Example - Same example as above, but the vanadium file is loaded in advance. The dataset for the dispersion peak is loaded after, using the auxiliary vanadium workspace.:**
-(see :ref:`algm-LoadILLINX` for more options)
+(see :ref:`algm-LoadILLTOF` for more options)
 
 .. code-block:: python
 
