@@ -246,7 +246,8 @@ class IntegratePeaksThread(QThread):
         # END-FOR
 
         # terminate the process
-        self.peakMergeSignal.emit(self._expNumber, -1, len(self._scanTupleList), 2)
-        self._mainWindow.ui.tableWidget_mergeScans.select_all_rows(False)
+        mode = int(2)
+        self.peakMergeSignal.emit(self._expNumber, -1, len(self._scanTupleList), mode)
+        # self._mainWindow.ui.tableWidget_mergeScans.select_all_rows(False)
 
         return

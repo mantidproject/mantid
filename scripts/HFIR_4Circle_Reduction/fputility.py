@@ -80,7 +80,7 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
         if 'up' in peak_dict:
             part4 = ''
             for i in range(3):
-                part4 += '%8.2f%8.2f' % (peak_dict['up'][i], peak_dict['us'][i])
+                part4 += '%8.5f%8.5f' % (peak_dict['up'][i], peak_dict['us'][i])
             peak_line += part4
 
         fp_buffer += peak_line + '\n'

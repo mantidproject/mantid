@@ -34,6 +34,7 @@ import guiutility as gutil
 import fourcircle_utility as hb3a
 import plot3dwindow
 from multi_threads_helpers import *
+import absorption
 
 # import line for the UI python class
 from ui_MainWindow import Ui_MainWindow
@@ -184,8 +185,6 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_view_merged_scans_3d)
         self.connect(self.ui.pushButton_showUB, QtCore.SIGNAL('clicked()'),
                      self.do_view_ub)
-        self.connect(self.ui.checkBox_mergeScanTabLorentzCorr, QtCore.SIGNAL('stateChanged(int)'),
-                     self.evt_apply_lorentz_correction_mt)
         self.connect(self.ui.pushButton_exportPeaks, QtCore.SIGNAL('clicked()'),
                      self.do_export_to_fp)
         self.connect(self.ui.pushButton_selectAllScans2Merge, QtCore.SIGNAL('clicked()'),
@@ -323,8 +322,12 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tableWidget_kShift.setup()
 
         # Radio buttons
-        self.ui.radioButton_hklFromSPICE.setChecked(True)
-        self.ui.radioButton_indexFromCalUB.setChecked(False)
+        self.ui.comboBox_indexFrom.clear()
+        self.ui.comboBox_indexFrom.addItem('By calculation')
+        self.ui.comboBox_indexFrom.addItem('From SPICE')
+
+        # self.ui.radioButton_hklFromSPICE.setChecked(True)
+        # self.ui.radioButton_indexFromCalUB.setChecked(False)
 
         # combo-box
         self.ui.comboBox_kVectors.clear()
@@ -983,9 +986,7 @@ class MainWindow(QtGui.QMainWindow):
         # write
         user_header = str(self.ui.lineEdit_fpHeader.text())
         try:
-            # TODO/NOW/ - Need to make lattice parameter a better place to go
-            import absorption
-
+            # get lattice parameters from UB tab
             a = float(self.ui.lineEdit_aUnitCell.text())
             b = float(self.ui.lineEdit_bUnitCell.text())
             c = float(self.ui.lineEdit_cUnitCell.text())
@@ -2069,7 +2070,8 @@ class MainWindow(QtGui.QMainWindow):
         """
         # get the parameters
         exp_number = int(self.ui.lineEdit_exp.text())
-        hkl_from_spice = self.ui.radioButton_hklFromSPICE.isChecked()
+        hkl_src = str(self.ui.comboBox_indexFrom.currentText())
+
         round_hkl = self.ui.checkBox_roundHKL.isChecked()
 
         # loop through all rows
@@ -2079,7 +2081,7 @@ class MainWindow(QtGui.QMainWindow):
             scan_i = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
 
             # get or calculate HKL
-            if hkl_from_spice:
+            if hkl_src == 'From SPICE':
                 # get HKL from SPICE
                 hkl_i = self._myControl.get_peak_info(exp_number, scan_number=scan_i).get_spice_hkl()
             else:
@@ -2090,7 +2092,7 @@ class MainWindow(QtGui.QMainWindow):
                     print 'Error to get UB matrix: %s' % str(key_err)
                     self.pop_one_button_dialog('Unable to get UB matrix.\nCheck whether UB matrix is set.')
                     return
-                index_status, ret_tup = self._myControl.index_peak(ub_matrix, scan_i)
+                index_status, ret_tup = self._myControl.index_peak(ub_matrix, scan_i, allow_magnetic=True)
                 if index_status:
                     hkl_i = ret_tup[0]
                 else:
@@ -2895,6 +2897,9 @@ class MainWindow(QtGui.QMainWindow):
 
         elif mode == 2:
             # end of the whole run
+            # apply Lorentz correction
+            self.evt_apply_lorentz_correction_mt()
+
             progress = int(sig_value+0.5)
             self.ui.progressBar_mergeScans.setValue(progress)
 
@@ -2904,6 +2909,7 @@ class MainWindow(QtGui.QMainWindow):
             message = 'Peak integration is over. Used %.2f seconds' % elapsed
 
             self.ui.statusbar.showMessage(message)
+            print '[DB...BAT]', message
 
             # pop error message if there is any
             if len(self._errorMessageEnsemble) > 0:

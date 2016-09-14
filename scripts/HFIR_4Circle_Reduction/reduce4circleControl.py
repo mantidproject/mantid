@@ -629,7 +629,7 @@ class CWSCDReductionControl(object):
 
                 spice_ub = convert_mantid_ub_to_spice(ub_matrix)
                 up_cart, us_cart = absorption.calculate_absorption_correction_2(
-                    exp_number, scan_number, lattice, spice_ub)
+                    exp_number, scan_number, spice_ub)
                 peak_dict['up'] = up_cart
                 peak_dict['us'] = us_cart
 
@@ -1071,10 +1071,11 @@ class CWSCDReductionControl(object):
 
         return p_key in self._myPeakInfoDict
 
-    def index_peak(self, ub_matrix, scan_number):
+    def index_peak(self, ub_matrix, scan_number, allow_magnetic=False):
         """ Index peaks in a Pt. by create a temporary PeaksWorkspace which contains only 1 peak
         :param ub_matrix: numpy.ndarray (3, 3)
         :param scan_number:
+        :param allow_magnetic: flag to allow magnetic reflections
         :return: boolean, object (list of HKL or error message)
         """
         # Check
@@ -1111,8 +1112,13 @@ class CWSCDReductionControl(object):
 
         # Note: IndexPeaks and CalculatePeaksHKL do the same job
         #       while IndexPeaks has more control on the output
+        if allow_magnetic:
+            tol = 0.5
+        else:
+            tol = 0.3
+
         num_peak_index, error = api.IndexPeaks(PeaksWorkspace=temp_index_ws_name,
-                                               Tolerance=0.4,
+                                               Tolerance=tol,
                                                RoundHKLs=False)
         temp_index_ws = AnalysisDataService.retrieve(temp_index_ws_name)
 

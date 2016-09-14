@@ -184,7 +184,6 @@ class NTableWidget(QtGui.QTableWidget):
         # check
         assert isinstance(status, bool)
         assert self._statusColName is not None
-        print 'Status column name = ', self._statusColName
         index_status = self._myColumnNameList.index(self._statusColName)
 
         # loop over all the rows

@@ -259,7 +259,7 @@ def get_average_omega(exp_number, scan_number):
     :return:
     """
     # get table workspace
-    # FIXME - this is very vulnerable for hardcode the workspace's name
+    # FIXME - this is very vulnerable due to hard coding the workspace's name
     spice_table_name = 'HB3A_Exp%d_%04d_SpiceTable' % (exp_number, scan_number)
     spice_table = AnalysisDataService.retrieve(spice_table_name)
 
@@ -318,7 +318,8 @@ def calculate_absorption_correction_2(exp_number, scan_number, spice_ub_matrix):
     phiave = get_average_spice_table(exp_number, scan_number, 'phi')  # sum(phi(:))/length(phi);
     avg_omega = get_average_omega(exp_number, scan_number)
     
-    print '[DB...TEST] Exp = %d Scan = %d:\n2theta = %f, chi = %f, phi = %f, omega = %f' % (exp_number, scan_number, theta2ave, chiave, phiave, avg_omega)
+    print '[DB...TEST] Exp = %d Scan = %d:\n2theta = %f, chi = %f, phi = %f, omega = %f' % (
+        exp_number, scan_number, theta2ave, chiave, phiave, avg_omega)
 
     up_phi = calculate_upphi(avg_omega, theta2ave, chiave, phiave)
     us_phi = calculate_usphi(avg_omega, theta2ave, chiave, phiave)
@@ -346,18 +347,10 @@ def calculate_absorption_correction_2(exp_number, scan_number, spice_ub_matrix):
     return up_cart, us_cart
     
 # Test ... ...
-
-test_lattice = Lattice(4.32765, 4.32765, 11.25736, 90., 90., 90.)
-ub_matrix = numpy.array([[-0.1482003, -0.0376897, 0.0665967], [-0.0494848, 0.2256107, 0.0025953],[-0.1702423, -0.0327691, -0.0587285]])
-# ub_matrix_5k = convert_mantid_ub_to_spice(ub_matrix)
-ub_matrix_5k = numpy.array([[-0.149514, -0.036502, 0.066258], [0.168508, 0.028803, 0.059636], [-0.045800, 0.225134, 0.003113]])
-upcart, uscart = calculate_absorption_correction_2(522, 52,  ub_matrix_5k)
-print upcart
-print uscart
-
-
-
-
-
-
-        
+# test_lattice = Lattice(4.32765, 4.32765, 11.25736, 90., 90., 90.)
+# ub_matrix = numpy.array([[-0.1482003, -0.0376897, 0.0665967], [-0.0494848, 0.2256107, 0.0025953],[-0.1702423, -0.0327691, -0.0587285]])
+# # ub_matrix_5k = convert_mantid_ub_to_spice(ub_matrix)
+# ub_matrix_5k = numpy.array([[-0.149514, -0.036502, 0.066258], [0.168508, 0.028803, 0.059636], [-0.045800, 0.225134, 0.003113]])
+# upcart, uscart = calculate_absorption_correction_2(522, 52,  ub_matrix_5k)
+# print upcart
+# print uscart
