@@ -165,11 +165,24 @@ void CalcCountRate::exec() {
         "Can not sum spectra of input event workspace: " + sourceWS->name());
   }
   //-------------------------------------
+  // identify ranges for count rate calculations
   this->setWSDataRanges(m_workingWS);
 
+  // create results log and add it to the source workspace
   std::string logname = getProperty("CountRateLogName");
   auto newlog = new Kernel::TimeSeriesProperty<double>(logname);
   sourceWS->mutableRun().addProperty(newlog, true);
+
+  // calculate averages requested and modify results log
+  this->calcRateLog(m_workingWS,newlog);
+
+
+  // clear up log derivative and existing log pointer (if any)
+  // to avoid incorrect usage
+  // at subsequent calls to the same algorithm.
+  m_logDerivHolder.release();
+  m_pNormalizationLog = nullptr;
+
   /*
 
   auto newlog = new TimeSeriesProperty<double>(logname);
@@ -199,9 +212,14 @@ void CalcCountRate::exec() {
 
     */
 }
+void CalcCountRate::calcRateLog(DataObjects::EventWorkspace_sptr &InputWorkspace,
+    Kernel::TimeSeriesProperty<double> *const targLog) {
+
+}
+
 /*Analyse input log parameters and logs, attached to the workspace and identify
  * the parameters of the target log
- @param InputWorkspace -- input workspace to analyze logs
+ @param InputWorkspace -- input workspace to analyse logs
  */
 void CalcCountRate::setOutLogParameters(
     const DataObjects::EventWorkspace_sptr &InputWorkspace) {
@@ -229,34 +247,37 @@ void CalcCountRate::setOutLogParameters(
     if (useLogAccuracy) {
       g_log.warning() << "Using accuracy of the log " << NormLogName
                       << " is requested but the log is not attached to the "
-                         "workspace. Will use accurace defined by "
+                         "workspace. Will use accuracy defined by "
                          "'NumTimeSteps' property value\n";
       useLogAccuracy = false;
     }
+  } else {
+    m_pNormalizationLog =
+        InputWorkspace->run().getTimeSeriesProperty<double>(NormLogName);
   }
-  else {
-      m_pNormalizationLog = InputWorkspace->run().getTimeSeriesProperty<double>(NormLogName);
-  }
-  // Analyze properties interactions
-  if (useLogDerivative) {
 
+  // Analyse properties interactions
+
+  // if property derivative is specified.
+  if (useLogDerivative) {
+    m_logDerivHolder = m_pNormalizationLog->getDerivative();
+    m_pNormalizationLog = m_logDerivHolder.get();
   }
 
   ///
   if (useLogAccuracy) {
-      m_numLogSteps = m_pNormalizationLog->realSize();
-  }
-  else {
-      m_numLogSteps = getProperty("NumTimeSteps");
+    m_numLogSteps = m_pNormalizationLog->realSize();
+  } else {
+    m_numLogSteps = getProperty("NumTimeSteps");
   }
 }
 
 /* Retrieve and define data search ranges from input workspace parameters and
  * algorithm properties
  *
- *@param InputWorkspace -- event workspace to process. Also retrieves algorithm 
+ *@param InputWorkspace -- event workspace to process. Also retrieves algorithm
  *                         properties, relevant to the workspace.
- *@return -- the input workspace cropped accoding to XMin-XMax ranges in units,
+ *@return -- the input workspace cropped according to XMin-XMax ranges in units,
  *           requested by the user
  *
 */
@@ -274,7 +295,7 @@ void CalcCountRate::setWSDataRanges(
     InputWorkspace->getEventXMinMax(m_XRangeMin, m_XRangeMax);
     return;
   }
-  // Search wihin partial range;
+  // Search within partial range;
   std::string RangeUnits = getProperty("RangeUnits");
   auto axis = InputWorkspace->getAxis(0);
   const auto unit = axis->unit();
@@ -300,12 +321,11 @@ void CalcCountRate::setWSDataRanges(
   } else {
     wst = InputWorkspace;
   }
-  auto wste  =
-      boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(wst);
-  if(!wste) {
-    throw std::runtime_error(
-    "SetWSDataRanges:Can not retrieve EventWorkspace after converting units");
-   }
+  auto wste = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(wst);
+  if (!wste) {
+    throw std::runtime_error("SetWSDataRanges:Can not retrieve EventWorkspace "
+                             "after converting units");
+  }
   // here the ranges have been changed so both will newer remain defaults
   double realMin, realMax;
   wste->getEventXMinMax(realMin, realMax);
@@ -317,14 +337,14 @@ void CalcCountRate::setWSDataRanges(
     m_XRangeMax = realMax;
   }
   if (m_XRangeMin < realMin) {
-      g_log.debug()<<"Workspace constrain min range changed from: "
-      << m_XRangeMin << " To: " << realMin << std::endl;
-      m_XRangeMin = realMin;
+    g_log.debug() << "Workspace constrain min range changed from: "
+                  << m_XRangeMin << " To: " << realMin << std::endl;
+    m_XRangeMin = realMin;
   }
   if (m_XRangeMax > realMax) {
-      g_log.debug() << "Workspace constrain max range changed from: "
-          << m_XRangeMax  << " To: " << realMax << std::endl;
-      m_XRangeMax = realMax;
+    g_log.debug() << "Workspace constrain max range changed from: "
+                  << m_XRangeMax << " To: " << realMax << std::endl;
+    m_XRangeMax = realMax;
   }
 
   //
@@ -345,6 +365,15 @@ void CalcCountRate::setWSDataRanges(
         "Can not crop input workspace within the XMin-XMax ranges requested");
   }
 }
+/** Helper function, mainly for testing
+* @return  true if count rate should be normalized and false
+* otherwise */
+bool CalcCountRate::notmalizeCountRate() const {
+  return (m_pNormalizationLog != nullptr);
+}
+/** Helper function, mainly for testing
+* @return  true if log derivative is used instead of log itself */
+bool CalcCountRate::useLogDerivative() const { return bool(m_logDerivHolder); }
 
 } // namespace Algorithms
 } // namespace Mantid

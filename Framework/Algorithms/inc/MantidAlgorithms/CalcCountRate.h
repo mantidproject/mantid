@@ -49,19 +49,26 @@ public:
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
+  /// Helper function: true if count rate should be normalized and false
+  /// otherwise
+  bool notmalizeCountRate() const;
+  /// Helper function to test if log derivative is used
+  bool useLogDerivative() const;
 
 private:
   void init() override;
   void exec() override;
+  // holder of the derivative of the time series log, if one is used;
+  std::unique_ptr<Kernel::TimeSeriesProperty<double>> m_logDerivHolder;
 
 protected: // for testing, actually private
   /// pointer to the log used to normalize results or NULL if no such log
   /// present on input workspace.
-  Kernel::TimeSeriesProperty<double> const * m_pNormalizationLog{nullptr};
+  Kernel::TimeSeriesProperty<double> const *m_pNormalizationLog{nullptr};
   /// default number of points in the target log
-  size_t m_numLogSteps{100};
+  int m_numLogSteps{200};
 
-  /// specifies if rate is calculated in selected frame interval (range defined)
+  /// specify if rate is calculated in selected frame interval (range defined)
   /// or all frame should be used
   bool m_rangeExplicit{false};
   /// spurion search ranges
@@ -73,6 +80,9 @@ protected: // for testing, actually private
 
   void
   setOutLogParameters(const DataObjects::EventWorkspace_sptr &InputWorkspace);
+
+  void calcRateLog(DataObjects::EventWorkspace_sptr &InputWorkspace,
+                        Kernel::TimeSeriesProperty<double> *const targLog);
 };
 
 } // namespace Algorithms
