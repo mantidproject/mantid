@@ -10,6 +10,7 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 
+#include <algorithm>
 #include <fstream>
 
 #include <boost/lexical_cast.hpp>
@@ -65,12 +66,12 @@ std::string EnggDiffractionPresenter::g_sumOfFilesFocus = "";
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(nullptr), m_calibFinishedOK(false),
-      m_focusFinishedOK(false), m_rebinningFinishedOK(false),
-      m_view(view) /*, m_model(new EnggDiffractionModel()), */ {
+      m_focusFinishedOK(false), m_rebinningFinishedOK(false), m_view(view),
+      m_viewHasClosed(false) {
   if (!m_view) {
     throw std::runtime_error(
         "Severe inconsistency found. Presenter created "
-        "with an empty/null view (engineeering diffraction interface). "
+        "with an empty/null view (Engineering diffraction interface). "
         "Cannot continue.");
   }
 }
@@ -94,10 +95,25 @@ void EnggDiffractionPresenter::cleanup() {
     delete m_workerThread;
     m_workerThread = nullptr;
   }
+
+  // Remove the workspace which is loaded when the interface starts
+  auto &ADS = Mantid::API::AnalysisDataService::Instance();
+  if (ADS.doesExist(g_calibBanksParms)) {
+    ADS.remove(g_calibBanksParms);
+  }
 }
 
 void EnggDiffractionPresenter::notify(
     IEnggDiffractionPresenter::Notification notif) {
+
+  // Check the view is valid - QT can send multiple notification
+  // signals in any order at any time. This means that it is possible
+  // to receive a shutdown signal and subsequently an input example
+  // for example. As we can't guarantee the state of the viewer
+  // after calling shutdown instead we shouldn't do anything after
+  if (m_viewHasClosed) {
+    return;
+  }
 
   switch (notif) {
 
@@ -607,6 +623,10 @@ void EnggDiffractionPresenter::processRBNumberChange() {
 }
 
 void EnggDiffractionPresenter::processShutDown() {
+  // Set that the view has closed in case QT attempts to fire another
+  // signal whilst we are shutting down. This stops notify before
+  // it hits the switch statement as the view could be in any state.
+  m_viewHasClosed = true;
   m_view->showStatus("Closing...");
   m_view->saveSettings();
   cleanup();
@@ -1058,18 +1078,22 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   MatrixWorkspace_sptr vanCurvesWS;
   MatrixWorkspace_sptr ceriaWS;
 
+  // Append current instrument name if numerical only entry
+  // to help Load algorithm determine instrument
+  std::string vanFileHint, cerFileHint;
+  appendCalibInstPrefix(vanNo, ceriaNo, vanFileHint, cerFileHint);
+
   // save vanIntegWS and vanCurvesWS as open genie
   // see where spec number comes from
 
-  loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
+  loadOrCalcVanadiumWorkspaces(vanFileHint, cs.m_inputDirCalib, vanIntegWS,
                                vanCurvesWS, cs.m_forceRecalcOverwrite, specNos);
 
-  const std::string instStr = m_view->currentInstrument();
   try {
     auto load =
         Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
     load->initialize();
-    load->setPropertyValue("Filename", instStr + ceriaNo);
+    load->setPropertyValue("Filename", cerFileHint);
     const std::string ceriaWSName = "engggui_calibration_sample_ws";
     load->setPropertyValue("OutputWorkspace", ceriaWSName);
     load->execute();
@@ -1126,44 +1150,35 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   for (size_t i = 0; i < difc.size(); i++) {
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
         "EnggCalibrate");
-    try {
-      alg->initialize();
-      alg->setProperty("InputWorkspace", ceriaWS);
-      alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
-      alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
-      if (specNumUsed) {
-        alg->setPropertyValue(g_calibCropIdentifier,
-                              boost::lexical_cast<std::string>(specNos));
-      } else {
-        alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
-      }
-      const std::string outFitParamsTblName =
-          outFitParamsTblNameGenerator(specNos, i);
-      alg->setPropertyValue("FittedPeaks", outFitParamsTblName);
-      alg->setPropertyValue("OutputParametersTableName", outFitParamsTblName);
-      alg->execute();
-    } catch (std::runtime_error &re) {
+
+    alg->initialize();
+    alg->setProperty("InputWorkspace", ceriaWS);
+    alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
+    alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
+    if (specNumUsed) {
+      alg->setPropertyValue(g_calibCropIdentifier,
+                            boost::lexical_cast<std::string>(specNos));
+    } else {
+      alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
+    }
+    const std::string outFitParamsTblName =
+        outFitParamsTblNameGenerator(specNos, i);
+    alg->setPropertyValue("FittedPeaks", outFitParamsTblName);
+    alg->setPropertyValue("OutputParametersTableName", outFitParamsTblName);
+    alg->execute();
+    if (!alg->isExecuted()) {
       g_log.error() << "Error in calibration. ",
-          "Could not run the algorithm EnggCalibrate succesfully for bank " +
-              boost::lexical_cast<std::string>(i) + ". Error description: " +
-              re.what() + " Please check also the log messages for details.";
-      throw;
+          "Could not run the algorithm EnggCalibrate successfully for bank " +
+              boost::lexical_cast<std::string>(i);
+      throw std::runtime_error("EnggCalibrate failed");
     }
 
-    try {
-      difc[i] = alg->getProperty("DIFC");
-      tzero[i] = alg->getProperty("TZERO");
-    } catch (std::runtime_error &rexc) {
-      g_log.error() << "Error in calibration. ",
-          "The calibration algorithm EnggCalibrate run succesfully but could "
-          "not retrieve the outputs DIFC and TZERO. Error description: " +
-              std::string(rexc.what()) +
-              " Please check also the log messages for additional details.";
-      throw;
-    }
+    difc[i] = alg->getProperty("DIFC");
+    tzero[i] = alg->getProperty("TZERO");
 
-    g_log.notice() << " * Bank " << i + 1 << " calibrated, "
-                   << "difc: " << difc[i] << ", zero: " << tzero[i] << '\n';
+    g_log.information() << " * Bank " << i + 1 << " calibrated, "
+                        << "difc: " << difc[i] << ", zero: " << tzero[i]
+                        << '\n';
   }
 
   // Creates appropriate output directory
@@ -1185,6 +1200,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   // specific bank name as suffix
   for (size_t bankIdx = 0; bankIdx < difc.size(); ++bankIdx) {
     Poco::Path bankOutputFullPath(saveDir);
+    // Need to use van number not file name here else it will be
+    // "ENGINX_ENGINX12345_ENGINX12345...." as out name
     const std::string bankFilename = buildCalibrateSuggestedFilename(
         vanNo, ceriaNo, "bank_" + bankNames[bankIdx]);
     bankOutputFullPath.append(bankFilename);
@@ -1209,6 +1226,51 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   // plots the calibrated workspaces.
   g_plottingCounter++;
   plotCalibWorkspace(difc, tzero, specNos);
+}
+
+/**
+  * Appends the current instrument as a filename prefix for numeric
+  * only inputs of the Vanadium run so Load can find the file
+  *
+  * @param vanNo The user input for the vanadium run
+  * @param outVanName The fixed filename for the vanadium run
+  */
+void EnggDiffractionPresenter::appendCalibInstPrefix(
+    const std::string vanNo, std::string &outVanName) const {
+  // Use a single non numeric digit so we are guaranteed to skip
+  // generating cerium file names
+  const std::string cer = "-";
+  std::string outCerName;
+  appendCalibInstPrefix(vanNo, cer, outVanName, outCerName);
+}
+
+/**
+  * Appends the current instrument as a filename prefix for numeric
+  * only inputs of both the Vanadium and Cerium Oxide runs so Load
+  * can find the files.
+  *
+  * @param vanNo The user input for the vanadium run
+  * @param cerNo The user input for the cerium run
+  * @param outVanName The fixed filename for the vanadium run
+  * @param outCerName The fixed filename for the cerium run
+  */
+void EnggDiffractionPresenter::appendCalibInstPrefix(
+    const std::string vanNo, const std::string cerNo, std::string &outVanName,
+    std::string &outCerName) const {
+  // If the file is numerical only we need to append
+  // it in case the favorite instrument isn't set to ENGINX
+  const std::string currentInst = m_view->currentInstrument();
+  // Vanadium file
+  if (std::all_of(vanNo.begin(), vanNo.end(), ::isdigit)) {
+    // This only has digits - append prefix
+    outVanName = currentInst + vanNo;
+  }
+
+  // Cerium file
+  if (std::all_of(cerNo.begin(), cerNo.end(), ::isdigit)) {
+    // All digits - append inst prefix
+    outCerName = currentInst + cerNo;
+  }
 }
 
 /**
@@ -1663,7 +1725,14 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   MatrixWorkspace_sptr inWS;
 
   const std::string vanNo = m_view->currentVanadiumNo();
-  loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
+
+  // Append instrument name if numerical only entry to help load
+  std::string vanFileHint;
+  // We dont need cerium file name so just pass vanadium number twice and
+  // ignore return
+  appendCalibInstPrefix(vanNo, vanFileHint);
+
+  loadOrCalcVanadiumWorkspaces(vanFileHint, cs.m_inputDirCalib, vanIntegWS,
                                vanCurvesWS, cs.m_forceRecalcOverwrite, "");
 
   const std::string inWSName = "engggui_focusing_input_ws";
@@ -1862,7 +1931,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
   findPrecalcVanadiumCorrFilenames(vanNo, inputDirCalib, preIntegFilename,
                                    preCurvesFilename, foundPrecalc);
 
-  // if pre caluclated not found ..
+  // if pre calculated not found ..
   if (forceRecalc || !foundPrecalc) {
     g_log.notice() << "Calculating Vanadium corrections. This may take a "
                       "few seconds...\n";

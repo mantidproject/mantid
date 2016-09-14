@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/InterpolatingRebin.h"
@@ -14,6 +15,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using Mantid::HistogramData::LinearGenerator;
 
 class InterpolatingRebinTest : public CxxTest::TestSuite {
 public:
@@ -291,14 +293,14 @@ private:
     retVal->initialize(2, nBins + 1, nBins);
 
     // the first histogram has all zeros
+    retVal->setBinEdges(0, nBins + 1, LinearGenerator(0.0, 1.0));
     for (int i = 0; i < nBins - 1; i++) {
-      retVal->dataX(0)[i] = 0;
       retVal->dataY(0)[i] = 0;
       retVal->dataE(0)[i] = 0;
     }
     // the second has NAN values
+    retVal->setBinEdges(1, nBins + 1, LinearGenerator(0.0, 1.0));
     for (int i = 0; i < nBins - 1; i++) {
-      retVal->dataX(1)[i] = i;
       retVal->dataY(1)[i] = std::numeric_limits<double>::quiet_NaN();
       retVal->dataE(1)[i] = 2;
     }

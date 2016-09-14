@@ -11,6 +11,7 @@
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include <boost/algorithm/string/find.hpp>
+#include <QMessageBox>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -297,6 +298,57 @@ void IndirectTab::plotSpectrum(const QString &workspaceName, int specStart,
 }
 
 /**
+* Creates a spectrum plot of one or more workspaces with a set
+*  of spectra specified in a vector
+*
+* This uses the plotSpectrum function from the Python API.
+*
+* @param workspaceNames List of names of workspaces to plot
+* @param wsIndices List of indices of spectra to plot
+*/
+void IndirectTab::plotSpectra(const QStringList &workspaceNames,
+                              const std::vector<int> &wsIndices) {
+  if (workspaceNames.isEmpty()) {
+    return;
+  }
+  if (wsIndices.empty()) {
+    return;
+  }
+  QString pyInput = "from mantidplot import plotSpectrum\n";
+
+  pyInput += "plotSpectrum(['";
+  pyInput += workspaceNames.join("','");
+  pyInput += "'], [";
+  pyInput += QString::number(wsIndices[0]);
+  for (size_t i = 1; i < wsIndices.size(); i++) {
+    pyInput += " ,";
+    pyInput += QString::number(wsIndices[i]);
+  }
+  pyInput += "])\n";
+  m_pythonRunner.runPythonCode(pyInput);
+}
+
+/**
+* Creates a spectrum plot of a single workspace with a set
+*  of spectra specified in a vector
+*
+* @param workspaceName Name of workspace to plot
+* @param wsIndices List of indices of spectra to plot
+*/
+void IndirectTab::plotSpectra(const QString &workspaceName,
+                              const std::vector<int> &wsIndices) {
+  if (workspaceName.isEmpty()) {
+    return;
+  }
+  if (wsIndices.empty()) {
+    return;
+  }
+  QStringList workspaceNames;
+  workspaceNames << workspaceName;
+  plotSpectra(workspaceNames, wsIndices);
+}
+
+/**
  * Plots a contour (2D) plot of a given workspace.
  *
  * This uses the plot2D function from the Python API.
@@ -527,6 +579,30 @@ void IndirectTab::algorithmFinished(bool error) {
  */
 QString IndirectTab::runPythonCode(QString code, bool no_output) {
   return m_pythonRunner.runPythonCode(code, no_output);
+}
+
+/**
+ * Checks if the ADS contains a workspace and opens a message box if not
+ * @param workspaceName The name of the workspace to look for
+ * @param plotting if true use plotting error message, false use saving error
+ * message
+ * @return False if no workpsace found, True if workspace found
+ */
+bool IndirectTab::checkADSForPlotSaveWorkspace(const std::string &workspaceName,
+                                               const bool &plotting) {
+  const auto workspaceExists =
+      AnalysisDataService::Instance().doesExist(workspaceName);
+  if (workspaceExists) {
+    return true;
+  } else {
+    const std::string plotSave = plotting ? "plotting" : "saving";
+    const auto errorMessage = "Error while " + plotSave +
+                              ":\nThe workspace \"" + workspaceName +
+                              "\" could not be found.";
+    const char *textMessage = errorMessage.c_str();
+    QMessageBox::warning(NULL, tr("Workspace not found"), tr(textMessage));
+    return false;
+  }
 }
 
 } // namespace CustomInterfaces

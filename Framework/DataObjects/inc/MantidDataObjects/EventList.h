@@ -158,8 +158,6 @@ public:
 
   void setMRU(EventWorkspaceMRU *newMRU);
 
-  EventWorkspaceMRU *getMRU();
-
   void clearData() override;
 
   void reserve(size_t num) override;

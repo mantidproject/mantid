@@ -31,7 +31,7 @@
 #include "Grid.h"
 #include "ColorBox.h"
 
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include <qwt_plot_canvas.h>
 #include <qwt_painter.h>
@@ -261,7 +261,7 @@ void Grid::copy(Grid *grid) {
 }
 
 std::string Grid::saveToString() {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
   tsv.writeLine("grid");
 
   tsv << xEnabled() << xMinEnabled();

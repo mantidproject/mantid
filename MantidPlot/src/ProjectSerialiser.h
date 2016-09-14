@@ -1,5 +1,5 @@
-#ifndef PROJECTMANAGER_H
-#define PROJECTMANAGER_H
+#ifndef PROJECT_SERIALISER_H
+#define PROJECT_SERIALISER_H
 
 #include <string>
 
@@ -10,8 +10,12 @@
 #include <QDir>
 #include <QApplication>
 
+#include "MantidQtAPI/TSVSerialiser.h"
+
 #include "qstring.h"
 #include "Folder.h"
+#include "Graph3D.h"
+#include "Mantid/MantidMatrix.h"
 
 // Forward declare Mantid classes.
 class ApplicationWindow;
@@ -44,6 +48,7 @@ class ApplicationWindow;
 
 namespace MantidQt {
 namespace API {
+
 class ProjectSerialiser {
 public:
   /// Create a new serialiser with the current application window
@@ -91,20 +96,20 @@ private:
   /// Load sections of the folder
   void loadProjectSections(const std::string &lines, const int fileVersion,
                            const bool isTopLevel);
+  /// Load workspaces from the project file
+  void loadWorkspaces(const TSVSerialiser &tsv);
+  /// Load project windows from the project file
+  void loadWindows(const TSVSerialiser &tsv, const int fileVersion);
+  /// Load all subfolders of the current folder
+  void loadSubFolders(const TSVSerialiser &tsv, const int fileVersion);
+  /// Load scripts into the script window
+  void loadScriptWindow(const TSVSerialiser &tsv, const int fileVersion);
+  /// Load saved log data into the log
+  void loadLogData(const TSVSerialiser &tsv);
+  /// Load information about the current folder
+  void loadCurrentFolder(const TSVSerialiser &tsv);
   /// Open the script window and load scripts from string
   void openScriptWindow(const std::string &files, const int fileVersion);
-  /// Open a Mantid matrix from a workspaces
-  void openMantidMatrix(const std::string &lines);
-  /// Open a (non-Mantid) matrix
-  void openMatrix(const std::string &lines, const int fileVersion);
-  /// Open a multi-layer plot window
-  void openMultiLayer(const std::string &lines, const int fileVersion);
-  /// Open a surface plot window
-  void openSurfacePlot(const std::string &lines, const int fileVersion);
-  /// Open a table window
-  void openTable(const std::string &lines, const int fileVersion);
-  /// Open a table statistics window
-  void openTableStatistics(const std::string &lines, const int fileVersion);
   /// Load Nexus files and add workspaces to the ADS
   void populateMantidTreeWidget(const QString &lines);
   /// Load a single workspaces to the ADS
@@ -113,4 +118,4 @@ private:
 }
 }
 
-#endif // PROJECTMANAGER_H
+#endif // PROJECT_SERIALISER_H

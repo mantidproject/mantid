@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h"
+#include "MantidKernel/make_unique.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -8,7 +9,7 @@ using namespace MantidQt::MantidWidgets;
 /**
 * Creates a Reflectometry Data Processor Presenter
 */
-boost::shared_ptr<GenericDataProcessorPresenter>
+std::unique_ptr<GenericDataProcessorPresenter>
 ReflGenericDataProcessorPresenterFactory::create() {
 
   // The whitelist, elements will appear in order in the table
@@ -96,10 +97,12 @@ ReflGenericDataProcessorPresenterFactory::create() {
            std::set<std::string>{"FirstTransmissionRun",
                                  "SecondTransmissionRun", "OutputWorkspace"})}};
 
-  // The post-processor algorithm's name, 'Stitch1DMany' by default
-  DataProcessorPostprocessingAlgorithm postprocessor;
+  // The post-processing algorithm
+  DataProcessorPostprocessingAlgorithm postprocessor(
+      "Stitch1DMany", "IvsQ_",
+      std::set<std::string>{"InputWorkspaces", "OutputWorkspace"});
 
-  return boost::make_shared<GenericDataProcessorPresenter>(
+  return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
       whitelist, preprocessMap, processor, postprocessor);
 }
 }

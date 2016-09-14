@@ -2,6 +2,7 @@
 """
     Top-level auto-reduction algorithm for the SNS Liquids Reflectometer
 """
+from __future__ import (absolute_import, division, print_function)
 import sys
 import math
 import re
@@ -14,6 +15,7 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
 from reduction_gui.reduction.reflectometer.refl_data_script import DataSets
+from six import string_types
 
 
 class LRAutoReduction(PythonAlgorithm):
@@ -425,7 +427,7 @@ class LRAutoReduction(PythonAlgorithm):
         direct_beam_runs_str = self._read_property(meta_data_run, "direct_beam_runs",
                                                    _direct_beam_runs, is_string=True)
         # The direct runs in the DAS logs are stored as a string
-        if isinstance(direct_beam_runs_str, (str, unicode)):
+        if isinstance(direct_beam_runs_str, string_types):
             try:
                 direct_beam_runs = [int(r.strip()) for r in direct_beam_runs_str.split(',')]
             except ValueError:
@@ -487,7 +489,9 @@ class LRAutoReduction(PythonAlgorithm):
         # Copy over the existing series, up to the point we are at
         new_data_sets = []
         for i in range(int(run_number) - int(first_run_of_set) + 1):
-            if i > len(self.data_series_template.data_sets):
+            if i >= len(self.data_series_template.data_sets):
+                logger.warning("Sequence is corrupted: run=%s, first run of set=%s" % (str(run_number),
+                                                                                      str(first_run_of_set)))
                 break
             d = self.data_series_template.data_sets[i]
             d.data_files = [int(first_run_of_set) + i]
@@ -617,7 +621,7 @@ class LRAutoReduction(PythonAlgorithm):
             incident_medium = self._read_property(meta_data_run, "incident_medium",
                                                   _incident_medium, is_string=True)
             file_id = incident_medium.replace("medium", "")
-            LRDirectBeamSort(RunList=range(first_run_of_set, first_run_of_set + sequence_number),
+            LRDirectBeamSort(RunList=list(range(first_run_of_set, first_run_of_set + sequence_number)),
                              UseLowResCut=True, ComputeScalingFactors=True, TOFSteps=sf_tof_step,
                              IncidentMedium=incident_medium,
                              SlitTolerance=slit_tolerance,

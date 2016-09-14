@@ -1,9 +1,9 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEW_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEW_H_
 
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionUserMsg.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionSettings.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPythonRunner.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionSettings.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionUserMsg.h"
 
 #include <string>
 #include <vector>
@@ -71,18 +71,6 @@ public:
   virtual void setPeakList(const std::string &peakList) const = 0;
 
   /**
-   * Splits the file name in to sections of '_' and 'ENGINX' text
-   * within the filename
-   *
-   * @param selectedfPath is the selected file's path
-   *
-   * @return std::vector<std::string> of splitted file name with run
-   * number & bank
-   */
-  virtual std::vector<std::string>
-  splitFittingDirectory(std::string &selectedfPath) = 0;
-
-  /**
    * adds the number of banks to the combo-box widget on the interface
    *
    * @param bankID the bank number to add to combo-box
@@ -90,11 +78,18 @@ public:
   virtual void addBankItem(std::string bankID) = 0;
 
   /**
-   * adds the run number to the list view widget on the interface
+   * enables the Fit All button when multi-run number given
    *
-   * @param runNo run number which needs to be added to
-   * the list widget
+   * @param enable the button to Fit multi-run number
    */
+  virtual void enableFitAllButton(bool enable) const = 0;
+
+  /**
+  * adds the run number to the list view widget on the interface
+  *
+  * @param runNo run number which needs to be added to
+  * the list widget
+  */
   virtual void addRunNoItem(std::string runNo) = 0;
 
   /**
@@ -142,6 +137,54 @@ public:
    * @param enable or disable the fitting list widget
    */
   virtual void enableFittingListWidget(bool enable) const = 0;
+
+  /**
+  * Gets the peak picker's center (d-spacing value)
+  *
+  * @return the peak picker's center value
+  */
+  virtual double getPeakCentre() const = 0;
+
+  /**
+  * Checks whether peak picker widget is enabled or no
+  *
+  * @return true or false according to the state of the
+  *  peak picker widget
+  */
+  virtual bool peakPickerEnabled() const = 0;
+
+  /**
+  * gets the previously used directory path by the user
+  *
+  * @return directory of previously used directory by user,
+  * may return empty if no previous history
+  */
+  virtual std::string getPreviousDir() const = 0;
+
+  /**
+  * sets the previously used directory path
+  *
+  * @param path is set according to the file selected by user
+  */
+  virtual void setPreviousDir(const std::string &path) = 0;
+
+  /**
+  * gets the path as string which required when browsing the file
+  *
+  * @param prevPath path set according to the previously file selected
+  *
+  * @return string of the browsed file path
+  */
+  virtual std::string getOpenFile(const std::string &prevPath) = 0;
+
+  /**
+  * gets the path as string which is required when saving the file
+  *
+  * @param prevPath path set according to the previously selected file
+  *
+  * @return string of the saved file
+  */
+  virtual std::string getSaveFile(const std::string &prevPath) = 0;
 
   /**
    * @return idx of current selected row of list widget
@@ -194,6 +237,22 @@ public:
   virtual void setFittingMultiRunMode(bool mode) = 0;
 
   /**
+  * to determine whether the current loop is multi-run or single to avoid
+  * regenerating the list-view widget when not required
+  *
+  * @return bool whether given multi-run or singular file
+  */
+  virtual bool getFittingSingleRunMode() = 0;
+
+  /**
+  * sets the fitting mode to multi-run or single to avoid
+  * regenerating the list-view widget when not required
+  *
+  * @param mode true if its multi-run
+  */
+  virtual void setFittingSingleRunMode(bool mode) = 0;
+
+  /**
    * generates and sets the curves on the fitting tab
    *
    * @param data of the workspace to be passed as QwtData
@@ -202,6 +261,11 @@ public:
    */
   virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                              bool focused, bool plotSinglePeaks) = 0;
+
+  /**
+   * resets the canvas to avoid multiple plotting
+   */
+  virtual void resetCanvas() = 0;
 
   /**
    * Messages that this view wants to send to the logging system.

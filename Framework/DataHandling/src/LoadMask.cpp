@@ -39,6 +39,234 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace std;
 
+namespace {
+// service routines
+//-------------------------------------------------------------------------------------------
+/** Convert ranged vectors to single-valued vector
+* @param singles -- input vector of single numbers to copy to result without
+*                   changes.
+* @param ranges  -- input vector of data ranges -- pairs of min-max values,
+*                   expanded to result as numbers from min to max
+*                   inclusively, with step 1
+* @param tot_singles -- on input contains range of single values already
+*                   copied into the result by previous call to the routine,
+*                   on output, all signles and expanded pairs
+*                   from the input are added to it.
+*/
+template <typename T>
+void convertToVector(const std::vector<T> &singles,
+                     const std::vector<T> &ranges,
+                     std::vector<T> &tot_signles) {
+
+  // find the size of the final vector of masked values
+  size_t n_total(singles.size() + tot_signles.size());
+  for (size_t i = 0; i < ranges.size(); i += 2) {
+    n_total += ranges[i + 1] - ranges[i] + 1;
+  }
+  // reserve space for all masked spectra
+  // for efficient memory operations
+  tot_signles.reserve(n_total);
+  // add singles to the existing singles
+  tot_signles.insert(tot_signles.end(), singles.begin(), singles.end());
+  // expand pairs
+  for (size_t i = 0; i < ranges.size(); i += 2) {
+    for (T obj_id = ranges[i]; obj_id < ranges[i + 1] + 1; ++obj_id) {
+      tot_signles.push_back(obj_id);
+    }
+  }
+}
+
+/*
+* Parse index range text to singles and pairs
+* Example: 3,4,9-10,33
+*
+* @param inputstr -- input string to process in the format as above
+* @param sinvles -- vector of obects, defined as singles
+* @param pairs   -- vector of obects, defined as pairs, in the form min,max
+*                   value
+*/
+template <typename T>
+void parseRangeText(const std::string &inputstr, std::vector<T> &singles,
+                    std::vector<T> &pairs) {
+  // 1. Split ','
+  std::vector<std::string> rawstrings;
+  boost::split(rawstrings, inputstr, boost::is_any_of(","),
+               boost::token_compress_on);
+
+  for (auto &rawstring : rawstrings) {
+    // a) Find '-':
+    boost::trim(rawstring);
+    bool containDash(true);
+    if (rawstring.find_first_of("-") == std::string::npos) {
+      containDash = false;
+    }
+
+    // Process appropriately
+    if (containDash) { // 4. Treat pairs
+      std::vector<std::string> ptemp;
+      boost::split(ptemp, rawstring, boost::is_any_of("-"),
+                   boost::token_compress_on);
+      if (ptemp.size() != 2) {
+        std::string error =
+            "Range string " + rawstring + " has a wrong format!";
+        throw std::invalid_argument(error);
+      }
+      // b) parse
+      T intstart = boost::lexical_cast<T>(ptemp[0]);
+      T intend = boost::lexical_cast<T>(ptemp[1]);
+      if (intstart >= intend) {
+        std::string error =
+            "Range string " + rawstring + " has wrong order of detectors ID!";
+        throw std::invalid_argument(error);
+      }
+      pairs.push_back(intstart);
+      pairs.push_back(intend);
+
+    } else { // 3. Treat singles
+      T itemp = boost::lexical_cast<T>(rawstring);
+      singles.push_back(itemp);
+    }
+  } // ENDFOR i
+}
+
+/*
+* Parse a line in an ISIS mask file string to vector
+* Combination of 5 types of format for unit
+* (1) a (2) a-b (3) a - b (4) a- b (5) a- b
+* separated by space(s)
+* @param  ins    -- input string in ISIS ASCII format
+* @return ranges -- vector of a,b pairs converted from input
+*/
+void parseISISStringToVector(const std::string &ins,
+                             std::vector<Mantid::specnum_t> &ranges) {
+  // 1. Split by space
+  std::vector<string> splitstrings;
+  boost::split(splitstrings, ins, boost::is_any_of(" "),
+               boost::token_compress_on);
+
+  // 2. Replace a-b to a - b, remove a-b and insert a, -, b
+  bool tocontinue = true;
+  size_t index = 0;
+  while (tocontinue) {
+    // a) Determine end of loop.  Note that loop size changes
+    if (index == splitstrings.size() - 1) {
+      tocontinue = false;
+    }
+
+    // b) Need to split?
+    vector<string> temps;
+    boost::split(temps, splitstrings[index], boost::is_any_of("-"),
+                 boost::token_compress_on);
+    if (splitstrings[index].compare("-") == 0 || temps.size() == 1) {
+      // Nothing to split
+      index++;
+    } else if (temps.size() == 2) {
+      // Has a '-' inside.  Delete and Replace
+      temps.insert(temps.begin() + 1, "-");
+      splitstrings.erase(splitstrings.begin() + index);
+      for (size_t ic = 0; ic < 3; ic++) {
+        if (temps[ic].size() > 0) {
+          splitstrings.insert(splitstrings.begin() + index, temps[ic]);
+          index++;
+        }
+      }
+    } else {
+      // Exception
+      std::string err = "String " + splitstrings[index] + " has Too many '-'";
+      throw std::invalid_argument(err);
+    }
+
+    if (index >= splitstrings.size())
+      tocontinue = false;
+
+  } // END WHILE
+
+  // 3. Put to output integer vector
+  tocontinue = true;
+  index = 0;
+  while (tocontinue) {
+    // i)   push to the starting vector
+    ranges.push_back(
+        boost::lexical_cast<Mantid::specnum_t>(splitstrings[index]));
+
+    // ii)  push the ending vector
+    if (index == splitstrings.size() - 1 ||
+        splitstrings[index + 1].compare("-") != 0) {
+      // the next one is not '-'
+      ranges.push_back(
+          boost::lexical_cast<Mantid::specnum_t>(splitstrings[index]));
+      index++;
+    } else {
+      // the next one is '-', thus read '-', next
+      ranges.push_back(
+          boost::lexical_cast<Mantid::specnum_t>(splitstrings[index + 2]));
+      index += 3;
+    }
+
+    if (index >= splitstrings.size())
+      tocontinue = false;
+  } // END-WHILE
+
+  splitstrings.clear();
+}
+/*
+* Load and parse an ISIS masking file
+@param isisfilename :: the string containing full path to an ISIS mask file
+@param SpectraMasks :: output list of the spectra numbers to mask.
+*/
+void loadISISMaskFile(const std::string &isisfilename,
+                      std::vector<Mantid::specnum_t> &spectraMasks) {
+
+  std::vector<Mantid::specnum_t> ranges;
+
+  std::ifstream ifs;
+  ifs.open(isisfilename.c_str(), std::ios::in);
+  if (!ifs.is_open()) {
+    throw std::invalid_argument("Cannot open ISIS mask file" + isisfilename);
+  }
+
+  std::string isisline;
+  while (getline(ifs, isisline)) {
+    boost::trim(isisline);
+
+    // a. skip empty line
+    if (isisline.size() == 0)
+      continue;
+
+    // b. skip comment line
+    if (isisline.c_str()[0] < '0' || isisline.c_str()[0] > '9')
+      continue;
+
+    // c. parse
+    parseISISStringToVector(isisline, ranges);
+  }
+  ifs.close();
+
+  // dummy helper vector as ISIS mask is always processed as pairs.
+  std::vector<Mantid::specnum_t> dummy;
+  convertToVector(dummy, ranges, spectraMasks);
+}
+
+/** Parse bank IDs (string name)
+* Sample:            bank2
+* @param valuetext:  must be bank name
+* @param tomask:     if true, mask, if not unmask
+* @param toMask:     vector of string containing component names for masking
+* @param toUnmask    vector of strings containing component names for unmasking
+*/
+void parseComponent(const std::string &valuetext, bool tomask,
+                    std::vector<std::string> &toMask,
+                    std::vector<std::string> &toUnmask) {
+
+  // 1. Parse bank out
+  if (tomask) {
+    toMask.push_back(valuetext);
+  } else {
+    toUnmask.push_back(valuetext);
+  }
+}
+}
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -120,47 +348,35 @@ void LoadMask::exec() {
   } else if (boost::ends_with(filename, "k") ||
              boost::ends_with(filename, "K")) {
     // 2.2 ISIS Masking file
-    loadISISMaskFile(filename, m_MaskSpecID);
+    loadISISMaskFile(filename, m_maskSpecID);
     m_defaultToUse = true;
   } else {
     g_log.error() << "File " << filename << " is not in supported format. \n";
     return;
   }
-
   // 3. Translate and set geometry
   g_log.information() << "To Mask: \n";
-  std::vector<int32_t> maskdetids;
-  std::vector<int32_t> maskdetidpairsL;
-  std::vector<int32_t> maskdetidpairsU;
 
-  componentToDetectors(mask_bankid_single, maskdetids);
-  detectorToDetectors(mask_detid_single, mask_detid_pair_low,
-                      mask_detid_pair_up, maskdetids, maskdetidpairsL,
-                      maskdetidpairsU);
+  this->componentToDetectors(m_maskCompIdSingle, m_maskDetID);
 
-  g_log.information() << "To UnMask: \n";
-  std::vector<int32_t> unmaskdetids;
-  std::vector<int32_t> unmaskdetidpairsL;
-  std::vector<int32_t> unmaskdetidpairsU;
+  // unmasking is not implemented
+  // g_log.information() << "To UnMask: \n";
 
-  this->bankToDetectors(unmask_bankid_single, unmaskdetids, unmaskdetidpairsL,
-                        unmaskdetidpairsU);
-  this->detectorToDetectors(unmask_detid_single, unmask_detid_pair_low,
-                            unmask_detid_pair_up, unmaskdetids,
-                            unmaskdetidpairsL, unmaskdetidpairsU);
+  // As m_uMaskCompIdSingle is empty, this never works
+  this->bankToDetectors(m_uMaskCompIdSingle, m_unMaskDetID);
+
+  // convert spectra ID to corresponet det-id-s
+  this->processMaskOnWorkspaceIndex(true, m_maskSpecID, m_maskDetID);
 
   // 4. Apply
   this->initDetectors();
   const detid2index_map indexmap =
       m_maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
-  this->processMaskOnWorkspaceIndex(true, m_MaskSpecID, maskdetids);
-
-  this->processMaskOnDetectors(indexmap, true, maskdetids, maskdetidpairsL,
-                               maskdetidpairsU);
-
-  this->processMaskOnDetectors(indexmap, false, unmaskdetids, unmaskdetidpairsL,
-                               unmaskdetidpairsU);
+  this->processMaskOnDetectors(indexmap, true, m_maskDetID);
+  // TODO: Not implemented, but should work as soon as m_unMask contains
+  // something
+  this->processMaskOnDetectors(indexmap, false, m_unMaskDetID);
 }
 
 void LoadMask::initDetectors() {
@@ -179,14 +395,11 @@ void LoadMask::initDetectors() {
  *                   in masking
  *   @param tomask:  true to mask, false to unmask
  *   @param singledetids: list of individual det ids to mask
- *   @param pairdetids_low: list of lower bound of det ids to mask
- *   @param pairdetids_up: list of upper bound of det ids to mask
+
  */
 void LoadMask::processMaskOnDetectors(const detid2index_map &indexmap,
                                       bool tomask,
-                                      std::vector<int32_t> singledetids,
-                                      std::vector<int32_t> pairdetids_low,
-                                      std::vector<int32_t> pairdetids_up) {
+                                      std::vector<int32_t> singledetids) {
   // 1. Get index map
   // 2. Mask
   g_log.debug() << "Mask = " << tomask
@@ -202,26 +415,22 @@ void LoadMask::processMaskOnDetectors(const detid2index_map &indexmap,
       else
         m_maskWS->dataY(index)[0] = 0;
     } else {
-      g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located\n";
+      g_log.warning() << "Pixel w/ ID = " << detid << " Cannot Be Located\n";
     }
   }
-
-  // 3. Mask pairs
-  for (size_t i = 0; i < pairdetids_low.size(); ++i) {
-    g_log.error() << "To Be Implemented Soon For Pair (" << pairdetids_low[i]
-                  << ", " << pairdetids_up[i] << "!\n";
-  }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
-/** Convert a component to detectors.  It is a generalized version of
- * bankToDetectors()
+/** Extract a component's detectors and return it within detectors array
+ *  It is a generalized version of bankToDetectors()
+ *
+ * @param componentnames -- vector of compnents names to process
+ * @param detectors      -- vector of detectors id, which belongs to components
+ *provided as input.
  */
 void LoadMask::componentToDetectors(
     const std::vector<std::string> &componentnames,
-    std::vector<int32_t> &detectors) {
+    std::vector<detid_t> &detectors) {
   Geometry::Instrument_const_sptr minstrument = m_maskWS->getInstrument();
 
   for (auto &componentname : componentnames) {
@@ -246,9 +455,9 @@ void LoadMask::componentToDetectors(
 
     g_log.debug() << "Number of Children = " << children.size() << '\n';
 
-    int32_t numdets = 0;
-    int32_t id_min = 1000000;
-    int32_t id_max = 0;
+    size_t numdets(0);
+    detid_t id_min = std::numeric_limits<Mantid::detid_t>::max();
+    detid_t id_max = 0;
 
     for (const auto &child : children) {
       // c) convert component to detector
@@ -256,7 +465,7 @@ void LoadMask::componentToDetectors(
           boost::dynamic_pointer_cast<const Geometry::IDetector>(child);
 
       if (det) {
-        int32_t detid = det->getID();
+        detid_t detid = det->getID();
         detectors.push_back(detid);
         numdets++;
         if (detid < id_min)
@@ -273,11 +482,12 @@ void LoadMask::componentToDetectors(
 
 //----------------------------------------------------------------------------------------------
 /** Convert bank to detectors
+* This routine have never been invoked.
+* @param   singlebanks -- vector of string containing bank names
+* @param  detectors   -- vector of detector-id-s belonging to these banks
  */
 void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks,
-                               std::vector<int32_t> &detectors,
-                               std::vector<int32_t> &detectorpairslow,
-                               std::vector<int32_t> &detectorpairsup) {
+                               std::vector<detid_t> &detectors) {
   std::stringstream infoss;
   infoss << "Bank IDs to be converted to detectors: \n";
   for (auto &singlebank : singlebanks) {
@@ -300,24 +510,16 @@ void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks,
     detid_t detid_last = idetectors.back()->getID();
 
     // b) set detectors
-    if (detid_first + int32_t(numdets) == detid_last + 1 && false) {
-      // TODO This save-time method is not used at this stage
-      g_log.information() << "Using Range of Detectors\n";
 
-      detectorpairslow.push_back(detid_first);
-      detectorpairsup.push_back(detid_last);
+    for (const auto &det : idetectors) {
+      int32_t detid = det->getID();
+      detectors.push_back(detid);
+    }
+    g_log.debug() << "Number of Detectors in Bank  " << singlebank
+                  << "  is: " << numdets << "\nRange From: " << detid_first
+                  << " To: " << detid_last << '\n';
 
-    } else {
-      g_log.debug() << "Apply 1 by 1  "
-                    << "DetID: " << detid_first << ", " << detid_last << '\n';
-
-      for (const auto &det : idetectors) {
-        int32_t detid = det->getID();
-        detectors.push_back(detid);
-      }
-
-    } // if-else
-  }   // ENDFOR
+  } // ENDFOR
 }
 
 //----------------------------------------------------------------------------------------------
@@ -337,9 +539,9 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
 
   if (m_sourceMapWS) {
     // convert spectra masks into det-id mask using source workspace
-    convertSpMasksToDetIDs(m_sourceMapWS, maskedSpecID, singleDetIds);
+    convertSpMasksToDetIDs(*m_sourceMapWS, maskedSpecID, singleDetIds);
     maskedSpecID
-        .clear(); // specrtra ID not neede any more as converted to det-ids
+        .clear(); // specrtra ID not needed any more as all converted to det-ids
     return;
   }
   // 2. Get Map
@@ -388,41 +590,8 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
 }
 
 //----------------------------------------------------------------------------------------------
-/** Convert spectrum to detectors
- */
-void LoadMask::detectorToDetectors(const std::vector<int32_t> &singles,
-                                   const std::vector<int32_t> &pairslow,
-                                   const std::vector<int32_t> &pairsup,
-                                   std::vector<int32_t> &detectors,
-                                   std::vector<int32_t> &detectorpairslow,
-                                   std::vector<int32_t> &detectorpairsup) {
-  UNUSED_ARG(detectorpairslow)
-  UNUSED_ARG(detectorpairsup)
-
-  /*
-  for (size_t i = 0; i < singles.size(); i ++){
-    g_log.information() << "Detector " << singles[i] << '\n';
-  }
-  for (size_t i = 0; i < pairslow.size(); i ++){
-    g_log.information() << "Detector " << pairslow[i] << "  To " << pairsup[i]
-  << '\n';
-  }
-  */
-  detectors.insert(detectors.end(), singles.begin(), singles.end());
-  for (size_t i = 0; i < pairslow.size(); i++) {
-    for (int32_t j = 0; j < pairsup[i] - pairslow[i] + 1; j++) {
-      int32_t detid = pairslow[i] + j;
-      detectors.push_back(detid);
-    }
-    /*
-    detectorpairslow.push_back(pairslow[i]);
-    detectorpairsup.push_back(pairsup[i]);
-    */
-  }
-}
-
-//----------------------------------------------------------------------------------------------
 /** Initalize Poco XML Parser
+* @param filename  -- name of the xml file to process.
  */
 void LoadMask::initializeXMLParser(const std::string &filename) {
   // const std::string instName
@@ -450,7 +619,26 @@ void LoadMask::initializeXMLParser(const std::string &filename) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Parse XML file
+/** Parse XML file and define the following internal variables:
+    std::vector<detid_t> m_maskDetID;
+    //spectrum id-s to unmask
+    std::vector<detid_t> m_unMaskDetID;
+
+    spectra mask provided
+    std::vector<specnum_t> m_maskSpecID;
+    spectra unmask provided NOT IMPLEMENTED
+    std::vector<specnum_t> m_unMaskSpecID;
+
+    std::vector<std::string> m_maskCompIDSingle;
+    std::vector<std::string> m_uMaskCompIDSingle;
+//
+Supported xml Node names are:
+component:  the name of an instrument component, containing detectors.
+ids      : spectra numbers
+detids   : detector numbers
+Full implementation needs unit tests verifying all these. Only detector id-s are
+currently implemented
+// There are also no current support for keyword, switching on un-masking
  */
 void LoadMask::parseXML() {
   // 0. Check
@@ -464,6 +652,10 @@ void LoadMask::parseXML() {
   Poco::XML::NodeIterator it(m_pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
   Poco::XML::Node *pNode = it.nextNode();
 
+  std::vector<specnum_t> singleSp, pairSp;
+  std::vector<detid_t> maskSingleDet, maskPairDet;
+  std::vector<detid_t> umaskSingleDet, umaskPairDet;
+
   bool tomask = true;
   bool ingroup = false;
   while (pNode) {
@@ -473,29 +665,11 @@ void LoadMask::parseXML() {
       // Node "group"
       ingroup = true;
       tomask = true;
-      /*
-      // get type
-      Poco::AutoPtr<Poco::XML::NamedNodeMap> att = pNode->attributes();
-      Poco::XML::Node* cNode = att->item(0);
-      if (cNode->getNodeValue().compare("mask") == 0 ||
-      cNode->getNodeValue().compare("notuse") == 0){
-        tomask = true;
-      } else if (cNode->getNodeValue().compare("unmask") == 0 ||
-      cNode->getNodeValue().compare("use") == 0){
-        tomask = false;
-      } else {
-        g_log.error() << "Type (" << cNode->localName() << ") = " <<
-      cNode->getNodeValue() << " is not supported!\n";
-      }
-      g_log.information() << "Node Group:  child Node Name = " <<
-      cNode->localName() << ": " << cNode->getNodeValue()
-              << "(always)"<< '\n';
-      */
 
     } else if (pNode->nodeName().compare("component") == 0) {
       // Node "component"
       if (ingroup) {
-        this->parseComponent(value, tomask);
+        parseComponent(value, tomask, m_maskCompIdSingle, m_uMaskCompIdSingle);
       } else {
         g_log.error() << "XML File heirachial (component) error!\n";
       }
@@ -504,17 +678,21 @@ void LoadMask::parseXML() {
     } else if (pNode->nodeName().compare("ids") == 0) {
       // Node "ids"
       if (ingroup) {
-        this->parseSpectrumNos(value, m_MaskSpecID);
+        parseRangeText(value, singleSp, pairSp);
+        // this->parseSpectrumNos(value, m_maskSpecID);
       } else {
         g_log.error() << "XML File (ids) heirachial error!"
                       << "  Inner Text = " << pNode->innerText() << '\n';
       }
-      // g_log.information() << "detids: " << value << '\n';
 
     } else if (pNode->nodeName().compare("detids") == 0) {
       // Node "detids"
       if (ingroup) {
-        this->parseDetectorIDs(value, tomask);
+        if (tomask) {
+          parseRangeText(value, maskSingleDet, maskPairDet);
+        } else { // NOTE -- currently never happens.TODO: NOT IMPLEMENTED
+          parseRangeText(value, umaskSingleDet, umaskPairDet);
+        }
       } else {
         g_log.error() << "XML File (detids) heirachial error!\n";
       }
@@ -522,326 +700,33 @@ void LoadMask::parseXML() {
     } else if (pNode->nodeName().compare("detector-masking") == 0) {
       // Node "detector-masking".  Check default value
       m_defaultToUse = true;
-      /*
-      Poco::AutoPtr<Poco::XML::NamedNodeMap> att = pNode->attributes();
-      if (att->length() > 0){
-        Poco::XML::Node* cNode = att->item(0);
-        m_defaultToUse = true;
-        if (cNode->localName().compare("default") == 0){
-          if (cNode->getNodeValue().compare("use") == 0){
-            m_defaultToUse = true;
-          } else {
-            m_defaultToUse = false;
-          }
-      } // if - att-length
-      */
     } // END-IF-ELSE: pNode->nodeName()
 
     pNode = it.nextNode();
   } // ENDWHILE
+
+  convertToVector(singleSp, pairSp, m_maskSpecID);
+  convertToVector(maskSingleDet, maskPairDet, m_maskDetID);
+  // NOTE: -- TODO: NOT IMPLEMENTD -- if unmasking is implemented, should be
+  // enabled
+  // convertToVector(umaskSingleDet, umaskPairDet, m_unMaskDetID);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Parse bank IDs (string name)
- * Sample:  bank2
- * @param valuetext:  must be bank name
- * @param tomask: if true, mask, if not unmask
- */
-void LoadMask::parseComponent(const std::string &valuetext, bool tomask) {
-
-  // 1. Parse bank out
-  /*
-  std::vector<std::string> values;
-  this->splitString(valuetext, values, "bank");
-  if (values.size() <= 1){
-    g_log.error() << "Bank information format error!\n";
-    return;
-  }
-  */
-
-  if (tomask) {
-    mask_bankid_single.push_back(valuetext);
-  } else {
-    unmask_bankid_single.push_back(valuetext);
-  }
-
-  /*
-  for (size_t i = 0; i < singles.size(); i ++){
-    g_log.information() << "Bank " << singles[i] << '\n';
-  }
-  for (size_t i = 0; i < pairs.size()/2; i ++){
-    g_log.information() << "Bank " << pairs[2*i] << "  To " << pairs[2*i+1] <<
-  '\n';
-  }
-  */
-}
-
-//----------------------------------------------------------------------------------------------
-/** Parse input string for spectrum No
- *@param inputstr :: string to parce
- *@param targetMask :: output array containing spectra numbers to mask
- */
-void LoadMask::parseSpectrumNos(const std::string &inputstr,
-                                std::vector<int32_t> &targetMask) {
-
-  // 1. Parse range out
-  std::vector<int32_t> singles;
-  std::vector<int32_t> pairs;
-  this->parseRangeText(inputstr, singles, pairs);
-
-  targetMask.insert(targetMask.end(), singles.begin(), singles.end());
-  for (size_t i = 0; i < pairs.size(); i += 2) {
-    for (int32_t spectranum = pairs[2 * i]; spectranum <= pairs[2 * i + 1];
-         spectranum++) {
-
-      targetMask.push_back(spectranum);
-    }
-  }
-}
-
-//----------------------------------------------------------------------------------------------
-/** Parse input string for detector ID
- */
-void LoadMask::parseDetectorIDs(const std::string &inputstr, bool tomask) {
-  // g_log.information() << "Detector IDs: " << inputstr << '\n';
-
-  // 1. Parse range out
-  std::vector<int32_t> singles;
-  std::vector<int32_t> pairs;
-  this->parseRangeText(inputstr, singles, pairs);
-
-  // 2. Set to data storage
-  if (tomask) {
-    mask_detid_single.insert(mask_detid_single.end(), singles.begin(),
-                             singles.end());
-    for (size_t i = 0; i < pairs.size() / 2; i++) {
-      mask_detid_pair_low.push_back(pairs[2 * i]);
-      mask_detid_pair_up.push_back(pairs[2 * i + 1]);
-    }
-  } else {
-    unmask_detid_single.insert(unmask_detid_single.end(), singles.begin(),
-                               singles.end());
-    for (size_t i = 0; i < pairs.size() / 2; i++) {
-      unmask_detid_pair_low.push_back(pairs[2 * i]);
-      unmask_detid_pair_up.push_back(pairs[2 * i + 1]);
-    }
-  }
-}
-
-/*
- * Parse index range text to singles and pairs
- * Example: 3,4,9-10,33
- */
-void LoadMask::parseRangeText(const std::string &inputstr,
-                              std::vector<int32_t> &singles,
-                              std::vector<int32_t> &pairs) {
-  // 1. Split ','
-  std::vector<std::string> rawstrings;
-  this->splitString(inputstr, rawstrings, ",");
-
-  // 2. Filter
-  std::vector<std::string> strsingles;
-  std::vector<std::string> strpairs;
-  for (auto &rawstring : rawstrings) {
-    // a) Find '-':
-    bool containto = false;
-    const char *tempchs = rawstring.c_str();
-    for (size_t j = 0; j < rawstring.size(); j++)
-      if (tempchs[j] == '-') {
-        containto = true;
-        break;
-      }
-    // b) Rebin
-    if (containto)
-      strpairs.push_back(rawstring);
-    else
-      strsingles.push_back(rawstring);
-  } // ENDFOR i
-
-  // 3. Treat singles
-  for (auto &strsingle : strsingles) {
-    int32_t itemp = atoi(strsingle.c_str());
-    singles.push_back(itemp);
-  }
-
-  // 4. Treat pairs
-  for (auto &strpair : strpairs) {
-    // a) split and check
-    std::vector<std::string> ptemp;
-    this->splitString(strpair, ptemp, "-");
-    if (ptemp.size() != 2) {
-      g_log.error() << "Range string " << strpair << " has a wrong format!\n";
-      throw std::invalid_argument("Wrong format");
-    }
-
-    // b) parse
-    int32_t intstart = atoi(ptemp[0].c_str());
-    int32_t intend = atoi(ptemp[1].c_str());
-    if (intstart >= intend) {
-      g_log.error() << "Range string " << strpair << " has a reversed order\n";
-      throw std::invalid_argument("Wrong format");
-    }
-    pairs.push_back(intstart);
-    pairs.push_back(intend);
-  }
-}
-
-void LoadMask::splitString(const std::string &inputstr,
-                           std::vector<std::string> &strings, std::string sep) {
-
-  // std::vector<std::string> SplitVec;
-  boost::split(strings, inputstr, boost::is_any_of(sep),
-               boost::token_compress_on);
-
-  // g_log.information() << "Inside... split size = " << strings.size() <<
-  // '\n';
-}
-
-/*
- * Load and parse an ISIS masking file
- @param isisfilename :: the string containing full path to an ISIS mask file
- @param SpectraMasks :: list of the spectra numbers to mask.
- */
-void LoadMask::loadISISMaskFile(const std::string &isisfilename,
-                                std::vector<int32_t> &SpectraMasks) {
-
-  std::vector<int32_t> mask_specid_pair_low, mask_specid_pair_up;
-
-  std::ifstream ifs;
-  ifs.open(isisfilename.c_str(), std::ios::in);
-  if (!ifs.is_open()) {
-    g_log.error() << "Cannot open ISIS mask file " << isisfilename << '\n';
-    throw std::invalid_argument("Cannot open ISIS mask file");
-  }
-
-  std::string isisline;
-  while (getline(ifs, isisline)) {
-    boost::trim(isisline);
-
-    // a. skip empty line
-    if (isisline.size() == 0)
-      continue;
-
-    // b. skip comment line
-    if (isisline.c_str()[0] < '0' || isisline.c_str()[0] > '9')
-      continue;
-
-    // c. parse
-    g_log.debug() << "Input: " << isisline << '\n';
-    parseISISStringToVector(isisline, mask_specid_pair_low,
-                            mask_specid_pair_up);
-  }
-  size_t n_masked_spectra(0);
-  for (size_t i = 0; i < mask_specid_pair_low.size(); i++) {
-    g_log.debug() << i << ": " << mask_specid_pair_low[i] << ", "
-                  << mask_specid_pair_up[i] << '\n';
-    n_masked_spectra += mask_specid_pair_up[i] - mask_specid_pair_low[i] + 1;
-  }
-
-  ifs.close();
-
-  SpectraMasks.reserve(n_masked_spectra);
-  for (size_t i = 0; i < mask_specid_pair_low.size(); i++) {
-    for (int32_t nmask = mask_specid_pair_low[i];
-         nmask <= mask_specid_pair_up[i]; nmask++)
-      SpectraMasks.push_back(nmask);
-  }
-
-  return;
-}
-
-/*
- * Parse a line in an ISIS mask file string to vector
- * Combination of 5 types of format for unit
- * (1) a (2) a-b (3) a - b (4) a- b (5) a- b
- * separated by space(s)
- */
-void LoadMask::parseISISStringToVector(const std::string &ins,
-                                       std::vector<int> &rangestartvec,
-                                       std::vector<int> &rangeendvec) {
-  // 1. Split by space
-  std::vector<string> splitstrings;
-  boost::split(splitstrings, ins, boost::is_any_of(" "),
-               boost::token_compress_on);
-
-  // 2. Replace a-b to a - b, remove a-b and insert a, -, b
-  bool tocontinue = true;
-  size_t index = 0;
-  while (tocontinue) {
-    // a) Determine end of loop.  Note that loop size changes
-    if (index == splitstrings.size() - 1) {
-      tocontinue = false;
-    }
-
-    // b) Need to split?
-    vector<string> temps;
-    boost::split(temps, splitstrings[index], boost::is_any_of("-"),
-                 boost::token_compress_on);
-    if (splitstrings[index].compare("-") == 0 || temps.size() == 1) {
-      // Nothing to split
-      index++;
-    } else if (temps.size() == 2) {
-      // Has a '-' inside.  Delete and Replace
-      temps.insert(temps.begin() + 1, "-");
-      splitstrings.erase(splitstrings.begin() + index);
-      for (size_t ic = 0; ic < 3; ic++) {
-        if (temps[ic].size() > 0) {
-          splitstrings.insert(splitstrings.begin() + index, temps[ic]);
-          index++;
-        }
-      }
-    } else {
-      // Exception
-      g_log.error() << "String " << splitstrings[index]
-                    << " has a wrong format.  Too many '-'\n";
-      throw std::invalid_argument("Invalid string in input");
-    }
-
-    if (index >= splitstrings.size())
-      tocontinue = false;
-
-  } // END WHILE
-
-  // 3. Put to output integer vector
-  tocontinue = true;
-  index = 0;
-  while (tocontinue) {
-    // i)   push to the starting vector
-    rangestartvec.push_back(atoi(splitstrings[index].c_str()));
-
-    // ii)  push the ending vector
-    if (index == splitstrings.size() - 1 ||
-        splitstrings[index + 1].compare("-") != 0) {
-      // the next one is not '-'
-      rangeendvec.push_back(atoi(splitstrings[index].c_str()));
-      index++;
-    } else {
-      // the next one is '-', thus read '-', next
-      rangeendvec.push_back(atoi(splitstrings[index + 2].c_str()));
-      index += 3;
-    }
-
-    if (index >= splitstrings.size())
-      tocontinue = false;
-  } // END-WHILE
-
-  splitstrings.clear();
-}
 /* Convert spectra mask into det-id mask using workspace as source of
 *spectra-detector maps
 *
 * @param sourceWS       -- the workspace containing source spectra-detecot map
-*to use on masks
+*                          to use on masks
 * @param maskedSpecID   -- vector of spectra id to mask
 * @param singleDetIds   -- output vector of detectors id to mask
 */
-void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace_sptr &SourceWS,
+void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
                                       const std::vector<int32_t> &maskedSpecID,
                                       std::vector<int32_t> &singleDetIds) {
 
-  spec2index_map s2imap = SourceWS->getSpectrumToWorkspaceIndexMap();
+  spec2index_map s2imap = sourceWS.getSpectrumToWorkspaceIndexMap();
   detid2index_map sourceDetMap =
-      SourceWS->getDetectorIDToWorkspaceIndexMap(false);
+      sourceWS.getDetectorIDToWorkspaceIndexMap(false);
 
   std::multimap<size_t, Mantid::detid_t> spectr2index_map;
   for (auto it = sourceDetMap.begin(); it != sourceDetMap.end(); it++) {
@@ -856,7 +741,7 @@ void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace_sptr &SourceWS,
       throw std::runtime_error(
           "Can not find spectra with ID: " +
           boost::lexical_cast<std::string>(maskedSpecID[i]) +
-          " in the workspace" + SourceWS->getName());
+          " in the workspace" + sourceWS.getName());
     }
     size_t specN = itSpec->second;
 
@@ -865,7 +750,7 @@ void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace_sptr &SourceWS,
     if (source_range.first == spectr2index_map.end()) {
       throw std::runtime_error("Can not find spectra N: " +
                                boost::lexical_cast<std::string>(specN) +
-                               " in the workspace" + SourceWS->getName());
+                               " in the workspace" + sourceWS.getName());
     }
     // add detectors to the masked det-id list
     for (auto it = source_range.first; it != source_range.second; ++it) {

@@ -41,19 +41,20 @@
 #include <QPrintDialog>
 
 #include "ApplicationWindow.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/FileDialogHandler.h"
+
+// Register the window into the WindowFactory
+DECLARE_WINDOW(Note)
+
+using namespace Mantid;
 
 Note::Note(const QString &label, QWidget *parent, const QString &name,
            Qt::WFlags f)
     : MdiSubWindow(parent, label, name, f) {
-  init();
-}
-
-void Note::init() {
   te = new QTextEdit(this);
-  te->setObjectName(name());
+  te->setObjectName(name);
   setWidget(te);
 
   setGeometry(0, 0, 500, 200);
@@ -131,49 +132,61 @@ QString Note::exportASCII(const QString &filename) {
   return fn;
 }
 
-void Note::loadFromProject(const std::string &lines, ApplicationWindow *app,
-                           const int fileVersion) {
+IProjectSerialisable *Note::loadFromProject(const std::string &lines,
+                                            ApplicationWindow *app,
+                                            const int fileVersion) {
   Q_UNUSED(fileVersion);
 
   std::vector<std::string> lineVec;
   boost::split(lineVec, lines, boost::is_any_of("\n"));
 
   if (lineVec.size() < 1)
-    return;
+    return nullptr;
 
   std::vector<std::string> firstLineVec;
   boost::split(firstLineVec, lineVec[0], boost::is_any_of("\t"));
   if (firstLineVec.size() < 2)
-    return;
+    return nullptr;
 
   const QString name = QString::fromUtf8(firstLineVec[0].c_str());
   const QString date = QString::fromUtf8(firstLineVec[1].c_str());
+  auto note = new Note("", app, name);
 
-  setName(name);
   app->setListViewDate(name, date);
-  setBirthDate(date);
+  note->setBirthDate(date);
 
-  TSVSerialiser tsv(lines);
+  MantidQt::API::TSVSerialiser tsv(lines);
 
   if (tsv.hasLine("geometry")) {
     const QString geometry =
         QString::fromUtf8(tsv.lineAsString("geometry").c_str());
-    app->restoreWindowGeometry(app, this, geometry);
+    app->restoreWindowGeometry(app, note, geometry);
   }
 
   if (tsv.selectLine("WindowLabel")) {
-    setWindowLabel(QString::fromUtf8(tsv.asString(1).c_str()));
-    setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
+    note->setWindowLabel(QString::fromUtf8(tsv.asString(1).c_str()));
+    note->setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
   }
 
   if (tsv.hasSection("content")) {
     const std::string content = tsv.sections("content").front();
-    te->setText(QString::fromUtf8(content.c_str()));
+    note->te->setText(QString::fromUtf8(content.c_str()));
   }
+
+  QString newName = name;
+  while (newName.isEmpty() || app->alreadyUsedName(newName))
+    newName = app->generateUniqueName("Notes");
+
+  note->setName(newName);
+  note->confirmClose(app->confirmCloseNotes);
+
+  app->addMdiSubWindow(note);
+  note->showNormal();
+  return note;
 }
 
 std::string Note::saveToProject(ApplicationWindow *app) {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
   tsv.writeRaw("<note>");
   tsv.writeLine(name().toStdString()) << birthDate();
   tsv.writeRaw(app->windowGeometryInfo(this));

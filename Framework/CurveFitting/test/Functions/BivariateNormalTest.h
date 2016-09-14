@@ -9,6 +9,7 @@
 #define BIVARIATENORMALTEST_H_
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidCurveFitting/Functions/BivariateNormal.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidAPI/Jacobian.h"
@@ -16,11 +17,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/cow_ptr.h"
-/*#include "MantidAPI/IFunction.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
-#include "MantidCurveFitting/GSLFunctions.h"
-#include "MantidKernel/UnitFactory.h"
-*/
+
 #include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,7 +30,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
-using Mantid::HistogramData::Points;
+using Mantid::HistogramData::LinearGenerator;
 /**
  * Used for testing only
  */
@@ -119,15 +116,13 @@ public:
       data.push_back(val);
     }
 
-    Points x_vec_ptr(nCells);
-    std::iota(begin(x_vec_ptr), end(x_vec_ptr), 0.0);
     double xx[nCells];
     for (int i = 0; i < nCells; i++) {
       xx[i] = i;
     }
     NormalFit.setAttributeValue("CalcVariances", CalcVariances);
 
-    ws->setPoints(0, x_vec_ptr);
+    ws->setPoints(0, nCells, LinearGenerator(0.0, 1.0));
     ws->dataY(0) = data;
     ws->dataY(1) = xvals;
     ws->dataY(2) = yvals;

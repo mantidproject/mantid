@@ -1073,9 +1073,9 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
   // whereas other values are scaled by (1 - weight)
   if (weight != 0.) {
     double &y = this->mutableY(workspaceIndex)[binIndex];
-    (isnan(y) || isinf(y)) ? y = 0. : y *= (1 - weight);
+    (std::isnan(y) || std::isinf(y)) ? y = 0. : y *= (1 - weight);
     double &e = this->mutableE(workspaceIndex)[binIndex];
-    (isnan(e) || isinf(e)) ? e = 0. : e *= (1 - weight);
+    (std::isnan(e) || std::isinf(e)) ? e = 0. : e *= (1 - weight);
   }
 }
 
@@ -1569,7 +1569,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(
   }
 
   if (wi < nhist) {
-    const MantidVec &X = this->readX(wi);
+    const auto &X = this->binEdges(wi);
     auto it = std::lower_bound(X.cbegin(), X.cend(), x);
     if (it == X.end()) {
       // Out of range
