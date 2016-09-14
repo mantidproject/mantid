@@ -105,7 +105,7 @@ class ABINSLoadCASTEPTest(unittest.TestCase):
         data = self._get_reader_data(castep_reader=_CASTEP_reader)
 
         # test validData method
-        self.assertEqual(True, _CASTEP_reader.validData())
+        self.assertEqual(True, _CASTEP_reader._valid_hash())
 
         return data
 

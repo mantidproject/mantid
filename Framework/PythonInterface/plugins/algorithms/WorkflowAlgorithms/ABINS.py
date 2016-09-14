@@ -7,7 +7,6 @@ from mantid.kernel import logger, StringListValidator, Direction, StringArrayPro
 
 from AbinsModules import LoadCASTEP, CalculateS, AbinsParameters
 
-
 class ABINS(PythonAlgorithm):
 
 
@@ -135,12 +134,15 @@ class ABINS(PythonAlgorithm):
 
 
     def PyExec(self):
-        # 1) get input parameters from a user
-        self._get_properties()
+
+        # 0) Create reporter to report progress
         steps = 9
         begin = 0
         end = 1.0
         prog_reporter = Progress(self, begin, end, steps)
+
+        # 1) get input parameters from a user
+        self._get_properties()
         prog_reporter.report("Input data from the user has been collected.")
 
         # 2) read DFT data

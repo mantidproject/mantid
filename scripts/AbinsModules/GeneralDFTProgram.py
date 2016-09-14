@@ -166,12 +166,12 @@ class GeneralDFTProgram(IOmodule):
         # try to load DFT data from *.hdf5 file
         try:
 
-            self.validData()
+            self.checkPreviousData()
             dft_data = self.loadData()
             logger.notice(str(dft_data) + " has been loaded from the HDF file.")
 
         # if loading from *.hdf5 file failed than read data directly  from input DFT file and erase hdf file
-        except IOError as err:
+        except (IOError, ValueError) as err:
 
             logger.notice(str(err))
             self.eraseHDFfile()

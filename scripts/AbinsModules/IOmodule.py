@@ -3,21 +3,24 @@ import numpy as np
 import subprocess
 import shutil
 import hashlib
+from AbinsModules import AbinsParameters
 
 from mantid.kernel import logger
 
+
+# noinspection PyProtectedMember
 class IOmodule(object):
     """
     Class for ABINS I/O HDF file operations.
     """
     def __init__(self, input_filename=None, group_name=None):
 
-        if  isinstance(input_filename, str):
+        if isinstance(input_filename, str):
 
             self._input_filename = input_filename
             try:
-                self._hash_input_filename = self.calculateHash()
-            except IOError as err:
+                self._hash_input_filename = self.calculateDFTFileHash()
+            except (IOError, ValueError) as err:
                 logger.error(str(err))
 
             # extract name of file from its path.
@@ -30,11 +33,17 @@ class IOmodule(object):
 
         else: raise ValueError("Invalid name of hdf file. String was expected!")
 
-        if  isinstance(group_name, str): self._group_name = group_name
+        if isinstance(group_name, str): self._group_name = group_name
         else: raise ValueError("Invalid name of the group. String was expected!")
 
         core_name = input_filename[0:input_filename.find(".")]
         self._hdf_filename = core_name + ".hdf5" # name of hdf file
+
+        try:
+            self._advanced_parameters = self._get_advanced_parameters()
+        except (IOError, ValueError) as err:
+            logger.error(str(err))
+
         self._attributes = {} # attributes for group
         self._data = {} # data  for group; they are expected to be numpy arrays or
                         # complex data sets which have the form of Python dictionaries or list of Python
@@ -43,14 +52,37 @@ class IOmodule(object):
         # Fields which have a form of empty dictionaries have to be set by an inheriting class.
 
 
-    def validData(self):
+    def _valid_hash(self):
         """
         Checks if input DFT file and content of HDF file are consistent.
         @return: True if consistent, otherwise False.
         """
         _saved_hash = self.load(list_of_attributes=["hash"])
-
         return self._hash_input_filename == _saved_hash["attributes"]["hash"]
+
+
+    def _valid_advanced_parameters(self):
+        """
+        In case of rerun checks if advanced parameters haven't changed.
+        Returns: True if they are the same, otherwise False
+
+        """
+        previous_advanced_parameters = self.load(list_of_attributes=["advanced_parameters"])
+        return self._advanced_parameters == previous_advanced_parameters["attributes"]["advanced_parameters"]
+
+
+    def checkPreviousData(self):
+        """
+        Checks if currently used DFT file is the same as in the previous calculations. Also checks if currently used
+        parameters from AbinsParameters are the same as in the previous calculations.
+
+        """
+
+        if not self._valid_hash():
+            raise ValueError("Different DFT file  was used in the previous calculations.")
+
+        if not self._valid_advanced_parameters():
+            raise ValueError("Different advanced parameters were used in the previous calculations.")
 
 
     def loadData(self):
@@ -76,13 +108,14 @@ class IOmodule(object):
 
         try:
 
-            self.validData()
+            self.checkPreviousData()
+
             _data = self.loadData()
             logger.notice(str(_data) + " has been loaded from the HDF file.")
 
         except (IOError, ValueError) as err:
 
-            logger.notice("Warning: "+ str(err) + " Data has to be calculated.")
+            logger.notice("Warning: " + str(err) + " Data has to be calculated.")
             _data = self.calculateData()
             logger.notice(str(_data) + " has been calculated.")
 
@@ -114,6 +147,7 @@ class IOmodule(object):
         """
         self.addAttribute("hash", self._hash_input_filename)
         self.addAttribute("filename", self._input_filename)
+        self.addAttribute("advanced_parameters", self._advanced_parameters)
 
 
     def addData(self, name=None, value=None):
@@ -394,16 +428,11 @@ class IOmodule(object):
         return results
 
 
-    def calculateHash(self):
-        """
-        This method calculates hash of the phonon file according to SHA-2 algorithm from hashlib library: sha512.
-        @return: string representation of hash for phonon file which contains only hexadecimal digits
-        """
-
+    def _calculate_hash(self, filename=None):
         buf = 65536  # chop content of phonon file into 64kb chunks to minimize memory consumption for hash creation
         sha = hashlib.sha512()
 
-        with open(self._input_filename, 'rU') as f:
+        with open(filename, 'rU') as f:
             while True:
                 data = f.read(buf)
                 if not data:
@@ -411,3 +440,21 @@ class IOmodule(object):
                 sha.update(data)
 
         return sha.hexdigest()
+
+
+    def _get_advanced_parameters(self):
+        """
+        Calculates hash of file with advanced parameters.
+        Returns: string representation of hash for  file  with advanced parameters which contains only hexadecimal digits
+
+        """
+        return self._calculate_hash(filename=AbinsParameters.__file__.replace(".pyc", ".py"))
+
+
+    def calculateDFTFileHash(self):
+        """
+        This method calculates hash of the phonon file according to SHA-2 algorithm from hashlib library: sha512.
+        @return: string representation of hash for phonon file which contains only hexadecimal digits
+        """
+
+        return self._calculate_hash(filename=self._input_filename)
