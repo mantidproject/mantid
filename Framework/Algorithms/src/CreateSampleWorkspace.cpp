@@ -227,13 +227,13 @@ void CreateSampleWorkspace::exec() {
 
   MatrixWorkspace_sptr ws;
   if (wsType == "Event") {
-    ws = createEventWorkspace(numPixels, numBins, numMonitors, numEvents, xMin, binWidth,
-                              bankPixelWidth * bankPixelWidth, inst,
+    ws = createEventWorkspace(numPixels, numBins, numMonitors, numEvents, xMin,
+                              binWidth, bankPixelWidth * bankPixelWidth, inst,
                               functionString, isRandom);
   } else {
-    ws = createHistogramWorkspace(numPixels, numBins, numMonitors, xMin, binWidth,
-                                  bankPixelWidth * bankPixelWidth, inst,
-                                  functionString, isRandom);
+    ws = createHistogramWorkspace(numPixels, numBins, numMonitors, xMin,
+                                  binWidth, bankPixelWidth * bankPixelWidth,
+                                  inst, functionString, isRandom);
   }
   // add chopper
   this->addChopperParameters(ws);
@@ -306,11 +306,13 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
   CountStandardDeviations e(CountVariances(y.cbegin(), y.cend()));
 
-  auto retVal = createWorkspace<Workspace2D>(numPixels + numMonitors, numBins + 1, numBins);
+  auto retVal = createWorkspace<Workspace2D>(numPixels + numMonitors,
+                                             numBins + 1, numBins);
   retVal->setInstrument(inst);
 
   for (int wi = 0; wi < numMonitors + numPixels; wi++) {
-    detid_t detNumber = wi < numMonitors ? start_at_pixelID + numPixels + wi : start_at_pixelID + wi - numMonitors;
+    detid_t detNumber = wi < numMonitors ? start_at_pixelID + numPixels + wi
+                                         : start_at_pixelID + wi - numMonitors;
     retVal->setBinEdges(wi, x);
     retVal->setCounts(wi, y);
     retVal->setCountStandardDeviations(wi, e);
@@ -324,8 +326,8 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
 /** Create event workspace
  */
 EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
-    int numPixels, int numBins, int numMonitors, int numEvents, double x0, double binDelta,
-    int start_at_pixelID, Geometry::Instrument_sptr inst,
+    int numPixels, int numBins, int numMonitors, int numEvents, double x0,
+    double binDelta, int start_at_pixelID, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
   DateAndTime run_start("2010-01-01T00:00:00");
 
@@ -360,7 +362,8 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
   for (int wi = 0; wi < numPixels + numMonitors; wi++) {
     EventList &el = retVal->getSpectrum(workspaceIndex);
     el.setSpectrumNo(wi + 1);
-    detid_t detNumber = wi < numMonitors ? start_at_pixelID + numPixels + wi : start_at_pixelID + wi - numMonitors;
+    detid_t detNumber = wi < numMonitors ? start_at_pixelID + numPixels + wi
+                                         : start_at_pixelID + wi - numMonitors;
     el.setDetectorID(detNumber);
 
     // for each bin
