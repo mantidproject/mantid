@@ -518,13 +518,13 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
                            V3D(0., 1.0, 0.), "monitor-shape");
 
   for (int monitorNumber = monitorsStart;
-       monitorNumber <= monitorsStart + numMonitors; monitorNumber++) {
+       monitorNumber < monitorsStart + numMonitors; monitorNumber++) {
     // Make a new bank
     std::ostringstream monitorName;
     monitorName << "monitor" << monitorNumber;
 
     RectangularDetector *bank = new RectangularDetector(monitorName.str());
-    bank->initialize(pixelShape, 1, 0.0, pixelSpacing, 1, 0.0, pixelSpacing,
+    bank->initialize(monitorShape, 1, 0.0, pixelSpacing, 1, 0.0, pixelSpacing,
                      monitorNumber, true, 1);
 
     boost::shared_ptr<Detector> detector = bank->getAtXY(0, 0);
