@@ -83,7 +83,7 @@ private:
                        std::vector<detid_t> &detectors);
 
   void processMaskOnDetectors(const detid2index_map &indexmap, bool tomask,
-                              std::vector<detid_t> singledetids);
+                              const std::vector<detid_t> &singledetids);
   /// Convert spectrum to detector
   void processMaskOnWorkspaceIndex(bool mask,
                                    std::vector<specnum_t> &maskedSpecID,

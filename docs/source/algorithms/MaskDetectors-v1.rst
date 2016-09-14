@@ -11,10 +11,10 @@ Introduction
 
 To understand the algorithms options, user should clearly understand the difference between *WorkspaceIndex* 
 -- the numbers, specified in *WorkspaceIndexList* and *StartWorkspacIndex*, *EndWorkspaceIndex* properties,
-the *Spectra ID* -- values of the **SpectraList** property and *Detector ID* -- the numbers to provide for 
+the *Spectra ID* or *Spectra Number* -- values of the **SpectraList** property and *Detector ID* -- the numbers to provide for 
 *DetectorList* property.
 
-The *WorkspaceIndex* is the number a spectra has in a workspace, e.g. ::
+The *WorkspaceIndex* is the number a spectrum has in a workspace, e.g. ::
 
   sp = ws.getSpectrum(0) 
 

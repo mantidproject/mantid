@@ -76,8 +76,7 @@ void convertToVector(const std::vector<T> &singles,
   }
 }
 
-/*
-* Parse index range text to singles and pairs
+/** Parse index range text to singles and pairs
 * Example: 3,4,9-10,33
 *
 * @param inputstr -- input string to process in the format as above
@@ -218,7 +217,7 @@ void loadISISMaskFile(const std::string &isisfilename,
   std::vector<Mantid::specnum_t> ranges;
 
   std::ifstream ifs;
-  ifs.open(isisfilename.c_str(), std::ios::in);
+  ifs.open(isisfilename, std::ios::in);
   if (!ifs.is_open()) {
     throw std::invalid_argument("Cannot open ISIS mask file" + isisfilename);
   }
@@ -228,7 +227,7 @@ void loadISISMaskFile(const std::string &isisfilename,
     boost::trim(isisline);
 
     // a. skip empty line
-    if (isisline.size() == 0)
+    if (isisline.empty())
       continue;
 
     // b. skip comment line
@@ -238,7 +237,6 @@ void loadISISMaskFile(const std::string &isisfilename,
     // c. parse
     parseISISStringToVector(isisline, ranges);
   }
-  ifs.close();
 
   // dummy helper vector as ISIS mask is always processed as pairs.
   std::vector<Mantid::specnum_t> dummy;
@@ -309,7 +307,7 @@ void LoadMask::init() {
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "RefWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "The name of the workspace with defines instrument and spectra, "
+      "The name of the workspace wich defines instrument and spectra, "
       "used as the source of the spectra-detector map for the mask to load. "
       "The instrument, attached to this workspace has to be the same as the "
       "one specified by 'Instrument' property");
@@ -404,11 +402,10 @@ void LoadMask::initDetectors() {
  *                   in masking
  *   @param tomask:  true to mask, false to unmask
  *   @param singledetids: list of individual det ids to mask
-
  */
-void LoadMask::processMaskOnDetectors(const detid2index_map &indexmap,
-                                      bool tomask,
-                                      std::vector<int32_t> singledetids) {
+void LoadMask::processMaskOnDetectors(
+    const detid2index_map &indexmap, bool tomask,
+    const std::vector<detid_t> &singledetids) {
   // 1. Get index map
   // 2. Mask
   g_log.debug() << "Mask = " << tomask
@@ -433,8 +430,8 @@ void LoadMask::processMaskOnDetectors(const detid2index_map &indexmap,
 /** Extract a component's detectors and return it within detectors array
  *  It is a generalized version of bankToDetectors()
  *
- * @param componentnames -- vector of components names to process
- * @param detectors      -- vector of detectors id, which belongs to components
+ * @param componentnames -- vector of component names to process
+ * @param detectors      -- vector of detector ids, which belongs to components
  *provided as input.
  */
 void LoadMask::componentToDetectors(
@@ -465,8 +462,8 @@ void LoadMask::componentToDetectors(
     g_log.debug() << "Number of Children = " << children.size() << '\n';
 
     size_t numdets(0);
-    detid_t id_min = std::numeric_limits<Mantid::detid_t>::max();
-    detid_t id_max = 0;
+    detid_t id_min(std::numeric_limits<Mantid::detid_t>::max());
+    detid_t id_max(0);
 
     for (const auto &child : children) {
       // c) convert component to detector
@@ -491,7 +488,7 @@ void LoadMask::componentToDetectors(
 
 //----------------------------------------------------------------------------------------------
 /** Convert bank to detectors
-* This routine have never been invoked.
+* This routine has never been used. Dead code.
 * @param   singlebanks -- vector of string containing bank names
 * @param  detectors   -- vector of detector-id-s belonging to these banks
  */
@@ -521,7 +518,7 @@ void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks,
     // b) set detectors
 
     for (const auto &det : idetectors) {
-      int32_t detid = det->getID();
+      detid_t detid = det->getID();
       detectors.push_back(detid);
     }
     g_log.debug() << "Number of Detectors in Bank  " << singlebank
@@ -682,13 +679,11 @@ void LoadMask::parseXML() {
       } else {
         g_log.error() << "XML File hierarchical (component) error!\n";
       }
-      // g_log.information() << "Component: " << value << '\n';
 
     } else if (pNode->nodeName().compare("ids") == 0) {
       // Node "ids"
       if (ingroup) {
         parseRangeText(value, singleSp, pairSp);
-        // this->parseSpectrumNos(value, m_maskSpecID);
       } else {
         g_log.error() << "XML File (ids) hierarchical error!"
                       << "  Inner Text = " << pNode->innerText() << '\n';
@@ -724,10 +719,10 @@ void LoadMask::parseXML() {
 /* Convert spectra mask into det-id mask using workspace as source of
 *spectra-detector maps
 *
-* @param sourceWS       -- the workspace containing source spectra-detecot map
+* @param sourceWS       -- the workspace containing source spectra-detector map
 *                          to use on masks
 * @param maskedSpecID   -- vector of spectra id to mask
-* @param singleDetIds   -- output vector of detectors id to mask
+* @param singleDetIds   -- output vector of detector ids to mask
 */
 void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
                                       const std::vector<int32_t> &maskedSpecID,

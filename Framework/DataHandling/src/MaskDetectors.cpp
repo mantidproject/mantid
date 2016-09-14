@@ -13,7 +13,7 @@
 #include <numeric>
 
 namespace { // declare file scoped function
-/* internal method copies values in specified range from source list to the
+/** internal method copies values in specified range from source list to the
 target list
 @param sourceList :: vector of input values
 @param targetList :: vector of output values
@@ -25,9 +25,9 @@ void constrainIndexInRange(std::vector<size_t> &sourceList,
                            size_t maxIndex) {
   targetList.reserve(sourceList.size());
   std::sort(sourceList.begin(), sourceList.end());
-  for (auto it = sourceList.begin(); it != sourceList.end(); it++) {
-    if (*it >= minIndex && *it <= maxIndex) {
-      targetList.push_back(*it);
+  for (auto memb : sourceList) {
+    if (memb >= minIndex && memb <= maxIndex) {
+      targetList.push_back(memb);
     }
   }
 }
@@ -82,13 +82,13 @@ void MaskDetectors::init() {
   mustBePosInt->setLower(0);
   declareProperty(
       "StartWorkspaceIndex", 0, mustBePosInt,
-      "If other masks fields are provided, its the first index of the "
+      "If other masks fields are provided, it's the first index of the "
       "target workspace to be allowed to be masked from by these masks, "
       "if not, its the first index of the target workspace to mask.\n"
       "Default value is 0 if other masking is present or ignored if not.");
   declareProperty(
       "EndWorkspaceIndex", EMPTY_INT(), mustBePosInt,
-      "If other masks are provided, its the last index of the "
+      "If other masks are provided, it's the last index of the "
       "target workspace allowed to be masked to by these masks, "
       "if not, its the last index of the target workspace to mask.\n"
       "Default is number of histograms in target workspace if other masks are"
@@ -279,13 +279,13 @@ MaskDetectors::getRanges(const MatrixWorkspace_sptr &targWS) {
     return std::tuple<size_t, size_t, bool>(startIndex_l, endIndex_l, true);
   }
 }
-/* Constrain masked indexes by limits, provided as input
+/* Do constrain masked indexes by limits, provided as input
 * @param indexList  :: list of indexes to verify against constrain on input
 *                      and list of constrained indexes on the output.
 * @param startIndex :: minimal index (inclusive) to include in the constrained
-* list.
+*                      list.
 * @param endIndex   :: maximal index (inclusive) to include in the constrained
-* list
+*                      list.
 */
 void MaskDetectors::constrainMaskedIndexes(
     std::vector<size_t> &indexList,
@@ -301,8 +301,7 @@ void MaskDetectors::constrainMaskedIndexes(
 * the mask workspace assumed to be not having masked detectors, but has masked
 * state defined in its spectra
 @param detectorList :: list of masked detectors, appended on output by the
-detectors,
-*                      defined in the mask workspace.
+*                      detectors, defined in the mask workspace.
 @param maskWS       :: shared pointer to workspace containing masks.
 */
 void MaskDetectors::extractMaskedWSDetIDs(
@@ -491,7 +490,6 @@ void MaskDetectors::appendToIndexListFromWS(
   }
   tmp_index.swap(indexList);
 
-  return;
 } // appendToIndexListFromWS
 
 /**
@@ -535,7 +533,6 @@ void MaskDetectors::appendToIndexListFromMaskWS(
     }
   }
   tmp_index.swap(indexList);
-  return;
 } // appendToIndexListFromWS
 
 } // namespace DataHandling
