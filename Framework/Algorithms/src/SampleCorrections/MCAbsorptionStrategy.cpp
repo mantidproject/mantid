@@ -55,11 +55,11 @@ MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
       const double wgt = m_scatterVol.calculateAbsorption(
           rng, neutron.startPos, neutron.unitDir, finalPos, lambdaBefore,
           lambdaAfter);
-      if (wgt > 0.0) {
+      if (wgt < 0.0) {
+        ++attempts;
+      } else {
         factor += wgt;
         break;
-      } else {
-        ++attempts;
       }
       if (attempts == MAX_EVENT_ATTEMPTS) {
         throw std::runtime_error("Unable to generate valid track through "
