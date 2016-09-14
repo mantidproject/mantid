@@ -197,6 +197,8 @@ MantidUI::MantidUI(ApplicationWindow *aw)
           m_exploreAlgorithms,
           SLOT(updateProgress(void *, double, const QString &, double, int)),
           Qt::QueuedConnection);
+
+  connect(this, SIGNAL(ADS_updated()), appWindow(), SLOT(modifiedProject()));
   m_algMonitor->start();
 
   mantidMenu = new QMenu(m_appWindow);
@@ -770,6 +772,7 @@ void MantidUI::showVatesSimpleInterface() {
         m_vatesSubWindow->setWidget(vsui);
         m_vatesSubWindow->widget()->show();
         vsui->renderWorkspace(wsName, wsType, instrumentName);
+        appWindow()->modifiedProject();
       } else {
         delete m_vatesSubWindow;
         m_vatesSubWindow = NULL;
@@ -800,7 +803,9 @@ void MantidUI::showSpectrumViewer() {
                       << "\n";
         throw std::runtime_error(e);
       }
-      viewer->setAttribute(Qt::WA_DeleteOnClose, false);
+      // Delete on close so we don't hold a shared pointer to a workspace
+      // which has been deleted in the ADS and is "inaccessible"
+      viewer->setAttribute(Qt::WA_DeleteOnClose, true);
       viewer->resize(1050, 800);
       connect(m_appWindow, SIGNAL(shutting_down()), viewer, SLOT(close()));
 
@@ -817,6 +822,7 @@ void MantidUI::showSpectrumViewer() {
 
       viewer->show();
       viewer->renderWorkspace(wksp);
+      appWindow()->modifiedProject();
     } else {
       g_log.information()
           << "Only event or matrix workspaces are currently supported.\n"
@@ -878,6 +884,7 @@ void MantidUI::showSliceViewer() {
 
     // Pop up the window
     w->show();
+    appWindow()->modifiedProject();
     // And add it
     // appWindow()->d_workspace->addSubWindow(w);
   }
