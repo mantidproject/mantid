@@ -60,7 +60,7 @@ Usage
 
 Output:
 
-.. code-block:: PDCalibrationExample
+.. code-block:: none
 
   The calibrated difc at detid 40896 is 5522.64160156
 
