@@ -133,6 +133,8 @@ private:
   QtProperty *m_costFunction;
   /// MaxIterations property
   QtProperty *m_maxIterations;
+  /// EvaluationType property
+  QtProperty *m_evaluationType;
 
   // Fit properties
   /// Output property

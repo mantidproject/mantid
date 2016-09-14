@@ -130,9 +130,9 @@ public:
     delete suite;
   }
 
-  void setUp() { inputWS = createEventWorkspace(); }
+  void setUp() override { inputWS = createEventWorkspace(); }
 
-  void tearDown() {
+  void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().remove("TimeStat");
   }
 

@@ -78,6 +78,9 @@ void Iqt::setup() {
           SLOT(calculateBinning()));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbTile, SIGNAL(clicked()), this, SLOT(PlotTiled()));
 }
 
 void Iqt::run() {
@@ -112,11 +115,6 @@ void Iqt::run() {
   IqtAlg->setProperty("DryRun", false);
 
   m_batchAlgoRunner->addAlgorithm(IqtAlg);
-
-  // Add save step
-  if (m_uiForm.ckSave->isChecked())
-    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
-
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -128,15 +126,25 @@ void Iqt::run() {
 void Iqt::algorithmComplete(bool error) {
   if (error)
     return;
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+  m_uiForm.pbTile->setEnabled(true);
+}
+/**
+ * Handle saving of workspace
+ */
+void Iqt::saveClicked() {
+  checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+  addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatchAsync();
+}
 
-  // Regular Plot
-  if (m_uiForm.ckPlot->isChecked())
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
-
-  // Tiled plot
-  if (m_uiForm.ckTile->isChecked()) {
-    PlotTiled();
-  }
+/**
+ * Handle mantid plotting
+ */
+void Iqt::plotClicked() {
+  checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+  plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 }
 
 void Iqt::PlotTiled() {

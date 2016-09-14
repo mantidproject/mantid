@@ -7,6 +7,12 @@
 #include <cstring>
 #include <boost/algorithm/string.hpp>
 
+#ifdef _WIN32
+#define strcasecmp _stricmp
+#else
+#include "strings.h"
+#endif
+
 namespace Mantid {
 namespace Geometry {
 using Kernel::V3D;
@@ -162,9 +168,8 @@ ParameterMap::getShortDescription(const std::string &compName,
   pmap_cit it;
   std::string result;
   for (it = m_map.begin(); it != m_map.end(); ++it) {
-    if (compName.compare(((const IComponent *)(*it).first)->getName()) == 0) {
-      boost::shared_ptr<Parameter> param =
-          get((const IComponent *)(*it).first, name);
+    if (compName.compare(it->first->getName()) == 0) {
+      boost::shared_ptr<Parameter> param = get(it->first, name);
       if (param) {
         result = param->getShortDescription();
         if (!result.empty())
@@ -261,7 +266,7 @@ void ParameterMap::clearParametersByName(const std::string &name) {
   // Key is component ID so have to search through whole lot
   for (auto itr = m_map.begin(); itr != m_map.end();) {
     if (itr->second->name() == name) {
-      m_map.erase(itr++);
+      PARALLEL_CRITICAL(unsafe_erase) { itr = m_map.unsafe_erase(itr); }
     } else {
       ++itr;
     }
@@ -280,12 +285,12 @@ void ParameterMap::clearParametersByName(const std::string &name,
                                          const IComponent *comp) {
   if (!m_map.empty()) {
     const ComponentID id = comp->getComponentID();
-    auto it_found = m_map.find(id);
-    if (it_found != m_map.end()) {
-      if (it_found->second->name() == name) {
-        m_map.erase(it_found++);
+    auto itrs = m_map.equal_range(id);
+    for (auto it = itrs.first; it != itrs.second;) {
+      if (it->second->name() == name) {
+        PARALLEL_CRITICAL(unsafe_erase) { it = m_map.unsafe_erase(it); }
       } else {
-        ++it_found;
+        ++it;
       }
     }
 
@@ -334,18 +339,27 @@ void ParameterMap::add(const IComponent *comp,
   if (pDescription)
     par->setDescription(*pDescription);
 
-  PARALLEL_CRITICAL(m_mapAccess) {
-    auto existing_par = positionOf(comp, par->name().c_str(), "");
-    // As this is only an add method it should really throw if it already
-    // exists.
-    // However, this is old behavior and many things rely on this actually be
-    // an
-    // add/replace-style function
-    if (existing_par != m_map.end()) {
-      existing_par->second = par;
-    } else {
-      m_map.emplace(comp->getComponentID(), par);
-    }
+  auto existing_par = positionOf(comp, par->name().c_str(), "");
+  // As this is only an add method it should really throw if it already
+  // exists.
+  // However, this is old behavior and many things rely on this actually be
+  // an
+  // add/replace-style function
+  if (existing_par != m_map.end()) {
+    boost::atomic_store(&(existing_par->second), par);
+  } else {
+// When using Clang & Linux, TBB 4.4 doesn't detect C++11 features.
+// https://software.intel.com/en-us/forums/intel-threading-building-blocks/topic/641658
+#if defined(__clang__) && !defined(__APPLE__)
+#define CLANG_ON_LINUX true
+#else
+#define CLANG_ON_LINUX false
+#endif
+#if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
+    m_map.emplace(comp->getComponentID(), par);
+#else
+    m_map.insert(std::make_pair(comp->getComponentID(), par));
+#endif
   }
 }
 
@@ -642,8 +656,6 @@ void ParameterMap::addQuat(const IComponent *comp, const std::string &name,
  */
 bool ParameterMap::contains(const IComponent *comp, const std::string &name,
                             const std::string &type) const {
-  if (m_map.empty())
-    return false;
   return contains(comp, name.c_str(), type.c_str());
 }
 
@@ -663,8 +675,8 @@ bool ParameterMap::contains(const IComponent *comp, const char *name,
   std::pair<pmap_cit, pmap_cit> components = m_map.equal_range(id);
   bool anytype = (strlen(type) == 0);
   for (auto itr = components.first; itr != components.second; ++itr) {
-    boost::shared_ptr<Parameter> param = itr->second;
-    if (boost::iequals(param->name(), name) &&
+    const auto &param = itr->second;
+    if (strcasecmp(param->nameAsCString(), name) == 0 &&
         (anytype || param->type() == type)) {
       return true;
     }
@@ -685,9 +697,8 @@ bool ParameterMap::contains(const IComponent *comp,
   const ComponentID id = comp->getComponentID();
   auto it_found = m_map.find(id);
   if (it_found != m_map.end()) {
-    auto itr = m_map.lower_bound(id);
-    auto itr_end = m_map.upper_bound(id);
-    for (; itr != itr_end; ++itr) {
+    auto itrs = m_map.equal_range(id);
+    for (auto itr = itrs.first; itr != itrs.second; ++itr) {
       const Parameter_sptr &param = itr->second;
       if (*param == parameter)
         return true;
@@ -725,11 +736,9 @@ boost::shared_ptr<Parameter> ParameterMap::get(const IComponent *comp,
   if (!comp)
     return result;
 
-  PARALLEL_CRITICAL(m_mapAccess) {
-    auto itr = positionOf(comp, name, type);
-    if (itr != m_map.end())
-      result = itr->second;
-  }
+  auto itr = positionOf(comp, name, type);
+  if (itr != m_map.end())
+    result = boost::atomic_load(&itr->second);
   return result;
 }
 
@@ -750,11 +759,10 @@ component_map_it ParameterMap::positionOf(const IComponent *comp,
     const ComponentID id = comp->getComponentID();
     auto it_found = m_map.find(id);
     if (it_found != m_map.end()) {
-      auto itr = m_map.lower_bound(id);
-      auto itr_end = m_map.upper_bound(id);
-      for (; itr != itr_end; ++itr) {
-        Parameter_sptr param = itr->second;
-        if (boost::iequals(param->nameAsCString(), name) &&
+      auto itrs = m_map.equal_range(id);
+      for (auto itr = itrs.first; itr != itrs.second; ++itr) {
+        const auto &param = itr->second;
+        if (strcasecmp(param->nameAsCString(), name) == 0 &&
             (anytype || param->type() == type)) {
           result = itr;
           break;
@@ -783,11 +791,10 @@ component_map_cit ParameterMap::positionOf(const IComponent *comp,
     const ComponentID id = comp->getComponentID();
     auto it_found = m_map.find(id);
     if (it_found != m_map.end()) {
-      auto itr = m_map.lower_bound(id);
-      auto itr_end = m_map.upper_bound(id);
-      for (; itr != itr_end; ++itr) {
-        Parameter_sptr param = itr->second;
-        if (boost::iequals(param->nameAsCString(), name) &&
+      auto itrs = m_map.equal_range(id);
+      for (auto itr = itrs.first; itr != itrs.second; ++itr) {
+        const auto &param = itr->second;
+        if (strcasecmp(param->nameAsCString(), name) == 0 &&
             (anytype || param->type() == type)) {
           result = itr;
           break;
@@ -805,26 +812,21 @@ component_map_cit ParameterMap::positionOf(const IComponent *comp,
 */
 Parameter_sptr ParameterMap::getByType(const IComponent *comp,
                                        const std::string &type) const {
-  Parameter_sptr result = Parameter_sptr();
-  PARALLEL_CRITICAL(m_mapAccess) {
-    if (!m_map.empty()) {
-      const ComponentID id = comp->getComponentID();
-      auto it_found = m_map.find(id);
-      if (it_found != m_map.end()) {
-        if (it_found->first) {
-          auto itr = m_map.lower_bound(id);
-          auto itr_end = m_map.upper_bound(id);
-          for (; itr != itr_end; ++itr) {
-            Parameter_sptr param = itr->second;
-            if (boost::iequals(param->type(), type)) {
-              result = param;
-              break;
-            }
-          }
-        } // found->firdst
-      }   // it_found != m_map.end()
-    }     //! m_map.empty()
-  }       // PARALLEL_CRITICAL(m_map_access)
+  Parameter_sptr result;
+  if (!m_map.empty()) {
+    const ComponentID id = comp->getComponentID();
+    auto it_found = m_map.find(id);
+    if (it_found != m_map.end() && it_found->first) {
+      auto itrs = m_map.equal_range(id);
+      for (auto itr = itrs.first; itr != itrs.second; ++itr) {
+        const auto &param = itr->second;
+        if (strcasecmp(param->type().c_str(), type.c_str()) == 0) {
+          result = boost::atomic_load(&param);
+          break;
+        }
+      } // found->firdst
+    }   // it_found != m_map.end()
+  }     //! m_map.empty()
   return result;
 }
 
@@ -922,9 +924,8 @@ std::set<std::string> ParameterMap::names(const IComponent *comp) const {
     return paramNames;
   }
 
-  auto itr = m_map.lower_bound(id);
-  auto itr_end = m_map.upper_bound(id);
-  for (auto it = itr; it != itr_end; ++it) {
+  auto itrs = m_map.equal_range(id);
+  for (auto it = itrs.first; it != itrs.second; ++it) {
     paramNames.insert(it->second->name());
   }
 
@@ -942,11 +943,11 @@ std::string ParameterMap::asString() const {
   for (const auto &mappair : m_map) {
     const boost::shared_ptr<Parameter> &p = mappair.second;
     if (p && mappair.first) {
-      const IComponent *comp = (const IComponent *)(mappair.first);
+      const IComponent *comp = dynamic_cast<const IComponent *>(mappair.first);
       const IDetector *det = dynamic_cast<const IDetector *>(comp);
       if (det) {
         out << "detID:" << det->getID();
-      } else {
+      } else if (comp) {
         out << comp->getFullName(); // Use full path name to ensure unambiguous
                                     // naming
       }
@@ -971,10 +972,7 @@ void ParameterMap::clearPositionSensitiveCaches() {
 /// @param location :: The location
 void ParameterMap::setCachedLocation(const IComponent *comp,
                                      const V3D &location) const {
-  // Call to setCachedLocation is a write so not thread-safe
-  PARALLEL_CRITICAL(positionCache) {
-    m_cacheLocMap.setCache(comp->getComponentID(), location);
-  }
+  m_cacheLocMap.setCache(comp->getComponentID(), location);
 }
 
 /// Attempts to retrieve a location from the location cache
@@ -983,11 +981,7 @@ void ParameterMap::setCachedLocation(const IComponent *comp,
 /// @returns true if the location is in the map, otherwise false
 bool ParameterMap::getCachedLocation(const IComponent *comp,
                                      V3D &location) const {
-  bool inMap(false);
-  PARALLEL_CRITICAL(positionCache) {
-    inMap = m_cacheLocMap.getCache(comp->getComponentID(), location);
-  }
-  return inMap;
+  return m_cacheLocMap.getCache(comp->getComponentID(), location);
 }
 
 /// Sets a cached rotation on the rotation cache
@@ -995,10 +989,7 @@ bool ParameterMap::getCachedLocation(const IComponent *comp,
 /// @param rotation :: The rotation as a quaternion
 void ParameterMap::setCachedRotation(const IComponent *comp,
                                      const Quat &rotation) const {
-  // Call to setCachedRotation is a write so not thread-safe
-  PARALLEL_CRITICAL(rotationCache) {
-    m_cacheRotMap.setCache(comp->getComponentID(), rotation);
-  }
+  m_cacheRotMap.setCache(comp->getComponentID(), rotation);
 }
 
 /// Attempts to retrieve a rotation from the rotation cache
@@ -1007,11 +998,7 @@ void ParameterMap::setCachedRotation(const IComponent *comp,
 /// @returns true if the rotation is in the map, otherwise false
 bool ParameterMap::getCachedRotation(const IComponent *comp,
                                      Quat &rotation) const {
-  bool inMap(false);
-  PARALLEL_CRITICAL(rotationCache) {
-    inMap = m_cacheRotMap.getCache(comp->getComponentID(), rotation);
-  }
-  return inMap;
+  return m_cacheRotMap.getCache(comp->getComponentID(), rotation);
 }
 
 /// Sets a cached bounding box
@@ -1019,10 +1006,7 @@ bool ParameterMap::getCachedRotation(const IComponent *comp,
 /// @param box :: A reference to the bounding box
 void ParameterMap::setCachedBoundingBox(const IComponent *comp,
                                         const BoundingBox &box) const {
-  // Call to setCachedRotation is a write so not thread-safe
-  PARALLEL_CRITICAL(boundingBoxCache) {
-    m_boundingBoxMap.setCache(comp->getComponentID(), box);
-  }
+  m_boundingBoxMap.setCache(comp->getComponentID(), box);
 }
 
 /// Attempts to retrieve a bounding box from the cache
@@ -1048,8 +1032,13 @@ void ParameterMap::copyFromParameterMap(const IComponent *oldComp,
   auto oldParameterNames = oldPMap->names(oldComp);
   for (const auto &oldParameterName : oldParameterNames) {
     Parameter_sptr thisParameter = oldPMap->get(oldComp, oldParameterName);
-    // Insert the fetched parameter in the m_map
-    m_map.emplace(newComp->getComponentID(), thisParameter);
+// Insert the fetched parameter in the m_map
+#if TBB_VERSION_MAJOR >= 4 && TBB_VERSION_MINOR >= 4 && !CLANG_ON_LINUX
+    m_map.emplace(newComp->getComponentID(), std::move(thisParameter));
+#else
+    m_map.insert(
+        std::make_pair(newComp->getComponentID(), std::move(thisParameter)));
+#endif
   }
 }
 

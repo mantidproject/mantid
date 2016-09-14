@@ -14,6 +14,7 @@
 #include <cstring>
 #include <map>
 #include <vector>
+#include <iterator>
 
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
@@ -178,8 +179,6 @@ private:
   FactoryMap _map;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
 template class Mantid::Kernel::SingletonHolder<WindowFactoryImpl>;

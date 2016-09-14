@@ -71,7 +71,7 @@
 #include "Mantid/MantidWSIndexDialog.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
 
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 // Register the window into the WindowFactory
 DECLARE_WINDOW(MultiLayer)
@@ -1464,7 +1464,8 @@ void MultiLayer::convertToWaterfall() {
     return;
 
   hide();
-  active->setWaterfallOffset(10, 20);
+  active->setWaterfallOffset(default_waterfall_width_offset,
+                             default_waterfall_height_offset);
   setWaterfallLayout(true);
   // Next two lines replace the legend so that it works on reversing the curve
   // order
@@ -1754,12 +1755,12 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
   Mantid::Kernel::Strings::convert<int>(values[2], cols);
   QString birthDate = QString::fromStdString(values[3]);
 
-  QString label = caption;
+  MantidQt::API::TSVSerialiser tsv(lines);
 
   auto multiLayer = new MultiLayer(app, 0, rows, cols);
 
-  TSVSerialiser tsv(lines);
-
+  multiLayer->setBirthDate(birthDate);
+  app->setListViewDate(caption, birthDate);
   multiLayer->blockSignals(true);
 
   if (tsv.selectLine("WindowLabel")) {
@@ -1791,49 +1792,63 @@ IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
     multiLayer->setAlignement(hor, vert);
   }
 
-  if (tsv.hasSection("waterfall")) {
-    const std::string wfStr = tsv.sections("waterfall").front();
-
-    if (wfStr == "1")
-      multiLayer->setWaterfallLayout(true);
-    else
-      multiLayer->setWaterfallLayout(false);
-  }
-
-  if (tsv.hasSection("graph")) {
-    auto graphSections = tsv.sections("graph");
-    for (auto it = graphSections.cbegin(); it != graphSections.cend(); ++it) {
-      auto graphLines = *it;
-
-      TSVSerialiser gtsv(graphLines);
-
-      if (gtsv.selectLine("ggeometry")) {
-        int x = 0, y = 0, w = 0, h = 0;
-        gtsv >> x >> y >> w >> h;
-
-        auto g = dynamic_cast<Graph *>(multiLayer->addLayer(x, y, w, h));
-        if (g)
-          g->loadFromProject(graphLines, app, fileVersion);
-      }
-    }
-  }
-
   multiLayer->blockSignals(false);
 
-  multiLayer->setBirthDate(birthDate);
-  app->initMultilayerPlot(multiLayer, label.replace(QRegExp("_"), "-"));
-  app->setListViewDate(caption, birthDate);
+  QString label = caption;
+  label = label.replace(QRegExp("_"), "-");
+  app->initMultilayerPlot(multiLayer, label);
 
   if (tsv.hasLine("geometry")) {
     app->restoreWindowGeometry(
         app, multiLayer, QString::fromStdString(tsv.lineAsString("geometry")));
   }
 
+  bool isWaterfall = false;
+  if (tsv.hasSection("waterfall")) {
+    const std::string wfStr = tsv.sections("waterfall").front();
+    isWaterfall = (wfStr == "1");
+  }
+
+  if (tsv.hasSection("graph")) {
+    auto graphSections = tsv.sections("graph");
+    for (const auto &graphLines : graphSections) {
+      MantidQt::API::TSVSerialiser gtsv(graphLines);
+
+      if (gtsv.selectLine("ggeometry")) {
+        int x = 0, y = 0, w = 0, h = 0;
+        gtsv >> x >> y;
+
+        w = multiLayer->canvas->width();
+        w -= multiLayer->left_margin;
+        w -= multiLayer->right_margin;
+        w -= (multiLayer->d_cols - 1) * multiLayer->colsSpace;
+
+        h = multiLayer->canvas->height();
+        h -= multiLayer->top_margin;
+        h -= multiLayer->left_margin;
+        h -= (multiLayer->d_rows - 1) * multiLayer->rowsSpace;
+        h -= LayerButton::btnSize();
+
+        if (isWaterfall)
+          h -= LayerButton::btnSize(); // need an extra offset for the buttons
+
+        auto g = multiLayer->addLayer(x, y, w, h);
+        if (g) {
+          g->loadFromProject(graphLines, app, fileVersion);
+        }
+      }
+    }
+  }
+
+  // waterfall must be updated after graphs have been loaded
+  // as it requires the graphs to exist first!
+  multiLayer->setWaterfallLayout(isWaterfall);
+
   return multiLayer;
 }
 
 std::string MultiLayer::saveToProject(ApplicationWindow *app) {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
 
   tsv.writeRaw("<multiLayer>");
 

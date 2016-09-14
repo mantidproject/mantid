@@ -2,8 +2,10 @@
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGPRESWORKER_H_
 
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffFittingPresenter.h"
+#include "MantidKernel/Logger.h"
 
 #include <QThread>
+#include <stdexcept>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -40,14 +42,28 @@ class EnggDiffFittingWorker : public QObject {
 public:
   // for fitting (single peak fits)
   EnggDiffFittingWorker(EnggDiffFittingPresenter *pres,
-                        const std::string &focusedRunNo,
+                        const std::vector<std::string> &focusedRunNo,
                         const std::string &ExpectedPeaks)
-      : m_pres(pres), m_runNo(focusedRunNo), m_expectedPeaks(ExpectedPeaks) {}
+      : m_pres(pres), m_multiRunNo(focusedRunNo),
+        m_expectedPeaks(ExpectedPeaks) {}
 
 private slots:
 
   void fitting() {
-    m_pres->doFitting(m_runNo, m_expectedPeaks);
+    for (size_t i = 0; i < m_multiRunNo.size(); ++i) {
+
+      auto runNo = m_multiRunNo[i];
+      try {
+        m_pres->doFitting(runNo, m_expectedPeaks);
+      } catch (std::exception &e) {
+        // If we catch any sort of exception throw we should break
+        // the loop to ensure we don't continue and emit
+        // the finished signal to Qt and replay the error to log
+        Mantid::Kernel::Logger log("EngineeringDiffractionFitting");
+        log.error(e.what());
+        break;
+      }
+    }
     emit finished();
   }
 
@@ -58,7 +74,7 @@ private:
   EnggDiffFittingPresenter *m_pres;
 
   /// sample run to process
-  const std::string m_runNo;
+  const std::vector<std::string> m_multiRunNo;
   // parameters for fitting, list of peaks
   const std::string m_expectedPeaks;
 };
