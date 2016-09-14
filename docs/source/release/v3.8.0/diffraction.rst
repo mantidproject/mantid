@@ -48,8 +48,8 @@ Single Crystal Diffraction
   set in the instrument parameter file. Default values are in the parameter file for the TOPAZ instrument.
 
 - :ref:`SaveLauenorm <algm-SaveLauenorm>`
-  was modified to use the detector bank scales in the instrument parameters. The default values can be
-  set in the instrument parameter file or by
+  was modified to have an option to use the detector bank scales from the instrument parameters. The values can be
+  set to have defaults in the instrument parameter file or by
   :ref:`SetDetScale <algm-SetDetScale>`.
 
 

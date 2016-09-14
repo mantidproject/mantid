@@ -80,6 +80,7 @@ public:
       }
     }
 
+    // Now try with setting detector parameter
     auto &paramMap = ws->instrumentParameters();
     paramMap.addDouble(inst.get(), "detScale1", 0.5);
 
@@ -88,7 +89,7 @@ public:
     TS_ASSERT(alg2.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg2.setProperty("InputWorkspace", ws));
     TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("Filename", outfile));
-    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("UseDetScale", "true"));
+    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("UseDetScale", true));
     TS_ASSERT_THROWS_NOTHING(alg2.execute(););
     TS_ASSERT(alg2.isExecuted());
     // Get the file
@@ -102,14 +103,16 @@ public:
 
       double d1, d2, d3, d4, d5, d6, d7;
       if (numPeaksPerBank > 0) {
-        in >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7;
-        TS_ASSERT_EQUALS(d1, -1);
-        TS_ASSERT_EQUALS(d2, -1);
-        TS_ASSERT_EQUALS(d3, -1);
-        TS_ASSERT_EQUALS(d6, 1);
+        for (int i = 0; i < 17; i++)
+          in >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7;
+        TS_ASSERT_EQUALS(d1, -3);
+        TS_ASSERT_EQUALS(d2, -3);
+        TS_ASSERT_EQUALS(d3, -3);
+        TS_ASSERT_EQUALS(d4, 3.5);
+        TS_ASSERT_DELTA(d5, 0.39270, 1e-4);
+        // was d6=3; d7=2 before 0.5 factor (round up to integer)
+        TS_ASSERT_EQUALS(d6, 2);
         TS_ASSERT_EQUALS(d7, 1);
-        TS_ASSERT_EQUALS(d4, 1.5 * 0.5);
-        TS_ASSERT_DELTA(d5, 0.21025 * 0.5, 1e-4);
       }
     }
 
