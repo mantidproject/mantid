@@ -2,7 +2,7 @@ from mantid import mtd
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, \
     FileProperty, WorkspaceProperty
 from mantid.kernel import Direction, EnabledWhenProperty, \
-    PropertyCriterion, StringListValidator
+    IntBoundedValidator, Property, PropertyCriterion, StringListValidator
 from mantid.simpleapi import *
 import os
 
@@ -26,10 +26,10 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
         filenames.sort()
 
         runNumber = self.getProperty('RunNumber').value
-        if runNumber > 0:
+        if runNumber != Property.EMPTY_INT:
             # convert to substring to look for
             runNumber = "%s_%d_live" % (instrument, runNumber)
-            self.log().information('Looking for %d' % runNumber)
+            self.log().information('Looking for ' + runNumber)
 
             filenames = [name for name in filenames
                          if runNumber in name]
@@ -72,7 +72,9 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
                              StringListValidator(instruments),
                              'Empty uses default instrument')
 
-        self.declareProperty('RunNumber', 0,
+        runValidator = IntBoundedValidator()
+        runValidator.setLower(1)
+        self.declareProperty('RunNumber', Property.EMPTY_INT, runValidator,
                              doc='Live run number to use (Optional, Default=most recent)')
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
