@@ -2884,6 +2884,11 @@ EnggDiffractionPresenter::outFilesGeneralDir(const std::string &addComponent) {
   try {
 
     dir.append(addComponent);
+
+    Poco::File dirFile(dir);
+    if (!dirFile.exists()) {
+      dirFile.createDirectories();
+    }
   } catch (Poco::FileAccessDeniedException &e) {
     g_log.error() << "Error caused by file access/permission, path to "
                      "general directory: " << dir.toString()
