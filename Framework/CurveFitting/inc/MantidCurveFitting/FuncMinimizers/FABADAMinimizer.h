@@ -63,7 +63,6 @@ public:
   void finalize() override;
 
 private:
-
   /// Returns the step from a Gaussian given sigma = Jump
   double GaussianStep(const double &Jump);
   /// If the new point is out of its bounds, it is changed to fit in the bound
