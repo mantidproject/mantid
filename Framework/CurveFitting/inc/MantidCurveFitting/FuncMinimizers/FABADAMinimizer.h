@@ -63,28 +63,32 @@ public:
   void finalize() override;
 
 private:
-  //Forward declarations
-  
-  //REFACTORING
-  ///Returns the step from a Gaussian given sigma = Jump
-  double GaussianStep(const double& Jump);
-  ///If the new point is out of its bounds, it is changed to fit in the bound limits
-  void BoundApplication(const size_t& ParameterIndex, double& new_value, double& step);
-  ///Applied to the other parameters first and sequentially, finally to the current one
-  void TieApplication(const size_t& ParameterIndex, GSLVector& new_parameters, double& new_value);
-  ///Given the new chi2, next position is calculated and updated. m_changes[ParameterIndex] updated too
-  void AlgorithmDisplacement(const size_t& ParameterIndex, const double& chi2_new, GSLVector& new_parameters);
-  ///Updates the ParameterIndex-th parameter jump if appropriate
-  void JumpUpdate(const size_t& ParameterIndex);
-  ///Check for convergence (including Overexploration convergence), updates m_converged
+
+  /// Returns the step from a Gaussian given sigma = Jump
+  double GaussianStep(const double &Jump);
+  /// If the new point is out of its bounds, it is changed to fit in the bound
+  /// limits
+  void BoundApplication(const size_t &ParameterIndex, double &new_value,
+                        double &step);
+  /// Applied to the other parameters first and sequentially, finally to the
+  /// current one
+  void TieApplication(const size_t &ParameterIndex, GSLVector &new_parameters,
+                      double &new_value);
+  /// Given the new chi2, next position is calculated and updated.
+  /// m_changes[ParameterIndex] updated too
+  void AlgorithmDisplacement(const size_t &ParameterIndex,
+                             const double &chi2_new, GSLVector &new_parameters);
+  /// Updates the ParameterIndex-th parameter jump if appropriate
+  void JumpUpdate(const size_t &ParameterIndex);
+  /// Check for convergence (including Overexploration convergence), updates
+  /// m_converged
   void ConvergenceCheck();
-  ///Refrigerates the system if appropriate
+  /// Refrigerates the system if appropriate
   void SimAnnealingRefrigeration();
-  ///Decides wheather iteration must continue or not
+  /// Decides wheather iteration must continue or not
   bool IterationContinuation();
-  
-  
-  //Variables declarations
+
+  // Variables declarations
   /// Pointer to the cost function. Must be the least squares.
   // Intentar encontrar una manera de sacar aqui el numero de parametros  que
   // no sea necesaria la cost function
@@ -121,37 +125,40 @@ private:
   std::vector<double> m_criteria;
   /// Maximum number of iterations
   size_t m_max_iter;
-  ///Bool that idicates if a varible has changed at some self iteration
+  /// Bool that idicates if a varible has changed at some self iteration
   std::vector<bool> m_par_changed;
-  ///Simulated Annealing temperature
+  /// Simulated Annealing temperature
   double m_Temperature;
-  ///The global number of iterations done
+  /// The global number of iterations done
   size_t m_counterGlobal;
-  ///Number of iterations between Simulated Annealing refrigeration points
+  /// Number of iterations between Simulated Annealing refrigeration points
   size_t m_SimAnnealingItStep;
-  ///The number of refrigeration points left
+  /// The number of refrigeration points left
   size_t m_LeftRefrPoints;
-  ///Temperature step between different Simulated Annealing phases
+  /// Temperature step between different Simulated Annealing phases
   double m_TempStep;
-  ///Overexploration applied
+  /// Overexploration applied
   bool m_Overexploration;
-  ///Number of parameters of the FittingFunction (not necessarily the CostFunction)
+  /// Number of parameters of the FittingFunction (not necessarily the
+  /// CostFunction)
   size_t m_nParams;
-  ///Number of consecutive innactive regenerations needed to consider convergence
+  /// Number of consecutive innactive regenerations needed to consider
+  /// convergence
   size_t m_InnactConvCriterion;
-  ///Number of consecutive regenerations without changes (>= m_InnactConvCriterion it is considered to have arrived to convergence at a steep minimum)
+  /// Number of consecutive regenerations without changes (>=
+  /// m_InnactConvCriterion it is considered to have arrived to convergence at a
+  /// steep minimum)
   std::vector<size_t> m_NumInactiveRegenerations;
-  ///To track convergence through immobility
+  /// To track convergence through immobility
   std::vector<double> m_changesOld;
 };
 
-///Used to access the setDirty() protected member
-class MaleableCostFunction: public CostFunctions::CostFuncLeastSquares {
-	public:
-	///To inform the main class of changes through the IFunction
-	    void setDirtyInherited() {setDirty();}
+/// Used to access the setDirty() protected member
+class MaleableCostFunction : public CostFunctions::CostFuncLeastSquares {
+public:
+  /// To inform the main class of changes through the IFunction
+  void setDirtyInherited() { setDirty(); }
 };
-
 
 } // namespace FuncMinimisers
 } // namespace CurveFitting
