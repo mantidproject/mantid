@@ -93,7 +93,7 @@ void MagFormFactorCorrection::exec() {
         "Workspace2D", 1, Qvals.size(), FF.size());
     ffws->mutableX(0).assign(Qvals.begin(), Qvals.end());
     ffws->mutableY(0).assign(FF.begin(), FF.end());
-    API::AnalysisDataService::Instance().addOrReplace(ffwsStr, ffws);
+    setProperty("FormFactorWorkspace", ffws);
   }
 
   // Does the actual scaling.
