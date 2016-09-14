@@ -214,7 +214,7 @@ void CreateSampleWorkspace::exec() {
     m_randGen = new Kernel::MersenneTwister(seedValue);
   }
 
-  int numPixels = numBanks * bankPixelWidth * bankPixelWidth + numMonitors;
+  int numPixels = numBanks * bankPixelWidth * bankPixelWidth;
 
   Progress progress(this, 0, 1, numBanks);
 
@@ -223,15 +223,15 @@ void CreateSampleWorkspace::exec() {
       progress, numBanks, numMonitors, bankPixelWidth, pixelSpacing,
       bankDistanceFromSample, sourceSampleDistance);
 
-  int num_bins = static_cast<int>((xMax - xMin) / binWidth);
+  int numBins = static_cast<int>((xMax - xMin) / binWidth);
 
   MatrixWorkspace_sptr ws;
   if (wsType == "Event") {
-    ws = createEventWorkspace(numPixels, num_bins, numEvents, xMin, binWidth,
+    ws = createEventWorkspace(numPixels, numBins, numMonitors, numEvents, xMin, binWidth,
                               bankPixelWidth * bankPixelWidth, inst,
                               functionString, isRandom);
   } else {
-    ws = createHistogramWorkspace(numPixels, num_bins, xMin, binWidth,
+    ws = createHistogramWorkspace(numPixels, numBins, numMonitors, xMin, binWidth,
                                   bankPixelWidth * bankPixelWidth, inst,
                                   functionString, isRandom);
   }
@@ -297,7 +297,7 @@ void CreateSampleWorkspace::addChopperParameters(
 /** Create histogram workspace
  */
 MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
-    int numPixels, int numBins, double x0, double binDelta,
+    int numPixels, int numBins, int numMonitors, double x0, double binDelta,
     int start_at_pixelID, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
   BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
@@ -306,14 +306,15 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
   CountStandardDeviations e(CountVariances(y.cbegin(), y.cend()));
 
-  auto retVal = createWorkspace<Workspace2D>(numPixels, numBins + 1, numBins);
+  auto retVal = createWorkspace<Workspace2D>(numPixels + numMonitors, numBins + 1, numBins);
   retVal->setInstrument(inst);
 
-  for (size_t wi = 0; wi < static_cast<size_t>(numPixels); wi++) {
+  for (int wi = 0; wi < numMonitors + numPixels; wi++) {
+    detid_t detNumber = wi < numMonitors ? start_at_pixelID + numPixels + wi : start_at_pixelID + wi - numMonitors;
     retVal->setBinEdges(wi, x);
     retVal->setCounts(wi, y);
     retVal->setCountStandardDeviations(wi, e);
-    retVal->getSpectrum(wi).setDetectorID(detid_t(start_at_pixelID + wi));
+    retVal->getSpectrum(wi).setDetectorID(detNumber);
     retVal->getSpectrum(wi).setSpectrumNo(specnum_t(wi + 1));
   }
 
@@ -323,7 +324,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
 /** Create event workspace
  */
 EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
-    int numPixels, int numBins, int numEvents, double x0, double binDelta,
+    int numPixels, int numBins, int numMonitors, int numEvents, double x0, double binDelta,
     int start_at_pixelID, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
   DateAndTime run_start("2010-01-01T00:00:00");
@@ -332,7 +333,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
   int numXBins = numBins + 1;
 
   auto retVal = boost::make_shared<EventWorkspace>();
-  retVal->initialize(numPixels, 1, 1);
+  retVal->initialize(numPixels + numMonitors, 1, 1);
 
   retVal->setInstrument(inst);
 
@@ -356,10 +357,11 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
   size_t workspaceIndex = 0;
 
   const double hourInSeconds = 60 * 60;
-  for (int wi = 0; wi < numPixels; wi++) {
+  for (int wi = 0; wi < numPixels + numMonitors; wi++) {
     EventList &el = retVal->getSpectrum(workspaceIndex);
     el.setSpectrumNo(wi + 1);
-    el.setDetectorID(wi + start_at_pixelID);
+    detid_t detNumber = wi < numMonitors ? start_at_pixelID + numPixels + wi : start_at_pixelID + wi - numMonitors;
+    el.setDetectorID(detNumber);
 
     // for each bin
 

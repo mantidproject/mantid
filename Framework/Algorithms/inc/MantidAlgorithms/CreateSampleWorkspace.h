@@ -53,12 +53,12 @@ private:
   void exec() override;
 
   DataObjects::EventWorkspace_sptr
-  createEventWorkspace(int numPixels, int numBins, int numEvents, double x0,
+  createEventWorkspace(int numPixels, int numBins, int numMonitors, int numEvents, double x0,
                        double binDelta, int start_at_pixelID,
                        Geometry::Instrument_sptr inst,
                        const std::string &functionString, bool isRandom);
   API::MatrixWorkspace_sptr
-  createHistogramWorkspace(int numPixels, int numBins, double x0,
+  createHistogramWorkspace(int numPixels, int numBins, int numMonitors, double x0,
                            double binDelta, int start_at_pixelID,
                            Geometry::Instrument_sptr inst,
                            const std::string &functionString, bool isRandom);
