@@ -91,7 +91,7 @@ void MaskDetectors::init() {
       "If other masks are provided, its the last index of the "
       "target workspace allowed to be masked to by these masks, "
       "if not, its the last index of the target workspace to mask.\n"
-      "Default is number of histograms in target worspace if other masks are"
+      "Default is number of histograms in target workspace if other masks are"
       " present "
       "or ignored if not.");
 }
@@ -239,14 +239,14 @@ void MaskDetectors::exec() {
   /*
   This rebuild request call, gives the workspace the opportunity to rebuild the
   nearest neighbours map
-  and therfore pick up any detectors newly masked with this algorithm.
+  and therefore pick up any detectors newly masked with this algorithm.
   */
   WS->rebuildNearestNeighbours();
 }
 /* Verifies input ranges are defined and returns these ranges if they are.
 *
 * @return tuple containing min/max ranges provided to algorithm
-*        (from 0 to max histogram range) and boolean value,
+*        (from 0 to max histogram range) and Boolean value,
 *        containing true if the ranges are
 *        constrained (or defined in other words)
 *        and false if they are not.
@@ -280,7 +280,7 @@ MaskDetectors::getRanges(const MatrixWorkspace_sptr &targWS) {
   }
 }
 /* Constrain masked indexes by limits, provided as input
-* @param indexList  :: list of indexes to verify agains constrain on input
+* @param indexList  :: list of indexes to verify against constrain on input
 *                      and list of constrained indexes on the output.
 * @param startIndex :: minimal index (inclusive) to include in the constrained
 * list.
@@ -299,7 +299,7 @@ void MaskDetectors::constrainMaskedIndexes(
 
 /* Method to extract detector's id-s from mask workspace
 * the mask workspace assumed to be not having masked detectors, but has masked
-* state defined in its spectea
+* state defined in its spectra
 @param detectorList :: list of masked detectors, appended on output by the
 detectors,
 *                      defined in the mask workspace.
@@ -384,7 +384,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
 
   // If explicitly given a list of detectors to mask, just mark those.
   // Otherwise, mask all detectors pointing to the requested spectra in
-  // indexlist loop below
+  // index list loop below
   std::vector<detid_t>::const_iterator it;
   if (!detectorList.empty()) {
     for (it = detectorList.begin(); it != detectorList.end(); ++it) {
@@ -406,8 +406,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
  * @param spectraList :: A list of spectra numbers
  * @param WS :: The input workspace to be masked
  * @param range_info :: tuple containing the range of spectra to process and
- *boolean
- *                      indicating if these ranges are defined
+ *                      Boolean indicating if these ranges are defined
  */
 void MaskDetectors::fillIndexListFromSpectra(
     std::vector<size_t> &indexList, const std::vector<specnum_t> &spectraList,
@@ -448,8 +447,7 @@ void MaskDetectors::fillIndexListFromSpectra(
  * @param indexList :: An existing list of indices.
  * @param sourceWS  :: An workspace with masked spectra.
  * @param range_info :: tuple containing the range of spectra to process and
- *boolean
- *                      indicating if these ranges are defined
+ *                            Boolean indicating if these ranges are defined
 */
 void MaskDetectors::appendToIndexListFromWS(
     std::vector<size_t> &indexList, const MatrixWorkspace_sptr sourceWS,
