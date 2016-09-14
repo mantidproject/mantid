@@ -58,7 +58,7 @@ FABADAMinimizer::FABADAMinimizer()
       m_NumInactiveRegenerations(), m_changesOld() {
   declareProperty("ChainLength", static_cast<size_t>(10000),
                   "Length of the converged chain.");
-  declareProperty("StepsBetweenValues", static_cast<size_t>(10),
+  declareProperty("StepsBetweenValues", 10,
                   "Steps done between chain points to avoid correlation"
                   " between them.");
   declareProperty(
@@ -89,7 +89,7 @@ FABADAMinimizer::FABADAMinimizer()
                       "PDF", "PDF", Kernel::Direction::Output),
                   "The name to give the output workspace for the"
                   " Probability Density Functions");
-  declareProperty("NumberBinsPDF", static_cast<size_t>(20),
+  declareProperty("NumberBinsPDF", 20,
                   "Number of bins used for the output PDFs");
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
                       "Chains", "", Kernel::Direction::Output),
