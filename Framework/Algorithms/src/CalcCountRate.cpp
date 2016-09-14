@@ -200,7 +200,9 @@ void CalcCountRate::exec() {
     */
 }
 /*Analyse input log parameters and logs, attached to the workspace and identify
- * the parameters of the target log*/
+ * the parameters of the target log
+ @param InputWorkspace -- input workspace to analyze logs
+ */
 void CalcCountRate::setOutLogParameters(
     const DataObjects::EventWorkspace_sptr &InputWorkspace) {
 

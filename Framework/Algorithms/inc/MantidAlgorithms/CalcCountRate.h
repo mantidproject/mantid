@@ -61,7 +61,7 @@ protected: // for testing, actually private
   /// default number of points in the target log
   size_t m_numLogSteps{100};
 
-  /// specifies if rate is calculatet in selected frame interval (range defined)
+  /// specifies if rate is calculated in selected frame interval (range defined)
   /// or all frame should be used
   bool m_rangeExplicit{false};
   /// spurion search ranges

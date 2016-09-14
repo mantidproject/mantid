@@ -23,6 +23,12 @@ public:
     return std::tuple<double, double, bool>(m_XRangeMin, m_XRangeMax,
                                             m_rangeExplicit);
   }
+  void setOutLogParameters(const DataObjects::EventWorkspace_sptr &InputWorkspace) {
+      CalcCountRate::setOutLogParameters(InputWorkspace);
+  }
+  void getAlgLogSettings() {
+
+  }
 };
 
 class CalcCountRateTest : public CxxTest::TestSuite {
@@ -42,18 +48,28 @@ public:
     DataObjects::EventWorkspace_sptr sws =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10,
                                                                         false);
+    double XRangeMin, XRangeMax;
 
     CalcCountRateTester alg;
+
     alg.initialize();
     alg.setProperty("Workspace", sws);
 
-    alg.setSearchRanges(sws);
+    alg.setSearchRanges(sws); // explicit ranges:
+    //-- real workspace ranges returned
 
     auto ranget = alg.getXRanges();
-    TS_ASSERT_DELTA(std::get<0>(ranget), 0., 1.e-8);
-    TS_ASSERT_DELTA(std::get<1>(ranget), 100., 1.e-8);
+    TS_ASSERT_DELTA(std::get<0>(ranget), 0.5, 1.e-8);
+    TS_ASSERT_DELTA(std::get<1>(ranget), 99.5, 1.e-8);
     TS_ASSERT(!std::get<2>(ranget));
+
+    sws->getEventXMinMax(XRangeMin, XRangeMax);
+    TS_ASSERT_DELTA(XRangeMin, 0.5, 1.e-5);
+    TS_ASSERT_DELTA(XRangeMax, 99.5, 1.e-5);
+
     //--------------------------------------------------------------------
+    // right crop range is specified. Top range is within the right
+    // limit
     alg.setProperty("Workspace", sws);
     alg.setProperty("XMax", 20.);
     alg.setProperty("RangeUnits", "dSpacing");
@@ -61,11 +77,20 @@ public:
     alg.setSearchRanges(sws);
 
     ranget = alg.getXRanges();
-    TS_ASSERT_DELTA(std::get<0>(ranget), 0., 1.e-8);
-    TS_ASSERT_DELTA(std::get<1>(ranget), 20., 1.e-8);
+    TS_ASSERT_DELTA(std::get<0>(ranget), 0.5, 1.e-8); // left range is real 
+    // range as not specified
+    TS_ASSERT_DELTA(std::get<1>(ranget), 20., 1.e-8); // Right range is specidied range
     TS_ASSERT(std::get<2>(ranget));
 
+    sws->getEventXMinMax(XRangeMin, XRangeMax);
+    TS_ASSERT_DELTA(XRangeMin,0.5,1.e-5);
+    TS_ASSERT_DELTA(XRangeMax, 19.5, 1.e-5);
+
+
     //--------------------------------------------------------------------
+    // both crop ranges are specified. Result lies within the crop
+    // ranges in energy units.
+
     sws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
         2, 10, false);
 
@@ -76,18 +101,21 @@ public:
     alg.setSearchRanges(sws);
 
     ranget = alg.getXRanges();
-    TS_ASSERT_DELTA(std::get<0>(ranget), 1., 1.e-8);
+    TS_ASSERT_DELTA(std::get<0>(ranget), 19.9301, 1.e-4);
     TS_ASSERT_DELTA(std::get<1>(ranget), 30., 1.e-8);
     TS_ASSERT(std::get<2>(ranget));
 
-    double XRangeMin, XRangeMax;
     sws->getEventXMinMax(XRangeMin,XRangeMax);
 
-    TS_ASSERT(std::get<0>(ranget) < XRangeMin);
-    TS_ASSERT(std::get<1>(ranget) > XRangeMax);
+    TS_ASSERT_DELTA(std::get<0>(ranget), XRangeMin,1.e-4);
+    TS_ASSERT_DELTA(29.95302,XRangeMax,1.e-4);
 
 
   }
+  void test_log_params() {
+
+  }
+
 };
 
 #endif /* MANTID_ALGORITHMS_CALC_COUNTRATE_TEST_H_ */
