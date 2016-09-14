@@ -650,7 +650,7 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
   m_file->getAttr<int>("rows", outD);
   m_file->getAttr<int>("columns", inD);
   m_file->closeData();
-  Matrix<coord_t> mat(vec,outD, inD);
+  Matrix<coord_t> mat(vec, outD, inD);
   // Adjust dimensions
   inD--;
   outD--;

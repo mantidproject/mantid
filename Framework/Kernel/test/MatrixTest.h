@@ -183,12 +183,12 @@ public:
   void testFromVectorAndDimensions() {
     std::vector<int> data{1, 2, 3, 4, 5, 6};
     TSM_ASSERT_THROWS("building matrix with worng dimension should fail",
-                      (Matrix<int>(data,4,5)), std::invalid_argument);
+                      (Matrix<int>(data, 4, 5)), std::invalid_argument);
     Matrix<int> myMat;
     TSM_ASSERT_THROWS_NOTHING("building matrix by this construcor and data "
                               "with correct number of elements should not "
                               "throw",
-                              myMat = Matrix<int>(data,2,3));
+                              myMat = Matrix<int>(data, 2, 3));
     TS_ASSERT_EQUALS(1, myMat[0][0]);
     TS_ASSERT_EQUALS(2, myMat[0][1]);
     TS_ASSERT_EQUALS(3, myMat[0][2]);

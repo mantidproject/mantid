@@ -139,15 +139,16 @@ Matrix<T>::Matrix(const std::vector<T> &data)
   }
 }
 
-
 template <typename T>
-Matrix<T>::Matrix(const std::vector<T> &data, const size_t nrow, const size_t ncol)
+Matrix<T>::Matrix(const std::vector<T> &data, const size_t nrow,
+                  const size_t ncol)
     : nx(0), ny(0), V(nullptr) {
   size_t numel = data.size();
   size_t test = nrow * ncol;
   if (test != numel) {
-    throw(std::invalid_argument(
-        "number of elements in input vector have is incompatible with the number of rows and columns"));
+    throw(std::invalid_argument("number of elements in input vector have is "
+                                "incompatible with the number of rows and "
+                                "columns"));
   }
 
   setMem(nrow, ncol);
@@ -160,7 +161,6 @@ Matrix<T>::Matrix(const std::vector<T> &data, const size_t nrow, const size_t nc
     }
   }
 }
-
 
 template <typename T>
 Matrix<T>::Matrix(const Matrix<T> &A, const size_t nrow, const size_t ncol)
