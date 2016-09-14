@@ -419,7 +419,7 @@ void FABADAMinimizer::finalize() {
   // Creating the reduced chain (considering only one each
   // "Steps between values" values)
   size_t ChainLength = getProperty("ChainLength");
-  size_t n_steps = getProperty("StepsBetweenValues");
+  int n_steps = getProperty("StepsBetweenValues");
   if (n_steps <= 0) {
     g_log.warning() << "StepsBetweenValues has a non valid value"
                        " (<= 0). Default one used"
@@ -433,9 +433,6 @@ void FABADAMinimizer::finalize() {
   std::vector<double> BestParameters(m_nParams);
   std::vector<double> error_left(m_nParams);
   std::vector<double> error_rigth(m_nParams);
-
-  // Iterator for the minimum chi square position
-  std::vector<double>::iterator position_min_chi2;
 
   // In case of reduced chain
   if (conv_length > 0) {
@@ -566,7 +563,7 @@ void FABADAMinimizer::finalize() {
   }
 
   // Create the workspace for the Probability Density Functions
-  size_t pdf_length = getProperty(
+  int pdf_length = getProperty(
       "NumberBinsPDF"); // histogram length for the PDF output workspace
   if (pdf_length <= 0) {
     g_log.warning() << "Non valid Number of bins for the PDF (<= 0)."
@@ -591,7 +588,7 @@ void FABADAMinimizer::finalize() {
     MantidVec &X = ws->dataX(m_nParams);
     MantidVec &Y = ws->dataY(m_nParams);
     X[0] = start;
-    for (size_t i = 1; i < pdf_length + 1; i++) {
+    for (size_t i = 1; i < static_cast<size_t>(pdf_length) + 1; i++) {
       double bin_end = start + double(i) * bin;
       X[i] = bin_end;
       while (step < conv_length && red_conv_chain[m_nParams][step] <= bin_end) {
@@ -617,7 +614,7 @@ void FABADAMinimizer::finalize() {
       MantidVec &X = ws->dataX(j);
       MantidVec &Y = ws->dataY(j);
       X[0] = start;
-      for (size_t i = 1; i < pdf_length + 1; i++) {
+      for (size_t i = 1; i < static_cast<size_t>(pdf_length) + 1; i++) {
         double bin_end = start + double(i) * bin;
         X[i] = bin_end;
         while (step < conv_length && red_conv_chain[j][step] <= bin_end) {
