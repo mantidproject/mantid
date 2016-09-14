@@ -11,11 +11,45 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/FFT.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Interpolation.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
+
+namespace {
+
+MatrixWorkspace_sptr createWSGlobal(int n, int dn, double dX) {
+  Mantid::DataObjects::Workspace2D_sptr ws =
+      boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+          WorkspaceFactory::Instance().create("Workspace2D", 1, n + dn, n));
+
+  auto &X = ws->mutableX(0);
+  auto &Y = ws->mutableY(0);
+  auto &E = ws->mutableE(0);
+
+  int n2 = n / 2;
+  for (int k = 0; k <= n2; k++) {
+    int i = n2 - k;
+    if (i >= 0) {
+      X[i] = -dX * (k);
+      Y[i] = exp(-X[i] * X[i] * 3.);
+      E[i] = 1.;
+    }
+    i = n2 + k;
+    if (i < n) {
+      X[i] = dX * (k);
+      Y[i] = exp(-X[i] * X[i] * 3.);
+      E[i] = 1.;
+    }
+  }
+
+  if (dn > 0)
+    X[n] = X[n - 1] + dX;
+
+  return ws;
+}
+}
 
 /**
  * This is a test class that exists to test the method validateInputs()
@@ -759,35 +793,10 @@ private:
                                    tolerance));
   }
 
+  // Wrap the global method so as to not change all of the functions 
+  // from the unit test
   MatrixWorkspace_sptr createWS(int n, int dn) {
-    Mantid::DataObjects::Workspace2D_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-            WorkspaceFactory::Instance().create("Workspace2D", 1, n + dn, n));
-
-    auto &X = ws->mutableX(0);
-    auto &Y = ws->mutableY(0);
-    auto &E = ws->mutableE(0);
-
-    int n2 = n / 2;
-    for (int k = 0; k <= n2; k++) {
-      int i = n2 - k;
-      if (i >= 0) {
-        X[i] = -dX * (k);
-        Y[i] = exp(-X[i] * X[i] * 3.);
-        E[i] = 1.;
-      }
-      i = n2 + k;
-      if (i < n) {
-        X[i] = dX * (k);
-        Y[i] = exp(-X[i] * X[i] * 3.);
-        E[i] = 1.;
-      }
-    }
-
-    if (dn > 0)
-      X[n] = X[n - 1] + dX;
-
-    return ws;
+    return createWSGlobal(n, dn, dX);
   }
 
   MatrixWorkspace_sptr createWS(int n, int dn, const std::string &name) {
@@ -980,6 +989,48 @@ private:
   const double h;
   const double a;
   const double tolerance;
+};
+
+class FFTTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FFTTestPerformance *createSuite() { return new FFTTestPerformance(); }
+  static void destroySuite(FFTTestPerformance *suite) { delete suite; }
+
+  FFTTestPerformance() {
+    inputWS = createWSGlobal(N, 0, dX);
+    inputWSHist = createWSGlobal(N, 1, dX);
+  }
+  ~FFTTestPerformance() override {}
+
+  void testPerformance() {
+	  IAlgorithm *fft =
+		  Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+	  fft->initialize();
+	  fft->setChild(true);
+	  fft->setProperty("InputWorkspace", inputWS);
+	  fft->setPropertyValue("OutputWorkspace", "__NotUsed");
+	  fft->setPropertyValue("Real", "0");
+	  fft->execute();
+  }
+
+  void testHistPerformance() {
+	  IAlgorithm *fft =
+		  Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+	  fft->initialize();
+	  fft->setChild(true);
+	  fft->setProperty("InputWorkspace", inputWSHist);
+	  fft->setPropertyValue("OutputWorkspace", "__NotUsed");
+	  fft->setPropertyValue("Real", "0");
+	  fft->execute();
+  }
+
+private:
+  MatrixWorkspace_sptr inputWS;
+  MatrixWorkspace_sptr inputWSHist;
+  const int N = 10000;
+  const double dX = 0.2;
 };
 
 #endif /*FFT_TEST_H_*/
