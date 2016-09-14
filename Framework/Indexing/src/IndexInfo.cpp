@@ -22,6 +22,9 @@ IndexInfo::IndexInfo(const size_t globalSize) {
 
 IndexInfo::IndexInfo(std::vector<specnum_t> &&spectrumNumbers,
                      std::vector<std::vector<detid_t>> &&detectorIDs) {
+  if (spectrumNumbers.size() != detectorIDs.size())
+    throw std::runtime_error("IndexInfo: Size mismatch between spectrum number "
+                             "and detector ID vectors");
   m_spectrumNumbers.access() = std::move(spectrumNumbers);
   m_detectorIDs.access() = std::move(detectorIDs);
 }

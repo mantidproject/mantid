@@ -4,6 +4,7 @@
 namespace Mantid {
 namespace Indexing {
 
+// TODO: What form of validation should we do? Duplicates? Invalids?
 IndexInfo extract(const IndexInfo &source, const std::vector<size_t> &indices) {
   std::vector<specnum_t> specNums;
   std::vector<std::vector<detid_t>> detIDs;

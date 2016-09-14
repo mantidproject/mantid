@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/DetectorIDs.cpp
 	src/Extract.cpp
+	src/Group.cpp
 	src/IndexInfo.cpp
 	src/SpectrumNumbers.cpp
 )
@@ -9,6 +10,7 @@ set ( INC_FILES
 	inc/MantidIndexing/DetectorIDs.h
 	inc/MantidIndexing/DllConfig.h
 	inc/MantidIndexing/Extract.h
+	inc/MantidIndexing/Group.h
 	inc/MantidIndexing/IndexInfo.h
 	inc/MantidIndexing/MakeRange.h
 	inc/MantidIndexing/SpectrumNumbers.h
@@ -17,6 +19,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	DetectorIDsTest.h
 	ExtractTest.h
+	GroupTest.h
 	IndexInfoTest.h
 	MakeRangeTest.h
 	SpectrumNumbersTest.h
