@@ -676,12 +676,14 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
                                               const int fileVersion) {
   TSVSerialiser tsv(lines);
 
-  if (tsv.selectSection("SliceViewer")) {
-    std::string sliceLines;
-    tsv >> sliceLines;
+  if (tsv.hasSection("SliceViewer")) {
+    for (auto &section : tsv.sections("SliceViewer")) {
+      std::string sliceLines;
+      tsv >> sliceLines;
 
-    auto win = SliceViewer::SliceViewerWindow::loadFromProject(
-        sliceLines, window, fileVersion);
-    window->addSerialisableWindow(dynamic_cast<QObject *>(win));
+      auto win = SliceViewer::SliceViewerWindow::loadFromProject(
+          sliceLines, window, fileVersion);
+      window->addSerialisableWindow(dynamic_cast<QObject *>(win));
+    }
   }
 }
