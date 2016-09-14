@@ -9,6 +9,10 @@ Framework Changes
 
 - A cmake parameter ``ENABLE_MANTIDPLOT`` (default ``True``) was added to facilitate framework only builds.
 
+- The case search in ``DataService`` has been replaced with a case-insensitive comparison function. Behavior
+  is almost identical, but a small number of cases (such as adding the workspaces ``Z`` and ``z``) will work
+  in a more predictable manner.
+
 - A race condition when accessing a singleton from multiple threads was fixed. 
 
 HistogramData
@@ -62,16 +66,19 @@ Improved
 - :ref:`SavePlot1D <algm-SavePlot1D>` has options for writing out
   plotly html files.
 
+- :ref:`SofQW <algm-SofQW>` has option to replace any NaNs in output workspace
+  with zeroes.
+
 - :ref:`ConvertTableToMatrixWorkspace <algm-ConvertTableToMatrixWorkspace>`
   had a bug where the table columns were in a reversed order in the dialogue's combo boxes.
   This is now fixed and the order is correct.
 
 - :ref:`ConvertUnits <algm-ConvertUnits>` will no longer corrupt an in place workspace if the algorithm fails.
 
+- :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
+
 - :ref:`ConvertUnits <algm-ConvertUnits>` now has the option to take a workspace with Points as input.
   A property has been added that will make the algorithm convert the workspace to Bins automatically. The output space will be converted back to Points.
-
-- :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
 - :ref:`ConvertToHistogram <algm-ConvertToHistogram>`: Performance improvement using new HistogramData module,
   3x to 4x speedup.
@@ -112,6 +119,11 @@ Performance
 
 - :ref:`StripPeaks <algm-StripPeaks>` has a slight performance improvement from these changes.
 
+- :ref:`ModeratorTzero <algm-ModeratorTzero>` 29% faster execution.
+
+- :ref:`ModeratorTzeroLinear <algm-ModeratorTzeroLinear>` 38% faster execution.
+
+- :ref:`MaxEnt <algm-MaxEnt>` slight improvement of 5% faster execution.
 
 CurveFitting
 ------------

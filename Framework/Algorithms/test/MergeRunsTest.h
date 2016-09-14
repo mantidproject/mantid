@@ -1,18 +1,23 @@
 #ifndef MERGERUNSTEST_H_
 #define MERGERUNSTEST_H_
 
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <stdarg.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/MergeRuns.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h>
@@ -222,9 +227,9 @@ private:
   void do_test_treat_as_non_period_groups(WorkspaceGroup_sptr input) {
     MatrixWorkspace_sptr sampleInputWorkspace =
         boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0));
-    const double uniformSignal = sampleInputWorkspace->readY(0)[0];
-    const double uniformError = sampleInputWorkspace->readE(0)[0];
-    const size_t nXValues = sampleInputWorkspace->readX(0).size();
+    const double uniformSignal = sampleInputWorkspace->y(0)[0];
+    const double uniformError = sampleInputWorkspace->e(0)[0];
+    const size_t nXValues = sampleInputWorkspace->x(0).size();
 
     MergeRuns alg;
     alg.initialize();
@@ -237,9 +242,9 @@ private:
     TS_ASSERT(wsOut != NULL);
     for (size_t j = 0; j < wsOut->getNumberHistograms(); ++j) {
       using Mantid::MantidVec;
-      MantidVec xValues = wsOut->readX(j);
-      MantidVec yValues = wsOut->readY(j);
-      MantidVec eValues = wsOut->readE(j);
+      auto &xValues = wsOut->x(j);
+      auto &yValues = wsOut->y(j);
+      auto &eValues = wsOut->e(j);
       TS_ASSERT_EQUALS(nXValues, xValues.size());
       // Loop through each y-value in the histogram
       for (size_t k = 0; k < yValues.size(); ++k) {
@@ -440,11 +445,11 @@ public:
 
     const size_t xsize = output->blocksize();
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
-      const auto &outX = output->readX(i);
-      const auto &outY = output->readY(i);
-      const auto &outE = output->readE(i);
+      const auto &outX = output->x(i);
+      const auto &outY = output->y(i);
+      const auto &outE = output->e(i);
       for (size_t j = 0; j < xsize; ++j) {
-        TS_ASSERT_DELTA(outX[j], input->readX(i)[j], 1e-12);
+        TS_ASSERT_DELTA(outX[j], input->x(i)[j], 1e-12);
         TS_ASSERT_DELTA(outY[j], 6.0, 1e-12);
         TS_ASSERT_DELTA(outE[j], sqrt(6.0), 1e-5);
       }
@@ -732,7 +737,7 @@ public:
     TS_ASSERT(!merge2.isExecuted());
     MatrixWorkspace_sptr badIn =
         WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
-    badIn->dataX(0) = std::vector<double>(11, 2.0);
+    badIn->mutableX(0) = 2.0;
     AnalysisDataService::Instance().add("badIn", badIn);
     TS_ASSERT_THROWS_ANYTHING(
         merge.setPropertyValue("InputWorkspaces", "ws1,badIn"));
@@ -753,7 +758,7 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "outer"));
 
-    const Mantid::MantidVec &X = output->readX(0);
+    auto &X = output->x(0);
     TS_ASSERT_EQUALS(X.size(), 17);
     int i;
     for (i = 0; i < 11; ++i) {
@@ -781,7 +786,7 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "outer"));
 
-    const Mantid::MantidVec &X = output->readX(0);
+    auto &X = output->x(0);
     TS_ASSERT_EQUALS(X.size(), 8);
     int i;
     for (i = 0; i < 3; ++i) {
@@ -809,7 +814,7 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "outer"));
 
-    const Mantid::MantidVec &X = output->readX(0);
+    auto &X = output->x(0);
     TS_ASSERT_EQUALS(X.size(), 8);
     int i;
     for (i = 0; i < 2; ++i) {
@@ -870,9 +875,9 @@ public:
             ->getNumberHistograms();
     MatrixWorkspace_sptr sampleNestedInputWorkspace =
         boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0));
-    const double uniformSignal = sampleNestedInputWorkspace->readY(0)[0];
-    const double uniformError = sampleNestedInputWorkspace->readE(0)[0];
-    const size_t nXValues = sampleNestedInputWorkspace->readX(0).size();
+    const double uniformSignal = sampleNestedInputWorkspace->y(0)[0];
+    const double uniformError = sampleNestedInputWorkspace->e(0)[0];
+    const size_t nXValues = sampleNestedInputWorkspace->x(0).size();
 
     MergeRuns alg;
     alg.initialize();
@@ -894,9 +899,9 @@ public:
       // Loop through each histogram in each workspace
       for (size_t j = 0; j < ws->getNumberHistograms(); ++j) {
         using Mantid::MantidVec;
-        MantidVec xValues = ws->readX(j);
-        MantidVec yValues = ws->readY(j);
-        MantidVec eValues = ws->readE(j);
+        auto &xValues = ws->x(j);
+        auto &yValues = ws->y(j);
+        auto &eValues = ws->e(j);
         TS_ASSERT_EQUALS(nXValues, xValues.size());
         // Loop through each y-value in the histogram
         for (size_t k = 0; k < yValues.size(); ++k) {

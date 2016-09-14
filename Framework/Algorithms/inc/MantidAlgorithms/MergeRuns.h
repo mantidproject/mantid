@@ -11,10 +11,16 @@
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
+#include <boost/shared_ptr.hpp>
+#include <list>
+#include <vector>
 
 namespace Mantid {
 namespace API {
 class WorkspaceGroup;
+}
+namespace HistogramData {
+class HistogramX;
 }
 namespace Algorithms {
 /** Combines the data contained in an arbitrary number of input workspaces.
@@ -137,11 +143,14 @@ private:
   void calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
                             const API::MatrixWorkspace_const_sptr &ws2,
                             std::vector<double> &params) const;
-  void noOverlapParams(const MantidVec &X1, const MantidVec &X2,
+  void noOverlapParams(const HistogramData::HistogramX &X1,
+                       const HistogramData::HistogramX &X2,
                        std::vector<double> &params) const;
-  void intersectionParams(const MantidVec &X1, int64_t &i, const MantidVec &X2,
+  void intersectionParams(const HistogramData::HistogramX &X1, int64_t &i,
+                          const HistogramData::HistogramX &X2,
                           std::vector<double> &params) const;
-  void inclusionParams(const MantidVec &X1, int64_t &i, const MantidVec &X2,
+  void inclusionParams(const HistogramData::HistogramX &X1, int64_t &i,
+                       const HistogramData::HistogramX &X2,
                        std::vector<double> &params) const;
   API::MatrixWorkspace_sptr
   rebinInput(const API::MatrixWorkspace_sptr &workspace,
