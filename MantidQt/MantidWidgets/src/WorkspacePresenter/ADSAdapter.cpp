@@ -12,13 +12,20 @@ ADSAdapter::ADSAdapter()
     : m_addObserver(*this, &ADSAdapter::handleAddWorkspace),
       m_deleteObserver(*this, &ADSAdapter::handleDeleteWorkspace),
       m_clearADSObserver(*this, &ADSAdapter::handleClearADS),
-      m_renameObserver(*this, &ADSAdapter::handleRenameWorkspace) {
+      m_renameObserver(*this, &ADSAdapter::handleRenameWorkspace),
+      m_groupworkspacesObserver(*this, &ADSAdapter::handleGroupWorkspaces),
+      m_ungroupworkspaceObserver(*this, &ADSAdapter::handleUnGroupWorkspace),
+      m_workspaceGroupUpdateObserver(*this,
+                                     &ADSAdapter::handleWorkspaceGroupUpdate) {
 
   AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
   dataStore.notificationCenter.addObserver(m_addObserver);
   dataStore.notificationCenter.addObserver(m_deleteObserver);
   dataStore.notificationCenter.addObserver(m_clearADSObserver);
   dataStore.notificationCenter.addObserver(m_renameObserver);
+  dataStore.notificationCenter.addObserver(m_groupworkspacesObserver);
+  dataStore.notificationCenter.addObserver(m_ungroupworkspaceObserver);
+  dataStore.notificationCenter.addObserver(m_workspaceGroupUpdateObserver);
 }
 
 ADSAdapter::~ADSAdapter() {
@@ -30,6 +37,12 @@ ADSAdapter::~ADSAdapter() {
       .notificationCenter.removeObserver(m_clearADSObserver);
   Mantid::API::AnalysisDataService::Instance()
       .notificationCenter.removeObserver(m_renameObserver);
+  Mantid::API::AnalysisDataService::Instance()
+      .notificationCenter.removeObserver(m_groupworkspacesObserver);
+  Mantid::API::AnalysisDataService::Instance()
+      .notificationCenter.removeObserver(m_ungroupworkspaceObserver);
+  Mantid::API::AnalysisDataService::Instance()
+      .notificationCenter.removeObserver(m_workspaceGroupUpdateObserver);
 }
 
 void ADSAdapter::registerPresenter(Presenter_wptr presenter) {
@@ -80,6 +93,27 @@ void ADSAdapter::handleRenameWorkspace(
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspaceRenamed);
+}
+
+void ADSAdapter::handleGroupWorkspaces(
+    Mantid::API::WorkspacesGroupedNotification_ptr pNf) {
+  auto presenter = lockPresenter();
+  presenter->notifyFromWorkspaceProvider(
+      WorkspaceProviderNotifiable::Flag::WorkspacesGrouped);
+}
+
+void ADSAdapter::handleUnGroupWorkspace(
+    Mantid::API::WorkspaceUnGroupingNotification_ptr pNf) {
+  auto presenter = lockPresenter();
+  presenter->notifyFromWorkspaceProvider(
+      WorkspaceProviderNotifiable::Flag::WorkspacesUngrouped);
+}
+
+void ADSAdapter::handleWorkspaceGroupUpdate(
+    Mantid::API::GroupUpdatedNotification_ptr pNf) {
+  auto presenter = lockPresenter();
+  presenter->notifyFromWorkspaceProvider(
+      WorkspaceProviderNotifiable::Flag::WorkspaceGroupUpdated);
 }
 
 } // namespace MantidQt

@@ -60,17 +60,17 @@ public:
 
 private:
   void loadWorkspace();
-  void saveWorkspace();
   void renameWorkspace();
   void groupWorkspaces();
+  void ungroupWorkspaces();
   void sortWorkspaces();
   void deleteWorkspaces();
 
   void workspaceLoaded();
-  void workspaceSaved();
   void workspaceRenamed();
   void workspacesGrouped();
-  void workspacesSorted();
+  void workspacesUngrouped();
+  void workspaceGroupUpdated();
   void workspacesDeleted();
 
   DockView_sptr lockView();

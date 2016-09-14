@@ -41,8 +41,8 @@ public:
     WorkspaceRenamed,
     WorkspaceDeleted,
     WorkspacesGrouped,
-    WorkspacesSorted,
-    WorkspacesSaved
+	WorkspacesUngrouped,
+	WorkspaceGroupUpdated
   };
 
   virtual void notifyFromWorkspaceProvider(Flag flag) = 0;

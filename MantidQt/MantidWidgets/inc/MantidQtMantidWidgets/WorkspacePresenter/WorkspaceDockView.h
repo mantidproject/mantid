@@ -44,10 +44,16 @@ public:
   WorkspacePresenter_wptr getPresenterWeakPtr() override;
   WorkspacePresenter_sptr getPresenterSharedPtr() override;
 
+  SortDirection getSortDirection() const override;
+  SortCriteria getSortCriteria() const override;
+  void sortWorkspaces(SortCriteria criteria, SortDirection direction) override;
+
   StringList getSelectedWorkspaceNames() const override;
   Mantid::API::Workspace_sptr getSelectedWorkspace() const override;
   void showLoadDialog() override;
   void showRenameDialog(const StringList &names) const override;
+  void groupWorkspaces(const StringList &names) const override;
+  void ungroupWorkspaces(const StringList &names) const override;
   bool deleteConfirmation() const override;
   void deleteWorkspaces() override;
   void updateTree(

@@ -26,14 +26,14 @@ void WorkspacePresenter::notifyFromWorkspaceProvider(
   case WorkspaceProviderNotifiable::Flag::WorkspaceRenamed:
     workspaceRenamed();
     break;
-  case WorkspaceProviderNotifiable::Flag::WorkspacesSaved:
-    workspaceSaved();
-    break;
   case WorkspaceProviderNotifiable::Flag::WorkspacesGrouped:
     workspacesGrouped();
     break;
-  case WorkspaceProviderNotifiable::Flag::WorkspacesSorted:
-    workspacesSorted();
+  case WorkspaceProviderNotifiable::Flag::WorkspacesUngrouped:
+    workspacesUngrouped();
+    break;
+  case WorkspaceProviderNotifiable::Flag::WorkspaceGroupUpdated:
+    workspaceGroupUpdated();
     break;
   case WorkspaceProviderNotifiable::Flag::WorkspaceDeleted:
     workspacesDeleted();
@@ -52,8 +52,8 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   case ViewNotifiable::Flag::GroupWorkspaces:
     groupWorkspaces();
     break;
-  case ViewNotifiable::Flag::SaveWorkspaces:
-    saveWorkspace();
+  case ViewNotifiable::Flag::UngroupWorkspaces:
+    ungroupWorkspaces();
     break;
   case ViewNotifiable::Flag::SortWorkspaces:
     sortWorkspaces();
@@ -69,16 +69,29 @@ void WorkspacePresenter::loadWorkspace() {
   view->showLoadDialog();
 }
 
-void WorkspacePresenter::saveWorkspace() {}
-
 void WorkspacePresenter::renameWorkspace() {
   auto view = lockView();
   auto selected = view->getSelectedWorkspaceNames();
   view->showRenameDialog(selected);
 }
 
-void WorkspacePresenter::groupWorkspaces() {}
-void WorkspacePresenter::sortWorkspaces() {}
+void WorkspacePresenter::groupWorkspaces() {
+  auto view = lockView();
+  auto selected = view->getSelectedWorkspaceNames();
+  view->groupWorkspaces(selected);
+}
+
+void WorkspacePresenter::ungroupWorkspaces() {
+  auto view = lockView();
+  auto selected = view->getSelectedWorkspaceNames();
+  view->ungroupWorkspaces(selected);
+}
+
+void WorkspacePresenter::sortWorkspaces() {
+  auto view = lockView();
+
+  view->sortWorkspaces(view->getSortCriteria(), view->getSortDirection());
+}
 
 void WorkspacePresenter::deleteWorkspaces() {
   auto view = lockView();
@@ -89,12 +102,11 @@ void WorkspacePresenter::deleteWorkspaces() {
 
 void WorkspacePresenter::workspaceLoaded() { updateView(); }
 
-void WorkspacePresenter::workspaceSaved() {}
-
 void WorkspacePresenter::workspaceRenamed() { updateView(); }
 
-void WorkspacePresenter::workspacesGrouped() {}
-void WorkspacePresenter::workspacesSorted() {}
+void WorkspacePresenter::workspacesGrouped() { updateView(); }
+void WorkspacePresenter::workspacesUngrouped() { updateView(); }
+void WorkspacePresenter::workspaceGroupUpdated() { updateView(); }
 
 void WorkspacePresenter::workspacesDeleted() { updateView(); }
 

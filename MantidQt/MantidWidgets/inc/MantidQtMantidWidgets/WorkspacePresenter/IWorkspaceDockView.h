@@ -46,6 +46,9 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 class IWorkspaceDockView
     : public boost::enable_shared_from_this<IWorkspaceDockView> {
 public:
+  enum class SortDirection { Ascending, Descending };
+  enum class SortCriteria { ByName, ByLastModified };
+
   virtual ~IWorkspaceDockView() = default;
 
   virtual void init() = 0;
@@ -54,8 +57,14 @@ public:
 
   virtual void showLoadDialog() = 0;
   virtual void showRenameDialog(const StringList &names) const = 0;
+  virtual void groupWorkspaces(const StringList &names) const = 0;
+  virtual void ungroupWorkspaces(const StringList &names) const = 0;
   virtual bool deleteConfirmation() const = 0;
   virtual void deleteWorkspaces() = 0;
+  virtual SortDirection getSortDirection() const = 0;
+  virtual SortCriteria getSortCriteria() const = 0;
+  virtual void sortWorkspaces(SortCriteria criteria,
+                              SortDirection direction) = 0;
   virtual StringList getSelectedWorkspaceNames() const = 0;
   virtual Mantid::API::Workspace_sptr getSelectedWorkspace() const = 0;
   virtual void updateTree(

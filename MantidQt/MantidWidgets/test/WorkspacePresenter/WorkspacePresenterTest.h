@@ -5,6 +5,7 @@
 #include "MantidQtMantidWidgets/WorkspacePresenter/WorkspaceDockViewMockObjects.h"
 #include "MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h"
 
+#include <MantidAPI/AlgorithmManager.h>
 #include <MantidAPI/AnalysisDataService.h>
 #include <MantidTestHelpers/WorkspaceCreationHelper.h>
 
@@ -51,15 +52,15 @@ public:
   }
 
   void testDeleteWorkspacesFromDock() {
-	ON_CALL(*mockView.get(), deleteConfirmation()).WillByDefault(Return(true));
+    ON_CALL(*mockView.get(), deleteConfirmation()).WillByDefault(Return(true));
     EXPECT_CALL(*mockView.get(), deleteConfirmation()).Times(Exactly(2));
     EXPECT_CALL(*mockView.get(), deleteWorkspaces()).Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 
-	ON_CALL(*mockView.get(), deleteConfirmation()).WillByDefault(Return(false));
+    ON_CALL(*mockView.get(), deleteConfirmation()).WillByDefault(Return(false));
 
-	presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
+    presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -111,10 +112,153 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
 
+    AnalysisDataService::Instance().remove("wksp");
+  }
+
+  void testWorkspacesGrouped() {
+    ::testing::DefaultValue<StringList>::Set(StringList(StringList()));
+
+    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), groupWorkspaces(_)).Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testWorkspacesUngrouped() {
+    ::testing::DefaultValue<StringList>::Set(StringList(StringList()));
+
+    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), ungroupWorkspaces(_)).Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::UngroupWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testWorkspacesGroupedExternal() {
+    EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
+
+    createGroup("group");
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    removeGroup("group");
+  }
+
+  void testWorkspacesUnGroupedExternal() {
+    createGroup("group");
+
+    EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
+
+    AnalysisDataService::Instance().remove("group");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
     AnalysisDataService::Instance().clear();
+  }
+
+  void testWorkspaceGroupUpdated() {
+    std::string groupName = "group";
+    createGroup(groupName);
+
+    auto wksp = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().add("wksp", wksp);
+
+    EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
+
+    AnalysisDataService::Instance().addToGroup(groupName, "wksp");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    removeGroup(groupName);
+  }
+
+  void testSortWorkspacesByNameAscending() {
+    using SortCriteria = IWorkspaceDockView::SortCriteria;
+    using SortDir = IWorkspaceDockView::SortDirection;
+    ::testing::DefaultValue<SortCriteria>::Set(SortCriteria::ByName);
+    ::testing::DefaultValue<SortDir>::Set(SortDir::Ascending);
+
+    EXPECT_CALL(*mockView.get(), getSortCriteria()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), getSortDirection()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(),
+                sortWorkspaces(SortCriteria::ByName, SortDir::Ascending))
+        .Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testSortWorkspacesByNameDescending() {
+    using SortCriteria = IWorkspaceDockView::SortCriteria;
+    using SortDir = IWorkspaceDockView::SortDirection;
+    ::testing::DefaultValue<SortCriteria>::Set(SortCriteria::ByName);
+    ::testing::DefaultValue<SortDir>::Set(SortDir::Descending);
+
+    EXPECT_CALL(*mockView.get(), getSortCriteria()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), getSortDirection()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(),
+                sortWorkspaces(SortCriteria::ByName, SortDir::Descending))
+        .Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testSortWorkspacesByLastModifiedAscending() {
+    using SortCriteria = IWorkspaceDockView::SortCriteria;
+    using SortDir = IWorkspaceDockView::SortDirection;
+    ::testing::DefaultValue<SortCriteria>::Set(SortCriteria::ByLastModified);
+    ::testing::DefaultValue<SortDir>::Set(SortDir::Ascending);
+
+    EXPECT_CALL(*mockView.get(), getSortCriteria()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), getSortDirection()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), sortWorkspaces(SortCriteria::ByLastModified,
+                                                SortDir::Ascending))
+        .Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testSortWorkspacesByLastModifiedDescending() {
+    using SortCriteria = IWorkspaceDockView::SortCriteria;
+    using SortDir = IWorkspaceDockView::SortDirection;
+    ::testing::DefaultValue<SortCriteria>::Set(SortCriteria::ByLastModified);
+    ::testing::DefaultValue<SortDir>::Set(SortDir::Descending);
+
+    EXPECT_CALL(*mockView.get(), getSortCriteria()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), getSortDirection()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), sortWorkspaces(SortCriteria::ByLastModified,
+                                                SortDir::Descending))
+        .Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
 private:
   boost::shared_ptr<NiceMock<MockWorkspaceDockView>> mockView;
   boost::shared_ptr<WorkspacePresenter> presenter;
+
+  void createGroup(std::string groupName) {
+    auto group =
+        WorkspaceCreationHelper::CreateWorkspaceGroup(0, 10, 10, groupName);
+    auto wksp1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto wksp2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+
+    AnalysisDataService::Instance().add("wksp1", wksp1);
+    AnalysisDataService::Instance().add("wksp2", wksp2);
+    AnalysisDataService::Instance().addToGroup("group", "wksp1");
+    AnalysisDataService::Instance().addToGroup("group", "wksp2");
+  }
+
+  void removeGroup(std::string groupName) {
+    AnalysisDataService::Instance().deepRemoveGroup(groupName);
+  }
 };

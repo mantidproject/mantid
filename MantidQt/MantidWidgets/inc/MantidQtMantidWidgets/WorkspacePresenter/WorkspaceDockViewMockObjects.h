@@ -28,6 +28,13 @@ public:
   MOCK_CONST_METHOD0(deleteConfirmation, bool());
   MOCK_METHOD0(deleteWorkspaces, void());
   MOCK_CONST_METHOD1(showRenameDialog, void(const StringList &names));
+  MOCK_CONST_METHOD1(groupWorkspaces, void(const StringList &names));
+  MOCK_CONST_METHOD1(ungroupWorkspaces, void(const StringList &names));
+  MOCK_CONST_METHOD0(getSortDirection, IWorkspaceDockView::SortDirection());
+  MOCK_CONST_METHOD0(getSortCriteria, IWorkspaceDockView::SortCriteria());
+  MOCK_METHOD2(sortWorkspaces,
+               void(IWorkspaceDockView::SortCriteria criteria,
+                    IWorkspaceDockView::SortDirection direction));
   MOCK_METHOD1(
       updateTree,
       void(const std::map<std::string, Mantid::API::Workspace_sptr> &items));

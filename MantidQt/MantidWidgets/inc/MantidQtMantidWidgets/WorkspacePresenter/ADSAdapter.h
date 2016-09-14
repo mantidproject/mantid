@@ -67,6 +67,21 @@ private:
   void handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr pNf);
   Poco::NObserver<ADSAdapter, Mantid::API::WorkspaceRenameNotification>
       m_renameObserver;
+
+  void
+  handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_ptr pNf);
+  Poco::NObserver<ADSAdapter, Mantid::API::WorkspacesGroupedNotification>
+      m_groupworkspacesObserver;
+
+  void
+  handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr pNf);
+  Poco::NObserver<ADSAdapter, Mantid::API::WorkspaceUnGroupingNotification>
+      m_ungroupworkspaceObserver;
+
+  void
+  handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_ptr pNf);
+  Poco::NObserver<ADSAdapter, Mantid::API::GroupUpdatedNotification>
+      m_workspaceGroupUpdateObserver;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

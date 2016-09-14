@@ -33,9 +33,26 @@ Mantid::API::Workspace_sptr WorkspaceDockView::getSelectedWorkspace() const {
 
 void WorkspaceDockView::showLoadDialog() {}
 
-bool WorkspaceDockView::deleteConfirmation() const { return false; }
-void WorkspaceDockView::deleteWorkspaces() {}
 void WorkspaceDockView::showRenameDialog(const StringList &names) const {}
+
+void WorkspaceDockView::groupWorkspaces(const StringList &names) const {}
+
+void WorkspaceDockView::ungroupWorkspaces(const StringList &names) const {}
+
+bool WorkspaceDockView::deleteConfirmation() const { return false; }
+
+void WorkspaceDockView::deleteWorkspaces() {}
+
+WorkspaceDockView::SortDirection WorkspaceDockView::getSortDirection() const {
+  return SortDirection::Ascending;
+}
+
+WorkspaceDockView::SortCriteria WorkspaceDockView::getSortCriteria() const {
+  return SortCriteria::ByName;
+}
+
+void WorkspaceDockView::sortWorkspaces(SortCriteria criteria,
+                                       SortDirection direction) {}
 
 void WorkspaceDockView::updateTree(
     const std::map<std::string, Mantid::API::Workspace_sptr> &items) {}

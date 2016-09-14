@@ -40,8 +40,8 @@ public:
     RenameWorkspace,
     DeleteWorkspaces,
     GroupWorkspaces,
+    UngroupWorkspaces,
     SortWorkspaces,
-    SaveWorkspaces
   };
 
   virtual void notifyFromView(Flag flag) = 0;
