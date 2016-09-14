@@ -444,15 +444,17 @@ void CreateSampleWorkspace::replaceAll(std::string &str,
 //----------------------------------------------------------------------------------------------
 /**
  * Create an test instrument with n panels of rectangular detectors,
- *pixels*pixels in size,
- * a source and spherical sample shape.
+ * pixels*pixels in size, a source and spherical sample shape.
  *
  * Banks' lower-left corner is at position (0,0,5*banknum) and they go up to
- *(pixels*0.008, pixels*0.008, Z)
- * Pixels are 4 mm wide.
+ * (pixels*0.008, pixels*0.008, Z). Pixels are 4 mm wide.
+ *
+ * Optionally include monitors 10 cm x 10 cm, with the first positioned between
+ * the sample and the first bank, and the rest between the banks.
  *
  * @param progress :: progress indicator
- * @param num_banks :: number of rectangular banks to create
+ * @param numBanks :: number of rectangular banks to create
+ * @param numMonitors :: number of monitors to create
  * @param pixels :: number of pixels in each direction.
  * @param pixelSpacing :: padding between pixels
  * @param bankDistanceFromSample :: Distance of first bank from sample (defaults
@@ -461,7 +463,7 @@ void CreateSampleWorkspace::replaceAll(std::string &str,
  * @returns A shared pointer to the generated instrument
  */
 Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
-    API::Progress &progress, int num_banks, int numMonitors, int pixels,
+    API::Progress &progress, int numBanks, int numMonitors, int pixels,
     double pixelSpacing, const double bankDistanceFromSample,
     const double sourceSampleDistance) {
   auto testInst = boost::make_shared<Instrument>("basic_rect");
@@ -477,7 +479,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
       cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
 
-  for (int banknum = 1; banknum <= num_banks; banknum++) {
+  for (int banknum = 1; banknum <= numBanks; banknum++) {
     // Make a new bank
     std::ostringstream bankname;
     bankname << "bank" << banknum;
@@ -504,7 +506,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     progress.report();
   }
 
-  int monitorsStart = (num_banks + 1) * pixels * pixels;
+  int monitorsStart = (numBanks + 1) * pixels * pixels;
 
   Object_sptr monitorShape =
       createCappedCylinder(0.1, 0.1, V3D(0.0, -cylHeight / 2.0, 0.0),
@@ -520,7 +522,6 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     bank->initialize(pixelShape, 1, 0.0, pixelSpacing, 1, 0.0, pixelSpacing,
                      monitorNumber, true, 1);
 
-    // Mark them all as detectors
     boost::shared_ptr<Detector> detector = bank->getAtXY(0, 0);
     if (detector) {
       // Mark it as a monitor (add to the instrument cache)
