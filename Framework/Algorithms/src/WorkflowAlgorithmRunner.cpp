@@ -13,7 +13,6 @@ namespace Algorithms {
 namespace PropertyNames {
 const static std::string ALGORITHM("Algorithm");
 const static std::string IO_MAP("InputOutputMap");
-const static std::string OUTPUT_PROPERTY_TABLE("OutputPropertyTable");
 const static std::string SETUP_TABLE("SetupTable");
 }
 
@@ -124,11 +123,6 @@ void WorkflowAlgorithmRunner::init() {
       make_unique<WorkspaceProperty<ITableWorkspace>>(
           PropertyNames::IO_MAP.c_str(), "", Direction::Input),
       "Table workspace mapping algorithm outputs to inputs.");
-
-  declareProperty(
-      make_unique<WorkspaceProperty<ITableWorkspace>>(
-          PropertyNames::OUTPUT_PROPERTY_TABLE.c_str(), "", Direction::Output, PropertyMode::Optional),
-      "Table workspace containing the final setup.");
 }
 
 void WorkflowAlgorithmRunner::exec() {
@@ -213,10 +207,6 @@ void WorkflowAlgorithmRunner::exec() {
       }
       queue.pop_front();
     }
-  }
-  const std::string outputName = getProperty(PropertyNames::OUTPUT_PROPERTY_TABLE);
-  if (!outputName.empty()) {
-    setProperty(PropertyNames::OUTPUT_PROPERTY_TABLE, propertyTable);
   }
 }
 
