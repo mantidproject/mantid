@@ -43,7 +43,8 @@ EnggDiffFittingPresenter::EnggDiffFittingPresenter(
     boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
     boost::shared_ptr<IEnggDiffractionParam> mainParam)
     : m_fittingFinishedOK(false), m_workerThread(nullptr),
-      m_mainCalib(mainCalib), m_mainParam(mainParam), m_view(view) {}
+      m_mainCalib(mainCalib), m_mainParam(mainParam), m_view(view),
+      m_viewHasClosed(false) {}
 
 EnggDiffFittingPresenter::~EnggDiffFittingPresenter() { cleanup(); }
 
@@ -68,6 +69,16 @@ void EnggDiffFittingPresenter::cleanup() {
 
 void EnggDiffFittingPresenter::notify(
     IEnggDiffFittingPresenter::Notification notif) {
+
+  // Check the view is valid - QT can send multiple notification
+  // signals in any order at any time. This means that it is possible
+  // to receive a shutdown signal and subsequently an input example
+  // for example. As we can't guarantee the state of the viewer
+  // after calling shutdown instead we shouldn't do anything after
+  if (m_viewHasClosed) {
+    return;
+  }
+
   switch (notif) {
 
   case IEnggDiffFittingPresenter::Start:
@@ -197,6 +208,17 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
 
     // receive the run number from the text-field
     auto strFocusedFile = m_view->getFittingRunNo();
+
+    if (m_previousInput == strFocusedFile) {
+      // Short circuit the checks and skip any warnings
+      // or errors as the user has not changed anything
+      // just clicked the box. Additionally this resolves an
+      // issue where QT will return the cursor and produce a new
+      // warning when the current warning is closed
+      return;
+    } else {
+      m_previousInput = strFocusedFile;
+    }
 
     // file name
     Poco::Path selectedfPath(strFocusedFile);
@@ -561,6 +583,7 @@ void EnggDiffFittingPresenter::processLoad() {
 }
 
 void EnggDiffFittingPresenter::processShutDown() {
+  m_viewHasClosed = true;
   m_view->saveSettings();
   cleanup();
 }

@@ -5,6 +5,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include <cmath>
@@ -18,14 +19,12 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RingProfile)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 RingProfile::RingProfile()
     : min_radius(-1.), max_radius(-1), start_angle(-1), clockwise(false),
       num_bins(-1), centre_x(-1.), centre_y(-1.), centre_z(-1), bin_size(-1) {}
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
     It configures the algorithm to accept the following inputs:
 
@@ -213,6 +212,7 @@ void RingProfile::checkInputsForSpectraWorkspace(
     const API::MatrixWorkspace_sptr inputWS) {
   try {
     // finding the limits of the instrument
+    const auto &spectrumInfo = inputWS->spectrumInfo();
     double first_x, first_y, first_z;
     size_t i = 0;
     while (true) {
@@ -221,12 +221,12 @@ void RingProfile::checkInputsForSpectraWorkspace(
         throw std::invalid_argument(
             "Did not find any non monitor detector position");
 
-      auto det = inputWS->getDetector(i);
-      if (det->isMonitor())
+      if (spectrumInfo.isMonitor(i))
         continue;
-      first_x = det->getPos().X();
-      first_y = det->getPos().Y();
-      first_z = det->getPos().Z();
+      const auto pos = spectrumInfo.position(i);
+      first_x = pos.X();
+      first_y = pos.Y();
+      first_z = pos.Z();
       break;
     }
 
@@ -238,12 +238,12 @@ void RingProfile::checkInputsForSpectraWorkspace(
         throw std::invalid_argument(
             "There is no region defined for the instrument of this workspace");
 
-      auto det = inputWS->getDetector(i);
-      if (det->isMonitor())
+      if (spectrumInfo.isMonitor(i))
         continue;
-      last_x = det->getPos().X();
-      last_y = det->getPos().Y();
-      last_z = det->getPos().Z();
+      const auto pos = spectrumInfo.position(i);
+      last_x = pos.X();
+      last_y = pos.Y();
+      last_z = pos.Z();
       break;
     }
 
@@ -391,41 +391,35 @@ void RingProfile::checkInputsForNumericWorkspace(
 void RingProfile::processInstrumentRingProfile(
     const API::MatrixWorkspace_sptr inputWS, std::vector<double> &output_bins) {
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (int i = 0; i < static_cast<int>(inputWS->getNumberHistograms()); i++) {
     m_progress->report("Computing ring bins positions for detectors");
     // for the detector based, the positions will be taken from the detector
     // itself.
-    try {
-      Mantid::Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
-
-      // skip monitors
-      if (det->isMonitor()) {
-        continue;
-      }
-
-      // this part will be executed if the instrument is attached to the
-      // workspace
-
-      // get the bin position
-      int bin_n = getBinForPixel(det);
-
-      if (bin_n < 0) // -1 is the agreement for an invalid bin, or outside the
-                     // ring being integrated
-        continue;
-
-      g_log.debug() << "Bin for the index " << i << " = " << bin_n
-                    << " Pos = " << det->getPos() << '\n';
-
-      const MantidVec &refY = inputWS->getSpectrum(i).dataY();
-      // accumulate the values of this spectrum inside this bin
-      for (size_t sp_ind = 0; sp_ind < inputWS->blocksize(); sp_ind++)
-        output_bins[bin_n] += refY[sp_ind];
-
-    } catch (Kernel::Exception::NotFoundError &ex) {
-      g_log.information() << "It found that detector for " << i
-                          << " is not valid. " << ex.what() << '\n';
+    if (!spectrumInfo.hasDetectors(i)) {
+      g_log.information() << "Spectrum " << i << " has no detector assigned.\n";
       continue;
     }
+
+    if (spectrumInfo.isMonitor(i))
+      continue;
+
+    // this part will be executed if the instrument is attached to the workspace
+
+    // get the bin position
+    int bin_n = getBinForPixel(spectrumInfo.position(i));
+
+    if (bin_n < 0) // -1 is the agreement for an invalid bin, or outside the
+                   // ring being integrated
+      continue;
+
+    g_log.debug() << "Bin for the index " << i << " = " << bin_n
+                  << " Pos = " << spectrumInfo.position(i) << '\n';
+
+    const MantidVec &refY = inputWS->getSpectrum(i).dataY();
+    // accumulate the values of this spectrum inside this bin
+    for (size_t sp_ind = 0; sp_ind < inputWS->blocksize(); sp_ind++)
+      output_bins[bin_n] += refY[sp_ind];
   }
 }
 
@@ -443,14 +437,14 @@ void RingProfile::processInstrumentRingProfile(
  * For those detectors that lay inside the ring, it will calculate the phi
  *angle. And than find the slot where
  * this angle should be placed (bin)
- * @param det: pointer to the detector from which the positions will be taken
+ * @param position: pixel position
  * @return bin position
  */
-int RingProfile::getBinForPixel(Mantid::Geometry::IDetector_const_sptr det) {
+int RingProfile::getBinForPixel(const Kernel::V3D &position) {
 
   using Mantid::Kernel::V3D;
   V3D origin(centre_x, centre_y, centre_z);
-  V3D diff_vector = det->getPos() - origin;
+  V3D diff_vector = position - origin;
   double radio, theta, phi;
   // get the spherical values of the vector from center to detector position
   diff_vector.getSpherical(radio, theta, phi);

@@ -28,16 +28,16 @@ DECLARE_ALGORITHM(SANSSolidAngleCorrection)
 
 /// Returns the angle between the sample-to-pixel vector and its
 /// projection on the X-Z plane.
-static double getYTubeAngle(IDetector_const_sptr det,
-                            MatrixWorkspace_const_sptr workspace) {
+static double getYTubeAngle(const IDetector &det,
+                            const MatrixWorkspace &workspace) {
 
   // Get the sample position
   Geometry::IComponent_const_sptr sample =
-      workspace->getInstrument()->getSample();
+      workspace.getInstrument()->getSample();
   const V3D samplePos = sample->getPos();
 
   // Get the vector from the sample position to the detector pixel
-  V3D sampleDetVec = det->getPos() - samplePos;
+  V3D sampleDetVec = det.getPos() - samplePos;
 
   // Get the projection of that vector on the X-Z plane
   V3D inPlane = V3D(sampleDetVec);
@@ -110,7 +110,9 @@ void SANSSolidAngleCorrection::exec() {
   // Number of X bins
   const int xLength = static_cast<int>(inputWS->readY(0).size());
 
+  PARALLEL_FOR2(outputWS, inputWS)
   for (int i = 0; i < numHists; ++i) {
+    PARALLEL_START_INTERUPT_REGION
     outputWS->dataX(i) = inputWS->readX(i);
 
     IDetector_const_sptr det;
@@ -147,7 +149,7 @@ void SANSSolidAngleCorrection::exec() {
     const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
     double corr;
     if (is_tube || is_wing) {
-      const double tanAlpha = tan(getYTubeAngle(det, inputWS));
+      const double tanAlpha = tan(getYTubeAngle(*det, *inputWS));
       const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
       if (is_tube)
         corr = alpha_term * theta_term * theta_term;
@@ -164,7 +166,9 @@ void SANSSolidAngleCorrection::exec() {
       EOut[j] = fabs(EIn[j] * corr);
     }
     progress.report("Solid Angle Correction");
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
   setProperty("OutputMessage", "Solid angle correction applied");
 }
 
@@ -184,7 +188,9 @@ void SANSSolidAngleCorrection::execEvent() {
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
   progress.report("Solid Angle Correction");
 
+  PARALLEL_FOR1(outputEventWS)
   for (int i = 0; i < numberOfSpectra; i++) {
+    PARALLEL_START_INTERUPT_REGION
     IDetector_const_sptr det;
     try {
       det = outputEventWS->getDetector(i);
@@ -210,7 +216,7 @@ void SANSSolidAngleCorrection::execEvent() {
     const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
     double corr;
     if (is_tube) {
-      const double tanAlpha = tan(getYTubeAngle(det, inputWS));
+      const double tanAlpha = tan(getYTubeAngle(*det, *inputWS));
       const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
       corr = alpha_term * theta_term * theta_term;
     } else {
@@ -219,7 +225,9 @@ void SANSSolidAngleCorrection::execEvent() {
     EventList &el = outputEventWS->getSpectrum(i);
     el *= corr;
     progress.report("Solid Angle Correction");
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("OutputMessage", "Solid angle correction applied");
 }

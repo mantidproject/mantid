@@ -20,6 +20,10 @@
 #include <winsock2.h>
 #endif
 
+#ifdef __linux__
+#include <execinfo.h>
+#endif
+
 #ifdef MPI_BUILD
 #include <boost/mpi.hpp>
 #endif
@@ -45,12 +49,32 @@ void NexusErrorFunction(void *data, char *text) {
   // Do nothing.
 }
 
+#ifdef __linux__
+/**
+ * Print the stacktrace for an unhandled exception to stderr
+ */
+void stackTraceToStdErr() {
+  void *trace_elems[20];
+  int trace_elem_count(backtrace(trace_elems, 20));
+  char **stack_syms(backtrace_symbols(trace_elems, trace_elem_count));
+  std::cerr << "\nterminate detected. backtrace:\n";
+  for (int i = 0; i < trace_elem_count; ++i) {
+    std::cerr << ' ' << stack_syms[i] << '\n';
+  }
+  free(stack_syms);
+  exit(1);
+}
+#endif
+
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl()
 #ifdef MPI_BUILD
     : m_mpi_environment(argc, argv)
 #endif
 {
+#ifdef __linux__
+  std::set_terminate(stackTraceToStdErr);
+#endif
   setGlobalNumericLocaleToC();
   Kernel::MemoryOptions::initAllocatorOptions();
 
