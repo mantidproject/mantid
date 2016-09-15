@@ -154,7 +154,6 @@ void WorkflowAlgorithmRunner::exec() {
     }
   }
   cleanPropertyTable(propertyTable, ioMap);
-  g_log.debug() << "Input/output mapping done.\n";
   std::deque<size_t> queue;
   for (size_t i = 0; i < setupTable->rowCount(); ++i) {
     appendToTaskQueue(setupTable, propertyTable, i, queue, ioMap);
@@ -170,12 +169,10 @@ void WorkflowAlgorithmRunner::exec() {
       if (!algorithm->isInitialized()) {
         throw std::runtime_error("Workflow algorithm failed to initialise.");
       }
-      g_log.debug() << "Setting up reduction " << setupTable->cell<std::string>(row, 0) << ".\n";
       // First column in taskTable is for id.
       for (size_t col = 1; col < propertyTable->columnCount(); ++col) {
         const auto column = propertyTable->getColumn(col);
         const auto &propertyName = column->name();
-        g_log.debug() << "Setting property " << propertyName << ".\n";
         const auto &valueType = column->get_type_info();
         try {
           if (valueType == typeid(std::string)) {
@@ -184,7 +181,6 @@ void WorkflowAlgorithmRunner::exec() {
           }
           else if (valueType == typeid(int)) {
             const auto &value = propertyTable->cell<int>(row, col);
-            g_log.debug() << "Assigning int value " << value << ".\n";
             algorithm->setProperty(propertyName, static_cast<long>(value));
           }
           else if (valueType == typeid(size_t)) {
@@ -211,7 +207,6 @@ void WorkflowAlgorithmRunner::exec() {
           throw std::runtime_error("While setting properties for algorithm " + algorithmName + ": " + e.what());
         }
       }
-      g_log.debug() << "Executing reduction " << setupTable->cell<std::string>(row, 0) + ".\n";
       algorithm->execute();
       if (!algorithm->isExecuted()) {
         throw std::runtime_error("Workflow algorithm failed to execute.");
