@@ -191,8 +191,8 @@ void EnggDiffractionPresenter::processLoadExistingCalib() {
 
 void EnggDiffractionPresenter::updateNewCalib(const std::string &fname) {
 
-	Poco::Path pocoPath;
-	const bool pathValid = pocoPath.tryParse(fname);
+  Poco::Path pocoPath;
+  const bool pathValid = pocoPath.tryParse(fname);
 
   if (!pathValid || fname.empty() || pocoPath.isDirectory()) {
     // Log that we couldn't open the file - its probably and invalid
