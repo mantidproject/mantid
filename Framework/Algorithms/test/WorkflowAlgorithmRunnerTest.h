@@ -36,24 +36,28 @@ public:
     deleteWorkspace(m_ioMapForScale);
   }
 
-  void test_UnsetPropertiesThrows() {
-    WorkflowAlgorithmRunner algorithm;
-    algorithm.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
-    TS_ASSERT_THROWS_ANYTHING(algorithm.execute())
-    TS_ASSERT(!algorithm.isExecuted())
-  }
-
-  void test_Init() {
+  void test_CircularDependenciesThrows() {
+    auto setupTable = createSetupTableForScale();
+    setupTable->setRowCount(2);
+    setupTable->getRef<std::string>("Id", 0) = "flow1";
+    setupTable->getRef<std::string>("InputWorkspace", 0) = "out2";
+    setupTable->getRef<std::string>("OutputWorkspace", 0) = "out1";
+    const double scaling1 = 0.03;
+    setupTable->getRef<double>("Factor", 0) = scaling1;
+    setupTable->getRef<std::string>("Id", 1) = "flow2";
+    setupTable->getRef<std::string>("InputWorkspace", 1) = "out1";
+    setupTable->getRef<std::string>("OutputWorkspace", 1) = "out2";
+    const double scaling2 = 0.09;
+    setupTable->getRef<double>("Factor", 1) = scaling2;
     WorkflowAlgorithmRunner algorithm;
     algorithm.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
     TS_ASSERT(algorithm.isInitialized())
-  }
-
-  void test_Name() {
-    WorkflowAlgorithmRunner algorithm;
-    TS_ASSERT_EQUALS(algorithm.name(), "WorkflowAlgorithmRunner")
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Algorithm", "Scale"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("SetupTable", setupTable))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("InputOutputMap", m_ioMapForScale))
+    TS_ASSERT_THROWS_ANYTHING(algorithm.execute())
+    TS_ASSERT(!algorithm.isExecuted())
   }
 
   void test_ComplexRun() {
@@ -106,6 +110,64 @@ public:
     deleteWorkspace(inputWs4);
   }
 
+  void test_ForcedOutputAsInput() {
+    // Data flow: input->spider2->output2; input->spider2->mantid1->output1
+    auto setupTable = createSetupTableForScale();
+    setupTable->setRowCount(2);
+    setupTable->getRef<std::string>("Id", 0) = "mantid1";
+    setupTable->getRef<std::string>("InputWorkspace", 0) = "spider2";
+    setupTable->getRef<std::string>("OutputWorkspace", 0) = "\"output1\"";
+    const double scaling1 = 42;
+    setupTable->getRef<double>("Factor", 0) = scaling1;
+    setupTable->getRef<std::string>("Id", 1) = "spider2";
+    setupTable->getRef<std::string>("InputWorkspace", 1) = "\"input\"";
+    setupTable->getRef<std::string>("OutputWorkspace", 1) = "\"output2\"";
+    const double scaling2 = 2.3;
+    setupTable->getRef<double>("Factor", 1) = scaling2;
+    auto inputWs = createTestWorkspace("input");
+    WorkflowAlgorithmRunner algorithm;
+    algorithm.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
+    TS_ASSERT(algorithm.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Algorithm", "Scale"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("SetupTable", setupTable))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("InputOutputMap", m_ioMapForScale))
+    TS_ASSERT_THROWS_NOTHING(algorithm.execute())
+    TS_ASSERT(algorithm.isExecuted())
+    assertOutputWorkspace("output1", scaling2 * scaling1);
+    assertOutputWorkspace("output2", scaling2);
+    deleteWorkspace(inputWs);
+  }
+
+  void test_Init() {
+    WorkflowAlgorithmRunner algorithm;
+    algorithm.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
+    TS_ASSERT(algorithm.isInitialized())
+  }
+
+  void test_Name() {
+    WorkflowAlgorithmRunner algorithm;
+    TS_ASSERT_EQUALS(algorithm.name(), "WorkflowAlgorithmRunner")
+  }
+
+  void test_NonExistentInputThrows() {
+    auto setupTable = createSetupTableForScale();
+    setupTable->setRowCount(1);
+    setupTable->getRef<std::string>("Id", 0) = "failingJob";
+    setupTable->getRef<std::string>("InputWorkspace", 0) = "notInSetupTable";
+    setupTable->getRef<std::string>("OutputWorkspace", 0) = "\"output1\"";
+    WorkflowAlgorithmRunner algorithm;
+    algorithm.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
+    TS_ASSERT(algorithm.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Algorithm", "Scale"))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("SetupTable", setupTable))
+    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("InputOutputMap", m_ioMapForScale))
+    TS_ASSERT_THROWS_ANYTHING(algorithm.execute())
+    TS_ASSERT(!algorithm.isExecuted())
+  }
+
   void test_SimpleRun() {
     auto setupTable = createSetupTableForScale();
     setupTable->setRowCount(1);
@@ -127,6 +189,14 @@ public:
     assertOutputWorkspace("output", factor);
     deleteWorkspace(inputWs);
     deleteWorkspace(setupTable);
+  }
+
+  void test_UnsetPropertiesThrows() {
+    WorkflowAlgorithmRunner algorithm;
+    algorithm.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
+    TS_ASSERT_THROWS_ANYTHING(algorithm.execute())
+    TS_ASSERT(!algorithm.isExecuted())
   }
 
   void test_Version() {
