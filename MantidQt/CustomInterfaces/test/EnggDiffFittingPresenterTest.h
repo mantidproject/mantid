@@ -200,7 +200,7 @@ public:
 
     // inputs from user
     EXPECT_CALL(mockView, getFittingRunNo())
-        .Times(2)
+        .Times(1)
         .WillRepeatedly(Return(std::string(g_focusedBankFile)));
 
     EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
@@ -210,7 +210,7 @@ public:
 
     // No errors/0 warnings. There will be no errors or warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(2);
 
     pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
   }
@@ -222,7 +222,7 @@ public:
     // inputs from user - empty run number given
     EXPECT_CALL(mockView, getFittingRunNo())
         .Times(1)
-        .WillOnce(Return(std::string("")));
+        .WillOnce(Return(std::string("1")));
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
@@ -233,6 +233,19 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(2);
 
     pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
+  }
+
+  void test_fitting_with_blank_input() {
+    testing::StrictMock<MockEnggDiffFittingView> mockView;
+    EnggDiffFittingPresenterNoThread pres(&mockView);
+
+    EXPECT_CALL(mockView, getFittingRunNo())
+        .Times(1)
+        .WillOnce(Return(std::string("")));
+
+    pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
+
+    testing::Mock::VerifyAndClearExpectations(&mockView);
   }
 
   void test_fitting_file_not_found_with_multiple_runs() {
@@ -331,8 +344,8 @@ public:
 
     // inputs from user - given multiple run
     EXPECT_CALL(mockView, getFittingRunNo())
-        .Times(2)
-        .WillRepeatedly(Return(g_focusedBankFile));
+        .Times(1)
+        .WillOnce(Return(g_focusedBankFile));
 
     EXPECT_CALL(mockView, getFittingRunNumVec()).Times(0);
 
@@ -352,7 +365,7 @@ public:
 
     // No errors/1 warnings. File entered is not found
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(2);
 
     pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
   }

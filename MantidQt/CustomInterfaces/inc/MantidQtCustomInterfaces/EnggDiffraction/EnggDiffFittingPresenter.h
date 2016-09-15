@@ -159,10 +159,10 @@ private:
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &expectedPeaks);
 
-  bool
-  findFilePathFromBaseName(const std::string &directoryToSearch,
-                           const std::string &baseFileNamesToFind,
-                           std::vector<std::string> &foundFullFilePath) const;
+  // TODO make this const when the global is removed
+  bool findFilePathFromBaseName(const std::string &directoryToSearch,
+                                const std::string &baseFileNamesToFind,
+                                std::vector<std::string> &foundFullFilePath);
 
   std::vector<std::string>
   splitFittingDirectory(const std::string &selectedfPath);
@@ -182,7 +182,7 @@ private:
 
   std::vector<std::string>
   getAllBrowsedFilePaths(const std::string &inputFullPath,
-                         std::vector<std::string> &foundFullFilePaths) const;
+                         std::vector<std::string> &foundFullFilePaths);
 
   std::vector<std::string> processMultiRun(const std::string userInput);
 

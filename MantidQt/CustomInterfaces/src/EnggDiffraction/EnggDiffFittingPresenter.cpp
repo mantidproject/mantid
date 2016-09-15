@@ -210,7 +210,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
   // receive the run number from the text-field
   const std::string userPathInput = m_view->getFittingRunNo();
 
-  if (m_previousInput == userPathInput) {
+  if (m_previousInput == userPathInput || userPathInput.empty()) {
     // Short circuit the checks and skip any warnings
     // or errors as the user has not changed anything
     // just clicked the box. Additionally this resolves an
@@ -344,7 +344,7 @@ std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
   */
 std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
     const std::string &inputFullPath,
-    std::vector<std::string> &foundFullFilePaths) const {
+    std::vector<std::string> &foundFullFilePaths) {
   // to track the FittingRunnoChanged loop number
   if (g_fitting_runno_counter == 0) {
     g_multi_run_directories.clear();
@@ -391,7 +391,7 @@ std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
   }
 
   // Store the run number as found
-  std::vector<std::string> runNoVec();
+  std::vector<std::string> runNoVec;
   runNoVec.push_back(splitBaseName[1]);
 
   return runNoVec;
@@ -468,8 +468,13 @@ std::vector<std::string> EnggDiffFittingPresenter::processSingleRun(
   const bool wasFound =
       findFilePathFromBaseName(focusDir, userInputBasename, foundFilePaths);
 
+  if (!wasFound) {
+    // Skip all UI update code
+    return foundFilePaths;
+  }
+
   const bool fittingMultiRunMode = m_view->getFittingMultiRunMode();
-  if (!fittingMultiRunMode && wasFound) {
+  if (!fittingMultiRunMode) {
     // Wrap the current run number in a vector and pass through
     // We cant use an initializer list as MSVC doesn't support this yet
     std::vector<std::string> strFocusedFileVector;
@@ -504,7 +509,7 @@ std::vector<std::string> EnggDiffFittingPresenter::processSingleRun(
 bool EnggDiffFittingPresenter::findFilePathFromBaseName(
     const std::string &directoryToSearch,
     const std::string &baseFileNamesToFind,
-    std::vector<std::string> &foundFullFilePath) const {
+    std::vector<std::string> &foundFullFilePath) {
 
   bool found = false;
 
