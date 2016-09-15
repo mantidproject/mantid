@@ -455,9 +455,9 @@ std::vector<std::string> EnggDiffFittingPresenter::processSingleRun(
   // Inform the view we are using single run mode
   m_view->setFittingSingleRunMode(true);
 
-  std::vector<std::string> foundFilePath;
+  std::vector<std::string> foundFilePaths;
   const bool wasFound =
-      findFilePathFromBaseName(focusDir, userInputBasename, foundFilePath);
+      findFilePathFromBaseName(focusDir, userInputBasename, foundFilePaths);
 
   auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
   if (!fittingMultiRunMode && wasFound) {
@@ -469,16 +469,16 @@ std::vector<std::string> EnggDiffFittingPresenter::processSingleRun(
   }
 
   // Update the list of found runs shown in the view
-  m_view->setFittingRunNumVec(foundFilePath);
+  m_view->setFittingRunNumVec(foundFilePaths);
 
   // add bank to the combo-box and list view
   // recreates bank widget for every run (multi-run) depending on
   // number of banks file found for given run number in folder
 
-  setBankItems(foundFilePath);
+  setBankItems(foundFilePaths);
   setDefaultBank(splitBaseName, userInputBasename);
 
-  return foundFilePath;
+  return foundFilePaths;
 }
 
 /**
@@ -1544,44 +1544,49 @@ void EnggDiffFittingPresenter::setDataToClonedWS(std::string &current_WS,
 
 void EnggDiffFittingPresenter::setBankItems(
     const std::vector<std::string> &bankFiles) {
-  try {
 
-    if (!bankFiles.empty()) {
+  if (bankFiles.empty()) {
+    // upon invalid file
+    // disable the widgets when only one related file found
+    m_view->enableFittingComboBox(false);
 
-      // delete previous bank added to the list
-      m_view->clearFittingComboBox();
+    m_view->clearFittingComboBox();
+    return;
+  }
 
-      int index = 0;
 
-      for (const auto filePath : bankFiles) {
-        const Poco::Path bankFile(filePath);
-        const std::string strVecFile = bankFile.toString();
-        // split the directory from m_fitting_runno_dir_vec
-        std::vector<std::string> vecFileSplit =
-            splitFittingDirectory(strVecFile);
 
-        // get the last split in vector which will be bank
-        std::string bankID = (vecFileSplit.back());
+    // delete previous bank added to the list
+    m_view->clearFittingComboBox();
 
-        bool digit = isDigit(bankID);
+    const int selectedRunNumber = m_view->getFittingListWidgetCurrentRow();
 
-        if (digit || bankID == "cropped") {
-          m_view->addBankItem(bankID);
-        } else {
-          QString qBank = QString("Bank %1").arg(index + 1);
-          m_view->addBankItem(qBank.toStdString());
-        }
+    // Keep track of current loop iteration for banks
+    int index = 0;
+
+	try {
+    for (const auto filePath : bankFiles) {
+
+      const Poco::Path bankFile(filePath);
+      const std::string strVecFile = bankFile.toString();
+      // split the directory from m_fitting_runno_dir_vec
+      std::vector<std::string> vecFileSplit = splitFittingDirectory(strVecFile);
+
+      // get the last split in vector which will be bank
+      std::string bankID = (vecFileSplit.back());
+
+      bool digit = isDigit(bankID);
+
+      if (digit || bankID == "cropped") {
+        m_view->addBankItem(bankID);
+      } else {
+        QString qBank = QString("Bank %1").arg(index + 1);
+        m_view->addBankItem(qBank.toStdString());
         ++index;
       }
-
-      m_view->enableFittingComboBox(true);
-    } else {
-      // upon invalid file
-      // disable the widgets when only one related file found
-      m_view->enableFittingComboBox(false);
-
-      m_view->clearFittingComboBox();
     }
+
+    m_view->enableFittingComboBox(true);
 
   } catch (std::runtime_error &re) {
     m_view->userWarning("Unable to insert items: ",
