@@ -218,9 +218,9 @@ void FindPeaks::processAlgorithmProperties() {
   singleSpectrum = !isEmpty(m_wsIndex);
   if (singleSpectrum &&
       m_wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms())) {
-    g_log.error() << "The value of WorkspaceIndex provided (" << m_wsIndex
-                  << ") is larger than the size of this workspace ("
-                  << m_dataWS->getNumberHistograms() << ")\n";
+    g_log.warning() << "The value of WorkspaceIndex provided (" << m_wsIndex
+                    << ") is larger than the size of this workspace ("
+                    << m_dataWS->getNumberHistograms() << ")\n";
     throw Kernel::Exception::IndexError(m_wsIndex,
                                         m_dataWS->getNumberHistograms() - 1,
                                         "FindPeaks WorkspaceIndex property");
@@ -237,7 +237,7 @@ void FindPeaks::processAlgorithmProperties() {
              "postive and make sense). "
           << "User inputs are min = " << t1 << ", max = " << t2
           << ", step = " << t3;
-    g_log.error(errss.str());
+    g_log.warning(errss.str());
     throw std::runtime_error(errss.str());
   }
 
@@ -787,13 +787,13 @@ int FindPeaks::getIndex(const HistogramX &vecX, double x) {
       std::stringstream errss;
       errss << "Returned index = 0 for x = " << x << " with X[0] = " << vecX[0]
             << ". This situation is ruled out in this algorithm.";
-      g_log.error(errss.str());
+      g_log.warning(errss.str());
       throw std::runtime_error(errss.str());
     } else if (x < vecX[index - 1] || x > vecX[index]) {
       std::stringstream errss;
       errss << "Returned x = " << x << " is not between " << vecX[index - 1]
             << " and " << vecX[index] << ", which are returned by lower_bound.";
-      g_log.error(errss.str());
+      g_log.warning(errss.str());
       throw std::runtime_error(errss.str());
     }
 
@@ -893,7 +893,7 @@ void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
                       << centre_guess << "  x-min = " << xmin
                       << ", x-max = " << xmax << "\n";
   if (xmin >= centre_guess || xmax <= centre_guess) {
-    g_log.error("Peak centre is on the edge of Fit window. ");
+    g_log.warning("Peak centre is on the edge of Fit window. ");
     addNonFitRecord(wsIndex, centre_guess);
     return;
   }
@@ -907,10 +907,10 @@ void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
   // The left index
   int i_min = getIndex(vecX, xmin);
   if (i_min >= i_centre) {
-    g_log.error() << "Input peak centre @ " << centre_guess
-                  << " is out side of minimum x = " << xmin
-                  << ".  Input X ragne = " << vecX.front() << ", "
-                  << vecX.back() << "\n";
+    g_log.warning() << "Input peak centre @ " << centre_guess
+                    << " is out side of minimum x = " << xmin
+                    << ".  Input X ragne = " << vecX.front() << ", "
+                    << vecX.back() << "\n";
     addNonFitRecord(wsIndex, centre_guess);
     return;
   }
@@ -918,8 +918,8 @@ void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
   // The right index
   int i_max = getIndex(vecX, xmax);
   if (i_max < i_centre) {
-    g_log.error() << "Input peak centre @ " << centre_guess
-                  << " is out side of maximum x = " << xmax << "\n";
+    g_log.warning() << "Input peak centre @ " << centre_guess
+                    << " is out side of maximum x = " << xmax << "\n";
     addNonFitRecord(wsIndex, centre_guess);
     return;
   }
@@ -988,7 +988,7 @@ void FindPeaks::fitSinglePeak(const API::MatrixWorkspace_sptr &input,
     i_obscentre = i_centre;
     est_fwhm = 1.;
     est_height = 1.;
-    g_log.error(errmsg);
+    g_log.warning(errmsg);
   }
 
   // Set peak parameters to
@@ -1053,6 +1053,7 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
 
   // Call FindPeakBackground
   IAlgorithm_sptr estimate = createChildAlgorithm("FindPeakBackground");
+  estimate->setLoggingOffset(1);
   estimate->setProperty("InputWorkspace", input);
   estimate->setProperty("WorkspaceIndex", spectrum);
   // estimate->setProperty("SigmaConstant", 1.0);

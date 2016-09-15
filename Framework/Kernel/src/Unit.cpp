@@ -94,11 +94,8 @@ Unit::ConversionsMap Unit::s_conversionFactors = Unit::ConversionsMap();
 void Unit::addConversion(std::string to, const double &factor,
                          const double &power) const {
   std::transform(to.begin(), to.end(), to.begin(), toupper);
-  // If this happens in a parallel loop the static map needs protecting
-  PARALLEL_CRITICAL(Unit_addConversion) {
-    // Add the conversion to the map (does nothing if it's already there)
-    s_conversionFactors[unitID()][to] = std::make_pair(factor, power);
-  }
+  // Add the conversion to the map (does nothing if it's already there)
+  s_conversionFactors[unitID()][to] = std::make_pair(factor, power);
 }
 
 //---------------------------------------------------------------------------------------

@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
 
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
@@ -18,6 +19,7 @@ using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Frequencies;
 using Mantid::HistogramData::FrequencyVariances;
 using Mantid::HistogramData::FrequencyStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
 
 class HistogramTest : public CxxTest::TestSuite {
 public:
@@ -953,6 +955,51 @@ public:
     Counts counts(1);
     TS_ASSERT_THROWS(hist.setSharedY(counts.cowData()), std::logic_error);
   }
+};
+
+class HistogramTestPerformance : public CxxTest::TestSuite {
+public:
+  static HistogramTestPerformance *createSuite() {
+    return new HistogramTestPerformance;
+  }
+  static void destroySuite(HistogramTestPerformance *suite) { delete suite; }
+
+  HistogramTestPerformance() : copy(histSize, LinearGenerator(0, 2)) {
+    for (size_t i = 0; i < nHists; i++)
+      hists.push_back(Histogram(BinEdges(histSize, LinearGenerator(0, 1))));
+
+    BinEdges edges(histSize, LinearGenerator(0, 2));
+
+    for (size_t i = 0; i < nHists; i++)
+      hists2.push_back(Histogram(edges));
+
+    // hists is stored to avoid benchmarking deallocation
+    histsCopy = hists;
+  }
+
+  void test_copy_X() {
+    for (auto &i : hists)
+      i.mutableX() = copy;
+  }
+
+  void test_share_X_with_deallocation() {
+    hists[0].mutableX() = copy;
+    for (auto &i : hists)
+      i.setSharedX(hists[0].sharedX());
+  }
+
+  void test_share_X() {
+    for (auto &i : hists2)
+      i.setSharedX(hists[0].sharedX());
+  }
+
+private:
+  const size_t nHists = 100000;
+  const size_t histSize = 10000;
+  std::vector<Histogram> hists;
+  std::vector<Histogram> hists2;
+  std::vector<Histogram> histsCopy;
+  HistogramX copy;
 };
 
 #endif /* MANTID_HISTOGRAMDATA_HISTOGRAMTEST_H_ */
