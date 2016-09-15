@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/LorentzCorrection.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <boost/make_shared.hpp>
@@ -17,8 +18,6 @@ using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LorentzCorrection)
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LorentzCorrection::version() const { return 1; }
@@ -37,7 +36,6 @@ const std::string LorentzCorrection::name() const {
   return "LorentzCorrection";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LorentzCorrection::init() {
@@ -52,7 +50,6 @@ void LorentzCorrection::init() {
                   "An output workspace.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LorentzCorrection::exec() {
@@ -67,27 +64,17 @@ void LorentzCorrection::exec() {
       boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
   const auto numHistos = inWS->getNumberHistograms();
+  const auto &spectrumInfo = inWS->spectrumInfo();
   Progress prog(this, 0, 1, numHistos);
 
   PARALLEL_FOR1(inWS)
   for (int64_t i = 0; i < int64_t(numHistos); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    IDetector_const_sptr detector;
-    try {
-      detector = inWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found, skip onto the next spectrum
-    if (!detector)
+    if (!spectrumInfo.hasDetectors(i))
       continue;
 
-    const double twoTheta = inWS->detectorTwoTheta(*detector);
+    const double twoTheta = spectrumInfo.twoTheta(i);
     const double sinTheta = std::sin(twoTheta / 2);
     double sinThetaSq = sinTheta * sinTheta;
 

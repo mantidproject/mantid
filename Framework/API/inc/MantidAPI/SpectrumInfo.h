@@ -1,27 +1,39 @@
-#ifndef MANTID_API_GEOMETRYINFOFACTORY_H_
-#define MANTID_API_GEOMETRYINFOFACTORY_H_
+#ifndef MANTID_API_SPECTRUMINFO_H_
+#define MANTID_API_SPECTRUMINFO_H_
+
+#include "MantidAPI/DllConfig.h"
+#include "MantidKernel/V3D.h"
 
 #include <boost/shared_ptr.hpp>
 
-#include "MantidKernel/V3D.h"
-#include "MantidAPI/DllConfig.h"
-
 #include <mutex>
+#include <vector>
 
 namespace Mantid {
-
+using detid_t = int32_t;
 namespace Geometry {
-class Instrument;
 class IComponent;
+class IDetector;
+class Instrument;
 }
-
 namespace API {
+
 class MatrixWorkspace;
-class GeometryInfo;
 
-/** Factory for GeometryInfo, see there for detailed information.
+/** API::SpectrumInfo is an intermediate step towards a SpectrumInfo that is
+  part of Instrument-2.0. The aim is to provide a nearly identical interface
+  such that we can start refactoring existing code before the full-blown
+  implementation of Instrument-2.0 is available.
 
-  @author Simon Heybrock, ESS
+  SpectrumInfo provides easy access to commonly used parameters, such as mask
+  and monitor flags, L1, L2, and 2-theta.
+
+  This class is thread safe with OpenMP BUT NOT WITH ANY OTHER THREADING LIBRARY
+  such as Poco threads or Intel TBB.
+
+
+  @author Simon Heybrock
+  @date 2016
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -44,31 +56,31 @@ class GeometryInfo;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL GeometryInfoFactory {
+class MANTID_API_DLL SpectrumInfo {
 public:
-  GeometryInfoFactory(const MatrixWorkspace &workspace);
+  SpectrumInfo(const MatrixWorkspace &workspace);
+  ~SpectrumInfo();
 
-  /// Returns a GeometryInfo instance for workspace index "index".
-  GeometryInfo create(const size_t index) const;
+  bool isMonitor(const size_t index) const;
+  bool isMasked(const size_t index) const;
+  double l2(const size_t index) const;
+  double twoTheta(const size_t index) const;
+  double signedTwoTheta(const size_t index) const;
+  Kernel::V3D position(const size_t index) const;
+  bool hasDetectors(const size_t index) const;
+  bool hasUniqueDetector(const size_t index) const;
 
-  /// Returns a reference to the instrument. The value is cached, so calling it
-  /// repeatedly is cheap.
-  const Geometry::Instrument &getInstrument() const;
-  /// Returns a reference to the source component. The value is cached, so
-  /// calling it repeatedly is cheap.
-  const Geometry::IComponent &getSource() const;
-  /// Returns a reference to the sample component. The value is cached, so
-  /// calling it repeatedly is cheap.
-  const Geometry::IComponent &getSample() const;
-  /// Returns the source position. The value is cached, so calling it repeatedly
-  /// is cheap.
-  Kernel::V3D getSourcePos() const;
-  /// Returns the sample position. The value is cached, so calling it repeatedly
-  /// is cheap.
-  Kernel::V3D getSamplePos() const;
-  double getL1() const;
+  // This does not really belong into SpectrumInfo, but it seems to be useful
+  // while Instrument-2.0 does not exist.
+  Kernel::V3D sourcePosition() const;
+  Kernel::V3D samplePosition() const;
+  double l1() const;
 
 private:
+  const Geometry::IDetector &getDetector(const size_t index) const;
+  const Geometry::IComponent &getSource() const;
+  const Geometry::IComponent &getSample() const;
+
   // These cache init functions are not thread-safe! Use only in combination
   // with std::call_once!
   void cacheSource() const;
@@ -77,6 +89,7 @@ private:
 
   const MatrixWorkspace &m_workspace;
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
+  std::vector<detid_t> m_validDetectorIDs;
   // The following variables are mutable, since they are initialized (cached)
   // only on demand, by const getters.
   mutable boost::shared_ptr<const Geometry::IComponent> m_source;
@@ -87,8 +100,12 @@ private:
   mutable std::once_flag m_sourceCached;
   mutable std::once_flag m_sampleCached;
   mutable std::once_flag m_L1Cached;
-};
-}
-}
 
-#endif /* MANTID_API_GEOMETRYINFOFACTORY_H_ */
+  mutable std::vector<boost::shared_ptr<const Geometry::IDetector>> m_detectors;
+  mutable std::vector<size_t> m_lastIndex;
+};
+
+} // namespace API
+} // namespace Mantid
+
+#endif /* MANTID_API_SPECTRUMINFO_H_ */

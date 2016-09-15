@@ -521,7 +521,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
        monitorNumber < monitorsStart + numMonitors; monitorNumber++) {
     // Make a new bank
     std::ostringstream monitorName;
-    monitorName << "monitor" << monitorNumber;
+    monitorName << "monitor" << monitorNumber - monitorsStart + 1;
 
     RectangularDetector *bank = new RectangularDetector(monitorName.str());
     bank->initialize(monitorShape, 1, 0.0, pixelSpacing, 1, 0.0, pixelSpacing,
