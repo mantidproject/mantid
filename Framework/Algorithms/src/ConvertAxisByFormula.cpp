@@ -1,9 +1,8 @@
 #include "MantidAlgorithms/ConvertAxisByFormula.h"
 #include "MantidAPI/CommonBinsValidator.h"
-#include "MantidAPI/GeometryInfoFactory.h"
-#include "MantidAPI/GeometryInfo.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -179,16 +178,14 @@ void ConvertAxisByFormula::exec() {
     if ((isRaggedBins) || (isGeometryRequired)) {
       // ragged bins or geometry used - we have to calculate for every spectra
       size_t numberOfSpectra_i = outputWs->getNumberHistograms();
-      GeometryInfoFactory geometryFactory(*outputWs);
+      const auto &spectrumInfo = outputWs->spectrumInfo();
 
       size_t failedDetectorCount = 0;
       Progress prog(this, 0.6, 1.0, numberOfSpectra_i);
       for (size_t i = 0; i < numberOfSpectra_i; ++i) {
         try {
-          GeometryInfo geomInfo =
-              GeometryInfo(geometryFactory, outputWs->getSpectrum(i));
           MantidVec &vec = outputWs->dataX(i);
-          setGeometryValues(geomInfo, variables);
+          setGeometryValues(spectrumInfo, i, variables);
           calculateValues(p, vec, variables);
         } catch (std::runtime_error &)
         // two possible exceptions runtime error and NotFoundError
@@ -281,17 +278,18 @@ void ConvertAxisByFormula::calculateValues(
 }
 
 void ConvertAxisByFormula::setGeometryValues(
-    API::GeometryInfo &geomInfo, std::vector<Variable_ptr> &variables) {
+    const API::SpectrumInfo &specInfo, const size_t index,
+    std::vector<Variable_ptr> &variables) {
   for (auto variable : variables) {
     if (variable->isGeometric) {
       if (variable->name == "twotheta") {
-        variable->value = geomInfo.getTwoTheta();
+        variable->value = specInfo.twoTheta(index);
       } else if (variable->name == "signedtwotheta") {
-        variable->value = geomInfo.getSignedTwoTheta();
+        variable->value = specInfo.signedTwoTheta(index);
       } else if (variable->name == "l1") {
-        variable->value = geomInfo.getL1();
+        variable->value = specInfo.l1();
       } else if (variable->name == "l2") {
-        variable->value = geomInfo.getL2();
+        variable->value = specInfo.l2(index);
       }
     }
   }
