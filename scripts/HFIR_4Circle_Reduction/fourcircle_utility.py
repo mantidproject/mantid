@@ -412,7 +412,8 @@ def get_spice_table_name(exp_number, scan_number):
     :param scan_number:
     :return:
     """
-    table_name = 'HB3A_Exp%03d_%04d_SpiceTable' % (exp_number, scan_number)
+    # table_name = 'HB3A_Exp%03d_%04d_SpiceTable' % (exp_number, scan_number)
+    table_name = 'HB3A_exp%04d_scan%04d' % (exp_number, scan_number)
 
     return table_name
 

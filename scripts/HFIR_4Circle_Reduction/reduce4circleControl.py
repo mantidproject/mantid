@@ -56,7 +56,7 @@ class CWSCDReductionControl(object):
         self._expNumber = None
 
         # Container for MDEventWorkspace for each Pt.
-        self._myPtMDDict = dict()
+        self._myMDWsList = list()
         # Container for loaded workspaces
         self._mySpiceTableDict = {}
         # Container for loaded raw pt workspace
@@ -560,13 +560,14 @@ class CWSCDReductionControl(object):
 
         return move_tup[1]
 
-    def export_to_fullprof(self, exp_number, scan_number_list, lattice, user_header,
-                           fullprof_file_name):
+    def export_to_fullprof(self, exp_number, scan_number_list, user_header,
+                           export_absorption, fullprof_file_name):
         """
         Export peak intensities to Fullprof data file
         :param exp_number:
         :param scan_number_list:
         :param user_header:
+        :param export_absorption:
         :param fullprof_file_name:
         :return: 2-tuples. status and return object (file content or error message)
         """
@@ -622,8 +623,7 @@ class CWSCDReductionControl(object):
             else:
                 peak_dict['kindex'] = scan_kindex_dict[scan_number]
 
-            if True:
-                # FIXME/TODO/NOW - must be an option!
+            if export_absorption:
                 # calculate absorption correction
                 import absorption
 
@@ -640,7 +640,7 @@ class CWSCDReductionControl(object):
             file_content = fputility.write_scd_fullprof_kvector(
                 user_header=user_header, wave_length=exp_wave_length,
                 k_vector_dict=k_shift_dict, peak_dict_list=peaks,
-                fp_file_name=fullprof_file_name)
+                fp_file_name=fullprof_file_name, with_absorption=export_absorption)
         except AssertionError as error:
             return False, 'AssertionError: %s.' % str(error)
         except RuntimeError as error:
@@ -1417,22 +1417,27 @@ class CWSCDReductionControl(object):
         if (exp_no, scan_no) in self._mySpiceTableDict:
             return True, out_ws_name
 
-        # Form standard name for a SPICE file if name is not given
-        if spice_file_name is None:
-            spice_file_name = os.path.join(self._dataDir,
-                                           get_spice_file_name(self._instrumentName, exp_no, scan_no))
+        # load the SPICE table data if the target workspace does not exist
+        if not AnalysisDataService.doesExist(out_ws_name):
+            # Form standard name for a SPICE file if name is not given
+            if spice_file_name is None:
+                spice_file_name = os.path.join(self._dataDir,
+                                               get_spice_file_name(self._instrumentName, exp_no, scan_no))
 
-        # Download SPICE file if necessary
-        if os.path.exists(spice_file_name) is False:
-            self.download_spice_file(exp_no, scan_no, over_write=True)
+            # Download SPICE file if necessary
+            if os.path.exists(spice_file_name) is False:
+                self.download_spice_file(exp_no, scan_no, over_write=True)
 
-        try:
-            spice_table_ws, info_matrix_ws = api.LoadSpiceAscii(Filename=spice_file_name,
-                                                                OutputWorkspace=out_ws_name,
-                                                                RunInfoWorkspace='TempInfo')
-            api.DeleteWorkspace(Workspace=info_matrix_ws)
-        except RuntimeError as run_err:
-            return False, 'Unable to load SPICE data %s due to %s' % (spice_file_name, str(run_err))
+            try:
+                spice_table_ws, info_matrix_ws = api.LoadSpiceAscii(Filename=spice_file_name,
+                                                                    OutputWorkspace=out_ws_name,
+                                                                    RunInfoWorkspace='TempInfo')
+                api.DeleteWorkspace(Workspace=info_matrix_ws)
+            except RuntimeError as run_err:
+                return False, 'Unable to load SPICE data %s due to %s' % (spice_file_name, str(run_err))
+        else:
+            spice_table_ws = AnalysisDataService.retrieve(out_ws_name)
+        # END-IF
 
         # Store
         self._add_spice_workspace(exp_no, scan_no, spice_table_ws)
@@ -1535,25 +1540,34 @@ class CWSCDReductionControl(object):
 
         # Collect HB3A Exp/Scan information
         # construct a configuration with 1 scan and multiple Pts.
-        scan_info_ws_name = get_merge_pt_info_ws_name(exp_no, scan_no)
-        try:
-            api.CollectHB3AExperimentInfo(ExperimentNumber=exp_no,
-                                          ScanList='%d' % scan_no,
-                                          PtLists=pt_list_str,
-                                          DataDirectory=self._dataDir,
-                                          GenerateVirtualInstrument=False,
-                                          OutputWorkspace=scan_info_ws_name,
-                                          DetectorTableWorkspace='MockDetTable')
-        except RuntimeError as rt_error:
-            return False, 'Unable to merge scan %d dur to %s.' % (scan_no, str(rt_error))
-        else:
-            assert AnalysisDataService.doesExist(scan_info_ws_name)
+        merged_scan_ws_name = get_merge_pt_info_ws_name(exp_no, scan_no)
+        if not AnalysisDataService.doesExist(merged_scan_ws_name):
+            # load data from disk
+            try:
+                api.CollectHB3AExperimentInfo(ExperimentNumber=exp_no,
+                                              ScanList='%d' % scan_no,
+                                              PtLists=pt_list_str,
+                                              DataDirectory=self._dataDir,
+                                              GenerateVirtualInstrument=False,
+                                              OutputWorkspace=merged_scan_ws_name,
+                                              DetectorTableWorkspace='MockDetTable')
+            except RuntimeError as rt_error:
+                return False, 'Unable to merge scan %d dur to %s.' % (scan_no, str(rt_error))
+            else:
+                # check
+                assert AnalysisDataService.doesExist(merged_scan_ws_name), 'Workspace %s does not exist.' \
+                                                                           '' % merged_scan_ws_name
+                # record the workspace created
+                self._myMDWsList.append(merged_scan_ws_name)
+        elif merged_scan_ws_name not in self._myMDWsList:
+            self._myMDWsList.append(merged_scan_ws_name)
+        # END-IF
 
         # Convert to Q-sample
         out_q_name = get_merged_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
         if AnalysisDataService.doesExist(out_q_name) is False:
             try:
-                api.ConvertCWSDExpToMomentum(InputWorkspace=scan_info_ws_name,
+                api.ConvertCWSDExpToMomentum(InputWorkspace=merged_scan_ws_name,
                                              CreateVirtualInstrument=False,
                                              OutputWorkspace=out_q_name,
                                              Directory=self._dataDir)
@@ -1982,33 +1996,6 @@ class CWSCDReductionControl(object):
 
         return True
 
-    def set_hkl_to_peak(self, exp_number, scan_number, pt_number):
-        """
-        Get HKL as _h, _k, _l from MDEventWorkspace.  It is for HB3A only
-        :return:
-        """
-        status, peak_info = self.get_peak_info(exp_number, scan_number, pt_number)
-        if status is False:
-            err_msg = peak_info
-            return False, err_msg
-
-        md_ws = self._myPtMDDict[(exp_number, scan_number, pt_number)]
-        assert md_ws.getNumExperimentInfo() == 1
-        exp_info = md_ws.getExperimentInfo(0)
-
-        try:
-            m_h = float(exp_info.run().getProperty('_h').value)
-            m_k = float(exp_info.run().getProperty('_k').value)
-            m_l = float(exp_info.run().getProperty('_l').value)
-        except RuntimeError as error:
-            return False, 'Unable to retrieve HKL due to %s.' % (str(error))
-
-        peak_ws = peak_info.get_peak_workspace()
-        peak = peak_ws.getPeak(0)
-        peak.setHKL(m_h, m_k, m_l)
-
-        return True, (m_h, m_k, m_l)
-
     def set_k_shift(self, scan_number_list, k_index):
         """ Set k-shift vector
         :param scan_number_list:
@@ -2299,6 +2286,23 @@ class CWSCDReductionControl(object):
         self._scanSummaryList = scan_sum_list
 
         return True, scan_sum_list, error_message
+
+    def export_project(self, project_file_name):
+        """
+
+        :return:
+        """
+        # TODO/NOW - need to check the project file name and etc.
+        import project_manager
+
+        project = project_manager.ProjectManager(mode='export', project_file_path=project_file_name)
+
+        project.add_workspaces(self._myMDWsList)
+        project.set('data dir', self._dataDir)
+
+        project.export()
+
+        return
 
 
 def convert_spice_ub_to_mantid(spice_ub):

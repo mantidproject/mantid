@@ -460,6 +460,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
   // Go through all XML nodes to process
   size_t numxmlnodes = vecxmlnode.size();
   bool parsedDet = false;
+  double max_counts = 0.;
   for (size_t n = 0; n < numxmlnodes; ++n) {
     // Process node for detector's count
     const SpiceXMLNode &xmlnode = vecxmlnode[n];
@@ -529,11 +530,16 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
             else
               outws->dataE(j_row)[icol] = 1.0;
           }
-        }
+
+	  // record max count
+	  if (counts > max_counts){
+	    max_counts = counts;
+	  }
+	}
 
         // Update irow
         icol += 1;
-      }
+      } // END-FOR (i-vec line)
 
       // Set flag
       parsedDet = true;
@@ -570,6 +576,8 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
           << ". Unable to load 2D detector XML file.";
     throw std::runtime_error(errss.str());
   }
+
+  g_log.notice() << "Maximum detector count on it is " << max_counts << "\n";
 
   return outws;
 }

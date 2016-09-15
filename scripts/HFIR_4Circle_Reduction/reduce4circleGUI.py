@@ -250,6 +250,11 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.actionLoad_Session, QtCore.SIGNAL('triggered()'),
                      self.load_session)
 
+        self.connect(self.ui.actionSave_Project, QtCore.SIGNAL('triggered()'),
+                     self.action_save_project)
+        self.connect(self.ui.actionOpen_Project, QtCore.SIGNAL('triggered()'),
+                     self.action_load_project)
+
         # Validator ... (NEXT)
 
         # Declaration of class variable
@@ -287,6 +292,21 @@ class MainWindow(QtGui.QMainWindow):
                                                                self._myControl.__class__.__name__)
 
         return self._myControl
+
+    def action_save_project(self):
+        """
+        Save project
+        :return:
+        """
+        project_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Choose Project File', os.getcwd()))
+        self._myControl.export_project(project_file_name)
+
+    def action_load_project(self):
+        """
+        Load project
+        :return:
+        """
+        self._myControl.load_project()
 
     def evt_show_survey(self):
         """
@@ -986,17 +1006,19 @@ class MainWindow(QtGui.QMainWindow):
         # write
         user_header = str(self.ui.lineEdit_fpHeader.text())
         try:
-            # get lattice parameters from UB tab
-            a = float(self.ui.lineEdit_aUnitCell.text())
-            b = float(self.ui.lineEdit_bUnitCell.text())
-            c = float(self.ui.lineEdit_cUnitCell.text())
-            alpha = float(self.ui.lineEdit_alphaUnitCell.text())
-            beta = float(self.ui.lineEdit_betaUnitCell.text())
-            gamma = float(self.ui.lineEdit_gammaUnitCell.text())
-            lattice = absorption.Lattice(a, b, c, alpha, beta, gamma)
+            # # get lattice parameters from UB tab
+            # a = float(self.ui.lineEdit_aUnitCell.text())
+            # b = float(self.ui.lineEdit_bUnitCell.text())
+            # c = float(self.ui.lineEdit_cUnitCell.text())
+            # alpha = float(self.ui.lineEdit_alphaUnitCell.text())
+            # beta = float(self.ui.lineEdit_betaUnitCell.text())
+            # gamma = float(self.ui.lineEdit_gammaUnitCell.text())
+            # lattice = absorption.Lattice(a, b, c, alpha, beta, gamma)
 
-            status, file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list, lattice,
-                                                                      user_header, fp_name)
+            export_absorption = self.ui.checkBox_exportAbsorptionToFP.isChecked()
+
+            status, file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list,
+                                                                      user_header, export_absorption, fp_name)
             self.ui.plainTextEdit_fpContent.setPlainText(file_content)
             if status is False:
                 error_msg = file_content
@@ -2490,9 +2512,10 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def evt_apply_lorentz_correction_mt(self):
+    def ui_apply_lorentz_correction_mt(self):
         """
-        Apply Lorentz corrections to the integrated peak intensities of all the selected peaks.
+        Apply Lorentz corrections to the integrated peak intensities of all the selected peaks
+        at the UI level
         :return:
         """
         # get experiment number
@@ -2712,6 +2735,10 @@ class MainWindow(QtGui.QMainWindow):
         lattice_gamma = str(self.ui.lineEdit_gamma.text())
         settings.setValue('gamma', lattice_gamma)
 
+        # last project
+        last_1_project_path = str(self.ui.label_last1Path.text())
+        settings.setValue('last1path', last_1_project_path)
+
         return
 
     def load_settings(self):
@@ -2745,6 +2772,11 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_beta.setText(str(lattice_beta))
             lattice_gamma = settings.value('gamma')
             self.ui.lineEdit_gamma.setText(str(lattice_gamma))
+
+            # last project
+            last_1_project_path = str(settings.value('last1path'))
+            self.ui.label_last1Path.setText(last_1_project_path)
+
         except TypeError as err:
             self.pop_one_button_dialog(str(err))
             return
@@ -2898,7 +2930,7 @@ class MainWindow(QtGui.QMainWindow):
         elif mode == 2:
             # end of the whole run
             # apply Lorentz correction
-            self.evt_apply_lorentz_correction_mt()
+            self.ui_apply_lorentz_correction_mt()
 
             progress = int(sig_value+0.5)
             self.ui.progressBar_mergeScans.setValue(progress)

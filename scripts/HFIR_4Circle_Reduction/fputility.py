@@ -2,7 +2,8 @@
 # Utility methods for Fullprof
 
 
-def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dict_list, fp_file_name):
+def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dict_list, fp_file_name,
+                               with_absorption):
     """
     Purpose: Export integrated peaks to single crystal diffraction Fullprof file
     Requirements:
@@ -14,6 +15,7 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
     :param k_vector_dict:
     :param peak_dict_list: a list of peak parameters stored in dictionaries.
     :param fp_file_name:
+    :param with_absorption:
     :return:
     """
     # check
@@ -28,7 +30,10 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
     # user defined header
     header = '%s' % user_header.strip()
     # fixed file format line
-    file_format = '(4i4,2f8.2,i4,3f8.2)'
+    if with_absorption:
+        file_format = '(4i4,2f8.2,i4,3f8.5)'
+    else:
+        file_format = '(4i4,2f8.2,i4)'
     # wave length
     lambda_line = '%.4f  0  0' % wave_length
 
@@ -58,7 +63,7 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
 
         # miller index
         m_h, m_k, m_l = peak_dict['hkl']
-        part1 = '%4d%4d%4d' % (round(m_h), round(m_k), round(m_l))
+        part1 = '%4d%4d%4d' % (nearest_int(m_h), nearest_int(m_k), nearest_int(m_l))
 
         # k index
         if num_k_vectors > 0:
@@ -96,3 +101,14 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
         raise RuntimeError(err_msg)
 
     return fp_buffer
+
+
+def nearest_int(number):
+    """
+    """
+    if number > 0:
+        ni = int(number + 0.5)
+    else:
+        ni = int(number - 0.5)
+
+    return ni

@@ -3,6 +3,8 @@ import numpy.linalg
 import math
 from mantid.api import AnalysisDataService
 
+import fourcircle_utility as util4
+
 # Do absorption correction
 
 
@@ -236,7 +238,8 @@ def calculate_absorption_correction_spice(exp_number, scan_number, lattice, ub_m
 def get_average_spice_table(exp_number, scan_number, col_name):
     """
     """
-    spice_table_name = 'HB3A_Exp%d_%04d_SpiceTable' % (exp_number, scan_number)
+    spice_table_name = util4.get_spice_table_name(exp_number, scan_number)
+    # spice_table_name = 'HB3A_Exp%d_%04d_SpiceTable' % (exp_number, scan_number)
     # spice_table = mtd[spice_table_name]
     spice_table = AnalysisDataService.retrieve(spice_table_name)
     
@@ -259,8 +262,7 @@ def get_average_omega(exp_number, scan_number):
     :return:
     """
     # get table workspace
-    # FIXME - this is very vulnerable due to hard coding the workspace's name
-    spice_table_name = 'HB3A_Exp%d_%04d_SpiceTable' % (exp_number, scan_number)
+    spice_table_name = util4.get_spice_table_name(exp_number, scan_number)
     spice_table = AnalysisDataService.retrieve(spice_table_name)
 
     # column index
