@@ -114,7 +114,11 @@ private:
                           const SampleLogBehaviour &behaviour,
                           const double addeeWSNumber, const double outWSNumber,
                           const std::string name);
-};
+
+  bool isWithinTolerance(const SampleLogBehaviour &behaviour, const double addeeWSNumber, const double outWSNumber);
+  bool stringPropertiesMatch(const SampleLogBehaviour &behaviour, const Kernel::Property *addeeWSProperty);
+
+  };
 
 } // namespace Algorithms
 } // namespace Mantid

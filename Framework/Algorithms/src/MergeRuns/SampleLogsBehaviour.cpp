@@ -299,7 +299,8 @@ SampleLogsBehaviour::addPropertyForList(const std::string item,
  * @param item the name of the sample log
  * @param ws the first workspace in the merge
  * @param value the value of the sample log (if it could be set)
- * @return true if the sample log could be converted to a double, false otherwise
+ * @return true if the sample log could be converted to a double, false
+ * otherwise
  */
 bool SampleLogsBehaviour::setNumericValue(const std::string item,
                                           const API::MatrixWorkspace_sptr &ws,
@@ -414,8 +415,8 @@ void SampleLogsBehaviour::updateListProperty(
 
 /**
  * Performs the check to see if a warning should be generated because logs are
- *different. Performs a numeric comparison if a tolerance is set and the log is
- *a number, else performs a string comparison.
+ * different. Performs a numeric comparison if a tolerance is set and the log is
+ * a number, else performs a string comparison.
  *
  * @param addeeWS the workspace being merged
  * @param addeeWSProperty the property value of the workspace being merged
@@ -431,25 +432,19 @@ void SampleLogsBehaviour::checkWarnProperty(const MatrixWorkspace_sptr &addeeWS,
                                             const double addeeWSNumber,
                                             const double outWSNumber,
                                             const std::string name) {
-  if (behaviour.isNumeric && behaviour.tolerance > 0.0) {
-    if (std::abs(addeeWSNumber - outWSNumber) > behaviour.tolerance) {
-      m_logger.warning() << generateDifferenceMessage(
-          name, addeeWS->name(), addeeWSProperty->value(),
-          behaviour.property->value());
-    }
-  } else {
-    if (behaviour.property->value().compare(addeeWSProperty->value()) != 0) {
-      m_logger.warning() << generateDifferenceMessage(
-          name, addeeWS->name(), addeeWSProperty->value(),
-          behaviour.property->value());
-    }
+
+  if (!isWithinTolerance(behaviour, addeeWSNumber, outWSNumber) &&
+      !stringPropertiesMatch(behaviour, addeeWSProperty)) {
+    m_logger.warning() << generateDifferenceMessage(
+        name, addeeWS->name(), addeeWSProperty->value(),
+        behaviour.property->value());
   }
 }
 
 /**
  ** Performs the check to see if an error should be generated because logs are
- *different. Performs a numeric comparison if a tolerance is set and the log is
- *a number, else performs a string comparison.
+ * different. Performs a numeric comparison if a tolerance is set and the log is
+ * a number, else performs a string comparison.
  *
  * @param addeeWS the workspace being merged
  * @param addeeWSProperty the property value of the workspace being merged
@@ -463,19 +458,46 @@ void SampleLogsBehaviour::checkErrorProperty(
     const MatrixWorkspace_sptr &addeeWS, Property *addeeWSProperty,
     const SampleLogBehaviour &behaviour, const double addeeWSNumber,
     const double outWSNumber, const std::string name) {
-  if (behaviour.isNumeric && behaviour.tolerance > 0.0) {
-    if (std::abs(addeeWSNumber - outWSNumber) > behaviour.tolerance) {
-      throw std::invalid_argument(generateDifferenceMessage(
-          name, addeeWS->name(), addeeWSProperty->value(),
-          behaviour.property->value()));
-    }
-  } else {
-    if (behaviour.property->value().compare(addeeWSProperty->value()) != 0) {
-      throw std::invalid_argument(generateDifferenceMessage(
-          name, addeeWS->name(), addeeWSProperty->value(),
-          behaviour.property->value()));
-    }
+
+  if (!isWithinTolerance(behaviour, addeeWSNumber, outWSNumber) &&
+      !stringPropertiesMatch(behaviour, addeeWSProperty)) {
+    throw std::invalid_argument(generateDifferenceMessage(
+        name, addeeWS->name(), addeeWSProperty->value(),
+        behaviour.property->value()));
   }
+}
+
+/**
+ * Check if a sample log value in the addee workspace is numeric and within
+ * tolerances.
+ *
+ * @param behaviour the SampleLogBehaviour item to check
+ * @param addeeWSNumber the value in the workspace being added
+ * @param outWSNumber the value in the first workspace
+ * @return true if the sample log is numeric and within any tolerance set, or if
+ * strings match, false otherwise
+ */
+bool SampleLogsBehaviour::isWithinTolerance(const SampleLogBehaviour &behaviour,
+                                            const double addeeWSNumber,
+                                            const double outWSNumber) {
+  if (behaviour.isNumeric && behaviour.tolerance > 0.0) {
+    return std::abs(addeeWSNumber - outWSNumber) < behaviour.tolerance;
+  }
+
+  return false;
+}
+
+/**
+ * Check if a sample log value in the addee workspace matches one in the first
+ * workspace.
+ *
+ * @param behaviour the SampleLogBehaviour item to check
+ * @param addeeWSProperty a pointer to the property in the workspace being added
+ * @return true if the sample logs match, false otherwise
+ */
+bool SampleLogsBehaviour::stringPropertiesMatch(
+    const SampleLogBehaviour &behaviour, const Property *addeeWSProperty) {
+  return behaviour.property->value().compare(addeeWSProperty->value()) != 0;
 }
 
 /**
