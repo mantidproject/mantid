@@ -35,7 +35,7 @@ class MANTID_ALGORITHMS_DLL WorkflowAlgorithmRunner : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override {
-    return "WorkspaceAlgorithmRunner";
+    return "WorkflowAlgorithmRunner";
   }
   /// Summary of algorithms purpose
   const std::string summary() const override {
