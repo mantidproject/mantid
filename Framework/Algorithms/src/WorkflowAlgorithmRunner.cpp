@@ -17,10 +17,6 @@ const static std::string OUTPUT_PROPERTY_TABLE("OutputPropertyTable");
 const static std::string SETUP_TABLE("SetupTable");
 }
 
-namespace TaskTableCols {
-const static std::string ID("TaskId");
-}
-
 bool isHardCodedWorkspaceName(const std::string &s) {
   if (s.size() < 3) {
     return false;
@@ -90,7 +86,13 @@ void WorkflowAlgorithmRunner::appendToTaskQueue(ITableWorkspace_sptr setupTable,
       }
       else {
         size_t outputRow = -1;
-        setupTable->find(outputId, outputRow, 0);
+        try {
+          setupTable->find(outputId, outputRow, 0);
+        }
+        catch (std::out_of_range &) {
+          throw std::runtime_error("Identifier \"" + outputId + "\" not found in " + PropertyNames::SETUP_TABLE + " (referenced in row " + std::to_string(currentRow) + ", column \"" + ioPair.first + "\").");
+        }
+
         appendToTaskQueue(setupTable, propertyTable, outputRow, queue, ioMap, rowsBeingQueued);
         const auto outputCol = ioPair.second;
         auto outputWorkspaceName = setupTable->getRef<std::string>(outputCol, outputRow);
@@ -175,33 +177,38 @@ void WorkflowAlgorithmRunner::exec() {
         const auto &propertyName = column->name();
         g_log.debug() << "Setting property " << propertyName << ".\n";
         const auto &valueType = column->get_type_info();
-        if (valueType == typeid(std::string)) {
-          const auto &value = propertyTable->cell<std::string>(row, col);
-          algorithm->setProperty(propertyName, value);
+        try {
+          if (valueType == typeid(std::string)) {
+            const auto &value = propertyTable->cell<std::string>(row, col);
+            algorithm->setProperty(propertyName, value);
+          }
+          else if (valueType == typeid(int)) {
+            const auto &value = propertyTable->cell<int>(row, col);
+            g_log.debug() << "Assigning int value " << value << ".\n";
+            algorithm->setProperty(propertyName, static_cast<long>(value));
+          }
+          else if (valueType == typeid(size_t)) {
+            const auto &value = propertyTable->cell<size_t>(row, col);
+            algorithm->setProperty(propertyName, value);
+          }
+          else if (valueType == typeid(float) || valueType == typeid(double)) {
+            const auto &value = propertyTable->cell<double>(row, col);
+            algorithm->setProperty(propertyName, value);
+          }
+          else if (valueType == typeid(bool)) {
+            const auto &value = propertyTable->cell<bool>(row, col);
+            algorithm->setProperty(propertyName, value);
+          }
+          else if (valueType == typeid(Kernel::V3D)) {
+            const auto &value = propertyTable->cell<V3D>(row, col);
+            algorithm->setProperty(propertyName, value);
+          }
+          else {
+            throw std::runtime_error("Unimplemented column type in " + PropertyNames::SETUP_TABLE + ": " + valueType.name() + '.');
+          }
         }
-        else if (valueType == typeid(int)) {
-          const auto &value = propertyTable->cell<int>(row, col);
-          g_log.debug() << "Assigning int value " << value << ".\n";
-          algorithm->setProperty(propertyName, static_cast<long>(value));
-        }
-        else if (valueType == typeid(size_t)) {
-          const auto &value = propertyTable->cell<size_t>(row, col);
-          algorithm->setProperty(propertyName, value);
-        }
-        else if (valueType == typeid(float) || valueType == typeid(double)) {
-          const auto &value = propertyTable->cell<double>(row, col);
-          algorithm->setProperty(propertyName, value);
-        }
-        else if (valueType == typeid(bool)) {
-          const auto &value = propertyTable->cell<bool>(row, col);
-          algorithm->setProperty(propertyName, value);
-        }
-        else if (valueType == typeid(Kernel::V3D)) {
-          const auto &value = propertyTable->cell<V3D>(row, col);
-          algorithm->setProperty(propertyName, value);
-        }
-        else {
-          throw std::runtime_error("Unimplemented column type in " + PropertyNames::SETUP_TABLE + ": " + valueType.name() + '.');
+        catch(std::invalid_argument &e) {
+          throw std::runtime_error("While setting properties for algorithm " + algorithmName + ": " + e.what());
         }
       }
       g_log.debug() << "Executing reduction " << setupTable->cell<std::string>(row, 0) + ".\n";
