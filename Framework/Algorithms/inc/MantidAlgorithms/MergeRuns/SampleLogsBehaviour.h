@@ -34,7 +34,7 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL SampleLogsBehaviour {
 public:
-  enum MergeLogType { time_series, list, warn, fail };
+  enum class MergeLogType { TimeSeries, List, Warn, Fail };
 
   static const std::string TIME_SERIES_MERGE;
   static const std::string LIST_MERGE;
@@ -46,12 +46,12 @@ public:
   static const std::string TIME_SERIES_SUFFIX;
   static const std::string LIST_SUFFIX;
 
-  typedef struct {
+  struct SampleLogBehaviour {
     MergeLogType type;
     std::shared_ptr<Kernel::Property> property;
     double tolerance;
     bool isNumeric;
-  } SampleLogBehaviour;
+  };
 
   SampleLogsBehaviour(const API::MatrixWorkspace_sptr &ws,
                       Kernel::Logger &logger,
@@ -62,11 +62,6 @@ public:
                       const std::string sampleLogsFail,
                       const std::string sampleLogsFailTolerances);
 
-  Kernel::Logger &m_logger;
-
-  typedef std::map<const std::string, SampleLogBehaviour> SampleLogsMap;
-  SampleLogsMap m_logMap;
-
   /// Create and update sample logs according to instrument parameters
   void mergeSampleLogs(const API::MatrixWorkspace_sptr &addeeWS,
                        const API::MatrixWorkspace_sptr &outWS);
@@ -74,6 +69,11 @@ public:
   void resetSampleLogs(const API::MatrixWorkspace_sptr &ws);
 
 private:
+  Kernel::Logger &m_logger;
+
+  typedef std::map<const std::string, SampleLogBehaviour> SampleLogsMap;
+  SampleLogsMap m_logMap;
+
   void
   createSampleLogsMapsFromInstrumentParams(SampleLogsMap &instrumentMap,
                                            const API::MatrixWorkspace_sptr &ws);

@@ -68,8 +68,6 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-enum MergeLogType { average, min, max, sum, list, warn, fail };
-
 class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm {
 public:
   MergeRuns();

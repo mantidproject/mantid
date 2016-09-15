@@ -43,7 +43,7 @@ Kernel::Logger g_log("Run");
 //----------------------------------------------------------------------
 
 boost::shared_ptr<Run> Run::clone() {
-  boost::shared_ptr<Run> clone(new Run());
+  auto clone = boost::make_shared<Run>();
   for (auto property : this->m_manager.getProperties()) {
     clone->addProperty(property->clone());
   }

@@ -64,10 +64,13 @@ SampleLogsBehaviour::SampleLogsBehaviour(
     std::string sampleLogsWarn, std::string sampleLogsWarnTolerances,
     std::string sampleLogsFail, std::string sampleLogsFailTolerances)
     : m_logger(logger) {
-  setSampleMap(m_logMap, time_series, sampleLogsTimeSeries, ws, "");
-  setSampleMap(m_logMap, list, sampleLogsList, ws, "");
-  setSampleMap(m_logMap, warn, sampleLogsWarn, ws, sampleLogsWarnTolerances);
-  setSampleMap(m_logMap, fail, sampleLogsFail, ws, sampleLogsFailTolerances);
+  setSampleMap(m_logMap, MergeLogType::TimeSeries, sampleLogsTimeSeries, ws,
+               "");
+  setSampleMap(m_logMap, MergeLogType::List, sampleLogsList, ws, "");
+  setSampleMap(m_logMap, MergeLogType::Warn, sampleLogsWarn, ws,
+               sampleLogsWarnTolerances);
+  setSampleMap(m_logMap, MergeLogType::Fail, sampleLogsFail, ws,
+               sampleLogsFailTolerances);
 
   SampleLogsMap instrumentMap;
   this->createSampleLogsMapsFromInstrumentParams(instrumentMap, ws);
@@ -88,21 +91,21 @@ void SampleLogsBehaviour::createSampleLogsMapsFromInstrumentParams(
     SampleLogsMap &map, const MatrixWorkspace_sptr &ws) {
   std::string params =
       ws->getInstrument()->getParameterAsString(TIME_SERIES_MERGE, false);
-  setSampleMap(map, time_series, params, ws, "", true);
+  setSampleMap(map, MergeLogType::TimeSeries, params, ws, "", true);
 
   params = ws->getInstrument()->getParameterAsString(LIST_MERGE, false);
-  setSampleMap(map, list, params, ws, "", true);
+  setSampleMap(map, MergeLogType::List, params, ws, "", true);
 
   params = ws->getInstrument()->getParameterAsString(WARN_MERGE, false);
   std::string paramsTolerances;
   paramsTolerances =
       ws->getInstrument()->getParameterAsString(WARN_MERGE_TOLERANCES, false);
-  setSampleMap(map, warn, params, ws, paramsTolerances, true);
+  setSampleMap(map, MergeLogType::Warn, params, ws, paramsTolerances, true);
 
   params = ws->getInstrument()->getParameterAsString(FAIL_MERGE, false);
   paramsTolerances =
       ws->getInstrument()->getParameterAsString(FAIL_MERGE_TOLERANCES, false);
-  setSampleMap(map, fail, params, ws, paramsTolerances, true);
+  setSampleMap(map, MergeLogType::Fail, params, ws, paramsTolerances, true);
 }
 
 /**
@@ -172,14 +175,14 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
       isNumeric = true;
     } catch (std::invalid_argument &) {
       isNumeric = false;
-      if (mergeType == time_series) {
+      if (mergeType == MergeLogType::TimeSeries) {
         m_logger.error() << item << " could not be converted to a numeric type"
                          << std::endl;
         continue;
       }
     }
 
-    if (mergeType == time_series) {
+    if (mergeType == MergeLogType::TimeSeries) {
       try {
         // See if property exists already - merging an output of MergeRuns
         prop = std::shared_ptr<Property>(
@@ -195,7 +198,7 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
         prop = std::shared_ptr<Property>(
             ws->getLog(item + TIME_SERIES_SUFFIX)->clone());
       }
-    } else if (mergeType == list) {
+    } else if (mergeType == MergeLogType::List) {
       try {
         // See if property exists already - merging an output of MergeRuns
         prop =
@@ -275,19 +278,19 @@ void SampleLogsBehaviour::mergeSampleLogs(
     }
 
     switch (item.second.type) {
-    case time_series: {
+    case MergeLogType::TimeSeries: {
       this->updateTimeSeriesProperty(addeeWS, outWS, item.first);
       break;
     }
-    case list: {
+    case MergeLogType::List: {
       this->updateListProperty(addeeWS, outWS, addeeWSProperty, item.first);
       break;
     }
-    case warn:
+    case MergeLogType::Warn:
       this->checkWarnProperty(addeeWS, addeeWSProperty, item.second,
                               addeeWSNumber, outWSNumber, item.first);
       break;
-    case fail:
+    case MergeLogType::Fail:
       this->checkErrorProperty(addeeWS, addeeWSProperty, item.second,
                                addeeWSNumber, outWSNumber, item.first);
       break;
@@ -421,9 +424,9 @@ void SampleLogsBehaviour::setUpdatedSampleLogs(
   for (auto item : m_logMap) {
     std::string propertyToReset = item.first;
 
-    if (item.second.type == time_series) {
+    if (item.second.type == MergeLogType::TimeSeries) {
       propertyToReset = item.first + TIME_SERIES_SUFFIX;
-    } else if (item.second.type == list) {
+    } else if (item.second.type == MergeLogType::List) {
       propertyToReset = item.first + LIST_SUFFIX;
     } else {
       return;
@@ -443,12 +446,12 @@ void SampleLogsBehaviour::resetSampleLogs(const API::MatrixWorkspace_sptr &ws) {
   for (auto item : m_logMap) {
     std::string propertyToReset = item.first;
 
-    if (item.second.type == time_series) {
+    if (item.second.type == MergeLogType::TimeSeries) {
       propertyToReset = item.first + TIME_SERIES_SUFFIX;
       auto property =
           std::unique_ptr<Kernel::Property>(item.second.property->clone());
       ws->mutableRun().addProperty(std::move(property), true);
-    } else if (item.second.type == list) {
+    } else if (item.second.type == MergeLogType::List) {
       propertyToReset = item.first + LIST_SUFFIX;
       ws->mutableRun()
           .getProperty(propertyToReset)
