@@ -240,7 +240,8 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     // or when default bank is set or changed, the text-field is updated with
     // selected bank directory which would trigger this function again
     if (pocoUserPathInput.isFile() && !splitBaseName.empty()) {
-      foundFullFilePaths = processFullPathInput(pocoUserPathInput, splitBaseName);
+      foundFullFilePaths =
+          processFullPathInput(pocoUserPathInput, splitBaseName);
       // if given a multi-run
     } else if (userPathInput.find("-") != std::string::npos) {
       foundFullFilePaths = processMultiRun(userPathInput);

@@ -191,7 +191,7 @@ void EnggDiffractionPresenter::processLoadExistingCalib() {
 
 void EnggDiffractionPresenter::updateNewCalib(const std::string &fname) {
 
-	const Poco::File pocoFile(fname);
+  const Poco::File pocoFile(fname);
 
   if (fname.empty() || pocoFile.isDirectory()) {
     return;
