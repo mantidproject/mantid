@@ -15859,6 +15859,8 @@ void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showFloating,
       sw->showMinimized();
     }
   }
+
+  modifiedProject(w);
 }
 
 /**

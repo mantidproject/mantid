@@ -197,6 +197,8 @@ MantidUI::MantidUI(ApplicationWindow *aw)
           m_exploreAlgorithms,
           SLOT(updateProgress(void *, double, const QString &, double, int)),
           Qt::QueuedConnection);
+
+  connect(this, SIGNAL(ADS_updated()), appWindow(), SLOT(modifiedProject()));
   m_algMonitor->start();
 
   mantidMenu = new QMenu(m_appWindow);
@@ -770,6 +772,7 @@ void MantidUI::showVatesSimpleInterface() {
         m_vatesSubWindow->setWidget(vsui);
         m_vatesSubWindow->widget()->show();
         vsui->renderWorkspace(wsName, wsType, instrumentName);
+        appWindow()->modifiedProject();
       } else {
         delete m_vatesSubWindow;
         m_vatesSubWindow = NULL;
@@ -819,6 +822,7 @@ void MantidUI::showSpectrumViewer() {
 
       viewer->show();
       viewer->renderWorkspace(wksp);
+      appWindow()->modifiedProject();
     } else {
       g_log.information()
           << "Only event or matrix workspaces are currently supported.\n"
@@ -880,6 +884,7 @@ void MantidUI::showSliceViewer() {
 
     // Pop up the window
     w->show();
+    appWindow()->modifiedProject();
     // And add it
     // appWindow()->d_workspace->addSubWindow(w);
   }

@@ -8,6 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/PDCalibration.h"
+#include "MantidDataObjects/TableColumn.h"
 
 using Mantid::Algorithms::PDCalibration;
 using Mantid::API::Workspace_sptr;
@@ -76,12 +77,20 @@ public:
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("cal");
 
     TS_ASSERT(calTable);
-    TS_ASSERT_DELTA(calTable->cell<double>(180, 1), 31.5, 0.05); // difc
-    TS_ASSERT_EQUALS(calTable->cell<double>(180, 2), 0);         // difa
-    TS_ASSERT_EQUALS(calTable->cell<double>(180, 3), 0);         // tzero
-    TS_ASSERT_DELTA(calTable->cell<double>(181, 1), 31.5, 0.05); // difc
-    TS_ASSERT_EQUALS(calTable->cell<double>(181, 2), 0);         // difa
-    TS_ASSERT_EQUALS(calTable->cell<double>(181, 3), 0);         // tzero
+
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+
+    size_t index =
+        std::find(detIDs.begin(), detIDs.end(), 280) - detIDs.begin();
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), 31.5, 0.05); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);         // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);         // tzero
+
+    index = std::find(detIDs.begin(), detIDs.end(), 281) - detIDs.begin();
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), 31.5, 0.05); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);         // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);         // tzero
 
     MatrixWorkspace_const_sptr mask =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("cal_mask");
@@ -115,12 +124,20 @@ public:
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("cal");
 
     TS_ASSERT(calTable);
-    TS_ASSERT_DELTA(calTable->cell<double>(156, 1), 31.5, 0.01); // difc
-    TS_ASSERT_EQUALS(calTable->cell<double>(156, 2), 0);         // difa
-    TS_ASSERT_DELTA(calTable->cell<double>(156, 3), 2, 0.01);    // tzero
-    TS_ASSERT_DELTA(calTable->cell<double>(165, 1), 31.5, 0.01); // difc
-    TS_ASSERT_EQUALS(calTable->cell<double>(165, 2), 0);         // difa
-    TS_ASSERT_DELTA(calTable->cell<double>(165, 3), 2, 0.01);    // tzero
+
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+
+    size_t index =
+        std::find(detIDs.begin(), detIDs.end(), 256) - detIDs.begin();
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), 31.5, 0.01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);         // difa
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 3), 2, 0.01);    // tzero
+
+    index = std::find(detIDs.begin(), detIDs.end(), 265) - detIDs.begin();
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), 31.5, 0.01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);         // difa
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 3), 2, 0.01);    // tzero
 
     MatrixWorkspace_const_sptr mask =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("cal_mask");
@@ -155,15 +172,25 @@ public:
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("cal");
 
     TS_ASSERT(calTable);
-    TS_ASSERT_DELTA(calTable->cell<double>(182, 1), 35.9, 0.1);  // difc
-    TS_ASSERT_DELTA(calTable->cell<double>(182, 2), 0.0, 0.01);  // difa
-    TS_ASSERT_DELTA(calTable->cell<double>(182, 3), -35.4, 0.1); // tzero
-    TS_ASSERT_DELTA(calTable->cell<double>(183, 1), 31.5, 0.1);  // difc
-    TS_ASSERT_DELTA(calTable->cell<double>(183, 2), 0.1, 0.01);  // difa
-    TS_ASSERT_DELTA(calTable->cell<double>(183, 3), 2, 0.2);     // tzero
-    TS_ASSERT_DELTA(calTable->cell<double>(184, 1), 31.5, 0.1);  // difc
-    TS_ASSERT_DELTA(calTable->cell<double>(184, 2), 0.1, 0.01);  // difa
-    TS_ASSERT_DELTA(calTable->cell<double>(184, 3), 2, 0.2);     // tzero
+
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+
+    size_t index =
+        std::find(detIDs.begin(), detIDs.end(), 282) - detIDs.begin();
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), 35.9, 0.1);  // difc
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 2), 0.0, 0.01);  // difa
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 3), -35.4, 0.1); // tzero
+
+    index = std::find(detIDs.begin(), detIDs.end(), 283) - detIDs.begin();
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), 31.5, 0.1); // difc
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 2), 0.1, 0.01); // difa
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 3), 2, 0.2);    // tzero
+
+    index = std::find(detIDs.begin(), detIDs.end(), 284) - detIDs.begin();
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), 31.5, 0.1); // difc
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 2), 0.1, 0.01); // difa
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 3), 2, 0.2);    // tzero
 
     MatrixWorkspace_const_sptr mask =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("cal_mask");

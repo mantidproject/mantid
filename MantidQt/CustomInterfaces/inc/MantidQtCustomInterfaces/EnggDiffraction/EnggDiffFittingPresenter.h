@@ -222,6 +222,9 @@ private:
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffFittingView *const m_view;
+
+  /// Holds if the view is in the process of being closed
+  bool m_viewHasClosed;
 };
 
 } // namespace CustomInterfaces
