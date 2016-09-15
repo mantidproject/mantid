@@ -1565,8 +1565,8 @@ void EnggDiffFittingPresenter::setBankItems(
   m_view->clearFittingComboBox();
 
   try {
-	  // Keep track of current loop iteration for banks
-	  int index = 0;
+    // Keep track of current loop iteration for banks
+    int index = 0;
     for (const auto filePath : bankFiles) {
 
       const Poco::Path bankFile(filePath);
