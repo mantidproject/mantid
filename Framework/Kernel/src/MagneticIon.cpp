@@ -109,7 +109,7 @@ double MagneticIon::analyticalFormFactor(const double qsqr) const {
     // We want equation 11.110 of Lovesey 1984 (Theory of Neutron Scattering
     // from Condensed Matter) not eq. 11.120. The "g" in eq 11.120 is an
     // effective g-factor indicating an experimentally determined orbital
-    // angular momentum contribution. 
+    // angular momentum contribution.
     // The "g" here is the Lande g-factor which is a theoretically determined
     // value of the coupling between spin and orbital angular momenta in
     // isolated rare earth ions.
