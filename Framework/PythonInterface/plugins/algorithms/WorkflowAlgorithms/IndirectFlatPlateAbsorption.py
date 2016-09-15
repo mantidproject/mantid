@@ -1,21 +1,25 @@
 #pylint: disable=no-init,too-many-instance-attributes,too-many-branches
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress, WorkspaceGroupProperty
-from mantid.kernel import StringMandatoryValidator, Direction, logger, FloatBoundedValidator
+from mantid.kernel import StringMandatoryValidator, Direction, logger, FloatBoundedValidator, MaterialBuilder
 
 
 class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
 
     _sample_ws = None
     _sample_chemical_formula = None
+    _use_sample_mass_density = None
     _sample_number_density = None
+    _sample_mass_density = None
     _sample_height = None
     _sample_width = None
     _sample_thickness = None
     _can_ws_name = None
     _use_can_corrections = None
     _can_chemical_formula = None
+    _use_can_mass_density = None
     _can_number_density = None
+    _can_mass_density = None
     _can_front_thickness = None
     _can_back_thickness = None
     _can_scale = None
@@ -41,9 +45,14 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
                              validator=StringMandatoryValidator(),
                              doc='Chemical formula for the sample')
+        self.declareProperty(name='UseSampleMassDensity', defaultValue=False,
+                             doc='Use Sample Mass Density (True) or Sample Number Density (False)')
         self.declareProperty(name='SampleNumberDensity', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Sample number density')
+                             doc='Sample number density in atoms/Angstrom3')
+        self.declareProperty(name='SampleMassDensity', defaultValue=1.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Sample mass density in g/cm3')
         self.declareProperty(name='SampleHeight', defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample height')
@@ -62,9 +71,14 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                              doc='Use can corrections in subtraction')
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
                              doc='Chemical formula for the Container')
+        self.declareProperty(name='UseCanMassDensity', defaultValue=False,
+                             doc='Use Container Mass Density (True) or Container Number Density (False).')
         self.declareProperty(name='CanNumberDensity', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
-                             doc='Container number density')
+                             doc='Container number density in atoms/Angstrom3')
+        self.declareProperty(name='CanMassDensity', defaultValue=1.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Container number density in g/cm3')
         self.declareProperty(name='CanFrontThickness', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Can front thickness')
@@ -106,7 +120,15 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         ConvertUnits(InputWorkspace=self._sample_ws, OutputWorkspace=sample_wave_ws,
                      Target='Wavelength', EMode='Indirect', EFixed=efixed)
 
-        SetSampleMaterial(sample_wave_ws, ChemicalFormula=self._sample_chemical_formula, SampleNumberDensity=self._sample_number_density)
+
+
+        if self._use_sample_mass_density:
+            builder = MaterialBuilder()
+            mat = builder.setFormula(self._sample_chemical_formula).setMassDensity(self._sample_mass_density).build()
+            self._sample_number_density = mat.numberDensity
+            SetSampleMaterial(sample_wave_ws, ChemicalFormula=self._sample_chemical_formula, SampleNumberDensity=self._sample_number_density, SampleMassDensity = self._sample_mass_density)
+        else:
+            SetSampleMaterial(sample_wave_ws, ChemicalFormula=self._sample_chemical_formula, SampleNumberDensity=self._sample_number_density)
 
         prog.report('Calculating sample corrections')
         FlatPlateAbsorption(InputWorkspace=sample_wave_ws,
@@ -133,7 +155,14 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
                 prog.report('Calculating container corrections')
                 Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)
 
-                SetSampleMaterial(can_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_number_density)
+                if self._use_can_mass_density:
+                    builder = MaterialBuilder()
+                    mat = builder.setFormula(self._can_chemical_formula).setMassDensity(self._can_mass_density).build()
+                    self._can_number_density = mat.numberDensity
+                    SetSampleMaterial(can_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_number_density, SampleMassDensity = self._can_mass_density)
+                else:
+                    SetSampleMaterial(can_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_number_density)
+
                 FlatPlateAbsorption(InputWorkspace=can_wave_ws,
                                     OutputWorkspace=self._acc_ws,
                                     SampleHeight=self._sample_height,
@@ -203,7 +232,9 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
 
         self._sample_ws = self.getPropertyValue('SampleWorkspace')
         self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
+        self._use_sample_mass_density = self.getProperty('UseSampleMassDensity').value
         self._sample_number_density = self.getProperty('SampleNumberDensity').value
+        self._sample_mass_density = self.getProperty('SampleMassDensity').value
         self._sample_height = self.getProperty('SampleHeight').value
         self._sample_width = self.getProperty('SampleWidth').value
         self._sample_thickness = self.getProperty('SampleThickness').value
@@ -213,7 +244,9 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
             self._can_ws_name = None
         self._use_can_corrections = self.getProperty('UseCanCorrections').value
         self._can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
+        self._use_can_mass_density = self.getProperty('UseCanMassDensity').value
         self._can_number_density = self.getProperty('CanNumberDensity').value
+        self._can_mass_density = self.getProperty('CanMassDensity').value
         self._can_front_thickness = self.getProperty('CanFrontThickness').value
         self._can_back_thickness = self.getProperty('CanBackThickness').value
         self._can_scale = self.getProperty('CanScaleFactor').value
