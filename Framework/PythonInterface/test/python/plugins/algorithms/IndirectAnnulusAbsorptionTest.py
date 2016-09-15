@@ -102,6 +102,43 @@ class IndirectAnnulusAbsorptionTest(unittest.TestCase):
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
 
+    def test_number_density_for_sample_can(self):
+        """
+        Test simple run with sample and can workspace and number density for both
+        """
+
+        corrected, fact = IndirectAnnulusAbsorption(SampleWorkspace=self._red_ws,
+                                       SampleChemicalFormula='H2-O',
+                                       UseSampleMassDensity=False,
+                                       SampleNumberDensity=0.5,
+                                       CanWorkspace=self._can_ws,
+                                       CanChemicalFormula='V',
+                                       UseCanMassDensity=False,
+                                       CanNumberDensity=0.5,
+                                       Events = 200,
+                                       UseCanCorrections = True)
+
+        self.assertEqual(fact.size(), 2)
+        self._test_workspaces(corrected, fact)
+
+    def test_mass_density_for_sample_can(self):
+        """
+        Test simple run with sample and can workspace and number density for both
+        """
+
+        corrected, fact = IndirectAnnulusAbsorption(SampleWorkspace=self._red_ws,
+                                       SampleChemicalFormula='H2-O',
+                                       UseSampleMassDensity=True,
+                                       SampleMassDensity=0.5,
+                                       CanWorkspace=self._can_ws,
+                                       CanChemicalFormula='V',
+                                       UseCanMassDensity=True,
+                                       CanMassDensity=0.5,
+                                       Events = 200,
+                                       UseCanCorrections = True)
+
+        self.assertEqual(fact.size(), 2)
+        self._test_workspaces(corrected, fact)
 
 if __name__ == '__main__':
     unittest.main()
