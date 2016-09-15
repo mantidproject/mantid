@@ -1094,9 +1094,17 @@ void LineViewer::loadFromProject(const std::string &lines) {
   std::string sliceWSName;
   std::vector<double> thickness, start, stop;
   double planeWidth, binWidth;
+  int xDim, yDim;
   int numBins;
-  bool adaptiveBins, overwriteLines, numBinsChecked, binWidthChecked;
+  bool adaptiveBins, overwriteLines, numBinsChecked, binWidthChecked,
+      allFreeDims;
 
+  tsv.selectLine("XDim");
+  tsv >> xDim;
+  tsv.selectLine("YDim");
+  tsv >> yDim;
+  tsv.selectLine("AllFreeDims");
+  tsv >> allFreeDims;
   tsv.selectLine("SliceWorkspace");
   tsv >> sliceWSName;
   tsv.selectLine("Thickness");
@@ -1120,6 +1128,7 @@ void LineViewer::loadFromProject(const std::string &lines) {
   tsv.selectLine("OverwriteLines");
   tsv >> overwriteLines;
 
+  setFreeDimensions(allFreeDims, xDim, yDim);
   setSliceWorkspace(sliceWSName);
   for (size_t i = 0; i < thickness.size(); ++i) {
     setThickness(static_cast<int>(i), thickness[i]);
@@ -1146,6 +1155,9 @@ std::string LineViewer::saveToProject() const {
   API::TSVSerialiser tsv;
 
   tsv.writeLine("SliceWorkspace") << m_sliceWS->name();
+  tsv.writeLine("XDim") << m_freeDimX;
+  tsv.writeLine("YDim") << m_freeDimY;
+  tsv.writeLine("AllFreeDims") << m_allDimsFree;
   tsv.writeLine("Thickness") << m_thickness.toString("\t");
   tsv.writeLine("Start") << m_start.toString("\t");
   tsv.writeLine("Stop") << m_end.toString("\t");

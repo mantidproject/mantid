@@ -2639,16 +2639,6 @@ void SliceViewer::loadFromProject(const std::string &lines) {
   tsv.selectLine("Limits");
   tsv >> xMin >> yMin >> xMax >> yMax;
 
-  // apply settings to interface
-  setXYDim(dimX, dimY);
-  setRebinMode(dynamicRebin);
-  setFastRender(fastRender);
-  setNormalization(norm);
-  setAspectRatio(ratio);
-  setXYLimits(xMin, xMax, yMin, yMax);
-  ui.btnAutoRebin->setChecked(autoRebin);
-  m_syncLineMode->toggle(overlayVisible);
-
   // set slice points for each dimension
   for (size_t i = 0; i < slicePoints.size(); ++i) {
     setSlicePoint(static_cast<int>(i), slicePoints[i]);
@@ -2660,6 +2650,15 @@ void SliceViewer::loadFromProject(const std::string &lines) {
     tsv >> dimensionLines;
     loadDimensionWidgets(dimensionLines);
   }
+
+  setXYDim(dimX, dimY);
+  setAspectRatio(ratio);
+  setXYLimits(xMin, xMax, yMin, yMax);
+  setRebinMode(dynamicRebin);
+  setFastRender(fastRender);
+  setNormalization(norm);
+  ui.btnAutoRebin->setChecked(autoRebin);
+  m_syncLineMode->toggle(overlayVisible);
 
   // setup color map
   if (tsv.selectSection("colormap")) {

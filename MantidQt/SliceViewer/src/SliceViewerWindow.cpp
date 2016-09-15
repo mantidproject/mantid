@@ -483,6 +483,7 @@ API::IProjectSerialisable *SliceViewerWindow::loadFromProject(
   tsv >> label;
 
   auto window = new SliceViewerWindow(wsName, label);
+  window->setGeometry(geometry);
   window->m_slicer->loadFromProject(lines);
 
   // Load state of line viewer
@@ -500,8 +501,8 @@ API::IProjectSerialisable *SliceViewerWindow::loadFromProject(
     window->m_peaksViewer->loadFromProject(peaksViewerLines);
   }
 
-  window->setGeometry(geometry);
   window->show();
+  window->m_slicer->resetZoom();
   return window;
 }
 
