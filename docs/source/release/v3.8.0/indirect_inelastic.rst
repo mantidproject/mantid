@@ -98,7 +98,7 @@ Improvements
 - Vesuvio sigma_theta value updated for single and double differencing in both forward and back scattering. The new value is 0.016 for all.
 - The Elwin interface now uses the resolution of the instrument to create the range bars when possible
 - Shift of container data and conversion of units to wavelength have been removed from ApplyPaalmanPings interface and added to ApplyPaalmanPingsCorrection algorithm.
-
+- Improvements to FABADA minimizer have been added (ergodicity, ties and false convergences).
 
 Bugfixes
 --------
