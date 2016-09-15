@@ -108,6 +108,8 @@ MD Algorithms (VATES CLI)
 
 - :ref:`MergeMD <algm-MergeMD>` now preserves the display normalization from the first workspace in the list
 
+- :ref:`BinMD <algm-BinMD>` fixed bug where algorithm would default to using orthogonal basis vectors when supplied with 4 bases and 4 dimensions
+
 Performance
 -----------
 
