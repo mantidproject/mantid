@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/MagFormFactorCorrection.h"
 #include "MantidKernel/MagneticIon.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -86,13 +87,16 @@ void MagFormFactorCorrection::exec() {
   std::vector<double> FF;
   FF.reserve(Qvals.size());
   for (int64_t iQ = 0; iQ < (int64_t)Qvals.size(); iQ++) {
-    FF.push_back(ion.analyticalFormFactor(Qvals[iQ] * Qvals[iQ], 0, 0));
+    FF.push_back(ion.analyticalFormFactor(Qvals[iQ] * Qvals[iQ]));
   }
   if (!ffwsStr.empty()) {
     MatrixWorkspace_sptr ffws = API::WorkspaceFactory::Instance().create(
         "Workspace2D", 1, Qvals.size(), FF.size());
     ffws->mutableX(0).assign(Qvals.begin(), Qvals.end());
     ffws->mutableY(0).assign(FF.begin(), FF.end());
+    ffws->getAxis(0)->unit() =
+        UnitFactory::Instance().create("MomentumTransfer");
+    ffws->setYUnitLabel("F(Q)");
     setProperty("FormFactorWorkspace", ffws);
   }
 

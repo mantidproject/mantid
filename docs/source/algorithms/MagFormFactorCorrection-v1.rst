@@ -32,9 +32,10 @@ The following code will run a reduction on a MARI (ISIS) dataset and apply
 the algorithm to the reduced data. The datafiles (runs 21334, 21337, 21346) and
 map file 'mari_res2013.map' should be in your path. Run number 21337 is a 
 measurement of a PrAl3 sample from the neutron training course. The single
-crystal field excitation around 5 meV should have an intensity variation that
-follows the magnetic form factor. Thus, the integrating between 3 and 6 meV in
-the corrected workspace should yield a nearly flat line along the \|Q\| direction.
+crystal field excitation around 4.5 meV should have an intensity variation that
+follows the magnetic form factor. Thus, the integrating between 4 and 5 meV in
+the corrected workspace should yield a nearly flat line along the :math:`|Q|` 
+direction.
 
 .. code:: python
 
@@ -65,9 +66,5 @@ of the build system where the above datafiles do not exist.
         y *= np.exp(-16*qv*qv)
     ws_corr = MagFormFactorCorrection(ws, IonName='Fe3', FormFactorWorkspace='Fe3FF')
 
-Output
-
-.. testoutput:: ExGenerated
-
-.. categories:: Algorithms Inelastic
+.. categories::
 

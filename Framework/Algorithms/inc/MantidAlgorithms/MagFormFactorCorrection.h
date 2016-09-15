@@ -51,8 +51,7 @@ public:
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "MagFormFactorCorrection corrects a workspace for the magnetic form "
-           "factor F(Q)"
-           "by dividing S(Q,w) by F(Q).";
+           "factor F(Q) by dividing S(Q,w) by |F(Q)|^2.";
   }
 
   /// Algorithm's version

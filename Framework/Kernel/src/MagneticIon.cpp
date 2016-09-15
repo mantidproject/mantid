@@ -93,9 +93,9 @@ double MagneticIon::analyticalFormFactor(const double qsqr) const {
     double j0exp, j2exp = 0.;
     j0exp = j0[0] * std::exp(-j0[1] * q2) + j0[2] * std::exp(-j0[3] * q2) +
             j0[4] * std::exp(-j0[5] * q2);
-    if (g != 2.) {
-      j2exp = (j0[0] * std::exp(-j0[1] * q2) + j0[2] * std::exp(-j0[3] * q2) +
-               j0[4] * std::exp(-j0[5] * q2)) *
+    if (fabs(g - 2.) > 0.01) {
+      j2exp = (j2[0] * std::exp(-j2[1] * q2) + j2[2] * std::exp(-j2[3] * q2) +
+               j2[4] * std::exp(-j2[5] * q2)) *
               q2;
     }
     // Handles the case of 5d where we need an extra Dexp(-delta*Q^2) term
@@ -106,7 +106,20 @@ double MagneticIon::analyticalFormFactor(const double qsqr) const {
       j0exp += j0[6];
       j2exp += j2[6] * q2;
     }
-    return j0exp + (1 - 2. / g) * j2exp;
+    // We want equation 11.110 of Lovesey 1984 (Theory of Neutron Scattering
+    // from Condensed Matter) not eq. 11.120. The "g" in eq 11.120 is an
+    // effective g-factor indicating an experimentally determined orbital
+    // angular momentum contribution. 
+    // The "g" here is the Lande g-factor which is a theoretically determined
+    // value of the coupling between spin and orbital angular momenta in
+    // isolated rare earth ions.
+    // So in substituting the Lande g-factor into equation 11.110, we get
+    // a minus sign instead of the plus sign in equation 11.120.
+    // Both equations are also reproduced in:
+    // http://www.neutron.ethz.ch/research/resources/magnetic-form-factors.html
+    // Equation 11.110 is that given for transition metal ions, and eq 11.120
+    // that for rare earth ions.
+    return j0exp - (1 - (2. / g)) * j2exp;
   } else
     return 0.; // Outside simple model range
 }
@@ -1048,7 +1061,7 @@ void createIonLookup(IonIndex &ion_map) {
                                j_Yb3[1], j_Yb3[2], j_Yb3[3], 8. / 7);
   ion_map["Yb3"] = Yb3;
   static const MagneticIon Pr3("Pr", static_cast<uint16_t>(3), j_Pr3[0],
-                               j_Pr3[1], j_Pr3[2], j_Pr3[3]);
+                               j_Pr3[1], j_Pr3[2], j_Pr3[3], 0.8);
   ion_map["Pr3"] = Pr3;
   static const MagneticIon U3("U", static_cast<uint16_t>(3), j_U3[0], j_U3[1],
                               j_U3[2], j_U3[3], 8. / 11);
