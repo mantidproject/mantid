@@ -109,6 +109,9 @@ MD Algorithms (VATES CLI)
 Performance
 -----------
 
+- An internal change that is a preliminary step for "Instrument-2.0" can yield slight to moderate performance improvements of the following algorithms (and other algorithms that use one of these):
+  AppendSpectra, ApplyTransmissionCorrection, CalculateEfficiency, CalculateFlatBackground, ConjoinSpectra, ConvertAxesToRealSpace, ConvertAxisByFormula, ConvertEmptyToTof, ConvertSpectrumAxis2, ConvertUnitsUsingDetectorTable, CorelliCrossCorrelate, DetectorEfficiencyVariation, EQSANSTofStructure, FilterEvents, FindCenterOfMassPosition, FindCenterOfMassPosition2, FindDetectorsOutsideLimits, GetEi, IntegrateByComponent, LorentzCorrection, MultipleScatteringCylinderAbsorption, NormaliseToMonitor, Q1D2, Q1DWeighted, RadiusSum, RemoveBackground, RemoveBins, RemoveMaskedSpectra, RingProfile, SANSDirectBeamScaling, SumSpectra, TOFSANSResolution, UnwrapMonitor, UnwrapSNS, VesuvioCalculateMS, and WeightedMeanOfWorkspace.
+
 - The introduction of the HistogramData module may have influenced the performance of some algorithms and many workflows.
   A moderate number of algorithms should experience a speedup and reduced memory consumption.
   If you experience unusual slowdowns, please contact the developer team.
