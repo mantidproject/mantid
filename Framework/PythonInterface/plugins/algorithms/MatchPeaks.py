@@ -22,8 +22,8 @@ def mask_reduced_ws(ws_to_mask, xstart, xend):
     else:
         logger.debug('No masking due to x bin < 0!: {}'.format(xstart))
     if xend < len(x_values) - 1:
-        logger.debug('Mask bins larger than {}'.format(xend - 1))
-        MaskBins(InputWorkspace=ws_to_mask, OutputWorkspace=ws_to_mask, XMin=x_values[xend], XMax=x_values[-1])
+        logger.debug('Mask bins larger than {}'.format(xend))
+        MaskBins(InputWorkspace=ws_to_mask, OutputWorkspace=ws_to_mask, XMin=x_values[xend + 1], XMax=x_values[-1])
     else:
         logger.debug('No masking due to x bin >= len(x_values) - 1!: {}'.format(xend))
 
@@ -49,11 +49,11 @@ class MatchPeaks(PythonAlgorithm):
         self._match_option = None
 
     def category(self):
-        return "Workflow\\Transforms"
+        return "Transforms"
 
     def summary(self):
-        return 'Shift bins of each spectrum of the input workspace in order to match its peak positions '\
-               '(i.e. witch center bin, peak positions of another workspace)'
+        return 'Shift bins of each spectrum of the input workspace such that peak positions match '\
+               '(i.e. the center bin, the corresponding peak positions of a second input workspace)'
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace',
@@ -65,7 +65,7 @@ class MatchPeaks(PythonAlgorithm):
                                                      defaultValue='',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
-                             doc='Input workspace according to which bins of the input workspace will be shifted')
+                             doc='Input workspace for extracting its peak positions')
 
         # Maybe for future use
         #self.declareProperty(ITableWorkspaceProperty('InputTable',
@@ -86,13 +86,13 @@ class MatchPeaks(PythonAlgorithm):
 
         self.declareProperty('MatchInput2ToCenter',
                              defaultValue=False,
-                             doc='Match peak bins such that InputWorkspace2 would require to be centered')
+                             doc='Match peak bins such that InputWorkspace2 would be centered')
 
         self.declareProperty(ITableWorkspaceProperty('BinRangeTable',
                                                      defaultValue='',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
-                             doc='Table workspace that contains a valid bin range: bins or x-values')
+                             doc='Table workspace that contains a bin range for masking')
 
     def setUp(self):
         self._input_ws = self.getPropertyValue('InputWorkspace')
@@ -125,7 +125,6 @@ class MatchPeaks(PythonAlgorithm):
             if np.any(np.isinf(mtd[input2].extractE())):
                 issues['InputWorkspace2'] = 'E-values contain infs'
         if input1:
-
             if np.any(np.isnan(mtd[input1].extractY())):
                 issues['InputWorkspace'] = 'Y-values contain nans'
             if np.any(np.isnan(mtd[input1].extractY())):
@@ -193,7 +192,7 @@ class MatchPeaks(PythonAlgorithm):
         max_bin = size
 
         if np.min(to_shift) < 0:
-            max_bin = size - abs(np.min(to_shift))
+            max_bin = size - 1 - abs(np.min(to_shift))
 
         if np.max(to_shift) > 0:
             min_bin = np.max(to_shift)

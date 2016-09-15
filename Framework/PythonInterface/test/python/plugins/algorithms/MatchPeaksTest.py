@@ -170,7 +170,7 @@ class MatchPeaksTest(unittest.TestCase):
         self.assertEqual(columns, bin_range_table.getColumnNames())
         # Bin range
         self.assertEqual(5, bin_range_table.row(0)["MinBin"])
-        self.assertEqual(67, bin_range_table.row(0)["MaxBin"])
+        self.assertEqual(66, bin_range_table.row(0)["MaxBin"])
         DeleteWorkspace(bin_range_table)
         self._FindEPPtables_deleted
 
@@ -220,7 +220,7 @@ class MatchPeaksTest(unittest.TestCase):
         self.assertEqual(42, np.argmax(shifted.readY(2)))
         # Bin range
         self.assertEqual(0, bin_range_table.row(0)["MinBin"])
-        self.assertEqual(60, bin_range_table.row(0)["MaxBin"])
+        self.assertEqual(59, bin_range_table.row(0)["MaxBin"])
         self._workspace_properties(shifted)
         self._FindEPPtables_deleted
         DeleteWorkspace(shifted)
