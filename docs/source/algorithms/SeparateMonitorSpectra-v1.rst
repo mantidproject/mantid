@@ -10,13 +10,14 @@ Description
 -----------
 This algorithm takes a workspace that contains monitors and detectors, and outputs two workspaces, one with only
 detectors and one with only the monitors. The workspaces are linked such that a call to *getMonitorWorkspace* on the
-detector workspace will return the new monitor workspace.
+new detector workspace will return the new monitor workspace.
 
 The algorithm can also output only the detector workspace without monitors, or the monitors on their own.
 
-
 Usage
 -----
+
+.. include:: ../usagedata-note.txt
 
 **Example - SeparateMonitorWorkspace**
 
@@ -32,6 +33,8 @@ Usage
   monitor_ws = mtd['Monitors']
 
   # Detector histograms
+  print("Number of spectra in input workspace: {}").format(ws.getNumberHistograms())
+  # Detector histograms (spectra missing detectors generate warnings)
   print("Number of spectra in detector workspace: {}").format(detector_ws.getNumberHistograms())
   # Monitor histograms
   print("Number of spectra in monitor workspace: {}").format(monitor_ws.getNumberHistograms())
@@ -47,6 +50,7 @@ Output:
 .. testoutput:: SeparateMonitorWorkspaceExample
   :options: +NORMALIZE_WHITESPACE
 
+  Number of spectra in input workspace: 2513
   Number of spectra in detector workspace: 2500
   Number of spectra in monitor workspace: 2
   Detector workspace isMonitor for spectrum 0: False

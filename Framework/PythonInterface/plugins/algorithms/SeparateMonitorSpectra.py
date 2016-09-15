@@ -63,14 +63,18 @@ class SeparateMonitorSpectra(DataProcessorAlgorithm):
 
         if detector_ws_name:
             if detectors:
-                detector_ws = ExtractSpectra(InputWorkspace=ws, OutputWorkspace=detector_ws_name, WorkspaceIndexList=detectors)
+                detector_ws = ExtractSpectra(InputWorkspace=ws,
+                                             OutputWorkspace=detector_ws_name,
+                                             WorkspaceIndexList=detectors)
                 self.setProperty("DetectorWorkspace", detector_ws)
             else:
                 self.log().error("No detectors found in input workspace. No detector output workspace created.")
 
         if monitor_ws_name:
             if monitors:
-                monitor_ws = ExtractSpectra(InputWorkspace=ws, OutputWorkspace=monitor_ws_name,  WorkspaceIndexList=monitors)
+                monitor_ws = ExtractSpectra(InputWorkspace=ws,
+                                            OutputWorkspace=monitor_ws_name,
+                                            WorkspaceIndexList=monitors)
                 self.setProperty("MonitorWorkspace", monitor_ws)
             else:
                 self.log().error("No monitors found in input workspace. No monitor output workspace created.")

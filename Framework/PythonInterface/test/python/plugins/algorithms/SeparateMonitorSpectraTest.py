@@ -62,7 +62,7 @@ class SeparateMonitorSpectraTest(unittest.TestCase):
 
         self.assertEquals(monitors.getNumberHistograms(), 3)
 
-    def test_workspace_with_no_monitors_gives_empty_monitor_workspace(self):
+    def test_workspace_with_no_monitors_gives_no_monitor_workspace(self):
         CreateSampleWorkspace(OutputWorkspace='testWS', NumMonitors = 0)
         SeparateMonitorSpectra(InputWorkspace = 'testWS', DetectorWorkspace = 'det', MonitorWorkspace = 'mon')
 
