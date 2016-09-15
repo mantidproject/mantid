@@ -1564,12 +1564,9 @@ void EnggDiffFittingPresenter::setBankItems(
   // delete previous bank added to the list
   m_view->clearFittingComboBox();
 
-  const int selectedRunNumber = m_view->getFittingListWidgetCurrentRow();
-
-  // Keep track of current loop iteration for banks
-  int index = 0;
-
   try {
+	  // Keep track of current loop iteration for banks
+	  int index = 0;
     for (const auto filePath : bankFiles) {
 
       const Poco::Path bankFile(filePath);
