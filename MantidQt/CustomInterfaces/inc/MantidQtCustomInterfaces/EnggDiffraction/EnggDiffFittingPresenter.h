@@ -123,7 +123,6 @@ public:
 
   void setBankItems(const std::vector<std::string> &bankFiles);
 
-
   void setRunNoItems(const std::vector<std::string> &runNumVector,
                      bool multiRun);
 
@@ -187,11 +186,13 @@ private:
 
   std::vector<std::string> processMultiRun(const std::string userInput);
 
-  std::vector<std::string> processSingleRun(const std::string &userInputBasename,
-                        const std::vector<std::string> &splitBaseName);
+  std::vector<std::string>
+  processSingleRun(const std::string &userInputBasename,
+                   const std::vector<std::string> &splitBaseName);
 
-  void processFullPathInput(const Poco::Path &pocoFilePath,
-                            const std::vector<std::string> &splitBaseName);
+  std::vector<std::string>
+  processFullPathInput(const Poco::Path &pocoFilePath,
+                       const std::vector<std::string> &splitBaseName);
 
   // whether to use AlignDetectors to convert units
   static const bool g_useAlignDetectors;

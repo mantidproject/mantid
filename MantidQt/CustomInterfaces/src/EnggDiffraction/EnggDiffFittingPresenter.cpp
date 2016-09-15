@@ -240,7 +240,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     // or when default bank is set or changed, the text-field is updated with
     // selected bank directory which would trigger this function again
     if (pocoUserPathInput.isFile() && !splitBaseName.empty()) {
-      processFullPathInput(pocoUserPathInput, splitBaseName);
+      foundFullFilePaths = processFullPathInput(pocoUserPathInput, splitBaseName);
       // if given a multi-run
     } else if (userPathInput.find("-") != std::string::npos) {
       foundFullFilePaths = processMultiRun(userPathInput);
@@ -277,8 +277,11 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
   *
   * @param pocoFilePath The user entered file path as a Poco Path
   * @param splitBaseName The base file name split by the `_` delimiter
+  *
+  * @return The full file path as a vector of strings to make this
+  * consistent with the other file processing methods
   */
-void EnggDiffFittingPresenter::processFullPathInput(
+std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
     const Poco::Path &pocoFilePath,
     const std::vector<std::string> &splitBaseName) {
 
@@ -299,7 +302,9 @@ void EnggDiffFittingPresenter::processFullPathInput(
         "in the focused output directory. Please check that the "
         "correct directory is set for Output Folder under Focusing Settings "
         "on the settings tab and that the input is correct");
-    return;
+    // Bring it back to a known state of 0 found
+    foundFullFilePaths.clear();
+    return foundFullFilePaths;
   }
 
   // Update UI to reflect found files
@@ -320,6 +325,8 @@ void EnggDiffFittingPresenter::processFullPathInput(
     // updated
     setRunNoItems(foundRunNumbers, false);
   }
+
+  return foundFullFilePaths;
 }
 
 /**
@@ -647,14 +654,12 @@ EnggDiffFittingPresenter::enableMultiRun(const std::string &firstRun,
       // Append those that were found with fittingRunNoDirVec
       fittingRunNoDirVec.insert(fittingRunNoDirVec.end(),
                                 foundFileNames.cbegin(), foundFileNames.cend());
-	}
-	else {
-		// We couldn't find this one - set the flag and break out of loop
-		foundAllRuns = false;
-		break;
-	}
+    } else {
+      // We couldn't find this one - set the flag and break out of loop
+      foundAllRuns = false;
+      break;
+    }
   }
-
 
   if (foundAllRuns) {
     setRunNoItems(RunNumberVec, true);
@@ -1554,17 +1559,15 @@ void EnggDiffFittingPresenter::setBankItems(
     return;
   }
 
+  // delete previous bank added to the list
+  m_view->clearFittingComboBox();
 
+  const int selectedRunNumber = m_view->getFittingListWidgetCurrentRow();
 
-    // delete previous bank added to the list
-    m_view->clearFittingComboBox();
+  // Keep track of current loop iteration for banks
+  int index = 0;
 
-    const int selectedRunNumber = m_view->getFittingListWidgetCurrentRow();
-
-    // Keep track of current loop iteration for banks
-    int index = 0;
-
-	try {
+  try {
     for (const auto filePath : bankFiles) {
 
       const Poco::Path bankFile(filePath);

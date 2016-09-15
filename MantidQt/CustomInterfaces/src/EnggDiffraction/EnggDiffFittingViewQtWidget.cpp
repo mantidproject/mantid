@@ -247,8 +247,8 @@ void EnggDiffFittingViewQtWidget::saveClicked() {
 
 void EnggDiffFittingViewQtWidget::setBankDir(int idx) {
 
-	const size_t runNoDirSize = m_fitting_runno_dir_vec.size();
-	// idx must correspond to an element and the vector cant be empty
+  const size_t runNoDirSize = m_fitting_runno_dir_vec.size();
+  // idx must correspond to an element and the vector cant be empty
   if (size_t(idx) < runNoDirSize && runNoDirSize > 0) {
 
     std::string bankDir = m_fitting_runno_dir_vec[idx];
@@ -264,7 +264,7 @@ void EnggDiffFittingViewQtWidget::listViewFittingRun() {
     auto listView = m_ui.listWidget_fitting_run_num;
     auto currentRow = listView->currentRow();
     auto item = listView->item(currentRow);
-	QString itemText = item->text();
+    QString itemText = item->text();
 
     setFittingRunNo(itemText.toStdString());
     FittingRunNo();
