@@ -140,7 +140,7 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
   auto tolerancesStringVector = tokenizerTolerances.asVector();
 
   std::vector<double> tolerancesVector = createTolerancesVector(
-      tokenizer.asVector().size(), tolerancesStringVector, paramsTolerances);
+      tokenizer.asVector().size(), tolerancesStringVector);
 
   StringTokenizer::Iterator i = tokenizer.begin();
   std::vector<double>::iterator j = tolerancesVector.begin();
@@ -208,8 +208,7 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
  * @return a vector of doubles of size numberNames
  */
 std::vector<double> SampleLogsBehaviour::createTolerancesVector(
-    size_t numberNames, const std::vector<std::string> &tolerances,
-    const std::string paramsTolerances) {
+    size_t numberNames, const std::vector<std::string> &tolerances) {
   size_t numberTolerances = tolerances.size();
 
   std::vector<double> tolerancesVector(numberNames);
@@ -218,7 +217,7 @@ std::vector<double> SampleLogsBehaviour::createTolerancesVector(
     std::transform(tolerances.begin(), tolerances.end(),
                    tolerancesVector.begin(),
                    [](const std::string &val) { return std::stod(val); });
-  } else if (paramsTolerances.empty()) {
+  } else if (tolerances.empty()) {
     std::fill(tolerancesVector.begin(), tolerancesVector.end(), -1.0);
   } else if (numberTolerances == 1) {
     double value = std::stod(tolerances.front());

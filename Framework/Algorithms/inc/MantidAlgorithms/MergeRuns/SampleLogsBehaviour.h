@@ -95,8 +95,7 @@ private:
 
   std::vector<double>
   createTolerancesVector(const size_t numberNames,
-                         const std::vector<std::string> &tolerances,
-                         const std::string paramsTolerances);
+                         const std::vector<std::string> &tolerances);
 
   void updateTimeSeriesProperty(const API::MatrixWorkspace_sptr &addeeWS,
                                 const API::MatrixWorkspace_sptr &outWS,
