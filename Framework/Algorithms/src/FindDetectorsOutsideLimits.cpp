@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/FindDetectorsOutsideLimits.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -123,6 +124,7 @@ void FindDetectorsOutsideLimits::exec() {
   }
 
   int numFailed(0);
+  const auto &spectrumInfo = countsWS->spectrumInfo();
 #pragma omp parallel for if (countsWS->threadSafe() &&                         \
                                                   outputWS->threadSafe()),     \
                                                   reduction(+ : numFailed)
@@ -134,16 +136,11 @@ void FindDetectorsOutsideLimits::exec() {
       interruption_point();
     }
 
-    if (checkForMask) {
-      const auto &sp = countsWS->getSpectrum(countsInd);
-      const std::set<detid_t> &detids = sp.getDetectorIDs();
-      if (instrument->isMonitor(detids)) {
+    if (checkForMask && spectrumInfo.hasDetectors(countsInd)) {
+      if (spectrumInfo.isMonitor(countsInd))
         continue; // do include or exclude from mask
-      }
-
-      if (instrument->isDetectorMasked(detids)) {
+      if (spectrumInfo.isMasked(countsInd))
         keepData = false;
-      }
     }
 
     const double &yValue = countsWS->y(countsInd)[0];
