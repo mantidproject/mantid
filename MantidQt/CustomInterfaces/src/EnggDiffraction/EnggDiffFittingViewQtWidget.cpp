@@ -262,7 +262,7 @@ void EnggDiffFittingViewQtWidget::listViewFittingRun() {
     auto listView = m_ui.listWidget_fitting_run_num;
     auto currentRow = listView->currentRow();
     auto item = listView->item(currentRow);
-    QString itemText = item->text();
+	QString itemText = item->text();
 
     setFittingRunNo(itemText.toStdString());
     FittingRunNo();

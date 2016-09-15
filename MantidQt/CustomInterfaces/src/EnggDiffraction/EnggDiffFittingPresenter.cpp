@@ -657,7 +657,6 @@ EnggDiffFittingPresenter::enableMultiRun(std::string firstRun,
 
   if (diff == run_vec_size) {
     setRunNoItems(RunNumberVec, true);
-    m_view->setBankEmit();
   } else {
     m_view->userWarning(
         "Run Number Not Found",
