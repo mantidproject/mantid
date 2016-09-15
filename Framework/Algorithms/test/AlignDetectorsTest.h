@@ -183,18 +183,17 @@ public:
     delete suite;
   }
 
-  void setUp() override {
-    inputWS = "";
-    setUp_Event(inputWS);
-    eventWS =
-        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWS);
+  // In constructor so that they are executed only once
+  AlignDetectorsTestPerformance() {
     setUp_HRP38692(inputWS);
-    WS = AnalysisDataService::Instance().retrieveWS<Workspace>(inputWS);
+    setUp_Event(inputWS_event);
   }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().remove(eventWS->getName());
-    AnalysisDataService::Instance().remove(WS->getName());
+  ~AlignDetectorsTestPerformance() override {
+    AnalysisDataService::Instance().remove(inputWS);
+    AnalysisDataService::Instance().remove(inputWS_event);
+    AnalysisDataService::Instance().remove(outputWS);
+    AnalysisDataService::Instance().remove(outputWS_event);
   }
 
   void testExec_EventWS() {
@@ -203,12 +202,11 @@ public:
     align.initialize();
 
     // Set all the properties
-    align.setProperty("InputWorkspace", eventWS);
-    align.setProperty("OutputWorkspace", eventWS);
+    align.setProperty("InputWorkspace", inputWS_event);
+    align.setProperty("OutputWorkspace", outputWS_event);
     align.setPropertyValue("CalibrationFile", "refl_fake.cal");
 
-    TS_ASSERT_THROWS_NOTHING(align.execute());
-    TS_ASSERT(align.isExecuted());
+    align.execute();
   }
 
   void testExec_HRP() {
@@ -217,16 +215,17 @@ public:
     align.initialize();
 
     // Set all the properties
-    align.setProperty("InputWorkspace", WS);
-    align.setProperty("OutputWorkspace", WS);
+    align.setProperty("InputWorkspace", inputWS);
+    align.setProperty("OutputWorkspace", outputWS);
     align.setPropertyValue("CalibrationFile", "refl_fake.cal");
 
-    TS_ASSERT_THROWS_NOTHING(align.execute());
-    TS_ASSERT(align.isExecuted());
+    align.execute();
   }
 
-  std::string inputWS;
-  EventWorkspace_sptr eventWS;
-  Workspace_sptr WS;
+private:
+  std::string inputWS = "inputWS";
+  std::string outputWS = "outputWS";
+  std::string inputWS_event = "inputWSEvent";
+  std::string outputWS_event = "outputWSEvent";
 };
 #endif /*ALIGNDETECTORSTEST_H_*/
