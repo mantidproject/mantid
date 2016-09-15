@@ -72,18 +72,18 @@ public:
     flatbuffers::FlatBufferBuilder builder;
     std::vector<int32_t> spec = {5, 4, 3, 2, 1, 2};
     std::vector<float> tof = {11000, 10000, 9000, 8000, 7000, 6000};
-    auto messageNEvents = ISISDAE::CreateNEvents(
+    auto messageNEvents = ISISStream::CreateNEvents(
         builder, builder.CreateVector(tof), builder.CreateVector(spec));
 
     int32_t frameNumber(2), period(0);
     float frameTime(1.f), protonCharge(0.5f);
     bool endOfFrame(false), endOfRun(false);
     // No SE events
-    auto messageFramePart = ISISDAE::CreateFramePart(
-        builder, frameNumber, frameTime, ISISDAE::RunState_RUNNING,
+    auto messageFramePart = ISISStream::CreateFramePart(
+        builder, frameNumber, frameTime, ISISStream::RunState_RUNNING,
         protonCharge, period, endOfFrame, endOfRun, messageNEvents);
-    auto messageFlatbuf = ISISDAE::CreateEventMessage(
-        builder, ISISDAE::MessageTypes_FramePart, messageFramePart.Union());
+    auto messageFlatbuf = ISISStream::CreateEventMessage(
+        builder, ISISStream::MessageTypes_FramePart, messageFramePart.Union());
     builder.Finish(messageFlatbuf);
 
     // Copy to provided buffer
@@ -109,9 +109,9 @@ public:
 
     // Serialize data with flatbuffers
     flatbuffers::FlatBufferBuilder builder;
-    auto runInfo = ISISDAE::CreateRunInfo(builder, startTime, m_runNumber,
-                                          builder.CreateString(m_instName),
-                                          m_streamOffset);
+    auto runInfo = ISISStream::CreateRunInfo(builder, startTime, m_runNumber,
+                                             builder.CreateString(m_instName),
+                                             m_streamOffset);
     builder.Finish(runInfo);
     // Copy to provided buffer
     buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
@@ -139,8 +139,8 @@ public:
     flatbuffers::FlatBufferBuilder builder;
     auto specVector = builder.CreateVector(m_spec);
     auto detIdsVector = builder.CreateVector(m_detid);
-    auto spdet = ISISDAE::CreateSpectraDetectorMapping(builder, specVector,
-                                                       detIdsVector);
+    auto spdet = ISISStream::CreateSpectraDetectorMapping(
+        builder, specVector, detIdsVector, static_cast<int32_t>(m_spec.size()));
     builder.Finish(spdet);
     // Copy to provided buffer
     buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),

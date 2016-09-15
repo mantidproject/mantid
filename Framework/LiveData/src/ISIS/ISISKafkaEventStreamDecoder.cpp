@@ -15,6 +15,7 @@ GCC_DIAG_ON(conversion)
 
 #include <boost/make_shared.hpp>
 
+#include <cassert>
 #include <functional>
 #include <map>
 
@@ -148,11 +149,11 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
     if (buffer.empty())
       continue;
 
-    auto evtMsg = ISISDAE::GetEventMessage(
+    auto evtMsg = ISISStream::GetEventMessage(
         reinterpret_cast<const uint8_t *>(buffer.c_str()));
-    if (evtMsg->message_type() == ISISDAE::MessageTypes_FramePart) {
+    if (evtMsg->message_type() == ISISStream::MessageTypes_FramePart) {
       auto frameData =
-          static_cast<const ISISDAE::FramePart *>(evtMsg->message());
+          static_cast<const ISISStream::FramePart *>(evtMsg->message());
       DateAndTime pulseTime =
           m_runStart + static_cast<double>(frameData->frame_time());
       if (frameData->period() > 0) {
@@ -195,7 +196,7 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
                              "Empty message received from spectrum-detector "
                              "topic. Unable to continue");
   }
-  auto spDetMsg = ISISDAE::GetSpectraDetectorMapping(
+  auto spDetMsg = ISISStream::GetSpectraDetectorMapping(
       reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
   auto nspec = spDetMsg->spec()->size();
   auto nudet = spDetMsg->det()->size();
@@ -206,8 +207,9 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
           "found nspec=" << nspec << ", ndet=" << nudet;
     throw std::runtime_error(os.str());
   }
-  auto eventBuffer = createBufferWorkspace(spDetMsg->spec()->data(),
-                                           spDetMsg->det()->data(), nudet);
+  auto eventBuffer = createBufferWorkspace(
+      static_cast<size_t>(spDetMsg->n_spectra()), spDetMsg->spec()->data(),
+      spDetMsg->det()->data(), nudet);
   // Load the instrument if possibly but continue if we can't
   m_runStream->consumeMessage(&rawMsgBuffer);
   if (rawMsgBuffer.empty()) {
@@ -217,7 +219,7 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
   }
 
   // ---- Run metadata ----
-  auto runMsg = ISISDAE::GetRunInfo(
+  auto runMsg = ISISStream::GetRunInfo(
       reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
   auto instName = runMsg->inst_name();
   if (instName && instName->size() > 0)
@@ -250,22 +252,23 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
 }
 
 /**
- * Create a buffer workspace of the correct size based on the spectra-detector
- * mapping
+ * Create a buffer workspace of the correct size based on the values given.
+ * @param nspectra The number of unique spectrum numbers
  * @param spec An array of length ndet specifying the spectrum number of each
  * detector
  * @param udet An array of length ndet specifying the detector ID of each
  * detector
- * @param ndet The length of the input arrays
+ * @param length The length of the spec/udet arrays
  * @return A new workspace of the appropriate size
  */
 DataObjects::EventWorkspace_sptr
-ISISKafkaEventStreamDecoder::createBufferWorkspace(const int32_t *spec,
+ISISKafkaEventStreamDecoder::createBufferWorkspace(const size_t nspectra,
+                                                   const int32_t *spec,
                                                    const int32_t *udet,
-                                                   uint32_t ndet) {
+                                                   const uint32_t length) {
   // Order is important here
   std::map<int32_t, std::set<int32_t>> spdetMap;
-  for (uint32_t i = 0; i < ndet; ++i) {
+  for (uint32_t i = 0; i < length; ++i) {
     auto specNo = spec[i];
     auto detId = udet[i];
     auto search = spdetMap.find(specNo);
@@ -275,7 +278,8 @@ ISISKafkaEventStreamDecoder::createBufferWorkspace(const int32_t *spec,
       spdetMap.insert({specNo, {detId}});
     }
   }
-  const auto nspectra = spdetMap.size();
+  assert(nspectra == spdetMap.size());
+
   // Create event workspace
   auto eventBuffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
       API::WorkspaceFactory::Instance().create("EventWorkspace", nspectra, 2,

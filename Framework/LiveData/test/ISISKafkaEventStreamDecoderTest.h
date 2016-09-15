@@ -72,18 +72,28 @@ public:
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isRunning());
 
-    // Workspace checks
+    // -- Workspace checks --
     TS_ASSERT(workspace);
     auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
     TS_ASSERT(eventWksp);
-    // Metadata
+
+    // -- Metadata --
     TS_ASSERT(eventWksp->getInstrument());
     TS_ASSERT_EQUALS("HRPDTEST", eventWksp->getInstrument()->getName());
     TS_ASSERT_EQUALS(
         "2016-08-31T12:07:42",
         eventWksp->run().getPropertyValueAsType<std::string>("run_start"));
-    // Data
-    TS_ASSERT_EQUALS(5, eventWksp->getNumberHistograms());
+    std::array<Mantid::specnum_t, 5> specs = {{1, 2, 3, 4, 5}};
+    std::array<Mantid::detid_t, 5> ids = {{1001, 1002, 1100, 901000, 10100}};
+    for (size_t i = 0; i < eventWksp->getNumberHistograms(); ++i) {
+      const auto &spec = eventWksp->getSpectrum(i);
+      TS_ASSERT_EQUALS(specs[i], spec.getSpectrumNo());
+      const auto &sid = spec.getDetectorIDs();
+      TS_ASSERT_EQUALS(ids[i], *(sid.begin()));
+    }
+
+    // -- Data --
+    TS_ASSERT_EQUALS(specs.size(), eventWksp->getNumberHistograms());
     // A timer-based test and each message contains 6 events so the total should
     // be divisible by 6
     TS_ASSERT(eventWksp->getNumberEvents() % 6 == 0);

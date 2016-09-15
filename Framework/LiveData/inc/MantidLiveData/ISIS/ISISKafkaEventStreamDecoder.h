@@ -74,9 +74,10 @@ private:
   void captureImplExcept();
 
   void initLocalCaches();
-  DataObjects::EventWorkspace_sptr createBufferWorkspace(const int32_t *spec,
+  DataObjects::EventWorkspace_sptr createBufferWorkspace(const size_t nspectra,
+                                                         const int32_t *spec,
                                                          const int32_t *udet,
-                                                         uint32_t ndet);
+                                                         const uint32_t length);
   void loadInstrument(const std::string &name,
                       DataObjects::EventWorkspace_sptr workspace);
 
@@ -86,7 +87,7 @@ private:
   std::unique_ptr<IKafkaStreamSubscriber> m_eventStream;
   /// Local event workspace buffers
   std::vector<DataObjects::EventWorkspace_sptr> m_localEvents;
-  /// Mapping of spectrum number to workspace index. 
+  /// Mapping of spectrum number to workspace index.
   spec2index_map m_specToIdx;
   /// Start time of the run
   Kernel::DateAndTime m_runStart;
