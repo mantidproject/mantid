@@ -140,34 +140,11 @@ Performance
 
   The following algorithms were adapted and do not show any speedup, however the memory consumption may have reduced slightly:
 
-:ref:`FindPeaks <algm-FindPeaks>`,
-:ref:`GeneralisedSecondDifference <algm-GeneralisedSecondDifference>`,
-:ref:`GeneratePeaks <algm-GeneratePeaks>`,
-GetDetectorOffset,
-:ref:`GetTimeSeriesLogInformation <algm-GetTimeSeriesLogInformation>`,
-:ref:`PolarizationCorrection <algm-PolarizationCorrection>`,
-:ref:`Rebin2D <algm-Rebin2D>`,
-:ref:`RebinByTimeAtSample <algm-RebinByTimeAtSample>`,
-ReflectometryTransform,
-:ref:`StripPeaks <algm-StripPeaks>`,
+  AbsorptionCorrection, ConvertEmptyToTof, ConvertToMatrixWorkspace, CrossCorrelate, ExtractFFTSpectrum, FindPeaks, GeneralisedSecondDifference, GeneratePeaks, GetDetectorOffset, GetTimeSeriesLogInformation, PolarizationCorrection, Rebin2D, RebinByTimeAtSample, ReflectometryTransform, StripPeaks
 
   Algorithms that are run after one of those listed above may also benefit from the improved data sharing that lead to speedup and reduced memory consumption.
   In some cases, however, follow-up algorithms may run slower (typically this can happen for algorithms that do in-place modification of data).
   However, the total runtime (sum of the runtimes of the improved *and* the degraded algorithm) should be unchanged in the worst case.
-
-
-
-
-  TODO:
-
-GeneralisedEventsFilter (performance seems worse we should investigate)
-
-AlignDetectors, ApplyTransmissionCorrection, CalculateEfficiency, CalculateFlatBackground, CalculateZScore, ConvertSpectrumAxis/2, CorrectFlightPaths, CorrectKiKf, CorrectToFile (Performance tests finished, results need to be added to release notes). (Dimitar/Lamar)
-
-  
-
-
-
 
 
 CurveFitting
