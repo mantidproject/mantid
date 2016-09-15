@@ -43,17 +43,23 @@ If the *Show multi-reps* check box is enabled (selected) then the resolution vs
 energy for all allowed Ei's will be plotted on the current axes. This only
 applies to LET or MERLIN with the G (gadolinium) chopper slit package.
 
-In the flux plot tab, there is a slider at the bottom and a line edit box to
-allow the user to select the maximum x-range (incident energy range) to plot.
+In the *Flux-Ei* plot tab, there is a slider at the bottom and a line edit box 
+to allow the user to select the maximum x-range (incident energy range) to plot.
 The plot updates when the slider or edit box is changed. To save computation 
 time, the flux / elastic resolution is only calculated at twenty incident energy
 points from 0.1 meV to the maximum selected.
 
-If the instrument is LET, the time-distance plot is enabled, and an additional
-option to change the phase of chopper 2 is available. This chopper has a wide
-openning and can be used to suppress low energy reps. The time delay which is
-specified in the chopper 2 phase edit box is the time-of-flight in microseconds
-relative to the moderator pulse when the chopper first opens.
+The flux and elastic resolution as a function of chopper frequency for the
+specified Ei is shown in the *Flux-Freq* plot tab. If *Hold current plot* is
+selected then several settings can be overplotted. The program will not overplot
+if it detects that only the frequency has changed.
+
+If the instrument is LET (or MERLIN with the G chopper), the time-distance plot 
+is enabled, and an additional option to change the phase of chopper 2 is 
+available. This chopper has a wide openning and can be used to suppress low 
+energy reps. The time delay which is specified in the chopper 2 phase edit box 
+is the time-of-flight in microseconds relative to the moderator pulse when the 
+chopper first opens.
 
 If the *Instrument scientist mode* option is selected, a similar option is
 enabled for MERLIN if the G chopper is used. In this case, the phase (time

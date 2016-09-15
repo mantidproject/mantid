@@ -8,6 +8,7 @@ This module contains a class to create a graphical user interface for PyChop.
 """
 
 import sys
+import re
 import numpy as np
 from .PyChop2 import PyChop2
 from PyQt4 import QtGui, QtCore
@@ -37,7 +38,7 @@ class PyChopGui(QtGui.QMainWindow):
         Defines the instrument parameters by the name of the instrument.
         Allowed values: 'LET', 'MAPS', 'MARI', 'MERLIN' (case-insensitive)
         """
-        self.tabs.setTabEnabled(2, False)
+        self.tabs.setTabEnabled(self.tdtabID, False)
         self.widgets['ChopperCombo']['Combo'].clear()
         self.widgets['FrequencyCombo']['Combo'].clear()
         self.widgets['PulseRemoverCombo']['Combo'].clear()
@@ -58,7 +59,7 @@ class PyChopGui(QtGui.QMainWindow):
                 self.widgets['FrequencyCombo']['Combo'].addItem(str(fq))
         if 'LET' in str(instname) or 'MERLIN' in str(instname):
             self.widgets['MultiRepCheck'].setEnabled(True)
-            self.tabs.setTabEnabled(2, True)
+            self.tabs.setTabEnabled(self.tdtabID, True)
             if 'LET' in str(instname):
                 self.widgets['Chopper2Phase']['Edit'].show()
                 self.widgets['Chopper2Phase']['Label'].show()
@@ -90,7 +91,7 @@ class PyChopGui(QtGui.QMainWindow):
         if 'MERLIN' in self.engine.instname:
             if 'G' in str(choppername):
                 self.widgets['MultiRepCheck'].setEnabled(True)
-                self.tabs.setTabEnabled(2, True)
+                self.tabs.setTabEnabled(self.tdtabID, True)
                 self.widgets['Chopper2Phase']['Edit'].setText('1500')
                 self.widgets['Chopper2Phase']['Label'].setText('Disk chopper phase delay time')
                 if self.instSciAct.isChecked():
@@ -99,25 +100,25 @@ class PyChopGui(QtGui.QMainWindow):
             else:
                 self.widgets['MultiRepCheck'].setEnabled(False)
                 self.widgets['MultiRepCheck'].setChecked(False)
-                self.tabs.setTabEnabled(2, False)
+                self.tabs.setTabEnabled(self.tdtabID, False)
                 self.widgets['Chopper2Phase']['Edit'].hide()
                 self.widgets['Chopper2Phase']['Label'].hide()
 
-    def setFreq(self, freqtext=None):
+    def setFreq(self, freqtext=None, **kwargs):
         """
         Sets the chopper frequency(ies), in Hz.
         """
+        freq_gui = float(self.widgets['FrequencyCombo']['Combo'].currentText())
+        freq_in = kwargs['manual_freq'] if ('manual_freq' in kwargs.keys()) else freq_gui
         if 'LET' in str(self.engine.instname):
-            freq1 = float(self.widgets['FrequencyCombo']['Combo'].currentText())
             freqpr = float(self.widgets['PulseRemoverCombo']['Combo'].currentText())
             chop2phase = float(self.widgets['Chopper2Phase']['Edit'].text()) % 1e5
-            self.engine.setFrequency([freq1, freqpr], Chopper2Phase=chop2phase)
+            self.engine.setFrequency([freq_in, freqpr], Chopper2Phase=chop2phase)
         elif 'MERLIN' in str(self.engine.instname) and 'G' in self.engine.getChopper():
-            freq = float(self.widgets['FrequencyCombo']['Combo'].currentText())
             chop2phase = float(self.widgets['Chopper2Phase']['Edit'].text()) % 2e4
-            self.engine.setFrequency(freq, Chopper2Phase=chop2phase)
+            self.engine.setFrequency(freq_in, Chopper2Phase=chop2phase)
         else:
-            self.engine.setFrequency(float(self.widgets['FrequencyCombo']['Combo'].currentText()))
+            self.engine.setFrequency(freq_in)
 
     def setEi(self):
         """
@@ -135,7 +136,8 @@ class PyChopGui(QtGui.QMainWindow):
         """
         Calls routines to calculate the resolution / flux and to update the Matplotlib graphs.
         """
-        self.plot_flux()
+        self.plot_flux_ei()
+        self.plot_flux_hz()
         try:
             if self.engine.getChopper() is None:
                 self.setChopper(self.widgets['ChopperCombo']['Combo'].currentText())
@@ -205,13 +207,22 @@ class PyChopGui(QtGui.QMainWindow):
         self.resaxes.set_ylabel(r'$\Delta$E (meV FWHM)')
         self.rescanvas.draw()
 
-    def plot_flux(self):
+    def plot_flux_ei(self, **kwargs):
         """
-        Plots the flux in the middle tab
+        Plots the flux vs Ei in the middle tab
         """
         inst = self.engine.instname
+        chop = self.engine.getChopper()
         freq = self.engine.getFrequency()
         if hasattr(freq, '__len__'): freq = freq[-1]
+        update = kwargs['update'] if 'update' in kwargs.keys() else False
+        prevtitle = self.flxaxes1.get_title()
+        # Do not recalculate if all relevant parameters still the same.
+        if prevtitle != "" and not update:
+            searchStr = '([A-Z]+) "([A-z ]+)" ([0-9]+) Hz'
+            prevInst, prevChop, prevFreq = re.search(searchStr, prevtitle).groups()
+            if inst == prevInst and chop == prevChop and freq == float(prevFreq):
+                return
         ne = 25
         mn = self.minE[inst]
         mx = (self.flxslder.val/100)*self.maxE[inst]
@@ -225,7 +236,7 @@ class PyChopGui(QtGui.QMainWindow):
             except ValueError:
                 pass
         self.flxaxes1.clear()
-        self.flxaxes1.set_title('%s %s %d Hz' % (inst, self.engine.getChopper(), freq))
+        self.flxaxes1.set_title('%s "%s" %d Hz' % (inst, chop, freq))
         self.flxaxes1.set_xlabel('Incident Energy (meV)')
         self.flxaxes1.set_ylabel('Flux (n/cm$^2$/s)')
         self.flxaxes1.spines['right'].set_visible(False)
@@ -255,8 +266,54 @@ class PyChopGui(QtGui.QMainWindow):
         else:
             val = self.flxslder.val * self.maxE[self.engine.instname] / 100
             self.flxedt.setText('%3.2f' % (val))
-        self.plot_flux()
+        self.plot_flux_ei(update=True)
         self.flxcanvas.draw()
+
+    def plot_flux_hz(self):
+        """
+        Plots the flux vs freq in the middle tab
+        """
+        inst = self.engine.instname
+        chop = self.engine.getChopper()
+        ei = float(self.widgets['EiEdit']['Edit'].text())
+        overplot = self.widgets['HoldCheck'].isChecked()
+        # Do not recalculate if one of the plots has the same parametersc
+        _, labels = self.frqaxes2.get_legend_handles_labels()
+        if labels and (overplot or len(labels) == 1):
+            for prevtitle in labels:
+                searchStr = '([A-Z]+) "([A-z ]+)" Ei = ([0-9.-]+) meV'
+                prevInst, prevChop, prevEi = re.search(searchStr, prevtitle).groups()
+                if inst == prevInst and chop == prevChop and abs(ei-float(prevEi)) < 0.01:
+                    return
+        freq0 = self.engine.getFrequency()
+        freqs = np.arange(10, 201, 10) if 'LET' in inst else np.arange(50, 601, 50)
+        flux = np.zeros(len(freqs))
+        elres = np.zeros(len(freqs))
+        for ie, freq in enumerate(freqs):
+            try:
+                self.setFreq(manual_freq=freq)
+                flux[ie] = self.engine.getFlux(ei)
+                elres[ie] = self.engine.getResolution(0., ei)[0]
+            except ValueError:
+                pass
+        if overplot:
+            self.frqaxes1.hold(True)
+            self.frqaxes2.hold(True)
+        else:
+            self.frqaxes1.clear()
+            self.frqaxes2.clear()
+        self.setFreq(manual_freq=(freq0[-1] if 'LET' in inst else freq0))
+        self.frqaxes1.set_xlabel('Chopper Frequency (Hz)')
+        self.frqaxes1.set_ylabel('Flux (n/cm$^2$/s)')
+        line, = self.frqaxes1.plot(freqs, flux, 'o-')
+        self.frqaxes1.set_xlim([0, np.max(freqs)])
+        self.frqaxes2.set_xlabel('Chopper Frequency (Hz)')
+        self.frqaxes2.set_ylabel('Elastic Resolution FWHM (meV)')
+        line, = self.frqaxes2.plot(freqs, elres, 'o-')
+        line.set_label('%s "%s" Ei = %5.3f meV' % (inst, chop, ei))
+        self.frqaxes2.legend()
+        self.frqaxes2.set_xlim([0, np.max(freqs)])
+        self.frqcanvas.draw()
 
     def instSciCB(self):
         """
@@ -486,7 +543,6 @@ class PyChopGui(QtGui.QMainWindow):
         self.flxaxes1.set_ylabel('Flux (n/cm$^2$/s)')
         self.flxaxes2 = self.flxaxes1.twinx()
         self.flxaxes2.set_ylabel('Elastic Resolution FWHM (meV)')
-
         self.flxfig_controls = NavigationToolbar(self.flxcanvas, self)
         self.flxsldfg = Figure()
         self.flxsldfg.patch.set_facecolor('white')
@@ -507,12 +563,27 @@ class PyChopGui(QtGui.QMainWindow):
         sz = self.flxsldwdg.maximumSize()
         sz.setHeight(50)
         self.flxsldwdg.setMaximumSize(sz)
-
         self.flxtabbox = QtGui.QVBoxLayout()
         self.flxtabbox.addWidget(self.flxcanvas)
         self.flxtabbox.addWidget(self.flxsldwdg)
         self.flxtabbox.addWidget(self.flxfig_controls)
         self.flxtab.setLayout(self.flxtabbox)
+
+        self.frqfig = Figure()
+        self.frqfig.patch.set_facecolor('white')
+        self.frqcanvas = FigureCanvas(self.frqfig)
+        self.frqaxes1 = self.frqfig.add_subplot(121)
+        self.frqaxes1.set_xlabel('Chopper Frequency (Hz)')
+        self.frqaxes1.set_ylabel('Flux (n/cm$^2$/s)')
+        self.frqaxes2 = self.frqfig.add_subplot(122)
+        self.frqaxes1.set_xlabel('Chopper Frequency (Hz)')
+        self.frqaxes2.set_ylabel('Elastic Resolution FWHM (meV)')
+        self.frqfig_controls = NavigationToolbar(self.frqcanvas, self)
+        self.frqtab = QtGui.QWidget(self.tabs)
+        self.frqtabbox = QtGui.QVBoxLayout()
+        self.frqtabbox.addWidget(self.frqcanvas)
+        self.frqtabbox.addWidget(self.frqfig_controls)
+        self.frqtab.setLayout(self.frqtabbox)
 
         self.repfig = Figure()
         self.repfig.patch.set_facecolor('white')
@@ -529,9 +600,11 @@ class PyChopGui(QtGui.QMainWindow):
         self.reptab.setLayout(self.reptabbox)
 
         self.tabs.addTab(self.restab, 'Resolution')
-        self.tabs.addTab(self.flxtab, 'Flux')
+        self.tabs.addTab(self.flxtab, 'Flux-Ei')
+        self.tabs.addTab(self.frqtab, 'Flux-Freq')
         self.tabs.addTab(self.reptab, 'Time-Distance')
-        self.tabs.setTabEnabled(2, False)
+        self.tdtabID = 3
+        self.tabs.setTabEnabled(self.tdtabID, False)
         self.rightPanel.addWidget(self.tabs)
 
         self.menuOptions = QtGui.QMenu('Options')

@@ -33,10 +33,10 @@ class ISISDisk:
         if 'LET' in instname:
             self.instname = 'LET'
             # Sets parameters which are the same for all configurations
-            self.dist = [7.83,8.4,11.75, 15.66, 23.5]          # distance to each chopper in m (same for all conf)
+            self.dist = [7.83, 8.4, 11.75, 15.66, 23.5]        # distance to each chopper in m (same for all conf)
             self.nslot = [6, 1, 2, 6, 2]                       # number of slots in each chopper. Assumed equally spaced
-            self.guide_width = [40, 40, 40, 40, 20]            # width of the guide in mm 
-            self.radius = [290, 545, 290, 290, 290]            # radius in mm of each disk at centre of window 
+            self.guide_width = [40, 40, 40, 40, 20]            # width of the guide in mm
+            self.radius = [290, 545, 290, 290, 290]            # radius in mm of each disk at centre of window
             self.numDisk = [2, 1, 1, 1, 2]                     # whether double or single disks
             # possible instname: ['LET', 'LETHIFLUX', 'LETINTERMED', 'LETHIRES'] - corresponds to different configurations
             if 'FLUX' in instname or (variant is not None and 'FLUX' in variant.upper()):
@@ -95,9 +95,9 @@ class ISISDisk:
             if 'FLUX' in self.variant.upper():
                 if hasattr(frequency, "__len__"):
                     if len(frequency) == 1:
-                        self.freq = [frequency[0]/4., 10., frequency[0]/4., frequency[0]/2., frequency[0]]
+                        self.freq = [frequency[0]/4., 10., frequency[0]/2., frequency[0]/2., frequency[0]]
                     elif len(frequency) == 2:
-                        self.freq = [frequency[1]/2., 10., frequency[1]/2., frequency[0]/2., frequency[0]]
+                        self.freq = [frequency[1]/2., 10., frequency[1], frequency[0]/2., frequency[0]]
                     elif len(frequency) == 5:
                         self.freq = frequency
                     else:
