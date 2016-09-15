@@ -12,15 +12,33 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static WorkflowAlgorithmRunnerTest *createSuite() { return new WorkflowAlgorithmRunnerTest(); }
-  static void destroySuite( WorkflowAlgorithmRunnerTest *suite ) { delete suite; }
+  static void destroySuite(WorkflowAlgorithmRunnerTest *suite) { delete suite; }
 
 
-  void test_Something()
-  {
-    TS_FAIL( "You forgot to write a test!");
+  void test_EmptyInput() {
+    WorkflowAlgorithmRunner algorithm;
+    algorithm.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
+    TS_ASSERT_THROWS_ANYTHING(algorithm.execute())
+    TS_ASSERT(!algorithm.isExecuted())
   }
 
+  void test_Init() {
+    WorkflowAlgorithmRunner algorithm;
+    algorithm.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(algorithm.initialize())
+    TS_ASSERT(algorithm.isInitialized())
+  }
 
+  void test_Name() {
+    WorkflowAlgorithmRunner algorithm;
+    TS_ASSERT_EQUALS(algorithm.name(), "WorkflowAlgorithmRunner")
+  }
+
+  void test_Version() {
+    WorkflowAlgorithmRunner algorithm;
+    TS_ASSERT_EQUALS(algorithm.version(), 1)
+  }
 };
 
 
