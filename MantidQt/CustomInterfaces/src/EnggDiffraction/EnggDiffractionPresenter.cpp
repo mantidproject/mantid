@@ -191,9 +191,13 @@ void EnggDiffractionPresenter::processLoadExistingCalib() {
 
 void EnggDiffractionPresenter::updateNewCalib(const std::string &fname) {
 
-  const Poco::File pocoFile(fname);
+	Poco::Path pocoPath;
+	const bool pathValid = pocoPath.tryParse(fname);
 
-  if (fname.empty() || pocoFile.isDirectory()) {
+  if (!pathValid || fname.empty() || pocoPath.isDirectory()) {
+    // Log that we couldn't open the file - its probably and invalid
+    // path which will be regenerated
+    g_log.warning("Could not open GSAS calibration file: " + fname);
     return;
   }
 
