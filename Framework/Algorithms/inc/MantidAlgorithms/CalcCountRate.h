@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -65,6 +66,8 @@ protected: // for testing, actually private
   /// pointer to the log used to normalize results or NULL if no such log
   /// present on input workspace.
   Kernel::TimeSeriesProperty<double> const *m_pNormalizationLog{nullptr};
+  /// shared pointer to the optional visualization workspace
+  DataObjects::Workspace2D_sptr m_visWs;
   /// default number of points in the target log
   int m_numLogSteps{200};
 
@@ -73,7 +76,7 @@ protected: // for testing, actually private
   bool m_rangeExplicit{false};
   /// spurion search ranges
   double m_XRangeMin{0}, m_XRangeMax{0};
-
+  /// temporary workspace used to keep intermediate results
   DataObjects::EventWorkspace_sptr m_workingWS;
 
   void setWSDataRanges(DataObjects::EventWorkspace_sptr &InputWorkspace);

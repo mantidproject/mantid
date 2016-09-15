@@ -174,8 +174,7 @@ void CalcCountRate::exec() {
   sourceWS->mutableRun().addProperty(newlog, true);
 
   // calculate averages requested and modify results log
-  this->calcRateLog(m_workingWS,newlog);
-
+  this->calcRateLog(m_workingWS, newlog);
 
   // clear up log derivative and existing log pointer (if any)
   // to avoid incorrect usage
@@ -212,8 +211,10 @@ void CalcCountRate::exec() {
 
     */
 }
-void CalcCountRate::calcRateLog(DataObjects::EventWorkspace_sptr &InputWorkspace,
+void CalcCountRate::calcRateLog(
+    DataObjects::EventWorkspace_sptr &InputWorkspace,
     Kernel::TimeSeriesProperty<double> *const targLog) {
+
 
 }
 
