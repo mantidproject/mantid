@@ -35,15 +35,15 @@ void WorkspaceDockView::showLoadDialog() {}
 
 void WorkspaceDockView::showLiveDataDialog() {}
 
-void WorkspaceDockView::showRenameDialog(const StringList &names) const {}
+void WorkspaceDockView::showRenameDialog(const StringList &wsNames) const {}
 
-void WorkspaceDockView::groupWorkspaces(const StringList &names) const {}
+void WorkspaceDockView::groupWorkspaces(const StringList &wsNames) const {}
 
-void WorkspaceDockView::ungroupWorkspaces(const StringList &names) const {}
+void WorkspaceDockView::ungroupWorkspaces(const StringList &wsNames) const {}
 
 bool WorkspaceDockView::deleteConfirmation() const { return false; }
 
-void WorkspaceDockView::deleteWorkspaces() {}
+void WorkspaceDockView::deleteWorkspaces(const StringList &wsNames) {}
 
 WorkspaceDockView::SortDirection WorkspaceDockView::getSortDirection() const {
   return SortDirection::Ascending;
@@ -59,8 +59,9 @@ void WorkspaceDockView::sortWorkspaces(SortCriteria criteria,
 WorkspaceDockView::SaveFileType WorkspaceDockView::getSaveFileType() const {
   return SaveFileType::Nexus;
 }
-void WorkspaceDockView::saveWorkspace(SaveFileType type) {}
-void WorkspaceDockView::saveWorkspaces() {}
+void WorkspaceDockView::saveWorkspace(const std::string &wsName,
+                                      SaveFileType type) {}
+void WorkspaceDockView::saveWorkspaces(const StringList &wsNames) {}
 
 void WorkspaceDockView::updateTree(
     const std::map<std::string, Mantid::API::Workspace_sptr> &items) {}

@@ -110,20 +110,22 @@ void WorkspacePresenter::sortWorkspaces() {
 void WorkspacePresenter::deleteWorkspaces() {
   auto view = lockView();
 
-  if (view->deleteConfirmation())
-    view->deleteWorkspaces();
+  if (view->deleteConfirmation()) {
+    auto selected = view->getSelectedWorkspaceNames();
+    view->deleteWorkspaces(selected);
+  }
 }
 
 void WorkspacePresenter::saveSingleWorkspace() {
   auto view = lockView();
-
-  view->saveWorkspace(view->getSaveFileType());
+  auto selected = view->getSelectedWorkspaceNames();
+  view->saveWorkspace(selected[0], view->getSaveFileType());
 }
 
 void WorkspacePresenter::saveWorkspaceCollection() {
   auto view = lockView();
-
-  view->saveWorkspaces();
+  auto selected = view->getSelectedWorkspaceNames();
+  view->saveWorkspaces(selected);
 }
 
 void WorkspacePresenter::workspaceLoaded() { updateView(); }

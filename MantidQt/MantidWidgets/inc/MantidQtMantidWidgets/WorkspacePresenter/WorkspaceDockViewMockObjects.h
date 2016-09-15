@@ -27,18 +27,19 @@ public:
   MOCK_METHOD0(showLoadDialog, void());
   MOCK_METHOD0(showLiveDataDialog, void());
   MOCK_CONST_METHOD0(deleteConfirmation, bool());
-  MOCK_METHOD0(deleteWorkspaces, void());
-  MOCK_CONST_METHOD1(showRenameDialog, void(const StringList &names));
-  MOCK_CONST_METHOD1(groupWorkspaces, void(const StringList &names));
-  MOCK_CONST_METHOD1(ungroupWorkspaces, void(const StringList &names));
+  MOCK_METHOD1(deleteWorkspaces, void(const StringList &wsNames));
+  MOCK_CONST_METHOD1(showRenameDialog, void(const StringList &wsNames));
+  MOCK_CONST_METHOD1(groupWorkspaces, void(const StringList &wsNames));
+  MOCK_CONST_METHOD1(ungroupWorkspaces, void(const StringList &wsNames));
   MOCK_CONST_METHOD0(getSortDirection, SortDirection());
   MOCK_CONST_METHOD0(getSortCriteria, SortCriteria());
   MOCK_METHOD2(sortWorkspaces,
                void(IWorkspaceDockView::SortCriteria criteria,
                     IWorkspaceDockView::SortDirection direction));
   MOCK_CONST_METHOD0(getSaveFileType, SaveFileType());
-  MOCK_METHOD1(saveWorkspace, void(SaveFileType type));
-  MOCK_METHOD0(saveWorkspaces, void());
+  MOCK_METHOD2(saveWorkspace,
+               void(const std::string &wsName, SaveFileType type));
+  MOCK_METHOD1(saveWorkspaces, void(const StringList &wsNames));
   MOCK_METHOD1(
       updateTree,
       void(const std::map<std::string, Mantid::API::Workspace_sptr> &items));

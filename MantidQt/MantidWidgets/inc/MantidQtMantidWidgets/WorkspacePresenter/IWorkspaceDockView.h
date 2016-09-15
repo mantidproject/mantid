@@ -58,18 +58,18 @@ public:
 
   virtual void showLoadDialog() = 0;
   virtual void showLiveDataDialog() = 0;
-  virtual void showRenameDialog(const StringList &names) const = 0;
-  virtual void groupWorkspaces(const StringList &names) const = 0;
-  virtual void ungroupWorkspaces(const StringList &names) const = 0;
+  virtual void showRenameDialog(const StringList &wsNames) const = 0;
+  virtual void groupWorkspaces(const StringList &wsNames) const = 0;
+  virtual void ungroupWorkspaces(const StringList &wsNames) const = 0;
   virtual bool deleteConfirmation() const = 0;
-  virtual void deleteWorkspaces() = 0;
+  virtual void deleteWorkspaces(const StringList &wsNames) = 0;
   virtual SortDirection getSortDirection() const = 0;
   virtual SortCriteria getSortCriteria() const = 0;
   virtual void sortWorkspaces(SortCriteria criteria,
                               SortDirection direction) = 0;
   virtual SaveFileType getSaveFileType() const = 0;
-  virtual void saveWorkspace(SaveFileType type) = 0;
-  virtual void saveWorkspaces() = 0;
+  virtual void saveWorkspace(const std::string &wsName, SaveFileType type) = 0;
+  virtual void saveWorkspaces(const StringList &wsNames) = 0;
   virtual StringList getSelectedWorkspaceNames() const = 0;
   virtual Mantid::API::Workspace_sptr getSelectedWorkspace() const = 0;
   virtual void updateTree(
