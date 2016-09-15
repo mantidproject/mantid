@@ -149,10 +149,12 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
     auto item = *i;
     auto tolerance = *j;
 
+    // TODO: switch to multi map and remove this?
     if (skipIfInPrimaryMap && (m_logMap.count(item) != 0)) {
       continue;
     }
 
+    // TODO: switch to multi map and remove this?
     if (map.count(item) != 0) {
       throw std::invalid_argument(
           "Error when making list of merge items, sample log \"" + item +
@@ -163,51 +165,30 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
     try {
       prop = std::shared_ptr<Property>(ws->getLog(item)->clone());
     } catch (std::invalid_argument &) {
-      m_logger.warning() << "Could not merge sample log \"" << item
-                         << "\", does not exist in workspace!" << std::endl;
+      m_logger.warning()
+          << "Could not merge sample log \"" << item
+          << "\", does not exist in workspace! This sample log will be ignored."
+          << std::endl;
       continue;
     }
 
+    // Check if the property can be converted to a double.
+    // Must be the case for a time series, optional for others.
     bool isNumeric;
     double value = 0.0;
-    try {
-      value = ws->getLogAsSingleValue(item);
-      isNumeric = true;
-    } catch (std::invalid_argument &) {
-      isNumeric = false;
-      if (mergeType == MergeLogType::TimeSeries) {
-        m_logger.error() << item << " could not be converted to a numeric type"
-                         << std::endl;
-        continue;
-      }
+
+    isNumeric = setNumericValue(item, ws, value);
+    if (!isNumeric && mergeType == MergeLogType::TimeSeries) {
+      m_logger.error() << item << " could not be converted to a numeric type. "
+                                  "This sample log will be ignored."
+                       << std::endl;
+      continue;
     }
 
     if (mergeType == MergeLogType::TimeSeries) {
-      try {
-        // See if property exists already - merging an output of MergeRuns
-        prop = std::shared_ptr<Property>(
-            ws->getLog(item + TIME_SERIES_SUFFIX)->clone());
-      } catch (std::invalid_argument &) {
-        // Property does not already exist
-        std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(
-            new TimeSeriesProperty<double>(item + TIME_SERIES_SUFFIX));
-        std::string startTime = ws->mutableRun().startTime().toISO8601String();
-        timeSeriesProp->addValue(startTime, value);
-        ws->mutableRun().addLogData(
-            std::unique_ptr<Kernel::Property>(std::move(timeSeriesProp)));
-        prop = std::shared_ptr<Property>(
-            ws->getLog(item + TIME_SERIES_SUFFIX)->clone());
-      }
+      prop = addPropertyForTimeSeries(item, value, ws);
     } else if (mergeType == MergeLogType::List) {
-      try {
-        // See if property exists already - merging an output of MergeRuns
-        prop =
-            std::shared_ptr<Property>(ws->getLog(item + LIST_SUFFIX)->clone());
-      } catch (std::invalid_argument &) {
-        ws->mutableRun().addProperty(item + LIST_SUFFIX, prop->value());
-        prop =
-            std::shared_ptr<Property>(ws->getLog(item + LIST_SUFFIX)->clone());
-      }
+      prop = addPropertyForList(item, prop->value(), ws);
     }
 
     map[item] = {mergeType, prop, tolerance, isNumeric};
@@ -250,6 +231,90 @@ std::vector<double> SampleLogsBehaviour::createTolerancesVector(
   }
 
   return tolerancesVector;
+}
+
+/**
+ * Adds a property to the workspace provided for a TimeSeries merge type.
+ *
+ * @param item the name of the sample log to merge as a time series
+ * @param value the numeric value of the sample log in the first workspace
+ * @param ws the first workspace in the merge
+ * @return a shared pointer to the added property
+ */
+std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(
+    const std::string item, const double value,
+    const API::MatrixWorkspace_sptr &ws) {
+  std::shared_ptr<Property> returnProp;
+
+  try {
+    // See if property exists already - merging an output of MergeRuns
+    returnProp = std::shared_ptr<Property>(
+        ws->getLog(item + TIME_SERIES_SUFFIX)->clone());
+  } catch (std::invalid_argument &) {
+    // Property does not already exist, so add it setting the first entry
+    std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(
+        new TimeSeriesProperty<double>(item + TIME_SERIES_SUFFIX));
+    std::string startTime = ws->mutableRun().startTime().toISO8601String();
+
+    timeSeriesProp->addValue(startTime, value);
+    ws->mutableRun().addLogData(
+        std::unique_ptr<Kernel::Property>(std::move(timeSeriesProp)));
+
+    returnProp = std::shared_ptr<Property>(
+        ws->getLog(item + TIME_SERIES_SUFFIX)->clone());
+  }
+
+  return returnProp;
+}
+
+/**
+ * Adds a property to the workspace provided for a List merge type.
+ *
+ * @param item the name of the sample log to merge as a list
+ * @param value the string value of the sample log in the first workspace
+ * @param ws the first workspace in the merge
+ * @return a shared pointer to the added property
+ */
+std::shared_ptr<Property>
+SampleLogsBehaviour::addPropertyForList(const std::string item,
+                                        const std::string value,
+                                        const API::MatrixWorkspace_sptr &ws) {
+  std::shared_ptr<Property> returnProp;
+
+  try {
+    // See if property exists already - merging an output of MergeRuns
+    returnProp =
+        std::shared_ptr<Property>(ws->getLog(item + LIST_SUFFIX)->clone());
+  } catch (std::invalid_argument &) {
+    ws->mutableRun().addProperty(item + LIST_SUFFIX, value);
+    returnProp =
+        std::shared_ptr<Property>(ws->getLog(item + LIST_SUFFIX)->clone());
+  }
+
+  return returnProp;
+}
+
+/**
+ * Tries to set the numeric value of a property.
+ *
+ * @param item the name of the sample log
+ * @param ws the first workspace in the merge
+ * @param value the value of the sample log (if it could be set)
+ * @return true if the sample log could be converted to a double, false otherwise
+ */
+bool SampleLogsBehaviour::setNumericValue(const std::string item,
+                                          const API::MatrixWorkspace_sptr &ws,
+                                          double &value) {
+  bool isNumeric;
+
+  try {
+    value = ws->getLogAsSingleValue(item);
+    isNumeric = true;
+  } catch (std::invalid_argument &) {
+    isNumeric = false;
+  }
+
+  return isNumeric;
 }
 
 /**

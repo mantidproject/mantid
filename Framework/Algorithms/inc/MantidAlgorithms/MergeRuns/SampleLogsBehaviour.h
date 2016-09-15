@@ -78,6 +78,15 @@ private:
   createSampleLogsMapsFromInstrumentParams(SampleLogsMap &instrumentMap,
                                            const API::MatrixWorkspace_sptr &ws);
 
+  std::shared_ptr<Kernel::Property>
+  addPropertyForTimeSeries(const std::string item, const double value,
+                           const API::MatrixWorkspace_sptr &ws);
+  std::shared_ptr<Kernel::Property>
+  addPropertyForList(const std::string item, const std::string value,
+                     const API::MatrixWorkspace_sptr &ws);
+  bool setNumericValue(const std::string item,
+                       const API::MatrixWorkspace_sptr &ws, double &value);
+
   void setSampleMap(SampleLogsMap &map, const MergeLogType &,
                     const std::string &params,
                     const API::MatrixWorkspace_sptr &ws,
