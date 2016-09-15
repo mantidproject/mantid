@@ -46,6 +46,9 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   case ViewNotifiable::Flag::LoadWorkspace:
     loadWorkspace();
     break;
+  case ViewNotifiable::Flag::LoadLiveDataWorkspace:
+    loadLiveData();
+    break;
   case ViewNotifiable::Flag::RenameWorkspace:
     renameWorkspace();
     break;
@@ -61,12 +64,23 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   case ViewNotifiable::Flag::DeleteWorkspaces:
     deleteWorkspaces();
     break;
+  case ViewNotifiable::Flag::SaveSingleWorkspace:
+    saveSingleWorkspace();
+    break;
+  case ViewNotifiable::Flag::SaveWorkspaceCollection:
+    saveWorkspaceCollection();
+    break;
   }
 }
 
 void WorkspacePresenter::loadWorkspace() {
   auto view = lockView();
   view->showLoadDialog();
+}
+
+void WorkspacePresenter::loadLiveData() {
+  auto view = lockView();
+  view->showLiveDataDialog();
 }
 
 void WorkspacePresenter::renameWorkspace() {
@@ -98,6 +112,18 @@ void WorkspacePresenter::deleteWorkspaces() {
 
   if (view->deleteConfirmation())
     view->deleteWorkspaces();
+}
+
+void WorkspacePresenter::saveSingleWorkspace() {
+  auto view = lockView();
+
+  view->saveWorkspace(view->getSaveFileType());
+}
+
+void WorkspacePresenter::saveWorkspaceCollection() {
+  auto view = lockView();
+
+  view->saveWorkspaces();
 }
 
 void WorkspacePresenter::workspaceLoaded() { updateView(); }

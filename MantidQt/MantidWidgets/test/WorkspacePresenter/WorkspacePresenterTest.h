@@ -39,6 +39,14 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
+  void testLoadLiveData() {
+    EXPECT_CALL(*mockView.get(), showLiveDataDialog()).Times(1);
+
+    presenter->notifyFromView(ViewNotifiable::Flag::LoadLiveDataWorkspace);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
   void testLoadWorkspaceExternal() {
     auto wksp = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
 
@@ -238,6 +246,53 @@ public:
         .Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testSaveSingleWorkspaceNexus() {
+    using SaveFileType = IWorkspaceDockView::SaveFileType;
+    ::testing::DefaultValue<SaveFileType>::Set(SaveFileType::Nexus);
+
+    EXPECT_CALL(*mockView.get(), getSaveFileType()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), saveWorkspace(SaveFileType::Nexus))
+        .Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testSaveSingleWorkspaceASCIIv1() {
+    using SaveFileType = IWorkspaceDockView::SaveFileType;
+    ::testing::DefaultValue<SaveFileType>::Set(SaveFileType::ASCIIv1);
+
+    EXPECT_CALL(*mockView.get(), getSaveFileType()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), saveWorkspace(SaveFileType::ASCIIv1))
+        .Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testSaveSingleWorkspaceASCII() {
+    using SaveFileType = IWorkspaceDockView::SaveFileType;
+    ::testing::DefaultValue<SaveFileType>::Set(SaveFileType::ASCII);
+
+    EXPECT_CALL(*mockView.get(), getSaveFileType()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), saveWorkspace(SaveFileType::ASCII))
+        .Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testSaveWorkspaceCollection() {
+    EXPECT_CALL(*mockView.get(), saveWorkspaces()).Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::SaveWorkspaceCollection);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

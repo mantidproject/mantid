@@ -33,6 +33,8 @@ Mantid::API::Workspace_sptr WorkspaceDockView::getSelectedWorkspace() const {
 
 void WorkspaceDockView::showLoadDialog() {}
 
+void WorkspaceDockView::showLiveDataDialog() {}
+
 void WorkspaceDockView::showRenameDialog(const StringList &names) const {}
 
 void WorkspaceDockView::groupWorkspaces(const StringList &names) const {}
@@ -53,6 +55,12 @@ WorkspaceDockView::SortCriteria WorkspaceDockView::getSortCriteria() const {
 
 void WorkspaceDockView::sortWorkspaces(SortCriteria criteria,
                                        SortDirection direction) {}
+
+WorkspaceDockView::SaveFileType WorkspaceDockView::getSaveFileType() const {
+  return SaveFileType::Nexus;
+}
+void WorkspaceDockView::saveWorkspace(SaveFileType type) {}
+void WorkspaceDockView::saveWorkspaces() {}
 
 void WorkspaceDockView::updateTree(
     const std::map<std::string, Mantid::API::Workspace_sptr> &items) {}

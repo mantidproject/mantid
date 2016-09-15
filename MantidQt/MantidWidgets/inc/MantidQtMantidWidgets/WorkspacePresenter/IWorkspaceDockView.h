@@ -48,6 +48,7 @@ class IWorkspaceDockView
 public:
   enum class SortDirection { Ascending, Descending };
   enum class SortCriteria { ByName, ByLastModified };
+  enum class SaveFileType { Nexus, ASCII, ASCIIv1 };
 
   virtual ~IWorkspaceDockView() = default;
 
@@ -56,6 +57,7 @@ public:
   virtual WorkspacePresenter_sptr getPresenterSharedPtr() = 0;
 
   virtual void showLoadDialog() = 0;
+  virtual void showLiveDataDialog() = 0;
   virtual void showRenameDialog(const StringList &names) const = 0;
   virtual void groupWorkspaces(const StringList &names) const = 0;
   virtual void ungroupWorkspaces(const StringList &names) const = 0;
@@ -65,6 +67,9 @@ public:
   virtual SortCriteria getSortCriteria() const = 0;
   virtual void sortWorkspaces(SortCriteria criteria,
                               SortDirection direction) = 0;
+  virtual SaveFileType getSaveFileType() const = 0;
+  virtual void saveWorkspace(SaveFileType type) = 0;
+  virtual void saveWorkspaces() = 0;
   virtual StringList getSelectedWorkspaceNames() const = 0;
   virtual Mantid::API::Workspace_sptr getSelectedWorkspace() const = 0;
   virtual void updateTree(

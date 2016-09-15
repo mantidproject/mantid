@@ -60,11 +60,14 @@ public:
 
 private:
   void loadWorkspace();
+  void loadLiveData();
   void renameWorkspace();
   void groupWorkspaces();
   void ungroupWorkspaces();
   void sortWorkspaces();
   void deleteWorkspaces();
+  void saveSingleWorkspace();
+  void saveWorkspaceCollection();
 
   void workspaceLoaded();
   void workspaceRenamed();

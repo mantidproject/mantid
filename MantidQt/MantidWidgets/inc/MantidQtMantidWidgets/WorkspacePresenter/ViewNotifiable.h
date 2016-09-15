@@ -37,11 +37,14 @@ public:
 
   enum class Flag {
     LoadWorkspace,
+    LoadLiveDataWorkspace,
     RenameWorkspace,
     DeleteWorkspaces,
     GroupWorkspaces,
     UngroupWorkspaces,
     SortWorkspaces,
+	SaveSingleWorkspace,
+	SaveWorkspaceCollection
   };
 
   virtual void notifyFromView(Flag flag) = 0;

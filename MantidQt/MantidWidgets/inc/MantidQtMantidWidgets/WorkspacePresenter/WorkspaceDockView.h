@@ -51,11 +51,15 @@ public:
   StringList getSelectedWorkspaceNames() const override;
   Mantid::API::Workspace_sptr getSelectedWorkspace() const override;
   void showLoadDialog() override;
+  void showLiveDataDialog() override;
   void showRenameDialog(const StringList &names) const override;
   void groupWorkspaces(const StringList &names) const override;
   void ungroupWorkspaces(const StringList &names) const override;
   bool deleteConfirmation() const override;
   void deleteWorkspaces() override;
+  SaveFileType getSaveFileType() const override;
+  void saveWorkspace(SaveFileType type) override;
+  void saveWorkspaces() override;
   void updateTree(
       const std::map<std::string, Mantid::API::Workspace_sptr> &items) override;
 
