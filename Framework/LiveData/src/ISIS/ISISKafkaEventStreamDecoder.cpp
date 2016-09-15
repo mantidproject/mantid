@@ -46,7 +46,7 @@ ISISKafkaEventStreamDecoder::ISISKafkaEventStreamDecoder(
     const IKafkaBroker &broker, std::string eventTopic,
     std::string runInfoTopic, std::string spDetTopic)
     : m_interrupt(false), m_eventStream(broker.subscribe(eventTopic)),
-      m_localEvents(), m_runStart(),
+      m_localEvents(), m_specToIdx(), m_runStart(),
       m_runStream(broker.subscribe(runInfoTopic)),
       m_spDetStream(broker.subscribe(spDetTopic)), m_runNumber(-1), m_thread(),
       m_capturing(false), m_exception() {}
@@ -135,11 +135,6 @@ void ISISKafkaEventStreamDecoder::captureImpl() noexcept {
 void ISISKafkaEventStreamDecoder::captureImplExcept() {
   g_log.debug("Event capture starting");
   initLocalCaches();
-  specnum_t spectrumMinOffset(0);
-  // Events are tagged with spectrum number and we need to look up the
-  // corresponding workspace index
-  auto wkspIdx =
-      m_localEvents[0]->getSpectrumToWorkspaceIndexVector(spectrumMinOffset);
 
   m_interrupt = false;
   std::string buffer;
@@ -174,8 +169,7 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
       const auto &specData = *(eventData->spec());
       auto nevents = tofData.size();
       for (decltype(nevents) i = 0; i < nevents; ++i) {
-        auto &spectrum =
-            periodBuffer.getSpectrum(wkspIdx[specData[i] + spectrumMinOffset]);
+        auto &spectrum = periodBuffer.getSpectrum(m_specToIdx[specData[i]]);
         spectrum.addEventQuickly(TofEvent(tofData[i], pulseTime));
       }
     }
@@ -245,6 +239,9 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
   // Create the proton charge property
   mutableRun.addProperty(
       new Kernel::TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY));
+
+  // Cache spec->index mapping. We assume it is the same across all periods
+  m_specToIdx = eventBuffer->getSpectrumToWorkspaceIndexMap();
 
   // ---- Additional buffers per period ----
   // Should be the number of periods. What is that?

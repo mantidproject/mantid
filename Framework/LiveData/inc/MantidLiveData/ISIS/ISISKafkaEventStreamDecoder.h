@@ -3,6 +3,7 @@
 
 #include "MantidLiveData/Kafka/IKafkaBroker.h"
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 #include <atomic>
@@ -85,6 +86,8 @@ private:
   std::unique_ptr<IKafkaStreamSubscriber> m_eventStream;
   /// Local event workspace buffers
   std::vector<DataObjects::EventWorkspace_sptr> m_localEvents;
+  /// Mapping of spectrum number to workspace index. 
+  spec2index_map m_specToIdx;
   /// Start time of the run
   Kernel::DateAndTime m_runStart;
   /// Subscriber for the run info stream
