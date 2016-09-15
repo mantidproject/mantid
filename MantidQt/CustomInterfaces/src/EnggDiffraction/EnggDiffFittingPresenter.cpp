@@ -311,7 +311,7 @@ void EnggDiffFittingPresenter::processFullPathInput(
   if (!multiRunMode && !singleRunMode) {
 
     // add bank to the combo-box
-    setBankItems(foundRunNumbers);
+    setBankItems(foundFullFilePaths);
     // set the bank widget according to selected bank file
     setDefaultBank(splitBaseName, pocoFilePath.toString());
 
@@ -350,9 +350,9 @@ std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
   std::vector<std::string> splitBaseName = splitFittingDirectory(baseName);
 
   // TODO look at removal of hard coded filename positions
+  // Produced <INST>_<RunNumber>_focused for subsequent lookup
   std::string baseFilenamePrefix = splitBaseName[0] + "_" + splitBaseName[1] +
-                                   "_" + splitBaseName[2] + "_" +
-                                   splitBaseName[3];
+	  "_" + splitBaseName[2];
 
   Poco::Path pocoFullFilePath;
   if (!pocoFullFilePath.tryParse(inputFullPath)) {
@@ -371,9 +371,8 @@ std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
 
   // Find all files which match this baseFilenamePrefix -
   // like a poor mans regular expression for files
-  std::vector<std::string> foundFullFilePath;
   if (!findFilePathFromBaseName(workingDirectory, baseFilenamePrefix,
-                                foundFullFilePath)) {
+                                foundFullFilePaths)) {
     // I can't see this ever being thrown if the user is browsing to files but
     // better to be safe and give an informative message
     throw std::runtime_error("Could not find any files matching the generated"
