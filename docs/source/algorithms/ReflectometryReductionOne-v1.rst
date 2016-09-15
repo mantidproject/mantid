@@ -216,7 +216,7 @@ Usage
    run = Load(Filename='INTER00013460.nxs')
    # Basic reduction with no transmission run
    IvsQ, IvsLam, thetaOut = ReflectometryReductionOne(InputWorkspace=run, ThetaIn=0.7, I0MonitorIndex=2, ProcessingInstructions='3:4',
-   WavelengthMin=1.0, WavelengthMax=17.0, WavelengthStep=0.05,
+   WavelengthMin=1.0, WavelengthMax=17.0,
    MonitorBackgroundWavelengthMin=15.0, MonitorBackgroundWavelengthMax=17.0,
    MonitorIntegrationWavelengthMin=4.0, MonitorIntegrationWavelengthMax=10.0 )
 
@@ -229,8 +229,8 @@ Output:
 
 .. testoutput:: ExReflRedOneSimple
 
-   The first four IvsLam Y values are: [ 0.0000e+00, 0.0000e+00, 4.9588e-07, 1.2769e-06 ]
-   The first four IvsQ Y values are: [ 6.2230e-04, 7.7924e-04, 9.1581e-04, 1.0967e-03 ]
+   The first four IvsLam Y values are: [ 0.0000e+00, 0.0000e+00, 7.8118e-07, 1.9346e-06 ]
+   The first four IvsQ Y values are: [ 6.2615e-04, 7.8498e-04, 9.2155e-04, 1.1042e-03 ]
    Theta out is the same as theta in: 0.7
 
 

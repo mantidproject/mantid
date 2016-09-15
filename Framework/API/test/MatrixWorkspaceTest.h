@@ -662,12 +662,10 @@ public:
   void test_getSpectrumToWorkspaceIndexMap() {
     WorkspaceTester ws;
     ws.initialize(2, 1, 1);
-    const auto map = ws.getSpectrumToWorkspaceIndexMap();
+    auto map = ws.getSpectrumToWorkspaceIndexMap();
+    TS_ASSERT_EQUALS(0, map[1]);
+    TS_ASSERT_EQUALS(1, map[2]);
     TS_ASSERT_EQUALS(map.size(), 2);
-    TS_ASSERT_EQUALS(map.begin()->first, 1);
-    TS_ASSERT_EQUALS(map.begin()->second, 0);
-    TS_ASSERT_EQUALS(map.rbegin()->first, 2);
-    TS_ASSERT_EQUALS(map.rbegin()->second, 1);
 
     // Check it throws for non-spectra axis
     ws.replaceAxis(1, new NumericAxis(1));

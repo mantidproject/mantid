@@ -162,6 +162,9 @@ private:
                            std::vector<std::string> &fittingRunNoDirVec,
                            std::vector<std::string> &foundRunNumber);
 
+  std::vector<std::string>
+  splitFittingDirectory(const std::string &selectedfPath);
+
   void enableMultiRun(std::string firstRun, std::string lastRun,
                       std::vector<std::string> &fittingRunNoDirVec);
 
@@ -200,6 +203,9 @@ private:
   // input run number - used for output file name
   std::vector<std::string> g_multi_run;
 
+  // Holds the previous user input so we can short circuit further checks
+  std::string m_previousInput;
+
   /// true if the last fitting completed successfully
   bool m_fittingFinishedOK;
 
@@ -216,6 +222,9 @@ private:
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffFittingView *const m_view;
+
+  /// Holds if the view is in the process of being closed
+  bool m_viewHasClosed;
 };
 
 } // namespace CustomInterfaces

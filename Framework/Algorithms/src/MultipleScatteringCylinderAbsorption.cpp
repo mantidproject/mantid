@@ -24,6 +24,9 @@ using Mantid::DataObjects::EventList;
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::DataObjects::WeightedEventNoTime;
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 using std::vector;
 using namespace Mantid::PhysicalConstants;
 using namespace Geometry;
@@ -181,13 +184,17 @@ void MultipleScatteringCylinderAbsorption::exec() {
       eventList.getWeights(y_vec);
       eventList.getWeightErrors(err_vec);
 
-      apply_msa_correction(tth_rad, radius, coeff1, coeff2, coeff3, tof_vec,
-                           y_vec, err_vec);
+      HistogramX tof(std::move(tof_vec));
+      HistogramY y(std::move(y_vec));
+      HistogramE err(std::move(err_vec));
+
+      apply_msa_correction(tth_rad, radius, coeff1, coeff2, coeff3, tof, y,
+                           err);
 
       std::vector<WeightedEventNoTime> &events =
           eventList.getWeightedEventsNoTime();
       for (size_t i = 0; i < events.size(); ++i) {
-        events[i] = WeightedEventNoTime(tof_vec[i], y_vec[i], err_vec[i]);
+        events[i] = WeightedEventNoTime(tof[i], y[i], err[i]);
       }
       prog.report();
       PARALLEL_END_INTERUPT_REGION
@@ -199,8 +206,8 @@ void MultipleScatteringCylinderAbsorption::exec() {
   } else // histogram case
   {
     // Create the new workspace
-    MatrixWorkspace_sptr out_WS = WorkspaceFactory::Instance().create(
-        in_WS, NUM_HIST, in_WS->readX(0).size(), in_WS->readY(0).size());
+    MatrixWorkspace_sptr out_WS =
+        WorkspaceFactory::Instance().create(in_WS, NUM_HIST);
 
     const auto &spectrumInfo = in_WS->spectrumInfo();
     for (int64_t index = 0; index < NUM_HIST; ++index) {
@@ -210,16 +217,11 @@ void MultipleScatteringCylinderAbsorption::exec() {
         continue;
       const double tth_rad = spectrumInfo.twoTheta(index);
 
-      MantidVec tof_vec = in_WS->readX(index);
-      MantidVec y_vec = in_WS->readY(index);
-      MantidVec err_vec = in_WS->readE(index);
+      out_WS->setHistogram(index, in_WS->histogram(index));
 
-      apply_msa_correction(tth_rad, radius, coeff1, coeff2, coeff3, tof_vec,
-                           y_vec, err_vec);
-
-      out_WS->dataX(index).assign(tof_vec.begin(), tof_vec.end());
-      out_WS->dataY(index).assign(y_vec.begin(), y_vec.end());
-      out_WS->dataE(index).assign(err_vec.begin(), err_vec.end());
+      apply_msa_correction(tth_rad, radius, coeff1, coeff2, coeff3,
+                           out_WS->x(index), out_WS->mutableY(index),
+                           out_WS->mutableE(index));
       prog.report();
     }
     setProperty("OutputWorkspace", out_WS);
@@ -311,8 +313,8 @@ double calculate_msa_factor(const double radius, const double Q2,
  */
 void MultipleScatteringCylinderAbsorption::apply_msa_correction(
     const double angle_deg, const double radius, const double coeff1,
-    const double coeff2, const double coeff3, const vector<double> &wavelength,
-    vector<double> &y_val, std::vector<double> &errors) {
+    const double coeff2, const double coeff3, const HistogramX &wavelength,
+    HistogramY &y_val, HistogramE &errors) {
 
   const size_t NUM_Y = y_val.size();
   bool is_histogram = false;
