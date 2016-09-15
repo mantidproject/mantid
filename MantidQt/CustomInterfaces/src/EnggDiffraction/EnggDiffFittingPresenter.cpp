@@ -258,15 +258,16 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
   // if single or multi run-number
   // set the text-field to directory here to the first in
   // the vector if its not empty
-  if (!foundFullFilePaths.empty() && !pocoUserPathInput.isFile()) {
-
+  if (foundFullFilePaths.empty()) {
+    m_view->userWarning(
+        "Error finding file(s)",
+        "Unable to find one or more files with a name matching the run"
+        " number or range input. Please check the files are present in"
+        " the focused output directory and the input is correct.");
+  } else if (!pocoUserPathInput.isFile()) {
+    // foundFiles is not empty and this is a directory
     auto firstDir = foundFullFilePaths[0];
     m_view->setFittingRunNo(firstDir);
-
-  } else if (m_view->getFittingRunNo().empty()) {
-    m_view->userWarning("Invalid Input",
-                        "Invalid directory or run number given. "
-                        "Please try again");
   }
 }
 
@@ -351,8 +352,8 @@ std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
 
   // TODO look at removal of hard coded filename positions
   // Produced <INST>_<RunNumber>_focused for subsequent lookup
-  std::string baseFilenamePrefix = splitBaseName[0] + "_" + splitBaseName[1] +
-	  "_" + splitBaseName[2];
+  std::string baseFilenamePrefix =
+      splitBaseName[0] + "_" + splitBaseName[1] + "_" + splitBaseName[2];
 
   Poco::Path pocoFullFilePath;
   if (!pocoFullFilePath.tryParse(inputFullPath)) {
@@ -458,8 +459,6 @@ std::vector<std::string> EnggDiffFittingPresenter::processSingleRun(
   const bool wasFound =
       findFilePathFromBaseName(focusDir, userInputBasename, foundFilePath);
 
-
-
   auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
   if (!fittingMultiRunMode && wasFound) {
     // Wrap the current run number in a vector and pass through
@@ -495,7 +494,8 @@ std::vector<std::string> EnggDiffFittingPresenter::processSingleRun(
   */
 bool EnggDiffFittingPresenter::findFilePathFromBaseName(
     const std::string &directoryToSearch,
-    const std::string &baseFileNamesToFind, std::vector<std::string> &foundFullFilePath) {
+    const std::string &baseFileNamesToFind,
+    std::vector<std::string> &foundFullFilePath) {
 
   bool found = false;
 
@@ -565,8 +565,8 @@ bool EnggDiffFittingPresenter::findFilePathFromBaseName(
   * @return A vector containing all file paths which were found
   */
 std::vector<std::string>
-EnggDiffFittingPresenter::enableMultiRun(std::string firstRun,
-                                         std::string lastRun) {
+EnggDiffFittingPresenter::enableMultiRun(const std::string &firstRun,
+                                         const std::string &lastRun) {
 
   std::vector<std::string> fittingRunNoDirVec;
 
@@ -638,29 +638,29 @@ EnggDiffFittingPresenter::enableMultiRun(std::string firstRun,
   // rewrite the vector of run number which is available
   std::vector<std::string> foundRunNumber;
 
+  bool foundAllRuns = true;
+
   for (const auto runNumber : RunNumberVec) {
     // Get full path for every run selected
     std::vector<std::string> foundFileNames;
     if (findFilePathFromBaseName(workingDirectory, runNumber, foundFileNames)) {
-		// Append those that were found with fittingRunNoDirVec
-		fittingRunNoDirVec.insert(fittingRunNoDirVec.end(), foundFileNames.cbegin(), foundFileNames.cend());
-    }
+      // Append those that were found with fittingRunNoDirVec
+      fittingRunNoDirVec.insert(fittingRunNoDirVec.end(),
+                                foundFileNames.cbegin(), foundFileNames.cend());
+	}
+	else {
+		// We couldn't find this one - set the flag and break out of loop
+		foundAllRuns = false;
+		break;
+	}
   }
 
-  // Check we have found all of the elements requested
-  const size_t diff = range + 1;
-  const size_t run_vec_size = RunNumberVec.size();
 
-  if (diff == run_vec_size) {
+  if (foundAllRuns) {
     setRunNoItems(RunNumberVec, true);
   } else {
-    m_view->userWarning(
-        "Run Number Not Found",
-        "Some of the runs in the range specified could not be located "
-        "in the focused output directory. Please check that the "
-        "correct directory is set for Output Folder under Focusing "
-        "Settings "
-        "on the settings tab.");
+    // Set the size to 0 as some were not found
+    fittingRunNoDirVec.clear();
   }
 
   return fittingRunNoDirVec;
@@ -696,8 +696,9 @@ void EnggDiffFittingPresenter::processLoad() {
     }
   } catch (std::invalid_argument &ia) {
     m_view->userWarning(
-        "Error loading file",
-        "Unable to load the selected focused file, Please try again.");
+        "Failed to load the selected focus file",
+        "The focus file failed to load, please check the logger for more"
+        " information.");
     g_log.error("Failed to load file. Error message: ");
     g_log.error(ia.what());
   }
@@ -1541,7 +1542,8 @@ void EnggDiffFittingPresenter::setDataToClonedWS(std::string &current_WS,
   currentClonedWS->dataE(0) = currentPeakWS->readE(0);
 }
 
-void EnggDiffFittingPresenter::setBankItems(const std::vector<std::string> &bankFiles) {
+void EnggDiffFittingPresenter::setBankItems(
+    const std::vector<std::string> &bankFiles) {
   try {
 
     if (!bankFiles.empty()) {
@@ -1549,10 +1551,10 @@ void EnggDiffFittingPresenter::setBankItems(const std::vector<std::string> &bank
       // delete previous bank added to the list
       m_view->clearFittingComboBox();
 
-	  int index = 0;
+      int index = 0;
 
       for (const auto filePath : bankFiles) {
-		  const Poco::Path bankFile(filePath);
+        const Poco::Path bankFile(filePath);
         const std::string strVecFile = bankFile.toString();
         // split the directory from m_fitting_runno_dir_vec
         std::vector<std::string> vecFileSplit =
@@ -1569,7 +1571,7 @@ void EnggDiffFittingPresenter::setBankItems(const std::vector<std::string> &bank
           QString qBank = QString("Bank %1").arg(index + 1);
           m_view->addBankItem(qBank.toStdString());
         }
-		++index;
+        ++index;
       }
 
       m_view->enableFittingComboBox(true);

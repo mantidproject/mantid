@@ -168,8 +168,8 @@ private:
   std::vector<std::string>
   splitFittingDirectory(const std::string &selectedfPath);
 
-  std::vector<std::string> enableMultiRun(std::string firstRun,
-                                          std::string lastRun);
+  std::vector<std::string> enableMultiRun(const std::string &firstRun,
+                                          const std::string &lastRun);
 
   void browsePeaksToFit();
 
