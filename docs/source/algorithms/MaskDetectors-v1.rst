@@ -11,7 +11,7 @@ Introduction
 
 To understand the algorithms options, user should clearly understand the difference between *WorkspaceIndex* 
 -- the numbers, specified in *WorkspaceIndexList* and *StartWorkspacIndex*, *EndWorkspaceIndex* properties,
-the *Spectra ID* or *Spectra Number* -- values of the **SpectraList** property and *Detector ID* -- the numbers to provide for 
+the *Spectra Number* or according to other terminology *Spectra ID* -- values of the **SpectraList** property and *Detector ID* -- the numbers to provide for 
 *DetectorList* property.
 
 The *WorkspaceIndex* is the number a spectrum has in a workspace, e.g. ::
@@ -20,26 +20,34 @@ The *WorkspaceIndex* is the number a spectrum has in a workspace, e.g. ::
 
 always returns first spectra present in the workspace.
 
-The *spectra ID* mean the number, assigned to spectra. This number is often equal to *WorkspaceIndex+1*, e.g. ::
+The *Spectra Number* or  *spectra ID* mean the number, assigned to a spectrum. This number is often equal to *WorkspaceIndex+1*, e.g. ::
 
   print sp.getSpectrumNo() 
 
 from the sample above will often print 1 but not always. The simplest case when this 
-number is different is when you load a second half of a workspace. There are other ways to assign 
-random number to a spectra. 
+number is different is when you load a second half of a workspace, when the first spectrum number still is **NumTotalSpectraInWorkspace/2+1**,
+ while *WorkspaceIndex* of this spectra becomes 0, i.e.: ::
+ 
+	sp = ws.getSpectrum(0)
+	print sp.getSpectrumNo()
+	
+prints number equal to **NumTotalSpectraInWorkspace/2+1**. There are other ways to assign a random number to a spectrum. 
+
 And finally, the *detector ID* is the number assigned to a detector in an instrument definition file. Sometimes, 
 a  first detector corresponds to the first spectra of a workspace, but it is not in any way certain. For example
 the code: ::
 
   ws = CreateSimulationWorkspace('MARI','-0.5,0.5,0.5')
-  sp=ws.getSpectrum(0)
+  sp=ws.getSpectrum(1)
   print sp.getSpectrumNo(), sp.getDetectorIDs()
 
 Will print: ::
 
-  1 set(1101)
+  2 set(1102)
+	
+but any *ISIS MARI* workspace obtained from experiment will produce different sequence, e.g. something like: ::
 
-but any *ISIS MARI* workspace obtained from experiment will produce different sequence.
+  5 set(4101)
 
   
 Description
