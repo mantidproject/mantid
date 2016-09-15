@@ -15,7 +15,6 @@
 #include <QObject>
 
 class QThread;
-class Poco::Path;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -153,16 +152,17 @@ private:
   startAsyncFittingWorker(const std::vector<std::string> &focusedRunNo,
                           const std::string &expectedPeaks);
 
-  std::string getBaseNameFromStr(const std::string filePath) const;
+  std::string getBaseNameFromStr(const std::string &filePath) const;
 
   std::string validateFittingexpectedPeaks(std::string &expectedPeaks) const;
 
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &expectedPeaks);
 
-  bool findFilePathFromBaseName(const std::string &directoryToSearch,
-                                const std::string &baseFileNamesToFind,
-                                std::vector<std::string> &foundFullFilePath);
+  bool
+  findFilePathFromBaseName(const std::string &directoryToSearch,
+                           const std::string &baseFileNamesToFind,
+                           std::vector<std::string> &foundFullFilePath) const;
 
   std::vector<std::string>
   splitFittingDirectory(const std::string &selectedfPath);
@@ -181,8 +181,8 @@ private:
   void fittingWriteFile(const std::string &fileDir);
 
   std::vector<std::string>
-  getAllBrowsedFilePaths(const std::string inputFullPath,
-                         std::vector<std::string> &foundFullFilePaths);
+  getAllBrowsedFilePaths(const std::string &inputFullPath,
+                         std::vector<std::string> &foundFullFilePaths) const;
 
   std::vector<std::string> processMultiRun(const std::string userInput);
 

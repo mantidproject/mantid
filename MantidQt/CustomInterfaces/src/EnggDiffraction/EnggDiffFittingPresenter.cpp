@@ -149,8 +149,8 @@ void EnggDiffFittingPresenter::startAsyncFittingWorker(
   *
   * @return The base name (without ext) of the file
   */
-std::string
-EnggDiffFittingPresenter::getBaseNameFromStr(const std::string filePath) const {
+std::string EnggDiffFittingPresenter::getBaseNameFromStr(
+    const std::string &filePath) const {
   Poco::Path pocoPath = filePath;
   return pocoPath.getBaseName();
 }
@@ -222,12 +222,12 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
   }
 
   // file name
-  Poco::Path pocoUserPathInput(userPathInput);
+  const Poco::Path pocoUserPathInput(userPathInput);
 
   std::vector<std::string> foundFullFilePaths;
 
   // returns empty if no directory is found
-  std::string parsedUserInput = pocoUserPathInput.toString();
+  const std::string parsedUserInput = pocoUserPathInput.toString();
 
   // split directory if 'ENGINX_' found by '_.'
   std::vector<std::string> splitBaseName;
@@ -267,7 +267,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
         " the focused output directory and the input is correct.");
   } else if (!pocoUserPathInput.isFile()) {
     // foundFiles is not empty and this is a directory
-    auto firstDir = foundFullFilePaths[0];
+    const std::string firstDir = foundFullFilePaths[0];
     m_view->setFittingRunNo(firstDir);
   }
 }
@@ -343,8 +343,8 @@ std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
   * @return Vector of all run numbers for which a full file path was found
   */
 std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
-    const std::string inputFullPath,
-    std::vector<std::string> &foundFullFilePaths) {
+    const std::string &inputFullPath,
+    std::vector<std::string> &foundFullFilePaths) const {
   // to track the FittingRunnoChanged loop number
   if (g_fitting_runno_counter == 0) {
     g_multi_run_directories.clear();
@@ -356,11 +356,12 @@ std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
   // a string similar to 'ENGINX_123456_focused_bank' to allow us
   // to search for additional banks]
   const std::string baseName = getBaseNameFromStr(inputFullPath);
-  std::vector<std::string> splitBaseName = splitFittingDirectory(baseName);
+  const std::vector<std::string> splitBaseName =
+      splitFittingDirectory(baseName);
 
   // TODO look at removal of hard coded filename positions
   // Produced <INST>_<RunNumber>_focused for subsequent lookup
-  std::string baseFilenamePrefix =
+  const std::string baseFilenamePrefix =
       splitBaseName[0] + "_" + splitBaseName[1] + "_" + splitBaseName[2];
 
   Poco::Path pocoFullFilePath;
@@ -390,7 +391,7 @@ std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
   }
 
   // Store the run number as found
-  std::vector<std::string> runNoVec;
+  std::vector<std::string> runNoVec();
   runNoVec.push_back(splitBaseName[1]);
 
   return runNoVec;
@@ -467,7 +468,7 @@ std::vector<std::string> EnggDiffFittingPresenter::processSingleRun(
   const bool wasFound =
       findFilePathFromBaseName(focusDir, userInputBasename, foundFilePaths);
 
-  auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
+  const bool fittingMultiRunMode = m_view->getFittingMultiRunMode();
   if (!fittingMultiRunMode && wasFound) {
     // Wrap the current run number in a vector and pass through
     // We cant use an initializer list as MSVC doesn't support this yet
@@ -503,7 +504,7 @@ std::vector<std::string> EnggDiffFittingPresenter::processSingleRun(
 bool EnggDiffFittingPresenter::findFilePathFromBaseName(
     const std::string &directoryToSearch,
     const std::string &baseFileNamesToFind,
-    std::vector<std::string> &foundFullFilePath) {
+    std::vector<std::string> &foundFullFilePath) const {
 
   bool found = false;
 
