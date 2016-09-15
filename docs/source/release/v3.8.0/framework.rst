@@ -92,6 +92,8 @@ Improved
 
 - :ref:`FindSXPeaks <algm-FindSXPeaks>`: Fixed a bug where peaks with an incorrect TOF would stored for some intrument geometries.
 
+- :ref: `LoadILL <algm-LoadILL>` was renamed to `LoadILLINX <algm-LoadILLINX>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
+
 - :ref:`FFT <algm-FFT>` deals correctly with histogram input data. Internally, it converts to point data, and the output is always a point data workspace. (It can be converted to histogram data using :ref:`ConvertToHistogram <algm-ConvertToHistogram>` if required).
 
 -  :ref:`StartLiveData <algm-StartLiveData>` has additional properties for specifying scripts to run for processing and post-processing.

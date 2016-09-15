@@ -9,11 +9,6 @@
 Description
 -----------
 
-.. warning::
-
-   This algorithm will be deprecated in the next version of Mantid. Please, use :ref:`algm-LoadILLINX` instead, which
-   is the new name for this algorithm.
-
 Loads an ILL TOF NeXus file into a :ref:`Workspace2D <Workspace2D>` with
 the given name.
 
@@ -30,7 +25,7 @@ Usage
 -----
 
 **Example - Load a regular histogram Nexus file:**
-(see :ref:`algm-LoadILL` for more options)
+(see :ref:`algm-LoadILLTOF` for more options)
 
 .. code-block:: python
 
@@ -50,7 +45,7 @@ Output:
 
 **Example - Load a histogram Nexus file where the dispersion peak is higher than the elastic peak.
 An auxiliary vanadium file is needed to locate the elastic peak.:**
-(see :ref:`algm-LoadILL` for more options)
+(see :ref:`algm-LoadILLTOF` for more options)
 
 .. code-block:: python
 
@@ -70,7 +65,7 @@ Output:
    This workspace has 2 dimensions and has 98305 histograms.
 
 **Example - Same example as above, but the vanadium file is loaded in advance. The dataset for the dispersion peak is loaded after, using the auxiliary vanadium workspace.:**
-(see :ref:`algm-LoadILL` for more options)
+(see :ref:`algm-LoadILLTOF` for more options)
 
 .. code-block:: python
 
