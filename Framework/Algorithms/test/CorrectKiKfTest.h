@@ -45,16 +45,14 @@ void createWorkspace2D(const std::string &inputWSname, bool isHistogram,
   Counts counts(ws2D->y(0).size(), LinearGenerator(1, 1));
 
   std::vector<double> e(nBins);
-  std::transform(counts.cbegin(), counts.cend(), e.begin(), [&](double y)
-  {
-	  return sqrt(y);
-  });
+  std::transform(counts.cbegin(), counts.cend(), e.begin(),
+                 [&](double y) { return sqrt(y); });
 
   auto cow_xv = make_cow<HistogramX>(std::move(xv));
   for (int i = 0; i < nHist; i++) {
     ws2D->setSharedX(i, cow_xv);
-	ws2D->setCounts(i, counts);
-	ws2D->mutableE(i) = e;
+    ws2D->setCounts(i, counts);
+    ws2D->mutableE(i) = e;
     ws2D->getSpectrum(i).setSpectrumNo(i);
   }
 
@@ -299,70 +297,72 @@ private:
 
 class CorrectKiKfTestPerformance : public CxxTest::TestSuite {
 public:
-	// This pair of boilerplate methods prevent the suite being created statically
-	// This means the constructor isn't called when running other tests
-	static CorrectKiKfTestPerformance *createSuite() { return new CorrectKiKfTestPerformance(); }
-	static void destroySuite(CorrectKiKfTestPerformance *suite) { delete suite; }
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static CorrectKiKfTestPerformance *createSuite() {
+    return new CorrectKiKfTestPerformance();
+  }
+  static void destroySuite(CorrectKiKfTestPerformance *suite) { delete suite; }
 
-	CorrectKiKfTestPerformance() {
-		bool isHistogram = true;
-		createWorkspace2D(histogramInputWS, isHistogram, 2000, 750);
-		isHistogram = false;
-		createWorkspace2D(notHistogramInputWS, isHistogram, 2000, 750);
-		createEventWorkspace(eventInputWS, 250, 1000, 1000);
-	}
+  CorrectKiKfTestPerformance() {
+    bool isHistogram = true;
+    createWorkspace2D(histogramInputWS, isHistogram, 2000, 750);
+    isHistogram = false;
+    createWorkspace2D(notHistogramInputWS, isHistogram, 2000, 750);
+    createEventWorkspace(eventInputWS, 250, 1000, 1000);
+  }
 
-	~CorrectKiKfTestPerformance() {
-		AnalysisDataService::Instance().remove(histogramInputWS);
-		AnalysisDataService::Instance().remove(histogramOutputWS);
+  ~CorrectKiKfTestPerformance() {
+    AnalysisDataService::Instance().remove(histogramInputWS);
+    AnalysisDataService::Instance().remove(histogramOutputWS);
 
-		AnalysisDataService::Instance().remove(notHistogramInputWS);
-		AnalysisDataService::Instance().remove(notHistogramOutputWS);
+    AnalysisDataService::Instance().remove(notHistogramInputWS);
+    AnalysisDataService::Instance().remove(notHistogramOutputWS);
 
-		AnalysisDataService::Instance().remove(eventInputWS);
-		AnalysisDataService::Instance().remove(eventOutputWS);
-	}
+    AnalysisDataService::Instance().remove(eventInputWS);
+    AnalysisDataService::Instance().remove(eventOutputWS);
+  }
 
-	void testExecHistogram() {
-		CorrectKiKf alg;
-		alg.initialize();
-		alg.setPropertyValue("InputWorkspace", histogramInputWS);
-		alg.setPropertyValue("OutputWorkspace", histogramOutputWS);
-		alg.setPropertyValue("EMode", "Direct");
-		alg.setPropertyValue("EFixed", "7.5");
-		alg.execute();
-		TS_ASSERT(alg.isExecuted());
-	}
+  void testExecHistogram() {
+    CorrectKiKf alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", histogramInputWS);
+    alg.setPropertyValue("OutputWorkspace", histogramOutputWS);
+    alg.setPropertyValue("EMode", "Direct");
+    alg.setPropertyValue("EFixed", "7.5");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+  }
 
-	void testExecNotHistogram() {
-		CorrectKiKf alg;
-		alg.initialize();
-		alg.setPropertyValue("InputWorkspace", notHistogramInputWS);
-		alg.setPropertyValue("OutputWorkspace", notHistogramOutputWS);
-		alg.setPropertyValue("EMode", "Direct");
-		alg.setPropertyValue("EFixed", "7.5");
-		alg.execute();
-		TS_ASSERT(alg.isExecuted());
-	}
+  void testExecNotHistogram() {
+    CorrectKiKf alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", notHistogramInputWS);
+    alg.setPropertyValue("OutputWorkspace", notHistogramOutputWS);
+    alg.setPropertyValue("EMode", "Direct");
+    alg.setPropertyValue("EFixed", "7.5");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+  }
 
-	void testExecEventWorkspace() {
-		CorrectKiKf alg;
-		alg.initialize();
-		alg.setPropertyValue("InputWorkspace", eventInputWS);
-		alg.setPropertyValue("OutputWorkspace", eventOutputWS);
-		alg.setPropertyValue("EMode", "Direct");
-		alg.setPropertyValue("EFixed", "3.");
-		TS_ASSERT_THROWS_NOTHING(alg.execute());
-	}
+  void testExecEventWorkspace() {
+    CorrectKiKf alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", eventInputWS);
+    alg.setPropertyValue("OutputWorkspace", eventOutputWS);
+    alg.setPropertyValue("EMode", "Direct");
+    alg.setPropertyValue("EFixed", "3.");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  }
+
 private:
-	const std::string histogramInputWS = "histogramInputWS";
-	const std::string histogramOutputWS = "histogramOutputWS";
+  const std::string histogramInputWS = "histogramInputWS";
+  const std::string histogramOutputWS = "histogramOutputWS";
 
-	const std::string notHistogramInputWS = "notHistogramInputWS";
-	const std::string notHistogramOutputWS = "notHistogramOutputWS";
+  const std::string notHistogramInputWS = "notHistogramInputWS";
+  const std::string notHistogramOutputWS = "notHistogramOutputWS";
 
-	const std::string eventInputWS = "eventInputWS";
-	const std::string eventOutputWS = "eventOutputWS";
-
+  const std::string eventInputWS = "eventInputWS";
+  const std::string eventOutputWS = "eventOutputWS";
 };
 #endif /*CorrectKiKfTEST_H_*/

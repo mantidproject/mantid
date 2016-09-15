@@ -89,64 +89,64 @@ public:
   }
 };
 
-class ConvertUnitsUsingDetectorTableTestPerformance : public CxxTest::TestSuite {
+class ConvertUnitsUsingDetectorTableTestPerformance
+    : public CxxTest::TestSuite {
 public:
-	// This pair of boilerplate methods prevent the suite being created statically
-	// This means the constructor isn't called when running other tests
-	static ConvertUnitsUsingDetectorTableTestPerformance *createSuite() {
-		return new ConvertUnitsUsingDetectorTableTestPerformance();
-	}
-	static void destroySuite(ConvertUnitsUsingDetectorTableTestPerformance *suite) {
-		delete suite;
-	}
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConvertUnitsUsingDetectorTableTestPerformance *createSuite() {
+    return new ConvertUnitsUsingDetectorTableTestPerformance();
+  }
+  static void
+  destroySuite(ConvertUnitsUsingDetectorTableTestPerformance *suite) {
+    delete suite;
+  }
 
-	void setUp() override {
-		int nBins = 10;
-		//     MatrixWorkspace_sptr WS =
-		//     WorkspaceCreationHelper::Create2DWorkspaceBinned(2, nBins, 500.0,
-		//     50.0);
-		WS =
-			WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-				3000, nBins, false, false, true, "TESTY");
-		WS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-		AnalysisDataService::Instance().add(workspaceName, WS);
-		pars =
-			WorkspaceFactory::Instance().createTable("TableWorkspace");
-		// Create TableWorkspace with values in it
+  void setUp() override {
+    int nBins = 10;
+    //     MatrixWorkspace_sptr WS =
+    //     WorkspaceCreationHelper::Create2DWorkspaceBinned(2, nBins, 500.0,
+    //     50.0);
+    WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        3000, nBins, false, false, true, "TESTY");
+    WS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    AnalysisDataService::Instance().add(workspaceName, WS);
+    pars = WorkspaceFactory::Instance().createTable("TableWorkspace");
+    // Create TableWorkspace with values in it
 
-		pars->addColumn("int", "spectra");
-		pars->addColumn("double", "l1");
-		pars->addColumn("double", "l2");
-		pars->addColumn("double", "twotheta");
-		pars->addColumn("double", "efixed");
-		pars->addColumn("int", "emode");
+    pars->addColumn("int", "spectra");
+    pars->addColumn("double", "l1");
+    pars->addColumn("double", "l2");
+    pars->addColumn("double", "twotheta");
+    pars->addColumn("double", "efixed");
+    pars->addColumn("int", "emode");
 
-		API::TableRow row0 = pars->appendRow();
-		row0 << 1 << 100.0 << 10.0 << 90.0 << 7.0 << 0;
+    API::TableRow row0 = pars->appendRow();
+    row0 << 1 << 100.0 << 10.0 << 90.0 << 7.0 << 0;
 
-		API::TableRow row1 = pars->appendRow();
-		row1 << 2 << 1.0 << 1.0 << 90.0 << 7.0 << 0;
-	}
+    API::TableRow row1 = pars->appendRow();
+    row1 << 2 << 1.0 << 1.0 << 90.0 << 7.0 << 0;
+  }
 
-	void tearDown() override {
+  void tearDown() override {
 
-		AnalysisDataService::Instance().remove(workspaceName);
-	}
-	void test_TofToLambda() {
-		ConvertUnitsUsingDetectorTable myAlg;
-		myAlg.initialize();
-		// Set the properties
-		myAlg.setRethrows(true);
-		myAlg.setPropertyValue("InputWorkspace", workspaceName);
-		myAlg.setPropertyValue("OutputWorkspace", workspaceName);
-		myAlg.setPropertyValue("Target", "Wavelength");
-		myAlg.setProperty("DetectorParameters", pars);
-		myAlg.execute();
+    AnalysisDataService::Instance().remove(workspaceName);
+  }
+  void test_TofToLambda() {
+    ConvertUnitsUsingDetectorTable myAlg;
+    myAlg.initialize();
+    // Set the properties
+    myAlg.setRethrows(true);
+    myAlg.setPropertyValue("InputWorkspace", workspaceName);
+    myAlg.setPropertyValue("OutputWorkspace", workspaceName);
+    myAlg.setPropertyValue("Target", "Wavelength");
+    myAlg.setProperty("DetectorParameters", pars);
+    myAlg.execute();
+  }
 
-	}
 private:
-	const std::string workspaceName = "_ws_testConvertUsingDetectorTable";
-	MatrixWorkspace_sptr WS;
-	ITableWorkspace_sptr pars;
+  const std::string workspaceName = "_ws_testConvertUsingDetectorTable";
+  MatrixWorkspace_sptr WS;
+  ITableWorkspace_sptr pars;
 };
 #endif /* MANTID_ALGORITHMS_CONVERTUNITSUSINGDETECTORTABLETEST_H_ */

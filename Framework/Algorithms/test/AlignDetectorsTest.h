@@ -20,7 +20,7 @@ using namespace Mantid::API;
 namespace {
 /** Setup for loading raw data */
 void setUp_Event(std::string &inputWSName) {
-	inputWSName = "eventWS";
+  inputWSName = "eventWS";
   EventWorkspace_sptr ws =
       WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,
                                                                       false);
@@ -184,50 +184,49 @@ public:
   }
 
   void setUp() override {
-	  inputWS = ""; 
-	  setUp_Event(inputWS);
-	  eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWS);
-	  setUp_HRP38692(inputWS);
-	  WS = AnalysisDataService::Instance().retrieveWS<Workspace>(inputWS);
+    inputWS = "";
+    setUp_Event(inputWS);
+    eventWS =
+        AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWS);
+    setUp_HRP38692(inputWS);
+    WS = AnalysisDataService::Instance().retrieveWS<Workspace>(inputWS);
   }
 
   void tearDown() override {
-	  AnalysisDataService::Instance().remove(eventWS->getName());
-	  AnalysisDataService::Instance().remove(WS->getName());
-
+    AnalysisDataService::Instance().remove(eventWS->getName());
+    AnalysisDataService::Instance().remove(WS->getName());
   }
 
   void testExec_EventWS() {
-	  // Start by init'ing the algorithm
-	  AlignDetectors align;
-	  align.initialize();
+    // Start by init'ing the algorithm
+    AlignDetectors align;
+    align.initialize();
 
-	  // Set all the properties
-	  align.setProperty("InputWorkspace", eventWS);
-	  align.setProperty("OutputWorkspace", eventWS);
-	  align.setPropertyValue("CalibrationFile", "refl_fake.cal");
+    // Set all the properties
+    align.setProperty("InputWorkspace", eventWS);
+    align.setProperty("OutputWorkspace", eventWS);
+    align.setPropertyValue("CalibrationFile", "refl_fake.cal");
 
-	  TS_ASSERT_THROWS_NOTHING(align.execute());
-	  TS_ASSERT(align.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(align.execute());
+    TS_ASSERT(align.isExecuted());
   }
 
   void testExec_HRP() {
-	  // Start by init'ing the algorithm
-	  AlignDetectors align;
-	  align.initialize();
+    // Start by init'ing the algorithm
+    AlignDetectors align;
+    align.initialize();
 
-	  // Set all the properties
-	  align.setProperty("InputWorkspace", WS);
-	  align.setProperty("OutputWorkspace", WS);
-	  align.setPropertyValue("CalibrationFile", "refl_fake.cal");
+    // Set all the properties
+    align.setProperty("InputWorkspace", WS);
+    align.setProperty("OutputWorkspace", WS);
+    align.setPropertyValue("CalibrationFile", "refl_fake.cal");
 
-	  TS_ASSERT_THROWS_NOTHING(align.execute());
-	  TS_ASSERT(align.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(align.execute());
+    TS_ASSERT(align.isExecuted());
   }
 
   std::string inputWS;
   EventWorkspace_sptr eventWS;
   Workspace_sptr WS;
-
 };
 #endif /*ALIGNDETECTORSTEST_H_*/

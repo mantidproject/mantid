@@ -793,7 +793,7 @@ private:
                                    tolerance));
   }
 
-  // Wrap the global method so as to not change all of the functions 
+  // Wrap the global method so as to not change all of the functions
   // from the unit test
   MatrixWorkspace_sptr createWS(int n, int dn) {
     return createWSGlobal(n, dn, dX);
@@ -1005,25 +1005,25 @@ public:
   ~FFTTestPerformance() override {}
 
   void testPerformance() {
-	  IAlgorithm *fft =
-		  Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
-	  fft->initialize();
-	  fft->setChild(true);
-	  fft->setProperty("InputWorkspace", inputWS);
-	  fft->setPropertyValue("OutputWorkspace", "__NotUsed");
-	  fft->setPropertyValue("Real", "0");
-	  fft->execute();
+    IAlgorithm *fft =
+        Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setChild(true);
+    fft->setProperty("InputWorkspace", inputWS);
+    fft->setPropertyValue("OutputWorkspace", "__NotUsed");
+    fft->setPropertyValue("Real", "0");
+    fft->execute();
   }
 
   void testHistPerformance() {
-	  IAlgorithm *fft =
-		  Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
-	  fft->initialize();
-	  fft->setChild(true);
-	  fft->setProperty("InputWorkspace", inputWSHist);
-	  fft->setPropertyValue("OutputWorkspace", "__NotUsed");
-	  fft->setPropertyValue("Real", "0");
-	  fft->execute();
+    IAlgorithm *fft =
+        Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setChild(true);
+    fft->setProperty("InputWorkspace", inputWSHist);
+    fft->setPropertyValue("OutputWorkspace", "__NotUsed");
+    fft->setPropertyValue("Real", "0");
+    fft->execute();
   }
 
 private:

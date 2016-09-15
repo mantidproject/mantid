@@ -169,10 +169,10 @@ public:
 
     correction.setPropertyValue("InputWorkspace", inputWS);
 
-	// Applytranscor Y and E params
-	// Y 0.6
+    // Applytranscor Y and E params
+    // Y 0.6
     correction.setProperty("TransmissionValue", 0.6);
-	// E 0.02
+    // E 0.02
     correction.setProperty("TransmissionError", 0.02);
     correction.setPropertyValue("OutputWorkspace", outputWS);
     correction.execute();

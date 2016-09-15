@@ -84,27 +84,27 @@ public:
     c.execute();
     TS_ASSERT(c.isExecuted());
 
-	// AFTER
+    // AFTER
     Mantid::API::MatrixWorkspace_const_sptr input;
-	input = Mantid::API::AnalysisDataService::Instance()
-                 .retrieveWS<Mantid::API::MatrixWorkspace>(inputWSName);    
-	
-	Mantid::API::MatrixWorkspace_const_sptr output;
+    input = Mantid::API::AnalysisDataService::Instance()
+                .retrieveWS<Mantid::API::MatrixWorkspace>(inputWSName);
+
+    Mantid::API::MatrixWorkspace_const_sptr output;
     output = Mantid::API::AnalysisDataService::Instance()
                  .retrieveWS<Mantid::API::MatrixWorkspace>(outputWSName);
 
-	// check some arbitrary values that shouldn't have been changed
-	for (size_t i = 0; i < polar.size(); ++i) {
-		const auto &inputY = input->y(i);
-		const auto &inputE = input->e(i);
-		const auto &outputY = output->y(i);
-		const auto &outputE = output->e(i);
+    // check some arbitrary values that shouldn't have been changed
+    for (size_t i = 0; i < polar.size(); ++i) {
+      const auto &inputY = input->y(i);
+      const auto &inputE = input->e(i);
+      const auto &outputY = output->y(i);
+      const auto &outputE = output->e(i);
 
-		for (size_t j = 0; j < azimutal.size(); ++j) {
-			TS_ASSERT_EQUALS(inputY[j], outputY[j])
-			TS_ASSERT_EQUALS(inputE[j], outputE[j])
-		}
-	}	
+      for (size_t j = 0; j < azimutal.size(); ++j) {
+        TS_ASSERT_EQUALS(inputY[j], outputY[j])
+        TS_ASSERT_EQUALS(inputE[j], outputE[j])
+      }
+    }
 
     // test the first tube to see if distance was well corrected to l2
     for (int i = 0; i < 5; i++) {
@@ -127,56 +127,56 @@ private:
 
 class CorrectFlightPathsTestPerformance : public CxxTest::TestSuite {
 public:
-	void setUp() override {
-		// generate large workspace
-		generateWorkspace(3000);
-	}
+  void setUp() override {
+    // generate large workspace
+    generateWorkspace(3000);
+  }
 
-	void tearDown() override {
-		AnalysisDataService::Instance().remove(outputWSName);
-		AnalysisDataService::Instance().remove(inputWSName);
-	}
-	void testPerformance() {
+  void tearDown() override {
+    AnalysisDataService::Instance().remove(outputWSName);
+    AnalysisDataService::Instance().remove(inputWSName);
+  }
+  void testPerformance() {
 
-		CorrectFlightPaths c;
-		if (!c.isInitialized())
-			c.initialize();
+    CorrectFlightPaths c;
+    if (!c.isInitialized())
+      c.initialize();
 
-		c.setPropertyValue("InputWorkspace", inputWSName);
-		c.setPropertyValue("OutputWorkspace", outputWSName);
-		c.execute();
-		TS_ASSERT(c.isExecuted());
+    c.setPropertyValue("InputWorkspace", inputWSName);
+    c.setPropertyValue("OutputWorkspace", outputWSName);
+    c.execute();
+    TS_ASSERT(c.isExecuted());
+  }
 
-	}
 private:
-	std::string inputWSName = "inputWS";
-	std::string outputWSName = "outputWS";
+  std::string inputWSName = "inputWS";
+  std::string outputWSName = "outputWS";
 
-	void generateWorkspace(int nHist = 50, int nBins = 50) {
-		int m_l2 = 4;
-		std::vector<double> L2(nHist, 5);
-		std::vector<double> polar(nHist, (30. / 180.) * M_PI);
-		polar[0] = 0;
-		std::vector<double> azimutal(nHist, 0);
-		azimutal[1] = (45. / 180.) * M_PI;
-		azimutal[2] = (90. / 180.) * M_PI;
-		azimutal[3] = (135. / 180.) * M_PI;
-		azimutal[4] = (180. / 180.) * M_PI;
+  void generateWorkspace(int nHist = 50, int nBins = 50) {
+    int m_l2 = 4;
+    std::vector<double> L2(nHist, 5);
+    std::vector<double> polar(nHist, (30. / 180.) * M_PI);
+    polar[0] = 0;
+    std::vector<double> azimutal(nHist, 0);
+    azimutal[1] = (45. / 180.) * M_PI;
+    azimutal[2] = (90. / 180.) * M_PI;
+    azimutal[3] = (135. / 180.) * M_PI;
+    azimutal[4] = (180. / 180.) * M_PI;
 
-		Mantid::API::MatrixWorkspace_sptr dataws =
-			WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal,
-				nBins, -1, 3, 3);
+    Mantid::API::MatrixWorkspace_sptr dataws =
+        WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal,
+                                                            nBins, -1, 3, 3);
 
-		dataws->getAxis(0)->setUnit("TOF");
-		dataws->mutableRun().addProperty("wavelength",
-			boost::lexical_cast<std::string>(5));
+    dataws->getAxis(0)->setUnit("TOF");
+    dataws->mutableRun().addProperty("wavelength",
+                                     boost::lexical_cast<std::string>(5));
 
-		dataws->instrumentParameters().addString(
-			dataws->getInstrument()->getComponentID(), "l2",
-			boost::lexical_cast<std::string>(m_l2));
+    dataws->instrumentParameters().addString(
+        dataws->getInstrument()->getComponentID(), "l2",
+        boost::lexical_cast<std::string>(m_l2));
 
-		API::AnalysisDataService::Instance().addOrReplace(inputWSName, dataws);
-	}
+    API::AnalysisDataService::Instance().addOrReplace(inputWSName, dataws);
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_CORRECTFLIGHTPATHSTEST_H_ */

@@ -398,9 +398,9 @@ public:
     Mantid::DataObjects::Workspace2D_sptr WS(
         new Mantid::DataObjects::Workspace2D);
     WS->initialize(1, NUMBINS + 1, NUMBINS);
-	auto &x = WS->mutableX(0);
-	auto &y = WS->mutableY(0);
-	auto &e = WS->mutableE(0);
+    auto &x = WS->mutableX(0);
+    auto &y = WS->mutableY(0);
+    auto &e = WS->mutableE(0);
     for (int i = 0; i < NUMBINS; ++i) {
       x[i] = 2 * i;
       y[i] = YVALUE;
