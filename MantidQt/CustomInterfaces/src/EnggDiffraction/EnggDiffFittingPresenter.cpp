@@ -246,7 +246,7 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
       foundFullFilePaths = processMultiRun(userPathInput);
       // try to process using single run
     } else {
-      processSingleRun(userPathInput, foundFullFilePaths, splitBaseName);
+      foundFullFilePaths = processSingleRun(userPathInput, splitBaseName);
     }
   } catch (std::invalid_argument &ia) {
     // If something went wrong stop and print error only
@@ -311,7 +311,7 @@ void EnggDiffFittingPresenter::processFullPathInput(
   if (!multiRunMode && !singleRunMode) {
 
     // add bank to the combo-box
-    setBankItems();
+    setBankItems(foundRunNumbers);
     // set the bank widget according to selected bank file
     setDefaultBank(splitBaseName, pocoFilePath.toString());
 
@@ -371,7 +371,7 @@ std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
 
   // Find all files which match this baseFilenamePrefix -
   // like a poor mans regular expression for files
-  std::string foundFullFilePath;
+  std::vector<std::string> foundFullFilePath;
   if (!findFilePathFromBaseName(workingDirectory, baseFilenamePrefix,
                                 foundFullFilePath)) {
     // I can't see this ever being thrown if the user is browsing to files but
@@ -380,9 +380,6 @@ std::vector<std::string> EnggDiffFittingPresenter::getAllBrowsedFilePaths(
                              " pattern: " +
                              baseFilenamePrefix);
   }
-
-  // Append the found file path for return
-  foundFullFilePaths.push_back(foundFullFilePath);
 
   // Store the run number as found
   std::vector<std::string> runNoVec;
@@ -418,9 +415,8 @@ EnggDiffFittingPresenter::processMultiRun(const std::string userInput) {
   return enableMultiRun(firstRun, lastRun);
 }
 
-void EnggDiffFittingPresenter::processSingleRun(
+std::vector<std::string> EnggDiffFittingPresenter::processSingleRun(
     const std::string &userInputBasename,
-    std::vector<std::string> &runnoDirVector,
     const std::vector<std::string> &splitBaseName) {
 
   std::string focusDir = m_view->focusingDir();
@@ -459,13 +455,11 @@ void EnggDiffFittingPresenter::processSingleRun(
   // Inform the view we are using single run mode
   m_view->setFittingSingleRunMode(true);
 
-  std::string foundFilePath;
+  std::vector<std::string> foundFilePath;
   const bool wasFound =
       findFilePathFromBaseName(focusDir, userInputBasename, foundFilePath);
 
-  if (wasFound) {
-    runnoDirVector.push_back(foundFilePath);
-  }
+
 
   auto fittingMultiRunMode = m_view->getFittingMultiRunMode();
   if (!fittingMultiRunMode && wasFound) {
@@ -477,13 +471,16 @@ void EnggDiffFittingPresenter::processSingleRun(
   }
 
   // Update the list of found runs shown in the view
-  m_view->setFittingRunNumVec(runnoDirVector);
+  m_view->setFittingRunNumVec(foundFilePath);
 
   // add bank to the combo-box and list view
   // recreates bank widget for every run (multi-run) depending on
   // number of banks file found for given run number in folder
-  setBankItems();
+
+  setBankItems(foundFilePath);
   setDefaultBank(splitBaseName, userInputBasename);
+
+  return foundFilePath;
 }
 
 /**
@@ -492,14 +489,14 @@ void EnggDiffFittingPresenter::processSingleRun(
   *
   * @param directoryToSearch The directory to search for these files
   * @param baseFileNamesToFind The base filename to find in this folder
-  * @param foundFullFilePath Holds the path of a file if one was found
+  * @param foundFullFilePath Holds the path of the files if one was found
   * which matched the given base filename
   *
   * @return True if any files were found or false if none were
   */
 bool EnggDiffFittingPresenter::findFilePathFromBaseName(
     const std::string &directoryToSearch,
-    const std::string &baseFileNamesToFind, std::string &foundFullFilePath) {
+    const std::string &baseFileNamesToFind, std::vector<std::string> &foundFullFilePath) {
 
   bool found = false;
 
@@ -518,7 +515,7 @@ bool EnggDiffFittingPresenter::findFilePathFromBaseName(
 
   try {
     // Walk through every file within that folder looking for required files
-    while (!found && directoryIter != directoryIterEnd) {
+    while (directoryIter != directoryIterEnd) {
 
       // Get files and not folders (don't recurse down)
       if (directoryIter->isFile()) {
@@ -535,7 +532,7 @@ bool EnggDiffFittingPresenter::findFilePathFromBaseName(
         // Look for the user input by comparing the base name of the
         // current file with the user input
         if (baseFileName.find(baseFileNamesToFind) != std::string::npos) {
-          foundFullFilePath = fullPathToCheck;
+          foundFullFilePath.emplace_back(fullPathToCheck);
           found = true;
 
           // if only first loop in Fitting Runno then add directory
@@ -644,10 +641,10 @@ EnggDiffFittingPresenter::enableMultiRun(std::string firstRun,
 
   for (const auto runNumber : RunNumberVec) {
     // Get full path for every run selected
-    std::string foundFileName;
-    if (findFilePathFromBaseName(workingDirectory, runNumber, foundFileName)) {
-      foundRunNumber.push_back(runNumber);
-      fittingRunNoDirVec.push_back(foundFileName);
+    std::vector<std::string> foundFileNames;
+    if (findFilePathFromBaseName(workingDirectory, runNumber, foundFileNames)) {
+		// Append those that were found with fittingRunNoDirVec
+		fittingRunNoDirVec.insert(fittingRunNoDirVec.end(), foundFileNames.cbegin(), foundFileNames.cend());
     }
   }
 
@@ -1545,19 +1542,19 @@ void EnggDiffFittingPresenter::setDataToClonedWS(std::string &current_WS,
   currentClonedWS->dataE(0) = currentPeakWS->readE(0);
 }
 
-void EnggDiffFittingPresenter::setBankItems() {
+void EnggDiffFittingPresenter::setBankItems(const std::vector<std::string> &bankFiles) {
   try {
-    std::vector<std::string> fitting_runno_vector =
-        m_view->getFittingRunNumVec();
 
-    if (!fitting_runno_vector.empty()) {
+    if (!bankFiles.empty()) {
 
       // delete previous bank added to the list
       m_view->clearFittingComboBox();
 
-      for (size_t i = 0; i < fitting_runno_vector.size(); i++) {
-        Poco::Path vecFile(fitting_runno_vector[i]);
-        std::string strVecFile = vecFile.toString();
+	  int index = 0;
+
+      for (const auto filePath : bankFiles) {
+		  const Poco::Path bankFile(filePath);
+        const std::string strVecFile = bankFile.toString();
         // split the directory from m_fitting_runno_dir_vec
         std::vector<std::string> vecFileSplit =
             splitFittingDirectory(strVecFile);
@@ -1570,9 +1567,10 @@ void EnggDiffFittingPresenter::setBankItems() {
         if (digit || bankID == "cropped") {
           m_view->addBankItem(bankID);
         } else {
-          QString qBank = QString("Bank %1").arg(i + 1);
+          QString qBank = QString("Bank %1").arg(index + 1);
           m_view->addBankItem(qBank.toStdString());
         }
+		++index;
       }
 
       m_view->enableFittingComboBox(true);

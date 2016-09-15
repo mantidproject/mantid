@@ -15,6 +15,7 @@
 #include <QObject>
 
 class QThread;
+class Poco::Path;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -120,7 +121,8 @@ public:
 
   void setDataToClonedWS(std::string &current_WS, const std::string &cloned_WS);
 
-  void setBankItems();
+  void setBankItems(const std::vector<std::string> &bankFiles);
+
 
   void setRunNoItems(const std::vector<std::string> &runNumVector,
                      bool multiRun);
@@ -161,7 +163,7 @@ private:
 
   bool findFilePathFromBaseName(const std::string &directoryToSearch,
                                 const std::string &baseFileNamesToFind,
-                                std::string &foundFullFilePath);
+                                std::vector<std::string> &foundFullFilePath);
 
   std::vector<std::string>
   splitFittingDirectory(const std::string &selectedfPath);
@@ -185,8 +187,7 @@ private:
 
   std::vector<std::string> processMultiRun(const std::string userInput);
 
-  void processSingleRun(const std::string &userInputBasename,
-                        std::vector<std::string> &runnoDirVector,
+  std::vector<std::string> processSingleRun(const std::string &userInputBasename,
                         const std::vector<std::string> &splitBaseName);
 
   void processFullPathInput(const Poco::Path &pocoFilePath,

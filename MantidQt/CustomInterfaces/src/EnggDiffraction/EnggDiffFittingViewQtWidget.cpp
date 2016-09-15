@@ -549,7 +549,6 @@ void EnggDiffFittingViewQtWidget::setBankIdComboBox(int idx) {
 }
 
 void EnggDiffFittingViewQtWidget::addBankItem(std::string bankID) {
-
   m_ui.comboBox_bank->addItem(QString::fromStdString(bankID));
 }
 
