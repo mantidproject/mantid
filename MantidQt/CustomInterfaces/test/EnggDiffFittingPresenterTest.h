@@ -219,7 +219,8 @@ public:
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     EnggDiffFittingPresenterNoThread pres(&mockView);
 
-    // inputs from user - invalid run given
+    // inputs from user - invalid run given this can't be numerical
+    // only as that has the chance of matching a file so use a prefix
     EXPECT_CALL(mockView, getFittingRunNo())
         .Times(1)
         .WillOnce(Return(std::string("ENGINX1")));
