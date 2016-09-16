@@ -249,10 +249,10 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
     } else {
       foundFullFilePaths = processSingleRun(userPathInput, splitBaseName);
     }
-  } catch (std::exception &e) {
+  } catch (std::invalid_argument &ia) {
     // If something went wrong stop and print error only
     g_log.error("Failed to process user input. Error was: ");
-    g_log.error(e.what());
+    g_log.error(ia.what());
     return;
   }
 

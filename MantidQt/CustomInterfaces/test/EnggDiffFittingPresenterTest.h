@@ -219,10 +219,10 @@ public:
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     EnggDiffFittingPresenterNoThread pres(&mockView);
 
-    // inputs from user - empty run number given
+    // inputs from user - invalid run given
     EXPECT_CALL(mockView, getFittingRunNo())
         .Times(1)
-        .WillOnce(Return(std::string("1")));
+        .WillOnce(Return(std::string("ENGINX1")));
 
     // should not get to the point where the status is updated
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
