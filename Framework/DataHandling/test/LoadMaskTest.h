@@ -279,6 +279,44 @@ public:
       TS_ASSERT_EQUALS(maskSourceDet[i], maskTargDet[i]);
     }
   }
+  void test_IDF_acceptedAsFileName() {
+    auto ws_creator = AlgorithmManager::Instance().createUnmanaged(
+        "CreateSimulationWorkspace");
+    ws_creator->initialize();
+    ws_creator->setChild(true);
+
+    ws_creator->setPropertyValue("Instrument", "MARI");
+    ws_creator->setPropertyValue("BinParams", "100,100,300");
+    ws_creator->setPropertyValue("OutputWorkspace", "testWS");
+    ws_creator->setPropertyValue("UnitX", "TOF");
+
+    ws_creator->execute();
+    MatrixWorkspace_sptr source = ws_creator->getProperty("OutputWorkspace");
+    TS_ASSERT(source);
+
+    std::string IDF_name =
+        API::ExperimentInfo::getInstrumentFilename("MARI", "");
+
+    /*Fake export mask algorithm: */
+    std::string mask_contents("4 10-12 100 110 120 130 140 200 300");
+    ScopedFileHelper::ScopedFile testFile(mask_contents, "test_mask_file.msk");
+
+    // 2. Run
+    LoadMask loadMask;
+    loadMask.initialize();
+    loadMask.setChild(true);
+
+    loadMask.setProperty("Instrument", IDF_name);
+    loadMask.setProperty("RefWorkspace", source);
+    loadMask.setProperty("InputFile", testFile.getFileName());
+    loadMask.setProperty("OutputWorkspace", "MaskedWithSample");
+
+    TS_ASSERT_EQUALS(loadMask.execute(), true);
+
+    DataObjects::MaskWorkspace_sptr maskWs =
+        loadMask.getProperty("OutputWorkspace");
+    TS_ASSERT(maskWs);
+  }
 
   /*
    * Load "testingmasking.xml" and "regionofinterest.xml"

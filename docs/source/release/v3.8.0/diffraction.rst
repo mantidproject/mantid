@@ -67,6 +67,9 @@ Engineering Diffraction
 - New *Load* button on the Fitting Tab, will enable user to load the
   focused file to the canvas, so that the user can select the peaks
   manually beforehand
+  
+- New tool-tip *How to use* quickly tells users how to use the peak
+  picker tool by simply hovering their cursor over it.
 
 Powder Diffraction
 ------------------

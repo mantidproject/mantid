@@ -3,13 +3,15 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MergeRuns.h"
 
-#include "MantidAPI/Axis.h"
+#include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/ADSValidator.h"
+
+using Mantid::HistogramData::HistogramX;
 
 namespace Mantid {
 namespace Algorithms {
@@ -307,7 +309,7 @@ void MergeRuns::execEvent() {
 // to order the input workspaces by the start of their frame (i.e. the first X
 // value).
 static bool compare(MatrixWorkspace_sptr first, MatrixWorkspace_sptr second) {
-  return (first->readX(0).front() < second->readX(0).front());
+  return (first->x(0).front() < second->x(0).front());
 }
 /// @endcond
 
@@ -468,8 +470,8 @@ MergeRuns::validateInputs(const std::vector<std::string> &inputWorkspaces) {
 void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
                                      const API::MatrixWorkspace_const_sptr &ws2,
                                      std::vector<double> &params) const {
-  const MantidVec &X1 = ws1->readX(0);
-  const MantidVec &X2 = ws2->readX(0);
+  auto &X1 = ws1->x(0);
+  auto &X2 = ws2->x(0);
   const double end1 = X1.back();
   const double start2 = X2.front();
   const double end2 = X2.back();
@@ -503,7 +505,7 @@ void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
  *  @param X2 ::     The bin boundaries from the second workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::noOverlapParams(const MantidVec &X1, const MantidVec &X2,
+void MergeRuns::noOverlapParams(const HistogramX &X1, const HistogramX &X2,
                                 std::vector<double> &params) const {
   // Add all the bins from the first workspace
   for (size_t i = 1; i < X1.size(); ++i) {
@@ -533,8 +535,8 @@ void MergeRuns::noOverlapParams(const MantidVec &X1, const MantidVec &X2,
  *  @param X2 ::     The bin boundaries from the second workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::intersectionParams(const MantidVec &X1, int64_t &i,
-                                   const MantidVec &X2,
+void MergeRuns::intersectionParams(const HistogramX &X1, int64_t &i,
+                                   const HistogramX &X2,
                                    std::vector<double> &params) const {
   // First calculate the number of bins in each workspace that are in the
   // overlap region
@@ -578,8 +580,8 @@ void MergeRuns::intersectionParams(const MantidVec &X1, int64_t &i,
  *  @param X2 ::     The bin boundaries from the second workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::inclusionParams(const MantidVec &X1, int64_t &i,
-                                const MantidVec &X2,
+void MergeRuns::inclusionParams(const HistogramX &X1, int64_t &i,
+                                const HistogramX &X2,
                                 std::vector<double> &params) const {
   // First calculate the number of bins in each workspace that are in the
   // overlap region
