@@ -151,34 +151,37 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
     auto item = *i;
     auto tolerance = *j;
 
-    // TODO: switch to multi map and remove this?
-    if (skipIfInPrimaryMap && (m_logMap.count(item) != 0)) {
+    // Check 1: Does the key exist in the primary map? If so ignore it and
+    // continue.
+    if (skipIfInPrimaryMap &&
+        (m_logMap.count(SampleLogsKey(item, mergeType)) != 0)) {
       continue;
     }
 
-    // TODO: switch to multi map and remove this?
-    if (map.count(item) != 0) {
+    // Check 2: If the key (sample log name, merge type) already exists in this
+    // map throw an error.
+    if (map.count(SampleLogsKey(item, mergeType)) != 0) {
       throw std::invalid_argument(
           "Error when making list of merge items, sample log \"" + item +
           "\" defined more than once!");
     }
 
+    // Check 3: Does the sample log exist? If not log an error but continue.
     std::shared_ptr<Property> prop;
     try {
       prop = std::shared_ptr<Property>(ws.getLog(item)->clone());
     } catch (std::invalid_argument &) {
-      m_logger.warning()
+      m_logger.error()
           << "Could not merge sample log \"" << item
           << "\", does not exist in workspace! This sample log will be ignored."
           << std::endl;
       continue;
     }
 
-    // Check if the property can be converted to a double.
-    // Must be the case for a time series, optional for others.
+    // Check 4: Can the property can be converted to a double? If not, and time
+    // series case, log an error but continue.
     bool isNumeric;
     double value = 0.0;
-
     isNumeric = setNumericValue(item, ws, value);
     if (!isNumeric && mergeType == MergeLogType::TimeSeries) {
       m_logger.error() << item << " could not be converted to a numeric type. "
@@ -194,7 +197,8 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
       prop = addPropertyForList(item, prop->value(), ws);
     }
 
-    map[item] = {mergeType, prop, tolerance, isNumeric};
+    // Finally add the key-value pair to the map
+    map[SampleLogsKey(item, mergeType)] = {prop, tolerance, isNumeric};
   }
 }
 
@@ -326,37 +330,39 @@ bool SampleLogsBehaviour::setNumericValue(const std::string item,
 void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace &addeeWS,
                                           MatrixWorkspace &outWS) {
   for (auto item : m_logMap) {
-    Property *addeeWSProperty = addeeWS.getLog(item.first);
+    std::string logName;
+
+    Property *addeeWSProperty = addeeWS.getLog(logName);
 
     double addeeWSNumber = 0;
     double outWSNumber = 0;
 
     try {
-      addeeWSNumber = addeeWS.getLogAsSingleValue(item.first);
-      outWSNumber = outWS.getLogAsSingleValue(item.first);
+      addeeWSNumber = addeeWS.getLogAsSingleValue(logName);
+      outWSNumber = outWS.getLogAsSingleValue(logName);
     } catch (std::invalid_argument &) {
       if (item.second.isNumeric) {
         throw std::invalid_argument(
-            item.first + " could not be converted to a numeric type");
+            logName + " could not be converted to a numeric type");
       }
     }
 
-    switch (item.second.type) {
+    switch (item.first.second) {
     case MergeLogType::TimeSeries: {
-      this->updateTimeSeriesProperty(addeeWS, outWS, item.first);
+      this->updateTimeSeriesProperty(addeeWS, outWS, logName);
       break;
     }
     case MergeLogType::List: {
-      this->updateListProperty(addeeWS, outWS, addeeWSProperty, item.first);
+      this->updateListProperty(addeeWS, outWS, addeeWSProperty, logName);
       break;
     }
     case MergeLogType::Warn:
       this->checkWarnProperty(addeeWS, addeeWSProperty, item.second,
-                              addeeWSNumber, outWSNumber, item.first);
+                              addeeWSNumber, outWSNumber, logName);
       break;
     case MergeLogType::Fail:
       this->checkErrorProperty(addeeWS, addeeWSProperty, item.second,
-                               addeeWSNumber, outWSNumber, item.first);
+                               addeeWSNumber, outWSNumber, logName);
       break;
     }
   }
@@ -507,12 +513,12 @@ bool SampleLogsBehaviour::stringPropertiesMatch(
  */
 void SampleLogsBehaviour::setUpdatedSampleLogs(MatrixWorkspace &ws) {
   for (auto &item : m_logMap) {
-    std::string propertyToReset = item.first;
+    std::string propertyToReset = item.first.first;
 
-    if (item.second.type == MergeLogType::TimeSeries) {
-      propertyToReset = item.first + TIME_SERIES_SUFFIX;
-    } else if (item.second.type == MergeLogType::List) {
-      propertyToReset = item.first + LIST_SUFFIX;
+    if (item.first.second == MergeLogType::TimeSeries) {
+      propertyToReset = propertyToReset.append(TIME_SERIES_SUFFIX);
+    } else if (item.first.second == MergeLogType::List) {
+      propertyToReset = propertyToReset.append(LIST_SUFFIX);
     } else {
       continue;
     }
@@ -530,15 +536,14 @@ void SampleLogsBehaviour::setUpdatedSampleLogs(MatrixWorkspace &ws) {
  */
 void SampleLogsBehaviour::resetSampleLogs(MatrixWorkspace &ws) {
   for (auto const &item : m_logMap) {
-    std::string propertyToReset = item.first;
-
-    if (item.second.type == MergeLogType::TimeSeries) {
-      propertyToReset = item.first + TIME_SERIES_SUFFIX;
+    std::string propertyToReset = item.first.first;
+    if (item.first.second == MergeLogType::TimeSeries) {
+      propertyToReset = propertyToReset.append(TIME_SERIES_SUFFIX);
       auto property =
           std::unique_ptr<Kernel::Property>(item.second.property->clone());
       ws.mutableRun().addProperty(std::move(property), true);
-    } else if (item.second.type == MergeLogType::List) {
-      propertyToReset = item.first + LIST_SUFFIX;
+    } else if (item.first.second == MergeLogType::List) {
+      propertyToReset = propertyToReset.append(LIST_SUFFIX);
       ws.mutableRun()
           .getProperty(propertyToReset)
           ->setValue(item.second.property->value());

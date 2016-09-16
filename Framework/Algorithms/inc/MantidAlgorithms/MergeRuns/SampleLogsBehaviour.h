@@ -47,7 +47,6 @@ public:
   static const std::string LIST_SUFFIX;
 
   struct SampleLogBehaviour {
-    MergeLogType type;
     std::shared_ptr<Kernel::Property> property;
     double tolerance;
     bool isNumeric;
@@ -70,7 +69,8 @@ public:
 private:
   Kernel::Logger &m_logger;
 
-  typedef std::map<const std::string, SampleLogBehaviour> SampleLogsMap;
+  typedef std::pair<std::string, MergeLogType> SampleLogsKey;
+  typedef std::map<SampleLogsKey, SampleLogBehaviour> SampleLogsMap;
   SampleLogsMap m_logMap;
 
   void createSampleLogsMapsFromInstrumentParams(SampleLogsMap &instrumentMap,
