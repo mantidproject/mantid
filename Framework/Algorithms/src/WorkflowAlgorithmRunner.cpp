@@ -62,55 +62,6 @@ void cleanPropertyTable(ITableWorkspace_sptr table, const MAP &ioMapping) {
   }
 }
 
-template<typename QUEUE, typename MAP>
-void WorkflowAlgorithmRunner::appendToTaskQueue(ITableWorkspace_sptr setupTable, ITableWorkspace_sptr propertyTable, const size_t currentRow, QUEUE &queue, const MAP &ioMap, std::shared_ptr<std::unordered_set<size_t>> rowsBeingQueued) const {
-  if (currentRow > setupTable->rowCount()) {
-    throw std::runtime_error("Current row " + std::to_string(currentRow) + " out of task table bounds " + std::to_string(setupTable->rowCount()) + '.');
-  }
-  if (std::find(queue.cbegin(), queue.cend(), currentRow) != queue.cend()) {
-    return;
-  }
-  if (!rowsBeingQueued) {
-    rowsBeingQueued.reset(new std::unordered_set<size_t>());
-  }
-  const auto status = rowsBeingQueued->emplace(currentRow);
-  if (!status.second) {
-    // This row is already being processed.
-    throw std::runtime_error("Circular dependencies!");
-  }
-  for (const auto &ioPair : ioMap) {
-    const auto &outputId = setupTable->getRef<std::string>(ioPair.first, currentRow);
-    if (!outputId.empty()) {
-      if (isHardCodedWorkspaceName(outputId)) {
-        propertyTable->getRef<std::string>(ioPair.first, currentRow) = tidyWorkspaceName(outputId);
-      }
-      else {
-        size_t outputRow = -1;
-        try {
-          setupTable->find(outputId, outputRow, 0);
-        }
-        catch (std::out_of_range &) {
-          throw std::runtime_error("Identifier \"" + outputId + "\" not found in " + PropertyNames::SETUP_TABLE + " (referenced in row " + std::to_string(currentRow) + ", column \"" + ioPair.first + "\").");
-        }
-
-        appendToTaskQueue(setupTable, propertyTable, outputRow, queue, ioMap, rowsBeingQueued);
-        const auto outputCol = ioPair.second;
-        auto outputWorkspaceName = setupTable->getRef<std::string>(outputCol, outputRow);
-        if (outputWorkspaceName.empty()) {
-          throw std::runtime_error("No source workspace name found for " + ioPair.first + '.');
-        }
-        if (isHardCodedWorkspaceName(outputWorkspaceName)) {
-          outputWorkspaceName = tidyWorkspaceName(outputWorkspaceName);
-        }
-        propertyTable->getRef<std::string>(ioPair.first, currentRow) = outputWorkspaceName;
-        propertyTable->getRef<std::string>(outputCol, outputRow) = outputWorkspaceName;
-      }
-    }
-  }
-  queue.emplace_back(currentRow);
-  rowsBeingQueued->erase(currentRow);
-}
-
 // Register the algorithm into the algorithm factory.
 DECLARE_ALGORITHM(WorkflowAlgorithmRunner)
 
@@ -152,7 +103,7 @@ void WorkflowAlgorithmRunner::exec() {
   cleanPropertyTable(propertyTable, ioMap);
   std::deque<size_t> queue;
   for (size_t i = 0; i < setupTable->rowCount(); ++i) {
-    appendToTaskQueue(setupTable, propertyTable, i, queue, ioMap);
+    configureRow(setupTable, propertyTable, i, queue, ioMap);
   }
 
   const std::string algorithmName = getProperty(PropertyNames::ALGORITHM);
@@ -208,6 +159,55 @@ void WorkflowAlgorithmRunner::exec() {
     }
     queue.pop_front();
   }
+}
+
+template<typename QUEUE, typename MAP>
+void WorkflowAlgorithmRunner::configureRow(ITableWorkspace_sptr setupTable, ITableWorkspace_sptr propertyTable, const size_t currentRow, QUEUE &queue, const MAP &ioMap, std::shared_ptr<std::unordered_set<size_t>> rowsBeingQueued) const {
+  if (currentRow > setupTable->rowCount()) {
+    throw std::runtime_error("Current row " + std::to_string(currentRow) + " out of task table bounds " + std::to_string(setupTable->rowCount()) + '.');
+  }
+  if (std::find(queue.cbegin(), queue.cend(), currentRow) != queue.cend()) {
+    return;
+  }
+  if (!rowsBeingQueued) {
+    rowsBeingQueued.reset(new std::unordered_set<size_t>());
+  }
+  const auto status = rowsBeingQueued->emplace(currentRow);
+  if (!status.second) {
+    // This row is already being processed.
+    throw std::runtime_error("Circular dependencies!");
+  }
+  for (const auto &ioPair : ioMap) {
+    const auto &outputId = setupTable->getRef<std::string>(ioPair.first, currentRow);
+    if (!outputId.empty()) {
+      if (isHardCodedWorkspaceName(outputId)) {
+        propertyTable->getRef<std::string>(ioPair.first, currentRow) = tidyWorkspaceName(outputId);
+      }
+      else {
+        size_t outputRow = -1;
+        try {
+          setupTable->find(outputId, outputRow, 0);
+        }
+        catch (std::out_of_range &) {
+          throw std::runtime_error("Identifier \"" + outputId + "\" not found in " + PropertyNames::SETUP_TABLE + " (referenced in row " + std::to_string(currentRow) + ", column \"" + ioPair.first + "\").");
+        }
+
+        configureRow(setupTable, propertyTable, outputRow, queue, ioMap, rowsBeingQueued);
+        const auto outputCol = ioPair.second;
+        auto outputWorkspaceName = setupTable->getRef<std::string>(outputCol, outputRow);
+        if (outputWorkspaceName.empty()) {
+          throw std::runtime_error("No source workspace name found for " + ioPair.first + '.');
+        }
+        if (isHardCodedWorkspaceName(outputWorkspaceName)) {
+          outputWorkspaceName = tidyWorkspaceName(outputWorkspaceName);
+        }
+        propertyTable->getRef<std::string>(ioPair.first, currentRow) = outputWorkspaceName;
+        propertyTable->getRef<std::string>(outputCol, outputRow) = outputWorkspaceName;
+      }
+    }
+  }
+  queue.emplace_back(currentRow);
+  rowsBeingQueued->erase(currentRow);
 }
 
 } // namespace Algorithms

@@ -54,7 +54,7 @@ private:
   void exec() override;
 
   template<typename QUEUE, typename MAP>
-  void appendToTaskQueue(API::ITableWorkspace_sptr setupTable, API::ITableWorkspace_sptr propertyTable, const size_t currentRow, QUEUE &queue, const MAP &ioMap, std::shared_ptr<std::unordered_set<size_t>> rowsBeingQueued = nullptr) const;
+  void configureRow(API::ITableWorkspace_sptr setupTable, API::ITableWorkspace_sptr propertyTable, const size_t currentRow, QUEUE &queue, const MAP &ioMap, std::shared_ptr<std::unordered_set<size_t>> rowsBeingQueued = nullptr) const;
 };
 
 } // namespace Algorithms
