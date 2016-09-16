@@ -1099,14 +1099,17 @@ void LineViewer::loadFromProject(const std::string &lines) {
   bool adaptiveBins, overwriteLines, numBinsChecked, binWidthChecked,
       allFreeDims;
 
+  if (!tsv.hasLine("SliceWorkspace"))
+    return;
+
+  tsv.selectLine("SliceWorkspace");
+  tsv >> sliceWSName;
   tsv.selectLine("XDim");
   tsv >> xDim;
   tsv.selectLine("YDim");
   tsv >> yDim;
   tsv.selectLine("AllFreeDims");
   tsv >> allFreeDims;
-  tsv.selectLine("SliceWorkspace");
-  tsv >> sliceWSName;
   tsv.selectLine("Thickness");
   tsv >> thickness;
   tsv.selectLine("Start");
@@ -1153,6 +1156,9 @@ void LineViewer::loadFromProject(const std::string &lines) {
 
 std::string LineViewer::saveToProject() const {
   API::TSVSerialiser tsv;
+
+  if (!m_sliceWS)
+    return "";
 
   tsv.writeLine("SliceWorkspace") << m_sliceWS->name();
   tsv.writeLine("XDim") << m_freeDimX;
