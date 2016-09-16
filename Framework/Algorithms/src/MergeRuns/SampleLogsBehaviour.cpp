@@ -58,11 +58,13 @@ const std::string SampleLogsBehaviour::LIST_SUFFIX = "_list";
  * @return An instance of SampleLogsBehaviour initialised with the merge types
  * from the IPF and parent algorithm
  */
-SampleLogsBehaviour::SampleLogsBehaviour(
-    MatrixWorkspace &ws, Logger &logger,
-    std::string sampleLogsTimeSeries, std::string sampleLogsList,
-    std::string sampleLogsWarn, std::string sampleLogsWarnTolerances,
-    std::string sampleLogsFail, std::string sampleLogsFailTolerances)
+SampleLogsBehaviour::SampleLogsBehaviour(MatrixWorkspace &ws, Logger &logger,
+                                         std::string sampleLogsTimeSeries,
+                                         std::string sampleLogsList,
+                                         std::string sampleLogsWarn,
+                                         std::string sampleLogsWarnTolerances,
+                                         std::string sampleLogsFail,
+                                         std::string sampleLogsFailTolerances)
     : m_logger(logger) {
   setSampleMap(m_logMap, MergeLogType::TimeSeries, sampleLogsTimeSeries, ws,
                "");
@@ -242,8 +244,7 @@ std::vector<double> SampleLogsBehaviour::createTolerancesVector(
  * @return a shared pointer to the added property
  */
 std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(
-    const std::string item, const double value,
-    MatrixWorkspace &ws) {
+    const std::string item, const double value, MatrixWorkspace &ws) {
   std::shared_ptr<Property> returnProp;
 
   try {
@@ -275,10 +276,8 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(
  * @param ws the first workspace in the merge
  * @return a shared pointer to the added property
  */
-std::shared_ptr<Property>
-SampleLogsBehaviour::addPropertyForList(const std::string item,
-                                        const std::string value,
-                                        MatrixWorkspace &ws) {
+std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForList(
+    const std::string item, const std::string value, MatrixWorkspace &ws) {
   std::shared_ptr<Property> returnProp;
 
   try {
@@ -324,9 +323,8 @@ bool SampleLogsBehaviour::setNumericValue(const std::string item,
  * @param addeeWS the workspace being merged
  * @param outWS the workspace the others are merged into
  */
-void SampleLogsBehaviour::mergeSampleLogs(
-    MatrixWorkspace &addeeWS,
-    MatrixWorkspace &outWS) {
+void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace &addeeWS,
+                                          MatrixWorkspace &outWS) {
   for (auto item : m_logMap) {
     Property *addeeWSProperty = addeeWS.getLog(item.first);
 
@@ -373,9 +371,9 @@ void SampleLogsBehaviour::mergeSampleLogs(
  * @param outWS the workspace the others are merged into
  * @param name the name of the property
  */
-void SampleLogsBehaviour::updateTimeSeriesProperty(
-    MatrixWorkspace &addeeWS, MatrixWorkspace &outWS,
-    const std::string name) {
+void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS,
+                                                   MatrixWorkspace &outWS,
+                                                   const std::string name) {
   try {
     // If this already exists we do not need to do anything, Time Series Logs
     // are combined when adding workspaces.
@@ -399,9 +397,10 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(
  * @param addeeWSProperty the relevant property in addeeWS
  * @param name the name of the property
  */
-void SampleLogsBehaviour::updateListProperty(
-    MatrixWorkspace &addeeWS, MatrixWorkspace &outWS,
-    Property *addeeWSProperty, const std::string name) {
+void SampleLogsBehaviour::updateListProperty(MatrixWorkspace &addeeWS,
+                                             MatrixWorkspace &outWS,
+                                             Property *addeeWSProperty,
+                                             const std::string name) {
   try {
     // If this already exists we combine the two strings.
     auto propertyAddeeWS = addeeWS.getLog(name + LIST_SUFFIX);
@@ -506,8 +505,7 @@ bool SampleLogsBehaviour::stringPropertiesMatch(
  *
  * @param ws the merged workspace
  */
-void SampleLogsBehaviour::setUpdatedSampleLogs(
-    MatrixWorkspace &ws) {
+void SampleLogsBehaviour::setUpdatedSampleLogs(MatrixWorkspace &ws) {
   for (auto &item : m_logMap) {
     std::string propertyToReset = item.first;
 
@@ -519,7 +517,8 @@ void SampleLogsBehaviour::setUpdatedSampleLogs(
       continue;
     }
 
-    const Property *outWSProperty = ws.mutableRun().getProperty(propertyToReset);
+    const Property *outWSProperty =
+        ws.mutableRun().getProperty(propertyToReset);
     item.second.property = std::shared_ptr<Property>(outWSProperty->clone());
   }
 }

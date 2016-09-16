@@ -53,8 +53,7 @@ public:
     bool isNumeric;
   };
 
-  SampleLogsBehaviour(API::MatrixWorkspace &ws,
-                      Kernel::Logger &logger,
+  SampleLogsBehaviour(API::MatrixWorkspace &ws, Kernel::Logger &logger,
                       const std::string sampleLogsTimeSeries,
                       const std::string sampleLogsList,
                       const std::string sampleLogsWarn,
@@ -74,9 +73,8 @@ private:
   typedef std::map<const std::string, SampleLogBehaviour> SampleLogsMap;
   SampleLogsMap m_logMap;
 
-  void
-  createSampleLogsMapsFromInstrumentParams(SampleLogsMap &instrumentMap,
-                                           API::MatrixWorkspace &ws);
+  void createSampleLogsMapsFromInstrumentParams(SampleLogsMap &instrumentMap,
+                                                API::MatrixWorkspace &ws);
 
   std::shared_ptr<Kernel::Property>
   addPropertyForTimeSeries(const std::string item, const double value,
@@ -84,12 +82,11 @@ private:
   std::shared_ptr<Kernel::Property>
   addPropertyForList(const std::string item, const std::string value,
                      API::MatrixWorkspace &ws);
-  bool setNumericValue(const std::string item,
-                       const API::MatrixWorkspace &ws, double &value);
+  bool setNumericValue(const std::string item, const API::MatrixWorkspace &ws,
+                       double &value);
 
   void setSampleMap(SampleLogsMap &map, const MergeLogType &,
-                    const std::string &params,
-                    API::MatrixWorkspace &ws,
+                    const std::string &params, API::MatrixWorkspace &ws,
                     const std::string paramsTolerances = "",
                     bool skipIfInPrimaryMap = false);
 
@@ -115,10 +112,11 @@ private:
                           const double addeeWSNumber, const double outWSNumber,
                           const std::string name);
 
-  bool isWithinTolerance(const SampleLogBehaviour &behaviour, const double addeeWSNumber, const double outWSNumber);
-  bool stringPropertiesMatch(const SampleLogBehaviour &behaviour, const Kernel::Property *addeeWSProperty);
-
-  };
+  bool isWithinTolerance(const SampleLogBehaviour &behaviour,
+                         const double addeeWSNumber, const double outWSNumber);
+  bool stringPropertiesMatch(const SampleLogBehaviour &behaviour,
+                             const Kernel::Property *addeeWSProperty);
+};
 
 } // namespace Algorithms
 } // namespace Mantid
