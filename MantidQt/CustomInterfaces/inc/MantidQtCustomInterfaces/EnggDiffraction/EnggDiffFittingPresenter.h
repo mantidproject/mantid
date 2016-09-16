@@ -145,7 +145,7 @@ protected slots:
   void fittingRunNoChanged();
 
 private:
-  bool isDigit(std::string text);
+  bool isDigit(const std::string text) const;
 
   // Methods related single peak fits
   virtual void
@@ -157,9 +157,13 @@ private:
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &expectedPeaks);
 
-  void updateFittingDirVec(const std::string &bankDir,
-                           const std::string &focusedFile,
-                           std::vector<std::string> &fittingRunNoDirVec);
+  void updateFittingDirVec(const std::string &focusDir,
+                           const std::string &runNumberVec,
+                           std::vector<std::string> &fittingRunNoDirVec,
+                           std::vector<std::string> &foundRunNumber);
+
+  std::vector<std::string>
+  splitFittingDirectory(const std::string &selectedfPath);
 
   void enableMultiRun(std::string firstRun, std::string lastRun,
                       std::vector<std::string> &fittingRunNoDirVec);
@@ -186,8 +190,7 @@ private:
   void processSingleRun(const std::string &focusDir,
                         const std::string &strFocusedFile,
                         std::vector<std::string> &runnoDirVector,
-                        const std::vector<std::string> &splitBaseName,
-                        std::vector<std::string> &runNoVec);
+                        const std::vector<std::string> &splitBaseName);
 
   // whether to use AlignDetectors to convert units
   static const bool g_useAlignDetectors;
@@ -199,6 +202,9 @@ private:
 
   // input run number - used for output file name
   std::vector<std::string> g_multi_run;
+
+  // Holds the previous user input so we can short circuit further checks
+  std::string m_previousInput;
 
   /// true if the last fitting completed successfully
   bool m_fittingFinishedOK;
@@ -216,6 +222,9 @@ private:
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffFittingView *const m_view;
+
+  /// Holds if the view is in the process of being closed
+  bool m_viewHasClosed;
 };
 
 } // namespace CustomInterfaces

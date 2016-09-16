@@ -160,6 +160,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                              doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
         self.declareProperty(FileProperty(name="CalibrationFile",defaultValue="",action=FileAction.Load,\
                                       extensions = [".h5", ".hd5", ".hdf", ".cal"]))
+        self.declareProperty(FileProperty(name="GroupingFile",defaultValue="",action=FileAction.OptionalLoad,\
+                                          extensions = [".xml"]), "Overrides grouping from CalibrationFile")
         self.declareProperty(FileProperty(name="CharacterizationRunsFile",defaultValue="",action=FileAction.OptionalLoad,\
                                       extensions = ["txt"]),"File with characterization runs denoted")
         self.declareProperty(FileProperty(name="ExpIniFilename", defaultValue="", action=FileAction.OptionalLoad,
@@ -830,7 +832,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # Do align and focus
             num_out_wksp = len(output_ws_name_list)
-            for split_index in range(num_out_wksp):
+            for split_index in xrange(num_out_wksp):
                 # Get workspace name
                 out_ws_name_chunk_split = output_ws_name_list[split_index]
                 # Align and focus
@@ -839,6 +841,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 api.AlignAndFocusPowder(InputWorkspace=out_ws_name_chunk_split,
                                         OutputWorkspace=out_ws_name_chunk_split,
                                         CalFileName=calib,
+                                        GroupFilename=self.getProperty("GroupingFile").value,
                                         Params=self._binning,
                                         ResampleX=self._resampleX,
                                         Dspacing=self._bin_in_dspace,
@@ -1296,6 +1299,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             api.AlignAndFocusPowder(InputWorkspace=van_run_ws_name,
                                     OutputWorkspace=van_run_ws_name,
                                     CalFileName=calib,
+                                    GroupFilename=self.getProperty("GroupingFile").value,
                                     Params=self._binning,
                                     ResampleX=self._resampleX,
                                     Dspacing=self._bin_in_dspace,

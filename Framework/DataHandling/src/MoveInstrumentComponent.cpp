@@ -59,14 +59,14 @@ void MoveInstrumentComponent::exec() {
       boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
-  Instrument_sptr inst;
+  Instrument_const_sptr inst;
   if (inputW) {
-    inst = boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+    inst = inputW->getInstrument();
     if (!inst)
       throw std::runtime_error("Could not get a valid instrument from the "
                                "MatrixWorkspace provided as input");
   } else if (inputP) {
-    inst = boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+    inst = inputP->getInstrument();
     if (!inst)
       throw std::runtime_error("Could not get a valid instrument from the "
                                "PeaksWorkspace provided as input");
@@ -85,7 +85,6 @@ void MoveInstrumentComponent::exec() {
   const bool relativePosition = getProperty("RelativePosition");
 
   IComponent_const_sptr comp;
-
   // Find the component to move
   if (DetID != -1) {
     comp = inst->getDetector(DetID);

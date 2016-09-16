@@ -668,6 +668,10 @@ qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Vates/VatesSimpleGui/ViewWid
 # Add the dependencies
 ###########################################################################
 
+if(MAKE_VATES)
+  include( ${PARAVIEW_USE_FILE} )
+endif()
+
 include_directories ( SYSTEM ${MUPARSER_INCLUDE_DIR} )
 include_directories ( ${ZLIB_INCLUDE_DIRS} )
 

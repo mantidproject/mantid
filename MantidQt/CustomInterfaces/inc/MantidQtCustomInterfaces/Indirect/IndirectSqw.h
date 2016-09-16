@@ -48,6 +48,8 @@ public:
 private slots:
   void plotContour();
   void sqwAlgDone(bool error);
+  void plotClicked();
+  void saveClicked();
 
 private:
   Ui::IndirectSqw m_uiForm;
