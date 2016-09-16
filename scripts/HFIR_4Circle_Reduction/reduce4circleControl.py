@@ -16,11 +16,13 @@ import os
 from fourcircle_utility import *
 from peakprocesshelper import PeakProcessHelper
 import fputility
+import project_manager
 
 import mantid
 import mantid.simpleapi as api
 from mantid.api import AnalysisDataService
 from mantid.kernel import V3D
+
 
 DebugMode = True
 
@@ -92,7 +94,7 @@ class CWSCDReductionControl(object):
         # A dictionary to manage all loaded and processed MDEventWorkspaces
         # self._expDataDict = {}
 
-        #register startup
+        # register startup
         mantid.UsageService.registerFeatureUsage("Interface","4-Circle Reduction",False)
 
         return
@@ -1538,42 +1540,46 @@ class CWSCDReductionControl(object):
         if pt_list_str == '-1':
             return False, err_msg
 
-        # Collect HB3A Exp/Scan information
-        # construct a configuration with 1 scan and multiple Pts.
-        merged_scan_ws_name = get_merge_pt_info_ws_name(exp_no, scan_no)
-        if not AnalysisDataService.doesExist(merged_scan_ws_name):
-            # load data from disk
+        # create output workspace's name
+        out_q_name = get_merged_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
+        if AnalysisDataService.doesExist(out_q_name) is False:
+            # collect HB3A Exp/Scan information
+            # - construct a configuration with 1 scan and multiple Pts.
+            scan_info_table_name = get_merge_pt_info_ws_name(exp_no, scan_no)
             try:
                 api.CollectHB3AExperimentInfo(ExperimentNumber=exp_no,
                                               ScanList='%d' % scan_no,
                                               PtLists=pt_list_str,
                                               DataDirectory=self._dataDir,
                                               GenerateVirtualInstrument=False,
-                                              OutputWorkspace=merged_scan_ws_name,
+                                              OutputWorkspace=scan_info_table_name,
                                               DetectorTableWorkspace='MockDetTable')
             except RuntimeError as rt_error:
                 return False, 'Unable to merge scan %d dur to %s.' % (scan_no, str(rt_error))
             else:
                 # check
-                assert AnalysisDataService.doesExist(merged_scan_ws_name), 'Workspace %s does not exist.' \
-                                                                           '' % merged_scan_ws_name
-                # record the workspace created
-                self._myMDWsList.append(merged_scan_ws_name)
-        elif merged_scan_ws_name not in self._myMDWsList:
-            self._myMDWsList.append(merged_scan_ws_name)
-        # END-IF
+                assert AnalysisDataService.doesExist(scan_info_table_name), 'Workspace %s does not exist.' \
+                                                                            '' % scan_info_table_name
+            # END-TRY-EXCEPT
 
-        # Convert to Q-sample
-        out_q_name = get_merged_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
-        if AnalysisDataService.doesExist(out_q_name) is False:
+            # create MD workspace in Q-sample
             try:
-                api.ConvertCWSDExpToMomentum(InputWorkspace=merged_scan_ws_name,
+                api.ConvertCWSDExpToMomentum(InputWorkspace=scan_info_table_name,
                                              CreateVirtualInstrument=False,
                                              OutputWorkspace=out_q_name,
                                              Directory=self._dataDir)
+                self._myMDWsList.append(out_q_name)
             except RuntimeError as e:
                 err_msg += 'Unable to convert scan %d data to Q-sample MDEvents due to %s' % (scan_no, str(e))
                 return False, err_msg
+            # END-TRY
+
+        else:
+            # analysis data service has the target MD workspace. do not load again
+            if out_q_name not in self._myMDWsList:
+                self._myMDWsList.append(out_q_name)
+
+        # END-IF-ELSE
 
         # Optionally converted to HKL space # Target frame
         if target_frame.lower().startswith('hkl'):
@@ -2293,14 +2299,27 @@ class CWSCDReductionControl(object):
         :return:
         """
         # TODO/NOW - need to check the project file name and etc.
-        import project_manager
-
         project = project_manager.ProjectManager(mode='export', project_file_path=project_file_name)
 
         project.add_workspaces(self._myMDWsList)
         project.set('data dir', self._dataDir)
 
         project.export()
+
+        return
+
+    def load_project(self, project_file_name):
+        """
+
+        :param project_file_name:
+        :return:
+        """
+        # TODO/NOW - need to check the project file name and etc.
+        saved_project = project_manager.ProjectManager(mode='import', project_file_path=project_file_name)
+        saved_project.load()
+
+        # set current value
+        self._dataDir = saved_project.get('data dir')
 
         return
 

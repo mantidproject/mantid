@@ -298,15 +298,24 @@ class MainWindow(QtGui.QMainWindow):
         Save project
         :return:
         """
-        project_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Choose Project File', os.getcwd()))
+        project_file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'Specify Project File', os.getcwd()))
         self._myControl.export_project(project_file_name)
+
+        # register
+        self.ui.label_last1Path.setText(project_file_name)
+
+        return
 
     def action_load_project(self):
         """
         Load project
         :return:
         """
-        self._myControl.load_project()
+        project_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Choose Project File', os.getcwd()))
+
+        self._myControl.load_project(project_file_name)
+
+        return
 
     def evt_show_survey(self):
         """
