@@ -155,7 +155,8 @@ bool MantidEVWorker::loadAndConvertToMD(
     if (load_data) {
       bool topaz = false;
       // Limits and filtering only done for topaz
-      if (file_name.find("TOPAZ") != std::string::npos) topaz = true;
+      if (file_name.find("TOPAZ") != std::string::npos)
+        topaz = true;
       IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
       alg->setProperty("Filename", file_name);
       alg->setProperty("OutputWorkspace", ev_ws_name);
