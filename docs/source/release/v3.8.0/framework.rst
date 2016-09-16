@@ -77,6 +77,9 @@ Improved
 
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` had a bug in cases where the beam was larger than the
+  sample, which lead to the attenuation factor being too high. This has been fixed.
+
 - :ref:`ConvertUnits <algm-ConvertUnits>` now has the option to take a workspace with Points as input.
   A property has been added that will make the algorithm convert the workspace to Bins automatically. The output space will be converted back to Points.
 
