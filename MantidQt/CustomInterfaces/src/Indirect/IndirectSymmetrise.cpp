@@ -134,6 +134,9 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
           SLOT(xRangeMinChanged(double)));
   connect(negativeERaw, SIGNAL(maxValueChanged(double)), this,
           SLOT(xRangeMaxChanged(double)));
+  // Handle plotting and saving
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
   // Set default X range values
   m_dblManager->setValue(m_properties["EMin"], 0.1);
@@ -186,9 +189,6 @@ void IndirectSymmetrise::run() {
 
   m_batchAlgoRunner->addAlgorithm(symmetriseAlg);
 
-  if (m_uiForm.ckSave->isChecked())
-    addSaveWorkspaceToQueue(outputWorkspaceName);
-
   // Set the workspace name for Python script export
   m_pythonExportWsName = outputWorkspaceName.toStdString();
 
@@ -212,12 +212,9 @@ void IndirectSymmetrise::algorithmComplete(bool error) {
   if (error)
     return;
 
-  if (m_uiForm.ckPlot->isChecked()) {
-    QStringList workspaces;
-    workspaces << m_uiForm.dsInput->getCurrentDataName()
-               << QString::fromStdString(m_pythonExportWsName);
-    plotSpectrum(workspaces);
-  }
+  // Enable save and plot
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 }
 
 /**
@@ -520,6 +517,23 @@ void IndirectSymmetrise::xRangeMaxChanged(double value) {
     m_dblManager->setValue(m_properties["EMin"], std::abs(value));
   }
 }
+/**
+ * Handles mantid plotting
+ */
+void IndirectSymmetrise::plotClicked() {
 
+  QStringList workspaces;
+  workspaces.append(m_uiForm.dsInput->getCurrentDataName());
+  workspaces.append(QString::fromStdString(m_pythonExportWsName));
+  plotSpectrum(workspaces);
+}
+
+/**
+ * Handles saving of workspace
+ */
+void IndirectSymmetrise::saveClicked() {
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+}
 } // namespace CustomInterfaces
 } // namespace Mantid

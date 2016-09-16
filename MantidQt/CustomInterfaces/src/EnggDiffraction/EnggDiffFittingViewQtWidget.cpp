@@ -17,6 +17,7 @@
 #include <QFileDialog>
 #include <QSettings>
 
+#include <qevent.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>
 #include <qwt_symbol.h>
@@ -36,12 +37,15 @@ const std::string EnggDiffFittingViewQtWidget::g_peaksListExt =
     "Other extensions/all files (*.*)";
 
 bool EnggDiffFittingViewQtWidget::m_fittingMutliRunMode = false;
+bool EnggDiffFittingViewQtWidget::m_fittingSingleRunMode = false;
+
 std::vector<std::string> EnggDiffFittingViewQtWidget::m_fitting_runno_dir_vec;
 
 EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
     QWidget * /*parent*/, boost::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
     boost::shared_ptr<IEnggDiffractionSettings> mainSettings,
     boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+    boost::shared_ptr<IEnggDiffractionParam> mainParam,
     boost::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner)
     : IEnggDiffFittingView(), m_fittedDataVector(), m_mainMsgProvider(mainMsg),
       m_mainSettings(mainSettings), m_mainPythonRunner(mainPythonRunner),
@@ -49,7 +53,7 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
 
   initLayout();
 
-  m_presenter.reset(new EnggDiffFittingPresenter(this, mainCalib));
+  m_presenter.reset(new EnggDiffFittingPresenter(this, mainCalib, mainParam));
   m_presenter->notify(IEnggDiffFittingPresenter::Start);
 }
 
@@ -79,7 +83,7 @@ void EnggDiffFittingViewQtWidget::doSetup() {
           SLOT(browseFitFocusedRun()));
 
   connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(textEdited(const QString &)),
-          this, SLOT(resetFittingMultiMode()));
+          this, SLOT(resetFittingMode()));
 
   connect(m_ui.lineEdit_pushButton_run_num, SIGNAL(editingFinished()), this,
           SLOT(FittingRunNo()));
@@ -100,7 +104,12 @@ void EnggDiffFittingViewQtWidget::doSetup() {
   connect(m_ui.pushButton_fitting_browse_peaks, SIGNAL(released()), this,
           SLOT(browseClicked()));
 
+  connect(m_ui.pushButton_load, SIGNAL(released()), this, SLOT(loadClicked()));
+
   connect(m_ui.pushButton_fit, SIGNAL(released()), this, SLOT(fitClicked()));
+
+  connect(m_ui.pushButton_fit_all, SIGNAL(released()), this,
+          SLOT(fitAllClicked()));
 
   // add peak by clicking the button
   connect(m_ui.pushButton_select_peak, SIGNAL(released()), SLOT(setPeakPick()));
@@ -115,6 +124,9 @@ void EnggDiffFittingViewQtWidget::doSetup() {
 
   connect(m_ui.pushButton_plot_separate_window, SIGNAL(released()),
           SLOT(plotSeparateWindow()));
+
+  // Tool-tip button
+  connect(m_ui.pushButton_tooltip, SIGNAL(released()), SLOT(showToolTipHelp()));
 
   m_ui.dataPlot->setCanvasBackground(Qt::white);
   m_ui.dataPlot->setAxisTitle(QwtPlot::xBottom, "d-Spacing (A)");
@@ -165,6 +177,7 @@ void EnggDiffFittingViewQtWidget::saveSettings() const {
 
 void EnggDiffFittingViewQtWidget::enable(bool enable) {
   m_ui.pushButton_fitting_browse_run_num->setEnabled(enable);
+  m_ui.pushButton_load->setEnabled(enable);
   m_ui.lineEdit_pushButton_run_num->setEnabled(enable);
   m_ui.pushButton_fitting_browse_peaks->setEnabled(enable);
   m_ui.lineEdit_fitting_peaks->setEnabled(enable);
@@ -208,8 +221,16 @@ EnggDiffFittingViewQtWidget::enggRunPythonCode(const std::string &pyCode) {
   return m_mainPythonRunner->enggRunPythonCode(pyCode);
 }
 
+void EnggDiffFittingViewQtWidget::loadClicked() {
+  m_presenter->notify(IEnggDiffFittingPresenter::Load);
+}
+
 void EnggDiffFittingViewQtWidget::fitClicked() {
   m_presenter->notify(IEnggDiffFittingPresenter::FitPeaks);
+}
+
+void EnggDiffFittingViewQtWidget::fitAllClicked() {
+  m_presenter->notify(IEnggDiffFittingPresenter::FitAllPeaks);
 }
 
 void EnggDiffFittingViewQtWidget::FittingRunNo() {
@@ -252,10 +273,28 @@ void EnggDiffFittingViewQtWidget::listViewFittingRun() {
   }
 }
 
-void EnggDiffFittingViewQtWidget::resetFittingMultiMode() {
+void EnggDiffFittingViewQtWidget::resetFittingMode() {
   // resets the global variable so the list view widgets
   // adds the run number to for single runs too
   m_fittingMutliRunMode = false;
+  m_fittingSingleRunMode = false;
+}
+
+void EnggDiffFittingViewQtWidget::resetCanvas() {
+  // clear vector and detach curves to avoid plot crash
+  // when only plotting focused workspace
+  for (auto curves : m_fittedDataVector) {
+    if (curves) {
+      curves->detach();
+      delete curves;
+    }
+  }
+
+  if (m_fittedDataVector.size() > 0)
+    m_fittedDataVector.clear();
+
+  // set it as false as there will be no valid workspace to plot
+  m_ui.pushButton_plot_separate_window->setEnabled(false);
 }
 
 void EnggDiffFittingViewQtWidget::setDataVector(
@@ -264,21 +303,10 @@ void EnggDiffFittingViewQtWidget::setDataVector(
 
   if (!plotSinglePeaks) {
     // clear vector and detach curves to avoid plot crash
-    // when only plotting focused workspace
-    for (auto curves : m_fittedDataVector) {
-      if (curves) {
-        curves->detach();
-        delete curves;
-      }
-    }
-
-    if (m_fittedDataVector.size() > 0)
-      m_fittedDataVector.clear();
-
-    // set it as false as there will be no valid workspace to plot
-    m_ui.pushButton_plot_separate_window->setEnabled(false);
+    resetCanvas();
   }
 
+  // when only plotting focused workspace
   if (focused) {
     dataCurvesFactory(data, m_focusedDataVector, focused);
   } else {
@@ -419,7 +447,7 @@ EnggDiffFittingViewQtWidget::getSaveFile(const std::string &prevPath) {
 }
 
 void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
-  resetFittingMultiMode();
+  resetFittingMode();
   QString prevPath = QString::fromStdString(focusingDir());
   if (prevPath.isEmpty()) {
     prevPath =
@@ -447,6 +475,10 @@ void EnggDiffFittingViewQtWidget::setFittingRunNo(const std::string &path) {
 
 std::string EnggDiffFittingViewQtWidget::getFittingRunNo() const {
   return m_ui.lineEdit_pushButton_run_num->text().toStdString();
+}
+
+void EnggDiffFittingViewQtWidget::enableFitAllButton(bool enable) const {
+  m_ui.pushButton_fit_all->setEnabled(enable);
 }
 
 void EnggDiffFittingViewQtWidget::clearFittingComboBox() const {
@@ -503,6 +535,19 @@ void EnggDiffFittingViewQtWidget::plotSeparateWindow() {
   m_presenter->notify(IEnggDiffFittingPresenter::LogMsg);
 }
 
+void EnggDiffFittingViewQtWidget::showToolTipHelp() {
+  // We need a the mouse click position relative to the widget
+  // and relative to the screen. We will set the mouse click position
+  // relative to widget to 0 as the global position of the mouse
+  // is what is considered when the tool tip is displayed
+  const QPoint relWidgetPosition(0, 0);
+  const QPoint mousePos = QCursor::pos();
+  // Now fire the generated event to show a tool tip at the cursor
+  QEvent *toolTipEvent =
+      new QHelpEvent(QEvent::ToolTip, relWidgetPosition, mousePos);
+  QCoreApplication::sendEvent(m_ui.pushButton_tooltip, toolTipEvent);
+}
+
 std::string EnggDiffFittingViewQtWidget::fittingPeaksData() const {
 
   return m_ui.lineEdit_fitting_peaks->text().toStdString();
@@ -511,18 +556,6 @@ std::string EnggDiffFittingViewQtWidget::fittingPeaksData() const {
 void EnggDiffFittingViewQtWidget::setPeakList(
     const std::string &peakList) const {
   m_ui.lineEdit_fitting_peaks->setText(QString::fromStdString(peakList));
-}
-
-std::vector<std::string>
-EnggDiffFittingViewQtWidget::splitFittingDirectory(std::string &selectedfPath) {
-
-  Poco::Path PocofPath(selectedfPath);
-  std::string selectedbankfName = PocofPath.getBaseName();
-  std::vector<std::string> splitBaseName;
-  if (selectedbankfName.find("ENGINX_") != std::string::npos) {
-    boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
-  }
-  return splitBaseName;
 }
 
 void EnggDiffFittingViewQtWidget::setBankEmit() { emit setBank(); }
@@ -547,8 +580,17 @@ std::vector<std::string> EnggDiffFittingViewQtWidget::getFittingRunNumVec() {
 
 void EnggDiffFittingViewQtWidget::setFittingRunNumVec(
     std::vector<std::string> assignVec) {
+  // holds all the directories required
   m_fitting_runno_dir_vec.clear();
   m_fitting_runno_dir_vec = assignVec;
+}
+
+bool EnggDiffFittingViewQtWidget::getFittingSingleRunMode() {
+  return m_fittingSingleRunMode;
+}
+
+void EnggDiffFittingViewQtWidget::setFittingSingleRunMode(bool mode) {
+  m_fittingSingleRunMode = mode;
 }
 
 void EnggDiffFittingViewQtWidget::setFittingMultiRunMode(bool mode) {

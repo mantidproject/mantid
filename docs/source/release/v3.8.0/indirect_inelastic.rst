@@ -28,14 +28,22 @@ Stretch
 
 - Previously the Quest script was used to drive the Bayes stretch interface. This functionality has been ported to the algorithm :ref:`BayesStretch <algm-BayesStretch>`.
 
+Corrections
+###########
+
+Absorption
+~~~~~~~~~~
+
+- Mantid plotting is now handled in the interface rather than the respective algorithm
+
 
 Data Reduction
 ##############
 
 ISIS Calibration
 ~~~~~~~~~~~~~~~~
-- Add load log option to ISIS calibration interface
 
+- Add load log option to ISIS calibration interface
 
 Data Analysis
 #############
@@ -66,6 +74,19 @@ Load nMoldyn
 
 - New algorithm :ref:`LoadNMoldyn4Ascii1D <algm-LoadNMoldyn4Ascii1D>` has been added to allow 1D nmoldyn data to be loaded in Mantid
 
+Correlations
+~~~~~~~~~~~~
+
+- New algorithms :ref:`VelocityCrossCorrelations <algm-VelocityCrossCorrelations>` and :ref:`VelocityAutoCorrelations <VelocityAutoCorrelations>`
+- New algorithms :ref:`AngularAutoCorrelationsSingleAxis <AngularAutoCorrelationsSingleAxis>` and :ref:`AngularAutoCorrelationsTwoAxes <AngularAutoCorrelationsTwoAxes>`
+
+VESUVIO
+#######
+
+- Add the functionality for ties between internal parameters within each mass profile. This allows for the creation of a BivariateGaussian profile from the MultivariateGaussian profile
+  Ties can be added within the defintion of the mass profile with the following:
+    flags['masses'] = [{'value':1.0079, 'function': 'MultivariateGaussian', 'SigmaX': 5, 'SigmaY': 5, 'SigmaZ': 5, 'ties': 'SigmaX=SigmaY'}]
+  The above will tie SigmaX to SigmaY for this MultivariateGaussian in the driver script
 
 Improvements
 ------------
@@ -77,7 +98,7 @@ Improvements
 - Vesuvio sigma_theta value updated for single and double differencing in both forward and back scattering. The new value is 0.016 for all.
 - The Elwin interface now uses the resolution of the instrument to create the range bars when possible
 - Shift of container data and conversion of units to wavelength have been removed from ApplyPaalmanPings interface and added to ApplyPaalmanPingsCorrection algorithm.
-
+- Improvements to FABADA minimizer have been added (ergodicity, ties and false convergences).
 
 Bugfixes
 --------

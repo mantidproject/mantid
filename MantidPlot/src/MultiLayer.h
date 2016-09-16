@@ -109,6 +109,8 @@ public:
                                                const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
 
+  void setCommonAxisScales();
+
 public slots:
   Graph *addLayer(int x = 0, int y = 0, int width = 0, int height = 0);
   void setLayersNumber(int n);
@@ -262,6 +264,9 @@ private:
 
   bool d_is_waterfall_plot;
   QColor d_waterfall_fill_color;
+
+  const int default_waterfall_width_offset = 10;
+  const int default_waterfall_height_offset = 20;
 };
 
 //! Button with layer number

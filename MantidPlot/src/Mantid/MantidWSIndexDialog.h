@@ -228,13 +228,15 @@ public:
   struct UserInput {
     QMultiMap<QString, std::set<int>> plots;
     bool waterfall;
+    bool tiled;
   };
 
   /// Constructor - same parameters as one of the parent constructors, along
   /// with a
   /// list of the names of workspaces to be plotted.
   MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags, QList<QString> wsNames,
-                      const bool showWaterfallOption = false);
+                      const bool showWaterfallOption = false,
+                      const bool showTiledOption = false);
 
   /// Returns a structure holding all of the selected options
   UserInput getSelections() const;
@@ -243,11 +245,13 @@ public:
   /// mapped to the set of workspace indices.
   QMultiMap<QString, std::set<int>> getPlots() const;
   /// Returns whether the waterfall option has been selected
-  bool waterfallPlotRequested() const;
+  bool isWaterfallPlotSelected() const;
   /// Called by dialog when plot requested
   bool plotRequested();
   /// Called by dialog when plot all requested
   void plotAllRequested();
+  /// Returns whether the tiled plot option has been selected
+  bool isTiledPlotSelected() const;
 
 private slots:
   /// Called when the wsField has been edited.
@@ -285,12 +289,15 @@ private:
   /// Do we allow the display of the waterfall option
   bool m_waterfall;
 
+  /// Do we allow the display of the tiled option
+  bool m_tiled;
+
   /// Pointers to the obligatory Qt objects:
   QLabel *m_wsMessage, *m_spectraMessage, *m_orMessage;
   QLineEditWithErrorMark *m_wsField, *m_spectraField;
   QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox;
   QHBoxLayout *m_optionsBox;
-  QCheckBox *m_waterfallOpt;
+  QCheckBox *m_waterfallOpt, *m_tiledOpt;
 
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;
@@ -304,13 +311,12 @@ class MantidWSIndexDialog : public QDialog {
   Q_OBJECT
 
 public:
-  /// Constructor - same parameters as one of the parent constructors, along
-  /// with a
-  /// list of the names of workspaces to be plotted.
+  /// Constructor - has a list of the names of workspaces to be plotted.
   MantidWSIndexDialog(MantidUI *parent, Qt::WFlags flags,
                       QList<QString> wsNames,
                       const bool showWaterfallOption = false,
-                      const bool showPlotAll = true);
+                      const bool showPlotAll = true,
+                      const bool showTiledOption = false);
   /// Returns a structure holding all of the selected options
   MantidWSIndexWidget::UserInput getSelections() const;
   /// Returns the QMultiMap that contains all the workspaces that are to be
@@ -318,7 +324,9 @@ public:
   /// mapped to the set of workspace indices.
   QMultiMap<QString, std::set<int>> getPlots() const;
   /// Returns whether the waterfall option has been selected
-  bool waterfallPlotRequested() const;
+  bool isWaterfallPlotSelected() const;
+  /// Returns whether the tiled plot option has been selected
+  bool isTiledPlotSelected() const;
 private slots:
   /// Called when the OK button is pressed.
   void plot();

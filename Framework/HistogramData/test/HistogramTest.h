@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
 
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
@@ -18,6 +19,7 @@ using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Frequencies;
 using Mantid::HistogramData::FrequencyVariances;
 using Mantid::HistogramData::FrequencyStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
 
 class HistogramTest : public CxxTest::TestSuite {
 public:
@@ -620,14 +622,37 @@ public:
     TS_ASSERT_THROWS_NOTHING(h.setCountStandardDeviations(2));
   }
 
+  void test_setFrequenciesDataValid() {
+    Histogram h(BinEdges{1, 2, 3});
+    std::vector<double> freqs(2, 0.36);
+    h.setFrequencies(freqs);
+    TS_ASSERT_EQUALS(freqs, h.y().rawData());
+  }
+
   void test_setFrequencyVariances() {
     Histogram h(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h.setFrequencyVariances(2));
   }
 
+  void test_setFrequencyVariancesDataValid() {
+    Histogram h(BinEdges{1, 2, 3});
+    std::vector<double> freqVars(2, 100);
+    std::vector<double> freqStdDevs(2, 10);
+
+    h.setFrequencyVariances(freqVars);
+    TS_ASSERT_EQUALS(freqStdDevs, h.e().rawData());
+  }
+
   void test_setFrequencyStandardDeviations() {
     Histogram h(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h.setFrequencyStandardDeviations(2));
+  }
+
+  void test_setFrequencyStandardDeviationsDataValid() {
+    Histogram h(BinEdges{1, 2, 3});
+    std::vector<double> freqStdDevs(2, 0.11);
+    h.setFrequencyStandardDeviations(freqStdDevs);
+    TS_ASSERT_EQUALS(freqStdDevs, h.e().rawData());
   }
 
   void test_setCountVariances_size_mismatch() {
@@ -930,6 +955,43 @@ public:
     Counts counts(1);
     TS_ASSERT_THROWS(hist.setSharedY(counts.cowData()), std::logic_error);
   }
+};
+
+class HistogramTestPerformance : public CxxTest::TestSuite {
+public:
+  static HistogramTestPerformance *createSuite() {
+    return new HistogramTestPerformance;
+  }
+  static void destroySuite(HistogramTestPerformance *suite) { delete suite; }
+
+  HistogramTestPerformance() : xData(histSize, LinearGenerator(0, 2)) {
+    BinEdges edges(histSize, LinearGenerator(0, 2));
+    for (size_t i = 0; i < nHists; i++)
+      hists.push_back(Histogram(edges));
+  }
+
+  void test_copy_X() {
+    for (auto &i : hists)
+      i.mutableX() = xData;
+  }
+
+  void test_share_X_with_deallocation() {
+    auto x = Mantid::Kernel::make_cow<HistogramX>(xData);
+    for (auto &i : hists)
+      i.setSharedX(x);
+  }
+
+  void test_share_X() {
+    auto x = Mantid::Kernel::make_cow<HistogramX>(xData);
+    for (auto &i : hists)
+      i.setSharedX(x);
+  }
+
+private:
+  const size_t nHists = 100000;
+  const size_t histSize = 4000;
+  std::vector<Histogram> hists;
+  HistogramX xData;
 };
 
 #endif /* MANTID_HISTOGRAMDATA_HISTOGRAMTEST_H_ */
