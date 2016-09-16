@@ -19,6 +19,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using namespace CxxTest;
+
 
 class ConvertUnitsUsingDetectorTableTest : public CxxTest::TestSuite {
 public:
@@ -30,6 +32,10 @@ public:
   static void destroySuite(ConvertUnitsUsingDetectorTableTest *suite) {
     delete suite;
   }
+
+  ConvertUnitsUsingDetectorTableTest() {}
+  ~ConvertUnitsUsingDetectorTableTest() override {}
+
   void test_Init() {
     ConvertUnitsUsingDetectorTable alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -89,64 +95,58 @@ public:
   }
 };
 
-class ConvertUnitsUsingDetectorTableTestPerformance
-    : public CxxTest::TestSuite {
+class ConvertUnitsUsingDetectorTableTestPerformance : public TestSuite {
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static ConvertUnitsUsingDetectorTableTestPerformance *createSuite() {
-    return new ConvertUnitsUsingDetectorTableTestPerformance();
-  }
-  static void
-  destroySuite(ConvertUnitsUsingDetectorTableTestPerformance *suite) {
-    delete suite;
-  }
+	ConvertUnitsUsingDetectorTableTestPerformance() {}
+	~ConvertUnitsUsingDetectorTableTestPerformance() override {
+		AnalysisDataService::Instance().remove(workspaceName);
+	}
+	void testPerformance() {
+		ConvertUnitsUsingDetectorTable myAlg;
+		myAlg.initialize();
 
-  void setUp() override {
-    int nBins = 10;
-    //     MatrixWorkspace_sptr WS =
-    //     WorkspaceCreationHelper::Create2DWorkspaceBinned(2, nBins, 500.0,
-    //     50.0);
-    WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        3000, nBins, false, false, true, "TESTY");
-    WS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    AnalysisDataService::Instance().add(workspaceName, WS);
-    pars = WorkspaceFactory::Instance().createTable("TableWorkspace");
-    // Create TableWorkspace with values in it
+		int nBins = 10;
+		//     MatrixWorkspace_sptr WS =
+		//     WorkspaceCreationHelper::Create2DWorkspaceBinned(2, nBins, 500.0,
+		//     50.0);
+		WS =
+			WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+				2, nBins, false, false, true, "TESTY");
 
-    pars->addColumn("int", "spectra");
-    pars->addColumn("double", "l1");
-    pars->addColumn("double", "l2");
-    pars->addColumn("double", "twotheta");
-    pars->addColumn("double", "efixed");
-    pars->addColumn("int", "emode");
+		WS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
-    API::TableRow row0 = pars->appendRow();
-    row0 << 1 << 100.0 << 10.0 << 90.0 << 7.0 << 0;
+		AnalysisDataService::Instance().add(workspaceName, WS);
 
-    API::TableRow row1 = pars->appendRow();
-    row1 << 2 << 1.0 << 1.0 << 90.0 << 7.0 << 0;
-  }
+		// Create TableWorkspace with values in it
 
-  void tearDown() override {
+		pars =
+			WorkspaceFactory::Instance().createTable("TableWorkspace");
+		pars->addColumn("int", "spectra");
+		pars->addColumn("double", "l1");
+		pars->addColumn("double", "l2");
+		pars->addColumn("double", "twotheta");
+		pars->addColumn("double", "efixed");
+		pars->addColumn("int", "emode");
 
-    AnalysisDataService::Instance().remove(workspaceName);
-  }
-  void test_TofToLambda() {
-    ConvertUnitsUsingDetectorTable myAlg;
-    myAlg.initialize();
-    // Set the properties
-    myAlg.setRethrows(true);
-    myAlg.setPropertyValue("InputWorkspace", workspaceName);
-    myAlg.setPropertyValue("OutputWorkspace", workspaceName);
-    myAlg.setPropertyValue("Target", "Wavelength");
-    myAlg.setProperty("DetectorParameters", pars);
-    myAlg.execute();
-  }
+		API::TableRow row0 = pars->appendRow();
+		row0 << 1 << 100.0 << 10.0 << 90.0 << 7.0 << 0;
+
+		API::TableRow row1 = pars->appendRow();
+		row1 << 2 << 1.0 << 1.0 << 90.0 << 7.0 << 0;
+
+		// Set the properties
+		myAlg.setRethrows(true);
+		myAlg.setPropertyValue("InputWorkspace", workspaceName);
+		myAlg.setPropertyValue("OutputWorkspace", workspaceName);
+		myAlg.setPropertyValue("Target", "Wavelength");
+		myAlg.setProperty("DetectorParameters", pars);
+		myAlg.execute();
+	}
 
 private:
-  const std::string workspaceName = "_ws_testConvertUsingDetectorTable";
-  MatrixWorkspace_sptr WS;
-  ITableWorkspace_sptr pars;
+	std::string workspaceName = "_ws_testConvertUsingDetectorTable";
+	MatrixWorkspace_sptr WS;
+	ITableWorkspace_sptr pars;
 };
+
 #endif /* MANTID_ALGORITHMS_CONVERTUNITSUSINGDETECTORTABLETEST_H_ */
