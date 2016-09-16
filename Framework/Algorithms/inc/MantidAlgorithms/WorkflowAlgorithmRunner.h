@@ -8,10 +8,10 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** WorkflowAlgorithmRunner : TODO: DESCRIPTION
+/** Controls the data flow and the order of algorithm execution.
 
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
+  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak
+  Ridge National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -53,6 +53,7 @@ private:
   /// Execution code
   void exec() override;
 
+  /// Configures a row in `setupTable`.
   template<typename QUEUE, typename MAP>
   void configureRow(API::ITableWorkspace_sptr setupTable, API::ITableWorkspace_sptr propertyTable, const size_t currentRow, QUEUE &queue, const MAP &ioMap, std::shared_ptr<std::unordered_set<size_t>> rowsBeingQueued = nullptr) const;
 };

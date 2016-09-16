@@ -17,6 +17,10 @@ const static std::string IO_MAP("InputOutputMap");
 const static std::string SETUP_TABLE("SetupTable");
 }
 
+/** Checks if a string is a hard coded workspace name.
+ * @param s string to be checked
+ * @return return true if `s` is surrounded by '"' or '''
+ */
 bool isHardCodedWorkspaceName(const std::string &s) {
   if (s.size() < 3) {
     return false;
@@ -26,6 +30,11 @@ bool isHardCodedWorkspaceName(const std::string &s) {
   return (f == '\'' && b == '\'') || (f == '"' && b == '"');
 }
 
+/** Removes first and last character of a string.
+ * @param s string to be tidied
+ * @return tidied string
+ * @throw std::runtime_error if `s` is too short
+ */
 std::string tidyWorkspaceName(const std::string &s) {
   if (s.length() < 3) {
     throw std::runtime_error("Workspace name is too short.");
@@ -33,6 +42,15 @@ std::string tidyWorkspaceName(const std::string &s) {
   return std::string(s.cbegin() + 1, s.cend() - 1);
 }
 
+/** Transforms a setup table to an empty property table.
+ * Clear cells referred to in `ioMapping`, if they do not contain
+ * hard coded values. In the case of hard coded values, removes
+ * '"' and ''' characters.
+ * @tparam MAP a type with `std::map` like iterators
+ * @param[in,out] table the table to be cleaned
+ * @param[in] ioMapping input/output property lookup table
+ * @throw std::runtime_error in case of errorneous entries in `table`
+ */
 template<typename MAP>
 void cleanPropertyTable(ITableWorkspace_sptr table, const MAP &ioMapping) {
   // Some output columns may be processed several times, but this should
@@ -66,7 +84,6 @@ void cleanPropertyTable(ITableWorkspace_sptr table, const MAP &ioMapping) {
 DECLARE_ALGORITHM(WorkflowAlgorithmRunner)
 
 void WorkflowAlgorithmRunner::init() {
-
   declareProperty(PropertyNames::ALGORITHM, "", boost::make_shared<MandatoryValidator<std::string>>(), "Name of the algorithm to run");
   declareProperty(
       make_unique<WorkspaceProperty<ITableWorkspace>>(
@@ -80,11 +97,14 @@ void WorkflowAlgorithmRunner::init() {
 
 void WorkflowAlgorithmRunner::exec() {
   ITableWorkspace_sptr setupTable = getProperty(PropertyNames::SETUP_TABLE);
+  // propertyTable will contain the final properties of the managed algorithms.
   ITableWorkspace_sptr propertyTable = setupTable->clone();
   ITableWorkspace_sptr ioMappingTable = getProperty(PropertyNames::IO_MAP);
   if (ioMappingTable->rowCount() != 1) {
     throw std::runtime_error("Row count in " + PropertyNames::IO_MAP + " is " + std::to_string(ioMappingTable->rowCount()) + ", not 1.");
   }
+  // Transform ioMappingTable to a real lookup table (ioMap) and check for
+  // consistency.
   std::unordered_map<std::string, std::string> ioMap;
   const auto inputPropertyNames = ioMappingTable->getColumnNames();
   for (size_t col = 0; col < ioMappingTable->columnCount(); ++col) {
@@ -100,12 +120,14 @@ void WorkflowAlgorithmRunner::exec() {
       ioMap[inputPropertyName] = outputPropertyName;
     }
   }
+  // Declare order of execution and fill in propertyTable.
   cleanPropertyTable(propertyTable, ioMap);
   std::deque<size_t> queue;
   for (size_t i = 0; i < setupTable->rowCount(); ++i) {
     configureRow(setupTable, propertyTable, i, queue, ioMap);
   }
 
+  // Execute the algorithm in the order specified by queue.
   const std::string algorithmName = getProperty(PropertyNames::ALGORITHM);
   while (!queue.empty()) {
     const auto row = queue.front();
@@ -161,6 +183,19 @@ void WorkflowAlgorithmRunner::exec() {
   }
 }
 
+/**
+ * Appends `currentRow` and the rows it depends on to `queue` if needed.
+ * Additionally, configures `propertyTable` appropriately.
+ * @tparam QUEUE a type which supports iterators and has `emplace_back()`
+ * @tparam MAP a type with `std::map` like iterators
+ * @param[in] setupTable a table defining the property dependencies
+ * @param[in,out] propertyTable a table containing the final property values
+ * @param[in] currentRow the row in `setupTable` to configure
+ * @param[in,out] queue a queue of row indexes in order of execution
+ * @param[in] ioMap input/output property lookup table
+ * @param[in,out] rowsBeingQueued a set of rows currently being configured
+ * @throw std::runtime_error in several errorneous cases
+ */
 template<typename QUEUE, typename MAP>
 void WorkflowAlgorithmRunner::configureRow(ITableWorkspace_sptr setupTable, ITableWorkspace_sptr propertyTable, const size_t currentRow, QUEUE &queue, const MAP &ioMap, std::shared_ptr<std::unordered_set<size_t>> rowsBeingQueued) const {
   if (currentRow > setupTable->rowCount()) {
