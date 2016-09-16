@@ -686,12 +686,11 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
     window->addSerialisableWindow(dynamic_cast<QObject *>(win));
   }
 
-  if (tsv.selectSection("spectrumviewer")) {
-    std::string specLines;
-    tsv >> specLines;
-
-    auto win = SpectrumView::SpectrumView::loadFromProject(specLines, window,
-                                                           fileVersion);
-    window->addSerialisableWindow(dynamic_cast<QObject *>(win));
+  if (tsv.hasSection("spectrumviewer")) {
+    for (const auto &section : tsv.sections("spectrumviewer")) {
+      auto win = SpectrumView::SpectrumView::loadFromProject(section, window,
+                                                             fileVersion);
+      window->addSerialisableWindow(dynamic_cast<QObject *>(win));
+    }
   }
 }
