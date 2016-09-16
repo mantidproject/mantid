@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/WorkflowAlgorithmRunner.h"
 
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 #include <unordered_map>
 
@@ -114,7 +115,8 @@ void WorkflowAlgorithmRunner::appendToTaskQueue(ITableWorkspace_sptr setupTable,
 DECLARE_ALGORITHM(WorkflowAlgorithmRunner)
 
 void WorkflowAlgorithmRunner::init() {
-  declareProperty(PropertyNames::ALGORITHM, "", "Name of the algorithm to run");
+
+  declareProperty(PropertyNames::ALGORITHM, "", boost::make_shared<MandatoryValidator<std::string>>(), "Name of the algorithm to run");
   declareProperty(
       make_unique<WorkspaceProperty<ITableWorkspace>>(
           PropertyNames::SETUP_TABLE.c_str(), "", Direction::Input),
@@ -154,59 +156,57 @@ void WorkflowAlgorithmRunner::exec() {
   }
 
   const std::string algorithmName = getProperty(PropertyNames::ALGORITHM);
-  if (!algorithmName.empty()) {
-    while (!queue.empty()) {
-      const auto row = queue.front();
-      auto &algorithmFactory = AlgorithmFactory::Instance();
-      auto algorithm = algorithmFactory.create(algorithmName, algorithmFactory.highestVersion(algorithmName));
-      algorithm->initialize();
-      if (!algorithm->isInitialized()) {
-        throw std::runtime_error("Workflow algorithm failed to initialise.");
-      }
-      // First column in taskTable is for id.
-      for (size_t col = 1; col < propertyTable->columnCount(); ++col) {
-        const auto column = propertyTable->getColumn(col);
-        const auto &propertyName = column->name();
-        const auto &valueType = column->get_type_info();
-        try {
-          if (valueType == typeid(std::string)) {
-            const auto &value = propertyTable->cell<std::string>(row, col);
-            algorithm->setProperty(propertyName, value);
-          }
-          else if (valueType == typeid(int)) {
-            const auto &value = propertyTable->cell<int>(row, col);
-            algorithm->setProperty(propertyName, static_cast<long>(value));
-          }
-          else if (valueType == typeid(size_t)) {
-            const auto &value = propertyTable->cell<size_t>(row, col);
-            algorithm->setProperty(propertyName, value);
-          }
-          else if (valueType == typeid(float) || valueType == typeid(double)) {
-            const auto &value = propertyTable->cell<double>(row, col);
-            algorithm->setProperty(propertyName, value);
-          }
-          else if (valueType == typeid(bool)) {
-            const auto &value = propertyTable->cell<bool>(row, col);
-            algorithm->setProperty(propertyName, value);
-          }
-          else if (valueType == typeid(Kernel::V3D)) {
-            const auto &value = propertyTable->cell<V3D>(row, col);
-            algorithm->setProperty(propertyName, value);
-          }
-          else {
-            throw std::runtime_error("Unimplemented column type in " + PropertyNames::SETUP_TABLE + ": " + valueType.name() + '.');
-          }
-        }
-        catch(std::invalid_argument &e) {
-          throw std::runtime_error("While setting properties for algorithm " + algorithmName + ": " + e.what());
-        }
-      }
-      algorithm->execute();
-      if (!algorithm->isExecuted()) {
-        throw std::runtime_error("Workflow algorithm failed to execute.");
-      }
-      queue.pop_front();
+  while (!queue.empty()) {
+    const auto row = queue.front();
+    auto &algorithmFactory = AlgorithmFactory::Instance();
+    auto algorithm = algorithmFactory.create(algorithmName, algorithmFactory.highestVersion(algorithmName));
+    algorithm->initialize();
+    if (!algorithm->isInitialized()) {
+      throw std::runtime_error("Workflow algorithm failed to initialise.");
     }
+    // First column in taskTable is for id.
+    for (size_t col = 1; col < propertyTable->columnCount(); ++col) {
+      const auto column = propertyTable->getColumn(col);
+      const auto &propertyName = column->name();
+      const auto &valueType = column->get_type_info();
+      try {
+        if (valueType == typeid(std::string)) {
+          const auto &value = propertyTable->cell<std::string>(row, col);
+          algorithm->setProperty(propertyName, value);
+        }
+        else if (valueType == typeid(int)) {
+          const auto &value = propertyTable->cell<int>(row, col);
+          algorithm->setProperty(propertyName, static_cast<long>(value));
+        }
+        else if (valueType == typeid(size_t)) {
+          const auto &value = propertyTable->cell<size_t>(row, col);
+          algorithm->setProperty(propertyName, value);
+        }
+        else if (valueType == typeid(float) || valueType == typeid(double)) {
+          const auto &value = propertyTable->cell<double>(row, col);
+          algorithm->setProperty(propertyName, value);
+        }
+        else if (valueType == typeid(bool)) {
+          const auto &value = propertyTable->cell<bool>(row, col);
+          algorithm->setProperty(propertyName, value);
+        }
+        else if (valueType == typeid(Kernel::V3D)) {
+          const auto &value = propertyTable->cell<V3D>(row, col);
+          algorithm->setProperty(propertyName, value);
+        }
+        else {
+          throw std::runtime_error("Unimplemented column type in " + PropertyNames::SETUP_TABLE + ": " + valueType.name() + '.');
+        }
+      }
+      catch(std::invalid_argument &e) {
+        throw std::runtime_error("While setting properties for algorithm " + algorithmName + ": " + e.what());
+      }
+    }
+    algorithm->execute();
+    if (!algorithm->isExecuted()) {
+      throw std::runtime_error("Workflow algorithm failed to execute.");
+    }
+    queue.pop_front();
   }
 }
 
