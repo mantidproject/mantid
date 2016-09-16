@@ -21,7 +21,9 @@ class WorkflowAlgorithmRunnerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static WorkflowAlgorithmRunnerTest *createSuite() { return new WorkflowAlgorithmRunnerTest(); }
+  static WorkflowAlgorithmRunnerTest *createSuite() {
+    return new WorkflowAlgorithmRunnerTest();
+  }
   static void destroySuite(WorkflowAlgorithmRunnerTest *suite) { delete suite; }
 
   WorkflowAlgorithmRunnerTest() {
@@ -32,9 +34,7 @@ public:
     m_ioMapForScale = ioMap;
   }
 
-  ~WorkflowAlgorithmRunnerTest() {
-    deleteWorkspace(m_ioMapForScale);
-  }
+  ~WorkflowAlgorithmRunnerTest() { deleteWorkspace(m_ioMapForScale); }
 
   void test_CircularDependenciesThrows() {
     auto setupTable = createSetupTableForScale();
@@ -55,7 +55,8 @@ public:
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Algorithm", "Scale"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("SetupTable", setupTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("InputOutputMap", m_ioMapForScale))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("InputOutputMap", m_ioMapForScale))
     TS_ASSERT_THROWS_ANYTHING(algorithm.execute())
     TS_ASSERT(!algorithm.isExecuted())
   }
@@ -98,7 +99,8 @@ public:
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Algorithm", "Scale"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("SetupTable", setupTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("InputOutputMap", m_ioMapForScale))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("InputOutputMap", m_ioMapForScale))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
     assertOutputWorkspace("output1", scaling3 * scaling2 * scaling1);
@@ -131,7 +133,8 @@ public:
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Algorithm", "Scale"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("SetupTable", setupTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("InputOutputMap", m_ioMapForScale))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("InputOutputMap", m_ioMapForScale))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
     assertOutputWorkspace("output1", scaling2 * scaling1);
@@ -163,7 +166,8 @@ public:
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Algorithm", "Scale"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("SetupTable", setupTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("InputOutputMap", m_ioMapForScale))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("InputOutputMap", m_ioMapForScale))
     TS_ASSERT_THROWS_ANYTHING(algorithm.execute())
     TS_ASSERT(!algorithm.isExecuted())
   }
@@ -175,7 +179,7 @@ public:
     setupTable->getRef<std::string>("InputWorkspace", 0) = "\"input\"";
     setupTable->getRef<std::string>("OutputWorkspace", 0) = "\"output\"";
     const double factor = 0.66;
-    setupTable->getRef<double>("Factor", 0) =  factor;
+    setupTable->getRef<double>("Factor", 0) = factor;
     auto inputWs = createTestWorkspace("input");
     WorkflowAlgorithmRunner algorithm;
     algorithm.setRethrows(true);
@@ -183,7 +187,8 @@ public:
     TS_ASSERT(algorithm.isInitialized())
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("Algorithm", "Scale"))
     TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("SetupTable", setupTable))
-    TS_ASSERT_THROWS_NOTHING(algorithm.setProperty("InputOutputMap", m_ioMapForScale))
+    TS_ASSERT_THROWS_NOTHING(
+        algorithm.setProperty("InputOutputMap", m_ioMapForScale))
     TS_ASSERT_THROWS_NOTHING(algorithm.execute())
     TS_ASSERT(algorithm.isExecuted())
     assertOutputWorkspace("output", factor);
@@ -207,9 +212,11 @@ public:
 private:
   ITableWorkspace_sptr m_ioMapForScale;
 
-  static void assertOutputWorkspace(const std::string& name, const double factor) {
+  static void assertOutputWorkspace(const std::string &name,
+                                    const double factor) {
     TS_ASSERT(AnalysisDataService::Instance().doesExist(name))
-    auto outputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+    auto outputWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
     TS_ASSERT_EQUALS(outputWs->y(0)[0], DEFAULT_TEST_VALUE * factor)
     deleteWorkspace(outputWs);
   }
@@ -225,7 +232,7 @@ private:
     return table;
   }
 
-  static MatrixWorkspace_sptr createTestWorkspace(const std::string& name) {
+  static MatrixWorkspace_sptr createTestWorkspace(const std::string &name) {
     auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     auto &es = ws->mutableE(0);
     auto &xs = ws->mutableX(0);
@@ -237,16 +244,13 @@ private:
     return ws;
   }
 
-  template<typename T_sptr>
-  static void deleteWorkspace(T_sptr ws) {
+  template <typename T_sptr> static void deleteWorkspace(T_sptr ws) {
     DeleteWorkspace deleter;
     deleter.setChild(true);
     deleter.initialize();
     deleter.setProperty("Workspace", ws);
     deleter.execute();
   }
-
 };
-
 
 #endif /* MANTID_ALGORITHMS_WORKFLOWALGORITHMRUNNERTEST_H_ */
