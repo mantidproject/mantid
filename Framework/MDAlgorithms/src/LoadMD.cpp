@@ -238,8 +238,10 @@ void LoadMD::exec() {
     if (pref_QConvention != m_QConvention) {
       std::vector<double> scaling(m_numDims);
       for (size_t d = 0; d < m_numDims; d++) {
-        if (d < 3) scaling[d] = -1.0;
-        else scaling[d] = 1.0;
+        if (d < 3)
+          scaling[d] = -1.0;
+        else
+          scaling[d] = 1.0;
       }
       g_log.information() << "Transforming Q\n";
       Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
@@ -352,8 +354,10 @@ void LoadMD::loadHisto() {
   if (pref_QConvention != m_QConvention) {
     std::vector<double> scaling(m_numDims);
     for (size_t d = 0; d < m_numDims; d++) {
-      if (d < 3) scaling[d] = -1.0;
-      else scaling[d] = 1.0;
+      if (d < 3)
+        scaling[d] = -1.0;
+      else
+        scaling[d] = 1.0;
     }
     g_log.information() << "Transforming Q\n";
     Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
