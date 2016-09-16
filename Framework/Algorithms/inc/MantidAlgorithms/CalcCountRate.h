@@ -59,8 +59,8 @@ public:
 private:
   void init() override;
   void exec() override;
-  // holder of the derivative of the time series log, if one is used;
-  std::unique_ptr<Kernel::TimeSeriesProperty<double>> m_logDerivHolder;
+  // holder of the temporary log, used for normalization, binning source etc...
+  std::unique_ptr<Kernel::TimeSeriesProperty<double>> m_tmpLogHolder;
 
 protected: // for testing, actually private
   /// pointer to the log used to normalize results or NULL if no such log
@@ -74,12 +74,16 @@ protected: // for testing, actually private
   /// specify if rate is calculated in selected frame interval (range defined)
   /// or all frame should be used
   bool m_rangeExplicit{false};
-  /// spurion search ranges
+  bool m_useLogDerivative{false};
+  /// spurion search TOF ranges
   double m_XRangeMin{0}, m_XRangeMax{0};
+  /// experiment time ranges:
+  Kernel::DateAndTime m_TRangeMin{ 0 }, m_TRangeMax{ 0 };
+
   /// temporary workspace used to keep intermediate results
   DataObjects::EventWorkspace_sptr m_workingWS;
 
-  void setWSDataRanges(DataObjects::EventWorkspace_sptr &InputWorkspace);
+  void setSourceWSandXRanges(DataObjects::EventWorkspace_sptr &InputWorkspace);
 
   void
   setOutLogParameters(const DataObjects::EventWorkspace_sptr &InputWorkspace);

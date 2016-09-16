@@ -222,6 +222,28 @@ DateAndTime EventWorkspace::getPulseTimeMax() const {
   }
   return tMax;
 }
+/**
+Get the maximum and mimumum pulse time for events accross the entire workspace.
+@param Tmin minimal pulse time as a DateAndTime.
+@param Tmax maximal pulse time as a DateAndTime.
+*/
+void EventWorkspace::getPulseTimeMinMax(Mantid::Kernel::DateAndTime &Tmin,
+    Mantid::Kernel::DateAndTime &Tmax) const {
+
+    Mantid::Kernel::DateAndTime Tmax = DateAndTime::minimum();
+    Mantid::Kernel::DateAndTime Tmin = DateAndTime::maximum();
+    size_t numWorkspace = this->data.size();
+    DateAndTime tempMin,tempMax;
+    for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
+        workspaceIndex++) {
+        const EventList &evList = this->getSpectrum(workspaceIndex);
+        evList.getPulseTimeMinMax(tempMin, tempMax);
+        if (tempMin > Tmin)
+            Tmin = tempMin;
+    }
+
+}
+
 
 /**
  Get the minimum time at sample for events across the entire workspace.

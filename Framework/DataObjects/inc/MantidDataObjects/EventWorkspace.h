@@ -76,6 +76,9 @@ public:
 
   Mantid::Kernel::DateAndTime getPulseTimeMax() const override;
 
+  void getPulseTimeMinMax(Mantid::Kernel::DateAndTime &xmin,
+                          Mantid::Kernel::DateAndTime &xmax) const;
+
   Mantid::Kernel::DateAndTime
   getTimeAtSampleMin(double tofOffset = 0) const override;
 

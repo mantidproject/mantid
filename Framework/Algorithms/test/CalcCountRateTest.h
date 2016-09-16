@@ -19,7 +19,7 @@ using namespace Mantid::Algorithms;
 class CalcCountRateTester : public CalcCountRate {
 public:
   void setSearchRanges(DataObjects::EventWorkspace_sptr &InputWorkspace) {
-    CalcCountRate::setWSDataRanges(InputWorkspace);
+    CalcCountRate::setSourceWSandXRanges(InputWorkspace);
   }
   std::tuple<double, double, bool> getXRanges() const {
     return std::tuple<double, double, bool>(m_XRangeMin, m_XRangeMax,

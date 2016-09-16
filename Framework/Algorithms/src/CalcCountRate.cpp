@@ -144,29 +144,9 @@ void CalcCountRate::exec() {
   // log
   this->setOutLogParameters(sourceWS);
 
-  //
-  std::string SourceWSName = sourceWS->name();
-  if (SourceWSName.size() == 0) {
-    SourceWSName = "CalcCountRateInputWS";
-  }
-  // Sum spectra of the input workspace
-  auto summator = createChildAlgorithm("SumSpectra", 0, 1);
-  summator->setProperty("InputWorkspace", sourceWS);
-  summator->setProperty("OutputWorkspace", "__" + SourceWSName + "_Sum");
-  summator->setProperty("IncludeMonitors", false);
-
-  summator->execute();
-
-  API::MatrixWorkspace_sptr source = summator->getProperty("OutputWorkspace");
-  m_workingWS =
-      boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(source);
-  if (!m_workingWS) {
-    throw std::invalid_argument(
-        "Can not sum spectra of input event workspace: " + sourceWS->name());
-  }
   //-------------------------------------
-  // identify ranges for count rate calculations
-  this->setWSDataRanges(m_workingWS);
+  // identify ranges for count rate calculations and initiate source workspace
+  this->setSourceWSandXRanges(m_workingWS);
 
   // create results log and add it to the source workspace
   std::string logname = getProperty("CountRateLogName");
@@ -179,7 +159,7 @@ void CalcCountRate::exec() {
   // clear up log derivative and existing log pointer (if any)
   // to avoid incorrect usage
   // at subsequent calls to the same algorithm.
-  m_logDerivHolder.release();
+  m_tmpLogHolder.release();
   m_pNormalizationLog = nullptr;
 
   /*
@@ -211,15 +191,77 @@ void CalcCountRate::exec() {
 
     */
 }
+
 void CalcCountRate::calcRateLog(
     DataObjects::EventWorkspace_sptr &InputWorkspace,
     Kernel::TimeSeriesProperty<double> *const targLog) {
 
+  MantidVec countRate(m_numLogSteps);
 
+  auto nHist = InputWorkspace->getNumberHistograms();
+  // Initialize progress reporting.
+  API::Progress prog(this, 0.0, 1.0, nHist);
+
+  double dTRangeMin = static_cast<double>(m_TRangeMin.totalNanoseconds());
+  double dTRangeMax = static_cast<double>(m_TRangeMax.totalNanoseconds());
+
+#pragma omp parallel
+  {
+    auto nThreads = omp_get_num_threads();
+    std::vector<MantidVec> Buff(nThreads);
+// initialize thread's histogram buffer
+#pragma omp critical
+    for (size_t i = 0; i < nThreads; i++) {
+      Buff[i].assign(m_numLogSteps, 0);
+    }
+
+#pragma omp for
+    for (int i = 0; i < nHist; ++i) {
+      auto nThread = omp_get_thread_num();
+      PARALLEL_START_INTERUPT_REGION
+
+      // Get a const event list reference. eventInputWS->dataY() doesn't work.
+      const DataObjects::EventList &el = InputWorkspace->getSpectrum(i);
+      el.generateCountsHistogramPulseTime(dTRangeMin, dTRangeMax, Buff[nThread],
+                                          m_XRangeMin, m_XRangeMax);
+
+      // Report progress
+      prog.report(name());
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+    std::vector<double> countNormalization;
+    if (m_pNormalizationLog) {
+#pragma omp critical
+      countNormalization = m_pNormalizationLog->valuesAsVector();
+    }
+// calculate final sums
+#pragma omp single
+    for (size_t j = 0; j < m_numLogSteps; j++) {
+      for (size_t i = 0; i < nThreads; j++) {
+        countRate[j] += Buff[i][j];
+      }
+      // normalize if requested
+      if (!countNormalization.empty()) {
+        countRate[j] /= countNormalization[j];
+      }
+    }
+  }
+  // recover histogram timing, but start assuming run starts at
+  std::vector<Kernel::DateAndTime> times(m_numLogSteps);
+
+  double dt = (dTRangeMax - dTRangeMin) / m_numLogSteps;
+  auto t0 = m_TRangeMin.totalNanoseconds();
+  for (size_t i = 0; i < m_numLogSteps; i++) {
+    times[i] = Kernel::DateAndTime(t0 + static_cast<int64_t>((0.5 + i) * dt));
+  }
+  // store calculated values within the target log.
+  targLog->replaceValues(times, countRate);
 }
 
 /*Analyse input log parameters and logs, attached to the workspace and identify
- * the parameters of the target log
+ * the parameters of the target log, including experiment time.
+ *
  @param InputWorkspace -- input workspace to analyse logs
  */
 void CalcCountRate::setOutLogParameters(
@@ -261,16 +303,63 @@ void CalcCountRate::setOutLogParameters(
 
   // if property derivative is specified.
   if (useLogDerivative) {
-    m_logDerivHolder = m_pNormalizationLog->getDerivative();
-    m_pNormalizationLog = m_logDerivHolder.get();
+    m_tmpLogHolder = m_pNormalizationLog->getDerivative();
+    m_pNormalizationLog = m_tmpLogHolder.get();
+    m_useLogDerivative = true;
   }
 
   ///
-  if (useLogAccuracy) {
-    m_numLogSteps = m_pNormalizationLog->realSize();
-  } else {
+  if (normalizeResult) {
+    if (!useLogAccuracy) {
+      g_log.warning() << "Change of the counting log accuracy while "
+                         "normalizing by log values is not implemented. Will "
+                         "use log accuracy.";
+      useLogAccuracy = true;
+    }
+  } //---------------------------------------------------------------------
+  // find target log ranges and identify what normalization should be used
+
+  Kernel::DateAndTime runTMin, runTMax;
+  InputWorkspace->getPulseTimeMinMax(runTMin, runTMax);
+  //
+  if (useLogAccuracy) { // extract log times located inside the run time
+    Kernel::DateAndTime tLogMin, tLogMax;
+    if (m_useLogDerivative) { // derivative moves events to center, but we need
+                              // initial range
+      auto pSource =
+          InputWorkspace->run().getTimeSeriesProperty<double>(NormLogName);
+      tLogMin = pSource->firstTime();
+      tLogMax = pSource->lastTime();
+    } else {
+      tLogMin = m_pNormalizationLog->firstTime();
+      tLogMax = m_pNormalizationLog->lastTime();
+    }
+    //
+    if (tLogMin < runTMin || tLogMax > runTMax) {
+      if (!m_tmpLogHolder) {
+        m_tmpLogHolder = std::make_unique<Kernel::TimeSeriesProperty<double>>(
+            *m_pNormalizationLog->clone());
+      }
+      m_tmpLogHolder->filterByTime(runTMin, runTMax);
+      m_pNormalizationLog = m_tmpLogHolder.get();
+      m_numLogSteps = m_pNormalizationLog->realSize();
+    } else {
+      if (tLogMin > runTMin || tLogMax < runTMax) {
+        g_log.warning() << "Normalization log " << m_pNormalizationLog->name()
+                        << " values do not cover the whole experiment time. "
+                           "Log normalization impossible ";
+        m_pNormalizationLog = nullptr;
+        useLogAccuracy = false;
+      }
+    }
+  }
+
+  if (!useLogAccuracy) {
     m_numLogSteps = getProperty("NumTimeSteps");
   }
+
+  m_TRangeMin = runTMin;
+  m_TRangeMax = runTMax;
 }
 
 /* Retrieve and define data search ranges from input workspace parameters and
@@ -282,7 +371,7 @@ void CalcCountRate::setOutLogParameters(
  *           requested by the user
  *
 */
-void CalcCountRate::setWSDataRanges(
+void CalcCountRate::setSourceWSandXRanges(
     DataObjects::EventWorkspace_sptr &InputWorkspace) {
   m_XRangeMin = getProperty("XMin");
   m_XRangeMax = getProperty("XMax");
@@ -322,14 +411,15 @@ void CalcCountRate::setWSDataRanges(
   } else {
     wst = InputWorkspace;
   }
-  auto wste = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(wst);
-  if (!wste) {
+  InputWorkspace =
+      boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(wst);
+  if (!InputWorkspace) {
     throw std::runtime_error("SetWSDataRanges:Can not retrieve EventWorkspace "
                              "after converting units");
   }
   // here the ranges have been changed so both will newer remain defaults
   double realMin, realMax;
-  wste->getEventXMinMax(realMin, realMax);
+  InputWorkspace->getEventXMinMax(realMin, realMax);
 
   if (m_XRangeMin == EMPTY_DBL()) {
     m_XRangeMin = realMin;
@@ -347,24 +437,6 @@ void CalcCountRate::setWSDataRanges(
                   << m_XRangeMax << " To: " << realMax << std::endl;
     m_XRangeMax = realMax;
   }
-
-  //
-  auto crop = createChildAlgorithm("CropWorkspace", 0, 1);
-  crop->setProperty("InputWorkspace", wste);
-  crop->setProperty("OutputWorkspace", wsName);
-  crop->setProperty("XMin", m_XRangeMin);
-  crop->setProperty("XMax", m_XRangeMax);
-
-  crop->execute();
-
-  wst = crop->getProperty("OutputWorkspace");
-
-  InputWorkspace =
-      boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(wst);
-  if (!InputWorkspace) {
-    throw std::runtime_error(
-        "Can not crop input workspace within the XMin-XMax ranges requested");
-  }
 }
 /** Helper function, mainly for testing
 * @return  true if count rate should be normalized and false
@@ -374,7 +446,7 @@ bool CalcCountRate::notmalizeCountRate() const {
 }
 /** Helper function, mainly for testing
 * @return  true if log derivative is used instead of log itself */
-bool CalcCountRate::useLogDerivative() const { return bool(m_logDerivHolder); }
+bool CalcCountRate::useLogDerivative() const { return m_useLogDerivative; }
 
 } // namespace Algorithms
 } // namespace Mantid

@@ -869,6 +869,14 @@ public:
       TS_ASSERT_EQUALS(Y[i], 2.0);
       TS_ASSERT_DELTA(E[i], M_SQRT2, 1e-5);
     }
+
+    // check uniform counts histogram.
+    size_t hist1 = Y.size();
+    MantidVec Y1(hist1, 0);
+    eList.generateCountsHistogramPulseTime(X[0], X[hist1], Y1);
+    for (std::size_t i = 0; i < Y.size(); i++) {
+      TS_ASSERT_EQUALS(Y[i], Y1[i]);
+    }
   }
 
   void test_histogram_weighed_event_by_pulse_time_throws() {
