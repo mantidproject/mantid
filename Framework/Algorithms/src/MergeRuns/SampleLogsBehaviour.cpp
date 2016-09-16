@@ -211,7 +211,6 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
  *
  * @param numberNames the number of sample log names
  * @param tolerances a vector containing strings with the tolerances
- * @param paramsTolerances a string containing nothing, or tolerances to use
  * @return a vector of doubles of size numberNames
  */
 std::vector<double> SampleLogsBehaviour::createTolerancesVector(
