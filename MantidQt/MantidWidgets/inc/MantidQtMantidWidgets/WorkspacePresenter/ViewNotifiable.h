@@ -43,8 +43,9 @@ public:
     GroupWorkspaces,
     UngroupWorkspaces,
     SortWorkspaces,
-	SaveSingleWorkspace,
-	SaveWorkspaceCollection
+    SaveSingleWorkspace,
+    SaveWorkspaceCollection,
+    FilterWorkspaces
   };
 
   virtual void notifyFromView(Flag flag) = 0;

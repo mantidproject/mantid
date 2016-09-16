@@ -70,6 +70,8 @@ public:
   virtual SaveFileType getSaveFileType() const = 0;
   virtual void saveWorkspace(const std::string &wsName, SaveFileType type) = 0;
   virtual void saveWorkspaces(const StringList &wsNames) = 0;
+  virtual std::string getFilterText() const = 0;
+  virtual void filterWorkspaces(const std::string &filterText) = 0;
   virtual StringList getSelectedWorkspaceNames() const = 0;
   virtual Mantid::API::Workspace_sptr getSelectedWorkspace() const = 0;
   virtual void updateTree(

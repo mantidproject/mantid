@@ -68,6 +68,7 @@ private:
   void deleteWorkspaces();
   void saveSingleWorkspace();
   void saveWorkspaceCollection();
+  void filterWorkspaces();
 
   void workspaceLoaded();
   void workspaceRenamed();

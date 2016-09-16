@@ -309,6 +309,17 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
+  void testFilterWorkspaces() {
+    ::testing::DefaultValue<std::string>::Set(std::string());
+    EXPECT_CALL(*mockView.get(), getFilterText()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), filterWorkspaces(std::string()))
+        .Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::FilterWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
 private:
   boost::shared_ptr<NiceMock<MockWorkspaceDockView>> mockView;
   boost::shared_ptr<WorkspacePresenter> presenter;

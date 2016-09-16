@@ -70,6 +70,9 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   case ViewNotifiable::Flag::SaveWorkspaceCollection:
     saveWorkspaceCollection();
     break;
+  case ViewNotifiable::Flag::FilterWorkspaces:
+    filterWorkspaces();
+    break;
   }
 }
 
@@ -85,20 +88,17 @@ void WorkspacePresenter::loadLiveData() {
 
 void WorkspacePresenter::renameWorkspace() {
   auto view = lockView();
-  auto selected = view->getSelectedWorkspaceNames();
-  view->showRenameDialog(selected);
+  view->showRenameDialog(view->getSelectedWorkspaceNames());
 }
 
 void WorkspacePresenter::groupWorkspaces() {
   auto view = lockView();
-  auto selected = view->getSelectedWorkspaceNames();
-  view->groupWorkspaces(selected);
+  view->groupWorkspaces(view->getSelectedWorkspaceNames());
 }
 
 void WorkspacePresenter::ungroupWorkspaces() {
   auto view = lockView();
-  auto selected = view->getSelectedWorkspaceNames();
-  view->ungroupWorkspaces(selected);
+  view->ungroupWorkspaces(view->getSelectedWorkspaceNames());
 }
 
 void WorkspacePresenter::sortWorkspaces() {
@@ -110,10 +110,8 @@ void WorkspacePresenter::sortWorkspaces() {
 void WorkspacePresenter::deleteWorkspaces() {
   auto view = lockView();
 
-  if (view->deleteConfirmation()) {
-    auto selected = view->getSelectedWorkspaceNames();
-    view->deleteWorkspaces(selected);
-  }
+  if (view->deleteConfirmation())
+    view->deleteWorkspaces(view->getSelectedWorkspaceNames());
 }
 
 void WorkspacePresenter::saveSingleWorkspace() {
@@ -124,8 +122,12 @@ void WorkspacePresenter::saveSingleWorkspace() {
 
 void WorkspacePresenter::saveWorkspaceCollection() {
   auto view = lockView();
-  auto selected = view->getSelectedWorkspaceNames();
-  view->saveWorkspaces(selected);
+  view->saveWorkspaces(view->getSelectedWorkspaceNames());
+}
+
+void WorkspacePresenter::filterWorkspaces() {
+  auto view = lockView();
+  view->filterWorkspaces(view->getFilterText());
 }
 
 void WorkspacePresenter::workspaceLoaded() { updateView(); }

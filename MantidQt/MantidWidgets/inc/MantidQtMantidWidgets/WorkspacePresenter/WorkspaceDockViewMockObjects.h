@@ -44,6 +44,9 @@ public:
       updateTree,
       void(const std::map<std::string, Mantid::API::Workspace_sptr> &items));
 
+  MOCK_CONST_METHOD0(getFilterText, std::string());
+  MOCK_METHOD1(filterWorkspaces, void(const std::string &filterText));
+
   MOCK_CONST_METHOD0(getSelectedWorkspaceNames, StringList());
   MOCK_CONST_METHOD0(getSelectedWorkspace, Mantid::API::Workspace_sptr());
 
