@@ -269,9 +269,8 @@ class MatchPeaksTest(unittest.TestCase):
         DeleteWorkspace(shifted)
 
     def _FindEPPtables_deleted(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError, 'MatchPeaks'):
             run_algorithm('DeleteWorkspace', Workspace='EPPfit_Parameters')
-            DeleteWorkspace()
         with self.assertRaises(ValueError):
             run_algorithm('DeleteWorkspace', Workspace='EPPfit_NormalisedCovarianceMatrix')
         with self.assertRaises(ValueError):
