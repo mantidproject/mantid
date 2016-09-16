@@ -27,6 +27,7 @@ class HFIRBackground(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
         Background("BioSANS_test_data.xml")
@@ -51,6 +52,7 @@ class HFIRBackgroundTransmission(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         AppendDataFile("BioSANS_test_data.xml")
         Background("BioSANS_test_data.xml")
         SetBckTransmission(0.55, 0.1)
@@ -75,6 +77,7 @@ class HFIRBackgroundDirectBeamTrans(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         AppendDataFile("BioSANS_test_data.xml")
         Background("BioSANS_test_data.xml")
         BckDirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
@@ -101,6 +104,7 @@ class HFIRBackgroundBeamSpreaderTrans(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         AppendDataFile("BioSANS_test_data.xml")
         Background("BioSANS_test_data.xml")
         BckBeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml",
@@ -130,6 +134,7 @@ class HFIRBackgroundTransDarkCurrent(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         AppendDataFile("BioSANS_test_data.xml")
         Background("BioSANS_test_data.xml")
         BckDirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
@@ -157,6 +162,7 @@ class HFIRBackgroundDirectBeamTransDC(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         AppendDataFile("BioSANS_test_data.xml")
         Background("BioSANS_test_data.xml")
         BckDirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",

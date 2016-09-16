@@ -55,6 +55,7 @@ class NonIDF_Properties(object):
         super(NonIDF_Properties,self).__setattr__('second_white',None)
         super(NonIDF_Properties,self).__setattr__('_tmp_run',None)
         super(NonIDF_Properties,self).__setattr__('_cashe_sum_ws',False)
+        super(NonIDF_Properties,self).__setattr__('_mapmask_ref_ws',None)
 
     #end
     def log(self, msg,level="notice"):
@@ -148,11 +149,23 @@ class NonIDF_Properties(object):
     @log_to_mantid.setter
     def log_to_mantid(self,val):
         object.__setattr__(self,'_log_to_mantid',bool(val))
+    # -----------------------------------------------------------------------------
+    @property
+    def mapmask_ref_ws(self):
+        """Property provides reference workspace for LoadMask and GroupWorkspace algorithms
+
+            on 26/07/2016 refernce workspace (a workspace which provides appropriate
+            spectra-detector mapping was implemented for LoadMask algorithm only.
+        """
+        return self._mapmask_ref_ws
+
+    @mapmask_ref_ws.setter
+    def mapmask_ref_ws(self,val):
+        object.__setattr__(self,'_mapmask_ref_ws',val)
 
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)
     #
-
     def _set_instrument_and_facility(self,Instrument,run_workspace=None):
         """Obtain default instrument and facility and store it in properties"""
 

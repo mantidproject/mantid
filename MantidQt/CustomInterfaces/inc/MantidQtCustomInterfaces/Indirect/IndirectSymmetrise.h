@@ -75,6 +75,8 @@ private slots:
   void previewAlgDone(bool error);
   void xRangeMaxChanged(double value);
   void xRangeMinChanged(double value);
+  void plotClicked();
+  void saveClicked();
 
 private:
   Ui::IndirectSymmetrise m_uiForm;

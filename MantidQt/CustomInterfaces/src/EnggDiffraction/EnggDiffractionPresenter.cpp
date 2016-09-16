@@ -66,12 +66,12 @@ std::string EnggDiffractionPresenter::g_sumOfFilesFocus = "";
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_workerThread(nullptr), m_calibFinishedOK(false),
-      m_focusFinishedOK(false), m_rebinningFinishedOK(false),
-      m_view(view) /*, m_model(new EnggDiffractionModel()), */ {
+      m_focusFinishedOK(false), m_rebinningFinishedOK(false), m_view(view),
+      m_viewHasClosed(false) {
   if (!m_view) {
     throw std::runtime_error(
         "Severe inconsistency found. Presenter created "
-        "with an empty/null view (engineeering diffraction interface). "
+        "with an empty/null view (Engineering diffraction interface). "
         "Cannot continue.");
   }
 }
@@ -95,10 +95,25 @@ void EnggDiffractionPresenter::cleanup() {
     delete m_workerThread;
     m_workerThread = nullptr;
   }
+
+  // Remove the workspace which is loaded when the interface starts
+  auto &ADS = Mantid::API::AnalysisDataService::Instance();
+  if (ADS.doesExist(g_calibBanksParms)) {
+    ADS.remove(g_calibBanksParms);
+  }
 }
 
 void EnggDiffractionPresenter::notify(
     IEnggDiffractionPresenter::Notification notif) {
+
+  // Check the view is valid - QT can send multiple notification
+  // signals in any order at any time. This means that it is possible
+  // to receive a shutdown signal and subsequently an input example
+  // for example. As we can't guarantee the state of the viewer
+  // after calling shutdown instead we shouldn't do anything after
+  if (m_viewHasClosed) {
+    return;
+  }
 
   switch (notif) {
 
@@ -608,6 +623,10 @@ void EnggDiffractionPresenter::processRBNumberChange() {
 }
 
 void EnggDiffractionPresenter::processShutDown() {
+  // Set that the view has closed in case QT attempts to fire another
+  // signal whilst we are shutting down. This stops notify before
+  // it hits the switch statement as the view could be in any state.
+  m_viewHasClosed = true;
   m_view->showStatus("Closing...");
   m_view->saveSettings();
   cleanup();
@@ -1131,44 +1150,35 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   for (size_t i = 0; i < difc.size(); i++) {
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
         "EnggCalibrate");
-    try {
-      alg->initialize();
-      alg->setProperty("InputWorkspace", ceriaWS);
-      alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
-      alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
-      if (specNumUsed) {
-        alg->setPropertyValue(g_calibCropIdentifier,
-                              boost::lexical_cast<std::string>(specNos));
-      } else {
-        alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
-      }
-      const std::string outFitParamsTblName =
-          outFitParamsTblNameGenerator(specNos, i);
-      alg->setPropertyValue("FittedPeaks", outFitParamsTblName);
-      alg->setPropertyValue("OutputParametersTableName", outFitParamsTblName);
-      alg->execute();
-    } catch (std::runtime_error &re) {
+
+    alg->initialize();
+    alg->setProperty("InputWorkspace", ceriaWS);
+    alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
+    alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
+    if (specNumUsed) {
+      alg->setPropertyValue(g_calibCropIdentifier,
+                            boost::lexical_cast<std::string>(specNos));
+    } else {
+      alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
+    }
+    const std::string outFitParamsTblName =
+        outFitParamsTblNameGenerator(specNos, i);
+    alg->setPropertyValue("FittedPeaks", outFitParamsTblName);
+    alg->setPropertyValue("OutputParametersTableName", outFitParamsTblName);
+    alg->execute();
+    if (!alg->isExecuted()) {
       g_log.error() << "Error in calibration. ",
-          "Could not run the algorithm EnggCalibrate succesfully for bank " +
-              boost::lexical_cast<std::string>(i) + ". Error description: " +
-              re.what() + " Please check also the log messages for details.";
-      throw;
+          "Could not run the algorithm EnggCalibrate successfully for bank " +
+              boost::lexical_cast<std::string>(i);
+      throw std::runtime_error("EnggCalibrate failed");
     }
 
-    try {
-      difc[i] = alg->getProperty("DIFC");
-      tzero[i] = alg->getProperty("TZERO");
-    } catch (std::runtime_error &rexc) {
-      g_log.error() << "Error in calibration. ",
-          "The calibration algorithm EnggCalibrate run succesfully but could "
-          "not retrieve the outputs DIFC and TZERO. Error description: " +
-              std::string(rexc.what()) +
-              " Please check also the log messages for additional details.";
-      throw;
-    }
+    difc[i] = alg->getProperty("DIFC");
+    tzero[i] = alg->getProperty("TZERO");
 
-    g_log.notice() << " * Bank " << i + 1 << " calibrated, "
-                   << "difc: " << difc[i] << ", zero: " << tzero[i] << '\n';
+    g_log.information() << " * Bank " << i + 1 << " calibrated, "
+                        << "difc: " << difc[i] << ", zero: " << tzero[i]
+                        << '\n';
   }
 
   // Creates appropriate output directory

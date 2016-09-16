@@ -9,6 +9,11 @@
 Description
 -----------
 
+.. warning::
+
+   This algorithm will be deprecated in the next version of Mantid. Please, use :ref:`algm-LoadILLINX` instead, which
+   is the new name for this algorithm.
+
 Loads an ILL TOF NeXus file into a :ref:`Workspace2D <Workspace2D>` with
 the given name.
 

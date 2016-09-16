@@ -127,5 +127,32 @@ FunctionDomain1DSpectrum::FunctionDomain1DSpectrum(
     std::vector<double>::const_iterator to)
     : FunctionDomain1DVector(from, to), m_workspaceIndex(wi) {}
 
+/// Constructor.
+/// @param bins :: A vector with bin boundaries.
+FunctionDomain1DHistogram::FunctionDomain1DHistogram(
+    const std::vector<double> &bins)
+    : FunctionDomain1DHistogram(bins.begin(), bins.end()) {}
+
+/**
+  * Create a domain from a part of a vector.
+  * @param from :: Iterator to start copying values from.
+  * @param to :: Iterator to the end of the data.
+  */
+FunctionDomain1DHistogram::FunctionDomain1DHistogram(
+    std::vector<double>::const_iterator from,
+    std::vector<double>::const_iterator to)
+    : FunctionDomain1D(nullptr, 0), m_bins(from, to) {
+  if (m_bins.size() < 2) {
+    throw std::runtime_error("Cannot initialize FunctionDomain1DHistogram with "
+                             "less than 2 bin boundaries.");
+  }
+  resetData(&m_bins[1], m_bins.size() - 1);
+}
+
+/// Get the leftmost boundary
+double FunctionDomain1DHistogram::leftBoundary() const {
+  return m_bins.front();
+}
+
 } // namespace API
 } // namespace Mantid

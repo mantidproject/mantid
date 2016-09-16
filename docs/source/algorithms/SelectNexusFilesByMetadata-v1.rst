@@ -17,10 +17,11 @@ Criteria could be any python logical expression involving the nexus entry names 
 Arbitrary number of criteria can be combined. The metadata entry should contain only one element.
 Note, that if the entry is of string type, string comparison will be performed.
 As a result, a plain comma separated list of fully resolved file names satisfying the criteria will be returned.
+Note, that this algorithm requires `h5py <https://pypi.python.org/pypi/h5py>`_ package installed.
 
 **Example - Running SelectNexusFilesByMetadata**
 
-.. testcode:: ExSelectNexusFilesByMetadata
+.. code-block:: python
 
     res = SelectNexusFilesByMetadata(FileList='INTER00013460,13463,13464.nxs',
                                      NexusCriteria='$raw_data_1/duration$ > 1000 or $raw_data_1/good_frames$ > 10000')
@@ -28,7 +29,7 @@ As a result, a plain comma separated list of fully resolved file names satisfyin
 
 Output:
 
-.. testoutput:: ExSelectNexusFilesByMetadata
+.. code-block:: none
 
    res is now a string containing comma separated paths of 2 file names that satisfy the criteria
 
