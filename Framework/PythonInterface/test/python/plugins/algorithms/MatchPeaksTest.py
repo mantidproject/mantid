@@ -6,7 +6,7 @@ from mantid.api import *
 import numpy as np
 from mantid.simpleapi import *
 from testhelpers import run_algorithm
-
+import sys
 
 class MatchPeaksTest(unittest.TestCase):
 
@@ -103,12 +103,24 @@ class MatchPeaksTest(unittest.TestCase):
     def testValidatorInput(self):
         self._args['OutputWorkspace'] = 'output'
         # Test if incompatible workspaces will fail
-        with self.assertRaises(RuntimeError):
-            self._args['InputWorkspace'] = self._in1
-            run_algorithm('MatchPeaks', **self._args)
+        if sys.version_info >= (2, 7):
+            with self.assertRaises(RuntimeError):
+                self._args['InputWorkspace'] = self._in1
+                run_algorithm('MatchPeaks', **self._args)
 
-            self._args['InputWorkspace'] = self._in2
-            run_algorithm('MatchPeaks', **self._args)
+                self._args['InputWorkspace'] = self._in2
+                run_algorithm('MatchPeaks', **self._args)
+        else:
+            incompatible = False
+            try:
+                self._args['InputWorkspace'] = self._in1
+                run_algorithm('MatchPeaks', **self._args)
+
+                self._args['InputWorkspace'] = self._in2
+                run_algorithm('MatchPeaks', **self._args)
+            except RuntimeError:
+                incompatible = True
+            self.assertTrue(incompatible, "Workspaces are incompatible")
 
         # Test if compatible workspaces will be accepted (size, X-values, E-values)
         self._args['InputWorkspace'] = self._ws_shift
@@ -120,12 +132,24 @@ class MatchPeaksTest(unittest.TestCase):
         self._args['InputWorkspace'] = self._ws_shift
         self._args['OutputWorkspace'] = 'output'
         # Test if incompatible workspaces will fail
-        with self.assertRaises(RuntimeError):
-            self._args['InputWorkspace2'] = self._in1
-            run_algorithm('MatchPeaks', **self._args)
+        if sys.version_info >= (2, 7):
+            with self.assertRaises(RuntimeError):
+                self._args['InputWorkspace2'] = self._in1
+                run_algorithm('MatchPeaks', **self._args)
 
-            self._args['InputWorkspace2'] = self._in2
-            run_algorithm('MatchPeaks', **self._args)
+                self._args['InputWorkspace2'] = self._in2
+                run_algorithm('MatchPeaks', **self._args)
+        else:
+            incompatible = False
+            try:
+                self._args['InputWorkspace2'] = self._in1
+                run_algorithm('MatchPeaks', **self._args)
+
+                self._args['InputWorkspace2'] = self._in2
+                run_algorithm('MatchPeaks', **self._args)
+            except RuntimeError:
+                incompatible = True
+            self.assertTrue(incompatible, "Workspaces are incompatible")
 
         # Test if compatible workspaces will be accepted (size, X-values, E-values)
         self._args['InputWorkspace2'] = self._ws_in_2
@@ -269,16 +293,38 @@ class MatchPeaksTest(unittest.TestCase):
         DeleteWorkspace(shifted)
 
     def _FindEPPtables_deleted(self):
-        with self.assertRaises(ValueError, 'MatchPeaks'):
-            run_algorithm('DeleteWorkspace', Workspace='EPPfit_Parameters')
-        with self.assertRaises(ValueError):
-            run_algorithm('DeleteWorkspace', Workspace='EPPfit_NormalisedCovarianceMatrix')
-        with self.assertRaises(ValueError):
-            run_algorithm('DeleteWorkspace', Workspace='fit_table')
+        if sys.version_info >= (2, 7):
+            with self.assertRaises(ValueError):
+                run_algorithm('DeleteWorkspace', Workspace='EPPfit_Parameters')
+            with self.assertRaises(ValueError):
+                run_algorithm('DeleteWorkspace', Workspace='EPPfit_NormalisedCovarianceMatrix')
+            with self.assertRaises(ValueError):
+                run_algorithm('DeleteWorkspace', Workspace='fit_table')
+        else:
+            deleted_fit_params = False
+            try:
+                run_algorithm('DeleteWorkspace', Workspace='EPPfit_Parameters')
+            except ValueError:
+                deleted_fit_params = True
+            self.assertTrue(deleted_fit_params, "Should raise a value error")
+
+            deleted_fit_matrix = False
+            try:
+                run_algorithm('DeleteWorkspace', Workspace='EPPfit_NormalisedCovarianceMatrix')
+            except ValueError:
+                deleted_fit_matrix = True
+            self.assertTrue(deleted_fit_matrix, "Should raise a value error")
+
+            deleted_fit_table = False
+            try:
+                run_algorithm('DeleteWorkspace', Workspace='fit_table')
+            except ValueError:
+                deleted_fit_table = True
+            self.assertTrue(deleted_fit_table, "Should raise a value error")
 
     def _workspace_properties(self, test_ws):
         self.assertTrue(isinstance(test_ws, MatrixWorkspace), "Should be a matrix workspace")
-        self.assertTrue(test_ws.getSampleDetails(), "Should have SampleLogs")
+        self.assertTrue(test_ws.getRun().getLogData(), "Should have SampleLogs")
         self.assertTrue(test_ws.getHistory().lastAlgorithm(), "Should have AlgorithmsHistory")
 
 if __name__=="__main__":
