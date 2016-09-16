@@ -13,7 +13,9 @@ Framework Changes
   is almost identical, but a small number of cases (such as adding the workspaces ``Z`` and ``z``) will work
   in a more predictable manner.
 
-- A race condition when accessing a singleton from multiple threads was fixed. 
+- A race condition when accessing a singleton from multiple threads was fixed.
+
+- Log file buffers are no longer flushed by default for each newline received, increasing the speed of some system tests on Windows by 3x. 
 
 HistogramData
 -------------
