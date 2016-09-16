@@ -188,8 +188,8 @@ def getDetIDsForBank(bank):
     detIDs = set()
 
    
-	# less then zero indicates both banks, from line 98
-	bank_int = int(bank)
+    # less then zero indicates both banks, from line 98
+    bank_int = int(bank)
     if(bank_int < 0):
         # both banks, north and south
         bank_int = [1, 2]
