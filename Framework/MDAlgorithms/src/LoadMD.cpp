@@ -26,6 +26,7 @@
 #include "MantidKernel/ConfigService.h"
 #include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/range/algorithm/remove_if.hpp>
 #include <vector>
 
 typedef std::unique_ptr<Mantid::API::IBoxControllerIO> file_holder_type;
@@ -238,7 +239,11 @@ void LoadMD::exec() {
     if (pref_QConvention != m_QConvention) {
       std::vector<double> scaling(m_numDims);
       for (size_t d = 0; d < m_numDims; d++) {
-        if (d < 3)
+        std::string dimd = ws->getDimension(d)->getName();
+        std::string dim6 = dimd.substr(0, 6);
+        dimd.erase(boost::remove_if(dimd, ::isalpha), dimd.end());
+
+        if (dim6 == "Q_lab_" || dim6 == "Q_samp" || dimd == "[,,]")
           scaling[d] = -1.0;
         else
           scaling[d] = 1.0;
@@ -354,7 +359,11 @@ void LoadMD::loadHisto() {
   if (pref_QConvention != m_QConvention) {
     std::vector<double> scaling(m_numDims);
     for (size_t d = 0; d < m_numDims; d++) {
-      if (d < 3)
+      std::string dimd = ws->getDimension(d)->getName();
+      std::string dim6 = dimd.substr(0, 6);
+      dimd.erase(boost::remove_if(dimd, ::isalpha), dimd.end());
+
+      if (dim6 == "Q_lab_" || dim6 == "Q_samp" || dimd == "[,,]")
         scaling[d] = -1.0;
       else
         scaling[d] = 1.0;
