@@ -783,7 +783,7 @@ void FABADAMinimizer::TieApplication(const size_t &ParameterIndex,
   }
   // After all the other variables, the current one is updated to the ties
   API::ParameterTie *tie = m_FitFunction->getTie(i);
-  if (tie != 0) {
+  if (tie) {
     new_value = tie->eval();
     if (boost::math::isnan(new_value)) { // maybe not needed
       throw std::runtime_error("Parameter value is NaN.");
@@ -1020,13 +1020,9 @@ bool FABADAMinimizer::IterationContinuation() {
                    "(MaxIterations property).");
     }
   } else {
-    // If convergence has been reached, continue until complete the chain
-    // length.
-    if (m_counter < m_ChainIterations) {
-      return true;
-    }
-    // nothing else to do, stop interations
-    return false;
+    // If convergence has been reached, continue until we complete the chain
+    // length. Otherwise, stop interations.
+    return m_counter < m_ChainIterations;
   }
   // can we even get here? -> Nope (we should not, so we do not want it to
   // continue)
