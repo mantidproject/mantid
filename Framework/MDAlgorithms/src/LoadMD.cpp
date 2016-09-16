@@ -241,7 +241,7 @@ void LoadMD::exec() {
       for (size_t d = 0; d < m_numDims; d++) {
         std::string dimd = ws->getDimension(d)->getName();
         std::string dim2 = dimd.substr(0, 2);
-        dim = dimd.substr(0, 1);
+        dimd = dimd.substr(0, 1);
 
         if (dim2 == "Q_" || dimd == "[")
           scaling[d] = -1.0;
@@ -361,7 +361,7 @@ void LoadMD::loadHisto() {
     for (size_t d = 0; d < m_numDims; d++) {
       std::string dimd = ws->getDimension(d)->getName();
       std::string dim2 = dimd.substr(0, 2);
-      dim = dimd.substr(0, 1);
+      dimd = dimd.substr(0, 1);
 
       if (dim2 == "Q_" || dimd == "[")
         scaling[d] = -1.0;
