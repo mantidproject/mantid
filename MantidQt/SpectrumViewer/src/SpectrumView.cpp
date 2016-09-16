@@ -306,6 +306,10 @@ SpectrumView::loadFromProject(const std::string &lines, ApplicationWindow *app,
   tsv.selectLine("VerticalPoint");
   tsv >> vPoint;
 
+  bool hScroll, vScroll;
+  tsv.selectLine("Scrolling");
+  tsv >> hScroll >> vScroll;
+
   viewer->m_rangeHandler->setRange(min, max, step);
   viewer->m_ui->intensity_slider->setValue(intensity);
   viewer->m_ui->graph_max_slider->setValue(graphMax);
@@ -318,6 +322,9 @@ SpectrumView::loadFromProject(const std::string &lines, ApplicationWindow *app,
   viewer->setGeometry(geometry);
   viewer->show(); // important! show before drawing/updating
   display->updateImage();
+
+  viewer->m_ui->action_Vscroll->setChecked(vScroll);
+  viewer->m_ui->action_Hscroll->setChecked(hScroll);
 
   return viewer;
 }
@@ -360,6 +367,10 @@ std::string SpectrumView::saveToProject(ApplicationWindow *app) {
   auto vPoint = m_vGraph->getPointedAtPoint();
   spec.writeLine("HorizontalPoint") << hPoint;
   spec.writeLine("VerticalPoint") << vPoint;
+
+  auto vScroll = m_ui->action_Vscroll->isChecked();
+  auto hScroll = m_ui->action_Hscroll->isChecked();
+  spec.writeLine("Scrolling") << hScroll << vScroll;
 
   tsv.writeSection("spectrumviewer", spec.outputLines());
   return tsv.outputLines();
