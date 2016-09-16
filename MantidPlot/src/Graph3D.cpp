@@ -2670,7 +2670,6 @@ IProjectSerialisable *Graph3D::loadFromProject(const std::string &lines,
   graph->setIgnoreFonts(true);
   app->restoreWindowGeometry(
       app, graph, QString::fromStdString(tsv.lineAsString("geometry")));
-
   return graph;
 }
 

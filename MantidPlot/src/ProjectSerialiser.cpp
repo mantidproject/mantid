@@ -159,7 +159,12 @@ void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv) {
  */
 void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv,
                                     const int fileVersion) {
-  for (auto &classname : WindowFactory::Instance().getKeys()) {
+  auto keys = WindowFactory::Instance().getKeys();
+  // Work around for graph-table dependance. Graph3D's currently rely on
+  // looking up tables. These must be loaded before the graphs, so work around
+  // by loading in reverse alphabetical order.
+  std::reverse(keys.begin(), keys.end());
+  for (auto &classname : keys) {
     if (tsv.hasSection(classname)) {
       for (auto &section : tsv.sections(classname)) {
         WindowFactory::Instance().loadFromProject(classname, section, window,
