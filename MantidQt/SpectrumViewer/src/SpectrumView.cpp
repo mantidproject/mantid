@@ -291,6 +291,9 @@ SpectrumView::loadFromProject(const std::string &lines, ApplicationWindow *app,
     viewer->m_svConnections->setColorScale(posScale, negScale);
   }
 
+  int index = viewer->m_ui->imageTabs->currentIndex();
+  auto display = viewer->m_spectrumDisplay.at(index);
+
   double x, y;
   tsv.selectLine("SelectedPoint");
   tsv >> x >> y;
@@ -312,8 +315,10 @@ SpectrumView::loadFromProject(const std::string &lines, ApplicationWindow *app,
   viewer->m_emodeHandler->setEFixed(efixed);
   viewer->m_hGraph->setPointedAtPoint(hPoint);
   viewer->m_vGraph->setPointedAtPoint(vPoint);
+
   viewer->setGeometry(geometry);
-  viewer->show();
+  viewer->show(); // important! show before drawing/updating
+  display->updateImage();
 
   return viewer;
 }
