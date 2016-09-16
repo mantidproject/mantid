@@ -17,18 +17,18 @@ def mask_reduced_ws(ws_to_mask, xstart, xend):
     x_values = ws_to_mask.readX(0)
 
     if xstart > 0:
-        logger.debug('Mask bins smaller than {}'.format(xstart))
+        logger.debug('Mask bins smaller than {0}'.format(xstart))
         MaskBins(InputWorkspace=ws_to_mask, OutputWorkspace=ws_to_mask, XMin=x_values[0], XMax=x_values[xstart])
     else:
-        logger.debug('No masking due to x bin < 0!: {}'.format(xstart))
+        logger.debug('No masking due to x bin < 0!: {0}'.format(xstart))
     if xend < len(x_values) - 1:
-        logger.debug('Mask bins larger than {}'.format(xend))
+        logger.debug('Mask bins larger than {0}'.format(xend))
         MaskBins(InputWorkspace=ws_to_mask, OutputWorkspace=ws_to_mask, XMin=x_values[xend + 1], XMax=x_values[-1])
     else:
-        logger.debug('No masking due to x bin >= len(x_values) - 1!: {}'.format(xend))
+        logger.debug('No masking due to x bin >= len(x_values) - 1!: {0}'.format(xend))
 
     if xstart > 0 and xend < len(x_values) - 1:
-        logger.notice('Bins out of range {} {} [Unit of X-axis] are masked'.format(x_values[xstart], x_values[xend]))
+        logger.notice('Bins out of range {0} {1} [Unit of X-axis] are masked'.format(x_values[xstart], x_values[xend]))
 
 
 class MatchPeaks(PythonAlgorithm):
@@ -166,9 +166,9 @@ class MatchPeaks(PythonAlgorithm):
         elif self._input_table:
             peak_bins2 = self._get_peak_position(mtd[self._input_table])
 
-        self.log().notice('Peak bins {}: {}'.format(self._input_ws, peak_bins1))
+        self.log().notice('Peak bins {0}: {1}'.format(self._input_ws, peak_bins1))
         if self._input_2_ws or self._input_table:
-            self.log().notice('Peak bins {} {}: {}'.format(self._input_2_ws, self._input_table, peak_bins2))
+            self.log().notice('Peak bins {0} {1}: {2}'.format(self._input_2_ws, self._input_table, peak_bins2))
 
         # All bins must be positive and larger than zero
         if not self._input_2_ws and not self._input_table:
@@ -185,7 +185,7 @@ class MatchPeaks(PythonAlgorithm):
             # Shift Y and E values of spectrum i
             output_ws.setY(i, np.roll(output_ws.readY(i), int(-to_shift[i])))
             output_ws.setE(i, np.roll(output_ws.readE(i), int(-to_shift[i])))
-        self.log().debug('Shift array: {}'.format(to_shift))
+        self.log().debug('Shift array: {0}'.format(to_shift))
 
         # Final treatment of bins (masking, produce output)
         min_bin = 0
@@ -261,14 +261,14 @@ class MatchPeaks(PythonAlgorithm):
                             logger.debug('Peak outside tolerance, do not shift spectrum')
                     elif abs(np.argmax(y_values) - mid_bin) < tolerance:
                         peak_bin[i] = np.argmax(y_values)
-                        logger.debug('Take maximum peak position {}'.format(peak_bin[i]))
+                        logger.debug('Take maximum peak position {0}'.format(peak_bin[i]))
                     else:
                         logger.debug('Fit failed and peak outside tolerance, do not shift spectrum')
                 else:
-                    logger.debug('Peak x-value {} > x-end {}, do not shift spectrum'.format(peak_pos_error,
+                    logger.debug('Peak x-value {0} > x-end {1}, do not shift spectrum'.format(peak_pos_error,
                                                                                             x_values[-1]))
             else:
-                logger.debug('Peak x-value {} < x-begin {}, do not shift spectrum'.format(peak_pos_error, x_values[0]))
+                logger.debug('Peak x-value {0} < x-begin {1}, do not shift spectrum'.format(peak_pos_error, x_values[0]))
 
         # Delete unused TableWorkspaces
         try:
