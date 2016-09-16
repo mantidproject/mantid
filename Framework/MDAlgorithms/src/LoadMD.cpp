@@ -236,11 +236,16 @@ void LoadMD::exec() {
                         << m_QConvention << '\n';
 
     if (pref_QConvention != m_QConvention) {
+      std::vector<double> scaling(m_numDims);
+      for (size_t d = 0; d < m_numDims; d++) {
+        if (d < 3) scaling[d] = -1.0;
+        else scaling[d] = 1.0;
+      }
       g_log.information() << "Transforming Q\n";
       Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
       transform_alg->setProperty("InputWorkspace",
                                  boost::dynamic_pointer_cast<IMDWorkspace>(ws));
-      transform_alg->setProperty("Scaling", "-1.0");
+      transform_alg->setProperty("Scaling", scaling);
       transform_alg->executeAsChildAlg();
       IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
       ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(tmp);
@@ -345,11 +350,16 @@ void LoadMD::loadHisto() {
                       << '\n';
 
   if (pref_QConvention != m_QConvention) {
+    std::vector<double> scaling(m_numDims);
+    for (size_t d = 0; d < m_numDims; d++) {
+      if (d < 3) scaling[d] = -1.0;
+      else scaling[d] = 1.0;
+    }
     g_log.information() << "Transforming Q\n";
     Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
     transform_alg->setProperty("InputWorkspace",
                                boost::dynamic_pointer_cast<IMDWorkspace>(ws));
-    transform_alg->setProperty("Scaling", "-1.0");
+    transform_alg->setProperty("Scaling", scaling);
     transform_alg->executeAsChildAlg();
     IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
     ws = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
