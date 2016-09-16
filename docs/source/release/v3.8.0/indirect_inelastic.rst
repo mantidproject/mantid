@@ -17,12 +17,6 @@ Algorithms
 Bayes
 #####
 
-Quasi
-~~~~~
-
-- Saving and plotting are performed after the algorithm is run via the use of push buttons at the bottom of the interface
-
-
 Stretch
 ~~~~~~~
 
@@ -55,10 +49,6 @@ Elwin
 - When using multiple input files, the naming convention for the outputworkspace contains the `first-final` run number.
   An example of this would be `osi92764-92767_graphite002_red_elwin_elf` for OSIRIS run between 92764-92767
 
-ConvFit
-~~~~~~~
-
-- Plotting and saving is now performed after the algorithm is run. These are push buttons at the bottom of the interface which are enabled post algorithm completion
 
 Simulations
 ###########
@@ -98,7 +88,8 @@ Improvements
 - Vesuvio sigma_theta value updated for single and double differencing in both forward and back scattering. The new value is 0.016 for all.
 - The Elwin interface now uses the resolution of the instrument to create the range bars when possible
 - Shift of container data and conversion of units to wavelength have been removed from ApplyPaalmanPings interface and added to ApplyPaalmanPingsCorrection algorithm.
-
+- The plotting and saving of the results of all Inelastic Interfaces, apart from EnergyTransfer has been re-factored to be only accessible via the interface and once the algorithm is completed.
+- Improvements to FABADA minimizer have been added (ergodicity, ties and false convergences).
 
 Bugfixes
 --------

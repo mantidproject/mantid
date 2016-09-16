@@ -77,6 +77,9 @@ Improved
 
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` had a bug in cases where the beam was larger than the
+  sample, which lead to the attenuation factor being too high. This has been fixed.
+
 - :ref:`ConvertUnits <algm-ConvertUnits>` now has the option to take a workspace with Points as input.
   A property has been added that will make the algorithm convert the workspace to Bins automatically. The output space will be converted back to Points.
 
@@ -92,6 +95,8 @@ Improved
 
 - :ref:`FindSXPeaks <algm-FindSXPeaks>`: Fixed a bug where peaks with an incorrect TOF would stored for some intrument geometries.
 
+- :ref: `LoadILL <algm-LoadILL>` was renamed to `LoadILLINX <algm-LoadILLINX>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
+
 - :ref:`FFT <algm-FFT>` deals correctly with histogram input data. Internally, it converts to point data, and the output is always a point data workspace. (It can be converted to histogram data using :ref:`ConvertToHistogram <algm-ConvertToHistogram>` if required).
 
 -  :ref:`StartLiveData <algm-StartLiveData>` has additional properties for specifying scripts to run for processing and post-processing.
@@ -106,8 +111,13 @@ MD Algorithms (VATES CLI)
 
 - :ref:`MergeMD <algm-MergeMD>` now preserves the display normalization from the first workspace in the list
 
+- :ref:`BinMD <algm-BinMD>` fixed bug where algorithm would default to using orthogonal basis vectors when supplied with 4 bases and 4 dimensions
+
 Performance
 -----------
+
+- An internal change that is a preliminary step for "Instrument-2.0" can yield slight to moderate performance improvements of the following algorithms (and other algorithms that use one of these):
+  AppendSpectra, ApplyTransmissionCorrection, CalculateEfficiency, CalculateFlatBackground, ConjoinSpectra, ConvertAxesToRealSpace, ConvertAxisByFormula, ConvertEmptyToTof, ConvertSpectrumAxis2, ConvertUnitsUsingDetectorTable, CorelliCrossCorrelate, DetectorEfficiencyVariation, EQSANSTofStructure, FilterEvents, FindCenterOfMassPosition, FindCenterOfMassPosition2, FindDetectorsOutsideLimits, GetEi, IntegrateByComponent, LorentzCorrection, MultipleScatteringCylinderAbsorption, NormaliseToMonitor, Q1D2, Q1DWeighted, RadiusSum, RemoveBackground, RemoveBins, RemoveMaskedSpectra, RingProfile, SANSDirectBeamScaling, SumSpectra, TOFSANSResolution, UnwrapMonitor, UnwrapSNS, VesuvioCalculateMS, and WeightedMeanOfWorkspace.
 
 - The introduction of the HistogramData module may have influenced the performance of some algorithms and many workflows.
   A moderate number of algorithms should experience a speedup and reduced memory consumption.
@@ -164,7 +174,7 @@ Bug Fixes
 - Scripts generated from history including algorithms that added dynamic properties at run time (for example Fit, and Load) will not not include those dynamic properties in their script.  This means they will execute without warnings.
 - Cloning a ``MultiDomainFunction``, or serializing to a string and recreating it, now preserves the domains.
 - :ref:`EvaluateFunction <algm-EvaluateFunction>` now works from its dialog in the GUI as well as from a script
-
+- :ref:`ConvertToMD <algm-ConvertToMD>` ConvertToMD will now work on powder diffraction samples stored .nxspe files. This is because if a Goniometer contains a NaN value it will report itself as undefined.
 
 |
 

@@ -1,9 +1,6 @@
 #ifndef MANTID_ALGORITHMS_UNWRAPMONITOR_H_
 #define MANTID_ALGORITHMS_UNWRAPMONITOR_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -72,9 +69,6 @@ private:
   void init() override;
   void exec() override;
 
-  double getPrimaryFlightpath() const;
-  double calculateFlightpath(const int &spectrum, const double &L1,
-                             bool &isMonitor) const;
   const std::vector<int> unwrapX(const API::MatrixWorkspace_sptr &tempWS,
                                  const int &spectrum, const double &Ld);
   std::pair<int, int> handleFrameOverlapped(const MantidVec &xdata,

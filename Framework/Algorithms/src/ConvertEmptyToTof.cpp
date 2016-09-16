@@ -1,12 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertEmptyToTof.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
@@ -28,7 +26,6 @@ using namespace API;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertEmptyToTof)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertEmptyToTof::name() const {
   return "ConvertEmptyToTof";
@@ -42,7 +39,6 @@ const std::string ConvertEmptyToTof::category() const {
   return "Transforms\\Units";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ConvertEmptyToTof::init() {
@@ -84,13 +80,13 @@ void ConvertEmptyToTof::init() {
                   "Workspace Index used for elastic peak position above.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ConvertEmptyToTof::exec() {
 
   m_inputWS = this->getProperty("InputWorkspace");
   m_outputWS = this->getProperty("OutputWorkspace");
+  m_spectrumInfo = &m_inputWS->spectrumInfo();
   std::vector<int> spectraIndices = getProperty("ListOfSpectraIndices");
   std::vector<int> channelIndices = getProperty("ListOfChannelIndices");
   int epp = getProperty("ElasticPeakPosition");
@@ -106,8 +102,8 @@ void ConvertEmptyToTof::exec() {
                       "ElasticPeakPositionSpectrum");
 
     double wavelength = getPropertyFromRun<double>(m_inputWS, "wavelength");
-    double l1 = getL1(m_inputWS);
-    double l2 = getL2(m_inputWS, eppSpectrum);
+    double l1 = m_spectrumInfo->l1();
+    double l2 = m_spectrumInfo->l2(eppSpectrum);
     double epTof =
         (calculateTOF(l1, wavelength) + calculateTOF(l2, wavelength)) *
         1e6; // microsecs
@@ -381,16 +377,16 @@ bool ConvertEmptyToTof::doFitGaussianPeak(int workspaceindex, double &center,
 std::pair<int, double>
 ConvertEmptyToTof::findAverageEppAndEpTof(const std::map<int, int> &eppMap) {
 
-  double l1 = getL1(m_inputWS);
+  double l1 = m_spectrumInfo->l1();
   double wavelength = getPropertyFromRun<double>(m_inputWS, "wavelength");
 
   std::vector<double> epTofList;
   std::vector<int> eppList;
 
-  double firstL2 = getL2(m_inputWS, eppMap.begin()->first);
+  double firstL2 = m_spectrumInfo->l2(eppMap.begin()->first);
   for (const auto &epp : eppMap) {
 
-    double l2 = getL2(m_inputWS, epp.first);
+    double l2 = m_spectrumInfo->l2(epp.first);
     if (!areEqual(l2, firstL2, 0.0001)) {
       g_log.error() << "firstL2=" << firstL2 << " , "
                     << "l2=" << l2 << '\n';
@@ -420,25 +416,6 @@ ConvertEmptyToTof::findAverageEppAndEpTof(const std::map<int, int> &eppMap) {
   g_log.debug() << "Average epp=" << averageEpp
                 << " , Average epTof=" << averageEpTof << '\n';
   return std::make_pair(averageEpp, averageEpTof);
-}
-
-double ConvertEmptyToTof::getL1(API::MatrixWorkspace_const_sptr workspace) {
-  Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  double l1 = instrument->getSource()->getDistance(*sample);
-  return l1;
-}
-
-double ConvertEmptyToTof::getL2(API::MatrixWorkspace_const_sptr workspace,
-                                int detId) {
-  // Get a pointer to the instrument contained in the workspace
-  Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
-  // Get the distance between the source and the sample (assume in metres)
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  // Get the sample-detector distance for this detector (in metres)
-  double l2 =
-      workspace->getDetector(detId)->getPos().distance(sample->getPos());
-  return l2;
 }
 
 double ConvertEmptyToTof::calculateTOF(double distance, double wavelength) {

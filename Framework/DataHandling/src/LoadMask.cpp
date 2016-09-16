@@ -50,39 +50,38 @@ namespace {
 *                   inclusively, with step 1
 * @param tot_singles -- on input contains range of single values already
 *                   copied into the result by previous call to the routine,
-*                   on output, all signles and expanded pairs
+*                   on output, all singles and expanded pairs
 *                   from the input are added to it.
 */
 template <typename T>
 void convertToVector(const std::vector<T> &singles,
                      const std::vector<T> &ranges,
-                     std::vector<T> &tot_signles) {
+                     std::vector<T> &tot_singles) {
 
   // find the size of the final vector of masked values
-  size_t n_total(singles.size() + tot_signles.size());
+  size_t n_total(singles.size() + tot_singles.size());
   for (size_t i = 0; i < ranges.size(); i += 2) {
     n_total += ranges[i + 1] - ranges[i] + 1;
   }
   // reserve space for all masked spectra
   // for efficient memory operations
-  tot_signles.reserve(n_total);
+  tot_singles.reserve(n_total);
   // add singles to the existing singles
-  tot_signles.insert(tot_signles.end(), singles.begin(), singles.end());
+  tot_singles.insert(tot_singles.end(), singles.begin(), singles.end());
   // expand pairs
   for (size_t i = 0; i < ranges.size(); i += 2) {
     for (T obj_id = ranges[i]; obj_id < ranges[i + 1] + 1; ++obj_id) {
-      tot_signles.push_back(obj_id);
+      tot_singles.push_back(obj_id);
     }
   }
 }
 
-/*
-* Parse index range text to singles and pairs
+/** Parse index range text to singles and pairs
 * Example: 3,4,9-10,33
 *
 * @param inputstr -- input string to process in the format as above
-* @param sinvles -- vector of obects, defined as singles
-* @param pairs   -- vector of obects, defined as pairs, in the form min,max
+* @param singles -- vector of objects, defined as singles
+* @param pairs   -- vector of objects, defined as pairs, in the form min,max
 *                   value
 */
 template <typename T>
@@ -132,7 +131,7 @@ void parseRangeText(const std::string &inputstr, std::vector<T> &singles,
 /*
 * Parse a line in an ISIS mask file string to vector
 * Combination of 5 types of format for unit
-* (1) a (2) a-b (3) a - b (4) a- b (5) a- b
+* (1) a (2) a-b (3) a - b (4) a- b (5) a -b
 * separated by space(s)
 * @param  ins    -- input string in ISIS ASCII format
 * @return ranges -- vector of a,b pairs converted from input
@@ -172,7 +171,7 @@ void parseISISStringToVector(const std::string &ins,
       }
     } else {
       // Exception
-      std::string err = "String " + splitstrings[index] + " has Too many '-'";
+      std::string err = "String " + splitstrings[index] + " has too many '-'";
       throw std::invalid_argument(err);
     }
 
@@ -206,8 +205,6 @@ void parseISISStringToVector(const std::string &ins,
     if (index >= splitstrings.size())
       tocontinue = false;
   } // END-WHILE
-
-  splitstrings.clear();
 }
 /*
 * Load and parse an ISIS masking file
@@ -220,7 +217,7 @@ void loadISISMaskFile(const std::string &isisfilename,
   std::vector<Mantid::specnum_t> ranges;
 
   std::ifstream ifs;
-  ifs.open(isisfilename.c_str(), std::ios::in);
+  ifs.open(isisfilename, std::ios::in);
   if (!ifs.is_open()) {
     throw std::invalid_argument("Cannot open ISIS mask file" + isisfilename);
   }
@@ -230,7 +227,7 @@ void loadISISMaskFile(const std::string &isisfilename,
     boost::trim(isisline);
 
     // a. skip empty line
-    if (isisline.size() == 0)
+    if (isisline.empty())
       continue;
 
     // b. skip comment line
@@ -240,7 +237,6 @@ void loadISISMaskFile(const std::string &isisfilename,
     // c. parse
     parseISISStringToVector(isisline, ranges);
   }
-  ifs.close();
 
   // dummy helper vector as ISIS mask is always processed as pairs.
   std::vector<Mantid::specnum_t> dummy;
@@ -277,7 +273,7 @@ DECLARE_ALGORITHM(LoadMask)
  */
 LoadMask::LoadMask()
     : m_maskWS(), m_instrumentPropValue(""), m_sourceMapWS(), m_pDoc(nullptr),
-      m_pRootElem(nullptr), m_defaultToUse(true) {}
+      m_pRootElem(nullptr), m_defaultToUse(true), m_IDF_provided(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -311,7 +307,7 @@ void LoadMask::init() {
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
           "RefWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "The name of the workspace with defines insrtument and spectra, "
+      "The name of the workspace wich defines instrument and spectra, "
       "used as the source of the spectra-detector map for the mask to load. "
       "The instrument, attached to this workspace has to be the same as the "
       "one specified by 'Instrument' property");
@@ -334,6 +330,17 @@ void LoadMask::exec() {
   setProperty("Instrument", instrumentname);
 
   this->intializeMaskWorkspace();
+
+  if (m_sourceMapWS) { // check if the instruments are compatible
+    auto t_inst_name = m_maskWS->getInstrument()->getName();
+    auto r_inst_name = m_sourceMapWS->getInstrument()->getName();
+    if (t_inst_name.compare(r_inst_name) != 0) {
+      throw std::invalid_argument("If reference workspace is provided, it has "
+                                  "to have instrument with the same name as "
+                                  "specified by 'Instrument' property");
+    }
+  }
+
   setProperty("OutputWorkspace", m_maskWS);
 
   m_defaultToUse = true;
@@ -365,7 +372,7 @@ void LoadMask::exec() {
   // As m_uMaskCompIdSingle is empty, this never works
   this->bankToDetectors(m_uMaskCompIdSingle, m_unMaskDetID);
 
-  // convert spectra ID to corresponet det-id-s
+  // convert spectra ID to corresponded det-id-s
   this->processMaskOnWorkspaceIndex(true, m_maskSpecID, m_maskDetID);
 
   // 4. Apply
@@ -395,11 +402,10 @@ void LoadMask::initDetectors() {
  *                   in masking
  *   @param tomask:  true to mask, false to unmask
  *   @param singledetids: list of individual det ids to mask
-
  */
-void LoadMask::processMaskOnDetectors(const detid2index_map &indexmap,
-                                      bool tomask,
-                                      std::vector<int32_t> singledetids) {
+void LoadMask::processMaskOnDetectors(
+    const detid2index_map &indexmap, bool tomask,
+    const std::vector<detid_t> &singledetids) {
   // 1. Get index map
   // 2. Mask
   g_log.debug() << "Mask = " << tomask
@@ -424,8 +430,8 @@ void LoadMask::processMaskOnDetectors(const detid2index_map &indexmap,
 /** Extract a component's detectors and return it within detectors array
  *  It is a generalized version of bankToDetectors()
  *
- * @param componentnames -- vector of compnents names to process
- * @param detectors      -- vector of detectors id, which belongs to components
+ * @param componentnames -- vector of component names to process
+ * @param detectors      -- vector of detector ids, which belongs to components
  *provided as input.
  */
 void LoadMask::componentToDetectors(
@@ -456,8 +462,8 @@ void LoadMask::componentToDetectors(
     g_log.debug() << "Number of Children = " << children.size() << '\n';
 
     size_t numdets(0);
-    detid_t id_min = std::numeric_limits<Mantid::detid_t>::max();
-    detid_t id_max = 0;
+    detid_t id_min(std::numeric_limits<Mantid::detid_t>::max());
+    detid_t id_max(0);
 
     for (const auto &child : children) {
       // c) convert component to detector
@@ -482,7 +488,7 @@ void LoadMask::componentToDetectors(
 
 //----------------------------------------------------------------------------------------------
 /** Convert bank to detectors
-* This routine have never been invoked.
+* This routine has never been used. Dead code.
 * @param   singlebanks -- vector of string containing bank names
 * @param  detectors   -- vector of detector-id-s belonging to these banks
  */
@@ -512,7 +518,7 @@ void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks,
     // b) set detectors
 
     for (const auto &det : idetectors) {
-      int32_t detid = det->getID();
+      detid_t detid = det->getID();
       detectors.push_back(detid);
     }
     g_log.debug() << "Number of Detectors in Bank  " << singlebank
@@ -541,7 +547,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
     // convert spectra masks into det-id mask using source workspace
     convertSpMasksToDetIDs(*m_sourceMapWS, maskedSpecID, singleDetIds);
     maskedSpecID
-        .clear(); // specrtra ID not needed any more as all converted to det-ids
+        .clear(); // spectra ID not needed any more as all converted to det-ids
     return;
   }
   // 2. Get Map
@@ -573,7 +579,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
                       << " with workspace size = "
                       << m_maskWS->getNumberHistograms() << '\n';
       } else {
-        // Finally set the maskiing;
+        // Finally set the masking;
         if (mask)
           m_maskWS->dataY(wsindex)[0] = 1.0;
         else
@@ -671,17 +677,15 @@ void LoadMask::parseXML() {
       if (ingroup) {
         parseComponent(value, tomask, m_maskCompIdSingle, m_uMaskCompIdSingle);
       } else {
-        g_log.error() << "XML File heirachial (component) error!\n";
+        g_log.error() << "XML File hierarchical (component) error!\n";
       }
-      // g_log.information() << "Component: " << value << '\n';
 
     } else if (pNode->nodeName().compare("ids") == 0) {
       // Node "ids"
       if (ingroup) {
         parseRangeText(value, singleSp, pairSp);
-        // this->parseSpectrumNos(value, m_maskSpecID);
       } else {
-        g_log.error() << "XML File (ids) heirachial error!"
+        g_log.error() << "XML File (ids) hierarchical error!"
                       << "  Inner Text = " << pNode->innerText() << '\n';
       }
 
@@ -694,7 +698,7 @@ void LoadMask::parseXML() {
           parseRangeText(value, umaskSingleDet, umaskPairDet);
         }
       } else {
-        g_log.error() << "XML File (detids) heirachial error!\n";
+        g_log.error() << "XML File (detids) hierarchical error!\n";
       }
 
     } else if (pNode->nodeName().compare("detector-masking") == 0) {
@@ -715,10 +719,10 @@ void LoadMask::parseXML() {
 /* Convert spectra mask into det-id mask using workspace as source of
 *spectra-detector maps
 *
-* @param sourceWS       -- the workspace containing source spectra-detecot map
+* @param sourceWS       -- the workspace containing source spectra-detector map
 *                          to use on masks
 * @param maskedSpecID   -- vector of spectra id to mask
-* @param singleDetIds   -- output vector of detectors id to mask
+* @param singleDetIds   -- output vector of detector ids to mask
 */
 void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
                                       const std::vector<int32_t> &maskedSpecID,
@@ -798,7 +802,7 @@ void LoadMask::intializeMaskWorkspace() {
   m_maskWS->setTitle("Mask");
 }
 
-/**Validates if either input workspace or instriment name is defined
+/**Validates if either input workspace or instrument name is defined
 @return the inconsistency between Instrument/Workspace properties or empty list
 if no errors is found.
 */
@@ -808,19 +812,35 @@ std::map<std::string, std::string> LoadMask::validateInputs() {
 
   API::MatrixWorkspace_sptr inputWS = getProperty("RefWorkspace");
   std::string InstrName = getProperty("Instrument");
-
   if (inputWS) {
+    boost::trim(InstrName);
+    boost::algorithm::to_lower(InstrName);
+    size_t len = InstrName.size();
+    // Check if the name ends up with .xml which means that idf file name
+    // is provided rather then an instrument name.
+    if (len > 4) {
+      if (InstrName.compare(len - 4, len, ".xml") == 0) {
+        m_IDF_provided = true;
+      } else {
+        m_IDF_provided = false;
+      }
+    } else {
+      m_IDF_provided = false;
+    }
     try {
       auto inst = inputWS->getInstrument();
       std::string Name = inst->getName();
-      if (Name != InstrName) {
+      boost::algorithm::to_lower(Name);
+      if (Name != InstrName && !m_IDF_provided) {
         result["RefWorkspace"] =
-            "If both workspace and instrument name are defined, "
-            "workspace has to have the instrument with the same name";
+            "If both reference workspace and instrument name are defined, "
+            "workspace has to have the instrument with the same name\n"
+            "'Instrument' value: " +
+            InstrName + " Workspace Instrument name: " + Name;
       }
     } catch (Kernel::Exception::NotFoundError &) {
       result["RefWorkspace"] =
-          "If workspace is defined, it mast have an instrument";
+          "If reference workspace is defined, it mast have an instrument";
     }
   }
 

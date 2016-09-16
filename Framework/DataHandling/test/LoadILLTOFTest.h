@@ -1,35 +1,33 @@
-#ifndef LOADILLTEST_H_
-#define LOADILLTEST_H_
+#ifndef LOADILLTOFTEST_H_
+#define LOADILLTOFTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/LoadILL.h"
+#include "MantidDataHandling/LoadILLTOF.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::API;
-using Mantid::DataHandling::LoadILL;
+using Mantid::DataHandling::LoadILLTOF;
 
-class LoadILLTest : public CxxTest::TestSuite {
+class LoadILLTOFTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadILLTest *createSuite() { return new LoadILLTest(); }
-  static void destroySuite(LoadILLTest *suite) { delete suite; }
-
-  LoadILLTest() : m_dataFile("ILLIN5_104007.nxs") {}
+  static LoadILLTOFTest *createSuite() { return new LoadILLTOFTest(); }
+  static void destroySuite(LoadILLTOFTest *suite) { delete suite; }
 
   void testName() {
-    LoadILL loader;
-    TS_ASSERT_EQUALS(loader.name(), "LoadILL");
+    LoadILLTOF loader;
+    TS_ASSERT_EQUALS(loader.name(), "LoadILLTOF");
   }
 
   void testVersion() {
-    LoadILL loader;
+    LoadILLTOF loader;
     TS_ASSERT_EQUALS(loader.version(), 1);
   }
 
   void testInit() {
-    LoadILL loader;
+    LoadILLTOF loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
   }
@@ -38,12 +36,12 @@ public:
    * This test only loads the Sample Data
    * The elastic peak is obtained on the fly from the sample data.
    */
-  void testExecJustSample() {
-    LoadILL loader;
+  void loadDataFile(const std::string dataFile, const int numberOfHistograms) {
+    LoadILLTOF loader;
     loader.initialize();
-    loader.setPropertyValue("Filename", m_dataFile);
+    loader.setPropertyValue("Filename", dataFile);
 
-    std::string outputSpace = "LoadILLTest_out";
+    std::string outputSpace = "LoadILLTOFTest_out";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
@@ -53,25 +51,26 @@ public:
     MatrixWorkspace_sptr output2D =
         boost::dynamic_pointer_cast<MatrixWorkspace>(output);
 
-    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 98305);
+    TS_ASSERT_EQUALS(output2D->getNumberHistograms(), numberOfHistograms);
 
     AnalysisDataService::Instance().clear();
   }
 
-private:
-  std::string m_dataFile;
+  void test_IN4_load() { loadDataFile("ILL/IN4/084446.nxs", 397); }
+  void test_IN5_load() { loadDataFile("ILL/IN5/104007.nxs", 98305); }
+  void test_IN6_load() { loadDataFile("ILL/IN6/164192.nxs", 340); }
 };
 
 //------------------------------------------------------------------------------
 // Performance test
 //------------------------------------------------------------------------------
 
-class LoadILLTestPerformance : public CxxTest::TestSuite {
+class LoadILLTOFTestPerformance : public CxxTest::TestSuite {
 public:
-  LoadILLTestPerformance() : m_dataFile("ILLIN5_104007.nxs") {}
+  LoadILLTOFTestPerformance() : m_dataFile("ILL/IN5/104007.nxs") {}
 
   void testDefaultLoad() {
-    Mantid::DataHandling::LoadILL loader;
+    Mantid::DataHandling::LoadILLTOF loader;
     loader.initialize();
     loader.setPropertyValue("Filename", m_dataFile);
     loader.setPropertyValue("OutputWorkspace", "ws");
@@ -82,4 +81,4 @@ private:
   std::string m_dataFile;
 };
 
-#endif /*LoadILLTEST_H_*/
+#endif /*LOADILLTOFTEST_H_*/
