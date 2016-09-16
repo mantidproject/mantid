@@ -297,8 +297,7 @@ SpectrumView::loadFromProject(const std::string &lines, ApplicationWindow *app,
   double x, y;
   tsv.selectLine("SelectedPoint");
   tsv >> x >> y;
-  int index = viewer->m_ui->imageTabs->currentIndex();
-  auto display = viewer->m_spectrumDisplay.at(index);
+
   display->setPointedAtXY(x, y);
 
   QPoint hPoint, vPoint;
