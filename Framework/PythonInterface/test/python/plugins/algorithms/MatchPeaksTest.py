@@ -183,9 +183,9 @@ class MatchPeaksTest(unittest.TestCase):
         masked = AnalysisDataService.retrieve('output')
         for i in range(4):
             for k in range(5):
-                self.assertEqual(0.0, masked.readY(i)[k], 'Mask spectrum {} bin {} failed'.format(i, k))
+                self.assertEqual(0.0, masked.readY(i)[k], 'Mask spectrum {0} bin {1} failed'.format(i, k))
             for k in range(67, 70):
-                self.assertEqual(0.0, masked.readY(i)[k], 'Mask spectrum {} bin {} failed'.format(i, k))
+                self.assertEqual(0.0, masked.readY(i)[k], 'Mask spectrum {0} bin {1} failed'.format(i, k))
         DeleteWorkspace(masked)
         self._FindEPPtables_deleted
 
