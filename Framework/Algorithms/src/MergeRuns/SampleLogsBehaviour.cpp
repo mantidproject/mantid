@@ -185,6 +185,7 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
       continue;
     }
 
+    // For a TimeSeries or a List we need to add a new property to the workspace
     if (mergeType == MergeLogType::TimeSeries) {
       prop = addPropertyForTimeSeries(item, value, ws);
     } else if (mergeType == MergeLogType::List) {
@@ -497,7 +498,7 @@ bool SampleLogsBehaviour::isWithinTolerance(const SampleLogBehaviour &behaviour,
  */
 bool SampleLogsBehaviour::stringPropertiesMatch(
     const SampleLogBehaviour &behaviour, const Property *addeeWSProperty) {
-  return behaviour.property->value().compare(addeeWSProperty->value()) != 0;
+  return behaviour.property->value().compare(addeeWSProperty->value()) == 0;
 }
 
 /**
@@ -507,7 +508,7 @@ bool SampleLogsBehaviour::stringPropertiesMatch(
  */
 void SampleLogsBehaviour::setUpdatedSampleLogs(
     const API::MatrixWorkspace_sptr &ws) {
-  for (auto item : m_logMap) {
+  for (auto &item : m_logMap) {
     std::string propertyToReset = item.first;
 
     if (item.second.type == MergeLogType::TimeSeries) {
@@ -515,10 +516,10 @@ void SampleLogsBehaviour::setUpdatedSampleLogs(
     } else if (item.second.type == MergeLogType::List) {
       propertyToReset = item.first + LIST_SUFFIX;
     } else {
-      return;
+      continue;
     }
 
-    Property *outWSProperty = ws->mutableRun().getProperty(propertyToReset);
+    const Property *outWSProperty = ws->mutableRun().getProperty(propertyToReset);
     item.second.property = std::shared_ptr<Property>(outWSProperty->clone());
   }
 }
@@ -529,7 +530,7 @@ void SampleLogsBehaviour::setUpdatedSampleLogs(
  * @param ws the merged workspace to reset the sample logs for
  */
 void SampleLogsBehaviour::resetSampleLogs(const API::MatrixWorkspace_sptr &ws) {
-  for (auto item : m_logMap) {
+  for (auto const &item : m_logMap) {
     std::string propertyToReset = item.first;
 
     if (item.second.type == MergeLogType::TimeSeries) {
@@ -542,8 +543,6 @@ void SampleLogsBehaviour::resetSampleLogs(const API::MatrixWorkspace_sptr &ws) {
       ws->mutableRun()
           .getProperty(propertyToReset)
           ->setValue(item.second.property->value());
-    } else {
-      return;
     }
   }
 }
