@@ -330,7 +330,7 @@ bool SampleLogsBehaviour::setNumericValue(const std::string item,
 void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace &addeeWS,
                                           MatrixWorkspace &outWS) {
   for (auto item : m_logMap) {
-    std::string logName;
+    std::string logName = item.first.first;
 
     Property *addeeWSProperty = addeeWS.getLog(logName);
 
@@ -537,6 +537,7 @@ void SampleLogsBehaviour::setUpdatedSampleLogs(MatrixWorkspace &ws) {
 void SampleLogsBehaviour::resetSampleLogs(MatrixWorkspace &ws) {
   for (auto const &item : m_logMap) {
     std::string propertyToReset = item.first.first;
+
     if (item.first.second == MergeLogType::TimeSeries) {
       propertyToReset = propertyToReset.append(TIME_SERIES_SUFFIX);
       auto property =

@@ -65,7 +65,7 @@ Merging Sample Logs
 
 Sample logs are optionally merged when running this algorithm. The behaviour
 when merging is defined in the instrument parameter file, but can be added to
-or overridden or via this algorithm. Definitions in the XML file are given as
+or overridden via this algorithm. Definitions in the XML file are given as
 shown in the example below. See the usage examples at the end of this document
 for examples of overriding the behaviour defined in the XML file.
 
@@ -81,10 +81,10 @@ Matrix Workspaces.
         <value val="run_number" />
     </parameter>
     <parameter name="sample_logs_warn" type="string">
-        <value val="EPP, Fermi.phase" />
+        <value val="EPP, Fermi.phase, sample.temperature" />
     </parameter>
     <parameter name="sample_logs_warn_tolerances" type="string">
-        <value val="5, 0.001" />
+        <value val="5, 0.001, 50" />
     </parameter>
     <parameter name="sample_logs_fail" type="string">
         <value val="experiment_identifier, Ei, Fermi.rotation_speed" />
@@ -227,11 +227,11 @@ Output:
   Load(Filename='MUSR00015189.nxs, MUSR00015190.nxs', OutputWorkspace='gws')
 
   merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
-                     SampleLogsTimeSeries='sample_temp',
+                     SampleLogsTimeSeries='sample_magn_field',
                      SampleLogsFail='sample_magn_field, nspectra',
                      SampleLogsFailTolerances='5, 0')
 
-  print merged.run().getLogData('sample_temp_time_series').size()
+  print merged.run().getLogData('sample_magn_field_time_series').size()
 
 Output:
 
