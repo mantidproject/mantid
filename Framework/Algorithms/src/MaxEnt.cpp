@@ -682,11 +682,7 @@ void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
   MantidVec YI(npoints);
   MantidVec E(npoints, 0.);
 
-  MantidVec dataPoints(npoints);
-  if (inWS->isHistogramData())
-    Kernel::VectorHelper::convertToBinCentre(inWS->readX(spec), dataPoints);
-  else
-    dataPoints = inWS->readX(spec);
+  auto dataPoints = inWS->points(spec);
   double x0 = dataPoints[0];
   double dx = dataPoints[1] - x0;
 
