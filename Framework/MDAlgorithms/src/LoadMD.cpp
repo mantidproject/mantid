@@ -243,6 +243,9 @@ void LoadMD::exec() {
         std::string dim2 = dimd.substr(0, 2);
         dimd = dimd.substr(0, 1);
 
+        //Assume the Q dimensions are those that have names starting with [ 
+        //such as [H,0.5H,0], or Q_ such as Q_sample_x. 
+        //The change in sign should apply only to those.
         if (dim2 == "Q_" || dimd == "[")
           scaling[d] = -1.0;
         else
@@ -363,6 +366,9 @@ void LoadMD::loadHisto() {
       std::string dim2 = dimd.substr(0, 2);
       dimd = dimd.substr(0, 1);
 
+      //Assume the Q dimensions are those that have names starting with [ 
+      //such as [H,0.5H,0], or Q_ such as Q_sample_x. 
+      //The change in sign should apply only to those.
       if (dim2 == "Q_" || dimd == "[")
         scaling[d] = -1.0;
       else
