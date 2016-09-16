@@ -69,6 +69,10 @@ or overridden via this algorithm. Definitions in the XML file are given as
 shown in the example below. See the usage examples at the end of this document
 for examples of overriding the behaviour defined in the XML file.
 
+When performing the tolerance check for the warn or fail options it is always
+with respect to the first workspace in the merge. When choosing via the GUI
+this will be the first workspace that was selected.
+
 **Note:** this currently only works when the underying workspaces being merged are
 Matrix Workspaces.
 
