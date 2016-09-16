@@ -142,8 +142,8 @@ private:
 
   template <typename T>
   WorkspaceGroup_sptr create_group_workspace_with_sample_logs(
-      std::string merge_type, std::string merge_list, T value_1, T value_2,
-      T value_3, T value_4, std::string tolerances = "") {
+      const std::string &merge_type, const std::string &merge_list, const T &value_1, const T &value_2,
+      const T &value_3, const T &value_4, const std::string &tolerances = "") {
     MatrixWorkspace_sptr a =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1000,
                                                                      true);
@@ -194,9 +194,9 @@ private:
 
   template <typename T>
   MatrixWorkspace_sptr
-  create_workspace_with_sample_logs(std::string merge_type,
-                                    std::string merge_list, T value_1,
-                                    T value_2, std::string tolerances = "") {
+  create_workspace_with_sample_logs(const std::string &merge_type,
+                                    const std::string &merge_list, const T &value_1,
+                                    const T &value_2, const std::string &tolerances = "") {
     MatrixWorkspace_sptr c =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1000,
                                                                      true);
@@ -939,10 +939,10 @@ public:
     TS_ASSERT(alg.useCustomInputPropertyName());
   }
 
-  void do_test_mergeSampleLogs(WorkspaceGroup_sptr input,
-                               std::string propertyName, std::string mergeType,
-                               std::string result, int filesMerged,
-                               bool noOutput = false) {
+  void do_test_mergeSampleLogs(const WorkspaceGroup_sptr &input,
+                               const std::string &propertyName, const std::string &mergeType,
+                               const std::string &result, const int filesMerged,
+                               const bool noOutput = false) {
     MergeRuns alg;
     alg.initialize();
 
@@ -951,11 +951,11 @@ public:
   }
 
   void do_test_mergeSampleLogs_modified_alg(MergeRuns &alg,
-                                            WorkspaceGroup_sptr input,
-                                            std::string propertyName,
-                                            std::string mergeType,
-                                            std::string result, int filesMerged,
-                                            bool noOutput = false) {
+                                            const WorkspaceGroup_sptr &input,
+                                            const std::string &propertyName,
+                                            const std::string &mergeType,
+                                            const std::string &result, const int filesMerged,
+                                            const bool noOutput = false) {
 
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("InputWorkspaces", input->name()));
