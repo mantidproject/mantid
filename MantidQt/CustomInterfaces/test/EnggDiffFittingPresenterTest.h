@@ -215,7 +215,7 @@ public:
     pres.notify(IEnggDiffFittingPresenter::FittingRunNo);
   }
 
-  void xtest_fitting_runno_invalid_run() {
+  void test_fitting_runno_invalid_run() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     EnggDiffFittingPresenterNoThread pres(&mockView);
 
