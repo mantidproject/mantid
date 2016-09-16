@@ -143,7 +143,7 @@ void MergeRuns::exec() {
     // Take the first input workspace as the first argument to the addition
     MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
     Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
-        outWS, g_log, sampleLogsTimeSeries, sampleLogsList, sampleLogsWarn,
+        *outWS, g_log, sampleLogsTimeSeries, sampleLogsList, sampleLogsWarn,
         sampleLogsWarnTolerances, sampleLogsFail, sampleLogsFailTolerances);
 
     m_progress = new Progress(this, 0.0, 1.0, numberOfWSs - 1);
@@ -167,15 +167,15 @@ void MergeRuns::exec() {
       // Add the current workspace to the total
       // Update the sample logs
       try {
-        sampleLogsBehaviour.mergeSampleLogs(*it, outWS);
+        sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
         outWS = outWS + addee;
-        sampleLogsBehaviour.setUpdatedSampleLogs(outWS);
+        sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
       } catch (std::invalid_argument &e) {
         g_log.error()
             << "Could not merge run: " << it->get()->name() << ". Reason: \""
             << e.what()
             << "\". MergeRuns will continue but this run will be skipped.";
-        sampleLogsBehaviour.resetSampleLogs(outWS);
+        sampleLogsBehaviour.resetSampleLogs(*outWS);
       }
 
       m_progress->report();
