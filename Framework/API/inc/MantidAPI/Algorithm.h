@@ -247,7 +247,11 @@ public:
   /// returns the status of logging, True = enabled
   bool isLogging() const override { return g_log.getEnabled(); }
 
-  /// sets the logging priority offset
+  /* Sets the logging priority offset. Values are subtracted from the log level.
+   *
+   * Example value=1 will turn warning into notice
+   * Example value=-1 will turn notice into warning
+   */
   void setLoggingOffset(const int value) override {
     g_log.setLevelOffset(value);
   }

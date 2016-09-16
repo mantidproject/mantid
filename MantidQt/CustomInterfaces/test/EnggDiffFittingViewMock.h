@@ -48,10 +48,6 @@ public:
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
 
-  // virtual Splits the fitting directory if the ENGINX found
-  MOCK_METHOD1(splitFittingDirectory,
-               std::vector<std::string>(std::string &selectedfPath));
-
   // adds the number of banks to the combo-box widget on the interface
   MOCK_METHOD1(addBankItem, void(std::string bankID));
 

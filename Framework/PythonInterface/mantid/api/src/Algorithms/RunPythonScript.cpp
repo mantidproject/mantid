@@ -1,3 +1,4 @@
+#include "MantidAPI/FileProperty.h"
 #include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
 #include "MantidPythonInterface/api/ExtractWorkspace.h"
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
@@ -11,6 +12,7 @@
 #include <boost/python/import.hpp>
 #include <boost/python/to_python_value.hpp>
 #include <boost/regex.hpp>
+#include <fstream>
 
 namespace Mantid {
 namespace PythonInterface {
@@ -49,13 +51,34 @@ void RunPythonScript::init() {
           "InputWorkspace", "", Direction::Input, PropertyMode::Optional),
       "An input workspace that the python code will modify."
       "The workspace will be in the python variable named 'input'.");
-  declareProperty("Code", "", "Python code (can be on multiple lines).",
-                  boost::make_shared<MandatoryValidator<std::string>>());
+  declareProperty("Code", "", "Python code (can be on multiple lines).");
+  declareProperty(make_unique<FileProperty>("Filename", "",
+                                            FileProperty::OptionalLoad, "py"),
+                  "A File containing a python script");
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<Workspace>>(
           "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
       "An output workspace to be produced by the python code."
       "The workspace will be in the python variable named 'output'.");
+}
+
+std::map<std::string, std::string> RunPythonScript::validateInputs() {
+  std::map<std::string, std::string> out;
+
+  bool hasCode = (!this->getPropertyValue("Code").empty());
+  bool hasFile = (!this->getPropertyValue("Filename").empty());
+
+  std::string msg;
+  if ((!hasCode) && (!hasFile)) {
+    msg = "Must specify python to execute";
+  }
+
+  if (!msg.empty()) {
+    out["Code"] = msg;
+    out["Filename"] = msg;
+  }
+
+  return out;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -80,6 +103,28 @@ void RunPythonScript::exec() {
  */
 std::string RunPythonScript::scriptCode() const {
   std::string userCode = getPropertyValue("Code");
+  std::string filename = getPropertyValue("Filename");
+
+  // fill userCode with the contents of the supplied file if it wasn't already
+  // supplied
+  if (userCode.empty() && (!filename.empty())) {
+    std::ifstream handle(filename.c_str(), std::ios_base::in);
+    if (!handle.is_open()) {
+      // throw exception if file cannot be opened
+      std::stringstream errss;
+      errss << "Unable to open file " << filename;
+      throw std::runtime_error(errss.str());
+    }
+
+    std::stringstream buffer;
+    buffer << handle.rdbuf();
+    userCode = buffer.str();
+  }
+
+  if (userCode.empty()) {
+    throw std::runtime_error("Python script is empty");
+  }
+
   // Unify line endings
   boost::regex eol("\\R"); // \R is Perl syntax for matching any EOL sequence
   userCode = boost::regex_replace(userCode, eol, "\n"); // converts all to LF

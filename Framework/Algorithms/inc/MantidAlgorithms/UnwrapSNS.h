@@ -68,7 +68,6 @@ private:
   void execEvent();
   void runMaskDetectors();
 
-  double calculateFlightpath(const int &spectrum, bool &isMonitor) const;
   int unwrapX(const MantidVec &, MantidVec &, const double &Ld);
   void getTofRangeData(const bool);
   double m_conversionConstant; ///< The constant used in the conversion from TOF
@@ -77,7 +76,6 @@ private:
   DataObjects::EventWorkspace_const_sptr
       m_inputEvWS;       ///< Pointer to the input event workspace
   double m_LRef;         ///< The 'reference' flightpath
-  double m_L1;           ///< The instrument initial flightpath
   double m_Tmin;         ///< The start of the time-of-flight frame
   double m_Tmax;         ///< The end of the time-of-flight frame
   double m_frameWidth;   ///< The width of the frame cached to speed up things
