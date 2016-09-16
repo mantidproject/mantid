@@ -240,10 +240,10 @@ void LoadMD::exec() {
       std::vector<double> scaling(m_numDims);
       for (size_t d = 0; d < m_numDims; d++) {
         std::string dimd = ws->getDimension(d)->getName();
-        std::string dim6 = dimd.substr(0, 6);
-        dimd.erase(boost::remove_if(dimd, ::isalpha), dimd.end());
+        std::string dim2 = dimd.substr(0, 2);
+        dim = dimd.substr(0, 1);
 
-        if (dim6 == "Q_lab_" || dim6 == "Q_samp" || dimd == "[,,]")
+        if (dim2 == "Q_" || dimd == "[")
           scaling[d] = -1.0;
         else
           scaling[d] = 1.0;
@@ -360,10 +360,10 @@ void LoadMD::loadHisto() {
     std::vector<double> scaling(m_numDims);
     for (size_t d = 0; d < m_numDims; d++) {
       std::string dimd = ws->getDimension(d)->getName();
-      std::string dim6 = dimd.substr(0, 6);
-      dimd.erase(boost::remove_if(dimd, ::isalpha), dimd.end());
+      std::string dim2 = dimd.substr(0, 2);
+      dim = dimd.substr(0, 1);
 
-      if (dim6 == "Q_lab_" || dim6 == "Q_samp" || dimd == "[,,]")
+      if (dim2 == "Q_" || dimd == "[")
         scaling[d] = -1.0;
       else
         scaling[d] = 1.0;
