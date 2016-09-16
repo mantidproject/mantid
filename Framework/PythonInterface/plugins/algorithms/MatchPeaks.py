@@ -268,7 +268,8 @@ class MatchPeaks(PythonAlgorithm):
                     logger.debug('Peak x-value {0} > x-end {1}, do not shift spectrum'.format(peak_pos_error,
                                                                                             x_values[-1]))
             else:
-                logger.debug('Peak x-value {0} < x-begin {1}, do not shift spectrum'.format(peak_pos_error, x_values[0]))
+                logger.debug('Peak x-value {0} < x-begin {1}, do not shift spectrum'.format(peak_pos_error,
+                                                                                            x_values[0]))
 
         # Delete unused TableWorkspaces
         try:
