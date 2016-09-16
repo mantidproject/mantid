@@ -988,7 +988,7 @@ public:
   }
 
 private:
-  const size_t nHists = 100000;
+  const size_t nHists = 50000;
   const size_t histSize = 4000;
   std::vector<Histogram> hists;
   HistogramX xData;
