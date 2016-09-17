@@ -15,7 +15,7 @@ Framework Changes
 
 - A race condition when accessing a singleton from multiple threads was fixed.
 
-- Log file buffers are no longer flushed by default for each newline received, increasing the speed of some system tests on Windows by 3x. 
+- Log file buffers are no longer flushed by default for each newline received, increasing the speed of some system tests on Windows by 4.5x.
 
 HistogramData
 -------------
