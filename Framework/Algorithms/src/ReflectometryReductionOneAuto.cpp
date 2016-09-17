@@ -590,11 +590,8 @@ ReflectometryReductionOneAuto::isSet(std::string propName) const {
 }
 
 bool ReflectometryReductionOneAuto::checkGroups() {
-  std::string wsName = getPropertyValue("InputWorkspace");
-
   try {
-    auto ws =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
+    WorkspaceGroup_sptr ws = getProperty("InputWorkspace");
     if (ws)
       return true;
   } catch (...) {
@@ -650,8 +647,7 @@ bool ReflectometryReductionOneAuto::processGroups() {
       this->getPropertyValue("PolarizationAnalysis") !=
       noPolarizationCorrectionMode();
   // Get our input workspace group
-  auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-      getPropertyValue("InputWorkspace"));
+  WorkspaceGroup_sptr group = getProperty("InputWorkspace");
   // Get name of IvsQ workspace
   const std::string outputIvsQ = this->getPropertyValue("OutputWorkspace");
   // Get name of IvsLam workspace
@@ -678,8 +674,7 @@ bool ReflectometryReductionOneAuto::processGroups() {
   const std::string firstTrans = this->getPropertyValue("FirstTransmissionRun");
   WorkspaceGroup_sptr firstTransG;
   if (!firstTrans.empty()) {
-    auto firstTransWS =
-        AnalysisDataService::Instance().retrieveWS<Workspace>(firstTrans);
+    Workspace_sptr firstTransWS = getProperty("FirstTransmissionRun");
     firstTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(firstTransWS);
 
     if (!firstTransG) {
@@ -699,8 +694,7 @@ bool ReflectometryReductionOneAuto::processGroups() {
       this->getPropertyValue("SecondTransmissionRun");
   WorkspaceGroup_sptr secondTransG;
   if (!secondTrans.empty()) {
-    auto secondTransWS =
-        AnalysisDataService::Instance().retrieveWS<Workspace>(secondTrans);
+    Workspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
     secondTransG = boost::dynamic_pointer_cast<WorkspaceGroup>(secondTransWS);
 
     if (!secondTransG)
