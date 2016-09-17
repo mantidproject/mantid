@@ -185,8 +185,8 @@ public:
     Workspace2D_sptr ws1, ws2;
 
     // First go creates the fake ws
-    ws1 = doExec<Workspace2D>("Add", "Rebin", "Params=40e3, 1e3, 60e3", "", "",
-                              false);
+    ws1 = doExec<Workspace2D>(
+        "Add", "Rebin", "{\"Params\":\"40e3, 1e3, 60e3\"}", "", "", false);
     TS_ASSERT_EQUALS(ws1->getNumberHistograms(), 2);
     double total;
     total = 0;
@@ -195,8 +195,8 @@ public:
     TS_ASSERT_DELTA(total, 100.0, 1e-4);
 
     // Next one adds the histograms together
-    ws2 = doExec<Workspace2D>("Add", "Rebin", "Params=40e3, 1e3, 60e3", "", "",
-                              false);
+    ws2 = doExec<Workspace2D>(
+        "Add", "Rebin", "{\"Params\":\"40e3, 1e3, 60e3\"}", "", "", false);
     TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 2);
 
     // The new total signal is 200.0
@@ -216,8 +216,8 @@ public:
   /** Simple processing of a chunk */
   void test_ProcessChunk_DoPreserveEvents() {
     EventWorkspace_sptr ws;
-    ws = doExec<EventWorkspace>("Replace", "Rebin", "Params=40e3, 1e3, 60e3",
-                                "", "", true);
+    ws = doExec<EventWorkspace>(
+        "Replace", "Rebin", "{\"Params\":\"40e3, 1e3, 60e3\"}", "", "", true);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 200);
     // Check that rebin was called
@@ -231,8 +231,8 @@ public:
   /** DONT convert to workspace 2D when processing */
   void test_ProcessChunk_DontPreserveEvents() {
     Workspace2D_sptr ws;
-    ws = doExec<Workspace2D>("Replace", "Rebin", "Params=40e3, 1e3, 60e3", "",
-                             "", false);
+    ws = doExec<Workspace2D>("Replace", "Rebin",
+                             "{\"Params\":\"40e3, 1e3, 60e3\"}", "", "", false);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
     // Check that rebin was called
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
@@ -245,8 +245,8 @@ public:
   /** Do PostProcessing */
   void test_PostProcessing() {
     // No chunk processing, but PostProcessing
-    EventWorkspace_sptr ws = doExec<EventWorkspace>("Replace", "", "", "Rebin",
-                                                    "Params=40e3, 1e3, 60e3");
+    EventWorkspace_sptr ws = doExec<EventWorkspace>(
+        "Replace", "", "", "Rebin", "{\"Params\":\"40e3, 1e3, 60e3\"}");
     EventWorkspace_sptr ws_accum =
         AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
             "fake_accum");
@@ -273,9 +273,9 @@ public:
   /** Perform both chunk and post-processing*/
   void test_Chunk_and_PostProcessing() {
     // Process both times
-    EventWorkspace_sptr ws =
-        doExec<EventWorkspace>("Replace", "Rebin", "Params=20e3, 1e3, 60e3",
-                               "Rebin", "Params=40e3, 1e3, 60e3");
+    EventWorkspace_sptr ws = doExec<EventWorkspace>(
+        "Replace", "Rebin", "{\"Params\":\"20e3, 1e3, 60e3\"}", "Rebin",
+        "{\"Params\":\"40e3, 1e3, 60e3\"}");
     EventWorkspace_sptr ws_accum =
         AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
             "fake_accum");
@@ -303,14 +303,14 @@ public:
   /** Do some processing that converts to a different type of workspace */
   void test_ProcessToMDWorkspace_and_Add() {
     IMDWorkspace_sptr ws;
-    ws = doExec<IMDWorkspace>("Add", "ConvertToDiffractionMDWorkspace", "");
+    ws = doExec<IMDWorkspace>("Add", "ConvertToDiffractionMDWorkspace", "{}");
     if (!ws)
       return;
     TS_ASSERT_EQUALS(ws->getNumDims(), 3);
     TS_ASSERT_EQUALS(ws->getNPoints(), 200);
 
     // Does the adding work?
-    ws = doExec<IMDWorkspace>("Add", "ConvertToDiffractionMDWorkspace", "");
+    ws = doExec<IMDWorkspace>("Add", "ConvertToDiffractionMDWorkspace", "{}");
     TS_ASSERT_EQUALS(ws->getNPoints(), 400);
   }
 
@@ -338,7 +338,7 @@ public:
   //--------------------------------------------------------------------------------------------
   void test_WorkspaceGroup_Replace_Rebin_None() {
     WorkspaceGroup_sptr ws = doExec<WorkspaceGroup>(
-        "Replace", "Rebin", "Params=0,2,8", "", "", false,
+        "Replace", "Rebin", "{\"Params\":\"0,2,8\"}", "", "", false,
         ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
@@ -358,7 +358,7 @@ public:
   //--------------------------------------------------------------------------------------------
   void test_WorkspaceGroup_Replace_None_Rebin() {
     WorkspaceGroup_sptr ws = doExec<WorkspaceGroup>(
-        "Replace", "", "", "Rebin", "Params=0,2,8", false,
+        "Replace", "", "", "Rebin", "{\"Params\":\"0,2,8\"}", false,
         ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
@@ -400,11 +400,12 @@ public:
   }
   //--------------------------------------------------------------------------------------------
   void test_WorkspaceGroup_Add_Rebin_None() {
-    doExec<WorkspaceGroup>("Add", "Rebin", "Params=0,2,8", "", "", false,
+    doExec<WorkspaceGroup>("Add", "Rebin", "{\"Params\":\"0,2,8\"}", "", "",
+                           false,
                            ILiveListener_sptr(new TestGroupDataListener));
-    WorkspaceGroup_sptr ws =
-        doExec<WorkspaceGroup>("Add", "Rebin", "Params=0,2,8", "", "", false,
-                               ILiveListener_sptr(new TestGroupDataListener));
+    WorkspaceGroup_sptr ws = doExec<WorkspaceGroup>(
+        "Add", "Rebin", "{\"Params\":\"0,2,8\"}", "", "", false,
+        ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
     TS_ASSERT_EQUALS(ws->name(), "fake");
@@ -422,11 +423,12 @@ public:
   }
   //--------------------------------------------------------------------------------------------
   void test_WorkspaceGroup_Add_None_Rebin() {
-    doExec<WorkspaceGroup>("Add", "", "", "Rebin", "Params=0,2,8", false,
+    doExec<WorkspaceGroup>("Add", "", "", "Rebin", "{\"Params\":\"0,2,8\"}",
+                           false,
                            ILiveListener_sptr(new TestGroupDataListener));
-    WorkspaceGroup_sptr ws =
-        doExec<WorkspaceGroup>("Add", "", "", "Rebin", "Params=0,2,8", false,
-                               ILiveListener_sptr(new TestGroupDataListener));
+    WorkspaceGroup_sptr ws = doExec<WorkspaceGroup>(
+        "Add", "", "", "Rebin", "{\"Params\":\"0,2,8\"}", false,
+        ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
     TS_ASSERT_EQUALS(ws->name(), "fake");
@@ -467,11 +469,12 @@ public:
   }
   //--------------------------------------------------------------------------------------------
   void test_WorkspaceGroup_Append_Rebin_None() {
-    doExec<WorkspaceGroup>("Append", "Rebin", "Params=0,2,8", "", "", false,
+    doExec<WorkspaceGroup>("Append", "Rebin", "{\"Params\":\"0,2,8\"}", "", "",
+                           false,
                            ILiveListener_sptr(new TestGroupDataListener));
-    WorkspaceGroup_sptr ws =
-        doExec<WorkspaceGroup>("Append", "Rebin", "Params=0,2,8", "", "", false,
-                               ILiveListener_sptr(new TestGroupDataListener));
+    WorkspaceGroup_sptr ws = doExec<WorkspaceGroup>(
+        "Append", "Rebin", "{\"Params\":\"0,2,8\"}", "", "", false,
+        ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
     TS_ASSERT_EQUALS(ws->name(), "fake");
@@ -489,11 +492,12 @@ public:
   }
   //--------------------------------------------------------------------------------------------
   void test_WorkspaceGroup_Append_None_Rebin() {
-    doExec<WorkspaceGroup>("Append", "", "", "Rebin", "Params=0,2,8", false,
+    doExec<WorkspaceGroup>("Append", "", "", "Rebin", "{\"Params\":\"0,2,8\"}",
+                           false,
                            ILiveListener_sptr(new TestGroupDataListener));
-    WorkspaceGroup_sptr ws =
-        doExec<WorkspaceGroup>("Append", "", "", "Rebin", "Params=0,2,8", false,
-                               ILiveListener_sptr(new TestGroupDataListener));
+    WorkspaceGroup_sptr ws = doExec<WorkspaceGroup>(
+        "Append", "", "", "Rebin", "{\"Params\":\"0,2,8\"}", false,
+        ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
     TS_ASSERT_EQUALS(ws->name(), "fake");
