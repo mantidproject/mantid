@@ -145,6 +145,69 @@ public:
     return this;
   }
 
+  /** Variadic method to recursively set the value of a PropertyWithValue.
+   *  specialized for when the name is a std::string.
+   *  @param property :: The name (case insensitive) and value to assign to the
+   * property
+   *  @param others :: Other properties to be set recursively.
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename T, typename... Args>
+  IPropertyManager *setProperties(const std::tuple<std::string, T> &&property,
+                                  Args &&... others) {
+    setProperties(std::forward<const std::tuple<std::string, T>>(property));
+    setProperties(std::forward<Args>(others)...);
+    return this;
+  }
+
+  /** Variadic method to recursively set the value of a PropertyWithValue.
+   *  specialized for when the name is a string literal.
+   *  @param property :: The name (case insensitive) and value to assign to the
+   * property
+   *  @param others :: Other properties to be set recursively.
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename T, typename... Args>
+  IPropertyManager *setProperties(const std::tuple<const char *, T> &&property,
+                                  Args &&... others) {
+    setProperties(std::forward<const std::tuple<const char *, T>>(property));
+    setProperties(std::forward<Args>(others)...);
+    return this;
+  }
+
+  /** Templated method to set the value of a PropertyWithValue
+   *  specialized for when the name is a std::string.
+   *  @param property :: The name (case insensitive) and value to assign to the
+   * property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename T>
+  IPropertyManager *setProperties(const std::tuple<std::string, T> &&property) {
+    setProperty(std::get<0>(property), std::get<1>(property));
+    return this;
+  }
+
+  /** Templated method to set the value of a PropertyWithValue
+   *  specialized for when the name is a string literal.
+   *  @param property :: The name (case insensitive) and value to assign to the
+   * property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename T>
+  IPropertyManager *
+  setProperties(const std::tuple<const char *, T> &&property) {
+    setProperty(std::string(std::get<0>(property)), std::get<1>(property));
+    return this;
+  }
+
   /** Specialised version of setProperty template method to handle const char *
   *  @param name :: The name of the property (case insensitive)
   *  @param value :: The value to assign to the property

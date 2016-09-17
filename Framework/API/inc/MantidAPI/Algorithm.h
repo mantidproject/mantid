@@ -288,6 +288,50 @@ public:
       const double endProgress = -1., const bool enableLogging = true,
       const int &version = -1);
 
+  template <typename... Args>
+  API::IAlgorithm_sptr execAsChildAlgorithm(const std::string &name,
+                                            Args &&... properties) {
+    API::IAlgorithm_sptr alg = createChildAlgorithm(name);
+    alg->setProperties(std::forward<Args>(properties)...);
+    alg->executeAsChildAlg();
+    return alg;
+  }
+
+  template <typename... Args>
+  API::IAlgorithm_sptr
+  execAsChildAlgorithm(const std::string &name, const double startProgress,
+                       const double endProgress, Args &&... properties) {
+    API::IAlgorithm_sptr alg =
+        createChildAlgorithm(name, startProgress, endProgress);
+    alg->setProperties(std::forward<Args>(properties)...);
+    alg->executeAsChildAlg();
+    return alg;
+  }
+
+  template <typename... Args>
+  API::IAlgorithm_sptr
+  execAsChildAlgorithm(const std::string &name, const double startProgress,
+                       const double endProgress, const bool enableLogging,
+                       Args &&... properties) {
+    API::IAlgorithm_sptr alg =
+        createChildAlgorithm(name, startProgress, endProgress, enableLogging);
+    alg->setProperties(std::forward<Args>(properties)...);
+    alg->executeAsChildAlg();
+    return alg;
+  }
+
+  template <typename... Args>
+  API::IAlgorithm_sptr
+  execAsChildAlgorithm(const std::string &name, const double startProgress,
+                       const double endProgress, const bool enableLogging,
+                       const int &version, Args &&... properties) {
+    API::IAlgorithm_sptr alg = createChildAlgorithm(
+        name, startProgress, endProgress, enableLogging, version);
+    alg->setProperties(std::forward<Args>(properties)...);
+    alg->executeAsChildAlg();
+    return alg;
+  }
+
   /// set whether we wish to track the child algorithm's history and pass it the
   /// parent object to fill.
   void trackAlgorithmHistory(boost::shared_ptr<AlgorithmHistory> parentHist);
