@@ -222,7 +222,7 @@ void ImggFormatsConvertViewQtWidget::writeImg(
   int tableSize = 256;
   QVector<QRgb> grayscale(tableSize);
   for (int i = 0; i < grayscale.size(); i++) {
-    int level = i; qGray(i, i, i);
+    int level = i; // would be equivalent: qGray(i, i, i);
     grayscale[i] = qRgb(level, level, level);
   }
   img.setColorTable(grayscale);

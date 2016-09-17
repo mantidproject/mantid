@@ -401,7 +401,6 @@ double jop(int q, double mj, double nj, double j) {
   default:
     throw std::runtime_error("Cannot calculate jop with this q value.");
   }
-  throw std::runtime_error("Cannot calculate jop with this q value.");
 }
 
 //--------------------------------------------------

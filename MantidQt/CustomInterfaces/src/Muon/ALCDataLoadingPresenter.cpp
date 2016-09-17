@@ -26,7 +26,7 @@ using namespace MantidQt::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
-    : m_view(view), m_directoryChanged(false), m_timerID() {}
+    : m_view(view), m_directoryChanged(false), m_timerID(), m_numDetectors(0) {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();

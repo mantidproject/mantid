@@ -68,9 +68,10 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
         preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor)
-    : WorkspaceObserver(), m_whitelist(whitelist),
-      m_preprocessMap(preprocessMap), m_processor(processor),
-      m_postprocessor(postprocessor), m_tableDirty(false) {
+    : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
+      m_whitelist(whitelist), m_preprocessMap(preprocessMap),
+      m_processor(processor), m_postprocessor(postprocessor),
+      m_tableDirty(false) {
 
   // Columns Group and Options must be added to the whitelist
   m_whitelist.addElement("Group", "Group",
@@ -1175,9 +1176,8 @@ void GenericDataProcessorPresenter::expandSelection() {
   std::set<int> selection;
 
   for (int i = 0; i < m_model->rowCount(); ++i)
-    if (groupIds.find(
-            m_model->data(m_model->index(i, m_columns - 2)).toInt()) !=
-        groupIds.end())
+    if (groupIds.find(m_model->data(m_model->index(i, m_columns - 2))
+                          .toInt()) != groupIds.end())
       selection.insert(i);
 
   m_view->setSelection(selection);
@@ -1195,7 +1195,8 @@ void GenericDataProcessorPresenter::clearSelected() {
       m_model->setData(m_model->index(*row, i), "");
     }
     // 'Group' column
-    m_model->setData(m_model->index(*row, m_columns - 2), getUnusedGroup(ignore));
+    m_model->setData(m_model->index(*row, m_columns - 2),
+                     getUnusedGroup(ignore));
     // 'Options' column
     m_model->setData(m_model->index(*row, m_columns - 1), "");
   }
