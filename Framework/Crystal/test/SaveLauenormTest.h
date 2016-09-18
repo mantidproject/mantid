@@ -61,9 +61,10 @@ public:
 
     // Get the file
     outfile = alg.getPropertyValue("Filename") + "001";
-    TS_ASSERT(Poco::File(outfile).exists());
+    bool fileExists = false;
+    TS_ASSERT(fileExists = Poco::File(outfile).exists());
 
-    TS_ASSERT(std::ifstream in(outfile.c_str()));
+    std::ifstream in(outfile.c_str());
 
     double d1, d2, d3, d4, d5, d6, d7;
     if (numPeaksPerBank > 0) {
@@ -76,7 +77,7 @@ public:
       TS_ASSERT_EQUALS(d4, 1.5);
       TS_ASSERT_DELTA(d5, 0.21025, 1e-4);
     }
-    TS_ASSERT(Poco::File(outfile).remove());
+    Poco::File(outfile).remove();
 
     /*std::string outfile2 = "./LAUE2";
 
