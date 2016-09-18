@@ -16,13 +16,15 @@ class ISISDisk:
     Calculates the resolution and flux for the ISIS disk chopper spectrometer LET
     """
 
-    def __init__(self, instname=None, variant=None):
+    def __init__(self, instname=None, variant=None, freq=None):
         if instname:
             self.setInstrument(instname, variant)
+            self.freq = 0
+            if freq is not None:
+                self.setFrequency(freq)
         else:
             self.instname = None
             self.variant = None
-        self.freq = 0
         self.Ei = None
 
     def setInstrument(self, instname, variant=None):

@@ -202,7 +202,8 @@ class PyChopGui(QtGui.QMainWindow):
             line.set_label('%s_%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s' % (inst, chopper, ei, freq, self.flux))
             if ei > self.xlim: self.xlim = ei
         self.resaxes.set_xlim([0, self.xlim])
-        self.resaxes.legend()
+        lg = self.resaxes.legend()
+        lg.draggable()
         self.resaxes.set_xlabel('Energy Transfer (meV)')
         self.resaxes.set_ylabel(r'$\Delta$E (meV FWHM)')
         self.rescanvas.draw()
@@ -214,40 +215,66 @@ class PyChopGui(QtGui.QMainWindow):
         inst = self.engine.instname
         chop = self.engine.getChopper()
         freq = self.engine.getFrequency()
+        overplot = self.widgets['HoldCheck'].isChecked()
         if hasattr(freq, '__len__'): freq = freq[-1]
         update = kwargs['update'] if 'update' in kwargs.keys() else False
-        prevtitle = self.flxaxes1.get_title()
         # Do not recalculate if all relevant parameters still the same.
-        if prevtitle != "" and not update:
-            searchStr = '([A-Z]+) "([A-z ]+)" ([0-9]+) Hz'
-            prevInst, prevChop, prevFreq = re.search(searchStr, prevtitle).groups()
-            if inst == prevInst and chop == prevChop and freq == float(prevFreq):
-                return
+        _, labels = self.flxaxes2.get_legend_handles_labels()
+        searchStr = '([A-Z]+) "([A-z ]+)" ([0-9]+) Hz'
+        tmpinst = []
+        if (labels and (overplot or len(labels) == 1)) or update:
+            for prevtitle in labels:
+                prevInst, prevChop, prevFreq = re.search(searchStr, prevtitle).groups()
+                if update:
+                    tmpinst.append(PyChop2(prevInst, prevChop, float(prevFreq)))
+                else:
+                    if inst == prevInst and chop == prevChop and freq == float(prevFreq):
+                        return
         ne = 25
         mn = self.minE[inst]
         mx = (self.flxslder.val/100)*self.maxE[inst]
         eis = np.linspace(mn, mx, ne)
         flux = eis*0
         elres = eis*0
-        for ie, ei in enumerate(eis):
-            try:
-                flux[ie] = self.engine.getFlux(ei)
-                elres[ie] = self.engine.getResolution(0., ei)[0]
-            except ValueError:
-                pass
-        self.flxaxes1.clear()
-        self.flxaxes1.set_title('%s "%s" %d Hz' % (inst, chop, freq))
+        if update:
+            self.flxaxes1.clear()
+            self.flxaxes2.clear()
+            self.flxaxes1.hold(True)
+            self.flxaxes2.hold(True)
+            for ii, instrument in enumerate(tmpinst):
+                for ie, ei in enumerate(eis):
+                    try:
+                        flux[ie] = instrument.getFlux(ei)
+                        elres[ie] = instrument.getResolution(0., ei)[0]
+                    except ValueError:
+                        pass
+                self.flxaxes1.plot(eis, flux)
+                line, = self.flxaxes2.plot(eis, elres)
+                line.set_label(labels[ii])
+        else:
+            for ie, ei in enumerate(eis):
+                try:
+                    flux[ie] = self.engine.getFlux(ei)
+                    elres[ie] = self.engine.getResolution(0., ei)[0]
+                except ValueError:
+                    pass
+            if overplot:
+                self.flxaxes1.hold(True)
+                self.flxaxes2.hold(True)
+            else:
+                self.flxaxes1.clear()
+                self.flxaxes2.clear()
+            self.flxaxes1.plot(eis, flux)
+            line, = self.flxaxes2.plot(eis, elres)
+            line.set_label('%s "%s" %d Hz' % (inst, chop, freq))
+        self.flxaxes1.set_xlim([mn, mx])
+        self.flxaxes2.set_xlim([mn, mx])
         self.flxaxes1.set_xlabel('Incident Energy (meV)')
         self.flxaxes1.set_ylabel('Flux (n/cm$^2$/s)')
-        self.flxaxes1.spines['right'].set_visible(False)
-        self.flxaxes1.plot(eis, flux, '-k')
-        self.flxfig.delaxes(self.flxaxes2)
-        self.flxaxes1.set_xlim([mn, mx])
-        self.flxaxes2 = self.flxaxes1.twinx()
-        self.flxaxes2.set_xlim([mn, mx])
-        self.flxaxes2.set_ylabel('Elastic Resolution FWHM (meV)', color='r')
-        self.flxaxes2.plot(eis, elres, '-r')
-        for tl in self.flxaxes2.get_yticklabels(): tl.set_color('r')
+        self.flxaxes1.set_xlabel('Incident Energy (meV)')
+        self.flxaxes2.set_ylabel('Elastic Resolution FWHM (meV)')
+        lg = self.flxaxes2.legend()
+        lg.draggable()
         self.flxcanvas.draw()
 
     def update_slider(self, val=None):
@@ -279,9 +306,9 @@ class PyChopGui(QtGui.QMainWindow):
         overplot = self.widgets['HoldCheck'].isChecked()
         # Do not recalculate if one of the plots has the same parametersc
         _, labels = self.frqaxes2.get_legend_handles_labels()
+        searchStr = '([A-Z]+) "([A-z ]+)" Ei = ([0-9.-]+) meV'
         if labels and (overplot or len(labels) == 1):
             for prevtitle in labels:
-                searchStr = '([A-Z]+) "([A-z ]+)" Ei = ([0-9.-]+) meV'
                 prevInst, prevChop, prevEi = re.search(searchStr, prevtitle).groups()
                 if inst == prevInst and chop == prevChop and abs(ei-float(prevEi)) < 0.01:
                     return
@@ -311,7 +338,8 @@ class PyChopGui(QtGui.QMainWindow):
         self.frqaxes2.set_ylabel('Elastic Resolution FWHM (meV)')
         line, = self.frqaxes2.plot(freqs, elres, 'o-')
         line.set_label('%s "%s" Ei = %5.3f meV' % (inst, chop, ei))
-        self.frqaxes2.legend()
+        lg = self.frqaxes2.legend()
+        lg.draggable()
         self.frqaxes2.set_xlim([0, np.max(freqs)])
         self.frqcanvas.draw()
 
@@ -447,6 +475,33 @@ class PyChopGui(QtGui.QMainWindow):
         fid.write(self.genText())
         fid.close()
 
+    def onHelp(self):
+        try:
+            from pymantidplot.proxies import showCustomInterfaceHelp
+            showCustomInterfaceHelp("PyChop")
+        except ImportError:
+            helpTxt = "PyChop is a tool to allow direct inelastic neutron\nscattering users to estimate the inelastic resolution\n"
+            helpTxt += "and incident flux for a given spectrometer setting.\n\nFirst select the instrument, chopper settings and\n"
+            helpTxt += "Ei, and then click 'Calculate and Plot'. Data for all\nthe graphs will be generated (may take 1-2s) and\n"
+            helpTxt += "all graphs will be updated. If the 'Hold current plot'\ncheck box is ticked, additional settings will be\n"
+            helpTxt += "overplotted on the existing graphs if they are\ndifferent from previous settings.\n\nMore in-depth help "
+            helpTxt += "can be obtained from the\nMantid help pages."
+            self.hlpwin = QtGui.QDialog()
+            self.hlpedt = QtGui.QLabel(helpTxt)
+            self.hlpbtn = QtGui.QPushButton('OK')
+            self.hlpwin.layout = QtGui.QVBoxLayout(self.hlpwin)
+            self.hlpwin.layout.addWidget(self.hlpedt)
+            self.hlpwin.layout.addWidget(self.hlpbtn)
+            self.hlpbtn.clicked.connect(self.hlpwin.deleteLater)
+            self.hlpwin.setWindowTitle('Help')
+            self.hlpwin.setWindowModality(QtCore.Qt.ApplicationModal)
+            self.hlpwin.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+            self.hlpwin.setMinimumSize(370, 300)
+            self.hlpwin.resize(370, 300)
+            self.hlpwin.show()
+            self.hlploop = QtCore.QEventLoop()
+            self.hlploop.exec_()
+
     def dummy(self, text):
         """
         Does nothing.
@@ -480,7 +535,7 @@ class PyChopGui(QtGui.QMainWindow):
         self.leftPanel = QtGui.QVBoxLayout()
         self.rightPanel = QtGui.QVBoxLayout()
         self.tabs = QtGui.QTabWidget(self)
-        self.fullWindow = QtGui.QHBoxLayout()
+        self.fullWindow = QtGui.QGridLayout()
         for widget in self.widgetslist:
             if 'pair' in widget[0]:
                 self.droplabels.append(QtGui.QLabel(widget[2]))
@@ -492,7 +547,6 @@ class PyChopGui(QtGui.QMainWindow):
                     self.widgets[widget[-1]] = {'Combo':self.dropboxes[-1], 'Label':self.droplabels[-1]}
                 elif 'edit' in widget[3]:
                     self.dropboxes.append(QtGui.QLineEdit(self))
-                    #self.dropboxes[-1].textChanged['QString'].connect(widget[5])
                     self.dropboxes[-1].returnPressed.connect(widget[5])
                     self.widgets[widget[-1]] = {'Edit':self.dropboxes[-1], 'Label':self.droplabels[-1]}
                 else:
@@ -538,10 +592,11 @@ class PyChopGui(QtGui.QMainWindow):
         self.flxfig = Figure()
         self.flxfig.patch.set_facecolor('white')
         self.flxcanvas = FigureCanvas(self.flxfig)
-        self.flxaxes1 = self.flxfig.add_subplot(111)
+        self.flxaxes1 = self.flxfig.add_subplot(121)
         self.flxaxes1.set_xlabel('Incident Energy (meV)')
         self.flxaxes1.set_ylabel('Flux (n/cm$^2$/s)')
-        self.flxaxes2 = self.flxaxes1.twinx()
+        self.flxaxes2 = self.flxfig.add_subplot(122)
+        self.flxaxes2.set_xlabel('Incident Energy (meV)')
         self.flxaxes2.set_ylabel('Elastic Resolution FWHM (meV)')
         self.flxfig_controls = NavigationToolbar(self.flxcanvas, self)
         self.flxsldfg = Figure()
@@ -615,8 +670,13 @@ class PyChopGui(QtGui.QMainWindow):
         self.menuOptions.addAction(self.eiPlots)
         self.menuBar().addMenu(self.menuOptions)
 
-        self.fullWindow.addLayout(self.leftPanel)
-        self.fullWindow.addLayout(self.rightPanel)
+        self.fullWindow.addLayout(self.leftPanel, 0, 0)
+        self.fullWindow.addLayout(self.rightPanel, 0, 1)
+        self.helpbtn = QtGui.QPushButton("?", self)
+        self.helpbtn.setMaximumWidth(30)
+        self.helpbtn.clicked.connect(self.onHelp)
+        self.fullWindow.addWidget(self.helpbtn, 1, 0, 1, -1)
+
         self.mainWidget = QtGui.QWidget()
         self.mainWidget.setLayout(self.fullWindow)
         self.setCentralWidget(self.mainWidget)
