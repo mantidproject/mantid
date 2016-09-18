@@ -129,7 +129,6 @@ public:
       Poco::File(outfile).remove();
     if (Poco::File(outfile2).exists())
       Poco::File(outfile2).remove();
-
   }
 
   /// Test with a few peaks
