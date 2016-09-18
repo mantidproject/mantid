@@ -125,8 +125,11 @@ public:
     outfile3 = alg3.getPropertyValue("Filename") + "001";
     // file does not exist because all peaks are bank1 which were eliminated
     TS_ASSERT(!Poco::File(outfile3).exists());
-    // Poco::File(outfile).remove();
-    // Poco::File(outfile2).remove();
+    if (Poco::File(outfile).exists())
+      Poco::File(outfile).remove();
+    if (Poco::File(outfile2).exists())
+      Poco::File(outfile2).remove();
+
   }
 
   /// Test with a few peaks
