@@ -109,20 +109,20 @@ choppers, :math:`\tau_{\mathrm{chop}}`, the response time of the detector,
 The first two contributions dominate so we will only concentrate on those.
 
 The moderator time width is determined from fitting data above 100 meV to a 
-:math:`\chi^2` distribution [1]_ which has a variance :math:`\tau_{\mathrm{mod}}^2
+:math:`\chi^2` distribution `[1]`_ which has a variance :math:`\tau_{\mathrm{mod}}^2
 =3/(\Sigma v)^2` where :math:`\Sigma` is the macroscopic scattering cross-section
 of the moderator and :math:`v` is the neutron velocity. However, experimentally
-it was found that this underestimates the widths at high energy [2]_, so that a 
+it was found that this underestimates the widths at high energy `[2]`_, so that a 
 modified form for the variance
 
-.. math:: \tau_{\mathrm{mod}}^2 = \tau_0 + \frac{3}{\Sigma v}
+.. math:: \tau_{\mathrm{mod}}^2 = \tau_0 + \frac{3}{(\Sigma v)^2}
 
 is used in PyChop. In future versions, the moderator lineshape will be reparameterised
 to use an Ikeda-Carpenter lineshape, which more accurately describes the ToF spectrum
 at lower neutron energies.
 
 The chopper time width is determined from the geometry of chopper and is given by
-[2]_, [3]_
+`[2]`_, `[3]`_
 
 .. math:: 
         \tau_{\mathrm{chop}}^2 \left\{ \begin{array}{ll} \frac{(\Delta T)^2}{6} 
@@ -148,7 +148,7 @@ As the neutron bunches travel towards the sample and detector they also spread o
 and the final time (energy) widths are determined by the geometry (distances) of the
 instrument. Specifically, the relative energy width is given by the sum in quadrature
 of each of the contributing time widths, which we will restrict here to the two major
-terms, :math:`\tau_{\mathrm{mod}}` and :math:`\tau_{\mathrm{chop}}` [4]_:
+terms, :math:`\tau_{\mathrm{mod}}` and :math:`\tau_{\mathrm{chop}}` `[4]`_:
 
 .. math:: \left( \frac{\Delta E}{E_i}\right )^2 = 
         \left[ 2\frac{\tau_{\mathrm{chop}}}{t_{\mathrm{chop}}} \frac{l_0+l_1}{l_2}
@@ -163,18 +163,29 @@ and :math:`E_f` are the incident and scattered neutron energies.
 
 The flux is obtained from lookup tables of measured (white-beam) flux on each instrument.
 
-.. [1] `RAL-94-025: The resolution function of the chopper spectrometer HET at ISIS,
-       T G Perring, Proceedings of ICANS XII (1993)
-       <http://www.neutronresearch.com/parch/1993/01/199301013280.pdf>`_
+References
+----------
 
-.. [2] RALT-028-94: High energy magnetic excitations in hexagonal cobalt,
-       T G Perring, Ph.D. Thesis, University of Cambridge (1991)
+.. _[1]:
 
-.. [3] `M. Marseguerra and G. Pauli, Neutron transmission probability through a 
-       curved revolving slit, Nucl. Inst. Meth. 4 (1959) 140
-       <http://dx.doi.org/10.1016/0029-554X(59)90066-7>`_
+[1] `RAL-94-025: The resolution function of the chopper spectrometer HET at ISIS,
+T G Perring, Proceedings of ICANS XII (1993)
+<http://www.neutronresearch.com/parch/1993/01/199301013280.pdf>`_
 
-.. [4] RAL-85-052: MARS - A Multi-Angle Rotor Spectrometer for the SNS,
-       C J Carlile, A D Taylor and W G Williams (1985)
+.. _[2]: 
+
+[2] RALT-028-94: High energy magnetic excitations in hexagonal cobalt,
+T G Perring, Ph.D. Thesis, University of Cambridge (1991)
+
+.. _[3]:
+
+[3] `M. Marseguerra and G. Pauli, Neutron transmission probability through a 
+curved revolving slit, Nucl. Inst. Meth. 4 (1959) 140
+<http://dx.doi.org/10.1016/0029-554X(59)90066-7>`_
+
+.. _[4]:
+
+[4] RAL-85-052: MARS - A Multi-Angle Rotor Spectrometer for the SNS,
+C J Carlile, A D Taylor and W G Williams (1985)
 
 .. categories:: Interfaces

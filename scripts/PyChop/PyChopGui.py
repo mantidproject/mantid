@@ -186,6 +186,9 @@ class PyChopGui(QtGui.QMainWindow):
             if hasattr(freq, '__len__'): freq = freq[0]
             self.resaxes.hold(True)
             for ie, Ei in enumerate(Eis):
+                # For LET ignore reps above 40 meV in energy as there is no flux there.
+                if 'LET' in inst and Ei>40:
+                    continue
                 en = np.linspace(0, 0.95*Ei, 200)
                 line, = self.resaxes.plot(en, self.res[ie])
                 line.set_label('%s_%3.2fmeV_%dHz_Flux=%fn/cm2/s' % (inst, Ei, freq, self.flux[ie]))
