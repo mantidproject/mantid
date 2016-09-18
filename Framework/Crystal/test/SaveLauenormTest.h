@@ -60,7 +60,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Get the file
-    outfile = alg.getPropertyValue("Filename") + "001";
+    /*outfile = alg.getPropertyValue("Filename") + "001";
     bool fileExists = false;
     TS_ASSERT(fileExists = Poco::File(outfile).exists());
 
@@ -79,7 +79,7 @@ public:
     }
     Poco::File(outfile).remove();
 
-    /*std::string outfile2 = "./LAUE2";
+    std::string outfile2 = "./LAUE2";
 
     // Now try with setting detector parameter
     auto &paramMap = ws->instrumentParameters();
