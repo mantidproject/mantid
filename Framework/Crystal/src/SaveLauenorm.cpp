@@ -56,9 +56,10 @@ void SaveLauenorm::init() {
                                         "factor of detector if set in "
                                         "SetDetScale.\n"
                                         "If false, no change (default).");
-  declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
-                      "EliminateBankNumbers", Direction::Input),
-                  "Comma deliminated string of bank numbers to exclude for example 1,2,5");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<std::string>>("EliminateBankNumbers",
+                                                      Direction::Input),
+      "Comma deliminated string of bank numbers to exclude for example 1,2,5");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -141,7 +142,8 @@ void SaveLauenorm::exec() {
     }
     // Do not use peaks from these banks
     std::vector<std::string> notBanks = getProperty("EliminateBankNumbers");
-    if (std::find(notBanks.begin(), notBanks.end(), bankName) != notBanks.end()) continue;
+    if (std::find(notBanks.begin(), notBanks.end(), bankName) != notBanks.end())
+      continue;
     if (scaleDet) {
       if (inst->hasParameter("detScale" + bankName)) {
         double correc = static_cast<double>(

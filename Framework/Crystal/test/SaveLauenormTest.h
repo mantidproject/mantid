@@ -120,14 +120,14 @@ public:
     TS_ASSERT(alg3.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg3.setProperty("InputWorkspace", ws));
     TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("Filename", outfile3));
-    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("EliminateBankNumbers", "1"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg3.setPropertyValue("EliminateBankNumbers", "1"));
     TS_ASSERT_THROWS_NOTHING(alg3.execute(););
     TS_ASSERT(alg3.isExecuted());
     // Get the file
     outfile3 = alg3.getPropertyValue("Filename") + "001";
     // file does not exist because all peaks are bank1 which were eliminated
     TS_ASSERT(!Poco::File(outfile3).exists());
-
   }
 
   /// Test with a few peaks
