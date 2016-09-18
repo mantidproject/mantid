@@ -60,7 +60,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Get the file
-    /*outfile = alg.getPropertyValue("Filename") + "001";
+    outfile = alg.getPropertyValue("Filename") + "001";
     bool fileExists = false;
     TS_ASSERT(fileExists = Poco::File(outfile).exists());
 
@@ -77,7 +77,7 @@ public:
       TS_ASSERT_EQUALS(d4, 1.5);
       TS_ASSERT_DELTA(d5, 0.21025, 1e-4);
     }
-    Poco::File(outfile).remove();
+    /*Poco::File(outfile).remove();
 
     std::string outfile2 = "./LAUE2";
 
