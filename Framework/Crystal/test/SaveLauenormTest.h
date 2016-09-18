@@ -77,7 +77,6 @@ public:
       TS_ASSERT_EQUALS(d4, 1.5);
       TS_ASSERT_DELTA(d5, 0.21025, 1e-4);
     }
-    /*Poco::File(outfile).remove();
 
     std::string outfile2 = "./LAUE2";
 
@@ -111,7 +110,6 @@ public:
       TS_ASSERT_EQUALS(d6, 2);
       TS_ASSERT_EQUALS(d7, 1);
     }
-    Poco::File(outfile2).remove();
 
     std::string outfile3 = "./LAUE3";
     SaveLauenorm alg3;
@@ -126,7 +124,9 @@ public:
     // Get the file
     outfile3 = alg3.getPropertyValue("Filename") + "001";
     // file does not exist because all peaks are bank1 which were eliminated
-    TS_ASSERT(!Poco::File(outfile3).exists());*/
+    TS_ASSERT(!Poco::File(outfile3).exists());
+    //Poco::File(outfile).remove();
+    //Poco::File(outfile2).remove();
   }
 
   /// Test with a few peaks
