@@ -63,22 +63,23 @@ public:
     outfile = alg.getPropertyValue("Filename") + "001";
     bool fileExists = false;
     TS_ASSERT(fileExists = Poco::File(outfile).exists());
-    if (fileExists) {
 
-      std::ifstream in(outfile.c_str());
+    std::ifstream in(outfile.c_str());
 
-      double d1, d2, d3, d4, d5, d6, d7;
-      if (numPeaksPerBank > 0) {
-        in >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7;
-        TS_ASSERT_EQUALS(d1, -1);
-        TS_ASSERT_EQUALS(d2, -1);
-        TS_ASSERT_EQUALS(d3, -1);
-        TS_ASSERT_EQUALS(d6, 1);
-        TS_ASSERT_EQUALS(d7, 1);
-        TS_ASSERT_EQUALS(d4, 1.5);
-        TS_ASSERT_DELTA(d5, 0.21025, 1e-4);
-      }
+    double d1, d2, d3, d4, d5, d6, d7;
+    if (numPeaksPerBank > 0) {
+      in >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7;
+      TS_ASSERT_EQUALS(d1, -1);
+      TS_ASSERT_EQUALS(d2, -1);
+      TS_ASSERT_EQUALS(d3, -1);
+      TS_ASSERT_EQUALS(d6, 1);
+      TS_ASSERT_EQUALS(d7, 1);
+      TS_ASSERT_EQUALS(d4, 1.5);
+      TS_ASSERT_DELTA(d5, 0.21025, 1e-4);
     }
+    Poco::File(outfile).remove();
+
+    std::string outfile2 = "./LAUE2";
 
     // Now try with setting detector parameter
     auto &paramMap = ws->instrumentParameters();
@@ -88,36 +89,45 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg2.initialize())
     TS_ASSERT(alg2.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg2.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("Filename", outfile));
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("Filename", outfile2));
     TS_ASSERT_THROWS_NOTHING(alg2.setProperty("UseDetScale", true));
     TS_ASSERT_THROWS_NOTHING(alg2.execute(););
     TS_ASSERT(alg2.isExecuted());
     // Get the file
-    outfile = alg2.getPropertyValue("Filename") + "001";
+    outfile2 = alg2.getPropertyValue("Filename") + "001";
     fileExists = false;
-    TS_ASSERT(fileExists = Poco::File(outfile).exists());
+    TS_ASSERT(fileExists = Poco::File(outfile2).exists());
 
-    if (fileExists) {
+    std::ifstream in2(outfile2.c_str());
 
-      std::ifstream in(outfile.c_str());
-
-      double d1, d2, d3, d4, d5, d6, d7;
-      if (numPeaksPerBank > 0) {
-        for (int i = 0; i < 17; i++)
-          in >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7;
-        TS_ASSERT_EQUALS(d1, -3);
-        TS_ASSERT_EQUALS(d2, -3);
-        TS_ASSERT_EQUALS(d3, -3);
-        TS_ASSERT_EQUALS(d4, 3.5);
-        TS_ASSERT_DELTA(d5, 0.39270, 1e-4);
-        // was d6=3; d7=2 before 0.5 factor (round up to integer)
-        TS_ASSERT_EQUALS(d6, 2);
-        TS_ASSERT_EQUALS(d7, 1);
-      }
+    if (numPeaksPerBank > 0) {
+      for (int i = 0; i < 17; i++)
+        in2 >> d1 >> d2 >> d3 >> d4 >> d5 >> d6 >> d7;
+      TS_ASSERT_EQUALS(d1, -3);
+      TS_ASSERT_EQUALS(d2, -3);
+      TS_ASSERT_EQUALS(d3, -3);
+      TS_ASSERT_EQUALS(d4, 3.5);
+      TS_ASSERT_DELTA(d5, 0.39270, 1e-4);
+      // was d6=3; d7=2 before 0.5 factor (round up to integer)
+      TS_ASSERT_EQUALS(d6, 2);
+      TS_ASSERT_EQUALS(d7, 1);
     }
+    Poco::File(outfile2).remove();
 
-    if (Poco::File(outfile).exists())
-      Poco::File(outfile).remove();
+    std::string outfile3 = "./LAUE3";
+    SaveLauenorm alg3;
+    TS_ASSERT_THROWS_NOTHING(alg3.initialize())
+    TS_ASSERT(alg3.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg3.setProperty("InputWorkspace", ws));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("Filename", outfile3));
+    TS_ASSERT_THROWS_NOTHING(alg3.setPropertyValue("EliminateBankNumbers", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg3.execute(););
+    TS_ASSERT(alg3.isExecuted());
+    // Get the file
+    outfile3 = alg3.getPropertyValue("Filename") + "001";
+    // file does not exist because all peaks are bank1 which were eliminated
+    TS_ASSERT(!Poco::File(outfile3).exists());
+
   }
 
   /// Test with a few peaks

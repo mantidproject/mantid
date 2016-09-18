@@ -6,6 +6,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidCrystal/AnvredCorrection.h"
+#include "MantidKernel/ArrayProperty.h"
 #include <fstream>
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -55,6 +56,9 @@ void SaveLauenorm::init() {
                                         "factor of detector if set in "
                                         "SetDetScale.\n"
                                         "If false, no change (default).");
+  declareProperty(Kernel::make_unique<ArrayProperty<std::string>>(
+                      "EliminateBankNumbers", Direction::Input),
+                  "Comma deliminated string of bank numbers to exclude for example 1,2,5");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -135,6 +139,9 @@ void SaveLauenorm::exec() {
     if (type.compare(0, 2, "Ru") != 0) {
       Strings::convert(bankName, sequence);
     }
+    // Do not use peaks from these banks
+    std::vector<std::string> notBanks = getProperty("EliminateBankNumbers");
+    if (std::find(notBanks.begin(), notBanks.end(), bankName) != notBanks.end()) continue;
     if (scaleDet) {
       if (inst->hasParameter("detScale" + bankName)) {
         double correc = static_cast<double>(
