@@ -104,7 +104,7 @@ private:
   void checkForRequiredLegacyFixup(API::IMDWorkspace_sptr ws);
 
   /// Negative scaling for Q dimensions
-  std::vector<double>qDimensions(API::IMDWorkspace_sptr ws);
+  std::vector<double> qDimensions(API::IMDWorkspace_sptr ws);
 
   /// Open file handle
   // clang-format off

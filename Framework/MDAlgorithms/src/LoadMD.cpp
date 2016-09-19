@@ -779,13 +779,14 @@ void LoadMD::checkForRequiredLegacyFixup(API::IMDWorkspace_sptr ws) {
 std::vector<double> LoadMD::qDimensions(API::IMDWorkspace_sptr ws) {
   std::vector<double> scaling(m_numDims);
   for (size_t d = 0; d < m_numDims; d++) {
-    std::string dimd = ws->getDimension(d)->getName();;
+    std::string dimd = ws->getDimension(d)->getName();
+    ;
 
     // Assume the Q dimensions are those that have names starting with [
     // such as [H,0.5H,0], or Q_ such as Q_sample_x.
     // The change in sign should apply only to those.
     boost::regex re("\\[.*|Q_");
-    if (boost::regex_search(dimd.begin(), dimd.begin()+2, re))
+    if (boost::regex_search(dimd.begin(), dimd.begin() + 2, re))
       scaling[d] = -1.0;
     else
       scaling[d] = 1.0;
