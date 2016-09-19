@@ -907,9 +907,9 @@ void MantidUI::showSliceViewer() {
 
     // Pop up the window
     w->show();
+    // Keep and handle to the window for later serialisation
+    appWindow()->addSerialisableWindow(w);
     appWindow()->modifiedProject();
-    // And add it
-    // appWindow()->d_workspace->addSubWindow(w);
   }
 }
 

@@ -1719,9 +1719,9 @@ void WaterfallFillDialog::setFillMode() {
   }
 }
 
-IProjectSerialisable *MultiLayer::loadFromProject(const std::string &lines,
-                                                  ApplicationWindow *app,
-                                                  const int fileVersion) {
+MantidQt::API::IProjectSerialisable *
+MultiLayer::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                            const int fileVersion) {
   std::string multiLayerLines = lines;
 
   // The very first line of a multilayer section has some important settings,

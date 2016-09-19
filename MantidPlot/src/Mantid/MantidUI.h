@@ -6,7 +6,7 @@
 //----------------------------------
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
-#include "Mantid/IProjectSerialisable.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
