@@ -43,27 +43,27 @@ class ExtractMonitors(DataProcessorAlgorithm):
         return issues
 
     def PyExec(self):
-        ws = self.getProperty("InputWorkspace").value
+        in_ws = self.getProperty("InputWorkspace").value
         detector_ws_name = self.getProperty("DetectorWorkspace").valueAsStr
         monitor_ws_name = self.getProperty("MonitorWorkspace").valueAsStr
 
         try:
-            mon = ws.getMonitorWorkspace()
+            mon = in_ws.getMonitorWorkspace()
             raise ValueError("Monitor workspace already exists, called: " + mon.name() + ".")
         except RuntimeError:
             pass
 
         monitors = []
         detectors = []
-        for i in range(ws.getNumberHistograms()):
+        for i in range(in_ws.getNumberHistograms()):
             try:
-                monitors.append(i) if ws.getDetector(i).isMonitor() else detectors.append(i)
+                monitors.append(i) if in_ws.getDetector(i).isMonitor() else detectors.append(i)
             except RuntimeError:
                 self.log().warning("Missing detector at " + str(i))
 
         if detector_ws_name:
             if detectors:
-                detector_ws = ExtractSpectra(InputWorkspace=ws,
+                detector_ws = ExtractSpectra(InputWorkspace=in_ws,
                                              OutputWorkspace=detector_ws_name,
                                              WorkspaceIndexList=detectors)
                 self.setProperty("DetectorWorkspace", detector_ws)
@@ -72,7 +72,7 @@ class ExtractMonitors(DataProcessorAlgorithm):
 
         if monitor_ws_name:
             if monitors:
-                monitor_ws = ExtractSpectra(InputWorkspace=ws,
+                monitor_ws = ExtractSpectra(InputWorkspace=in_ws,
                                             OutputWorkspace=monitor_ws_name,
                                             WorkspaceIndexList=monitors)
                 self.setProperty("MonitorWorkspace", monitor_ws)
