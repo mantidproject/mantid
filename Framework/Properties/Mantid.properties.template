@@ -186,6 +186,8 @@ logging.channels.fileFilterChannel.level= information
 logging.channels.fileChannel.class = FileChannel
 # Blank entry uses default path of HOME/.mantid/mantid.log on Linux/OSX and %APPDATA%\\mantidproject\\mantid
 logging.channels.fileChannel.path =
+# Do not flush file buffers for each newline
+logging.channels.fileChannel.flush = false
 logging.channels.fileChannel.rotation = 1 M
 logging.channels.fileChannel.purgeCount = 9
 logging.channels.fileChannel.formatter.class = PatternFormatter
