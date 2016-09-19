@@ -52,8 +52,8 @@ splitByCommas(const std::string &names_string);
 
 std::string DLLExport plot1DString(const std::vector<std::string> &ws_names);
 
-std::string DLLExport tableString(const TreeData &treeData,
-                                  const DataProcessorWhiteList &whitelist);
+std::string DLLExport
+tableString(const TreeData &treeData, const DataProcessorWhiteList &whitelist);
 
 std::string DLLExport titleString(const std::string &wsName);
 
@@ -69,9 +69,9 @@ plotsString(const std::vector<std::string> &output_ws,
             const DataProcessorProcessingAlgorithm &processor);
 
 std::string DLLExport
-    getReducedWorkspaceName(const RowData &data,
-                            const DataProcessorWhiteList &whitelist,
-                            const std::string &prefix = "");
+getReducedWorkspaceName(const RowData &data,
+                        const DataProcessorWhiteList &whitelist,
+                        const std::string &prefix = "");
 
 boost::tuple<std::string, std::string> DLLExport reduceRowString(
     const RowData &data, const std::string &instrument,

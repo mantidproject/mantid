@@ -425,8 +425,8 @@ bool QDataProcessorTwoLevelTreeModel::setData(const QModelIndex &index,
 * whitelist
 * @param table : A table workspace containing the data
 */
-void
-QDataProcessorTwoLevelTreeModel::setupModelData(ITableWorkspace_sptr table) {
+void QDataProcessorTwoLevelTreeModel::setupModelData(
+    ITableWorkspace_sptr table) {
 
   int nrows = static_cast<int>(table->rowCount());
 

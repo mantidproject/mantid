@@ -356,9 +356,8 @@ void DataProcessorOneLevelTreeManager::transfer(
 * @param child :: the row
 * @param data :: the data
 */
-void
-DataProcessorOneLevelTreeManager::update(int parent, int child,
-                                         const std::vector<std::string> &data) {
+void DataProcessorOneLevelTreeManager::update(
+    int parent, int child, const std::vector<std::string> &data) {
 
   UNUSED_ARG(child);
 
@@ -408,9 +407,8 @@ ITableWorkspace_sptr DataProcessorOneLevelTreeManager::createDefaultWorkspace(
 * @param ws :: the table workspace
 * @param whitelistColumns :: the number of columns as specified in a whitelist
 */
-void
-DataProcessorOneLevelTreeManager::validateModel(ITableWorkspace_sptr ws,
-                                                size_t whitelistColumns) const {
+void DataProcessorOneLevelTreeManager::validateModel(
+    ITableWorkspace_sptr ws, size_t whitelistColumns) const {
 
   if (!ws)
     throw std::runtime_error("Null pointer");
@@ -437,9 +435,8 @@ DataProcessorOneLevelTreeManager::validateModel(ITableWorkspace_sptr ws,
 * @param whitelistColumns : [input] The number of columns in the whitelist
 * @throws std::runtime_error if the number of columns in the table is incorrect
 */
-bool
-DataProcessorOneLevelTreeManager::isValidModel(Workspace_sptr ws,
-                                               size_t whitelistColumns) const {
+bool DataProcessorOneLevelTreeManager::isValidModel(
+    Workspace_sptr ws, size_t whitelistColumns) const {
 
   try {
     validateModel(boost::dynamic_pointer_cast<ITableWorkspace>(ws),

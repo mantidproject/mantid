@@ -277,10 +277,9 @@ void ConvertAxisByFormula::calculateValues(
   }
 }
 
-void
-ConvertAxisByFormula::setGeometryValues(const API::SpectrumInfo &specInfo,
-                                        const size_t index,
-                                        std::vector<Variable_ptr> &variables) {
+void ConvertAxisByFormula::setGeometryValues(
+    const API::SpectrumInfo &specInfo, const size_t index,
+    std::vector<Variable_ptr> &variables) {
   for (auto variable : variables) {
     if (variable->isGeometric) {
       if (variable->name == "twotheta") {

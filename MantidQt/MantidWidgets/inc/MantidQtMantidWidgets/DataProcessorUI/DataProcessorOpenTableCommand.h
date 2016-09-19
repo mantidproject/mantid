@@ -36,7 +36,8 @@ public:
       : DataProcessorCommandBase(tablePresenter){};
   virtual ~DataProcessorOpenTableCommand(){};
 
-  void execute() override{// This action should do nothing
+  void execute() override{
+      // This action should do nothing
   };
   std::string name() override { return std::string("Open Table"); }
   std::string icon() override { return std::string("://multiload.png"); }

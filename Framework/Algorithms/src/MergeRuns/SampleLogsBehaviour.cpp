@@ -500,9 +500,8 @@ bool SampleLogsBehaviour::isWithinTolerance(const SampleLogBehaviour &behaviour,
  * @param addeeWSProperty a pointer to the property in the workspace being added
  * @return true if the sample logs match, false otherwise
  */
-bool
-SampleLogsBehaviour::stringPropertiesMatch(const SampleLogBehaviour &behaviour,
-                                           const Property *addeeWSProperty) {
+bool SampleLogsBehaviour::stringPropertiesMatch(
+    const SampleLogBehaviour &behaviour, const Property *addeeWSProperty) {
   return behaviour.property->value().compare(addeeWSProperty->value()) == 0;
 }
 
