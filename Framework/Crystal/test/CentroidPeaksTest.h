@@ -9,8 +9,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidIndexing/IndexInfo.h"
-#include "MantidIndexing/MakeRange.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -31,7 +29,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
-using namespace Mantid::Indexing;
 using namespace Mantid::HistogramData;
 
 class CentroidPeaksTest : public CxxTest::TestSuite {
@@ -70,11 +67,8 @@ public:
       gens[d] = gen;
     }
 
-    IndexInfo indexInfo(numPixels);
-    indexInfo.setSpectrumNumbers(makeRange(0, numPixels - 1));
-    indexInfo.setDetectorIDs(makeRange(0, numPixels - 1));
     auto retVal = create<EventWorkspace>(
-        indexInfo,
+        numPixels,
         Histogram(BinEdges(numBins, LinearGenerator(0.0, binDelta))));
 
     // --------- Load the instrument -----------
