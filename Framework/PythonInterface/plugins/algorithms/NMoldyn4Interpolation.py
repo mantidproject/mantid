@@ -1,5 +1,5 @@
 # Author: Alex Phimister 08/2016
-# pylint disable: invalid-name
+# pylint: disable=invalid-name
 import math
 import numpy as np
 import scipy as sc
