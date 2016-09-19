@@ -26,6 +26,7 @@
 #include "MantidKernel/ConfigService.h"
 #include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 #include <vector>
 
 typedef std::unique_ptr<Mantid::API::IBoxControllerIO> file_holder_type;
@@ -236,11 +237,13 @@ void LoadMD::exec() {
                         << m_QConvention << '\n';
 
     if (pref_QConvention != m_QConvention) {
+      std::vector<double> scaling(m_numDims);
+      scaling = qDimensions(ws);
       g_log.information() << "Transforming Q\n";
       Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
       transform_alg->setProperty("InputWorkspace",
                                  boost::dynamic_pointer_cast<IMDWorkspace>(ws));
-      transform_alg->setProperty("Scaling", "-1.0");
+      transform_alg->setProperty("Scaling", scaling);
       transform_alg->executeAsChildAlg();
       IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
       ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(tmp);
@@ -345,11 +348,13 @@ void LoadMD::loadHisto() {
                       << '\n';
 
   if (pref_QConvention != m_QConvention) {
+    std::vector<double> scaling(m_numDims);
+    scaling = qDimensions(ws);
     g_log.information() << "Transforming Q\n";
     Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
     transform_alg->setProperty("InputWorkspace",
                                boost::dynamic_pointer_cast<IMDWorkspace>(ws));
-    transform_alg->setProperty("Scaling", "-1.0");
+    transform_alg->setProperty("Scaling", scaling);
     transform_alg->executeAsChildAlg();
     IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
     ws = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
@@ -766,6 +771,27 @@ void LoadMD::checkForRequiredLegacyFixup(API::IMDWorkspace_sptr ws) {
   if (isQBasedSpecialCoordinateSystem && containsOnlyUnkownFrames) {
     m_requiresMDFrameCorrection = true;
   }
+}
+
+/**
+ * Find scaling for Q dimensions
+ */
+std::vector<double> LoadMD::qDimensions(API::IMDWorkspace_sptr ws) {
+  std::vector<double> scaling(m_numDims);
+  for (size_t d = 0; d < m_numDims; d++) {
+    std::string dimd = ws->getDimension(d)->getName();
+    ;
+
+    // Assume the Q dimensions are those that have names starting with [
+    // such as [H,0.5H,0], or Q_ such as Q_sample_x.
+    // The change in sign should apply only to those.
+    boost::regex re("\\[.*|Q_");
+    if (boost::regex_search(dimd.begin(), dimd.begin() + 2, re))
+      scaling[d] = -1.0;
+    else
+      scaling[d] = 1.0;
+  }
+  return scaling;
 }
 const std::string LoadMD::VISUAL_NORMALIZATION_KEY = "visual_normalization";
 const std::string LoadMD::VISUAL_NORMALIZATION_KEY_HISTO =
