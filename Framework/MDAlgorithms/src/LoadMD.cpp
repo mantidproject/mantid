@@ -780,7 +780,6 @@ std::vector<double> LoadMD::qDimensions(API::IMDWorkspace_sptr ws) {
   std::vector<double> scaling(m_numDims);
   for (size_t d = 0; d < m_numDims; d++) {
     std::string dimd = ws->getDimension(d)->getName();
-    ;
 
     // Assume the Q dimensions are those that have names starting with [
     // such as [H,0.5H,0], or Q_ such as Q_sample_x.
