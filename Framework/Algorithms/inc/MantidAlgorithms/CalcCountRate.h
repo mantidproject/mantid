@@ -55,7 +55,8 @@ public:
   bool notmalizeCountRate() const;
   /// Helper function to test if log derivative is used
   bool useLogDerivative() const;
-
+  /// helper function to test if visualization workspace is requested
+  bool buildVisWS() const;
 private:
   void init() override;
   void exec() override;

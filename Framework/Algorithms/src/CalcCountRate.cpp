@@ -9,6 +9,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -167,7 +168,15 @@ void CalcCountRate::exec() {
   m_pNormalizationLog = nullptr;
 }
 
-/** Process input workspace to calculate  */
+/** Process input workspace to calculate instrument counting rate as function of
+*experiment time
+*@param InputWorkspace :: shared pointer to the input workspace to process
+*@param targLog        :: pointer to time series property containing count rate
+*log.
+*                         Property should exist on input and will be modified
+*with
+*                         counting rate log on output.
+*/
 void CalcCountRate::calcRateLog(
     DataObjects::EventWorkspace_sptr &InputWorkspace,
     Kernel::TimeSeriesProperty<double> *const targLog) {
@@ -431,8 +440,22 @@ void CalcCountRate::setSourceWSandXRanges(
     m_XRangeMax = realMax;
   }
 }
+
+/** Initiate visualization workspace if user requested one. If not, resets
+ * existing visWs pointer (if any)*/
 void CalcCountRate::initVisWorkspace() {
-  std::string visWSName = getProperty();
+  std::string visWSName = getProperty("VisualizationWs");
+  if (visWSName.empty()) {
+    m_visWs.reset();
+    return;
+  }
+  size_t numTBins = getProperty("NumTimeSteps");
+  size_t numXBins = getProperty("XResolution");
+
+  //m_visWs = API::WorkspaceFactory::Instance().create();
+}
+bool CalcCountRate::buildVisWS() const {
+return bool(m_visWs);
 }
 
 /** Helper function, mainly for testing
