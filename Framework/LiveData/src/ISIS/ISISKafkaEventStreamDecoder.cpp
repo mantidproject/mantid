@@ -188,7 +188,6 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
 void ISISKafkaEventStreamDecoder::initLocalCaches() {
   std::string rawMsgBuffer;
 
-  // ---- Create workspace ----
   // Load spectra-detector mapping from stream
   m_spDetStream->consumeMessage(&rawMsgBuffer);
   if (rawMsgBuffer.empty()) {
@@ -207,20 +206,22 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
           "found nspec=" << nspec << ", ndet=" << nudet;
     throw std::runtime_error(os.str());
   }
+  // Create buffer
   auto eventBuffer = createBufferWorkspace(
       static_cast<size_t>(spDetMsg->n_spectra()), spDetMsg->spec()->data(),
       spDetMsg->det()->data(), nudet);
-  // Load the instrument if possibly but continue if we can't
+
+  // Load run metadata
   m_runStream->consumeMessage(&rawMsgBuffer);
   if (rawMsgBuffer.empty()) {
     throw std::runtime_error("ISISKafkaEventStreamDecoder::initLocalCaches() - "
                              "Empty message received from run info "
                              "topic. Unable to continue");
   }
-
-  // ---- Run metadata ----
   auto runMsg = ISISStream::GetRunInfo(
       reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
+
+  // Load the instrument if possibly but continue if we can't
   auto instName = runMsg->inst_name();
   if (instName && instName->size() > 0)
     loadInstrument(instName->c_str(), eventBuffer);
@@ -245,9 +246,8 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
   // Cache spec->index mapping. We assume it is the same across all periods
   m_specToIdx = eventBuffer->getSpectrumToWorkspaceIndexMap();
 
-  // ---- Additional buffers per period ----
-  // Should be the number of periods. What is that?
-  m_localEvents.resize(1);
+  // Buffers for each period
+  m_localEvents.resize(static_cast<size_t>(runMsg->n_periods()));
   m_localEvents[0] = eventBuffer;
 }
 

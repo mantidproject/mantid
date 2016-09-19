@@ -5,6 +5,7 @@
 
 #include "MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/make_unique.h"
@@ -62,7 +63,7 @@ public:
     EXPECT_CALL(mockBroker, subscribe_(_))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISSinglePeriodEventSubscriber))
-        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber))
+        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
@@ -77,26 +78,39 @@ public:
     auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
     TS_ASSERT(eventWksp);
 
-    // -- Metadata --
-    TS_ASSERT(eventWksp->getInstrument());
-    TS_ASSERT_EQUALS("HRPDTEST", eventWksp->getInstrument()->getName());
-    TS_ASSERT_EQUALS(
-        "2016-08-31T12:07:42",
-        eventWksp->run().getPropertyValueAsType<std::string>("run_start"));
-    std::array<Mantid::specnum_t, 5> specs = {{1, 2, 3, 4, 5}};
-    std::array<Mantid::detid_t, 5> ids = {{1001, 1002, 1100, 901000, 10100}};
-    for (size_t i = 0; i < eventWksp->getNumberHistograms(); ++i) {
-      const auto &spec = eventWksp->getSpectrum(i);
-      TS_ASSERT_EQUALS(specs[i], spec.getSpectrumNo());
-      const auto &sid = spec.getDetectorIDs();
-      TS_ASSERT_EQUALS(ids[i], *(sid.begin()));
-    }
-
+    checkWorkspaceMetadata(*eventWksp);
     // -- Data --
-    TS_ASSERT_EQUALS(specs.size(), eventWksp->getNumberHistograms());
     // A timer-based test and each message contains 6 events so the total should
     // be divisible by 6
     TS_ASSERT(eventWksp->getNumberEvents() % 6 == 0);
+  }
+
+  void test_Multiple_Period_Event_Stream_Throws_RuntimeErrorOnExtract() {
+    using namespace ::testing;
+    using namespace ISISKafkaTesting;
+    using Mantid::API::Workspace_sptr;
+    using Mantid::API::WorkspaceGroup;
+    using Mantid::DataObjects::EventWorkspace;
+    using namespace Mantid::LiveData;
+
+    MockKafkaBroker mockBroker;
+    EXPECT_CALL(mockBroker, subscribe_(_))
+        .Times(Exactly(3))
+        .WillOnce(Return(new FakeISISMultiplePeriodEventSubscriber))
+        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(2)))
+        .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
+    auto decoder = createTestDecoder(mockBroker);
+    TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS(workspace = decoder->extractData(), std::runtime_error);
+    TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
+    TS_ASSERT(!decoder->isRunning());
+
+//    // -- Workspace checks --
+//    TS_ASSERT(workspace);
+//    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+//    TS_ASSERT(group);
   }
 
   void test_Empty_Event_Stream_Waits() {
@@ -107,7 +121,7 @@ public:
     EXPECT_CALL(mockBroker, subscribe_(_))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeEmptyStreamSubscriber))
-        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber))
+        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
@@ -146,7 +160,7 @@ public:
     EXPECT_CALL(mockBroker, subscribe_(_))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISSinglePeriodEventSubscriber))
-        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber))
+        .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeEmptyStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
@@ -180,6 +194,24 @@ private:
     using namespace Mantid::LiveData;
     return Mantid::Kernel::make_unique<ISISKafkaEventStreamDecoder>(broker, "",
                                                                     "", "");
+  }
+
+  void
+  checkWorkspaceMetadata(const Mantid::DataObjects::EventWorkspace &eventWksp) {
+    TS_ASSERT(eventWksp.getInstrument());
+    TS_ASSERT_EQUALS("HRPDTEST", eventWksp.getInstrument()->getName());
+    TS_ASSERT_EQUALS(
+        "2016-08-31T12:07:42",
+        eventWksp.run().getPropertyValueAsType<std::string>("run_start"));
+    std::array<Mantid::specnum_t, 5> specs = {{1, 2, 3, 4, 5}};
+    std::array<Mantid::detid_t, 5> ids = {{1001, 1002, 1100, 901000, 10100}};
+    TS_ASSERT_EQUALS(specs.size(), eventWksp.getNumberHistograms());
+    for (size_t i = 0; i < eventWksp.getNumberHistograms(); ++i) {
+      const auto &spec = eventWksp.getSpectrum(i);
+      TS_ASSERT_EQUALS(specs[i], spec.getSpectrumNo());
+      const auto &sid = spec.getDetectorIDs();
+      TS_ASSERT_EQUALS(ids[i], *(sid.begin()));
+    }
   }
 };
 

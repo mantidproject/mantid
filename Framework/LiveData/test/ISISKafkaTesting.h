@@ -75,7 +75,7 @@ public:
     auto messageNEvents = ISISStream::CreateNEvents(
         builder, builder.CreateVector(tof), builder.CreateVector(spec));
 
-    int32_t frameNumber(2), period(0);
+    int32_t frameNumber(2), period(1);
     float frameTime(1.f), protonCharge(0.5f);
     bool endOfFrame(false), endOfRun(false);
     // No SE events
@@ -93,11 +93,22 @@ public:
 };
 
 // -----------------------------------------------------------------------------
+// Fake ISIS event stream to provide event data
+// -----------------------------------------------------------------------------
+class FakeISISMultiplePeriodEventSubscriber
+    : public Mantid::LiveData::IKafkaStreamSubscriber {
+public:
+  void subscribe() override {}
+  void consumeMessage(std::string *buffer) override { assert(buffer); }
+};
+
+// -----------------------------------------------------------------------------
 // Fake ISIS run data stream
 // -----------------------------------------------------------------------------
 class FakeISISRunInfoStreamSubscriber
     : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
+  FakeISISRunInfoStreamSubscriber(int32_t nperiods) : m_nperiods(nperiods) {}
   void subscribe() override {}
   void consumeMessage(std::string *buffer) override {
     assert(buffer);
@@ -111,7 +122,7 @@ public:
     flatbuffers::FlatBufferBuilder builder;
     auto runInfo = ISISStream::CreateRunInfo(builder, startTime, m_runNumber,
                                              builder.CreateString(m_instName),
-                                             m_streamOffset);
+                                             m_streamOffset, m_nperiods);
     builder.Finish(runInfo);
     // Copy to provided buffer
     buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
@@ -123,6 +134,7 @@ private:
   int32_t m_runNumber = 1000;
   std::string m_instName = "HRPDTEST";
   int64_t m_streamOffset = 0;
+  int32_t m_nperiods = 1;
 };
 
 // -----------------------------------------------------------------------------
