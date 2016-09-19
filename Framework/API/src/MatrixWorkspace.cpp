@@ -86,10 +86,16 @@ MatrixWorkspace::~MatrixWorkspace() {
   }
 }
 
+/** Returns a const reference to the IndexInfo object of the workspace.
+ *
+ * Used for access to spectrum number and detector ID information of spectra. */
 const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
   return *m_indexInfo;
 }
 
+/** Sets the IndexInfo object of the workspace.
+ *
+ * Used for setting spectrum number and detector ID information of spectra */
 void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
   // Comparing the *local* size of the indexInfo.
   if (indexInfo.size() != getNumberHistograms())
@@ -2112,10 +2118,12 @@ void MatrixWorkspace::setImageE(const MantidImage &image, size_t start,
   setImage(&MatrixWorkspace::dataE, image, start, parallelExecution);
 }
 
+/// Private helper method for IndexInfo
 specnum_t MatrixWorkspace::spectrumNumber(const size_t index) const {
   return getSpectrum(index).getSpectrumNo();
 }
 
+/// Private helper method for IndexInfo
 const std::set<detid_t> &
 MatrixWorkspace::detectorIDs(const size_t index) const {
   return getSpectrum(index).getDetectorIDs();
