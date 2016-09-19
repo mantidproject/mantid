@@ -34,6 +34,9 @@ public:
     pNormLog = m_pNormalizationLog;
     numLogSteps = m_numLogSteps;
   }
+  DataObjects::EventWorkspace const *const getWorkingWS() {
+    return m_workingWS.get();
+  }
 };
 
 class CalcCountRateTest : public CxxTest::TestSuite {
@@ -59,6 +62,7 @@ public:
 
     alg.initialize();
     alg.setProperty("Workspace", sws);
+    alg.setProperty("RangeUnits", "dSpacing");
 
     alg.setSearchRanges(sws); // explicit ranges:
     //-- real workspace ranges returned
@@ -68,9 +72,9 @@ public:
     TS_ASSERT_DELTA(std::get<1>(ranget), 99.5, 1.e-8);
     TS_ASSERT(!std::get<2>(ranget));
 
-    sws->getEventXMinMax(XRangeMin, XRangeMax);
-    TS_ASSERT_DELTA(XRangeMin, 0.5, 1.e-5);
-    TS_ASSERT_DELTA(XRangeMax, 99.5, 1.e-5);
+    alg.getWorkingWS()->getEventXMinMax(XRangeMin, XRangeMax);
+    TS_ASSERT_EQUALS(XRangeMin, std::get<0>(ranget));
+    TS_ASSERT_EQUALS(XRangeMax, std::get<1>(ranget));
 
     //--------------------------------------------------------------------
     // right crop range is specified. Top range is within the right
@@ -90,7 +94,7 @@ public:
 
     sws->getEventXMinMax(XRangeMin, XRangeMax);
     TS_ASSERT_DELTA(XRangeMin, 0.5, 1.e-5);
-    TS_ASSERT_DELTA(XRangeMax, 19.5, 1.e-5);
+    TS_ASSERT_DELTA(XRangeMax, 99.5, 1.e-5);
 
     //--------------------------------------------------------------------
     // both crop ranges are specified. Result lies within the crop
@@ -110,10 +114,11 @@ public:
     TS_ASSERT_DELTA(std::get<1>(ranget), 30., 1.e-8);
     TS_ASSERT(std::get<2>(ranget));
 
-    sws->getEventXMinMax(XRangeMin, XRangeMax);
+    // units have been converted
+    alg.getWorkingWS()->getEventXMinMax(XRangeMin, XRangeMax);
 
     TS_ASSERT_DELTA(std::get<0>(ranget), XRangeMin, 1.e-4);
-    TS_ASSERT_DELTA(29.95302, XRangeMax, 1.e-4);
+    TS_ASSERT(std::isinf(XRangeMax));
   }
   void test_log_params() {
 
@@ -154,6 +159,7 @@ public:
     TS_ASSERT(!pNormLog);
     TS_ASSERT(!alg.notmalizeCountRate());
 
+    // Check time series log outside of the data range
     auto pTime_log = new Kernel::TimeSeriesProperty<double>("proton_charge");
     Kernel::DateAndTime first("2015-11-30T16:17:10");
     std::vector<Kernel::DateAndTime> times(140);
@@ -164,13 +170,31 @@ public:
       values[i] = double(i);
     }
 
+    // DateAndTime("2010-01-01T00:00:00")
+
     pTime_log->addValues(times, values);
     sws->mutableRun().addProperty(pTime_log, true);
 
+    alg.setOutLogParameters(sws);
+    alg.getAlgLogSettings(numLogSteps, pNormLog);
+    TS_ASSERT_EQUALS(numLogSteps, 120);
+    TS_ASSERT(!pNormLog);
+    TS_ASSERT(!alg.notmalizeCountRate());
+    TS_ASSERT(!alg.useLogDerivative());
+
+    // Check correct date and time
+    first = Kernel::DateAndTime("2010-01-01T00:00:00");
+    times.resize(240);
+    values.resize(240);
+    for (size_t i = 0; i < 240; ++i) {
+      times[i] = first - 20. + double(i);
+      values[i] = double(i);
+    }
+    pTime_log->replaceValues(times, values);
 
     alg.setOutLogParameters(sws);
     alg.getAlgLogSettings(numLogSteps, pNormLog);
-    TS_ASSERT_EQUALS(numLogSteps, 140);
+    TS_ASSERT_EQUALS(numLogSteps, 99);
     TS_ASSERT(pNormLog);
     TS_ASSERT(alg.notmalizeCountRate());
     TS_ASSERT(!alg.useLogDerivative());
@@ -180,11 +204,59 @@ public:
     //
     alg.setOutLogParameters(sws);
     alg.getAlgLogSettings(numLogSteps, pNormLog);
-    TS_ASSERT_EQUALS(numLogSteps, 139);
+    TS_ASSERT_EQUALS(numLogSteps, 100);
     TS_ASSERT(pNormLog);
     TS_ASSERT(alg.notmalizeCountRate());
     TS_ASSERT(alg.useLogDerivative());
+  }
+  void test_processing() {
 
+    DataObjects::EventWorkspace_sptr sws =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10,
+                                                                        false);
+
+    // Create proper log which has time around the time of the events on the
+    // workspace
+    auto pTime_log = new Kernel::TimeSeriesProperty<double>("proton_charge");
+    Kernel::DateAndTime first("2010-01-01T00:00:00");
+    std::vector<Kernel::DateAndTime> times(240);
+    std::vector<double> values(240);
+
+    for (size_t i = 0; i < 240; ++i) {
+      times[i] = first - 10. + double(i);
+      values[i] = 2 * double(i);
+    }
+    pTime_log->addValues(times, values);
+    sws->mutableRun().addProperty(pTime_log, true);
+
+    CalcCountRateTester alg;
+    alg.initialize();
+
+    alg.setProperty("NumTimeSteps", 120);
+    alg.setProperty("NormalizeTheRate", true);
+    alg.setProperty("UseLogDerivative", true);
+    alg.setProperty("UseNormLogGranularity", true);
+
+    alg.setProperty("Workspace", sws);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    TS_ASSERT(sws->run().hasProperty("block_count_rate"));
+
+    auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+        sws->run().getLogData("block_count_rate"));
+
+    TS_ASSERT(newLog);
+    if (!newLog)
+      return;
+
+    TS_ASSERT_EQUALS(newLog->realSize(), 100);
+    TS_ASSERT_EQUALS(newLog->size(), 100);
+    auto val_vec = newLog->valuesAsVector();
+
+    for (size_t i=0;i<val_vec.size()-1;i++) {
+        TS_ASSERT_DELTA(val_vec[i],200.,1.e-4);
+    }
 
   }
 };

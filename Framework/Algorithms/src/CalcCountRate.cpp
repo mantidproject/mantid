@@ -101,7 +101,7 @@ void CalcCountRate::init() {
   declareProperty(
       "CountRateLogName", "block_count_rate",
       boost::make_shared<Kernel::MandatoryValidator<std::string>>(),
-      "The name of the processed time series log with count rate to add"
+      "The name of the processed time series log with count rate to be added"
       " to the source workspace");
   // visualisation group
   std::string spur_vis_mode("Spurion visualisation");
@@ -116,13 +116,13 @@ void CalcCountRate::init() {
       "XMin-XMax");
 
   auto mustBeReasonable = boost::make_shared<Kernel::BoundedValidator<int>>();
-  mustBeReasonable->setLower(2);
+  mustBeReasonable->setLower(3);
   declareProperty(
       Kernel::make_unique<Kernel::PropertyWithValue<int>>(
           "NumTimeSteps", 200, mustBeReasonable, Kernel::Direction::Input),
       "Number of time steps (time accuracy) the visualization workspace has. "
       "Also number of steps in 'CountRateLogName' log if "
-      "'UseNormLogGranularity' is set to false");
+      "'UseNormLogGranularity' is set to false. Should be bigger than 3");
   declareProperty(
       Kernel::make_unique<Kernel::PropertyWithValue<int>>(
           "XResolution", 100, mustBeReasonable, Kernel::Direction::Input),
@@ -146,7 +146,7 @@ void CalcCountRate::exec() {
 
   //-------------------------------------
   // identify ranges for count rate calculations and initiate source workspace
-  this->setSourceWSandXRanges(m_workingWS);
+  this->setSourceWSandXRanges(sourceWS);
 
   // create results log and add it to the source workspace
   std::string logname = getProperty("CountRateLogName");
@@ -161,35 +161,6 @@ void CalcCountRate::exec() {
   // at subsequent calls to the same algorithm.
   m_tmpLogHolder.release();
   m_pNormalizationLog = nullptr;
-
-  /*
-
-  auto newlog = new TimeSeriesProperty<double>(logname);
-  newlog->setUnits(oldlog->units());
-  int size = oldlog->realSize();
-  vector<double> values = oldlog->valuesAsVector();
-  vector<DateAndTime> times = oldlog->timesAsVector();
-  for (int i = 0; i < size; i++) {
-  newlog->addValue(times[i] + offset, values[i]);
-  }
-
-  // Just overwrite if the change is in place
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  if (outputWS != inputWS) {
-  IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");
-  duplicate->initialize();
-  duplicate->setProperty<Workspace_sptr>(
-  "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inputWS));
-  duplicate->execute();
-  Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
-  outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
-
-  setProperty("OutputWorkspace", outputWS);
-  }
-
-  outputWS->mutableRun().addProperty(newlog, true);
-
-    */
 }
 
 void CalcCountRate::calcRateLog(
@@ -197,26 +168,32 @@ void CalcCountRate::calcRateLog(
     Kernel::TimeSeriesProperty<double> *const targLog) {
 
   MantidVec countRate(m_numLogSteps);
+  std::vector<double> countNormalization =
+      m_pNormalizationLog->valuesAsVector();
 
-  auto nHist = InputWorkspace->getNumberHistograms();
+  int64_t nHist = static_cast<int64_t>(InputWorkspace->getNumberHistograms());
   // Initialize progress reporting.
   API::Progress prog(this, 0.0, 1.0, nHist);
 
   double dTRangeMin = static_cast<double>(m_TRangeMin.totalNanoseconds());
   double dTRangeMax = static_cast<double>(m_TRangeMax.totalNanoseconds());
+  std::vector<MantidVec> Buff;
+  int nThreads;
 
 #pragma omp parallel
   {
-    auto nThreads = omp_get_num_threads();
-    std::vector<MantidVec> Buff(nThreads);
-// initialize thread's histogram buffer
-#pragma omp critical
-    for (size_t i = 0; i < nThreads; i++) {
-      Buff[i].assign(m_numLogSteps, 0);
+#pragma omp single
+    {
+      // initialize thread's histogram buffer
+      nThreads = omp_get_num_threads();
+      Buff.resize(nThreads);
+      for (size_t i = 0; i < nThreads; i++) {
+        Buff[i].assign(m_numLogSteps, 0);
+      }
     }
 
 #pragma omp for
-    for (int i = 0; i < nHist; ++i) {
+    for (int64_t i = 0; i < nHist; ++i) {
       auto nThread = omp_get_thread_num();
       PARALLEL_START_INTERUPT_REGION
 
@@ -230,15 +207,11 @@ void CalcCountRate::calcRateLog(
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
-    std::vector<double> countNormalization;
-    if (m_pNormalizationLog) {
-#pragma omp critical
-      countNormalization = m_pNormalizationLog->valuesAsVector();
-    }
 // calculate final sums
-#pragma omp single
-    for (size_t j = 0; j < m_numLogSteps; j++) {
-      for (size_t i = 0; i < nThreads; j++) {
+#pragma omp for
+    for (int64_t j = 0; j < m_numLogSteps; j++) {
+
+      for (size_t i = 0; i < nThreads; i++) {
         countRate[j] += Buff[i][j];
       }
       // normalize if requested
@@ -324,8 +297,8 @@ void CalcCountRate::setOutLogParameters(
   //
   if (useLogAccuracy) { // extract log times located inside the run time
     Kernel::DateAndTime tLogMin, tLogMax;
-    if (m_useLogDerivative) { // derivative moves events to center, but we need
-                              // initial range
+    if (m_useLogDerivative) { // derivative moves events to the bin center,
+                              // but we need initial range
       auto pSource =
           InputWorkspace->run().getTimeSeriesProperty<double>(NormLogName);
       tLogMin = pSource->firstTime();
@@ -336,18 +309,29 @@ void CalcCountRate::setOutLogParameters(
     }
     //
     if (tLogMin < runTMin || tLogMax > runTMax) {
-      if (!m_tmpLogHolder) {
-        m_tmpLogHolder = std::make_unique<Kernel::TimeSeriesProperty<double>>(
-            *m_pNormalizationLog->clone());
+      if (tLogMin > runTMax ||
+          tLogMax < runTMin) { // log time is outside of the experiment time.
+                               // Log normalization is impossible
+        g_log.warning()
+            << "Normalization log " << m_pNormalizationLog->name()
+            << " time lies outside of the the whole experiment time. "
+               "Log normalization impossible.\n";
+        m_pNormalizationLog = nullptr;
+        useLogAccuracy = false;
+      } else {
+        if (!m_tmpLogHolder) {
+          m_tmpLogHolder = std::make_unique<Kernel::TimeSeriesProperty<double>>(
+              *m_pNormalizationLog->clone());
+        }
+        m_tmpLogHolder->filterByTime(runTMin, runTMax);
+        m_pNormalizationLog = m_tmpLogHolder.get();
+        m_numLogSteps = m_pNormalizationLog->realSize();
       }
-      m_tmpLogHolder->filterByTime(runTMin, runTMax);
-      m_pNormalizationLog = m_tmpLogHolder.get();
-      m_numLogSteps = m_pNormalizationLog->realSize();
     } else {
       if (tLogMin > runTMin || tLogMax < runTMax) {
         g_log.warning() << "Normalization log " << m_pNormalizationLog->name()
-                        << " values do not cover the whole experiment time. "
-                           "Log normalization impossible ";
+                        << " time does not cover the whole experiment time. "
+                           "Log normalization impossible.\n";
         m_pNormalizationLog = nullptr;
         useLogAccuracy = false;
       }
@@ -373,31 +357,20 @@ void CalcCountRate::setOutLogParameters(
 */
 void CalcCountRate::setSourceWSandXRanges(
     DataObjects::EventWorkspace_sptr &InputWorkspace) {
-  m_XRangeMin = getProperty("XMin");
-  m_XRangeMax = getProperty("XMax");
 
-  if (m_XRangeMin == EMPTY_DBL() && m_XRangeMax == EMPTY_DBL()) {
-    m_rangeExplicit = false;
-  } else {
-    m_rangeExplicit = true;
-  }
-  if (!m_rangeExplicit) {
-    InputWorkspace->getEventXMinMax(m_XRangeMin, m_XRangeMax);
-    return;
-  }
-  // Search within partial range;
   std::string RangeUnits = getProperty("RangeUnits");
   auto axis = InputWorkspace->getAxis(0);
   const auto unit = axis->unit();
 
   API::MatrixWorkspace_sptr wst;
-  std::string wsName = InputWorkspace->name();
-  if (wsName.size() == 0) {
-    wsName = "_CropDataWS";
-  }
-
   if (unit->unitID() != RangeUnits) {
     auto conv = createChildAlgorithm("ConvertUnits", 0, 1);
+    std::string wsName = InputWorkspace->name();
+    if (wsName.empty()) {
+      wsName = "_CountRate_UnitsConverted";
+    } else {
+      wsName = "_" + wsName + "_converted";
+    }
 
     conv->setProperty("InputWorkspace", InputWorkspace);
     conv->setPropertyValue("OutputWorkspace", wsName);
@@ -411,15 +384,28 @@ void CalcCountRate::setSourceWSandXRanges(
   } else {
     wst = InputWorkspace;
   }
-  InputWorkspace =
-      boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(wst);
-  if (!InputWorkspace) {
+  m_workingWS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(wst);
+  if (!m_workingWS) {
     throw std::runtime_error("SetWSDataRanges:Can not retrieve EventWorkspace "
                              "after converting units");
   }
-  // here the ranges have been changed so both will newer remain defaults
+  // data ranges
+  m_XRangeMin = getProperty("XMin");
+  m_XRangeMax = getProperty("XMax");
+
+  if (m_XRangeMin == EMPTY_DBL() && m_XRangeMax == EMPTY_DBL()) {
+    m_rangeExplicit = false;
+  } else {
+    m_rangeExplicit = true;
+  }
+
   double realMin, realMax;
-  InputWorkspace->getEventXMinMax(realMin, realMax);
+  m_workingWS->getEventXMinMax(realMin, realMax);
+  if (!m_rangeExplicit) { // The range is the whole workspace range
+    m_XRangeMin = realMin;
+    m_XRangeMax = realMax;
+    return;
+  }
 
   if (m_XRangeMin == EMPTY_DBL()) {
     m_XRangeMin = realMin;
