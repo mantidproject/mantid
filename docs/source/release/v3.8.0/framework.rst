@@ -105,6 +105,8 @@ Improved
 
 - :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` now also accepts a workspace name as input, as an alternative to an instrument definition xml file.
 
+- :ref:`Mergeruns <algm-MergeRuns>` can now also deal with non-time series sample logs when merging. Behaviour can be to create a time series, a list of values and warn or fail if different.
+
 Deprecated
 ##########
 

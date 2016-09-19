@@ -168,6 +168,7 @@ set ( SRC_FILES
 	src/MaxMin.cpp
 	src/MedianDetectorTest.cpp
 	src/MergeRuns.cpp
+	src/MergeRuns/SampleLogsBehaviour.cpp
 	src/Min.cpp
 	src/Minus.cpp
 	src/ModeratorTzero.cpp
@@ -474,6 +475,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaxMin.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
+	inc/MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h
 	inc/MantidAlgorithms/Min.h
 	inc/MantidAlgorithms/Minus.h
 	inc/MantidAlgorithms/ModeratorTzero.h

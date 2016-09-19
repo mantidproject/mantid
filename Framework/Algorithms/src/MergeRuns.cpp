@@ -6,10 +6,13 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/ADSValidator.h"
+#include "MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h"
 
 using Mantid::HistogramData::HistogramX;
 
@@ -21,6 +24,7 @@ DECLARE_ALGORITHM(MergeRuns)
 
 using namespace Kernel;
 using namespace API;
+using namespace Geometry;
 using namespace DataObjects;
 
 /// Default constructor
@@ -45,6 +49,32 @@ void MergeRuns::init() {
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
+  declareProperty("SampleLogsTimeSeries", "",
+                  "A comma separated list of the sample logs to merge into a "
+                  "time series. The initial times are taken as the start times "
+                  "for the run, and the merged sample log is suffixed with "
+                  "\"_time_series\". Sample logs must be numeric.");
+  declareProperty("SampleLogsList", "",
+                  "A comma separated list of the sample logs to merge into a "
+                  "list. The merged sample log is suffixed with \"_list\". ");
+  declareProperty("SampleLogsWarn", "", "A comma separated list of the sample "
+                                        "logs to generate a warning if "
+                                        "different when merging.");
+  declareProperty("SampleLogsWarnTolerances", "",
+                  "The tolerances for warning if sample logs are different. "
+                  "Can either be empty for a comparison of the strings, a "
+                  "single value for all warn sample logs, or a comma "
+                  "separated list of values (must be the same length as "
+                  "SampleLogsWarn).");
+  declareProperty("SampleLogsFail", "", "The sample logs to fail if different "
+                                        "when merging. If there is a "
+                                        "difference the run is skipped.");
+  declareProperty("SampleLogsFailTolerances", "",
+                  "The tolerances for failing if sample logs are different. "
+                  "Can either be empty for a comparison of the strings, a "
+                  "single value for all fail sample logs, or a comma "
+                  "separated list of values (must be the same length as "
+                  "SampleLogsFail).");
 }
 
 //------------------------------------------------------------------------------------------------
@@ -66,6 +96,15 @@ bool MergeRuns::useCustomInputPropertyName() const { return true; }
 void MergeRuns::exec() {
   // Check that all input workspaces exist and match in certain important ways
   const std::vector<std::string> inputs_orig = getProperty("InputWorkspaces");
+
+  const std::string sampleLogsTimeSeries = getProperty("SampleLogsTimeSeries");
+  const std::string sampleLogsList = getProperty("SampleLogsList");
+  const std::string sampleLogsWarn = getProperty("SampleLogsWarn");
+  const std::string sampleLogsWarnTolerances =
+      getProperty("SampleLogsWarnTolerances");
+  const std::string sampleLogsFail = getProperty("SampleLogsFail");
+  const std::string sampleLogsFailTolerances =
+      getProperty("SampleLogsFailTolerances");
 
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs;
@@ -98,10 +137,16 @@ void MergeRuns::exec() {
 
     // Iterate over the collection of input workspaces
     auto it = m_inMatrixWS.begin();
+
+    size_t numberOfWSs = m_inMatrixWS.size();
+
     // Take the first input workspace as the first argument to the addition
-    MatrixWorkspace_sptr outWS = m_inMatrixWS.front();
-    int64_t n = m_inMatrixWS.size() - 1;
-    m_progress = new Progress(this, 0.0, 1.0, n);
+    MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
+    Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
+        *outWS, g_log, sampleLogsTimeSeries, sampleLogsList, sampleLogsWarn,
+        sampleLogsWarnTolerances, sampleLogsFail, sampleLogsFailTolerances);
+
+    m_progress = new Progress(this, 0.0, 1.0, numberOfWSs - 1);
     // Note that the iterator is incremented before first pass so that 1st
     // workspace isn't added to itself
     for (++it; it != m_inMatrixWS.end(); ++it) {
@@ -120,7 +165,18 @@ void MergeRuns::exec() {
       }
 
       // Add the current workspace to the total
-      outWS = outWS + addee;
+      // Update the sample logs
+      try {
+        sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
+        outWS = outWS + addee;
+        sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
+      } catch (std::invalid_argument &e) {
+        g_log.error()
+            << "Could not merge run: " << it->get()->name() << ". Reason: \""
+            << e.what()
+            << "\". MergeRuns will continue but this run will be skipped.";
+        sampleLogsBehaviour.resetSampleLogs(*outWS);
+      }
 
       m_progress->report();
     }
