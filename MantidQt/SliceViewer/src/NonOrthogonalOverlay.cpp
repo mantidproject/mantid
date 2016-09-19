@@ -89,7 +89,7 @@ namespace MantidQt {
 			API::provideSkewMatrix(skewMatrix, *m_ws);
 			skewMatrix.Invert();
 			Mantid::coord_t coord_skewMatrix[3];
-			Mantid::coord_t testH[3];
+			Mantid::coord_t testH[3]; //rename
 			std::size_t index = 0;
 			if (dim == 1) {m_startPoint = 0;}
 			if (dim == 2) {m_startPoint = 3;}
@@ -100,7 +100,9 @@ namespace MantidQt {
 				++index;
 			}
 			auto dotProduct = std::inner_product(std::begin(coord_skewMatrix), std::end(coord_skewMatrix), std::begin(testH), 0.0);
-			return dotProduct;
+			auto theta = std::acos(dotProduct);
+			//auto cross = 
+			//return dotProduct;
 		}
 
 		void NonOrthogonalOverlay::calculateAxesSkew() {
@@ -116,7 +118,8 @@ namespace MantidQt {
 			auto dimXdot = getDotProductForGivenDim(dimX);
 			auto dimYdot = getDotProductForGivenDim(dimY);
 
-			//then do cross product
+			//then do cross product and figure out how to get sine from 
+			auto theta = std::acos(dimXdot);
 
 
 
