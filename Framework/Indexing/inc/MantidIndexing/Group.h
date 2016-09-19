@@ -13,6 +13,9 @@ class IndexInfo;
 /** Functions for grouping spectra. A new IndexInfo with the desired grouping is
   created based on an existing one.
 
+  @author Simon Heybrock
+  @date 2016
+
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 

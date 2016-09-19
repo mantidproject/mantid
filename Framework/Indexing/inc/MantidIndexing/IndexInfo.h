@@ -15,7 +15,11 @@ using detid_t = int32_t;
 
 namespace Indexing {
 
-/** IndexInfo : TODO: DESCRIPTION
+/** IndexInfo is an object for holding information about spectrum numbers and
+  detector IDs associated to the spectra in a workspace.
+
+  @author Simon Heybrock
+  @date 2016
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
