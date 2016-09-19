@@ -90,6 +90,8 @@ protected: // for testing, actually private
 
   void calcRateLog(DataObjects::EventWorkspace_sptr &InputWorkspace,
                         Kernel::TimeSeriesProperty<double> *const targLog);
+
+   void initVisWorkspace();
 };
 
 } // namespace Algorithms

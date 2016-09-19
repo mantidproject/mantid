@@ -107,7 +107,7 @@ void CalcCountRate::init() {
   std::string spur_vis_mode("Spurion visualisation");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>(
-          "VisualizationWs", "", Kernel::Direction::Output,
+          "VisualizationWs", "", Kernel::Direction::InOut,
           API::PropertyMode::Optional),
       "Optional name to build 2D matrix workspace for spurion visualization. "
       "If name is provided, a 2D workspace with this name will be created "
@@ -148,6 +148,10 @@ void CalcCountRate::exec() {
   // identify ranges for count rate calculations and initiate source workspace
   this->setSourceWSandXRanges(sourceWS);
 
+  // check if visualization workspace is necessary and if it is, prepare
+  // visualization workspace to use
+  this->initVisWorkspace();
+
   // create results log and add it to the source workspace
   std::string logname = getProperty("CountRateLogName");
   auto newlog = new Kernel::TimeSeriesProperty<double>(logname);
@@ -163,13 +167,16 @@ void CalcCountRate::exec() {
   m_pNormalizationLog = nullptr;
 }
 
+/** Process input workspace to calculate  */
 void CalcCountRate::calcRateLog(
     DataObjects::EventWorkspace_sptr &InputWorkspace,
     Kernel::TimeSeriesProperty<double> *const targLog) {
 
   MantidVec countRate(m_numLogSteps);
-  std::vector<double> countNormalization =
-      m_pNormalizationLog->valuesAsVector();
+  std::vector<double> countNormalization;
+
+  if (this->notmalizeCountRate())
+    countNormalization = m_pNormalizationLog->valuesAsVector();
 
   int64_t nHist = static_cast<int64_t>(InputWorkspace->getNumberHistograms());
   // Initialize progress reporting.
@@ -424,6 +431,10 @@ void CalcCountRate::setSourceWSandXRanges(
     m_XRangeMax = realMax;
   }
 }
+void CalcCountRate::initVisWorkspace() {
+  std::string visWSName = getProperty();
+}
+
 /** Helper function, mainly for testing
 * @return  true if count rate should be normalized and false
 * otherwise */
