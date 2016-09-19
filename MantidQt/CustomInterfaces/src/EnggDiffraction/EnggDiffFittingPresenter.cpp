@@ -276,15 +276,14 @@ void EnggDiffFittingPresenter::fittingRunNoChanged() {
   * Verifies and uses the user input path (i.e. a browsed file)
   * to update drop down for available banks and various widgets on the GUI
   *
-  * @param pocoFilePath The user entered file path as a Poco Path
+  * @param filePath The user entered file path as a Poco Path
   * @param splitBaseName The base file name split by the `_` delimiter
   *
   * @return The full file path as a vector of strings to make this
   * consistent with the other file processing methods
   */
 std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
-    const Poco::Path &pocoFilePath,
-    const std::vector<std::string> &splitBaseName) {
+    const Poco::Path &filePath, const std::vector<std::string> &splitBaseName) {
 
   std::vector<std::string> foundRunNumbers;
   std::vector<std::string> foundFullFilePaths;
@@ -292,7 +291,7 @@ std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
   // Handle files the user browsed to separately
   try {
     foundRunNumbers =
-        getAllBrowsedFilePaths(pocoFilePath.toString(), foundFullFilePaths);
+        getAllBrowsedFilePaths(filePath.toString(), foundFullFilePaths);
   } catch (std::runtime_error &e) {
     const std::string eMsg(e.what());
     g_log.error("Error loading browsed file: " + eMsg);
@@ -320,7 +319,7 @@ std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
     // add bank to the combo-box
     setBankItems(foundFullFilePaths);
     // set the bank widget according to selected bank file
-    setDefaultBank(splitBaseName, pocoFilePath.toString());
+    setDefaultBank(splitBaseName, filePath.toString());
 
     // Skips this step if it is multiple run because widget already
     // updated
@@ -428,7 +427,7 @@ std::vector<std::string> EnggDiffFittingPresenter::processSingleRun(
     const std::string &userInputBasename,
     const std::vector<std::string> &splitBaseName) {
 
-  std::string focusDir = m_view->focusingDir();
+  const auto focusDir = m_view->focusingDir();
 
   // Check there is a folder to search for this file
   // this will be changed to respect user directories as well later
@@ -444,14 +443,22 @@ std::vector<std::string> EnggDiffFittingPresenter::processSingleRun(
 
   // Next check input is a run number only as this is currently all
   // that we can handle
-  if (userInputBasename.size() == 0 || !isDigit(userInputBasename)) {
+  if (!isDigit(userInputBasename)) {
+    m_view->userWarning(
+        "Invalid Run Number",
+        "Invalid format of run number has been entered. There was"
+        " non-numeric digits present in the input. Please try again");
+    m_view->enableFitAllButton(false);
+    throw std::invalid_argument("User input contained non-numeric characters");
+  }
+
+  if (userInputBasename.empty()) {
 
     m_view->userWarning("Invalid Run Number",
                         "Invalid format of run number has been entered. "
-                        "Please try again");
+                        " The input was blank. Please try again");
     m_view->enableFitAllButton(false);
-    throw std::invalid_argument("User input was blank or contained"
-                                " non-numeric characters");
+    throw std::invalid_argument("User input was blank");
   }
 
   if (g_fitting_runno_counter == 0) {
@@ -614,8 +621,8 @@ EnggDiffFittingPresenter::enableMultiRun(const std::string &firstRun,
   // about the ordering of values
   if (firstNum > lastNum) {
     m_view->userWarning("Range not ascending",
-                        "The range specified"
-                        " was not ascending. This last run number needs to be"
+                        "The range specified was not ascending. "
+                        "The last run number needs to be"
                         " larger than the start run number");
     throw std::invalid_argument("Run range is not ascending");
   }
@@ -813,7 +820,7 @@ void EnggDiffFittingPresenter::processFitPeaks() {
 
 void EnggDiffFittingPresenter::inputChecksBeforeFitting(
     const std::string &focusedRunNo, const std::string &expectedPeaks) {
-  if (focusedRunNo.size() == 0) {
+  if (focusedRunNo.empty()) {
     throw std::invalid_argument(
         "Focused Run "
         "cannot be empty and must be a valid directory");
