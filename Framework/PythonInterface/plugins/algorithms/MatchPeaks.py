@@ -1,9 +1,10 @@
+# pylint: disable=too-many-branches
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import Direction
 import numpy as np
-import os.path
+
 
 def mask_reduced_ws(ws_to_mask, xstart, xend):
     """
@@ -28,7 +29,8 @@ def mask_reduced_ws(ws_to_mask, xstart, xend):
         logger.debug('No masking due to x bin >= len(x_values) - 1!: {0}'.format(xend))
 
     if xstart > 0 and xend < len(x_values) - 1:
-        logger.notice('Bins out of range {0} {1} [Unit of X-axis] are masked'.format(x_values[xstart], x_values[xend]))
+        logger.notice('Bins out of range {0} {1} [Unit of X-axis] are masked'.format(x_values[xstart],
+                                                                                     x_values[xend + 1]))
 
 
 class MatchPeaks(PythonAlgorithm):
