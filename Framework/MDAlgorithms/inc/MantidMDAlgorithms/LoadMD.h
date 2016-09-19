@@ -103,6 +103,9 @@ private:
   /// Checks if a worspace is a certain type of legacy file
   void checkForRequiredLegacyFixup(API::IMDWorkspace_sptr ws);
 
+  /// Negative scaling for Q dimensions
+  std::vector<double>qDimensions(API::IMDWorkspace_sptr ws);
+
   /// Open file handle
   // clang-format off
   boost::scoped_ptr< ::NeXus::File> m_file;
