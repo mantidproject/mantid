@@ -91,6 +91,16 @@ if [[ $USE_CLANG ]]; then
   fi
 fi
 
+#for openmp support on OS X run
+# `brew install llvm`
+# `ln -s /usr/local/opt/llvm/lib/libomp.dylib /usr/local/lib/libomp.dylib`
+if [[ $(uname) == 'Darwin' ]] ; then
+  if [[ ${JOB_NAME} == *openmp* ]]; then
+    export CC=/usr/local/opt/llvm/bin/clang
+    export CXX=/usr/local/opt/llvm/bin/clang++
+  fi
+fi
+
 ###############################################################################
 # Set up the location for the local object store outside of the build and
 # source tree, which can be shared by multiple builds.
