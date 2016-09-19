@@ -641,7 +641,11 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
         << "## Valid values are: error, warning, notice, information, debug\n";
     filestr << "#logging.channels.fileFilterChannel.level=debug\n\n";
     filestr << "## Sets the file to write logs to\n";
-    filestr << "#logging.channels.fileChannel.path=../mantid.log\n\n";
+    filestr << "#logging.channels.fileChannel.path=../mantid.log\n";
+    filestr << "## Uncomment the following line to flush log messages to disk "
+               "immediately.\n";
+    filestr << "## Useful for debugging crashes but it will hurt performance\n";
+    filestr << "#logging.channels.fileChannel.flush = true\n\n";
     filestr << "##\n";
     filestr << "## MantidPlot\n";
     filestr << "##\n\n";

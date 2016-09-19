@@ -483,13 +483,22 @@ API::IProjectSerialisable *SliceViewerWindow::loadFromProject(
   tsv >> label;
 
   auto window = new SliceViewerWindow(wsName, label);
+  window->setGeometry(geometry);
+  window->m_slicer->resetZoom();
   window->m_slicer->loadFromProject(lines);
 
   // Load state of line viewer
   if (tsv.selectSection("lineviewer")) {
     std::string lineViewerLines;
     tsv >> lineViewerLines;
-    window->m_liner->loadFromProject(lineViewerLines);
+    if (lineViewerLines.empty()) {
+      // edge case where the line viewer is open but no line
+      // was drawn yet!
+      window->m_slicer->toggleLineMode(true);
+      window->m_slicer->clearLine();
+    } else {
+      window->m_liner->loadFromProject(lineViewerLines);
+    }
   }
 
   // Load state of peaks viewer
@@ -500,6 +509,7 @@ API::IProjectSerialisable *SliceViewerWindow::loadFromProject(
     window->m_peaksViewer->loadFromProject(peaksViewerLines);
   }
 
+  // reset geometry as line/peaks viewer may change shape
   window->setGeometry(geometry);
   window->show();
   return window;

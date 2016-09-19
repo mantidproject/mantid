@@ -13,7 +13,9 @@ Framework Changes
   is almost identical, but a small number of cases (such as adding the workspaces ``Z`` and ``z``) will work
   in a more predictable manner.
 
-- A race condition when accessing a singleton from multiple threads was fixed. 
+- A race condition when accessing a singleton from multiple threads was fixed.
+
+- Log file buffers are no longer flushed by default for each newline received, increasing the speed of some system tests on Windows by 4.5x.
 
 HistogramData
 -------------
@@ -77,6 +79,9 @@ Improved
 
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` had a bug in cases where the beam was larger than the
+  sample, which lead to the attenuation factor being too high. This has been fixed.
+
 - :ref:`ConvertUnits <algm-ConvertUnits>` now has the option to take a workspace with Points as input.
   A property has been added that will make the algorithm convert the workspace to Bins automatically. The output space will be converted back to Points.
 
@@ -99,6 +104,8 @@ Improved
 -  :ref:`StartLiveData <algm-StartLiveData>` has additional properties for specifying scripts to run for processing and post-processing.
 
 - :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` now also accepts a workspace name as input, as an alternative to an instrument definition xml file.
+
+- :ref:`Mergeruns <algm-MergeRuns>` can now also deal with non-time series sample logs when merging. Behaviour can be to create a time series, a list of values and warn or fail if different.
 
 Deprecated
 ##########

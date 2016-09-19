@@ -276,6 +276,9 @@ private:
   Poco::Path outFilesGeneralDir(const std::string &addComponent);
   Poco::Path outFilesRootDir();
 
+  std::string appendToPath(const std::string &path,
+                           const std::string &toAppend) const;
+
   /// convenience methods to copy files to different destinations
   void copyToGeneral(const Poco::Path &source, const std::string &pathComp);
   void copyToUser(const Poco::Path &source, const std::string &pathComp);

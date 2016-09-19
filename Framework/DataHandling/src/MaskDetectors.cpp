@@ -424,8 +424,8 @@ void MaskDetectors::fillIndexListFromSpectra(
   }
 
   auto SpecID2IndMap = WS->getSpectrumToWorkspaceIndexMap();
-  for (auto it = spectraList.begin(); it != spectraList.end(); it++) {
-    auto element = SpecID2IndMap.find(*it);
+  for (auto specnum : spectraList) {
+    auto element = SpecID2IndMap.find(specnum);
     if (element == SpecID2IndMap.end()) {
       continue;
     }

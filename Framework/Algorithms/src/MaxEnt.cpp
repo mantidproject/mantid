@@ -12,6 +12,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 #include <gsl/gsl_linalg.h>
 #include <numeric>
 
@@ -67,9 +68,8 @@ const std::string MaxEnt::category() const { return "Arithmetic\\FFT"; }
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string MaxEnt::summary() const {
   return "Runs Maximum Entropy method on every spectrum of an input workspace. "
-         "Note this algorithm is still in development, and its interface is "
-         "likely to change. It currently works for the case where data and "
-         "image are related by a 1D Fourier transform.";
+         "It currently works for the case where data and image are related by a"
+         " 1D Fourier transform.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -270,7 +270,7 @@ void MaxEnt::exec() {
 
   nspec = complexData ? nspec / 2 : nspec;
   outImageWS =
-      WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
+      WorkspaceFactory::Instance().create(inWS, 2 * nspec, npoints, npoints);
   outDataWS =
       WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
   outEvolChi = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
@@ -677,14 +677,14 @@ void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
 
   int npoints = complex ? static_cast<int>(result.size() / 2)
                         : static_cast<int>(result.size());
-  int npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
-  MantidVec X(npointsX);
+  MantidVec X(npoints);
   MantidVec YR(npoints);
   MantidVec YI(npoints);
   MantidVec E(npoints, 0.);
 
-  double x0 = inWS->x(spec)[0];
-  double dx = inWS->x(spec)[1] - x0;
+  auto dataPoints = inWS->points(spec);
+  double x0 = dataPoints[0];
+  double dx = dataPoints[1] - x0;
 
   double delta = 1. / dx / npoints;
   int isOdd = (inWS->blocksize() % 2) ? 1 : 0;
@@ -697,8 +697,6 @@ void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
   for (int i = 0; i < npoints; i++) {
     X[i] = delta * (-npoints / 2 + i);
   }
-  if (npointsX == npoints + 1)
-    X[npoints] = X[npoints - 1] + delta;
 
   // Y values
   if (complex) {
@@ -776,11 +774,9 @@ void MaxEnt::populateDataWS(const MatrixWorkspace_sptr &inWS, size_t spec,
   double dx = inWS->x(spec)[1] - x0;
 
   // X values
-  for (int i = 0; i < npoints; i++) {
+  for (int i = 0; i < npointsX; i++) {
     X[i] = x0 + i * dx;
   }
-  if (npointsX == npoints + 1)
-    X[npoints] = x0 + npoints * dx;
 
   // Y values
   if (complex) {
