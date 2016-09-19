@@ -54,6 +54,8 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
     # END-IF
 
     # peak intensities
+    print '[DB...BAT] Number of peaks to output: ', len(peak_dict_list)
+
     for i_peak, peak_dict in enumerate(peak_dict_list):
         # check
         assert isinstance(peak_dict, dict), '%d-th peak must be a dictionary but not %s.' % (i_peak,
@@ -61,11 +63,29 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
         for key in ['hkl', 'kindex', 'intensity', 'sigma']:
             assert key in peak_dict, '%d-th peak dictionary does not have required key %s.' % (i_peak, key)
 
+        # check whether it is magnetic
+        if num_k_vectors > 0 and peak_dict['kindex'] > 0:
+            is_magnetic = True
+        else:
+            is_magnetic = False
+
         # miller index
         m_h, m_k, m_l = peak_dict['hkl']
-        part1 = '%4d%4d%4d' % (nearest_int(m_h), nearest_int(m_k), nearest_int(m_l))
+        if is_magnetic:
+            k_index = peak_dict['kindex']
+            kx, ky, kz = k_vector_dict[k_index]
+        else:
+            kx = ky = kz = 0.0
+            k_index = 0
+
+        part1 = '%4d%4d%4d' % (nearest_int(m_h+kx), nearest_int(m_k+ky), nearest_int(m_l+kz))
 
         # k index
+        if is_magnetic:
+            part2 = '%4d' % k_index
+        else:
+            part2 = ''
+        """
         if num_k_vectors > 0:
             k_index = peak_dict['kindex']
             if k_index > 0:
@@ -74,6 +94,7 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
                 part2 = ''
         else:
             part2 = ''
+        """
         # END-IF-ELSE
 
         # peak intensity and sigma

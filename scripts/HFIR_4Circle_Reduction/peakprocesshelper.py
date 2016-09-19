@@ -139,6 +139,8 @@ class PeakProcessHelper(object):
         if self._currHKL is None:
             raise RuntimeError('Exp %d Scan %d does not have CURRENT HKL set up yet.' % (self._myExpNumber,
                                                                                          self._myScanNumber))
+        else:
+            print '[DB...BAT] current HKL: ', self._currHKL
 
         return self._currHKL
 

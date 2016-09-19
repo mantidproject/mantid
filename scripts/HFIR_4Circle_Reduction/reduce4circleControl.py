@@ -635,7 +635,8 @@ class CWSCDReductionControl(object):
                 peak_dict['up'] = up_cart
                 peak_dict['us'] = us_cart
 
-                peaks.append(peak_dict)
+            # append peak (in dict) to peaks
+            peaks.append(peak_dict)
         # END-FOR (scan_number)
 
         try:
