@@ -1,13 +1,10 @@
-#pylint: disable=invalid-name, relative-import, too-many-lines,too-many-instance-attributes,too-many-arguments
+#pylint: disable=invalid-name, relative-import, too-many-lines,too-many-instance-attributes,too-many-arguments, too-many-public-methods,too-many-branches,too-many-locals,too-many-statements
+
 ################################################################################
 # Main class for HFIR powder reduction GUI
 # Key word for future developing: FUTURE, NEXT, REFACTOR, RELEASE 2.0
 ################################################################################
 
-import numpy
-import os
-
-from ui_MainWindow import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -15,14 +12,15 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
+from ui_MainWindow import Ui_MainWindow  # import line for the UI python class
 import mantid
 from HfirPDReductionControl import *
 
-#----- default configuration ---------------
+""" default configuration """
 DEFAULT_SERVER = 'http://neutron.ornl.gov/user_data'
 DEFAULT_INSTRUMENT = 'hb2a'
 DEFAULT_WAVELENGTH = 2.4100
-#-------------------------------------------
+
 
 class EmptyError(Exception):
     """ Exception for finding empty input for integer or float
@@ -37,99 +35,9 @@ class EmptyError(Exception):
         return repr(self.value)
 
 
-class MultiScanTabState(object):
-    """ Description of the state of the multi-scan-tab is in
-    """
-    NO_OPERATION = 0
-    RELOAD_DATA = 1
-    REDUCE_DATA = 2
-
-    def __init__(self):
-        """ Initialization
-        :return:
-        """
-        self._expNo = -1
-        self._scanList = []
-        self._xMin = None
-        self._xMax = None
-        self._binSize = 0
-        self._unit = ''
-        self._plotRaw = False
-        self._useDetEfficiencyCorrection = False
-        self._excludeDetectors = []
-
-    def compare_state(self, tab_state):
-        """ Compare this tab state and another tab state
-        :param tab_state:
-        :return:
-        """
-        if isinstance(tab_state, MultiScanTabState) is False:
-            raise NotImplementedError('compare_state must have MultiScanTabStatus as input.')
-
-        if self._expNo != tab_state.getExpNumber() or self._scanList != tab_state.getScanList:
-            return self.RELOAD_DATA
-
-        for attname in self.__dict__.keys():
-            if self.__getattribute__(attname) != tab_state.__getattribute__(attname):
-                return self.REDUCE_DATA
-
-        return self.NO_OPERATION
-
-    def getExpNumber(self):
-        """ Get experiment number
-        :return:
-        """
-        return self._expNo
-
-    def getScanList(self):
-        """ Get the list of scans
-        :return:
-        """
-        return self._scanList[:]
-
-    #pyline: disable=too-many-arguments
-    def setup(self, exp_no, scan_list, min_x, max_x, bin_size, unit, raw, correct_det_eff, exclude_dets):
-        """
-        Set up the object
-        :param exp_no:
-        :param scan_list:
-        :param min_x:
-        :param max_x:
-        :param bin_size:
-        :param unit:
-        :param raw:
-        :param correct_det_eff:
-        :param exclude_dets:
-        :return:
-        """
-        self._expNo = int(exp_no)
-        if isinstance(scan_list, list) is False:
-            raise NotImplementedError('Scan_List must be list!')
-        self._scanList = scan_list
-        self._xMin = min_x
-        self._xMax = max_x
-        self._binSize = float(bin_size)
-        self._unit = str(unit)
-        self._plotRaw = raw
-        self._useDetEfficiencyCorrection = correct_det_eff
-        self._excludeDetectors = exclude_dets
-
-        return
-
-
-#pylint: disable=too-many-public-methods,too-many-branches,too-many-locals,too-many-statements
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
     """
-
-    # Copy to ui.setupUI
-    # # Version 3.0 + Import for ui_MainWindow.py
-    #     from MplFigureCanvas import Qt4MplCanvas
-
-    #     # Replace 'self.graphicsView = QtGui.QtGraphicsView' with the following
-    #     self.graphicsView = Qt4MplCanvas(self.centralwidget)
-    #     self.mainplot = self.graphicsView.getPlot()
-
     def __init__(self, parent=None):
         """ Initialization and set up
         """
@@ -243,6 +151,16 @@ class MainWindow(QtGui.QMainWindow):
                      self.doBrowseLocalDataSrc)
         self.connect(self.ui.pushButton_chkServer, QtCore.SIGNAL('clicked()'),
                      self.doCheckSrcServer)
+
+        # tab 'Information' (data mining)
+        self.connect(self.ui.pushButton_setInfoTable, QtCore.SIGNAL('clicked()'),
+                self.do_setup_info_table)
+
+        self.connect(self.ui.pushButton_mineData, QtCore.SIGNAL('clicked()'),
+                self.do_mine_data)
+
+        self.connect(self.ui.pushButton_sortInfoTable, QtCore.SIGNAL('clicked()'),
+                self.do_sort_info_table)
 
         # Define signal-event handling
 
@@ -422,6 +340,9 @@ class MainWindow(QtGui.QMainWindow):
         #register startup
         mantid.UsageService.registerFeatureUsage("Interface","HfirPowderReduction",False)
 
+        # load previous session's setting
+        self.load_settings()
+
         return
 
 
@@ -586,6 +507,8 @@ class MainWindow(QtGui.QMainWindow):
         if clearcache is True:
             delAllFile(self._cache)
 
+        self.save_settings()
+
         self.close()
 
         return
@@ -659,7 +582,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Load SPICE data to raw table (step 1)
         try:
-            execstatus = self._myControl.loadSpicePDData(expno, scanno, datafilename)
+            execstatus = self._myControl.do_load_spice_file(expno, scanno, datafilename)
             if execstatus is False:
                 cause = "Load data failed."
             else:
@@ -1418,9 +1341,14 @@ class MainWindow(QtGui.QMainWindow):
             self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=True)
 
             # plot vanadium peaks
-            vanpeakpos = self._myControl.getVanadiumPeaksPos(expno, scanno)
-            self.ui.lineEdit_stripVPeaks.setText(str(vanpeakpos))
-            self._plotPeakIndicators(self.ui.graphicsView_vanPeaks, vanpeakpos)
+            status, ret_obj = van_peak_positions = self._myControl.get_vanadium_peak_positions(expno, scanno)
+            if status:
+                van_peak_positions = ret_obj
+            else:
+                error_msg = ret_obj
+                self._logError(error_msg)
+            self.ui.lineEdit_stripVPeaks.setText(str(van_peak_positions))
+            self._plotPeakIndicators(self.ui.graphicsView_vanPeaks, van_peak_positions)
 
         return good
 
@@ -1610,6 +1538,111 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_setup_info_table(self):
+        """
+        Set up the information table by specifiying the items to view in the table
+        """
+        import InfoTableSetupWindow
+
+        # read the first scan to find out the field
+        try:
+            exp_number = self.get_experiment_number(throw=True)
+            status, ret_obj = self._getIntArray(str(self.ui.lineEdit_infoScans.text()))
+            if status:
+                scan_list = ret_obj
+            else:
+                raise RuntimeError('Unable to parse scan number list due to %s.' % str(ret_obj))
+            scan_number = scan_list[0]
+        except RuntimeError as run_err:
+            raise run_err
+
+        # Download and load the first run 
+        cache_dir = self._get_cache_dir()
+        status, ret_obj = self._myControl.download_spice_file(exp_number, scan_number, cache_dir) #download_ # download_file(exp_number, scan_number)
+        if not status:
+            err_msg = ret_obj
+            self.pop_error_message(err_msg)
+            return
+        else:
+            spice_file_name = ret_obj
+
+        # Load data
+        try:
+            self._myControl.do_load_spice_file(exp_number=exp_number, scan_number=scan_number)
+        except RuntimeError as run_err:
+            self.pop_error_message('Unable to load Exp %d Scan %d due to %s.' % (exp_number, scan_number, str(run_err)))
+            return
+
+        # get information
+        # FIXME/TODO/NOW - implement get_log_names()
+        spice_log_list, spice_col_list = self._myControl.get_log_names(exp_number, scan_number)
+
+        # load
+
+        # pop up a window for user to select the log names and types for output in the table
+        self._scanInfoSetupWindow = InfoTableSetupWindow.ScanInfoTableSetupWindow(self)
+        self._scanInfoSetupWindow.set_up_information('blabla')
+        self._scanInfoSetupWindow.add_log_names(spoice_log_list, spice_col_list)
+
+        self._scanInfoSetupWindow.show()
+
+        return
+
+    def do_sort_info_table(self):
+        """
+        """
+        # FIXME/TODO/NOW: Implement from prototype
+        import InfoTableSortDialog
+        #  date, time, ok = InfoTableSortDialog.DateDialog.getDateTime()
+
+        ret_obj = InfoTableSortDialog.SortOrderDialog.get_sort_order()
+
+        print ret_obj
+
+    # pysignal: 
+    def signal_info_setup_done(self, val):
+        """
+        Process the signal emit and recieved such that the info table setup is finished.
+        """
+        assert val == 1, 'communication value must be 1 but not %s of type %s.' % (str(val),
+                str(type(val)))
+
+        
+        # set up the table
+        table_setup_list = self._scanInfoSetupWindow.get_setup()
+        self.ui.tableWidget_scanInfoTable.setup(table_setup_list)
+
+
+        # enable the push button for data mining
+        self.ui.pushButton_mineData.setEnabled(True)
+
+        return
+
+    def do_mine_data(self):
+        """
+        Do data mining on all scans in the experiment
+        """
+        # read the first scan to find out the field
+        try:
+            exp_number = self.get_exp_number(throw=True)
+            scan_list = self.get_int_list(self.ui.lineEdit_infoScans, throw=True)
+        except ValueError as val_err:
+            self.pop_error_message(self, 'Unable to do data mining due to %s.' % str(val_err))
+            return
+
+        # load and scan the data
+        for scan_number in scan_list:
+            # load data
+            data_file_name = self._myControl.get_data_file(exp_number, scan_number)
+            self._myControl.do_load_spice_file(exp_number, scan_number, data_file_name)
+            log_info_dict = self._myControl.summarize_log_info(exp_number, scan_number)
+            log_inof_dict['Scan'] = scan_number
+            self.ui.tableWidget_scanInfoTable.add_scan_info(log_info_dict)
+        # END-FOR
+
+
+        return
+
     def on_mouseDownEvent(self, event):
         """ Respond to pick up a value with mouse down event
         Definition of button_press_event is:
@@ -1690,9 +1723,34 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    #--------------------------------------------------------------------------
+    def get_experiment_number(self, throw):
+        """
+        Get experiment number
+        Args:
+            throw: if true, throw exception if experiment number (ui.lineEdit_expNumber) is empty or non-integer.
+                   otherwise, return None
+
+        Returns: integer or None
+
+        """
+        err = None
+        exp_number = None
+        try:
+            exp_number = self._getInteger(self.ui.lineEdit_expNo)
+        except EmptyError as err:
+            pass
+        except ValueError as err:
+            pass
+
+        if err is not None and throw:
+            # has error with experiment number and throw error
+            raise RuntimeError(str(err))
+
+        return exp_number
+
+    # --------------------------------------------------------------------------
     # Private methods to plot data
-    #--------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def _plotIndividualDetCountsVsSampleLog(self, expno, scanno, detid, samplename, raw=True):
         """ Plot one specific detector's counts vs. one specified sample log's value
         along with all Pts.
@@ -2126,6 +2184,21 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def _get_cache_dir(self):
+        """
+        """
+        # get directory for cache
+        cache_dir = str(self.ui.lineEdit_cache.text()).strip()
+        if os.path.exists(cache_dir) is False:
+            # if cache directory does not exist, then use the current working directory
+            bad_input_dir = cache_dir
+            cache_dir = os.getcwd()
+            self.ui.lineEdit_cache.setText(cache_dir)
+            self._logWarning('Cache directory %s is not valid. Using current workspace directory %s as '
+                             'cache.' % (bad_input_dir, cache_dir))
+
+        return cache_dir
+
 
     def _uiDownloadDataFile(self, exp, scan):
         """ Download data file according to its exp and scan
@@ -2144,42 +2217,33 @@ class MainWindow(QtGui.QMainWindow):
         # ENDIF
 
         rvalue = False
+
         if self._srcFromServer is True:
-            # Use server: build the URl to download data
-            if self._serverAddress.endswith('/') is False:
-                self._serverAddress += '/'
-            fullurl = "%s%s/exp%d/Datafiles/%s_exp%04d_scan%04d.dat" % (self._serverAddress,
-                    self._instrument.lower(), exp, self._instrument.upper(), exp, scan)
-            print "URL: ", fullurl
+            # download SPICE scan data file
+            cache_dir = self._get_cache_dir()
 
-            cachedir = str(self.ui.lineEdit_cache.text()).strip()
-            if os.path.exists(cachedir) is False:
-                invalidcache = cachedir
-                cachedir = os.getcwd()
-                self.ui.lineEdit_cache.setText(cachedir)
-                self._logWarning("Cache directory %s is not valid. "
-                                 "Using current workspace directory %s as cache." % (invalidcache, cachedir) )
-
-            filename = '%s_exp%04d_scan%04d.dat' % (self._instrument.upper(), exp, scan)
-            srcFileName = os.path.join(cachedir, filename)
-            status, errmsg = downloadFile(fullurl, srcFileName)
-            if status is False:
-                self._logError(errmsg)
-                srcFileName = None
+            # download file
+            status, ret_obj = self._myControl.download_spice_file(exp, scan, cache_dir)
+            if not status:
+                err_msg = str(ret_obj)
+                self._logError(err_msg)
             else:
                 rvalue = True
 
         elif self._srcAtLocal is True:
             # Data from local
-            srcFileName = os.path.join(self._localSrcDataDir, "%s/Exp%d_Scan%04d.dat" % (self._instrument, exp, scan))
-            if os.path.exists(srcFileName) is True:
+            status, ret_obj = self._myControl.locate_local_spice_file(exp, scan, self._localSrcDataDir)
+            if status:
                 rvalue = True
+            else:
+                err_msg = str(ret_obj)
+                self._logError(err_msg)
 
         else:
             raise NotImplementedError("Logic error.  Neither downloaded from server.\
                 Nor from local drive")
 
-        return (rvalue,srcFileName)
+        return rvalue
 
 
     def _uiGetBinningParams(self, itab):
@@ -2569,10 +2633,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # Return with false
         if returnstatus is False:
-            return (False, errmsg)
+            return False, errmsg
 
-        return (True, intlist)
-
+        return True, intlist
 
     def _getXLabelFromUnit(self, unit):
         """ Get X-label from unit
@@ -2587,3 +2650,84 @@ class MainWindow(QtGui.QMainWindow):
             xlabel = 'Wacky Unknown'
 
         return xlabel
+
+
+    def pop_error_message(self, error_message):
+        """ Pop up a dialog with error message
+        """
+        # TODO/NOW - ASAP
+        print error_message
+
+        return
+
+    def save_settings(self):
+        """
+        Save settings (parameter set) upon quiting
+        :return:
+        """
+        settings = QtCore.QSettings()
+
+        # directories
+        local_spice_dir = str(self.ui.lineEdit_localSpiceDir.text())
+        settings.setValue("local_spice_dir", local_spice_dir)
+        work_dir = str(self.ui.lineEdit_workDir.text())
+        settings.setValue('work_dir', work_dir)
+
+        # experiment number
+        exp_num = str(self.ui.lineEdit_exp.text())
+        settings.setValue('exp_number', exp_num)
+
+        # lattice parameters
+        lattice_a = str(self.ui.lineEdit_a.text())
+        settings.setValue('a', lattice_a)
+        lattice_b = str(self.ui.lineEdit_b.text())
+        settings.setValue('b', lattice_b)
+        lattice_c = str(self.ui.lineEdit_c.text())
+        settings.setValue('c', lattice_c)
+        lattice_alpha = str(self.ui.lineEdit_alpha.text())
+        settings.setValue('alpha', lattice_alpha)
+        lattice_beta = str(self.ui.lineEdit_beta.text())
+        settings.setValue('beta', lattice_beta)
+        lattice_gamma = str(self.ui.lineEdit_gamma.text())
+        settings.setValue('gamma', lattice_gamma)
+
+        return
+
+    def load_settings(self):
+        """
+        Load QSettings from previous saved file
+        :return:
+        """
+        settings = QtCore.QSettings()
+
+        # directories
+        try:
+            spice_dir = settings.value('local_spice_dir', '')
+            self.ui.lineEdit_localSpiceDir.setText(str(spice_dir))
+            work_dir = settings.value('work_dir')
+            self.ui.lineEdit_workDir.setText(str(work_dir))
+
+            # experiment number
+            exp_num = settings.value('exp_number')
+            self.ui.lineEdit_exp.setText(str(exp_num))
+
+            # lattice parameters
+            lattice_a = settings.value('a')
+            self.ui.lineEdit_a.setText(str(lattice_a))
+            lattice_b = settings.value('b')
+            self.ui.lineEdit_b.setText(str(lattice_b))
+            lattice_c = settings.value('c')
+            self.ui.lineEdit_c.setText(str(lattice_c))
+            lattice_alpha = settings.value('alpha')
+            self.ui.lineEdit_alpha.setText(str(lattice_alpha))
+            lattice_beta = settings.value('beta')
+            self.ui.lineEdit_beta.setText(str(lattice_beta))
+            lattice_gamma = settings.value('gamma')
+            self.ui.lineEdit_gamma.setText(str(lattice_gamma))
+        except TypeError as err:
+            self.pop_one_button_dialog(str(err))
+            return
+
+        return
+
+
