@@ -61,6 +61,7 @@ public:
   ///@name Querying
   ///@{
   bool isRunning() const noexcept { return m_capturing; }
+  bool hasData() const noexcept;
   int runNumber() const noexcept { return m_runNumber; }
   ///@}
 
@@ -101,7 +102,7 @@ private:
   /// Associated thread running the capture process
   std::thread m_thread;
   /// Mutex protecting event buffers
-  std::mutex m_mutex;
+  mutable std::mutex m_mutex;
   /// Flag indicating that the decoder is capturing
   std::atomic<bool> m_capturing;
   /// Exception object indicating there was an error

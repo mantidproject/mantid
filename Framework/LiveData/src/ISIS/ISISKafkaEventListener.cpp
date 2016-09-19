@@ -40,11 +40,18 @@ void ISISKafkaEventListener::start(Kernel::DateAndTime startTime) {
 
 /// @copydoc ILiveListener::extractData
 boost::shared_ptr<API::Workspace> ISISKafkaEventListener::extractData() {
-  if (isConnected()) {
-    return m_decoder->extractData();
+  if (!isConnected()) {
+    throw std::runtime_error("ISISKafkaEventListener::extractData() - Cannot "
+                             "extract data, listener not connected.");
   }
-  throw std::runtime_error("ISISKafkaEventListener::extractData() - Cannot "
-                           "extract data, listener not connected.");
+  // The first call to extract is very early in the start live data process
+  // and we may not be completely ready yet, wait upto a maximum of 5 seconds
+  // to become ready
+  auto checkEnd = std::chrono::system_clock::now() + std::chrono::seconds(5);
+  while (!m_decoder->hasData() || std::chrono::system_clock::now() < checkEnd) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+  return m_decoder->extractData();
 }
 
 /// @copydoc ILiveListener::isConnected

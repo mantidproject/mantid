@@ -66,9 +66,13 @@ public:
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
+    TSM_ASSERT(!decoder->hasData(),
+               "Decoder should not have create data buffers yet");
     TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     Workspace_sptr workspace;
+    TSM_ASSERT(decoder->hasData(),
+               "Decoder's data buffers should be created now");
     TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isRunning());
@@ -107,10 +111,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isRunning());
 
-//    // -- Workspace checks --
-//    TS_ASSERT(workspace);
-//    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
-//    TS_ASSERT(group);
+    //    // -- Workspace checks --
+    //    TS_ASSERT(workspace);
+    //    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    //    TS_ASSERT(group);
   }
 
   void test_Empty_Event_Stream_Waits() {

@@ -1,4 +1,5 @@
 #include "MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h"
+#include "MantidLiveData/Exception.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -82,6 +83,16 @@ void ISISKafkaEventStreamDecoder::stopCapture() noexcept {
 }
 
 /**
+ * Check if there is data available to extract
+ * @return True if data has been accumulated so that extractData()
+ * can be called, false otherwise
+ */
+bool ISISKafkaEventStreamDecoder::hasData() const noexcept {
+  std::lock_guard<std::mutex> lock(m_mutex);
+  return !m_localEvents.empty();
+}
+
+/**
  * Check for an exception thrown by the background thread and rethrow
  * it if necessary. If no error occurred swap the current internal buffer
  * for a fresh one and return the old buffer.
@@ -92,20 +103,24 @@ API::Workspace_sptr ISISKafkaEventStreamDecoder::extractData() {
   if (m_exception) {
     throw * m_exception;
   }
-  std::lock_guard<std::mutex> lock(m_mutex);
   if (m_localEvents.size() == 1) {
     DataObjects::EventWorkspace_sptr temp;
-    std::swap(m_localEvents[0], temp);
-    initLocalCaches();
+    {
+      std::lock_guard<std::mutex> lock(m_mutex);
+      std::swap(m_localEvents[0], temp);
+      initLocalCaches();
+    }
+    if (temp->getNumberEvents() > 0) {
+      temp->setAllX(
+          HistogramData::BinEdges{temp->getTofMin(), temp->getTofMax()});
+    }
     return temp;
   } else if (m_localEvents.size() > 1) {
     // return a group
     throw std::runtime_error(
         "ISISKafkaEventStreamDecoder does not yet support multi-period data");
   } else {
-    throw std::runtime_error("ISISKafkaEventStreamDecoder::extractData() - "
-                             "Local buffers not initialized, extractData() "
-                             "called too early.");
+    throw Exception::NotYet("Local buffers not initialized.");
   }
 }
 
@@ -156,12 +171,13 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
           static_cast<const ISISStream::FramePart *>(evtMsg->message());
       DateAndTime pulseTime =
           m_runStart + static_cast<double>(frameData->frame_time());
-      if (frameData->period() > 0) {
-        throw std::runtime_error(
-            "Found period number > 0. Multi-period data not yet supported.");
+      if (frameData->period() > 1) {
+        throw std::runtime_error("Found period number == " +
+                                 std::to_string(frameData->period()) +
+                                 ". Multi-period data not yet supported.");
       }
       std::lock_guard<std::mutex> lock(m_mutex);
-      auto &periodBuffer = *m_localEvents[frameData->period()];
+      auto &periodBuffer = *m_localEvents[frameData->period() - 1];
       auto &mutableRunInfo = periodBuffer.mutableRun();
       mutableRunInfo.getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
           ->addValue(pulseTime, frameData->proton_charge());
