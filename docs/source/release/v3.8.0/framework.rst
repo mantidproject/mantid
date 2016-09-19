@@ -123,11 +123,11 @@ Performance
 
   The following algorithms were adapted and show a noticeable speedup:
 
-  - :ref:`ApplyTransmissionCorrection <algm-ApplyTransmissionCorrection >`: 20% speedup
-  - :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis >`: 25% speedup
+  - :ref:`ApplyTransmissionCorrection <algm-ApplyTransmissionCorrection>`: 20% speedup
+  - :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`: 25% speedup
   - :ref:`ConvertToHistogram <algm-ConvertToHistogram>`: 3x to 4x speedup
   - :ref:`ConvertToPointData <algm-ConvertToPointData>`: 3x to 4x speedup
-  - :ref:`CorrectFlightPaths <algm-CorrectFlightPaths >`: 10% speedup
+  - :ref:`CorrectFlightPaths <algm-CorrectFlightPaths>`: 10% speedup
   - :ref:`ExtractSpectra <algm-ExtractSpectra>`: no change when X-range changes, otherwise 50x to 100x speedup for Workspace2D and up to 3x speedup for EventWorkspace
   - :ref:`GetAllEi <algm-GetAllEi>`: 5-10% speedup
   - :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`: 5-10% speedup
