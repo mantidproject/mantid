@@ -403,9 +403,9 @@ void LoadMask::initDetectors() {
  *   @param tomask:  true to mask, false to unmask
  *   @param singledetids: list of individual det ids to mask
  */
-void LoadMask::processMaskOnDetectors(
-    const detid2index_map &indexmap, bool tomask,
-    const std::vector<detid_t> &singledetids) {
+void
+LoadMask::processMaskOnDetectors(const detid2index_map &indexmap, bool tomask,
+                                 const std::vector<detid_t> &singledetids) {
   // 1. Get index map
   // 2. Mask
   g_log.debug() << "Mask = " << tomask
@@ -434,9 +434,9 @@ void LoadMask::processMaskOnDetectors(
  * @param detectors      -- vector of detector ids, which belongs to components
  *provided as input.
  */
-void LoadMask::componentToDetectors(
-    const std::vector<std::string> &componentnames,
-    std::vector<detid_t> &detectors) {
+void
+LoadMask::componentToDetectors(const std::vector<std::string> &componentnames,
+                               std::vector<detid_t> &detectors) {
   Geometry::Instrument_const_sptr minstrument = m_maskWS->getInstrument();
 
   for (auto &componentname : componentnames) {

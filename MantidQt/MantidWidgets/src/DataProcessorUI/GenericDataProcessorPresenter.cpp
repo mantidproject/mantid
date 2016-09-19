@@ -275,8 +275,8 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
 Post-processes the workspaces created by the given rows together.
 @param groupData : the data in a given group as received from the tree manager
 */
-void GenericDataProcessorPresenter::postProcessGroup(
-    const GroupData &groupData) {
+void
+GenericDataProcessorPresenter::postProcessGroup(const GroupData &groupData) {
 
   if (!m_postprocess)
     throw std::runtime_error("Cannot post-process workspaces");
@@ -1245,8 +1245,9 @@ ChildItems GenericDataProcessorPresenter::selectedChildren() const {
  * @param title :: the title
  * @return :: Yes/No
  */
-bool GenericDataProcessorPresenter::askUserYesNo(
-    const std::string &prompt, const std::string &title) const {
+bool
+GenericDataProcessorPresenter::askUserYesNo(const std::string &prompt,
+                                            const std::string &title) const {
 
   return m_mainPresenter->askUserYesNo(prompt, title);
 }
@@ -1255,8 +1256,9 @@ bool GenericDataProcessorPresenter::askUserYesNo(
  * @param prompt :: the message
  * @param title :: the title
  */
-void GenericDataProcessorPresenter::giveUserWarning(
-    const std::string &prompt, const std::string &title) const {
+void
+GenericDataProcessorPresenter::giveUserWarning(const std::string &prompt,
+                                               const std::string &title) const {
 
   m_mainPresenter->giveUserWarning(prompt, title);
 }

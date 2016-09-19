@@ -109,8 +109,8 @@ void QDataProcessorWidget::setModel(const std::string &name) {
 Set a new model in the tableview
 @param model : the model to be attached to the tableview
 */
-void QDataProcessorWidget::showTable(
-    boost::shared_ptr<QAbstractItemModel> model) {
+void
+QDataProcessorWidget::showTable(boost::shared_ptr<QAbstractItemModel> model) {
   m_model = model;
   // So we can notify the presenter when the user updates the table
   connect(m_model.get(),

@@ -1611,7 +1611,6 @@ public:
     TS_ASSERT(l2 > 0);
   }
 
-
   /*
    * Rotate a bank in the workspace and read the positions out again. Very
    * typical.

@@ -29,9 +29,10 @@ HistogramDomainCreator::HistogramDomainCreator(
  * @param values :: Pointer to outgoing FunctionValues object.
  * @param i0 :: Size offset for values object if it already contains data.
  */
-void HistogramDomainCreator::createDomain(
-    boost::shared_ptr<FunctionDomain> &domain,
-    boost::shared_ptr<FunctionValues> &values, size_t i0) {
+void
+HistogramDomainCreator::createDomain(boost::shared_ptr<FunctionDomain> &domain,
+                                     boost::shared_ptr<FunctionValues> &values,
+                                     size_t i0) {
 
   setParameters();
 

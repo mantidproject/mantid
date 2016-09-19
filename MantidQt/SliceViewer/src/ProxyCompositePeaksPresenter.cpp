@@ -161,13 +161,13 @@ bool ProxyCompositePeaksPresenter::hasPeakAddModeFor(
   return m_compositePresenter->hasPeakAddModeFor(target);
 }
 
-void ProxyCompositePeaksPresenter::setPeakSizeOnProjection(
-    const double fraction) {
+void
+ProxyCompositePeaksPresenter::setPeakSizeOnProjection(const double fraction) {
   m_compositePresenter->setPeakSizeOnProjection(fraction);
 }
 
-void ProxyCompositePeaksPresenter::setPeakSizeIntoProjection(
-    const double fraction) {
+void
+ProxyCompositePeaksPresenter::setPeakSizeIntoProjection(const double fraction) {
   m_compositePresenter->setPeakSizeIntoProjection(fraction);
 }
 
