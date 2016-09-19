@@ -9,6 +9,7 @@
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -158,6 +159,163 @@ public:
       }
     }
     std::cout << "Total " << errorcounts << " errors \n";
+  }
+  /*Calculate werid spectra number as function of index */
+  size_t calc_spec_num(size_t index) {
+    if ((index + 3) % 3 == 0) {
+      return index + 3;
+    }
+    if ((index + 2) % 3 == 0) {
+      return index + 1;
+    }
+    if ((index + 1) % 3 == 0) {
+      return index - 1;
+    }
+    // suppress warinings
+    return index;
+  }
+
+  void test_ISISWithRefWS() {
+    auto ws_creator = AlgorithmManager::Instance().createUnmanaged(
+        "CreateSimulationWorkspace");
+    ws_creator->initialize();
+    ws_creator->setChild(true);
+
+    ws_creator->setPropertyValue("Instrument", "MARI");
+    ws_creator->setPropertyValue("BinParams", "100,100,300");
+    ws_creator->setPropertyValue("OutputWorkspace", "testWS");
+    ws_creator->setPropertyValue("UnitX", "TOF");
+
+    ws_creator->execute();
+    MatrixWorkspace_sptr source = ws_creator->getProperty("OutputWorkspace");
+    TS_ASSERT(source);
+
+    // modify spectra-detector map on the sample workspace to check masking
+    std::vector<detid_t> detIDs = source->getInstrument()->getDetectorIDs(true);
+    size_t index = 0;
+    auto it = --detIDs.end();
+    for (; it > detIDs.begin(); --it) {
+      const detid_t detId = *it;
+      auto &spec = source->getSpectrum(index);
+      Mantid::specnum_t specNo =
+          static_cast<Mantid::specnum_t>(calc_spec_num(index));
+      spec.setSpectrumNo(specNo);
+      spec.setDetectorID(detId);
+
+      index++;
+    }
+    source->buildNearestNeighbours(true);
+
+    auto masker = AlgorithmManager::Instance().create("MaskDetectors");
+    masker->initialize();
+    masker->setChild(true);
+    masker->setProperty("Workspace", source);
+    std::vector<int> masked_spectra(11);
+    masked_spectra[0] = 10;
+    masked_spectra[1] = 11;
+    masked_spectra[2] = 12;
+    masked_spectra[3] = 100;
+    masked_spectra[4] = 110;
+    masked_spectra[5] = 120;
+    masked_spectra[6] = 130;
+    masked_spectra[7] = 140;
+    masked_spectra[8] = 200;
+    masked_spectra[9] = 300;
+    masked_spectra[10] = 4;
+    masker->setProperty("SpectraList", masked_spectra);
+    masker->execute();
+    Workspace_sptr tsource = masker->getProperty("Workspace");
+    source = boost::dynamic_pointer_cast<MatrixWorkspace>(tsource);
+    TS_ASSERT(source);
+
+    /* This is proper way of extracting mask this but does not work from
+    subproject (yet)
+     and you have to delete target file manually
+    auto exporter =
+        AlgorithmManager::Instance().create("ExportSpectraMask");
+    exporter->initialize();
+    exporter->setProperty("Workspace", source);
+    exporter->execute();
+    */
+    /*Fake export mask algorithm: */
+    std::string mask_contents("4 10-12 100 110 120 130 140 200 300");
+    ScopedFileHelper::ScopedFile testFile(mask_contents, "test_mask_file.msk");
+
+    // 2. Run
+    LoadMask loadMask;
+    loadMask.initialize();
+    loadMask.setChild(true);
+
+    loadMask.setProperty("Instrument", "MARI");
+    loadMask.setProperty("RefWorkspace", source);
+    loadMask.setProperty("InputFile", testFile.getFileName());
+    loadMask.setProperty("OutputWorkspace", "MaskedWithSample");
+
+    TS_ASSERT_EQUALS(loadMask.execute(), true);
+
+    DataObjects::MaskWorkspace_sptr maskWs =
+        loadMask.getProperty("OutputWorkspace");
+
+    // check that mask ws contains different spectra but the same detectors
+    // masked
+    std::vector<detid_t> maskSourceDet, maskTargDet;
+
+    size_t n_steps = source->getNumberHistograms();
+    for (size_t i = 0; i < n_steps; ++i) {
+      bool source_masked = source->getDetector(i)->isMasked();
+      if (source_masked) {
+        maskSourceDet.push_back(source->getDetector(i)->getID());
+      }
+      bool targ_masked = (maskWs->getSpectrum(i).readY()[0] > 0.5);
+      if (targ_masked) {
+        maskTargDet.push_back(maskWs->getDetector(i)->getID());
+      }
+    }
+    std::sort(maskSourceDet.begin(), maskSourceDet.end());
+    std::sort(maskTargDet.begin(), maskTargDet.end());
+
+    TS_ASSERT_EQUALS(maskSourceDet.size(), maskTargDet.size());
+    for (size_t i = 0; i < maskSourceDet.size(); i++) {
+      TS_ASSERT_EQUALS(maskSourceDet[i], maskTargDet[i]);
+    }
+  }
+  void test_IDF_acceptedAsFileName() {
+    auto ws_creator = AlgorithmManager::Instance().createUnmanaged(
+        "CreateSimulationWorkspace");
+    ws_creator->initialize();
+    ws_creator->setChild(true);
+
+    ws_creator->setPropertyValue("Instrument", "MARI");
+    ws_creator->setPropertyValue("BinParams", "100,100,300");
+    ws_creator->setPropertyValue("OutputWorkspace", "testWS");
+    ws_creator->setPropertyValue("UnitX", "TOF");
+
+    ws_creator->execute();
+    MatrixWorkspace_sptr source = ws_creator->getProperty("OutputWorkspace");
+    TS_ASSERT(source);
+
+    std::string IDF_name =
+        API::ExperimentInfo::getInstrumentFilename("MARI", "");
+
+    /*Fake export mask algorithm: */
+    std::string mask_contents("4 10-12 100 110 120 130 140 200 300");
+    ScopedFileHelper::ScopedFile testFile(mask_contents, "test_mask_file.msk");
+
+    // 2. Run
+    LoadMask loadMask;
+    loadMask.initialize();
+    loadMask.setChild(true);
+
+    loadMask.setProperty("Instrument", IDF_name);
+    loadMask.setProperty("RefWorkspace", source);
+    loadMask.setProperty("InputFile", testFile.getFileName());
+    loadMask.setProperty("OutputWorkspace", "MaskedWithSample");
+
+    TS_ASSERT_EQUALS(loadMask.execute(), true);
+
+    DataObjects::MaskWorkspace_sptr maskWs =
+        loadMask.getProperty("OutputWorkspace");
+    TS_ASSERT(maskWs);
   }
 
   /*

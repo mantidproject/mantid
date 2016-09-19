@@ -29,11 +29,14 @@
 #ifndef MdiSubWindow_H
 #define MdiSubWindow_H
 
-#include <QMdiSubWindow>
+#include "MantidKernel/RegistrationHelper.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
+#include "WindowFactory.h"
 #include <QDockWidget>
-#include <QVBoxLayout>
-#include <QMainWindow>
 #include <QFrame>
+#include <QMainWindow>
+#include <QMdiSubWindow>
+#include <QVBoxLayout>
 
 #include <stdexcept>
 
@@ -42,6 +45,7 @@ class QCloseEvent;
 class QString;
 class FloatingWindow;
 class ApplicationWindow;
+class Folder;
 
 class MdiSubWindowParent_t : public QFrame {
   Q_OBJECT
@@ -107,7 +111,8 @@ protected:
  *
  * \sa Folder, ApplicationWindow
  */
-class MdiSubWindow : public MdiSubWindowParent_t {
+class MdiSubWindow : public MdiSubWindowParent_t,
+                     public MantidQt::API::IProjectSerialisable {
   Q_OBJECT
 
 public:
@@ -122,6 +127,12 @@ public:
   MdiSubWindow(QWidget *parent, const QString &label = QString(),
                const QString &name = QString(), Qt::WFlags f = 0);
 
+  MdiSubWindow();
+
+  /// Setup the window without constructor
+  void init(QWidget *parent, const QString &label, const QString &name,
+            Qt::WFlags flags);
+
   //! Possible window captions.
   enum CaptionPolicy {
     Name = 0,  //!< caption determined by the window name
@@ -132,7 +143,8 @@ public:
 
   /// Get the pointer to ApplicationWindow
   ApplicationWindow *applicationWindow() { return d_app; }
-
+  /// Get the pointer to Folder
+  Folder *folder() { return d_folder; }
 public slots:
 
   //! Return the window label
@@ -261,8 +273,15 @@ public: // non-slot methods
   bool isDocked() const;
   /// Detach this window from any parent window
   void detach();
-///@}
-
+  ///@}
+  /// Set the label property on the widget
+  void setLabel(const QString &label);
+  /// Loads the given lines from the project file and applies them.
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
+  /// Serialises to a string that can be saved to a project file.
+  std::string saveToProject(ApplicationWindow *app) override;
 signals:
   //! Emitted when the window was closed
   void closedWindow(MdiSubWindow *);
@@ -301,6 +320,9 @@ private:
   void updateCaption();
   /// Store the pointer to the ApplicationWindow
   ApplicationWindow *d_app;
+  /// Store the pointer to the Folder
+  Folder *d_folder;
+
   //! The window label
   /**
    * \sa setWindowLabel(), windowLabel(), setCaptionPolicy()
@@ -324,5 +346,22 @@ private:
 };
 
 typedef QList<MdiSubWindow *> MDIWindowList;
+
+/* Used to register classes into the factory. creates a global object in an
+ * anonymous namespace. The object itself does nothing, but the comma operator
+ * is used in the call to its constructor to effect a call to the factory's
+ * subscribe method.
+ */
+#define DECLARE_WINDOW_WITH_NAME(classname, username)                          \
+  namespace {                                                                  \
+  Mantid::Kernel::RegistrationHelper                                           \
+      register_window_##username(((Mantid::API::WindowFactory::Instance()      \
+                                       .subscribe<classname>(#username)),      \
+                                  0));                                         \
+  }
+
+// Helper macro to subscribe a class to the factory with the same name as the
+// class name
+#define DECLARE_WINDOW(classname) DECLARE_WINDOW_WITH_NAME(classname, classname)
 
 #endif

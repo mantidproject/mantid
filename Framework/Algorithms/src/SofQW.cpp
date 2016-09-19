@@ -107,6 +107,10 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
                       "The value of fixed energy: :math:`E_i` (EMode=Direct) "
                       "or :math:`E_f` (EMode=Indirect) (meV).\nMust be set "
                       "here if not available in the instrument definition.");
+  alg.declareProperty("ReplaceNaNs", false,
+                      "If true, all NaN values in the output workspace are "
+                      "replaced using the ReplaceSpecialValues algorithm.",
+                      Direction::Input);
 }
 
 void SofQW::exec() {
@@ -123,7 +127,14 @@ void SofQW::exec() {
   childAlg->execute();
 
   MatrixWorkspace_sptr outputWS = childAlg->getProperty("OutputWorkspace");
+
   this->setProperty("OutputWorkspace", outputWS);
+
+  // Progress reports & cancellation
+  MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+  const size_t nHistos = inputWorkspace->getNumberHistograms();
+  auto m_progress = new Progress(this, 0.0, 1.0, nHistos);
+  m_progress->report("Creating output workspace");
 }
 
 /** Creates the output workspace, setting the axes according to the input

@@ -55,8 +55,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>478</width>
-        <height>372</height>
+        <width>480</width>
+        <height>379</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -359,14 +359,30 @@
                   </item>
                  </widget>
                 </item>
-                <item row="2" column="0" colspan="2">
-                 <widget class="QCheckBox" name="ckSumContributions">
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sum contributions from selected ions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
+                <item row="2" column="0">
+                 <widget class="QLabel" name="lbOutputFormat">
                   <property name="text">
-                   <string>Sum Ion Contributions</string>
+                   <string>Output Format:</string>
                   </property>
+                 </widget>
+                </item>
+                <item row="2" column="1">
+                 <widget class="QComboBox" name="cbOutputFormat">
+                  <item>
+                   <property name="text">
+                    <string>Individual Ion Contributions</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Sum Ion Contributions</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Calculate Individual Indices</string>
+                   </property>
+                  </item>
                  </widget>
                 </item>
                 <item row="4" column="0" colspan="2">
@@ -482,9 +498,9 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QCheckBox" name="ckPlot">
+       <widget class="QPushButton" name="pbPlot">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="text">
          <string>Plot Result</string>
@@ -505,7 +521,10 @@
        </spacer>
       </item>
       <item>
-       <widget class="QCheckBox" name="ckSave">
+       <widget class="QPushButton" name="pbSave">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Save Result</string>
         </property>
@@ -525,8 +544,8 @@
  </customwidgets>
  <tabstops>
   <tabstop>mwInputFile</tabstop>
-  <tabstop>ckPlot</tabstop>
-  <tabstop>ckSave</tabstop>
+  <tabstop>pbPlot</tabstop>
+  <tabstop>pbSave</tabstop>
  </tabstops>
  <resources/>
  <connections>

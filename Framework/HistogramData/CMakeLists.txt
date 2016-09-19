@@ -9,18 +9,21 @@ set ( SRC_FILES
 	src/FrequencyStandardDeviations.cpp
 	src/FrequencyVariances.cpp
 	src/Histogram.cpp
+	src/HistogramMath.cpp
 	src/PointStandardDeviations.cpp
 	src/PointVariances.cpp
 	src/Points.cpp
 )
 
 set ( INC_FILES
+	inc/MantidHistogramData/Addable.h
 	inc/MantidHistogramData/BinEdgeStandardDeviations.h
 	inc/MantidHistogramData/BinEdgeVariances.h
 	inc/MantidHistogramData/BinEdges.h
 	inc/MantidHistogramData/CountStandardDeviations.h
 	inc/MantidHistogramData/CountVariances.h
 	inc/MantidHistogramData/Counts.h
+	inc/MantidHistogramData/EValidation.h
 	inc/MantidHistogramData/FixedLengthVector.h
 	inc/MantidHistogramData/Frequencies.h
 	inc/MantidHistogramData/FrequencyStandardDeviations.h
@@ -28,36 +31,49 @@ set ( INC_FILES
 	inc/MantidHistogramData/Histogram.h
 	inc/MantidHistogramData/HistogramDx.h
 	inc/MantidHistogramData/HistogramE.h
+	inc/MantidHistogramData/HistogramMath.h
 	inc/MantidHistogramData/HistogramX.h
 	inc/MantidHistogramData/HistogramY.h
 	inc/MantidHistogramData/Iterable.h
+	inc/MantidHistogramData/LinearGenerator.h
+	inc/MantidHistogramData/LogarithmicGenerator.h
+	inc/MantidHistogramData/Multipliable.h
 	inc/MantidHistogramData/Offsetable.h
 	inc/MantidHistogramData/PointStandardDeviations.h
 	inc/MantidHistogramData/PointVariances.h
 	inc/MantidHistogramData/Points.h
 	inc/MantidHistogramData/Scalable.h
 	inc/MantidHistogramData/StandardDeviationVectorOf.h
+	inc/MantidHistogramData/Validation.h
 	inc/MantidHistogramData/VarianceVectorOf.h
 	inc/MantidHistogramData/VectorOf.h
+	inc/MantidHistogramData/XValidation.h
+	inc/MantidHistogramData/YValidation.h
 )
 
 set ( TEST_FILES
+	AddableTest.h
 	BinEdgeStandardDeviationsTest.h
 	BinEdgeVariancesTest.h
 	BinEdgesTest.h
 	CountStandardDeviationsTest.h
 	CountVariancesTest.h
 	CountsTest.h
+	EValidationTest.h
 	FixedLengthVectorTest.h
 	FrequenciesTest.h
 	FrequencyStandardDeviationsTest.h
 	FrequencyVariancesTest.h
 	HistogramDxTest.h
 	HistogramETest.h
+	HistogramMathTest.h
 	HistogramTest.h
 	HistogramXTest.h
 	HistogramYTest.h
 	IterableTest.h
+	LinearGeneratorTest.h
+	LogarithmicGeneratorTest.h
+	MultipliableTest.h
 	OffsetableTest.h
 	PointStandardDeviationsTest.h
 	PointVariancesTest.h
@@ -66,6 +82,8 @@ set ( TEST_FILES
 	StandardDeviationVectorOfTest.h
 	VarianceVectorOfTest.h
 	VectorOfTest.h
+	XValidationTest.h
+	YValidationTest.h
 )
 
 if (COVERALLS)

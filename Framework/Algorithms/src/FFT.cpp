@@ -16,9 +16,6 @@
 
 #include <gsl/gsl_errno.h>
 
-#define REAL(z, i) ((z)[2 * (i)])
-#define IMAG(z, i) ((z)[2 * (i) + 1])
-
 #include <algorithm>
 #include <cmath>
 #include <functional>
@@ -92,11 +89,10 @@ void FFT::exec() {
   const int iImag = getProperty("Imaginary");
   const bool isComplex = iImag != EMPTY_INT();
 
-  auto &X = m_inWS->x(iReal);
-  const int ySize = static_cast<int>(m_inWS->blocksize());
-  const int xSize = static_cast<int>(X.size());
+  const auto &xPoints = m_inWS->points(iReal);
+  const int nPoints = static_cast<int>(xPoints.size());
 
-  boost::shared_array<double> data(new double[2 * ySize]);
+  boost::shared_array<double> data(new double[2 * nPoints]);
   const std::string transform = getProperty("Transform");
 
   // The number of spectra in the output workspace
@@ -108,20 +104,20 @@ void FFT::exec() {
     addPositiveOnly = true;
   }
 
-  m_outWS = WorkspaceFactory::Instance().create(m_inWS, nOut, xSize, ySize);
+  m_outWS = WorkspaceFactory::Instance().create(m_inWS, nOut, nPoints, nPoints);
 
-  const double dx = X[1] - X[0];
-  double df = 1.0 / (dx * ySize);
+  const double dx = xPoints[1] - xPoints[0];
+  double df = 1.0 / (dx * nPoints);
 
   // Output label
   createUnitsLabels(df);
 
   setupTAxis(nOut, addPositiveOnly);
 
-  const int dys = ySize % 2;
+  const int dys = nPoints % 2;
 
-  m_wavetable = gsl_fft_complex_wavetable_alloc(ySize);
-  m_workspace = gsl_fft_complex_workspace_alloc(ySize);
+  m_wavetable = gsl_fft_complex_wavetable_alloc(nPoints);
+  m_workspace = gsl_fft_complex_workspace_alloc(nPoints);
 
   // Hardcoded "centerShift == true" means that the zero on the x axis is
   // assumed to be in the centre, at point with index i = ySize/2.
@@ -129,11 +125,11 @@ void FFT::exec() {
   const bool centerShift = true;
 
   if (transform == "Forward") {
-    transformForward(data, xSize, ySize, dys, addPositiveOnly, centerShift,
+    transformForward(data, nPoints, nPoints, dys, addPositiveOnly, centerShift,
                      isComplex, iReal, iImag, df, dx);
   } else { // Backward
-    transformBackward(data, xSize, ySize, dys, centerShift, isComplex, iReal,
-                      iImag, df);
+    transformBackward(data, nPoints, nPoints, dys, centerShift, isComplex,
+                      iReal, iImag, df);
   }
 
   m_outWS->setSharedX(1, m_outWS->sharedX(0));
@@ -177,7 +173,7 @@ void FFT::transformForward(boost::shared_array<double> &data, const int xSize,
   }
 
   double shift = getPhaseShift(
-      m_inWS->x(iReal)); // extra phase to be applied to the transform
+      m_inWS->points(iReal)); // extra phase to be applied to the transform
 
   gsl_fft_complex_forward(data.get(), 1, ySize, m_wavetable, m_workspace);
 
@@ -234,11 +230,10 @@ void FFT::transformBackward(boost::shared_array<double> &data, const int xSize,
                             const int ySize, const int dys,
                             const bool centerShift, const bool isComplex,
                             const int iReal, const int iImag, const double df) {
-
   for (int i = 0; i < ySize; i++) {
     int j = (ySize / 2 + i) % ySize;
-    data[2 * i] = m_inWS->dataY(iReal)[j];
-    data[2 * i + 1] = isComplex ? m_inImagWS->dataY(iImag)[j] : 0.;
+    data[2 * i] = m_inWS->y(iReal)[j];
+    data[2 * i + 1] = isComplex ? m_inImagWS->y(iImag)[j] : 0.;
   }
 
   gsl_fft_complex_inverse(data.get(), 1, ySize, m_wavetable, m_workspace);
@@ -343,7 +338,7 @@ std::map<std::string, std::string> FFT::validateInputs() {
       // Check that the x values are evenly spaced
       // If accepting rounding errors, just give a warning if bins are
       // different.
-      if (areBinWidthsUneven(X)) {
+      if (areBinWidthsUneven(inWS->binEdges(iReal))) {
         errors["InputWorkspace"] =
             "X axis must be linear (all bins have same width)";
       }
@@ -376,16 +371,16 @@ std::map<std::string, std::string> FFT::validateInputs() {
  * In normal use, return true if not evenly spaced (error).
  * If accepting rounding errors, threshold is more lenient, and don't return an
  * error but just warn the user.
- * @param xValues :: [input] Values to check
+ * @param xBins :: [input] Values to check
  * @returns :: True if unevenly spaced, False if not (or accepting errors)
  */
-bool FFT::areBinWidthsUneven(const HistogramData::HistogramX &xValues) const {
+bool FFT::areBinWidthsUneven(const HistogramData::BinEdges &xBins) const {
   const bool acceptXRoundingErrors = getProperty("AcceptXRoundingErrors");
   const double tolerance = acceptXRoundingErrors ? 0.5 : 1e-7;
   const double warnValue = acceptXRoundingErrors ? 0.1 : -1;
 
   // TODO should be added to HistogramData as a convenience function
-  Kernel::EqualBinsChecker binChecker(xValues.rawData(), tolerance, warnValue);
+  Kernel::EqualBinsChecker binChecker(xBins.rawData(), tolerance, warnValue);
 
   // Compatibility with previous behaviour
   if (!acceptXRoundingErrors) {
@@ -403,15 +398,15 @@ bool FFT::areBinWidthsUneven(const HistogramData::HistogramX &xValues) const {
  * Returns the phase shift to apply
  * If "AutoShift" is set, calculates this automatically as -X[N/2]
  * Otherwise, returns user-supplied "Shift" (or zero if none set)
- * @param xValues :: [input] Reference to X values of input workspace
+ * @param xPoints :: [input] Reference to X points of input workspace
  * @returns :: Phase shift
  */
-double FFT::getPhaseShift(const HistogramData::HistogramX &xValues) {
+double FFT::getPhaseShift(const HistogramData::Points &xPoints) {
   double shift = 0.0;
   const bool autoshift = getProperty("AutoShift");
   if (autoshift) {
-    const size_t mid = xValues.size() / 2;
-    shift = -xValues[mid];
+    const size_t mid = xPoints.size() / 2;
+    shift = -xPoints[mid];
   } else {
     shift = getProperty("Shift");
   }

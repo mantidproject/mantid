@@ -5,6 +5,7 @@
 #include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -35,6 +36,7 @@ using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
 
 class GroupDetectors2Test : public CxxTest::TestSuite {
 public:
@@ -54,7 +56,7 @@ public:
     // Set up a small workspace for testing
     auto space2D = createWorkspace<Workspace2D>(NHIST, NBINS + 1, NBINS);
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    BinEdges xs(NBINS + 1, 10.0);
+    BinEdges xs(NBINS + 1, LinearGenerator(10.0, 1.0));
     CountStandardDeviations errors(NBINS, 1.0);
     for (int j = 0; j < NHIST; ++j) {
       space2D->setBinEdges(j, xs);
@@ -134,7 +136,7 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
-    std::vector<double> tens(NBINS + 1, 10.0);
+    std::vector<double> tens{10, 11, 12, 13, 14};
     std::vector<double> ones(NBINS, 1.0);
     TS_ASSERT_EQUALS(outputWS->dataX(0), tens);
     TS_ASSERT_EQUALS(outputWS->dataY(0), std::vector<double>(NBINS, 1 + 4));
@@ -169,7 +171,7 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
-    std::vector<double> tens(NBINS + 1, 10.0);
+    std::vector<double> tens{10, 11, 12, 13, 14};
     std::vector<double> ones(NBINS, 1.0);
     TS_ASSERT_EQUALS(outputWS->dataX(0), tens);
     TS_ASSERT_EQUALS(outputWS->dataY(0),
@@ -202,7 +204,7 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
-    std::vector<double> tens(NBINS + 1, 10.0);
+    std::vector<double> tens{10, 11, 12, 13, 14};
     std::vector<double> ones(NBINS, 1.0);
     TS_ASSERT_EQUALS(outputWS->dataX(0), tens);
     TS_ASSERT_EQUALS(outputWS->dataY(0),
@@ -241,7 +243,7 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NHIST - 1);
-    std::vector<double> tens(NBINS + 1, 10.0);
+    std::vector<double> tens{10, 11, 12, 13, 14};
     std::vector<double> ones(NBINS, 1.0);
     // check the two grouped spectra
     TS_ASSERT_EQUALS(outputWS->dataX(0), tens);
@@ -318,7 +320,7 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), NHIST - 3);
-    std::vector<double> tens(NBINS + 1, 10.0);
+    std::vector<double> tens{10, 11, 12, 13, 14};
     std::vector<double> ones(NBINS, 1.0);
     // check the first grouped spectrum
     TS_ASSERT_EQUALS(outputWS->dataX(0), tens);

@@ -4,6 +4,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -13,6 +14,7 @@
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 
@@ -41,9 +43,8 @@ const std::string MatrixWorkspace::yDimensionId = "yDimension";
 MatrixWorkspace::MatrixWorkspace(
     Mantid::Geometry::INearestNeighboursFactory *nnFactory)
     : IMDWorkspace(), ExperimentInfo(), m_axes(), m_isInitialized(false),
-      m_YUnit(), m_YUnitLabel(), m_isDistribution(false),
-      m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks(),
-      m_indexCalculator(),
+      m_YUnit(), m_YUnitLabel(), m_isCommonBinsFlagSet(false),
+      m_isCommonBinsFlag(false), m_masks(), m_indexCalculator(),
       m_nearestNeighboursFactory(
           (nnFactory == nullptr) ? new NearestNeighboursFactory : nnFactory),
       m_nearestNeighbours() {}
@@ -57,7 +58,6 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   m_isInitialized = other.m_isInitialized;
   m_YUnit = other.m_YUnit;
   m_YUnitLabel = other.m_YUnitLabel;
-  m_isDistribution = other.m_isDistribution;
   m_isCommonBinsFlagSet = other.m_isCommonBinsFlagSet;
   m_isCommonBinsFlag = other.m_isCommonBinsFlag;
   m_masks = other.m_masks;
@@ -179,6 +179,35 @@ const std::string MatrixWorkspace::getTitle() const {
     return title;
   } else
     return Workspace::getTitle();
+}
+
+/** Return a reference to the SpectrumInfo object. NOT THREAD-SAFE!
+ *
+ * By default ThreadedContextCheck::Check enables a check of the OpenMP thread
+ * number to actively fail when called from a threaded context. In cases where
+ * the code is calling this in a threaded context but with different workspaces
+ * this check can be disabled by setting contextCheck =
+ * ThreadedContextCheck::Skip. This is not recommended and should be used with
+ * extreme care. This flag is a temporary workaround and will be removed once
+ * Instrument-2.0 is introduced.
+ *
+ * Currently this method is not thread-safe, and any modifications of the
+ * instrument or instrument parameters such as mask flags will not be visible in
+ * existing SpectrumInfo references. After modification, obtain a new reference
+ * by calling this method again.
+ */
+const SpectrumInfo &
+MatrixWorkspace::spectrumInfo(ThreadedContextCheck contextCheck) const {
+  if (contextCheck == ThreadedContextCheck::Check &&
+      PARALLEL_THREAD_NUMBER != 0)
+    throw std::runtime_error("MatrixWorkspace::spectrumInfo(): Thread ID is "
+                             "not 0. This indicates that the method is called "
+                             "in a threaded context. This is not allowed.");
+
+  // For now we *always* create a new SpectrumInfo since the instrument or
+  // parameters may have changed.
+  m_spectrumInfo = Kernel::make_unique<SpectrumInfo>(*this);
+  return *m_spectrumInfo;
 }
 
 void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
@@ -829,7 +858,6 @@ double MatrixWorkspace::detectorTwoTheta(const Geometry::IDetector &det) const {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Source and sample are at same position!");
   }
-
   return det.getTwoTheta(samplePos, beamLine);
 }
 
@@ -926,13 +954,21 @@ void MatrixWorkspace::setYUnitLabel(const std::string &newLabel) {
 * TODO: For example: ????
 * @return whether workspace is a distribution or not
 */
-const bool &MatrixWorkspace::isDistribution() const { return m_isDistribution; }
+bool MatrixWorkspace::isDistribution() const {
+  return getSpectrum(0).yMode() == HistogramData::Histogram::YMode::Frequencies;
+}
 
 /** Set the flag for whether the Y-values are dimensioned
 *  @return whether workspace is now a distribution
 */
 void MatrixWorkspace::setDistribution(bool newValue) {
-  m_isDistribution = newValue;
+  if (isDistribution() == newValue)
+    return;
+  HistogramData::Histogram::YMode ymode =
+      newValue ? HistogramData::Histogram::YMode::Frequencies
+               : HistogramData::Histogram::YMode::Counts;
+  for (size_t i = 0; i < getNumberHistograms(); ++i)
+    getSpectrum(i).setYMode(ymode);
 }
 
 /**
@@ -1061,8 +1097,16 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
   // this is the actual result of the masking that most algorithms and plotting
   // implementations will see, the bin mask flags defined above are used by only
   // some algorithms
-  this->dataY(workspaceIndex)[binIndex] *= (1 - weight);
-  this->dataE(workspaceIndex)[binIndex] *= (1 - weight);
+  // If the weight is 0, nothing more needs to be done after flagMasked above
+  // (i.e. NaN and Inf will also stay intact)
+  // If the weight is not 0, NaN and Inf values are set to 0,
+  // whereas other values are scaled by (1 - weight)
+  if (weight != 0.) {
+    double &y = this->mutableY(workspaceIndex)[binIndex];
+    (std::isnan(y) || std::isinf(y)) ? y = 0. : y *= (1 - weight);
+    double &e = this->mutableE(workspaceIndex)[binIndex];
+    (std::isnan(e) || std::isinf(e)) ? e = 0. : e *= (1 - weight);
+  }
 }
 
 /** Writes the masking weight to m_masks (doesn't alter y-values). Contains a
@@ -1555,7 +1599,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(
   }
 
   if (wi < nhist) {
-    const MantidVec &X = this->readX(wi);
+    const auto &X = this->binEdges(wi);
     auto it = std::lower_bound(X.cbegin(), X.cend(), x);
     if (it == X.end()) {
       // Out of range

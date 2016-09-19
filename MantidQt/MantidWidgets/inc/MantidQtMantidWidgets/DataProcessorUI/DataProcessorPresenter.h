@@ -3,14 +3,18 @@
 
 #include <QVariant>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
+
+using ParentItems = std::set<int>;
+using ChildItems = std::map<int, std::set<int>>;
 
 namespace MantidQt {
 namespace MantidWidgets {
 // Forward decs
-class WorkspaceReceiver;
 class DataProcessorCommand;
+class DataProcessorMainPresenter;
 class DataProcessorView;
 class ProgressableView;
 
@@ -19,7 +23,7 @@ class ProgressableView;
 DataProcessorPresenter is an interface which defines the functions any data
 processor interface presenter needs to support.
 
-Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -78,10 +82,16 @@ public:
                                  const std::string &defaultInstrument) = 0;
   virtual std::vector<std::unique_ptr<DataProcessorCommand>>
   publishCommands() = 0;
-  virtual void accept(WorkspaceReceiver *workspaceReceiver) = 0;
+  virtual void accept(DataProcessorMainPresenter *mainPresenter) = 0;
   virtual void acceptViews(DataProcessorView *tableView,
                            ProgressableView *progressView) = 0;
   virtual void setModel(std::string name) = 0;
+  virtual ParentItems selectedParents() const = 0;
+  virtual ChildItems selectedChildren() const = 0;
+  virtual bool askUserYesNo(const std::string &prompt,
+                            const std::string &title) const = 0;
+  virtual void giveUserWarning(const std::string &prompt,
+                               const std::string &title) const = 0;
 };
 }
 }

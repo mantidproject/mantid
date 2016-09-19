@@ -232,10 +232,9 @@ void export_MatrixWorkspace() {
            "Get a pointer to a workspace axis")
       .def("isHistogramData", &MatrixWorkspace::isHistogramData, arg("self"),
            "Returns True if this is considered to be binned data.")
-      .def("isDistribution", (const bool &(MatrixWorkspace::*)() const) &
+      .def("isDistribution", (bool (MatrixWorkspace::*)() const) &
                                  MatrixWorkspace::isDistribution,
-           arg("self"), return_value_policy<copy_const_reference>(),
-           "Returns the status of the distribution flag")
+           arg("self"), "Returns the status of the distribution flag")
       .def("YUnit", &MatrixWorkspace::YUnit, arg("self"),
            "Returns the current Y unit for the data (Y axis) in the workspace")
       .def("YUnitLabel", &MatrixWorkspace::YUnitLabel, arg("self"),

@@ -1,17 +1,20 @@
 #include "globals.h"
-#include "ProjectSerialiser.h"
 #include "ApplicationWindow.h"
-#include "ScriptingWindow.h"
-#include "TSVSerialiser.h"
-#include "Note.h"
-#include "Matrix.h"
-#include "TableStatistics.h"
 #include "Graph3D.h"
+#include "Matrix.h"
+#include "Note.h"
+#include "ProjectSerialiser.h"
+#include "ScriptingWindow.h"
+#include "TableStatistics.h"
+#include "WindowFactory.h"
 
-#include "Mantid/MantidMatrix.h"
-#include "Mantid/MantidUI.h"
-#include "MantidKernel/MantidVersion.h"
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
+#include "Mantid/MantidUI.h"
+#include "Mantid/MantidMatrixFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/MantidVersion.h"
+#include "MantidQtAPI/PlotAxis.h"
+#include "MantidQtSliceViewer/SliceViewerWindow.h"
 
 #include <QTextCodec>
 #include <QTextStream>
@@ -119,108 +122,117 @@ void ProjectSerialiser::loadProjectSections(const std::string &lines,
 
   // If this is the top level folder of the project, we'll need to load the
   // workspaces before anything else.
-  if (isTopLevel && tsv.hasSection("mantidworkspaces")) {
+  if (isTopLevel) {
+    loadWorkspaces(tsv);
+  }
+
+  loadCurrentFolder(tsv);
+  loadWindows(tsv, fileVersion);
+  loadLogData(tsv);
+  loadScriptWindow(tsv, fileVersion);
+  loadAdditionalWindows(lines, fileVersion);
+
+  // Deal with subfolders last.
+  loadSubFolders(tsv, fileVersion);
+}
+
+/**
+ * Load workspaces listed in the project file.
+ *
+ * This function should only be called once.
+ *
+ * @param tsv :: the TSVserialiser object for the project file
+ */
+void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv) {
+  if (tsv.hasSection("mantidworkspaces")) {
     // There should only be one of these, so we only read the first.
     std::string workspaces = tsv.sections("mantidworkspaces").front();
     populateMantidTreeWidget(QString::fromStdString(workspaces));
   }
+}
 
-  if (tsv.hasSection("open")) {
-    std::string openStr = tsv.sections("open").front();
-    int openValue = 0;
-    std::stringstream(openStr) >> openValue;
-    window->currentFolder()->folderListItem()->setExpanded(openValue);
-  }
-
-  if (tsv.hasSection("mantidmatrix")) {
-    auto matrices = tsv.sections("mantidmatrix");
-    for (auto &it : matrices) {
-      openMantidMatrix(it);
+/** Load open project windows from the project file
+ *
+ * This uses the dynamic window factory to create the various different types
+ * of windows.
+ *
+ * @param lines :: string of characters from a Mantid project file
+ * @param fileVersion :: version of the project file loaded
+ */
+void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv,
+                                    const int fileVersion) {
+  auto keys = WindowFactory::Instance().getKeys();
+  // Work around for graph-table dependance. Graph3D's currently rely on
+  // looking up tables. These must be loaded before the graphs, so work around
+  // by loading in reverse alphabetical order.
+  std::reverse(keys.begin(), keys.end());
+  for (auto &classname : keys) {
+    if (tsv.hasSection(classname)) {
+      for (auto &section : tsv.sections(classname)) {
+        WindowFactory::Instance().loadFromProject(classname, section, window,
+                                                  fileVersion);
+      }
     }
   }
+}
 
-  if (tsv.hasSection("table")) {
-    auto tableSections = tsv.sections("table");
-    for (auto &it : tableSections) {
-      openTable(it, fileVersion);
+/**
+ * Load subfolders from the project file.
+ *
+ * @param tsv :: the TSVserialiser object for the project file
+ * @param fileVersion :: the version of the project file
+ */
+void ProjectSerialiser::loadSubFolders(const TSVSerialiser &tsv,
+                                       const int fileVersion) {
+  if (tsv.hasSection("folder")) {
+    auto folders = tsv.sections("folder");
+    for (auto &it : folders) {
+      load(it, fileVersion, false);
     }
   }
+}
 
-  if (tsv.hasSection("TableStatistics")) {
-    auto tableStatsSections = tsv.sections("TableStatistics");
-    for (auto &it : tableStatsSections) {
-      openTableStatistics(it, fileVersion);
-    }
-  }
-
-  if (tsv.hasSection("matrix")) {
-    auto matrixSections = tsv.sections("matrix");
-    for (auto &it : matrixSections) {
-      openMatrix(it, fileVersion);
-    }
-  }
-
-  if (tsv.hasSection("multiLayer")) {
-    auto multiLayer = tsv.sections("multiLayer");
-    for (auto &it : multiLayer) {
-      openMultiLayer(it, fileVersion);
-    }
-  }
-
-  if (tsv.hasSection("SurfacePlot")) {
-    auto plotSections = tsv.sections("SurfacePlot");
-    for (auto &it : plotSections) {
-      openSurfacePlot(it, fileVersion);
-    }
-  }
-
-  if (tsv.hasSection("log")) {
-    auto logSections = tsv.sections("log");
-    for (auto &it : logSections) {
-      window->currentFolder()->appendLogInfo(QString::fromStdString(it));
-    }
-  }
-
-  if (tsv.hasSection("note")) {
-    auto noteSections = tsv.sections("note");
-    for (auto &it : noteSections) {
-      auto n = window->newNote("");
-      n->loadFromProject(it, window, fileVersion);
-    }
-  }
-
+/**
+ * Load the script window from the project file.
+ *
+ * @param tsv :: the TSVserialiser object for the project file
+ * @param fileVersion :: the version of the project file
+ */
+void ProjectSerialiser::loadScriptWindow(const TSVSerialiser &tsv,
+                                         const int fileVersion) {
   if (tsv.hasSection("scriptwindow")) {
     auto scriptSections = tsv.sections("scriptwindow");
     for (auto &it : scriptSections) {
       openScriptWindow(it, fileVersion);
     }
   }
+}
 
-  if (tsv.hasSection("instrumentwindow")) {
-    auto instrumentSections = tsv.sections("instrumentwindow");
-    for (auto &it : instrumentSections) {
-      TSVSerialiser iws(it);
-
-      if (iws.selectLine("WorkspaceName")) {
-        std::string wsName = iws.asString(1);
-        QString name = QString::fromStdString(wsName);
-
-        auto obj = window->mantidUI->getInstrumentView(name);
-        auto iw = dynamic_cast<InstrumentWindow *>(obj);
-
-        if (iw) {
-          iw->loadFromProject(it, window, fileVersion);
-        }
-      }
+/**
+ * Load any log entries from the project file.
+ *
+ * @param tsv :: the TSVserialiser object for the project file
+ */
+void ProjectSerialiser::loadLogData(const TSVSerialiser &tsv) {
+  if (tsv.hasSection("log")) {
+    auto logSections = tsv.sections("log");
+    for (auto &it : logSections) {
+      window->currentFolder()->appendLogInfo(QString::fromStdString(it));
     }
   }
+}
 
-  // Deal with subfolders last.
-  if (tsv.hasSection("folder")) {
-    auto folders = tsv.sections("folder");
-    for (auto &it : folders) {
-      load(it, fileVersion, false);
-    }
+/**
+ * Load data about the current folder from the project file.
+ *
+ * @param tsv :: the TSVserialiser object for the project file
+ */
+void ProjectSerialiser::loadCurrentFolder(const TSVSerialiser &tsv) {
+  if (tsv.hasSection("open")) {
+    std::string openStr = tsv.sections("open").front();
+    int openValue = 0;
+    std::stringstream(openStr) >> openValue;
+    window->currentFolder()->folderListItem()->setExpanded(openValue);
   }
 }
 
@@ -267,6 +279,8 @@ QString ProjectSerialiser::serialiseProjectState(Folder *folder) {
     std::string scriptString = scriptingWindow->saveToProject(window);
     text += QString::fromStdString(scriptString);
   }
+
+  text += saveAdditionalWindows();
 
   // Finally, recursively save folders
   if (folder) {
@@ -341,8 +355,8 @@ QString ProjectSerialiser::saveFolderSubWindows(Folder *folder) {
   // Write windows
   QList<MdiSubWindow *> windows = folder->windowsList();
   for (auto &w : windows) {
-    Mantid::IProjectSerialisable *ips =
-        dynamic_cast<Mantid::IProjectSerialisable *>(w);
+    MantidQt::API::IProjectSerialisable *ips =
+        dynamic_cast<MantidQt::API::IProjectSerialisable *>(w);
 
     if (ips) {
       text += QString::fromUtf8(ips->saveToProject(window).c_str());
@@ -416,6 +430,26 @@ QString ProjectSerialiser::saveWorkspaces() {
   }
   wsNames += "\n</mantidworkspaces>\n";
   return wsNames;
+}
+
+/**
+ * Save additional windows that are not MdiSubWindows
+ *
+ * This includes windows such as the slice viewer, VSI, and the spectrum viewer
+ *
+ * @return a string representing the sections of the
+ */
+QString ProjectSerialiser::saveAdditionalWindows() {
+  QString output;
+  for (auto win : window->getSerialisableWindows()) {
+    auto serialisableWindow = dynamic_cast<IProjectSerialisable *>(win);
+    if (!serialisableWindow)
+      continue;
+
+    auto lines = serialisableWindow->saveToProject(window);
+    output += QString::fromStdString(lines);
+  }
+  return output;
 }
 
 /**
@@ -506,313 +540,6 @@ void ProjectSerialiser::saveProjectFile(QFile *fileHandle,
 }
 
 /**
- * Open a new matrix window
- *
- * @param lines :: string of characters from a Mantid project file
- * @param fileVersion :: the version of the project file
- */
-void ProjectSerialiser::openMatrix(const std::string &lines,
-                                   const int fileVersion) {
-  // The first line specifies the name, dimensions and date.
-  std::vector<std::string> lineVec;
-  boost::split(lineVec, lines, boost::is_any_of("\n"));
-  std::string firstLine = lineVec.front();
-  lineVec.erase(lineVec.begin());
-  std::string newLines = boost::algorithm::join(lineVec, "\n");
-
-  // Parse the first line
-  std::vector<std::string> values;
-  boost::split(values, firstLine, boost::is_any_of("\t"));
-
-  if (values.size() < 4) {
-    return;
-  }
-
-  const std::string caption = values[0];
-  const std::string date = values[3];
-
-  int rows = 0;
-  int cols = 0;
-  Mantid::Kernel::Strings::convert<int>(values[1], rows);
-  Mantid::Kernel::Strings::convert<int>(values[2], cols);
-
-  auto m = window->newMatrix(QString::fromStdString(caption), rows, cols);
-  window->setListViewDate(QString::fromStdString(caption),
-                          QString::fromStdString(date));
-  m->setBirthDate(QString::fromStdString(date));
-
-  TSVSerialiser tsv(newLines);
-
-  if (tsv.hasLine("geometry")) {
-    std::string gStr = tsv.lineAsString("geometry");
-    window->restoreWindowGeometry(window, m, QString::fromStdString(gStr));
-  }
-
-  m->loadFromProject(newLines, window, fileVersion);
-}
-
-/**
- * Open a new Mantid Matrix window.
- *
- * @param lines :: string of characters from a Mantid project file
- */
-void ProjectSerialiser::openMantidMatrix(const std::string &lines) {
-  TSVSerialiser tsv(lines);
-
-  MantidMatrix *m = nullptr;
-
-  if (tsv.selectLine("WorkspaceName")) {
-    m = window->mantidUI->openMatrixWorkspace(tsv.asString(1), -1, -1);
-  }
-
-  if (!m)
-    return;
-
-  if (tsv.selectLine("geometry")) {
-    const std::string geometry = tsv.lineAsString("geometry");
-    window->restoreWindowGeometry(window, m, QString::fromStdString(geometry));
-  }
-
-  if (tsv.selectLine("tgeometry")) {
-    const std::string geometry = tsv.lineAsString("tgeometry");
-    window->restoreWindowGeometry(window, m, QString::fromStdString(geometry));
-  }
-
-  // Append to the list of mantid matrix windows
-  window->addMantidMatrixWindow(m);
-}
-
-/**
- * Open a new Multi-Layer plot window
- * @param lines :: string of characters from a Mantid project file.
- * @param fileVersion :: the version of the project file
- */
-void ProjectSerialiser::openMultiLayer(const std::string &lines,
-                                       const int fileVersion) {
-  MultiLayer *plot = nullptr;
-  std::string multiLayerLines = lines;
-
-  // The very first line of a multilayer section has some important settings,
-  // and lacks a name. Take it out and parse it manually.
-
-  if (multiLayerLines.length() == 0)
-    return;
-
-  std::vector<std::string> lineVec;
-  boost::split(lineVec, multiLayerLines, boost::is_any_of("\n"));
-
-  std::string firstLine = lineVec.front();
-  // Remove the first line
-  lineVec.erase(lineVec.begin());
-  multiLayerLines = boost::algorithm::join(lineVec, "\n");
-
-  // Split the line up into its values
-  std::vector<std::string> values;
-  boost::split(values, firstLine, boost::is_any_of("\t"));
-
-  std::string caption = values[0];
-  int rows = 1;
-  int cols = 1;
-  Mantid::Kernel::Strings::convert<int>(values[1], rows);
-  Mantid::Kernel::Strings::convert<int>(values[2], cols);
-  std::string birthDate = values[3];
-
-  plot =
-      window->multilayerPlot(QString::fromUtf8(caption.c_str()), 0, rows, cols);
-  plot->setBirthDate(QString::fromStdString(birthDate));
-  window->setListViewDate(QString::fromStdString(caption),
-                          QString::fromStdString(birthDate));
-
-  plot->loadFromProject(multiLayerLines, window, fileVersion);
-}
-
-/**
- * Open a new table window
- * @param lines :: chracters from a Mantid project file
- * @param fileVersion :: the version of the project file
- */
-void ProjectSerialiser::openTable(const std::string &lines,
-                                  const int fileVersion) {
-  std::vector<std::string> lineVec, valVec;
-  boost::split(lineVec, lines, boost::is_any_of("\n"));
-
-  const std::string firstLine = lineVec.front();
-  boost::split(valVec, firstLine, boost::is_any_of("\t"));
-
-  if (valVec.size() < 4)
-    return;
-
-  std::string caption = valVec[0];
-  std::string date = valVec[3];
-  int rows = 1;
-  int cols = 1;
-  Mantid::Kernel::Strings::convert<int>(valVec[1], rows);
-  Mantid::Kernel::Strings::convert<int>(valVec[2], cols);
-
-  auto t = window->newTable(QString::fromStdString(caption), rows, cols);
-  window->setListViewDate(QString::fromStdString(caption),
-                          QString::fromStdString(date));
-  t->setBirthDate(QString::fromStdString(date));
-  t->loadFromProject(lines, window, fileVersion);
-}
-
-/**
- * Open a new table statistics window
- * @param lines :: chracters from a Mantid project file
- * @param fileVersion :: the version of the project file
- */
-void ProjectSerialiser::openTableStatistics(const std::string &lines,
-                                            const int fileVersion) {
-  std::vector<std::string> lineVec;
-  boost::split(lineVec, lines, boost::is_any_of("\n"));
-
-  const std::string firstLine = lineVec.front();
-
-  std::vector<std::string> firstLineVec;
-  boost::split(firstLineVec, firstLine, boost::is_any_of("\t"));
-
-  if (firstLineVec.size() < 4)
-    return;
-
-  const std::string name = firstLineVec[0];
-  const std::string tableName = firstLineVec[1];
-  const std::string type = firstLineVec[2];
-  const std::string birthDate = firstLineVec[3];
-
-  TSVSerialiser tsv(lines);
-
-  if (!tsv.hasLine("Targets"))
-    return;
-
-  const std::string targetsLine = tsv.lineAsString("Targets");
-
-  std::vector<std::string> targetsVec;
-  boost::split(targetsVec, targetsLine, boost::is_any_of("\t"));
-
-  // Erase the first item ("Targets")
-  targetsVec.erase(targetsVec.begin());
-
-  QList<int> targets;
-  for (auto &it : targetsVec) {
-    int target = 0;
-    Mantid::Kernel::Strings::convert<int>(it, target);
-    targets << target;
-  }
-
-  auto t = window->newTableStatistics(
-      window->table(QString::fromStdString(tableName)),
-      type == "row" ? TableStatistics::row : TableStatistics::column, targets,
-      QString::fromStdString(name));
-
-  if (!t)
-    return;
-
-  window->setListViewDate(QString::fromStdString(name),
-                          QString::fromStdString(birthDate));
-  t->setBirthDate(QString::fromStdString(birthDate));
-
-  t->loadFromProject(lines, window, fileVersion);
-}
-
-/**
- * Open a new surface plot window
- * @param lines :: the string of characters from a Mantid project file
- * @param fileVersion :: the version of the project file
- */
-void ProjectSerialiser::openSurfacePlot(const std::string &lines,
-                                        const int fileVersion) {
-  std::vector<std::string> lineVec, valVec;
-  boost::split(lineVec, lines, boost::is_any_of("\n"));
-
-  // First line is name\tdate
-  const std::string firstLine = lineVec[0];
-  boost::split(valVec, firstLine, boost::is_any_of("\t"));
-
-  if (valVec.size() < 2)
-    return;
-
-  const std::string caption = valVec[0];
-  const std::string dateStr = valVec[1];
-  valVec.clear();
-
-  const std::string tsvLines = boost::algorithm::join(lineVec, "\n");
-
-  TSVSerialiser tsv(tsvLines);
-
-  Graph3D *plot = nullptr;
-
-  if (tsv.selectLine("SurfaceFunction")) {
-    std::string funcStr;
-    double val2, val3, val4, val5, val6, val7;
-    tsv >> funcStr >> val2 >> val3 >> val4 >> val5 >> val6 >> val7;
-
-    const QString funcQStr = QString::fromStdString(funcStr);
-
-    if (funcQStr.endsWith("(Y)", Qt::CaseSensitive)) {
-      plot = window->dataPlot3D(QString::fromStdString(caption),
-                                QString::fromStdString(funcStr), val2, val3,
-                                val4, val5, val6, val7);
-    } else if (funcQStr.contains("(Z)", Qt::CaseSensitive) > 0) {
-      plot = window->openPlotXYZ(QString::fromStdString(caption),
-                                 QString::fromStdString(funcStr), val2, val3,
-                                 val4, val5, val6, val7);
-    } else if (funcQStr.startsWith("matrix<", Qt::CaseSensitive) &&
-               funcQStr.endsWith(">", Qt::CaseInsensitive)) {
-      plot = window->openMatrixPlot3D(QString::fromStdString(caption),
-                                      QString::fromStdString(funcStr), val2,
-                                      val3, val4, val5, val6, val7);
-    } else if (funcQStr.contains("mantidMatrix3D")) {
-      MantidMatrix *m = nullptr;
-      if (tsv.selectLine("title")) {
-        std::string wsName = tsv.asString(1);
-
-        // wsName is actually "Workspace workspacename", so we chop off
-        // the first 10 characters.
-        if (wsName.length() < 11)
-          return;
-
-        wsName = wsName.substr(10, std::string::npos);
-        m = window->findMantidMatrixWindow(wsName);
-      } // select line "title"
-
-      int style = Qwt3D::WIREFRAME;
-      if (tsv.selectLine("Style"))
-        tsv >> style;
-
-      if (m)
-        plot = m->plotGraph3D(style);
-    } else if (funcQStr.contains(",")) {
-      QStringList l = funcQStr.split(",", QString::SkipEmptyParts);
-      plot = window->plotParametricSurface(
-          l[0], l[1], l[2], l[3].toDouble(), l[4].toDouble(), l[5].toDouble(),
-          l[6].toDouble(), l[7].toInt(), l[8].toInt(), l[9].toInt(),
-          l[10].toInt());
-    } else {
-      QStringList l = funcQStr.split(";", QString::SkipEmptyParts);
-      if (l.count() == 1) {
-        plot =
-            window->plotSurface(funcQStr, val2, val3, val4, val5, val6, val7);
-      } else if (l.count() == 3) {
-        plot = window->plotSurface(l[0], val2, val3, val4, val5, val6, val7,
-                                   l[1].toInt(), l[2].toInt());
-      }
-      window->setWindowName(plot, QString::fromStdString(caption));
-    }
-  }
-
-  if (!plot)
-    return;
-
-  window->setListViewDate(QString::fromStdString(caption),
-                          QString::fromStdString(dateStr));
-  plot->setBirthDate(QString::fromStdString(dateStr));
-  plot->setIgnoreFonts(true);
-  window->restoreWindowGeometry(
-      window, plot, QString::fromStdString(tsv.lineAsString("geometry")));
-  plot->loadFromProject(tsvLines, window, fileVersion);
-}
-
-/**
  * Open a new script window
  * @param lines :: the string of characters from a Mantid project file
  * @param fileVersion :: the version of the project file
@@ -824,9 +551,6 @@ void ProjectSerialiser::openScriptWindow(const std::string &lines,
 
   if (!scriptingWindow)
     return;
-
-  scriptingWindow->setWindowTitle(
-      "MantidPlot: " + window->scriptingEnv()->languageName() + " Window");
 
   scriptingWindow->loadFromProject(lines, window, fileVersion);
 }
@@ -942,4 +666,26 @@ void ProjectSerialiser::loadWsToMantidTree(const std::string &wsName) {
   std::string fileName(window->workingDir.toStdString() + "/" + wsName);
   fileName.append(".nxs");
   window->mantidUI->loadWSFromFile(wsName, fileName);
+}
+
+/**
+ * Load additional windows which are not MdiSubWindows
+ *
+ * This will load other windows in Mantid such as the slice viewer, VSI, and
+ * the spectrum viewer
+ *
+ * @param tsv :: the TSVSerialiser object for the project file
+ * @param fileVersion :: the version of the project file
+ */
+void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
+                                              const int fileVersion) {
+  TSVSerialiser tsv(lines);
+
+  if (tsv.hasSection("SliceViewer")) {
+    for (auto &section : tsv.sections("SliceViewer")) {
+      auto win = SliceViewer::SliceViewerWindow::loadFromProject(
+          section, window, fileVersion);
+      window->addSerialisableWindow(dynamic_cast<QObject *>(win));
+    }
+  }
 }

@@ -3,6 +3,7 @@
 
 #include "ui_Stretch.h"
 #include "IndirectBayesTab.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -28,10 +29,21 @@ private slots:
   void updateProperties(QtProperty *prop, double val) override;
   /// Slot to handle when a new sample file is available
   void handleSampleInputReady(const QString &filename);
+  /// Save the workspaces produces from the algorithm
+  void saveWorkspaces();
+  /// Plot the workspaces specified by the interface
+  void plotWorkspaces();
+  void algorithmComplete(const bool &error);
 
 private:
   // The ui form
   Ui::Stretch m_uiForm;
+  // Output Names
+  std::string m_fitWorkspaceName;
+  std::string m_contourWorkspaceName;
+  // state of plot and save when algorithm is run
+  std::string m_plotType;
+  bool m_save;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

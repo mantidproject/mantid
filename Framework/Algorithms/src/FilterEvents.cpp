@@ -1,21 +1,22 @@
 #include "MantidAlgorithms/FilterEvents.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyIndirect.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include <memory>
 #include <sstream>
 
@@ -32,7 +33,6 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(FilterEvents)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 FilterEvents::FilterEvents()
@@ -46,7 +46,6 @@ FilterEvents::FilterEvents()
       m_specSkipType(), m_vecSkip(), m_isSplittersRelativeTime(false),
       m_filterStartTime(0) {}
 
-//----------------------------------------------------------------------------------------------
 /** Declare Inputs
  */
 void FilterEvents::init() {
@@ -143,7 +142,6 @@ void FilterEvents::init() {
       "Start time for splitters that can be parsed to DateAndTime.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execution body
  */
 void FilterEvents::exec() {
@@ -214,7 +212,6 @@ void FilterEvents::exec() {
   progress(m_progress, "Completed");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Process input properties
  */
 void FilterEvents::processAlgorithmProperties() {
@@ -326,7 +323,6 @@ void FilterEvents::processAlgorithmProperties() {
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Examine whether any spectrum does not have detector
   */
 void FilterEvents::examineEventWS() {
@@ -343,21 +339,9 @@ void FilterEvents::examineEventWS() {
     size_t numskipspec = 0;
     size_t numeventsskip = 0;
 
+    const auto &spectrumInfo = m_eventWS->spectrumInfo();
     for (size_t i = 0; i < numhist; ++i) {
-      bool skip = false;
-
-      // Access detector of the spectrum
-      try {
-        IDetector_const_sptr tempdet = m_eventWS->getDetector(i);
-        if (!tempdet)
-          skip = true;
-      } catch (const Kernel::Exception::NotFoundError &) {
-        // No detector found
-        skip = true;
-      }
-
-      // Output
-      if (skip) {
+      if (!spectrumInfo.hasDetectors(i)) {
         m_vecSkip[i] = true;
 
         ++numskipspec;
@@ -387,7 +371,6 @@ void FilterEvents::examineEventWS() {
   } // END-IF-ELSE
 }
 
-//----------------------------------------------------------------------------------------------
 /** Purpose:
  *    Convert SplitterWorkspace object to TimeSplitterType (sorted vector)
  *    and create a map for all workspace group number
@@ -431,7 +414,6 @@ void FilterEvents::processSplittersWorkspace() {
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /**
  * @brief FilterEvents::processMatrixSplitterWorkspace
  * Purpose:
@@ -447,19 +429,18 @@ void FilterEvents::processMatrixSplitterWorkspace() {
   // Check input workspace validity
   assert(m_matrixSplitterWS);
 
-  const MantidVec &vecX = m_matrixSplitterWS->readX(0);
-  const MantidVec &vecY = m_matrixSplitterWS->readY(0);
-  size_t sizex = vecX.size();
-  size_t sizey = vecY.size();
-  assert(sizex - sizey == 1);
+  auto X = m_matrixSplitterWS->binEdges(0);
+  auto &Y = m_matrixSplitterWS->y(0);
+  size_t sizex = X.size();
+  size_t sizey = Y.size();
 
   // Assign vectors for time comparison
-  m_vecSplitterTime.assign(vecX.size(), 0);
-  m_vecSplitterGroup.assign(vecY.size(), -1);
+  m_vecSplitterTime.assign(X.size(), 0);
+  m_vecSplitterGroup.assign(Y.size(), -1);
 
   // Transform vector
   for (size_t i = 0; i < sizex; ++i) {
-    m_vecSplitterTime[i] = static_cast<int64_t>(vecX[i]);
+    m_vecSplitterTime[i] = static_cast<int64_t>(X[i]);
   }
   // shift the splitters' time if applied
   if (m_isSplittersRelativeTime) {
@@ -469,12 +450,11 @@ void FilterEvents::processMatrixSplitterWorkspace() {
   }
 
   for (size_t i = 0; i < sizey; ++i) {
-    m_vecSplitterGroup[i] = static_cast<int>(vecY[i]);
+    m_vecSplitterGroup[i] = static_cast<int>(Y[i]);
     m_workGroupIndexes.insert(m_vecSplitterGroup[i]);
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Create a list of EventWorkspace for output
  */
 void FilterEvents::createOutputWorkspaces() {
@@ -589,7 +569,6 @@ void FilterEvents::createOutputWorkspaces() {
   g_log.information("Output workspaces are created. ");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Set up neutron event's TOF correction.
   * It can be (1) parsed from TOF-correction table workspace to vectors,
   * (2) created according to detector's position in instrument;
@@ -630,8 +609,8 @@ void FilterEvents::setupDetectorTOFCalibration() {
         m_detTofOffsets[i] = correction.offset;
         m_detTofFactors[i] = correction.factor;
 
-        corrws->dataY(i)[0] = correction.factor;
-        corrws->dataY(i)[1] = correction.offset;
+        corrws->mutableY(i)[0] = correction.factor;
+        corrws->mutableY(i)[1] = correction.offset;
       }
     }
   }
@@ -665,7 +644,6 @@ TimeAtSampleStrategy *FilterEvents::setupIndirectTOFCorrection() const {
   return new TimeAtSampleStrategyIndirect(m_eventWS);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Set up corrections with customized TOF correction input
   * The first column must be either DetectorID or Spectrum (from 0... as
  * workspace index)
@@ -814,7 +792,6 @@ void FilterEvents::setupCustomizedTOFCorrection() {
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Main filtering method
   * Structure: per spectrum --> per workspace
  */
@@ -910,7 +887,6 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Split events by splitters represented by vector
   */
 void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
@@ -976,7 +952,6 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
                "split sample logs. ");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Generate splitters for specified workspace index as a subset of
  * m_splitters
  */
@@ -991,7 +966,6 @@ Kernel::TimeSplitterType FilterEvents::generateSplitters(int wsindex) {
   return splitters;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Split a log by splitters
  */
 void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
@@ -1026,7 +1000,6 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Get all filterable logs' names (double and integer)
  * @returns Vector of names of logs
  */

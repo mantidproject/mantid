@@ -80,6 +80,14 @@ public:
                                const size_t nData);
 
 protected:
+  /// Calculate histogram data for the given bin boundaries.
+  virtual void histogram1D(double *out, double left, const double *right,
+                           const size_t nBins) const;
+  /// Derivatives of the histogram1D with respect to active parameters.
+  virtual void histogramDerivative1D(Jacobian *jacobian, double left,
+                                     const double *right,
+                                     const size_t nBins) const;
+
   /// Logger instance
   static Kernel::Logger g_log;
 

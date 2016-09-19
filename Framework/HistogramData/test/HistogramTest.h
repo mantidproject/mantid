@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
 
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
@@ -18,6 +19,7 @@ using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Frequencies;
 using Mantid::HistogramData::FrequencyVariances;
 using Mantid::HistogramData::FrequencyStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
 
 class HistogramTest : public CxxTest::TestSuite {
 public:
@@ -26,12 +28,24 @@ public:
   static HistogramTest *createSuite() { return new HistogramTest(); }
   static void destroySuite(HistogramTest *suite) { delete suite; }
 
-  void test_construction_Points() {
-    TS_ASSERT_THROWS_NOTHING(Histogram hist(Histogram::XMode::Points));
+  void test_construction_Points_Counts() {
+    TS_ASSERT_THROWS_NOTHING(
+        Histogram hist(Histogram::XMode::Points, Histogram::YMode::Counts));
   }
 
-  void test_construction_BinEdges() {
-    TS_ASSERT_THROWS_NOTHING(Histogram hist(Histogram::XMode::BinEdges));
+  void test_construction_BinEdges_Counts() {
+    TS_ASSERT_THROWS_NOTHING(
+        Histogram hist(Histogram::XMode::BinEdges, Histogram::YMode::Counts));
+  }
+
+  void test_construction_Points_Frequencies() {
+    TS_ASSERT_THROWS_NOTHING(Histogram hist(Histogram::XMode::Points,
+                                            Histogram::YMode::Frequencies));
+  }
+
+  void test_construction_BinEdges_Frequencies() {
+    TS_ASSERT_THROWS_NOTHING(Histogram hist(Histogram::XMode::BinEdges,
+                                            Histogram::YMode::Frequencies));
   }
 
   void test_construct_from_Points() {
@@ -56,36 +70,38 @@ public:
 
   void test_construct_Points_Counts_CountVariances() {
     TS_ASSERT_THROWS_NOTHING(
-        Histogram src(Points(2), Counts(2), CountVariances(2)));
+        Histogram src(Points{1.0, 2.0}, Counts(2), CountVariances(2)));
   }
 
   void test_construct_Points_null_Counts_CountVariances() {
     TS_ASSERT_THROWS_NOTHING(
-        Histogram src(Points(2), Counts(), CountVariances()));
+        Histogram src(Points{1.0, 2.0}, Counts(), CountVariances()));
   }
 
   void test_construct_values_size_mismatch() {
     TS_ASSERT_THROWS(Histogram(Points(1), Counts(2)), std::logic_error);
-    TS_ASSERT_THROWS(Histogram(BinEdges(2), Counts(2)), std::logic_error);
+    TS_ASSERT_THROWS(Histogram(BinEdges{1.0, 2.0}, Counts(2)),
+                     std::logic_error);
     TS_ASSERT_THROWS(Histogram(Points(1), Frequencies(2)), std::logic_error);
-    TS_ASSERT_THROWS(Histogram(BinEdges(2), Frequencies(2)), std::logic_error);
+    TS_ASSERT_THROWS(Histogram(BinEdges{1.0, 2.0}, Frequencies(2)),
+                     std::logic_error);
   }
 
   void test_construct_values_uncertainties_size_mismatch() {
-    TS_ASSERT_THROWS(Histogram(Points(2), Counts(2), CountVariances(1)),
+    TS_ASSERT_THROWS(Histogram(Points{1.0, 2.0}, Counts(2), CountVariances(1)),
                      std::logic_error);
     TS_ASSERT_THROWS(
-        Histogram(Points(2), Frequencies(2), FrequencyVariances(1)),
+        Histogram(Points{1.0, 2.0}, Frequencies(2), FrequencyVariances(1)),
         std::logic_error);
   }
 
   void test_construct_null_values_but_uncertainties_fail() {
-    TS_ASSERT_THROWS(Histogram(Points(2), Counts(), CountVariances(2)),
+    TS_ASSERT_THROWS(Histogram(Points{1.0, 2.0}, Counts(), CountVariances(2)),
                      std::logic_error);
   }
 
   void test_construct_Counts_automatic_errors() {
-    Histogram histogram(BinEdges(3), Counts{4.0, 9.0});
+    Histogram histogram(BinEdges{1.0, 2.0, 3.0}, Counts{4.0, 9.0});
     TS_ASSERT(histogram.sharedE());
     TS_ASSERT_EQUALS(histogram.e()[0], 2.0);
     TS_ASSERT_EQUALS(histogram.e()[1], 3.0);
@@ -112,7 +128,7 @@ public:
 
   void test_copy_assignment() {
     Histogram src(Points{0.1, 0.2, 0.4});
-    Histogram dest(Histogram::XMode::BinEdges);
+    Histogram dest(Histogram::XMode::BinEdges, Histogram::YMode::Counts);
     TS_ASSERT_EQUALS(dest.xMode(), Histogram::XMode::BinEdges);
     dest = src;
     TS_ASSERT(src.points());
@@ -127,7 +143,7 @@ public:
 
   void test_move_assignment() {
     Histogram src(Points{0.1, 0.2, 0.4});
-    Histogram dest(Histogram::XMode::BinEdges);
+    Histogram dest(Histogram::XMode::BinEdges, Histogram::YMode::Counts);
     TS_ASSERT_EQUALS(dest.xMode(), Histogram::XMode::BinEdges);
     dest = std::move(src);
     TS_ASSERT(!src.points());
@@ -136,9 +152,9 @@ public:
   }
 
   void test_xMode() {
-    Histogram hist1(Histogram::XMode::Points);
+    Histogram hist1(Histogram::XMode::Points, Histogram::YMode::Counts);
     TS_ASSERT_EQUALS(hist1.xMode(), Histogram::XMode::Points);
-    Histogram hist2(Histogram::XMode::BinEdges);
+    Histogram hist2(Histogram::XMode::BinEdges, Histogram::YMode::Counts);
     TS_ASSERT_EQUALS(hist2.xMode(), Histogram::XMode::BinEdges);
   }
 
@@ -161,23 +177,23 @@ public:
 
   void test_assignment_mutating() {
     const Histogram src(Points(1));
-    Histogram dest(BinEdges(2));
+    Histogram dest(BinEdges{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(dest = src);
     TS_ASSERT_EQUALS(&dest.x()[0], &src.x()[0]);
   }
 
   void test_assignment_size_change() {
     Histogram src1(Points(1));
-    Histogram dest1(Points(2));
+    Histogram dest1(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(dest1 = src1);
     Histogram src2(Points(1));
-    Histogram dest2(BinEdges(3));
+    Histogram dest2(BinEdges{1.0, 2.0, 3.0});
     TS_ASSERT_THROWS_NOTHING(dest2 = src2);
-    Histogram src3(BinEdges(2));
-    Histogram dest3(Points(2));
+    Histogram src3(BinEdges{1.0, 2.0});
+    Histogram dest3(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(dest3 = src3);
-    Histogram src4(BinEdges(2));
-    Histogram dest4(BinEdges(3));
+    Histogram src4(BinEdges{1.0, 2.0});
+    Histogram dest4(BinEdges{1.0, 2.0, 3.0});
     TS_ASSERT_THROWS_NOTHING(dest4 = src4);
   }
 
@@ -238,36 +254,36 @@ public:
   }
 
   void test_setPoints_from_vector() {
-    Histogram h1(Points(2));
+    Histogram h1(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h1.setPoints(std::vector<double>{0.1, 0.2}));
     TS_ASSERT_EQUALS(h1.x().size(), 2);
     TS_ASSERT_EQUALS(h1.x()[0], 0.1);
     TS_ASSERT_EQUALS(h1.x()[1], 0.2);
-    Histogram h2(BinEdges(2));
+    Histogram h2(BinEdges{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h2.setPoints(std::vector<double>{0.1}));
     TS_ASSERT_EQUALS(h2.x().size(), 1);
     TS_ASSERT_EQUALS(h2.x()[0], 0.1);
   }
 
   void test_setPoints_from_Points() {
-    Histogram h1(Points(2));
+    Histogram h1(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h1.setPoints(Points{0.1, 0.2}));
     TS_ASSERT_EQUALS(h1.x().size(), 2);
     TS_ASSERT_EQUALS(h1.x()[0], 0.1);
     TS_ASSERT_EQUALS(h1.x()[1], 0.2);
-    Histogram h2(BinEdges(2));
+    Histogram h2(BinEdges{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h2.setPoints(Points{0.1}));
     TS_ASSERT_EQUALS(h2.x().size(), 1);
     TS_ASSERT_EQUALS(h2.x()[0], 0.1);
   }
 
   void test_setPoints_from_BinEdges() {
-    Histogram h1(Points(2));
+    Histogram h1(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h1.setPoints(BinEdges{0.1, 0.2, 0.4}));
     TS_ASSERT_EQUALS(h1.x().size(), 2);
     TS_ASSERT_DELTA(h1.x()[0], 0.15, 1e-14);
     TS_ASSERT_DELTA(h1.x()[1], 0.3, 1e-14);
-    Histogram h2(BinEdges(2));
+    Histogram h2(BinEdges{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h2.setPoints(BinEdges{0.1, 0.2}));
     TS_ASSERT_EQUALS(h2.x().size(), 1);
     TS_ASSERT_DELTA(h2.x()[0], 0.15, 1e-14);
@@ -291,20 +307,23 @@ public:
   }
 
   void test_setPoints_size_mismatch() {
-    Histogram h1(Points(2));
+    Histogram h1(Points{1.0, 2.0});
     TS_ASSERT_THROWS(h1.setPoints(std::vector<double>(1)), std::logic_error);
-    TS_ASSERT_THROWS(h1.setPoints(std::vector<double>(3)), std::logic_error);
+    TS_ASSERT_THROWS(h1.setPoints(std::vector<double>{1.0, 2.0, 3.0}),
+                     std::logic_error);
     TS_ASSERT_THROWS(h1.setPoints(Points(1)), std::logic_error);
-    TS_ASSERT_THROWS(h1.setPoints(Points(3)), std::logic_error);
-    TS_ASSERT_THROWS(h1.setPoints(BinEdges(2)), std::logic_error);
-    TS_ASSERT_THROWS(h1.setPoints(BinEdges(4)), std::logic_error);
-    Histogram h2(BinEdges(2));
+    TS_ASSERT_THROWS(h1.setPoints(Points{1.0, 2.0, 3.0}), std::logic_error);
+    TS_ASSERT_THROWS(h1.setPoints(BinEdges{1.0, 2.0}), std::logic_error);
+    TS_ASSERT_THROWS(h1.setPoints(BinEdges{1.0, 2.0, 3.0, 4.0}),
+                     std::logic_error);
+    Histogram h2(BinEdges{1.0, 2.0});
     TS_ASSERT_THROWS(h2.setPoints(std::vector<double>(0)), std::logic_error);
-    TS_ASSERT_THROWS(h2.setPoints(std::vector<double>(2)), std::logic_error);
+    TS_ASSERT_THROWS(h2.setPoints(std::vector<double>{1.0, 2.0}),
+                     std::logic_error);
     TS_ASSERT_THROWS(h2.setPoints(Points(0)), std::logic_error);
-    TS_ASSERT_THROWS(h2.setPoints(Points(2)), std::logic_error);
+    TS_ASSERT_THROWS(h2.setPoints(Points{1.0, 2.0}), std::logic_error);
     TS_ASSERT_THROWS(h2.setPoints(BinEdges(1)), std::logic_error);
-    TS_ASSERT_THROWS(h2.setPoints(BinEdges(3)), std::logic_error);
+    TS_ASSERT_THROWS(h2.setPoints(BinEdges{1.0, 2.0, 3.0}), std::logic_error);
   }
 
   void test_setPoints_size_mismatch_degenerate() {
@@ -335,7 +354,7 @@ public:
   }
 
   void test_setPoints_self_assignment_with_size_mismatch() {
-    Histogram h(BinEdges(2));
+    Histogram h(BinEdges{1.0, 2.0});
     auto &x = h.x();
     // This test makes sure that size mismatch takes precedence over the
     // self-assignment check. x is bin edges, setting it as points should fail.
@@ -343,11 +362,11 @@ public:
   }
 
   void test_setPoints_changesDxStorageMode() {
-    Histogram hist(BinEdges(3));
+    Histogram hist(BinEdges{1.0, 2.0, 3.0});
     auto dx = {1.0, 2.0, 3.0};
     hist.setBinEdgeStandardDeviations(dx);
     TS_ASSERT_EQUALS(hist.dx().size(), 3);
-    hist.setPoints(Points(2));
+    hist.setPoints(Points{1.0, 2.0});
     TS_ASSERT_EQUALS(hist.dx().size(), 2);
     TS_ASSERT_DELTA(hist.dx()[0], 1.5, 1e-14);
     TS_ASSERT_DELTA(hist.dx()[1], 2.5, 1e-14);
@@ -368,25 +387,26 @@ public:
   }
 
   void test_setBinEdges() {
-    Histogram h1(Points(2));
-    TS_ASSERT_THROWS_NOTHING(h1.setBinEdges(std::vector<double>(3)));
-    TS_ASSERT_THROWS_NOTHING(h1.setBinEdges(Points(2)));
-    TS_ASSERT_THROWS_NOTHING(h1.setBinEdges(BinEdges(3)));
-    Histogram h2(BinEdges(2));
-    TS_ASSERT_THROWS_NOTHING(h2.setBinEdges(std::vector<double>(2)));
+    Histogram h1(Points{1.0, 2.0});
+    TS_ASSERT_THROWS_NOTHING(
+        h1.setBinEdges(std::vector<double>{1.0, 2.0, 3.0}));
+    TS_ASSERT_THROWS_NOTHING(h1.setBinEdges(Points{1.0, 2.0}));
+    TS_ASSERT_THROWS_NOTHING(h1.setBinEdges(BinEdges{1.0, 2.0, 3.0}));
+    Histogram h2(BinEdges{1.0, 2.0});
+    TS_ASSERT_THROWS_NOTHING(h2.setBinEdges(std::vector<double>{1.0, 2.0}));
     TS_ASSERT_THROWS_NOTHING(h2.setBinEdges(Points(1)));
-    TS_ASSERT_THROWS_NOTHING(h2.setBinEdges(BinEdges(2)));
+    TS_ASSERT_THROWS_NOTHING(h2.setBinEdges(BinEdges{1.0, 2.0}));
   }
 
   void test_setBinEdges_from_vector() {
-    Histogram h1(Points(2));
+    Histogram h1(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(
         h1.setBinEdges(std::vector<double>{0.1, 0.2, 0.4}));
     TS_ASSERT_EQUALS(h1.x().size(), 3);
     TS_ASSERT_EQUALS(h1.x()[0], 0.1);
     TS_ASSERT_EQUALS(h1.x()[1], 0.2);
     TS_ASSERT_EQUALS(h1.x()[2], 0.4);
-    Histogram h2(BinEdges(2));
+    Histogram h2(BinEdges{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h2.setBinEdges(std::vector<double>{0.1, 0.2}));
     TS_ASSERT_EQUALS(h2.x().size(), 2);
     TS_ASSERT_EQUALS(h2.x()[0], 0.1);
@@ -394,13 +414,13 @@ public:
   }
 
   void test_setBinEdges_from_Points() {
-    Histogram h1(Points(2));
+    Histogram h1(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h1.setBinEdges(Points{0.1, 0.3}));
     TS_ASSERT_EQUALS(h1.x().size(), 3);
     TS_ASSERT_DELTA(h1.x()[0], 0.0, 1e-14);
     TS_ASSERT_DELTA(h1.x()[1], 0.2, 1e-14);
     TS_ASSERT_DELTA(h1.x()[2], 0.4, 1e-14);
-    Histogram h2(BinEdges(2));
+    Histogram h2(BinEdges{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h2.setBinEdges(Points{1.0}));
     TS_ASSERT_EQUALS(h2.x().size(), 2);
     TS_ASSERT_DELTA(h2.x()[0], 0.5, 1e-14);
@@ -408,13 +428,13 @@ public:
   }
 
   void test_setBinEdges_from_BinEdges() {
-    Histogram h1(Points(2));
+    Histogram h1(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h1.setBinEdges(BinEdges{0.1, 0.2, 0.4}));
     TS_ASSERT_EQUALS(h1.x().size(), 3);
     TS_ASSERT_EQUALS(h1.x()[0], 0.1);
     TS_ASSERT_EQUALS(h1.x()[1], 0.2);
     TS_ASSERT_EQUALS(h1.x()[2], 0.4);
-    Histogram h2(BinEdges(2));
+    Histogram h2(BinEdges{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h2.setBinEdges(BinEdges{0.1, 0.2}));
     TS_ASSERT_EQUALS(h2.x().size(), 2);
     TS_ASSERT_EQUALS(h2.x()[0], 0.1);
@@ -439,20 +459,24 @@ public:
   }
 
   void test_setBinEdges_size_mismatch() {
-    Histogram h1(Points(2));
-    TS_ASSERT_THROWS(h1.setBinEdges(std::vector<double>(2)), std::logic_error);
-    TS_ASSERT_THROWS(h1.setBinEdges(std::vector<double>(4)), std::logic_error);
+    Histogram h1(Points{1.0, 2.0});
+    TS_ASSERT_THROWS(h1.setBinEdges(std::vector<double>{1.0, 2.0}),
+                     std::logic_error);
+    TS_ASSERT_THROWS(h1.setBinEdges(std::vector<double>{1.0, 2.0, 3.0, 4.0}),
+                     std::logic_error);
     TS_ASSERT_THROWS(h1.setBinEdges(Points(1)), std::logic_error);
-    TS_ASSERT_THROWS(h1.setBinEdges(Points(3)), std::logic_error);
-    TS_ASSERT_THROWS(h1.setBinEdges(BinEdges(2)), std::logic_error);
-    TS_ASSERT_THROWS(h1.setBinEdges(BinEdges(4)), std::logic_error);
-    Histogram h2(BinEdges(2));
+    TS_ASSERT_THROWS(h1.setBinEdges(Points{1.0, 2.0, 3.0}), std::logic_error);
+    TS_ASSERT_THROWS(h1.setBinEdges(BinEdges{1.0, 2.0}), std::logic_error);
+    TS_ASSERT_THROWS(h1.setBinEdges(BinEdges{1.0, 2.0, 3.0, 4.0}),
+                     std::logic_error);
+    Histogram h2(BinEdges{1.0, 2.0});
     TS_ASSERT_THROWS(h2.setBinEdges(std::vector<double>(1)), std::logic_error);
-    TS_ASSERT_THROWS(h2.setBinEdges(std::vector<double>(3)), std::logic_error);
+    TS_ASSERT_THROWS(h2.setBinEdges(std::vector<double>{1.0, 2.0, 3.0}),
+                     std::logic_error);
     TS_ASSERT_THROWS(h2.setBinEdges(Points(0)), std::logic_error);
-    TS_ASSERT_THROWS(h2.setBinEdges(Points(2)), std::logic_error);
+    TS_ASSERT_THROWS(h2.setBinEdges(Points{1.0, 2.0}), std::logic_error);
     TS_ASSERT_THROWS(h2.setBinEdges(BinEdges(1)), std::logic_error);
-    TS_ASSERT_THROWS(h2.setBinEdges(BinEdges(3)), std::logic_error);
+    TS_ASSERT_THROWS(h2.setBinEdges(BinEdges{1.0, 2.0, 3.0}), std::logic_error);
   }
 
   void test_setBinEdges_size_mismatch_degenerate() {
@@ -483,7 +507,7 @@ public:
   }
 
   void test_setBinEdges_self_assignment_with_size_mismatch() {
-    Histogram h(Points(2));
+    Histogram h(Points{1.0, 2.0});
     auto &x = h.x();
     // This test makes sure that size mismatch takes precedence over the
     // self-assignment check. x is points, setting it as bin edges should fail.
@@ -491,11 +515,11 @@ public:
   }
 
   void test_setBinEdges_changesDxStorageMode() {
-    Histogram hist(Points(2));
+    Histogram hist(Points{1.0, 2.0});
     auto dx = {1.0, 2.0};
     hist.setPointStandardDeviations(dx);
     TS_ASSERT_EQUALS(hist.dx().size(), 2);
-    hist.setBinEdges(BinEdges(3));
+    hist.setBinEdges(BinEdges{1.0, 2.0, 3.0});
     TS_ASSERT_EQUALS(hist.dx().size(), 3);
     TS_ASSERT_DELTA(hist.dx()[0], 0.5, 1e-14);
     TS_ASSERT_DELTA(hist.dx()[1], 1.5, 1e-14);
@@ -503,12 +527,12 @@ public:
   }
 
   void test_setCounts_size_mismatch() {
-    Histogram h1(Points(2));
+    Histogram h1(Points{1.0, 2.0});
     TS_ASSERT_THROWS(h1.setCounts(std::vector<double>(1)), std::logic_error);
     TS_ASSERT_THROWS(h1.setCounts(std::vector<double>(3)), std::logic_error);
     TS_ASSERT_THROWS(h1.setCounts(Counts(1)), std::logic_error);
     TS_ASSERT_THROWS(h1.setCounts(Counts(3)), std::logic_error);
-    Histogram h2(BinEdges(2));
+    Histogram h2(BinEdges{1.0, 2.0});
     TS_ASSERT_THROWS(h2.setCounts(std::vector<double>(0)), std::logic_error);
     TS_ASSERT_THROWS(h2.setCounts(std::vector<double>(2)), std::logic_error);
     TS_ASSERT_THROWS(h2.setCounts(Counts(0)), std::logic_error);
@@ -543,14 +567,14 @@ public:
   }
 
   void test_setFrequencies_size_mismatch() {
-    Histogram h1(Points(2));
+    Histogram h1(Points{1.0, 2.0});
     TS_ASSERT_THROWS(h1.setFrequencies(std::vector<double>(1)),
                      std::logic_error);
     TS_ASSERT_THROWS(h1.setFrequencies(std::vector<double>(3)),
                      std::logic_error);
     TS_ASSERT_THROWS(h1.setFrequencies(Frequencies(1)), std::logic_error);
     TS_ASSERT_THROWS(h1.setFrequencies(Frequencies(3)), std::logic_error);
-    Histogram h2(BinEdges(2));
+    Histogram h2(BinEdges{1.0, 2.0});
     TS_ASSERT_THROWS(h2.setFrequencies(std::vector<double>(0)),
                      std::logic_error);
     TS_ASSERT_THROWS(h2.setFrequencies(std::vector<double>(2)),
@@ -574,64 +598,89 @@ public:
     Histogram h(Points(0));
     h.setFrequencies(0);
     auto &y = h.y();
-    h.setCounts(y);
-    // y is always counts, setting it as frequencies must fail.
-    TS_ASSERT_THROWS(h.setFrequencies(y), std::logic_error);
+    auto old_address = &y;
+    h.setFrequencies(y);
+    TS_ASSERT_EQUALS(&h.y(), old_address);
   }
 
   void test_setFrequencies_legacy_self_assignment() {
     Histogram h(Points(0));
-    h.setCounts(0);
+    h.setFrequencies(0);
     auto &y = h.readY();
-    TS_ASSERT_THROWS(h.setFrequencies(y), std::logic_error);
+    auto old_address = &y;
+    h.setFrequencies(y);
+    TS_ASSERT_EQUALS(&h.readY(), old_address);
   }
 
   void test_setCountVariances() {
-    Histogram h(Points(2));
+    Histogram h(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h.setCountVariances(2));
   }
 
   void test_setCountStandardDeviations() {
-    Histogram h(Points(2));
+    Histogram h(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h.setCountStandardDeviations(2));
   }
 
+  void test_setFrequenciesDataValid() {
+    Histogram h(BinEdges{1, 2, 3});
+    std::vector<double> freqs(2, 0.36);
+    h.setFrequencies(freqs);
+    TS_ASSERT_EQUALS(freqs, h.y().rawData());
+  }
+
   void test_setFrequencyVariances() {
-    Histogram h(Points(2));
+    Histogram h(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h.setFrequencyVariances(2));
   }
 
+  void test_setFrequencyVariancesDataValid() {
+    Histogram h(BinEdges{1, 2, 3});
+    std::vector<double> freqVars(2, 100);
+    std::vector<double> freqStdDevs(2, 10);
+
+    h.setFrequencyVariances(freqVars);
+    TS_ASSERT_EQUALS(freqStdDevs, h.e().rawData());
+  }
+
   void test_setFrequencyStandardDeviations() {
-    Histogram h(Points(2));
+    Histogram h(Points{1.0, 2.0});
     TS_ASSERT_THROWS_NOTHING(h.setFrequencyStandardDeviations(2));
   }
 
+  void test_setFrequencyStandardDeviationsDataValid() {
+    Histogram h(BinEdges{1, 2, 3});
+    std::vector<double> freqStdDevs(2, 0.11);
+    h.setFrequencyStandardDeviations(freqStdDevs);
+    TS_ASSERT_EQUALS(freqStdDevs, h.e().rawData());
+  }
+
   void test_setCountVariances_size_mismatch() {
-    Histogram h(Points(2));
+    Histogram h(Points{1.0, 2.0});
     TS_ASSERT_THROWS(h.setCountVariances(1), std::logic_error);
     TS_ASSERT_THROWS(h.setCountVariances(3), std::logic_error);
   }
 
   void test_setCountStandardDeviations_size_mismatch() {
-    Histogram h(Points(2));
+    Histogram h(Points{1.0, 2.0});
     TS_ASSERT_THROWS(h.setCountStandardDeviations(1), std::logic_error);
     TS_ASSERT_THROWS(h.setCountStandardDeviations(3), std::logic_error);
   }
 
   void test_setFrequencyVariances_size_mismatch() {
-    Histogram h(Points(2));
+    Histogram h(Points{1.0, 2.0});
     TS_ASSERT_THROWS(h.setFrequencyVariances(1), std::logic_error);
     TS_ASSERT_THROWS(h.setFrequencyVariances(3), std::logic_error);
   }
 
   void test_setFrequencyStandardDeviations_size_mismatch() {
-    Histogram h(Points(2));
+    Histogram h(Points{1.0, 2.0});
     TS_ASSERT_THROWS(h.setFrequencyStandardDeviations(1), std::logic_error);
     TS_ASSERT_THROWS(h.setFrequencyStandardDeviations(3), std::logic_error);
   }
 
   void test_error_setter_self_assignment() {
-    Histogram h(Points(2));
+    Histogram h(Points{1.0, 2.0});
     h.setCountVariances(2);
     auto &e = h.e();
     auto old_address = &e;
@@ -700,20 +749,21 @@ public:
 
   void test_setSharedX_size_mismatch() {
     auto data1 = Mantid::Kernel::make_cow<HistogramX>(0);
-    auto data2 = Mantid::Kernel::make_cow<HistogramX>(2);
+    auto tmp = {1.0, 2.0};
+    auto data2 = Mantid::Kernel::make_cow<HistogramX>(tmp);
     Histogram hist{BinEdges(data1)};
     TS_ASSERT_THROWS(hist.setSharedX(data2), std::logic_error);
   }
 
   void test_setSharedX_catches_misuse() {
-    BinEdges edges(2);
+    BinEdges edges{1.0, 2.0};
     Histogram hist(edges);
     auto points = hist.points();
     TS_ASSERT_THROWS(hist.setSharedX(points.cowData()), std::logic_error);
   }
 
   void test_y() {
-    Histogram hist(Points(3));
+    Histogram hist(Points{1.0, 2.0, 3.0});
     hist.setCounts(Counts{0.1, 0.2, 0.4});
     TS_ASSERT_EQUALS(hist.y()[0], 0.1);
     TS_ASSERT_EQUALS(hist.y()[1], 0.2);
@@ -728,7 +778,7 @@ public:
   }
 
   void test_mutableY() {
-    Histogram hist(Points(3));
+    Histogram hist(Points{1.0, 2.0, 3.0});
     hist.setCounts(Counts{0.1, 0.2, 0.4});
     TS_ASSERT_EQUALS(hist.mutableY()[0], 0.1);
     TS_ASSERT_EQUALS(hist.mutableY()[1], 0.2);
@@ -776,7 +826,7 @@ public:
   }
 
   void test_e() {
-    Histogram hist(Points(3));
+    Histogram hist(Points{1.0, 2.0, 3.0});
     hist.setCountStandardDeviations(CountStandardDeviations{0.1, 0.2, 0.4});
     TS_ASSERT_EQUALS(hist.e()[0], 0.1);
     TS_ASSERT_EQUALS(hist.e()[1], 0.2);
@@ -791,7 +841,7 @@ public:
   }
 
   void test_mutableE() {
-    Histogram hist(Points(3));
+    Histogram hist(Points{1.0, 2.0, 3.0});
     hist.setCountStandardDeviations(CountStandardDeviations{0.1, 0.2, 0.4});
     TS_ASSERT_EQUALS(hist.mutableE()[0], 0.1);
     TS_ASSERT_EQUALS(hist.mutableE()[1], 0.2);
@@ -837,6 +887,111 @@ public:
     hist.setCountStandardDeviations(data1);
     TS_ASSERT_THROWS(hist.setSharedE(data2), std::logic_error);
   }
+
+  void test_yMode() {
+    Histogram hist1(Histogram::XMode::Points, Histogram::YMode::Counts);
+    TS_ASSERT_EQUALS(hist1.yMode(), Histogram::YMode::Counts);
+    Histogram hist2(Histogram::XMode::Points, Histogram::YMode::Frequencies);
+    TS_ASSERT_EQUALS(hist2.yMode(), Histogram::YMode::Frequencies);
+  }
+
+  void test_yMode_Uninitialized() {
+    Histogram hist(Points(1));
+    TS_ASSERT_EQUALS(hist.yMode(), Histogram::YMode::Uninitialized);
+  }
+
+  void test_yMode_initialized_by_setCounts() {
+    Histogram h(Points(2));
+    h.setCounts(2);
+    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Counts);
+  }
+
+  void test_yMode_initialized_by_setCountStandardDeviations() {
+    Histogram h(Points(2));
+    h.setCountStandardDeviations(2);
+    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Counts);
+  }
+
+  void test_yMode_initialized_by_setCountVariances() {
+    Histogram h(Points(2));
+    h.setCountVariances(2);
+    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Counts);
+  }
+
+  void test_yMode_initialized_by_setFrequencies() {
+    Histogram h(Points(2));
+    h.setFrequencies(2);
+    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Frequencies);
+  }
+
+  void test_yMode_initialized_by_setFrequencyStandardDeviations() {
+    Histogram h(Points(2));
+    h.setFrequencyStandardDeviations(2);
+    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Frequencies);
+  }
+
+  void test_yMode_initialized_by_setFrequencyVariances() {
+    Histogram h(Points(2));
+    h.setFrequencyVariances(2);
+    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Frequencies);
+  }
+
+  void test_yMode_cannot_be_changed_by_Count_setters() {
+    Histogram h(Points(1), Counts(1));
+    TS_ASSERT_THROWS(h.setFrequencies(1), std::logic_error);
+    TS_ASSERT_THROWS(h.setFrequencyVariances(1), std::logic_error);
+    TS_ASSERT_THROWS(h.setFrequencyStandardDeviations(1), std::logic_error);
+  }
+
+  void test_yMode_cannot_be_changed_by_Frequency_setters() {
+    Histogram h(Points(1), Frequencies(1));
+    TS_ASSERT_THROWS(h.setCounts(1), std::logic_error);
+    TS_ASSERT_THROWS(h.setCountVariances(1), std::logic_error);
+    TS_ASSERT_THROWS(h.setCountStandardDeviations(1), std::logic_error);
+  }
+
+  void test_setSharedY_fails_for_YMode_Uninitialized() {
+    Histogram hist(Points(1));
+    Counts counts(1);
+    TS_ASSERT_THROWS(hist.setSharedY(counts.cowData()), std::logic_error);
+  }
+};
+
+class HistogramTestPerformance : public CxxTest::TestSuite {
+public:
+  static HistogramTestPerformance *createSuite() {
+    return new HistogramTestPerformance;
+  }
+  static void destroySuite(HistogramTestPerformance *suite) { delete suite; }
+
+  HistogramTestPerformance() : xData(histSize, LinearGenerator(0, 2)) {
+    BinEdges edges(histSize, LinearGenerator(0, 2));
+    for (size_t i = 0; i < nHists; i++)
+      hists.push_back(Histogram(edges));
+  }
+
+  void test_copy_X() {
+    for (auto &i : hists)
+      i.mutableX() = xData;
+  }
+
+  void test_share_X_with_deallocation() {
+    auto x = Mantid::Kernel::make_cow<HistogramX>(xData);
+    for (auto &i : hists)
+      i.setSharedX(x);
+  }
+
+  void test_share_X() {
+    auto x = Mantid::Kernel::make_cow<HistogramX>(xData);
+    for (auto &i : hists)
+      i.setSharedX(x);
+  }
+
+private:
+  const size_t nHists = 50000;
+  const size_t histSize = 4000;
+  std::vector<Histogram> hists;
+  HistogramX xData;
 };
 
 #endif /* MANTID_HISTOGRAMDATA_HISTOGRAMTEST_H_ */

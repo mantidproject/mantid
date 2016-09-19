@@ -83,7 +83,8 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  void loadCalFile(const std::string &calFileName);
+  void loadCalFile(const std::string &calFilename,
+                   const std::string &groupFilename);
   API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr matrixws);
 
   API::MatrixWorkspace_sptr conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,

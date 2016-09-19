@@ -403,7 +403,7 @@ public:
 
     TS_ASSERT_EQUALS(monWS->readX(0).size(), 2);
     TS_ASSERT_DELTA(monWS->readX(0)[0], 0, 1e-6);
-    TS_ASSERT_DELTA(monWS->readX(0)[1], 0, 1e-6);
+    TS_ASSERT_DELTA(monWS->readX(0)[1], 1, 1e-6);
     TS_ASSERT_EQUALS(monWS->readY(0).size(), 1);
     TS_ASSERT_DELTA(monWS->readY(0)[0], 0, 1e-6);
     TS_ASSERT_EQUALS(monWS->readE(0).size(), 1);

@@ -7,6 +7,7 @@ from mantid.kernel import *
 from mantid.simpleapi import *
 import csv
 import os
+from string import ascii_letters, digits # pylint: disable=deprecated-module
 
 ######################################################################
 # Remove artifacts such as prompt pulse
@@ -44,7 +45,7 @@ class VisionReduction(PythonAlgorithm):
     binE='-2,0.005,5,-0.001,1000'
 
     def FormatFilename(self,s):
-        valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+        valid_chars = "-_.() %s%s" % (ascii_letters, digits)
         outfilename = ''.join(c for c in s if c in valid_chars)
         outfilename = outfilename.replace(' ','_')
         return outfilename

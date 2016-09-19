@@ -4,6 +4,7 @@
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
@@ -40,8 +41,6 @@ using boost::bind;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertUnitsUsingDetectorTable)
 
-//----------------------------------------------------------------------------------------------
-
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ConvertUnitsUsingDetectorTable::name() const {
   return "ConvertUnitsUsingDetectorTable";
@@ -61,7 +60,6 @@ const std::string ConvertUnitsUsingDetectorTable::summary() const {
          "Performs a unit change on the X values of a workspace";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ConvertUnitsUsingDetectorTable::init() {
@@ -91,7 +89,6 @@ void ConvertUnitsUsingDetectorTable::init() {
                   "http://www.mantidproject.org/ConvertUnits).");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ConvertUnitsUsingDetectorTable::exec() {
@@ -497,22 +494,19 @@ const std::vector<double> ConvertUnitsUsingDetectorTable::calculateRebinParams(
   // Need to loop round and find the full range
   double XMin = DBL_MAX, XMax = DBL_MIN;
   const size_t numSpec = workspace->getNumberHistograms();
+  const auto &spectrumInfo = workspace->spectrumInfo();
   for (size_t i = 0; i < numSpec; ++i) {
-    try {
-      Geometry::IDetector_const_sptr det = workspace->getDetector(i);
-      if (!det->isMasked()) {
-        auto &XData = workspace->x(i);
-        double xfront = XData.front();
-        double xback = XData.back();
-        if (boost::math::isfinite(xfront) && boost::math::isfinite(xback)) {
-          if (xfront < XMin)
-            XMin = xfront;
-          if (xback > XMax)
-            XMax = xback;
-        }
+    if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMasked(i)) {
+      auto &XData = workspace->x(i);
+      double xfront = XData.front();
+      double xback = XData.back();
+      if (boost::math::isfinite(xfront) && boost::math::isfinite(xback)) {
+        if (xfront < XMin)
+          XMin = xfront;
+        if (xback > XMax)
+          XMax = xback;
       }
-    } catch (Exception::NotFoundError &) {
-    } // Do nothing
+    }
   }
   const double step =
       (XMax - XMin) / static_cast<double>(workspace->blocksize());
@@ -588,13 +582,10 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
     // Need to make sure we don't pick a monitor as the 'reference' X spectrum
     // (X0)
     size_t i = 0;
+    const auto &spectrumInfo = workspace->spectrumInfo();
     for (; i < numSpec; ++i) {
-      try {
-        Geometry::IDetector_const_sptr det = workspace->getDetector(i);
-        if (!det->isMonitor())
-          break;
-      } catch (Exception::NotFoundError &) { /* Do nothing */
-      }
+      if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i))
+        break;
     }
     // Get an X spectrum to search (they're all the same, monitors excepted)
     auto &X0 = workspace->x(i);
@@ -649,8 +640,10 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
       result->mutableX(j).assign(edges.cbegin(), edges.cbegin() + k);
 
       // If the entire X range is not covered, generate fake values.
-      std::iota(result->mutableX(j).begin() + k, result->mutableX(j).end(),
-                workspace->x(j)[k] + 1);
+      if (k < maxBins) {
+        std::iota(result->mutableX(j).begin() + k, result->mutableX(j).end(),
+                  workspace->x(j)[k] + 1);
+      }
 
       result->mutableY(j)
           .assign(workspace->y(j).cbegin(), workspace->y(j).cbegin() + (k - 1));

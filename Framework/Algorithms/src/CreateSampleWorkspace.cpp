@@ -1,3 +1,4 @@
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -27,9 +28,11 @@ using namespace Geometry;
 using namespace DataObjects;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using HistogramData::BinEdges;
 using HistogramData::Counts;
 using HistogramData::CountVariances;
 using HistogramData::CountStandardDeviations;
+using HistogramData::LinearGenerator;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSampleWorkspace)
@@ -126,6 +129,9 @@ void CreateSampleWorkspace::init() {
   declareProperty("NumBanks", 2,
                   boost::make_shared<BoundedValidator<int>>(0, 100),
                   "The Number of banks in the instrument (default:2)");
+  declareProperty("NumMonitors", 0,
+                  boost::make_shared<BoundedValidator<int>>(0, 100),
+                  "The number of monitors in the instrument (default:0)");
   declareProperty("BankPixelWidth", 10,
                   boost::make_shared<BoundedValidator<int>>(0, 10000),
                   "The number of pixels in horizontally and vertically in a "
@@ -166,6 +172,7 @@ void CreateSampleWorkspace::exec() {
   const std::string preDefinedFunction = getProperty("Function");
   const std::string userDefinedFunction = getProperty("UserDefinedFunction");
   const int numBanks = getProperty("NumBanks");
+  const int numMonitors = getProperty("NumMonitors");
   const int bankPixelWidth = getProperty("BankPixelWidth");
   const int numEvents = getProperty("NumEvents");
   const bool isRandom = getProperty("Random");
@@ -213,20 +220,20 @@ void CreateSampleWorkspace::exec() {
 
   // Create an instrument with one or more rectangular banks.
   Instrument_sptr inst = createTestInstrumentRectangular(
-      progress, numBanks, bankPixelWidth, pixelSpacing, bankDistanceFromSample,
-      sourceSampleDistance);
+      progress, numBanks, numMonitors, bankPixelWidth, pixelSpacing,
+      bankDistanceFromSample, sourceSampleDistance);
 
-  int num_bins = static_cast<int>((xMax - xMin) / binWidth);
+  int numBins = static_cast<int>((xMax - xMin) / binWidth);
 
   MatrixWorkspace_sptr ws;
   if (wsType == "Event") {
-    ws = createEventWorkspace(numPixels, num_bins, numEvents, xMin, binWidth,
-                              bankPixelWidth * bankPixelWidth, inst,
+    ws = createEventWorkspace(numPixels, numBins, numMonitors, numEvents, xMin,
+                              binWidth, bankPixelWidth * bankPixelWidth, inst,
                               functionString, isRandom);
   } else {
-    ws = createHistogramWorkspace(numPixels, num_bins, xMin, binWidth,
-                                  bankPixelWidth * bankPixelWidth, inst,
-                                  functionString, isRandom);
+    ws = createHistogramWorkspace(numPixels, numBins, numMonitors, xMin,
+                                  binWidth, bankPixelWidth * bankPixelWidth,
+                                  inst, functionString, isRandom);
   }
   // add chopper
   this->addChopperParameters(ws);
@@ -290,26 +297,26 @@ void CreateSampleWorkspace::addChopperParameters(
 /** Create histogram workspace
  */
 MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
-    int numPixels, int numBins, double x0, double binDelta,
+    int numPixels, int numBins, int numMonitors, double x0, double binDelta,
     int start_at_pixelID, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
-  HistogramData::BinEdges x(numBins + 1);
-  for (int i = 0; i < numBins + 1; ++i) {
-    x.mutableData()[i] = x0 + i * binDelta;
-  }
+  BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
 
   std::vector<double> xValues(cbegin(x), cend(x) - 1);
   Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
   CountStandardDeviations e(CountVariances(y.cbegin(), y.cend()));
 
-  auto retVal = createWorkspace<Workspace2D>(numPixels, numBins + 1, numBins);
+  auto retVal = createWorkspace<Workspace2D>(numPixels + numMonitors,
+                                             numBins + 1, numBins);
   retVal->setInstrument(inst);
 
-  for (size_t wi = 0; wi < static_cast<size_t>(numPixels); wi++) {
+  for (int wi = 0; wi < numMonitors + numPixels; wi++) {
+    detid_t detNumber = wi < numMonitors ? start_at_pixelID + numPixels + wi
+                                         : start_at_pixelID + wi - numMonitors;
     retVal->setBinEdges(wi, x);
     retVal->setCounts(wi, y);
     retVal->setCountStandardDeviations(wi, e);
-    retVal->getSpectrum(wi).setDetectorID(detid_t(start_at_pixelID + wi));
+    retVal->getSpectrum(wi).setDetectorID(detNumber);
     retVal->getSpectrum(wi).setSpectrumNo(specnum_t(wi + 1));
   }
 
@@ -319,8 +326,8 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
 /** Create event workspace
  */
 EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
-    int numPixels, int numBins, int numEvents, double x0, double binDelta,
-    int start_at_pixelID, Geometry::Instrument_sptr inst,
+    int numPixels, int numBins, int numMonitors, int numEvents, double x0,
+    double binDelta, int start_at_pixelID, Geometry::Instrument_sptr inst,
     const std::string &functionString, bool isRandom) {
   DateAndTime run_start("2010-01-01T00:00:00");
 
@@ -328,21 +335,15 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
   int numXBins = numBins + 1;
 
   auto retVal = boost::make_shared<EventWorkspace>();
-  retVal->initialize(numPixels, 1, 1);
+  retVal->initialize(numPixels + numMonitors, 1, 1);
 
   retVal->setInstrument(inst);
 
-  // Create the x-axis for histogramming.
-  HistogramData::BinEdges x1(numXBins);
-  auto &xRef = x1.mutableData();
-  for (int i = 0; i < numXBins; ++i) {
-    xRef[i] = x0 + i * binDelta;
-  }
-
   // Set all the histograms at once.
-  retVal->setAllX(x1);
+  BinEdges x(numXBins, LinearGenerator(x0, binDelta));
+  retVal->setAllX(x);
 
-  std::vector<double> xValues(xRef.begin(), xRef.end() - 1);
+  std::vector<double> xValues(x.cbegin(), x.cend() - 1);
   std::vector<double> yValues =
       evalFunction(functionString, xValues, isRandom ? 1 : 0);
 
@@ -358,10 +359,12 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
   size_t workspaceIndex = 0;
 
   const double hourInSeconds = 60 * 60;
-  for (int wi = 0; wi < numPixels; wi++) {
+  for (int wi = 0; wi < numPixels + numMonitors; wi++) {
     EventList &el = retVal->getSpectrum(workspaceIndex);
     el.setSpectrumNo(wi + 1);
-    el.setDetectorID(wi + start_at_pixelID);
+    detid_t detNumber = wi < numMonitors ? start_at_pixelID + numPixels + wi
+                                         : start_at_pixelID + wi - numMonitors;
+    el.setDetectorID(detNumber);
 
     // for each bin
 
@@ -446,15 +449,17 @@ void CreateSampleWorkspace::replaceAll(std::string &str,
 //----------------------------------------------------------------------------------------------
 /**
  * Create an test instrument with n panels of rectangular detectors,
- *pixels*pixels in size,
- * a source and spherical sample shape.
+ * pixels*pixels in size, a source and spherical sample shape.
  *
  * Banks' lower-left corner is at position (0,0,5*banknum) and they go up to
- *(pixels*0.008, pixels*0.008, Z)
- * Pixels are 4 mm wide.
+ * (pixels*0.008, pixels*0.008, Z). Pixels are 4 mm wide.
+ *
+ * Optionally include monitors 10 cm x 10 cm, with the first positioned between
+ * the sample and the first bank, and the rest between the banks.
  *
  * @param progress :: progress indicator
- * @param num_banks :: number of rectangular banks to create
+ * @param numBanks :: number of rectangular banks to create
+ * @param numMonitors :: number of monitors to create
  * @param pixels :: number of pixels in each direction.
  * @param pixelSpacing :: padding between pixels
  * @param bankDistanceFromSample :: Distance of first bank from sample (defaults
@@ -463,8 +468,9 @@ void CreateSampleWorkspace::replaceAll(std::string &str,
  * @returns A shared pointer to the generated instrument
  */
 Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
-    API::Progress &progress, int num_banks, int pixels, double pixelSpacing,
-    const double bankDistanceFromSample, const double sourceSampleDistance) {
+    API::Progress &progress, int numBanks, int numMonitors, int pixels,
+    double pixelSpacing, const double bankDistanceFromSample,
+    const double sourceSampleDistance) {
   auto testInst = boost::make_shared<Instrument>("basic_rect");
   // The instrument is going to be set up with z as the beam axis and y as the
   // vertical axis.
@@ -478,7 +484,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
       cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
 
-  for (int banknum = 1; banknum <= num_banks; banknum++) {
+  for (int banknum = 1; banknum <= numBanks; banknum++) {
     // Make a new bank
     std::ostringstream bankname;
     bankname << "bank" << banknum;
@@ -488,19 +494,49 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
                      pixelSpacing, banknum * pixels * pixels, true, pixels);
 
     // Mark them all as detectors
-    for (int x = 0; x < pixels; x++)
+    for (int x = 0; x < pixels; x++) {
       for (int y = 0; y < pixels; y++) {
         boost::shared_ptr<Detector> detector = bank->getAtXY(x, y);
-        if (detector)
+        if (detector) {
           // Mark it as a detector (add to the instrument cache)
           testInst->markAsDetector(detector.get());
+        }
       }
+    }
 
     testInst->add(bank);
     // Set the bank along the z-axis of the instrument. (beam direction).
     bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample * banknum));
 
     progress.report();
+  }
+
+  int monitorsStart = (numBanks + 1) * pixels * pixels;
+
+  Object_sptr monitorShape =
+      createCappedCylinder(0.1, 0.1, V3D(0.0, -cylHeight / 2.0, 0.0),
+                           V3D(0., 1.0, 0.), "monitor-shape");
+
+  for (int monitorNumber = monitorsStart;
+       monitorNumber < monitorsStart + numMonitors; monitorNumber++) {
+    // Make a new bank
+    std::ostringstream monitorName;
+    monitorName << "monitor" << monitorNumber - monitorsStart + 1;
+
+    RectangularDetector *bank = new RectangularDetector(monitorName.str());
+    bank->initialize(monitorShape, 1, 0.0, pixelSpacing, 1, 0.0, pixelSpacing,
+                     monitorNumber, true, 1);
+
+    boost::shared_ptr<Detector> detector = bank->getAtXY(0, 0);
+    if (detector) {
+      // Mark it as a monitor (add to the instrument cache)
+      testInst->markAsMonitor(detector.get());
+    }
+
+    testInst->add(bank);
+    // Set the bank along the z-axis of the instrument, between the detectors.
+    bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample *
+                                   (monitorNumber - monitorsStart + 0.5)));
   }
 
   // Define a source component

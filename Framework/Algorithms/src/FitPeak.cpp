@@ -27,6 +27,8 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
 
 using namespace std;
 
@@ -86,10 +88,10 @@ void FitOneSinglePeak::setFitWindow(double leftwindow, double rightwindow) {
   m_minFitX = leftwindow;
   m_maxFitX = rightwindow;
 
-  const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
+  auto &vecX = m_dataWS->x(m_wsIndex);
 
-  i_minFitX = getVectorIndex(vecX, m_minFitX);
-  i_maxFitX = getVectorIndex(vecX, m_maxFitX);
+  i_minFitX = getIndex(vecX, m_minFitX);
+  i_maxFitX = getIndex(vecX, m_maxFitX);
 
   m_peakWindowSet = true;
 }
@@ -105,10 +107,10 @@ void FitOneSinglePeak::setPeakRange(double xpeakleft, double xpeakright) {
   m_minPeakX = xpeakleft;
   m_maxPeakX = xpeakright;
 
-  const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
+  auto &vecX = m_dataWS->x(m_wsIndex);
 
-  i_minPeakX = getVectorIndex(vecX, m_minPeakX);
-  i_maxPeakX = getVectorIndex(vecX, m_maxPeakX);
+  i_minPeakX = getIndex(vecX, m_minPeakX);
+  i_maxPeakX = getIndex(vecX, m_maxPeakX);
 
   m_peakRangeSet = true;
 }
@@ -187,10 +189,9 @@ void FitOneSinglePeak::setupGuessedFWHM(double usrwidth, int minfwhm,
     return;
   }
 
-  const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
+  auto &vecX = m_dataWS->x(m_wsIndex);
 
-  int i_centre = static_cast<int>(
-      getVectorIndex(m_dataWS->readX(m_wsIndex), m_peakFunc->centre()));
+  int i_centre = static_cast<int>(getIndex(vecX, m_peakFunc->centre()));
   int i_maxindex = static_cast<int>(vecX.size()) - 1;
 
   m_sstream << "FWHM to guess. Range = " << minfwhm << ", " << maxfwhm
@@ -342,9 +343,9 @@ bool FitOneSinglePeak::simpleFit() {
 /** Generate a new temporary workspace for removed background peak
   */
 API::MatrixWorkspace_sptr FitOneSinglePeak::genFitWindowWS() {
-  const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
-  const MantidVec &vecY = m_dataWS->readY(m_wsIndex);
-  const MantidVec &vecE = m_dataWS->readE(m_wsIndex);
+
+  auto &vecY = m_dataWS->y(m_wsIndex);
+
   size_t size = i_maxFitX - i_minFitX + 1;
   size_t ysize = size;
   size_t ishift = i_maxFitX + 1;
@@ -353,17 +354,19 @@ API::MatrixWorkspace_sptr FitOneSinglePeak::genFitWindowWS() {
   MatrixWorkspace_sptr purePeakWS =
       WorkspaceFactory::Instance().create("Workspace2D", 1, size, ysize);
 
-  MantidVec &dataX = purePeakWS->dataX(0);
-  MantidVec &dataY = purePeakWS->dataY(0);
-  MantidVec &dataE = purePeakWS->dataE(0);
+  auto &vecX = m_dataWS->x(m_wsIndex);
+  auto &vecE = m_dataWS->e(m_wsIndex);
+  auto &dataX = purePeakWS->mutableX(0);
+  auto &dataY = purePeakWS->mutableY(0);
+  auto &dataE = purePeakWS->mutableE(0);
 
-  dataX.assign(vecX.begin() + i_minFitX, vecX.begin() + i_maxFitX + 1);
+  dataX.assign(vecX.cbegin() + i_minFitX, vecX.cbegin() + i_maxFitX + 1);
   if (ishift < vecY.size()) {
-    dataY.assign(vecY.begin() + i_minFitX, vecY.begin() + i_maxFitX + 1);
-    dataE.assign(vecE.begin() + i_minFitX, vecE.begin() + i_maxFitX + 1);
+    dataY.assign(vecY.cbegin() + i_minFitX, vecY.cbegin() + i_maxFitX + 1);
+    dataE.assign(vecE.cbegin() + i_minFitX, vecE.cbegin() + i_maxFitX + 1);
   } else {
-    dataY.assign(vecY.begin() + i_minFitX, vecY.end());
-    dataE.assign(vecE.begin() + i_minFitX, vecE.end());
+    dataY.assign(vecY.cbegin() + i_minFitX, vecY.cend());
+    dataE.assign(vecE.cbegin() + i_minFitX, vecE.cend());
   }
 
   return purePeakWS;
@@ -383,8 +386,8 @@ double FitOneSinglePeak::estimatePeakHeight(
   peakfunc->function(svdomain, svvalues);
   double curpeakheight = svvalues[0];
 
-  const MantidVec &vecX = dataws->readX(wsindex);
-  const MantidVec &vecY = dataws->readY(wsindex);
+  auto &vecX = dataws->x(wsindex);
+  auto &vecY = dataws->y(wsindex);
   double ymax = vecY[ixmin + 1];
   size_t iymax = ixmin + 1;
   for (size_t i = ixmin + 2; i < ixmax; ++i) {
@@ -413,22 +416,19 @@ double FitOneSinglePeak::estimatePeakHeight(
 void FitOneSinglePeak::removeBackground(MatrixWorkspace_sptr purePeakWS) {
   // Calculate background
   // FIXME - This can be costly to use FunctionDomain and FunctionValue
-  const MantidVec &vecX = purePeakWS->readX(0);
-  FunctionDomain1DVector domain(vecX);
+  auto &vecX = purePeakWS->x(0);
+  FunctionDomain1DVector domain(MantidVec(vecX.begin(), vecX.end()));
   FunctionValues bkgdvalues(domain);
   m_bkgdFunc->function(domain, bkgdvalues);
 
   // Calculate pure background and put weight on peak if using Rwp
-  MantidVec &vecY = purePeakWS->dataY(0);
-  MantidVec &vecE = purePeakWS->dataE(0);
-  for (size_t i = 0; i < vecY.size(); ++i) {
-    double y = vecY[i];
-    y -= bkgdvalues[i];
-    if (y < 0.)
-      y = 0.;
-    vecY[i] = y;
-    vecE[i] = 1.0;
-  }
+  purePeakWS->mutableE(0).assign(purePeakWS->y(0).size(), 1.0);
+  size_t i = 0;
+  std::transform(purePeakWS->y(0).cbegin(), purePeakWS->y(0).cend(),
+                 purePeakWS->mutableY(0).begin(), [=](const double &y) mutable {
+                   double newY = y - bkgdvalues[i++];
+                   return std::max(0.0, newY);
+                 });
 }
 
 //----------------------------------------------------------------------------------------------
@@ -490,7 +490,7 @@ void FitOneSinglePeak::highBkgdFit() {
     size_t numpts = i_maxFitX - i_minFitX;
     size_t shift = static_cast<size_t>(static_cast<double>(numpts) / 6.);
     i_minPeakX += shift;
-    auto Xdata = m_dataWS->readX(m_wsIndex);
+    auto Xdata = m_dataWS->x(m_wsIndex);
     if (i_minPeakX >= Xdata.size())
       i_minPeakX = Xdata.size() - 1;
     m_minPeakX = Xdata[i_minPeakX];
@@ -513,7 +513,7 @@ void FitOneSinglePeak::highBkgdFit() {
 
   // Estimate the peak height
   double est_peakheight = estimatePeakHeight(m_peakFunc, purePeakWS, 0, 0,
-                                             purePeakWS->readX(0).size() - 1);
+                                             purePeakWS->x(0).size() - 1);
   m_peakFunc->setHeight(est_peakheight);
 
   // Store starting setup
@@ -652,18 +652,6 @@ double FitOneSinglePeak::calChiSquareSD(IFunction_sptr fitfunc,
 
   // Retrieve result
   const double chi2 = fit->getProperty("ChiSquaredWeightedDividedByNData");
-  // g_log.notice() << "[DELETE DB]"
-  //               << " Chi2/NParam = " <<
-  //               fit->getPropertyValue("ChiSquaredDividedByNData")
-  //               << " Chi2/DOF = " <<
-  //               fit->getPropertyValue("ChiSquaredDividedByDOF")
-  //               << " Chi2 = " << fit->getPropertyValue("ChiSquared")
-  //               << " Chi2W/NParam = " <<
-  //               fit->getPropertyValue("ChiSquaredWeightedDividedByNData")
-  //               << " Chi2W/DOF = " <<
-  //               fit->getPropertyValue("ChiSquaredWeightedDividedByDOF")
-  //               << " Chi2W = " << fit->getPropertyValue("ChiSquaredWeighted")
-  //               << "\n";
 
   return chi2;
 }
@@ -1267,7 +1255,7 @@ void FitPeak::processProperties() {
   m_wsIndex = static_cast<size_t>(tempint);
 
   // Fit window
-  const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
+  auto &vecX = m_dataWS->x(m_wsIndex);
 
   vector<double> fitwindow = getProperty("FitWindow");
   if (fitwindow.size() != 2) {
@@ -1495,13 +1483,14 @@ void FitPeak::setupOutput(
     const std::map<std::string, double> &m_fitErrorBkgdFunc) {
   // TODO - Need to retrieve useful information from FitOneSinglePeak object
   // (think of how)
-  size_t i_minFitX = getVectorIndex(m_dataWS->readX(m_wsIndex), m_minFitX);
-  size_t i_maxFitX = getVectorIndex(m_dataWS->readX(m_wsIndex), m_maxFitX);
+  auto &vecX = m_dataWS->x(m_wsIndex);
+  size_t i_minFitX = getIndex(vecX, m_minFitX);
+  size_t i_maxFitX = getIndex(vecX, m_maxFitX);
 
   // Data workspace
   size_t nspec = 3;
   // Get a vector for fit window
-  const MantidVec &vecX = m_dataWS->readX(m_wsIndex);
+
   size_t vecsize = i_maxFitX - i_minFitX + 1;
   vector<double> vecoutx(vecsize);
   for (size_t i = i_minFitX; i <= i_maxFitX; ++i)
@@ -1522,18 +1511,20 @@ void FitPeak::setupOutput(
   compfunc->addFunction(m_peakFunc);
   compfunc->addFunction(m_bkgdFunc);
   compfunc->function(domain, values);
-  for (size_t i = 0; i < sizex; ++i) {
-    for (size_t j = 0; j < 3; ++j) {
-      outws->dataX(j)[i] = domain[i];
-    }
-  }
-  const MantidVec &vecY = m_dataWS->readY(m_wsIndex);
-  for (size_t i = 0; i < sizey; ++i) {
-    outws->dataY(0)[i] = vecY[i + i_minFitX];
-    outws->dataY(1)[i] = values[i];
-    outws->dataY(2)[i] = outws->dataY(0)[i] - outws->dataY(1)[i];
-  }
 
+  const auto domainVec = domain.toVector();
+  outws->mutableX(0).assign(domainVec.cbegin(), domainVec.cend());
+  outws->setSharedX(1, outws->sharedX(0));
+  outws->setSharedX(2, outws->sharedX(0));
+
+  auto &vecY = m_dataWS->y(m_wsIndex);
+  const auto valvec = values.toVector();
+  outws->mutableY(0)
+      .assign(vecY.cbegin() + i_minFitX, vecY.cbegin() + i_minFitX + sizey);
+  outws->mutableY(1).assign(valvec.cbegin(), valvec.cbegin() + sizey);
+  std::transform(outws->y(0).cbegin(), outws->y(0).cbegin() + sizey,
+                 outws->y(1).cbegin(), outws->mutableY(2).begin(),
+                 std::minus<double>());
   // Set property
   setProperty("OutputWorkspace", outws);
 
@@ -1568,7 +1559,7 @@ void FitPeak::setupOutput(
 /** Get an index of a value in a sorted vector.  The index should be the item
  * with value nearest to X
   */
-size_t getVectorIndex(const MantidVec &vecx, double x) {
+size_t getIndex(const HistogramX &vecx, double x) {
   size_t index;
   if (x <= vecx.front()) {
     index = 0;

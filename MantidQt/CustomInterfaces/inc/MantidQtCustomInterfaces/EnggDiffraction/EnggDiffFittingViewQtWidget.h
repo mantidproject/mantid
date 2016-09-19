@@ -63,6 +63,7 @@ public:
       QWidget *parent, boost::shared_ptr<IEnggDiffractionUserMsg> mainMsg,
       boost::shared_ptr<IEnggDiffractionSettings> mainSettings,
       boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+      boost::shared_ptr<IEnggDiffractionParam> mainParam,
       boost::shared_ptr<IEnggDiffractionPythonRunner> mainPyhonRunner);
   ~EnggDiffFittingViewQtWidget() override;
 
@@ -98,6 +99,8 @@ public:
 
   std::string getFittingRunNo() const override;
 
+  void enableFitAllButton(bool enable) const override;
+
   void clearFittingComboBox() const override;
 
   void enableFittingComboBox(bool enable) const override;
@@ -116,10 +119,9 @@ public:
 
   void setPeakList(const std::string &peakList) const override;
 
-  std::vector<std::string>
-  splitFittingDirectory(std::string &selectedfPath) override;
-
   void setBankEmit() override;
+
+  void resetCanvas() override;
 
   void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
                      bool focused, bool plotSinglePeaks) override;
@@ -136,10 +138,21 @@ public:
 
   void setFittingMultiRunMode(bool mode) override;
 
-  std::string fittingRunNoFactory(std::string bank, std::string fileName,
-                                  std::string &bankDir, std::string fileDir);
+  bool getFittingSingleRunMode() override;
 
-  std::string readPeaksFile(std::string fileDir);
+  void setFittingSingleRunMode(bool mode) override;
+
+  double getPeakCentre() const override;
+
+  bool peakPickerEnabled() const override;
+
+  std::string getPreviousDir() const override;
+
+  void setPreviousDir(const std::string &path) override;
+
+  std::string getOpenFile(const std::string &prevPath) override;
+
+  std::string getSaveFile(const std::string &prevPath) override;
 
   void dataCurvesFactory(std::vector<boost::shared_ptr<QwtData>> &data,
                          std::vector<QwtPlotCurve *> &dataVector, bool focused);
@@ -147,10 +160,6 @@ public:
   void setPeakPickerEnabled(bool enabled);
 
   void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak);
-
-  double getPeakCentre() const;
-
-  void fittingWriteFile(const std::string &fileDir);
 
   void setZoomTool(bool enabled);
 
@@ -166,16 +175,19 @@ signals:
 private slots:
   // slot of the fitting peaks per part of the interface
   void browseFitFocusedRun();
-  void resetFittingMultiMode();
+  void resetFittingMode();
   void setBankIdComboBox(int idx) override;
-  void browsePeaksToFit();
   void setPeakPick();
-  void addPeakToList();
-  void savePeakList();
   void clearPeakList();
+  void loadClicked();
   void fitClicked();
+  void fitAllClicked();
   void FittingRunNo();
+  void addClicked();
+  void browseClicked();
+  void saveClicked();
   void plotSeparateWindow();
+  void showToolTipHelp();
   void setBankDir(int idx);
   void listViewFittingRun();
 
@@ -199,6 +211,9 @@ private:
 
   /// indentifier for fitting multi-run or single run input
   static bool m_fittingMutliRunMode;
+
+  /// indentifier for fitting multi-run or single run input
+  static bool m_fittingSingleRunMode;
 
   // vector holding directory of focused bank file
   static std::vector<std::string> m_fitting_runno_dir_vec;

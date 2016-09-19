@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/FindCenterOfMassPosition2.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -148,26 +146,20 @@ void FindCenterOfMassPosition2::exec() {
     double position_x = 0;
     double position_y = 0;
 
+    const auto &spectrumInfo = inputWS->spectrumInfo();
     for (int i = 0; i < numSpec; i++) {
-      // Get the pixel relating to this spectrum
-      IDetector_const_sptr det;
-      try {
-        det = inputWS->getDetector(i);
-      } catch (Exception::NotFoundError &) {
+      if (!spectrumInfo.hasDetectors(i)) {
         g_log.warning() << "Workspace index " << i
                         << " has no detector assigned to it - discarding\n";
         continue;
       }
-      // If this detector is masked, skip to the next one
-      if (det->isMasked())
-        continue;
-      // If this detector is a monitor, skip to the next one
-      if (det->isMonitor())
+      // Skip if we have a monitor or if the detector is masked.
+      if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
         continue;
 
       // Get the current spectrum
-      const MantidVec &YIn = inputWS->readY(i);
-      const V3D pos = det->getPos();
+      auto &YIn = inputWS->y(i);
+      const V3D pos = spectrumInfo.position(i);
       double x = pos.X();
       double y = pos.Y();
 
