@@ -19,15 +19,15 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - SeparateMonitorWorkspace**
+**Example - ExtractMonitorsExample**
 
 .. testcode:: SeparateMonitorWorkspaceExample
 
   ws = Load('ENGINX00213855.nxs')
 
-  SeparateMonitorSpectra(InputWorkspace = ws,
-                         DetectorWorkspace = 'Detectors',
-                         MonitorWorkspace = 'Monitors')
+  ExtractMonitors(InputWorkspace = ws,
+                  DetectorWorkspace = 'Detectors',
+                  MonitorWorkspace = 'Monitors')
 
   detector_ws = mtd['Detectors']
   monitor_ws = mtd['Monitors']
@@ -47,7 +47,7 @@ Usage
 
 Output:
 
-.. testoutput:: SeparateMonitorWorkspaceExample
+.. testoutput:: ExtractMonitorsExample
   :options: +NORMALIZE_WHITESPACE
 
   Number of spectra in input workspace: 2513

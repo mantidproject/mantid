@@ -3,7 +3,7 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import (MatrixWorkspaceProperty, DataProcessorAlgorithm, PropertyMode)
 
-class SeparateMonitorSpectra(DataProcessorAlgorithm):
+class ExtractMonitors(DataProcessorAlgorithm):
     def category(self):
         return 'Utility\\Workspaces'
 
@@ -82,4 +82,4 @@ class SeparateMonitorSpectra(DataProcessorAlgorithm):
         if detector_ws_name and detectors and monitor_ws_name and monitors:
             detector_ws.setMonitorWorkspace(monitor_ws)
 
-AlgorithmFactory.subscribe(SeparateMonitorSpectra)
+AlgorithmFactory.subscribe(ExtractMonitors)
