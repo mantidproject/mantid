@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "REF_M" valid-from="2011-12-08 11:36:21.935542">
+
+<component-link name = "REF_M">
+
+    <parameter name="number-of-x-pixels">
+      <value val="304"/>
+    </parameter>
+
+    <parameter name="number-of-y-pixels">
+      <value val="256"/>
+    </parameter>
+      
+   <parameter name="MultiDetectorStart">
+       <value val="1"/>
+   </parameter>
+   
+   <parameter name="LambdaMin">
+    <value val="0.10"/>
+  </parameter>
+
+  <parameter name="LambdaMax">
+    <value val="15.0"/>
+  </parameter>
+
+  <parameter name="PointDetectorStart">
+    <value val="0"/>
+  </parameter>
+
+</component-link>
+</parameter-file>
+

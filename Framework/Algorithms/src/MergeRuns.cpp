@@ -3,13 +3,18 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MergeRuns.h"
 
+#include "MantidAPI/ADSValidator.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/MandatoryValidator.h"
+#include "MantidAPI/ADSValidator.h"
+#include "MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h"
+
+using Mantid::HistogramData::HistogramX;
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,6 +24,7 @@ DECLARE_ALGORITHM(MergeRuns)
 
 using namespace Kernel;
 using namespace API;
+using namespace Geometry;
 using namespace DataObjects;
 
 /// Default constructor
@@ -36,14 +42,39 @@ void MergeRuns::init() {
   // moment
   declareProperty(
       Kernel::make_unique<ArrayProperty<std::string>>(
-          "InputWorkspaces",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
-      "The names of the input workspaces as a comma-separated list. You may "
+          "InputWorkspaces", boost::make_shared<ADSValidator>()),
+      "The names of the input workspaces as a list. You may "
       "also group workspaces using the GUI or [[GroupWorkspaces]], and specify "
       "the name of the group instead.");
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
+  declareProperty("SampleLogsTimeSeries", "",
+                  "A comma separated list of the sample logs to merge into a "
+                  "time series. The initial times are taken as the start times "
+                  "for the run, and the merged sample log is suffixed with "
+                  "\"_time_series\". Sample logs must be numeric.");
+  declareProperty("SampleLogsList", "",
+                  "A comma separated list of the sample logs to merge into a "
+                  "list. The merged sample log is suffixed with \"_list\". ");
+  declareProperty("SampleLogsWarn", "", "A comma separated list of the sample "
+                                        "logs to generate a warning if "
+                                        "different when merging.");
+  declareProperty("SampleLogsWarnTolerances", "",
+                  "The tolerances for warning if sample logs are different. "
+                  "Can either be empty for a comparison of the strings, a "
+                  "single value for all warn sample logs, or a comma "
+                  "separated list of values (must be the same length as "
+                  "SampleLogsWarn).");
+  declareProperty("SampleLogsFail", "", "The sample logs to fail if different "
+                                        "when merging. If there is a "
+                                        "difference the run is skipped.");
+  declareProperty("SampleLogsFailTolerances", "",
+                  "The tolerances for failing if sample logs are different. "
+                  "Can either be empty for a comparison of the strings, a "
+                  "single value for all fail sample logs, or a comma "
+                  "separated list of values (must be the same length as "
+                  "SampleLogsFail).");
 }
 
 //------------------------------------------------------------------------------------------------
@@ -65,6 +96,15 @@ bool MergeRuns::useCustomInputPropertyName() const { return true; }
 void MergeRuns::exec() {
   // Check that all input workspaces exist and match in certain important ways
   const std::vector<std::string> inputs_orig = getProperty("InputWorkspaces");
+
+  const std::string sampleLogsTimeSeries = getProperty("SampleLogsTimeSeries");
+  const std::string sampleLogsList = getProperty("SampleLogsList");
+  const std::string sampleLogsWarn = getProperty("SampleLogsWarn");
+  const std::string sampleLogsWarnTolerances =
+      getProperty("SampleLogsWarnTolerances");
+  const std::string sampleLogsFail = getProperty("SampleLogsFail");
+  const std::string sampleLogsFailTolerances =
+      getProperty("SampleLogsFailTolerances");
 
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs;
@@ -97,10 +137,16 @@ void MergeRuns::exec() {
 
     // Iterate over the collection of input workspaces
     auto it = m_inMatrixWS.begin();
+
+    size_t numberOfWSs = m_inMatrixWS.size();
+
     // Take the first input workspace as the first argument to the addition
-    MatrixWorkspace_sptr outWS = m_inMatrixWS.front();
-    int64_t n = m_inMatrixWS.size() - 1;
-    m_progress = new Progress(this, 0.0, 1.0, n);
+    MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
+    Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
+        *outWS, g_log, sampleLogsTimeSeries, sampleLogsList, sampleLogsWarn,
+        sampleLogsWarnTolerances, sampleLogsFail, sampleLogsFailTolerances);
+
+    m_progress = new Progress(this, 0.0, 1.0, numberOfWSs - 1);
     // Note that the iterator is incremented before first pass so that 1st
     // workspace isn't added to itself
     for (++it; it != m_inMatrixWS.end(); ++it) {
@@ -119,7 +165,18 @@ void MergeRuns::exec() {
       }
 
       // Add the current workspace to the total
-      outWS = outWS + addee;
+      // Update the sample logs
+      try {
+        sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
+        outWS = outWS + addee;
+        sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
+      } catch (std::invalid_argument &e) {
+        g_log.error()
+            << "Could not merge run: " << it->get()->name() << ". Reason: \""
+            << e.what()
+            << "\". MergeRuns will continue but this run will be skipped.";
+        sampleLogsBehaviour.resetSampleLogs(*outWS);
+      }
 
       m_progress->report();
     }
@@ -168,7 +225,7 @@ void MergeRuns::buildAdditionTables() {
     table->reserve(nhist);
     for (int inWI = 0; inWI < static_cast<int>(nhist); inWI++) {
       // Get the set of detectors in the output
-      auto &inDets = ews->getEventList(inWI).getDetectorIDs();
+      auto &inDets = ews->getSpectrum(inWI).getDetectorIDs();
 
       bool done = false;
 
@@ -177,7 +234,7 @@ void MergeRuns::buildAdditionTables() {
       int outWI = inWI;
       if (outWI < lhs_nhist) // don't go out of bounds
       {
-        auto &outDets = lhs->getEventList(outWI).getDetectorIDs();
+        auto &outDets = lhs->getSpectrum(outWI).getDetectorIDs();
 
         // Checks that inDets is a subset of outDets
         if (std::includes(outDets.begin(), outDets.end(), inDets.begin(),
@@ -218,7 +275,7 @@ void MergeRuns::buildAdditionTables() {
         // NOTE: This can be SUPER SLOW!
         for (outWI = 0; outWI < lhs_nhist; outWI++) {
           std::set<detid_t> &outDets2 =
-              lhs->getEventList(outWI).getDetectorIDs();
+              lhs->getSpectrum(outWI).getDetectorIDs();
           // Another subset check
           if (std::includes(outDets2.begin(), outDets2.end(), inDets.begin(),
                             inDets.end())) {
@@ -264,7 +321,7 @@ void MergeRuns::execEvent() {
 
   // Create a new output event workspace, by copying the first WS in the list
   EventWorkspace_sptr inputWS = m_inEventWS[0];
-  EventWorkspace_sptr outWS(inputWS->clone().release());
+  EventWorkspace_sptr outWS(inputWS->clone());
 
   int64_t n = m_inEventWS.size() - 1;
   m_progress = new Progress(this, 0.0, 1.0, n);
@@ -282,11 +339,11 @@ void MergeRuns::execEvent() {
       int64_t inWI = WI.first;
       int64_t outWI = WI.second;
       if (outWI >= 0) {
-        outWS->getEventList(outWI) += addee->getEventList(inWI);
+        outWS->getSpectrum(outWI) += addee->getSpectrum(inWI);
       } else {
         // Add an entry to list
         outWS->getOrAddEventList(outWS->getNumberHistograms()) +=
-            addee->getEventList(inWI);
+            addee->getSpectrum(inWI);
       }
     }
 
@@ -308,7 +365,7 @@ void MergeRuns::execEvent() {
 // to order the input workspaces by the start of their frame (i.e. the first X
 // value).
 static bool compare(MatrixWorkspace_sptr first, MatrixWorkspace_sptr second) {
-  return (first->readX(0).front() < second->readX(0).front());
+  return (first->x(0).front() < second->x(0).front());
 }
 /// @endcond
 
@@ -421,14 +478,14 @@ MergeRuns::validateInputs(const std::vector<std::string> &inputWorkspaces) {
           inputWorkspaces[i]);
       if (!ws) {
         g_log.error() << "Input workspace " << inputWorkspaces[i]
-                      << " not found." << std::endl;
+                      << " not found.\n";
         throw Kernel::Exception::NotFoundError("Data Object",
                                                inputWorkspaces[i]);
       }
       inWS.push_back(ws);
     } catch (Exception::NotFoundError &) {
-      g_log.error() << "Input workspace " << inputWorkspaces[i] << " not found."
-                    << std::endl;
+      g_log.error() << "Input workspace " << inputWorkspaces[i]
+                    << " not found.\n";
       throw;
     }
     // Check that it has common binning
@@ -469,8 +526,8 @@ MergeRuns::validateInputs(const std::vector<std::string> &inputWorkspaces) {
 void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
                                      const API::MatrixWorkspace_const_sptr &ws2,
                                      std::vector<double> &params) const {
-  const MantidVec &X1 = ws1->readX(0);
-  const MantidVec &X2 = ws2->readX(0);
+  auto &X1 = ws1->x(0);
+  auto &X2 = ws2->x(0);
   const double end1 = X1.back();
   const double start2 = X2.front();
   const double end2 = X2.back();
@@ -504,7 +561,7 @@ void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr &ws1,
  *  @param X2 ::     The bin boundaries from the second workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::noOverlapParams(const MantidVec &X1, const MantidVec &X2,
+void MergeRuns::noOverlapParams(const HistogramX &X1, const HistogramX &X2,
                                 std::vector<double> &params) const {
   // Add all the bins from the first workspace
   for (size_t i = 1; i < X1.size(); ++i) {
@@ -534,8 +591,8 @@ void MergeRuns::noOverlapParams(const MantidVec &X1, const MantidVec &X2,
  *  @param X2 ::     The bin boundaries from the second workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::intersectionParams(const MantidVec &X1, int64_t &i,
-                                   const MantidVec &X2,
+void MergeRuns::intersectionParams(const HistogramX &X1, int64_t &i,
+                                   const HistogramX &X2,
                                    std::vector<double> &params) const {
   // First calculate the number of bins in each workspace that are in the
   // overlap region
@@ -579,8 +636,8 @@ void MergeRuns::intersectionParams(const MantidVec &X1, int64_t &i,
  *  @param X2 ::     The bin boundaries from the second workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::inclusionParams(const MantidVec &X1, int64_t &i,
-                                const MantidVec &X2,
+void MergeRuns::inclusionParams(const HistogramX &X1, int64_t &i,
+                                const HistogramX &X2,
                                 std::vector<double> &params) const {
   // First calculate the number of bins in each workspace that are in the
   // overlap region

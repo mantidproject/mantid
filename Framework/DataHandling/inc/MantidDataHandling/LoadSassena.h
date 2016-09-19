@@ -54,10 +54,6 @@ class LoadDataSet
 
 class DLLExport LoadSassena : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
-  /// Constructor
-  LoadSassena() : API::IFileLoader<Kernel::NexusDescriptor>(), m_filename(""){};
-  /// Virtual Destructor
-  ~LoadSassena() override {}
   /// Algorithm's name
   const std::string name() const override { return "LoadSassena"; }
   /// Summary of algorithms purpose
@@ -85,11 +81,10 @@ protected:
                      hsize_t *dims) const;
   /// Read dataset data to a buffer ot type double
   herr_t dataSetDouble(const hid_t &h5file, const std::string setName,
-                       double *buf);
+                       std::vector<double> &buf);
   /// Load qvectors dataset, calculate modulus of vectors
-  const MantidVec loadQvectors(const hid_t &h5file,
-                               API::WorkspaceGroup_sptr gws,
-                               std::vector<int> &sorting_indexes);
+  MantidVec loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
+                         std::vector<int> &sorting_indexes);
   /// Load structure factor asa function of q-vector modulus
   void loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
               const std::string setName, const MantidVec &qvmod,

@@ -10,7 +10,7 @@
 
 #include <boost/optional.hpp>
 
-    /* Forward declarations */
+/* Forward declarations */
 
 class QtTreePropertyBrowser;
 class QtGroupPropertyManager;
@@ -32,52 +32,44 @@ class QMenu;
 class QAction;
 class QTreeWidget;
 
-namespace Mantid
-{
-  namespace API
-  {
-    class CompositeFunction;
-    class Workspace;
-    class ParameterTie;
-  }
+namespace Mantid {
+namespace API {
+class CompositeFunction;
+class Workspace;
+class ParameterTie;
+}
 }
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
+namespace MantidQt {
+namespace MantidWidgets {
 
 class CreateAttributePropertyForFunctionBrowser;
 
 /**
- * Class FitPropertyBrowser implements QtPropertyBrowser to display 
+ * Class FitPropertyBrowser implements QtPropertyBrowser to display
  * and control fitting function parameters and settings.
- * 
+ *
  * @date 18/04/2012
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FunctionBrowser: public QWidget
-{
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FunctionBrowser : public QWidget {
   Q_OBJECT
 public:
   /// To keep QtProperty and its QtBrowserItem in one place
-  struct AProperty
-  {
+  struct AProperty {
     QtProperty *prop;
     QtBrowserItem *item;
     QtProperty *parent;
   };
   /// Tie structure
-  struct ATie
-  {
+  struct ATie {
     QtProperty *paramProp; ///< Parameter property
     QtProperty *tieProp;   ///< Tie property
   };
   /// Constraint structure
-  struct AConstraint
-  {
+  struct AConstraint {
     QtProperty *paramProp; ///< Parameter property
-    QtProperty *lower;   ///< Constraint property
-    QtProperty *upper;   ///< Constraint property
+    QtProperty *lower;     ///< Constraint property
+    QtProperty *upper;     ///< Constraint property
   };
 
   /// Constructor
@@ -87,36 +79,41 @@ public:
   /// Clear the contents
   void clear();
   /// Set the function in the browser
-  void setFunction(const QString& funStr);
+  void setFunction(const QString &funStr);
   /// Set the function in the browser
   void setFunction(Mantid::API::IFunction_sptr fun);
   /// Return FunctionFactory function string
   QString getFunctionString();
   /// Return the function
-  Mantid::API::IFunction_sptr getFunction(QtProperty* prop = NULL, bool attributesOnly = false);
+  Mantid::API::IFunction_sptr getFunction(QtProperty *prop = NULL,
+                                          bool attributesOnly = false);
   /// Check if a function is set
   bool hasFunction() const;
 
   /// Return a function with specified index
-  Mantid::API::IFunction_sptr getFunctionByIndex(const QString& index);
+  Mantid::API::IFunction_sptr getFunctionByIndex(const QString &index);
 
   /// Return index of the current function, if one is selected
-  boost::optional<QString> currentFunctionIndex() { return m_currentFunctionIndex; }
+  boost::optional<QString> currentFunctionIndex() {
+    return m_currentFunctionIndex;
+  }
 
   /// Update the function parameter value
-  void setParameter(const QString& funcIndex, const QString& paramName, double value);
+  void setParameter(const QString &funcIndex, const QString &paramName,
+                    double value);
   /// Update the function parameter error
-  void setParamError(const QString& funcIndex, const QString& paramName, double error);
+  void setParamError(const QString &funcIndex, const QString &paramName,
+                     double error);
   /// Get a value of a parameter
-  double getParameter(const QString& funcIndex, const QString& paramName) const;
+  double getParameter(const QString &funcIndex, const QString &paramName) const;
   /// Update the function parameter value
-  void setParameter(const QString& paramName, double value);
+  void setParameter(const QString &paramName, double value);
   /// Update the function parameter error
-  void setParamError(const QString& paramName, double error);
+  void setParamError(const QString &paramName, double error);
   /// Get a value of a parameter
-  double getParameter(const QString& paramName) const;
+  double getParameter(const QString &paramName) const;
   /// Update parameter values in the browser to match those of a function.
-  void updateParameters(const Mantid::API::IFunction& fun);
+  void updateParameters(const Mantid::API::IFunction &fun);
 
   /// Get a list of names of global parameters
   QStringList getGlobalParameters() const;
@@ -125,22 +122,22 @@ public:
   /// Get the number of datasets
   int getNumberOfDatasets() const;
   /// Get value of a local parameter
-  double getLocalParameterValue(const QString& parName, int i) const;
+  double getLocalParameterValue(const QString &parName, int i) const;
   /// Set value of a local parameter
-  void setLocalParameterValue(const QString& parName, int i, double value);
+  void setLocalParameterValue(const QString &parName, int i, double value);
   /// Check if a local parameter is fixed
-  bool isLocalParameterFixed(const QString& parName, int i) const;
+  bool isLocalParameterFixed(const QString &parName, int i) const;
   /// Fix/unfix local parameter
-  void setLocalParameterFixed(const QString& parName, int i, bool fixed);
+  void setLocalParameterFixed(const QString &parName, int i, bool fixed);
   /// Get the tie for a local parameter.
-  QString getLocalParameterTie(const QString& parName, int i) const;
+  QString getLocalParameterTie(const QString &parName, int i) const;
   /// Set a tie for a local parameter.
-  void setLocalParameterTie(const QString& parName, int i, QString tie);
+  void setLocalParameterTie(const QString &parName, int i, QString tie);
 
   /// Return the multidomain function if number of datasets is greater than 1
   Mantid::API::IFunction_sptr getGlobalFunction();
   /// Update parameter values in the browser to match those of a function.
-  void updateMultiDatasetParameters(const Mantid::API::IFunction& fun);
+  void updateMultiDatasetParameters(const Mantid::API::IFunction &fun);
 
   /// Resize the browser's columns
   void setColumnSizes(int s0, int s1, int s2 = -1);
@@ -152,10 +149,10 @@ signals:
   /// Function parameter gets changed
   /// @param funcIndex :: Index of the changed function
   /// @param paramName :: Name of the changed parameter
-  void parameterChanged(const QString& funcIndex, const QString& paramName);
+  void parameterChanged(const QString &funcIndex, const QString &paramName);
 
   /// In multi-dataset context a button value editor was clicked
-  void localParameterButtonClicked(const QString& parName);
+  void localParameterButtonClicked(const QString &parName);
 
   void functionStructureChanged();
   void globalsChanged();
@@ -175,90 +172,96 @@ protected:
   /// Create and connect actions
   void createActions();
   /// Add a sub-property
-  AProperty addProperty(QtProperty* parent, QtProperty* subproperty);
+  AProperty addProperty(QtProperty *parent, QtProperty *subproperty);
   /// Remove and delete property
   void removeProperty(QtProperty *prop);
   /// Set a function
-  void setFunction(QtProperty* prop, Mantid::API::IFunction_sptr fun);
+  void setFunction(QtProperty *prop, Mantid::API::IFunction_sptr fun);
   /// Add a function
-  void addFunction(QtProperty* prop, Mantid::API::IFunction_sptr fun);
+  void addFunction(QtProperty *prop, Mantid::API::IFunction_sptr fun);
   /// Add a function property
-  AProperty addFunctionProperty(QtProperty* parent, QString funName);
+  AProperty addFunctionProperty(QtProperty *parent, QString funName);
   /// Add a parameter property
-  AProperty addParameterProperty(QtProperty* parent, QString paramName, QString paramDesc, double paramValue);
+  AProperty addParameterProperty(QtProperty *parent, QString paramName,
+                                 QString paramDesc, double paramValue);
   /// Add a attribute property
-  AProperty addAttributeProperty(QtProperty* parent, QString attName, const Mantid::API::IFunction::Attribute& att);
+  AProperty addAttributeProperty(QtProperty *parent, QString attName,
+                                 const Mantid::API::IFunction::Attribute &att);
   /// Add attribute and parameter properties to a function property
-  void addAttributeAndParameterProperties(QtProperty* prop, Mantid::API::IFunction_sptr fun);
+  void addAttributeAndParameterProperties(QtProperty *prop,
+                                          Mantid::API::IFunction_sptr fun);
   /// Add property showing function's index in the composite function
-  AProperty addIndexProperty(QtProperty* prop);
-  /// Update function index properties 
-  void updateFunctionIndices(QtProperty* prop = NULL, QString index = "");
+  AProperty addIndexProperty(QtProperty *prop);
+  /// Update function index properties
+  void updateFunctionIndices(QtProperty *prop = NULL, QString index = "");
   /// Get property of the overall function
   AProperty getFunctionProperty() const;
   /// Check if property is a function group
-  bool isFunction(QtProperty* prop) const;
+  bool isFunction(QtProperty *prop) const;
   /// Check if property is a function attribute
-  bool isAttribute(QtProperty* prop) const;
+  bool isAttribute(QtProperty *prop) const;
   /// Check if property is a string attribute
-  bool isStringAttribute(QtProperty* prop) const;
+  bool isStringAttribute(QtProperty *prop) const;
   /// Check if property is a double attribute
-  bool isDoubleAttribute(QtProperty* prop) const;
+  bool isDoubleAttribute(QtProperty *prop) const;
   /// Check if property is a int attribute
-  bool isIntAttribute(QtProperty* prop) const;
+  bool isIntAttribute(QtProperty *prop) const;
   /// Check if property is a bool attribute
-  bool isBoolAttribute(QtProperty* prop) const;
+  bool isBoolAttribute(QtProperty *prop) const;
   /// Check if property is a vector attribute
-  bool isVectorAttribute(QtProperty* prop) const;
+  bool isVectorAttribute(QtProperty *prop) const;
   /// Check if property is a function paramater
-  bool isParameter(QtProperty* prop) const;
+  bool isParameter(QtProperty *prop) const;
   /// Get attribute as a string
-  double getParameter(QtProperty* prop) const;
+  double getParameter(QtProperty *prop) const;
   /// Check if a property is an index
-  bool isIndex(QtProperty* prop) const;
+  bool isIndex(QtProperty *prop) const;
   /// Get the function index for a property
-  QString getIndex(QtProperty* prop) const;
+  QString getIndex(QtProperty *prop) const;
   /// Get name of the parameter for a property
-  QString getParameterName(QtProperty* prop);
+  QString getParameterName(QtProperty *prop);
   /// Get function property for the index
-  QtProperty* getFunctionProperty(const QString& index)const;
-  /// Split a qualified parameter name into function index and local parameter name.
-  QStringList splitParameterName(const QString& paramName) const;
+  QtProperty *getFunctionProperty(const QString &index) const;
+  /// Split a qualified parameter name into function index and local parameter
+  /// name.
+  QStringList splitParameterName(const QString &paramName) const;
   /// Get a property for a parameter
-  QtProperty* getParameterProperty(const QString& paramName) const;
+  QtProperty *getParameterProperty(const QString &paramName) const;
   /// Get a property for a parameter
-  QtProperty* getParameterProperty(const QString& funcIndex, const QString& paramName) const;
+  QtProperty *getParameterProperty(const QString &funcIndex,
+                                   const QString &paramName) const;
   /// Get a tie property attached to a parameter property
-  QtProperty* getTieProperty(QtProperty* prop) const;
+  QtProperty *getTieProperty(QtProperty *prop) const;
 
   /// Add a tie property
-  AProperty addTieProperty(QtProperty* prop, QString tie);
+  AProperty addTieProperty(QtProperty *prop, QString tie);
   /// Check if a parameter property has a tie
-  bool hasTie(QtProperty* prop) const;
+  bool hasTie(QtProperty *prop) const;
   /// Check if a property is a tie
-  bool isTie(QtProperty* prop) const;
+  bool isTie(QtProperty *prop) const;
   /// Get a tie for a paramater
-  std::string getTie(QtProperty* prop) const;
-  /// Remove all tie properties
-  void removeAllTieProperties();
+  std::string getTie(QtProperty *prop) const;
+  /// Remove all local tie properties
+  void removeAllLocalTieProperties();
 
   /// Add a constraint property
-  QList<AProperty> addConstraintProperties(QtProperty* prop, QString constraint);
+  QList<AProperty> addConstraintProperties(QtProperty *prop,
+                                           QString constraint);
   /// Check if a property is a constraint
-  bool isConstraint(QtProperty* prop) const;
+  bool isConstraint(QtProperty *prop) const;
   /// Check if a parameter property has a constraint
-  bool hasConstraint(QtProperty* prop) const;
+  bool hasConstraint(QtProperty *prop) const;
   /// Check if a parameter property has a lower bound
-  bool hasLowerBound(QtProperty* prop) const;
+  bool hasLowerBound(QtProperty *prop) const;
   /// Check if a parameter property has a upper bound
-  bool hasUpperBound(QtProperty* prop) const;
+  bool hasUpperBound(QtProperty *prop) const;
 
   /// Initialize storage and values for local parameters
-  void initLocalParameter(const QString& parName)const;
+  void initLocalParameter(const QString &parName) const;
   /// Make sure that the parameter is initialized
-  void checkLocalParameter(const QString& parName)const;
+  void checkLocalParameter(const QString &parName) const;
   /// Make sure that properties are in sync with the cached ties
-  void updateLocalTie(const QString& parName);
+  void updateLocalTie(const QString &parName);
 
 protected slots:
   /// Show the context menu
@@ -293,19 +296,19 @@ protected slots:
   //   Property change slots
 
   /// Called when a function attribute property is changed
-  void attributeChanged(QtProperty*);
+  void attributeChanged(QtProperty *);
   /// Called when a member of a vector attribute is changed
-  void attributeVectorDoubleChanged(QtProperty*);
+  void attributeVectorDoubleChanged(QtProperty *);
   /// Called when a function parameter property is changed
-  void parameterChanged(QtProperty*);
+  void parameterChanged(QtProperty *);
   /// Called when button in local parameter editor was clicked
-  void parameterButtonClicked(QtProperty*);
+  void parameterButtonClicked(QtProperty *);
   /// Called when a tie property changes
-  void tieChanged(QtProperty*);
+  void tieChanged(QtProperty *);
   /// Called when "Global" check-box was clicked
-  void globalChanged(QtProperty*, const QString&, bool);
+  void globalChanged(QtProperty *, const QString &, bool);
   /// Set value of an attribute (as a property) to a function
-  void setAttributeToFunction(Mantid::API::IFunction& fun, QtProperty* prop);
+  void setAttributeToFunction(Mantid::API::IFunction &fun, QtProperty *prop);
 
 protected:
   /// Manager for function group properties
@@ -339,15 +342,14 @@ protected:
   /// Manager for vector attribute size properties
   QtIntPropertyManager *m_attributeSizeManager;
 
-
   /// Qt property browser which displays properties
-  QtTreePropertyBrowser* m_browser;
+  QtTreePropertyBrowser *m_browser;
   /// Store all properties in a map for easy access
-  QMap<QtProperty*,AProperty> m_properties;
+  QMap<QtProperty *, AProperty> m_properties;
   /// Store parameter ties. Keys are function properties.
-  QMultiMap<QtProperty*,ATie> m_ties;
+  QMultiMap<QtProperty *, ATie> m_ties;
   /// Store parameter constraints. Keys are function properties.
-  QMultiMap<QtProperty*,AConstraint> m_constraints;
+  QMultiMap<QtProperty *, AConstraint> m_constraints;
 
   //   Actions
 
@@ -376,24 +378,24 @@ protected:
   /// Remove one constraints from current parameter
   QAction *m_actionRemoveConstraint;
 
-  /// Index of currently selected function. Gets updated in updateCurrentFunctionIndex()
+  /// Index of currently selected function. Gets updated in
+  /// updateCurrentFunctionIndex()
   boost::optional<QString> m_currentFunctionIndex;
 
-
-  struct LocalParameterData
-  {
-    explicit LocalParameterData(double v = 0.0):value(v),fixed(false){}
+  struct LocalParameterData {
+    explicit LocalParameterData(double v = 0.0) : value(v), fixed(false) {}
     double value;
     bool fixed;
     QString tie;
   };
 
-  /// Set true if the constructed function is intended to be used in a multi-dataset fit
+  /// Set true if the constructed function is intended to be used in a
+  /// multi-dataset fit
   bool m_multiDataset;
   /// Number of datasets this function is used for
   int m_numberOfDatasets;
   /// Storage for local paramter values
-  mutable QMap<QString,QVector<LocalParameterData>> m_localParameterValues;
+  mutable QMap<QString, QVector<LocalParameterData>> m_localParameterValues;
   /// Index of a dataset for which the parameters are currently displayed
   int m_currentDataset;
 

@@ -2,7 +2,8 @@
     File                 : QwtErrorPlotCurve.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Error bars curve
 
@@ -34,21 +35,20 @@
 #include <qwt_plot.h>
 
 //! Error bars curve
-class QwtErrorPlotCurve: public DataCurve, public ErrorBarSettings
-{
+class QwtErrorPlotCurve : public DataCurve, public ErrorBarSettings {
 public:
-  enum Orientation{Horizontal = 0, Vertical = 1};
+  enum Orientation { Horizontal = 0, Vertical = 1 };
 
-  QwtErrorPlotCurve(int orientation, Table *t, const QString& name);
-  QwtErrorPlotCurve(Table *t, const QString& name);
+  QwtErrorPlotCurve(int orientation, Table *t, const QString &name);
+  QwtErrorPlotCurve(Table *t, const QString &name);
 
   void copy(const QwtErrorPlotCurve *e);
 
   QwtDoubleRect boundingRect() const override;
 
   double errorValue(int i);
-  QwtArray<double> errors(){return err;};
-  void setErrors(const QwtArray<double>&data){err=data;};
+  QwtArray<double> errors() { return err; };
+  void setErrors(const QwtArray<double> &data) { err = data; };
 
   double width() const override { return pen().widthF(); };
   void setWidth(double w) override;
@@ -56,18 +56,19 @@ public:
   QColor color() const override { return pen().color(); };
   void setColor(const QColor &c) override;
 
-  int direction(){return type;};
-  void setDirection(int o){type = o;};
+  int direction() { return type; };
+  void setDirection(int o) { type = o; };
 
   bool xErrors();
   void setXErrors(bool yes);
 
   //! Returns the master curve to which this error bars curve is attached.
-  DataCurve* masterCurve(){return d_master_curve;};
+  DataCurve *masterCurve() { return d_master_curve; };
   void setMasterCurve(DataCurve *c);
 
-  //! Causes the master curve to delete this curve from its managed error bars list.
-  void detachFromMasterCurve(){d_master_curve->removeErrorBars(this);};
+  //! Causes the master curve to delete this curve from its managed error bars
+  // list.
+  void detachFromMasterCurve() { d_master_curve->removeErrorBars(this); };
 
   QString plotAssociation() const override;
 
@@ -75,7 +76,8 @@ public:
   void loadData() override;
 
 private:
-  using DataCurve::draw; // Unhide base class method (avoids Intel compiler warning)
+  using DataCurve::draw; // Unhide base class method (avoids Intel compiler
+                         // warning)
   void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
             int from, int to) const override;
 

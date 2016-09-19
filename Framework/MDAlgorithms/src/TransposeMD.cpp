@@ -29,16 +29,6 @@ using namespace Mantid::DataObjects;
 DECLARE_ALGORITHM(TransposeMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-TransposeMD::TransposeMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-TransposeMD::~TransposeMD() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string TransposeMD::name() const { return "TransposeMD"; }

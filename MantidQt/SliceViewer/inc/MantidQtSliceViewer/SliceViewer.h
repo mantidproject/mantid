@@ -29,17 +29,13 @@ class QDragEnterEvent;
 class QDropEvent;
 class QwtPlotRescaler;
 
-namespace Mantid
-{
-namespace API
-{
- class IPeaksWorkspace;
+namespace Mantid {
+namespace API {
+class IPeaksWorkspace;
 }
 }
-namespace MantidQt
-{
-namespace SliceViewer
-{
+namespace MantidQt {
+namespace SliceViewer {
 
 // Forward dec
 class CompositePeaksPresenter;
@@ -47,26 +43,31 @@ class ProxyCompositePeaksPresenter;
 
 // Static Const values
 static const std::string g_iconPathPrefix = ":/SliceViewer/icons/";
-static const std::string g_iconZoomPlus = g_iconPathPrefix + "colour zoom plus scale 32x32.png";
-static const std::string g_iconZoomMinus = g_iconPathPrefix + "colour zoom minus scale 32x32.png";
-static const std::string g_iconViewFull = g_iconPathPrefix + "view-fullscreen.png";
+static const std::string g_iconZoomPlus =
+    g_iconPathPrefix + "colour zoom plus scale 32x32.png";
+static const std::string g_iconZoomMinus =
+    g_iconPathPrefix + "colour zoom minus scale 32x32.png";
+static const std::string g_iconViewFull =
+    g_iconPathPrefix + "view-fullscreen.png";
 static const std::string g_iconCutOn = g_iconPathPrefix + "cut on 32x32.png";
 static const std::string g_iconCut = g_iconPathPrefix + "cut 32x32.png";
 static const std::string g_iconGridOn = g_iconPathPrefix + "grid on 32x32.png";
 static const std::string g_iconGrid = g_iconPathPrefix + "grid 32x32.png";
-static const std::string g_iconRebinOn = g_iconPathPrefix + "rebin on 32x32.png";
+static const std::string g_iconRebinOn =
+    g_iconPathPrefix + "rebin on 32x32.png";
 static const std::string g_iconRebin = g_iconPathPrefix + "rebin 32x32.png";
-static const std::string g_iconPeakListOn = g_iconPathPrefix + "Peak List on 32x32.png";
-static const std::string g_iconPeakList = g_iconPathPrefix + "Peak List 32x32.png";
-
+static const std::string g_iconPeakListOn =
+    g_iconPathPrefix + "Peak List on 32x32.png";
+static const std::string g_iconPeakList =
+    g_iconPathPrefix + "Peak List 32x32.png";
 
 /** GUI for viewing a 2D slice out of a multi-dimensional workspace.
  * You can select which dimension to plot as X,Y, and the cut point
  * along the other dimension(s).
  *
  */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget, public ZoomablePeaksView
-{
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget,
+                                                    public ZoomablePeaksView {
   friend class SliceViewerWindow;
 
   Q_OBJECT
@@ -75,13 +76,13 @@ public:
   SliceViewer(QWidget *parent = 0);
   ~SliceViewer() override;
 
-  void setWorkspace(const QString & wsName);
+  void setWorkspace(const QString &wsName);
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);
   Mantid::API::IMDWorkspace_sptr getWorkspace();
   void showControls(bool visible);
   void zoomBy(double factor);
-  void loadColorMap(QString filename = QString() );
-  LineOverlay * getLineOverlay() { return m_lineOverlay; }
+  void loadColorMap(QString filename = QString());
+  LineOverlay *getLineOverlay() { return m_lineOverlay; }
   Mantid::Kernel::VMD getSlicePoint() const { return m_slicePoint; }
   int getDimX() const;
   int getDimY() const;
@@ -89,11 +90,11 @@ public:
   /// Methods for Python bindings
   QString getWorkspaceName() const;
   void setXYDim(int indexX, int indexY);
-  void setXYDim(const QString & dimX, const QString & dimY);
+  void setXYDim(const QString &dimX, const QString &dimY);
   void setSlicePoint(int dim, double value);
-  void setSlicePoint(const QString & dim, double value);
+  void setSlicePoint(const QString &dim, double value);
   double getSlicePoint(int dim) const;
-  double getSlicePoint(const QString & dim) const;
+  double getSlicePoint(const QString &dim) const;
   void setColorScaleMin(double min);
   void setColorScaleMax(double max);
   void setColorScaleLog(bool log);
@@ -109,9 +110,9 @@ public:
   QwtDoubleInterval getXLimits() const;
   QwtDoubleInterval getYLimits() const;
   void setXYCenter(double x, double y);
-  void openFromXML(const QString & xml);
+  void openFromXML(const QString &xml);
   void toggleLineMode(bool);
-  void setNormalization(Mantid::API::MDNormalization norm, bool update=true);
+  void setNormalization(Mantid::API::MDNormalization norm, bool update = true);
   Mantid::API::MDNormalization getNormalization() const;
   void setColorBarAutoScale(bool autoscale);
 
@@ -123,8 +124,9 @@ public:
 
   /// Methods relating to peaks overlays.
   boost::shared_ptr<ProxyCompositePeaksPresenter> getPeaksPresenter() const;
-  ProxyCompositePeaksPresenter* setPeaksWorkspaces(const QStringList& list); // For python binding
-  void clearPeaksWorkspaces(); // For python binding
+  ProxyCompositePeaksPresenter *
+  setPeaksWorkspaces(const QStringList &list); // For python binding
+  void clearPeaksWorkspaces();                 // For python binding
 
   /* -- Methods from implementation of ZoomablePeaksView. --*/
   void zoomToRectangle(const PeakBoundingBox &box) override;
@@ -132,7 +134,18 @@ public:
   void detach() override;
 
   /* Methods associated with workspace observers. Driven by SliceViewerWindow */
-  void peakWorkspaceChanged(const std::string& wsName, boost::shared_ptr<Mantid::API::IPeaksWorkspace>& changedPeaksWS);
+  void peakWorkspaceChanged(
+      const std::string &wsName,
+      boost::shared_ptr<Mantid::API::IPeaksWorkspace> &changedPeaksWS);
+
+  /// Load the state of the slice viewer from a Mantid project file
+  void loadFromProject(const std::string &lines);
+  /// Save the state of the slice viewer to a Mantid project file
+  std::string saveToProject() const;
+  /// Load the state of the dimension widgets from a Mantid project file
+  void loadDimensionWidgets(const std::string &lines);
+  /// Save the state of the dimension widgets to a Mantid project file
+  std::string saveDimensionWidgets() const;
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed
@@ -162,7 +175,7 @@ public slots:
   void setXYLimitsDialog();
   void zoomInSlot();
   void zoomOutSlot();
-  void zoomRectSlot(const QwtDoubleRect & rect);
+  void zoomRectSlot(const QwtDoubleRect &rect);
   void panned(int, int);
   void magnifierRescaled(double);
 
@@ -175,15 +188,14 @@ public slots:
   void changeNormalizationNone();
   void changeNormalizationVolume();
   void changeNormalizationNumEvents();
-  void onNormalizationChanged(const QString& normalizationKey);
+  void onNormalizationChanged(const QString &normalizationKey);
 
   // Buttons or actions
   void clearLine();
   QPixmap getImage();
-  void saveImage(const QString & filename = QString());
+  void saveImage(const QString &filename = QString());
   void copyImageToClipboard();
   void onPeaksViewerOverlayOptions();
-
 
   // Synced checkboxes
   void LineMode_toggled(bool);
@@ -206,19 +218,20 @@ protected:
   void dropEvent(QDropEvent *e) override;
 
 private:
-  enum AspectRatioType{Guess=0, All=1, Unlock=2};
+  enum AspectRatioType { Guess = 0, All = 1, Unlock = 2 };
   void loadSettings();
   void saveSettings();
-  void setIconFromString(QAction* action, const std::string& iconName,
-    QIcon::Mode mode, QIcon::State state);
-  void setIconFromString(QAbstractButton* btn, const std::string& iconName,
-    QIcon::Mode mode, QIcon::State state);
+  void setIconFromString(QAction *action, const std::string &iconName,
+                         QIcon::Mode mode, QIcon::State state);
+  void setIconFromString(QAbstractButton *btn, const std::string &iconName,
+                         QIcon::Mode mode, QIcon::State state);
   void initMenus();
   void initZoomer();
 
   void updateDisplay(bool resetAxes = false);
   void updateDimensionSliceWidgets();
-  void resetAxis(int axis, const Mantid::Geometry::IMDDimension_const_sptr & dim);
+  void resetAxis(int axis,
+                 const Mantid::Geometry::IMDDimension_const_sptr &dim);
 
   void findRangeFull();
   void findRangeSlice();
@@ -234,7 +247,7 @@ private:
   void autoRebinIfRequired();
 
   // helper for saveImage
-  QString ensurePngExtension(const QString& fname) const;
+  QString ensurePngExtension(const QString &fname) const;
 
   // Rescaler methods
   void updateAspectRatios();
@@ -246,38 +259,34 @@ private:
   void applyColorScalingForCurrentSliceIfRequired();
 
 private:
-  
-
   // -------------------------- Widgets ----------------------------
 
   /// Auto-generated UI controls.
   Ui::SliceViewerClass ui;
 
   /// Main plot object
-  MantidQt::MantidWidgets::SafeQwtPlot * m_plot;
+  MantidQt::MantidWidgets::SafeQwtPlot *m_plot;
 
   /// Spectrogram plot
-  QwtPlotSpectrogram * m_spect;
+  QwtPlotSpectrogram *m_spect;
 
   /// Layout containing the spectrogram
-  QHBoxLayout * m_spectLayout;
+  QHBoxLayout *m_spectLayout;
 
   /// Color bar indicating the color scale
-  MantidQt::MantidWidgets::ColorBarWidget * m_colorBar;
+  MantidQt::MantidWidgets::ColorBarWidget *m_colorBar;
 
   /// Vector of the widgets for slicing dimensions
   std::vector<DimensionSliceWidget *> m_dimWidgets;
 
   /// The LineOverlay widget for drawing line cross-sections (hidden at startup)
-  LineOverlay * m_lineOverlay;
+  LineOverlay *m_lineOverlay;
 
   /// The LineOverlay widget for drawing the outline of the rebinned workspace
-  LineOverlay * m_overlayWSOutline;
-
-  //PeakOverlay * m_peakOverlay;
+  LineOverlay *m_overlayWSOutline;
 
   /// Object for running algorithms in the background
-  MantidQt::API::AlgorithmRunner * m_algoRunner;
+  MantidQt::API::AlgorithmRunner *m_algoRunner;
 
   // -------------------------- Data Members ----------------------------
 
@@ -297,7 +306,7 @@ private:
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> m_dimensions;
 
   /// Data presenter
-  API::QwtRasterDataMD * m_data;
+  API::QwtRasterDataMD *m_data;
 
   /// The X and Y dimensions being plotted
   Mantid::Geometry::IMDDimension_const_sptr m_X;
@@ -314,14 +323,16 @@ private:
   /// The calculated range of values in the FULL data set
   QwtDoubleInterval m_colorRangeFull;
 
-  /// The calculated range of values ONLY in the currently viewed part of the slice
+  /// The calculated range of values ONLY in the currently viewed part of the
+  /// slice
   QwtDoubleInterval m_colorRangeSlice;
 
   /// Use the log of the value for the color scale
   bool m_logColor;
 
   /// Menus
-  QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp, *m_menuLine, *m_menuFile, *m_menuPeaks;
+  QMenu *m_menuColorOptions, *m_menuView, *m_menuHelp, *m_menuLine, *m_menuFile,
+      *m_menuPeaks;
   QAction *m_actionFileClose;
   QAction *m_actionTransparentZeros;
   QAction *m_actionNormalizeNone;
@@ -332,10 +343,9 @@ private:
   QAction *m_lockAspectRatiosActionAll;
   QAction *m_lockAspectRatiosActionUnlock;
 
-
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid,
-    *m_syncRebinMode, *m_syncAutoRebin;
+      *m_syncRebinMode, *m_syncAutoRebin;
 
   /// Cached double for infinity
   double m_inf;
@@ -355,32 +365,31 @@ private:
   /// If true, the rebinned overlayWS is locked until refreshed.
   bool m_rebinLocked;
 
-  /// Md Settings for color maps 
-  boost::shared_ptr<MantidQt::API::MdSettings>  m_mdSettings;
+  /// Md Settings for color maps
+  boost::shared_ptr<MantidQt::API::MdSettings> m_mdSettings;
 
   /// Logger
   Mantid::Kernel::Logger m_logger;
 
   // -------------------------- Controllers ------------------------
-  boost::shared_ptr<CompositePeaksPresenter>  m_peaksPresenter;
+  boost::shared_ptr<CompositePeaksPresenter> m_peaksPresenter;
 
   boost::shared_ptr<ProxyCompositePeaksPresenter> m_proxyPeaksPresenter;
 
   /// Pointer to widget used for peaks sliding.
-  DimensionSliceWidget* m_peaksSliderWidget;
+  DimensionSliceWidget *m_peaksSliderWidget;
 
   /// Object for choosing a PeakTransformFactory based on the workspace type.
   Mantid::Geometry::PeakTransformSelector m_peakTransformSelector;
 
   /// Plot rescaler. For fixed aspect ratios.
-  QwtPlotRescaler* m_rescaler;
+  QwtPlotRescaler *m_rescaler;
 
   static const QString NoNormalizationKey;
   static const QString VolumeNormalizationKey;
   static const QString NumEventsNormalizationKey;
 
   AspectRatioType m_aspectRatioType;
-
 };
 
 } // namespace SliceViewer

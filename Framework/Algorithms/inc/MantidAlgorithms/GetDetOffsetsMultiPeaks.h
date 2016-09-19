@@ -7,10 +7,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_multifit_nlin.h>
-#include <gsl/gsl_multimin.h>
-#include <gsl/gsl_statistics.h>
 
 namespace Mantid {
 namespace Algorithms {
@@ -70,8 +66,6 @@ class DLLExport GetDetOffsetsMultiPeaks : public API::Algorithm {
 public:
   /// Default constructorMatrix
   GetDetOffsetsMultiPeaks();
-  /// Destructor
-  ~GetDetOffsetsMultiPeaks() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "GetDetOffsetsMultiPeaks"; }
   /// Algorithm's version for identification overriding a virtual method

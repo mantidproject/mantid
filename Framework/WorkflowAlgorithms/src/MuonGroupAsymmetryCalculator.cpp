@@ -23,11 +23,6 @@ MuonGroupAsymmetryCalculator::MuonGroupAsymmetryCalculator(
     : MuonGroupCalculator(inputWS, summedPeriods, subtractedPeriods,
                           groupIndex) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MuonGroupAsymmetryCalculator::~MuonGroupAsymmetryCalculator() {}
-
 /**
 * Calculates asymmetry between given group (specified via group index) and Muon
 * exponential decay

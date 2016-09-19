@@ -22,12 +22,6 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveCanSAS1D2)
 
-/// constructor
-SaveCanSAS1D2::SaveCanSAS1D2() {}
-
-/// destructor
-SaveCanSAS1D2::~SaveCanSAS1D2() {}
-
 /// Overwrites Algorithm method.
 void SaveCanSAS1D2::init() {
   SaveCanSAS1D::init();
@@ -107,49 +101,21 @@ void SaveCanSAS1D2::exec() {
   createSASSampleElement(sasSample);
   m_outFile << sasSample;
 
-  std::string sasInstr = "\n\t\t<SASinstrument>";
-  m_outFile << sasInstr;
-  std::string sasInstrName = "\n\t\t\t<name>";
-  std::string instrname = m_workspace->getInstrument()->getName();
-  // look for xml special characters and replace with entity refrence
-  searchandreplaceSpecialChars(instrname);
-  sasInstrName += instrname;
-  sasInstrName += "</name>";
-  m_outFile << sasInstrName;
-
-  std::string sasSource;
-  createSASSourceElement(sasSource);
-  m_outFile << sasSource;
-
-  std::string sasCollimation = "\n\t\t\t<SAScollimation/>";
-  m_outFile << sasCollimation;
-
+  // Recording the SAS instrument can throw, if there
+  // are no detecors present
+  std::string sasInstrument;
   try {
-    std::string sasDet;
-    createSASDetectorElement(sasDet);
-    m_outFile << sasDet;
+    createSASInstrument(sasInstrument);
   } catch (Kernel::Exception::NotFoundError &) {
-    m_outFile.close();
     throw;
   } catch (std::runtime_error &) {
-    m_outFile.close();
     throw;
   }
-
-  sasInstr = "\n\t\t</SASinstrument>";
-  m_outFile << sasInstr;
+  m_outFile << sasInstrument;
 
   std::string sasProcess;
   createSASProcessElement(sasProcess);
   m_outFile << sasProcess;
-
-  // Reduction process, if available
-  const std::string process_xml = getProperty("Process");
-  if (process_xml.size() > 0) {
-    m_outFile << "\n\t\t<SASProcess>\n";
-    m_outFile << process_xml;
-    m_outFile << "\n\t\t</SASProcess>\n";
-  }
 
   std::string sasNote = "\n\t\t<SASnote>";
   sasNote += "\n\t\t</SASnote>";
@@ -246,7 +212,7 @@ void SaveCanSAS1D2::writeHeader(const std::string &fileName) {
     m_outFile
         << "<?xml version=\"1.0\"?>\n"
         << "<?xml-stylesheet type=\"text/xsl\" href=\"cansas1d.xsl\" ?>\n";
-    std::string sasroot = "";
+    std::string sasroot;
     createSASRootElement(sasroot);
     m_outFile << sasroot;
   } catch (std::fstream::failure &) {

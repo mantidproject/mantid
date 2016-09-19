@@ -70,7 +70,7 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
   } catch (Kernel::Exception::NotFoundError &) {
     throw std::invalid_argument("ConvertToYSpace - Workspace has no detector "
                                 "attached to histogram at index " +
-                                boost::lexical_cast<std::string>(index));
+                                std::to_string(index));
   }
 
   DetectorParams detpar;
@@ -78,7 +78,7 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
   detpar.l1 = sample->getDistance(*source);
   detpar.l2 = det->getDistance(*sample);
   detpar.pos = det->getPos();
-  detpar.theta = ws->detectorTwoTheta(det);
+  detpar.theta = ws->detectorTwoTheta(*det);
   detpar.t0 = ConvertToYSpace::getComponentParameter(det, pmap, "t0") *
               1e-6; // Convert to seconds
   detpar.efixed = ConvertToYSpace::getComponentParameter(det, pmap, "efixed");
@@ -205,8 +205,7 @@ void ConvertToYSpace::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     if (!convert(i)) {
-      g_log.warning("No detector defined for index=" +
-                    boost::lexical_cast<std::string>(i) +
+      g_log.warning("No detector defined for index=" + std::to_string(i) +
                     ". Zeroing spectrum.");
       m_outputWS->maskWorkspaceIndex(i);
       if (m_qOutputWS)

@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup, ITableWorkspace
@@ -26,6 +28,9 @@ class IqtFitMultipleTest(unittest.TestCase):
         self._validate_table_values(params)
         self._validate_matrix_values(result)
         self._validate_group_values(fit_group)
+
+        self._validate_sample_log_values(result)
+        self._validate_sample_log_values(fit_group.getItem(0))
 
 
     def _validate_table_shape(self, tableWS):
@@ -91,7 +96,7 @@ class IqtFitMultipleTest(unittest.TestCase):
         row = tableWS.row(0)
         self.assertEquals(round(row['axis-1'], 6),  0.483619)
         self.assertEquals(round(row['f1.Intensity'], 6), 0.979517)
-        self.assertEquals(round(row['f1.Tau'], 7), 0.0246719)
+        self.assertEquals(round(row['f1.Tau'], 6), 0.024672)
 
     def _validate_matrix_values(self, matrixWS):
         # Check f0.A0
@@ -106,7 +111,7 @@ class IqtFitMultipleTest(unittest.TestCase):
 
         # Check f1.Tau
         tau = matrixWS.readY(2)
-        self.assertEquals(round(tau[0], 7), 0.0246719)
+        self.assertEquals(round(tau[0], 6), 0.024672)
         self.assertEquals(round(tau[-1],8), 0.00253487)
 
         # Check f1.Beta
@@ -123,11 +128,26 @@ class IqtFitMultipleTest(unittest.TestCase):
         # Check Calc
         calc = sub_ws.readY(1)
         self.assertEquals(round(calc[0], 5), 1)
-        self.assertEquals(round(calc[-1],7),0.0264651)
+        self.assertEquals(round(calc[-1],6),0.026465)
         # Check Diff
         diff = sub_ws.readY(2)
         self.assertEquals(round(diff[0], 19), -5.31797e-14)
         self.assertEquals(round(diff[-1],6), 0.018612)
+
+    def _validate_sample_log_values(self, matrixWS):
+        run = matrixWS.getRun()
+        # Check additionally added logs
+        self.assertEqual(run.getProperty('fit_type').value, '1S')
+        self.assertEqual(run.getProperty('intensities_constrained').value, 'True')
+        self.assertEqual(run.getProperty('beta_constrained').value, 'True')
+        self.assertEqual(run.getProperty('end_x').value, 0.2)
+        self.assertEqual(run.getProperty('start_x').value, 0.0)
+
+        # Check copied logs from input
+        self.assertEqual(run.getProperty('current_period').value, 1)
+        self.assertEqual(run.getProperty('iqt_resolution_workspace').value, 'iris26173_graphite002_res')
+        self.assertEqual(run.getProperty('iqt_sample_workspace').value, 'iris26176_graphite002_red')
+
 
 #---------------------------------------Success cases--------------------------------------
 

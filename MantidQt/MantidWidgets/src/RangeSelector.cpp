@@ -12,23 +12,19 @@ using namespace MantidQt::MantidWidgets;
 RangeSelector::RangeSelector(QwtPlot *plot, SelectType type, bool visible,
                              bool infoOnly)
     : QwtPlotPicker(plot->canvas()), m_type(type), m_min(0.0), m_max(0.0),
-      m_lower(0.0), m_higher(0.0), m_mrkMin(NULL), m_mrkMax(NULL),
-      m_plot(plot), m_canvas(plot->canvas()),
-      m_minChanging(false), m_maxChanging(false),
-      m_infoOnly(infoOnly), m_visible(visible),
-      m_pen(NULL), m_movCursor() {
+      m_lower(0.0), m_higher(0.0), m_mrkMin(NULL), m_mrkMax(NULL), m_plot(plot),
+      m_canvas(plot->canvas()), m_minChanging(false), m_maxChanging(false),
+      m_infoOnly(infoOnly), m_visible(visible), m_pen(NULL), m_movCursor() {
   init();
 }
 
 RangeSelector::RangeSelector(PreviewPlot *plot, SelectType type, bool visible,
                              bool infoOnly)
     : QwtPlotPicker(plot->m_uiForm.plot->canvas()), m_type(type), m_min(0.0),
-      m_max(0.0), m_lower(0.0), m_higher(0.0),
-      m_mrkMin(NULL), m_mrkMax(NULL),
+      m_max(0.0), m_lower(0.0), m_higher(0.0), m_mrkMin(NULL), m_mrkMax(NULL),
       m_plot(plot->m_uiForm.plot), m_canvas(plot->m_uiForm.plot->canvas()),
-      m_minChanging(false), m_maxChanging(false),
-      m_infoOnly(infoOnly), m_visible(visible),
-      m_pen(NULL), m_movCursor() {
+      m_minChanging(false), m_maxChanging(false), m_infoOnly(infoOnly),
+      m_visible(visible), m_pen(NULL), m_movCursor() {
   init();
 }
 
@@ -377,9 +373,11 @@ void RangeSelector::setMax(double val) {
 }
 
 /**
- * @brief Find out if user is moving the line marking the position of the minimum
+ * @brief Find out if user is moving the line marking the position of the
+ * minimum
  * @param x new candidate position for the minimum
- * @param xPlusdx safety boundary indicating we are closer to the minimum than to the maximum
+ * @param xPlusdx safety boundary indicating we are closer to the minimum than
+ * to the maximum
  * @return
  */
 bool RangeSelector::changingMin(double x, double xPlusdx) {
@@ -387,9 +385,11 @@ bool RangeSelector::changingMin(double x, double xPlusdx) {
 }
 
 /**
- * @brief Find out if user is moving the line marking the position of the maximum
+ * @brief Find out if user is moving the line marking the position of the
+ * maximum
  * @param x new candidate position for the maximum
- * @param xPlusdx safety boundary indicating we are closer to the maximum than to the minimum
+ * @param xPlusdx safety boundary indicating we are closer to the maximum than
+ * to the minimum
  * @return
  */
 bool RangeSelector::changingMax(double x, double xPlusdx) {
@@ -424,7 +424,6 @@ void RangeSelector::verify() {
  * @param x
  * @return true if position within the allowed range
  */
-bool RangeSelector::inRange(double x)
-{
+bool RangeSelector::inRange(double x) {
   return (x >= m_lower && x <= m_higher);
 }

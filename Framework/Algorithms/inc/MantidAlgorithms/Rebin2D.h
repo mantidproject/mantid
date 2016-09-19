@@ -6,16 +6,9 @@
 //------------------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 
 namespace Mantid {
-//------------------------------------------------------------------------------
-// Forward declarations
-//------------------------------------------------------------------------------
-namespace Geometry {
-class ConvexPolygon;
-}
 
 namespace Algorithms {
 

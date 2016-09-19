@@ -20,18 +20,29 @@ More specifically, the algorithm maximizes the entropy :math:`S\left(x\right)` s
 .. math:: \chi^2 = \sum_m \frac{\left(d_m - d_m^c\right)^2}{\sigma_m^2} \leq C_{target}
 
 where :math:`d_m` are the experimental data, :math:`\sigma_m` the associated errors, and :math:`d_m^c`
-the calculated or reconstructed data. The image is the set of numbers
-:math:`\{x_0, x_1, \dots, x_N\}` which relates to the measured data as:
+the calculated or reconstructed data. The image is a set of numbers
+:math:`\{x_0, x_1, \dots, x_N\}` related to the measured data via a 1D Fourier transform:
 
-.. math:: d_m = \sum_j M_{mj} x_j
+.. math:: d_m = \sum_{j=0}^{N-1} x_j e^{i 2\pi m j / N}
 
-where the measurement kernel matrix :math:`\mathbf{M}` represents a Fourier transform,
-:math:`M_{mj} = \exp\left(-ik_mj\right)`. At present, nothing is assumed about :math:`x_j`:
-it can be either positive or negative and real or complex, and the entropy is defined as
+Note that even for real input data the reconstructed image can be complex, which means that both the real and
+imaginary parts will be taken into account for the calculations. This is the default behaviour, which can be
+changed by setting the input property *ComplexImage* to *False*. Note that the algorithm will fail to converge
+if the image is complex (i.e. the data does not satisfy Friedel's law) and this option is set to *False*. 
+For this reason, it is recomended to use the default when no prior knowledge is available. 
 
-.. math:: S = \sum_j \left(x_j/A\right) \sinh^{-1} \left(x_j/A\right)
+The entropy is defined on the image :math:`\{x_j\}` as:
 
-where :math:`A` is a constant. The sensitive of the reconstructed image to reconstructed
+.. math:: S = \sum_j \left[ \sqrt{x_j^2 + A^2} - x_j \sinh^{-1}\left(\frac{x_j}{A}\right) \right]
+
+
+or
+
+.. math:: S = -\sum_j x_j \left(\log(x_j/A)-1\right)
+
+where :math:`A` is a constant and the formula which is used depends on the input property *PositiveImage*: when it is
+set to *False* the first equation will be applied, whereas the latter expresion will be used if this property
+is set to *True*. The sensitive of the reconstructed image to reconstructed
 image will vary depending on the data. In general a smaller value would preduce a
 sharper image. See section 4.7 in Ref. [1] for recommended strategy to selected :math:`A`.
 
@@ -42,10 +53,11 @@ construct a subspace from a set of *search directions* to approach the maximum e
 the image :math:`x` is set to the flat background :math:`A` and the search directions are constructed
 using the gradients of :math:`S` and :math:`\chi^2`:
 
-.. math:: \mathbf{e}_1 = f\left(\nabla S\right)
-.. math:: \mathbf{e}_2 = f\left(\nabla \chi^2\right)
+.. math:: \mathbf{e}_1 = \left|x\right|\left(\nabla S\right)
+.. math:: \mathbf{e}_2 = \left|x\right|\left(\nabla \chi^2\right)
 
-where :math:`f\left(\nabla S\right)` stands for a componentwise multiplication. The algorithm next uses
+where :math:`a\left(b\right)` stands for a componentwise multiplication between vectors
+:math:`a` and :math:`b`. The algorithm next uses
 a quadratic approximation to determine the increment :math:`\delta \mathbf{x}` that *moves* the image
 one step closer to the solution:
 
@@ -84,7 +96,7 @@ the output workspaces whether the algorithm was evolving towards the correct sol
 On the other hand, the user must always check the validity of the solution by inspecting *EvolChi* and *EvolAngle*,
 whose values will be set to zero once the true maximum entropy solution is found.
 
-.. table:: Table 1. Output workspaces for the case of real data (M histograms and N bins in the input workspace)
+.. table:: Table 1. Output workspaces for a real input workspace with M histograms and N bins
 
     +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
     | Workspace         | Number of histograms         | Number of bins | Description                                                                                                                                                                                                                                                                                                        |
@@ -98,7 +110,7 @@ whose values will be set to zero once the true maximum entropy solution is found
     | ReconstructedData | 2M                           | N              | For spectrum :math:`s` in the input workspace, the reconstructed data are stored in spectrum :math:`s` (real part) and :math:`s+M` (imaginary part). Note that although the input is real, the imaginary part is recorded for debugging purposes, it should be zero for all data points.                           |
     +-------------------+------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-.. table:: Table 2. Output workspaces for the case of complex input (2M histograms and N bins in the input workspace. Real and imaginary parts must be consecutive)
+.. table:: Table 2. Output workspaces for a complex input workspace with 2M histograms and N bins.
 
     +-------------------+------------------------------+----------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
     | Workspace         | Number of histograms         | Number of bins | Description                                                                                                                                                |
@@ -136,7 +148,7 @@ and the reconstructed image, i.e. Fourier transform (right).
        E.append(0.001)
 
    # Fill in five Fourier coefficients
-   # The input signal must be symmetric
+   # The input signal must be symmetric to get a real image
    Y[5] = Y[195] = 0.85
    Y[10] = Y[190] = 0.85
    Y[20] = Y[180] = 0.85
@@ -155,11 +167,11 @@ Output:
 
 .. testoutput:: ExFourierCoeffs
 
-   First  reconstructed coefficient: 0.849
-   Second reconstructed coefficient: 0.847
-   Third  reconstructed coefficient: 0.848
-   Fourth reconstructed coefficient: 0.901
-   Fifth  reconstructed coefficient: 0.899
+   First  reconstructed coefficient: 0.847
+   Second reconstructed coefficient: 0.846
+   Third  reconstructed coefficient: 0.846
+   Fourth reconstructed coefficient: 0.896
+   Fifth  reconstructed coefficient: 0.896
 
 .. figure:: ../images/MaxEntFourierCoefficients.png
    :align: center
@@ -189,9 +201,9 @@ Output:
 
 .. testoutput:: ExMUSR00022725
 
-   Image at -1.359: 0.102
-   Image at 0.000: 0.010
-   Image at 1.359: 0.102
+   Image at -1.359: 0.100
+   Image at 0.000: 0.009
+   Image at 1.359: 0.100
 
 .. figure:: ../images/MaxEntMUSR00022725.png
    :align: center
@@ -276,7 +288,7 @@ Positive Images
 
 The algorithm allows users to restrict the reconstructed image to positive values only. This behaviour can be
 selected by setting the input property *PositiveImage* to true. In this case, the entropy is defined by the
-alternative expression:
+expression:
 
 .. math:: S = -\sum_j x_j \left(\log(x_j/A)-1\right)
 
@@ -305,55 +317,67 @@ image in order to obtain smooth results).
        YIm.append(sin(w*x)+(random()-0.5)*0.3)
        E.append(0.1)
    CreateWorkspace(OutputWorkspace='ws',DataX=X+X,DataY=YRe+YIm,DataE=E+E,NSpec=2)
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=1, PositiveImage=False)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001, PositiveImage=False)
    evolChiP, evolAngleP, imageP, dataP = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001, PositiveImage=True)
 
    print "Image at %.3f: %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[102], image.readY(0)[102], imageP.readY(0)[102])
-   print "Image at %.3f:  %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[103], image.readY(0)[103], imageP.readY(0)[103])
+   print "Image at %.3f: %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[103], image.readY(0)[103], imageP.readY(0)[103])
    print "Image at %.3f: %.3f (PositiveImage=False), %.3f (PositiveImage=True)" % (image.readX(0)[104], image.readY(0)[104], imageP.readY(0)[102])
 
 Output:
 
 .. testoutput:: ExRealPosImage
 
-   Image at 0.318: -0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
-   Image at 0.477:  5.843 (PositiveImage=False), 5.842 (PositiveImage=True)
-   Image at 0.637: -0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
+   Image at 0.318: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
+   Image at 0.477: 5.842 (PositiveImage=False), 5.842 (PositiveImage=True)
+   Image at 0.637: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
 
 .. figure:: ../images/MaxEntPositiveImage.png
    :align: center
 
-Increasing the density of points in the image
----------------------------------------------
+Complex Images
+--------------
 
-The algorithm has an input property, *DensityFactor* that allows to increase the number of points in the reconstructed image. This is
-at present done by extending the range (and also the number of points) in the reconstructed data. The number of reconstructed
-points can be increased by any integer factor, but note that this will slow down the algorithm and a greater number of maxent iterations may be needed
-for the algorithm to converge to a solution.
+By default the input property *ComplexImage* is set to *True* and the algorithm will assume complex images for the calculations.
+This means that the set of numbers :math:`\{x_j\}` that form the image will have a real and an imaginary part, and both components will be
+considered to evaluate the entropy, :math:`S\left(x_j\right)`, and its derivative, :math:`\nabla S\left(x_j\right)`. This effectively means
+splitting the entropy (the same applies to its derivative) in two terms, :math:`S\left(x_j\right) = \left[S\left(x_j^{re}\right), S\left(x_j^{im}\right)\right]`,
+where the first one refers to the real part of the entropy and the second one to the imaginary part. This is the recommended option when no prior knowledge
+about the image is available, as trying to reconstruct images that are inherently complex discarding the imaginary part will prevent the algorithm
+from converging. If the image is known to be real this property can be safely set to *False*.
+
+
+Increasing the number of points in the image
+--------------------------------------------
+
+The algorithm has an input property, *ResolutionFactor*, that allows to increase the number of points in the reconstructed image. This is
+at present done by extending the range (and therefore the number of points) in the reconstructed data. The number of reconstructed
+points can be increased by any integer factor, but note that this will slow down the algorithm and you may need to increase the number of
+maxent iterations so that the algorithm is able to converge to a solution.
 
 An example script where the density of points is increased by a factor of 2 can be found below. Note that when a factor of 2 is used,
 the reconstructed data is twice the size of the original (experimental) data.
 
-.. testcode:: ExDensityFactor
+.. testcode:: ExResolutionFactor
 
    Load(Filename=r'EMU00020884.nxs', OutputWorkspace='ws')
    CropWorkspace(InputWorkspace='ws', OutputWorkspace='ws', XMin=0.17, XMax=4.5, EndWorkspaceIndex=0)
    ws = RemoveExpDecay(InputWorkspace='ws')
    ws = Rebin(InputWorkspace='ws', Params='0.016')
-   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=2500, DensityFactor=1)
-   evolChi2, evolAngle2, image2, data2 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=5000, DensityFactor=2)
+   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=2500, ResolutionFactor=1)
+   evolChi2, evolAngle2, image2, data2 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=5000, ResolutionFactor=2)
 
-   print "Image at %.3f:  %.3f (DensityFactor=1)" % (image1.readX(0)[103], image1.readY(0)[103])
-   print "Image at %.3f: %.3f (DensityFactor=2)" % (image2.readX(0)[258], image2.readY(0)[258])
+   print "Image at %.3f: %.3f (ResolutionFactor=1)" % (image1.readX(0)[135], image1.readY(0)[135])
+   print "Image at %.3f: %.3f (ResolutionFactor=2)" % (image2.readX(0)[270], image2.readY(0)[270])
 
 Output:
 
-.. testoutput:: ExDensityFactor
+.. testoutput:: ExResolutionFactor
 
-   Image at -7.407:  0.000 (DensityFactor=1)
-   Image at -1.389: -0.081 (DensityFactor=2)
+   Image at 0.000: 0.015 (ResolutionFactor=1)
+   Image at 0.000: 0.079 (ResolutionFactor=2)
 
-.. figure:: ../images/MaxEntDensityFactor.png
+.. figure:: ../images/MaxEntResolutionFactor.png
    :align: center
 
 In the next example, we increased the density of points by factors of 10, 20 and 40. We show the reconstructed image (left) and
@@ -365,12 +389,12 @@ a zoom into the region :math:`0.82 < x < 1.44` and :math:`-0.187 < y < 0.004`.
    CropWorkspace(InputWorkspace='ws', OutputWorkspace='ws', XMin=0.17, XMax=4.5, EndWorkspaceIndex=0)
    ws = RemoveExpDecay(InputWorkspace='ws')
    ws = Rebin(InputWorkspace='ws', Params='0.016')
-   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=2500, DensityFactor=1)
-   evolChi10, evolAngle10, image10, data10 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=25000, DensityFactor=10)
-   evolChi20, evolAngle20, image20, data20 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=50000, DensityFactor=20)
-   evolChi40, evolAngle40, image40, data40 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=75000, DensityFactor=40)
+   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=2500, ResolutionFactor=1)
+   evolChi10, evolAngle10, image10, data10 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=25000, ResolutionFactor=10)
+   evolChi20, evolAngle20, image20, data20 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=50000, ResolutionFactor=20)
+   evolChi40, evolAngle40, image40, data40 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=75000, ResolutionFactor=40)
 
-.. figure:: ../images/MaxEntDensityFactor2.png
+.. figure:: ../images/MaxEntResolutionFactor2.png
    :align: center
 
 References
@@ -379,8 +403,6 @@ References
 [1] Anders Johannes Markvardsen, (2000). Polarised neutron diffraction measurements of PrBa2Cu3O6+x and the Bayesian statistical analysis of such data. DPhil. University of Oxford (http://ora.ox.ac.uk/objects/uuid:bef0c991-4e1c-4b07-952a-a0fe7e4943f7)
 
 [2] Skilling & Bryan, (1984). Maximum entropy image reconstruction: general algorithm. Mon. Not. R. astr. Soc. 211, 111-124.
-
-[3] Smith & Player, (1990). Deconvolution of bipolar ultrasonic signals using a modified maximum entropy method. J. Phys. D: Appl. Phys. 24, 1714-1721.
 
 .. categories::
 

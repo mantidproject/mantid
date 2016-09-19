@@ -177,7 +177,7 @@ def fix_image_links(rst_text, wiki_markup, rel_img_dir):
     It returns the processed text + the names of the required images from the wiki
     """
     mw_img_re = re.compile(r'\[\[(Image|File):(.+?)(\|.*?)?(\|.*?)?(\|.*?)?(\|.*?)?(\|.*?)?(\|.*?)?\]\]',
-                                re.IGNORECASE)
+                           re.IGNORECASE)
     rst_img_re = re.compile(r'figure:: (([\w\-\_\\\/]+)\.(\w{2,5}))(.{0,50}\3){2}',
                             re.DOTALL)
     rst_sub_re = re.compile(r'(figure|image):: (([\w\-\_\\\/]+)\.(\w{2,5}))')

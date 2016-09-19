@@ -1,11 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/ApplyTransmissionCorrection.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -19,6 +17,7 @@ DECLARE_ALGORITHM(ApplyTransmissionCorrection)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+using namespace HistogramData;
 
 void ApplyTransmissionCorrection::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -61,10 +60,8 @@ void ApplyTransmissionCorrection::exec() {
   const double trans_error = getProperty("TransmissionError");
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
-  MantidVec trans(inputWS->readY(0).size(), trans_value);
-  MantidVec dtrans(inputWS->readY(0).size(), trans_error);
-  MantidVec &TrIn = trans;
-  MantidVec &ETrIn = dtrans;
+  HistogramY TrIn(inputWS->y(0).size(), trans_value);
+  HistogramE ETrIn(inputWS->y(0).size(), trans_error);
 
   if (isEmpty(trans_value)) {
     // Get the transmission workspace
@@ -72,15 +69,15 @@ void ApplyTransmissionCorrection::exec() {
 
     // Check that the two input workspaces are consistent (same number of X
     // bins)
-    if (transWS->readY(0).size() != inputWS->readY(0).size()) {
+    if (transWS->y(0).size() != inputWS->y(0).size()) {
       g_log.error() << "Input and transmission workspaces have a different "
-                       "number of wavelength bins" << std::endl;
+                       "number of wavelength bins\n";
       throw std::invalid_argument("Input and transmission workspaces have a "
                                   "different number of wavelength bins");
     }
 
-    TrIn = transWS->readY(0);
-    ETrIn = transWS->readE(0);
+    TrIn = transWS->y(0);
+    ETrIn = transWS->e(0);
   }
 
   const int numHists = static_cast<int>(inputWS->getNumberHistograms());
@@ -89,42 +86,32 @@ void ApplyTransmissionCorrection::exec() {
   // Create a Workspace2D to match the intput workspace
   MatrixWorkspace_sptr corrWS = WorkspaceFactory::Instance().create(inputWS);
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+
   // Loop through the spectra and apply correction
   PARALLEL_FOR2(inputWS, corrWS)
   for (int i = 0; i < numHists; i++) {
     PARALLEL_START_INTERUPT_REGION
 
-    IDetector_const_sptr det;
-    try {
-      det = inputWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i
-                      << " has no detector assigned to it - discarding"
-                      << std::endl;
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found, skip onto the next spectrum
-    if (!det)
+                      << " has no detector assigned to it - discarding'\n";
       continue;
+    }
 
     // Copy over the X data
-    corrWS->dataX(i) = inputWS->readX(i);
+    corrWS->setSharedX(i, inputWS->sharedX(i));
 
     // Skip if we have a monitor or if the detector is masked.
-    if (det->isMonitor() || det->isMasked())
+    if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
       continue;
 
     // Compute theta-dependent transmission term for each wavelength bin
-    MantidVec &YOut = corrWS->dataY(i);
-    MantidVec &EOut = corrWS->dataE(i);
+    auto &YOut = corrWS->mutableY(i);
+    auto &EOut = corrWS->mutableE(i);
 
-    const double exp_term =
-        (1.0 / cos(inputWS->detectorTwoTheta(det)) + 1.0) / 2.0;
-    for (int j = 0; j < static_cast<int>(inputWS->readY(0).size()); j++) {
+    const double exp_term = 0.5 / cos(spectrumInfo.twoTheta(i)) + 0.5;
+    for (int j = 0; j < static_cast<int>(inputWS->y(0).size()); j++) {
       if (!thetaDependent) {
         YOut[j] = 1.0 / TrIn[j];
         EOut[j] = std::fabs(ETrIn[j] * TrIn[j] * TrIn[j]);

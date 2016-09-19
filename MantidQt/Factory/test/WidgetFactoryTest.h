@@ -11,21 +11,14 @@ using namespace Mantid;
 using namespace Mantid::Factory;
 using namespace Mantid::API;
 
-class WidgetFactoryTest : public CxxTest::TestSuite
-{
+class WidgetFactoryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static WidgetFactoryTest *createSuite() { return new WidgetFactoryTest(); }
-  static void destroySuite( WidgetFactoryTest *suite ) { delete suite; }
+  static void destroySuite(WidgetFactoryTest *suite) { delete suite; }
 
-
-  void test_Something()
-  {
-  }
-
-
+  void test_Something() {}
 };
-
 
 #endif /* MANTID_FACTORY_WIDGETFACTORYTEST_H_ */

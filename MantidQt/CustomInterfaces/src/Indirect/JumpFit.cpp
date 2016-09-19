@@ -17,7 +17,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 JumpFit::JumpFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_jfTree(NULL) {
+    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr) {
   m_uiForm.setupUi(parent);
 }
 
@@ -70,6 +70,10 @@ void JumpFit::setup() {
 
   connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(generatePlotGuess()));
+
+  // Handle plotting and saving
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 }
 
 /**
@@ -101,18 +105,6 @@ bool JumpFit::validate() {
  * script that runs JumpFit
  */
 void JumpFit::run() {
-  bool plot = m_uiForm.chkPlot->isChecked();
-  bool save = m_uiForm.chkSave->isChecked();
-  runImpl(plot, save);
-}
-
-/**
- * Runs algorithm.
- *
- * @param plot Enable/disable plotting
- * @param save Enable/disable saving
- */
-void JumpFit::runImpl(bool plot, bool save) {
   // Do noting with invalid data
   if (!m_uiForm.dsSample->isValid())
     return;
@@ -147,15 +139,6 @@ void JumpFit::runImpl(bool plot, bool save) {
   m_fitAlg->setProperty("Output", outputName.toStdString());
 
   m_batchAlgoRunner->addAlgorithm(m_fitAlg);
-
-  // Add save step if required
-  if (save) {
-    QString outWsName = outputName + "_Workspace";
-    addSaveWorkspaceToQueue(outWsName);
-  }
-  // update plot result state when run
-  m_plotResult = plot;
-
   // Connect algorithm runner to completion handler function
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(fitAlgDone(bool)));
@@ -173,7 +156,8 @@ void JumpFit::fitAlgDone(bool error) {
   // Ignore errors
   if (error)
     return;
-
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
   std::string outName = m_fitAlg->getPropertyValue("Output");
 
   // Get output workspace name
@@ -197,12 +181,6 @@ void JumpFit::fitAlgDone(bool error) {
     if (specName == "Diff")
       m_uiForm.ppPlot->addSpectrum("Diff", outputWorkspace, histIndex,
                                    Qt::blue);
-  }
-
-  // plot result
-  if (m_plotResult) {
-    std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
-    plotSpectrum(QString::fromStdString(outWsName), 0, 2);
   }
 
   // Update parameters in UI
@@ -558,6 +536,24 @@ void JumpFit::deletePlotGuessWorkspaces(const bool &removePlotGuess) {
   }
 }
 
+/**
+ * Handles mantid plotting
+ */
+void JumpFit::plotClicked() {
+  std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
+  checkADSForPlotSaveWorkspace(outWsName, true);
+  plotSpectrum(QString::fromStdString(outWsName), 0, 2);
+}
+
+/**
+ * Handles saving of workspace
+ */
+void JumpFit::saveClicked() {
+  std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
+  checkADSForPlotSaveWorkspace(outWsName, false);
+  addSaveWorkspaceToQueue(QString::fromStdString(outWsName));
+  m_batchAlgoRunner->executeBatchAsync();
+}
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

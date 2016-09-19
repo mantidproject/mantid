@@ -22,7 +22,6 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidAPI/MemoryManager.h"
 
 #include <algorithm>
 #include <sstream>
@@ -49,7 +48,6 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using DataObjects::TofEvent;
 using std::cout;
-using std::endl;
 using std::ifstream;
 using std::runtime_error;
 using std::stringstream;
@@ -295,7 +293,7 @@ void LoadEventPreNexus::exec() {
     if (!pulseid_filename.empty()) {
       if (Poco::File(pulseid_filename).exists()) {
         this->g_log.information() << "Found pulseid file " << pulseid_filename
-                                  << std::endl;
+                                  << '\n';
         throwError = false;
       } else {
         pulseid_filename = "";
@@ -348,7 +346,7 @@ void LoadEventPreNexus::exec() {
     mapping_filename = generateMappingfileName(localWorkspace);
     if (!mapping_filename.empty())
       this->g_log.information() << "Found mapping file \"" << mapping_filename
-                                << "\"" << std::endl;
+                                << "\"\n";
   }
   this->loadPixelMap(mapping_filename);
 
@@ -447,7 +445,7 @@ void LoadEventPreNexus::procEvents(
     double setUpTime = double(detector_map.size()) * 10e-6;
     parallelProcessing = ((double(max_events) / 7e6) > setUpTime);
     g_log.debug() << (parallelProcessing ? "Using" : "Not using")
-                  << " parallel processing." << std::endl;
+                  << " parallel processing.\n";
   }
 
   // determine maximum pixel id
@@ -533,12 +531,12 @@ void LoadEventPreNexus::procEvents(
     for (detid_t j = 0; j < detid_max + 1; j++) {
       size_t wi = pixel_to_wkspindex[j];
       // Save a POINTER to the vector<tofEvent>
-      theseEventVectors[j] = &partWS->getEventList(wi).getEvents();
+      theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
     }
   }
 
   g_log.debug() << tim << " to create " << partWorkspaces.size()
-                << " workspaces for parallel loading." << std::endl;
+                << " workspaces for parallel loading.\n";
 
   prog->resetNumSteps(numBlocks, 0.1, 0.8);
 
@@ -586,7 +584,7 @@ void LoadEventPreNexus::procEvents(
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  g_log.debug() << tim << " to load the data." << std::endl;
+  g_log.debug() << tim << " to load the data.\n";
 
   // ---------------------------------- MERGE WORKSPACES BACK TOGETHER
   // --------------------------
@@ -594,47 +592,32 @@ void LoadEventPreNexus::procEvents(
     PARALLEL_START_INTERUPT_REGION
     prog->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
 
-    size_t memoryCleared = 0;
-    MemoryManager::Instance().releaseFreeMemory();
-
     // Merge all workspaces, index by index.
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int iwi = 0; iwi < int(workspace->getNumberHistograms()); iwi++) {
       size_t wi = size_t(iwi);
 
       // The output event list.
-      EventList &el = workspace->getEventList(wi);
+      EventList &el = workspace->getSpectrum(wi);
       el.clear(false);
 
       // How many events will it have?
       size_t numEvents = 0;
       for (size_t i = 0; i < numThreads; i++)
-        numEvents += partWorkspaces[i]->getEventList(wi).getNumberEvents();
+        numEvents += partWorkspaces[i]->getSpectrum(wi).getNumberEvents();
       // This will avoid too much copying.
       el.reserve(numEvents);
 
       // Now merge the event lists
       for (size_t i = 0; i < numThreads; i++) {
-        EventList &partEl = partWorkspaces[i]->getEventList(wi);
+        EventList &partEl = partWorkspaces[i]->getSpectrum(wi);
         el += partEl.getEvents();
         // Free up memory as you go along.
         partEl.clear(false);
       }
-
-      // With TCMalloc, release memory when you accumulate enough to make sense
-      PARALLEL_CRITICAL(LoadEventPreNexus_trackMemory) {
-        memoryCleared += numEvents;
-        if (memoryCleared > 10000000) // ten million events = about 160 MB
-        {
-          MemoryManager::Instance().releaseFreeMemory();
-          memoryCleared = 0;
-        }
-      }
       prog->report("Merging Workspaces");
     }
-    // Final memory release
-    MemoryManager::Instance().releaseFreeMemory();
-    g_log.debug() << tim << " to merge workspaces together." << std::endl;
+    g_log.debug() << tim << " to merge workspaces together.\n";
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -656,17 +639,13 @@ void LoadEventPreNexus::procEvents(
 
   prog->report("Setting proton charge");
   this->setProtonCharge(workspace);
-  g_log.debug() << tim << " to set the proton charge log." << std::endl;
+  g_log.debug() << tim << " to set the proton charge log.\n";
 
   // Make sure the MRU is cleared
   workspace->clearMRU();
 
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef.resize(2);
-  xRef[0] = shortest_tof - 1; // Just to make sure the bins hold it all
-  xRef[1] = longest_tof + 1;
+  auto axis = HistogramData::BinEdges{shortest_tof - 1, longest_tof + 1};
   workspace->setAllX(axis);
   this->pixel_to_wkspindex.clear();
 
@@ -674,7 +653,7 @@ void LoadEventPreNexus::procEvents(
                       << this->num_error_events << " errors"
                       << ". Shortest TOF: " << shortest_tof
                       << " microsec; longest TOF: " << longest_tof
-                      << " microsec." << std::endl;
+                      << " microsec.\n";
 }
 
 //-----------------------------------------------------------------------------
@@ -776,10 +755,10 @@ void LoadEventPreNexus::procEventsLinear(
 
     // The addEventQuickly method does not clear the cache, making things
     // slightly faster.
-    // workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
+    // workspace->getSpectrum(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
 
     // This is equivalent to
-    // workspace->getEventList(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
+    // workspace->getSpectrum(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
     // But should be faster as a bunch of these calls were cached.
     arrayOfVectors[pid]->push_back(event);
 
@@ -924,7 +903,7 @@ void LoadEventPreNexus::readPulseidFile(const std::string &filename,
     return;
   }
 
-  std::vector<Pulse> *pulses;
+  std::vector<Pulse> pulses;
 
   // set up for reading
   // Open the file; will throw if there is any problem
@@ -953,14 +932,12 @@ void LoadEventPreNexus::readPulseidFile(const std::string &filename,
 
   if (num_pulses > 0) {
     this->pulsetimes.reserve(num_pulses);
-    for (size_t i = 0; i < num_pulses; i++) {
-      Pulse &it = (*pulses)[i];
-      this->pulsetimes.push_back(
-          DateAndTime(static_cast<int64_t>(it.seconds),
-                      static_cast<int64_t>(it.nanoseconds)));
-      this->event_indices.push_back(it.event_index);
+    for (const auto &pulse : pulses) {
+      this->pulsetimes.emplace_back(static_cast<int64_t>(pulse.seconds),
+                                    static_cast<int64_t>(pulse.nanoseconds));
+      this->event_indices.push_back(pulse.event_index);
 
-      temp = it.pCurrent;
+      temp = pulse.pCurrent;
       this->proton_charge.push_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");
@@ -970,9 +947,6 @@ void LoadEventPreNexus::readPulseidFile(const std::string &filename,
   }
 
   this->proton_charge_tot = this->proton_charge_tot * CURRENT_CONVERSION;
-
-  // Clear the vector
-  delete pulses;
 }
 
 } // namespace DataHandling

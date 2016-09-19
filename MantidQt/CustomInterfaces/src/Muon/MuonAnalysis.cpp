@@ -21,6 +21,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h"
@@ -52,8 +53,6 @@
 #include <QHeaderView>
 #include <QApplication>
 #include <QTemporaryFile>
-#include <QDesktopServices>
-#include <QUrl>
 
 #include <fstream>
 
@@ -62,12 +61,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(MuonAnalysis)
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::CustomInterfaces;
 using namespace MantidQt::CustomInterfaces::Muon;
 using namespace Mantid::Geometry;
+using namespace MuonAnalysisHelper;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::Grouping;
 
@@ -80,6 +81,7 @@ Mantid::Kernel::Logger g_log("MuonAnalysis");
 const QString MuonAnalysis::NOT_AVAILABLE("N/A");
 const QString MuonAnalysis::TIME_ZERO_DEFAULT("0.2");
 const QString MuonAnalysis::FIRST_GOOD_BIN_DEFAULT("0.3");
+const std::string MuonAnalysis::PEAK_RADIUS_CONFIG("curvefitting.peakRadius");
 
 //----------------------
 // Public member functions
@@ -297,10 +299,6 @@ void MuonAnalysis::initLayout() {
 
   connectAutoSave();
 
-  // Muon scientists never fits peaks, hence they want the following parameter,
-  // set to a high number
-  ConfigService::Instance().setString("curvefitting.peakRadius", "99");
-
   connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this,
           SLOT(onDeadTimeTypeChanged(int)));
 
@@ -323,16 +321,16 @@ void MuonAnalysis::initLayout() {
 * Muon Analysis help (slot)
 */
 void MuonAnalysis::muonAnalysisHelpClicked() {
-  QDesktopServices::openUrl(
-      QUrl(QString("http://www.mantidproject.org/") + "MuonAnalysis"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
+                                                 QString("Muon_Analysis"));
 }
 
 /**
 * Muon Analysis Grouping help (slot)
 */
 void MuonAnalysis::muonAnalysisHelpGroupingClicked() {
-  QDesktopServices::openUrl(
-      QUrl(QString("http://www.mantidproject.org/") + "MuonAnalysisGrouping"));
+  MantidQt::API::HelpWindow::showCustomInterface(
+      nullptr, QString("Muon_Analysis"), QString("grouping-options"));
 }
 
 /**
@@ -471,17 +469,21 @@ std::string MuonAnalysis::getNewAnalysisWSName(ItemType itemType, int tableRow,
     workspaceName << "Logs";
     break;
   }
-  
-  // Period(s)
-  workspaceName << sep << getPeriodLabels();
 
-  // Construct workspace name
+  // Period(s)
+  const auto periods = getPeriodLabels();
+  if (!periods.empty()) {
+    workspaceName << sep << periods;
+  }
+
+  // Version - always "#1" if overwrite is on, otherwise increment
+  workspaceName << sep << "#";
   std::string newName;
   if (isOverwriteEnabled()) {
+    workspaceName << "1"; // Always use #1
     newName = workspaceName.str();
   } else {
     // If overwrite is disabled, need to find unique name for the new workspace
-    workspaceName << sep << "#";
     newName = workspaceName.str();
     std::string uniqueName;
     int plotNum(1);
@@ -663,8 +665,7 @@ void MuonAnalysis::runSaveGroupButton() {
   QString prevPath =
       prevValues.value("dir", QString::fromStdString(
                                   ConfigService::Instance().getString(
-                                      "defaultsave.directory")))
-          .toString();
+                                      "defaultsave.directory"))).toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
@@ -703,8 +704,7 @@ void MuonAnalysis::runLoadGroupButton() {
   QString prevPath =
       prevValues.value("dir", QString::fromStdString(
                                   ConfigService::Instance().getString(
-                                      "defaultload.directory")))
-          .toString();
+                                      "defaultload.directory"))).toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
@@ -1198,7 +1198,9 @@ MuonAnalysis::load(const QStringList &files) const {
 
     if (f == files.constBegin()) {
       // These are only needed for the first file
-      load->setPropertyValue("DeadTimeTable", "__NotUsed");
+      if (m_uiForm.deadTimeType->currentText() == "From Data File") {
+        load->setPropertyValue("DeadTimeTable", "__NotUsed");
+      }
       load->setPropertyValue("DetectorGroupingTable", "__NotUsed");
     }
 
@@ -1211,10 +1213,18 @@ MuonAnalysis::load(const QStringList &files) const {
 
       // Check that is a valid Muon instrument
       if (m_uiForm.instrSelector->findText(QString::fromStdString(instrName)) ==
-          -1)
-        throw std::runtime_error("Instrument is not recognized: " + instrName);
+          -1) {
+        if (0 !=
+            instrName.compare(
+                "DEVA")) { // special case - no IDF but let it load anyway
+          throw std::runtime_error("Instrument is not recognized: " +
+                                   instrName);
+        }
+      }
 
-      result->loadedDeadTimes = load->getProperty("DeadTimeTable");
+      if (m_uiForm.deadTimeType->currentText() == "From Data File") {
+        result->loadedDeadTimes = load->getProperty("DeadTimeTable");
+      }
       result->loadedGrouping = load->getProperty("DetectorGroupingTable");
       result->mainFieldDirection =
           static_cast<std::string>(load->getProperty("MainFieldDirection"));
@@ -1270,30 +1280,21 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
   auto result = boost::make_shared<GroupResult>();
 
   boost::shared_ptr<Mantid::API::Grouping> groupingToUse;
-
   Instrument_const_sptr instr =
       firstPeriod(loadResult->loadedWorkspace)->getInstrument();
 
-  // Check whether the instrument was changed
-  int instrIndex = m_uiForm.instrSelector->findText(
-      QString::fromStdString(instr->getName()));
-  bool instrChanged = m_uiForm.instrSelector->currentIndex() != instrIndex;
-
-  // Check whether the number of spectra was changed
-  bool noSpectraChanged(true);
-
+  Workspace_sptr currentWS;
   if (AnalysisDataService::Instance().doesExist(m_workspace_name)) {
-    auto currentWs =
+    currentWS =
         AnalysisDataService::Instance().retrieveWS<Workspace>(m_workspace_name);
-    size_t currentNoSpectra = firstPeriod(currentWs)->getNumberHistograms();
-
-    size_t loadedNoSpectra =
-        firstPeriod(loadResult->loadedWorkspace)->getNumberHistograms();
-
-    noSpectraChanged = (currentNoSpectra != loadedNoSpectra);
+  } else {
+    currentWS = nullptr;
   }
 
-  if (!noSpectraChanged && !instrChanged && isGroupingSet()) {
+  const bool reloadNecessary =
+      isReloadGroupingNecessary(currentWS, loadResult->loadedWorkspace);
+
+  if (!reloadNecessary && isGroupingSet()) {
     // Use grouping currently set
     result->usedExistGrouping = true;
     groupingToUse = boost::make_shared<Mantid::API::Grouping>(
@@ -1312,6 +1313,7 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
                       << "\n";
 
       if (loadResult->loadedGrouping) {
+        g_log.warning("Using grouping loaded from NeXus file.");
         ITableWorkspace_sptr groupingTable;
 
         if (!(groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>(
@@ -1803,14 +1805,13 @@ std::string MuonAnalysis::getPeriodLabels() const {
 }
 
 /**
- * plots specific WS spectrum (used by plotPair and plotGroup)
+ * Plots specific WS spectrum (used by plotPair and plotGroup)
+ * This is done with a Python script (there must be a better way!)
  * @param wsName   :: Workspace name
  * @param logScale :: Whether to plot using logarithmic scale
  */
 void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
-  // List of script lines which acquire a window for plotting. The window is
-  // placed to Python
-  // variable named 'w';'
+  // List of script lines which acquire a window and plot in it.
   QStringList acquireWindowScript;
 
   MuonAnalysisOptionTab::NewPlotPolicy policy = m_optionTab->newPlotPolicy();
@@ -1822,28 +1823,81 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   }
 
   QStringList &s = acquireWindowScript; // To keep short
-  s << "ws = mtd['%WSNAME%']";
-  s << "altName = ws.name() + '-1'";
 
-  if (policy == MuonAnalysisOptionTab::PreviousWindow) {
-    s << "ew = graph(altName)";
-    s << "if '%WSNAME%' != '%PREV%' and ew != None:";
-    s << "    ew.close()";
+  // Get the window to plot in (returns window)
+  // ws_name: name of workspace to plot
+  // prev_name: name of currently plotted workspace
+  // use_prev: whether to plot in existing window or new
+  s << "def get_window(ws_name, prev_name, use_prev):";
+  s << "  graph_name = ws_name + '-1'";
+  s << "  if not use_prev:";
+  s << "    return newGraph(graph_name, 0)";
+  s << "  existing = graph(graph_name)";
+  s << "  if existing is not None and ws_name != prev_name:";
+  s << "    existing.close()";
+  s << "  window = graph(prev_name + '-1')";
+  s << "  if window is None:";
+  s << "    window = newGraph(graph_name, 0)";
+  s << "  return window";
+  s << "";
 
-    s << "pw = graph('%PREV%-1')";
-    s << "if pw == None:";
-    s << "  pw = newGraph(altName, 0)";
-  } else if (policy == MuonAnalysisOptionTab::NewWindow) {
-    s << "pw = newGraph(altName, 0)";
-  }
+  // Remove data and difference from given plot (keep fit and guess)
+  // num_to_keep: number of previous fits to keep
+  s << "def remove_data(window, num_to_keep):";
+  s << "  if window is None:";
+  s << "    raise ValueError('No plot to remove data from')";
+  // Need to keep the last "num_to_keep" curves with
+  // "Workspace-Calc" in their name, plus guesses
+  s << "  layer = window.activeLayer()";
+  s << "  if layer is not None:";
+  s << "    kept_fits = 0";
+  s << "    for i in range(layer.numCurves() - 1, -1, -1):"; // reversed
+  s << "      title = layer.curveTitle(i)";
+  s << "      if title == \"CompositeFunction\":";
+  s << "        continue"; // keep all guesses
+  s << "      if \"Workspace-Calc\" in title and kept_fits < num_to_keep:";
+  s << "        kept_fits = kept_fits + 1";
+  s << "        continue";           // keep last n fits
+  s << "      layer.removeCurve(i)"; // remove everything else
 
-  s << "w = plotSpectrum(ws.name(), 0, error_bars = %ERRORS%, type = "
-       "%CONNECT%, window = pw, "
-       "clearWindow = True)";
-  s << "w.setName(altName)";
-  s << "w.setObjectName(ws.name())";
-  s << "w.show()";
-  s << "w.setFocus()";
+  // Plot data in the given window with given options
+  s << "def plot_data(ws_name, errors, connect, window_to_use):";
+  s << "  w = plotSpectrum(ws_name, 0, error_bars = errors, type = connect, "
+       "window = window_to_use)";
+  s << "  w.setName(ws_name + '-1')";
+  s << "  w.setObjectName(ws_name)";
+  s << "  w.show()";
+  s << "  w.setFocus()";
+  s << "  return w";
+  s << "";
+
+  // Format the graph scale, title, legends and colours
+  // Data (most recently added curve) should be black
+  s << "def format_graph(graph, ws_name, log_scale, y_auto, y_min, y_max):";
+  s << "  layer = graph.activeLayer()";
+  s << "  num_curves = layer.numCurves()";
+  s << "  layer.setCurveTitle(num_curves, ws_name)";
+  s << "  layer.setTitle(mtd[ws_name].getTitle())";
+  s << "  for i in range(0, num_curves):";
+  s << "    color = i + 1 if i != num_curves - 1 else 0";
+  s << "    layer.setCurveLineColor(i, color)";
+  s << "  if log_scale:";
+  s << "    layer.logYlinX()";
+  s << "  if y_auto:";
+  s << "    layer.setAutoScale()";
+  s << "  else:";
+  s << "    try:";
+  s << "      layer.setAxisScale(Layer.Left, float(y_min), float(y_max))";
+  s << "    except ValueError:";
+  s << "      layer.setAutoScale()";
+  s << "";
+
+  // Plot the data!
+  s << "win = get_window('%WSNAME%', '%PREV%', %USEPREV%)";
+  s << "if %FITSTOKEEP% != -1:";
+  s << "  remove_data(win, %FITSTOKEEP%)";
+  s << "g = plot_data('%WSNAME%', %ERRORS%, %CONNECT%, win)";
+  s << "format_graph(g, '%WSNAME%', %LOGSCALE%, %YAUTO%, '%YMIN%', '%YMAX%')";
 
   QString pyS;
 
@@ -1858,25 +1912,21 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   safeWSName.replace("'", "\'");
   pyS.replace("%WSNAME%", safeWSName);
   pyS.replace("%PREV%", m_currentDataName);
+  pyS.replace("%USEPREV%", policy == MuonAnalysisOptionTab::PreviousWindow
+                               ? "True"
+                               : "False");
   pyS.replace("%ERRORS%", params["ShowErrors"]);
   pyS.replace("%CONNECT%", params["ConnectType"]);
-
-  // Update titles
-  pyS += "l = w.activeLayer()\n"
-         "l.setCurveTitle(0, ws.name())\n"
-         "l.setTitle(ws.getTitle())\n";
-
-  // Set logarithmic scale if required
-  if (logScale)
-    pyS += "l.logYlinX()\n";
-
-  // Set scaling
-  if (params["YAxisAuto"] == "True") {
-    pyS += "l.setAutoScale()\n";
+  pyS.replace("%LOGSCALE%", logScale ? "True" : "False");
+  pyS.replace("%YAUTO%", params["YAxisAuto"]);
+  pyS.replace("%YMIN%", params["YAxisMin"]);
+  pyS.replace("%YMAX%", params["YAxisMax"]);
+  if (policy == MuonAnalysisOptionTab::PreviousWindow) {
+    pyS.replace("%FITSTOKEEP%", m_uiForm.spinBoxNPlotsToKeep->text());
   } else {
-    pyS += "l.setAxisScale(Layer.Left, %1, %2)\n";
-    pyS = pyS.arg(params["YAxisMin"]).arg(params["YAxisMax"]);
+    pyS.replace("%FITSTOKEEP%", "-1");
   }
+
   runPythonCode(pyS);
 }
 
@@ -1950,8 +2000,10 @@ bool MuonAnalysis::plotExists(const QString &wsName) {
 void MuonAnalysis::selectMultiPeak(const QString &wsName) {
   disableAllTools();
 
-  if (!plotExists(wsName))
+  if (!plotExists(wsName)) {
     plotSpectrum(wsName);
+    setCurrentDataName(wsName);
+  }
 
   QString code;
 
@@ -2288,7 +2340,7 @@ void MuonAnalysis::setAppendingRun(int inc) {
   // Increment is positive (next button)
   if (inc < 0) {
     // Add the file to the beginning of mwRunFiles text box.
-    QString lastName = m_previousFilenames[m_previousFilenames.size() - 1];
+    QString lastName = m_previousFilenames.back();
     separateMuonFile(filePath, lastName, run, runSize);
     getFullCode(runSize, run);
     m_uiForm.mwRunFiles->setUserInput(newRun + '-' + run);
@@ -2425,6 +2477,9 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     // Say MantidPlot to use default fit prop. browser
     emit setFitPropertyBrowser(NULL);
 
+    // Reset cached config option
+    ConfigService::Instance().setString(PEAK_RADIUS_CONFIG, m_cachedPeakRadius);
+
     // Remove PP tool from any plots it was attached to
     disableAllTools();
 
@@ -2443,6 +2498,12 @@ void MuonAnalysis::changeTab(int newTabIndex) {
 
     // Say MantidPlot to use Muon Analysis fit prop. browser
     emit setFitPropertyBrowser(m_uiForm.fitBrowser);
+
+    // Muon scientists never fit peaks, hence they want the following
+    // parameter set to a high number
+    m_cachedPeakRadius =
+        ConfigService::Instance().getString(PEAK_RADIUS_CONFIG);
+    ConfigService::Instance().setString(PEAK_RADIUS_CONFIG, "99");
 
     // Show connected plot and attach PP tool to it (if has been assigned)
     if (m_currentDataName != NOT_AVAILABLE)
@@ -2874,7 +2935,7 @@ void MuonAnalysis::openSequentialFitDialog() {
                     "Error was: ");
     message.append(err.what());
     QMessageBox::critical(this, "Unable to open dialog", message);
-    g_log.error(message.ascii());
+    g_log.error(message.toLatin1().data());
     return;
   } catch (...) {
     QMessageBox::critical(this, "Unable to open dialog",
@@ -3128,7 +3189,7 @@ void MuonAnalysis::fillGroupingTable(const Grouping &grouping) {
  */
 std::string MuonAnalysis::getSummedPeriods() const {
   auto summed = m_uiForm.homePeriodBox1->text().toStdString();
-  summed.erase(std::remove(summed.begin(), summed.end(), ' '));
+  summed.erase(std::remove(summed.begin(), summed.end(), ' '), summed.end());
   return summed;
 }
 
@@ -3138,7 +3199,8 @@ std::string MuonAnalysis::getSummedPeriods() const {
  */
 std::string MuonAnalysis::getSubtractedPeriods() const {
   auto subtracted = m_uiForm.homePeriodBox2->text().toStdString();
-  subtracted.erase(std::remove(subtracted.begin(), subtracted.end(), ' '));
+  subtracted.erase(std::remove(subtracted.begin(), subtracted.end(), ' '),
+                   subtracted.end());
   return subtracted;
 }
 

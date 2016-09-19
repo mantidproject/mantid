@@ -1,10 +1,10 @@
 /***************************************************************************
-	File                 : ImageSymbol.h
+        File                 : ImageSymbol.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-	Copyright            : (C) 2010 by Ion Vasilief
+        Copyright            : (C) 2010 by Ion Vasilief
     Email (use @ for *)  : ion_vasilief*yahoo.fr
-	Description          : A QwtSymbol displaying a custom image
+        Description          : A QwtSymbol displaying a custom image
 
  ***************************************************************************/
 
@@ -29,17 +29,16 @@
 #include <qwt_symbol.h>
 
 //! A QwtSymbol displaying a custom image
-class ImageSymbol: public QwtSymbol
-{
+class ImageSymbol : public QwtSymbol {
 public:
   explicit ImageSymbol(const QString &fileName);
-  ImageSymbol(const QPixmap& pixmap, const QString& fileName = QString());
+  ImageSymbol(const QPixmap &pixmap, const QString &fileName = QString());
 
   ImageSymbol *clone() const override;
   void draw(QPainter *p, const QRect &r) const override;
 
-  QPixmap pixmap(){return d_pixmap;};
-  QString imagePath(){return d_image_path;};
+  QPixmap pixmap() { return d_pixmap; };
+  QString imagePath() { return d_image_path; };
 
 private:
   QString d_image_path;

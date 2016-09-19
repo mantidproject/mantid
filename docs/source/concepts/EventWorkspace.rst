@@ -101,7 +101,7 @@ Event Workspaces store their data in event lists, one per spectrum.  You can acc
    evListCount = eventWS.getNumberHistograms()
 
    # Get the first event list
-   evList = eventWS.getEventList(0)
+   evList = eventWS.getSpectrum(0)
 
    # Get some basic information
    print "Number of events in event List 0:", evList.getNumberEvents()
@@ -122,7 +122,7 @@ Event Workspaces store their data in event lists, one per spectrum.  You can acc
    # Get a vector of the errors squared of the weights of the events
    weightErrors = evList.getWeightErrors()
 
-   # Integrate the events between  a range of X values 
+   # Integrate the events between  a range of X values
    print "Events between 1000 and 5000:", evList.integrate(1000,5000,False)
 
    #Check if the list is sorted in TOF
@@ -151,7 +151,7 @@ Please note these should only be done as part of a Python Algorithm, otherwise t
    import math
    eventWS = CreateSampleWorkspace(WorkspaceType="Event")
    # Get the first event list
-   evList = eventWS.getEventList(0)
+   evList = eventWS.getSpectrum(0)
 
    # Add an offset to the pulsetime (wall-clock time) of each event in the list.
    print "First pulse time before addPulsetime:", evList.getPulseTimes()[0]
@@ -198,8 +198,8 @@ Please note these should only be done as part of a Python Algorithm, otherwise t
    :hide:
    :options: +ELLIPSIS,+NORMALIZE_WHITESPACE
 
-   First pulse time before addPulsetime: 2010-01-01T00:32:55... 
-   First pulse time after addPulsetime: 2010-01-01T00:36:15... 
+   First pulse time before addPulsetime: 2010-01-01T00:32:55...
+   First pulse time after addPulsetime: 2010-01-01T00:36:15...
    First tof before addTof: 118...
    First tof after addTof: 121...
    First tof before scaleTof: 121...

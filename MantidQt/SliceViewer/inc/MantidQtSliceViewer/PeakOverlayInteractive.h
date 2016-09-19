@@ -45,13 +45,16 @@ class PeaksPresenter;
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayInteractive : public QWidget, public PeakOverlayView {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayInteractive
+    : public QWidget,
+      public PeakOverlayView {
   Q_OBJECT
 
 public:
   /// Constructor
   PeakOverlayInteractive(PeaksPresenter *const peaksPresenter, QwtPlot *plot,
-                        const int plotXIndex, const int plotYIndex, QWidget *parent);
+                         const int plotXIndex, const int plotYIndex,
+                         QWidget *parent);
   /// Destructor
   ~PeakOverlayInteractive() override;
 
@@ -100,12 +103,8 @@ private slots:
 
   void erasePeaks(const QRect &rect);
   void addPeakAt(int coordX, int coordY);
-
-
 };
-
-
 }
 }
 
-#endif //MANTID_SLICEVIEWER_PEAKOVERLAYINTERACTIVE_H_
+#endif // MANTID_SLICEVIEWER_PEAKOVERLAYINTERACTIVE_H_

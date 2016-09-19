@@ -77,7 +77,7 @@ void vtkMDHexFactory::doCreate(
 
   if (VERBOSE)
     std::cout << tim << " to retrieve the " << numBoxes
-              << " boxes down to depth " << m_maxDepth << std::endl;
+              << " boxes down to depth " << m_maxDepth << '\n';
 
   // Create 8 points per box.
   vtkNew<vtkPoints> points;
@@ -120,7 +120,7 @@ void vtkMDHexFactory::doCreate(
       API::IMDNode *box = boxes[i];
       Mantid::signal_t signal_normalized = (box->*normFunction)();
 
-      if (!isSpecial(signal_normalized) &&
+      if (std::isfinite(signal_normalized) &&
           m_thresholdRange->inRange(signal_normalized)) {
         // Cache the signal and using of it
         signalCache[i] = static_cast<float>(signal_normalized);
@@ -147,7 +147,7 @@ void vtkMDHexFactory::doCreate(
     } // For each box
 
     if (VERBOSE)
-      std::cout << tim << " to create the necessary points." << std::endl;
+      std::cout << tim << " to create the necessary points.\n";
     // Add points
     visualDataSet->SetPoints(points.GetPointer());
 
@@ -190,8 +190,7 @@ void vtkMDHexFactory::doCreate(
     }
 
     if (VERBOSE)
-      std::cout << tim << " to create " << imageSizeActual << " hexahedrons."
-                << std::endl;
+      std::cout << tim << " to create " << imageSizeActual << " hexahedrons.\n";
 }
 
 //-------------------------------------------------------------------------------------------------

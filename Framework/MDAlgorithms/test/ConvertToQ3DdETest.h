@@ -341,11 +341,11 @@ public:
     // std::vector<double>
     // rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,1,0),Kernel::V3D(1,-1,0));
     Kernel::Matrix<double> sample = Kernel::Matrix<double>(3, 3, true);
-    sample[0][0] = sqrt(2.) / 2;
-    sample[0][1] = sqrt(2.) / 2;
-    sample[1][0] = sqrt(2.) / 2;
-    sample[1][1] = -sqrt(2.) / 2;
-    sample[2][2] = -1;
+    sample[0][0] = 0.5 * M_SQRT2;
+    sample[0][1] = 0.5 * M_SQRT2;
+    sample[1][0] = 0.5 * M_SQRT2;
+    sample[1][1] = -0.5 * M_SQRT2;
+    sample[2][2] = -1.0;
     Kernel::Matrix<double> rez(rot);
     TS_ASSERT(sample.equals(rez, 1.e-4));
   }

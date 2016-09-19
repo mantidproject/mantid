@@ -130,7 +130,7 @@ public:
   void testExec() {
     AnalysisDataService::Instance().add(
         "normIn", WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 3, 1));
-    doTest("normIn", "normOut", 1.0, sqrt(2.0) / 2.0);
+    doTest("normIn", "normOut", 1.0, 0.5 * M_SQRT2);
     AnalysisDataService::Instance().remove("normIn");
     AnalysisDataService::Instance().remove("normOut");
   }
@@ -268,7 +268,7 @@ public:
   void testExec_InPlace() {
     AnalysisDataService::Instance().add(
         "normIn", WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 3, 1));
-    doTest("normIn", "normIn", 1.0, sqrt(2.0) / 2.0);
+    doTest("normIn", "normIn", 1.0, 0.5 * M_SQRT2);
     AnalysisDataService::Instance().remove("normIn");
   }
 
@@ -279,7 +279,7 @@ public:
 
     EventWorkspace_const_sptr outputEvent;
     outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(
-        doTest("normInEvent", "normOutEvent", 1.0, sqrt(2.0) / 2.0));
+        doTest("normInEvent", "normOutEvent", 1.0, 0.5 * M_SQRT2));
     // Output is an event workspace
     TS_ASSERT(outputEvent);
 
@@ -294,7 +294,7 @@ public:
 
     EventWorkspace_const_sptr outputEvent;
     outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(
-        doTest("normInEvent", "normInEvent", 1.0, sqrt(2.0) / 2.0));
+        doTest("normInEvent", "normInEvent", 1.0, 0.5 * M_SQRT2));
     // Output is an event workspace
     TS_ASSERT(outputEvent);
 

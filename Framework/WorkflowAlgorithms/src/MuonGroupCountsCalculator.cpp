@@ -21,11 +21,6 @@ MuonGroupCountsCalculator::MuonGroupCountsCalculator(
     : MuonGroupCalculator(inputWS, summedPeriods, subtractedPeriods,
                           groupIndex) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MuonGroupCountsCalculator::~MuonGroupCountsCalculator() {}
-
 /**
  * Calculates raw counts according to period arithmetic
  * @returns Workspace containing result of calculation

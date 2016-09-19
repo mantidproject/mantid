@@ -4,8 +4,9 @@
 <component-link name = "VESUVIO">
 
   <!-- The monitor spectrum  -->
-  <parameter name="monitor_spectrum">
-    <value val="1"/>
+  <parameter name="monitor_spectra" type="string">
+    <!-- The first item in the list is used for monitor normalisation -->
+    <value val="1,2"/>
   </parameter>
 
   <!-- Back scattering spectrum numbers -->

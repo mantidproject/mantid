@@ -49,6 +49,8 @@ class TOFTOFCropWorkspace(PythonAlgorithm):
             issues['InputWorkspace'] = "Input workpsace must have sample log channel_width."
         if not run.hasProperty('full_channels'):
             issues['InputWorkspace'] = "Input workpsace must have sample log full_channels."
+        if not run.hasProperty('TOF1'):
+            issues['InputWorkspace'] = "Input workpsace must have sample log TOF1."
 
         return issues
 
@@ -61,8 +63,9 @@ class TOFTOFCropWorkspace(PythonAlgorithm):
         run = inputws.getRun()
         channel_width = float(run.getLogData('channel_width').value)
         full_channels = float(run.getLogData('full_channels').value)
+        tof1 = float(run.getLogData('TOF1').value)
 
-        outputws = api.CropWorkspace(inputws, XMin=0., XMax=full_channels*channel_width, OutputWorkspace=outputws)
+        outputws = api.CropWorkspace(inputws, XMin=0., XMax=full_channels*channel_width + tof1, OutputWorkspace=outputws)
         self.setProperty("OutputWorkspace", outputws)
 
 

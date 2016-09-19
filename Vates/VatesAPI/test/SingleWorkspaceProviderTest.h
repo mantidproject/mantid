@@ -9,8 +9,7 @@
 
 using namespace Mantid::DataObjects;
 
-class SingleWorkspaceProviderTest : public CxxTest::TestSuite
-{
+class SingleWorkspaceProviderTest : public CxxTest::TestSuite {
 public:
   void test_that_correctly_initiated_provider_can_provide() {
     // Arrange
@@ -39,7 +38,9 @@ public:
     // Act
     auto fetchedWorkspace = provider.fetchWorkspace("");
     // Assert
-    TSM_ASSERT("Should have a handle on a MDHistoWorkspace", boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(fetchedWorkspace));
+    TSM_ASSERT("Should have a handle on a MDHistoWorkspace",
+               boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
+                   fetchedWorkspace));
   }
 };
 

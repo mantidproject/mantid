@@ -52,18 +52,29 @@ private slots:
   void algorithmComplete(bool error);
   void
   setInstrumentDefault(); ///< Sets default parameters for current instrument
-  void mappingOptionSelected(const QString &groupType); ///< change ui to display appropriate options
-  void plotRaw();       ///< plot raw data from instrument
-  void pbRunEditing();  //< Called when a user starts to type / edit the runs to load.
+  void mappingOptionSelected(
+      const QString &groupType); ///< change ui to display appropriate options
+  void plotRaw();                ///< plot raw data from instrument
+  void
+  pbRunEditing(); //< Called when a user starts to type / edit the runs to load.
   void pbRunFinding();  //< Called when the FileFinder starts finding the files.
-  void pbRunFinished(); //< Called when the FileFinder has finished finding the files.
-  void plotRawComplete(bool error); //< Called when the Plot Raw algorithmm chain completes
+  void pbRunFinished(); //< Called when the FileFinder has finished finding the
+  // files.
+  void plotRawComplete(
+      bool error); //< Called when the Plot Raw algorithmm chain completes
+  /// Handles plotting and saving
+  void plotClicked();
+  void saveClicked();
 
 private:
   Ui::ISISEnergyTransfer m_uiForm;
 
-  QPair<QString, QString> createMapFile(const QString &groupType); ///< create the mapping file with which to group results
+  QPair<QString, QString> createMapFile(
+      const QString &
+          groupType); ///< create the mapping file with which to group results
   std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
+  std::vector<std::string>
+      m_outputWorkspaces; ///< get a vector of workspaces to plot
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

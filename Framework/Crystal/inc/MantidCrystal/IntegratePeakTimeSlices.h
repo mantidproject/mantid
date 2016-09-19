@@ -83,9 +83,8 @@ public:
 
   bool isEdgePeak(const double *params, int nparams);
 
-  void setHeightHalfWidthInfo(Mantid::MantidVecPtr &xvals,
-                              Mantid::MantidVecPtr &yvals,
-                              Mantid::MantidVecPtr &counts);
+  void setHeightHalfWidthInfo(const MantidVec &xvals, const MantidVec &yvals,
+                              const MantidVec &counts);
 
   void setCurrentRadius(double radius) { currentRadius = radius; }
   void setCurrentCenter(const Kernel::V3D newCenter) {

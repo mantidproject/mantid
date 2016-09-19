@@ -9,7 +9,10 @@
 Description
 -----------
 
-This workflow algorithm creates MDWorkspaces in the Q3D, HKL frame using :ref:`algm-ConvertToMD`. 
+This workflow algorithm creates MDWorkspaces in the Q3D, HKL frame using :ref:`algm-ConvertToMD`.
+
+Using the FileBackEnd and Filename properties the algorithm can produce a file-backed workspace.
+Note that this will significantly increase the execution time of the algorithm.
 
 Setting the UB matrix
 ######################################

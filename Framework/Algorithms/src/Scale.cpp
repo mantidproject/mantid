@@ -51,7 +51,7 @@ void Scale::exec() {
 
     if (outputWS == inputWS) {
       if (hasDx) {
-        bufferWS = MatrixWorkspace_sptr(inputWS->clone().release());
+        bufferWS = inputWS->clone();
       }
       inputWS *= factor;
     } else {
@@ -63,7 +63,7 @@ void Scale::exec() {
 
     if (outputWS == inputWS) {
       if (hasDx) {
-        bufferWS = MatrixWorkspace_sptr(inputWS->clone().release());
+        bufferWS = inputWS->clone();
       }
       inputWS += factor;
     } else {
@@ -80,7 +80,7 @@ void Scale::exec() {
       bufferWS = inputWS;
     }
     for (size_t index = 0; index < bufferWS->getNumberHistograms(); ++index) {
-      outputWS->setDx(0, bufferWS->dataDx(0));
+      outputWS->setSharedDx(index, bufferWS->sharedDx(index));
     }
   }
 

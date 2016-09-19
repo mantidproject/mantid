@@ -1,4 +1,6 @@
 # pylint: disable=no-init,invalid-name,too-many-public-methods,broad-except
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.geometry import CrystalStructure
 

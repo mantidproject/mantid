@@ -67,8 +67,6 @@ class DLLExport DiffractionFocussing : public API::Algorithm,
 public:
   /// Constructor
   DiffractionFocussing();
-  /// Destructor
-  ~DiffractionFocussing() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "DiffractionFocussing"; }
   /// Summary of algorithms purpose

@@ -37,9 +37,6 @@ namespace Algorithms {
 */
 class DLLExport ConvertAxesToRealSpace : public API::Algorithm {
 public:
-  ConvertAxesToRealSpace();
-  ~ConvertAxesToRealSpace() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

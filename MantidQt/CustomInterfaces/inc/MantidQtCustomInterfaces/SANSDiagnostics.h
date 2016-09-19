@@ -166,8 +166,8 @@ private:
   /// hide the group boxes
   void disableDetectorGroupBoxes(bool bStatus);
 
-  /// minimum and maximum spectrum ids for detector
-  void minandMaxSpectrumIds(const std::vector<Mantid::specnum_t> &specList,
+  /// minimum and maximum spectrum Nos for detector
+  void minandMaxSpectrumNos(const std::vector<Mantid::specnum_t> &specList,
                             QString &minSpec, QString &maxSpec);
 
   /// get workspaceIndexes from spectrum list

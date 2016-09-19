@@ -308,7 +308,7 @@ uint64_t DiskBuffer::allocate(uint64_t const newSize) {
     // Will place the new block at the end of the file
     return retVal;
   } else {
-    //      std::cout << "Block found for allocate " << newSize << std::endl;
+    //      std::cout << "Block found for allocate " << newSize << '\n';
     uint64_t foundPos = it->getFilePosition();
     uint64_t foundSize = it->getSize();
     // Remove the free block you found - it is no longer free
@@ -337,7 +337,7 @@ uint64_t DiskBuffer::allocate(uint64_t const newSize) {
 uint64_t DiskBuffer::relocate(uint64_t const oldPos, uint64_t const oldSize,
                               const uint64_t newSize) {
   // std::cout << "Relocating " << oldPos << ", " << oldSize << ", " << newSize
-  // << std::endl;
+  // << '\n';
   // First, release the space in the old block.
   this->freeBlock(oldPos, oldSize);
   return this->allocate(newSize);

@@ -44,9 +44,6 @@ namespace Mantid {
 namespace Crystal {
 class DLLExport ShowPeakHKLOffsets : public API::Algorithm {
 public:
-  ShowPeakHKLOffsets();
-  ~ShowPeakHKLOffsets() override;
-
   const std::string name() const override { return "ShowPeakHKLOffsets"; };
 
   /// Summary of algorithms purpose

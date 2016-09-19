@@ -3,11 +3,10 @@
 
 #include <string>
 #include <vector>
-#include <qwt_plot_curve.h>
-#include <QStringList>
 
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionUserMsg.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionSettings.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPythonRunner.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -40,35 +39,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class IEnggDiffractionView {
+class IEnggDiffractionView : public IEnggDiffractionUserMsg,
+                             public IEnggDiffractionSettings,
+                             public IEnggDiffractionPythonRunner {
 
 public:
-  IEnggDiffractionView(){};
-  virtual ~IEnggDiffractionView(){};
+  virtual ~IEnggDiffractionView() = default;
 
-  /// @name Direct (and usually modal) user interaction
+  /// @name Direct (and usually modal, or at least top/pop-up level) user
+  /// interaction
   //@{
   /**
-   * Display a warning to the user (for example as a pop-up window).
+   * To display important messages that need maximum visibility
+   * (normally a dialog on top of the interface). This can be used to
+   * control the visibility and content of the message. An example use
+   * case is to inform the user that certain inputs are absolutely
+   * needed to use the interface functionality.
    *
-   * @param warn warning title, should be short and would normally be
-   * shown as the title of the window or a big banner.
-   *
-   * @param description longer, free form description of the issue.
+   * @param visible whether the "splash"/important message should be visible
+   * @param shortMsg short/one line message summary
+   * @param description message with full details
    */
-  virtual void userWarning(const std::string &warn,
-                           const std::string &description) = 0;
-
-  /**
-   * Display an error message (for example as a pop-up window).
-   *
-   * @param err Error title, should be short and would normally be
-   * shown as the title of the window or a big banner.
-   *
-   * @param description longer, free form description of the issue.
-   */
-  virtual void userError(const std::string &err,
-                         const std::string &description) = 0;
+  virtual void splashMessage(bool visible, const std::string &shortMsg,
+                             const std::string &description) = 0;
 
   /**
    * Gets a filename from the user, to use for a new calibration file.
@@ -105,12 +98,6 @@ public:
   virtual std::string getRBNumber() const = 0;
 
   /**
-   *
-   * @return calibration settings object with current user settings
-   */
-  virtual EnggDiffCalibSettings currentCalibSettings() const = 0;
-
-  /**
    * What's the instrument this interface is using?
    *
    * @return current instrument selection
@@ -121,7 +108,7 @@ public:
   * selected spec will be passed as a bank for the calibrartion
   * process to be carried out
   *
-  * @return which format should to applied for plotting data
+  * @return Bank selection index: spectrum-numbers / north / south
   */
   virtual int currentCropCalibBankName() const = 0;
 
@@ -193,13 +180,6 @@ public:
   virtual std::vector<std::string> newCeriaNo() const = 0;
 
   /**
-   * The filename (can be full path) selected to write a calibration
-   *
-   * @return file name
-   */
-  virtual std::string outCalibFilename() const = 0;
-
-  /**
    * A new calibration is calculated or loaded => update display and
    * widgets. This becomes the new 'current' calibration.
    *
@@ -212,18 +192,6 @@ public:
                               const std::string &fname) = 0;
 
   /**
-   * Write a GSAS file. Temporarily here until we have a more final
-   * way of generating these files.
-   *
-   * @param outFilename output file name
-   * @param difc difc values (one per bank)
-   * @param tzero tzero values (one per bank)
-   */
-  virtual void writeOutCalibFile(const std::string &outFilename,
-                                 const std::vector<double> &difc,
-                                 const std::vector<double> &tzero) = 0;
-
-  /**
    * Enable/disable all the sections or tabs of the interface. To be
    * used with required parameters, like a valid instrument, a valid
    * RB number, etc. This should effectively disable/enable all
@@ -234,20 +202,12 @@ public:
   virtual void enableTabs(bool enable) = 0;
 
   /**
-   * Enable/disable calibrate+focus actions. The idea is that actions
-   * / buttons like 'calibrate', 'load calibration', or 'focus' can be
-   * disabled while a calibration of a focusing is being calculated.
+   * Highlights the RB number box to make it more visible if the
+   * user needs to enter an RB number
    *
-   * @param enable true to enable actions (default initial state)
+   * @param isValid Is the current value in RB Number field valid
    */
-  virtual void enableCalibrateAndFocusActions(bool enable) = 0;
-
-  /**
-   * Directory set for focusing outputs
-   *
-   * @return directory path as a string
-   */
-  virtual std::string focusingDir() const = 0;
+  virtual void highlightRbNumber(bool isValid) = 0;
 
   /**
    * A (sample) run to focus
@@ -279,9 +239,9 @@ public:
   virtual std::vector<bool> focusingBanks() const = 0;
 
   /**
-   * Specification of spectrum IDs for focus in "cropped" mode.
+   * Specification of spectrum Nos for focus in "cropped" mode.
    *
-   * @return spectrum IDs, expected as a comma separated list of
+   * @return spectrum Nos, expected as a comma separated list of
    * integers or ranges of integers.
    */
   virtual std::string focusingCroppedSpectrumNos() const = 0;
@@ -346,29 +306,6 @@ public:
    */
   virtual double rebinningPulsesTime() const = 0;
 
-  /**
-  * returns directory of the file name to preform fitting on
-  *
-  * @return directory as std::string
-  */
-  virtual std::string fittingRunNo() const = 0;
-
-  /**
-  * A list of dSpacing values to be translated into TOF
-  * to find expected peaks.
-  *
-  * @return list of dSpacing values as std::string
-  */
-  virtual std::string fittingPeaksData() const = 0;
-
-  /**
-  * generates and sets the curves on the fitting tab
-  * @param data of the workspace to be passed as QwtData
-  * @param focused to check whether focused workspace
-  *
-  */
-  virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
-                             bool focused) = 0;
   //@}
 
   /**
@@ -387,19 +324,12 @@ public:
   virtual bool saveFocusedOutputFiles() const = 0;
 
   /**
-  * Produces vanadium curves graph with three spectrum for calib
-  * output.
-  *
-  */
-  virtual void plotVanCurvesCalibOutput() = 0;
-
-  /**
-  * Produces ceria peaks graph with two spectrum for calib
-  * output.
+  * Produces vanadium curves graph with three spectrum and
+  * ceria peaks graph with two spectrum for calib output.
   *
   * @param pyCode string which is passed to Mantid via pyScript
   */
-  virtual void plotDifcZeroCalibOutput(const std::string &pyCode) = 0;
+  virtual void plotCalibOutput(const std::string &pyCode) = 0;
 
   /**
   * Produces a single spectrum graph for focused output.

@@ -10,17 +10,17 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include <vtkNew.h>
 
-namespace Mantid
-{
-  namespace VATES
-  {
+namespace Mantid {
+namespace VATES {
 
-/** Line Factory. This type is responsible for rendering IMDWorkspaces as a single dimension.
+/** Line Factory. This type is responsible for rendering IMDWorkspaces as a
+ single dimension.
 
  @author Owen Arnold, Tessella plc
  @date 09/05/2011
 
- Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -40,47 +40,43 @@ namespace Mantid
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-    class DLLExport vtkMDHistoLineFactory : public vtkDataSetFactory
-    {
-    public:
+class DLLExport vtkMDHistoLineFactory : public vtkDataSetFactory {
+public:
+  /// Constructor
+  vtkMDHistoLineFactory(ThresholdRange_scptr thresholdRange,
+                        const VisualNormalization normalizationOption);
 
-      /// Constructor
-      vtkMDHistoLineFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption);
+  /// Assignment operator
+  vtkMDHistoLineFactory &operator=(const vtkMDHistoLineFactory &other);
 
-      /// Assignment operator
-      vtkMDHistoLineFactory& operator=(const vtkMDHistoLineFactory& other);
+  /// Copy constructor.
+  vtkMDHistoLineFactory(const vtkMDHistoLineFactory &other);
 
-      /// Copy constructor.
-      vtkMDHistoLineFactory(const vtkMDHistoLineFactory& other);
+  /// Destructor
+  ~vtkMDHistoLineFactory() override;
 
-      /// Destructor
-      ~vtkMDHistoLineFactory() override;
+  /// Factory Method.
+  vtkSmartPointer<vtkDataSet>
+  create(ProgressAction &progressUpdating) const override;
 
-      /// Factory Method.
-      vtkSmartPointer<vtkDataSet>
-      create(ProgressAction &progressUpdating) const override;
+  void initialize(Mantid::API::Workspace_sptr) override;
 
-      void initialize(Mantid::API::Workspace_sptr) override;
+  typedef std::vector<UnstructuredPoint> Column;
 
-      typedef std::vector<UnstructuredPoint> Column;
-
-      std::string getFactoryTypeName() const override {
-        return "vtkMDHistoLineFactory";
-      }
-
-    protected:
-      void validate() const override;
-
-    private:
-
-      Mantid::DataObjects::MDHistoWorkspace_sptr m_workspace;
-
-      VisualNormalization m_normalizationOption;
-
-      mutable ThresholdRange_scptr m_thresholdRange;
-    
-    };
-    
+  std::string getFactoryTypeName() const override {
+    return "vtkMDHistoLineFactory";
   }
+
+protected:
+  void validate() const override;
+
+private:
+  Mantid::DataObjects::MDHistoWorkspace_sptr m_workspace;
+
+  VisualNormalization m_normalizationOption;
+
+  mutable ThresholdRange_scptr m_thresholdRange;
+};
+}
 }
 #endif

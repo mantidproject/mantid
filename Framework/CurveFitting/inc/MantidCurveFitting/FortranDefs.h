@@ -13,6 +13,7 @@ typedef FortranMatrix<ComplexMatrix> ComplexFortranMatrix;
 typedef FortranMatrix<GSLMatrix> DoubleFortranMatrix;
 typedef FortranVector<ComplexVector> ComplexFortranVector;
 typedef FortranVector<GSLVector> DoubleFortranVector;
+typedef FortranVector<std::vector<int>> IntFortranVector;
 
 } // namespace CurveFitting
 } // namespace Mantid

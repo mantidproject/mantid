@@ -53,7 +53,9 @@ class PredictPeaksTestWISH(stresstesting.MantidStressTest):
 
 class PredictPeaksTestTOPAZ(stresstesting.MantidStressTest):
     def runTest(self):
-        simulationWorkspace = CreateSimulationWorkspace(Instrument='TOPAZ',
+        direc = config['instrumentDefinition.directory']
+        xmlFile =  os.path.join(direc,'TOPAZ_Definition_2015-01-01.xml')
+        simulationWorkspace = CreateSimulationWorkspace(Instrument=xmlFile,
                                                         BinParams='0,1,2',
                                                         UnitX='TOF')
 

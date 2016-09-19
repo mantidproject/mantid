@@ -36,37 +36,33 @@
                  <http://doxygen.mantidproject.org>
  */
 
-namespace MantidQt
-{
-namespace RefDetectorViewer
-{
+namespace MantidQt {
+namespace RefDetectorViewer {
 
-class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefRangeHandler : public SpectrumView::IRangeHandler
-{
-  public:
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefRangeHandler
+    : public SpectrumView::IRangeHandler {
+public:
+  /// Construct object to manage min, max and step controls in the UI
+  RefRangeHandler(Ui_RefImageViewer *ivUI);
 
-    /// Construct object to manage min, max and step controls in the UI
-    RefRangeHandler( Ui_RefImageViewer* ivUI );
+  /// Configure min, max and step controls for the specified data source
+  void configureRangeControls(
+      SpectrumView::SpectrumDataSource_sptr dataSource) override;
 
-    /// Configure min, max and step controls for the specified data source
-    void configureRangeControls(
-        SpectrumView::SpectrumDataSource_sptr dataSource) override;
+  /// Get the range of data to display in the image, from GUI controls
+  void getRange(double &min, double &max, double &step) override;
 
-    /// Get the range of data to display in the image, from GUI controls
-    void getRange(double &min, double &max, double &step) override;
+  /// Set the values displayed in the GUI controls
+  void setRange(double min, double max, double step, char type);
 
-    /// Set the values displayed in the GUI controls
-    void setRange( double min, double max, double step, char type );
+private:
+  Ui_RefImageViewer *m_ivUI;
 
-  private:
-    Ui_RefImageViewer* m_ivUI;
-
-    double m_totalMinX;
-    double m_totalMaxX;
-    double m_totalMinY;
-    double m_totalMaxY;
-    size_t m_totalNSteps;
-
+  double m_totalMinX;
+  double m_totalMaxX;
+  double m_totalMinY;
+  double m_totalMaxY;
+  size_t m_totalNSteps;
 };
 
 } // namespace RefDetectorViewer

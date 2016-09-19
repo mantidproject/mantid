@@ -38,9 +38,6 @@ namespace Algorithms {
 */
 class DLLExport ExportTimeSeriesLog : public API::Algorithm {
 public:
-  ExportTimeSeriesLog();
-  ~ExportTimeSeriesLog() override;
-
   const std::string name() const override { return "ExportTimeSeriesLog"; };
 
   int version() const override { return 1; };

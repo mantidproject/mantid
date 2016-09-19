@@ -22,15 +22,18 @@
 #include "MantidQtMantidWidgets/MessageDisplay.h"
 #include "MantidQtMantidWidgets/PreviewPlot.h"
 #include "MantidQtMantidWidgets/DisplayCurveFit.h"
+#include "MantidQtMantidWidgets/LogValueSelector.h"
 
-/** 
-The PluginCollectionInterface implements the interface for the plugin library and holds a 
+/**
+The PluginCollectionInterface implements the interface for the plugin library
+and holds a
 list of plugins defined by the library.
 
 @author Martyn Gigg, Tessella plc
 @date 10/08/2009
 
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -47,10 +50,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-File change history is stored at: <https://github.com/mantidproject/mantid>    
+File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class PluginCollectionInterface : public QObject, public QDesignerCustomWidgetCollectionInterface
-{
+class PluginCollectionInterface
+    : public QObject,
+      public QDesignerCustomWidgetCollectionInterface {
   Q_OBJECT
   Q_INTERFACES(QDesignerCustomWidgetCollectionInterface)
 
@@ -58,13 +62,11 @@ public:
   /// Default constructor
   PluginCollectionInterface(QObject *parent = 0);
   /// Returns a list of the custom widgets within this library
-  virtual QList<QDesignerCustomWidgetInterface*> customWidgets() const;
+  virtual QList<QDesignerCustomWidgetInterface *> customWidgets() const;
 
 private:
-  QList<QDesignerCustomWidgetInterface*> m_widgets;
+  QList<QDesignerCustomWidgetInterface *> m_widgets;
 };
-
-
 
 //==============================================================================
 /** Macro to REALLY quickly declare a plugin for
@@ -74,93 +76,87 @@ private:
  * @param WidgetClass :: fully-qualified name of the widget class
  * @param ToolTip :: a string with the tooltip
  */
-#define DECLARE_WIDGET_PLUGIN(PluginClass, WidgetClass, ToolTip) \
-class PluginClass : public DesignerPlugin { \
-public: \
-  PluginClass(QObject * parent) : DesignerPlugin(parent) {} \
-  QWidget *createWidget(QWidget *parent) \
-  { return new WidgetClass(parent); } \
-  QString name() const \
-  { return #WidgetClass; } \
-  QString toolTip() const \
-  { return ToolTip; } \
-};
-
+#define DECLARE_WIDGET_PLUGIN(PluginClass, WidgetClass, ToolTip)               \
+  class PluginClass : public DesignerPlugin {                                  \
+  public:                                                                      \
+    PluginClass(QObject *parent) : DesignerPlugin(parent) {}                   \
+    QWidget *createWidget(QWidget *parent) { return new WidgetClass(parent); } \
+    QString name() const { return #WidgetClass; }                              \
+    QString toolTip() const { return ToolTip; }                                \
+  };
 
 //==============================================================================
 // Declare plugins for several types of widgets in MantidWidgets
 // REMEMBER TO ADD THESE TO PluginCollectionInterface.cpp -> customWidgets
 //==============================================================================
 DECLARE_WIDGET_PLUGIN(AlgorithmSelectorWidgetPlugin,
-    MantidQt::MantidWidgets::AlgorithmSelectorWidget,
-    "Widget for picking algorithms");
+                      MantidQt::MantidWidgets::AlgorithmSelectorWidget,
+                      "Widget for picking algorithms");
 
-DECLARE_WIDGET_PLUGIN(ScriptEditorPlugin,
-    ScriptEditor,
-    "Widget for editing python script");
+DECLARE_WIDGET_PLUGIN(ScriptEditorPlugin, ScriptEditor,
+                      "Widget for editing python script");
 
-DECLARE_WIDGET_PLUGIN(FileFinderPlugin,
-    MantidQt::MantidWidgets::MWRunFiles,
-    "Searches for the given files within the paths defined by\nMantid's datasearch.directories property");
+DECLARE_WIDGET_PLUGIN(FileFinderPlugin, MantidQt::MantidWidgets::MWRunFiles,
+                      "Searches for the given files within the paths defined "
+                      "by\nMantid's datasearch.directories property");
 
 DECLARE_WIDGET_PLUGIN(InstrumentSelectorPlugin,
-    MantidQt::MantidWidgets::InstrumentSelector,
-    "Sets the current instrument within Mantid");
+                      MantidQt::MantidWidgets::InstrumentSelector,
+                      "Sets the current instrument within Mantid");
 
 DECLARE_WIDGET_PLUGIN(MuonFitBrowserPlugin,
-    MantidQt::MantidWidgets::MuonFitPropertyBrowser,
-    "The menu for fitting functions within Muon Analysis");
+                      MantidQt::MantidWidgets::MuonFitPropertyBrowser,
+                      "The menu for fitting functions within Muon Analysis");
 
 DECLARE_WIDGET_PLUGIN(FitBrowserPlugin,
-    MantidQt::MantidWidgets::FitPropertyBrowser,
-    "The menu for fitting functions");
+                      MantidQt::MantidWidgets::FitPropertyBrowser,
+                      "The menu for fitting functions");
 
 DECLARE_WIDGET_PLUGIN(WorkspaceSelectorPlugin,
-    MantidQt::MantidWidgets::WorkspaceSelector,
-    "Select a workspace for use in this operation");
+                      MantidQt::MantidWidgets::WorkspaceSelector,
+                      "Select a workspace for use in this operation");
 
 DECLARE_WIDGET_PLUGIN(ColorBarWidgetPlugin,
-    MantidQt::MantidWidgets::ColorBarWidget,
-    "Shows a color scale and allow user to change it");
+                      MantidQt::MantidWidgets::ColorBarWidget,
+                      "Shows a color scale and allow user to change it");
 
-DECLARE_WIDGET_PLUGIN(SliceViewerPlugin,
-    MantidQt::SliceViewer::SliceViewer,
-    "Shows 2D slices of MDWorkspaces");
+DECLARE_WIDGET_PLUGIN(SliceViewerPlugin, MantidQt::SliceViewer::SliceViewer,
+                      "Shows 2D slices of MDWorkspaces");
 
-DECLARE_WIDGET_PLUGIN(LineViewerPlugin,
-    MantidQt::SliceViewer::LineViewer,
-    "Shows 1D lines selected in a LineViewer");
+DECLARE_WIDGET_PLUGIN(LineViewerPlugin, MantidQt::SliceViewer::LineViewer,
+                      "Shows 1D lines selected in a LineViewer");
 
-DECLARE_WIDGET_PLUGIN(SafeQwtPlotPlugin,
-    MantidQt::MantidWidgets::SafeQwtPlot,
-    "Version of QwtPlot with workspace-level thread safety");
+DECLARE_WIDGET_PLUGIN(SafeQwtPlotPlugin, MantidQt::MantidWidgets::SafeQwtPlot,
+                      "Version of QwtPlot with workspace-level thread safety");
 
-DECLARE_WIDGET_PLUGIN(MWViewPlugin,
-    MantidQt::MantidWidgets::MWView,
-    "2D view of a MatrixWorkspace");
+DECLARE_WIDGET_PLUGIN(MWViewPlugin, MantidQt::MantidWidgets::MWView,
+                      "2D view of a MatrixWorkspace");
 
 DECLARE_WIDGET_PLUGIN(AlgorithmPropertiesWidgetPlugin,
-    MantidQt::API::AlgorithmPropertiesWidget,
-    "List of algorithm properties");
+                      MantidQt::API::AlgorithmPropertiesWidget,
+                      "List of algorithm properties");
 
-DECLARE_WIDGET_PLUGIN(ProcessingAlgoWidgetPlugin,
-    MantidQt::MantidWidgets::ProcessingAlgoWidget,
+DECLARE_WIDGET_PLUGIN(
+    ProcessingAlgoWidgetPlugin, MantidQt::MantidWidgets::ProcessingAlgoWidget,
     "Choose an algorithm or write a script as a processing step");
 
 DECLARE_WIDGET_PLUGIN(MessageDisplayPlugin,
-    MantidQt::MantidWidgets::MessageDisplay,
-    "Display messages with various priorities, optionally connecting to the logging framework");
+                      MantidQt::MantidWidgets::MessageDisplay,
+                      "Display messages with various priorities, optionally "
+                      "connecting to the logging framework");
 
-DECLARE_WIDGET_PLUGIN(DataSelectorPlugin,
-    MantidQt::MantidWidgets::DataSelector,
-    "Choose a file path or workspace to work with");
+DECLARE_WIDGET_PLUGIN(DataSelectorPlugin, MantidQt::MantidWidgets::DataSelector,
+                      "Choose a file path or workspace to work with");
 
-DECLARE_WIDGET_PLUGIN(PreviewPlotPlugin,
-    MantidQt::MantidWidgets::PreviewPlot,
-    "Curve plots for workspace spectra");
+DECLARE_WIDGET_PLUGIN(PreviewPlotPlugin, MantidQt::MantidWidgets::PreviewPlot,
+                      "Curve plots for workspace spectra");
 
 DECLARE_WIDGET_PLUGIN(DisplayCurveFitPlugin,
-    MantidQt::MantidWidgets::DisplayCurveFit,
-    "Curve plots for workspace spectra");
+                      MantidQt::MantidWidgets::DisplayCurveFit,
+                      "Curve plots for workspace spectra");
+
+DECLARE_WIDGET_PLUGIN(LogValueSelectorPlugin,
+                      MantidQt::MantidWidgets::LogValueSelector,
+                      "Select a log name and function");
 
 #endif

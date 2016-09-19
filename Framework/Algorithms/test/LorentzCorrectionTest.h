@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/LorentzCorrection.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/LorentzCorrection.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/V3D.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 
 using Mantid::Algorithms::LorentzCorrection;
@@ -27,12 +27,12 @@ private:
    * Calculate what the weight should be.
    */
   double calculate_weight_at(MatrixWorkspace_sptr &ws, const int bin_index) {
-    const Mantid::MantidVec &xData = ws->readX(0);
+    auto &xData = ws->x(0);
 
     auto detector = ws->getDetector(0);
-    double twotheta = ws->detectorTwoTheta(detector);
-    double lam = (xData[bin_index] + xData[bin_index + 1]) / 2;
-    double weight = std::sin(twotheta / 2);
+    double twotheta = ws->detectorTwoTheta(*detector);
+    double lam = 0.5 * (xData[bin_index] + xData[bin_index + 1]);
+    double weight = std::sin(0.5 * twotheta);
     weight = weight * weight;
     weight = weight / (lam * lam * lam * lam);
     return weight;
@@ -67,18 +67,13 @@ private:
     const double startX = 0;
     auto workspace = Create2DWorkspaceBinned(nSpectra, nBins, startX,
                                              deltaX); // Creates histogram data
-
-    auto &ydata = workspace->dataY(0);
-    auto &edata = workspace->dataE(0);
-    for (size_t i = 0; i < ydata.size(); ++i) {
-      ydata[i] = 1;
-      edata[i] = 1;
-    }
+    workspace->mutableY(0) = 1.0;
+    workspace->mutableE(0) = 1.0;
 
     workspace->getAxis(0)->setUnit("Wavelength");
     workspace->setYUnit("Counts");
     workspace->setInstrument(instrument);
-    workspace->getSpectrum(0)->addDetectorID(det->getID());
+    workspace->getSpectrum(0).addDetectorID(det->getID());
     return workspace;
   }
 
@@ -111,8 +106,7 @@ public:
 
   void test_throws_if_wavelength_zero() {
     auto ws_lam = this->create_workspace(2 /*nBins*/);
-    ws_lam->dataX(0)[0] = 0; // Make wavelength zero
-    ws_lam->dataX(0)[1] = 0; // Make wavelength zero
+    ws_lam->mutableX(0) = 0; // Make wavelength zero
     LorentzCorrection alg;
     alg.setChild(true);
     alg.setRethrows(true);
@@ -138,8 +132,8 @@ public:
     const std::string unitID = out_ws->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unitID, "Wavelength");
 
-    const Mantid::MantidVec &yData = out_ws->readY(0);
-    const Mantid::MantidVec &eData = out_ws->readE(0);
+    auto &yData = out_ws->y(0);
+    auto &eData = out_ws->e(0);
 
     int index = 0;
     double weight = calculate_weight_at(out_ws, index /*y index*/);

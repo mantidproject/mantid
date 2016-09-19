@@ -60,6 +60,12 @@ Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   // Connect preview spectrum spinner to handler
   connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(previewSpecChanged(int)));
+
+  // Post saving
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+
+  // Post plotting
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 }
 
 /**
@@ -102,7 +108,7 @@ bool Quasi::validate() {
   const auto eMin = m_dblManager->value(m_properties["EMin"]);
   const auto eMax = m_dblManager->value(m_properties["EMax"]);
   if (eMin >= eMax)
-	  errors.append("EMin must be strictly less than EMax.\n");
+    errors.append("EMin must be strictly less than EMax.\n");
 
   // Create and show error messages
   errors.append(uiv.generateErrorMessage());
@@ -112,7 +118,7 @@ bool Quasi::validate() {
     return false;
   }
 
-  //Validate program
+  // Validate program
   QString program = m_uiForm.cbProgram->currentText();
   if (program == "Stretched Exponential") {
     QString resName = m_uiForm.dsResolution->getCurrentDataName();
@@ -148,7 +154,6 @@ void Quasi::run() {
     }
   }
 
-  bool save = false;
   bool elasticPeak = false;
   bool sequence = false;
 
@@ -198,12 +203,6 @@ void Quasi::run() {
   long sampleBins = m_properties["SampleBinning"]->valueText().toLong();
   long resBins = m_properties["ResBinning"]->valueText().toLong();
 
-  // Output options
-  if (m_uiForm.chkSave->isChecked()) {
-    save = true;
-  }
-  std::string plot = m_uiForm.cbPlot->currentText().toStdString();
-
   IAlgorithm_sptr runAlg = AlgorithmManager::Instance().create("BayesQuasi");
   runAlg->initialize();
   runAlg->setProperty("Program", program);
@@ -223,24 +222,26 @@ void Quasi::run() {
   runAlg->setProperty("UseResNorm", useResNorm);
   runAlg->setProperty("WidthFile", fixedWidthFile);
   runAlg->setProperty("Loop", sequence);
-  runAlg->setProperty("Save", save);
-  runAlg->setProperty("Plot", plot);
 
   m_QuasiAlg = runAlg;
   m_batchAlgoRunner->addAlgorithm(runAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
+
   m_batchAlgoRunner->executeBatchAsync();
 }
-
 /**
- * Updates the data and fit curves on the mini plot.
+ * Enable plotting and savimg and fit curves on the mini plot.
  */
 void Quasi::algorithmComplete(bool error) {
   if (error)
     return;
-  else
+  else {
     updateMiniPlot();
+    m_uiForm.cbPlot->setEnabled(true);
+    m_uiForm.pbPlot->setEnabled(true);
+    m_uiForm.pbSave->setEnabled(true);
+  }
 }
 
 void Quasi::updateMiniPlot() {
@@ -328,6 +329,8 @@ void Quasi::handleSampleInputReady(const QString &filename) {
                    range);
   setPlotPropertyRange(eRangeSelector, m_properties["EMin"],
                        m_properties["EMax"], range);
+  eRangeSelector->setMinimum(range.first);
+  eRangeSelector->setMaximum(range.second);
 }
 
 /**
@@ -390,10 +393,10 @@ void Quasi::handleProgramChange(int index) {
   int numberOptions = m_uiForm.cbPlot->count();
   switch (index) {
   case 0:
-    m_uiForm.cbPlot->setItemText(numberOptions - 1, "Prob");
+    m_uiForm.cbPlot->setItemText(numberOptions - 2, "Prob");
     break;
   case 1:
-    m_uiForm.cbPlot->setItemText(numberOptions - 1, "Beta");
+    m_uiForm.cbPlot->setItemText(numberOptions - 2, "Beta");
     break;
   }
 }
@@ -406,6 +409,83 @@ void Quasi::handleProgramChange(int index) {
 void Quasi::previewSpecChanged(int value) {
   m_previewSpec = value;
   updateMiniPlot();
+}
+
+/**
+ * Handles saving the workspace when save is clicked
+ */
+void Quasi::saveClicked() {
+  QString saveDirectory = QString::fromStdString(
+      Mantid::Kernel::ConfigService::Instance().getString(
+          "defaultsave.directory"));
+  const auto fitWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
+  IndirectTab::checkADSForPlotSaveWorkspace(fitWS, false);
+  QString QfitWS = QString::fromStdString(fitWS);
+  const auto fitPath = saveDirectory + QfitWS + ".nxs";
+  addSaveWorkspaceToQueue(QfitWS, fitPath);
+
+  const auto resultWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
+  IndirectTab::checkADSForPlotSaveWorkspace(resultWS, false);
+  QString QresultWS = QString::fromStdString(resultWS);
+  const auto resultPath = saveDirectory + QresultWS + ".nxs";
+  addSaveWorkspaceToQueue(QresultWS, resultPath);
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+* Handles plotting the selected plot when plot is clicked
+*/
+void Quasi::plotClicked() {
+  // Output options
+  std::string plot = m_uiForm.cbPlot->currentText().toStdString();
+  QString program = m_uiForm.cbProgram->currentText();
+  const auto resultName = m_QuasiAlg->getPropertyValue("OutputWorkspaceResult");
+  if ((plot == "Prob" || plot == "All") && (program == "Lorentzians")) {
+    const auto probWS = m_QuasiAlg->getPropertyValue("OutputWorkspaceProb");
+    // Check workspace exists
+    IndirectTab::checkADSForPlotSaveWorkspace(probWS, true);
+    QString QprobWS = QString::fromStdString(probWS);
+    IndirectTab::plotSpectrum(QprobWS, 1, 2);
+  }
+  if (plot == "Fit" || plot == "All") {
+    std::string fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
+    fitName.pop_back();
+    fitName.append("_0");
+    IndirectTab::checkADSForPlotSaveWorkspace(fitName, true);
+    QString QfitWS = QString::fromStdString(fitName);
+    if (program == "Lorentzians")
+      IndirectTab::plotSpectra(QfitWS, {0, 1, 2, 4});
+    else
+      IndirectTab::plotSpectra(QfitWS, {0, 1, 2});
+  }
+
+  MatrixWorkspace_sptr resultWS =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
+  int numSpectra = (int)resultWS->getNumberHistograms();
+  IndirectTab::checkADSForPlotSaveWorkspace(resultName, true);
+  QString QresultWS = QString::fromStdString(resultName);
+  auto paramNames = {"Amplitude", "FWHM", "Beta"};
+  for (std::string paramName : paramNames) {
+
+    if (plot == paramName || plot == "All") {
+      std::vector<int> spectraIndices = {};
+      for (int i = 0; i < numSpectra; i++) {
+        auto axisLabel = resultWS->getAxis(1)->label(i);
+
+        auto found = axisLabel.find(paramName);
+        if (found != std::string::npos) {
+          spectraIndices.push_back(i);
+
+          if (program == "Lorentzians") {
+            if (spectraIndices.size() == 3) {
+              IndirectTab::plotSpectra(QresultWS, spectraIndices);
+            }
+          } else
+            IndirectTab::plotSpectrum(QresultWS, spectraIndices[0]);
+        }
+      }
+    }
+  }
 }
 
 } // namespace CustomInterfaces

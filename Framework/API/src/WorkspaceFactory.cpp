@@ -1,11 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
@@ -24,7 +20,7 @@ using std::size_t;
 /// Private constructor for singleton class
 WorkspaceFactoryImpl::WorkspaceFactoryImpl()
     : Mantid::Kernel::DynamicFactory<Workspace>() {
-  g_log.debug() << "WorkspaceFactory created." << std::endl;
+  g_log.debug() << "WorkspaceFactory created.\n";
 }
 
 /** Create a new instance of the same type of workspace as that given as
@@ -103,7 +99,7 @@ void WorkspaceFactoryImpl::initializeFromParent(
   child->m_run = parent->m_run;
   child->setYUnit(parent->m_YUnit);
   child->setYUnitLabel(parent->m_YUnitLabel);
-  child->isDistribution(parent->isDistribution());
+  child->setDistribution(parent->isDistribution());
 
   // Only copy the axes over if new sizes are not given
   if (!differentSize) {
@@ -115,10 +111,10 @@ void WorkspaceFactoryImpl::initializeFromParent(
   // Same number of histograms = copy over the spectra data
   if (parent->getNumberHistograms() == child->getNumberHistograms()) {
     for (size_t wi = 0; wi < parent->getNumberHistograms(); wi++) {
-      ISpectrum *childSpec = child->getSpectrum(wi);
-      const ISpectrum *parentSpec = parent->getSpectrum(wi);
+      auto &childSpec = child->getSpectrum(wi);
+      const auto &parentSpec = parent->getSpectrum(wi);
       // Copy spectrum number and detector IDs
-      childSpec->copyInfoFrom(*parentSpec);
+      childSpec.copyInfoFrom(parentSpec);
     }
   }
 
@@ -141,8 +137,6 @@ void WorkspaceFactoryImpl::initializeFromParent(
       }
     }
   }
-
-  return;
 }
 
 /** Creates a new instance of the class with the given name, and allocates

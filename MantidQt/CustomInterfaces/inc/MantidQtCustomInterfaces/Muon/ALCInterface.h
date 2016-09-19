@@ -11,94 +11,91 @@
 
 #include <qwt_symbol.h>
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
+namespace MantidQt {
+namespace CustomInterfaces {
 
-  class ALCDataLoadingPresenter;
+class ALCDataLoadingPresenter;
 
-  class ALCBaselineModellingView;
-  class ALCBaselineModellingPresenter;
-  class ALCBaselineModellingModel;
+class ALCBaselineModellingView;
+class ALCBaselineModellingPresenter;
+class ALCBaselineModellingModel;
 
-  class ALCPeakFittingView;
-  class ALCPeakFittingPresenter;
-  class ALCPeakFittingModel;
+class ALCPeakFittingView;
+class ALCPeakFittingPresenter;
+class ALCPeakFittingModel;
 
-  /** ALCInterface : Custom interface for Avoided Level Crossing analysis
-    
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+/** ALCInterface : Custom interface for Avoided Level Crossing analysis
 
-    This file is part of Mantid.
+  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class MANTIDQT_CUSTOMINTERFACES_DLL ALCInterface : public API::UserSubWindow
-  {
-    Q_OBJECT
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  public:
-    ALCInterface(QWidget* parent = 0);
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class MANTIDQT_CUSTOMINTERFACES_DLL ALCInterface : public API::UserSubWindow {
+  Q_OBJECT
 
-    static std::string name() { return "ALC"; }
-    static QString categoryInfo() { return "Muon"; }
+public:
+  ALCInterface(QWidget *parent = 0);
 
-  protected:
-    void initLayout() override;
+  static std::string name() { return "ALC"; }
+  static QString categoryInfo() { return "Muon"; }
 
-  private slots:
-    void nextStep();
-    void previousStep();
+protected:
+  void initLayout() override;
 
-    void switchStep(int newStepIndex);
+private slots:
+  void nextStep();
+  void previousStep();
 
-    void exportResults();
-    void importResults();
+  void switchStep(int newStepIndex);
 
-    void updateBaselineData();
-    void updatePeakData();
+  void exportResults();
+  void importResults();
 
-  private:
+  void updateBaselineData();
+  void updatePeakData();
 
-    /// UI form
-    Ui::ALCInterface m_ui;
+private:
+  /// UI form
+  Ui::ALCInterface m_ui;
 
-    // Step views
-    ALCBaselineModellingView* m_baselineModellingView;
-    ALCPeakFittingView* m_peakFittingView;
+  // Step views
+  ALCBaselineModellingView *m_baselineModellingView;
+  ALCPeakFittingView *m_peakFittingView;
 
-    // Step presenters
-    ALCDataLoadingPresenter* m_dataLoading;
-    ALCBaselineModellingPresenter* m_baselineModelling;
-    ALCPeakFittingPresenter* m_peakFitting;
+  // Step presenters
+  ALCDataLoadingPresenter *m_dataLoading;
+  ALCBaselineModellingPresenter *m_baselineModelling;
+  ALCPeakFittingPresenter *m_peakFitting;
 
-    // Models
-    ALCBaselineModellingModel* m_baselineModellingModel;
-    ALCPeakFittingModel* m_peakFittingModel;
+  // Models
+  ALCBaselineModellingModel *m_baselineModellingModel;
+  ALCPeakFittingModel *m_peakFittingModel;
 
-    /// Name for every step for labels
-    static const QStringList STEP_NAMES;
+  /// Name for every step for labels
+  static const QStringList STEP_NAMES;
 
-    /// Format of the label at the bottom
-    static const QString LABEL_FORMAT;
-  };
+  /// Format of the label at the bottom
+  static const QString LABEL_FORMAT;
+};
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif  /* MANTIDQT_CUSTOMINTERFACES_ALCINTERFACE_H_ */
+#endif /* MANTIDQT_CUSTOMINTERFACES_ALCINTERFACE_H_ */

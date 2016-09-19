@@ -22,18 +22,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CentroidPeaksMD::CentroidPeaksMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CentroidPeaksMD::~CentroidPeaksMD() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CentroidPeaksMD::init() {
@@ -83,21 +71,19 @@ void CentroidPeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
       getProperty("OutputWorkspace");
   if (peakWS != inPeakWS)
-    peakWS.reset(inPeakWS->clone().release());
+    peakWS = inPeakWS->clone();
 
   std::string CoordinatesToUseStr = getPropertyValue("CoordinatesToUse");
   int CoordinatesToUse = ws->getSpecialCoordinateSystem();
   if (CoordinatesToUse == 1 && CoordinatesToUseStr != "Q (lab frame)")
     g_log.warning() << "Warning: used Q (lab frame) coordinates for MD "
-                       "workspace, not CoordinatesToUse from input "
-                    << std::endl;
+                       "workspace, not CoordinatesToUse from input \n";
   else if (CoordinatesToUse == 2 && CoordinatesToUseStr != "Q (sample frame)")
     g_log.warning() << "Warning: used Q (sample frame) coordinates for MD "
-                       "workspace, not CoordinatesToUse from input "
-                    << std::endl;
+                       "workspace, not CoordinatesToUse from input \n";
   else if (CoordinatesToUse == 3 && CoordinatesToUseStr != "HKL")
     g_log.warning() << "Warning: used HKL coordinates for MD workspace, not "
-                       "CoordinatesToUse from input " << std::endl;
+                       "CoordinatesToUse from input \n";
 
   /// Radius to use around peaks
   double PeakRadius = getProperty("PeakRadius");
@@ -161,11 +147,10 @@ void CentroidPeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
         g_log.information() << "Peak " << i << " at " << pos << ": signal "
                             << signal << ", centroid " << vecCentroid << " in "
-                            << CoordinatesToUse << std::endl;
+                            << CoordinatesToUse << '\n';
       } else {
         g_log.information() << "Peak " << i << " at " << pos
-                            << " had no signal, and could not be centroided."
-                            << std::endl;
+                            << " had no signal, and could not be centroided.\n";
       }
     }
 

@@ -31,7 +31,7 @@ void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels,
   const double tofExact = peak->getTOF();
   delete peak;
 
-  EventList &el = eventWS->getEventList(detectorId - totalNPixels);
+  EventList &el = eventWS->getSpectrum(detectorId - totalNPixels);
 
   // Add more events to the event list corresponding to the peak centre
   double start = tofExact - (double(nEvents) / 2 * tofGap);

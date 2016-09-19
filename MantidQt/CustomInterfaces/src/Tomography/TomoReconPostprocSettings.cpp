@@ -9,7 +9,7 @@ namespace CustomInterfaces {
  * GUIs, etc.
  */
 TomoReconPostprocSettings::TomoReconPostprocSettings()
-  : circMaskRadius(0.94), cutOffLevel(0.0) {}
+    : circMaskRadius(0.94), cutOffLevel(0.0) {}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

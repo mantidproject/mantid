@@ -14,14 +14,6 @@ using DataObjects::PeaksWorkspace_const_sptr;
 using DataObjects::PeaksWorkspace_sptr;
 using DataObjects::Peak;
 
-/** Constructor
- */
-DiffPeaksWorkspaces::DiffPeaksWorkspaces() {}
-
-/** Destructor
- */
-DiffPeaksWorkspaces::~DiffPeaksWorkspaces() {}
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DiffPeaksWorkspaces::name() const {
   return "DiffPeaksWorkspaces";
@@ -74,7 +66,7 @@ void DiffPeaksWorkspaces::exec() {
   }
 
   // Copy the first workspace to our output workspace
-  PeaksWorkspace_sptr output(LHSWorkspace->clone().release());
+  PeaksWorkspace_sptr output(LHSWorkspace->clone());
   // Get hold of the peaks in the second workspace
   auto &rhsPeaks = RHSWorkspace->getPeaks();
   // Get hold of the peaks in the first workspace as we'll need to examine them

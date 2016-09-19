@@ -71,8 +71,8 @@ public:
       TS_ASSERT_EQUALS(phi, 0);
       TS_ASSERT_DELTA(dx, r * step * Geometry::deg2rad, 0.01);
       TS_ASSERT_EQUALS(dy, 0.01);
-      tth = ws->detectorTwoTheta(ws->getInstrument()->getDetector(detID)) *
-            Geometry::rad2deg;
+      auto det = ws->getInstrument()->getDetector(detID);
+      tth = ws->detectorTwoTheta(*det) * Geometry::rad2deg;
       TS_ASSERT_LESS_THAN(tth, static_cast<double>(i + 1) * step);
       TS_ASSERT_LESS_THAN(static_cast<double>(i) * step, tth);
     }

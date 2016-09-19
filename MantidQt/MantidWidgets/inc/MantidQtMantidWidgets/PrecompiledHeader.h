@@ -4,12 +4,12 @@
 // Mantid
 #include "MantidAPI/Algorithm.h"
 
- // MantidQt API
+// MantidQt API
 #include "MantidQtAPI/MantidWidget.h"
 
-//STL
+// STL
 #include <vector>
 #include <map>
 #include <string>
 
-#endif //MANTIDQT_MANTIDWIDGETS_PRECOMPILEDHEADER_H_
+#endif // MANTIDQT_MANTIDWIDGETS_PRECOMPILEDHEADER_H_

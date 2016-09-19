@@ -6,6 +6,7 @@
 #include "MantidMPIAlgorithms/GatherWorkspaces.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidGeometry/Instrument.h"
 
 using namespace Mantid;
 

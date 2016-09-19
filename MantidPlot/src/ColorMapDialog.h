@@ -1,10 +1,10 @@
 /***************************************************************************
-	File                 : ColorMapDialog.h
-	Project              : QtiPlot
+        File                 : ColorMapDialog.h
+        Project              : QtiPlot
 --------------------------------------------------------------------
-	Copyright            : (C) 2007 by Ion Vasilief
-	Email (use @ for *)  : ion_vasilief*yahoo.fr
-	Description          : A QwtLinearColorMap Editor Dialog
+        Copyright            : (C) 2007 by Ion Vasilief
+        Email (use @ for *)  : ion_vasilief*yahoo.fr
+        Description          : A QwtLinearColorMap Editor Dialog
  ***************************************************************************/
 
 /***************************************************************************
@@ -33,22 +33,21 @@
 class QPushButton;
 class ColorMapEditor;
 class Matrix;
-	
-class ColorMapDialog: public QDialog
-{
-    Q_OBJECT
+
+class ColorMapDialog : public QDialog {
+  Q_OBJECT
 
 public:
-	ColorMapDialog(QWidget* parent=0, Qt::WFlags fl = 0);
-	void setMatrix(Matrix *m);
-	
+  ColorMapDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
+  void setMatrix(Matrix *m);
+
 protected slots:
-	void apply();
+  void apply();
 
 private:
-	QPushButton *applyBtn, *closeBtn;
-	ColorMapEditor *editor;
-	Matrix *d_matrix;
+  QPushButton *applyBtn, *closeBtn;
+  ColorMapEditor *editor;
+  Matrix *d_matrix;
 };
-   
+
 #endif

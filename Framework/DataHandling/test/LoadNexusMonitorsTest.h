@@ -80,8 +80,8 @@ public:
     // Correct number of monitors found
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), 2);
     // Verify number of events loaded
-    TS_ASSERT_EQUALS(WS->getEventList(0).getNumberEvents(), 15000);
-    TS_ASSERT_EQUALS(WS->getEventList(1).getNumberEvents(), 15000);
+    TS_ASSERT_EQUALS(WS->getSpectrum(0).getNumberEvents(), 15000);
+    TS_ASSERT_EQUALS(WS->getSpectrum(1).getNumberEvents(), 15000);
   }
 
   void testOldFile() {

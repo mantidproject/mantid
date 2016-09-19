@@ -4,19 +4,18 @@
 #include "ui_MultifitSetupDialog.h"
 #include <QDialog>
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
-  class FitPropertyBrowser;
-/** 
+namespace MantidQt {
+namespace MantidWidgets {
+class FitPropertyBrowser;
+/**
     This is a dialog for doing setting up the MultiBG function.
-    
+
 
     @author Roman Tolchenov, Tessella plc
     @date 7/09/2011
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -34,40 +33,35 @@ namespace MantidWidgets
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MultifitSetupDialog : public QDialog
-{
+class MultifitSetupDialog : public QDialog {
   Q_OBJECT
 
 public:
-  
   /// Default constructor
-  MultifitSetupDialog(FitPropertyBrowser* fitBrowser);
+  MultifitSetupDialog(FitPropertyBrowser *fitBrowser);
 
-  /// Returns a list of parameter ties. Empty string means no ties and parameter is local
-  QStringList getParameterTies()const{return m_ties;}
+  /// Returns a list of parameter ties. Empty string means no ties and parameter
+  /// is local
+  QStringList getParameterTies() const { return m_ties; }
 
 private slots:
 
   /// Setup the function and close dialog
   void accept() override;
-  void cellChanged(int,int);
+  void cellChanged(int, int);
 
 private:
-
   /// The form generated with Qt Designer
   Ui::MultifitSetupDialog ui;
 
   /// Pointer to the calling fit browser
-  FitPropertyBrowser* m_fitBrowser;
+  FitPropertyBrowser *m_fitBrowser;
 
   /// A list with parameter ties
   QStringList m_ties;
-
 };
-
-
 }
 }
 

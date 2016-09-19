@@ -36,7 +36,6 @@ namespace Algorithms {
 class DLLExport MaskBinsFromTable : public API::Algorithm {
 public:
   MaskBinsFromTable();
-  ~MaskBinsFromTable() override;
 
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "MaskBinsFromTable"; };

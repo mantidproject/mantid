@@ -66,8 +66,6 @@ void SetScalingPSD::exec() {
   std::vector<Kernel::V3D> truepos;
   processScalingFile(m_filename, truepos);
   // calculateDetectorShifts(truepos);
-
-  return;
 }
 
 /** Read the scaling information from a file (e.g. merlin_detector.sca) or from
@@ -97,8 +95,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
 
     std::ifstream sFile(scalingFile.c_str());
     if (!sFile) {
-      g_log.error() << "Unable to open scaling file " << scalingFile
-                    << std::endl;
+      g_log.error() << "Unable to open scaling file " << scalingFile << '\n';
       return false;
     }
     std::string str;
@@ -167,7 +164,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
           scaleMap[detIndex - 1] = scale;
         else
           its->second = 0.5 * (its->second + scale);
-        // std::cout << detIndex << scale << scaleDir << std::endl;
+        // std::cout << detIndex << scale << scaleDir << '\n';
       }
       detIdLast = detIndex;
       detPosLast = detPos;
@@ -222,7 +219,7 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile,
           } else
             its->second = 3.0; // crazy test value
         }
-        // std::cout << detIndex << scale << scaleDir << std::endl;
+        // std::cout << detIndex << scale << scaleDir << '\n';
       }
       detIdLast = detID[i];
       detPosLast = detPos;
@@ -308,7 +305,6 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
                      "because the scale count is 0! Its value before dividing "
                      "by the count is " << aveScale << "\n";
   }
-  return;
 }
 
 /** Find all detectors in the comp and push the IComp pointers onto m_vectDet
@@ -322,13 +318,12 @@ void SetScalingPSD::findAll(
     m_vectDet.push_back(comp);
     return;
   }
-  boost::shared_ptr<const ICompAssembly> asmb =
-      boost::dynamic_pointer_cast<const ICompAssembly>(comp);
-  if (asmb)
+  auto asmb = boost::dynamic_pointer_cast<const ICompAssembly>(comp);
+  if (asmb) {
     for (int i = 0; i < asmb->nelements(); i++) {
       findAll((*asmb)[i]);
     }
-  return;
+  }
 }
 
 /** Read detector true positions from raw file

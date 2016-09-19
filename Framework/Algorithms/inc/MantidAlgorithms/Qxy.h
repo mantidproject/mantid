@@ -1,11 +1,7 @@
 #ifndef MANTID_ALGORITHMS_QXY_H_
 #define MANTID_ALGORITHMS_QXY_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAlgorithms/GravitySANSHelper.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -52,10 +48,6 @@ namespace Algorithms {
 */
 class DLLExport Qxy : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  Qxy() : API::Algorithm() {}
-  /// Virtual destructor
-  ~Qxy() override {}
   /// Algorithm's name
   const std::string name() const override { return "Qxy"; }
   /// Summary of algorithms purpose

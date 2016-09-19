@@ -4,18 +4,19 @@
 #include "qtpropertymanager.h"
 #include "MantidQtMantidWidgets/WorkspaceSelector.h"
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
+namespace MantidQt {
+namespace MantidWidgets {
 
-class WorkspaceEditorFactory : public QtAbstractEditorFactory<QtStringPropertyManager>
-{
-    Q_OBJECT
+class WorkspaceEditorFactory
+    : public QtAbstractEditorFactory<QtStringPropertyManager> {
+  Q_OBJECT
 public:
-  WorkspaceEditorFactory(QObject *parent = 0): QtAbstractEditorFactory<QtStringPropertyManager>(parent){}
+  WorkspaceEditorFactory(QObject *parent = 0)
+      : QtAbstractEditorFactory<QtStringPropertyManager>(parent) {}
+
 protected:
-  using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler warning
+  using QtAbstractEditorFactoryBase::createEditor; // Avoid Intel compiler
+                                                   // warning
   void connectPropertyManager(QtStringPropertyManager *) override {}
   QWidget *createEditorForManager(QtStringPropertyManager *manager,
                                   QtProperty *property,
@@ -23,17 +24,16 @@ protected:
   void disconnectPropertyManager(QtStringPropertyManager *) override {}
 };
 
-class WorkspaceEditor: public WorkspaceSelector
-{
+class WorkspaceEditor : public WorkspaceSelector {
   Q_OBJECT
 public:
   WorkspaceEditor(QtProperty *property, QWidget *parent);
 protected slots:
-  void updateProperty(const QString& text);
-private:
-  QtProperty* m_property;
-};
+  void updateProperty(const QString &text);
 
+private:
+  QtProperty *m_property;
+};
 }
 }
 

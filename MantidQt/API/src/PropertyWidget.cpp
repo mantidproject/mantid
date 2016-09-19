@@ -89,12 +89,8 @@ bool isEmptyNumMacro(const std::string &value) {
   }
 
   static const std::vector<double> EMPTY_NUM_MACROS = {
-      EMPTY_DBL(),
-      -DBL_MAX,
-      DBL_MAX,
-      static_cast<double>(EMPTY_INT()),
-      static_cast<double>(EMPTY_LONG()),
-      static_cast<double>(-INT_MAX),
+      EMPTY_DBL(), -DBL_MAX, DBL_MAX, static_cast<double>(EMPTY_INT()),
+      static_cast<double>(EMPTY_LONG()), static_cast<double>(-INT_MAX),
       static_cast<double>(-LONG_MAX)};
 
   return std::find(EMPTY_NUM_MACROS.begin(), EMPTY_NUM_MACROS.end(),
@@ -196,11 +192,12 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent,
   if (!prop)
     throw std::runtime_error(
         "NULL Property passed to the PropertyWidget constructor.");
+  setObjectName(QString::fromStdString(prop->name()));
 
   if (!m_gridLayout) {
     // Create a LOCAL grid layout
     m_gridLayout = new QGridLayout(this);
-      
+
     m_gridLayout->setSpacing(5);
     this->setLayout(m_gridLayout);
     m_row = 0;
@@ -208,6 +205,13 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent,
   } else {
     // Use the parent of the provided QGridLayout when adding widgets
     m_parent = parent;
+    // HACK - In this mode a property widget is not a true self-contained
+    // widget: it has no children
+    //        of its own. By default, when added to a parent widget, it will be
+    //        drawn invisble
+    //        at the top left of the parent widget and obscure mouse clicks etc.
+    //        The hack fix is to lower it down the visible stack.
+    this->lower();
   }
 
   QWidget *infoWidget = new QWidget();

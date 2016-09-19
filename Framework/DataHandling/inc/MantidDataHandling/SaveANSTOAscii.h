@@ -39,10 +39,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SaveANSTOAscii : public DataHandling::AsciiPointBase {
 public:
-  /// Default constructor
-  SaveANSTOAscii() {}
-  /// Destructor
-  ~SaveANSTOAscii() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveANSTOAscii"; }
   /// Summary of algorithms purpose

@@ -1,9 +1,9 @@
 #pylint: disable=invalid-name,no-init
+import os
 from stresstesting import MantidStressTest
 from mantid.simpleapi import *
 from mantid.kernel import PropertyManager
 from mantid import config
-import os
 
 def MAX_DBL():
     import sys

@@ -46,7 +46,6 @@ namespace Algorithms {
 class DLLExport SplineInterpolation : public API::Algorithm {
 public:
   SplineInterpolation();
-  ~SplineInterpolation() override;
 
   const std::string name() const override;
   int version() const override;

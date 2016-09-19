@@ -17,11 +17,6 @@ DECLARE_ALGORITHM(PeaksOnSurface)
 PeaksOnSurface::PeaksOnSurface() : m_extents(6) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PeaksOnSurface::~PeaksOnSurface() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PeaksOnSurface::name() const { return "PeaksOnSurface"; }
 

@@ -77,13 +77,13 @@ private:
   void createGoodFluxWorkspace(const std::string &wsName) {
     auto flux =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
-    auto &x = flux->dataX(0);
+    auto &x = flux->readX(0);
     auto &y1 = flux->dataY(1);
 
     for (size_t i = 0; i < y1.size(); ++i) {
       y1[i] = 2 * x[i];
     }
-    flux->setX(1, x);
+    flux->setX(1, flux->refX(0));
     flux->getAxis(0)->setUnit("Momentum");
 
     AnalysisDataService::Instance().addOrReplace(wsName, flux);
@@ -92,13 +92,13 @@ private:
   void createBadFluxWorkspace(const std::string &wsName) {
     auto flux =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 10);
-    auto &x = flux->dataX(0);
+    auto &x = flux->readX(0);
     auto &y1 = flux->dataY(1);
 
     for (size_t i = 0; i < y1.size(); ++i) {
       y1[i] = -2 * x[i];
     }
-    flux->setX(1, x);
+    flux->setX(1, flux->refX(0));
     flux->getAxis(0)->setUnit("Momentum");
 
     AnalysisDataService::Instance().addOrReplace(wsName, flux);

@@ -37,8 +37,6 @@ class MANTID_SINQ_DLL SliceMDHisto : public Mantid::API::Algorithm {
 public:
   /// Default constructor
   SliceMDHisto();
-  /// Virtual destructor
-  ~SliceMDHisto() override {}
   /// Algorithm's name
   const std::string name() const override { return "SliceMDHisto"; }
   /// Summary of algorithms purpose

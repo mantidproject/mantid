@@ -35,9 +35,6 @@ namespace Algorithms {
 class DLLExport SpecularReflectionPositionCorrect
     : public SpecularReflectionAlgorithm {
 public:
-  SpecularReflectionPositionCorrect();
-  ~SpecularReflectionPositionCorrect() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

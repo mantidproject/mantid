@@ -1,4 +1,5 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 
@@ -70,6 +71,42 @@ class EnggFocus(PythonAlgorithm):
         self.setPropertyGroup('Bank', banks_grp)
         self.setPropertyGroup(self.INDICES_PROP_NAME, banks_grp)
 
+        self.declareProperty('NormaliseByCurrent', True, direction=Direction.Input,
+                             doc='Normalize the input data by applying the NormaliseByCurrent algorithm '
+                             'which use the log entry gd_proton_charge')
+
+        self.declareProperty(FloatArrayProperty('MaskBinsXMins', EnggUtils.ENGINX_MASK_BIN_MINS,
+                                                direction=Direction.Input),
+                             doc="List of minimum bin values to mask, separated by commas.")
+
+        self.declareProperty(FloatArrayProperty('MaskBinsXMaxs', EnggUtils.ENGINX_MASK_BIN_MAXS,
+                                                direction=Direction.Input),
+                             doc="List of maximum bin values to mask, separated by commas.")
+
+        prep_grp = 'Data preparation/pre-processing'
+        self.setPropertyGroup('NormaliseByCurrent', prep_grp)
+        self.setPropertyGroup('MaskBinsXMins', prep_grp)
+        self.setPropertyGroup('MaskBinsXMaxs', prep_grp)
+
+    def validateInputs(self):
+        issues = dict()
+
+        if not self.getPropertyValue('MaskBinsXMins') and self.getPropertyValue('MaskBinsXMaxs') or\
+           self.getPropertyValue('MaskBinsXMins') and not self.getPropertyValue('MaskBinsXMaxs'):
+            issues['MaskBinsXMins'] = "Both minimum and maximum values need to be given, or none"
+
+        min_list = self.getProperty('MaskBinsXMins').value
+        max_list = self.getProperty('MaskBinsXMaxs').value
+        if len(min_list) > 0 and len(max_list) > 0:
+            len_min = len(min_list)
+            len_max = len(max_list)
+            if len_min != len_max:
+                issues['MaskBinsXMins'] = ("The number of minimum and maximum values must match. Got "
+                                           "{0} and {1} for the minimum and maximum, respectively"
+                                           .format(len_min, len_max))
+
+        return issues
+
     def PyExec(self):
         # Get the run workspace
         wks = self.getProperty('InputWorkspace').value
@@ -79,12 +116,20 @@ class EnggFocus(PythonAlgorithm):
         spectra = self.getProperty(self.INDICES_PROP_NAME).value
         indices = EnggUtils.getWsIndicesFromInProperties(wks, bank, spectra)
 
-    	# Leave the data for the bank we are interested in only
+        detPos = self.getProperty("DetectorPositions").value
+        nreports = 5
+        if detPos:
+            nreports += 1
+        prog = Progress(self, start=0, end=1, nreports=nreports)
+
+        # Leave only the data for the bank/spectra list requested
+        prog.report('Selecting spectra from input workspace')
         wks = EnggUtils.cropData(self, wks, indices)
 
-        prog = Progress(self, start=0, end=1, nreports=3)
+        prog.report('Masking some bins if requested')
+        self._mask_bins(wks, self.getProperty('MaskBinsXMins').value, self.getProperty('MaskBinsXMaxs').value)
 
-        prog.report('Preparing input workspace')
+        prog.report('Preparing input workspace with vanadium corrections')
         # Leave data for the same bank in the vanadium workspace too
         vanWS = self.getProperty('VanadiumWorkspace').value
         vanIntegWS = self.getProperty('VanIntegrationWorkspace').value
@@ -92,7 +137,6 @@ class EnggFocus(PythonAlgorithm):
         EnggUtils.applyVanadiumCorrections(self, wks, indices, vanWS, vanIntegWS, vanCurvesWS)
 
     	# Apply calibration
-        detPos = self.getProperty("DetectorPositions").value
         if detPos:
             self._applyCalibration(wks, detPos)
 
@@ -100,18 +144,57 @@ class EnggFocus(PythonAlgorithm):
         wks = EnggUtils.convertToDSpacing(self, wks)
 
         prog.report('Summing spectra')
-    	# Sum the values
+        # Sum the values across spectra
         wks = EnggUtils.sumSpectra(self, wks)
 
         prog.report('Preparing output workspace')
-    	# Convert back to time of flight
+        # Convert back to time of flight
         wks = EnggUtils.convertToToF(self, wks)
+
+        prog.report('Normalizing input workspace if needed')
+        if self.getProperty('NormaliseByCurrent').value:
+            self._normalize_by_current(wks)
 
     	# OpenGenie displays distributions instead of pure counts (this is done implicitly when
     	# converting units), so I guess that's what users will expect
         self._convertToDistr(wks)
 
         self.setProperty("OutputWorkspace", wks)
+
+    def _mask_bins(self, wks, min_bins, max_bins):
+        """
+        Mask multiple ranges of bins, given multiple pairs min-max
+
+        @param wks :: workspace that will be masked (in/out, masked in place)
+        @param min_bins :: list of minimum values for every range to mask
+        @param max_bins :: list of maxima
+        """
+        for min_x, max_x in zip(min_bins, max_bins):
+            alg = self.createChildAlgorithm('MaskBins')
+            alg.setProperty('InputWorkspace', wks)
+            alg.setProperty('OutputWorkspace', wks)
+            alg.setProperty('XMin', min_x)
+            alg.setProperty('XMax', max_x)
+            alg.execute()
+
+    def _normalize_by_current(self, wks):
+        """
+        Apply the normalize by current algorithm on a workspace
+
+        @param wks :: workspace (in/out, modified in place)
+        """
+        p_charge = wks.getRun().getProtonCharge()
+        if p_charge <= 0:
+            self.log().warning("Cannot normalize by current because the proton charge log value "
+                               "is not positive!")
+
+        self.log().notice("Normalizing by current with proton charge: {0} uamp".
+                          format(p_charge))
+
+        alg = self.createChildAlgorithm('NormaliseByCurrent')
+        alg.setProperty('InputWorkspace', wks)
+        alg.setProperty('OutputWorkspace', wks)
+        alg.execute()
 
     def _applyCalibration(self, wks, detPos):
         """

@@ -137,16 +137,17 @@ Usage
 
   Load(Filename=r'focussed.nxs', OutputWorkspace='focussed')
   FitPeak(InputWorkspace='focussed', OutputWorkspace='peak4', ParameterTableWorkspace='peak4result',
-	WorkspaceIndex='3',PeakFunctionType='Gaussian (Height, PeakCentre, Sigma)',
-	PeakParameterValues='2000,2.1,0.01',BackgroundType='Linear (A0, A1)',
-	BackgroundParameterValues='2500,2000',FitWindow='2,2.3',PeakRange='2.1,2.25')
+          WorkspaceIndex='3',PeakFunctionType='Gaussian (Height, PeakCentre, Sigma)',
+          PeakParameterValues='2000,2.14,0.01',BackgroundType='Linear (A0, A1)',
+          BackgroundParameterValues='2500,2000',FitWindow='2,2.3',PeakRange='2.1,2.25')
+
 
   tbws = mtd["peak4result"]
   chi2 = tbws.cell(0, 1)
-  peakcentre = tbws.cell(2, 1)
-  peakheight = tbws.cell(3, 1)
+  peakheight = tbws.cell(2, 1)
+  peakcentre = tbws.cell(3, 1)
   sigma = tbws.cell(4, 1)
-  print "Chi-square = %f: Peak centre = %f, Height = %f, Sigma = %f" % (chi2, peakcentre, peakheight, sigma)
+  print "Chi-square = %.5f: Peak centre = %.5f, Height = %.2f, Sigma = %.5f" % (chi2, peakcentre, peakheight, sigma)
 
 
 .. testcleanup:: ExFitPeak
@@ -158,8 +159,7 @@ Output:
 
 .. testoutput:: ExFitPeak
 
-  Chi-square = 7.138740: Peak centre = 8365.836316, Height = 2.141713, Sigma = 0.005644
-
+  Chi-square = 1.74892: Peak centre = 2.14201, Height = 7490.67, Sigma = 0.00776
 
 .. categories::
 

@@ -10,11 +10,12 @@
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 
-#include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
-#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/Interpolation.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
+#include "MantidSINQ/PoldiUtilities/PoldiHeliumDetector.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -52,13 +53,14 @@ public:
   void loadConfiguration(Instrument_const_sptr poldiInstrument) override {
     UNUSED_ARG(poldiInstrument);
   }
-
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(efficiency, double());
   MOCK_METHOD1(twoTheta, double(int elementIndex));
   MOCK_METHOD1(distanceFromSample, double(int elementIndex));
   MOCK_METHOD0(elementCount, size_t());
   MOCK_METHOD0(centralElement, size_t());
   MOCK_METHOD2(qLimits, DoublePair(double lambdaMin, double lambdaMax));
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 
   const std::vector<int> &availableElements() override {
     return m_availableElements;
@@ -103,20 +105,20 @@ public:
   void loadConfiguration(Instrument_const_sptr poldiInstrument) override {
     UNUSED_ARG(poldiInstrument)
   }
-
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
   MOCK_METHOD0(rotationSpeed, double());
   MOCK_METHOD0(cycleTime, double());
   MOCK_METHOD0(zeroOffset, double());
   MOCK_METHOD0(distanceFromSample, double());
 
   MOCK_METHOD1(setRotationSpeed, void(double rotationSpeed));
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 
   const std::vector<double> &slitPositions() override {
     return m_slitPositions;
   }
   const std::vector<double> &slitTimes() override { return m_slitTimes; }
 };
-
 class PoldiFakeSourceComponent : public ObjComponent {
 public:
   PoldiFakeSourceComponent() : ObjComponent("FakePoldiSource", 0) {}

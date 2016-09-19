@@ -89,6 +89,8 @@ signals:
   void dataReadyToProcess(bool state);
   // signal  to notify mask file loaded
   void userfileLoaded();
+  /// signal to send gemoetry information
+  void sendGeometryInformation(QString &, QString &, QString &, QString &);
 
 private:
   /// Stores the batch or single run mode selection
@@ -315,6 +317,8 @@ private slots:
   void onUpDownCheckboxChanged();
   /// Handle a change of the aperture geometry for QResolution
   void handleQResolutionApertureChange(int aperture);
+  ///
+  void onUpdateGeometryRequest();
 
 private:
   /// used to specify the range of validation to do
@@ -453,7 +457,7 @@ private:
   /// Reset the to M3
   void resetToM3IfNecessary();
   /// Check the validty of inputs
-  bool areSettingsValid();
+  bool areSettingsValid(States type);
   /// Check setting for wavelengths and Q values
   void checkWaveLengthAndQValues(bool &isValid, QString &message,
                                  QLineEdit *min, QLineEdit *max,
@@ -491,11 +495,12 @@ private:
                                   bool w1W2Disabled);
   /// Initialize the QResolution settings
   void initQResolutionSettings();
-  
+
   /// Gets the BackgroundCorrection settings
   void retrieveBackgroundCorrection();
   /// Get Background runner
-  SANSBackgroundCorrectionSettings retrieveBackgroundCorrectionSetting(bool isTime, bool isMon);
+  SANSBackgroundCorrectionSettings
+  retrieveBackgroundCorrectionSetting(bool isTime, bool isMon);
   /// Initialize the background correction
   void initializeBackgroundCorrection();
   /// Sets the BackgroundCorrection settings
@@ -512,7 +517,6 @@ private:
   /// Update IDF file path
   void updateIDFFilePath();
 
-      
   UserSubWindow *slicingWindow;
 };
 }

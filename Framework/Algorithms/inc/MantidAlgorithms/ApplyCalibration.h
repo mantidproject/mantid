@@ -49,9 +49,6 @@ public:
   /// Default constructor
   ApplyCalibration();
 
-  /// Destructor
-  ~ApplyCalibration() override {}
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ApplyCalibration"; }
   /// Summary of algorithms purpose

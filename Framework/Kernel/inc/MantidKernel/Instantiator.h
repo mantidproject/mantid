@@ -78,8 +78,7 @@ public:
    *  @return A pointer to the base type
    */
   boost::shared_ptr<Base> createInstance() const override {
-    boost::shared_ptr<Base> ptr(new C);
-    return ptr;
+    return boost::shared_ptr<Base>(new C());
   }
 
   /** Creates an instance of a concrete subclass of Base that is not wrapped in
@@ -87,7 +86,7 @@ public:
    *  @return A bare pointer to the base type
    */
   Base *createUnwrappedInstance() const override {
-    return static_cast<Base *>(new C);
+    return static_cast<Base *>(new C());
   }
 };
 

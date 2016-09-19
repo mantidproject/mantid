@@ -42,7 +42,7 @@ AlgorithmProxy::~AlgorithmProxy() { delete m_executeAsync; }
 /** Initialization method invoked by the framework.
 *  Does nothing for AlgorithmProxy as initialization is done in the constructor.
 */
-void AlgorithmProxy::initialize() { return; }
+void AlgorithmProxy::initialize() {}
 
 AlgorithmID AlgorithmProxy::getAlgorithmID() const {
   return AlgorithmID(const_cast<AlgorithmProxy *>(this));

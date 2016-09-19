@@ -4,9 +4,30 @@ Defines functions to dynamically load Python modules.
 These modules may define extensions to C++ types, e.g.
 algorithms, fit functions etc.
 """
+from __future__ import (absolute_import, division,
+                        print_function)
+
 import os as _os
-import imp as _imp
-from mantid.kernel import logger, Logger, config
+import sys as _sys
+try:
+    from importlib.machinery import SourceFileLoader
+except ImportError:
+    # imp is deprecated in Python 3 but importlib doesn't exist
+    # in Python 2.
+    # We only use a single function so implement a handwritten compatability
+    # class
+    import imp as _imp
+    class SourceFileLoader(object):
+
+        def __init__(self, name, pathname):
+            self._name = name
+            self._pathname = pathname
+
+        def load_module(self):
+            return _imp.load_source(self._name, self._pathname)
+    #endclass
+
+from . import logger, Logger, config
 
 # String that separates paths (should be in the ConfigService)
 PATH_SEPARATOR=";"
@@ -35,7 +56,7 @@ class PluginLoader(object):
         name = _os.path.basename(pathname) # Including extension
         name = _os.path.splitext(name)[0]
         self._logger.debug("Loading python plugin %s" % pathname)
-        return _imp.load_source(name, pathname)
+        return SourceFileLoader(name, pathname).load_module()
 
 #======================================================================================================================
 # High-level functions to assist with loading
@@ -70,6 +91,7 @@ def check_for_plugins(top_dir):
 
     return False
 
+
 def find_plugins(top_dir):
     """
        Searches recursively from the given directory to find the list of plugins that should be loaded
@@ -84,7 +106,7 @@ def find_plugins(top_dir):
             if f.endswith(PluginLoader.extension):
                 filename = _os.path.join(root, f)
                 all_plugins.append(filename)
-                if contains_newapi_algorithm(filename):
+                if contains_algorithm(filename):
                     algs.append(filename)
 
     return all_plugins, algs
@@ -163,10 +185,9 @@ def load_from_file(filepath):
     """
     loaded = []
     try:
-        if contains_newapi_algorithm(filepath):
-            name, module = load_plugin(filepath)
-            loaded.append(module)
-    except Exception, exc:
+        name, module = load_plugin(filepath)
+        loaded.append(module)
+    except Exception as exc:
         logger.warning("Failed to load plugin %s. Error: %s" % (filepath, str(exc)))
 
     return loaded
@@ -194,7 +215,6 @@ def sync_attrs(source_module, attrs, clients):
         given list from the source module & list of client modules such
         that the function defintions point to the same
         one
-
         @param source_module :: The module containing the "correct"
                                 definitions
         @param attrs :: The list of attributes to change in the client modules
@@ -209,25 +229,27 @@ def sync_attrs(source_module, attrs, clients):
 
 #======================================================================================================================
 
-def contains_newapi_algorithm(filename):
+def contains_algorithm(filename):
     """
-        Inspects the given file to check whether
-        it contains an algorithm written with this API.
-        The check is simple. If registerPyAlgorithm is
-        discovered then it will not be considered a new API algorithm
-
-        @param filename :: A full file path pointing to a python file
-        @returns True if a python algorithm written with the new API
-        has been found.
+        Inspects the file to look for an algorithm registration line
     """
-    file = open(filename,'r')
+    if _sys.version_info[0] < 3:
+        def readlines_reversed(f):
+            return reversed(f.readlines())
+    else:
+        def readlines_reversed(f):
+            return reversed(list(f.readlines()))
+    #endif
     alg_found = True
-    for line in reversed(file.readlines()):
-        if 'registerPyAlgorithm' in line:
-            alg_found = False
-            break
-        if 'AlgorithmFactory.subscribe' in line:
-            alg_found = True
-            break
-    file.close()
+    try:
+        with open(filename,'r') as plugin_file:
+            for line in readlines_reversed(plugin_file):
+                if 'AlgorithmFactory.subscribe' in line:
+                    alg_found = True
+                    break
+    except Exception as exc:
+        # something wrong with reading the file
+        logger.warning("Error checking plugin content in '{0}'\n{1}".format(filename,str(exc)))
+        alg_found = False
+
     return alg_found

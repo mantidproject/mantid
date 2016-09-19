@@ -5,7 +5,7 @@
     Copyright            : (C) 2006 by Knut Franke
     Email (use @ for *)  : knut.franke*gmx.de
     Description          : Implementations of generic scripting classes
-                           
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -26,7 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-// M. Gigg. Python is slightly special in that is better to include it before 
+// M. Gigg. Python is slightly special in that is better to include it before
 // any system headers are included.
 #ifdef SCRIPTING_PYTHON
 #include "PythonScript.h"
@@ -43,30 +43,21 @@
 
 #include <cstring>
 
-#include <QDir>
-#include <QDateTime>
-#include "MantidKernel/ConfigService.h"
-
-
-ScriptingEnv::ScriptingEnv(ApplicationWindow *parent, const QString & langName)
-  : QObject(0, langName), d_initialized(false), d_parent(parent), m_is_running(false), d_refcount(0),
-    m_languageName(langName)
-{
+ScriptingEnv::ScriptingEnv(ApplicationWindow *parent, const QString &langName)
+    : QObject(nullptr), d_initialized(false), d_parent(parent),
+      m_is_running(false), d_refcount(0), m_languageName(langName) {
+  setObjectName(langName.toAscii().constData());
 }
 
-ScriptingEnv::~ScriptingEnv()
-{
-}
+ScriptingEnv::~ScriptingEnv() {}
 
 /**
  * Start the environment
  * @return
  */
-bool ScriptingEnv::initialize()
-{
+bool ScriptingEnv::initialize() {
   static bool init_called(false);
-  if( !init_called )
-  {
+  if (!init_called) {
     init_called = true;
     emit starting();
     return start();
@@ -77,36 +68,28 @@ bool ScriptingEnv::initialize()
 /**
  * Perform a shutdown of the environment
  */
-void ScriptingEnv::finalize()
-{
+void ScriptingEnv::finalize() {
   emit shuttingDown();
   shutdown();
 }
 
+const QString ScriptingEnv::languageName() const { return m_languageName; }
 
-const QString ScriptingEnv::languageName() const
-{
-  return m_languageName;
-}
-
-const QString ScriptingEnv::fileFilter() const
-{
+const QString ScriptingEnv::fileFilter() const {
   QStringList extensions = fileExtensions();
   if (extensions.isEmpty())
     return "";
   else
-    return tr("%1 Source (*.%2);;").arg(name()).arg(extensions.join(" *."));
+    return tr("%1 Source (*.%2);;")
+        .arg(objectName())
+        .arg(extensions.join(" *."));
 }
 
-void ScriptingEnv::incref()
-{
-  d_refcount++;
-}
+void ScriptingEnv::incref() { d_refcount++; }
 
-void ScriptingEnv::decref()
-{
+void ScriptingEnv::decref() {
   d_refcount--;
-  if (d_refcount==0)
+  if (d_refcount == 0)
     delete this;
 }
 
@@ -116,43 +99,33 @@ void ScriptingEnv::decref()
 /**
  * A list of available languages
  */
-ScriptingLangManager::ScriptingLang ScriptingLangManager::g_langs[] = 
-  {
-    { "muParser", muParserScripting::constructor },
-    { "Python", PythonScripting::constructor },
+ScriptingLangManager::ScriptingLang ScriptingLangManager::g_langs[] = {
+    {"muParser", muParserScripting::constructor},
+    {"Python", PythonScripting::constructor},
     // Sentinel defining the end of the list
-    { NULL, NULL }
-};
+    {NULL, NULL}};
 
-ScriptingEnv *ScriptingLangManager::newEnv(ApplicationWindow *parent)
-{
-  if (!g_langs[0].constructor)
-  {
+ScriptingEnv *ScriptingLangManager::newEnv(ApplicationWindow *parent) {
+  if (!g_langs[0].constructor) {
     return NULL;
-  }
-  else 
-  {
+  } else {
     return g_langs[0].constructor(parent);
   }
 }
 
-ScriptingEnv *ScriptingLangManager::newEnv(const QString & name, ApplicationWindow *parent)
-{
-  for(ScriptingLang *l = g_langs; l->constructor; l++)
-  {
-    if( name == QString(l->name) )
-    {
+ScriptingEnv *ScriptingLangManager::newEnv(const QString &name,
+                                           ApplicationWindow *parent) {
+  for (ScriptingLang *l = g_langs; l->constructor; l++) {
+    if (name == QString(l->name)) {
       return l->constructor(parent);
     }
   }
   return NULL;
 }
 
-QStringList ScriptingLangManager::languages()
-{
+QStringList ScriptingLangManager::languages() {
   QStringList lang_list;
-  for (ScriptingLang *l = g_langs; l->constructor; l++)
-  {
+  for (ScriptingLang *l = g_langs; l->constructor; l++) {
     lang_list << l->name;
   }
   return lang_list;

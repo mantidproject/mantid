@@ -2,7 +2,8 @@
     File                 : AssociationsDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Plot associations dialog
 
@@ -42,39 +43,38 @@ class Graph;
 class MdiSubWindow;
 
 //! Plot associations dialog
-class AssociationsDialog : public QDialog
-{
-    Q_OBJECT
+class AssociationsDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    AssociationsDialog( Graph* g, Qt::WFlags fl = 0 );
+  AssociationsDialog(Graph *g, Qt::WFlags fl = 0);
 
-    void initTablesList(QList<MdiSubWindow *> lst, int curve);
+  void initTablesList(QList<MdiSubWindow *> lst, int curve);
 
 private slots:
-    void updateTable(int index);
-    void updateCurves();
-    void accept() override;
-    void processStateChange(QTableWidgetItem* item);
+  void updateTable(int index);
+  void updateCurves();
+  void accept() override;
+  void processStateChange(QTableWidgetItem *item);
 
 private:
-    void setGraph(Graph *g);
-  void changePlotAssociation(int curve, const QString& text);
-    void updateColumnTypes();
-    void uncheckCol(int col);
-    void updatePlotAssociation(int row, int col);
-    QString plotAssociation(const QString& text);
-    Table *findTable(int index);
+  void setGraph(Graph *g);
+  void changePlotAssociation(int curve, const QString &text);
+  void updateColumnTypes();
+  void uncheckCol(int col);
+  void updatePlotAssociation(int row, int col);
+  QString plotAssociation(const QString &text);
+  Table *findTable(int index);
 
-    QList <MdiSubWindow*> tables;
-    Table *active_table;
-    Graph *graph;
-    QStringList plotAssociationsList;
+  QList<MdiSubWindow *> tables;
+  Table *active_table;
+  Graph *graph;
+  QStringList plotAssociationsList;
 
-    QLabel* tableCaptionLabel;
-    QTableWidget *table;
-    QPushButton *btnOK, *btnCancel, *btnApply;
-    QListWidget* associations;
+  QLabel *tableCaptionLabel;
+  QTableWidget *table;
+  QPushButton *btnOK, *btnCancel, *btnApply;
+  QListWidget *associations;
 };
 
 #endif // ASSOCIATIONSDIALOG_H

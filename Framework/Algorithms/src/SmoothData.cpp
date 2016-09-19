@@ -165,8 +165,7 @@ void SmoothData::exec() {
  *  @return Group number if successful otherwise return -1
  */
 int SmoothData::validateSpectrumInGroup(size_t wi) {
-  const std::set<detid_t> &dets =
-      inputWorkspace->getSpectrum(wi)->getDetectorIDs();
+  const auto &dets = inputWorkspace->getSpectrum(wi).getDetectorIDs();
   if (dets.empty()) // Not in group
   {
     g_log.debug() << wi << " <- this workspace index is empty!\n";

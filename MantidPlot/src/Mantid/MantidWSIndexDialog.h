@@ -23,31 +23,34 @@
 //----------------------------------
 class IntervalList;
 
-/** 
-    The MantidWSIndexDialog class presents users with a dialog so that they may 
+/**
+    The MantidWSIndexDialog class presents users with a dialog so that they may
     specify which workspace indices / spectra IDs are to be plotted by Mantid.
 
     They are prompted with the available range(s) of indices/IDs they can plot.
     They must enter a range(s) that is(are) enclosed within those ranges.
 
     "Ranges" are of a format you've probably seen when inputting page numbers to
-    print into a word processing program or similar, i.e. "2, 4-6" to print out 
-    pages 2, 4, 5 and 6. 
-    
+    print into a word processing program or similar, i.e. "2, 4-6" to print out
+    pages 2, 4, 5 and 6.
+
     Ranges are defined by the "Interval" and "IntervalList" classes.
 
     The IntervalListValidator class overrides QValidator, and allows Mantid
     to assertain whether a user has attempted to input a valid range or not.
-    Altering this class will affect the behaviour of what is allowed to be typed,
+    Altering this class will affect the behaviour of what is allowed to be
+   typed,
     and what inputs allow the "OK" button to be pressed.
 
-    TODO - perhaps the interval objects are useful elsewhere, in which case those
+    TODO - perhaps the interval objects are useful elsewhere, in which case
+   those
            three classes are best in thier own header and source.
 
     @author Peter G Parker, ISIS, RAL
     @date 2011/10/06
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -65,11 +68,10 @@ class IntervalList;
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class Interval
-{
+class Interval {
 public:
   /// Constructor - starting and ending at single.
   explicit Interval(int single);
@@ -78,12 +80,13 @@ public:
   /// Constructor - attempts to parse given string to find start and end.
   explicit Interval(QString);
   /// Copy constructor
-  Interval(const Interval&);
+  Interval(const Interval &);
 
   /// Attempts to merge the given Interval with this Interval
-  bool merge(const Interval&);
-  /// Returns true if it is possible to merge the given Interval with this Interval, else false.
-  bool canMerge(const Interval&) const;
+  bool merge(const Interval &);
+  /// Returns true if it is possible to merge the given Interval with this
+  /// Interval, else false.
+  bool canMerge(const Interval &) const;
   /// Returns the int marking the start of this Interval
   int start() const;
   /// Returns the int marking the end of this Interval
@@ -94,8 +97,9 @@ public:
   /// Returns a set of ints that represents the interval.
   std::set<int> getIntSet() const;
 
-  /// Returns true if this interval completely contains the interval passed to it, else false.
-  bool contains(const Interval&) const;
+  /// Returns true if this interval completely contains the interval passed to
+  /// it, else false.
+  bool contains(const Interval &) const;
 
   /// Returns a string which represents the start and end of this Interval
   std::string toStdString() const;
@@ -110,8 +114,7 @@ private:
   int m_start, m_end;
 };
 
-class IntervalList
-{
+class IntervalList {
 public:
   /// Constructor - with empty list.
   IntervalList(void);
@@ -120,17 +123,18 @@ public:
   /// Constructor - with a list containing a single Interval
   explicit IntervalList(Interval);
   /// Copy Constructor
-  IntervalList(const IntervalList&);
+  IntervalList(const IntervalList &);
 
   /// Returns a reference to the list of Intervals.
-  const QList<Interval>& getList() const;
+  const QList<Interval> &getList() const;
   /// Returns the combined length of all Intervals in the list.
   int totalIntervalLength() const;
 
   /// Returns a string that represents the IntervalList, of the form
   /// "0, 2-5, 8, 10-12".  String is cut short by default to 6 intervals.
   std::string toStdString(int numOfIntervals = 6) const;
-  /// Convenience function that returns the contents of toStdString as a QString object.
+  /// Convenience function that returns the contents of toStdString as a QString
+  /// object.
   QString toQString(int numOfIntervals = 6) const;
 
   /// Add an interval starting and ending at single.
@@ -142,42 +146,48 @@ public:
   /// Attempts to parse the given string into a IntervalList to add.
   void addIntervals(QString);
   /// Adds an IntervalList to this IntervalList.
-  void addIntervalList(const IntervalList&);
-  /// Replaces the current list with the list belonging to given IntervalList object.
-  void setIntervalList(const IntervalList&);
+  void addIntervalList(const IntervalList &);
+  /// Replaces the current list with the list belonging to given IntervalList
+  /// object.
+  void setIntervalList(const IntervalList &);
 
   /// Returns a set of ints that represents the interval.
   std::set<int> getIntSet() const;
 
-  /// Returns true if this interval list completely contains the interval passed to it, else false.
-  bool contains(const Interval&) const;
-  /// Returns true if this interval list completely contains the interval list passed to it, else false.
-  bool contains(const IntervalList&) const;
+  /// Returns true if this interval list completely contains the interval passed
+  /// to it, else false.
+  bool contains(const Interval &) const;
+  /// Returns true if this interval list completely contains the interval list
+  /// passed to it, else false.
+  bool contains(const IntervalList &) const;
 
-  /// Returns true if the QString can be parsed into an IntervalList, else false.
-  static bool isParsable(const QString&);
-  /// Returns true if the QString can be parsed into an IntervalList which can then be contained
+  /// Returns true if the QString can be parsed into an IntervalList, else
+  /// false.
+  static bool isParsable(const QString &);
+  /// Returns true if the QString can be parsed into an IntervalList which can
+  /// then be contained
   /// in the IntervalList given, else false.
-  static bool isParsable(const QString&, const IntervalList&);
+  static bool isParsable(const QString &, const IntervalList &);
 
-  /// Returns an IntervalList which is the intersection of the given IntervalList and Interval
-  static IntervalList intersect(const IntervalList&, const Interval&);
-  /// Returns an IntervalList which is the intersection of the given IntervalLists
-  static IntervalList intersect(const IntervalList&, const IntervalList&);
+  /// Returns an IntervalList which is the intersection of the given
+  /// IntervalList and Interval
+  static IntervalList intersect(const IntervalList &, const Interval &);
+  /// Returns an IntervalList which is the intersection of the given
+  /// IntervalLists
+  static IntervalList intersect(const IntervalList &, const IntervalList &);
 
 private:
   /// A list of all the Intervals in this IntervalList
   QList<Interval> m_list;
 };
 
-class IntervalListValidator : public QValidator
-{
+class IntervalListValidator : public QValidator {
   Q_OBJECT
 
 public:
   /// Constructor - This object must know its parent QObject, as well as the
   /// IntervalList it is validating against.
-  IntervalListValidator(QObject* parent, const IntervalList& intervals);
+  IntervalListValidator(QObject *parent, const IntervalList &intervals);
 
   /// Overriden method to validate a given QString, at a particular position
   State validate(QString &, int &) const override;
@@ -218,13 +228,15 @@ public:
   struct UserInput {
     QMultiMap<QString, std::set<int>> plots;
     bool waterfall;
+    bool tiled;
   };
 
   /// Constructor - same parameters as one of the parent constructors, along
   /// with a
   /// list of the names of workspaces to be plotted.
   MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags, QList<QString> wsNames,
-                      const bool showWaterfallOption = false);
+                      const bool showWaterfallOption = false,
+                      const bool showTiledOption = false);
 
   /// Returns a structure holding all of the selected options
   UserInput getSelections() const;
@@ -233,11 +245,13 @@ public:
   /// mapped to the set of workspace indices.
   QMultiMap<QString, std::set<int>> getPlots() const;
   /// Returns whether the waterfall option has been selected
-  bool waterfallPlotRequested() const;
+  bool isWaterfallPlotSelected() const;
   /// Called by dialog when plot requested
   bool plotRequested();
   /// Called by dialog when plot all requested
   void plotAllRequested();
+  /// Returns whether the tiled plot option has been selected
+  bool isTiledPlotSelected() const;
 
 private slots:
   /// Called when the wsField has been edited.
@@ -264,10 +278,10 @@ private:
   void generateWsIndexIntervals();
   /// Generates an IntervalList which defines which spectra IDs the user can ask
   /// to plot.
-  void generateSpectraIdIntervals();
+  void generateSpectraNumIntervals();
 
   /// Whether or not there are any common spectra IDs between workspaces.
-  bool usingSpectraIDs() const;
+  bool usingSpectraNumbers() const;
 
   /// Do we allow the user to ask for a range of spectra IDs or not?
   bool m_spectra;
@@ -275,17 +289,20 @@ private:
   /// Do we allow the display of the waterfall option
   bool m_waterfall;
 
+  /// Do we allow the display of the tiled option
+  bool m_tiled;
+
   /// Pointers to the obligatory Qt objects:
   QLabel *m_wsMessage, *m_spectraMessage, *m_orMessage;
   QLineEditWithErrorMark *m_wsField, *m_spectraField;
   QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox;
   QHBoxLayout *m_optionsBox;
-  QCheckBox *m_waterfallOpt;
+  QCheckBox *m_waterfallOpt, *m_tiledOpt;
 
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;
   /// IntervalLists for the range of indices/IDs AVAILABLE to the user.
-  IntervalList m_wsIndexIntervals, m_spectraIdIntervals;
+  IntervalList m_wsIndexIntervals, m_spectraNumIntervals;
   /// IntervalLists for the range of indices/IDs CHOSEN by the user.
   IntervalList m_wsIndexChoice, m_spectraIdChoice;
 };
@@ -294,13 +311,12 @@ class MantidWSIndexDialog : public QDialog {
   Q_OBJECT
 
 public:
-  /// Constructor - same parameters as one of the parent constructors, along
-  /// with a
-  /// list of the names of workspaces to be plotted.
+  /// Constructor - has a list of the names of workspaces to be plotted.
   MantidWSIndexDialog(MantidUI *parent, Qt::WFlags flags,
                       QList<QString> wsNames,
                       const bool showWaterfallOption = false,
-                      const bool showPlotAll = true);
+                      const bool showPlotAll = true,
+                      const bool showTiledOption = false);
   /// Returns a structure holding all of the selected options
   MantidWSIndexWidget::UserInput getSelections() const;
   /// Returns the QMultiMap that contains all the workspaces that are to be
@@ -308,7 +324,9 @@ public:
   /// mapped to the set of workspace indices.
   QMultiMap<QString, std::set<int>> getPlots() const;
   /// Returns whether the waterfall option has been selected
-  bool waterfallPlotRequested() const;
+  bool isWaterfallPlotSelected() const;
+  /// Returns whether the tiled plot option has been selected
+  bool isTiledPlotSelected() const;
 private slots:
   /// Called when the OK button is pressed.
   void plot();
@@ -331,5 +349,4 @@ private:
   QVBoxLayout *m_outer;
 };
 
-#endif //MANTIDWSINDEXDIALOG_H_
-
+#endif // MANTIDWSINDEXDIALOG_H_

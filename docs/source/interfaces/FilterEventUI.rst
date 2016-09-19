@@ -14,7 +14,7 @@ according to user’s requirement for filtering events.
 The generated time splitters are stored either in a SplittersWorkspace or a 
 :ref:`MatrixWorkspace <MatrixWorkspace>`. Both of them will be used by algorithm 
 :ref:`FilterEvents <algm-FilterEvents>` which filters the events from a EventWorkspace to one or 
-multiple EventWorkspaces according to an input `SplittersWorkspace <http://www.mantidproject.org/SplittersWorkspace>`_
+multiple EventWorkspaces according to an input :ref:`SplittersWorkspace`
 containing a series of splitters. 
 
 On the bottom section the user has an option of :ref:`filterbylogv-GenerateEventFilter-ref`  
@@ -65,7 +65,7 @@ data structure that has the above 3 properties can serve as an event splitter. T
 output workspaces for storing event splitters that are supported by 
 :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` algorithm.
 
-- `SplittersWorkspace <http://www.mantidproject.org/SplittersWorkspace>`_: It is a 
+- :ref:`SplittersWorkspace`: It is a
   :ref:`TableWorkspace <Table Workspaces>` that has 3 columns for start time, 
   stop time and target workspace for events within start time and stop time. This type of workspace is 
   appropriate for the case that the amount of generated event splitters are not huge.

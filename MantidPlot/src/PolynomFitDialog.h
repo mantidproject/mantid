@@ -2,7 +2,8 @@
     File                 : PolynomFitDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Fit polynomial dialog
 
@@ -40,32 +41,30 @@ class Graph;
 class ColorBox;
 
 //! Fit polynomial dialog
-class PolynomFitDialog : public QDialog
-{
-    Q_OBJECT
+class PolynomFitDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    PolynomFitDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
+  PolynomFitDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
 
 public slots:
-	void fit();
-	void setGraph(Graph *g);
-	void activateCurve(const QString& curveName);
-	void changeDataRange();
+  void fit();
+  void setGraph(Graph *g);
+  void activateCurve(const QString &curveName);
+  void changeDataRange();
 
 private:
-	Graph *graph;
+  Graph *graph;
 
-    QPushButton* buttonFit;
-	QPushButton* buttonCancel;
-    QCheckBox* boxShowFormula;
-	QComboBox* boxName;
-	QSpinBox* boxOrder;
-	QSpinBox* boxPoints;
-	QLineEdit* boxStart;
-	QLineEdit* boxEnd;
-	ColorBox* boxColor;
+  QPushButton *buttonFit;
+  QPushButton *buttonCancel;
+  QCheckBox *boxShowFormula;
+  QComboBox *boxName;
+  QSpinBox *boxOrder;
+  QSpinBox *boxPoints;
+  QLineEdit *boxStart;
+  QLineEdit *boxEnd;
+  ColorBox *boxColor;
 };
 
 #endif
-

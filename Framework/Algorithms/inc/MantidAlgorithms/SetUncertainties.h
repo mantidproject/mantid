@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_CONVERTTOMATRIXWORKSPACE_H_
-#define MANTID_ALGORITHMS_CONVERTTOMATRIXWORKSPACE_H_
+#ifndef MANTID_ALGORITHMS_SETUNCERTAINTIES_H_
+#define MANTID_ALGORITHMS_SETUNCERTAINTIES_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -41,12 +41,6 @@ namespace Algorithms {
  */
 class DLLExport SetUncertainties : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  SetUncertainties();
-
-  /// Virtual destructor
-  ~SetUncertainties() override;
-
   /// Algorithm's name
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -72,4 +66,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_CONVERTTOMATRIXWORKSPACE_H_*/
+#endif /*MANTID_ALGORITHMS_SETUNCERTAINTIES_H_*/

@@ -1,10 +1,10 @@
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Exception.h"
@@ -35,10 +35,7 @@ using Kernel::Exception::NotImplementedError;
 using std::size_t;
 using namespace Mantid::Kernel;
 
-//---- Constructors
-//-------------------------------------------------------------------
-EventWorkspace::EventWorkspace()
-    : data(), m_noVectors(), mru(new EventWorkspaceMRU) {}
+EventWorkspace::EventWorkspace() : mru(new EventWorkspaceMRU) {}
 
 EventWorkspace::EventWorkspace(const EventWorkspace &other)
     : IEventWorkspace(other), mru(new EventWorkspaceMRU) {
@@ -46,15 +43,13 @@ EventWorkspace::EventWorkspace(const EventWorkspace &other)
 }
 
 EventWorkspace::~EventWorkspace() {
+  clearData();
   delete mru;
-
-  for (auto i = data.begin(); i != this->data.end(); ++i) {
-    delete (*i);
-  }
 }
 
-//-----------------------------------------------------------------------------
 /** Returns true if the EventWorkspace is safe for multithreaded operations.
+ * WARNING: This is only true for OpenMP threading. EventWorkspace is NOT thread
+ * safe with Poco threads or other threading mechanisms.
  */
 bool EventWorkspace::threadSafe() const {
   // Since there is a mutex lock around sorting, EventWorkspaces are always
@@ -62,7 +57,6 @@ bool EventWorkspace::threadSafe() const {
   return true;
 }
 
-//-----------------------------------------------------------------------------
 /** Initialize the pixels
  *  @param NVectors :: The number of vectors/histograms/detectors in the
  * workspace. Does not need
@@ -82,20 +76,16 @@ void EventWorkspace::init(const std::size_t &NVectors,
         "Negative or 0 Number of Pixels specified to EventWorkspace::init");
   }
   // Initialize the data
-  m_noVectors = NVectors;
-  data.resize(m_noVectors, nullptr);
+  data.resize(NVectors, nullptr);
   // Make sure SOMETHING exists for all initialized spots.
-  for (size_t i = 0; i < m_noVectors; i++)
+  for (size_t i = 0; i < NVectors; i++)
     data[i] = new EventList(mru, specnum_t(i));
 
   // Set each X vector to have one bin of 0 & extremely close to zero
-  MantidVecPtr xVals;
-  MantidVec &x = xVals.access();
-  x.resize(2, 0.0);
   // Move the rhs very,very slightly just incase something doesn't like them
   // being the same
-  x[1] = std::numeric_limits<double>::min();
-  this->setAllX(xVals);
+  HistogramData::BinEdges edges{0.0, std::numeric_limits<double>::min()};
+  this->setAllX(edges);
 
   // Create axes.
   m_axes.resize(2);
@@ -103,7 +93,6 @@ void EventWorkspace::init(const std::size_t &NVectors,
   m_axes[1] = new API::SpectraAxis(this);
 }
 
-//-----------------------------------------------------------------------------
 /**
  * Copy all of the data (event lists) from the source workspace to this
  *workspace.
@@ -126,8 +115,7 @@ void EventWorkspace::copyDataFrom(const EventWorkspace &source,
   this->clearData(); // properly de-allocates memory!
 
   // Copy the vector of EventLists
-  EventListVector source_data = source.data;
-  EventListVector::iterator it;
+  const auto &source_data = source.data;
   auto it_start = source_data.begin();
   auto it_end = source_data.end();
   size_t source_data_size = source_data.size();
@@ -142,27 +130,23 @@ void EventWorkspace::copyDataFrom(const EventWorkspace &source,
     it_end = source_data.begin() + sourceEndWorkspaceIndex + 1;
   }
 
-  for (it = it_start; it != it_end; ++it) {
+  for (auto it = it_start; it != it_end; ++it) {
     // Create a new event list, copying over the events
     auto newel = new EventList(**it);
     // Make sure to update the MRU to point to THIS event workspace.
     newel->setMRU(this->mru);
     this->data.push_back(newel);
   }
-  // Save the number of vectors
-  m_noVectors = this->data.size();
 
   this->clearMRU();
 }
 
-//-----------------------------------------------------------------------------
 /// The total size of the workspace
 /// @returns the number of single indexable items in the workspace
 size_t EventWorkspace::size() const {
   return this->data.size() * this->blocksize();
 }
 
-//-----------------------------------------------------------------------------
 /// Get the blocksize, aka the number of bins in the histogram
 /// @returns the number of bins in the Y data
 size_t EventWorkspace::blocksize() const {
@@ -176,33 +160,26 @@ size_t EventWorkspace::blocksize() const {
   }
 }
 
-//-----------------------------------------------------------------------------
 /** Get the number of histograms, usually the same as the number of pixels or
  detectors.
  @returns the number of histograms / event lists
  */
 size_t EventWorkspace::getNumberHistograms() const { return this->data.size(); }
 
-//--------------------------------------------------------------------------------------------
-/// Return the underlying ISpectrum ptr at the given workspace index.
-Mantid::API::ISpectrum *EventWorkspace::getSpectrum(const size_t index) {
-  if (index >= m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::getSpectrum, workspace index out of range");
+/// Return const reference to EventList at the given workspace index.
+EventList &EventWorkspace::getSpectrum(const size_t index) {
   invalidateCommonBinsFlag();
-  return data[index];
+  return const_cast<EventList &>(
+      static_cast<const EventWorkspace &>(*this).getSpectrum(index));
 }
 
-/// Return the underlying ISpectrum ptr at the given workspace index.
-const Mantid::API::ISpectrum *
-EventWorkspace::getSpectrum(const size_t index) const {
-  if (index >= m_noVectors)
+/// Return const reference to EventList at the given workspace index.
+const EventList &EventWorkspace::getSpectrum(const size_t index) const {
+  if (index >= data.size())
     throw std::range_error(
         "EventWorkspace::getSpectrum, workspace index out of range");
-  return data[index];
+  return *data[index];
 }
-
-//-----------------------------------------------------------------------------
 
 double EventWorkspace::getTofMin() const { return this->getEventXMin(); }
 
@@ -219,7 +196,7 @@ DateAndTime EventWorkspace::getPulseTimeMin() const {
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
-    const EventList &evList = this->getEventList(workspaceIndex);
+    const EventList &evList = this->getSpectrum(workspaceIndex);
     temp = evList.getPulseTimeMin();
     if (temp < tMin)
       tMin = temp;
@@ -238,7 +215,7 @@ DateAndTime EventWorkspace::getPulseTimeMax() const {
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
-    const EventList &evList = this->getEventList(workspaceIndex);
+    const EventList &evList = this->getSpectrum(workspaceIndex);
     temp = evList.getPulseTimeMax();
     if (temp > tMax)
       tMax = temp;
@@ -255,7 +232,7 @@ DateAndTime EventWorkspace::getTimeAtSampleMin(double tofOffset) const {
   auto instrument = this->getInstrument();
   auto sample = instrument->getSample();
   auto source = instrument->getSource();
-  const double L1 = sample->getDistance(*source.get());
+  const double L1 = sample->getDistance(*source);
 
   // set to crazy values to start
   Mantid::Kernel::DateAndTime tMin = DateAndTime::maximum();
@@ -263,11 +240,10 @@ DateAndTime EventWorkspace::getTimeAtSampleMin(double tofOffset) const {
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
-    const double L2 =
-        this->getDetector(workspaceIndex)->getDistance(*sample.get());
+    const double L2 = this->getDetector(workspaceIndex)->getDistance(*sample);
     const double tofFactor = L1 / (L1 + L2);
 
-    const EventList &evList = this->getEventList(workspaceIndex);
+    const EventList &evList = this->getSpectrum(workspaceIndex);
     temp = evList.getTimeAtSampleMin(tofFactor, tofOffset);
     if (temp < tMin)
       tMin = temp;
@@ -284,7 +260,7 @@ DateAndTime EventWorkspace::getTimeAtSampleMax(double tofOffset) const {
   auto instrument = this->getInstrument();
   auto sample = instrument->getSample();
   auto source = instrument->getSource();
-  const double L1 = sample->getDistance(*source.get());
+  const double L1 = sample->getDistance(*source);
 
   // set to crazy values to start
   Mantid::Kernel::DateAndTime tMax = DateAndTime::minimum();
@@ -292,11 +268,10 @@ DateAndTime EventWorkspace::getTimeAtSampleMax(double tofOffset) const {
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
-    const double L2 =
-        this->getDetector(workspaceIndex)->getDistance(*sample.get());
+    const double L2 = this->getDetector(workspaceIndex)->getDistance(*sample);
     const double tofFactor = L1 / (L1 + L2);
 
-    const EventList &evList = this->getEventList(workspaceIndex);
+    const EventList &evList = this->getSpectrum(workspaceIndex);
     temp = evList.getTimeAtSampleMax(tofFactor, tofOffset);
     if (temp > tMax)
       tMax = temp;
@@ -320,7 +295,7 @@ double EventWorkspace::getEventXMin() const {
   size_t numWorkspace = this->data.size();
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
-    const EventList &evList = this->getEventList(workspaceIndex);
+    const EventList &evList = this->getSpectrum(workspaceIndex);
     const double temp = evList.getTofMin();
     if (temp < xmin)
       xmin = temp;
@@ -344,7 +319,7 @@ double EventWorkspace::getEventXMax() const {
   size_t numWorkspace = this->data.size();
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
-    const EventList &evList = this->getEventList(workspaceIndex);
+    const EventList &evList = this->getSpectrum(workspaceIndex);
     const double temp = evList.getTofMax();
     if (temp > xmax)
       xmax = temp;
@@ -365,7 +340,7 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
   size_t numWorkspace = this->data.size();
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {
-    const EventList &evList = this->getEventList(workspaceIndex);
+    const EventList &evList = this->getSpectrum(workspaceIndex);
     double temp = evList.getTofMin();
     if (temp < xmin)
       xmin = temp;
@@ -375,7 +350,6 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
   }
 }
 
-//-----------------------------------------------------------------------------
 /// The total number of events across all of the spectra.
 /// @returns The total number of events
 size_t EventWorkspace::getNumberEvents() const {
@@ -385,7 +359,6 @@ size_t EventWorkspace::getNumberEvents() const {
                          });
 }
 
-//-----------------------------------------------------------------------------
 /** Get the EventType of the most-specialized EventList in the workspace
  *
  * @return the EventType of the most-specialized EventList in the workspace
@@ -404,49 +377,38 @@ Mantid::API::EventType EventWorkspace::getEventType() const {
   return out;
 }
 
-//-----------------------------------------------------------------------------
 /** Switch all event lists to the given event type
  *
  * @param type :: EventType to switch to
  */
 void EventWorkspace::switchEventType(const Mantid::API::EventType type) {
-  for (EventListVector::const_iterator it = this->data.begin();
-       it != this->data.end(); ++it) {
-    (*it)->switchTo(type);
-  }
+  for (auto &eventList : this->data)
+    eventList->switchTo(type);
 }
 
-//-----------------------------------------------------------------------------
 /// Returns true always - an EventWorkspace always represents histogramm-able
 /// data
 /// @returns If the data is a histogram - always true for an eventWorkspace
 bool EventWorkspace::isHistogramData() const { return true; }
 
-//-----------------------------------------------------------------------------
 /** Return how many entries in the Y MRU list are used.
  * Only used in tests. It only returns the 0-th MRU list size.
  * @return :: number of entries in the MRU list.
  */
 size_t EventWorkspace::MRUSize() const { return mru->MRUSize(); }
 
-//-----------------------------------------------------------------------------
 /** Clears the MRU lists */
 void EventWorkspace::clearMRU() const { mru->clear(); }
 
-//-----------------------------------------------------------------------------
 /** Clear the data[] vector and delete
  * any EventList objects in it
  */
 void EventWorkspace::clearData() {
-  m_noVectors = data.size();
-  for (size_t i = 0; i < m_noVectors; i++) {
-    delete data[i];
-  }
+  for (auto &eventList : data)
+    delete eventList;
   data.clear();
-  m_noVectors = 0;
 }
 
-//-----------------------------------------------------------------------------
 /// Returns the amount of memory used in bytes
 size_t EventWorkspace::getMemorySize() const {
   // TODO: Add the MRU buffer
@@ -465,49 +427,6 @@ size_t EventWorkspace::getMemorySize() const {
   return total;
 }
 
-//-----------------------------------------------------------------------------
-// --- Data Access ----
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-/** Get an EventList object at the given workspace index number
- * @param workspace_index :: The histogram workspace index number.
- * @returns A reference to the eventlist
- */
-EventList &EventWorkspace::getEventList(const std::size_t workspace_index) {
-  EventList *result = data[workspace_index];
-  if (!result)
-    throw std::runtime_error(
-        "EventWorkspace::getEventList: NULL EventList found.");
-  else
-    return *result;
-}
-
-//-----------------------------------------------------------------------------
-/** Get a const EventList object at the given workspace index number
- * @param workspace_index :: The workspace index number.
- * @returns A const reference to the eventlist
- */
-const EventList &
-EventWorkspace::getEventList(const std::size_t workspace_index) const {
-  EventList *result = data[workspace_index];
-  if (!result)
-    throw std::runtime_error(
-        "EventWorkspace::getEventList (const): NULL EventList found.");
-  else
-    return *result;
-}
-
-//-----------------------------------------------------------------------------
-/** Get an EventList pointer at the given workspace index number
- * @param workspace_index :: index into WS
- * @return an EventList pointer at the given workspace index number
- */
-EventList *EventWorkspace::getEventListPtr(const std::size_t workspace_index) {
-  return data[workspace_index];
-}
-
-//-----------------------------------------------------------------------------
 /** Either return an existing EventList from the list, or
  * create a new one if needed and expand the list.
  *  to finalize the stuff that needs to.
@@ -526,7 +445,6 @@ EventWorkspace::getOrAddEventList(const std::size_t workspace_index) {
       // Add to list
       this->data.push_back(newel);
     }
-    m_noVectors = data.size();
   }
 
   // Now it should be safe to return the value
@@ -547,20 +465,14 @@ void EventWorkspace::resizeTo(const std::size_t numSpectra) {
   // Remove all old EventLists and resize the vector
   this->clearData();
   data.resize(numSpectra);
-  m_noVectors = numSpectra;
   for (size_t i = 0; i < numSpectra; ++i) {
     data[i] = new EventList(mru, static_cast<specnum_t>(i + 1));
   }
 
   // Put on a default set of X vectors, with one bin of 0 & extremely close to
   // zero
-  MantidVecPtr xVals;
-  MantidVec &x = xVals.access();
-  x.resize(2, 0.0);
-  // Move the rhs very,very slightly just incase something doesn't like them
-  // being the same
-  x[1] = std::numeric_limits<double>::min();
-  this->setAllX(xVals);
+  HistogramData::BinEdges edges{0.0, std::numeric_limits<double>::min()};
+  this->setAllX(edges);
 
   // Clearing the MRU list is a good idea too.
   this->clearMRU();
@@ -580,7 +492,7 @@ void EventWorkspace::padSpectra() {
   resizeTo(pixelIDs.size());
 
   for (size_t i = 0; i < pixelIDs.size(); ++i) {
-    getSpectrum(i)->setDetectorID(pixelIDs[i]);
+    getSpectrum(i).setDetectorID(pixelIDs[i]);
   }
 }
 
@@ -596,147 +508,99 @@ void EventWorkspace::padSpectra(const std::vector<int32_t> &specList) {
     for (size_t i = 0; i < specList.size(); ++i) {
       // specList ranges from 1, ..., N
       // detector ranges from 0, ..., N-1
-      getSpectrum(i)->setDetectorID(specList[i] - 1);
-      getSpectrum(i)->setSpectrumNo(specList[i]);
+      getSpectrum(i).setDetectorID(specList[i] - 1);
+      getSpectrum(i).setSpectrumNo(specList[i]);
     }
   }
 }
 
 void EventWorkspace::deleteEmptyLists() {
-  // figure out how much data to copy
-  size_t orig_length = this->data.size();
-  size_t new_length = 0;
-  for (size_t i = 0; i < orig_length; i++) {
-    if (!(this->data[i]->empty()))
-      new_length++;
-  }
-
   // copy over the data
-  EventListVector notEmpty;
-  notEmpty.reserve(new_length);
-  for (size_t i = 0; i < orig_length; i++) {
-    if (!(this->data[i]->empty()))
-      notEmpty.push_back(this->data[i]);
+  std::vector<EventList *> notEmpty;
+  for (auto &eventList : this->data) {
+    if (!eventList->empty())
+      notEmpty.push_back(eventList);
     else
-      delete this->data[i];
+      delete eventList;
   }
 
   // replace the old vector
   this->data.swap(notEmpty);
 
-  this->m_noVectors = this->data.size();
-
   // Clearing the MRU list is a good idea too.
   this->clearMRU();
 }
 
-//-----------------------------------------------------------------------------
-/// Return the data X vector at a given workspace index
-/// Note: the MRUlist should be cleared before calling getters for the Y or E
-/// data
+/// Deprecated, use mutableX() instead. Return the data X vector at a given
+/// workspace index
 /// @param index :: the workspace index to return
 /// @returns A reference to the vector of binned X values
 MantidVec &EventWorkspace::dataX(const std::size_t index) {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataX, histogram number out of range");
-  return this->data[index]->dataX();
+  return getSpectrum(index).dataX();
 }
 
-/// Return the data X error vector at a given workspace index
-/// Note: the MRUlist should be cleared before calling getters for the Y or E
-/// data
+/// Deprecated, use mutableDx() instead. Return the data X error vector at a
+/// given workspace index
 /// @param index :: the workspace index to return
 /// @returns A reference to the vector of binned error values
 MantidVec &EventWorkspace::dataDx(const std::size_t index) {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataDx, histogram number out of range");
-  return this->data[index]->dataDx();
+  return getSpectrum(index).dataDx();
 }
 
-/// Return the data Y vector at a given workspace index
+/// Deprecated, use mutableY() instead. Return the data Y vector at a given
+/// workspace index
 /// Note: these non-const access methods will throw NotImplementedError
-/// @param index :: the workspace index to return
-/// @returns A reference to the vector of binned Y values
-MantidVec &EventWorkspace::dataY(const std::size_t index) {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataY, histogram number out of range");
+MantidVec &EventWorkspace::dataY(const std::size_t) {
   throw NotImplementedError("EventWorkspace::dataY cannot return a non-const "
                             "array: you can't modify the histogrammed data in "
                             "an EventWorkspace!");
 }
 
-/// Return the data E vector at a given workspace index
+/// Deprecated, use mutableE() instead. Return the data E vector at a given
+/// workspace index
 /// Note: these non-const access methods will throw NotImplementedError
-/// @param index :: the workspace index to return
-/// @returns A reference to the vector of binned error values
-MantidVec &EventWorkspace::dataE(const std::size_t index) {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataE, histogram number out of range");
+MantidVec &EventWorkspace::dataE(const std::size_t) {
   throw NotImplementedError("EventWorkspace::dataE cannot return a non-const "
                             "array: you can't modify the histogrammed data in "
                             "an EventWorkspace!");
 }
 
-//-----------------------------------------------------------------------------
-// --- Const Data Access ----
-//-----------------------------------------------------------------------------
-
-//---------------------------------------------------------------------------
-/** @return the const data X vector at a given workspace index
+/** Deprecated, use x() instead.
+ * @return the const data X vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataX(const std::size_t index) const {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataX, histogram number out of range");
-  return this->data[index]->constDataX();
+  return getSpectrum(index).readX();
 }
 
-/** @return the const data X error vector at a given workspace index
+/** Deprecated, use dx() instead.
+ * @return the const data X error vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataDx(const std::size_t index) const {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataDx, histogram number out of range");
-  return this->data[index]->readDx();
+  return getSpectrum(index).readDx();
 }
 
-//---------------------------------------------------------------------------
-/** @return the const data Y vector at a given workspace index
+/** Deprecated, use y() instead.
+ * @return the const data Y vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataY(const std::size_t index) const {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataY, histogram number out of range");
-  const MantidVec &out = this->data[index]->constDataY();
-  return out;
+  return getSpectrum(index).readY();
 }
 
-//---------------------------------------------------------------------------
-/** @return the const data E (error) vector at a given workspace index
+/** Deprecated, use e() instead.
+ * @return the const data E (error) vector at a given workspace index
  * @param index :: workspace index   */
 const MantidVec &EventWorkspace::dataE(const std::size_t index) const {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::dataE, histogram number out of range");
-  const MantidVec &out = this->data[index]->constDataE();
-  return out;
+  return getSpectrum(index).readE();
 }
 
-//---------------------------------------------------------------------------
-/** @return a pointer to the X data vector at a given workspace index
+/** Deprecated, use sharedX() instead.
+ * @return a pointer to the X data vector at a given workspace index
  * @param index :: workspace index   */
-Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const std::size_t index) const {
-  if (index >= this->m_noVectors)
-    throw std::range_error(
-        "EventWorkspace::refX, histogram number out of range");
-  return this->data[index]->ptrX();
+Kernel::cow_ptr<HistogramData::HistogramX>
+EventWorkspace::refX(const std::size_t index) const {
+  return getSpectrum(index).ptrX();
 }
 
-//---------------------------------------------------------------------------
 /** Using the event data in the event list, generate a histogram of it w.r.t
  *TOF.
  *
@@ -750,13 +614,12 @@ Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const std::size_t index) const {
 void EventWorkspace::generateHistogram(const std::size_t index,
                                        const MantidVec &X, MantidVec &Y,
                                        MantidVec &E, bool skipError) const {
-  if (index >= this->m_noVectors)
+  if (index >= data.size())
     throw std::range_error(
         "EventWorkspace::generateHistogram, histogram number out of range");
   this->data[index]->generateHistogram(X, Y, E, skipError);
 }
 
-//---------------------------------------------------------------------------
 /** Using the event data in the event list, generate a histogram of it w.r.t
  *PULSE TIME.
  *
@@ -771,32 +634,26 @@ void EventWorkspace::generateHistogramPulseTime(const std::size_t index,
                                                 const MantidVec &X,
                                                 MantidVec &Y, MantidVec &E,
                                                 bool skipError) const {
-  if (index >= this->m_noVectors)
+  if (index >= data.size())
     throw std::range_error("EventWorkspace::generateHistogramPulseTime, "
                            "histogram number out of range");
   this->data[index]->generateHistogramPulseTime(X, Y, E, skipError);
 }
 
-//-----------------------------------------------------------------------------
-// --- Histogramming ----
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
 /*** Set all histogram X vectors.
  * @param x :: The X vector of histogram bins to use.
  */
-void EventWorkspace::setAllX(Kernel::cow_ptr<MantidVec> &x) {
-  // int counter=0;
-  auto i = this->data.begin();
-  for (; i != this->data.end(); ++i) {
-    (*i)->setX(x);
-  }
+void EventWorkspace::setAllX(const HistogramData::BinEdges &x) {
+  // This is an EventWorkspace, so changing X size is ok as long as we clear
+  // the MRU below, i.e., we avoid the size check of Histogram::setBinEdges and
+  // just reset the whole Histogram.
+  for (auto &eventList : this->data)
+    eventList->setHistogram(x);
 
   // Clear MRU lists now, free up memory
   this->clearMRU();
 }
 
-//-----------------------------------------------------------------------------
 /** Task for sorting an event list */
 class EventSortingTask final : public Task {
 public:
@@ -811,7 +668,7 @@ public:
       m_wiStop = m_WS->getNumberHistograms();
 
     for (size_t wi = m_wiStart; wi < m_wiStop; wi++) {
-      double n = static_cast<double>(m_WS->getEventList(wi).getNumberEvents());
+      double n = static_cast<double>(m_WS->getSpectrum(wi).getNumberEvents());
       // Sorting time is approximately n * ln (n)
       m_cost += n * log(n);
     }
@@ -827,16 +684,14 @@ public:
       return;
     for (size_t wi = m_wiStart; wi < m_wiStop; wi++) {
       if (m_sortType != TOF_SORT)
-        m_WS->getEventList(wi).sort(m_sortType);
+        m_WS->getSpectrum(wi).sort(m_sortType);
       else {
         if (m_howManyCores == 1) {
-          m_WS->getEventList(wi).sort(m_sortType);
+          m_WS->getSpectrum(wi).sort(m_sortType);
         } else if (m_howManyCores == 2) {
-          m_WS->getEventList(wi).sortTof2();
-          Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+          m_WS->getSpectrum(wi).sortTof2();
         } else if (m_howManyCores == 4) {
-          m_WS->getEventList(wi).sortTof4();
-          Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+          m_WS->getSpectrum(wi).sortTof4();
         }
       }
       // Report progress
@@ -859,8 +714,6 @@ private:
   /// Optional Progress dialog.
   Mantid::API::Progress *prog;
 };
-
-//-----------------------------------------------------------------------------
 
 /*
  * Review each event list to get the sort type
@@ -896,7 +749,7 @@ void EventWorkspace::sortAll(EventSortType sortType,
 
   // Initial chunk size: set so that each core will be called for 20 tasks.
   // (This is to avoid making too small tasks.)
-  size_t chunk_size = m_noVectors / (num_threads * 20);
+  size_t chunk_size = data.size() / (num_threads * 20);
   if (chunk_size < 1)
     chunk_size = 1;
 
@@ -905,12 +758,12 @@ void EventWorkspace::sortAll(EventSortType sortType,
   // And auto-detect how many threads
   size_t howManyThreads = 0;
 #ifdef _OPENMP
-  if (m_noVectors < num_threads * 10) {
+  if (data.size() < num_threads * 10) {
     // If you have few vectors, sort with 2 cores.
     chunk_size = 1;
     howManyCores = 2;
     howManyThreads = num_threads / 2 + 1;
-  } else if (m_noVectors < num_threads) {
+  } else if (data.size() < num_threads) {
     // If you have very few vectors, sort with 4 cores.
     chunk_size = 1;
     howManyCores = 4;
@@ -923,7 +776,7 @@ void EventWorkspace::sortAll(EventSortType sortType,
 
   // Create the thread pool, and optimize by doing the longest sorts first.
   ThreadPool pool(new ThreadSchedulerLargestCost(), howManyThreads);
-  for (size_t i = 0; i < m_noVectors; i += chunk_size) {
+  for (size_t i = 0; i < data.size(); i += chunk_size) {
     pool.schedule(new EventSortingTask(this, i, i + chunk_size, sortType,
                                        howManyCores, prog));
   }
@@ -932,7 +785,6 @@ void EventWorkspace::sortAll(EventSortType sortType,
   pool.joinAll();
 }
 
-//---------------------------------------------------------------------------------------
 /** Integrate all the spectra in the matrix workspace within the range given.
  * Default implementation, can be overridden by base classes if they know
  *something smarter!
@@ -967,8 +819,8 @@ void EventWorkspace::getIntegratedSpectra(std::vector<double> &out,
 } // namespace Mantid
 
 ///\cond TEMPLATE
-template DLLExport class Mantid::API::WorkspaceProperty<
-    Mantid::DataObjects::EventWorkspace>;
+template class DLLExport
+    Mantid::API::WorkspaceProperty<Mantid::DataObjects::EventWorkspace>;
 
 namespace Mantid {
 namespace Kernel {

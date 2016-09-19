@@ -1,0 +1,29 @@
+<!-- Definition of Cryostat 01-->
+<environmentspec>
+  <materials>
+    <material id="van" formula="V"/>
+  </materials>
+  <components>
+    <containers>
+      <container id="8mm" material="van">
+	<geometry>
+	  <hollow-cylinder id="cyla">
+	    <centre-of-bottom-base x="0.0" y="-0.025" z="0.0"/>
+	    <axis x="0.0" y="1" z="0" />
+	    <inner-radius val="0.008" />
+	    <outer-radius val="0.018" />
+	    <height val="0.05" />
+	  </hollow-cylinder>
+	</geometry>
+	<samplegeometry>
+	  <cylinder id="cyla">
+	    <centre-of-bottom-base x="0.0" y="-0.025" z="0.0"/>
+	    <axis x="0.0" y="1" z="0" />
+	    <radius val="0.008" />
+	    <height val="0.05" />
+	  </cylinder>
+	</samplegeometry>
+      </container>
+    </containers>
+  </components>
+</environmentspec>

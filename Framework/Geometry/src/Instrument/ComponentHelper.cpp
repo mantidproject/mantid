@@ -43,7 +43,7 @@ void moveComponent(const IComponent &comp, ParameterMap &pmap,
     break;
   default:
     throw std::invalid_argument("moveComponent -  Unknown positionType: " +
-                                boost::lexical_cast<std::string>(positionType));
+                                std::to_string(positionType));
   }
 
   // Then find the corresponding relative position
@@ -89,7 +89,7 @@ void rotateComponent(const IComponent &comp, ParameterMap &pmap,
     newRot = Rot0 * rot;
   } else {
     throw std::invalid_argument("rotateComponent -  Unknown rotType: " +
-                                boost::lexical_cast<std::string>(rotType));
+                                std::to_string(rotType));
   }
 
   // Add a parameter for the new rotation

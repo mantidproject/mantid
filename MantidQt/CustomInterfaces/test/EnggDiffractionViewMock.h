@@ -1,15 +1,28 @@
 #ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H
 #define MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H
 
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 
 #include <gmock/gmock.h>
+
+class QwtData;
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 // This is a simple mock for the tomo interface view when using SCARF.
 class MockEnggDiffractionView
     : public MantidQt::CustomInterfaces::IEnggDiffractionView {
 
 public:
+  // virtual void splashMessage(bool visible, const std::string &shortMsg,
+  // const std::string &description);
+  MOCK_METHOD3(splashMessage, void(bool visible, const std::string &shortMsg,
+                                   const std::string &description));
+
+  // virtual void showStatus(const std::string &sts);
+  MOCK_METHOD1(showStatus, void(const std::string &sts));
+
   // virtual void userWarning(const std::string &warn, const std::string
   // &description);
   MOCK_METHOD2(userWarning,
@@ -79,18 +92,21 @@ public:
   MOCK_METHOD3(newCalibLoaded, void(const std::string &, const std::string &,
                                     const std::string &));
 
-  // virtual void writeOutCalibFile(const std::string &outFilename,
-  //                                const std::vector<double> &difc,
-  //                                const std::vector<double> &tzero)
-  MOCK_METHOD3(writeOutCalibFile,
-               void(const std::string &, const std::vector<double> &,
-                    const std::vector<double> &));
+  // virtual std::vector<GSASCalibrationParms> currentCalibration() const
+  MOCK_CONST_METHOD0(
+      currentCalibration,
+      std::vector<MantidQt::CustomInterfaces::GSASCalibrationParms>());
+
+  // virtual std::string enggRunPythonCode(const std::string &pyCode)
+  MOCK_METHOD1(enggRunPythonCode, std::string(const std::string &));
 
   // virtual void enableTabs(bool enable);
   MOCK_METHOD1(enableTabs, void(bool));
 
-  // virtual void enableCalibrateAndFocusActions(bool enable);
-  MOCK_METHOD1(enableCalibrateAndFocusActions, void(bool));
+  MOCK_METHOD1(highlightRbNumber, void(bool));
+
+  // virtual void enableCalibrateFocusFitUserActions(bool enable);
+  MOCK_METHOD1(enableCalibrateFocusFitUserActions, void(bool));
 
   // virtual std::string focusingDir() const;
   MOCK_CONST_METHOD0(focusingDir, std::string());
@@ -128,12 +144,6 @@ public:
   // virtual double rebinningPulsesPerPeriod() const;
   MOCK_CONST_METHOD0(rebinningPulsesTime, double());
 
-  // virtual std::string fittingRunNo() const;
-  MOCK_CONST_METHOD0(fittingRunNo, std::string());
-
-  // virtual std::string fittingPeaksData() const;
-  MOCK_CONST_METHOD0(fittingPeaksData, std::string());
-
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
 
@@ -164,14 +174,13 @@ public:
                     const std::string &type));
 
   // virtual void setDataVector
-  MOCK_METHOD2(setDataVector,
-	  void(std::vector<boost::shared_ptr<QwtData>> &data, bool focused));
+  MOCK_METHOD3(setDataVector,
+               void(std::vector<boost::shared_ptr<QwtData>> &data, bool focused,
+                    bool plotSinglePeaks));
 
-  // virtual void plotVanCurvesCalibOutput();
-  MOCK_METHOD0(plotVanCurvesCalibOutput, void());
-
-  // virtual void plotDifcZeroCalibOutput();
-  MOCK_METHOD1(plotDifcZeroCalibOutput, void(const std::string &pyCode));
+  // virtual void plotCalibOutput();
+  MOCK_METHOD1(plotCalibOutput, void(const std::string &pyCode));
 };
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

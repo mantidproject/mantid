@@ -50,7 +50,7 @@ NearestNeighbours::NearestNeighbours(
 /**
  * Returns a map of the spectrum numbers to the distances for the nearest
  * neighbours.
- * @param spectrum :: Spectrum ID of the central pixel
+ * @param spectrum :: Spectrum No of the central pixel
  * @return map of Detector ID's to distance
  */
 std::map<specnum_t, V3D>
@@ -61,7 +61,7 @@ NearestNeighbours::neighbours(const specnum_t spectrum) const {
 /**
  * Returns a map of the spectrum numbers to the distances for the nearest
  * neighbours.
- * @param spectrum :: Spectrum ID of the central pixel
+ * @param spectrum :: Spectrum No of the central pixel
  * @param radius :: cut-off distance for detector list to returns
  * @return map of Detector ID's to distance
  * @throw NotFoundError if component is not recognised as a detector

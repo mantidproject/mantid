@@ -15,12 +15,9 @@ namespace Json {
 class Value;
 }
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 
 class ColorSelectionWidget;
 
@@ -31,7 +28,8 @@ class ColorSelectionWidget;
   @author Michael Reuter
   @date 15/08/2011
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -51,8 +49,7 @@ class ColorSelectionWidget;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorUpdater
-{
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorUpdater {
 public:
   /// Object constructor
   ColorUpdater();
@@ -96,26 +93,33 @@ public:
   /// Update the internal state.
   void updateState(ColorSelectionWidget *cs);
 
-  /// To update the VSI min/mas lineEdits when the user uses the Paraview color editor
-  void observeColorScaleEdited(pqPipelineRepresentation *repr, ColorSelectionWidget *cs);
+  /// To update the VSI min/mas lineEdits when the user uses the Paraview color
+  /// editor
+  void observeColorScaleEdited(pqPipelineRepresentation *repr,
+                               ColorSelectionWidget *cs);
 
 private:
-  /// vtkcallback function for color change events coming from the Paraview color editor
-  static void colorScaleEditedCallbackFunc(vtkObject* caller, long unsigned int eventID,
+  /// vtkcallback function for color change events coming from the Paraview
+  /// color editor
+  static void colorScaleEditedCallbackFunc(vtkObject *caller,
+                                           long unsigned int eventID,
                                            void *clientData, void *callData);
-  /// vtk callback function for user clicks on log-scale in the Paraview color editor
-  static void logScaleClickedCallbackFunc(vtkObject* caller, long unsigned int eventID,
-                                           void *clientData, void *callData);
+  /// vtk callback function for user clicks on log-scale in the Paraview color
+  /// editor
+  static void logScaleClickedCallbackFunc(vtkObject *caller,
+                                          long unsigned int eventID,
+                                          void *clientData, void *callData);
 
-  void updateLookupTable(pqDataRepresentation* representation); ///< Updates the lookup tables.
+  void updateLookupTable(
+      pqDataRepresentation *representation); ///< Updates the lookup tables.
 
   bool m_autoScaleState; ///< Holder for the auto scaling state
-  bool m_logScaleState; ///< Holder for the log scaling state
-  double m_minScale; ///< Holder for the minimum color range state
-  double m_maxScale; ///< Holder for the maximum color range state
-  AutoScaleRangeGenerator m_autoScaleRangeGenerator; ///< Holds a range generator for auto scale.
+  bool m_logScaleState;  ///< Holder for the log scaling state
+  double m_minScale;     ///< Holder for the minimum color range state
+  double m_maxScale;     ///< Holder for the maximum color range state
+  AutoScaleRangeGenerator
+      m_autoScaleRangeGenerator; ///< Holds a range generator for auto scale.
 };
-
 }
 }
 }

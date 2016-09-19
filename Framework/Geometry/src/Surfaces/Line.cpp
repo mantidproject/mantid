@@ -84,7 +84,6 @@ object.
   Origin.rotate(MA);
   Direct.rotate(MA);
   Direct.normalize();
-  return;
 }
 
 void Line::displace(const Kernel::V3D &Pt)
@@ -94,7 +93,6 @@ Apply a displacement Pt
 */
 {
   Origin += Pt;
-  return;
 }
 
 int Line::lambdaPair(
@@ -161,7 +159,7 @@ added. It does not check the points for validity.
 @return Number of points found.
 */
 {
-  const std::vector<double> BN = Sur.copyBaseEqn();
+  const std::vector<double> &BN = Sur.copyBaseEqn();
   const double a(Origin[0]), b(Origin[1]), c(Origin[2]);
   const double d(Direct[0]), e(Direct[1]), f(Direct[2]);
   double Coef[3];
@@ -278,8 +276,7 @@ void Line::print() const
 Print statement for debugging
 */
 {
-  std::cout << "Line == " << Origin << " :: " << Direct << std::endl;
-  return;
+  std::cout << "Line == " << Origin << " :: " << Direct << '\n';
 }
 
 } // NAMESPACE MonteCarlo

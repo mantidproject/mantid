@@ -3,16 +3,18 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Functions/CrystalElectricField.h"
 #include "MantidCurveFitting/FortranDefs.h"
+#include "MantidCurveFitting/Functions/CrystalElectricField.h"
 
 using Mantid::CurveFitting::DoubleFortranMatrix;
 using Mantid::CurveFitting::DoubleFortranVector;
 using Mantid::CurveFitting::ComplexFortranMatrix;
+using Mantid::CurveFitting::IntFortranVector;
 using Mantid::CurveFitting::ComplexType;
 using Mantid::CurveFitting::GSLVector;
 using Mantid::CurveFitting::ComplexMatrix;
-using Mantid::CurveFitting::Functions::calculateEigesystem;
+
+using namespace Mantid::CurveFitting::Functions;
 
 class CrystalFieldTest : public CxxTest::TestSuite {
 
@@ -27,6 +29,7 @@ public:
     DoubleFortranVector bmol(1, 3);
     DoubleFortranVector bext(1, 3);
     ComplexFortranMatrix bkq(0, 6, 0, 6);
+    zeroAllEntries(bmol, bext, bkq);
 
     bkq(2, 0) = 0.3365;
     bkq(2, 2) = 7.4851;
@@ -37,7 +40,7 @@ public:
     DoubleFortranVector en;
     ComplexFortranMatrix wf;
     ComplexFortranMatrix ham;
-    calculateEigesystem(en, wf, ham, nre, bmol, bext, bkq);
+    calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
     doTestEigensystem(en, wf, ham);
   }
 
@@ -46,6 +49,7 @@ public:
     DoubleFortranVector bmol(1, 3);
     DoubleFortranVector bext(1, 3);
     ComplexFortranMatrix bkq(0, 6, 0, 6);
+    zeroAllEntries(bmol, bext, bkq);
 
     bmol(1) = 10.;
     bkq(2, 0) = 0.3365;
@@ -57,7 +61,7 @@ public:
     DoubleFortranVector en;
     ComplexFortranMatrix wf;
     ComplexFortranMatrix ham;
-    calculateEigesystem(en, wf, ham, nre, bmol, bext, bkq);
+    calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
     doTestEigensystem(en, wf, ham);
   }
 
@@ -66,6 +70,7 @@ public:
     DoubleFortranVector bmol(1, 3);
     DoubleFortranVector bext(1, 3);
     ComplexFortranMatrix bkq(0, 6, 0, 6);
+    zeroAllEntries(bmol, bext, bkq);
 
     bmol(1) = 10.;
     bkq(2, 0) = 0.3365;
@@ -79,7 +84,7 @@ public:
       DoubleFortranVector en;
       ComplexFortranMatrix wf;
       ComplexFortranMatrix ham;
-      calculateEigesystem(en, wf, ham, nre, bmol, bext, bkq);
+      calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
       doTestEigensystem(en, wf, ham);
       en1 = en;
     }
@@ -89,7 +94,7 @@ public:
       DoubleFortranVector en;
       ComplexFortranMatrix wf;
       ComplexFortranMatrix ham;
-      calculateEigesystem(en, wf, ham, nre, bmol, bext, bkq, 10.0, 20, 73.0);
+      calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq, 10.0, 20, 73.0);
       doTestEigensystem(en, wf, ham);
       en2 = en;
     }
@@ -98,7 +103,91 @@ public:
     }
   }
 
+  void test_calculateIntensities() {
+    int nre = 1;
+    DoubleFortranVector bmol(1, 3);
+    DoubleFortranVector bext(1, 3);
+    ComplexFortranMatrix bkq(0, 6, 0, 6);
+
+    bkq(2, 0) = 0.3365;
+    bkq(2, 2) = 7.4851;
+    bkq(4, 0) = 0.4062;
+    bkq(4, 2) = -3.8296;
+    bkq(4, 4) = -2.3210;
+
+    DoubleFortranVector en;
+    ComplexFortranMatrix wf;
+    ComplexFortranMatrix ham;
+    calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
+
+    IntFortranVector degeneration;
+    DoubleFortranVector e_energies;
+    DoubleFortranMatrix i_energies;
+    const double de = 1e-10;
+    calculateIntensities(nre, en, wf, 25.0, de, degeneration, e_energies,
+                         i_energies);
+
+    int n_energies = int(e_energies.size());
+    TS_ASSERT_EQUALS(n_energies, 3);
+    TS_ASSERT_EQUALS(i_energies.size1(), 3);
+    TS_ASSERT_EQUALS(i_energies.size2(), 3);
+
+    TS_ASSERT_DELTA(e_energies(1), en(1), 1e-10);
+    TS_ASSERT_DELTA(e_energies(1), en(2), 1e-10);
+    TS_ASSERT_DELTA(e_energies(2), en(3), 1e-10);
+    TS_ASSERT_DELTA(e_energies(2), en(4), 1e-10);
+    TS_ASSERT_DELTA(e_energies(3), en(5), 1e-10);
+    TS_ASSERT_DELTA(e_energies(3), en(6), 1e-10);
+  }
+
+  void test_calculateExcitations() {
+    int nre = 1;
+    DoubleFortranVector bmol(1, 3);
+    DoubleFortranVector bext(1, 3);
+    ComplexFortranMatrix bkq(0, 6, 0, 6);
+
+    bkq(2, 0) = 0.37737;
+    bkq(2, 2) = 3.9770;
+    bkq(4, 0) = -0.031787;
+    bkq(4, 2) = -0.11611;
+    bkq(4, 4) = -0.12544;
+    double temperature = 44.0;
+
+    DoubleFortranVector en;
+    ComplexFortranMatrix wf;
+    ComplexFortranMatrix ham;
+    calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
+
+    IntFortranVector degeneration;
+    DoubleFortranVector e_energies;
+    DoubleFortranMatrix i_energies;
+    const double de = 1e-10;
+    const double di = 1e-3;
+    calculateIntensities(nre, en, wf, temperature, de, degeneration, e_energies,
+                         i_energies);
+
+    DoubleFortranVector e_excitations;
+    DoubleFortranVector i_excitations;
+    calculateExcitations(e_energies, i_energies, de, di, e_excitations,
+                         i_excitations);
+    TS_ASSERT_EQUALS(e_excitations.size(), 3);
+    TS_ASSERT_EQUALS(i_excitations.size(), 3);
+    TS_ASSERT_DELTA(e_excitations(1), 0.0, 1e-10);
+    TS_ASSERT_DELTA(e_excitations(2), 29.33, 0.01);
+    TS_ASSERT_DELTA(e_excitations(3), 44.34, 0.01);
+    TS_ASSERT_DELTA(i_excitations(1), 2.75, 0.01);
+    TS_ASSERT_DELTA(i_excitations(2), 0.72, 0.01);
+    TS_ASSERT_DELTA(i_excitations(3), 0.43, 0.01);
+  }
+
 private:
+  void zeroAllEntries(DoubleFortranVector &bmol, DoubleFortranVector &bext,
+                      ComplexFortranMatrix &bkq) {
+    bmol.zero();
+    bext.zero();
+    bkq.zero();
+  }
+
   void doTestEigensystem(DoubleFortranVector &en, ComplexFortranMatrix &wf,
                          ComplexFortranMatrix &ham) {
     const size_t n = en.size();

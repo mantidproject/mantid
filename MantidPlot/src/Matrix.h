@@ -44,7 +44,7 @@
 #include "ScriptingEnv.h"
 #include "Scripted.h"
 
-#include "Mantid/IProjectSerialisable.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 
 #include <qwt_double_rect.h>
 #include <qwt_color_map.h>
@@ -61,15 +61,14 @@ class QShortcut;
 class QUndoStack;
 
 //! Matrix worksheet class
-class Matrix: public MdiSubWindow, public Scripted, public Mantid::IProjectSerialisable
-{
+class Matrix : public MdiSubWindow, public Scripted {
   Q_OBJECT
 
 protected:
-  Matrix(ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
+  Matrix(ScriptingEnv *env, const QString &label, QWidget *parent,
+         const QString &name = QString(), Qt::WFlags f = 0);
 
 public:
-
   /**
    * \brief Constructor
    *
@@ -82,49 +81,67 @@ public:
 ::    * @param name :: window name
    * @param f :: window flags
    */
-  Matrix(ScriptingEnv *env, int r, int c, const QString& label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
-  Matrix(ScriptingEnv *env, const QImage& image, const QString& label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
+  Matrix(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent,
+         const QString &name = QString(), Qt::WFlags f = 0);
+  Matrix(ScriptingEnv *env, const QImage &image, const QString &label,
+         QWidget *parent, const QString &name = QString(), Qt::WFlags f = 0);
   ~Matrix() override;
 
-  enum Operation{Transpose, Invert, FlipHorizontally, FlipVertically, RotateClockwise,
-    RotateCounterClockwise, FFT, Clear, Calculate, MuParserCalculate, SetImage, ImportAscii};
-  enum HeaderViewType{ColumnRow, XY};
-  enum ViewType{TableView, ImageView};
-  enum ColorMapType{GrayScale, Rainbow, Custom};
+  enum Operation {
+    Transpose,
+    Invert,
+    FlipHorizontally,
+    FlipVertically,
+    RotateClockwise,
+    RotateCounterClockwise,
+    FFT,
+    Clear,
+    Calculate,
+    MuParserCalculate,
+    SetImage,
+    ImportAscii
+  };
+  enum HeaderViewType { ColumnRow, XY };
+  enum ViewType { TableView, ImageView };
+  enum ColorMapType { GrayScale, Rainbow, Custom };
   enum ImportMode {
     NewColumns, //!< add file as new columns to the current matrix
-    NewRows, //!< add file as new rows to the current matrix
-    Overwrite //!< replace content of current matrix with the imported file
+    NewRows,    //!< add file as new rows to the current matrix
+    Overwrite   //!< replace content of current matrix with the imported file
   };
 
   void setViewType(ViewType, bool renderImage = true);
-  ViewType viewType(){return d_view_type;};
+  ViewType viewType() { return d_view_type; };
 
-  HeaderViewType headerViewType(){return d_header_view_type;};
+  HeaderViewType headerViewType() { return d_header_view_type; };
   void setHeaderViewType(HeaderViewType type);
 
   QImage image();
-  void displayImage(const QImage& image);
-  void importImage(const QString& fn);
-  void exportRasterImage(const QString& fileName, int quality = 100);
-  void exportSVG(const QString& fileName);
-  void exportToFile(const QString& fileName);
-  void exportVector(const QString& fileName, int res = 0, bool color = true, bool keepAspect = true, QPrinter::PageSize pageSize = QPrinter::Custom);
+  void displayImage(const QImage &image);
+  void importImage(const QString &fn);
+  void exportRasterImage(const QString &fileName, int quality = 100);
+  void exportSVG(const QString &fileName);
+  void exportToFile(const QString &fileName);
+  void exportVector(const QString &fileName, int res = 0, bool color = true,
+                    bool keepAspect = true,
+                    QPrinter::PageSize pageSize = QPrinter::Custom);
 
-  MatrixModel * matrixModel(){return d_matrix_model;};
-  QUndoStack *undoStack(){return d_undo_stack;};
+  MatrixModel *matrixModel() { return d_matrix_model; };
+  QUndoStack *undoStack() { return d_undo_stack; };
 
-  QItemSelectionModel * selectionModel(){return d_table_view->selectionModel();};
+  QItemSelectionModel *selectionModel() {
+    return d_table_view->selectionModel();
+  };
 
   //! Return the number of rows
-  int numRows(){return d_matrix_model->rowCount();};
-  void setNumRows(int rows){d_matrix_model->setRowCount(rows);};
+  int numRows() { return d_matrix_model->rowCount(); };
+  void setNumRows(int rows) { d_matrix_model->setRowCount(rows); };
 
   //! Return the number of columns
-  int numCols(){return d_matrix_model->columnCount();};
-  void setNumCols(int cols){d_matrix_model->setColumnCount(cols);};
+  int numCols() { return d_matrix_model->columnCount(); };
+  void setNumCols(int cols) { d_matrix_model->setColumnCount(cols); };
 
-  //event handlers
+  // event handlers
   //! Custom event handler
   /**
    * Currently handles SCRIPTING_CHANGE_EVENT only.
@@ -132,20 +149,20 @@ public:
   void customEvent(QEvent *e) override;
 
   void resetView();
-  void moveCell(const QModelIndex& index);
+  void moveCell(const QModelIndex &index);
 
   virtual void flipVertically();
   virtual void flipHorizontally();
   void rotate90(bool clockwise = true);
   void fft(bool inverse = false);
 
-  ColorMapType colorMapType(){return d_color_map_type;};
+  ColorMapType colorMapType() { return d_color_map_type; };
   void setColorMapType(ColorMapType mapType);
 
-  QwtLinearColorMap colorMap(){return d_color_map;};
-  void setColorMap(const QwtLinearColorMap& map);
+  QwtLinearColorMap colorMap() { return d_color_map; };
+  void setColorMap(const QwtLinearColorMap &map);
   //! Used when restoring from project files
-  void setColorMap(const QStringList& lst);
+  void setColorMap(const QStringList &lst);
 
   void setGrayScale();
   void setRainbowColorMap();
@@ -159,26 +176,33 @@ public:
   void invert();
 
   //! Calculate matrix values using the #formula_str.
-  bool calculate(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1, bool forceMuParser = true);
-  //! Calculate matrix values using the #formula_str (optimization for muParser).
-  bool muParserCalculate(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1);
+  bool calculate(int startRow = 0, int endRow = -1, int startCol = 0,
+                 int endCol = -1, bool forceMuParser = true);
+  //! Calculate matrix values using the #formula_str (optimization for
+  // muParser).
+  bool muParserCalculate(int startRow = 0, int endRow = -1, int startCol = 0,
+                         int endCol = -1);
 
-  bool exportASCII(const QString& fname, const QString& separator, bool exportSelection);
-  void importASCII(const QString &fname, const QString &sep, int ignoredLines, bool stripSpaces,
-      bool simplifySpaces, const QString& commentString, ImportMode importAs = Overwrite,
-      const QLocale& l = QLocale(), int endLineChar = 0, int maxRows = -1);
+  bool exportASCII(const QString &fname, const QString &separator,
+                   bool exportSelection);
+  void importASCII(const QString &fname, const QString &sep, int ignoredLines,
+                   bool stripSpaces, bool simplifySpaces,
+                   const QString &commentString,
+                   ImportMode importAs = Overwrite,
+                   const QLocale &l = QLocale(), int endLineChar = 0,
+                   int maxRows = -1);
 
-  QPixmap matrixIcon(){return m_matrix_icon;}
+  QPixmap matrixIcon() { return m_matrix_icon; }
 
 public slots:
   void exportPDF(const QString &fileName) override;
   //! Print the Matrix
   void print() override;
   //! Print the Matrix to fileName
-  void print(const QString& fileName);
+  void print(const QString &fileName);
 
   //! Return the width of all columns
-  int columnsWidth(){return d_column_width;};
+  int columnsWidth() { return d_column_width; };
   //! Set the width of all columns
   void setColumnsWidth(int width);
 
@@ -188,31 +212,31 @@ public slots:
   //! Return the content of the cell as a string
   QString text(int row, int col);
   //! Set the content of the cell as a string
-  void setText(int row, int col, const QString & new_text );
+  void setText(int row, int col, const QString &new_text);
   //! Return the value of the cell as a double
   double cell(int row, int col);
   //! Set the value of the cell
-  void setCell(int row, int col, double value );
+  void setCell(int row, int col, double value);
 
   /**
    * \brief Return the text format code ('e', 'f', ...)
    *
    * \sa setNumerFormat(), setTextFormat()
    */
-  QChar textFormat(){return txt_format;};
+  QChar textFormat() { return txt_format; };
   /**
    * \brief Return the number precision digits
    *
    * See arguments of setNumericFormat().
    * \sa setNumericFormat(), setTextFormat()
    */
-  int precision(){return num_precision;};
+  int precision() { return num_precision; };
   /**
    * \brief Set the number of significant digits
    *
    * \sa precision(), setNumericFormat(), setTextFormat()
    */
-  void setNumericPrecision(int prec){num_precision = prec;};
+  void setNumericPrecision(int prec) { num_precision = prec; };
 
   /**
    * \brief Set the number format for the cells
@@ -223,19 +247,20 @@ public slots:
    * \sa setTextFormat()
    */
   void setTextFormat(const QChar &format, int precision);
-  void setNumericFormat(const QChar & f, int prec);
+  void setNumericFormat(const QChar &f, int prec);
 
   //! Return the matrix formula
-  QString formula(){return formula_str;};
+  QString formula() { return formula_str; };
   //! Set the matrix forumla
-  void setFormula(const QString &s){formula_str = s;};
+  void setFormula(const QString &s) { formula_str = s; };
 
   //! Load the matrix from a string list (i.e. lines from a project file)
   void restore(const QStringList &l) override;
 
   // loading and saving project files
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion) override;
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
 
   // selection operations
@@ -263,18 +288,18 @@ public slots:
   int numSelectedColumns();
 
   //! Returns the X value corresponding to column 1
-  double xStart(){return x_start;};
+  double xStart() { return x_start; };
   //! Returns the X value corresponding to the last column
-  double xEnd(){return x_end;};
+  double xEnd() { return x_end; };
   //! Returns the Y value corresponding to row 1
-  double yStart(){return y_start;};
+  double yStart() { return y_start; };
   //! Returns the Y value corresponding to the last row
-  double yEnd(){return y_end;};
+  double yEnd() { return y_end; };
 
   //! Returns the step of the X axis
-  double dx(){return fabs(x_end - x_start)/(double)(numCols() - 1);};
+  double dx() { return fabs(x_end - x_start) / (double)(numCols() - 1); };
   //! Returns the step of the Y axis
-  double dy(){return fabs(y_end - y_start)/(double)(numRows() - 1);};
+  double dy() { return fabs(y_end - y_start) / (double)(numRows() - 1); };
 
   //! Returns the bounding rect of the matrix coordinates
   QwtDoubleRect boundingRect();
@@ -290,33 +315,37 @@ public slots:
   void goToColumn(int col);
 
   //! Allocate memory for a matrix buffer
-  static double** allocateMatrixData(int rows, int columns);
+  static double **allocateMatrixData(int rows, int columns);
   //! Free memory used for a matrix buffer
   static void freeMatrixData(double **data, int rows);
 
-  int verticalHeaderWidth(){return d_table_view->verticalHeader()->width();}
+  int verticalHeaderWidth() { return d_table_view->verticalHeader()->width(); }
 
   void copy(Matrix *m);
-  //! Tries to allocate memory for the workspace. Returns a NULL pointer if failure.
+  //! Tries to allocate memory for the workspace. Returns a NULL pointer if
+  // failure.
   double *initWorkspace(int size);
-  void freeWorkspace(){free(d_workspace); d_workspace = NULL;};
+  void freeWorkspace() {
+    free(d_workspace);
+    d_workspace = NULL;
+  };
 
   bool canCalculate(bool useMuParser = true);
 
-  protected:
+protected:
   MatrixModel *d_matrix_model;
   QColor m_bk_color;
 
   //! Initialize the matrix
   void initTable(int rows, int cols);
-  void initImage(const QImage& image);
+  void initImage(const QImage &image);
   void initImageView();
   void initTableView();
   void initGlobals();
   bool ignoreUndo();
   QPixmap m_matrix_icon;
 
-  //private:
+  // private:
   QStackedWidget *d_stack;
   //! Pointer to the table view
   QTableView *d_table_view;
@@ -329,9 +358,9 @@ public slots:
   //! Number of significant digits
   int num_precision;
   double x_start, //!< X value corresponding to column 1
-  x_end,  //!< X value corresponding to the last column
-  y_start,  //!< Y value corresponding to row 1
-  y_end;  //!< Y value corresponding to the last row
+      x_end,      //!< X value corresponding to the last column
+      y_start,    //!< Y value corresponding to row 1
+      y_end;      //!< Y value corresponding to the last row
 
   //! Keeps track of the view type;
   ViewType d_view_type;

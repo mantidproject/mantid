@@ -319,7 +319,7 @@ public:
     size_t n = costFun->nParams();
     // system("pause");
     // double f0 = costFun->val();
-    // std::cerr << "fun=" << f0 << std::endl;
+    // std::cerr << "fun=" << f0 << '\n';
     // const GSLVector& g = costFun->getDeriv();
     // const GSLMatrix& H = costFun->getHessian();
 
@@ -330,7 +330,7 @@ public:
       // double f1 = costFun->val();
       costFun->setParameter(i, p1 - dp);
       // std::cerr << "deriv " << i << ' ' << p1 << ' ' << (f1 - f0) / dp << ' '
-      // << g.get(i)  << std::endl;
+      // << g.get(i)  << '\n';
       // for(size_t j = 0; j <= i; ++j)
       //{
       //}

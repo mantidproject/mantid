@@ -14,9 +14,6 @@ namespace Algorithms {
  */
 class DLLExport CreatePeaksWorkspace : public API::Algorithm {
 public:
-  CreatePeaksWorkspace();
-  ~CreatePeaksWorkspace() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "CreatePeaksWorkspace"; };
   /// Summary of algorithms purpose

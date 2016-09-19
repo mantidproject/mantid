@@ -17,19 +17,13 @@ namespace Vates {
 namespace SimpleGui {
 
 // Need this class to access color of tabBar
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeakCustomTabWidget:public QTabWidget
-{
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeakCustomTabWidget
+    : public QTabWidget {
 public:
-    PeakCustomTabWidget(QWidget* parent = 0)
-    {
-      setParent(parent);
-    }
-    
-    //Overridden method from QTabWidget
-    QTabBar* tabBar()
-    {
-      return QTabWidget::tabBar();
-    }
+  PeakCustomTabWidget(QWidget *parent = 0) { setParent(parent); }
+
+  // Overridden method from QTabWidget
+  QTabBar *tabBar() { return QTabWidget::tabBar(); }
 };
 
 class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeaksTabWidget
@@ -42,7 +36,8 @@ public:
   void setupMvc(std::map<std::string, std::vector<bool>> visiblePeaks);
   void addNewPeaksWorkspace(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
                             std::vector<bool> visiblePeaks);
-  void updateTabs(std::map<std::string, std::vector<bool>> visiblePeaks, std::map<std::string, QColor> colors);
+  void updateTabs(std::map<std::string, std::vector<bool>> visiblePeaks,
+                  std::map<std::string, QColor> colors);
 signals:
   void zoomToPeak(Mantid::API::IPeaksWorkspace_sptr ws, int row);
   void sortPeaks(const std::string &columnToSortBy, const bool sortAscending,
@@ -63,7 +58,7 @@ private:
   /// Coordinate system.
   const std::string m_coordinateSystem;
   /// Custom peaks tab widget
-  PeakCustomTabWidget* m_tabWidget;
+  PeakCustomTabWidget *m_tabWidget;
 };
 } // namespace
 }

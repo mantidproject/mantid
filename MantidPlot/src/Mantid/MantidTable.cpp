@@ -9,7 +9,7 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QHash>
-
+#include <limits>
 #include <qfontmetrics.h>
 
 using namespace MantidQt::API;
@@ -88,9 +88,10 @@ void MantidTable::fillTable() {
     return;
   }
 
-  // temporarily allow resizing
+  // temporarily allow resizing and disable graph auto-update
   d_table->blockResizing(false);
   d_table->blockSignals(true);
+  applicationWindow()->setUpdateCurvesFromTable(this, false);
 
   setNumRows(0);
   setNumCols(0);
@@ -132,6 +133,10 @@ void MantidTable::fillTable() {
     // Print out the data in each row of this column
     for (int j = 0; j < static_cast<int>(m_ws->rowCount()); j++) {
       std::ostringstream ostr;
+      // Avoid losing precision for numeric data
+      if (c->type() == "double") {
+        ostr.precision(std::numeric_limits<double>::max_digits10);
+      }
       // This is the method on the Column object to convert to a string.
       c->print(static_cast<size_t>(j), ostr);
       QString qstr = QString::fromStdString(ostr.str());
@@ -151,9 +156,11 @@ void MantidTable::fillTable() {
     setColumnWidth(i, maxWidth);
   }
 
-  // block resizing
+  // block resizing and turn auto-update back on
   d_table->blockResizing(true);
   d_table->blockSignals(false);
+  applicationWindow()->setUpdateCurvesFromTable(this, true);
+  this->notifyChanges();
 }
 
 /**
@@ -192,6 +199,10 @@ void MantidTable::fillTableTransposed() {
     // Print out the data in each row of this column
     for (int j = 0; j < static_cast<int>(m_ws->rowCount()); ++j) {
       std::ostringstream ostr;
+      // Avoid losing precision for numeric data
+      if (c->type() == "double") {
+        ostr.precision(std::numeric_limits<double>::max_digits10);
+      }
       // This is the method on the Column object to convert to a string.
       c->print(static_cast<size_t>(j), ostr);
       QString qstr = QString::fromStdString(ostr.str());
@@ -267,9 +278,14 @@ void MantidTable::cellEdited(int row, int col) {
     return;
   }
 
-  std::string text =
-      d_table->text(row, col).remove(QRegExp("\\s")).toStdString();
+  QString oldText = d_table->text(row, col);
   Mantid::API::Column_sptr c = m_ws->getColumn(col);
+
+  if (c->type() != "str") {
+    oldText.remove(QRegExp("\\s"));
+  }
+
+  std::string text = oldText.toStdString();
 
   // Have the column convert the text to a value internally
   int index = row;
@@ -278,8 +294,13 @@ void MantidTable::cellEdited(int row, int col) {
   // Set the table view to be the same text after editing.
   // That way, if the string was stupid, it will be reset to the old value.
   std::ostringstream s;
+  // Avoid losing precision for numeric data
+  if (c->type() == "double") {
+    s.precision(std::numeric_limits<double>::max_digits10);
+  }
   c->print(index, s);
-  d_table->setText(row, col, QString(s.str().c_str()));
+
+  d_table->setText(row, col, QString::fromStdString(s.str()));
 }
 
 //------------------------------------------------------------------------------------------------

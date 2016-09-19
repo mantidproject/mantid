@@ -11,10 +11,6 @@ namespace WorkflowAlgorithms {
 
 class DLLExport HFIRSANSNormalise : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  HFIRSANSNormalise() : API::Algorithm() {}
-  /// Virtual destructor
-  ~HFIRSANSNormalise() override {}
   /// Algorithm's name
   const std::string name() const override { return "HFIRSANSNormalise"; }
   /// Summary of algorithms purpose

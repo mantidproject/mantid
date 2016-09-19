@@ -30,105 +30,104 @@
 #include "LegendWidget.h"
 #include "QwtPieCurve.h"
 
+#include <QCloseEvent>
 #include <QTextCursor>
 
 #include <qwt_text.h>
 #include <qwt_text_label.h>
 #include <qwt_scale_widget.h>
 
-TextEditor::TextEditor(Graph *g): QTextEdit(g), d_target(NULL)
-{
-	setAttribute(Qt::WA_DeleteOnClose);
-	setFrameShadow(QFrame::Plain);
-	setFrameShape(QFrame::Box);
-	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+TextEditor::TextEditor(Graph *g) : QTextEdit(g), d_target(NULL) {
+  setAttribute(Qt::WA_DeleteOnClose);
+  setFrameShadow(QFrame::Plain);
+  setFrameShape(QFrame::Box);
+  setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-	QPalette palette = this->palette();
-	palette.setColor(QPalette::Active, QPalette::WindowText, Qt::blue);
-	palette.setColor(QPalette::Active, QPalette::Base, Qt::white);
-	setPalette(palette);
+  QPalette palette = this->palette();
+  palette.setColor(QPalette::Active, QPalette::WindowText, Qt::blue);
+  palette.setColor(QPalette::Active, QPalette::Base, Qt::white);
+  setPalette(palette);
 
-	QString text;
-	if (g->selectedText()){
-		d_target = g->selectedText();
-		setGeometry(d_target->geometry());
-    auto legend = dynamic_cast<LegendWidget*>(d_target);
-		text = legend ? legend->text() : "";
-		d_target->hide();
-	} else if (g->titleSelected()){
-		d_target = g->plotWidget()->titleLabel();
-		QwtText t = g->plotWidget()->title();
-		text = t.text();
-		setAlignment((Qt::Alignment)t.renderFlags());
-		setGeometry(d_target->geometry());
-	} else if (g->selectedScale()){
-		d_target = g->selectedScale();
-		QwtScaleWidget *scale = (QwtScaleWidget*)d_target;
-		QwtText t = scale->title();
-		text = t.text();
-		setAlignment((Qt::Alignment)t.renderFlags());
+  QString text;
+  if (g->selectedText()) {
+    d_target = g->selectedText();
+    setGeometry(d_target->geometry());
+    auto legend = dynamic_cast<LegendWidget *>(d_target);
+    text = legend ? legend->text() : "";
+    d_target->hide();
+  } else if (g->titleSelected()) {
+    d_target = g->plotWidget()->titleLabel();
+    QwtText t = g->plotWidget()->title();
+    text = t.text();
+    setAlignment((Qt::Alignment)t.renderFlags());
+    setGeometry(d_target->geometry());
+  } else if (g->selectedScale()) {
+    d_target = g->selectedScale();
+    QwtScaleWidget *scale = (QwtScaleWidget *)d_target;
+    QwtText t = scale->title();
+    text = t.text();
+    setAlignment((Qt::Alignment)t.renderFlags());
 
-		QRect rect = g->axisTitleRect(scale);
-		if (scale->alignment() == QwtScaleDraw::BottomScale ||
-			scale->alignment() == QwtScaleDraw::TopScale){
-			resize(rect.size());
-			move(QPoint(d_target->x() + rect.x(), d_target->y() + rect.y()));
-		} else {
-			resize(QSize(rect.height(), rect.width()));
-			if (scale->alignment() == QwtScaleDraw::LeftScale)
-                move(QPoint(d_target->x() + rect.x(), d_target->y() + rect.y() + rect.height()/2));
-            else if (scale->alignment() == QwtScaleDraw::RightScale)
-                move(QPoint(d_target->x() - rect.height(), d_target->y() + rect.y() + rect.height()/2));
+    QRect rect = g->axisTitleRect(scale);
+    if (scale->alignment() == QwtScaleDraw::BottomScale ||
+        scale->alignment() == QwtScaleDraw::TopScale) {
+      resize(rect.size());
+      move(QPoint(d_target->x() + rect.x(), d_target->y() + rect.y()));
+    } else {
+      resize(QSize(rect.height(), rect.width()));
+      if (scale->alignment() == QwtScaleDraw::LeftScale)
+        move(QPoint(d_target->x() + rect.x(),
+                    d_target->y() + rect.y() + rect.height() / 2));
+      else if (scale->alignment() == QwtScaleDraw::RightScale)
+        move(QPoint(d_target->x() - rect.height(),
+                    d_target->y() + rect.y() + rect.height() / 2));
 
-			t.setText(" ");
-			t.setBackgroundPen(QPen(Qt::NoPen));
-			scale->setTitle(t);
-		}
-	}
+      t.setText(" ");
+      t.setBackgroundPen(QPen(Qt::NoPen));
+      scale->setTitle(t);
+    }
+  }
 
-	QTextCursor cursor = textCursor();
-	cursor.insertText(text);
-	d_initial_text = text;
+  QTextCursor cursor = textCursor();
+  cursor.insertText(text);
+  d_initial_text = text;
 
-	show();
-	setFocus();
+  show();
+  setFocus();
 }
 
-TextEditor::~TextEditor()
-{
-  emit textEditorDeleted();
-}
+TextEditor::~TextEditor() { emit textEditorDeleted(); }
 
-void TextEditor::closeEvent(QCloseEvent *e)
-{
-  if(d_target != NULL)
-  {
+void TextEditor::closeEvent(QCloseEvent *e) {
+  if (d_target != NULL) {
     Graph *g = dynamic_cast<Graph *>(parent());
     if (g) {
       QString s = QString();
-      if (auto legend = dynamic_cast<LegendWidget*>(d_target)){
-        s = text();
+      if (auto legend = dynamic_cast<LegendWidget *>(d_target)) {
+        s = toPlainText();
         legend->setText(s);
         d_target->show();
         g->setSelectedText(NULL);
-      } else if (auto pieLabel = dynamic_cast<PieLabel*>(d_target)){
-        s = text();
+      } else if (auto pieLabel = dynamic_cast<PieLabel *>(d_target)) {
+        s = toPlainText();
         pieLabel->setCustomText(s);
         d_target->show();
         g->setSelectedText(NULL);
-      } else if (d_target->isA("QwtTextLabel")){
+      } else if (QString(d_target->metaObject()->className()) ==
+                 "QwtTextLabel") {
         QwtText title = g->plotWidget()->title();
-        s = text();
-        if(s.isEmpty())
+        s = toPlainText();
+        if (s.isEmpty())
           s = " ";
-        title.setText(s);			
+        title.setText(s);
         g->plotWidget()->setTitle(title);
-      } else if (d_target->isA("QwtScaleWidget")){
-        QwtScaleWidget *scale = (QwtScaleWidget*)d_target;
+      } else if (QString(d_target->metaObject()->className()) ==
+                 "QwtScaleWidget") {
+        QwtScaleWidget *scale = (QwtScaleWidget *)d_target;
         QwtText title = scale->title();
-        s = text();
-        if(s.isEmpty())
+        s = toPlainText();
+        if (s.isEmpty())
           s = " ";
         title.setText(s);
         scale->setTitle(title);
@@ -143,19 +142,18 @@ void TextEditor::closeEvent(QCloseEvent *e)
   e->accept();
 }
 
-void TextEditor::formatText(const QString& prefix, const QString& postfix)
-{
-	QTextCursor cursor = textCursor();
-	QString markedText = cursor.selectedText();
-	cursor.insertText(prefix + markedText + postfix);
-	if(markedText.isEmpty()){
-		cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveAnchor, postfix.size());
-		setTextCursor(cursor);
-	}
-	setFocus();
+void TextEditor::formatText(const QString &prefix, const QString &postfix) {
+  QTextCursor cursor = textCursor();
+  QString markedText = cursor.selectedText();
+  cursor.insertText(prefix + markedText + postfix);
+  if (markedText.isEmpty()) {
+    cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::MoveAnchor,
+                        postfix.size());
+    setTextCursor(cursor);
+  }
+  setFocus();
 }
 
-void TextEditor::addSymbol(const QString& letter)
-{
-	textCursor().insertText(letter);
+void TextEditor::addSymbol(const QString &letter) {
+  textCursor().insertText(letter);
 }

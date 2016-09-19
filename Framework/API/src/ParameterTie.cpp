@@ -100,7 +100,7 @@ void ParameterTie::set(const std::string &expr) {
   m_expression = "";
   while (boost::regex_search(start, end, res, rx)) {
     m_expression.append(start, res[0].first);
-    m_expression += "#" + boost::lexical_cast<std::string>(varNames[res[1]]);
+    m_expression += "#" + std::to_string(varNames[res[1]]);
     start = res[0].second;
   }
   m_expression.append(start, end);

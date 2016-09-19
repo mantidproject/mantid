@@ -37,16 +37,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(SaveDetectorsGrouping)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveDetectorsGrouping::SaveDetectorsGrouping() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveDetectorsGrouping::~SaveDetectorsGrouping() {}
-
 /// Define input parameters
 void SaveDetectorsGrouping::init() {
   declareProperty(
@@ -68,7 +58,7 @@ void SaveDetectorsGrouping::exec() {
   // 2. Create Map(group ID, workspace-index vector)
   std::map<int, std::vector<detid_t>> groupIDwkspIDMap;
   this->createGroupDetectorIDMap(groupIDwkspIDMap);
-  g_log.debug() << "Size of map = " << groupIDwkspIDMap.size() << std::endl;
+  g_log.debug() << "Size of map = " << groupIDwkspIDMap.size() << '\n';
 
   // 3. Convert to detectors ranges
   std::map<int, std::vector<detid_t>> groupIDdetectorRangeMap;
@@ -98,28 +88,20 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
     }
     it = groupwkspmap.find(groupid);
     if (it == groupwkspmap.end()) {
-      g_log.error() << "Impossible situation! " << std::endl;
+      g_log.error() << "Impossible situation! \n";
       throw std::invalid_argument("Cannot Happen!");
     }
 
     // c) Convert workspace ID to detector ID
-    const API::ISpectrum *mspec = mGroupWS->getSpectrum(iws);
-    if (!mspec) {
-      g_log.error() << "Workspace index " << iws
-                    << " has no spectrum.  Impossible!" << std::endl;
-      throw;
-    }
-    auto detids = mspec->getDetectorIDs();
+    const auto &mspec = mGroupWS->getSpectrum(iws);
+    auto &detids = mspec.getDetectorIDs();
     if (detids.size() != 1) {
-      g_log.error() << "Spectrum " << mspec->getSpectrumNo() << " has "
-                    << detids.size() << " detectors.  Not allowed situation!"
-                    << std::endl;
+      g_log.error() << "Spectrum " << mspec.getSpectrumNo() << " has "
+                    << detids.size() << " detectors.  Not allowed situation!\n";
       throw;
     }
     it->second.insert(it->second.end(), detids.begin(), detids.end());
   }
-
-  return;
 }
 
 /*
@@ -136,7 +118,7 @@ void SaveDetectorsGrouping::convertToDetectorsRanges(
     sort(groupdetids.second.begin(), groupdetids.second.end());
 
     g_log.debug() << "Group " << groupid << "  has "
-                  << groupdetids.second.size() << " detectors. " << std::endl;
+                  << groupdetids.second.size() << " detectors. \n";
 
     // b) Group to ranges
     std::vector<detid_t> detranges;
@@ -164,8 +146,6 @@ void SaveDetectorsGrouping::convertToDetectorsRanges(
     groupdetidrangemap[groupid] = detranges;
 
   } // ENDFOR GroupID
-
-  return;
 }
 
 void SaveDetectorsGrouping::printToXML(
@@ -175,7 +155,7 @@ void SaveDetectorsGrouping::printToXML(
   // 1. Get Instrument information
   Geometry::Instrument_const_sptr instrument = mGroupWS->getInstrument();
   std::string name = instrument->getName();
-  g_log.debug() << "Instrument " << name << std::endl;
+  g_log.debug() << "Instrument " << name << '\n';
 
   // 2. Start document (XML)
   AutoPtr<Document> pDoc = new Document;
@@ -210,7 +190,7 @@ void SaveDetectorsGrouping::printToXML(
 
     pRoot->appendChild(pChildGroup);
 
-    g_log.debug() << "Group ID = " << groupid << std::endl;
+    g_log.debug() << "Group ID = " << groupid << '\n';
 
     // b) Detector ID Child Nodes
     std::stringstream ss;
@@ -228,7 +208,7 @@ void SaveDetectorsGrouping::printToXML(
         ss << ist;
       } else {
         writedata = false;
-        g_log.error() << "Impossible to have this situation!" << std::endl;
+        g_log.error() << "Impossible to have this situation!\n";
         throw std::invalid_argument("Impossible to have this sitaution!");
       }
       // add ","
@@ -237,12 +217,12 @@ void SaveDetectorsGrouping::printToXML(
       }
 
       g_log.debug() << "Detectors:  " << groupdetidrange.second[i * 2] << ", "
-                    << groupdetidrange.second[i * 2 + 1] << std::endl;
+                    << groupdetidrange.second[i * 2 + 1] << '\n';
     } // FOREACH Detectors Range Set
 
     std::string textvalue = ss.str();
 
-    g_log.debug() << "Detector IDs Node: " << textvalue << std::endl;
+    g_log.debug() << "Detector IDs Node: " << textvalue << '\n';
 
     // c) Create element
     AutoPtr<Element> pDetid = pDoc->createElement("detids");

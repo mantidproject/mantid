@@ -29,11 +29,14 @@
 #ifndef MdiSubWindow_H
 #define MdiSubWindow_H
 
-#include <QMdiSubWindow>
+#include "MantidKernel/RegistrationHelper.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
+#include "WindowFactory.h"
 #include <QDockWidget>
-#include <QVBoxLayout>
-#include <QMainWindow>
 #include <QFrame>
+#include <QMainWindow>
+#include <QMdiSubWindow>
+#include <QVBoxLayout>
 
 #include <stdexcept>
 
@@ -42,79 +45,77 @@ class QCloseEvent;
 class QString;
 class FloatingWindow;
 class ApplicationWindow;
+class Folder;
 
-class MdiSubWindowParent_t: public QFrame
-{
+class MdiSubWindowParent_t : public QFrame {
   Q_OBJECT
 public:
-  MdiSubWindowParent_t(QWidget* parent, Qt::WFlags f = 0):
-    QFrame(parent,f),
-    m_widget(NULL)
-  {}
-  void setWidget(QWidget* w)
-  {
-    if (w == NULL)
-      {// removing widget
-        if (m_widget)
-        {
-          layout()->takeAt(0);
-        }
-        m_widget = NULL;
-        return;
+  MdiSubWindowParent_t(QWidget *parent, Qt::WFlags f = 0)
+      : QFrame(parent, f), m_widget(NULL) {}
+  void setWidget(QWidget *w) {
+    if (w == NULL) { // removing widget
+      if (m_widget) {
+        layout()->takeAt(0);
       }
+      m_widget = NULL;
+      return;
+    }
 
     // widget cannot be replaced
-    if (m_widget)
-    {
+    if (m_widget) {
       throw std::runtime_error("Widget already set");
     }
 
     // setting the internal widget
-    if ( this->layout() == NULL )
-    {
-      QVBoxLayout* layout = new QVBoxLayout(this);
-      layout->setContentsMargins(0,0,0,0);
+    if (this->layout() == NULL) {
+      QVBoxLayout *layout = new QVBoxLayout(this);
+      layout->setContentsMargins(0, 0, 0, 0);
       layout->addWidget(w);
-    }
-    else
-    {
+    } else {
       layout()->addWidget(w);
     }
     m_widget = w;
     m_widget->setParent(this); // I am not sure about this
   }
   ~MdiSubWindowParent_t() override {
-    //std::cerr << "MdiSubWindowParent_t deleted\n";
+    // std::cerr << "MdiSubWindowParent_t deleted\n";
   }
-  QWidget* widget() {return m_widget;}
-  const QWidget* widget() const {return m_widget;}
+  QWidget *widget() { return m_widget; }
+  const QWidget *widget() const { return m_widget; }
+
 protected:
-  QWidget* m_widget;
+  QWidget *m_widget;
 };
 
 /**
  * \brief Base class of all MDI client windows.
  *
  * These are the main objects of every Qtiplot project.
- * All content (apart from the directory structure) is managed by subclasses of MdiSubWindow.
+ * All content (apart from the directory structure) is managed by subclasses of
+ *MdiSubWindow.
  *
- * With introduction of floating windows this class is no longer a sub-window (with window title and system menu)
- * but rather the internal widget of a QMdiSubWindow or a FloatingWindow. The outer window can be changed between
- * FloatingWindow and QMdiSubWindow at runtime using ApplicationWindow::changeToFloating(...) and
- * ApplicationWindow::changeToDocked(...) methods. MdiSubWindow overrides show(), hide(), and close() methods so that the
+ * With introduction of floating windows this class is no longer a sub-window
+ *(with window title and system menu)
+ * but rather the internal widget of a QMdiSubWindow or a FloatingWindow. The
+ *outer window can be changed between
+ * FloatingWindow and QMdiSubWindow at runtime using
+ *ApplicationWindow::changeToFloating(...) and
+ * ApplicationWindow::changeToDocked(...) methods. MdiSubWindow overrides
+ *show(), hide(), and close() methods so that the
  * corresponding events are passed to the outer window.
  *
- * MdiSubWindow can serve as a wrapper for another widget. Use MdiSubWindow::setWidget(...) to set its internal widget.
- * In this case if close event needs to be processed override closeEvent(...) of the internal widget.
+ * MdiSubWindow can serve as a wrapper for another widget. Use
+ *MdiSubWindow::setWidget(...) to set its internal widget.
+ * In this case if close event needs to be processed override closeEvent(...) of
+ *the internal widget.
  *
  * \sa Folder, ApplicationWindow
  */
-class MdiSubWindow: public MdiSubWindowParent_t
-{
+class MdiSubWindow : public MdiSubWindowParent_t,
+                     public MantidQt::API::IProjectSerialisable {
   Q_OBJECT
 
 public:
-
   //! Constructor
   /**
    * @param parent :: parent window
@@ -123,55 +124,74 @@ public:
    * @param f :: window flags
    * \sa setCaptionPolicy(), captionPolicy()
    */
-  MdiSubWindow(QWidget *parent, const QString& label = QString(), const QString& name = QString(), Qt::WFlags f = 0);
+  MdiSubWindow(QWidget *parent, const QString &label = QString(),
+               const QString &name = QString(), Qt::WFlags f = 0);
+
+  MdiSubWindow();
+
+  /// Setup the window without constructor
+  void init(QWidget *parent, const QString &label, const QString &name,
+            Qt::WFlags flags);
 
   //! Possible window captions.
-  enum CaptionPolicy{
-    Name = 0, //!< caption determined by the window name
+  enum CaptionPolicy {
+    Name = 0,  //!< caption determined by the window name
     Label = 1, //!< caption detemined by the window label
-    Both = 2 //!< caption = "name - label"
+    Both = 2   //!< caption = "name - label"
   };
-  enum Status{Hidden = -1, Normal = 0, Minimized = 1, Maximized = 2};
+  enum Status { Hidden = -1, Normal = 0, Minimized = 1, Maximized = 2 };
 
   /// Get the pointer to ApplicationWindow
-  ApplicationWindow *applicationWindow() {return d_app;}
-
+  ApplicationWindow *applicationWindow() { return d_app; }
+  /// Get the pointer to Folder
+  Folder *folder() { return d_folder; }
 public slots:
 
   //! Return the window label
-  QString windowLabel(){return QString(d_label);}
+  QString windowLabel() { return QString(d_label); }
   //! Set the window label
-  void setWindowLabel(const QString& s) { d_label = s; updateCaption();}
+  void setWindowLabel(const QString &s) {
+    d_label = s;
+    updateCaption();
+  }
 
   //! Return the window name
-  QString name(){return objectName();}
+  QString name() { return objectName(); }
   //! Set the window name
-  void setName(const QString& s){setObjectName(s); updateCaption();}
+  void setName(const QString &s) {
+    setObjectName(s);
+    updateCaption();
+  }
 
   //! Return the caption policy
-  CaptionPolicy captionPolicy(){return d_caption_policy;}
+  CaptionPolicy captionPolicy() { return d_caption_policy; }
   //! Set the caption policy
-  void setCaptionPolicy(CaptionPolicy policy) { d_caption_policy = policy; updateCaption(); }
+  void setCaptionPolicy(CaptionPolicy policy) {
+    d_caption_policy = policy;
+    updateCaption();
+  }
 
   //! Return the creation date
-  QString birthDate(){return d_birthdate;}
+  QString birthDate() { return d_birthdate; }
   //! Set the creation date
-  void setBirthDate(const QString& s){d_birthdate = s;}
+  void setBirthDate(const QString &s) { d_birthdate = s; }
 
   //! Return the window status as a string
   QString aspect();
   //! Return the window status flag (hidden, normal, minimized or maximized)
-    Status status(){return d_status;}
+  Status status() { return d_status; }
   //! Set the window status flag (hidden, normal, minimized or maximized)
   void setStatus(Status s);
 
   // TODO:
   //! Not implemented yet
-  virtual void restore(const QStringList& ){}
+  virtual void restore(const QStringList &) {}
 
-  virtual void exportPDF(const QString&){}
+  virtual void exportPDF(const QString &) {}
 
-  virtual QString saveToString(const QString &, bool = false){return QString();}
+  virtual QString saveToString(const QString &, bool = false) {
+    return QString();
+  }
 
   // TODO: make this return something useful
   //! Size of the widget as a string
@@ -180,7 +200,7 @@ public slots:
   //!Notifies that a window was hidden by a direct user action
   virtual void setHidden();
 
-  //event handlers
+  // event handlers
   //! Close event handler
   /**
    * Ask the user "delete, hide, or cancel?" if the
@@ -195,48 +215,52 @@ public slots:
   //! Filters other object's events (customizes title bar's context menu)
   bool eventFilter(QObject *object, QEvent *e) override;
 
-  FloatingWindow* getFloatingWindow() const;
-  QMdiSubWindow* getDockedWindow() const;
-  QWidget* getWrapperWindow() const;
+  FloatingWindow *getFloatingWindow() const;
+  QMdiSubWindow *getDockedWindow() const;
+  QWidget *getWrapperWindow() const;
 
   void setNormal();
   void setMinimized();
   void setMaximized();
 
   //! Returns the size the window had before a change state event to minimized.
-  QSize minRestoreSize(){return d_min_restore_size;}
+  QSize minRestoreSize() { return d_min_restore_size; }
 
-  //! Static function used as a workaround for ASCII files having end line char != '\n'.
+  //! Static function used as a workaround for ASCII files having end line char
+  //!= '\n'.
   /*
-   * It counts the number of valid rows to be imported and the number of first lines to be ignored.
-   * It creates a temporary file with '\n' terminated lines which can be correctly read by QTextStream
+   * It counts the number of valid rows to be imported and the number of first
+   * lines to be ignored.
+   * It creates a temporary file with '\n' terminated lines which can be
+   * correctly read by QTextStream
    * and returnes a path to this file.
    */
-  static QString parseAsciiFile(const QString& fname, const QString &commentString, int endLine,
-                                int ignoreFirstLines, int maxRows, int& rows);
+  static QString parseAsciiFile(const QString &fname,
+                                const QString &commentString, int endLine,
+                                int ignoreFirstLines, int maxRows, int &rows);
 
-  void setconfirmcloseFlag(bool closeflag){d_confirm_close=closeflag;}
+  void setconfirmcloseFlag(bool closeflag) { d_confirm_close = closeflag; }
 
   //! Notifies the main application that the window has been modified
-  void notifyChanges(){emit modifiedWindow(this);}
-  virtual void print(){}
+  void notifyChanges() { emit modifiedWindow(this); }
+  virtual void print() {}
 
   bool close();
   void hide();
   void show();
   void resize(int w, int h);
-  void resize(const QSize& size);
+  void resize(const QSize &size);
   QSize sizeHint() const override;
 
   /// Focus on the window
   void setFocus();
 
   void move(int x, int y);
-  void move(const QPoint& pos);
+  void move(const QPoint &pos);
   /// Resize the window to it's default size
   void resizeToDefault();
 
-public: //non-slot methods
+public: // non-slot methods
   /**@name Floating/Docking */
   ///@{
   /// If docked, undock the window out of the MDI area
@@ -250,7 +274,14 @@ public: //non-slot methods
   /// Detach this window from any parent window
   void detach();
   ///@}
-
+  /// Set the label property on the widget
+  void setLabel(const QString &label);
+  /// Loads the given lines from the project file and applies them.
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
+  /// Serialises to a string that can be saved to a project file.
+  std::string saveToProject(ApplicationWindow *app) override;
 signals:
   //! Emitted when the window was closed
   void closedWindow(MdiSubWindow *);
@@ -274,19 +305,24 @@ signals:
   void dragMousePress(QPoint);
   void dragMouseRelease(QPoint);
   void dragMouseMove(QPoint);
-  
+
 protected:
   //! Catches status changes
   void changeEvent(QEvent *event) override;
 
 private:
   //! Used to parse ASCII files with carriage return ('\r') endline.
-  static QString parseMacAsciiFile(const QString& fname, const QString &commentString,
-                           int ignoreFirstLines, int maxRows, int& rows);
+  static QString parseMacAsciiFile(const QString &fname,
+                                   const QString &commentString,
+                                   int ignoreFirstLines, int maxRows,
+                                   int &rows);
   //! Set caption according to current CaptionPolicy, name and label
   void updateCaption();
   /// Store the pointer to the ApplicationWindow
   ApplicationWindow *d_app;
+  /// Store the pointer to the Folder
+  Folder *d_folder;
+
   //! The window label
   /**
    * \sa setWindowLabel(), windowLabel(), setCaptionPolicy()
@@ -309,6 +345,23 @@ private:
   friend class FloatingWindow;
 };
 
-typedef QList<MdiSubWindow*> MDIWindowList;
+typedef QList<MdiSubWindow *> MDIWindowList;
+
+/* Used to register classes into the factory. creates a global object in an
+ * anonymous namespace. The object itself does nothing, but the comma operator
+ * is used in the call to its constructor to effect a call to the factory's
+ * subscribe method.
+ */
+#define DECLARE_WINDOW_WITH_NAME(classname, username)                          \
+  namespace {                                                                  \
+  Mantid::Kernel::RegistrationHelper                                           \
+      register_window_##username(((Mantid::API::WindowFactory::Instance()      \
+                                       .subscribe<classname>(#username)),      \
+                                  0));                                         \
+  }
+
+// Helper macro to subscribe a class to the factory with the same name as the
+// class name
+#define DECLARE_WINDOW(classname) DECLARE_WINDOW_WITH_NAME(classname, classname)
 
 #endif

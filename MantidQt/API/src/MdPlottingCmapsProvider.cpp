@@ -13,110 +13,109 @@
 #include "vtk_jsoncpp.h"
 #endif
 
-namespace MantidQt{
-  namespace API{
-    namespace
-    {
-      /// Static logger
-      Mantid::Kernel::Logger g_log("MdViewerWidget");
-    }
+namespace MantidQt {
+namespace API {
+namespace {
+/// Static logger
+Mantid::Kernel::Logger g_log("MdViewerWidget");
+}
 
-    MdPlottingCmapsProvider::MdPlottingCmapsProvider()
-    {
-    }
+MdPlottingCmapsProvider::MdPlottingCmapsProvider() {}
 
-    MdPlottingCmapsProvider::~MdPlottingCmapsProvider()
-    {
-    }
+MdPlottingCmapsProvider::~MdPlottingCmapsProvider() {}
 
-    void MdPlottingCmapsProvider::getColorMapsForMdPlotting(QStringList& colorMapNames, QStringList& colorMapFiles)
-    {
-      // Get the installed color maps directory.
-      QString colorMapDirectory = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("colormaps.directory"));
-      if (colorMapDirectory.isEmpty())
-      {
-        return;
-      }
+void MdPlottingCmapsProvider::getColorMapsForMdPlotting(
+    QStringList &colorMapNames, QStringList &colorMapFiles) {
+  // Get the installed color maps directory.
+  QString colorMapDirectory = QString::fromStdString(
+      Mantid::Kernel::ConfigService::Instance().getString(
+          "colormaps.directory"));
+  if (colorMapDirectory.isEmpty()) {
+    return;
+  }
 
-      // We show only those color maps as options which can be found in the .map files and in the .xml files of the VSI
-      QStringList colorMapNamesSliceViewer;
-      QStringList colorMapFilesSliceViewer;
-      appendAllFileNamesForFileType(colorMapNamesSliceViewer, colorMapFilesSliceViewer, colorMapDirectory, "map");
+  // We show only those color maps as options which can be found in the .map
+  // files and in the .xml files of the VSI
+  QStringList colorMapNamesSliceViewer;
+  QStringList colorMapFilesSliceViewer;
+  appendAllFileNamesForFileType(colorMapNamesSliceViewer,
+                                colorMapFilesSliceViewer, colorMapDirectory,
+                                "map");
 
-      QStringList colorMapNamesVsi;
-      getColorMapsForVSI(colorMapNamesVsi);
+  QStringList colorMapNamesVsi;
+  getColorMapsForVSI(colorMapNamesVsi);
 
-      std::vector<int> indexList = getSliceViewerIndicesForCommonColorMaps(colorMapNamesSliceViewer, colorMapNamesVsi);
+  std::vector<int> indexList = getSliceViewerIndicesForCommonColorMaps(
+      colorMapNamesSliceViewer, colorMapNamesVsi);
 
-      for (std::vector<int>::iterator it = indexList.begin(); it != indexList.end(); ++it)
-      {
-        colorMapNames.append(colorMapNamesSliceViewer[*it]);
-        colorMapFiles.append(colorMapFilesSliceViewer[*it]);
-      }
-    }
+  for (std::vector<int>::iterator it = indexList.begin(); it != indexList.end();
+       ++it) {
+    colorMapNames.append(colorMapNamesSliceViewer[*it]);
+    colorMapFiles.append(colorMapFilesSliceViewer[*it]);
+  }
+}
 
-    void MdPlottingCmapsProvider::getColorMapsForVSI(QStringList& colorMapNames)
-    {
+void MdPlottingCmapsProvider::getColorMapsForVSI(QStringList &colorMapNames) {
 #ifdef MAKE_VATES
-      vtkNew<vtkSMTransferFunctionPresets> presets;
+  vtkNew<vtkSMTransferFunctionPresets> presets;
 
-      // Check for colormap "hot". If preset, assume custom colormaps have
-      // already been loaded.
-      auto viridisColormap = presets->GetFirstPresetWithName("hot");
-      if (viridisColormap.empty()) {
-        const std::string filenames[3] = {"All_slice_viewer_cmaps_for_vsi.json",
-                                          "All_idl_cmaps.json",
-                                          "All_mpl_cmaps.json"};
-        const std::string colorMapDirectory =
-            Mantid::Kernel::ConfigService::Instance().getString(
-                "colormaps.directory");
-        for (const auto &baseName : filenames) {
-          std::string colorMap = colorMapDirectory + baseName;
-          presets->ImportPresets(colorMap.c_str());
-        }
-      }
+  // Check for colormap "hot". If preset, assume custom colormaps have
+  // already been loaded.
+  auto viridisColormap = presets->GetFirstPresetWithName("hot");
+  if (viridisColormap.empty()) {
+    const std::string filenames[3] = {"All_slice_viewer_cmaps_for_vsi.json",
+                                      "All_idl_cmaps.json",
+                                      "All_mpl_cmaps.json"};
+    const std::string colorMapDirectory =
+        Mantid::Kernel::ConfigService::Instance().getString(
+            "colormaps.directory");
+    for (const auto &baseName : filenames) {
+      std::string colorMap = colorMapDirectory + baseName;
+      presets->ImportPresets(colorMap.c_str());
+    }
+  }
 
-      unsigned int numberOfPresets = presets->GetNumberOfPresets();
-      for (unsigned int i = 0; i < numberOfPresets; ++i) {
-        colorMapNames.append(QString::fromStdString(presets->GetPresetName(i)));
-        }
+  unsigned int numberOfPresets = presets->GetNumberOfPresets();
+  for (unsigned int i = 0; i < numberOfPresets; ++i) {
+    colorMapNames.append(QString::fromStdString(presets->GetPresetName(i)));
+  }
 #else
-      (void)colorMapNames;
+  (void)colorMapNames;
 #endif
-    }
+}
 
-    void MdPlottingCmapsProvider::appendAllFileNamesForFileType(QStringList& colorMapNames, QStringList& colorMapFiles, QString colorMapDirectory, QString fileType)
-    {
-      QDir directory(colorMapDirectory);
+void MdPlottingCmapsProvider::appendAllFileNamesForFileType(
+    QStringList &colorMapNames, QStringList &colorMapFiles,
+    QString colorMapDirectory, QString fileType) {
+  QDir directory(colorMapDirectory);
 
-      QStringList filter(QString("*.%1").arg(fileType));
+  QStringList filter(QString("*.%1").arg(fileType));
 
-      QFileInfoList info = directory.entryInfoList(filter, QDir::Files);
+  QFileInfoList info = directory.entryInfoList(filter, QDir::Files);
 
-      for (QFileInfoList::iterator it = info.begin(); it != info.end(); ++it)
-      {
-        colorMapNames.append(it->baseName());
-        colorMapFiles.append(it->absoluteFilePath());
-      }
-    }
-
-    std::vector<int> MdPlottingCmapsProvider::getSliceViewerIndicesForCommonColorMaps(QStringList colorMapNamesSliceViewer,QStringList colorMapNamesVsi)
-    {
-      int index = 0;
-
-      std::vector<int> indexVector;
-
-      for (QStringList::iterator it = colorMapNamesSliceViewer.begin(); it != colorMapNamesSliceViewer.end(); ++it)
-      {
-        if (colorMapNamesVsi.indexOf(*it) != -1)
-        {
-          indexVector.push_back(index);
-        }
-
-        index++;
-      }
-
-      return indexVector;
-    }
+  for (QFileInfoList::iterator it = info.begin(); it != info.end(); ++it) {
+    colorMapNames.append(it->baseName());
+    colorMapFiles.append(it->absoluteFilePath());
   }
+}
+
+std::vector<int>
+MdPlottingCmapsProvider::getSliceViewerIndicesForCommonColorMaps(
+    QStringList colorMapNamesSliceViewer, QStringList colorMapNamesVsi) {
+  int index = 0;
+
+  std::vector<int> indexVector;
+
+  for (QStringList::iterator it = colorMapNamesSliceViewer.begin();
+       it != colorMapNamesSliceViewer.end(); ++it) {
+    if (colorMapNamesVsi.indexOf(*it) != -1) {
+      indexVector.push_back(index);
+    }
+
+    index++;
   }
+
+  return indexVector;
+}
+}
+}

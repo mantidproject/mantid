@@ -7,16 +7,16 @@
 #include "MantidQtSpectrumViewer/SpectrumView.h"
 
 /**
-    @class MatrixWSDataSource 
-  
+    @class MatrixWSDataSource
+
     This is the top level class for showing a matrix workspace
     using an SpectrumViewer.
- 
-    @author Dennis Mikkelson 
-    @date   2012-05-08 
-     
+
+    @author Dennis Mikkelson
+    @date   2012-05-08
+
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
-  
+
     This file is part of Mantid.
 
     Mantid is free software; you can redistribute it and/or modify
@@ -31,30 +31,26 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Code Documentation is available at 
+
+    Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
 
-namespace MantidQt
-{
-namespace SpectrumView
-{
+namespace MantidQt {
+namespace SpectrumView {
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSSpectrumView
-{
-  public:
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSSpectrumView {
+public:
+  /// Construct a spectrum viewer for the specifed MatrixWorkspace
+  MatrixWSSpectrumView(Mantid::API::MatrixWorkspace_const_sptr mat_ws);
 
-    /// Construct a spectrum viewer for the specifed MatrixWorkspace
-    MatrixWSSpectrumView( Mantid::API::MatrixWorkspace_const_sptr mat_ws );
+  ~MatrixWSSpectrumView();
 
-   ~MatrixWSSpectrumView();
-
-  private:
-    SpectrumView *spectrum_view;
+private:
+  SpectrumView *spectrum_view;
 };
 
 } // namespace SpectrumView
-} // namespace MantidQt 
+} // namespace MantidQt
 
 #endif // MATRIX_WS_SPECTRUM_VIEW_H

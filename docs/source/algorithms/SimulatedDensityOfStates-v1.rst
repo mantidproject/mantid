@@ -25,6 +25,11 @@ If the BondTable spectrum type is used then the output workspace will be
 a table workspace containing details of the bonds defined in the *.castep*
 file.
 
+Workflow
+--------
+
+.. diagram:: SimulatedDensityOfStates-v1_wkflw.dot
+
 Usage
 -----
 

@@ -1,44 +1,39 @@
 #!/usr/bin/env python
 """ Utility for generating a class file, header, and test file """
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+import argparse
 import sys
 import os
-try:
-    import argparse
-    useArgparse = True
-except ImportError, e:
-    import optparse # deprecated in v2.7
-    useArgparse = False
 import datetime
 import re
 import cmakelists_utils
 from cmakelists_utils import *
-import commands
 
 VERSION = "1.0"
 
 #======================================================================
 def write_header(subproject, classname, filename, args):
     """Write a class header file"""
-    print "Writing header file to %s" % filename
+    print("Writing header file to", filename)
     f = open(filename, 'w')
 
     subproject_upper = subproject.upper()
-    guard = "MANTID_%s_%s_H_" % (subproject_upper, classname.upper())
+    guard = "MANTID_{}_{}_H_".format(subproject_upper, classname.upper())
 
     # Create an Algorithm header; will not use it if not an algo
     algorithm_header = """
-  const std::string name() const override final;
-  int version() const override final;
-  const std::string category() const override final;
-  const std::string summary() const override final;
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  void init() override final;
-  void exec() override final;
+  void init() override;
+  void exec() override;
 """
 
-    alg_class_declare = " final : public API::Algorithm"
+    alg_class_declare = " : public API::Algorithm"
     alg_include = '#include "MantidAPI/Algorithm.h"'
 
     if not args.alg:
@@ -47,17 +42,18 @@ private:
         alg_include = ""
 
     # The full text
-    s = """#ifndef %s
-#define %s
+    s = r"""#ifndef {guard}
+#define {guard}
 
-#include "Mantid%s/DllConfig.h"
-%s
-namespace Mantid {
-namespace %s {
+#include "Mantid{subproject}/DllConfig.h"
+{alg_include}
 
-/** %s : TODO: DESCRIPTION
+namespace Mantid {{
+namespace {subproject} {{
 
-  Copyright &copy; %s ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+/** {classname} : TODO: DESCRIPTION
+
+  Copyright &copy; {today} ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -78,28 +74,25 @@ namespace %s {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_%s_DLL %s%s {
-public:%s};
+class MANTID_{subproject_upper}_DLL {classname}{alg_class_declare} {{
+public:{algorithm_header}}};
 
-} // namespace %s
-} // namespace Mantid
+}} // namespace {subproject}
+}} // namespace Mantid
 
-#endif /* %s */""" % (guard, guard, subproject,
-       alg_include, subproject, classname,
-       datetime.datetime.now().date().year, subproject_upper, classname, alg_class_declare,
-       algorithm_header, subproject, guard)
+#endif /* {guard} */""".format(guard=guard, subproject=subproject,
+       alg_include=alg_include, classname=classname,
+       today=datetime.datetime.now().date().year, subproject_upper=subproject_upper,
+       alg_class_declare=alg_class_declare, algorithm_header=algorithm_header)
 
     f.write(s)
     f.close()
 
 
-
-
-
 #======================================================================
 def write_source(subproject, classname, filename, args):
     """Write a class source file"""
-    print "Writing source file to %s" % filename
+    print("Writing source file to", filename)
     f = open(filename, 'w')
 
     algorithm_top = """
@@ -107,63 +100,65 @@ using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(%s)
-""" % (classname)
+DECLARE_ALGORITHM({})
+""".format(classname)
 
     algorithm_source = """
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string %s::name() const { return "%s"; }
+const std::string {algname}::name() const {{ return "{algname}"; }}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int %s::version() const { return 1; }
+int {algname}::version() const {{ return 1; }}
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string %s::category() const {
+const std::string {algname}::category() const {{
   return "TODO: FILL IN A CATEGORY";
-}
+}}
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string %s::summary() const {
+const std::string {algname}::summary() const {{
   return "TODO: FILL IN A SUMMARY";
-}
+}}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void %s::init() {
+void {algname}::init() {{
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      Kernel::make_unique<WorkspaceProperty<API::Workspace>>("InputWorkspace", "",
+                                                             Direction::Input),
       "An input workspace.");
   declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      Kernel::make_unique<WorkspaceProperty<API::Workspace>>("OutputWorkspace", "",
+                                                             Direction::Output),
       "An output workspace.");
-}
+}}
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void %s::exec() {
+void {algname}::exec() {{
   // TODO Auto-generated execute stub
-}
-""" % (classname, classname, classname, classname, classname, classname, classname)
+}}
+""".format(algname=classname)
 
     if not args.alg:
         algorithm_top = ""
         algorithm_source = ""
 
     # ------- Now the normal class text ------------------------------
-    s = """#include "Mantid%s/%s%s.h"
+    s = """#include "Mantid{subproject}/{subfolder}{classname}.h"
 
-namespace Mantid {
-namespace %s {
-%s%s
-} // namespace %s
-} // namespace Mantid
-""" % (
-        subproject, args.subfolder, classname, subproject, algorithm_top,
-        algorithm_source, subproject)
+namespace Mantid {{
+namespace {subproject} {{
+{algorithm_top}{algorithm_source}
+}} // namespace {subproject}
+}} // namespace Mantid
+""".format(
+        subproject=subproject, subfolder=args.subfolder, classname=classname, algorithm_top=algorithm_top,
+        algorithm_source=algorithm_source)
     f.write(s)
     f.close()
 
@@ -172,24 +167,24 @@ namespace %s {
 #======================================================================
 def write_test(subproject, classname, filename, args):
     """Write a class test file"""
-    print "Writing test file to %s" % filename
+    print("Writing test file to", filename)
     f = open(filename, 'w')
 
-    guard = "MANTID_%s_%sTEST_H_" % (subproject.upper(), classname.upper())
+    guard = "MANTID_{}_{}TEST_H_".format(subproject.upper(), classname.upper())
     algorithm_test = """
   void test_Init()
-  {
-    %s alg;
+  {{
+    {algname} alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-  }
+  }}
 
   void test_exec()
-  {
+  {{
     // Create test input if necessary
     MatrixWorkspace_sptr inputWS = //-- Fill in appropriate code. Consider using TestHelpers/WorkspaceCreationHelpers.h --
 
-    %s alg;
+    {algname} alg;
     // Don't put output in ADS by default
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -205,42 +200,41 @@ def write_test(subproject, classname, filename, args):
     Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
     TS_FAIL("TODO: Check the results and remove this line");
-  }
-  """ % (classname,classname);
+  }}
+  """.format(algname=classname);
 
     if not args.alg:
         algorithm_test = ""
 
-    s = """#ifndef %s
-#define %s
+    s = """#ifndef {guard}
+#define {guard}
 
 #include <cxxtest/TestSuite.h>
 
-#include "Mantid%s/%s%s.h"
+#include "Mantid{subproject}/{subfolder}{classname}.h"
 
-using Mantid::%s::%s;
+using Mantid::{subproject}::{classname};
 
-class %sTest : public CxxTest::TestSuite {
+class {classname}Test : public CxxTest::TestSuite {{
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static %sTest *createSuite() { return new %sTest(); }
-  static void destroySuite( %sTest *suite ) { delete suite; }
+  static {classname}Test *createSuite() {{ return new {classname}Test(); }}
+  static void destroySuite( {classname}Test *suite ) {{ delete suite; }}
 
-%s
+{algorithm_test}
   void test_Something()
-  {
+  {{
     TS_FAIL( "You forgot to write a test!");
-  }
+  }}
 
 
-};
+}};
 
 
-#endif /* %s */""" % (
-          guard, guard, subproject, args.subfolder, classname,
-          subproject, classname, classname, classname, classname, classname,
-          algorithm_test, guard)
+#endif /* {guard} */""".format(
+          guard=guard, subproject=subproject, subfolder=args.subfolder, classname=classname,
+          algorithm_test=algorithm_test)
     f.write(s)
     f.close()
 
@@ -252,7 +246,7 @@ public:
 #======================================================================
 def write_rst(subproject, classname, filename, args):
     """Write an algorithm rst documentation file"""
-    print "Writing rst file to %s" % filename
+    print("Writing rst file to", filename)
     f = open(filename, 'w')
 
     s = """
@@ -274,26 +268,26 @@ Usage
 -----
 ..  Try not to use files in your examples,
     but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
+    autotestdata\\UsageData and the following tag unindented
     .. include:: ../usagedata-note.txt
 
-**Example - %s**
+**Example - {algname}**
 
-.. testcode:: %sExample
+.. testcode:: {algname}Example
 
    # Create a host workspace
    ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
    or
    ws = CreateSampleWorkspace()
 
-   wsOut = %s()
+   wsOut = {algname}()
 
    # Print the result
    print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
 
 Output:
 
-.. testoutput:: %sExample
+.. testoutput:: {algname}Example
 
   The output workspace has ?? spectra
 
@@ -301,7 +295,7 @@ Output:
 
 .. sourcelink::
 
-""" % (classname,classname,classname,classname)
+""".format(algname=classname)
 
     f.write(s)
     f.close()
@@ -321,19 +315,19 @@ def generate(subproject, classname, overwrite, args):
     rstfile = os.path.join(mantiddir, "docs", "source", "algorithms", classname + "-v1.rst")
 
     if args.header and not overwrite and os.path.exists(headerfile):
-        print "\nError! Header file %s already exists. Use --force to overwrite.\n" % headerfile
+        print("\nError! Header file {} already exists. Use --force to overwrite.\n".format(headerfile))
         return
     if args.cpp and not overwrite and os.path.exists(sourcefile):
-        print "\nError! Source file %s already exists. Use --force to overwrite.\n" % sourcefile
+        print("\nError! Source file {} already exists. Use --force to overwrite.\n".format(sourcefile))
         return
     if args.test and not overwrite and os.path.exists(testfile):
-        print "\nError! Test file %s already exists. Use --force to overwrite.\n" % testfile
+        print("\nError! Test file {} already exists. Use --force to overwrite.\n".format(testfile))
         return
     if args.rst and args.alg and not overwrite and os.path.exists(rstfile):
-        print "\nError! Rst documentation file %s already exists. Use --force to overwrite.\n" % rstfile
+        print("\nError! Rst documentation file {} already exists. Use --force to overwrite.\n".format(rstfile))
         return
 
-    print
+    print()
     if args.header:
         write_header(subproject, classname, headerfile, args)
     if args.cpp:
@@ -343,97 +337,54 @@ def generate(subproject, classname, overwrite, args):
     if args.rst and args.alg:
         write_rst(subproject, classname, rstfile, args)
 
-    # Insert into the cmake list
-    add_to_cmake(subproject, classname, args, args.subfolder)
-
-    print "\n   Files were added to Framework/%s/CMakeLists.txt !" % (subproject)
-    print
+    # Insert into the cmake list if required
+    if args.cmake:
+        add_to_cmake(subproject, classname, args, args.subfolder)
+        print("\n   Files were added to Framework/{}/CMakeLists.txt !".format(subproject))
+    print()
 
     if args.alg:
-        print "Note: if this is a WorkflowAlgorithm, please subclass DataProcessorAlgorithm"
-        print "Note: if this algorithm operates on a WorkspaceGroup, please override processGroups()"
-        print
-
-
-#    if not test_only:
-#        print "\tsrc/%s.cpp" % (classname)
-#        print "\tinc/Mantid%s/%s.h" % (subproject, classname)
-#    print "\ttest/%sTest.h" % (classname)
-#    print
-
-
+        print("Note: if this is a WorkflowAlgorithm, please subclass DataProcessorAlgorithm")
+        print("Note: if this algorithm operates on a WorkspaceGroup, please override processGroups()")
+        print()
 
 #======================================================================
 if __name__ == "__main__":
-    parser = None
 
-    if useArgparse:
-        parser = argparse.ArgumentParser(description='Utility to create Mantid class files: header, source and test. version ' + VERSION)
-        parser.add_argument('subproject', metavar='SUBPROJECT', type=str,
-                            help='The subproject under Framework/; e.g. Kernel')
-        parser.add_argument('classname', metavar='CLASSNAME', type=str,
-                            help='Name of the class to create')
-        parser.add_argument('--force', dest='force', action='store_const',
-                            const=True, default=False,
-                            help='Force overwriting existing files. Use with caution!')
-        parser.add_argument('--no-header', dest='header', action='store_const',
-                            const=False, default=True,
-                            help="Don't create the header file")
-        parser.add_argument('--no-test', dest='test', action='store_const',
-                            const=False, default=True,
-                            help="Don't create the test file")
-        parser.add_argument('--no-cpp', dest='cpp', action='store_const',
-                            const=False, default=True,
-                            help="Don't create the cpp file")
-        parser.add_argument('--no-rst', dest='rst', action='store_const',
-                            const=False, default=True,
-                            help="Don't create the rst file")
-        parser.add_argument('--alg', dest='alg', action='store_const',
-                            const=True, default=False,
-                            help='Create an Algorithm stub. This adds some methods common to algorithms.')
-        parser.add_argument('--subfolder', dest='subfolder',
-                            default="",
-                            help='Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.')
-        parser.add_argument('--project', dest='project',
-                            default="Framework",
-                            help='The project in which this goes. Default: Framework. Can be MantidQt, Vates')
-    else:
-        parser = optparse.OptionParser("Usage: %prog SUBPROJECT CLASSNAME [options]", None,
-                                       optparse.Option, VERSION, 'error', 'Utility to create Mantid class files: header, source and test.')
-        parser.add_option('--force', dest='force', action='store_const',
-                            const=True, default=False,
-                            help='Force overwriting existing files. Use with caution!')
-        parser.add_option('--no-header', dest='header', action='store_const',
-                            const=False, default=True,
-                            help="Don't create the header file")
-        parser.add_option('--no-test', dest='test', action='store_const',
-                            const=False, default=True,
-                            help="Don't create the test file")
-        parser.add_option('--no-cpp', dest='cpp', action='store_const',
-                            const=False, default=True,
-                            help="Don't create the cpp file")
-        parser.add_option('--no-rst', dest='rst', action='store_const',
-                            const=False, default=True,
-                            help="Don't create the rst file")
-        parser.add_option('--alg', dest='alg', action='store_const',
-                            const=True, default=False,
-                            help='Create an Algorithm stub. This adds some methods common to algorithms.')
-        parser.add_option('--subfolder', dest='subfolder',
-                            default="",
-                            help='Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.')
-        parser.add_option('--project', dest='project',
-                            default="Framework",
-                            help='The project in which this goes. Default: Framework. Can be MantidQt, Vates')
+    parser = argparse.ArgumentParser(description='Utility to create Mantid class files: header, source and test. version ' + VERSION)
+    parser.add_argument('subproject', metavar='SUBPROJECT', type=str,
+                        help='The subproject under Framework/; e.g. Kernel')
+    parser.add_argument('classname', metavar='CLASSNAME', type=str,
+                        help='Name of the class to create')
+    parser.add_argument('--force', dest='force', action='store_const',
+                        const=True, default=False,
+                        help='Force overwriting existing files. Use with caution!')
+    parser.add_argument('--no-header', dest='header', action='store_const',
+                        const=False, default=True,
+                        help="Don't create the header file")
+    parser.add_argument('--no-test', dest='test', action='store_const',
+                        const=False, default=True,
+                        help="Don't create the test file")
+    parser.add_argument('--no-cpp', dest='cpp', action='store_const',
+                        const=False, default=True,
+                        help="Don't create the cpp file")
+    parser.add_argument('--no-rst', dest='rst', action='store_const',
+                        const=False, default=True,
+                        help="Don't create the rst file")
+    parser.add_argument('--no-cmake', dest='cmake', action='store_const',
+                        const=False, default=True,
+                        help="Don't modify cmake files")
+    parser.add_argument('--alg', dest='alg', action='store_const',
+                        const=True, default=False,
+                        help='Create an Algorithm stub. This adds some methods common to algorithms.')
+    parser.add_argument('--subfolder', dest='subfolder',
+                        default="",
+                        help='Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.')
+    parser.add_argument('--project', dest='project',
+                        default="Framework",
+                        help='The project in which this goes. Default: Framework. Can be MantidQt, Vates')
 
-    args = None
-    if useArgparse:
-        args = parser.parse_args()
-    else:
-        (options, myargs) = parser.parse_args()
-        args = options
-        args.subproject = myargs[0]
-        args.classname = myargs[1]
-
+    args = parser.parse_args()
     subproject = args.subproject
     classname = args.classname
     overwrite = args.force

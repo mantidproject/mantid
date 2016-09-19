@@ -55,8 +55,6 @@ class DLLExport ReplaceSpecialValues : public UnaryOperation {
 public:
   /// Default constructor
   ReplaceSpecialValues();
-  /// Destructor
-  ~ReplaceSpecialValues() override {}
   /// Algorithm's name for identification
   const std::string name() const override { return "ReplaceSpecialValues"; }
   /// Summary of algorithms purpose

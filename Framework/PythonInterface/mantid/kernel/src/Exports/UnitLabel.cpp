@@ -7,24 +7,28 @@
 #include <boost/make_shared.hpp>
 #include <boost/scoped_array.hpp>
 
+// For Python unicode object
+#include <unicodeobject.h>
+
 using Mantid::Kernel::UnitLabel;
 using namespace boost::python;
 
 namespace {
 boost::shared_ptr<UnitLabel>
 createLabel(const object &ascii, const object &utf8, const object &latex) {
-  PyObject *utf8Ptr = utf8.ptr();
-  if (PyUnicode_Check(utf8Ptr)) {
-    auto length = PyUnicode_GetSize(utf8Ptr);
-    typedef UnitLabel::Utf8String::value_type Utf8Char;
+  typedef UnitLabel::Utf8String::value_type Utf8Char;
+  if (PyUnicode_Check(utf8.ptr())) {
+    auto length = PyUnicode_GetSize(utf8.ptr());
     boost::scoped_array<Utf8Char> buffer(new Utf8Char[length]);
-    PyUnicode_AsWideChar(reinterpret_cast<PyUnicodeObject *>(utf8Ptr),
+#if PY_MAJOR_VERSION >= 3
+    PyUnicode_AsWideChar(utf8.ptr(), buffer.get(), length);
+#else
+    PyUnicode_AsWideChar(reinterpret_cast<PyUnicodeObject *>(utf8.ptr()),
                          buffer.get(), length);
-
-    auto *rawBuffer = buffer.get();
+#endif
     return boost::make_shared<UnitLabel>(
         extract<std::string>(ascii)(),
-        UnitLabel::Utf8String(rawBuffer, rawBuffer + length),
+        UnitLabel::Utf8String(buffer.get(), buffer.get() + length),
         extract<std::string>(latex)());
   } else {
     throw std::invalid_argument(

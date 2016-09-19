@@ -2,7 +2,8 @@
     File                 : PlotDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Custom curves dialog
 
@@ -34,8 +35,6 @@
 #include "MultiLayer.h"
 //#include "MantidKernel/Logger.h"
 
-
-
 class QCheckBox;
 class QComboBox;
 class QLabel;
@@ -66,16 +65,18 @@ class ContourLinesEditor;
 class ApplicationWindow;
 
 //! Custom plot/curves dialog
-class PlotDialog : public QDialog
-{
+class PlotDialog : public QDialog {
   Q_OBJECT
 
 public:
-  PlotDialog(bool showExtended, ApplicationWindow* app, MultiLayer *ml, Qt::WFlags fl = 0 );
-  void initFonts(const QFont& titlefont, const QFont& axesfont, const QFont& numbersfont, const QFont& legendfont);
-  void insertColumnsList(const QStringList& names){columnNames = names;};
+  PlotDialog(bool showExtended, ApplicationWindow *app, MultiLayer *ml,
+             Qt::WFlags fl = 0);
+  void initFonts(const QFont &titlefont, const QFont &axesfont,
+                 const QFont &numbersfont, const QFont &legendfont);
+  void insertColumnsList(const QStringList &names) { columnNames = names; };
 
-  void setPlotType(int plotType, int curveNum, const QString & color = "Default");
+  void setPlotType(int plotType, int curveNum,
+                   const QString &color = "Default");
 
 public slots:
   void showAll(bool all);
@@ -84,7 +85,7 @@ public slots:
 private slots:
   void showStatistics();
   void customVectorsPage(bool angleMag);
-  void updateEndPointColumns(const QString& text);
+  void updateEndPointColumns(const QString &text);
 
   void showBoxSymbols(bool show);
   bool acceptParams();
@@ -97,7 +98,8 @@ private slots:
   void setActiveCurve(CurveTreeItem *item);
 
   void insertTabs(int plot_type);
-  void updateTabWindow(QTreeWidgetItem *currentItem, QTreeWidgetItem *previousItem);
+  void updateTabWindow(QTreeWidgetItem *currentItem,
+                       QTreeWidgetItem *previousItem);
   void showAreaColor(bool show);
 
   void removeSelectedCurve();
@@ -107,21 +109,21 @@ private slots:
   void showPlotAssociations(QTreeWidgetItem *item, int);
 
   void setPenStyle(Qt::PenStyle style);
-  void setPiePenStyle(const Qt::PenStyle& style);
+  void setPiePenStyle(const Qt::PenStyle &style);
 
-  //box plots
+  // box plots
   void setBoxType(int index);
   void setBoxRangeType(int index);
   void setWhiskersRange(int index);
 
-  //spectrograms
+  // spectrograms
   void showDefaultContourLinesBox(bool show);
   void showColorMapEditor(bool show);
 
-  //layer geometry
+  // layer geometry
   void adjustLayerHeight(int width);
   void adjustLayerWidth(int height);
-  void changeColormap(const QString & filename = "");
+  void changeColormap(const QString &filename = "");
   void setEquidistantLevels();
 
 protected slots:
@@ -175,76 +177,84 @@ private:
   MultiLayer *d_ml;
   QStringList columnNames;
 
-  QSpinBox* boxX, *boxY, *boxLayerWidth, *boxLayerHeight;
+  QSpinBox *boxX, *boxY, *boxLayerWidth, *boxLayerHeight;
   QCheckBox *keepRatioBox;
   QCheckBox *keepRatioOnResizeBox;
 
   QPushButton *btnTitle, *btnAxesLabels, *btnAxesNumbers, *btnLegend;
   ColorMapEditor *colorMapEditor;
   QLabel *mLabelCurrentColormap;
-  QPushButton* mSelectColormap;
+  QPushButton *mSelectColormap;
   QString mCurrentColorMap;
-  QWidget *curvePlotTypeBox, *layerPage, *layerGeometryPage, *piePage, *fontsPage, *printPage, *contourLinesPage;
-  QTreeWidget* listBox;
-  QCheckBox *boxAntialiasing, *boxAll, *boxScaleLayers, *boxPrintCrops, *boxSetCMapAsDefault;
-  ColorButton *boxBorderColor, *boxBackgroundColor, *boxCanvasColor, *boxCanvasFrameColor;
-  QSpinBox *boxBackgroundTransparency, *boxCanvasTransparency, *boxBorderWidth, *boxMargin, *boxCanvasFrameWidth;
+  QWidget *curvePlotTypeBox, *layerPage, *layerGeometryPage, *piePage,
+      *fontsPage, *printPage, *contourLinesPage;
+  QTreeWidget *listBox;
+  QCheckBox *boxAntialiasing, *boxAll, *boxScaleLayers, *boxPrintCrops,
+      *boxSetCMapAsDefault;
+  ColorButton *boxBorderColor, *boxBackgroundColor, *boxCanvasColor,
+      *boxCanvasFrameColor;
+  QSpinBox *boxBackgroundTransparency, *boxCanvasTransparency, *boxBorderWidth,
+      *boxMargin, *boxCanvasFrameWidth;
   QSpinBox *boxRadius;
   DoubleSpinBox *boxPieLineWidth;
   ColorBox *boxFirstColor, *boxPieLineColor;
   PatternBox *boxPiePattern;
-  QComboBox* boxPieLineStyle;
+  QComboBox *boxPieLineStyle;
 
-  QPushButton* buttonApply, *btnWorksheet;
-  QPushButton* buttonOk, *btnMore;
-  QPushButton* buttonCancel;
-  QComboBox* boxPlotType;
-  QWidget* linePage;
-  QComboBox* boxConnect;
-  QComboBox* boxLineStyle;
+  QPushButton *buttonApply, *btnWorksheet;
+  QPushButton *buttonOk, *btnMore;
+  QPushButton *buttonCancel;
+  QComboBox *boxPlotType;
+  QWidget *linePage;
+  QComboBox *boxConnect;
+  QComboBox *boxLineStyle;
   DoubleSpinBox *boxLineWidth, *boxPenWidth;
-  ColorBox* boxLineColor, *boxAreaColor;
-  QWidget* symbolPage;
-  QSpinBox* boxSymbolSize;
-  ColorBox* boxSymbolColor,*boxFillColor;
-  SymbolBox* boxSymbolStyle;
+  ColorBox *boxLineColor, *boxAreaColor;
+  QWidget *symbolPage;
+  QSpinBox *boxSymbolSize;
+  ColorBox *boxSymbolColor, *boxFillColor;
+  SymbolBox *boxSymbolStyle;
   PatternBox *boxPattern;
-  QTabWidget* privateTabWidget;
+  QTabWidget *privateTabWidget;
   QWidget *errorsPage, *spectrogramPage;
-  QGroupBox* fillGroupBox;
-  QCheckBox* plusBox;
-  QCheckBox* minusBox;
-  QCheckBox* xBox;
+  QGroupBox *fillGroupBox;
+  QCheckBox *plusBox;
+  QCheckBox *minusBox;
+  QCheckBox *xBox;
   ColorButton *colorBox, *levelsColorBox;
-  ColorBox* vectColorBox;
-  DoubleSpinBox* widthBox;
-  QComboBox* capBox;
-  QCheckBox* throughBox;
-  QLabel *labelPosition, *labelXEnd, *labelYEnd,*justifyLabelsLbl,*labelsColumnLbl;
-  QGroupBox* GroupBoxH;
+  ColorBox *vectColorBox;
+  DoubleSpinBox *widthBox;
+  QComboBox *capBox;
+  QCheckBox *throughBox;
+  QLabel *labelPosition, *labelXEnd, *labelYEnd, *justifyLabelsLbl,
+      *labelsColumnLbl;
+  QGroupBox *GroupBoxH;
   QWidget *histogramPage, *spacingPage;
   QLineEdit *binSizeBox, *histogramBeginBox, *histogramEndBox;
   QCheckBox *automaticBox;
-  QPushButton* buttonStatistics, *btnEditCurve;
-  QSpinBox* gapBox, *offsetBox, *boxWidth;
+  QPushButton *buttonStatistics, *btnEditCurve;
+  QSpinBox *gapBox, *offsetBox, *boxWidth;
   QWidget *vectPage, *boxPage, *percentilePage, *axesPage;
-  QComboBox *xEndBox, *yEndBox, *boxType, *boxWhiskersType, *boxWhiskersRange, *boxRange;
-  QSpinBox* headAngleBox, *headLengthBox, *boxPercSize;
+  QComboBox *xEndBox, *yEndBox, *boxType, *boxWhiskersType, *boxWhiskersRange,
+      *boxRange;
+  QSpinBox *headAngleBox, *headLengthBox, *boxPercSize;
   DoubleSpinBox *vectWidthBox, *boxEdgeWidth;
   QCheckBox *filledHeadBox;
   QSpinBox *boxCoef, *boxWhiskersCoef;
   QCheckBox *boxFillSymbols, *boxFillSymbol;
   ColorBox *boxPercFillColor, *boxEdgeColor;
-  QLabel 	*whiskerCoeffLabel, *whiskerRangeLabel, *boxCoeffLabel;
+  QLabel *whiskerCoeffLabel, *whiskerRangeLabel, *boxCoeffLabel;
   QLabel *boxRangeLabel, *whiskerCntLabel, *boxCntLabel;
   QGroupBox *GroupBoxVectEnd;
-  QComboBox *vectPosBox, *boxXAxis, *boxYAxis, *colorScaleBox;//, *boxContourStyle;
-  PenStyleBox	*penContourStyle,*boxContourStyle;
+  QComboBox *vectPosBox, *boxXAxis, *boxYAxis,
+      *colorScaleBox; //, *boxContourStyle;
+  PenStyleBox *penContourStyle, *boxContourStyle;
   QSpinBox *levelsBox, *colorScaleWidthBox;
   DoubleSpinBox *contourWidthBox;
   QGroupBox *levelsGroupBox, *axisScaleBox, *imageGroupBox;
   QGroupBox *defaultPenBox;
-  QRadioButton *defaultScaleBox, *grayScaleBox, *customScaleBox, *defaultContourBox, *autoContourBox;
+  QRadioButton *defaultScaleBox, *grayScaleBox, *customScaleBox,
+      *defaultContourBox, *autoContourBox;
 
   SymbolBox *boxMaxStyle, *boxMinStyle, *boxMeanStyle, *box99Style, *box1Style;
   QDoubleSpinBox *whiskerCnt, *boxCnt;
@@ -253,20 +263,22 @@ private:
   DoubleSpinBox *boxLabelsAngle;
   QSpinBox *boxLabelsXOffset, *boxLabelsYOffset;
   QCheckBox *boxLabelsWhiteOut;
-  QPushButton *btnLabelsFont,*btnSetEquidistantLevels;
+  QPushButton *btnLabelsFont, *btnSetEquidistantLevels;
   QComboBox *boxLabelsAlign, *boxLabelsColumn;
-  ColorBox* boxLabelsColor;
+  ColorBox *boxLabelsColor;
   QWidget *labelsPage;
 
   QGroupBox *pieAutoLabelsBox, *boxPieWedge;
-  DoubleSpinBox *boxPieStartAzimuth, *boxPieEdgeDist, *boxPieViewAngle, *boxPieThickness,*firstContourLineBox,*contourLinesDistanceBox;
-  QCheckBox *boxPieConterClockwise, *boxPieValues, *boxPiePercentages, *boxPieCategories;
+  DoubleSpinBox *boxPieStartAzimuth, *boxPieEdgeDist, *boxPieViewAngle,
+      *boxPieThickness, *firstContourLineBox, *contourLinesDistanceBox;
+  QCheckBox *boxPieConterClockwise, *boxPieValues, *boxPiePercentages,
+      *boxPieCategories;
   QWidget *pieLabelsPage;
   QSpinBox *boxPieOffset;
   QWidget *pieGeometryPage;
   ContourLinesEditor *contourLinesEditor;
   QRadioButton *customPenBtn;
-  //static Mantid::Kernel::Logger &g_log;
+  // static Mantid::Kernel::Logger &g_log;
 };
 
 /*****************************************************************************
@@ -275,11 +287,10 @@ private:
  *
  *****************************************************************************/
 //! LayerItem tree widget item class
-class LayerItem : public QTreeWidgetItem
-{
+class LayerItem : public QTreeWidgetItem {
 public:
-  enum {LayerTreeItem = 1001};
-  LayerItem(Graph *g, QTreeWidgetItem *parent, const QString& s);
+  enum { LayerTreeItem = 1001 };
+  LayerItem(Graph *g, QTreeWidgetItem *parent, const QString &s);
 
   Graph *graph() { return d_graph; };
   void setActive(bool select);
@@ -295,16 +306,15 @@ protected:
  *
  *****************************************************************************/
 //! CurveTreeItem tree widget item class
-class CurveTreeItem : public QTreeWidgetItem
-{
+class CurveTreeItem : public QTreeWidgetItem {
 public:
-  enum {PlotCurveTreeItem = 1002};
-  CurveTreeItem(QwtPlotItem *curve, LayerItem *parent, const QString& s);
+  enum { PlotCurveTreeItem = 1002 };
+  CurveTreeItem(QwtPlotItem *curve, LayerItem *parent, const QString &s);
 
-  Graph* graph();
+  Graph *graph();
   void setActive(bool on);
 
-  QwtPlotItem *plotItem() const{ return d_curve; };
+  QwtPlotItem *plotItem() const { return d_curve; };
   int plotItemType();
   int plotItemIndex();
 

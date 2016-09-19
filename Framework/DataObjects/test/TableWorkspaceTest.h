@@ -305,7 +305,7 @@ public:
     tw.getColumn(1)->cell<std::string>(0) = "b";
     tw.getColumn(2)->cell<std::string>(0) = "c";
 
-    boost::scoped_ptr<TableWorkspace> cloned(tw.clone().release());
+    boost::scoped_ptr<ITableWorkspace> cloned(tw.clone().release());
 
     // Check clone is same as original.
     TS_ASSERT_EQUALS(tw.columnCount(), cloned->columnCount());
@@ -313,6 +313,27 @@ public:
     TS_ASSERT_EQUALS("a", cloned->getColumn(0)->cell<std::string>(0));
     TS_ASSERT_EQUALS("b", cloned->getColumn(1)->cell<std::string>(0));
     TS_ASSERT_EQUALS("c", cloned->getColumn(2)->cell<std::string>(0));
+  }
+
+  void testCloneColumns() {
+    TableWorkspace tw(1);
+    tw.addColumn("str", "X");
+    tw.addColumn("str", "Y");
+    tw.addColumn("str", "Z");
+
+    tw.getColumn(0)->cell<std::string>(0) = "a";
+    tw.getColumn(1)->cell<std::string>(0) = "b";
+    tw.getColumn(2)->cell<std::string>(0) = "c";
+
+    std::vector<std::string> colNames{"X", "Z"};
+
+    boost::scoped_ptr<ITableWorkspace> cloned(tw.clone(colNames).release());
+
+    // Check clone is same as original.
+    TS_ASSERT_EQUALS(colNames.size(), cloned->columnCount());
+    TS_ASSERT_EQUALS(tw.rowCount(), cloned->rowCount());
+    TS_ASSERT_EQUALS("a", cloned->getColumn(0)->cell<std::string>(0));
+    TS_ASSERT_EQUALS("c", cloned->getColumn(1)->cell<std::string>(0));
   }
 
   void test_toDouble() {

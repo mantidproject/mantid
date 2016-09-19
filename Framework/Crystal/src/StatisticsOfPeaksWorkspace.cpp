@@ -29,13 +29,6 @@ StatisticsOfPeaksWorkspace::StatisticsOfPeaksWorkspace() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-StatisticsOfPeaksWorkspace::~StatisticsOfPeaksWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void StatisticsOfPeaksWorkspace::init() {
@@ -70,8 +63,8 @@ void StatisticsOfPeaksWorkspace::init() {
                                      "Overall"};
   declareProperty("SortBy", sortTypes[0],
                   boost::make_shared<StringListValidator>(sortTypes),
-                  "Sort the peaks by bank, run number(default) or only overall "
-                  "statistics.");
+                  "Sort the peaks by resolution shell in d-Spacing(default), "
+                  "bank, run number, or only overall statistics.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -88,7 +81,7 @@ void StatisticsOfPeaksWorkspace::exec() {
   // We must sort the peaks
   std::vector<std::pair<std::string, bool>> criteria;
   if (sortType.compare(0, 2, "Re") == 0)
-    criteria.push_back(std::pair<std::string, bool>("wavelength", false));
+    criteria.push_back(std::pair<std::string, bool>("DSpacing", false));
   else if (sortType.compare(0, 2, "Ru") == 0)
     criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
   criteria.push_back(std::pair<std::string, bool>("BankName", true));
@@ -105,23 +98,23 @@ void StatisticsOfPeaksWorkspace::exec() {
   // run number
   std::string oldSequence;
   if (sortType.compare(0, 2, "Re") == 0) {
-    double wavelength = peaks[0].getWavelength();
-    if (wavelength > 3.0)
-      oldSequence = "first";
-    else if (wavelength > 2.5)
-      oldSequence = "second";
-    else if (wavelength > 2.0)
-      oldSequence = "third";
-    else if (wavelength > 1.5)
-      oldSequence = "fourth";
-    else if (wavelength > 1.0)
-      oldSequence = "fifth";
-    else if (wavelength > 0.5)
-      oldSequence = "sixth";
+    double dspacing = peaks[0].getDSpacing();
+    if (dspacing > 3.0)
+      oldSequence = "Inf - 3.0";
+    else if (dspacing > 2.5)
+      oldSequence = "3.0 - 2.5";
+    else if (dspacing > 2.0)
+      oldSequence = "2.5 - 2.0";
+    else if (dspacing > 1.5)
+      oldSequence = "2.0 - 1.5";
+    else if (dspacing > 1.0)
+      oldSequence = "1.5 - 1.0";
+    else if (dspacing > 0.5)
+      oldSequence = "1.0 - 0.5";
     else
-      oldSequence = "seventh";
+      oldSequence = "0.5 - 0.0";
   } else if (sortType.compare(0, 2, "Ru") == 0)
-    oldSequence = boost::lexical_cast<std::string>(peaks[0].getRunNumber());
+    oldSequence = std::to_string(peaks[0].getRunNumber());
   else
     oldSequence = peaks[0].getBankName();
   // Go through each peak at this run / bank
@@ -130,28 +123,29 @@ void StatisticsOfPeaksWorkspace::exec() {
     Peak &p = peaks[wi];
     std::string sequence;
     if (sortType.compare(0, 2, "Re") == 0) {
-      double wavelength = p.getWavelength();
-      if (wavelength > 3.0)
-        sequence = "first";
-      else if (wavelength > 2.5)
-        sequence = "second";
-      else if (wavelength > 2.0)
-        sequence = "third";
-      else if (wavelength > 1.5)
-        sequence = "fourth";
-      else if (wavelength > 1.0)
-        sequence = "fifth";
-      else if (wavelength > 0.5)
-        sequence = "sixth";
+      double dspacing = p.getDSpacing();
+      if (dspacing > 3.0)
+        sequence = "Inf - 3.0";
+      else if (dspacing > 2.5)
+        sequence = "3.0 - 2.5";
+      else if (dspacing > 2.0)
+        sequence = "2.5 - 2.0";
+      else if (dspacing > 1.5)
+        sequence = "2.0 - 1.5";
+      else if (dspacing > 1.0)
+        sequence = "1.5 - 1.0";
+      else if (dspacing > 0.5)
+        sequence = "1.0 - 0.5";
       else
-        sequence = "seventh";
+        sequence = "0.5 - 0.0";
     } else if (sortType.compare(0, 2, "Ru") == 0)
-      sequence = boost::lexical_cast<std::string>(p.getRunNumber());
+      sequence = std::to_string(p.getRunNumber());
     else
       sequence = p.getBankName();
 
     if (sequence.compare(oldSequence) != 0 && tempWS->getNumberPeaks() > 0) {
-      doSortHKL(tempWS, oldSequence);
+      if (tempWS->getNumberPeaks() > 1)
+        doSortHKL(tempWS, oldSequence);
       tempWS = WorkspaceFactory::Instance().createPeaks();
       // Copy over ExperimentInfo from input workspace
       tempWS->copyExperimentInfoFrom(ws.get());

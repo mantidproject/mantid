@@ -478,7 +478,7 @@ private:
           function->function(x, y);
           double tmp = yValues[i] - y[0];
           // std::cerr << "test " << xValue << ' ' << yValues[i] << ' ' << y[0]
-          // << std::endl;
+          // << '\n';
           sum2 += tmp * tmp;
           tmp /= eValues[i];
           sum2w += tmp * tmp;

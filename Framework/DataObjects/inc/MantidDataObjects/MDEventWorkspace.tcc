@@ -88,6 +88,12 @@ TMDE(MDEventWorkspace)::~MDEventWorkspace() { delete data; }
 TMDE(void MDEventWorkspace)::setFileBacked(const std::string & /*fileName*/) {
   throw Kernel::Exception::NotImplementedError(" Not yet implemented");
 }
+/*
+ * Set filebacked on the contained box
+ */
+TMDE(void MDEventWorkspace)::setFileBacked() {
+  this->getBox()->setFileBacked();
+}
 /** If the workspace was filebacked, this would clear file-backed information
  *from the workspace nodes and close the files responsible for file backing
  *
@@ -178,7 +184,7 @@ TMDE(void MDEventWorkspace)::setMinRecursionDepth(size_t minDepth) {
          << "MinRecursionDepth is set to " << minDepth
          << ", which would create " << numBoxes << " boxes using "
          << memoryToUse << " kB of memory."
-         << " You have " << stats.availMem() << " kB available." << std::endl;
+         << " You have " << stats.availMem() << " kB available.\n";
     throw std::runtime_error(mess.str());
   }
 
@@ -369,7 +375,7 @@ TMDE(signal_t MDEventWorkspace)::getSignalWithMaskAtCoord(
  *workspace
  */
 TMDE(std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>>
-         MDEventWorkspace)::getMinimumExtents(size_t depth) {
+         MDEventWorkspace)::getMinimumExtents(size_t depth) const {
   std::vector<Mantid::Geometry::MDDimensionExtents<coord_t>> out(nd);
   std::vector<API::IMDNode *> boxes;
   // Get all the end (leaf) boxes
@@ -534,18 +540,18 @@ TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(
     }
     ws->cell<std::string>(i, col++) = box->getExtentsStr();
   }
-  std::cout << tim << " to create the MDBox data table." << std::endl;
+  std::cout << tim << " to create the MDBox data table.\n";
   return ws;
 }
 
 //-----------------------------------------------------------------------------------------------
 /** @returns the number of bytes of memory used by the workspace. */
 TMDE(size_t MDEventWorkspace)::getMemorySize() const {
-  //    std::cout << "sizeof(MDE) " << sizeof(MDE) << std::endl;
+  //    std::cout << "sizeof(MDE) " << sizeof(MDE) << '\n';
   //    std::cout << "sizeof(MDBox<MDE,nd>) " << sizeof(MDBox<MDE,nd>) <<
-  //    std::endl;
+  //    '\n';
   //    std::cout << "sizeof(MDGridBox<MDE,nd>) " << sizeof(MDGridBox<MDE,nd>)
-  //    << std::endl;
+  //    << '\n';
   size_t total = 0;
   if (this->m_BoxController->isFileBacked()) {
     // File-backed workspace
@@ -709,7 +715,7 @@ TMDE(void MDEventWorkspace)::refreshCache() {
 //
 //        // Create a task and push it into the scheduler
 //        //std::cout << "Making a AddEventsTask " << start_at << " to " <<
-//        stop_at << std::endl;
+//        stop_at << '\n';
 //        typename MDGridBox<MDE,nd>::AddEventsTask * task;
 //        task = new typename MDGridBox<MDE,nd>::AddEventsTask(gridBox, events,
 //        start_at, stop_at, prog) ;
@@ -720,7 +726,7 @@ TMDE(void MDEventWorkspace)::refreshCache() {
 //
 //      // Finish all threads.
 ////      std::cout << "Starting block ending at index " << event_index << " of
-///" << events.size() << std::endl;
+///" << events.size() << '\n';
 //      Timer tim;
 //      tp.joinAll();
 ////      std::cout << "... block took " << tim.elapsed() << " secs.\n";
@@ -817,7 +823,7 @@ TMDE(void MDEventWorkspace)::getBoundariesInDimension(
   for (size_t i = 1; i <= num_boundaries; i++) {
     size_t current_id = std::numeric_limits<size_t>::max();
     // Position along the line
-    coord_t this_x = i * box_size;
+    coord_t this_x = static_cast<coord_t>(i) * box_size;
     auto linePos = static_cast<coord_t>(this_x / fabs(dir_current_dim));
     // Full position
     auto pos = start + (dir * linePos);
@@ -932,6 +938,8 @@ TMDE(void MDEventWorkspace)::setMDMasking(
     // Apply new masks
     this->data->getBoxes(toMaskBoxes, 10000, true, maskingRegion);
     for (const auto box : toMaskBoxes) {
+      box->clear();
+      box->clearFileBacked(false);
       box->mask();
     }
 

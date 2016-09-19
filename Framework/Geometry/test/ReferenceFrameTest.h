@@ -1,10 +1,10 @@
 #ifndef MANTID_GEOMETRY_REFERENCEFRAMETEST_H_
 #define MANTID_GEOMETRY_REFERENCEFRAMETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
@@ -43,6 +43,19 @@ public:
     ReferenceFrame frame2(Z, X, Right, "source");
     TS_ASSERT_EQUALS(Y, frame1.pointingAlongBeam());
     TS_ASSERT_EQUALS(X, frame2.pointingAlongBeam());
+  }
+
+  void testVectorAlongBeam() {
+    V3D testVector = V3D(0, 0, 1);
+    ReferenceFrame frame1(Y, Z, Right, "source");
+    ReferenceFrame frame2(Z, X, Right, "source");
+
+    TSM_ASSERT("Should be positive because test vector is paralell to along "
+               "beam vector",
+               frame1.isVectorPointingAlongBeam(testVector));
+    TSM_ASSERT("Should be negative because test vector is perpendicular to "
+               "along beam vector",
+               !frame2.isVectorPointingAlongBeam(testVector));
   }
 
   void testGetHorizontal() {

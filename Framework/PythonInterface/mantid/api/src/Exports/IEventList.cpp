@@ -3,6 +3,7 @@
 #include <boost/python/enum.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <vector>
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
 using Mantid::API::IEventList;
@@ -14,6 +15,8 @@ using Mantid::API::WEIGHTED_NOTIME;
 namespace Policies = Mantid::PythonInterface::Policies;
 namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IEventList)
 
 /// return_value_policy for copied numpy array
 typedef return_value_policy<Policies::VectorToNumpy> return_clone_numpy;

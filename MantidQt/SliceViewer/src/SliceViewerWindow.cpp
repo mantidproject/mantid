@@ -1,6 +1,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidKernel/DataService.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/VMD.h"
@@ -32,6 +33,15 @@ SliceViewerWindow::SliceViewerWindow(const QString &wsName,
                                      const QString &label, Qt::WFlags f)
     : QMainWindow(NULL, f), WorkspaceObserver(), m_lastLinerWidth(0),
       m_lastPeaksViewerWidth(0) {
+
+#ifdef Q_OS_MAC
+  // Work around to ensure that floating windows remain on top of the main
+  // application window, but below other applications on Mac
+  Qt::WindowFlags flags = windowFlags();
+  Qt::WindowFlags new_flags = flags | Qt::Tool;
+  setWindowFlags(new_flags);
+#endif
+
   // Set the window icon
   QIcon icon;
   icon.addFile(
@@ -58,7 +68,7 @@ SliceViewerWindow::SliceViewerWindow(const QString &wsName,
   QString caption = QString("Slice Viewer (") + wsName + QString(")");
   if (!m_label.isEmpty())
     caption += QString(" ") + m_label;
-  this->setCaption(caption);
+  this->setWindowTitle(caption);
   this->resize(500, 500);
 
   // Create the m_slicer and add it to the MDI window
@@ -455,6 +465,72 @@ void SliceViewerWindow::afterReplaceHandle(
       m_slicer->peakWorkspaceChanged(wsName, new_peaks_ws);
     }
   }
+}
+
+API::IProjectSerialisable *SliceViewerWindow::loadFromProject(
+    const std::string &lines, ApplicationWindow *app, const int fileVersion) {
+  UNUSED_ARG(app);
+  UNUSED_ARG(fileVersion);
+  MantidQt::API::TSVSerialiser tsv(lines);
+  QString wsName, label;
+  QRect geometry;
+
+  tsv.selectLine("geometry");
+  tsv >> geometry;
+  tsv.selectLine("Workspace");
+  tsv >> wsName;
+  tsv.selectLine("Label");
+  tsv >> label;
+
+  auto window = new SliceViewerWindow(wsName, label);
+  window->setGeometry(geometry);
+  window->m_slicer->resetZoom();
+  window->m_slicer->loadFromProject(lines);
+
+  // Load state of line viewer
+  if (tsv.selectSection("lineviewer")) {
+    std::string lineViewerLines;
+    tsv >> lineViewerLines;
+    if (lineViewerLines.empty()) {
+      // edge case where the line viewer is open but no line
+      // was drawn yet!
+      window->m_slicer->toggleLineMode(true);
+      window->m_slicer->clearLine();
+    } else {
+      window->m_liner->loadFromProject(lineViewerLines);
+    }
+  }
+
+  // Load state of peaks viewer
+  if (tsv.selectSection("peaksviewer")) {
+    std::string peaksViewerLines;
+    tsv >> peaksViewerLines;
+    window->showPeaksViewer(true);
+    window->m_peaksViewer->loadFromProject(peaksViewerLines);
+  }
+
+  // reset geometry as line/peaks viewer may change shape
+  window->setGeometry(geometry);
+  window->show();
+  return window;
+}
+
+std::string SliceViewerWindow::saveToProject(ApplicationWindow *app) {
+  UNUSED_ARG(app);
+  MantidQt::API::TSVSerialiser tsv, tab;
+  tab.writeLine("geometry") << geometry();
+  tab.writeLine("Workspace") << m_ws->name();
+  tab.writeLine("Label") << m_label;
+  tab.writeRaw(m_slicer->saveToProject());
+
+  if (m_liner->isVisible())
+    tab.writeSection("lineviewer", m_liner->saveToProject());
+
+  if (m_peaksViewer->isVisible())
+    tab.writeSection("peaksviewer", m_peaksViewer->saveToProject());
+
+  tsv.writeSection("sliceviewer", tab.outputLines());
+  return tsv.outputLines();
 }
 
 } // namespace SliceViewer

@@ -46,8 +46,9 @@ fi
 ###############################################################################
 # Create the build directory if it doesn't exist
 ###############################################################################
-[ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
-cd $WORKSPACE/build
+BUILD_DIR=$WORKSPACE/build
+[ -d $BUILD_DIR ] || mkdir $BUILD_DIR
+cd $BUILD_DIR
 
 ###############################################################################
 # CMake configuration. We only need a minimal configuration as we will actually
@@ -79,11 +80,16 @@ fi
 #####################################################################################
 # Run tests
 #####################################################################################
+# Remove doctrees directory so it forces a full reparse. This will then pick up all
+# reference warnings in a html build
+if [ -d $BUILD_DIR/docs/doctrees ]; then
+  rm -rf $BUILD_DIR/docs/doctrees/*
+fi
 # Create clean user properties with UsageData search path
 userprops=~/.mantid/Mantid.user.properties
 rm -f $userprops
 
-data_binary_root=${WORKSPACE}/build/ExternalData
+data_binary_root=$BUILD_DIR/ExternalData
 testdata_dir=${data_binary_root}/Testing/Data
 instrument_dir=${WORKSPACE}/instrument
 echo "datasearch.directories=${testdata_dir}/DocTest;${testdata_dir}/UnitTest;${instrument_dir}" > $userprops
@@ -91,6 +97,7 @@ echo "UpdateInstrumentDefinitions.OnStartup = 0" >> $userprops
 echo "usagereports.enabled = 0" >> $userprops
 
 set +e #don't immediately exit on failure so that we can remove the package
+${MANTIDPLOT_EXE} -xq docs/runsphinx_html.py
 ${MANTIDPLOT_EXE} -xq docs/runsphinx_doctest.py
 status=$?
 set -e #exit on failures from now on

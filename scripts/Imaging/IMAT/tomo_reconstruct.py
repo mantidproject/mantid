@@ -185,29 +185,36 @@ def grab_preproc_options(args):
     if args.out_img_format:
         pre_config.out_img_format = args.out_img_format
 
-    pre_config.cor = int(args.cor)
+    if args.max_angle:
+        pre_config.max_angle = float(args.max_angle)
 
-    if 'yes' == args.mcp_corrections:
-        pre_config.mcp_corrections = True
+    if args.rotation:
+        pre_config.rotation = int(args.rotation)
 
-    if 'wf' == args.remove_stripes:
-        pre_config.stripe_removal_method = 'wavelet-fourier'
+    if args.air_region:
+        coords = ast.literal_eval(args.air_region)
+        pre_config.normalize_air_region = [int(val) for val in coords]
 
     if args.air_region:
         coords = ast.literal_eval(args.air_region)
         pre_config.normalize_air_region = [int(val) for val in coords]
 
     if args.region_of_interest:
-        coords = ast.literal_eval(args.region_of_interest)
-        pre_config.crop_coords = [int(val) for val in coords]
+        roi_coords = ast.literal_eval(args.region_of_interest)
+        pre_config.crop_coords = [int(val) for val in roi_coords]
+
+    if 'yes' == args.mcp_corrections:
+        pre_config.mcp_corrections = True
 
     if args.median_filter_size:
         if isinstance(args.median_filter_size, str) and not args.median_filter_size.isdigit():
             raise RuntimeError("The median filter size/width must be an integer")
         pre_config.median_filter_size = args.median_filter_size
 
-    if args.max_angle:
-        pre_config.max_angle = float(args.max_angle)
+    if 'wf' == args.remove_stripes:
+        pre_config.stripe_removal_method = 'wavelet-fourier'
+
+    pre_config.cor = int(args.cor)
 
     return pre_config
 

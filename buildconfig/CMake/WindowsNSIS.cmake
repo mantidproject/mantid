@@ -80,6 +80,10 @@ set ( MISC_CORE_DIST_DLLS
     libNeXusCPP-0.dll
     ssleay32.dll
     szip.dll
+    tbb.dll
+    tbbmalloc.dll
+    tbbmalloc_proxy.dll
+    tbb_preview.dll
     zlib.dll
 )
 set ( QT_DIST_DLLS
@@ -136,7 +140,8 @@ install ( FILES ${QT_PLUGIN_DIR}/sqldrivers/qsqlite4.dll DESTINATION plugins/qt/
 ###########################################################################
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
-install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/mantidpython.bat DESTINATION bin )
+install ( FILES ${PROJECT_BINARY_DIR}/mantidpython.bat.install DESTINATION bin 
+    RENAME mantidpython.bat )
 
 ###########################################################################
 # Icons for shortcuts

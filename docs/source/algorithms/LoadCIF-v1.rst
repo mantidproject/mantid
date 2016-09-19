@@ -17,7 +17,7 @@ the CIF-file must contain some mandatory fields, describing the three components
 
 For the unit cell, at least *_cell_length_a* must be present. If *_cell_length_b* or *_cell_length_c* are absent, the
 value is replaced with the one of *_cell_length_a*. Any absent item of *_cell_angle_alpha*, *_cell_angle_beta* or
-*_cell_angle_gamma* is missing, it's replaced with 90.
+*_cell_angle_gamma* is replaced with 90.
 
 **Space group**
 
@@ -32,14 +32,25 @@ which one to use.
 
 **Atoms**
 
-There needs to be a *loop_* with at least the following fields: *_atom_site_type_symbol* or *_atom_site_label*,
-*_atom_site_fract_x*, *_atom_site_fract_y* and *_atom_site_fract_z*. Additionally, *_atom_site_occupancy* and
+There needs to be a *loop_* with at least the following fields: *_atom_site_label*, *_atom_site_fract_x*,
+*_atom_site_fract_y* and *_atom_site_fract_z*. Additionally, *_atom_site_type_symbol*, *_atom_site_occupancy* and
 *_atom_site_U_iso_or_equiv* and *_atom_site_B_iso_or_equiv* (internally converted to U by dividing by :math:`8\pi^2`
 are recognized. The labels are expected to contain the element symbol, any non-letter characters (numbers, special
-characters) are removed. The *_atom_site_label* is only used when *_atom_site_type_symbol* is not present.
+characters) are removed. The *_atom_site_label* is only used for this purpose when *_atom_site_type_symbol*
+is not present.
+
+The algorithm can also compute :math:`U_{equiv}` from anisotropic ADPs [1]_ specified by the fields *_atom_site_aniso_u_11*,
+*_atom_site_aniso_u_12*, *_atom_site_aniso_u_13*, *_atom_site_aniso_u_22*, *_atom_site_aniso_u_23* and
+*_atom_site_aniso_u_33* (the :math:`B`-based variant is recognized too, if both are present, :math:`U` is used).
+For this to work correctly, the field *_atom_site_aniso_label* has to be present and contain
+the same strings as *_atom_site_label*. This calculation is only performed for atoms where the isotropic parameter is
+missing or invalid. If neither isotropic nor anisotropic parameters are present for an atom, 0 is used.
 
 Optionally, a UB-matrix can be loaded from the CIF-file and applied to the workspace via the SetUB-algorithm. For this,
 the *_diffrn_orient_matrix_UB_xy* fields have to be set.
+
+.. [1] The equivalent isotropic displacement factor, R. X. Fischer & E. Tillmanns, Acta Crystallogr. C, vol. 44, p. 775,
+   DOI: `10.1107/S0108270187012745 <http://dx.doi.org/10.1107/S0108270187012745>`_
 
 Required
 --------

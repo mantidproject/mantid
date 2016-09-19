@@ -123,7 +123,7 @@ void LoadInstrumentFromNexus::exec() {
   dynamic_cast<Geometry::Detector*>(instrument->getDetector(detectorToMark));
     det->markAsMonitor();
     g_log.information() << "Detector with ID " << detectorToMark << " marked as
-  a monitor." << std::endl;
+  a monitor.\n";
   }
 
   // Information to the user about what info is extracted from nexus file
@@ -141,8 +141,6 @@ void LoadInstrumentFromNexus::exec() {
     << "of the sample. This value can be changed via the 'instrument.l1'
   configuration property.\n";
   */
-
-  return;
 }
 
 } // namespace DataHandling

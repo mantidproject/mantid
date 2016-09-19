@@ -3,8 +3,8 @@ from mantid.kernel import *
 from mantid.api import *
 from vesuvio.base import VesuvioBase, TableWorkspaceDictionaryFacade
 from vesuvio.fitting import parse_fit_options
-
 import mantid.simpleapi as ms
+import math
 
 #----------------------------------------------------------------------------------------
 
@@ -412,7 +412,20 @@ class VesuvioCorrections(VesuvioBase):
             # The program THICK also uses sigma/int_sum to be consistent with the prgram
             # DINSMS_BATCH
 
-            width = params_dict['f%d.Width' % i]
+            width_prop = 'f%d.Width' % i
+            sigma_x_prop = 'f%d.SigmaX' % i
+            sigma_y_prop = 'f%d.SigmaY' % i
+            sigma_z_prop = 'f%d.SigmaZ' % i
+
+            if width_prop in params_dict:
+                width = params_dict['f%d.Width' % i]
+            elif sigma_x_prop in params_dict:
+                sigma_x = float(params_dict[sigma_x_prop])
+                sigma_y = float(params_dict[sigma_y_prop])
+                sigma_z = float(params_dict[sigma_z_prop])
+                width = math.sqrt((sigma_x**2 + sigma_y**2 + sigma_z**2) / 3.0)
+            else:
+                continue
 
             atom_props.append(mass)
             atom_props.append(intentisy)

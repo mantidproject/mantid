@@ -4,44 +4,48 @@
 #include "ui_EditLocalParameterDialog.h"
 #include <QDialog>
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
+namespace MantidQt {
+namespace CustomInterfaces {
 
 class MultiDatasetFit;
 
-namespace MDF
-{
+namespace MDF {
 
 /**
   * A dialog for displaying and editing values of local parameters.
   * Parameters can be set individually or all to the same value.
   * They also can be fixed and unfixed.
   */
-class EditLocalParameterDialog: public QDialog
-{
+class EditLocalParameterDialog : public QDialog {
   Q_OBJECT
 public:
   EditLocalParameterDialog(MultiDatasetFit *parent, const QString &parName);
   QList<double> getValues() const;
   QList<bool> getFixes() const;
   QStringList getTies() const;
-  double getValue(int i) const {return m_values[i];}
-  bool isFixed(int i) const {return m_fixes[i];}
-  QString getTie(int i) const {return m_ties[i];}
+  double getValue(int i) const { return m_values[i]; }
+  bool isFixed(int i) const { return m_fixes[i]; }
+  QString getTie(int i) const { return m_ties[i]; }
   bool areOthersFixed(int i) const;
   bool areAllOthersFixed(int i) const;
   bool areOthersTied(int i) const;
-  private slots:
-  void valueChanged(int,int);
+  bool isLogCheckboxTicked() const;
+
+signals:
+  void logOptionsChecked(bool);
+
+private slots:
+  void valueChanged(int, int);
   void setAllValues(double);
-  void fixParameter(int,bool);
+  void fixParameter(int, bool);
   void setAllFixed(bool);
-  void setTie(int,QString);
+  void setTie(int, QString);
   void setTieAll(QString);
   void copy();
   void paste();
+  void setValueToLog(int);
+  void setAllValuesToLog();
+
 private:
   bool eventFilter(QObject *obj, QEvent *ev) override;
   void showContextMenu();
@@ -59,10 +63,8 @@ private:
   QStringList m_ties;
 };
 
-
 } // MDF
 } // CustomInterfaces
 } // MantidQt
-
 
 #endif /*MDFEDITLOCALPARAMETERDIALOG_H_*/

@@ -6,6 +6,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidMDAlgorithms/BinMD.h"
 #include "MantidMDAlgorithms/SaveMD2.h"
+#include "MantidMDAlgorithms/LoadMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -15,14 +16,6 @@
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
-
-class SaveMD2Tester : public SaveMD2 {
-public:
-  void saveExperimentInfos(::NeXus::File *const file,
-                           IMDEventWorkspace_const_sptr ws) {
-    this->saveExperimentInfos(file, ws);
-  }
-};
 
 /** Note: See the LoadMDTest class
  * for a more thorough test that does
@@ -217,6 +210,64 @@ public:
     TS_ASSERT(alg.isExecuted());
     std::string this_filename = alg.getProperty("Filename");
     ws->clearFileBacked(false);
+    if (Poco::File(this_filename).exists()) {
+      Poco::File(this_filename).remove();
+    }
+  }
+
+  void test_saveMaskedEventWorkspace() {
+    // Create a masked workspace
+    const std::string maskedWSName("SaveMDTest_maskedWS");
+    MDEventsTestHelper::makeAnyMDEW<MDLeanEvent<2>, 2>(10, 0., 20., 1,
+                                                       maskedWSName);
+    // Mask half of the workspace (and thus half of the events)
+    FrameworkManager::Instance().exec("MaskMD", 6, "Workspace",
+                                      "SaveMDTest_maskedWS", "Dimensions",
+                                      "Axis0,Axis1", "Extents", "0,10,0,20");
+
+    // Save the masked workspace
+    const std::string saveFilename = "SaveMDTest_masked.nxs";
+    SaveMD2 saveAlg;
+    TS_ASSERT_THROWS_NOTHING(saveAlg.initialize())
+    TS_ASSERT(saveAlg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        saveAlg.setPropertyValue("InputWorkspace", maskedWSName));
+    TS_ASSERT_THROWS_NOTHING(
+        saveAlg.setPropertyValue("Filename", saveFilename));
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setProperty("MakeFileBacked", "0"));
+    saveAlg.execute();
+    TS_ASSERT(saveAlg.isExecuted());
+
+    // Load the masked workspace
+    const std::string loadedWSName("SaveMDTest_loadedWS");
+    LoadMD loadAlg;
+    TS_ASSERT_THROWS_NOTHING(loadAlg.initialize())
+    TS_ASSERT(loadAlg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(
+        loadAlg.setPropertyValue("Filename", saveFilename));
+    TS_ASSERT_THROWS_NOTHING(loadAlg.setProperty("FileBackEnd", false));
+    TS_ASSERT_THROWS_NOTHING(
+        loadAlg.setPropertyValue("OutputWorkspace", loadedWSName));
+    TS_ASSERT_THROWS_NOTHING(loadAlg.setProperty("MetadataOnly", false));
+    TS_ASSERT_THROWS_NOTHING(loadAlg.setProperty("BoxStructureOnly", false));
+    TS_ASSERT_THROWS_NOTHING(loadAlg.execute(););
+    TS_ASSERT(loadAlg.isExecuted());
+
+    // Retrieve the workspace from data service.
+    IMDEventWorkspace_sptr iws;
+    TS_ASSERT_THROWS_NOTHING(
+        iws = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
+            loadedWSName));
+    TS_ASSERT(iws);
+    if (!iws)
+      return;
+
+    // Test that number of events in the workspace is original events minus the
+    // masked ones
+    TS_ASSERT_EQUALS(iws->getNPoints(), 100 - 50);
+
+    // Clean up
+    const std::string this_filename = saveAlg.getProperty("Filename");
     if (Poco::File(this_filename).exists()) {
       Poco::File(this_filename).remove();
     }

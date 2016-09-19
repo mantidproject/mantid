@@ -317,7 +317,7 @@ public:
     // TS_ASSERT_EQUALS(3,descr.data_start_position._Fpos);
     TS_ASSERT_EQUALS(2, descr.nData_records);
     TS_ASSERT_EQUALS(6, descr.nData_blocks);
-#ifdef WIN32
+#ifdef _WIN32
     TS_ASSERT_EQUALS(char(0x0A), descr.line_end);
 #else
 //  TS_ASSERT_EQUALS(char(0x0A),descr.line_end);
@@ -350,7 +350,7 @@ public:
     // TS_ASSERT_EQUALS(3,descr.data_start_position._Fpos);
     TS_ASSERT_EQUALS(3, descr.nData_records);
     TS_ASSERT_EQUALS(6, descr.nData_blocks);
-#ifdef WIN32
+#ifdef _WIN32
     TS_ASSERT_EQUALS(char(0x0A), descr.line_end);
 #else
 //  TS_ASSERT_EQUALS(char(0x0A),descr.line_end);
@@ -382,7 +382,7 @@ public:
     // TS_ASSERT_EQUALS(3,descr.data_start_position._Fpos);
     TS_ASSERT_EQUALS(3, descr.nData_records);
     TS_ASSERT_EQUALS(7, descr.nData_blocks);
-#ifdef WIN32
+#ifdef _WIN32
     TS_ASSERT_EQUALS(char(0x0A), descr.line_end);
 #else
 //   TS_ASSERT_EQUALS(char(0x0A),descr.line_end);
@@ -422,9 +422,9 @@ private:
 
     for (int j = 0; j < NHIST; ++j) {
       // Just set the spectrum number to match the index
-      ISpectrum *spec = inputWS->getSpectrum(j);
-      spec->setSpectrumNo(j + 1);
-      spec->setDetectorID(j + 1);
+      auto &spec = inputWS->getSpectrum(j);
+      spec.setSpectrumNo(j + 1);
+      spec.setDetectorID(j + 1);
     }
 
     AnalysisDataService::Instance().add(WS_Name, inputWS);
@@ -465,9 +465,9 @@ private:
     // get pointers to the detectors, contributed into group;
     partDetectors = pDet->getDetectors();
 
-    inputWS->getSpectrum(0)->setSpectrumNo(1);
-    inputWS->getSpectrum(0)->clearDetectorIDs();
-    inputWS->getSpectrum(0)->addDetectorIDs(pDet->getDetectorIDs());
+    inputWS->getSpectrum(0).setSpectrumNo(1);
+    inputWS->getSpectrum(0).clearDetectorIDs();
+    inputWS->getSpectrum(0).addDetectorIDs(pDet->getDetectorIDs());
 
     for (size_t i = 0; i < NDET; i++) {
       spInst->markAsDetector(partDetectors[i].get());
@@ -486,7 +486,7 @@ private:
 
     std::ofstream testFile(fileName);
     for (size_t i = 0; i < cont.size(); i++) {
-      testFile << cont[i] << std::endl;
+      testFile << cont[i] << '\n';
     }
     testFile.close();
   }
@@ -499,7 +499,7 @@ private:
 
     std::ofstream testFile(fileName);
     for (size_t i = 0; i < cont.size(); i++) {
-      testFile << cont[i] << std::endl;
+      testFile << cont[i] << '\n';
     }
     testFile.close();
   }
@@ -512,7 +512,7 @@ private:
 
     std::ofstream testFile(fileName);
     for (size_t i = 0; i < cont.size(); i++) {
-      testFile << cont[i] << std::endl;
+      testFile << cont[i] << '\n';
     }
     testFile.close();
   }
@@ -523,7 +523,7 @@ private:
 
     std::ofstream testFile(fileName);
     for (size_t i = 0; i < cont.size(); i++) {
-      testFile << cont[i] << std::endl;
+      testFile << cont[i] << '\n';
     }
     testFile.close();
   }

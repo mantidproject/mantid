@@ -205,12 +205,12 @@ public:
         TS_ASSERT_DELTA(A.distance(P), A.distance(P), 1e-6);
         std::cout << "Sphere == ";
         A.Surface::write(std::cout);
-        std::cout << "TestPoint == " << P << std::endl;
+        std::cout << "TestPoint == " << P << '\n';
         std::cout << "Distance == " << A.distance(P) << " === " << A.distance(P)
-                  << std::endl;
-        std::cout << "--------------" << std::endl;
+                  << '\n';
+        std::cout << "--------------\n";
         std::cout << "Distance == " << A.distance(Q) << " === " << A.distance(Q)
-                  << std::endl;
+                  << '\n';
       }
     }
   }

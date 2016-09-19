@@ -37,9 +37,6 @@ namespace Algorithms {
 */
 class DLLExport ChopData : public API::Algorithm {
 public:
-  ChopData() : API::Algorithm() {} ///< Empty constructor
-  ~ChopData() override {}          ///< Empty destructor
-
   const std::string name() const override {
     return "ChopData";
   } ///< @return the algorithms name

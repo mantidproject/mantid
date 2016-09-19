@@ -4,28 +4,25 @@
 #include <QDialog>
 #include "ui_MDFAddWorkspaceDialog.h"
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-namespace MDF
-{
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace MDF {
 
 /**
   * A dialog for selecting a workspace from the ADS.
   */
-class AddWorkspaceDialog: public QDialog
-{
+class AddWorkspaceDialog : public QDialog {
   Q_OBJECT
 public:
   AddWorkspaceDialog(QWidget *parent);
-  QString workspaceName() const {return m_workspaceName;} 
-  std::vector<int> workspaceIndices() const {return m_wsIndices;}
+  QString workspaceName() const { return m_workspaceName; }
+  std::vector<int> workspaceIndices() const { return m_wsIndices; }
 private slots:
   void accept() override;
   void reject() override;
-  void workspaceNameChanged(const QString&);
+  void workspaceNameChanged(const QString &);
   void selectAllSpectra(int state);
+
 private:
   /// Name of the selected workspace
   QString m_workspaceName;
@@ -39,6 +36,5 @@ private:
 } // MDF
 } // CustomInterfaces
 } // MantidQt
-
 
 #endif /*MDFADDWORKSPACEDIALOG_H_*/

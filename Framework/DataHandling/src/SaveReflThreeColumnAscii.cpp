@@ -31,7 +31,7 @@ void SaveReflThreeColumnAscii::extraHeaders(std::ofstream &file) {
 
   if (title != "") // if is toggled
   {
-    file << "#" << title << std::endl;
+    file << "#" << title << '\n';
   }
 
   const std::vector<std::string> logList = getProperty("LogList");
@@ -39,7 +39,7 @@ void SaveReflThreeColumnAscii::extraHeaders(std::ofstream &file) {
   for (const auto &log : logList) {
     file << boost::lexical_cast<std::string>(log) << ": "
          << boost::lexical_cast<std::string>(samp.getLogData(log)->value())
-         << std::endl;
+         << '\n';
   }
 }
 

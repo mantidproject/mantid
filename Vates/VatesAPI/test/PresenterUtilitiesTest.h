@@ -4,20 +4,18 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/FactoryChains.h"
 
-class PresenterUtilitiesTest : public CxxTest::TestSuite
-{
+class PresenterUtilitiesTest : public CxxTest::TestSuite {
 public:
-
   void test_that_time_stamped_name_is_produced() {
     // Arrange
     std::string name = "testName";
     // Act
     auto timeStampedName = Mantid::VATES::createTimeStampedName(name);
     // Assert
-    TSM_ASSERT("Time stamped name should be larger than the original name", name.size() < timeStampedName.size());
-    TSM_ASSERT("Time stamped name should start with original name", timeStampedName.find(name) == 0);
+    TSM_ASSERT("Time stamped name should be larger than the original name",
+               name.size() < timeStampedName.size());
+    TSM_ASSERT("Time stamped name should start with original name",
+               timeStampedName.find(name) == 0);
   }
-
-
 };
 #endif

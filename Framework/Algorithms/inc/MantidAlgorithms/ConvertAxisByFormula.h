@@ -2,12 +2,23 @@
 #define MANTID_ALGORITHMS_CONVERTAXISBYFORMULA_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/Workspace_fwd.h"
 
+// forward declaration
+namespace mu {
+class Parser;
+}
+
 namespace Mantid {
+
+namespace API {
+class SpectrumInfo;
+}
+
 namespace Algorithms {
-/** ConvertAxisByFormula : TODO: DESCRIPTION
+/** ConvertAxisByFormula : Performs a unit conversion based on a supplied
+  formula
 
   Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -30,11 +41,8 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConvertAxisByFormula : public API::Algorithm {
+class DLLExport ConvertAxisByFormula : public ConvertUnits {
 public:
-  ConvertAxisByFormula();
-  ~ConvertAxisByFormula() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -45,9 +53,33 @@ public:
   int version() const override;
   const std::string category() const override;
 
+protected:
+  const std::string workspaceMethodName() const override { return ""; }
+  const std::string workspaceMethodInputProperty() const override { return ""; }
+
 private:
   void init() override;
   void exec() override;
+
+  /// A simple internal structure to hold information on variables
+  class Variable {
+  public:
+    Variable(const std::string &name)
+        : name(name), value(0.0), isGeometric(false) {}
+    Variable(const std::string &name, bool isGeometric)
+        : name(name), value(0.0), isGeometric(isGeometric) {}
+    std::string name;
+    double value;
+    bool isGeometric;
+  };
+  typedef boost::shared_ptr<Variable> Variable_ptr;
+
+  void setAxisValue(const double &value, std::vector<Variable_ptr> &variables);
+  void calculateValues(mu::Parser &p, std::vector<double> &vec,
+                       std::vector<Variable_ptr> variables);
+  void setGeometryValues(const API::SpectrumInfo &specInfo, const size_t index,
+                         std::vector<Variable_ptr> &variables);
+  double evaluateResult(mu::Parser &p);
 };
 
 } // namespace Algorithms

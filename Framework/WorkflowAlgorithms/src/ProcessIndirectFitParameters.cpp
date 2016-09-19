@@ -7,6 +7,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -16,16 +17,6 @@ using namespace Kernel;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ProcessIndirectFitParameters)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ProcessIndirectFitParameters::ProcessIndirectFitParameters() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ProcessIndirectFitParameters::~ProcessIndirectFitParameters() {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -86,14 +77,15 @@ void ProcessIndirectFitParameters::exec() {
   ITableWorkspace_sptr inputWs = getProperty("InputWorkspace");
   std::string xColumn = getProperty("ColumnX");
   std::string parameterNamesProp = getProperty("ParameterNames");
-  auto parameterNames = listToVector(parameterNamesProp);
+  auto parameterNames =
+      Kernel::VectorHelper::splitStringIntoVector<std::string>(
+          parameterNamesProp);
   std::string xUnit = getProperty("XAxisUnit");
   MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
-  const std::string outputWsName = getPropertyValue("OutputWorkspace");
 
   // Search for any parameters in the table with the given parameter names,
   // ignoring their function index and output them to a workspace
-  auto workspaceNames = std::vector<std::vector<std::string>>();
+  auto workspaces = std::vector<std::vector<MatrixWorkspace_sptr>>();
   const size_t totalNames = parameterNames.size();
   Progress tblSearchProg = Progress(this, 0.0, 0.5, totalNames * 2);
   for (size_t i = 0; i < totalNames; i++) {
@@ -103,14 +95,13 @@ void ProcessIndirectFitParameters::exec() {
     auto errColumns =
         searchForFitParams((parameterNames.at(i) + "_Err"), allColumnNames);
 
-    auto paramWorkspaces = std::vector<std::string>();
+    auto paramWorkspaces = std::vector<MatrixWorkspace_sptr>();
     size_t min = columns.size();
     if (errColumns.size() < min) {
       min = errColumns.size();
     }
     auto convertToMatrix =
         createChildAlgorithm("ConvertTableToMatrixWorkspace", -1, -1, true);
-    convertToMatrix->setAlwaysStoreInADS(true);
     tblSearchProg.report("Converting Column to Matrix");
     for (size_t j = 0; j < min; j++) {
       convertToMatrix->setProperty("InputWorkspace", inputWs);
@@ -119,9 +110,10 @@ void ProcessIndirectFitParameters::exec() {
       convertToMatrix->setProperty("ColumnE", errColumns.at(j));
       convertToMatrix->setProperty("OutputWorkspace", columns.at(j));
       convertToMatrix->executeAsChildAlg();
-      paramWorkspaces.push_back(columns.at(j));
+      paramWorkspaces.push_back(
+          convertToMatrix->getProperty("OutputWorkspace"));
     }
-    workspaceNames.push_back(paramWorkspaces);
+    workspaces.push_back(std::move(paramWorkspaces));
   }
 
   Progress workflowProg = Progress(this, 0.5, 1.0, 10);
@@ -129,56 +121,52 @@ void ProcessIndirectFitParameters::exec() {
   // this handles the case where a parameter occurs only once in the whole
   // workspace
   workflowProg.report("Reordering workspace vector");
-  workspaceNames = reorder2DVector(workspaceNames);
+  workspaces = reorder2DVector(workspaces);
+
+  // Get output workspace columns
+  auto outputSpectraNames = std::vector<std::string>();
+  for (const auto &paramWorkspaces : workspaces) {
+    for (const auto &workspace : paramWorkspaces) {
+      outputSpectraNames.push_back(workspace->YUnitLabel());
+    }
+  }
 
   // Join all the parameters for each peak into a single workspace per peak
-  auto tempWorkspaces = std::vector<std::string>();
+  auto tempWorkspaces = std::vector<MatrixWorkspace_sptr>();
   auto conjoin = createChildAlgorithm("ConjoinWorkspaces", -1, -1, true);
-  conjoin->setAlwaysStoreInADS(true);
   conjoin->setProperty("CheckOverlapping", false);
-  const size_t wsMax = workspaceNames.size();
+  const size_t wsMax = workspaces.size();
   for (size_t j = 0; j < wsMax; j++) {
-    std::string tempPeakWs = workspaceNames.at(j).at(0);
-    const size_t paramMax = workspaceNames.at(j).size();
+    auto tempPeakWs = workspaces.at(j).at(0);
+    const size_t paramMax = workspaces.at(j).size();
     workflowProg.report("Conjoining matrix workspaces");
     for (size_t k = 1; k < paramMax; k++) {
-      auto paramWs = workspaceNames.at(j).at(k);
+      auto paramWs = workspaces.at(j).at(k);
       conjoin->setProperty("InputWorkspace1", tempPeakWs);
       conjoin->setProperty("InputWorkspace2", paramWs);
       conjoin->executeAsChildAlg();
-      tempPeakWs = std::string(conjoin->getProperty("InputWorkspace1"));
+      tempPeakWs = conjoin->getProperty("InputWorkspace1");
     }
     tempWorkspaces.push_back(tempPeakWs);
   }
 
   // Join all peaks into a single workspace
-  std::string tempWorkspace = tempWorkspaces.at(0);
+  outputWs = tempWorkspaces.at(0);
   for (auto it = tempWorkspaces.begin() + 1; it != tempWorkspaces.end(); ++it) {
     workflowProg.report("Joining peak workspaces");
-    conjoin->setProperty("InputWorkspace1", tempWorkspace);
+    conjoin->setProperty("InputWorkspace1", outputWs);
     conjoin->setProperty("InputWorkspace2", *it);
     conjoin->executeAsChildAlg();
-    tempWorkspace = std::string(conjoin->getProperty("InputWorkspace1"));
+    outputWs = conjoin->getProperty("InputWorkspace1");
   }
-
-  // Rename the workspace to the specified outputName
-  workflowProg.report("Renaming Workspace");
-  auto renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
-  renamer->setProperty("InputWorkspace", tempWorkspace);
-  renamer->setProperty("OutputWorkspace", outputWsName);
-  renamer->executeAsChildAlg();
-  Workspace_sptr renameWs = renamer->getProperty("OutputWorkspace");
-  outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(renameWs);
 
   // Replace axis on workspaces with text axis
   workflowProg.report("Converting text axis");
-  auto axis = new TextAxis(outputWs->getNumberHistograms());
-  size_t offset = 0;
-  for (auto peakWs : workspaceNames) {
-    for (size_t k = 0; k < peakWs.size(); k++) {
-      axis->setLabel((k + offset), peakWs.at(k));
-    }
-    offset += peakWs.size();
+  const auto numberOfHist = outputWs->getNumberHistograms();
+  auto axis = new TextAxis(numberOfHist);
+
+  for (size_t k = 0; k < numberOfHist; k++) {
+    axis->setLabel(k, outputSpectraNames[k]);
   }
   outputWs->replaceAxis(1, axis);
 
@@ -189,27 +177,6 @@ void ProcessIndirectFitParameters::exec() {
   }
 
   setProperty("OutputWorkspace", outputWs);
-}
-
-/**
- * Transforms a comma separated list into a vector of strings
- * @param commaList - The comma separated list to be separated
- * @return - The vector of string composed of the elements of the comma list
- */
-std::vector<std::string>
-ProcessIndirectFitParameters::listToVector(std::string &commaList) {
-  auto listVector = std::vector<std::string>();
-  auto pos = commaList.find(',');
-  while (pos != std::string::npos) {
-    std::string nextItem = commaList.substr(0, pos);
-    listVector.push_back(nextItem);
-    commaList = commaList.substr(pos + 1, commaList.size());
-    pos = commaList.find(',');
-  }
-  if (commaList.compare("") != 0) {
-    listVector.push_back(commaList);
-  }
-  return listVector;
 }
 
 /**
@@ -245,9 +212,9 @@ std::vector<std::string> ProcessIndirectFitParameters::searchForFitParams(
  * @param original - The original vector to be transformed
  * @return - The vector after it has been transformed
  */
-std::vector<std::vector<std::string>>
+std::vector<std::vector<MatrixWorkspace_sptr>>
 ProcessIndirectFitParameters::reorder2DVector(
-    const std::vector<std::vector<std::string>> &original) {
+    std::vector<std::vector<MatrixWorkspace_sptr>> &original) {
   size_t maximumLength = original.at(0).size();
   for (size_t i = 1; i < original.size(); i++) {
     if (original.at(i).size() > maximumLength) {
@@ -255,9 +222,9 @@ ProcessIndirectFitParameters::reorder2DVector(
     }
   }
 
-  auto reorderedVector = std::vector<std::vector<std::string>>();
+  auto reorderedVector = std::vector<std::vector<MatrixWorkspace_sptr>>();
   for (size_t i = 0; i < maximumLength; i++) {
-    std::vector<std::string> temp;
+    std::vector<MatrixWorkspace_sptr> temp;
     for (const auto &j : original) {
       if (j.size() > i) {
         temp.push_back(j.at(i));

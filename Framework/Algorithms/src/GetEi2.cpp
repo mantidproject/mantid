@@ -6,7 +6,6 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -175,7 +174,7 @@ double GetEi2::calculateEi(const double initial_guess) {
       double tzero = p.Eval();
       setProperty("Tzero", tzero);
 
-      g_log.debug() << "T0 = " << tzero << std::endl;
+      g_log.debug() << "T0 = " << tzero << '\n';
       return initial_guess;
     } catch (mu::Parser::exception_type &e) {
       throw Kernel::Exception::InstrumentDefinitionError(
@@ -237,7 +236,7 @@ double GetEi2::calculateEi(const double initial_guess) {
       if (!m_fixedei) {
         throw std::invalid_argument(
             "No peak found for the monitor with spectra num: " +
-            boost::lexical_cast<std::string>(spec_nums[i]) + " (at " +
+            std::to_string(spec_nums[i]) + " (at " +
             boost::lexical_cast<std::string>(det_distances[i]) +
             "  metres from source).\n");
       } else {
@@ -265,8 +264,8 @@ double GetEi2::calculateEi(const double initial_guess) {
     double mean_speed =
         (det_distances[1] - det_distances[0]) / (peak_times[1] - peak_times[0]);
     double tzero = peak_times[1] - ((1.0 / mean_speed) * det_distances[1]);
-    g_log.debug() << "T0 = " << tzero << std::endl;
-    g_log.debug() << "Mean Speed = " << mean_speed << std::endl;
+    g_log.debug() << "T0 = " << tzero << '\n';
+    g_log.debug() << "Mean Speed = " << mean_speed << '\n';
     setProperty("Tzero", tzero);
 
     const double energy = mean_speed * mean_speed * m_t_to_mev;
@@ -388,11 +387,11 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
     API::MatrixWorkspace_sptr data_ws, const double prominence,
     std::vector<double> &peak_x, std::vector<double> &peak_y,
     std::vector<double> &peak_e) const {
-  // First create a temporary vector of bin_centre values to work with
-  std::vector<double> Xs(data_ws->readX(0).size());
-  VectorHelper::convertToBinCentre(data_ws->readX(0), Xs);
-  const MantidVec &Ys = data_ws->readY(0);
-  const MantidVec &Es = data_ws->readE(0);
+  // Use WS->points() to create a temporary vector of bin_centre values to work
+  // with
+  auto Xs = data_ws->points(0);
+  const auto &Ys = data_ws->y(0);
+  const auto &Es = data_ws->e(0);
 
   auto peakIt = std::max_element(Ys.cbegin(), Ys.cend());
   double bkg_val = *std::min_element(Ys.begin(), Ys.end());
@@ -400,7 +399,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
     throw std::invalid_argument("No peak in the range specified as minimal and "
                                 "maximal values of the function are equal ");
   }
-  MantidVec::difference_type iPeak = peakIt - Ys.begin();
+  auto iPeak = peakIt - Ys.begin();
   double peakY = Ys[iPeak] - bkg_val;
   double peakE = Es[iPeak];
 
@@ -500,14 +499,14 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
 
   if (im > 0) {
     double bkgd_m, bkgd_err_m;
-    integrate(bkgd_m, bkgd_err_m, Xs, Ys, Es, bkgd_min, pk_min);
+    integrate(bkgd_m, bkgd_err_m, Xs.rawData(), Ys, Es, bkgd_min, pk_min);
     bkgd = bkgd + bkgd_m;
     bkgd_range = bkgd_range + (pk_min - bkgd_min);
   }
 
   if (ip < nxvals - 1) {
     double bkgd_p, bkgd_err_p;
-    integrate(bkgd_p, bkgd_err_p, Xs, Ys, Es, pk_max, bkgd_max);
+    integrate(bkgd_p, bkgd_err_p, Xs.rawData(), Ys, Es, pk_max, bkgd_max);
     bkgd = bkgd + bkgd_p;
     bkgd_range = bkgd_range + (bkgd_max - pk_max);
   }
@@ -661,20 +660,21 @@ API::MatrixWorkspace_sptr GetEi2::rebin(API::MatrixWorkspace_sptr monitor_ws,
  * @param xmax :: The maximum value for the integration
  */
 void GetEi2::integrate(double &integral_val, double &integral_err,
-                       const Mantid::MantidVec &x, const Mantid::MantidVec &s,
-                       const Mantid::MantidVec &e, const double xmin,
+                       const HistogramData::HistogramX &x,
+                       const HistogramData::HistogramY &s,
+                       const HistogramData::HistogramE &e, const double xmin,
                        const double xmax) const {
   // MG: Note that this is integration of a point data set from libisis
   // @todo: Move to Kernel::VectorHelper and improve performance
 
   auto lowit = std::lower_bound(x.cbegin(), x.cend(), xmin);
-  MantidVec::difference_type ml = std::distance(x.cbegin(), lowit);
+  auto ml = std::distance(x.cbegin(), lowit);
   auto highit = std::upper_bound(lowit, x.cend(), xmax);
-  MantidVec::difference_type mu = std::distance(x.cbegin(), highit);
+  auto mu = std::distance(x.cbegin(), highit);
   if (mu > 0)
     --mu;
 
-  MantidVec::size_type nx(x.size());
+  auto nx(x.size());
   if (mu < ml) {
     // special case of no data points in the integration range
     unsigned int ilo =

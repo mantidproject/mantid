@@ -29,6 +29,19 @@ Note that the NormalizationWorkspace is not changed, and needs to be smoothed as
    
    Smooth with WidthVector=5
 
+WidthVector and Functions
+-------------------------
+
+The WidthVector property defines the width of the smoothing function in each dimension in units of pixels. If "Hat" is chosen as the smoothing function then the WidthVector must only contain odd integer values, such that the filter will have a central pixel. For the "Gaussian" option the width is defined as the full width at half maximum (FWHM). Where the Gaussian function in 1D is defined as
+
+.. math:: G(x) = \frac{1}{\sqrt{2\pi} \sigma} e^{-\frac{x^2}{2\sigma^2}} ,
+
+the FWHM is given by
+
+.. math:: \text{FWHM} = 2 \sqrt{2\text{ln}2}\sigma .
+
+The Gaussian filter uses values which are integrated over the width of the pixel and is truncated at the point where the value of the pixel falls to less than 0.02 of the central pixel.
+
 
 Usage
 -----

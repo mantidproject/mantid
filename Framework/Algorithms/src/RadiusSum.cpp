@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/RadiusSum.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
@@ -12,8 +13,8 @@
 
 #include <boost/foreach.hpp>
 
+#include <cmath>
 #include <limits>
-#include <math.h>
 #include <numeric>
 #include <sstream>
 
@@ -25,18 +26,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RadiusSum)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-RadiusSum::RadiusSum()
-    : centre(), num_bins(0), inputWS(), min_radius(0.), max_radius(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RadiusSum::~RadiusSum() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification.
 const std::string RadiusSum::name() const { return "RadiusSum"; }
 
@@ -46,9 +35,6 @@ int RadiusSum::version() const { return 1; }
 /// Algorithm's category for identification.
 const std::string RadiusSum::category() const { return "Transforms\\Grouping"; }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void RadiusSum::init() {
@@ -96,7 +82,6 @@ void RadiusSum::init() {
   setPropertyGroup(normOrder, groupNorm);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void RadiusSum::exec() {
@@ -117,41 +102,36 @@ void RadiusSum::exec() {
 }
 
 std::vector<double> RadiusSum::processInstrumentRadiusSum() {
-  g_log.debug() << "Process Instrument related image" << std::endl;
+  g_log.debug() << "Process Instrument related image\n";
 
   std::vector<double> accumulator(num_bins, 0);
 
   g_log.debug() << "For every detector in the image get its position "
-                << " and sum up all the counts inside the related spectrum"
-                << std::endl;
+                << " and sum up all the counts inside the related spectrum\n";
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (size_t i = 0; i < inputWS->getNumberHistograms(); i++) {
-    try {
-      auto det = inputWS->getDetector(i);
-
-      if (det->isMonitor())
-        continue;
-
-      int bin_n = getBinForPixelPos(det->getPos());
-
-      if (bin_n < 0)
-        continue; // not in the limits of min_radius and max_radius
-
-      auto refY = inputWS->getSpectrum(i)->readY();
-      accumulator[bin_n] += std::accumulate(refY.begin(), refY.end(), 0.0);
-
-    } catch (Kernel::Exception::NotFoundError &ex) {
+    if (!spectrumInfo.hasDetectors(i)) {
       // it may occur because there is no detector assigned, but it does not
       // cause problem. Hence, continue the loop.
-      g_log.information() << "It found that detector for " << i
-                          << " is not valid. " << ex.what() << std::endl;
+      g_log.information() << "Spectrum " << i << " has no detector assigned.\n";
       continue;
     }
+    if (spectrumInfo.isMonitor(i))
+      continue;
+
+    int bin_n = getBinForPixelPos(spectrumInfo.position(i));
+
+    if (bin_n < 0)
+      continue; // not in the limits of min_radius and max_radius
+
+    auto &refY = inputWS->getSpectrum(i).readY();
+    accumulator[bin_n] += std::accumulate(refY.begin(), refY.end(), 0.0);
   }
   return accumulator;
 }
 
 std::vector<double> RadiusSum::processNumericImageRadiusSum() {
-  g_log.debug() << "Process Numeric Image" << std::endl;
+  g_log.debug() << "Process Numeric Image\n";
 
   std::vector<double> accumulator(num_bins, 0);
 
@@ -167,9 +147,9 @@ std::vector<double> RadiusSum::processNumericImageRadiusSum() {
   // histogram,
   // or the center of the bin, if it is a histogram.
 
-  g_log.debug() << "Define the X positions of the pixels" << std::endl;
-  auto refX = inputWS->getSpectrum(0)->readX();
-  auto refY = inputWS->getSpectrum(0)->readY();
+  g_log.debug() << "Define the X positions of the pixels\n";
+  auto &refX = inputWS->getSpectrum(0).readX();
+  auto &refY = inputWS->getSpectrum(0).readY();
   std::vector<double> x_pos(refY.size());
 
   if (refY.size() == refX.size()) { // non-histogram workspace X has n values
@@ -179,13 +159,12 @@ std::vector<double> RadiusSum::processNumericImageRadiusSum() {
       x_pos[ind] = (refX[ind] + refX[ind + 1]) / 2.0;
   }
 
-  g_log.debug() << "For every pixel define its bin position and sum them up"
-                << std::endl;
+  g_log.debug() << "For every pixel define its bin position and sum them up\n";
   // for each row in the image
   for (size_t i = 0; i < inputWS->getNumberHistograms(); i++) {
 
     // pixel values
-    auto refY = inputWS->getSpectrum(i)->readY();
+    auto &refY = inputWS->getSpectrum(i).readY();
 
     // for every pixel
     for (size_t j = 0; j < refY.size(); j++) {
@@ -222,10 +201,10 @@ int RadiusSum::getBinForPixelPos(const V3D &pos) {
 }
 
 void RadiusSum::cacheInputPropertyValues() {
-  g_log.debug() << "Copy the input property values" << std::endl;
+  g_log.debug() << "Copy the input property values\n";
   inputWS = getProperty("InputWorkspace");
 
-  g_log.debug() << "Extract the center and make it a V3D object" << std::endl;
+  g_log.debug() << "Extract the center and make it a V3D object\n";
   std::vector<double> centre_aux = getProperty("Centre");
   if (centre_aux.size() == 2)
     centre = V3D(centre_aux[0], centre_aux[1], 0);
@@ -233,22 +212,21 @@ void RadiusSum::cacheInputPropertyValues() {
     centre = V3D(centre_aux[0], centre_aux[1], centre_aux[2]);
 
   g_log.debug()
-      << "Copy the remaning properties: MinRadius, MaxRadius and NumBins"
-      << std::endl;
+      << "Copy the remaning properties: MinRadius, MaxRadius and NumBins\n";
   min_radius = getProperty("MinRadius");
   max_radius = getProperty("MaxRadius");
   num_bins = getProperty("NumBins");
 }
 
 void RadiusSum::inputValidationSanityCheck() {
-  g_log.debug() << "Sanity check" << std::endl;
+  g_log.debug() << "Sanity check\n";
 
-  g_log.debug() << "Check MinRadius < MaxRadius" << std::endl;
+  g_log.debug() << "Check MinRadius < MaxRadius\n";
   if (min_radius >= max_radius) {
     std::stringstream s;
     s << "Wrong definition of the radius min and max. The minimum radius can "
          "not be bigger than maximum. "
-      << "\nInputs (" << min_radius << ", " << max_radius << ")." << std::endl;
+      << "\nInputs (" << min_radius << ", " << max_radius << ").\n";
     throw std::invalid_argument(s.str());
   }
 
@@ -256,23 +234,21 @@ void RadiusSum::inputValidationSanityCheck() {
   std::stringstream s;
   BOOST_FOREACH (auto &value, boundary_limits)
     s << value << " , ";
-  g_log.information() << "Boundary limits are: " << s.str() << std::endl;
+  g_log.information() << "Boundary limits are: " << s.str() << '\n';
 
   g_log.debug() << "Check: centre is defined inside the region defined by the "
-                   "image or instrument" << std::endl;
+                   "image or instrument\n";
   centerIsInsideLimits(getProperty("centre"), boundary_limits);
 
-  g_log.debug() << "Recalculate MaxRadius if default value is given"
-                << std::endl;
+  g_log.debug() << "Recalculate MaxRadius if default value is given\n";
   if (max_radius > 0.9 * std::numeric_limits<double>::max()) {
     max_radius = getMaxDistance(centre, boundary_limits);
     g_log.notice() << "RadiusMax automatically calculated and set to "
-                   << max_radius << std::endl;
+                   << max_radius << '\n';
   }
 
   g_log.debug()
-      << "Check number of bins to alert user if many bins will end up empty"
-      << std::endl;
+      << "Check number of bins to alert user if many bins will end up empty\n";
   numBinsIsReasonable();
 }
 
@@ -329,8 +305,8 @@ RadiusSum::getBoundariesOfNumericImage(API::MatrixWorkspace_sptr inWS) {
 
   double min_x, max_x;
 
-  const double &first_x(refX[0]);
-  const double &last_x(refX[refX.size() - 1]);
+  const double &first_x = refX.front();
+  const double &last_x = refX.back();
   if (first_x < last_x) {
     min_x = first_x;
     max_x = last_x;
@@ -380,10 +356,10 @@ std::vector<double>
 RadiusSum::getBoundariesOfInstrument(API::MatrixWorkspace_sptr inWS) {
 
   // This function is implemented based in the following assumption:
-  //   - The workspace is composed by spectrum with associated spectrum ID which
+  //   - The workspace is composed by spectrum with associated spectrum No which
   //   is associated to one detector or monitor
-  //   - The first spectrum ID (non monitor) is associated with one detector
-  //   while the last spectrum ID (non monitor)
+  //   - The first spectrum No (non monitor) is associated with one detector
+  //   while the last spectrum No (non monitor)
   //     is associated with one detector.
   //   - They are in complete oposite direction.
   //
@@ -414,6 +390,7 @@ RadiusSum::getBoundariesOfInstrument(API::MatrixWorkspace_sptr inWS) {
 
   double first_x, first_y, first_z;
   size_t i = 0;
+  const auto &spectrumInfo = inWS->spectrumInfo();
   while (true) {
     i++;
     if (i >= inWS->getNumberHistograms())
@@ -421,13 +398,14 @@ RadiusSum::getBoundariesOfInstrument(API::MatrixWorkspace_sptr inWS) {
                                   "Failed to identify the boundaries of this "
                                   "instrument.");
 
-    auto det = inWS->getDetector(i);
-    if (det->isMonitor())
+    if (spectrumInfo.isMonitor(i))
       continue;
+
+    const auto pos = spectrumInfo.position(i);
     // get the position of the first valid (non-monitor) detector.
-    first_x = det->getPos().X();
-    first_y = det->getPos().Y();
-    first_z = det->getPos().Z();
+    first_x = pos.X();
+    first_y = pos.Y();
+    first_z = pos.Z();
     break;
   }
 
@@ -440,13 +418,14 @@ RadiusSum::getBoundariesOfInstrument(API::MatrixWorkspace_sptr inWS) {
                                   "instrument of this workspace. Failed to "
                                   "identify the boundaries of this instrument");
 
-    auto det = inWS->getDetector(i);
-    if (det->isMonitor())
+    if (spectrumInfo.isMonitor(i))
       continue;
+
+    const auto pos = spectrumInfo.position(i);
     // get the last valid detector position
-    last_x = det->getPos().X();
-    last_y = det->getPos().Y();
-    last_z = det->getPos().Z();
+    last_x = pos.X();
+    last_y = pos.Y();
+    last_z = pos.Z();
     break;
   }
 
@@ -533,7 +512,7 @@ void RadiusSum::numBinsIsReasonable() {
                        "resolution (detector size). "
                     << "A resonable number is smaller than "
                     << static_cast<int>((max_radius - min_radius) /
-                                        min_bin_size) << std::endl;
+                                        min_bin_size) << '\n';
 }
 
 double RadiusSum::getMinBinSizeForInstrument(API::MatrixWorkspace_sptr inWS) {
@@ -586,8 +565,7 @@ double RadiusSum::getMinBinSizeForNumericImage(API::MatrixWorkspace_sptr inWS) {
 void RadiusSum::normalizeOutputByRadius(std::vector<double> &values,
                                         double exp_power) {
   g_log.debug()
-      << "Normalization of the output in relation to the 'radius' (distance)"
-      << std::endl;
+      << "Normalization of the output in relation to the 'radius' (distance)\n";
 
   // the radius can be defined as:
   // radius_min + bin_size/2 + n * bin_size ; for 0<= n <= num_bins
@@ -595,7 +573,7 @@ void RadiusSum::normalizeOutputByRadius(std::vector<double> &values,
   double first_radius = min_radius + bin_size / 2;
 
   g_log.debug() << "Calculate Output[i] = Counts[i] / (Radius[i] ^ "
-                << exp_power << ") << " << std::endl;
+                << exp_power << ") << \n";
   if (exp_power > 1.00001 || exp_power < 0.99999) {
     for (int i = 0; i < static_cast<int>(values.size()); i++) {
       values[i] = values[i] / pow(first_radius + i * bin_size, exp_power);
@@ -635,23 +613,22 @@ double RadiusSum::getMaxDistance(const V3D &centre,
 
 void RadiusSum::setUpOutputWorkspace(std::vector<double> &values) {
 
-  g_log.debug() << "Output calculated, setting up the output workspace"
-                << std::endl;
+  g_log.debug() << "Output calculated, setting up the output workspace\n";
 
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(
       inputWS, 1, values.size() + 1, values.size());
 
-  g_log.debug() << "Set the data" << std::endl;
+  g_log.debug() << "Set the data\n";
   MantidVec &refY = outputWS->dataY(0);
   std::copy(values.begin(), values.end(), refY.begin());
 
-  g_log.debug() << "Set the bins limits" << std::endl;
+  g_log.debug() << "Set the bins limits\n";
   MantidVec &refX = outputWS->dataX(0);
   double bin_size = (max_radius - min_radius) / num_bins;
 
   for (int i = 0; i < (static_cast<int>(refX.size())) - 1; i++)
     refX[i] = min_radius + i * bin_size;
-  refX[refX.size() - 1] = max_radius;
+  refX.back() = max_radius;
 
   // configure the axis:
   // for numeric images, the axis are the same as the input workspace, and are

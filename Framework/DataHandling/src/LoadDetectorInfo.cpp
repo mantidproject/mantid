@@ -177,8 +177,7 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
   } else {
     throw std::invalid_argument(
         "RAW file contains unexpected number of user tables=" +
-        boost::lexical_cast<std::string>(numUserTables) +
-        ". Expected 10 or 14.");
+        std::to_string(numUserTables) + ". Expected 10 or 14.");
   }
 
   // Is ut01 (=phi) present? Sometimes an array is present but has wrong values

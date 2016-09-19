@@ -34,9 +34,6 @@ namespace MDAlgorithms {
 class DLLExport CreateMDHistoWorkspace
     : public MDAlgorithms::ImportMDHistoWorkspaceBase {
 public:
-  CreateMDHistoWorkspace();
-  ~CreateMDHistoWorkspace() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

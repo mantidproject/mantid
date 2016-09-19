@@ -123,7 +123,7 @@ public:
     /*
     for (size_t i = 0; i < outws->dataY(0).size(); ++i)
       std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << "\t\t"
-    << outws->dataY(1)[i] << std::endl;
+    << outws->dataY(1)[i] << '\n';
     */
 
     // 4. Calcualte data
@@ -227,7 +227,7 @@ public:
     /*
     for (size_t i = 0; i < outws->dataY(0).size(); ++i)
       std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << "\t\t"
-    << outws->dataY(1)[i] << std::endl;
+    << outws->dataY(1)[i] << '\n';
     */
 
     // 4. Calcualte data
@@ -497,12 +497,12 @@ public:
 
     size_t numpeaks = hkls.size();
     std::cout << "[TESTx349] Nmber of (file imported) peaks = " << hkls.size()
-              << std::endl;
+              << '\n';
 
     // b) data
     dataws = createInputDataWorkspace(4);
     std::cout << "[TESTx349] Data Workspace Range: " << dataws->readX(0)[0]
-              << ", " << dataws->readX(0).back() << std::endl;
+              << ", " << dataws->readX(0).back() << '\n';
 
     // c) Generate TableWorkspaces
     std::vector<double> pkheights(numpeaks, 1.0);
@@ -680,7 +680,7 @@ public:
 #if 0
     /*
       for (size_t i = 0; i < outws->dataY(0).size(); ++i)
-        std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << "\t\t" << outws->dataY(1)[i] << std::endl;
+        std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << "\t\t" << outws->dataY(1)[i] << '\n';
       */
 
     // 4. Calcualte data
@@ -751,7 +751,7 @@ public:
       throw std::invalid_argument(errmsg.str());
       break;
     }
-    cout << "Parameter Value Map Size = " << paramvaluemap.size() << std::endl;
+    cout << "Parameter Value Map Size = " << paramvaluemap.size() << '\n';
 
     // 3. Fix all peak parameters
     std::map<std::string, double>::iterator mit;
@@ -760,7 +760,7 @@ public:
       paramfitmap.emplace(parname, "t");
     }
 
-    std::cout << "Parameter Fit Map Size = " << paramfitmap.size() << std::endl;
+    std::cout << "Parameter Fit Map Size = " << paramfitmap.size() << '\n';
 
     // 4. Parpare the table workspace
     DataObjects::TableWorkspace *tablews;
@@ -796,14 +796,14 @@ public:
       }
 
       // c) Append to table
-      std::cout << parname << ": " << parvalue << "  " << fit_tie << std::endl;
+      std::cout << parname << ": " << parvalue << "  " << fit_tie << '\n';
 
       API::TableRow newparam = parameterws->appendRow();
       newparam << parname << parvalue << fit_tie;
     }
 
     std::cout << "ParameterWorkspace: Size = " << parameterws->rowCount()
-              << std::endl;
+              << '\n';
 
     return parameterws;
   }
@@ -948,7 +948,7 @@ public:
     // 0. Check
     if (hkls.size() != heights.size()) {
       std::cout << "createInputHKLWorkspace: input two vectors have different "
-                   "sizes.  It is not supported." << std::endl;
+                   "sizes.  It is not supported.\n";
       throw std::invalid_argument(
           "Vectors for HKL and heights are of different sizes.");
     }
@@ -1270,11 +1270,11 @@ public:
     if (!ins.is_open()) {
       stringstream errss;
       errss << "File " << filename << " cannot be opened. ";
-      std::cout << errss.str() << std::endl;
+      std::cout << errss.str() << '\n';
       throw std::invalid_argument(errss.str());
     } else {
       std::cout << "[TEST] Import file " << filename
-                << " for reflections (HKL)." << std::endl;
+                << " for reflections (HKL).\n";
     }
 
     char line[256];
@@ -1313,7 +1313,7 @@ public:
     if (!load.isExecuted()) {
       stringstream errss;
       errss << "Data file " << filename << " cannot be opened. ";
-      std::cout << errss.str() << std::endl;
+      std::cout << errss.str() << '\n';
       throw std::runtime_error(errss.str());
     }
 
@@ -1322,7 +1322,7 @@ public:
     if (!ws) {
       stringstream errss;
       errss << "LoadAscii failed to generate workspace";
-      std::cout << errss.str() << std::endl;
+      std::cout << errss.str() << '\n';
       throw std::runtime_error(errss.str());
     }
 
@@ -1364,7 +1364,7 @@ public:
         fitortie = fitstatus[0];
       } else {
         std::cout << "ParameterWorkspace:  parameter " << parname
-                  << " has am empty field for fit/tie. " << std::endl;
+                  << " has am empty field for fit/tie. \n";
       }
 
       paramvalues.emplace(parname, parvalue);

@@ -40,19 +40,6 @@ bool isTimeSeries(Mantid::Kernel::Property *prop) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ChangeTimeZero::ChangeTimeZero()
-    : m_defaultTimeShift(0.0), m_defaultAbsoluteTimeShift("") {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ChangeTimeZero::~ChangeTimeZero() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ChangeTimeZero::init() {
@@ -309,11 +296,11 @@ std::map<std::string, std::string> ChangeTimeZero::validateInputs() {
       try {
         run.getTimeSeriesProperty<double>("proton_charge");
       } catch (...) {
-        invalidProperties.insert(std::make_pair(
+        invalidProperties.emplace(
             "InputWorkspace",
             "A TimeOffset with an absolute time requires the "
             "input workspace to have a proton_charge property in "
-            "its log."));
+            "its log.");
       }
     }
   }

@@ -1,50 +1,45 @@
 #ifndef MULTIDATASETFIT_H_
 #define MULTIDATASETFIT_H_
 
+#include "MantidKernel/Statistics.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "ui_MultiDatasetFit.h"
 
-namespace Mantid
-{
-namespace API
-{
-  class IFunction;
-  class IAlgorithm;
-  class MatrixWorkspace;
+namespace Mantid {
+namespace API {
+class IFunction;
+class IAlgorithm;
+class MatrixWorkspace;
 }
 }
 
-namespace MantidQt
-{
+namespace MantidQt {
 
 // Forward declarations
-namespace MantidWidgets
-{
-  class FunctionBrowser;
-  class FitOptionsBrowser;
+namespace MantidWidgets {
+class FunctionBrowser;
+class FitOptionsBrowser;
 }
-namespace API
-{
-  class AlgorithmRunner;
+namespace API {
+class AlgorithmRunner;
 }
 
-namespace CustomInterfaces
-{
+namespace CustomInterfaces {
 
 // Forward declarations
-namespace MDF
-{
-  class DataController;
-  class PlotController;
+namespace MDF {
+class DataController;
+class PlotController;
 }
 
 /**
- * Class MultiDatasetFitDialog implements a dialog for setting up a multi-dataset fit
+ * Class MultiDatasetFitDialog implements a dialog for setting up a
+ * multi-dataset fit
  * and displaying the results.
  */
-class MANTIDQT_CUSTOMINTERFACES_DLL MultiDatasetFit: public API::UserSubWindow
-{
+class MANTIDQT_CUSTOMINTERFACES_DLL MultiDatasetFit
+    : public API::UserSubWindow {
   Q_OBJECT
 public:
   /// The name of the interface as registered into the factory
@@ -62,7 +57,7 @@ public:
   /// Workspace index of the i-th spectrum
   int getWorkspaceIndex(int i) const;
   /// Get the fitting range for the i-th spectrum
-  std::pair<double,double> getFittingRange(int i) const;
+  std::pair<double, double> getFittingRange(int i) const;
   /// Total number of spectra (datasets).
   int getNumberOfSpectra() const;
   /// Display info about the plot.
@@ -70,17 +65,25 @@ public:
   /// Check that the data sets in the table are valid
   void checkSpectra();
   /// Get value of a local parameter
-  double getLocalParameterValue(const QString& parName, int i) const;
+  double getLocalParameterValue(const QString &parName, int i) const;
   /// Set value of a local parameter
-  void setLocalParameterValue(const QString& parName, int i, double value);
+  void setLocalParameterValue(const QString &parName, int i, double value);
   /// Check if a local parameter is fixed
-  bool isLocalParameterFixed(const QString& parName, int i) const;
+  bool isLocalParameterFixed(const QString &parName, int i) const;
   /// Fix/unfix local parameter
-  void setLocalParameterFixed(const QString& parName, int i, bool fixed);
+  void setLocalParameterFixed(const QString &parName, int i, bool fixed);
   /// Get the tie for a local parameter.
-  QString getLocalParameterTie(const QString& parName, int i) const;
+  QString getLocalParameterTie(const QString &parName, int i) const;
   /// Set a tie for a local parameter.
-  void setLocalParameterTie(const QString& parName, int i, QString tie);
+  void setLocalParameterTie(const QString &parName, int i, QString tie);
+  /// Log a warning
+  static void logWarning(const std::string &msg);
+  /// Get log names from workspace(s)
+  std::vector<std::string> getLogNames() const;
+  /// Get value of log from spectrum
+  double getLogValue(const QString &logName,
+                     const Mantid::Kernel::Math::StatisticType &function,
+                     int i) const;
 
   /// Make it public
   using API::UserSubWindow::runPythonCode;
@@ -90,7 +93,7 @@ public slots:
 
 private slots:
   void fit();
-  void editLocalParameterValues(const QString& parName);
+  void editLocalParameterValues(const QString &parName);
   void finishFit(bool);
   void enableZoom();
   void enablePan();
@@ -101,7 +104,7 @@ private slots:
   void setLogNames();
   void setParameterNamesForPlotting();
   void invalidateOutput();
-  void updateGuessFunction(const QString&, const QString&);
+  void updateGuessFunction(const QString &, const QString &);
 
 protected:
   void initLayout() override;
@@ -109,8 +112,8 @@ protected:
 private:
   void createPlotToolbar();
   boost::shared_ptr<Mantid::API::IFunction> createFunction() const;
-  void updateParameters(const Mantid::API::IFunction& fun);
-  void showInfo(const QString& text);
+  void updateParameters(const Mantid::API::IFunction &fun);
+  void showInfo(const QString &text);
   bool eventFilter(QObject *widget, QEvent *evn) override;
   void showFunctionBrowserInfo();
   void showFitOptionsBrowserInfo();
@@ -137,10 +140,11 @@ private:
   QString m_outputWorkspaceName;
   /// Fit algorithm runner
   boost::shared_ptr<API::AlgorithmRunner> m_fitRunner;
+  /// Remembers setting for just current session
+  int m_fitAllSettings;
 };
 
 } // CustomInterfaces
 } // MantidQt
-
 
 #endif /*MULTIDATASETFITDIALOG_H_*/

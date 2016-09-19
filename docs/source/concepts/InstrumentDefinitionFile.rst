@@ -155,26 +155,35 @@ using the following python:
     currentIDF = ExperimentInfo.getInstrumentFilename("ARCS")
     otherIDF = ExperimentInfo.getInstrumentFilename("ARCS", "2012-10-30T00:00:00")
 
+.. _InstrumentDefinitionFile_Directories:
 
-Downloaded Instrument File Definitions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Instrument Definition Directories
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-As well as the instrument definitions that ship with Mantid, mantid can also download updates
-or new instrument definitions when it is started.  This is a great way of keeping the files
-current without needing a new release of Mantid for each instrument change.
+Mantid ships with many instrument definition files within the installation but
+also has the capability of fetching new instrument definitions by running the
+:ref:`DownloadInstrument <algm-DownloadInstrument>` algorithm (this is run
+automatically on startup). Downloaded definitions are written to a different
+directory to the shipped versions so that they do not overwrite them. The default list
+of directories searched (in the this order) for an IDF for a given instrument are:
 
-Mantid does not overwrite files in the MantidInstall instrument directory when downloading files,
-it writes to another location that is a little different on windows and linux.
+For Windows:
 
-For windows:
-    %appdata%\\mantidproject\\instrument
+- %APPDATA%\\mantidproject\\instrument: location of downloaded files
+- [INSTALLDIR]\\instrument: location of shipped files
 
-For Linux:
-    ~/.mantid/instrument
+For Linux/OSX:
 
-You should not edit files there, or add new ones as the may be deleted or overwritten.
+- $HOME/.mantid/instrument: location of downloaded files
+- /etc/mantid/instrument: system-wide location for all users of a machine
+- [INSTALLDIR]/instrument: location of shipped files
+
+Editing Downloaded Definitions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You should not edit files in the downloaded location, or add new ones as the may be deleted or overwritten.
 If you have a change to an instrument definition you wish to use then edit a copy in the
-MantidInstall instrument directory, but updated the valid-from date so mantid will pick that one
+[INSTALLDIR] instrument directory, but update the valid-from date so mantid will pick that one
 up in preference.  Or if you just wish to force a particular instrument definition for a particular
 workspace just run :ref:`LoadInstrument <algm-LoadInstrument>` for that workspace.
 
@@ -314,7 +323,7 @@ Using detector/monitor IDs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Any component that is either a detector or monitor must be assigned a
-unique detector/monitor ID numbers (note this is *not* spectrum ID
+unique detector/monitor ID numbers (note this is *not* spectrum
 numbers but detector/monitor ID numbers). There are at least two
 important reason to insist on this.
 
@@ -1236,7 +1245,7 @@ below:
 
 .. code-block:: xml
 
-    <component type="adjusted cuboid"
+    <component type="adjusted cuboid">
       <location />
     </component>
 

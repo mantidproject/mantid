@@ -5,8 +5,11 @@
 set ( TEST_PY_FILES
   AddSampleLogMultipleTest.py
   AlignComponentsTest.py
+  AngularAutoCorrelationsSingleAxisTest.py
+  AngularAutoCorrelationsTwoAxesTest.py
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
+  BayesStretchTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
@@ -16,8 +19,8 @@ set ( TEST_PY_FILES
   CreateLeBailFitInputTest.py
   DetectorFloodWeightingTest.py
   IndirectCalibrationTest.py
+  CorrectTOFTest.py
   CreateWorkspaceTest.py
-  CylinderPaalmanPingsCorrectionTest.py
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
   DNSComputeDetEffCorrCoefsTest.py
@@ -26,23 +29,29 @@ set ( TEST_PY_FILES
   DSFinterpTest.py
   EnggCalibrateFullTest.py
   EnggCalibrateTest.py
+  EnggFitDIFCFromPeaksTest.py
   EnggFitPeaksTest.py
   EnggFocusTest.py
   EnggVanadiumCorrectionsTest.py
-  VesuvioDiffractionReductionTest.py
+  ExportSpectraMaskTest.py   
   FilterLogByTimeTest.py
+  FindEPPTest.py
   FindReflectometryLinesTest.py
+  FitGaussianTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
+  GSASIIRefineFitPeaksTest.py
   GetEiT0atSNSTest.py
   GetNegMuMuonicXRDTest.py
   IndirectAnnulusAbsorptionTest.py
   IndirectCylinderAbsorptionTest.py
   IndirectFlatPlateAbsorptionTest.py
   IndirectILLReductionTest.py
+  IndirectResolutionTest.py
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
   ILLIN16BCalibrationTest.py
   IqtFitMultipleTest.py
+  IqtFitSequentialTest.py
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
   LoadDNSLegacyTest.py
@@ -52,6 +61,7 @@ set ( TEST_PY_FILES
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
   LoadNMoldyn3AsciiTest.py
+  LoadNMoldyn4Ascii1DTest.py
   LoadNMoldyn4AsciiTest.py
   MaskAngleTest.py
   MaskBTPTest.py
@@ -67,9 +77,11 @@ set ( TEST_PY_FILES
   RetrieveRunInfoTest.py
   SANSFitShiftScaleTest.py
   SANSWideAngleCorrectionTest.py
+  SaveNexusPDTest.py
   SavePlot1DTest.py
   SavePlot1DAsJsonTest.py
   SaveVulcanGSSTest.py
+  SetDetScaleTest.py
   SimulatedDensityOfStatesTest.py
   SortByQVectorsTest.py
   SofQWMomentsTest.py
@@ -94,9 +106,13 @@ set ( TEST_PY_FILES
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
   PoldiMergeTest.py
-  VesuvioCorrectionsTest.py
+  VelocityCrossCorrelationsTest.py
+  VelocityAutoCorrelationsTest.py
+  SelectNexusFilesByMetadataTest.py
+  VesuvioDiffractionReductionTest.py
   VesuvioPreFitTest.py
   VesuvioResolutionTest.py
+  VesuvioThicknessTest.py
   VesuvioTOFFitTest.py
   PoldiCreatePeaksFromFileTest.py
   LoadCIFTest.py

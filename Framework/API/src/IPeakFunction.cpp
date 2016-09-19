@@ -155,7 +155,7 @@ void IPeakFunction::functionDeriv1D(Jacobian *out, const double *xValues,
 void IPeakFunction::setPeakRadius(const int &r) {
   if (r > 0) {
     s_peakRadius = r;
-    std::string setting = boost::lexical_cast<std::string>(r);
+    std::string setting = std::to_string(r);
     Kernel::ConfigService::Instance().setString("curvefitting.peakRadius",
                                                 setting);
   }

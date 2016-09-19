@@ -51,8 +51,6 @@ class DLLExport PowerLawCorrection : public UnaryOperation {
 public:
   /// Default constructor
   PowerLawCorrection();
-  /// Destructor
-  ~PowerLawCorrection() override{};
   /// Algorithm's name for identification
   const std::string name() const override { return "PowerLawCorrection"; }
   /// Summary of algorithms purpose

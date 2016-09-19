@@ -117,25 +117,25 @@ void SANSInstrumentCreationHelper::runLoadMappingTable(
     throw std::invalid_argument("number of y-bins < 0");
   }
 
-  // Generate mapping of detector/channel IDs to spectrum ID
+  // Generate mapping of detector/channel IDs to spectrum No
 
   // Detector/channel counter
   size_t wi = 0;
 
   // Monitor: IDs start at 1 and increment by 1
   for (size_t i = 0; i < nMonitors; i++) {
-    // std::cout << "SANS instrument monitor number " << i << std::endl;
-    workspace->getSpectrum(wi)->setSpectrumNo(specnum_t(wi));
-    workspace->getSpectrum(wi)->setDetectorID(detid_t(wi + 1));
+    // std::cout << "SANS instrument monitor number " << i << '\n';
+    workspace->getSpectrum(wi).setSpectrumNo(specnum_t(wi));
+    workspace->getSpectrum(wi).setDetectorID(detid_t(wi + 1));
     wi++;
   }
 
   // Detector pixels
   for (size_t ix = 0; ix < nXbins; ix++) {
     for (size_t iy = 0; iy < nYbins; iy++) {
-      workspace->getSpectrum(wi)->setSpectrumNo(specnum_t(wi));
+      workspace->getSpectrum(wi).setSpectrumNo(specnum_t(wi));
       workspace->getSpectrum(wi)
-          ->setDetectorID(detid_t(1000000 + iy * 1000 + ix));
+          .setDetectorID(detid_t(1000000 + iy * 1000 + ix));
       wi++;
     }
   }

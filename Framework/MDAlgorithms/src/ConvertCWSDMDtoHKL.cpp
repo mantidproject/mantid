@@ -34,16 +34,6 @@ using namespace Mantid::Geometry;
 DECLARE_ALGORITHM(ConvertCWSDMDtoHKL)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertCWSDMDtoHKL::ConvertCWSDMDtoHKL() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertCWSDMDtoHKL::~ConvertCWSDMDtoHKL() {}
-
-//----------------------------------------------------------------------------------------------
 /** Init
  */
 void ConvertCWSDMDtoHKL::init() {
@@ -91,7 +81,7 @@ void ConvertCWSDMDtoHKL::exec() {
   getUBMatrix();
 
   // Test indexing.  Will be delete soon
-  if (true) {
+  if (false) {
     Kernel::V3D qsample; // [1.36639,-2.52888,-4.77349]
     qsample.setX(1.36639);
     qsample.setY(-2.52888);
@@ -133,6 +123,13 @@ void ConvertCWSDMDtoHKL::exec() {
   // Create output workspace
   m_outputWS =
       createHKLMDWorkspace(vec_event_hkl, vec_event_signal, vec_event_det);
+  // Experiment info
+  ExperimentInfo_sptr expinfo = boost::make_shared<ExperimentInfo>();
+  expinfo->setInstrument(inputWS->getExperimentInfo(0)->getInstrument());
+  expinfo->mutableRun().setGoniometer(
+      inputWS->getExperimentInfo(0)->run().getGoniometer(), false);
+  expinfo->mutableRun().addProperty("run_number", 1);
+  m_outputWS->addExperimentInfo(expinfo);
 
   setProperty("OutputWorkspace", m_outputWS);
 }
@@ -158,8 +155,6 @@ void ConvertCWSDMDtoHKL::getUBMatrix() {
       }
     }
   }
-
-  return;
 }
 
 //--------------------------------------------------------------------------
@@ -214,8 +209,6 @@ void ConvertCWSDMDtoHKL::exportEvents(
       scancell = false;
     }
   }
-
-  return;
 }
 
 //--------------------------------------------------------------------------
@@ -244,8 +237,6 @@ void ConvertCWSDMDtoHKL::saveMDToFile(
           << vec_event_qsample[i][2] << ", " << vec_event_signal[i] << "\n";
   }
   ofile.close();
-
-  return;
 }
 
 //--------------------------------------------------------------------------
@@ -271,8 +262,6 @@ void ConvertCWSDMDtoHKL::saveEventsToFile(
           << vec_event_detid[i] << "\n";
   }
   ofile.close();
-
-  return;
 }
 
 //--------------------------------------------------------------------------
@@ -291,8 +280,6 @@ void ConvertCWSDMDtoHKL::convertFromQSampleToHKL(
 
   g_log.notice() << "[DB] " << original_indexed << " peaks are indexed."
                  << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -399,8 +386,6 @@ void ConvertCWSDMDtoHKL::getRange(const std::vector<Kernel::V3D> vec_hkl,
     extentMins[i] = minvalue;
     extentMaxs[i] = maxvalue;
   }
-
-  return;
 }
 
 } // namespace MDAlgorithms

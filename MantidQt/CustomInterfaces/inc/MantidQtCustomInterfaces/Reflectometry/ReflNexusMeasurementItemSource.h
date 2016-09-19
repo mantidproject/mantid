@@ -10,7 +10,8 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-/** ReflNexusMeasurementSource : ReflMeasurementSource repository realization that
+/** ReflNexusMeasurementSource : ReflMeasurementSource repository realization
+  that
   fetches data out off disk using load algorithms and Nexus formats.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -34,7 +35,8 @@ namespace CustomInterfaces {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL ReflNexusMeasurementItemSource : public ReflMeasurementItemSource {
+class MANTIDQT_CUSTOMINTERFACES_DLL ReflNexusMeasurementItemSource
+    : public ReflMeasurementItemSource {
 public:
   ReflNexusMeasurementItemSource();
   MeasurementItem obtain(const std::string &definedPath,

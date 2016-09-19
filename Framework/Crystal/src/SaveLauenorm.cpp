@@ -24,18 +24,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(SaveLauenorm)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveLauenorm::SaveLauenorm() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveLauenorm::~SaveLauenorm() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveLauenorm::init() {
@@ -199,7 +187,7 @@ void SaveLauenorm::exec() {
       out << std::setw(10) << Utils::round(p.getSigmaIntensity());
     }
 
-    out << std::endl;
+    out << '\n';
   }
 
   out.flush();

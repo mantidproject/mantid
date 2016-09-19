@@ -59,8 +59,6 @@ class DLLExport SumSpectra : public API::Algorithm {
 public:
   /// Default constructor
   SumSpectra();
-  /// Destructor
-  ~SumSpectra() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SumSpectra"; }
   /// Summary of algorithms purpose
@@ -83,7 +81,7 @@ private:
                         size_t &numMasked, size_t &numZeros);
   /// Handle logic for Workspace2D workspaces
   void doWorkspace2D(API::MatrixWorkspace_const_sptr localworkspace,
-                     API::ISpectrum *outSpec, API::Progress &progress,
+                     API::ISpectrum &outSpec, API::Progress &progress,
                      size_t &numSpectra, size_t &numMasked, size_t &numZeros);
 
   // Overridden Algorithm methods
@@ -91,10 +89,10 @@ private:
   void exec() override;
   void execEvent(DataObjects::EventWorkspace_const_sptr localworkspace,
                  std::set<int> &indices);
-  specnum_t getOutputSpecId(API::MatrixWorkspace_const_sptr localworkspace);
+  specnum_t getOutputSpecNo(API::MatrixWorkspace_const_sptr localworkspace);
 
-  /// The output spectrum id
-  specnum_t m_outSpecId;
+  /// The output spectrum number
+  specnum_t m_outSpecNum;
   /// The spectrum to start the integration from
   int m_minWsInd;
   /// The spectrum to finish the integration at

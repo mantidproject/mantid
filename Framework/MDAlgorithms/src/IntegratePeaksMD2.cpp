@@ -38,18 +38,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IntegratePeaksMD2::IntegratePeaksMD2() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IntegratePeaksMD2::~IntegratePeaksMD2() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksMD2::init() {
@@ -175,7 +163,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
       getProperty("OutputWorkspace");
   if (peakWS != inPeakWS)
-    peakWS.reset(inPeakWS->clone().release());
+    peakWS = inPeakWS->clone();
   // This only fails in the unit tests which say that MaskBTP is not registered
   try {
     runMaskDetectors(inPeakWS, "Tube", "edges");
@@ -317,7 +305,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     if (edge < std::max(BackgroundOuterRadius, PeakRadius)) {
       g_log.warning() << "Warning: sphere/cylinder for integration is off edge "
                          "of detector for peak " << i
-                      << "; radius of edge =  " << edge << std::endl;
+                      << "; radius of edge =  " << edge << '\n';
       if (!integrateEdge) {
         if (replaceIntensity) {
           p.setIntensity(0.0);
@@ -666,7 +654,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                         << bgSignal + ratio * background_total << " (sig^2 "
                         << bgErrorSquared +
                                ratio * ratio * std::fabs(background_total)
-                        << ") subtracted." << std::endl;
+                        << ") subtracted.\n";
   }
   // This flag is used by the PeaksWorkspace to evaluate whether it has been
   // integrated.
@@ -804,7 +792,7 @@ void IntegratePeaksMD2::checkOverlap(
     if (pos1.distance(pos2) < radius) {
       g_log.warning() << " Warning:  Peak integration spheres for peaks " << i
                       << " and " << j << " overlap.  Distance between peaks is "
-                      << pos1.distance(pos2) << std::endl;
+                      << pos1.distance(pos2) << '\n';
     }
   }
 }

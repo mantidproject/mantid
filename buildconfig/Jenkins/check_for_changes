@@ -5,31 +5,32 @@ FOUND=1
 NOTFOUND=0
 
 TYPE=${1}
-BASE_BRANCH="origin/master"
-if [ $2 ]; then
-    BASE_BRANCH=$2
-fi
-SHA=$(git rev-parse HEAD)
-echo "SHA=${SHA}"
+# Assume the current commit is the merged commit created by GitHub.
+# The first and second parents will be the PR target branch & PR branch
+# that is being merged, resepectively. We want the files changes between the 
+# base and tail commits of the branch
+BRANCH_TIP=$(git rev-parse HEAD^2)
+BRANCH_BASE=$(git merge-base HEAD^2 HEAD^1)
+echo "Looking for files changed between ${BRANCH_BASE} and ${BRANCH_TIP}"
 
 case "$TYPE" in
     py)
-        exit $(git diff --quiet ${BASE_BRANCH} ${SHA} -- \*\.py)
+        exit $(git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.py)
     ;;
     cpp)
-        if $(! git diff --quiet ${BASE_BRANCH} ${SHA} -- \*\.h)
+        if $(! git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.h)
         then
             exit $FOUND
         fi
-        if $(! git diff --quiet ${BASE_BRANCH} ${SHA} -- \*\.cpp)
+        if $(! git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cpp)
         then
             exit $FOUND
         fi
-        if $(! git diff --quiet ${BASE_BRANCH} ${SHA} -- \*\.cxx)
+        if $(! git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.cxx)
         then
             exit $FOUND
         fi
-        if $(! git diff --quiet ${BASE_BRANCH} ${SHA} -- \*\.tcc)
+        if $(! git diff --quiet ${BRANCH_TIP} ${BRANCH_BASE} -- \*\.tcc)
         then
             exit $FOUND
         fi

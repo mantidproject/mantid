@@ -22,18 +22,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(SliceMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SliceMD::SliceMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SliceMD::~SliceMD() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SliceMD::init() {
@@ -162,7 +150,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (!filename.empty()) {
 
     // First save to the NXS file
-    g_log.notice() << "Running SaveMD to create file back-end" << std::endl;
+    g_log.notice() << "Running SaveMD to create file back-end\n";
     IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("InputWorkspace", outWS);
@@ -211,7 +199,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   for (int i = 0; i < int(boxes.size()); i++) {
     MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
     // Perform the binning in this separate method.
-    if (box) {
+    if (box && !box->getIsMasked()) {
       // An array to hold the rotated/transformed coordinates
       coord_t outCenter[ond];
 
@@ -269,11 +257,11 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Account for events that were added after the last split
   totalAdded += numSinceSplit;
   g_log.notice() << totalAdded << " " << OMDE::getTypeName()
-                 << "s added to the output workspace." << std::endl;
+                 << "s added to the output workspace.\n";
 
   if (outWS->isFileBacked()) {
     // Update the file-back-end
-    g_log.notice() << "Running SaveMD" << std::endl;
+    g_log.notice() << "Running SaveMD\n";
     IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
     alg->setProperty("UpdateFileBackEnd", true);
     alg->setProperty("InputWorkspace", outWS);

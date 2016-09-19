@@ -54,7 +54,7 @@ namespace Geometry {
 using Kernel::V3D;
 
 Intersection::Intersection(std::unique_ptr<Rule> Ix, std::unique_ptr<Rule> Iy)
-    : Rule(), A(std::move(Iy)), B(std::move(Ix))
+    : Rule(), A(std::move(Ix)), B(std::move(Iy))
 /**
   Intersection constructor from two Rule ptrs.
   - Sets A,B's parents to *this
@@ -176,7 +176,6 @@ void Intersection::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> bR)
     A->setParent(this);
   if (B)
     B->setParent(this);
-  return;
 }
 
 void Intersection::setLeaf(std::unique_ptr<Rule> nR, const int side)
@@ -198,7 +197,6 @@ void Intersection::setLeaf(std::unique_ptr<Rule> nR, const int side)
     if (A)
       A->setParent(this);
   }
-  return;
 }
 
 int Intersection::findLeaf(const Rule *R) const
@@ -492,7 +490,6 @@ void Union::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> bR)
     A->setParent(this);
   if (B)
     B->setParent(this);
-  return;
 }
 
 int Union::findLeaf(const Rule *R) const
@@ -703,12 +700,11 @@ void SurfPoint::setLeaf(std::unique_ptr<Rule> nR, const int)
   @param :: ignored
 */
 {
-  // std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
+  // std::cerr<<"Calling SurfPoint setLeaf"<<'\n';
 
   SurfPoint *newX = dynamic_cast<SurfPoint *>(nR.get());
   if (newX)
     *this = *newX;
-  return;
 }
 
 void SurfPoint::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule>)
@@ -718,11 +714,10 @@ void SurfPoint::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule>)
   @param aR :: new rule
 */
 {
-  // std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
+  // std::cerr<<"Calling SurfPoint setLeaf"<<'\n';
   SurfPoint *newX = dynamic_cast<SurfPoint *>(aR.get());
   if (newX)
     *this = *newX;
-  return;
 }
 
 int SurfPoint::findLeaf(const Rule *A) const
@@ -755,7 +750,6 @@ void SurfPoint::setKeyN(const int Ky)
 {
   sign = (Ky < 0) ? -1 : 1;
   keyN = sign * Ky;
-  return;
 }
 
 void SurfPoint::setKey(const boost::shared_ptr<Surface> &Spoint)
@@ -765,7 +759,6 @@ void SurfPoint::setKey(const boost::shared_ptr<Surface> &Spoint)
 */
 {
   m_key = Spoint;
-  return;
 }
 
 int SurfPoint::simplify()
@@ -919,7 +912,7 @@ void SurfPoint::getBoundingBox(double &xmax, double &ymax, double &zmax,
       xmax = ymax = zmax = -DBL_MAX;
       for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
            it != listOfPoints.end(); ++it) {
-        //			std::cout<<(*it)<<std::endl;
+        //			std::cout<<(*it)<<'\n';
         if ((*it)[0] < xmin)
           xmin = (*it)[0];
         if ((*it)[1] < ymin)
@@ -988,7 +981,6 @@ void CompObj::setObjN(const int Ky)
 */
 {
   objN = Ky;
-  return;
 }
 
 void CompObj::setObj(Object *val)
@@ -998,7 +990,6 @@ void CompObj::setObj(Object *val)
 */
 {
   key = val;
-  return;
 }
 
 void CompObj::setLeaf(std::unique_ptr<Rule> aR, const int)
@@ -1013,7 +1004,6 @@ void CompObj::setLeaf(std::unique_ptr<Rule> aR, const int)
   // Make a copy
   if (newX)
     *this = *newX;
-  return;
 }
 
 void CompObj::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
@@ -1029,7 +1019,6 @@ void CompObj::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
   CompObj *newX = dynamic_cast<CompObj *>(aR.get());
   if (newX)
     *this = *newX;
-  return;
 }
 
 Rule *CompObj::findKey(const int i)
@@ -1200,7 +1189,7 @@ void CompObj::getBoundingBox(double &xmax, double &ymax, double &zmax,
     xmax = ymax = zmax = -DBL_MAX;
     for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
          it != listOfPoints.end(); ++it) {
-      //			std::cout<<(*it)<<std::endl;
+      //			std::cout<<(*it)<<'\n';
       if ((*it)[0] < xmin)
         xmin = (*it)[0];
       if ((*it)[1] < ymin)
@@ -1276,11 +1265,10 @@ void BoolValue::setLeaf(std::unique_ptr<Rule> aR, const int)
   secont argument ignored ( Null side point)
 */
 {
-  // std::cerr<<"Calling BoolValue setLeaf"<<std::endl;
+  // std::cerr<<"Calling BoolValue setLeaf"<<'\n';
   BoolValue *newX = dynamic_cast<BoolValue *>(aR.get());
   if (newX)
     *this = *newX;
-  return;
 }
 
 void BoolValue::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
@@ -1292,11 +1280,10 @@ void BoolValue::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
 */
 {
   (void)oR; // Avoid compiler warning
-  // std::cerr<<"Calling BoolValue setLeaves"<<std::endl;
+  // std::cerr<<"Calling BoolValue setLeaves"<<'\n';
   BoolValue *newX = dynamic_cast<BoolValue *>(aR.get());
   if (newX)
     *this = *newX;
-  return;
 }
 
 int BoolValue::findLeaf(const Rule *A) const { return (this == A) ? 0 : -1; }
@@ -1456,7 +1443,6 @@ void CompGrp::setLeaf(std::unique_ptr<Rule> nR, const int side)
   A = std::move(nR);
   if (A)
     A->setParent(this);
-  return;
 }
 
 void CompGrp::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
@@ -1471,7 +1457,6 @@ void CompGrp::setLeaves(std::unique_ptr<Rule> aR, std::unique_ptr<Rule> oR)
   A = std::move(aR);
   if (A)
     A->setParent(this);
-  return;
 }
 
 Rule *CompGrp::findKey(const int i)
@@ -1653,7 +1638,7 @@ void CompGrp::getBoundingBox(double &xmax, double &ymax, double &zmax,
     xmax = ymax = zmax = -DBL_MAX;
     for (std::vector<V3D>::const_iterator it = listOfPoints.begin();
          it != listOfPoints.end(); ++it) {
-      //			std::cout<<(*it)<<std::endl;
+      //			std::cout<<(*it)<<'\n';
       if ((*it)[0] < xmin)
         xmin = (*it)[0];
       if ((*it)[1] < ymin)

@@ -190,8 +190,9 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec,
   verticalAxis->unit() = verticalUnit;
   verticalUnit->setLabel(caption, units);
   verticalAxis->title() = caption;
+  auto xAxis = Kernel::make_cow<HistogramData::HistogramX>(xAxisVec);
   for (size_t i = 0; i < nBins; ++i) {
-    ws->setX(i, xAxisVec);
+    ws->setX(i, xAxis);
     double qzIncrement =
         ((1 / gradY) * (static_cast<double>(i) + 1) + cyToUnit);
     verticalAxis->setValue(i, qzIncrement);
@@ -235,7 +236,7 @@ DetectorAngularCache initAngularCaches(const MatrixWorkspace *const workspace) {
       continue;
     }
     // We have to convert theta from radians to degrees
-    const double theta = workspace->detectorSignedTwoTheta(det) * 180.0 / M_PI;
+    const double theta = workspace->detectorSignedTwoTheta(*det) * rad2deg;
     thetas[i] = theta;
     /**
      * Determine width from shape geometry. A group is assumed to contain
@@ -427,7 +428,7 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
     bool dumpVertexes, std::string outputDimensions) const {
   MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
-      "RebinnedOutput", m_d1NumBins, m_d0NumBins, m_d0NumBins);
+      "RebinnedOutput", m_d1NumBins, m_d0NumBins + 1, m_d0NumBins);
   RebinnedOutput_sptr outWS = boost::static_pointer_cast<RebinnedOutput>(temp);
 
   const double widthD0 = (m_d0Max - m_d0Min) / double(m_d0NumBins);
@@ -443,8 +444,9 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   // Put the correct bin boundaries into the workspace
   auto verticalAxis = new BinEdgeAxis(zBinsVec);
   outWS->replaceAxis(1, verticalAxis);
+  HistogramData::BinEdges binEdges(xBinsVec);
   for (size_t i = 0; i < zBinsVec.size() - 1; ++i)
-    outWS->setX(i, xBinsVec);
+    outWS->setBinEdges(i, binEdges);
 
   verticalAxis->title() = m_d1Label;
 
@@ -494,7 +496,7 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
       if (qIndex != 0 && qIndex < static_cast<int>(zBinsVec.size())) {
         // Add this spectra-detector pair to the mapping
         specNumberMapping.push_back(
-            outWS->getSpectrum(qIndex - 1)->getSpectrumNo());
+            outWS->getSpectrum(qIndex - 1).getSpectrumNo());
         detIDMapping.push_back(detector->getID());
       }
       // Debugging

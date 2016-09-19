@@ -37,10 +37,10 @@ Set the foreground colour of the peaks.
 @ color to use for re-colouring
 */
 void ProxyCompositePeaksPresenter::setForegroundColor(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, PeakViewColor color) {
+    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
+    PeakViewColor color) {
   m_compositePresenter->setForegroundColor(ws, color);
 }
-
 
 /**
 Set the background colour of the peaks.
@@ -48,7 +48,8 @@ Set the background colour of the peaks.
 @ colour to use for re-colouring
 */
 void ProxyCompositePeaksPresenter::setBackgroundColor(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, PeakViewColor color) {
+    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
+    PeakViewColor color) {
   m_compositePresenter->setBackgroundColor(ws, color);
 }
 
@@ -135,8 +136,8 @@ bool ProxyCompositePeaksPresenter::getIsHidden(
   return m_compositePresenter->getIsHidden(peaksWS);
 }
 
-void
-ProxyCompositePeaksPresenter::registerView(UpdateableOnDemand *updateableView) {
+void ProxyCompositePeaksPresenter::registerView(
+    UpdateableOnDemand *updateableView) {
   m_updateableView = updateableView;
 }
 
@@ -146,17 +147,36 @@ ProxyCompositePeaksPresenter::getZoomedPeakPresenter() const {
 }
 
 int ProxyCompositePeaksPresenter::getZoomedPeakIndex() const {
-    return m_compositePresenter->getZoomedPeakIndex();
+  return m_compositePresenter->getZoomedPeakIndex();
 }
 
-void ProxyCompositePeaksPresenter::editCommand(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target)
-{
-    m_compositePresenter->editCommand(editMode, target);
+void ProxyCompositePeaksPresenter::editCommand(
+    EditMode editMode,
+    boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target) {
+  m_compositePresenter->editCommand(editMode, target);
 }
 
-bool ProxyCompositePeaksPresenter::hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target){
-    return m_compositePresenter->hasPeakAddModeFor(target);
+bool ProxyCompositePeaksPresenter::hasPeakAddModeFor(
+    boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target) {
+  return m_compositePresenter->hasPeakAddModeFor(target);
 }
 
+void ProxyCompositePeaksPresenter::setPeakSizeOnProjection(
+    const double fraction) {
+  m_compositePresenter->setPeakSizeOnProjection(fraction);
+}
+
+void ProxyCompositePeaksPresenter::setPeakSizeIntoProjection(
+    const double fraction) {
+  m_compositePresenter->setPeakSizeIntoProjection(fraction);
+}
+
+double ProxyCompositePeaksPresenter::getPeakSizeOnProjection() const {
+  return m_compositePresenter->getPeakSizeOnProjection();
+}
+
+double ProxyCompositePeaksPresenter::getPeakSizeIntoProjection() const {
+  return m_compositePresenter->getPeakSizeIntoProjection();
+}
 }
 }

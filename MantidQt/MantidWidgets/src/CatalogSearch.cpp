@@ -918,9 +918,9 @@ void CatalogSearch::investigationSelected(QTableWidgetItem *item) {
   // investigation.
   m_icatHelper->executeGetDataFiles(
       investigationId->text().toStdString(),
-      searchResultsTable->item(
-                            item->row(),
-                            headerIndexByName(searchResultsTable, "SessionID"))
+      searchResultsTable->item(item->row(),
+                               headerIndexByName(searchResultsTable,
+                                                 "SessionID"))
           ->text()
           .toStdString());
 
@@ -1086,17 +1086,15 @@ void CatalogSearch::updateDataFileLabels(QTableWidgetItem *item) {
   // Set the instrument label using data from the investigation results
   // workspace.
   m_icatUiForm.dataFileInstrumentRes->setText(
-      searchResultsTable->item(
-                            item->row(),
-                            headerIndexByName(searchResultsTable, "Instrument"))
-          ->text());
+      searchResultsTable->item(item->row(),
+                               headerIndexByName(searchResultsTable,
+                                                 "Instrument"))->text());
 
   // Show the related "run-range" for the specific dataFiles.
   m_icatUiForm.dataFileRunRangeRes->setText(
-      searchResultsTable->item(
-                            item->row(),
-                            headerIndexByName(searchResultsTable, "Run range"))
-          ->text());
+      searchResultsTable->item(item->row(),
+                               headerIndexByName(searchResultsTable,
+                                                 "Run range"))->text());
 }
 
 /**

@@ -1,6 +1,7 @@
 #include "MantidDataHandling/SaveDiffCal.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidDataHandling/H5Util.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 
@@ -26,17 +27,6 @@ using namespace H5;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveDiffCal)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveDiffCal::SaveDiffCal()
-    : m_numValues(0), m_calibrationWS(), m_detidToIndex() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveDiffCal::~SaveDiffCal() {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -108,86 +98,18 @@ std::map<std::string, std::string> SaveDiffCal::validateInputs() {
   return result;
 }
 
-namespace { // anonymous
-
-DataSpace getDataSpace(const size_t length) {
-  hsize_t dims[] = {length};
-  return DataSpace(1, dims);
-}
-
-template <typename NumT> DataSpace getDataSpace(const std::vector<NumT> &data) {
-  return getDataSpace(data.size());
-}
-
-/**
- * Sets up the chunking and compression rate.
- * @param length
- * @return The configured property list
- */
-DSetCreatPropList getPropList(const std::size_t length) {
-  DSetCreatPropList propList;
-  hsize_t chunk_dims[1] = {length};
-  propList.setChunk(1, chunk_dims);
-  propList.setDeflate(6);
-  return propList;
-}
-
-void writeStrAttribute(H5::Group &location, const std::string &name,
-                       const std::string &value) {
-  StrType attrType(0, H5T_VARIABLE);
-  DataSpace attrSpace(H5S_SCALAR);
-  auto groupAttr = location.createAttribute(name, attrType, attrSpace);
-  groupAttr.write(attrType, value);
-}
-
-void writeArray(H5::Group &group, const std::string &name,
-                const std::string &value) {
-  StrType dataType(0, value.length() + 1);
-  DataSpace dataSpace = getDataSpace(1);
-  H5::DataSet data = group.createDataSet(name, dataType, dataSpace);
-  data.write(value, dataType);
-}
-
-void writeArray(H5::Group &group, const std::string &name,
-                const std::vector<double> &values) {
-  DataType dataType(PredType::NATIVE_DOUBLE);
-  DataSpace dataSpace = getDataSpace(values);
-
-  DSetCreatPropList propList = getPropList(values.size());
-
-  auto data = group.createDataSet(name, dataType, dataSpace, propList);
-  data.write(&(values[0]), dataType);
-}
-
-void writeArray(H5::Group &group, const std::string &name,
-                const std::vector<int32_t> &values) {
-  DataType dataType(PredType::NATIVE_INT32);
-  DataSpace dataSpace = getDataSpace(values);
-
-  DSetCreatPropList propList = getPropList(values.size());
-
-  auto data = group.createDataSet(name, dataType, dataSpace, propList);
-  data.write(&(values[0]), dataType);
-}
-
-} // anonymous
-
 void SaveDiffCal::writeDoubleFieldFromTable(H5::Group &group,
                                             const std::string &name) {
   auto column = m_calibrationWS->getColumn(name);
-  std::vector<double> data;
-  column->numeric_fill(data);
-  data.erase(data.begin() + m_numValues, data.end());
-  writeArray(group, name, std::vector<double>(data));
+  auto data = column->numeric_fill<>(m_numValues);
+  H5Util::writeArray1D(group, name, data);
 }
 
 void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
                                          const std::string &name) {
   auto column = m_calibrationWS->getColumn(name);
-  std::vector<int32_t> data;
-  column->numeric_fill(data);
-  data.erase(data.begin() + m_numValues, data.end());
-  writeArray(group, name, std::vector<int32_t>(data));
+  auto data = column->numeric_fill<int32_t>(m_numValues);
+  H5Util::writeArray1D(group, name, data);
 }
 
 // TODO should flip for mask
@@ -195,41 +117,37 @@ void SaveDiffCal::writeIntFieldFromSVWS(
     H5::Group &group, const std::string &name,
     DataObjects::SpecialWorkspace2D_const_sptr ws) {
   auto detidCol = m_calibrationWS->getColumn("detid");
-  std::vector<detid_t> detids;
-  detidCol->numeric_fill(detids);
-  bool isMask = bool(boost::dynamic_pointer_cast<const MaskWorkspace>(ws));
+  const bool isMask = (name == "use");
 
   // output array defaults to all one (one group, use the pixel)
-  const int32_t DEFAULT_VALUE = (isMask ? 0 : 1);
-  std::vector<int32_t> values(m_numValues, DEFAULT_VALUE);
+  std::vector<int32_t> values(m_numValues, 1);
 
-  int32_t value;
-  for (size_t i = 0; i < m_numValues; ++i) {
-    auto spectrum = ws->getSpectrum(i);
-    auto ids = spectrum->getDetectorIDs();
-    auto found = m_detidToIndex.find(*(ids.begin()));
-    if (found != m_detidToIndex.end()) {
-      value = static_cast<int32_t>(ws->getValue(found->first));
-      // in maskworkspace 0=use, 1=dontuse
-      if (isMask) {
-        if (value == 0)
-          value = 1;
-        else
-          value = 0;
+  if (bool(ws)) {
+    for (size_t i = 0; i < m_numValues; ++i) {
+      auto &ids = ws->getSpectrum(i).getDetectorIDs();
+      auto found = m_detidToIndex.find(*(ids.begin()));
+      if (found != m_detidToIndex.end()) {
+        int32_t value = static_cast<int32_t>(ws->getValue(found->first));
+        // in maskworkspace 0=use, 1=dontuse - backwards from the file
+        if (isMask) {
+          if (value == 0)
+            value = 1;
+          else
+            value = 0;
+        }
+        values[found->second] = value;
       }
-      values[found->second] = value;
     }
   }
 
-  writeArray(group, name, values);
+  H5Util::writeArray1D(group, name, values);
 }
 
 void SaveDiffCal::generateDetidToIndex() {
   m_detidToIndex.clear();
 
   auto detidCol = m_calibrationWS->getColumn("detid");
-  std::vector<detid_t> detids;
-  detidCol->numeric_fill(detids);
+  auto detids = detidCol->numeric_fill<detid_t>();
 
   const size_t numDets = detids.size();
   for (size_t i = 0; i < numDets; ++i) {
@@ -272,8 +190,8 @@ void SaveDiffCal::exec() {
 
   H5File file(filename, H5F_ACC_EXCL);
 
-  auto calibrationGroup = file.createGroup("calibration");
-  writeStrAttribute(calibrationGroup, "NX_class", "NXentry");
+  auto calibrationGroup =
+      H5Util::createGroupNXS(file, "calibration", "NXentry");
 
   this->writeDoubleFieldFromTable(calibrationGroup, "difc");
   this->writeDoubleFieldFromTable(calibrationGroup, "difa");
@@ -314,12 +232,12 @@ void SaveDiffCal::exec() {
 
   // add the instrument information
   auto instrumentGroup = calibrationGroup.createGroup("instrument");
-  writeStrAttribute(instrumentGroup, "NX_class", "NXinstrument");
+  H5Util::writeStrAttribute(instrumentGroup, "NX_class", "NXinstrument");
   if (!instrumentName.empty()) {
-    writeArray(instrumentGroup, "name", instrumentName);
+    H5Util::write(instrumentGroup, "name", instrumentName);
   }
   if (!instrumentSource.empty()) {
-    writeArray(instrumentGroup, "instrument_source", instrumentSource);
+    H5Util::write(instrumentGroup, "instrument_source", instrumentSource);
   }
 
   file.close();

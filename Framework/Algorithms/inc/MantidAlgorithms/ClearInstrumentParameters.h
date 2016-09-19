@@ -36,8 +36,6 @@ namespace Algorithms {
 */
 class DLLExport ClearInstrumentParameters : public API::Algorithm {
 public:
-  ClearInstrumentParameters();
-  ~ClearInstrumentParameters() override;
   const std::string name() const override;
   const std::string summary() const override;
   const std::string category() const override;

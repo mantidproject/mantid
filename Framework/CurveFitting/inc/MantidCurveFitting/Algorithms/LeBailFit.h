@@ -75,7 +75,6 @@ public:
   enum FunctionMode { CALCULATION, FIT, BACKGROUNDPROCESS, MONTECARLO };
 
   LeBailFit();
-  ~LeBailFit() override;
 
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LeBailFit"; }

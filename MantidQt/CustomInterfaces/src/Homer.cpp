@@ -512,8 +512,8 @@ void Homer::runClicked() {
       m_saveChanged = false;
       saveSettings();
     }
-  } catch (std::invalid_argument
-               &e) { // can be caused by an invalid user entry that was detected
+  } catch (std::invalid_argument &
+               e) { // can be caused by an invalid user entry that was detected
     QMessageBox::critical(this, "", QString::fromStdString(e.what()));
   } catch (std::runtime_error &e) { // possibly a Python run time error
     QMessageBox::critical(

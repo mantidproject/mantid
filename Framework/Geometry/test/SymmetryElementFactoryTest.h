@@ -5,8 +5,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidGeometry/Crystal/SymmetryElementFactory.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidGeometry/Crystal/SymmetryElementFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -395,11 +396,12 @@ private:
   class TestableSymmetryElementWithAxisGenerator
       : public SymmetryElementWithAxisGenerator {
     friend class SymmetryElementFactoryTest;
-
+    GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(generateElement,
                        SymmetryElement_sptr(const SymmetryOperation &));
     MOCK_CONST_METHOD1(canProcess, bool(const SymmetryOperation &));
     MOCK_CONST_METHOD1(determineSymbol, std::string(const SymmetryOperation &));
+    GCC_DIAG_ON_SUGGEST_OVERRIDE
   };
 
   class TestableSymmetryElementRotationGenerator

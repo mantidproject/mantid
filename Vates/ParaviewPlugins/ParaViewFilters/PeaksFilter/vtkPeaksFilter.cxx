@@ -1,11 +1,12 @@
 #include "vtkPeaksFilter.h"
-#include "MantidVatesAPI/vtkDataSetToPeaksFilteredDataSet.h"
+
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
+#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/VatesConfigurations.h"
+#include "MantidVatesAPI/vtkDataSetToPeaksFilteredDataSet.h"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -21,16 +22,11 @@ vtkStandardNewMacro(vtkPeaksFilter)
 
 using namespace Mantid::VATES;
 
-vtkPeaksFilter::vtkPeaksFilter() : m_peaksWorkspaceNames(""),
-                                   m_delimiter(";"),
-                                   m_radiusNoShape(0.5),
-                                   m_radiusType(0),
-                                   m_minValue(0.1),
-                                   m_maxValue(0.1),
-                                   m_metadataJsonManager(new MetadataJsonManager()),
-                                   m_vatesConfigurations(new VatesConfigurations()),
-                                   m_coordinateSystem(0)
-{
+vtkPeaksFilter::vtkPeaksFilter()
+    : m_radiusNoShape(0.5), m_minValue(0.1), m_maxValue(0.1),
+      m_coordinateSystem(0), m_radiusType(Mantid::Geometry::PeakShape::Radius),
+      m_metadataJsonManager(new MetadataJsonManager()),
+      m_vatesConfigurations(new VatesConfigurations()) {
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);
 }
@@ -38,7 +34,6 @@ vtkPeaksFilter::vtkPeaksFilter() : m_peaksWorkspaceNames(""),
 vtkPeaksFilter::~vtkPeaksFilter()
 {
 }
-
 
 int vtkPeaksFilter::RequestData(vtkInformation*, vtkInformationVector **inputVector, vtkInformationVector *outputVector)
 {
@@ -68,17 +63,14 @@ int vtkPeaksFilter::RequestData(vtkInformation*, vtkInformationVector **inputVec
   {
   }
 
-  std::vector<std::string> peaksWorkspaceNames = extractPeakWorkspaceNames();
-  std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces = getPeaksWorkspaces(peaksWorkspaceNames);
-
-  if (peaksWorkspaces.empty())
-  {
+  if (m_peaksWorkspaces.empty()) {
     return 0;
   }
   FilterUpdateProgressAction<vtkPeaksFilter> drawingProgressUpdate(this, "Drawing...");
 
   vtkDataSetToPeaksFilteredDataSet peaksFilter(inputDataSet, outputDataSet);
-  peaksFilter.initialize(peaksWorkspaces, m_radiusNoShape, m_radiusType, m_coordinateSystem);
+  peaksFilter.initialize(m_peaksWorkspaces, m_radiusNoShape, m_radiusType,
+                         m_coordinateSystem);
   peaksFilter.execute(drawingProgressUpdate);
   return 1;
 }
@@ -120,10 +112,13 @@ void vtkPeaksFilter::PrintSelf(ostream& os, vtkIndent indent)
 /**
  * Set the peaks workspace name
  * @param peaksWorkspaceName The peaks workspace name.
+ * @param delimiter The workspace name delimiter
 */
-void vtkPeaksFilter::SetPeaksWorkspace(std::string peaksWorkspaceName)
-{
-  m_peaksWorkspaceNames = peaksWorkspaceName;
+void vtkPeaksFilter::SetPeaksWorkspace(const std::string &peaksWorkspaceName,
+                                       const std::string &delimiter) {
+  auto tokenizedNames =
+      Mantid::Kernel::StringTokenizer(peaksWorkspaceName, delimiter);
+  m_peaksWorkspaces = getPeaksWorkspaces(tokenizedNames);
   this->Modified();
 }
 
@@ -141,9 +136,8 @@ void vtkPeaksFilter::SetRadiusNoShape(double radius)
  * Set the radius type.
  * @param type The type of the radius
  */
-void vtkPeaksFilter::SetRadiusType(int type)
-{
-  m_radiusType = type;
+void vtkPeaksFilter::SetRadiusType(int type) {
+  m_radiusType = static_cast<Mantid::Geometry::PeakShape::RadiusType>(type);
   this->Modified();
 }
 
@@ -159,55 +153,24 @@ void vtkPeaksFilter::updateAlgorithmProgress(double progress, const std::string&
 }
 
 /**
- * Extract the names of the peaks workspaces.
- * @returns A list of peaks workspace names.
- */
-std::vector<std::string> vtkPeaksFilter::extractPeakWorkspaceNames()
-{
-  // Split the string in to bits 
-  size_t pos = 0;
-  std::string peakNames = m_peaksWorkspaceNames;
-  std::vector<std::string> peaksWorkspaceNamesList;
-  std::string token;
-  while ((pos = peakNames.find(m_delimiter)) != std::string::npos) {
-      token = peakNames.substr(0, pos);
-      peaksWorkspaceNamesList.push_back(token);
-      peakNames.erase(0, pos + m_delimiter.length());
-  }
-
-  // If there was only one element in there then push it
-  peaksWorkspaceNamesList.push_back(peakNames);
-
-  return peaksWorkspaceNamesList;
-}
-
-/**
- * Set the delimiter for concatenated workspace names.
- * @param delimiter The workspace name delimiter
- */
-void vtkPeaksFilter::SetDelimiter(std::string delimiter){
-  m_delimiter = delimiter;
-  this->Modified();
-}
-
-/**
   * Get a list of peaks workspace pointers
   * @returns A list of peaks workspace pointers.
   */
-std::vector<Mantid::API::IPeaksWorkspace_sptr> vtkPeaksFilter::getPeaksWorkspaces(std::vector<std::string> peaksWorkspaceNames)
-{
+std::vector<Mantid::API::IPeaksWorkspace_sptr>
+vtkPeaksFilter::getPeaksWorkspaces(
+    const Mantid::Kernel::StringTokenizer &workspaceNames) {
+
+  Mantid::API::AnalysisDataServiceImpl &ADS =
+      Mantid::API::AnalysisDataService::Instance();
+
   std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces;
-
-  for (std::vector<std::string>::iterator it = peaksWorkspaceNames.begin(); it != peaksWorkspaceNames.end(); ++it)
-  {
+  for (const auto &name : workspaceNames) {
     // Check if the peaks workspace exists
-    if (!Mantid::API::AnalysisDataService::Instance().doesExist(*it))
-    {
-      continue;
+    if (ADS.doesExist(name)) {
+      peaksWorkspaces.push_back(
+          ADS.retrieveWS<Mantid::API::IPeaksWorkspace>(name));
     }
-    peaksWorkspaces.push_back(Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::IPeaksWorkspace>(*it));
   }
-
   return peaksWorkspaces;
 }
 

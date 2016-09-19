@@ -96,8 +96,7 @@ double FitParameter::getValue(const double &at) const {
     } catch (mu::Parser::exception_type &e) {
       g_log.error() << "Cannot evaluate fitting parameter formula."
                     << " Formula which cannot be passed is " << m_formula
-                    << ". Muparser error message is: " << e.GetMsg()
-                    << std::endl;
+                    << ". Muparser error message is: " << e.GetMsg() << '\n';
     }
   }
 
@@ -120,7 +119,6 @@ void FitParameter::printSelf(std::ostream &os) const {
      << m_constraintPenaltyFactor << " , " << m_tie << " , " << m_formula
      << " , " << m_formulaUnit << " , " << m_resultUnit << " , "
      << m_lookUpTable;
-  return;
 }
 
 /**
@@ -176,7 +174,7 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
         << "Expecting a comma separated list of at each three entries"
         << " (any of which may be empty strings) to set information about a "
            "fitting parameter"
-        << " instead of: " << str << std::endl;
+        << " instead of: " << str << '\n';
     return in;
   }
 
@@ -188,7 +186,7 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
     if (!values.at(0).empty()) {
       g_log.warning() << "Could not read " << values[0] << " as double for "
                       << " fitting parameter: " << values[1] << ":" << values[2]
-                      << std::endl;
+                      << '\n';
     }
   }
 

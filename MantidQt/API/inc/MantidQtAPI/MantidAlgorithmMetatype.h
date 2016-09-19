@@ -6,11 +6,11 @@
 
 /**
 
- Declare Qt metatype for IAlgorithm_sptr to allow its direct use with signals and slots.
+ Declare Qt metatype for IAlgorithm_sptr to allow its direct use with signals
+ and slots.
 
  */
 
 Q_DECLARE_METATYPE(Mantid::API::IAlgorithm_sptr)
-
 
 #endif /* MANTIDALGORITHMMETATYPE_H */

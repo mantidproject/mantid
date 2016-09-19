@@ -39,6 +39,7 @@
 
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_blas.h>
+#include <gsl/gsl_version.h>
 
 #include <QApplication>
 #include <QMessageBox>
@@ -141,7 +142,14 @@ gsl_multifit_fdfsolver *Fit::fitGSL(gsl_multifit_function_fdf f,
     status = gsl_multifit_test_delta(s->dx, s->x, d_tolerance, d_tolerance);
   } while (inRange && status == GSL_CONTINUE && (int)iter < d_max_iterations);
 
+#if GSL_MAJOR_VERSION < 2
   gsl_multifit_covar(s->J, 0.0, covar);
+#else
+  gsl_matrix *J = gsl_matrix_alloc(d_n, d_p);
+  gsl_multifit_fdfsolver_jac(s, J);
+  gsl_multifit_covar(J, 0.0, covar);
+  gsl_matrix_free(J);
+#endif
   iterations = static_cast<int>(iter);
   return s;
 }
@@ -467,7 +475,7 @@ bool Fit::setWeightingData(WeightingMethod w, const QString &colName) {
       d_w[i] = sqrt(d_y[i]);
   } break;
   case Dataset: // Dataset weighting
-  { // d_w are equal to the values of the arbitrary dataset
+  {             // d_w are equal to the values of the arbitrary dataset
     if (colName.isEmpty())
       return false;
 
@@ -476,10 +484,10 @@ bool Fit::setWeightingData(WeightingMethod w, const QString &colName) {
       return false;
 
     if (t->numRows() < d_n) {
-      QMessageBox::critical(app, tr("MantidPlot - Error"),
-                            tr("The column %1 has less points than the fitted "
-                               "data set. Please choose another column!.")
-                                .arg(colName));
+      QMessageBox::critical(
+          app, tr("MantidPlot - Error"),
+          tr("The column %1 has less points than the fitted "
+             "data set. Please choose another column!.").arg(colName));
       return false;
     }
 
@@ -507,8 +515,7 @@ Table *Fit::parametersTable(const QString &tableName) {
         app->newTable(app->generateUniqueName(tableName, false), d_p, 3);
   }
 
-  d_param_table->setHeader(QStringList() << tr("Parameter") << tr("Value")
-                                         << tr("Error"));
+  d_param_table->setHeader({tr("Parameter"), tr("Value"), tr("Error")});
   d_param_table->setColPlotDesignation(2, Table::yErr);
   d_param_table->setHeaderColType();
 
@@ -611,8 +618,7 @@ void Fit::fit() {
   if (d_p > d_n) {
     QMessageBox::critical(app, tr("MantidPlot - Fit Error"),
                           tr("You need at least %1 data points for this fit "
-                             "operation. Operation aborted!")
-                              .arg(d_p));
+                             "operation. Operation aborted!").arg(d_p));
     return;
   }
   if (d_formula.isEmpty()) {
@@ -624,17 +630,12 @@ void Fit::fit() {
 
   QApplication::setOverrideCursor(Qt::WaitCursor);
 
-  const char *function = d_formula.ascii();
+  const char *function = d_formula.toAscii().constData();
   QString names = d_param_names.join(",");
-  const char *parNames = names.ascii();
+  const char *parNames = names.toAscii().constData();
 
-  struct FitData d_data = {static_cast<size_t>(d_n),
-                           static_cast<size_t>(d_p),
-                           d_x,
-                           d_y,
-                           d_w,
-                           function,
-                           parNames};
+  struct FitData d_data = {static_cast<size_t>(d_n), static_cast<size_t>(d_p),
+                           d_x, d_y, d_w, function, parNames};
 
   int status, iterations = d_max_iterations;
   if (d_solver == NelderMeadSimplex) {
@@ -732,8 +733,7 @@ bool Fit::save(const QString &fileName) {
     QMessageBox::critical(
         0, tr("MantidPlot") + " - " + tr("File Save Error"),
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
-           "you have the right to write to this location!")
-            .arg(fileName));
+           "you have the right to write to this location!").arg(fileName));
     return false;
   }
 

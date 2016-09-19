@@ -339,6 +339,7 @@ public:
   void testPartialSpectraLoading() {
     LoadMuonNexus1 alg1;
     LoadMuonNexus1 alg2;
+    inputFile = "emu00006473.nxs";
 
     const std::string deadTimeWSName = "LoadMuonNexus1Test_DeadTimes";
     const std::string groupingWSName = "LoadMuonNexus1Test_Grouping";
@@ -434,6 +435,41 @@ public:
     testVec.push_back(31);
     TS_ASSERT_EQUALS(groupingTable->cell<std::vector<int>>(1, 0), testVec);
     AnalysisDataService::Instance().remove(groupingWSName);
+  }
+
+  void testPartialSpectraLoading_spectrumNumbers_detectorIDs() {
+    LoadMuonNexus1 alg;
+
+    // It will only load some spectra
+    try {
+      alg.initialize();
+      alg.setChild(true);
+      alg.setPropertyValue("Filename", "emu00006473.nxs");
+      alg.setPropertyValue("OutputWorkspace", "__NotUsed");
+      alg.setPropertyValue("SpectrumList", "29,31");
+      alg.setPropertyValue("SpectrumMin", "5");
+      alg.setPropertyValue("SpectrumMax", "10");
+      alg.execute();
+    } catch (const std::exception &ex) {
+      TS_FAIL(std::string("Loading failed: ") + ex.what());
+    }
+
+    Workspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    const auto loadedWS = boost::dynamic_pointer_cast<Workspace2D>(outWS);
+    TS_ASSERT(loadedWS);
+
+    // Check the right spectra have been loaded
+    const std::vector<Mantid::specnum_t> expectedSpectra{5, 6,  7,  8,
+                                                         9, 10, 29, 31};
+    TS_ASSERT_EQUALS(loadedWS->getNumberHistograms(), expectedSpectra.size());
+    for (size_t i = 0; i < loadedWS->getNumberHistograms(); ++i) {
+      const auto spec = loadedWS->getSpectrum(i);
+      TS_ASSERT_EQUALS(spec.getSpectrumNo(), expectedSpectra[i]);
+      // detector ID = spectrum number for muon Nexus v1
+      const auto detIDs = spec.getDetectorIDs();
+      TS_ASSERT_EQUALS(detIDs.size(), 1);
+      TS_ASSERT_EQUALS(*detIDs.begin(), static_cast<int>(spec.getSpectrumNo()));
+    }
   }
 
   void test_loadingDeadTimes_singlePeriod() {
@@ -827,6 +863,131 @@ public:
 
     checkProperty(run, "sample_temp", 280.0);
     checkProperty(run, "sample_magn_field", 20.0);
+  }
+
+  /**
+   * CHRONUS0003422.nxs has no grouping entry in the file
+   * Test loading grouping from this file
+   */
+  void test_loadingDetectorGrouping_missingGrouping() {
+    LoadMuonNexus1 alg;
+    try {
+      alg.initialize();
+      alg.setChild(true);
+      alg.setPropertyValue("Filename", "CHRONUS00003422.nxs");
+      alg.setPropertyValue("OutputWorkspace", "__NotUsed");
+      alg.setPropertyValue("DetectorGroupingTable", "__Grouping");
+      alg.execute();
+    } catch (const std::exception &error) {
+      TS_FAIL(error.what());
+    }
+
+    Workspace_sptr grouping;
+    TS_ASSERT_THROWS_NOTHING(grouping =
+                                 alg.getProperty("DetectorGroupingTable"));
+    const auto detectorGrouping =
+        boost::dynamic_pointer_cast<TableWorkspace>(grouping);
+
+    if (detectorGrouping) {
+      TS_ASSERT_EQUALS(detectorGrouping->columnCount(), 1);
+      TS_ASSERT_EQUALS(detectorGrouping->rowCount(), 2);
+
+      TS_ASSERT_EQUALS(detectorGrouping->getColumn(0)->type(), "vector_int");
+      TS_ASSERT_EQUALS(detectorGrouping->getColumn(0)->name(), "Detectors");
+
+      std::vector<int> fwd, bwd;
+      TS_ASSERT_THROWS_NOTHING(
+          fwd = detectorGrouping->cell<std::vector<int>>(0, 0));
+      TS_ASSERT_THROWS_NOTHING(
+          bwd = detectorGrouping->cell<std::vector<int>>(1, 0));
+
+      TS_ASSERT_EQUALS(fwd.size(), 304);
+      TS_ASSERT_EQUALS(bwd.size(), 302);
+
+      for (const int det : fwd) {
+        TS_ASSERT_EQUALS(det % 2, 1);
+      }
+      for (const int det : bwd) {
+        TS_ASSERT_EQUALS(det % 2, 0);
+      }
+    } else {
+      TS_FAIL("Loaded grouping was null");
+    }
+  }
+
+  /**
+    * EMU00019489.nxs has a grouping entry in the file, but it is
+    * filled with zeros.
+    * Test loading grouping from this file
+    */
+  void test_loadingDetectorGrouping_zeroGrouping() {
+    LoadMuonNexus1 alg;
+    try {
+      alg.initialize();
+      alg.setChild(true);
+      alg.setPropertyValue("Filename", "EMU00019489.nxs");
+      alg.setPropertyValue("OutputWorkspace", "__NotUsed");
+      alg.setPropertyValue("DetectorGroupingTable", "__Grouping");
+      alg.execute();
+    } catch (const std::exception &error) {
+      TS_FAIL(error.what());
+    }
+
+    Workspace_sptr grouping;
+    TS_ASSERT_THROWS_NOTHING(grouping =
+                                 alg.getProperty("DetectorGroupingTable"));
+    const auto detectorGrouping =
+        boost::dynamic_pointer_cast<TableWorkspace>(grouping);
+
+    if (detectorGrouping) {
+      TS_ASSERT_EQUALS(detectorGrouping->columnCount(), 1);
+      TS_ASSERT_EQUALS(detectorGrouping->rowCount(), 2);
+
+      TS_ASSERT_EQUALS(detectorGrouping->getColumn(0)->type(), "vector_int");
+      TS_ASSERT_EQUALS(detectorGrouping->getColumn(0)->name(), "Detectors");
+
+      std::vector<int> fwd, bwd;
+      TS_ASSERT_THROWS_NOTHING(
+          fwd = detectorGrouping->cell<std::vector<int>>(0, 0));
+      TS_ASSERT_THROWS_NOTHING(
+          bwd = detectorGrouping->cell<std::vector<int>>(1, 0));
+
+      TS_ASSERT_EQUALS(fwd.size(), 48);
+      TS_ASSERT_EQUALS(bwd.size(), 48);
+
+      for (int i = 0; i < 48; i++) {
+        TS_ASSERT_EQUALS(fwd[i], i + 1);
+        TS_ASSERT_EQUALS(bwd[i], i + 49);
+      }
+    } else {
+      TS_FAIL("Loaded grouping was null");
+    }
+  }
+
+  /**
+   * Some old data does not have run/instrument/beam/frames_good.
+   * Test that we can use run/instrument/beam/frames in this case to get a
+   * goodfrm value.
+   * Example file: MUT53591
+   */
+  void test_loadingNumGoodFrames_notPresent() {
+    LoadMuonNexus1 alg;
+    ScopedWorkspace outWsEntry;
+    try {
+      alg.initialize();
+      alg.setPropertyValue("Filename", "MUT00053591.NXS");
+      alg.setPropertyValue("OutputWorkspace", outWsEntry.name());
+      alg.execute();
+    } catch (const std::exception &error) {
+      TS_FAIL(error.what());
+    }
+    Workspace_sptr outWs = outWsEntry.retrieve();
+    TS_ASSERT(outWs);
+    const auto matrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>(outWs);
+    TS_ASSERT(matrixWs);
+    if (matrixWs) {
+      checkProperty(matrixWs->run(), "goodfrm", 65500);
+    }
   }
 
 private:

@@ -36,9 +36,6 @@ namespace Crystal {
   */
 class DLLExport FindUBUsingIndexedPeaks : public API::Algorithm {
 public:
-  FindUBUsingIndexedPeaks();
-  ~FindUBUsingIndexedPeaks() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "FindUBUsingIndexedPeaks"; };
 

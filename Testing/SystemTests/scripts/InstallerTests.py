@@ -5,6 +5,8 @@ import sys
 import platform
 import shutil
 import subprocess
+import sys
+
 from getopt import getopt
 
 from mantidinstaller import (createScriptLog, log, stop, failure, scriptfailure, 
@@ -71,13 +73,6 @@ if doInstall:
 else:
     installer.no_uninstall = True
 
-# Ensure MANTIDPATH points at this directory so that 
-# the correct properties file is loaded              
-mantidPlotDir = os.path.dirname(installer.mantidPlotPath)
-log('MantidPlot directory %s' % mantidPlotDir)
-log('Pointing MANTIDPATH at MantidPlot directory %s' % mantidPlotDir)
-os.environ["MANTIDPATH"] = mantidPlotDir
-
 try:
     # Keep hold of the version that was run
     version = run(installer.mantidPlotPath + ' -v')
@@ -100,12 +95,13 @@ except Exception, err:
 
 log("Running system tests. Log files are: '%s' and '%s'" % (testRunLogPath,testRunErrPath))
 try:
-    # Pick the correct Mantid along with the bundled python on windows
-    run_test_cmd = "%s %s/runSystemTests.py --loglevel=%s --mantidpath=%s" % \
-                (installer.python_cmd, THIS_MODULE_DIR, log_level, mantidPlotDir)
+    run_test_cmd = '%s %s %s/runSystemTests.py --loglevel=%s --executable="%s" --exec-args="%s"' % \
+                (installer.python_cmd,  installer.python_args,
+                 THIS_MODULE_DIR, log_level, installer.python_cmd, installer.python_args)
     if test_regex is not None:
         run_test_cmd += " -R " + test_regex
     if out2stdout:
+        print "Executing command '{0}'".format(run_test_cmd)
         p = subprocess.Popen(run_test_cmd, shell=True) # no PIPE: print on screen for debugging
         p.wait()
     else:

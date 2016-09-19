@@ -7,12 +7,11 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/DataItem.h"
 #include "MantidKernel/Logger.h"
+
 #ifndef Q_MOC_RUN
 #include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/type_traits/is_convertible.hpp>
-#include <boost/type_traits/is_pointer.hpp>
 #endif
 #include <vector>
 #include <string>
@@ -31,11 +30,12 @@ typedef boost::shared_ptr<IValidator> IValidator_sptr;
 namespace {
 /// Helper object to determine if a type is either a pointer/shared_ptr
 /// Generic implementation says it is not
-template <class T> struct IsPtrType : public boost::is_pointer<T> {};
+template <class T> struct IsPtrType : public std::is_pointer<T> {};
 /// Helper object to determine if a type is either a pointer/shared_ptr
 /// Specialized implementation for shared_ptr
 template <class T>
-struct IsPtrType<boost::shared_ptr<T>> : public boost::true_type {};
+struct IsPtrType<boost::shared_ptr<T>> : public std::true_type {};
+template <> struct IsPtrType<decltype(nullptr)> : public std::true_type {};
 }
 
 /** IValidator is the basic interface for all validators for properties
@@ -106,6 +106,11 @@ public:
     return std::vector<std::string>();
   }
 
+  /** Is Multiple Selection Allowed
+  *  @return true if multiple selection is allowed
+  */
+  virtual bool isMultipleSelectionAllowed() { return false; };
+
   /**
    * Implement this method for validators which wish to support aliasing for
    * alloeed values.
@@ -136,7 +141,7 @@ private:
    * error
    */
   template <typename T>
-  std::string runCheck(const T &value, const boost::false_type &) const {
+  std::string runCheck(const T &value, const std::false_type &) const {
     const T *valuePtr =
         &value; // Avoid a copy by storing the pointer in the any holder
     return check(boost::any(valuePtr));
@@ -148,9 +153,11 @@ private:
    * error
    */
   template <typename T>
-  std::string runCheck(const T &value, const boost::true_type &) const {
-    return runCheckWithDataItemPtr(value,
-                                   boost::is_convertible<T, DataItem_sptr>());
+  std::string runCheck(const T &value, const std::true_type &) const {
+    return runCheckWithDataItemPtr(
+        value, std::integral_constant < bool,
+        std::is_convertible<T, DataItem_sptr>::value &&
+            !std::is_same<T, decltype(nullptr)>::value > ());
   }
   /** Calls the validator for a pointer type that is NOT convertible to
    * DataItem_sptr
@@ -160,7 +167,7 @@ private:
    */
   template <typename T>
   std::string runCheckWithDataItemPtr(const T &value,
-                                      const boost::false_type &) const {
+                                      const std::false_type &) const {
     return check(boost::any(value));
   }
   /** Calls the validator for a pointer type that IS convertible to
@@ -171,7 +178,7 @@ private:
    */
   template <typename T>
   std::string runCheckWithDataItemPtr(const T &value,
-                                      const boost::true_type &) const {
+                                      const std::true_type &) const {
     return check(boost::any(boost::static_pointer_cast<DataItem>(value)));
   }
 };

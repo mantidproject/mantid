@@ -22,18 +22,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(CreateLogTimeCorrection)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateLogTimeCorrection::CreateLogTimeCorrection()
-    : API::Algorithm(), m_dataWS(), m_instrument(), m_l2map(),
-      m_correctionMap(), m_L1(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateLogTimeCorrection::~CreateLogTimeCorrection() {}
-
-//----------------------------------------------------------------------------------------------
 /** Declare properties
  */
 void CreateLogTimeCorrection::init() {
@@ -49,8 +37,6 @@ void CreateLogTimeCorrection::init() {
   declareProperty(Kernel::make_unique<FileProperty>("OutputFilename", "",
                                                     FileProperty::OptionalSave),
                   "Name of the output time correction file.");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -188,8 +174,6 @@ void CreateLogTimeCorrection::writeCorrectionToFile(string filename) {
   } else {
     g_log.error() << "Unable to open file " << filename << " to write!\n";
   }
-
-  return;
 }
 
 } // namespace Algorithms

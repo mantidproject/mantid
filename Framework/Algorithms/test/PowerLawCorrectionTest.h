@@ -111,7 +111,7 @@ public:
     TS_ASSERT(evout); // should be an event workspace
     for (size_t i = 0; i < 5; ++i) {
       double t = static_cast<double>(i) + 0.5;
-      TS_ASSERT_DELTA(evout->getEventList(0).getEvent(i).m_weight, 3. * t * t,
+      TS_ASSERT_DELTA(evout->getSpectrum(0).getEvent(i).m_weight, 3. * t * t,
                       1e-8);
     }
 

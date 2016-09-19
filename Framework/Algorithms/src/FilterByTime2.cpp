@@ -11,16 +11,6 @@ using namespace Mantid::API;
 namespace Mantid {
 namespace Algorithms {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-FilterByTime2::FilterByTime2() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FilterByTime2::~FilterByTime2() {}
-
 //-----------------------------------------------------------------------
 void FilterByTime2::init() {
   std::string commonHelp("\nYou can only specify the relative or absolute "
@@ -71,11 +61,10 @@ void FilterByTime2::exec() {
   DataObjects::EventWorkspace_const_sptr inWS =
       this->getProperty("InputWorkspace");
   if (!inWS) {
-    g_log.error() << "Input is not EventWorkspace" << std::endl;
+    g_log.error() << "Input is not EventWorkspace\n";
     throw std::invalid_argument("Input is not EventWorksapce");
   } else {
-    g_log.debug() << "DB5244 InputWorkspace Name = " << inWS->getName()
-                  << std::endl;
+    g_log.debug() << "DB5244 InputWorkspace Name = " << inWS->getName() << '\n';
   }
 
   double starttime = this->getProperty("StartTime");
@@ -105,7 +94,7 @@ void FilterByTime2::exec() {
 
   // 1. Generate Filters
   g_log.debug() << "\nDB441: About to generate Filter.  StartTime = "
-                << starttime << "  StopTime = " << stoptime << std::endl;
+                << starttime << "  StopTime = " << stoptime << '\n';
 
   API::Algorithm_sptr genfilter =
       createChildAlgorithm("GenerateEventsFilter", 0.0, 20.0, true, 1);
@@ -119,16 +108,16 @@ void FilterByTime2::exec() {
 
   bool sucgen = genfilter->execute();
   if (!sucgen) {
-    g_log.error() << "Unable to generate event filters" << std::endl;
+    g_log.error() << "Unable to generate event filters\n";
     throw std::runtime_error("Unable to generate event filters");
   } else {
-    g_log.debug() << "Filters are generated. " << std::endl;
+    g_log.debug() << "Filters are generated. \n";
   }
 
   API::Workspace_sptr filterWS = genfilter->getProperty("OutputWorkspace");
   if (!filterWS) {
     g_log.error() << "Unable to retrieve generated SplittersWorkspace object "
-                     "from AnalysisDataService." << std::endl;
+                     "from AnalysisDataService.\n";
     throw std::runtime_error("Unable to retrieve Splittersworkspace. ");
   }
 
@@ -146,10 +135,10 @@ void FilterByTime2::exec() {
 
   bool sucfilt = filter->execute();
   if (!sucfilt) {
-    g_log.error() << "Unable to filter events" << std::endl;
+    g_log.error() << "Unable to filter events\n";
     throw std::runtime_error("Unable to filter events");
   } else {
-    g_log.debug() << "Filter events is successful. " << std::endl;
+    g_log.debug() << "Filter events is successful. \n";
   }
 
   DataObjects::EventWorkspace_sptr optws =

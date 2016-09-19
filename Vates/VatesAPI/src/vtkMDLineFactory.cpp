@@ -17,6 +17,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 
+#include <cmath>
+
 using namespace Mantid::API;
 
 namespace {
@@ -68,7 +70,7 @@ vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
     /*
     Write mask array with correct order for each internal dimension.
     */
-        auto masks = Mantid::Kernel::make_unique<bool[]>(nDims);
+    auto masks = Mantid::Kernel::make_unique<bool[]>(nDims);
     for (size_t i_dim = 0; i_dim < nDims; ++i_dim) {
       bool bIntegrated = imdws->getDimension(i_dim)->getIsIntegrated();
       masks[i_dim] =
@@ -113,12 +115,12 @@ vtkMDLineFactory::create(ProgressAction &progressUpdating) const {
       progressUpdating.eventRaised(double(iBox) * progressFactor);
 
       Mantid::signal_t signal_normalized = it->getNormalizedSignal();
-      if (!isSpecial(signal_normalized) &&
+      if (std::isfinite(signal_normalized) &&
           m_thresholdRange->inRange(signal_normalized)) {
         useBox[iBox] = true;
         signals->InsertNextValue(static_cast<float>(signal_normalized));
 
-        auto coords = std::unique_ptr<coord_t>(
+        auto coords = std::unique_ptr<coord_t[]>(
             it->getVertexesArray(nVertexes, nNonIntegrated, masks.get()));
 
         // Iterate through all coordinates. Candidate for speed improvement.

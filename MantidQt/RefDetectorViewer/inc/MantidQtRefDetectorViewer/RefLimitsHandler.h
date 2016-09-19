@@ -3,13 +3,12 @@
 
 #include "ui_RefImageView.h"
 
-namespace MantidQt
-{
-namespace RefDetectorViewer
-{
+namespace MantidQt {
+namespace RefDetectorViewer {
 /** Retrieves the states of the peak/background/TOF limit settings from the gui
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -29,11 +28,10 @@ namespace RefDetectorViewer
     Code Documentation is available at <http://doxygen.mantidproject.org>
  */
 
-class RefLimitsHandler
-{
+class RefLimitsHandler {
 public:
   /// Construct object to manage range (peak/back/TOF) controls in the UI
-  RefLimitsHandler( Ui_RefImageViewer* ivUI );
+  RefLimitsHandler(Ui_RefImageViewer *ivUI);
 
   /// get peak, back and tof values
   int getPeakLeft() const;
@@ -53,8 +51,7 @@ public:
   void setActiveValue(const double x, const double y);
 
 private:
-  const Ui_RefImageViewer* const m_ui;
-
+  const Ui_RefImageViewer *const m_ui;
 };
 
 } // namespace RefDetectorViewer

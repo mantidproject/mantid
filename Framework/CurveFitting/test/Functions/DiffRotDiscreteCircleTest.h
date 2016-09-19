@@ -579,7 +579,7 @@ private:
 
     // Set the instrument and spec-det mapping
     ws->setInstrument(inst);
-    ws->getSpectrum(0)->addDetectorID(det->getID());
+    ws->getSpectrum(0).addDetectorID(det->getID());
 
     // Set emergy mode and fixed energy
     ws->mutableRun().addLogData(

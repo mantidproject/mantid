@@ -95,6 +95,16 @@ namespace API {
 
   ------------------------------------------------------------------------------------------------------
 
+  The value returned by getProperty is of type
+  std::vector<std::vector<std::string>>. While the property itself does
+  expand ranges, the value needs some intepretation by the client code.
+  Specifically, values inside the same std::vector<std::string> should
+  be added together, while values between them should be treated
+  separately. In other words, if the value was [[a1,a2], [b1,b2]]. The
+  results should be two workspaces, a1+a2 and b1+b2.
+
+  ------------------------------------------------------------------------------------------------------
+
   Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
@@ -144,11 +154,6 @@ public:
   // Unhide the PropertyWithValue assignment operator
   using Kernel::PropertyWithValue<std::vector<std::vector<std::string>>>::
   operator=;
-
-  /// Return a "flattened" vector with the contents of the given vector of
-  /// vectors.
-  static std::vector<std::string>
-  flattenFileNames(const std::vector<std::vector<std::string>> &fileNames);
 
 private:
   std::string setValueAsSingleFile(const std::string &propValue);

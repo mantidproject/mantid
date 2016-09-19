@@ -19,8 +19,8 @@ Description
 Allows to calibrate or correct for variations in detector position
 parameters. It does this by fitting the peaks for each of the selected
 bank's detector indices, (using :ref:`algm-EnggFitPeaks` as a child
-algorithm) and using the resulting difc values to calibrate the
-detector positions.
+algorithm) and using the resulting DIFC (GSAS calibration parameter)
+values to calibrate the detector positions.
 
 This algorithm produces a table with calibration information,
 including calibrated or corrected positions and parameters. This
@@ -35,8 +35,8 @@ The output table has one row per detector where each row gives the
 original position before calibration (as a V3D point, x-y-z values),
 the new calibrated position (as V3D) and the calibrated spherical
 co-ordinates (L2, :math:`2 \theta`, :math:`\phi`). It also gives the
-variation in the L2 position, and the 'difc' and 'zero' calibration
-parameters.
+variation in the L2 position, and the 'DIFA', 'DIFC' and 'TZERO'
+calibration parameters as used in GSAS and other Mantid algorithms.
 
 The result of the calibration (the output table given in
 OutDetPosTable) is accepted by both :ref:`algm-EnggCalibrate` and
@@ -47,14 +47,14 @@ to apply the calibration calculated by this algorithm on any other
 workspace by using the algorithm :ref:`algm-ApplyCalibration`.
 
 In the output table the calibrated positions for every detector are
-found by calculating the *L2* values from the *difc* values as
+found by calculating the *L2* values from the *DIFC* values as
 follows:
 
-.. math:: L2 = \left(\frac{Difc} { 252.816 * 2 * sin \left(\frac{2\theta} {2.0}\right)}\right) - 50
+.. math:: L2 = \left(\frac{DIFC} { 252.816 * 2 * sin \left(\frac{2\theta} {2.0}\right)}\right) - 50
 
-where the *difc* values are obtained from the fitting of expected
+where the *DIFC* values are obtained from the fitting of expected
 peaks. See the algorithm :ref:`algm-EnggFitPeaks` for details on how
-*difc* and other calibration parameters are calculated.
+*DIFC* and other calibration parameters are calculated.
 
 This algorithm expects as input/output workspace the *long*
 calibration run, which provides a decent pattern for every detector or
@@ -76,7 +76,7 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - Calculate corrected positions, and difc and zero, for Engg:**
+**Example - Calculate corrected positions, using the DIFC parameter, for the EnginX instrument:**
 
 .. testcode:: ExCalFull
 

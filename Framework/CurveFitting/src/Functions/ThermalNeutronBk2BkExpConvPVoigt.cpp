@@ -121,8 +121,6 @@ void ThermalNeutronBk2BkExpConvPVoigt::init() {
 
   // Set flag
   m_cellParamValueChanged = true;
-
-  return;
 }
 
 //------------- Public Functions (Overwrite) Set/Get
@@ -333,8 +331,6 @@ void ThermalNeutronBk2BkExpConvPVoigt::calculateParameters(
 
   // Reset the flag
   m_hasNewParameterValue = false;
-
-  return;
 }
 
 //------------- Private Functions (Overwrite) Calculation
@@ -357,7 +353,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double *out,
 
   double peakrange = m_fwhm * PEAKRANGE;
 
-  // cout << "DBx212:  eta = " << eta << ", gamma = " << gamma << endl;
+  // cout << "DBx212:  eta = " << eta << ", gamma = " << gamma << '\n';
 
   double invert_sqrt2sigma = 1.0 / sqrt(2.0 * m_Sigma2);
 
@@ -405,8 +401,6 @@ void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double *out,
     // PARALLEL_END_INTERUPT_REGION
   } // ENDFOR data points
   // PARALLEL_CHECK_INTERUPT_REGION
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -445,8 +439,6 @@ void ThermalNeutronBk2BkExpConvPVoigt::function(
                                  m_fwhm, m_Sigma2, INVERT_SQRT2SIGMA);
     pos++;
   } // ENDFOR data points
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -514,7 +506,7 @@ void ThermalNeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma,
                                                   double &H,
                                                   double &eta) const {
   // 1. Calculate H
-  double H_G = sqrt(8.0 * sigma2 * log(2.0));
+  double H_G = sqrt(8.0 * sigma2 * M_LN2);
   double H_L = gamma;
 
   double temp1 = std::pow(H_L, 5) + 0.07842 * H_G * std::pow(H_L, 4) +
@@ -533,8 +525,6 @@ void ThermalNeutronBk2BkExpConvPVoigt::calHandEta(double sigma2, double gamma,
     g_log.warning() << "Calculated eta = " << eta
                     << " is out of range [0, 1].\n";
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -589,7 +579,7 @@ double ThermalNeutronBk2BkExpConvPVoigt::calOmega(
     }
   }
 
-  // cout << "[DB] Final Value = " << omega << endl;
+  // cout << "[DB] Final Value = " << omega << '\n';
   return omega;
 }
 
@@ -613,8 +603,6 @@ void ThermalNeutronBk2BkExpConvPVoigt::setParameter(size_t i,
     ParamFunction::setParameter(i, value, explicitlySet);
     m_hasNewParameterValue = true;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -636,8 +624,6 @@ void ThermalNeutronBk2BkExpConvPVoigt::setParameter(const std::string &name,
     ParamFunction::setParameter(name, value, explicitlySet);
     m_hasNewParameterValue = true;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -751,8 +737,6 @@ void ThermalNeutronBk2BkExpConvPVoigt::function1D(double *out,
   if (i0 < 0 || n == 0)
     return;
   this->functionLocal(out + i0, xValues + i0, n);
-
-  return;
 }
 
 /// Default value for the peak radius

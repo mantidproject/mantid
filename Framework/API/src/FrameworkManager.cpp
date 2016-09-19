@@ -1,26 +1,27 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
-#include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/UsageService.h"
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/UsageService.h"
 
 #include <Poco/ActiveResult.h>
 
+#include <clocale>
 #include <cstdarg>
 
 #ifdef _WIN32
 #include <winsock2.h>
+#endif
+
+#ifdef __linux__
+#include <execinfo.h>
 #endif
 
 #ifdef MPI_BUILD
@@ -48,15 +49,33 @@ void NexusErrorFunction(void *data, char *text) {
   // Do nothing.
 }
 
+#ifdef __linux__
+/**
+ * Print the stacktrace for an unhandled exception to stderr
+ */
+void stackTraceToStdErr() {
+  void *trace_elems[20];
+  int trace_elem_count(backtrace(trace_elems, 20));
+  char **stack_syms(backtrace_symbols(trace_elems, trace_elem_count));
+  std::cerr << "\nterminate detected. backtrace:\n";
+  for (int i = 0; i < trace_elem_count; ++i) {
+    std::cerr << ' ' << stack_syms[i] << '\n';
+  }
+  free(stack_syms);
+  exit(1);
+}
+#endif
+
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl()
 #ifdef MPI_BUILD
-    : m_mpi_environment()
+    : m_mpi_environment(argc, argv)
 #endif
 {
-  // Mantid only understands English...
-  setGlobalLocaleToAscii();
-  // Setup memory allocation scheme
+#ifdef __linux__
+  std::set_terminate(stackTraceToStdErr);
+#endif
+  setGlobalNumericLocaleToC();
   Kernel::MemoryOptions::initAllocatorOptions();
 
 #ifdef _WIN32
@@ -71,23 +90,23 @@ FrameworkManagerImpl::FrameworkManagerImpl()
   _set_output_format(_TWO_DIGIT_EXPONENT);
 #endif
 
-  g_log.notice() << Mantid::welcomeMessage() << std::endl;
+  g_log.notice() << Mantid::welcomeMessage() << '\n';
   loadPluginsUsingKey(PLUGINS_DIR_KEY);
   disableNexusOutput();
   setNumOMPThreadsToConfigValue();
 
 #ifdef MPI_BUILD
   g_log.notice() << "This MPI process is rank: "
-                 << boost::mpi::communicator().rank() << std::endl;
+                 << boost::mpi::communicator().rank() << '\n';
 #endif
 
-  g_log.debug() << "FrameworkManager created." << std::endl;
+  g_log.debug() << "FrameworkManager created.\n";
 
   AsynchronousStartupTasks();
 }
 
 /// Destructor
-FrameworkManagerImpl::~FrameworkManagerImpl() {}
+FrameworkManagerImpl::~FrameworkManagerImpl() = default;
 
 /// Starts asynchronous tasks that are done as part of Start-up.
 void FrameworkManagerImpl::AsynchronousStartupTasks() {
@@ -97,9 +116,8 @@ void FrameworkManagerImpl::AsynchronousStartupTasks() {
   if ((retVal == 1) && (updateInstrumentDefinitions == 1)) {
     UpdateInstrumentDefinitions();
   } else {
-    g_log.information()
-        << "Instrument updates disabled - cannot update instrument definitions."
-        << std::endl;
+    g_log.information() << "Instrument updates disabled - cannot update "
+                           "instrument definitions.\n";
   }
 
   int checkIfNewerVersionIsAvailable = 0;
@@ -108,7 +126,7 @@ void FrameworkManagerImpl::AsynchronousStartupTasks() {
   if ((retValVersionCheck == 1) && (checkIfNewerVersionIsAvailable == 1)) {
     CheckIfNewerVersionIsAvailable();
   } else {
-    g_log.information() << "Version check disabled." << std::endl;
+    g_log.information() << "Version check disabled.\n";
   }
 
   setupUsageReporting();
@@ -123,7 +141,7 @@ void FrameworkManagerImpl::UpdateInstrumentDefinitions() {
     Poco::ActiveResult<bool> result = algDownloadInstrument->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "DowndloadInstrument algorithm is not available - cannot "
-                     "update instrument definitions." << std::endl;
+                     "update instrument definitions.\n";
   }
 }
 
@@ -135,7 +153,7 @@ void FrameworkManagerImpl::CheckIfNewerVersionIsAvailable() {
     Poco::ActiveResult<bool> result = algCheckVersion->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "CheckMantidVersion algorithm is not available - cannot "
-                     "check if a newer version is available." << std::endl;
+                     "check if a newer version is available.\n";
   }
 }
 
@@ -155,22 +173,18 @@ void FrameworkManagerImpl::loadPluginsUsingKey(const std::string &key) {
 }
 
 /**
- * Set the global locale for all C++ stream operations to use simple ASCII
- * characters.
- * If the system supports it UTF-8 encoding will be used, otherwise the
- * classic C locale is used
+ * Set the numeric formatting category of the C locale to classic C.
  */
-void FrameworkManagerImpl::setGlobalLocaleToAscii() {
-  // This ensures that all subsequent stream operations interpret everything as
-  // simple
-  // ASCII. On systems in the UK and US having this as the system default is not
-  // an issue.
-  // However, systems that have their encoding set differently can see
-  // unexpected behavour when
-  // translating from string->numeral values. One example is floating-point
-  // interpretation in
-  // German where a comma is used instead of a period.
-  std::locale::global(std::locale::classic());
+void FrameworkManagerImpl::setGlobalNumericLocaleToC() {
+  // Some languages, for example German, using different decimal separators.
+  // By default C/C++ operations attempting to extract numbers from a stream
+  // will use the system locale. For those locales where numbers are formatted
+  // differently we see issues, particularly with opencascade, where Mantid
+  // will hang or throw an exception while trying to parse text.
+  //
+  // The following tells all numerical extraction operations to use classic
+  // C as the locale.
+  setlocale(LC_NUMERIC, "C");
 }
 
 /// Silence NeXus output
@@ -236,7 +250,6 @@ void FrameworkManagerImpl::clearAlgorithms() {
  */
 void FrameworkManagerImpl::clearData() {
   AnalysisDataService::Instance().clear();
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 }
 
 /**
@@ -250,6 +263,7 @@ void FrameworkManagerImpl::clearInstruments() {
  * Clear memory associated with the PropertyManagers
  */
 void FrameworkManagerImpl::clearPropertyManagers() {
+  using Kernel::PropertyManagerDataService;
   PropertyManagerDataService::Instance().clear();
 }
 
@@ -290,7 +304,7 @@ FrameworkManagerImpl::createAlgorithm(const std::string &algName,
   IAlgorithm *alg = AlgorithmManager::Instance()
                         .create(algName, version)
                         .get(); // createAlgorithm(algName);
-  alg->setPropertiesWithSimpleString(propertiesArray);
+  alg->setPropertiesWithString(propertiesArray);
 
   return alg;
 }
@@ -387,7 +401,7 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
   try {
     ws_sptr = AnalysisDataService::Instance().retrieve(wsName);
   } catch (Kernel::Exception::NotFoundError &ex) {
-    g_log.error() << ex.what() << std::endl;
+    g_log.error() << ex.what() << '\n';
     return false;
   }
 
@@ -406,11 +420,9 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
     retVal = true;
   } catch (Kernel::Exception::NotFoundError &) {
     // workspace was not found
-    g_log.error() << "Workspace " << wsName << " could not be found."
-                  << std::endl;
+    g_log.error() << "Workspace " << wsName << " could not be found.\n";
     retVal = false;
   }
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
   return retVal;
 }
 

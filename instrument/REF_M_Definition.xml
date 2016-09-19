@@ -18,10 +18,10 @@
     <location z="-18.703"/>
   </component>
   <type is="Source" name="moderator"/>
-  <component type="sample-position">
+  <component type="some-surface-holder">
     <location x="0.0" y="0.0" z="0.0"/>
   </component>
-  <type is="SamplePos" name="sample-position"/>
+  <type name="some-surface-holder" is="SamplePos"/>
 
   <!--DETECTOR-->
   <component type="DetectorArm">

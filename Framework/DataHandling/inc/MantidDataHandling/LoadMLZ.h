@@ -37,7 +37,6 @@ namespace DataHandling {
 class DLLExport LoadMLZ : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadMLZ();
-  ~LoadMLZ() override;
 
   const std::string name() const override;
   int version() const override;
@@ -106,6 +105,8 @@ private:
 
   double m_l1;
   double m_l2;
+
+  double m_t1; // time of flight from source to sample
 
   std::vector<std::string> m_supportedInstruments;
   LoadHelper m_mlzloader;

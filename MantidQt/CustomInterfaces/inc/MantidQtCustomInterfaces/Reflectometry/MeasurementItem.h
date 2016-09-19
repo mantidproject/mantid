@@ -37,8 +37,8 @@ public:
 
   /// Constructor
   MeasurementItem(const IDType &measurementItemId, const IDType &subId,
-              const std::string &label, const std::string &type,
-              const double angle, const std::string &run);
+                  const std::string &label, const std::string &type,
+                  const double angle, const std::string &run);
 
   /// Constructional method
   static MeasurementItem InvalidMeasurementItem(const std::string &why);

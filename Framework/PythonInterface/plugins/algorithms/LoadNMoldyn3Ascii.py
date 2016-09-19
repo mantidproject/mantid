@@ -1,5 +1,6 @@
 #pylint: disable=invalid-name,no-init,too-many-locals,too-many-branches
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -100,7 +101,7 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         self.declareProperty(FileProperty('Filename', '',
                                           action=FileAction.Load,
                                           extensions=['.cdl', '.dat']),
-                                          doc='File path for data')
+                             doc='File path for data')
 
         self.declareProperty(StringArrayProperty('Functions'),
                              doc='Names of functions to attempt to load from file')

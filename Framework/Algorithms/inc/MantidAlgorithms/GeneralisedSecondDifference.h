@@ -55,10 +55,6 @@ namespace Algorithms {
 */
 class DLLExport GeneralisedSecondDifference : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  GeneralisedSecondDifference();
-  /// Virtual destructor
-  ~GeneralisedSecondDifference() override;
   /// Algorithm's name
   const std::string name() const override {
     return "GeneralisedSecondDifference";
@@ -88,9 +84,9 @@ private:
   /// [-zm-1,zm+1]
   std::vector<double> m_Cij2;
   /// Contains the value of the property z
-  int m_z;
+  int m_z = 0;
   /// Contains the value of the property m
-  int m_m;
+  int m_m = 0;
   /// Progress reporting
 };
 

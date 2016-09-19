@@ -58,10 +58,10 @@ def runTests(classname):
     QtCore.QCoreApplication.processEvents()
     QtCore.QCoreApplication.processEvents()
 
-    # Set Mantid exit code
+    # Close Mantid and set exit code
     if not res.wasSuccessful():
-        _qti.app.setExitCode(1)
+        sys.exit(1)
     else:
-        _qti.app.setExitCode(0)
+        sys.exit(0)
 
     return res

@@ -63,16 +63,16 @@ private:
   using BaseClass::createUnwrapped;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// MDResolutionConvolutionFactoryImpl (needed for dllexport/dllimport).
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_MDALGORITHMS_DLL
-    Kernel::SingletonHolder<MDResolutionConvolutionFactoryImpl>;
-#endif /* _WIN32 */
 /// Typedef singleton instance to MDResolutionConvolutionFactory
-typedef MANTID_MDALGORITHMS_DLL Kernel::SingletonHolder<
-    MDResolutionConvolutionFactoryImpl> MDResolutionConvolutionFactory;
+typedef Kernel::SingletonHolder<MDResolutionConvolutionFactoryImpl>
+    MDResolutionConvolutionFactory;
+}
+}
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_MDALGORITHMS template class MANTID_MDALGORITHMS_DLL Kernel::
+    SingletonHolder<Mantid::MDAlgorithms::MDResolutionConvolutionFactoryImpl>;
 }
 }
 

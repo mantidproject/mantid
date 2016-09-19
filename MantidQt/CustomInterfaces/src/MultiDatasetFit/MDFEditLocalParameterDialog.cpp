@@ -4,41 +4,50 @@
 
 #include <QMenu>
 #include <QClipboard>
+#include <QMessageBox>
+#include <limits>
 
-namespace{
-  QString makeNumber(double d) {return QString::number(d,'g',16);}
-  const int valueColumn = 0;
-  const int roleColumn  = 1;
+namespace {
+QString makeNumber(double d) { return QString::number(d, 'g', 16); }
+const int valueColumn = 0;
+const int roleColumn = 1;
 }
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-namespace MDF
-{
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace MDF {
 
 /// Constructor.
-EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, const QString &parName):
-  QDialog(multifit),m_parName(parName)
-{
+EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit,
+                                                   const QString &parName)
+    : QDialog(multifit), m_parName(parName) {
   m_uiForm.setupUi(this);
+  m_uiForm.logValueSelector->setCheckboxShown(true);
+  connect(m_uiForm.logValueSelector, SIGNAL(logOptionsEnabled(bool)), this,
+          SIGNAL(logOptionsChecked(bool)));
+
   QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
-  header->setResizeMode(0,QHeaderView::Stretch);
-  connect(m_uiForm.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(valueChanged(int,int)));
+  header->setResizeMode(0, QHeaderView::Stretch);
+  connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this,
+          SLOT(valueChanged(int, int)));
   m_uiForm.lblParameterName->setText("Parameter: " + parName);
 
+  // Populate list of logs
+  auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
+  for (const auto &logName : multifit->getLogNames()) {
+    logCombo->addItem(QString::fromStdString(logName));
+  }
+
   auto n = multifit->getNumberOfSpectra();
-  for(int i = 0; i < n; ++i)
-  {
-    double value = multifit->getLocalParameterValue(parName,i);
+  for (int i = 0; i < n; ++i) {
+    double value = multifit->getLocalParameterValue(parName, i);
     m_values.push_back(value);
-    bool fixed = multifit->isLocalParameterFixed(parName,i);
+    bool fixed = multifit->isLocalParameterFixed(parName, i);
     m_fixes.push_back(fixed);
-    auto tie = multifit->getLocalParameterTie(parName,i);
+    auto tie = multifit->getLocalParameterTie(parName, i);
     m_ties.push_back(tie);
     m_uiForm.tableWidget->insertRow(i);
-    auto cell = new QTableWidgetItem( makeNumber(value) );
+    auto cell = new QTableWidgetItem(makeNumber(value));
     m_uiForm.tableWidget->setItem(i, valueColumn, cell);
     auto headerItem = new QTableWidgetItem(
         multifit->getWorkspaceName(i) + " (" +
@@ -55,11 +64,16 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
   }
   auto deleg = new LocalParameterItemDelegate(this);
   m_uiForm.tableWidget->setItemDelegateForColumn(valueColumn, deleg);
-  connect(deleg,SIGNAL(setAllValues(double)),this,SLOT(setAllValues(double)));
-  connect(deleg,SIGNAL(fixParameter(int,bool)),this,SLOT(fixParameter(int,bool)));
-  connect(deleg,SIGNAL(setAllFixed(bool)),this,SLOT(setAllFixed(bool)));
-  connect(deleg,SIGNAL(setTie(int,QString)),this,SLOT(setTie(int,QString)));
-  connect(deleg,SIGNAL(setTieAll(QString)),this,SLOT(setTieAll(QString)));
+  connect(deleg, SIGNAL(setAllValues(double)), this,
+          SLOT(setAllValues(double)));
+  connect(deleg, SIGNAL(fixParameter(int, bool)), this,
+          SLOT(fixParameter(int, bool)));
+  connect(deleg, SIGNAL(setAllFixed(bool)), this, SLOT(setAllFixed(bool)));
+  connect(deleg, SIGNAL(setTie(int, QString)), this,
+          SLOT(setTie(int, QString)));
+  connect(deleg, SIGNAL(setTieAll(QString)), this, SLOT(setTieAll(QString)));
+  connect(deleg, SIGNAL(setValueToLog(int)), this, SLOT(setValueToLog(int)));
+  connect(deleg, SIGNAL(setAllValuesToLog()), this, SLOT(setAllValuesToLog()));
 
   m_uiForm.tableWidget->installEventFilter(this);
 }
@@ -67,13 +81,10 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
 /// Slot. Called when a value changes.
 /// @param row :: Row index of the changed cell.
 /// @param col :: Column index of the changed cell.
-void EditLocalParameterDialog::valueChanged(int row, int col)
-{
-  if ( col == valueColumn )
-  {
-    QString text = m_uiForm.tableWidget->item(row,col)->text();
-    try
-    {
+void EditLocalParameterDialog::valueChanged(int row, int col) {
+  if (col == valueColumn) {
+    QString text = m_uiForm.tableWidget->item(row, col)->text();
+    try {
       bool ok = false;
       double value = text.toDouble(&ok);
       if (ok) {
@@ -81,51 +92,37 @@ void EditLocalParameterDialog::valueChanged(int row, int col)
       } else {
         m_ties[row] = text;
       }
-    }
-    catch(std::exception&)
-    {
+    } catch (std::exception &) {
       // restore old value
-      m_uiForm.tableWidget->item(row,col)->setText( makeNumber(m_values[row]) );
+      m_uiForm.tableWidget->item(row, col)->setText(makeNumber(m_values[row]));
     }
   }
 }
 
 /// Set all parameters to the same value.
 /// @param value :: A new value.
-void EditLocalParameterDialog::setAllValues(double value)
-{
+void EditLocalParameterDialog::setAllValues(double value) {
   int n = m_values.size();
-  for(int i = 0; i < n; ++i)
-  {
+  for (int i = 0; i < n; ++i) {
     m_values[i] = value;
-    m_uiForm.tableWidget->item(i, valueColumn)->setText( makeNumber(value) );
+    m_uiForm.tableWidget->item(i, valueColumn)->setText(makeNumber(value));
     updateRoleColumn(i);
   }
 }
 
 /// Get the list of new parameter values.
-QList<double> EditLocalParameterDialog::getValues() const
-{
-  return m_values;
-}
+QList<double> EditLocalParameterDialog::getValues() const { return m_values; }
 
 /// Get a list with the "fixed" attribute.
-QList<bool> EditLocalParameterDialog::getFixes() const
-{
-  return m_fixes;
-}
+QList<bool> EditLocalParameterDialog::getFixes() const { return m_fixes; }
 
 /// Get a list of the ties.
-QStringList EditLocalParameterDialog::getTies() const
-{
-  return m_ties;
-}
+QStringList EditLocalParameterDialog::getTies() const { return m_ties; }
 
 /// Fix/unfix a single parameter.
 /// @param index :: Index of a paramter to fix or unfix.
 /// @param fix :: Fix (true) or unfix (false).
-void EditLocalParameterDialog::fixParameter(int index, bool fix)
-{
+void EditLocalParameterDialog::fixParameter(int index, bool fix) {
   m_fixes[index] = fix;
   m_ties[index] = "";
   updateRoleColumn(index);
@@ -134,8 +131,7 @@ void EditLocalParameterDialog::fixParameter(int index, bool fix)
 /// Set a new tie for a parameter
 /// @param index :: Index of a paramter to tie.
 /// @param tie :: A tie string.
-void EditLocalParameterDialog::setTie(int index, QString tie)
-{
+void EditLocalParameterDialog::setTie(int index, QString tie) {
   m_ties[index] = tie;
   m_fixes[index] = false;
   updateRoleColumn(index);
@@ -143,10 +139,8 @@ void EditLocalParameterDialog::setTie(int index, QString tie)
 
 /// Set the same tie to all parameters.
 /// @param tie :: A tie string.
-void EditLocalParameterDialog::setTieAll(QString tie)
-{
-  for(int i = 0; i < m_ties.size(); ++i)
-  {
+void EditLocalParameterDialog::setTieAll(QString tie) {
+  for (int i = 0; i < m_ties.size(); ++i) {
     m_ties[i] = tie;
     m_fixes[i] = false;
     updateRoleColumn(i);
@@ -156,11 +150,10 @@ void EditLocalParameterDialog::setTieAll(QString tie)
 
 /// Fix/unfix all parameters.
 /// @param fix :: Fix (true) or unfix (false).
-void EditLocalParameterDialog::setAllFixed(bool fix)
-{
-  if ( m_fixes.empty() ) return;
-  for(int i = 0; i < m_fixes.size(); ++i)
-  {
+void EditLocalParameterDialog::setAllFixed(bool fix) {
+  if (m_fixes.empty())
+    return;
+  for (int i = 0; i < m_fixes.size(); ++i) {
     m_fixes[i] = fix;
     m_ties[i] = "";
     updateRoleColumn(i);
@@ -169,40 +162,38 @@ void EditLocalParameterDialog::setAllFixed(bool fix)
 }
 
 /// Event filter for managing the context menu.
-bool EditLocalParameterDialog::eventFilter(QObject * obj, QEvent * ev)
-{
-  if ( obj == m_uiForm.tableWidget && ev->type() == QEvent::ContextMenu )
-  {
+bool EditLocalParameterDialog::eventFilter(QObject *obj, QEvent *ev) {
+  if (obj == m_uiForm.tableWidget && ev->type() == QEvent::ContextMenu) {
     showContextMenu();
   }
-  return QDialog::eventFilter(obj,ev);
+  return QDialog::eventFilter(obj, ev);
 }
 
 /// Show the context menu.
-void EditLocalParameterDialog::showContextMenu()
-{
+void EditLocalParameterDialog::showContextMenu() {
   auto selection = m_uiForm.tableWidget->selectionModel()->selectedColumns();
 
   bool hasSelection = false;
 
-  for(auto index = selection.begin(); index != selection.end(); ++index)
-  {
-    if ( index->column() == valueColumn ) hasSelection = true;
+  for (auto index = selection.begin(); index != selection.end(); ++index) {
+    if (index->column() == valueColumn)
+      hasSelection = true;
   }
 
-  if ( !hasSelection ) return;
+  if (!hasSelection)
+    return;
 
   QMenu *menu = new QMenu(this);
   {
-    QAction *action = new QAction("Copy",this);
+    QAction *action = new QAction("Copy", this);
     action->setToolTip("Copy data to clipboard.");
-    connect(action,SIGNAL(activated()),this,SLOT(copy()));
+    connect(action, SIGNAL(triggered()), this, SLOT(copy()));
     menu->addAction(action);
   }
   {
-    QAction *action = new QAction("Paste",this);
+    QAction *action = new QAction("Paste", this);
     action->setToolTip("Paste data from clipboard.");
-    connect(action,SIGNAL(activated()),this,SLOT(paste()));
+    connect(action, SIGNAL(triggered()), this, SLOT(paste()));
     auto text = QApplication::clipboard()->text();
     action->setEnabled(!text.isEmpty());
     menu->addAction(action);
@@ -213,94 +204,123 @@ void EditLocalParameterDialog::showContextMenu()
 
 /// Copy all parameter values to the clipboard.
 /// Values will be separated by '\n'
-void EditLocalParameterDialog::copy()
-{
+void EditLocalParameterDialog::copy() {
   QStringList text;
   auto n = m_values.size();
-  for(int i = 0; i < n; ++i)
-  {
+  for (int i = 0; i < n; ++i) {
     text << makeNumber(m_values[i]);
   }
-  QApplication::clipboard()->setText( text.join("\n") );
+  QApplication::clipboard()->setText(text.join("\n"));
 }
 
 /// Paste a list of values from the clipboard.
-void EditLocalParameterDialog::paste()
-{
+void EditLocalParameterDialog::paste() {
   auto text = QApplication::clipboard()->text();
-  auto vec = text.split(QRegExp("\\s|,"),QString::SkipEmptyParts);
+  auto vec = text.split(QRegExp("\\s|,"), QString::SkipEmptyParts);
   auto n = qMin(vec.size(), m_uiForm.tableWidget->rowCount());
-  for(int i = 0; i < n; ++i)
-  {
+  // prepare for pasting data
+  auto deleg = static_cast<LocalParameterItemDelegate *>(
+      m_uiForm.tableWidget->itemDelegateForColumn(valueColumn));
+  deleg->prepareForPastedData();
+  // insert data into table
+  for (int i = 0; i < n; ++i) {
     auto str = vec[i];
     bool ok;
     m_values[i] = str.toDouble(&ok);
-    if ( !ok ) str = "0";
-    m_uiForm.tableWidget->item(i,1)->setText( str );
+    if (!ok)
+      str = "0";
+    m_uiForm.tableWidget->item(i, valueColumn)->setText(str);
   }
 }
 
 /// Force the table to redraw its cells.
-void EditLocalParameterDialog::redrawCells()
-{
-  for(int i = 0; i < m_values.size(); ++i)
-  {
+void EditLocalParameterDialog::redrawCells() {
+  for (int i = 0; i < m_values.size(); ++i) {
     // it's the only way I am able to make the table to repaint itself
     auto text = makeNumber(m_values[i]);
-    m_uiForm.tableWidget->item(i, valueColumn)->setText( text + " " );
-    m_uiForm.tableWidget->item(i, valueColumn)->setText( text );
+    m_uiForm.tableWidget->item(i, valueColumn)->setText(text + " ");
+    m_uiForm.tableWidget->item(i, valueColumn)->setText(text);
   }
 }
 
 /// Update the text in the role column
-void EditLocalParameterDialog::updateRoleColumn(int index)
-{
+void EditLocalParameterDialog::updateRoleColumn(int index) {
   auto cell = m_uiForm.tableWidget->item(index, roleColumn);
-  if (m_fixes[index])
-  {
+  if (m_fixes[index]) {
     cell->setText("fixed");
     cell->setForeground(QBrush(Qt::red));
-  }
-  else if (!m_ties[index].isEmpty())
-  {
+  } else if (!m_ties[index].isEmpty()) {
     cell->setText("tied");
     cell->setForeground(QBrush(Qt::blue));
-  }
-  else
-  {
+  } else {
     cell->setText("fitted");
     cell->setForeground(QBrush(Qt::darkGreen));
   }
 }
 
 /// Check if there are any other fixed parameters
-bool EditLocalParameterDialog::areOthersFixed(int i) const
-{
-  for (int j = 0; j < m_fixes.size(); ++j)
-  {
-    if (j != i && m_fixes[j]) return true;
+bool EditLocalParameterDialog::areOthersFixed(int i) const {
+  for (int j = 0; j < m_fixes.size(); ++j) {
+    if (j != i && m_fixes[j])
+      return true;
   }
   return false;
 }
 
 /// Check if all other parameters are fixed
-bool EditLocalParameterDialog::areAllOthersFixed(int i) const
-{
-  for (int j = 0; j < m_fixes.size(); ++j)
-  {
-    if (j != i && !m_fixes[j]) return false;
+bool EditLocalParameterDialog::areAllOthersFixed(int i) const {
+  for (int j = 0; j < m_fixes.size(); ++j) {
+    if (j != i && !m_fixes[j])
+      return false;
   }
   return true;
 }
 
 /// Check if there are any other tied parameters
-bool EditLocalParameterDialog::areOthersTied(int i) const
-{
-  for (int j = 0; j < m_fixes.size(); ++j)
-  {
-    if (j != i && !m_ties[j].isEmpty()) return true;
+bool EditLocalParameterDialog::areOthersTied(int i) const {
+  for (int j = 0; j < m_fixes.size(); ++j) {
+    if (j != i && !m_ties[j].isEmpty())
+      return true;
   }
   return false;
+}
+
+/// Set value to log value
+/// @param i :: [input] Index of parameter to set
+void EditLocalParameterDialog::setValueToLog(int i) {
+  assert(i < m_values.size());
+  const auto *multifit = static_cast<MultiDatasetFit *>(this->parent());
+  assert(multifit);
+
+  const auto &logName = m_uiForm.logValueSelector->getLog();
+  const auto &function = m_uiForm.logValueSelector->getFunction();
+
+  double value = std::numeric_limits<double>::quiet_NaN();
+  try {
+    value = multifit->getLogValue(logName, function, i);
+  } catch (const std::invalid_argument &err) {
+    const auto &message =
+        QString("Failed to get log value:\n\n %1").arg(err.what());
+    multifit->logWarning(message.toStdString());
+    QMessageBox::critical(this, "MantidPlot - Error", message);
+  }
+  m_values[i] = value;
+  m_uiForm.tableWidget->item(i, valueColumn)->setText(makeNumber(value));
+  updateRoleColumn(i);
+}
+
+/// Set value of each parameter to log value from respective workspace
+void EditLocalParameterDialog::setAllValuesToLog() {
+  const int nValues = m_values.size();
+  for (int i = 0; i < nValues; ++i) {
+    setValueToLog(i);
+  }
+}
+
+/// Returns whether log checkbox is ticked or not
+/// @returns True if log options are enabled
+bool EditLocalParameterDialog::isLogCheckboxTicked() const {
+  return m_uiForm.logValueSelector->isCheckboxTicked();
 }
 
 } // MDF

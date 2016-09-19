@@ -11,6 +11,9 @@ Description
 
 This workflow algorithm appends new data to an existing multidimensional workspace. It allows the accumulation of data in a single MDWorkspace as you go, e.g. during an experiment.
 
+Using the FileBackEnd and Filename properties the algorithm can produce a file-backed workspace.
+Note that this will significantly increase the execution time of the algorithm.
+
 Input properties which are not described here are identical to those in the :ref:`algm-CreateMD` algorithm.
 
 InputWorkspace

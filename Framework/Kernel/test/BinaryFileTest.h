@@ -13,7 +13,6 @@ using std::runtime_error;
 using std::size_t;
 using std::vector;
 using std::cout;
-using std::endl;
 
 //==========================================================================================
 /// Make the code clearer by having this an explicit type
@@ -30,8 +29,7 @@ struct DasEvent {
 
 /** Creates a dummy file with so many bytes */
 static void MakeDummyFile(std::string filename, size_t num_bytes) {
-  char *buffer;
-  buffer = new char[num_bytes];
+  std::vector<char> buffer(num_bytes);
   for (size_t i = 0; i < num_bytes; i++) {
     // Put 1,2,3 in 32-bit ints
     if (i % 4 == 0)
@@ -41,8 +39,7 @@ static void MakeDummyFile(std::string filename, size_t num_bytes) {
   }
 
   std::ofstream myFile(filename.c_str(), std::ios::out | std::ios::binary);
-  myFile.write(buffer, num_bytes);
-  delete[] buffer;
+  myFile.write(buffer.data(), num_bytes);
   myFile.close();
 }
 
@@ -79,17 +76,16 @@ public:
     size_t num = 20;
     TS_ASSERT_EQUALS(file.getNumElements(), num);
     // Get it
-    std::vector<DasEvent> *data = 0;
+    std::vector<DasEvent> data;
     TS_ASSERT_THROWS_NOTHING(data = file.loadAll());
-    TS_ASSERT_EQUALS(data->size(), num);
+    TS_ASSERT_EQUALS(data.size(), num);
     // Check the first event
-    TS_ASSERT_EQUALS(data->at(0).tof, 0);
-    TS_ASSERT_EQUALS(data->at(0).pid, 1);
+    TS_ASSERT_EQUALS(data.at(0).tof, 0);
+    TS_ASSERT_EQUALS(data.at(0).pid, 1);
     // Check the last event
-    TS_ASSERT_EQUALS(data->at(num - 1).tof, 38);
-    TS_ASSERT_EQUALS(data->at(num - 1).pid, 39);
+    TS_ASSERT_EQUALS(data.at(num - 1).tof, 38);
+    TS_ASSERT_EQUALS(data.at(num - 1).pid, 39);
 
-    delete data;
     file.close();
     Poco::File(dummy_file).remove();
   }
@@ -124,8 +120,8 @@ public:
     TS_ASSERT_EQUALS(file.getNumElements(), num);
     // Get it
     size_t block_size = 10;
-    DasEvent *data = new DasEvent[block_size];
-    size_t loaded_size = file.loadBlock(data, block_size);
+    auto data = Mantid::Kernel::make_unique<DasEvent[]>(block_size);
+    size_t loaded_size = file.loadBlock(data.get(), block_size);
     // Yes, we loaded that amount
     TS_ASSERT_EQUALS(loaded_size, block_size);
 
@@ -133,17 +129,15 @@ public:
     TS_ASSERT_EQUALS(data[0].tof, 0);
     TS_ASSERT_EQUALS(data[0].pid, 1);
 
-    delete[] data;
     // Now try to load a lot more - going past the end
     block_size = 10;
-    data = new DasEvent[block_size];
-    loaded_size = file.loadBlock(data, block_size);
+    data = Mantid::Kernel::make_unique<DasEvent[]>(block_size);
+    loaded_size = file.loadBlock(data.get(), block_size);
     TS_ASSERT_EQUALS(loaded_size, 10);
 
     // Check the last event
     TS_ASSERT_EQUALS(data[9].tof, 38);
     TS_ASSERT_EQUALS(data[9].pid, 39);
-    delete[] data;
     file.close();
     Poco::File(dummy_file).remove();
   }
@@ -157,8 +151,8 @@ public:
     TS_ASSERT_EQUALS(file.getNumElements(), num);
     // Get it
     size_t block_size = 10;
-    DasEvent *data = new DasEvent[block_size];
-    size_t loaded_size = file.loadBlockAt(data, 5, block_size);
+    auto data = Mantid::Kernel::make_unique<DasEvent[]>(block_size);
+    size_t loaded_size = file.loadBlockAt(data.get(), 5, block_size);
     // Yes, we loaded that amount
     TS_ASSERT_EQUALS(loaded_size, block_size);
 
@@ -166,13 +160,11 @@ public:
     TS_ASSERT_EQUALS(data[0].tof, 10);
     TS_ASSERT_EQUALS(data[0].pid, 11);
 
-    delete[] data;
     // Now try to load a lot more - going past the end
     block_size = 10;
-    data = new DasEvent[block_size];
-    loaded_size = file.loadBlock(data, block_size);
+    data = Mantid::Kernel::make_unique<DasEvent[]>(block_size);
+    loaded_size = file.loadBlock(data.get(), block_size);
     TS_ASSERT_EQUALS(loaded_size, 5);
-    delete[] data;
     file.close();
     Poco::File(dummy_file).remove();
   }
@@ -184,7 +176,7 @@ public:
   void testReadingNotOpenFile() {
     BinaryFile<DasEvent> file2;
     std::vector<DasEvent> data;
-    DasEvent *buffer = NULL;
+    DasEvent *buffer = nullptr;
     TS_ASSERT_EQUALS(file2.getNumElements(), 0);
     TS_ASSERT_THROWS(file2.loadAll(), std::runtime_error);
     TS_ASSERT_THROWS(data = file2.loadAllIntoVector(), std::runtime_error);

@@ -57,16 +57,6 @@ void checkSpectrumNumbers(const std::vector<int> &spectrumNumbers,
 namespace Mantid {
 namespace Algorithms {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SpecularReflectionAlgorithm::SpecularReflectionAlgorithm() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SpecularReflectionAlgorithm::~SpecularReflectionAlgorithm() {}
-
 /**
  * Initialize common properties
  */

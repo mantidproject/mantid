@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, print_function)
+
 from mantid.kernel import VMD
 import math
 import unittest

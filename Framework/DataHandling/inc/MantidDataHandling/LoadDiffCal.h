@@ -38,9 +38,6 @@ namespace DataHandling {
 */
 class DLLExport LoadDiffCal : public API::Algorithm {
 public:
-  LoadDiffCal();
-  ~LoadDiffCal() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -50,10 +47,6 @@ private:
   void init() override;
   void exec() override;
   void getInstrument(H5::H5File &file);
-  std::vector<int32_t> readInt32Array(H5::Group &group,
-                                      const std::string &name);
-  std::vector<double> readDoubleArray(H5::Group &group,
-                                      const std::string &name);
   void runLoadCalFile();
   void makeGroupingWorkspace(const std::vector<int32_t> &detids,
                              const std::vector<int32_t> &groups);

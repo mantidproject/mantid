@@ -60,9 +60,15 @@
 // Export/Import declarations
 #define DLLExport __declspec(dllexport)
 #define DLLImport __declspec(dllimport)
+#define EXTERN_IMPORT extern
+#elif defined(__GNUC__) && !defined(__clang__)
+#define DLLExport __attribute__((visibility("default")))
+#define DLLImport
+#define EXTERN_IMPORT extern
 #else
 #define DLLExport
 #define DLLImport
+#define EXTERN_IMPORT
 #endif
 
 /**
@@ -94,7 +100,7 @@
  * not available
  */
 #ifdef HAVE_STDINT_H
-#include <stdint.h>
+#include <cstdint>
 #else
 #ifdef BOOST_CSTDINT_HPP
 #include <cstdint.hpp>

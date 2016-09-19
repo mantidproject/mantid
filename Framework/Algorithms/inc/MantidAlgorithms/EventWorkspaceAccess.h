@@ -9,7 +9,7 @@ struct EventWorkspaceAccess {
   static decltype(
       std::mem_fn((DataObjects::EventList &
                    (DataObjects::EventWorkspace::*)(const std::size_t)) &
-                  DataObjects::EventWorkspace::getEventList)) eventList;
+                  DataObjects::EventWorkspace::getSpectrum)) eventList;
 };
 }
 }

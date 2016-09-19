@@ -11,10 +11,16 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "../../Kernel/inc/MantidKernel/MDUnit.h"
+#include "../inc/MantidMDAlgorithms/CutMD.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "../../API/inc/MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::MDAlgorithms;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -42,16 +48,77 @@ private:
     }
   }
 
+  IMDWorkspace_const_sptr
+  makeWorkspaceWithSpecifiedUnits(const std::string &units,
+                                  const std::string &wsName) {
+    const std::string units_string = units + "," + units + "," + units + ",V";
+
+    FrameworkManager::Instance().exec(
+        "CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(),
+        "Dimensions", "4", "Extents", "-1,1,-1,1,-1,1,-10,10", "Names",
+        "H,K,L,E", "Units", units_string.c_str());
+
+    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(),
+                                      "a", "1", "b", "1", "c", "1", "alpha",
+                                      "90", "beta", "90", "gamma", "90");
+
+    FrameworkManager::Instance().exec("FakeMDEventData", 4, "InputWorkspace",
+                                      wsName.c_str(), "PeakParams",
+                                      "1000,0,0,0,0,1");
+
+    IMDWorkspace_sptr cutMDtestws =
+        AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
+
+    auto eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(cutMDtestws);
+
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord =
+        Mantid::Kernel::QSample;
+    eventWS->setCoordinateSystem(appliedCoord);
+
+    FrameworkManager::Instance().exec(
+        "CreateSampleWorkspace", 4, "OutputWorkspace", "__CutMDTest_tempMatWS",
+        "WorkspaceType", "Event");
+
+    MatrixWorkspace_sptr tempMatWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "__CutMDTest_tempMatWS");
+
+    Mantid::Geometry::OrientedLattice latt(2, 3, 4, 90, 90, 90);
+    tempMatWS->mutableSample().setOrientedLattice(&latt);
+
+    ExperimentInfo_sptr ei(tempMatWS->cloneExperimentInfo());
+    eventWS->addExperimentInfo(ei);
+
+    AnalysisDataService::Instance().addOrReplace(wsName, eventWS);
+
+    return eventWS;
+  }
+
+  ITableWorkspace_sptr createProjection(const std::string &units) {
+    ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
+    proj->addColumn("str", "name");
+    proj->addColumn("V3D", "value");
+    proj->addColumn("double", "offset");
+    proj->addColumn("str", "type");
+
+    TableRow uRow = proj->appendRow();
+    TableRow vRow = proj->appendRow();
+    TableRow wRow = proj->appendRow();
+    uRow << "u" << V3D(1, 0, 0) << 0.0 << units;
+    vRow << "v" << V3D(0, 1, 0) << 0.0 << units;
+    wRow << "w" << V3D(0, 0, 1) << 0.0 << units;
+
+    return proj;
+  }
+
+  Mantid::Kernel::Logger m_log;
+
 public:
-  CutMDTest() {
+  CutMDTest() : m_log("CutMDTest") {
     FrameworkManager::Instance().exec(
         "CreateMDWorkspace", 10, "OutputWorkspace", sharedWSName.c_str(),
         "Dimensions", "3", "Extents", "-10,10,-10,10,-10,10", "Names", "A,B,C",
         "Units", "U,U,U");
-
-    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
-                                      "InputWorkspace", sharedWSName.c_str(),
-                                      "SpecialCoordinates", "HKL");
 
     FrameworkManager::Instance().exec(
         "SetUB", 14, "Workspace", sharedWSName.c_str(), "a", "1", "b", "1", "c",
@@ -91,9 +158,6 @@ public:
         "Dimensions", "3", "Extents", "-10,10,-10,10,-10,10", "Names", "H,K,L",
         "Units", "U,U,U");
 
-    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
-                                      "InputWorkspace", wsName.c_str(),
-                                      "SpecialCoordinates", "HKL");
     auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
@@ -218,10 +282,6 @@ public:
                                       "a", "1", "b", "1", "c", "1", "alpha",
                                       "90", "beta", "90", "gamma", "90");
 
-    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
-                                      "InputWorkspace", wsName.c_str(),
-                                      "SpecialCoordinates", "HKL");
-
     ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
     proj->addColumn("str", "name");
     proj->addColumn("V3D", "value");
@@ -281,10 +341,6 @@ public:
     FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(),
                                       "a", "1", "b", "1", "c", "1", "alpha",
                                       "90", "beta", "90", "gamma", "90");
-
-    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
-                                      "InputWorkspace", wsName.c_str(),
-                                      "SpecialCoordinates", "HKL");
 
     ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
     proj->addColumn("str", "name");
@@ -346,22 +402,7 @@ public:
                                       "a", "1", "b", "1", "c", "1", "alpha",
                                       "90", "beta", "90", "gamma", "90");
 
-    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
-                                      "InputWorkspace", wsName.c_str(),
-                                      "SpecialCoordinates", "HKL");
-
-    ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
-    proj->addColumn("str", "name");
-    proj->addColumn("V3D", "value");
-    proj->addColumn("double", "offset");
-    proj->addColumn("str", "type");
-
-    TableRow uRow = proj->appendRow();
-    TableRow vRow = proj->appendRow();
-    TableRow wRow = proj->appendRow();
-    uRow << "u" << V3D(1, 0, 0) << 0.0 << "r";
-    vRow << "v" << V3D(0, 1, 0) << 0.0 << "r";
-    wRow << "w" << V3D(0, 0, 1) << 0.0 << "r";
+    auto proj = createProjection("r");
 
     addNormalization(wsName);
 
@@ -409,10 +450,6 @@ public:
     FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(),
                                       "a", "1", "b", "1", "c", "1", "alpha",
                                       "90", "beta", "90", "gamma", "90");
-
-    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
-                                      "InputWorkspace", wsName.c_str(),
-                                      "SpecialCoordinates", "HKL");
 
     addNormalization(wsName);
 
@@ -462,6 +499,69 @@ public:
                       outWS->displayNormalizationHisto(), histoNorm);
     AnalysisDataService::Instance().remove(wsName);
     AnalysisDataService::Instance().remove(wsOutName);
+  }
+
+  void test_MaxRecursionDepth_one() {
+    // Test that with MaxRecursionDepth = 1, boxes are not split despite
+    // many events
+    const std::string wsName = "__CutMDTest_MaxRecursionDepth_one";
+
+    FrameworkManager::Instance().exec(
+        "CreateMDWorkspace", 10, "OutputWorkspace", wsName.c_str(),
+        "Dimensions", "3", "Extents", "-1,1,-1,1,-1,1", "Names", "H,K,L",
+        "Units", "U,U,U");
+    FrameworkManager::Instance().exec(
+        "FakeMDEventData", 6, "InputWorkspace", wsName.c_str(), "PeakParams",
+        "2000,-0.5,-0.5,-0.5,0.1", "RandomizeSignal", "0");
+
+    FrameworkManager::Instance().exec("SetUB", 14, "Workspace", wsName.c_str(),
+                                      "a", "1", "b", "1", "c", "1", "alpha",
+                                      "90", "beta", "90", "gamma", "90");
+
+    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
+                                      "InputWorkspace", wsName.c_str(),
+                                      "SpecialCoordinates", "HKL");
+
+    ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
+    proj->addColumn("str", "name");
+    proj->addColumn("V3D", "value");
+    proj->addColumn("double", "offset");
+    proj->addColumn("str", "type");
+
+    TableRow uRow = proj->appendRow();
+    TableRow vRow = proj->appendRow();
+    TableRow wRow = proj->appendRow();
+    uRow << "u" << V3D(1, 0, 0) << 0.0 << "r";
+    vRow << "v" << V3D(0, 1, 0) << 0.0 << "r";
+    wRow << "w" << V3D(0, 0, 1) << 0.0 << "r";
+
+    addNormalization(wsName);
+
+    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    algCutMD->initialize();
+    algCutMD->setRethrows(true);
+    algCutMD->setProperty("InputWorkspace", wsName);
+    algCutMD->setProperty("OutputWorkspace", wsName);
+    algCutMD->setProperty("Projection", proj);
+    algCutMD->setProperty("P1Bin", "-1,1");
+    algCutMD->setProperty("P2Bin", "-1,1");
+    algCutMD->setProperty("P3Bin", "-1,1");
+    algCutMD->setProperty("NoPix", false);
+    algCutMD->execute();
+    TS_ASSERT(algCutMD->isExecuted());
+
+    IMDEventWorkspace_sptr outWS =
+        AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
+    TS_ASSERT(outWS.get());
+
+    auto bc = outWS->getBoxController();
+    TSM_ASSERT_EQUALS("Boxes should not have split into more than the 1 bin we "
+                      "specificed in PnBin properties, because CutMD should "
+                      "specify MaxRecursionDepth=1 in SliceMD",
+                      bc->getTotalNumMDBoxes(), 1);
+
+    // Clean up
+    AnalysisDataService::Instance().remove(wsName);
   }
 
   void test_slice_md_histo_workspace() {
@@ -549,6 +649,109 @@ public:
     TSM_ASSERT_DELTA("Wrong error value",
                      std::sqrt(6.0 * (ws->getErrorAt(0) * ws->getErrorAt(0))),
                      histoOutWS->getErrorAt(0), 1e-4);
+  }
+
+  void test_findOriginalQUnits_invA() {
+    const std::string ws_name = "__CutMDTest_unitstest";
+    auto cutMDtestws = makeWorkspaceWithSpecifiedUnits("A^-1", ws_name);
+
+    auto foundUnits = findOriginalQUnits(cutMDtestws, m_log);
+    TSM_ASSERT_EQUALS("Units should be found to be inverse angstroms",
+                      foundUnits[0], "a");
+    // Clean up
+    AnalysisDataService::Instance().remove(ws_name);
+  }
+
+  void test_findOriginalQUnits_invAngstroms() {
+    const std::string ws_name = "__CutMDTest_unitstest";
+    auto cutMDtestws = makeWorkspaceWithSpecifiedUnits("Angstrom^-1", ws_name);
+
+    auto foundUnits = findOriginalQUnits(cutMDtestws, m_log);
+    TSM_ASSERT_EQUALS("Units should be found to be inverse angstroms",
+                      foundUnits[0], "a");
+    // Clean up
+    AnalysisDataService::Instance().remove(ws_name);
+  }
+
+  void test_findOriginalQUnits_rlu() {
+    const std::string ws_name = "__CutMDTest_unitstest";
+    // When units have been converted to RLU the unit label looks like this
+    auto cutMDtestws = makeWorkspaceWithSpecifiedUnits("in 1.11A^-1", ws_name);
+
+    auto foundUnits = findOriginalQUnits(cutMDtestws, m_log);
+    TSM_ASSERT_EQUALS("Units should be found to be RLU", foundUnits[0], "r");
+    // Clean up
+    AnalysisDataService::Instance().remove(ws_name);
+  }
+
+  void test_CutMD_dimension_labels_A_to_A() {
+    const std::string ws_name = "__CutMDTest_unitstest";
+    auto ws_temp = makeWorkspaceWithSpecifiedUnits("Angstrom^-1", ws_name);
+    TSM_ASSERT_EQUALS(
+        "Input workspace dimensions have units of inverse angstroms",
+        ws_temp->getDimension(0)->getUnits().ascii(), "Angstrom^-1");
+
+    auto proj = createProjection("a");
+
+    CutMD alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", ws_name);
+    alg.setProperty("P1Bin", "-0.4,0.8");
+    alg.setProperty("P2Bin", "-0.4,0.8");
+    alg.setProperty("P3Bin", "-0.4,0.8");
+    alg.setProperty("P4Bin", "-1.0,1.0");
+    alg.setProperty("Projection", proj);
+    alg.setProperty("NoPix", true);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    IMDWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outWS->getDimension(0)->getName(), "['zeta', 0, 0]")
+    TS_ASSERT_EQUALS(outWS->getDimension(1)->getName(), "[0, 'eta', 0]")
+    TS_ASSERT_EQUALS(outWS->getDimension(2)->getName(), "[0, 0, 'xi']")
+    TSM_ASSERT_EQUALS("Output workspace should have units of inverse angstroms",
+                      outWS->getDimension(0)->getUnits().ascii(), "Angstrom^-1")
+
+    // Clean up
+    AnalysisDataService::Instance().remove(ws_name);
+  }
+
+  void test_CutMD_dimension_labels_A_to_RLU() {
+    const std::string ws_name = "__CutMDTest_unitstest";
+    auto ws_temp = makeWorkspaceWithSpecifiedUnits("Angstrom^-1", ws_name);
+    TSM_ASSERT_EQUALS(
+        "Input workspace dimensions have units of inverse angstroms",
+        ws_temp->getDimension(0)->getUnits().ascii(), "Angstrom^-1");
+
+    auto proj = createProjection("r");
+
+    CutMD alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", ws_name);
+    alg.setProperty("P1Bin", "-0.4,0.8");
+    alg.setProperty("P2Bin", "-0.4,0.8");
+    alg.setProperty("P3Bin", "-0.4,0.8");
+    alg.setProperty("P4Bin", "-1.0,1.0");
+    alg.setProperty("Projection", proj);
+    alg.setProperty("NoPix", false);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    IMDWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outWS->getDimension(0)->getName(), "['zeta', 0, 0]")
+    TS_ASSERT_EQUALS(outWS->getDimension(1)->getName(), "[0, 'eta', 0]")
+    TS_ASSERT_EQUALS(outWS->getDimension(2)->getName(), "[0, 0, 'xi']")
+    TSM_ASSERT_EQUALS("Output workspace unit label should show scaling from "
+                      "conversion to RLU",
+                      outWS->getDimension(0)->getUnits().ascii(),
+                      "in 3.14 A^-1")
+
+    // Clean up
+    AnalysisDataService::Instance().remove(ws_name);
   }
 };
 

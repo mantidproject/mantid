@@ -472,7 +472,7 @@ public:
                 << "nevents"
                 << "\t"
                 << "at"
-                << "\t" << i << std::endl;
+                << "\t" << i << '\n';
     }
 
     IntegrateMDHistoWorkspace alg;
@@ -641,10 +641,10 @@ public:
 
     std::cerr << std::setprecision(10) << minimumDim << "   "
               << std::setprecision(10) << static_cast<Mantid::coord_t>(min[0])
-              << "    " << std::setprecision(10) << min[0] << std::endl;
+              << "    " << std::setprecision(10) << min[0] << '\n';
     std::cerr << std::setprecision(10) << maximumDim << "   "
               << std::setprecision(10) << static_cast<Mantid::coord_t>(max[0])
-              << "    " << std::setprecision(10) << max[0] << std::endl;
+              << "    " << std::setprecision(10) << max[0] << '\n';
 
     TSM_ASSERT_DELTA("Should snap to the second bin boundary.", minimumDim,
                      static_cast<Mantid::coord_t>(min[0]), 1e-6);
@@ -703,10 +703,10 @@ public:
     std::cerr << std::setprecision(10) << minimumDim << "   "
               << std::setprecision(10)
               << static_cast<Mantid::coord_t>(secondBinBoundary) << "    "
-              << std::setprecision(10) << secondBinBoundary << std::endl;
+              << std::setprecision(10) << secondBinBoundary << '\n';
     std::cerr << std::setprecision(10) << maximumDim << "   "
               << std::setprecision(10) << static_cast<Mantid::coord_t>(max[0])
-              << "    " << std::setprecision(10) << max[0] << std::endl;
+              << "    " << std::setprecision(10) << max[0] << '\n';
 
     TSM_ASSERT_DELTA("Should snap to the second bin boundary.", minimumDim,
                      static_cast<Mantid::coord_t>(secondBinBoundary), 1e-6);

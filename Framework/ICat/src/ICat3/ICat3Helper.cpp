@@ -45,8 +45,8 @@ int CICatHelper::doSearch(ICATPortBindingProxy &icat,
   }
   clock_t end = clock();
   float diff = float(end - start) / CLOCKS_PER_SEC;
-  g_log.information() << " Time taken to do  search is " << diff << "  seconds "
-                      << std::endl;
+  g_log.information() << " Time taken to do  search is " << diff
+                      << "  seconds \n";
   return ret_advsearch;
 }
 
@@ -83,7 +83,7 @@ void CICatHelper::saveInvestigations(
     for (citr = investigations.begin(); citr != investigations.end(); ++citr) {
       API::TableRow t = outputws->appendRow();
 
-      std::string id = boost::lexical_cast<std::string>(*(*citr)->id);
+      std::string id = std::to_string(*(*citr)->id);
 
       savetoTableWorkspace(&id, t);
       savetoTableWorkspace((*citr)->facility, t);
@@ -91,12 +91,10 @@ void CICatHelper::saveInvestigations(
       savetoTableWorkspace((*citr)->instrument, t);
       savetoTableWorkspace((*citr)->invParamValue, t);
 
-      std::string startDate =
-          boost::lexical_cast<std::string>(*(*citr)->invStartDate);
+      std::string startDate = std::to_string(*(*citr)->invStartDate);
       savetoTableWorkspace(&startDate, t);
 
-      std::string endDate =
-          boost::lexical_cast<std::string>(*(*citr)->invEndDate);
+      std::string endDate = std::to_string(*(*citr)->invEndDate);
       savetoTableWorkspace(&endDate, t);
 
       std::string sessionID = m_session->getSessionId();
@@ -395,8 +393,7 @@ void CICatHelper::doMyDataSearch(API::ITableWorkspace_sptr &ws_sptr) {
   }
   if (response.return_.empty()) {
     g_log.information()
-        << "ICat Mydata search is complete.There are no results to display"
-        << std::endl;
+        << "ICat Mydata search is complete.There are no results to display\n";
     return;
   }
   // save response to a table workspace
@@ -467,7 +464,7 @@ void CICatHelper::doAdvancedSearch(const CatalogSearchParam &inputs,
   }
   if (response.return_.empty()) {
     g_log.information() << "ICat investigations search is complete.There are "
-                           "no results to display" << std::endl;
+                           "no results to display\n";
     return;
   }
   // save response to a table workspace
@@ -589,7 +586,7 @@ CICatHelper::getNumberOfSearchResults(const CatalogSearchParam &inputs) {
   }
 
   g_log.debug() << "CICatHelper::getNumberOfSearchResults -> Number of results "
-                   "returned is: { " << numOfResults << " }" << std::endl;
+                   "returned is: { " << numOfResults << " }\n";
 
   return numOfResults;
 }

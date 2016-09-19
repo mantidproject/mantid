@@ -7,6 +7,14 @@
 
 class GroupWorkspacesTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static GroupWorkspacesTest *createSuite() {
+    return new GroupWorkspacesTest();
+  }
+
+  static void destroySuite(GroupWorkspacesTest *suite) { delete suite; }
+
   //========================= Success Cases
   //===========================================
   void testName() {
@@ -177,7 +185,7 @@ public:
 
     const std::string groupName =
         "test_Exec_With_Input_That_Is_Not_In_ADS_Fails";
-    TS_ASSERT_THROWS(runAlgorithm(inputs, groupName), std::runtime_error);
+    runAlgorithm(inputs, groupName, true);
 
     TS_ASSERT_EQUALS(
         false,
@@ -209,16 +217,21 @@ private:
   }
 
   void runAlgorithm(const std::vector<std::string> &inputs,
-                    const std::string &outputWorkspace) {
+                    const std::string &outputWorkspace,
+                    bool errorExpected = false) {
     Mantid::Algorithms::GroupWorkspaces alg;
     alg.initialize();
     alg.setRethrows(true);
 
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", inputs));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("OutputWorkspace", outputWorkspace));
-    alg.execute();
-    TS_ASSERT(alg.isExecuted());
+    if (errorExpected) {
+      TS_ASSERT_THROWS_ANYTHING(alg.setProperty("InputWorkspaces", inputs));
+    } else {
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", inputs));
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setProperty("OutputWorkspace", outputWorkspace));
+      alg.execute();
+      TS_ASSERT(alg.isExecuted());
+    }
   }
 
   void

@@ -22,23 +22,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/systemtests>.
 '''
-import sys
-import os
-import types
-import re
-import time
 import datetime
-import platform
-import subprocess
-import tempfile
 import imp
 import inspect
-import abc
+import os
 import numpy
+import platform
+import re
+import subprocess
+import sys
+import tempfile
+import time
 import unittest
 
 # Path to this file
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
+# Some windows paths can contain sequences such as \r, e.g. \release_systemtests
+# and need escaping to be able to add to the python path
+TESTING_FRAMEWORK_DIR = THIS_MODULE_DIR.replace('\\', '\\\\')
 
 #########################################################################
 # The base test class.
@@ -164,7 +165,7 @@ class MantidStressTest(unittest.TestCase):
                 foundAll = False
 
         if not foundAll:
-            sys.exit(PythonTestRunner.SKIP_TEST)
+            sys.exit(TestRunner.SKIP_TEST)
             
     def __verifyMemory(self):
         """ Do we need to skip due to lack of memory? """
@@ -177,7 +178,7 @@ class MantidStressTest(unittest.TestCase):
         MB_avail = MemoryStats().availMem()/(1024.)
         if (MB_avail < required):
             print "Insufficient memory available to run test! %g MB available, need %g MB." % (MB_avail,required)
-            sys.exit(PythonTestRunner.SKIP_TEST)
+            sys.exit(TestRunner.SKIP_TEST)
 
     def execute(self):
         '''
@@ -190,7 +191,7 @@ class MantidStressTest(unittest.TestCase):
         
         # A custom check for skipping the tests for other reasons
         if self.skipTests():
-            sys.exit(PythonTestRunner.SKIP_TEST)
+            sys.exit(TestRunner.SKIP_TEST)
 
         # Start timer
         start = time.time()
@@ -499,7 +500,7 @@ from xmlreporter import XmlResultReporter
 #########################################################################
 # A base class for a TestRunner
 #########################################################################
-class PythonTestRunner(object):
+class TestRunner(object):
     '''
     A base class to serve as a wrapper to actually run the tests in a specific 
     environment, i.e. console, gui
@@ -511,129 +512,67 @@ class PythonTestRunner(object):
     NOT_A_TEST = 98
     SKIP_TEST = 97
 
-    def __init__(self, need_escaping = False):
-        self._mtdpy_header = ''
+    def __init__(self, executable, exec_args=None, escape_quotes=False):
+        self._executable = executable
+        self._exec_args = exec_args
         self._test_dir = ''
-        # Get the path that this module resides in so that the tests know about it
-        # Some windows paths can contain sequences such as \r, e.g. \release_systemtests
-        # that need to be escaped or the module cannot be found
-        self._framework_path = THIS_MODULE_DIR.replace('\\', '\\\\')
-        # A string to prefix the code with
-        self._code_prefix = ''
-        self._using_escape = need_escaping
+        self._escape_quotes = escape_quotes
 
-    def commandString(self, pycode):
-        '''
-        Return the appropriate command to pass to subprocess.Popen
-        '''
-        raise NotImplementedError('"commandString(self)" should be overridden in a derived class')
-
-    def setMantidDir(self, mtdheader_dir):
-        # Store the path to mantid module
-        self._mtdpy_header = os.path.abspath(mtdheader_dir).replace('\\','/')
+    def getTestDir(self):
+        return self._test_dir
 
     def setTestDir(self, test_dir):
         self._test_dir = os.path.abspath(test_dir).replace('\\','/')
-
-    def createCodePrefix(self):
-        if self._using_escape == True:
-            esc = '\\'
-        else:
-            esc = ''
-
-        self._code_prefix = 'import sys, time;'
-        self._code_prefix += 'sys.path.insert(0, ' + esc + '"' + self._mtdpy_header + esc + '");' + \
-        'sys.path.append(' + esc + '"' + self._framework_path + esc + '");' + \
-        'sys.path.append(' + esc + '"' + self._test_dir + esc + '");'
-
-    def getCodePrefix(self):
-        '''
-        Return a prefix to the code that will be executed
-        '''
-        return self._code_prefix
 
     def spawnSubProcess(self, cmd):
         '''
         Spawn a new process and run the given command within it
         '''
-
-        proc = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize=-1)
-        std_out = ""
-        std_err = ""
-        for line in proc.stdout:
-            print line,
-            std_out += line
-        proc.wait()
-
-        return proc.returncode, std_out, std_err 
+        proc = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE,
+                                stderr = subprocess.STDOUT, bufsize=-1)
+        std_out, _ = proc.communicate()
+        return proc.returncode, std_out
     
-    def start(self, pycode):
+    def start(self, script):
         '''
         Run the given test code in a new subprocess
         '''
-        raise NotImplementedError('"run(self, pycode)" should be overridden in a derived class')
-    
-#########################################################################
-# A runner class to execute the tests on using the command line interface
-#########################################################################
-class PythonConsoleRunner(PythonTestRunner):
-    '''
-    This class executes tests within a Mantid environment inside a standalone python
-    interpreter
-    '''
-    
-    def __init__(self):
-        PythonTestRunner.__init__(self, True)
-
-    def start(self, pycode):
-        '''
-        Run the code in a new instance of a python interpreter
-        '''
-        return self.spawnSubProcess(sys.executable + ' -c \"' + self.getCodePrefix() + pycode + '\"')
+        exec_call = self._executable
+        if self._exec_args:
+            exec_call += ' '  + self._exec_args
+        # write script to temporary file and execute this file
+        tmp_file = tempfile.NamedTemporaryFile(mode='w', delete=False)
+        tmp_file.write(script.asString())
+        tmp_file.close()
+        cmd = exec_call + ' ' + tmp_file.name
+        print "Executing test script '%s'" % (cmd)
+        results = self.spawnSubProcess(cmd)
+        os.remove(tmp_file.name)
+        return results
 
 #########################################################################
-# A runner class to execute the tests on using the command line interface
+# Encapsulate the script for runnning a single test
 #########################################################################
-class MantidPlotTestRunner(PythonTestRunner):
-    '''
-    This class executes tests within the Python scripting environment inside 
-    MantidPlot
-    '''
-    
-    def __init__(self, mtdplot_dir):
-        PythonTestRunner.__init__(self)
-        mtdplot_bin = mtdplot_dir + '/MantidPlot'
-        if os.name == 'nt':
-            mtdplot_bin += '.exe'
-        self._mtdplot_bin = os.path.abspath(mtdplot_bin).replace('\\','/')
-        
-    def start(self, pycode):
-        '''
-        Run the code in a new instance of the MantidPlot scripting environment
-        '''
-        # The code needs wrapping in a temporary file so that it can be passed
-        # to MantidPlot, along with the redirection of the scripting output to
-        # stdout
-        # On Windows, just using the file given back by tempfile doesn't work
-        # as the name is mangled to a short version where all characters after 
-        # a space are replace by ~. So on windows use put the file in the 
-        # current directory
-        if os.name == 'nt':
-            loc = '.'
-        else:
-            loc = ''
-        # MG 11/09/2009: I tried the simple tempfile.NamedTemporaryFile() method
-        # but this didn't work on Windows so I had to be a little long winded
-        # about it
-        fd, tmpfilepath = tempfile.mkstemp(suffix = '.py', dir = loc, text=True)
+class TestScript(object):
 
-        os.write(fd, 'import sys\nsys.stdout = sys.__stdout__\n' + self.getCodePrefix() + pycode)
-        retcode, output, err = self.spawnSubProcess('"' +self._mtdplot_bin + '" -xq \'' + tmpfilepath + '\'') 
-        # Remove the temporary file
-        os.close(fd)
-        os.remove(tmpfilepath)
-        return retcode, output, err
-                
+    def __init__(self, test_dir, module_name, test_cls_name):
+        self._test_dir = test_dir
+        self._modname = module_name
+        self._test_cls_name = test_cls_name
+
+    def asString(self):
+        code = '''import sys
+sys.path.append('{0}')
+sys.path.append('{1}')
+from {2} import {3}
+systest = {3}()
+systest.execute()
+exitcode = systest.returnValidationCode({4})
+systest.cleanup()
+sys.exit(exitcode)'''
+        return code.format(TESTING_FRAMEWORK_DIR, self._test_dir, self._modname,
+                           self._test_cls_name, TestRunner.VALIDATION_FAIL_CODE)
+
 #########################################################################
 # A class to tie together a test and its results
 #########################################################################
@@ -641,29 +580,31 @@ class TestSuite(object):
     '''
     Tie together a test and its results.
     '''
-    def __init__(self, modname, testname, filename = None):
+    def __init__(self, test_dir, modname, testname, filename = None):
+        self._test_dir = test_dir
         self._modname = modname
-        self._fullname = modname
+        self._test_cls_name = testname
+        self._fqtestname = modname
         # A None testname indicates the source did not load properly
         # It has come this far so that it gets reported as a proper failure
         # by the framework
         if testname is not None:
-            self._fullname += '.' + testname
+            self._fqtestname += '.' + testname
 
         self._result = TestResult()
         # Add some results that are not linked to the actually test itself
-        self._result.name = self._fullname
+        self._result.name = self._fqtestname
         if filename:
             self._result.filename = filename
         else:
-            self._result.filename = self._fullname
-        self._result.addItem(['test_name', self._fullname])
+            self._result.filename = self._fqtestname
+        self._result.addItem(['test_name', self._fqtestname])
         sysinfo = platform.uname()
         self._result.addItem(['host_name', sysinfo[1]])
         self._result.addItem(['environment', self.envAsString()])
         self._result.status = 'skipped' # the test has been skipped until it has been executed
 
-    name = property(lambda self: self._fullname)
+    name = property(lambda self: self._fqtestname)
     status = property(lambda self: self._result.status)
 
     def envAsString(self):
@@ -682,29 +623,26 @@ class TestSuite(object):
         self._result.status = 'skipped'
 
     def execute(self, runner):
-        print time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) + ': Executing ' + self._fullname
-        pycode = 'import ' + self._modname + ';'\
-                 + 'systest = ' + self._fullname + '();'\
-                 + 'systest.execute();'\
-                 + 'retcode = systest.returnValidationCode('+str(PythonTestRunner.VALIDATION_FAIL_CODE)+');'\
-                 + 'systest.cleanup();'\
-                 + 'sys.exit(retcode)'
-        # Start the new process
+        print time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) + ': Executing ' + self._fqtestname
+        if self._test_cls_name is not None:
+          script = TestScript(self._test_dir, self._modname, self._test_cls_name)
+          # Start the new process and wait until it finishes
+          retcode, output  = runner.start(script)
+        else:
+          retcode, output = TestRunner.SKIP_TEST, ""
         self._result.date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self._result.addItem(['test_date',self._result.date])
-        retcode, output, err = runner.start(pycode)
-        
 
-        if retcode == PythonTestRunner.SUCCESS_CODE:
+        if retcode == TestRunner.SUCCESS_CODE:
             status = 'success'
-        elif retcode == PythonTestRunner.GENERIC_FAIL_CODE:
+        elif retcode == TestRunner.GENERIC_FAIL_CODE:
             # This is most likely an algorithm failure, but it's not certain
             status = 'algorithm failure'
-        elif retcode == PythonTestRunner.VALIDATION_FAIL_CODE:
+        elif retcode == TestRunner.VALIDATION_FAIL_CODE:
             status = 'failed validation'
-        elif retcode == PythonTestRunner.SEGFAULT_CODE:
+        elif retcode == TestRunner.SEGFAULT_CODE:
             status = 'crashed'
-        elif retcode == PythonTestRunner.SKIP_TEST:
+        elif retcode == TestRunner.SKIP_TEST:
             status = 'skipped'
         elif retcode < 0:
             status = 'hung'
@@ -740,23 +678,14 @@ class TestManager(object):
     This is the main interaction point for the framework.
     '''
 
-    def __init__(self, test_loc, runner = PythonConsoleRunner(), output = [TextResultReporter()],
+    def __init__(self, test_loc, runner, output = [TextResultReporter()],
                  testsInclude=None, testsExclude=None):
         '''Initialize a class instance'''
 
-        # Check whether the MANTIDPATH variable is set
-        mtdheader_dir = os.getenv("MANTIDPATH")
-        if mtdheader_dir is None:
-            raise RuntimeError('MANTIDPATH variable not be found. Please ensure Mantid is installed correctly.')
-
-        # Runners and reporters    
+        # Runners and reporters
         self._runner = runner
         self._reporters = output
         
-        # Init mantid
-        sys.path.append(os.path.abspath(mtdheader_dir).replace('\\','/'))
-        runner.setMantidDir(mtdheader_dir)
-
         # If given option is a directory
         if os.path.isdir(test_loc) == True:
             test_dir = os.path.abspath(test_loc).replace('\\','/')
@@ -783,9 +712,6 @@ class TestManager(object):
 
         self._testsInclude = testsInclude
         self._testsExclude = testsExclude
-
-        # Create a prefix to use when executing the code
-        runner.createCodePrefix()
 
     totalTests = property(lambda self: len(self._tests))
     skippedTests = property(lambda self: (self.totalTests - self._passedTests - self._failedTests))
@@ -843,7 +769,7 @@ class TestManager(object):
         pyfile = open(filename, 'r')
         tests = []
         try:
-            mod = imp.load_module(modname, pyfile, filename, ("","",imp.PY_SOURCE))
+            mod = imp.load_module(modname, pyfile, filename, ("", "", imp.PY_SOURCE))
             mod_attrs = dir(mod)
             for key in mod_attrs:
                 value = getattr(mod, key)
@@ -851,11 +777,12 @@ class TestManager(object):
                     continue
                 if self.isValidTestClass(value):
                     test_name = key
-                    tests.append(TestSuite(modname, test_name, filename))
-        except Exception:
+                    tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
+        except Exception, exc:
+            print "Error importing module '%s': %s" % (modname, str(exc))
             # Error loading the source, add fake unnamed test so that an error
             # will get generated when the tests are run and it will be counted properly
-            tests.append(TestSuite(modname, None, filename))
+            tests.append(TestSuite(self._runner.getTestDir(), modname, None, filename))
         finally:
             pyfile.close()
         return tests
@@ -880,24 +807,9 @@ class TestManager(object):
 #########################################################################
 class MantidFrameworkConfig:
 
-    def __init__(self, mantidDir=None, sourceDir=None,
+    def __init__(self, sourceDir=None,
                  data_dirs="", save_dir = "",
                  loglevel='information', archivesearch=False):
-        # force the environment variable
-        if mantidDir is not None:
-            if os.path.isfile(mantidDir):
-                mantidDir = os.path.split(mantidDir)[0]
-            os.environ['MANTIDPATH'] = mantidDir
-
-        # add it to the python path
-        directory = os.getenv("MANTIDPATH")
-        if directory is None:
-            raise RuntimeError("MANTIDPATH not found.")
-        else:
-            sys.path.append(directory)
-        if not os.path.isdir(os.path.join(directory, "mantid")):
-            raise RuntimeError("Did not find mantid package in %s" % directory)
-
         self.__sourceDir = self.__locateSourceDir(sourceDir)
 
         # add location of stress tests

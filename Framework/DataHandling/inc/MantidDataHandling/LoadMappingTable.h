@@ -57,9 +57,6 @@ class DLLExport LoadMappingTable : public API::Algorithm {
 public:
   /// Default constructor
   LoadMappingTable();
-
-  /// Destructor
-  ~LoadMappingTable() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadMappingTable"; };
   /// Summary of algorithms purpose

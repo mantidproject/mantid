@@ -23,7 +23,6 @@
 #include <vtkFieldData.h>
 #include <vtkDataSet.h>
 
-
 namespace Mantid {
 namespace VATES {
 
@@ -42,8 +41,9 @@ namespace VATES {
  * @return A workspace that can be directly rendered from. Integrated dimensions
  *are always last.
  */
-void MDHWLoadingPresenter::transposeWs(Mantid::API::IMDHistoWorkspace_sptr &inHistoWs,
-                 Mantid::API::IMDHistoWorkspace_sptr &outCachedHistoWs) {
+void MDHWLoadingPresenter::transposeWs(
+    Mantid::API::IMDHistoWorkspace_sptr &inHistoWs,
+    Mantid::API::IMDHistoWorkspace_sptr &outCachedHistoWs) {
   using namespace Mantid::API;
 
   if (!outCachedHistoWs) {
@@ -108,26 +108,25 @@ Extract the geometry and function information
 @param histoWs : histogram workspace to get the information from.
 */
 void MDHWLoadingPresenter::extractMetadata(
-    Mantid::API::IMDHistoWorkspace_sptr histoWs) {
+    const Mantid::API::IMDHistoWorkspace &histoWs) {
   using namespace Mantid::Geometry;
   MDGeometryBuilderXML<NoDimensionPolicy> refresh;
   xmlBuilder = refresh; // Reassign.
   std::vector<IMDDimension_sptr> dimensions;
-  size_t nDimensions = histoWs->getNumDims();
+  size_t nDimensions = histoWs.getNumDims();
   for (size_t d = 0; d < nDimensions; d++) {
-    IMDDimension_const_sptr inDim = histoWs->getDimension(d);
+    IMDDimension_const_sptr inDim = histoWs.getDimension(d);
     coord_t min = inDim->getMinimum();
     coord_t max = inDim->getMaximum();
     if (min > max) {
       min = 0.0;
       max = 1.0;
     }
-    // std::cout << "dim " << d << min << " to " <<  max << std::endl;
-    axisLabels.push_back(makeAxisTitle(inDim));
-    MDHistoDimension_sptr dim(
-        new MDHistoDimension(inDim->getName(), inDim->getName(),
-                             inDim->getMDFrame(), min, max, inDim->getNBins()));
-    dimensions.push_back(dim);
+    // std::cout << "dim " << d << min << " to " <<  max << '\n';
+    axisLabels.push_back(makeAxisTitle(*inDim));
+    dimensions.push_back(boost::make_shared<MDHistoDimension>(
+        inDim->getName(), inDim->getName(), inDim->getMDFrame(), min, max,
+        inDim->getNBins()));
   }
 
   // Configuring the geometry xml builder allows the object panel associated
@@ -208,8 +207,8 @@ void MDHWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
   VatesKnowledgeSerializer serializer;
   serializer.setWorkspaceName(wsName);
   serializer.setGeometryXML(xmlBuilder.create());
-  serializer.setImplicitFunction(Mantid::Geometry::MDImplicitFunction_sptr(
-      new Mantid::Geometry::NullImplicitFunction()));
+  serializer.setImplicitFunction(
+      boost::make_shared<Mantid::Geometry::NullImplicitFunction>());
   std::string xmlString = serializer.createXMLString();
 
   // Serialize Json metadata
@@ -217,12 +216,12 @@ void MDHWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
 
   // Add metadata to dataset.
   MetadataToFieldData convert;
-  convert(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId().c_str());
+  convert(outputFD.GetPointer(), xmlString,
+          XMLDefinitions::metaDataId().c_str());
   convert(outputFD.GetPointer(), jsonString,
           m_vatesConfigurations->getMetadataIdJson().c_str());
   visualDataSet->SetFieldData(outputFD.GetPointer());
 }
-
 
 /**
  * Set the axis labels from the current dimensions
@@ -236,7 +235,6 @@ void MDHWLoadingPresenter::setAxisLabels(vtkDataSet *visualDataSet) {
                   "the data set.\n");
   }
 }
-
 
 /**
 Gets the geometry in a string format.

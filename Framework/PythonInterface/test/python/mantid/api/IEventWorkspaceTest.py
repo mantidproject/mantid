@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 
 from testhelpers import run_algorithm, can_be_instantiated, WorkspaceCreationHelper
@@ -33,19 +35,19 @@ class IEventWorkspaceTest(unittest.TestCase):
         self.assertFalse(error_raised)
 
     def test_event_list_is_return_as_correct_type(self):
-        el = self._test_ws.getEventList(0)
+        el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         self.assertEquals(el.getNumberEvents(), 200)
 
     def test_event_list_getWeights(self):
-        el = self._test_ws.getEventList(0)
+        el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         TofList = el.getTofs()
         self.assertEquals(len(TofList), el.getNumberEvents()) #check length
         self.assertAlmostEquals(TofList[0], 0.5) #first value
 
     def test_event_list_getWeights(self):
-        el = self._test_ws.getEventList(0)
+        el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         weightList = el.getWeights()
         self.assertEquals(len(weightList), el.getNumberEvents()) #check length
@@ -53,12 +55,17 @@ class IEventWorkspaceTest(unittest.TestCase):
         self.assertAlmostEquals(weightList[len(weightList)-1], 1.0) #last value
 
     def test_event_list_getWeightErrors(self):
-        el = self._test_ws.getEventList(0)
+        el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         weightErrorList = el.getWeightErrors()
         self.assertEquals(len(weightErrorList), el.getNumberEvents()) #check length
         self.assertAlmostEquals(weightErrorList[0], 1.0) #first value
         self.assertAlmostEquals(weightErrorList[len(weightErrorList)-1], 1.0) #last value
+
+    def test_deprecated_getEventList(self):
+        el = self._test_ws.getEventList(0)
+        self.assertTrue(isinstance(el, IEventList))
+        self.assertEquals(el.getNumberEvents(), 200)
 
 
 if __name__ == '__main__':

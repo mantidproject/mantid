@@ -172,9 +172,9 @@ public:
     //----------------------------------------------------------------------
     // Tests to check that spectra-detector mapping is done correctly
     //----------------------------------------------------------------------
-    TS_ASSERT_EQUALS(output2D->getSpectrum(0)->getDetectorIDs().size(), 1);
-    TS_ASSERT_EQUALS(output2D->getSpectrum(0)->getSpectrumNo(), 1);
-    TS_ASSERT(output2D->getSpectrum(0)->hasDetectorID(1));
+    TS_ASSERT_EQUALS(output2D->getSpectrum(0).getDetectorIDs().size(), 1);
+    TS_ASSERT_EQUALS(output2D->getSpectrum(0).getSpectrumNo(), 1);
+    TS_ASSERT(output2D->getSpectrum(0).hasDetectorID(1));
 
     // obtain the expected log data which was read from the Nexus file (NXlog)
 

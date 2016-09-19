@@ -58,8 +58,6 @@ class DLLExport LoadNexusLogs : public API::Algorithm {
 public:
   /// Default constructor
   LoadNexusLogs();
-  /// Destructor
-  ~LoadNexusLogs() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadNexusLogs"; }
   /// Summary of algorithms purpose

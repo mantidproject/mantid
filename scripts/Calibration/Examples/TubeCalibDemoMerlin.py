@@ -86,7 +86,8 @@ def calibrateMerlin(filename):
 
   # the known positions are given in pixels inside the tubes and transformed to provide the positions
   # with the center of the tube as the origin
-    knownPositions = 2.92713867188*(numpy.array([ 27.30074322, 92.5,    294.65178585,    362.37861919 , 512.77103043    ,663.41425323, 798.3223896,     930.9, 997.08480835])/1024 - 0.5)
+    knownPositions = 2.92713867188*(numpy.array([27.30074322, 92.5, 294.65178585, 362.37861919,
+                                                 512.77103043, 663.41425323, 798.3223896, 930.9, 997.08480835])/1024 - 0.5)
     funcForm = numpy.array([2,2,1,1,1,1,1,2,2],numpy.int8)
   # The calibration will follow different steps for sets of tubes
 
@@ -100,10 +101,10 @@ def calibrateMerlin(filename):
   # == Get the calibration and put results into calibration table ==
   # also put peaks into PeakFile
     calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, door9pos, door9func,
-        outputPeak=True,
-        margin=30,
-        rangeList=range(20) # because 20, 21, 22, 23 are defective detectors
-        )
+                                                 outputPeak=True,
+                                                 margin=30,
+                                                 rangeList=range(20) # because 20, 21, 22, 23 are defective detectors
+                                                )
     print "Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt"
     analisePeakTable(peakTable, 'door9_tube1_peaks')
 
@@ -112,10 +113,10 @@ def calibrateMerlin(filename):
     door8func = points7func
     CalibratedComponent = 'MERLIN/door8'
     calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, door8pos,
-        door8func,
-    outputPeak = True, #change to peakTable to append to peakTable
-    calibTable = calibrationTable,
-    margin = 30)
+                                                 door8func,
+                                                 outputPeak = True, #change to peakTable to append to peakTable
+                                                 calibTable = calibrationTable,
+                                                 margin = 30)
     analisePeakTable(peakTable, 'door8_peaks')
 
   # For the doors 7,6,5,4, 2, 1 we may use the 9 points

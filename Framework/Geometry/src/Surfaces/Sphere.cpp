@@ -170,7 +170,6 @@ Apply a shift of the centre
 {
   Centre += Pt;
   Quadratic::displace(Pt);
-  return;
 }
 
 void Sphere::rotate(const Kernel::Matrix<double> &MA)
@@ -181,7 +180,6 @@ Apply a Rotation matrix
 {
   Centre.rotate(MA);
   Quadratic::rotate(MA);
-  return;
 }
 
 double Sphere::centreToPoint(const V3D &pt) const {
@@ -201,7 +199,6 @@ Set the centre point
 {
   Centre = A;
   setBaseEqn();
-  return;
 }
 
 void Sphere::setBaseEqn()
@@ -220,7 +217,6 @@ Sets an equation of type (general sphere)
   BaseEqn[7] = -2.0 * Centre[1];                             // H y
   BaseEqn[8] = -2.0 * Centre[2];                             // J z
   BaseEqn[9] = Centre.scalar_prod(Centre) - Radius * Radius; // K const
-  return;
 }
 
 void Sphere::write(std::ostream &OX) const
@@ -239,7 +235,6 @@ Object of write is to output a MCNPX plane info
     cx << "s " << Centre << " " << Radius;
   }
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
-  return;
 }
 /**
 * Calculates the bounding box for the sphere and returns the bounding box

@@ -139,9 +139,6 @@ class DetParameters;
 
 class DLLExport FindDetectorsPar : public API::Algorithm {
 public:
-  FindDetectorsPar();
-  ~FindDetectorsPar() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FindDetectorsPar"; };
   /// Summary of algorithms purpose
@@ -177,10 +174,10 @@ private:
   /**  the variable defines if algorithm needs to calculate linear ranges for
    * the detectors (dX,dY)
    *    instead of azimuthal_width and polar_width */
-  bool m_SizesAreLinear;
+  bool m_SizesAreLinear = false;
 
   // numner of real(valid and non-monitor) detectors calculated by the alvorithm
-  size_t m_nDetectors;
+  size_t m_nDetectors = 0;
   // the vectors which represent detector's parameters as linear structure
   std::vector<double> azimuthal;
   std::vector<double> polar;

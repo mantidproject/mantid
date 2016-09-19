@@ -43,10 +43,6 @@ namespace Algorithms {
 */
 class DLLExport CuboidGaugeVolumeAbsorption : public FlatPlateAbsorption {
 public:
-  /// (Empty) Constructor
-  CuboidGaugeVolumeAbsorption();
-  /// Virtual destructor
-  ~CuboidGaugeVolumeAbsorption() override {}
   /// Algorithm's name
   const std::string name() const override {
     return "CuboidGaugeVolumeAbsorption";

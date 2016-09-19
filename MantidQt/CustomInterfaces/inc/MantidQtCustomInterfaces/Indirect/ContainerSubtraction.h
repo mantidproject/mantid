@@ -14,13 +14,21 @@ public:
 
 private slots:
   /// Handles a new sample being loaded
-  void newData(const QString &dataName);
+  void newSample(const QString &dataName);
+  /// Handles a new container being loaded
+  void newContainer(const QString &dataName);
+  /// Handles a change in the can scale or shift
+  void updateCan();
   /// Updates the preview mini plot
   void plotPreview(int wsIndex);
   /// Handle abs. correction algorithm completion
   void absCorComplete(bool error);
   /// Handle convert units and save algorithm completion
   void postProcessComplete(bool error);
+  /// Handles saving workspace
+  void saveClicked();
+  /// Handles mantid plotting
+  void plotClicked();
 
 private:
   void setup() override;
@@ -32,6 +40,9 @@ private:
 
   Ui::ContainerSubtraction m_uiForm;
   std::string m_originalSampleUnits;
+
+  std::string m_sampleWorkspaceName;
+  std::string m_containerWorkspaceName;
 };
 
 } // namespace CustomInterfaces

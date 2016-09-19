@@ -1,7 +1,9 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
-from mantid.simpleapi import CreateSampleWorkspace, AddSampleLogMultiple, DeleteWorkspace, GroupWorkspaces
+from mantid.simpleapi import CreateSampleWorkspace, AddSampleLogMultiple, DeleteWorkspace, GroupWorkspaces, AddSampleLog
 
 
 class CompareSampleLogsTest(unittest.TestCase):
@@ -34,6 +36,26 @@ class CompareSampleLogsTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         result = alg_test.getProperty('Result').value
         self.assertEqual('', result)
+
+    def test_string_num(self):
+        AddSampleLog(self.ws1, 'chopper_speed', '14000', 'String')
+        AddSampleLog(self.ws2, 'chopper_speed', '14009', 'Number')
+        wslist = [self.ws1, self.ws2]
+        alg_test = run_algorithm("CompareSampleLogs", InputWorkspaces=wslist, SampleLogs='chopper_speed',
+                                 Tolerance=10.0)
+        self.assertTrue(alg_test.isExecuted())
+        result = alg_test.getProperty('Result').value
+        self.assertEqual('', result)
+
+    def test_nasty_log(self):
+        AddSampleLog(self.ws1, 'chopper_speed', '14000.0', 'String')
+        AddSampleLog(self.ws2, 'chopper_speed', '1400q', 'String')
+        wslist = [self.ws1, self.ws2]
+        alg_test = run_algorithm("CompareSampleLogs", InputWorkspaces=wslist, SampleLogs='chopper_speed',
+                                 Tolerance=10.0)
+        self.assertTrue(alg_test.isExecuted())
+        result = alg_test.getProperty('Result').value
+        self.assertEqual('chopper_speed', result)
 
     def tearDown(self):
         if AnalysisDataService.doesExist('ws1'):

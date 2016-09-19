@@ -30,14 +30,13 @@ MuonSequentialFitDialog::MuonSequentialFitDialog(
   setState(Stopped);
 
   // Set initial run to be run number of the workspace selected in fit browser
-  // when starting
-  // seq. fit dialog
-  auto fitWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+  // when starting seq. fit dialog
+  const auto fitWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(
       m_fitPropBrowser->getWorkspace());
   m_ui.runs->setText(QString::number(fitWS->getRunNumber()) + "-");
   // Set the file finder to the correct instrument (not Mantid's default
   // instrument)
-  auto instName = fitWS->getInstrument()->getName();
+  const auto instName = fitWS->getInstrument()->getName();
   m_ui.runs->setInstrumentOverride(QString(instName.c_str()));
 
   // TODO: find a better initial one, e.g. previously used
@@ -76,20 +75,20 @@ MuonSequentialFitDialog::MuonSequentialFitDialog(
 MuonSequentialFitDialog::~MuonSequentialFitDialog() {}
 
 /**
- * Checks if specified name is valid as a name for label.
+ * Checks if specified name is valid as a name for the label.
  * @param label :: The name to check
- * @return Empty string if valid, otherwise a string describing why is invalid
+ * @return Empty string if valid, otherwise an error string
  */
 std::string MuonSequentialFitDialog::isValidLabel(const std::string &label) {
   if (label.empty())
-    return "Can not be empty";
+    return "Cannot be empty";
   else
     return AnalysisDataService::Instance().isValid(label);
 }
 
 /**
  * Returns displayable title for the given workspace;
- * @param ws :: Workpspace to get title from
+ * @param ws :: Workspace to get title from
  * @return The title, or empty string if unable to get one
  */
 std::string MuonSequentialFitDialog::getRunTitle(Workspace_const_sptr ws) {
@@ -143,7 +142,7 @@ void MuonSequentialFitDialog::initDiagnosisTable() {
 /**
  * Add a new entry to the diagnosis table.
  * @param runTitle       :: Title of the run fitted
- * @param fitQuality     :: Number representing a goodness of the fit
+ * @param fitQuality     :: Number representing goodness of the fit
  * @param fittedFunction :: Function containing fitted parameters
  */
 void MuonSequentialFitDialog::addDiagnosisEntry(const std::string &runTitle,
@@ -199,7 +198,7 @@ void MuonSequentialFitDialog::updateLabelError(const QString &label) {
 }
 
 /**
- * Check if all the input field are valid.
+ * Check if all the input fields are valid.
  * @return True if everything valid, false otherwise
  */
 bool MuonSequentialFitDialog::isInputValid() {
@@ -237,7 +236,7 @@ void MuonSequentialFitDialog::setState(DialogState newState) {
 }
 
 /**
- * Update enabled state off all the input widgets depending on new dialog state.
+ * Update enabled state of all the input widgets depending on new dialog state.
  * @param newState :: New state of the dialog
  */
 void MuonSequentialFitDialog::updateInputEnabled(DialogState newState) {
@@ -261,7 +260,7 @@ void MuonSequentialFitDialog::updateControlEnabled(DialogState newState) {
 
 /**
  * Update cursor depending on the new state of the dialog.
- * Waiting cursor is displayed while preparing so that user does now that
+ * Waiting cursor is displayed while preparing so that user does know that
  * something is happening.
  * @param newState :: New state of the dialog
  */
@@ -280,30 +279,34 @@ void MuonSequentialFitDialog::updateCursor(DialogState newState) {
 }
 
 /**
- * Start fitting process.
+ * Start fitting process by running file search.
+ * Once search is complete, fit continues in continueFit().
  */
 void MuonSequentialFitDialog::startFit() {
   if (m_state != Stopped)
-    throw std::runtime_error("Couln't start: already running");
+    throw std::runtime_error("Couldn't start: already running");
 
   setState(Preparing);
 
   // Explicitly run the file search. This might be needed when Start is clicked
-  // straigh after
-  // editing the run box. In that case, lost focus event might not be processed
-  // yet and search
-  // might not have been started yet. Otherwise, search is not done as the
-  // widget sees that it
-  // has not been changed. Taken from LoadDialog.cpp:124.
-  m_ui.runs->findFiles();
-
-  // Wait for file search to finish.
-  while (m_ui.runs->isSearching()) {
-    QApplication::processEvents();
+  // straight after editing the run box. In that case, lost focus event might
+  // not be processed yet and search might not have been started yet.
+  // Otherwise, search is not done as the widget sees that it has not been
+  // changed.
+  connect(m_ui.runs, SIGNAL(fileInspectionFinished()), this,
+          SLOT(continueFit()));
+  if (!m_ui.runs->isSearching()) {
+    m_ui.runs->findFiles();
   }
+}
 
-  // To process events from the finished thread
-  QApplication::processEvents();
+/**
+ * Carries out the fitting process once the file search has completed.
+ * Called when the run control reports that its search has finished.
+ */
+void MuonSequentialFitDialog::continueFit() {
+  disconnect(m_ui.runs, SIGNAL(fileInspectionFinished()), this,
+             SLOT(continueFit()));
 
   // Validate input fields
   if (!isInputValid()) {
@@ -464,7 +467,8 @@ void MuonSequentialFitDialog::startFit() {
       fit->setProperty("InputWorkspace", ws);
       fit->setProperty("Output", wsBaseName);
 
-      // We should have one spectra only in the workspace, so use the first one.
+      // We should have one spectrum only in the workspace, so use the first
+      // one.
       fit->setProperty("WorkspaceIndex", 0);
 
       // Various properties from the fit prop. browser
@@ -481,7 +485,7 @@ void MuonSequentialFitDialog::startFit() {
       break;
     }
 
-    // Make sure created fit workspaces end-up in the group
+    // Make sure created fit workspaces end up in the group
     // TODO: this really should use loop
     ads.addToGroup(labelGroupName, wsBaseName + "_NormalisedCovarianceMatrix");
     ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");

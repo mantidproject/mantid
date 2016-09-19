@@ -40,13 +40,6 @@ BinMD::BinMD()
       numEvents(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-BinMD::~BinMD() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void BinMD::init() {
@@ -120,7 +113,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
       // Now transform to the output dimensions
       m_transform->apply(inCenter, outCenter);
       // std::cout << "Input coord " << VMD(nd,inCenter) << " transformed to "
-      // <<  VMD(nd,outCenter) << std::endl;
+      // <<  VMD(nd,outCenter) << '\n';
 
       // To build up the linear index
       size_t linearIndex = 0;
@@ -325,7 +318,7 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       if (prog) {
         PARALLEL_CRITICAL(BinMD_progress) {
           g_log.debug() << "Chunk " << chunk << ": found " << boxes.size()
-                        << " boxes within the implicit function." << std::endl;
+                        << " boxes within the implicit function.\n";
           progNumSteps += boxes.size();
           prog->setNumSteps(progNumSteps);
         }
@@ -335,7 +328,7 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       for (auto &boxe : boxes) {
         MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxe);
         // Perform the binning in this separate method.
-        if (box)
+        if (box && !box->getIsMasked())
           this->binMDBox(box, chunkMin.data(), chunkMax.data());
 
         // Progress reporting
@@ -404,7 +397,7 @@ void BinMD::exec() {
   bool IterateEvents = getProperty("IterateEvents");
   if (!IterateEvents) {
     g_log.warning() << "IterateEvents=False is no longer supported. Setting "
-                       "IterateEvents=True." << std::endl;
+                       "IterateEvents=True.\n";
     IterateEvents = true;
   }
 
@@ -415,7 +408,7 @@ void BinMD::exec() {
   IMDHistoWorkspaces is if they also happen to contain original workspaces
   that are MDEventWorkspaces.
   */
-  if (boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_inWS)) {
+  if (m_inWS->isMDHistoWorkspace()) {
     throw std::runtime_error(
         "Cannot rebin a workspace that is histogrammed and has no original "
         "workspace that is an MDEventWorkspace. "
@@ -435,7 +428,7 @@ void BinMD::exec() {
       g_log.warning()
           << this->name()
           << " was not able to copy experiment info to output workspace "
-          << outWS->getName() << std::endl;
+          << outWS->getName() << '\n';
     }
   }
 

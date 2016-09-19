@@ -1,4 +1,5 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import Direction, FloatArrayProperty
@@ -67,7 +68,8 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                              "Crop the data at this maximum wavelength.")
 
         self.declareProperty(FloatArrayProperty("Binning", values=[0., 0., 0.],
-                             direction=Direction.Input), "Positive is linear bins, negative is logorithmic")
+                                                direction=Direction.Input),
+                             "Positive is linear bins, negative is logorithmic")
         self.declareProperty("ResampleX", 0,
                              "Number of bins in x-axis. Non-zero value overrides \"Params\" property. " +
                              "Negative value means logorithmic binning.")
@@ -85,6 +87,17 @@ class PDToPDFgetN(DataProcessorAlgorithm):
             if self.getProperty("InputWorkspace").value.id() == EVENT_WORKSPACE_ID:
                 if self.getProperty("InputWorkspace").value.getNumberEvents() <= 0:
                     issues["InputWorkspace"] = "Workspace contains no events"
+
+        if self.getProperty("ResampleX").value == 0:
+            binning = self.getProperty('Binning').value
+            if len(binning) == 1:
+                binning = binning[0]
+            else:
+                binning = binning[1]
+            if binning == 0.:   # has to be non-zero delta
+                msg = 'Must supply a Binning or ResampleX'
+                issues['Binning'] = msg
+                issues['ResampleX'] = msg
 
         return issues
 
@@ -148,7 +161,7 @@ class PDToPDFgetN(DataProcessorAlgorithm):
             wksp.getRun()['iparm_file'] = self._iparmFile
 
         wksp = SetUncertainties(InputWorkspace=wksp, OutputWorkspace=wksp,
-                                SetError="sqrt")
+                                SetError="sqrtOrOne")
         SaveGSS(InputWorkspace=wksp,
                 Filename=self.getProperty("PDFgetNFile").value,
                 SplitFiles=False, Append=False,

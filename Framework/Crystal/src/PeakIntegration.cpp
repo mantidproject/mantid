@@ -1,7 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -28,12 +24,6 @@ using namespace Kernel;
 using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
-
-/// Constructor
-PeakIntegration::PeakIntegration() : API::Algorithm(), m_IC(false) {}
-
-/// Destructor
-PeakIntegration::~PeakIntegration() {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
@@ -75,7 +65,7 @@ void PeakIntegration::exec() {
   /// Output peaks workspace, create if needed
   PeaksWorkspace_sptr peaksW = getProperty("OutPeaksWorkspace");
   if (peaksW != inPeaksW)
-    peaksW.reset(inPeaksW->clone().release());
+    peaksW = inPeaksW->clone();
 
   double qspan = 0.12;
   m_IC = getProperty("IkedaCarpenterTOF");
@@ -328,7 +318,6 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
 
   slice_alg->setProperty("NBadEdgePixels", nPixels);
   slice_alg->executeAsChildAlg();
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 
   MantidVec &Xout = outputW->dataX(idet);
   MantidVec &Yout = outputW->dataY(idet);
@@ -353,7 +342,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
     }
   }
 
-  outputW->getSpectrum(idet)->clearDetectorIDs();
+  outputW->getSpectrum(idet).clearDetectorIDs();
   // Find the pixel ID at that XY position on the rectangular detector
   int pixelID = peak.getDetectorID(); // det->getAtXY(x0,y0)->getID();
 
@@ -363,7 +352,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
     size_t wi = wiEntry->second;
     // Set detectorIDs
     outputW->getSpectrum(idet)
-        ->addDetectorIDs(inputW->getSpectrum(wi)->getDetectorIDs());
+        .addDetectorIDs(inputW->getSpectrum(wi).getDetectorIDs());
   }
 
   return TOFmax - 1;

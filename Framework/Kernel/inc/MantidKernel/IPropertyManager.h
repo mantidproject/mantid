@@ -79,7 +79,7 @@ public:
     @param ignoreProperties :: A set of names of any properties NOT to set
     from the propertiesArray
   */
-  virtual void setPropertiesWithSimpleString(
+  virtual void setPropertiesWithString(
       const std::string &propertiesString,
       const std::unordered_set<std::string> &
           ignoreProperties = std::unordered_set<std::string>()) = 0;

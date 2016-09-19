@@ -16,12 +16,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
-/// Empty constructor allocates no resources.
-ChangeLogTime::ChangeLogTime() {}
-
-/// Empty destructor deallocates no resources.
-ChangeLogTime::~ChangeLogTime() {}
-
 /// Algorithm's name for identification
 const string ChangeLogTime::name() const { return "ChangeLogTime"; }
 

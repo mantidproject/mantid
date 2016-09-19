@@ -23,16 +23,6 @@ std::string LessThan() { return "Less Than"; }
 std::string GreaterThan() { return "Greater Than"; }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ThresholdMD::ThresholdMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ThresholdMD::~ThresholdMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ThresholdMD::name() const { return "ThresholdMD"; }
 

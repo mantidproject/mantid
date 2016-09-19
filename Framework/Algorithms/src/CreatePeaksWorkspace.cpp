@@ -14,18 +14,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreatePeaksWorkspace::CreatePeaksWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreatePeaksWorkspace::~CreatePeaksWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CreatePeaksWorkspace::init() {
@@ -55,6 +43,8 @@ void CreatePeaksWorkspace::exec() {
     Progress progress(this, 0, 1, NumberOfPeaks);
 
     out->setInstrument(instWS->getInstrument());
+    out->mutableRun().setGoniometer(instWS->run().getGoniometer().getR(),
+                                    false);
     // Create some default peaks
     for (int i = 0; i < NumberOfPeaks; i++) {
       out->addPeak(Peak(out->getInstrument(),

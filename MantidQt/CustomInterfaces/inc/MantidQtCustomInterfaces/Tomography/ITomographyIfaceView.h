@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_ITOMOGRAPHYIFACEVIEW_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_ITOMOGRAPHYIFACEVIEW_H_
 
+#include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/IRemoteJobManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
@@ -320,6 +321,25 @@ public:
    * using it; 0 otherwise.
    */
   virtual int keepAlivePeriod() { return 0; }
+
+  /**
+   * Get parameters for wavelength/energy bands aggregation. Provides
+   * all the parameters needed to run the aggregation algorithm.
+   *
+   * @return parameters for an algorithm, as key-value strings
+   * for every required parameter and optinal parameter set to
+   * non-default values.
+   */
+  virtual std::map<std::string, std::string>
+  currentAggregateBandsParams() const = 0;
+
+  /**
+   * Run the wavelength/energy bands aggregation algorithm in the
+   * background.
+   *
+   * @param alg algorithm initialized and ready to run.
+   */
+  virtual void runAggregateBands(Mantid::API::IAlgorithm_sptr alg) = 0;
 };
 
 } // namespace CustomInterfaces

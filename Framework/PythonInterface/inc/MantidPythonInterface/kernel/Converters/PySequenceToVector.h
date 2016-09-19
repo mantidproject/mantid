@@ -83,8 +83,7 @@ template <typename DestElementType> struct DLLExport PySequenceToVector {
       return cvector;
     ExtractCType<DestElementType> elementConverter;
     for (Py_ssize_t i = 0; i < length; ++i) {
-      PyObject *item = PySequence_Fast_GET_ITEM(m_obj, i);
-      DestElementType element = elementConverter(item);
+      DestElementType element = elementConverter(PySequence_GetItem(m_obj, i));
       cvector[i] = element;
     }
     return cvector;

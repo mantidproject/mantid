@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/FFTSmooth2.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidAlgorithms/FFTSmooth2.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -95,7 +95,7 @@ public:
     TS_ASSERT_EQUALS(test_output_WS->size(), gold_output_WS->size());
 
     for (size_t i = 0; i < test_output_WS->size(); i++) {
-      TS_ASSERT_DELTA(test_output_WS->dataY(0)[i], gold_output_WS->dataY(0)[i],
+      TS_ASSERT_DELTA(test_output_WS->y(0)[i], gold_output_WS->y(0)[i],
                       0.00001);
     }
 
@@ -103,7 +103,7 @@ public:
     AnalysisDataService::Instance().remove("SmoothedWS");
     AnalysisDataService::Instance().remove("ZeroingGoldWS");
 
-    //  std::cout<< "RUNNING FFTSmooth2 testZeroing() DONE!" << std::endl;
+    //  std::cout<< "RUNNING FFTSmooth2 testZeroing() DONE!\n";
   }
 
   void testButterworth() { // load input and "Gold" result workspaces
@@ -152,7 +152,7 @@ public:
     TS_ASSERT_EQUALS(test_output_WS->size(), gold_output_WS->size());
 
     for (size_t i = 0; i < test_output_WS->size(); i++) {
-      TS_ASSERT_DELTA(test_output_WS->dataY(0)[i], gold_output_WS->dataY(0)[i],
+      TS_ASSERT_DELTA(test_output_WS->y(0)[i], gold_output_WS->y(0)[i],
                       0.00001);
     }
 
@@ -160,7 +160,7 @@ public:
     AnalysisDataService::Instance().remove("SmoothedWS");
     AnalysisDataService::Instance().remove("ZeroingGoldWS");
 
-    //  std::cout<< "RUNNING FFTSmooth2 testZeroing() DONE!" << std::endl;
+    //  std::cout<< "RUNNING FFTSmooth2 testZeroing() DONE!\n";
   }
 
   //-------------------------------------------------------------------------------------------------
@@ -218,11 +218,11 @@ public:
     for (size_t wi = 0; wi < out->getNumberHistograms(); wi++)
       for (size_t x = 0; x < out->blocksize(); x++) {
         if (AllSpectra) {
-          TS_ASSERT_DELTA(out->readY(wi)[x], static_cast<double>(wi) * 1.0,
+          TS_ASSERT_DELTA(out->y(wi)[x], static_cast<double>(wi) * 1.0,
                           0.02); // Because the spectra are flat, the smoothing
                                  // won't do much
         } else {
-          TS_ASSERT_DELTA(out->readY(wi)[x], WorkspaceIndex * 1.0,
+          TS_ASSERT_DELTA(out->y(wi)[x], WorkspaceIndex * 1.0,
                           0.02); // Because the spectra are flat, the smoothing
                                  // won't do much
         }

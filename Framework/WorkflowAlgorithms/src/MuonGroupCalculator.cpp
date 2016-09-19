@@ -19,10 +19,5 @@ MuonGroupCalculator::MuonGroupCalculator(
     : IMuonAsymmetryCalculator(inputWS, summedPeriods, subtractedPeriods),
       m_groupIndex(groupIndex) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MuonGroupCalculator::~MuonGroupCalculator() {}
-
 } // namespace WorkflowAlgorithms
 } // namespace Mantid

@@ -37,8 +37,6 @@ class DLLExport ProcessDasNexusLog : public API::Algorithm,
                                      public API::DeprecatedAlgorithm {
 public:
   ProcessDasNexusLog();
-  ~ProcessDasNexusLog() override;
-
   const std::string name() const override { return "ProcessDasNexusLog"; };
   /// Summary of algorithms purpose
   const std::string summary() const override {

@@ -15,7 +15,7 @@
 
 #include "boost/shared_ptr.hpp"
 
-#include <assert.h>
+#include <cassert>
 #include <map>
 #include <vector>
 
@@ -97,8 +97,8 @@ void CreateLogPropertyTable::exec() {
 
   // Make sure all workspaces contain the properties.
   for (const auto &matrixWs : matrixWsList) {
-    const Run &run = matrixWs.get()->run();
-    const std::string wsName = matrixWs.get()->getName();
+    const Run &run = matrixWs->run();
+    const std::string wsName = matrixWs->getName();
 
     // Throw if a run does not have a property.
     for (const auto &propName : propNames)

@@ -46,27 +46,26 @@ class ScriptEditor;
 class Matrix;
 
 //! Set matrix values dialog
-class MatrixValuesDialog : public QDialog, public Scripted
-{
-    Q_OBJECT
+class MatrixValuesDialog : public QDialog, public Scripted {
+  Q_OBJECT
 
 public:
-    MatrixValuesDialog( ScriptingEnv *env, QWidget* parent = 0, Qt::WFlags fl = 0 );
-	void setMatrix(Matrix *m);
+  MatrixValuesDialog(ScriptingEnv *env, QWidget *parent = 0, Qt::WFlags fl = 0);
+  void setMatrix(Matrix *m);
 
 private slots:
-	bool apply();
+  bool apply();
 
 private:
-	Matrix *matrix;
+  Matrix *matrix;
 
-        QSize sizeHint() const override;
-        void customEvent(QEvent *e) override;
+  QSize sizeHint() const override;
+  void customEvent(QEvent *e) override;
 
-        ScriptEditor* commands;
-    QPushButton* btnCancel;
-	QSpinBox *startRow, *endRow, *startCol, *endCol;
-	QPushButton *btnApply;
+  ScriptEditor *commands;
+  QPushButton *btnCancel;
+  QSpinBox *startRow, *endRow, *startCol, *endCol;
+  QPushButton *btnApply;
 };
 
 #endif //

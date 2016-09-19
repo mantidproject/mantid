@@ -1,9 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectraAxis.h"
@@ -34,8 +30,6 @@ LoadRaw3::LoadRaw3()
     : m_filename(), m_numberOfSpectra(), m_cache_options(), m_specTimeRegimes(),
       m_noTimeRegimes(0), m_prog(0.0), m_prog_start(0.0), m_prog_end(1.0),
       m_lengthIn(0), m_timeChannelsVec(), m_total_specs(0), m_periodList() {}
-
-LoadRaw3::~LoadRaw3() {}
 
 /// Initialization method.
 void LoadRaw3::init() {
@@ -228,14 +222,12 @@ void LoadRaw3::exec() {
                                              m_lengthIn, m_lengthIn - 1);
         } catch (std::out_of_range &) {
           g_log.information() << "Separate Monitors option is selected and no "
-                                 "monitors in the selected specra range."
-                              << std::endl;
+                                 "monitors in the selected specra range.\n";
           g_log.information()
-              << "Error in creating one of the output workspaces" << std::endl;
+              << "Error in creating one of the output workspaces\n";
         } catch (std::runtime_error &) {
           g_log.information() << "Separate Monitors option is selected,Error "
-                                 "in creating one of the output workspaces"
-                              << std::endl;
+                                 "in creating one of the output workspaces\n";
         }
       } // end of separate Monitors
 

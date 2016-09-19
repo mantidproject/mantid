@@ -230,8 +230,7 @@ void DetectorDiagnostic::exec() {
       numTests += 1;
     if (sampleWS)
       numTests += 1;
-    g_log.information() << "Number of tests requested: " << numTests
-                        << std::endl;
+    g_log.information() << "Number of tests requested: " << numTests << '\n';
     m_progStepWidth = (1. - m_fracDone) / static_cast<double>(numTests);
   }
 
@@ -505,8 +504,7 @@ MatrixWorkspace_sptr DetectorDiagnostic::integrateSpectra(
   MatrixWorkspace_sptr finalOutputW = outputW;
   if (outputWorkspace2D &&
       boost::dynamic_pointer_cast<EventWorkspace>(outputW)) {
-    g_log.debug() << "Converting output Event Workspace into a Workspace2D."
-                  << std::endl;
+    g_log.debug() << "Converting output Event Workspace into a Workspace2D.\n";
     childAlg = createChildAlgorithm("ConvertToMatrixWorkspace", t0, t1);
     childAlg->setProperty("InputWorkspace", outputW);
     childAlg->executeAsChildAlg();
@@ -564,11 +562,11 @@ DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
   }
 
   for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
-    detid_t d = (*((countsWS->getSpectrum(i))->getDetectorIDs().begin()));
+    detid_t d = (*(countsWS->getSpectrum(i).getDetectorIDs().begin()));
     std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> anc =
         instrument->getDetector(d)->getAncestors();
     // std::vector<boost::shared_ptr<const IComponent> >
-    // anc=(*(countsWS->getSpectrum(i)->getDetectorIDs().begin()))->getAncestors();
+    // anc=(*(countsWS->getSpectrum(i)->getDetectorIDs().begin())).getAncestors();
     if (anc.size() < static_cast<size_t>(m_parents)) {
       g_log.warning("Too many levels up. Will ignore LevelsUp");
       m_parents = 0;
@@ -639,7 +637,7 @@ DetectorDiagnostic::calculateMedian(const API::MatrixWorkspace_sptr input,
 
       if (checkForMask) {
         const std::set<detid_t> &detids =
-            input->getSpectrum(hists[i])->getDetectorIDs();
+            input->getSpectrum(hists[i]).getDetectorIDs();
         if (instrument->isDetectorMasked(detids))
           continue;
         if (instrument->isMonitor(detids))

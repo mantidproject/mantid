@@ -26,11 +26,6 @@ DECLARE_ALGORITHM(FindDetectorsPar)
 
 using namespace Kernel;
 using namespace API;
-// nothing here according to mantid
-FindDetectorsPar::FindDetectorsPar()
-    : m_SizesAreLinear(false), m_nDetectors(0) {}
-
-FindDetectorsPar::~FindDetectorsPar() {}
 
 void FindDetectorsPar::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -92,7 +87,7 @@ void FindDetectorsPar::exec() {
       g_log.warning()
           << " number of parameters in the file: " << fileName
           << "  not equal to the number of histograms in the workspace"
-          << inputWS->getName() << std::endl;
+          << inputWS->getName() << '\n';
       g_log.warning() << " calculating detector parameters algorithmically\n";
     }
   }
@@ -162,7 +157,7 @@ void FindDetectorsPar::setOutputTable() {
     g_log.information() << " findDetecotorsPar: unsuccessfully declaring "
                            "property: OutputParTableWS\n";
     g_log.information() << " findDetecotorsPar: the reason is: " << err.what()
-                        << std::endl;
+                        << '\n';
   }
 
   // Set the name of the new workspace
@@ -192,7 +187,7 @@ void FindDetectorsPar::setOutputTable() {
 }
 
 // Constant for converting Radians to Degrees
-const double rad2deg = 180.0 / M_PI;
+constexpr double rad2deg = 180.0 / M_PI;
 
 /** method calculates an angle closest to the initial one taken on a ring
   * e.g. given inital angle 179 deg and another one -179 closest one to 179 is
@@ -347,8 +342,7 @@ void FindDetectorsPar::calcDetPar(const Geometry::IDetector_const_sptr &spDet,
         boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(spDet);
     if (!spDetGroup) {
       g_log.error() << "calc_cylDetPar: can not downcast IDetector_sptr to "
-                       "detector group for det->ID: " << spDet->getID()
-                    << std::endl;
+                       "detector group for det->ID: " << spDet->getID() << '\n';
       throw(std::bad_cast());
     }
     auto detectors = spDetGroup->getDetectors();
@@ -454,7 +448,7 @@ size_t FindDetectorsPar::loadParFile(const std::string &fileName) {
     }
   } else {
     g_log.error() << " unsupported type of ASCII parameter file: " << fileName
-                  << std::endl;
+                  << '\n';
     throw(std::invalid_argument("unsupported ASCII file type"));
   }
 
@@ -575,7 +569,7 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
   data_stream.open(fileName.c_str(), std::ios_base::in | std::ios_base::binary);
   if (!data_stream.is_open()) {
     g_log.error() << " can not open existing ASCII data file: " << fileName
-                  << std::endl;
+                  << '\n';
     throw(Kernel::Exception::FileError(" Can not open existing input data file",
                                        fileName));
   }
@@ -671,7 +665,7 @@ FindDetectorsPar::get_ASCII_header(std::string const &fileName,
       file_descriptor.nData_blocks = space_to_symbol_change;
     } else { // something unclear or damaged
       g_log.error() << " can not identify format of the input data file "
-                    << fileName << std::endl;
+                    << fileName << '\n';
       throw(Kernel::Exception::FileError(
           " can not identify format of the input data file", fileName));
     }
@@ -746,7 +740,7 @@ void FindDetectorsPar::load_plain(std::ifstream &stream,
     }
     default: {
       g_log.error() << " unsupported value of FILE_TYPE.Type: "
-                    << FILE_TYPE.Type << std::endl;
+                    << FILE_TYPE.Type << '\n';
       throw(std::invalid_argument(" unsupported value of FILE_TYPE.Type"));
     }
     }

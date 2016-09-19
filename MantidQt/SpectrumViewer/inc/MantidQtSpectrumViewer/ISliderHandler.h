@@ -5,15 +5,14 @@
 #include <QRect>
 #include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 
-namespace MantidQt
-{
-namespace SpectrumView
-{
+namespace MantidQt {
+namespace SpectrumView {
 
 /** An interface to the SliderHandler, which manages the horizontal and vertical
     scroll bars for the SpectrumView data viewer.
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -33,8 +32,7 @@ namespace SpectrumView
     Code Documentation is available at <http://doxygen.mantidproject.org>
  */
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ISliderHandler
-{
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ISliderHandler {
 
 public:
   /// Construct object to manage image scrollbars from the specified UI
@@ -42,12 +40,11 @@ public:
   virtual ~ISliderHandler() {}
 
   /// Configure the image scrollbars for the specified data and drawing area
-  virtual void configureSliders( QRect drawArea,
-                                 SpectrumDataSource_sptr dataSource ) = 0;
+  virtual void configureSliders(QRect drawArea,
+                                SpectrumDataSource_sptr dataSource) = 0;
 
   /// Configure the horizontal scrollbar to cover the specified range
-  virtual void configureHSlider( int         nDataSteps,
-                                 int         nPixels ) = 0;
+  virtual void configureHSlider(int nDataSteps, int nPixels) = 0;
 
   /// Return true if the image horizontal scrollbar is enabled.
   virtual bool hSliderOn() = 0;
@@ -56,10 +53,10 @@ public:
   virtual bool vSliderOn() = 0;
 
   /// Get the range of columns to display in the image.
-  virtual void getHSliderInterval( int &xMin, int &xMax ) = 0;
+  virtual void getHSliderInterval(int &xMin, int &xMax) = 0;
 
   /// Get the range of rows to display in the image.
-  virtual void getVSliderInterval( int &yMin, int &yMax ) = 0;
+  virtual void getVSliderInterval(int &yMin, int &yMax) = 0;
 };
 
 } // namespace SpectrumView

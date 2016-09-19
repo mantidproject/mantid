@@ -1,4 +1,3 @@
-# pylint: disable=bare-except,invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the HFIRReduction class could
@@ -108,7 +107,7 @@ class ReductionOptions(BaseScriptElement):
         Return: pairs of (var_name,var_value)
         '''
         attributes = inspect.getmembers(
-            self, lambda a: not(inspect.isroutine(a)))
+            self, lambda a: not inspect.isroutine(a))
         pairs = [a for a in attributes if not(
             a[0].startswith('__') and a[0].endswith('__'))]
         return pairs
@@ -208,80 +207,80 @@ class ReductionOptions(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml = "<Instrument>\n"
-        xml += "  <name>%s</name>\n" % self.instrument_name
+        xml_out = "<Instrument>\n"
+        xml_out += "  <name>%s</name>\n" % self.instrument_name
         if self.nx_pixels is not None:
-            xml += "  <nx_pixels>%g</nx_pixels>\n" % self.nx_pixels
+            xml_out += "  <nx_pixels>%g</nx_pixels>\n" % self.nx_pixels
         if self.ny_pixels is not None:
-            xml += "  <ny_pixels>%g</ny_pixels>\n" % self.ny_pixels
+            xml_out += "  <ny_pixels>%g</ny_pixels>\n" % self.ny_pixels
         if self.pixel_size is not None:
-            xml += "  <pixel_size>%g</pixel_size>\n" % self.pixel_size
+            xml_out += "  <pixel_size>%g</pixel_size>\n" % self.pixel_size
 
-        xml += "  <sample_det_dist>%g</sample_det_dist>\n" % self.sample_detector_distance
-        xml += "  <detector_offset>%g</detector_offset>\n" % self.detector_offset
-        xml += "  <wavelength>%g</wavelength>\n" % self.wavelength
-        xml += "  <wavelength_spread>%g</wavelength_spread>\n" % self.wavelength_spread
+        xml_out += "  <sample_det_dist>%g</sample_det_dist>\n" % self.sample_detector_distance
+        xml_out += "  <detector_offset>%g</detector_offset>\n" % self.detector_offset
+        xml_out += "  <wavelength>%g</wavelength>\n" % self.wavelength
+        xml_out += "  <wavelength_spread>%g</wavelength_spread>\n" % self.wavelength_spread
 
-        xml += "  <solid_angle_corr>%s</solid_angle_corr>\n" % str(
+        xml_out += "  <solid_angle_corr>%s</solid_angle_corr>\n" % str(
             self.solid_angle_corr)
-        xml += "  <dark_current_corr>%s</dark_current_corr>\n" % str(
+        xml_out += "  <dark_current_corr>%s</dark_current_corr>\n" % str(
             self.dark_current_corr)
-        xml += "  <dark_current_data>%s</dark_current_data>\n" % self.dark_current_data
+        xml_out += "  <dark_current_data>%s</dark_current_data>\n" % self.dark_current_data
 
-        xml += "  <n_q_bins>%g</n_q_bins>\n" % self.n_q_bins
-        xml += "  <n_sub_pix>%g</n_sub_pix>\n" % self.n_sub_pix
-        xml += "  <log_binning>%s</log_binning>\n" % str(self.log_binning)
-        xml += "  <align_log_with_decades>%s</align_log_with_decades>\n" % str(
+        xml_out += "  <n_q_bins>%g</n_q_bins>\n" % self.n_q_bins
+        xml_out += "  <n_sub_pix>%g</n_sub_pix>\n" % self.n_sub_pix
+        xml_out += "  <log_binning>%s</log_binning>\n" % str(self.log_binning)
+        xml_out += "  <align_log_with_decades>%s</align_log_with_decades>\n" % str(
             self.align_log_with_decades)
-        xml += "  <error_weighting>%s</error_weighting>\n" % str(
+        xml_out += "  <error_weighting>%s</error_weighting>\n" % str(
             self.error_weighting)
 
-        xml += "  <n_wedges>%g</n_wedges>\n" % self.n_wedges
-        xml += "  <wedge_angle>%g</wedge_angle>\n" % self.wedge_angle
-        xml += "  <wedge_offset>%g</wedge_offset>\n" % self.wedge_offset
+        xml_out += "  <n_wedges>%g</n_wedges>\n" % self.n_wedges
+        xml_out += "  <wedge_angle>%g</wedge_angle>\n" % self.wedge_angle
+        xml_out += "  <wedge_offset>%g</wedge_offset>\n" % self.wedge_offset
 
-        xml += "  <normalization>%d</normalization>\n" % self.normalization
+        xml_out += "  <normalization>%d</normalization>\n" % self.normalization
 
         # Output directory
-        xml += "  <UseDataDirectory>%s</UseDataDirectory>\n" % str(
+        xml_out += "  <UseDataDirectory>%s</UseDataDirectory>\n" % str(
             self.use_data_directory)
-        xml += "  <OutputDirectory>%s</OutputDirectory>\n" % self.output_directory
+        xml_out += "  <OutputDirectory>%s</OutputDirectory>\n" % self.output_directory
 
-        xml += "</Instrument>\n"
+        xml_out += "</Instrument>\n"
 
-        xml += "<Mask>\n"
-        xml += "  <mask_top>%g</mask_top>\n" % self.top
-        xml += "  <mask_bottom>%g</mask_bottom>\n" % self.bottom
-        xml += "  <mask_left>%g</mask_left>\n" % self.left
-        xml += "  <mask_right>%g</mask_right>\n" % self.right
+        xml_out += "<Mask>\n"
+        xml_out += "  <mask_top>%g</mask_top>\n" % self.top
+        xml_out += "  <mask_bottom>%g</mask_bottom>\n" % self.bottom
+        xml_out += "  <mask_left>%g</mask_left>\n" % self.left
+        xml_out += "  <mask_right>%g</mask_right>\n" % self.right
 
-        xml += "  <mask_side>%s</mask_side>\n" % str(self.masked_side)
+        xml_out += "  <mask_side>%s</mask_side>\n" % str(self.masked_side)
 
-        xml += "  <Shapes>\n"
+        xml_out += "  <Shapes>\n"
         for item in self.shapes:
-            xml += "    <rect x_min='%g' x_max='%g' y_min='%g' y_max='%g' />\n" % (
+            xml_out += "    <rect x_min='%g' x_max='%g' y_min='%g' y_max='%g' />\n" % (
                 item.x_min, item.x_max, item.y_min, item.y_max)
-        xml += "  </Shapes>\n"
+        xml_out += "  </Shapes>\n"
 
         ids_str = ','.join(map(str, self.detector_ids))
-        xml += "  <DetectorIDs>%s</DetectorIDs>\n" % ids_str
-        xml += "  <mask_file>%s</mask_file>\n" % self.mask_file
-        xml += "  <use_mask_file>%s</use_mask_file>\n" % self.use_mask_file
+        xml_out += "  <DetectorIDs>%s</DetectorIDs>\n" % ids_str
+        xml_out += "  <mask_file>%s</mask_file>\n" % self.mask_file
+        xml_out += "  <use_mask_file>%s</use_mask_file>\n" % self.use_mask_file
 
-        xml += "</Mask>\n"
+        xml_out += "</Mask>\n"
 
-        xml += "<AbsScale>\n"
-        xml += "  <manual_beam_diam>%s</manual_beam_diam>\n" % str(
+        xml_out += "<AbsScale>\n"
+        xml_out += "  <manual_beam_diam>%s</manual_beam_diam>\n" % str(
             self.manual_beam_diam)
-        xml += "  <scaling_factor>%g</scaling_factor>\n" % self.scaling_factor
-        xml += "  <calculate_scale>%s</calculate_scale>\n" % str(
+        xml_out += "  <scaling_factor>%g</scaling_factor>\n" % self.scaling_factor
+        xml_out += "  <calculate_scale>%s</calculate_scale>\n" % str(
             self.calculate_scale)
-        xml += "  <scaling_direct_file>%s</scaling_direct_file>\n" % self.scaling_direct_file
-        xml += "  <scaling_att_trans>%g</scaling_att_trans>\n" % self.scaling_att_trans
-        xml += "  <scaling_beam_diam>%g</scaling_beam_diam>\n" % self.scaling_beam_diam
-        xml += "</AbsScale>\n"
+        xml_out += "  <scaling_direct_file>%s</scaling_direct_file>\n" % self.scaling_direct_file
+        xml_out += "  <scaling_att_trans>%g</scaling_att_trans>\n" % self.scaling_att_trans
+        xml_out += "  <scaling_beam_diam>%g</scaling_beam_diam>\n" % self.scaling_beam_diam
+        xml_out += "</AbsScale>\n"
 
-        return xml
+        return xml_out
 
     def from_xml(self, xml_str):
         """
@@ -407,13 +406,7 @@ class ReductionOptions(BaseScriptElement):
             @param xml_str: text to read the data from
         """
         self.reset()
-        from mantid.api import Algorithm
-
-        dom = xml.dom.minidom.parseString(xml_str)
-        process_dom = dom.getElementsByTagName("SASProcess")[0]
-        setup_alg_str = BaseScriptElement.getStringElement(
-            process_dom, 'SetupInfo')
-        alg = Algorithm.fromString(str(setup_alg_str))
+        (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
         self.sample_detector_distance = BaseScriptElement.getPropertyValue(
             alg, "SampleDetectorDistance", default=ReductionOptions.sample_detector_distance)
@@ -507,7 +500,7 @@ class ReductionOptions(BaseScriptElement):
         """
         self.nx_pixels = ReductionOptions.nx_pixels
         self.ny_pixels = ReductionOptions.ny_pixels
-        #self.instrument_name = ''
+        # self.instrument_name = ''
         self.pixel_size = ReductionOptions.pixel_size
 
         self.scaling_factor = ReductionOptions.scaling_factor

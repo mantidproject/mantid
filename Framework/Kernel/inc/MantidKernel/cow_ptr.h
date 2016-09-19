@@ -64,12 +64,36 @@ private:
   std::mutex copyMutex;
 
 public:
+  cow_ptr(ptr_type &&resourceSptr) noexcept;
+  cow_ptr(const ptr_type &resourceSptr) noexcept;
+  explicit cow_ptr(DataType *resourcePtr);
   cow_ptr();
-  cow_ptr(const cow_ptr<DataType> &);
-  cow_ptr(cow_ptr<DataType> &&) = default;
-  cow_ptr<DataType> &operator=(const cow_ptr<DataType> &);
-  cow_ptr<DataType> &operator=(cow_ptr<DataType> &&) = default;
-  cow_ptr<DataType> &operator=(const ptr_type &);
+  /// Constructs a cow_ptr with no managed object, i.e. empty cow_ptr.
+  constexpr cow_ptr(std::nullptr_t) noexcept : Data(nullptr) {}
+  cow_ptr(const cow_ptr<DataType> &) noexcept;
+  // Move is hand-written, since std::mutex member prevents auto-generation.
+  cow_ptr(cow_ptr<DataType> &&other) noexcept : Data(std::move(other.Data)) {}
+  cow_ptr<DataType> &operator=(const cow_ptr<DataType> &) noexcept;
+  // Move is hand-written, since std::mutex member prevents auto-generation.
+  cow_ptr<DataType> &operator=(cow_ptr<DataType> &&rhs) noexcept {
+    Data = std::move(rhs.Data);
+    return *this;
+  }
+  cow_ptr<DataType> &operator=(const ptr_type &) noexcept;
+
+  /// Returns the stored pointer.
+  const DataType *get() const noexcept { return Data.get(); }
+
+  /// Checks if *this stores a non-null pointer, i.e. whether get() != nullptr.
+  explicit operator bool() const noexcept { return bool(Data); }
+
+  /// Returns the number of different shared_ptr instances (this included)
+  /// managing the current object. If there is no managed object, 0 is returned.
+  long use_count() const noexcept { return Data.use_count(); }
+
+  /// Checks if *this is the only shared_ptr instance managing the current
+  /// object, i.e. whether use_count() == 1.
+  bool unique() const noexcept { return Data.unique(); }
 
   const DataType &operator*() const {
     return *Data;
@@ -77,11 +101,19 @@ public:
   const DataType *operator->() const {
     return Data.get();
   } ///<indirectrion dereference access
-  bool operator==(const cow_ptr<DataType> &A) {
+  bool operator==(const cow_ptr<DataType> &A) noexcept {
     return Data == A.Data;
   } ///< Based on ptr equality
   DataType &access();
 };
+
+/**
+ Constructor : creates a new cow_ptr around the resource
+ resource is a sink.
+ */
+template <typename DataType>
+cow_ptr<DataType>::cow_ptr(DataType *resourcePtr)
+    : Data(resourcePtr) {}
 
 /**
   Constructor : creates new data() object
@@ -96,8 +128,8 @@ cow_ptr<DataType>::cow_ptr()
 */
 // Note: Need custom implementation, since std::mutex is not copyable.
 template <typename DataType>
-cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A)
-    : Data(A.Data) {}
+cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A) noexcept : Data(A.Data) {
+}
 
 /**
   Assignment operator : double references the data object
@@ -107,7 +139,8 @@ cow_ptr<DataType>::cow_ptr(const cow_ptr<DataType> &A)
 */
 // Note: Need custom implementation, since std::mutex is not copyable.
 template <typename DataType>
-cow_ptr<DataType> &cow_ptr<DataType>::operator=(const cow_ptr<DataType> &A) {
+cow_ptr<DataType> &cow_ptr<DataType>::
+operator=(const cow_ptr<DataType> &A) noexcept {
   if (this != &A) {
     Data = A.Data;
   }
@@ -121,7 +154,7 @@ cow_ptr<DataType> &cow_ptr<DataType>::operator=(const cow_ptr<DataType> &A) {
   @return *this
 */
 template <typename DataType>
-cow_ptr<DataType> &cow_ptr<DataType>::operator=(const ptr_type &A) {
+cow_ptr<DataType> &cow_ptr<DataType>::operator=(const ptr_type &A) noexcept {
   if (this->Data != A) {
     Data = A;
   }
@@ -131,6 +164,12 @@ cow_ptr<DataType> &cow_ptr<DataType>::operator=(const ptr_type &A) {
 /**
   Access function.
   If data is shared, creates a copy of Data so that it can be modified.
+
+  In certain situations this function is not thread safe. Specifically it is not
+  thread
+  safe in the presence of a simultaneous cow_ptr copy. Copies of the underlying
+  data are only
+  made when the reference count > 1.
 
   @return new copy of *this, if required
 */
@@ -146,6 +185,16 @@ template <typename DataType> DataType &cow_ptr<DataType>::access() {
   }
 
   return *Data;
+}
+
+template <typename DataType>
+cow_ptr<DataType>::cow_ptr(ptr_type &&resourceSptr) noexcept {
+  this->Data = std::move(resourceSptr);
+}
+
+template <typename DataType>
+cow_ptr<DataType>::cow_ptr(const ptr_type &resourceSptr) noexcept {
+  this->Data = resourceSptr;
 }
 
 } // NAMESPACE Kernel

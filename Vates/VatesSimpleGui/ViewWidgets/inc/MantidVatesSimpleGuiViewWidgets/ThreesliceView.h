@@ -10,14 +10,11 @@
 
 class pqRenderView;
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 
-  class RebinnedSourcesManager;
+class RebinnedSourcesManager;
 /**
  *
  This class creates four views of the given dataset. There are three 2D views
@@ -27,7 +24,8 @@ namespace SimpleGui
  @author Michael Reuter
  @date 24/05/2011
 
- Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -47,8 +45,8 @@ namespace SimpleGui
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ThreeSliceView : public ViewBase
-{
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ThreeSliceView
+    : public ViewBase {
   Q_OBJECT
 
 public:
@@ -57,7 +55,8 @@ public:
    * @param parent the parent widget for the threeslice view
    * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
    */
-  ThreeSliceView(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
+  ThreeSliceView(QWidget *parent = 0,
+                 RebinnedSourcesManager *rebinnedSourcesManager = 0);
   /// Default destructor.
   ~ThreeSliceView() override;
 
@@ -67,7 +66,7 @@ public:
    * Correct an oddity in the creation of the 3D view so that the cuts
    * are visibile.
    */
-  //void correctVisibility();
+  // void correctVisibility();
   /**
    * ViewBase::destroyView
    */
@@ -101,7 +100,6 @@ private:
 
   Ui::ThreeSliceView m_ui; ///< The three slice view's UI form
 };
-
 }
 }
 }

@@ -17,6 +17,7 @@
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Surfaces/SurfaceFactory.h"
+#include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -54,11 +55,12 @@ public:
   void testCopyConstructorGivesObjectWithSameAttributes() {
     Object_sptr original =
         ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
+    original->setID("sp-1");
     int objType(-1);
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
     original->GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         original->getGeometryHandler()));
 
@@ -67,7 +69,8 @@ public:
     objType = -1;
     copy.GetObjectGeom(objType, pts, radius, height);
 
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS("sp-1", copy.id());
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         copy.getGeometryHandler()));
     TS_ASSERT_EQUALS(copy.getName(), original->getName());
@@ -79,11 +82,12 @@ public:
   void testAssignmentOperatorGivesObjectWithSameAttributes() {
     Object_sptr original =
         ComponentCreationHelper::createSphere(1.0, V3D(), "sphere");
+    original->setID("sp-1");
     int objType(-1);
     double radius(-1.0), height(-1.0);
     std::vector<V3D> pts;
     original->GetObjectGeom(objType, pts, radius, height);
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         original->getGeometryHandler()));
 
@@ -93,7 +97,8 @@ public:
     objType = -1;
     lhs.GetObjectGeom(objType, pts, radius, height);
 
-    TS_ASSERT_EQUALS(2, objType);
+    TS_ASSERT_EQUALS("sp-1", lhs.id());
+    TS_ASSERT_EQUALS(3, objType);
     TS_ASSERT(boost::dynamic_pointer_cast<GluGeometryHandler>(
         lhs.getGeometryHandler()));
   }
@@ -101,7 +106,7 @@ public:
   void testCreateUnitCube() {
     Object_sptr geom_obj = createUnitCube();
 
-    TS_ASSERT_EQUALS(geom_obj->str(), "68 -6 5 -4 3 -2 1");
+    TS_ASSERT_EQUALS(geom_obj->str(), "68 1 -2 3 -4 5 -6");
 
     double xmin(0.0), xmax(0.0), ymin(0.0), ymax(0.0), zmin(0.0), zmax(0.0);
     geom_obj->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
@@ -392,7 +397,7 @@ public:
     checkTrackIntercept(track, expectedResults);
   }
 
-  void xtestTrackTwoIsolatedCubes()
+  void testTrackTwoIsolatedCubes()
   /**
   Test a track going through an object
   */
@@ -549,6 +554,48 @@ public:
     checkTrackIntercept(TL, expectedResults);
   }
 
+  void testComplementWithTwoPrimitives() {
+    auto shell = createSphericalShell();
+
+    TS_ASSERT_EQUALS(2, shell->getSurfaceIndex().size());
+
+    // Are the rules correct?
+    const Rule *headRule = shell->topRule();
+    TS_ASSERT_EQUALS("Intersection", headRule->className());
+    const Rule *leaf1 = headRule->leaf(0);
+    TS_ASSERT_EQUALS("SurfPoint", leaf1->className());
+    auto surfPt1 = dynamic_cast<const SurfPoint *>(leaf1);
+    TS_ASSERT(surfPt1);
+    TS_ASSERT_EQUALS(1, surfPt1->getKeyN());
+    auto outer = dynamic_cast<const Sphere *>(surfPt1->getKey());
+    TS_ASSERT(outer);
+    TS_ASSERT_DELTA(1.0, outer->getRadius(), 1e-10);
+
+    const Rule *leaf2 = headRule->leaf(1);
+    TS_ASSERT_EQUALS("CompGrp", leaf2->className());
+    auto compRule = dynamic_cast<const CompGrp *>(leaf2);
+    TS_ASSERT(compRule);
+    TS_ASSERT_EQUALS("SurfPoint", compRule->leaf(0)->className());
+    auto surfPt2 = dynamic_cast<const SurfPoint *>(compRule->leaf(0));
+    TS_ASSERT_EQUALS(2, surfPt2->getKeyN());
+    auto inner = dynamic_cast<const Sphere *>(surfPt2->getKey());
+    TS_ASSERT(inner);
+    TS_ASSERT_DELTA(0.5, inner->getRadius(), 1e-10);
+
+    TS_ASSERT_EQUALS(false, shell->isValid(V3D(0, 0, 0)));
+
+    Track p1(V3D(-2, 0, 0), V3D(1, 0, 0));
+    int nsegments = shell->interceptSurface(p1);
+    TS_ASSERT_EQUALS(2, nsegments);
+    // total traversed distance -> 2*(r2-r1)
+    double distanceInside(0.0);
+    std::for_each(p1.cbegin(), p1.cend(),
+                  [&distanceInside](const Link &segment) {
+                    distanceInside += segment.distInsideObject;
+                  });
+    TS_ASSERT_DELTA(1.0, distanceInside, 1e-10);
+  }
+
   void testFindPointInCube()
   /**
   Test find point in cube
@@ -610,9 +657,9 @@ public:
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1); // This now succeeds
     // Test use of defineBoundingBox to explictly set the bounding box, when the
     // automatic method fails
-    F->defineBoundingBox(0.5, -1 / (2.0 * sqrt(2.0)), -1.0 / (2.0 * sqrt(2.0)),
-                         -0.5, -sqrt(2.0) - 1.0 / (2.0 * sqrt(2.0)),
-                         -sqrt(2.0) - 1.0 / (2.0 * sqrt(2.0)));
+    F->defineBoundingBox(0.5, -0.5 * M_SQRT1_2, -0.5 * M_SQRT1_2, -0.5,
+                         -M_SQRT2 - 0.5 * M_SQRT1_2,
+                         -M_SQRT2 - 0.5 * M_SQRT1_2);
     TS_ASSERT_EQUALS(F->getPointInObject(pt), 1);
     Object_sptr S = createSphere();
     TS_ASSERT_EQUALS(S->getPointInObject(pt), 1);
@@ -743,6 +790,48 @@ public:
     TS_ASSERT_DELTA(zmin, -3.0, 0.0001);
   }
 
+  void testGetBoundingBoxForCuboid() {
+    Object_sptr cuboid = createUnitCube();
+    double xmax, ymax, zmax, xmin, ymin, zmin;
+    xmax = ymax = zmax = 100;
+    xmin = ymin = zmin = -100;
+
+    cuboid->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
+
+    TS_ASSERT_DELTA(xmax, 0.5, 0.0001);
+    TS_ASSERT_DELTA(ymax, 0.5, 0.0001);
+    TS_ASSERT_DELTA(zmax, 0.5, 0.0001);
+    TS_ASSERT_DELTA(xmin, -0.5, 0.0001);
+    TS_ASSERT_DELTA(ymin, -0.5, 0.0001);
+    TS_ASSERT_DELTA(zmin, -0.5, 0.0001);
+  }
+
+  void testGetBoundingBoxForHexahedron() {
+    // For information on how the hexahedron is constructed
+    // See
+    // http://docs.mantidproject.org/nightly/concepts/HowToDefineGeometricShape.html#hexahedron
+    Hexahedron hex;
+    hex.lbb = V3D(0, 0, -2);
+    hex.lfb = V3D(1, 0, 0);
+    hex.rfb = V3D(1, 1, 0);
+    hex.rbb = V3D(0, 1, 0);
+    hex.lbt = V3D(0, 0, 2);
+    hex.lft = V3D(0.5, 0, 2);
+    hex.rft = V3D(0.5, 0.5, 2);
+    hex.rbt = V3D(0, 0.5, 2);
+
+    Object_sptr hexahedron = createHexahedron(hex);
+
+    auto bb = hexahedron->getBoundingBox();
+
+    TS_ASSERT_DELTA(bb.xMax(), 1, 0.0001);
+    TS_ASSERT_DELTA(bb.yMax(), 1, 0.0001);
+    TS_ASSERT_DELTA(bb.zMax(), 2, 0.0001);
+    TS_ASSERT_DELTA(bb.xMin(), 0, 0.0001);
+    TS_ASSERT_DELTA(bb.yMin(), 0, 0.0001);
+    TS_ASSERT_DELTA(bb.zMin(), -2, 0.0001);
+  }
+
   void testdefineBoundingBox()
   /**
   Test use of defineBoundingBox
@@ -806,7 +895,7 @@ public:
     //      int endtime=clock();
     //      std::cout << std::endl << "Cyl tri time=" <<
     //      (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) <<
-    //      std::endl;
+    //      '\n';
     //      iter=50;
     //      starttime=clock();
     //      for (int i=0;i<iter;i++)
@@ -814,7 +903,7 @@ public:
     //      endtime=clock();
     //      std::cout << "Cyl ray time=" <<
     //      (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) <<
-    //      std::endl;
+    //      '\n';
     //    }
 
     saTri = geom_obj->triangleSolidAngle(observer);
@@ -956,6 +1045,26 @@ private:
     return retVal;
   }
 
+  Object_sptr createSphericalShell() {
+    // First create some surfaces
+    auto outer = boost::make_shared<Sphere>();
+    outer->setName(1);
+    outer->setRadius(1.0);
+    auto inner = boost::make_shared<Sphere>();
+    inner->setName(2);
+    inner->setRadius(0.5);
+    std::map<int, boost::shared_ptr<Surface>> surfaces = {{1, outer},
+                                                          {2, inner}};
+
+    // algebra string is outer with intersection of complement of inner
+    const std::string algebra = "(-1) # (-2)";
+    auto shell = boost::make_shared<Object>();
+    shell->setObject(21, algebra);
+    shell->populate(surfaces);
+
+    return shell;
+  }
+
   void clearSurfMap()
   /**
   Clears the surface map for a new test
@@ -1006,10 +1115,7 @@ private:
     // Note that the testObject now manages the "new Plane"
     for (auto vc = SurfLine.cbegin(); vc != SurfLine.cend(); ++vc) {
       auto A = Geometry::SurfaceFactory::Instance()->processLine(vc->second);
-      if (!A) {
-        std::cerr << "Failed to process line " << vc->second << std::endl;
-        exit(1);
-      }
+      TSM_ASSERT("Expected a non-null surface from the factory", A);
       A->setName(vc->first);
       SMap.insert(STYPE::value_type(vc->first,
                                     boost::shared_ptr<Surface>(A.release())));
@@ -1097,6 +1203,93 @@ private:
     retVal->setObject(68, ObjCube);
     retVal->populate(CubeSurMap);
 
+    return retVal;
+  }
+
+  Object_sptr createHexahedron(Hexahedron &hex) {
+    // Create surfaces
+    std::map<int, boost::shared_ptr<Surface>> HexSurMap;
+    HexSurMap[1] = boost::make_shared<Plane>();
+    HexSurMap[2] = boost::make_shared<Plane>();
+    HexSurMap[3] = boost::make_shared<Plane>();
+    HexSurMap[4] = boost::make_shared<Plane>();
+    HexSurMap[5] = boost::make_shared<Plane>();
+    HexSurMap[6] = boost::make_shared<Plane>();
+
+    V3D normal;
+
+    // add front face
+    auto pPlaneFrontCutoff = boost::make_shared<Plane>();
+
+    // calculate surface normal
+    normal = (hex.rfb - hex.lfb).cross_prod(hex.lft - hex.lfb);
+    // Ensure surfacenormal is pointing in the correct direction
+    if (normal.scalar_prod(hex.rfb - hex.rbb) < 0)
+      normal *= -1.0;
+    pPlaneFrontCutoff->setPlane(hex.lfb, normal);
+    HexSurMap[1] = pPlaneFrontCutoff;
+
+    // add back face
+    auto pPlaneBackCutoff = boost::make_shared<Plane>();
+    normal = (hex.rbb - hex.lbb).cross_prod(hex.lbt - hex.lbb);
+    if (normal.scalar_prod(hex.rfb - hex.rbb) < 0)
+      normal *= -1.0;
+    pPlaneBackCutoff->setPlane(hex.lbb, normal);
+    HexSurMap[2] = pPlaneBackCutoff;
+
+    // add left face
+    auto pPlaneLeftCutoff = boost::make_shared<Plane>();
+    normal = (hex.lbb - hex.lfb).cross_prod(hex.lft - hex.lfb);
+    if (normal.scalar_prod(hex.rfb - hex.lfb) < 0)
+      normal *= -1.0;
+    pPlaneLeftCutoff->setPlane(hex.lfb, normal);
+    HexSurMap[3] = pPlaneLeftCutoff;
+
+    // add right face
+    auto pPlaneRightCutoff = boost::make_shared<Plane>();
+    normal = (hex.rbb - hex.rfb).cross_prod(hex.rft - hex.rfb);
+    if (normal.scalar_prod(hex.rfb - hex.lfb) < 0)
+      normal *= -1.0;
+    pPlaneRightCutoff->setPlane(hex.rfb, normal);
+    HexSurMap[4] = pPlaneRightCutoff;
+
+    // add top face
+    auto pPlaneTopCutoff = boost::make_shared<Plane>();
+    normal = (hex.rft - hex.lft).cross_prod(hex.lbt - hex.lft);
+    if (normal.scalar_prod(hex.rft - hex.rfb) < 0)
+      normal *= -1.0;
+    pPlaneTopCutoff->setPlane(hex.lft, normal);
+    HexSurMap[5] = pPlaneTopCutoff;
+
+    // add bottom face
+    auto pPlaneBottomCutoff = boost::make_shared<Plane>();
+    normal = (hex.rfb - hex.lfb).cross_prod(hex.lbb - hex.lfb);
+    if (normal.scalar_prod(hex.rft - hex.rfb) < 0)
+      normal *= -1.0;
+    pPlaneBottomCutoff->setPlane(hex.lfb, normal);
+    HexSurMap[6] = pPlaneBottomCutoff;
+
+    // using surface ids:  1-6
+    HexSurMap[1]->setName(1);
+    HexSurMap[2]->setName(2);
+    HexSurMap[3]->setName(3);
+    HexSurMap[4]->setName(4);
+    HexSurMap[5]->setName(5);
+    HexSurMap[6]->setName(6);
+
+    std::string ObjHex = "-1 2 3 -4 -5 6";
+
+    Object_sptr retVal = Object_sptr(new Object);
+
+    // Explicitly setting the GluGeometryHanler hexahedron allows
+    // for the correct bounding box calculation.
+    auto handler = boost::make_shared<GluGeometryHandler>(retVal);
+    handler->setHexahedron(hex.lbb, hex.lfb, hex.rfb, hex.rbb, hex.lbt, hex.lft,
+                           hex.rft, hex.rbt);
+    retVal->setGeometryHandler(handler);
+
+    retVal->setObject(68, ObjHex);
+    retVal->populate(HexSurMap);
     return retVal;
   }
 };

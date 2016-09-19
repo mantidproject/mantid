@@ -4,10 +4,8 @@
 #include "MantidQtSliceViewer/PeakRepresentation.h"
 #include "MantidQtSliceViewer/EllipsoidPlaneSliceCalculator.h"
 #include "MantidKernel/V2D.h"
-namespace MantidQt
-{
-namespace SliceViewer
-{
+namespace MantidQt {
+namespace SliceViewer {
 
 /** PeakRepresentationEllipsoid : Draws an ellipse for elliptical peaks.
 
@@ -33,15 +31,15 @@ namespace SliceViewer
   <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PeakRepresentationEllipsoid : public PeakRepresentation
-{
+class DLLExport PeakRepresentationEllipsoid : public PeakRepresentation {
 public:
-  PeakRepresentationEllipsoid(const Mantid::Kernel::V3D &origin,
-                           const std::vector<double> peakRadii,
-                           const std::vector<double> backgroundInnerRadii,
-                           const std::vector<double> backgroundOuterRadii,
-                           const std::vector<Mantid::Kernel::V3D> directions,
-                           std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator> calculator);
+  PeakRepresentationEllipsoid(
+      const Mantid::Kernel::V3D &origin, const std::vector<double> peakRadii,
+      const std::vector<double> backgroundInnerRadii,
+      const std::vector<double> backgroundOuterRadii,
+      const std::vector<Mantid::Kernel::V3D> directions,
+      std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
+          calculator);
 
   /// Setter for the slice point
   void setSlicePoint(const double &) override;
@@ -60,6 +58,8 @@ public:
   const Mantid::Kernel::V3D &getOrigin() const override;
   /// Show the background radius
   void showBackgroundRadius(const bool show) override;
+
+  static const double zeroRadius;
 
 protected:
   std::shared_ptr<PeakPrimitives> getDrawingInformation(
@@ -80,7 +80,7 @@ private:
 
   // -----------Working copies of collections
   /// Origin md-x, md-y, and md-z
-  Mantid::Kernel::V3D  m_origin;
+  Mantid::Kernel::V3D m_origin;
   /// Direction in md-x, md-y and md-z
   std::vector<Mantid::Kernel::V3D> m_directions;
   /// Actual peak radii
@@ -89,7 +89,6 @@ private:
   const std::vector<double> m_backgroundInnerRadii;
   /// Peak background outer radius
   const std::vector<double> m_backgroundOuterRadii;
-
 
   /// Max opacity
   const double m_opacityMax;
@@ -118,7 +117,8 @@ private:
   bool m_showBackgroundRadii;
 
   /// A calculator to extract the ellipse parameters
-  std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator> m_calculator;
+  std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
+      m_calculator;
 };
 }
 }

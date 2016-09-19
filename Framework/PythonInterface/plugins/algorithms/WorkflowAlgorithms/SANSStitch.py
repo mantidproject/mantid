@@ -267,7 +267,7 @@ class SANSStitch(DataProcessorAlgorithm):
 
             # Calculate merged q for the can
             merged_q_can = self._calculate_merged_q_can(cF=cF_can, nF=nF_can, cR=cR_can, nR=nR_can,
-                                                    scale_factor=scale_factor)
+                                                        scale_factor=scale_factor)
 
             # Subtract it from the sample
             merged_q = self._subract(merged_q, merged_q_can)
@@ -377,7 +377,7 @@ class QErrorCorrectionForMergedWorkspaces(object):
         return q_res_buffer
 
     def correct_q_resolution_for_merged(self, count_ws_front, count_ws_rear,
-                                            output_ws, scale):
+                                        output_ws, scale):
         """
         We need to transfer the DX error values from the original workspaces to the merged worksapce.
         We have:

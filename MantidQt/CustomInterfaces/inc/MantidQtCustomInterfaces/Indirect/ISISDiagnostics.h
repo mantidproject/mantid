@@ -77,7 +77,9 @@ private slots:
   pbRunEditing(); //< Called when a user starts to type / edit the runs to load.
   void pbRunFinding();  //< Called when the FileFinder starts finding the files.
   void pbRunFinished(); //< Called when the FileFinder has finished finding the
-                        //files.
+  // files.
+  void saveClicked();
+  void plotClicked();
 
 private:
   Ui::ISISDiagnostics m_uiForm;

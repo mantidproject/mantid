@@ -18,16 +18,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(ResizeRectangularDetector)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ResizeRectangularDetector::ResizeRectangularDetector() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ResizeRectangularDetector::~ResizeRectangularDetector() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ResizeRectangularDetector::name() const {
   return "ResizeRectangularDetector";

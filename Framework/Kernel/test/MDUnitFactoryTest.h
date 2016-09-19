@@ -1,11 +1,12 @@
 #ifndef MANTID_KERNEL_MDUNITFACTORYTEST_H_
 #define MANTID_KERNEL_MDUNITFACTORYTEST_H_
 
+#include "MantidKernel/MDUnit.h"
+#include "MantidKernel/MDUnitFactory.h"
+#include "MantidKernel/UnitLabelTypes.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
-#include "MantidKernel/MDUnitFactory.h"
-#include "MantidKernel/MDUnit.h"
-#include "MantidKernel/UnitLabelTypes.h"
 
 using namespace Mantid::Kernel;
 using namespace testing;
@@ -13,13 +14,13 @@ using namespace testing;
 /**
  * Helper Mock MDUnit
  */
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 class MockMDUnit : public MDUnit {
 public:
   MOCK_CONST_METHOD0(getUnitLabel, UnitLabel());
   MOCK_CONST_METHOD1(canConvertTo, bool(const MDUnit &other));
   MOCK_CONST_METHOD0(isQUnit, bool());
   MOCK_CONST_METHOD0(clone, MDUnit *());
-  ~MockMDUnit() override {}
 };
 
 /**
@@ -29,9 +30,8 @@ class MockMDUnitFactory : public MDUnitFactory {
 public:
   MOCK_CONST_METHOD1(createRaw, MDUnit *(const std::string &));
   MOCK_CONST_METHOD1(canInterpret, bool(const std::string &));
-  ~MockMDUnitFactory() override {}
 };
-
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 class MDUnitFactoryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically

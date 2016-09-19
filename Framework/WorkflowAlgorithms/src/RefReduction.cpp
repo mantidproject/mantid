@@ -160,7 +160,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   if (cropLowRes) {
     if (lowResRange.size() < 2) {
       g_log.error() << "LowResDataAxisPixelRange parameter should be a vector "
-                       "of two values" << std::endl;
+                       "of two values\n";
       throw std::invalid_argument("LowResDataAxisPixelRange parameter should "
                                   "be a vector of two values");
     }
@@ -175,8 +175,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   const std::vector<int> peakRange = getProperty("SignalPeakPixelRange");
   if (peakRange.size() < 2) {
     g_log.error()
-        << "SignalPeakPixelRange parameter should be a vector of two values"
-        << std::endl;
+        << "SignalPeakPixelRange parameter should be a vector of two values\n";
     throw std::invalid_argument(
         "SignalPeakPixelRange parameter should be a vector of two values");
   }
@@ -219,7 +218,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
     const std::vector<int> bckRange = getProperty("SignalBackgroundPixelRange");
     if (bckRange.size() < 2) {
       g_log.error() << "SignalBackgroundPixelRange parameter should be a "
-                       "vector of two values" << std::endl;
+                       "vector of two values\n";
       throw std::invalid_argument("SignalBackgroundPixelRange parameter should "
                                   "be a vector of two values");
     }
@@ -388,7 +387,7 @@ MatrixWorkspace_sptr RefReduction::processNormalization() {
   if (cropLowRes) {
     if (lowResRange.size() < 2) {
       g_log.error() << "LowResNormAxisPixelRange parameter should be a vector "
-                       "of two values" << std::endl;
+                       "of two values\n";
       throw std::invalid_argument("LowResNormAxisPixelRange parameter should "
                                   "be a vector of two values");
     }
@@ -422,7 +421,7 @@ MatrixWorkspace_sptr RefReduction::processNormalization() {
     const std::vector<int> bckRange = getProperty("NormBackgroundPixelRange");
     if (bckRange.size() < 2) {
       g_log.error() << "NormBackgroundPixelRange parameter should be a vector "
-                       "of two values" << std::endl;
+                       "of two values\n";
       throw std::invalid_argument("NormBackgroundPixelRange parameter should "
                                   "be a vector of two values");
     }
@@ -469,11 +468,11 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   IEventWorkspace_sptr rawWS;
   if (AnalysisDataService::Instance().doesExist(dataRun)) {
     rawWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(dataRun);
-    g_log.notice() << "Found workspace: " << dataRun << std::endl;
+    g_log.notice() << "Found workspace: " << dataRun << '\n';
     m_output_message += "    |Input data run is a workspace: " + dataRun + "\n";
   } else if (AnalysisDataService::Instance().doesExist(ws_name)) {
     rawWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(ws_name);
-    g_log.notice() << "Using existing workspace: " << ws_name << std::endl;
+    g_log.notice() << "Using existing workspace: " << ws_name << '\n';
     m_output_message +=
         "    |Found workspace from previous reduction: " + ws_name + "\n";
   } else {
@@ -501,7 +500,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
     }
 
     if (Poco::File(path).exists()) {
-      g_log.notice() << "Found: " << path << std::endl;
+      g_log.notice() << "Found: " << path << '\n';
       m_output_message += "    |Loading from " + path + "\n";
       IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadEventNexus", 0, 0.2);
       loadAlg->setProperty("Filename", path);
@@ -517,7 +516,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
       Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
       rawWS = boost::dynamic_pointer_cast<IEventWorkspace>(temp);
       if (rawWS->getNumberEvents() == 0) {
-        g_log.notice() << "No data in " << polarization << std::endl;
+        g_log.notice() << "No data in " << polarization << '\n';
         m_output_message += "    |No data for " + polarization + "\n";
         return rawWS;
       }
@@ -537,12 +536,11 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
         mvAlg->executeAsChildAlg();
         g_log.notice() << "Ensuring correct Z position: Correction = "
                        << Poco::NumberFormatter::format(sdd - det_distance)
-                       << " m" << std::endl;
+                       << " m\n";
       }
       AnalysisDataService::Instance().addOrReplace(ws_name, rawWS);
     } else {
-      g_log.error() << "Could not find a data file for " << dataRun
-                    << std::endl;
+      g_log.error() << "Could not find a data file for " << dataRun << '\n';
       throw std::invalid_argument(
           "Could not find a data file for the given input");
     }
@@ -672,9 +670,8 @@ double RefReduction::calculateAngleREFM(MatrixWorkspace_sptr workspace) {
   if (ref_pix == 0 || isEmpty(ref_pix)) {
     const std::vector<int> peakRange = getProperty("SignalPeakPixelRange");
     if (peakRange.size() < 2) {
-      g_log.error()
-          << "SignalPeakPixelRange parameter should be a vector of two values"
-          << std::endl;
+      g_log.error() << "SignalPeakPixelRange parameter should be a vector of "
+                       "two values\n";
       throw std::invalid_argument(
           "SignalPeakPixelRange parameter should be a vector of two values");
     }
@@ -779,11 +776,11 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(
 
     // Check for overlaps
     if (bckMax > peakMin && bckMax < peakMax) {
-      g_log.notice() << "Background range overlaps with peak" << std::endl;
+      g_log.notice() << "Background range overlaps with peak\n";
       bckMax = peakMin - 1;
     }
     if (bckMin < peakMax && bckMin > peakMin) {
-      g_log.notice() << "Background range overlaps with peak" << std::endl;
+      g_log.notice() << "Background range overlaps with peak\n";
       bckMin = peakMax + 1;
     }
 

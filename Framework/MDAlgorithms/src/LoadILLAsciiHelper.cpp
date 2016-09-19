@@ -157,14 +157,14 @@ RrAadIitddddddddddddddddAatdddddddFfttttttttddddddddddddddddddddddddddIitdd etc.
 #include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
-#include <iostream>
+#include <cstdlib>
 #include <fstream>
-#include <stdexcept>
-#include <vector>
-#include <string>
-#include <map>
-#include <stdlib.h>
+#include <iostream>
 #include <limits>
+#include <map>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/erase.hpp>
@@ -233,7 +233,7 @@ std::string ILLParser::getInstrumentName() {
     // throw std::runtime_error("Must be called before reading the file!");
   }
 
-  std::string line, instrumentKeyword("Inst"), instrumentName("");
+  std::string line, instrumentKeyword("Inst"), instrumentName;
   int lineRead = 0, maxLineRead = 20; // never read more than
 
   while (std::getline(fin, line) && lineRead < maxLineRead) {
@@ -277,7 +277,7 @@ void ILLParser::parseFieldA() {
   // int numberOfCharsToRead = evaluate<int>(parsedLineFields[0]);
   int numberOfLinesToRead = evaluate<int>(parsedLineFields[1]);
   std::string key;
-  std::string value("");
+  std::string value;
   std::getline(fin, key);
   for (int i = 0; i < numberOfLinesToRead; i++) {
     std::getline(fin, line);
@@ -360,11 +360,11 @@ std::vector<int> ILLParser::parseFieldISpec(int fieldWith) {
  * Just for debug purposes.
  */
 void ILLParser::showHeader() {
-  std::cout << "* Global header" << '\n';
+  std::cout << "* Global header\n";
   for (auto &value : header)
     std::cout << value.first << " => " << value.second << '\n';
 
-  std::cout << "* Spectrum header" << '\n';
+  std::cout << "* Spectrum header\n";
   int i = 0;
   std::vector<std::map<std::string, std::string>>::const_iterator s;
   for (s = spectraHeaders.begin(); s != spectraHeaders.end(); ++s) {
@@ -372,11 +372,11 @@ void ILLParser::showHeader() {
     std::map<std::string, std::string>::const_iterator it;
     for (it = s->begin(); it != s->end(); ++it)
       std::cout << it->first << " => " << it->second << ',';
-    std::cout << std::endl;
+    std::cout << '\n';
     i++;
   }
 
-  std::cout << "* Spectrum list" << '\n';
+  std::cout << "* Spectrum list\n";
   std::vector<std::vector<int>>::const_iterator l;
   for (l = spectraList.begin(); l != spectraList.end(); ++l) {
     std::cout << "From " << (*l)[0] << " to " << (*l)[l->size() - 1] << " => "

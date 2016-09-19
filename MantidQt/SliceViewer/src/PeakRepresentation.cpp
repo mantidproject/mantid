@@ -2,10 +2,8 @@
 #include "MantidQtSliceViewer/PeakViewColor.h"
 #include <QPainter>
 
-namespace MantidQt
-{
-namespace SliceViewer
-{
+namespace MantidQt {
+namespace SliceViewer {
 
 /**
  * Template method which draws a peaks representation
@@ -15,16 +13,16 @@ namespace SliceViewer
  * @param viewInformation: information about the view into which the peak is
  * drawn
  */
-void PeakRepresentation::draw(QPainter &painter, PeakViewColor &foregroundColor,
-                              PeakViewColor &backgroundColor,
-                              PeakRepresentationViewInformation viewInformation)
-{
-    // Setup the drawing information, eg positions, radii ...
-    auto drawingInformation = getDrawingInformation(viewInformation);
+void PeakRepresentation::draw(
+    QPainter &painter, PeakViewColor &foregroundColor,
+    PeakViewColor &backgroundColor,
+    PeakRepresentationViewInformation viewInformation) {
+  // Setup the drawing information, eg positions, radii ...
+  auto drawingInformation = getDrawingInformation(viewInformation);
 
-    // Draw
-    doDraw(painter, foregroundColor, backgroundColor, drawingInformation,
-           viewInformation);
+  // Draw
+  doDraw(painter, foregroundColor, backgroundColor, drawingInformation,
+         viewInformation);
 }
 }
 }

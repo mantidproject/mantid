@@ -68,12 +68,21 @@ std::string CompositeFunction::asString() const {
     ostr << ';';
   }
   for (size_t i = 0; i < nFunctions(); i++) {
+    const auto localAttr = this->getLocalAttributeNames();
     IFunction_sptr fun = getFunction(i);
     bool isComp =
         boost::dynamic_pointer_cast<CompositeFunction>(fun) != nullptr;
     if (isComp)
       ostr << '(';
     ostr << fun->asString();
+    for (const auto &localAttName : localAttr) {
+      const std::string localAttValue =
+          this->getLocalAttribute(i, localAttName).value();
+      if (!localAttValue.empty()) {
+        // local attribute names are prefixed by dollar sign
+        ostr << ',' << '$' << localAttName << '=' << localAttValue;
+      }
+    }
     if (isComp)
       ostr << ')';
     if (i < nFunctions() - 1) {
@@ -375,6 +384,16 @@ void CompositeFunction::checkFunction() {
   }
 }
 
+/**
+ * Remove all member functions
+ */
+void CompositeFunction::clear() {
+  m_nParams = 0;
+  m_paramOffsets.clear();
+  m_IFunction.clear();
+  m_functions.clear();
+}
+
 /** Add a function
  * @param f :: A pointer to the added function
  * @return The function index
@@ -666,7 +685,7 @@ void CompositeFunction::setUpForFit() {
       ParameterTie *tie = getTie(i);
       if (tie && !tie->isConstant()) {
         g_log.warning() << "Numeric derivatives should be used when "
-                           "non-constant ties defined." << std::endl;
+                           "non-constant ties defined.\n";
         break;
       }
     }

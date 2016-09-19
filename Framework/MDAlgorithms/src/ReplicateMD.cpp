@@ -130,16 +130,6 @@ size_t linearIndexToLinearIndex(const size_t &nDimsShape,
 DECLARE_ALGORITHM(ReplicateMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ReplicateMD::ReplicateMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ReplicateMD::~ReplicateMD() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ReplicateMD::name() const { return "ReplicateMD"; }
@@ -193,6 +183,7 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
   }
 
   size_t nonMatchingCount = 0;
+  bool haveMatchingIntegratedDims = false;
   for (size_t i = 0; i < shapeWS->getNumDims(); ++i) {
     const auto shapeDim = shapeWS->getDimension(i);
 
@@ -200,16 +191,29 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
     const auto dataDim = findMatchingDimension(*dataWS, *shapeDim);
     if (dataDim) {
       if (dataDim->getIsIntegrated()) {
-        // We count this as a non-matching dimension
-        ++nonMatchingCount;
+        if (!shapeDim->getIsIntegrated()) {
+          // We count this as a non-matching dimension
+          ++nonMatchingCount;
+        } else {
+          haveMatchingIntegratedDims = true;
+        }
       } else {
         // Check bin sizes match between the two dimensions
         if (shapeDim->getNBins() != dataDim->getNBins()) {
           std::stringstream stream;
           stream << "Dimension with id " << shapeDim->getDimensionId()
-                 << "in ShapeWorkspace has a different number of bins as the "
+                 << " in ShapeWorkspace has a different number of bins as the "
                     "same id dimension in the DataWorkspace";
           errorMap.emplace("DataWorkspace", stream.str());
+        } else if (haveMatchingIntegratedDims) {
+          errorMap.emplace(
+              "ShapeWorkspace",
+              "Extra integrated dimensions must be only "
+              "the last dimensions, e.g.:\n\nThis is allowed:\n  "
+              "Shape: {10, 5, 1, 1}\n  Data:  { 1, 5, 1, 1}\n\nBut "
+              "this is not:\n  Shape: {10, 1, 5, 1}\n  Data:  { 1, 1, "
+              "5, 1}\n\nUse TransposeMD to re-arrange dimensions.");
+          break;
         }
       }
     } else {
@@ -289,8 +293,24 @@ void ReplicateMD::exec() {
    the linear index -> linear index calculation below will not work correctly.
    */
   MDHistoWorkspace_const_sptr transposedDataWS = dataWS;
-  if (dataWS->getNumDims() == shapeWS->getNumDims()) {
+  if (nDimsData <= nDimsShape) {
     auto axes = findAxes(*shapeWS, *dataWS);
+    // Check that the indices stored in axes are compatible with the
+    // dimensionality of the data workspace
+    const auto numberOfDimensionsOfDataWorkspace = static_cast<int>(nDimsData);
+    for (const auto &axis : axes) {
+      if (axis >= numberOfDimensionsOfDataWorkspace) {
+        std::string message =
+            "ReplicateMD: Cannot transpose the data workspace. Attempting to "
+            "swap dimension index " +
+            std::to_string(
+                std::distance(static_cast<const int *>(&axes[0]), &axis)) +
+            " with index " + std::to_string(axis) +
+            ", but the dimensionality of the data workspace is " +
+            std::to_string(nDimsData);
+        throw std::runtime_error(message);
+      }
+    }
     transposedDataWS = transposeMD(dataWS, axes);
     nDimsData = transposedDataWS->getNumDims();
   }
@@ -318,7 +338,7 @@ void ReplicateMD::exec() {
       findReplicationDimension(*shapeWS, *transposedDataWS);
 
   // Create the output workspace from the shape.
-  MDHistoWorkspace_sptr outputWS(shapeWS->clone().release());
+  MDHistoWorkspace_sptr outputWS(shapeWS->clone());
   auto outIt = std::unique_ptr<MDHistoWorkspaceIterator>(
       dynamic_cast<MDHistoWorkspaceIterator *>(outputWS->createIterator()));
 

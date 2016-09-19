@@ -3,11 +3,12 @@
 //------------------------------------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/GramCharlierComptonProfile.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidKernel/Math/Distributions/HermitePolynomials.h"
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_sf_gamma.h> // for factorial
 #include <gsl/gsl_spline.h>
+
+#include <boost/math/special_functions/hermite.hpp>
 
 #include <cmath>
 #include <sstream>
@@ -293,8 +294,8 @@ void GramCharlierComptonProfile::addMassProfile(
   const double denom = ((std::pow(2.0, static_cast<int>(npoly))) * factorial);
 
   for (int j = 0; j < NFINE_Y; ++j) {
-    const double y = m_yfine[j] / std::sqrt(2.) / wg;
-    const double hermiteI = Math::hermitePoly(npoly, y);
+    const double y = m_yfine[j] / M_SQRT2 / wg;
+    const double hermiteI = boost::math::hermite(npoly, y);
     result[j] += ampNorm * std::exp(-y * y) * hermiteI * hermiteCoeff / denom;
   }
 }
@@ -316,8 +317,8 @@ void GramCharlierComptonProfile::addFSETerm(std::vector<double> &lhs) const {
     kfse *= getParameter("C_0");
 
   for (int j = 0; j < NFINE_Y; ++j) {
-    const double y = m_yfine[j] / std::sqrt(2.) / wg;
-    const double he3 = Math::hermitePoly(3, y);
+    const double y = m_yfine[j] / M_SQRT2 / wg;
+    const double he3 = boost::math::hermite(3, y);
     lhs[j] += ampNorm * std::exp(-y * y) * he3 * (kfse / m_qfine[j]);
   }
 }

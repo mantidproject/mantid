@@ -45,8 +45,12 @@ public:
   virtual void setSeed(const size_t seedValue) = 0;
   /// Sets the range of the subsequent calls to nextValue;
   virtual void setRange(const double start, const double end) = 0;
-  /// Return the next number in the sequence
+  /// Return the next double in the sequence
   virtual double nextValue() = 0;
+  /// Return the next double in the sequence overriding the default range
+  virtual double nextValue(double start, double end) = 0;
+  /// Return the next integer in the sequence
+  virtual int nextInt(int start, int end) = 0;
   /// Generates the next point
   void generateNextPoint() override;
 

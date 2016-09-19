@@ -77,7 +77,7 @@
 #pragma warning(disable : 4100)
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 //----------------------------------------------------------------------
 // For Microsoft Visual C++, externally accessible symbols must be
 // explicitly indicated with DLL_API, which is somewhat like "extern."
@@ -96,9 +96,12 @@
 #else
 #define DLL_API __declspec(dllimport)
 #endif
-//----------------------------------------------------------------------
-// DLL_API is ignored for all other systems
-//----------------------------------------------------------------------
+#elif defined(__GNUC__) && !defined(__clang__)
+#ifdef IN_MANTID_KERNEL
+#define DLL_API __attribute__((visibility("default")))
+#else
+#define DLL_API
+#endif
 #else
 #define DLL_API
 #endif

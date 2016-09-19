@@ -17,13 +17,14 @@
 
 class MantidUI;
 
-/** 
+/**
     This is a dialog for constructing fitting functions.
 
     @author Roman Tolchenov, Tessella plc
     @date 23/09/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -41,25 +42,23 @@ class MantidUI;
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class UserFitFunctionDialog : public QDialog
-{
+class UserFitFunctionDialog : public QDialog {
   Q_OBJECT
 
 public:
-  
   /// Default constructor
   explicit UserFitFunctionDialog(QWidget *parent);
 
   /// The constructed expression
-  QString expression()const{return ui.teExpression->toPlainText();}
+  QString expression() const { return ui.teExpression->toPlainText(); }
 
   /// Peak parameters. Empty if the function is not a peak
-  QString peakParams()const{return ui.lePeakParams->text();}
+  QString peakParams() const { return ui.lePeakParams->text(); }
 
-  /// Width formula - 
-  QString widthFormula()const{return ui.leWidthFormula->text();}
+  /// Width formula -
+  QString widthFormula() const { return ui.leWidthFormula->text(); }
 
 private slots:
 
@@ -72,19 +71,16 @@ private slots:
   /// Add the selected function(s) from ui.treeFunctions to the edit window
   void insertFunction();
 
-  /// React on the change of selection in ui.treeFunctions (e.g. enable or disable ui.btnAdd)
+  /// React on the change of selection in ui.treeFunctions (e.g. enable or
+  /// disable ui.btnAdd)
   void functionSelectionChanged();
 
 private:
-
   /// Add the selected function(s) from ui.treeFunctions to the edit window
-  void addFunction(const QString& op,bool brackets);
+  void addFunction(const QString &op, bool brackets);
 
   // The form generated with Qt Designer
   Ui::UserFitFunctionDialog ui;
-
 };
-
-
 
 #endif /* USERFITFUNCTIONDIALOG_H */

@@ -1,20 +1,23 @@
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/MDFrame.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
-#include "MantidGeometry/MDGeometry/QLab.h"
-#include "MantidGeometry/MDGeometry/HKL.h"
-#include "MantidGeometry/MDGeometry/GeneralFrame.h"
-#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/System.h"
-#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidKernel/Memory.h"
-#include <math.h>
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Memory.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -22,19 +25,35 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using boost::regex;
+
+/*
+ * The list of dimension names often looks like "[H,0,0],[0,K,0]" with "[H,0,0]"
+ * being the first dimension but getProperty returns a vector of
+ * the string split on every comma
+ * This function parses the string, and does not split on commas within brackets
+ */
+std::vector<std::string> parseNames(const std::string &names_string) {
+
+  // This regex has two parts which are separated by the "|" (or)
+  // The first part matches anything which is bounded by square brackets
+  // unless they contain square brackets (so that it only matches inner pairs)
+  // The second part matches anything that doesn't contain a comma
+  // NB, the order of the two parts matters
+
+  regex expression("\\[([^\\[]*)\\]|[^,]+");
+
+  boost::sregex_token_iterator iter(names_string.begin(), names_string.end(),
+                                    expression, 0);
+  boost::sregex_token_iterator end;
+
+  std::vector<std::string> names_result(iter, end);
+
+  return names_result;
+}
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateMDWorkspace)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateMDWorkspace::CreateMDWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateMDWorkspace::~CreateMDWorkspace() {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -53,8 +72,9 @@ void CreateMDWorkspace::init() {
                   "A comma separated list of min, max for each dimension,\n"
                   "specifying the extents of each dimension.");
 
-  declareProperty(make_unique<ArrayProperty<std::string>>("Names"),
-                  "A comma separated list of the name of each dimension.");
+  declareProperty(
+      make_unique<ArrayProperty<std::string>>("Names", Direction::Input),
+      "A comma separated list of the name of each dimension.");
 
   declareProperty(make_unique<ArrayProperty<std::string>>("Units"),
                   "A comma separated list of the units of each dimension.");
@@ -141,7 +161,9 @@ void CreateMDWorkspace::exec() {
   size_t ndims = static_cast<size_t>(ndims_prop);
 
   std::vector<double> extents = getProperty("Extents");
-  std::vector<std::string> names = getProperty("Names");
+  std::string dimensions_string = getPropertyValue("Names");
+  std::vector<std::string> names = parseNames(dimensions_string);
+
   std::vector<std::string> units = getProperty("Units");
   std::vector<std::string> frames = getProperty("Frames");
 
@@ -191,14 +213,14 @@ void CreateMDWorkspace::exec() {
   std::string filename = getProperty("Filename");
   if (!filename.empty()) {
     // First save to the NXS file
-    g_log.notice() << "Running SaveMD" << std::endl;
+    g_log.notice() << "Running SaveMD\n";
     IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("InputWorkspace",
                      boost::dynamic_pointer_cast<IMDWorkspace>(out));
     alg->executeAsChildAlg();
     // And now re-load it with this file as the backing.
-    g_log.notice() << "Running LoadMD" << std::endl;
+    g_log.notice() << "Running LoadMD\n";
     alg = createChildAlgorithm("LoadMD");
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("FileBackEnd", true);

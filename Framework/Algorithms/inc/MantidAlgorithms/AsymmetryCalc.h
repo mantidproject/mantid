@@ -51,10 +51,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport AsymmetryCalc : public API::Algorithm {
 public:
-  /// Default constructor
-  AsymmetryCalc() : API::Algorithm(){};
-  /// Destructor
-  ~AsymmetryCalc() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "AsymmetryCalc"; }
   /// Summary of algorithms purpose

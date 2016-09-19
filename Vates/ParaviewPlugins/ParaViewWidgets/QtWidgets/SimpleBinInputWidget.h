@@ -1,5 +1,5 @@
 #ifndef SIMPLE_BIN_INPUT_WIDGET_H
-#define SIMPLE_BIN_INPUT_WIDGET_H 
+#define SIMPLE_BIN_INPUT_WIDGET_H
 
 #include "BinInputWidget.h"
 class QLineEdit;
@@ -7,10 +7,9 @@ class QLineEdit;
 /**
 class SimpleBinInputWidget
 This simple implementation allows users to specify the number of bins directly.
-Widget wrapper around a label and text box. 
+Widget wrapper around a label and text box.
 */
-class SimpleBinInputWidget : public BinInputWidget
-{
+class SimpleBinInputWidget : public BinInputWidget {
   Q_OBJECT
 
 public:
@@ -24,9 +23,10 @@ public:
   ~SimpleBinInputWidget() override;
 private slots:
   void nBinsListener();
+
 private:
-   /// Number of bins text box.
-   QLineEdit* m_nBinsBox;
+  /// Number of bins text box.
+  QLineEdit *m_nBinsBox;
 };
 
 #endif

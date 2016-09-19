@@ -34,24 +34,23 @@
 
 class Graph;
 
-class TextEditor: public QTextEdit
-{
-	Q_OBJECT
+class TextEditor : public QTextEdit {
+  Q_OBJECT
 
 public:
   explicit TextEditor(Graph *g);
   ~TextEditor() override;
-    void formatText(const QString & prefix, const QString & postfix);
+  void formatText(const QString &prefix, const QString &postfix);
 
 signals:
-    void textEditorDeleted();
+  void textEditorDeleted();
 public slots:
-    void addSymbol(const QString & letter);
+  void addSymbol(const QString &letter);
 
 private:
   void closeEvent(QCloseEvent *e) override;
-        QString d_initial_text;
-	QWidget *d_target;
+  QString d_initial_text;
+  QWidget *d_target;
 };
 
 #endif

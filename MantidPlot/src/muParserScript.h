@@ -35,59 +35,70 @@
 #include "MantidGeometry/muParser_Silent.h"
 #include "math.h"
 #include <gsl/gsl_sf.h>
-#include <q3asciidict.h>
+#include <QMap>
 
 class ScriptingEnv;
 
-class muParserScript: public Script
-{
+class muParserScript : public Script {
   Q_OBJECT
 
-  public:
-    muParserScript(ScriptingEnv *env, const QString &name,
-                   QObject *context, bool checkMultilineCode = true);
+public:
+  muParserScript(ScriptingEnv *env, const QString &name, QObject *context,
+                 bool checkMultilineCode = true);
+  ~muParserScript();
 
-    bool compilesToCompleteStatement(const QString &) const override {
-      return true;
-    };
+  bool compilesToCompleteStatement(const QString &) const override {
+    return true;
+  };
 
-  public slots:
-    QVariant evaluateImpl() override;
-    double evalSingleLine();
-    QString evalSingleLineToString(const QLocale& locale, char f, int prec);
-    bool compileImpl() override;
-    bool executeImpl() override;
-    void abortImpl() override;
-    bool setQObject(QObject *val, const char *name) override;
-    bool setInt(int val, const char *name) override;
-    bool setDouble(double val, const char *name) override;
-    double* defineVariable(const char *name, double val = 0.0);
-    int codeLines(){return muCode.size();};
+public slots:
+  QVariant evaluateImpl() override;
+  double evalSingleLine();
+  QString evalSingleLineToString(const QLocale &locale, char f, int prec);
+  bool compileImpl() override;
+  bool executeImpl() override;
+  void abortImpl() override;
+  bool setQObject(QObject *val, const char *name) override;
+  bool setInt(int val, const char *name) override;
+  bool setDouble(double val, const char *name) override;
+  double *defineVariable(const char *name, double val = 0.0);
+  int codeLines() { return muCode.size(); };
 
-  private:
-    double col(const QString &arg);
-    double tablecol(const QString &arg);
-    double cell(int row, int col);
-    double tableCell(int col, int row);
-    double *addVariable(const char *name);
-    double *addVariableR(const char *name);
-    static double *mu_addVariableR(const char *name) { return current->addVariableR(name); }
-    static double mu_col(const char *arg) { return current->col(arg); }
-    static double mu_cell(double row, double col) { return current->cell(qRound(row), qRound(col)); }
-    static double mu_tableCell(double col, double row) { return current->tableCell(qRound(col), qRound(row)); }
-    static double mu_tablecol(const char *arg) { return current->tablecol(arg); }
-    static double *mu_addVariable(const char *name, void *){ return current->addVariable(name); }
-    static double *mu_addVariableR(const char *name, void *) { return current->addVariableR(name); }
-    static QString compileColArg(const QString& in);
+private:
+  double col(const QString &arg);
+  double tablecol(const QString &arg);
+  double cell(int row, int col);
+  double tableCell(int col, int row);
+  double *addVariable(const char *name);
+  double *addVariableR(const char *name);
+  static double *mu_addVariableR(const char *name) {
+    return current->addVariableR(name);
+  }
+  static double mu_col(const char *arg) { return current->col(arg); }
+  static double mu_cell(double row, double col) {
+    return current->cell(qRound(row), qRound(col));
+  }
+  static double mu_tableCell(double col, double row) {
+    return current->tableCell(qRound(col), qRound(row));
+  }
+  static double mu_tablecol(const char *arg) { return current->tablecol(arg); }
+  static double *mu_addVariable(const char *name, void *) {
+    return current->addVariable(name);
+  }
+  static double *mu_addVariableR(const char *name, void *) {
+    return current->addVariableR(name);
+  }
+  static QString compileColArg(const QString &in);
+  static void clearVariables(QMap<QString, double *> &vars);
 
-    mu::Parser parser, rparser;
-    Q3AsciiDict<double> variables, rvariables;
-    QStringList muCode;
-    //! Flag telling is the parser should warn users on multiline code input
-    bool d_warn_multiline_code;
+  mu::Parser parser, rparser;
+  QMap<QString, double *> variables, rvariables;
+  QStringList muCode;
+  //! Flag telling is the parser should warn users on multiline code input
+  bool d_warn_multiline_code;
 
-  public:
-    static muParserScript *current;
+public:
+  static muParserScript *current;
 };
 
 #endif

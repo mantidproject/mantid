@@ -28,8 +28,8 @@ const char *MASS_NAME = "Mass";
  */
 ComptonProfile::ComptonProfile()
     : API::ParamFunction(), API::IFunction1D(), m_log("ComptonProfile"),
-      m_wsIndex(0), m_voigt(), m_resolutionFunction(), m_yspace(), m_modQ(),
-      m_e0(), m_mass(0.0) {
+      m_wsIndex(0), m_startX(0.0), m_endX(0.0), m_voigt(),
+      m_resolutionFunction(), m_yspace(), m_modQ(), m_e0(), m_mass(0.0) {
   using namespace Mantid::API;
   m_resolutionFunction = boost::dynamic_pointer_cast<VesuvioResolution>(
       FunctionFactory::Instance().createFunction("VesuvioResolution"));
@@ -98,7 +98,7 @@ void ComptonProfile::buildCaches() {
   } catch (Kernel::Exception::NotFoundError &) {
     throw std::invalid_argument("ComptonProfile - Workspace has no detector "
                                 "attached to histogram at index " +
-                                boost::lexical_cast<std::string>(m_wsIndex));
+                                std::to_string(m_wsIndex));
   }
 
   m_resolutionFunction->setAttributeValue("Mass", m_mass);

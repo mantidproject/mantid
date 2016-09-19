@@ -290,7 +290,8 @@ void LoadISISNexus2::exec() {
     // Get the X data
     NXFloat timeBins = entry.openNXFloat("detector_1/time_of_flight");
     timeBins.load();
-    m_tof_data.reset(new MantidVec(timeBins(), timeBins() + x_length));
+    m_tof_data = boost::make_shared<HistogramData::HistogramX>(
+        timeBins(), timeBins() + x_length);
   }
   int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
   loadPeriodData(firstentry, entry, local_workspace, m_load_selected_spectra);
@@ -421,7 +422,7 @@ void LoadISISNexus2::exec() {
       }
     } else {
       g_log.information() << " no monitors to load for workspace: " << wsName
-                          << std::endl;
+                          << '\n';
     }
   }
 
@@ -511,7 +512,7 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
     std::string err =
         "Inconsistent range property. SpectrumMax is larger than number of "
         "spectra: " +
-        boost::lexical_cast<std::string>(m_loadBlockInfo.getMaxSpectrumID());
+        std::to_string(m_loadBlockInfo.getMaxSpectrumID());
     throw std::invalid_argument(err);
   }
 
@@ -519,10 +520,9 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
   m_entrynumber = getProperty("EntryNumber");
   if (static_cast<int>(m_entrynumber) > m_loadBlockInfo.getNumberOfPeriods() ||
       m_entrynumber < 0) {
-    std::string err =
-        "Invalid entry number entered. File contains " +
-        boost::lexical_cast<std::string>(m_loadBlockInfo.getNumberOfPeriods()) +
-        " period. ";
+    std::string err = "Invalid entry number entered. File contains " +
+                      std::to_string(m_loadBlockInfo.getNumberOfPeriods()) +
+                      " period. ";
     throw std::invalid_argument(err);
   }
 
@@ -689,7 +689,7 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
     int64_t hist = 0;
     for (; !generator->isDone(); generator->next()) {
       specnum_t spec_num = static_cast<specnum_t>(generator->getValue());
-      m_wsInd2specNum_map.insert(std::make_pair(hist, spec_num));
+      m_wsInd2specNum_map.emplace(hist, spec_num);
       ++hist;
     }
   }
@@ -794,11 +794,11 @@ void LoadISISNexus2::loadPeriodData(
       if (update_spectra2det_mapping) {
         // local_workspace->getAxis(1)->setValue(hist_index,
         // static_cast<specnum_t>(it->first));
-        auto spec = local_workspace->getSpectrum(hist_index);
+        auto &spec = local_workspace->getSpectrum(hist_index);
         specnum_t specNum = m_wsInd2specNum_map.at(hist_index);
-        spec->setDetectorIDs(
+        spec.setDetectorIDs(
             m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
-        spec->setSpectrumNo(specNum);
+        spec.setSpectrumNo(specNum);
       }
 
       NXFloat timeBins = monitor.openNXFloat("time_of_flight");
@@ -846,7 +846,7 @@ void LoadISISNexus2::loadPeriodData(
     local_workspace->mutableRun().addProperty("run_title", title, true);
   } catch (std::runtime_error &) {
     g_log.debug() << "No title was found in the input file, "
-                  << getPropertyValue("Filename") << std::endl;
+                  << getPropertyValue("Filename") << '\n';
   }
 }
 
@@ -894,12 +894,12 @@ void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize,
     if (m_load_selected_spectra) {
       // local_workspace->getAxis(1)->setValue(hist,
       // static_cast<specnum_t>(spec_num));
-      auto spec = local_workspace->getSpectrum(hist);
+      auto &spec = local_workspace->getSpectrum(hist);
       specnum_t specNum = m_wsInd2specNum_map.at(hist);
       // set detectors corresponding to spectra Number
-      spec->setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
+      spec.setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
       // set correct spectra Number
-      spec->setSpectrumNo(specNum);
+      spec.setSpectrumNo(specNum);
     }
 
     ++hist;
@@ -971,8 +971,7 @@ void LoadISISNexus2::loadRunDetails(
   m_proton_charge = static_cast<double>(entry.getFloat("proton_charge"));
   runDetails.setProtonCharge(m_proton_charge);
 
-  std::string run_num =
-      boost::lexical_cast<std::string>(entry.getInt("run_number"));
+  std::string run_num = std::to_string(entry.getInt("run_number"));
   runDetails.addProperty("run_number", run_num);
 
   //

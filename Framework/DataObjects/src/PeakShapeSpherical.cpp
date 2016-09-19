@@ -86,9 +86,25 @@ bool PeakShapeSpherical::operator==(const PeakShapeSpherical &other) const {
 
 /**
  * @brief Get radius of sphere
+ * @param type Which radius to get.
  * @return radius
  */
-double PeakShapeSpherical::radius() const { return m_radius; }
+boost::optional<double> PeakShapeSpherical::radius(RadiusType type) const {
+
+  boost::optional<double> value;
+  switch (type) {
+  case (RadiusType::Radius):
+    value = boost::optional<double>{m_radius};
+    break;
+  case (RadiusType::OuterRadius):
+    value = m_backgroundOuterRadius;
+    break;
+  case (RadiusType::InnerRadius):
+    value = m_backgroundInnerRadius;
+    break;
+  }
+  return value;
+}
 
 /**
  * @brief Get the background outer radius. The outer radius may not be set, so

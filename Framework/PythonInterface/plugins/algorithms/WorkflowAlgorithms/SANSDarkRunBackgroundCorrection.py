@@ -23,11 +23,11 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
                                                      direction=Direction.Input))
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
                                                      direction = Direction.Output),
-                                                     "The corrected SANS workspace.")
+                             "The corrected SANS workspace.")
         self.declareProperty("NormalizationRatio", 1.0, "Number to scale the dark run in order"
-                                                       "to make it comparable to the SANS run")
+                             "to make it comparable to the SANS run")
         self.declareProperty("Mean", False, "If True then a mean value of all spectra is used to "
-                                             "calculate the value to subtract")
+                             "calculate the value to subtract")
         self.declareProperty("Uniform", True, "If True then we treat the treat the tim ebins a")
         self.declareProperty("ApplyToDetectors", True, "If True then we apply the correction to the detector pixels")
         self.declareProperty("ApplyToMonitors", False, "If True then we apply the correction to the monitors")
@@ -39,7 +39,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
                                               direction=Direction.Input),
                              "List of selected detector IDs of monitors to which the "
                              "correction should be applied. If empty, all monitors will "
-                              "be corrected, if ApplyToMonitors has been selected.")
+                             "be corrected, if ApplyToMonitors has been selected.")
     def PyExec(self):
         # Get the workspaces
         workspace = self.getProperty("InputWorkspace").value

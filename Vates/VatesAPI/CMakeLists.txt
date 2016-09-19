@@ -1,5 +1,5 @@
 #This is mainly here so you don't get a complaint when running cmake
-cmake_minimum_required( VERSION 2.8.12 )
+cmake_minimum_required( VERSION 3.5 )
 
 project( VatesAPI )
 
@@ -228,6 +228,7 @@ vtkFiltersSources
 ${vtkjsoncpp_LIBRARIES}
 vtkPVVTKExtensionsDefault
 ${QWT_LIBRARIES}
+Qt4::QtCore
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
 ${NEXUS_LIBRARIES}
@@ -281,6 +282,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   ${Boost_LIBRARIES}
   ${GMOCK_LIBRARIES} 
   ${QWT_LIBRARIES}
+  Qt4::QtCore
   ${GTEST_LIBRARIES} )
   add_dependencies( AllTests VatesAPITest )
   # Add to the 'UnitTests' group in VS

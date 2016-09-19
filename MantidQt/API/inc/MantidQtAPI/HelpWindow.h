@@ -3,19 +3,18 @@
 
 #include "MantidQtAPI/DllOption.h"
 #include <string>
+#include <QString>
 
 // forward declarations
-class QString;
 class QUrl;
 class QWidget;
 
-namespace MantidQt
-{
-namespace API
-{
+namespace MantidQt {
+namespace API {
 
 /**
-  Copyright &copy; 2013-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2013-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -35,19 +34,26 @@ namespace API
   File change history is stored at: <https://github.com/mantidproject/mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDQT_API HelpWindow
-{
+class EXPORT_OPT_MANTIDQT_API HelpWindow {
 public:
-  static void showPage(QWidget *parent, const std::string & url=std::string());
-  static void showPage(QWidget *parent, const QString & url);
-  static void showPage(QWidget *parent, const QUrl & url);
-  static void showAlgorithm(QWidget *parent, const std::string &name=std::string(), const int version=-1);
-  static void showAlgorithm(QWidget *parent, const QString &name, const int version=-1);
-  static void showConcept(QWidget *parent, const std::string &name=std::string());
+  static void showPage(QWidget *parent, const std::string &url = std::string());
+  static void showPage(QWidget *parent, const QString &url);
+  static void showPage(QWidget *parent, const QUrl &url);
+  static void showAlgorithm(QWidget *parent,
+                            const std::string &name = std::string(),
+                            const int version = -1);
+  static void showAlgorithm(QWidget *parent, const QString &name,
+                            const int version = -1);
+  static void showConcept(QWidget *parent,
+                          const std::string &name = std::string());
   static void showConcept(QWidget *parent, const QString &name);
-  static void showFitFunction(QWidget *parent, const std::string &name=std::string());
-  static void showCustomInterface(QWidget *parent, const QString &name);
-  static void showCustomInterface(QWidget *parent, const std::string &name=std::string());
+  static void showFitFunction(QWidget *parent,
+                              const std::string &name = std::string());
+  static void showCustomInterface(QWidget *parent, const QString &name,
+                                  const QString &section = QString());
+  static void showCustomInterface(QWidget *parent,
+                                  const std::string &name = std::string(),
+                                  const std::string &section = std::string());
 };
 } // namespace API
 } // namespace MantidQt

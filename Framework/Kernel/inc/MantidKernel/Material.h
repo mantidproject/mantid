@@ -12,7 +12,7 @@
 namespace Mantid {
 
 namespace PhysicalConstants {
-struct Atom;
+class Atom;
 }
 
 namespace Kernel {
@@ -50,6 +50,19 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class MANTID_KERNEL_DLL Material {
 public:
+  /// Structure to hold the information for a parsed chemical formula
+  struct FormulaUnit {
+    boost::shared_ptr<PhysicalConstants::Atom> atom;
+    double multiplicity;
+    FormulaUnit(const boost::shared_ptr<PhysicalConstants::Atom> &atom,
+                const double multiplicity);
+    FormulaUnit(const PhysicalConstants::Atom &atom, const double multiplicity);
+  };
+
+  typedef std::vector<FormulaUnit> ChemicalFormula;
+
+  static ChemicalFormula parseChemicalFormula(const std::string chemicalSymbol);
+
   /// Default constructor. Required for other parts of the code to
   /// function correctly. The material is considered "empty"
   Material();
@@ -57,7 +70,11 @@ public:
   /// Construct a material from a known element, with optional
   /// temperature and pressure
   explicit Material(
-      const std::string &name, const PhysicalConstants::NeutronAtom &element,
+      const std::string &name, const ChemicalFormula &formula,
+      const double numberDensity, const double temperature = 300,
+      const double pressure = PhysicalConstants::StandardAtmosphere);
+  explicit Material(
+      const std::string &name, const PhysicalConstants::NeutronAtom &atom,
       const double numberDensity, const double temperature = 300,
       const double pressure = PhysicalConstants::StandardAtmosphere);
   /// Virtual destructor.
@@ -65,6 +82,7 @@ public:
 
   /// Returns the name of the material
   const std::string &name() const;
+  const Material::ChemicalFormula &chemicalFormula() const;
 
   /** @name Material properties */
   //@{
@@ -90,24 +108,69 @@ public:
   double
   absorbXSection(const double lambda =
                      PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+
+  /// Get the coherent scattering length for a given wavelength
+  double
+  cohScatterLength(const double lambda =
+                       PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+  /// Get the incoherent length for a given wavelength
+  double
+  incohScatterLength(const double lambda =
+                         PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+  /// Return the total scattering length for a given wavelength
+  double
+  totalScatterLength(const double lambda =
+                         PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+
+  /// Get the coherent scattering length for a given wavelength
+  double cohScatterLengthReal(
+      const double lambda =
+          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+  /// Get the incoherent length for a given wavelength
+  double incohScatterLengthReal(
+      const double lambda =
+          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+
+  /// Get the real part of the coherent scattering length <b^2> for a given
+  /// wavelength
+  double cohScatterLengthRealSqrd(
+      const double lambda =
+          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+
+  /// Get the real part of the incoherent length <b^2> for a given wavelength
+  double incohScatterLengthRealSqrd(
+      const double lambda =
+          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+
+  /// Get the coherent scattering length <b^2> for a given wavelength
+  double cohScatterLengthSqrd(
+      const double lambda =
+          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+
+  /// Get the incoherent length <b^2> for a given wavelength
+  double incohScatterLengthSqrd(
+      const double lambda =
+          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+
+  /// Return the total scattering length <b^2> for a given wavelength
+  double totalScatterLengthSqrd(
+      const double lambda =
+          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
   //@}
 
   void saveNexus(::NeXus::File *file, const std::string &group) const;
   void loadNexus(::NeXus::File *file, const std::string &group);
 
-  /// Structure to hold the information for a parsed chemical formula
-  struct ChemicalFormula {
-    /// Atoms for the formula. Caller responsible to delete.
-    std::vector<boost::shared_ptr<PhysicalConstants::Atom>> atoms;
-    std::vector<float> numberAtoms; ///< Number of each atom
-  };
-  static ChemicalFormula parseChemicalFormula(const std::string chemicalSymbol);
-
 private:
+  /// Update the total atom count
+  void countAtoms();
+
   /// Material name
   std::string m_name;
-  /// Reference to an element
-  PhysicalConstants::NeutronAtom m_element;
+  /// The normalized chemical formula
+  ChemicalFormula m_chemicalFormula;
+  /// Total number of atoms
+  double m_atomTotal;
   /// Number density in A^-3
   double m_numberDensity;
   /// Temperature

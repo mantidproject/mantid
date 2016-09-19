@@ -36,18 +36,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IntegratePeaksMD::IntegratePeaksMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IntegratePeaksMD::~IntegratePeaksMD() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void IntegratePeaksMD::init() {
@@ -165,26 +153,24 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
       getProperty("OutputWorkspace");
   if (peakWS != inPeakWS)
-    peakWS.reset(inPeakWS->clone().release());
+    peakWS = inPeakWS->clone();
 
   /// Value of the CoordinatesToUse property.
   std::string CoordinatesToUseStr = getPropertyValue("CoordinatesToUse");
   Kernel::SpecialCoordinateSystem CoordinatesToUse =
       ws->getSpecialCoordinateSystem();
-  g_log.warning() << " Warning" << CoordinatesToUse << std::endl;
+  g_log.warning() << " Warning" << CoordinatesToUse << '\n';
   if (CoordinatesToUse == Kernel::QLab &&
       CoordinatesToUseStr != "Q (lab frame)")
     g_log.warning() << "Warning: used Q (lab frame) coordinates for MD "
-                       "workspace, not CoordinatesToUse from input "
-                    << std::endl;
+                       "workspace, not CoordinatesToUse from input \n";
   else if (CoordinatesToUse == Kernel::QSample &&
            CoordinatesToUseStr != "Q (sample frame)")
     g_log.warning() << "Warning: used Q (sample frame) coordinates for MD "
-                       "workspace, not CoordinatesToUse from input "
-                    << std::endl;
+                       "workspace, not CoordinatesToUse from input \n";
   else if (CoordinatesToUse == Kernel::HKL && CoordinatesToUseStr != "HKL")
     g_log.warning() << "Warning: used HKL coordinates for MD workspace, not "
-                       "CoordinatesToUse from input " << std::endl;
+                       "CoordinatesToUse from input \n";
 
   /// Radius to use around peaks
   double PeakRadius = getProperty("PeakRadius");
@@ -294,14 +280,14 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     if (BackgroundOuterRadius > PeakRadius) {
       if (!detectorQ(p.getQLabFrame(), BackgroundOuterRadius)) {
         g_log.warning() << "Warning: sphere/cylinder for integration is off "
-                           "edge of detector for peak " << i << std::endl;
+                           "edge of detector for peak " << i << '\n';
         if (!integrateEdge)
           continue;
       }
     } else {
       if (!detectorQ(p.getQLabFrame(), PeakRadius)) {
         g_log.warning() << "Warning: sphere/cylinder for integration is off "
-                           "edge of detector for peak " << i << std::endl;
+                           "edge of detector for peak " << i << '\n';
         if (!integrateEdge)
           continue;
       }
@@ -611,7 +597,7 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                         << bgSignal + ratio * background_total << " (sig^2 "
                         << bgErrorSquared +
                                ratio * ratio * std::fabs(background_total)
-                        << ") subtracted." << std::endl;
+                        << ") subtracted.\n";
   }
   // This flag is used by the PeaksWorkspace to evaluate whether it has been
   // integrated.

@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/FunctionDomain.h"
+#include "MantidKernel/ClassMacros.h"
 
 #include <vector>
 
@@ -45,6 +46,10 @@ namespace API {
 */
 class MANTID_API_DLL FunctionDomain1D : public FunctionDomain {
 public:
+  /// copying is not allowed.
+  FunctionDomain1D(const FunctionDomain1D &right) = delete;
+  /// copying is not allowed.
+  FunctionDomain1D &operator=(const FunctionDomain1D &) = delete;
   /// Return the number of arguments in the domain
   size_t size() const override { return m_n; }
   /// Get an x value.
@@ -66,10 +71,6 @@ protected:
   }
 
 private:
-  /// Private copy constructor - copying is not allowed.
-  FunctionDomain1D(const FunctionDomain1D &right);
-  /// Private copy assignment operator - copying is not allowed.
-  FunctionDomain1D &operator=(const FunctionDomain1D &);
   const double *m_data; ///< pointer to the start of the domain data
   size_t m_n;           ///< size of the data
 };
@@ -136,6 +137,25 @@ public:
 private:
   /// The workspace index
   size_t m_workspaceIndex;
+};
+
+/// Implements FunctionDomain1D as a set of bins for a histogram.
+/// operator[i] returns the right boundary of i-th bin.
+/// The left boundary of the first bin (#0) is returned by leftBoundary()
+/// method.
+class MANTID_API_DLL FunctionDomain1DHistogram : public FunctionDomain1D {
+public:
+  /// Constructor.
+  FunctionDomain1DHistogram(const std::vector<double> &bins);
+  /// Constructor.
+  FunctionDomain1DHistogram(std::vector<double>::const_iterator from,
+                            std::vector<double>::const_iterator to);
+  /// Get the leftmost boundary
+  double leftBoundary() const;
+
+protected:
+  DISABLE_COPY_AND_ASSIGN(FunctionDomain1DHistogram)
+  std::vector<double> m_bins; ///< vector of bin boundaries
 };
 
 /// typedef for a shared pointer to a FunctionDomain1D

@@ -19,10 +19,17 @@ Performs a Time-of-flight (TOF) to dSpacing conversion using
 calibrated pixel positions, focuses the values in dSpacing (summing
 them up into a single spectrum) and then converts them back to
 TOF. The output workspace produced by this algorithm has one spectrum.
+The algorithm also normalizes the spectra values by current or proton
+charge, using :ref:`algm-NormaliseByCurrent` so that the output
+workspace is focused and normalized. In the focusing process, several
+bins will be masked in the spectra as well. A list of minimum and
+maximum TOF bin boundaries for the masking can be given. The default
+values of this list is set for the ENGIN-X instrument.
 
 If a table of detector positions is passed as an input property, the
 detectors are calibrated before performing the conversions between TOF
-and dSpacing.
+and dSpacing. The table with individual detector or pixel positions
+can be generated with :ref:`algm-EnggCalibrateFull`.
 
 In any case, before focusing the workspace, the spectra are corrected
 by using data from a Vanadium run (passed in the VanadiumWorkspace
@@ -61,7 +68,7 @@ Usage
    print "No. of spectra:", focussed_ws.getNumberHistograms()
 
    # Print a few arbitrary bins where higher intensities are expected
-   fmt = "For TOF of {0:.3f} intensity is {1:.3f}"
+   fmt = "For TOF of {0:.3f} normalized intensity is {1:.3f}"
    for bin in [3169, 6037, 7124]:
      print fmt.format(focussed_ws.readX(0)[bin], focussed_ws.readY(0)[bin])
 
@@ -77,9 +84,9 @@ Output:
 .. testoutput:: ExSimpleFocussing
 
    No. of spectra: 1
-   For TOF of 20165.642 intensity is 13.102
-   For TOF of 33547.826 intensity is 17.844
-   For TOF of 38619.804 intensity is 32.768
+   For TOF of 20165.642 normalized intensity is 1.769
+   For TOF of 33547.826 normalized intensity is 2.895
+   For TOF of 38619.804 normalized intensity is 5.181
    
 .. categories::
 

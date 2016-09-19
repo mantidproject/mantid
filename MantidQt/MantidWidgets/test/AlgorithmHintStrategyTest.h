@@ -46,9 +46,8 @@ class AlgorithmHintStrategyTest : public CxxTest::TestSuite {
       declareProperty(
           Mantid::Kernel::make_unique<Mantid::Kernel::ArrayProperty<double>>(
               "DoubleArray"));
-      declareProperty(
-          Mantid::Kernel::make_unique<
-              Mantid::Kernel::ArrayProperty<std::string>>("StringArray"));
+      declareProperty(Mantid::Kernel::make_unique<
+          Mantid::Kernel::ArrayProperty<std::string>>("StringArray"));
     };
     void exec() override { return; };
   };

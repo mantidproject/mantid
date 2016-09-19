@@ -4,7 +4,7 @@
 #include "MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -28,16 +28,16 @@ DECLARE_ALGORITHM(SANSSolidAngleCorrection)
 
 /// Returns the angle between the sample-to-pixel vector and its
 /// projection on the X-Z plane.
-static double getYTubeAngle(IDetector_const_sptr det,
-                            MatrixWorkspace_const_sptr workspace) {
+static double getYTubeAngle(const IDetector &det,
+                            const MatrixWorkspace &workspace) {
 
   // Get the sample position
   Geometry::IComponent_const_sptr sample =
-      workspace->getInstrument()->getSample();
+      workspace.getInstrument()->getSample();
   const V3D samplePos = sample->getPos();
 
   // Get the vector from the sample position to the detector pixel
-  V3D sampleDetVec = det->getPos() - samplePos;
+  V3D sampleDetVec = det.getPos() - samplePos;
 
   // Get the projection of that vector on the X-Z plane
   V3D inPlane = V3D(sampleDetVec);
@@ -59,6 +59,10 @@ void SANSSolidAngleCorrection::init() {
   declareProperty("DetectorTubes", false, "If true, the algorithm will assume "
                                           "that the detectors are tubes in the "
                                           "Y direction.");
+  declareProperty("DetectorWing", false,
+                  "If true, the algorithm will assume "
+                  "that the detector is curved around the sample. E.g. BIOSANS "
+                  "Wing detector.");
   declareProperty("OutputMessage", "", Direction::Output);
   declareProperty("ReductionProperties", "__sans_reduction_properties",
                   Direction::Input);
@@ -78,8 +82,8 @@ void SANSSolidAngleCorrection::exec() {
   }
 
   // If the solid angle algorithm isn't in the reduction properties, add it
-  if (!reductionManager->existsProperty("SolidAngleAlgorithm")) {
-    auto algProp = make_unique<AlgorithmProperty>("SolidAngleAlgorithm");
+  if (!reductionManager->existsProperty("SANSSolidAngleCorrection")) {
+    auto algProp = make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
     algProp->setValue(toString());
     reductionManager->declareProperty(std::move(algProp));
   }
@@ -94,7 +98,7 @@ void SANSSolidAngleCorrection::exec() {
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != inputWS) {
     outputWS = WorkspaceFactory::Instance().create(inputWS);
-    outputWS->isDistribution(true);
+    outputWS->setDistribution(true);
     outputWS->setYUnit("");
     outputWS->setYUnitLabel("Steradian");
     setProperty("OutputWorkspace", outputWS);
@@ -116,8 +120,7 @@ void SANSSolidAngleCorrection::exec() {
       det = inputWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Workspace index " << i
-                      << " has no detector assigned to it - discarding"
-                      << std::endl;
+                      << " has no detector assigned to it - discarding\n";
       // Catch if no detector. Next line tests whether this happened - test
       // placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a
@@ -140,13 +143,19 @@ void SANSSolidAngleCorrection::exec() {
 
     // Compute solid angle correction factor
     const bool is_tube = getProperty("DetectorTubes");
-    const double tanTheta = tan(inputWS->detectorTwoTheta(det));
+    const bool is_wing = getProperty("DetectorWing");
+
+    const double tanTheta = tan(inputWS->detectorTwoTheta(*det));
     const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
     double corr;
-    if (is_tube) {
-      const double tanAlpha = tan(getYTubeAngle(det, inputWS));
+    if (is_tube || is_wing) {
+      const double tanAlpha = tan(getYTubeAngle(*det, *inputWS));
       const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
-      corr = alpha_term * theta_term * theta_term;
+      if (is_tube)
+        corr = alpha_term * theta_term * theta_term;
+      else { // is_wing
+        corr = alpha_term * alpha_term * alpha_term;
+      }
     } else {
       corr = theta_term * theta_term * theta_term;
     }
@@ -169,7 +178,7 @@ void SANSSolidAngleCorrection::execEvent() {
   // generate the output workspace pointer
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (outputWS != inputWS) {
-    outputWS = MatrixWorkspace_sptr(inputWS->clone().release());
+    outputWS = inputWS->clone();
     setProperty("OutputWorkspace", outputWS);
   }
   auto outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
@@ -187,8 +196,7 @@ void SANSSolidAngleCorrection::execEvent() {
       det = outputEventWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.warning() << "Workspace index " << i
-                      << " has no detector assigned to it - discarding"
-                      << std::endl;
+                      << " has no detector assigned to it - discarding\n";
       // Catch if no detector. Next line tests whether this happened - test
       // placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a
@@ -204,17 +212,17 @@ void SANSSolidAngleCorrection::execEvent() {
 
     // Compute solid angle correction factor
     const bool is_tube = getProperty("DetectorTubes");
-    const double tanTheta = tan(outputEventWS->detectorTwoTheta(det));
+    const double tanTheta = tan(outputEventWS->detectorTwoTheta(*det));
     const double theta_term = sqrt(tanTheta * tanTheta + 1.0);
     double corr;
     if (is_tube) {
-      const double tanAlpha = tan(getYTubeAngle(det, inputWS));
+      const double tanAlpha = tan(getYTubeAngle(*det, *inputWS));
       const double alpha_term = sqrt(tanAlpha * tanAlpha + 1.0);
       corr = alpha_term * theta_term * theta_term;
     } else {
       corr = theta_term * theta_term * theta_term;
     }
-    EventList &el = outputEventWS->getEventList(i);
+    EventList &el = outputEventWS->getSpectrum(i);
     el *= corr;
     progress.report("Solid Angle Correction");
     PARALLEL_END_INTERUPT_REGION

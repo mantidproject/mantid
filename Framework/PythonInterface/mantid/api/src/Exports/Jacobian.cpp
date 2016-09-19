@@ -1,9 +1,12 @@
 #include "MantidAPI/Jacobian.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::Jacobian;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(Jacobian)
 
 void export_Jacobian() {
   register_ptr_to_python<Jacobian *>();

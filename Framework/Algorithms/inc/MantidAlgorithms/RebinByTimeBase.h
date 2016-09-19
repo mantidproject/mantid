@@ -37,11 +37,6 @@ namespace Algorithms {
  */
 class DLLExport RebinByTimeBase : public API::Algorithm {
 public:
-  /// Constructor
-  RebinByTimeBase();
-  /// Virtual destructor
-  ~RebinByTimeBase() override = 0;
-
 private:
   /// Initialization method
   void init() override;

@@ -63,7 +63,7 @@ PyArrayObject *cloneArray(MatrixWorkspace &workspace, DataField field,
       PyArray_NewFromDescr(&PyArray_Type, PyArray_DescrFromType(NPY_DOUBLE),
                            2,         // rank 2
                            arrayDims, // Length in each dimension
-                           nullptr, NULL, 0, nullptr));
+                           nullptr, nullptr, 0, nullptr));
   double *dest = reinterpret_cast<double *>(
       PyArray_DATA(nparray)); // HEAD of the contiguous numpy data array
   for (size_t i = start; i < endp1; ++i) {

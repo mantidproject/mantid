@@ -1,10 +1,10 @@
 /***************************************************************************
-	File                 : ColorMapDialog.cpp
-	Project              : QtiPlot
+        File                 : ColorMapDialog.cpp
+        Project              : QtiPlot
 --------------------------------------------------------------------
-	Copyright            : (C) 2007 by Ion Vasilief
-	Email (use @ for *)  : ion_vasilief*yahoo.fr
-	Description          : A QwtLinearColorMap Editor Dialog
+        Copyright            : (C) 2007 by Ion Vasilief
+        Email (use @ for *)  : ion_vasilief*yahoo.fr
+        Description          : A QwtLinearColorMap Editor Dialog
  ***************************************************************************/
 
 /***************************************************************************
@@ -33,51 +33,50 @@
 #include <QPushButton>
 #include <QLayout>
 
-ColorMapDialog::ColorMapDialog(QWidget* parent, Qt::WFlags fl)
-  : QDialog(parent, fl), applyBtn(NULL), closeBtn(NULL), editor(NULL), d_matrix(NULL)
-{
-  setObjectName( "ColorMapDialog" );
+ColorMapDialog::ColorMapDialog(QWidget *parent, Qt::WFlags fl)
+    : QDialog(parent, fl), applyBtn(NULL), closeBtn(NULL), editor(NULL),
+      d_matrix(NULL) {
+  setObjectName("ColorMapDialog");
   setWindowTitle(tr("MantidPlot") + " - " + tr("Custom Color Map"));
   editor = new ColorMapEditor();
-	
+
   applyBtn = new QPushButton(tr("&Apply"));
   connect(applyBtn, SIGNAL(clicked()), this, SLOT(apply()));
 
   closeBtn = new QPushButton(tr("&Close"));
   connect(closeBtn, SIGNAL(clicked()), this, SLOT(reject()));
 
-  QHBoxLayout* hb = new QHBoxLayout();
+  QHBoxLayout *hb = new QHBoxLayout();
   hb->setSpacing(5);
   hb->addStretch();
   hb->addWidget(applyBtn);
   hb->addWidget(closeBtn);
   hb->addStretch();
-	
-  QVBoxLayout* vl = new QVBoxLayout(this);
+
+  QVBoxLayout *vl = new QVBoxLayout(this);
   vl->setSpacing(0);
   vl->addWidget(editor);
   vl->addLayout(hb);
-	
+
   setMaximumWidth(editor->width() + 20);
 }
 
-void ColorMapDialog::setMatrix(Matrix *m)
-{
-	if (!m)
-		return;
-	
-	d_matrix = m;
-	
-	double minValue = 0.0, maxValue = 0.0;
-	m->range(&minValue, &maxValue);
-	
-	editor->setRange(minValue, maxValue);
-	editor->setColorMap(m->colorMap());
+void ColorMapDialog::setMatrix(Matrix *m) {
+  if (!m)
+    return;
+
+  d_matrix = m;
+
+  double minValue = 0.0, maxValue = 0.0;
+  m->range(&minValue, &maxValue);
+
+  editor->setRange(minValue, maxValue);
+  editor->setColorMap(m->colorMap());
 }
 
-void ColorMapDialog::apply()
-{
-	d_matrix->undoStack()->push(new MatrixSetColorMapCommand(d_matrix, d_matrix->colorMapType(), 
-						d_matrix->colorMap(), Matrix::Custom, editor->colorMap(), tr("Set Custom Palette")));
-	d_matrix->setColorMap(editor->colorMap());
+void ColorMapDialog::apply() {
+  d_matrix->undoStack()->push(new MatrixSetColorMapCommand(
+      d_matrix, d_matrix->colorMapType(), d_matrix->colorMap(), Matrix::Custom,
+      editor->colorMap(), tr("Set Custom Palette")));
+  d_matrix->setColorMap(editor->colorMap());
 }

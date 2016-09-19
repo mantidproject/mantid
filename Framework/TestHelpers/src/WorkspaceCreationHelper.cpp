@@ -15,6 +15,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
@@ -44,6 +45,11 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using HistogramData::BinEdges;
+using HistogramData::Counts;
+using HistogramData::CountStandardDeviations;
+using HistogramData::HistogramX;
+using HistogramData::LinearGenerator;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps) {
   m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
@@ -66,34 +72,32 @@ void removeWS(const std::string &name) {
 }
 
 Workspace2D_sptr Create1DWorkspaceRand(int size) {
-  MantidVecPtr x1, y1, e1;
-  x1.access().resize(size, 1);
-  y1.access().resize(size);
+  MantidVec y1(size);
+  MantidVec e1(size);
 
   MersenneTwister randomGen(DateAndTime::getCurrentTime().nanoseconds(), 0,
                             std::numeric_limits<int>::max());
   auto randFunc = [&randomGen] { return randomGen.nextValue(); };
 
-  std::generate(y1.access().begin(), y1.access().end(), randFunc);
-  e1.access().resize(size);
-  std::generate(e1.access().begin(), e1.access().end(), randFunc);
+  std::generate(y1.begin(), y1.end(), randFunc);
+  std::generate(e1.begin(), e1.end(), randFunc);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
-  retVal->setX(0, x1);
-  retVal->setData(0, y1, e1);
+  retVal->setPoints(0, size, LinearGenerator(1.0, 1.0));
+  retVal->dataY(0) = y1;
+  retVal->dataE(0) = e1;
   return retVal;
 }
 
 Workspace2D_sptr Create1DWorkspaceConstant(int size, double value,
                                            double error) {
-  MantidVecPtr x1, y1, e1;
-  x1.access().resize(size, 1);
-  y1.access().resize(size, value);
-  e1.access().resize(size, error);
+  MantidVec y1(size, value);
+  MantidVec e1(size, error);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
-  retVal->setX(0, x1);
-  retVal->setData(0, y1, e1);
+  retVal->setPoints(0, size, LinearGenerator(1.0, 1.0));
+  retVal->dataY(0) = y1;
+  retVal->dataE(0) = e1;
   return retVal;
 }
 
@@ -101,22 +105,20 @@ Workspace2D_sptr Create1DWorkspaceConstantWithXerror(int size, double value,
                                                      double error,
                                                      double xError) {
   auto ws = Create1DWorkspaceConstant(size, value, error);
-  MantidVecPtr dx1;
-  dx1.access().resize(size, xError);
-  ws->setDx(0, dx1);
+  auto dx1 = Kernel::make_cow<HistogramData::HistogramDx>(size, xError);
+  ws->setSharedDx(0, dx1);
   return ws;
 }
 
 Workspace2D_sptr Create1DWorkspaceFib(int size) {
-  MantidVecPtr x1, y1, e1;
-  x1.access().resize(size, 1);
-  y1.access().resize(size);
-  std::generate(y1.access().begin(), y1.access().end(), FibSeries<double>());
-  e1.access().resize(size);
+  MantidVec y1(size);
+  MantidVec e1(size);
+  std::generate(y1.begin(), y1.end(), FibSeries<double>());
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, size, size);
-  retVal->setX(0, x1);
-  retVal->setData(0, y1, e1);
+  retVal->setPoints(0, size, LinearGenerator(1.0, 1.0));
+  retVal->dataY(0) = y1;
+  retVal->dataE(0) = e1;
   return retVal;
 }
 
@@ -156,17 +158,18 @@ Workspace2D_sptr
 Create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
                             const std::set<int64_t> &maskedWorkspaceIndices,
                             double xVal, double yVal, double eVal) {
-  MantidVecPtr x1, y1, e1;
-  x1.access().resize(isHist ? nBins + 1 : nBins, xVal);
-  y1.access().resize(nBins, yVal);
-  e1.access().resize(nBins, eVal);
+  auto x1 = Kernel::make_cow<HistogramData::HistogramX>(
+      isHist ? nBins + 1 : nBins, LinearGenerator(xVal, 1.0));
+  Counts y1(nBins, yVal);
+  CountStandardDeviations e1(nBins, eVal);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(nHist, isHist ? nBins + 1 : nBins, nBins);
   for (int i = 0; i < nHist; i++) {
     retVal->setX(i, x1);
-    retVal->setData(i, y1, e1);
-    retVal->getSpectrum(i)->setDetectorID(i);
-    retVal->getSpectrum(i)->setSpectrumNo(i);
+    retVal->setCounts(i, y1);
+    retVal->setCountStandardDeviations(i, e1);
+    retVal->getSpectrum(i).setDetectorID(i);
+    retVal->getSpectrum(i).setSpectrumNo(i);
   }
   retVal = maskSpectra(retVal, maskedWorkspaceIndices);
   return retVal;
@@ -178,10 +181,10 @@ Workspace2D_sptr Create2DWorkspaceWithValuesAndXerror(
     const std::set<int64_t> &maskedWorkspaceIndices) {
   auto ws = Create2DWorkspaceWithValues(
       nHist, nBins, isHist, maskedWorkspaceIndices, xVal, yVal, eVal);
-  MantidVecPtr dx1;
-  dx1.access().resize(isHist ? nBins + 1 : nBins, dxVal);
+  auto dx1 = Kernel::make_cow<HistogramData::HistogramDx>(
+      isHist ? nBins + 1 : nBins, dxVal);
   for (int i = 0; i < nHist; i++) {
-    ws->setDx(i, dx1);
+    ws->setSharedDx(i, dx1);
   }
   return ws;
 }
@@ -253,45 +256,39 @@ WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist, int nBins,
 }
 
 /** Create a 2D workspace with this many histograms and bins.
- * Filled with Y = 2.0 and E = sqrt(2.0)w
+ * Filled with Y = 2.0 and E = M_SQRT2w
  */
 Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0,
                                          double deltax) {
-  MantidVecPtr x, y, e;
-  x.access().resize(nbins + 1);
-  y.access().resize(nbins, 2);
-  e.access().resize(nbins, sqrt(2.0));
-  for (int i = 0; i < nbins + 1; ++i) {
-    x.access()[i] = x0 + i * deltax;
-  }
+  BinEdges x(nbins + 1, LinearGenerator(x0, deltax));
+  Counts y(nbins, 2);
+  CountStandardDeviations e(nbins, M_SQRT2);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(nhist, nbins + 1, nbins);
   for (int i = 0; i < nhist; i++) {
-    retVal->setX(i, x);
-    retVal->setData(i, y, e);
+    retVal->setBinEdges(i, x);
+    retVal->setCounts(i, y);
+    retVal->setCountStandardDeviations(i, e);
   }
   return retVal;
 }
 
 /** Create a 2D workspace with this many histograms and bins. The bins are
  * assumed to be non-uniform and given by the input array
- * Filled with Y = 2.0 and E = sqrt(2.0)w
+ * Filled with Y = 2.0 and E = M_SQRT2w
  */
 Workspace2D_sptr Create2DWorkspaceBinned(int nhist, const int numBoundaries,
                                          const double xBoundaries[]) {
-  MantidVecPtr x, y, e;
+  BinEdges x(xBoundaries, xBoundaries + numBoundaries);
   const int numBins = numBoundaries - 1;
-  x.access().resize(numBoundaries);
-  y.access().resize(numBins, 2);
-  e.access().resize(numBins, sqrt(2.0));
-  for (int i = 0; i < numBoundaries; ++i) {
-    x.access()[i] = xBoundaries[i];
-  }
+  Counts y(numBins, 2);
+  CountStandardDeviations e(numBins, M_SQRT2);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(nhist, numBins + 1, numBins);
   for (int i = 0; i < nhist; i++) {
-    retVal->setX(i, x);
-    retVal->setData(i, y, e);
+    retVal->setBinEdges(i, x);
+    retVal->setCounts(i, y);
+    retVal->setCountStandardDeviations(i, e);
   }
   return retVal;
 }
@@ -323,7 +320,7 @@ void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise,
  * Each spectra will have a cylindrical detector defined 2*cylinder_radius away
  * from the centre of the
  * previous.
- * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0
+ * Data filled with: Y: 2.0, E: M_SQRT2, X: nbins of width 1 starting at 0
  */
 Workspace2D_sptr
 create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
@@ -354,7 +351,7 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
 //================================================================================================================
 /** Create an Workspace2D with an instrument that contains
  *RectangularDetector's.
- * Bins will be 0.0, 1.0, to numBins, filled with signal=2.0, sqrt(2.0)
+ * Bins will be 0.0, 1.0, to numBins, filled with signal=2.0, M_SQRT2
  *
  * @param numBanks :: number of rectangular banks
  * @param numPixels :: each bank will be numPixels*numPixels
@@ -372,8 +369,8 @@ create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels,
   ws->setInstrument(inst);
   ws->getAxis(0)->setUnit("dSpacing");
   for (size_t wi = 0; wi < ws->getNumberHistograms(); wi++) {
-    ws->getSpectrum(wi)->setDetectorID(detid_t(numPixels * numPixels + wi));
-    ws->getSpectrum(wi)->setSpectrumNo(specnum_t(wi));
+    ws->getSpectrum(wi).setDetectorID(detid_t(numPixels * numPixels + wi));
+    ws->getSpectrum(wi).setSpectrumNo(specnum_t(wi));
   }
 
   return ws;
@@ -412,10 +409,10 @@ createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
   // re-assign detector IDs to the rectangular detector
   int detID = numPixels * numPixels;
   for (int wi = 0; wi < static_cast<int>(ws->getNumberHistograms()); wi++) {
-    ws->getEventList(wi).clearDetectorIDs();
+    ws->getSpectrum(wi).clearDetectorIDs();
     if (clearEvents)
-      ws->getEventList(wi).clear(true);
-    ws->getEventList(wi).setDetectorID(detID);
+      ws->getSpectrum(wi).clear(true);
+    ws->getSpectrum(wi).setDetectorID(detID);
     detID++;
   }
   return ws;
@@ -441,10 +438,10 @@ createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents) {
 
   // Re-assign detector IDs
   for (size_t wi = 0; wi < ws->getNumberHistograms(); wi++) {
-    ws->getEventList(wi).clearDetectorIDs();
+    ws->getSpectrum(wi).clearDetectorIDs();
     if (clearEvents)
-      ws->getEventList(wi).clear(true);
-    ws->getEventList(wi).setDetectorID(detectorIds[wi]);
+      ws->getSpectrum(wi).clear(true);
+    ws->getSpectrum(wi).setDetectorID(detectorIds[wi]);
   }
 
   return ws;
@@ -495,8 +492,8 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   workspace->setYUnit("Counts");
 
   workspace->setInstrument(instrument);
-  workspace->getSpectrum(0)->setDetectorID(det->getID());
-  workspace->getSpectrum(1)->setDetectorID(monitor->getID());
+  workspace->getSpectrum(0).setDetectorID(det->getID());
+  workspace->getSpectrum(1).setDetectorID(monitor->getID());
   return workspace;
 }
 
@@ -528,7 +525,8 @@ void createInstrumentForWorkspaceWithDistances(
     instrument->markAsDetector(det);
 
     // Link it to the workspace
-    workspace->getSpectrum(i)->addDetectorID(det->getID());
+    workspace->getSpectrum(i).clearDetectorIDs();
+    workspace->getSpectrum(i).addDetectorID(det->getID());
   }
 }
 
@@ -597,7 +595,7 @@ CreateEventWorkspaceWithStartTime(int numPixels, int numBins, int numEvents,
     size_t workspaceIndex = 0;
     for (int pix = start_at_pixelID + 0; pix < start_at_pixelID + numPixels;
          pix++) {
-      EventList &el = retVal->getEventList(workspaceIndex);
+      EventList &el = retVal->getSpectrum(workspaceIndex);
       el.setSpectrumNo(pix);
       el.setDetectorID(pix);
 
@@ -622,16 +620,7 @@ CreateEventWorkspaceWithStartTime(int numPixels, int numBins, int numEvents,
     }
   }
 
-  // Create the x-axis for histogramming.
-  MantidVecPtr x1;
-  MantidVec &xRef = x1.access();
-  xRef.resize(numBins);
-  for (int i = 0; i < numBins; ++i) {
-    xRef[i] = x0 + i * binDelta;
-  }
-
-  // Set all the histograms at once.
-  retVal->setAllX(x1);
+  retVal->setAllX(BinEdges(numBins, LinearGenerator(x0, binDelta)));
 
   return retVal;
 }
@@ -657,28 +646,13 @@ CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
   }
 
   if (xOffset == 0.) {
-    // Create the x-axis for histogramming.
-    MantidVecPtr x1;
-    MantidVec &xRef = x1.access();
-    const double x0 = 0.;
-    xRef.resize(numBins);
-    for (int i = 0; i < numBins; ++i) {
-      xRef[i] = x0 + static_cast<double>(i) * binDelta;
-    }
-
-    // Set all the histograms at once.
-    retVal->setAllX(x1);
+    retVal->setAllX(BinEdges(numBins, LinearGenerator(0.0, binDelta)));
   } else {
     for (size_t g = 0; g < groups.size(); g++) {
       // Create the x-axis for histogramming.
-      MantidVecPtr x1;
-      MantidVec &xRef = x1.access();
       const double x0 = xOffset * static_cast<double>(g);
-      xRef.resize(numBins);
-      for (int i = 0; i < numBins; ++i) {
-        xRef[i] = x0 + static_cast<double>(i) * binDelta;
-      }
-      retVal->setX(g, x1);
+      retVal->setX(
+          g, make_cow<HistogramX>(numBins, LinearGenerator(x0, binDelta)));
     }
   }
 
@@ -702,12 +676,9 @@ EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
   auto pAxis0 = new NumericAxis(numbins);
   // Create the original X axis to histogram on.
   // Create the x-axis for histogramming.
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef.resize(numbins);
+  HistogramData::BinEdges axis(numbins, LinearGenerator(0.0, bin_delta));
   for (int i = 0; i < static_cast<int>(numbins); ++i) {
-    xRef[i] = i * bin_delta;
-    pAxis0->setValue(i, xRef[i]);
+    pAxis0->setValue(i, axis[i]);
   }
   pAxis0->setUnit("TOF");
 
@@ -716,7 +687,7 @@ EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels,
   // Make up some data for each pixels
   for (size_t i = 0; i < numpixels; i++) {
     // Create one event for each bin
-    EventList &events = retVal->getEventList(static_cast<detid_t>(i));
+    EventList &events = retVal->getSpectrum(static_cast<detid_t>(i));
     for (std::size_t ie = 0; ie < numbins; ie++) {
       // Create a list of events, randomize
       events += TofEvent(static_cast<double>(randomGen.nextValue()),
@@ -743,10 +714,10 @@ MatrixWorkspace_sptr CreateGroupedWorkspace2D(size_t numHist, int numBins,
           static_cast<int>(numHist)));
 
   for (int g = 0; g < static_cast<int>(numHist); g++) {
-    ISpectrum *spec = retVal->getSpectrum(g);
+    auto &spec = retVal->getSpectrum(g);
     for (int i = 1; i <= 9; i++)
-      spec->addDetectorID(g * 9 + i);
-    spec->setSpectrumNo(g + 1); // Match detector ID and spec NO
+      spec.addDetectorID(g * 9 + i);
+    spec.setSpectrumNo(g + 1); // Match detector ID and spec NO
   }
   return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
 }
@@ -763,10 +734,10 @@ CreateGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins,
       ComponentCreationHelper::createTestInstrumentCylindrical(
           static_cast<int>(numHist)));
   for (int g = 0; g < static_cast<int>(numHist); g++) {
-    ISpectrum *spec = retVal->getSpectrum(g);
+    auto &spec = retVal->getSpectrum(g);
     for (int i = 1; i <= 9; i++)
-      spec->addDetectorID(g * 9 + i);
-    spec->setSpectrumNo(g + 1); // Match detector ID and spec NO
+      spec.addDetectorID(g * 9 + i);
+    spec.setSpectrumNo(g + 1); // Match detector ID and spec NO
   }
   return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
 }
@@ -780,7 +751,7 @@ void DisplayDataY(const MatrixWorkspace_sptr ws) {
     for (size_t j = 0; j < ws->blocksize(); ++j) {
       std::cout << ws->readY(i)[j] << " ";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
   }
 }
 void DisplayData(const MatrixWorkspace_sptr ws) { DisplayDataX(ws); }
@@ -794,7 +765,7 @@ void DisplayDataX(const MatrixWorkspace_sptr ws) {
     for (size_t j = 0; j < ws->blocksize(); ++j) {
       std::cout << ws->readX(i)[j] << " ";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
   }
 }
 
@@ -807,7 +778,7 @@ void DisplayDataE(const MatrixWorkspace_sptr ws) {
     for (size_t j = 0; j < ws->blocksize(); ++j) {
       std::cout << ws->readE(i)[j] << " ";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
   }
 }
 
@@ -921,13 +892,13 @@ createProcessedInelasticWS(const std::vector<double> &L2,
           L2, polar, azimutal));
 
   for (int g = 0; g < static_cast<int>(numPixels); g++) {
-    ISpectrum *spec = ws->getSpectrum(g);
+    auto &spec = ws->getSpectrum(g);
     // we just made (in createCylInstrumentWithDetInGivenPosisions) det ID-s to
     // start from 1
-    spec->setDetectorID(g + 1);
+    spec.setDetectorID(g + 1);
     // and this is absolutely different nummer, corresponding to det ID just by
     // chance ? -- some uncertainties remain
-    spec->setSpectrumNo(g + 1);
+    spec.setSpectrumNo(g + 1);
     // spec->setSpectrumNo(g+1);
     //   spec->addDetectorID(g*9);
     //   spec->setSpectrumNo(g+1); // Match detector ID and spec NO
@@ -959,7 +930,8 @@ createProcessedInelasticWS(const std::vector<double> &L2,
       Mantid::Kernel::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
   ws->mutableSample().setOrientedLattice(latt.release());
 
-  // TODO: clarify if this property indeed goes there;
+  ws->mutableRun().addProperty(
+      new PropertyWithValue<std::string>("deltaE-mode", "Direct"), true);
   ws->mutableRun().addProperty(new PropertyWithValue<double>("Ei", Ei), true);
   // these properties have to be different -> specific for processed ws, as time
   // now should be reconciled
@@ -1078,13 +1050,7 @@ RebinnedOutput_sptr CreateRebinnedOutputWorkspace() {
   outputWS->setTitle("Empty_Title");
 
   // Create the x-axis for histogramming.
-  MantidVecPtr x1;
-  MantidVec &xRef = x1.access();
-  double x0 = -3;
-  xRef.resize(numX);
-  for (int i = 0; i < numX; ++i) {
-    xRef[i] = x0 + i;
-  }
+  HistogramData::BinEdges x1{-3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0};
 
   // Create a numeric axis to replace the default vertical one
   Axis *const verticalAxis = new NumericAxis(numY);
@@ -1092,7 +1058,7 @@ RebinnedOutput_sptr CreateRebinnedOutputWorkspace() {
 
   // Now set the axis values
   for (int i = 0; i < numHist; ++i) {
-    outputWS->setX(i, x1);
+    outputWS->setBinEdges(i, x1);
     verticalAxis->setValue(i, qaxis[i]);
   }
   // One more to set on the 'y' axis
@@ -1310,7 +1276,7 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
     detIDMap[liveDetectorsCount] = i;
     L2[liveDetectorsCount] = spDet->getDistance(*sample);
 
-    double polar = inputWS->detectorTwoTheta(spDet);
+    double polar = inputWS->detectorTwoTheta(*spDet);
     double azim = spDet->getPhi();
     TwoTheta[liveDetectorsCount] = polar;
     Azimuthal[liveDetectorsCount] = azim;

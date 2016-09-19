@@ -17,7 +17,7 @@ namespace Mantid {
 namespace DataHandling {
 /** @class LoadMuonNexus LoadMuonNexus.h DataHandling/LoadMuonNexus.h
 
-It is a base class for loadres for versions 1 and 2 of the muon nexus file
+It is a base class for loaders for versions 1 and 2 of the muon nexus file
 format.
 It implements property initialization and some common for both versions methods.
 
@@ -67,8 +67,6 @@ class DLLExport LoadMuonNexus
 public:
   /// Default constructor
   LoadMuonNexus();
-  /// Destructor
-  ~LoadMuonNexus() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadMuonNexus"; }
   /// Summary of algorithms purpose

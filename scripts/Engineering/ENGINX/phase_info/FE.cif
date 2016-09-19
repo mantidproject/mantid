@@ -1,0 +1,383 @@
+data_FE_publ
+
+_pd_block_id
+  2016-03-31T12:59|FE|skabra|Overall
+
+_audit_creation_method  "from EXP file using GSAS2CIF"
+_audit_creation_date                   2016-03-31T12:59
+_audit_author_name                     skabra
+_audit_update_record
+; 2016-03-31T12:59  Initial CIF as created by GSAS2CIF
+;
+
+#=============================================================================
+# this information describes the project, paper etc. for the CIF             #
+# Acta Cryst. Section C papers and editorial correspondence is generated     #
+# from the information in this section                                       #
+#                                                                            #
+#   (from)   CIF submission form for Rietveld refinements (Acta Cryst. C)    #
+#                                                 Version 14 December 1998   #
+#=============================================================================
+# 1. SUBMISSION DETAILS
+
+_publ_contact_author_name            ?   # Name of author for correspondence
+_publ_contact_author_address             # Address of author for correspondence
+; ?
+;
+_publ_contact_author_email           ?
+_publ_contact_author_fax             ?
+_publ_contact_author_phone           ?
+
+_publ_contact_letter
+; ?
+;
+
+_publ_requested_journal              ?
+_publ_requested_coeditor_name        ?
+_publ_requested_category             ?   # Acta C: one of CI/CM/CO/FI/FM/FO
+
+#==============================================================================
+
+# 2. PROCESSING SUMMARY (IUCr Office Use Only)
+
+_journal_data_validation_number      ?
+
+_journal_date_recd_electronic        ?
+_journal_date_to_coeditor            ?
+_journal_date_from_coeditor          ?
+_journal_date_accepted               ?
+_journal_date_printers_first         ?
+_journal_date_printers_final         ?
+_journal_date_proofs_out             ?
+_journal_date_proofs_in              ?
+_journal_coeditor_name               ?
+_journal_coeditor_code               ?
+_journal_coeditor_notes
+; ?
+;
+_journal_techeditor_code             ?
+_journal_techeditor_notes
+; ?
+;
+_journal_coden_ASTM                  ?
+_journal_name_full                   ?
+_journal_year                        ?
+_journal_volume                      ?
+_journal_issue                       ?
+_journal_page_first                  ?
+_journal_page_last                   ?
+_journal_paper_category              ?
+_journal_suppl_publ_number           ?
+_journal_suppl_publ_pages            ?
+
+#==============================================================================
+
+# 3. TITLE AND AUTHOR LIST
+
+_publ_section_title
+; ?
+;
+_publ_section_title_footnote
+; ?
+;
+
+# The loop structure below should contain the names and addresses of all
+# authors, in the required order of publication. Repeat as necessary.
+
+loop_
+	_publ_author_name
+        _publ_author_footnote
+	_publ_author_address
+ ?                                   #<--'Last name, first name'
+; ?
+;
+; ?
+;
+
+#==============================================================================
+
+# 4. TEXT
+
+_publ_section_synopsis
+;  ?
+;
+_publ_section_abstract
+; ?
+;
+_publ_section_comment
+; ?
+;
+_publ_section_exptl_prep      # Details of the preparation of the sample(s)
+                              # should be given here.
+; ?
+;
+_publ_section_exptl_refinement
+; ?
+;
+_publ_section_references
+; ?
+;
+_publ_section_figure_captions
+; ?
+;
+_publ_section_acknowledgements
+; ?
+;
+
+#=============================================================================
+# 5. OVERALL REFINEMENT & COMPUTING DETAILS
+
+_refine_special_details
+; ?
+;
+_pd_proc_ls_special_details
+; ?
+;
+
+# The following items are used to identify the programs used.
+_computing_molecular_graphics     ?
+_computing_publication_material   ?
+
+_refine_ls_weighting_scheme       ?
+_refine_ls_weighting_details      ?
+_refine_ls_hydrogen_treatment     ?
+_refine_ls_extinction_method      ?
+_refine_ls_extinction_coef        ?
+_refine_ls_number_constraints     ?
+
+_refine_ls_restrained_S_all       ?
+_refine_ls_restrained_S_obs       ?
+
+#==============================================================================
+# 6. SAMPLE PREPARATION DATA
+
+# (In the unusual case where multiple samples are used in a single
+#  Rietveld study, this information should be moved into the phase
+#  blocks)
+
+# The following three fields describe the preparation of the material.
+# The cooling rate is in K/min.  The pressure at which the sample was
+# prepared is in kPa.  The temperature of preparation is in K.
+
+_pd_prep_cool_rate                ?
+_pd_prep_pressure                 ?
+_pd_prep_temperature              ?
+
+_pd_char_colour                   ?       # use ICDD colour descriptions
+data_FE_overall
+
+_refine_ls_shift/su_max                .
+_refine_ls_shift/su_mean               .
+_computing_structure_refinement        GSAS
+_refine_ls_number_parameters           .
+_refine_ls_goodness_of_fit_all         .
+_refine_ls_number_restraints           0
+_refine_ls_matrix_type                 full
+
+# pointers to the phase blocks
+loop_   _pd_phase_block_id
+      2016-03-31T12:59|FE_phase1|skabra||
+# pointers to the diffraction patterns
+loop_   _pd_block_diffractogram_id
+      ?
+
+# Information for phase 1
+data_FE_phase_1
+
+_pd_block_id
+  2016-03-31T12:59|FE_phase1|skabra||
+
+#==============================================================================
+# 7. CHEMICAL, STRUCTURAL AND CRYSTAL DATA
+
+_pd_char_particle_morphology      ?
+
+_chemical_name_systematic
+; ?
+;
+_chemical_name_common             ?
+_chemical_formula_moiety          ?
+_chemical_formula_structural      ?
+_chemical_formula_analytical      ?
+_chemical_melting_point           ?
+_chemical_compound_source         ?       # for minerals and
+                                          # natural products
+_symmetry_space_group_name_Hall   ?
+
+_exptl_crystal_F_000               ?
+_exptl_crystal_density_diffrn      ?
+_exptl_crystal_density_meas        ?
+_exptl_crystal_density_method      ?
+
+_cell_measurement_temperature     ?
+
+_cell_special_details
+; ?
+;
+
+_geom_special_details             ?
+
+# The following item identifies the program(s) used (if appropriate).
+_computing_structure_solution     ?
+
+#==============================================================================
+
+# 8. Phase information from GSAS
+
+_pd_phase_name                         "Fe alpha"
+_cell_length_a                         2.86
+_cell_length_b                         2.86
+_cell_length_c                         2.86
+_cell_angle_alpha                      90.0
+_cell_angle_beta                       90.0
+_cell_angle_gamma                      90.0
+_cell_volume                           23.39366
+_symmetry_cell_setting                 cubic
+_symmetry_space_group_name_H-M         "I m 3 m"
+loop_ _symmetry_equiv_pos_site_id _symmetry_equiv_pos_as_xyz
+       1 +x,+y,+z 
+       2 +z,+x,+y 
+       3 +y,+z,+x 
+       4 +x,+y,-z 
+       5 -z,+x,+y 
+       6 +y,-z,+x 
+       7 -z,+x,-y 
+       8 -y,-z,+x 
+       9 +y,-z,-x 
+      10 -x,+y,-z 
+      11 -z,-x,+y 
+      12 +x,-y,-z 
+      13 +y,+x,+z 
+      14 +z,+y,+x 
+      15 +x,+z,+y 
+      16 +y,+x,-z 
+      17 -z,+y,+x 
+      18 +x,-z,+y 
+      19 -z,+y,-x 
+      20 -x,-z,+y 
+      21 +x,-z,-y 
+      22 -y,+x,-z 
+      23 -z,-y,+x 
+      24 +y,-x,-z 
+      -1 -x,-y,-z 
+      -2 -z,-x,-y 
+      -3 -y,-z,-x 
+      -4 -x,-y,+z 
+      -5 +z,-x,-y 
+      -6 -y,+z,-x 
+      -7 +z,-x,+y 
+      -8 +y,+z,-x 
+      -9 -y,+z,+x 
+     -10 +x,-y,+z 
+     -11 +z,+x,-y 
+     -12 -x,+y,+z 
+     -13 -y,-x,-z 
+     -14 -z,-y,-x 
+     -15 -x,-z,-y 
+     -16 -y,-x,+z 
+     -17 +z,-y,-x 
+     -18 -x,+z,-y 
+     -19 +z,-y,+x 
+     -20 +x,+z,-y 
+     -21 -x,+z,+y 
+     -22 +y,-x,+z 
+     -23 +z,+y,-x 
+     -24 -y,+x,+z 
+     101 +x+1/2,+y+1/2,+z+1/2 
+     102 +z+1/2,+x+1/2,+y+1/2 
+     103 +y+1/2,+z+1/2,+x+1/2 
+     104 +x+1/2,+y+1/2,-z+1/2 
+     105 -z+1/2,+x+1/2,+y+1/2 
+     106 +y+1/2,-z+1/2,+x+1/2 
+     107 -z+1/2,+x+1/2,-y+1/2 
+     108 -y+1/2,-z+1/2,+x+1/2 
+     109 +y+1/2,-z+1/2,-x+1/2 
+     110 -x+1/2,+y+1/2,-z+1/2 
+     111 -z+1/2,-x+1/2,+y+1/2 
+     112 +x+1/2,-y+1/2,-z+1/2 
+     113 +y+1/2,+x+1/2,+z+1/2 
+     114 +z+1/2,+y+1/2,+x+1/2 
+     115 +x+1/2,+z+1/2,+y+1/2 
+     116 +y+1/2,+x+1/2,-z+1/2 
+     117 -z+1/2,+y+1/2,+x+1/2 
+     118 +x+1/2,-z+1/2,+y+1/2 
+     119 -z+1/2,+y+1/2,-x+1/2 
+     120 -x+1/2,-z+1/2,+y+1/2 
+     121 +x+1/2,-z+1/2,-y+1/2 
+     122 -y+1/2,+x+1/2,-z+1/2 
+     123 -z+1/2,-y+1/2,+x+1/2 
+     124 +y+1/2,-x+1/2,-z+1/2 
+    -101 -x+1/2,-y+1/2,-z+1/2 
+    -102 -z+1/2,-x+1/2,-y+1/2 
+    -103 -y+1/2,-z+1/2,-x+1/2 
+    -104 -x+1/2,-y+1/2,+z+1/2 
+    -105 +z+1/2,-x+1/2,-y+1/2 
+    -106 -y+1/2,+z+1/2,-x+1/2 
+    -107 +z+1/2,-x+1/2,+y+1/2 
+    -108 +y+1/2,+z+1/2,-x+1/2 
+    -109 -y+1/2,+z+1/2,+x+1/2 
+    -110 +x+1/2,-y+1/2,+z+1/2 
+    -111 +z+1/2,+x+1/2,-y+1/2 
+    -112 -x+1/2,+y+1/2,+z+1/2 
+    -113 -y+1/2,-x+1/2,-z+1/2 
+    -114 -z+1/2,-y+1/2,-x+1/2 
+    -115 -x+1/2,-z+1/2,-y+1/2 
+    -116 -y+1/2,-x+1/2,+z+1/2 
+    -117 +z+1/2,-y+1/2,-x+1/2 
+    -118 -x+1/2,+z+1/2,-y+1/2 
+    -119 +z+1/2,-y+1/2,+x+1/2 
+    -120 +x+1/2,+z+1/2,-y+1/2 
+    -121 -x+1/2,+z+1/2,+y+1/2 
+    -122 +y+1/2,-x+1/2,+z+1/2 
+    -123 +z+1/2,+y+1/2,-x+1/2 
+    -124 -y+1/2,+x+1/2,+z+1/2 
+
+# ATOMIC COORDINATES AND DISPLACEMENT PARAMETERS
+
+
+loop_
+      _atom_site_type_symbol
+      _atom_site_label
+      _atom_site_fract_x
+      _atom_site_fract_y
+      _atom_site_fract_z
+      _atom_site_occupancy
+      _atom_site_thermal_displace_type
+      _atom_site_U_iso_or_equiv
+      _atom_site_symmetry_multiplicity
+Fe
+FE1     0.0          0.0          0.0          1.0        Uiso   0.025         2
+Fe
+FE2     0.5          0.5          0.5          1.0        Uiso   0.025         2
+
+loop_ _atom_type_symbol
+      _atom_type_number_in_cell
+                   Fe  4.0        
+ 
+# If you change Z, be sure to change all 3 of the following
+_chemical_formula_sum                  Fe
+_chemical_formula_weight               55.85
+_cell_formula_units_Z                  4
+
+# MOLECULAR GEOMETRY
+
+loop_
+      _geom_bond_atom_site_label_1
+      _geom_bond_atom_site_label_2
+      _geom_bond_distance
+      _geom_bond_site_symmetry_1
+      _geom_bond_site_symmetry_2
+      _geom_bond_publ_flag
+   ?   ?   ?   ?   ?   ?
+
+loop_
+      _geom_angle_atom_site_label_1
+      _geom_angle_atom_site_label_2
+      _geom_angle_atom_site_label_3
+      _geom_angle
+      _geom_angle_site_symmetry_1
+      _geom_angle_site_symmetry_2
+      _geom_angle_site_symmetry_3
+      _geom_angle_publ_flag
+   ?   ?   ?   ?   ?   ?   ?   ?
+#--eof--eof--eof--eof--eof--eof--eof--eof--eof--eof--eof--eof--eof--eof--eof--#

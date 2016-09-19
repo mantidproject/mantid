@@ -6,7 +6,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ImageStackPreParams::ImageStackPreParams()
-    : cor(), roi(), normalizationRegion() {}
+    : cor(), roi(), normalizationRegion(), rotation(-1.0f) {}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

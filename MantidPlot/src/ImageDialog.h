@@ -2,7 +2,8 @@
     File                 : ImageDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Image geometry dialog
 
@@ -35,35 +36,33 @@
 #include <QPushButton>
 
 //! Image geometry dialog
-class ImageDialog : public QDialog
-{
-    Q_OBJECT
+class ImageDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    ImageDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
+  ImageDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
 
-	void setOrigin(const QPoint& o);
-	void setSize(const QSize& size);
+  void setOrigin(const QPoint &o);
+  void setSize(const QSize &size);
 
 protected slots:
   void accept() override;
-        void update();
-	void adjustHeight(int width);
-	void adjustWidth(int height);
+  void update();
+  void adjustHeight(int width);
+  void adjustWidth(int height);
 
 signals:
-	void setGeometry(int, int, int, int);
+  void setGeometry(int, int, int, int);
 
 protected:
-	double aspect_ratio;
+  double aspect_ratio;
 
 private:
-    QPushButton* buttonOk;
-	QPushButton* buttonCancel;
-	QPushButton* buttonApply;
-    QSpinBox* boxX, *boxY, *boxWidth, *boxHeight;
-	QCheckBox *keepRatioBox;
+  QPushButton *buttonOk;
+  QPushButton *buttonCancel;
+  QPushButton *buttonApply;
+  QSpinBox *boxX, *boxY, *boxWidth, *boxHeight;
+  QCheckBox *keepRatioBox;
 };
-
 
 #endif // IMAGEDIALOG_H

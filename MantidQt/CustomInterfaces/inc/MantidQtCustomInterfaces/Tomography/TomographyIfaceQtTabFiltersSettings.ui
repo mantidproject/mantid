@@ -23,7 +23,7 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>-115</y>
+        <y>0</y>
         <width>788</width>
         <height>671</height>
        </rect>
@@ -35,7 +35,7 @@
           <string>Pre-processing (raw images)</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="9" column="2">
+          <item row="10" column="2">
            <widget class="QDoubleSpinBox" name="doubleSpinBox_prep_max_angle">
             <property name="toolTip">
              <string>Maximum angle to use for reconstruction</string>
@@ -54,52 +54,12 @@
             </property>
            </widget>
           </item>
-          <item row="7" column="2">
-           <widget class="QComboBox" name="comboBox_prep_rotation">
-            <property name="toolTip">
-             <string>Rotate all images in the input stacks by this angle</string>
-            </property>
-            <item>
-             <property name="text">
-              <string>0</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>90</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>180</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>270</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="10" column="0">
+          <item row="11" column="0">
            <widget class="QLabel" name="label_prep_scale_factor">
             <property name="text">
              <string>Scale down factor:</string>
             </property>
            </widget>
-          </item>
-          <item row="7" column="1">
-           <spacer name="horizontalSpacer_12">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>399</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
           </item>
           <item row="2" column="0">
            <widget class="QCheckBox" name="checkBox_normalize_by_flats">
@@ -127,14 +87,7 @@
             </property>
            </spacer>
           </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="label_prep_rotation">
-            <property name="text">
-             <string>Rotation (°, clockwise)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="1">
+          <item row="11" column="1">
            <spacer name="horizontalSpacer_14">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -147,7 +100,7 @@
             </property>
            </spacer>
           </item>
-          <item row="9" column="1">
+          <item row="10" column="1">
            <spacer name="horizontalSpacer_15">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -160,7 +113,7 @@
             </property>
            </spacer>
           </item>
-          <item row="10" column="2">
+          <item row="11" column="2">
            <widget class="QSpinBox" name="spinBox_prep_scale_factor">
             <property name="toolTip">
              <string>Sets the size of block to downscale. For example with 2, blocks of 2x2 pixels will be combined into a (median value) pixel</string>
@@ -183,7 +136,7 @@
             </property>
            </widget>
           </item>
-          <item row="9" column="0">
+          <item row="10" column="0">
            <widget class="QLabel" name="label_prep_max_angle">
             <property name="text">
              <string>Maximum angle:</string>
@@ -271,6 +224,53 @@
             </property>
             <property name="text">
              <string>Normalize by proton charge</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="2">
+           <widget class="QComboBox" name="comboBox_prep_rotation">
+            <property name="toolTip">
+             <string>Rotate all images in the input stacks by this angle</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>0</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>90</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>180</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>270</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="8" column="1">
+           <spacer name="horizontalSpacer_12">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>399</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="8" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Rotation (°, clockwise)</string>
             </property>
            </widget>
           </item>

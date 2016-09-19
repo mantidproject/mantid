@@ -26,11 +26,11 @@
 #include <Poco/TemporaryFile.h>
 
 #include <algorithm>
+#include <cstdio>
+#include <cstring>
+#include <fstream>
 #include <iterator> // std::distance
 #include <sstream>
-#include <fstream>
-#include <stdio.h>
-#include <string.h>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -40,19 +40,6 @@ using namespace API;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadILLAscii)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadILLAscii::LoadILLAscii() : m_instrumentName(""), m_wavelength(0) {
-  // Add here supported instruments by this loader
-  m_supportedInstruments.emplace_back("D2B");
-}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadILLAscii::~LoadILLAscii() {}
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -145,7 +132,7 @@ void LoadILLAscii::exec() {
        ++iSpectra, ++iSpectraHeader) {
 
     size_t spectrumIndex = std::distance(spectraList.begin(), iSpectra);
-    g_log.debug() << "Reading Spectrum: " << spectrumIndex << std::endl;
+    g_log.debug() << "Reading Spectrum: " << spectrumIndex << '\n';
 
     std::vector<int> thisSpectrum = *iSpectra;
     API::MatrixWorkspace_sptr thisWorkspace =
@@ -207,7 +194,7 @@ void LoadILLAscii::setWorkspaceRotationAngle(API::MatrixWorkspace_sptr ws,
 void LoadILLAscii::loadExperimentDetails(ILLParser &p) {
 
   m_wavelength = p.getValueFromHeader<double>("wavelength");
-  g_log.debug() << "Wavelength: " << m_wavelength << std::endl;
+  g_log.debug() << "Wavelength: " << m_wavelength << '\n';
 }
 
 void LoadILLAscii::loadInstrumentName(ILLParser &p) {
@@ -216,10 +203,10 @@ void LoadILLAscii::loadInstrumentName(ILLParser &p) {
   if (m_instrumentName == "") {
     throw std::runtime_error("Cannot read instrument name from the data file.");
   }
-  g_log.debug() << "Instrument name set to: " + m_instrumentName << std::endl;
+  g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 
   m_wavelength = p.getValueFromHeader<double>("wavelength");
-  g_log.debug() << "Wavelength: " << m_wavelength << std::endl;
+  g_log.debug() << "Wavelength: " << m_wavelength << '\n';
 }
 
 /**
@@ -283,17 +270,17 @@ IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 
   Poco::TemporaryFile tmpFile;
   std::string tempFileName = tmpFile.path();
-  g_log.debug() << "Dumping WSs in a temp file: " << tempFileName << std::endl;
+  g_log.debug() << "Dumping WSs in a temp file: " << tempFileName << '\n';
 
   std::ofstream myfile;
   myfile.open(tempFileName.c_str());
-  myfile << "DIMENSIONS" << std::endl;
-  myfile << "x X m 100" << std::endl;
-  myfile << "y Y m 100" << std::endl;
-  myfile << "z Z m 100" << std::endl;
+  myfile << "DIMENSIONS\n";
+  myfile << "x X m 100\n";
+  myfile << "y Y m 100\n";
+  myfile << "z Z m 100\n";
   myfile << "# Signal, Error, DetectorId, RunId, coord1, coord2, ... to end of "
-            "coords" << std::endl;
-  myfile << "MDEVENTS" << std::endl;
+            "coords\n";
+  myfile << "MDEVENTS\n";
 
   if (!workspaceList.empty()) {
     Progress progress(this, 0, 1, workspaceList.size());
@@ -314,7 +301,7 @@ IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
         myfile << detPos.X() << " ";
         myfile << detPos.Y() << " ";
         myfile << detPos.Z() << " ";
-        myfile << std::endl;
+        myfile << '\n';
       }
       progress.report("Creating MD WS");
     }

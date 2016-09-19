@@ -27,6 +27,7 @@ class HFIRTrans1(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
@@ -53,6 +54,7 @@ class HFIRTrans2(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         SetTransmission(0.522296, 0.009134)
@@ -78,6 +80,7 @@ class HFIRTransmissionDarkCurrent(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
@@ -105,6 +108,7 @@ class HFIRTransmissionDirectBeamCenter(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
@@ -132,6 +136,7 @@ class HFIRTransmissionBeamCenter(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
@@ -160,6 +165,7 @@ class HFIRTransmissionBeamSpreader(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml",
@@ -190,6 +196,7 @@ class HFIRTransmissionBeamSpreaderDC(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml",
@@ -221,6 +228,7 @@ class HFIRTransmissionBeamSpreaderDBC(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml",
@@ -252,6 +260,7 @@ class HFIRTransmissionBeamSpreaderBC(stresstesting.MantidStressTest):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml",

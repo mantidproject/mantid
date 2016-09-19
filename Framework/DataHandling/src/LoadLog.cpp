@@ -263,7 +263,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
             Mantid::Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
                 propname);
         logd->addValue(timecolumn, dvalue);
-        dMap.emplace(std::make_pair(propname, std::move(logd)));
+        dMap.emplace(propname, std::move(logd));
       }
     } else {
       auto sitr = sMap.find(propname);
@@ -275,7 +275,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
         auto logs = Mantid::Kernel::make_unique<
             Kernel::TimeSeriesProperty<std::string>>(propname);
         logs->addValue(timecolumn, valuecolumn);
-        sMap.emplace(std::make_pair(propname, std::move(logs)));
+        sMap.emplace(propname, std::move(logs));
       }
     }
   }

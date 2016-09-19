@@ -8,22 +8,19 @@
 
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-  using namespace MuonAnalysisHelper;
+namespace MantidQt {
+namespace CustomInterfaces {
 
-namespace Muon
-{
+namespace Muon {
 
-/** 
+/**
 This is a Helper class for MuonAnalysis. In particular this helper class deals
-callbacks from the Plot Options tab.    
+callbacks from the Plot Options tab.
 
 @author Anders Markvardsen, ISIS, RAL
 
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -41,12 +38,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>    
+Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MuonAnalysisOptionTab : public QWidget
-{
- Q_OBJECT
+class MuonAnalysisOptionTab : public QWidget {
+  Q_OBJECT
 public:
   /// Types of the start time
   enum StartTimeType { FirstGoodData, TimeZero, Custom };
@@ -58,7 +54,7 @@ public:
   enum NewPlotPolicy { NewWindow, PreviousWindow };
 
   /// Constructor
-  MuonAnalysisOptionTab(Ui::MuonAnalysis& uiForm, const QString& settingsGroup);
+  MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm, const QString &settingsGroup);
 
   /// Initialise the layout of the tab
   void initLayout();
@@ -104,12 +100,12 @@ private:
   static const QString VARIABLE_REBIN_DEFAULT;
 
   /// The Muon Analysis UI file.
-  Ui::MuonAnalysis& m_uiForm;
+  Ui::MuonAnalysis &m_uiForm;
 
   /// Auto-saver for all the widgets
-  WidgetAutoSaver m_autoSaver;
+  MuonAnalysisHelper::WidgetAutoSaver m_autoSaver;
 
-private slots:  
+private slots:
   /// Open the Muon Analysis Settings help (Wiki).
   void muonAnalysisHelpSettingsClicked();
 
@@ -122,9 +118,8 @@ private slots:
   /// Run when autoscale check-box state is changed
   void onAutoscaleToggled(bool state);
 };
-
 }
 }
 }
 
-#endif //MANTIDQTCUSTOMINTERFACES_MUONANALYSISOPTIONTAB_H_
+#endif // MANTIDQTCUSTOMINTERFACES_MUONANALYSISOPTIONTAB_H_

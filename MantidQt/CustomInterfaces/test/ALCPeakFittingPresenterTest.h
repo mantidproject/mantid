@@ -6,36 +6,40 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h"
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h"
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h"
 
+#include <qwt_data.h>
+
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 
-namespace boost
-{
-  template<class CharType, class CharTrait>
-  std::basic_ostream<CharType, CharTrait>& operator<<(std::basic_ostream<CharType, CharTrait>& out, optional<QString> const& maybe)
-  {
-    if (maybe)
-      out << maybe->toStdString();
-    return out;
-  }
+namespace boost {
+template <class CharType, class CharTrait>
+std::basic_ostream<CharType, CharTrait> &
+operator<<(std::basic_ostream<CharType, CharTrait> &out,
+           optional<QString> const &maybe) {
+  if (maybe)
+    out << maybe->toStdString();
+  return out;
+}
 }
 
-class MockALCPeakFittingView : public IALCPeakFittingView
-{
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
+
+class MockALCPeakFittingView : public IALCPeakFittingView {
 public:
   void requestFit() { emit fitRequested(); }
   void changeCurrentFunction() { emit currentFunctionChanged(); }
   void changePeakPicker() { emit peakPickerChanged(); }
-  void changeParameter(const QString& funcIndex, const QString& paramName)
-  {
+  void changeParameter(const QString &funcIndex, const QString &paramName) {
     emit parameterChanged(funcIndex, paramName);
   }
   void plotGuess() override { emit plotGuessClicked(); }
@@ -45,19 +49,19 @@ public:
   MOCK_CONST_METHOD0(peakPicker, IPeakFunction_const_sptr());
 
   MOCK_METHOD0(initialize, void());
-  MOCK_METHOD2(setDataCurve, void(const QwtData&, const std::vector<double>&));
-  MOCK_METHOD1(setFittedCurve, void(const QwtData&));
+  MOCK_METHOD2(setDataCurve,
+               void(const QwtData &, const std::vector<double> &));
+  MOCK_METHOD1(setFittedCurve, void(const QwtData &));
   MOCK_METHOD1(setPeakPickerEnabled, void(bool));
-  MOCK_METHOD1(setPeakPicker, void(const IPeakFunction_const_sptr&));
-  MOCK_METHOD1(setFunction, void(const IFunction_const_sptr&));
-  MOCK_METHOD3(setParameter, void(const QString&, const QString&, double));
-  MOCK_METHOD1(displayError, void(const QString&));
+  MOCK_METHOD1(setPeakPicker, void(const IPeakFunction_const_sptr &));
+  MOCK_METHOD1(setFunction, void(const IFunction_const_sptr &));
+  MOCK_METHOD3(setParameter, void(const QString &, const QString &, double));
+  MOCK_METHOD1(displayError, void(const QString &));
   MOCK_METHOD0(help, void());
   MOCK_METHOD1(changePlotGuessState, void(bool));
 };
 
-class MockALCPeakFittingModel : public IALCPeakFittingModel
-{
+class MockALCPeakFittingModel : public IALCPeakFittingModel {
 public:
   void changeFittedPeaks() { emit fittedPeaksChanged(); }
   void changeData() { emit dataChanged(); }
@@ -68,25 +72,29 @@ public:
   MOCK_METHOD1(fitPeaks, void(IFunction_const_sptr));
 };
 
-MATCHER_P3(QwtDataX, i, value, delta, "") { return fabs(arg.x(i) - value) < delta; }
-MATCHER_P3(QwtDataY, i, value, delta, "") { return fabs(arg.y(i) - value) < delta; }
-MATCHER_P3(VectorValue, i, value, delta, "") { return fabs(arg.at(i) - value) < delta; }
+MATCHER_P3(QwtDataX, i, value, delta, "") {
+  return fabs(arg.x(i) - value) < delta;
+}
+MATCHER_P3(QwtDataY, i, value, delta, "") {
+  return fabs(arg.y(i) - value) < delta;
+}
+MATCHER_P3(VectorValue, i, value, delta, "") {
+  return fabs(arg.at(i) - value) < delta;
+}
 
 // DoubleNear matcher was introduced in gmock 1.7 only
 MATCHER_P2(DoubleDelta, value, delta, "") { return fabs(arg - value) < delta; }
 
 using namespace MantidQt::CustomInterfaces;
 
-class ALCPeakFittingPresenterTest : public CxxTest::TestSuite
-{
-  MockALCPeakFittingView* m_view;
-  MockALCPeakFittingModel* m_model;
-  ALCPeakFittingPresenter* m_presenter;
+class ALCPeakFittingPresenterTest : public CxxTest::TestSuite {
+  MockALCPeakFittingView *m_view;
+  MockALCPeakFittingModel *m_model;
+  ALCPeakFittingPresenter *m_presenter;
 
-  IPeakFunction_sptr createGaussian(double centre, double fwhm, double height)
-  {
+  IPeakFunction_sptr createGaussian(double centre, double fwhm, double height) {
     auto peak = boost::dynamic_pointer_cast<IPeakFunction>(
-          API::FunctionFactory::Instance().createFunction("Gaussian"));
+        API::FunctionFactory::Instance().createFunction("Gaussian"));
     peak->setCentre(centre);
     peak->setFwhm(fwhm);
     peak->setHeight(height);
@@ -96,11 +104,12 @@ class ALCPeakFittingPresenterTest : public CxxTest::TestSuite
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ALCPeakFittingPresenterTest *createSuite() { return new ALCPeakFittingPresenterTest(); }
-  static void destroySuite( ALCPeakFittingPresenterTest *suite ) { delete suite; }
+  static ALCPeakFittingPresenterTest *createSuite() {
+    return new ALCPeakFittingPresenterTest();
+  }
+  static void destroySuite(ALCPeakFittingPresenterTest *suite) { delete suite; }
 
-  ALCPeakFittingPresenterTest()
-  {
+  ALCPeakFittingPresenterTest() {
     API::FrameworkManager::Instance(); // To make sure everything is initialized
   }
 
@@ -121,8 +130,7 @@ public:
     delete m_view;
   }
 
-  void test_initialize()
-  {
+  void test_initialize() {
     MockALCPeakFittingView view;
     MockALCPeakFittingModel model;
     ALCPeakFittingPresenter presenter(&view, &model);
@@ -146,41 +154,39 @@ public:
     auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
 
-    IFunction_sptr peaks = createGaussian(1,2,3);
+    IFunction_sptr peaks = createGaussian(1, 2, 3);
 
     ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(peaks));
 
     EXPECT_CALL(*m_model, fitPeaks(Property(&IFunction_const_sptr::get,
-                                            Property(&IFunction::asString, peaks->asString()))));
+                                            Property(&IFunction::asString,
+                                                     peaks->asString()))));
 
     m_view->requestFit();
   }
 
-  void test_onDataChanged()
-  {
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1,3);
+  void test_onDataChanged() {
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
 
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
 
-    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
-                                            QwtDataX(0, 1, 1E-8),
-                                            QwtDataX(1, 1, 1E-8),
-                                            QwtDataX(2, 1, 1E-8),
-                                            QwtDataY(0, 2, 1E-8),
-                                            QwtDataY(1, 2, 1E-8),
-                                            QwtDataY(2, 2, 1E-8)),
-                                      AllOf(Property(&std::vector<double>::size,3),
-                                            VectorValue(0, 3, 1E-6),
-                                            VectorValue(1, 3, 1E-6),
-                                            VectorValue(2, 3, 1E-6))));
+    EXPECT_CALL(
+        *m_view,
+        setDataCurve(AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1, 1E-8),
+                           QwtDataX(1, 2, 1E-8), QwtDataX(2, 3, 1E-8),
+                           QwtDataY(0, 2, 1E-8), QwtDataY(1, 2, 1E-8),
+                           QwtDataY(2, 2, 1E-8)),
+                     AllOf(Property(&std::vector<double>::size, 3),
+                           VectorValue(0, 3, 1E-6), VectorValue(1, 3, 1E-6),
+                           VectorValue(2, 3, 1E-6))));
     m_model->changeData();
   }
 
-  void test_onFittedPeaksChanged()
-  {
-    ON_CALL(*m_model, fittedPeaks()).WillByDefault(Return(createGaussian(1,2,3)));
+  void test_onFittedPeaksChanged() {
+    ON_CALL(*m_model, fittedPeaks())
+        .WillByDefault(Return(createGaussian(1, 2, 3)));
 
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1,3);
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
 
     // TODO: check better
@@ -190,11 +196,11 @@ public:
     m_model->changeFittedPeaks();
   }
 
-  void test_onFittedPeaksChanged_toEmpty()
-  {
-    ON_CALL(*m_model, fittedPeaks()).WillByDefault(Return(IFunction_const_sptr()));
+  void test_onFittedPeaksChanged_toEmpty() {
+    ON_CALL(*m_model, fittedPeaks())
+        .WillByDefault(Return(IFunction_const_sptr()));
 
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1,3);
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 3);
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
 
     EXPECT_CALL(*m_view, setFittedCurve(Property(&QwtData::size, 0)));
@@ -203,8 +209,7 @@ public:
     m_model->changeFittedPeaks();
   }
 
-  void test_onCurrentFunctionChanged_nothing()
-  {
+  void test_onCurrentFunctionChanged_nothing() {
     ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::none));
 
     EXPECT_CALL(*m_view, setPeakPickerEnabled(false));
@@ -212,81 +217,91 @@ public:
     m_view->changeCurrentFunction();
   }
 
-  void test_onCurrentFunctionChanged_peak()
-  {
-    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<QString>("f1")));
-    ON_CALL(*m_view, function(QString("f1"))).WillByDefault(Return(createGaussian(1,2,3)));
+  void test_onCurrentFunctionChanged_peak() {
+    ON_CALL(*m_view, currentFunctionIndex())
+        .WillByDefault(Return(boost::optional<QString>("f1")));
+    ON_CALL(*m_view, function(QString("f1")))
+        .WillByDefault(Return(createGaussian(1, 2, 3)));
 
     EXPECT_CALL(*m_view, setPeakPickerEnabled(true));
-    EXPECT_CALL(*m_view, setPeakPicker(Property(&IPeakFunction_const_sptr::get,
-                                                AllOf(Property(&IPeakFunction::centre, 1),
-                                                      Property(&IPeakFunction::fwhm, 2),
-                                                      Property(&IPeakFunction::height, 3)))));
+    EXPECT_CALL(*m_view, setPeakPicker(Property(
+                             &IPeakFunction_const_sptr::get,
+                             AllOf(Property(&IPeakFunction::centre, 1),
+                                   Property(&IPeakFunction::fwhm, 2),
+                                   Property(&IPeakFunction::height, 3)))));
 
     m_view->changeCurrentFunction();
   }
 
-  void test_onCurrentFunctionChanged_nonPeak()
-  {
-    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<QString>("f1")));
-    ON_CALL(*m_view, function(QString("f1"))).WillByDefault(
-          Return(API::FunctionFactory::Instance().createFunction("LinearBackground")));
+  void test_onCurrentFunctionChanged_nonPeak() {
+    ON_CALL(*m_view, currentFunctionIndex())
+        .WillByDefault(Return(boost::optional<QString>("f1")));
+    ON_CALL(*m_view, function(QString("f1")))
+        .WillByDefault(Return(API::FunctionFactory::Instance().createFunction(
+            "LinearBackground")));
 
     EXPECT_CALL(*m_view, setPeakPickerEnabled(false));
 
     m_view->changeCurrentFunction();
   }
 
-  void test_onPeakPickerChanged()
-  {
-    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<QString>("f1")));
-    ON_CALL(*m_view, peakPicker()).WillByDefault(Return(createGaussian(4,5,6)));
+  void test_onPeakPickerChanged() {
+    ON_CALL(*m_view, currentFunctionIndex())
+        .WillByDefault(Return(boost::optional<QString>("f1")));
+    ON_CALL(*m_view, peakPicker())
+        .WillByDefault(Return(createGaussian(4, 5, 6)));
 
     EXPECT_CALL(*m_view, setParameter(QString("f1"), QString("PeakCentre"), 4));
-    EXPECT_CALL(*m_view, setParameter(QString("f1"), QString("Sigma"), DoubleDelta(2.123, 1E-3)));
+    EXPECT_CALL(*m_view, setParameter(QString("f1"), QString("Sigma"),
+                                      DoubleDelta(2.123, 1E-3)));
     EXPECT_CALL(*m_view, setParameter(QString("f1"), QString("Height"), 6));
 
     m_view->changePeakPicker();
   }
 
-  void test_onParameterChanged_peak()
-  {
-    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<QString>("f1")));
-    ON_CALL(*m_view, function(QString("f1"))).WillByDefault(Return(createGaussian(4,2,6)));
-    ON_CALL(*m_view, peakPicker()).WillByDefault(Return(createGaussian(4,5,6)));
+  void test_onParameterChanged_peak() {
+    ON_CALL(*m_view, currentFunctionIndex())
+        .WillByDefault(Return(boost::optional<QString>("f1")));
+    ON_CALL(*m_view, function(QString("f1")))
+        .WillByDefault(Return(createGaussian(4, 2, 6)));
+    ON_CALL(*m_view, peakPicker())
+        .WillByDefault(Return(createGaussian(4, 5, 6)));
 
-    EXPECT_CALL(*m_view, setPeakPicker(Property(&IPeakFunction_const_sptr::get,
-                                                AllOf(Property(&IPeakFunction::centre, 4),
-                                                      Property(&IPeakFunction::fwhm, 2),
-                                                      Property(&IPeakFunction::height, 6)))));
+    EXPECT_CALL(*m_view, setPeakPicker(Property(
+                             &IPeakFunction_const_sptr::get,
+                             AllOf(Property(&IPeakFunction::centre, 4),
+                                   Property(&IPeakFunction::fwhm, 2),
+                                   Property(&IPeakFunction::height, 6)))));
 
     m_view->changeParameter(QString("f1"), QString("Sigma"));
   }
 
-  // parameterChanged signal is thrown in many scenarios - we want to update the PeakPicker only
-  // if it's thrown for currently selected peak function, because that's when PeakPicker is displayed
-  void test_onParameterChanged_notACurrentFunction()
-  {
-    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<QString>("f2")));
+  // parameterChanged signal is thrown in many scenarios - we want to update the
+  // PeakPicker only
+  // if it's thrown for currently selected peak function, because that's when
+  // PeakPicker is displayed
+  void test_onParameterChanged_notACurrentFunction() {
+    ON_CALL(*m_view, currentFunctionIndex())
+        .WillByDefault(Return(boost::optional<QString>("f2")));
 
     EXPECT_CALL(*m_view, setPeakPicker(_)).Times(0);
 
     m_view->changeParameter(QString("f1"), QString("Sigma"));
   }
 
-  void test_onParameterChanged_nonPeak()
-  {
-    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<QString>("f1")));
-    ON_CALL(*m_view, function(QString("f1"))).WillByDefault(
-          Return(API::FunctionFactory::Instance().createFunction("LinearBackground")));
+  void test_onParameterChanged_nonPeak() {
+    ON_CALL(*m_view, currentFunctionIndex())
+        .WillByDefault(Return(boost::optional<QString>("f1")));
+    ON_CALL(*m_view, function(QString("f1")))
+        .WillByDefault(Return(API::FunctionFactory::Instance().createFunction(
+            "LinearBackground")));
 
     EXPECT_CALL(*m_view, setPeakPicker(_)).Times(0);
 
     m_view->changeParameter(QString("f1"), QString("A0"));
   }
 
-  void test_helpPage ()
-  {
+  void test_helpPage() {
     EXPECT_CALL(*m_view, help()).Times(1);
     m_view->help();
   }
@@ -344,5 +359,5 @@ public:
     m_model->setError("Test error");
   }
 };
-
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 #endif /* MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGTEST_H_ */

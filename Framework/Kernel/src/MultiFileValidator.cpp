@@ -51,7 +51,7 @@ std::string MultiFileValidator::checkValidity(
   if (values.empty())
     return m_fileValidator.isValid("");
 
-  std::string accumulatedErrors("");
+  std::string accumulatedErrors;
 
   for (auto row : values) {
     for (const auto &valueIt : row) {

@@ -4,10 +4,8 @@
 #include "MantidQtSliceViewer/PeakOverlayInteractive.h"
 #include "PeakRepresentation.h"
 
-namespace MantidQt
-{
-namespace SliceViewer
-{
+namespace MantidQt {
+namespace SliceViewer {
 
 /** PeakView : Holds a collection of peaks of any type and coordinates
                them being drawn.
@@ -34,105 +32,104 @@ namespace SliceViewer
   <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class PeakView : public PeakOverlayInteractive
-{
+class PeakView : public PeakOverlayInteractive {
 public:
-    PeakView(PeaksPresenter *const presenter, QwtPlot *plot, QWidget *parent,
-             const VecPeakRepresentation &vecPeakRepresentation,
-             const int plotXIndex, const int plotYIndex,
-             PeakViewColor foregroundColor, PeakViewColor backgroundColor,
-             double largestEffectiveRadius);
+  PeakView(PeaksPresenter *const presenter, QwtPlot *plot, QWidget *parent,
+           const VecPeakRepresentation &vecPeakRepresentation,
+           const int plotXIndex, const int plotYIndex,
+           PeakViewColor foregroundColor, PeakViewColor backgroundColor,
+           double largestEffectiveRadius);
 
-    virtual ~PeakView();
+  virtual ~PeakView();
 
-    /// Set the slice point at position.
-    void setSlicePoint(const double &point,
-                       const std::vector<bool> &viewablePeaks) override;
+  /// Set the slice point at position.
+  void setSlicePoint(const double &point,
+                     const std::vector<bool> &viewablePeaks) override;
 
-    /// Hide the view.
-    void hideView() override;
+  /// Hide the view.
+  void hideView() override;
 
-    /// Show the view.
-    void showView() override;
+  /// Show the view.
+  void showView() override;
 
-    /// Update the view.
-    void updateView() override;
+  /// Update the view.
+  void updateView() override;
 
-    /// Move the position of the peak, by using a different configuration of the
-    /// existing origin indexes.
-    void
-    movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
+  /// Move the position of the peak, by using a different configuration of the
+  /// existing origin indexes.
+  void
+  movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) override;
 
-    /// Show the background radius
-    void showBackgroundRadius(const bool show) override;
+  /// Show the background radius
+  void showBackgroundRadius(const bool show) override;
 
-    /// Get a bounding box for this peak.
-    PeakBoundingBox getBoundingBox(const int peakIndex) const override;
+  /// Get a bounding box for this peak.
+  PeakBoundingBox getBoundingBox(const int peakIndex) const override;
 
-    /// Changes the size of the overlay to be the requested fraction of the
-    /// current view width.
-    void changeOccupancyInView(const double fraction) override;
+  /// Changes the size of the overlay to be the requested fraction of the
+  /// current view width.
+  void changeOccupancyInView(const double fraction) override;
 
-    /// Changes the size of the overlay to be the requested fraction of the view
-    /// depth.
-    void changeOccupancyIntoView(const double fraction) override;
+  /// Changes the size of the overlay to be the requested fraction of the view
+  /// depth.
+  void changeOccupancyIntoView(const double fraction) override;
 
-    /// Get the peak size (width/2 as a fraction of total width)  on projection
-    double getOccupancyInView() const override;
+  /// Get the peak size (width/2 as a fraction of total width)  on projection
+  double getOccupancyInView() const override;
 
-    /// Get the peaks size into the projection (effective radius as a fraction
-    /// of z range)
-    double getOccupancyIntoView() const override;
+  /// Get the peaks size into the projection (effective radius as a fraction
+  /// of z range)
+  double getOccupancyIntoView() const override;
 
-    /// Getter indicating that the view is position only
-    bool positionOnly() const override;
+  /// Getter indicating that the view is position only
+  bool positionOnly() const override;
 
-    /// Get the radius of the peak objects.
-    double getRadius() const override;
+  /// Get the radius of the peak objects.
+  double getRadius() const override;
 
-    /// Determine if the background radius is shown.
-    bool isBackgroundShown() const override;
+  /// Determine if the background radius is shown.
+  bool isBackgroundShown() const override;
 
-    /// Take settings from another view
-    void takeSettingsFrom(const PeakOverlayView *const) override;
+  /// Take settings from another view
+  void takeSettingsFrom(const PeakOverlayView *const) override;
 
-    /// Change foreground colour -- overload for PeakViewColor
-    void changeForegroundColour(const PeakViewColor peakViewColor) override;
+  /// Change foreground colour -- overload for PeakViewColor
+  void changeForegroundColour(const PeakViewColor peakViewColor) override;
 
-    /// Change background colour -- overload for PeakViewColor
-    void changeBackgroundColour(const PeakViewColor peakViewColor) override;
+  /// Change background colour -- overload for PeakViewColor
+  void changeBackgroundColour(const PeakViewColor peakViewColor) override;
 
-    /// Get the current background colour
-    PeakViewColor getBackgroundPeakViewColor() const override;
+  /// Get the current background colour
+  PeakViewColor getBackgroundPeakViewColor() const override;
 
-    /// Get the current foreground colour
-    PeakViewColor getForegroundPeakViewColor() const override;
+  /// Get the current foreground colour
+  PeakViewColor getForegroundPeakViewColor() const override;
 
 private:
-    /// Draw the peak representations. Pure virtual on base class.
-    void doPaintPeaks(QPaintEvent *) override;
+  /// Draw the peak representations. Pure virtual on base class.
+  void doPaintPeaks(QPaintEvent *) override;
 
-    /// The actual peak objects
-    VecPeakRepresentation m_peaks;
+  /// The actual peak objects
+  VecPeakRepresentation m_peaks;
 
-    /// Peaks in the workspace that are viewable in the present view.
-    std::vector<bool> m_viewablePeaks;
+  /// Peaks in the workspace that are viewable in the present view.
+  std::vector<bool> m_viewablePeaks;
 
-    /// Cached occupancy into the view
-    double m_cachedOccupancyIntoView;
+  /// Cached occupancy into the view
+  double m_cachedOccupancyIntoView;
 
-    /// Cached occupancy onto view
-    double m_cachedOccupancyInView;
+  /// Cached occupancy onto view
+  double m_cachedOccupancyInView;
 
-    /// Show the background radius.
-    bool m_showBackground;
+  /// Show the background radius.
+  bool m_showBackground;
 
-    /// Foreground color
-    PeakViewColor m_foregroundColor;
-    PeakViewColor m_backgroundColor;
+  /// Foreground color
+  PeakViewColor m_foregroundColor;
+  PeakViewColor m_backgroundColor;
 
-    /// Largeste effective radius of all sub-representations
-    double m_largestEffectiveRadius;
+  /// Largeste effective radius of all sub-representations
+  double m_largestEffectiveRadius;
 };
 }
 }

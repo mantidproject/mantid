@@ -22,12 +22,10 @@ bool MDTransfNoQ::calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) {
   // sanity check. If fails, something went fundamentally wrong
   if (m_NMatrixDim + m_AddDimCoordinates.size() != nd) {
     std::string ERR =
-        "Number of matrix dimensions: " +
-        boost::lexical_cast<std::string>(m_NMatrixDim) +
+        "Number of matrix dimensions: " + std::to_string(m_NMatrixDim) +
         " plus number of additional dimensions: " +
-        boost::lexical_cast<std::string>(m_AddDimCoordinates.size()) +
-        " not equal to number of workspace dimensions: " +
-        boost::lexical_cast<std::string>(nd);
+        std::to_string(m_AddDimCoordinates.size()) +
+        " not equal to number of workspace dimensions: " + std::to_string(nd);
     throw(std::invalid_argument(ERR));
   }
   // if one axis is numeric, 1  coordinate  came from workspace
@@ -71,7 +69,7 @@ bool MDTransfNoQ::calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) {
     Coord[1] = static_cast<coord_t>(m_YAxis->operator()(i));
     return !(Coord[1] < m_DimMin[1] || Coord[1] >= m_DimMax[1]);
   }
-  return false;
+  return true;
 }
 bool MDTransfNoQ::calcMatrixCoord(const double &X, std::vector<coord_t> &Coord,
                                   double & /*s*/, double & /*errSq*/) const {

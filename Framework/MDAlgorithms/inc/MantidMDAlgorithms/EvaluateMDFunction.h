@@ -35,7 +35,6 @@ class DLLExport EvaluateMDFunction : public API::Algorithm,
                                      public API::DeprecatedAlgorithm {
 public:
   EvaluateMDFunction();
-  ~EvaluateMDFunction() override;
 
   const std::string name() const override { return "EvaluateMDFunction"; }
   int version() const override;

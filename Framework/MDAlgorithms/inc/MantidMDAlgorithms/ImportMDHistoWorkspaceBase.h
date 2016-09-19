@@ -37,8 +37,6 @@ namespace MDAlgorithms {
 */
 class DLLExport ImportMDHistoWorkspaceBase : public API::Algorithm {
 public:
-  ImportMDHistoWorkspaceBase();
-  ~ImportMDHistoWorkspaceBase() override;
   std::map<std::string, std::string> validateInputs() override;
 
 protected:
@@ -54,7 +52,7 @@ protected:
 
 private:
   // Product of the bins across all dimensions.
-  size_t m_bin_product;
+  size_t m_bin_product = 0;
   Mantid::Geometry::MDFrame_uptr createMDFrame(std::string frame,
                                                std::string unit);
   bool checkIfFrameValid(const std::string &frame,

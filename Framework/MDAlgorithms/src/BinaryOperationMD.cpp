@@ -19,16 +19,6 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-BinaryOperationMD::BinaryOperationMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-BinaryOperationMD::~BinaryOperationMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string BinaryOperationMD::name() const {
   return "BinaryOperationMD";
@@ -176,7 +166,7 @@ void BinaryOperationMD::exec() {
           g_log.warning() << "Dimension " << d << " (" << dimA->getName()
                           << ") has different extents in the two "
                              "MDHistoWorkspaces. The operation may not make "
-                             "sense!" << std::endl;
+                             "sense!\n";
       }
       this->execHistoHisto(m_out_histo, m_operand_histo);
     } else if (m_operand_scalar)
@@ -186,6 +176,11 @@ void BinaryOperationMD::exec() {
           "Unexpected operand workspace type. Expected MDHistoWorkspace or "
           "WorkspaceSingleValue, got " +
           m_rhs->id());
+
+    // Clear any masking flags from the output workspace
+    if (m_out) {
+      m_out->clearMDMasking();
+    }
 
     // When operating on MDHistoWorkspaces, add a simple flag
     // that will be checked in BinMD to avoid binning a modified workspace

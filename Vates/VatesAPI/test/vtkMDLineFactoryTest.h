@@ -21,19 +21,15 @@ using namespace testing;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class vtkMDLineFactoryTest : public CxxTest::TestSuite
-{
+class vtkMDLineFactoryTest : public CxxTest::TestSuite {
 public:
-
-  void testGetFactoryTypeName()
-  {
+  void testGetFactoryTypeName() {
     vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
                              Mantid::VATES::VolumeNormalization);
     TS_ASSERT_EQUALS("vtkMDLineFactory", factory.getFactoryTypeName());
   }
 
-  void testInitializeDelegatesToSuccessor()
-  {
+  void testInitializeDelegatesToSuccessor() {
     auto mockSuccessor = new MockvtkDataSetFactory();
     auto uniqueSuccessor =
         std::unique_ptr<MockvtkDataSetFactory>(mockSuccessor);
@@ -52,8 +48,7 @@ public:
                Mock::VerifyAndClearExpectations(mockSuccessor));
   }
 
-  void testCreateDelegatesToSuccessor()
-  {
+  void testCreateDelegatesToSuccessor() {
     FakeProgressAction progressUpdate;
 
     auto mockSuccessor = new MockvtkDataSetFactory();
@@ -77,46 +72,48 @@ public:
                Mock::VerifyAndClearExpectations(mockSuccessor));
   }
 
-  void testOnInitaliseCannotDelegateToSuccessor()
-  {
+  void testOnInitaliseCannotDelegateToSuccessor() {
     vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
                              Mantid::VATES::VolumeNormalization);
-    //factory.SetSuccessor(mockSuccessor); No Successor set.
+    // factory.SetSuccessor(mockSuccessor); No Successor set.
 
     ITableWorkspace_sptr ws =
         boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS(factory.initialize(ws), std::runtime_error);
   }
 
-  void testCreateWithoutInitializeThrows()
-  {
+  void testCreateWithoutInitializeThrows() {
     FakeProgressAction progressUpdate;
 
     vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
                              Mantid::VATES::VolumeNormalization);
-    //initialize not called!
+    // initialize not called!
     TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
   }
 
-  void testCreation()
-  {
+  void testCreation() {
     MockProgressAction mockProgressAction;
-    //Expectation checks that progress should be >= 0 and <= 100 and called at least once!
-    EXPECT_CALL(mockProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
+    // Expectation checks that progress should be >= 0 and <= 100 and called at
+    // least once!
+    EXPECT_CALL(mockProgressAction, eventRaised(AllOf(Le(100), Ge(0))))
+        .Times(AtLeast(1));
 
-    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<1>,1> >
-            ws = MDEventsTestHelper::makeMDEWFull<1>(10, 10, 10, 10);
+    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<
+        Mantid::DataObjects::MDEvent<1>, 1>> ws =
+        MDEventsTestHelper::makeMDEWFull<1>(10, 10, 10, 10);
 
-    //Rebin it to make it possible to compare cells to bins.
+    // Rebin it to make it possible to compare cells to bins.
     using namespace Mantid::API;
-    IAlgorithm_sptr slice = AlgorithmManager::Instance().createUnmanaged("SliceMD");
+    IAlgorithm_sptr slice =
+        AlgorithmManager::Instance().createUnmanaged("SliceMD");
     slice->initialize();
     slice->setProperty("InputWorkspace", ws);
     slice->setPropertyValue("AlignedDim0", "Axis0, -10, 10, 100");
     slice->setPropertyValue("OutputWorkspace", "binned");
     slice->execute();
 
-    Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
+    Workspace_sptr binned =
+        Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
     vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
                              Mantid::VATES::VolumeNormalization);
@@ -131,24 +128,25 @@ public:
     TS_ASSERT_EQUALS(VTK_LINE, product->GetCellType(0));
 
     AnalysisDataService::Instance().remove("binned");
-    TSM_ASSERT("Progress Updates not used as expected.", Mock::VerifyAndClearExpectations(&mockProgressAction));
+    TSM_ASSERT("Progress Updates not used as expected.",
+               Mock::VerifyAndClearExpectations(&mockProgressAction));
   }
-
 };
 
 //=====================================================================================
 // Peformance tests
 //=====================================================================================
-class vtkMDLineFactoryTestPerformance : public CxxTest::TestSuite
-{
+class vtkMDLineFactoryTestPerformance : public CxxTest::TestSuite {
 
 public:
   void setUp() override {
-    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<1>,1> > input
-      = MDEventsTestHelper::makeMDEWFull<1>(2, 10, 10, 4000);
-    //Rebin it to make it possible to compare cells to bins.
+    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<
+        Mantid::DataObjects::MDEvent<1>, 1>> input =
+        MDEventsTestHelper::makeMDEWFull<1>(2, 10, 10, 4000);
+    // Rebin it to make it possible to compare cells to bins.
     using namespace Mantid::API;
-    IAlgorithm_sptr slice = AlgorithmManager::Instance().createUnmanaged("SliceMD");
+    IAlgorithm_sptr slice =
+        AlgorithmManager::Instance().createUnmanaged("SliceMD");
     slice->initialize();
     slice->setProperty("InputWorkspace", input);
     slice->setPropertyValue("AlignedDim0", "Axis0, -10, 10, 200000");
@@ -158,11 +156,11 @@ public:
 
   void tearDown() override { AnalysisDataService::Instance().remove("binned"); }
 
-  void testCreationOnLargeWorkspace()
-  {
+  void testCreationOnLargeWorkspace() {
     FakeProgressAction progressAction;
 
-    Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
+    Workspace_sptr binned =
+        Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
     vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
                              Mantid::VATES::VolumeNormalization);

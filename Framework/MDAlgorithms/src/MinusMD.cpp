@@ -16,16 +16,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(MinusMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MinusMD::MinusMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MinusMD::~MinusMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MinusMD::name() const { return "MinusMD"; }
 
@@ -122,6 +112,9 @@ void MinusMD::doMinus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 void MinusMD::execEvent() {
   // Now we add m_operand_event into m_out_event.
   CALL_MDEVENT_FUNCTION(this->doMinus, m_out_event);
+
+  // Clear masking (box flags) from the output workspace
+  m_out_event->clearMDMasking();
 
   // Set to the output
   setProperty("OutputWorkspace", m_out_event);

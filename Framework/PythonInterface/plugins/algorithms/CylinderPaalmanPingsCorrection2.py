@@ -1,12 +1,13 @@
 #pylint: disable=no-init,too-many-locals,too-many-instance-attributes,too-many-arguments,invalid-name
+from __future__ import (absolute_import, division, print_function)
 
+import math
+import numpy as np
 from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator, Progress)
 from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, CompositeValidator)
-import math
-import numpy as np
 
 
 class CylinderPaalmanPingsCorrection(PythonAlgorithm):
@@ -104,8 +105,8 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                              doc='Number of wavelengths for calculation')
 
         self.declareProperty(name='Emode', defaultValue='Elastic',
-                             validator=StringListValidator(['Elastic', 'Indirect']),
-                             doc='Emode: Elastic or Indirect')
+                             validator=StringListValidator(['Elastic', 'Indirect', 'Direct']),
+                             doc='Energy transfer mode')
         self.declareProperty(name='Efixed', defaultValue=1.0,
                              doc='Analyser energy')
 
@@ -295,7 +296,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
     def _sample(self):
         sample_prog = Progress(self, start=0.01, end=0.03, nreports=2)
-        sample_prog.report('Setting Sample Material for Sample') 
+        sample_prog.report('Setting Sample Material for Sample')
         SetSampleMaterial(self._sample_ws_name , ChemicalFormula=self._sample_chemical_formula,
                           SampleNumberDensity=self._sample_number_density)
         sample = mtd[self._sample_ws_name].sample()
@@ -311,7 +312,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self._density[0] = self._sample_number_density
 
         if self._use_can:
-            sample_prog.report('Setting Sample Material for Container') 
+            sample_prog.report('Setting Sample Material for Container')
             SetSampleMaterial(InputWorkspace=self._can_ws_name, ChemicalFormula=self._can_chemical_formula,
                               SampleNumberDensity=self._can_number_density)
             can_sample = mtd[self._can_ws_name].sample()
@@ -357,9 +358,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         if self._emode == 'Elastic':
             self._elastic = self._waves[int(len(self._waves) / 2)]
-        elif self._emode == 'Direct':
-            self._elastic = math.sqrt(81.787/self._efixed) # elastic wavelength
-        elif self._emode == 'Indirect':
+        else:
             self._elastic = math.sqrt(81.787/self._efixed) # elastic wavelength
 
         logger.information('Elastic lambda : %f' % (self._elastic))

@@ -16,16 +16,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(MultiplyMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MultiplyMD::MultiplyMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MultiplyMD::~MultiplyMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MultiplyMD::name() const { return "MultiplyMD"; }
 
@@ -59,8 +49,8 @@ void MultiplyMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Get the scalar multiplying
   float scalar = float(m_rhs_scalar->dataY(0)[0]);
   float scalarError = float(m_rhs_scalar->dataE(0)[0]);
-  float scalarRelativeErrorSquared =
-      (scalarError * scalarError) / (scalar * scalar);
+  float scalarErrorSquared = scalarError * scalarError;
+  float scalarSquared = scalar * scalar;
 
   // Get all the MDBoxes contained
   MDBoxBase<MDE, nd> *parentBox = ws->getBox();
@@ -85,9 +75,8 @@ void MultiplyMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         // Multiply weight by a scalar, propagating error
         float oldSignal = it->getSignal();
         float signal = oldSignal * scalar;
-        float errorSquared =
-            signal * signal * (it->getErrorSquared() / (oldSignal * oldSignal) +
-                               scalarRelativeErrorSquared);
+        float errorSquared = scalarSquared * it->getErrorSquared() +
+                             oldSignal * oldSignal * scalarErrorSquared;
         it->setSignal(signal);
         it->setErrorSquared(errorSquared);
       }

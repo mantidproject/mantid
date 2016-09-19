@@ -11,21 +11,17 @@ using namespace Mantid::VATES;
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class NoThresholdRangeTest: public CxxTest::TestSuite
-{
-public :
-
-  void testEverythingWithinRange()
-  {
+class NoThresholdRangeTest : public CxxTest::TestSuite {
+public:
+  void testEverythingWithinRange() {
     NoThresholdRange range;
-    
+
     TS_ASSERT_EQUALS(true, range.inRange(-1e9));
     TS_ASSERT_EQUALS(true, range.inRange(0));
     TS_ASSERT_EQUALS(true, range.inRange(1e9));
   }
 
-  void testGetMinMax()
-  {
+  void testGetMinMax() {
     NoThresholdRange range;
 
     range.inRange(1);
@@ -35,7 +31,6 @@ public :
     TSM_ASSERT_EQUALS("Wrong max found", 5, range.getMaximum());
     TSM_ASSERT_EQUALS("Wrong min found", -2, range.getMinimum());
   }
-
 };
 
 #endif

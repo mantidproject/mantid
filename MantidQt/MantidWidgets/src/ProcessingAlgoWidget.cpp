@@ -10,18 +10,14 @@
 using Mantid::API::Algorithm_sptr;
 using Mantid::API::AlgorithmManager;
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
+namespace MantidQt {
+namespace MantidWidgets {
 
 //----------------------
 // Public member functions
 //----------------------
-///Constructor
-ProcessingAlgoWidget::ProcessingAlgoWidget(QWidget *parent)
-: QWidget(parent)
-{
+/// Constructor
+ProcessingAlgoWidget::ProcessingAlgoWidget(QWidget *parent) : QWidget(parent) {
   ui.setupUi(this);
 
   // Load all available algorithms
@@ -31,14 +27,17 @@ ProcessingAlgoWidget::ProcessingAlgoWidget(QWidget *parent)
   ui.editor->setLexer(new QsciLexerPython);
 
   // Layout tweak
-  QList<int> sizes; sizes.push_back(300); sizes.push_back(1000);
+  QList<int> sizes;
+  sizes.push_back(300);
+  sizes.push_back(1000);
   ui.splitter->setSizes(sizes);
   ui.splitter->setStretchFactor(0, 0);
   ui.splitter->setStretchFactor(1, 0);
 
   //=========== SLOTS =============
-  connect(ui.algoSelector, SIGNAL(algorithmSelectionChanged(const QString &, int)),
-      this, SLOT(changeAlgorithm()));
+  connect(ui.algoSelector,
+          SIGNAL(algorithmSelectionChanged(const QString &, int)), this,
+          SLOT(changeAlgorithm()));
 
   connect(ui.btnSave, SIGNAL(clicked()), this, SLOT(btnSaveClicked()));
   connect(ui.btnLoad, SIGNAL(clicked()), this, SLOT(btnLoadClicked()));
@@ -48,23 +47,15 @@ ProcessingAlgoWidget::ProcessingAlgoWidget(QWidget *parent)
 
 //------------------------------------------------------------------------------
 /// Destructor
-ProcessingAlgoWidget::~ProcessingAlgoWidget()
-{
-  saveSettings();
-}
+ProcessingAlgoWidget::~ProcessingAlgoWidget() { saveSettings(); }
 
 //------------------------------------------------------------------------------
 /** Save the inputs to algorithm history */
-void ProcessingAlgoWidget::saveInput()
-{
-  ui.algoProperties->saveInput();
-}
-
+void ProcessingAlgoWidget::saveInput() { ui.algoProperties->saveInput(); }
 
 //------------------------------------------------------------------------------------
 /** Load QSettings from .ini-type files */
-void ProcessingAlgoWidget::loadSettings()
-{
+void ProcessingAlgoWidget::loadSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/ProcessingAlgoWidget");
   m_lastFile = settings.value("LastFile", QString()).toString();
@@ -73,50 +64,46 @@ void ProcessingAlgoWidget::loadSettings()
 
 //------------------------------------------------------------------------------------
 /** Save settings for next time. */
-void ProcessingAlgoWidget::saveSettings()
-{
+void ProcessingAlgoWidget::saveSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/ProcessingAlgoWidget");
   settings.setValue("LastFile", m_lastFile);
   settings.endGroup();
 }
 
-
 //------------------------------------------------------------------------------
 /** Slot called when the save button is clicked */
-void ProcessingAlgoWidget::btnSaveClicked()
-{
+void ProcessingAlgoWidget::btnSaveClicked() {
   // Save to a .py file
-  QString fileselection = MantidQt::API::FileDialogHandler::getSaveFileName(this, "Save a Python Script",
-      QFileInfo(m_lastFile).absoluteFilePath(), "Python scripts (*.py);;All files (*)");
-  if (!fileselection.isEmpty())
-  {
+  QString fileselection = MantidQt::API::FileDialogHandler::getSaveFileName(
+      this, "Save a Python Script", QFileInfo(m_lastFile).absoluteFilePath(),
+      "Python scripts (*.py);;All files (*)");
+  if (!fileselection.isEmpty()) {
     m_lastFile = fileselection;
     std::ofstream file;
-    file.exceptions (std::ifstream::failbit | std::ifstream::badbit );
-    try
-    {
+    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    try {
       file.open(fileselection.toStdString().c_str());
       file << ui.editor->text().toStdString();
       file.close();
-    }
-    catch (std::ifstream::failure & e)
-    {
-      QMessageBox::critical(this, "Exception saving file " + m_lastFile,
-          QString("The file could not be saved due to the following exception:\n") + QString(e.what()));
+    } catch (std::ifstream::failure &e) {
+      QMessageBox::critical(
+          this, "Exception saving file " + m_lastFile,
+          QString(
+              "The file could not be saved due to the following exception:\n") +
+              QString(e.what()));
     }
   }
 }
 
 //------------------------------------------------------------------------------
 /** Slot called when the Load button is clicked */
-void ProcessingAlgoWidget::btnLoadClicked()
-{
+void ProcessingAlgoWidget::btnLoadClicked() {
   // Load a .py file
-  QString fileselection = QFileDialog::getOpenFileName(this, "Load a Python Script",
-      QFileInfo(m_lastFile).absoluteFilePath(), "Python scripts (*.py);;All files (*)");
-  if (!fileselection.isEmpty())
-  {
+  QString fileselection = QFileDialog::getOpenFileName(
+      this, "Load a Python Script", QFileInfo(m_lastFile).absoluteFilePath(),
+      "Python scripts (*.py);;All files (*)");
+  if (!fileselection.isEmpty()) {
     m_lastFile = fileselection;
     std::ifstream file(fileselection.toStdString().c_str());
     std::stringstream buffer;
@@ -126,21 +113,16 @@ void ProcessingAlgoWidget::btnLoadClicked()
   }
 }
 
-
 //------------------------------------------------------------------------------
 /** Slot called when the algorithm selected changes
  */
-void ProcessingAlgoWidget::changeAlgorithm()
-{
+void ProcessingAlgoWidget::changeAlgorithm() {
   auto alg = ui.algoSelector->getSelectedAlgorithm();
-  try
-  {
+  try {
     m_alg = AlgorithmManager::Instance().createUnmanaged(alg.name.toStdString(),
                                                          alg.version);
     m_alg->initialize();
-  }
-  catch (std::runtime_error &)
-  {
+  } catch (std::runtime_error &) {
     // Ignore when the m_algorithm is not found
     m_alg = Algorithm_sptr();
 
@@ -166,8 +148,7 @@ void ProcessingAlgoWidget::changeAlgorithm()
  *
  * @param algo :: name of the algorithm
  */
-void ProcessingAlgoWidget::setSelectedAlgorithm(QString algo)
-{
+void ProcessingAlgoWidget::setSelectedAlgorithm(QString algo) {
   ui.algoSelector->setSelectedAlgorithm(algo);
   this->changeAlgorithm();
 }
@@ -179,5 +160,5 @@ void ProcessingAlgoWidget::setScriptText(QString text) {
   ui.editor->setText(text);
 }
 
-}//namespace
-}//namespace
+} // namespace
+} // namespace

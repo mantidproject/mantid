@@ -80,8 +80,6 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.scaledata_edit.setValidator(dv7)
 
         # Default states
-        self._content.extension_combo.setCurrentIndex(1)
-
         self._content.stripvanpeaks_chkbox.setChecked(True)
         self._syncStripVanPeakWidgets(True)
 
@@ -91,8 +89,6 @@ class AdvancedSetupWidget(BaseWidget):
         dv8.setBottom(0.0)
         self._content.filterbadpulses_edit.setValidator(dv8)
         self._content.filterbadpulses_edit.setText("95.")
-
-        # self._content.extension_combo.addItems(['.h5', '.hd5'])
 
         # Connections from action/event to function to handle
         self.connect(self._content.stripvanpeaks_chkbox, QtCore.SIGNAL("clicked()"),\
@@ -128,7 +124,6 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.vansmoothpar_edit.setText(str(state.vanadiumsmoothparams))
 
         self._content.preserveevents_checkbox.setChecked(state.preserveevents)
-        self._content.extension_combo.setCurrentIndex(self._content.extension_combo.findText(state.extension))
         self._content.outputfileprefix_edit.setText(state.outputfileprefix)
 
         # range of wavelength
@@ -161,7 +156,6 @@ class AdvancedSetupWidget(BaseWidget):
         s.vanadiumsmoothparams = self._content.vansmoothpar_edit.text()
 
         s.preserveevents = self._content.preserveevents_checkbox.isChecked()
-        s.extension = str(self._content.extension_combo.currentText())
 
         s.outputfileprefix = self._content.outputfileprefix_edit.text()
 

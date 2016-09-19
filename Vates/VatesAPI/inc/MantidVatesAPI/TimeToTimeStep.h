@@ -4,13 +4,16 @@
 #include "MantidKernel/System.h"
 #include <functional>
 
-/** Unary operation applying visualisation platforms specific conversion from a time to a timestep understood by underlying mantid code, where time is treated as an index
+/** Unary operation applying visualisation platforms specific conversion from a
+ time to a timestep understood by underlying mantid code, where time is treated
+ as an index
  * in a single dimensional array. See MDWorkspace/MDImage.
 
  @author Owen Arnold, Tessella plc
  @date 14/03/2011
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -31,12 +34,9 @@
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-namespace Mantid
-{
-namespace VATES
-{
-class DLLExport TimeToTimeStep: std::unary_function<double, int>
-{
+namespace Mantid {
+namespace VATES {
+class DLLExport TimeToTimeStep : std::unary_function<double, int> {
 private:
   // Minimum time.
   double m_timeMin;
@@ -50,19 +50,18 @@ private:
   double m_fraction;
   size_t m_nIntervalSteps;
   bool m_runnable;
-  
+
   /// Constructor only accessible via 'construct' static member function.
   TimeToTimeStep(double timeMin, double timeMax, size_t nIntervalSteps);
 
 public:
-
   /// Constructional method.
-  static TimeToTimeStep construct(double timeMin, double timeMax, size_t nIntervalSteps);
+  static TimeToTimeStep construct(double timeMin, double timeMax,
+                                  size_t nIntervalSteps);
 
   TimeToTimeStep();
 
   size_t operator()(double time) const;
-
 };
 }
 }

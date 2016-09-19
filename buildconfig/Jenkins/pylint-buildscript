@@ -1,0 +1,112 @@
+#!/bin/bash -ex
+###############################################################################
+# Setup the build directory
+###############################################################################
+BUILD_DIR=$WORKSPACE/build
+if [ -z "$BUILD_DIR" ]; then
+  echo "Build directory not set. Cannot continue"
+  exit 1
+fi
+PYLINT_OUTPUT_DIR=$BUILD_DIR/pylint
+###############################################################################
+# Purge old logs
+###############################################################################
+rm -f $PYLINT_OUTPUT_DIR/PYLINT-*
+
+###############################################################################
+# Check if python files have changed
+###############################################################################
+if $ALLOW_SKIPPING
+then
+    if $WORKSPACE/buildconfig/Jenkins/check_for_changes py
+    then
+        echo "no python files changed, skipping pylint"
+        # Copy "reference" results from master to keep numbers stable across builds
+        REF_RESULTS=$WORKSPACE/master_pylint-logs.zip
+        if [[ -f "$REF_RESULTS" ]] && [[ -d "$PYLINT_OUTPUT_DIR" ]]; then
+          echo "extracting refererence results from master build"
+          cd $PYLINT_OUTPUT_DIR
+          unzip $REF_RESULTS
+        fi
+        exit 0
+    fi
+fi
+echo "running pylint"
+
+###############################################################################
+# Print out the versions of things we are using
+###############################################################################
+cmake --version
+
+###############################################################################
+# RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
+###############################################################################
+if [[ ${NODE_LABELS} == *rhel6* ]]; then
+  SCL_ON_RHEL6="scl enable mantidlibs34"
+  ON_RHEL6=true
+else
+  SCL_ON_RHEL6="eval"
+fi
+
+###############################################################################
+# Clean build if requested
+###############################################################################
+if [[ "${CLEAN}" == "true" ]]; then
+  # Removing the build directory entirely guarantees a completely clean build
+  rm -rf $BUILD_DIR
+fi
+
+###############################################################################
+# Create the build directory if it doesn't exist
+###############################################################################
+[ -d $BUILD_DIR ] || mkdir $BUILD_DIR
+cd $BUILD_DIR
+
+###############################################################################
+# Clean some artifacts
+###############################################################################
+rm -rf $BUILD_DIR/bin
+# legacy file
+rm -fr $BUILD_DIR/pylint.log
+
+
+###############################################################################
+## Build configuration
+###############################################################################
+BUILD_CONFIG="Release"
+
+###############################################################################
+# CMake configuration
+###############################################################################
+# Generator
+if [ $(command -v ninja) ]; then
+  CMAKE_GENERATOR="-G Ninja"
+elif [ $(command -v ninja-build) ]; then
+  CMAKE_GENERATOR="-G Ninja"
+fi
+if [ -e $BUILD_DIR/CMakeCache.txt ]; then
+  CMAKE_GENERATOR=""
+fi
+
+# Need this because some strange control sequences when using default TERM=xterm
+export TERM="linux"
+PYLINT_FORMAT="parseable"
+$SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=OFF -DMAKE_VATES=OFF -DPYLINT_MSG_TEMPLATE=\"${PYLINT_FORMAT}\" -DPYLINT_NTHREADS=$BUILD_THREADS -DPYLINT_OUTPUT_DIR=${PYLINT_OUTPUT_DIR} .."
+
+###############################################################################
+# Build step (we only need the framework)
+###############################################################################
+$SCL_ON_RHEL6 "cmake --build . --target Framework -- -j$BUILD_THREADS"
+
+###############################################################################
+# Run plint check
+###############################################################################
+$SCL_ON_RHEL6 "cmake --build . --target pylintcheck"
+
+###############################################################################
+# Archive the results
+###############################################################################
+if [ -d $PYLINT_OUTPUT_DIR ]; then
+  cd $PYLINT_OUTPUT_DIR
+  zip ${JOB_NAME}-logs.zip PYLINT-*.log
+fi

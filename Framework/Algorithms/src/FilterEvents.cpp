@@ -1,21 +1,22 @@
 #include "MantidAlgorithms/FilterEvents.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyIndirect.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include <memory>
 #include <sstream>
 
@@ -32,7 +33,6 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(FilterEvents)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 FilterEvents::FilterEvents()
@@ -46,12 +46,6 @@ FilterEvents::FilterEvents()
       m_specSkipType(), m_vecSkip(), m_isSplittersRelativeTime(false),
       m_filterStartTime(0) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FilterEvents::~FilterEvents() {}
-
-//----------------------------------------------------------------------------------------------
 /** Declare Inputs
  */
 void FilterEvents::init() {
@@ -146,11 +140,8 @@ void FilterEvents::init() {
   declareProperty(
       "FilterStartTime", "",
       "Start time for splitters that can be parsed to DateAndTime.");
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execution body
  */
 void FilterEvents::exec() {
@@ -205,7 +196,7 @@ void FilterEvents::exec() {
     groupws->setProperty("OutputWorkspace", groupname);
     groupws->execute();
     if (!groupws->isExecuted()) {
-      g_log.error() << "Grouping all output workspaces fails." << std::endl;
+      g_log.error() << "Grouping all output workspaces fails.\n";
     }
   }
 
@@ -219,11 +210,8 @@ void FilterEvents::exec() {
 
   m_progress = 1.0;
   progress(m_progress, "Completed");
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Process input properties
  */
 void FilterEvents::processAlgorithmProperties() {
@@ -333,11 +321,8 @@ void FilterEvents::processAlgorithmProperties() {
       }
     }
   }
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Examine whether any spectrum does not have detector
   */
 void FilterEvents::examineEventWS() {
@@ -354,25 +339,13 @@ void FilterEvents::examineEventWS() {
     size_t numskipspec = 0;
     size_t numeventsskip = 0;
 
+    const auto &spectrumInfo = m_eventWS->spectrumInfo();
     for (size_t i = 0; i < numhist; ++i) {
-      bool skip = false;
-
-      // Access detector of the spectrum
-      try {
-        IDetector_const_sptr tempdet = m_eventWS->getDetector(i);
-        if (!tempdet)
-          skip = true;
-      } catch (const Kernel::Exception::NotFoundError &) {
-        // No detector found
-        skip = true;
-      }
-
-      // Output
-      if (skip) {
+      if (!spectrumInfo.hasDetectors(i)) {
         m_vecSkip[i] = true;
 
         ++numskipspec;
-        const EventList &elist = m_eventWS->getEventList(i);
+        const EventList &elist = m_eventWS->getSpectrum(i);
         numeventsskip += elist.getNumberEvents();
         msgss << i;
         if (numskipspec % 10 == 0)
@@ -396,11 +369,8 @@ void FilterEvents::examineEventWS() {
     }
 
   } // END-IF-ELSE
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Purpose:
  *    Convert SplitterWorkspace object to TimeSplitterType (sorted vector)
  *    and create a map for all workspace group number
@@ -439,14 +409,11 @@ void FilterEvents::processSplittersWorkspace() {
                       << m_workGroupIndexes.size() - 1
                       << ") than input information workspaces ("
                       << m_informationWS->rowCount() << "). "
-                      << "  Information may not be accurate. " << std::endl;
+                      << "  Information may not be accurate. \n";
     }
   }
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /**
  * @brief FilterEvents::processMatrixSplitterWorkspace
  * Purpose:
@@ -462,19 +429,18 @@ void FilterEvents::processMatrixSplitterWorkspace() {
   // Check input workspace validity
   assert(m_matrixSplitterWS);
 
-  const MantidVec &vecX = m_matrixSplitterWS->readX(0);
-  const MantidVec &vecY = m_matrixSplitterWS->readY(0);
-  size_t sizex = vecX.size();
-  size_t sizey = vecY.size();
-  assert(sizex - sizey == 1);
+  auto X = m_matrixSplitterWS->binEdges(0);
+  auto &Y = m_matrixSplitterWS->y(0);
+  size_t sizex = X.size();
+  size_t sizey = Y.size();
 
   // Assign vectors for time comparison
-  m_vecSplitterTime.assign(vecX.size(), 0);
-  m_vecSplitterGroup.assign(vecY.size(), -1);
+  m_vecSplitterTime.assign(X.size(), 0);
+  m_vecSplitterGroup.assign(Y.size(), -1);
 
   // Transform vector
   for (size_t i = 0; i < sizex; ++i) {
-    m_vecSplitterTime[i] = static_cast<int64_t>(vecX[i]);
+    m_vecSplitterTime[i] = static_cast<int64_t>(X[i]);
   }
   // shift the splitters' time if applied
   if (m_isSplittersRelativeTime) {
@@ -484,14 +450,11 @@ void FilterEvents::processMatrixSplitterWorkspace() {
   }
 
   for (size_t i = 0; i < sizey; ++i) {
-    m_vecSplitterGroup[i] = static_cast<int>(vecY[i]);
+    m_vecSplitterGroup[i] = static_cast<int>(Y[i]);
     m_workGroupIndexes.insert(m_vecSplitterGroup[i]);
   }
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Create a list of EventWorkspace for output
  */
 void FilterEvents::createOutputWorkspaces() {
@@ -604,11 +567,8 @@ void FilterEvents::createOutputWorkspaces() {
   setProperty("NumberOutputWS", numoutputws);
 
   g_log.information("Output workspaces are created. ");
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Set up neutron event's TOF correction.
   * It can be (1) parsed from TOF-correction table workspace to vectors,
   * (2) created according to detector's position in instrument;
@@ -649,13 +609,11 @@ void FilterEvents::setupDetectorTOFCalibration() {
         m_detTofOffsets[i] = correction.offset;
         m_detTofFactors[i] = correction.factor;
 
-        corrws->dataY(i)[0] = correction.factor;
-        corrws->dataY(i)[1] = correction.offset;
+        corrws->mutableY(i)[0] = correction.factor;
+        corrws->mutableY(i)[1] = correction.offset;
       }
     }
   }
-
-  return;
 }
 
 TimeAtSampleStrategy *FilterEvents::setupElasticTOFCorrection() const {
@@ -686,7 +644,6 @@ TimeAtSampleStrategy *FilterEvents::setupIndirectTOFCorrection() const {
   return new TimeAtSampleStrategyIndirect(m_eventWS);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Set up corrections with customized TOF correction input
   * The first column must be either DetectorID or Spectrum (from 0... as
  * workspace index)
@@ -772,7 +729,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
       // It is assumed that there is one detector per spectra.
       // If there are more than 1 spectrum, it is very likely to have problem
       // with correction factor
-      const DataObjects::EventList events = m_eventWS->getEventList(i);
+      const DataObjects::EventList events = m_eventWS->getSpectrum(i);
       auto detids = events.getDetectorIDs();
       if (detids.size() != 1) {
         // Check whether there are more than 1 detector per spectra.
@@ -808,7 +765,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
         m_detTofOffsets[i] = fiter->second;
     } // ENDFOR (each spectrum i)
   } else {
-    // It is spectrum ID already
+    // It is spectrum Number already
     map<detid_t, double>::iterator fiter;
     // correction factor
     for (fiter = toffactormap.begin(); fiter != toffactormap.end(); ++fiter) {
@@ -833,17 +790,13 @@ void FilterEvents::setupCustomizedTOFCorrection() {
       }
     }
   }
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Main filtering method
   * Structure: per spectrum --> per workspace
  */
 void FilterEvents::filterEventsBySplitters(double progressamount) {
   size_t numberOfSpectra = m_eventWS->getNumberHistograms();
-  std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
 
   // Loop over the histograms (detector spectra) to do split from 1 event list
   // to N event list
@@ -860,17 +813,15 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
       // Get the output event lists (should be empty) to be a map
       std::map<int, DataObjects::EventList *> outputs;
       PARALLEL_CRITICAL(build_elist) {
-        for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end();
-             ++wsiter) {
-          int index = wsiter->first;
-          DataObjects::EventList *output_el =
-              wsiter->second->getEventListPtr(iws);
-          outputs.emplace(index, output_el);
+        for (auto &ws : m_outputWS) {
+          int index = ws.first;
+          auto &output_el = ws.second->getSpectrum(iws);
+          outputs.emplace(index, &output_el);
         }
       }
 
       // Get a holder on input workspace's event list of this spectrum
-      const DataObjects::EventList &input_el = m_eventWS->getEventList(iws);
+      const DataObjects::EventList &input_el = m_eventWS->getSpectrum(iws);
 
       // Perform the filtering (using the splitting function and just one
       // output)
@@ -904,9 +855,9 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
 
   double numws = static_cast<double>(m_outputWS.size());
   double outwsindex = 0.;
-  for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++wsiter) {
-    int wsindex = wsiter->first;
-    DataObjects::EventWorkspace_sptr opws = wsiter->second;
+  for (auto &ws : m_outputWS) {
+    int wsindex = ws.first;
+    DataObjects::EventWorkspace_sptr opws = ws.second;
 
     // Generate a list of splitters for current output workspace
     Kernel::TimeSplitterType splitters = generateSplitters(wsindex);
@@ -934,17 +885,13 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
     progress(0.1 + progressamount + outwsindex / numws * 0.2, "Splitting logs");
     outwsindex += 1.;
   }
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Split events by splitters represented by vector
   */
 void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
   size_t numberOfSpectra = m_eventWS->getNumberHistograms();
   // FIXME : consider to use vector to index workspace and event list
-  std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
 
   // Loop over the histograms (detector spectra) to do split from 1 event list
   // to N event list
@@ -960,17 +907,15 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       // Get the output event lists (should be empty) to be a map
       map<int, DataObjects::EventList *> outputs;
       PARALLEL_CRITICAL(build_elist) {
-        for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end();
-             ++wsiter) {
-          int index = wsiter->first;
-          DataObjects::EventList *output_el =
-              wsiter->second->getEventListPtr(iws);
-          outputs.emplace(index, output_el);
+        for (auto &ws : m_outputWS) {
+          int index = ws.first;
+          auto &output_el = ws.second->getSpectrum(iws);
+          outputs.emplace(index, &output_el);
         }
       }
 
       // Get a holder on input workspace's event list of this spectrum
-      const DataObjects::EventList &input_el = m_eventWS->getEventList(iws);
+      const DataObjects::EventList &input_el = m_eventWS->getSpectrum(iws);
 
       bool printdetail = false;
       if (m_useDBSpectrum)
@@ -978,7 +923,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 
       // Perform the filtering (using the splitting function and just one
       // output)
-      std::string logmessage("");
+      std::string logmessage;
       if (m_FilterByPulseTime) {
         throw runtime_error(
             "It is not a good practice to split fast event by pulse time. ");
@@ -1005,11 +950,8 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 
   g_log.notice("Splitters in format of Matrixworkspace are not recommended to "
                "split sample logs. ");
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Generate splitters for specified workspace index as a subset of
  * m_splitters
  */
@@ -1024,36 +966,41 @@ Kernel::TimeSplitterType FilterEvents::generateSplitters(int wsindex) {
   return splitters;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Split a log by splitters
  */
 void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
                             TimeSplitterType &splitters) {
-  Kernel::TimeSeriesProperty<double> *prop =
+  // cast property to both double TimeSeriesProperty and IntSeriesProperty
+  Kernel::TimeSeriesProperty<double> *dbl_prop =
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
           eventws->mutableRun().getProperty(logname));
-  if (!prop) {
-    g_log.warning() << "Log " << logname
-                    << " is not TimeSeriesProperty.  Unable to split."
-                    << std::endl;
-    return;
+  Kernel::TimeSeriesProperty<int> *int_prop =
+      dynamic_cast<Kernel::TimeSeriesProperty<int> *>(
+          eventws->mutableRun().getProperty(logname));
+
+  if (!dbl_prop && !int_prop) {
+    std::stringstream errmsg;
+    errmsg << "Log " << logname
+           << " is not TimeSeriesProperty<int> or TimeSeriesProperty<double>. "
+           << "Unable to split.";
+    throw std::runtime_error(errmsg.str());
   } else {
     for (const auto &split : splitters) {
-      g_log.debug() << "[FilterEvents DB1226] Going to filter workspace "
-                    << eventws->name() << ": "
+      g_log.debug() << "Workspace " << eventws->name() << ": "
                     << "log name = " << logname
                     << ", duration = " << split.duration() << " from "
                     << split.start() << " to " << split.stop() << ".\n";
     }
+
+    // split log
+    if (dbl_prop)
+      dbl_prop->filterByTimes(splitters);
+    else
+      int_prop->filterByTimes(splitters);
   }
-
-  prop->filterByTimes(splitters);
-
-  return;
 }
 
-//----------------------------------------------------------------------------------------------
-/** Get all filterable logs' names
+/** Get all filterable logs' names (double and integer)
  * @returns Vector of names of logs
  */
 std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
@@ -1062,10 +1009,15 @@ std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
   const std::vector<Kernel::Property *> allprop =
       m_eventWS->mutableRun().getProperties();
   for (auto ip : allprop) {
-    Kernel::TimeSeriesProperty<double> *timeprop =
+    // cast to double log and integer log
+    Kernel::TimeSeriesProperty<double> *dbltimeprop =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(ip);
-    if (timeprop) {
-      std::string pname = timeprop->name();
+    Kernel::TimeSeriesProperty<int> *inttimeprop =
+        dynamic_cast<Kernel::TimeSeriesProperty<int> *>(ip);
+
+    // append to vector if it is either double TimeSeries or int TimeSeries
+    if (dbltimeprop || inttimeprop) {
+      std::string pname = ip->name();
       lognames.push_back(pname);
     }
   }

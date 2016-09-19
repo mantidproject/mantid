@@ -2,6 +2,7 @@
 ## mantid.api tests
 ##
 set ( TEST_PY_FILES
+  ADSValidatorTest.py
   AlgorithmTest.py
   AlgorithmFactoryTest.py
   AlgorithmHistoryTest.py
@@ -26,6 +27,7 @@ set ( TEST_PY_FILES
   ITableWorkspaceTest.py
   JacobianTest.py
   MatrixWorkspaceTest.py
+  MDEventWorkspaceTest.py
   MDGeometryTest.py
   MDHistoWorkspaceTest.py
   MultipleExperimentInfos.py

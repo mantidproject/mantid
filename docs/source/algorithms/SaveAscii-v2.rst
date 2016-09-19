@@ -18,7 +18,7 @@ Limitations
 ###########
 
 The algorithm assumes that the workspace has common X values for all spectra
-(i.e. is not a `ragged workspace <Ragged Workspace>`__).
+(i.e. is not a :ref:`ragged workspace <Ragged_Workspace>` )
 
 Usage
 -----

@@ -19,18 +19,6 @@ using namespace Mantid::API;
 const size_t NUM_AXES = 6;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SetGoniometer::SetGoniometer() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SetGoniometer::~SetGoniometer() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SetGoniometer::init() {
@@ -93,7 +81,7 @@ void SetGoniometer::exec() {
         if (Strings::convert(axisName, angle)) {
           g_log.information() << "Axis " << i
                               << " - create a new log value GoniometerAxis" << i
-                              << "_FixedValue" << std::endl;
+                              << "_FixedValue\n";
           axisName = "GoniometerAxis" + Strings::toString(i) + "_FixedValue";
           try {
             Kernel::DateAndTime now = Kernel::DateAndTime::getCurrentTime();
@@ -136,7 +124,7 @@ void SetGoniometer::exec() {
 
   if (gon.getNumberAxes() == 0)
     g_log.warning() << "Empty goniometer created; will always return an "
-                       "identity rotation matrix." << std::endl;
+                       "identity rotation matrix.\n";
 
   // All went well, copy the goniometer into it. It will throw if the log values
   // cannot be found

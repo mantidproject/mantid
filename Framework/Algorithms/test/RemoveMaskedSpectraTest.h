@@ -90,7 +90,7 @@ private:
       }
       space->dataY(j).assign(nBins, double(j));
       space->dataE(j).assign(nBins, sqrt(double(j)));
-      space->getSpectrum(j)->setDetectorID(detid_t(j + 1));
+      space->getSpectrum(j).setDetectorID(detid_t(j + 1));
     }
     return space;
   }

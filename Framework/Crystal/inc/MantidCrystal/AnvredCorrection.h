@@ -77,8 +77,6 @@ class DLLExport AnvredCorrection : public API::Algorithm {
 public:
   /// (Empty) Constructor
   AnvredCorrection();
-  /// Virtual destructor
-  ~AnvredCorrection() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "AnvredCorrection"; }
   /// Summary of algorithms purpose
@@ -126,9 +124,10 @@ private:
   void BuildLamdaWeights();
   double absor_sphere(double &twoth, double &wl);
   void scale_init(Geometry::IDetector_const_sptr det,
-                  Geometry::Instrument_const_sptr inst, int &bank, double &L2,
-                  double &depth, double &pathlength, std::string bankName);
-  void scale_exec(int &bank, double &lambda, double &depth, double &pathlength,
+                  Geometry::Instrument_const_sptr inst, double &L2,
+                  double &depth, double &pathlength, std::string &bankName);
+  void scale_exec(std::string &bankName, double &lambda, double &depth,
+                  Geometry::Instrument_const_sptr inst, double &pathlength,
                   double &value);
 
   double m_smu;                       ///< linear scattering coefficient in 1/cm

@@ -12,68 +12,71 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 
-namespace MantidQt
-{
-	namespace MantidWidgets
-	{
+namespace MantidQt {
+namespace MantidWidgets {
 
-		/**
-		This is an implementation of ProjectionSurface for viewing the instrument in 3D.
+/**
+This is an implementation of ProjectionSurface for viewing the instrument in 3D.
 
-		*/
-		class Projection3D : public ProjectionSurface
-		{
-			Q_OBJECT
-			enum AxisDirection { XPOSITIVE, YPOSITIVE, ZPOSITIVE, XNEGATIVE, YNEGATIVE, ZNEGATIVE };
+*/
+class Projection3D : public ProjectionSurface {
+  Q_OBJECT
+  enum AxisDirection {
+    XPOSITIVE,
+    YPOSITIVE,
+    ZPOSITIVE,
+    XNEGATIVE,
+    YNEGATIVE,
+    ZNEGATIVE
+  };
 
-		public:
-			Projection3D(const InstrumentActor* rootActor, int winWidth, int winHeight);
-                        ~Projection3D() override;
-                        RectF getSurfaceBounds() const override;
+public:
+  Projection3D(const InstrumentActor *rootActor, int winWidth, int winHeight);
+  ~Projection3D() override;
+  RectF getSurfaceBounds() const override;
 
-                        void setViewDirection(const QString& vd);
-			void set3DAxesState(bool on);
-			void setWireframe(bool on);
+  void setViewDirection(const QString &vd);
+  void set3DAxesState(bool on);
+  void setWireframe(bool on);
 
-                        void componentSelected(
-                            Mantid::Geometry::ComponentID = NULL) override;
-                        void getSelectedDetectors(QList<int> &dets) override;
-                        void
-                        getMaskedDetectors(QList<int> &dets) const override;
-                        void resize(int, int) override;
-                        QString getInfoText() const override;
+  void componentSelected(Mantid::Geometry::ComponentID = NULL) override;
+  void getSelectedDetectors(QList<int> &dets) override;
+  void getMaskedDetectors(QList<int> &dets) const override;
+  void resize(int, int) override;
+  QString getInfoText() const override;
+  /// Load settings for the 3D projection from a project file
+  virtual void loadFromProject(const std::string &lines) override;
+  /// Save settings for the 3D projection to a project file
+  virtual std::string saveToProject() const override;
 
-                signals:
-			void finishedMove();
+signals:
+  void finishedMove();
 
-			protected slots:
-			void initTranslation(int x, int y);
-			void translate(int x, int y);
-			void initZoom(int x, int y);
-			void zoom(int x, int y);
-			void wheelZoom(int x, int y, int d);
-			void initRotation(int x, int y);
-			void rotate(int x, int y);
-			void finishMove();
+protected slots:
+  void initTranslation(int x, int y);
+  void translate(int x, int y);
+  void initZoom(int x, int y);
+  void zoom(int x, int y);
+  void wheelZoom(int x, int y, int d);
+  void initRotation(int x, int y);
+  void rotate(int x, int y);
+  void finishMove();
 
-		protected:
-                  void init() override {}
-                  void drawSurface(MantidGLWidget *widget,
-                                   bool picking = false) const override;
-                  void changeColorMap() override;
+protected:
+  void init() override {}
+  void drawSurface(MantidGLWidget *widget, bool picking = false) const override;
+  void changeColorMap() override;
 
-                        void drawAxes(double axis_length = 100.0)const;
-			void setLightingModel(bool picking)const;
+  void drawAxes(double axis_length = 100.0) const;
+  void setLightingModel(bool picking) const;
 
-			bool m_drawAxes;
-			bool m_wireframe;
+  bool m_drawAxes;
+  bool m_wireframe;
 
-			Viewport m_viewport;
+  Viewport m_viewport;
+};
 
-		};
-
-	}//MantidWidgets
-}//MantidQt
+} // MantidWidgets
+} // MantidQt
 
 #endif /* PROJECTION3D_H_ */
-

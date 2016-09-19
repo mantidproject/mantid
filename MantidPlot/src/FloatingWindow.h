@@ -11,16 +11,15 @@ class QSize;
 /**
  * Floating wrapper window for a MdiSubWindow.
  */
-class FloatingWindow: public QMainWindow
-{
+class FloatingWindow : public QMainWindow {
   Q_OBJECT
 public:
-  FloatingWindow(ApplicationWindow* appWindow, Qt::WindowFlags f = 0);
+  FloatingWindow(ApplicationWindow *appWindow, Qt::WindowFlags f = 0);
   ~FloatingWindow() override;
   void setStaysOnTopFlag();
   void removeStaysOnTopFlag();
-  MdiSubWindow* mdiSubWindow() const;
-  void setMdiSubWindow(MdiSubWindow* sw);
+  MdiSubWindow *mdiSubWindow() const;
+  void setMdiSubWindow(MdiSubWindow *sw);
   void removeMdiSubWindow();
   QSize minimumSizeHint() const override;
 
@@ -30,17 +29,16 @@ public slots:
   void dragMouseMove(QPoint);
 
 protected:
-
-  void setWidget(QWidget* w);
-  QWidget* widget() const;
+  void setWidget(QWidget *w);
+  QWidget *widget() const;
   bool event(QEvent *ev) override;
   void moveEvent(QMoveEvent *ev) override;
 
 private:
-
-  ApplicationWindow* d_app; ///< Pointer to the main window
+  ApplicationWindow *d_app; ///< Pointer to the main window
 #ifdef Q_OS_WIN
-  Qt::WindowFlags m_flags;  ///< Keeps a copy of window flags, used when re-parenting
+  Qt::WindowFlags
+      m_flags; ///< Keeps a copy of window flags, used when re-parenting
 #endif
   bool m_draggingToTiledWindow;
   bool m_isInsideTiledWindow;

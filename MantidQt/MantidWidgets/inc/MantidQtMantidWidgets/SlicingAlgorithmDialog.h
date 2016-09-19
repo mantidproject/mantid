@@ -11,10 +11,8 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "WidgetDllOption.h"
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
+namespace MantidQt {
+namespace MantidWidgets {
 
 typedef QMap<QString, QString> PropertyDimensionMap;
 
@@ -22,18 +20,19 @@ typedef QMap<QString, QString> PropertyDimensionMap;
 Class SlicingAlgorithmDialog
 Abstract SlicingAlgorithm Dialog geared for MD Slicing type algorithms
 
-This custom dialog provides two advantages over the default custom generated one.
+This custom dialog provides two advantages over the default custom generated
+one.
 
-1) It dynamically creates dimension input controls based on the nature of the input MD workspace
+1) It dynamically creates dimension input controls based on the nature of the
+input MD workspace
 2) It pre-populates those dimension input controls based on existing values.
 
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SlicingAlgorithmDialog : public MantidQt::API::AlgorithmDialog
-{
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SlicingAlgorithmDialog
+    : public MantidQt::API::AlgorithmDialog {
   Q_OBJECT
 public:
-
-   /// Default Constructor
+  /// Default Constructor
   SlicingAlgorithmDialog(QWidget *parent = 0);
 
   /// Destructor
@@ -42,19 +41,18 @@ public:
   // Customisation for the VSI
   void customiseLayoutForVsi(std::string initialWorkspace);
 
-  ///Reset the aligned dim values for the VSI
+  /// Reset the aligned dim values for the VSI
   void resestAlignedDimProperty(size_t index, QString propertyValue);
 
 protected:
-
   /// view
-  Ui::SlicingAlgorithmDialog ui; 
+  Ui::SlicingAlgorithmDialog ui;
 
   /// Common slice md setup
   void commonSliceMDSetup(const bool);
 
   /// Build dimension inputs.
-  void buildDimensionInputs(const bool bForceForget=false);
+  void buildDimensionInputs(const bool bForceForget = false);
 
 protected slots:
 
@@ -67,14 +65,13 @@ protected slots:
   void onMaxFromInput(bool);
 
   void onRebuildDimensions();
-  
+
   void onCalculateChanged(bool checked);
 
 private:
+  enum History { Remember, Forget };
 
-  enum History{Remember, Forget};
-
-  enum HistoryChanged{HasChanged, HasNotChanged};
+  enum HistoryChanged { HasChanged, HasNotChanged };
 
   /// Initialize the layout
   void initLayout() override;
@@ -92,13 +89,17 @@ private:
   QString getCurrentOutputWorkspaceName() const;
 
   /// Build dimension inputs.
-  void makeDimensionInputs(const QString& propertyPrefix, QLayout* owningLayout, QString(*format)(Mantid::Geometry::IMDDimension_const_sptr), History history);
+  void makeDimensionInputs(
+      const QString &propertyPrefix, QLayout *owningLayout,
+      QString (*format)(Mantid::Geometry::IMDDimension_const_sptr),
+      History history);
 
   /// Determine if history should be used.
-  History useHistory(const HistoryChanged& criticalChange, const bool bForceForget);
+  History useHistory(const HistoryChanged &criticalChange,
+                     const bool bForceForget);
 
   /// Cleans a given layout.
-  void cleanLayoutOfDimensions(QLayout* layout);
+  void cleanLayoutOfDimensions(QLayout *layout);
 
   /// Clear out any exisiting dimension widgets.
   void clearExistingDimensions();
@@ -117,20 +118,17 @@ private:
 
   /// Do auto fill dimension inputs on changes.
   bool doAutoFillDimensions() const;
-
 };
 
 /*
 Class SliceMDDialog
 Concrete SlicingAlgorithm Dialog geared for SliceMD
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SliceMDDialog : public SlicingAlgorithmDialog
-{
-    Q_OBJECT
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SliceMDDialog
+    : public SlicingAlgorithmDialog {
+  Q_OBJECT
 public:
-  SliceMDDialog(QWidget* parent=NULL) : SlicingAlgorithmDialog(parent)
-  {
-  }
+  SliceMDDialog(QWidget *parent = NULL) : SlicingAlgorithmDialog(parent) {}
 
   ~SliceMDDialog() override {}
 
@@ -141,17 +139,14 @@ public:
 Class BinMDDialog
 Concrete BinMDDialog Dialog geared for BinMD
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS BinMDDialog : public SlicingAlgorithmDialog
-{
-    Q_OBJECT
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS BinMDDialog
+    : public SlicingAlgorithmDialog {
+  Q_OBJECT
 public:
-  BinMDDialog(QWidget* parent=NULL) : SlicingAlgorithmDialog(parent)
-  {
-  }
+  BinMDDialog(QWidget *parent = NULL) : SlicingAlgorithmDialog(parent) {}
   ~BinMDDialog() override {}
   void customiseInitLayout() override;
 };
-
 }
 }
 

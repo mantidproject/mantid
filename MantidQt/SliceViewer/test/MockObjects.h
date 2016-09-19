@@ -3,19 +3,20 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
-#include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidQtSliceViewer/PeakViewColor.h"
-#include "MantidQtSliceViewer/ZoomablePeaksView.h"
+#include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
-#include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidKernel/UnitLabel.h"
+#include "MantidQtSliceViewer/ZoomablePeaksView.h"
+#include <QColor>
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
-#include <QColor>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid::API;
@@ -23,8 +24,9 @@ using namespace Mantid::Geometry;
 using namespace Mantid;
 using boost::regex;
 
-namespace {
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
+namespace {
 /*------------------------------------------------------------
 Zoomable Peaks View
 ------------------------------------------------------------*/
@@ -162,7 +164,8 @@ Mock IPeak
 ------------------------------------------------------------*/
 class MockIPeak : public Mantid::Geometry::IPeak {
 public:
-  MOCK_METHOD1(setInstrument, void(Geometry::Instrument_const_sptr inst));
+  MOCK_METHOD1(setInstrument,
+               void(const Geometry::Instrument_const_sptr &inst));
   MOCK_CONST_METHOD0(getDetectorID, int());
   MOCK_METHOD1(setDetectorID, void(int m_DetectorID));
   MOCK_CONST_METHOD0(getDetector, Geometry::IDetector_const_sptr());
@@ -179,13 +182,13 @@ public:
   MOCK_METHOD1(setK, void(double m_K));
   MOCK_METHOD1(setL, void(double m_L));
   MOCK_METHOD3(setHKL, void(double H, double K, double L));
-  MOCK_METHOD1(setHKL, void(Mantid::Kernel::V3D HKL));
+  MOCK_METHOD1(setHKL, void(const Mantid::Kernel::V3D &HKL));
   MOCK_CONST_METHOD0(getQLabFrame, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getQSampleFrame, Mantid::Kernel::V3D());
   MOCK_METHOD0(findDetector, bool());
-  MOCK_METHOD2(setQSampleFrame, void(Mantid::Kernel::V3D QSampleFrame,
+  MOCK_METHOD2(setQSampleFrame, void(const Mantid::Kernel::V3D &QSampleFrame,
                                      boost::optional<double> detectorDistance));
-  MOCK_METHOD2(setQLabFrame, void(Mantid::Kernel::V3D QLabFrame,
+  MOCK_METHOD2(setQLabFrame, void(const Mantid::Kernel::V3D &QLabFrame,
                                   boost::optional<double> detectorDistance));
   MOCK_METHOD1(setWavelength, void(double wavelength));
   MOCK_CONST_METHOD0(getWavelength, double());
@@ -204,7 +207,7 @@ public:
   MOCK_METHOD1(setBinCount, void(double m_BinCount));
   MOCK_CONST_METHOD0(getGoniometerMatrix, Mantid::Kernel::Matrix<double>());
   MOCK_METHOD1(setGoniometerMatrix,
-               void(Mantid::Kernel::Matrix<double> m_GoniometerMatrix));
+               void(const Mantid::Kernel::Matrix<double> &m_GoniometerMatrix));
   MOCK_CONST_METHOD0(getBankName, std::string());
   MOCK_CONST_METHOD0(getRow, int());
   MOCK_CONST_METHOD0(getCol, int());
@@ -247,5 +250,7 @@ public:
   MOCK_METHOD3(setRange, void(size_t nBins, coord_t min, coord_t max));
 };
 }
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
 
 #endif

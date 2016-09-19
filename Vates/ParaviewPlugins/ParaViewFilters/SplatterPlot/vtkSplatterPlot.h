@@ -5,31 +5,29 @@
 #include "vtkUnstructuredGridAlgorithm.h"
 #include <string>
 
-namespace Mantid
-{
-  namespace VATES
-  {
-    class vtkSplatterPlotFactory;
-  }
+namespace Mantid {
+namespace VATES {
+class vtkSplatterPlotFactory;
+}
 }
 
 // cppcheck-suppress class_X_Y
-class VTK_EXPORT vtkSplatterPlot : public vtkUnstructuredGridAlgorithm
-{
+class VTK_EXPORT vtkSplatterPlot : public vtkUnstructuredGridAlgorithm {
 public:
   static vtkSplatterPlot *New();
-  vtkTypeMacro(vtkSplatterPlot, vtkUnstructuredGridAlgorithm)
-  double getTime() const;
+  vtkTypeMacro(vtkSplatterPlot,
+               vtkUnstructuredGridAlgorithm) double getTime() const;
   void PrintSelf(ostream &os, vtkIndent indent) override;
   void SetNumberOfPoints(int nPoints);
   void SetTopPercentile(double topPercentile);
-  void updateAlgorithmProgress(double progress, const std::string& message);
+  void updateAlgorithmProgress(double progress, const std::string &message);
   /// Getter for the minimum value of the workspace data
   double GetMinValue();
   /// Getter for the maximum value of the workspace data
   double GetMaxValue();
   /// Getter for the maximum value of the workspace data
-  const char* GetInstrument();
+  const char *GetInstrument();
+
 protected:
   vtkSplatterPlot();
   ~vtkSplatterPlot() override;
@@ -50,7 +48,7 @@ private:
   /// Time.
   double m_time;
 
-  vtkSplatterPlot(const vtkSplatterPlot&);
-  void operator = (const vtkSplatterPlot&);
+  vtkSplatterPlot(const vtkSplatterPlot &);
+  void operator=(const vtkSplatterPlot &);
 };
 #endif

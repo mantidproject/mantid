@@ -15,16 +15,18 @@ class QListWidget;
 class QMouseEvent;
 class QStringList;
 
-//SendToProgramDialog
+// SendToProgramDialog
 
-class SendToProgramDialog : public QDialog
-{
+class SendToProgramDialog : public QDialog {
   Q_OBJECT
-  
+
 public:
-  SendToProgramDialog(QWidget* parent, Qt::WFlags fl = 0 );
-  SendToProgramDialog(QWidget* parent, QString programName, std::map<std::string, std::string> programKeysAndDetails, Qt::WFlags fl = 0 );
-  std::pair<std::string,std::map<std::string,std::string> > getSettings() const;
+  SendToProgramDialog(QWidget *parent, Qt::WFlags fl = 0);
+  SendToProgramDialog(QWidget *parent, QString programName,
+                      std::map<std::string, std::string> programKeysAndDetails,
+                      Qt::WFlags fl = 0);
+  std::pair<std::string, std::map<std::string, std::string>>
+  getSettings() const;
 
 private slots:
   /// Open up a new file browsing window.
@@ -38,7 +40,7 @@ private slots:
 
   /// Validate user specified target.
   void validateTarget();
-  
+
   /// Validate user specified save algorithm.
   void validateSaveUsing();
 
@@ -48,8 +50,7 @@ private slots:
 private:
   bool validName, validTarget, validSaveUsing;
   Ui::SendToProgramDialog m_uiform;
-  std::pair<std::string,std::map<std::string,std::string> > m_settings;
+  std::pair<std::string, std::map<std::string, std::string>> m_settings;
 };
-
 
 #endif // SendToProgram_H

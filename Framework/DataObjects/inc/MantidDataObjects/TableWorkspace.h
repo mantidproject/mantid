@@ -80,10 +80,7 @@ class MANTID_DATAOBJECTS_DLL TableWorkspace : public API::ITableWorkspace {
 public:
   /// Constructor.
   TableWorkspace(size_t nrows = 0);
-  /// Returns a clone of the workspace
-  std::unique_ptr<TableWorkspace> clone() const {
-    return std::unique_ptr<TableWorkspace>(doClone());
-  }
+
   TableWorkspace &operator=(const TableWorkspace &other) = delete;
   /// Return the workspace typeID
   const std::string id() const override { return "TableWorkspace"; }
@@ -149,8 +146,7 @@ public:
    *  e.g.: resise/reserve are unsafe
    *   Writing/reading data to vector through [] or at() is safe. */
   template <class T> std::vector<T> &getColVector(const std::string &name) {
-    column_it ci =
-        std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
+    auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));
     if (ci == m_columns.end())
       throw(
           std::runtime_error("column with name: " + name + " does not exist"));
@@ -296,7 +292,10 @@ protected:
   TableWorkspace(const TableWorkspace &other);
 
 private:
-  TableWorkspace *doClone() const override { return new TableWorkspace(*this); }
+  // TableWorkspace *doClone() const override { return new
+  // TableWorkspace(*this); }
+  ITableWorkspace *
+  doCloneColumns(const std::vector<std::string> &colNames) const override;
 
   /// template method to find a given value in a table.
   template <typename Type>

@@ -165,7 +165,7 @@ public:
   class CancelException : public std::exception {
   public:
     /// Returns the message string.
-    const char *what() const throw() override { return outMessage.c_str(); }
+    const char *what() const noexcept override { return outMessage.c_str(); }
 
   private:
     /// The message returned by what()
@@ -247,7 +247,11 @@ public:
   /// returns the status of logging, True = enabled
   bool isLogging() const override { return g_log.getEnabled(); }
 
-  /// sets the logging priority offset
+  /* Sets the logging priority offset. Values are subtracted from the log level.
+   *
+   * Example value=1 will turn warning into notice
+   * Example value=-1 will turn notice into warning
+   */
   void setLoggingOffset(const int value) override {
     g_log.setLevelOffset(value);
   }
@@ -380,6 +384,9 @@ protected:
   std::vector<WorkspaceVector> m_groups;
   /// Size of the group(s) being processed
   size_t m_groupSize;
+  /// distinguish between base processGroups() and overriden/algorithm specific
+  /// versions
+  bool m_usingBaseProcessGroups = false;
 
 private:
   void lockWorkspaces();
@@ -390,6 +397,8 @@ private:
   void logAlgorithmInfo() const;
 
   bool executeAsyncImpl(const Poco::Void &i);
+
+  bool doCallProcessGroups(Mantid::Kernel::DateAndTime &start_time);
 
   // Report that the algorithm has completed.
   void reportCompleted(const double &duration,

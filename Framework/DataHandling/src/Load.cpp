@@ -51,7 +51,7 @@ bool isSingleFile(const std::vector<std::vector<std::string>> &fileNames) {
  *names.
  */
 std::string generateWsNameFromFileNames(std::vector<std::string> filenames) {
-  std::string wsName("");
+  std::string wsName;
 
   for (auto &filename : filenames) {
     if (!wsName.empty())
@@ -414,7 +414,7 @@ void Load::loadMultipleFiles() {
       for (; childWsName != childWsNames.end(); ++childWsName, ++count) {
         Workspace_sptr childWs = group->getItem(*childWsName);
         const std::string childName =
-            group->getName() + "_" + boost::lexical_cast<std::string>(count);
+            group->getName() + "_" + std::to_string(count);
         API::AnalysisDataService::Instance().addOrReplace(childName, childWs);
         // childWs->setName(group->getName() + "_" +
         // boost::lexical_cast<std::string>(count));
@@ -444,7 +444,7 @@ void Load::loadMultipleFiles() {
         // child->setName(child->getName() + "_" +
         // boost::lexical_cast<std::string>(count));
         const std::string childName =
-            child->getName() + "_" + boost::lexical_cast<std::string>(count);
+            child->getName() + "_" + std::to_string(count);
         API::AnalysisDataService::Instance().addOrReplace(childName, child);
         count++;
       }
@@ -454,8 +454,7 @@ void Load::loadMultipleFiles() {
     count = 1;
     for (auto &childWsName : childWsNames) {
       Workspace_sptr childWs = group->getItem(childWsName);
-      std::string outWsPropName =
-          "OutputWorkspace_" + boost::lexical_cast<std::string>(count);
+      std::string outWsPropName = "OutputWorkspace_" + std::to_string(count);
       ++count;
       declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
           outWsPropName, childWsName, Direction::Output));
@@ -615,7 +614,7 @@ Load::getOutputWorkspace(const std::string &propName,
 
   g_log.debug() << "Workspace property " << propName
                 << " did not return to MatrixWorkspace, EventWorkspace, "
-                   "IMDEventWorkspace, IMDWorkspace" << std::endl;
+                   "IMDEventWorkspace, IMDWorkspace\n";
   return Workspace_sptr();
 }
 

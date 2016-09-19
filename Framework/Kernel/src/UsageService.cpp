@@ -8,7 +8,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ParaViewVersion.h"
 
-#include <Poco/ActiveMethod.h>
+#include <Poco/ActiveResult.h>
+
 #include <json/json.h>
 
 namespace Mantid {
@@ -68,7 +69,9 @@ bool FeatureUsage::operator<(const FeatureUsage &r) const {
 UsageServiceImpl::UsageServiceImpl()
     : m_timer(), m_timerTicks(0), m_timerTicksTarget(0), m_FeatureQueue(),
       m_FeatureQueueSizeThreshold(50), m_isEnabled(false), m_mutex(),
-      m_application("python") {
+      m_application("python"),
+      m_startupActiveMethod(this, &UsageServiceImpl::sendStartupAsyncImpl),
+      m_featureActiveMethod(this, &UsageServiceImpl::sendFeatureAsyncImpl) {
   setInterval(60);
 }
 
@@ -117,6 +120,11 @@ void UsageServiceImpl::setEnabled(const bool enabled) {
   m_isEnabled = enabled;
 }
 
+void UsageServiceImpl::clear() {
+  std::queue<FeatureUsage> empty;
+  std::swap(m_FeatureQueue, empty);
+}
+
 void UsageServiceImpl::flush() {
   if (isEnabled()) {
     sendFeatureUsageReport(true);
@@ -140,28 +148,25 @@ void UsageServiceImpl::sendStartupReport() {
     std::string message = this->generateStartupMessage();
 
     // send the report
-    // sendReport(message, STARTUP_URL);
-    Poco::ActiveResult<int> result = this->sendStartupAsync(message);
+    Poco::ActiveResult<int> result = m_startupActiveMethod(message);
   } catch (std::exception &ex) {
-    g_log.debug() << "Send startup usage failure. " << ex.what() << std::endl;
+    g_log.debug() << "Send startup usage failure. " << ex.what() << '\n';
   }
 }
 
 void UsageServiceImpl::sendFeatureUsageReport(const bool synchronous = false) {
   try {
     std::string message = this->generateFeatureUsageMessage();
-    // g_log.debug() << "FeatureUsage to send\n" << message << std::endl;
     if (!message.empty()) {
       if (synchronous) {
         sendFeatureAsyncImpl(message);
       } else {
-        Poco::ActiveResult<int> result = this->sendFeatureAsync(message);
+        Poco::ActiveResult<int> result = m_featureActiveMethod(message);
       }
     }
 
   } catch (std::exception &ex) {
-    g_log.debug() << "sendFeatureUsageReport failure. " << ex.what()
-                  << std::endl;
+    g_log.debug() << "sendFeatureUsageReport failure. " << ex.what() << '\n';
   }
 }
 
@@ -270,26 +275,11 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
 /**
 * Asynchronous execution
 */
-Poco::ActiveResult<int>
-UsageServiceImpl::sendStartupAsync(const std::string &message) {
-  auto sendAsync = new Poco::ActiveMethod<int, std::string, UsageServiceImpl>(
-      this, &UsageServiceImpl::sendStartupAsyncImpl);
-  return (*sendAsync)(message);
-}
 
 /**Async method for sending startup messages
 */
 int UsageServiceImpl::sendStartupAsyncImpl(const std::string &message) {
   return this->sendReport(message, STARTUP_URL);
-}
-
-/**Async method for sending feature messages
-*/
-Poco::ActiveResult<int>
-UsageServiceImpl::sendFeatureAsync(const std::string &message) {
-  auto sendAsync = new Poco::ActiveMethod<int, std::string, UsageServiceImpl>(
-      this, &UsageServiceImpl::sendFeatureAsyncImpl);
-  return (*sendAsync)(message);
 }
 
 /**Async method for sending feature messages
@@ -304,7 +294,7 @@ int UsageServiceImpl::sendReport(const std::string &message,
   try {
     Kernel::InternetHelper helper;
     std::stringstream responseStream;
-    helper.setTimeout(2);
+    helper.setTimeout(20);
     helper.setBody(message);
     status = helper.sendRequest(url, responseStream);
   } catch (Mantid::Kernel::Exception::InternetError &e) {
@@ -316,5 +306,5 @@ int UsageServiceImpl::sendReport(const std::string &message,
   return status;
 }
 
-} // namespace API
+} // namespace Kernel
 } // namespace Mantid

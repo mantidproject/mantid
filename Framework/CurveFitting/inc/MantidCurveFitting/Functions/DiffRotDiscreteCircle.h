@@ -1,12 +1,15 @@
 #ifndef MANTID_DIFFROTDISCRETECIRCLE_H_
 #define MANTID_DIFFROTDISCRETECIRCLE_H_
 
-#include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/FunctionDomain.h"
-#include "MantidAPI/Jacobian.h"
+// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
+// Mantid Headers from the same project
+#include "MantidCurveFitting/Functions/ElasticDiffRotDiscreteCircle.h"
+#include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
+// Mantid headers from other projects
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/ImmutableCompositeFunction.h"
-#include "DeltaFunction.h"
+// 3rd party library headers (N/A)
+// standard library (N/A)
 
 namespace Mantid {
 namespace CurveFitting {
@@ -37,54 +40,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-/* Class representing the elastic portion of DiffRotDiscreteCircle
- * Contains a Delta Dirac.
- */
-class DLLExport ElasticDiffRotDiscreteCircle : public DeltaFunction {
-public:
-  /// Constructor
-  ElasticDiffRotDiscreteCircle();
-
-  /// overwrite IFunction base class methods
-  std::string name() const override { return "ElasticDiffRotDiscreteCircle"; }
-
-  const std::string category() const override { return "QuasiElastic"; }
-
-  /// overwrite IFunction base class method, which declare function parameters
-  void init() override;
-
-  /// A rescaling of the peak intensity
-  double HeightPrefactor() const override;
-};
-
-/* Class representing the inelastic portion of DiffRotDiscreteCircle
- * Contains a linear combination of Lorentzians.
- */
-class DLLExport InelasticDiffRotDiscreteCircle : public API::ParamFunction,
-                                                 public API::IFunction1D {
-public:
-  /// Constructor
-  InelasticDiffRotDiscreteCircle();
-
-  std::string name() const override { return "InelasticDiffRotDiscreteCircle"; }
-
-  const std::string category() const override { return "QuasiElastic"; }
-
-  void init() override;
-
-protected:
-  void function1D(double *out, const double *xValues,
-                  const size_t nData) const override;
-
-private:
-  /// Cache Q values from the workspace
-  void setWorkspace(boost::shared_ptr<const API::Workspace> ws) override;
-
-  const double m_hbar; // Plank constant, in meV*THz (or ueV*PHz)
-
-  std::vector<double> m_qValueCache; // List of calculated Q values
-};
-
 /* Class representing the dynamics structure factor of a particle undergoing
  * discrete jumps on N-sites evenly distributed in a circle. The particle can
  * only
@@ -109,7 +64,8 @@ public:
                                 const API::IFunction::Attribute &defaultValue);
 
   /// Override parent definition
-  void setAttribute(const std::string &name, const Attribute &att) override;
+  void setAttribute(const std::string &name,
+                    const API::IFunction::Attribute &att) override;
 
 private:
   boost::shared_ptr<ElasticDiffRotDiscreteCircle> m_elastic;

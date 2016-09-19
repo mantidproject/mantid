@@ -61,7 +61,7 @@ size_t calculateMaxClusters(IMDHistoWorkspace const *const ws,
  */
 boost::shared_ptr<Mantid::API::IMDHistoWorkspace>
 cloneInputWorkspace(IMDHistoWorkspace_sptr &inWS) {
-  IMDHistoWorkspace_sptr outWS(inWS->clone().release());
+  IMDHistoWorkspace_sptr outWS(inWS->clone());
 
   // Initialize to zero.
   PARALLEL_FOR_NO_WSP_CHECK()
@@ -143,7 +143,7 @@ size_t doConnectedComponentLabeling(IMDIterator *iterator,
            correcly provided for all neighbours until the end. We must store
            indexes instead.
            */
-          edgeIndexVec.push_back(EdgeIndexPair(currentIndex, neighIndex));
+          edgeIndexVec.emplace_back(currentIndex, neighIndex);
           continue;
         }
 
@@ -246,7 +246,7 @@ size_t ConnectedComponentLabeling::getStartLabelId() const { return m_startId; }
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-ConnectedComponentLabeling::~ConnectedComponentLabeling() {}
+ConnectedComponentLabeling::~ConnectedComponentLabeling() = default;
 
 /**
  * Get the number of threads available

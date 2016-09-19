@@ -8,14 +8,13 @@
 
 using namespace MantidQt::API;
 
-namespace
-{
-  /// static logger
-  Mantid::Kernel::Logger g_log("UserSubWindowFactoryImpl");
+namespace {
+/// static logger
+Mantid::Kernel::Logger g_log("UserSubWindowFactoryImpl");
 }
 
 //*********************************************************
-//                 UserSubWindow 
+//                 UserSubWindow
 //*********************************************************
 
 //----------------------------------------
@@ -24,43 +23,47 @@ namespace
 
 /**
  * Create a raw pointer to the interface with the given name
- * @param name :: The name of the interface that should have been registered into the factory
+ * @param name :: The name of the interface that should have been registered
+ * into the factory
  */
-UserSubWindow * UserSubWindowFactoryImpl::createUnwrapped(const std::string & name) const
-{
+UserSubWindow *
+UserSubWindowFactoryImpl::createUnwrapped(const std::string &name) const {
   // Try primary name as a start
   UserSubWindow *window;
-  try
-  {
-    window = Mantid::Kernel::DynamicFactory<UserSubWindow>::createUnwrapped(name);
-  }
-  catch(Mantid::Kernel::Exception::NotFoundError&)
-  {
-    g_log.debug() << "\"" << name << "\" not registered as a real name, trying an alias.\n";
+  try {
+    window =
+        Mantid::Kernel::DynamicFactory<UserSubWindow>::createUnwrapped(name);
+  } catch (Mantid::Kernel::Exception::NotFoundError &) {
+    g_log.debug() << "\"" << name
+                  << "\" not registered as a real name, trying an alias.\n";
     window = NULL;
   }
-  if( !window )
-  {
+  if (!window) {
     window = createFromAlias(name);
   }
-  if( !window ) 
-  {
-    g_log.error() << "UserSubWindowFactory: \""+ name + "\" is not registered as an interface name.\n";
-    throw Mantid::Kernel::Exception::NotFoundError("UserSubWindowFactory:"+ name + " is not registered or recognised as an alias of a known interface.\n", name);
+  if (!window) {
+    g_log.error() << "UserSubWindowFactory: \"" + name +
+                         "\" is not registered as an interface name.\n";
+    throw Mantid::Kernel::Exception::NotFoundError(
+        "UserSubWindowFactory:" + name + " is not registered or recognised as "
+                                         "an alias of a known interface.\n",
+        name);
   }
-  return window;   
+  return window;
 }
 
 /**
- * Return the set of categories that the interface with the given name belongs to.
+ * Return the set of categories that the interface with the given name belongs
+ *to.
  *
  * @param interfaceName :: The name of the interface.
- * @returns the set of category names if an interface with the given name has been registered,
+ * @returns the set of category names if an interface with the given name has
+ *been registered,
  *          else an empty set.
  */
-QSet<QString> UserSubWindowFactoryImpl::getInterfaceCategories(const QString & interfaceName) const
-{
-  if( !m_categoryLookup.contains(interfaceName) )
+QSet<QString> UserSubWindowFactoryImpl::getInterfaceCategories(
+    const QString &interfaceName) const {
+  if (!m_categoryLookup.contains(interfaceName))
     return QSet<QString>();
 
   return m_categoryLookup[interfaceName];
@@ -71,42 +74,35 @@ QSet<QString> UserSubWindowFactoryImpl::getInterfaceCategories(const QString & i
 //----------------------------------------
 
 /// Default constructor
-UserSubWindowFactoryImpl::UserSubWindowFactoryImpl() : m_aliasLookup(), m_badAliases()
-{
-}
+UserSubWindowFactoryImpl::UserSubWindowFactoryImpl()
+    : m_aliasLookup(), m_badAliases() {}
 
 /**
  * Create a user sub window by searching for an alias name
  * @param name :: The alias name to use to try and create an interface
- * @returns A pointer to a created interface pointer if this alias exists and is not multiply defined
+ * @returns A pointer to a created interface pointer if this alias exists and is
+ * not multiply defined
  */
-UserSubWindow * UserSubWindowFactoryImpl::createFromAlias(const std::string & name) const
-{
+UserSubWindow *
+UserSubWindowFactoryImpl::createFromAlias(const std::string &name) const {
   QString alias = QString::fromStdString(name);
-  if( m_badAliases.contains(alias) )
-  {
-    std::string error = "Alias \"" + name + "\" is defined for multiple real interfaces: \"";
+  if (m_badAliases.contains(alias)) {
+    std::string error =
+        "Alias \"" + name + "\" is defined for multiple real interfaces: \"";
     QListIterator<std::string> itr(m_badAliases.value(alias));
-    while( itr.hasNext() )
-    {
+    while (itr.hasNext()) {
       error += itr.next();
-      if( itr.hasNext() )
-      {
+      if (itr.hasNext()) {
         error += ",";
       }
     }
-      g_log.error() << error + "\n";
+    g_log.error() << error + "\n";
     return NULL;
   }
 
-  if( m_aliasLookup.contains(alias) )
-  {
+  if (m_aliasLookup.contains(alias)) {
     return this->createUnwrapped(m_aliasLookup.value(alias));
-  }
-  else
-  {
+  } else {
     return NULL;
   }
-}	
-
-
+}

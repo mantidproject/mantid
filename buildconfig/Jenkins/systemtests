@@ -62,10 +62,10 @@ $SCL_ON_RHEL6 "cmake --build . -- SystemTestData"
 # Remove any Mantid.user.properties file
 userprops=~/.mantid/Mantid.user.properties
 rm -f $userprops
-# Turn off usage reports and instrument downloading for the mantid call
-# that creates the properties file
+# Turn off any auto updating on startup
 echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
 echo "usagereports.enabled = 0" >> $userprops
+echo "CheckMantidVersion.OnStartup = 0" >> $userprops
 
 # Run
 PKGDIR=${WORKSPACE}/build

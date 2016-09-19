@@ -47,8 +47,6 @@ class DLLExport CorrectFlightPaths : public API::Algorithm {
 public:
   /// Default constructor
   CorrectFlightPaths();
-  /// Destructor
-  ~CorrectFlightPaths() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CorrectFlightPaths"; }
   /// Summary of algorithms purpose

@@ -29,7 +29,7 @@ public:
   }
 
   void testClone() {
-    RebinnedOutput_sptr cloned(ws->clone().release());
+    RebinnedOutput_sptr cloned(ws->clone());
 
     // Swap ws with cloned pointer, such that we can reuse existing tests.
     ws.swap(cloned);

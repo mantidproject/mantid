@@ -35,9 +35,6 @@ namespace MDAlgorithms {
 */
 class DLLExport TransformMD : public API::Algorithm {
 public:
-  TransformMD();
-  ~TransformMD() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

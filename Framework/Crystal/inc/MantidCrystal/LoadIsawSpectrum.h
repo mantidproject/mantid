@@ -34,9 +34,6 @@ National Laboratory & European Spallation Source
 
 class DLLExport LoadIsawSpectrum : public API::Algorithm {
 public:
-  LoadIsawSpectrum();
-  ~LoadIsawSpectrum() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadIsawSpectrum"; };
   /// Summary of algorithms purpose

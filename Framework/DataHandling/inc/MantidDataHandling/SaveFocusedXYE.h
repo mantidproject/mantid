@@ -63,8 +63,6 @@ public:
   enum HeaderType { XYE, MAUD, TOPAS };
   /// Constructor
   SaveFocusedXYE();
-  /// Virtual destructor
-  ~SaveFocusedXYE() override {}
   /// Algorithm's name
   const std::string name() const override { return "SaveFocusedXYE"; }
   /// Summary of algorithms purpose

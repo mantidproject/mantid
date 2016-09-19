@@ -2,7 +2,8 @@
     File                 : CurvesDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Add/remove curves dialog
 
@@ -41,12 +42,11 @@ class PlotCurve;
 class ApplicationWindow;
 
 //! Add/remove curves dialog
-class CurvesDialog : public QDialog
-{
+class CurvesDialog : public QDialog {
   Q_OBJECT
 
 public:
-  CurvesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl = 0 );
+  CurvesDialog(ApplicationWindow *app, Graph *g, Qt::WFlags fl = 0);
   ~CurvesDialog() override;
 
 private slots:
@@ -64,33 +64,32 @@ private slots:
   void updateCurveRange();
   void showCurrentFolder(bool);
 
-
 private:
   void setGraph(Graph *graph);
   void closeEvent(QCloseEvent *) override;
 
-  void init();	
-  bool addCurve(const QString& name);
+  void init();
+  bool addCurve(const QString &name);
   QSize sizeHint() const override;
   void contextMenuEvent(QContextMenuEvent *) override;
 
-  ApplicationWindow* d_app;
+  ApplicationWindow *d_app;
   Graph *d_graph;
 
-  QPushButton* btnAdd;
-  QPushButton* btnRemove;
-  QPushButton* btnOK;
-  QPushButton* btnCancel;
-  QPushButton* btnAssociations;
-  QPushButton* btnEditFunction;
-  QPushButton* btnRange;
-  QListWidget* available;
-  QListWidget* contents;
-  QComboBox* boxStyle;
-  QComboBox* boxMatrixStyle;
-  QCheckBox* boxShowRange;
-  QCheckBox* boxShowCurrentFolder;
-  QMap<QString,PlotCurve*> d_plotCurves;
+  QPushButton *btnAdd;
+  QPushButton *btnRemove;
+  QPushButton *btnOK;
+  QPushButton *btnCancel;
+  QPushButton *btnAssociations;
+  QPushButton *btnEditFunction;
+  QPushButton *btnRange;
+  QListWidget *available;
+  QListWidget *contents;
+  QComboBox *boxStyle;
+  QComboBox *boxMatrixStyle;
+  QCheckBox *boxShowRange;
+  QCheckBox *boxShowCurrentFolder;
+  QMap<QString, PlotCurve *> d_plotCurves;
 };
 
 #endif // CurvesDialog_H

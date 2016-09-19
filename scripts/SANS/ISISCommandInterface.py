@@ -1148,8 +1148,9 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     # If we have 0 iterations then we should return here. At this point the
     # Left/Right/Up/Down workspaces have been already created by the SeekCentre function.
     if MaxIter <= 0:
-        zero_iterations_msg = ("You have selected 0 iterations. The beam centre" +
-                               "will be positioned at (" + str(xstart) + ", " + str(ystart) + ")")
+        zero_iterations_msg = ("You have selected 0 iterations. The beam centre " +
+                               "will be positioned at (" + str(xstart*coord1_scale_factor) +
+                               ", " + str(ystart*coord2_scale_factor) + ")")
         beam_center_logger.report(zero_iterations_msg)
         return xstart, ystart
 
@@ -1779,7 +1780,7 @@ def MatchIDFInReducerAndWorkspace(file_name):
     idf_path_reducer = get_current_idf_path_in_reducer()
 
     if ((idf_path_reducer == idf_path_workspace) and
-         su.are_two_files_identical(idf_path_reducer, idf_path_reducer)):
+            su.are_two_files_identical(idf_path_reducer, idf_path_reducer)):
         is_matched = True
     else:
         is_matched = False

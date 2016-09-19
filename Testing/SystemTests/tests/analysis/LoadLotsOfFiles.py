@@ -56,6 +56,7 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'SANS2D_mask_batch.csv',
                 'sans2d_reduction_gui_batch.csv',
                 'squaricn.phonon',
+                'test_isotopes.phonon',
                 'squaricn.castep',
                 'target_circles_mask.xml',
                 'tube10_mask.xml',
@@ -82,7 +83,8 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'poldi2015n000977.hdf',
                 'USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt',
                 'USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt',
-                'Vesuvio_IP_file_test.par'
+                'Vesuvio_IP_file_test.par',
+                'IP0004_10.par'
                ]
 
 EXPECTED_EXT = '.expected'
