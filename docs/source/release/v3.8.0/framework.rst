@@ -51,6 +51,8 @@ New
 - :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>` an algorithm which saves a TableWorkspace containing
   diffraction fitting results as an ASCII file
 
+- :ref:`ExtractMonitors <algm-ExtractMonitors>` an algorithm to extract the monitor spectra into a new workspace. Can also be 
+  used to create a workspace with just the detectors, or two workspaces, one with the monitors and one with the detectors.
 
 Improved
 ########
