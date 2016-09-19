@@ -1883,6 +1883,8 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "    layer.setCurveLineColor(i, color)";
   s << "  if log_scale:";
   s << "    layer.logYlinX()";
+  s << "  else:";
+  s << "    layer.linearAxes()";
   s << "  if y_auto:";
   s << "    layer.setAutoScale()";
   s << "  else:";
