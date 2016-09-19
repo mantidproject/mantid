@@ -10,7 +10,6 @@ subgraph params {
   processingInst      [label="ProcessingInstructions"]
   wavMin              [label="WavelengthMin"]
   wavMax              [label="WavelengthMax"]
-  wavStep             [label="WavelengthStep"]
   monIntWavMin        [label="MonitorIntegration-\nWavelengthMin"]
   monIntWavMax        [label="MonitorIntegration-\nWavelengthMax"]
   outputWS            [label="TransmissionRun\nin wavelength"]
@@ -23,6 +22,7 @@ subgraph decisions {
  $decision_style
   checkMon        [label="Monitors?"]
   checkBgMinMax   [label="MonitorBackground-\nWavelength\nMin/Max non-zero?"]
+  checkMonInt	  [label="Normalize by\nIntegrated Monitors?"]
 }
 
 subgraph algorithms {
@@ -30,7 +30,6 @@ subgraph algorithms {
   convertDet    [label="ConvertUnits\n(AlignBins = True)"]
   groupDet      [label="GroupDetectors"]
   cropDet       [label="CropWorkspace"]
-  rebinDet      [label="Rebin"]
 
   convertMon    [label="ConvertUnits\n(AlignBins = False)"]
   cropMon       [label="CropWorkspace"]
@@ -61,9 +60,7 @@ processingInst       -> groupDet
 groupDet             -> cropDet
 wavMin               -> cropDet
 wavMax               -> cropDet
-cropDet              -> rebinDet
-wavStep              -> rebinDet
-rebinDet             -> detWS
+cropDet              -> detWS
 
 firstRun	     -> checkMon	[label="Monitors"]
 checkMon             -> convertMon      [label="Yes"]
@@ -75,7 +72,9 @@ checkBgMinMax	     -> calcFlatBg	[label="Yes"]
 calcFlatBg	     -> rebinToWS
 checkBgMinMax	     -> rebinToWS	[label="No"]
 detWS		     -> rebinToWS
-rebinToWS	     -> intMon
+rebinToWS	     -> checkMonInt
+checkMonInt	     -> monWS		[label="no"]
+checkMonInt	     -> intMon		[label="yes"]
 monIntWavMin	     -> intMon
 monIntWavMax	     -> intMon
 rebinToWS	     -> monIntWavMin	[style=invis]

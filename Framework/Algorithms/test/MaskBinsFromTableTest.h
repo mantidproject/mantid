@@ -65,7 +65,7 @@ public:
     TS_ASSERT(WS);
     for (int wi = 1; wi <= 3; wi++) {
       for (int bin = 3; bin < 6; bin++) {
-        TS_ASSERT_EQUALS(WS->dataY(wi)[bin], 0.0);
+        TS_ASSERT_EQUALS(WS->y(wi)[bin], 0.0);
       }
     }
 
@@ -114,7 +114,7 @@ public:
     TS_ASSERT(outWS);
     for (int wi = 1; wi <= 3; wi++) {
       for (int bin = 3; bin < 6; bin++) {
-        TS_ASSERT_EQUALS(outWS->dataY(wi)[bin], 0.0);
+        TS_ASSERT_EQUALS(outWS->y(wi)[bin], 0.0);
       }
     }
 
@@ -168,11 +168,11 @@ public:
 
     // a) Table Line 0
     for (int wi = 1; wi <= 3; wi++) {
-      for (size_t bin = 0; bin < WS->dataY(wi).size(); ++bin) {
+      for (size_t bin = 0; bin < WS->y(wi).size(); ++bin) {
         if (bin >= 3 && bin < 6) {
-          TS_ASSERT_EQUALS(WS->dataY(wi)[bin], 0.0);
+          TS_ASSERT_EQUALS(WS->y(wi)[bin], 0.0);
         } else {
-          TS_ASSERT_EQUALS(WS->dataY(wi)[bin], 2.0);
+          TS_ASSERT_EQUALS(WS->y(wi)[bin], 2.0);
         }
       }
     }
@@ -184,7 +184,7 @@ public:
     speclist.push_back(7);
     speclist.push_back(8);
     for (size_t iws = 0; iws < speclist.size(); ++iws) {
-      const MantidVec &yvec = WS->readY(speclist[iws]);
+      auto &yvec = WS->y(speclist[iws]);
       for (size_t bin = 0; bin < yvec.size(); ++bin) {
         if (bin >= 4 && bin < 7) {
           TS_ASSERT_EQUALS(yvec[bin], 0.0);
@@ -196,7 +196,7 @@ public:
 
     // c) Table Line 2
     for (size_t iws = 9; iws < 10; ++iws) {
-      const MantidVec &yvec = WS->readY(iws);
+      auto &yvec = WS->y(iws);
       for (size_t bin = 0; bin < yvec.size(); ++bin) {
         if (bin == 0) {
           TS_ASSERT_EQUALS(yvec[bin], 0.0);
@@ -250,7 +250,7 @@ public:
     TS_ASSERT(WS);
     for (int wi = 1; wi <= 3; wi++) {
       for (int bin = 3; bin < 6; bin++) {
-        TS_ASSERT_EQUALS(WS->dataY(wi)[bin], 0.0);
+        TS_ASSERT_EQUALS(WS->y(wi)[bin], 0.0);
       }
     }
 
@@ -303,7 +303,7 @@ public:
     TS_ASSERT(outws);
     for (int wi = 1; wi <= 3; wi++) {
       for (int bin = 3; bin < 6; bin++) {
-        TS_ASSERT_EQUALS(outws->dataY(wi)[bin], 0.0);
+        TS_ASSERT_EQUALS(outws->y(wi)[bin], 0.0);
       }
     }
 

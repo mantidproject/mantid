@@ -29,6 +29,10 @@ Algorithms
   to *False* when the imaginary part of the image should not be taken into account for the
   calculations.
 
+- :ref:`MaxEnt <algm-MaxEnt>`: The expression for the second derivative of real (pos/neg) images has been corrected.
+
+- :ref:`MaxEnt <algm-MaxEnt>`: The reconstructed image is always a point data workspace. The reconstructed data is of the same type as the input workspace.
+
 - :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`: the *Frequency* parameter is now supplied in MHz rather than megaradians per second.
 
 - :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`: The first column of the output phase table now shows spectrum numbers rather than workspace indices.

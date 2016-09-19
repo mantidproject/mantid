@@ -1,13 +1,14 @@
-#ifndef MANTID_API_IPROJECTSERIALISABLE_H_
-#define MANTID_API_IPROJECTSERIALISABLE_H_
+#ifndef MANTID_API_IProjectSerialisable_H_
+#define MANTID_API_IProjectSerialisable_H_
 
 #include "MantidKernel/System.h"
-#include <string>
 #include <stdexcept>
+#include <string>
 
 class ApplicationWindow;
 
-namespace Mantid {
+namespace MantidQt {
+namespace API {
 
 /**
 Defines an interface to a MantidPlot class that can be saved into or loaded from
@@ -56,6 +57,7 @@ public:
   virtual std::string saveToProject(ApplicationWindow *app) = 0;
 };
 
-} // namespace Mantid
+} // namespace API
+} // namespace MantidQt
 
-#endif /* MANTID_API_IPROJECTSERIALISABLE_H_ */
+#endif /* MANTID_API_ProjectSerialisable_H_ */

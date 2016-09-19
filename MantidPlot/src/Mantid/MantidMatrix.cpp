@@ -1185,9 +1185,9 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
   }
 }
 
-IProjectSerialisable *MantidMatrix::loadFromProject(const std::string &lines,
-                                                    ApplicationWindow *app,
-                                                    const int fileVersion) {
+MantidQt::API::IProjectSerialisable *
+MantidMatrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                              const int fileVersion) {
   Q_UNUSED(fileVersion);
   TSVSerialiser tsv(lines);
 

@@ -253,39 +253,39 @@ class BayesQuasi(PythonAlgorithm):
 
         group = ''
         workflow_prog = Progress(self, start=0.3, end=0.7, nreports=nsam*3)
-        for m in range(0,nsam):
-            logger.information('Group ' +str(m)+ ' at angle '+ str(theta[m]))
-            nsp = m+1
+        for spectrum in range(0,nsam):
+            logger.information('Group ' +str(spectrum)+ ' at angle '+ str(theta[spectrum]))
+            nsp = spectrum+1
 
-            nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(self._samWS,m,erange,nbin)
+            nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(self._samWS,spectrum,erange,nbin)
             Ndat = nout[0]
             Imin = nout[1]
             Imax = nout[2]
             if prog == 'QLd':
-                mm = m
+                mm = spectrum
             else:
                 mm = 0
             Nb,Xb,Yb,Eb = GetXYE(self._resWS,mm,array_len)     # get resolution data
             numb = [nsam, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin]
             rscl = 1.0
-            reals = [efix, theta[m], rscl, bnorm]
+            reals = [efix, theta[spectrum], rscl, bnorm]
 
             if prog == 'QLr':
-                workflow_prog.report('Processing Sample number %i as Lorentzian' % nsam)
+                workflow_prog.report('Processing Sample number %i as Lorentzian' % spectrum)
                 nd,xout,yout,eout,yfit,yprob=QLr.qlres(numb,Xv,Yv,Ev,reals,fitOp,
                                                        Xdat,Xb,Yb,Wy,We,dtn,xsc,
                                                        wrks,wrkr,lwrk)
                 message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
                 logger.information(message)
             if prog == 'QLd':
-                workflow_prog.report('Processing Sample number %i' % nsam)
+                workflow_prog.report('Processing Sample number %i' % spectrum)
                 nd,xout,yout,eout,yfit,yprob=QLd.qldata(numb,Xv,Yv,Ev,reals,fitOp,
                                                         Xdat,Xb,Yb,Eb,Wy,We,
                                                         wrks,wrkr,lwrk)
                 message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
                 logger.information(message)
             if prog == 'QSe':
-                workflow_prog.report('Processing Sample number %i as Stretched Exp' % nsam)
+                workflow_prog.report('Processing Sample number %i as Stretched Exp' % spectrum)
                 nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,\
                                                         Xdat,Xb,Yb,Wy,We,dtn,xsc,\
                                                         wrks,wrkr,lwrk)
@@ -328,7 +328,7 @@ class BayesQuasi(PythonAlgorithm):
 
             # create result workspace
             fitWS = fname+'_Workspaces'
-            fout = fname+'_Workspace_'+ str(m)
+            fout = fname+'_Workspace_'+ str(spectrum)
 
             workflow_prog.report('Creating OutputWorkspace')
             s_api.CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,
