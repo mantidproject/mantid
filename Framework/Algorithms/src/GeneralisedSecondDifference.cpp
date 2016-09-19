@@ -2,7 +2,6 @@
 
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/HistoWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidIndexing/Extract.h"

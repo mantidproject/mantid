@@ -1,10 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/Rebin.h"
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
@@ -136,16 +133,13 @@ void Rebin::exec() {
   // workspace independent determination of length
   const int histnumber = static_cast<int>(inputWS->getNumberHistograms());
 
-  //-------------------------------------------------------
-
   bool fullBinsOnly = getProperty("FullBinsOnly");
 
   HistogramData::BinEdges XValues_new(0);
   // create new output X axis
-  const int ntcnew = VectorHelper::createAxisFromRebinParams(
-      rbParams, XValues_new.mutableRawData(), true, fullBinsOnly);
+  static_cast<void>(VectorHelper::createAxisFromRebinParams(
+      rbParams, XValues_new.mutableRawData(), true, fullBinsOnly));
 
-  //---------------------------------------------------------------------------------
   // Now, determine if the input workspace is actually an EventWorkspace
   EventWorkspace_const_sptr eventInputWS =
       boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
@@ -229,8 +223,8 @@ void Rebin::exec() {
 
     // make output Workspace the same type is the input, but with new length of
     // signal array
-    outputWS = API::WorkspaceFactory::Instance().create(inputWS, histnumber,
-                                                        ntcnew, ntcnew - 1);
+    outputWS = DataObjects::create<API::HistoWorkspace>(
+        *inputWS, histnumber, HistogramData::Histogram(XValues_new));
 
     // Copy over the 'vertical' axis
     if (inputWS->axes() > 1)
@@ -257,10 +251,6 @@ void Rebin::exec() {
         g_log.error() << "Error in rebin function: " << ex.what() << '\n';
         throw;
       }
-
-      // Populate the output workspace X values
-      outputWS->setBinEdges(hist, XValues_new);
-
       prog.report(name());
       PARALLEL_END_INTERUPT_REGION
     }

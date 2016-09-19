@@ -10,6 +10,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidIndexing/IndexInfo.h"
 
 #include <boost/algorithm/string/split.hpp>
@@ -758,17 +759,7 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
     else
       xvalue += fabs(dx) * xvalue;
   }
-  size_t numxvalue = xarray.size();
 
-  BinEdges xArrayEdges(xarray);
-
-  // Create new workspace
-  MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", m_spectraSet.size(), numxvalue, numxvalue - 1);
-  for (size_t ip = 0; ip < m_spectraSet.size(); ip++) {
-    ws->setBinEdges(ip, xArrayEdges);
-  }
-  // Set spectrum numbers
   std::vector<specnum_t> specNums;
   for (const auto &item : m_SpectrumMap) {
     specnum_t specid = item.first;
@@ -776,14 +767,12 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
                   << " , " << specid << "\n";
     specNums.push_back(specid);
   }
-  auto indexInfo = ws->indexInfo();
-  indexInfo.setSpectrumNumbers(std::move(specNums));
-  ws->setIndexInfo(indexInfo);
 
-  return ws;
+  Indexing::IndexInfo indices(specNums.size());
+  indices.setSpectrumNumbers(std::move(specNums));
+  return create<Workspace2D>(indices, Histogram(BinEdges(std::move(xarray))));
 }
 
-//----------------------------------------------------------------------------------------------
 /** Add function's parameter names after peak function name
   */
 std::vector<std::string>
