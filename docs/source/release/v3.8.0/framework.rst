@@ -123,8 +123,11 @@ Performance
 
   The following algorithms were adapted and show a noticeable speedup:
 
+  - :ref:`ApplyTransmissionCorrection <algm-ApplyTransmissionCorrection >`: 20% speedup
+  - :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis >`: 25% speedup
   - :ref:`ConvertToHistogram <algm-ConvertToHistogram>`: 3x to 4x speedup
   - :ref:`ConvertToPointData <algm-ConvertToPointData>`: 3x to 4x speedup
+  - :ref:`CorrectFlightPaths <algm-CorrectFlightPaths >`: 10% speedup
   - :ref:`ExtractSpectra <algm-ExtractSpectra>`: no change when X-range changes, otherwise 50x to 100x speedup for Workspace2D and up to 3x speedup for EventWorkspace
   - :ref:`GetAllEi <algm-GetAllEi>`: 5-10% speedup
   - :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`: 5-10% speedup
@@ -140,7 +143,7 @@ Performance
 
   The following algorithms were adapted and do not show any speedup, however the memory consumption may have reduced slightly:
 
-  AbsorptionCorrection, ConvertEmptyToTof, ConvertToMatrixWorkspace, CrossCorrelate, ExtractFFTSpectrum, FindPeaks, GeneralisedSecondDifference, GeneratePeaks, GetDetectorOffset, GetTimeSeriesLogInformation, PolarizationCorrection, Rebin2D, RebinByTimeAtSample, ReflectometryTransform, StripPeaks
+  AbsorptionCorrection, CalculateEfficiency, CalculateFlatBackground, CalculateZscore, ConvertEmptyToTof, ConvertToMatrixWorkspace, CrossCorrelate, ExtractFFTSpectrum, FindPeaks, GeneratePeaks, PolarizationCorrection, Rebin2D, RebinByTimeAtSample, ReflectometryTransform, StripPeaks
 
   Algorithms that are run after one of those listed above may also benefit from the improved data sharing that lead to speedup and reduced memory consumption.
   In some cases, however, follow-up algorithms may run slower (typically this can happen for algorithms that do in-place modification of data).
