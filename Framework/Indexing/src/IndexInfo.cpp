@@ -8,6 +8,14 @@
 namespace Mantid {
 namespace Indexing {
 
+// Create default translator. size is global size
+// Default implies 1:1 spectrum numbers and detector IDs, each defined as
+// (global) workspace index + 1
+//
+// Can we internally provide an optimization for the case of trivial mapping?
+// We want to avoid complicated maps if it is just a simple offset, i.e.,
+// SpectrumNumber = WorkspaceIndex + 1 (will always be more complex with
+// MPI?).
 IndexInfo::IndexInfo(const size_t globalSize) {
   // Default to spectrum numbers 1...globalSize
   auto &specNums = m_spectrumNumbers.access();
@@ -54,7 +62,29 @@ IndexInfo::IndexInfo(const IndexInfo &other) {
   }
 }
 
+/// The *local* size, i.e., the number of spectra in this partition.
+size_t IndexInfo::size() const {
+  if (m_isLegacy)
+    return m_legacySize;
+  return m_spectrumNumbers->size();
+}
+
+specnum_t IndexInfo::spectrumNumber(const size_t index) const {
+  if (m_isLegacy)
+    return m_getSpectrumNumber(index);
+  return (*m_spectrumNumbers)[index];
+}
+
+std::vector<detid_t> IndexInfo::detectorIDs(const size_t index) const {
+  if (m_isLegacy) {
+    const auto &ids = m_getDetectorIDs(index);
+    return std::vector<detid_t>(ids.begin(), ids.end());
+  }
+  return (*m_detectorIDs)[index];
+}
+
 void IndexInfo::setSpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers) & {
+  // No test of m_isLegacy, we cannot have non-const access in that case.
   if (m_spectrumNumbers->size() != spectrumNumbers.size())
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new spectrum numbers");
@@ -62,6 +92,7 @@ void IndexInfo::setSpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers) & {
 }
 
 void IndexInfo::setDetectorIDs(const std::vector<detid_t> &detectorIDs) & {
+  // No test of m_isLegacy, we cannot have non-const access in that case.
   if (m_detectorIDs->size() != detectorIDs.size())
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new detector IDs");
@@ -72,6 +103,7 @@ void IndexInfo::setDetectorIDs(const std::vector<detid_t> &detectorIDs) & {
 }
 
 void IndexInfo::setDetectorIDs(
+    // No test of m_isLegacy, we cannot have non-const access in that case.
     std::vector<std::vector<detid_t>> &&detectorIDs) & {
   if (m_detectorIDs->size() != detectorIDs.size())
     throw std::runtime_error(
@@ -84,8 +116,6 @@ void IndexInfo::setDetectorIDs(
     ids.erase(std::unique(ids.begin(), ids.end()), ids.end());
   }
 }
-
-size_t IndexInfo::size() const { return m_spectrumNumbers->size(); }
 
 } // namespace Indexing
 } // namespace Mantid
