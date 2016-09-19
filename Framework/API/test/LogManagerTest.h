@@ -264,6 +264,36 @@ public:
     TS_ASSERT_DELTA(1.0, result, 1e-12);
   }
 
+  void test_GetPropertyAsIntegerValue_SingleValue_Int32Type() {
+    doTest_GetPropertyAsIntegerValue<int32_t>(1);
+  }
+
+  void test_GetPropertyAsIntegerValue_SingleValue_Int64Type() {
+    doTest_GetPropertyAsIntegerValue<int64_t>(1L);
+  }
+
+  void test_GetPropertyAsIntegerValue_SingleValue_Uint32Type() {
+    doTest_GetPropertyAsIntegerValue<uint32_t>(1U);
+  }
+
+  void test_GetPropertyAsIntegerValue_SingleValue_Uint64Type() {
+    doTest_GetPropertyAsIntegerValue<uint64_t>(1UL);
+  }
+
+  void test_GetPropertyAsSingleInteger_DoubleType_Throws() {
+    LogManager runInfo;
+    const std::string name = "T_prop";
+    runInfo.addProperty<double>(name, 1.0);
+    TS_ASSERT_THROWS(runInfo.getPropertyAsIntegerValue(name),
+                     std::invalid_argument);
+  }
+
+  void test_GetPropertyAsSingleInteger_Throws_for_nonexistant_property() {
+    LogManager runInfo;
+    TS_ASSERT_THROWS(runInfo.getPropertyAsIntegerValue("T_prop"),
+                     Exception::NotFoundError);
+  }
+
   void test_GetPropertyAsSingleValue_TimeSeries_DoubleType() {
     doTest_GetPropertyAsSingleValue_TimeSeriesType<double>();
   }
@@ -501,6 +531,16 @@ private:
     TS_ASSERT_DELTA(
         runInfo.getPropertyAsSingleValue(name, Mantid::Kernel::Math::Mean),
         expectedValue, 1e-12);
+  }
+
+  template <typename T> void doTest_GetPropertyAsIntegerValue(const T value) {
+    LogManager runInfo;
+    const std::string name = "T_prop";
+    runInfo.addProperty<T>(name, value);
+    int result(-1);
+    result = runInfo.getPropertyAsIntegerValue(name);
+    TS_ASSERT_THROWS_NOTHING(result = runInfo.getPropertyAsIntegerValue(name));
+    TS_ASSERT_EQUALS(value, static_cast<T>(result));
   }
 };
 

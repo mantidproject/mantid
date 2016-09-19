@@ -1,7 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/TOFSANSResolution.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventList.h"
@@ -130,41 +128,30 @@ void TOFSANSResolution::exec() {
   for (int i = 0; i < xLength; i++)
     DxOut[i] = 0.0;
 
-  const V3D samplePos = reducedWS->getInstrument()->getSample()->getPos();
-  const V3D sourcePos = reducedWS->getInstrument()->getSource()->getPos();
-  const V3D SSD = samplePos - sourcePos;
-  const double L1 = SSD.norm();
-
   const int numberOfSpectra =
       static_cast<int>(reducedWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
 
+  const auto &spectrumInfo = reducedWS->spectrumInfo();
+  const double L1 = spectrumInfo.l1();
+
   PARALLEL_FOR2(reducedWS, iqWS)
   for (int i = 0; i < numberOfSpectra; i++) {
     PARALLEL_START_INTERUPT_REGION
-    IDetector_const_sptr det;
-    try {
-      det = reducedWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i
                       << " has no detector assigned to it - discarding\n";
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
+      continue;
     }
-    // If no detector found or if it's masked or a monitor, skip onto the next
-    // spectrum
-    if (!det || det->isMonitor() || det->isMasked())
+    // Skip if we have a monitor or if the detector is masked.
+    if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
       continue;
 
-    // Get the flight path from the sample to the detector pixel
-    const V3D scattered_flight_path = det->getPos() - samplePos;
+    const double L2 = spectrumInfo.l2(i);
 
     // Multiplicative factor to go from lambda to Q
     // Don't get fooled by the function name...
-    const double theta = reducedWS->detectorTwoTheta(*det);
+    const double theta = spectrumInfo.twoTheta(i);
     const double factor = 4.0 * M_PI * sin(0.5 * theta);
 
     const MantidVec &XIn = reducedWS->readX(i);
@@ -196,7 +183,6 @@ void TOFSANSResolution::exec() {
             floor(log(q / binParams[0]) / log(1.0 - binParams[1])));
       }
 
-      const double L2 = scattered_flight_path.norm();
       const double src_to_pixel = L1 + L2;
       const double dTheta2 =
           (3.0 * R1 * R1 / (L1 * L1) +

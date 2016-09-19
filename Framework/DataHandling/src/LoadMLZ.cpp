@@ -295,14 +295,13 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
   std::string end_time = entry.getString("end_time");
   runDetails.addProperty("run_end", end_time);
 
-  std::string wavelength = boost::lexical_cast<std::string>(m_wavelength);
-  runDetails.addProperty("wavelength", wavelength);
+  runDetails.addProperty("wavelength", m_wavelength, "Angstrom", true);
 
   double ei = m_mlzloader.calculateEnergy(m_wavelength);
-  runDetails.addProperty<double>("Ei", ei, true); // overwrite
+  runDetails.addProperty<double>("Ei", ei, "meV", true); // overwrite
 
-  std::string duration = std::to_string(entry.getInt("duration"));
-  runDetails.addProperty("duration", duration);
+  int duration = entry.getInt("duration");
+  runDetails.addProperty("duration", duration, "Seconds", true);
 
   std::string mode = entry.getString("mode");
   runDetails.addProperty("mode", mode);
@@ -313,22 +312,14 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
   // Check if temperature is defined
   NXClass sample = entry.openNXGroup("sample");
   if (sample.containsDataSet("temperature")) {
-    std::string temperature =
-        boost::lexical_cast<std::string>(entry.getFloat("sample/temperature"));
-    runDetails.addProperty("temperature", temperature);
+    double temperature = entry.getFloat("sample/temperature");
+    runDetails.addProperty("temperature", temperature, "K", true);
   }
 
-  std::string monitorCounts = std::to_string(m_monitorCounts);
-  runDetails.addProperty("monitor_counts", monitorCounts);
-
-  std::string chopper_speed = boost::lexical_cast<std::string>(m_chopper_speed);
-  runDetails.addProperty("chopper_speed", chopper_speed);
-
-  std::string chopper_ratio = std::to_string(m_chopper_ratio);
-  runDetails.addProperty("chopper_ratio", chopper_ratio);
-
-  std::string channel_width = boost::lexical_cast<std::string>(m_channelWidth);
-  runDetails.addProperty("channel_width", channel_width);
+  runDetails.addProperty("monitor_counts", m_monitorCounts);
+  runDetails.addProperty("chopper_speed", m_chopper_speed);
+  runDetails.addProperty("chopper_ratio", m_chopper_ratio);
+  runDetails.addProperty("channel_width", m_channelWidth, "microseconds", true);
 
   // Calculate number of full time channels - use to crop workspace - S. Busch's
   // method
@@ -349,7 +340,7 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
   runDetails.addProperty("experiment_team", user_name);
 
   runDetails.addProperty("EPP", m_monitorElasticPeakPosition);
-  runDetails.addProperty("TOF1", m_t1);
+  runDetails.addProperty("TOF1", m_t1, "microseconds", true);
 }
 
 /**

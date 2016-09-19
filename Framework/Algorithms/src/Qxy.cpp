@@ -1,12 +1,11 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidAlgorithms/GravitySANSHelper.h"
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
@@ -193,7 +192,8 @@ void Qxy::exec() {
     // constructed once per spectrum
     GravitySANSHelper grav;
     if (doGravity) {
-      grav = GravitySANSHelper(inputWorkspace, det, getProperty("ExtraLength"));
+      grav = GravitySANSHelper(inputWorkspace->spectrumInfo(), i,
+                               getProperty("ExtraLength"));
     }
 
     for (int j = static_cast<int>(numBins) - 1; j >= static_cast<int>(wavStart);

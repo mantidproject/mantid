@@ -1,4 +1,6 @@
 #include "../inc/MantidQtSliceViewer/LinePlotOptions.h"
+#include "MantidQtAPI/TSVSerialiser.h"
+
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -169,3 +171,32 @@ void LinePlotOptions::onYScalingChanged() { emit changedYLogScaling(); }
  * @return
  */
 bool LinePlotOptions::isLogScaledY() const { return ui.ckLog10->isChecked(); }
+
+void LinePlotOptions::loadFromProject(const std::string &lines) {
+  MantidQt::API::TSVSerialiser tsv(lines);
+
+  int plotAxis, normalization;
+  bool logScale;
+
+  tsv.selectLine("PlotAxis");
+  tsv >> plotAxis;
+  tsv.selectLine("LogYScale");
+  tsv >> logScale;
+  tsv.selectLine("Normalization");
+  tsv >> normalization;
+
+  auto norm = static_cast<Mantid::API::MDNormalization>(normalization);
+  setPlotAxis(plotAxis);
+  ui.ckLog10->setChecked(logScale);
+  setNormalization(norm);
+}
+
+std::string LinePlotOptions::saveToProject() const {
+  MantidQt::API::TSVSerialiser tsv;
+
+  tsv.writeLine("PlotAxis") << getPlotAxis();
+  tsv.writeLine("LogYScale") << isLogScaledY();
+  tsv.writeLine("Normalization") << static_cast<int>(getNormalization());
+
+  return tsv.outputLines();
+}
