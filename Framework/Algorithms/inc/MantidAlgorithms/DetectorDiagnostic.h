@@ -86,7 +86,7 @@ protected:
   /// integrated counts
   std::vector<double>
   calculateMedian(API::MatrixWorkspace_sptr input, bool excludeZeroes,
-                  std::vector<std::vector<size_t>> indexmap);
+                  const std::vector<std::vector<size_t>> &indexmap);
   /// Convert to a distribution
   API::MatrixWorkspace_sptr convertToRate(API::MatrixWorkspace_sptr workspace);
   /// method to check which spectra should be grouped when calculating the
