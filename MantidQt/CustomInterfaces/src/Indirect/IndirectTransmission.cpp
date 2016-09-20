@@ -136,7 +136,8 @@ void IndirectTransmission::instrumentSet() {
  * Handle saving of workspace
  */
 void IndirectTransmission::saveClicked() {
-  QString outputWs = (m_uiForm.dsSampleInput->getCurrentDataName() + "_transmission");
+  QString outputWs =
+      (m_uiForm.dsSampleInput->getCurrentDataName() + "_transmission");
 
   if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), false))
     addSaveWorkspaceToQueue(outputWs);
@@ -147,7 +148,8 @@ void IndirectTransmission::saveClicked() {
  * Handle mantid plotting
  */
 void IndirectTransmission::plotClicked() {
-  QString outputWs = (m_uiForm.dsSampleInput->getCurrentDataName() + "_transmission");
+  QString outputWs =
+      (m_uiForm.dsSampleInput->getCurrentDataName() + "_transmission");
   if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), true))
     plotSpectrum(outputWs);
 }
