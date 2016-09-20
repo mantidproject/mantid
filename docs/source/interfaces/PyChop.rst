@@ -151,8 +151,8 @@ of each of the contributing time widths, which we will restrict here to the two 
 terms, :math:`\tau_{\mathrm{mod}}` and :math:`\tau_{\mathrm{chop}}` `[4]`_:
 
 .. math:: \left( \frac{\Delta E}{E_i}\right )^2 = 
-        \left[ 2\frac{\tau_{\mathrm{chop}}}{t_{\mathrm{chop}}} \frac{l_0+l_1}{l_2}
-        \left(\frac{E_f}{E_i}\right)^{\frac{3}{2}} \right]^2
+        \left[ 2\frac{\tau_{\mathrm{chop}}}{t_{\mathrm{chop}}} \left(1+\frac{l_0+l_1}{l_2}
+        \left(\frac{E_f}{E_i}\right)^{\frac{3}{2}} \right) \right]^2
         + \left[ 2\frac{\tau_{\mathrm{mod}}}{t_{\mathrm{chop}}} \left(1+\frac{l_1}{l_2}
         \left(\frac{E_f}{E_i}\right)^{\frac{3}{2}} \right) \right]^2
 

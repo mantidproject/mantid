@@ -189,7 +189,7 @@ class ISISDisk:
             for en in Et:
                 Ef = Eis[ie] - en
                 fac = (Ef/Eis[ie])**1.5
-                chopRes = (2*chop_width[ie]/t_mod_chop) * ((self.samp_det+self.chop_samp+lastChopDist)/self.samp_det)*fac
+                chopRes = (2*chop_width[ie]/t_mod_chop) * (1+((self.samp_det+self.chop_samp+lastChopDist)/self.samp_det)*fac)
                 modRes = (2*mod_width[ie]/t_mod_chop) * (1+(self.chop_samp/self.samp_det)*fac)
                 res.append(np.sqrt(chopRes**2 + modRes**2)*Eis[ie])
             if len(ie_list) == 1:
