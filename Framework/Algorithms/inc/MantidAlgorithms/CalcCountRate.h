@@ -57,6 +57,7 @@ public:
   bool useLogDerivative() const;
   /// helper function to test if visualization workspace is requested
   bool buildVisWS() const;
+
 private:
   void init() override;
   void exec() override;
@@ -66,23 +67,18 @@ private:
 protected: // for testing, actually private
   /// pointer to the log used to normalize results or NULL if no such log
   /// present on input workspace.
+  bool m_normalizeResult{false};
   Kernel::TimeSeriesProperty<double> const *m_pNormalizationLog{nullptr};
-  /// should algo generate visualization VS
-  bool m_doVis{false};
-  /// shared pointer to the optional visualization workspace
-  DataObjects::Workspace2D_sptr m_visWs;
   /// default number of points in the target log
   int m_numLogSteps{200};
-
   /// specify if rate is calculated in selected frame interval (range defined)
   /// or all frame should be used
   bool m_rangeExplicit{false};
   bool m_useLogDerivative{false};
-  /// spurion search TOF ranges
+  /// spurion search ranges (TOF or unigs requested)
   double m_XRangeMin{0}, m_XRangeMax{0};
   /// experiment time ranges:
-  Kernel::DateAndTime m_TRangeMin{ 0 }, m_TRangeMax{ 0 };
-
+  Kernel::DateAndTime m_TRangeMin{0}, m_TRangeMax{0};
   /// temporary workspace used to keep intermediate results
   DataObjects::EventWorkspace_sptr m_workingWS;
 
@@ -92,9 +88,25 @@ protected: // for testing, actually private
   setOutLogParameters(const DataObjects::EventWorkspace_sptr &InputWorkspace);
 
   void calcRateLog(DataObjects::EventWorkspace_sptr &InputWorkspace,
-                        Kernel::TimeSeriesProperty<double> *const targLog);
+                   Kernel::TimeSeriesProperty<double> *const targLog);
 
-   void checkAndInitVisWorkspace();
+  void checkAndInitVisWorkspace();
+
+  void hisogramEvents(const DataObjects::EventList &el,
+      std::mutex * spectraLocks);
+
+  void normalizeVisWs(int64_t wsIndex);
+  void buildVisWSNormalization(std::vector<double> &normalization);
+
+  /// should algo generate visualization VS
+  bool m_doVis{ false };
+  /// shared pointer to the optional visualization workspace
+  DataObjects::Workspace2D_sptr m_visWs;
+  // variables used in 2D histogramming of the visualization workspace
+  double m_visX0, m_visDX, m_visT0, m_visDT,m_visTmax;
+  // vector used in normalization of the visualization workspace
+  std::vector<double> m_visNorm;
+
 };
 
 } // namespace Algorithms

@@ -8,6 +8,7 @@
 #include "MantidAlgorithms/CalcCountRate.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/NumericAxis.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -282,14 +283,65 @@ public:
 
       TS_ASSERT_THROWS_NOTHING(alg.setVisWS("testVisWSName"));
 
-
       API::MatrixWorkspace_sptr testVisWS = alg.getProperty("VisualizationWs");
       TS_ASSERT(testVisWS);
+      if(!testVisWS) return;
+
       TS_ASSERT_EQUALS(testVisWS->getNumberHistograms(),120);
       auto X = testVisWS->readX(0);
       auto Y = testVisWS->readY(0);
       TS_ASSERT_EQUALS(X.size(),201);
       TS_ASSERT_EQUALS(Y.size(), 200);
+
+  }
+
+  void test_visWS_noNormalization() {
+
+      DataObjects::EventWorkspace_sptr sws =
+          WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10,
+              false);
+
+
+      CalcCountRateTester alg;
+      alg.initialize();
+
+      alg.setProperty("NumTimeSteps", 100);
+      alg.setProperty("XResolution", 200);
+
+      alg.setProperty("RangeUnits", "dSpacing");
+
+      alg.setProperty("NormalizeTheRate", false);
+      alg.setProperty("UseLogDerivative", true);
+      alg.setProperty("UseNormLogGranularity", true);
+
+      alg.setProperty("Workspace", sws);
+      alg.setProperty("VisualizationWsName", "testVisWSNoNorm");
+
+
+      TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+      API::MatrixWorkspace_sptr testVisWS = alg.getProperty("VisualizationWs");
+      TS_ASSERT(testVisWS);
+      TS_ASSERT_EQUALS(testVisWS->getNumberHistograms(), 100);
+      const MantidVec &X = testVisWS->readX(0);
+      const MantidVec &Y = testVisWS->readY(0);
+      TS_ASSERT_EQUALS(X.size(), 201);
+      TS_ASSERT_EQUALS(Y.size(), 200);
+      auto Yax = dynamic_cast<API::NumericAxis *>(testVisWS->getAxis(1));
+      TS_ASSERT(Yax);
+      if(!Yax)return;
+
+      auto &YaxVal = Yax->getValues();
+
+      auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+          sws->run().getLogData("block_count_rate"));
+      TS_ASSERT(newLog);
+      if (!newLog)return;
+      auto times = newLog->timesAsVectorSeconds();
+      MantidVec counts = newLog->valuesAsVector();
+
+
+
 
   }
 };

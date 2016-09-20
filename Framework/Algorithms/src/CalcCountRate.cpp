@@ -114,10 +114,9 @@ void CalcCountRate::init() {
       "containing data to visualize counting rate as function of time in the "
       "ranges "
       "XMin-XMax");
-  declareProperty(Kernel::make_unique <
-                  API::WorkspaceProperty<>>("VisualizationWs", "",
-                                           Kernel::Direction::Output,
-                                           API::PropertyMode::Optional));
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+      "VisualizationWs", "", Kernel::Direction::Output,
+      API::PropertyMode::Optional));
 
   auto mustBeReasonable = boost::make_shared<Kernel::BoundedValidator<int>>();
   mustBeReasonable->setLower(3);
@@ -144,6 +143,12 @@ void CalcCountRate::init() {
 void CalcCountRate::exec() {
 
   DataObjects::EventWorkspace_sptr sourceWS = getProperty("Workspace");
+  API::EventType et = sourceWS->getEventType();
+  if (et == API::EventType::WEIGHTED_NOTIME) {
+    throw std::runtime_error("Event workspace " + sourceWS->name() +
+                             " contains events without necessary frame "
+                             "information. Can not process counting rate");
+  }
 
   // Identity correct way to treat input logs and general properties of output
   // log
@@ -187,9 +192,13 @@ void CalcCountRate::calcRateLog(
 
   MantidVec countRate(m_numLogSteps);
   std::vector<double> countNormalization;
-
   if (this->notmalizeCountRate())
     countNormalization = m_pNormalizationLog->valuesAsVector();
+
+  std::unique_ptr<std::mutex[]> pVisWS_locks;
+  if (this->buildVisWS()) {
+    pVisWS_locks.reset(new std::mutex[m_visWs->getNumberHistograms()]);
+  }
 
   int64_t nHist = static_cast<int64_t>(InputWorkspace->getNumberHistograms());
   // Initialize progress reporting.
@@ -221,6 +230,9 @@ void CalcCountRate::calcRateLog(
       const DataObjects::EventList &el = InputWorkspace->getSpectrum(i);
       el.generateCountsHistogramPulseTime(dTRangeMin, dTRangeMax, Buff[nThread],
                                           m_XRangeMin, m_XRangeMax);
+      if (this->buildVisWS()) {
+        this->hisogramEvents(el, pVisWS_locks.get());
+      }
 
       // Report progress
       prog.report(name());
@@ -237,13 +249,16 @@ void CalcCountRate::calcRateLog(
       // normalize if requested
       if (!countNormalization.empty()) {
         countRate[j] /= countNormalization[j];
+        if (this->buildVisWS()) {
+          this->normalizeVisWs(j);
+        }
       }
     }
   }
   // recover histogram timing, but start assuming run starts at
   std::vector<Kernel::DateAndTime> times(m_numLogSteps);
 
-  double dt = (dTRangeMax - dTRangeMin) / m_numLogSteps;
+  double dt = (dTRangeMax - dTRangeMin) / static_cast<double>(m_numLogSteps);
   auto t0 = m_TRangeMin.totalNanoseconds();
   for (size_t i = 0; i < m_numLogSteps; i++) {
     times[i] = Kernel::DateAndTime(t0 + static_cast<int64_t>((0.5 + i) * dt));
@@ -251,7 +266,46 @@ void CalcCountRate::calcRateLog(
   // store calculated values within the target log.
   targLog->replaceValues(times, countRate);
 }
+/** hisogram event list into visualization workspace
+* @param el       :: event list to rebin into visualization workspace
+* @param spectraLocks :: pointer to the array of mutexes to lock modifyed
+*                        visualization workspace spectra for a thread
+*/
+void CalcCountRate::hisogramEvents(const DataObjects::EventList &el,
+                                   std::mutex *spectraLocks) {
 
+  if (el.empty())
+    return;
+
+  auto events = el.getEvents();
+  for (const DataObjects::TofEvent &ev : events) {
+    double pulsetime = static_cast<double>(ev.pulseTime().totalNanoseconds());
+    double tof = ev.tof();
+    if (pulsetime < m_visT0 || pulsetime >= m_visTmax)
+      continue;
+    if (tof < m_XRangeMin || tof >= m_XRangeMax)
+      continue;
+
+    size_t n_spec = static_cast<size_t>((pulsetime - m_visT0) / m_visDT);
+    size_t n_bin = static_cast<size_t>((tof - m_XRangeMin) / m_visDX);
+    (spectraLocks + n_spec)->lock();
+    auto &Y = m_visWs->mutableY(n_spec);
+    Y[n_bin]++;
+    (spectraLocks + n_spec)->unlock();
+  }
+}
+
+/** Normalize single spectra of the normalization workspace using prepared
+ * normzlization log*/
+void CalcCountRate::normalizeVisWs(int64_t wsIndex) {
+
+  auto Y = m_visWs->dataY(wsIndex);
+  for (size_t i = 0; i < Y.size(); i++) {
+    Y[i] /= m_visNorm[wsIndex];
+  }
+}
+void CalcCountRate::buildVisWSNormalization(
+    std::vector<double> &normalization) {}
 /*Analyse input log parameters and logs, attached to the workspace and identify
  * the parameters of the target log, including experiment time.
  *
@@ -262,17 +316,17 @@ void CalcCountRate::setOutLogParameters(
 
   std::string NormLogName = getProperty("NormalizationLogName");
 
-  bool normalizeResult = getProperty("NormalizeTheRate");
+  m_normalizeResult = getProperty("NormalizeTheRate");
   bool useLogDerivative = getProperty("UseLogDerivative");
   bool useLogAccuracy = getProperty("UseNormLogGranularity");
 
   bool logPresent = InputWorkspace->run().hasProperty(NormLogName);
   if (!logPresent) {
-    if (normalizeResult) {
+    if (m_normalizeResult) {
       g_log.warning() << "Normalization by log " << NormLogName
                       << " values requested but the log is not attached to the "
                          "workspace. Normalization disabled\n";
-      normalizeResult = false;
+      m_normalizeResult = false;
     }
     if (useLogDerivative) {
       g_log.warning() << "Normalization by log " << NormLogName
@@ -302,7 +356,7 @@ void CalcCountRate::setOutLogParameters(
   }
 
   ///
-  if (normalizeResult) {
+  if (m_normalizeResult) {
     if (!useLogAccuracy) {
       g_log.warning() << "Change of the counting log accuracy while "
                          "normalizing by log values is not implemented. Will "
@@ -337,6 +391,7 @@ void CalcCountRate::setOutLogParameters(
             << " time lies outside of the the whole experiment time. "
                "Log normalization impossible.\n";
         m_pNormalizationLog = nullptr;
+        m_normalizeResult = false;
         useLogAccuracy = false;
       } else {
         if (!m_tmpLogHolder) {
@@ -353,6 +408,7 @@ void CalcCountRate::setOutLogParameters(
                         << " time does not cover the whole experiment time. "
                            "Log normalization impossible.\n";
         m_pNormalizationLog = nullptr;
+        m_normalizeResult = false;
         useLogAccuracy = false;
       }
     }
@@ -363,7 +419,7 @@ void CalcCountRate::setOutLogParameters(
   }
 
   m_TRangeMin = runTMin;
-  m_TRangeMax = runTMax;
+  m_TRangeMax = runTMax + int64_t(1);// *(1+std::numeric_limits<double>::epsilon());
 }
 
 /* Retrieve and define data search ranges from input workspace parameters and
@@ -477,13 +533,21 @@ void CalcCountRate::checkAndInitVisWorkspace() {
         break;
       }
     }
+    if (std::isinf(Xmax)) {
+      g_log.warning() << "All X-range for visualization workspace is infinity. "
+                         "Can not build visualization workspace in the units "
+                         "requested\n";
+      m_visWs.reset();
+      m_doVis = false;
+      return;
+    }
   }
 
   // define X-axis in target units
   double dX = (Xmax - m_XRangeMin) / numXBins;
   std::vector<double> xx(numXBins);
   for (size_t i = 0; i < numXBins; ++i) {
-    xx[i] = m_XRangeMin + 0.5 * dX + i * dX;
+    xx[i] = m_XRangeMin + (0.5 + static_cast<double>(i)) * dX;
   }
   auto ax0 = new API::NumericAxis(xx);
   ax0->setUnit(RangeUnits);
@@ -492,11 +556,11 @@ void CalcCountRate::checkAndInitVisWorkspace() {
   // define Y axis (in seconds);
   double dt =
       ((m_TRangeMax.totalNanoseconds() - m_TRangeMin.totalNanoseconds()) /
-       numTBins) *
+       (numTBins)) *
       1.e-9;
   xx.resize(numTBins);
   for (size_t i = 0; i < numTBins; i++) {
-    xx[i] = 0.5 * dt + dt * i;
+    xx[i] = (0.5 + static_cast<double>(i)) * dt;
   }
   auto ax1 = new API::NumericAxis(xx);
   auto labelY = boost::dynamic_pointer_cast<Kernel::Units::Label>(
@@ -506,6 +570,18 @@ void CalcCountRate::checkAndInitVisWorkspace() {
   m_visWs->replaceAxis(1, ax1);
 
   setProperty("VisualizationWs", m_visWs);
+
+  // define binning parameters used while calculating visualization
+  m_visX0 = m_XRangeMin;
+  m_visDX = dX;
+  m_visT0 = static_cast<double>(m_TRangeMin.totalNanoseconds());
+  m_visTmax = static_cast<double>(m_TRangeMax.totalNanoseconds());
+  m_visDT = (m_visTmax - m_visT0) / static_cast<double>(numTBins);
+
+  if (this->notmalizeCountRate()) {
+    m_visNorm.resize(numTBins);
+    this->buildVisWSNormalization(m_visNorm);
+  }
 }
 /** Helper function to check if visualization workspace should be used*/
 bool CalcCountRate::buildVisWS() const { return m_doVis; }
@@ -513,9 +589,7 @@ bool CalcCountRate::buildVisWS() const { return m_doVis; }
 /** Helper function, mainly for testing
 * @return  true if count rate should be normalized and false
 * otherwise */
-bool CalcCountRate::notmalizeCountRate() const {
-  return (m_pNormalizationLog != nullptr);
-}
+bool CalcCountRate::notmalizeCountRate() const { return m_normalizeResult; }
 /** Helper function, mainly for testing
 * @return  true if log derivative is used instead of log itself */
 bool CalcCountRate::useLogDerivative() const { return m_useLogDerivative; }

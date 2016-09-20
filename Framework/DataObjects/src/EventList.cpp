@@ -2244,10 +2244,12 @@ void EventList::generateCountsHistogramPulseTime(const double &xMin,
     return;
 
   size_t nBins = Y.size();
+
   if (nBins == 0)
     return;
 
   double step = (xMax - xMin) / nBins;
+
   for (const TofEvent &ev : this->events) {
     double pulsetime = static_cast<double>(ev.pulseTime().totalNanoseconds());
     if (pulsetime < xMin || pulsetime >= xMax)
