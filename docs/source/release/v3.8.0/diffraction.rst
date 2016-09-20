@@ -91,8 +91,7 @@ Powder Diffraction
   ``CalibrationFile``. The documentation for this algorithm has been
   greatly expanded as well.
 
-- :ref:`PDFFourierTransformSNSPowderReduction
-  <algm-PDFFourierTransformSNSPowderReduction>` has been modified to
+- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been modified to
   look at the signal as well when looking at the ``Q``-range to use
   for the transform.
 

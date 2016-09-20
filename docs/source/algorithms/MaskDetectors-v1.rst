@@ -26,8 +26,8 @@ The *Spectra Number* or  *spectra ID* mean the number, assigned to a spectrum. T
 
 from the sample above will often print 1 but not always. The simplest case when this 
 number is different is when you load a second half of a workspace, when the first spectrum number still is **NumTotalSpectraInWorkspace/2+1**,
- while *WorkspaceIndex* of this spectra becomes 0, i.e.: ::
- 
+while *WorkspaceIndex* of this spectra becomes 0, i.e.: ::
+
 	sp = ws.getSpectrum(0)
 	print sp.getSpectrumNo()
 	
