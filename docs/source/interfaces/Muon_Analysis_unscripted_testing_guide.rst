@@ -43,44 +43,51 @@ Test 1: individual fit
 
 Test 2: sequential fit
 ----------------------
-- With everything set up as before, click *Fit/Sequential fit*
-- Dialog should appear. In the runs box, type "20918-20" and hit Start
+- With everything set up as in the picture above, click *Fit/Sequential fit*. (Runs should still be set to "20918", a single run).
+- Dialog should appear. In the runs box **of the new dialog that appears**, type "20918-20" and hit Start
 - Sequential fit of runs 20918, 20919, 20920 should happen one after the other
 
-Test 2: co-added fit
+Test 3: co-added fit
 --------------------
-- Now in the "Runs" box, type "20918-20" and hit return.
+- Close the sequential dialog and return to the main interface.
+- Now in the "Runs" box of MuonAnalysis's *Data Analysis* tab, type "20918-20" and hit return.
 - Stale errors should be cleared from the function browser.
 - "Co-add/Simultaneous" radio buttons should be enabled with "Co-add" selected
 - "Label" box should still be disabled
 - In the drop-down, there should only be one workspace (``EMU00020918-20; Pair; long; Asym; #1``)
 - Fit as before. Graph should be updated.
 
-Test 3: simultaneous fit across runs
+Test 4: simultaneous fit across runs
 ------------------------------------
-- Select the "Simultaneous" radio button option.
+- With the same runs (20918-20) selected, select the "Simultaneous" radio button option.
 - Drop-down list should have three workspaces in it now, for the three runs that will be fitted.
 - Keep the same fit function, but use the "Global" checkboxes to mark ``A``, ``Omega``, ``Phi`` and ``Sigma`` as global.
 - Fit the data. Note that plot will *not* be updated at present.
   (If you want to plot results, see the ``MuonSimulFit_Label`` workspace group)
 - Use the ``<<`` and ``>>`` buttons, or drop-down list, to see the fitted parameters for each run in the function browser.
 
-Test 4: simultaneous fit across groups
+Test 5: simultaneous fit across groups
 --------------------------------------
 - Type "20918" only in the "Runs" box
 - Select both "fwd" and "bwd" as groups
 - Keep fit function and global parameters as before
 - Fit data. It should warn you that "Label" has already been used - say no to overwriting and it should automatically increment the label.
 
-Test 5: sequential fit of simultaneous fits
+Test 6: sequential fit of simultaneous fits
 -------------------------------------------
-- With the same setup, click *Fit/Sequential fit*
-- Again, choose not to overwrite the label.
-- Dialog should appear. In the runs box, type "20918-20", and put "Label2" in the label box, then hit Start
+- Keep the same setup as Test 5, i.e. Runs="20918", "fwd" and "bwd" selected as groups
+- Click *Fit/Sequential fit* to launch the dialog
+- If offered the choice, choose not to overwrite the label
+- Dialog should appear. In this new dialog (not the interface underneath):
+
+  - Runs = "20918-20"
+  - Label = "Label2"
+  - Hit "Start"
+
 - This should fit the ``fwd`` and ``bwd`` groups simultaneously for each run 20918, 20919, 20920 in sequence.
 
 
-Test 6: simultaneous fit across periods
+Test 7: simultaneous fit across periods
 ---------------------------------------
 The data used so far is single period, so here we will use MUSR data from the unit test data.
 
@@ -112,22 +119,22 @@ Test 1: individual fits
 
 Test 2: Sequential fit (simple)
 -------------------------------
+- Top group box: keep same logs as before
 - Select the *Sequential fits* radio button in the centre group box, and "Label" in the drop-down, *i.e.* the first sequential fit you did. Keep all three runs included.
-- The same logs as before should be selected in the top box.
 - Create the table - check that, if you don't change the name, it warns you about overwriting.
 - The table should have three rows, one for each run, with the correct sample log values (180, 190, 200).
 - Again there should be one pair of columns for each parameter and error, and a cost function column at the end.
 
 Test 3: Sequential fit of simultaneous fits
 -------------------------------------------
-- Now select "Label2", the sequential fit of simultaneous fits (from test 5 above).
+- Now select "Label2", the sequential fit of simultaneous fits (from test 5 above), in the drop-down next to *Sequential fits* (see test 2).
 - The top box should have extra log values for ``group`` and ``period`` - select ``group`` (as well as ``run_number``)
 - Keep all runs selected and create table
 - There should be six rows in all, two per run (one for fwd, one for bwd).
 
 Test 4: Simultaneous fits
 -------------------------
-- Select the "Simultaneous fits" radio button.
+- Select the "Simultaneous fits" radio button above the centre group box.
 - Keep the first "Label" selected in the drop-down list.
 - Create the table
 - There should be one row per run
@@ -137,7 +144,7 @@ Test 4: Simultaneous fits
 
 Test 5: Multiple simultaneous fits
 ----------------------------------
-- Select the last radio button, "Multiple".
+- Select the last radio button, "Multiple", above the centre group box.
 - Three simultaneous fit labels are listed: Label, Label#2, MUSRlabel.
 - Note that they have different colours, because the number of datasets and fit models differ. You should not be able to create a table with all of these selected.
 - Select just the first "Label", log values ``run_number`` and ``sample_temp``, and create the table.
