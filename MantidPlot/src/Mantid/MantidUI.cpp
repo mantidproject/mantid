@@ -429,7 +429,6 @@ void MantidUI::deleteWorkspace(const QString &workspaceName) {
   executeAlgorithmAsync(alg);
 }
 
-
 QString MantidUI::getSelectedWorkspaceName() {
   QString str = m_exploreMantid->getSelectedWorkspaceName();
   if (str.isEmpty()) {
@@ -1454,7 +1453,11 @@ QStringList MantidUI::extractPyFiles(const QList<QUrl> &urlList) const {
 }
 
 /**
-executes Save Nexus from the right click context menu
+Executes the Save Nexus dialogue from the right click context menu.
+
+The Save > Nexus function from the button in the Dock (with Load, Delete, Group,
+Sort, Save buttons) is in MantidDock at line 933
+
 saveNexus Input Dialog is a generic dialog.Below code is added to remove
 the workspaces except the selected workspace from the InputWorkspace combo
 
