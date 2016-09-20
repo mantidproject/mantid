@@ -1456,7 +1456,7 @@ QStringList MantidUI::extractPyFiles(const QList<QUrl> &urlList) const {
 Executes the Save Nexus dialogue from the right click context menu.
 
 The Save > Nexus function from the button in the Dock (with Load, Delete, Group,
-Sort, Save buttons) is in MantidDock at line 933
+Sort, Save buttons) is in MantidDock in function handleShowSaveAlgorithm()
 
 saveNexus Input Dialog is a generic dialog.Below code is added to remove
 the workspaces except the selected workspace from the InputWorkspace combo

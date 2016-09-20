@@ -21,7 +21,6 @@
 #include <MantidQtAPI/InterfaceManager.h>
 
 #include <Poco/Path.h>
-#include <boost/shared_ptr.hpp>
 
 #ifdef MAKE_VATES
 #include "vtkPVDisplayInformation.h"
@@ -934,7 +933,7 @@ void MantidDockWidget::handleShowSaveAlgorithm() {
   const QAction *sendingAction = dynamic_cast<QAction *>(sender());
 
   if (sendingAction) {
-    auto inputWorkspace = getSelectedWorkspace();
+    const auto inputWorkspace = getSelectedWorkspace();
     const QString wsName = QString::fromStdString(inputWorkspace->getName());
     const QVariant data = sendingAction->data();
 
@@ -943,7 +942,7 @@ void MantidDockWidget::handleShowSaveAlgorithm() {
       int version = -1;
 
       // Check if workspace is MD, this is the same check used in
-      // SaveNexusProcessed.cpp line 175 to determine if the WS is MD
+      // SaveNexusProcessed.cpp in the doExec()
       if (bool(boost::dynamic_pointer_cast<const IMDEventWorkspace>(
               inputWorkspace)) ||
           bool(boost::dynamic_pointer_cast<const IMDHistoWorkspace>(
@@ -959,6 +958,7 @@ void MantidDockWidget::handleShowSaveAlgorithm() {
         switch (splitData.length()) {
         case 2:
           version = splitData[1].toInt();
+        /* intentional fall through to get algorithm name */
         case 1:
           algorithmName = splitData[0];
           break;
