@@ -730,7 +730,7 @@ void MuonAnalysis::runPairTablePlotButton() {
  * Update front tab and plot
  * @param itemType :: [input] Group or pair
  */
-void MuonAnalysis::runTablePlotButton(MuonAnalysis::ItemType itemType) {
+void MuonAnalysis::runTablePlotButton(ItemType itemType) {
   if (m_updating) {
     return;
   }
@@ -742,13 +742,13 @@ void MuonAnalysis::runTablePlotButton(MuonAnalysis::ItemType itemType) {
 
   int plotChoiceIndex(-1), groupPairNumber(-1);
   switch (itemType) {
-  case MantidQt::CustomInterfaces::MuonAnalysis::Pair:
+  case ItemType::Pair:
     plotChoiceIndex = m_uiForm.pairTablePlotChoice->currentIndex();
     if (getPairNumberFromRow(m_pairTableRowInFocus) != -1) {
       groupPairNumber = numGroups() + m_pairTableRowInFocus;
     }
     break;
-  case MantidQt::CustomInterfaces::MuonAnalysis::Group:
+  case ItemType::Group:
   default:
     plotChoiceIndex = m_uiForm.groupTablePlotChoice->currentIndex();
     groupPairNumber = getGroupNumberFromRow(m_groupTableRowInFocus);

@@ -517,7 +517,7 @@ private:
   std::string getSubtractedPeriods() const;
 
   /// Run "Plot" button from group or pair table
-  void runTablePlotButton(ItemType itemType);
+  void runTablePlotButton(Muon::ItemType itemType);
 
   /// Cached value of config setting
   std::string m_cachedPeakRadius;
