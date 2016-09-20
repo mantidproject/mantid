@@ -816,5 +816,35 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         fun = FunctionFactory.createInitialized(s)
 
+    def test_bad_input(self):
+        from CrystalField import CrystalField
+        from mantid.simpleapi import FunctionFactory
+
+        cf = CrystalField('Ce', 'C2v', B20='aaa', B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                      Temperature=44.0, FWHM=1.0)
+        s = cf.makeSpectrumFunction()
+        self.assertRaises(RuntimeError, FunctionFactory.createInitialized, s)
+
+        cf = CrystalField('Ce', 'C2v', B20=1, B22=3.97, B40=[-0.0317], B42=-0.116, B44=-0.12,
+                          Temperature=44.0, FWHM=1.0)
+        s = cf.makeSpectrumFunction()
+        self.assertRaises(RuntimeError, FunctionFactory.createInitialized, s)
+
+        cf = CrystalField('Ce', 'C2v', B20=1, B22=3.97, B40=np.array([-0.0317]), B42=-0.116, B44=-0.12,
+                          Temperature=44.0, FWHM=1.0)
+        s = cf.makeSpectrumFunction()
+        self.assertRaises(RuntimeError, FunctionFactory.createInitialized, s)
+
+        cf = CrystalField('Ce', 'C2v', B20=1, B22=3.97, B40=np.array([1.2, 2.3]), B42=-0.116, B44=-0.12,
+                          Temperature=44.0, FWHM=1.0)
+        s = cf.makeSpectrumFunction()
+        self.assertRaises(RuntimeError, FunctionFactory.createInitialized, s)
+
+        cf = CrystalField('Ce', 'C2v', B20=1, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
+                          Temperature=44.0, FWHM=1.0)
+        cf.peaks.param[1]["FWHM"] = 'aaa'
+        s = cf.makeSpectrumFunction()
+        self.assertRaises(RuntimeError, FunctionFactory.createInitialized, s)
+
 if __name__ == "__main__":
     unittest.main()

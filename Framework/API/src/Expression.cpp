@@ -213,8 +213,14 @@ void Expression::tokenize() {
       if (lvl == 0 && !isNumber && is_op_symbol(c)) // insert new token
       {
         if (i == last) {
-          break;
-          // throw std::runtime_error("Expression: syntax error");
+          if (c == ',' || c == ';') {
+            m_expr.resize(last);
+            break;
+          } else {
+            throw std::runtime_error("Syntax error in expression.\n\nA binary "
+                                     "operator isn't followed by a value:\n    " +
+                                     m_expr);
+          }
         }
 
         if (is_op_symbol(m_expr[i + 1])) {
