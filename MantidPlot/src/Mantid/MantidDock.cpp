@@ -10,6 +10,8 @@
 
 #include <MantidAPI/FileProperty.h>
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -19,6 +21,7 @@
 #include <MantidQtAPI/InterfaceManager.h>
 
 #include <Poco/Path.h>
+#include <boost/shared_ptr.hpp>
 
 #ifdef MAKE_VATES
 #include "vtkPVDisplayInformation.h"
@@ -928,28 +931,39 @@ void MantidDockWidget::saveWorkspacesToFolder(const QString &folder) {
  * most recent version.
  */
 void MantidDockWidget::handleShowSaveAlgorithm() {
-  QAction *sendingAction = dynamic_cast<QAction *>(sender());
+  const QAction *sendingAction = dynamic_cast<QAction *>(sender());
 
   if (sendingAction) {
-    QString wsName = getSelectedWorkspaceName();
-    QVariant data = sendingAction->data();
+    auto inputWorkspace = getSelectedWorkspace();
+    const QString wsName = QString::fromStdString(inputWorkspace->getName());
+    const QVariant data = sendingAction->data();
 
     if (data.canConvert<QString>()) {
       QString algorithmName;
       int version = -1;
 
-      QStringList splitData = data.toString().split(".");
-      switch (splitData.length()) {
-      case 2:
-        version = splitData[1].toInt();
-      case 1:
-        algorithmName = splitData[0];
-        break;
-      default:
-        m_mantidUI->saveNexusWorkspace();
-        return;
-      }
+      // Check if workspace is MD, this is the same check used in
+      // SaveNexusProcessed.cpp line 175 to determine if the WS is MD
+      if (bool(boost::dynamic_pointer_cast<const IMDEventWorkspace>(
+              inputWorkspace)) ||
+          bool(boost::dynamic_pointer_cast<const IMDHistoWorkspace>(
+              inputWorkspace))) {
 
+        algorithmName = "SaveMD";
+
+      } else {
+        QStringList splitData = data.toString().split(".");
+        switch (splitData.length()) {
+        case 2:
+          version = splitData[1].toInt();
+        case 1:
+          algorithmName = splitData[0];
+          break;
+        default:
+          m_mantidUI->saveNexusWorkspace();
+          return;
+        }
+      }
       QHash<QString, QString> presets;
       if (!wsName.isEmpty())
         presets["InputWorkspace"] = wsName;
