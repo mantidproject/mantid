@@ -152,7 +152,6 @@ public:
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189"),
                                                      QString("MUSR"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
-    EXPECT_CALL(*m_fitBrowser, allowSequentialFits(true)).Times(1);
     m_presenter->setAssignedFirstRun(wsName);
   }
 
@@ -161,7 +160,6 @@ public:
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189-91"),
                                                      QString("MUSR"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
-    EXPECT_CALL(*m_fitBrowser, allowSequentialFits(false)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
     m_presenter->setAssignedFirstRun(wsName);
@@ -173,7 +171,6 @@ public:
                 setWorkspaceDetails(QString("00015189-91, 15193"),
                                     QString("MUSR"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0u)).Times(1);
-    EXPECT_CALL(*m_fitBrowser, allowSequentialFits(false)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("long"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
     m_presenter->setAssignedFirstRun(wsName);
@@ -516,9 +513,6 @@ private:
     EXPECT_CALL(*m_dataSelector, getInstrumentName())
         .Times(1)
         .WillOnce(Return("MUSR"));
-    EXPECT_CALL(*m_dataSelector, getRuns())
-        .Times(1)
-        .WillOnce(Return("15189-91"));
     EXPECT_CALL(*m_dataSelector, getChosenGroups())
         .Times(1)
         .WillOnce(Return(QStringList({"fwd", "long"})));
@@ -528,6 +522,7 @@ private:
     EXPECT_CALL(*m_dataSelector, getFitType())
         .Times(1)
         .WillOnce(Return(fitType));
+    ON_CALL(*m_dataSelector, getRuns()).WillByDefault(Return("15189-91"));
     ON_CALL(*m_dataSelector, getStartTime()).WillByDefault(Return(0.55));
     ON_CALL(*m_dataSelector, getEndTime()).WillByDefault(Return(10.0));
     const std::vector<QString> expectedNames = [&fitType]() {
@@ -559,6 +554,7 @@ private:
                 setDatasetNames(UnorderedElementsAreArray(expectedNames)))
         .Times(1);
     EXPECT_CALL(*m_fitBrowser, setWorkspaceName(_)).Times(1);
+    EXPECT_CALL(*m_fitBrowser, allowSequentialFits(false));
     m_dataLoader.setDeadTimesType(DeadTimesType::FromFile);
     ads.add("MUSR00015189", boost::make_shared<WorkspaceGroup>());
     m_presenter->handleSelectedDataChanged(true);

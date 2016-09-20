@@ -138,6 +138,7 @@ void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
   if (!names.empty()) {
     createWorkspacesToFit(names);
     updateWorkspaceNames(names);
+    m_fitBrowser->allowSequentialFits(!isMultipleRuns());
   }
 }
 
@@ -593,6 +594,13 @@ void MuonAnalysisFitDataPresenter::openSequentialFitDialog() {
     return;
   }
 
+  // Check that only one run is selected. If not, disable sequential fits and
+  // don't open the dialog
+  if (isMultipleRuns()) {
+    m_fitBrowser->allowSequentialFits(false);
+    return;
+  }
+
   // Open the dialog
   fitBrowser->blockSignals(true);
   MuonSequentialFitDialog dialog(fitBrowser, this);
@@ -684,17 +692,18 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName) {
   m_dataSelector->setWorkspaceDetails(
       numberString, QString::fromStdString(wsParams.instrument));
   m_dataSelector->setWorkspaceIndex(0u); // always has only one spectrum
-  // Check for multiple runs
-  if (wsParams.runs.size() > 1) {
-    m_fitBrowser->allowSequentialFits(false);
-  } else {
-    m_fitBrowser->allowSequentialFits(
-        true); // will still be forbidden if no function
-  }
 
   // Set selected groups/pairs and periods here too
   m_dataSelector->setChosenGroup(QString::fromStdString(wsParams.itemName));
   m_dataSelector->setChosenPeriod(QString::fromStdString(wsParams.periods));
+}
+
+/**
+ * Check if multiple runs (co-add or simultaneous) are selected
+ * @returns :: True if multiple runs selected
+ */
+bool MuonAnalysisFitDataPresenter::isMultipleRuns() const {
+  return m_dataSelector->getRuns().contains(QRegExp("-|,"));
 }
 
 } // namespace CustomInterfaces

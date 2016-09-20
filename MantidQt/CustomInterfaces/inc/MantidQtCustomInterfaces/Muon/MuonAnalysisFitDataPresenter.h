@@ -143,6 +143,8 @@ private:
   bool isSimultaneousFit() const;
   /// Set up UI based on workspace
   void setUpDataSelector(const QString &wsName);
+  /// Check if multiple runs are selected
+  bool isMultipleRuns() const;
   /// Fit browser to update (non-owning pointer)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Data selector to get input from (non-owning pointer)
