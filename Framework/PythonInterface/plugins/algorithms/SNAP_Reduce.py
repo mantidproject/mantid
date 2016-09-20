@@ -230,7 +230,7 @@ class SNAP_Reduce(PythonAlgorithm):
             filename = self.getProperty("NormalizationFilename").value
             if len(filename) <= 0:
                 issues["NormalizationFilename"] = "Normalization=\"%s\" requires a filename" \
-                                                   % normalization
+                                                  % normalization
         else:
             raise RuntimeError("Normalization value \"%s\" not supported" % normalization)
 
@@ -305,20 +305,7 @@ class SNAP_Reduce(PythonAlgorithm):
             print self.get_IPTS_Local(r)
             if self.getProperty("LiveData").value:
                 Tag = 'Live'
-                # TODO should remove branch and always use LoadPreNexusLive
-                if AlgorithmFactory.exists('LoadPreNexusLive'):
-                    WS = LoadPreNexusLive(Instrument='SNAP')
-                else:
-                    WS = LoadEventPreNexus(EventFilename=r'/SNS/SNAP/shared/live/SNAP_%s_live_neutron_event.dat' % r,
-                                           PulseidFilename=r'/SNS/SNAP/shared/live/SNAP_%s_live_pulseid.dat' % r)
-                    print 'going normalize'
-                    WS = NormaliseByCurrent(InputWorkspace='WS', Outputworkspace='WS')
-                    print 'going loadlogs'
-                    LoadNexusLogs(Workspace=WS,
-                                  Filename='%s/data/SNAP_%s_event.nxs' % (self.get_IPTS_Local(r),
-                                                                          self.get_Run_Log_Local(r)))
-                    LoadInstrument(Workspace=WS, InstrumentName='SNAP')
-                    WS = FilterByXValue(InputWorkspace=WS, XMin=1)
+                WS = LoadPreNexusLive(Instrument='SNAP')
             else:
                 WS = Load(Filename='SNAP'+str(r), Outputworkspace='WS')
                 WS = NormaliseByCurrent(InputWorkspace=WS, Outputworkspace='WS')
