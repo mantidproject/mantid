@@ -37,6 +37,12 @@ public:
     auto ws = create<HistoWorkspace>(*eventWS);
     TS_ASSERT_EQUALS(ws->id(), "Workspace2D");
   }
+
+  void test_EventWorkspace_MRU_is_empty() {
+    const auto ws1 = create<EventWorkspace>(1, Histogram(BinEdges(3)));
+    const auto ws2 = create<EventWorkspace>(*ws1, 1, Histogram(BinEdges(3)));
+    TS_ASSERT_EQUALS(ws2->MRUSize(), 0);
+  }
 };
 
 #endif /* MANTID_DATAOBJECTS_WORKSPACECREATIONTEST_H_ */
