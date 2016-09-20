@@ -398,7 +398,8 @@ class CWSCDReductionControl(object):
                 error_message = ret_obj
                 return False, error_message
             else:
-                spice_table = self._mySpiceTableDict[(self._expNumber, scan_no)]
+                # spice_table = self._mySpiceTableDict[(self._expNumber, scan_no)]
+                spice_table = self._get_spice_workspace(self._expNumber, scan_no)
                 assert spice_table
             pt_no_list = self._get_pt_list_from_spice_table(spice_table)
 
@@ -986,7 +987,9 @@ class CWSCDReductionControl(object):
 
         for key in self._mySpiceTableDict.keys():
             if key[0] == exp_number:
-                ws_names_str += '%s,' % self._mySpiceTableDict[key].name()
+                exp_number, scan_number = key
+                spice_table_name = get_spice_table_name(exp_number, scan_number)
+                ws_names_str += '%s,' % spice_table_name  # self._mySpiceTableDict[key].name()
 
         # Check
         if len(ws_names_str) == 0:
@@ -1472,7 +1475,9 @@ class CWSCDReductionControl(object):
 
         # retrieve and check SPICE table workspace
         spice_table_ws = self._get_spice_workspace(exp_no, scan_no)
-        assert isinstance(spice_table_ws, mantid.dataobjects.TableWorkspace)
+        assert isinstance(spice_table_ws, mantid.dataobjects.TableWorkspace), 'SPICE table workspace must be a ' \
+                                                                              'TableWorkspace but not %s.' \
+                                                                              '' % type(spice_table_ws)
         spice_table_name = spice_table_ws.name()
 
         # load SPICE Pt.  detector file
@@ -2091,20 +2096,27 @@ class CWSCDReductionControl(object):
         assert isinstance(exp_no, int)
         assert isinstance(scan_no, int)
         assert isinstance(spice_table_ws, mantid.dataobjects.TableWorkspace)
-        self._mySpiceTableDict[(exp_no, scan_no)] = spice_table_ws
+        self._mySpiceTableDict[(exp_no, scan_no)] = str(spice_table_ws)
 
         return
 
-    def _get_spice_workspace(self, exp_no, scan_no):
+    @staticmethod
+    def _get_spice_workspace(exp_no, scan_no):
         """ Get SPICE's scan table workspace
         :param exp_no:
         :param scan_no:
         :return: Table workspace or None
         """
-        try:
-            ws = self._mySpiceTableDict[(exp_no, scan_no)]
-        except KeyError:
-            return None
+        # try:
+        #     ws = self._mySpiceTableDict[(exp_no, scan_no)]
+        # except KeyError:
+        #     return None
+
+        spice_ws_name = get_spice_table_name(exp_no, scan_no)
+        if AnalysisDataService.doesExist(spice_ws_name):
+            ws = AnalysisDataService.retrieve(spice_ws_name)
+        else:
+            raise KeyError('Spice table workspace %s does not exist in ADS.' % spice_ws_name)
 
         return ws
 
