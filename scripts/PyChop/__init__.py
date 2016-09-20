@@ -1,0 +1,21 @@
+# pylint: disable=line-too-long
+
+"""
+Module containing classes to calculate the flux and resolution of direct geometry neutron time-of-flight spectrometers.
+At present, the subclasses understand the ISIS instruments 'LET', 'MAPS', 'MARI' and 'MERLIN'.
+
+Usage:
+
+from PyChop import PyChop2
+
+merlin = PyChop2('merlin','s',250)
+merlin.setEi(25)
+resolution = merlin.getResolution()
+
+resolution, flux = PyChop2.calculate(inst='maps', chtyp='a', freq=500, ei=600, etrans=range(0,550,50))
+
+PyChop2.showGUI()
+"""
+
+from .PyChop2 import PyChop2
+from .PyChopGui import show as showGUI
