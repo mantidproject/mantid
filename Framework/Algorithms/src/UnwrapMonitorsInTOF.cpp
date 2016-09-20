@@ -36,7 +36,7 @@ struct MinAndMaxIndex {
  *
  * To get the time: T = L/V and V = h/(m*lambda) --> T(lambda) = (L*m/h)*lambda
  * In addition we need to divide the wavelength by 10^10 since the input is in
- *Anstrom and we need to multiply by 10^6 since the
+ * Angstrom and we need to multiply by 10^6 since the
  * output is in microseconds
  * @param distanceFromSource the distance from the source in meters
  * @param lowerWavelengthLimit the lower bound of the wavelength in Angstrom

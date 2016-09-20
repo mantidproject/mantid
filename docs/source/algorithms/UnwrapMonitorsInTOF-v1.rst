@@ -64,18 +64,14 @@ Usage
   # Inspect the unwrapped data
   dataY_doubled = output_workspace.dataY(3)
   print("The number of bins is {0} and is expected to be 20.".format(len(dataY_doubled)))
-  print("The 1st entry is {0}.".format(dataY_doubled[0]))
-  print("The 9th entry is {0}.".format(dataY_doubled[8]))
-  print("The 13th entry is {0}.".format(dataY_doubled[12]))
+  print("The monitor 4 entries are: {0}.".format(dataY_doubled))
 
 Output:
 
 .. testoutput:: UnwrapMonitorsInTOFExample
 
   The number of bins is 20 and is expected to be 20.
-  The 1st entry is 0.0.
-  The 9th entry is 5.0.
-  The 13th entry is 1.0.
+  The monitor 4 entries are: [ 0.  0.  0.  0.  0.  0.  0.  0.  5.  4.  3.  2.  1.  0.  0.  0.  0.  0. 0.  0.].
 
 .. categories::
 

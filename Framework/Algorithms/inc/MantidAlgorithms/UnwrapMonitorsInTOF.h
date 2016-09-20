@@ -8,8 +8,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** UnwrapMonitorsInTOF : Handles workspaces which only contain monitors
- *  and have data recorded which spills over from the previous frame.
+/** UnwrapMonitorsInTOF : Handles workspaces which contain monitors
+ *  that recorded data which spills over from the previous frame.
  *  This can occur when dealing with different time regimes for detectors
  *  and monitors.
 
