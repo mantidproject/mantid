@@ -189,7 +189,6 @@ inline bool threadSafe(Arg workspace, Args... others) {
 #define PARALLEL_FOR_NO_WSP_CHECK_FIRSTPRIVATE2(variable1, variable2)
 #define PARALLEL_FOR1(workspace1)
 #define PARALLEL_FOR2(workspace1, workspace2)
-#define PARALLEL_FOR3(workspace1, workspace2, workspace3)
 #define IF_PARALLEL if (false)
 #define IF_NOT_PARALLEL
 #define PARALLEL_CRITICAL(name)
