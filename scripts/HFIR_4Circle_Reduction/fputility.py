@@ -78,7 +78,8 @@ def write_scd_fullprof_kvector(user_header, wave_length, k_vector_dict, peak_dic
             kx = ky = kz = 0.0
             k_index = 0
 
-        part1 = '%4d%4d%4d' % (nearest_int(m_h+kx), nearest_int(m_k+ky), nearest_int(m_l+kz))
+        # remove the magnetic k-shift vector from HKL
+        part1 = '%4d%4d%4d' % (nearest_int(m_h-kx), nearest_int(m_k-ky), nearest_int(m_l-kz))
 
         # k index
         if is_magnetic:
