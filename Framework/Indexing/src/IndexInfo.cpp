@@ -46,7 +46,7 @@ IndexInfo::IndexInfo(
 }
 
 IndexInfo::IndexInfo(const IndexInfo &other) {
-  if (m_isLegacy) {
+  if (other.m_isLegacy) {
     // Workaround while IndexInfo is not holding index data stored in
     // MatrixWorkspace: build IndexInfo based on data in ISpectrum.
     auto &specNums = m_spectrumNumbers.access();
