@@ -652,6 +652,8 @@ void NormaliseToMonitor::normaliseBinByBin(
   if (hasZeroDivision) {
     g_log.warning() << "Division by zero in some of the bins.\n";
   }
+  if (inputEvent)
+    outputEvent->clearMRU();
 }
 
 /** Calculates the overall normalization factor.
