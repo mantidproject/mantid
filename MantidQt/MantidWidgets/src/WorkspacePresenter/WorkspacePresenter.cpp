@@ -38,6 +38,9 @@ void WorkspacePresenter::notifyFromWorkspaceProvider(
   case WorkspaceProviderNotifiable::Flag::WorkspaceDeleted:
     workspacesDeleted();
     break;
+  case WorkspaceProviderNotifiable::Flag::WorkspacesCleared:
+    workspacesCleared();
+    break;
   }
 }
 
@@ -93,12 +96,38 @@ void WorkspacePresenter::renameWorkspace() {
 
 void WorkspacePresenter::groupWorkspaces() {
   auto view = lockView();
-  view->groupWorkspaces(view->getSelectedWorkspaceNames());
+  auto selected = view->getSelectedWorkspaceNames();
+
+  std::string groupName("NewGroup");
+  std::vector<std::string> inputWSVec;
+  // get selected workspaces
+  if (selected.size() < 2) {
+    view->showCriticalUserMessage("Cannot Group Workspaces",
+                                  "Select at least two workspaces to group ");
+    return;
+  }
+
+  if (m_adapter->doesWorkspaceExist(groupName)) {
+    if (!view->askUserYesNo("",
+                            "Workspace " + groupName +
+                                " already exists. Do you want to replace it?"))
+      return;
+  }
+
+  view->groupWorkspaces(selected, groupName);
 }
 
 void WorkspacePresenter::ungroupWorkspaces() {
   auto view = lockView();
-  view->ungroupWorkspaces(view->getSelectedWorkspaceNames());
+  auto selected = view->getSelectedWorkspaceNames();
+
+  if (selected.size() == 0) {
+    view->showCriticalUserMessage("Error Ungrouping Workspaces",
+                                  "Select a group workspace to Ungroup.");
+    return;
+  }
+
+  view->ungroupWorkspaces(selected);
 }
 
 void WorkspacePresenter::sortWorkspaces() {
@@ -109,9 +138,25 @@ void WorkspacePresenter::sortWorkspaces() {
 
 void WorkspacePresenter::deleteWorkspaces() {
   auto view = lockView();
+  bool deleteWs = true;
+  auto selected = view->getSelectedWorkspaceNames();
 
-  if (view->deleteConfirmation())
-    view->deleteWorkspaces(view->getSelectedWorkspaceNames());
+  // Ensure all workspaces exist in the ADS
+  if (!std::all_of(selected.cbegin(), selected.cend(),
+                   [=](const std::string &ws) {
+                     return m_adapter->doesWorkspaceExist(ws);
+                   })) {
+    view->showCriticalUserMessage(
+        "Delete Workspaces",
+        "Unabel to delete workspaces. Invalid workspace names provided.");
+    return;
+  }
+
+  if (view->isPromptDelete())
+    deleteWs = view->deleteConfirmation();
+
+  if (deleteWs)
+    view->deleteWorkspaces(selected);
 }
 
 void WorkspacePresenter::saveSingleWorkspace() {
@@ -132,13 +177,23 @@ void WorkspacePresenter::filterWorkspaces() {
 
 void WorkspacePresenter::workspaceLoaded() { updateView(); }
 
-void WorkspacePresenter::workspaceRenamed() { updateView(); }
+void WorkspacePresenter::workspaceRenamed() {
+  auto view = lockView();
+  view->recordWorkspaceRename(m_adapter->getOldName(), m_adapter->getNewName());
+  view->updateTree(m_adapter->topLevelItems());
+}
 
 void WorkspacePresenter::workspacesGrouped() { updateView(); }
 void WorkspacePresenter::workspacesUngrouped() { updateView(); }
 void WorkspacePresenter::workspaceGroupUpdated() { updateView(); }
 
 void WorkspacePresenter::workspacesDeleted() { updateView(); }
+
+void WorkspacePresenter::workspacesCleared() {
+  auto view = lockView();
+  view->clearView();
+  view->updateTree(m_adapter->topLevelItems());
+}
 
 DockView_sptr WorkspacePresenter::lockView() {
   auto view_sptr = m_view.lock();

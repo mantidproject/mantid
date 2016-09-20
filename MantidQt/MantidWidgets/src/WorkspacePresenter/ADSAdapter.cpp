@@ -54,6 +54,10 @@ ADSAdapter::getWorkspace(const std::string &wsname) const {
   return AnalysisDataService::Instance().retrieve(wsname);
 }
 
+bool ADSAdapter::doesWorkspaceExist(const std::string &wsname) const {
+  return AnalysisDataService::Instance().doesExist(wsname);
+}
+
 std::map<std::string, Mantid::API::Workspace_sptr>
 ADSAdapter::topLevelItems() const {
   return AnalysisDataService::Instance().topLevelItems();
@@ -67,6 +71,9 @@ Presenter_sptr ADSAdapter::lockPresenter() {
 
   return std::move(psptr);
 }
+
+std::string ADSAdapter::getOldName() const { return m_oldName; }
+std::string ADSAdapter::getNewName() const { return m_newName; }
 
 // ADS Observation methods
 void ADSAdapter::handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr) {
@@ -85,11 +92,13 @@ void ADSAdapter::handleDeleteWorkspace(
 void ADSAdapter::handleClearADS(Mantid::API::ClearADSNotification_ptr pNf) {
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
-      WorkspaceProviderNotifiable::Flag::WorkspaceDeleted);
+      WorkspaceProviderNotifiable::Flag::WorkspacesCleared);
 }
 
 void ADSAdapter::handleRenameWorkspace(
     Mantid::API::WorkspaceRenameNotification_ptr pNf) {
+  m_oldName = pNf->objectName();
+  m_newName = pNf->newObjectName();
   auto presenter = lockPresenter();
   presenter->notifyFromWorkspaceProvider(
       WorkspaceProviderNotifiable::Flag::WorkspaceRenamed);

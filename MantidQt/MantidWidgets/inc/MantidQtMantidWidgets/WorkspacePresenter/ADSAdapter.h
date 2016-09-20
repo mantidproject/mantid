@@ -41,11 +41,18 @@ public:
   void registerPresenter(Presenter_wptr presenter) override;
   Mantid::API::Workspace_sptr
   getWorkspace(const std::string &wsname) const override;
+  bool doesWorkspaceExist(const std::string &wsname) const override;
 
   std::map<std::string, Mantid::API::Workspace_sptr>
   topLevelItems() const override;
 
+  std::string getOldName() const override;
+  std::string getNewName() const override;
+
 private:
+  std::string m_oldName;
+  std::string m_newName;
+
   Presenter_wptr m_presenter;
 
   Presenter_sptr lockPresenter();

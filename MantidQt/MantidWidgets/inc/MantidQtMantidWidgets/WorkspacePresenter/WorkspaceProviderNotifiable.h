@@ -40,6 +40,7 @@ public:
     WorkspaceLoaded,
     WorkspaceRenamed,
     WorkspaceDeleted,
+    WorkspacesCleared,
     WorkspacesGrouped,
     WorkspacesUngrouped,
     WorkspaceGroupUpdated

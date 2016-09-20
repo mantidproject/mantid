@@ -56,13 +56,23 @@ public:
   virtual WorkspacePresenter_wptr getPresenterWeakPtr() = 0;
   virtual WorkspacePresenter_sptr getPresenterSharedPtr() = 0;
 
+  virtual bool askUserYesNo(const std::string &caption,
+                            const std::string &message) const = 0;
+  virtual void showCriticalUserMessage(const std::string &caption,
+                                       const std::string &message) const = 0;
   virtual void showLoadDialog() = 0;
   virtual void showLiveDataDialog() = 0;
   virtual void showRenameDialog(const StringList &wsNames) const = 0;
-  virtual void groupWorkspaces(const StringList &wsNames) const = 0;
+  virtual void recordWorkspaceRename(const std::string &oldName,
+                                     const std::string &newName) = 0;
+  virtual void groupWorkspaces(const StringList &wsNames,
+                               const std::string &groupName) const = 0;
   virtual void ungroupWorkspaces(const StringList &wsNames) const = 0;
+  virtual void enableDeletePrompt(bool enable) = 0;
+  virtual bool isPromptDelete() const = 0;
   virtual bool deleteConfirmation() const = 0;
   virtual void deleteWorkspaces(const StringList &wsNames) = 0;
+  virtual void clearView() = 0;
   virtual SortDirection getSortDirection() const = 0;
   virtual SortCriteria getSortCriteria() const = 0;
   virtual void sortWorkspaces(SortCriteria criteria,

@@ -15,8 +15,6 @@
 #include <QDockWidget>
 #include <QList>
 #include <QPoint>
-#include <QTreeWidget>
-#include <QTreeWidgetItem>
 #include <QSortFilterProxyModel>
 #include <QStringList>
 #include <QMap>

@@ -59,17 +59,62 @@ public:
     AnalysisDataService::Instance().remove("wksp");
   }
 
-  void testDeleteWorkspacesFromDock() {
-    ::testing::DefaultValue<StringList>::Set(StringList(StringList()));
+  void testDeleteWorkspacesFromDockWithPrompt() {
+    auto ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().add("ws1", ws1);
+    AnalysisDataService::Instance().add("ws2", ws2);
+
+    ::testing::DefaultValue<StringList>::Set(
+        StringList(StringList{"ws1", "ws2"}));
     ON_CALL(*mockView.get(), deleteConfirmation()).WillByDefault(Return(true));
+    ON_CALL(*mockView.get(), isPromptDelete()).WillByDefault(Return(true));
+
+    EXPECT_CALL(*mockView.get(), isPromptDelete()).Times(Exactly(2));
     EXPECT_CALL(*mockView.get(), deleteConfirmation()).Times(Exactly(2));
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), deleteWorkspaces(StringList()))
+    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(2));
+    EXPECT_CALL(*mockView.get(), deleteWorkspaces(StringList{"ws1", "ws2"}))
         .Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 
     ON_CALL(*mockView.get(), deleteConfirmation()).WillByDefault(Return(false));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    AnalysisDataService::Instance().remove("ws1");
+    AnalysisDataService::Instance().remove("ws2");
+  }
+
+  void testDeleteWorkspacesFromDockWithoutPrompt() {
+    auto ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().add("ws1", ws1);
+    AnalysisDataService::Instance().add("ws2", ws2);
+
+    ::testing::DefaultValue<StringList>::Set(
+        StringList(StringList{"ws1", "ws2"}));
+    ON_CALL(*mockView.get(), isPromptDelete()).WillByDefault(Return(false));
+
+    EXPECT_CALL(*mockView.get(), isPromptDelete()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), deleteWorkspaces(StringList{"ws1", "ws2"}))
+        .Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    AnalysisDataService::Instance().remove("ws1");
+    AnalysisDataService::Instance().remove("ws2");
+  }
+
+  void testDeleteWorkspacesInvalidInput() {
+    ::testing::DefaultValue<StringList>::Set(
+        StringList(StringList{"ws1", "ws2"}));
+
+    EXPECT_CALL(*mockView.get(), showCriticalUserMessage(_, _))
+        .Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 
@@ -93,6 +138,7 @@ public:
 
     AnalysisDataService::Instance().add("wksp", wksp);
 
+	EXPECT_CALL(*mockView.get(), clearView()).Times(Exactly(1));
     EXPECT_CALL(*mockView.get(), updateTree(_)).Times(Exactly(1));
 
     AnalysisDataService::Instance().clear();
@@ -127,21 +173,85 @@ public:
   }
 
   void testWorkspacesGrouped() {
-    ::testing::DefaultValue<StringList>::Set(StringList(StringList()));
+    ::testing::DefaultValue<StringList>::Set(StringList{"ws1", "ws2"});
 
     EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), groupWorkspaces(_)).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(),
+                groupWorkspaces(StringList{"ws1", "ws2"}, "NewGroup"))
+        .Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
+  void testInvalidGroupFails() {
+    ::testing::DefaultValue<StringList>::Set(StringList());
+
+    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), showCriticalUserMessage(_, _))
+        .Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testGroupAlreadyExistsUserConfirm() {
+    createGroup("NewGroup");
+
+    ::testing::DefaultValue<StringList>::Set(StringList{"ws1", "ws2"});
+    ON_CALL(*mockView.get(), askUserYesNo(_, _)).WillByDefault(Return(true));
+
+    EXPECT_CALL(*mockView.get(), askUserYesNo(_, _)).Times(1);
+    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(),
+                groupWorkspaces(StringList{"ws1", "ws2"}, "NewGroup"))
+        .Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    removeGroup("NewGroup");
+  }
+
+  void testGroupAlreadyExistsUserDenies() {
+    createGroup("NewGroup");
+
+    ::testing::DefaultValue<StringList>::Set(StringList{"ws1", "ws2"});
+    ON_CALL(*mockView.get(), askUserYesNo(_, _)).WillByDefault(Return(false));
+
+    EXPECT_CALL(*mockView.get(), askUserYesNo(_, _)).Times(1);
+    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), groupWorkspaces(_, _)).Times(Exactly(0));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+
+    removeGroup("NewGroup");
+  }
+
   void testWorkspacesUngrouped() {
+    ::testing::DefaultValue<StringList>::Set(StringList(StringList{"group"}));
+
+    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), ungroupWorkspaces(StringList{"group"}))
+        .Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::UngroupWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testInvalidGroupForUngrouping() {
     ::testing::DefaultValue<StringList>::Set(StringList(StringList()));
 
     EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), ungroupWorkspaces(_)).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), showCriticalUserMessage(_, _))
+        .Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), ungroupWorkspaces(_)).Times(Exactly(0));
 
     presenter->notifyFromView(ViewNotifiable::Flag::UngroupWorkspaces);
 
@@ -332,8 +442,8 @@ private:
 
     AnalysisDataService::Instance().add("wksp1", wksp1);
     AnalysisDataService::Instance().add("wksp2", wksp2);
-    AnalysisDataService::Instance().addToGroup("group", "wksp1");
-    AnalysisDataService::Instance().addToGroup("group", "wksp2");
+    AnalysisDataService::Instance().addToGroup(groupName, "wksp1");
+    AnalysisDataService::Instance().addToGroup(groupName, "wksp2");
   }
 
   void removeGroup(std::string groupName) {

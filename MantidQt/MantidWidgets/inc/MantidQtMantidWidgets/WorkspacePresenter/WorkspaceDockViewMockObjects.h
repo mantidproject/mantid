@@ -24,12 +24,22 @@ public:
     presenter->init();
   }
 
+  MOCK_CONST_METHOD2(askUserYesNo, bool(const std::string &caption,
+                                        const std::string &message));
+  MOCK_CONST_METHOD2(showCriticalUserMessage, void(const std::string &caption,
+                                                   const std::string &message));
+
   MOCK_METHOD0(showLoadDialog, void());
   MOCK_METHOD0(showLiveDataDialog, void());
+  MOCK_CONST_METHOD0(isPromptDelete, bool());
   MOCK_CONST_METHOD0(deleteConfirmation, bool());
   MOCK_METHOD1(deleteWorkspaces, void(const StringList &wsNames));
+  MOCK_METHOD0(clearView, void());
+  MOCK_METHOD2(recordWorkspaceRename,
+               void(const std::string &oldName, const std::string &newName));
   MOCK_CONST_METHOD1(showRenameDialog, void(const StringList &wsNames));
-  MOCK_CONST_METHOD1(groupWorkspaces, void(const StringList &wsNames));
+  MOCK_CONST_METHOD2(groupWorkspaces, void(const StringList &wsNames,
+                                           const std::string &groupName));
   MOCK_CONST_METHOD1(ungroupWorkspaces, void(const StringList &wsNames));
   MOCK_CONST_METHOD0(getSortDirection, SortDirection());
   MOCK_CONST_METHOD0(getSortCriteria, SortCriteria());
@@ -51,6 +61,7 @@ public:
   MOCK_CONST_METHOD0(getSelectedWorkspace, Mantid::API::Workspace_sptr());
 
   // Methods which are not to be mocked
+  void enableDeletePrompt(bool) override {}
   WorkspacePresenter_wptr getPresenterWeakPtr() override { return presenter; }
   WorkspacePresenter_sptr getPresenterSharedPtr() override { return presenter; }
 

@@ -196,6 +196,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmDockWidget.cpp
                    src/Mantid/MantidWSIndexDialog.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
+                   src/Mantid/QWorkspaceDockView.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
                    src/Mantid/WorkspaceIcons.cpp
@@ -395,6 +396,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmDockWidget.h
 				   src/Mantid/MantidTreeWidgetItem.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
+                   src/Mantid/QWorkspaceDockView.h
                    src/Mantid/RemoveErrorsDialog.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/WorkspaceIcons.h

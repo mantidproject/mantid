@@ -1,5 +1,5 @@
 #include "MantidTreeWidget.h"
-#include "MantidDock.h"
+#include "QWorkspaceDockView.h"
 #include "MantidGroupPlotGenerator.h"
 #include "MantidUI.h"
 
@@ -18,7 +18,7 @@ namespace {
 Mantid::Kernel::Logger treelog("MantidTreeWidget");
 }
 
-MantidTreeWidget::MantidTreeWidget(MantidDockWidget *w, MantidUI *mui)
+MantidTreeWidget::MantidTreeWidget(QWorkspaceDockView *w, MantidUI *mui)
     : QTreeWidget(w), m_dockWidget(w), m_mantidUI(mui),
       m_ads(Mantid::API::AnalysisDataService::Instance()), m_sortScheme() {
   setObjectName("WorkspaceTree");

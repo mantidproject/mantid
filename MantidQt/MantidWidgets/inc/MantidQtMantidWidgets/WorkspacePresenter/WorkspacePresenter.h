@@ -76,6 +76,7 @@ private:
   void workspacesUngrouped();
   void workspaceGroupUpdated();
   void workspacesDeleted();
+  void workspacesCleared();
 
   DockView_sptr lockView();
   void updateView();
