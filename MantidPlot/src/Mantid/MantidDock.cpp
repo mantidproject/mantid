@@ -958,7 +958,7 @@ void MantidDockWidget::handleShowSaveAlgorithm() {
         switch (splitData.length()) {
         case 2:
           version = splitData[1].toInt();
-        /* intentional fall through to get algorithm name */
+        // intentional fall through to get algorithm name
         case 1:
           algorithmName = splitData[0];
           break;
