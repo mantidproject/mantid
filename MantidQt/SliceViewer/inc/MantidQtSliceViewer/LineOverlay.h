@@ -77,6 +77,9 @@ public:
   void setAngleSnapMode(bool angleSnap);
   void setAngleSnap(double snapDegrees);
 
+  ///@return whether the overlay is shown
+  bool isShown() const;
+
   ///@return the snap-to X interval
   double getSnapX() { return m_snapX; }
 
@@ -85,6 +88,10 @@ public:
 
   ///@return true if the line is in creation mode (waiting for first click)
   bool getCreationMode() const { return m_creation; }
+  /// Load the state of the line overlay from a Mantid project file
+  void loadFromProject(const std::string &lines);
+  /// Save the state of the line overlay to a Mantid project file
+  std::string saveToProject() const;
 
 signals:
   /// Signal sent while the line is being dragged

@@ -91,6 +91,16 @@ if [[ $USE_CLANG ]]; then
   fi
 fi
 
+#for openmp support on OS X run
+# `brew install llvm`
+# `ln -s /usr/local/opt/llvm/lib/libomp.dylib /usr/local/lib/libomp.dylib`
+if [[ $(uname) == 'Darwin' ]] ; then
+  if [[ ${JOB_NAME} == *openmp* ]]; then
+    export CC=/usr/local/opt/llvm/bin/clang
+    export CXX=/usr/local/opt/llvm/bin/clang++
+  fi
+fi
+
 ###############################################################################
 # Set up the location for the local object store outside of the build and
 # source tree, which can be shared by multiple builds.
@@ -185,7 +195,7 @@ rm -f *.dmg *.rpm *.deb *.tar.gz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON ${DIST_FLAGS} ${PACKAGINGVARS} .."
+$SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} .."
 
 ###############################################################################
 # Coverity build should exit early
