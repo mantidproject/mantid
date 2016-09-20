@@ -217,9 +217,10 @@ void Expression::tokenize() {
             m_expr.resize(last);
             break;
           } else {
-            throw std::runtime_error("Syntax error in expression.\n\nA binary "
-                                     "operator isn't followed by a value:\n    " +
-                                     m_expr);
+            throw std::runtime_error(
+                "Syntax error in expression.\n\nA binary "
+                "operator isn't followed by a value:\n    " +
+                m_expr);
           }
         }
 
