@@ -76,20 +76,24 @@ public:
            it != counts.cend() || expectedCountIt != expectedCounts.cend();
            ++it, ++expectedCountIt) {
         TS_ASSERT(std::abs(*it - *expectedCountIt) < tolerance);
-      } 
+      }
     }
 
-    // Check that the other elements are untouched. This means that each bin should
-    // have a value of 2 and there should be 10 of them. We only check index 0 here
+    // Check that the other elements are untouched. This means that each bin
+    // should
+    // have a value of 2 and there should be 10 of them. We only check index 0
+    // here
     {
-      Mantid::HistogramData::BinEdges expectedBinEdgesDetector{0,  1,  2,  3,
-                                                               4,  5,  6,  7,  8,  9, 10};
-      Mantid::HistogramData::Counts expectedCountsDetector{2, 2, 2, 2, 2, 2, 2, 2, 2, 2};
+      Mantid::HistogramData::BinEdges expectedBinEdgesDetector{0, 1, 2, 3, 4, 5,
+                                                               6, 7, 8, 9, 10};
+      Mantid::HistogramData::Counts expectedCountsDetector{2, 2, 2, 2, 2,
+                                                           2, 2, 2, 2, 2};
 
       auto histogramDetector = outputWorkspace->histogram(0);
       auto binEdgesDetector = histogramDetector.binEdges();
       auto countsDetector = histogramDetector.dataY();
-      TSM_ASSERT_EQUALS("Should have 11 bin edges.", binEdgesDetector.size(), 11);
+      TSM_ASSERT_EQUALS("Should have 11 bin edges.", binEdgesDetector.size(),
+                        11);
       TSM_ASSERT_EQUALS("Should have 10 counts.", countsDetector.size(), 10);
 
       auto expectedBinEdgeDetectorIt = expectedBinEdgesDetector.cbegin();
@@ -102,7 +106,8 @@ public:
 
       auto expectedCountDetectorIt = expectedCountsDetector.cbegin();
       for (auto it = expectedCountsDetector.cbegin();
-           it != expectedCountsDetector.cend() || expectedCountDetectorIt != expectedCountsDetector.cend();
+           it != expectedCountsDetector.cend() ||
+               expectedCountDetectorIt != expectedCountsDetector.cend();
            ++it, ++expectedCountDetectorIt) {
         TS_ASSERT(std::abs(*it - *expectedCountDetectorIt) < tolerance);
       }
