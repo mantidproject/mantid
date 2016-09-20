@@ -23,6 +23,8 @@ Improvements
   This allow users to use old legacy *.msk* files as source of mask workspaces usable with modified :ref:`MaskDetectors <algm-MaskDetectors>` algorithm
   and to use old spectra masks on a workspaces with different grouping and spectra-detector maps.
 
+- There is a new algorithm :ref:`MagFormFactorCorrection <algm-MagFormFactorCorrection>` which will scale an input workspace by 1/:math:`|F(Q)|^2` where :math:`F(Q)` is the magnetic form factor for a specified magnetic ion. 
+
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+Direct+Inelastic%22>`_
 
 Crystal Field

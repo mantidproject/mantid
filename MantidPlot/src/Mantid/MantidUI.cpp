@@ -845,6 +845,8 @@ void MantidUI::showSpectrumViewer() {
 
       viewer->show();
       viewer->renderWorkspace(wksp);
+      // Add to the list of serialisable windows
+      appWindow()->addSerialisableWindow(viewer);
       appWindow()->modifiedProject();
     } else {
       g_log.information()
