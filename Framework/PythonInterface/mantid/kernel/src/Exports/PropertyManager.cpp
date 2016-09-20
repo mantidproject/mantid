@@ -3,17 +3,18 @@
                                 // dominance, we have no way around it with the
                                 // design
 #endif
-
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/PropertyManager.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::IPropertyManager;
 using Mantid::Kernel::PropertyManager;
 
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(PropertyManager)
 
 void export_PropertyManager() {
   typedef boost::shared_ptr<PropertyManager> PropertyManager_sptr;

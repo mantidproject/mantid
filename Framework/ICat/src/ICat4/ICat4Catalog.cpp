@@ -273,8 +273,8 @@ void ICat4Catalog::search(const CatalogSearchParam &inputs,
 
   // Modify the query to include correct SELECT and LIMIT clauses.
   query.insert(0, "SELECT DISTINCT inves");
-  query.append(" LIMIT " + boost::lexical_cast<std::string>(offset) + "," +
-               boost::lexical_cast<std::string>(limit));
+  query.append(" LIMIT " + std::to_string(offset) + "," +
+               std::to_string(limit));
 
   ICATPortBindingProxy icat;
   setICATProxySettings(icat);
@@ -360,7 +360,7 @@ void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType *> response,
     if (investigation) {
       API::TableRow table = outputws->appendRow();
       // Used to insert an empty string into the cell if value does not exist.
-      std::string emptyCell("");
+      std::string emptyCell;
 
       // Now add the relevant investigation data to the table (They always
       // exist).
@@ -442,7 +442,7 @@ void ICat4Catalog::saveDataSets(std::vector<xsd__anyType *> response,
     outputws->addColumn("size_t", "Number of datafiles");
   }
 
-  std::string emptyCell = "";
+  std::string emptyCell;
   for (auto &iter : response) {
     ns1__dataset *dataset = dynamic_cast<ns1__dataset *>(iter);
     if (dataset) {
@@ -585,8 +585,7 @@ const std::string ICat4Catalog::getFileLocation(const long long &fileID) {
   setICATProxySettings(icat);
 
   auto searchResults =
-      performSearch(icat, "Datafile[id = '" +
-                              boost::lexical_cast<std::string>(fileID) + "']");
+      performSearch(icat, "Datafile[id = '" + std::to_string(fileID) + "']");
   auto datafile = dynamic_cast<ns1__datafile *>(searchResults.at(0));
 
   if (datafile && datafile->location)
@@ -609,14 +608,13 @@ const std::string ICat4Catalog::getDownloadURL(const long long &fileID) {
 
   // Set the REST features of the URL.
   std::string session = "sessionId=" + m_session->getSessionId();
-  std::string datafile =
-      "&datafileIds=" + boost::lexical_cast<std::string>(fileID);
-  std::string outname = "&outname=" + boost::lexical_cast<std::string>(fileID);
+  std::string datafile = "&datafileIds=" + std::to_string(fileID);
+  std::string outname = "&outname=" + std::to_string(fileID);
 
   // Add all the REST pieces to the URL.
   url += ("getData?" + session + datafile + outname + "&zip=false");
   g_log.debug() << "The download URL in ICat4Catalog::getDownloadURL is: "
-                << url << std::endl;
+                << url << '\n';
   return url;
 }
 
@@ -642,15 +640,14 @@ ICat4Catalog::getUploadURL(const std::string &investigationID,
   std::string session = "sessionId=" + m_session->getSessionId();
   std::string name = "&name=" + createFileName;
   std::string datasetId =
-      "&datasetId=" +
-      boost::lexical_cast<std::string>(getMantidDatasetId(investigationID));
+      "&datasetId=" + std::to_string(getMantidDatasetId(investigationID));
   std::string description = "&description=" + dataFileDescription;
 
   // Add pieces of URL together.
   url += ("put?" + session + name + datasetId + description +
           "&datafileFormatId=1");
   g_log.debug() << "The upload URL in ICat4Catalog::getUploadURL is: " << url
-                << std::endl;
+                << '\n';
   return url;
 }
 
@@ -772,7 +769,7 @@ std::string ICat4Catalog::bytesToString(int64_t &fileSize) {
     fileSize = fileSize / 1024;
   }
 
-  return boost::lexical_cast<std::string>(fileSize) + units.at(order);
+  return std::to_string(fileSize) + units.at(order);
 }
 
 /**
@@ -908,8 +905,7 @@ ICat4Catalog::performSearch(ICATPortBindingProxy &icat, std::string query) {
   request.sessionId = &sessionID;
   request.query = &query;
 
-  g_log.debug() << "The search query sent to ICAT was: \n" << query
-                << std::endl;
+  g_log.debug() << "The search query sent to ICAT was: \n" << query << '\n';
 
   std::vector<xsd__anyType *> searchResults;
 

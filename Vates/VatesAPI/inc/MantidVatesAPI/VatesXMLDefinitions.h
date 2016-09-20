@@ -3,20 +3,21 @@
 
 #include <string>
 #include "MantidKernel/System.h"
-namespace Mantid
-{
-namespace VATES
-{
+namespace Mantid {
+namespace VATES {
 
 /**
 
- This type contains definitions that will be found in the xml schema of VATES, but must be used in
- code as part of the peristance/fetching routines. This file provides a single location for definitions to aid future maintenance.
+ This type contains definitions that will be found in the xml schema of VATES,
+ but must be used in
+ code as part of the peristance/fetching routines. This file provides a single
+ location for definitions to aid future maintenance.
 
  @author Owen Arnold, Tessella plc
  @date 16/12/2010
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -36,10 +37,10 @@ namespace VATES
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org> */
 
-//TODO: these definitions may be more appropriate in API/Geometry where they can also be used as part of the parsing.
+// TODO: these definitions may be more appropriate in API/Geometry where they
+// can also be used as part of the parsing.
 
-class DLLExport XMLDefinitions
-{
+class DLLExport XMLDefinitions {
 public:
   ////XML schema tag definitions for generating xml.
   // static const std::string workspaceNameXMLTagStart()
@@ -107,38 +108,20 @@ public:
   // {
   //   return "RefDimensionId";
   // }
-   ///An id for recognising specific vtkFieldData objects on inbound and outbound datasets.
-   static const std::string metaDataId()
-   {
-     return "VATES_Metadata";
-   }
-   static const std::string signalName()
-   {
-     return "signal";
-   }
-   static const std::string geometryNodeName()
-   {
-     return "geometryNodeName";
-   }
-   static const std::string functionNodeName()
-   {
-     return "functionNodeName";
-   }
-   static const std::string geometryOperatorInfo()
-   {
-     return "geometryOperatorInfo";
-   }
-   static const std::string functionOperatorInfo()
-   {
-     return "functionOperatorInfo";
-   }
-   static const std::string RebinnedWSName()
-   {
-     return "RebinnedWS";
-   }
-
+  /// An id for recognising specific vtkFieldData objects on inbound and
+  /// outbound datasets.
+  static const std::string metaDataId() { return "VATES_Metadata"; }
+  static const std::string signalName() { return "signal"; }
+  static const std::string geometryNodeName() { return "geometryNodeName"; }
+  static const std::string functionNodeName() { return "functionNodeName"; }
+  static const std::string geometryOperatorInfo() {
+    return "geometryOperatorInfo";
+  }
+  static const std::string functionOperatorInfo() {
+    return "functionOperatorInfo";
+  }
+  static const std::string RebinnedWSName() { return "RebinnedWS"; }
 };
-
 }
 }
-#endif 
+#endif

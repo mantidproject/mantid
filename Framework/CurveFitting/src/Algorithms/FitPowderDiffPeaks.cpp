@@ -75,11 +75,6 @@ FitPowderDiffPeaks::FitPowderDiffPeaks()
       m_fitPeakBackgroundComposite(false) {}
 
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FitPowderDiffPeaks::~FitPowderDiffPeaks() {}
-
-//----------------------------------------------------------------------------------------------
 /** Parameter declaration
  */
 void FitPowderDiffPeaks::init() {
@@ -201,8 +196,6 @@ void FitPowderDiffPeaks::init() {
   declareProperty("FitCompositePeakBackground", true,
                   "Flag to do fit to both peak and background in a composite "
                   "function as last fit step.");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -238,17 +231,17 @@ void FitPowderDiffPeaks::exec() {
     m_peakData.push_back(0.0);
 
   g_log.information() << "[FitPeaks] Total Number of Peak = "
-                      << m_vecPeakFunctions.size() << std::endl;
+                      << m_vecPeakFunctions.size() << '\n';
   m_peakFitChi2.resize(m_vecPeakFunctions.size(), -1.0 * DBL_MIN);
   m_goodFit.resize(m_vecPeakFunctions.size(), false);
 
   if (m_fitMode == ROBUSTFIT) {
-    g_log.information() << "Fit (Single) Peaks In Robust Mode." << endl;
+    g_log.information() << "Fit (Single) Peaks In Robust Mode.\n";
     fitPeaksRobust();
   } else if (m_fitMode == TRUSTINPUTFIT) {
-    g_log.information()
-        << "Fit Peaks In Trust Mode.  Possible to fit overlapped peaks."
-        << endl;
+    g_log.information() << "Fit Peaks In Trust Mode.  Possible to fit "
+                           "overlapped "
+                           "peaks.\n";
     fitPeaksWithGoodStartingValues();
   } else {
     g_log.error("Unsupported fit mode!");
@@ -272,8 +265,6 @@ void FitPowderDiffPeaks::exec() {
   // c) Create data workspace for X0, A, B and S of peak with good fit
   Workspace2D_sptr peakparamvaluews = genPeakParameterDataWorkspace();
   setProperty("OutputBraggPeakParameterDataWorkspace", peakparamvaluews);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -358,8 +349,6 @@ void FitPowderDiffPeaks::processInputProperties() {
   m_minPeakHeight = getProperty("MinimumPeakHeight");
 
   m_fitPeakBackgroundComposite = getProperty("FitCompositePeakBackground");
-
-  return;
 }
 
 //=================================  Fit Peaks In Robust Mode
@@ -421,7 +410,7 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
              << ", predicted at TOF = " << thispeak->centre()
              << ";  User specify boundary = [" << peakleftbound << ", "
              << peakrightbound << "].";
-      g_log.information() << infoss.str() << endl;
+      g_log.information() << infoss.str() << '\n';
 
       map<string, double> rightpeakparameters;
       goodfit = fitSinglePeakRobust(
@@ -437,11 +426,10 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
 
       stringstream robmsgss;
       for (auto &parname : peakparnames) {
-        robmsgss << parname << " = " << thispeak->getParameter(parname) << endl;
+        robmsgss << parname << " = " << thispeak->getParameter(parname) << '\n';
       }
       g_log.information() << "[DB1151] Robust Fit Result:   Chi^2 = " << chi2
-                          << endl
-                          << robmsgss.str();
+                          << '\n' << robmsgss.str();
 
       rightpeak = thispeak;
       isrightmost = false;
@@ -451,7 +439,7 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
 
       g_log.notice() << "[DBx332] Peak -"
                      << static_cast<int>(numpeaks) - peakindex - 1
-                     << ": shifted = " << refpeakshift << endl;
+                     << ": shifted = " << refpeakshift << '\n';
     } else if (!isrightmost) {
       // All peaks but not the right most peak
       // 1. Validate inputs
@@ -467,14 +455,13 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
                        peakrightbound);
 
       stringstream dbxss;
-      dbxss << endl;
+      dbxss << '\n';
       for (int i = 0; i < 10; ++i)
-        dbxss << "==";
-      dbxss << endl
-            << "[DBx323] Peak (" << peakhkl[0] << ", " << peakhkl[1] << ","
-            << peakhkl[2] << ").  Centre predicted @ TOF = " << predictcentre
-            << ".  Observed range = " << peakleftbound << ", "
-            << peakrightbound;
+        dbxss << "==\n[DBx323] Peak (" << peakhkl[0] << ", " << peakhkl[1]
+              << "," << peakhkl[2]
+              << ").  Centre predicted @ TOF = " << predictcentre
+              << ".  Observed range = " << peakleftbound << ", "
+              << peakrightbound;
       g_log.notice(dbxss.str());
 
       // 3. Fit peak
@@ -504,7 +491,7 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
         // Bad fit
         m_peakFitChi2[peakindex] = -1.0;
         g_log.warning() << "Fitting peak @ " << thispeak->centre()
-                        << " failed. " << endl;
+                        << " failed. \n";
       }
 
     } else {
@@ -521,13 +508,11 @@ void FitPowderDiffPeaks::fitPeaksRobust() {
              << m_rightmostPeakHKL[0] << ", " << m_rightmostPeakHKL[1] << ", "
              << m_rightmostPeakHKL[2] << " User specify boundary = ["
              << peakleftbound << ", " << peakrightbound << "].";
-      g_log.information() << infoss.str() << endl;
+      g_log.information() << infoss.str() << '\n';
       continue;
     }
 
   } // ENDFOR Peaks
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -577,11 +562,8 @@ void FitPowderDiffPeaks::observePeakRange(BackToBackExponential_sptr thispeak,
     peakrightbound = rightpeakleftbound;
     if (peakrightbound < 2.0 * rightfwhm + peakcentre)
       g_log.warning() << "Peak @ " << peakcentre
-                      << "'s right boundary is too close to its right peak!"
-                      << endl;
+                      << "'s right boundary is too close to its right peak!\n";
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -631,7 +613,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   Workspace2D_sptr peakws =
       buildPartialWorkspace(m_dataWS, m_wsIndex, peakleftbound, peakrightbound);
   g_log.debug() << "[DB1208] Build partial workspace for peak @ "
-                << peak->centre() << " (predicted)." << endl;
+                << peak->centre() << " (predicted).\n";
 
   // 2. Estimate and remove background
   size_t rawdata_wsindex = 0;
@@ -641,11 +623,11 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
                            estbkgd_wsindex, peak_wsindex);
 
   stringstream dbss;
-  dbss << "[DBx203] Removed background peak data: " << endl;
+  dbss << "[DBx203] Removed background peak data: \n";
   for (size_t i = 0; i < peakws->readX(peak_wsindex).size(); ++i)
     dbss << peakws->readX(peak_wsindex)[i] << "\t\t"
          << peakws->readY(peak_wsindex)[i] << "\t\t"
-         << peakws->readE(peak_wsindex)[i] << endl;
+         << peakws->readE(peak_wsindex)[i] << '\n';
   g_log.debug(dbss.str());
 
   // 3. Estimate FWHM, peak centre, and height
@@ -664,14 +646,14 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   } else if (height < m_minPeakHeight) {
     g_log.notice() << "[FLAGx409] Peak proposed @ TOF = " << peak->centre()
                    << " has a trivial "
-                   << "peak height = " << height << " by observation.  Skipped."
-                   << endl;
+                   << "peak height = " << height
+                   << " by observation.  Skipped.\n";
     return false;
   } else {
     g_log.information() << "[DBx201] Peak Predicted @ TOF = " << peak->centre()
                         << ", Estimated (observation) Centre = " << centre
                         << ", FWHM = " << fwhm << " Height = " << height
-                        << endl;
+                        << '\n';
   }
 
   // 4. Fit by Gaussian to get some starting value
@@ -707,9 +689,9 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   // a) Fit by using input peak parameters
   string peakinfoa0 =
       getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
-  g_log.notice() << "[DBx533A] Approach A: Starting Peak Function Information: "
-                 << endl
-                 << peakinfoa0 << endl;
+  g_log.notice()
+      << "[DBx533A] Approach A: Starting Peak Function Information: \n"
+      << peakinfoa0 << '\n';
 
   double chi2a;
   bool fitgooda = doFit1PeakSequential(peakws, peak_wsindex, peak, minimizers,
@@ -724,9 +706,8 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   string peakinfoa1 =
       getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
   g_log.notice() << "[DBx533A] Approach A:  Fit Successful = " << fitgooda
-                 << ", Chi2 = " << chi2a
-                 << ", Peak Function Information: " << endl
-                 << peakinfoa1 << endl;
+                 << ", Chi2 = " << chi2a << ", Peak Function Information: \n"
+                 << peakinfoa1 << '\n';
 
   // b) Fit by using Gaussian result (Sigma)
   restoreFunctionParameters(peak, origparammap);
@@ -734,9 +715,9 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
 
   string peakinfob0 =
       getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
-  g_log.notice() << "[DBx533B] Approach B: Starting Peak Function Information: "
-                 << endl
-                 << peakinfob0 << endl;
+  g_log.notice()
+      << "[DBx533B] Approach B: Starting Peak Function Information: \n"
+      << peakinfob0 << '\n';
 
   double chi2b;
   bool fitgoodb = doFit1PeakSequential(peakws, peak_wsindex, peak, minimizers,
@@ -752,9 +733,8 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
   string peakinfob1 =
       getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
   g_log.notice() << "[DBx533B] Approach 2: Fit Successful = " << fitgoodb
-                 << ", Chi2 = " << chi2b
-                 << ", Peak Function Information: " << endl
-                 << peakinfob1 << endl;
+                 << ", Chi2 = " << chi2b << ", Peak Function Information: \n"
+                 << peakinfob1 << '\n';
 
   // c) Fit peak parameters by the value from right peak
   if (!rightpeakparammap.empty()) {
@@ -765,8 +745,8 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
     string peakinfoc0 =
         getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
     g_log.notice()
-        << "[DBx533C] Approach C: Starting Peak Function Information: " << endl
-        << peakinfoc0 << endl;
+        << "[DBx533C] Approach C: Starting Peak Function Information: \n"
+        << peakinfoc0 << '\n';
 
     double chi2c;
     bool fitgoodc = doFit1PeakSequential(peakws, peak_wsindex, peak, minimizers,
@@ -781,9 +761,8 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
     string peakinfoc1 =
         getFunctionInfo(boost::dynamic_pointer_cast<IFunction>(peak));
     g_log.notice() << "[DBx533C] Approach C:  Fit Successful = " << fitgoodc
-                   << ", Chi2 = " << chi2c
-                   << ", Peak Function Information: " << endl
-                   << peakinfoc1 << endl;
+                   << ", Chi2 = " << chi2c << ", Peak Function Information: \n"
+                   << peakinfoc1 << '\n';
   } else {
     // No right peak information: set a error entry
     chi2s.push_back(DBL_MAX);
@@ -806,7 +785,7 @@ bool FitPowderDiffPeaks::fitSinglePeakRobust(
            << " of total " << goodfits.size()
            << " approaches.  Best Chi^2 = " << bestchi2
            << ", Peak Height = " << peak->height();
-  g_log.notice() << "[DB1127] " << fitsumss.str() << endl;
+  g_log.notice() << "[DB1127] " << fitsumss.str() << '\n';
 
   bool fitgood = true;
   if (bestapproach < goodfits.size()) {
@@ -878,10 +857,9 @@ bool FitPowderDiffPeaks::doFit1PeakBackground(
 
   // 3. Fit
   string cominfoa = getFunctionInfo(compfunc);
-  g_log.notice() << "[DBx533X-0] Fit All: Starting Peak Function Information: "
-                 << endl
-                 << cominfoa << "Fit range = " << startx << ", " << endx
-                 << endl;
+  g_log.notice()
+      << "[DBx533X-0] Fit All: Starting Peak Function Information: \n"
+      << cominfoa << "Fit range = " << startx << ", " << endx << '\n';
 
   // 3. Set
   IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
@@ -909,15 +887,15 @@ bool FitPowderDiffPeaks::doFit1PeakBackground(
     // Figure out result
     stringstream cominfob;
     cominfob << "[DBx533X] Fit All: Fit Successful = " << fitsuccess
-             << ", Chi^2 = " << chi2 << endl;
-    cominfob << "Detailed info = " << fitresult << endl;
+             << ", Chi^2 = " << chi2 << '\n';
+    cominfob << "Detailed info = " << fitresult << '\n';
     string fitinfo = getFunctionInfo(compfunc);
     cominfob << fitinfo;
 
     g_log.notice(cominfob.str());
   } else {
     g_log.notice() << "[DB1203B] Failed To Fit Peak+Background @ "
-                   << peak->centre() << endl;
+                   << peak->centre() << '\n';
     fitsuccess = false;
   }
 
@@ -946,7 +924,7 @@ bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
   doFit1PeakSimple(peakws, 1, peak, "Levenberg-MarquardtMD", 0, newchi2);
   g_log.debug() << "[DBx401] Peak @ TOF = " << peak->centre() << ", Starting
   Chi^2 = "
-                << newchi2 << endl;
+                << newchi2 << '\n';
 
   bool continuetofit = true;
   bool goodfit;
@@ -994,7 +972,7 @@ bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
 
     // b) Fit
     g_log.debug() << "DBx329:  Proposed A = " << varA << ", B = " << varB <<
-  endl;
+  '\n';
     fitresult = doFitPeak(peakws, peak, fwhm);
 
     // c) Get fit result
@@ -1084,7 +1062,7 @@ bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
       {
         stringstream errmsg;
         errmsg << "In parameter value map, there is no key named " << parname <<
-  endl;
+  '\n';
         throw runtime_error(errmsg.str());
       }
       peak->setParameter(parname, liter->second);
@@ -1102,7 +1080,7 @@ bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
 
       g_log.information() << "[DB1055] Chi2 = " << thischi2 << ", A = " <<
   thisparams["A"]
-                          << ", B = " << thisparams["B"] << endl;
+                          << ", B = " << thisparams["B"] << '\n';
     }
   }
   else
@@ -1110,7 +1088,7 @@ bool FitPowderDiffPeaks::fitSinglePeakSimulatedAnnealing(
     // Bad result
     goodfit = false;
     stringstream errmsg;
-    errmsg << "Failed to fit peak @ " << tof_h << " in robust mode!" << endl;
+    errmsg << "Failed to fit peak @ " << tof_h << " in robust mode!\n";
     g_log.error(errmsg.str());
   }
 
@@ -1186,10 +1164,9 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
       calculatePeakFitBoundary(ipeak, ipeak, peakfitleftbound,
                                peakfitrightbound);
 
-      g_log.information() << endl
-                          << "[T] Fit Peak Indexed " << ipeak << " ("
+      g_log.information() << "\n[T] Fit Peak Indexed " << ipeak << " ("
                           << m_vecPeakFunctions.size() - 1 - ipeak
-                          << ")\t----------------------------------" << endl;
+                          << ")\t----------------------------------\n";
 
       BackToBackExponential_sptr thispeak =
           m_vecPeakFunctions[ipeak].second.second;
@@ -1210,7 +1187,7 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
         dbss << "Annihilated!";
       else
         dbss << "Fit Status = " << m_goodFit[ipeak] << ",   Chi2 = " << chi2;
-      g_log.information() << "[DB531] " << dbss.str() << endl;
+      g_log.information() << "[DB531] " << dbss.str() << '\n';
     } else {
       // Fit overlapped peaks
       vector<BackToBackExponential_sptr> peaksgroup;
@@ -1228,13 +1205,11 @@ void FitPowderDiffPeaks::fitPeaksWithGoodStartingValues() {
   // 2. Output
 
   g_log.information() << "DBx415: Number of good fit peaks = "
-                      << m_indexGoodFitPeaks.size() << endl;
+                      << m_indexGoodFitPeaks.size() << '\n';
 
   // 3. Clean up
   g_log.information() << "[FitPeaks] Number of peak of good chi2 = "
-                      << m_chi2GoodFitPeaks.size() << endl;
-
-  return;
+                      << m_chi2GoodFitPeaks.size() << '\n';
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1264,11 +1239,11 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   estimateBackgroundCoarse(peakdataws, backgroundfunction, 0, 2, 1);
 
   stringstream dbss2;
-  dbss2 << "[T] Partial workspace No Background: " << endl;
+  dbss2 << "[T] Partial workspace No Background: \n";
   for (size_t i = 0; i < peakdataws->readX(1).size(); ++i)
     dbss2 << peakdataws->readX(1)[i] << "\t\t" << peakdataws->readY(1)[i]
           << "\t\t" << peakdataws->readE(1)[i] << "\t\t"
-          << peakdataws->readY(0)[i] << endl;
+          << peakdataws->readY(0)[i] << '\n';
   g_log.notice(dbss2.str());
 
   // 3. Estimate peak heights
@@ -1308,10 +1283,10 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   /*  Debug information */
   stringstream dbss0;
   dbss0 << "[DBx100] Peak @" << peak->centre() << ", FWHM = " << peak->fwhm()
-        << endl;
+        << '\n';
   vector<string> peakparams = peak->getParameterNames();
   for (size_t i = 0; i < peakparams.size(); ++i)
-    dbss0 << peakparams[i] << " = " << peak->getParameter(i) << endl;
+    dbss0 << peakparams[i] << " = " << peak->getParameter(i) << '\n';
   g_log.notice(dbss0.str());
 
   // 5. Fit peak with simple scheme
@@ -1431,9 +1406,9 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
 
   // d) Summarize and compare result
   stringstream sumss;
-  sumss << "[DBx833] Confident fit on peak summary: " << endl;
+  sumss << "[DBx833] Confident fit on peak summary: \n";
   for (size_t i = 0; i < 4; ++i)
-    sumss << "Index " << i << ": chi^2 = " << chi2indexvec[i].first << endl;
+    sumss << "Index " << i << ": chi^2 = " << chi2indexvec[i].first << '\n';
   g_log.notice(sumss.str());
 
   sort(chi2indexvec.begin(), chi2indexvec.end());
@@ -1469,9 +1444,9 @@ bool FitPowderDiffPeaks::fitSinglePeakConfident(
   vector<string> parnames = peak->getParameterNames();
   stringstream debugss;
   debugss << "DB1251 Single Peak Confident Fit Result:  Chi^2 = " << chi2
-          << endl;
+          << '\n';
   for (auto &parname : parnames) {
-    debugss << parname << "  =  " << peak->getParameter(parname) << endl;
+    debugss << parname << "  =  " << peak->getParameter(parname) << '\n';
   }
   g_log.notice(debugss.str());
 
@@ -1531,8 +1506,6 @@ void FitPowderDiffPeaks::calculatePeakFitBoundary(size_t ileftpeak,
     if (rightneighborleftbound < peakrightboundary)
       peakrightboundary = rightneighborleftbound;
   }
-
-  return;
 }
 
 //=======================  Fit 1 Set of Overlapped Peaks ======================
@@ -1563,7 +1536,7 @@ FitPowderDiffPeaks::doFitPeak(Workspace2D_sptr dataws,
     peakfunction->addConstraint(centerbound);
 
     g_log.debug() << "[DoFitPeak] Peak Center Boundary = " << centerleftend
-                  << ", " << centerrightend << endl;
+                  << ", " << centerrightend << '\n';
   }
 
   // A > 0, B > 0, S > 0
@@ -1661,7 +1634,6 @@ void FitPowderDiffPeaks::storeFunctionParameters(
   parammaps.clear();
   for (auto &paramname : paramnames)
     parammaps.emplace(paramname, function->getParameter(paramname));
-  return;
 }
 
 //----------------------------------------------------------------------------
@@ -1675,8 +1647,6 @@ void FitPowderDiffPeaks::restoreFunctionParameters(
     if (miter != parammap.end())
       function->setParameter(parname, miter->second);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------
@@ -1697,7 +1667,7 @@ bool FitPowderDiffPeaks::doFit1PeakSimple(
     BackToBackExponential_sptr peakfunction, string minimzername,
     size_t maxiteration, double &chi2) {
   stringstream dbss;
-  dbss << peakfunction->asString() << endl;
+  dbss << peakfunction->asString() << '\n';
   dbss << "Starting Value: ";
   vector<string> names = peakfunction->getParameterNames();
   for (auto &name : names)
@@ -1705,8 +1675,8 @@ bool FitPowderDiffPeaks::doFit1PeakSimple(
   for (size_t i = 0; i < dataws->readX(workspaceindex).size(); ++i)
     dbss << dataws->readX(workspaceindex)[i] << "\t\t"
          << dataws->readY(workspaceindex)[i] << "\t\t"
-         << dataws->readE(workspaceindex)[i] << endl;
-  g_log.debug() << "DBx430 " << dbss.str() << endl;
+         << dataws->readE(workspaceindex)[i] << '\n';
+  g_log.debug() << "DBx430 " << dbss.str() << '\n';
 
   // 1. Peak height
   if (peakfunction->height() < 1.0E-5)
@@ -1738,16 +1708,15 @@ bool FitPowderDiffPeaks::doFit1PeakSimple(
     g_log.information() << "[DBx138A] Fit Peak @ " << peakfunction->centre()
                         << " Result:" << fitsuccess << "\n"
                         << "Detailed info = " << fitresult
-                        << ", Chi^2 = " << chi2 << endl;
+                        << ", Chi^2 = " << chi2 << '\n';
 
     // Debug information output
     API::ITableWorkspace_sptr paramws = fitalg->getProperty("OutputParameters");
     std::string infofit = parseFitParameterWorkspace(paramws);
-    g_log.information() << "Fitted Parameters: " << endl
-                        << infofit << endl;
+    g_log.information() << "Fitted Parameters: \n" << infofit << '\n';
   } else {
     g_log.error() << "[DBx128B] Failed to execute fitting peak @ "
-                  << peakfunction->centre() << endl;
+                  << peakfunction->centre() << '\n';
   }
 
   return fitsuccess;
@@ -1796,7 +1765,7 @@ bool FitPowderDiffPeaks::doFit1PeakSequential(
                    << ", Max Iterations = " << maxiteration
                    << ", Workspace Index = " << workspaceindex
                    << ", Data Range = " << dataws->readX(workspaceindex)[0]
-                   << ", " << dataws->readX(workspaceindex).back() << endl;
+                   << ", " << dataws->readX(workspaceindex).back() << '\n';
 
     storeFunctionParameters(peakfunction, parambeforefit);
 
@@ -1812,7 +1781,7 @@ bool FitPowderDiffPeaks::doFit1PeakSequential(
       // A same of worse one
       restoreFunctionParameters(peakfunction, parambeforefit);
       g_log.information() << "DBx315C  Fit Failed.  Fit Good = " << localgoodfit
-                          << endl;
+                          << '\n';
     }
   }
 
@@ -1873,7 +1842,7 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   if (!fitalg->isExecuted() || !successfulfit) {
     // Early return due to bad fit
     g_log.warning() << "Fitting Gaussian peak for peak around "
-                    << gaussianpeak->centre() << std::endl;
+                    << gaussianpeak->centre() << '\n';
     return false;
   }
 
@@ -1881,7 +1850,7 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   bool fitsuccess;
   std::string fitresult = parseFitResult(fitalg, chi2, fitsuccess);
   g_log.information() << "[Fit Gaussian Peak] Successful = " << fitsuccess
-                      << ", Result:\n" << fitresult << endl;
+                      << ", Result:\n" << fitresult << '\n';
 
   // 4. Get result
   center = gaussianpeak->centre();
@@ -1895,8 +1864,8 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   // 5. Debug output
   API::ITableWorkspace_sptr paramws = fitalg->getProperty("OutputParameters");
   std::string infofit = parseFitParameterWorkspace(paramws);
-  g_log.information() << "[DBx133] Fitted Gaussian Parameters: " << endl
-                      << infofit << endl;
+  g_log.information() << "[DBx133] Fitted Gaussian Parameters: \n" << infofit
+                      << '\n';
 
   // DB output for data
   /*
@@ -1909,10 +1878,10 @@ bool FitPowderDiffPeaks::doFitGaussianPeak(DataObjects::Workspace2D_sptr dataws,
   for (size_t i = 0; i < fitY.size(); ++i)
   {
     datass << allX[i] << setw(5) << " " << fitY[i] << "  " << rawY[i] <<
-  std::endl;
+  '\n';
   }
   std::cout << "Fitted Gaussian Peak:  Index, Fittet, Raw\n" << datass.str() <<
-  "........................." << std::endl;
+  ".........................\n";
   */
 
   return true;
@@ -1956,22 +1925,22 @@ bool FitPowderDiffPeaks::fitOverlappedPeaks(
 
   // [DB] Debug output
   stringstream piss;
-  piss << peaks.size() << "-Peaks Group Information: " << endl;
+  piss << peaks.size() << "-Peaks Group Information: \n";
   for (size_t ipk = 0; ipk < tofpeakpairs.size(); ++ipk) {
     BackToBackExponential_sptr tmppeak = tofpeakpairs[ipk].second;
     piss << "Peak " << ipk << "  @ TOF = " << tmppeak->centre()
          << ", A = " << tmppeak->getParameter("A")
          << ", B = " << tmppeak->getParameter("B")
          << ", S = " << tmppeak->getParameter("S")
-         << ", FWHM = " << tmppeak->fwhm() << endl;
+         << ", FWHM = " << tmppeak->fwhm() << '\n';
   }
   g_log.information() << "[DB1034] " << piss.str();
 
   stringstream datass;
-  datass << "Partial workspace for peaks: " << endl;
+  datass << "Partial workspace for peaks: \n";
   for (size_t i = 0; i < peaksws->readX(0).size(); ++i)
     datass << peaksws->readX(1)[i] << "\t\t" << peaksws->readY(1)[i] << "\t\t"
-           << peaksws->readE(1)[i] << "\t\t" << peaksws->readY(0)[i] << endl;
+           << peaksws->readE(1)[i] << "\t\t" << peaksws->readY(0)[i] << '\n';
   g_log.information() << "[DB1042] " << datass.str();
 
   // 5. Estimate peak height according to pre-set peak value
@@ -2105,9 +2074,8 @@ bool FitPowderDiffPeaks::doFitMultiplePeaks(
   peaksfunc->function(domain, values);
   stringstream rss;
   for (size_t i = 0; i < domain.size(); ++i)
-    rss << domain[i] << "\t\t" << values[i] << endl;
-  g_log.information() << "[T] Multiple peak fitting pattern:" << endl
-                      << rss.str();
+    rss << domain[i] << "\t\t" << values[i] << '\n';
+  g_log.information() << "[T] Multiple peak fitting pattern:\n" << rss.str();
 
   return evergood;
 }
@@ -2159,10 +2127,8 @@ void FitPowderDiffPeaks::estimatePeakHeightsLeBail(
 
     g_log.information() << "[DBx256] Peak @ " << thispeak->centre()
                         << "  Set Guessed Height (LeBail) = "
-                        << thispeak->height() << endl;
+                        << thispeak->height() << '\n';
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -2181,8 +2147,6 @@ void FitPowderDiffPeaks::setOverlappedPeaksConstraints(
         thispeak.get(), "X0", leftcentrebound, rightcentrebound, false);
     thispeak->addConstraint(bc);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -2198,7 +2162,7 @@ bool FitPowderDiffPeaks::doFitNPeaksSimple(
   vector<string> names = peaksfunc->getParameterNames();
   for (auto &name : names)
     dbss0 << name << "= " << peaksfunc->getParameter(name) << ", \t";
-  g_log.information() << "DBx430 " << dbss0.str() << endl;
+  g_log.information() << "DBx430 " << dbss0.str() << '\n';
 
   // 2. Create fit
   Algorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
@@ -2232,16 +2196,15 @@ bool FitPowderDiffPeaks::doFitNPeaksSimple(
     dbss << " Result:" << fitsuccess << "\n"
          << "Detailed info = " << fitresult;
 
-    g_log.information() << "[DBx149A] " << dbss.str() << endl;
+    g_log.information() << "[DBx149A] " << dbss.str() << '\n';
 
     // Debug information output
     API::ITableWorkspace_sptr paramws = fitalg->getProperty("OutputParameters");
     std::string infofit = parseFitParameterWorkspace(paramws);
-    g_log.information() << "[DBx149B] Fitted Parameters: " << endl
-                        << infofit << endl;
+    g_log.information() << "[DBx149B] Fitted Parameters: \n" << infofit << '\n';
   } else {
     dbss << ": Failed ";
-    g_log.error() << "[DBx149C] " << dbss.str() << endl;
+    g_log.error() << "[DBx149C] " << dbss.str() << '\n';
   }
 
   return fitsuccess;
@@ -2274,7 +2237,7 @@ std::string FitPowderDiffPeaks::parseFitParameterWorkspace(
     API::ITableWorkspace_sptr paramws) {
   // 1. Check
   if (!paramws) {
-    g_log.warning() << "Input table workspace is NULL.  " << std::endl;
+    g_log.warning() << "Input table workspace is NULL.  \n";
     return "";
   }
 
@@ -2288,7 +2251,7 @@ std::string FitPowderDiffPeaks::parseFitParameterWorkspace(
     row >> parname >> parvalue >> parerror;
 
     msgss << parname << " = " << setw(10) << setprecision(5) << parvalue
-          << " +/- " << setw(10) << setprecision(5) << parerror << std::endl;
+          << " +/- " << setw(10) << setprecision(5) << parerror << '\n';
   }
 
   return msgss.str();
@@ -2327,7 +2290,7 @@ void FitPowderDiffPeaks::importInstrumentParameterFromTable(
 
   g_log.notice() << "[DBx409] Import TableWorkspace " << parameterWS->name()
                  << " containing " << numrows
-                 << " instrument profile parameters" << endl;
+                 << " instrument profile parameters\n";
 
   // 2. Import data to maps
   std::string parname;
@@ -2339,10 +2302,8 @@ void FitPowderDiffPeaks::importInstrumentParameterFromTable(
     trow >> parname >> value;
     m_instrumentParmaeters.emplace(parname, value);
     g_log.notice() << "[DBx211] Import parameter " << parname << ": " << value
-                   << endl;
+                   << '\n';
   }
-
-  return;
 }
 
 /** Import Bragg peak table workspace
@@ -2391,9 +2352,7 @@ void FitPowderDiffPeaks::parseBraggPeakTable(
 
   g_log.information() << "Import " << hklmaps.size()
                       << " entries from Bragg peak TableWorkspace "
-                      << peakws->name() << endl;
-
-  return;
+                      << peakws->name() << '\n';
 }
 
 //----------------------------------------------------------------------------
@@ -2412,7 +2371,7 @@ FitPowderDiffPeaks::genOutputFittedPatternWorkspace(std::vector<double> pattern,
     errmsg << "Input pattern (" << pattern.size()
            << ") and algorithm's input workspace (" << X.size()
            << ") have different size. ";
-    g_log.error() << errmsg.str() << endl;
+    g_log.error() << errmsg.str() << '\n';
     throw std::logic_error(errmsg.str());
   }
 
@@ -2447,7 +2406,7 @@ FitPowderDiffPeaks::genOutputFittedPatternWorkspace(std::vector<double> pattern,
   for (size_t i = 0; i < numpts; ++i) {
     ofile << setw(12) << setprecision(5) << X[i] << setw(12) << setprecision(5)
           << pattern[i] << setw(12) << setprecision(5) << dataws->readY(0)[i]
-          << setw(12) << setprecision(5) << dataws->readY(2)[i] << endl;
+          << setw(12) << setprecision(5) << dataws->readY(2)[i] << '\n';
   }
   ofile.close();
 
@@ -2529,7 +2488,7 @@ FitPowderDiffPeaks::genPeakParametersWorkspace() {
   // 1. Debug/Test Output
   for (size_t i = 0; i < m_vecPeakFunctions.size(); ++i) {
     g_log.debug() << "Peak @ d = " << m_vecPeakFunctions[i].first
-                  << ":  Chi^2 = " << m_peakFitChi2[i] << endl;
+                  << ":  Chi^2 = " << m_peakFitChi2[i] << '\n';
   }
 
   if (m_vecPeakFunctions.size() != m_peakFitChi2.size()) {
@@ -2561,7 +2520,7 @@ FitPowderDiffPeaks::genPeakParametersWorkspace() {
   outbuf << setw(10) << "H" << setw(10) << "K" << setw(10) << "L"
          << setw(10) << "d_h" << setw(10) << "X0" << setw(10) << "I"
          << setw(10) << "A" << setw(10) << "B" << setw(10) << "S" << setw(10) <<
-  "Chi2" << endl;
+  "Chi2\n";
   */
 
   for (size_t i = 0; i < numpeaks; ++i) {
@@ -2599,7 +2558,7 @@ FitPowderDiffPeaks::genPeakParametersWorkspace() {
       vecsigma[i] = p_s;
 
       /*
-      outbuf << setw(10) << setprecision(5) << chi2 << endl;
+      outbuf << setw(10) << setprecision(5) << chi2 << '\n';
       outbuf << setw(10) << hkl[0] << setw(10) << hkl[1] << setw(10) << hkl[2]
              << setw(10) << setprecision(5) << dh;
       outbuf << setw(10) << setprecision(5) << p_x
@@ -2768,7 +2727,7 @@ void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws) {
       // Miminum HKL peak does not exist
       vector<int> hkl = m_minimumHKL;
       g_log.warning() << "Minimum peak " << hkl[0] << ", " << hkl[1] << ", "
-                      << hkl[2] << " does not exit. " << endl;
+                      << hkl[2] << " does not exit. \n";
     }
   }
 
@@ -2780,12 +2739,10 @@ void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws) {
     double d_h = deliter->first;
     double tof_h = deliter->second.second->centre();
     dbout << "Peak (" << hkl[0] << ", " << hkl[1] << ", " << hkl[2]
-          << ") @ d = " << d_h << ", TOF = " << tof_h << endl;
+          << ") @ d = " << d_h << ", TOF = " << tof_h << '\n';
   }
   g_log.information() << "[DBx531] Peaks To Fit:  Number of peaks = "
                       << m_vecPeakFunctions.size() << "\n" << dbout.str();
-
-  return;
 }
 
 //-----------------------------------------------------------------------------------------
@@ -2846,9 +2803,9 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
         zerot == EMPTY_DBL()) {
       stringstream errss;
       errss << "In input InstrumentParameterTable, one of the following is not "
-               "given.  Unable to process. " << endl;
+               "given.  Unable to process. \n";
       errss << "Tcross = " << tcross << "; Width = " << width
-            << ", Dtt1 = " << dtt1 << ", Dtt1t = " << dtt1t << endl;
+            << ", Dtt1 = " << dtt1 << ", Dtt1t = " << dtt1t << '\n';
       errss << "Dtt2t = " << dtt2t << ", Zero = " << zero
             << ", Zerot = " << zerot;
 
@@ -2864,15 +2821,15 @@ FitPowderDiffPeaks::genPeak(map<string, int> hklmap,
       caltofonly = true;
       g_log.warning() << "[DBx343] At least one of the input instrument-peak "
                          "profile parameters is not given. "
-                      << "Use (HKL) only!" << endl;
+                      << "Use (HKL) only!\n";
       g_log.warning() << "Alph0 = " << alph0 << ", Alph1 = " << alph1
                       << ", Alph0t = " << alph0t << ", Alph1t = " << alph1t
-                      << endl;
+                      << '\n';
       g_log.warning() << "Beta0 = " << beta0 << ", Beta1 = " << beta1
                       << ", Beta0t = " << beta0t << ", Beta1t = " << beta1t
-                      << endl;
+                      << '\n';
       g_log.warning() << "Sig0 = " << sig0 << ", Sig1 = " << sig1
-                      << ", Sig2 = " << sig2 << endl;
+                      << ", Sig2 = " << sig2 << '\n';
     }
 
     if (caltofonly) {
@@ -3021,8 +2978,6 @@ void FitPowderDiffPeaks::plotFunction(IFunction_sptr peakfunction,
 
   for (int i = 0; i < static_cast<int>(domain.size()); ++i)
     m_peakData[i + ix0] += values2[i];
-
-  return;
 }
 
 //=====================================  Auxiliary Functions
@@ -3075,7 +3030,7 @@ void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax) {
   std::stringstream errmsg;
   if (!cropstatus) {
     errmsg << "DBx309 Cropping workspace unsuccessful.  Fatal Error. Quit!";
-    g_log.error() << errmsg.str() << std::endl;
+    g_log.error() << errmsg.str() << '\n';
     throw std::runtime_error(errmsg.str());
   }
 
@@ -3088,10 +3043,8 @@ void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax) {
   } else {
     cout << "[DBx211] Cropped Workspace Range: "
          << m_dataWS->readX(m_wsIndex)[0] << ", "
-         << m_dataWS->readX(m_wsIndex).back() << endl;
+         << m_dataWS->readX(m_wsIndex).back() << '\n';
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -3186,10 +3139,10 @@ string getFunctionInfo(IFunction_sptr function) {
   stringstream outss;
   vector<string> parnames = function->getParameterNames();
   size_t numpars = parnames.size();
-  outss << "Number of Parameters = " << numpars << endl;
+  outss << "Number of Parameters = " << numpars << '\n';
   for (size_t i = 0; i < numpars; ++i)
     outss << parnames[i] << " = " << function->getParameter(i)
-          << ", \t\tFitted = " << !function->isFixed(i) << endl;
+          << ", \t\tFitted = " << !function->isFixed(i) << '\n';
 
   return outss.str();
 }
@@ -3270,8 +3223,6 @@ void estimateBackgroundCoarse(DataObjects::Workspace2D_sptr dataws,
     pY[i] = Y[i] - bY[i];
     pE[i] = origE[i];
   }
-
-  return;
 }
 
 //-----------------------------------------------------------------------------------------------------------

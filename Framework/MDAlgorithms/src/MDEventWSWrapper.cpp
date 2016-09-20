@@ -138,7 +138,7 @@ template <> void MDEventWSWrapper::splitBoxList<0>() {
 }
 
 /// helper function to refresh centroid on MDEventWorkspace with nd dimensions
-template <size_t nd> void MDEventWSWrapper::calcCentroidND(void) {
+template <size_t nd> void MDEventWSWrapper::calcCentroidND() {
 
   DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *const pWs =
       dynamic_cast<
@@ -151,7 +151,7 @@ template <size_t nd> void MDEventWSWrapper::calcCentroidND(void) {
 }
 /// the function used in template metaloop termination on 0 dimensions and as
 /// the function which will throw the error on undefined MDWorkspaceWrapper
-template <> void MDEventWSWrapper::calcCentroidND<0>(void) {
+template <> void MDEventWSWrapper::calcCentroidND<0>() {
   throw(std::invalid_argument(" class has not been initiated"));
 }
 
@@ -176,12 +176,11 @@ API::IMDEventWorkspace_sptr
 MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD) {
 
   if (WSD.nDimensions() < 1 || WSD.nDimensions() > MAX_N_DIM) {
-    std::string ERR =
-        " Number of requested MD dimensions: " +
-        boost::lexical_cast<std::string>(WSD.nDimensions()) +
-        " exceeds maximal number of MD dimensions: " +
-        boost::lexical_cast<std::string>(static_cast<int>(MAX_N_DIM)) +
-        " instantiated during compilation\n";
+    std::string ERR = " Number of requested MD dimensions: " +
+                      std::to_string(WSD.nDimensions()) +
+                      " exceeds maximal number of MD dimensions: " +
+                      std::to_string(static_cast<int>(MAX_N_DIM)) +
+                      " instantiated during compilation\n";
     throw(std::invalid_argument(ERR));
   }
 

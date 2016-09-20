@@ -9,7 +9,9 @@
 
 #include "MantidGeometry/IDetector.h"
 
+#include <QApplication>
 #include <QObject>
+#include <QPalette>
 #include <QVariant>
 // ----------   MantidMatrixModel   ------------------ //
 
@@ -38,7 +40,11 @@ void MantidMatrixModel::setup(const Mantid::API::MatrixWorkspace *ws, int rows,
   m_colNumCorr = 1;
   m_endRow = m_rows - 1;
   m_startRow = start >= 0 ? start : 0;
-  m_mon_color = QColor(255, 255, 204);
+  m_mon_color =
+      QApplication::palette().color(QPalette::Active, QPalette::ToolTipBase);
+  m_mask_color =
+      QApplication::palette().color(QPalette::Disabled, QPalette::Background);
+
   if (ws->blocksize() != 0)
     m_colNumCorr = ws->isHistogramData() ? 1 : 0;
   else
@@ -100,12 +106,12 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
         return QString("index %1%2spectra no %3")
             .arg(QString::number(section), toolTipSeperator,
                  QString::number(
-                     m_workspace->getSpectrum(section)->getSpectrumNo()));
+                     m_workspace->getSpectrum(section).getSpectrumNo()));
       } else {
         return QString("%1%2sp-%3")
             .arg(QString::number(section), headerSeperator,
                  QString::number(
-                     m_workspace->getSpectrum(section)->getSpectrumNo()));
+                     m_workspace->getSpectrum(section).getSpectrumNo()));
       }
     }
 
@@ -238,10 +244,25 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const {
     return QVariant(m_locale.toString(val, m_format, m_prec));
   }
   case Qt::BackgroundRole: {
-    if (checkMonitorCache(index.row())) {
+    if (checkMaskedCache(index.row())) {
+      return m_mask_color;
+    } else if (checkMonitorCache(index.row())) {
       return m_mon_color;
     } else {
       return QVariant();
+    }
+  }
+  case Qt::ToolTipRole: {
+    if (checkMaskedCache(index.row())) {
+      if (checkMonitorCache(index.row())) {
+        return QString("This is a masked monitor spectrum");
+      } else {
+        return QString("This is a masked spectrum");
+      }
+    } else if (checkMonitorCache(index.row())) {
+      return QString("This is a monitor spectrum");
+    } else {
+      return QString();
     }
   }
   default:
@@ -272,6 +293,34 @@ bool MantidMatrixModel::checkMonitorCache(int row) const {
       }
     }
     return isMon;
+  } else {
+    return false;
+  }
+}
+
+/**   Checks the row cache to see if the detector flag is stored, then returns
+it, otherwise it looks it up and adds it to the cache for quick lookup
+@param row :: current row in the table that maps to a detector.
+@return bool :: the value of if the detector is masked or not.
+*/
+bool MantidMatrixModel::checkMaskedCache(int row) const {
+  row += m_startRow; // correctly offset the row
+  if (m_workspace->axes() > 1 && m_workspace->getAxis(1)->isSpectra()) {
+    bool isMasked = false;
+    if (m_maskCache.contains(row)) {
+      isMasked = m_maskCache.value(row);
+    } else {
+      try {
+        size_t wsIndex = static_cast<size_t>(row);
+        auto det = m_workspace->getDetector(wsIndex);
+        isMasked = det->isMasked();
+        m_maskCache.insert(row, isMasked);
+      } catch (std::exception &) {
+        m_maskCache.insert(row, false);
+        isMasked = false;
+      }
+    }
+    return isMasked;
   } else {
     return false;
   }

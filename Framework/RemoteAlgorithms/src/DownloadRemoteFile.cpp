@@ -80,8 +80,7 @@ void DownloadRemoteFile::exec() {
       outfile.close();
       g_log.information() << "Downloaded '"
                           << getPropertyValue("RemoteFileName") << "' to '"
-                          << getPropertyValue("LocalFileName") << "'"
-                          << std::endl;
+                          << getPropertyValue("LocalFileName") << "'\n";
     } else {
       throw(std::runtime_error(
           std::string("Failed to open " + getPropertyValue("LocalFileName"))));

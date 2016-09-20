@@ -29,21 +29,14 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm *const alg,
                                    std::size_t uexeccount)
     : m_name(alg->name()), m_version(alg->version()), m_executionDate(start),
       m_executionDuration(duration), m_execCount(uexeccount),
-      m_childHistories(boost::bind(CompareHistory::compare, _1, _2)) {
+      m_childHistories() {
   // Now go through the algorithm's properties and create the PropertyHistory
   // objects.
   setProperties(alg);
 }
 
-/** Private empty constructor for use by Algorithm
- */
-AlgorithmHistory::AlgorithmHistory()
-    : m_name(), m_version(), m_executionDate(), m_executionDuration(),
-      m_execCount(),
-      m_childHistories(boost::bind(CompareHistory::compare, _1, _2)) {}
-
 /// Destructor
-AlgorithmHistory::~AlgorithmHistory() {}
+AlgorithmHistory::~AlgorithmHistory() = default;
 
 /**
     Construct AlgorithmHistory by name. Can be used for rstoring the history
@@ -61,7 +54,7 @@ AlgorithmHistory::AlgorithmHistory(const std::string &name, int vers,
                                    std::size_t uexeccount)
     : m_name(name), m_version(vers), m_executionDate(start),
       m_executionDuration(duration), m_execCount(uexeccount),
-      m_childHistories(boost::bind(CompareHistory::compare, _1, _2)) {}
+      m_childHistories() {}
 
 /**
  *  Set the history properties for an algorithm pointer
@@ -74,10 +67,9 @@ void AlgorithmHistory::setProperties(const Algorithm *const alg) {
   // Now go through the algorithm's properties and create the PropertyHistory
   // objects.
   const std::vector<Property *> &properties = alg->getProperties();
-  std::vector<Property *>::const_iterator it;
-  for (it = properties.begin(); it != properties.end(); ++it) {
+  for (const auto &property : properties) {
     m_properties.push_back(
-        boost::make_shared<PropertyHistory>((*it)->createHistory()));
+        boost::make_shared<PropertyHistory>(property->createHistory()));
   }
 }
 
@@ -110,8 +102,7 @@ AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory &A)
     : m_name(A.m_name), m_version(A.m_version),
       m_executionDate(A.m_executionDate),
       m_executionDuration(A.m_executionDuration), m_properties(A.m_properties),
-      m_execCount(A.m_execCount),
-      m_childHistories(boost::bind(CompareHistory::compare, _1, _2)) {
+      m_execCount(A.m_execCount) {
   m_childHistories = A.m_childHistories;
 }
 
@@ -134,8 +125,8 @@ void AlgorithmHistory::addExecutionInfo(const DateAndTime &start,
 void AlgorithmHistory::addProperty(const std::string &name,
                                    const std::string &value, bool isdefault,
                                    const unsigned int &direction) {
-  Kernel::PropertyHistory propHist(name, value, "", isdefault, direction);
-  m_properties.push_back(boost::make_shared<PropertyHistory>(propHist));
+  m_properties.push_back(boost::make_shared<PropertyHistory>(
+      name, value, "", isdefault, direction));
 }
 
 /** Add a child algorithm history to history
@@ -158,20 +149,18 @@ size_t AlgorithmHistory::childHistorySize() const {
 }
 
 /**
- * Retrieve a child algorithm history by index
- * @param index ::  An index within the child algorithm history set
- * @returns A pointer to an AlgorithmHistory object
- * @throws std::out_of_range error if the index is invalid
- */
+  * Retrieve a child algorithm history by index
+  * @param index ::  An index within the child algorithm history set
+  * @returns A pointer to an AlgorithmHistory object
+  * @throws std::out_of_range error if the index is invalid
+  */
 AlgorithmHistory_sptr
 AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const {
   if (index >= this->getChildHistories().size()) {
     throw std::out_of_range(
         "AlgorithmHistory::getAlgorithmHistory() - Index out of range");
   }
-  auto start = m_childHistories.cbegin();
-  std::advance(start, index);
-  return *start;
+  return *std::next(m_childHistories.cbegin(), index);
 }
 
 /**
@@ -182,6 +171,23 @@ AlgorithmHistory::getChildAlgorithmHistory(const size_t index) const {
  */
 AlgorithmHistory_sptr AlgorithmHistory::operator[](const size_t index) const {
   return getChildAlgorithmHistory(index);
+}
+
+/**
+* Gets the value of a specified algorithm property
+* @param name ::  The property to find
+* @returns The string value of the property
+* @throw Exception::NotFoundError if the named property is unknown
+*/
+const std::string &
+AlgorithmHistory::getPropertyValue(const std::string &name) const {
+  for (const auto &hist : m_properties) {
+    if (hist->name() == name) {
+      return hist->value();
+    }
+  }
+  throw Kernel::Exception::NotFoundError(
+      "Could not find the specified property", name);
 }
 
 /**
@@ -201,19 +207,17 @@ AlgorithmHistory::getChildAlgorithm(const size_t index) const {
  */
 void AlgorithmHistory::printSelf(std::ostream &os, const int indent) const {
   os << std::string(indent, ' ') << "Algorithm: " << m_name;
-  os << std::string(indent, ' ') << " v" << m_version << std::endl;
+  os << std::string(indent, ' ') << " v" << m_version << '\n';
 
   os << std::string(indent, ' ')
-     << "Execution Date: " << m_executionDate.toFormattedString() << std::endl;
+     << "Execution Date: " << m_executionDate.toFormattedString() << '\n';
   os << std::string(indent, ' ')
-     << "Execution Duration: " << m_executionDuration << " seconds"
-     << std::endl;
+     << "Execution Duration: " << m_executionDuration << " seconds\n";
 
-  os << std::string(indent, ' ') << "Parameters:" << std::endl;
+  os << std::string(indent, ' ') << "Parameters:\n";
 
-  PropertyHistories::const_iterator it;
-  for (it = m_properties.begin(); it != m_properties.end(); ++it) {
-    (*it)->printSelf(os, indent + 2);
+  for (const auto &property : m_properties) {
+    property->printSelf(os, indent + 2);
   }
 }
 

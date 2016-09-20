@@ -75,8 +75,6 @@ class DLLExport ModeratorTzero : public Mantid::API::Algorithm {
 public:
   /// Default constructor
   ModeratorTzero();
-  /// Virtual destructor
-  ~ModeratorTzero() override {}
   /// Algorithm's name
   const std::string name() const override { return "ModeratorTzero"; }
   /// Summary of algorithms purpose

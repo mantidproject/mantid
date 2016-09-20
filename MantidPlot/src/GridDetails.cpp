@@ -19,24 +19,26 @@
 #include <ColorBox.h>
 #include <Grid.h>
 
-/** The constructor for a single set of widgets containing parameters for a sigle direction of gridlines.
+/** The constructor for a single set of widgets containing parameters for a
+* sigle direction of gridlines.
 *  @param app :: the containing application window
 *  @param graph :: the graph the dialog is settign the options for
 *  @param mappedaxis :: the QwtPlot::axis value that corresponds to this axis
-*  @param parent :: the QWidget that acts as this widget's parent in the hierachy
+*  @param parent :: the QWidget that acts as this widget's parent in the
+* hierachy
 */
-GridDetails::GridDetails(ApplicationWindow* app, Graph* graph, int alignment, QWidget *parent) : QWidget(parent)
-{
+GridDetails::GridDetails(ApplicationWindow *app, Graph *graph, int alignment,
+                         QWidget *parent)
+    : QWidget(parent) {
   m_app = app;
   m_graph = graph;
   m_initialised = false;
   m_alignment = alignment;
-  if (m_alignment != 0 && m_alignment != 1)
-  {
+  if (m_alignment != 0 && m_alignment != 1) {
     m_alignment = 0;
   }
 
-  QGridLayout * rightLayout = new QGridLayout(this);
+  QGridLayout *rightLayout = new QGridLayout(this);
 
   m_chkMajorGrid = new QCheckBox();
   m_chkMajorGrid->setText(tr("Major Grids"));
@@ -96,16 +98,13 @@ GridDetails::GridDetails(ApplicationWindow* app, Graph* graph, int alignment, QW
   rightLayout->addWidget(new QLabel(tr("Axis")), 4, 0);
 
   m_cmbGridAxis = new QComboBox();
-  if (m_alignment == 1)
-  {
-    m_cmbGridAxis->insertItem(tr("Bottom"));
-    m_cmbGridAxis->insertItem(tr("Top"));
+  if (m_alignment == 1) {
+    m_cmbGridAxis->addItem(tr("Bottom"));
+    m_cmbGridAxis->addItem(tr("Top"));
     m_chkZeroLine = new QCheckBox(tr("X=0"));
-  }
-  else
-  {
-    m_cmbGridAxis->insertItem(tr("Left"));
-    m_cmbGridAxis->insertItem(tr("Right"));
+  } else {
+    m_cmbGridAxis->addItem(tr("Left"));
+    m_cmbGridAxis->addItem(tr("Right"));
     m_chkZeroLine = new QCheckBox(tr("Y=0"));
   }
   rightLayout->addWidget(m_cmbGridAxis, 4, 1);
@@ -120,30 +119,22 @@ GridDetails::GridDetails(ApplicationWindow* app, Graph* graph, int alignment, QW
   initWidgets();
 }
 
-GridDetails::~GridDetails()
-{
+GridDetails::~GridDetails() {}
 
-}
-
-/** Initialisation method. Sets up all widgets and variables not done in the constructor.
+/** Initialisation method. Sets up all widgets and variables not done in the
+ * constructor.
 *
 */
-void GridDetails::initWidgets()
-{
-  if (m_initialised)
-  {
+void GridDetails::initWidgets() {
+  if (m_initialised) {
     return;
-  }
-  else
-  {
+  } else {
     Grid *grd = dynamic_cast<Grid *>(m_graph->plotWidget()->grid());
-    if (!grd)
-    {
+    if (!grd) {
       return;
     }
 
-    if (m_alignment == 1)
-    {
+    if (m_alignment == 1) {
       m_chkMajorGrid->setChecked(grd->xEnabled());
       m_chkMinorGrid->setChecked(grd->xMinEnabled());
 
@@ -153,15 +144,13 @@ void GridDetails::initWidgets()
       m_dspnWidthMajor->setValue(majPenX.widthF());
 
       QPen minPenX = grd->minPenX();
-      m_cmbTypeMinor->setCurrentItem(minPenX.style() - 1);
+      m_cmbTypeMinor->setCurrentIndex(minPenX.style() - 1);
       m_cboxColorMinor->setColor(minPenX.color());
       m_dspnWidthMinor->setValue(minPenX.widthF());
 
       m_cmbGridAxis->setCurrentIndex(grd->xAxis() - 2);
       m_chkZeroLine->setChecked(grd->xZeroLineEnabled());
-    }
-    else
-    {
+    } else {
       m_chkMajorGrid->setChecked(grd->yEnabled());
       m_chkMinorGrid->setChecked(grd->yMinEnabled());
 
@@ -171,7 +160,7 @@ void GridDetails::initWidgets()
       m_dspnWidthMajor->setValue(majPenY.widthF());
 
       QPen minPenY = grd->minPenY();
-      m_cmbTypeMinor->setCurrentItem(minPenY.style() - 1);
+      m_cmbTypeMinor->setCurrentIndex(minPenY.style() - 1);
       m_cboxColorMinor->setColor(minPenY.color());
       m_dspnWidthMinor->setValue(minPenY.widthF());
 
@@ -185,19 +174,28 @@ void GridDetails::initWidgets()
     bool minorOn = m_chkMinorGrid->isChecked();
     minorGridEnabled(minorOn);
 
-    connect(m_chkMajorGrid, SIGNAL(toggled(bool)), this, SLOT(majorGridEnabled(bool)));
-    connect(m_chkMinorGrid, SIGNAL(toggled(bool)), this, SLOT(minorGridEnabled(bool)));
+    connect(m_chkMajorGrid, SIGNAL(toggled(bool)), this,
+            SLOT(majorGridEnabled(bool)));
+    connect(m_chkMinorGrid, SIGNAL(toggled(bool)), this,
+            SLOT(minorGridEnabled(bool)));
 
     connect(m_chkMajorGrid, SIGNAL(clicked()), this, SLOT(setModified()));
-    connect(m_chkMinorGrid, SIGNAL(clicked()), this, SLOT(setModified()));  
+    connect(m_chkMinorGrid, SIGNAL(clicked()), this, SLOT(setModified()));
     connect(m_chkZeroLine, SIGNAL(clicked()), this, SLOT(setModified()));
-    connect(m_cboxColorMinor, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
-    connect(m_cboxColorMajor, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
-    connect(m_cmbTypeMajor, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));  
-    connect(m_cmbTypeMinor, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified())); 
-    connect(m_cmbGridAxis, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
-    connect(m_dspnWidthMajor, SIGNAL(valueChanged(double)), this, SLOT(setModified())); 
-    connect(m_dspnWidthMinor, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
+    connect(m_cboxColorMinor, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(setModified()));
+    connect(m_cboxColorMajor, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(setModified()));
+    connect(m_cmbTypeMajor, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(setModified()));
+    connect(m_cmbTypeMinor, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(setModified()));
+    connect(m_cmbGridAxis, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(setModified()));
+    connect(m_dspnWidthMajor, SIGNAL(valueChanged(double)), this,
+            SLOT(setModified()));
+    connect(m_dspnWidthMinor, SIGNAL(valueChanged(double)), this,
+            SLOT(setModified()));
 
     m_modified = false;
     m_initialised = true;
@@ -207,39 +205,44 @@ void GridDetails::initWidgets()
 /** Sets the modifed flag to true so that the changes may be applied.
 *
 */
-void GridDetails::setModified()
-{
-  m_modified = true;
-}
+void GridDetails::setModified() { m_modified = true; }
 
 /** Applies the grid paremeters to the graphs
 *
 @param grid :: the gird to apply this formatting to
 @bool antialias :: apply antialias to this formatting or not
-@bool multirun :: this will run multiple times for this dialog, and forces even if no modified
+@bool multirun :: this will run multiple times for this dialog, and forces even
+if no modified
 */
-void GridDetails::apply(Grid *grid, bool antialias, bool multirun)
-{
-  if ((m_modified || multirun) && grid)
-  {
-    if (m_alignment == 1)
-    {
+void GridDetails::apply(Grid *grid, bool antialias, bool multirun) {
+  if ((m_modified || multirun) && grid) {
+    if (m_alignment == 1) {
       grid->enableX(m_chkMajorGrid->isChecked());
       grid->enableXMin(m_chkMinorGrid->isChecked());
       grid->setXAxis(m_cmbGridAxis->currentIndex() + 2);
 
-      grid->setMajPenX(QPen(ColorBox::color(m_cboxColorMajor->currentIndex()), m_dspnWidthMajor->value(), Graph::getPenStyle(m_cmbTypeMajor->currentIndex())));
-      grid->setMinPenX(QPen(ColorBox::color(m_cboxColorMinor->currentIndex()), m_dspnWidthMinor->value(), Graph::getPenStyle(m_cmbTypeMinor->currentIndex())));
+      grid->setMajPenX(
+          QPen(ColorBox::color(m_cboxColorMajor->currentIndex()),
+               m_dspnWidthMajor->value(),
+               Graph::getPenStyle(m_cmbTypeMajor->currentIndex())));
+      grid->setMinPenX(
+          QPen(ColorBox::color(m_cboxColorMinor->currentIndex()),
+               m_dspnWidthMinor->value(),
+               Graph::getPenStyle(m_cmbTypeMinor->currentIndex())));
       grid->enableZeroLineX(m_chkZeroLine->isChecked());
-    }
-    else
-    {
+    } else {
       grid->enableY(m_chkMajorGrid->isChecked());
       grid->enableYMin(m_chkMinorGrid->isChecked());
       grid->setYAxis(m_cmbGridAxis->currentIndex());
 
-      grid->setMajPenY(QPen(ColorBox::color(m_cboxColorMajor->currentIndex()), m_dspnWidthMajor->value(), Graph::getPenStyle(m_cmbTypeMajor->currentIndex())));
-      grid->setMinPenY(QPen(ColorBox::color(m_cboxColorMinor->currentIndex()), m_dspnWidthMinor->value(), Graph::getPenStyle(m_cmbTypeMinor->currentIndex())));
+      grid->setMajPenY(
+          QPen(ColorBox::color(m_cboxColorMajor->currentIndex()),
+               m_dspnWidthMajor->value(),
+               Graph::getPenStyle(m_cmbTypeMajor->currentIndex())));
+      grid->setMinPenY(
+          QPen(ColorBox::color(m_cboxColorMinor->currentIndex()),
+               m_dspnWidthMinor->value(),
+               Graph::getPenStyle(m_cmbTypeMinor->currentIndex())));
       grid->enableZeroLineY(m_chkZeroLine->isChecked());
     }
 
@@ -248,21 +251,21 @@ void GridDetails::apply(Grid *grid, bool antialias, bool multirun)
   }
 }
 
-/** Enables or disables widgets corresponding to the current value of the majorGridEnabled check box.
+/** Enables or disables widgets corresponding to the current value of the
+ * majorGridEnabled check box.
 *
 */
-void GridDetails::majorGridEnabled(bool on)
-{
+void GridDetails::majorGridEnabled(bool on) {
   m_cmbTypeMajor->setEnabled(on);
   m_cboxColorMajor->setEnabled(on);
   m_dspnWidthMajor->setEnabled(on);
 }
 
-/** Enables or disables widgets corresponding to the current value of the minorGridEnabled check box.
+/** Enables or disables widgets corresponding to the current value of the
+ * minorGridEnabled check box.
 *
 */
-void GridDetails::minorGridEnabled(bool on)
-{
+void GridDetails::minorGridEnabled(bool on) {
   m_cmbTypeMinor->setEnabled(on);
   m_cboxColorMinor->setEnabled(on);
   m_dspnWidthMinor->setEnabled(on);

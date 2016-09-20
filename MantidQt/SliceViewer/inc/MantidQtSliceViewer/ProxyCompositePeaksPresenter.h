@@ -28,11 +28,11 @@ public:
 
   void
   setForegroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                      PeakViewColor);
+                     PeakViewColor);
   /// Change the background representation for the peaks of this workspace
   void
   setBackgroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                      PeakViewColor);
+                     PeakViewColor);
   /// Get the foreground colour corresponding to the workspace
   PeakViewColor getForegroundPeakViewColor(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
@@ -81,9 +81,19 @@ public:
   /// Get optional zoomed peak index.
   int getZoomedPeakIndex() const;
   /// Set the edit mode.
-  void editCommand(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
+  void editCommand(EditMode editMode,
+                   boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
   /// Can we add HKL peaks to this workspace.
-  bool hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
+  bool
+  hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
+  /// Set the peaks size within the current projection
+  void setPeakSizeOnProjection(const double fraction);
+  /// Set the peaks size into the current projection
+  void setPeakSizeIntoProjection(const double fraction);
+  /// Get the peaks size onto the current projection
+  double getPeakSizeOnProjection() const;
+  /// Get the peaks size into the current projection
+  double getPeakSizeIntoProjection() const;
 
 private:
   /// Wrapped composite to delegate to.

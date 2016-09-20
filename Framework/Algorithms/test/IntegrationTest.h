@@ -39,11 +39,8 @@ public:
       for (int k = 0; k < 6; ++k) {
         space2D->dataX(j)[k] = k;
       }
-      space2D->setData(
-          j, boost::shared_ptr<Mantid::MantidVec>(
-                 new Mantid::MantidVec(a + (5 * j), a + (5 * j) + 5)),
-          boost::shared_ptr<Mantid::MantidVec>(
-              new Mantid::MantidVec(e + (5 * j), e + (5 * j) + 5)));
+      space2D->dataY(j) = Mantid::MantidVec(a + (5 * j), a + (5 * j) + 5);
+      space2D->dataE(j) = Mantid::MantidVec(e + (5 * j), e + (5 * j) + 5);
     }
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("testSpace", space);
@@ -193,7 +190,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         input = AnalysisDataService::Instance().retrieve("testSpace"));
     Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-    input2D->isDistribution(true);
+    input2D->setDistribution(true);
     // Replace workspace
     AnalysisDataService::Instance().addOrReplace("testSpace", input2D);
 
@@ -264,9 +261,9 @@ public:
       TS_ASSERT_DELTA(Y[0], 20.0, 1e-6);
       TS_ASSERT_DELTA(E[0], sqrt(20.0), 1e-6);
       // Correct spectra etc?
-      specnum_t specNo = output2D->getSpectrum(i)->getSpectrumNo();
+      specnum_t specNo = output2D->getSpectrum(i).getSpectrumNo();
       TS_ASSERT_EQUALS(specNo, StartWorkspaceIndex + i);
-      TS_ASSERT(output2D->getSpectrum(i)->hasDetectorID(specNo));
+      TS_ASSERT(output2D->getSpectrum(i).hasDetectorID(specNo));
     }
 
     AnalysisDataService::Instance().remove(inName);

@@ -10,17 +10,40 @@ Description
 -----------
 
 Statistics of the Peaks Workspaces are calculated for all peaks and by
-default for resolution shell.  There is a SortBy option to change this
+default for resolution shell(d-Spacing).  There is a SortBy option to change this
 to by orientation (RunNumber) or by Anger camera (bank) or only do all peaks.
+This algorithm calls :ref:`algm-SortHKL`, so more details are in the documentation for that algorithm.
 
-Statistics include:
-	No of Unique Reflections
-	Resolution range
-	Multiplicity
-	Mean ((I)/sd(I))
-	Rmerge
-	Rplm
-	Data Completeness
+After removing invalid peaks with :math:`I \leq 0`, :math:`\sigma \leq 0` and :math:`h=k=l=0`,
+the peaks are assigned to their respective unique reflection so that each theoretically present
+reflection may have :math:`n` observations (:math:`n` can be zero). The number of unique reflections
+which have at least one observation can be labeled :math:`N_{unique}`.
+
+The intensities of peaks in each reflection are checked for outliers, which are removed. Outliers
+in this context are peaks with an intensity that deviates more than :math:`3\sigma_{hkl}` from the
+mean of the reflection, where :math:`\sigma_{hkl}` is the standard deviation of the peak intensities.
+
+Formulas for the statistics columns are:
+
+        :math:`N_{unique}`
+
+        :math:`dSpacing_{min}`
+
+        :math:`dSpacing_{max}`
+
+        :math:`Multiplicity =  \frac{N_{observed}}{N_{unique}}`
+
+        :math:`\langle \frac{I}{\sigma_I} \rangle`
+
+        In the following, all sums over hkl extend only over unique reflections with more than one observation! Output is percentages.
+
+        :math:`R_{merge} = 100 * \frac{\sum_{hkl} \sum_{j} \vert I_{hkl,j}-\langle I_{hkl}\rangle\vert}{\sum_{hkl} \sum_{j}I_{hkl,j}}`
+        where :math:`\langle I_{hkl}\rangle` is the average of j multiple measurements of the n equivalent reflections.
+
+
+        :math:`R_{pim} = 100 * \frac{\sum_{hkl} \sqrt \frac{1}{n-1} \sum_{j=1}^{n} \vert I_{hkl,j}-\langle I_{hkl}\rangle\vert}{\sum_{hkl} \sum_{j}I_{hkl,j}}`
+
+        :math:`Completeness =  100 * \frac{N_{unique}}{N_{theoretical}}`
 
 
 Usage
@@ -61,8 +84,8 @@ Output:
 
     HKL of first peak in table -10 5.0 42.0
     Multiplicity = 1.21
-    Resolution Min = 0.30
-    Resolution Max = 3.17
+    Resolution Min = 0.21
+    Resolution Max = 2.08
     No. of Unique Reflections = 337
     Mean ((I)/sd(I)) = 27.51
     Rmerge = 10.08

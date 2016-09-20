@@ -63,16 +63,12 @@ public:
     ads.setIllegalCharacterList("");
   }
 
-  void
-  test_Retrieve_Checks_For_Exact_Match_Then_Lower_Upper_And_Sentence_Case() {
+  void test_Retrieve_Case_Insensitive() {
     addToADS("z");
-    addToADS("Z");
     TS_ASSERT_THROWS_NOTHING(ads.retrieve("z"));
     TS_ASSERT_THROWS_NOTHING(ads.retrieve("Z"));
 
-    ads.remove("z");                             // Remove lower case
-    TS_ASSERT_THROWS_NOTHING(ads.retrieve("z")); // Will find upper case
-    ads.remove("z");                             // Remove lower case
+    ads.remove("Z");
     TS_ASSERT_THROWS(ads.retrieve("z"), Exception::NotFoundError);
   }
 
@@ -311,11 +307,15 @@ public:
     TSM_ASSERT_EQUALS("Hidden entries should not be returned", names.size(), 2);
     TSM_ASSERT_EQUALS("Hidden entries should not be returned", objects.size(),
                       2);
-    TS_ASSERT_DIFFERS(names.find("One"), names.end());
-    TS_ASSERT_DIFFERS(names.find("Two"), names.end());
-    TS_ASSERT_EQUALS(names.find("__Three"), names.end());
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "One"),
+                      names.end());
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "Two"),
+                      names.end());
+    TS_ASSERT_EQUALS(std::find(names.cbegin(), names.cend(), "__Three"),
+                     names.end());
     TSM_ASSERT_EQUALS("Hidden entries should not be returned",
-                      names.find("__Three"), names.end());
+                      std::find(names.cbegin(), names.cend(), "__Three"),
+                      names.end());
 
     ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
                                         "1");
@@ -323,7 +323,8 @@ public:
     objects = ads.getObjects();
     TS_ASSERT_EQUALS(names.size(), 3);
     TS_ASSERT_EQUALS(objects.size(), 3);
-    TS_ASSERT_DIFFERS(names.find("__Three"), names.end());
+    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "__Three"),
+                      names.end());
     ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces",
                                         "0");
   }

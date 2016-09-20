@@ -70,8 +70,6 @@ public:
   inline AlgorithmProperty *clone() const override {
     return new AlgorithmProperty(*this);
   }
-  /// Destructor
-  ~AlgorithmProperty() override;
 
   /// Add the value of another property. Doesn't make sense here.
   AlgorithmProperty &operator+=(Kernel::Property const *) override {

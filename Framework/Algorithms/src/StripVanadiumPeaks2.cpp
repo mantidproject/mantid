@@ -13,16 +13,6 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(StripVanadiumPeaks2)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-StripVanadiumPeaks2::StripVanadiumPeaks2() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-StripVanadiumPeaks2::~StripVanadiumPeaks2() {}
-
 void StripVanadiumPeaks2::init() {
   // Declare inputs and output.  Copied from StripPeaks
 
@@ -72,8 +62,6 @@ void StripVanadiumPeaks2::init() {
   declareProperty("WorkspaceIndex", EMPTY_INT(), mustBePositive,
                   "If set, peaks will only be removed from this workspace "
                   "index (otherwise from all) ");
-
-  return;
 }
 
 void StripVanadiumPeaks2::exec() {
@@ -105,7 +93,7 @@ void StripVanadiumPeaks2::exec() {
   } else {
     g_log.error() << "Unit " << unit << " Is NOT supported by "
                                         "StripVanadiumPeaks, which only "
-                                        "supports d-spacing" << std::endl;
+                                        "supports d-spacing\n";
     throw std::invalid_argument("Not supported unit");
   }
 
@@ -136,8 +124,6 @@ void StripVanadiumPeaks2::exec() {
       stripPeaks->getProperty("OutputWorkspace");
 
   this->setProperty("OutputWorkspace", outputWS);
-
-  return;
 }
 
 } // namespace Mantid

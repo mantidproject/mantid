@@ -16,7 +16,6 @@ namespace LiveData {
 class TestGroupDataListener : public API::ILiveListener {
 public:
   TestGroupDataListener();
-  ~TestGroupDataListener() override;
 
   std::string name() const override { return "TestDataListener"; }
   bool supportsHistory() const override { return false; }

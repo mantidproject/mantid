@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 
@@ -113,13 +114,25 @@ class EnggCalibrate(PythonAlgorithm):
         self.setPropertyGroup('TZERO', out_grp)
         self.setPropertyGroup('FittedPeaks', out_grp)
 
+    def validateInputs(self):
+        issues = dict()
+
+        if not self.getPropertyValue("ExpectedPeaksFromFile") and not self.getPropertyValue('ExpectedPeaks'):
+            issues['ExpectedPeaks'] = ("Cannot run this algorithm without any expected peak. Please provide "
+                                       "either a list of peaks or a file with a list of peaks")
+
+        return issues
+
     def PyExec(self):
 
         import EnggUtils
 
         # Get peaks in dSpacing from file
-        expectedPeaksD = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                          self.getProperty('ExpectedPeaks').value)
+        expected_peaks_dsp = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
+                                                              self.getProperty('ExpectedPeaks').value)
+
+        if len(expected_peaks_dsp) < 1:
+            raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         prog = Progress(self, start=0, end=1, nreports=2)
 
@@ -129,11 +142,8 @@ class EnggCalibrate(PythonAlgorithm):
                                       self.getProperty('Bank').value,
                                       self.getProperty(self.INDICES_PROP_NAME).value)
 
-        if len(expectedPeaksD) < 1:
-            raise ValueError("Cannot run this algorithm without any input expected peaks")
-
         prog.report('Fitting parameters for the focused run')
-        difa, difc, zero, fitted_peaks = self._fit_params(focussed_ws, expectedPeaksD)
+        difa, difc, zero, fitted_peaks = self._fit_params(focussed_ws, expected_peaks_dsp)
 
         self.log().information("Fitted {0} peaks. Resulting DIFA: {1}, DIFC: {2}, TZERO: {3}".
                                format(fitted_peaks.rowCount(), difa, difc, zero))

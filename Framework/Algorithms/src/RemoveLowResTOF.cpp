@@ -10,9 +10,9 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include <cmath>
 #include <limits>
 #include <map>
-#include <math.h>
 
 namespace Mantid {
 namespace Algorithms {
@@ -190,46 +190,45 @@ void RemoveLowResTOF::execEvent() {
   // do the actual work
   for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
-    if (outW->getEventList(workspaceIndex).getNumberEvents() > 0) {
+    if (outW->getSpectrum(workspaceIndex).getNumberEvents() > 0) {
       double tmin = this->calcTofMin(workspaceIndex);
       if (tmin != tmin) {
         // Problematic
         g_log.warning() << "tmin for workspaceIndex " << workspaceIndex
                         << " is nan. Clearing out data. "
                         << "There are "
-                        << outW->getEventList(workspaceIndex).getNumberEvents()
+                        << outW->getSpectrum(workspaceIndex).getNumberEvents()
                         << " of it. \n";
         numClearedEventLists += 1;
-        numClearedEvents +=
-            outW->getEventList(workspaceIndex).getNumberEvents();
-        outW->getEventList(workspaceIndex).clear(false);
+        numClearedEvents += outW->getSpectrum(workspaceIndex).getNumberEvents();
+        outW->getSpectrum(workspaceIndex).clear(false);
 
         if (m_outputLowResTOF)
-          lowW->getEventList(workspaceIndex).clear(false);
+          lowW->getSpectrum(workspaceIndex).clear(false);
       } else if (tmin > 0.) {
         // there might be events between 0 and tmin (i.e., low resolution)
-        outW->getEventList(workspaceIndex).maskTof(0., tmin);
-        if (outW->getEventList(workspaceIndex).getNumberEvents() == 0)
+        outW->getSpectrum(workspaceIndex).maskTof(0., tmin);
+        if (outW->getSpectrum(workspaceIndex).getNumberEvents() == 0)
           numClearedEventLists += 1;
 
         if (m_outputLowResTOF) {
-          double tmax = lowW->getEventList(workspaceIndex).getTofMax();
+          double tmax = lowW->getSpectrum(workspaceIndex).getTofMax();
           if (tmax != tmax) {
             g_log.warning() << "tmax for workspaceIndex " << workspaceIndex
                             << " is nan. Clearing out data. \n";
-            lowW->getEventList(workspaceIndex).clear(false);
+            lowW->getSpectrum(workspaceIndex).clear(false);
           } else {
             // There is possibility that tmin calculated is larger than TOF-MAX
             // of the spectrum
             if (tmax + DBL_MIN > tmin)
-              lowW->getEventList(workspaceIndex).maskTof(tmin, tmax + DBL_MIN);
+              lowW->getSpectrum(workspaceIndex).maskTof(tmin, tmax + DBL_MIN);
           }
         }
       } else {
         // do nothing if tmin <= 0. for outW
         if (m_outputLowResTOF) {
           // tmin = 0.  no event will be in low resolution
-          lowW->getEventList(workspaceIndex).clear(false);
+          lowW->getSpectrum(workspaceIndex).clear(false);
         }
       } //
     }
@@ -259,8 +258,7 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex) {
 
   // Get a vector of detector IDs
   std::vector<detid_t> detNumbers;
-  const std::set<detid_t> &detSet =
-      m_inputWS->getSpectrum(workspaceIndex)->getDetectorIDs();
+  const auto &detSet = m_inputWS->getSpectrum(workspaceIndex).getDetectorIDs();
   detNumbers.assign(detSet.begin(), detSet.end());
 
   double tmin = 0.;

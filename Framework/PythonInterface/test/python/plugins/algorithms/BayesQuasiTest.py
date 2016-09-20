@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 import platform
 import numpy as np
@@ -51,9 +53,7 @@ if platform.system() == "Windows":
                                               FixedWidth=False,
                                               UseResNorm=False,
                                               WidthFile='',
-                                              Loop=True,
-                                              Save=False,
-                                              Plot='None')
+                                              Loop=True)
             self._validate_QLr_shape(result, prob, fit_group)
             self._validate_Qlr_value(result, prob, fit_group)
 
@@ -74,9 +74,7 @@ if platform.system() == "Windows":
                                       FixedWidth=False,
                                       UseResNorm=False,
                                       WidthFile='',
-                                      Loop=True,
-                                      Save=False,
-                                      Plot='None')
+                                      Loop=True)
             self._validate_QSe_shape(result, fit_group)
             self._validate_QSe_value(result, fit_group)
 
@@ -98,9 +96,7 @@ if platform.system() == "Windows":
                                            FixedWidth=False,
                                            UseResNorm=True,
                                            WidthFile='',
-                                           Loop=True,
-                                           Save=False,
-                                           Plot='None')
+                                           Loop=True)
             self._validate_QLr_shape(result, prob, fit_group)
             self._validate_QLr_value_with_resnorm(result, prob, fit_group)
 
@@ -113,8 +109,7 @@ if platform.system() == "Windows":
                                                  ResolutionWorkspace=self._res_ws,
                                                  MinRange=-0.54,
                                                  MaxRange=0.50,
-                                                 FixedWidth=False,
-                                                 Plot='None')
+                                                 FixedWidth=False)
 
             self.assertTrue(isinstance(fit_group, WorkspaceGroup))
             self.assertTrue(isinstance(result, MatrixWorkspace))

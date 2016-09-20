@@ -1,7 +1,9 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
+from six.moves import range #pylint: disable=redefined-builtin
 
 
 class MSDFit(DataProcessorAlgorithm):
@@ -10,7 +12,6 @@ class MSDFit(DataProcessorAlgorithm):
     _x_range = None
     _input_ws = None
     _output_param_ws = None
-    _plot = None
     _output_msd_ws = None
 
     def category(self):
@@ -34,9 +35,6 @@ class MSDFit(DataProcessorAlgorithm):
                              doc='Start of spectra range to be fit')
         self.declareProperty(name='SpecMax', defaultValue=0,
                              doc='End of spectra range to be fit')
-
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='Plots results after fit')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',direction=Direction.Output),
                              doc='Output mean squared displacement')
@@ -96,7 +94,7 @@ class MSDFit(DataProcessorAlgorithm):
 
         # Fit line to each of the spectra
         function = 'name=LinearBackground, A0=0, A1=0'
-        input_params = [self._input_ws + ',i%d' % i for i in xrange(self._spec_range[0],
+        input_params = [self._input_ws + ',i%d' % i for i in range(self._spec_range[0],
                                                                     self._spec_range[1] + 1)]
         input_params = ';'.join(input_params)
         PlotPeakByLogValue(Input=input_params,
@@ -157,10 +155,6 @@ class MSDFit(DataProcessorAlgorithm):
         self.setProperty('ParameterWorkspace', self._output_param_ws)
         self.setProperty('FitWorkspaces', self._output_fit_ws)
 
-        if self._plot:
-            self._plot_result()
-
-
     def _setup(self):
         """
         Gets algorithm properties.
@@ -181,29 +175,5 @@ class MSDFit(DataProcessorAlgorithm):
 
         self._spec_range = [self.getProperty('SpecMin').value,
                             self.getProperty('SpecMax').value]
-
-        self._plot = self.getProperty('Plot').value
-
-
-    def _plot_result(self):
-        """
-        Handles plotting result workspaces.
-        """
-
-        from IndirectImport import import_mantidplot
-        mtd_plot = import_mantidplot()
-
-        x_label = ''
-        ws_run = mtd[self._input_ws].getRun()
-        if 'vert_axis' in ws_run:
-            x_label = ws_run.getLogData('vert_axis').value
-
-        result_ws = mtd[self._output_msd_ws + '_A1']
-        if len(result_ws.readX(0)) > 1:
-            msd_plot = mtd_plot.plotSpectrum(result_ws, 0, True)
-            msd_layer = msd_plot.activeLayer()
-            msd_layer.setAxisTitle(mtd_plot.Layer.Bottom, x_label)
-            msd_layer.setAxisTitle(mtd_plot.Layer.Left, '<u2>')
-
 
 AlgorithmFactory.subscribe(MSDFit)

@@ -19,10 +19,8 @@
 //---------------------------------
 class QCloseEvent;
 
-namespace MantidQt
-{
-namespace CustomDialogs
-{
+namespace MantidQt {
+namespace CustomDialogs {
 
 class BinaryTreeWidget;
 class BinaryTreeWidgetItem;
@@ -31,14 +29,15 @@ struct BaseInstantiator;
 struct Operation;
 class MantidGLWidget;
 
-/** 
+/**
     This class gives specialised dialog for the sample shape definition
     algorithm
 
     @author Martyn Gigg, Tessella Support Services plc
     @date 13/03/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -56,14 +55,12 @@ class MantidGLWidget;
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class CreateSampleShapeDialog : public MantidQt::API::AlgorithmDialog
-{
+class CreateSampleShapeDialog : public MantidQt::API::AlgorithmDialog {
   Q_OBJECT
 
 public:
-  
   /// Default constructor
   CreateSampleShapeDialog(QWidget *parent = 0);
 
@@ -72,8 +69,8 @@ public:
 
 private slots:
   /// Context menu request
-  void handleTreeContextMenuRequest(const QPoint & pos);
-  /// Toggle the flag on 
+  void handleTreeContextMenuRequest(const QPoint &pos);
+  /// Toggle the flag on
   void toggleShapeComplement(bool state);
   /// Add a new shape
   void addShape(QAction *shape);
@@ -82,11 +79,11 @@ private slots:
   /// Connects to the delete slot
   void handleDeleteRequest();
   /// Remove an item from the tree (recursive)
-  void removeItem(BinaryTreeWidgetItem* item);
+  void removeItem(BinaryTreeWidgetItem *item);
   /// Setup the details box based currently selected item
   void setupDetailsBox();
   ///  Change item data
-  void changeTreeData(BinaryTreeWidgetItem* item, int data);
+  void changeTreeData(BinaryTreeWidgetItem *item, int data);
   /// Update the object within the 3D widget
   void update3DView();
 
@@ -96,9 +93,9 @@ private:
   /// Get the input out of the dialog
   void parseInput() override;
   /// Find the parent
-  BinaryTreeWidgetItem* getSelectedItem();
+  BinaryTreeWidgetItem *getSelectedItem();
   /// Create a details widget based upon the shape name given
-  ShapeDetails* createDetailsWidget(const QString & shapename) const;
+  ShapeDetails *createDetailsWidget(const QString &shapename) const;
   /// Construct the XML from the current tree
   QString constructShapeXML() const;
 
@@ -108,36 +105,36 @@ private:
   /// A pointer to the model for the shape tree
   BinaryTreeWidget *m_shapeTree;
   /// A map of shape names to instantiator objects
-  QHash<QString, BaseInstantiator*> m_setup_map;
-  ///A map of QTreeWidgetItem objects to their details objects
-  QMap<BinaryTreeWidgetItem*, ShapeDetails*> m_details_map;
-  ///A map of QTreeWidgetItem objects to their operation objects
-  QMap<BinaryTreeWidgetItem*, Operation*> m_ops_map;
-  ///The 3D object viewer
+  QHash<QString, BaseInstantiator *> m_setup_map;
+  /// A map of QTreeWidgetItem objects to their details objects
+  QMap<BinaryTreeWidgetItem *, ShapeDetails *> m_details_map;
+  /// A map of QTreeWidgetItem objects to their operation objects
+  QMap<BinaryTreeWidgetItem *, Operation *> m_ops_map;
+  /// The 3D object viewer
   MantidGLWidget *m_object_viewer;
 };
 
 /**
  * A custom item to use in the BinaryTree widget
  */
-class BinaryTreeWidgetItem : public QTreeWidgetItem
-{
+class BinaryTreeWidgetItem : public QTreeWidgetItem {
 
 public:
   /// Default Constructor
   BinaryTreeWidgetItem(int type = QTreeWidgetItem::UserType);
 
   /// Constructor taking a string list and an optional type
-  BinaryTreeWidgetItem(const QStringList & strings, int type = QTreeWidgetItem::UserType);
+  BinaryTreeWidgetItem(const QStringList &strings,
+                       int type = QTreeWidgetItem::UserType);
 
-  /// Add a child item 
+  /// Add a child item
   bool addChildItem(BinaryTreeWidgetItem *child);
 
   /// A pointer to the left child
-  BinaryTreeWidgetItem* leftChild() const;
+  BinaryTreeWidgetItem *leftChild() const;
 
   /// A pointer to the right child
-  BinaryTreeWidgetItem* rightChild() const;
+  BinaryTreeWidgetItem *rightChild() const;
 
 private:
   /// The index of the left child (0 or 1)
@@ -149,19 +146,19 @@ private:
 /**
  * A widget to implement a binary tree display.
  */
-class BinaryTreeWidget : public QTreeWidget
-{
+class BinaryTreeWidget : public QTreeWidget {
   Q_OBJECT
-  
+
 public:
   /// Default constructor
   BinaryTreeWidget(QWidget *parent = 0);
 
-  //Return the root of the binary tree
-  BinaryTreeWidgetItem* root() const;
+  // Return the root of the binary tree
+  BinaryTreeWidgetItem *root() const;
 
   /// Recurse through the tree in a post-order
-  void traverseInPostOrder(BinaryTreeWidgetItem* node, QList<BinaryTreeWidgetItem*> & expression);
+  void traverseInPostOrder(BinaryTreeWidgetItem *node,
+                           QList<BinaryTreeWidgetItem *> &expression);
 
   /// Called when the data in the model is changed
   void dataChanged(const QModelIndex &topLeft,
@@ -169,14 +166,13 @@ public:
 
 signals:
   /// Emitted when data has changed
-  void treeDataChange(BinaryTreeWidgetItem* item, int data);
+  void treeDataChange(BinaryTreeWidgetItem *item, int data);
 };
 
 /**
  * A custom delegate class used for item editing
  */
-class ComboBoxDelegate : public QItemDelegate
-{
+class ComboBoxDelegate : public QItemDelegate {
   Q_OBJECT
 
 public:
@@ -185,17 +181,16 @@ public:
   /// Create an editor for the item
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const override;
-  ///Set the data for the editor when it has been created
+  /// Set the data for the editor when it has been created
   void setEditorData(QWidget *editor, const QModelIndex &index) const override;
-  ///Set the data for the model when editing has finished
+  /// Set the data for the model when editing has finished
   void setModelData(QWidget *editor, QAbstractItemModel *model,
                     const QModelIndex &index) const override;
   /// Ensure that the editor has the correct geometry when it is created
   void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
                             const QModelIndex &index) const override;
 };
-
 }
 }
 
-#endif //MANTIDQT_CUSTOMDIALOGS_CREATESAMPLESHAPE_H_
+#endif // MANTIDQT_CUSTOMDIALOGS_CREATESAMPLESHAPE_H_

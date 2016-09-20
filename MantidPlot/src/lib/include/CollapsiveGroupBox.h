@@ -1,10 +1,10 @@
 /***************************************************************************
-	File                 : CollapsiveGroupBox.h
+        File                 : CollapsiveGroupBox.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-	Copyright            : (C) 2010 by Ion Vasilief
+        Copyright            : (C) 2010 by Ion Vasilief
     Email (use @ for *)  : ion_vasilief*yahoo.fr
-	Description          : A collapsive QGroupBox
+        Description          : A collapsive QGroupBox
 
  ***************************************************************************/
 
@@ -36,8 +36,7 @@
 /**
  *
  */
-class CollapsiveGroupBox : public QGroupBox
-{
+class CollapsiveGroupBox : public QGroupBox {
   Q_OBJECT
 
 public:
@@ -45,11 +44,11 @@ public:
   /**
    * \param parent parent widget (only affects placement of the widget)
    */
-  CollapsiveGroupBox(const QString & title = QString(), QWidget * parent = 0);
+  CollapsiveGroupBox(const QString &title = QString(), QWidget *parent = 0);
 
 public slots:
-  void setCollapsed (bool collapsed = true);
-  void setExpanded (bool expanded = true);
+  void setCollapsed(bool collapsed = true);
+  void setExpanded(bool expanded = true);
 };
 
 #endif

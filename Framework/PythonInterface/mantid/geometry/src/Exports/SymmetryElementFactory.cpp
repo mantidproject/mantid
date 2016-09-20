@@ -1,9 +1,12 @@
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidGeometry/Crystal/SymmetryElementFactory.h"
 
 #include <boost/python/class.hpp>
 
 using namespace Mantid::Geometry;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(SymmetryElementFactoryImpl)
 
 void export_SymmetryElementFactory() {
   class_<SymmetryElementFactoryImpl, boost::noncopyable>(

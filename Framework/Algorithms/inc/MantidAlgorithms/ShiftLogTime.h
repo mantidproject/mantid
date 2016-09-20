@@ -34,9 +34,6 @@ namespace Algorithms {
 */
 class DLLExport ShiftLogTime : public API::Algorithm {
 public:
-  ShiftLogTime();
-  ~ShiftLogTime() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

@@ -75,7 +75,7 @@ output subdirectory will be named
 **bands_index_idx_<start>_to_<end>**. And when the time of flight
 range option (**ToFRanges**) is used the names will be
 **bands_tof_idx_<start>_to_<end>**. The initial prefix
-(bands_uniform_, bands_index_, bands_tof_) can be mofified via the
+(bands_uniform, bands_index, bands_tof) can be mofified via the
 input properties **OutputSubdirsPrefixUniformBands**,
 **OutputSubdirsPrefixIndexBands**, **OutputSubdirsPrefixToFBands**,
 respectively.

@@ -2,9 +2,11 @@
     File                 : TextFormatButtons.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
-    Description          : Widget with text format buttons (connected to a QTextEdit)
+    Description          : Widget with text format buttons (connected to a
+ QTextEdit)
 
  ***************************************************************************/
 
@@ -35,29 +37,29 @@ class QTextEdit;
 class QPushButton;
 
 //! Widget with text format buttons (connected to a QTextEdit)
-class TextFormatButtons : public QWidget
-{
+class TextFormatButtons : public QWidget {
   Q_OBJECT
 
 signals:
   void formattingModified();
 
 public:
-  enum Buttons{Plot3D, AxisLabel, Legend, Equation, TexLegend};
+  enum Buttons { Plot3D, AxisLabel, Legend, Equation, TexLegend };
 
   //! Constructor
   /**
    * \param textEdit the QTextEdit that the buttons shall affect
    * \param parent parent widget
    */
-  TextFormatButtons(QTextEdit * textEdit, Buttons buttons = Plot3D, QWidget * parent=0);
+  TextFormatButtons(QTextEdit *textEdit, Buttons buttons = Plot3D,
+                    QWidget *parent = 0);
   void setButtons(Buttons btns);
 
 private:
   QTextEdit *connectedTextEdit;
   Buttons d_buttons;
   //! Internal function: format selected text with prefix and postfix
-  void formatText(const QString & prefix, const QString & postfix);
+  void formatText(const QString &prefix, const QString &postfix);
   void init(Buttons btns);
 
 private slots:
@@ -87,7 +89,7 @@ private slots:
   //! Let the user insert arrow symbols
   void showArrowSymbols();
   //! Insert 'letter' into the text
-  void addSymbol(const QString& letter);
+  void addSymbol(const QString &letter);
 };
 
 #endif // TEXTFORMATBUTTONS_H

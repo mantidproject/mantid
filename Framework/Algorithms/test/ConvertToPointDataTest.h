@@ -78,7 +78,7 @@ public:
       for (int j = 0; j < numBins; ++j) {
         // Now the data. Y and E unchanged
         TS_ASSERT_EQUALS(yValues[j], 2.0);
-        TS_ASSERT_EQUALS(eValues[j], sqrt(2.0));
+        TS_ASSERT_EQUALS(eValues[j], M_SQRT2);
         // X data originally was 0->10 in steps of 1. Now it should be the
         // centre of each bin which is
         // 1.0 away from the last centre
@@ -128,7 +128,7 @@ public:
       for (size_t j = 0; j < numBins; ++j) {
         // Now the data. Y and E unchanged
         TS_ASSERT_EQUALS(yValues[j], 2.0);
-        TS_ASSERT_EQUALS(eValues[j], sqrt(2.0));
+        TS_ASSERT_EQUALS(eValues[j], M_SQRT2);
         // X data originally was 0->10 in steps of 1. Now it should be the
         // centre of each bin which is
         // 1.0 away from the last centre
@@ -156,6 +156,39 @@ private:
 
     return outputWS;
   }
+};
+
+class ConvertToPointDataTestPerformance : public CxxTest::TestSuite {
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ConvertToPointDataTestPerformance *createSuite() {
+    return new ConvertToPointDataTestPerformance();
+  }
+
+  static void destroySuite(ConvertToPointDataTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(20000, 10000);
+  }
+
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().remove("output");
+  }
+
+  void testPerformanceWS() {
+    ConvertToPointData ctpd;
+    ctpd.initialize();
+    ctpd.setProperty("InputWorkspace", inputWS);
+    ctpd.setProperty("OutputWorkspace", "output");
+    ctpd.execute();
+  }
+
+private:
+  Workspace2D_sptr inputWS;
 };
 
 #endif // CONVERTTOPONTDATATEST_H_

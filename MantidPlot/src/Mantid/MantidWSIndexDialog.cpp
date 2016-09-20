@@ -23,12 +23,15 @@
  * @param flags :: Window flags that are passed the the QWidget constructor
  * @param wsNames :: the names of the workspaces to be plotted
  * @param showWaterfallOption :: If true the waterfall checkbox is created
+ * @param showTiledOption :: If true the "Tiled" checkbox is created
  */
 MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
                                          QList<QString> wsNames,
-                                         const bool showWaterfallOption)
+                                         const bool showWaterfallOption,
+                                         const bool showTiledOption)
     : QWidget(parent, flags), m_spectra(false),
-      m_waterfall(showWaterfallOption), m_wsNames(wsNames),
+      m_waterfall(showWaterfallOption), m_tiled(showTiledOption),
+      m_waterfallOpt(nullptr), m_tiledOpt(nullptr), m_wsNames(wsNames),
       m_wsIndexIntervals(), m_spectraNumIntervals(), m_wsIndexChoice(),
       m_spectraIdChoice() {
   checkForSpectraAxes();
@@ -47,7 +50,8 @@ MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
 MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() const {
   UserInput options;
   options.plots = getPlots();
-  options.waterfall = waterfallPlotRequested();
+  options.waterfall = isWaterfallPlotSelected();
+  options.tiled = isTiledPlotSelected();
   return options;
 }
 
@@ -103,8 +107,16 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
  * Whether the user checked the "waterfall" box
  * @returns True if waterfall plot selected
  */
-bool MantidWSIndexWidget::waterfallPlotRequested() const {
-  return m_waterfallOpt->isChecked();
+bool MantidWSIndexWidget::isWaterfallPlotSelected() const {
+  return m_waterfallOpt ? m_waterfallOpt->isChecked() : false;
+}
+
+/**
+ * Whether the user checked the "tiled" box
+ * @returns True if tiled plot selected
+ */
+bool MantidWSIndexWidget::isTiledPlotSelected() const {
+  return m_tiledOpt ? m_tiledOpt->isChecked() : false;
 }
 
 /**
@@ -179,14 +191,19 @@ void MantidWSIndexWidget::init() {
  */
 void MantidWSIndexWidget::initWorkspaceBox() {
   m_wsBox = new QVBoxLayout;
-  m_wsMessage = new QLabel(
-      tr("Enter Workspace Indices: " + m_wsIndexIntervals.toQString()));
+  const QString wsIndices = m_wsIndexIntervals.toQString();
+  const QString label = "Enter Workspace Indices: " + wsIndices;
+  m_wsMessage = new QLabel(tr(label.toAscii().constData()));
   m_wsField = new QLineEditWithErrorMark();
 
   m_wsField->lineEdit()->setValidator(
       new IntervalListValidator(this, m_wsIndexIntervals));
-  m_wsBox->add(m_wsMessage);
-  m_wsBox->add(m_wsField);
+  if (wsIndices == "0") { // single spectrum
+    m_wsField->lineEdit()->setEnabled(false);
+    m_wsField->lineEdit()->setText("0");
+  }
+  m_wsBox->addWidget(m_wsMessage);
+  m_wsBox->addWidget(m_wsField);
   m_outer->addItem(m_wsBox);
 
   connect(m_wsField->lineEdit(), SIGNAL(textEdited(const QString &)), this,
@@ -198,16 +215,21 @@ void MantidWSIndexWidget::initWorkspaceBox() {
  */
 void MantidWSIndexWidget::initSpectraBox() {
   m_spectraBox = new QVBoxLayout;
-  m_spectraMessage =
-      new QLabel(tr("Enter Spectra Numbers: " + m_spectraNumIntervals.toQString()));
+  const QString spectraNumbers = m_spectraNumIntervals.toQString();
+  const QString label = "Enter Spectra Numbers: " + spectraNumbers;
+  m_spectraMessage = new QLabel(tr(label.toAscii().constData()));
   m_spectraField = new QLineEditWithErrorMark();
   m_orMessage = new QLabel(tr("<br>Or"));
 
   m_spectraField->lineEdit()->setValidator(
       new IntervalListValidator(this, m_spectraNumIntervals));
-  m_spectraBox->add(m_spectraMessage);
-  m_spectraBox->add(m_spectraField);
-  m_spectraBox->add(m_orMessage);
+  if (spectraNumbers == "1") { // single spectrum
+    m_spectraField->lineEdit()->setEnabled(false);
+    m_spectraField->lineEdit()->setText("1");
+  }
+  m_spectraBox->addWidget(m_spectraMessage);
+  m_spectraBox->addWidget(m_spectraField);
+  m_spectraBox->addWidget(m_orMessage);
 
   if (usingSpectraNumbers())
     m_outer->addItem(m_spectraBox);
@@ -221,11 +243,15 @@ void MantidWSIndexWidget::initSpectraBox() {
  */
 void MantidWSIndexWidget::initOptionsBoxes() {
   m_optionsBox = new QHBoxLayout;
-  m_waterfallOpt = new QCheckBox("Waterfall Plot");
-  if (m_waterfall)
-    m_optionsBox->add(m_waterfallOpt);
-  else
-    m_waterfallOpt->setChecked(true);
+  if (m_waterfall) {
+    m_waterfallOpt = new QCheckBox("Waterfall Plot");
+    m_optionsBox->addWidget(m_waterfallOpt);
+  }
+
+  if (m_tiled) {
+    m_tiledOpt = new QCheckBox("Tiled Plot");
+    m_optionsBox->addWidget(m_tiledOpt);
+  }
 
   m_outer->addItem(m_optionsBox);
 }
@@ -339,14 +365,16 @@ bool MantidWSIndexWidget::usingSpectraNumbers() const {
  * @param wsNames :: the names of the workspaces to be plotted
  * @param showWaterfallOption :: If true the waterfall checkbox is created
  * @param showPlotAll :: If true the "Plot all" button is created
+ * @param showTiledOption :: If true the "Tiled" checkbox is created
  */
 MantidWSIndexDialog::MantidWSIndexDialog(MantidUI *mui, Qt::WFlags flags,
                                          QList<QString> wsNames,
                                          const bool showWaterfallOption,
-                                         const bool showPlotAll)
+                                         const bool showPlotAll,
+                                         const bool showTiledOption)
     : QDialog(mui->appWindow(), flags),
-      m_widget(this, flags, wsNames, showWaterfallOption), m_mantidUI(mui),
-      m_plotAll(showPlotAll) {
+      m_widget(this, flags, wsNames, showWaterfallOption, showTiledOption),
+      m_mantidUI(mui), m_plotAll(showPlotAll) {
   // Set up UI.
   init();
 }
@@ -372,8 +400,16 @@ QMultiMap<QString, std::set<int>> MantidWSIndexDialog::getPlots() const {
  * Whether the user checked the "waterfall" box
  * @returns True if waterfall plot selected
  */
-bool MantidWSIndexDialog::waterfallPlotRequested() const {
-  return m_widget.waterfallPlotRequested();
+bool MantidWSIndexDialog::isWaterfallPlotSelected() const {
+  return m_widget.isWaterfallPlotSelected();
+}
+
+/**
+ * Whether the user checked the "tiled" box
+ * @returns True if tiled plot selected
+ */
+bool MantidWSIndexDialog::isTiledPlotSelected() const {
+  return m_widget.isTiledPlotSelected();
 }
 
 //----------------------------------
@@ -592,7 +628,7 @@ std::string IntervalList::toStdString(int numOfIntervals) const {
     }
 
     output += ", ..., ";
-    output += m_list[m_list.size() - 1].toStdString();
+    output += m_list.back().toStdString();
   }
   return output;
 }

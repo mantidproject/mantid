@@ -10,16 +10,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(AndMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-AndMD::AndMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-AndMD::~AndMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string AndMD::name() const { return "AndMD"; }
 

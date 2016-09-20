@@ -363,14 +363,14 @@ void PanelsSurface::addObjCompAssemblies(ComponentID bankId) {
     if (!objCompAssembly) {
       CompAssembly *compAssembly = dynamic_cast<CompAssembly *>(elem.get());
       if (!compAssembly || compAssembly->nelements() != 1) {
-        // m_surface.g_log.warning() << "Not a CompAssembly" << std::endl;
+        // m_surface.g_log.warning() << "Not a CompAssembly\n";
         addCompAssembly(bankId);
         return;
       }
       elem = compAssembly->getChild(0);
       objCompAssembly = dynamic_cast<ObjCompAssembly *>(elem.get());
       if (!objCompAssembly) {
-        // m_surface.g_log.warning() << "Not a ObjCompAssembly" << std::endl;
+        // m_surface.g_log.warning() << "Not a ObjCompAssembly\n";
         return;
       }
     }
@@ -389,7 +389,7 @@ void PanelsSurface::addObjCompAssemblies(ComponentID bankId) {
         normal = x.cross_prod(y);
       }
       if (normal.nullVector()) {
-        g_log.warning() << "Colinear ObjCompAssemblies" << std::endl;
+        g_log.warning() << "Colinear ObjCompAssemblies\n";
         return;
       }
       normal.normalize();
@@ -398,8 +398,8 @@ void PanelsSurface::addObjCompAssemblies(ComponentID bankId) {
                                    objCompAssembly->getChild(1)->getPos();
       vector.normalize();
       if (fabs(vector.scalar_prod(normal)) > Mantid::Kernel::Tolerance) {
-        g_log.warning() << "Assembly " << assembly->getName() << " isn't flat."
-                        << std::endl;
+        g_log.warning() << "Assembly " << assembly->getName()
+                        << " isn't flat.\n";
         return;
       }
     }
@@ -455,8 +455,8 @@ void PanelsSurface::addCompAssembly(ComponentID bankId) {
         x = y.cross_prod(normal);
         normalFound = true;
       } else {
-        g_log.warning() << "Assembly " << assembly->getName() << " isn't flat."
-                        << std::endl;
+        g_log.warning() << "Assembly " << assembly->getName()
+                        << " isn't flat.\n";
         return;
       }
     }

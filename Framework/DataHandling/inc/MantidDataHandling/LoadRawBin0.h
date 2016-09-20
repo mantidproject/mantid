@@ -68,8 +68,6 @@ class DLLExport LoadRawBin0 : public LoadRawHelper {
 public:
   /// Default constructor
   LoadRawBin0();
-  /// Destructor
-  ~LoadRawBin0() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadRawBin0"; }
   /// Summary of algorithms purpose
@@ -120,7 +118,7 @@ private:
   /// total number of specs
   specnum_t m_total_specs;
   /// time channel vector
-  std::vector<boost::shared_ptr<MantidVec>> m_timeChannelsVec;
+  std::vector<boost::shared_ptr<HistogramData::HistogramX>> m_timeChannelsVec;
 };
 }
 }

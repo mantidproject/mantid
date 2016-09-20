@@ -16,45 +16,45 @@ public:
   /// Constructor
   TestColumn(size_t n) : m_data(n) {}
   /// Number of individual elements in the column.
-  virtual size_t size() const { return m_data.size(); }
+  size_t size() const override { return m_data.size(); }
   /// Returns typeid for the data in the column
-  virtual const std::type_info &get_type_info() const { return typeid(T); }
+  const std::type_info &get_type_info() const override { return typeid(T); }
   /// Returns typeid for the pointer type to the data element in the column
-  virtual const std::type_info &get_pointer_type_info() const {
+  const std::type_info &get_pointer_type_info() const override {
     return typeid(T *);
   }
   /// Prints out the value to a stream
-  virtual void print(size_t, std::ostream &) const {
+  void print(size_t, std::ostream &) const override {
     throw std::logic_error("Not implemented");
   }
   /// Specialized type check
-  virtual bool isBool() const { return false; }
+  bool isBool() const override { return false; }
   /// Must return overall memory size taken by the column.
-  virtual long int sizeOfData() const {
+  long int sizeOfData() const override {
     throw std::logic_error("Not implemented");
   }
   /// Virtual constructor. Fully clone any column.
-  virtual Column *clone() const { throw std::logic_error("Not implemented"); }
+  Column *clone() const override { throw std::logic_error("Not implemented"); }
   /// Cast an element to double if possible
-  virtual double toDouble(size_t) const {
+  double toDouble(size_t) const override {
     throw std::logic_error("Not implemented");
   }
   /// Assign an element from double if possible
-  virtual void fromDouble(size_t, double) {
+  void fromDouble(size_t, double) override {
     throw std::logic_error("Not implemented");
   }
 
 protected:
   /// Sets the new column size.
-  virtual void resize(size_t) { throw std::logic_error("Not implemented"); }
+  void resize(size_t) override { throw std::logic_error("Not implemented"); }
   /// Inserts an item.
-  virtual void insert(size_t) { throw std::logic_error("Not implemented"); }
+  void insert(size_t) override { throw std::logic_error("Not implemented"); }
   /// Removes an item.
-  virtual void remove(size_t) { throw std::logic_error("Not implemented"); }
+  void remove(size_t) override { throw std::logic_error("Not implemented"); }
   /// Pointer to a data element
-  virtual void *void_pointer(size_t index) { return &m_data[index]; }
+  void *void_pointer(size_t index) override { return &m_data[index]; }
   /// Pointer to a data element
-  virtual const void *void_pointer(size_t index) const {
+  const void *void_pointer(size_t index) const override {
     return &m_data[index];
   }
   /// Data storage

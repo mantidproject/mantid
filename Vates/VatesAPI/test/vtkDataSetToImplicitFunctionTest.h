@@ -1,5 +1,5 @@
 #ifndef VTK_DATASET_TO_WS_IMPLICITFUNCTION_TEST
-#define VTK_DATASET_TO_WS_IMPLICITFUNCTION_TEST 
+#define VTK_DATASET_TO_WS_IMPLICITFUNCTION_TEST
 
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
@@ -11,19 +11,16 @@
 
 using namespace Mantid::VATES;
 
-
 //=====================================================================================
 // Functional tests
 //=====================================================================================
-class vtkDataSetToImplicitFunctionTest : public CxxTest::TestSuite
-{
+class vtkDataSetToImplicitFunctionTest : public CxxTest::TestSuite {
 
 public:
-
-  void testThrowIfvtkDataSetNull()
-  {
-    vtkDataSet* nullArg = NULL;
-    TS_ASSERT_THROWS(vtkDataSetToImplicitFunction temp(nullArg), std::runtime_error);
+  void testThrowIfvtkDataSetNull() {
+    vtkDataSet *nullArg = NULL;
+    TS_ASSERT_THROWS(vtkDataSetToImplicitFunction temp(nullArg),
+                     std::runtime_error);
   }
 
   void testNoImplcitFunction() {

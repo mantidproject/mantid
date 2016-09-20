@@ -35,9 +35,6 @@ namespace Algorithms {
 class DLLExport SpecularReflectionCalculateTheta
     : public SpecularReflectionAlgorithm {
 public:
-  SpecularReflectionCalculateTheta();
-  ~SpecularReflectionCalculateTheta() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

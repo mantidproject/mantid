@@ -43,10 +43,10 @@ Output:
 .. testoutput:: ExCreateTransWSAutoSimple
 
     The first four transWS Y values are:
-    0.0223
-    0.0602
-    0.1020
-    0.1207
+    0.0255
+    0.0758
+    0.1322
+    0.1422
 
     
 **Example - Create a transmission run, overloading default parameters**
@@ -66,10 +66,10 @@ Output:
 .. testoutput:: ExCreateTransWSAutoOverload
 
     The first four transWS Y values are:
-    0.0221
-    0.0598
-    0.1013
-    0.1198
+    0.0253
+    0.0752
+    0.1312
+    0.1412
 
     
 **Example - Create a transmission run from two runs**
@@ -90,10 +90,10 @@ Output:
 .. testoutput:: ExCreateTransWSAutoTwo
 
     The first four transWS Y values are:
-    0.0567
-    0.0575
-    0.0577
-    0.0580
+    0.0572
+    0.0574
+    0.0584
+    0.0584
 
 
 .. categories::

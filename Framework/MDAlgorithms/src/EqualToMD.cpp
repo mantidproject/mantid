@@ -11,16 +11,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(EqualToMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-EqualToMD::EqualToMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-EqualToMD::~EqualToMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string EqualToMD::name() const { return "EqualToMD"; }
 

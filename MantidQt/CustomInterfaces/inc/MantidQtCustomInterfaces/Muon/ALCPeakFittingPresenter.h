@@ -8,80 +8,78 @@
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingView.h"
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h"
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
+namespace MantidQt {
+namespace CustomInterfaces {
 
-  /** ALCPeakFittingPresenter : Presenter for Peak Fitting step of ALC interface.
-    
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+/** ALCPeakFittingPresenter : Presenter for Peak Fitting step of ALC interface.
 
-    This file is part of Mantid.
+  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class MANTIDQT_CUSTOMINTERFACES_DLL ALCPeakFittingPresenter : public QObject
-  {
-    Q_OBJECT
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  public:
-    ALCPeakFittingPresenter(IALCPeakFittingView* view, IALCPeakFittingModel* model);
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class MANTIDQT_CUSTOMINTERFACES_DLL ALCPeakFittingPresenter : public QObject {
+  Q_OBJECT
 
-    void initialize();
+public:
+  ALCPeakFittingPresenter(IALCPeakFittingView *view,
+                          IALCPeakFittingModel *model);
 
-  private slots:
-    /// Fit the data using the peaks from the view, and update them
-    void fit();
+  void initialize();
 
-    /// Executed when user selects a function in a Function Browser
-    void onCurrentFunctionChanged();
+private slots:
+  /// Fit the data using the peaks from the view, and update them
+  void fit();
 
-    /// Executed when Peak Picker if moved/resized
-    void onPeakPickerChanged();
+  /// Executed when user selects a function in a Function Browser
+  void onCurrentFunctionChanged();
 
-    /// Executed when user changes parameter in Function Browser
-    void onParameterChanged(const QString& funcIndex);
+  /// Executed when Peak Picker if moved/resized
+  void onPeakPickerChanged();
 
-    void onFittedPeaksChanged();
-    void onDataChanged();
+  /// Executed when user changes parameter in Function Browser
+  void onParameterChanged(const QString &funcIndex);
 
-    /// Executed when user clicks "Plot guess"
-    void onPlotGuessClicked();
+  void onFittedPeaksChanged();
+  void onDataChanged();
 
-  private:
-    /// Plot guess on graph
-    bool plotGuessOnGraph();
+  /// Executed when user clicks "Plot guess"
+  void onPlotGuessClicked();
 
-    /// Remove plots from graph
-    void removePlots();
+private:
+  /// Plot guess on graph
+  bool plotGuessOnGraph();
 
-    /// Associated view
-    IALCPeakFittingView* const m_view;
+  /// Remove plots from graph
+  void removePlots();
 
-    /// Associated model
-    IALCPeakFittingModel* const m_model;
+  /// Associated view
+  IALCPeakFittingView *const m_view;
 
-    /// Whether guess is currently plotted
-    bool m_guessPlotted;
-  };
+  /// Associated model
+  IALCPeakFittingModel *const m_model;
 
+  /// Whether guess is currently plotted
+  bool m_guessPlotted;
+};
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif  /* MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGPRESENTER_H_ */
+#endif /* MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGPRESENTER_H_ */

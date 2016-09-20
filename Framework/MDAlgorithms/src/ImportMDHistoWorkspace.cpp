@@ -17,17 +17,6 @@ using namespace Geometry;
 DECLARE_ALGORITHM(ImportMDHistoWorkspace)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ImportMDHistoWorkspace::ImportMDHistoWorkspace()
-    : ImportMDHistoWorkspaceBase() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ImportMDHistoWorkspace::~ImportMDHistoWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ImportMDHistoWorkspace::name() const {
   return "ImportMDHistoWorkspace";

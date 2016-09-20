@@ -4,34 +4,36 @@
 #include "ui_AbsorptionCorrections.h"
 #include "CorrectionsTab.h"
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-  class DLLExport AbsorptionCorrections : public CorrectionsTab
-  {
-    Q_OBJECT
+namespace MantidQt {
+namespace CustomInterfaces {
+class DLLExport AbsorptionCorrections : public CorrectionsTab {
+  Q_OBJECT
 
-  public:
-    AbsorptionCorrections(QWidget * parent = 0);
+public:
+  AbsorptionCorrections(QWidget *parent = 0);
 
-  private:
-    void setup() override;
-    void run() override;
-    bool validate() override;
-    void loadSettings(const QSettings &settings) override;
+private:
+  void setup() override;
+  void run() override;
+  bool validate() override;
+  void loadSettings(const QSettings &settings) override;
 
-  private slots:
-    virtual void algorithmComplete(bool error);
+private slots:
+  virtual void algorithmComplete(bool error);
+  void saveClicked();
+  void plotClicked();
 
-  private:
-    void addSaveWorkspace(QString wsName);
-    void addShapeSpecificSampleOptions(Mantid::API::IAlgorithm_sptr alg, QString shape);
-    void addShapeSpecificCanOptions(Mantid::API::IAlgorithm_sptr alg, QString shape);
+private:
+  void addSaveWorkspace(QString wsName);
+  void addShapeSpecificSampleOptions(Mantid::API::IAlgorithm_sptr alg,
+                                     QString shape);
+  void addShapeSpecificCanOptions(Mantid::API::IAlgorithm_sptr alg,
+                                  QString shape);
 
-    Ui::AbsorptionCorrections m_uiForm;
-
-  };
+  Ui::AbsorptionCorrections m_uiForm;
+  /// alg
+  Mantid::API::IAlgorithm_sptr m_absCorAlgo;
+};
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

@@ -11,16 +11,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(ExponentialMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ExponentialMD::ExponentialMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ExponentialMD::~ExponentialMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ExponentialMD::name() const { return "ExponentialMD"; }
 

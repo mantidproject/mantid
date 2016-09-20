@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidGeometry/IDetector.h"
@@ -146,14 +144,14 @@ void SumSpectra::exec() {
     Progress progress(this, 0, 1, this->m_indices.size());
 
     // This is the (only) output spectrum
-    ISpectrum *outSpec = outputWorkspace->getSpectrum(0);
+    auto &outSpec = outputWorkspace->getSpectrum(0);
 
     // Copy over the bin boundaries
-    outSpec->dataX() = localworkspace->readX(0);
+    outSpec.dataX() = localworkspace->readX(0);
 
     // Build a new spectra map
-    outSpec->setSpectrumNo(m_outSpecNum);
-    outSpec->clearDetectorIDs();
+    outSpec.setSpectrumNo(m_outSpecNum);
+    outSpec.clearDetectorIDs();
 
     if (localworkspace->id() == "RebinnedOutput") {
       this->doRebinnedOutput(outputWorkspace, progress, numSpectra, numMasked,
@@ -164,7 +162,7 @@ void SumSpectra::exec() {
     }
 
     // Pointer to sqrt function
-    MantidVec &YError = outSpec->dataE();
+    MantidVec &YError = outSpec.dataE();
     typedef double (*uf)(double);
     uf rs = std::sqrt;
     // take the square root of all the accumulated squared errors - Assumes
@@ -194,7 +192,7 @@ specnum_t
 SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
   // initial value
   specnum_t specId =
-      localworkspace->getSpectrum(*(this->m_indices.begin()))->getSpectrumNo();
+      localworkspace->getSpectrum(*(this->m_indices.begin())).getSpectrumNo();
 
   // the total number of spectra
   int totalSpec = static_cast<int>(localworkspace->getNumberHistograms());
@@ -202,7 +200,7 @@ SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
   specnum_t temp;
   for (const auto index : this->m_indices) {
     if (index < totalSpec) {
-      temp = localworkspace->getSpectrum(index)->getSpectrumNo();
+      temp = localworkspace->getSpectrum(index).getSpectrumNo();
       if (temp < specId)
         specId = temp;
     }
@@ -223,12 +221,12 @@ SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
  * spectra for event workspace.
  */
 void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
-                               ISpectrum *outSpec, Progress &progress,
+                               ISpectrum &outSpec, Progress &progress,
                                size_t &numSpectra, size_t &numMasked,
                                size_t &numZeros) {
   // Get references to the output workspaces's data vectors
-  MantidVec &YSum = outSpec->dataY();
-  MantidVec &YError = outSpec->dataE();
+  MantidVec &YSum = outSpec.dataY();
+  MantidVec &YError = outSpec.dataE();
 
   MantidVec Weight;
   std::vector<size_t> nZeros;
@@ -240,6 +238,8 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
   numMasked = 0;
   numZeros = 0;
 
+  const auto &spectrumInfo =
+      localworkspace->spectrumInfo(ThreadedContextCheck::Skip);
   // Loop over spectra
   for (const auto i : this->m_indices) {
     // Don't go outside the range.
@@ -249,19 +249,15 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
       break;
     }
 
-    try {
-      // Get the detector object for this spectrum
-      Geometry::IDetector_const_sptr det = localworkspace->getDetector(i);
+    if (spectrumInfo.hasDetectors(i)) {
       // Skip monitors, if the property is set to do so
-      if (!m_keepMonitors && det->isMonitor())
+      if (!m_keepMonitors && spectrumInfo.isMonitor(i))
         continue;
       // Skip masked detectors
-      if (det->isMasked()) {
+      if (spectrumInfo.isMasked(i)) {
         numMasked++;
         continue;
       }
-    } catch (...) {
-      // if the detector not found just carry on
     }
     numSpectra++;
 
@@ -287,7 +283,7 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
     }
 
     // Map all the detectors onto the spectrum of the output
-    outSpec->addDetectorIDs(localworkspace->getSpectrum(i)->getDetectorIDs());
+    outSpec.addDetectorIDs(localworkspace->getSpectrum(i).getDetectorIDs());
 
     progress.report();
   }
@@ -338,9 +334,9 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
       boost::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
 
   // Get references to the output workspaces's data vectors
-  ISpectrum *outSpec = outputWorkspace->getSpectrum(0);
-  MantidVec &YSum = outSpec->dataY();
-  MantidVec &YError = outSpec->dataE();
+  auto &outSpec = outputWorkspace->getSpectrum(0);
+  MantidVec &YSum = outSpec.dataY();
+  MantidVec &YError = outSpec.dataE();
   MantidVec &FracSum = outWS->dataF(0);
   MantidVec Weight;
   std::vector<size_t> nZeros;
@@ -352,6 +348,12 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   numMasked = 0;
   numZeros = 0;
 
+  // Careful: SumSpectra is called in an OpenMP by other algorithms (on distinct
+  // workspaces) so we manually disable the thread context check here. This will
+  // go wrong if clients call SumSpectra on the same workspace in different
+  // threads at the same time.
+  const auto &spectrumInfo =
+      localworkspace->spectrumInfo(ThreadedContextCheck::Skip);
   // Loop over spectra
   for (const auto i : m_indices) {
     // Don't go outside the range.
@@ -361,19 +363,15 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
       break;
     }
 
-    try {
-      // Get the detector object for this spectrum
-      Geometry::IDetector_const_sptr det = localworkspace->getDetector(i);
+    if (spectrumInfo.hasDetectors(i)) {
       // Skip monitors, if the property is set to do so
-      if (!m_keepMonitors && det->isMonitor())
+      if (!m_keepMonitors && spectrumInfo.isMonitor(i))
         continue;
       // Skip masked detectors
-      if (det->isMasked()) {
+      if (spectrumInfo.isMasked(i)) {
         numMasked++;
         continue;
       }
-    } catch (...) {
-      // if the detector not found just carry on
     }
     numSpectra++;
 
@@ -404,7 +402,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
     }
 
     // Map all the detectors onto the spectrum of the output
-    outSpec->addDetectorIDs(localworkspace->getSpectrum(i)->getDetectorIDs());
+    outSpec.addDetectorIDs(localworkspace->getSpectrum(i).getDetectorIDs());
 
     progress.report();
   }
@@ -440,10 +438,12 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   Progress progress(this, 0, 1, indices.size());
 
   // Get the pointer to the output event list
-  EventList &outEL = outputWorkspace->getEventList(0);
+  EventList &outEL = outputWorkspace->getSpectrum(0);
   outEL.setSpectrumNo(m_outSpecNum);
   outEL.clearDetectorIDs();
 
+  const auto &spectrumInfo =
+      localworkspace->spectrumInfo(ThreadedContextCheck::Skip);
   // Loop over spectra
   size_t numSpectra(0);
   size_t numMasked(0);
@@ -456,24 +456,20 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
       break;
     }
 
-    try {
-      // Get the detector object for this spectrum
-      Geometry::IDetector_const_sptr det = localworkspace->getDetector(i);
+    if (spectrumInfo.hasDetectors(i)) {
       // Skip monitors, if the property is set to do so
-      if (!m_keepMonitors && det->isMonitor())
+      if (!m_keepMonitors && spectrumInfo.isMonitor(i))
         continue;
       // Skip masked detectors
-      if (det->isMasked()) {
+      if (spectrumInfo.isMasked(i)) {
         numMasked++;
         continue;
       }
-    } catch (...) {
-      // if the detector not found just carry on
     }
     numSpectra++;
 
     // Add the event lists with the operator
-    const EventList &tOutEL = localworkspace->getEventList(i);
+    const EventList &tOutEL = localworkspace->getSpectrum(i);
     if (tOutEL.empty()) {
       ++numZeros;
     }
@@ -483,9 +479,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   }
 
   // Set all X bins on the output
-  cow_ptr<MantidVec> XValues;
-  XValues.access() = localworkspace->readX(0);
-  outputWorkspace->setAllX(XValues);
+  outputWorkspace->setAllX(HistogramData::BinEdges(localworkspace->refX(0)));
 
   outputWorkspace->mutableRun().addProperty("NumAllSpectra", int(numSpectra),
                                             "", true);

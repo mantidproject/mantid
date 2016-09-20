@@ -15,7 +15,7 @@
 
 #include "boost/shared_ptr.hpp"
 
-#include <assert.h>
+#include <cassert>
 #include <map>
 #include <vector>
 

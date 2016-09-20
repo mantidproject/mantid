@@ -20,48 +20,39 @@
 
 #include <map>
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
+namespace MantidQt {
+namespace CustomInterfaces {
 
-using namespace Mantid;
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
-using namespace Mantid::Geometry;
+namespace Muon {
+// Tab classes
+class MuonAnalysisOptionTab;
+class MuonAnalysisFitDataTab;
+class MuonAnalysisResultTableTab;
 
-namespace Muon
-{
-  // Tab classes
-  class MuonAnalysisOptionTab;
-  class MuonAnalysisFitDataTab;
-  class MuonAnalysisResultTableTab;
+struct LoadResult {
+  Mantid::API::Workspace_sptr loadedWorkspace;
+  Mantid::API::Workspace_sptr loadedGrouping;
+  Mantid::API::Workspace_sptr loadedDeadTimes;
+  std::string mainFieldDirection;
+  double timeZero;
+  double firstGoodData;
+  std::string label;
+};
 
-  struct LoadResult {
-    Workspace_sptr loadedWorkspace;
-    Workspace_sptr loadedGrouping;
-    Workspace_sptr loadedDeadTimes;
-    std::string mainFieldDirection;
-    double timeZero;
-    double firstGoodData;
-    std::string label;
-  };
-
-  struct GroupResult {
-    bool usedExistGrouping;
-    boost::shared_ptr<Mantid::API::Grouping> groupingUsed;
-  };
+struct GroupResult {
+  bool usedExistGrouping;
+  boost::shared_ptr<Mantid::API::Grouping> groupingUsed;
+};
 }
 
-using namespace Muon;
-
-/** 
+/**
 This is the main class for the MuonAnalysis interface
-see <http://www.mantidproject.org/MuonAnalysis>.    
+see <http://www.mantidproject.org/MuonAnalysis>.
 
 @author Anders Markvardsen, ISIS, RAL
 
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -79,12 +70,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>    
+Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-
-class MuonAnalysis : public MantidQt::API::UserSubWindow
-{
+class MuonAnalysis : public MantidQt::API::UserSubWindow {
   Q_OBJECT
 
 public:
@@ -105,13 +94,14 @@ public:
 
 signals:
   /// Request to hide/show Mantid toolbars
-  void setToolbarsHidden(bool isHidden); 
+  void setToolbarsHidden(bool isHidden);
 
 private slots:
   /// Guess Alpha clicked
   void guessAlphaClicked();
 
-  /// Checks whether two specified periods are equal and, if they are, sets second one to None
+  /// Checks whether two specified periods are equal and, if they are, sets
+  /// second one to None
   void checkForEqualPeriods();
 
   /// Input file changed in MWRunFiles widget
@@ -151,10 +141,10 @@ private slots:
   void runLoadGroupButton();
 
   /// Clear grouping button
-  void runClearGroupingButton(); 
+  void runClearGroupingButton();
 
   /// User select instrument
-  void userSelectInstrument(const QString& prefix);
+  void userSelectInstrument(const QString &prefix);
 
   /// Hide/show MantidPlot toolbars
   void doSetToolbarsHidden(bool hidden);
@@ -171,7 +161,8 @@ private slots:
   /// Link to the wiki for the grouping tab.
   void muonAnalysisHelpGroupingClicked();
 
-  /// Check to see if the user want to append the previous run and set accordingly
+  /// Check to see if the user want to append the previous run and set
+  /// accordingly
   void checkAppendingPreviousRun();
 
   /// Check to see if the user want to append the next run and set accordingly
@@ -187,12 +178,15 @@ private slots:
   void settingsTabUpdatePlot();
 
   /// Update the plot based on changes on the grouping options tab
-  void groupTabUpdatePlot();
+  void groupTabUpdatePlotGroup();
+  void groupTabUpdatePlotPair();
 
-  /// Sets plot type combo box on the Home tab to the same value as the one under Group Table
+  /// Sets plot type combo box on the Home tab to the same value as the one
+  /// under Group Table
   void syncGroupTablePlotTypeWithHome();
 
-  /// Updates the style of the current plot according to actual parameters on settings tab.
+  /// Updates the style of the current plot according to actual parameters on
+  /// settings tab.
   void updateCurrentPlotStyle();
 
   /// Checks whether plots should be auto-updated when some settings change.
@@ -202,10 +196,10 @@ private slots:
   bool isOverwriteEnabled();
 
   /// Checks if the plot for the workspace does exist.
-  bool plotExists(const QString& wsName);
+  bool plotExists(const QString &wsName);
 
   /// Enable PP tool for the plot of the given WS
-  void selectMultiPeak(const QString& wsName);
+  void selectMultiPeak(const QString &wsName);
 
   /// Disable tools for all the graphs within MantidPlot
   void disableAllTools();
@@ -222,13 +216,16 @@ private slots:
   /// Auto-update the plot after user has changed dead time correction type.
   void deadTimeTypeAutoUpdate(int choice);
 
-  /// Change to the dead time file, make sure graph is updated next time it is plotted.
+  /// Change to the dead time file, make sure graph is updated next time it is
+  /// plotted.
   void deadTimeFileSelected();
 
-  /// Updates the enabled-state and value of Time Zero using "auto" check-box state
+  /// Updates the enabled-state and value of Time Zero using "auto" check-box
+  /// state
   void setTimeZeroState(int checkBoxState = -1);
 
-  /// Updates the enabled-state and value of First Good Data using "auto" check-box state
+  /// Updates the enabled-state and value of First Good Data using "auto"
+  /// check-box state
   void setFirstGoodDataState(int checkBoxState = -1);
 
   /// Saves the value of the widget which called the slot
@@ -244,10 +241,9 @@ private slots:
   void openDirectoryDialog();
 
 private:
- 
   /// Types of entities we are dealing with
   enum ItemType { Pair, Group };
-  
+
   /// Possible plot types users might request
   enum PlotType { Asymmetry, Counts, Logarithm };
 
@@ -264,7 +260,7 @@ private:
   void startUpLook();
 
   /// Change the connected data name
-  void setCurrentDataName(const QString& name);
+  void setCurrentDataName(const QString &name);
 
   /// Executed when interface gets hidden or closed
   void hideEvent(QHideEvent *e) override;
@@ -273,14 +269,14 @@ private:
   void showEvent(QShowEvent *e) override;
 
   /// Input file changed - update GUI accordingly
-  void inputFileChanged(const QStringList& filenames);
+  void inputFileChanged(const QStringList &filenames);
 
   /// Loads the given list of files
-  boost::shared_ptr<LoadResult> load(const QStringList& files) const;
+  boost::shared_ptr<Muon::LoadResult> load(const QStringList &files) const;
 
   /// Get grouping for the loaded workspace
-  boost::shared_ptr<GroupResult>
-  getGrouping(boost::shared_ptr<LoadResult> loadResult) const;
+  boost::shared_ptr<Muon::GroupResult>
+  getGrouping(boost::shared_ptr<Muon::LoadResult> loadResult) const;
 
   /// Set whether the loading buttons and MWRunFiles widget are enabled.
   void allowLoading(bool enabled);
@@ -288,18 +284,21 @@ private:
   /// is grouping set
   bool isGroupingSet() const;
 
-  /// Creates workspace for specified group/pair and plots it 
+  /// Creates workspace for specified group/pair and plots it
   void plotItem(ItemType itemType, int tableRow, PlotType plotType);
 
   /// Creates workspace ready for analysis and plotting
-  Workspace_sptr createAnalysisWorkspace(ItemType itemType, int tableRow,
-                                         PlotType type, bool isRaw = false);
+  Mantid::API::Workspace_sptr createAnalysisWorkspace(ItemType itemType,
+                                                      int tableRow,
+                                                      PlotType type,
+                                                      bool isRaw = false);
 
-  /// Returns PlotType as chosen using given selector 
-  PlotType parsePlotType(QComboBox* selector);
+  /// Returns PlotType as chosen using given selector
+  PlotType parsePlotType(QComboBox *selector);
 
-  /// Finds a name for new analysis workspace 
-  std::string getNewAnalysisWSName(ItemType itemType, int tableRow, PlotType plotType);
+  /// Finds a name for new analysis workspace
+  std::string getNewAnalysisWSName(ItemType itemType, int tableRow,
+                                   PlotType plotType);
 
   /// Update front anc pair combo box
   void updateFrontAndCombo();
@@ -308,7 +307,7 @@ private:
   void updatePeriodWidgets(size_t numPeriods);
 
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
-  int numOfDetectors(const std::string& str) const;
+  int numOfDetectors(const std::string &str) const;
 
   /// Clear tables and front combo box
   void clearTablesAndCombo();
@@ -316,8 +315,9 @@ private:
   /// Clear run info and loaded run
   void clearLoadedRun();
 
-  /// Deletes a workspace _or_ a workspace group with the given name, if one exists
-  void deleteWorkspaceIfExists(const std::string& wsName);
+  /// Deletes a workspace _or_ a workspace group with the given name, if one
+  /// exists
+  void deleteWorkspaceIfExists(const std::string &wsName);
 
   /// Return number of pairs
   int numPairs();
@@ -329,24 +329,27 @@ private:
   std::string deadTimeFilename() const;
 
   /// Loads dead time table (group of tables) from the file.
-  Workspace_sptr loadDeadTimes(const std::string& filename) const;
+  Mantid::API::Workspace_sptr loadDeadTimes(const std::string &filename) const;
 
   /// Convert dead times workspace to table workspace
-  ITableWorkspace_sptr deadTimesToTable(const Workspace_sptr &deadTimes) const;
+  Mantid::API::ITableWorkspace_sptr
+  deadTimesToTable(const Mantid::API::Workspace_sptr &deadTimes) const;
 
   /// Gets table of dead time corrections from the loaded workspace
-  ITableWorkspace_sptr
-  getDeadTimeCorrection(boost::shared_ptr<LoadResult> loadResult) const;
+  Mantid::API::ITableWorkspace_sptr
+  getDeadTimeCorrection(boost::shared_ptr<Muon::LoadResult> loadResult) const;
 
-  /// Creates and algorithm with all the properties set according to widget values on the interface
-  Algorithm_sptr createLoadAlgorithm();
+  /// Creates and algorithm with all the properties set according to widget
+  /// values on the interface
+  Mantid::API::Algorithm_sptr createLoadAlgorithm();
 
   /// Plots specific WS spectrum (used by plotPair and plotGroup)
-  void plotSpectrum(const QString& wsName, bool logScale = false);
+  void plotSpectrum(const QString &wsName, bool logScale = false);
 
-  /// Get current plot style parameters. wsName and wsIndex are used to get default values if 
+  /// Get current plot style parameters. wsName and wsIndex are used to get
+  /// default values if
   /// something is not specified
-  QMap<QString, QString> getPlotStyleParams(const QString& wsName);
+  QMap<QString, QString> getPlotStyleParams(const QString &wsName);
 
   /// get period labels
   std::string getPeriodLabels() const;
@@ -379,12 +382,12 @@ private:
   int m_pairTableRowInFocus;
 
   /// Widget of the current tab
-  QWidget* m_currentTab;
+  QWidget *m_currentTab;
 
-  /// used to test that a new filename has been entered 
+  /// used to test that a new filename has been entered
   QStringList m_previousFilenames;
 
-  /// List of current group names 
+  /// List of current group names
   std::vector<std::string> m_groupNames;
 
   /// Deal with input file changes.
@@ -402,11 +405,11 @@ private:
   /// tell which group is in which row
   std::vector<int> m_groupToRow;
 
-  /// Return the group-number for the group in a row. 
+  /// Return the group-number for the group in a row.
   /// Return -1 if invalid group in row
   int getGroupNumberFromRow(int row);
 
-  /// Return the pair-number for the pair in a row. 
+  /// Return the pair-number for the pair in a row.
   /// Return -1 if invalid pair in row
   int getPairNumberFromRow(int row);
 
@@ -422,8 +425,9 @@ private:
   /// time zero returned in ms
   double timeZero();
 
-  /// Returns params string which can be passed to Rebin, according to what user specified
-  std::string rebinParams(Workspace_sptr wsForRebin);
+  /// Returns params string which can be passed to Rebin, according to what user
+  /// specified
+  std::string rebinParams(Mantid::API::Workspace_sptr wsForRebin);
 
   /// title of run
   std::string m_title;
@@ -437,7 +441,8 @@ private:
   /// Flag to indicate that grouping table is being updated
   bool m_updatingGrouping;
 
-  /// Boolean to show when data has been loaded. (Can't auto-update data that hasn't been loaded)
+  /// Boolean to show when data has been loaded. (Can't auto-update data that
+  /// hasn't been loaded)
   bool m_loaded;
 
   /// If the dead times have changed.
@@ -447,7 +452,7 @@ private:
   QString m_textToDisplay;
 
   /// Load auto saved values
-  void loadAutoSavedValues(const QString& group);
+  void loadAutoSavedValues(const QString &group);
 
   /// connect the settings for the fit function to their respective slots
   void loadFittings();
@@ -458,11 +463,14 @@ private:
   /// change and load the run depending on the value passed as a parameter
   void changeRun(int amountToChange);
 
-  /// Separate the muon file. The current File will remove the path (i.e MUSR002413.nxs)
-  void separateMuonFile(QString & filePath, QString & currentFile, QString & run, int & runSize);
+  /// Separate the muon file. The current File will remove the path (i.e
+  /// MUSR002413.nxs)
+  void separateMuonFile(QString &filePath, QString &currentFile, QString &run,
+                        int &runSize);
 
-  /// Include the 0's fromt eh beginning of the file that were lost in conversion from QString to int
-  void getFullCode(int originalSize, QString & run);
+  /// Include the 0's fromt eh beginning of the file that were lost in
+  /// conversion from QString to int
+  void getFullCode(int originalSize, QString &run);
 
   /// Setup the signals for updating
   void connectAutoUpdate();
@@ -471,16 +479,18 @@ private:
   void connectAutoSave();
 
   /// Saves the value of the widget which called the slot
-  void loadWidgetValue(QWidget* target, const QVariant& defaultValue);
+  void loadWidgetValue(QWidget *target, const QVariant &defaultValue);
 
   /// Groups the workspace
-  Workspace_sptr groupWorkspace(const std::string& wsName, const std::string& groupingName) const;
+  Mantid::API::Workspace_sptr
+  groupWorkspace(const std::string &wsName,
+                 const std::string &groupingName) const;
 
   /// Groups loaded workspace using information from Grouping Options tab
   void groupLoadedWorkspace();
 
   /// Parses grouping information from the UI table.
-  ITableWorkspace_sptr parseGrouping();  
+  Mantid::API::ITableWorkspace_sptr parseGrouping();
 
   /// When no data loaded set various buttons etc to inactive
   void noDataAvailable();
@@ -492,11 +502,12 @@ private:
   void fillGroupingTable(const Mantid::API::Grouping &grouping);
 
   /// handles option tab work
-  MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
+  MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab *m_optionTab;
   /// handles fit data work
-  MantidQt::CustomInterfaces::Muon::MuonAnalysisFitDataTab* m_fitDataTab;
+  MantidQt::CustomInterfaces::Muon::MuonAnalysisFitDataTab *m_fitDataTab;
   /// handles result table tab work
-  MantidQt::CustomInterfaces::Muon::MuonAnalysisResultTableTab* m_resultTableTab;
+  MantidQt::CustomInterfaces::Muon::MuonAnalysisResultTableTab *
+      m_resultTableTab;
 
   /// Time Zero as loaded from Data file
   double m_dataTimeZero;
@@ -517,15 +528,22 @@ private:
   size_t m_numPeriods;
 
   /// Grouping helper class
-  MuonGroupingHelper m_groupingHelper;
+  Muon::MuonGroupingHelper m_groupingHelper;
 
   /// Get period number string in summed set
   std::string getSummedPeriods() const;
 
   /// Get period number string in subtracted set
   std::string getSubtractedPeriods() const;
+
+  /// Run "Plot" button from group or pair table
+  void runTablePlotButton(ItemType itemType);
+
+  /// Cached value of config setting
+  std::string m_cachedPeakRadius;
+  static const std::string PEAK_RADIUS_CONFIG;
 };
 }
 }
 
-#endif //MANTIDQTCUSTOMINTERFACES_MUONANALYSIS_H_
+#endif // MANTIDQTCUSTOMINTERFACES_MUONANALYSIS_H_

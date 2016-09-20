@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_MAXENTENTROPY_H_
 
 #include "MantidAlgorithms/DllConfig.h"
-#include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace Mantid {
 namespace Algorithms {
@@ -38,15 +38,15 @@ public:
   // Destructor
   virtual ~MaxentEntropy() = default;
   // First derivative of the entropy
-  virtual double getDerivative(double value) = 0;
+  virtual std::vector<double> derivative(const std::vector<double> &values,
+                                         double background) = 0;
   // Second derivative of the entropy
-  virtual double getSecondDerivative(double value) = 0;
+  virtual std::vector<double>
+  secondDerivative(const std::vector<double> &values, double background) = 0;
   // Corrects an invalid value
-  virtual double correctValue(double value, double newValue) = 0;
+  virtual std::vector<double> correctValues(const std::vector<double> &value,
+                                            double newValue) = 0;
 };
-
-// Helper typedef for scoped pointer of this type.
-typedef boost::shared_ptr<MaxentEntropy> MaxentEntropy_sptr;
 
 } // namespace Algorithms
 } // namespace Mantid

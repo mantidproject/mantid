@@ -107,6 +107,10 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
                       "The value of fixed energy: :math:`E_i` (EMode=Direct) "
                       "or :math:`E_f` (EMode=Indirect) (meV).\nMust be set "
                       "here if not available in the instrument definition.");
+  alg.declareProperty("ReplaceNaNs", false,
+                      "If true, all NaN values in the output workspace are "
+                      "replaced using the ReplaceSpecialValues algorithm.",
+                      Direction::Input);
 }
 
 void SofQW::exec() {
@@ -123,7 +127,14 @@ void SofQW::exec() {
   childAlg->execute();
 
   MatrixWorkspace_sptr outputWS = childAlg->getProperty("OutputWorkspace");
+
   this->setProperty("OutputWorkspace", outputWS);
+
+  // Progress reports & cancellation
+  MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+  const size_t nHistos = inputWorkspace->getNumberHistograms();
+  auto m_progress = new Progress(this, 0.0, 1.0, nHistos);
+  m_progress->report("Creating output workspace");
 }
 
 /** Creates the output workspace, setting the axes according to the input
@@ -139,9 +150,8 @@ SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
                             const std::vector<double> &binParams,
                             std::vector<double> &newAxis) {
   // Create vector to hold the new X axis values
-  MantidVecPtr xAxis;
-  xAxis.access() = inputWorkspace->readX(0);
-  const int xLength = static_cast<int>(xAxis->size());
+  HistogramData::BinEdges xAxis(inputWorkspace->refX(0));
+  const int xLength = static_cast<int>(xAxis.size());
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
   const int yLength = static_cast<int>(
@@ -156,7 +166,7 @@ SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
 
   // Now set the axis values
   for (int i = 0; i < yLength - 1; ++i) {
-    outputWorkspace->setX(i, xAxis);
+    outputWorkspace->setBinEdges(i, xAxis);
   }
 
   // Set the axis units

@@ -38,7 +38,7 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), 1);
     TS_ASSERT_EQUALS(ws->getInstrument()->getName(),
                      "basic"); // Name of the test instrument
-    auto dets = ws->getSpectrum(0)->getDetectorIDs();
+    auto dets = ws->getSpectrum(0).getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
 
     // Set the group numbers
@@ -72,7 +72,7 @@ public:
     TS_ASSERT_EQUALS(cloned->blocksize(), 1);
     TS_ASSERT_EQUALS(cloned->getInstrument()->getName(),
                      "basic"); // Name of the test instrument
-    auto dets = cloned->getSpectrum(0)->getDetectorIDs();
+    auto dets = cloned->getSpectrum(0).getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
 
     // Set the group numbers

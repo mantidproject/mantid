@@ -74,9 +74,7 @@ int TestDataListener::runNumber() const { return 999; }
 
 void TestDataListener::start(
     Kernel::DateAndTime /*startTime*/) // Ignore the start time
-{
-  return;
-}
+{}
 
 /** Create the default empty event workspace */
 void TestDataListener::createEmptyWorkspace() {
@@ -86,7 +84,7 @@ void TestDataListener::createEmptyWorkspace() {
       WorkspaceFactory::Instance().create("EventWorkspace", 2, 2, 1));
   // Give detector IDs
   for (size_t i = 0; i < m_buffer->getNumberHistograms(); i++)
-    m_buffer->getSpectrum(i)->setDetectorID(detid_t(i));
+    m_buffer->getSpectrum(i).setDetectorID(detid_t(i));
   // Create in TOF units
   m_buffer->getAxis(0)->setUnit("TOF");
   // Load a fake instrument
@@ -109,15 +107,15 @@ boost::shared_ptr<Workspace> TestDataListener::extractData() {
 
   // Add a small number of uniformly distributed events to each event list.
   using namespace DataObjects;
-  EventList &el1 = m_buffer->getEventList(0);
-  EventList &el2 = m_buffer->getEventList(1);
+  EventList &el1 = m_buffer->getSpectrum(0);
+  EventList &el2 = m_buffer->getSpectrum(1);
   for (int i = 0; i < 100; ++i) {
     el1.addEventQuickly(TofEvent(m_rand->nextValue()));
     el2.addEventQuickly(TofEvent(m_rand->nextValue()));
   }
   auto mon_buffer =
       boost::dynamic_pointer_cast<EventWorkspace>(m_buffer->monitorWorkspace());
-  mon_buffer->getEventList(0).addEventQuickly(TofEvent(m_rand->nextValue()));
+  mon_buffer->getSpectrum(0).addEventQuickly(TofEvent(m_rand->nextValue()));
 
   // Copy the workspace pointer to a temporary variable
   EventWorkspace_sptr extracted = m_buffer;

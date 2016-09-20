@@ -44,8 +44,7 @@ void StopRemoteTransaction2::exec() {
   jm->stopRemoteTransaction(tid);
 
   g_log.information() << "Transaction with ID " << tid
-                      << " stopped on the compute resource " << comp
-                      << std::endl;
+                      << " stopped on the compute resource " << comp << '\n';
 }
 
 } // end namespace RemoteAlgorithms

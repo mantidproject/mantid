@@ -10,22 +10,24 @@
 
 using namespace Mantid::VATES;
 
-class NullPeaksPresenterVsiTest : public CxxTest::TestSuite
-{
+class NullPeaksPresenterVsiTest : public CxxTest::TestSuite {
 public:
   void testGettingPeaksWorkspaceThrows() {
-     NullPeaksPresenterVsi presenter;
-     TSM_ASSERT_THROWS("Should not implement this method", presenter.getPeaksWorkspace(), std::runtime_error);
+    NullPeaksPresenterVsi presenter;
+    TSM_ASSERT_THROWS("Should not implement this method",
+                      presenter.getPeaksWorkspace(), std::runtime_error);
   }
 
   void testGettingUsablePeaksThrows() {
     NullPeaksPresenterVsi presenter;
-    TSM_ASSERT_THROWS("Should not implement this method", presenter.getViewablePeaks(), std::runtime_error);
+    TSM_ASSERT_THROWS("Should not implement this method",
+                      presenter.getViewablePeaks(), std::runtime_error);
   }
 
   void testGettingPeaksWorkspaceNameThrows() {
     NullPeaksPresenterVsi presenter;
-    TSM_ASSERT_THROWS("Should not implement this method", presenter.getViewablePeaks(), std::runtime_error);
+    TSM_ASSERT_THROWS("Should not implement this method",
+                      presenter.getViewablePeaks(), std::runtime_error);
   }
 
   void testGettingPeaksInfoThrows() {
@@ -33,9 +35,13 @@ public:
     int row = 0;
     double radius;
     Mantid::Kernel::V3D position;
-    Mantid::Kernel::SpecialCoordinateSystem coord = Mantid::Kernel::SpecialCoordinateSystem::None;
+    Mantid::Kernel::SpecialCoordinateSystem coord =
+        Mantid::Kernel::SpecialCoordinateSystem::None;
     Mantid::API::IPeaksWorkspace_sptr peaksWorkspace;
-    TSM_ASSERT_THROWS("Should not implement this method", presenter.getPeaksInfo(peaksWorkspace,row,position,radius, coord), std::runtime_error);
+    TSM_ASSERT_THROWS(
+        "Should not implement this method",
+        presenter.getPeaksInfo(peaksWorkspace, row, position, radius, coord),
+        std::runtime_error);
   }
 };
 #endif

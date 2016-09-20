@@ -37,7 +37,7 @@ void SaveReflCustomAscii::extraHeaders(std::ofstream &file) {
 
   if (title != "") // if is toggled
   {
-    file << "#" << title << std::endl;
+    file << "#" << title << '\n';
   }
 
   if (subtitle) {
@@ -48,14 +48,14 @@ void SaveReflCustomAscii::extraHeaders(std::ofstream &file) {
     }
   }
 
-  file << "#" << subtitleEntry << std::endl;
+  file << "#" << subtitleEntry << '\n';
 
   const std::vector<std::string> logList = getProperty("LogList");
   /// logs
   for (const auto &log : logList) {
     file << boost::lexical_cast<std::string>(log) << ": "
          << boost::lexical_cast<std::string>(samp.getLogData(log)->value())
-         << std::endl;
+         << '\n';
   }
 }
 

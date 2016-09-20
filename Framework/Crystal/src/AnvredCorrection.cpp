@@ -1,13 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/VectorHelper.h"
@@ -66,19 +63,6 @@ using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
 using namespace Mantid::PhysicalConstants;
-std::map<int, double> detScale = {{17, 1.092114823},
-                                  {18, 0.869105443},
-                                  {22, 1.081377685},
-                                  {26, 1.055199489},
-                                  {27, 1.070308725},
-                                  {28, 0.886157884},
-                                  {36, 1.112773972},
-                                  {37, 1.012894506},
-                                  {38, 1.049384146},
-                                  {39, 0.890313805},
-                                  {47, 1.068553893},
-                                  {48, 0.900566426},
-                                  {58, 0.911249203}};
 
 AnvredCorrection::AnvredCorrection()
     : API::Algorithm(), m_smu(0.), m_amu(0.), m_radius(0.), m_power_th(0.),
@@ -122,7 +106,7 @@ void AnvredCorrection::init() {
   declareProperty("PowerLambda", 4.0, "Power of lamda ");
   declareProperty("DetectorBankScaleFactors", false,
                   "No scale factors if false (default).\n"
-                  "If true, use fixed TOPAZ scale factors.");
+                  "If true, use scale factors from instrument parameter map.");
 
   defineProperties();
 }
@@ -142,7 +126,7 @@ void AnvredCorrection::exec() {
         m_onlySphericalAbsorption = true;
         g_log.warning() << "Lorentz Correction was already done for this "
                            "workspace.  OnlySphericalAbsorption was changed to "
-                           "true." << std::endl;
+                           "true.\n";
       }
     }
   }
@@ -192,13 +176,12 @@ void AnvredCorrection::exec() {
     MantidVec &E = correctionFactors->dataE(i);
 
     // Copy over bin boundaries
-    const ISpectrum *inSpec = m_inputWS->getSpectrum(i);
-    inSpec->lockData(); // for MRU-related thread safety
+    const auto &inSpec = m_inputWS->getSpectrum(i);
 
-    const MantidVec &Xin = inSpec->readX();
+    const MantidVec &Xin = inSpec.readX();
     correctionFactors->dataX(i) = Xin;
-    const MantidVec &Yin = inSpec->readY();
-    const MantidVec &Ein = inSpec->readE();
+    const MantidVec &Yin = inSpec.readY();
+    const MantidVec &Ein = inSpec.readE();
 
     // Get detector position
     IDetector_const_sptr det;
@@ -225,12 +208,11 @@ void AnvredCorrection::exec() {
 
     Mantid::Kernel::Units::Wavelength wl;
     std::vector<double> timeflight;
-    int bank = 0;
     double depth = 0.2;
     double pathlength = 0.0;
-    std::string bankName = "";
+    std::string bankName;
     if (m_useScaleFactors)
-      scale_init(det, inst, bank, L2, depth, pathlength, bankName);
+      scale_init(det, inst, L2, depth, pathlength, bankName);
 
     // Loop through the bins in the current spectrum
     for (int64_t j = 0; j < specSize; j++) {
@@ -245,13 +227,11 @@ void AnvredCorrection::exec() {
       } else {
         double value = this->getEventWeight(lambda, scattering);
         if (m_useScaleFactors)
-          scale_exec(bank, lambda, depth, pathlength, value);
+          scale_exec(bankName, lambda, depth, inst, pathlength, value);
         Y[j] = Yin[j] * value;
         E[j] = Ein[j] * value;
       }
     }
-
-    inSpec->unlockData();
 
     prog.report();
 
@@ -292,8 +272,10 @@ void AnvredCorrection::execEvent() {
     g_log.debug("Correcting EventWorkspace in-place.");
 
   // If sample not at origin, shift cached positions.
-  const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
-  const V3D pos = m_inputWS->getInstrument()->getSource()->getPos() - samplePos;
+  Instrument_const_sptr inst = m_inputWS->getInstrument();
+
+  const V3D samplePos = inst->getSample()->getPos();
+  const V3D pos = inst->getSource()->getPos() - samplePos;
   double L1 = pos.norm();
 
   Progress prog(this, 0.0, 1.0, numHists);
@@ -322,14 +304,13 @@ void AnvredCorrection::execEvent() {
       continue;
 
     // This is the scattered beam direction
-    Instrument_const_sptr inst = eventW->getInstrument();
     V3D dir = det->getPos() - samplePos;
     double L2 = dir.norm();
     // Two-theta = polar angle = scattering angle = between +Z vector and the
     // scattered beam
     double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
 
-    EventList el = eventW->getEventList(i);
+    EventList el = eventW->getSpectrum(i);
     el.switchTo(WEIGHTED_NOTIME);
     std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
 
@@ -338,12 +319,11 @@ void AnvredCorrection::execEvent() {
 
     Mantid::Kernel::Units::Wavelength wl;
     std::vector<double> timeflight;
-    int bank = 0;
     double depth = 0.2;
     double pathlength = 0.0;
-    std::string bankName = "";
+    std::string bankName;
     if (m_useScaleFactors)
-      scale_init(det, inst, bank, L2, depth, pathlength, bankName);
+      scale_init(det, inst, L2, depth, pathlength, bankName);
 
     // multiplying an event list by a scalar value
     for (itev = events.begin(); itev != itev_end; ++itev) {
@@ -352,21 +332,19 @@ void AnvredCorrection::execEvent() {
         wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
       double value = this->getEventWeight(timeflight[0], scattering);
       if (m_useScaleFactors)
-        scale_exec(bank, timeflight[0], depth, pathlength, value);
+        scale_exec(bankName, timeflight[0], depth, inst, pathlength, value);
       timeflight.clear();
       itev->m_errorSquared =
           static_cast<float>(itev->m_errorSquared * value * value);
       itev->m_weight *= static_cast<float>(value);
     }
-    correctionFactors->getOrAddEventList(i) += events;
+    correctionFactors->getSpectrum(i) += events;
 
-    auto &dets = eventW->getEventList(i).getDetectorIDs();
-    for (auto const &det : dets)
-      correctionFactors->getOrAddEventList(i).addDetectorID(det);
+    auto &dets = eventW->getSpectrum(i).getDetectorIDs();
+    correctionFactors->getSpectrum(i).addDetectorIDs(dets);
     // When focussing in place, you can clear out old memory from the input one!
     if (inPlace) {
-      eventW->getEventList(i).clear();
-      Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+      eventW->getSpectrum(i).clear();
     }
 
     prog.report();
@@ -569,16 +547,10 @@ void AnvredCorrection::BuildLamdaWeights() {
   }
 }
 void AnvredCorrection::scale_init(IDetector_const_sptr det,
-                                  Instrument_const_sptr inst, int &bank,
-                                  double &L2, double &depth, double &pathlength,
-                                  std::string bankName) {
+                                  Instrument_const_sptr inst, double &L2,
+                                  double &depth, double &pathlength,
+                                  std::string &bankName) {
   bankName = det->getParent()->getParent()->getName();
-  std::string bankNameStr = bankName;
-  // Take out the "bank" part of the bank name and convert to an int
-  bankNameStr.erase(remove_if(bankNameStr.begin(), bankNameStr.end(),
-                              not1(std::ptr_fun(::isdigit))),
-                    bankNameStr.end());
-  Strings::convert(bankNameStr, bank);
   // Distance to center of detector
   boost::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
   if (inst->getName().compare("CORELLI") ==
@@ -595,16 +567,22 @@ void AnvredCorrection::scale_init(IDetector_const_sptr det,
   double cosA = det0->getDistance(*sample) / L2;
   pathlength = depth / cosA;
 }
-void AnvredCorrection::scale_exec(int &bank, double &lambda, double &depth,
+void AnvredCorrection::scale_exec(std::string &bankName, double &lambda,
+                                  double &depth, Instrument_const_sptr inst,
                                   double &pathlength, double &value) {
   // correct for the slant path throught the scintillator glass
   double mu = (9.614 * lambda) + 0.266; // mu for GS20 glass
   double eff_center =
       1.0 - std::exp(-mu * depth); // efficiency at center of detector
   double eff_R = 1.0 - exp(-mu * pathlength); // efficiency at point R
-  double sp_ratio = eff_center / eff_R;       // slant path efficiency ratio
-  if (detScale.find(bank) != detScale.end())
-    value *= detScale[bank] * sp_ratio;
+  value *= eff_center / eff_R;                // slant path efficiency ratio
+  // Take out the "bank" part of the bank name
+  bankName.erase(remove_if(bankName.begin(), bankName.end(),
+                           not1(std::ptr_fun(::isdigit))),
+                 bankName.end());
+  if (inst->hasParameter("detScale" + bankName))
+    value *=
+        static_cast<double>(inst->getNumberParameter("detScale" + bankName)[0]);
 }
 
 } // namespace Crystal

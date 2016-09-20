@@ -130,20 +130,20 @@ bool SVUtils::FindValidInterval(double &min, double &max) {
 bool SVUtils::FindValidLogInterval(double &min, double &max) {
   bool valuesOK = true;
   if (min < 0) {
-    std::cout << "min < 0 " << min << std::endl;
+    std::cout << "min < 0 " << min << '\n';
     valuesOK = false;
     min = -min;
   }
 
   if (max < 0) {
-    std::cout << "max < 0 " << max << std::endl;
+    std::cout << "max < 0 " << max << '\n';
     valuesOK = false;
     max = -max;
   }
 
   if (min > max) // Fix the order
   {
-    std::cout << "min > max " << min << " > " << max << std::endl;
+    std::cout << "min > max " << min << " > " << max << '\n';
     valuesOK = false;
     double temp = min;
     min = max;
@@ -152,13 +152,13 @@ bool SVUtils::FindValidLogInterval(double &min, double &max) {
 
   // Raise min, so the interval covers 2 orders of magnitude
   if (min == 0 && max > 0) {
-    std::cout << "min == 0, max > 0 " << min << ", " << max << std::endl;
+    std::cout << "min == 0, max > 0 " << min << ", " << max << '\n';
     valuesOK = false;
     min = 0.01 * max;
   } else if (max == min) // Adjust values so they are not equal
   {
     valuesOK = false;
-    std::cout << "min == max " << min << " == " << max << std::endl;
+    std::cout << "min == max " << min << " == " << max << '\n';
     if (min == 0) {
       min = 0.1, max = 10;
     } else {

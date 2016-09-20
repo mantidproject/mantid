@@ -11,6 +11,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidKernel/Material.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::DataHandling;
@@ -19,15 +21,14 @@ class CreateSampleShapeTest : public CxxTest::TestSuite {
 
 public:
   void testSphere() {
-    std::string sphere = "<sphere id=\"some-sphere\">"
-                         "<centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" />"
-                         "<radius val=\"1.0\" />"
-                         "</sphere>";
+    using Mantid::Kernel::V3D;
+    std::string sphere =
+        ComponentCreationHelper::sphereXML(1, V3D(), "some-sphere");
 
     /// Test passes point inside sphere
-    runTest(sphere, 0.5, 0.5, 0.5, true);
+    runStandardTest(sphere, 0.5, 0.5, 0.5, true);
     /// Test fails for point outside sphere
-    runTest(sphere, 5, 5, 5, false);
+    runStandardTest(sphere, 5, 5, 5, false);
   }
 
   void testCompositeObject() {
@@ -46,13 +47,39 @@ public:
         "<algebra val=\"some-sphere (# stick)\" />";
 
     // Inside object
-    runTest(xmldef, 0.0, 0.25, 0.25, true);
+    runStandardTest(xmldef, 0.0, 0.25, 0.25, true);
     // Outside object
-    runTest(xmldef, 0.0, 0.0, 0.0, false);
+    runStandardTest(xmldef, 0.0, 0.0, 0.0, false);
   }
 
-  void runTest(std::string xmlShape, double x, double y, double z,
-               bool inside) {
+  void test_Setting_Geometry_With_Material_Already_Set_Keeps_Material() {
+    using Mantid::Kernel::Material;
+    using Mantid::Kernel::V3D;
+    using Mantid::PhysicalConstants::getNeutronAtom;
+
+    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto sampleShape = ComponentCreationHelper::createSphere(0.5);
+    sampleShape->setID("mysample");
+    Material alum("Al", getNeutronAtom(13), 2.6989);
+    sampleShape->setMaterial(alum);
+    inputWS->mutableSample().setShape(*sampleShape);
+
+    CreateSampleShape alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setPropertyValue(
+        "ShapeXML", ComponentCreationHelper::sphereXML(1.0, V3D(), "sp-1"));
+    alg.execute();
+
+    // Old material
+    const auto &material = inputWS->sample().getMaterial();
+    TS_ASSERT_EQUALS("Al", material.name());
+    TS_ASSERT_DELTA(2.6989, material.numberDensity(), 1e-04);
+  }
+
+  void runStandardTest(std::string xmlShape, double x, double y, double z,
+                       bool inside) {
     // Need a test workspace
     Mantid::API::AnalysisDataService::Instance().add(
         "TestWorkspace",

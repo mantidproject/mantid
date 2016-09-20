@@ -63,10 +63,6 @@ namespace Algorithms {
 */
 class DLLExport SumRowColumn : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  SumRowColumn() : API::Algorithm() {}
-  /// Virtual destructor
-  ~SumRowColumn() override {}
   /// Algorithm's name
   const std::string name() const override { return "SumRowColumn"; }
   /// Summary of algorithms purpose

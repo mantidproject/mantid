@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/WeightedMeanOfWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -15,17 +16,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(WeightedMeanOfWorkspace)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-WeightedMeanOfWorkspace::WeightedMeanOfWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-WeightedMeanOfWorkspace::~WeightedMeanOfWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string WeightedMeanOfWorkspace::name() const {
   return "WeightedMeanOfWorkspace";
@@ -39,9 +29,6 @@ const std::string WeightedMeanOfWorkspace::category() const {
   return "Arithmetic";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void WeightedMeanOfWorkspace::init() {
@@ -53,7 +40,6 @@ void WeightedMeanOfWorkspace::init() {
                         "An output workspace.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void WeightedMeanOfWorkspace::exec() {
@@ -72,16 +58,11 @@ void WeightedMeanOfWorkspace::exec() {
   std::size_t numHists = inputWS->getNumberHistograms();
   double averageValue = 0.0;
   double weightSum = 0.0;
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (std::size_t i = 0; i < numHists; ++i) {
-    try {
-      IDetector_const_sptr det = inputWS->getDetector(i);
-      if (det->isMonitor() || det->isMasked()) {
+    if (spectrumInfo.hasDetectors(i))
+      if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
         continue;
-      }
-    } catch (...) {
-      // Swallow these if no instrument is found
-      ;
-    }
     MantidVec y = inputWS->dataY(i);
     MantidVec e = inputWS->dataE(i);
     double weight = 0.0;

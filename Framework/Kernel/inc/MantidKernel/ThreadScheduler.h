@@ -275,7 +275,7 @@ public:
     // change before you get the next item.
     if (!m_map.empty()) {
       // Since the map is sorted by cost, we want the LAST item.
-      std::multimap<double, Task *>::iterator it = m_map.end();
+      auto it = m_map.end();
       it--;
       temp = it->second;
       m_map.erase(it);

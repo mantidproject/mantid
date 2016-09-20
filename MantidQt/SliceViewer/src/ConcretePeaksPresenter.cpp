@@ -104,7 +104,7 @@ void ConcretePeaksPresenter::checkWorkspaceCompatibilities(
     // Check that the MDWorkspace is self-consistent.
     if (coordSystMD != coordSystDim) {
       std::stringstream ss;
-      ss << std::endl;
+      ss << '\n';
       ss << "According to the dimension names in your MDWorkspace, this "
             "work-space is determined to be in: ";
       ss << m_transform->getFriendlyName() << " in the PeaksViewer. ";
@@ -118,7 +118,7 @@ void ConcretePeaksPresenter::checkWorkspaceCompatibilities(
     // compatibility.
     if (coordSystDim != coordSystPK && m_peaksWS->hasIntegratedPeaks()) {
       std::stringstream ss;
-      ss << std::endl;
+      ss << '\n';
       ss << "You appear to be plotting your PeaksWorkspace in a different "
             "coordinate system from the one in which integration was "
             "performed. ";
@@ -466,8 +466,7 @@ void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction) {
 
 double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) &&
-      m_viewPeaks->positionOnly()) {
+  if (m_viewPeaks != NULL && m_peaksWS->getNumberPeaks() > 0) {
     result = m_viewPeaks->getOccupancyInView();
   }
   return result;
@@ -475,8 +474,7 @@ double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
 
 double ConcretePeaksPresenter::getPeakSizeIntoProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) &&
-      m_viewPeaks->positionOnly()) {
+  if (m_viewPeaks != NULL && m_peaksWS->getNumberPeaks() > 0) {
     result = m_viewPeaks->getOccupancyIntoView();
   }
   return result;
@@ -532,8 +530,7 @@ bool ConcretePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
 
   // Tranform box from plot coordinates into orderd HKL, Qx,Qy,Qz etc, then find
   // the visible peaks.
-  std::vector<size_t> deletionIndexList = findVisiblePeakIndexes(
-      accurateBox);
+  std::vector<size_t> deletionIndexList = findVisiblePeakIndexes(accurateBox);
 
   // If we have things to remove, do that in one-step.
   if (!deletionIndexList.empty()) {
@@ -581,15 +578,13 @@ bool ConcretePeaksPresenter::addPeakAt(double plotCoordsPointX,
   alg->setProperty("Workspace", peaksWS);
   alg->setProperty("HKL", std::vector<double>(hkl));
 
-
-// Execute the algorithm
-try {
+  // Execute the algorithm
+  try {
     alg->execute();
-} catch (...) {
+  } catch (...) {
     g_log.warning("ConcretePeaksPresenter: Could not add the peak. Make sure "
                   "that it is added within a valid workspace region");
-}
-
+  }
 
   // Reproduce the views. Proxy representations recreated for all peaks.
   this->produceViews();
@@ -602,7 +597,6 @@ try {
   this->informOwnerUpdate();
 
   return alg->isExecuted();
-
 }
 
 bool ConcretePeaksPresenter::hasPeakAddMode() const {
@@ -620,30 +614,27 @@ ConcretePeaksPresenter::findVisiblePeakIndexes(const PeakBoundingBox &box) {
             ->getRadius(); // Effective radius of each peak representation.
 
     Mantid::API::IPeaksWorkspace_sptr peaksWS =
-          boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
-              this->m_peaksWS);
+        boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
+            this->m_peaksWS);
 
-      PeakBoundingBox transformedViewableRegion =
-          box.makeSliceBox(radius);
+    PeakBoundingBox transformedViewableRegion = box.makeSliceBox(radius);
 
-      transformedViewableRegion.transformBox(m_transform);
+    transformedViewableRegion.transformBox(m_transform);
 
+    Mantid::API::IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("PeaksInRegion");
+    alg->setChild(true);
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setProperty("InputWorkspace", peaksWS);
+    alg->setProperty("OutputWorkspace", peaksWS->name() + "_peaks_in_region");
+    alg->setProperty("Extents", transformedViewableRegion.toExtents());
+    alg->setProperty("CheckPeakExtents", false); // consider all peaks as points
+    alg->setProperty("PeakRadius", radius);
+    alg->setPropertyValue("CoordinateFrame", m_transform->getFriendlyName());
+    alg->execute();
+    ITableWorkspace_sptr outTable = alg->getProperty("OutputWorkspace");
 
-      Mantid::API::IAlgorithm_sptr alg =
-          AlgorithmManager::Instance().create("PeaksInRegion");
-      alg->setChild(true);
-      alg->setRethrows(true);
-      alg->initialize();
-      alg->setProperty("InputWorkspace", peaksWS);
-      alg->setProperty("OutputWorkspace", peaksWS->name() + "_peaks_in_region");
-      alg->setProperty("Extents", transformedViewableRegion.toExtents());
-      alg->setProperty("CheckPeakExtents", false); // consider all peaks as points
-      alg->setProperty("PeakRadius", radius);
-      alg->setPropertyValue("CoordinateFrame", m_transform->getFriendlyName());
-      alg->execute();
-      ITableWorkspace_sptr outTable = alg->getProperty("OutputWorkspace");
-
-    
     for (size_t i = 0; i < outTable->rowCount(); ++i) {
       const bool insideRegion = outTable->cell<Boolean>(i, 1);
       if (insideRegion) {

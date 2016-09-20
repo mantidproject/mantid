@@ -51,13 +51,11 @@ void ConvertToMatrixWorkspace::exec() {
     PARALLEL_FOR2(inputWorkspace, outputWorkspace)
     for (int64_t i = 0; i < static_cast<int64_t>(numHists); ++i) {
       PARALLEL_START_INTERUPT_REGION
-      const ISpectrum *inSpec = inputWorkspace->getSpectrum(i);
-      ISpectrum *outSpec = outputWorkspace->getSpectrum(i);
+      const auto &inSpec = inputWorkspace->getSpectrum(i);
+      auto &outSpec = outputWorkspace->getSpectrum(i);
 
-      outSpec->copyInfoFrom(*inSpec);
-      outSpec->setX(inSpec->ptrX());
-      outSpec->dataY() = inSpec->dataY();
-      outSpec->dataE() = inSpec->dataE();
+      outSpec.copyInfoFrom(inSpec);
+      outSpec.setHistogram(inSpec.histogram());
 
       prog.report("Binning");
 

@@ -17,16 +17,6 @@ using Mantid::API::WorkspaceProperty;
 DECLARE_ALGORITHM(SavePDFGui)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SavePDFGui::SavePDFGui() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SavePDFGui::~SavePDFGui() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SavePDFGui::name() const { return "SavePDFGui"; }
@@ -115,7 +105,9 @@ void SavePDFGui::exec() {
 
   // --------- write the data
   auto x = inputWS->readX(0);
-  auto dx = inputWS->readDx(0);
+  HistogramData::HistogramDx dx(x.size(), 0.0);
+  if (inputWS->sharedDx(0))
+    dx = inputWS->dx(0);
   auto y = inputWS->readY(0);
   auto dy = inputWS->readE(0);
   const size_t length = x.size();

@@ -107,7 +107,7 @@ public:
       in_ws *= 2.0;
     if (type == WEIGHTED_NOTIME) {
       for (size_t i = 0; i < in_ws->getNumberHistograms(); i++) {
-        EventList &el = in_ws->getEventList(i);
+        EventList &el = in_ws->getSpectrum(i);
         el.compressEvents(0.0, &el);
       }
     }
@@ -144,7 +144,7 @@ public:
 
     // Add to an existing MDEW
     for (size_t i = 1; i < numTimesToAdd; i++) {
-      std::cout << "Iteration " << i << std::endl;
+      std::cout << "Iteration " << i << '\n';
       TS_ASSERT_THROWS_NOTHING(alg.initialize())
       TS_ASSERT(alg.isInitialized())
       alg.setPropertyValue("InputWorkspace", "inputWS");

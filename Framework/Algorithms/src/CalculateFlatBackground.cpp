@@ -1,22 +1,21 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidHistogramData/Histogram.h"
 #include <algorithm>
+#include <boost/lexical_cast.hpp>
 #include <climits>
 #include <numeric>
-#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -117,9 +116,7 @@ void CalculateFlatBackground::exec() {
     PARALLEL_FOR2(inputWS, outputWS)
     for (int i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
-      outputWS->dataX(i) = inputWS->readX(i);
-      outputWS->dataY(i) = inputWS->readY(i);
-      outputWS->dataE(i) = inputWS->readE(i);
+      outputWS->setHistogram(i, inputWS->histogram(i));
       m_progress->report();
       PARALLEL_END_INTERUPT_REGION
     }
@@ -138,24 +135,21 @@ void CalculateFlatBackground::exec() {
   std::vector<int>::const_iterator specIt;
   // local cache for global variable
   bool skipMonitors(m_skipMonitors);
+  const auto &spectrumInfo = outputWS->spectrumInfo();
   for (specIt = wsInds.begin(); specIt != wsInds.end(); ++specIt) {
     const int currentSpec = *specIt;
     try {
-      if (skipMonitors) { // this will fail in Windows ReleaseWithDebug info
-                          // mode if the loop above made parallel. MS2012
-                          // Compiler bug.
-        // the remedy in this case would be to extract the code within internal
-        // true into separate routine.
-        try {
-          if (outputWS->getDetector(currentSpec)->isMonitor())
-            continue;
-        } catch (...) {
+      if (skipMonitors) {
+        if (!spectrumInfo.hasDetectors(currentSpec)) {
           // Do nothing.
           // not every spectra is the monitor or detector, some spectra have no
           // instrument components attached.
           g_log.information(" Can not find detector for spectra N: " +
-                            boost::lexical_cast<std::string>(currentSpec) +
+                            std::to_string(currentSpec) +
                             " Processing background anyway\n");
+        } else {
+          if (spectrumInfo.isMonitor(currentSpec))
+            continue;
         }
       }
 
@@ -173,13 +167,13 @@ void CalculateFlatBackground::exec() {
                            "counts spectrum with index " << currentSpec
                         << ". The spectrum has been left unchanged.\n";
         g_log.debug() << "The background for spectra index " << currentSpec
-                      << "was calculated to be " << background << std::endl;
+                      << "was calculated to be " << background << '\n';
         continue;
       } else { // only used for the logging that gets done at the end
         backgroundTotal += background;
       }
 
-      MantidVec &E = outputWS->dataE(currentSpec);
+      auto &E = outputWS->mutableE(currentSpec);
       // only the Mean() function calculates the variance
       // cppcheck-suppress knownConditionTrueFalse
       if (variance > 0) {
@@ -189,7 +183,7 @@ void CalculateFlatBackground::exec() {
             std::bind2nd(VectorHelper::AddVariance<double>(), variance));
       }
       // Get references to the current spectrum
-      MantidVec &Y = outputWS->dataY(currentSpec);
+      auto &Y = outputWS->mutableY(currentSpec);
       // Now subtract the background from the data
       for (int j = 0; j < blocksize; ++j) {
         if (removeBackground) {
@@ -208,7 +202,7 @@ void CalculateFlatBackground::exec() {
       }
     } catch (std::exception &) {
       g_log.error() << "Error processing the spectrum with index "
-                    << currentSpec << std::endl;
+                    << currentSpec << '\n';
       throw;
     }
 
@@ -253,9 +247,9 @@ void CalculateFlatBackground::convertToDistribution(
                            ? 1
                            : workspace->getNumberHistograms();
 
-  MantidVec adjacents(workspace->readX(0).size() - 1);
+  MantidVec adjacents(workspace->x(0).size() - 1);
   for (std::size_t i = 0; i < total; ++i) {
-    MantidVec X = workspace->readX(i);
+    auto &X = workspace->x(i);
     // Calculate bin widths
     std::adjacent_difference(X.begin() + 1, X.end(), adjacents.begin());
     // the first entry from adjacent difference is just a copy of the first
@@ -342,8 +336,9 @@ double CalculateFlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS,
                                      const int wsInd, const double startX,
                                      const double endX,
                                      double &variance) const {
-  const MantidVec &XS = WS->readX(wsInd), &YS = WS->readY(wsInd);
-  const MantidVec &ES = WS->readE(wsInd);
+  auto &XS = WS->x(wsInd);
+  auto &YS = WS->y(wsInd);
+  auto &ES = WS->e(wsInd);
   // the function checkRange should already have checked that startX <= endX,
   // but we still need to check values weren't out side the ranges
   if (endX > XS.back() || startX < XS.front()) {

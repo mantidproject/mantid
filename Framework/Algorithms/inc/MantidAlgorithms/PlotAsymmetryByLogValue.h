@@ -27,9 +27,9 @@ Required Properties:
 <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
 <LI> OutputWorkspace - The name of the workspace in which to store the result
 </LI>
-<LI> ForwardSpectra - The detector number of the first group </LI>
-<LI> BackwardSpectra - The detector number of the second group </LI>
-<LI> Alpha - ?? </LI>
+<LI> ForwardSpectra - The spectrum numbers of the forward group </LI>
+<LI> BackwardSpectra - The spectrum numbers of the backward group </LI>
+<LI> Alpha - balance parameter </LI>
 </UL>
 
 
@@ -61,8 +61,6 @@ class DLLExport PlotAsymmetryByLogValue : public API::Algorithm {
 public:
   /// Default constructor
   PlotAsymmetryByLogValue();
-  /// Destructor
-  ~PlotAsymmetryByLogValue() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PlotAsymmetryByLogValue"; }
   /// Summary of algorithms purpose
@@ -119,7 +117,7 @@ private:
   std::string m_filenameBase;
   /// Stores extension shared by all runs
   std::string m_filenameExt;
-  /// Sotres number of zeros in run name
+  /// Stores number of zeros in run name
   int m_filenameZeros;
   /// Store type of dead time corrections
   std::string m_dtcType;
@@ -168,6 +166,8 @@ private:
   std::string m_allProperties;
   // Name of the hidden ws
   std::string m_currResName;
+  /// Cached start time for first run
+  int64_t m_firstStart_ns;
 };
 
 } // namespace Algorithm

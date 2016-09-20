@@ -82,10 +82,6 @@ namespace Algorithms {
  */
 class DLLExport DiffractionFocussing2 : public API::Algorithm {
 public:
-  /// Default constructor
-  DiffractionFocussing2();
-  /// Destructor
-  ~DiffractionFocussing2() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "DiffractionFocussing"; }
   /// Summary of algorithms purpose
@@ -139,15 +135,15 @@ private:
   /// The list of group numbers
   std::vector<int> groupAtWorkspaceIndex;
   /// Map from the group number to the group's X vector
-  group2vectormap group2xvector;
+  std::map<int, HistogramData::BinEdges> group2xvector;
   /// Map from the group number to the group's summed weight vector
   group2vectormap group2wgtvector;
   /// The number of (used) groups
-  int64_t nGroups;
+  int64_t nGroups = 0;
   /// Number of histograms
-  int nHist;
+  int nHist = 0;
   /// Number of points in the 2D workspace
-  int nPoints;
+  int nPoints = 0;
   /// Mapping of group number to vector of inputworkspace indices.
   std::vector<std::vector<std::size_t>> m_wsIndices;
   /// List of valid group numbers

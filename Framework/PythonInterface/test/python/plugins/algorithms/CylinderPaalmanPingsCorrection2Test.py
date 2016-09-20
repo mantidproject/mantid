@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.kernel import *
 from mantid.api import *
@@ -81,9 +83,9 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
             self._verify_workspace(workspace)
 
 
-    def test_sampleOnly(self):
+    def test_sampleOnly_Indirect(self):
         """
-        Test simple run with sample workspace only.
+        Test simple run with sample workspace only for indirect mode
         """
 
         CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
@@ -95,7 +97,23 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
                                        Efixed=1.845)
 
         ass_ws_name = self._corrections_ws_name + '_ass'
-        self. _verify_workspace(ass_ws_name)
+        self._verify_workspace(ass_ws_name)
+
+    def test_sampleOnly_Direct(self):
+        """
+        Test simple run with sample workspace only for direct mode
+        """
+    
+        CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                       SampleWorkspace=self._sample_ws,
+                                       SampleChemicalFormula='H2-O',
+                                       SampleInnerRadius=0.05,
+                                       SampleOuterRadius=0.1,
+                                       Emode='Direct',
+                                       Efixed=1.845)
+    
+        ass_ws_name = self._corrections_ws_name + '_ass'
+        self._verify_workspace(ass_ws_name)
 
 
     def test_sampleAndCan(self):

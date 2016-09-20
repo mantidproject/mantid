@@ -149,7 +149,7 @@ void SplineBackground::exec() {
       WorkspaceFactory::Instance().create(inWS, 1, X.size(), Y.size());
   {
     outWS->getSpectrum(0)
-        ->setSpectrumNo(inWS->getSpectrum(spec)->getSpectrumNo());
+        .setSpectrumNo(inWS->getSpectrum(spec).getSpectrumNo());
     double yi, yerr;
     for (MantidVec::size_type i = 0; i < Y.size(); i++) {
       double xi = X[i];

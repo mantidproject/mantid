@@ -291,8 +291,7 @@ void ImggAggregateWavelengths::exec() {
     aggToFBands(inputPath, outputPath, tofRanges);
 
   g_log.notice() << "Saved output aggregated images into: " << outputPath
-                 << ". They are now ready for further processing. "
-                 << std::endl;
+                 << ". They are now ready for further processing. \n";
 }
 
 void ImggAggregateWavelengths::aggUniformBands(const std::string &inputPath,
@@ -307,7 +306,7 @@ void ImggAggregateWavelengths::aggUniformBands(const std::string &inputPath,
                     << inputPath
                     << " when trying to split the input bands into a uniform "
                        "number of output bands. Nothing will be produced in "
-                       "the output path." << std::endl;
+                       "the output path.\n";
   }
 
   auto outputSubdirs =
@@ -331,8 +330,7 @@ void ImggAggregateWavelengths::aggIndexBands(const std::string &inputPath,
   if (inputSubDirs.empty()) {
     g_log.warning() << "Could not find any input files or directories in "
                     << inputPath << " when looking for input bands. Nothing "
-                                    "will be produced in the output path."
-                    << std::endl;
+                                    "will be produced in the output path.\n";
   }
 
   auto outRanges = rangesFromStringProperty(rangesSpec, PROP_INDEX_RANGES);
@@ -391,7 +389,7 @@ void ImggAggregateWavelengths::processDirectory(
   if (images.empty()) {
     g_log.warning()
         << "Could not find any input image files in the subdirectory '"
-        << inDir.toString() << "'. It will be ignored." << std::endl;
+        << inDir.toString() << "'. It will be ignored.\n";
     return;
   }
 
@@ -780,15 +778,10 @@ void ImggAggregateWavelengths::aggImage(API::MatrixWorkspace_sptr accum,
   }
 
   for (size_t row = 0; row < sizeY; row++) {
-    Mantid::API::ISpectrum *spectrum = accum->getSpectrum(row);
-    Mantid::API::ISpectrum *specIn = toAdd->getSpectrum(row);
-    auto &dataY = spectrum->dataY();
-    const auto &dataYIn = specIn->readY();
+    auto &dataY = accum->dataY(row);
+    const auto &dataYIn = toAdd->readY(row);
     std::transform(dataY.begin(), dataY.end(), dataYIn.cbegin(), dataY.begin(),
                    std::plus<double>());
-    // for (size_t col = 0; col < sizeX; col++) {
-    //  dataY[col] += dataYIn[col];
-    //}
   }
 }
 
@@ -814,7 +807,7 @@ void ImggAggregateWavelengths::saveAggImage(
   if (!dirFile.isDirectory() || !dirFile.exists()) {
     g_log.information() << "Cannot save output image into '"
                         << outPath.toString()
-                        << "'. It is not an existing directory." << std::endl;
+                        << "'. It is not an existing directory.\n";
     return;
   }
 
@@ -824,7 +817,7 @@ void ImggAggregateWavelengths::saveAggImage(
   fullName += ".fits";
   saveFITS(accum, fullName);
   g_log.information() << "Saved output aggregated image into: " << fullName
-                      << std::endl;
+                      << '\n';
 }
 
 API::MatrixWorkspace_sptr
@@ -880,111 +873,31 @@ ImggAggregateWavelengths::loadFITS(const Poco::Path &imgPath,
   return ws;
 }
 
-namespace {
-// Minimalistic SaveFITS.  At a very least we should add headers for
-// ToF, time bin, counts, triggers, etc.
-// TODO: this is a very early version of what should become an
-// algorithm of its own
-const size_t maxLenHdr = 80;
-const std::string FITSHdrFirst =
-    "SIMPLE  =                    T / file does conform to FITS standard";
-const std::string FITSHdrBitDepth =
-    "BITPIX  =                   16 / number of bits per data pixel";
-const std::string FITSHdrAxes =
-    "NAXIS   =                    2 / number of data axes";
-const std::string FITSHdrExtensions =
-    "EXTEND  =                    T / FITS dataset may contain extensions";
-const std::string FITSHdrRefComment1 = "COMMENT   FITS (Flexible Image "
-                                       "Transport System) format is defined in "
-                                       "'Astronomy";
-const std::string FITSHdrRefComment2 =
-    "COMMENT   and Astrophysics', volume 376, page 359; bibcode: "
-    "2001A&A...376..359H";
-const std::string FITSHdrEnd = "END";
-
-void writeFITSHeaderEntry(const std::string &hdr, std::ofstream &file) {
-  static const std::vector<char> zeros(maxLenHdr, 0);
-
-  size_t count = hdr.size();
-  if (count >= maxLenHdr)
-    count = maxLenHdr;
-
-  file.write(hdr.c_str(), sizeof(char) * count);
-  file.write(zeros.data(), maxLenHdr - count);
-}
-
-void writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr img,
-                              std::ofstream &file) {
-  const std::string sizeX = std::to_string(img->blocksize());
-  const std::string sizeY = std::to_string(img->getNumberHistograms());
-
-  const size_t fieldWidth = 20;
-  std::stringstream axis1;
-  axis1 << "NAXIS1  = " << std::setw(fieldWidth) << sizeX
-        << " / length of data axis 1";
-  writeFITSHeaderEntry(axis1.str(), file);
-
-  std::stringstream axis2;
-  axis2 << "NAXIS2  = " << std::setw(fieldWidth) << sizeY
-        << " / length of data axis 2";
-  writeFITSHeaderEntry(axis2.str(), file);
-}
-
-// FITS headers consist of subblocks of 36 entries/lines. This method
-// is to write the "padding" lines required to have 36 in a block
-void writePaddingFITSHeaders(size_t count, std::ofstream &file) {
-  static const std::vector<char> zeros(maxLenHdr, 0);
-
-  for (size_t i = 0; i < count; ++i) {
-    file.write(zeros.data(), maxLenHdr);
-  }
-}
-
-void writeFITSHeaderBlock(const API::MatrixWorkspace_sptr img,
-                          std::ofstream &file) {
-  writeFITSHeaderEntry(FITSHdrFirst, file);
-  writeFITSHeaderEntry(FITSHdrBitDepth, file);
-  writeFITSHeaderEntry(FITSHdrAxes, file);
-  writeFITSHeaderAxesSizes(img, file);
-  writeFITSHeaderEntry(FITSHdrExtensions, file);
-  writeFITSHeaderEntry(FITSHdrRefComment1, file);
-  writeFITSHeaderEntry(FITSHdrRefComment2, file);
-  writeFITSHeaderEntry(FITSHdrEnd, file);
-
-  const size_t entriesPerHDU = 36;
-  writePaddingFITSHeaders(entriesPerHDU - 9, file);
-}
-
-void writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
-                          std::ofstream &file) {
-  const size_t sizeX = img->blocksize();
-  const size_t sizeY = img->getNumberHistograms();
-
-  for (size_t row = 0; row < sizeY; row++) {
-    Mantid::API::ISpectrum *spectrum = img->getSpectrum(row);
-    const auto &dataY = spectrum->readY();
-    for (size_t col = 0; col < sizeX; col++) {
-      int16_t pixelVal = static_cast<uint16_t>(dataY[col]);
-
-      // change endianness: to sequence of bytes in big-endian
-      const size_t bytespp = 2;
-      uint8_t bytesPixel[bytespp];
-      uint8_t *iter = reinterpret_cast<uint8_t *>(&pixelVal);
-      std::reverse_copy(iter, iter + bytespp, bytesPixel);
-
-      file.write(reinterpret_cast<const char *>(&bytesPixel),
-                 sizeof(bytesPixel));
-    }
-  }
-}
-}
-
 void ImggAggregateWavelengths::saveFITS(const API::MatrixWorkspace_sptr accum,
                                         const std::string &filename) {
-  std::ofstream outfile(filename, std::ofstream::binary);
+  auto writer =
+      Mantid::API::AlgorithmManager::Instance().createUnmanaged("SaveFITS");
+  try {
+    writer->initialize();
+    writer->setChild(true);
+    writer->setPropertyValue("Filename", filename);
+    writer->setProperty("InputWorkspace", accum);
+    // this is way faster when loading into a MatrixWorkspace
+    writer->setProperty("BitDepth", 16);
+  } catch (std::exception &e) {
+    throw std::runtime_error("Failed to initialize the algorithm to "
+                             "save images in FITS format. Error description: " +
+                             std::string(e.what()));
+  }
 
-  writeFITSHeaderBlock(accum, outfile);
-  writeFITSImageMatrix(accum, outfile);
+  try {
+    writer->execute();
+  } catch (std::exception &e) {
+    throw std::runtime_error(
+        "Failed to write image. Could not write this file as a"
+        "FITS image: " +
+        std::string(e.what()));
+  }
 }
 
 } // namespace DataHandling

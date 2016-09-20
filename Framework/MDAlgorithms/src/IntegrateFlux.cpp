@@ -178,7 +178,7 @@ void IntegrateFlux::integrateSpectraEvents(
   // loop overr the spectra and integrate
   for (size_t sp = 0; sp < nSpec; ++sp) {
     const std::vector<EventType> *el;
-    DataObjects::getEventsFrom(inputWS.getEventList(sp), el);
+    DataObjects::getEventsFrom(inputWS.getSpectrum(sp), el);
     auto &outY = integrWS.dataY(sp);
     double sum = 0;
     auto x = X.begin() + 1;
@@ -479,7 +479,7 @@ IntegrateFlux::getMaxNumberOfPoints(const API::MatrixWorkspace &inputWS) const {
   // if it's events we shouldn't care about binning
   auto eventWS = dynamic_cast<const DataObjects::EventWorkspace *>(&inputWS);
   if (eventWS) {
-    return eventWS->getEventList(0).getNumberEvents();
+    return eventWS->getSpectrum(0).getNumberEvents();
   }
 
   return inputWS.blocksize();

@@ -1,7 +1,8 @@
 ﻿#pylint: disable=too-many-lines
 #pylint: disable=invalid-name
+#pylind: disable=attribute-defined-outside-init
 from mantid.simpleapi import *
-from mantid.kernel import funcreturns
+from mantid.kernel import funcinspect
 from mantid import geometry,api
 
 import os.path
@@ -30,7 +31,6 @@ def setup_reducer(inst_name,reload_instrument=False):
         raise RuntimeError('Unknown instrument "%s" or wrong IDF file for this instrument, cannot continue' % inst_name)
 
 #How could it be that abstract class is not referenced R0921? What it means?
-#pylint: disable=R0921
 #pylint: disable=too-many-instance-attributes
 class DirectEnergyConversion(object):
     """
@@ -190,7 +190,7 @@ class DirectEnergyConversion(object):
         # output workspace name.
         try:
 #pylint: disable=unused-variable
-            n,r = funcreturns.lhs_info('both')
+            n,r = funcinspect.lhs_info('both')
             out_ws_name = r[0]
 #pylint: disable=bare-except
         except:
@@ -213,9 +213,14 @@ class DirectEnergyConversion(object):
                 # data file.  SNS or 1 to 1 maps may probably avoid this
                 # stuff and can load masks directly
                 white_data = white.get_ws_clone('white_ws_clone')
+                if self.prop_man.mapmask_ref_ws is None:
+                    ref_ws = white.get_workspace()
+                else:
+                    ref_ws = self.prop_man.mapmask_ref_ws
                 idf_file = api.ExperimentInfo.getInstrumentFilename(self.instr_name)
                 diag_mask = LoadMask(Instrument=idf_file,InputFile=self.hard_mask_file,\
-                                 OutputWorkspace='hard_mask_ws')
+                                 OutputWorkspace='hard_mask_ws',RefWorkspace = ref_ws)
+                #
                 MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
                 white.add_masked_ws(white_data)
                 DeleteWorkspace(Workspace='white_ws_clone')
@@ -344,13 +349,14 @@ class DirectEnergyConversion(object):
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-branches
 #pylint: disable=too-many-locals
+#pylint: disable=W0621
     def convert_to_energy(self,wb_run=None,sample_run=None,ei_guess=None,rebin=None,map_file=None,
                           monovan_run=None,wb_for_monovan_run=None,**kwargs):
         """ One step conversion of run into workspace containing information about energy transfer
         """
         # Support for old reduction interface:
         self.prop_man.set_input_parameters_ignore_nan\
-            (wb_run=wb_run,sample_run=sample_run,incident_energy=ei_guess,energy_bins=rebin,
+            (wb_run=wb_run,sample_run=sample_run,incident_energy=ei_guess,energy_bins=rebin,\
             map_file=map_file,monovan_run=monovan_run,wb_for_monovan_run=wb_for_monovan_run)
         #
         self.prop_man.set_input_parameters(**kwargs)
@@ -358,7 +364,7 @@ class DirectEnergyConversion(object):
 
         # output workspace name.
         try:
-            _,r = funcreturns.lhs_info('both')
+            _,r = funcinspect.lhs_info('both')
             out_ws_name = r[0]
 #pylint: disable=bare-except
         except:
@@ -459,9 +465,8 @@ class DirectEnergyConversion(object):
         psi = PropertyManager.psi.read_psi_from_workspace(sample_ws)
         if not prop_man.motor_offset is None and np.isnan(psi):
             #logs have a problem
-            prop_man.log('*** Can not retrieve rotation value from sample environment logs: {0}.\n' + \
-                '    Rotation angle remains undefined'.\
-                format(prop_man.motor_log_names))
+            prop_man.log("*** Can not retrieve rotation value from sample environment logs: {0}.\n"
+                         "     Rotation angle remains undefined".format(prop_man.motor_log_names))
             PropertyManager.psi = None # Just in case
         else:
             # store psi in property not to retrieve it from workspace again
@@ -593,14 +598,18 @@ class DirectEnergyConversion(object):
         """
         # do not remove background from vanadium (sample background is not
         # fit for that anyway)
+#pylint: disable=E0203
         current_bkg_opt = self.check_background
+#pylint: disable=attribute-defined-outside-init
         self.check_background = False
         # what we want to do with absolute units:
+#pylint: disable=E0203
         if self.mono_correction_factor: # Correction provided.  Just apply it
             deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
                                                             ei_guess,PropertyManager.wb_for_monovan_run,\
                                                             ' provided ')
         elif cashed_mono_int:  # Correction cashed from previous run
+#pylint: disable=attribute-defined-outside-init
             self.mono_correction_factor = cashed_mono_int
             deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
                                                             ei_guess,PropertyManager.wb_for_monovan_run,\
@@ -791,16 +800,16 @@ class DirectEnergyConversion(object):
                 psp = workspace.getSpectrum(specID)
                 detIDs = psp.getDetectorIDs()
                 for detID in detIDs:
-                    MoveInstrumentComponent(Workspace=workspace,ComponentName= 'Detector',
-                                DetectorID=detID,X=detPos.getX(),Y=detPos.getY(),
+                    MoveInstrumentComponent(Workspace=workspace,ComponentName= 'Detector',\
+                                DetectorID=detID,X=detPos.getX(),Y=detPos.getY(),\
                                 Z=detPos.getZ(),RelativePosition=False)
             wsIDs.append(specID)
 
         if len(spectra_list) == 1:
-            ExtractSingleSpectrum(InputWorkspace=workspace,OutputWorkspace=target_ws_name,
+            ExtractSingleSpectrum(InputWorkspace=workspace,OutputWorkspace=target_ws_name,\
             WorkspaceIndex=wsIDs[0])
         else:
-            SumSpectra(InputWorkspace=workspace,OutputWorkspace=target_ws_name,
+            SumSpectra(InputWorkspace=workspace,OutputWorkspace=target_ws_name,\
             ListOfWorkspaceIndices=wsIDs)
         ws = mtd[target_ws_name]
         sp = ws.getSpectrum(0)
@@ -837,7 +846,7 @@ class DirectEnergyConversion(object):
 
         # Calculate the incident energy
         #Returns: ei,mon1_peak,mon1_index,tzero
-        ei,mon1_peak,mon1_index,_ = \
+        ei,mon1_peak,_,_ = \
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spectra[0],
                   Monitor2Spec=ei_mon_spectra[1],
                   EnergyEstimate=ei_guess,FixEi=fix_ei)
@@ -849,6 +858,7 @@ class DirectEnergyConversion(object):
            # case)
            #Find TOF range, correspondent to incident energy monitor peak
             energy_rage = self.mon2_norm_energy_range
+#pylint: disable=attribute-defined-outside-init
             self._mon2_norm_time_range = self.get_TOF_for_energies(monitor_ws,energy_rage,\
                                                                  [self.mon2_norm_spec],None,self._debug_mode)
         #end
@@ -1043,7 +1053,7 @@ class DirectEnergyConversion(object):
                 range_min = TOF_range[0]
                 range_max = TOF_range[1]
        # Normalize to monitor 2
-        NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name,IntegrationRangeMin=range_min,
+        NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name,IntegrationRangeMin=range_min,\
                            IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
 
         norm_ws_name = kwargs['NormFactorWS']
@@ -1145,8 +1155,8 @@ class DirectEnergyConversion(object):
                 # Calculate the incident energy and TOF when the particles access Monitor1
                 try:
                     ei,mon1_peak,mon1_index,_ = \
-                    GetEi(InputWorkspace=monitor_ws, Monitor1Spec=mon_1_spec_ID,
-                        Monitor2Spec=mon_2_spec_ID,
+                    GetEi(InputWorkspace=monitor_ws, Monitor1Spec=mon_1_spec_ID,\
+                        Monitor2Spec=mon_2_spec_ID,\
                         EnergyEstimate=ei_guess,FixEi=fix_ei)
                     mon1_det = monitor_ws.getDetector(mon1_index)
                     mon1_pos = mon1_det.getPos()
@@ -1492,7 +1502,7 @@ class DirectEnergyConversion(object):
 --------> Abs norm factors: Sigma^2: {9}
 --------> Abs norm factors: Poisson: {10}
 --------> Abs norm factors: TGP    : {11}\n"""\
-                .format(ws_name,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,
+                .format(ws_name,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,\
                           norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
             log_value = log_value + log1_value
             propman.log(log_value,'error')
@@ -1785,7 +1795,8 @@ class DirectEnergyConversion(object):
         if prop_man.energy_bins: # It should already be a distribution.
             ConvertToDistribution(Workspace=result_ws)
         # nullify negarive signals if necessary
-        if prop_man.check_background and prop_man.nullify_negative_signal:
+        if prop_man.check_background and (hasattr(prop_man,'nullify_negative_signal') and
+                                          prop_man.nullify_negative_signal):
             zeroBg = CreateWorkspace(DataX='0,1',DataY=0,DataE=0,UnitX='TOF')
             result_ws=RemoveBackground(result_ws,BkgWorkspace=zeroBg,Emode='Direct',NullifyNegativeValues=True)
             DeleteWorkspace(zeroBg)

@@ -1,10 +1,11 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/kernel/NdArray.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
-#include <boost/python/numeric.hpp>
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
@@ -12,10 +13,23 @@
 using namespace Mantid::API;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 namespace Converters = Mantid::PythonInterface::Converters;
+namespace NumPy = Mantid::PythonInterface::NumPy;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(IMDHistoWorkspace)
+
+namespace Mantid {
+namespace PythonInterface {
+namespace Converters {
+extern template int NDArrayTypeIndex<float>::typenum;
+extern template int NDArrayTypeIndex<double>::typenum;
+}
+}
+}
 
 namespace {
 /**
+
  * Determine the sizes of each dimensions
  * @param array :: the C++ array
  * @param dims :: the dimensions vector (Py_intptr_t type)
@@ -32,8 +46,8 @@ PyObject *WrapReadOnlyNumpyFArray(Mantid::signal_t *arr,
   PyArray_CLEARFLAGS(nparray, NPY_ARRAY_WRITEABLE);
 #else
   PyArrayObject *nparray = (PyArrayObject *)PyArray_New(
-      &PyArray_Type, static_cast<int>(dims.size()), &dims[0], datatype, NULL,
-      static_cast<void *>(const_cast<double *>(arr)), 0, NPY_FARRAY, NULL);
+      &PyArray_Type, static_cast<int>(dims.size()), &dims[0], datatype, nullptr,
+      static_cast<void *>(const_cast<double *>(arr)), 0, NPY_FARRAY, nullptr);
   nparray->flags &= ~NPY_WRITEABLE;
 #endif
   return reinterpret_cast<PyObject *>(nparray);
@@ -100,7 +114,7 @@ PyObject *getNumEventsArrayAsNumpyArray(IMDHistoWorkspace &self) {
  * @param signal :: The new values
  * @param fnLabel :: A message prefix to pass if the sizes are incorrect
  */
-void throwIfSizeIncorrect(IMDHistoWorkspace &self, const numeric::array &signal,
+void throwIfSizeIncorrect(IMDHistoWorkspace &self, const NumPy::NdArray &signal,
                           const std::string &fnLabel) {
   auto wsShape = countDimensions(self);
   const size_t ndims = wsShape.size();
@@ -117,8 +131,8 @@ void throwIfSizeIncorrect(IMDHistoWorkspace &self, const numeric::array &signal,
     int arrDim = extract<int>(arrShape[i])();
     if (wsShape[i] != arrDim) {
       std::ostringstream os;
-      os << fnLabel << ": The dimension size for the "
-         << boost::lexical_cast<std::string>(i) << "th dimension do not match. "
+      os << fnLabel << ": The dimension size for the " << std::to_string(i)
+         << "th dimension do not match. "
          << "Workspace dimension size=" << wsShape[i]
          << ", array size=" << arrDim;
       throw std::invalid_argument(os.str());
@@ -134,7 +148,7 @@ void throwIfSizeIncorrect(IMDHistoWorkspace &self, const numeric::array &signal,
  * correct
  */
 void setSignalArray(IMDHistoWorkspace &self,
-                    const numeric::array &signalValues) {
+                    const NumPy::NdArray &signalValues) {
   throwIfSizeIncorrect(self, signalValues, "setSignalArray");
   object rav = signalValues.attr("ravel")("F");
   object flattened = rav.attr("flat");
@@ -152,7 +166,7 @@ void setSignalArray(IMDHistoWorkspace &self,
  * correct
  */
 void setErrorSquaredArray(IMDHistoWorkspace &self,
-                          const numeric::array &errorSquared) {
+                          const NumPy::NdArray &errorSquared) {
   throwIfSizeIncorrect(self, errorSquared, "setErrorSquaredArray");
   object rav = errorSquared.attr("ravel")("F");
   object flattened = rav.attr("flat");

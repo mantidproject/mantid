@@ -12,27 +12,24 @@
 //-----------------------------------------
 // Forward Declarations
 //-----------------------------------------
-namespace Mantid
-{
-namespace Geometry
-{
-  class Object;
+namespace Mantid {
+namespace Geometry {
+class Object;
 }
 }
 
-namespace MantidQt
-{
-namespace CustomDialogs
-{
+namespace MantidQt {
+namespace CustomDialogs {
 
-/** 
-    This class provides a widget to display a Mantid Geometry object using 
+/**
+    This class provides a widget to display a Mantid Geometry object using
     OpenGL.
 
     @author Martyn Gigg, Tessella Support Services plc
     @date 18/05/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -50,17 +47,16 @@ namespace CustomDialogs
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MantidGLWidget : public QGLWidget
-{
+class MantidGLWidget : public QGLWidget {
 
   Q_OBJECT
 
 public:
-  ///Default constructor
+  /// Default constructor
   MantidGLWidget(QWidget *parent = 0);
-  ///Destructor
+  /// Destructor
   ~MantidGLWidget() override;
 
   /// Set the Mantid geometry object
@@ -93,7 +89,7 @@ private:
   void mouseMoveEvent(QMouseEvent *event) override;
   /// A Mantid geometry object
   boost::shared_ptr<Mantid::Geometry::Object> m_display_object;
-  /// The current X, Y and Z rotations 
+  /// The current X, Y and Z rotations
   GLdouble m_x_rot, m_y_rot, m_z_rot;
   /// The scaling factor to use
   GLdouble m_scale_factor;
@@ -104,8 +100,7 @@ private:
   /// The centre of the bounding box
   GLdouble m_bb_centres[3];
 };
-
 }
 }
 
-#endif //MANTIDQT_CUSTOMDIALOGS_MANTIDGLWIDGET_H_
+#endif // MANTIDQT_CUSTOMDIALOGS_MANTIDGLWIDGET_H_

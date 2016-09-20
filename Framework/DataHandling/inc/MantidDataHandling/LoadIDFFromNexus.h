@@ -53,10 +53,6 @@ class DLLExport LoadIDFFromNexus : public API::Algorithm {
 public:
   /// Default constructor
   LoadIDFFromNexus();
-
-  /// Destructor
-  ~LoadIDFFromNexus() override {}
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadIDFFromNexus"; }
   /// Summary of algorithms purpose

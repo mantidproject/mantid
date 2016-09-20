@@ -7,6 +7,7 @@
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/Logger.h"
 
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Strings::toString;
@@ -16,6 +17,8 @@ namespace Geometry {
 using Kernel::DblMatrix;
 using Kernel::V3D;
 using Kernel::Quat;
+
+Mantid::Kernel::Logger g_log("Goniometer");
 
 void GoniometerAxis::saveNexus(::NeXus::File *file,
                                const std::string &group) const {
@@ -100,7 +103,7 @@ std::string Goniometer::axesInfo() {
                            ? ((*it).angle)
                            : ((*it).angle * rad2deg);
         info << (*it).name << "\t" << (*it).rotationaxis << "\t" << sense
-             << "\t" << angle << std::endl;
+             << "\t" << angle << '\n';
       }
     }
     return info.str();
@@ -122,6 +125,15 @@ void Goniometer::pushAxis(std::string name, double axisx, double axisy,
     throw std::runtime_error(
         "Initialized from a rotation matrix, so no axes can be pushed.");
   } else {
+    if (!std::isfinite(axisx) || !std::isfinite(axisy) ||
+        !std::isfinite(axisz) || !std::isfinite(angle)) {
+      g_log.warning() << "NaN encountered while trying to push axis to "
+                         "goniometer, Operation aborted"
+                      << "\naxis name" << name << "\naxisx" << axisx
+                      << "\naxisy" << axisx << "\naxisz" << axisz << "\nangle"
+                      << angle;
+      return;
+    }
     std::vector<GoniometerAxis>::iterator it;
     // check if such axis is already defined
     for (it = motors.begin(); it < motors.end(); ++it) {

@@ -4,10 +4,8 @@
 
 #include "MantidQtSpectrumViewer/ColorMaps.h"
 
-namespace MantidQt
-{
-namespace SpectrumView
-{
+namespace MantidQt {
+namespace SpectrumView {
 
 /**
  * Get a color map of the specified type, with the specified number of
@@ -108,41 +106,35 @@ std::vector<double> ColorMaps::GetIntensityMap(double control_s,
                                                size_t n_entries) {
 
   std::vector<double> intensity_table;
-  intensity_table.resize( n_entries );
-                                        // restrict control range to [0,100]
+  intensity_table.resize(n_entries);
+  // restrict control range to [0,100]
   double MAX_CONTROL = 100.0;
-  if ( control_s > MAX_CONTROL )
-  {
+  if (control_s > MAX_CONTROL) {
     control_s = MAX_CONTROL;
-  }
-  else if ( control_s < 0.0 )
-  {
+  } else if (control_s < 0.0) {
     control_s = 0.0;
   }
 
-  if ( control_s == 0.0 )                // just use linear scale, 0 -> 1
+  if (control_s == 0.0) // just use linear scale, 0 -> 1
   {
-    for ( size_t i = 0; i < n_entries; i++ )
-    {
+    for (size_t i = 0; i < n_entries; i++) {
       intensity_table[i] = (double)i / (double)(n_entries - 1);
     }
-  }
-  else                                   // build log-shaped correction scale
+  } else // build log-shaped correction scale
   {
-                                         // first map control value
-                                         // exponentially to make the control
-                                         // parameter act more linearly
-    double s     = exp( 20.0 * control_s / MAX_CONTROL ) + 0.1;
-    double scale = 1.0 / log( s );
-    for ( size_t i = 0; i < n_entries - 1; i++ )
-    {
+    // first map control value
+    // exponentially to make the control
+    // parameter act more linearly
+    double s = exp(20.0 * control_s / MAX_CONTROL) + 0.1;
+    double scale = 1.0 / log(s);
+    for (size_t i = 0; i < n_entries - 1; i++) {
       intensity_table[i] = scale * log1p((s - 1.0) * static_cast<double>(i) /
                                          static_cast<double>(n_entries - 1));
     }
-    intensity_table[n_entries - 1] = 1.0;  // this could have been calculated
-                                           // by running the loop one step
-                                           // further, but due to rounding
-                                           // errors, it might exceed 1.
+    intensity_table[n_entries - 1] = 1.0; // this could have been calculated
+                                          // by running the loop one step
+                                          // further, but due to rounding
+                                          // errors, it might exceed 1.
   }
   return intensity_table;
 }
@@ -174,39 +166,37 @@ std::vector<QRgb> ColorMaps::InterpolateColorScale(double base_red[],
                                                    size_t n_base_colors,
                                                    size_t n_colors) {
   std::vector<QRgb> color_table;
-  color_table.resize( n_colors );
-                                      // first output color is first base color
-  color_table[0] = qRgb( (unsigned char)base_red[0],
-                         (unsigned char)base_green[0],
-                         (unsigned char)base_blue[0]  );
+  color_table.resize(n_colors);
+  // first output color is first base color
+  color_table[0] =
+      qRgb((unsigned char)base_red[0], (unsigned char)base_green[0],
+           (unsigned char)base_blue[0]);
 
-                                      // last output color is last base color
+  // last output color is last base color
   size_t last_out = n_colors - 1;
-  size_t last_in  = n_base_colors - 1;
-  color_table[last_out] = qRgb( (unsigned char)base_red[last_in],
-                                (unsigned char)base_green[last_in],
-                                (unsigned char)base_blue[last_in]  );
+  size_t last_in = n_base_colors - 1;
+  color_table[last_out] =
+      qRgb((unsigned char)base_red[last_in], (unsigned char)base_green[last_in],
+           (unsigned char)base_blue[last_in]);
 
-                                       // interpolate remaining output colors
-  for ( size_t i = 1; i < last_out; i++ )
-  {
-                                      // fraction of way along output indices
+  // interpolate remaining output colors
+  for (size_t i = 1; i < last_out; i++) {
+    // fraction of way along output indices
     double t_out = (double)i / (double)last_out;
 
     double float_index = t_out * (double)last_in;
-                                          // corresponding "floating point"
-                                          // index in array of input colors
+    // corresponding "floating point"
+    // index in array of input colors
     int base_index = (int)float_index;
 
     double t = float_index - (double)base_index;
 
-    color_table[i] = qRgb(
-                     (unsigned char) ( (1.0-t) * base_red[base_index]+
-                                          t    * base_red[base_index + 1] ),
-                     (unsigned char) ( (1.0-t) * base_green[base_index]+
-                                          t    * base_green[base_index + 1] ),
-                     (unsigned char) ( (1.0-t) * base_blue[base_index]+
-                                          t    * base_blue[base_index + 1] ) );
+    color_table[i] = qRgb((unsigned char)((1.0 - t) * base_red[base_index] +
+                                          t * base_red[base_index + 1]),
+                          (unsigned char)((1.0 - t) * base_green[base_index] +
+                                          t * base_green[base_index + 1]),
+                          (unsigned char)((1.0 - t) * base_blue[base_index] +
+                                          t * base_blue[base_index + 1]));
   }
   return color_table;
 }

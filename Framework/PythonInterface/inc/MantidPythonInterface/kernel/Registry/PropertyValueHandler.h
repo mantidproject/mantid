@@ -25,6 +25,7 @@
 #include "MantidKernel/System.h"
 #include <boost/python/object.hpp>
 #include <string>
+#include <memory>
 
 namespace Mantid {
 namespace Kernel {
@@ -49,10 +50,10 @@ struct DLLExport PropertyValueHandler {
   virtual void set(Kernel::IPropertyManager *alg, const std::string &name,
                    const boost::python::object &value) const = 0;
   /// Overload to create a Property type from the given value with no validation
-  virtual Kernel::Property *create(const std::string &name,
-                                   const boost::python::object &value,
-                                   const boost::python::object &validator,
-                                   const unsigned int direction) const = 0;
+  virtual std::unique_ptr<Kernel::Property>
+  create(const std::string &name, const boost::python::object &value,
+         const boost::python::object &validator,
+         const unsigned int direction) const = 0;
 };
 }
 }

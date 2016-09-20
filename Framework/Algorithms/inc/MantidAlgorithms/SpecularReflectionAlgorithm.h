@@ -38,7 +38,7 @@ class DLLExport SpecularReflectionAlgorithm
     : public Mantid::API::DataProcessorAlgorithm {
 protected:
   /// Constructor
-  SpecularReflectionAlgorithm();
+  SpecularReflectionAlgorithm() = default;
 
   /// Get the surface sample component
   Mantid::Geometry::IComponent_const_sptr
@@ -54,10 +54,6 @@ protected:
 
   /// initialize common properties
   void initCommonProperties();
-
-public:
-  /// Destructor
-  ~SpecularReflectionAlgorithm() override = 0;
 };
 
 } // namespace Algorithms

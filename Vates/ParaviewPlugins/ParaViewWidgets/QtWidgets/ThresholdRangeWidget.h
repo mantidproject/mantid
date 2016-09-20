@@ -6,12 +6,14 @@
 #include <qstring.h>
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <qlineedit.h>
-/** This is the GUI implementation of the threshold range widgets. These are used to set max and min threshold values.
+/** This is the GUI implementation of the threshold range widgets. These are
+   used to set max and min threshold values.
 
     @author Owen Arnold Tessella/ISIS
     @date July 04/2011
 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -32,64 +34,61 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-//Foward decs
+// Foward decs
 class QLabel;
 class QLayout;
 class QLineEdit;
 class QComboBox;
 
 // cppcheck-suppress class_X_Y
-class EXPORT_OPT_MANTIDPARVIEW ThresholdRangeWidget: public QWidget
-{
+class EXPORT_OPT_MANTIDPARVIEW ThresholdRangeWidget : public QWidget {
 
-Q_OBJECT
+  Q_OBJECT
 public:
-Q_PROPERTY(QString MinSignal READ getMinSignal WRITE setMinSignal NOTIFY minChanged)
-Q_PROPERTY(QString MaxSignal READ getMaxSignal WRITE setMaxSignal NOTIFY maxChanged)
-Q_PROPERTY(QString ChosenStrategy READ getChosenStrategy WRITE setChosenStrategy NOTIFY chosenStrategyChanged)
+  Q_PROPERTY(QString MinSignal READ getMinSignal WRITE setMinSignal NOTIFY
+                 minChanged)
+  Q_PROPERTY(QString MaxSignal READ getMaxSignal WRITE setMaxSignal NOTIFY
+                 maxChanged)
+  Q_PROPERTY(QString ChosenStrategy READ getChosenStrategy WRITE
+                 setChosenStrategy NOTIFY chosenStrategyChanged)
 
-ThresholdRangeWidget(double min, double max);
+  ThresholdRangeWidget(double min, double max);
 
-~ThresholdRangeWidget() override;
+  ~ThresholdRangeWidget() override;
 
-QString getMaxSignal() const;
-QString getMinSignal() const;
-QString getChosenStrategy() const;
+  QString getMaxSignal() const;
+  QString getMinSignal() const;
+  QString getChosenStrategy() const;
 
-void setMaximum(double value);
-void setMinimum(double value);
+  void setMaximum(double value);
+  void setMinimum(double value);
 
-void setMinSignal(QString value)
-{
-  //Do nothing.
-  UNUSED_ARG(value);
-}
+  void setMinSignal(QString value) {
+    // Do nothing.
+    UNUSED_ARG(value);
+  }
 
-void setMaxSignal(QString value)
-{
-  //Do nothing.
-  UNUSED_ARG(value);
-}
+  void setMaxSignal(QString value) {
+    // Do nothing.
+    UNUSED_ARG(value);
+  }
 
-void setChosenStrategy(QString value)
-{
-  //Do nothing.
-  UNUSED_ARG(value);
-}
-
+  void setChosenStrategy(QString value) {
+    // Do nothing.
+    UNUSED_ARG(value);
+  }
 
 Q_SIGNALS:
-        void minChanged();
-        void maxChanged();
-        void chosenStrategyChanged();
+  void minChanged();
+  void maxChanged();
+  void chosenStrategyChanged();
 
 private:
+  QLineEdit *m_maxEditBox;
+  QLineEdit *m_minEditBox;
+  QComboBox *m_thresholdStrategyComboBox;
 
-  QLineEdit* m_maxEditBox;
-  QLineEdit* m_minEditBox;
-  QComboBox* m_thresholdStrategyComboBox;
-
-  private slots:
+private slots:
   void maxThresholdListener(const QString &);
 
   void minThresholdListener(const QString &);

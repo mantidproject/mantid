@@ -96,6 +96,13 @@ void MDNormDirectSC::init() {
       "An input workspace containing integrated vanadium (a measure of the "
       "solid angle).");
 
+  declareProperty(make_unique<PropertyWithValue<bool>>("SkipSafetyCheck", false,
+                                                       Direction::Input),
+                  "If set to true, the algorithm does "
+                  "not check history if the workspace was modified since the"
+                  "ConvertToMD algorithm was run, and assume that the direct "
+                  "geometry inelastic mode is used.");
+
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
@@ -141,7 +148,8 @@ void MDNormDirectSC::exec() {
  */
 void MDNormDirectSC::cacheInputs() {
   m_inputWS = getProperty("InputWorkspace");
-  if (inputEnergyMode() != "Direct") {
+  bool skipCheck = getProperty("SkipSafetyCheck");
+  if (!skipCheck && (inputEnergyMode() != "Direct")) {
     throw std::invalid_argument("Invalid energy transfer mode. Algorithm only "
                                 "supports direct geometry spectrometers.");
   }
@@ -206,23 +214,17 @@ void MDNormDirectSC::cacheInputs() {
 std::string MDNormDirectSC::inputEnergyMode() const {
   const auto &hist = m_inputWS->getHistory();
   const size_t nalgs = hist.size();
-  const auto &lastAlgorithm = hist.lastAlgorithm();
+  const auto &lastAlgHist = hist.getAlgorithmHistory(nalgs - 1);
+  const auto &penultimateAlgHist = hist.getAlgorithmHistory(nalgs - 2);
 
-  std::string emode("");
-  if (lastAlgorithm->name() == "ConvertToMD") {
-    emode = lastAlgorithm->getPropertyValue("dEAnalysisMode");
-  } else if ((lastAlgorithm->name() == "Load" ||
-              hist.lastAlgorithm()->name() == "LoadMD") &&
-             hist.getAlgorithmHistory(nalgs - 2)->name() == "ConvertToMD") {
+  std::string emode;
+  if (lastAlgHist->name() == "ConvertToMD") {
+    emode = lastAlgHist->getPropertyValue("dEAnalysisMode");
+  } else if ((lastAlgHist->name() == "Load" ||
+              lastAlgHist->name() == "LoadMD") &&
+             penultimateAlgHist->name() == "ConvertToMD") {
     // get dEAnalysisMode
-    PropertyHistories histvec =
-        hist.getAlgorithmHistory(nalgs - 2)->getProperties();
-    for (auto &hist : histvec) {
-      if (hist->name() == "dEAnalysisMode") {
-        emode = hist->value();
-        break;
-      }
-    }
+    emode = penultimateAlgHist->getPropertyValue("dEAnalysisMode");
   } else {
     throw std::invalid_argument("The last algorithm in the history of the "
                                 "input workspace is not ConvertToMD");
@@ -242,7 +244,8 @@ MDHistoWorkspace_sptr MDNormDirectSC::binInputWS() {
   for (auto prop : props) {
     const auto &propName = prop->name();
     if (propName != "SolidAngleWorkspace" &&
-        propName != "OutputNormalizationWorkspace") {
+        propName != "OutputNormalizationWorkspace" &&
+        propName != "SkipSafetyCheck") {
       binMD->setPropertyValue(propName, prop->value());
     }
   }

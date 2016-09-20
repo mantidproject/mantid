@@ -201,6 +201,8 @@ public:
   void setDataSearchDirs(const std::string &searchDirs);
   /// Adds the passed path to the end of the list of data search paths
   void appendDataSearchDir(const std::string &path);
+  /// Appends subdirectory to each of the specified data search directories
+  void appendDataSearchSubDir(const std::string &subdir);
   /// Get the list of user search paths
   const std::vector<std::string> &getUserSearchDirs() const;
   /// Get instrument search directory
@@ -224,6 +226,9 @@ public:
   /// Set the default facility
   void setFacility(const std::string &facilityName);
 
+  /// registers additional logging filter channels
+  void registerLoggingFilterChannel(const std::string &filterChannelName,
+                                    Poco::Channel *pChannel);
   /// Sets the log level priority for the File log channel
   void setFileLogLevel(int logLevel);
   /// Sets the log level priority for the Console log channel
@@ -270,6 +275,7 @@ private:
   void loadConfig(const std::string &filename, const bool append = false);
   /// Read a file and place its contents into the given string
   bool readFile(const std::string &filename, std::string &contents) const;
+
   /// Provides a string of a default configuration
   std::string defaultConfig() const;
   /// Writes out a fresh user properties file
@@ -298,6 +304,8 @@ private:
   /// Returns a list of all keys under a given root key
   void getKeysRecursive(const std::string &root,
                         std::vector<std::string> &allKeys) const;
+  /// Finds the lowest registered logging filter level
+  int FindLowestFilterLevel() const;
 
   // Forward declaration of inner class
   template <class T> class WrappedObject;
@@ -341,17 +349,14 @@ private:
   Kernel::ProxyInfo m_proxyInfo;
   /// whether the proxy has been populated yet
   bool m_isProxySet;
+
+  /// store a list of logging FilterChannels
+  std::vector<std::string> m_filterChannels;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
-#if defined(__APPLE__) && defined(__INTEL_COMPILER)
-inline
-#endif
-    template class MANTID_KERNEL_DLL
-        Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
-typedef MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>
-    ConfigService;
+EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL
+    Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
+typedef Mantid::Kernel::SingletonHolder<ConfigServiceImpl> ConfigService;
 
 typedef Mantid::Kernel::ConfigServiceImpl::ValueChanged
     ConfigValChangeNotification;

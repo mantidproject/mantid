@@ -360,7 +360,7 @@ public:
       diff = det->getPos()- origin;
       diff.getSpherical(r,t,p);
       std::cout << "ind " << i << " -> theta = " << t << " phi = " << p << " r =
-    " << r << std::endl;
+    " << r << '\n';
     }
     throw std::runtime_error("stop");
      */

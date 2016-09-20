@@ -83,10 +83,8 @@ void SurfaceFactory::registerSurface()
   ID['g'] = "General";
   ID['p'] = "Plane";
   ID['s'] = "Sphere";
-  // ID['t']="Torus";
-  return;
+  // ID['t']="Torus";}
 }
-
 namespace {
 class KeyEquals {
 public:
@@ -160,7 +158,7 @@ SurfaceFactory::processLine(const std::string &Line) const
 
   std::unique_ptr<Surface> X = createSurfaceID(key);
   if (X->setSurface(Line)) {
-    std::cerr << "X:: " << X->setSurface(Line) << std::endl;
+    std::cerr << "X:: " << X->setSurface(Line) << '\n';
     throw Kernel::Exception::NotFoundError("SurfaceFactory::processLine", Line);
   }
 

@@ -17,7 +17,7 @@ location.
 **You must be in HKL space for the output of this algorithm to make
 sense!**
 
-From http://www.crystal.mat.ethz.ch/research/DiffuseXrayScattering:
+From http://www.crystal.mat.ethz.ch/research/DiffuseXrayScattering.html:
 
 -  In the frame of an international cooperation between our group, the
    University of Zurich and Oak Ridge National Laboratories, we are

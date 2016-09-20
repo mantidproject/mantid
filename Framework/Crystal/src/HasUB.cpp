@@ -10,16 +10,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(HasUB)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-HasUB::HasUB() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-HasUB::~HasUB() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string HasUB::name() const { return "HasUB"; }
 

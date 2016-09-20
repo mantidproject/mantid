@@ -19,7 +19,7 @@ and a warning message will be output on the `logging <http://www.mantidproject.o
 service.
 
 If AlignBins is false or left at the default the output workspace may be
-a `Ragged Workspace <http://www.mantidproject.org/Ragged_Workspace>`__. If it is set to true then the
+a :ref:`ragged workspace <Ragged_Workspace>`. If it is set to true then the
 data is automatically `rebinned <http://www.mantidproject.org/Rebin>`__ to a regular grid so that the
 maximum and minimum X values will be maintained. It uses the same number
 of bins as the input data, and divides them linearly equally between the
@@ -31,12 +31,16 @@ than is smaller than the input one. If the geometry is indirect then the
 value of EFixed will be taken, if available, from the instrument
 definition file.
 
+If ConvertFromPointData is true, an input workspace
+contains Point data will be converted using `ConvertToHistogram <http://www.mantidproject.org/ConvertToHistogram>`__
+and then the algorithm will be run on the converted workspace.
+
 Restrictions on the input workspace
 ###################################
 
 -  Naturally, the X values must have a unit set, and that unit must be
    known to the `Unit Factory <http://www.mantidproject.org/Units>`__.
--  Only histograms, not point data, can be handled at present.
+-  Histograms and Point data can be handled.
 -  The algorithm will also fail if the source-sample distance cannot be
    calculated (i.e. the :ref:`instrument <instrument>` has not been
    properly defined).
@@ -54,7 +58,7 @@ Usage
 **Example: Convert to wavelength**
 
 .. testcode:: ExConvertUnits
-             
+
     ws = CreateSampleWorkspace("Histogram",NumBanks=1,BankPixelWidth=1)
     wsOut = ConvertUnits(ws,Target="Wavelength")
 

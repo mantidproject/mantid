@@ -1,3 +1,4 @@
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/RefAxis.h"
@@ -25,10 +26,7 @@ Workspace2D::Workspace2D(const Workspace2D &other)
   data.resize(m_noVectors);
 
   for (size_t i = 0; i < m_noVectors; ++i) {
-    // Careful: data holds pointers to ISpectrum, but they point to Histogram1D.
-    // There are copy constructors, but we would need a clone() function that is
-    // aware of the polymorphism. Use cast + copy constructor for now.
-    data[i] = new Histogram1D(*static_cast<Histogram1D *>(other.data[i]));
+    data[i] = new Histogram1D(*(other.data[i]));
   }
 }
 
@@ -71,19 +69,21 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
   m_noVectors = NVectors;
   data.resize(m_noVectors);
 
-  MantidVecPtr t1, t2;
-  t1.access().resize(XLength); // this call initializes array to zero
-  t2.access().resize(YLength);
+  auto x = Kernel::make_cow<HistogramData::HistogramX>(
+      XLength, HistogramData::LinearGenerator(1.0, 1.0));
+  HistogramData::Counts y(YLength);
+  HistogramData::CountStandardDeviations e(YLength);
   for (size_t i = 0; i < m_noVectors; i++) {
     // Create the spectrum upon init
-    auto spec = new Histogram1D();
+    auto spec =
+        new Histogram1D(HistogramData::getHistogramXMode(XLength, YLength),
+                        HistogramData::Histogram::YMode::Counts);
     data[i] = spec;
     // Set the data and X
-    spec->setX(t1);
-    spec->setDx(t1);
-    spec->resetHasDx();
+    spec->setX(x);
     // Y,E arrays populated
-    spec->setData(t2, t2);
+    spec->setCounts(y);
+    spec->setCountStandardDeviations(e);
     // Default spectrum number = starts at 1, for workspace index 0.
     spec->setSpectrumNo(specnum_t(i + 1));
     spec->setDetectorID(detid_t(i + 1));
@@ -209,17 +209,17 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
       throw std::runtime_error(
           std::string("To load an image into a workspace with one spectrum per "
                       "row, then number of spectra (") +
-          boost::lexical_cast<std::string>(getNumberHistograms()) +
+          std::to_string(getNumberHistograms()) +
           ") needs to be equal to the height (rows) of the image (" +
-          boost::lexical_cast<std::string>(height) + ")");
+          std::to_string(height) + ")");
 
     if (width != blocksize())
       throw std::runtime_error(
           std::string("To load an image into a workspace with one spectrum per "
                       "row, then number of bins (") +
-          boost::lexical_cast<std::string>(blocksize()) +
+          std::to_string(blocksize()) +
           ") needs to be equal to the width (columns) of the image (" +
-          boost::lexical_cast<std::string>(width) + ")");
+          std::to_string(width) + ")");
 
     // one spectrum - one row
     PARALLEL_FOR_IF(parallelExecution)
@@ -238,32 +238,27 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
     }
     PARALLEL_FOR_IF(parallelExecution)
     for (int i = 1; i < static_cast<int>(height); ++i) {
-      data[i]->setX(data[0]->dataX());
+      data[i]->setX(data[0]->ptrX());
     }
   }
 }
 
-//--------------------------------------------------------------------------------------------
-/// Return the underlying ISpectrum ptr at the given workspace index.
-ISpectrum *Workspace2D::getSpectrum(const size_t index) {
-  if (index >= m_noVectors) {
-    std::stringstream ss;
-    ss << "Workspace2D::getSpectrum, histogram number " << index
-       << " out of range " << m_noVectors;
-    throw std::range_error(ss.str());
-  }
+/// Return reference to Histogram1D at the given workspace index.
+Histogram1D &Workspace2D::getSpectrum(const size_t index) {
   invalidateCommonBinsFlag();
-  return data[index];
+  return const_cast<Histogram1D &>(
+      static_cast<const Workspace2D &>(*this).getSpectrum(index));
 }
 
-const ISpectrum *Workspace2D::getSpectrum(const size_t index) const {
+/// Return const reference to Histogram1D at the given workspace index.
+const Histogram1D &Workspace2D::getSpectrum(const size_t index) const {
   if (index >= m_noVectors) {
     std::stringstream ss;
     ss << "Workspace2D::getSpectrum, histogram number " << index
        << " out of range " << m_noVectors;
     throw std::range_error(ss.str());
   }
-  return data[index];
+  return *data[index];
 }
 
 //--------------------------------------------------------------------------------------------
@@ -294,10 +289,10 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
     throw std::range_error(
         "Workspace2D::generateHistogram, histogram number out of range");
   // output data arrays are implicitly filled by function
-  const ISpectrum *spec = this->getSpectrum(index);
-  const MantidVec &currentX = spec->readX();
-  const MantidVec &currentY = spec->readY();
-  const MantidVec &currentE = spec->readE();
+  const auto &spec = this->getSpectrum(index);
+  const MantidVec &currentX = spec.readX();
+  const MantidVec &currentY = spec.readY();
+  const MantidVec &currentE = spec.readE();
   if (X.size() <= 1)
     throw std::runtime_error(
         "Workspace2D::generateHistogram(): X vector must be at least length 2");
@@ -324,8 +319,8 @@ void Workspace2D::generateHistogram(const std::size_t index, const MantidVec &X,
 } // NamespaceMantid
 
 ///\cond TEMPLATE
-template DLLExport class Mantid::API::WorkspaceProperty<
-    Mantid::DataObjects::Workspace2D>;
+template class DLLExport
+    Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace2D>;
 
 namespace Mantid {
 namespace Kernel {

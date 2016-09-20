@@ -39,8 +39,6 @@ class DLLExport RefRoi : public API::Algorithm {
 public:
   /// Constructor
   RefRoi();
-  /// Virtual destructor
-  ~RefRoi() override {}
   /// Algorithm's name
   const std::string name() const override { return "RefRoi"; }
   /// Summary of algorithms purpose

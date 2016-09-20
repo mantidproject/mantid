@@ -39,75 +39,87 @@ class QImage;
 class ImageMarker;
 class ApplicationWindow;
 
-/**\brief Plot tool for calculating intensity profiles of image markers along a line.
+/**\brief Plot tool for calculating intensity profiles of image markers along a
+ *line.
  *
- * It is assumed that on the parent Graph an ImageMarker is selected. During initialization,
- * a pointer to this marker is stored and the selection is removed. The LineProfileTool
- * adds itself as a full-sized child widget to the Graph's canvas, allowing for fast redraws
- * while selection of the line is in progress. Once the line is selected (mouse button is
- * released), the profile is calculate and displayed, a new LineMarker denoting the selected
- * profile line is added to the Graph and the LineProfileTool deletes itself by setting the
+ * It is assumed that on the parent Graph an ImageMarker is selected. During
+ *initialization,
+ * a pointer to this marker is stored and the selection is removed. The
+ *LineProfileTool
+ * adds itself as a full-sized child widget to the Graph's canvas, allowing for
+ *fast redraws
+ * while selection of the line is in progress. Once the line is selected (mouse
+ *button is
+ * released), the profile is calculate and displayed, a new LineMarker denoting
+ *the selected
+ * profile line is added to the Graph and the LineProfileTool deletes itself by
+ *setting the
  * Graph's active tool to NULL.
  *
  * \section future Future Plans
  * Actually, image analysis doesn't fit terribly well into the Graph framework.
- * A cleaner approach would be to add a new MyWidget subclass (Image?) that operates on a single
- * image, providing things like line profiles, intensity tables and measuring points on scanned graphs
- * (simple <a href="http://www.frantz.fi/software/g3data.php">g3data</a>-like functionality).
- * There could be facilities for making an Image from an ImageMarker and vice versa
+ * A cleaner approach would be to add a new MyWidget subclass (Image?) that
+ *operates on a single
+ * image, providing things like line profiles, intensity tables and measuring
+ *points on scanned graphs
+ * (simple <a href="http://www.frantz.fi/software/g3data.php">g3data</a>-like
+ *functionality).
+ * There could be facilities for making an Image from an ImageMarker and vice
+ *versa
  * (if that's really needed).
  * [ postponed until after the redesign of project handling ]
  */
-class LineProfileTool : public QWidget, public PlotToolInterface
-{
-	Q_OBJECT
+class LineProfileTool : public QWidget, public PlotToolInterface {
+  Q_OBJECT
 
-	public:
-		//! Standard constructor.
-		LineProfileTool(Graph *graph, ApplicationWindow *app, int average_pixels);
-		void calculateLineProfile(const QPoint &start, const QPoint &end);
+public:
+  //! Standard constructor.
+  LineProfileTool(Graph *graph, ApplicationWindow *app, int average_pixels);
+  void calculateLineProfile(const QPoint &start, const QPoint &end);
 
-                int rtti() const override {
-                  return PlotToolInterface::Rtti_LineProfileTool;
-                };
+  int rtti() const override { return PlotToolInterface::Rtti_LineProfileTool; };
 
-        signals:
-		/** Emitted whenever a new message should be presented to the user.
-		 *
-		 * You don't have to connect to this signal if you alreay specified a reciever during initialization.
-		 */
-		void statusText(const QString&);
+signals:
+  /** Emitted whenever a new message should be presented to the user.
+   *
+   * You don't have to connect to this signal if you alreay specified a reciever
+   *during initialization.
+   */
+  void statusText(const QString &);
 
-	protected:
-		int averageImagePixel(const QImage &image, int px, int py, bool moreHorizontal);
-		void addLineMarker(const QPoint &start, const QPoint &end);
-		/**\brief Draw line during operation (replaced by a LineMarker at the end).
-		 */
-                void paintEvent(QPaintEvent *e) override;
-                /**\brief Pressing the left mouse button starts line selection.
-		 *
-		 * Clicks with anything else than the left button are propagated to the parent as usual.
-		 */
-                void mousePressEvent(QMouseEvent *e) override;
-                /**\brief Mouse movements need to be monitored for updating the line during operation.
-		 */
-                void mouseMoveEvent(QMouseEvent *e) override;
-                /**\brief Mouse releases end line selection and cause the profile to be displayed.
-		 */
-                void mouseReleaseEvent(QMouseEvent *e) override;
+protected:
+  int averageImagePixel(const QImage &image, int px, int py,
+                        bool moreHorizontal);
+  void addLineMarker(const QPoint &start, const QPoint &end);
+  /**\brief Draw line during operation (replaced by a LineMarker at the end).
+   */
+  void paintEvent(QPaintEvent *e) override;
+  /**\brief Pressing the left mouse button starts line selection.
+   *
+   * Clicks with anything else than the left button are propagated to the parent
+   *as usual.
+   */
+  void mousePressEvent(QMouseEvent *e) override;
+  /**\brief Mouse movements need to be monitored for updating the line during
+   * operation.
+   */
+  void mouseMoveEvent(QMouseEvent *e) override;
+  /**\brief Mouse releases end line selection and cause the profile to be
+   * displayed.
+   */
+  void mouseReleaseEvent(QMouseEvent *e) override;
 
-        private:
-        ApplicationWindow *d_app;
-		//! Number of image pixels over which to average.
-		int d_average_pixels;
-		//! The image marker to operate on.
-		ImageMarker *d_target;
-		/**\brief Mouse position where an operation started.
-		 */
-		QPoint d_op_start;
-		//! Difference between current and start position during operation.
-		QPoint d_op_dp;
+private:
+  ApplicationWindow *d_app;
+  //! Number of image pixels over which to average.
+  int d_average_pixels;
+  //! The image marker to operate on.
+  ImageMarker *d_target;
+  /**\brief Mouse position where an operation started.
+   */
+  QPoint d_op_start;
+  //! Difference between current and start position during operation.
+  QPoint d_op_dp;
 };
 
 #endif // ifndef LINE_PROFILE_TOOL_H
-

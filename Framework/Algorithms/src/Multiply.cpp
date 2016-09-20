@@ -64,7 +64,7 @@ void Multiply::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
                               const API::MatrixWorkspace_const_sptr rhs,
                               API::MatrixWorkspace_sptr out) {
   if (!lhs->isDistribution() || !rhs->isDistribution())
-    out->isDistribution(false);
+    out->setDistribution(false);
 }
 
 // ===================================== EVENT LIST BINARY OPERATIONS
@@ -79,8 +79,8 @@ void Multiply::performEventBinaryOperation(DataObjects::EventList &lhs,
                                            const DataObjects::EventList &rhs) {
   // We must histogram the rhs event list to multiply.
   MantidVec rhsY, rhsE;
-  rhs.generateHistogram(rhs.constDataX(), rhsY, rhsE);
-  lhs.multiply(rhs.constDataX(), rhsY, rhsE);
+  rhs.generateHistogram(rhs.x().rawData(), rhsY, rhsE);
+  lhs.multiply(rhs.x().rawData(), rhsY, rhsE);
 }
 
 /** Carries out the binary operation IN-PLACE on a single EventList,

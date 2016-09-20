@@ -16,7 +16,6 @@ namespace MDAlgorithms {
 class DLLExport OneStepMDEW : public API::Algorithm, API::DeprecatedAlgorithm {
 public:
   OneStepMDEW();
-  ~OneStepMDEW() override;
 
   /// Algorithm's name for identification
   const std::string name() const override { return "OneStepMDEW"; };

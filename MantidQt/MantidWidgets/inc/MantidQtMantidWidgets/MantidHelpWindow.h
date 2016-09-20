@@ -12,17 +12,15 @@ class QString;
 class QWidget;
 class pqHelpWindow;
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
+namespace MantidQt {
+namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidHelpWindow : public API::MantidHelpInterface
-{
-Q_OBJECT
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidHelpWindow
+    : public API::MantidHelpInterface {
+  Q_OBJECT
 
 public:
-  MantidHelpWindow(QWidget* parent=0, Qt::WindowFlags flags=0);
+  MantidHelpWindow(QWidget *parent = 0, Qt::WindowFlags flags = 0);
   ~MantidHelpWindow() override;
 
   void showPage(const std::string &url = std::string()) override;
@@ -37,26 +35,28 @@ public:
   void showConcept(const QString &name) override;
   void showFitFunction(const std::string &name = std::string()) override;
   void showFitFunction(const QString &name) override;
-  void showCustomInterface(const std::string &name = std::string()) override;
-  void showCustomInterface(const QString &name) override;
+  void showCustomInterface(const std::string &name = std::string(),
+                           const std::string &section = std::string()) override;
+  void showCustomInterface(const QString &name,
+                           const QString &section = QString()) override;
 
 private:
   void showHelp(const QString &url);
-    void openWebpage(const QUrl &url);
+  void openWebpage(const QUrl &url);
 
-    /// The full path of the collection file.
-    std::string m_collectionFile;
-    /** The full path of the cache file. If it is not
-        determined this is an empty string. */
-    std::string m_cacheFile;
-    /// The window that renders the help information
-    static pqHelpWindow *g_helpWindow;
+  /// The full path of the collection file.
+  std::string m_collectionFile;
+  /** The full path of the cache file. If it is not
+      determined this is an empty string. */
+  std::string m_cacheFile;
+  /// The window that renders the help information
+  static pqHelpWindow *g_helpWindow;
 
-    /// Whether this is the very first startup of the helpwindow.
-    bool m_firstRun;
+  /// Whether this is the very first startup of the helpwindow.
+  bool m_firstRun;
 
-    void findCollectionFile(std::string & binDir);
-    void determineFileLocs();
+  void findCollectionFile(std::string &binDir);
+  void determineFileLocs();
 
 public slots:
   /// Perform any clean up on main window shutdown

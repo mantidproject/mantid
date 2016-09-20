@@ -18,16 +18,6 @@ using namespace std;
 DECLARE_ALGORITHM(ExtractMaskToTable)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ExtractMaskToTable::ExtractMaskToTable() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ExtractMaskToTable::~ExtractMaskToTable() {}
-
-//----------------------------------------------------------------------------------------------
 /** Declare properties
   */
 void ExtractMaskToTable::init() {
@@ -118,8 +108,6 @@ void ExtractMaskToTable::exec() {
   }
 
   addToTableWorkspace(outws, maskeddetids, xmin, xmax, prevmaskeddetids);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -259,13 +247,7 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMaskWorkspace() {
     if (maskws->readY(i)[0] < 1.0E-9)
       continue;
 
-    // Get spectrum
-    const API::ISpectrum *spec = maskws->getSpectrum(i);
-    if (!spec)
-      throw runtime_error(
-          "Unable to get spectrum reference from mask workspace.");
-
-    const set<detid_t> detidset = spec->getDetectorIDs();
+    const auto &detidset = maskws->getSpectrum(i).getDetectorIDs();
     std::copy(detidset.cbegin(), detidset.cend(),
               std::inserter(maskeddetids, maskeddetids.end()));
   }
@@ -312,8 +294,6 @@ void ExtractMaskToTable::copyTableWorkspaceContent(
     TableRow newrow = targetWS->appendRow();
     newrow << xmin << xmax << speclist;
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -396,8 +376,6 @@ void ExtractMaskToTable::addToTableWorkspace(TableWorkspace_sptr outws,
   string specliststr = spectralist.str();
   TableRow newrow = outws->appendRow();
   newrow << xmin << xmax << specliststr;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

@@ -154,13 +154,13 @@ private:
       size_t n = static_cast<size_t>(1.3 * static_cast<double>(cheb.size()));
       auto x = cheb.linspace(n);
       for (size_t i = 0; i < n; ++i) {
-        // std::cerr << x[i] << ' ' << cheb(x[i]) - fun(x[i]) << std::endl;
+        // std::cerr << x[i] << ' ' << cheb(x[i]) - fun(x[i]) << '\n';
         TS_ASSERT_DELTA(cheb(x[i]), fun(x[i]), accur1);
       }
     }
     auto &xp = cheb.xPoints();
     for (size_t i = 0; i < xp.size(); ++i) {
-      // std::cerr << xp[i] << ' ' << cheb(xp[i]) - fun(xp[i]) << std::endl;
+      // std::cerr << xp[i] << ' ' << cheb(xp[i]) - fun(xp[i]) << '\n';
       TS_ASSERT_DELTA(cheb(xp[i]), fun(xp[i]), accur2);
     }
   }

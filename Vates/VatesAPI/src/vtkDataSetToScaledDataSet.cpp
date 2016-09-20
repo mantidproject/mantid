@@ -23,8 +23,7 @@ namespace VATES {
 /**
  * Standard constructor for object.
  */
-vtkDataSetToScaledDataSet::vtkDataSetToScaledDataSet() {
-}
+vtkDataSetToScaledDataSet::vtkDataSetToScaledDataSet() {}
 
 vtkDataSetToScaledDataSet::~vtkDataSetToScaledDataSet() {}
 
@@ -41,19 +40,17 @@ vtkDataSetToScaledDataSet::~vtkDataSetToScaledDataSet() {}
  * @param info : info to obtain the output data set from.
  * @return The resulting scaled dataset
  */
-vtkPointSet *
-vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale,
-                                   vtkPointSet *inputData, vtkInformation* info) {
+vtkPointSet *vtkDataSetToScaledDataSet::execute(double xScale, double yScale,
+                                                double zScale,
+                                                vtkPointSet *inputData,
+                                                vtkInformation *info) {
 
   // Extract output dataset from information.
-  vtkPointSet *outputData = vtkPointSet::SafeDownCast(info->Get(vtkDataObject::DATA_OBJECT()));
+  vtkPointSet *outputData =
+      vtkPointSet::SafeDownCast(info->Get(vtkDataObject::DATA_OBJECT()));
 
   return execute(xScale, yScale, zScale, inputData, outputData);
-
 }
-
-
-
 
 /**
  * Process the input data. First, scale a copy of the points and apply
@@ -65,20 +62,22 @@ vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale,
  * @param yScale : Scale factor for the y direction
  * @param zScale : Scale factor for the z direction
  * @param inputData : The dataset to scale
- * @param outputData : The output dataset. Optional. If not specified or null, new one created.
+ * @param outputData : The output dataset. Optional. If not specified or null,
+ *new one created.
  * @return The resulting scaled dataset
  */
-vtkPointSet *
-vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale,
-                                   vtkPointSet *inputData, vtkPointSet* outputData) {
+vtkPointSet *vtkDataSetToScaledDataSet::execute(double xScale, double yScale,
+                                                double zScale,
+                                                vtkPointSet *inputData,
+                                                vtkPointSet *outputData) {
 
   if (NULL == inputData) {
     throw std::runtime_error("Cannot construct vtkDataSetToScaledDataSet with "
                              "NULL input vtkPointSet");
   }
 
-  if(outputData == NULL){
-       outputData = inputData->NewInstance();
+  if (outputData == NULL) {
+    outputData = inputData->NewInstance();
   }
 
   vtkPoints *points = inputData->GetPoints();
@@ -137,20 +136,23 @@ vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale,
  * @param outputData : Output dataset
  */
 void vtkDataSetToScaledDataSet::updateMetaData(double xScale, double yScale,
-                                               double zScale, vtkPointSet *inputData, vtkPointSet *outputData) {
+                                               double zScale,
+                                               vtkPointSet *inputData,
+                                               vtkPointSet *outputData) {
   // We need to scale the basis vectors of the input ChangeOfBasis
   // (COB) Matrix and set it as the output COB Matrix.
   auto cobMatrix = vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(inputData);
 
-  vtkVector3d u,v,w;
+  vtkVector3d u, v, w;
   if (vtkPVChangeOfBasisHelper::GetBasisVectors(cobMatrix, u, v, w)) {
-    u.Set(u.GetX()*xScale, u.GetY()*xScale, u.GetZ()*xScale);
-    v.Set(v.GetX()*yScale, v.GetY()*yScale, v.GetZ()*yScale);
-    w.Set(w.GetX()*zScale, w.GetY()*zScale, w.GetZ()*zScale);
-    cobMatrix = vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(u,v,w);
+    u.Set(u.GetX() * xScale, u.GetY() * xScale, u.GetZ() * xScale);
+    v.Set(v.GetX() * yScale, v.GetY() * yScale, v.GetZ() * yScale);
+    w.Set(w.GetX() * zScale, w.GetY() * zScale, w.GetZ() * zScale);
+    cobMatrix = vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(u, v, w);
   } else {
-    g_log.warning("Could not extract the basis vectors from the Change-of-Basis-Matrix"
-                  "data of the scaled data set.\n");
+    g_log.warning(
+        "Could not extract the basis vectors from the Change-of-Basis-Matrix"
+        "data of the scaled data set.\n");
     cobMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
     cobMatrix->Identity();
     cobMatrix->Element[0][0] *= xScale;

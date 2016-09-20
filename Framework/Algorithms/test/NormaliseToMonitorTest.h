@@ -38,9 +38,9 @@ public:
     input->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     // Now need to set up a minimal instrument
-    input->getSpectrum(0)->setSpectrumNo(0);
-    input->getSpectrum(1)->setSpectrumNo(1);
-    input->getSpectrum(2)->setSpectrumNo(2);
+    input->getSpectrum(0).setSpectrumNo(0);
+    input->getSpectrum(1).setSpectrumNo(1);
+    input->getSpectrum(2).setSpectrumNo(2);
     boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
     input->setInstrument(instr);
     Mantid::Geometry::Detector *mon =
@@ -60,7 +60,7 @@ public:
     monWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     // Now need to set up a minimal instrument and spectra-detector map
-    input->getSpectrum(0)->setSpectrumNo(0);
+    input->getSpectrum(0).setSpectrumNo(0);
     monWS->setInstrument(input->getInstrument());
 
     AnalysisDataService::Instance().addOrReplace("monWS", monWS);

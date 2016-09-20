@@ -7,12 +7,9 @@
 
 using namespace Mantid::VATES;
 
-class vtkMD0DFactoryTest : public CxxTest::TestSuite
-{
+class vtkMD0DFactoryTest : public CxxTest::TestSuite {
 public:
-
-  void testCreatesA0DDataSet()
-  {
+  void testCreatesA0DDataSet() {
     // Arrange
     FakeProgressAction progressUpdater;
     vtkMD0DFactory factory;
@@ -23,10 +20,11 @@ public:
     TSM_ASSERT_THROWS_NOTHING(
         "0D factory should create data set without exceptions",
         dataSet = factory.create(progressUpdater));
-    TSM_ASSERT("Should have exactly one point", dataSet->GetNumberOfPoints() == 1);
-    TSM_ASSERT("Should have exactly one cell", dataSet->GetNumberOfCells() == 1);
+    TSM_ASSERT("Should have exactly one point",
+               dataSet->GetNumberOfPoints() == 1);
+    TSM_ASSERT("Should have exactly one cell",
+               dataSet->GetNumberOfCells() == 1);
   }
 };
-
 
 #endif

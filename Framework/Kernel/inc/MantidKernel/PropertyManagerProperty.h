@@ -44,12 +44,17 @@ public:
                           const ValueType &defaultValue,
                           unsigned int direction = Direction::Input);
   using BaseClass::operator=;
+  PropertyManagerProperty *clone() const override {
+    return new PropertyManagerProperty(*this);
+  }
 
   std::string value() const override;
+  std::string getDefault() const override;
   std::string setValue(const std::string &strValue) override;
 
 private:
   std::string m_dataServiceKey;
+  std::string m_defaultAsStr;
 };
 
 } // namespace Kernel

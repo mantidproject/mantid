@@ -30,7 +30,7 @@ AlgorithmObserver::AlgorithmObserver(IAlgorithm_const_sptr alg)
 }
 
 /// Virtual destructor
-AlgorithmObserver::~AlgorithmObserver() {}
+AlgorithmObserver::~AlgorithmObserver() = default;
 
 /**   Connect to algorithm alg and observe all its notifications
       @param alg :: Algorithm to be observed

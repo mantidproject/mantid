@@ -13,9 +13,7 @@
 //-----------------------------------------------------------------------------
 namespace Mantid {
 namespace PythonInterface {
-using Environment::CallMethod0;
-using Environment::CallMethod1;
-using Environment::CallMethod2;
+using Environment::callMethod;
 using namespace boost::python;
 
 /**
@@ -28,13 +26,13 @@ IPeakFunctionAdapter::IPeakFunctionAdapter(PyObject *self)
 /**
  */
 double IPeakFunctionAdapter::centre() const {
-  return CallMethod0<double>::dispatchWithException(getSelf(), "centre");
+  return callMethod<double>(getSelf(), "centre");
 }
 
 /**
  */
 double IPeakFunctionAdapter::height() const {
-  return CallMethod0<double>::dispatchWithException(getSelf(), "height");
+  return callMethod<double>(getSelf(), "height");
 }
 
 /**
@@ -42,7 +40,7 @@ double IPeakFunctionAdapter::height() const {
  * @param c The centre of the peak
  */
 void IPeakFunctionAdapter::setCentre(const double c) {
-  CallMethod1<void, double>::dispatchWithException(getSelf(), "setCentre", c);
+  callMethod<void, double>(getSelf(), "setCentre", c);
 }
 
 /**
@@ -50,12 +48,12 @@ void IPeakFunctionAdapter::setCentre(const double c) {
  * @param h The new height of the peak
  */
 void IPeakFunctionAdapter::setHeight(const double h) {
-  CallMethod1<void, double>::dispatchWithException(getSelf(), "setHeight", h);
+  callMethod<void, double>(getSelf(), "setHeight", h);
 }
 
 /// Calls Python fwhm method
 double IPeakFunctionAdapter::fwhm() const {
-  return CallMethod0<double>::dispatchWithException(getSelf(), "fwhm");
+  return callMethod<double>(getSelf(), "fwhm");
 }
 
 /**
@@ -64,8 +62,7 @@ double IPeakFunctionAdapter::fwhm() const {
  * such that fwhm=w
  */
 void IPeakFunctionAdapter::setFwhm(const double w) {
-  return CallMethod1<void, double>::dispatchWithException(getSelf(), "setFwhm",
-                                                          w);
+  return callMethod<void, double>(getSelf(), "setFwhm", w);
 }
 
 /**
@@ -97,7 +94,7 @@ void IPeakFunctionAdapter::functionLocal(double *out, const double *xValues,
   Py_DECREF(xvals);
   if (PyErr_Occurred()) {
     Py_DECREF(result);
-    Environment::throwRuntimeError(true);
+    throw Environment::PythonException();
   }
 
   PyArrayObject *nparray = reinterpret_cast<PyArrayObject *>(result);
@@ -112,7 +109,7 @@ void IPeakFunctionAdapter::functionLocal(double *out, const double *xValues,
     PyArray_Descr *dtype = PyArray_DESCR(nparray);
     PyObject *name = PyList_GetItem(dtype->names, 0);
     std::ostringstream os;
-    os << "Unsupported numpy data type: '" << PyString_AsString(name)
+    os << "Unsupported numpy data type: '" << PyBytes_AsString(name)
        << "'. Currently only numpy.float64 is supported";
     throw std::runtime_error(os.str());
   }
@@ -126,8 +123,7 @@ void IPeakFunctionAdapter::functionLocal(double *out, const double *xValues,
  */
 object
 IPeakFunctionAdapter::functionLocal(const boost::python::object &xvals) const {
-  return CallMethod1<object, object>::dispatchWithException(
-      getSelf(), "functionLocal", xvals);
+  return callMethod<object, object>(getSelf(), "functionLocal", xvals);
 }
 
 /**
@@ -158,7 +154,7 @@ void IPeakFunctionAdapter::functionDerivLocal(API::Jacobian *out,
   // boost::python::objects when using boost::python::call_method
   PyEval_CallMethod(getSelf(), "functionDerivLocal", "(OO)", xvals, jacobian);
   if (PyErr_Occurred())
-    Environment::throwRuntimeError(true);
+    throw Environment::PythonException();
 }
 
 /**
@@ -170,8 +166,8 @@ void IPeakFunctionAdapter::functionDerivLocal(API::Jacobian *out,
  */
 void IPeakFunctionAdapter::functionDerivLocal(
     const boost::python::object &xvals, boost::python::object &jacobian) {
-  CallMethod2<void, object, object>::dispatchWithException(
-      getSelf(), "functionDerivLocal", xvals, jacobian);
+  callMethod<void, object, object>(getSelf(), "functionDerivLocal", xvals,
+                                   jacobian);
 }
 }
 }

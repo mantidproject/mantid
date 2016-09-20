@@ -2,6 +2,8 @@
 #include "MantidKernel/PropertyManager.h"
 
 #include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
+#include "MantidPythonInterface/kernel/Registry/MappingTypeHandler.h"
+#include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include <boost/python/class.hpp>
 
 using Mantid::Kernel::Direction;
@@ -9,6 +11,7 @@ using Mantid::Kernel::PropertyManagerProperty;
 using Mantid::Kernel::PropertyManager_sptr;
 using Mantid::Kernel::PropertyWithValue;
 using Mantid::PythonInterface::PropertyWithValueExporter;
+namespace Registry = Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
 void export_PropertyManagerProperty() {
@@ -24,4 +27,8 @@ void export_PropertyManagerProperty() {
       .def(init<const std::string &, const unsigned int>(
           (arg("self"), arg("name"), arg("direction") = Direction::Input),
           "Construct an PropertyManagerProperty"));
+
+  // type handler for alg.setProperty calls
+  Registry::TypeRegistry::subscribe(typeid(BaseValueType),
+                                    new Registry::MappingTypeHandler);
 }

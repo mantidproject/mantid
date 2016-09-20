@@ -36,11 +36,6 @@ namespace Algorithms {
 */
 class DLLExport CreateLogPropertyTable : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  CreateLogPropertyTable() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~CreateLogPropertyTable() override {}
-
   /// Algorithm's name for identification
   const std::string name() const override { return "CreateLogPropertyTable"; };
   /// Algorithm's version for identification

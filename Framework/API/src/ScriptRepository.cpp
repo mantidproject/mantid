@@ -48,7 +48,7 @@ ScriptRepoException::ScriptRepoException(const std::string &info,
   }
 }
 
-const char *ScriptRepoException::what() const throw() {
+const char *ScriptRepoException::what() const noexcept {
   return _user_info.c_str();
 }
 

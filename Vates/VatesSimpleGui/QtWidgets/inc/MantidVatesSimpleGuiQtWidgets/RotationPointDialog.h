@@ -6,19 +6,17 @@
 
 #include <QDialog>
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 /**
  *
   This class handles providing the coordinates for a center of rotation.
 
   @date 14/11/2011
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -38,9 +36,9 @@ namespace SimpleGui
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS RotationPointDialog : public QDialog
-{
-    Q_OBJECT
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS RotationPointDialog
+    : public QDialog {
+  Q_OBJECT
 
 public:
   /// Default constructor.
@@ -64,7 +62,6 @@ protected slots:
 private:
   Ui::RotationPointDialog ui; ///< The dialog's UI form
 };
-
 }
 }
 }

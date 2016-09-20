@@ -13,10 +13,6 @@ namespace DataHandling {
 
 DECLARE_ALGORITHM(LoadNexusMonitors)
 
-LoadNexusMonitors::LoadNexusMonitors() : Algorithm() {}
-
-LoadNexusMonitors::~LoadNexusMonitors() {}
-
 /// Initialization method.
 void LoadNexusMonitors::init() {
   declareProperty(

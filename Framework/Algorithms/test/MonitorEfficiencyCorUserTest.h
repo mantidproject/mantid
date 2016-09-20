@@ -76,14 +76,14 @@ public:
     double proportionality_coeff = m_monitor_counts * sqrt(m_Ei / 25.3);
     for (size_t i = 0; i < outWS->getNumberHistograms(); ++i) {
       for (size_t j = 0; j < xsize; ++j) { // Same x-values
-        TS_ASSERT_DELTA(outWS->readX(i)[j], inWS->readX(i)[j], 1e-12);
+        TS_ASSERT_DELTA(outWS->x(i)[j], inWS->x(i)[j], 1e-12);
         // Output Y-values proportional to input
-        TS_ASSERT_DELTA(proportionality_coeff * outWS->readY(i)[j],
-                        inWS->readY(i)[j], 1e-12);
+        TS_ASSERT_DELTA(proportionality_coeff * outWS->y(i)[j], inWS->y(i)[j],
+                        1e-12);
 
         // Output Err-values proportional to input
-        TS_ASSERT_DELTA(proportionality_coeff * outWS->readE(i)[j],
-                        inWS->readE(i)[j], 1e-12);
+        TS_ASSERT_DELTA(proportionality_coeff * outWS->e(i)[j], inWS->e(i)[j],
+                        1e-12);
       }
     }
 
@@ -106,14 +106,12 @@ private:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
             numHist, numBins, false, false, true, "TOFTOF");
 
-    static const double arr[] = {
+    HistogramData::BinEdges binEdges = {
         -10.,  -9.25, -8.5,  -7.75, -7.,  -6.25, -5.5, -4.75, -4.,  -3.25, -2.5,
         -1.75, -1.,   -0.25, 0.5,   1.25, 2.,    2.75, 3.5,   4.25, 5.};
 
-    std::vector<double> vec(arr, arr + sizeof(arr) / sizeof(arr[0]));
-
     for (size_t wi = 0; wi < dataws->getNumberHistograms(); wi++) {
-      dataws->setX(wi, vec);
+      dataws->setBinEdges(wi, binEdges);
     }
 
     dataws->getAxis(0)->setUnit("TOF");
@@ -130,4 +128,47 @@ private:
   }
 };
 
+class MonitorEfficiencyCorUserTestPerformance : public CxxTest::TestSuite {
+public:
+  static MonitorEfficiencyCorUserTestPerformance *createSuite() {
+    return new MonitorEfficiencyCorUserTestPerformance();
+  }
+
+  static void destroySuite(MonitorEfficiencyCorUserTestPerformance *suite) {
+    delete suite;
+  }
+
+  MonitorEfficiencyCorUserTestPerformance() {
+    input = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        100000, 2000, false, false, true, "TOFTOF");
+
+    input->getAxis(0)->setUnit("TOF");
+    input->mutableRun().addProperty("Ei",
+                                    boost::lexical_cast<std::string>(3.27));
+    input->mutableRun().addProperty("monitor_counts",
+                                    boost::lexical_cast<std::string>(1000));
+
+    input->instrumentParameters().addString(
+        input->getInstrument()->getChild(0).get(), "formula_mon_eff",
+        "sqrt(e/25.3)"); // TOFTOF
+
+    API::AnalysisDataService::Instance().addOrReplace("input", input);
+  }
+
+  void tearDown() {
+    API::AnalysisDataService::Instance().remove("input");
+    API::AnalysisDataService::Instance().remove("ouput");
+  }
+
+  void test_exec() {
+    MonitorEfficiencyCorUser alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "input");
+    alg.setPropertyValue("OutputWorkspace", "output");
+    alg.execute();
+  }
+
+private:
+  DataObjects::Workspace2D_sptr input;
+};
 #endif /* MANTID_ALGORITHMS_MONITOREFFICIENCYCORUSERTEST_H_ */

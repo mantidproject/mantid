@@ -62,39 +62,49 @@ Usage
 .. testcode:: ExampleCalib
 
    out_tbl_name = 'out_params'
-   ws_name = 'test'
+   ws_name = 'test_engg_data'
    Load('ENGINX00213855.nxs', OutputWorkspace=ws_name)
 
    # Using precalculated Vanadium corrections. To calculate from scrach see EnggVanadiumCorrections
    van_integ_ws = Load('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
    van_curves_ws = Load('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
 
-   difa1, Difc1, Zero1, peaks1 = EnggCalibrate(InputWorkspace=ws_name,
-                                               VanIntegrationWorkspace=van_integ_ws,
-                                               VanCurvesWorkspace=van_curves_ws,
-                                               ExpectedPeaks=[1.097, 2.1], Bank='1',
-                                               OutputParametersTableName=out_tbl_name)
+   difa1, difc1, tzero1, peaks1 = EnggCalibrate(InputWorkspace=ws_name,
+                                                VanIntegrationWorkspace=van_integ_ws,
+                                                VanCurvesWorkspace=van_curves_ws,
+                                                ExpectedPeaks=[1.28, 2.1], Bank='1',
+                                                OutputParametersTableName=out_tbl_name)
 
-   Difa1, Difc2, Zero2, peaks2 = EnggCalibrate(InputWorkspace=ws_name,
-                                               VanIntegrationWorkspace=van_integ_ws,
-                                               VanCurvesWorkspace=van_curves_ws,
-                                               ExpectedPeaks=[1.097, 2.1], Bank='2')
+   difa1, difc2, tzero2, peaks2 = EnggCalibrate(InputWorkspace=ws_name,
+                                                VanIntegrationWorkspace=van_integ_ws,
+                                                VanCurvesWorkspace=van_curves_ws,
+                                                ExpectedPeaks=[1.28, 2.1], Bank='2')
 
    # You can produce an instrument parameters (iparam) file for GSAS.
    # Note that this is very specific to ENGIN-X
-   GSAS_iparm_fname = 'ENGIN_X_bank1'
+   GSAS_iparm_fname = 'ENGIN_X_banks.prm'
    import EnggUtils
-   EnggUtils.write_ENGINX_GSAS_iparam_file(GSAS_iparm_fname, [Difc1, Difc2], [Zero1, Zero2])
+   EnggUtils.write_ENGINX_GSAS_iparam_file(GSAS_iparm_fname, bank_names=['North', 'South'],
+                                           difc=[difc1, difc2], tzero=[tzero1, tzero2])
 
-   print "DIFA1: %.2f" % (Difa1)
-   print "DIFC1: %.1f" % (Difc1)
-   print "TZERO1: %.2f" % (Zero1)
+   import math
+   print "DIFA1: {0}".format(difa1)
+   delta = 2
+   approx_difc1 = 18267
+   difc1_ok = abs(difc1 - approx_difc1) <= delta
+   print "DIFC1 is approximately (+/- {0}) {1}: {2}".format(delta, approx_difc1, difc1_ok)
+   approx_tzero1 = 277
+   tzero1_ok = abs(tzero1 - approx_tzero1) <= delta
+   print "TZERO1 is approximately (+/- {0}) {1}: {2}".format(delta, approx_tzero1, tzero1_ok)
    tbl = mtd[out_tbl_name]
-   print "The output table has %d row(s)" % tbl.rowCount()
-   print "Parameters from the table, DIFC1: %.1f, ZERO1: %.2f" % (tbl.cell(0,1), tbl.cell(0,2))
+
+   tbl_values_ok = (abs(tbl.cell(0,1) - approx_difc1) <= delta) and (abs(tbl.cell(0,2) - approx_tzero1) <= delta)
+   print "The output table has {0} row(s) and its values are as expected: {1}".format(tbl.rowCount(),
+                                                                                      tbl_values_ok)
+
    import os
-   print "Output GSAS iparam file was written?", os.path.exists(GSAS_iparm_fname)
-   print "Number of lines of the GSAS iparam file:", sum(1 for line in open(GSAS_iparm_fname))
+   print "Output GSAS iparam file was written? {0}".format(os.path.exists(GSAS_iparm_fname))
+   print "Number of lines of the GSAS iparam file: {0}".format(sum(1 for line in open(GSAS_iparm_fname)))
 
 .. testcleanup:: ExampleCalib
 
@@ -109,10 +119,9 @@ Output:
 
 .. testoutput:: ExampleCalib
 
-   DIFA1: 0.00
-   DIFC1: 18400.2
-   TZERO1: -2.06
-   The output table has 1 row(s)
-   Parameters from the table, DIFC1: 18400.2, ZERO1: -2.06
+   DIFA1: 0.0
+   DIFC1 is approximately (+/- 2) 18267: True
+   TZERO1 is approximately (+/- 2) 277: True
+   The output table has 1 row(s) and its values are as expected: True
    Output GSAS iparam file was written? True
-   Number of lines of the GSAS iparam file: 35
+   Number of lines of the GSAS iparam file: 36

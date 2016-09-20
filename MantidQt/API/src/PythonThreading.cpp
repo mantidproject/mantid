@@ -35,7 +35,7 @@ void PythonGIL::release() { PyGILState_Release(m_state); }
 RecursivePythonGIL::RecursivePythonGIL() : m_count(0), m_lock() {}
 
 void RecursivePythonGIL::acquire() {
-  if(m_count == 0) {
+  if (m_count == 0) {
     m_lock.acquire();
   }
   m_count += 1;

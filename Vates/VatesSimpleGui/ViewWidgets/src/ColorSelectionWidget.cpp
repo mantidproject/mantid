@@ -15,12 +15,9 @@
 #include <QFile>
 #include <QFileInfo>
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 
 /**
  * This is the class constructor. It sets up the UI and all the necessary
@@ -43,23 +40,25 @@ ColorSelectionWidget::ColorSelectionWidget(QWidget *parent)
   this->m_ui.maxValLineEdit->setValidator(m_minValidator);
   this->m_ui.minValLineEdit->setValidator(m_maxValidator);
 
-  // note the clicked() signals, not stateChanged(), beware of programmatic state changes
-  // comming from user events from other sources (vtk callbacks and signals from the
+  // note the clicked() signals, not stateChanged(), beware of programmatic
+  // state changes
+  // comming from user events from other sources (vtk callbacks and signals from
+  // the
   // Paraview color map editor)
   QObject::connect(this->m_ui.autoColorScaleCheckBox, SIGNAL(clicked(bool)),
                    this, SLOT(autoCheckBoxClicked(bool)));
 
-  QObject::connect(this->m_ui.presetButton, SIGNAL(clicked()),
-                   this, SLOT(loadPreset()));
+  QObject::connect(this->m_ui.presetButton, SIGNAL(clicked()), this,
+                   SLOT(loadPreset()));
 
-  QObject::connect(this->m_ui.minValLineEdit, SIGNAL(editingFinished()),
-                   this, SLOT(getColorScaleRange()));
+  QObject::connect(this->m_ui.minValLineEdit, SIGNAL(editingFinished()), this,
+                   SLOT(getColorScaleRange()));
 
-  QObject::connect(this->m_ui.maxValLineEdit, SIGNAL(editingFinished()),
-                   this, SLOT(getColorScaleRange()));
+  QObject::connect(this->m_ui.maxValLineEdit, SIGNAL(editingFinished()), this,
+                   SLOT(getColorScaleRange()));
 
-  QObject::connect(this->m_ui.useLogScaleCheckBox, SIGNAL(clicked(bool)),
-                   this, SLOT(useLogScalingClicked(bool)));
+  QObject::connect(this->m_ui.useLogScaleCheckBox, SIGNAL(clicked(bool)), this,
+                   SLOT(useLogScalingClicked(bool)));
 }
 
 /**
@@ -68,8 +67,7 @@ ColorSelectionWidget::ColorSelectionWidget(QWidget *parent)
  *
  * @param status the state to set the color selection widgets to
  */
-void ColorSelectionWidget::setEditorStatus(bool status)
-{
+void ColorSelectionWidget::setEditorStatus(bool status) {
   this->m_ui.maxValLabel->setEnabled(status);
   this->m_ui.maxValLineEdit->setEnabled(status);
   this->m_ui.minValLabel->setEnabled(status);
@@ -79,15 +77,14 @@ void ColorSelectionWidget::setEditorStatus(bool status)
 /**
  * This function sets up various color maps.
  */
-void ColorSelectionWidget::loadBuiltinColorPresets()
-{
+void ColorSelectionWidget::loadBuiltinColorPresets() {
   // the destructor of vtkSMTransferFunctionPresets copies these colormaps to
   // the vtkSMSettings singleton.
   vtkNew<vtkSMTransferFunctionPresets> presets;
-  // Check for colormap "Viridis". If preset, assume custom colormaps have
+  // Check for colormap "hot". If preset, assume custom colormaps have
   // already been loaded.
-  auto viridisColormap = presets->GetFirstPresetWithName("Viridis");
-  if (viridisColormap.empty()) {
+  auto colorMapName = presets->GetFirstPresetWithName("hot");
+  if (colorMapName.empty()) {
     const std::string filenames[3] = {"All_slice_viewer_cmaps_for_vsi.json",
                                       "All_idl_cmaps.json",
                                       "All_mpl_cmaps.json"};
@@ -100,41 +97,40 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
   }
 }
 
- /**
-  * Load the default color map
-  * @param viewSwitched Flag if the view has switched or not.
-  */
-  void ColorSelectionWidget::loadColorMap(bool viewSwitched)
-  {
+/**
+ * Load the default color map
+ * @param viewSwitched Flag if the view has switched or not.
+ */
+void ColorSelectionWidget::loadColorMap(bool viewSwitched) {
 
-    QString defaultColorMap;
+  QString defaultColorMap;
 
-    // If the view has switched or the VSI is loaded use the last color map
-    // index
-    if (viewSwitched) {
-      defaultColorMap = m_mdSettings.getLastSessionColorMap();
+  // If the view has switched or the VSI is loaded use the last color map
+  // index
+  if (viewSwitched) {
+    defaultColorMap = m_mdSettings.getLastSessionColorMap();
+  } else {
+    // Check if the user wants a general MD color map
+    if (m_mdSettings.getUsageGeneralMdColorMap()) {
+      // The name is sufficient for the VSI to find the color map
+      defaultColorMap = m_mdSettings.getGeneralMdColorMapName();
     } else {
-      // Check if the user wants a general MD color map
-      if (m_mdSettings.getUsageGeneralMdColorMap()) {
-        // The name is sufficient for the VSI to find the color map
-        defaultColorMap = m_mdSettings.getGeneralMdColorMapName();
+      // Check if the user wants to use the last session
+      if (m_mdSettings.getUsageLastSession()) {
+        defaultColorMap = m_mdSettings.getLastSessionColorMap();
       } else {
-        // Check if the user wants to use the last session
-        if (m_mdSettings.getUsageLastSession()) {
-          defaultColorMap = m_mdSettings.getLastSessionColorMap();
-        } else {
-          defaultColorMap = m_mdSettings.getUserSettingColorMap();
-        }
+        defaultColorMap = m_mdSettings.getUserSettingColorMap();
       }
     }
-
-    Mantid::VATES::ColorScaleLockGuard guard(m_colorScaleLock);
-    pqPresetDialog preset(this, pqPresetDialog::SHOW_NON_INDEXED_COLORS_ONLY);
-    preset.setCurrentPreset(defaultColorMap.toStdString().c_str());
-    Json::Value colorMap = preset.currentPreset();
-    if (!colorMap.empty())
-      this->onApplyPreset(colorMap);
   }
+
+  Mantid::VATES::ColorScaleLockGuard guard(m_colorScaleLock);
+  pqPresetDialog preset(this, pqPresetDialog::SHOW_NON_INDEXED_COLORS_ONLY);
+  preset.setCurrentPreset(defaultColorMap.toStdString().c_str());
+  Json::Value colorMap = preset.currentPreset();
+  if (!colorMap.empty())
+    this->onApplyPreset(colorMap);
+}
 
 /**
  * Changes the status of the autoScaling checkbox. This is in
@@ -143,8 +139,7 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
  *
  * @param autoScale whether to set auto scaling (on/off)
  */
-void ColorSelectionWidget::setAutoScale(bool autoScale)
-{
+void ColorSelectionWidget::setAutoScale(bool autoScale) {
   this->m_ui.autoColorScaleCheckBox->setChecked(autoScale);
   this->setEditorStatus(!autoScale);
 }
@@ -155,8 +150,7 @@ void ColorSelectionWidget::setAutoScale(bool autoScale)
  * @param max maximum value (corresponding to the max line edit)
  * @param min minimum value (corresponding to the max line edit)
  */
-void ColorSelectionWidget::setMinMax(double& min, double& max)
-{
+void ColorSelectionWidget::setMinMax(double &min, double &max) {
   setMinSmallerMax(min, max);
 }
 
@@ -188,16 +182,12 @@ bool ColorSelectionWidget::isIgnoringColorCallbacks() {
  *
  * @param wasOn current checked state (before the user clicks)
  */
-void ColorSelectionWidget::autoCheckBoxClicked(bool wasOn)
-{
+void ColorSelectionWidget::autoCheckBoxClicked(bool wasOn) {
   m_inProcessUserRequestedAutoScale = true;
-  if (!wasOn)
-  {
+  if (!wasOn) {
     this->setEditorStatus(true);
     emit this->autoScale(this);
-  }
-  else
-  {
+  } else {
     this->setEditorStatus(false);
     emit this->autoScale(this);
   }
@@ -208,15 +198,15 @@ void ColorSelectionWidget::autoCheckBoxClicked(bool wasOn)
  * This function presents the user with the available color presets (maps) and
  * gets the selection result from the user.
  */
-void ColorSelectionWidget::loadPreset()
-{
+void ColorSelectionWidget::loadPreset() {
   Mantid::VATES::ColorScaleLockGuard guard(m_colorScaleLock);
   pqPresetDialog preset(this, pqPresetDialog::SHOW_NON_INDEXED_COLORS_ONLY);
   preset.setCustomizableLoadColors(false, false);
   preset.setCustomizableLoadOpacities(false, false);
   preset.setCustomizableUsePresetRange(false, false);
   preset.setCustomizableLoadAnnotations(false, false);
-  preset.setCurrentPreset(m_mdSettings.getLastSessionColorMap());
+  preset.setCurrentPreset(
+      m_mdSettings.getLastSessionColorMap().toAscii().constData());
   this->connect(&preset, SIGNAL(applyPreset(const Json::Value &)), this,
                 SLOT(onApplyPreset(const Json::Value &)));
   preset.exec();
@@ -226,14 +216,10 @@ void ColorSelectionWidget::loadPreset()
  * This function gets the new color scale range from the value widgets and
  * passes a signal along with that new range.
  */
-void ColorSelectionWidget::getColorScaleRange()
-{
-  if (this->m_ui.useLogScaleCheckBox->isChecked())
-  {
+void ColorSelectionWidget::getColorScaleRange() {
+  if (this->m_ui.useLogScaleCheckBox->isChecked()) {
     setupLogScale(true);
-  }
-  else
-  {
+  } else {
     setupLogScale(false);
   }
 
@@ -248,10 +234,8 @@ void ColorSelectionWidget::getColorScaleRange()
  * @param min the minimum value of the color scale range
  * @param max the maximum value of the color scale range
  */
-void ColorSelectionWidget::setColorScaleRange(double min, double max)
-{
-  if (this->m_ui.autoColorScaleCheckBox->isChecked())
-  {
+void ColorSelectionWidget::setColorScaleRange(double min, double max) {
+  if (this->m_ui.autoColorScaleCheckBox->isChecked()) {
     m_minHistoric = min;
     m_maxHistoric = max;
 
@@ -259,9 +243,7 @@ void ColorSelectionWidget::setColorScaleRange(double min, double max)
     this->m_ui.minValLineEdit->insert(QString::number(min));
     this->m_ui.maxValLineEdit->clear();
     this->m_ui.maxValLineEdit->insert(QString::number(max));
-  }
-  else
-  {
+  } else {
     this->getColorScaleRange();
   }
 }
@@ -273,8 +255,7 @@ void ColorSelectionWidget::setColorScaleRange(double min, double max)
  *
  * @param on clicked-state of use-log-scaling
  */
-void ColorSelectionWidget::useLogScalingClicked(bool on)
-{
+void ColorSelectionWidget::useLogScalingClicked(bool on) {
   // Set up values for with or without log scale
   getColorScaleRange();
 
@@ -294,11 +275,9 @@ void ColorSelectionWidget::onApplyPreset(const Json::Value &value) {
  * associated checkbox.
  * @param state flag for whether or not to use log color scaling
  */
-void ColorSelectionWidget::useLogScaling(int state)
-{
+void ColorSelectionWidget::useLogScaling(int state) {
   // Qt::Checked is 2, need it to be 1 for boolean true conversion
-  if (Qt::Checked == state)
-  {
+  if (Qt::Checked == state) {
     state -= 1;
   }
 
@@ -309,11 +288,11 @@ void ColorSelectionWidget::useLogScaling(int state)
 }
 
 /**
- * Set up the min and max values and validators for use with or without log scaling
+ * Set up the min and max values and validators for use with or without log
+ * scaling
  * @param state The state of the log scale, where 0 is no log scale
  */
-void ColorSelectionWidget::setupLogScale(int state)
-{
+void ColorSelectionWidget::setupLogScale(int state) {
   // Get the min and max values
   double min = this->m_ui.minValLineEdit->text().toDouble();
   double max = this->m_ui.maxValLineEdit->text().toDouble();
@@ -322,15 +301,12 @@ void ColorSelectionWidget::setupLogScale(int state)
   setMinSmallerMax(min, max);
 
   // If we switched to a log state make sure that values are larger than 0
-  if (state)
-  {
-    if (min <= 0 )
-    {
+  if (state) {
+    if (min <= 0) {
       min = m_mdConstants.getLogScaleDefaultValue();
     }
 
-    if (max <= 0)
-    {
+    if (max <= 0) {
       max = m_mdConstants.getLogScaleDefaultValue();
     }
   }
@@ -339,41 +315,35 @@ void ColorSelectionWidget::setupLogScale(int state)
   setMinSmallerMax(min, max);
 
   // Set the validators
-  if (state)
-  {
+  if (state) {
     m_maxValidator->setBottom(0.0);
     m_minValidator->setBottom(0.0);
-  }
-  else
-  {
+  } else {
     m_maxValidator->setBottom(-DBL_MAX);
     m_minValidator->setBottom(-DBL_MAX);
   }
 }
 
 /**
- * Slot to set the checkbox if the logscaling behaviour has been set programatically
+ * Slot to set the checkbox if the logscaling behaviour has been set
+ * programatically
  * @param state Flag whether the checkbox should be checked or not
  */
-void ColorSelectionWidget::onSetLogScale(bool state)
-{
-    m_ui.useLogScaleCheckBox->setChecked(state);
+void ColorSelectionWidget::onSetLogScale(bool state) {
+  m_ui.useLogScaleCheckBox->setChecked(state);
 }
 
 /**
- * Make sure that min is smaller/equal than max. If not then set to the old value.
+ * Make sure that min is smaller/equal than max. If not then set to the old
+ * value.
  * @param max The maximum value.
  * @param min The minimum value.
  */
-void ColorSelectionWidget::setMinSmallerMax(double& min, double& max)
-{
-  if (min <= max)
-  {
+void ColorSelectionWidget::setMinSmallerMax(double &min, double &max) {
+  if (min <= max) {
     m_minHistoric = min;
     m_maxHistoric = max;
-  }
-  else
-  {
+  } else {
     min = m_minHistoric;
     max = m_maxHistoric;
   }
@@ -389,16 +359,13 @@ void ColorSelectionWidget::setMinSmallerMax(double& min, double& max)
  * widget.
  * @param state the boolean to set the controls' state to
  */
-void ColorSelectionWidget::enableControls(bool state)
-{
+void ColorSelectionWidget::enableControls(bool state) {
   this->m_ui.colorSelectionLabel->setEnabled(state);
   this->m_ui.autoColorScaleCheckBox->setEnabled(state);
   this->m_ui.useLogScaleCheckBox->setEnabled(state);
   int cbstate = this->m_ui.autoColorScaleCheckBox->isChecked();
-  if (state)
-  {
-    switch (cbstate)
-    {
+  if (state) {
+    switch (cbstate) {
     case Qt::Unchecked:
       this->setEditorStatus(true);
       break;
@@ -406,9 +373,7 @@ void ColorSelectionWidget::enableControls(bool state)
       this->setEditorStatus(false);
       break;
     }
-  }
-  else
-  {
+  } else {
     this->setEditorStatus(false);
   }
   this->m_ui.presetButton->setEnabled(state);
@@ -420,11 +385,9 @@ void ColorSelectionWidget::enableControls(bool state)
  * to be decremented to cast to a boolean.
  * @return the state of automatic color scaling
  */
-bool ColorSelectionWidget::getAutoScaleState()
-{
+bool ColorSelectionWidget::getAutoScaleState() {
   int state = this->m_ui.autoColorScaleCheckBox->isChecked();
-  if (Qt::Checked == state)
-  {
+  if (Qt::Checked == state) {
     state -= 1;
   }
   return static_cast<bool>(state);
@@ -436,11 +399,9 @@ bool ColorSelectionWidget::getAutoScaleState()
  * to be decremented to cast to a boolean.
  * @return the state of logarithmic color scaling
  */
-bool ColorSelectionWidget::getLogScaleState()
-{
+bool ColorSelectionWidget::getLogScaleState() {
   int state = this->m_ui.useLogScaleCheckBox->isChecked();
-  if (Qt::Checked == state)
-  {
+  if (Qt::Checked == state) {
     state -= 1;
   }
 
@@ -451,8 +412,7 @@ bool ColorSelectionWidget::getLogScaleState()
  * This function returns the minimum range value for the color scaling.
  * @return current minimum color scaling value
  */
-double ColorSelectionWidget::getMinRange()
-{
+double ColorSelectionWidget::getMinRange() {
   return this->m_ui.minValLineEdit->text().toDouble();
 }
 
@@ -460,8 +420,7 @@ double ColorSelectionWidget::getMinRange()
  * This function returns the maximum range value for the color scaling.
  * @return current maximum color scaling value
  */
-double ColorSelectionWidget::getMaxRange()
-{
+double ColorSelectionWidget::getMaxRange() {
   return this->m_ui.maxValLineEdit->text().toDouble();
 }
 
@@ -470,8 +429,7 @@ double ColorSelectionWidget::getMaxRange()
  * This means that automatic color scaling is on, log scaling is off and
  * the color range line edits are empty.
  */
-void ColorSelectionWidget::reset()
-{
+void ColorSelectionWidget::reset() {
   this->m_ui.autoColorScaleCheckBox->setChecked(true);
   this->m_ui.useLogScaleCheckBox->setChecked(false);
   this->m_ui.minValLineEdit->setText("");

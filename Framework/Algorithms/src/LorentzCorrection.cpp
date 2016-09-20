@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/LorentzCorrection.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <boost/make_shared.hpp>
@@ -17,18 +18,6 @@ using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LorentzCorrection)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LorentzCorrection::LorentzCorrection() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LorentzCorrection::~LorentzCorrection() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LorentzCorrection::version() const { return 1; }
@@ -47,7 +36,6 @@ const std::string LorentzCorrection::name() const {
   return "LorentzCorrection";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LorentzCorrection::init() {
@@ -62,7 +50,6 @@ void LorentzCorrection::init() {
                   "An output workspace.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LorentzCorrection::exec() {
@@ -77,47 +64,34 @@ void LorentzCorrection::exec() {
       boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
   const auto numHistos = inWS->getNumberHistograms();
+  const auto &spectrumInfo = inWS->spectrumInfo();
   Progress prog(this, 0, 1, numHistos);
-  const bool isHist = inWS->isHistogramData();
 
   PARALLEL_FOR1(inWS)
   for (int64_t i = 0; i < int64_t(numHistos); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    const MantidVec &inY = inWS->readY(i);
-    const MantidVec &inX = inWS->readX(i);
-
-    MantidVec &outY = outWS->dataY(i);
-    MantidVec &outE = outWS->dataE(i);
-
-    IDetector_const_sptr detector;
-    try {
-      detector = inWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found, skip onto the next spectrum
-    if (!detector)
+    if (!spectrumInfo.hasDetectors(i))
       continue;
 
-    const double twoTheta = inWS->detectorTwoTheta(*detector);
+    const double twoTheta = spectrumInfo.twoTheta(i);
     const double sinTheta = std::sin(twoTheta / 2);
     double sinThetaSq = sinTheta * sinTheta;
 
+    auto &inY = inWS->y(i);
+    auto &outY = outWS->mutableY(i);
+    auto &outE = outWS->mutableE(i);
+    const auto points = inWS->points(i);
+    const auto pos = std::find(cbegin(points), cend(points), 0.0);
+    if (pos != cend(points)) {
+      std::stringstream buffer;
+      buffer << "Cannot have zero values Wavelength. At workspace index: "
+             << pos - cbegin(points);
+      throw std::runtime_error(buffer.str());
+    }
     for (size_t j = 0; j < inY.size(); ++j) {
-      const double wL = isHist ? (0.5 * (inX[j] + inX[j + 1])) : inX[j];
-      if (wL == 0) {
-        std::stringstream buffer;
-        buffer << "Cannot have zero values Wavelength. At workspace index: "
-               << i;
-        throw std::runtime_error(buffer.str());
-      }
-
-      double weight = sinThetaSq / (wL * wL * wL * wL);
+      double weight =
+          sinThetaSq / (points[j] * points[j] * points[j] * points[j]);
       outY[j] *= weight;
       outE[j] *= weight;
     }

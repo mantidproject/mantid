@@ -35,7 +35,7 @@ GeneralDomainCreator::GeneralDomainCreator(
     m_domainColumnNames.push_back("ArgumentColumn");
     for (size_t i = 1; i < nDomainColumns; ++i) {
       m_domainColumnNames.push_back(m_domainColumnNames.front() + "_" +
-                                    boost::lexical_cast<std::string>(i));
+                                    std::to_string(i));
     }
   }
 
@@ -44,7 +44,7 @@ GeneralDomainCreator::GeneralDomainCreator(
     m_dataColumnNames.push_back("DataColumn");
     m_weightsColumnNames.push_back("WeightsColumn");
     for (size_t i = 1; i < nDataColumns; ++i) {
-      auto si = "_" + boost::lexical_cast<std::string>(i);
+      auto si = "_" + std::to_string(i);
       m_dataColumnNames.push_back(m_dataColumnNames.front() + si);
       m_weightsColumnNames.push_back(m_weightsColumnNames.front() + si);
     }
@@ -59,18 +59,19 @@ GeneralDomainCreator::GeneralDomainCreator(
 void GeneralDomainCreator::declareDatasetProperties(const std::string &suffix,
                                                     bool addProp) {
   UNUSED_ARG(suffix);
-  UNUSED_ARG(addProp);
-  for (auto &propName : m_domainColumnNames) {
-    declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
-                    "A name of a domain column.");
-  }
-  for (auto &propName : m_dataColumnNames) {
-    declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
-                    "A name of a fitting data column.");
-  }
-  for (auto &propName : m_weightsColumnNames) {
-    declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
-                    "A name of a fitting weights column.");
+  if (addProp) {
+    for (auto &propName : m_domainColumnNames) {
+      declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
+                      "A name of a domain column.");
+    }
+    for (auto &propName : m_dataColumnNames) {
+      declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
+                      "A name of a fitting data column.");
+    }
+    for (auto &propName : m_weightsColumnNames) {
+      declareProperty(new Kernel::PropertyWithValue<std::string>(propName, ""),
+                      "A name of a fitting weights column.");
+    }
   }
 }
 

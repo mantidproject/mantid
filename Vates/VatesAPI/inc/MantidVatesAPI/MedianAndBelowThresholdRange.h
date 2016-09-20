@@ -5,12 +5,14 @@
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidAPI/IMDWorkspace.h"
 
-/** Set range selection to cut-out zeros and provide an upper limit equal to the median value in the workspace.
+/** Set range selection to cut-out zeros and provide an upper limit equal to the
+ median value in the workspace.
 
  @author Owen Arnold, Tessella plc
  @date 07/07/2011
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -31,15 +33,11 @@
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-namespace Mantid
-{
-namespace VATES
-{
-class DLLExport MedianAndBelowThresholdRange : public ThresholdRange
-{
+namespace Mantid {
+namespace VATES {
+class DLLExport MedianAndBelowThresholdRange : public ThresholdRange {
 
 public:
-
   MedianAndBelowThresholdRange();
 
   void calculate() override;
@@ -59,11 +57,11 @@ public:
   void setWorkspace(Mantid::API::Workspace_sptr workspace) override;
 
 private:
-  
-  MedianAndBelowThresholdRange(signal_t min, signal_t max, bool isCalculated, Mantid::API::IMDWorkspace_sptr m_workspace);
+  MedianAndBelowThresholdRange(signal_t min, signal_t max, bool isCalculated,
+                               Mantid::API::IMDWorkspace_sptr m_workspace);
 
   signal_t m_min;
-  
+
   signal_t m_max;
 
   bool m_isCalculated;

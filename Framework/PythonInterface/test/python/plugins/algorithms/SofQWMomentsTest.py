@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.simpleapi import SofQWMoments, CreateSampleWorkspace, ScaleX, RenameWorkspace, LoadInstrument, SofQW
 from mantid import mtd

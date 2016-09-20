@@ -9,84 +9,151 @@
 Description
 -----------
 
-This algorithm performs a Monte Carlo simulation to calculate the
-attenuation factor of a given sample for an arbitrary arrangement of
-sample + container shapes. The algorithm proceeds as follows for each
-spectra in turn:
+This algorithm performs a Monte Carlo simulation to calculate the correction factors due
+to attenuation & single scattering within a sample plus optionally its sample environment.
 
--  A random point within the sample+container set up is selected and
-   chosen as a scattering point;
--  This point then defines an incoming vector from the source position
-   and an outgoing vector to the final detector;
--  The total attenuation factor for this path is then calculated as the
-   product of the factor for each defined material of the
-   sample/container that the track passes through.  Any process that 
-   removes neutrons from the beam prior to the scattering point looks
-   like absorption.  Therefore both the absorption and total scattering cross sections are 
-   used to calculate the attenuation factor.  This follows the description
-   of T. M. Sabine (International Tables for Crystallography Vol C., pg 603.) 
+Input Workspace Requirements
+############################
 
-Known limitations
------------------
+The algorithm will compute the correction factors on a bin-by-bin basis for each spectrum within
+the input workspace. The following assumptions on the input workspace will are made:
 
--  Only elastic scattering is implemented at the moment.
+- X units are in wavelength
+- the instrument is fully defined
+- properties of the sample and optionally its environment have been set with
+  :ref:`SetSample <algm-SetSample>`
 
--  The object's bounding box is used as a starting point for selecting a
-   random point. If the shape of the object is peculiar enough not to
-   occupy much of the bounding box then the generation of the initial
-   scatter point will fail.
+By default the beam is assumed to be the a slit with width and height matching
+the width and height of the sample. This can be overridden using :ref:`SetBeam <algm-SetBeam>`.
 
-Restrictions on the input workspace
-###################################
+Method
+######
 
-The input workspace must have units of wavelength. The
-:ref:`instrument <instrument>` associated with the workspace must be fully
-defined because detector, source & sample position are needed.
+By default, the material for the sample & containers will define the values of the cross section used to compute the absorption factor and will
+include contributions from both the total scattering cross section & absorption cross section.
+This follows the Hamilton-Darwin [#DAR]_, [#HAM]_ approach as described by T. M. Sabine in the International Tables of Crystallography Vol. C [#SAB]_.
 
-At a minimum, the input workspace must have a sample shape defined.
+The algorithm proceeds as follows. For each spectrum:
+
+#. find the associated detector position
+
+#. find the associated efixed value (if applicable) & convert to wavelength (:math:`\lambda_{fixed}`)
+
+#. loop over the bins in steps defined by `NumberOfWavelengthPoints` and for each step (:math:`\lambda_{step}`)
+
+   * define :math:`\lambda_1` as the wavelength before scattering & :math:`\lambda_2` as wavelength after scattering:
+
+     - Direct: :math:`\lambda_1 = \lambda_1`, :math:`\lambda_2 = \lambda_{step}`
+
+     - Indirect: :math:`\lambda_1 = \lambda_{step}`, :math:`\lambda_2 = \lambda_{fixed}`
+
+     - Elastic: :math:`\lambda_1 = \lambda_2 = \lambda_{step}`
+
+   * for each event in `NEvents`:
+
+     - generate a random point on the beam face defined by the input height & width. If the point is outside of the
+       area defined by the face of the sample then it is pulled to the boundary of this area
+
+     - assume the neutron travels in the direction defined by the `samplePos - srcPos` and define a `Track`
+
+     - test for intersections of the track & sample + container objects, giving the number of subsections
+       and corresponding distances within the object for each section, call them :math:`l_{1i}`
+
+     - choose a random section and depth for the scatter point
+
+     - form a second `Track` with the scatter position as the starting point and the direction defined by
+       `detPos - scatterPos`
+
+     - test for intersections of the track & sample + container objects, giving the number of subsections
+       and corresponding distances within the object for each section, call them :math:`l_{2i}`
+
+     - compute the self-attenuation factor for all intersections as
+       :math:`\prod\limits_{i} \exp(-(\rho_{1i}\sigma_{1i}(\lambda_{1i})l_{1i} + \rho_{2i}\sigma_{2i}(\lambda_{2i})l_{2i}))`
+       where :math:`\rho` is the mass density of the material &
+       :math:`\sigma` the absorption cross-section at a given wavelength
+
+     - accumulate this factor with the factor for all `NEvents`
+
+   * average the accumulated attentuation factors over `NEvents` and assign this as the correction factor for
+     this :math:`\lambda_{step}`.
+
+#. finally, perform an interpolation through the unsimulated wavelength points
 
 Usage
 -----
 
-**Example: A simple spherical sample**
+**Example: A cylindrical sample with no container**
 
-.. testcode:: ExMonteSimpleSample
-    
-    #setup the sample shape
-    sphere = '''<sphere id="sample-sphere">
-          <centre x="0" y="0" z="0"/>
-          <radius val="0.1" />
-      </sphere>'''
+.. testcode:: ExCylinderSampleOnly
 
-    ws = CreateSampleWorkspace("Histogram",NumBanks=1)
-    ws = ConvertUnits(ws,"Wavelength")
-    CreateSampleShape(ws,sphere)
-    SetSampleMaterial(ws,ChemicalFormula="V")
+   data = CreateSampleWorkspace(WorkspaceType='Histogram', NumBanks=1)
+   data = ConvertUnits(data, Target="Wavelength")
+   # Default up axis is Y
+   SetSample(data, Geometry={'Shape': 'Cylinder', 'Height': 5.0, 'Radius': 1.0,
+                     'Center': [0.0,0.0,0.0]},
+                   Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6', 'SampleNumberDensity': 0.07})
+   # Simulating every data point can be slow. Use a smaller set and interpolate
+   abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=50)
+   corrected = data/abscor
 
-    #Note: this is a quick and dirty evaluation, in reality you would need more than 300 events per point
-    wsOut = MonteCarloAbsorption(ws,EventsPerPoint=300)
+**Example: A cylindrical sample setting a beam size**
 
-    print "The created workspace has one entry for each spectra: %i" % ws.getNumberHistograms()
-    print "Just divide your data by the correction to correct for absorption."
+.. testcode:: ExCylinderSampleAndBeamSize
 
+   data = CreateSampleWorkspace(WorkspaceType='Histogram', NumBanks=1)
+   data = ConvertUnits(data, Target="Wavelength")
+   # Default up axis is Y
+   SetSample(data, Geometry={'Shape': 'Cylinder', 'Height': 5.0, 'Radius': 1.0,
+                     'Center': [0.0,0.0,0.0]},
+                     Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6', 'SampleNumberDensity': 0.07})
+   SetBeam(data, Geometry={'Shape': 'Slit', 'Width': 0.8, 'Height': 1.0})
+   # Simulating every data point can be slow. Use a smaller set and interpolate
+   abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=50)
+   corrected = data/abscor
 
-Output:
+**Example: A cylindrical sample with predefined container**
 
-.. testoutput:: ExMonteSimpleSample
+The following example uses a test sample environment defined for the ``TEST_LIVE``
+facility and ``ISIS_Histogram`` instrument and assumes that these are set as the
+default facility and instrument respectively. The definition can be found at
+``[INSTALLDIR]/instrument/sampleenvironments/TEST_LIVE/ISIS_Histogram/CRYO-01.xml``.
 
-    The created workspace has one entry for each spectra: 100
-    Just divide your data by the correction to correct for absorption.
+.. testsetup:: ExCylinderPlusEnvironment
 
-**Example: A simple spherical sample in a cylindrical container**
+   FACILITY_AT_START = config['default.facility']
+   INSTRUMENT_AT_START = config['default.instrument']
+   config['default.facility'] = 'TEST_LIVE'
+   config['default.instrument'] = 'ISIS_Histogram'
 
-.. Ticket 9644 is in place to improve the python exports and expand this example
+.. testcleanup:: ExCylinderPlusEnvironment
 
-.. code-block:: python
-    
-   # The algorithm does allow you to set a complex sample environment
-   # of different materials and shapes, but some of the required methods
-   # are not exported to python yet.  This will come.
+   config['default.facility'] = FACILITY_AT_START
+   config['default.instrument'] = INSTRUMENT_AT_START
 
+.. testcode:: ExCylinderPlusEnvironment
+
+   data = CreateSampleWorkspace(WorkspaceType='Histogram', NumBanks=1)
+   data = ConvertUnits(data, Target="Wavelength")
+   # Sample geometry is defined by container but not completely filled so
+   # we just define the height
+   SetSample(data, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
+             Geometry={'Height': 4.0},
+             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6', 'SampleNumberDensity': 0.07})
+   # Simulating every data point can be slow. Use a smaller set and interpolate
+   abscor = MonteCarloAbsorption(data, NumberOfWavelengthPoints=30)
+   corrected = data/abscor
+
+References
+----------
+
+.. [#DAR] Darwin, C. G., *Philos. Mag.*, **43** 800 (1922)
+          `doi: 10.1080/10448639208218770 <http://dx.doi.org/10.1080/10448639208218770>`_
+.. [#HAM] Hamilton, W.C., *Acta Cryst*, **10**, 629 (1957)
+          `doi: 10.1107/S0365110X57002212 <http://dx.doi.org/10.1107/S0365110X57002212>`_
+.. [#SAB] Sabine, T. M., *International Tables for Crystallography*, Vol. C, Page 609, Ed. Wilson, A. J. C and Prince, E. Kluwer Publishers (2004)
+          `doi: 10.1107/97809553602060000103 <http://dx.doi.org/10.1107/97809553602060000103>`_
+
+|
 
 .. categories::
 

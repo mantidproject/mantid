@@ -44,10 +44,10 @@ def CalibrateWish( RunNumber, PanelNumber):
 
     #calibrate the upper tubes
     calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, upper_tube, funcForm,
-                                    rangeList = range(76,152),
-                                    calibTable=calibrationTable,#give the calibration table to append data
-                                    outputPeak = peakTable#give peak table to append data
-                                                 )
+                                                 rangeList = range(76,152),
+                                                 calibTable=calibrationTable,#give the calibration table to append data
+                                                 outputPeak = peakTable#give peak table to append data
+                                                )
 
     print "Got calibration (new positions of detectors)"
 

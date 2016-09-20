@@ -8,12 +8,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/DateAndTime.h"
-#include "MantidAlgorithms/RebinByTimeAtSample.h"
 #include "MantidAPI/Axis.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAlgorithms/RebinByTimeAtSample.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/make_shared.hpp>
 #include <gmock/gmock.h>
@@ -48,7 +49,7 @@ createEventWorkspace(const int numberspectra, const int nDistrubutedEvents,
           uint64_t(((double)i + 0.5) * binWidth); // Stick an event with a
                                                   // pulse_time in the middle of
                                                   // each pulse_time bin.
-      retVal->getEventList(pix) += TofEvent(tof, pulseTime);
+      retVal->getSpectrum(pix) += TofEvent(tof, pulseTime);
     }
   }
 
@@ -68,6 +69,8 @@ createEventWorkspace(const int numberspectra, const int nDistrubutedEvents,
   return retVal;
 }
 
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
+
 /*
  This type is an IEventWorkspace, but not an EventWorkspace.
  */
@@ -81,7 +84,6 @@ public:
   MOCK_CONST_METHOD1(getTimeAtSampleMax, DateAndTime(double));
   MOCK_CONST_METHOD1(getTimeAtSampleMin, DateAndTime(double));
   MOCK_CONST_METHOD0(getEventType, EventType());
-  MOCK_METHOD1(getEventListPtr, IEventList *(const std::size_t));
   MOCK_CONST_METHOD5(generateHistogram,
                      void(const std::size_t, const Mantid::MantidVec &,
                           Mantid::MantidVec &, Mantid::MantidVec &, bool));
@@ -90,13 +92,12 @@ public:
   MOCK_CONST_METHOD0(blocksize, std::size_t());
   MOCK_CONST_METHOD0(size, std::size_t());
   MOCK_CONST_METHOD0(getNumberHistograms, std::size_t());
-  MOCK_METHOD1(getSpectrum, Mantid::API::ISpectrum *(const std::size_t));
+  MOCK_METHOD1(getSpectrum, Mantid::API::IEventList &(const std::size_t));
   MOCK_CONST_METHOD1(getSpectrum,
-                     const Mantid::API::ISpectrum *(const std::size_t));
+                     const Mantid::API::IEventList &(const std::size_t));
   MOCK_METHOD3(init, void(const size_t &, const size_t &, const size_t &));
   MOCK_CONST_METHOD0(getSpecialCoordinateSystem,
                      Mantid::Kernel::SpecialCoordinateSystem());
-  ~MockIEventWorkspace() override {}
 
 private:
   MockIEventWorkspace *doClone() const override {
@@ -105,6 +106,9 @@ private:
   }
 };
 }
+
+GCC_DIAG_ON_SUGGEST_OVERRIDE
+
 //=====================================================================================
 // Functional Tests
 //=====================================================================================

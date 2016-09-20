@@ -31,7 +31,7 @@ namespace MantidWidgets {
 StructuredDetectorActor::StructuredDetectorActor(
     const InstrumentActor &instrActor,
     const Mantid::Geometry::ComponentID &compID)
-    : ICompAssemblyActor(instrActor, compID){
+    : ICompAssemblyActor(instrActor, compID) {
 
   mNumberOfDetectors = 0;
   m_det = boost::dynamic_pointer_cast<const StructuredDetector>(getComponent());
@@ -44,14 +44,13 @@ StructuredDetectorActor::StructuredDetectorActor(
   mNumberOfDetectors = m_det->xPixels() * m_det->yPixels();
   this->AppendBoundingBox(compBox.minPoint(), compBox.maxPoint());
 
-  
   for (size_t y = 0; y < m_det->yPixels(); y++) {
     for (size_t x = 0; x < m_det->xPixels(); x++) {
       // Getting the detector is slow. Get the ID directly
       detid_t id = m_det->getDetectorIDAtXY(x, y);
       size_t pickID = instrActor.pushBackDetid(id);
-	  m_pickIds.push_back(pickID);
-	  m_pickColors.push_back(GLActor::makePickColor(pickID));
+      m_pickIds.push_back(pickID);
+      m_pickColors.push_back(GLActor::makePickColor(pickID));
       m_clist.push_back(instrActor.getColor(id));
     }
   }
@@ -60,8 +59,7 @@ StructuredDetectorActor::StructuredDetectorActor(
 /**
 * Destructor which removes the actors created by this object
 */
-StructuredDetectorActor::~StructuredDetectorActor() {
-}
+StructuredDetectorActor::~StructuredDetectorActor() {}
 
 void StructuredDetectorActor::draw(bool picking) const {
   glPushMatrix();
@@ -188,7 +186,7 @@ void StructuredDetectorActor::AppendBoundingBox(
 }
 
 void StructuredDetectorActor::setColors() {
- //do nothing
+  // do nothing
 }
 
 } // namespace MantidWidgets

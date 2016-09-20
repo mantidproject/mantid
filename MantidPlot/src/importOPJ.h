@@ -33,26 +33,29 @@
 #include "origin/OPJFile.h"
 
 //! Origin project import class
-class ImportOPJ
-{
+class ImportOPJ {
 public:
-	ImportOPJ(ApplicationWindow *app, const QString& filename);
+  ImportOPJ(ApplicationWindow *app, const QString &filename);
 
-	bool createProjectTree(const OPJFile& opj);
-	bool importTables(const OPJFile& opj);
-	bool importGraphs(const OPJFile& opj);
-	bool importNotes(const OPJFile& opj);
-	int error(){return parse_error;};
+  bool createProjectTree(const OPJFile &opj);
+  bool importTables(const OPJFile &opj);
+  bool importGraphs(const OPJFile &opj);
+  bool importNotes(const OPJFile &opj);
+  int error() { return parse_error; };
 
 private:
-    int arrowAngle(double length, double width){return int(ceil(45*atan(0.5*width/length)/atan(1.0)));};
-	int translateOrigin2QtiplotLineStyle(int linestyle);
-	QString parseOriginText(const QString &str);
-	QString parseOriginTags(const QString &str);
-	void addText(const text& _text, Graph* graph, LegendWidget* txt, const rect& layerRect, double fFontScaleFactor, double fXScale, double fYScale);
-	int parse_error;
-	int xoffset;
-	ApplicationWindow *mw;
+  int arrowAngle(double length, double width) {
+    return int(ceil(45 * atan(0.5 * width / length) / atan(1.0)));
+  };
+  int translateOrigin2QtiplotLineStyle(int linestyle);
+  QString parseOriginText(const QString &str);
+  QString parseOriginTags(const QString &str);
+  void addText(const text &_text, Graph *graph, LegendWidget *txt,
+               const rect &layerRect, double fFontScaleFactor, double fXScale,
+               double fYScale);
+  int parse_error;
+  int xoffset;
+  ApplicationWindow *mw;
 };
 
-#endif //IMPORTOPJ_H
+#endif // IMPORTOPJ_H

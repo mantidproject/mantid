@@ -30,10 +30,10 @@
 #include <QScrollBar>
 #include <QShowEvent>
 #include <QPainter>
+#include <QTextBlock>
 
 LineNumberDisplay::LineNumberDisplay(QTextEdit *te, QWidget *parent)
-  : QTextEdit(parent), d_text_edit(te)
-{
+    : QTextEdit(parent), d_text_edit(te) {
   setReadOnly(true);
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -48,30 +48,27 @@ LineNumberDisplay::LineNumberDisplay(QTextEdit *te, QWidget *parent)
   palette.setColor(QPalette::Highlight, palette.color(QPalette::Base));
   setPalette(palette);
 
-  if (te){
-    connect(this, SIGNAL(selectionChanged()), this, SLOT(updateDocumentSelection()));
+  if (te) {
+    connect(this, SIGNAL(selectionChanged()), this,
+            SLOT(updateDocumentSelection()));
 
-    connect(te->document(), SIGNAL(contentsChanged()), this, SLOT(updateLineNumbers()));
+    connect(te->document(), SIGNAL(contentsChanged()), this,
+            SLOT(updateLineNumbers()));
     connect((QObject *)te->verticalScrollBar(), SIGNAL(valueChanged(int)),
-        (QObject *)verticalScrollBar(), SLOT(setValue(int)));
-    connect(te, SIGNAL(currentCharFormatChanged (const QTextCharFormat &)),
-        this, SLOT(changeCharFormat (const QTextCharFormat &)));
+            (QObject *)verticalScrollBar(), SLOT(setValue(int)));
+    connect(te, SIGNAL(currentCharFormatChanged(const QTextCharFormat &)), this,
+            SLOT(changeCharFormat(const QTextCharFormat &)));
   }
 }
 
-void LineNumberDisplay::updateDocumentSelection()
-{
+void LineNumberDisplay::updateDocumentSelection() {
   if (!isVisible() || !d_text_edit)
     return;
 
   QTextCursor c = textCursor();
-#if QT_VERSION >= 0x040500
-  int selectionStart = document()->findBlock(c.selectionStart()).firstLineNumber();
+  int selectionStart =
+      document()->findBlock(c.selectionStart()).firstLineNumber();
   int selectionEnd = document()->findBlock(c.selectionEnd()).firstLineNumber();
-#else
-  int selectionStart = document()->findBlock(c.selectionStart()).blockNumber();
-  int selectionEnd = document()->findBlock(c.selectionEnd()).blockNumber();
-#endif
   int selectedLines = abs(selectionEnd - selectionStart);
 
   QTextCursor cursor(d_text_edit->textCursor());
@@ -90,8 +87,7 @@ void LineNumberDisplay::updateDocumentSelection()
   d_text_edit->setTextCursor(cursor);
 }
 
-void LineNumberDisplay::updateLineNumbers(bool force)
-{
+void LineNumberDisplay::updateLineNumbers(bool force) {
   if (!isVisible() || !d_text_edit)
     return;
 
@@ -100,24 +96,22 @@ void LineNumberDisplay::updateLineNumbers(bool force)
     return;
 
   QString aux;
-  for(int i = 0; i < lines; i++)
+  for (int i = 0; i < lines; i++)
     aux += QString::number(i + 1) + "\n";
 
   setPlainText(aux);
 
   QFontMetrics fm(d_text_edit->currentFont(), this);
-  setMaximumWidth(2*fm.boundingRect(QString::number(lines)).width());
+  setMaximumWidth(2 * fm.boundingRect(QString::number(lines)).width());
   verticalScrollBar()->setValue(d_text_edit->verticalScrollBar()->value());
 }
 
-void LineNumberDisplay::showEvent(QShowEvent *e)
-{
+void LineNumberDisplay::showEvent(QShowEvent *e) {
   e->accept();
   if (isVisible())
     updateLineNumbers();
 }
 
-void LineNumberDisplay::changeCharFormat (const QTextCharFormat &f)
-{
+void LineNumberDisplay::changeCharFormat(const QTextCharFormat &f) {
   setCurrentFont(f.font());
 }

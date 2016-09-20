@@ -112,7 +112,7 @@ public:
     TS_ASSERT_EQUALS(ws2->getNumberEvents(), 200);
     TSM_ASSERT("Workspace changed when replaced", ws1 != ws2);
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
-    TSM_ASSERT("Events are sorted", ws2->getEventList(0).isSortedByTof());
+    TSM_ASSERT("Events are sorted", ws2->getSpectrum(0).isSortedByTof());
   }
 
   //--------------------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ public:
     ws2 = doExec<EventWorkspace>("Append");
     TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
-    TSM_ASSERT("Events are sorted", ws2->getEventList(0).isSortedByTof());
+    TSM_ASSERT("Events are sorted", ws2->getSpectrum(0).isSortedByTof());
   }
 
   //--------------------------------------------------------------------------------------------
@@ -146,7 +146,7 @@ public:
     TS_ASSERT_EQUALS(ws2->getNumberEvents(), 400);
 
     TSM_ASSERT("Workspace being added stayed the same pointer", ws1 == ws2);
-    TSM_ASSERT("Events are sorted", ws2->getEventList(0).isSortedByTof());
+    TSM_ASSERT("Events are sorted", ws2->getSpectrum(0).isSortedByTof());
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
 
     // Test monitor workspace is present
@@ -265,8 +265,8 @@ public:
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 2);
 
-    TSM_ASSERT("Events are sorted", ws_accum->getEventList(0).isSortedByTof());
-    TSM_ASSERT("Events are sorted", ws->getEventList(0).isSortedByTof());
+    TSM_ASSERT("Events are sorted", ws_accum->getSpectrum(0).isSortedByTof());
+    TSM_ASSERT("Events are sorted", ws->getSpectrum(0).isSortedByTof());
   }
 
   //--------------------------------------------------------------------------------------------
@@ -295,8 +295,8 @@ public:
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 2);
 
-    TSM_ASSERT("Events are sorted", ws_accum->getEventList(0).isSortedByTof());
-    TSM_ASSERT("Events are sorted", ws->getEventList(0).isSortedByTof());
+    TSM_ASSERT("Events are sorted", ws_accum->getSpectrum(0).isSortedByTof());
+    TSM_ASSERT("Events are sorted", ws->getSpectrum(0).isSortedByTof());
   }
 
   //--------------------------------------------------------------------------------------------

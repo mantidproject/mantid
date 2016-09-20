@@ -23,6 +23,16 @@ dict neutron(Atom &self) {
   retval["inc_scatt_xs"] = self.neutron.inc_scatt_xs;
   retval["tot_scatt_xs"] = self.neutron.tot_scatt_xs;
   retval["abs_xs"] = self.neutron.abs_scatt_xs;
+
+  retval["coh_scatt_length_real"] = self.neutron.coh_scatt_length_real;
+  retval["coh_scatt_length_img"] = self.neutron.coh_scatt_length_img;
+  retval["inc_scatt_length_real"] = self.neutron.inc_scatt_length_real;
+  retval["inc_scatt_length_img"] = self.neutron.inc_scatt_length_img;
+
+  retval["tot_scatt_length"] = self.neutron.tot_scatt_length;
+  retval["coh_scatt_length"] = self.neutron.coh_scatt_length;
+  retval["inc_scatt_length"] = self.neutron.inc_scatt_length;
+
   return retval;
 }
 /**

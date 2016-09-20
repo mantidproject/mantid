@@ -7,9 +7,9 @@ import stresstesting
 import os
 import shutil
 import glob
+import numpy as np
 import mantid
 from mantid.simpleapi import *
-from numpy import *
 
 class DirectInelaticSNSTest(stresstesting.MantidStressTest):
     _nxspe_filename=""
@@ -46,17 +46,17 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
 
 
     #Routines from SNS scripts
-    def createanglelist(self,ws,amin,amax,astep):
+    def createanglelist(self,ws,angmin,angmax,angstep):
         """
         Function to create a map of detectors corresponding to angles in a certain range
         """
-        bin_angles=arange(amin+astep*0.5,amax+astep*0.5,astep)
+        bin_angles=np.arange(angmin+angstep*0.5,angmax+angstep*0.5,angstep)
         a=[[] for i in range(len(bin_angles))] #list of list with detector IDs
         w=mtd[ws]
         origin = w.getInstrument().getSample().getPos()
         for i in range(w.getNumberHistograms()):
-            ang=w.getDetector(i).getTwoTheta(origin,mantid.kernel.V3D(0,0,1))*180/math.pi
-            index=int((ang-amin)/astep)
+            ang=w.getDetector(i).getTwoTheta(origin,mantid.kernel.V3D(0,0,1))*180/np.pi
+            index=int((ang-angmin)/angstep)
             if (index>=0) and (index<len(a)) and ((w.getDetector(i).getID())>0):
                 a[index].append(w.getSpectrum(i).getSpectrumNo())
         #create lists with angles and detector ID only for bins where there are detectors
@@ -79,8 +79,8 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         # par file
         f = open(os.path.join(self.customDataDir,"group.par"),'w')
         print >>f,len(ang_list)
-        for i in range(len(ang_list)):
-            print >>f,5.5,ang_list[i],0.0,1.0,1.0,1
+        for angi in ang_list:
+            print >>f,5.5,angi,0.0,1.0,1.0,1
         f.close()
         return [ang_list,detIDlist]
 
@@ -111,9 +111,9 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
                 r=[r]
             temppath=[]
             tempnewruns=[]
-            for i in range(len(r)):
-                temppath.append(os.path.join(folder,prefix+str(r[i])+suffix))
-                tempnewruns.append(r[i])
+            for i,ri in enumerate(r):
+                temppath.append(os.path.join(folder,prefix+str(ri)+suffix))
+                tempnewruns.append(ri)
                 if not os.path.isfile(temppath[i]):
                     raise IOError(temppath[i]+" not found")
             path.append(temppath)
@@ -192,7 +192,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
                     DeleteWorkspace("IWS_temp")
                     DeleteWorkspace("monitor_ws_temp")
             w=mtd["IWS"]
-            psi=array(w.getRun()[angle_name].value).mean()+ang_offset
+            psi=np.array(w.getRun()[angle_name].value).mean()+ang_offset
             FilterBadPulses(InputWorkspace="IWS",OutputWorkspace = "IWS",LowerCutoff = 50)
             [Efixed,T0]=self.GetEiT0("monitor_ws",Eguess)
             ChangeBinOffset(InputWorkspace="IWS",OutputWorkspace="OWS",Offset=T0)

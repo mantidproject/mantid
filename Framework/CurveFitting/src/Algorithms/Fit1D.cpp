@@ -9,9 +9,8 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include <MantidKernel/StringTokenizer.h>
 #include "MantidKernel/UnitFactory.h"
-
-#include <boost/tokenizer.hpp>
 
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_multifit_nlin.h>
@@ -768,8 +767,6 @@ void Fit1D::exec() {
   delete[] l_data.forSimplexLSwrap;
   delete[] l_data.parameters;
   gsl_vector_free(initFuncArg);
-
-  return;
 }
 
 /**  Constructor.
@@ -779,14 +776,10 @@ void Fit1D::exec() {
 FitData::FitData(Fit1D *fit, const std::string &fixed)
     : n(0), X(nullptr), Y(nullptr), sigmaData(nullptr), fit1D(fit),
       forSimplexLSwrap(nullptr), parameters(nullptr) {
-  typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-  boost::char_separator<char> sep(",");
-  boost::tokenizer<boost::char_separator<char>> names(fixed, sep);
+  Mantid::Kernel::StringTokenizer namesStrTok(
+      fixed, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
   active.insert(active.begin(), fit1D->m_parameterNames.size(), true);
-  for (tokenizer::iterator it = names.begin(); it != names.end(); ++it) {
-    std::istringstream istr(*it);
-    std::string name;
-    istr >> name;
+  for (const auto &name : namesStrTok) {
     std::vector<std::string>::const_iterator i = std::find(
         fit1D->m_parameterNames.begin(), fit1D->m_parameterNames.end(), name);
     if (i != fit1D->m_parameterNames.end()) {

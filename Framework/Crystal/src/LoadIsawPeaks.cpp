@@ -23,16 +23,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadIsawPeaks::LoadIsawPeaks() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadIsawPeaks::~LoadIsawPeaks() {}
-
-//----------------------------------------------------------------------------------------------
 /**
  * Determine the confidence with which this algorithm can load a given file
  * @param descriptor A descriptor for the file
@@ -135,7 +125,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
   std::string L1s = getWord(in, false);
   std::string T0s = getWord(in, false);
   if (L1s.length() < 1 || T0s.length() < 1) {
-    g_log.error() << "Missing L1 or Time offset" << std::endl;
+    g_log.error() << "Missing L1 or Time offset\n";
     throw std::invalid_argument("Missing L1 or Time offset");
   }
 
@@ -148,7 +138,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
     SCDCalibratePanels::FixUpSourceParameterMap(instr, L1 / 100, sampPos,
                                                 parMap1);
   } catch (...) {
-    g_log.error() << "Invalid L1 or Time offset" << std::endl;
+    g_log.error() << "Invalid L1 or Time offset\n";
     throw std::invalid_argument("Invalid L1 or Time offset");
   }
 
@@ -160,7 +150,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
   }
 
   if (!(in.good())) {
-    g_log.error() << "Peaks file has no detector panel info" << std::endl;
+    g_log.error() << "Peaks file has no detector panel info\n";
     throw std::invalid_argument("Peaks file has no detector panel info");
   }
 
@@ -170,7 +160,7 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
     for (int i = 0; i < 16; i++) {
       std::string s = getWord(in, false);
       if (s.size() < 1) {
-        g_log.error() << "Not enough info to describe panel " << std::endl;
+        g_log.error() << "Not enough info to describe panel \n";
         throw std::length_error("Not enough info to describe panel ");
       }
       line += " " + s;
@@ -192,11 +182,11 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
           Upz;
     } catch (...) {
 
-      g_log.error() << "incorrect type of data for panel " << std::endl;
+      g_log.error() << "incorrect type of data for panel \n";
       throw std::length_error("incorrect type of data for panel ");
     }
 
-    std::string SbankNum = boost::lexical_cast<std::string>(bankNum);
+    std::string SbankNum = std::to_string(bankNum);
     std::string bankName = "bank";
     if (instr->getName() == "WISH") {
       if (bankNum < 10)
@@ -209,8 +199,8 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
         getCachedBankByName(bankName, instr_old);
 
     if (!bank) {
-      g_log.error() << "There is no bank " << bankName << " in the instrument"
-                    << std::endl;
+      g_log.error() << "There is no bank " << bankName
+                    << " in the instrument\n";
       throw std::length_error("There is no bank " + bankName +
                               " in the instrument");
     }
@@ -305,9 +295,10 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   // bug
   tempWS->populateInstrumentParameters();
   Geometry::Instrument_const_sptr instr_old = tempWS->getInstrument();
-  auto map = boost::make_shared<ParameterMap>();
+  auto instr = instr_old;
+  /*auto map = boost::make_shared<ParameterMap>();
   auto instr = boost::make_shared<const Geometry::Instrument>(
-      instr_old->baseInstrument(), map);
+      instr_old->baseInstrument(), map);*/
 
   std::string s = ApplyCalibInfo(in, "", instr_old, instr, T0);
   outWS->setInstrument(instr);
@@ -591,7 +582,7 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
       outWS->addPeak(peak);
     } catch (std::runtime_error &e) {
       g_log.warning() << "Error reading peak SEQN " << seqNum << " : "
-                      << e.what() << std::endl;
+                      << e.what() << '\n';
     }
 
     prog.report(in.tellg());
@@ -616,7 +607,7 @@ void LoadIsawPeaks::checkNumberPeaks(PeaksWorkspace_sptr outWS,
   }
   if (NumberPeaks != outWS->getNumberPeaks()) {
     g_log.error() << "Number of peaks in file is " << NumberPeaks
-                  << " but only read " << outWS->getNumberPeaks() << std::endl;
+                  << " but only read " << outWS->getNumberPeaks() << '\n';
     throw std::length_error("Wrong number of peaks read");
   }
 }

@@ -2,8 +2,11 @@
     Defines a set of aliases for the kernel module to make
     accessing certain objects easier.
 """
-from _kernel import (ConfigServiceImpl, Logger, UnitFactoryImpl,
-                     UsageServiceImpl, PropertyManagerDataServiceImpl)
+from __future__ import (absolute_import, division,
+                        print_function)
+
+from ._kernel import (ConfigServiceImpl, Logger, UnitFactoryImpl,
+                      UsageServiceImpl, PropertyManagerDataServiceImpl)
 
 ###############################################################################
 # Singletons - Make them just look like static classes

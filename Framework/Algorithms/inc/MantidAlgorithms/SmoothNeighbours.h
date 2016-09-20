@@ -82,8 +82,6 @@ class DLLExport SmoothNeighbours : public API::Algorithm {
 public:
   /// Default constructor
   SmoothNeighbours();
-  /// Destructor
-  ~SmoothNeighbours() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SmoothNeighbours"; }
   /// Summary of algorithms purpose

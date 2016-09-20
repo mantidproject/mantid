@@ -1,4 +1,4 @@
-# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,too-many-locals, too-many-nested-blocks
+﻿# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,too-many-locals, too-many-nested-blocks
 
 try:
     from mantidplot import *
@@ -22,6 +22,7 @@ from isis_reflectometry import load_live_runs
 from isis_reflectometry.combineMulti import *
 import mantidqtpython
 from mantid.api import Workspace, WorkspaceGroup, CatalogManager, AlgorithmManager
+from mantid import UsageService
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -59,7 +60,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         self.__graphs = dict()
 
         self._last_trans = ""
-        self.__icat_file_map = None
+        self.icat_file_map = None
 
         self.__instrumentRuns = None
 
@@ -123,6 +124,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         settings.endGroup()
 
         del settings
+        #register startup
+        UsageService.registerFeatureUsage("Interface", "ISIS Reflectomety", False)
 
     def __del__(self):
         """
@@ -417,7 +420,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 active_session_id = session_object.getPropertyValue("Session")
 
             # Fetch out an existing session id
-            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
+            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId()
+            # This might be another catalog session, but at present there is no way to tell.
 
             search_alg = AlgorithmManager.create('CatalogGetDataFiles')
             search_alg.initialize()
@@ -428,7 +432,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             search_alg.execute()
             search_results = search_alg.getProperty('OutputWorkspace').value
 
-            self.__icat_file_map = {}
+            self.icat_file_map = {}
             self.statusMain.clearMessage()
             for row in search_results:
                 file_name = row['Name']
@@ -438,7 +442,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
                 if bool(re.search('(raw)$', file_name, re.IGNORECASE)): # Filter to only display and map raw files.
                     title = (run_number + ': ' + description).strip()
-                    self.SampleText.__icat_file_map[title] = (file_id, run_number, file_name)
+                    self.icat_file_map[title] = (file_id, run_number, file_name)
                     self.listMain.addItem(title)
             self.listMain.sortItems()
             del search_results
@@ -499,7 +503,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         if not cells:
             print 'nothing to copy'
             return
-        #first discover the size of the selection and initialise a list
+        # first discover the size of the selection and initialise a list
         mincol = cells[0].column()
         if mincol > self.scale_col:
             logger.error("Cannot copy, all cells out of range")
@@ -600,7 +604,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             if len(split_title) != 3:
                 split_title = re.split(":", idx.text())
                 if len(split_title) != 2:
-                    logger.warning('cannot transfer ' +  idx.text() + ' title is not in the right form ')
+                    logger.warning('cannot transfer ' + idx.text() + ' title is not in the right form ')
                 else:
                     theta = 0
                     split_title.append(theta) # Append a dummy theta value.
@@ -649,8 +653,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
 
             contents = str(idx.text()).strip()
-            file_id, _runnumber, file_name = self.__icat_file_map[contents]
-            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId() # TODO. This might be another catalog session, but at present there is no way to tell.
+            file_id, _runnumber, file_name = self.icat_file_map[contents]
+            active_session_id = CatalogManager.getActiveSessions()[-1].getSessionId()
+            # This might be another catalog session, but at present there is no way to tell.
 
             save_location = config['defaultsave.directory']
 
@@ -793,10 +798,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                 overlapHigh.append(qmax)
                             if wksp[i].find(',') > 0 or wksp[i].find(':') > 0:
                                 wksp[i] = first_wq.name()
-
-                            #Scale each run
-                            if self.tableMain.item(row, self.scale_col).text():
-                                Scale(InputWorkspace=wksp[i], OutputWorkspace=wksp[i], Factor=1 / float(self.tableMain.item(row, self.scale_col).text()))
                             if self.__checked_row_stiched(row):
                                 if len(runno) == 1:
                                     logger.notice("Nothing to combine for processing row : " + str(row))
@@ -873,7 +874,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             self.__reset_plot_button(plotbutton)
             return
         for i in range(len(runno)):
-            ws_name_binned = wksp[i] + '_binned'
             _ws = getWorkspace(wksp[i])
             if len(overlapLow):
                 Qmin = overlapLow[0]
@@ -883,11 +883,11 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 Qmax = overlapHigh[len(overlapHigh) - 1]
             else:
                 Qmax = max(w2.readX(0))
-            Rebin(InputWorkspace=str(wksp[i]), Params=str(overlapLow[i]) + ',' + str(-dqq) + ',' + str(overlapHigh[i]), OutputWorkspace=ws_name_binned)
+            ws_name_binned = wksp[i]
             wkspBinned.append(ws_name_binned)
             wsb = getWorkspace(ws_name_binned)
-            Imin = min(wsb.readY(0))
-            Imax = max(wsb.readY(0))
+            _Imin = min(wsb.readY(0))
+            _Imax = max(wsb.readY(0))
 
             if canMantidPlot:
                 # Get the existing graph if it exists
@@ -905,7 +905,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 titl = groupGet(ws_name_binned, 'samp', 'run_title')
                 if type(titl) == str:
                     base_graph.activeLayer().setTitle(titl)
-                base_graph.activeLayer().setAxisScale(Layer.Left, Imin * 0.1, Imax * 10, Layer.Log10)
+                base_graph.activeLayer().setAxisScale(Layer.Left, _Imin * 0.1, _Imax * 10, Layer.Log10)
                 base_graph.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
                 base_graph.activeLayer().setAutoScale()
 
@@ -919,7 +919,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             if not getWorkspace(outputwksp, report_error=False):
                 # Stitching has not been done as part of processing, so we need to do it here.
                 _wcomb = combineDataMulti(wkspBinned, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1,
-                                         keep=True, scale_right=self.__scale_right)
+                                          keep=True, scale_right=self.__scale_right)
 
             Qmin = min(getWorkspace(outputwksp).readX(0))
             Qmax = max(getWorkspace(outputwksp).readX(0))
@@ -973,10 +973,10 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 logger.notice('Reusing transmission workspace ' + transrun_named)
                 transmission_ws = mtd[transrun_named]
 
-        angle = str(self.tableMain.item(row, which * 5 + 1).text())
+        angle_str = str(self.tableMain.item(row, which * 5 + 1).text())
 
-        if len(angle) > 0:
-            angle = float(angle)
+        if len(angle_str) > 0:
+            angle = float(angle_str)
         else:
             angle = None
 
@@ -1006,19 +1006,36 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         ws = ConvertToWavelength.to_workspace(loadedRun, ws_prefix="")
 
         if self.__alg_use:
+            if self.tableMain.item(row, self.scale_col).text():
+                factor=float(self.tableMain.item(row, self.scale_col).text())
+            else:
+                factor=1.0
+            if self.tableMain.item(row, 15).text():
+                Qstep=float(self.tableMain.item(row, 15).text())
+            else:
+                Qstep = None
+            if len(self.tableMain.item(row, which * 5 + 3).text()) > 0:
+                Qmin = float(self.tableMain.item(row, which * 5 + 3).text())
+            else:
+                Qmin = None
+            if len(self.tableMain.item(row, which * 5 + 4).text()) > 0:
+                Qmax = float(self.tableMain.item(row, which * 5 + 4).text())
+            else:
+                Qmax = None
             # If we're dealing with a workspace group, we'll manually map execution over each group member
             # We do this so we can get ThetaOut correctly (see ticket #10597 for why we can't at the moment)
             if isinstance(ws, WorkspaceGroup):
                 wqGroup = []
                 wlamGroup = []
                 thetaGroup = []
-
                 group_trans_ws = transmission_ws
                 for i in range(0, ws.size()):
                     #If the transmission workspace is a group, we'll use it pair-wise with the tof workspace group
                     if isinstance(transmission_ws, WorkspaceGroup):
                         group_trans_ws = transmission_ws[i]
-                    wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ_'+str(i+1), OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),)
+                    wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ_'+str(i+1),
+                                                                 OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),ScaleFactor=factor,MomentumTransferStep=Qstep,
+                                                                 MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
                     wqGroup.append(wq)
                     wlamGroup.append(wlam)
                     thetaGroup.append(th)
@@ -1027,7 +1044,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 wlam = GroupWorkspaces(InputWorkspaces=wlamGroup, OutputWorkspace=runno+'_IvsLam')
                 th = thetaGroup[0]
             else:
-                wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ', OutputWorkspaceWavelength=runno+'_IvsLam',)
+                wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ',
+                                                             OutputWorkspaceWavelength=runno+'_IvsLam', ScaleFactor=factor,MomentumTransferStep=Qstep,
+                                                             MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
 
             cleanup()
         else:

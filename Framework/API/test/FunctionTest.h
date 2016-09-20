@@ -10,38 +10,22 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ParameterTie.h"
 #include "PropertyManagerHelper.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
 
-class MocSpectrum : public ISpectrum {
+class MocSpectrum : public SpectrumTester {
 public:
-  MocSpectrum(size_t nx, size_t ny) : m_x(nx), m_y(ny), m_e(ny) {}
-
-  void clearData() override {}
-  void setData(const MantidVec &) override {}
-  void setData(const MantidVec &, const MantidVec &) override {}
-
-  void setData(const MantidVecPtr &) override {}
-  void setData(const MantidVecPtr &, const MantidVecPtr &) override {}
-
-  void setData(const MantidVecPtr::ptr_type &) override {}
-  void setData(const MantidVecPtr::ptr_type &,
-               const MantidVecPtr::ptr_type &) override {}
-
-  MantidVec &dataX() override { return m_x; }
-  MantidVec &dataY() override { return m_y; }
-  MantidVec &dataE() override { return m_e; }
-
-  const MantidVec &dataX() const override { return m_x; }
-  const MantidVec &dataY() const override { return m_y; }
-  const MantidVec &dataE() const override { return m_e; }
-
-  size_t getMemorySize() const override { return 0; }
-
-  MantidVec m_x, m_y, m_e;
+  MocSpectrum(size_t nx, size_t ny)
+      : SpectrumTester(HistogramData::getHistogramXMode(nx, ny),
+                       HistogramData::Histogram::YMode::Counts) {
+    dataX().resize(nx);
+    dataY().resize(ny);
+    dataE().resize(ny);
+  }
 };
 
 class MocMatrixWorkspace : public MatrixWorkspace {
@@ -64,14 +48,14 @@ public:
   std::size_t getNumberHistograms() const override { return m_spectra.size(); }
 
   /// Return the underlying ISpectrum ptr at the given workspace index.
-  ISpectrum *getSpectrum(const size_t index) override {
-    return &m_spectra[index];
+  ISpectrum &getSpectrum(const size_t index) override {
+    return m_spectra[index];
   }
 
   /// Return the underlying ISpectrum ptr (const version) at the given workspace
   /// index.
-  const ISpectrum *getSpectrum(const size_t index) const override {
-    return &m_spectra[index];
+  const ISpectrum &getSpectrum(const size_t index) const override {
+    return m_spectra[index];
   }
   const std::string id(void) const override { return ""; }
   void init(const size_t &, const size_t &, const size_t &) override {}

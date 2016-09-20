@@ -57,13 +57,8 @@ public:
   /// @return the number of histograms (spectra)
   std::size_t getNumberHistograms() const override { return 1; }
 
-  //------------------------------------------------------------
-  // Return the underlying ISpectrum ptr at the given workspace index.
-  Mantid::API::ISpectrum *getSpectrum(const size_t index) override;
-
-  // Return the underlying ISpectrum ptr (const version) at the given workspace
-  // index.
-  const Mantid::API::ISpectrum *getSpectrum(const size_t index) const override;
+  Histogram1D &getSpectrum(const size_t index) override;
+  const Histogram1D &getSpectrum(const size_t index) const override;
 
   void generateHistogram(const std::size_t index, const MantidVec &X,
                          MantidVec &Y, MantidVec &E,
@@ -86,7 +81,8 @@ private:
             const std::size_t &YLength) override;
 
   /// Instance of Histogram1D that holds the "spectrum" (AKA the single value);
-  Histogram1D data;
+  Histogram1D data{HistogramData::Histogram::XMode::Points,
+                   HistogramData::Histogram::YMode::Counts};
 };
 
 /// shared pointer to the WorkspaceSingleValue class

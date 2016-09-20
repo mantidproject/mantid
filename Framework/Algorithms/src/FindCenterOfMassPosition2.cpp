@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/FindCenterOfMassPosition2.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -93,7 +91,7 @@ void FindCenterOfMassPosition2::exec() {
     for (int i = 0; i < numSpec; i++) {
       double sum_i(0), err_i(0);
       progress.report("Integrating events");
-      const EventList &el = inputEventWS->getEventList(i);
+      const EventList &el = inputEventWS->getSpectrum(i);
       el.integrate(0, 0, true, sum_i, err_i);
       y_values[i] = sum_i;
       e_values[i] = err_i;
@@ -148,27 +146,20 @@ void FindCenterOfMassPosition2::exec() {
     double position_x = 0;
     double position_y = 0;
 
+    const auto &spectrumInfo = inputWS->spectrumInfo();
     for (int i = 0; i < numSpec; i++) {
-      // Get the pixel relating to this spectrum
-      IDetector_const_sptr det;
-      try {
-        det = inputWS->getDetector(i);
-      } catch (Exception::NotFoundError &) {
+      if (!spectrumInfo.hasDetectors(i)) {
         g_log.warning() << "Workspace index " << i
-                        << " has no detector assigned to it - discarding"
-                        << std::endl;
+                        << " has no detector assigned to it - discarding\n";
         continue;
       }
-      // If this detector is masked, skip to the next one
-      if (det->isMasked())
-        continue;
-      // If this detector is a monitor, skip to the next one
-      if (det->isMonitor())
+      // Skip if we have a monitor or if the detector is masked.
+      if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
         continue;
 
       // Get the current spectrum
-      const MantidVec &YIn = inputWS->readY(i);
-      const V3D pos = det->getPos();
+      auto &YIn = inputWS->y(i);
+      const V3D pos = spectrumInfo.position(i);
       double x = pos.X();
       double y = pos.Y();
 
@@ -207,9 +198,8 @@ void FindCenterOfMassPosition2::exec() {
     double radius_y = std::min((position_y - ymin0), (ymax0 - position_y));
 
     if (!direct_beam && (radius_x <= beam_radius || radius_y <= beam_radius)) {
-      g_log.error()
-          << "Center of mass falls within the beam center area: stopping here"
-          << std::endl;
+      g_log.error() << "Center of mass falls within the beam center area: "
+                       "stopping here\n";
       break;
     }
 
@@ -232,15 +222,14 @@ void FindCenterOfMassPosition2::exec() {
     if (n_local_minima > 5) {
       g_log.warning()
           << "Found the same or equivalent center of mass locations "
-             "more than 5 times in a row: stopping here" << std::endl;
+             "more than 5 times in a row: stopping here\n";
       break;
     }
 
     // Quit if we haven't converged after the maximum number of iterations.
     if (++n_iteration > max_iteration) {
       g_log.warning() << "More than " << max_iteration
-                      << " iteration to find beam center: stopping here"
-                      << std::endl;
+                      << " iteration to find beam center: stopping here\n";
       break;
     }
 
@@ -287,7 +276,7 @@ void FindCenterOfMassPosition2::exec() {
   }
 
   g_log.information() << "Center of Mass found at x=" << center_x
-                      << " y=" << center_y << std::endl;
+                      << " y=" << center_y << '\n';
 }
 
 } // namespace Algorithms

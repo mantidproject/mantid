@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.kernel import VisibleWhenProperty, PropertyCriterion
 
@@ -15,7 +17,7 @@ class VisibleWhenPropertyTest(unittest.TestCase):
         try:
             VisibleWhenProperty()
             self.fail("Expected default constructor to raise an error")
-        except Exception, e:
+        except Exception as e:
             # boost.python.ArgumentError are not catchable
             if "Python argument types in" not in str(e):
                 raise RuntimeError("Unexpected exception type raised")

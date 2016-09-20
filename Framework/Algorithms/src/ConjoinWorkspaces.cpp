@@ -17,15 +17,6 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(ConjoinWorkspaces)
 
 //----------------------------------------------------------------------------------------------
-/// Default constructor
-ConjoinWorkspaces::ConjoinWorkspaces()
-    : WorkspaceJoiners(), m_overlapChecked(false) {}
-
-//----------------------------------------------------------------------------------------------
-/// Destructor
-ConjoinWorkspaces::~ConjoinWorkspaces() {}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the properties */
 void ConjoinWorkspaces::init() {
   declareProperty(make_unique<WorkspaceProperty<>>(
@@ -120,10 +111,10 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1,
   std::set<detid_t> detectors;
   const size_t &nhist1 = ws1->getNumberHistograms();
   for (size_t i = 0; i < nhist1; ++i) {
-    const ISpectrum *spec = ws1->getSpectrum(i);
-    const specnum_t spectrum = spec->getSpectrumNo();
+    const auto &spec = ws1->getSpectrum(i);
+    const specnum_t spectrum = spec.getSpectrumNo();
     spectra.insert(spectrum);
-    const auto &dets = spec->getDetectorIDs();
+    const auto &dets = spec.getDetectorIDs();
     for (auto const &det : dets) {
       detectors.insert(det);
     }
@@ -133,8 +124,8 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1,
   // sure that there's no overlap
   const size_t &nhist2 = ws2->getNumberHistograms();
   for (size_t j = 0; j < nhist2; ++j) {
-    const ISpectrum *spec = ws2->getSpectrum(j);
-    const specnum_t spectrum = spec->getSpectrumNo();
+    const auto &spec = ws2->getSpectrum(j);
+    const specnum_t spectrum = spec.getSpectrumNo();
     if (checkSpectra) {
       if (spectrum > 0 && spectra.find(spectrum) != spectra.end()) {
         g_log.error()
@@ -144,7 +135,7 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1,
             "The input workspaces have overlapping spectrum numbers");
       }
     }
-    const auto &dets = spec->getDetectorIDs();
+    const auto &dets = spec.getDetectorIDs();
     for (const auto &det : dets) {
       if (detectors.find(det) != detectors.end()) {
         g_log.error() << "The input workspaces have common detectors: " << (det)
@@ -200,8 +191,8 @@ void ConjoinWorkspaces::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
   for (size_t i = ws1->getNumberHistograms(); i < output->getNumberHistograms();
        i++) {
     specnum_t origid;
-    origid = output->getSpectrum(i)->getSpectrumNo();
-    output->getSpectrum(i)->setSpectrumNo(origid + ws1max);
+    origid = output->getSpectrum(i).getSpectrumNo();
+    output->getSpectrum(i).setSpectrumNo(origid + ws1max);
   }
 }
 

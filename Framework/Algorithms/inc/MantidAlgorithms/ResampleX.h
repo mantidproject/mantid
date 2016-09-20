@@ -35,9 +35,6 @@ namespace Algorithms {
 */
 class DLLExport ResampleX : public Algorithms::Rebin {
 public:
-  ResampleX();
-  ~ResampleX() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -64,11 +61,11 @@ private:
   void exec() override;
 
   std::map<std::string, std::string> validateInputs() override;
-  bool m_useLogBinning;
-  bool m_preserveEvents;
-  int m_numBins;
-  bool m_isDistribution;
-  bool m_isHistogram;
+  bool m_useLogBinning = true;
+  bool m_preserveEvents = true;
+  int m_numBins = 0;
+  bool m_isDistribution = false;
+  bool m_isHistogram = true;
 };
 
 } // namespace Algorithms

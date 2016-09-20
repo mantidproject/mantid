@@ -50,14 +50,16 @@ private:
     auto v = vtkVector3d(-2, 2, 0);
     auto w = vtkVector3d(0, 0, 8);
 
-    vtkSmartPointer<vtkMatrix4x4> cobMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+    vtkSmartPointer<vtkMatrix4x4> cobMatrix =
+        vtkSmartPointer<vtkMatrix4x4>::New();
     cobMatrix->Identity();
     std::copy(u.GetData(), u.GetData() + 3, cobMatrix->Element[0]);
     std::copy(v.GetData(), v.GetData() + 3, cobMatrix->Element[1]);
     std::copy(w.GetData(), w.GetData() + 3, cobMatrix->Element[2]);
     cobMatrix->Transpose();
 
-    vtkPVChangeOfBasisHelper::AddChangeOfBasisMatrixToFieldData(grid, cobMatrix);
+    vtkPVChangeOfBasisHelper::AddChangeOfBasisMatrixToFieldData(grid,
+                                                                cobMatrix);
     return grid;
   }
 
@@ -94,8 +96,7 @@ public:
 
     vtkDataSetToScaledDataSet scaler;
 
-    TS_ASSERT_THROWS(scaler.execute(1, 1, 1, in),
-                     std::runtime_error);
+    TS_ASSERT_THROWS(scaler.execute(1, 1, 1, in), std::runtime_error);
   }
 
   void testExecution() {
@@ -179,12 +180,12 @@ public:
 
     // Check bounds are scaled
     double *bb = out->GetBounds();
-    TS_ASSERT_EQUALS(-10.0/4, bb[0]);
-    TS_ASSERT_EQUALS(10.0/4, bb[1]);
-    TS_ASSERT_EQUALS(-10.0/2, bb[2]);
-    TS_ASSERT_EQUALS(10.0/2, bb[3]);
-    TS_ASSERT_EQUALS(-10.0/8, bb[4]);
-    TS_ASSERT_EQUALS(10.0/8, bb[5]);
+    TS_ASSERT_EQUALS(-10.0 / 4, bb[0]);
+    TS_ASSERT_EQUALS(10.0 / 4, bb[1]);
+    TS_ASSERT_EQUALS(-10.0 / 2, bb[2]);
+    TS_ASSERT_EQUALS(10.0 / 2, bb[3]);
+    TS_ASSERT_EQUALS(-10.0 / 8, bb[4]);
+    TS_ASSERT_EQUALS(10.0 / 8, bb[5]);
 
     auto cobMatrix = vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(out);
 
@@ -219,7 +220,6 @@ public:
     TS_ASSERT_EQUALS(-10.0, bounds[4]);
     TS_ASSERT_EQUALS(10.0, bounds[5]);
   }
-
 };
 
 #endif /* MANTID_VATESAPI_VTKDATASETTOSCALEDDATASETTEST_H_ */

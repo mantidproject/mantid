@@ -36,7 +36,7 @@ DataObjects::MDEventWorkspace3Lean::sptr
 makeFileBackedMDEW(const std::string &wsName, bool fileBacked, long numEvents,
                    Kernel::SpecialCoordinateSystem coord) {
   // ---------- Make a file-backed MDEventWorkspace -----------------------
-  std::string snEvents = boost::lexical_cast<std::string>(numEvents);
+  std::string snEvents = std::to_string(numEvents);
   MDEventWorkspace3Lean::sptr ws1 =
       MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
   ws1->getBoxController()->setSplitThreshold(100);
@@ -79,7 +79,7 @@ makeFileBackedMDEWwithMDFrame(const std::string &wsName, bool fileBacked,
                               long numEvents,
                               Kernel::SpecialCoordinateSystem coord) {
   // ---------- Make a file-backed MDEventWorkspace -----------------------
-  std::string snEvents = boost::lexical_cast<std::string>(numEvents);
+  std::string snEvents = std::to_string(numEvents);
   MDEventWorkspace3Lean::sptr ws1 =
       MDEventsTestHelper::makeAnyMDEWWithFrames<MDLeanEvent<3>, 3>(
           10, 0.0, 10.0, frame, 0);

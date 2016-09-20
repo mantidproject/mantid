@@ -7,6 +7,7 @@
 
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Material.h"
 
 #include <QTreeWidgetItem>
 #include <QTreeWidget>
@@ -22,26 +23,29 @@ using namespace Mantid::Kernel;
  * @param mtdUI Pointer to the MantidUI object
  * @param flags Window flags
  */
-MantidSampleMaterialDialog::MantidSampleMaterialDialog(const QString & wsName, MantidUI* mtdUI, Qt::WFlags flags):
-  QDialog(mtdUI->appWindow(), flags),
-  m_wsName(wsName),
-  m_mantidUI(mtdUI)
-{
+MantidSampleMaterialDialog::MantidSampleMaterialDialog(const QString &wsName,
+                                                       MantidUI *mtdUI,
+                                                       Qt::WFlags flags)
+    : QDialog(mtdUI->appWindow(), flags), m_wsName(wsName), m_mantidUI(mtdUI) {
   m_uiForm.setupUi(this);
 
   connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
 
-  connect(m_uiForm.pbSetMaterial, SIGNAL(clicked()), this, SLOT(handleSetMaterial()));
-  connect(m_uiForm.pbCopyMaterial, SIGNAL(clicked()), this, SLOT(handleCopyMaterial()));
+  connect(m_uiForm.pbSetMaterial, SIGNAL(clicked()), this,
+          SLOT(handleSetMaterial()));
+  connect(m_uiForm.pbCopyMaterial, SIGNAL(clicked()), this,
+          SLOT(handleCopyMaterial()));
 }
 
 /**
- * Gets the sample material for a workspace and displays its properties in the tree.
+ * Gets the sample material for a workspace and displays its properties in the
+ * tree.
  */
-void MantidSampleMaterialDialog::updateMaterial()
-{
-  MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName.toStdString());
-  if(!ws)
+void MantidSampleMaterialDialog::updateMaterial() {
+  MatrixWorkspace_sptr ws =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          m_wsName.toStdString());
+  if (!ws)
     return;
 
   const Material material = ws->sample().getMaterial();
@@ -108,10 +112,10 @@ void MantidSampleMaterialDialog::updateMaterial()
 }
 
 /**
- * Creates a SetSampleMaterial dialog to set the sample material of the workspace.
+ * Creates a SetSampleMaterial dialog to set the sample material of the
+ * workspace.
  */
-void MantidSampleMaterialDialog::handleSetMaterial()
-{
+void MantidSampleMaterialDialog::handleSetMaterial() {
   QHash<QString, QString> presets;
   presets["InputWorkspace"] = m_wsName;
 
@@ -119,10 +123,10 @@ void MantidSampleMaterialDialog::handleSetMaterial()
 }
 
 /**
- * Creates a CopySample dialog with pre filled input to copy the sample material.
+ * Creates a CopySample dialog with pre filled input to copy the sample
+ * material.
  */
-void MantidSampleMaterialDialog::handleCopyMaterial()
-{
+void MantidSampleMaterialDialog::handleCopyMaterial() {
   QHash<QString, QString> presets;
   presets["InputWorkspace"] = m_wsName;
   presets["CopyName"] = "0";
@@ -136,12 +140,12 @@ void MantidSampleMaterialDialog::handleCopyMaterial()
 }
 
 /**
- * Reloads the material information when an algorithm started from the dialog finishes.
+ * Reloads the material information when an algorithm started from the dialog
+ *finishes.
  *
  * @param alg Completed algorithm (unused)
  */
-void MantidSampleMaterialDialog::finishHandle(const IAlgorithm *alg)
-{
+void MantidSampleMaterialDialog::finishHandle(const IAlgorithm *alg) {
   UNUSED_ARG(alg);
   updateMaterial();
 }

@@ -9,10 +9,6 @@ DECLARE_ALGORITHM(ExtractMonitorWorkspace)
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-ExtractMonitorWorkspace::ExtractMonitorWorkspace() {}
-
-ExtractMonitorWorkspace::~ExtractMonitorWorkspace() {}
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ExtractMonitorWorkspace::name() const {
   return "ExtractMonitorWorkspace";

@@ -5,10 +5,8 @@
 #include <qwt_scale_div.h>
 #include <qwt_double_interval.h>
 
-namespace MantidQt
-{
-namespace SliceViewer
-{
+namespace MantidQt {
+namespace SliceViewer {
 
 PeakView::PeakView(PeaksPresenter *const presenter, QwtPlot *plot,
                    QWidget *parent,
@@ -20,47 +18,42 @@ PeakView::PeakView(PeaksPresenter *const presenter, QwtPlot *plot,
       m_peaks(vecPeakRepresentation), m_cachedOccupancyIntoView(0),
       m_cachedOccupancyInView(0), m_showBackground(false),
       m_foregroundColor(foregroundColor), m_backgroundColor(backgroundColor),
-      m_largestEffectiveRadius(largestEffectiveRadius)
-{
-}
+      m_largestEffectiveRadius(largestEffectiveRadius) {}
 
 PeakView::~PeakView() {}
 
-void PeakView::doPaintPeaks(QPaintEvent *)
-{
-    const auto windowHeight = height();
-    const auto windowWidth = width();
-    const auto viewHeight
-        = m_plot->axisScaleDiv(QwtPlot::yLeft)->interval().width();
-    const auto viewWidth
-        = m_plot->axisScaleDiv(QwtPlot::xBottom)->interval().width();
+void PeakView::doPaintPeaks(QPaintEvent *) {
+  const auto windowHeight = height();
+  const auto windowWidth = width();
+  const auto viewHeight =
+      m_plot->axisScaleDiv(QwtPlot::yLeft)->interval().width();
+  const auto viewWidth =
+      m_plot->axisScaleDiv(QwtPlot::xBottom)->interval().width();
 
-    QPainter painter(this);
+  for (size_t i = 0; i < m_viewablePeaks.size(); ++i) {
+    if (m_viewablePeaks[i]) {
+      QPainter painter(this);
+      // Get the peak
+      auto &peak = m_peaks[i];
+      const auto &origin = peak->getOrigin();
 
-    for (size_t i = 0; i < m_viewablePeaks.size(); ++i) {
-        if (m_viewablePeaks[i]) {
-            // Get the peak
-            auto &peak = m_peaks[i];
-            const auto &origin = peak->getOrigin();
+      // Set up the view information
+      const auto xOriginWindow =
+          m_plot->transform(QwtPlot::xBottom, origin.X());
+      const auto yOriginWindow = m_plot->transform(QwtPlot::yLeft, origin.Y());
 
-            // Set up the view information
-            const auto xOriginWindow
-                = m_plot->transform(QwtPlot::xBottom, origin.X());
-            const auto yOriginWindow
-                = m_plot->transform(QwtPlot::yLeft, origin.Y());
+      PeakRepresentationViewInformation peakRepresentationViewInformation;
+      peakRepresentationViewInformation.windowHeight = windowHeight;
+      peakRepresentationViewInformation.windowWidth = windowWidth;
+      peakRepresentationViewInformation.viewHeight = viewHeight;
+      peakRepresentationViewInformation.viewWidth = viewWidth;
+      peakRepresentationViewInformation.xOriginWindow = xOriginWindow;
+      peakRepresentationViewInformation.yOriginWindow = yOriginWindow;
 
-            PeakRepresentationViewInformation peakRepresentationViewInformation;
-            peakRepresentationViewInformation.windowHeight = windowHeight;
-            peakRepresentationViewInformation.windowWidth = windowWidth;
-            peakRepresentationViewInformation.viewHeight = viewHeight;
-            peakRepresentationViewInformation.viewWidth = viewWidth;
-            peakRepresentationViewInformation.xOriginWindow = xOriginWindow;
-            peakRepresentationViewInformation.yOriginWindow = yOriginWindow;
-
-            peak->draw(painter, m_foregroundColor, m_backgroundColor,
-                       peakRepresentationViewInformation);
-        }
+      peak->draw(painter, m_foregroundColor, m_backgroundColor,
+                 peakRepresentationViewInformation);
     }
+  }
 }
 
 /** Set the distance between the plane and the center of the peak in md
@@ -70,16 +63,15 @@ coordinates
 which are viewable.
 */
 void PeakView::setSlicePoint(const double &point,
-                             const std::vector<bool> &viewablePeaks)
-{
-    m_viewablePeaks = viewablePeaks;
-    for (size_t i = 0; i < m_viewablePeaks.size(); ++i) {
-        if (m_viewablePeaks[i]) // is peak at this index visible.
-        {
-            m_peaks[i]->setSlicePoint(point);
-        }
+                             const std::vector<bool> &viewablePeaks) {
+  m_viewablePeaks = viewablePeaks;
+  for (size_t i = 0; i < m_viewablePeaks.size(); ++i) {
+    if (m_viewablePeaks[i]) // is peak at this index visible.
+    {
+      m_peaks[i]->setSlicePoint(point);
     }
-    this->update();
+  }
+  this->update();
 }
 
 void PeakView::hideView() { this->hide(); }
@@ -88,47 +80,42 @@ void PeakView::showView() { this->show(); }
 
 void PeakView::updateView() { this->update(); }
 
-void PeakView::movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform)
-{
-    for (auto &peak : m_peaks) {
-        peak->movePosition(peakTransform);
-    }
+void PeakView::movePosition(
+    Mantid::Geometry::PeakTransform_sptr peakTransform) {
+  for (auto &peak : m_peaks) {
+    peak->movePosition(peakTransform);
+  }
 }
 
-void PeakView::showBackgroundRadius(const bool show)
-{
-    for (const auto &peak : m_peaks) {
-        peak->showBackgroundRadius(show);
-    }
-    m_showBackground = show;
+void PeakView::showBackgroundRadius(const bool show) {
+  for (const auto &peak : m_peaks) {
+    peak->showBackgroundRadius(show);
+  }
+  m_showBackground = show;
 }
 
-PeakBoundingBox PeakView::getBoundingBox(const int peakIndex) const
-{
-    return m_peaks[peakIndex]->getBoundingBox();
+PeakBoundingBox PeakView::getBoundingBox(const int peakIndex) const {
+  return m_peaks[peakIndex]->getBoundingBox();
 }
 
-void PeakView::changeOccupancyInView(const double fraction)
-{
-    for (const auto &peak : m_peaks) {
-        peak->setOccupancyInView(fraction);
-    }
-    m_cachedOccupancyInView = fraction;
+void PeakView::changeOccupancyInView(const double fraction) {
+  for (const auto &peak : m_peaks) {
+    peak->setOccupancyInView(fraction);
+  }
+  m_cachedOccupancyInView = fraction;
 }
 
-void PeakView::changeOccupancyIntoView(const double fraction)
-{
-    for (const auto &peak : m_peaks) {
-        peak->setOccupancyIntoView(fraction);
-    }
-    m_cachedOccupancyIntoView = fraction;
+void PeakView::changeOccupancyIntoView(const double fraction) {
+  for (const auto &peak : m_peaks) {
+    peak->setOccupancyIntoView(fraction);
+  }
+  m_cachedOccupancyIntoView = fraction;
 }
 
 double PeakView::getOccupancyInView() const { return m_cachedOccupancyInView; }
 
-double PeakView::getOccupancyIntoView() const
-{
-    return m_cachedOccupancyIntoView;
+double PeakView::getOccupancyIntoView() const {
+  return m_cachedOccupancyIntoView;
 }
 
 bool PeakView::positionOnly() const { return false; }
@@ -137,39 +124,34 @@ double PeakView::getRadius() const { return m_largestEffectiveRadius; }
 
 bool PeakView::isBackgroundShown() const { return m_showBackground; }
 
-void PeakView::takeSettingsFrom(const PeakOverlayView *const source)
-{
-    // Pass on the color settings
-    this->changeForegroundColour(source->getForegroundPeakViewColor());
-    this->changeBackgroundColour(source->getBackgroundPeakViewColor());
+void PeakView::takeSettingsFrom(const PeakOverlayView *const source) {
+  // Pass on the color settings
+  this->changeForegroundColour(source->getForegroundPeakViewColor());
+  this->changeBackgroundColour(source->getBackgroundPeakViewColor());
 
-    // Pass on the information regarding the background color - not relvant for
-    // cross-type peak
-    this->showBackgroundRadius(source->isBackgroundShown());
+  // Pass on the information regarding the background color - not relvant for
+  // cross-type peak
+  this->showBackgroundRadius(source->isBackgroundShown());
 
-    // Pass on the information which only concerns the cross-type peak
-    this->changeOccupancyIntoView(source->getOccupancyIntoView());
-    this->changeOccupancyInView(source->getOccupancyInView());
+  // Pass on the information which only concerns the cross-type peak
+  this->changeOccupancyIntoView(source->getOccupancyIntoView());
+  this->changeOccupancyInView(source->getOccupancyInView());
 }
 
-void PeakView::changeForegroundColour(const PeakViewColor peakViewColor)
-{
-    m_foregroundColor = peakViewColor;
+void PeakView::changeForegroundColour(const PeakViewColor peakViewColor) {
+  m_foregroundColor = peakViewColor;
 }
 
-void PeakView::changeBackgroundColour(const PeakViewColor peakViewColor)
-{
-    m_backgroundColor = peakViewColor;
+void PeakView::changeBackgroundColour(const PeakViewColor peakViewColor) {
+  m_backgroundColor = peakViewColor;
 }
 
-PeakViewColor PeakView::getBackgroundPeakViewColor() const
-{
-    return m_backgroundColor;
+PeakViewColor PeakView::getBackgroundPeakViewColor() const {
+  return m_backgroundColor;
 }
 
-PeakViewColor PeakView::getForegroundPeakViewColor() const
-{
-    return m_foregroundColor;
+PeakViewColor PeakView::getForegroundPeakViewColor() const {
+  return m_foregroundColor;
 }
 }
 }

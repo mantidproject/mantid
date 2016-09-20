@@ -98,6 +98,7 @@ public:
     TS_ASSERT(manager.existsProperty("WeightsColumn_1"));
     TS_ASSERT(manager.existsProperty("WeightsColumn_2"));
     TS_ASSERT(!manager.existsProperty("WeightsColumn_3"));
+    TS_ASSERT_THROWS_NOTHING(creator.declareDatasetProperties("", false));
   }
 
   void test_domain_values() {

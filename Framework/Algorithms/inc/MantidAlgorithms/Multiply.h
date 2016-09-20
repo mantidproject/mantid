@@ -46,10 +46,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class DLLExport Multiply : public CommutativeBinaryOperation {
 public:
-  /// Default constructor
-  Multiply() : CommutativeBinaryOperation(){};
-  /// Destructor
-  ~Multiply() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Multiply"; }
   /// Summary of algorithms purpose

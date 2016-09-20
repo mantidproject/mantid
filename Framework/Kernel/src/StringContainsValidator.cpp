@@ -33,7 +33,7 @@ void StringContainsValidator::setRequiredStrings(
  */
 std::string
 StringContainsValidator::checkValidity(const std::string &value) const {
-  std::string error("");
+  std::string error;
   if (m_requiredStrings.empty() && !value.empty()) {
     return "";
   } else {

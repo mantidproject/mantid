@@ -17,16 +17,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ShiftLogTime)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ShiftLogTime::ShiftLogTime() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ShiftLogTime::~ShiftLogTime() {}
-
 /// Algorithm's name for identification
 const string ShiftLogTime::name() const { return "ShiftLogTime"; }
 

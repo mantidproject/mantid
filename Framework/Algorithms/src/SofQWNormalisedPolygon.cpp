@@ -72,7 +72,7 @@ void SofQWNormalisedPolygon::exec() {
 
   RebinnedOutput_sptr outputWS =
       this->setUpOutputWorkspace(inputWS, getProperty("QAxisBinning"), m_Qout);
-  g_log.debug() << "Workspace type: " << outputWS->id() << std::endl;
+  g_log.debug() << "Workspace type: " << outputWS->id() << '\n';
   setProperty("OutputWorkspace", outputWS);
   const size_t nEnergyBins = inputWS->blocksize();
   const size_t nHistos = inputWS->getNumberHistograms();
@@ -95,7 +95,7 @@ void SofQWNormalisedPolygon::exec() {
     // Index theta cache
     this->initAngularCachesNonPSD(inputWS);
   } else {
-    g_log.debug() << "Offset: " << par[0] << std::endl;
+    g_log.debug() << "Offset: " << par[0] << '\n';
     this->m_detNeighbourOffset = static_cast<int>(par[0]);
     this->initAngularCachesPSD(inputWS);
   }
@@ -130,7 +130,7 @@ void SofQWNormalisedPolygon::exec() {
     const double phiUpper = phi + phiHalfWidth;
 
     const double efixed = m_EmodeProperties.getEFixed(*detector);
-    const specnum_t specNo = inputWS->getSpectrum(i)->getSpectrumNo();
+    const specnum_t specNo = inputWS->getSpectrum(i).getSpectrumNo();
     std::stringstream logStream;
     for (size_t j = 0; j < nEnergyBins; ++j) {
       m_progress->report("Computing polygon intersections");
@@ -168,7 +168,7 @@ void SofQWNormalisedPolygon::exec() {
         // Add this spectra-detector pair to the mapping
         PARALLEL_CRITICAL(SofQWNormalisedPolygon_spectramap) {
           specNumberMapping.push_back(
-              outputWS->getSpectrum(qIndex - 1)->getSpectrumNo());
+              outputWS->getSpectrum(qIndex - 1).getSpectrumNo());
           detIDMapping.push_back(detector->getID());
         }
       }
@@ -187,6 +187,19 @@ void SofQWNormalisedPolygon::exec() {
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
   outputWS->updateSpectraUsing(outputDetectorMap);
+
+  // Replace any NaNs in outputWorkspace with zeroes
+  if (this->getProperty("ReplaceNaNs")) {
+    auto replaceNans = this->createChildAlgorithm("ReplaceSpecialValues");
+    replaceNans->setChild(true);
+    replaceNans->initialize();
+    replaceNans->setProperty("InputWorkspace", outputWS);
+    replaceNans->setProperty("OutputWorkspace", outputWS);
+    replaceNans->setProperty("NaNValue", 0.0);
+    replaceNans->setProperty("InfinityValue", 0.0);
+    replaceNans->setProperty("BigNumberThreshold", DBL_MAX);
+    replaceNans->execute();
+  }
 }
 
 /**
@@ -290,7 +303,7 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
     m_thetaWidths[i] = std::fabs(2.0 * std::atan(boxWidth / l2));
     if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
       g_log.debug() << "Detector at spectrum ="
-                    << workspace->getSpectrum(i)->getSpectrumNo()
+                    << workspace->getSpectrum(i).getSpectrumNo()
                     << ", width=" << m_thetaWidths[i] * 180.0 / M_PI
                     << " degrees\n";
     }
@@ -308,7 +321,7 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
   // Trigger a build of the nearst neighbors outside the OpenMP loop
   const int numNeighbours = 4;
   const size_t nHistos = workspace->getNumberHistograms();
-  g_log.debug() << "Number of Histograms: " << nHistos << std::endl;
+  g_log.debug() << "Number of Histograms: " << nHistos << '\n';
 
   this->m_theta = std::vector<double>(nHistos);
   this->m_thetaWidths = std::vector<double>(nHistos);
@@ -318,12 +331,12 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
   for (size_t i = 0; i < nHistos; ++i) {
     m_progress->report("Calculating detector angular widths");
     DetConstPtr detector = workspace->getDetector(i);
-    g_log.debug() << "Current histogram: " << i << std::endl;
-    specnum_t inSpec = workspace->getSpectrum(i)->getSpectrumNo();
+    g_log.debug() << "Current histogram: " << i << '\n';
+    specnum_t inSpec = workspace->getSpectrum(i).getSpectrumNo();
     SpectraDistanceMap neighbours =
         workspace->getNeighboursExact(inSpec, numNeighbours, true);
 
-    g_log.debug() << "Current ID: " << inSpec << std::endl;
+    g_log.debug() << "Current ID: " << inSpec << '\n';
     // Convert from spectrum numbers to workspace indices
     double thetaWidth = -DBL_MAX;
     double phiWidth = -DBL_MAX;
@@ -339,7 +352,7 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
 
     for (auto &neighbour : neighbours) {
       specnum_t spec = neighbour.first;
-      g_log.debug() << "Neighbor ID: " << spec << std::endl;
+      g_log.debug() << "Neighbor ID: " << spec << '\n';
       if (spec == deltaPlus1 || spec == deltaMinus1 || spec == deltaPlusT ||
           spec == deltaMinusT) {
         DetConstPtr detector_n = workspace->getDetector(spec - 1);
@@ -351,12 +364,12 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
         if (dTheta > thetaWidth) {
           thetaWidth = dTheta;
           g_log.information()
-              << "Current ThetaWidth: " << thetaWidth * 180 / M_PI << std::endl;
+              << "Current ThetaWidth: " << thetaWidth * 180 / M_PI << '\n';
         }
         if (dPhi > phiWidth) {
           phiWidth = dPhi;
           g_log.information() << "Current PhiWidth: " << phiWidth * 180 / M_PI
-                              << std::endl;
+                              << '\n';
         }
       }
     }
@@ -379,9 +392,8 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
     API::MatrixWorkspace_const_sptr inputWorkspace,
     const std::vector<double> &binParams, std::vector<double> &newAxis) {
   // Create vector to hold the new X axis values
-  MantidVecPtr xAxis;
-  xAxis.access() = inputWorkspace->readX(0);
-  const int xLength = static_cast<int>(xAxis->size());
+  HistogramData::BinEdges xAxis(inputWorkspace->refX(0));
+  const int xLength = static_cast<int>(xAxis.size());
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
   const int yLength = static_cast<int>(
@@ -401,7 +413,7 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
 
   // Now set the axis values
   for (int i = 0; i < yLength - 1; ++i) {
-    outputWorkspace->setX(i, xAxis);
+    outputWorkspace->setBinEdges(i, xAxis);
   }
 
   // Set the axis units

@@ -44,9 +44,6 @@ namespace Algorithms {
 */
 class DLLExport AnnularRingAbsorption : public API::Algorithm {
 public:
-  AnnularRingAbsorption();
-  ~AnnularRingAbsorption() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

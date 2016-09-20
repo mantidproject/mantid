@@ -117,6 +117,9 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
   // Reverts run button back to normal when file finding has finished
   connect(m_uiForm.dsInputFiles, SIGNAL(fileFindingFinished()), this,
           SLOT(pbRunFinished()));
+  // Handles plotting and saving
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   // Set default UI state
   sliceTwoRanges(0, false);
@@ -236,13 +239,10 @@ void ISISDiagnostics::algorithmComplete(bool error) {
   for (size_t i = 0; i < sliceOutputGroup->size(); i++) {
     QString wsName =
         QString::fromStdString(sliceOutputGroup->getItem(i)->name());
-
-    if (m_uiForm.ckPlot->isChecked())
-      plotSpectrum(wsName);
-
-    if (m_uiForm.ckSave->isChecked())
-      addSaveWorkspaceToQueue(wsName);
   }
+  // Enable plot and save buttons
+  m_uiForm.pbSave->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
 
   // Update the preview plots
   sliceAlgDone(false);
@@ -390,7 +390,6 @@ void ISISDiagnostics::doublePropertyChanged(QtProperty *prop, double val) {
   }
 }
 
-
 /**
  * Updates the preview plot when the algorithm is complete.
  *
@@ -468,5 +467,21 @@ void ISISDiagnostics::pbRunFinished() {
   m_uiForm.dsInputFiles->setEnabled(true);
 }
 
+/**
+ * Handles mantid plotting
+ */
+void ISISDiagnostics::plotClicked() {
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
+    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+}
+
+/**
+ * Handles saving workspace
+ */
+void ISISDiagnostics::saveClicked() {
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatchAsync();
+}
 } // namespace CustomInterfaces
 } // namespace Mantid

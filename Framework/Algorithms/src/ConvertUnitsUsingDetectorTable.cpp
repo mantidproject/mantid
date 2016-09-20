@@ -4,6 +4,7 @@
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
@@ -21,6 +22,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 
 #include <algorithm>
+#include <numeric>
 #include <cfloat>
 #include <limits>
 
@@ -32,25 +34,12 @@ using Mantid::API::WorkspaceProperty;
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using namespace HistogramData;
 using boost::function;
 using boost::bind;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertUnitsUsingDetectorTable)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertUnitsUsingDetectorTable::ConvertUnitsUsingDetectorTable()
-    : Algorithm(), m_numberOfSpectra(0), m_distribution(false),
-      m_inputEvents(false) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertUnitsUsingDetectorTable::~ConvertUnitsUsingDetectorTable() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ConvertUnitsUsingDetectorTable::name() const {
@@ -67,11 +56,10 @@ const std::string ConvertUnitsUsingDetectorTable::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ConvertUnitsUsingDetectorTable::summary() const {
-  return " *** Warning - This Routine is under development *** \n"
+  return "**Warning - This Routine is under development**\n"
          "Performs a unit change on the X values of a workspace";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ConvertUnitsUsingDetectorTable::init() {
@@ -101,7 +89,6 @@ void ConvertUnitsUsingDetectorTable::init() {
                   "http://www.mantidproject.org/ConvertUnits).");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ConvertUnitsUsingDetectorTable::exec() {
@@ -118,7 +105,7 @@ void ConvertUnitsUsingDetectorTable::exec() {
       g_log.information() << "Input workspace already has target unit ("
                           << m_outputUnit->unitID()
                           << "), so just pointing the output workspace "
-                             "property to the input workspace." << std::endl;
+                             "property to the input workspace.\n";
       setProperty("OutputWorkspace",
                   boost::const_pointer_cast<MatrixWorkspace>(inputWS));
       return;
@@ -136,15 +123,15 @@ void ConvertUnitsUsingDetectorTable::exec() {
     }
   }
 
-  if (inputWS->dataX(0).size() < 2) {
+  if (inputWS->x(0).size() < 2) {
     std::stringstream msg;
     msg << "Input workspace has invalid X axis binning parameters. Should have "
-           "at least 2 values. Found " << inputWS->dataX(0).size() << ".";
+           "at least 2 values. Found " << inputWS->x(0).size() << ".";
     throw std::runtime_error(msg.str());
   }
-  if (inputWS->dataX(0).front() > inputWS->dataX(0).back() ||
-      inputWS->dataX(m_numberOfSpectra / 2).front() >
-          inputWS->dataX(m_numberOfSpectra / 2).back())
+  if (inputWS->x(0).front() > inputWS->x(0).back() ||
+      inputWS->x(m_numberOfSpectra / 2).front() >
+          inputWS->x(m_numberOfSpectra / 2).back())
     throw std::runtime_error("Input workspace has invalid X axis binning "
                              "parameters. X values should be increasing.");
 
@@ -163,10 +150,10 @@ void ConvertUnitsUsingDetectorTable::exec() {
 
   // If the units conversion has flipped the ascending direction of X, reverse
   // all the vectors
-  if (!outputWS->dataX(0).empty() &&
-      (outputWS->dataX(0).front() > outputWS->dataX(0).back() ||
-       outputWS->dataX(m_numberOfSpectra / 2).front() >
-           outputWS->dataX(m_numberOfSpectra / 2).back())) {
+  if (!outputWS->x(0).empty() &&
+      (outputWS->x(0).front() > outputWS->x(0).back() ||
+       outputWS->x(m_numberOfSpectra / 2).front() >
+           outputWS->x(m_numberOfSpectra / 2).back())) {
     this->reverse(outputWS);
   }
 
@@ -193,7 +180,6 @@ void ConvertUnitsUsingDetectorTable::exec() {
   // Do right at end (workspace could could change in removeUnphysicalBins or
   // alignBins methods)
   setProperty("OutputWorkspace", outputWS);
-  return;
 }
 
 /** Initialise the member variables
@@ -236,9 +222,9 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::setupOutputWorkspace(
     for (int64_t i = 0; i < static_cast<int64_t>(m_numberOfSpectra); ++i) {
       PARALLEL_START_INTERUPT_REGION
       // Take the bin width dependency out of the Y & E data
-      const auto &X = outputWS->dataX(i);
-      auto &Y = outputWS->dataY(i);
-      auto &E = outputWS->dataE(i);
+      auto &X = outputWS->x(i);
+      auto &Y = outputWS->mutableY(i);
+      auto &E = outputWS->mutableE(i);
       for (size_t j = 0; j < outputWS->blocksize(); ++j) {
         const double width = std::abs(X[j + 1] - X[j]);
         Y[j] *= width;
@@ -332,7 +318,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
       // int spectraNumber = static_cast<int>(spectraColumn->toDouble(i));
       // wsid = outputWS->getIndexFromSpectrumNumber(spectraNumber);
       g_log.debug() << "###### Spectra #" << specNo
-                    << " ==> Workspace ID:" << wsid << std::endl;
+                    << " ==> Workspace ID:" << wsid << '\n';
 
       // Now we need to find the row that contains this spectrum
       std::vector<int>::iterator specIter;
@@ -347,7 +333,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
         int emode = emodeColumn[detectorRow];
 
         g_log.debug() << "specNo from detector table = "
-                      << spectraColumn[detectorRow] << std::endl;
+                      << spectraColumn[detectorRow] << '\n';
 
         // l1 = l1Column->toDouble(detectorRow);
         // l2 = l2Column->toDouble(detectorRow);
@@ -356,10 +342,10 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
         // emode = static_cast<int>(emodeColumn->toDouble(detectorRow));
 
         g_log.debug() << "###### Spectra #" << specNo
-                      << " ==> Det Table Row:" << detectorRow << std::endl;
+                      << " ==> Det Table Row:" << detectorRow << '\n';
 
         g_log.debug() << "\tL1=" << l1 << ",L2=" << l2 << ",TT=" << twoTheta
-                      << ",EF=" << efixed << ",EM=" << emode << std::endl;
+                      << ",EF=" << efixed << ",EM=" << emode << '\n';
 
         // Make local copies of the units. This allows running the loop in
         // parallel
@@ -367,15 +353,21 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
         Unit *localOutputUnit = outputUnit->clone();
         /// @todo Don't yet consider hold-off (delta)
         const double delta = 0.0;
+        std::vector<double> values(outputWS->x(wsid).begin(),
+                                   outputWS->x(wsid).end());
+
         // Convert the input unit to time-of-flight
-        localFromUnit->toTOF(outputWS->dataX(wsid), emptyVec, l1, l2, twoTheta,
-                             emode, efixed, delta);
+        localFromUnit->toTOF(values, emptyVec, l1, l2, twoTheta, emode, efixed,
+                             delta);
         // Convert from time-of-flight to the desired unit
-        localOutputUnit->fromTOF(outputWS->dataX(wsid), emptyVec, l1, l2,
-                                 twoTheta, emode, efixed, delta);
+        localOutputUnit->fromTOF(values, emptyVec, l1, l2, twoTheta, emode,
+                                 efixed, delta);
+
+        outputWS->mutableX(wsid) = std::move(values);
+
         // EventWorkspace part, modifying the EventLists.
         if (m_inputEvents) {
-          eventWS->getEventList(wsid)
+          eventWS->getSpectrum(wsid)
               .convertUnitsViaTof(localFromUnit, localOutputUnit);
         }
         // Clear unit memory
@@ -384,7 +376,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
 
       } else {
         // Not found
-        g_log.debug() << "Spectrum " << specNo << " not found!" << std::endl;
+        g_log.debug() << "Spectrum " << specNo << " not found!\n";
         failedDetectorCount++;
         outputWS->maskWorkspaceIndex(wsid);
       }
@@ -406,7 +398,7 @@ void ConvertUnitsUsingDetectorTable::convertViaTOF(
 
   if (failedDetectorCount != 0) {
     g_log.information() << "Something went wrong for " << failedDetectorCount
-                        << " spectra. Masking spectrum." << std::endl;
+                        << " spectra. Masking spectrum.\n";
   }
   if (m_inputEvents)
     eventWS->clearMRU();
@@ -434,19 +426,16 @@ void ConvertUnitsUsingDetectorTable::convertQuickly(
     // Only do the full check if the quick one passes
     if (commonBoundaries) {
       // Calculate the new (common) X values
-      MantidVec::iterator iter;
-      for (iter = outputWS->dataX(0).begin(); iter != outputWS->dataX(0).end();
-           ++iter) {
-        *iter = factor *std::pow(*iter, power);
+      for (auto &x : outputWS->mutableX(0)) {
+        x = factor * std::pow(x, power);
       }
 
-      MantidVecPtr xVals;
-      xVals.access() = outputWS->dataX(0);
+      auto xVals = outputWS->refX(0);
 
       PARALLEL_FOR1(outputWS)
       for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
         PARALLEL_START_INTERUPT_REGION
-        outputWS->setX(j, xVals);
+        outputWS->setSharedX(j, xVals);
         prog.report("Convert to " + m_outputUnit->unitID());
         PARALLEL_END_INTERUPT_REGION
       }
@@ -466,15 +455,13 @@ void ConvertUnitsUsingDetectorTable::convertQuickly(
   for (int64_t k = 0; k < numberOfSpectra_i; ++k) {
     PARALLEL_START_INTERUPT_REGION
     if (!commonBoundaries) {
-      MantidVec::iterator it;
-      for (it = outputWS->dataX(k).begin(); it != outputWS->dataX(k).end();
-           ++it) {
-        *it = factor *std::pow(*it, power);
+      for (auto &x : outputWS->mutableX(k)) {
+        x = factor * std::pow(x, power);
       }
     }
     // Convert the events themselves if necessary. Inefficiently.
     if (m_inputEvents) {
-      eventWS->getEventList(k).convertUnitsQuickly(factor, power);
+      eventWS->getSpectrum(k).convertUnitsQuickly(factor, power);
     }
     prog.report("Convert to " + m_outputUnit->unitID());
     PARALLEL_END_INTERUPT_REGION
@@ -483,7 +470,6 @@ void ConvertUnitsUsingDetectorTable::convertQuickly(
 
   if (m_inputEvents)
     eventWS->clearMRU();
-  return;
 }
 
 /// Calls Rebin as a Child Algorithm to align the bins
@@ -508,22 +494,19 @@ const std::vector<double> ConvertUnitsUsingDetectorTable::calculateRebinParams(
   // Need to loop round and find the full range
   double XMin = DBL_MAX, XMax = DBL_MIN;
   const size_t numSpec = workspace->getNumberHistograms();
+  const auto &spectrumInfo = workspace->spectrumInfo();
   for (size_t i = 0; i < numSpec; ++i) {
-    try {
-      Geometry::IDetector_const_sptr det = workspace->getDetector(i);
-      if (!det->isMasked()) {
-        const MantidVec &XData = workspace->readX(i);
-        double xfront = XData.front();
-        double xback = XData.back();
-        if (boost::math::isfinite(xfront) && boost::math::isfinite(xback)) {
-          if (xfront < XMin)
-            XMin = xfront;
-          if (xback > XMax)
-            XMax = xback;
-        }
+    if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMasked(i)) {
+      auto &XData = workspace->x(i);
+      double xfront = XData.front();
+      double xback = XData.back();
+      if (boost::math::isfinite(xfront) && boost::math::isfinite(xback)) {
+        if (xfront < XMin)
+          XMin = xfront;
+        if (xback > XMax)
+          XMax = xback;
       }
-    } catch (Exception::NotFoundError &) {
-    } // Do nothing
+    }
   }
   const double step =
       (XMax - XMin) / static_cast<double>(workspace->blocksize());
@@ -536,16 +519,15 @@ const std::vector<double> ConvertUnitsUsingDetectorTable::calculateRebinParams(
  */
 void ConvertUnitsUsingDetectorTable::reverse(API::MatrixWorkspace_sptr WS) {
   if (WorkspaceHelpers::commonBoundaries(WS) && !m_inputEvents) {
-    std::reverse(WS->dataX(0).begin(), WS->dataX(0).end());
-    std::reverse(WS->dataY(0).begin(), WS->dataY(0).end());
-    std::reverse(WS->dataE(0).begin(), WS->dataE(0).end());
+    std::reverse(WS->mutableX(0).begin(), WS->mutableX(0).end());
+    std::reverse(WS->mutableY(0).begin(), WS->mutableY(0).end());
+    std::reverse(WS->mutableE(0).begin(), WS->mutableE(0).end());
 
-    MantidVecPtr xVals;
-    xVals.access() = WS->dataX(0);
+    auto xVals = WS->sharedX(0);
     for (size_t j = 1; j < m_numberOfSpectra; ++j) {
-      WS->setX(j, xVals);
-      std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());
-      std::reverse(WS->dataE(j).begin(), WS->dataE(j).end());
+      WS->setSharedX(j, xVals);
+      std::reverse(WS->mutableY(j).begin(), WS->mutableY(j).end());
+      std::reverse(WS->mutableE(j).begin(), WS->mutableE(j).end());
       if (j % 100 == 0)
         interruption_point();
     }
@@ -559,11 +541,11 @@ void ConvertUnitsUsingDetectorTable::reverse(API::MatrixWorkspace_sptr WS) {
     for (int j = 0; j < m_numberOfSpectra_i; ++j) {
       PARALLEL_START_INTERUPT_REGION
       if (m_inputEvents) {
-        eventWS->getEventList(j).reverse();
+        eventWS->getSpectrum(j).reverse();
       } else {
-        std::reverse(WS->dataX(j).begin(), WS->dataX(j).end());
-        std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());
-        std::reverse(WS->dataE(j).begin(), WS->dataE(j).end());
+        std::reverse(WS->mutableX(j).begin(), WS->mutableX(j).end());
+        std::reverse(WS->mutableY(j).begin(), WS->mutableY(j).end());
+        std::reverse(WS->mutableE(j).begin(), WS->mutableE(j).end());
       }
       PARALLEL_END_INTERUPT_REGION
     }
@@ -600,16 +582,13 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
     // Need to make sure we don't pick a monitor as the 'reference' X spectrum
     // (X0)
     size_t i = 0;
+    const auto &spectrumInfo = workspace->spectrumInfo();
     for (; i < numSpec; ++i) {
-      try {
-        Geometry::IDetector_const_sptr det = workspace->getDetector(i);
-        if (!det->isMonitor())
-          break;
-      } catch (Exception::NotFoundError &) { /* Do nothing */
-      }
+      if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i))
+        break;
     }
     // Get an X spectrum to search (they're all the same, monitors excepted)
-    const MantidVec &X0 = workspace->readX(i);
+    auto &X0 = workspace->x(i);
     auto start = std::lower_bound(X0.cbegin(), X0.cend(), -1.0e-10 * DBL_MAX);
     if (start == X0.cend()) {
       const std::string e("Check the input EFixed: the one given leads to all "
@@ -624,12 +603,13 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
         WorkspaceFactory::Instance().create(workspace, numSpec, bins, bins - 1);
 
     for (size_t i = 0; i < numSpec; ++i) {
-      const MantidVec &X = workspace->readX(i);
-      const MantidVec &Y = workspace->readY(i);
-      const MantidVec &E = workspace->readE(i);
-      result->dataX(i).assign(X.begin() + first, X.end());
-      result->dataY(i).assign(Y.begin() + first, Y.end());
-      result->dataE(i).assign(E.begin() + first, E.end());
+      auto &X = workspace->x(i);
+      auto &Y = workspace->y(i);
+      auto &E = workspace->e(i);
+
+      result->mutableX(i).assign(X.begin() + first, X.end());
+      result->mutableY(i).assign(Y.begin() + first, Y.end());
+      result->mutableE(i).assign(E.begin() + first, E.end());
     }
   } else if (emode == "Indirect") {
     // Now the indirect instruments. In this case we could want to keep a
@@ -641,40 +621,34 @@ API::MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::removeUnphysicalBins(
     std::vector<MantidVec::difference_type> lastBins(numSpec);
     int maxBins = 0;
     for (size_t i = 0; i < numSpec; ++i) {
-      const MantidVec &X = workspace->readX(i);
+      auto &X = workspace->x(i);
       auto end = std::lower_bound(X.cbegin(), X.cend(), 1.0e-10 * DBL_MAX);
       MantidVec::difference_type bins = end - X.cbegin();
       lastBins[i] = bins;
       if (bins > maxBins)
         maxBins = static_cast<int>(bins);
     }
-    g_log.debug() << maxBins << std::endl;
+    g_log.debug() << maxBins << '\n';
     // Now create an output workspace large enough for the longest 'good' range
     result = WorkspaceFactory::Instance().create(workspace, numSpec, maxBins,
                                                  maxBins - 1);
     // Next, loop again copying in the correct range for each spectrum
     for (int64_t j = 0; j < int64_t(numSpec); ++j) {
-      const MantidVec &X = workspace->readX(j);
-      const MantidVec &Y = workspace->readY(j);
-      const MantidVec &E = workspace->readE(j);
-      MantidVec &Xnew = result->dataX(j);
-      MantidVec &Ynew = result->dataY(j);
-      MantidVec &Enew = result->dataE(j);
-      int k;
-      for (k = 0; k < lastBins[j] - 1; ++k) {
-        Xnew[k] = X[k];
-        Ynew[k] = Y[k];
-        Enew[k] = E[k];
-      }
-      Xnew[k] = X[k];
-      ++k;
-      // If necessary, add on some fake values to the end of the X array (Y&E
-      // will be zero)
+      auto edges = workspace->binEdges(j);
+      auto k = lastBins[j];
+
+      result->mutableX(j).assign(edges.cbegin(), edges.cbegin() + k);
+
+      // If the entire X range is not covered, generate fake values.
       if (k < maxBins) {
-        for (int l = k; l < maxBins; ++l) {
-          Xnew[l] = X[k] + 1 + l - k;
-        }
+        std::iota(result->mutableX(j).begin() + k, result->mutableX(j).end(),
+                  workspace->x(j)[k] + 1);
       }
+
+      result->mutableY(j)
+          .assign(workspace->y(j).cbegin(), workspace->y(j).cbegin() + (k - 1));
+      result->mutableE(j)
+          .assign(workspace->e(j).cbegin(), workspace->e(j).cbegin() + (k - 1));
     }
   }
 
@@ -690,10 +664,9 @@ void ConvertUnitsUsingDetectorTable::putBackBinWidth(
 
   for (size_t i = 0; i < m_numberOfSpectra; ++i) {
     for (size_t j = 0; j < outSize; ++j) {
-      const double width =
-          std::abs(outputWS->dataX(i)[j + 1] - outputWS->dataX(i)[j]);
-      outputWS->dataY(i)[j] = outputWS->dataY(i)[j] / width;
-      outputWS->dataE(i)[j] = outputWS->dataE(i)[j] / width;
+      const double width = std::abs(outputWS->x(i)[j + 1] - outputWS->x(i)[j]);
+      outputWS->mutableY(i)[j] = outputWS->y(i)[j] / width;
+      outputWS->mutableE(i)[j] = outputWS->e(i)[j] / width;
     }
   }
 }

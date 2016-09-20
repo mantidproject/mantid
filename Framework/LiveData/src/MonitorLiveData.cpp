@@ -1,6 +1,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/WriteLock.h"
 #include "MantidLiveData/LoadLiveData.h"
@@ -16,16 +16,6 @@ namespace LiveData {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MonitorLiveData)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MonitorLiveData::MonitorLiveData() : m_chunkNumber(0) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MonitorLiveData::~MonitorLiveData() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -63,8 +53,7 @@ void MonitorLiveData::doClone(const std::string &originalName,
     Workspace_sptr original = ads.retrieveWS<Workspace>(originalName);
     if (original) {
       size_t bytesUsed = original->getMemorySize();
-      size_t bytesAvail =
-          MemoryManager::Instance().getMemoryInfo().availMemory * size_t(1024);
+      size_t bytesAvail = MemoryStats().availMem() * size_t(1024);
       // Give a buffer of 3 times the size of the workspace
       if (size_t(3) * bytesUsed < bytesAvail) {
         WriteLock _lock(*original);
@@ -101,7 +90,7 @@ void MonitorLiveData::doClone(const std::string &originalName,
       } else {
         std::cout << "Not cloning\n";
         g_log.warning() << "Not enough spare memory to clone " << originalName
-                        << ". Workspace will be reset." << std::endl;
+                        << ". Workspace will be reset.\n";
       }
     }
   }
@@ -150,7 +139,7 @@ void MonitorLiveData::exec() {
     if (seconds > UpdateEvery) {
       lastTime = now;
       g_log.notice() << "Loading live data chunk " << m_chunkNumber << " at "
-                     << now.toFormattedString("%H:%M:%S") << std::endl;
+                     << now.toFormattedString("%H:%M:%S") << '\n';
 
       // Time to run LoadLiveData again
       Algorithm_sptr alg = createChildAlgorithm("LoadLiveData");
@@ -178,7 +167,7 @@ void MonitorLiveData::exec() {
 
       if (runNumber == 0) {
         runNumber = listener->runNumber();
-        g_log.debug() << "Run number set to " << runNumber << std::endl;
+        g_log.debug() << "Run number set to " << runNumber << '\n';
       }
 
       // Did we just hit a run transition?
@@ -236,8 +225,7 @@ void MonitorLiveData::exec() {
     if (seconds > UpdateEvery)
       g_log.warning() << "Cannot process live data as quickly as requested: "
                          "requested every " << UpdateEvery
-                      << " seconds but it takes " << seconds << " seconds!"
-                      << std::endl;
+                      << " seconds but it takes " << seconds << " seconds!\n";
   } // loop until aborted
 
   // Set the outputs (only applicable when RunTransitionBehavior is "Stop")

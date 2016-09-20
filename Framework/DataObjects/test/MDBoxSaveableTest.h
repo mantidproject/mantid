@@ -729,7 +729,7 @@ public:
   //-----------------------------------------------------------------------------------------
   /** Set up the file back end and test accessing data
    * by binning and stuff */
-  void do_test_fileBackEnd_binningOperations(bool parallel) {
+  void do_test_fileBackEnd_binningOperations(bool parallel_condition) {
     // Create a box with a controller for the back-end
     BoxController_sptr bc(new BoxController(3));
 
@@ -743,7 +743,7 @@ public:
     // It is empty now
     TS_ASSERT_EQUALS(dbuf->getWriteBufferUsed(), 0);
 
-    PARALLEL_FOR_IF(parallel)
+    PARALLEL_FOR_IF(parallel_condition)
     for (int i = 0; i < 20; i++) {
       // std::cout << "Bin try " << i << "\n";
       // Try a bin, 2x2x2 so 8 events should be in there
@@ -758,7 +758,7 @@ public:
       TS_ASSERT_DELTA(bin.m_errorSquared, 8.0, 1e-4);
     }
 
-    PARALLEL_FOR_IF(parallel)
+    PARALLEL_FOR_IF(parallel_condition)
     for (int i = 0; i < 20; i++) {
       // std::cout << "Sphere try " << i << "\n";
       // Integrate a sphere in the middle
@@ -776,7 +776,7 @@ public:
     bc->getFileIO()->closeFile();
     do_deleteNexusFile("MDBoxBinningxest.nxs");
     // suppress unused variable when built without openmp
-    UNUSED_ARG(parallel)
+    UNUSED_ARG(parallel_condition)
   }
 
   void test_fileBackEnd_binningOperations() {
@@ -859,7 +859,7 @@ public:
         if (fileEnd > maxFilePos)
           maxFilePos = fileEnd;
         // std::cout << mdbox->getFilePosition() << " file pos " << i <<
-        // std::endl;
+        // '\n';
       }
     }
     TSM_ASSERT_EQUALS(
@@ -881,7 +881,7 @@ public:
     TSM_ASSERT_LESS_THAN(
         "And the events were properly saved sequentially in the files.",
         minimumSaved, maxFilePos);
-    std::cout << dbuf->getMemoryStr() << std::endl;
+    std::cout << dbuf->getMemoryStr() << '\n';
 
     delete b;
     const std::string filename = fbc->getFileName();

@@ -2,6 +2,7 @@
 from itertools import ifilterfalse
 import os
 import re
+import subprocess
 
 # Authors in Git that do not have a translation listed here or that have not
 # been blacklisted will cause the DOI script to fail.
@@ -12,7 +13,7 @@ import re
 # prefer multiple translations over blacklist entries in case users log back on
 # to machines and start using old aliases again.
 _translations = {
-#    Name in Git.             :  Preffered name for DOI.
+    #Name in Git.             :  Preffered name for DOI.
     'Freddie Akeroyd'         : 'Akeroyd, Freddie',
     'Stuart Ansell'           : 'Ansell, Stuart',
     'Sofia Antony'            : 'Antony, Sofia',
@@ -119,9 +120,11 @@ _translations = {
     'Michael Hart'            : 'Hart, Michael',
     'Lamar Moore'             : 'Moore, Lamar',
     'LamarMoore'              : 'Moore, Lamar',
+    'Moore'                   : 'Moore, Lamar',
     'Tom Perkins'             : 'Perkins, Tom',
     'Jan Burle'               : 'Burle, Jan',
-    'Duc Le'                  : 'Le, Duc'
+    'Duc Le'                  : 'Le, Duc',
+    'David Fairbrother'       : 'Fairbrother, David'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -156,8 +159,6 @@ whitelist = [
     'Taylor, Jon',
     'Granroth, Garrett'
 ]
-
-import subprocess
 
 def run_from_script_dir(func):
     '''Decorator that changes the working directory to the directory of this

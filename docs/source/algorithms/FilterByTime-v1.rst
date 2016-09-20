@@ -13,7 +13,7 @@ Goes through all events in all EventLists and takes out any events with
 a PulseTime value not within the range specified.
 
 -  Sample logs consisting of
-   `TimeSeriesProperty <http://www.mantidproject.org/TimeSeriesProperty>`__'s are also filtered out
+   :ref:`TimeSeriesProperty`'s are also filtered out
    according to the same time.
 -  The integrated proton charge of the run is also re-calculated
    according to the filtered out ProtonCharge pulse log.
@@ -27,7 +27,7 @@ You must specify:
 Comparing with other event filtering algorithms
 ###############################################
 
-Wiki page `EventFiltering <http://www.mantidproject.org/EventFiltering>`__ has a detailed
+Wiki page :ref:`EventFiltering` has a detailed
 introduction on event filtering in MantidPlot.
 
 Usage

@@ -45,10 +45,6 @@ namespace Algorithms {
 */
 class DLLExport SolidAngle : public API::Algorithm {
 public:
-  /// Default constructor
-  SolidAngle();
-  /// Virtual destructor
-  ~SolidAngle() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SolidAngle"; }
   /// Summary of algorithms purpose

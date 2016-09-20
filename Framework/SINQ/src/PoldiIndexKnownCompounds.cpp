@@ -65,12 +65,6 @@ IndexCandidatePair::IndexCandidatePair(const PoldiPeak_sptr &measuredPeak,
   positionMatch = complementOfCloserPeak * candidateIntensity;
 }
 
-/// Default constructor
-PoldiIndexKnownCompounds::PoldiIndexKnownCompounds() {}
-
-/// Destructor
-PoldiIndexKnownCompounds::~PoldiIndexKnownCompounds() {}
-
 /// Returns the algorithm name
 const std::string PoldiIndexKnownCompounds::name() const {
   return "PoldiIndexKnownCompounds";
@@ -177,12 +171,12 @@ void PoldiIndexKnownCompounds::initializeIndexedPeaks(
 
 /// Converts FWHM to sigma of a Gaussian
 double PoldiIndexKnownCompounds::fwhmToSigma(double fwhm) {
-  return fwhm / (2.0 * sqrt(2.0 * log(2.0)));
+  return fwhm / (2.0 * sqrt(2.0 * M_LN2));
 }
 
 /// Converts sigma of a Gaussian to FWHM
 double PoldiIndexKnownCompounds::sigmaToFwhm(double sigma) {
-  return sigma * (2.0 * sqrt(2.0 * log(2.0)));
+  return sigma * (2.0 * sqrt(2.0 * M_LN2));
 }
 
 /** Recursively creates a list of Workspaces from a list of workspace names.
@@ -490,13 +484,12 @@ void PoldiIndexKnownCompounds::indexPeaks(
     throw std::invalid_argument("Cannot index invalid PoldiPeakCollection.");
   }
 
-  g_log.information() << "  Creating list of index candidates..." << std::endl;
+  g_log.information() << "  Creating list of index candidates...\n";
   std::vector<IndexCandidatePair> candidates =
       getAllIndexCandidatePairs(measured, knownCompoundPeaks);
 
   g_log.information() << "  Number of candidate pairs: " << candidates.size()
-                      << std::endl
-                      << "  Assigning most likely candidates..." << std::endl;
+                      << "\n  Assigning most likely candidates...\n";
   assignCandidates(candidates);
 }
 
@@ -537,8 +530,7 @@ PoldiIndexKnownCompounds::getAllIndexCandidatePairs(
 
     g_log.information() << "    Peak at d="
                         << static_cast<double>(currentPeak->d()) << " has "
-                        << currentCandidates.size() << " candidates."
-                        << std::endl;
+                        << currentCandidates.size() << " candidates.\n";
   }
 
   return candidates;
@@ -676,8 +668,7 @@ void PoldiIndexKnownCompounds::assignCandidates(
       if (inPeakSet(usedExpectedPeaks, expectedPeak)) {
         unassignedMeasuredPeaks.insert(measuredPeak);
         g_log.information()
-            << "      Candidate rejected: Candidate has been already used."
-            << std::endl;
+            << "      Candidate rejected: Candidate has been already used.\n";
       } else {
         /* Otherwise, the indexed candidate is accepted and the measured peak
          * is removed from the set of peaks that are waiting for another
@@ -691,13 +682,12 @@ void PoldiIndexKnownCompounds::assignCandidates(
         usedMeasuredPeaks.insert(measuredPeak);
 
         assignPeakIndex(currentCandidate);
-        g_log.information() << "      Candidate accepted." << std::endl;
+        g_log.information() << "      Candidate accepted.\n";
       }
     } else {
       g_log.information()
           << "      Candidate rejected: peak has already been indexed: ["
-          << MillerIndicesIO::toString(measuredPeak->hkl()) << "]."
-          << std::endl;
+          << MillerIndicesIO::toString(measuredPeak->hkl()) << "].\n";
     }
   }
 
@@ -785,7 +775,7 @@ void PoldiIndexKnownCompounds::init() {
 /** Execute the algorithm.
    */
 void PoldiIndexKnownCompounds::exec() {
-  g_log.information() << "Starting POLDI peak indexing." << std::endl;
+  g_log.information() << "Starting POLDI peak indexing.\n";
 
   DataObjects::TableWorkspace_sptr peakTableWorkspace =
       getProperty("InputWorkspace");
@@ -793,14 +783,14 @@ void PoldiIndexKnownCompounds::exec() {
   PoldiPeakCollection_sptr unindexedPeaks =
       boost::make_shared<PoldiPeakCollection>(peakTableWorkspace);
   g_log.information() << "  Number of peaks: " << unindexedPeaks->peakCount()
-                      << std::endl;
+                      << '\n';
 
   std::vector<Workspace_sptr> workspaces =
       getWorkspaces(getProperty("CompoundWorkspaces"));
   std::vector<PoldiPeakCollection_sptr> peakCollections =
       getPeakCollections(workspaces);
   g_log.information() << "  Number of phases: " << peakCollections.size()
-                      << std::endl;
+                      << '\n';
 
   /* The procedure is much easier to formulate with some state stored in member
    * variables,
@@ -832,7 +822,7 @@ void PoldiIndexKnownCompounds::exec() {
   indexPeaks(unindexedPeaks, peakCollections);
 
   g_log.information() << "  Unindexed peaks: " << m_unindexedPeaks->peakCount()
-                      << std::endl;
+                      << '\n';
 
   /* Finally, the peaks are put into separate workspaces, determined by
    * the phase they have been attributed to, plus unindexed peaks.

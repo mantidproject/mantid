@@ -47,10 +47,6 @@ namespace Algorithms {
  */
 class DLLExport ConvertTableToMatrixWorkspace : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  ConvertTableToMatrixWorkspace() : API::Algorithm() {}
-  /// Virtual destructor
-  ~ConvertTableToMatrixWorkspace() override {}
   /// Algorithm's name
   const std::string name() const override {
     return "ConvertTableToMatrixWorkspace";

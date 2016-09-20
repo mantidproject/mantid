@@ -39,7 +39,7 @@ private:
                                                                  9));
     // Make sure the detector IDs are ok
     for (int i = 0; i < NUMPIXELS; i++)
-      test_in->getSpectrum(i)->setDetectorID(i + 1);
+      test_in->getSpectrum(i).setDetectorID(i + 1);
 
     // Add it to the workspace
     AnalysisDataService::Instance().add(wsName, test_in);

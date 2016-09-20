@@ -4,13 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/Resolution.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
-#include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/cow_ptr.h"
 #include <Poco/File.h>
 
 #include <fstream>
@@ -128,59 +125,6 @@ public:
       double xi = x[i];
       TS_ASSERT_DELTA(y[i], resH * exp(-xi * xi * resS), yErr);
     }
-  }
-
-  void testFit() {
-    const int nX = 100;
-    const int nY = nX - 1;
-
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", 1, nX, nY));
-
-    double x;
-    const double x0 = 0.;
-    const double dx = DX / nY;
-
-    const double pi = acos(0.) * 2.;
-    const double s1 = pi / 3;
-    const double h1 = 2.;
-    const double c1 = 5.5;
-    const double sp = s1 * resS / (s1 + resS);
-    const double hp = h1 * resH * sqrt(pi / (s1 + resS));
-
-    Mantid::MantidVec &X = ws->dataX(0);
-    Mantid::MantidVec &Y = ws->dataY(0);
-    Mantid::MantidVec &E = ws->dataE(0);
-
-    for (int i = 0; i < nY; i++) {
-      X[i] = x0 + dx * i;
-      x = X[i] - c1;
-      Y[i] = hp * exp(-x * x * sp);
-      E[i] = 1;
-    }
-    X.back() = X[nY - 1] + dx;
-    AnalysisDataService::Instance().add("ResolutionTest_WS", ws);
-
-    IFunction_sptr res(new Resolution);
-    res->setAttributeValue("FileName", resFileName);
-
-    IFunction_sptr gauss(new ResolutionTest_Gauss);
-    gauss->setParameter("c", 5);
-    gauss->setParameter("h", 2);
-    gauss->setParameter("s", 1);
-
-    Convolution conv;
-    conv.addFunction(res);
-    conv.addFunction(gauss);
-
-    Algorithms::Fit fit;
-    fit.initialize();
-    fit.setPropertyValue("Function", conv.asString());
-    fit.setPropertyValue("InputWorkspace", "ResolutionTest_WS");
-    fit.setPropertyValue("WorkspaceIndex", "0");
-    fit.execute();
-
-    AnalysisDataService::Instance().clear();
   }
 
   void testForCategories() {

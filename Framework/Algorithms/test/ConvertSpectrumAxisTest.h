@@ -1,14 +1,16 @@
 #ifndef CONVERTSPECTRUMAXISTEST_H_
 #define CONVERTSPECTRUMAXISTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAlgorithms/ConvertSpectrumAxis.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAlgorithms/ConvertSpectrumAxis.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
+using namespace Mantid::HistogramData::detail;
 
 class ConvertSpectrumAxisTest : public CxxTest::TestSuite {
 private:
@@ -78,12 +80,12 @@ public:
     TS_ASSERT_THROWS((*thetaAxis)(2), Mantid::Kernel::Exception::IndexError);
 
     // Data should be swapped over
-    TS_ASSERT_EQUALS(input->readX(0), output->readX(1));
-    TS_ASSERT_EQUALS(input->readY(0), output->readY(1));
-    TS_ASSERT_EQUALS(input->readE(0), output->readE(1));
-    TS_ASSERT_EQUALS(input->readX(1), output->readX(0));
-    TS_ASSERT_EQUALS(input->readY(1), output->readY(0));
-    TS_ASSERT_EQUALS(input->readE(1), output->readE(0));
+    TS_ASSERT_EQUALS(input->x(0), output->x(1));
+    TS_ASSERT_EQUALS(input->y(0), output->y(1));
+    TS_ASSERT_EQUALS(input->e(0), output->e(1));
+    TS_ASSERT_EQUALS(input->x(1), output->x(0));
+    TS_ASSERT_EQUALS(input->y(1), output->y(0));
+    TS_ASSERT_EQUALS(input->e(1), output->e(0));
 
     // Clean up
     AnalysisDataService::Instance().remove(inputWS);

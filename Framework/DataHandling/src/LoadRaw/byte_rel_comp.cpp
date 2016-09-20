@@ -160,7 +160,7 @@ int byte_rel_expn(char *data_in, int n_in, int n_from, int *data_out,
 
   // expansion OK, but excessive number of bytes given to the routine
   if (n_out < n_in / 5) {
-    std::cerr << "byte rel expn: excessive bytes" << std::endl;
+    std::cerr << "byte rel expn: excessive bytes\n";
   }
   return SUCCESS;
 }

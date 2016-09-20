@@ -1,8 +1,9 @@
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
-#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidQtMantidWidgets/InstrumentView/DetXMLFile.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentActor.h"
+#include "MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h"
+#include "MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -35,22 +36,23 @@
 #endif
 #endif
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
+#include <QAction>
+#include <QApplication>
+#include <QCheckBox>
+#include <QFileDialog>
 #include <QGridLayout>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QMenu>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QRadioButton>
-#include <QTextEdit>
-#include <QMenu>
-#include <QAction>
-#include <QLabel>
-#include <QMessageBox>
-#include <QApplication>
-#include <QFileDialog>
-#include <QToolTip>
+#include <QSettings>
 #include <QTemporaryFile>
-#include <QGroupBox>
-#include <QCheckBox>
+#include <QTextEdit>
+#include <QToolTip>
+#include <QVBoxLayout>
 
 #include "MantidQtAPI/FileDialogHandler.h"
 
@@ -208,38 +210,38 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
       new QAction("As Detector Mask to workspace", this);
   m_save_as_workspace_exclude->setToolTip(
       "Save current detector mask to mask workspace.");
-  connect(m_save_as_workspace_exclude, SIGNAL(activated()), this,
+  connect(m_save_as_workspace_exclude, SIGNAL(triggered()), this,
           SLOT(saveMaskToWorkspace()));
 
   m_save_as_workspace_include =
       new QAction("As Detector ROI to workspace", this);
   m_save_as_workspace_include->setToolTip(
       "Save current detector mask as ROI to mask workspace.");
-  connect(m_save_as_workspace_include, SIGNAL(activated()), this,
+  connect(m_save_as_workspace_include, SIGNAL(triggered()), this,
           SLOT(saveInvertedMaskToWorkspace()));
 
   m_save_as_file_exclude = new QAction("As Detector Mask to file", this);
   m_save_as_file_exclude->setToolTip(
       "Save current detector mask to mask file.");
-  connect(m_save_as_file_exclude, SIGNAL(activated()), this,
+  connect(m_save_as_file_exclude, SIGNAL(triggered()), this,
           SLOT(saveMaskToFile()));
 
   m_save_as_file_include = new QAction("As Detector ROI to file", this);
   m_save_as_file_include->setToolTip("Save current mask as ROI to mask file.");
-  connect(m_save_as_file_include, SIGNAL(activated()), this,
+  connect(m_save_as_file_include, SIGNAL(triggered()), this,
           SLOT(saveInvertedMaskToFile()));
 
   m_save_as_cal_file_exclude =
       new QAction("As Detector Mask to cal file", this);
   m_save_as_cal_file_exclude->setToolTip(
       "Save current detector mask to cal file.");
-  connect(m_save_as_cal_file_exclude, SIGNAL(activated()), this,
+  connect(m_save_as_cal_file_exclude, SIGNAL(triggered()), this,
           SLOT(saveMaskToCalFile()));
 
   m_save_as_cal_file_include = new QAction("As Detector ROI to cal file", this);
   m_save_as_cal_file_include->setToolTip(
       "Save current detector mask as ROI to cal file.");
-  connect(m_save_as_cal_file_include, SIGNAL(activated()), this,
+  connect(m_save_as_cal_file_include, SIGNAL(triggered()), this,
           SLOT(saveInvertedMaskToCalFile()));
 
   m_save_as_table_xrange_exclude =
@@ -249,29 +251,29 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
       "The name of output table workspace is 'MaskBinTable'. "
       "If the output table workspace has alrady exist, then "
       "the newly masked detectors will be added to output workspace.");
-  connect(m_save_as_table_xrange_exclude, SIGNAL(activated()), this,
+  connect(m_save_as_table_xrange_exclude, SIGNAL(triggered()), this,
           SLOT(saveMaskToTable()));
 
   m_save_group_file_include = new QAction("As include group to file", this);
   m_save_group_file_include->setToolTip(
       "Save current mask as include group to a file.");
-  connect(m_save_group_file_include, SIGNAL(activated()), this,
+  connect(m_save_group_file_include, SIGNAL(triggered()), this,
           SLOT(saveIncludeGroupToFile()));
 
   m_save_group_file_exclude = new QAction("As exclude group to file", this);
   m_save_group_file_exclude->setToolTip(
       "Save current mask as exclude group to a file.");
-  connect(m_save_group_file_exclude, SIGNAL(activated()), this,
+  connect(m_save_group_file_exclude, SIGNAL(triggered()), this,
           SLOT(saveExcludeGroupToFile()));
 
   m_extract_to_workspace = new QAction("Extract detectors to workspace", this);
   m_extract_to_workspace->setToolTip("Extract detectors to workspace.");
-  connect(m_extract_to_workspace, SIGNAL(activated()), this,
+  connect(m_extract_to_workspace, SIGNAL(triggered()), this,
           SLOT(extractDetsToWorkspace()));
 
   m_sum_to_workspace = new QAction("Sum detectors to workspace", this);
   m_sum_to_workspace->setToolTip("Sum detectors to workspace.");
-  connect(m_sum_to_workspace, SIGNAL(activated()), this,
+  connect(m_sum_to_workspace, SIGNAL(triggered()), this,
           SLOT(sumDetsToWorkspace()));
 
   // Save button and its menus
@@ -645,7 +647,7 @@ void InstrumentWidgetMaskTab::clearMask() {
 * false the name will be unique.
 */
 Mantid::API::MatrixWorkspace_sptr
-InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp) {
+InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp) const {
   m_instrWidget->updateInstrumentView(); // to refresh the pick image
   Mantid::API::MatrixWorkspace_sptr inputWS =
       m_instrWidget->getInstrumentActor()->getMaskMatrixWorkspace();
@@ -1179,5 +1181,194 @@ void InstrumentWidgetMaskTab::storeMask() {
 void InstrumentWidgetMaskTab::changedIntegrationRange(double, double) {
   enableApplyButtons();
 }
+
+/** Load mask tab state from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
+void InstrumentWidgetMaskTab::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+
+  if (!tsv.selectSection("masktab"))
+    return;
+
+  std::string tabLines;
+  tsv >> tabLines;
+  API::TSVSerialiser tab(tabLines);
+
+  std::vector<QPushButton *> buttons{
+      m_move,         m_pointer,        m_ellipse,  m_rectangle,
+      m_ring_ellipse, m_ring_rectangle, m_free_draw};
+
+  tab.selectLine("ActiveTools");
+  for (auto button : buttons) {
+    bool value;
+    tab >> value;
+    button->setChecked(value);
+  }
+
+  std::vector<QRadioButton *> typeButtons{m_masking_on, m_grouping_on,
+                                          m_roi_on};
+
+  tab.selectLine("ActiveType");
+  for (auto type : typeButtons) {
+    bool value;
+    tab >> value;
+    type->setChecked(value);
+  }
+
+  if (tab.selectLine("MaskViewWorkspace")) {
+    // the view was masked. We should load reapply this from a cached
+    // workspace in the project folder
+    std::string maskWSName;
+    tab >> maskWSName;
+    loadMaskViewFromProject(maskWSName);
+  }
+}
+
+/** Load a mask workspace applied to the instrument actor from the project
+ *
+ * This is for the case where masks have been applied to the instrument actor
+ * but not to the workspace itself or saved to a workspace/table
+ *
+ * @param name :: name of the file to load from the project folder
+ */
+void InstrumentWidgetMaskTab::loadMaskViewFromProject(const std::string &name) {
+  using namespace Mantid::API;
+  using namespace Mantid::Kernel;
+
+  QSettings settings;
+  auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
+  auto fileName = workingDir.toStdString() + "/" + name;
+  auto maskWS = loadMask(fileName);
+
+  if (!maskWS)
+    return; // if we couldn't load it then just fail silently
+
+  auto actor = m_instrWidget->getInstrumentActor();
+  actor->setMaskMatrixWorkspace(maskWS);
+  actor->updateColors();
+  m_instrWidget->updateInstrumentDetectors();
+  m_instrWidget->updateInstrumentView();
+}
+
+/** Load a mask workspace given a file name
+ *
+ * This will attempt to load a mask workspace using the supplied file name and
+ * assume that the instrument is the same one as the actor in the instrument
+ * view.
+ *
+ * @param fileName :: the full path to the mask file on disk
+ * @return a pointer to the loaded mask workspace
+ */
+Mantid::API::MatrixWorkspace_sptr
+InstrumentWidgetMaskTab::loadMask(const std::string &fileName) {
+  using namespace Mantid::API;
+
+  // build path and input properties etc.
+  auto actor = m_instrWidget->getInstrumentActor();
+  auto workspace = actor->getWorkspace();
+  auto instrument = workspace->getInstrument();
+  auto instrumentName = instrument->getName();
+  auto tempName = "__" + workspace->name() + "MaskView";
+
+  // load the mask from the project folder
+  try {
+    auto alg = AlgorithmManager::Instance().create("LoadMask", -1);
+    alg->initialize();
+    alg->setPropertyValue("Instrument", instrumentName);
+    alg->setPropertyValue("InputFile", fileName);
+    alg->setPropertyValue("OutputWorkspace", tempName);
+    alg->execute();
+  } catch (...) {
+    // just fail silently, if we can't load the mask then we should
+    // give up at this point.
+    return nullptr;
+  }
+
+  // get the mask workspace and remove from ADS to clean up
+  auto &ads = AnalysisDataService::Instance();
+  auto maskWS = ads.retrieveWS<MatrixWorkspace>(tempName);
+  ads.remove(tempName);
+
+  return maskWS;
+}
+
+/** Save the state of the mask tab to a Mantid project file
+ * @return a string representing the state of the mask tab
+ */
+std::string InstrumentWidgetMaskTab::saveToProject() const {
+  API::TSVSerialiser tsv;
+  API::TSVSerialiser tab;
+
+  std::vector<QPushButton *> buttons{
+      m_move,         m_pointer,        m_ellipse,  m_rectangle,
+      m_ring_ellipse, m_ring_rectangle, m_free_draw};
+
+  tab.writeLine("ActiveTools");
+  for (auto button : buttons) {
+    tab << button->isChecked();
+  }
+
+  std::vector<QRadioButton *> typeButtons{m_masking_on, m_grouping_on,
+                                          m_roi_on};
+
+  tab.writeLine("ActiveType");
+  for (auto type : typeButtons) {
+    tab << type->isChecked();
+  }
+
+  // Save the masks applied to view but not saved to a workspace
+  auto wsName =
+      m_instrWidget->getWorkspaceName().toStdString() + "MaskView.xml";
+  bool success = saveMaskViewToProject(wsName);
+  if (success)
+    tab.writeLine("MaskViewWorkspace") << wsName;
+
+  tsv.writeSection("masktab", tab.outputLines());
+  return tsv.outputLines();
+}
+
+/** Save a mask workspace containing masks applied to the instrument view
+ *
+ * This will save masks which have been applied to the instrument view actor
+ * but have not be applied to the workspace or exported to a seperate
+ * workspace/table already
+ *
+ * @param name :: the name to call the workspace in the project folder
+ * @return whether a workspace was successfully saved to the project
+ */
+bool InstrumentWidgetMaskTab::saveMaskViewToProject(
+    const std::string &name) const {
+  using namespace Mantid::API;
+  using namespace Mantid::Kernel;
+
+  QSettings settings;
+  auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
+  auto fileName = workingDir.toStdString() + "/" + name;
+
+  try {
+    // get masked detector workspace from actor
+    auto actor = m_instrWidget->getInstrumentActor();
+    auto outputWS = actor->getMaskMatrixWorkspace();
+
+    if (!outputWS)
+      return false; // no mask workspace was found
+
+    // save mask to file inside project folder
+    auto alg = AlgorithmManager::Instance().create("SaveMask", -1);
+    alg->setProperty("InputWorkspace",
+                     boost::dynamic_pointer_cast<Workspace>(outputWS));
+    alg->setPropertyValue("OutputFile", fileName);
+    alg->execute();
+
+  } catch (...) {
+    // just fail silently, if we can't save the mask then we should
+    // give up at this point.
+    return false;
+  }
+
+  return true;
+}
+
 } // MantidWidgets
 } // MantidQt

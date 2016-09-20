@@ -64,7 +64,7 @@ public:
 
   /// Create all the detector pixels of this rectangular detector.
   void initialize(size_t xPixels, size_t yPixels, const std::vector<double> &x,
-                  const std::vector<double> &y, detid_t idStart,
+                  const std::vector<double> &y, bool isZBeam, detid_t idStart,
                   bool idFillByFirstY, int idStepByRow, int idStep = 1);
 
   //! Make a clone of the present component
@@ -140,9 +140,7 @@ public:
   /// Returns the shape of the Object
   const boost::shared_ptr<const Object> shape() const override;
   /// Returns the material of the detector
-  const boost::shared_ptr<const Kernel::Material> material() const override {
-    return boost::shared_ptr<const Kernel::Material>();
-  }
+  const Kernel::Material material() const override;
 
   // ------------ End of IObjComponent methods ----------------
 private:

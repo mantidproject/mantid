@@ -35,7 +35,7 @@ SortHKL::SortHKL() {
   m_refConds = getAllReflectionConditions();
 }
 
-SortHKL::~SortHKL() {}
+SortHKL::~SortHKL() = default;
 
 void SortHKL::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
@@ -291,8 +291,8 @@ void SortHKL::insertStatisticsIntoTable(
   // append to the table workspace
   API::TableRow newrow = table->appendRow();
 
-  newrow << name << statistics.m_uniqueReflections << statistics.m_lambdaMin
-         << statistics.m_lambdaMax << statistics.m_redundancy
+  newrow << name << statistics.m_uniqueReflections << statistics.m_dspacingMin
+         << statistics.m_dspacingMax << statistics.m_redundancy
          << statistics.m_meanIOverSigma << 100.0 * statistics.m_rMerge
          << 100.0 * statistics.m_rPim << 100.0 * completeness;
 }
@@ -328,18 +328,18 @@ double PeaksStatistics::getRMS(const std::vector<double> &data) const {
 
 /// Returns the lowest and hights wavelength in the peak list.
 std::pair<double, double>
-PeaksStatistics::getLambdaLimits(const std::vector<Peak> &peaks) const {
+PeaksStatistics::getDSpacingLimits(const std::vector<Peak> &peaks) const {
   if (peaks.empty()) {
     return std::make_pair(0.0, 0.0);
   }
 
-  auto lambdaLimitIterators = std::minmax_element(
+  auto dspacingLimitIterators = std::minmax_element(
       peaks.begin(), peaks.end(), [](const Peak &lhs, const Peak &rhs) {
-        return lhs.getWavelength() < rhs.getWavelength();
+        return lhs.getDSpacing() < rhs.getDSpacing();
       });
 
-  return std::make_pair((*(lambdaLimitIterators.first)).getWavelength(),
-                        (*(lambdaLimitIterators.second)).getWavelength());
+  return std::make_pair((*(dspacingLimitIterators.first)).getDSpacing(),
+                        (*(dspacingLimitIterators.second)).getDSpacing());
 }
 
 /// Sorts the peaks in the workspace by H, K and L.
@@ -451,9 +451,9 @@ void PeaksStatistics::calculatePeaksStatistics(
     m_meanIOverSigma =
         iOverSigmaSum / static_cast<double>(m_measuredReflections);
 
-    std::pair<double, double> lambdaLimits = getLambdaLimits(m_peaks);
-    m_lambdaMin = lambdaLimits.first;
-    m_lambdaMax = lambdaLimits.second;
+    std::pair<double, double> dspacingLimits = getDSpacingLimits(m_peaks);
+    m_dspacingMin = dspacingLimits.first;
+    m_dspacingMax = dspacingLimits.second;
   }
 }
 

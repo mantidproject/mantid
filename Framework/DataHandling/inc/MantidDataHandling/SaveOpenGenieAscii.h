@@ -16,9 +16,6 @@ public:
   /// (Empty) Constructor
   SaveOpenGenieAscii();
 
-  //// Virtual destructor
-  ~SaveOpenGenieAscii() override {}
-
   /// Algorithm's name
   const std::string name() const override { return "SaveOpenGenieAscii"; }
 

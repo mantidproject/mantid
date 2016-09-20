@@ -1,4 +1,6 @@
-﻿import unittest
+from __future__ import (absolute_import, division, print_function)
+
+import unittest
 
 from mantid.kernel import *
 from mantid.api import *

@@ -46,26 +46,29 @@ public:
     loader.setPropertyValue("OutputWorkspace", "in");
     loader.execute();
 
+    MatrixWorkspace_sptr in =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("in");
+    // Input file does not contain Dx, we just add it for testing.
+    HistogramData::BinEdgeStandardDeviations dx(in->readX(0).size());
+    for (size_t i = 0; i < in->getNumberHistograms(); ++i)
+      in->setBinEdgeStandardDeviations(i, dx);
+
     TS_ASSERT_THROWS_NOTHING(cloner.setPropertyValue("InputWorkspace", "in"));
     TS_ASSERT_THROWS_NOTHING(cloner.setPropertyValue("OutputWorkspace", "out"));
 
     TS_ASSERT(cloner.execute());
 
     // Check Dx vectors are shared on both the input and output workspaces
-    MatrixWorkspace_const_sptr in =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("in");
-    // Check sharing of the Dx vectors (which are unused in this case) has not
-    // been broken
+    // Check sharing of the Dx vectors has not been broken
     TSM_ASSERT_EQUALS("Dx vectors should be shared between spectra by default "
                       "(after a LoadRaw)",
-                      in->getSpectrum(0)->ptrDx(), in->getSpectrum(1)->ptrDx())
+                      in->sharedDx(0), in->sharedDx(1));
     MatrixWorkspace_const_sptr out =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
-    // Check sharing of the Dx vectors (which are unused in this case) has not
-    // been broken
+    // Check sharing of the Dx vectors has not been broken
     TSM_ASSERT_EQUALS(
         "Dx vectors should remain shared between spectra after CloneWorkspace",
-        out->getSpectrum(0)->ptrDx(), out->getSpectrum(1)->ptrDx())
+        out->sharedDx(0), out->sharedDx(1));
 
     // Best way to test this is to use the CheckWorkspacesMatch algorithm
     Mantid::Algorithms::CheckWorkspacesMatch checker;

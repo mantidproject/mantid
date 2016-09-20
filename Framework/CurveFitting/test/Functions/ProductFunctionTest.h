@@ -6,23 +6,15 @@
 #include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Jacobian.h"
-#include "MantidCurveFitting/Algorithms/Fit.h"
 
 #include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/AnalysisDataService.h"
-
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
 using Mantid::CurveFitting::Functions::ProductFunction;
 using Mantid::CurveFitting::Functions::Gaussian;
-using Mantid::CurveFitting::Algorithms::Fit;
 
 class ProductFunctionMWTest_Gauss : public Mantid::API::IPeakFunction {
 public:
@@ -230,60 +222,6 @@ public:
                           exp(-0.5 * (x[i] - c2) * (x[i] - c2) / (s2 * s2)),
                       1e-6);
     }
-
-    // create dummy workspace to fit against
-    std::string wsName = "ProductFunctionMWTest_workspace";
-    int histogramNumber = 1;
-    int timechannels = 30;
-    Mantid::API::Workspace_sptr ws =
-        Mantid::API::WorkspaceFactory::Instance().create(
-            "Workspace2D", histogramNumber, timechannels, timechannels);
-    Mantid::DataObjects::Workspace2D_sptr ws2D =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
-    Mantid::MantidVec &xx = ws2D->dataX(0);
-    Mantid::MantidVec &yy = ws2D->dataY(0);
-    Mantid::MantidVec &ee = ws2D->dataE(0);
-
-    for (int i = 0; i < N; i++) {
-      xx[i] = x[i];
-      yy[i] = out.getCalculated(i);
-      ee[i] = 0.1;
-    }
-
-    Mantid::API::AnalysisDataService::Instance().add(wsName, ws);
-
-    Mantid::CurveFitting::Algorithms::Fit fit;
-    fit.initialize();
-
-    f0->tie("PeakCentre", "1.0");
-    f0->tie("Height", "3.0");
-    f0->tie("Sigma", "0.5");
-    f1->setParameter("PeakCentre", c2 + 0.5);
-    f1->setParameter("Height", h2 + 5.0);
-    f1->tie("Sigma", "0.5");
-    fit.setPropertyValue("Function", prodF.asString());
-    fit.setPropertyValue("InputWorkspace", wsName);
-    fit.setPropertyValue("WorkspaceIndex", "0");
-
-    // execute fit
-    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fit.execute()))
-    TS_ASSERT(fit.isExecuted());
-
-    // test the output from fit is what you expect
-
-    double dummy = fit.getProperty("OutputChi2overDoF");
-    TS_ASSERT_DELTA(dummy, 0.0, 0.01);
-
-    Mantid::API::IFunction_sptr outF = fit.getProperty("Function");
-
-    TS_ASSERT_DELTA(outF->getParameter("f0.PeakCentre"), 1.0, 0.001);
-    TS_ASSERT_DELTA(outF->getParameter("f0.Height"), 3.0, 0.001);
-    TS_ASSERT_DELTA(outF->getParameter("f0.Sigma"), 0.5, 0.001);
-    TS_ASSERT_DELTA(outF->getParameter("f1.PeakCentre"), 2.0, 0.001);
-    TS_ASSERT_DELTA(outF->getParameter("f1.Height"), 10.0, 0.01);
-    TS_ASSERT_DELTA(outF->getParameter("f1.Sigma"), 0.5, 0.001);
-
-    Mantid::API::AnalysisDataService::Instance().remove(wsName);
   }
 
   void testForCategories() {

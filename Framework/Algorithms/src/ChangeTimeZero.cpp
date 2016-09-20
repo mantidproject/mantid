@@ -40,19 +40,6 @@ bool isTimeSeries(Mantid::Kernel::Property *prop) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ChangeTimeZero::ChangeTimeZero()
-    : m_defaultTimeShift(0.0), m_defaultAbsoluteTimeShift("") {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ChangeTimeZero::~ChangeTimeZero() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ChangeTimeZero::init() {

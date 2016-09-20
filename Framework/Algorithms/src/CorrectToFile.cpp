@@ -72,11 +72,10 @@ void CorrectToFile::exec() {
     }
 
     // Get references to the correction factors
-    const MantidVec &Xcor = rkhInput->readX(0);
-    const MantidVec &Ycor = rkhInput->readY(0);
-    const MantidVec &Ecor = rkhInput->readE(0);
+    auto &Xcor = rkhInput->x(0);
+    auto &Ycor = rkhInput->y(0);
+    auto &Ecor = rkhInput->e(0);
 
-    const bool histogramData = outputWS->isHistogramData();
     const bool divide = operation == "Divide";
     double Yfactor, correctError;
 
@@ -87,17 +86,17 @@ void CorrectToFile::exec() {
     Progress prg(this, 0 /*LOAD_TIME*/, 1.0, nOutSpec);
 
     for (int64_t i = 0; i < nOutSpec; ++i) {
-      MantidVec &xOut = outputWS->dataX(i);
-      MantidVec &yOut = outputWS->dataY(i);
-      MantidVec &eOut = outputWS->dataE(i);
+      const auto xIn = toCorrect->points(i);
+      outputWS->setSharedX(i, toCorrect->sharedX(i));
 
-      const MantidVec &xIn = toCorrect->readX(i);
-      const MantidVec &yIn = toCorrect->readY(i);
-      const MantidVec &eIn = toCorrect->readE(i);
+      auto &yOut = outputWS->mutableY(i);
+      auto &eOut = outputWS->mutableE(i);
+
+      auto &yIn = toCorrect->y(i);
+      auto &eIn = toCorrect->e(i);
 
       for (size_t j = 0; j < nbins; ++j) {
-        const double currentX =
-            histogramData ? (xIn[j] + xIn[j + 1]) / 2.0 : xIn[j];
+        const double currentX = xIn[j];
         // Find out the index of the first correction point after this value
         auto pos = std::lower_bound(Xcor.cbegin(), Xcor.cend(), currentX);
         const size_t index = pos - Xcor.begin();
@@ -149,12 +148,7 @@ void CorrectToFile::exec() {
           eOut[j] =
               sqrt(pow(eIn[j] * Yfactor, 2) + pow(correctError * yIn[j], 2));
         }
-
-        // Copy X value over
-        xOut[j] = xIn[j];
       }
-      if (histogramData)
-        xOut[nbins] = xIn[nbins];
       prg.report("CorrectToFile: applying " + operation);
     }
   }
@@ -168,7 +162,7 @@ void CorrectToFile::exec() {
 *  @throw runtime_error if load algorithm fails
 */
 MatrixWorkspace_sptr CorrectToFile::loadInFile(const std::string &corrFile) {
-  g_log.information() << "Loading file " << corrFile << std::endl;
+  g_log.information() << "Loading file " << corrFile << '\n';
   progress(0, "Loading file");
   IAlgorithm_sptr loadRKH =
       createChildAlgorithm("LoadRKH", 0, 1.0 /*LOAD_TIME*/);
@@ -194,7 +188,7 @@ void CorrectToFile::doWkspAlgebra(API::MatrixWorkspace_sptr lhs,
                                   API::MatrixWorkspace_sptr rhs,
                                   const std::string &algName,
                                   API::MatrixWorkspace_sptr &result) {
-  g_log.information() << "Initalising the algorithm " << algName << std::endl;
+  g_log.information() << "Initalising the algorithm " << algName << '\n';
   progress(LOAD_TIME, "Applying correction");
   IAlgorithm_sptr algebra = createChildAlgorithm(algName, LOAD_TIME, 1.0);
   algebra->setProperty("LHSWorkspace", lhs);
@@ -205,12 +199,12 @@ void CorrectToFile::doWkspAlgebra(API::MatrixWorkspace_sptr lhs,
     algebra->execute();
   } catch (std::runtime_error &) {
     g_log.warning() << "Error encountered while running algorithm " << algName
-                    << std::endl;
+                    << '\n';
     g_log.error() << "Correction file "
                   << getPropertyValue("Filename") +
                          " can't be used to correct workspace "
-                  << getPropertyValue("WorkspaceToCorrect") << std::endl;
-    g_log.error() << "Mismatched number of spectra?" << std::endl;
+                  << getPropertyValue("WorkspaceToCorrect") << '\n';
+    g_log.error() << "Mismatched number of spectra?\n";
     throw std::runtime_error("Correct to file failed, see log for details");
   }
 

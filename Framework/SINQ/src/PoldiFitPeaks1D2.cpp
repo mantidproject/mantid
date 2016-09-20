@@ -52,10 +52,6 @@ RefinedRange::RefinedRange(double xStart, double xEnd,
   setRangeBorders(xStart, xEnd);
 }
 
-RefinedRange::RefinedRange(const RefinedRange &other)
-    : m_peaks(other.m_peaks), m_xStart(other.m_xStart), m_xEnd(other.m_xEnd),
-      m_width(other.m_width) {}
-
 double RefinedRange::getWidth() const { return m_width; }
 
 bool RefinedRange::operator<(const RefinedRange &other) const {
@@ -117,10 +113,9 @@ bool operator<(const RefinedRange_sptr &lhs, const RefinedRange_sptr &rhs) {
 DECLARE_ALGORITHM(PoldiFitPeaks1D2)
 
 PoldiFitPeaks1D2::PoldiFitPeaks1D2()
-    : m_peaks(), m_profileTemplate(), m_fitplots(new WorkspaceGroup),
-      m_fwhmMultiples(1.0), m_maxRelativeFwhm(0.02) {}
-
-PoldiFitPeaks1D2::~PoldiFitPeaks1D2() {}
+    : m_peaks(), m_profileTemplate(),
+      m_fitplots(boost::make_shared<WorkspaceGroup>()), m_fwhmMultiples(1.0),
+      m_maxRelativeFwhm(0.02) {}
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PoldiFitPeaks1D2::name() const { return "PoldiFitPeaks1D"; }
@@ -236,7 +231,7 @@ PoldiFitPeaks1D2::getRangeProfile(const RefinedRange_sptr &range, int n) const {
   }
 
   totalProfile->addFunction(FunctionFactory::Instance().createInitialized(
-      "name=Chebyshev,n=" + boost::lexical_cast<std::string>(n) + ",StartX=" +
+      "name=Chebyshev,n=" + std::to_string(n) + ",StartX=" +
       boost::lexical_cast<std::string>(range->getXStart()) + ",EndX=" +
       boost::lexical_cast<std::string>(range->getXEnd())));
 
@@ -277,13 +272,13 @@ PoldiFitPeaks1D2::getFwhmWidthRelation(IPeakFunction_sptr peakFunction) const {
 
 PoldiPeakCollection_sptr
 PoldiFitPeaks1D2::fitPeaks(const PoldiPeakCollection_sptr &peaks) {
-  g_log.information() << "Peaks to fit: " << peaks->peakCount() << std::endl;
+  g_log.information() << "Peaks to fit: " << peaks->peakCount() << '\n';
 
   std::vector<RefinedRange_sptr> rawRanges = getRefinedRanges(peaks);
   std::vector<RefinedRange_sptr> reducedRanges = getReducedRanges(rawRanges);
 
   g_log.information() << "Ranges used for fitting: " << reducedRanges.size()
-                      << std::endl;
+                      << '\n';
 
   Workspace2D_sptr dataWorkspace = getProperty("InputWorkspace");
   m_fitplots->removeAll();
@@ -353,7 +348,7 @@ int PoldiFitPeaks1D2::getBestChebyshevPolynomialDegree(
   } else {
     g_log.information() << "Chi^2 for range [" << range->getXStart() << " - "
                         << range->getXEnd() << "] is minimal at n = " << nMin
-                        << " with Chi^2 = " << chiSquareMin << std::endl;
+                        << " with Chi^2 = " << chiSquareMin << '\n';
   }
 
   return nMin;

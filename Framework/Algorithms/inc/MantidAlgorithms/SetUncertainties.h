@@ -41,12 +41,6 @@ namespace Algorithms {
  */
 class DLLExport SetUncertainties : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  SetUncertainties();
-
-  /// Virtual destructor
-  ~SetUncertainties() override;
-
   /// Algorithm's name
   const std::string name() const override;
   /// Summary of algorithms purpose

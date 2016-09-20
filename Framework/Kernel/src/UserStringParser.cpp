@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/UserStringParser.h"
+#include "MantidKernel/StringTokenizer.h"
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid {
@@ -83,17 +84,9 @@ bool UserStringParser::Contains(const std::string &input, char ch) {
   */
 std::vector<std::string>
 UserStringParser::separateComma(const std::string &input) {
-
-  typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-  boost::char_separator<char> commasep(",");
-  std::vector<std::string> commaseparatedvalues;
-
-  tokenizer tokens(input, commasep);
-  for (tokenizer::iterator tokItr = tokens.begin(); tokItr != tokens.end();
-       ++tokItr) {
-    commaseparatedvalues.push_back(*tokItr);
-  }
-  return commaseparatedvalues;
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  tokenizer tokens(input, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  return tokens.asVector();
 }
 
 /**This method parses a given string of numbers into colon separated tokens.
@@ -149,25 +142,15 @@ void UserStringParser::Tokenize(const std::string &input,
                                 const std::string &delimiter,
                                 unsigned int &start, unsigned int &end,
                                 unsigned int &step) {
-  typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-
-  boost::char_separator<char> seps(delimiter.c_str());
-  std::vector<std::string> temp;
-  tokenizer tokens(input, seps);
-  for (tokenizer::const_iterator tokItr = tokens.begin();
-       tokItr != tokens.end(); ++tokItr) {
-    temp.push_back(*tokItr);
-  }
-  if (temp.empty()) {
-    return;
-  }
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  tokenizer tokens(input, delimiter);
   // validate the separated tokens
-  if (!isValidStepSeparator(input, temp)) {
+  if (!isValidStepSeparator(input, tokens.asVector())) {
     throw std::runtime_error("Non supported format found in the input string " +
                              input + " Step string should be preceded by :");
   }
   // convert the parsed string to number
-  convertToNumbers(input, temp, start, end, step);
+  convertToNumbers(input, tokens.asVector(), start, end, step);
 }
 
 /**This method checks the separator preceded by the step string is valid
@@ -176,8 +159,8 @@ void UserStringParser::Tokenize(const std::string &input,
   *@param tokens - vector containing separated values.
   *@returns true if the input is valid
   */
-bool UserStringParser::isValidStepSeparator(const std::string &input,
-                                            std::vector<std::string> &tokens) {
+bool UserStringParser::isValidStepSeparator(
+    const std::string &input, const std::vector<std::string> &tokens) {
   std::string step_separator;
   if (tokens.size() == 3) {
     std::string step = tokens[2];

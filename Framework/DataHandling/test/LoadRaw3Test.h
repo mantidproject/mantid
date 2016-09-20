@@ -132,17 +132,17 @@ public:
     // Tests to check that spectra-detector mapping is done correctly
     //----------------------------------------------------------------------
     // Test one to one mapping, for example spectra 6 has only 1 pixel
-    TS_ASSERT_EQUALS(output2D->getSpectrum(6)->getDetectorIDs().size(),
+    TS_ASSERT_EQUALS(output2D->getSpectrum(6).getDetectorIDs().size(),
                      1); // rummap.ndet(6),1);
 
     // Test one to many mapping, for example 10 pixels contribute to spectra
     // 2084 (workspace index 2083)
-    TS_ASSERT_EQUALS(output2D->getSpectrum(2083)->getDetectorIDs().size(),
+    TS_ASSERT_EQUALS(output2D->getSpectrum(2083).getDetectorIDs().size(),
                      10); // map.ndet(2084),10);
 
     // Check the id number of all pixels contributing
     std::set<detid_t> detectorgroup;
-    detectorgroup = output2D->getSpectrum(2083)->getDetectorIDs();
+    detectorgroup = output2D->getSpectrum(2083).getDetectorIDs();
     std::set<detid_t>::const_iterator it;
     int pixnum = 101191;
     for (it = detectorgroup.begin(); it != detectorgroup.end(); it++)
@@ -258,11 +258,11 @@ public:
         boost::dynamic_pointer_cast<Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 6);
-    TS_ASSERT_EQUALS(output2D->getSpectrum(0)->getSpectrumNo(), 5);
-    TS_ASSERT_EQUALS(output2D->getSpectrum(1)->getSpectrumNo(), 6);
-    TS_ASSERT(output2D->getSpectrum(1)->hasDetectorID(4103));
-    TS_ASSERT_EQUALS(output2D->getSpectrum(5)->getSpectrumNo(), 10);
-    TS_ASSERT(output2D->getSpectrum(5)->hasDetectorID(4107));
+    TS_ASSERT_EQUALS(output2D->getSpectrum(0).getSpectrumNo(), 5);
+    TS_ASSERT_EQUALS(output2D->getSpectrum(1).getSpectrumNo(), 6);
+    TS_ASSERT(output2D->getSpectrum(1).hasDetectorID(4103));
+    TS_ASSERT_EQUALS(output2D->getSpectrum(5).getSpectrumNo(), 10);
+    TS_ASSERT(output2D->getSpectrum(5).hasDetectorID(4107));
     AnalysisDataService::Instance().remove(outWS);
   }
 
@@ -495,8 +495,8 @@ public:
 
     TS_ASSERT_EQUALS(monitoroutput2D->getNumberHistograms(), 4);
 
-    TS_ASSERT(monitoroutput2D->getSpectrum(0)->hasDetectorID(601));
-    TS_ASSERT(monitoroutput2D->getSpectrum(1)->hasDetectorID(602));
+    TS_ASSERT(monitoroutput2D->getSpectrum(0).hasDetectorID(601));
+    TS_ASSERT(monitoroutput2D->getSpectrum(1).hasDetectorID(602));
 
     // Check two X vectors are the same
     TS_ASSERT((output2D->dataX(95)) == (output2D->dataX(1730)));
@@ -559,17 +559,17 @@ public:
     // Tests to check that spectra-detector mapping is done correctly
     //----------------------------------------------------------------------
     // Test one to one mapping, for example spectra 6 has only 1 pixel
-    TS_ASSERT_EQUALS(output2D->getSpectrum(6)->getDetectorIDs().size(),
+    TS_ASSERT_EQUALS(output2D->getSpectrum(6).getDetectorIDs().size(),
                      1); // rummap.ndet(6),1);
 
     // Test one to many mapping, for example 10 pixels contribute to spectra
     // 2084 (workspace index 2083)
-    TS_ASSERT_EQUALS(output2D->getSpectrum(2079)->getDetectorIDs().size(),
+    TS_ASSERT_EQUALS(output2D->getSpectrum(2079).getDetectorIDs().size(),
                      10); // map.ndet(2084),10);
 
     // Check the id number of all pixels contributing
     std::set<detid_t> detectorgroup;
-    detectorgroup = output2D->getSpectrum(2079)->getDetectorIDs();
+    detectorgroup = output2D->getSpectrum(2079).getDetectorIDs();
     std::set<detid_t>::const_iterator it;
     int pixnum = 101191;
     for (it = detectorgroup.begin(); it != detectorgroup.end(); it++)
@@ -759,15 +759,14 @@ public:
         ads.retrieveWS<MatrixWorkspace>(outputWSName + "_1");
     TS_ASSERT_EQUALS(1, output1->getNumberHistograms());
 
-    ISpectrum *spectrum2(NULL);
-    TS_ASSERT_THROWS_NOTHING(spectrum2 = output1->getSpectrum(0));
-    if (spectrum2) {
-      TS_ASSERT_EQUALS(2, spectrum2->getSpectrumNo());
+    TS_ASSERT_THROWS_NOTHING(output1->getSpectrum(0));
+    auto &spectrum2 = output1->getSpectrum(0);
+    TS_ASSERT_EQUALS(2, spectrum2.getSpectrumNo());
 
-      const auto &detIDs = spectrum2->getDetectorIDs();
-      TS_ASSERT_EQUALS(1, detIDs.size());
-      TS_ASSERT(spectrum2->hasDetectorID(2));
-    }
+    const auto &detIDs = spectrum2.getDetectorIDs();
+    TS_ASSERT_EQUALS(1, detIDs.size());
+    TS_ASSERT(spectrum2.hasDetectorID(2));
+
     ads.remove(outputWSName);
   }
 

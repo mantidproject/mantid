@@ -6,6 +6,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TestChannel.h"
+#include "MantidKernel/FilterChannel.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/FacilityInfo.h"
 
@@ -16,6 +17,8 @@
 #include <fstream>
 
 #include <Poco/NObserver.h>
+#include <Poco/SplitterChannel.h>
+#include <Poco/Logger.h>
 #include <Poco/Environment.h>
 #include <Poco/File.h>
 
@@ -42,22 +45,21 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(
         log1.fatal() << "A fatal message from the stream operators " << 4.5
-                     << std::endl;
+                     << '\n';
         log1.error() << "A error message from the stream operators " << -0.2
-                     << std::endl;
+                     << '\n';
         log1.warning() << "A warning message from the stream operators "
-                       << 999.99 << std::endl;
+                       << 999.99 << '\n';
         log1.notice() << "A notice message from the stream operators " << 0.0
-                      << std::endl;
+                      << '\n';
         log1.information() << "A information message from the stream operators "
-                           << -999.99 << std::endl;
+                           << -999.99 << '\n';
         log1.debug() << "A debug message from the stream operators " << 5684568
-                     << std::endl;
+                     << '\n';
 
         );
 
-    // checking the level - this should be set to debug in the config file
-    // therefore this should only return false for debug
+    // checking the level - this is set above
     TS_ASSERT(log1.is(Poco::Message::PRIO_DEBUG) == false);       // debug
     TS_ASSERT(log1.is(Poco::Message::PRIO_INFORMATION) == false); // information
     TS_ASSERT(log1.is(Poco::Message::PRIO_NOTICE));               // notice
@@ -74,20 +76,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         log1.fatal()
             << "A fatal message from the stream operators with enabled=true "
-            << 4.5 << std::endl;);
+            << 4.5 << '\n';);
 
     TS_ASSERT_THROWS_NOTHING(log1.setEnabled(false));
     TS_ASSERT(!log1.getEnabled());
     TS_ASSERT_THROWS_NOTHING(log1.fatal("YOU SHOULD NEVER SEE THIS"));
     TS_ASSERT_THROWS_NOTHING(
-        log1.fatal() << "YOU SHOULD NEVER SEE THIS VIA A STREAM" << std::endl;);
+        log1.fatal() << "YOU SHOULD NEVER SEE THIS VIA A STREAM\n";);
 
     TS_ASSERT_THROWS_NOTHING(log1.setEnabled(true));
     TS_ASSERT(log1.getEnabled());
     TS_ASSERT_THROWS_NOTHING(log1.fatal("you are allowed to see this"));
-    TS_ASSERT_THROWS_NOTHING(log1.fatal()
-                                 << "you are allowed to see this via a stream"
-                                 << std::endl;);
+    TS_ASSERT_THROWS_NOTHING(
+        log1.fatal() << "you are allowed to see this via a stream\n";);
   }
 
   void testLogLevelOffset() {
@@ -129,6 +130,72 @@ public:
         "setFilterChannelLogLevel did not throw",
         ConfigService::Instance().setFilterChannelLogLevel("consoleChannel", 4),
         std::invalid_argument);
+  }
+
+  void testLogLevelChangesWithFilteringLevels() {
+    Logger log1("testLogLevelChangesWithFilteringLevels");
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setConsoleLogLevel(4));
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setFileLogLevel(4));
+    TSM_ASSERT("The log level should be 4 after both filters are set to 4",
+               log1.is(4));
+
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setFileLogLevel(3));
+    TSM_ASSERT("The log level remain at 4 if any filter is at 4", log1.is(4));
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setConsoleLogLevel(3));
+    TSM_ASSERT("The log level should be 3 after both filters are set to 3",
+               log1.is(3));
+
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setFileLogLevel(5));
+    TSM_ASSERT("The log level should be at 5 if any filter is at 5",
+               log1.is(5));
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setConsoleLogLevel(5));
+    TSM_ASSERT("The log level remain at 5 after both filters are set to 5",
+               log1.is(5));
+
+    // return back to previous values
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setConsoleLogLevel(4));
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setFileLogLevel(4));
+  }
+
+  void testRegisteringaNewFilter() {
+    Logger log1("testRegisteringaNewFilter");
+    Poco::FilterChannel *testFilterChannel = new Poco::FilterChannel();
+    std::string m_FilterChannelName = "testRegisteringaNewFilter";
+
+    // Setup logging
+    auto &rootLogger = Poco::Logger::root();
+    auto *rootChannel = Poco::Logger::root().getChannel();
+    // The root channel might be a SplitterChannel
+    if (auto *splitChannel =
+            dynamic_cast<Poco::SplitterChannel *>(rootChannel)) {
+      splitChannel->addChannel(testFilterChannel);
+    } else {
+      Poco::Logger::setChannel(rootLogger.name(), testFilterChannel);
+    }
+
+    auto &configService = ConfigService::Instance();
+    configService.registerLoggingFilterChannel(m_FilterChannelName,
+                                               testFilterChannel);
+
+    int prevLogLevel = log1.getLevel();
+    TSM_ASSERT("The log level start above PRIO_TRACE",
+               log1.getLevel() < Logger::Priority::PRIO_TRACE);
+
+    configService.setFilterChannelLogLevel(m_FilterChannelName,
+                                           Logger::Priority::PRIO_TRACE);
+    TSM_ASSERT("The log level should be PRIO_TRACE",
+               log1.getLevel() == Logger::Priority::PRIO_TRACE);
+    TSM_ASSERT("The log filter priority should be PRIO_TRACE",
+               testFilterChannel->getPriority() ==
+                   Logger::Priority::PRIO_TRACE);
+
+    configService.setFilterChannelLogLevel(m_FilterChannelName, prevLogLevel);
+    TSM_ASSERT("The log level should be " + std::to_string(prevLogLevel),
+               log1.getLevel() == prevLogLevel);
+    TSM_ASSERT("The log filter priority should be " +
+                   std::to_string(prevLogLevel),
+               testFilterChannel->getPriority() ==
+                   static_cast<unsigned int>(prevLogLevel));
   }
 
   void testDefaultFacility() {
@@ -281,7 +348,7 @@ public:
     }
     // Check that the last directory matches that returned by
     // getInstrumentDirectory
-    TS_ASSERT_EQUALS(directories[directories.size() - 1],
+    TS_ASSERT_EQUALS(directories.back(),
                      ConfigService::Instance().getInstrumentDirectory());
 
     // check all of the directory entries actually exist
@@ -624,7 +691,7 @@ public:
 
     std::vector<std::string> keys = ConfigService::Instance().keys();
 
-    TS_ASSERT_EQUALS(keys.size(), 17);
+    TS_ASSERT_EQUALS(keys.size(), 18);
   }
 
   void testRemovingProperty() {

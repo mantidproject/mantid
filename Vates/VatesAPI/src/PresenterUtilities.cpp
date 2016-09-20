@@ -10,7 +10,6 @@
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
 #include "MantidVatesAPI/vtkMDLineFactory.h"
 
-
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 
@@ -20,16 +19,13 @@
 #include <ctime>
 #include <algorithm>
 
-namespace
-{
+namespace {
 /// Static logger
 Mantid::Kernel::Logger g_log_presenter_utilities("PresenterUtilities");
 }
 
-namespace Mantid
-{
-namespace VATES
-{
+namespace Mantid {
+namespace VATES {
 
 /**
  * Gets a clipped object
@@ -37,16 +33,15 @@ namespace VATES
  * @returns a clipped object
  */
 vtkSmartPointer<vtkPVClipDataSet>
-getClippedDataSet(vtkSmartPointer<vtkDataSet> dataSet)
-{
-    auto box = vtkSmartPointer<vtkBox>::New();
-    box->SetBounds(dataSet->GetBounds());
-    auto clipper = vtkSmartPointer<vtkPVClipDataSet>::New();
-    clipper->SetInputData(dataSet);
-    clipper->SetClipFunction(box);
-    clipper->SetInsideOut(true);
-    clipper->Update();
-    return clipper;
+getClippedDataSet(vtkSmartPointer<vtkDataSet> dataSet) {
+  auto box = vtkSmartPointer<vtkBox>::New();
+  box->SetBounds(dataSet->GetBounds());
+  auto clipper = vtkSmartPointer<vtkPVClipDataSet>::New();
+  clipper->SetInputData(dataSet);
+  clipper->SetClipFunction(box);
+  clipper->SetInsideOut(true);
+  clipper->Update();
+  return clipper;
 }
 
 /**
@@ -59,25 +54,24 @@ getClippedDataSet(vtkSmartPointer<vtkDataSet> dataSet)
  */
 void applyCOBMatrixSettingsToVtkDataSet(
     Mantid::VATES::MDLoadingPresenter *presenter, vtkDataSet *dataSet,
-    std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider)
-{
-    try {
-        presenter->makeNonOrthogonal(dataSet, std::move(workspaceProvider));
-    } catch (std::invalid_argument &e) {
-        std::string error = e.what();
-        g_log_presenter_utilities.warning()
-            << "PresenterUtilities: Workspace does not have correct "
-               "information to "
-            << "plot non-orthogonal axes: " << error;
-        // Add the standard change of basis matrix and set the boundaries
-        presenter->setDefaultCOBandBoundaries(dataSet);
-    } catch (...) {
-        g_log_presenter_utilities.warning()
-            << "PresenterUtilities: Workspace does not have correct "
-               "information to "
-            << "plot non-orthogonal axes. Non-orthogonal axes features require "
-               "three dimensions.";
-    }
+    std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider) {
+  try {
+    presenter->makeNonOrthogonal(dataSet, std::move(workspaceProvider));
+  } catch (std::invalid_argument &e) {
+    std::string error = e.what();
+    g_log_presenter_utilities.warning()
+        << "PresenterUtilities: Workspace does not have correct "
+           "information to "
+        << "plot non-orthogonal axes: " << error;
+    // Add the standard change of basis matrix and set the boundaries
+    presenter->setDefaultCOBandBoundaries(dataSet);
+  } catch (...) {
+    g_log_presenter_utilities.warning()
+        << "PresenterUtilities: Workspace does not have correct "
+           "information to "
+        << "plot non-orthogonal axes. Non-orthogonal axes features require "
+           "three dimensions.";
+  }
 }
 
 /**
@@ -90,17 +84,16 @@ void applyCOBMatrixSettingsToVtkDataSet(
 std::unique_ptr<vtkMDHexFactory>
 createFactoryChainForEventWorkspace(ThresholdRange_scptr threshold,
                                     VisualNormalization normalization,
-                                    double time)
-{
-    auto factory = Mantid::Kernel::make_unique<vtkMDHexFactory>(threshold,
-                                                                normalization);
-    factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDQuadFactory>(
-                              threshold, normalization))
-        .setSuccessor(Mantid::Kernel::make_unique<vtkMDLineFactory>(
-            threshold, normalization))
-        .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
-    factory->setTime(time);
-    return factory;
+                                    double time) {
+  auto factory =
+      Mantid::Kernel::make_unique<vtkMDHexFactory>(threshold, normalization);
+  factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDQuadFactory>(
+                            threshold, normalization))
+      .setSuccessor(Mantid::Kernel::make_unique<vtkMDLineFactory>(
+          threshold, normalization))
+      .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
+  factory->setTime(time);
+  return factory;
 }
 
 /**
@@ -113,19 +106,18 @@ createFactoryChainForEventWorkspace(ThresholdRange_scptr threshold,
 std::unique_ptr<vtkMDHistoHex4DFactory<TimeToTimeStep>>
 createFactoryChainForHistoWorkspace(ThresholdRange_scptr threshold,
                                     VisualNormalization normalization,
-                                    double time)
-{
-    auto factory
-        = Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
-            threshold, normalization, time);
-    factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
-                              threshold, normalization))
-        .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
-            threshold, normalization))
-        .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
-            threshold, normalization))
-        .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
-    return factory;
+                                    double time) {
+  auto factory =
+      Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
+          threshold, normalization, time);
+  factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
+                            threshold, normalization))
+      .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
+          threshold, normalization))
+      .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
+          threshold, normalization))
+      .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
+  return factory;
 }
 
 /**
@@ -133,23 +125,22 @@ createFactoryChainForHistoWorkspace(ThresholdRange_scptr threshold,
 * @param name: the input name
 * @return a name with a time stamp
 */
-std::string createTimeStampedName(std::string name)
-{
-    auto currentTime = std::chrono::system_clock::to_time_t(
-        std::chrono::system_clock::now());
-    std::string timeInReadableFormat = std::string(std::ctime(&currentTime));
-    // Replace all white space with double underscore
-    std::replace(timeInReadableFormat.begin(), timeInReadableFormat.end(), ' ',
-                 '_');
-    // Replace all colons with single underscore
-    std::replace(timeInReadableFormat.begin(), timeInReadableFormat.end(), ':',
-                 '_');
-    timeInReadableFormat.erase(std::remove(timeInReadableFormat.begin(),
-                                           timeInReadableFormat.end(), '\n'),
-                               timeInReadableFormat.end());
-    std::string stampedName = name + "_";
-    stampedName = stampedName + timeInReadableFormat;
-    return stampedName;
+std::string createTimeStampedName(std::string name) {
+  auto currentTime =
+      std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+  std::string timeInReadableFormat = std::string(std::ctime(&currentTime));
+  // Replace all white space with double underscore
+  std::replace(timeInReadableFormat.begin(), timeInReadableFormat.end(), ' ',
+               '_');
+  // Replace all colons with single underscore
+  std::replace(timeInReadableFormat.begin(), timeInReadableFormat.end(), ':',
+               '_');
+  timeInReadableFormat.erase(std::remove(timeInReadableFormat.begin(),
+                                         timeInReadableFormat.end(), '\n'),
+                             timeInReadableFormat.end());
+  std::string stampedName = name + "_";
+  stampedName = stampedName + timeInReadableFormat;
+  return stampedName;
 }
 }
 }

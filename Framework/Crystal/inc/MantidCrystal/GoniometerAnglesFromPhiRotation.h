@@ -43,9 +43,6 @@ namespace Mantid {
 namespace Crystal {
 class DLLExport GoniometerAnglesFromPhiRotation : public API::Algorithm {
 public:
-  GoniometerAnglesFromPhiRotation();
-  ~GoniometerAnglesFromPhiRotation() override;
-
   /// Algorithm's name for identification
   const std::string name() const override {
     return "GoniometerAnglesFromPhiRotation";

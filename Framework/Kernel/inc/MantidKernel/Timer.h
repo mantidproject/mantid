@@ -63,7 +63,7 @@ private:
       m_start; ///< The starting time (implementation dependent format)
 };
 
-std::ostream &operator<<(std::ostream &, const Timer &);
+MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const Timer &);
 
 } // namespace Kernel
 } // namespace Mantid

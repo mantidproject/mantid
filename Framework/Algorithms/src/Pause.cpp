@@ -13,16 +13,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(Pause)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-Pause::Pause() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-Pause::~Pause() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string Pause::name() const { return "Pause"; }
 
@@ -59,7 +49,7 @@ void Pause::exec() {
     } catch (CancelException &) {
       // Break out of the lo
       breakOut = true;
-      g_log.notice() << "User stopped the Pause." << std::endl;
+      g_log.notice() << "User stopped the Pause.\n";
     }
     if (breakOut)
       break;

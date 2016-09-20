@@ -2,7 +2,8 @@
     File                 : RenameWindowDialog.cpp
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Rename window dialog
 
@@ -30,24 +31,18 @@
 #include "ApplicationWindow.h"
 #include "Table.h"
 
-#include <QPushButton>
 #include <QGroupBox>
 #include <QLineEdit>
-#include <QTextEdit>
 #include <QRadioButton>
 #include <QMessageBox>
 #include <QButtonGroup>
-#include <QRegExp>
-#include <QHBoxLayout>
-#include <QGridLayout>
 
-RenameWindowDialog::RenameWindowDialog(QWidget* parent, Qt::WFlags fl )
-    : QDialog( parent, fl )
-{
+RenameWindowDialog::RenameWindowDialog(QWidget *parent, Qt::WFlags fl)
+    : QDialog(parent, fl) {
   setWindowTitle(tr("MantidPlot - Rename Window"));
 
-  QGridLayout * leftLayout = new QGridLayout();
-  QVBoxLayout * rightLayout = new QVBoxLayout();
+  QGridLayout *leftLayout = new QGridLayout();
+  QVBoxLayout *rightLayout = new QVBoxLayout();
 
   groupBox1 = new QGroupBox(tr("Window Title"));
   groupBox1->setLayout(leftLayout);
@@ -73,85 +68,84 @@ RenameWindowDialog::RenameWindowDialog(QWidget* parent, Qt::WFlags fl )
   buttons->addButton(boxLabel);
   buttons->addButton(boxBoth);
 
-  buttonOk = new QPushButton(tr( "&OK" ));
-  buttonOk->setAutoDefault( true );
-  buttonOk->setDefault( true );
+  buttonOk = new QPushButton(tr("&OK"));
+  buttonOk->setAutoDefault(true);
+  buttonOk->setDefault(true);
   rightLayout->addWidget(buttonOk);
 
-  buttonCancel = new QPushButton(tr( "&Cancel" ));
-  buttonCancel->setAutoDefault( true );
+  buttonCancel = new QPushButton(tr("&Cancel"));
+  buttonCancel->setAutoDefault(true);
   rightLayout->addWidget(buttonCancel);
   rightLayout->addStretch();
 
-  QHBoxLayout * mainLayout = new QHBoxLayout(this);
+  QHBoxLayout *mainLayout = new QHBoxLayout(this);
   mainLayout->addWidget(groupBox1);
   mainLayout->addLayout(rightLayout);
 
   window = NULL;
 
   // signals and slots connections
-  connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
-  connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
+  connect(buttonOk, SIGNAL(clicked()), this, SLOT(accept()));
+  connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
 }
 
-void RenameWindowDialog::setWidget(MdiSubWindow *w)
-{
-	window = w;
-	boxNameLine->setText(w->objectName());
-	boxLabelEdit->setText(w->windowLabel());
-	switch (w->captionPolicy())
-	{
-		case MdiSubWindow::Name:
-			boxName->setChecked(true);
-			break;
+void RenameWindowDialog::setWidget(MdiSubWindow *w) {
+  window = w;
+  boxNameLine->setText(w->objectName());
+  boxLabelEdit->setText(w->windowLabel());
+  switch (w->captionPolicy()) {
+  case MdiSubWindow::Name:
+    boxName->setChecked(true);
+    break;
 
-		case MdiSubWindow::Label:
-			boxLabel->setChecked(true);
-			break;
+  case MdiSubWindow::Label:
+    boxLabel->setChecked(true);
+    break;
 
-		case MdiSubWindow::Both:
-			boxBoth->setChecked(true);
-			break;
-	}
+  case MdiSubWindow::Both:
+    boxBoth->setChecked(true);
+    break;
+  }
 }
 
-MdiSubWindow::CaptionPolicy RenameWindowDialog::getCaptionPolicy()
-{
-	MdiSubWindow::CaptionPolicy policy = MdiSubWindow::Name;
-	if (boxLabel->isChecked())
-		policy = MdiSubWindow::Label;
-	else if (boxBoth->isChecked())
-		policy = MdiSubWindow::Both;
+MdiSubWindow::CaptionPolicy RenameWindowDialog::getCaptionPolicy() {
+  MdiSubWindow::CaptionPolicy policy = MdiSubWindow::Name;
+  if (boxLabel->isChecked())
+    policy = MdiSubWindow::Label;
+  else if (boxBoth->isChecked())
+    policy = MdiSubWindow::Both;
 
-	return policy;
+  return policy;
 }
 
-void RenameWindowDialog::accept()
-{
-	QString name = window->name();
-	QString text = boxNameLine->text().remove("=").remove(QRegExp("\\s"));
-	QString label = boxLabelEdit->text();
+void RenameWindowDialog::accept() {
+  QString name = window->name();
+  QString text = boxNameLine->text().remove("=").remove(QRegExp("\\s"));
+  QString label = boxLabelEdit->toPlainText();
 
-	MdiSubWindow::CaptionPolicy policy = getCaptionPolicy();
-	if (text == name && label == window->windowLabel() && window->captionPolicy() == policy)
-		close();
+  MdiSubWindow::CaptionPolicy policy = getCaptionPolicy();
+  if (text == name && label == window->windowLabel() &&
+      window->captionPolicy() == policy)
+    close();
 
-	ApplicationWindow *app = static_cast<ApplicationWindow *>(parentWidget());
-	if (!app)
-		return;
+  ApplicationWindow *app = static_cast<ApplicationWindow *>(parentWidget());
+  if (!app)
+    return;
 
-	if (text.contains("_")){
-  		QMessageBox::warning(this, tr("MantidPlot - Warning"),
-  	    tr("For internal consistency reasons the underscore character is replaced with a minus sign."));}
+  if (text.contains("_")) {
+    QMessageBox::warning(this, tr("MantidPlot - Warning"),
+                         tr("For internal consistency reasons the underscore "
+                            "character is replaced with a minus sign."));
+  }
 
-  	if (text.replace("_", "-") != name){
-		if(!app->setWindowName(window, text))
-			return;
-	}
+  if (text.replace("_", "-") != name) {
+    if (!app->setWindowName(window, text))
+      return;
+  }
 
-	label.replace("\n"," ").replace("\t"," ");
-	window->setWindowLabel(label);
-	window->setCaptionPolicy(policy);
-	app->modifiedProject(window);
-	close();
+  label.replace("\n", " ").replace("\t", " ");
+  window->setWindowLabel(label);
+  window->setCaptionPolicy(policy);
+  app->modifiedProject(window);
+  close();
 }

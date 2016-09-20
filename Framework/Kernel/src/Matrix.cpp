@@ -62,7 +62,6 @@ void indexSort(const std::vector<T> &pVec, std::vector<int> &Index) {
   transform(pVec.begin(), pVec.end(), PartList.begin(), PIndex<T>());
   sort(PartList.begin(), PartList.end());
   transform(PartList.begin(), PartList.end(), Index.begin(), PSep<T>());
-  return;
 }
 template void indexSort(const std::vector<double> &, std::vector<int> &);
 template void indexSort(const std::vector<float> &, std::vector<int> &);
@@ -130,6 +129,29 @@ Matrix<T>::Matrix(const std::vector<T> &data)
   }
 
   setMem(nxt, nxt);
+
+  size_t ic(0);
+  for (size_t i = 0; i < nx; i++) {
+    for (size_t j = 0; j < ny; j++) {
+      V[i][j] = data[ic];
+      ic++;
+    }
+  }
+}
+
+template <typename T>
+Matrix<T>::Matrix(const std::vector<T> &data, const size_t nrow,
+                  const size_t ncol)
+    : nx(0), ny(0), V(nullptr) {
+  size_t numel = data.size();
+  size_t test = nrow * ncol;
+  if (test != numel) {
+    throw(std::invalid_argument("number of elements in input vector have is "
+                                "incompatible with the number of rows and "
+                                "columns"));
+  }
+
+  setMem(nrow, ncol);
 
   size_t ic(0);
   for (size_t i = 0; i < nx; i++) {
@@ -212,6 +234,28 @@ Matrix<T> &Matrix<T>::operator=(const Matrix<T> &A)
       }
     }
   }
+  return *this;
+}
+
+template <typename T>
+Matrix<T>::Matrix(Matrix<T> &&other) noexcept : nx(other.nx),
+                                                ny(other.ny),
+                                                V(other.V) {
+  other.nx = 0;
+  other.ny = 0;
+  other.V = nullptr;
+}
+
+template <typename T>
+Matrix<T> &Matrix<T>::operator=(Matrix<T> &&other) noexcept {
+  nx = other.nx;
+  ny = other.ny;
+  V = other.V;
+
+  other.nx = 0;
+  other.ny = 0;
+  other.V = nullptr;
+
   return *this;
 }
 
@@ -546,7 +590,6 @@ void Matrix<T>::deleteMem()
   }
   nx = 0;
   ny = 0;
-  return;
 }
 
 /**
@@ -571,7 +614,6 @@ template <typename T> void Matrix<T>::setMem(const size_t a, const size_t b) {
       V[i] = tmpX + (i * ny);
     }
   }
-  return;
 }
 
 /**
@@ -588,7 +630,6 @@ void Matrix<T>::swapRows(const size_t RowI, const size_t RowJ) {
       V[RowJ][k] = tmp;
     }
   }
-  return;
 }
 
 /**
@@ -605,7 +646,6 @@ void Matrix<T>::swapCols(const size_t colI, const size_t colJ) {
       V[k][colJ] = tmp;
     }
   }
-  return;
 }
 
 template <typename T>
@@ -621,7 +661,6 @@ void Matrix<T>::zeroMatrix()
       }
     }
   }
-  return;
 }
 
 template <typename T>
@@ -638,7 +677,6 @@ void Matrix<T>::identityMatrix()
       }
     }
   }
-  return;
 }
 template <typename T>
 void Matrix<T>::setColumn(const size_t nCol, const std::vector<T> &newCol) {
@@ -684,7 +722,6 @@ void Matrix<T>::rotate(const double tau, const double s, const int i,
   const T hh = V[k][m];
   V[i][j] = static_cast<T>(gg - s * (hh + gg * tau));
   V[k][m] = static_cast<T>(hh + s * (gg - hh * tau));
-  return;
 }
 
 template <typename T>
@@ -990,7 +1027,7 @@ T Matrix<T>::factor()
     }
     if (Pmax < 1e-8) // maxtrix signular
     {
-      //          std::cerr<<"Matrix Singular"<<std::endl;
+      //          std::cerr<<"Matrix Singular"<<'\n';
       return 0;
     }
     // Swap Columns
@@ -1030,7 +1067,6 @@ void Matrix<T>::normVert()
       V[i][j] /= sum;
     }
   }
-  return;
 }
 
 template <typename T>
@@ -1061,7 +1097,7 @@ void Matrix<T>::lubcmp(int *rowperm, int &interchange)
   double sum, dum, big, temp;
 
   if (nx != ny || nx < 2) {
-    std::cerr << "Error with lubcmp" << std::endl;
+    std::cerr << "Error with lubcmp\n";
     return;
   }
   auto vv = new double[nx];
@@ -1122,7 +1158,6 @@ void Matrix<T>::lubcmp(int *rowperm, int &interchange)
     }
   }
   delete[] vv;
-  return;
 }
 
 template <typename T>
@@ -1152,7 +1187,6 @@ void Matrix<T>::lubksb(const int *rowperm, double *b)
       sum -= V[i][j] * b[j];
     b[i] = sum / V[i][i];
   }
-  return;
 }
 
 template <typename T>
@@ -1210,7 +1244,7 @@ void Matrix<T>::sortEigen(Matrix<T> &DiagMatrix)
 */
 {
   if (ny != nx || nx != DiagMatrix.nx || nx != DiagMatrix.ny) {
-    std::cerr << "Matrix not Eigen Form" << std::endl;
+    std::cerr << "Matrix not Eigen Form\n";
     throw(std::invalid_argument(" Matrix is not in an eigenvalue format"));
   }
   std::vector<int> index;
@@ -1223,8 +1257,6 @@ void Matrix<T>::sortEigen(Matrix<T> &DiagMatrix)
     }
     DiagMatrix[Icol][Icol] = X[index[Icol]];
   }
-
-  return;
 }
 
 template <typename T>
@@ -1237,13 +1269,13 @@ int Matrix<T>::Diagonalise(Matrix<T> &EigenVec, Matrix<T> &DiagMatrix) const
 */
 {
   if (nx != ny || nx < 1) {
-    std::cerr << "Matrix not square" << std::endl;
+    std::cerr << "Matrix not square\n";
     return 0;
   }
   for (size_t i = 0; i < nx; i++)
     for (size_t j = i + 1; j < nx; j++)
       if (fabs(V[i][j] - V[j][i]) > 1e-6) {
-        std::cerr << "Matrix not symmetric" << std::endl;
+        std::cerr << "Matrix not symmetric\n";
         std::cerr << (*this);
         return 0;
       }
@@ -1334,7 +1366,7 @@ int Matrix<T>::Diagonalise(Matrix<T> &EigenVec, Matrix<T> &DiagMatrix) const
       ZeroComp[j] = 0.0;
     }
   }
-  std::cerr << "Error :: Iterations are a problem" << std::endl;
+  std::cerr << "Error :: Iterations are a problem\n";
   return 0;
 }
 
@@ -1347,13 +1379,13 @@ bool Matrix<T>::isRotation() const
   if (this->nx != this->ny)
     throw(std::invalid_argument("matrix is not square"));
   //  std::cout << "Matrix determinant-1 is " << (this->determinant()-1) <<
-  //  std::endl;
+  //  '\n';
   if (fabs(this->determinant() - 1) > 1e-5) {
     return false;
   } else {
     Matrix<T> prod(nx, ny), ident(nx, ny, true);
     prod = this->operator*(this->Tprime());
-    //    std::cout << "Matrix * Matrix' = " << std::endl << prod << std::endl;
+    //    std::cout << "Matrix * Matrix' = " << std::endl << prod << '\n';
     return prod.equals(ident, 1e-5);
   }
 }
@@ -1433,7 +1465,6 @@ void Matrix<T>::print() const
  */
 {
   write(std::cout, 10);
-  return;
 }
 
 /** set matrix elements ito random values  in the range from  rMin to rMax*/
@@ -1468,18 +1499,17 @@ void Matrix<T>::write(std::ostream &Fh, const int blockCnt) const
     }
 
     if (ACnt) {
-      Fh << " ----- " << ACnt << " " << BCnt << " ------ " << std::endl;
+      Fh << " ----- " << ACnt << " " << BCnt << " ------ \n";
     }
     for (size_t i = 0; i < nx; i++) {
       for (size_t j = ACnt; j < BCnt; j++) {
         Fh << std::setw(10) << V[i][j] << "  ";
       }
-      Fh << std::endl;
+      Fh << '\n';
     }
   } while (BCnt < ny);
 
   Fh.flags(oldFlags);
-  return;
 }
 
 template <typename T>
@@ -1613,7 +1643,13 @@ void fillFromStream(std::istream &is, Kernel::Matrix<T> &in,
 
 // Symbol definitions for common types
 template class MANTID_KERNEL_DLL Matrix<double>;
-template class MANTID_KERNEL_DLL Matrix<int>;
+// The explicit template instantiation for int does not have an export macro
+// since this produces a warning on "gcc: warning: type attributes ignored after
+// type is already define" The reason for this is the use of Matrix<int>
+// in a template specialization above, causing an implicit sepcialization.
+// This, most likely, obtains a visibility setting from the general template
+// definition.
+template class Matrix<int>;
 template class MANTID_KERNEL_DLL Matrix<float>;
 
 template MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,

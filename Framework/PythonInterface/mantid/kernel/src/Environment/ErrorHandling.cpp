@@ -4,17 +4,29 @@
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 
+#include <boost/python/extract.hpp>
+#include <boost/python/object.hpp>
 #include <frameobject.h> //Python
 
 #include <sstream>
 #include <stdexcept>
 
+using boost::python::extract;
+using boost::python::object;
+
 namespace Mantid {
 namespace PythonInterface {
 namespace Environment {
 namespace {
-void tracebackToMsg(std::stringstream &msg, PyTracebackObject *traceback,
-                    bool root = true) {
+
+/**
+ * Unroll a traceback as a string reprsentation and append it to the stream
+ * @param msg A stream reference for building up the msg
+ * @param traceback A Python traceback object
+ * @param root True if this is the root of the traceback, false otherwise
+ */
+void tracebackToStream(std::ostream &msg, PyTracebackObject *traceback,
+                       bool root = true) {
   if (traceback == nullptr)
     return;
   msg << "\n  ";
@@ -24,36 +36,38 @@ void tracebackToMsg(std::stringstream &msg, PyTracebackObject *traceback,
     msg << "caused by";
 
   msg << " line " << traceback->tb_lineno << " in \'"
-      << PyString_AsString(traceback->tb_frame->f_code->co_filename) << "\'";
-  tracebackToMsg(msg, traceback->tb_next, false);
-}
+      << extract<const char *>(traceback->tb_frame->f_code->co_filename)()
+      << "\'";
+  tracebackToStream(msg, traceback->tb_next, false);
 }
 
 /**
- * Convert a python error state to a C++ exception
- * @param withTrace If true then a traceback will be included in the exception
- * message
- * @throws std::runtime_error
+ * Create a string representation of the current Python exception state. Note
+ *that
+ * the python error state is *not* checked and it is undefined what happens if
+ * called in this state.
+ *
+ * The GIL is held for the duration of this call.
+ * @param withTrace If true then provide a full traceback as part of the
+ * string message.
  */
-void throwRuntimeError(const bool withTrace) {
+std::string exceptionToString(bool withTrace) {
   GlobalInterpreterLock gil;
-  if (!PyErr_Occurred()) {
-    throw std::runtime_error(
-        "ErrorHandling::throwRuntimeError - No Python error state set!");
-  }
   PyObject *exception(nullptr), *value(nullptr), *traceback(nullptr);
   PyErr_Fetch(&exception, &value, &traceback);
+  assert(exception);
   PyErr_NormalizeException(&exception, &value, &traceback);
   PyErr_Clear();
-  PyObject *str_repr = PyObject_Str(value);
-  std::stringstream msg;
-  if (value && str_repr) {
-    msg << PyString_AsString(str_repr);
+  PyObject *strRepr = PyObject_Str(value);
+  std::stringstream builder;
+  if (value && strRepr) {
+    builder << extract<const char *>(strRepr)();
   } else {
-    msg << "Unknown exception has occurred.";
+    builder << "Unknown exception has occurred.";
   }
   if (withTrace) {
-    tracebackToMsg(msg, reinterpret_cast<PyTracebackObject *>(traceback));
+    tracebackToStream(builder,
+                      reinterpret_cast<PyTracebackObject *>(traceback));
   }
 
   // Ensure we decrement the reference count on the traceback and exception
@@ -64,9 +78,33 @@ void throwRuntimeError(const bool withTrace) {
   Py_XDECREF(traceback);
   Py_XDECREF(exception);
   Py_XDECREF(value);
-  // Raise this error as a C++ error
-  throw std::runtime_error(msg.str());
+  return builder.str();
 }
+}
+
+// -----------------------------------------------------------------------------
+// PythonException
+// -----------------------------------------------------------------------------
+
+/**
+ * Construct an exception object where the message is populated from the
+ * current Python exception state.
+ * @param withTrace If true, include the full traceback in the message
+ */
+PythonException::PythonException(bool withTrace)
+    : std::exception(), m_msg(exceptionToString(withTrace)) {}
+
+// -----------------------------------------------------------------------------
+// PythonRuntimeError
+// -----------------------------------------------------------------------------
+
+/**
+ * Construct an exception object where the message is populated from the
+ * current Python exception state.
+ * @param withTrace If true, include the full traceback in the message
+ */
+PythonRuntimeError::PythonRuntimeError(bool withTrace)
+    : std::runtime_error(exceptionToString(withTrace)) {}
 }
 }
 }

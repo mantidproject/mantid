@@ -13,16 +13,6 @@ using Mantid::API::Workspace;
 DECLARE_ALGORITHM(Comment)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-Comment::Comment() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-Comment::~Comment() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string Comment::name() const { return "Comment"; }

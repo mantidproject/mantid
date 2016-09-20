@@ -2,7 +2,7 @@
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
-  #pragma warning disable 1170
+#pragma warning disable 1170
 #endif
 
 #include <pqAnimationManager.h>
@@ -12,27 +12,21 @@
 #include <vtkSMProxy.h>
 
 #if defined(__INTEL_COMPILER)
-  #pragma warning enable 1170
+#pragma warning enable 1170
 #endif
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 
 /**
  * @param parent the parent widget for the time control widget
  */
-TimeControlWidget::TimeControlWidget(QWidget *parent) : QWidget(parent)
-{
-    this->ui.setupUi(this);
+TimeControlWidget::TimeControlWidget(QWidget *parent) : QWidget(parent) {
+  this->ui.setupUi(this);
 }
 
-TimeControlWidget::~TimeControlWidget()
-{
-}
+TimeControlWidget::~TimeControlWidget() {}
 
 /**
  * Function to update the animation scene with "time" information. This
@@ -44,9 +38,9 @@ TimeControlWidget::~TimeControlWidget()
  */
 void TimeControlWidget::updateAnimationControls(double timeStart,
                                                 double timeEnd,
-                                                int numTimesteps)
-{
-  pqAnimationScene *scene = pqPVApplicationCore::instance()->animationManager()->getActiveScene();
+                                                int numTimesteps) {
+  pqAnimationScene *scene =
+      pqPVApplicationCore::instance()->animationManager()->getActiveScene();
   vtkSMProxy *proxy = scene->getProxy();
   vtkSMPropertyHelper(proxy, "StartTime").Set(timeStart);
   vtkSMPropertyHelper(proxy, "EndTime").Set(timeEnd);
@@ -58,11 +52,9 @@ void TimeControlWidget::updateAnimationControls(double timeStart,
  * Function to enable or disable the entire animation controls widget.
  * @param state how to set the animation controls
  */
-void TimeControlWidget::enableAnimationControls(bool state)
-{
+void TimeControlWidget::enableAnimationControls(bool state) {
   this->setEnabled(state);
 }
-
 }
 }
 }

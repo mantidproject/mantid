@@ -126,8 +126,7 @@ void VesuvioCalculateGammaBackground::exec() {
 
     if (!calculateBackground(inputIndex, outputIndex)) {
       g_log.information("No detector defined for index=" +
-                        boost::lexical_cast<std::string>(inputIndex) +
-                        ". Skipping correction.");
+                        std::to_string(inputIndex) + ". Skipping correction.");
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -155,17 +154,16 @@ bool VesuvioCalculateGammaBackground::calculateBackground(
   m_correctedWS->dataE(outputIndex) = m_inputWS->readE(inputIndex);
 
   try {
-    const auto *inSpec = m_inputWS->getSpectrum(inputIndex);
-    const specnum_t spectrumNo(inSpec->getSpectrumNo());
-    m_backgroundWS->getSpectrum(outputIndex)->copyInfoFrom(*inSpec);
-    m_correctedWS->getSpectrum(outputIndex)->copyInfoFrom(*inSpec);
+    const auto &inSpec = m_inputWS->getSpectrum(inputIndex);
+    const specnum_t spectrumNo(inSpec.getSpectrumNo());
+    m_backgroundWS->getSpectrum(outputIndex).copyInfoFrom(inSpec);
+    m_correctedWS->getSpectrum(outputIndex).copyInfoFrom(inSpec);
 
     if (spectrumNo >= FORWARD_SCATTER_SPECMIN &&
         spectrumNo <= FORWARD_SCATTER_SPECMAX) {
       applyCorrection(inputIndex, outputIndex);
     } else {
-      g_log.information("Spectrum " +
-                        boost::lexical_cast<std::string>(spectrumNo) +
+      g_log.information("Spectrum " + std::to_string(spectrumNo) +
                         " not in forward scatter range. Skipping correction.");
       // Leave background at 0 and just copy data to corrected
       m_correctedWS->dataY(outputIndex) = m_inputWS->readY(inputIndex);
@@ -290,7 +288,7 @@ void VesuvioCalculateGammaBackground::calculateBackgroundFromFoils(
                    ctfoil.begin(), std::minus<double>());
   }
   bool reversed = (m_reversed.count(m_inputWS->getSpectrum(inputIndex)
-                                        ->getSpectrumNo()) != 0);
+                                        .getSpectrumNo()) != 0);
   // This is quicker than the if within the loop
   if (reversed) {
     // The reversed ones should be (C0 - C1)

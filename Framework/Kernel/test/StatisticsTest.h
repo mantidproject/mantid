@@ -259,7 +259,7 @@ public:
 
     // Normal distribution values are taken from the wikipedia page
     {
-      std::cout << "Normal distribution about origin" << std::endl;
+      std::cout << "Normal distribution about origin\n";
       vector<double> aboutOrigin = getMomentsAboutOrigin(x, y);
       TS_ASSERT_EQUALS(aboutOrigin.size(), 4);
       TS_ASSERT_DELTA(aboutOrigin[0], 1., .0001);
@@ -267,7 +267,7 @@ public:
       TS_ASSERT_DELTA(aboutOrigin[2], expVar, .001 * expVar);
       TS_ASSERT_DELTA(aboutOrigin[3], expSkew, .001 * expSkew);
 
-      std::cout << "Normal distribution about mean" << std::endl;
+      std::cout << "Normal distribution about mean\n";
       vector<double> aboutMean = getMomentsAboutMean(x, y);
       TS_ASSERT_EQUALS(aboutMean.size(), 4);
       TS_ASSERT_DELTA(aboutMean[0], 1., .0001);
@@ -286,12 +286,12 @@ public:
       double tempright = (x[i + 1] - mean) / sigma;
       tempright = exp(-.5 * tempright * tempright) / (sigma * sqrt(2. * M_PI));
       y.push_back(.5 * deltaX * (templeft + tempright));
-      //      std::cout << i << ":\t" << x[i] << "\t" << y[i] << std::endl;
+      //      std::cout << i << ":\t" << x[i] << "\t" << y[i] << '\n';
     }
 
     // Normal distribution values are taken from the wikipedia page
     {
-      std::cout << "Normal distribution about origin" << std::endl;
+      std::cout << "Normal distribution about origin\n";
       vector<double> aboutOrigin = getMomentsAboutOrigin(x, y);
       TS_ASSERT_EQUALS(aboutOrigin.size(), 4);
       TS_ASSERT_DELTA(aboutOrigin[0], 1., .0001);
@@ -299,7 +299,7 @@ public:
       TS_ASSERT_DELTA(aboutOrigin[2], expVar, .001 * expVar);
       TS_ASSERT_DELTA(aboutOrigin[3], expSkew, .001 * expSkew);
 
-      std::cout << "Normal distribution about mean" << std::endl;
+      std::cout << "Normal distribution about mean\n";
       vector<double> aboutMean = getMomentsAboutMean(x, y);
       TS_ASSERT_EQUALS(aboutMean.size(), 4);
       TS_ASSERT_DELTA(aboutMean[0], 1., .0001);

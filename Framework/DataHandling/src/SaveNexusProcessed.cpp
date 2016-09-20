@@ -299,7 +299,6 @@ void SaveNexusProcessed::doExec(Workspace_sptr inputWorkspace,
 
   inputWorkspace->history().saveNexus(cppFile);
   nexusFile->closeGroup();
-  return;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -377,7 +376,7 @@ void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
        wi < static_cast<int>(m_eventWorkspace->getNumberHistograms()); wi++) {
     indices.push_back(index);
     // Track the total # of events
-    index += m_eventWorkspace->getEventList(wi).getNumberEvents();
+    index += m_eventWorkspace->getSpectrum(wi).getNumberEvents();
   }
   indices.push_back(index);
 
@@ -425,7 +424,7 @@ void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
   for (int wi = 0;
        wi < static_cast<int>(m_eventWorkspace->getNumberHistograms()); wi++) {
     PARALLEL_START_INTERUPT_REGION
-    const DataObjects::EventList &el = m_eventWorkspace->getEventList(wi);
+    const DataObjects::EventList &el = m_eventWorkspace->getSpectrum(wi);
 
     // This is where it will land in the output array.
     // It is okay to write in parallel since none should step on each other.
@@ -519,10 +518,6 @@ bool SaveNexusProcessed::processGroups() {
   }
 
   nexusFile->closeNexusFile();
-  // We finished successfully.
-  setExecuted(true);
-  notificationCenter().postNotification(
-      new FinishedNotification(this, isExecuted()));
 
   return true;
 }

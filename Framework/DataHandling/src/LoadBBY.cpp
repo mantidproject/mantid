@@ -1,5 +1,5 @@
-#include <math.h>
-#include <stdio.h>
+#include <cmath>
+#include <cstdio>
 
 #include "MantidDataHandling/LoadBBY.h"
 #include "MantidAPI/Axis.h"
@@ -51,8 +51,7 @@ void AddSinglePointTimeSeriesProperty(API::LogManager &logManager,
                                       const std::string &name,
                                       const TYPE value) {
   // create time series property and add single value
-  Kernel::TimeSeriesProperty<TYPE> *p =
-      new Kernel::TimeSeriesProperty<TYPE>(name);
+  auto p = new Kernel::TimeSeriesProperty<TYPE>(name);
   p->addValue(time, value);
 
   // add to log manager
@@ -252,7 +251,7 @@ void LoadBBY::exec() {
                                      numberHistograms, Progress_ReserveMemory);
 
   for (size_t i = 0; i != numberHistograms; ++i) {
-    DataObjects::EventList &eventList = eventWS->getEventList(i);
+    DataObjects::EventList &eventList = eventWS->getSpectrum(i);
 
     eventList.setSortOrder(DataObjects::PULSETIME_SORT);
     eventList.reserve(eventCounts[i]);
@@ -282,20 +281,16 @@ void LoadBBY::exec() {
                eventAssigner);
   }
 
-  Kernel::cow_ptr<MantidVec> axis;
-  MantidVec &xRef = axis.access();
-  xRef.resize(2, 0.0);
   if (instrumentInfo.is_tof) {
-    xRef[0] = std::max(
-        0.0,
-        floor(eventCounter.tofMin())); // just to make sure the bins hold it all
-    xRef[1] = eventCounter.tofMax() + 1;
+    // just to make sure the bins hold it all
+    eventWS->setAllX(
+        HistogramData::BinEdges{std::max(0.0, floor(eventCounter.tofMin())),
+                                eventCounter.tofMax() + 1});
   } else {
     // +/-10%
-    xRef[0] = instrumentInfo.wavelength * 0.9;
-    xRef[1] = instrumentInfo.wavelength * 1.1;
+    eventWS->setAllX(HistogramData::BinEdges{instrumentInfo.wavelength * 0.9,
+                                             instrumentInfo.wavelength * 1.1});
   }
-  eventWS->setAllX(axis);
 
   // count total number of masked bins
   size_t maskedBins = 0;

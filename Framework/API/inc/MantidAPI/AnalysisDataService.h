@@ -178,15 +178,7 @@ private:
   std::string m_illegalChars;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// AnalysisDataServiceImpl (needed for dllexport/dllimport) and a typedef for
-/// it.
-#ifdef _WIN32
-// this breaks new namespace declaration rules; need to find a better fix
-template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>;
-#endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>
+typedef Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>
     AnalysisDataService;
 
 typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification
@@ -248,5 +240,12 @@ typedef const Poco::AutoPtr<AnalysisDataServiceImpl::GroupUpdatedNotification> &
 
 } // Namespace API
 } // Namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::AnalysisDataServiceImpl>;
+}
+}
 
 #endif /*MANTID_KERNEL_ANALYSISDATASERVICE_H_*/

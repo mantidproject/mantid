@@ -6,6 +6,8 @@
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include <unordered_map>
+
 namespace Mantid {
 namespace Kernel {
 
@@ -38,7 +40,7 @@ Property::Property(const Property &right)
 }
 
 /// Virtual destructor
-Property::~Property() {}
+Property::~Property() = default;
 
 /** Get the property's name
  *  @return The name of the property
@@ -198,7 +200,6 @@ void Property::filterByTime(const Kernel::DateAndTime &start,
   UNUSED_ARG(start);
   UNUSED_ARG(stop);
   // Do nothing in general
-  return;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -215,7 +216,6 @@ void Property::splitByTime(std::vector<SplittingInterval> &splitter,
   UNUSED_ARG(splitter);
   UNUSED_ARG(outputs);
   UNUSED_ARG(isProtonCharge);
-  return;
 }
 
 } // End Kernel namespace
@@ -254,6 +254,7 @@ class SplittersWorkspace;
 }
 
 namespace Kernel {
+class PropertyManager;
 
 /**
  * @param lhs Thing on the left
@@ -311,7 +312,7 @@ std::string getUnmangledTypeName(const std::type_info &type) {
   using namespace Mantid::DataObjects;
   // Compile a lookup table. This is a static local variable that
   // will get initialized when the function is first used
-  static std::map<string, string> typestrings;
+  static std::unordered_map<string, string> typestrings;
   if (typestrings.empty()) {
     typestrings.emplace(typeid(char).name(), string("letter"));
     typestrings.emplace(typeid(int).name(), string("number"));
@@ -374,9 +375,10 @@ std::string getUnmangledTypeName(const std::type_info &type) {
                         string("Function"));
     typestrings.emplace(typeid(boost::shared_ptr<IAlgorithm>).name(),
                         string("IAlgorithm"));
+    typestrings.emplace(typeid(boost::shared_ptr<PropertyManager>).name(),
+                        string("Dictionary"));
   }
-  std::map<std::string, std::string>::const_iterator mitr =
-      typestrings.find(type.name());
+  auto mitr = typestrings.find(type.name());
   if (mitr != typestrings.end()) {
     return mitr->second;
   }

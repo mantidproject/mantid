@@ -16,13 +16,6 @@ DECLARE_ALGORITHM(MaskDetectorsIf)
 
 using namespace Kernel;
 
-/// Constructor
-MaskDetectorsIf::MaskDetectorsIf()
-    : API::Algorithm(), value(0.), select_on(false) {}
-
-/// Destructor
-MaskDetectorsIf::~MaskDetectorsIf() {}
-
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
@@ -72,12 +65,12 @@ void MaskDetectorsIf::exec() {
 
   for (size_t i = 0; i < nspec; ++i) {
     // Get the list of udets contributing to this spectra
-    const auto &dets = inputW->getSpectrum(i)->getDetectorIDs();
+    const auto &dets = inputW->getSpectrum(i).getDetectorIDs();
 
     if (dets.empty())
       continue;
     else {
-      double val = inputW->readY(i)[0];
+      double val = inputW->y(i)[0];
       if (compar_f(val, value)) {
         for (auto det : dets) {
           umap.emplace(det, select_on);
@@ -91,7 +84,6 @@ void MaskDetectorsIf::exec() {
   std::string newf = getProperty("OutputCalFile");
   progress(0.99, "Creating new cal file");
   createNewCalFile(oldf, newf);
-  return;
 }
 
 /**
@@ -133,8 +125,6 @@ void MaskDetectorsIf::retrieveProperties() {
   if (newf.empty()) {
     throw std::runtime_error("OutputCalFile is empty. Enter a filename");
   }
-
-  return;
 }
 
 /**
@@ -146,19 +136,19 @@ void MaskDetectorsIf::createNewCalFile(const std::string &oldfile,
                                        const std::string &newfile) {
   std::ifstream oldf(oldfile.c_str());
   if (!oldf.is_open()) {
-    g_log.error() << "Unable to open grouping file " << oldfile << std::endl;
+    g_log.error() << "Unable to open grouping file " << oldfile << '\n';
     throw Exception::FileError("Error reading .cal file", oldfile);
   }
   std::ofstream newf(newfile.c_str());
   if (!newf.is_open()) {
-    g_log.error() << "Unable to open grouping file " << newfile << std::endl;
+    g_log.error() << "Unable to open grouping file " << newfile << '\n';
     throw Exception::FileError("Error reading .cal file", newfile);
   }
   std::string str;
   while (getline(oldf, str)) {
     // Comment or empty lines get copied into the new cal file
     if (str.empty() || str[0] == '#') {
-      newf << str << std::endl;
+      newf << str << '\n';
       continue;
     }
     std::istringstream istr(str);
@@ -176,21 +166,18 @@ void MaskDetectorsIf::createNewCalFile(const std::string &oldfile,
     newf << std::fixed << std::setw(9) << n << std::fixed << std::setw(15)
          << udet << std::fixed << std::setprecision(7) << std::setw(15)
          << offset << std::fixed << std::setw(8) << selection << std::fixed
-         << std::setw(8) << group << std::endl;
+         << std::setw(8) << group << '\n';
   }
   oldf.close();
   newf.close();
-  return;
 }
 
 std::string
-MaskDetectorsIf::allowedValuesStatement(std::vector<std::string> vals) {
+MaskDetectorsIf::allowedValuesStatement(const std::vector<std::string> &vals) {
   std::ostringstream statement;
   statement << "Allowed Values: ";
-  for (size_t i = 0; i < vals.size(); ++i) {
-    statement << vals[i];
-    if (i < vals.size())
-      statement << ", ";
+  for (const auto &val : vals) {
+    statement << val << ", ";
   }
   return statement.str();
 }

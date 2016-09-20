@@ -21,7 +21,8 @@ Constructor
 */
 PeaksWidget::PeaksWidget(Mantid::API::IPeaksWorkspace_sptr ws,
                          const std::string &coordinateSystem, QWidget *parent)
-    : QWidget(parent), m_ws(ws), m_coordinateSystem(coordinateSystem), m_originalTableWidth(1) {
+    : QWidget(parent), m_ws(ws), m_coordinateSystem(coordinateSystem),
+      m_originalTableWidth(1) {
   ui.setupUi(this);
 }
 

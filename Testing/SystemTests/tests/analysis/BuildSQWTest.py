@@ -8,9 +8,8 @@
     repository & required to be accessible from any machine that wishes to run the test.
 """
 import stresstesting
-from mantid.simpleapi import *
-
 import os
+from mantid.simpleapi import *
 
 # allow for multiple locations
 FILE_LOCATIONS = ["/isis/mantid/localtestdata/"]#,"d:/Data/MantidSystemTests/BigData/Dropbox/LoadSQW"]

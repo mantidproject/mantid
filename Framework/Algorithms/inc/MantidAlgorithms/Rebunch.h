@@ -53,10 +53,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport Rebunch : public API::Algorithm {
 public:
-  /// Default constructor
-  Rebunch() : API::Algorithm(){};
-  /// Destructor
-  ~Rebunch() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Rebunch"; }
   /// Summary of algorithms purpose

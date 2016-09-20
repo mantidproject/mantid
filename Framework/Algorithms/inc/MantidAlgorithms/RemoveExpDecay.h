@@ -48,10 +48,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport MuonRemoveExpDecay : public API::Algorithm {
 public:
-  /// Default constructor
-  MuonRemoveExpDecay() : API::Algorithm(){};
-  /// Destructor
-  ~MuonRemoveExpDecay() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RemoveExpDecay"; }
   /// Summary of algorithms purpose

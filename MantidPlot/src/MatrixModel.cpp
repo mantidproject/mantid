@@ -36,7 +36,7 @@
 #include "muParserScript.h"
 #include "ScriptingEnv.h"
 #include "analysis/fft2D.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include "MantidKernel/Strings.h"
 
@@ -508,9 +508,9 @@ bool MatrixModel::importASCII(const QString &fname, const QString &sep,
 
   QString s = t.readLine();
   if (simplifySpaces)
-    s = s.simplifyWhiteSpace();
+    s = s.simplified();
   else if (stripSpaces)
-    s = s.stripWhiteSpace();
+    s = s.trimmed();
 
   QStringList line = s.split(sep);
   int cols = line.size();
@@ -547,13 +547,13 @@ bool MatrixModel::importASCII(const QString &fname, const QString &sep,
     }
   }
 
-  qApp->processEvents(QEventLoop::ExcludeUserInput);
+  qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
   for (int i = startRow; i < d_rows; i++) {
     s = t.readLine();
     if (simplifySpaces)
-      s = s.simplifyWhiteSpace();
+      s = s.simplified();
     else if (stripSpaces)
-      s = s.stripWhiteSpace();
+      s = s.trimmed();
     line = s.split(sep);
     int lc = line.size();
     if (lc > cols)
@@ -818,13 +818,13 @@ bool MatrixModel::muParserCalculate(int startRow, int endRow, int startCol,
       double r = row + 1.0;
       *ri = r;
       *rr = r;
-      *y = y_start + row * dy;
+      *y = y_start + row *dy;
       int aux = row * d_cols + startCol;
       for (int col = startCol; col <= endCol; col++) {
         double c = col + 1.0;
         *cj = c;
         *cc = c;
-        *x = x_start + col * dx;
+        *x = x_start + col *dx;
         d_data[aux++] = mup->evalSingleLine();
       }
     }
@@ -834,13 +834,13 @@ bool MatrixModel::muParserCalculate(int startRow, int endRow, int startCol,
       double r = row + 1.0;
       *ri = r;
       *rr = r;
-      *y = y_start + row * dy;
+      *y = y_start + row *dy;
       int aux = row * d_cols + startCol;
       for (int col = startCol; col <= endCol; col++) {
         double c = col + 1.0;
         *cj = c;
         *cc = c;
-        *x = x_start + col * dx;
+        *x = x_start + col *dx;
         res = mup->evaluate(ScriptCode(d_matrix->formula()));
         if (res.canConvert(QVariant::Double))
           d_data[aux++] = res.toDouble();
@@ -1014,7 +1014,7 @@ void MatrixModel::pasteData(double *clipboardBuffer, int topRow, int leftCol,
 MatrixModel::~MatrixModel() { free(d_data); }
 
 std::string MatrixModel::saveToProject() {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
 
   for (int row = 0; row < d_rows; ++row) {
     // Index to the first element of each row

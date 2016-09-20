@@ -34,10 +34,6 @@
 
 class MANTID_SINQ_DLL ProjectMD : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  ProjectMD() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~ProjectMD() override {}
   /// Algorithm's name
   const std::string name() const override { return "ProjectMD"; }
   /// Summary of algorithms purpose

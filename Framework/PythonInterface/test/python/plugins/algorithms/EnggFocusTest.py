@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.simpleapi import *
 from mantid.api import *
@@ -67,7 +69,7 @@ class EnggFocusTest(unittest.TestCase):
                           EnggFocus,
                           InputWorkspace=self.__class__._data_ws, Detectors=tbl, OutputWorkspace='nop')
 
-        # bank and indices list clsh. This starts as a ValueError but the managers is raising a RuntimeError
+        # bank and indices list clash. This starts as a ValueError but the managers is raising a RuntimeError
         self.assertRaises(RuntimeError,
                           EnggFocus,
                           InputWorkspace=self.__class__._data_ws, Bank='2', DetectorPositions=tbl,
@@ -78,6 +80,33 @@ class EnggFocusTest(unittest.TestCase):
                           EnggFocus,
                           InputWorkspace=self.__class__._data_ws, DetectorPositions=tbl,
                           SpectrumNumbers='999999999999999', OutputWorkspace='nop')
+
+        # wrong normalize option
+        self.assertRaises(ValueError,
+                          EnggFocus,
+                          InputWorkspace=self.__class__._data_ws, DetectorPositions=tbl,
+                          SpectrumNumbers='3', NormaliseByCurrent='4',
+                          OutputWorkspace='nop')
+
+        # wrong bin values for masking
+        self.assertRaises(RuntimeError,
+                          EnggFocus,
+                          InputWorkspace=self.__class__._data_ws, DetectorPositions=tbl,
+                          SpectrumNumbers='3',
+                          MaskBinsXMins=[1, 2, 3], MaskBinsXMaxs=[10, 20],
+                          OutputWorkspace='nop')
+
+        self.assertRaises(RuntimeError,
+                          EnggFocus,
+                          InputWorkspace=self.__class__._data_ws, DetectorPositions=tbl,
+                          SpectrumNumbers='3', MaskBinsXMins=[1, 2, 3],
+                          OutputWorkspace='nop')
+
+        self.assertRaises(RuntimeError,
+                          EnggFocus,
+                          InputWorkspace=self.__class__._data_ws, DetectorPositions=tbl,
+                          SpectrumNumbers='3', MaskBinsXMaxs=[10, 20, 30],
+                          OutputWorkspace='nop')
 
     def _check_output_ok(self, wks, ws_name='', y_dim_max=1, yvalues=None):
         """
@@ -108,9 +137,10 @@ class EnggFocusTest(unittest.TestCase):
             raise ValueError("No y-vals provided for test")
         xvals = [10861.958645540433, 12192.372902418168, 13522.787159295902,
                  14853.201416173637, 24166.101214317776, 34809.415269339654]
+        p_charge = wks.getRun().getProtonCharge()
         for i, bin_idx in enumerate([0, 5, 10, 15, 50, 90]):
             self.assertAlmostEqual(wks.readX(0)[bin_idx], xvals[i])
-            self.assertAlmostEqual(wks.readY(0)[bin_idx], yvalues[i])
+            self.assertAlmostEqual(wks.readY(0)[bin_idx], yvalues[i] / p_charge)
 
 
     def test_runs_ok(self):

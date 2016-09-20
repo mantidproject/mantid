@@ -1,13 +1,13 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_DPDFFITOPTIONSBROWSER_H_
 #define MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_DPDFFITOPTIONSBROWSER_H_
 
-//Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-//Mantid Headers from the same project
-//Mantid headers from other projects
+// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
+// Mantid Headers from the same project
+// Mantid headers from other projects
 #include "MantidQtMantidWidgets/FitOptionsBrowser.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
-//3rd party library headers
-//System headers
+// 3rd party library headers
+// System headers
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -40,10 +40,10 @@ namespace DynamicPDF {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTIDQT_CUSTOMINTERFACES_DLL DPDFFitOptionsBrowser:
-  public MantidQt::MantidWidgets::FitOptionsBrowser {
+class MANTIDQT_CUSTOMINTERFACES_DLL DPDFFitOptionsBrowser
+    : public MantidQt::MantidWidgets::FitOptionsBrowser {
 
-Q_OBJECT
+  Q_OBJECT
 
 public:
   DPDFFitOptionsBrowser(QWidget *parent = NULL);
@@ -52,14 +52,9 @@ private:
   void createAdditionalProperties();
   void customizeBrowser();
   /// Starting fitting range
-  QtProperty* m_startX;
+  QtProperty *m_startX;
   /// Ending fitting range
-  QtProperty* m_endX;
-
-
-
-
-
+  QtProperty *m_endX;
 
 }; // class DPDFFitOptionsBrowser
 

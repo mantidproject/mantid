@@ -1,11 +1,7 @@
 #ifndef MANTID_ALGORITHMS_REMOVEBACKGROUND_H_
 #define MANTID_ALGORITHMS_REMOVEBACKGROUND_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/GeometryInfoFactory.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidGeometry/IComponent.h"
 
@@ -14,6 +10,10 @@ namespace Mantid {
 // forward declarations from other Mantid modules
 namespace Kernel {
 class Unit;
+}
+
+namespace API {
+class SpectrumInfo;
 }
 
 namespace Algorithms {
@@ -68,7 +68,7 @@ private:
   // shared pointer to the workspace where background should be removed
   API::MatrixWorkspace_const_sptr m_wkWS;
 
-  std::unique_ptr<API::GeometryInfoFactory> m_geometryInfoFactory;
+  const API::SpectrumInfo *m_spectrumInfo;
 
   // logger from the hosting algorithm
   Kernel::Logger *m_pgLog;
@@ -102,10 +102,6 @@ private:
 
 class DLLExport RemoveBackground : public API::Algorithm {
 public:
-  /// Default constructor
-  RemoveBackground() : API::Algorithm(), m_BackgroundHelper(){};
-  /// Destructor
-  ~RemoveBackground() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RemoveBackground"; }
   /// Summary of algorithms purpose

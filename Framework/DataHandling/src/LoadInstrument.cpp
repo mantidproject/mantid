@@ -237,7 +237,7 @@ void LoadInstrument::runLoadParameterFile() {
 
   if (!fullPathParamIDF.empty()) {
 
-    g_log.debug() << "Parameter file: " << fullPathParamIDF << std::endl;
+    g_log.debug() << "Parameter file: " << fullPathParamIDF << '\n';
     // Now execute the Child Algorithm. Catch and log any error, but don't stop.
     try {
       // To allow the use of ExperimentInfo instead of workspace, we call it

@@ -29,16 +29,6 @@ static const std::string EXP_INI_CAN_KEY("MTc");
 }
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-PDLoadCharacterizations::PDLoadCharacterizations() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-PDLoadCharacterizations::~PDLoadCharacterizations() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PDLoadCharacterizations::name() const {
   return "PDLoadCharacterizations";

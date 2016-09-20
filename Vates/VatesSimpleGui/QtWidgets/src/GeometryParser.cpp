@@ -14,35 +14,29 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 
-GeometryParser::GeometryParser(const char *xml)
-{
+GeometryParser::GeometryParser(const char *xml) {
   Poco::XML::DOMParser parser;
   this->pDoc = parser.parseString(Poco::XML::XMLString(xml));
 }
 
-AxisInformation *GeometryParser::getAxisInfo(const std::string dimension)
-{
+AxisInformation *GeometryParser::getAxisInfo(const std::string dimension) {
   AxisInformation *axis = new AxisInformation();
 
-  Poco::AutoPtr<Poco::XML::NodeList> pNodes = this->pDoc->getElementsByTagName(dimension);
+  Poco::AutoPtr<Poco::XML::NodeList> pNodes =
+      this->pDoc->getElementsByTagName(dimension);
   Poco::XML::Node *pNode = pNodes->item(0)->childNodes()->item(0);
   Poco::XML::XMLString label = pNode->innerText();
 
   pNodes = this->pDoc->getElementsByTagName("Dimension");
-  for (unsigned long int i = 0; i < pNodes->length(); ++i)
-  {
+  for (unsigned long int i = 0; i < pNodes->length(); ++i) {
     pNode = pNodes->item(i);
     Poco::AutoPtr<Poco::XML::NamedNodeMap> aMap = pNode->attributes();
     Poco::XML::XMLString id = aMap->getNamedItem("ID")->getNodeValue();
-    if (id == label)
-    {
+    if (id == label) {
       break;
     }
   }
@@ -53,8 +47,7 @@ AxisInformation *GeometryParser::getAxisInfo(const std::string dimension)
   std::string title;
   // Using ID for now. Remove if we go back to using axis name
   title = label;
-  for (unsigned long int j = 0; j < cNodes->length(); ++j)
-  {
+  for (unsigned long int j = 0; j < cNodes->length(); ++j) {
     Poco::XML::Node *cNode = cNodes->item(j);
     Poco::XML::XMLString elem = cNode->nodeName();
     // Keeping below around in case we go back to using axis name
@@ -64,12 +57,10 @@ AxisInformation *GeometryParser::getAxisInfo(const std::string dimension)
         title = cNode->innerText();
         }
       */
-    if (elem == Poco::XML::XMLString("LowerBounds"))
-    {
+    if (elem == Poco::XML::XMLString("LowerBounds")) {
       min = this->convertBounds(cNode->innerText());
     }
-    if (elem == Poco::XML::XMLString("UpperBounds"))
-    {
+    if (elem == Poco::XML::XMLString("UpperBounds")) {
       max = this->convertBounds(cNode->innerText());
     }
   }
@@ -81,8 +72,7 @@ AxisInformation *GeometryParser::getAxisInfo(const std::string dimension)
   return axis;
 }
 
-double GeometryParser::convertBounds(Poco::XML::XMLString val)
-{
+double GeometryParser::convertBounds(Poco::XML::XMLString val) {
   double temp;
   std::stringstream number(val);
   number >> temp;
@@ -95,15 +85,18 @@ double GeometryParser::convertBounds(Poco::XML::XMLString val)
  * @param time the value of the timestep
  * @return the XML geometry with the timestep value added
  */
-std::string GeometryParser::addTDimValue(double time)
-{
-  std::string tDimLabel = Mantid::Geometry::MDGeometryXMLDefinitions::workspaceTDimensionElementName();
-  Poco::AutoPtr<Poco::XML::NodeList> pNodes = this->pDoc->getElementsByTagName(tDimLabel);
+std::string GeometryParser::addTDimValue(double time) {
+  std::string tDimLabel = Mantid::Geometry::MDGeometryXMLDefinitions::
+      workspaceTDimensionElementName();
+  Poco::AutoPtr<Poco::XML::NodeList> pNodes =
+      this->pDoc->getElementsByTagName(tDimLabel);
   Poco::XML::Node *pNode = pNodes->item(0);
   std::ostringstream timeStr;
   timeStr << time;
-  Poco::AutoPtr<Poco::XML::Element> valueElement = this->pDoc->createElement("Value");
-  Poco::AutoPtr<Poco::XML::Text> valueText = this->pDoc->createTextNode(timeStr.str());
+  Poco::AutoPtr<Poco::XML::Element> valueElement =
+      this->pDoc->createElement("Value");
+  Poco::AutoPtr<Poco::XML::Text> valueText =
+      this->pDoc->createTextNode(timeStr.str());
   valueElement->appendChild(valueText);
   pNode->appendChild(valueElement);
 

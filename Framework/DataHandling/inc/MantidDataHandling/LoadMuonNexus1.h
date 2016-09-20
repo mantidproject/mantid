@@ -73,8 +73,6 @@ class DLLExport LoadMuonNexus1 : public LoadMuonNexus {
 public:
   /// Default constructor
   LoadMuonNexus1();
-  /// Destructor
-  ~LoadMuonNexus1() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadMuonNexus"; }
   /// Summary of algorithms purpose
@@ -120,7 +118,9 @@ private:
                       std::vector<double> deadTimes);
 
   /// Loads detector grouping information
-  API::Workspace_sptr loadDetectorGrouping(Mantid::NeXus::NXRoot &root);
+  API::Workspace_sptr
+  loadDetectorGrouping(Mantid::NeXus::NXRoot &root,
+                       Mantid::Geometry::Instrument_const_sptr inst);
 
   /// Creates Detector Grouping Table using all the data from the range
   DataObjects::TableWorkspace_sptr

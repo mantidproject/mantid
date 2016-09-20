@@ -34,20 +34,11 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMLZ)
 /** Constructor
  */
 LoadMLZ::LoadMLZ()
-    : m_instrumentName(""), m_instrumentPath(""), m_numberOfTubes(0),
-      m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
-      m_numberOfHistograms(0), m_monitorElasticPeakPosition(0),
-      m_wavelength(0.0), m_channelWidth(0.0), m_timeOfFlightDelay(0.0),
-      m_monitorCounts(0), m_chopper_speed(0.0), m_chopper_ratio(0), m_l1(0.0),
-      m_l2(0.0), m_t1(0.0) {
-  m_supportedInstruments.emplace_back("TOFTOF");
-  m_supportedInstruments.emplace_back("DNS");
-}
-
-//---------------------------------------------------------------------------
-/** Destructor
- */
-LoadMLZ::~LoadMLZ() {}
+    : m_numberOfTubes{0}, m_numberOfPixelsPerTube{0}, m_numberOfChannels{0},
+      m_numberOfHistograms{0}, m_monitorElasticPeakPosition{0},
+      m_wavelength{0.0}, m_channelWidth{0.0}, m_timeOfFlightDelay{0.0},
+      m_monitorCounts{0}, m_chopper_speed{0.0}, m_chopper_ratio{0}, m_l1{0.0},
+      m_l2{0.0}, m_t1{0.0}, m_supportedInstruments{"TOFTOF", "DNS"} {}
 
 //---------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -129,18 +120,18 @@ void LoadMLZ::maskDetectors(NeXus::NXEntry &entry) {
   NeXus::NXInt pmdata = entry.openNXInt(pmpath);
   // load the counts from the file into memory
   pmdata.load();
-  g_log.debug() << "PMdata size: " << pmdata.size() << std::endl;
+  g_log.debug() << "PMdata size: " << pmdata.size() << '\n';
   std::vector<int> masked_detectors(pmdata(), pmdata() + pmdata.size());
 
   g_log.debug() << "Number of masked detectors: " << masked_detectors.size()
-                << std::endl;
+                << '\n';
 
   for (auto masked_detector : masked_detectors) {
     g_log.debug() << "List of masked detectors: ";
     g_log.debug() << masked_detector;
     g_log.debug() << ", ";
   }
-  g_log.debug() << std::endl;
+  g_log.debug() << '\n';
 
   // Need to get hold of the parameter map
   Geometry::ParameterMap &pmap = m_localWorkspace->instrumentParameters();
@@ -159,8 +150,7 @@ void LoadMLZ::maskDetectors(NeXus::NXEntry &entry) {
           pmap.addBool(det, "masked", true);
         }
       } catch (Kernel::Exception::NotFoundError &e) {
-        g_log.warning() << e.what() << " Found while running MaskDetectors"
-                        << std::endl;
+        g_log.warning() << e.what() << " Found while running MaskDetectors\n";
       }
     }
   }
@@ -188,7 +178,7 @@ void LoadMLZ::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
     throw std::runtime_error(message);
   }
 
-  g_log.debug() << "Instrument name set to: " + m_instrumentName << std::endl;
+  g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 }
 
 /**
@@ -210,10 +200,9 @@ void LoadMLZ::initWorkSpace(
   m_numberOfChannels = static_cast<size_t>(data.dim2());
   m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
 
-  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << std::endl;
-  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube
-                << std::endl;
-  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << std::endl;
+  g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << '\n';
+  g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube << '\n';
+  g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << '\n';
 
   // Now create the output workspace
   m_localWorkspace = WorkspaceFactory::Instance().create(
@@ -232,7 +221,7 @@ void LoadMLZ::initInstrumentSpecific() {
   m_l1 = m_mlzloader.getL1(m_localWorkspace);
   m_l2 = m_mlzloader.getL2(m_localWorkspace);
 
-  g_log.debug() << "L1: " << m_l1 << ", L2: " << m_l2 << std::endl;
+  g_log.debug() << "L1: " << m_l1 << ", L2: " << m_l2 << '\n';
 }
 
 /**
@@ -269,21 +258,20 @@ void LoadMLZ::loadTimeDetails(NeXus::NXEntry &entry) {
   m_timeOfFlightDelay = time_of_flight_data[2] * 50.e-3;
 
   g_log.debug("Nexus Data:");
-  g_log.debug() << " MonitorCounts: " << m_monitorCounts << std::endl;
-  g_log.debug() << " ChannelWidth (microseconds): " << m_channelWidth
-                << std::endl;
-  g_log.debug() << " Wavelength (angstroems): " << m_wavelength << std::endl;
+  g_log.debug() << " MonitorCounts: " << m_monitorCounts << '\n';
+  g_log.debug() << " ChannelWidth (microseconds): " << m_channelWidth << '\n';
+  g_log.debug() << " Wavelength (angstroems): " << m_wavelength << '\n';
   g_log.debug() << " ElasticPeakPosition: " << m_monitorElasticPeakPosition
-                << std::endl;
+                << '\n';
   g_log.debug() << " TimeOfFlightDelay (microseconds): " << m_timeOfFlightDelay
-                << std::endl;
+                << '\n';
 
   m_chopper_speed = entry.getFloat("instrument/chopper/rotation_speed");
 
   m_chopper_ratio = entry.getInt("instrument/chopper/ratio");
 
-  g_log.debug() << " ChopperSpeed: " << m_chopper_speed << std::endl;
-  g_log.debug() << " ChopperRatio: " << m_chopper_ratio << std::endl;
+  g_log.debug() << " ChopperSpeed: " << m_chopper_speed << '\n';
+  g_log.debug() << " ChopperRatio: " << m_chopper_ratio << '\n';
 }
 
 /**
@@ -307,15 +295,13 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
   std::string end_time = entry.getString("end_time");
   runDetails.addProperty("run_end", end_time);
 
-  std::string wavelength = boost::lexical_cast<std::string>(m_wavelength);
-  runDetails.addProperty("wavelength", wavelength);
+  runDetails.addProperty("wavelength", m_wavelength, "Angstrom", true);
 
   double ei = m_mlzloader.calculateEnergy(m_wavelength);
-  runDetails.addProperty<double>("Ei", ei, true); // overwrite
+  runDetails.addProperty<double>("Ei", ei, "meV", true); // overwrite
 
-  std::string duration =
-      boost::lexical_cast<std::string>(entry.getInt("duration"));
-  runDetails.addProperty("duration", duration);
+  int duration = entry.getInt("duration");
+  runDetails.addProperty("duration", duration, "Seconds", true);
 
   std::string mode = entry.getString("mode");
   runDetails.addProperty("mode", mode);
@@ -326,22 +312,14 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
   // Check if temperature is defined
   NXClass sample = entry.openNXGroup("sample");
   if (sample.containsDataSet("temperature")) {
-    std::string temperature =
-        boost::lexical_cast<std::string>(entry.getFloat("sample/temperature"));
-    runDetails.addProperty("temperature", temperature);
+    double temperature = entry.getFloat("sample/temperature");
+    runDetails.addProperty("temperature", temperature, "K", true);
   }
 
-  std::string monitorCounts = boost::lexical_cast<std::string>(m_monitorCounts);
-  runDetails.addProperty("monitor_counts", monitorCounts);
-
-  std::string chopper_speed = boost::lexical_cast<std::string>(m_chopper_speed);
-  runDetails.addProperty("chopper_speed", chopper_speed);
-
-  std::string chopper_ratio = boost::lexical_cast<std::string>(m_chopper_ratio);
-  runDetails.addProperty("chopper_ratio", chopper_ratio);
-
-  std::string channel_width = boost::lexical_cast<std::string>(m_channelWidth);
-  runDetails.addProperty("channel_width", channel_width);
+  runDetails.addProperty("monitor_counts", m_monitorCounts);
+  runDetails.addProperty("chopper_speed", m_chopper_speed);
+  runDetails.addProperty("chopper_ratio", m_chopper_ratio);
+  runDetails.addProperty("channel_width", m_channelWidth, "microseconds", true);
 
   // Calculate number of full time channels - use to crop workspace - S. Busch's
   // method
@@ -362,7 +340,7 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
   runDetails.addProperty("experiment_team", user_name);
 
   runDetails.addProperty("EPP", m_monitorElasticPeakPosition);
-  runDetails.addProperty("TOF1", m_t1);
+  runDetails.addProperty("TOF1", m_t1, "microseconds", true);
 }
 
 /**
@@ -394,7 +372,7 @@ void LoadMLZ::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   data.load();
 
   m_t1 = m_mlzloader.calculateTOF(m_l1, m_wavelength) * 1.0e+6;
-  g_log.debug() << " t1 (microseconds): " << m_t1 << std::endl;
+  g_log.debug() << " t1 (microseconds): " << m_t1 << '\n';
 
   std::vector<double> detectorTofBins(m_numberOfChannels + 1);
   for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
@@ -439,7 +417,7 @@ void LoadMLZ::runLoadInstrument() {
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
-    g_log.debug() << "InstrumentName" << m_instrumentName << std::endl;
+    g_log.debug() << "InstrumentName" << m_instrumentName << '\n';
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
     loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(true));

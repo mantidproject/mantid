@@ -1,12 +1,16 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/CalculateEfficiency.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <vector>
 
 namespace Mantid {
@@ -40,6 +44,14 @@ void CalculateEfficiency::init() {
   declareProperty(
       "MaxEfficiency", EMPTY_DBL(), positiveDouble,
       "Maximum efficiency for a pixel to be considered (default: no maximum).");
+  declareProperty("MaskedFullComponent", "",
+                  "Component Name to fully mask according to the IDF file.");
+  declareProperty(
+      make_unique<ArrayProperty<int>>("MaskedEdges"),
+      "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
+  declareProperty(
+      "MaskedComponent", "",
+      "Component Name to mask the edges according to the IDF file.");
 }
 
 /** Executes the algorithm
@@ -56,6 +68,28 @@ void CalculateEfficiency::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr rebinnedWS; // = inputWS;
 
+  //  BioSANS has 2 detectors and reduces one at the time: one is masked!
+  //  We must use that masked detector
+  const std::string maskedFullComponent =
+      getPropertyValue("MaskedFullComponent");
+  if (!maskedFullComponent.empty()) {
+    g_log.debug() << "CalculateEfficiency: Masking Full Component: "
+                  << maskedFullComponent << "\n";
+    maskComponent(*inputWS, maskedFullComponent);
+  }
+
+  // BioSANS has 2 detectors and the front masks the back!!!!
+  // We must mask the shaded part to calculate efficency
+  std::vector<int> maskedEdges = getProperty("MaskedEdges");
+  if (!maskedEdges.empty() && (maskedEdges[0] > 0 || maskedEdges[1] > 0 ||
+                               maskedEdges[2] > 0 || maskedEdges[3] > 0)) {
+    g_log.debug() << "CalculateEfficiency: Masking edges length = "
+                  << maskedEdges.size() << ")"
+                  << " of the component " << maskedFullComponent << "\n";
+    const std::string maskedComponent = getPropertyValue("MaskedComponent");
+    maskEdges(inputWS, maskedEdges[0], maskedEdges[1], maskedEdges[2],
+              maskedEdges[3], maskedComponent);
+  }
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS; // = getProperty("OutputWorkspace");
 
@@ -72,7 +106,7 @@ void CalculateEfficiency::exec() {
   WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
   for (int i = 0; i < static_cast<int>(rebinnedWS->getNumberHistograms());
        i++) {
-    outputWS->dataX(i) = rebinnedWS->readX(i);
+    outputWS->setSharedX(i, rebinnedWS->sharedX(i));
   }
   setProperty("OutputWorkspace", outputWS);
 
@@ -105,8 +139,6 @@ void CalculateEfficiency::exec() {
     normalizeDetectors(rebinnedWS, outputWS, sum, err, npixels, EMPTY_DBL(),
                        EMPTY_DBL());
   }
-
-  return;
 }
 
 /*
@@ -128,25 +160,24 @@ void CalculateEfficiency::sumUnmaskedDetectors(MatrixWorkspace_sptr rebinnedWS,
   error = 0.0;
   nPixels = 0;
 
+  const auto &spectrumInfo = rebinnedWS->spectrumInfo();
   for (int i = 0; i < numberOfSpectra; i++) {
     progress(0.2 + 0.2 * i / numberOfSpectra, "Computing sensitivity");
-    // Get the detector object for this spectrum
-    IDetector_const_sptr det = rebinnedWS->getDetector(i);
-    // If this detector is masked, skip to the next one
-    if (det->isMasked())
-      continue;
-    // If this detector is a monitor, skip to the next one
-    if (det->isMonitor())
+    // Skip if we have a monitor or if the detector is masked.
+    if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
       continue;
 
     // Retrieve the spectrum into a vector
-    const MantidVec &YValues = rebinnedWS->readY(i);
-    const MantidVec &YErrors = rebinnedWS->readE(i);
+    auto &YValues = rebinnedWS->y(i);
+    auto &YErrors = rebinnedWS->e(i);
 
     sum += YValues[0];
     error += YErrors[0] * YErrors[0];
     nPixels++;
   }
+
+  g_log.debug() << "sumUnmaskedDetectors: unmasked pixels = " << nPixels
+                << " from a total of " << numberOfSpectra << "\n";
 
   error = std::sqrt(error);
 }
@@ -175,24 +206,23 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
   // range
   std::vector<size_t> dets_to_mask;
 
+  const auto &spectrumInfo = rebinnedWS->spectrumInfo();
   for (size_t i = 0; i < numberOfSpectra; i++) {
     const double currProgress =
         0.4 +
         0.2 * (static_cast<double>(i) / static_cast<double>(numberOfSpectra));
     progress(currProgress, "Computing sensitivity");
-    // Get the detector object for this spectrum
-    IDetector_const_sptr det = rebinnedWS->getDetector(i);
-    // If this detector is masked, skip to the next one
-    if (det->isMasked())
+    // If this spectrum is masked, skip to the next one
+    if (spectrumInfo.isMasked(i))
       continue;
 
     // Retrieve the spectrum into a vector
-    const MantidVec &YIn = rebinnedWS->readY(i);
-    const MantidVec &EIn = rebinnedWS->readE(i);
-    MantidVec &YOut = outputWS->dataY(i);
-    MantidVec &EOut = outputWS->dataE(i);
+    auto &YIn = rebinnedWS->y(i);
+    auto &EIn = rebinnedWS->e(i);
+    auto &YOut = outputWS->mutableY(i);
+    auto &EOut = outputWS->mutableE(i);
     // If this detector is a monitor, skip to the next one
-    if (det->isMonitor()) {
+    if (spectrumInfo.isMonitor(i)) {
       YOut[0] = 1.0;
       EOut[0] = 0.0;
       continue;
@@ -210,6 +240,13 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
     if (!isEmpty(max_eff) && YOut[0] > max_eff)
       dets_to_mask.push_back(i);
   }
+
+  g_log.debug() << "normalizeDetectors: Masked pixels outside the acceptable "
+                   "efficiency range [" << min_eff << "," << max_eff
+                << "] = " << dets_to_mask.size()
+                << " from a total of non masked = " << nPixels
+                << " (from a total number of spectra in the ws = "
+                << numberOfSpectra << ")\n";
 
   // If we identified pixels to be masked, mask them now
   if (!dets_to_mask.empty()) {
@@ -240,6 +277,125 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
       g_log.error(e.str());
     }
   }
+}
+
+/**
+ * Fully masks one component named componentName
+ * @param ws :: workspace with the respective instrument assigned
+ * @param componentName :: must be a known CompAssembly.
+ */
+void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
+                                        const std::string &componentName) {
+  auto instrument = ws.getInstrument();
+  try {
+    boost::shared_ptr<const Geometry::ICompAssembly> component =
+        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+            instrument->getComponentByName(componentName));
+    if (!component) {
+      g_log.warning("Component " + componentName +
+                    " expected to be a CompAssembly, e.g., a bank. Component " +
+                    componentName + " not masked!");
+      return;
+    }
+    std::vector<detid_t> detectorList;
+    for (int x = 0; x < component->nelements(); x++) {
+      boost::shared_ptr<Geometry::ICompAssembly> xColumn =
+          boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*component)[x]);
+      for (int y = 0; y < xColumn->nelements(); y++) {
+        boost::shared_ptr<Geometry::Detector> detector =
+            boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
+        if (detector) {
+          auto detID = detector->getID();
+          detectorList.push_back(detID);
+        }
+      }
+    }
+    auto indexList = ws.getIndicesFromDetectorIDs(detectorList);
+    for (const auto &idx : indexList)
+      ws.maskWorkspaceIndex(idx);
+  } catch (std::exception &) {
+    g_log.warning("Expecting the component " + componentName +
+                  " to be a CompAssembly, e.g., a bank. Component not masked!");
+  }
+}
+
+/**
+ * Mask edges of a RectangularDetector
+ * @param ws :: Input workspace
+ * @param left :: number of columns to mask left
+ * @param right :: number of columns to mask right
+ * @param high :: number of rows to mask top
+ * @param low :: number of rows to mask Bottom
+ * @param componentName :: Must be a RectangularDetector
+ */
+void CalculateEfficiency::maskEdges(MatrixWorkspace_sptr ws, int left,
+                                    int right, int high, int low,
+                                    const std::string &componentName) {
+
+  auto instrument = ws->getInstrument();
+
+  boost::shared_ptr<Mantid::Geometry::RectangularDetector> component;
+  try {
+    component =
+        boost::const_pointer_cast<Mantid::Geometry::RectangularDetector>(
+            boost::dynamic_pointer_cast<
+                const Mantid::Geometry::RectangularDetector>(
+                instrument->getComponentByName(componentName)));
+  } catch (std::exception &) {
+    g_log.warning("Expecting the component " + componentName +
+                  " to be a RectangularDetector. maskEdges not executed.");
+    return;
+  }
+  if (!component) {
+    g_log.warning("Component " + componentName +
+                  " is not a RectangularDetector. MaskEdges not executed.");
+    return;
+  }
+
+  std::vector<int> IDs;
+  int i = 0;
+
+  while (i < left * component->idstep()) {
+    IDs.push_back(component->idstart() + i);
+    i += 1;
+  }
+  // right
+  i = component->maxDetectorID() - right * component->idstep();
+  while (i < component->maxDetectorID()) {
+    IDs.push_back(i);
+    i += 1;
+  }
+  // low: 0,256,512,768,..,1,257,513
+  for (int row = 0; row < low; row++) {
+    i = row + component->idstart();
+    while (i < component->nelements() * component->idstep() -
+                   component->idstep() + low + component->idstart()) {
+      IDs.push_back(i);
+      i += component->idstep();
+    }
+  }
+  // high # 255, 511, 767..
+  for (int row = 0; row < high; row++) {
+    i = component->idstep() + component->idstart() - row - 1;
+    while (i < component->nelements() * component->idstep() +
+                   component->idstart()) {
+      IDs.push_back(i);
+      i += component->idstep();
+    }
+  }
+
+  g_log.debug() << "CalculateEfficiency::maskEdges Detector Ids to Mask:"
+                << std::endl;
+  for (auto id : IDs) {
+    g_log.debug() << id << " ";
+  }
+  g_log.debug() << std::endl;
+
+  IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
+  maskAlg->setChild(true);
+  maskAlg->setProperty("Workspace", ws);
+  maskAlg->setProperty("DetectorList", IDs);
+  maskAlg->execute();
 }
 
 } // namespace Algorithms

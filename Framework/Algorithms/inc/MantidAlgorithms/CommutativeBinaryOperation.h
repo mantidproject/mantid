@@ -41,11 +41,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 class DLLExport CommutativeBinaryOperation : public BinaryOperation {
 public:
-  /// Default constructor
-  CommutativeBinaryOperation() : BinaryOperation(){};
-  /// Destructor
-  ~CommutativeBinaryOperation() override{};
-
 protected:
   // Overridden BinaryOperation method
   /// Checks the overall size compatability of two workspaces

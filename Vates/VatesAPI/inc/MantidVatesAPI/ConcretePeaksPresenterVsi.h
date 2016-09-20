@@ -15,7 +15,8 @@ namespace VATES {
 class DLLExport ConcretePeaksPresenterVsi : public PeaksPresenterVsi {
 public:
   ConcretePeaksPresenterVsi(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
-                            ViewFrustum_const_sptr frustum, std::string wsFrame);
+                            ViewFrustum_const_sptr frustum,
+                            std::string wsFrame);
   ~ConcretePeaksPresenterVsi() override;
   Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() const override;
   std::vector<bool> getViewablePeaks() const override;

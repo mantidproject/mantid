@@ -100,7 +100,8 @@ protected:
   /// auto-guess additional directories when the user gives the samples path
   void findFlatsDarksFromSampleGivenByUser(TomoPathsConfig &cfg);
 
-  bool usableEnergyBandsPaths(const std::map<std::string, std::string> &algParams);
+  bool
+  usableEnergyBandsPaths(const std::map<std::string, std::string> &algParams);
 
   /// Starts a periodic query just to keep sessions alive when logged in
   void startKeepAliveMechanism(int period);

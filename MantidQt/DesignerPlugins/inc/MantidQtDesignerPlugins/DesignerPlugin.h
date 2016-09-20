@@ -3,13 +3,14 @@
 
 #include <QDesignerCustomWidgetInterface>
 
-/** 
+/**
 The DesignerPlugin creates a Qt designer plugin of the AlgorithmSelectorWidget.
 
 @author Martyn Gigg, Tessella plc
 @date 03/08/2009
 
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -26,10 +27,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-File change history is stored at: <https://github.com/mantidproject/mantid>    
+File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class DesignerPlugin : public QObject, public QDesignerCustomWidgetInterface
-{
+class DesignerPlugin : public QObject, public QDesignerCustomWidgetInterface {
   Q_OBJECT
   Q_INTERFACES(QDesignerCustomWidgetInterface)
 
@@ -68,7 +68,7 @@ public:
 private:
   std::string getShortName() const;
 
-  /// Are we initialized? 
+  /// Are we initialized?
   bool m_initialized;
 };
 

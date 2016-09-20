@@ -9,27 +9,23 @@ namespace CustomInterfaces {
 
 /**
  * Gets the most recently modified valid Nexus file in the same directory as the
- * first run
+ * first run. Assumes files go in run number order.
  * @returns Path to most recently modified file
  */
 std::string ALCLatestFileFinder::getMostRecentFile() const {
   if (m_firstRunFileName.empty()) {
     return "";
   } else {
+    // List all valid Nexus files in the directory
     Poco::Path path(m_firstRunFileName);
-    Poco::File latestFile(path);
-    Poco::Timestamp lastModified(0); // start at Epoch
+    std::vector<std::string> fileNames;
     try {
       // Directory iterator - check if we were passed a file or a directory
-      Poco::DirectoryIterator iter(latestFile.isDirectory() ? path
-                                                            : path.parent());
+      Poco::DirectoryIterator iter(path.isDirectory() ? path : path.parent());
       Poco::DirectoryIterator end; // the end iterator
       while (iter != end) {
         if (isValid(iter->path())) {
-          if (iter->getLastModified() > lastModified) {
-            latestFile = *iter;
-            lastModified = iter->getLastModified();
-          }
+          fileNames.push_back(iter->path());
         }
         ++iter;
       }
@@ -38,7 +34,11 @@ std::string ALCLatestFileFinder::getMostRecentFile() const {
       // Return the file we were given.
       return path.toString();
     }
-    return latestFile.path();
+
+    // Sort by run number
+    std::sort(fileNames.begin(), fileNames.end());
+
+    return fileNames.back();
   }
 }
 

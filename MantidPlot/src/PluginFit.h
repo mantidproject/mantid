@@ -2,7 +2,8 @@
     File                 : PluginFit.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Plugin Fit class
 
@@ -31,25 +32,24 @@
 
 #include "Fit.h"
 
-class PluginFit : public Fit
-{
-	Q_OBJECT
+class PluginFit : public Fit {
+  Q_OBJECT
 
-	public:
-		PluginFit(ApplicationWindow *parent, Graph *g);
-		PluginFit(ApplicationWindow *parent, Graph *g, const QString& curveTitle);
-		PluginFit(ApplicationWindow *parent, Graph *g, const QString& curveTitle, double start, double end);
-		PluginFit(ApplicationWindow *parent, Table *t, const QString& xCol, const QString& yCol, int startRow = 1, int endRow = -1);
+public:
+  PluginFit(ApplicationWindow *parent, Graph *g);
+  PluginFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle);
+  PluginFit(ApplicationWindow *parent, Graph *g, const QString &curveTitle,
+            double start, double end);
+  PluginFit(ApplicationWindow *parent, Table *t, const QString &xCol,
+            const QString &yCol, int startRow = 1, int endRow = -1);
 
-		bool load(const QString& pluginName);
-                double eval(double *par, double x) override {
-                  return f_eval(x, par);
-                };
+  bool load(const QString &pluginName);
+  double eval(double *par, double x) override { return f_eval(x, par); };
 
-        private:
-		void init();
-		typedef double (*fitFunctionEval)(double, double *);
-                void calculateFitCurveData(double *X, double *Y) override;
-                fitFunctionEval f_eval;
+private:
+  void init();
+  typedef double (*fitFunctionEval)(double, double *);
+  void calculateFitCurveData(double *X, double *Y) override;
+  fitFunctionEval f_eval;
 };
 #endif

@@ -8,20 +8,17 @@
 #include <QMap>
 #include <QList>
 
-namespace Mantid
-{
-    namespace API
-    {
-        class IAlgorithm;
-        typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
-    }
+namespace Mantid {
+namespace API {
+class IAlgorithm;
+typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
+}
 }
 
-struct PropertyData
-{
-    PropertyData(const QString& nm,const QString& vl):name(nm),value(vl){}
-    QString name;
-    QString value;
+struct PropertyData {
+  PropertyData(const QString &nm, const QString &vl) : name(nm), value(vl) {}
+  QString name;
+  QString value;
 };
 
 /** @class InputHistory
@@ -31,7 +28,8 @@ struct PropertyData
  @author Roman Tolchenov, Tessella Support Services plc
  @date 15/10/2008
 
- Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -52,44 +50,44 @@ struct PropertyData
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class InputHistoryImpl
-{
+class InputHistoryImpl {
 public:
   InputHistoryImpl(const InputHistoryImpl &) = delete;
   InputHistoryImpl &operator=(const InputHistoryImpl &) = delete;
-    void updateAlgorithm(Mantid::API::IAlgorithm_sptr alg);
-    /// The name:value map of non-default properties with which algorithm algName was called last time.
-    QMap< QString, QString > algorithmProperties(const QString& algName);
-    /// Returns the value of property propNameif it has been recorded for algorithm algName.
-    QString algorithmProperty(const QString& algName,const QString& propName);
-    /// Replaces the value of a recorded property.
-    void updateAlgorithmProperty(const QString& algName,const QString& propName, const QString& propValue);
-    /// Saves the properties.
-    void save();
+  void updateAlgorithm(Mantid::API::IAlgorithm_sptr alg);
+  /// The name:value map of non-default properties with which algorithm algName
+  /// was called last time.
+  QMap<QString, QString> algorithmProperties(const QString &algName);
+  /// Returns the value of property propNameif it has been recorded for
+  /// algorithm algName.
+  QString algorithmProperty(const QString &algName, const QString &propName);
+  /// Replaces the value of a recorded property.
+  void updateAlgorithmProperty(const QString &algName, const QString &propName,
+                               const QString &propValue);
+  /// Saves the properties.
+  void save();
 
-    /// Returns the directory name from a full file path.
-    static QString getDirectoryFromFilePath(const QString& filePath);
-    /// Returns the short file name (without extension) from a full file path.
-    static QString getNameOnlyFromFilePath(const QString& filePath);
+  /// Returns the directory name from a full file path.
+  static QString getDirectoryFromFilePath(const QString &filePath);
+  /// Returns the short file name (without extension) from a full file path.
+  static QString getNameOnlyFromFilePath(const QString &filePath);
 
 private:
-	friend struct Mantid::Kernel::CreateUsingNew<InputHistoryImpl>;
+  friend struct Mantid::Kernel::CreateUsingNew<InputHistoryImpl>;
 
-	///Private Constructor
-	InputHistoryImpl();
-	///Private Destructor
-        virtual ~InputHistoryImpl() = default;
+  /// Private Constructor
+  InputHistoryImpl();
+  /// Private Destructor
+  virtual ~InputHistoryImpl() = default;
 
   /// For debugging
   // cppcheck-suppress unusedPrivateFunction
   void printAll();
 
   /// Keeps algorithm parameters.
-  QMap< QString,QList< PropertyData > > m_history;
-
+  QMap<QString, QList<PropertyData>> m_history;
 };
 
 typedef Mantid::Kernel::SingletonHolder<InputHistoryImpl> InputHistory;
-
 
 #endif /* INPUTHISTORY_H */

@@ -8,6 +8,11 @@
 #include <vector>
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+class HistogramE;
+}
 namespace Algorithms {
 /** Multiple scattering absorption correction, originally used to
     correct vanadium spectrum at IPNS.  Algorithm originally worked
@@ -41,12 +46,6 @@ namespace Algorithms {
  */
 class DLLExport MultipleScatteringCylinderAbsorption : public API::Algorithm {
 public:
-  /// Default constructor
-  MultipleScatteringCylinderAbsorption();
-
-  /// Destructor
-  ~MultipleScatteringCylinderAbsorption() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override;
 
@@ -71,9 +70,9 @@ private:
   void apply_msa_correction(const double angle_deg, const double radius,
                             const double coeff1, const double coeff2,
                             const double coeff3,
-                            const std::vector<double> &wavelength,
-                            std::vector<double> &y_val,
-                            std::vector<double> &errors);
+                            const HistogramData::HistogramX &wavelength,
+                            HistogramData::HistogramY &y_val,
+                            HistogramData::HistogramE &errors);
 };
 
 } // namespace Algorithm

@@ -34,9 +34,6 @@ namespace Algorithms {
 */
 class DLLExport ConvertUnitsUsingDetectorTable : public API::Algorithm {
 public:
-  ConvertUnitsUsingDetectorTable();
-  ~ConvertUnitsUsingDetectorTable() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -75,11 +72,12 @@ private:
   API::MatrixWorkspace_sptr
   removeUnphysicalBins(const API::MatrixWorkspace_const_sptr workspace);
 
-  std::size_t
-      m_numberOfSpectra; ///< The number of spectra in the input workspace
-  bool m_distribution;   ///< Whether input is a distribution. Only applies to
+  std::size_t m_numberOfSpectra =
+      0; ///< The number of spectra in the input workspace
+  bool m_distribution =
+      false; ///< Whether input is a distribution. Only applies to
   /// histogram workspaces.
-  bool m_inputEvents; ///< Flag indicating whether input workspace is an
+  bool m_inputEvents = false; ///< Flag indicating whether input workspace is an
   /// EventWorkspace
   Kernel::Unit_const_sptr m_inputUnit; ///< The unit of the input workspace
   Kernel::Unit_sptr m_outputUnit;      ///< The unit we're going to

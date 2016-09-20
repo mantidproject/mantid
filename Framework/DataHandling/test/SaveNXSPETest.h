@@ -157,7 +157,7 @@ private:
     for (size_t j = 0; j < inputWS->getNumberHistograms(); ++j) {
       // Just set the spectrum number to match the index
       inputWS->getSpectrum(j)
-          ->setSpectrumNo(static_cast<Mantid::specnum_t>(j + 1));
+          .setSpectrumNo(static_cast<Mantid::specnum_t>(j + 1));
     }
 
     // mask the detector
@@ -168,7 +168,7 @@ private:
     m_Pmap->addBool(toMask.get(), "masked", true);
 
     // required to get it passed the algorthms validator
-    inputWS->isDistribution(true);
+    inputWS->setDistribution(true);
 
     return inputWS;
   }

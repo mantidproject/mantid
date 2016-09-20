@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/UnwrapSNS.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -32,7 +30,7 @@ using std::size_t;
 /// Default constructor
 UnwrapSNS::UnwrapSNS()
     : m_conversionConstant(0.), m_inputWS(), m_inputEvWS(), m_LRef(0.),
-      m_L1(0.), m_Tmin(0.), m_Tmax(0.), m_frameWidth(0.), m_numberOfSpectra(0),
+      m_Tmin(0.), m_Tmax(0.), m_frameWidth(0.), m_numberOfSpectra(0),
       m_XSize(0), m_progress(nullptr) {}
 
 /// Destructor
@@ -105,16 +103,6 @@ void UnwrapSNS::exec() {
   // Get the input workspace
   m_inputWS = getProperty("InputWorkspace");
 
-  // without the primary flight path the algorithm cannot work
-  try {
-    Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
-    Geometry::IComponent_const_sptr sample = instrument->getSample();
-    m_L1 = instrument->getSource()->getDistance(*sample);
-  } catch (NotFoundError &) {
-    throw InstrumentDefinitionError(
-        "Unable to calculate source-sample distance", m_inputWS->getTitle());
-  }
-
   // Get the "reference" flightpath (currently passed in as a property)
   m_LRef = getProperty("LRef");
 
@@ -144,14 +132,15 @@ void UnwrapSNS::exec() {
     setProperty("OutputWorkspace", outputWS);
   }
 
+  // without the primary flight path the algorithm cannot work
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const double L1 = spectrumInfo.l1();
+
   PARALLEL_FOR2(m_inputWS, outputWS)
   for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
     PARALLEL_START_INTERUPT_REGION
-    // get the total flight path
-    bool isMonitor;
-    double Ld = this->calculateFlightpath(workspaceIndex, isMonitor);
-    if (Ld < 0.) {
+    if (!spectrumInfo.hasDetectors(workspaceIndex)) {
       // If the detector flightpath is missing, zero the data
       g_log.debug() << "Detector information for workspace index "
                     << workspaceIndex << " is not available.\n";
@@ -159,6 +148,7 @@ void UnwrapSNS::exec() {
       outputWS->dataY(workspaceIndex).assign(m_XSize - 1, 0.0);
       outputWS->dataE(workspaceIndex).assign(m_XSize - 1, 0.0);
     } else {
+      const double Ld = L1 + spectrumInfo.l2(workspaceIndex);
       // fix the x-axis
       size_t pivot = this->unwrapX(m_inputWS->readX(workspaceIndex),
                                    outputWS->dataX(workspaceIndex), Ld);
@@ -204,25 +194,30 @@ void UnwrapSNS::execEvent() {
 
   this->getTofRangeData(true);
 
+  // without the primary flight path the algorithm cannot work
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const double L1 = spectrumInfo.l1();
+
   // do the actual work
   //  PARALLEL_FOR2(m_inputWS, outW)
   for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
     //    PARALLEL_START_INTERUPT_REGION
-    std::size_t numEvents =
-        outW->getEventList(workspaceIndex).getNumberEvents();
-    bool isMonitor;
-    double Ld = this->calculateFlightpath(workspaceIndex, isMonitor);
+    std::size_t numEvents = outW->getSpectrum(workspaceIndex).getNumberEvents();
+    double Ld = -1.0;
+    if (spectrumInfo.hasDetectors(workspaceIndex))
+      Ld = L1 + spectrumInfo.l2(workspaceIndex);
+
     MantidVec time_bins;
     if (outW->dataX(0).size() > 2) {
       this->unwrapX(m_inputWS->dataX(workspaceIndex), time_bins, Ld);
-      outW->setX(workspaceIndex, time_bins);
+      outW->setBinEdges(workspaceIndex, time_bins);
     } else {
-      outW->setX(workspaceIndex, m_inputWS->dataX(workspaceIndex));
+      outW->setX(workspaceIndex, m_inputWS->refX(workspaceIndex));
     }
     if (numEvents > 0) {
       MantidVec times(numEvents);
-      outW->getEventList(workspaceIndex).getTofs(times);
+      outW->getSpectrum(workspaceIndex).getTofs(times);
       double filterVal = m_Tmin * Ld / m_LRef;
       for (size_t j = 0; j < numEvents; j++) {
         if (times[j] < filterVal)
@@ -230,7 +225,7 @@ void UnwrapSNS::execEvent() {
         else
           break; // stop filtering
       }
-      outW->getEventList(workspaceIndex).setTofs(times);
+      outW->getSpectrum(workspaceIndex).setTofs(times);
     }
     m_progress->report();
     //    PARALLEL_END_INTERUPT_REGION
@@ -239,40 +234,6 @@ void UnwrapSNS::execEvent() {
 
   outW->clearMRU();
   this->runMaskDetectors();
-}
-
-/** Calculates the total flightpath for the given detector.
- *  This is L1+L2 normally, but is the source-detector distance for a monitor.
- *  @param spectrum ::  The workspace index
- *  @param isMonitor :: Output: true is this detector is a monitor
- *  @return The flightpath (Ld) for the detector linked to spectrum
- *  @throw Kernel::Exception::InstrumentDefinitionError if the detector position
- * can't be obtained
- */
-double UnwrapSNS::calculateFlightpath(const int &spectrum,
-                                      bool &isMonitor) const {
-  double Ld = -1.0;
-  try {
-    // Get the detector object for this histogram
-    Geometry::IDetector_const_sptr det = m_inputWS->getDetector(spectrum);
-    // Get the sample-detector distance for this detector (or source-detector if
-    // a monitor)
-    // This is the total flightpath
-    isMonitor = det->isMonitor();
-    // Get the L2 distance if this detector is not a monitor
-    if (!isMonitor) {
-      double L2 = det->getDistance(*(m_inputWS->getInstrument()->getSample()));
-      Ld = m_L1 + L2;
-    }
-    // If it is a monitor, then the flightpath is the distance to the source
-    else {
-      Ld = det->getDistance(*(m_inputWS->getInstrument()->getSource()));
-    }
-  } catch (Exception::NotFoundError &) {
-    // If the detector information is missing, return a negative number
-  }
-
-  return Ld;
 }
 
 int UnwrapSNS::unwrapX(const MantidVec &datain, MantidVec &dataout,

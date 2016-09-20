@@ -64,7 +64,7 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
     /*
     Write mask array with correct order for each internal dimension.
     */
-        auto masks = Mantid::Kernel::make_unique<bool[]>(nDims);
+    auto masks = Mantid::Kernel::make_unique<bool[]>(nDims);
     for (size_t i_dim = 0; i_dim < nDims; ++i_dim) {
       bool bIntegrated = imdws->getDimension(i_dim)->getIsIntegrated();
       masks[i_dim] =
@@ -110,7 +110,7 @@ vtkMDQuadFactory::create(ProgressAction &progressUpdating) const {
       progressUpdating.eventRaised(progressFactor * double(iBox));
 
       Mantid::signal_t signal = it->getNormalizedSignal();
-      if (!isSpecial(signal) && m_thresholdRange->inRange(signal)) {
+      if (std::isfinite(signal) && m_thresholdRange->inRange(signal)) {
         useBox[iBox] = true;
         signals->InsertNextValue(static_cast<float>(signal));
 

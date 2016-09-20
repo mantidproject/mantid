@@ -20,7 +20,34 @@ class VesuvioTests(unittest.TestCase):
         if monitor_name in mtd:
             mtd.remove(monitor_name)
 
+
+    #==================== Test spectrum list validation ============================
+
+    def test_spectrum_list_single_range(self):
+        diff_mode = "DoubleDifference"
+        self._run_load("14188", "10-20", diff_mode)
+
+        # check workspace created
+        self.assertTrue(mtd.doesExist(self.ws_name))
+
+    def test_spectrum_list_comma_separated_list(self):
+        diff_mode = "DoubleDifference"
+        self._run_load("14188", "10,20,30,40", diff_mode)
+
+        # check workspace created
+        self.assertTrue(mtd.doesExist(self.ws_name))
+
+    def test_spectrum_list_comma_separated_ranges(self):
+        diff_mode = "DoubleDifference"
+        self._run_load("14188", "10-20;30-40", diff_mode, do_size_check=False)
+
+        # check workspace created
+        self.assertTrue(mtd.doesExist(self.ws_name))
+
+
     #================== Success cases ================================
+
+
     def test_load_with_back_scattering_spectra_produces_correct_workspace_using_double_difference(self):
         diff_mode = "DoubleDifference"
         self._run_load("14188", "3-134", diff_mode)
@@ -39,7 +66,10 @@ class VesuvioTests(unittest.TestCase):
         diff_mode = "SingleDifference"
         self._run_load("14188", "3-134", diff_mode, load_mon=True)
         self.assertTrue(mtd.doesExist('evs_raw_monitors'))
-        self.assertTrue(isinstance(mtd['evs_raw_monitors'], MatrixWorkspace))
+        monitor_ws = mtd['evs_raw_monitors']
+        self.assertTrue(isinstance(monitor_ws, MatrixWorkspace))
+        self.assertEqual(monitor_ws.readX(0)[0], 5)
+        self.assertEqual(monitor_ws.readX(0)[-1], 19990)
 
     def test_monitors_loaded_into_ADS_when_monitor_load_is_true_for_forward_scattering(self):
         diff_mode = "SingleDifference"
@@ -272,14 +302,14 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(sigma_l2, 0.023, places=tol_places)
         self.assertAlmostEqual(sigma_tof, 0.370, places=tol_places)
         if forward_scatter:
-            self.assertAlmostEqual(sigma_theta, 0.040, places=tol_places)
+            self.assertAlmostEqual(sigma_theta, 0.016, places=tol_places)
             if diff_mode == "DoubleDifference":
                 raise ValueError("Double difference is not compataible with forward scattering spectra")
             else:
                 self.assertAlmostEqual(sigma_gauss, 73, places=tol_places)
                 self.assertAlmostEqual(hwhm_lorentz, 24, places=tol_places)
         else:
-            self.assertAlmostEqual(sigma_theta, 0.0227, places=tol_places)
+            self.assertAlmostEqual(sigma_theta, 0.016, places=tol_places)
             if diff_mode == "DoubleDifference":
                 self.assertAlmostEqual(sigma_gauss, 88.7, places=tol_places)
                 self.assertAlmostEqual(hwhm_lorentz, 40.3, places=tol_places)
@@ -287,7 +317,7 @@ class VesuvioTests(unittest.TestCase):
                 self.assertAlmostEqual(sigma_gauss, 52.3, places=tol_places)
                 self.assertAlmostEqual(hwhm_lorentz, 141.2, places=tol_places)
 
-    def _run_load(self, runs, spectra, diff_opt, ip_file="", sum_runs=False, load_mon=False):
+    def _run_load(self, runs, spectra, diff_opt, ip_file="", sum_runs=False, load_mon=False, do_size_check=True):
         ms.LoadVesuvio(Filename=runs,OutputWorkspace=self.ws_name,
                        SpectrumList=spectra,Mode=diff_opt,InstrumentParFile=ip_file,
                        SumSpectra=sum_runs, LoadMonitors=load_mon)
@@ -309,8 +339,9 @@ class VesuvioTests(unittest.TestCase):
                 return len(elements)
             else:
                 return 1
+        if do_size_check:
+            self._do_size_check(self.ws_name, expected_size())
 
-        self._do_size_check(self.ws_name, expected_size())
         loaded_data = mtd[self.ws_name]
         if "Difference" in diff_opt:
             self.assertTrue(not loaded_data.isHistogramData())

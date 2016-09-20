@@ -1,4 +1,5 @@
 # pylint: disable=no-init,invalid-name,bare-except
+from __future__ import (absolute_import, division, print_function)
 import math
 import time
 import mantid
@@ -85,7 +86,7 @@ class LRReflectivityOutput(PythonAlgorithm):
         # Get binning parameters
         binning_parameters = self.getProperty("OutputBinning").value
         header_list = ("DataRun", "NormRun", "TwoTheta(deg)", "LambdaMin(A)",
-                      "LambdaMax(A)", "Qmin(1/A)", "Qmax(1/A)", "SF_A", "SF_B", "PrimaryFrac")
+                       "LambdaMax(A)", "Qmin(1/A)", "Qmax(1/A)", "SF_A", "SF_B", "PrimaryFrac")
         header_info = "# %-9s %-9s %-14s %-14s %-12s %-12s %-12s %-12s %-12s %-12s\n" % header_list
         # Convert each histo to histograms and rebin to final binning
         for ws in scaled_ws_list:
@@ -176,7 +177,8 @@ class LRReflectivityOutput(PythonAlgorithm):
                 w = 1.0 / e_values[i]**2
                 total += w * y_values[i]
                 weights += w
-            scaling_factor = total / weights
+            if weights > 0:
+                scaling_factor = total / weights
 
         Scale(InputWorkspace=scaled_ws_list[0] + '_histo', OutputWorkspace=scaled_ws_list[0] + '_scaled',
               Factor=1.0 / scaling_factor, Operation='Multiply')
@@ -194,11 +196,14 @@ class LRReflectivityOutput(PythonAlgorithm):
         start_time = mtd[scaled_ws_list[0] + '_scaled'].getRun().getProperty("start_time").value
         experiment = mtd[scaled_ws_list[0] + '_scaled'].getRun().getProperty("experiment_identifier").value
         run_number = mtd[scaled_ws_list[0] + '_scaled'].getRun().getProperty("run_number").value
+        run_title = mtd[scaled_ws_list[0] + '_scaled'].getTitle()
 
         content = '# Experiment %s Run %s\n' % (experiment, run_number)
+        content += '# Run title: %s\n' % run_title
         content += '# Run start time: %s\n' % start_time
         content += '# Reduction time: %s\n' % time.ctime()
         content += '# Mantid version: %s\n' % mantid.__version__
+        content += '# Scaling factor: %s\n' % scaling_factor
         content += header_info
 
         try:

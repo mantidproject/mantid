@@ -21,23 +21,25 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
+namespace {
+template <typename MDE, size_t nd>
+void prepareUpdate(MDBoxFlatTree &BoxFlatStruct, BoxController *bc,
+                   typename MDEventWorkspace<MDE, nd>::sptr ws,
+                   std::string filename) {
+  // remove all boxes from the DiskBuffer. DB will calculate boxes positions
+  // on HDD.
+  bc->getFileIO()->flushCache();
+  // flatten the box structure; this will remember boxes file positions in the
+  // box structure
+  BoxFlatStruct.initFlatStructure(ws, filename);
+}
+}
+
 namespace Mantid {
 namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveMD)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SaveMD::SaveMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveMD::~SaveMD() {}
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -83,30 +85,39 @@ void SaveMD::init() {
  */
 template <typename MDE, size_t nd>
 void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
-  std::string filename = getPropertyValue("Filename");
-  bool update = getProperty("UpdateFileBackEnd");
-  bool MakeFileBacked = getProperty("MakeFileBacked");
-
-  bool wsIsFileBacked = ws->isFileBacked();
-  if (update && MakeFileBacked)
+  bool updateFileBackend = getProperty("UpdateFileBackEnd");
+  bool makeFileBackend = getProperty("MakeFileBacked");
+  if (updateFileBackend && makeFileBackend)
     throw std::invalid_argument(
         "Please choose either UpdateFileBackEnd or MakeFileBacked, not both.");
 
-  if (MakeFileBacked && wsIsFileBacked)
-    throw std::invalid_argument(
-        "You picked MakeFileBacked but the workspace is already file-backed!");
-
+  bool wsIsFileBacked = ws->isFileBacked();
+  std::string filename = getPropertyValue("Filename");
   BoxController_sptr bc = ws->getBoxController();
+  auto copyFile =
+      wsIsFileBacked && !filename.empty() && filename != bc->getFilename();
+  if (wsIsFileBacked) {
+    if (makeFileBackend) {
+      throw std::runtime_error(
+          "MakeFileBacked selected but workspace is already file backed.");
+    }
+  } else {
+    if (updateFileBackend) {
+      throw std::runtime_error(
+          "UpdateFileBackEnd selected but workspace is not file backed.");
+    }
+  }
 
-  if (!wsIsFileBacked) { // Erase the file if it exists
+  if (!wsIsFileBacked) {
     Poco::File oldFile(filename);
     if (oldFile.exists())
       oldFile.remove();
   }
 
   auto prog = new Progress(this, 0.0, 0.05, 1);
-  if (update) // workspace has its own file and ignores any changes to the
-              // algorithm parameters
+  if (updateFileBackend) // workspace has its own file and ignores any changes
+                         // to the
+                         // algorithm parameters
   {
     if (!ws->isFileBacked())
       throw std::runtime_error(" attempt to update non-file backed workspace");
@@ -123,7 +134,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   // Save each NEW ExperimentInfo to a spot in the file
   MDBoxFlatTree::saveExperimentInfos(file.get(), ws);
-  if (!update || !data_exist) {
+  if (!updateFileBackend || !data_exist) {
     MDBoxFlatTree::saveWSGenericInfo(file.get(), ws);
   }
   file->closeGroup();
@@ -131,14 +142,16 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   MDBoxFlatTree BoxFlatStruct;
   //-----------------------------------------------------------------------------------------------------
-  if (update) // the workspace is already file backed;
+  if (updateFileBackend) // the workspace is already file backed;
   {
-    // remove all boxes from the DiskBuffer. DB will calculate boxes positions
-    // on HDD.
-    bc->getFileIO()->flushCache();
-    // flatten the box structure; this will remember boxes file positions in the
-    // box structure
-    BoxFlatStruct.initFlatStructure(ws, filename);
+    prepareUpdate<MDE, nd>(BoxFlatStruct, bc.get(), ws, filename);
+  } else if (copyFile) {
+    // Update the original file
+    if (ws->fileNeedsUpdating()) {
+      prepareUpdate<MDE, nd>(BoxFlatStruct, bc.get(), ws, filename);
+      BoxFlatStruct.saveBoxStructure(filename);
+    }
+    Poco::File(bc->getFilename()).copyTo(filename);
   } else // not file backed;
   {
     // the boxes file positions are unknown and we need to calculate it.
@@ -147,7 +160,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     auto Saver = boost::shared_ptr<API::IBoxControllerIO>(
         new DataObjects::BoxControllerNeXusIO(bc.get()));
     Saver->setDataType(sizeof(coord_t), MDE::getTypeName());
-    if (MakeFileBacked) {
+    if (makeFileBackend) {
       // store saver with box controller
       bc->setFileBacked(Saver, filename);
       // get access to boxes array
@@ -203,7 +216,9 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   prog->resetNumSteps(8, 0.92, 1.00);
 
   // Save box structure;
-  BoxFlatStruct.saveBoxStructure(filename);
+  if (!copyFile) {
+    BoxFlatStruct.saveBoxStructure(filename);
+  }
 
   delete prog;
 

@@ -34,9 +34,6 @@ namespace DataHandling {
 */
 class DLLExport SaveMask : public API::Algorithm {
 public:
-  SaveMask();
-  ~SaveMask() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveMask"; };
   /// Summary of algorithms purpose

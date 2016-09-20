@@ -129,7 +129,7 @@ public:
       datafile << peakdataws->readX(0)[i] << "\t\t" << peakdataws->readY(0)[i]
     << "\t\t"
                << peakdataws->readY(1)[i] << "\t\t" << peakdataws->readY(2)[i]
-    << endl;
+    << '\n';
     datafile.close();
     */
 
@@ -157,18 +157,18 @@ public:
     case 1:
       importDataFromColumnFile(
           "/home/wzz/Mantid/Code/debug/MyTestData/4862b7.inp", datawsname);
-      std::cout << "Option 1:  4862b7.inp. " << endl;
+      std::cout << "Option 1:  4862b7.inp. \n";
       break;
 
     case 2:
       importDataFromColumnFile("PG3_10808-1.dat", datawsname);
-      std::cout << "Option 2:  PG3_10808-1.dat. " << endl;
+      std::cout << "Option 2:  PG3_10808-1.dat. \n";
       break;
 
     default:
       // not supported
       std::cout << "LeBailFitTest.createInputDataWorkspace() Option " << option
-                << " is not supported. " << std::endl;
+                << " is not supported. \n";
       throw std::invalid_argument("Unsupported option. ");
     }
 
@@ -236,14 +236,14 @@ public:
     default:
       stringstream errss;
       errss << "createReflectionWorkspace does not support option " << option
-            << endl;
+            << '\n';
       errss << "Supported options include 1 (LaB6 for PG3 bank 1). ";
       throw invalid_argument(errss.str());
     }
 
     // 3. Output information
     std::cout << "Created Table Workspace with " << hklws->rowCount()
-              << " entries of peaks." << std::endl;
+              << " entries of peaks.\n";
 
     return hklws;
   }
@@ -404,8 +404,7 @@ public:
     default:
       stringstream errss;
       errss << "Option " << option
-            << " is not supported by createInstrumentParameterWorkspace."
-            << endl;
+            << " is not supported by createInstrumentParameterWorkspace.\n";
       errss << "Supported options are 1 (PG3 bank1). ";
       throw invalid_argument(errss.str());
       break;

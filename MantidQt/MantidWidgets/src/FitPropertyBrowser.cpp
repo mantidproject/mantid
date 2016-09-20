@@ -169,6 +169,8 @@ void FitPropertyBrowser::init() {
   m_minimizer = m_enumManager->addProperty("Minimizer");
   m_minimizers << "Levenberg-Marquardt"
                << "Levenberg-MarquardtMD"
+               << "More-Sorensen"
+               << "DTRS"
                << "Simplex"
                << "FABADA"
                << "Conjugate gradient (Fletcher-Reeves imp.)"
@@ -211,6 +213,16 @@ void FitPropertyBrowser::init() {
   m_boolManager->setValue(m_showParamErrors, showParamErrors);
   m_parameterManager->setErrorsEnabled(showParamErrors);
 
+  m_evaluationType = m_enumManager->addProperty("Evaluate Function As");
+  m_evaluationType->setToolTip(
+      "Consider using Histogram fit which may produce more accurate results.");
+  m_evaluationTypes << "CentrePoint"
+                    << "Histogram";
+  m_enumManager->setEnumNames(m_evaluationType, m_evaluationTypes);
+  int evaluationType =
+      settings.value(m_evaluationType->propertyName(), 0).toInt();
+  m_enumManager->setValue(m_evaluationType, evaluationType);
+
   m_xColumn = m_columnManager->addProperty("XColumn");
   m_yColumn = m_columnManager->addProperty("YColumn");
   m_errColumn = m_columnManager->addProperty("ErrColumn");
@@ -231,6 +243,7 @@ void FitPropertyBrowser::init() {
   settingsGroup->addSubProperty(m_plotCompositeMembers);
   settingsGroup->addSubProperty(m_convolveMembers);
   settingsGroup->addSubProperty(m_showParamErrors);
+  settingsGroup->addSubProperty(m_evaluationType);
 
   /* Create editors and assign them to the managers */
   createEditors(w);
@@ -305,10 +318,10 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
   m_fitMapper->setMapping(m_fitActionSeqFit, "SeqFit");
   m_fitMapper->setMapping(m_fitActionUndoFit, "UndoFit");
   m_fitMapper->setMapping(m_fitActionEvaluate, "Evaluate");
-  connect(m_fitActionFit, SIGNAL(activated()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionSeqFit, SIGNAL(activated()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionUndoFit, SIGNAL(activated()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionEvaluate, SIGNAL(activated()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionSeqFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionUndoFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionEvaluate, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
   connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
           SLOT(executeFitMenu(const QString &)));
   m_fitMenu->addAction(m_fitActionFit);
@@ -331,11 +344,11 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
   displayMapper->setMapping(m_displayActionPlotGuess, "PlotGuess");
   displayMapper->setMapping(m_displayActionQuality, "Quality");
   displayMapper->setMapping(m_displayActionClearAll, "ClearAll");
-  connect(m_displayActionPlotGuess, SIGNAL(activated()), displayMapper,
+  connect(m_displayActionPlotGuess, SIGNAL(triggered()), displayMapper,
           SLOT(map()));
-  connect(m_displayActionQuality, SIGNAL(activated()), displayMapper,
+  connect(m_displayActionQuality, SIGNAL(triggered()), displayMapper,
           SLOT(map()));
-  connect(m_displayActionClearAll, SIGNAL(activated()), displayMapper,
+  connect(m_displayActionClearAll, SIGNAL(triggered()), displayMapper,
           SLOT(map()));
   connect(displayMapper, SIGNAL(mapped(const QString &)), this,
           SLOT(executeDisplayMenu(const QString &)));
@@ -366,10 +379,10 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
   setupManageMapper->setMapping(setupActionSave, "SaveSetup");
   setupManageMapper->setMapping(setupActionCopyToClipboard, "CopyToClipboard");
   setupManageMapper->setMapping(setupActionLoadFromString, "LoadFromString");
-  connect(setupActionSave, SIGNAL(activated()), setupManageMapper, SLOT(map()));
-  connect(setupActionCopyToClipboard, SIGNAL(activated()), setupManageMapper,
+  connect(setupActionSave, SIGNAL(triggered()), setupManageMapper, SLOT(map()));
+  connect(setupActionCopyToClipboard, SIGNAL(triggered()), setupManageMapper,
           SLOT(map()));
-  connect(setupActionLoadFromString, SIGNAL(activated()), setupManageMapper,
+  connect(setupActionLoadFromString, SIGNAL(triggered()), setupManageMapper,
           SLOT(map()));
   connect(setupManageMapper, SIGNAL(mapped(const QString &)), this,
           SLOT(executeSetupManageMenu(const QString &)));
@@ -387,8 +400,8 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
   QSignalMapper *setupMapper = new QSignalMapper(this);
   setupMapper->setMapping(setupActionClearFit, "ClearFit");
   setupMapper->setMapping(setupActionFindPeaks, "FindPeaks");
-  connect(setupActionClearFit, SIGNAL(activated()), setupMapper, SLOT(map()));
-  connect(setupActionFindPeaks, SIGNAL(activated()), setupMapper, SLOT(map()));
+  connect(setupActionClearFit, SIGNAL(triggered()), setupMapper, SLOT(map()));
+  connect(setupActionFindPeaks, SIGNAL(triggered()), setupMapper, SLOT(map()));
   connect(setupMapper, SIGNAL(mapped(const QString &)), this,
           SLOT(executeSetupMenu(const QString &)));
 
@@ -492,8 +505,8 @@ void FitPropertyBrowser::updateSetupMenus() {
     QAction *itemRemove = new QAction(names.at(i), this);
     mapperLoad->setMapping(itemLoad, names.at(i));
     mapperRemove->setMapping(itemRemove, names.at(i));
-    connect(itemLoad, SIGNAL(activated()), mapperLoad, SLOT(map()));
-    connect(itemRemove, SIGNAL(activated()), mapperRemove, SLOT(map()));
+    connect(itemLoad, SIGNAL(triggered()), mapperLoad, SLOT(map()));
+    connect(itemRemove, SIGNAL(triggered()), mapperRemove, SLOT(map()));
     menuLoad->addAction(itemLoad);
     menuRemove->addAction(itemRemove);
   }
@@ -1100,6 +1113,15 @@ bool FitPropertyBrowser::convolveMembers() const {
   return m_boolManager->value(m_convolveMembers);
 }
 
+/// Get "HistogramFit" option
+bool FitPropertyBrowser::isHistogramFit() const {
+  if (!m_evaluationType->isEnabled()) {
+    return false;
+  }
+  int i = m_enumManager->value(m_evaluationType);
+  return m_evaluationTypes[i].toStdString() == "Histogram";
+}
+
 /// Get the max number of iterations
 int FitPropertyBrowser::maxIterations() const {
   return m_intManager->value(m_maxIterations);
@@ -1143,6 +1165,7 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
   if (!m_changeSlotsEnabled)
     return;
 
+  bool storeSettings = false;
   if (prop == m_workspace) {
     workspaceChange(QString::fromStdString(workspaceName()));
     setWorkspaceProperties();
@@ -1163,6 +1186,15 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
     emit functionChanged();
   } else if (prop == m_minimizer) {
     minimizerChanged();
+  } else if (prop == m_evaluationType) {
+    storeSettings = true;
+  }
+
+  if (storeSettings) {
+    QSettings settings;
+    settings.beginGroup("Mantid/FitBrowser");
+    auto val = m_enumManager->value(prop);
+    settings.setValue(prop->propertyName(), val);
   }
 }
 
@@ -1435,14 +1467,14 @@ void FitPropertyBrowser::setCurrentFunction(
  * Creates an instance of Fit algorithm, sets its properties and launches it.
  */
 void FitPropertyBrowser::doFit(int maxIterations) {
-  std::string wsName = workspaceName();
+  const std::string wsName = workspaceName();
 
   if (wsName.empty()) {
     QMessageBox::critical(this, "Mantid - Error", "Workspace name is not set");
     return;
   }
 
-  auto ws = getWorkspace();
+  const auto ws = getWorkspace();
   if (!ws) {
     return;
   }
@@ -1454,13 +1486,16 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    std::string funStr = getFittingFunction()->asString();
+    const std::string funStr = getFittingFunction()->asString();
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
+    if (isHistogramFit()) {
+      alg->setProperty("EvaluationType", "Histogram");
+    }
     alg->setPropertyValue("Function", funStr);
-    alg->setPropertyValue("InputWorkspace", wsName);
+    alg->setProperty("InputWorkspace", ws);
     alg->setProperty("WorkspaceIndex", workspaceIndex());
     alg->setProperty("StartX", startX());
     alg->setProperty("EndX", endX());
@@ -1469,16 +1504,18 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     alg->setProperty("IgnoreInvalidData", ignoreInvalidData());
     alg->setPropertyValue("CostFunction", costFunction());
     alg->setProperty("MaxIterations", maxIterations);
-    alg->setProperty("Normalise", m_shouldBeNormalised);
-    // Always output each composite function but not necessarily plot it
-    alg->setProperty("OutputCompositeMembers", true);
-    if (alg->existsProperty("ConvolveMembers")) {
-      alg->setProperty("ConvolveMembers", convolveMembers());
+    if (!isHistogramFit()) {
+      alg->setProperty("Normalise", m_shouldBeNormalised);
+      // Always output each composite function but not necessarily plot it
+      alg->setProperty("OutputCompositeMembers", true);
+      if (alg->existsProperty("ConvolveMembers")) {
+        alg->setProperty("ConvolveMembers", convolveMembers());
+      }
     }
     observeFinish(alg);
     alg->executeAsync();
 
-  } catch (std::exception &e) {
+  } catch (const std::exception &e) {
     QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
   }
@@ -1502,8 +1539,8 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   // the fit has been done against is sent as a parameter)
   QString name(QString::fromStdString(alg->getProperty("InputWorkspace")));
   if (name.contains('_')) // Must be fitting to raw data, need to group under
-                          // name without "_Raw".
-                          emit fittingDone(name.left(name.indexOf('_')));
+    // name without "_Raw".
+    emit fittingDone(name.left(name.indexOf('_')));
   else // else fitting to current workspace, group under same name.
     emit fittingDone(name);
 
@@ -2479,10 +2516,8 @@ void FitPropertyBrowser::setPeakToolOn(bool on) {
 /**
  * @brief impose a number of decimal places on all defined Double properties
  */
-void FitPropertyBrowser::updateDecimals()
-{
-  if (m_decimals < 0)
-  {
+void FitPropertyBrowser::updateDecimals() {
+  if (m_decimals < 0) {
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");
     m_decimals = settings.value("decimals", 6).toInt();
@@ -2686,13 +2721,22 @@ void FitPropertyBrowser::setWorkspaceProperties() {
   }
   if (!ws)
     return;
+
+  m_settingsGroup->property()->removeSubProperty(m_evaluationType);
+  m_evaluationType->setEnabled(false);
   // if it is a MatrixWorkspace insert WorkspaceIndex
   auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
-  if (mws &&
-      !m_settingsGroup->property()->subProperties().contains(
-          m_workspaceIndex)) {
-    m_settingsGroup->property()->insertSubProperty(m_workspaceIndex,
-                                                   m_workspace);
+  if (mws) {
+    if (!m_settingsGroup->property()->subProperties().contains(
+            m_workspaceIndex)) {
+      m_settingsGroup->property()->insertSubProperty(m_workspaceIndex,
+                                                     m_workspace);
+    }
+    auto isHistogram = mws->isHistogramData();
+    m_evaluationType->setEnabled(isHistogram);
+    if (isHistogram) {
+      m_settingsGroup->property()->addSubProperty(m_evaluationType);
+    }
     return;
   }
 

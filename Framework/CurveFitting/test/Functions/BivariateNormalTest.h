@@ -9,6 +9,7 @@
 #define BIVARIATENORMALTEST_H_
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidCurveFitting/Functions/BivariateNormal.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidAPI/Jacobian.h"
@@ -16,15 +17,12 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/cow_ptr.h"
-/*#include "MantidAPI/IFunction.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
-#include "MantidCurveFitting/GSLFunctions.h"
-#include "MantidKernel/UnitFactory.h"
-*/
+
 #include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
 #include <exception>
+#include <numeric>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -32,6 +30,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
+using Mantid::HistogramData::LinearGenerator;
 /**
  * Used for testing only
  */
@@ -90,7 +89,7 @@ public:
 
     bool CalcVariances = 0;
 
-    Mantid::MantidVecPtr xvals, yvals, data;
+    Mantid::MantidVec xvals, yvals, data;
     int sgn1 = 1;
     int sgn2 = 1;
     for (int i = 0; i < nCells; i++) {
@@ -109,26 +108,24 @@ public:
         sgn1 = -sgn1 + 1;
         sgn2 = sgn1;
       }
-      xvals.access().push_back(x);
-      yvals.access().push_back(y);
+      xvals.push_back(x);
+      yvals.push_back(y);
       double val =
           NormVal(background, intensity, Mcol, Mrow, Vx, Vy, Vxy, y, x);
 
-      data.access().push_back(val);
+      data.push_back(val);
     }
 
-    Mantid::MantidVecPtr x_vec_ptr;
     double xx[nCells];
     for (int i = 0; i < nCells; i++) {
       xx[i] = i;
-      x_vec_ptr.access().push_back(static_cast<double>(i));
     }
     NormalFit.setAttributeValue("CalcVariances", CalcVariances);
 
-    ws->setX(0, x_vec_ptr);
-    ws->setData(0, data);
-    ws->setData(1, xvals);
-    ws->setData(2, yvals);
+    ws->setPoints(0, nCells, LinearGenerator(0.0, 1.0));
+    ws->dataY(0) = data;
+    ws->dataY(1) = xvals;
+    ws->dataY(2) = yvals;
 
     NormalFit.setMatrixWorkspace(ws, 0, 0.0, 30.0);
 
@@ -151,16 +148,16 @@ public:
 
     NormalFit.function1D(out.data(), xx, nCells);
 
-    //  std::cout<<"-------------------------------------"<<std::endl;
+    //  std::cout<<"-------------------------------------"<<'\n';
     for (int i = 0; i < nCells; i++) {
 
-      double x = xvals.access()[i];
-      double y = yvals.access()[i];
+      double x = xvals[i];
+      double y = yvals[i];
       double d = NormVal(background, intensity, Mcol, Mrow, Vx, Vy, Vxy, y, x);
 
       TS_ASSERT_DELTA(d, out[i], .001);
     }
-    // std::cout<<"\n-------------------------------------"<<std::endl;
+    // std::cout<<"\n-------------------------------------"<<'\n';
 
     double Res[5][7] = {
         {1, 0.0410131, -1.21055, 5.93517, -3.04761, -4.03279, 3.79245},

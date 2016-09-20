@@ -2,6 +2,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
@@ -173,7 +174,7 @@ void FindFilesThread::getFilesFromAlgorithm() {
     std::vector<std::vector<std::string>> filenames =
         algorithm->getProperty(propName);
     std::vector<std::string> flattenedNames =
-        MultipleFileProperty::flattenFileNames(filenames);
+        VectorHelper::flattenVector(filenames);
 
     for (auto filename = flattenedNames.begin();
          filename != flattenedNames.end(); ++filename) {
@@ -248,8 +249,7 @@ MWRunFiles::MWRunFiles(QWidget *parent)
     QStringList dataDirs =
         QString::fromStdString(
             Mantid::Kernel::ConfigService::Instance().getString(
-                "datasearch.directories"))
-            .split(";", QString::SkipEmptyParts);
+                "datasearch.directories")).split(";", QString::SkipEmptyParts);
 
     if (!dataDirs.isEmpty())
       m_lastDir = dataDirs[0];
@@ -736,7 +736,8 @@ void MWRunFiles::findFiles() {
       // Regex to match a selection of run numbers as defined here:
       // mantidproject.org/MultiFileLoading
       // Also allowing spaces between delimiters as this seems to work fine
-      const std::string runNumberString = "([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?";
+      const std::string runNumberString =
+          "([0-9]+)([:+-] ?[0-9]+)? ?(:[0-9]+)?";
       boost::regex runNumbers(runNumberString, boost::regex::extended);
       // Regex to match a list of run numbers delimited by commas
       const std::string runListString =
@@ -794,6 +795,7 @@ void MWRunFiles::inspectThreadResult() {
 
   if (!error.empty()) {
     setFileProblem(QString::fromStdString(error));
+    emit fileInspectionFinished();
     return;
   }
 
@@ -811,6 +813,8 @@ void MWRunFiles::inspectThreadResult() {
   } else {
     setFileProblem("");
   }
+
+  emit fileInspectionFinished();
 
   // Only emit the signal if file(s) were found
   if (!m_foundFiles.isEmpty())
@@ -833,8 +837,7 @@ void MWRunFiles::readSettings(const QString &group) {
     QStringList datadirs =
         QString::fromStdString(
             Mantid::Kernel::ConfigService::Instance().getString(
-                "datasearch.directories"))
-            .split(";", QString::SkipEmptyParts);
+                "datasearch.directories")).split(";", QString::SkipEmptyParts);
     if (!datadirs.isEmpty())
       m_lastDir = datadirs[0];
   }

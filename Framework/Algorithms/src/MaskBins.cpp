@@ -10,6 +10,8 @@
 #include <limits>
 #include <sstream>
 
+using Mantid::HistogramData::BinEdges;
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -68,7 +70,7 @@ void MaskBins::exec() {
 
   if (m_startX > m_endX) {
     std::stringstream msg;
-    msg << "XMax (" << m_startX << ") must be greater than XMin (" << m_endX
+    msg << "XMax (" << m_endX << ") must be greater than XMin (" << m_startX
         << ")";
     g_log.error(msg.str());
     throw std::invalid_argument(msg.str());
@@ -114,7 +116,7 @@ void MaskBins::exec() {
     // limits once
     const bool commonBins = WorkspaceHelpers::commonBoundaries(inputWS);
     if (commonBins) {
-      const MantidVec &X = inputWS->readX(0);
+      auto X = inputWS->binEdges(0);
       this->findIndices(X, startBin, endBin);
     }
 
@@ -139,11 +141,9 @@ void MaskBins::exec() {
       else
         wi = i;
 
-      const MantidVec &X = outputWS->readX(wi);
-
       MantidVec::difference_type startBinLoop(startBin), endBinLoop(endBin);
       if (!commonBins)
-        this->findIndices(X, startBinLoop, endBinLoop);
+        this->findIndices(outputWS->binEdges(wi), startBinLoop, endBinLoop);
 
       // Loop over masking each bin in the range
       for (int j = static_cast<int>(startBinLoop);
@@ -154,8 +154,6 @@ void MaskBins::exec() {
 
     } // ENDFOR(i)
   }   // ENDIFELSE(eventworkspace?)
-
-  return;
 }
 
 /** Execution code for EventWorkspaces
@@ -178,7 +176,7 @@ void MaskBins::execEvent() {
     for (int i = 0; i < static_cast<int>(this->spectra_list.size()); // NOLINT
          ++i) {
       PARALLEL_START_INTERUPT_REGION
-      outputWS->getEventList(this->spectra_list[i]).maskTof(m_startX, m_endX);
+      outputWS->getSpectrum(this->spectra_list[i]).maskTof(m_startX, m_endX);
       progress.report();
       PARALLEL_END_INTERUPT_REGION
     }
@@ -188,7 +186,7 @@ void MaskBins::execEvent() {
     PARALLEL_FOR1(outputWS)
     for (int64_t i = 0; i < int64_t(numHists); ++i) {
       PARALLEL_START_INTERUPT_REGION
-      outputWS->getEventList(i).maskTof(m_startX, m_endX);
+      outputWS->getSpectrum(i).maskTof(m_startX, m_endX);
       progress.report();
       PARALLEL_END_INTERUPT_REGION
     }
@@ -204,7 +202,7 @@ void MaskBins::execEvent() {
  *  @param startBin :: Returns the bin index including the starting value
  *  @param endBin ::   Returns the bin index after the end value
  */
-void MaskBins::findIndices(const MantidVec &X,
+void MaskBins::findIndices(const BinEdges &X,
                            MantidVec::difference_type &startBin,
                            MantidVec::difference_type &endBin) {
   startBin = std::distance(X.begin(),

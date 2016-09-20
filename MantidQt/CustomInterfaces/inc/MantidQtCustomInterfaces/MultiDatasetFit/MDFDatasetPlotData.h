@@ -9,46 +9,42 @@
 class QwtPlot;
 class QwtPlotCurve;
 
-namespace Mantid
-{
-namespace API
-{
-  class MatrixWorkspace;
+namespace Mantid {
+namespace API {
+class MatrixWorkspace;
 }
 }
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
-  class ErrorCurve;
+namespace MantidQt {
+namespace MantidWidgets {
+class ErrorCurve;
 }
 }
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-namespace MDF
-{
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace MDF {
 
 /**
- * Contains graphics for a single data set: fitting data, claculated result, difference.
+ * Contains graphics for a single data set: fitting data, claculated result,
+ * difference.
  */
-class DatasetPlotData
-{
+class DatasetPlotData {
 public:
-  DatasetPlotData(const QString& wsName, int wsIndex, const QString& outputWSName);
+  DatasetPlotData(const QString &wsName, int wsIndex,
+                  const QString &outputWSName);
   ~DatasetPlotData();
   void show(QwtPlot *plot);
   void hide();
   QwtDoubleRect boundingRect() const;
   void showDataErrorBars(bool on);
+
 private:
   // no copying
-  DatasetPlotData(const DatasetPlotData&);
-  DatasetPlotData& operator=(const DatasetPlotData&);
-  void setData(const Mantid::API::MatrixWorkspace *ws, int wsIndex, const Mantid::API::MatrixWorkspace *outputWS);
+  DatasetPlotData(const DatasetPlotData &);
+  DatasetPlotData &operator=(const DatasetPlotData &);
+  void setData(const Mantid::API::MatrixWorkspace *ws, int wsIndex,
+               const Mantid::API::MatrixWorkspace *outputWS);
   /// Curve object for the fit data (spectrum).
   QwtPlotCurve *m_dataCurve;
   /// Error bar curve for the data
@@ -64,6 +60,5 @@ private:
 } // MDF
 } // CustomInterfaces
 } // MantidQt
-
 
 #endif /*MDFDATASETPLOTDATA_H_*/

@@ -18,9 +18,6 @@ namespace MDAlgorithms {
  */
 class DLLExport IntegratePeaksMD2 : public API::Algorithm {
 public:
-  IntegratePeaksMD2();
-  ~IntegratePeaksMD2() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "IntegratePeaksMD"; };
   /// Summary of algorithms purpose

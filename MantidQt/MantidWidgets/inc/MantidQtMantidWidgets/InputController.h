@@ -67,7 +67,8 @@ private:
     translation, rotation and zooming.
 
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputController3DMove : public InputController {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputController3DMove
+    : public InputController {
   Q_OBJECT
 
 public:
@@ -102,7 +103,8 @@ private:
 /**
     Controller for picking detectors.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerPick : public InputController {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerPick
+    : public InputController {
   Q_OBJECT
 
 public:
@@ -125,7 +127,8 @@ private:
 /**
     Controller for drawing mask shapes.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDrawShape : public InputController {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDrawShape
+    : public InputController {
   Q_OBJECT
 
 public:
@@ -179,7 +182,8 @@ private:
 /**
     Controller for moving the instrument on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerMoveUnwrapped : public InputController {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerMoveUnwrapped
+    : public InputController {
   Q_OBJECT
 
 public:
@@ -201,7 +205,8 @@ private:
 /**
     Controller for free drawing on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDraw : public InputController {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDraw
+    : public InputController {
   Q_OBJECT
 
 public:
@@ -216,10 +221,10 @@ public:
   void leaveEvent(QEvent *) override;
 
 protected:
-  int cursorSize() const {return m_size;}
-  bool isLeftButtonPressed() const {return m_isLeftButtonPressed;}
-  bool isRightButtonPressed() const {return m_isRightButtonPressed;}
-  bool isActive() const {return m_isActive;}
+  int cursorSize() const { return m_size; }
+  bool isLeftButtonPressed() const { return m_isLeftButtonPressed; }
+  bool isRightButtonPressed() const { return m_isRightButtonPressed; }
+  bool isActive() const { return m_isActive; }
 
 private:
   void redrawCursor();
@@ -240,7 +245,8 @@ private:
 /**
     Controller for erasing peaks on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerErase : public InputControllerDraw {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerErase
+    : public InputControllerDraw {
   Q_OBJECT
 
 public:
@@ -264,7 +270,8 @@ private:
 /**
     Controller for drawing and erasing arbitrary shapes on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDrawAndErase : public InputControllerDraw {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDrawAndErase
+    : public InputControllerDraw {
   Q_OBJECT
 
 public:
@@ -292,7 +299,6 @@ private:
   QColor m_borderColor, m_fillColor;
   bool m_creating;
 };
-
 }
 }
 

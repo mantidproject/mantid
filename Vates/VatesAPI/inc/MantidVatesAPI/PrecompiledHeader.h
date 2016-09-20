@@ -14,5 +14,4 @@
 #include <set>
 #include <string>
 
-
-#endif //MANTID_VATES_PRECOMPILEDHEADER_H_
+#endif // MANTID_VATES_PRECOMPILEDHEADER_H_

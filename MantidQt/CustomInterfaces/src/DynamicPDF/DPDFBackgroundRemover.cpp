@@ -10,6 +10,7 @@
 // Mantid headers from other projects
 #include "MantidKernel/make_unique.h"
 #include "MantidQtAPI/HelpWindow.h"
+#include "MantidKernel/UsageService.h"
 // 3rd party library headers
 // System includes
 
@@ -28,14 +29,11 @@ DECLARE_SUBWINDOW(BackgroundRemover)
  *              **  Public Methods  **
  *              **********************/
 
-BackgroundRemover::BackgroundRemover(QWidget *parent) :
-  UserSubWindow{parent},
-  m_sliceSelector(),
-  m_inputDataControl(),
-  m_displayControl(),
-  m_fitControl{nullptr},
-  m_fourierTransform{nullptr} {
-  //nothing in the body
+BackgroundRemover::BackgroundRemover(QWidget *parent)
+    : UserSubWindow{parent}, m_sliceSelector(), m_inputDataControl(),
+      m_displayControl(), m_fitControl{nullptr}, m_fourierTransform{nullptr} {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Interface", "DynamicPDF->BackgroundRemover", false);
 }
 
 /**
@@ -59,7 +57,7 @@ void BackgroundRemover::initLayout() {
   m_uiForm.splitterModelResiduals->setSizes(sizes);
   // user wants to load new slices
   connect(m_uiForm.pushButtonSummonSliceSelector, SIGNAL(clicked()), this,
-    SLOT(summonSliceSelector()));
+          SLOT(summonSliceSelector()));
   // user wants help
   connect(m_uiForm.pushButtonHelp, SIGNAL(clicked()), this, SLOT(showHelp()));
 }
@@ -73,23 +71,23 @@ void BackgroundRemover::initLayout() {
  */
 void BackgroundRemover::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(
-    NULL, QString("DPDFBackgroundRemover"));
+      NULL, QString("DPDFBackgroundRemover"));
 }
 
 /**
  * @brief Spawn the SliceSelector widget to load a matrix workspace (or file)
  * containing they dynamic structure factor.
  */
-void BackgroundRemover::summonSliceSelector(){
-  if(!m_sliceSelector){
+void BackgroundRemover::summonSliceSelector() {
+  if (!m_sliceSelector) {
     // Initialize all the components
     // Initialize the slice selector
     m_sliceSelector = Mantid::Kernel::make_unique<SliceSelector>(this);
     // Initialize the InputDataControl object
     m_inputDataControl = Mantid::Kernel::make_unique<InputDataControl>();
     // Initialize the DisplayControl object
-    m_displayControl = Mantid::Kernel::make_unique<DisplayControl>
-      (m_inputDataControl.get(), m_uiForm.displayModelFit);
+    m_displayControl = Mantid::Kernel::make_unique<DisplayControl>(
+        m_inputDataControl.get(), m_uiForm.displayModelFit);
     m_displayControl->init();
     // Initialize the FitControl object
     m_fitControl->setInputDataControl(m_inputDataControl.get());
@@ -101,30 +99,26 @@ void BackgroundRemover::summonSliceSelector(){
     // user loaded a workspace in the SliceSelector
     // (use get() for required raw pointer)
     connect(m_sliceSelector.get(), SIGNAL(signalSlicesLoaded(QString)),
-      m_inputDataControl.get(), SLOT(updateWorkspace(QString)));
+            m_inputDataControl.get(), SLOT(updateWorkspace(QString)));
     // user selected a slice for fitting in SliceSelector
     connect(m_sliceSelector.get(),
-      SIGNAL(signalSliceForFittingSelected(size_t)),
-      m_inputDataControl.get(), SLOT(updateSliceForFitting(size_t)));
+            SIGNAL(signalSliceForFittingSelected(size_t)),
+            m_inputDataControl.get(), SLOT(updateSliceForFitting(size_t)));
     // slice for fitting updated
     connect(m_inputDataControl.get(), SIGNAL(signalSliceForFittingUpdated()),
-      m_displayControl.get(), SLOT(updateSliceForFitting()));
+            m_displayControl.get(), SLOT(updateSliceForFitting()));
     m_fitControl->setConnections();
     m_fourierTransform->setConnections();
-    connect(m_uiForm.pbFourier, SIGNAL(clicked()),
-      m_fourierTransform, SLOT(transform()));
-    connect(m_uiForm.pbClearFourierPlot, SIGNAL(clicked()),
-      m_fourierTransform, SLOT(clearFourierPlot()));
+    connect(m_uiForm.pbFourier, SIGNAL(clicked()), m_fourierTransform,
+            SLOT(transform()));
+    connect(m_uiForm.pbClearFourierPlot, SIGNAL(clicked()), m_fourierTransform,
+            SLOT(clearFourierPlot()));
   }
 
   m_sliceSelector->show();
-  m_sliceSelector->raise(); // raise on top
+  m_sliceSelector->raise();          // raise on top
   m_sliceSelector->activateWindow(); // set as active window
 }
-
-
-
-
 }
 }
 }

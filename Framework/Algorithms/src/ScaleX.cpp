@@ -128,13 +128,13 @@ void ScaleX::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     // Copy y and e data
-    auto &outY = outputW->dataY(i);
-    outY = inputW->dataY(i);
-    auto &outE = outputW->dataE(i);
-    outE = inputW->dataE(i);
+    outputW->setHistogram(i, inputW->histogram(i));
 
-    auto &outX = outputW->dataX(i);
-    const auto &inX = inputW->readX(i);
+    auto &outX = outputW->mutableX(i);
+    auto &outY = outputW->mutableY(i);
+    auto &outE = outputW->mutableE(i);
+
+    const auto &inX = inputW->x(i);
     // Change bin value by offset
     if ((i >= m_wi_min) && (i <= m_wi_max)) {
       double factor = getScaleFactor(inputW, i);
@@ -147,9 +147,8 @@ void ScaleX::exec() {
         std::reverse(outY.begin(), outY.end());
         std::reverse(outE.begin(), outE.end());
       }
-    } else {
-      outX = inX; // copy
     }
+
     m_progress->report("Scaling X");
 
     PARALLEL_END_INTERUPT_REGION
@@ -190,12 +189,12 @@ void ScaleX::execEvent() {
     if ((i >= m_wi_min) && (i <= m_wi_max)) {
       auto factor = getScaleFactor(outputWS, i);
       if (op == "Multiply") {
-        outputWS->getEventList(i).scaleTof(factor);
+        outputWS->getSpectrum(i).scaleTof(factor);
         if (factor < 0) {
-          outputWS->getEventList(i).reverse();
+          outputWS->getSpectrum(i).reverse();
         }
       } else if (op == "Add") {
-        outputWS->getEventList(i).addTof(factor);
+        outputWS->getSpectrum(i).addTof(factor);
       }
     }
     m_progress->report("Scaling X");
@@ -234,8 +233,7 @@ double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS,
   Geometry::IDetector_const_sptr det;
   auto inst = inputWS->getInstrument();
 
-  auto *spec = inputWS->getSpectrum(index);
-  const auto &ids = spec->getDetectorIDs();
+  const auto &ids = inputWS->getSpectrum(index).getDetectorIDs();
   const size_t ndets(ids.size());
   if (ndets > 0) {
     try {

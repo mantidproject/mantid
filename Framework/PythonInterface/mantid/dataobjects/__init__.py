@@ -13,7 +13,8 @@ downcast to the correct leaf type if the export for that class exists in the reg
 The names from the library are not imported by default as it is best if the interface classes
 are used for checks such as isinstance()
 """
-from __future__ import absolute_import
+from __future__ import (absolute_import, division,
+                        print_function)
 
 ###############################################################################
 # Load the C++ library and register the C++ class exports

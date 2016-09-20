@@ -8,12 +8,9 @@
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-namespace Muon
-{
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace Muon {
 
 /**
 This is a collection of helper functions for MuonAnalysis.h. In particular
@@ -42,9 +39,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
-using namespace Mantid;
-using namespace Mantid::API;
 
 class MANTIDQT_CUSTOMINTERFACES_DLL MuonGroupingHelper {
 public:
@@ -79,4 +73,4 @@ private:
 }
 }
 
-#endif //MANTIDQTCUSTOMINTERFACES_MUONANALYSIS_IO_GROUPING_H_
+#endif // MANTIDQTCUSTOMINTERFACES_MUONANALYSIS_IO_GROUPING_H_

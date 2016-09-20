@@ -35,16 +35,16 @@
 #include "ScaleEngine.h"
 #include "MantidQtAPI/DllOption.h"
 
-class EXPORT_OPT_MANTIDQT_API PowerScaleTransformation: public ScaleTransformation
-{
+class EXPORT_OPT_MANTIDQT_API PowerScaleTransformation
+    : public ScaleTransformation {
 public:
-	PowerScaleTransformation(const ScaleEngine *engine):ScaleTransformation(engine), nth_power(engine->nthPower()){};
-        double xForm(double x, double, double, double p1,
-                     double p2) const override;
-        double invXForm(double x, double s1, double s2, double p1,
-                        double p2) const override;
-        QwtScaleTransformation *copy() const override;
-        ~PowerScaleTransformation() override;
+  PowerScaleTransformation(const ScaleEngine *engine)
+      : ScaleTransformation(engine), nth_power(engine->nthPower()){};
+  double xForm(double x, double, double, double p1, double p2) const override;
+  double invXForm(double x, double s1, double s2, double p1,
+                  double p2) const override;
+  QwtScaleTransformation *copy() const override;
+  ~PowerScaleTransformation() override;
 
 private:
   double nth_power;
@@ -54,8 +54,7 @@ private:
   \brief A scale engine for power (X^n) scales
 */
 
-class EXPORT_OPT_MANTIDQT_API PowerScaleEngine: public QwtScaleEngine
-{
+class EXPORT_OPT_MANTIDQT_API PowerScaleEngine : public QwtScaleEngine {
 public:
   void autoScale(int maxSteps, double &x1, double &x2,
                  double &stepSize) const override;
@@ -69,21 +68,17 @@ public:
   ~PowerScaleEngine() override;
 
 protected:
-    QwtDoubleInterval align(const QwtDoubleInterval&,
-        double stepSize) const;
+  QwtDoubleInterval align(const QwtDoubleInterval &, double stepSize) const;
 
 private:
-    void buildTicks(
-        const QwtDoubleInterval &, double stepSize, int maxMinSteps,
-        QwtValueList ticks[QwtScaleDiv::NTickTypes]) const;
+  void buildTicks(const QwtDoubleInterval &, double stepSize, int maxMinSteps,
+                  QwtValueList ticks[QwtScaleDiv::NTickTypes]) const;
 
-    void buildMinorTicks(
-        const QwtValueList& majorTicks,
-        int maxMinMark, double step,
-        QwtValueList &, QwtValueList &) const;
+  void buildMinorTicks(const QwtValueList &majorTicks, int maxMinMark,
+                       double step, QwtValueList &, QwtValueList &) const;
 
-    QwtValueList buildMajorTicks(
-        const QwtDoubleInterval &interval, double stepSize) const;
+  QwtValueList buildMajorTicks(const QwtDoubleInterval &interval,
+                               double stepSize) const;
 };
 
 #endif

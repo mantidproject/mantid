@@ -39,6 +39,10 @@ void SetupHFIRReduction::init() {
   declareProperty(
       "DetectorTubes", false,
       "If true, the solid angle correction for tube detectors will be applied");
+  declareProperty("DetectorWing", false,
+                  "If true, the solid angle "
+                  "correction for the Wing Detector (curved detector) "
+                  "will be applied");
 
   // Optionally, we can specify the wavelength and wavelength spread and
   // overwrite
@@ -56,6 +60,7 @@ void SetupHFIRReduction::init() {
   setPropertyGroup("SampleDetectorDistanceOffset", load_grp);
   setPropertyGroup("SolidAngleCorrection", load_grp);
   setPropertyGroup("DetectorTubes", load_grp);
+  setPropertyGroup("DetectorWing", load_grp);
   setPropertyGroup("Wavelength", load_grp);
   setPropertyGroup("WavelengthSpread", load_grp);
 
@@ -201,10 +206,7 @@ void SetupHFIRReduction::init() {
 
   // Transmission
   std::string trans_grp = "Transmission";
-  std::vector<std::string> transOptions;
-  transOptions.emplace_back("Value");
-  transOptions.emplace_back("DirectBeam");
-  transOptions.emplace_back("BeamSpreader");
+  std::vector<std::string> transOptions{"Value", "DirectBeam", "BeamSpreader"};
   declareProperty("TransmissionMethod", "Value",
                   boost::make_shared<StringListValidator>(transOptions),
                   "Transmission determination method");
@@ -504,6 +506,9 @@ void SetupHFIRReduction::init() {
   declareProperty(
       make_unique<ArrayProperty<int>>("MaskedEdges"),
       "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
+  declareProperty(
+      "MaskedComponent", "",
+      "Component Name to mask the edges according to the IDF file.");
   std::vector<std::string> maskOptions;
   maskOptions.emplace_back("None");
   maskOptions.emplace_back("Front");
@@ -511,10 +516,15 @@ void SetupHFIRReduction::init() {
   declareProperty("MaskedSide", "None",
                   boost::make_shared<StringListValidator>(maskOptions),
                   "Mask one side of the detector");
+  declareProperty(
+      "MaskedFullComponent", "",
+      "Component Name to mask the edges according to the IDF file.");
 
   setPropertyGroup("MaskedDetectorList", mask_grp);
   setPropertyGroup("MaskedEdges", mask_grp);
+  setPropertyGroup("MaskedComponent", mask_grp);
   setPropertyGroup("MaskedSide", mask_grp);
+  setPropertyGroup("MaskedFullComponent", mask_grp);
 
   // Absolute scale
   std::string abs_scale_grp = "Absolute Scale";
@@ -620,8 +630,7 @@ void SetupHFIRReduction::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
   if (reductionManagerName.size() == 0) {
-    g_log.error() << "ERROR: Reduction Property Manager name is empty"
-                  << std::endl;
+    g_log.error() << "ERROR: Reduction Property Manager name is empty\n";
     return;
   }
   boost::shared_ptr<PropertyManager> reductionManager =
@@ -698,7 +707,7 @@ void SetupHFIRReduction::exec() {
       reductionManager->declareProperty(std::move(beamFinderAlgProp));
     } else {
       g_log.error() << "ERROR: Beam center determination was required"
-                       " but no file was provided" << std::endl;
+                       " but no file was provided\n";
     }
   }
 
@@ -728,9 +737,11 @@ void SetupHFIRReduction::exec() {
   // Solid angle correction
   const bool solidAngleCorrection = getProperty("SolidAngleCorrection");
   const bool isTubeDetector = getProperty("DetectorTubes");
+  const bool isCurvedDetector = getProperty("DetectorWing");
   if (solidAngleCorrection) {
     IAlgorithm_sptr solidAlg = createChildAlgorithm("SANSSolidAngleCorrection");
     solidAlg->setProperty("DetectorTubes", isTubeDetector);
+    solidAlg->setProperty("DetectorWing", isCurvedDetector);
     auto ssaAlgProp =
         make_unique<AlgorithmProperty>("SANSSolidAngleCorrection");
     ssaAlgProp->setValue(solidAlg->toString());
@@ -773,6 +784,8 @@ void SetupHFIRReduction::exec() {
   const std::string maskDetList = getPropertyValue("MaskedDetectorList");
   const std::string maskEdges = getPropertyValue("MaskedEdges");
   const std::string maskSide = getProperty("MaskedSide");
+  const std::string maskComponent = getPropertyValue("MaskedComponent");
+  const std::string maskFullComponent = getPropertyValue("MaskedFullComponent");
 
   IAlgorithm_sptr maskAlg = createChildAlgorithm("SANSMask");
   // The following is broken, try PropertyValue
@@ -780,6 +793,9 @@ void SetupHFIRReduction::exec() {
   maskAlg->setPropertyValue("MaskedDetectorList", maskDetList);
   maskAlg->setPropertyValue("MaskedEdges", maskEdges);
   maskAlg->setProperty("MaskedSide", maskSide);
+  maskAlg->setProperty("MaskedComponent", maskComponent);
+  maskAlg->setProperty("MaskedFullComponent", maskFullComponent);
+
   auto maskAlgProp = make_unique<AlgorithmProperty>("MaskAlgorithm");
   maskAlgProp->setValue(maskAlg->toString());
   reductionManager->declareProperty(std::move(maskAlgProp));
@@ -884,6 +900,24 @@ void SetupHFIRReduction::setupSensitivity(
     const double maxEff = getProperty("MaxEfficiency");
     const double sensitivityBeamCenterX = getProperty("SensitivityBeamCenterX");
     const double sensitivityBeamCenterY = getProperty("SensitivityBeamCenterY");
+    const std::string maskFullComponent =
+        getPropertyValue("MaskedFullComponent");
+    const std::string maskComponent = getPropertyValue("MaskedComponent");
+
+    // nx_low=0, nx_high=0, ny_low=0, ny_high=0
+    std::vector<int> maskEdges = getProperty("MaskedEdges");
+    // it only make sense masking edges for sensitivity if there are a lot of
+    // pixels masked
+    // Let'a assume more than 10:
+    std::stringstream maskEdgesStringStream;
+    for (size_t i = 0; i < maskEdges.size(); i++) {
+      if (i != 0)
+        maskEdgesStringStream << ",";
+      if (maskEdges[i] <= 10)
+        maskEdgesStringStream << 0;
+      else
+        maskEdgesStringStream << maskEdges[i];
+    }
 
     IAlgorithm_sptr effAlg = createChildAlgorithm("SANSSensitivityCorrection");
     effAlg->setProperty("Filename", sensitivityFile);
@@ -891,6 +925,9 @@ void SetupHFIRReduction::setupSensitivity(
     effAlg->setProperty("DarkCurrentFile", sensitivityDarkCurrentFile);
     effAlg->setProperty("MinEfficiency", minEff);
     effAlg->setProperty("MaxEfficiency", maxEff);
+    effAlg->setProperty("MaskedFullComponent", maskFullComponent);
+    effAlg->setProperty("MaskedComponent", maskComponent);
+    effAlg->setPropertyValue("MaskedEdges", maskEdgesStringStream.str());
 
     // Beam center option for sensitivity data
     const std::string centerMethod =
@@ -924,7 +961,7 @@ void SetupHFIRReduction::setupSensitivity(
       } else {
         g_log.error()
             << "ERROR: Sensitivity beam center determination was required"
-               " but no file was provided" << std::endl;
+               " but no file was provided\n";
       }
     }
 
@@ -1013,7 +1050,7 @@ void SetupHFIRReduction::setupBackground(
         reductionManager->declareProperty(std::move(backBeamCentreAlgProp));
       } else {
         g_log.error() << "ERROR: Beam center determination was required"
-                         " but no file was provided" << std::endl;
+                         " but no file was provided\n";
       }
     }
     transAlg->setProperty("DarkCurrentFilename", darkCurrent);
@@ -1127,7 +1164,7 @@ void SetupHFIRReduction::setupTransmission(
       } else {
         g_log.error()
             << "ERROR: Transmission beam center determination was required"
-               " but no file was provided" << std::endl;
+               " but no file was provided\n";
       }
     }
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);

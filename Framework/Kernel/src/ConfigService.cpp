@@ -145,7 +145,8 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
       m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(),
-      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
+      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false),
+      m_filterChannels() {
   // getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
   m_pConf = nullptr;
@@ -229,18 +230,18 @@ ConfigServiceImpl::ConfigServiceImpl()
 
   updateFacilities();
 
-  g_log.debug() << "ConfigService created." << std::endl;
+  g_log.debug() << "ConfigService created.\n";
   g_log.debug() << "Configured Mantid.properties directory of application as "
-                << getPropertiesDir() << std::endl;
+                << getPropertiesDir() << '\n';
   g_log.information() << "This is Mantid version " << MantidVersion::version()
-                      << " revision " << MantidVersion::revision() << std::endl;
+                      << " revision " << MantidVersion::revision() << '\n';
   g_log.information() << "running on " << getComputerName() << " starting "
                       << DateAndTime::getCurrentTime().toFormattedString(
                              "%Y-%m-%dT%H:%MZ") << "\n";
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList
-                      << std::endl;
+                      << '\n';
 #ifndef MPI_BUILD // There is no logging to file by default in MPI build
-  g_log.information() << "Logging to: " << m_logFilePath << std::endl;
+  g_log.information() << "Logging to: " << m_logFilePath << '\n';
 #endif
 
   // Assert that the appdata and the instrument subdirectory exists
@@ -257,7 +258,7 @@ ConfigServiceImpl::ConfigServiceImpl()
         << "Cannot create the local instrument cache directory ["
         << path.toString()
         << "]. Mantid will not be able to update instrument definitions.\n"
-        << fe.what() << std::endl;
+        << fe.what() << '\n';
   }
   Poco::File vtpDir(getVTPFileDirectory());
   try {
@@ -267,7 +268,7 @@ ConfigServiceImpl::ConfigServiceImpl()
         << "Cannot create the local instrument geometry cache directory ["
         << path.toString()
         << "]. Mantid will be slower at viewing complex instruments.\n"
-        << fe.what() << std::endl;
+        << fe.what() << '\n';
   }
   // must update the cache of instrument paths
   cacheInstrumentPaths();
@@ -277,7 +278,7 @@ ConfigServiceImpl::ConfigServiceImpl()
  *  Prevents client from calling 'delete' on the pointer handed out by Instance
  */
 ConfigServiceImpl::~ConfigServiceImpl() {
-  // std::cerr << "ConfigService destroyed." << std::endl;
+  // std::cerr << "ConfigService destroyed.\n";
   Kernel::Logger::shutdown();
   delete m_pSysConfig;
   delete m_pConf; // potential double delete???
@@ -326,7 +327,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
   } catch (std::exception &e) {
     // there was a problem loading the file - it probably is not there
     std::cerr << "Problem loading the configuration file " << filename << " "
-              << e.what() << std::endl;
+              << e.what() << '\n';
     if (!append) {
       // if we have no property values then take the default
       m_PropertyString = defaultConfig();
@@ -362,101 +363,55 @@ bool ConfigServiceImpl::readFile(const std::string &filename,
   return good;
 }
 
+/** Registers additional logging filter channels
+* @param filterChannelName The name to refer to the filter channel, this should
+* be unique
+* @param pChannel a pointer to the channel to be registered, if blank, then the
+* channel must already be registered with the logging registry in Poco
+*/
+void ConfigServiceImpl::registerLoggingFilterChannel(
+    const std::string &filterChannelName, Poco::Channel *pChannel) {
+  m_filterChannels.push_back(filterChannelName);
+  if (pChannel) {
+    Poco::LoggingRegistry::defaultRegistry().registerChannel(filterChannelName,
+                                                             pChannel);
+  }
+}
+
 /** Configures the Poco logging and starts it up
  *
  */
 void ConfigServiceImpl::configureLogging() {
-  try {
-    // Ensure that the logging directory exists
-    m_logFilePath = getString("logging.channels.fileChannel.path");
-    Poco::Path logpath(m_logFilePath);
-
-    // Undocumented way to override the mantid.log path
-    if (Poco::Environment::has("MANTIDLOGPATH")) {
-      logpath = Poco::Path(Poco::Environment::get("MANTIDLOGPATH"));
-      logpath = logpath.absolute();
-      m_logFilePath = logpath.toString();
-    }
-
-    // An absolute path makes things simpler
+  // Undocumented way to override the mantid.log path
+  if (Poco::Environment::has("MANTIDLOGPATH")) {
+    auto logpath = Poco::Path(Poco::Environment::get("MANTIDLOGPATH"));
     logpath = logpath.absolute();
-
-    // First, try the logpath given
-    if (!m_logFilePath.empty()) {
-      try {
-        // Save it for later
-        m_logFilePath = logpath.toString();
-
-        // make this path point to the parent directory and create it if it does
-        // not exist
-        Poco::Path parent = logpath;
-        parent.makeParent();
-        Poco::File(parent).createDirectories();
-
-        // Try to create or append to the file. If it fails, use the default
-        FILE *fp = fopen(m_logFilePath.c_str(), "a+");
-        if (fp == nullptr) {
-          std::cerr
-              << "Error writing to log file path given in properties file: \""
-              << m_logFilePath << "\". Will use a default path instead."
-              << std::endl;
-          // Clear the path; this will make it use the default
-          m_logFilePath = "";
-        } else
-          fclose(fp);
-      } catch (std::exception &) {
-        std::cerr
-            << "Error writing to log file path given in properties file: \""
-            << m_logFilePath << "\". Will use a default path instead."
-            << std::endl;
-        // ERROR! Maybe the file is not writable!
-        // Clear the path; this will make it use the default
-        m_logFilePath = "";
-      }
-    }
-
-    // The path given was invalid somehow? Use a default
-    if (m_logFilePath.empty()) {
-      m_logFilePath = getUserPropertiesDir() + "mantid.log";
-      // Check whether the file can be written. The Poco::File::canWrite method
-      // does not work
-      // for files that don't exist, it throws an exception. It also can't be
-      // used to check for
-      // directory access as the Windows API doesn't return this information
-      // correctly for
-      // directories.
-      FILE *fp = fopen(m_logFilePath.c_str(), "a+");
-      if (!fp) {
-        // if we cannot write to the default directory then set use the system
-        // temp
-        logpath = Poco::Path::temp() + "mantid.log";
-        m_logFilePath = logpath.toString();
-        std::cerr << "Error writing to log file path to default location: \""
-                  << m_logFilePath
-                  << "\". Will use a system temp path instead: \""
-                  << m_logFilePath << "\"" << std::endl;
-      } else
-        fclose(fp);
-    }
+    m_logFilePath = logpath.toString();
     // Set the line in the configuration properties.
-    //  this'll be picked up by LoggingConfigurator (somehow)
     m_pConf->setString("logging.channels.fileChannel.path", m_logFilePath);
-
-    // make this path point to the parent directory and create it if it does not
-    // exist
-    logpath.makeParent();
-    if (!logpath.toString().empty()) {
-      Poco::File(logpath)
-          .createDirectories(); // Also creates all necessary directories
+  } else {
+    m_logFilePath = getString("logging.channels.fileChannel.path");
+    if (m_logFilePath.empty()) {
+      // Default to appdata/mantid.log
+      Poco::Path path(getAppDataDir());
+      path.append("mantid.log");
+      m_logFilePath = path.toString();
+      // Set the line in the configuration properties.
+      m_pConf->setString("logging.channels.fileChannel.path", m_logFilePath);
     }
+  }
 
+  try {
     // Configure the logging framework
     Poco::Util::LoggingConfigurator configurator;
     configurator.configure(m_pConf);
   } catch (std::exception &e) {
     std::cerr << "Trouble configuring the logging framework " << e.what()
-              << std::endl;
+              << '\n';
   }
+  // register the filter channels - the order here is important
+  registerLoggingFilterChannel("fileFilterChannel", nullptr);
+  registerLoggingFilterChannel("consoleFilterChannel", nullptr);
 }
 
 /**
@@ -624,110 +579,89 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
         std::fstream::out);
 
     filestr << "# This file can be used to override any properties for this "
-               "installation." << std::endl;
+               "installation.\n";
     filestr << "# Any properties found in this file will override any that are "
-               "found in the Mantid.Properties file" << std::endl;
+               "found in the Mantid.Properties file\n";
     filestr << "# As this file will not be replaced with futher installations "
-               "of Mantid it is a safe place to put " << std::endl;
-    filestr << "# properties that suit your particular installation."
-            << std::endl;
-    filestr << "#" << std::endl;
-    filestr << "# See here for a list of possible options:" << std::endl;
+               "of Mantid it is a safe place to put \n";
+    filestr << "# properties that suit your particular installation.\n";
+    filestr << "#\n";
+    filestr << "# See here for a list of possible options:\n";
     filestr << "# "
                "http://www.mantidproject.org/"
-               "Properties_File#Mantid.User.Properties" << std::endl;
-    filestr << std::endl;
-    filestr << "##" << std::endl;
-    filestr << "## GENERAL" << std::endl;
-    filestr << "##" << std::endl;
-    filestr << std::endl;
-    filestr << "## Set the number of algorithm properties to retain"
-            << std::endl;
-    filestr << "#algorithms.retained=90" << std::endl;
-    filestr << std::endl;
-    filestr << "## Hides catagories from the algorithm list in MantidPlot"
-            << std::endl;
-    filestr << "#algorithms.catagories.hidden=Muons,Inelastic" << std::endl;
-    filestr << std::endl;
-    filestr << "## Set the maximum number of coures used to run algorithms over"
-            << std::endl;
-    filestr << "#MultiThreaded.MaxCores=4" << std::endl;
-    filestr << std::endl;
-    filestr << "##" << std::endl;
-    filestr << "## FACILITY AND INSTRUMENT" << std::endl;
-    filestr << "##" << std::endl;
-    filestr << std::endl;
-    filestr << "## Sets the default facility" << std::endl;
-    filestr << "## e.g.: ISIS, SNS, ILL" << std::endl;
-    filestr << "default.facility=" << std::endl;
-    filestr << std::endl;
-    filestr << "## Sets the default instrument" << std::endl;
-    filestr << "## e.g. IRIS, HET, NIMROD" << std::endl;
-    filestr << "default.instrument=" << std::endl;
-    filestr << std::endl;
-    filestr << std::endl;
-    filestr << "## Sets the Q.convention" << std::endl;
+               "Properties_File#Mantid.User.Properties\n\n";
+    filestr << "##\n";
+    filestr << "## GENERAL\n";
+    filestr << "##\n\n";
+    filestr << "## Set the number of algorithm properties to retain\n";
+    filestr << "#algorithms.retained=90\n\n";
+    filestr << "## Hides catagories from the algorithm list in MantidPlot\n";
+    filestr << "#algorithms.catagories.hidden=Muons,Inelastic\n\n";
+    filestr
+        << "## Set the maximum number of coures used to run algorithms over\n";
+    filestr << "#MultiThreaded.MaxCores=4\n\n";
+    filestr << "##\n";
+    filestr << "## FACILITY AND INSTRUMENT\n";
+    filestr << "##\n\n";
+    filestr << "## Sets the default facility\n";
+    filestr << "## e.g.: ISIS, SNS, ILL\n";
+    filestr << "default.facility=\n\n";
+    filestr << "## Sets the default instrument\n";
+    filestr << "## e.g. IRIS, HET, NIMROD\n";
+    filestr << "default.instrument=\n\n";
+    filestr << '\n';
+    filestr << "## Sets the Q.convention\n";
     filestr << "## Set to Crystallography for kf-ki instead of default "
-               "Inelastic which is ki-kf" << std::endl;
-    filestr << "#Q.convention=Crystallography" << std::endl;
-    filestr << "##" << std::endl;
-    filestr << "## DIRECTORIES" << std::endl;
-    filestr << "##" << std::endl;
-    filestr << std::endl;
+               "Inelastic which is ki-kf\n";
+    filestr << "#Q.convention=Crystallography\n";
+    filestr << "##\n";
+    filestr << "## DIRECTORIES\n";
+    filestr << "##\n\n";
     filestr << "## Sets a list of directories (separated by semi colons) to "
-               "search for data" << std::endl;
-    filestr << "#datasearch.directories=../data;../isis/data" << std::endl;
-    filestr << std::endl;
+               "search for data\n";
+    filestr << "#datasearch.directories=../data;../isis/data\n\n";
     filestr << "## Set a list (separated by semi colons) of directories to "
-               "look for additional Python scripts" << std::endl;
-    filestr << "#pythonscripts.directories=../scripts;../docs/MyScripts"
-            << std::endl;
-    filestr << std::endl;
-    filestr << "## Uncomment to enable archive search - ICat and Orbiter"
-            << std::endl;
-    filestr << "#datasearch.searcharchive=On" << std::endl;
-    filestr << std::endl;
-    filestr << "## Sets default save directory" << std::endl;
-    filestr << "#defaultsave.directory=../data" << std::endl;
-    filestr << std::endl;
-    filestr << "##" << std::endl;
-    filestr << "## LOGGING" << std::endl;
-    filestr << "##" << std::endl;
-    filestr << std::endl;
-    filestr << "## Uncomment to change logging level" << std::endl;
-    filestr << "## Default is information" << std::endl;
-    filestr << "## Valid values are: error, warning, notice, information, debug"
-            << std::endl;
-    filestr << "#logging.loggers.root.level=information" << std::endl;
-    filestr << std::endl;
-    filestr << "## Sets the lowest level messages to be logged to file"
-            << std::endl;
-    filestr << "## Default is warning" << std::endl;
-    filestr << "## Valid values are: error, warning, notice, information, debug"
-            << std::endl;
-    filestr << "#logging.channels.fileFilterChannel.level=debug" << std::endl;
-    filestr << std::endl;
-    filestr << "## Sets the file to write logs to" << std::endl;
-    filestr << "#logging.channels.fileChannel.path=../mantid.log" << std::endl;
-    filestr << std::endl;
-    filestr << "##" << std::endl;
-    filestr << "## MantidPlot" << std::endl;
-    filestr << "##" << std::endl;
-    filestr << std::endl;
-    filestr << "## Show invisible workspaces" << std::endl;
-    filestr << "#MantidOptions.InvisibleWorkspaces=0" << std::endl;
-    filestr << "## Re-use plot instances for different plot types" << std::endl;
-    filestr << "#MantidOptions.ReusePlotInstances=Off" << std::endl;
-    filestr << std::endl;
+               "look for additional Python scripts\n";
+    filestr << "#pythonscripts.directories=../scripts;../docs/MyScripts\n\n";
+    filestr << "## Uncomment to enable archive search - ICat and Orbiter\n";
+    filestr << "#datasearch.searcharchive=On\n\n";
+    filestr << "## Sets default save directory\n";
+    filestr << "#defaultsave.directory=../data\n\n";
+    filestr << "##\n";
+    filestr << "## LOGGING\n";
+    filestr << "##\n\n";
+    filestr << "## Uncomment to change logging level\n";
+    filestr << "## Default is information\n";
+    filestr
+        << "## Valid values are: error, warning, notice, information, debug\n";
+    filestr << "#logging.loggers.root.level=information\n\n";
+    filestr << "## Sets the lowest level messages to be logged to file\n";
+    filestr << "## Default is warning\n";
+    filestr
+        << "## Valid values are: error, warning, notice, information, debug\n";
+    filestr << "#logging.channels.fileFilterChannel.level=debug\n\n";
+    filestr << "## Sets the file to write logs to\n";
+    filestr << "#logging.channels.fileChannel.path=../mantid.log\n";
+    filestr << "## Uncomment the following line to flush log messages to disk "
+               "immediately.\n";
+    filestr << "## Useful for debugging crashes but it will hurt performance\n";
+    filestr << "#logging.channels.fileChannel.flush = true\n\n";
+    filestr << "##\n";
+    filestr << "## MantidPlot\n";
+    filestr << "##\n\n";
+    filestr << "## Show invisible workspaces\n";
+    filestr << "#MantidOptions.InvisibleWorkspaces=0\n";
+    filestr << "## Re-use plot instances for different plot types\n";
+    filestr << "#MantidOptions.ReusePlotInstances=Off\n\n";
     filestr << "## Uncomment to disable use of OpenGL to render unwrapped "
-               "instrument views" << std::endl;
-    filestr << "#MantidOptions.InstrumentView.UseOpenGL=Off" << std::endl;
+               "instrument views\n";
+    filestr << "#MantidOptions.InstrumentView.UseOpenGL=Off\n";
 
     filestr.close();
   } catch (std::runtime_error &ex) {
     g_log.warning() << "Unable to write out user.properties file to "
                     << getUserPropertiesDir() << m_user_properties_file_name
-                    << " error: " << ex.what() << std::endl;
+                    << " error: " << ex.what() << '\n';
   }
 }
 
@@ -834,7 +768,7 @@ void ConfigServiceImpl::updateConfig(const std::string &filename,
  */
 void ConfigServiceImpl::saveConfig(const std::string &filename) const {
   // Open and read the user properties file
-  std::string updated_file("");
+  std::string updated_file;
 
   std::ifstream reader(filename.c_str(), std::ios::in);
   if (reader.bad()) {
@@ -842,7 +776,7 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
                              "updated configuration.");
   }
 
-  std::string file_line(""), output("");
+  std::string file_line, output;
   bool line_continuing(false);
   while (std::getline(reader, file_line)) {
     if (!file_line.empty()) {
@@ -958,7 +892,7 @@ std::string ConfigServiceImpl::getString(const std::string &keyName,
     retVal = m_pConf->getString(keyName);
   } catch (Poco::NotFoundException &) {
     g_log.debug() << "Unable to find " << keyName << " in the properties file"
-                  << std::endl;
+                  << '\n';
     retVal = "";
   }
   return retVal;
@@ -1425,7 +1359,7 @@ std::string ConfigServiceImpl::getDirectoryOfExecutable() const {
   * @returns A string containing the full path the the executable
   */
 std::string ConfigServiceImpl::getPathToExecutable() const {
-  std::string execpath("");
+  std::string execpath;
   const size_t LEN(1024);
   // cppcheck-suppress variableScope
   char pBuf[LEN];
@@ -1589,6 +1523,41 @@ void ConfigServiceImpl::setDataSearchDirs(const std::string &searchDirs) {
 }
 
 /**
+ *  Appends the passed subdirectory path to the end of each of data
+ *  search dirs and adds these new dirs to data search directories
+ *  @param subdir :: the subdirectory path to add (relative)
+ */
+void ConfigServiceImpl::appendDataSearchSubDir(const std::string &subdir) {
+  if (subdir.empty())
+    return;
+
+  Poco::Path subDirPath;
+  try {
+    subDirPath = Poco::Path(subdir);
+  } catch (Poco::PathSyntaxException &) {
+    return;
+  }
+
+  if (!subDirPath.isDirectory() || !subDirPath.isRelative()) {
+    return;
+  }
+
+  auto newDataDirs = m_DataSearchDirs;
+  for (const auto &path : m_DataSearchDirs) {
+    Poco::Path newDirPath;
+    try {
+      newDirPath = Poco::Path(path);
+      newDirPath.append(subDirPath);
+      newDataDirs.push_back(newDirPath.toString());
+    } catch (Poco::PathSyntaxException &) {
+      continue;
+    }
+  }
+
+  setDataSearchDirs(newDataDirs);
+}
+
+/**
  *  Adds the passed path to the end of the list of data search paths
  *  the path name must be absolute
  *  @param path :: the absolute path to add
@@ -1638,7 +1607,7 @@ ConfigServiceImpl::getInstrumentDirectories() const {
  * @returns a last entry of getInstrumentDirectories
  */
 const std::string ConfigServiceImpl::getInstrumentDirectory() const {
-  return m_InstrumentDirs[m_InstrumentDirs.size() - 1];
+  return m_InstrumentDirs.back();
 }
 /**
  * Return the search directory for vtp files
@@ -1785,7 +1754,7 @@ ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
   if (!defaultFacility.empty()) {
     try {
       g_log.debug() << "Looking for " << instrumentName << " at "
-                    << defaultFacility << "." << std::endl;
+                    << defaultFacility << ".\n";
       return getFacility(defaultFacility).instrument(instrumentName);
     } catch (Exception::NotFoundError &) {
       // Well the instName doesn't exist for this facility
@@ -1797,7 +1766,7 @@ ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
   for (auto facility : m_facilities) {
     try {
       g_log.debug() << "Looking for " << instrumentName << " at "
-                    << (*facility).name() << "." << std::endl;
+                    << (*facility).name() << ".\n";
       return (*facility).instrument(instrumentName);
     } catch (Exception::NotFoundError &) {
       // Well the instName doesn't exist for this facility...
@@ -1952,13 +1921,13 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
 * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
 */
 void ConfigServiceImpl::setFileLogLevel(int logLevel) {
-  setFilterChannelLogLevel("fileFilterChannel", logLevel);
+  setFilterChannelLogLevel(m_filterChannels[0], logLevel);
 }
 /** Sets the log level priority for the Console log channel
 * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
 */
 void ConfigServiceImpl::setConsoleLogLevel(int logLevel) {
-  setFilterChannelLogLevel("consoleFilterChannel", logLevel);
+  setFilterChannelLogLevel(m_filterChannels[1], logLevel);
 }
 
 /** Sets the Log level for a filter channel
@@ -1981,10 +1950,11 @@ void ConfigServiceImpl::setFilterChannelLogLevel(
   auto *filterChannel = dynamic_cast<Poco::FilterChannel *>(channel);
   if (filterChannel) {
     filterChannel->setPriority(logLevel);
+    int lowestLogLevel = FindLowestFilterLevel();
     // set root level if required
     int rootLevel = Poco::Logger::root().getLevel();
-    if (rootLevel < logLevel) {
-      Mantid::Kernel::Logger::setLevelForAll(logLevel);
+    if (rootLevel != lowestLogLevel) {
+      Mantid::Kernel::Logger::setLevelForAll(lowestLogLevel);
     }
     g_log.log(filterChannelName + " log channel set to " +
                   Logger::PriorityNames[logLevel] + " priority",
@@ -1993,6 +1963,31 @@ void ConfigServiceImpl::setFilterChannelLogLevel(
     throw std::invalid_argument(filterChannelName +
                                 " was not a filter channel");
   }
+}
+
+/** Finds the lowest Log level for all registered filter channels
+*/
+int ConfigServiceImpl::FindLowestFilterLevel() const {
+  int lowestPriority = Logger::Priority::PRIO_FATAL;
+  // Find the lowest level of all of the filter channels
+  for (const auto &filterChannelName : m_filterChannels) {
+    try {
+      auto *channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
+          filterChannelName);
+      auto *filterChannel = dynamic_cast<Poco::FilterChannel *>(channel);
+      if (filterChannel) {
+        int filterPriority = filterChannel->getPriority();
+        if (filterPriority > lowestPriority) {
+          lowestPriority = filterPriority;
+        }
+      }
+    } catch (Poco::NotFoundException &) {
+      g_log.warning(filterChannelName +
+                    " registered log filter channel not found");
+    }
+  }
+
+  return lowestPriority;
 }
 
 /// \cond TEMPLATE

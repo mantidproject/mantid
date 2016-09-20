@@ -55,15 +55,15 @@ public:
 
     TS_ASSERT_EQUALS(outputWs->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(
-        outputWs->getSpectrum(0)->readX(),
-        inputWs->getSpectrum(0)->readX()); // Check outputWs X values
-    TS_ASSERT_EQUALS(outputWs->getSpectrum(1)->readX(),
-                     inputWs->getSpectrum(1)->readX());
+        outputWs->getSpectrum(0).readX(),
+        inputWs->getSpectrum(0).readX()); // Check outputWs X values
+    TS_ASSERT_EQUALS(outputWs->getSpectrum(1).readX(),
+                     inputWs->getSpectrum(1).readX());
 
-    auto specReY = outputWs->getSpectrum(0)->readY();
-    auto specReE = outputWs->getSpectrum(0)->readE();
-    auto specImY = outputWs->getSpectrum(1)->readY();
-    auto specImE = outputWs->getSpectrum(1)->readE();
+    auto specReY = outputWs->getSpectrum(0).readY();
+    auto specReE = outputWs->getSpectrum(0).readE();
+    auto specImY = outputWs->getSpectrum(1).readY();
+    auto specImE = outputWs->getSpectrum(1).readE();
     // Check real Y values
     TS_ASSERT_DELTA(specReY[0], -0.9982, 0.0001);
     TS_ASSERT_DELTA(specReY[20], -0.0252, 0.0001);

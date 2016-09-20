@@ -33,12 +33,14 @@ using Mantid::Kernel::Quat;
 
 namespace ComponentCreationHelper {
 //----------------------------------------------------------------------------------------------
+
 /**
- * Create a capped cylinder object
+ * Return the XML for a capped cylinder
  */
-Object_sptr createCappedCylinder(double radius, double height,
-                                 const V3D &baseCentre, const V3D &axis,
-                                 const std::string &id) {
+std::string cappedCylinderXML(double radius, double height,
+                              const Mantid::Kernel::V3D &baseCentre,
+                              const Mantid::Kernel::V3D &axis,
+                              const std::string &id) {
   std::ostringstream xml;
   xml << "<cylinder id=\"" << id << "\">"
       << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
@@ -48,9 +50,17 @@ Object_sptr createCappedCylinder(double radius, double height,
       << "<radius val=\"" << radius << "\" />"
       << "<height val=\"" << height << "\" />"
       << "</cylinder>";
+  return xml.str();
+}
 
-  ShapeFactory shapeMaker;
-  return shapeMaker.createShape(xml.str());
+/**
+ * Create a capped cylinder object
+ */
+Object_sptr createCappedCylinder(double radius, double height,
+                                 const V3D &baseCentre, const V3D &axis,
+                                 const std::string &id) {
+  return ShapeFactory().createShape(
+      cappedCylinderXML(radius, height, baseCentre, axis, id));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -371,8 +381,8 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
   CompAssembly *bank = new CompAssembly("det_ass");
 
   for (size_t i = 0; i < azim.size(); i++) {
-    Detector *physicalPixel = new Detector(
-        "det" + boost::lexical_cast<std::string>(i), pixelID, pixelShape, bank);
+    Detector *physicalPixel =
+        new Detector("det" + std::to_string(i), pixelID, pixelShape, bank);
     double zpos = L2[i] * cos(polar[i]);
     double xpos = L2[i] * sin(polar[i]) * cos(azim[i]);
     double ypos = L2[i] * sin(polar[i]) * sin(azim[i]);

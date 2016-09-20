@@ -237,17 +237,17 @@ ParameterType<Type> &ParameterType<Type>::operator=(const Type &value) {
 /// Typedef for the shared pointer
 typedef boost::shared_ptr<Parameter> Parameter_sptr;
 /// Parameter of type int
-typedef MANTID_GEOMETRY_DLL ParameterType<int> ParameterInt;
+typedef ParameterType<int> ParameterInt;
 /// Parameter of type double
-typedef MANTID_GEOMETRY_DLL ParameterType<double> ParameterDouble;
+typedef ParameterType<double> ParameterDouble;
 /// Parameter of type bool
-typedef MANTID_GEOMETRY_DLL ParameterType<bool> ParameterBool;
+typedef ParameterType<bool> ParameterBool;
 /// Parameter of type std::string
-typedef MANTID_GEOMETRY_DLL ParameterType<std::string> ParameterString;
+typedef ParameterType<std::string> ParameterString;
 /// Parameter of type V3D
-typedef MANTID_GEOMETRY_DLL ParameterType<Kernel::V3D> ParameterV3D;
+typedef ParameterType<Kernel::V3D> ParameterV3D;
 /// Parameter of type Quat
-typedef MANTID_GEOMETRY_DLL ParameterType<Kernel::Quat> ParameterQuat;
+typedef ParameterType<Kernel::Quat> ParameterQuat;
 
 } // namespace Geometry
 } // namespace Mantid

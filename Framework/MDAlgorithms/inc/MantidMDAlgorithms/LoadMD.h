@@ -41,7 +41,6 @@ namespace MDAlgorithms {
 class DLLExport LoadMD : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadMD();
-  ~LoadMD() override;
 
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadMD"; };
@@ -103,6 +102,9 @@ private:
 
   /// Checks if a worspace is a certain type of legacy file
   void checkForRequiredLegacyFixup(API::IMDWorkspace_sptr ws);
+
+  /// Negative scaling for Q dimensions
+  std::vector<double> qDimensions(API::IMDWorkspace_sptr ws);
 
   /// Open file handle
   // clang-format off

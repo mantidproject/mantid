@@ -30,7 +30,7 @@ public:
     detIDs.insert(9);
     detIDs.insert(6);
     detIDs.insert(2);
-    toMatch->getSpectrum(0)->setDetectorIDs(detIDs);
+    toMatch->getSpectrum(0).setDetectorIDs(detIDs);
 
     // Add workspaces to ADS
     AnalysisDataService::Instance().add("to_match", toMatch);
@@ -52,7 +52,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         result = boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("to_remap")));
-    auto resultDetIDs = result->getSpectrum(0)->getDetectorIDs();
+    auto resultDetIDs = result->getSpectrum(0).getDetectorIDs();
     TS_ASSERT(detIDs == resultDetIDs);
 
     // Clean up workspace

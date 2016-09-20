@@ -22,7 +22,8 @@ and allows it to be modified.
 @author Dan Nixon
 @date 22/10/2014
 
-Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -43,12 +44,13 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MantidSampleMaterialDialog : public QDialog, Mantid::API::AlgorithmObserver
-{
+class MantidSampleMaterialDialog : public QDialog,
+                                   Mantid::API::AlgorithmObserver {
   Q_OBJECT
 
 public:
-  MantidSampleMaterialDialog(const QString & wsName, MantidUI* mtdUI, Qt::WFlags flags = 0);
+  MantidSampleMaterialDialog(const QString &wsName, MantidUI *mtdUI,
+                             Qt::WFlags flags = 0);
 
 public slots:
   void updateMaterial();
@@ -63,10 +65,9 @@ private:
   QString m_wsName;
 
   /// A pointer to the MantidUI object
-  MantidUI* m_mantidUI;
+  MantidUI *m_mantidUI;
 
   Ui::MantidSampleMaterialDialog m_uiForm;
-
 };
 
-#endif //MANTIDSAMPLEMATERIALDIALOG_H_
+#endif // MANTIDSAMPLEMATERIALDIALOG_H_

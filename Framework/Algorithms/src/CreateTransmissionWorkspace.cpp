@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/CreateTransmissionWorkspace.h"
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -11,16 +12,6 @@ namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateTransmissionWorkspace)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateTransmissionWorkspace::CreateTransmissionWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateTransmissionWorkspace::~CreateTransmissionWorkspace() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -94,20 +85,24 @@ void CreateTransmissionWorkspace::exec() {
   getTransmissionRunInfo(firstTransmissionRun, secondTransmissionRun,
                          stitchingStart, stitchingDelta, stitchingEnd,
                          stitchingStartOverlap, stitchingEndOverlap);
+  // Get the monitor i0 index
+  auto transWS = firstTransmissionRun.get();
+  auto instrument = transWS->getInstrument();
+  const OptionalInteger i0MonitorIndex = checkForOptionalInstrumentDefault<int>(
+      this, "I0MonitorIndex", instrument, "I0MonitorIndex");
 
   // Get wavelength intervals.
   const MinMax wavelengthInterval =
       this->getMinMax("WavelengthMin", "WavelengthMax");
-  const double wavelengthStep = getProperty("WavelengthStep");
-  const MinMax monitorBackgroundWavelengthInterval = getMinMax(
-      "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax");
-  const MinMax monitorIntegrationWavelengthInterval = getMinMax(
-      "MonitorIntegrationWavelengthMin", "MonitorIntegrationWavelengthMax");
+  const OptionalMinMax monitorBackgroundWavelengthInterval = getOptionalMinMax(
+      this, "MonitorBackgroundWavelengthMin", "MonitorBackgroundWavelengthMax",
+      instrument, "MonitorBackgroundMin", "MonitorBackgroundMax");
+  const OptionalMinMax monitorIntegrationWavelengthInterval =
+      getOptionalMinMax(this, "MonitorIntegrationWavelengthMin",
+                        "MonitorIntegrationWavelengthMax", instrument,
+                        "MonitorIntegralMin", "MonitorIntegralMax");
 
   const std::string processingCommands = getWorkspaceIndexList();
-
-  // Get the monitor i0 index
-  const int i0MonitorIndex = getProperty("I0MonitorIndex");
 
   // Create the transmission workspace.
   MatrixWorkspace_sptr outWS = this->makeTransmissionCorrection(
@@ -115,7 +110,7 @@ void CreateTransmissionWorkspace::exec() {
       monitorBackgroundWavelengthInterval, monitorIntegrationWavelengthInterval,
       i0MonitorIndex, firstTransmissionRun.get(), secondTransmissionRun,
       stitchingStart, stitchingDelta, stitchingEnd, stitchingStartOverlap,
-      stitchingEndOverlap, wavelengthStep);
+      stitchingEndOverlap);
 
   setProperty("OutputWorkspace", outWS);
 }
@@ -146,39 +141,40 @@ void CreateTransmissionWorkspace::exec() {
  *dependent on secondTransmissionRun)
  * @param stitchingEndOverlap : Stitching end overlap (optional but dependent on
  *secondTransmissionRun)
- * @param wavelengthStep : Step in angstroms for rebinning for workspaces
- *converted into wavelength.
  * @return A transmission workspace in Wavelength units.
  */
 MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
     const std::string &processingCommands, const MinMax &wavelengthInterval,
-    const MinMax &wavelengthMonitorBackgroundInterval,
-    const MinMax &wavelengthMonitorIntegrationInterval,
-    const int &i0MonitorIndex, MatrixWorkspace_sptr firstTransmissionRun,
+    const OptionalMinMax &wavelengthMonitorBackgroundInterval,
+    const OptionalMinMax &wavelengthMonitorIntegrationInterval,
+    const OptionalInteger &i0MonitorIndex,
+    MatrixWorkspace_sptr firstTransmissionRun,
     OptionalMatrixWorkspace_sptr secondTransmissionRun,
     const OptionalDouble &stitchingStart, const OptionalDouble &stitchingDelta,
     const OptionalDouble &stitchingEnd,
     const OptionalDouble &stitchingStartOverlap,
-    const OptionalDouble &stitchingEndOverlap, const double &wavelengthStep) {
-  auto trans1InLam = toLam(firstTransmissionRun, processingCommands,
-                           i0MonitorIndex, wavelengthInterval,
-                           wavelengthMonitorBackgroundInterval, wavelengthStep);
+    const OptionalDouble &stitchingEndOverlap) {
+  /*make struct of optional inputs to refactor method arguments*/
+  /*make a using statements defining OptionalInteger for MonitorIndex*/
+  auto trans1InLam =
+      toLam(firstTransmissionRun, processingCommands, i0MonitorIndex,
+            wavelengthInterval, wavelengthMonitorBackgroundInterval);
   MatrixWorkspace_sptr trans1Detector = trans1InLam.get<0>();
   MatrixWorkspace_sptr trans1Monitor = trans1InLam.get<1>();
 
   // Monitor integration ... can this happen inside the toLam routine?
-  auto integrationAlg = this->createChildAlgorithm("Integration");
-  integrationAlg->initialize();
-  integrationAlg->setProperty("InputWorkspace", trans1Monitor);
-  integrationAlg->setProperty("RangeLower",
-                              wavelengthMonitorIntegrationInterval.get<0>());
-  integrationAlg->setProperty("RangeUpper",
-                              wavelengthMonitorIntegrationInterval.get<1>());
-  integrationAlg->execute();
-  trans1Monitor = integrationAlg->getProperty("OutputWorkspace");
-
+  if (wavelengthMonitorIntegrationInterval.is_initialized()) {
+    auto integrationAlg = this->createChildAlgorithm("Integration");
+    integrationAlg->initialize();
+    integrationAlg->setProperty("InputWorkspace", trans1Monitor);
+    integrationAlg->setProperty(
+        "RangeLower", wavelengthMonitorIntegrationInterval.get().get<0>());
+    integrationAlg->setProperty(
+        "RangeUpper", wavelengthMonitorIntegrationInterval.get().get<1>());
+    integrationAlg->execute();
+    trans1Monitor = integrationAlg->getProperty("OutputWorkspace");
+  }
   MatrixWorkspace_sptr transmissionWS = divide(trans1Detector, trans1Monitor);
-
   if (secondTransmissionRun.is_initialized()) {
     auto transRun2 = secondTransmissionRun.get();
     g_log.debug(
@@ -186,22 +182,24 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
 
     auto trans2InLam =
         toLam(transRun2, processingCommands, i0MonitorIndex, wavelengthInterval,
-              wavelengthMonitorBackgroundInterval, wavelengthStep);
+              wavelengthMonitorBackgroundInterval);
 
     // Unpack the conversion results.
     MatrixWorkspace_sptr trans2Detector = trans2InLam.get<0>();
     MatrixWorkspace_sptr trans2Monitor = trans2InLam.get<1>();
 
     // Monitor integration ... can this happen inside the toLam routine?
-    auto integrationAlg = this->createChildAlgorithm("Integration");
-    integrationAlg->initialize();
-    integrationAlg->setProperty("InputWorkspace", trans2Monitor);
-    integrationAlg->setProperty("RangeLower",
-                                wavelengthMonitorIntegrationInterval.get<0>());
-    integrationAlg->setProperty("RangeUpper",
-                                wavelengthMonitorIntegrationInterval.get<1>());
-    integrationAlg->execute();
-    trans2Monitor = integrationAlg->getProperty("OutputWorkspace");
+    if (wavelengthMonitorIntegrationInterval.is_initialized()) {
+      auto integrationAlg = this->createChildAlgorithm("Integration");
+      integrationAlg->initialize();
+      integrationAlg->setProperty("InputWorkspace", trans2Monitor);
+      integrationAlg->setProperty(
+          "RangeLower", wavelengthMonitorIntegrationInterval.get().get<0>());
+      integrationAlg->setProperty(
+          "RangeUpper", wavelengthMonitorIntegrationInterval.get().get<1>());
+      integrationAlg->execute();
+      trans2Monitor = integrationAlg->getProperty("OutputWorkspace");
+    }
 
     MatrixWorkspace_sptr normalizedTrans2 =
         divide(trans2Detector, trans2Monitor);
@@ -238,6 +236,5 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
 
   return transmissionWS;
 }
-
 } // namespace Algorithms
 } // namespace Mantid

@@ -37,34 +37,33 @@ class QSpinBox;
 class QComboBox;
 
 //! Matrix properties dialog
-class MatrixDialog : public QDialog
-{
-    Q_OBJECT
+class MatrixDialog : public QDialog {
+  Q_OBJECT
 
 public:
-	//! Constructor
-	/**
-	 * @param parent :: parent widget
-	 * @param fl :: window flags
-	 */
-    MatrixDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
-    void setMatrix(Matrix *m);
+  //! Constructor
+  /**
+   * @param parent :: parent widget
+   * @param fl :: window flags
+   */
+  MatrixDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
+  void setMatrix(Matrix *m);
 
 private slots:
-	//! Accept changes and quit
+  //! Accept changes and quit
   void accept() override;
-        //! Apply changes
-	void apply();
-	//! Activate the numeric precision choice box
-	void showPrecisionBox(int item);
+  //! Apply changes
+  void apply();
+  //! Activate the numeric precision choice box
+  void showPrecisionBox(int item);
 
 private:
-    Matrix *d_matrix;
+  Matrix *d_matrix;
 
-    QPushButton* buttonOk;
-	QPushButton* buttonCancel, *buttonApply;
-	QSpinBox* boxColWidth, *boxPrecision;
-	QComboBox *boxFormat, *boxNumericDisplay;
+  QPushButton *buttonOk;
+  QPushButton *buttonCancel, *buttonApply;
+  QSpinBox *boxColWidth, *boxPrecision;
+  QComboBox *boxFormat, *boxNumericDisplay;
 };
 
 #endif // MATRIXDIALOG_H

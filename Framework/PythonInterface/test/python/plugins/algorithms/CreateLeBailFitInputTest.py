@@ -1,10 +1,12 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 import numpy
 from mantid.kernel import *
 from mantid.api import *
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
-
+from six.moves import range
 import os
 
 class CreateLeBailFitInputTest(unittest.TestCase):
@@ -35,12 +37,12 @@ class CreateLeBailFitInputTest(unittest.TestCase):
             numrowgood = 29
         else:
             numrowgood = 28
-        print "Parameter name of first line = ", paramname0
+        print("Parameter name of first line = ", paramname0)
 
         #self.assertEqual(numrowgood, paramws.rowCount())
 
         paramnames = []
-        for i in xrange(paramws.rowCount()):
+        for i in range(paramws.rowCount()):
             paramname = paramws.cell(i, 0)
             paramnames.append(paramname)
         self.assertEqual(paramnames.count("LatticeConstant"), 1)
@@ -89,7 +91,7 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         #self.assertEqual(numrowgood, paramws.rowCount())
 
         paramnames = []
-        for i in xrange(paramws.rowCount()):
+        for i in range(paramws.rowCount()):
             paramname = paramws.cell(i, 0)
             paramnames.append(paramname)
         self.assertEqual(paramnames.count("LatticeConstant"), 1)

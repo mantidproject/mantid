@@ -385,7 +385,8 @@ signal_t MDHistoWorkspace::getSignalWithMaskAtCoord(
     const coord_t *coords,
     const Mantid::API::MDNormalization &normalization) const {
   size_t linearIndex = this->getLinearIndexAtCoord(coords);
-  if (this->getIsMaskedAt(linearIndex)) {
+  if (linearIndex == std::numeric_limits<size_t>::max() ||
+      this->getIsMaskedAt(linearIndex)) {
     return MDMaskValue;
   }
   return getSignalAtCoord(coords, normalization);
@@ -596,7 +597,9 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
       const auto linearIndex =
           this->getLinearIndexAtCoord(middle.getBareArray());
 
-      if (bin_centres && !this->getIsMaskedAt(linearIndex)) {
+      if (bin_centres &&
+          !(linearIndex == std::numeric_limits<size_t>::max() ||
+            this->getIsMaskedAt(linearIndex))) {
         coord_t bin_centrePos =
             static_cast<coord_t>((linePos + lastLinePos) * 0.5);
         line.x.push_back(bin_centrePos);
@@ -845,6 +848,9 @@ MDHistoWorkspace &MDHistoWorkspace::operator*=(const MDHistoWorkspace &b_ws) {
  *
  * Error propagation of \f$ f = a * b \f$  is given by:
  * \f$ df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) \f$
+ * Rewritten as:
+ * \f$ df^2 = b^2 da^2 + a^2 * db^2 \f$
+ * to avoid problems when a or b are 0
  *
  * @param b_ws :: workspace on the RHS of the operation
  * */
@@ -858,7 +864,7 @@ void MDHistoWorkspace::multiply(const MDHistoWorkspace &b_ws) {
     signal_t db2 = b_ws.m_errorsSquared[i];
 
     signal_t f = a * b;
-    signal_t df2 = (f * f) * (da2 / (a * a) + db2 / (b * b));
+    signal_t df2 = da2 * b * b + db2 * a * a;
 
     m_signals[i] = f;
     m_errorsSquared[i] = df2;
@@ -870,6 +876,9 @@ void MDHistoWorkspace::multiply(const MDHistoWorkspace &b_ws) {
  *
  * Error propagation of \f$ f = a * b \f$  is given by:
  * \f$ df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) \f$
+ *  Rewritten as:
+ * \f$ df^2 = b^2 da^2 + a^2 * db^2 \f$
+ * to avoid problems when a or b are 0
  *
  * @param signal :: signal to apply
  * @param error :: error (not squared) to apply
@@ -877,13 +886,13 @@ void MDHistoWorkspace::multiply(const MDHistoWorkspace &b_ws) {
 void MDHistoWorkspace::multiply(const signal_t signal, const signal_t error) {
   signal_t b = signal;
   signal_t db2 = error * error;
-  signal_t db2_relative = db2 / (b * b);
+
   for (size_t i = 0; i < m_length; ++i) {
     signal_t a = m_signals[i];
     signal_t da2 = m_errorsSquared[i];
 
     signal_t f = a * b;
-    signal_t df2 = (f * f) * (da2 / (a * a) + db2_relative);
+    signal_t df2 = da2 * b * b + db2 * a * a;
 
     m_signals[i] = f;
     m_errorsSquared[i] = df2;
@@ -908,6 +917,9 @@ MDHistoWorkspace &MDHistoWorkspace::operator/=(const MDHistoWorkspace &b_ws) {
  *
  * Error propagation of \f$ f = a / b \f$  is given by:
  * \f$ df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) \f$
+ * Rewritten as:
+ * \f$ df^2 = da^2 / b^2 + db^2 *f^2 / b^2 \f$
+ * to avoid problems when a or b are 0
  *
  * @param b_ws :: workspace on the RHS of the operation
  **/
@@ -921,7 +933,7 @@ void MDHistoWorkspace::divide(const MDHistoWorkspace &b_ws) {
     signal_t db2 = b_ws.m_errorsSquared[i];
 
     signal_t f = a / b;
-    signal_t df2 = (f * f) * (da2 / (a * a) + db2 / (b * b));
+    signal_t df2 = da2 / (b * b) + db2 * f * f / (b * b);
 
     m_signals[i] = f;
     m_errorsSquared[i] = df2;
@@ -933,6 +945,9 @@ void MDHistoWorkspace::divide(const MDHistoWorkspace &b_ws) {
  *
  * Error propagation of \f$ f = a / b \f$  is given by:
  * \f$ df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) \f$
+ * Rewritten as:
+ * \f$ df^2 = da^2 / b^2 + db^2 *f^2 / b^2 \f$
+ * to avoid problems when a or b are 0
  *
  * @param signal :: signal to apply
  * @param error :: error (not squared) to apply
@@ -946,7 +961,7 @@ void MDHistoWorkspace::divide(const signal_t signal, const signal_t error) {
     signal_t da2 = m_errorsSquared[i];
 
     signal_t f = a / b;
-    signal_t df2 = (f * f) * (da2 / (a * a) + db2_relative);
+    signal_t df2 = da2 / (b * b) + db2_relative * f * f;
 
     m_signals[i] = f;
     m_errorsSquared[i] = df2;

@@ -10,26 +10,20 @@
 class QwtPlot;
 class QwtPlotCurve;
 
-namespace Mantid
-{
-namespace API
-{
-  class IFunction;
+namespace Mantid {
+namespace API {
+class IFunction;
 }
 }
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-namespace MDF
-{
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace MDF {
 
 /**
  * Contains the curve and helps to set the data to plot a function.
  */
-class MDFFunctionPlotData
-{
+class MDFFunctionPlotData {
 public:
   MDFFunctionPlotData(boost::shared_ptr<Mantid::API::IFunction> fun,
                       double startX, double endX,
@@ -41,11 +35,12 @@ public:
   /// Set curve data
   void setDomain(double startX, double endX, size_t nX = g_defaultDomainSize);
   /// Update function parameters and attributes
-  void updateFunction(const Mantid::API::IFunction& fun);
+  void updateFunction(const Mantid::API::IFunction &fun);
+
 private:
   // No copying
-  MDFFunctionPlotData(const MDFFunctionPlotData&);
-  MDFFunctionPlotData& operator=(const MDFFunctionPlotData&);
+  MDFFunctionPlotData(const MDFFunctionPlotData &);
+  MDFFunctionPlotData &operator=(const MDFFunctionPlotData &);
 
   /// The function
   boost::shared_ptr<Mantid::API::IFunction> m_function;
@@ -59,6 +54,5 @@ private:
 } // MDF
 } // CustomInterfaces
 } // MantidQt
-
 
 #endif /*MDFFUNCTIONPLOTDATA_H_*/

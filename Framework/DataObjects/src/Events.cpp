@@ -1,11 +1,11 @@
-#include <stdexcept>
+#include "MantidDataObjects/Events.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/Events.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Exception.h"
+#include <cmath>
 #include <functional>
-#include <math.h>
+#include <stdexcept>
 
 using std::ostream;
 using std::runtime_error;

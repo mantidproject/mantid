@@ -492,15 +492,15 @@ bool Component::hasParameter(const std::string &name, bool recursive) const {
 */
 void Component::printSelf(std::ostream &os) const {
   boost::shared_ptr<const IComponent> parent = getParent();
-  os << "Name : " << getName() << std::endl;
-  os << "Type: " << this->type() << std::endl;
+  os << "Name : " << getName() << '\n';
+  os << "Type: " << this->type() << '\n';
   if (parent)
-    os << "Parent: " << parent->getName() << std::endl;
+    os << "Parent: " << parent->getName() << '\n';
   else
-    os << "Parent: None" << std::endl;
+    os << "Parent: None\n";
 
-  os << "Position : " << getPos() << std::endl;
-  os << "Orientation :" << getRelativeRot() << std::endl;
+  os << "Position : " << getPos() << '\n';
+  os << "Orientation :" << getRelativeRot() << '\n';
 }
 
 /** Prints a text representation

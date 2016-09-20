@@ -12,6 +12,8 @@ Description
 
 The algorithm calculates the elastic signal for the Corelli diffractometer. This is done by calculating the cross-correlation with the correlation chopper. The correlation chopper modulates the incident neutron beam with a pseudo-random sequence. The calculated signal is applied the each event in the form of a weight.
 
+The weights that the events are scaled by are :math:`1` for transparent and :math:`\frac{-c}{1-c}` for absorbing, where :math:`c` is the duty cycle (:math:`c\approx0.498475`).
+
 The algorithm requires the timing offset of the TDC signal from the correlation chopper to run. The timing offset is dependent on the frequency of the chopper and should not change if the frequency has not changed.
 
 Usage
@@ -29,14 +31,14 @@ Usage
     ws = Load('CORELLI_2100')
 
     # You will need to load the instrument if the one in the NeXus file doesn't contain the chopper sequence.
-    LoadInstrument(ws, MonitorList='-1,-2,-3', InstrumentName='CORELLI', RewriteSpectraMap=True)
+    LoadInstrument(ws, InstrumentName='CORELLI', RewriteSpectraMap=False)
 
     # Run the cross-correlation. This is using a TDC timing offset of 56000ns.
-    wsOut = CorelliCrossCorrelate(ws,56000)
+    wsOut = CorelliCrossCorrelate(ws, 56000)
 
-    print 'The detector 172305 has ' + str(ws.getEventList(172305).getNumberEvents()) + ' events.'
-    print 'The event weights before cross-correlation are ' + str(ws.getEventList(172305).getWeights())
-    print 'The event weights after  cross-correlation are ' + str(wsOut.getEventList(172305).getWeights())
+    print 'The detector 172305 has ' + str(ws.getSpectrum(172305).getNumberEvents()) + ' events.'
+    print 'The event weights before cross-correlation are ' + str(ws.getSpectrum(172305).getWeights())
+    print 'The event weights after  cross-correlation are ' + str(wsOut.getSpectrum(172305).getWeights())
 
 Output:
 
@@ -44,7 +46,7 @@ Output:
 
     The detector 172305 has 3 events.
     The event weights before cross-correlation are [ 1.  1.  1.]
-    The event weights after  cross-correlation are [-1.99391854  2.00611877  2.00611877]
+    The event weights after  cross-correlation are [-0.99391854  1.          1.        ]
 
 .. categories::
 

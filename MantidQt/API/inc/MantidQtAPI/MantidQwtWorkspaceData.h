@@ -24,8 +24,8 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-#include "qwt_data.h"
 #include "DllOption.h"
+#include "qwt_data.h"
 
 //-----------------------------------------------------------------------------
 // Forward declarations
@@ -41,28 +41,59 @@ class MatrixWorkspace;
  */
 class EXPORT_OPT_MANTIDQT_API MantidQwtWorkspaceData : public QwtData {
 public:
-  virtual void setLogScale(bool on) = 0;
-  virtual bool logScale() const = 0;
-  virtual void saveLowestPositiveValue(const double v) = 0;
-  virtual size_t esize() const = 0;
-  virtual double e(size_t i) const = 0;
-  virtual double ex(size_t i) const = 0;
-  virtual double getYMin() const = 0;
-  virtual double getYMax() const = 0;
+  MantidQwtWorkspaceData(bool logScaleY);
+  MantidQwtWorkspaceData(const MantidQwtWorkspaceData &data);
+  MantidQwtWorkspaceData &operator=(const MantidQwtWorkspaceData &);
+
   virtual QString getXAxisLabel() const = 0;
   virtual QString getYAxisLabel() const = 0;
-  static void calculateYMinAndMax(const std::vector<double> &yvalues,
-                                  double &yMin, double &yMax,
-                                  double &yMinPositive);
 
-  virtual void setXOffset(const double x) = 0;
-  virtual void setYOffset(const double y) = 0;
-  virtual void setWaterfallPlot(bool on) = 0;
+  double x(size_t i) const override;
+  double y(size_t i) const override;
+  virtual size_t esize() const;
+  virtual double e(size_t i) const;
+  virtual double ex(size_t i) const;
+  virtual void setLogScaleY(bool on);
+  virtual bool logScaleY() const;
+  virtual void saveLowestPositiveValue(const double v);
+  virtual double getYMin() const;
+  virtual double getYMax() const;
+
+  virtual void setXOffset(const double x);
+  virtual void setYOffset(const double y);
+  virtual void setWaterfallPlot(bool on);
+  virtual bool isWaterfallPlot() const;
+  double offsetY() const { return m_offsetY; }
+
+  void calculateYMinAndMax(/*const std::vector<double> &yvalues*/) const;
 
 protected:
-  // Assignment operator (virtualized).
-  MantidQwtWorkspaceData &
-  operator=(const MantidQwtWorkspaceData &); // required by QwtData base class
+  virtual double getX(size_t i) const = 0;
+  virtual double getY(size_t i) const = 0;
+  virtual double getE(size_t i) const = 0;
+  virtual double getEX(size_t i) const = 0;
+
+private:
+  /// Indicates that the data is plotted on a log y scale
+  bool m_logScaleY;
+
+  /// lowest y value
+  mutable double m_minY;
+
+  /// lowest positive y value
+  mutable double m_minPositive;
+
+  /// highest y value
+  mutable double m_maxY;
+
+  /// Indicates whether or not waterfall plots are enabled
+  bool m_isWaterfall;
+
+  /// x-axis offset for waterfall plots
+  double m_offsetX;
+
+  /// y-axis offset for waterfall plots
+  double m_offsetY;
 };
 
 /**
@@ -71,14 +102,10 @@ protected:
 class EXPORT_OPT_MANTIDQT_API MantidQwtMatrixWorkspaceData
     : public MantidQwtWorkspaceData {
 public:
+  MantidQwtMatrixWorkspaceData(bool logScaleY);
   /// Return a new data object of the same type but with a new workspace
   virtual MantidQwtMatrixWorkspaceData *
   copyWithNewSource(const Mantid::API::MatrixWorkspace &workspace) const = 0;
-
-protected:
-  // Assignment operator (virtualized).
-  MantidQwtMatrixWorkspaceData &operator=(
-      const MantidQwtMatrixWorkspaceData &); // required by QwtData base class
 };
 
 #endif

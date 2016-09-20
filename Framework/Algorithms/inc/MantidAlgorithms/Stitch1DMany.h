@@ -33,12 +33,6 @@ namespace Algorithms {
  */
 class DLLExport Stitch1DMany : public API::Algorithm {
 public:
-  /// Default constructor
-  Stitch1DMany()
-      : m_numWorkspaces(0), m_manualScaleFactor(1.0), m_scaleRHSWorkspace(true),
-        m_useManualScaleFactor(false){};
-  /// Destructor
-  ~Stitch1DMany() override{};
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string name() const override { return "Stitch1DMany"; }
   /// Algorithm's version for identification. @see Algorithm::version
@@ -66,10 +60,10 @@ private:
   std::vector<double> m_scaleFactors;
   Mantid::API::Workspace_sptr m_outputWorkspace;
 
-  size_t m_numWorkspaces;
-  double m_manualScaleFactor;
-  bool m_scaleRHSWorkspace;
-  bool m_useManualScaleFactor;
+  size_t m_numWorkspaces = 0;
+  double m_manualScaleFactor = 1.0;
+  bool m_scaleRHSWorkspace = true;
+  bool m_useManualScaleFactor = false;
 };
 
 } // namespace Algorithms

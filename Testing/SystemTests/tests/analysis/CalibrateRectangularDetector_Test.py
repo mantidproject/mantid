@@ -1,7 +1,7 @@
 #pylint: disable=invalid-name,no-init,attribute-defined-outside-init
 import stresstesting
-from mantid.simpleapi import *
 import os
+from mantid.simpleapi import *
 
 def _skip_test():
     """Helper function to determine if we run the test"""
@@ -37,21 +37,20 @@ class PG3Calibration(stresstesting.MantidStressTest):
                                                GroupDetectorsBy = 'All', DiffractionFocusWorkspace = False,
                                                Binning = '0.5, -0.0004, 2.5',
                                                MaxOffset=0.01, PeakPositions = '.6866,.7283,.8185,.8920,1.0758,1.2615,2.0599',
-                                               CrossCorrelation = False, Instrument = 'PG3', RunNumber = '2538',
-                                               Extension = '_event.nxs')
+                                               CrossCorrelation = False, RunNumber = 'PG3_2538')
 
         if isinstance(output, basestring):
-            self.saved_cal_file = output
+            self.saved_cal_file = output.replace('.h5','.cal')
         else:
             raise NotImplementedError("Output from CalibrateRectangularDetectors is NOT string for calibration file name!")
 
         # load saved cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file, WorkspaceName="PG3_2538",
-                    MakeGroupingWorkspace=False)
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file,
+                    WorkspaceName="PG3_2538", MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_offsets",MaskedWorkspace="PG3_2538_mask")
         # load golden cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_golden.cal", WorkspaceName="PG3_2538_golden",
-                    MakeGroupingWorkspace=False)
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_golden.cal",
+                    WorkspaceName="PG3_2538_golden", MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_golden_offsets",MaskedWorkspace="PG3_2538_golden_mask")
 
     def validateMethod(self):
@@ -85,21 +84,20 @@ class PG3CCCalibration(stresstesting.MantidStressTest):
                                                GroupDetectorsBy = 'All', DiffractionFocusWorkspace = False,
                                                Binning = '0.5, -0.0004, 2.5',
                                                MaxOffset=0.01, PeakPositions = '0.7282933,1.261441',DetectorsPeaks = '17,6',
-                                               CrossCorrelation = True, Instrument = 'PG3', RunNumber = '2538',
-                                               Extension = '_event.nxs')
+                                               CrossCorrelation = True, RunNumber = 'PG3_2538')
 
         if isinstance(output, basestring):
-            self.saved_cal_file = output
+            self.saved_cal_file = output.replace('.h5','.cal')
         else:
             raise NotImplementedError("Output from CalibrateRectangularDetectors is NOT string for calibration file name!")
 
         # load saved cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file, WorkspaceName="PG3_2538",
-                    MakeGroupingWorkspace=False)
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file,
+                    WorkspaceName="PG3_2538", MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_offsets",MaskedWorkspace="PG3_2538_mask")
         # load golden cal file
-        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_goldenCC.cal", WorkspaceName="PG3_2538_golden",
-                    MakeGroupingWorkspace=False)
+        LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_goldenCC.cal",
+                    WorkspaceName="PG3_2538_golden", MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_golden_offsets",MaskedWorkspace="PG3_2538_golden_mask")
 
     def validateMethod(self):

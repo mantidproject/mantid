@@ -41,10 +41,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport AsciiPointBase : public API::Algorithm {
 public:
-  /// Default constructor
-  AsciiPointBase() : m_qres(0), m_xlength(0), m_ws() {}
-  /// Destructor
-  ~AsciiPointBase() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override = 0;
   /// Algorithm's version for identification overriding a virtual method
@@ -81,8 +77,8 @@ protected:
   /// write the main content of the data
   virtual void data(std::ofstream &file, const std::vector<double> &XData,
                     bool exportDeltaQ = true);
-  double m_qres;
-  size_t m_xlength;
+  double m_qres = 0.0;
+  size_t m_xlength = 0;
 
   API::MatrixWorkspace_const_sptr m_ws;
 };

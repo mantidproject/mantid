@@ -16,7 +16,8 @@ algorithms and data objects that are:
       Implementing Algorithms, Virtual Instrument Geometry.
 
 """
-from __future__ import absolute_import
+from __future__ import (absolute_import, division,
+                        print_function)
 
 ###############################################################################
 # Check the current Python version is correct
@@ -47,7 +48,8 @@ except ImportError:
 ###############################################################################
 import warnings as _warnings
 # Default we see everything
-_warnings.filterwarnings("default",category=DeprecationWarning)
+_warnings.filterwarnings("default",category=DeprecationWarning,
+                         module="mantid.*")
 # We can't do anything about numpy.oldnumeric being deprecated but
 # still used in other libraries, e.g scipy, so just ignore those
 _warnings.filterwarnings("ignore",category=DeprecationWarning,
@@ -115,8 +117,8 @@ for directory in plugin_dirs:
         all_plugins, algs = _plugins.find_plugins(directory)
         plugin_files += all_plugins
         alg_files += algs
-    except ValueError, exc:
-        logger.warning(str(exc))
+    except ValueError as exc:
+        logger.warning('Exception encountered during plugin discovery: {0}'.format(str(exc)))
         continue
 
 # Mockup the full API first so that any Python algorithm module has something to import

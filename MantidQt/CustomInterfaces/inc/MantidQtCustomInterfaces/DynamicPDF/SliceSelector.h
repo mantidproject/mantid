@@ -1,10 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_
 #define MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_
 
-//Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
-//Mantid Headers from the same project
+// Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
+// Mantid Headers from the same project
 #include "ui_SliceSelector.h"
-//Mantid headers from other projects
+// Mantid headers from other projects
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 // includes for interface
@@ -12,14 +12,14 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include <QMainWindow>
 
-//3rd party library headers
+// 3rd party library headers
 #include <qwt_plot_spectrogram.h>
 
 // Forward Declarations
 namespace MantidQt {
 namespace MantidWidgets {
-  class MWView;
-  class RangeSelector;
+class MWView;
+class RangeSelector;
 }
 }
 
@@ -28,13 +28,13 @@ namespace CustomInterfaces {
 namespace DynamicPDF {
 
 /// Helper class containing pointer and some metadata for the loaded workspace
-class WorkspaceRecord{
+class WorkspaceRecord {
 
 public:
   WorkspaceRecord(const std::string &workspaceName);
   ~WorkspaceRecord();
   void updateMetadata(const size_t &newIndex);
-  std::pair<double,double> getErange();
+  std::pair<double, double> getErange();
 
   boost::shared_ptr<Mantid::API::MatrixWorkspace> m_ws;
   const std::string m_name;
@@ -42,9 +42,8 @@ public:
   std::string m_label;
 };
 
-class SliceSelector :
-  public QMainWindow,
-  public MantidQt::API::WorkspaceObserver {
+class SliceSelector : public QMainWindow,
+                      public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 
 public:
@@ -52,8 +51,9 @@ public:
   ~SliceSelector();
 
 protected:
-  void preDeleteHandle(const std::string &workspaceName,
-    const boost::shared_ptr<Mantid::API::Workspace> workspace) override;
+  void preDeleteHandle(
+      const std::string &workspaceName,
+      const boost::shared_ptr<Mantid::API::Workspace> workspace) override;
 
 signals:
   void signalSlicesLoaded(const QString &workspaceName);
@@ -85,9 +85,8 @@ private:
   std::unique_ptr<WorkspaceRecord> m_loadedWorkspace;
   size_t m_selectedWorkspaceIndex;
 
-}; //class SliceSelector
-
+}; // class SliceSelector
 }
 }
 }
-#endif //MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_
+#endif // MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_SLICESELECTOR_H_

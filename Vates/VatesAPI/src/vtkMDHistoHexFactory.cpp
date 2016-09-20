@@ -17,6 +17,7 @@
 #include "vtkFloatArray.h"
 #include "vtkDoubleArray.h"
 
+#include <cmath>
 
 using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDHistoWorkspace;
@@ -110,14 +111,13 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
 
   vtkSmartPointer<vtkStructuredGrid> visualDataSet =
       vtkSmartPointer<vtkStructuredGrid>::New();
-  visualDataSet->SetDimensions(nBinsX+1,nBinsY+1,nBinsZ+1);
+  visualDataSet->SetDimensions(nBinsX + 1, nBinsY + 1, nBinsZ + 1);
 
   // Array with true where the voxel should be shown
   double progressFactor = 0.5 / double(imageSize);
 
   std::size_t offset = 0;
-  if (nDims == 4)
-  {
+  if (nDims == 4) {
     offset = timestep * indexMultiplier[2];
   }
 
@@ -131,12 +131,11 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   signal->InitializeArray(std::move(iterator), offset, imageSize);
   visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
 
-
   for (vtkIdType index = 0; index < imageSize; ++index) {
     progressUpdate.eventRaised(double(index) * progressFactor);
     double signalScalar = signal->GetValue(index);
-    bool maskValue =
-        (isSpecial(signalScalar) || !m_thresholdRange->inRange(signalScalar));
+    bool maskValue = (!std::isfinite(signalScalar) ||
+                      !m_thresholdRange->inRange(signalScalar));
     if (maskValue) {
       visualDataSet->BlankCell(index);
     }
@@ -174,14 +173,14 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   for (int z = 0; z < nPointsZ; z++) {
     // Report progress updates for the last 50%
     progressUpdate.eventRaised(double(z) * progressFactor + progressOffset);
-    in[1] = (minZ +
-             (static_cast<coord_t>(z) * incrementZ)); // Calculate increment in z;
+    in[1] = (minZ + (static_cast<coord_t>(z) *
+                     incrementZ)); // Calculate increment in z;
     for (int y = 0; y < nPointsY; y++) {
       in[0] = (minY + (static_cast<coord_t>(y) *
                        incrementY)); // Calculate increment in y;
       for (int x = 0; x < nPointsX; x++) {
         it[0] = (minX + (static_cast<coord_t>(x) *
-                        incrementX)); // Calculate increment in x;
+                         incrementX)); // Calculate increment in x;
         it[1] = in[0];
         it[2] = in[1];
         std::advance(it, 3);
@@ -201,7 +200,6 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
 
   vtkSmartPointer<vtkDataSet> dataset = visualDataSet;
   return dataset;
-
 }
 
 /**

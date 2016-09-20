@@ -73,7 +73,8 @@ PeaksTableControllerVsi::PeaksTableControllerVsi(
     boost::shared_ptr<CameraManager> cameraManager, QWidget *parent)
     : QWidget(parent), m_cameraManager(cameraManager),
       m_presenter(new Mantid::VATES::CompositePeaksPresenterVsi()),
-      m_peaksTabWidget(NULL), m_peakMarker(NULL), m_coordinateSystem(Mantid::Kernel::SpecialCoordinateSystem::QLab) {
+      m_peaksTabWidget(NULL), m_peakMarker(NULL),
+      m_coordinateSystem(Mantid::Kernel::SpecialCoordinateSystem::QLab) {
   m_peakTransformSelector.registerCandidate(
       boost::make_shared<Mantid::Geometry::PeakTransformHKLFactory>());
   m_peakTransformSelector.registerCandidate(
@@ -410,7 +411,8 @@ void PeaksTableControllerVsi::onZoomToPeak(
     double radius;
     Mantid::Kernel::V3D position;
 
-    m_presenter->getPeaksInfo(peaksWorkspace, row, position, radius, m_coordinateSystem);
+    m_presenter->getPeaksInfo(peaksWorkspace, row, position, radius,
+                              m_coordinateSystem);
 
     // Reset camera
     m_cameraManager->setCameraToPeak(position[0], position[1], position[2],
@@ -607,41 +609,38 @@ void PeaksTableControllerVsi::onPeaksSorted(
  */
 void PeaksTableControllerVsi::setPeakSourceColorToDefault() {
   pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+  pqServerManagerModel *smModel =
+      pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources =
+      smModel->findItems<pqPipelineSource *>(server);
   for (auto src = sources.begin(); src != sources.end(); ++src) {
 
     std::string xmlName((*src)->getProxy()->GetXMLName());
     if ((xmlName.find("Peaks Source") != std::string::npos)) {
-        double red = 1.0;
-        double green = 1.0;
-        double blue = 1.0;
+      double red = 1.0;
+      double green = 1.0;
+      double blue = 1.0;
 
-        pqDataRepresentation *rep =
-            (*src)
-                ->getRepresentation(pqActiveObjects::instance().activeView());
-        if (!rep)
-        {
-          continue;
-        }
-          pqPipelineRepresentation *pipelineRepresentation =
-              qobject_cast<pqPipelineRepresentation *>(rep);
-        if (!pipelineRepresentation)
-        {
-          continue;
-        }
-        pipelineRepresentation->getProxy()->UpdatePropertyInformation();
+      pqDataRepresentation *rep =
+          (*src)->getRepresentation(pqActiveObjects::instance().activeView());
+      if (!rep) {
+        continue;
+      }
+      pqPipelineRepresentation *pipelineRepresentation =
+          qobject_cast<pqPipelineRepresentation *>(rep);
+      if (!pipelineRepresentation) {
+        continue;
+      }
+      pipelineRepresentation->getProxy()->UpdatePropertyInformation();
 
-        vtkSMDoubleVectorProperty *prop =
-            vtkSMDoubleVectorProperty::SafeDownCast(
-                pipelineRepresentation->getProxy()->GetProperty(
-                    "AmbientColor"));
-        prop->SetElement(0, red);
-        prop->SetElement(1, green);
-        prop->SetElement(2, blue);
-        pipelineRepresentation->getProxy()->UpdateVTKObjects();
-        pipelineRepresentation->updateHelperProxies();
-        pqActiveObjects::instance().activeView()->forceRender();
+      vtkSMDoubleVectorProperty *prop = vtkSMDoubleVectorProperty::SafeDownCast(
+          pipelineRepresentation->getProxy()->GetProperty("AmbientColor"));
+      prop->SetElement(0, red);
+      prop->SetElement(1, green);
+      prop->SetElement(2, blue);
+      pipelineRepresentation->getProxy()->UpdateVTKObjects();
+      pipelineRepresentation->updateHelperProxies();
+      pqActiveObjects::instance().activeView()->forceRender();
     }
   }
 }

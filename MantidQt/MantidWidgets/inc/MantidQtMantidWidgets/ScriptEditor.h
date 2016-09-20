@@ -21,17 +21,15 @@ class QKeyEvent;
 class QMouseEvent;
 class QsciAPIs;
 
-
 /**
  * A small wrapper around a QStringList to manage a command history
  */
-struct EXPORT_OPT_MANTIDQT_MANTIDWIDGETS CommandHistory
-{
-  ///Default constructor
+struct EXPORT_OPT_MANTIDQT_MANTIDWIDGETS CommandHistory {
+  /// Default constructor
   CommandHistory() : m_commands(), m_hist_maxsize(1000), m_current(0) {}
   /// Add a block of lines
   void addCode(QString block);
-  /// Add a command. 
+  /// Add a command.
   void add(QString command);
   /// Is there a previous command
   bool hasPrevious() const;
@@ -51,14 +49,16 @@ private:
   mutable int m_current;
 };
 
-/** 
-    This class provides an area to write scripts. It inherits from QScintilla to use
+/**
+    This class provides an area to write scripts. It inherits from QScintilla to
+   use
     functionality such as auto-indent and if supported, syntax highlighting.
-        
+
     @author Martyn Gigg, Tessella Support Services plc
     @date 19/08/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -76,10 +76,9 @@ private:
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>   
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ScriptEditor : public QsciScintilla
-{
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ScriptEditor : public QsciScintilla {
   // Qt macro
   Q_OBJECT
 
@@ -87,25 +86,24 @@ public:
   /**
    * Exception type to indicate that saving was cancelled
    */
-  class SaveCancelledException : public std::exception
-  {
+  class SaveCancelledException : public std::exception {
   public:
     /// Return a message
-    const char *what() const throw() override {
-      return "File saving was cancelled";
-    }
-  };
+    const char *what() const noexcept override { return m_msg.c_str(); }
 
+  private:
+    std::string m_msg{"File Saving was cancelled"};
+  };
 
 public:
   /// Constructor
-  ScriptEditor(QWidget* parent = 0, QsciLexer* lexer = NULL,
-               const QString & settingsGroup = "");
-  ///Destructor
+  ScriptEditor(QWidget *parent = 0, QsciLexer *lexer = NULL,
+               const QString &settingsGroup = "");
+  /// Destructor
   ~ScriptEditor() override;
 
   /// Set the name of the group to save the settings for
-  void setSettingsGroup(const QString & name);
+  void setSettingsGroup(const QString &name);
   /// Settings group
   QString settingsGroup() const;
   /// Read settings from persistent store
@@ -127,40 +125,30 @@ public:
   // Unhide base class method to avoid intel compiler warning
   using QsciScintilla::setText;
   /// Set the text on a given line number
-  void setText(int lineno, const QString& text,int index=0);
-  ///Capture key presses
+  void setText(int lineno, const QString &text, int index = 0);
+  /// Capture key presses
   void keyPressEvent(QKeyEvent *event) override;
   /// The current filename
-  inline QString fileName() const
-  {
-    return m_filename;
-  }
+  inline QString fileName() const { return m_filename; }
   /**
    * Set a new file name
    * @param filename :: The new filename
    */
-  inline void setFileName(const QString & filename)
-  {
-    m_filename = filename;
-  }
-  
+  inline void setFileName(const QString &filename) { m_filename = filename; }
 
   /// Override so that ctrl + mouse wheel will zoom in and out
   void wheelEvent(QWheelEvent *e) override;
 
   /// Return a pointer to the object responsible for code completion
-  inline QsciAPIs * scintillaAPI() const
-  {
-    return m_completer;
-  }
-  
+  inline QsciAPIs *scintillaAPI() const { return m_completer; }
+
 public slots:
   /// Save the script, opening a dialog
   void saveAs();
   /// Save to the current filename, opening a dialog if blank
   void saveToCurrentFile();
   /// Save a the text to the given filename
-  void saveScript(const QString & filename);
+  void saveScript(const QString &filename);
 
   /// Ensure the margin width is big enough to hold everything + padding
   void padMargin();
@@ -171,7 +159,7 @@ public slots:
   /// Mark the progress arrow as an error
   void markExecutingLineAsError();
   /// Refresh the autocomplete information base on a new set of keywords
-  void updateCompletionAPI(const QStringList & keywords);
+  void updateCompletionAPI(const QStringList &keywords);
   /// Print the text within the widget
   void print();
   /// Raise find replace dialog
@@ -192,7 +180,7 @@ signals:
 
 protected:
   /// Write to the given device
-  virtual void writeToDevice(QIODevice & device) const;
+  virtual void writeToDevice(QIODevice &device) const;
 
   void dropEvent(QDropEvent *de) override;
   void dragMoveEvent(QDragMoveEvent *de) override;
@@ -201,13 +189,14 @@ protected:
 private slots:
 
 private:
-  /// Forward a KeyPress event to QsciScintilla base class. Necessary due to bug in QsciScintilla
+  /// Forward a KeyPress event to QsciScintilla base class. Necessary due to bug
+  /// in QsciScintilla
   void forwardKeyPressToBase(QKeyEvent *event);
 
   /// The file name associated with this editor
   QString m_filename;
 
-  /// The margin marker 
+  /// The margin marker
   int m_progressArrowKey;
   /// Hold the line number of the currently executing line
   int m_currentExecLine;
@@ -225,9 +214,4 @@ private:
   QString m_settingsGroup;
 };
 
-
-
-
-
-
-#endif //SCRIPTEDITOR_H_
+#endif // SCRIPTEDITOR_H_

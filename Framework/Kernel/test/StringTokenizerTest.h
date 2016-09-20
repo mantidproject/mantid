@@ -1,5 +1,5 @@
-#ifndef MANTID_SUPPORTTEST_H_
-#define MANTID_SUPPORTTEST_H_
+#ifndef MANTID_STRINGTOKENIZERTEST_H_
+#define MANTID_STRINGTOKENIZERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <random>
@@ -233,4 +233,4 @@ public:
   }
 };
 
-#endif // MANTID_SUPPORTTEST_H_
+#endif // MANTID_STRINGTOKENZIERTEST_H_

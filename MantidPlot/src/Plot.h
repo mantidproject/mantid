@@ -2,7 +2,8 @@
     File                 : Plot.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Plot window class
 
@@ -41,8 +42,7 @@
 class Grid;
 
 /// Helper class to delay deletion of curves
-struct Detacher : public QObject
-{
+struct Detacher : public QObject {
   explicit Detacher(QwtPlotItem *plotItem);
   ~Detacher() override;
 
@@ -52,62 +52,62 @@ private:
 };
 
 //! Plot window class
-class Plot: public QwtPlot
-{
-    Q_OBJECT
+class Plot : public QwtPlot {
+  Q_OBJECT
 
 public:
-	Plot(int width = 500, int height = 400, QWidget *parent = 0, const char *name = 0);
+  Plot(int width = 500, int height = 400, QWidget *parent = 0,
+       const char *name = 0);
 
-	Grid *grid(){return static_cast<Grid *>(d_grid);};
-	QList<int> curveKeys(){return d_curves.keys();};
-	QList<QwtPlotItem *> curvesList(){return d_curves.values();};
+  Grid *grid() { return static_cast<Grid *>(d_grid); };
+  QList<int> curveKeys() { return d_curves.keys(); };
+  QList<QwtPlotItem *> curvesList() { return d_curves.values(); };
 
-	int insertCurve(QwtPlotItem *c);
-	void removeCurve(int index);
+  int insertCurve(QwtPlotItem *c);
+  void removeCurve(int index);
 
-	int closestCurve(int xpos, int ypos, int &dist, int &point);
-	QwtPlotCurve* curve(int index);
-	QwtPlotItem* plotItem(int index){return d_curves.value(index);};
-	QMap<int, QwtPlotItem*> curves(){return d_curves;};
+  int closestCurve(int xpos, int ypos, int &dist, int &point);
+  QwtPlotCurve *curve(int index);
+  QwtPlotItem *plotItem(int index) { return d_curves.value(index); };
+  QMap<int, QwtPlotItem *> curves() { return d_curves; };
 
-	QwtPlotMarker* marker(int index){return d_markers.value(index);};
-	QList<int> markerKeys(){return d_markers.keys();};
-	int insertMarker(QwtPlotMarker *m);
-	void removeMarker(int index);
+  QwtPlotMarker *marker(int index) { return d_markers.value(index); };
+  QList<int> markerKeys() { return d_markers.keys(); };
+  int insertMarker(QwtPlotMarker *m);
+  void removeMarker(int index);
 
-	QList<int> getMajorTicksType();
-	void setMajorTicksType(int axis, int type);
+  QList<int> getMajorTicksType();
+  void setMajorTicksType(int axis, int type);
 
-	QList<int> getMinorTicksType();
-	void setMinorTicksType(int axis, int type);
+  QList<int> getMinorTicksType();
+  void setMinorTicksType(int axis, int type);
 
-	int minorTickLength() const;
-	int majorTickLength() const;
-	void setTickLength (int minLength, int majLength);
+  int minorTickLength() const;
+  int majorTickLength() const;
+  void setTickLength(int minLength, int majLength);
 
-	int axesLinewidth() const;
-	void setAxesLinewidth(int width);
+  int axesLinewidth() const;
+  void setAxesLinewidth(int width);
 
-    void axisLabelFormat(int axis, char &f, int &prec) const;
+  void axisLabelFormat(int axis, char &f, int &prec) const;
 
-    int axisLabelFormat(int axis);
-    int axisLabelPrecision(int axis);
+  int axisLabelFormat(int axis);
+  int axisLabelPrecision(int axis);
 
-    QColor frameColor();
-    const QColor & paletteBackgroundColor() const;
+  QColor frameColor();
+  const QColor &paletteBackgroundColor() const;
 
-    using QwtPlot::print; // Avoid Intel compiler warning
-    void
-    print(QPainter *, const QRect &rect,
-          const QwtPlotPrintFilter & = QwtPlotPrintFilter()) const override;
-    void updateLayout() override;
+  using QwtPlot::print; // Avoid Intel compiler warning
+  void print(QPainter *, const QRect &rect,
+             const QwtPlotPrintFilter & = QwtPlotPrintFilter()) const override;
+  void updateLayout() override;
 
-    void updateCurveLabels();
-    // pass through method that is public on the base class in later qwt versions
-    void updateAxes() { QwtPlot::updateAxes(); }
+  void updateCurveLabels();
+  // pass through method that is public on the base class in later qwt versions
+  void updateAxes() { QwtPlot::updateAxes(); }
 
-    void reverseCurveOrder(); // Created in connection with waterfall plots. Called from Graph method of same name.
+  void reverseCurveOrder(); // Created in connection with waterfall plots.
+                            // Called from Graph method of same name.
 
 signals:
   void dragMousePress(QPoint);
@@ -116,29 +116,31 @@ signals:
 
 protected:
   void showEvent(QShowEvent *event) override;
-    void printFrame(QPainter *painter, const QRect &rect) const;
-    // 'Dummy' QRect argument inserted into printCanvas method to avoid Intel
-    // compiler warning (about printCanvas signature not matching that in base class)
-    void printCanvas(QPainter *painter, const QRect &, const QRect &canvasRect,
-                     const QwtScaleMap map[axisCnt],
-                     const QwtPlotPrintFilter &pfilter) const override;
-    void drawItems(QPainter *painter, const QRect &rect,
+  void printFrame(QPainter *painter, const QRect &rect) const;
+  // 'Dummy' QRect argument inserted into printCanvas method to avoid Intel
+  // compiler warning (about printCanvas signature not matching that in base
+  // class)
+  void printCanvas(QPainter *painter, const QRect &, const QRect &canvasRect,
                    const QwtScaleMap map[axisCnt],
                    const QwtPlotPrintFilter &pfilter) const override;
+  void drawItems(QPainter *painter, const QRect &rect,
+                 const QwtScaleMap map[axisCnt],
+                 const QwtPlotPrintFilter &pfilter) const override;
 
-        void drawInwardTicks(QPainter *painter, const QRect &rect,
-							const QwtScaleMap&map, int axis, bool min, bool maj) const;
-    void drawBreak(QPainter *painter, const QRect &rect, const QwtScaleMap &map, int axis) const;
+  void drawInwardTicks(QPainter *painter, const QRect &rect,
+                       const QwtScaleMap &map, int axis, bool min,
+                       bool maj) const;
+  void drawBreak(QPainter *painter, const QRect &rect, const QwtScaleMap &map,
+                 int axis) const;
 
-    bool eventFilter(QObject *obj, QEvent *ev) override;
+  bool eventFilter(QObject *obj, QEvent *ev) override;
 
-        Grid *d_grid;
-	QMap<int, QwtPlotItem*> d_curves;
-	QMap<int, QwtPlotMarker*> d_markers;
+  Grid *d_grid;
+  QMap<int, QwtPlotItem *> d_curves;
+  QMap<int, QwtPlotMarker *> d_markers;
 
-	int minTickLength, majTickLength;
-	int marker_key;
-	int curve_key;
-
+  int minTickLength, majTickLength;
+  int marker_key;
+  int curve_key;
 };
 #endif

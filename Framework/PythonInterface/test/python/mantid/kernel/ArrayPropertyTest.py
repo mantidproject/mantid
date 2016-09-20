@@ -1,10 +1,13 @@
 """Test the exposed ArrayProperty
 """
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.kernel import (FloatArrayProperty, StringArrayProperty, IntArrayProperty, Direction,
                            NullValidator)
 from mantid.api import PythonAlgorithm
 import numpy as np
+import sys
 
 class ArrayPropertyTest(unittest.TestCase):
 
@@ -92,9 +95,9 @@ class ArrayPropertyTest(unittest.TestCase):
         self.assertEquals(arrprop.direction, direction)
         self.assertEquals(len(arrprop.value), length)
 
-    def test_PythonAlgorithm_setProperty_with_FloatArrayProperty(self):
+    def test_setProperty_with_FloatArrayProperty(self):
         """
-            Test ArrayProperty within a python algorithm
+        Test ArrayProperty within a python algorithm
         """
         class AlgWithFloatArrayProperty(PythonAlgorithm):
 
@@ -111,7 +114,26 @@ class ArrayPropertyTest(unittest.TestCase):
         input_values = [1.1,2.5,5.6,4.6,9.0,6.0]
         self._do_algorithm_test(AlgWithFloatArrayProperty, input_values)
 
-    def test_PythonAlgorithm_setProperty_With_Ranges(self):
+    def test_setProperty_With_FloatArrayProperty_And_Py3_Range_Object(self):
+        """
+        Python 3 range() returns a range object that behaves like a sequence
+        whereas it just returned a list in Python 2
+        """
+        if sys.version_info[0] < 3:
+            return
+        class AlgWithFloatArrayProperty(PythonAlgorithm):
+            _input_values = None
+            def PyInit(self):
+                name = "numbers"
+                self.declareProperty(
+                    FloatArrayProperty("Input", Direction.Input), "Float array")
+            def PyExec(self):
+                self._input_values = self.getProperty("Input").value
+    
+        input_values = range(1, 5)
+        self._do_algorithm_test(AlgWithFloatArrayProperty, input_values)
+
+    def test_PythonAlgorithm_setProperty_With_Ranges_String(self):
         """
             Test ArrayProperty within a python algorithm can
             be set with a string range

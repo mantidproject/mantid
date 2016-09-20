@@ -14,23 +14,20 @@ class Tile;
 
 /**
  *
- *  A mdi sub-window that contains other sub-windows arranged in rows and columns.
+ *  A mdi sub-window that contains other sub-windows arranged in rows and
+ *columns.
  *  The child sub-windows can be selected, moved, deleted, dragged and dropped.
  *
  */
-class TiledWindow: public MdiSubWindow
-{
+class TiledWindow : public MdiSubWindow {
   Q_OBJECT
 
 public:
-  TiledWindow(QWidget* parent, 
-    const QString& label, 
-    const QString& name = QString(), 
-    int nrows = 1,
-    int ncols = 1,
-    Qt::WFlags f=0);
+  TiledWindow(QWidget *parent, const QString &label,
+              const QString &name = QString(), int nrows = 1, int ncols = 1,
+              Qt::WFlags f = 0);
 
-  /// Populate a menu with actions 
+  /// Populate a menu with actions
   void populateMenu(QMenu *menu);
 
 public slots:
@@ -73,9 +70,9 @@ public slots:
   /// Remove the selection and put them into separate windows
   void removeSelectionToDefaultWindowType();
   /// Sow a position where tile can be inserted.
-  void showInsertPosition( QPoint pos, bool global = true );
+  void showInsertPosition(QPoint pos, bool global = true);
   /// Do the widget drop operation
-  bool dropAtPosition( MdiSubWindow *w, QPoint pos, bool global = true );
+  bool dropAtPosition(MdiSubWindow *w, QPoint pos, bool global = true);
 
   /// Save
   QString saveToString(const QString &info, bool = false) override;
@@ -94,7 +91,6 @@ protected:
   void dropEvent(QDropEvent *ev) override;
 
 private:
-
   /// Ways a widget can be removed from this window
   enum RemoveDestination { Default, Docked, Floating };
 
@@ -113,9 +109,9 @@ private:
   /// Remove (but don't delete) a widget.
   MdiSubWindow *removeTile(Tile *tile);
   /// Get a tile at a mouse position (in pixels).
-  Tile *getTileAtMousePos( const QPoint& pos );
+  Tile *getTileAtMousePos(const QPoint &pos);
   /// Get a list of all tiles.
-  QList<Tile*> getAllTiles();
+  QList<Tile *> getAllTiles();
   /// Add a tile to the selection.
   void addToSelection(Tile *tile, bool append);
   /// Add a range of tiles to the selection.
@@ -125,7 +121,7 @@ private:
   /// Calculate a linear index from row and column numbers.
   int calcFlatIndex(int row, int col) const;
   /// Calculate tile's position in the layout.
-  void calcTilePosition( int index, int &row, int &col ) const;
+  void calcTilePosition(int index, int &row, int &col) const;
   /// Deselect a tile
   bool deselectTile(Tile *tile);
   /// Tell all tiles to not show that they accept widget drops.
@@ -151,13 +147,12 @@ signals:
   void dropAtPositionQueued(MdiSubWindow *w, QPoint pos, bool global);
 
 private:
-
   /// The inner widget providing scrolling functionality.
   QScrollArea *m_scrollArea;
   /// The layout arranging the tiles into a grid.
   mutable QGridLayout *m_layout;
   /// Tile selection
-  QList<Tile*> m_selection;
+  QList<Tile *> m_selection;
   /// mouse cursor position where dragging started
   QPoint m_dragStartPos;
   /// mouse left button is pressed
@@ -165,11 +160,11 @@ private:
 };
 
 /**
- * The widget holder. It displays the held MdiSubWindow, helps to implement selection, 
+ * The widget holder. It displays the held MdiSubWindow, helps to implement
+ * selection,
  * drag and drop operations.
  */
-class Tile: public QFrame
-{
+class Tile : public QFrame {
 public:
   /// Constructor
   explicit Tile(QWidget *parent);
@@ -180,13 +175,14 @@ public:
   /// Remove the held widget without deleting it.
   void removeWidget();
   /// Get the held widget
-  MdiSubWindow *widget() {return m_widget;}
+  MdiSubWindow *widget() { return m_widget; }
   /// Display the tile as selected
   void makeSelected(bool yes);
   /// Display the tile ready to accept a drop of a widget
   void makeAcceptDrop(bool yes);
   /// Check if the tile is selected
-  bool isSelected() const {return m_selected;}
+  bool isSelected() const { return m_selected; }
+
 protected:
   void paintEvent(QPaintEvent *ev) override;
 
@@ -194,14 +190,13 @@ private:
   /// The TiledWindow which has this Tile
   QWidget *m_tiledWindow;
   /// The layout
-  QVBoxLayout * m_layout;
+  QVBoxLayout *m_layout;
   /// A pointer to the displayed widget
-  MdiSubWindow* m_widget;
+  MdiSubWindow *m_widget;
   /// Selected flag
   bool m_selected;
   /// Accepts drops flag
   bool m_acceptDrop;
-
 };
 
 #endif // TiledWindow_H

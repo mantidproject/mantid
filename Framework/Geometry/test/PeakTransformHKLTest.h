@@ -151,7 +151,7 @@ public:
       boost::regex_match("K (Lattice)", transform.getFreePeakAxisRegex());
       boost::regex_match("[0,K,0]", transform.getFreePeakAxisRegex());
     } catch (PeakTransformException &ex) {
-      std::cout << "THROWS!!!" << ex.what() << std::endl;
+      std::cout << "THROWS!!!" << ex.what() << '\n';
     }
   }
 

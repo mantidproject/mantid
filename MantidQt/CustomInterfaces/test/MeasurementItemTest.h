@@ -11,7 +11,9 @@ class MeasurementItemTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MeasurementItemTest *createSuite() { return new MeasurementItemTest(); }
+  static MeasurementItemTest *createSuite() {
+    return new MeasurementItemTest();
+  }
   static void destroySuite(MeasurementItemTest *suite) { delete suite; }
 
   void test_invalid_construction_via_constructional_method() {
@@ -29,8 +31,8 @@ public:
     const double angle = 0.1;
     const std::string run = "123";
 
-    MeasurementItem measurement(measurementId, measurementSubId, measurementLabel,
-                            measurementType, angle, run);
+    MeasurementItem measurement(measurementId, measurementSubId,
+                                measurementLabel, measurementType, angle, run);
 
     TS_ASSERT(measurement.isUseable());
     TS_ASSERT_EQUALS(measurementId, measurement.id());
@@ -44,7 +46,7 @@ public:
   void test_invalid_construction_when_measurementId_empty() {
 
     MeasurementItem measurement("", "measurementSubId", "measurementLabel",
-                            "measurementType", 0.1, "111");
+                                "measurementType", 0.1, "111");
 
     TS_ASSERT(!measurement.isUseable());
   }
@@ -52,7 +54,7 @@ public:
   void test_invalid_construction_when_measurementSubId_empty() {
 
     MeasurementItem measurement("measurementId", "", "measurementLabel",
-                            "measurementType", 0.1, "111");
+                                "measurementType", 0.1, "111");
 
     TS_ASSERT(!measurement.isUseable());
   }
@@ -60,16 +62,16 @@ public:
   void test_valid_construction_when_label_empty() {
 
     MeasurementItem measurement("measurementId", "measurementSubId", "",
-                            "measurementType", 0.1, "111");
+                                "measurementType", 0.1, "111");
 
     TSM_ASSERT("Empty labels are not terminal", measurement.isUseable());
   }
 
   void test_valid_construction_when_type_empty() {
     MeasurementItem measurement("measurementId", "measurementSubId",
-                            "measurementLabel", "", 0.1, "111");
+                                "measurementLabel", "", 0.1, "111");
 
-    TSM_ASSERT("Empty type info is not terminal",measurement.isUseable());
+    TSM_ASSERT("Empty type info is not terminal", measurement.isUseable());
   }
 };
 

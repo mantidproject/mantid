@@ -14,14 +14,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(AppendSpectra)
 
-/** Constructor
- */
-AppendSpectra::AppendSpectra() : WorkspaceJoiners() {}
-
-/** Destructor
- */
-AppendSpectra::~AppendSpectra() {}
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string AppendSpectra::name() const { return "AppendSpectra"; }
 
@@ -141,7 +133,7 @@ void AppendSpectra::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
   // change the axis by adding the maximum existing spectrum number to the
   // current value
   for (size_t i = 0; i < output->getNumberHistograms(); i++)
-    output->getSpectrum(i)->setSpectrumNo(specnum_t(i));
+    output->getSpectrum(i).setSpectrumNo(specnum_t(i));
 }
 
 void AppendSpectra::combineLogs(const API::Run &lhs, const API::Run &rhs,

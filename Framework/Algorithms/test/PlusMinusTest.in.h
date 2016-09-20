@@ -571,7 +571,7 @@ public:
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(3,10,50, 0.0, 1.0, 2, 100); //100 events per spectrum, but the spectra are at different pixel ids
 
       //First pixel id of rhs is 100
-      TS_ASSERT( work_in2->getSpectrum(0)->hasDetectorID(100) );
+      TS_ASSERT( work_in2->getSpectrum(0).hasDetectorID(100) );
 
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
           DO_PLUS ? 3.0 : -1.0,   DO_PLUS ? 1.7320 : 1.7320);
@@ -583,7 +583,7 @@ public:
       //But two detector IDs in each one
       for (int i=0; i<3; i++)
       {
-        auto detIT = work_out->getSpectrum(i)->getDetectorIDs().begin();
+        auto detIT = work_out->getSpectrum(i).getDetectorIDs().begin();
         TS_ASSERT_EQUALS( *detIT, 0+i );
         if (DO_PLUS)
         {
@@ -1146,7 +1146,7 @@ public:
     DO_PLUS = @PLUSMINUSTEST_DO_PLUS@;
   }
   
-  void setUp()
+  void setUp() override
   {
   	ws2D_1 = WorkspaceCreationHelper::Create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);
    	ws2D_2 = WorkspaceCreationHelper::Create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);

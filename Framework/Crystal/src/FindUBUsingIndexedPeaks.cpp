@@ -16,16 +16,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 //--------------------------------------------------------------------------
-/** Constructor
- */
-FindUBUsingIndexedPeaks::FindUBUsingIndexedPeaks() {}
-
-//--------------------------------------------------------------------------
-/** Destructor
- */
-FindUBUsingIndexedPeaks::~FindUBUsingIndexedPeaks() {}
-
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingIndexedPeaks::init() {

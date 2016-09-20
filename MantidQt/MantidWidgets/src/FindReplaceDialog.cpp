@@ -19,118 +19,115 @@
  * Constructor
  */
 FindReplaceDialog::FindReplaceDialog(ScriptEditor *editor, Qt::WFlags fl)
-  : QDialog(editor, fl), m_editor(editor), 
-    m_findInProgress(false)
-{
- initLayout();
- setSizeGripEnabled(true);
+    : QDialog(editor, fl), m_editor(editor), m_findInProgress(false) {
+  initLayout();
+  setSizeGripEnabled(true);
 }
 
 /**
- * Create the widgets and lay them out 
+ * Create the widgets and lay them out
  */
-void FindReplaceDialog::initLayout()
-{
- QGroupBox *gb1 = new QGroupBox();
- m_topLayout = new QGridLayout(gb1);
+void FindReplaceDialog::initLayout() {
+  QGroupBox *gb1 = new QGroupBox();
+  m_topLayout = new QGridLayout(gb1);
 
- m_topLayout->addWidget(new QLabel(tr("Find")), 0, 0);
- boxFind = new QComboBox();
- boxFind->setEditable(true);
- boxFind->setDuplicatesEnabled(false);
- boxFind->setInsertPolicy( QComboBox::InsertAtTop );
- boxFind->setAutoCompletion(true);
- boxFind->setMaxCount ( 10 );
- boxFind->setMaxVisibleItems ( 10 );
- boxFind->setMinimumWidth(250);
- boxFind->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
- connect(boxFind, SIGNAL(editTextChanged(const QString &)), 
-         this, SLOT(resetSearchFlags()));
+  m_topLayout->addWidget(new QLabel(tr("Find")), 0, 0);
+  boxFind = new QComboBox();
+  boxFind->setEditable(true);
+  boxFind->setDuplicatesEnabled(false);
+  boxFind->setInsertPolicy(QComboBox::InsertAtTop);
+  boxFind->setAutoCompletion(true);
+  boxFind->setMaxCount(10);
+  boxFind->setMaxVisibleItems(10);
+  boxFind->setMinimumWidth(250);
+  boxFind->setSizePolicy(
+      QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+  connect(boxFind, SIGNAL(editTextChanged(const QString &)), this,
+          SLOT(resetSearchFlags()));
 
- m_topLayout->addWidget(boxFind, 0, 1);
- 
- addReplaceBox();
+  m_topLayout->addWidget(boxFind, 0, 1);
 
- QGroupBox *gb2 = new QGroupBox();
- QGridLayout * bottomLayout = new QGridLayout(gb2);
- QButtonGroup *find_options = new QButtonGroup(this);
- find_options->setExclusive(false);
+  addReplaceBox();
 
- boxCaseSensitive = new QCheckBox(tr("&Match case"));
- boxCaseSensitive->setChecked(false);
- bottomLayout->addWidget( boxCaseSensitive, 0, 0);
- find_options->addButton(boxCaseSensitive);
+  QGroupBox *gb2 = new QGroupBox();
+  QGridLayout *bottomLayout = new QGridLayout(gb2);
+  QButtonGroup *find_options = new QButtonGroup(this);
+  find_options->setExclusive(false);
 
- boxWholeWords = new QCheckBox(tr("&Whole word"));
- boxWholeWords->setChecked(false);
- bottomLayout->addWidget(boxWholeWords, 1, 0);
- find_options->addButton(boxWholeWords);
+  boxCaseSensitive = new QCheckBox(tr("&Match case"));
+  boxCaseSensitive->setChecked(false);
+  bottomLayout->addWidget(boxCaseSensitive, 0, 0);
+  find_options->addButton(boxCaseSensitive);
 
- boxRegex = new QCheckBox(tr("&Regular expression"));
- boxRegex->setChecked(false);
- bottomLayout->addWidget(boxRegex, 2, 0);
- find_options->addButton(boxRegex);
+  boxWholeWords = new QCheckBox(tr("&Whole word"));
+  boxWholeWords->setChecked(false);
+  bottomLayout->addWidget(boxWholeWords, 1, 0);
+  find_options->addButton(boxWholeWords);
 
- boxSearchBackwards = new QCheckBox(tr("&Search backwards"));
- boxSearchBackwards->setChecked(false);
- bottomLayout->addWidget(boxSearchBackwards, 0, 1);
- find_options->addButton(boxSearchBackwards);
+  boxRegex = new QCheckBox(tr("&Regular expression"));
+  boxRegex->setChecked(false);
+  bottomLayout->addWidget(boxRegex, 2, 0);
+  find_options->addButton(boxRegex);
 
- boxWrapAround = new QCheckBox(tr("&Wrap around"));
- boxWrapAround->setChecked(true);
- bottomLayout->addWidget(boxWrapAround, 1, 1);
- find_options->addButton(boxWrapAround);
- connect(find_options, SIGNAL(buttonClicked(int)), this, 
-         SLOT(resetSearchFlags()));
+  boxSearchBackwards = new QCheckBox(tr("&Search backwards"));
+  boxSearchBackwards->setChecked(false);
+  bottomLayout->addWidget(boxSearchBackwards, 0, 1);
+  find_options->addButton(boxSearchBackwards);
 
- QVBoxLayout *vb1 = new QVBoxLayout();
- vb1->addWidget(gb1);
- vb1->addWidget(gb2);
+  boxWrapAround = new QCheckBox(tr("&Wrap around"));
+  boxWrapAround->setChecked(true);
+  bottomLayout->addWidget(boxWrapAround, 1, 1);
+  find_options->addButton(boxWrapAround);
+  connect(find_options, SIGNAL(buttonClicked(int)), this,
+          SLOT(resetSearchFlags()));
 
- m_vb2 = new QVBoxLayout();
+  QVBoxLayout *vb1 = new QVBoxLayout();
+  vb1->addWidget(gb1);
+  vb1->addWidget(gb2);
 
- buttonNext = new QPushButton(tr("&Next"));
- buttonNext->setShortcut(tr("Ctrl+F"));
- buttonNext->setDefault(true);
- m_vb2->addWidget(buttonNext);
- connect(buttonNext, SIGNAL(clicked()), this, SLOT(findClicked()));
+  m_vb2 = new QVBoxLayout();
 
- addReplaceButtons();
+  buttonNext = new QPushButton(tr("&Next"));
+  buttonNext->setShortcut(tr("Ctrl+F"));
+  buttonNext->setDefault(true);
+  m_vb2->addWidget(buttonNext);
+  connect(buttonNext, SIGNAL(clicked()), this, SLOT(findClicked()));
 
- buttonCancel = new QPushButton(tr("&Close"));
- m_vb2->addWidget(buttonCancel);
- m_vb2->addStretch();
- connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
+  addReplaceButtons();
 
- QHBoxLayout *hb = new QHBoxLayout(this);
- hb->addLayout(vb1);
- hb->addLayout(m_vb2);
+  buttonCancel = new QPushButton(tr("&Close"));
+  m_vb2->addWidget(buttonCancel);
+  m_vb2->addStretch();
+  connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
+
+  QHBoxLayout *hb = new QHBoxLayout(this);
+  hb->addLayout(vb1);
+  hb->addLayout(m_vb2);
 }
 
 /// Add replace box
-void FindReplaceDialog::addReplaceBox()
-{
- setWindowTitle (tr("MantidPlot") + " - " + tr("Find and Replace"));
- m_topLayout->addWidget(new QLabel(tr( "Replace with" )), 1, 0);
- boxReplace = new QComboBox();
- boxReplace->setEditable(true);
- boxReplace->setDuplicatesEnabled(false);
- boxReplace->setInsertPolicy( QComboBox::InsertAtTop );
- boxReplace->setAutoCompletion(true);
- boxReplace->setMaxCount ( 10 );
- boxReplace->setMaxVisibleItems ( 10 );
- boxReplace->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
- m_topLayout->addWidget( boxReplace, 1, 1);
- m_topLayout->setColumnStretch(1, 10);
+void FindReplaceDialog::addReplaceBox() {
+  setWindowTitle(tr("MantidPlot") + " - " + tr("Find and Replace"));
+  m_topLayout->addWidget(new QLabel(tr("Replace with")), 1, 0);
+  boxReplace = new QComboBox();
+  boxReplace->setEditable(true);
+  boxReplace->setDuplicatesEnabled(false);
+  boxReplace->setInsertPolicy(QComboBox::InsertAtTop);
+  boxReplace->setAutoCompletion(true);
+  boxReplace->setMaxCount(10);
+  boxReplace->setMaxVisibleItems(10);
+  boxReplace->setSizePolicy(
+      QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+  m_topLayout->addWidget(boxReplace, 1, 1);
+  m_topLayout->setColumnStretch(1, 10);
 }
 
 /// Add the replace buttons
-void FindReplaceDialog::addReplaceButtons()
-{
+void FindReplaceDialog::addReplaceButtons() {
   buttonReplace = new QPushButton(tr("&Replace"));
   connect(buttonReplace, SIGNAL(clicked()), this, SLOT(replace()));
   m_vb2->addWidget(buttonReplace);
- 
+
   buttonReplaceAll = new QPushButton(tr("Replace &all"));
   connect(buttonReplaceAll, SIGNAL(clicked()), this, SLOT(replaceAll()));
   m_vb2->addWidget(buttonReplaceAll);
@@ -141,133 +138,125 @@ void FindReplaceDialog::addReplaceButtons()
 //------------------------------------------------------
 /**
  * Find the current search term
- * @param backwards :: If true then the search procedes backwards from the cursor's current position
+ * @param backwards :: If true then the search procedes backwards from the
+ * cursor's current position
  * @returns A boolean indicating success/failure
  */
-bool FindReplaceDialog::find(bool backwards)
-{
- QString searchString = boxFind->currentText();
- if (searchString.isEmpty()){
-   QMessageBox::warning(this, tr("Empty Search Field"),
-			 tr("The search field is empty. Please enter some text and try again."));
-   boxFind->setFocus();
-   return false;
- }
+bool FindReplaceDialog::find(bool backwards) {
+  QString searchString = boxFind->currentText();
+  if (searchString.isEmpty()) {
+    QMessageBox::warning(
+        this, tr("Empty Search Field"),
+        tr("The search field is empty. Please enter some text and try again."));
+    boxFind->setFocus();
+    return false;
+  }
 
- if(boxFind->findText(searchString) == -1)
- {
-   boxFind->addItem(searchString);
- }
+  if (boxFind->findText(searchString) == -1) {
+    boxFind->addItem(searchString);
+  }
 
- if( m_findInProgress )
- {
-   m_findInProgress = m_editor->findNext();
- }
- else
- {
-   bool cs = boxCaseSensitive->isChecked();
-   bool whole = boxWholeWords->isChecked();
-   bool wrap = boxWrapAround->isChecked();
-   bool regex = boxRegex->isChecked();
-   m_findInProgress = m_editor->findFirst(searchString, regex, cs, whole, wrap, !backwards);
- }
- return m_findInProgress;
+  if (m_findInProgress) {
+    m_findInProgress = m_editor->findNext();
+  } else {
+    bool cs = boxCaseSensitive->isChecked();
+    bool whole = boxWholeWords->isChecked();
+    bool wrap = boxWrapAround->isChecked();
+    bool regex = boxRegex->isChecked();
+    m_findInProgress =
+        m_editor->findFirst(searchString, regex, cs, whole, wrap, !backwards);
+  }
+  return m_findInProgress;
 }
 
 /**
  * Replace the next occurrence of the search term with the replacement text
  */
-void FindReplaceDialog::replace()
-{
- QString searchString = boxFind->currentText();
- if (searchString.isEmpty()){
-   QMessageBox::warning(this, tr("Empty Search Field"),
-			 tr("The search field is empty. Please enter some text and try again."));
-   boxFind->setFocus();
-   return;
- }
+void FindReplaceDialog::replace() {
+  QString searchString = boxFind->currentText();
+  if (searchString.isEmpty()) {
+    QMessageBox::warning(
+        this, tr("Empty Search Field"),
+        tr("The search field is empty. Please enter some text and try again."));
+    boxFind->setFocus();
+    return;
+  }
 
- if (!m_editor->hasSelectedText() || m_editor->selectedText() != searchString)
- {
-   find();//find and select next match
-   return;
- }
+  if (!m_editor->hasSelectedText() ||
+      m_editor->selectedText() != searchString) {
+    find(); // find and select next match
+    return;
+  }
 
- QString replaceString = boxReplace->currentText();
- m_editor->replace(replaceString);
- find();//find and select next match
+  QString replaceString = boxReplace->currentText();
+  m_editor->replace(replaceString);
+  find(); // find and select next match
 
- if(boxReplace->findText(replaceString) == -1)
- {
-   boxReplace->addItem(replaceString);
- }
+  if (boxReplace->findText(replaceString) == -1) {
+    boxReplace->addItem(replaceString);
+  }
 }
 
 /**
  * Replace all occurrences of the current search term with the replacement text
  */
-void FindReplaceDialog::replaceAll()
-{
- QString searchString = boxFind->currentText();
- if (searchString.isEmpty()){
-   QMessageBox::warning(this, tr("Empty Search Field"),
-			 tr("The search field is empty. Please enter some text and try again."));
-   boxFind->setFocus();
-   return;
- }
+void FindReplaceDialog::replaceAll() {
+  QString searchString = boxFind->currentText();
+  if (searchString.isEmpty()) {
+    QMessageBox::warning(
+        this, tr("Empty Search Field"),
+        tr("The search field is empty. Please enter some text and try again."));
+    boxFind->setFocus();
+    return;
+  }
 
- if(boxFind->findText(searchString) == -1)
- {
-   boxFind->addItem (searchString);
- }
+  if (boxFind->findText(searchString) == -1) {
+    boxFind->addItem(searchString);
+  }
 
- QString replaceString = boxReplace->currentText();
- if(boxReplace->findText(replaceString) == -1)
- {
-   boxReplace->addItem(replaceString);
- }
+  QString replaceString = boxReplace->currentText();
+  if (boxReplace->findText(replaceString) == -1) {
+    boxReplace->addItem(replaceString);
+  }
 
- int line(-1), index(-1), prevLine(-1), prevIndex(-1);
- bool regex = boxRegex->isChecked();
- bool cs = boxCaseSensitive->isChecked();
- bool whole = boxWholeWords->isChecked();
- bool wrap = boxWrapAround->isChecked();
- bool backward = boxSearchBackwards->isChecked();
- // Mark this as a set of actions that can be undone as one
- m_editor->beginUndoAction();
- bool found = m_editor->findFirst(searchString, regex, cs, whole, wrap, !backward, 0, 0);
- // If find first fails then there is nothing to replace
- if( !found )
- {
-   QMessageBox::information(this, "MantidPlot - Find and Replace", "No matches found in current document.");
- }
+  int line(-1), index(-1), prevLine(-1), prevIndex(-1);
+  bool regex = boxRegex->isChecked();
+  bool cs = boxCaseSensitive->isChecked();
+  bool whole = boxWholeWords->isChecked();
+  bool wrap = boxWrapAround->isChecked();
+  bool backward = boxSearchBackwards->isChecked();
+  // Mark this as a set of actions that can be undone as one
+  m_editor->beginUndoAction();
+  bool found = m_editor->findFirst(searchString, regex, cs, whole, wrap,
+                                   !backward, 0, 0);
+  // If find first fails then there is nothing to replace
+  if (!found) {
+    QMessageBox::information(this, "MantidPlot - Find and Replace",
+                             "No matches found in current document.");
+  }
 
- while( found )
- {
-   m_editor->replace(replaceString);
-   m_editor->getCursorPosition(&prevLine, &prevIndex);
-   found = m_editor->findNext();
-   m_editor->getCursorPosition(&line, &index);
-   if( line < prevLine || ( line == prevLine && index <= prevIndex ) )
-   {
-     break;
-   }
- }
- m_editor->endUndoAction();
+  while (found) {
+    m_editor->replace(replaceString);
+    m_editor->getCursorPosition(&prevLine, &prevIndex);
+    found = m_editor->findNext();
+    m_editor->getCursorPosition(&line, &index);
+    if (line < prevLine || (line == prevLine && index <= prevIndex)) {
+      break;
+    }
+  }
+  m_editor->endUndoAction();
 }
 
 /**
  * Find button clicked slot
  */
-void FindReplaceDialog::findClicked()
-{
- // Forward to worker function
- find(boxSearchBackwards->isChecked());
+void FindReplaceDialog::findClicked() {
+  // Forward to worker function
+  find(boxSearchBackwards->isChecked());
 }
 
 /// Reset the search flags due to changes
-void FindReplaceDialog::resetSearchFlags()
-{
+void FindReplaceDialog::resetSearchFlags() {
   findNotInProgress();
   clearEditorSelection();
 }
@@ -275,16 +264,12 @@ void FindReplaceDialog::resetSearchFlags()
 /**
  * Flip the in-progress flag
  */
-void FindReplaceDialog::findNotInProgress()
-{
-  m_findInProgress = false;
-}
+void FindReplaceDialog::findNotInProgress() { m_findInProgress = false; }
 
 /**
  * Clear the selection in the editor
  */
-void FindReplaceDialog::clearEditorSelection()
-{
+void FindReplaceDialog::clearEditorSelection() {
   m_editor->setSelection(-1, -1, -1, -1);
 }
 
@@ -292,11 +277,9 @@ void FindReplaceDialog::clearEditorSelection()
  * Called when the widget is shown
  * @param event :: Parameterizes the dialog
  */
-void FindReplaceDialog::showEvent(QShowEvent *event)
-{
+void FindReplaceDialog::showEvent(QShowEvent *event) {
   Q_UNUSED(event);
-  if( m_editor->hasSelectedText() )
-  {
+  if (m_editor->hasSelectedText()) {
     QString text = m_editor->selectedText();
     boxFind->setEditText(text);
     boxFind->addItem(text);

@@ -3,6 +3,7 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/ListValidator.h"
 #include <fstream>
@@ -19,18 +20,6 @@ namespace Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 // DECLARE_ALGORITHM(TOFExtinction)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-TOFExtinction::TOFExtinction() : m_smu(0.), m_amu(0.), m_radius(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-TOFExtinction::~TOFExtinction() {}
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -72,16 +61,13 @@ void TOFExtinction::exec() {
   if (peaksW != inPeaksW)
     peaksW = inPeaksW->clone();
 
-  const Kernel::Material *m_sampleMaterial =
-      &(inPeaksW->sample().getMaterial());
-  if (m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) !=
+  const auto sampleMaterial = inPeaksW->sample().getMaterial();
+  if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
       0.0) {
-    double rho = m_sampleMaterial->numberDensity();
+    double rho = sampleMaterial.numberDensity();
     m_smu =
-        m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) *
-        rho;
-    m_amu =
-        m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+        sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
+    m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
   } else {
     throw std::invalid_argument(
         "Could not retrieve LinearScatteringCoef from material");
@@ -123,8 +109,8 @@ void TOFExtinction::exec() {
       sigfsq_ys = getSigFsqr(EgLaueI, cell, wl, twoth, tbar, fsq, sigfsq);
     } else if (cType.compare("Type I Gaussian") == 0) {
       // Apply correction to fsq with Type-I BCG for testing
-      double EgLaueI = std::sqrt(2.0) *
-                       getEgLaue(Eg, twoth, wl, divBeam, betaBeam) * 2.0 / 3.0;
+      double EgLaueI =
+          M_SQRT2 * getEgLaue(Eg, twoth, wl, divBeam, betaBeam) * 2.0 / 3.0;
       double Xqt = getXqt(EgLaueI, cell, wl, twoth, tbar, fsq);
       y_corr = getGaussian(Xqt, twoth);
       sigfsq_ys = getSigFsqr(EgLaueI, cell, wl, twoth, tbar, fsq, sigfsq);

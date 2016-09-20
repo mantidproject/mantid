@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/CalculateSlits.h"
 
 #include <boost/shared_ptr.hpp>
-#include <math.h>
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,7 +20,7 @@ CalculateSlits::CalculateSlits() {}
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
-CalculateSlits::~CalculateSlits() {}
+CalculateSlits::~CalculateSlits() = default;
 
 //----------------------------------------------------------------------------------------------
 

@@ -64,7 +64,7 @@ public:
   /// constructor
   SessionException(const std::string &error);
   /// return the error message
-  const char *what() const throw();
+  const char *what() const noexcept override;
 };
 }
 }

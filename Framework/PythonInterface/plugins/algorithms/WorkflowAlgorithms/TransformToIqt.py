@@ -1,6 +1,8 @@
 #pylint: disable=no-init,too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
+                        ITableWorkspaceProperty, PropertyMode, Progress)
 from mantid.kernel import Direction, logger
 from mantid import config
 import math
@@ -47,7 +49,7 @@ class TransformToIqt(PythonAlgorithm):
                              doc='Decrease total number of spectrum points by this ratio through merging of '
                                  'intensities from neighbouring bins. Default=1')
 
-        self.declareProperty(MatrixWorkspaceProperty('ParameterWorkspace', '',
+        self.declareProperty(ITableWorkspaceProperty('ParameterWorkspace', '',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
                              doc='Table workspace for saving TransformToIqt properties')
@@ -193,11 +195,9 @@ class TransformToIqt(PythonAlgorithm):
 
 
     def _add_logs(self):
-        sample_logs = [
-                ('iqt_sample_workspace', self._sample),
-                ('iqt_resolution_workspace', self._resolution),
-                ('iqt_binning', '%f,%f,%f' % (self._e_min, self._e_width, self._e_max))
-            ]
+        sample_logs = [('iqt_sample_workspace', self._sample),
+                       ('iqt_resolution_workspace', self._resolution),
+                       ('iqt_binning', '%f,%f,%f' % (self._e_min, self._e_width, self._e_max))]
 
         log_alg = self.createChildAlgorithm(name='AddSampleLogMultiple', startProgress=0.8,
                                             endProgress=1.0, enableLogging=True)

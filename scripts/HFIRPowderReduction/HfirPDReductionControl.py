@@ -26,7 +26,7 @@ from mantid.simpleapi import AnalysisDataService
 
 
 VanadiumPeakPositions = [0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,
-        0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401]
+                         0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401]
 
 class PDRManager(object):
     """ Powder diffraction reduction workspace manager
@@ -57,6 +57,9 @@ class PDRManager(object):
         self._vanadiumPeakPosList = []
 
         self._wavelength = None
+
+        #register startup
+        mantid.UsageService.registerFeatureUsage("Interface","HfirPowderReduction",False)
 
         return
 
@@ -571,7 +574,7 @@ class HFIRPDRedControl(object):
         tablewsname = basewsname + "_RawTable"
         infowsname  = basewsname + "ExpInfo"
         api.LoadSpiceAscii(Filename=datafilename,
-                OutputWorkspace=tablewsname, RunInfoWorkspace=infowsname)
+                           OutputWorkspace=tablewsname, RunInfoWorkspace=infowsname)
 
         tablews = AnalysisDataService.retrieve(tablewsname)
         infows  = AnalysisDataService.retrieve(infowsname)
@@ -689,8 +692,7 @@ class HFIRPDRedControl(object):
         try:
             wsmanager = self._myWorkspaceDict[ (int(expno), int(scanno) )]
         except KeyError:
-            raise NotImplementedError("Exp %d Scan %d has not been loaded yet." % (int(expno),
-                int(scanno)))
+            raise NotImplementedError("Exp %d Scan %d has not been loaded yet." % (int(expno),int(scanno)))
 
         # Convert to MDWorkspace
         tablews = wsmanager.getRawSpiceTable()
@@ -836,13 +838,13 @@ class HFIRPDRedControl(object):
         basewsname = datamdws.name().split("_DataMD")[0]
         outwsname = basewsname + "_Reduced"
         api.ConvertCWPDMDToSpectra(InputWorkspace=datamdws,
-                InputMonitorWorkspace=monitormdws,
-                OutputWorkspace=outwsname,
-                BinningParams=binpar,
-                UnitOutput = unit,
-                NeutronWaveLength=wavelength,
-                ExcludedDetectorIDs=numpy.array(excludeddetlist),
-                ScaleFactor=scalefactor)
+                                   InputMonitorWorkspace=monitormdws,
+                                   OutputWorkspace=outwsname,
+                                   BinningParams=binpar,
+                                   UnitOutput = unit,
+                                   NeutronWaveLength=wavelength,
+                                   ExcludedDetectorIDs=numpy.array(excludeddetlist),
+                                   ScaleFactor=scalefactor)
 
         print "[DB] Reduction is finished.  Data is in workspace %s. " % (outwsname)
 
@@ -1002,8 +1004,8 @@ class HFIRPDRedControl(object):
 
         # Save
         api.SaveFocusedXYE(InputWorkspace=wksp,
-                   StartAtBankNumber=1,
-                   Filename=savefilename)
+                           StartAtBankNumber=1,
+                           Filename=savefilename)
 
         return
 

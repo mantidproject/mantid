@@ -47,10 +47,6 @@ namespace Algorithms {
 */
 class DLLExport Q1DWeighted : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  Q1DWeighted() : API::Algorithm() {}
-  /// Virtual destructor
-  ~Q1DWeighted() override {}
   /// Algorithm's name
   const std::string name() const override { return "Q1DWeighted"; }
   /// Summary of algorithms purpose

@@ -67,7 +67,7 @@ std::string FileValidator::checkValidity(const std::string &value) const {
           g_log.debug() << extension << " ";
         g_log.debug() << "]";
       }
-      g_log.debug() << "\"." << std::endl;
+      g_log.debug() << "\".\n";
     }
   }
 

@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQWPolygon.h"
 #include "MantidAlgorithms/SofQW.h"
+#include "MantidAlgorithms/ReplaceSpecialValues.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Math/PolygonIntersection.h"
@@ -118,7 +119,7 @@ void SofQWPolygon::exec() {
         // Add this spectra-detector pair to the mapping
         PARALLEL_CRITICAL(SofQWPolygon_spectramap) {
           specNumberMapping.push_back(
-              outputWS->getSpectrum(qIndex - 1)->getSpectrumNo());
+              outputWS->getSpectrum(qIndex - 1).getSpectrumNo());
           detIDMapping.push_back(det->getID());
         }
       }
@@ -134,6 +135,19 @@ void SofQWPolygon::exec() {
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
   outputWS->updateSpectraUsing(outputDetectorMap);
+
+  // Replace any NaNs in outputWorkspace with zeroes
+  if (this->getProperty("ReplaceNaNs")) {
+    auto replaceNans = this->createChildAlgorithm("ReplaceSpecialValues");
+    replaceNans->setChild(true);
+    replaceNans->initialize();
+    replaceNans->setProperty("InputWorkspace", outputWS);
+    replaceNans->setProperty("OutputWorkspace", outputWS);
+    replaceNans->setProperty("NaNValue", 0.0);
+    replaceNans->setProperty("InfinityValue", 0.0);
+    replaceNans->setProperty("BigNumberThreshold", DBL_MAX);
+    replaceNans->execute();
+  }
 }
 
 /**

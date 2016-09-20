@@ -43,10 +43,6 @@ namespace DataHandling {
  */
 class DLLExport LoadIsawDetCal : public API::Algorithm, public Kernel::Quat {
 public:
-  /// Default constructor
-  LoadIsawDetCal();
-  /// Destructor
-  ~LoadIsawDetCal() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadIsawDetCal"; }
   /// Summary of algorithms purpose

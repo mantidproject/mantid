@@ -246,16 +246,6 @@ namespace Crystal {
 DECLARE_ALGORITHM(FindClusterFaces)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
-*/
-FindClusterFaces::FindClusterFaces() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-FindClusterFaces::~FindClusterFaces() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string FindClusterFaces::name() const { return "FindClusterFaces"; }
 

@@ -692,16 +692,18 @@ std::string getMatchingString(const std::string &regexString,
  */
 std::string pad(unsigned int run, const std::string &instString) {
   InstrumentInfo instInfo = ConfigService::Instance().getInstrument(instString);
-  std::string prefix = instInfo.filePrefix(run) + instInfo.delimiter();
+  std::string prefix;
+  if (!instInfo.facility().noFilePrefix())
+    prefix = instInfo.filePrefix(run) + instInfo.delimiter();
   unsigned int padLength = instInfo.zeroPadding(run);
-  std::string runStr = boost::lexical_cast<std::string>(run);
+  std::string runStr = std::to_string(run);
   if (runStr.size() < padLength)
     runStr.insert(0, padLength - runStr.size(), '0');
   else if (padLength > 0 && runStr.size() > padLength)
     throw std::runtime_error(
         "Could not parse run number \"" + runStr +
         "\" since the instrument run number length required is " +
-        boost::lexical_cast<std::string>(padLength));
+        std::to_string(padLength));
   runStr.insert(0, prefix);
   return runStr;
 }
@@ -773,10 +775,10 @@ std::string &accumulateString(std::string &output,
     output += "_and_";
 
   if (runRange.first == runRange.second)
-    output += boost::lexical_cast<std::string>(runRange.first);
+    output += std::to_string(runRange.first);
   else
-    output += boost::lexical_cast<std::string>(runRange.first) + "_to_" +
-              boost::lexical_cast<std::string>(runRange.second);
+    output += std::to_string(runRange.first) + "_to_" +
+              std::to_string(runRange.second);
 
   return output;
 }

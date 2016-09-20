@@ -38,31 +38,30 @@ class QSpinBox;
 class DoubleSpinBox;
 
 //! Matrix dimensions dialog
-class MatrixSizeDialog : public QDialog
-{
-    Q_OBJECT
+class MatrixSizeDialog : public QDialog {
+  Q_OBJECT
 
 public:
-	//! Constructor
-	/**
-	 * @param parent :: parent widget
-	 * @param fl :: window flags
-	 */
-    MatrixSizeDialog(Matrix *m, QWidget* parent = 0, Qt::WFlags fl = 0);
+  //! Constructor
+  /**
+   * @param parent :: parent widget
+   * @param fl :: window flags
+   */
+  MatrixSizeDialog(Matrix *m, QWidget *parent = 0, Qt::WFlags fl = 0);
 
 private slots:
-	//! Accept changes and quit
+  //! Accept changes and quit
   void accept() override;
-        //! Apply changes
-	void apply();
+  //! Apply changes
+  void apply();
 
 private:
-    QPushButton* buttonOk, *buttonApply;
-	QPushButton* buttonCancel;
-    QGroupBox* groupBox1, *groupBox2;
-	QSpinBox *boxCols, *boxRows;
-	DoubleSpinBox *boxXStart, *boxYStart, *boxXEnd, *boxYEnd;
-	Matrix *d_matrix;
+  QPushButton *buttonOk, *buttonApply;
+  QPushButton *buttonCancel;
+  QGroupBox *groupBox1, *groupBox2;
+  QSpinBox *boxCols, *boxRows;
+  DoubleSpinBox *boxXStart, *boxYStart, *boxXEnd, *boxYEnd;
+  Matrix *d_matrix;
 };
 
 #endif // MATRIXSIZEDIALOG_H

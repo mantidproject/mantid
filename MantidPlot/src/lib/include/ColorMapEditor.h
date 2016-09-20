@@ -1,10 +1,10 @@
 /***************************************************************************
-	File                 : ColorMapEditor.h
-	Project              : QtiPlot
+        File                 : ColorMapEditor.h
+        Project              : QtiPlot
 --------------------------------------------------------------------
-	Copyright            : (C) 2006 by Ion Vasilief
-	Email (use @ for *)  : ion_vasilief*yahoo.fr
-	Description          : A QwtLinearColorMap Editor Widget
+        Copyright            : (C) 2006 by Ion Vasilief
+        Email (use @ for *)  : ion_vasilief*yahoo.fr
+        Description          : A QwtLinearColorMap Editor Widget
  ***************************************************************************/
 
 /***************************************************************************
@@ -39,13 +39,13 @@ class DoubleSpinBox;
 
 //! A complex widget allowing to customize a QwtLinearColorMap.
 /**
- * It uses a QTableWidget to display the values in one column and their corresponding colors in a second column.
+ * It uses a QTableWidget to display the values in one column and their
+ corresponding colors in a second column.
  * A click on a table color pops-up a QColorDialog allowing to customize it.
 
-	\image html images/color_map_editor.png
+        \image html images/color_map_editor.png
  */
-class ColorMapEditor: public QWidget
-{
+class ColorMapEditor : public QWidget {
   Q_OBJECT
 
 public:
@@ -53,17 +53,18 @@ public:
   /**
    * \param parent parent widget (only affects placement of the widget)
    */
-  ColorMapEditor(const QLocale& locale = QLocale::system(), int precision = 6, QWidget* parent = 0);
+  ColorMapEditor(const QLocale &locale = QLocale::system(), int precision = 6,
+                 QWidget *parent = 0);
   //! Returns the customized color map.
-  QwtLinearColorMap colorMap(){return color_map;};
+  QwtLinearColorMap colorMap() { return color_map; };
   //! Use this function to initialize the color map to be edited.
-  void setColorMap(const QwtLinearColorMap& map);
+  void setColorMap(const QwtLinearColorMap &map);
   //! Use this function to initialize the values range.
   void setRange(double min, double max);
   //! Exports the map to a pseudo-XML string
-  static QString saveToXmlString(const QwtLinearColorMap& color_map);
+  static QString saveToXmlString(const QwtLinearColorMap &color_map);
 
-  signals:
+signals:
   void scalingChanged();
 
 protected slots:
@@ -78,7 +79,8 @@ protected slots:
   bool eventFilter(QObject *object, QEvent *e) override;
 
 private:
-  //! Table displaying the values ranges in the first column and their corresponding colors in the second column
+  //! Table displaying the values ranges in the first column and their
+  // corresponding colors in the second column
   QTableWidget *table;
   QPushButton *insertBtn, *deleteBtn;
   QCheckBox *scaleColorsBox;

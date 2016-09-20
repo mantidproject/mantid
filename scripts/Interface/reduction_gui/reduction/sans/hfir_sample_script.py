@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name, R0902, R0904, R0912
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the HFIRReduction class could
@@ -9,12 +9,13 @@ import os
 from reduction_gui.reduction.scripter import BaseScriptElement
 
 # Check whether we are running in MantidPlot
-IS_IN_MANTIDPLOT = False
+# Disable unused import warning
+# pylint: disable=W0611
 try:
     import mantidplot
     IS_IN_MANTIDPLOT = True
-except:
-    pass
+except(ImportError, ImportWarning):
+    IS_IN_MANTIDPLOT = False
 
 class SampleData(BaseScriptElement):
 
@@ -31,7 +32,7 @@ class SampleData(BaseScriptElement):
             """
             if len(str(self.sample_file).strip())==0 \
                 or len(str(self.direct_beam).strip())==0:
-                raise RuntimeError, "Transmission with direct beam was selected but data files were not entered."
+                raise RuntimeError("Transmission with direct beam was selected but data files were not entered.")
 
             return "DirectBeamTransmission(\"%s\", \"%s\", beam_radius=%g)\n" % \
             (self.sample_file, self.direct_beam, self.beam_radius)
@@ -40,12 +41,12 @@ class SampleData(BaseScriptElement):
             """
                 Create XML from the current data.
             """
-            xml  = "<DirectBeam>\n"
-            xml += "  <sample_file>%s</sample_file>\n" % self.sample_file
-            xml += "  <direct_beam>%s</direct_beam>\n" % self.direct_beam
-            xml += "  <beam_radius>%g</beam_radius>\n" % self.beam_radius
-            xml += "</DirectBeam>\n"
-            return xml
+            xml_out  = "<DirectBeam>\n"
+            xml_out += "  <sample_file>%s</sample_file>\n" % self.sample_file
+            xml_out += "  <direct_beam>%s</direct_beam>\n" % self.direct_beam
+            xml_out += "  <beam_radius>%g</beam_radius>\n" % self.beam_radius
+            xml_out += "</DirectBeam>\n"
+            return xml_out
 
         def find(self, dom):
             element_list = dom.getElementsByTagName("DirectBeam")
@@ -71,12 +72,7 @@ class SampleData(BaseScriptElement):
                 @param xml_str: text to read the data from
             """
             self.reset()
-            from mantid.api import Algorithm
-            dom = xml.dom.minidom.parseString(xml_str)
-
-            process_dom = dom.getElementsByTagName("SASProcess")[0]
-            setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-            alg=Algorithm.fromString(str(setup_alg_str))
+            (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
             self.sample_file = BaseScriptElement.getPropertyValue(alg, "TransmissionSampleDataFile", default='')
             self.direct_beam = BaseScriptElement.getPropertyValue(alg, "TransmissionEmptyDataFile", default='')
@@ -108,7 +104,7 @@ class SampleData(BaseScriptElement):
                 or len(str(self.sample_spreader).strip())==0 \
                 or len(str(self.direct_scatt).strip())==0 \
                 or len(str(self.direct_spreader).strip())==0:
-                raise RuntimeError, "Transmission with beam spreader was selected but data files were not entered."
+                raise RuntimeError("Transmission with beam spreader was selected but data files were not entered.")
 
             return "BeamSpreaderTransmission(\"%s\",\n \"%s\",\n \"%s\",\n \"%s\", %g, %g)\n" % \
             (self.sample_spreader, self.direct_spreader,
@@ -119,16 +115,16 @@ class SampleData(BaseScriptElement):
             """
                 Create XML from the current data.
             """
-            xml  = "<BeamSpreader>\n"
-            xml += "  <sample_scatt>%s</sample_scatt>\n" % self.sample_scatt
-            xml += "  <sample_spreader>%s</sample_spreader>\n" % self.sample_spreader
-            xml += "  <direct_scatt>%s</direct_scatt>\n" % self.direct_scatt
-            xml += "  <direct_spreader>%s</direct_spreader>\n" % self.direct_spreader
+            xml_out  = "<BeamSpreader>\n"
+            xml_out += "  <sample_scatt>%s</sample_scatt>\n" % self.sample_scatt
+            xml_out += "  <sample_spreader>%s</sample_spreader>\n" % self.sample_spreader
+            xml_out += "  <direct_scatt>%s</direct_scatt>\n" % self.direct_scatt
+            xml_out += "  <direct_spreader>%s</direct_spreader>\n" % self.direct_spreader
 
-            xml += "  <spreader_trans>%g</spreader_trans>\n" % self.spreader_trans
-            xml += "  <spreader_trans_spread>%g</spreader_trans_spread>\n" % self.spreader_trans_spread
-            xml += "</BeamSpreader>\n"
-            return xml
+            xml_out += "  <spreader_trans>%g</spreader_trans>\n" % self.spreader_trans
+            xml_out += "  <spreader_trans_spread>%g</spreader_trans_spread>\n" % self.spreader_trans_spread
+            xml_out += "</BeamSpreader>\n"
+            return xml_out
 
         def find(self, dom):
             element_list = dom.getElementsByTagName("BeamSpreader")
@@ -158,12 +154,7 @@ class SampleData(BaseScriptElement):
                 @param xml_str: text to read the data from
             """
             self.reset()
-            from mantid.api import Algorithm
-            dom = xml.dom.minidom.parseString(xml_str)
-
-            process_dom = dom.getElementsByTagName("SASProcess")[0]
-            setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-            alg=Algorithm.fromString(str(setup_alg_str))
+            (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
             self.sample_scatt = BaseScriptElement.getPropertyValue(alg, "TransSampleScatteringFilename", default='')
             self.sample_spreader = BaseScriptElement.getPropertyValue(alg, "TransSampleSpreaderFilename", default='')
@@ -232,7 +223,7 @@ class SampleData(BaseScriptElement):
 
         # Data files
         if len(self.data_files)==0:
-            raise RuntimeError, "Trying to generate reduction script without a data file."
+            raise RuntimeError("Trying to generate reduction script without a data file.")
 
         if data_file is None:
             data_file_list = self.get_data_file_list()
@@ -262,7 +253,7 @@ class SampleData(BaseScriptElement):
             Update transmission from reduction output
         """
         if IS_IN_MANTIDPLOT:
-            from mantid.api import PropertyManagerDataService
+            from mantid import PropertyManagerDataService
             from reduction_workflow.command_interface import ReductionSingleton
             property_manager_name = ReductionSingleton().get_reduction_table_name()
             property_manager = PropertyManagerDataService.retrieve(property_manager_name)
@@ -275,22 +266,22 @@ class SampleData(BaseScriptElement):
         """
             Create XML from the current data.
         """
-        xml  = "<Transmission>\n"
-        xml += "  <trans>%g</trans>\n" % self.transmission
-        xml += "  <trans_spread>%g</trans_spread>\n" % self.transmission_spread
-        xml += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
-        xml += "  <theta_dependent>%s</theta_dependent>\n" % str(self.theta_dependent)
-        xml += "  <dark_current>%s</dark_current>\n" % str(self.dark_current)
-        xml += self.calculation_method.to_xml()
-        xml += "</Transmission>\n"
-        xml += "<SampleData>\n"
-        xml += "  <separate_jobs>%s</separate_jobs>\n" % str(self.separate_jobs)
-        xml += "  <sample_thickness>%g</sample_thickness>\n" % self.sample_thickness
+        xml_out  = "<Transmission>\n"
+        xml_out += "  <trans>%g</trans>\n" % self.transmission
+        xml_out += "  <trans_spread>%g</trans_spread>\n" % self.transmission_spread
+        xml_out += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
+        xml_out += "  <theta_dependent>%s</theta_dependent>\n" % str(self.theta_dependent)
+        xml_out += "  <dark_current>%s</dark_current>\n" % str(self.dark_current)
+        xml_out += self.calculation_method.to_xml()
+        xml_out += "</Transmission>\n"
+        xml_out += "<SampleData>\n"
+        xml_out += "  <separate_jobs>%s</separate_jobs>\n" % str(self.separate_jobs)
+        xml_out += "  <sample_thickness>%g</sample_thickness>\n" % self.sample_thickness
         for item in self.data_files:
-            xml += "  <data_file>%s</data_file>\n" % item.strip()
-        xml += "</SampleData>\n"
+            xml_out += "  <data_file>%s</data_file>\n" % item.strip()
+        xml_out += "</SampleData>\n"
 
-        return xml
+        return xml_out
 
     def from_xml(self, xml_str):
         """
@@ -337,12 +328,7 @@ class SampleData(BaseScriptElement):
             @param xml_str: text to read the data from
         """
         self.reset()
-        from mantid.api import Algorithm
-        dom = xml.dom.minidom.parseString(xml_str)
-
-        process_dom = dom.getElementsByTagName("SASProcess")[0]
-        setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-        alg=Algorithm.fromString(str(setup_alg_str))
+        alg, filename = BaseScriptElement.getAlgorithmFromXML(xml_str)
 
         # Transmission
         self.transmission = BaseScriptElement.getPropertyValue(alg, "TransmissionValue", default=SampleData.transmission)
@@ -364,7 +350,7 @@ class SampleData(BaseScriptElement):
             self.calculation_method.from_setup_info(xml_str)
 
         # Data file section
-        self.data_files = [BaseScriptElement.getStringElement(process_dom, 'Filename', '')]
+        self.data_files = [filename]
 
     def reset(self):
         """

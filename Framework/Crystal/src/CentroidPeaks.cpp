@@ -19,18 +19,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Crystal;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CentroidPeaks::CentroidPeaks() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CentroidPeaks::~CentroidPeaks() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CentroidPeaks::init() {
@@ -267,7 +255,7 @@ void CentroidPeaks::integrateEvent() {
           continue;
         it = wi_to_detid_map.find(findPixelID(bankName, icol, irow));
         size_t workspaceIndex = (it->second);
-        EventList el = eventW->getEventList(workspaceIndex);
+        EventList el = eventW->getSpectrum(workspaceIndex);
         el.switchTo(WEIGHTED_NOTIME);
         std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
 

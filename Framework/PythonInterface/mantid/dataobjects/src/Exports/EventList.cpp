@@ -1,9 +1,12 @@
 #include "MantidDataObjects/EventList.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using namespace boost::python;
 using namespace Mantid::DataObjects;
+
+GET_POINTER_SPECIALIZATION(EventList)
 
 namespace {
 void addEventToEventList(EventList &self, double tof,

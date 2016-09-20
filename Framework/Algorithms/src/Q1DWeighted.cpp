@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/Q1DWeighted.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Histogram1D.h"
@@ -83,9 +81,9 @@ void Q1DWeighted::exec() {
   const std::vector<double> binParams = getProperty("OutputBinning");
   // XOut defines the output histogram, so its length is equal to the number of
   // bins + 1
-  MantidVecPtr XOut;
+  HistogramData::BinEdges XOut(0);
   const int sizeOut =
-      VectorHelper::createAxisFromRebinParams(binParams, XOut.access());
+      VectorHelper::createAxisFromRebinParams(binParams, XOut.mutableRawData());
 
   // Get pixel size and pixel sub-division
   double pixelSizeX = getProperty("PixelSizeX");
@@ -104,11 +102,11 @@ void Q1DWeighted::exec() {
   outputWS->getAxis(0)->unit() =
       UnitFactory::Instance().create("MomentumTransfer");
   outputWS->setYUnitLabel("1/cm");
-  outputWS->isDistribution(true);
+  outputWS->setDistribution(true);
   setProperty("OutputWorkspace", outputWS);
 
   // Set the X vector for the output workspace
-  outputWS->setX(0, XOut);
+  outputWS->setBinEdges(0, XOut);
   MantidVec &YOut = outputWS->dataY(0);
   MantidVec &EOut = outputWS->dataE(0);
 
@@ -148,8 +146,8 @@ void Q1DWeighted::exec() {
     wedge_ws->getAxis(0)->unit() =
         UnitFactory::Instance().create("MomentumTransfer");
     wedge_ws->setYUnitLabel("1/cm");
-    wedge_ws->isDistribution(true);
-    wedge_ws->setX(0, XOut);
+    wedge_ws->setDistribution(true);
+    wedge_ws->setBinEdges(0, XOut);
     wedge_ws->mutableRun().addProperty("wedge_angle", center_angle, "degrees",
                                        true);
     wedgeWorkspaces.push_back(wedge_ws);
@@ -158,6 +156,8 @@ void Q1DWeighted::exec() {
   // Count histogram for wedge normalization
   std::vector<std::vector<double>> wedge_XNormLambda(
       nWedges, std::vector<double>(sizeOut - 1, 0.0));
+
+  const auto &spectrumInfo = inputWS->spectrumInfo();
 
   PARALLEL_FOR2(inputWS, outputWS)
   // Loop over all xLength-1 detector channels
@@ -179,23 +179,13 @@ void Q1DWeighted::exec() {
         nWedges, std::vector<double>(sizeOut - 1, 0.0));
 
     for (int i = 0; i < numSpec; i++) {
-      // Get the pixel relating to this spectrum
-      IDetector_const_sptr det;
-      try {
-        det = inputWS->getDetector(i);
-      } catch (Exception::NotFoundError &) {
+      if (!spectrumInfo.hasDetectors(i)) {
         g_log.warning() << "Workspace index " << i
-                        << " has no detector assigned to it - discarding"
-                        << std::endl;
-        // Catch if no detector. Next line tests whether this happened - test
-        // placed
-        // outside here because Mac Intel compiler doesn't like 'continue' in a
-        // catch
-        // in an openmp block.
+                        << " has no detector assigned to it - discarding\n";
+        continue;
       }
-      // If no detector found or if it's masked or a monitor, skip onto the next
-      // spectrum
-      if (!det || det->isMonitor() || det->isMasked())
+      // Skip if we have a monitor or if the detector is masked.
+      if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
         continue;
 
       // Get the current spectrum for both input workspaces
@@ -218,8 +208,8 @@ void Q1DWeighted::exec() {
         // Find the position of this sub-pixel in real space and compute Q
         // For reference - in the case where we don't use sub-pixels, simply
         // use:
-        //     double sinTheta = sin( inputWS->detectorTwoTheta(*det)/2.0 );
-        V3D pos = det->getPos() - V3D(sub_x, sub_y, 0.0);
+        //     double sinTheta = sin( spectrumInfo.twoTheta(i)/2.0 );
+        V3D pos = spectrumInfo.position(i) - V3D(sub_x, sub_y, 0.0);
         double sinTheta = sin(0.5 * pos.angle(beamLine));
         double factor = fmp * sinTheta;
         double q = factor * 2.0 / (XIn[j] + XIn[j + 1]);
@@ -235,9 +225,9 @@ void Q1DWeighted::exec() {
           }
           // If we got a more complicated binning, find the q bin the slow way
         } else {
-          for (int i_qbin = 0;
-               i_qbin < static_cast<int>(XOut.access().size()) - 1; i_qbin++) {
-            if (q >= XOut.access()[i_qbin] && q < XOut.access()[(i_qbin + 1)]) {
+          for (int i_qbin = 0; i_qbin < static_cast<int>(XOut.size()) - 1;
+               i_qbin++) {
+            if (q >= XOut[i_qbin] && q < XOut[(i_qbin + 1)]) {
               iq = i_qbin;
               break;
             }

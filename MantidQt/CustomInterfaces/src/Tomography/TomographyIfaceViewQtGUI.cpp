@@ -162,13 +162,14 @@ DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
  * @param parent Parent window (most likely the Mantid main app window).
  */
 TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIW(NULL),
-      m_processingJobsIDs(), m_currentComputeRes(""), m_currentReconTool(""),
-      m_imgPath(""), m_logMsgs(), m_systemSettings(), m_toolsSettings(),
-      m_settings(), m_settingsGroup("CustomInterfaces/Tomography"),
+    : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIW(nullptr),
+      m_tabImggFormats(nullptr), m_processingJobsIDs(), m_currentComputeRes(""),
+      m_currentReconTool(""), m_imgPath(""), m_logMsgs(), m_systemSettings(),
+      m_toolsSettings(), m_settings(),
+      m_settingsGroup("CustomInterfaces/Tomography"),
       m_settingsSubGroupEnergy(m_settingsGroup + "/EnergyBands"),
       m_aggAlgRunner(), m_availPlugins(), m_currPlugins(), m_currentParamPath(),
-      m_presenter(NULL) {
+      m_presenter(nullptr) {
 
   // defaults from the tools
   m_tomopyMethod = ToolConfigTomoPy::methods().front().first;
@@ -195,6 +196,7 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_uiTabSetup.setupUi(tabSetupW);
   m_ui.tabMain->addTab(tabSetupW, QString("Setup"));
 
+  // this is a Qt widget, let Qt manage the pointer
   m_tabROIW = new ImageROIViewQtWidget(m_ui.tabMain);
   m_ui.tabMain->addTab(m_tabROIW, QString("ROI etc."));
 
@@ -206,9 +208,9 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_uiTabVisualize.setupUi(tabVizW);
   m_ui.tabMain->addTab(tabVizW, QString("Visualize"));
 
-  QWidget *tabConvertW = new QWidget();
-  m_uiTabConvertFormats.setupUi(tabConvertW);
-  m_ui.tabMain->addTab(tabConvertW, QString("Convert"));
+  // this is a Qt widget, let Qt manage the pointer
+  QWidget *m_tabImggFormats = new ImggFormatsConvertViewQtWidget();
+  m_ui.tabMain->addTab(m_tabImggFormats, QString("Convert"));
 
   QWidget *tabEBandsW = new QWidget();
   m_uiTabEnergy.setupUi(tabEBandsW);
@@ -229,7 +231,6 @@ void TomographyIfaceViewQtGUI::initLayout() {
 
   // extra / experimental tabs:
   doSetupSectionVisualize();
-  doSetupSectionConvert();
   doSetupSectionEnergy();
 
   // presenter that knows how to handle a ITomographyIfaceView should take care
@@ -252,17 +253,13 @@ void TomographyIfaceViewQtGUI::doSetupGeneralWidgets() {
   connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
   // note connection to the parent window, otherwise you'd be left
   // with an empty frame window
-  connect(m_ui.pushButton_close, SIGNAL(released()), this->parent(),
-          SLOT(close()));
+  if (this->parent()) {
+    connect(m_ui.pushButton_close, SIGNAL(released()), this->parent(),
+            SLOT(close()));
+  }
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
-  // 'local' - not disabled any longer
-  // m_uiTabSetup.tabWidget_comp_resource->setTabEnabled(false, 1);
-  // m_uiTabSetup.tab_local->setEnabled(false);
-
-  resetRemoteSetup();
-
   // populate setup values from defaults
   const TomoPathsConfig cfg = currentPathsConfig();
   m_uiTabSetup.lineEdit_path_samples->setText(
@@ -422,14 +419,11 @@ void TomographyIfaceViewQtGUI::doSetupSectionVisualize() {
           this, SLOT(defaultDirLocalVisualizeClicked()));
   connect(m_uiTabVisualize.pushButton_remote_default_dir, SIGNAL(released()),
           this, SLOT(defaultDirRemoteVisualizeClicked()));
-}
 
-void TomographyIfaceViewQtGUI::doSetupSectionConvert() {
-  connect(m_uiTabConvertFormats.pushButton_browse_input, SIGNAL(released()),
-          this, SLOT(browseImgInputConvertClicked()));
-
-  connect(m_uiTabConvertFormats.pushButton_browse_output, SIGNAL(released()),
-          this, SLOT(browseImgOutputConvertClicked()));
+  connect(m_uiTabVisualize.pushButton_browse_paraview, SIGNAL(released()), this,
+          SLOT(browseVisToolParaviewClicked()));
+  connect(m_uiTabVisualize.pushButton_browse_octopus, SIGNAL(released()), this,
+          SLOT(browseVisToolOctopusClicked()));
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionSystemSettings() {
@@ -1770,7 +1764,7 @@ void TomographyIfaceViewQtGUI::setPrePostProcSettings(
   m_uiTabFilters.checkBox_normalize_by_flats->setChecked(
       opts.prep.normalizeByFlats);
 
-  m_uiTabFilters.checkBox_normalize_by_flats->setChecked(
+  m_uiTabFilters.checkBox_normalize_by_darks->setChecked(
       opts.prep.normalizeByDarks);
 
   m_uiTabFilters.spinBox_prep_median_filter_width->setValue(
@@ -1806,9 +1800,9 @@ TomographyIfaceViewQtGUI::grabSystemSettingsFromUser() const {
   // paths and related
   setts.m_pathComponents[0] =
       m_uiTabSystemSettings.lineEdit_path_comp_1st->text().toStdString();
-  // Not modifyable at the moment:
+  // Not modifiable at the moment:
   // m_uiTabSystemSettings.lineEdit_path_comp_2nd;
-  // Not modifyable at the moment:
+  // Not modifiable at the moment:
   // m_uiTabSystemSettings.lineEdit_path_comp_3rd;
   setts.m_samplesDirPrefix =
       m_uiTabSystemSettings.lineEdit_path_comp_input_samples->text()
@@ -1990,32 +1984,14 @@ void TomographyIfaceViewQtGUI::defaultDirRemoteVisualizeClicked() {
   }
 }
 
-void TomographyIfaceViewQtGUI::browseVisToolParaviewClicke() {
+void TomographyIfaceViewQtGUI::browseVisToolParaviewClicked() {
   m_setupParaviewPath =
-      checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_input);
+      checkUserBrowseDir(m_uiTabVisualize.lineEdit_paraview_location);
 }
 
 void TomographyIfaceViewQtGUI::browseVisToolOctopusClicked() {
   m_setupOctopusVisPath =
-      checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_input);
-}
-
-void TomographyIfaceViewQtGUI::browseImgInputConvertClicked() {
-  // Not using this path to update the "current" path where to load from, but
-  // it could be an option.
-  // const std::string path =
-  checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_input);
-  // m_pathsConfig.updatePathDarks(str, );
-  // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
-}
-
-void TomographyIfaceViewQtGUI::browseImgOutputConvertClicked() {
-  // Not using this path to update the "current" path where to load from, but
-  // it could be an option.
-  // const std::string path =
-  checkUserBrowseDir(m_uiTabConvertFormats.lineEdit_output);
-  // m_pathsConfig.updatePathDarks(str, );
-  // m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
+      checkUserBrowseDir(m_uiTabVisualize.lineEdit_octopus_vis_location);
 }
 
 /**
@@ -2045,8 +2021,8 @@ std::string TomographyIfaceViewQtGUI::checkUserBrowseDir(
     prev = le->text();
   }
 
-  QString path(QFileDialog::getExistingDirectory(
-      this, tr(QString::fromStdString(userMsg)), prev));
+  QString path(
+      QFileDialog::getExistingDirectory(this, tr(userMsg.c_str()), prev));
 
   if (!path.isEmpty()) {
     le->setText(path);
@@ -2086,8 +2062,7 @@ std::string TomographyIfaceViewQtGUI::checkUserBrowseFile(
     prev = le->text();
   }
 
-  QString path(QFileDialog::getOpenFileName(
-      this, tr(QString::fromStdString(userMsg)), prev));
+  QString path(QFileDialog::getOpenFileName(this, tr(userMsg.c_str()), prev));
 
   if (!path.isEmpty()) {
     le->setText(path);
@@ -2101,9 +2076,16 @@ std::string TomographyIfaceViewQtGUI::checkUserBrowseFile(
 }
 
 void TomographyIfaceViewQtGUI::resetPrePostFilters() {
+  auto reply = QMessageBox::question(
+      this, "Reset Confirmation", "Are you sure you want to <br><strong>RESET "
+                                  "ALL</strong> Filter settings?<br>This "
+                                  "action cannot be undone!",
+      QMessageBox::Yes | QMessageBox::No);
   // default constructors with factory defaults
-  TomoReconFiltersSettings def;
-  setPrePostProcSettings(def);
+  if (reply == QMessageBox::Yes) {
+    TomoReconFiltersSettings def;
+    setPrePostProcSettings(def);
+  }
 }
 
 void TomographyIfaceViewQtGUI::systemSettingsEdited() {
@@ -2115,9 +2097,17 @@ void TomographyIfaceViewQtGUI::systemSettingsNumericEdited() {
 }
 
 void TomographyIfaceViewQtGUI::resetSystemSettings() {
-  // From factory defaults
-  TomoSystemSettings defaults;
-  updateSystemSettings(defaults);
+  auto reply = QMessageBox::question(
+      this, "Reset Confirmation", "Are you sure you want to <br><strong>RESET "
+                                  "ALL</strong> System settings?<br>This "
+                                  "action cannot be undone!",
+      QMessageBox::Yes | QMessageBox::No);
+  // default constructors with factory defaults
+  if (reply == QMessageBox::Yes) {
+    // From factory defaults
+    TomoSystemSettings defaults;
+    updateSystemSettings(defaults);
+  }
 }
 
 /**
@@ -2209,6 +2199,5 @@ void TomographyIfaceViewQtGUI::openHelpWin() {
   MantidQt::API::HelpWindow::showCustomInterface(
       NULL, QString("Tomographic_Reconstruction"));
 }
-
 } // namespace CustomInterfaces
 } // namespace MantidQt

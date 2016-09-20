@@ -61,9 +61,9 @@ public:
     TS_ASSERT(!mws->isHistogramData());
     TS_ASSERT_EQUALS(mws->blocksize(), tws->rowCount());
 
-    const Mantid::MantidVec &X = mws->readX(0);
-    const Mantid::MantidVec &Y = mws->readY(0);
-    const Mantid::MantidVec &E = mws->readE(0);
+    auto &X = mws->x(0);
+    auto &Y = mws->y(0);
+    auto &E = mws->e(0);
 
     for (size_t i = 0; i < tws->rowCount(); ++i) {
       TableRow row = tws->getRow(i);
@@ -103,9 +103,9 @@ public:
     TS_ASSERT(!mws->isHistogramData());
     TS_ASSERT_EQUALS(mws->blocksize(), tws->rowCount());
 
-    const Mantid::MantidVec &X = mws->readX(0);
-    const Mantid::MantidVec &Y = mws->readY(0);
-    const Mantid::MantidVec &E = mws->readE(0);
+    auto &X = mws->x(0);
+    auto &Y = mws->y(0);
+    auto &E = mws->e(0);
 
     for (size_t i = 0; i < tws->rowCount(); ++i) {
       TableRow row = tws->getRow(i);

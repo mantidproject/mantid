@@ -19,6 +19,9 @@ with selected dimensions, e.g. the reciprocal space of momentums **(Qx, Qy, Qz)*
 and any other user specified log values which can be treated as dimensions. If the target workspace do exist, 
 the **MD Events** are added to this workspace.
 
+Using the FileBackEnd and Filename properties the algorithm can produce a file-backed workspace.
+Note that this will significantly increase the execution time of the algorithm.
+
 Used Subalgorithms
 ------------------
 

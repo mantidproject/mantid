@@ -40,8 +40,7 @@ class QString;
 /**
  * A scripting environment for executing Python code.
  */
-class PythonScripting: public ScriptingEnv
-{
+class PythonScripting : public ScriptingEnv {
 
   Q_OBJECT
 
@@ -55,9 +54,12 @@ public:
   /// Simulate file-like object (required for IPython)
   inline void flush() {}
   /// Simulate file-like object (required for colorama)
-  inline bool closed() { return false; }
+  inline bool closed() const { return false; }
+  /// Simulate file-like object
+  inline bool isatty() const { return false; }
+
   /// 'Fake' method needed for IPython import
-  void set_parent(PyObject*) {}
+  void set_parent(PyObject *) {}
 
   /// Set the argv attribute on the sys module
   void setSysArgs(const QStringList &args) override;
@@ -80,27 +82,28 @@ public:
   /// Convert a Python list object to a Qt QStringList
   QStringList toStringList(PyObject *py_seq);
   /// Convert a QtringList to a Python List
-  PyObject * toPyList(const QStringList & items);
-  /// Returns an integer representation of the object. No check is performed to see if it is an integer
+  PyObject *toPyList(const QStringList &items);
+  /// Returns an integer representation of the object. No check is performed to
+  /// see if it is an integer
   long toLong(PyObject *object, bool decref = false);
   /// Raise an asynchronous exception in the given thread
   void raiseAsyncException(long id, PyObject *exc);
 
-  ///Return a list of file extensions for Python
+  /// Return a list of file extensions for Python
   const QStringList fileExtensions() const override;
 
   /// Set a reference to a QObject in the given dictionary
-  bool setQObject(QObject*, const char*, PyObject *dict);
+  bool setQObject(QObject *, const char *, PyObject *dict);
   /// Set a reference to a QObject in the global dictionary
   bool setQObject(QObject *val, const char *name) override {
     return setQObject(val, name, NULL);
   }
   /// Set a reference to an int in the global dictionary
   bool setInt(int, const char *) override;
-  bool setInt(int, const char*, PyObject *dict);
+  bool setInt(int, const char *, PyObject *dict);
   /// Set a reference to a double in the global dictionary
   bool setDouble(double, const char *) override;
-  bool setDouble(double, const char*, PyObject *dict);
+  bool setDouble(double, const char *, PyObject *dict);
 
   /// Return a list of mathematical functions define by qtiplot
   const QStringList mathFunctions() const override;
@@ -120,8 +123,12 @@ private:
   bool start() override;
   /// Shutdown the environment
   void shutdown() override;
-  /// Run execfile on a given file
-  bool loadInitFile(const QString &path);
+  /// Configure python path
+  void setupPythonPath();
+  /// Configure sip
+  void setupSip();
+  /// Exec the mantidplotrc file
+  bool loadInitRCFile();
 
 private:
   /// The global dictionary

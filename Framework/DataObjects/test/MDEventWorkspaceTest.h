@@ -316,7 +316,7 @@ public:
     // Each box (cube) has edges 0.5 long, so a face diagonal is sqrt(2)/2
     for (size_t i = 0; i < mid_points_vect.size(); ++i) {
       TS_ASSERT_DELTA(mid_points_vect[i],
-                      (static_cast<double>(i) + 0.5) * 0.5 * sqrt(2.0), 1e-5);
+                      (static_cast<double>(i) + 0.5) * 0.5 * M_SQRT2, 1e-5);
     }
   }
 
@@ -751,6 +751,13 @@ public:
     TSM_ASSERT_EQUALS(
         "Should be set to number of events normalizationnormalization",
         ew->displayNormalizationHisto(), histoSetting);
+  }
+
+  void test_is_histogram_is_false() {
+    MDEventWorkspace3Lean::sptr ew =
+        MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+    TSM_ASSERT("Should always be false for event workspace",
+               !ew->isMDHistoWorkspace());
   }
 
   /**

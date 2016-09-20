@@ -1,12 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertEmptyToTof.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
@@ -28,17 +26,6 @@ using namespace API;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertEmptyToTof)
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ConvertEmptyToTof::ConvertEmptyToTof() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-ConvertEmptyToTof::~ConvertEmptyToTof() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertEmptyToTof::name() const {
   return "ConvertEmptyToTof";
@@ -52,7 +39,6 @@ const std::string ConvertEmptyToTof::category() const {
   return "Transforms\\Units";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ConvertEmptyToTof::init() {
@@ -94,13 +80,13 @@ void ConvertEmptyToTof::init() {
                   "Workspace Index used for elastic peak position above.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ConvertEmptyToTof::exec() {
 
   m_inputWS = this->getProperty("InputWorkspace");
   m_outputWS = this->getProperty("OutputWorkspace");
+  m_spectrumInfo = &m_inputWS->spectrumInfo();
   std::vector<int> spectraIndices = getProperty("ListOfSpectraIndices");
   std::vector<int> channelIndices = getProperty("ListOfChannelIndices");
   int epp = getProperty("ElasticPeakPosition");
@@ -116,8 +102,8 @@ void ConvertEmptyToTof::exec() {
                       "ElasticPeakPositionSpectrum");
 
     double wavelength = getPropertyFromRun<double>(m_inputWS, "wavelength");
-    double l1 = getL1(m_inputWS);
-    double l2 = getL2(m_inputWS, eppSpectrum);
+    double l1 = m_spectrumInfo->l1();
+    double l2 = m_spectrumInfo->l2(eppSpectrum);
     double epTof =
         (calculateTOF(l1, wavelength) + calculateTOF(l2, wavelength)) *
         1e6; // microsecs
@@ -138,7 +124,7 @@ void ConvertEmptyToTof::exec() {
 
     for (auto &epp : eppMap) {
       g_log.debug() << "Spectra idx =" << epp.first << ", epp=" << epp.second
-                    << std::endl;
+                    << '\n';
     }
 
     std::pair<int, double> eppAndEpTof = findAverageEppAndEpTof(eppMap);
@@ -150,7 +136,7 @@ void ConvertEmptyToTof::exec() {
   // If input and output workspaces are not the same, create a new workspace for
   // the output
   if (m_outputWS != m_inputWS) {
-    m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
+    m_outputWS = m_inputWS->clone();
   }
 
   setTofInWS(tofAxis, m_outputWS);
@@ -177,7 +163,7 @@ void ConvertEmptyToTof::validateWorkspaceIndices(std::vector<int> &v) {
     for (auto index : v) {
       if (index < 0 || static_cast<size_t>(index) >= nHist) {
         throw std::runtime_error("Spectra index out of limits: " +
-                                 boost::lexical_cast<std::string>(index));
+                                 std::to_string(index));
       }
     }
   }
@@ -202,7 +188,7 @@ void ConvertEmptyToTof::validateChannelIndices(std::vector<int> &v) {
     for (auto &index : v) {
       if (index < 0 || static_cast<size_t>(index) >= blockSize) {
         throw std::runtime_error("Channel index out of limits: " +
-                                 boost::lexical_cast<std::string>(index));
+                                 std::to_string(index));
       }
     }
   }
@@ -223,11 +209,11 @@ std::map<int, int> ConvertEmptyToTof::findElasticPeakPositions(
   assert(static_cast<size_t>(*(channelIndices.end() - 1)) <
          m_inputWS->blocksize() + 1);
 
-  g_log.information() << "Peak detection, search for peak " << std::endl;
+  g_log.information() << "Peak detection, search for peak \n";
 
   for (auto spectrumIndex : spectraIndices) {
 
-    const Mantid::MantidVec &thisSpecY = m_inputWS->dataY(spectrumIndex);
+    auto &thisSpecY = m_inputWS->y(spectrumIndex);
 
     int minChannelIndex = *(channelIndices.begin());
     int maxChannelIndex = *(channelIndices.end() - 1);
@@ -239,18 +225,18 @@ std::map<int, int> ConvertEmptyToTof::findElasticPeakPositions(
 
     g_log.debug() << "Peak estimate :: center=" << center
                   << "\t sigma=" << sigma << "\t height=" << height
-                  << "\t minX=" << minX << "\t maxX=" << maxX << std::endl;
+                  << "\t minX=" << minX << "\t maxX=" << maxX << '\n';
 
     bool doFit =
         doFitGaussianPeak(spectrumIndex, center, sigma, height, minX, maxX);
     if (!doFit) {
-      g_log.error() << "doFitGaussianPeak failed..." << std::endl;
+      g_log.error() << "doFitGaussianPeak failed...\n";
       throw std::runtime_error("Gaussin Peak Fit failed....");
     }
 
     g_log.debug() << "Peak Fitting :: center=" << center << "\t sigma=" << sigma
                   << "\t height=" << height << "\t minX=" << minX
-                  << "\t maxX=" << maxX << std::endl;
+                  << "\t maxX=" << maxX << '\n';
 
     // round up the center to the closest int
     eppMap[spectrumIndex] = roundUp(center);
@@ -262,10 +248,9 @@ std::map<int, int> ConvertEmptyToTof::findElasticPeakPositions(
  * Estimated the FWHM for Gaussian peak fitting
  *
  */
-void ConvertEmptyToTof::estimateFWHM(const Mantid::MantidVec &spec,
-                                     double &center, double &sigma,
-                                     double &height, double &minX,
-                                     double &maxX) {
+void ConvertEmptyToTof::estimateFWHM(
+    const Mantid::HistogramData::HistogramY &spec, double &center,
+    double &sigma, double &height, double &minX, double &maxX) {
 
   auto maxValueIt =
       std::max_element(spec.begin() + static_cast<size_t>(minX),
@@ -292,7 +277,7 @@ void ConvertEmptyToTof::estimateFWHM(const Mantid::MantidVec &spec,
   height = maxValue;
 
   g_log.debug() << "Peak estimate  : center=" << center << "\t sigma=" << sigma
-                << "\t h=" << height << std::endl;
+                << "\t h=" << height << '\n';
 
   // determination of the range used for the peak definition
   size_t ipeak_min = std::max(
@@ -306,7 +291,7 @@ void ConvertEmptyToTof::estimateFWHM(const Mantid::MantidVec &spec,
   size_t i_delta_peak = ipeak_max - ipeak_min;
 
   g_log.debug() << "Peak estimate xmin/max: " << ipeak_min - 1 << "\t"
-                << ipeak_max + 1 << std::endl;
+                << ipeak_max + 1 << '\n';
 
   minX = static_cast<double>(ipeak_min - 2 * i_delta_peak);
   maxX = static_cast<double>(ipeak_max + 2 * i_delta_peak);
@@ -371,7 +356,7 @@ bool ConvertEmptyToTof::doFitGaussianPeak(int workspaceindex, double &center,
   if (!fitalg->isExecuted() || !successfulfit) {
     // Early return due to bad fit
     g_log.warning() << "Fitting Gaussian peak for peak around "
-                    << gaussianpeak->centre() << std::endl;
+                    << gaussianpeak->centre() << '\n';
     return false;
   }
 
@@ -392,19 +377,19 @@ bool ConvertEmptyToTof::doFitGaussianPeak(int workspaceindex, double &center,
 std::pair<int, double>
 ConvertEmptyToTof::findAverageEppAndEpTof(const std::map<int, int> &eppMap) {
 
-  double l1 = getL1(m_inputWS);
+  double l1 = m_spectrumInfo->l1();
   double wavelength = getPropertyFromRun<double>(m_inputWS, "wavelength");
 
   std::vector<double> epTofList;
   std::vector<int> eppList;
 
-  double firstL2 = getL2(m_inputWS, eppMap.begin()->first);
+  double firstL2 = m_spectrumInfo->l2(eppMap.begin()->first);
   for (const auto &epp : eppMap) {
 
-    double l2 = getL2(m_inputWS, epp.first);
+    double l2 = m_spectrumInfo->l2(epp.first);
     if (!areEqual(l2, firstL2, 0.0001)) {
       g_log.error() << "firstL2=" << firstL2 << " , "
-                    << "l2=" << l2 << std::endl;
+                    << "l2=" << l2 << '\n';
       throw std::runtime_error("All the pixels for selected spectra must have "
                                "the same distance from the sample!");
     } else {
@@ -418,7 +403,7 @@ ConvertEmptyToTof::findAverageEppAndEpTof(const std::map<int, int> &eppMap) {
 
     g_log.debug() << "WS index = " << epp.first << ", l1 = " << l1
                   << ", l2 = " << l2
-                  << ", TOF(l1+l2) = " << *(epTofList.end() - 1) << std::endl;
+                  << ", TOF(l1+l2) = " << *(epTofList.end() - 1) << '\n';
   }
 
   double averageEpTof =
@@ -429,27 +414,8 @@ ConvertEmptyToTof::findAverageEppAndEpTof(const std::map<int, int> &eppMap) {
       static_cast<double>(eppList.size()));
 
   g_log.debug() << "Average epp=" << averageEpp
-                << " , Average epTof=" << averageEpTof << std::endl;
+                << " , Average epTof=" << averageEpTof << '\n';
   return std::make_pair(averageEpp, averageEpTof);
-}
-
-double ConvertEmptyToTof::getL1(API::MatrixWorkspace_const_sptr workspace) {
-  Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  double l1 = instrument->getSource()->getDistance(*sample);
-  return l1;
-}
-
-double ConvertEmptyToTof::getL2(API::MatrixWorkspace_const_sptr workspace,
-                                int detId) {
-  // Get a pointer to the instrument contained in the workspace
-  Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
-  // Get the distance between the source and the sample (assume in metres)
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  // Get the sample-detector distance for this detector (in metres)
-  double l2 =
-      workspace->getDetector(detId)->getPos().distance(sample->getPos());
-  return l2;
 }
 
 double ConvertEmptyToTof::calculateTOF(double distance, double wavelength) {
@@ -496,7 +462,7 @@ std::vector<double> ConvertEmptyToTof::makeTofAxis(int epp, double epTof,
   std::vector<double> axis(size);
 
   g_log.debug() << "Building the TOF X Axis: epp=" << epp << ", epTof=" << epTof
-                << ", Channel Width=" << channelWidth << std::endl;
+                << ", Channel Width=" << channelWidth << '\n';
   for (size_t i = 0; i < size; ++i) {
     axis[i] =
         epTof + channelWidth * static_cast<double>(static_cast<int>(i) - epp) -
@@ -504,7 +470,7 @@ std::vector<double> ConvertEmptyToTof::makeTofAxis(int epp, double epTof,
             2; // to make sure the bin is in the middle of the elastic peak
   }
   g_log.debug() << "TOF X Axis: [start,end] = [" << *axis.begin() << ","
-                << *(axis.end() - 1) << "]" << std::endl;
+                << *(axis.end() - 1) << "]\n";
   return axis;
 }
 
@@ -512,26 +478,21 @@ void ConvertEmptyToTof::setTofInWS(const std::vector<double> &tofAxis,
                                    API::MatrixWorkspace_sptr outputWS) {
 
   const size_t numberOfSpectra = m_inputWS->getNumberHistograms();
-  int64_t numberOfSpectraInt64 =
-      static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
   g_log.debug() << "Setting the TOF X Axis for numberOfSpectra="
-                << numberOfSpectra << std::endl;
+                << numberOfSpectra << '\n';
 
+  auto axisPtr = Kernel::make_cow<HistogramData::HistogramX>(tofAxis);
+  HistogramData::BinEdges edges(tofAxis);
   Progress prog(this, 0.0, 0.2, numberOfSpectra);
-  PARALLEL_FOR2(m_inputWS, outputWS)
-  for (int64_t i = 0; i < numberOfSpectraInt64; ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    // Just copy over
-    outputWS->dataY(i) = m_inputWS->readY(i);
-    outputWS->dataE(i) = m_inputWS->readE(i);
-    // copy
-    outputWS->setX(i, tofAxis);
+
+  for (size_t i = 0; i < numberOfSpectra; ++i) {
+    // Replace bin edges with tof axis
+    outputWS->setBinEdges(i, edges);
 
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
   } // end for i
-  PARALLEL_CHECK_INTERUPT_REGION
+
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 }
 

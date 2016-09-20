@@ -71,6 +71,8 @@ class SANSReduction(PythonAlgorithm):
                     output_str += self._load_data(data_file[i], workspace, property_manager, property_manager_name)
                     continue
                 output_str += self._load_data(data_file[i], '__tmp_wksp', property_manager, property_manager_name)
+                api.RebinToWorkspace(WorkspaceToRebin='__tmp_wksp', WorkspaceToMatch=workspace,
+                                     OutputWorkspace='__tmp_wksp')
                 api.Plus(LHSWorkspace=workspace, RHSWorkspace='__tmp_wksp', OutputWorkspace=workspace)
             if AnalysisDataService.doesExist('__tmp_wksp'):
                 AnalysisDataService.remove('__tmp_wksp')
@@ -401,7 +403,7 @@ class SANSReduction(PythonAlgorithm):
                     process_file = property_manager.getProperty("ProcessInfo").value
                     if os.path.isfile(process_file):
                         proc = open(process_file, 'r')
-                        proc_xml = proc.read()
+                        proc_xml = "<SASprocessnote>\n%s</SASprocessnote>\n" % proc.read()
                     elif len(process_file)>0 and process_file.lower().find("none") != 0:
                         Logger("SANSReduction").error("Could not read process info file %s\n" % process_file)
                 if property_manager.existsProperty("SetupAlgorithm"):
@@ -410,12 +412,12 @@ class SANSReduction(PythonAlgorithm):
                     else:
                         instrument_name = 'EQSANS'
                     setup_info = property_manager.getProperty("SetupAlgorithm").value
-                    proc_xml += "\n<Reduction>\n"
+                    proc_xml += "\n<SASprocessnote>\n<Reduction>\n"
                     proc_xml += "  <instrument_name>%s</instrument_name>\n" % instrument_name
                     proc_xml += "  <SetupInfo>%s</SetupInfo>\n" % setup_info
                     filename = self.getProperty("Filename").value
                     proc_xml += "  <Filename>%s</Filename>\n" % filename
-                    proc_xml += "</Reduction>\n"
+                    proc_xml += "</Reduction>\n</SASprocessnote>\n"
 
                 filename = os.path.join(output_dir, iq_output+'.txt')
 

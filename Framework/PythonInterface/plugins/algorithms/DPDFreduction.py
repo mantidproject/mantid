@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import os
 import numpy
 import re
@@ -26,32 +27,49 @@ class DPDFreduction(PythonAlgorithm):
     _ebins = None
 
     def category(self):
-        return "Inelastic\\Reduction;Utility\\Development"
+        return "Inelastic\\Reduction"
 
     def name(self):
         return 'DPDFreduction'
 
     def summary(self):
-        return 'Obtain S(Q,E) sliced in E'
+        return 'Calculate S(Q,E) from powder or isotropic data'
 
     def PyInit(self):
+
+        # Input parameters
+        titleInputOptions = "Input"
         self.declareProperty('RunNumbers', '', 'Sample run numbers')
+        self.setPropertyGroup("RunNumbers", titleInputOptions)
         self.declareProperty(FileProperty(name='Vanadium', defaultValue='',
                                           action=FileAction.OptionalLoad, extensions=['.nxs']),
                              'Preprocessed vanadium file.')
+        self.setPropertyGroup("Vanadium", titleInputOptions)
         self.declareProperty('EmptyCanRunNumbers', '', 'Empty can run numbers')
+        self.setPropertyGroup("EmptyCanRunNumbers", titleInputOptions)
+
+        # Configuration parameters
+        titleConfigurationOptions = "Configuration"
         self.declareProperty('EnergyBins', '1.5',
                              'Energy transfer binning scheme (in meV)',
                              direction=Direction.Input)
+        self.setPropertyGroup("EnergyBins", titleConfigurationOptions)
         self.declareProperty('MomentumTransferBins', '',
                              'Momentum transfer binning scheme (in inverse Angstroms)',
                              direction=Direction.Input)
+        self.setPropertyGroup("MomentumTransferBins", titleConfigurationOptions)
         self.declareProperty('NormalizeSlices', False,
                              'Do we normalize each slice?', direction=Direction.Input)
+        self.setPropertyGroup("NormalizeSlices", titleConfigurationOptions)
+
+        # Ouptut parameters
+        titleOuptutOptions = "Output"
         self.declareProperty('CleanWorkspaces', True,
                              'Do we clean intermediate steps?', direction=Direction.Input)
+        self.setPropertyGroup("CleanWorkspaces", titleOuptutOptions)
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', 'S_Q_E_sliced',
                                                      Direction.Output), "Output workspace")
+        self.setPropertyGroup("OutputWorkspace", titleOuptutOptions)
 
     def validateInputs(self):
         issues = dict()
@@ -110,7 +128,7 @@ class DPDFreduction(PythonAlgorithm):
         prefix = ''
         if self._clean:
             prefix = '__'
-        # Sample files
+        # "wn" denotes workspace name
         wn_data = prefix + 'data'
         wn_van = prefix + 'vanadium'
         wn_reduced = prefix + 'reduced'
@@ -131,12 +149,12 @@ class DPDFreduction(PythonAlgorithm):
             config["datasearch.searcharchive"] = "On"
 
         try:
-            # Load several event files into a sinle workspace. The nominal incident
+            # Load several event files into a single workspace. The nominal incident
             # energy should be the same to avoid difference in energy resolution
             api.Load(Filename=self._runs, OutputWorkspace=wn_data)
 
-            # Load the vanadium file, assume to be preprocessed, meaning that
-            # for every detector all events whithin a particular wide wavelength
+            # Load the vanadium file, assumed to be preprocessed, meaning that
+            # for every detector all events within a particular wide wavelength
             # range have been rebinned into a single histogram
             api.Load(Filename=self._vanfile, OutputWorkspace=wn_van)
 
@@ -156,7 +174,7 @@ class DPDFreduction(PythonAlgorithm):
             api.MaskDetectors(Workspace=wn_ec_data, MaskedWorkspace=wn_van)
 
         # Obtain incident energy as the mean of the nominal Ei values.
-        # There is one nominal value per events file.
+        # There is one nominal value for each run number.
         ws_data = api.mtd[wn_data]
         Ei = ws_data.getRun()['EnergyRequest'].getStatistics().mean
         Ei_std = ws_data.getRun()['EnergyRequest'].getStatistics().standard_deviation
@@ -169,7 +187,9 @@ class DPDFreduction(PythonAlgorithm):
                 raise RuntimeError('Empty can runs were obtained at a significant' +
                                    ' different incident energy than the sample runs')
 
-        # Obtain energy range
+        # Obtain energy range. If user did not supply a triad
+        # [Estart, Ewidth, Eend] but only Ewidth, then estimate
+        # Estart and End from the nominal energies
         self._ebins = [float(x) for x in re.compile(r'\d+[\.\d+]*').findall(self._ebins_str)]
         if len(self._ebins) == 1:
             ws_data = api.mtd[wn_data]
@@ -190,20 +210,23 @@ class DPDFreduction(PythonAlgorithm):
 
         # Convert to energy transfer. Normalize by proton charge.
         # The output workspace is S(detector-id,E)
-        factor = 0.1  # a fine energy bin
+        factor = 0.1  # use a finer energy bin than the one passed (self._ebins[1])
         Erange = '{0},{1},{2}'.format(self._ebins[0], factor * self._ebins[1], self._ebins[2])
         api.DgsReduction(SampleInputWorkspace=wn_data,
                          EnergyTransferRange=Erange, OutputWorkspace=wn_reduced)
         if self._ecruns:
             api.DgsReduction(SampleInputWorkspace=wn_ec_data,
-                             EnergyTransferRange=Erange, IncidentBeamNormalisation='ByCurrent',
+                             EnergyTransferRange=Erange,
+                             IncidentBeamNormalisation='ByCurrent',
                              OutputWorkspace=wn_ec_reduced)
 
         # Obtain maximum and minimum |Q| values, as well as dQ if none passed
         self._qbins = [float(x) for x in re.compile(r'\d+[\.\d+]*').findall(self._qbins_str)]
         if len(self._qbins) < 3:
             if not self._qbins:
-                # insert dQ if empty qbins
+                # insert dQ if empty qbins. The minimal momentum transfer
+                # is the result on an event where the initial energy was
+                # Ei and the final energy was Ei+dE.
                 dE = self._ebins[1]
                 self._qbins.append(numpy.sqrt((Ei + dE) / ENERGY_TO_WAVEVECTOR) -
                                    numpy.sqrt(Ei / ENERGY_TO_WAVEVECTOR))
@@ -212,19 +235,22 @@ class DPDFreduction(PythonAlgorithm):
             self._qbins.insert(0, mins[0])  # prepend minimum Q
             self._qbins.append(maxs[0])  # append maximum Q
 
-        # Clean up the events files. They take a lot of space in memory
+        # Delete sample and empty can event workspaces to free memory.
         api.DeleteWorkspace(wn_data)
         if self._ecruns:
             api.DeleteWorkspace(wn_ec_data)
 
         # Convert to S(theta,E)
         ki = numpy.sqrt(Ei / ENERGY_TO_WAVEVECTOR)
-        factor = 1. / 5  # a reasonable (heuristic) value
         # If dE is the smallest energy transfer considered,
         # then dQ/ki is the smallest dtheta (in radians)
-        dtheta = factor * self._qbins[1] / ki * (180.0 / numpy.pi)
-        # very small dtheta (<0.15 degrees) prevents interpolation
+        dtheta = self._qbins[1] / ki * (180.0 / numpy.pi)
+        # Use a finer dtheta that the nominal smallest value
+        factor = 1. / 5  # a reasonable (heuristic) value
+        dtheta *= factor
+        # Fix: a very small dtheta (<0.15 degrees) prevents correct interpolation
         dtheta = max(0.15, dtheta)
+        # Group detectors according to theta angle for the sample runs
         group_file_os_handle, group_file_name = mkstemp(suffix='.xml')
         group_file_handle = os.fdopen(group_file_os_handle, 'w')
         api.GenerateGroupingPowder(InputWorkspace=wn_reduced, AngleStep=dtheta,
@@ -232,10 +258,11 @@ class DPDFreduction(PythonAlgorithm):
         group_file_handle.close()
         api.GroupDetectors(InputWorkspace=wn_reduced, MapFile=group_file_name,
                            OutputWorkspace=wn_ste)
+        # Group detectors according to theta angle for the emtpy can run
         if self._ecruns:
             api.GroupDetectors(InputWorkspace=wn_ec_reduced, MapFile=group_file_name,
                                OutputWorkspace=wn_ec_ste)
-            # Substract the empty can from the can+sample
+            # Subtract the empty can from the can+sample
             api.Minus(LHSWorkspace=wn_ste, RHSWorkspace=wn_ec_ste, OutputWorkspace=wn_ste)
 
         # Normalize by the vanadium intensity, but before that we need S(theta)
@@ -250,7 +277,7 @@ class DPDFreduction(PythonAlgorithm):
         max_i_theta = 0.0
         min_i_theta = 0.0
 
-        # Linear interpolation
+        # Linear interpolation for those theta values with no intensity
         # First, find minimum theta index with a non-zero histogram
         ws_sten = api.mtd[wn_sten]
         for i_theta in range(ws_sten.getNumberHistograms()):
@@ -281,7 +308,8 @@ class DPDFreduction(PythonAlgorithm):
                 intercept = y_start
                 slope = (y_end - y_start) / (nonnull_i_theta_end - nonnull_i_theta_start)
                 for null_i_theta in range(1 + nonnull_i_theta_start, nonnull_i_theta_end):
-                    ws_steni.dataY(null_i_theta)[:] = intercept + slope * (null_i_theta - nonnull_i_theta_start)
+                    ws_steni.dataY(null_i_theta)[:] = \
+                        intercept + slope * (null_i_theta - nonnull_i_theta_start)
             i_theta += 1
 
         # Convert S(theta,E) to S(Q,E), then rebin in |Q| and E to MD workspace
@@ -298,9 +326,11 @@ class DPDFreduction(PythonAlgorithm):
         api.BinMD(InputWorkspace=wn_sqe, AxisAligned=1, AlignedDim0=Qrange,
                   AlignedDim1=deltaErange, OutputWorkspace=wn_sqeb)
 
-        # Slice the data by transforming to a Matrix2Dworkspace, with deltaE along the vertical axis
+        # Slice the data by transforming to a Matrix2Dworkspace,
+        # with deltaE along the vertical axis
         api.ConvertMDHistoToMatrixWorkspace(InputWorkspace=wn_sqeb,
-                                            Normalization='NumEventsNormalization', OutputWorkspace=wn_sqes)
+                                            Normalization='NumEventsNormalization',
+                                            OutputWorkspace=wn_sqes)
 
         # Ensure correct units
         api.mtd[wn_sqes].getAxis(0).setUnit("MomentumTransfer")
@@ -314,7 +344,7 @@ class DPDFreduction(PythonAlgorithm):
         for i in range(Eaxis.length()):
             Eaxis.setValue(i, Eaxis.getValue(i) + e_shift)
 
-        # Normalize each slice
+        # Normalize each slice, if requested
         if self._snorm:
             api.Integration(InputWorkspace=wn_sqes, OutputWorkspace=wn_sqesn)
             api.Divide(LHSWorkspace=wn_sqes, RHSWorkspace=wn_sqesn, OutputWorkspace=wn_sqes)
@@ -326,11 +356,14 @@ class DPDFreduction(PythonAlgorithm):
                 if api.mtd.doesExist(name):
                     api.DeleteWorkspace(name)
 
-        # Ouput some info
+        # Ouput some info as a Notice in the log
+        ebins = ', '.join(['{0:.2f}'.format(x) for x in self._ebins])
+        qbins = ', '.join(['{0:.2f}'.format(x) for x in self._qbins])
+        tbins = '{0:.2f} {1:.2f} {2:.2f}'.format(min_i_theta*dtheta, dtheta, max_i_theta*dtheta)
         message = '\n******  SOME OUTPUT INFORMATION ***' + \
-                  '\nEnergy bins: ' + ', '.join(['{0:.2f}'.format(x) for x in self._ebins]) + \
-                  '\nQ bins: ' + ', '.join(['{0:.2f}'.format(x) for x in self._qbins]) + \
-                  '\nTheta bins: {0:.2f} {1:.2f} {2:.2f}'.format(min_i_theta * dtheta, dtheta, max_i_theta * dtheta)
+                  '\nEnergy bins: ' + ebins + \
+                  '\nQ bins: ' + qbins + \
+                  '\nTheta bins: '+tbins
         logger.notice(message)
 
         self.setProperty("OutputWorkspace", api.mtd[wn_sqes])

@@ -5,14 +5,16 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+class HistogramE;
+}
 namespace Algorithms {
 
 class DLLExport MonitorEfficiencyCorUser : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  MonitorEfficiencyCorUser(); // : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~MonitorEfficiencyCorUser() override;
   /// Algorithm's name
   const std::string name() const override { return "MonitorEfficiencyCorUser"; }
   /// Summary of algorithms purpose
@@ -37,18 +39,15 @@ private:
 
   double calculateFormulaValue(const std::string &, double);
   std::string getValFromInstrumentDef(const std::string &);
-  void applyMonEfficiency(const size_t numberOfChannels, const MantidVec &yIn,
-                          const MantidVec &eIn, const double effVec,
-                          MantidVec &yOut, MantidVec &eOut);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr m_inputWS;
   /// The output workspace, maybe the same as the input one
   API::MatrixWorkspace_sptr m_outputWS;
   /// stores the incident energy of the neutrons
-  double m_Ei;
+  double m_Ei = 0.0;
   /// stores the total count of neutrons from the monitor
-  int m_monitorCounts;
+  int m_monitorCounts = 0;
 };
 
 } // namespace Algorithms

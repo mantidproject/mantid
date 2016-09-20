@@ -81,6 +81,54 @@ std::vector<Kernel::V3D> Group::operator*(const Kernel::V3D &vector) const {
   return result;
 }
 
+/**
+ * Returns true if the tensor is invariant under the group operations
+ *
+ * This method returns true if the supplied tensor is not changed by the
+ * group's symmetry operations. This is done by applying eq. 10 from [1],
+ *
+ *   G_i = W_i' * G * W_i
+ *
+ * where G is the tensor and W_i is the matrix of the i-th symmetry operation.
+ * If G_i == G holds for all i, the tensor is invariant with respect to the
+ * groups symmetry operations. To allow for floating point errors, a tolerance
+ * can be specified.
+ *
+ * One application of this method is to check whether a unit cell is compatible
+ * with the symmetry operations of a space group:
+ *
+ *   UnitCell cell(5, 5, 10);
+ *   SpaceGroup_const_sptr sg = SpaceGroupFactory::Instance()
+ *                                        .createSpaceGroup("F m -3 m");
+ *
+ *   // returns false:
+ *   sg->isTensorInvariant(cell.getG());
+ *
+ * This is expected, because the cell with a different length for c is not
+ * compatible with the restrictions imposed by cubic symmetry.
+ *
+ * [1] G. Rigault, Metric tensor and symmetry operations in crystallography,
+ *     http://www.iucr.org/education/pamphlets/10
+ *
+ * @param tensor :: Tensor to check.
+ * @param tolerance :: Tolerance for comparison of tensor equality.
+ * @return :: True if tensor is invariant.
+ */
+bool Group::isInvariant(const Kernel::DblMatrix &tensor,
+                        double tolerance) const {
+  auto transformTensor =
+      [](const Kernel::DblMatrix &opMatrix, const Kernel::DblMatrix &tensor) {
+        return opMatrix.Tprime() * tensor * opMatrix;
+      };
+
+  return std::all_of(m_allOperations.cbegin(), m_allOperations.cend(),
+                     [&](const SymmetryOperation &op) {
+                       return transformTensor(
+                                  convertMatrix<double>(op.matrix()), tensor)
+                           .equals(tensor, tolerance);
+                     });
+}
+
 /// Returns true if both groups contain the same set of symmetry operations.
 bool Group::operator==(const Group &other) const {
   return m_operationSet == other.m_operationSet;

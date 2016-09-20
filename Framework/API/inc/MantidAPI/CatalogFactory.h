@@ -76,19 +76,18 @@ private:
   mutable std::map<std::string, boost::shared_ptr<ICatalog>> m_createdCatalogs;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// CatalogFactoryImpl (needed for dllexport/dllimport) .
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<CatalogFactoryImpl>;
-#endif /* _WIN32 */
 /// The specialisation of the SingletonHolder class that holds the
 /// CatalogFactory
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<CatalogFactoryImpl>
-    CatalogFactory;
+typedef Mantid::Kernel::SingletonHolder<CatalogFactoryImpl> CatalogFactory;
 
 } // namespace API
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::CatalogFactoryImpl>;
+}
+}
 
 #endif /*MANTID_API_CATALOGFACTORYIMPL_H_*/

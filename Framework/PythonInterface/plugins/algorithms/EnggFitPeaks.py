@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import math
 
 from mantid.kernel import *
@@ -12,7 +13,7 @@ class EnggFitPeaks(PythonAlgorithm):
     CENTER_ERROR_LIMIT = 10
 
     def category(self):
-        return "Diffraction\\Engineering"
+        return "Diffraction\\Engineering;Diffraction\\Fitting"
 
     def name(self):
         return "EnggFitPeaks"
@@ -22,13 +23,13 @@ class EnggFitPeaks(PythonAlgorithm):
                 "by fitting one peak at a time (single peak fits).")
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
-                             "Workspace to fit peaks in. ToF is expected X unit.")
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
+                             "Workspace to fit peaks in. The X units must be time of flight (TOF).")
 
-        self.declareProperty("WorkspaceIndex", 0,\
+        self.declareProperty("WorkspaceIndex", 0,
                              "Index of the spectra to fit peaks in")
 
-        self.declareProperty(FloatArrayProperty("ExpectedPeaks", (self._get_default_peaks())),\
+        self.declareProperty(FloatArrayProperty("ExpectedPeaks", (self._get_default_peaks())),
                              "A list of dSpacing values to be translated into TOF to find expected peaks.")
 
         self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
@@ -170,7 +171,7 @@ class EnggFitPeaks(PythonAlgorithm):
 
             try:
                 param_table, chi_over_dof = self._fit_single_peak(peaks[1][i], initial_params, in_wks, wks_index)
-            except StandardError:
+            except RuntimeError:
                 self.log().warning("Problem found when trying to fit a peak centered at {0} (dSpacing), "
                                    "for which the initial guess from FindPeaks is at {1} (ToF). Single "
                                    "peak fitting failed. Skipping this peak."
@@ -273,7 +274,7 @@ class EnggFitPeaks(PythonAlgorithm):
         found_peaks = find_peaks_alg.getProperty('PeaksList').value
         return found_peaks
 
-    def _expected_peaks_in_ToF(self, expectedPeaks, in_wks, wks_index):
+    def _expected_peaks_in_ToF(self, expected_peaks, in_wks, wks_index):
         """
         Converts expected peak dSpacing values to TOF values for the
         detector. Implemented by using the Mantid algorithm ConvertUnits. A
@@ -282,15 +283,15 @@ class EnggFitPeaks(PythonAlgorithm):
 
         import mantid.simpleapi as sapi
 
-        yVals = [1] * (len(expectedPeaks) - 1)
-        ws_from = sapi.CreateWorkspace(UnitX='dSpacing', DataX=expectedPeaks, DataY=yVals,
+        yVals = [1] * (len(expected_peaks) - 1)
+        ws_from = sapi.CreateWorkspace(UnitX='dSpacing', DataX=expected_peaks, DataY=yVals,
                                       ParentWorkspace=in_wks)
         target_units = 'TOF'
         wsTo = sapi.ConvertUnits(InputWorkspace=ws_from, Target=target_units)
         peaks_ToF = wsTo.dataX(0)
         values = [peaks_ToF[i] for i in range(0,len(peaks_ToF))]
 
-        @param expectedPeaks :: vector of expected peaks, in dSpacing units
+        @param expected_peaks :: vector of expected peaks, in dSpacing units
         @param in_wks :: input workspace with the relevant instrument/geometry
         @param wks_index workspace index
 
@@ -298,6 +299,22 @@ class EnggFitPeaks(PythonAlgorithm):
             a vector of ToF values converted from the input (dSpacing) vector.
 
         """
+
+        # This and the next exception, below, still need revisiting:
+        # https://github.com/mantidproject/mantid/issues/12930
+        run = in_wks.getRun()
+        if 1 == in_wks.getNumberHistograms() and run.hasProperty('difc'):
+            difc = run.getLogData('difc').value
+            if run.hasProperty('difa'):
+                _difa = run.getLogData('difa').value
+            else:
+                _difa = 0
+            if run.hasProperty('tzero'):
+                tzero = run.getLogData('tzero').value
+            else:
+                tzero = 0
+            # If the log difc is present, then use these GSAS calibration parameters from the logs
+            return [(epd * difc + tzero) for epd in expected_peaks]
 
         # When receiving a (for example) focussed workspace we still do not know how
         # to properly deal with it. CreateWorkspace won't copy the instrument sample
@@ -307,7 +324,7 @@ class EnggFitPeaks(PythonAlgorithm):
         # "Unable to calculate sample-detector distance for 1 spectra. Masking spectrum"
         # and silently produce a wrong output workspace. That might need revisiting.
         if 1 == in_wks.getNumberHistograms():
-            return self._do_approx_hard_coded_convert_units_to_ToF(expectedPeaks, in_wks, wks_index)
+            return self._do_approx_hard_coded_convert_units_to_ToF(expected_peaks, in_wks, wks_index)
 
         # Create workspace just to convert dSpacing -> ToF, yVals are irrelevant
         # this used to be calculated with:
@@ -315,12 +332,12 @@ class EnggFitPeaks(PythonAlgorithm):
         # which is approximately what ConverUnits will do
         # remember the -1, we must produce a histogram data workspace, which is what
         # for example EnggCalibrate expects
-        yVals = [1] * (len(expectedPeaks) - 1)
-        # Do like: ws_from = sapi.CreateWorkspace(UnitX='dSpacing', DataX=expectedPeaks, DataY=yVals,
-        #                                        ParentWorkspace=self.getProperty("InputWorkspace").value)
+        yVals = [1] * (len(expected_peaks) - 1)
+        # Do like: ws_from = sapi.CreateWorkspace(UnitX='dSpacing', DataX=expected_peaks, DataY=yVals,
+        #                                         ParentWorkspace=self.getProperty("InputWorkspace").value)
         create_alg = self.createChildAlgorithm("CreateWorkspace")
         create_alg.setProperty("UnitX", 'dSpacing')
-        create_alg.setProperty("DataX", expectedPeaks)
+        create_alg.setProperty("DataX", expected_peaks)
         create_alg.setProperty("DataY", yVals)
         create_alg.setProperty("ParentWorkspace", in_wks)
         create_alg.execute()
@@ -337,20 +354,20 @@ class EnggFitPeaks(PythonAlgorithm):
 
         if not goodExec:
             raise RuntimeError("Conversion of units went wrong. Failed to run ConvertUnits for {0} "
-                               "peaks. Details: {1}".format(len(expectedPeaks), expectedPeaks))
+                               "peaks. Details: {1}".format(len(expected_peaks), expected_peaks))
 
         wsTo = conv_alg.getProperty('OutputWorkspace').value
         peaks_ToF = wsTo.readX(0)
-        if len(peaks_ToF) != len(expectedPeaks):
+        if len(peaks_ToF) != len(expected_peaks):
             raise RuntimeError("Conversion of units went wrong. Converted {0} peaks from the "
                                "original list of {1} peaks. The instrument definition might be "
                                "incomplete for the original workspace / file.".
-                               format(len(peaks_ToF), len(expectedPeaks)))
+                               format(len(peaks_ToF), len(expected_peaks)))
 
         tof_values = [peaks_ToF[i] for i in range(0,len(peaks_ToF))]
         # catch potential failures because of geometry issues, etc.
-        if tof_values == expectedPeaks:
-            vals = self._do_approx_hard_coded_convert_units_to_ToF(expectedPeaks, in_wks, wks_index)
+        if tof_values == expected_peaks:
+            vals = self._do_approx_hard_coded_convert_units_to_ToF(expected_peaks, in_wks, wks_index)
             return vals
 
         return tof_values

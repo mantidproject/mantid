@@ -11,8 +11,7 @@
  *
  * For use with the SliceViewer.
  */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER SnapToGridDialog : public QDialog
-{
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER SnapToGridDialog : public QDialog {
   Q_OBJECT
 
 public:

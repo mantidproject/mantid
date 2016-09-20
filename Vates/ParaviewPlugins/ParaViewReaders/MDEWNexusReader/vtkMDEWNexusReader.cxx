@@ -30,14 +30,13 @@ using Mantid::Geometry::IMDDimension_sptr;
 using Mantid::Geometry::IMDDimension_sptr;
 
 vtkMDEWNexusReader::vtkMDEWNexusReader()
-    : m_loadInMemory(false), m_depth(1), m_time(0),
-      m_normalization(NoNormalization) {
-  this->FileName = NULL;
+    : FileName{nullptr}, m_loadInMemory{false}, m_depth{1}, m_time{0},
+      m_normalization{NoNormalization} {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
 }
 
-vtkMDEWNexusReader::~vtkMDEWNexusReader() { this->SetFileName(0); }
+vtkMDEWNexusReader::~vtkMDEWNexusReader() { this->SetFileName(nullptr); }
 
 void vtkMDEWNexusReader::SetDepth(int depth) {
   size_t temp = depth;
@@ -69,14 +68,14 @@ void vtkMDEWNexusReader::SetInMemory(bool inMemory) {
   themeselves.
   @return geometry xml const * char reference.
 */
-const char *vtkMDEWNexusReader::GetInputGeometryXML() {
+std::string vtkMDEWNexusReader::GetInputGeometryXML() {
   if (m_presenter == nullptr) {
-    return "";
+    return std::string();
   }
   try {
-    return m_presenter->getGeometryXML().c_str();
+    return m_presenter->getGeometryXML();
   } catch (std::runtime_error &) {
-    return "";
+    return std::string();
   }
 }
 
@@ -206,8 +205,7 @@ void vtkMDEWNexusReader::setTimeRange(vtkInformationVector *outputVector) {
 /*
 Getter for the workspace type name.
 */
-char *vtkMDEWNexusReader::GetWorkspaceTypeName() {
+std::string vtkMDEWNexusReader::GetWorkspaceTypeName() {
   // Forward request on to MVP presenter
-  typeName = m_presenter->getWorkspaceTypeName();
-  return const_cast<char *>(typeName.c_str());
+  return m_presenter->getWorkspaceTypeName();
 }

@@ -35,33 +35,28 @@
                  <http://doxygen.mantidproject.org>
  */
 
-namespace MantidQt
-{
-namespace SpectrumView
-{
+namespace MantidQt {
+namespace SpectrumView {
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER EModeHandler
-{
-  public:
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER EModeHandler {
+public:
+  /// Construct object to manage E Mode controls in the UI
+  EModeHandler(Ui_SpectrumViewer *sv_ui);
 
-    /// Construct object to manage E Mode controls in the UI
-    EModeHandler( Ui_SpectrumViewer* sv_ui );
+  /// Get the E Mode to control units calculation, from the combo box
+  int getEMode();
 
-    /// Get the E Mode to control units calculation, from the combo box
-    int getEMode();
+  /// Set the E Mode to control units calculation, in the combo box
+  void setEMode(const int mode);
 
-    /// Set the E Mode to control units calculation, in the combo box
-    void setEMode( const int mode );
+  /// Get the E Fixed value from the GUI
+  double getEFixed();
 
-    /// Get the E Fixed value from the GUI
-    double getEFixed();
+  /// Set the E Fixed value in the GUI
+  void setEFixed(const double efixed);
 
-    /// Set the E Fixed value in the GUI
-    void setEFixed( const double efixed );
-
-  private:
-    Ui_SpectrumViewer* m_svUI;
-
+private:
+  Ui_SpectrumViewer *m_svUI;
 };
 
 } // namespace SpectrumView

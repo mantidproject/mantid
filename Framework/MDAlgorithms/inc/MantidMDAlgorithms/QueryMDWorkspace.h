@@ -36,9 +36,6 @@ namespace MDAlgorithms {
 */
 class DLLExport QueryMDWorkspace : public Mantid::API::Algorithm {
 public:
-  QueryMDWorkspace();
-  ~QueryMDWorkspace() override;
-
   /// Algorithm's name for identification
   const std::string name() const override { return "QueryMDWorkspace"; }
   /// Summary of algorithms purpose

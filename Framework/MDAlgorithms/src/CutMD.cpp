@@ -156,8 +156,7 @@ calculateSteps(const std::vector<MinMax> &inExtents,
       outExtents[i].first = dimMin;
 
     } else {
-      throw std::runtime_error("Cannot handle " +
-                               boost::lexical_cast<std::string>(nArgs) +
+      throw std::runtime_error("Cannot handle " + std::to_string(nArgs) +
                                " bins.");
     }
     if (outBin < 0)
@@ -218,7 +217,7 @@ std::vector<std::string> findOriginalQUnits(IMDWorkspace_const_sptr inws,
     unitMarkers[i] = unitMarker;
     logger.debug() << "In dimension with index " << i << " and units "
                    << units.ascii() << " taken to be of type " << unitMarker
-                   << std::endl;
+                   << '\n';
   }
   return unitMarkers;
 }
@@ -231,16 +230,6 @@ const std::string CutMD::RLUSymbol = "r";
 const std::string CutMD::AutoMethod = "Auto";
 const std::string CutMD::RLUMethod = "RLU";
 const std::string CutMD::InvAngstromMethod = "Q in A^-1";
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CutMD::CutMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CutMD::~CutMD() {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -340,14 +329,14 @@ void CutMD::exec() {
     for (size_t i = 0; i < 5; ++i) {
       if (i < numDims && pbins[i].empty())
         throw std::runtime_error(
-            "P" + boost::lexical_cast<std::string>(i + 1) +
+            "P" + std::to_string(i + 1) +
             "Bin must be set when processing a workspace with " +
-            boost::lexical_cast<std::string>(numDims) + " dimensions.");
+            std::to_string(numDims) + " dimensions.");
       if (i >= numDims && !pbins[i].empty())
         throw std::runtime_error(
-            "P" + boost::lexical_cast<std::string>(i + 1) +
+            "P" + std::to_string(i + 1) +
             "Bin must NOT be set when processing a workspace with " +
-            boost::lexical_cast<std::string>(numDims) + " dimensions.");
+            std::to_string(numDims) + " dimensions.");
     }
 
     // Get extents in projection
@@ -456,8 +445,7 @@ void CutMD::exec() {
       }
 
       const std::string value = label + ", " + unit + ", " + vecStr;
-      cutAlg->setProperty("BasisVector" + boost::lexical_cast<std::string>(i),
-                          value);
+      cutAlg->setProperty("BasisVector" + std::to_string(i), value);
     }
 
     // Translate extents into a single vector

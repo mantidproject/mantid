@@ -35,9 +35,6 @@ namespace DataHandling {
 */
 class DLLExport LoadSpiceAscii : public API::Algorithm {
 public:
-  LoadSpiceAscii();
-  ~LoadSpiceAscii() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

@@ -18,16 +18,6 @@ namespace WorkflowAlgorithms {
 DECLARE_ALGORITHM(DgsAbsoluteUnitsReduction)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsAbsoluteUnitsReduction::DgsAbsoluteUnitsReduction() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsAbsoluteUnitsReduction::~DgsAbsoluteUnitsReduction() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsAbsoluteUnitsReduction::name() const {
   return "DgsAbsoluteUnitsReduction";
@@ -88,7 +78,7 @@ void DgsAbsoluteUnitsReduction::init() {
 /** Execute the algorithm.
  */
 void DgsAbsoluteUnitsReduction::exec() {
-  g_log.notice() << "Starting DgsAbsoluteUnitsReduction" << std::endl;
+  g_log.notice() << "Starting DgsAbsoluteUnitsReduction\n";
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");

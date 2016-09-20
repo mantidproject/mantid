@@ -45,9 +45,9 @@ public:
     const int monitorIndex = 0;
 
     specnum_t specId1 =
-        toConvert->getSpectrum(workspaceIndexToKeep1)->getSpectrumNo();
+        toConvert->getSpectrum(workspaceIndexToKeep1).getSpectrumNo();
     specnum_t monitorSpecId =
-        toConvert->getSpectrum(monitorIndex)->getSpectrumNo();
+        toConvert->getSpectrum(monitorIndex).getSpectrumNo();
 
     // Define one spectra to keep
     detectorIndexRange.push_back(static_cast<int>(workspaceIndexToKeep1));
@@ -58,7 +58,6 @@ public:
     // Define a wavelength range for the detector workspace
     const double wavelengthMin = 1.0;
     const double wavelengthMax = 15;
-    const double wavelengthStep = 0.05;
     const double backgroundWavelengthMin = 17;
     const double backgroundWavelengthMax = 20;
 
@@ -69,8 +68,7 @@ public:
         alg.toLam(toConvert, detectorIndexRangesStr, monitorIndex,
                   boost::tuple<double, double>(wavelengthMin, wavelengthMax),
                   boost::tuple<double, double>(backgroundWavelengthMin,
-                                               backgroundWavelengthMax),
-                  wavelengthStep);
+                                               backgroundWavelengthMax));
 
     // Unpack the results
     MatrixWorkspace_sptr detectorWS = inLam.get<0>();
@@ -119,6 +117,7 @@ public:
     alg->setProperty("MonitorBackgroundWavelengthMax", 2.0);
     alg->setProperty("MonitorIntegrationWavelengthMin", 1.2);
     alg->setProperty("MonitorIntegrationWavelengthMax", 1.5);
+    alg->setProperty("MomentumTransferStep", 0.1);
     alg->setPropertyValue("ProcessingInstructions", "1");
     alg->setPropertyValue("OutputWorkspace", "x");
     alg->setPropertyValue("OutputWorkspaceWavelength", "y");
@@ -176,7 +175,7 @@ public:
     // set the instrument to this workspace
     m_tinyReflWS->setInstrument(instrument);
     // set this detector ready for processing instructions
-    m_tinyReflWS->getSpectrum(0)->setDetectorID(det->getID());
+    m_tinyReflWS->getSpectrum(0).setDetectorID(det->getID());
 
     auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne");
     alg->setRethrows(true);
@@ -185,12 +184,12 @@ public:
     alg->setProperty("InputWorkspace", m_tinyReflWS);
     alg->setProperty("WavelengthMin", 1.0);
     alg->setProperty("WavelengthMax", 15.0);
-    alg->setProperty("WavelengthStep", 0.1);
     alg->setProperty("I0MonitorIndex", 0);
     alg->setProperty("MonitorBackgroundWavelengthMin", 0.0);
     alg->setProperty("MonitorBackgroundWavelengthMax", 0.0);
     alg->setProperty("MonitorIntegrationWavelengthMin", 0.0);
     alg->setProperty("MonitorIntegrationWavelengthMax", 0.0);
+    alg->setProperty("MomentumTransferStep", 0.1);
     alg->setProperty("NormalizeByIntegratedMonitors", false);
     alg->setProperty("CorrectDetectorPositions", true);
     alg->setProperty("CorrectionAlgorithm", "None");
@@ -200,10 +199,6 @@ public:
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     MatrixWorkspace_sptr outLam = alg->getProperty("OutputWorkspaceWavelength");
-    alg->setProperty("InputWorkspace", outLam);
-    alg->setProperty("OutputWorkspace", "IvsQ");
-    alg->setProperty("OutputWorkspaceWavelength", "IvsLam");
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
     MatrixWorkspace_sptr outQ = alg->getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(m_tinyReflWS->getInstrument()->getSource()->getPos(),
@@ -211,7 +206,107 @@ public:
     TS_ASSERT_EQUALS(outLam->getInstrument()->getSource()->getPos(),
                      outQ->getInstrument()->getSource()->getPos());
   }
-
+  void test_post_processing_scale_step() {
+    auto alg = construct_standard_algorithm();
+    auto inWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
+            2.0);
+    inWS->getAxis(0)->setUnit("Wavelength");
+    alg->setProperty("InputWorkspace", inWS);
+    alg->setProperty("ScaleFactor", 1.0);
+    alg->setProperty("ThetaIn", 1.5);
+    alg->setProperty("OutputWorkspace", "Test");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    MatrixWorkspace_sptr nonScaledWS = alg->getProperty("OutputWorkspace");
+    alg->setProperty("InputWorkspace", inWS);
+    alg->setProperty("ScaleFactor", 0.5);
+    alg->setProperty("OutputWorkspace", "scaledTest");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    MatrixWorkspace_sptr scaledWS = alg->getProperty("OutputWorkspace");
+    // compare y data instead of workspaces.
+    auto scaledYData = scaledWS->readY(0);
+    auto nonScaledYData = nonScaledWS->readY(0);
+    TS_ASSERT_EQUALS(scaledYData.front(), 2 * nonScaledYData.front());
+    TS_ASSERT_EQUALS(scaledYData[scaledYData.size() / 2],
+                     2 * nonScaledYData[nonScaledYData.size() / 2]);
+    TS_ASSERT_EQUALS(scaledYData.back(), 2 * nonScaledYData.back());
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove("Test");
+    AnalysisDataService::Instance().remove("scaledTest");
+  }
+  void test_post_processing_rebin_step_with_params_not_provided() {
+    auto alg = construct_standard_algorithm();
+    auto inWS = Create2DWorkspace154(1, 10, true);
+    // this instrument does not have a "slit-gap" property
+    // defined in the IPF, so CalculateResolution should throw.
+    inWS->setInstrument(m_tinyReflWS->getInstrument());
+    inWS->getAxis(0)->setUnit("Wavelength");
+    // Setup bad bin edges, Rebin will throw (not CalculateResolution?)
+    inWS->dataX(0).assign(inWS->readX(0).size(), inWS->readX(0)[0]);
+    alg->setProperty("InputWorkspace", inWS);
+    alg->setProperty("OutputWorkspace", "rebinnedWS");
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+  }
+  void test_post_processing_rebin_step_with_partial_params_provided() {
+    auto alg = construct_standard_algorithm();
+    auto inWS = Create2DWorkspace154(1, 10, true);
+    inWS->setInstrument(m_tinyReflWS->getInstrument());
+    inWS->getAxis(0)->setUnit("Wavelength");
+    alg->setProperty("InputWorkspace", inWS);
+    alg->setProperty("MomentumTransferMaximum", 15.0);
+    alg->setProperty("OutputWorkspace", "rebinnedWS");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    MatrixWorkspace_sptr rebinnedIvsQWS = alg->getProperty("OutputWorkspace");
+    auto xData = rebinnedIvsQWS->readX(0);
+    // based off the equation for logarithmic binning X(i+1)=X(i)(1+|dX|)
+    double binWidthFromLogarithmicEquation = fabs((xData[1] / xData[0]) - 1);
+    TSM_ASSERT_DELTA("DQQ should be the same as abs(x[1]/x[0] - 1)",
+                     binWidthFromLogarithmicEquation, 0.1, 1e-06);
+    TSM_ASSERT_DELTA("Qmax should be the same as last Params entry (5.0)",
+                     xData.back(), 15.0, 1e-06);
+  }
+  void test_post_processing_rebin_step_with_logarithmic_rebinning() {
+    auto alg = construct_standard_algorithm();
+    auto inWS = Create2DWorkspace154(1, 10, true);
+    inWS->setInstrument(m_tinyReflWS->getInstrument());
+    inWS->getAxis(0)->setUnit("Wavelength");
+    alg->setProperty("InputWorkspace", inWS);
+    alg->setProperty("MomentumTransferMinimum", 1.0);
+    alg->setProperty("MomentumTransferStep", 0.2);
+    alg->setProperty("MomentumTransferMaximum", 5.0);
+    alg->setProperty("OutputWorkspace", "rebinnedWS");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    MatrixWorkspace_sptr rebinnedIvsQWS = alg->getProperty("OutputWorkspace");
+    auto xData = rebinnedIvsQWS->readX(0);
+    TSM_ASSERT_EQUALS("QMin should be the same as first Param entry (1.0)",
+                      xData[0], 1.0);
+    // based off the equation for logarithmic binning X(i+1)=X(i)(1+|dX|)
+    double binWidthFromLogarithmicEquation = fabs((xData[1] / xData[0]) - 1);
+    TSM_ASSERT_DELTA("DQQ should be the same as abs(x[1]/x[0] - 1)",
+                     binWidthFromLogarithmicEquation, 0.2, 1e-06);
+    TSM_ASSERT_EQUALS("QMax should be the same as last Param entry",
+                      xData.back(), 5.0);
+  }
+  void test_post_processing_rebin_step_with_linear_rebinning() {
+    auto alg = construct_standard_algorithm();
+    auto inWS = Create2DWorkspace154(1, 10, true);
+    inWS->setInstrument(m_tinyReflWS->getInstrument());
+    inWS->getAxis(0)->setUnit("Wavelength");
+    alg->setProperty("InputWorkspace", inWS);
+    alg->setProperty("MomentumTransferMinimum", 1.577);
+    alg->setProperty("MomentumTransferStep", -0.2);
+    alg->setProperty("MomentumTransferMaximum", 5.233);
+    alg->setProperty("OutputWorkspace", "rebinnedWS");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    MatrixWorkspace_sptr rebinnedIvsQWS = alg->getProperty("OutputWorkspace");
+    auto xData = rebinnedIvsQWS->readX(0);
+    TSM_ASSERT_DELTA("QMin should be the same as the first Param entry (1.577)",
+                     xData[0], 1.577, 1e-06);
+    TSM_ASSERT_DELTA("DQQ should the same as 0.2", xData[1] - xData[0], 0.2,
+                     1e-06);
+    TSM_ASSERT_DELTA("QMax should be the same as the last Param entry (5.233)",
+                     xData.back(), 5.233, 1e-06);
+  }
   void test_Qrange() {
     // set up the axis for the instrument
     Instrument_sptr instrument = boost::make_shared<Instrument>();
@@ -239,7 +334,7 @@ public:
     // set the instrument to this workspace
     m_tinyReflWS->setInstrument(instrument);
     // set this detector ready for processing instructions
-    m_tinyReflWS->getSpectrum(0)->setDetectorID(det->getID());
+    m_tinyReflWS->getSpectrum(0).setDetectorID(det->getID());
 
     auto alg = AlgorithmManager::Instance().create("ReflectometryReductionOne");
     alg->setRethrows(true);
@@ -248,12 +343,12 @@ public:
     alg->setProperty("InputWorkspace", m_tinyReflWS);
     alg->setProperty("WavelengthMin", 1.0);
     alg->setProperty("WavelengthMax", 15.0);
-    alg->setProperty("WavelengthStep", 0.1);
     alg->setProperty("I0MonitorIndex", 0);
     alg->setProperty("MonitorBackgroundWavelengthMin", 0.0);
     alg->setProperty("MonitorBackgroundWavelengthMax", 0.0);
     alg->setProperty("MonitorIntegrationWavelengthMin", 0.0);
     alg->setProperty("MonitorIntegrationWavelengthMax", 0.0);
+    alg->setProperty("MomentumTransferStep", 0.1);
     alg->setProperty("NormalizeByIntegratedMonitors", false);
     alg->setProperty("CorrectDetectorPositions", true);
     alg->setProperty("CorrectionAlgorithm", "None");

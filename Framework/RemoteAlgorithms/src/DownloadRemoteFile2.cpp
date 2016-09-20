@@ -58,8 +58,7 @@ void DownloadRemoteFile2::exec() {
   const std::string local = getPropertyValue("LocalFileName");
   jobManager->downloadRemoteFile(tid, remote, local);
 
-  g_log.information() << "Downloaded '" << remote << "' to '" << local << "'"
-                      << std::endl;
+  g_log.information() << "Downloaded '" << remote << "' to '" << local << "'\n";
 }
 
 } // end namespace RemoteAlgorithms

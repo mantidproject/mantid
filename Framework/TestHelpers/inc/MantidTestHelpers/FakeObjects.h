@@ -40,40 +40,41 @@ using namespace Mantid;
 /** Helper class that implements ISpectrum */
 class SpectrumTester : public ISpectrum {
 public:
-  SpectrumTester() : ISpectrum() {}
-  SpectrumTester(const specnum_t specNo) : ISpectrum(specNo) {}
-
-  void setData(const MantidVec &Y) override { data = Y; }
-  void setData(const MantidVec &Y, const MantidVec &E) override {
-    data = Y;
-    data_E = E;
+  SpectrumTester(HistogramData::Histogram::XMode xmode,
+                 HistogramData::Histogram::YMode ymode)
+      : ISpectrum(), m_histogram(xmode, ymode) {
+    m_histogram.setCounts(0);
+    m_histogram.setCountStandardDeviations(0);
+  }
+  SpectrumTester(const specnum_t specNo, HistogramData::Histogram::XMode xmode,
+                 HistogramData::Histogram::YMode ymode)
+      : ISpectrum(specNo), m_histogram(xmode, ymode) {
+    m_histogram.setCounts(0);
+    m_histogram.setCountStandardDeviations(0);
   }
 
-  void setData(const MantidVecPtr &Y) override {
-    data.assign(Y->begin(), Y->end());
+  void setX(const cow_ptr<HistogramData::HistogramX> &X) override {
+    m_histogram.setX(X);
   }
-  void setData(const MantidVecPtr &Y, const MantidVecPtr &E) override {
-    data.assign(Y->begin(), Y->end());
-    data_E.assign(E->begin(), E->end());
-  }
-
-  void setData(const MantidVecPtr::ptr_type &Y) override {
-    data.assign(Y->begin(), Y->end());
-  }
-  void setData(const MantidVecPtr::ptr_type &Y,
-               const MantidVecPtr::ptr_type &E) override {
-    data.assign(Y->begin(), Y->end());
-    data_E.assign(E->begin(), E->end());
+  MantidVec &dataX() override { return m_histogram.dataX(); }
+  const MantidVec &dataX() const override { return m_histogram.dataX(); }
+  const MantidVec &readX() const override { return m_histogram.readX(); }
+  cow_ptr<HistogramData::HistogramX> ptrX() const override {
+    return m_histogram.ptrX();
   }
 
-  MantidVec &dataY() override { return data; }
-  MantidVec &dataE() override { return data_E; }
+  MantidVec &dataDx() override { return m_histogram.dataDx(); }
+  const MantidVec &dataDx() const override { return m_histogram.dataDx(); }
+  const MantidVec &readDx() const override { return m_histogram.readDx(); }
 
-  const MantidVec &dataY() const override { return data; }
-  const MantidVec &dataE() const override { return data_E; }
+  MantidVec &dataY() override { return m_histogram.dataY(); }
+  MantidVec &dataE() override { return m_histogram.dataE(); }
+
+  const MantidVec &dataY() const override { return m_histogram.dataY(); }
+  const MantidVec &dataE() const override { return m_histogram.dataE(); }
 
   size_t getMemorySize() const override {
-    return data.size() * sizeof(double) * 2;
+    return readY().size() * sizeof(double) * 2;
   }
 
   /// Mask the spectrum to this value
@@ -86,8 +87,15 @@ public:
   }
 
 protected:
-  MantidVec data;
-  MantidVec data_E;
+  HistogramData::Histogram m_histogram;
+
+private:
+  const HistogramData::Histogram &histogramRef() const override {
+    return m_histogram;
+  }
+  HistogramData::Histogram &mutableHistogramRef() override {
+    return m_histogram;
+  }
 };
 
 //===================================================================================================================
@@ -103,7 +111,8 @@ public:
   const std::string id() const override { return "WorkspaceTester"; }
   void init(const size_t &numspec, const size_t &j, const size_t &k) override {
     spec = numspec;
-    vec.resize(spec);
+    vec.resize(spec, SpectrumTester(HistogramData::getHistogramXMode(j, k),
+                                    HistogramData::Histogram::YMode::Counts));
     for (size_t i = 0; i < spec; i++) {
       vec[i].dataX().resize(j, 1.0);
       vec[i].dataY().resize(k, 1.0);
@@ -121,10 +130,9 @@ public:
   size_t blocksize() const override {
     return vec.empty() ? 0 : vec[0].dataY().size();
   }
-  ISpectrum *getSpectrum(const size_t index) override { return &vec[index]; }
-  const ISpectrum *getSpectrum(const size_t index) const override {
-    return &vec[index];
-    ;
+  ISpectrum &getSpectrum(const size_t index) override { return vec[index]; }
+  const ISpectrum &getSpectrum(const size_t index) const override {
+    return vec[index];
   }
   void generateHistogram(const std::size_t, const MantidVec &, MantidVec &,
                          MantidVec &, bool) const override {}

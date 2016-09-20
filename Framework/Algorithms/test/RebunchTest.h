@@ -3,15 +3,23 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/Rebunch.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
+#include <numeric>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountVariances;
+using Mantid::HistogramData::LinearGenerator;
 
 class RebunchTest : public CxxTest::TestSuite {
 public:
@@ -80,7 +88,7 @@ public:
 
   void testworkspace2D_dist() {
     Workspace2D_sptr test_in2D = Create2DWorkspaceHist(50, 20);
-    test_in2D->isDistribution(true);
+    test_in2D->setDistribution(true);
     AnalysisDataService::Instance().add("test_in2D", test_in2D);
 
     Rebunch rebunch;
@@ -176,62 +184,52 @@ private:
   }
 
   Workspace2D_sptr Create2DWorkspaceHist(int xlen, int ylen) {
-    boost::shared_ptr<Mantid::MantidVec> x1 =
-        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> y1(
-        new Mantid::MantidVec(xlen - 1, 0.0));
-    boost::shared_ptr<Mantid::MantidVec> e1(
-        new Mantid::MantidVec(xlen - 1, 0.0));
-    boost::shared_ptr<Mantid::MantidVec> e2(
-        new Mantid::MantidVec(xlen - 1, 0.0));
+    BinEdges x1(xlen, LinearGenerator(0.0, 1.0));
 
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen, xlen, xlen - 1);
     double j = 1.0;
 
-    for (int i = 0; i < xlen; i++) {
-      (*x1)[i] = j * 0.5;
+    for (auto &x : x1) {
+      x = j * 0.5;
       j += 1.5;
     }
-    j = 1.0;
-    for (int i = 0; i < xlen - 1; i++) {
-      (*y1)[i] = j;
-      (*e1)[i] = sqrt(j);
-      j += 1;
-    }
+
+    Counts y1(xlen - 1);
+    CountVariances e1(xlen - 1);
+    std::iota(y1.begin(), y1.end(), 1.0);
+    std::iota(e1.begin(), e1.end(), 1.0);
 
     for (int i = 0; i < ylen; i++) {
-      retVal->setX(i, x1);
-      retVal->setData(i, y1, e1);
+      retVal->setBinEdges(i, x1);
+      retVal->setCounts(i, y1);
+      retVal->setCountVariances(i, e1);
     }
 
     return retVal;
   }
 
   Workspace2D_sptr Create2DWorkspacePnt(int xlen, int ylen) {
-    boost::shared_ptr<Mantid::MantidVec> x1 =
-        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> y1 =
-        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> e1 =
-        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
-    boost::shared_ptr<Mantid::MantidVec> e2 =
-        boost::make_shared<Mantid::MantidVec>(xlen, 0.0);
+    Points x1(xlen, LinearGenerator(0.0, 1.0));
 
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen, xlen, xlen);
     double j = 1.0;
 
-    for (int i = 0; i < xlen; i++) {
-      (*x1)[i] = j * 0.5;
-      (*y1)[i] = j;
-      (*e1)[i] = sqrt(j);
+    for (auto &x : x1) {
+      x = j * 0.5;
       j += 1.5;
     }
 
+    Counts y1(xlen);
+    std::iota(y1.begin(), y1.end(), 0.0);
+    y1 = 1.5 * y1 + 1.0;
+    CountVariances e1(y1.begin(), y1.end());
+
     for (int i = 0; i < ylen; i++) {
-      retVal->setX(i, x1);
-      retVal->setData(i, y1, e1);
+      retVal->setPoints(i, x1);
+      retVal->setCounts(i, y1);
+      retVal->setCountVariances(i, e1);
     }
 
     return retVal;

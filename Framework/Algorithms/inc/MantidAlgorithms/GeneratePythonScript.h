@@ -44,9 +44,6 @@ namespace Algorithms {
 */
 class DLLExport GeneratePythonScript : public API::Algorithm {
 public:
-  GeneratePythonScript() : Mantid::API::Algorithm() {}
-  ~GeneratePythonScript() override {}
-
   /// Algorithm's name for identification
   const std::string name() const override { return "GeneratePythonScript"; };
   /// Summary of algorithms purpose

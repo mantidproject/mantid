@@ -11,16 +11,6 @@ namespace MDAlgorithms {
 DECLARE_ALGORITHM(NotMD)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-NotMD::NotMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-NotMD::~NotMD() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string NotMD::name() const { return "NotMD"; }
 

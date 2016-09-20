@@ -39,7 +39,6 @@ class ChopperConfiguration;
 class DLLExport SaveGSASInstrumentFile : public API::Algorithm {
 public:
   SaveGSASInstrumentFile();
-  ~SaveGSASInstrumentFile() override;
   /// Algorithm's name
   const std::string name() const override { return "SaveGSASInstrumentFile"; }
   /// Summary of algorithms purpose

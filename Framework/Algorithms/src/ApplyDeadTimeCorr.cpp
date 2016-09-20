@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ApplyDeadTimeCorr.h"
+#include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -29,7 +30,8 @@ DECLARE_ALGORITHM(ApplyDeadTimeCorr)
 void ApplyDeadTimeCorr::init() {
 
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
-                      "InputWorkspace", "", Direction::Input),
+                      "InputWorkspace", "", Direction::Input,
+                      boost::make_shared<EqualBinSizesValidator>(0.5)),
                   "The name of the input workspace containing measured counts");
 
   declareProperty(make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
@@ -76,7 +78,7 @@ void ApplyDeadTimeCorr::exec() {
           boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
       // Presumed to be the same for all data
-      double timeBinWidth(inputWs->dataX(0)[1] - inputWs->dataX(0)[0]);
+      double timeBinWidth(inputWs->x(0)[1] - inputWs->x(0)[0]);
 
       if (timeBinWidth != 0) {
         try {
@@ -90,14 +92,14 @@ void ApplyDeadTimeCorr::exec() {
             for (size_t j = 0; j < inputWs->blocksize(); ++j) {
               double temp(
                   1 -
-                  inputWs->dataY(index)[j] *
+                  inputWs->y(index)[j] *
                       (deadTimeRow.Double(1) / (timeBinWidth * numGoodFrames)));
               if (temp != 0) {
-                outputWs->dataY(index)[j] = inputWs->dataY(index)[j] / temp;
+                outputWs->mutableY(index)[j] = inputWs->y(index)[j] / temp;
               } else {
                 g_log.error() << "1 - MeasuredCount * (Deadtime/TimeBin width "
                                  "is currently (" << temp
-                              << "). Can't divide by this amount." << std::endl;
+                              << "). Can't divide by this amount.\n";
 
                 throw std::invalid_argument("Can't divide by 0");
               }
@@ -110,62 +112,26 @@ void ApplyDeadTimeCorr::exec() {
         }
       } else {
         g_log.error() << "The time bin width is currently (" << timeBinWidth
-                      << "). Can't divide by this amount." << std::endl;
+                      << "). Can't divide by this amount.\n";
 
         throw std::invalid_argument("Can't divide by 0");
       }
     } else {
-      g_log.error() << "To calculate Muon deadtime requires that goodfrm "
-                       "(number of good frames) "
-                    << "is stored in InputWorkspace Run object\n";
+      const std::string message = "To calculate Muon deadtime requires that "
+                                  "goodfrm (number of good frames) is stored "
+                                  "in InputWorkspace Run object\n";
+      g_log.error() << message;
+      throw std::invalid_argument(message);
     }
   } else {
     g_log.error()
         << "Row count(" << deadTimeTable->rowCount()
         << ") of Dead time table is bigger than the Number of Histograms("
-        << inputWs->getNumberHistograms() << ")." << std::endl;
+        << inputWs->getNumberHistograms() << ").\n";
 
     throw std::invalid_argument(
         "Row count was bigger than the Number of Histograms.");
   }
-}
-
-/**
- * Validates input properties:
- * - input workspace must have all bins the same size (within reasonable error)
- * @returns :: map of property names to error strings (empty if no error)
- */
-std::map<std::string, std::string> ApplyDeadTimeCorr::validateInputs() {
-  std::map<std::string, std::string> errors;
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  if (inputWS) { // in case input was a WorkspaceGroup
-    const MantidVec &xValues = inputWS->readX(0);
-    const size_t xSize = xValues.size();
-    if (xSize < 2) {
-      errors["InputWorkspace"] = "Input workspace cannot be empty";
-    } else {
-      // average bin width
-      const double dx =
-          (xValues[xSize - 1] - xValues[0]) / static_cast<double>(xSize - 1);
-
-      // Use cumulative errors
-      auto difference = [&xValues, &dx](size_t i) {
-        return std::abs((xValues[i] - xValues[0] - (double)i * dx) / dx);
-      };
-
-      // Check each width against dx
-      constexpr double tolerance = 0.5;
-      for (size_t i = 1; i < xValues.size() - 2; i++) {
-        if (difference(i) > tolerance) {
-          g_log.error() << "dx=" << xValues[i + 1] - xValues[i] << ' ' << dx
-                        << ' ' << i << std::endl;
-          errors["InputWorkspace"] = "Uneven bin widths in input workspace";
-          break;
-        }
-      }
-    }
-  }
-  return errors;
 }
 
 } // namespace Mantid

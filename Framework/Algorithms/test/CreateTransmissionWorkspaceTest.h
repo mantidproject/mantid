@@ -64,7 +64,7 @@ public:
     m_tinyReflWS = create2DWorkspaceWithReflectometryInstrument();
 
     FrameworkManager::Instance();
-    MantidVec xData = {0, 0, 0, 0};
+    MantidVec xData = {0, 1, 2, 3};
     MantidVec yData = {0, 0, 0};
 
     auto createWorkspace =
@@ -151,12 +151,6 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_monitor_index_positive() {
-    auto alg = construct_standard_algorithm();
-    TS_ASSERT_THROWS(alg->setProperty("I0MonitorIndex", -1),
-                     std::invalid_argument);
-  }
-
   void test_execute_one_tranmission() {
 
     IAlgorithm_sptr alg =
@@ -168,7 +162,6 @@ public:
     alg->setProperty("FirstTransmissionRun", m_tinyReflWS);
     alg->setProperty("WavelengthMin", 1.0);
     alg->setProperty("WavelengthMax", 15.0);
-    alg->setProperty("WavelengthStep", 0.05);
     alg->setProperty("I0MonitorIndex", 1);
     alg->setProperty("MonitorBackgroundWavelengthMin", 14.0);
     alg->setProperty("MonitorBackgroundWavelengthMax", 15.0);
@@ -180,13 +173,6 @@ public:
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS("Wavelength", outWS->getAxis(0)->unit()->unitID());
-
-    // Because we have one transmission workspace, binning should come from the
-    // WavelengthStep.
-    auto x = outWS->readX(0);
-    auto actual_binning = x[1] - x[0];
-    double step = alg->getProperty("WavelengthStep");
-    TS_ASSERT_DELTA(step, actual_binning, 0.0001);
   }
 };
 

@@ -4,8 +4,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 
-#include <cxxtest/TestSuite.h>
 #include "EnggDiffractionViewMock.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::CustomInterfaces;
 using testing::TypedEq;
@@ -36,7 +36,7 @@ private:
                              const std::vector<bool> &banks,
                              const std::string &specNos,
                              const std::string &dgFile) override {
-    std::cerr << "focus run " << std::endl;
+    std::cerr << "focus run \n";
 
     std::string runNo = multi_RunNo[0];
 
@@ -56,12 +56,6 @@ private:
                                        const std::string &outWSName) override {
     doRebinningPulses(runNo, nperiods, timeStep, outWSName);
     rebinningFinished();
-  }
-
-  void startAsyncFittingWorker(const std::string &focusedRunNo,
-                               const std::string &ExpectedPeaks) override {
-    doFitting(focusedRunNo, ExpectedPeaks);
-    fittingFinished();
   }
 };
 
@@ -129,15 +123,24 @@ public:
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
-    std::vector<std::string> sv;
-    sv.emplace_back("dummy msg");
-    EXPECT_CALL(mockView, logMsgs()).Times(1).WillOnce(Return(sv));
+    // needs basic calibration settings from the user
+    EnggDiffCalibSettings calibSettings;
+    EXPECT_CALL(mockView, currentCalibSettings())
+        .Times(1)
+        .WillOnce(Return(calibSettings));
+
+    // should set a ready or similar status
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
-    pres.notify(IEnggDiffractionPresenter::LogMsg);
+    pres.notify(IEnggDiffractionPresenter::Start);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_loadExistingCalibWithWrongName() {
@@ -164,6 +167,10 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::LoadExistingCalib);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_loadExistingCalibWithAcceptableName() {
@@ -190,6 +197,10 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::LoadExistingCalib);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_calcCalibWithoutRunNumbers() {
@@ -217,6 +228,10 @@ public:
         .Times(0);
 
     pres.notify(IEnggDiffractionPresenter::CalcCalib);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   // this can start the calibration thread, so watch out
@@ -237,9 +252,7 @@ public:
     // them
     EnggDiffCalibSettings calibSettings;
 
-    EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(1)
-        .WillOnce(Return(calibSettings));
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
@@ -254,6 +267,10 @@ public:
         .Times(0);
 
     TS_ASSERT_THROWS_NOTHING(pres.notify(IEnggDiffractionPresenter::CalcCalib));
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   // this test actually starts the calibration process - which implies starting
@@ -276,22 +293,20 @@ public:
     calibSettings.m_pixelCalibFilename =
         instr + "_" + vanNo + "_" + ceriaNo + ".prm";
     calibSettings.m_templateGSAS_PRM = "fake.prm";
-    EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(2)
-        .WillRepeatedly(Return(calibSettings));
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
     EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
 
-    EXPECT_CALL(mockView, currentInstrument()).Times(1).WillOnce(Return(instr));
+    EXPECT_CALL(mockView, currentInstrument()).Times(0);
+    // if it got here, it would: .WillOnce(Return(instr));
 
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
-    EXPECT_CALL(mockView,
-                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
-                                          ceriaNo + "_both_banks.prm"))
-        .Times(0);
+    EXPECT_CALL(mockView, askNewCalibrationFilename(
+                              "UNKNOWNINST_" + vanNo + "_" + ceriaNo +
+                              "_both_banks.prm")).Times(0);
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
     // Should not try to use options for focusing
@@ -301,23 +316,22 @@ public:
     EXPECT_CALL(mockView, focusingCroppedSpectrumNos()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
 
-    // should disable actions at the beginning of the calculations
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(1);
+    // only after the error, it should disable actions at the beginning of the
+    // calculations
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(false)).Times(0);
 
-    // and should enable them again at the (unsuccessful) end - this happens
-    // when a separate thread finished (here the thread is mocked)
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(1);
+    // and only after the error it should enable them again at the
+    // (unsuccessful) end - this happens when a separate thread
+    // finished (here the thread is mocked)
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(true)).Times(0);
 
     // plots peaks and curves
     // the test doesnt get to here as it finishes at EnggCalibrate algo
     EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
-    EXPECT_CALL(mockView, plotVanCurvesCalibOutput()).Times(0);
-    EXPECT_CALL(mockView, plotDifcZeroCalibOutput(testing::_)).Times(0);
+    EXPECT_CALL(mockView, plotCalibOutput(testing::_)).Times(0);
 
-    // No warnings/error pop-ups: some exception(s) are thrown (because there
-    // are missing settings and/or files) but these must be caught
-    // and error messages logged
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+    // A warning about the vanadium number, and what it should look like
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
 
     // does not update the current calibration as it must have failed
@@ -326,6 +340,10 @@ public:
 
     // TS_ASSERT_THROWS_NOTHING(pres.notify(IEnggDiffractionPresenter::CalcCalib));
     pres.notify(IEnggDiffractionPresenter::CalcCalib);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   // TODO: disabled for now, as this one would need to load files
@@ -346,14 +364,18 @@ public:
     // plots peaks and curves
     // the test doesnt get to here as it finishes at EnggCalibrate algo
     EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
-    EXPECT_CALL(mockView, plotVanCurvesCalibOutput()).Times(0);
-    EXPECT_CALL(mockView, plotDifcZeroCalibOutput(testing::_)).Times(0);
+    EXPECT_CALL(mockView, plotCalibOutput(testing::_)).Times(0);
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
 
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::CalcCalib);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   // This would test the cropped calibration with no cerial number
@@ -377,6 +399,10 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::CropCalib);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   // this can start the cropped calibration thread, so watch out
@@ -397,9 +423,8 @@ public:
 
     EnggDiffCalibSettings calibSettings;
 
-    EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(1)
-        .WillOnce(Return(calibSettings));
+    // doesn't get here
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
@@ -410,6 +435,10 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
 
     TS_ASSERT_THROWS_NOTHING(pres.notify(IEnggDiffractionPresenter::CropCalib));
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   // This should not start the process, tests with an empty spec number which
@@ -432,18 +461,16 @@ public:
     calibSettings.m_pixelCalibFilename =
         instr + "_" + vanNo + "_" + ceriaNo + ".prm";
     calibSettings.m_templateGSAS_PRM = "fake.prm";
-    EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(1)
-        .WillOnce(Return(calibSettings));
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
     EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(g_ceriaNo));
 
     std::string specno = "";
-    EXPECT_CALL(mockView, currentCalibSpecNos())
-        .Times(1)
-        .WillOnce(Return(specno));
+    EXPECT_CALL(mockView, currentCalibSpecNos()).Times(0);
+    // if it got here, it would: .WillOnce(Return(specno));
+
     EXPECT_CALL(mockView, currentCalibCustomisedBankName()).Times(0);
 
     // No warnings/error pop-ups: some exception(s) are thrown (because there
@@ -453,6 +480,10 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::CropCalib);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   // this test actually starts the cropped calibration process - which implies
@@ -478,9 +509,8 @@ public:
     calibSettings.m_pixelCalibFilename =
         instr + "_" + vanNo + "_" + ceriaNo + ".prm";
     calibSettings.m_templateGSAS_PRM = "fake.prm";
-    EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(2)
-        .WillRepeatedly(Return(calibSettings));
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+    // if it got here it would: .WillRepeatedly(Return(calibSettings));
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
@@ -494,38 +524,38 @@ public:
 
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
-    EXPECT_CALL(mockView,
-                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
-                                          ceriaNo + "_both_banks.prm"))
-        .Times(0);
+    EXPECT_CALL(mockView, askNewCalibrationFilename(
+                              "UNKNOWNINST_" + vanNo + "_" + ceriaNo +
+                              "_both_banks.prm")).Times(0);
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
-    // should disable actions at the beginning of the calculations
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(1);
+    // with the normal thread should disable actions at the beginning
+    // of the calculations
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(false)).Times(0);
 
     // and should enable them again at the (unsuccessful) end - this happens
     // when a separate thread finished (here the thread is mocked)
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(1);
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(true)).Times(0);
 
     // tests whether the plot functions have been called
     EXPECT_CALL(mockView, plotCalibWorkspace()).Times(0);
-    EXPECT_CALL(mockView, plotVanCurvesCalibOutput()).Times(0);
-    EXPECT_CALL(mockView, plotDifcZeroCalibOutput(testing::_)).Times(0);
+    EXPECT_CALL(mockView, plotCalibOutput(testing::_)).Times(0);
 
-    // No warnings/error pop-ups: some exception(s) are thrown (because there
-    // are missing settings and/or files) but these must be caught
-    // and error messages logged
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+    // A warning about the vanadium run number
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::CropCalib);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   // this test actually starts the cropped calibration process - which implies
   // starting the thread unless you use the mock without thread
   // this test case includes all valid settings, run numbers, spectrum no
-  // selected
-  // & valid spectrum no provided
+  // selected & valid spectrum no provided
   void test_calcCroppedCalibWithRunNumbers() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
 
@@ -544,9 +574,8 @@ public:
     calibSettings.m_pixelCalibFilename =
         instr + "_" + vanNo + "_" + ceriaNo + ".prm";
     calibSettings.m_templateGSAS_PRM = "fake.prm";
-    EXPECT_CALL(mockView, currentCalibSettings())
-        .Times(2)
-        .WillRepeatedly(Return(calibSettings));
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+    // if it was called it would: .WillRepeatedly(Return(calibSettings));
 
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(g_vanNo));
 
@@ -557,18 +586,16 @@ public:
         .WillOnce(Return(0));
 
     std::string specno = "100-200";
-    EXPECT_CALL(mockView, currentCalibSpecNos())
-        .Times(2)
-        .WillRepeatedly(Return(specno));
+    EXPECT_CALL(mockView, currentCalibSpecNos()).Times(0);
+    // if it was called it would: .WillRepeatedly(Return(specno));
 
     EXPECT_CALL(mockView, currentCalibCustomisedBankName()).Times(0);
 
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
-    EXPECT_CALL(mockView,
-                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
-                                          ceriaNo + "_both_banks.prm"))
-        .Times(0);
+    EXPECT_CALL(mockView, askNewCalibrationFilename(
+                              "UNKNOWNINST_" + vanNo + "_" + ceriaNo +
+                              "_both_banks.prm")).Times(0);
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
     // Should not try to use options for focusing
@@ -578,20 +605,24 @@ public:
     EXPECT_CALL(mockView, focusingCroppedSpectrumNos()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
 
+    // it will not get to the next steps:
+
     // should disable actions at the beginning of the calculations
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(1);
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(false)).Times(0);
 
     // and should enable them again at the (unsuccessful) end - this happens
     // when a separate thread finished (here the thread is mocked)
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(1);
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(true)).Times(0);
 
-    // No warnings/error pop-ups: some exception(s) are thrown (because there
-    // are missing settings and/or files) but these must be caught
-    // and error messages logged
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+    // A warning about the vanadium
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::CropCalib);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   // TODO: disabled for now, as this one would need to load files
@@ -620,11 +651,17 @@ public:
 
     EXPECT_CALL(mockView, currentCalibCustomisedBankName()).Times(0);
 
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
+
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::CropCalib);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_focusWithoutRunNumber() {
@@ -650,11 +687,18 @@ public:
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
     EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::FocusRun);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_focusWithRunNumberButWrongBanks() {
@@ -677,11 +721,18 @@ public:
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::FocusRun);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   // the focusing process starts but the input run number cannot be found
@@ -711,14 +762,21 @@ public:
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
     // it should not get there
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(0);
-    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(0);
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(false)).Times(0);
+    EXPECT_CALL(mockView, enableCalibrateFocusFitUserActions(true)).Times(0);
+
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
 
     // 0 errors, 1 warning error pop-up to user
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::FocusRun);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   // TODO: disabled for now, as this one would need to load files
@@ -761,11 +819,18 @@ public:
     EXPECT_CALL(mockView, focusingCroppedSpectrumNos()).Times(0);
     EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // 0 errors/ 0 warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::FocusRun);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void disabled_test_focusOK_allBanksOff() {
@@ -793,6 +858,10 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::FocusRun);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_focusCropped_withoutRunNo() {
@@ -821,11 +890,18 @@ public:
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::FocusCropped);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_focusCropped_withoutBanks() {
@@ -854,11 +930,18 @@ public:
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
     EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::FocusCropped);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_focusCropped_withoutSpectrumNos() {
@@ -887,11 +970,18 @@ public:
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
     EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::FocusCropped);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_focusTexture_withoutRunNo() {
@@ -916,11 +1006,18 @@ public:
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::FocusTexture);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_focusTexture_withoutFilename() {
@@ -945,11 +1042,18 @@ public:
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::FocusTexture);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_focusTexture_withInexistentTextureFile() {
@@ -974,11 +1078,18 @@ public:
     EXPECT_CALL(mockView, focusedOutWorkspace()).Times(0);
     EXPECT_CALL(mockView, plotFocusedSpectrum(testing::_)).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // 1 warning pop-up to user, 0 errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::FocusTexture);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_resetFocus() {
@@ -992,6 +1103,10 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::ResetFocus);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_resetFocus_thenFocus() {
@@ -1016,11 +1131,18 @@ public:
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
     EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // Now one error shown as a warning-pop-up cause inputs and options are
     // empty
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::FocusRun);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_preproc_event_time_bin_missing_runno() {
@@ -1038,6 +1160,10 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::RebinTime);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_preproc_event_time_wrong_bin() {
@@ -1050,11 +1176,18 @@ public:
         .WillOnce(Return(g_rebinRunNo));
     EXPECT_CALL(mockView, rebinningTimeBin()).Times(1).WillOnce(Return(0));
 
-    // No errors/warnings
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
+    // An error, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::RebinTime);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   // this test does run Load and then Rebin //
@@ -1063,18 +1196,31 @@ public:
     EnggDiffPresenterNoThread pres(&mockView);
     // inputs from user
     EXPECT_CALL(mockView, currentPreprocRunNo())
-        .Times(2)
+        .Times(1)
         .WillRepeatedly(Return(g_rebinRunNo));
 
     EXPECT_CALL(mockView, rebinningTimeBin())
         .Times(1)
         .WillRepeatedly(Return(0.100000));
 
-    // No errors/warnings
+    // doesn't effectively finish the processing
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
+    // A warning complaining about the run number / path Because the
+    // real QtView uses MWRunFile::getFilenames, if we give a run
+    // number (ENGINX00228061) without path, it will find the full
+    // path if possible. Here we mock currentPreprocRunNo() by just
+    // returning the run number without the path that would be
+    // needed. EnggDiffractionPresenter::isValidRunNumber() will not
+    // find the file (when it tries Poco::File(path).exists()).
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::RebinTime);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_preproc_event_multiperiod_missing_runno() {
@@ -1088,7 +1234,14 @@ public:
     // should not even call this one when the run number is obviously wrong
     EXPECT_CALL(mockView, rebinningTimeBin()).Times(0);
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     pres.notify(IEnggDiffractionPresenter::RebinMultiperiod);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_preproc_event_multiperiod_wrong_bin() {
@@ -1104,11 +1257,18 @@ public:
         .WillOnce(Return(1));
     EXPECT_CALL(mockView, rebinningPulsesTime()).Times(1).WillOnce(Return(0));
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // No errors, warning because of wrong bin
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::RebinMultiperiod);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   // this test does run Load but then RebinByPulseTimes should fail
@@ -1127,67 +1287,18 @@ public:
     // 1s is big enough
     EXPECT_CALL(mockView, rebinningPulsesTime()).Times(1).WillOnce(Return(1));
 
+    // should not get to the point where the status is updated
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // No errors/warnings. There will be an error log from the algorithms
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::RebinMultiperiod);
-  }
-
-  void test_fitting_with_missing_param() {
-    testing::NiceMock<MockEnggDiffractionView> mockView;
-    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
-
-    EXPECT_CALL(mockView, fittingRunNo()).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(mockView, fittingPeaksData()).Times(1).WillOnce(Return(""));
-
-    // No errors/1 warnings. There will be an error log from the algorithms
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
-
-    pres.notify(IEnggDiffractionPresenter::FitPeaks);
-  }
-
-  // This would test the fitting tab with no focused workspace
-  // which should produce a warning
-  void test_fitting_without_focused_run() {
-    testing::NiceMock<MockEnggDiffractionView> mockView;
-    EnggDiffPresenterNoThread pres(&mockView);
-
-    // inputs from user
-    const std::string mockFname = "";
-    EXPECT_CALL(mockView, fittingRunNo()).Times(1).WillOnce(Return(mockFname));
-    EXPECT_CALL(mockView, fittingPeaksData())
-        .Times(1)
-        .WillOnce(Return("2.57,4.88,5.78"));
-
-    // No errors/1 warnings. There will be an error log from the algorithms
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
-
-    pres.notify(IEnggDiffractionPresenter::FitPeaks);
-  }
-
-  // This would test the fitting tab with invalid expected peaks but should only
-  // produce a warning
-  void test_fitting_with_invalid_expected_peaks() {
-    testing::NiceMock<MockEnggDiffractionView> mockView;
-    EnggDiffPresenterNoThread pres(&mockView);
-    EnggDiffCalibSettings calibSettings;
-
-    // inputs from user
-    EXPECT_CALL(mockView, fittingRunNo())
-        .Times(1)
-        .WillOnce(Return(g_focusedRun));
-    EXPECT_CALL(mockView, fittingPeaksData())
-        .Times(1)
-        .WillOnce(Return(",3.5,7.78,r43d"));
-
-    // No errors/1 warnings. There will be an error log from the algorithms
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
-
-    pres.notify(IEnggDiffractionPresenter::FitPeaks);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_logMsg() {
@@ -1198,11 +1309,18 @@ public:
     sv.emplace_back("dummy log");
     EXPECT_CALL(mockView, logMsgs()).Times(1).WillOnce(Return(sv));
 
+    // should not change status
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::LogMsg);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_RBNumberChange_ok() {
@@ -1213,11 +1331,18 @@ public:
     EXPECT_CALL(mockView, getRBNumber()).Times(1).WillOnce(Return("RB000xxxx"));
     EXPECT_CALL(mockView, enableTabs(true)).Times(1);
 
+    // should update status
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
+
     // no errors/ warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::RBNumberChange);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_RBNumberChange_empty() {
@@ -1228,11 +1353,18 @@ public:
     EXPECT_CALL(mockView, getRBNumber()).Times(1).WillOnce(Return(""));
     EXPECT_CALL(mockView, enableTabs(false)).Times(1);
 
+    // should update status / invalid
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
+
     // no errors/ warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::RBNumberChange);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_instChange() {
@@ -1243,12 +1375,21 @@ public:
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(1);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
+    // should not change status
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+
     pres.notify(IEnggDiffractionPresenter::InstrumentChange);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
   void test_shutDown() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, showStatus(testing::_)).Times(1);
 
     EXPECT_CALL(mockView, saveSettings()).Times(1);
     // No errors, no warnings
@@ -1256,6 +1397,10 @@ public:
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     pres.notify(IEnggDiffractionPresenter::ShutDown);
+    TSM_ASSERT(
+        "Mock not used as expected. Some EXPECT_CALL conditions were not "
+        "satisfied.",
+        testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
 private:
@@ -1282,10 +1427,7 @@ private:
 // A possible event mode file would be: 197019, but it is too big for
 // unit test data. TODO: find a small one or crop a big one.
 const std::string EnggDiffractionPresenterTest::g_eventModeRunNo =
-    "ENGINX228061";
-
-const std::string EnggDiffractionPresenterTest::g_focusedRun =
-    "focused_texture_bank_1";
+    "ENGINX00228061"; // could also be given as "ENGINX228061"
 
 const std::string EnggDiffractionPresenterTest::g_validRunNo = "228061";
 

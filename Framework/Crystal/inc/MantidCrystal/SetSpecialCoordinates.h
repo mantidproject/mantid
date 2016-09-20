@@ -40,7 +40,6 @@ namespace Crystal {
 class DLLExport SetSpecialCoordinates : public API::Algorithm {
 public:
   SetSpecialCoordinates();
-  ~SetSpecialCoordinates() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose

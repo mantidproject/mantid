@@ -85,8 +85,6 @@ class DLLExport AnyShapeAbsorption : public AbsorptionCorrection {
 public:
   /// (Empty) Constructor
   AnyShapeAbsorption();
-  /// Virtual destructor
-  ~AnyShapeAbsorption() override {}
   /// Algorithm's name
   const std::string name() const override { return "AbsorptionCorrection"; }
   /// Summary of algorithms purpose
