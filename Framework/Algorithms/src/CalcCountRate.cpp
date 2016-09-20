@@ -9,6 +9,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidDataObjects/Workspace2D.h"
@@ -107,14 +108,16 @@ void CalcCountRate::init() {
   // visualisation group
   std::string spur_vis_mode("Spurion visualisation");
   declareProperty(
-      Kernel::make_unique<API::WorkspaceProperty<DataObjects::Workspace2D>>(
-          "VisualizationWs", "", Kernel::Direction::InOut,
-          API::PropertyMode::Optional),
+      "VisualizationWsName", "",
       "Optional name to build 2D matrix workspace for spurion visualization. "
       "If name is provided, a 2D workspace with this name will be created "
       "containing data to visualize counting rate as function of time in the "
       "ranges "
       "XMin-XMax");
+  declareProperty(Kernel::make_unique <
+                  API::WorkspaceProperty<>>("VisualizationWs", "",
+                                           Kernel::Direction::Output,
+                                           API::PropertyMode::Optional));
 
   auto mustBeReasonable = boost::make_shared<Kernel::BoundedValidator<int>>();
   mustBeReasonable->setLower(3);
@@ -129,9 +132,10 @@ void CalcCountRate::init() {
           "XResolution", 100, mustBeReasonable, Kernel::Direction::Input),
       "Number of steps (accuracy) of the visualization workspace has along "
       "X-axis. ");
-  setPropertyGroup("VisualizationWs", spur_vis_mode);
+  setPropertyGroup("VisualizationWsName", spur_vis_mode);
   setPropertyGroup("NumTimeSteps", spur_vis_mode);
   setPropertyGroup("XResolution", spur_vis_mode);
+  setPropertyGroup("VisualizationWs", spur_vis_mode);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -151,7 +155,7 @@ void CalcCountRate::exec() {
 
   // check if visualization workspace is necessary and if it is, prepare
   // visualization workspace to use
-  this->initVisWorkspace();
+  this->checkAndInitVisWorkspace();
 
   // create results log and add it to the source workspace
   std::string logname = getProperty("CountRateLogName");
@@ -441,22 +445,70 @@ void CalcCountRate::setSourceWSandXRanges(
   }
 }
 
-/** Initiate visualization workspace if user requested one. If not, resets
- * existing visWs pointer (if any)*/
-void CalcCountRate::initVisWorkspace() {
-  std::string visWSName = getProperty("VisualizationWs");
+/**Check if visualization workspace is necessary and initiate it if requested.
+* Sets or clears up internal m_visWS pointer and "do-visualization workspace"
+* option.
+*/
+void CalcCountRate::checkAndInitVisWorkspace() {
+  std::string visWSName = getProperty("VisualizationWsName");
   if (visWSName.empty()) {
     m_visWs.reset();
+    m_doVis = false;
     return;
   }
-  size_t numTBins = getProperty("NumTimeSteps");
-  size_t numXBins = getProperty("XResolution");
+  m_doVis = true;
 
-  //m_visWs = API::WorkspaceFactory::Instance().create();
+  int numTBins = getProperty("NumTimeSteps");
+  int numXBins = getProperty("XResolution");
+  std::string RangeUnits = getProperty("RangeUnits");
+
+  m_visWs = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      API::WorkspaceFactory::Instance().create("Workspace2D", numTBins,
+                                               numXBins + 1, numXBins));
+  m_visWs->setTitle(visWSName);
+
+  double Xmax = m_XRangeMax;
+  // a bit dodgy code. It can be generalized
+  if (std::isinf(Xmax)) {
+    auto Xbin = m_workingWS->readX(0);
+    for (int64_t i = Xbin.size() - 1; i >= 0; --i) {
+      if (!std::isinf(Xbin[i])) {
+        Xmax = Xbin[i];
+        break;
+      }
+    }
+  }
+
+  // define X-axis in target units
+  double dX = (Xmax - m_XRangeMin) / numXBins;
+  std::vector<double> xx(numXBins);
+  for (size_t i = 0; i < numXBins; ++i) {
+    xx[i] = m_XRangeMin + 0.5 * dX + i * dX;
+  }
+  auto ax0 = new API::NumericAxis(xx);
+  ax0->setUnit(RangeUnits);
+  m_visWs->replaceAxis(0, ax0);
+
+  // define Y axis (in seconds);
+  double dt =
+      ((m_TRangeMax.totalNanoseconds() - m_TRangeMin.totalNanoseconds()) /
+       numTBins) *
+      1.e-9;
+  xx.resize(numTBins);
+  for (size_t i = 0; i < numTBins; i++) {
+    xx[i] = 0.5 * dt + dt * i;
+  }
+  auto ax1 = new API::NumericAxis(xx);
+  auto labelY = boost::dynamic_pointer_cast<Kernel::Units::Label>(
+      Kernel::UnitFactory::Instance().create("Label"));
+  labelY->setLabel("sec");
+  ax1->unit() = labelY;
+  m_visWs->replaceAxis(1, ax1);
+
+  setProperty("VisualizationWs", m_visWs);
 }
-bool CalcCountRate::buildVisWS() const {
-return bool(m_visWs);
-}
+/** Helper function to check if visualization workspace should be used*/
+bool CalcCountRate::buildVisWS() const { return m_doVis; }
 
 /** Helper function, mainly for testing
 * @return  true if count rate should be normalized and false

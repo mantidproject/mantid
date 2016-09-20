@@ -37,6 +37,10 @@ public:
   DataObjects::EventWorkspace const *const getWorkingWS() {
     return m_workingWS.get();
   }
+  void setVisWS(const std::string &wsName) {
+      this->setProperty("VisualizationWsName", wsName);
+      this->checkAndInitVisWorkspace();
+  }
 };
 
 class CalcCountRateTest : public CxxTest::TestSuite {
@@ -257,6 +261,35 @@ public:
     for (size_t i=0;i<val_vec.size()-1;i++) {
         TS_ASSERT_DELTA(val_vec[i],200.,1.e-4);
     }
+
+  }
+  void test_visWS_creation() {
+
+      DataObjects::EventWorkspace_sptr sws =
+          WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10,
+              false);
+
+      CalcCountRateTester alg;
+      alg.initialize();
+
+      alg.setProperty("NumTimeSteps", 120);
+      alg.setProperty("XResolution",200);
+      alg.setProperty("XMin",10.);
+      alg.setProperty("XMax", 50.);
+
+      alg.setProperty("Workspace", sws);
+      alg.setSearchRanges(sws);
+
+      TS_ASSERT_THROWS_NOTHING(alg.setVisWS("testVisWSName"));
+
+
+      API::MatrixWorkspace_sptr testVisWS = alg.getProperty("VisualizationWs");
+      TS_ASSERT(testVisWS);
+      TS_ASSERT_EQUALS(testVisWS->getNumberHistograms(),120);
+      auto X = testVisWS->readX(0);
+      auto Y = testVisWS->readY(0);
+      TS_ASSERT_EQUALS(X.size(),201);
+      TS_ASSERT_EQUALS(Y.size(), 200);
 
   }
 };

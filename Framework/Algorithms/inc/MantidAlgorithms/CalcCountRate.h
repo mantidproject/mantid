@@ -67,6 +67,8 @@ protected: // for testing, actually private
   /// pointer to the log used to normalize results or NULL if no such log
   /// present on input workspace.
   Kernel::TimeSeriesProperty<double> const *m_pNormalizationLog{nullptr};
+  /// should algo generate visualization VS
+  bool m_doVis{false};
   /// shared pointer to the optional visualization workspace
   DataObjects::Workspace2D_sptr m_visWs;
   /// default number of points in the target log
@@ -92,7 +94,7 @@ protected: // for testing, actually private
   void calcRateLog(DataObjects::EventWorkspace_sptr &InputWorkspace,
                         Kernel::TimeSeriesProperty<double> *const targLog);
 
-   void initVisWorkspace();
+   void checkAndInitVisWorkspace();
 };
 
 } // namespace Algorithms
