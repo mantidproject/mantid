@@ -243,7 +243,7 @@ void ExtractSpectra::execEvent() {
 
   // Retrieve and validate the input properties
   this->checkProperties();
-  HistogramData::BinEdges XValues_new(0);
+  HistogramData::BinEdges XValues_new(2);
   if (m_commonBoundaries) {
     auto &oldX = m_inputWorkspace->x(m_workspaceIndexList.front());
     XValues_new =
