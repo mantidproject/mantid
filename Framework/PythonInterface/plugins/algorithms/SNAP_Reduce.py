@@ -131,7 +131,7 @@ class SNAP_Reduce(PythonAlgorithm):
                                               validator=validator),
                              "Run numbers to process, comma separated")
 
-        self.declareProperty("Live Data", False,
+        self.declareProperty("LiveData", False,
                              "Read live data - requires a saved run in the current IPTS "
                              + "with the same Instrument configuration as the live run")
 
@@ -139,11 +139,11 @@ class SNAP_Reduce(PythonAlgorithm):
         self.declareProperty("Masking", "None", StringListValidator(mask),
                              "Mask to be applied to the data")
 
-        self.declareProperty(WorkspaceProperty("Masking Workspace", "",
+        self.declareProperty(WorkspaceProperty("MaskingWorkspace", "",
                                                Direction.Input, PropertyMode.Optional),
                              "The workspace containing the mask.")
 
-        self.declareProperty(FileProperty(name="Masking Filename", defaultValue="",
+        self.declareProperty(FileProperty(name="MaskingFilename", defaultValue="",
                                           direction=Direction.Input,
                                           action=FileAction.OptionalLoad),
                              doc="The file containing the xml mask.")
@@ -153,7 +153,7 @@ class SNAP_Reduce(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="The type of conversion to d_spacing to be used.")
 
-        self.declareProperty(FileProperty(name="Calibration Filename", defaultValue="",
+        self.declareProperty(FileProperty(name="CalibrationFilename", defaultValue="",
                                           direction=Direction.Input,
                                           action=FileAction.OptionalLoad),
                              doc="The calibration file to convert to d_spacing.")
@@ -167,20 +167,20 @@ class SNAP_Reduce(PythonAlgorithm):
                              + "Data uses a background determination that is peak independent.This "
                              + "implemantation can be tested in algorithm SNAP Peak Clipping Background")
 
-        self.declareProperty(FileProperty(name="Normalization Filename", defaultValue="",
+        self.declareProperty(FileProperty(name="NormalizationFilename", defaultValue="",
                                           direction=Direction.Input,
                                           action=FileAction.OptionalLoad),
                              doc="The file containing the processed nexus for normalization.")
 
-        self.declareProperty(WorkspaceProperty("Normalization Workspace", "",
+        self.declareProperty(WorkspaceProperty("NormalizationWorkspace", "",
                                                Direction.Input, PropertyMode.Optional),
                              "The workspace containing the normalization data.")
 
-        self.declareProperty("Peak Clipping Window Size", 10,
+        self.declareProperty("PeakClippingWindowSize", 10,
                              "Read live data - requires a saved run in the current "
                              + "IPTS with the same Instrumnet configuration")
 
-        self.declareProperty("Smoothing Range", 10,
+        self.declareProperty("SmoothingRange", 10,
                              "Read live data - requires a saved run in the "
                              + "current IPTS with the same Instrumnet configuration")
 
@@ -191,15 +191,15 @@ class SNAP_Reduce(PythonAlgorithm):
                              + "SNAP), Columns for SNAP, detector banks")
 
         mode = ["Set-Up", "Production"]
-        self.declareProperty("Processing Mode", "Production", StringListValidator(mode),
+        self.declareProperty("ProcessingMode", "Production", StringListValidator(mode),
                              "Set-Up Mode is used for establishing correct parameters. Production "
                              + "Mode only Normalized workspace is kept for each run.")
 
-        self.declareProperty(name="Optional Prefix", defaultValue="",
+        self.declareProperty(name="OptionalPrefix", defaultValue="",
                              direction=Direction.Input,
                              doc="Optional Prefix to be added to workspaces and output filenames")
 
-        self.declareProperty("Save Data", False,
+        self.declareProperty("SaveData", False,
                              "Save data in the following formats: Ascii- d-spacing ,Nexus Processed,GSAS and Fullprof")
 
     def validateInputs(self):
@@ -210,13 +210,13 @@ class SNAP_Reduce(PythonAlgorithm):
         if masking in ("None", "Horizontal", "Vertical"):
             pass
         elif masking in ("Custom - xml masking file"):
-            filename = self.getProperty("Masking Filename").value
+            filename = self.getProperty("MaskingFilename").value
             if len(filename) <= 0:
-                issues["Masking Filename"] = "Masking=\"%s\" requires a filename" % masking
-        elif masking == "Masking Workspace":
-            mask_workspace = self.getPropertyValue("Masking Workspace")
+                issues["MaskingFilename"] = "Masking=\"%s\" requires a filename" % masking
+        elif masking == "MaskingWorkspace":
+            mask_workspace = self.getPropertyValue("MaskingWorkspace")
             if mask_workspace is None or len(mask_workspace) <= 0:
-                issues["Masking Workspace"] = "Must supply masking workspace"
+                issues["MaskingWorkspace"] = "Must supply masking workspace"
         else:
             raise RuntimeError("Masking value \"%s\" not supported" % masking)
 
@@ -225,11 +225,11 @@ class SNAP_Reduce(PythonAlgorithm):
         if normalization in ("None", "Extracted from Data"):
             pass
         elif normalization == "From Workspace":
-            norm_workspace = self.getPropertyValue("Normalization Workspace")
+            norm_workspace = self.getPropertyValue("NormalizationWorkspace")
         elif normalization == "From Processed Nexus":
-            filename = self.getProperty("Normalization Filename").value
+            filename = self.getProperty("NormalizationFilename").value
             if len(filename) <= 0:
-                issues["Normalization Filename"] = "Normalization=\"%s\" requires a filename" \
+                issues["NormalizationFilename"] = "Normalization=\"%s\" requires a filename" \
                                                    % normalization
         else:
             raise RuntimeError("Normalization value \"%s\" not supported" % normalization)
@@ -241,12 +241,10 @@ class SNAP_Reduce(PythonAlgorithm):
 
         in_Runs = self.getProperty("RunNumbers").value
 
-        live = self.getProperty("Live Data").value
-
         masking = self.getProperty("Masking").value
 
         if masking == "Custom - xml masking file":
-            LoadMask(InputFile=self.getProperty("Masking Filename").value,
+            LoadMask(InputFile=self.getProperty("MaskingFilename").value,
                      Instrument='SNAP', OutputWorkspace='CustomMask')
         elif masking == "Horizontal":
             if not mtd.doesExist('HorizontalMask'):
@@ -257,11 +255,11 @@ class SNAP_Reduce(PythonAlgorithm):
                 LoadMask(InputFile='/SNS/SNAP/shared/libs/Vertical_Mask.xml',
                          Instrument='SNAP', OutputWorkspace='VerticalMask')
         elif masking == "Masking Workspace":
-            mask_workspace = self.getProperty("Masking Workspace").value
+            mask_workspace = self.getProperty("MaskingWorkspace").value
 
         calib = self.getProperty("Calibration").value
         if calib == "Calibration File":
-            cal_File = self.getProperty("Calibration Filename").value
+            cal_File = self.getProperty("CalibrationFilename").value
 
         params = self.getProperty("Binning").value
         norm = self.getProperty("Normalization").value
@@ -270,7 +268,7 @@ class SNAP_Reduce(PythonAlgorithm):
             norm_File = self.getProperty("Normalization filename").value
             Normalization = LoadNexusProcessed(Filename=norm_File)
         if norm == "From Workspace":
-            normWS = self.getProperty("Normalization Workspace").value
+            normWS = self.getProperty("NormalizationWorkspace").value
 
         group = self.getProperty("GroupDetectorsBy").value
 
@@ -293,11 +291,11 @@ class SNAP_Reduce(PythonAlgorithm):
                 CreateGroupingWorkspace(InstrumentName='SNAP', GroupDetectorsBy=real_name,
                                         OutputWorkspace=group)
 
-        Process_Mode = self.getProperty("Processing Mode").value
+        Process_Mode = self.getProperty("ProcessingMode").value
 
-        prefix = self.getProperty("Optional Prefix").value
+        prefix = self.getProperty("OptionalPrefix").value
 
-        save_Data = self.getProperty("Save Data").value
+        save_Data = self.getProperty("SaveData").value
 
         # --------------------------- REDUCE DATA ------------------------------------------------
 
@@ -305,7 +303,7 @@ class SNAP_Reduce(PythonAlgorithm):
         for r in in_Runs:
             self.log().notice("processing run %s" % r)
             print self.get_IPTS_Local(r)
-            if live:
+            if self.getProperty("LiveData").value:
                 Tag = 'Live'
                 # TODO should remove branch and always use LoadPreNexusLive
                 if AlgorithmFactory.exists('LoadPreNexusLive'):
@@ -362,9 +360,9 @@ class SNAP_Reduce(PythonAlgorithm):
                 WS_nor = Divide(LHSWorkspace=WS_red, RHSWorkspace=normWS)
             elif norm == "Extracted from Data":
 
-                window = self.getProperty("Peak Clipping Window Size").value
+                window = self.getProperty("PeakClippingWindowSize").value
 
-                smooth_range = self.getProperty("Smoothing Range").value
+                smooth_range = self.getProperty("SmoothingRange").value
 
                 peak_clip_WS = CloneWorkspace(WS_red)
                 n_histo = peak_clip_WS.getNumberHistograms()
