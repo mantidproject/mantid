@@ -4,12 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "Mantid/IProjectSerialisable.h"
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/CaseInsensitiveMap.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/CaseInsensitiveMap.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 
 #include <cstring>
 #include <map>
@@ -71,7 +71,7 @@ public:
 };
 
 /** The WindowFactory class is in charge of the creation of concrete
-    instances of IProjectSerialisable.
+    instances of MantidQt::API::IProjectSerialisable.
 
     It is implemented as a singleton class.
 
@@ -101,7 +101,8 @@ public:
 
 class WindowFactoryImpl final {
 private:
-  typedef AbstractProjectInstantiator<IProjectSerialisable> AbstractFactory;
+  typedef AbstractProjectInstantiator<MantidQt::API::IProjectSerialisable>
+      AbstractFactory;
 
 public:
   WindowFactoryImpl();
@@ -112,12 +113,11 @@ public:
    * @param lines :: the string containing the serialised form of the window
    * @param app :: handle to the ApplicationWindow instance
    * @param fileVersion :: the file version number
-   * @return an instance of IProjectSerialisable
+   * @return an instance of MantidQt::API::IProjectSerialisable
    */
-  IProjectSerialisable *loadFromProject(const std::string &className,
-                                        const std::string &lines,
-                                        ApplicationWindow *app,
-                                        const int fileVersion = -1) {
+  MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &className, const std::string &lines,
+                  ApplicationWindow *app, const int fileVersion = -1) {
     auto it = _map.find(className);
     if (it != _map.end())
       return it->second->loadFromProject(lines, app, fileVersion);
@@ -132,7 +132,7 @@ public:
    */
   template <class C> void subscribe(const std::string &className) {
     auto instantiator = Mantid::Kernel::make_unique<
-        ProjectWindowInstantiator<C, IProjectSerialisable>>();
+        ProjectWindowInstantiator<C, MantidQt::API::IProjectSerialisable>>();
     subscribe(className, std::move(instantiator));
   }
 

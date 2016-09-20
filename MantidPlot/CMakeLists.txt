@@ -91,7 +91,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
                    src/PolynomialFit.cpp
-		    src/ProjectSerialiser.cpp
+                   src/ProjectSerialiser.cpp
                    src/PythonScript.cpp
                    src/PythonScripting.cpp
                    src/QwtBarCurve.cpp
@@ -392,7 +392,6 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/RemoveErrorsDialog.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/WorkspaceIcons.h
-                   src/Mantid/IProjectSerialisable.h
                    src/Mantid/InstrumentWidget/InstrumentWindow.h
 )
 

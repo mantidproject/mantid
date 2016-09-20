@@ -1508,9 +1508,9 @@ Matrix::~Matrix() {
   delete d_matrix_model;
 }
 
-IProjectSerialisable *Matrix::loadFromProject(const std::string &lines,
-                                              ApplicationWindow *app,
-                                              const int fileVersion) {
+MantidQt::API::IProjectSerialisable *
+Matrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                        const int fileVersion) {
   Q_UNUSED(fileVersion);
   std::vector<std::string> lineVec;
   boost::split(lineVec, lines, boost::is_any_of("\n"));

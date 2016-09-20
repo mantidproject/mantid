@@ -789,7 +789,7 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws) {
     PARALLEL_START_INTERUPT_REGION
 
     // Create the output event list (empty)
-    EventList &outEL = outWS->getOrAddEventList(outWIi);
+    EventList &outEL = outWS->getSpectrum(outWIi);
 
     // Which are the neighbours?
     std::vector<weightedNeighbour> &neighbours = m_neighbours[outWIi];

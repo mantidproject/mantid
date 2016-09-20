@@ -22,12 +22,18 @@ Muon Analysis
 
 - Documentation has been moved to the Mantid help system.
 
+- A bug was fixed where, when plotting the log of counts and then switching to plot counts or asymmetry, the y axis was left as a logarithmic axis.
+
 Algorithms
 ----------
 
 - :ref:`MaxEnt <algm-MaxEnt>`: MaxEnt has a new property, *ComplexImage*, which can be set
   to *False* when the imaginary part of the image should not be taken into account for the
   calculations.
+
+- :ref:`MaxEnt <algm-MaxEnt>`: The expression for the second derivative of real (pos/neg) images has been corrected.
+
+- :ref:`MaxEnt <algm-MaxEnt>`: The reconstructed image is always a point data workspace. The reconstructed data is of the same type as the input workspace.
 
 - :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`: the *Frequency* parameter is now supplied in MHz rather than megaradians per second.
 

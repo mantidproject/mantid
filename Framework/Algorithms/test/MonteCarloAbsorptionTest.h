@@ -94,18 +94,18 @@ public:
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta(1e-08);
+    const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.21339478, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.23415902, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.18711438, outputWS->y(0).back(), delta);
-    TS_ASSERT_DELTA(0.21347241, outputWS->y(2).front(), delta);
-    TS_ASSERT_DELTA(0.2341577, outputWS->y(2)[middle_index], delta);
-    TS_ASSERT_DELTA(0.18707489, outputWS->y(2).back(), delta);
-    TS_ASSERT_DELTA(0.21367069, outputWS->y(4).front(), delta);
-    TS_ASSERT_DELTA(0.23437129, outputWS->y(4)[middle_index], delta);
-    TS_ASSERT_DELTA(0.18710594, outputWS->y(4).back(), delta);
+    TS_ASSERT_DELTA(0.019012, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.0021002, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.00010066, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.019074, outputWS->y(2).front(), delta);
+    TS_ASSERT_DELTA(0.001629, outputWS->y(2)[middle_index], delta);
+    TS_ASSERT_DELTA(9.4268e-05, outputWS->y(2).back(), delta);
+    TS_ASSERT_DELTA(0.019256, outputWS->y(4).front(), delta);
+    TS_ASSERT_DELTA(0.0014369, outputWS->y(4)[middle_index], delta);
+    TS_ASSERT_DELTA(9.8238e-05, outputWS->y(4).back(), delta);
   }
 
   void test_Workspace_With_Just_Sample_For_Direct() {
@@ -115,11 +115,12 @@ public:
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta(1e-08);
+    const double delta(1e-05);
     const size_t middle_index(4);
-    TS_ASSERT_DELTA(0.20488748, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.23469609, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.187899, outputWS->y(0).back(), delta);
+
+    TS_ASSERT_DELTA(0.0087756, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.0031353, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.00087368, outputWS->y(0).back(), delta);
   }
 
   void test_Workspace_With_Just_Sample_For_Indirect() {
@@ -129,11 +130,12 @@ public:
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta(1e-08);
+    const double delta(1e-05);
     const size_t middle_index(4);
-    TS_ASSERT_DELTA(0.20002242, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.23373778, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.18742317, outputWS->y(0).back(), delta);
+
+    TS_ASSERT_DELTA(0.0038337, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.0013434, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.00019552, outputWS->y(0).back(), delta);
   }
 
   void test_Workspace_With_Sample_And_Container() {
@@ -143,11 +145,12 @@ public:
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta(1e-08);
+    const double delta(1e-05);
     const size_t middle_index(4);
-    TS_ASSERT_DELTA(0.22929866, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.21436937, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.23038325, outputWS->y(0).back(), delta);
+
+    TS_ASSERT_DELTA(0.016547, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.0022329, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.00024214, outputWS->y(0).back(), delta);
   }
 
   void test_Workspace_Beam_Size_Set() {
@@ -157,11 +160,12 @@ public:
     auto outputWS = runAlgorithm(wsProps);
 
     verifyDimensions(wsProps, outputWS);
-    const double delta(1e-08);
+    const double delta(1e-05);
     const size_t middle_index(4);
-    TS_ASSERT_DELTA(0.0343979777, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.0437048479, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.0433649673, outputWS->y(0).back(), delta);
+
+    TS_ASSERT_DELTA(0.0045478, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.00036224, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(6.5735e-05, outputWS->y(0).back(), delta);
   }
 
   //---------------------------------------------------------------------------

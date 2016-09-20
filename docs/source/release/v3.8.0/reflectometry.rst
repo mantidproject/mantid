@@ -1,4 +1,4 @@
-Doc=====================
+=====================
 Reflectometry Changes
 =====================
 
@@ -21,12 +21,6 @@ CreateTransmissionWorkspace
 - A workflow diagram has been added to the documentation.
 - The rebinning in wavelength has been removed
 
-ConvertToReflectometryQ
------------------------
-
-
-Reflectometry Reduction Interface
----------------------------------
 
 ISIS Reflectometry (Polref)
 ###########################

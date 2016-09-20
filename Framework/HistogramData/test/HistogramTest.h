@@ -964,42 +964,34 @@ public:
   }
   static void destroySuite(HistogramTestPerformance *suite) { delete suite; }
 
-  HistogramTestPerformance() : copy(histSize, LinearGenerator(0, 2)) {
-    for (size_t i = 0; i < nHists; i++)
-      hists.push_back(Histogram(BinEdges(histSize, LinearGenerator(0, 1))));
-
+  HistogramTestPerformance() : xData(histSize, LinearGenerator(0, 2)) {
     BinEdges edges(histSize, LinearGenerator(0, 2));
-
     for (size_t i = 0; i < nHists; i++)
-      hists2.push_back(Histogram(edges));
-
-    // hists is stored to avoid benchmarking deallocation
-    histsCopy = hists;
+      hists.push_back(Histogram(edges));
   }
 
   void test_copy_X() {
     for (auto &i : hists)
-      i.mutableX() = copy;
+      i.mutableX() = xData;
   }
 
   void test_share_X_with_deallocation() {
-    hists[0].mutableX() = copy;
+    auto x = Mantid::Kernel::make_cow<HistogramX>(xData);
     for (auto &i : hists)
-      i.setSharedX(hists[0].sharedX());
+      i.setSharedX(x);
   }
 
   void test_share_X() {
-    for (auto &i : hists2)
-      i.setSharedX(hists[0].sharedX());
+    auto x = Mantid::Kernel::make_cow<HistogramX>(xData);
+    for (auto &i : hists)
+      i.setSharedX(x);
   }
 
 private:
-  const size_t nHists = 100000;
-  const size_t histSize = 10000;
+  const size_t nHists = 50000;
+  const size_t histSize = 4000;
   std::vector<Histogram> hists;
-  std::vector<Histogram> hists2;
-  std::vector<Histogram> histsCopy;
-  HistogramX copy;
+  HistogramX xData;
 };
 
 #endif /* MANTID_HISTOGRAMDATA_HISTOGRAMTEST_H_ */

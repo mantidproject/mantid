@@ -160,5 +160,23 @@ bool ProxyCompositePeaksPresenter::hasPeakAddModeFor(
     boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target) {
   return m_compositePresenter->hasPeakAddModeFor(target);
 }
+
+void ProxyCompositePeaksPresenter::setPeakSizeOnProjection(
+    const double fraction) {
+  m_compositePresenter->setPeakSizeOnProjection(fraction);
+}
+
+void ProxyCompositePeaksPresenter::setPeakSizeIntoProjection(
+    const double fraction) {
+  m_compositePresenter->setPeakSizeIntoProjection(fraction);
+}
+
+double ProxyCompositePeaksPresenter::getPeakSizeOnProjection() const {
+  return m_compositePresenter->getPeakSizeOnProjection();
+}
+
+double ProxyCompositePeaksPresenter::getPeakSizeIntoProjection() const {
+  return m_compositePresenter->getPeakSizeIntoProjection();
+}
 }
 }
