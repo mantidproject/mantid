@@ -179,7 +179,8 @@ private slots:
   void settingsTabUpdatePlot();
 
   /// Update the plot based on changes on the grouping options tab
-  void groupTabUpdatePlot();
+  void groupTabUpdatePlotGroup();
+  void groupTabUpdatePlotPair();
 
   /// Sets plot type combo box on the Home tab to the same value as the one
   /// under Group Table
@@ -514,6 +515,9 @@ private:
 
   /// Get period number string in subtracted set
   std::string getSubtractedPeriods() const;
+
+  /// Run "Plot" button from group or pair table
+  void runTablePlotButton(ItemType itemType);
 
   /// Cached value of config setting
   std::string m_cachedPeakRadius;

@@ -58,6 +58,8 @@ bool MultiPeriodGroupAlgorithm::checkGroups() {
  * @return true - if all the workspace members are executed.
  */
 bool MultiPeriodGroupAlgorithm::processGroups() {
+  m_usingBaseProcessGroups = true;
+
   bool result = m_worker->processGroups(this, m_multiPeriodGroups);
   /*
    * If we could not process the groups as a multiperiod set of groups
@@ -67,10 +69,6 @@ bool MultiPeriodGroupAlgorithm::processGroups() {
     result = Algorithm::processGroups();
   }
 
-  this->setExecuted(result);
-
-  notificationCenter().postNotification(
-      new FinishedNotification(this, isExecuted()));
   return result;
 }
 

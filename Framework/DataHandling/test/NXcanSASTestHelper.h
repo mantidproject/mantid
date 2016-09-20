@@ -1,16 +1,19 @@
 #ifndef MANTID_DATAHANDLINGTEST_NXCANSASTESTHELPER_H
 #define MANTID_DATAHANDLINGTEST_NXCANSASTESTHELPER_H
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include <Poco/TemporaryFile.h>
 #include <string>
 #include <vector>
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace NXcanSASTestHelper {
 struct NXcanSASTestParameters {
   NXcanSASTestParameters() { initParameters(); }
 
   void initParameters() {
-    filename = "SaveNXcanSASTestFile.h5";
+    Poco::TemporaryFile tmpFile;
+    tmpFile.keep();
+    filename = tmpFile.path();
     size = 10;
     value = 10.23;
     error = 3.45;

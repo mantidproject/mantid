@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MonteCarloTesting.h"
 
@@ -44,7 +45,7 @@ public:
     }
     const Mantid::Algorithms::IBeamProfile::Ray testRay = {V3D(-2, 0, 0),
                                                            V3D(1, 0, 0)};
-    EXPECT_CALL(m_testBeamProfile, generatePoint(_))
+    EXPECT_CALL(m_testBeamProfile, generatePoint(_, _))
         .Times(Exactly(static_cast<int>(m_nevents)))
         .WillRepeatedly(Return(testRay));
     const V3D endPos(0.7, 0.7, 1.4);
@@ -68,6 +69,9 @@ private:
     GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(generatePoint,
                        Ray(Mantid::Kernel::PseudoRandomNumberGenerator &));
+    MOCK_CONST_METHOD2(generatePoint,
+                       Ray(Mantid::Kernel::PseudoRandomNumberGenerator &,
+                           const Mantid::Geometry::BoundingBox &));
     GCC_DIAG_ON_SUGGEST_OVERRIDE
   };
 

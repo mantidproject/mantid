@@ -120,6 +120,7 @@ private:
   void addClearMenuItems(QMenu *menu, const QString &wsName);
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
+  void doPlotSpectra(bool errors);
 
 protected:
   MantidTreeWidget *m_tree;
@@ -175,7 +176,8 @@ public:
   QStringList getSelectedWorkspaceNames() const;
   MantidWSIndexWidget::UserInput
   chooseSpectrumFromSelected(bool showWaterfallOpt = true,
-                             bool showPlotAll = true) const;
+                             bool showPlotAll = true,
+                             bool showTiledOpt = true) const;
   void setSortScheme(MantidItemSortScheme);
   void setSortOrder(Qt::SortOrder);
   MantidItemSortScheme getSortScheme() const;

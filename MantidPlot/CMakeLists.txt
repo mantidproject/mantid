@@ -91,7 +91,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
                    src/PolynomialFit.cpp
-		    src/ProjectSerialiser.cpp
+                   src/ProjectSerialiser.cpp
                    src/PythonScript.cpp
                    src/PythonScripting.cpp
                    src/QwtBarCurve.cpp
@@ -392,7 +392,6 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/RemoveErrorsDialog.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/WorkspaceIcons.h
-                   src/Mantid/IProjectSerialisable.h
                    src/Mantid/InstrumentWidget/InstrumentWindow.h
 )
 
@@ -668,6 +667,10 @@ qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Vates/VatesSimpleGui/ViewWid
 ###########################################################################
 # Add the dependencies
 ###########################################################################
+
+if(MAKE_VATES)
+  include( ${PARAVIEW_USE_FILE} )
+endif()
 
 include_directories ( SYSTEM ${MUPARSER_INCLUDE_DIR} )
 include_directories ( ${ZLIB_INCLUDE_DIRS} )

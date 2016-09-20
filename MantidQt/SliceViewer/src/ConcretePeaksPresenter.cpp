@@ -466,8 +466,7 @@ void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction) {
 
 double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) &&
-      m_viewPeaks->positionOnly()) {
+  if (m_viewPeaks != NULL && m_peaksWS->getNumberPeaks() > 0) {
     result = m_viewPeaks->getOccupancyInView();
   }
   return result;
@@ -475,8 +474,7 @@ double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
 
 double ConcretePeaksPresenter::getPeakSizeIntoProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) &&
-      m_viewPeaks->positionOnly()) {
+  if (m_viewPeaks != NULL && m_peaksWS->getNumberPeaks() > 0) {
     result = m_viewPeaks->getOccupancyIntoView();
   }
   return result;
