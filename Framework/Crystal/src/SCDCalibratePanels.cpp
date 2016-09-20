@@ -161,8 +161,6 @@ void SCDCalibratePanels::exec() {
   int nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
   bool changeL1 = getProperty("ChangeL1");
   bool changeSize = getProperty("ChangePanelSize");
-  std::vector<std::string> fit_workspaces;
-  std::vector<std::string> parameter_workspaces;
 
   if (changeL1)
     findL1(nPeaks, peaksWs);
@@ -170,6 +168,9 @@ void SCDCalibratePanels::exec() {
   for (int i = 0; i < nPeaks; ++i) {
     MyBankNames.insert(peaksWs->getPeak(i).getBankName());
   }
+
+  std::vector<std::string> fit_workspaces(MyBankNames.size(), "fit_");
+  std::vector<std::string> parameter_workspaces(MyBankNames.size(), "params_");
 
   PARALLEL_FOR1(peaksWs)
   for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
@@ -285,16 +286,23 @@ void SCDCalibratePanels::exec() {
       scaleHeight = paramsWS->getRef<double>("Value", 7);
     }
     AnalysisDataService::Instance().remove(bankName);
-    PARALLEL_CRITICAL(afterFit2) {
-      SCDPanelErrors det;
-      det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate,
-                       scaleWidth, scaleHeight, iBank, peaksWs);
-      parameter_workspaces.push_back("params_" + iBank);
-      fit_workspaces.push_back("fit_" + iBank);
-    }
+    SCDPanelErrors det;
+    det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate,
+                     scaleWidth, scaleHeight, iBank, peaksWs);
+    parameter_workspaces[i] += iBank;
+    fit_workspaces[i] += iBank;
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  // remove skipped banks
+  fit_workspaces.erase(
+      std::remove(fit_workspaces.begin(), fit_workspaces.end(), "fit_"),
+      fit_workspaces.end());
+  parameter_workspaces.erase(std::remove(parameter_workspaces.begin(),
+                                         parameter_workspaces.end(), "params_"),
+                             parameter_workspaces.end());
+
   // Try again to optimize L1
   if (changeL1)
     findL1(nPeaks, peaksWs);

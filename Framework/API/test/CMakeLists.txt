@@ -21,6 +21,7 @@ if ( CXXTEST_FOUND )
             ${NEXUS_LIBRARIES}
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
+            ${MUPARSER_LIBRARIES}
             ${GMOCK_LIBRARIES}
             ${GTEST_LIBRARIES}  )
 

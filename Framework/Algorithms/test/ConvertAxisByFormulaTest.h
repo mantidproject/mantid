@@ -6,8 +6,7 @@
 #include "MantidAlgorithms/ConvertAxisByFormula.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/Axis.h"
-#include <MantidAPI/GeometryInfoFactory.h>
-#include <MantidAPI/GeometryInfo.h>
+#include <MantidAPI/SpectrumInfo.h>
 #include <MantidKernel/PhysicalConstants.h>
 #include <math.h>
 
@@ -244,9 +243,7 @@ public:
         result = boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(resultWs)));
 
-    GeometryInfoFactory geometryFactory(*in);
-    GeometryInfo geomInfo = GeometryInfo(geometryFactory, in->getSpectrum(0));
-    double l1 = geomInfo.getL1();
+    double l1 = in->spectrumInfo().l1();
     Axis *axIn = in->getAxis(0);
     Axis *ax = result->getAxis(0);
     for (size_t i = 0; i < ax->length(); ++i) {
@@ -275,7 +272,7 @@ public:
         result = boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(resultWs)));
 
-    GeometryInfoFactory geometryFactory(*in);
+    const auto &spectrumInfo = in->spectrumInfo();
     const size_t xsize = result->blocksize();
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
       const auto &outX = result->readX(i);
@@ -285,8 +282,7 @@ public:
       const auto &inY = in->readY(i);
       const auto &inE = in->readE(i);
 
-      GeometryInfo geomInfo = GeometryInfo(geometryFactory, in->getSpectrum(i));
-      double l2 = geomInfo.getL2();
+      double l2 = spectrumInfo.l2(i);
       for (size_t j = 0; j < xsize; ++j) {
         TS_ASSERT_DELTA(outX[j], inX[j] / l2, 0.0001);
         TS_ASSERT_EQUALS(outY[j], inY[j]);
@@ -317,7 +313,7 @@ public:
         result = boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(resultWs)));
 
-    GeometryInfoFactory geometryFactory(*in);
+    const auto &spectrumInfo = in->spectrumInfo();
     const size_t xsize = result->blocksize();
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
       const auto &outX = result->readX(i);
@@ -327,8 +323,7 @@ public:
       const auto &inY = in->readY(i);
       const auto &inE = in->readE(i);
 
-      GeometryInfo geomInfo = GeometryInfo(geometryFactory, in->getSpectrum(i));
-      double twoTheta = geomInfo.getTwoTheta();
+      double twoTheta = spectrumInfo.twoTheta(i);
       for (size_t j = 0; j < xsize; ++j) {
 
         TS_ASSERT_DELTA(outX[j], inX[j] * (1 + twoTheta), 0.001);
@@ -360,7 +355,7 @@ public:
         result = boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(resultWs)));
 
-    GeometryInfoFactory geometryFactory(*in);
+    const auto &spectrumInfo = in->spectrumInfo();
     const size_t xsize = result->blocksize();
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
       const auto &outX = result->readX(i);
@@ -370,8 +365,7 @@ public:
       const auto &inY = in->readY(i);
       const auto &inE = in->readE(i);
 
-      GeometryInfo geomInfo = GeometryInfo(geometryFactory, in->getSpectrum(i));
-      double signedTwoTheta = geomInfo.getSignedTwoTheta();
+      double signedTwoTheta = spectrumInfo.signedTwoTheta(i);
       for (size_t j = 0; j < xsize; ++j) {
         TS_ASSERT_DELTA(outX[j], inX[j] - signedTwoTheta, 0.0001);
         TS_ASSERT_EQUALS(outY[j], inY[j]);
@@ -402,7 +396,6 @@ public:
         result = boost::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(resultWs)));
 
-    GeometryInfoFactory geometryFactory(*in);
     const size_t xsize = result->blocksize();
     for (size_t i = 0; i < result->getNumberHistograms(); ++i) {
       const auto &outX = result->readX(i);
@@ -412,7 +405,6 @@ public:
       const auto &inY = in->readY(i);
       const auto &inE = in->readE(i);
 
-      GeometryInfo geomInfo = GeometryInfo(geometryFactory, in->getSpectrum(i));
       for (size_t j = 0; j < xsize; ++j) {
         TS_ASSERT_DELTA(outX[j], -inX[xsize - j], 0.0001);
         TS_ASSERT_EQUALS(outY[j], inY[xsize - j - 1]);
