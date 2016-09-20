@@ -533,10 +533,10 @@ DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS) {
 }
 
 std::vector<std::vector<size_t>>
-DetectorDiagnostic::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS) {
+DetectorDiagnostic::makeInstrumentMap(const API::MatrixWorkspace &countsWS) {
   return {
       {boost::counting_iterator<std::size_t>(0),
-       boost::counting_iterator<std::size_t>(countsWS->getNumberHistograms())}};
+       boost::counting_iterator<std::size_t>(countsWS.getNumberHistograms())}};
 }
 /** This function will check how to group spectra when calculating median
  *
@@ -548,11 +548,11 @@ DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
 
   Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
   if (m_parents == 0) {
-    return makeInstrumentMap(countsWS);
+    return makeInstrumentMap(*countsWS);
   }
   if (!instrument) {
     g_log.warning("Workspace has no instrument. LevelsUP is ignored");
-    return makeInstrumentMap(countsWS);
+    return makeInstrumentMap(*countsWS);
   }
 
   // check if not grouped. If grouped, it will throw
@@ -567,7 +567,7 @@ DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
     if (anc.size() < static_cast<size_t>(m_parents)) {
       g_log.warning("Too many levels up. Will ignore LevelsUp");
       m_parents = 0;
-      return makeInstrumentMap(countsWS);
+      return makeInstrumentMap(*countsWS);
     }
     mymap.emplace(anc[m_parents - 1]->getComponentID(), i);
   }
@@ -603,7 +603,7 @@ DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
  * @throw out_of_range if a value is negative
  */
 std::vector<double> DetectorDiagnostic::calculateMedian(
-    const API::MatrixWorkspace_sptr input, bool excludeZeroes,
+    const API::MatrixWorkspace &input, bool excludeZeroes,
     const std::vector<std::vector<size_t>> &indexmap) {
   std::vector<double> medianvec;
   g_log.debug("Calculating the median count rate of the spectra");
@@ -615,7 +615,7 @@ std::vector<double> DetectorDiagnostic::calculateMedian(
     medianInput.reserve(nhists);
 
     bool checkForMask = false;
-    Geometry::Instrument_const_sptr instrument = input->getInstrument();
+    Geometry::Instrument_const_sptr instrument = input.getInstrument();
     if (instrument != nullptr) {
       checkForMask = ((instrument->getSource() != nullptr) &&
                       (instrument->getSample() != nullptr));
@@ -627,14 +627,14 @@ std::vector<double> DetectorDiagnostic::calculateMedian(
 
       if (checkForMask) {
         const std::set<detid_t> &detids =
-            input->getSpectrum(hists[i]).getDetectorIDs();
+            input.getSpectrum(hists[i]).getDetectorIDs();
         if (instrument->isDetectorMasked(detids))
           continue;
         if (instrument->isMonitor(detids))
           continue;
       }
 
-      const double yValue = input->readY(hists[i])[0];
+      const double yValue = input.readY(hists[i])[0];
       if (yValue < 0.0) {
         throw std::out_of_range("Negative number of counts found, could be "
                                 "corrupted raw counts or solid angle data");
