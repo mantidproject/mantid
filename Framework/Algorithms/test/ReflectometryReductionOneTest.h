@@ -58,7 +58,6 @@ public:
     // Define a wavelength range for the detector workspace
     const double wavelengthMin = 1.0;
     const double wavelengthMax = 15;
-    const double wavelengthStep = 0.05;
     const double backgroundWavelengthMin = 17;
     const double backgroundWavelengthMax = 20;
 
@@ -69,8 +68,7 @@ public:
         alg.toLam(toConvert, detectorIndexRangesStr, monitorIndex,
                   boost::tuple<double, double>(wavelengthMin, wavelengthMax),
                   boost::tuple<double, double>(backgroundWavelengthMin,
-                                               backgroundWavelengthMax),
-                  wavelengthStep);
+                                               backgroundWavelengthMax));
 
     // Unpack the results
     MatrixWorkspace_sptr detectorWS = inLam.get<0>();
@@ -186,7 +184,6 @@ public:
     alg->setProperty("InputWorkspace", m_tinyReflWS);
     alg->setProperty("WavelengthMin", 1.0);
     alg->setProperty("WavelengthMax", 15.0);
-    alg->setProperty("WavelengthStep", 0.1);
     alg->setProperty("I0MonitorIndex", 0);
     alg->setProperty("MonitorBackgroundWavelengthMin", 0.0);
     alg->setProperty("MonitorBackgroundWavelengthMax", 0.0);
@@ -244,6 +241,8 @@ public:
     // defined in the IPF, so CalculateResolution should throw.
     inWS->setInstrument(m_tinyReflWS->getInstrument());
     inWS->getAxis(0)->setUnit("Wavelength");
+    // Setup bad bin edges, Rebin will throw (not CalculateResolution?)
+    inWS->dataX(0).assign(inWS->readX(0).size(), inWS->readX(0)[0]);
     alg->setProperty("InputWorkspace", inWS);
     alg->setProperty("OutputWorkspace", "rebinnedWS");
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
@@ -344,7 +343,6 @@ public:
     alg->setProperty("InputWorkspace", m_tinyReflWS);
     alg->setProperty("WavelengthMin", 1.0);
     alg->setProperty("WavelengthMax", 15.0);
-    alg->setProperty("WavelengthStep", 0.1);
     alg->setProperty("I0MonitorIndex", 0);
     alg->setProperty("MonitorBackgroundWavelengthMin", 0.0);
     alg->setProperty("MonitorBackgroundWavelengthMax", 0.0);

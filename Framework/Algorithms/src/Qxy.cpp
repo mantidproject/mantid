@@ -1,11 +1,11 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidAlgorithms/GravitySANSHelper.h"
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
@@ -192,7 +192,8 @@ void Qxy::exec() {
     // constructed once per spectrum
     GravitySANSHelper grav;
     if (doGravity) {
-      grav = GravitySANSHelper(inputWorkspace, det, getProperty("ExtraLength"));
+      grav = GravitySANSHelper(inputWorkspace->spectrumInfo(), i,
+                               getProperty("ExtraLength"));
     }
 
     for (int j = static_cast<int>(numBins) - 1; j >= static_cast<int>(wavStart);
@@ -369,12 +370,10 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   outputWorkspace->replaceAxis(1, verticalAxis);
 
   // Build up the X values
-  HistogramData::BinEdges axis(bins);
-  auto &horizontalAxisRef = axis.mutableData();
+  HistogramData::BinEdges axis(bins,
+                               HistogramData::LinearGenerator(startVal, delta));
   for (int i = 0; i < bins; ++i) {
     const double currentVal = startVal + i * delta;
-    // Set the X value
-    horizontalAxisRef[i] = currentVal;
     // Set the Y value on the axis
     verticalAxis->setValue(i, currentVal);
   }

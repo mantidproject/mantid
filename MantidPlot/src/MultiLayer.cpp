@@ -43,6 +43,8 @@
 #include <QSpinBox>
 #include <QSize>
 
+#include <cmath>
+#include <limits>
 #include <set>
 
 #if QT_VERSION >= 0x040300
@@ -71,11 +73,20 @@
 #include "Mantid/MantidWSIndexDialog.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
 
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
+
+// Register the window into the WindowFactory
+DECLARE_WINDOW(MultiLayer)
+
+using namespace Mantid;
 
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MultiLayer");
+
+const double MAXIMUM = std::numeric_limits<double>::max();
+const double MINIMUM = std::numeric_limits<double>::min();
+constexpr int AXIS_X(0), AXIS_Y(1);
 }
 
 LayerButton::LayerButton(const QString &text, QWidget *parent)
@@ -97,9 +108,8 @@ void LayerButton::mouseDoubleClickEvent(QMouseEvent *) {
   emit showCurvesDialog();
 }
 
-MultiLayer::MultiLayer(ApplicationWindow *parent, int layers, int rows,
-                       int cols, const QString &label, const char *name,
-                       Qt::WFlags f)
+MultiLayer::MultiLayer(QWidget *parent, int layers, int rows, int cols,
+                       const QString &label, const char *name, Qt::WFlags f)
     : MdiSubWindow(parent, label, name, f), active_graph(NULL), d_cols(cols),
       d_rows(rows), graph_width(500), graph_height(400), colsSpace(5),
       rowsSpace(5), left_margin(5), right_margin(5), top_margin(5),
@@ -107,6 +117,9 @@ MultiLayer::MultiLayer(ApplicationWindow *parent, int layers, int rows,
       hor_align(HCenter), vert_align(VCenter), d_scale_on_print(true),
       d_print_cropmarks(false), d_close_on_empty(false),
       d_is_waterfall_plot(false), d_waterfall_fill_color(/*Invalid color*/) {
+  d_cols = cols;
+  d_rows = rows;
+
   layerButtonsBox = new QHBoxLayout();
   waterfallBox = new QHBoxLayout();
   buttonsLine = new QHBoxLayout();
@@ -120,11 +133,7 @@ MultiLayer::MultiLayer(ApplicationWindow *parent, int layers, int rows,
   mainWidget->setAutoFillBackground(true);
   mainWidget->setBackgroundRole(QPalette::Window);
 
-  // setAutoFillBackground(true);
-  // setBackgroundRole(QPalette::Window);
-
   QVBoxLayout *layout = new QVBoxLayout(mainWidget);
-  // QVBoxLayout* layout = new QVBoxLayout(this);
 
   layout->addLayout(buttonsLine);
   layout->addWidget(canvas, 1);
@@ -146,9 +155,6 @@ MultiLayer::MultiLayer(ApplicationWindow *parent, int layers, int rows,
 
   for (int i = 0; i < layers; i++)
     addLayer();
-
-  // setFocusPolicy(Qt::StrongFocus);
-  // setFocus();
 
   setAcceptDrops(true);
 }
@@ -562,8 +568,8 @@ QSize MultiLayer::arrangeLayers(bool userSize) {
       gr->setAutoscaleFonts(false);
     }
 
-    gr->setGeometry(QRect(x, y, w, h));
-    gr->plotWidget()->resize(QSize(w, h));
+    gr->setGeometry(QRect(x, y, std::abs(w), std::abs(h)));
+    gr->plotWidget()->resize(QSize(std::abs(w), std::abs(h)));
 
     if (!userSize)
       gr->setAutoscaleFonts(autoscaleFonts); // restore user settings
@@ -583,32 +589,19 @@ QSize MultiLayer::arrangeLayers(bool userSize) {
   return size;
 }
 
+/**
+ * Find best layout for a multilayer plot, given the number of layers
+ * @param d_rows :: [output] Number of rows
+ * @param d_cols :: [output] Number of columns
+ */
 void MultiLayer::findBestLayout(int &d_rows, int &d_cols) {
-  int NumGraph = graphsList.size();
-  if (NumGraph % 2 == 0) // NumGraph is an even number
-  {
-    if (NumGraph <= 2)
-      d_cols = NumGraph / 2 + 1;
-    else if (NumGraph > 2)
-      d_cols = NumGraph / 2;
-
-    if (NumGraph < 8)
-      d_rows = NumGraph / 4 + 1;
-    if (NumGraph >= 8)
-      d_rows = NumGraph / 4;
-  } else if (NumGraph % 2 != 0) // NumGraph is an odd number
-  {
-    int Num = NumGraph + 1;
-
-    if (Num <= 2)
-      d_cols = 1;
-    else if (Num > 2)
-      d_cols = Num / 2;
-
-    if (Num < 8)
-      d_rows = Num / 4 + 1;
-    if (Num >= 8)
-      d_rows = Num / 4;
+  const int numGraphs = graphsList.size();
+  const int root =
+      static_cast<int>(std::ceil(std::sqrt(static_cast<double>(numGraphs))));
+  d_rows = root;
+  d_cols = root;
+  if (d_rows * d_cols - numGraphs > d_rows) {
+    --d_rows;
   }
 }
 
@@ -1464,7 +1457,8 @@ void MultiLayer::convertToWaterfall() {
     return;
 
   hide();
-  active->setWaterfallOffset(10, 20);
+  active->setWaterfallOffset(default_waterfall_width_offset,
+                             default_waterfall_height_offset);
   setWaterfallLayout(true);
   // Next two lines replace the legend so that it works on reversing the curve
   // order
@@ -1725,78 +1719,129 @@ void WaterfallFillDialog::setFillMode() {
   }
 }
 
-void MultiLayer::loadFromProject(const std::string &lines,
-                                 ApplicationWindow *app,
-                                 const int fileVersion) {
-  TSVSerialiser tsv(lines);
+MantidQt::API::IProjectSerialisable *
+MultiLayer::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                            const int fileVersion) {
+  std::string multiLayerLines = lines;
 
-  if (tsv.hasLine("geometry"))
-    app->restoreWindowGeometry(
-        app, this, QString::fromStdString(tsv.lineAsString("geometry")));
+  // The very first line of a multilayer section has some important settings,
+  // and lacks a name. Take it out and parse it manually.
 
-  blockSignals(true);
+  if (multiLayerLines.length() == 0)
+    return nullptr;
+
+  std::vector<std::string> lineVec;
+  boost::split(lineVec, multiLayerLines, boost::is_any_of("\n"));
+
+  std::string firstLine = lineVec.front();
+  // Remove the first line
+  lineVec.erase(lineVec.begin());
+
+  // Split the line up into its values
+  std::vector<std::string> values;
+  boost::split(values, firstLine, boost::is_any_of("\t"));
+
+  QString caption = QString::fromUtf8(values[0].c_str());
+  int rows = 1;
+  int cols = 1;
+  Mantid::Kernel::Strings::convert<int>(values[1], rows);
+  Mantid::Kernel::Strings::convert<int>(values[2], cols);
+  QString birthDate = QString::fromStdString(values[3]);
+
+  MantidQt::API::TSVSerialiser tsv(lines);
+
+  auto multiLayer = new MultiLayer(app, 0, rows, cols);
+
+  multiLayer->setBirthDate(birthDate);
+  app->setListViewDate(caption, birthDate);
+  multiLayer->blockSignals(true);
 
   if (tsv.selectLine("WindowLabel")) {
-    setWindowLabel(QString::fromUtf8(tsv.asString(1).c_str()));
-    setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
+    multiLayer->setWindowLabel(QString::fromUtf8(tsv.asString(1).c_str()));
+    multiLayer->setCaptionPolicy((MdiSubWindow::CaptionPolicy)tsv.asInt(2));
   }
 
   if (tsv.selectLine("Margins")) {
     int left = 0, right = 0, top = 0, bottom = 0;
     tsv >> left >> right >> top >> bottom;
-    setMargins(left, right, top, bottom);
+    multiLayer->setMargins(left, right, top, bottom);
   }
 
   if (tsv.selectLine("Spacing")) {
     int rowSpace = 0, colSpace = 0;
     tsv >> rowSpace >> colSpace;
-    setSpacing(rowSpace, colSpace);
+    multiLayer->setSpacing(rowSpace, colSpace);
   }
 
   if (tsv.selectLine("LayerCanvasSize")) {
     int width = 0, height = 0;
     tsv >> width >> height;
-    setLayerCanvasSize(width, height);
+    multiLayer->setLayerCanvasSize(width, height);
   }
 
   if (tsv.selectLine("Alignement")) {
     int hor = 0, vert = 0;
     tsv >> hor >> vert;
-    setAlignement(hor, vert);
+    multiLayer->setAlignement(hor, vert);
   }
 
+  multiLayer->blockSignals(false);
+
+  QString label = caption;
+  label = label.replace(QRegExp("_"), "-");
+  app->initMultilayerPlot(multiLayer, label);
+
+  if (tsv.hasLine("geometry")) {
+    app->restoreWindowGeometry(
+        app, multiLayer, QString::fromStdString(tsv.lineAsString("geometry")));
+  }
+
+  bool isWaterfall = false;
   if (tsv.hasSection("waterfall")) {
     const std::string wfStr = tsv.sections("waterfall").front();
-
-    if (wfStr == "1")
-      setWaterfallLayout(true);
-    else
-      setWaterfallLayout(false);
+    isWaterfall = (wfStr == "1");
   }
 
   if (tsv.hasSection("graph")) {
-    std::vector<std::string> graphSections = tsv.sections("graph");
-    for (auto it = graphSections.begin(); it != graphSections.end(); ++it) {
-      const std::string graphLines = *it;
-
-      TSVSerialiser gtsv(graphLines);
+    auto graphSections = tsv.sections("graph");
+    for (const auto &graphLines : graphSections) {
+      MantidQt::API::TSVSerialiser gtsv(graphLines);
 
       if (gtsv.selectLine("ggeometry")) {
         int x = 0, y = 0, w = 0, h = 0;
-        gtsv >> x >> y >> w >> h;
+        gtsv >> x >> y;
 
-        Graph *g = dynamic_cast<Graph *>(addLayer(x, y, w, h));
-        if (g)
+        w = multiLayer->canvas->width();
+        w -= multiLayer->left_margin;
+        w -= multiLayer->right_margin;
+        w -= (multiLayer->d_cols - 1) * multiLayer->colsSpace;
+
+        h = multiLayer->canvas->height();
+        h -= multiLayer->top_margin;
+        h -= multiLayer->left_margin;
+        h -= (multiLayer->d_rows - 1) * multiLayer->rowsSpace;
+        h -= LayerButton::btnSize();
+
+        if (isWaterfall)
+          h -= LayerButton::btnSize(); // need an extra offset for the buttons
+
+        auto g = multiLayer->addLayer(x, y, w, h);
+        if (g) {
           g->loadFromProject(graphLines, app, fileVersion);
+        }
       }
     }
   }
 
-  blockSignals(false);
+  // waterfall must be updated after graphs have been loaded
+  // as it requires the graphs to exist first!
+  multiLayer->setWaterfallLayout(isWaterfall);
+
+  return multiLayer;
 }
 
 std::string MultiLayer::saveToProject(ApplicationWindow *app) {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
 
   tsv.writeRaw("<multiLayer>");
 
@@ -1819,4 +1864,34 @@ std::string MultiLayer::saveToProject(ApplicationWindow *app) {
   tsv.writeRaw("</multiLayer>");
 
   return tsv.outputLines();
+}
+
+/**
+ * Sets axes for all layers to the same scales, which are set to encompass the
+ * widest range of data.
+ */
+void MultiLayer::setCommonAxisScales() {
+  double lowestX(MAXIMUM), lowestY(MAXIMUM), highestX(MINIMUM),
+      highestY(MINIMUM);
+
+  // Find the lowest, highest X and Y values
+  // N.B. Layers are 1-indexed
+  for (int i = 1; i < layers() + 1; ++i) {
+    const auto *plot = layer(i)->plotWidget();
+    const auto xmin = plot->axisScaleDiv(AXIS_X)->lowerBound();
+    const auto xmax = plot->axisScaleDiv(AXIS_X)->upperBound();
+    const auto ymin = plot->axisScaleDiv(AXIS_Y)->lowerBound();
+    const auto ymax = plot->axisScaleDiv(AXIS_Y)->upperBound();
+    lowestX = xmin < lowestX ? xmin : lowestX;
+    highestX = xmax < highestX ? highestX : xmax;
+    lowestY = ymin < lowestY ? ymin : lowestY;
+    highestY = ymax < highestY ? highestY : ymax;
+  }
+
+  // Set axes for all layers
+  for (int i = 1; i < layers() + 1; ++i) {
+    auto *plot = layer(i)->plotWidget();
+    plot->setAxisScale(AXIS_X, lowestX, highestX);
+    plot->setAxisScale(AXIS_Y, lowestY, highestY);
+  }
 }

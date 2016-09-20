@@ -92,7 +92,8 @@ public:
 
     std::vector<double> values{1.0, 2.0, 3.0, 4.0};
 
-    alg.setProperty<std::vector<double>>("DataX", std::vector<double>(2, 1.1));
+    alg.setProperty<std::vector<double>>("DataX",
+                                         std::vector<double>{1.1, 2.2});
     alg.setProperty<std::vector<double>>("DataY", values);
     alg.setProperty<std::vector<double>>("DataE", values);
 
@@ -109,7 +110,7 @@ public:
     TS_ASSERT(workspace->isHistogramData());
     TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 4);
     TS_ASSERT_EQUALS(workspace->x(0)[0], 1.1);
-    TS_ASSERT_EQUALS(workspace->x(2)[1], 1.1);
+    TS_ASSERT_EQUALS(workspace->x(2)[1], 2.2);
 
     Mantid::API::TextAxis *axis =
         dynamic_cast<Mantid::API::TextAxis *>(workspace->getAxis(1));
@@ -133,7 +134,8 @@ public:
     alg.initialize();
     const std::string outWS = "testParenting";
     alg.setPropertyValue("OutputWorkspace", outWS);
-    alg.setProperty<std::vector<double>>("DataX", std::vector<double>(2, 1.1));
+    alg.setProperty<std::vector<double>>("DataX",
+                                         std::vector<double>{1.1, 2.2});
     alg.setProperty<std::vector<double>>("DataY", std::vector<double>(2, 1.1));
     alg.setProperty("ParentWorkspace", parent);
     TS_ASSERT(alg.execute());

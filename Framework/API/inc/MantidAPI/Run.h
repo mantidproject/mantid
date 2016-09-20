@@ -46,6 +46,9 @@ namespace API {
 */
 class MANTID_API_DLL Run : public LogManager {
 public:
+  /// Clone
+  boost::shared_ptr<Run> clone();
+
   /// Addition
   Run &operator+=(const Run &rhs);
 

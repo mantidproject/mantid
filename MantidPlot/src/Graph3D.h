@@ -29,8 +29,8 @@
 #ifndef GRAPH3D_H
 #define GRAPH3D_H
 
-#include "Mantid/IProjectSerialisable.h"
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 
 #include <qwt3d_surfaceplot.h>
 #include <qwt3d_function.h>
@@ -42,7 +42,9 @@
 
 #include "Table.h"
 #include "Matrix.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
+class MantidMatrix;
 class UserFunction2D;
 class UserParametricSurface;
 class Function2D; // Mantid
@@ -60,13 +62,15 @@ class Function2D; // Mantid
  *directly to a file, so they
  * can't be combined with output generated via QPrinter.
  */
-class Graph3D : public MdiSubWindow, public Mantid::IProjectSerialisable {
+class Graph3D : public MdiSubWindow {
   Q_OBJECT
 
 public:
   Graph3D(const QString &label, QWidget *parent, const char *name = 0,
           Qt::WFlags f = 0);
   ~Graph3D() override;
+
+  void initPlot();
 
   enum PlotType { Scatter = 0, Trajectory = 1, Bars = 2, Ribbon = 3 };
   enum PointStyle {
@@ -77,9 +81,43 @@ public:
     Cones = 4
   };
 
+  enum class SurfaceFunctionType {
+    XYZ,
+    Plot3D,
+    MatrixPlot3D,
+    MantidMatrixPlot3D,
+    Surface,
+    ParametricSurface
+  };
+
+  // A POD struct to pass around all of the parameters
+  // for the 3D plots
+  struct SurfaceFunctionParams {
+    std::string formula;
+    SurfaceFunctionType type;
+    double xStart;
+    double xStop;
+    double yStart;
+    double yStop;
+    double zStart;
+    double zStop;
+
+    // surface plot parameters
+    std::string xFormula;
+    std::string yFormula;
+    std::string zFormula;
+    double uStart;
+    double uEnd;
+    double vStart;
+    double vEnd;
+    int columns;
+    int rows;
+    int uPeriodic;
+    int vPeriodic;
+  };
+
 public slots:
   void copy(Graph3D *g);
-  void initPlot();
   void initCoord();
   void addFunction(Function2D *hfun, double xl, double xr, double yl, double yr,
                    double zl, double zr, size_t columns, size_t rows);
@@ -261,8 +299,9 @@ public slots:
   void exportVector(const QString &fileName);
   void exportToFile(const QString &fileName);
 
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion) override;
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
 
   void zoomChanged(double);
@@ -377,6 +416,27 @@ signals:
   void modified();
 
 private:
+  Graph3D::SurfaceFunctionParams
+  readSurfaceFunction(MantidQt::API::TSVSerialiser &tsv);
+  Graph3D::SurfaceFunctionType
+  readSurfaceFunctionType(const std::string &formula);
+  MantidMatrix *readWorkspaceForPlot(ApplicationWindow *app,
+                                     MantidQt::API::TSVSerialiser &tsv);
+  int read3DPlotStyle(MantidQt::API::TSVSerialiser &tsv);
+  void setupMantidMatrixPlot3D(ApplicationWindow *app,
+                               MantidQt::API::TSVSerialiser &tsv);
+  void setupPlot3D(ApplicationWindow *app, const QString &caption,
+                   const SurfaceFunctionParams &params);
+  void setupPlotXYZ(ApplicationWindow *app, const QString &caption,
+                    const SurfaceFunctionParams &params);
+  void setupPlotParametricSurface(ApplicationWindow *app,
+                                  const SurfaceFunctionParams &params);
+  void setupPlotSurface(ApplicationWindow *app,
+                        const SurfaceFunctionParams &params);
+  void setupMatrixPlot3D(ApplicationWindow *app, const QString &caption,
+                         const SurfaceFunctionParams &params);
+  void readScaleType(const std::string &scaleTypes);
+
   //! Wait this many msecs before redraw 3D plot (used for animations)
   int animation_redraw_wait;
   //! File name of the color map used for the data (if any)

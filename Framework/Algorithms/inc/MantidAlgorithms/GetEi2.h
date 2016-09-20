@@ -9,6 +9,16 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
 
+//----------------------------------------------------------------------
+// Forward Declarations
+//----------------------------------------------------------------------
+namespace Mantid {
+namespace HistogramData {
+class HistogramY;
+class HistogramX;
+class HistogramE;
+}
+}
 namespace Mantid {
 namespace Algorithms {
 /** Requires an estimate for the initial neutron energy which it uses to
@@ -98,8 +108,10 @@ private:
                                   const double first, const double width,
                                   const double end);
   /// Integrate the point data
-  void integrate(double &integral_val, double &integral_err, const MantidVec &x,
-                 const MantidVec &s, const MantidVec &e, const double xmin,
+  void integrate(double &integral_val, double &integral_err,
+                 const HistogramData::HistogramX &x,
+                 const HistogramData::HistogramY &s,
+                 const HistogramData::HistogramE &e, const double xmin,
                  const double xmax) const;
   /// Store the incident energy within the sample object
   void storeEi(const double ei) const;

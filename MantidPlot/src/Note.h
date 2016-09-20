@@ -30,8 +30,8 @@
 #ifndef NOTE_H
 #define NOTE_H
 
+#include "MantidQtAPI/IProjectSerialisable.h"
 #include "MdiSubWindow.h"
-#include "Mantid/IProjectSerialisable.h"
 #include <QTextEdit>
 
 class ApplicationWindow;
@@ -41,7 +41,7 @@ class ApplicationWindow;
  * \section future Future Plans
  * - Search and replace
  */
-class Note : public MdiSubWindow, public Mantid::IProjectSerialisable {
+class Note : public MdiSubWindow {
   Q_OBJECT
 
 public:
@@ -49,8 +49,9 @@ public:
        Qt::WFlags f = 0);
   ~Note() override{};
 
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion) override;
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
 
   void setName(const QString &name);
@@ -68,8 +69,6 @@ public slots:
   QString exportASCII(const QString &filename = QString::null);
 
 private:
-  void init();
-
   QTextEdit *te;
 };
 

@@ -1,11 +1,9 @@
-#ifndef MUONALPHACALCTEST_H_
-#define MUONALPHACALCTEST_H_
+#ifndef CALMUONDEADTIMETEST_H_
+#define CALMUONDEADTIMETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadMuonNexus1.h"
-#include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Column.h"
 #include "MantidAlgorithms/CalMuonDeadTime.h"
@@ -21,25 +19,28 @@ using namespace Mantid::DataObjects;
 
 class CalMuonDeadTimeTest : public CxxTest::TestSuite {
 public:
-  void testName() { TS_ASSERT_EQUALS(calDeadTime.name(), "CalMuonDeadTime") }
+  void testName() {
+    CalMuonDeadTime calDeadTime;
+    TS_ASSERT_EQUALS(calDeadTime.name(), "CalMuonDeadTime")
+  }
 
-  void testCategory() { TS_ASSERT_EQUALS(calDeadTime.category(), "Muon") }
+  void testCategory() {
+    CalMuonDeadTime calDeadTime;
+    TS_ASSERT_EQUALS(calDeadTime.category(), "Muon")
+  }
 
   void testInit() {
+    CalMuonDeadTime calDeadTime;
     calDeadTime.initialize();
     TS_ASSERT(calDeadTime.isInitialized())
   }
 
   void testCalDeadTime() {
-    // Load the muon nexus file
-    Mantid::DataHandling::LoadMuonNexus1 loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "emu00006473.nxs");
-    loader.setPropertyValue("OutputWorkspace", "EMU6473");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    TS_ASSERT_EQUALS(loader.isExecuted(), true);
+    auto inputWS = loadData();
 
-    calDeadTime.setPropertyValue("InputWorkspace", "EMU6473");
+    CalMuonDeadTime calDeadTime;
+    calDeadTime.initialize();
+    calDeadTime.setProperty("InputWorkspace", inputWS);
     calDeadTime.setPropertyValue("DeadTimeTable", "deadtimetable");
     calDeadTime.setPropertyValue("DataFitted", "fittedData");
     calDeadTime.setPropertyValue("FirstGoodData", "1.0");
@@ -65,8 +66,39 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove("EMU6473");
   }
 
+  void testNoGoodfrmPresent() {
+    auto inputWS = loadData();
+
+    auto &run = inputWS->mutableRun();
+    run.removeLogData("goodfrm");
+    TS_ASSERT(!run.hasProperty("goodfrm"));
+
+    CalMuonDeadTime calDeadTime;
+    calDeadTime.initialize();
+    calDeadTime.setRethrows(true);
+    calDeadTime.setProperty("InputWorkspace", inputWS);
+    calDeadTime.setPropertyValue("DeadTimeTable", "deadtimetable");
+    calDeadTime.setPropertyValue("DataFitted", "fittedData");
+    calDeadTime.setPropertyValue("FirstGoodData", "1.0");
+    calDeadTime.setPropertyValue("LastGoodData", "2.0");
+
+    TS_ASSERT_THROWS(calDeadTime.execute(), std::runtime_error);
+    TS_ASSERT(!calDeadTime.isExecuted());
+  }
+
 private:
-  CalMuonDeadTime calDeadTime;
+  // Load the muon nexus file
+  MatrixWorkspace_sptr loadData() {
+    Mantid::DataHandling::LoadMuonNexus1 loader;
+    loader.initialize();
+    loader.setChild(true);
+    loader.setPropertyValue("Filename", "emu00006473.nxs");
+    loader.setPropertyValue("OutputWorkspace", "__NotUsed");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT_EQUALS(loader.isExecuted(), true);
+    Workspace_sptr outputWS = loader.getProperty("OutputWorkspace");
+    return boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+  }
 };
 
-#endif /*MUONALPHACALCTEST_H_*/
+#endif /*CALMUONDEADTIMETEST_H_*/

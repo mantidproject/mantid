@@ -9,7 +9,6 @@
 #include "MantidMatrixModel.h"
 #include "MantidMatrixTabExtension.h"
 
-#include "Mantid/IProjectSerialisable.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -83,15 +82,13 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 */
-class MantidMatrix : public MdiSubWindow,
-                     MantidQt::API::WorkspaceObserver,
-                     public Mantid::IProjectSerialisable {
+class MantidMatrix : public MdiSubWindow, MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 
 public:
-  MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
-               ApplicationWindow *parent, const QString &label,
-               const QString &name = QString(), int start = -1, int end = -1);
+  MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, QWidget *parent,
+               const QString &label, const QString &name = QString(),
+               int start = -1, int end = -1);
 
   void connectTableView(QTableView *, MantidMatrixModel *);
   MantidMatrixModel *model() { return m_modelY; }
@@ -156,8 +153,9 @@ public:
   int precision();
 
   // Loading and saving projects
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion) override;
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
 
   /// returns the workspace name

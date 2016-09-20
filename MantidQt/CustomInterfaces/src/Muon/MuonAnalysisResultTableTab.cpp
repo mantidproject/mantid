@@ -11,6 +11,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
@@ -21,7 +22,6 @@
 #include <QFileDialog>
 #include <QHash>
 #include <QMessageBox>
-#include <QDesktopServices>
 
 #include <algorithm>
 
@@ -82,8 +82,8 @@ MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis &uiForm)
 * Muon Analysis Results Table Help (slot)
 */
 void MuonAnalysisResultTableTab::helpResultsClicked() {
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-                                 "MuonAnalysisResultsTable"));
+  MantidQt::API::HelpWindow::showCustomInterface(
+      nullptr, QString("Muon_Analysis"), QString("results-table"));
 }
 
 /**

@@ -222,7 +222,8 @@ typedef boost::shared_ptr<BoundingBox> BoundingBox_sptr;
 typedef boost::shared_ptr<const BoundingBox> BoundingBox_const_sptr;
 
 /// Print out the bounding box values to a stream.
-std::ostream &operator<<(std::ostream &os, const BoundingBox &box);
+MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os,
+                                             const BoundingBox &box);
 }
 }
 

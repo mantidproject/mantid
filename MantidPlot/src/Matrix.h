@@ -44,7 +44,7 @@
 #include "ScriptingEnv.h"
 #include "Scripted.h"
 
-#include "Mantid/IProjectSerialisable.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 
 #include <qwt_double_rect.h>
 #include <qwt_color_map.h>
@@ -61,13 +61,11 @@ class QShortcut;
 class QUndoStack;
 
 //! Matrix worksheet class
-class Matrix : public MdiSubWindow,
-               public Scripted,
-               public Mantid::IProjectSerialisable {
+class Matrix : public MdiSubWindow, public Scripted {
   Q_OBJECT
 
 protected:
-  Matrix(ScriptingEnv *env, const QString &label, ApplicationWindow *parent,
+  Matrix(ScriptingEnv *env, const QString &label, QWidget *parent,
          const QString &name = QString(), Qt::WFlags f = 0);
 
 public:
@@ -83,12 +81,10 @@ public:
 ::    * @param name :: window name
    * @param f :: window flags
    */
-  Matrix(ScriptingEnv *env, int r, int c, const QString &label,
-         ApplicationWindow *parent, const QString &name = QString(),
-         Qt::WFlags f = 0);
+  Matrix(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent,
+         const QString &name = QString(), Qt::WFlags f = 0);
   Matrix(ScriptingEnv *env, const QImage &image, const QString &label,
-         ApplicationWindow *parent, const QString &name = QString(),
-         Qt::WFlags f = 0);
+         QWidget *parent, const QString &name = QString(), Qt::WFlags f = 0);
   ~Matrix() override;
 
   enum Operation {
@@ -262,8 +258,9 @@ public slots:
   void restore(const QStringList &l) override;
 
   // loading and saving project files
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion) override;
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
 
   // selection operations

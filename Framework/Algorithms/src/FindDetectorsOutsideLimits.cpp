@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/FindDetectorsOutsideLimits.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -112,7 +113,7 @@ void FindDetectorsOutsideLimits::exec() {
 
   const double deadValue(1.0); // delete the data
 
-  const int diagLength = static_cast<int>(countsWS->getNumberHistograms());
+  const int diagLength = maxIndex - minIndex;
   const int progStep = static_cast<int>(std::ceil(diagLength / 100.0));
 
   bool checkForMask = false;
@@ -123,27 +124,26 @@ void FindDetectorsOutsideLimits::exec() {
   }
 
   int numFailed(0);
-  PARALLEL_FOR2(countsWS, outputWS)
-  for (int i = 0; i < diagLength; ++i) {
+  const auto &spectrumInfo = countsWS->spectrumInfo();
+#pragma omp parallel for if (countsWS->threadSafe() &&                         \
+                                                  outputWS->threadSafe()),     \
+                                                  reduction(+ : numFailed)
+  for (int i = minIndex; i <= maxIndex; ++i) {
     bool keepData = true;
+    int countsInd = i - minIndex;
     if (i % progStep == 0) {
-      progress(static_cast<double>(i) / diagLength);
+      progress(static_cast<double>(countsInd) / diagLength);
       interruption_point();
     }
 
-    if (checkForMask) {
-      const std::set<detid_t> &detids =
-          countsWS->getSpectrum(i).getDetectorIDs();
-      if (instrument->isMonitor(detids)) {
+    if (checkForMask && spectrumInfo.hasDetectors(countsInd)) {
+      if (spectrumInfo.isMonitor(countsInd))
         continue; // do include or exclude from mask
-      }
-
-      if (instrument->isDetectorMasked(detids)) {
+      if (spectrumInfo.isMasked(countsInd))
         keepData = false;
-      }
     }
 
-    const double &yValue = countsWS->y(i)[0];
+    const double &yValue = countsWS->y(countsInd)[0];
     // Mask out NaN and infinite
     if (boost::math::isinf(yValue) || boost::math::isnan(yValue)) {
       keepData = false;
@@ -159,7 +159,6 @@ void FindDetectorsOutsideLimits::exec() {
 
     if (!keepData) {
       outputWS->mutableY(i)[0] = deadValue;
-      PARALLEL_ATOMIC
       ++numFailed;
     }
   }

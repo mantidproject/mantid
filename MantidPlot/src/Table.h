@@ -40,9 +40,8 @@
 #include "ScriptingEnv.h"
 #include "Scripted.h"
 
-#include "Mantid/IProjectSerialisable.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 
-class Folder;
 class QTableWidgetItem;
 
 class MyTable : public QTableWidget {
@@ -88,9 +87,7 @@ private:
  * dependancy.
  * [ assigned to thzs ]
  */
-class Table : public MdiSubWindow,
-              public Scripted,
-              public Mantid::IProjectSerialisable {
+class Table : public MdiSubWindow, public Scripted {
   Q_OBJECT
 
 public:
@@ -118,9 +115,8 @@ public:
     Overwrite   //!< replace content of table with the imported file
   };
 
-  Table(ScriptingEnv *env, int r, int c, const QString &label,
-        ApplicationWindow *parent, const QString &name = QString(),
-        Qt::WFlags f = 0);
+  Table(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent,
+        const QString &name = QString(), Qt::WFlags f = 0);
 
   int topSelectedRow() const { return d_table->topSelectedRow(); }
   int bottomSelectedRow() const { return d_table->bottomSelectedRow(); }
@@ -135,8 +131,6 @@ public:
   //! Updates the decimal separators when importing ASCII files on user request
   void updateDecimalSeparators(const QLocale &oldSeparators);
   void setAutoUpdateValues(bool on = true);
-  /// Get the pointer to the parent folder of the window
-  Folder *folder() { return m_folder; }
 
 public slots:
   MyTable *table() { return d_table; };
@@ -307,7 +301,6 @@ public slots:
   void clear();
   //@}
 
-  void init(int rows, int cols);
   QStringList selectedColumns();
   QStringList selectedYColumns();
   QStringList selectedXColumns();
@@ -398,8 +391,9 @@ public slots:
   void showComments(bool on = true);
   bool commentsEnabled() { return d_show_comments; }
 
-  void loadFromProject(const std::string &lines, ApplicationWindow *app,
-                       const int fileVersion) override;
+  static MantidQt::API::IProjectSerialisable *
+  loadFromProject(const std::string &lines, ApplicationWindow *app,
+                  const int fileVersion);
   void restore(const QStringList &lst) override;
 
   //! This slot notifies the main application that the table has been modified.
@@ -449,8 +443,6 @@ private:
 
   //! Internal function to change the column header
   void setColumnHeader(int index, const QString &label);
-  /// Pointer to the parent folder of the window
-  Folder *m_folder;
 };
 
 #endif

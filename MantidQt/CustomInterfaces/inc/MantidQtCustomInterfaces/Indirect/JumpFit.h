@@ -17,7 +17,6 @@ public:
   void setup() override;
   bool validate() override;
   void run() override;
-  void runImpl(bool plot = false, bool save = false);
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
 
@@ -40,6 +39,9 @@ private slots:
   void generatePlotGuess();
   /// Add the plot guess to the mini plot
   void plotGuess(bool error);
+  /// Handles plotting and saving
+  void saveClicked();
+  void plotClicked();
 
 private:
   /// Gets a list of parameter names for a given fit function
@@ -63,9 +65,6 @@ private:
   QtTreePropertyBrowser *m_jfTree;
 
   Mantid::API::IAlgorithm_sptr m_fitAlg;
-
-  // The state of plot result when the algorithm was run
-  bool m_plotResult;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

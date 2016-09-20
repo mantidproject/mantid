@@ -1,3 +1,4 @@
+#include "MantidHistogramData/LogarithmicGenerator.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -337,7 +338,8 @@ void DiffractionFocussing2::execEvent() {
   // Create a new outputworkspace with not much in it
   DataObjects::EventWorkspace_sptr out;
   out = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1));
+      API::WorkspaceFactory::Instance().create("EventWorkspace",
+                                               m_validGroups.size(), 2, 1));
   // Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(m_matrixInputW, out,
                                                          true);
@@ -375,7 +377,7 @@ void DiffractionFocussing2::execEvent() {
   // This creates and reserves the space required
   for (size_t iGroup = 0; iGroup < this->m_validGroups.size(); iGroup++) {
     const int group = this->m_validGroups[iGroup];
-    EventList &groupEL = out->getOrAddEventList(iGroup);
+    EventList &groupEL = out->getSpectrum(iGroup);
     groupEL.switchTo(eventWtype);
     groupEL.reserve(size_required[iGroup]);
     groupEL.clearDetectorIDs();
@@ -390,7 +392,7 @@ void DiffractionFocussing2::execEvent() {
   if (this->m_validGroups.size() == 1) {
     g_log.information() << "Performing focussing on a single group\n";
     // Special case of a single group - parallelize differently
-    EventList &groupEL = out->getOrAddEventList(0);
+    EventList &groupEL = out->getSpectrum(0);
     const int group = m_validGroups[0];
     const std::vector<size_t> &indices = this->m_wsIndices[group];
 
@@ -438,7 +440,7 @@ void DiffractionFocussing2::execEvent() {
       const std::vector<size_t> &indices = this->m_wsIndices[group];
       for (auto wi : indices) {
         // In workspace index iGroup, put what was in the OLD workspace index wi
-        out->getOrAddEventList(iGroup) += m_eventW->getSpectrum(wi);
+        out->getSpectrum(iGroup) += m_eventW->getSpectrum(wi);
 
         prog->reportIncrement(1, "Appending Lists");
 
@@ -611,6 +613,8 @@ void DiffractionFocussing2::determineRebinParameters() {
       Xmin = Xmax / nPoints;
     if (Xmin <= 0)
       Xmin = 1.0;
+    if (Xmin == Xmax)
+      Xmin = Xmax / 2.0;
 
     if (Xmax < Xmin) // Should never happen
     {
@@ -627,14 +631,8 @@ void DiffractionFocussing2::determineRebinParameters() {
     // g_log.information(mess.str());
     mess.str("");
 
-    // Build up the X vector.
-    HistogramData::BinEdges xnew(xPoints);
-    auto &xnewData = xnew.mutableData();
-    xnewData[0] = Xmin;
-    for (int64_t j = 1; j < xPoints; j++) {
-      xnewData[j] = Xmin * (1.0 + step);
-      Xmin = xnewData[j];
-    }
+    HistogramData::BinEdges xnew(
+        xPoints, HistogramData::LogarithmicGenerator(Xmin, step));
     group2xvector[gpit->first] = xnew; // Register this vector in the map
   }
   // Not needed anymore
