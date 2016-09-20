@@ -3155,7 +3155,6 @@ void SANSRunWindow::handleInstrumentChange() {
   m_uiForm.l_events_binning->setHidden(hide_events_gui);
 }
 
-
 /** Record if the user has changed the default filename, because then we don't
 *  change it
 */
