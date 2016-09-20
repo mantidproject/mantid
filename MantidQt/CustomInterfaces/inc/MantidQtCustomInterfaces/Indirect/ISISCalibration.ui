@@ -92,17 +92,17 @@
           </property>
          </widget>
         </item>
-         <item>
-           <widget class="QCheckBox" name="ckLoadLogFiles">
-             <property name="text">
-               <string>Load Log Files</string>
-             </property>
-             <property name="checked">
-               <bool>false</bool>
-             </property>
-           </widget>
-         </item>
-         <item>
+        <item>
+         <widget class="QCheckBox" name="ckLoadLogFiles">
+          <property name="text">
+           <string>Load Log Files</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="horizontalSpacer_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -230,7 +230,10 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QCheckBox" name="ckPlot">
+       <widget class="QPushButton" name="pbPlot">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="toolTip">
          <string>Plot resulting calibration file when created.</string>
         </property>
@@ -253,7 +256,10 @@
        </spacer>
       </item>
       <item>
-       <widget class="QCheckBox" name="ckSave">
+       <widget class="QPushButton" name="pbSave">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Save Result</string>
         </property>

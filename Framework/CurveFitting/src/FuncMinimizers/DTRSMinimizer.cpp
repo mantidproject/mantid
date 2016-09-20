@@ -5,12 +5,8 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FuncMinimizers/DTRSMinimizer.h"
 #include "MantidCurveFitting/RalNlls/TrustRegion.h"
-
 #include "MantidAPI/FuncMinimizerFactory.h"
 
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 #include <algorithm>
 #include <limits>
 

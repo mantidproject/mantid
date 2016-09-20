@@ -24,7 +24,7 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSample">
+      <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSample" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -56,14 +56,14 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="MantidQt::MantidWidgets::DataSelector" name="dsResolution">
+      <widget class="MantidQt::MantidWidgets::DataSelector" name="dsResolution" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="autoLoad">
+       <property name="autoLoad" stdset="0">
         <bool>true</bool>
        </property>
        <property name="workspaceSuffixes" stdset="0">
@@ -76,7 +76,7 @@
          <string>_res.nxs</string>
         </stringlist>
        </property>
-       <property name="showLoad">
+       <property name="showLoad" stdset="0">
         <bool>false</bool>
        </property>
       </widget>
@@ -207,11 +207,6 @@
           </property>
           <item>
            <property name="text">
-            <string>None</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
             <string>Sigma</string>
            </property>
           </item>
@@ -228,6 +223,16 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="pbPlot">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Plot</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="horizontalSpacer_18">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -241,7 +246,10 @@
          </spacer>
         </item>
         <item>
-         <widget class="QCheckBox" name="chkSave">
+         <widget class="QPushButton" name="pbSave">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Save Result</string>
           </property>

@@ -35,7 +35,7 @@
 #include "muParserScript.h"
 #include "ApplicationWindow.h"
 #include "pixmaps.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
 #include <QContextMenuEvent>
 #include <QMessageBox>
@@ -638,7 +638,7 @@ void Table::updateValues(Table *t, const QString &columnName) {
 }
 
 std::string Table::saveToProject(ApplicationWindow *app) {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
 
   tsv.writeRaw("<table>");
   tsv.writeLine(objectName().toStdString())
@@ -3001,9 +3001,9 @@ void Table::showAllColumns() {
   }
 }
 
-IProjectSerialisable *Table::loadFromProject(const std::string &lines,
-                                             ApplicationWindow *app,
-                                             const int fileVersion) {
+MantidQt::API::IProjectSerialisable *
+Table::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion) {
   Q_UNUSED(fileVersion);
 
   std::vector<std::string> lineVec, valVec;
@@ -3036,7 +3036,7 @@ IProjectSerialisable *Table::loadFromProject(const std::string &lines,
     }
   }
 
-  TSVSerialiser tsv(lines);
+  MantidQt::API::TSVSerialiser tsv(lines);
 
   if (tsv.selectLine("geometry"))
     app->restoreWindowGeometry(
@@ -3176,7 +3176,7 @@ IProjectSerialisable *Table::loadFromProject(const std::string &lines,
 }
 
 std::string Table::saveTableMetadata() {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
   tsv.writeLine("header");
   for (int j = 0; j < d_table->columnCount(); j++) {
     QString val = colLabel(j);

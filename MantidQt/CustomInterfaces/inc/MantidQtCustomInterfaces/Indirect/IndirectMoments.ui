@@ -76,7 +76,7 @@
            <double>0.100000000000000</double>
           </property>
           <property name="value">
-            <double>1.000000000000000</double>
+           <double>1.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -163,9 +163,12 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QCheckBox" name="ckPlot">
+       <widget class="QPushButton" name="pbPlot">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
-         <string>Plot</string>
+         <string>Plot Result</string>
         </property>
        </widget>
       </item>
@@ -183,9 +186,12 @@
        </spacer>
       </item>
       <item>
-       <widget class="QCheckBox" name="ckSave">
+       <widget class="QPushButton" name="pbSave">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
-         <string>Save</string>
+         <string>Save Result</string>
         </property>
        </widget>
       </item>

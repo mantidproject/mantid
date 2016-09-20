@@ -79,9 +79,13 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         outputWorskapceName = "LoadLogPropertyTableTest_Test4"
 
         #invalid log name
-        alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "emu00006473.nxs",
-                LastFile = "emu00006475.nxs", LogNames="WrongTemp", OutputWorkspace = outputWorskapceName)
-        self.assertFalse(alg_test.isExecuted())
+        ExecptionThrownOnBadLogName = False
+        try:
+            alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "emu00006473.nxs",
+                                     LastFile = "emu00006475.nxs", LogNames="WrongTemp", OutputWorkspace = outputWorskapceName)
+        except RuntimeError:
+            ExecptionThrownOnBadLogName = True
+        self.assertEqual(True, ExecptionThrownOnBadLogName)
 
         #invalid first file
         ExecptionThrownOnBadFileParameter = False

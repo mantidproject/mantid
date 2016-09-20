@@ -86,6 +86,11 @@ public:
   /// Get a list containing pairs of strings with information about x,y
   std::vector<std::string> getInfoList(double x, double y) override;
 
+  /// Get a pointer to the workspace
+  Mantid::API::MatrixWorkspace_const_sptr getWorkspace() const {
+    return m_matWs;
+  }
+
 private:
   Mantid::API::MatrixWorkspace_const_sptr m_matWs;
   EModeHandler *m_emodeHandler;

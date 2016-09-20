@@ -27,6 +27,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         (dynamic_cast<detail::VectorOf<Frequencies, HistogramY> &>(data)));
     TS_ASSERT_THROWS_NOTHING(
+        dynamic_cast<detail::Addable<Frequencies> &>(data));
+    TS_ASSERT_THROWS_NOTHING(
         dynamic_cast<detail::Iterable<Frequencies> &>(data));
     TS_ASSERT_THROWS_NOTHING(
         dynamic_cast<detail::Offsetable<Frequencies> &>(data));

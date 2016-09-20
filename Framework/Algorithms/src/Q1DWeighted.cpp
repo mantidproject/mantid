@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/Q1DWeighted.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Histogram1D.h"
@@ -159,6 +157,8 @@ void Q1DWeighted::exec() {
   std::vector<std::vector<double>> wedge_XNormLambda(
       nWedges, std::vector<double>(sizeOut - 1, 0.0));
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+
   PARALLEL_FOR2(inputWS, outputWS)
   // Loop over all xLength-1 detector channels
   // Note: xLength -1, because X is a histogram and has a number of boundaries
@@ -179,22 +179,13 @@ void Q1DWeighted::exec() {
         nWedges, std::vector<double>(sizeOut - 1, 0.0));
 
     for (int i = 0; i < numSpec; i++) {
-      // Get the pixel relating to this spectrum
-      IDetector_const_sptr det;
-      try {
-        det = inputWS->getDetector(i);
-      } catch (Exception::NotFoundError &) {
+      if (!spectrumInfo.hasDetectors(i)) {
         g_log.warning() << "Workspace index " << i
                         << " has no detector assigned to it - discarding\n";
-        // Catch if no detector. Next line tests whether this happened - test
-        // placed
-        // outside here because Mac Intel compiler doesn't like 'continue' in a
-        // catch
-        // in an openmp block.
+        continue;
       }
-      // If no detector found or if it's masked or a monitor, skip onto the next
-      // spectrum
-      if (!det || det->isMonitor() || det->isMasked())
+      // Skip if we have a monitor or if the detector is masked.
+      if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
         continue;
 
       // Get the current spectrum for both input workspaces
@@ -217,8 +208,8 @@ void Q1DWeighted::exec() {
         // Find the position of this sub-pixel in real space and compute Q
         // For reference - in the case where we don't use sub-pixels, simply
         // use:
-        //     double sinTheta = sin( inputWS->detectorTwoTheta(*det)/2.0 );
-        V3D pos = det->getPos() - V3D(sub_x, sub_y, 0.0);
+        //     double sinTheta = sin( spectrumInfo.twoTheta(i)/2.0 );
+        V3D pos = spectrumInfo.position(i) - V3D(sub_x, sub_y, 0.0);
         double sinTheta = sin(0.5 * pos.angle(beamLine));
         double factor = fmp * sinTheta;
         double q = factor * 2.0 / (XIn[j] + XIn[j + 1]);

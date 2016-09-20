@@ -21,6 +21,7 @@ User Interface
 
 Instrument View
 ###############
+* The instrument view will now save the state of the window to a Mantid project file.
 
 Workspace Matrix View
 #####################
@@ -31,12 +32,17 @@ Workspace Matrix View
 
 Plotting Improvements
 #####################
+* A new option has been added to the "Plot Spectrum" and "Plot Spectrum with Errors" dialogs. The "Tiled plot" checkbox enables such a plot to be produced as a simple right-click option.
+
+  - When this option is used for a workspace group, each workspace will its own subplot, with all specified spectra in it.
+  - When the option is used for a single workspace, each of the specified spectra will have its own subplot.
 
 Algorithm Toolbox
 #################
 
 Algorithms
 ##########
+
 .. figure::  ../../images/GroupWorkspaces_multipleInput.png
    :width: 487
    :align: right
@@ -47,9 +53,13 @@ Algorithms
 Scripting Window
 ################
 
+ - All `matplotlib` examples now work out of the box when run inside the MantidPlot scripting environment.
+
+
 Progress Reporting
 ##################
 
+- The progress reporting for algorithms has been improved, so that the progress is reported correctly when processing workspace groups or multi-period workspaces.
 - The progress reporting for algorithms has been improved, so that the progress is reported correctly when processin workspace groups or multi-period workspaces.
 
 
@@ -65,13 +75,15 @@ Options Window
 
 Bugs Resolved
 -------------
-- Floating windows now always stay on top of the main window in OSX
+- Floating windows now always stay on top of the main window in OSX.
 - The sliceviewer will now rebin an existing binned workspace correctly.
 - 2D plots now display correctly for point data workspaces as well as for histogram data
+- Cuts aligned with an axis no longer generate an empty integrated line plot.
 
 SliceViewer Improvements
 ------------------------
-- When opening the sliceviewer, it will default to showing the first two non-integrated dimensions
+* When opening the SliceViewer, it will default to showing the first two non-integrated dimensions
+* The SliceViewer now uses bin centres instead of bin edges when slicing on a histogram workspace
 
 VSI Improvements
 ----------------
@@ -80,6 +92,12 @@ VSI Improvements
 Multi-dataset fitting interface improvements
 --------------------------------------------
 * Fitting a single dataset with a composite function no longer causes a crash
+
+.. figure::  ../../images/MDFSetToLog.png
+   :width: 487
+   :align: right
+
+* "Set to log" and "Set all to log" options have been added to the parameter editing dialog. These enable a parameter to be set to a value from a sample log for one or all spectra.
 
 |
 

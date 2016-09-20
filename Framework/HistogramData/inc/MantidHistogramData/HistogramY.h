@@ -1,9 +1,11 @@
 #ifndef MANTID_HISTOGRAMDATA_HISTOGRAMY_H_
 #define MANTID_HISTOGRAMDATA_HISTOGRAMY_H_
 
+#include "MantidHistogramData/Addable.h"
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/FixedLengthVector.h"
 #include "MantidHistogramData/Offsetable.h"
+#include "MantidHistogramData/Multipliable.h"
 #include "MantidHistogramData/Scalable.h"
 
 namespace Mantid {
@@ -48,7 +50,9 @@ template <class Frequencies, class HistogramY> class VectorOf;
 */
 class MANTID_HISTOGRAMDATA_DLL HistogramY
     : public detail::FixedLengthVector<HistogramY>,
+      public detail::Addable<HistogramY>,
       public detail::Offsetable<HistogramY>,
+      public detail::Multipliable<HistogramY>,
       public detail::Scalable<HistogramY> {
 public:
   using detail::FixedLengthVector<HistogramY>::FixedLengthVector;
@@ -60,6 +64,19 @@ public:
   HistogramY(HistogramY &&) = default;
   HistogramY &operator=(const HistogramY &)& = default;
   HistogramY &operator=(HistogramY &&)& = default;
+  // Multiple inheritance causes ambiguous overload, bring operators into scope.
+  using detail::Addable<HistogramY>::operator+;
+  using detail::Addable<HistogramY>::operator+=;
+  using detail::Addable<HistogramY>::operator-;
+  using detail::Addable<HistogramY>::operator-=;
+  using detail::Offsetable<HistogramY>::operator+;
+  using detail::Offsetable<HistogramY>::operator+=;
+  using detail::Offsetable<HistogramY>::operator-;
+  using detail::Offsetable<HistogramY>::operator-=;
+  using detail::Multipliable<HistogramY>::operator*=;
+  using detail::Multipliable<HistogramY>::operator/=;
+  using detail::Scalable<HistogramY>::operator*=;
+  using detail::Scalable<HistogramY>::operator/=;
 
   // These classes are friends, such that they can modify the length.
   friend class Histogram;
