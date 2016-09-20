@@ -21,7 +21,7 @@ Usage
 
 **Example - ExtractMonitorsExample**
 
-.. testcode:: SeparateMonitorWorkspaceExample
+.. testcode:: ExtractMonitorsExample
 
   ws = Load('ENGINX00213855.nxs')
 
