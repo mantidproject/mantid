@@ -948,7 +948,10 @@ void MantidDockWidget::handleShowSaveAlgorithm() {
               inputWorkspace)) ||
           bool(boost::dynamic_pointer_cast<const IMDHistoWorkspace>(
               inputWorkspace))) {
-
+        // This will also be executed if the user clicks Save to ASCII or ASCII
+        // v1, therefore overwriting their choice and running
+        // SaveMD. SaveASCII doesn't support MD Workspaces, but if an issue,
+        // move the MD check to case 1: below
         algorithmName = "SaveMD";
 
       } else {
