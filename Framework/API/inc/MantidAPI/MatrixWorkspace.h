@@ -12,6 +12,8 @@
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+#include <mutex>
+
 namespace Mantid {
 
 namespace Indexing {
@@ -616,7 +618,9 @@ private:
   specnum_t spectrumNumber(const size_t index) const;
   const std::set<detid_t> &detectorIDs(const size_t index) const;
 
-  std::unique_ptr<Indexing::IndexInfo> m_indexInfo;
+  mutable std::unique_ptr<Indexing::IndexInfo> m_indexInfo;
+  mutable std::once_flag m_indexInfoCached;
+  void cacheIndexInfo() const;
 
   /// Has this workspace been initialised?
   bool m_isInitialized;

@@ -75,11 +75,6 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   // ExperimentInfo just kept a shared_ptr to the same map as in other, which
   // is not enough as soon as the maps in one of the workspaces it edited.
   instrumentParameters();
-
-  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(
-      other.m_indexInfo->size(),
-      std::bind(&MatrixWorkspace::spectrumNumber, this, std::placeholders::_1),
-      std::bind(&MatrixWorkspace::detectorIDs, this, std::placeholders::_1));
 }
 
 /// Destructor
@@ -95,7 +90,15 @@ MatrixWorkspace::~MatrixWorkspace() {
  *
  * Used for access to spectrum number and detector ID information of spectra. */
 const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
+  std::call_once(m_indexInfoCached, &MatrixWorkspace::cacheIndexInfo, this);
   return *m_indexInfo;
+}
+
+void MatrixWorkspace::cacheIndexInfo() const {
+  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(
+      getNumberHistograms(),
+      std::bind(&MatrixWorkspace::spectrumNumber, this, std::placeholders::_1),
+      std::bind(&MatrixWorkspace::detectorIDs, this, std::placeholders::_1));
 }
 
 /** Sets the IndexInfo object of the workspace.
@@ -171,11 +174,6 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
   if (m_isInitialized)
     return;
 
-  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(
-      NVectors,
-      std::bind(&MatrixWorkspace::spectrumNumber, this, std::placeholders::_1),
-      std::bind(&MatrixWorkspace::detectorIDs, this, std::placeholders::_1));
-
   // Invoke init() method of the derived class inside a try/catch clause
   try {
     this->init(NVectors, XLength, YLength);
@@ -200,11 +198,6 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
   // Bypass the initialization if the workspace has already been initialized.
   if (m_isInitialized)
     return;
-
-  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(
-      NVectors,
-      std::bind(&MatrixWorkspace::spectrumNumber, this, std::placeholders::_1),
-      std::bind(&MatrixWorkspace::detectorIDs, this, std::placeholders::_1));
 
   // Invoke init() method of the derived class inside a try/catch clause
   try {
