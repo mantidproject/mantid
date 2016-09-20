@@ -137,7 +137,7 @@ class CrystalField(object):
                 self._fieldParameters[key] = kwargs[key]
 
         if isinstance(self._temperature, list) or isinstance(self._temperature, np.ndarray):
-            self.peaks = [PeaksFunction() for _ in self._temperature]
+            self.peaks = [PeaksFunction(firstIndex=1) for _ in self._temperature]
         else:
             self.peaks = PeaksFunction()
         self.background = None
@@ -394,9 +394,9 @@ class CrystalField(object):
         """Define the shape of the peaks and create PeakFunction instances."""
         from .function import PeaksFunction
         if self._temperature is None or not isinstance(self._temperature, list):
-            self.peaks = PeaksFunction(name)
+            self.peaks = PeaksFunction(name, firstIndex=0)
         else:
-            self.peaks = [PeaksFunction(name) for _ in self._temperature]
+            self.peaks = [PeaksFunction(name, firstIndex=1) for _ in self._temperature]
 
     def setBackground(self, peak=None, background=None):
         from .function import Background

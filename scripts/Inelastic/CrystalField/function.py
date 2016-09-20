@@ -199,11 +199,14 @@ class PeaksFunction(object):
     @param name: A name of the individual peak function, such as 'Lorentzian' or 'Gaussian'.
         If None then the default function is used (currently 'Lorentzian')
     """
-    def __init__(self, name=None):
+    def __init__(self, name=None, firstIndex=0):
         """
         Constructor.
 
         @param name: The name of the function of each peak.  E.g. Gaussian
+
+        @param firstIndex: Index of the first peak in the function. For a single spectrum
+                function it is 0, in a multi-spectral case it's 1.
         """
         # Name of the peaks
         self._name = name if name is not None else 'Lorentzian'
@@ -215,6 +218,8 @@ class PeaksFunction(object):
         self._ties = []
         # Constraints
         self._constraints = []
+        # Index of the first peak
+        self._firstIndex = firstIndex
 
     @property
     def name(self):
@@ -264,6 +269,52 @@ class PeaksFunction(object):
                 constraints('f0.Sigma > 0', '0.1 < f1.Sigma < 0.9')
         """
         self._constraints += constraints
+
+    def tieAll(self, tie, iFirstN, iLast=-1):
+        """
+        Tie parameters with the same name for all peaks.
+
+        @param tie: A tie as a string. For example:
+                tieAll('Sigma=0.1', 3) is equivalent to a call
+                ties('f0.Sigma=0.1', 'f1.Sigma=0.1', 'f2.Sigma=0.1')
+
+        @param iFirstN: If iLast is given then it's the index of the first peak to tie.
+                Otherwise it's a number of peaks to tie.
+
+        @param iLast: An index of the last peak to tie (inclusive).
+        """
+        if iLast >= 0:
+            start = iFirstN
+            end = iLast + 1
+        else:
+            start = self._firstIndex
+            end = iFirstN + self._firstIndex
+        pattern = 'f%s.' + tie
+        ties = [pattern % i for i in range(start, end)]
+        self.ties(*ties)
+
+    def constrainAll(self, constraint, iFirstN, iLast=-1):
+        """
+        Constrain parameters with the same name for all peaks.
+
+        @param constraint: A constraint as a string. For example:
+                constrainAll('0 < Sigma <= 0.1', 3) is equivalent to a call
+                constrains('0 < f0.Sigma <= 0.1', '0 < f1.Sigma <= 0.1', '0 < f2.Sigma <= 0.1')
+
+        @param iFirstN: If iLast is given then it's the index of the first peak to constrain.
+                Otherwise it's a number of peaks to constrain.
+
+        @param iLast: An index of the last peak to tie (inclusive).
+        """
+        if iLast >= 0:
+            start = iFirstN
+            end = iLast + 1
+        else:
+            start = self._firstIndex
+            end = iFirstN + self._firstIndex
+
+        pattern = re.sub(parNamePattern, 'f%s.\\1', constraint)
+        self.constraints(*[pattern % i for i in range(start, end)])
 
     def nPeaks(self):
         """Get the number of peaks"""

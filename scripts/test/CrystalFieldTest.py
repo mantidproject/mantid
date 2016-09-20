@@ -688,7 +688,6 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.ties(B40='B20/2')
         cf.constraints('IntensityScaling > 0', 'B22 < 4')
         cf.peaks.constraints('f0.FWHM < 2.2', 'f1.FWHM >= 0.1')
-        # ties have to be put into a dictionary
         cf.peaks.ties('f2.FWHM=2*f1.FWHM', 'f3.FWHM=2*f2.FWHM')
         cf.background.peak.ties(Height=10.1)
         cf.background.peak.constraints('Sigma > 0')
@@ -706,6 +705,80 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertTrue('f3.FWHM=2*f2.FWHM' in s)
         self.assertTrue('Height=10.1' in s)
         self.assertTrue('A0=0.1' in s)
+
+        # Test that ties and constraints are correctly defined
+        fun = FunctionFactory.createInitialized(s)
+        self.assertTrue(fun is not None)
+
+    def test_all_peak_ties_single_spectrum(self):
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+        from mantid.simpleapi import FunctionFactory
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=50, FWHM=0.9)
+        cf.peaks.tieAll('FWHM=2.1', 3)
+
+        s = cf.makeSpectrumFunction()
+        self.assertTrue('f0.FWHM=2.1' in s)
+        self.assertTrue('f1.FWHM=2.1' in s)
+        self.assertTrue('f2.FWHM=2.1' in s)
+        self.assertTrue('f3.FWHM=2.1' not in s)
+
+        # Test that ties and constraints are correctly defined
+        fun = FunctionFactory.createInitialized(s)
+        self.assertTrue(fun is not None)
+
+    def test_all_peak_ties_single_spectrum_range(self):
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+        from mantid.simpleapi import FunctionFactory
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=50, FWHM=0.9)
+        cf.peaks.tieAll('FWHM=f0.FWHM', 1, 4)
+
+        s = cf.makeSpectrumFunction()
+        self.assertTrue('f0.FWHM=f0.FWHM' not in s)
+        self.assertTrue('f1.FWHM=f0.FWHM' in s)
+        self.assertTrue('f2.FWHM=f0.FWHM' in s)
+        self.assertTrue('f3.FWHM=f0.FWHM' in s)
+        self.assertTrue('f4.FWHM=f0.FWHM' in s)
+        self.assertTrue('f5.FWHM=f0.FWHM' not in s)
+
+        # Test that ties and constraints are correctly defined
+        fun = FunctionFactory.createInitialized(s)
+        self.assertTrue(fun is not None)
+
+    def test_all_peak_constraints_single_spectrum(self):
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+        from mantid.simpleapi import FunctionFactory
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=50, FWHM=0.9)
+        cf.peaks.constrainAll('0.1 < FWHM <=2.1', 3)
+
+        s = cf.makeSpectrumFunction()
+        self.assertTrue('0.1 < f0.FWHM <=2.1' in s)
+        self.assertTrue('0.1 < f1.FWHM <=2.1' in s)
+        self.assertTrue('0.1 < f2.FWHM <=2.1' in s)
+        self.assertTrue('0.1 < f3.FWHM <=2.1' not in s)
+
+        # Test that ties and constraints are correctly defined
+        fun = FunctionFactory.createInitialized(s)
+        self.assertTrue(fun is not None)
+
+    def test_all_peak_constraints_single_spectrum_range(self):
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+        from mantid.simpleapi import FunctionFactory
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=50, FWHM=0.9)
+        cf.peaks.constrainAll('0.1 < FWHM <=2.1', 1, 2)
+
+        s = cf.makeSpectrumFunction()
+        self.assertTrue('0.1 < f0.FWHM <=2.1' not in s)
+        self.assertTrue('0.1 < f1.FWHM <=2.1' in s)
+        self.assertTrue('0.1 < f2.FWHM <=2.1' in s)
+        self.assertTrue('0.1 < f3.FWHM <=2.1' not in s)
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
@@ -746,6 +819,57 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         fun = FunctionFactory.createInitialized(s)
 
+    def test_all_peak_ties_multi_spectrum(self):
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+        from mantid.simpleapi import FunctionFactory
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=[50, 100], FWHM=[0.9, 0.1])
+        cf.peaks[0].tieAll('FWHM=f1.FWHM', 2, 4)
+        cf.peaks[1].tieAll('FWHM=3.14', 4)
+
+        s = cf.makeMultiSpectrumFunction()
+        self.assertTrue('f0.f1.FWHM=f0.f1.FWHM' not in s)
+        self.assertTrue('f0.f2.FWHM=f0.f1.FWHM' in s)
+        self.assertTrue('f0.f3.FWHM=f0.f1.FWHM' in s)
+        self.assertTrue('f0.f4.FWHM=f0.f1.FWHM' in s)
+        self.assertTrue('f0.f5.FWHM=f0.f1.FWHM' not in s)
+
+        self.assertTrue('f1.f0.FWHM=3.14' not in s)
+        self.assertTrue('f1.f1.FWHM=3.14' in s)
+        self.assertTrue('f1.f2.FWHM=3.14' in s)
+        self.assertTrue('f1.f3.FWHM=3.14' in s)
+        self.assertTrue('f1.f4.FWHM=3.14' in s)
+        self.assertTrue('f1.f5.FWHM=3.14' not in s)
+
+        # Test that ties and constraints are correctly defined
+        fun = FunctionFactory.createInitialized(s)
+        self.assertTrue(fun is not None)
+
+    def test_all_peak_constraints_multi_spectrum_range(self):
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+        from mantid.simpleapi import FunctionFactory
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=[50, 20], FWHM=[0.9, 10])
+        cf.peaks[0].constrainAll('0.1 < FWHM <=2.1', 2)
+        cf.peaks[1].constrainAll('FWHM > 12.1', 3, 5)
+
+        s = cf.makeMultiSpectrumFunction()
+        self.assertTrue('0.1 < f0.f0.FWHM <=2.1' not in s)
+        self.assertTrue('0.1 < f0.f1.FWHM <=2.1' in s)
+        self.assertTrue('0.1 < f0.f2.FWHM <=2.1' in s)
+        self.assertTrue('0.1 < f0.f4.FWHM <=2.1' not in s)
+
+        self.assertTrue('f1.f2.FWHM > 12.1' not in s)
+        self.assertTrue('f1.f3.FWHM > 12.1' in s)
+        self.assertTrue('f1.f4.FWHM > 12.1' in s)
+        self.assertTrue('f1.f5.FWHM > 12.1' in s)
+        self.assertTrue('f1.f6.FWHM > 12.1' not in s)
+
+        # Test that ties and constraints are correctly defined
+        fun = FunctionFactory.createInitialized(s)
+        self.assertTrue(fun is not None)
 
     def test_constraints_multi_ion_multi_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
