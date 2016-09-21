@@ -36,6 +36,7 @@ Plotting Improvements
 
   - When this option is used for a workspace group, each workspace will its own subplot, with all specified spectra in it.
   - When the option is used for a single workspace, each of the specified spectra will have its own subplot.
+* Using the Label Tool on a plot to add Sample Logs as labels now opens up a dialogue for the selected workspace with all the available Sample Logs listed and the ability to import the selected one onto the plot as a label.
 
 Algorithm Toolbox
 #################
@@ -71,10 +72,6 @@ Documentation
 Options Window
 ###############
 - Within Preferences->Mantid->Options ticking a category off/on will now untick/tick all subcategories. Also having some subcategories on and off will now show a partially ticked box for that category. 
-
-Label Tool
-##########
-- Using the Label Tool on a plot to add Sample Logs as labels now opens up a dialogue for the selected workspace with all the available Sample Logs listed and the ability to import the selected one onto the plot as a label.
 
 Bugs Resolved
 -------------
