@@ -122,6 +122,13 @@ public:
       m_data = Kernel::make_cow<CowType>(std::move(data));
     return *this;
   }
+  /// Assigns a constant value to stored object. The behavior is undefined if
+  /// the stored pointer is null.
+  VectorOf &operator=(const double value) & {
+    mutableData().assign(size(), value);
+    return *this;
+  }
+
   /// Assigns the contents of the range [first, last)
   template <class InputIt> void assign(InputIt first, InputIt last) & {
     m_data = Kernel::make_cow<CowType>(first, last);

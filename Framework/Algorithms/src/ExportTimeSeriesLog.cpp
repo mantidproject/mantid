@@ -295,7 +295,7 @@ void ExportTimeSeriesLog::setupEventWorkspace(
         "Output workspace cannot be casted to a MatrixWorkspace.");
 
   // Create the output event list (empty)
-  EventList &outEL = outEventWS->getOrAddEventList(0);
+  EventList &outEL = outEventWS->getSpectrum(0);
   outEL.switchTo(WEIGHTED_NOTIME);
 
   // Allocate all the required memory

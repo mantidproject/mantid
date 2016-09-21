@@ -44,10 +44,11 @@ Description          : QtiPlot's main window
 #include <QSplitter>
 
 #include "MantidQtAPI/HelpWindow.h"
-#include "Table.h"
-#include "ScriptingEnv.h"
-#include "Scripted.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 #include "Script.h"
+#include "Scripted.h"
+#include "ScriptingEnv.h"
+#include "Table.h"
 
 class QPixmap;
 class QCloseEvent;
@@ -1087,10 +1088,18 @@ public slots:
   void setConfirmFolderClose(bool value) { confirmCloseFolder = value; }
   /** The very fist method to be executed as soon as the QApplication event loop
    * starts*/
-  void about2Start();
+  void onAboutToStart();
 
   /// Show/hide MantidPlot toolbars.
   void setToolbarsVisible(bool visible);
+  /// Get a list of serialisable project windows
+  QList<QObject *> getSerialisableWindows() const {
+    return m_serialisableWindows;
+  }
+  /// Add a serialisable window
+  void addSerialisableWindow(QObject *window);
+  /// Remove a serialisable window
+  void removeSerialisableWindow(QObject *window);
 
   /// \name Tiled window
   //@{
@@ -1416,6 +1425,8 @@ private:
   QSet<QString> m_allCategories;
   // Map interfaces to their categories.
   QMap<QString, QSet<QString>> m_interfaceCategories;
+  /// Keep a list of serialisable windows
+  QList<QObject *> m_serialisableWindows;
 
   mutable MdiSubWindow *d_active_window;
   MdiSubWindow *getActiveWindow() const;
@@ -1607,6 +1618,10 @@ private:
   QMenuBar *m_sharedMenuBar; ///< Pointer to the shared menubar
 #endif
 
+  /// Arguments parsed from the command line
+  bool m_exec_on_start;
+  bool m_quit_after_exec;
+  QString m_cmdline_filename;
   /// Exit code to set at application end
   int m_exitCode;
 

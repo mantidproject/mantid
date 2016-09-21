@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/RadiusSum.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
@@ -25,7 +26,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RadiusSum)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification.
 const std::string RadiusSum::name() const { return "RadiusSum"; }
 
@@ -35,9 +35,6 @@ int RadiusSum::version() const { return 1; }
 /// Algorithm's category for identification.
 const std::string RadiusSum::category() const { return "Transforms\\Grouping"; }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void RadiusSum::init() {
@@ -85,7 +82,6 @@ void RadiusSum::init() {
   setPropertyGroup(normOrder, groupNorm);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void RadiusSum::exec() {
@@ -112,28 +108,24 @@ std::vector<double> RadiusSum::processInstrumentRadiusSum() {
 
   g_log.debug() << "For every detector in the image get its position "
                 << " and sum up all the counts inside the related spectrum\n";
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (size_t i = 0; i < inputWS->getNumberHistograms(); i++) {
-    try {
-      auto det = inputWS->getDetector(i);
-
-      if (det->isMonitor())
-        continue;
-
-      int bin_n = getBinForPixelPos(det->getPos());
-
-      if (bin_n < 0)
-        continue; // not in the limits of min_radius and max_radius
-
-      auto &refY = inputWS->getSpectrum(i).readY();
-      accumulator[bin_n] += std::accumulate(refY.begin(), refY.end(), 0.0);
-
-    } catch (Kernel::Exception::NotFoundError &ex) {
+    if (!spectrumInfo.hasDetectors(i)) {
       // it may occur because there is no detector assigned, but it does not
       // cause problem. Hence, continue the loop.
-      g_log.information() << "It found that detector for " << i
-                          << " is not valid. " << ex.what() << '\n';
+      g_log.information() << "Spectrum " << i << " has no detector assigned.\n";
       continue;
     }
+    if (spectrumInfo.isMonitor(i))
+      continue;
+
+    int bin_n = getBinForPixelPos(spectrumInfo.position(i));
+
+    if (bin_n < 0)
+      continue; // not in the limits of min_radius and max_radius
+
+    auto &refY = inputWS->getSpectrum(i).readY();
+    accumulator[bin_n] += std::accumulate(refY.begin(), refY.end(), 0.0);
   }
   return accumulator;
 }
@@ -398,6 +390,7 @@ RadiusSum::getBoundariesOfInstrument(API::MatrixWorkspace_sptr inWS) {
 
   double first_x, first_y, first_z;
   size_t i = 0;
+  const auto &spectrumInfo = inWS->spectrumInfo();
   while (true) {
     i++;
     if (i >= inWS->getNumberHistograms())
@@ -405,13 +398,14 @@ RadiusSum::getBoundariesOfInstrument(API::MatrixWorkspace_sptr inWS) {
                                   "Failed to identify the boundaries of this "
                                   "instrument.");
 
-    auto det = inWS->getDetector(i);
-    if (det->isMonitor())
+    if (spectrumInfo.isMonitor(i))
       continue;
+
+    const auto pos = spectrumInfo.position(i);
     // get the position of the first valid (non-monitor) detector.
-    first_x = det->getPos().X();
-    first_y = det->getPos().Y();
-    first_z = det->getPos().Z();
+    first_x = pos.X();
+    first_y = pos.Y();
+    first_z = pos.Z();
     break;
   }
 
@@ -424,13 +418,14 @@ RadiusSum::getBoundariesOfInstrument(API::MatrixWorkspace_sptr inWS) {
                                   "instrument of this workspace. Failed to "
                                   "identify the boundaries of this instrument");
 
-    auto det = inWS->getDetector(i);
-    if (det->isMonitor())
+    if (spectrumInfo.isMonitor(i))
       continue;
+
+    const auto pos = spectrumInfo.position(i);
     // get the last valid detector position
-    last_x = det->getPos().X();
-    last_y = det->getPos().Y();
-    last_z = det->getPos().Z();
+    last_x = pos.X();
+    last_y = pos.Y();
+    last_z = pos.Z();
     break;
   }
 

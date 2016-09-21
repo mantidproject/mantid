@@ -1,4 +1,5 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, \
     InstrumentValidator, FileProperty, FileAction
 from mantid.kernel import Direction, StringArrayProperty, StringListValidator

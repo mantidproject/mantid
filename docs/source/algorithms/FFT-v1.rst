@@ -85,6 +85,9 @@ that should be added to the X values to centre the X axis. Setting the *AutoShif
 property will automatically apply the correct shift (overriding any manually supplied
 *Shift*).
 
+The algorithm works internally with point data - if a histogram workspace is provided as input, the bin edges are converted to points automatically inside the algorithm.
+The output transform is always a point data workspace. (It can be subsequently converted back to a histogram workspace using :ref:`algm-ConvertToHistogram`, if required).
+
 Example 1
 #########
 
@@ -202,11 +205,11 @@ Usage
    #Create Sample Workspace 
    ws = CreateSampleWorkspace(WorkspaceType = 'Event', NumBanks = 1, Function = 'Exp Decay', BankPixelWidth = 1, NumEvents = 100)
 
-   #apply the FFT algorithm 
+   #apply the FFT algorithm - note output is point data
    outworkspace = FFT(InputWorkspace = ws, Transform = 'Backward')
 
    #print statements
-   print "DataX(0)[0] equals DataX(0)[100]? : " + str((round(abs(outworkspace.dataX(0)[0]), 3)) == (round(outworkspace.dataX(0)[100], 3)))
+   print "DataX(0)[1] equals DataX(0)[99]? : " + str((round(abs(outworkspace.dataX(0)[1]), 3)) == (round(outworkspace.dataX(0)[99], 3)))
    print "DataX(0)[10] equals DataX(0)[90]? : " + str((round(abs(outworkspace.dataX(0)[10]), 3)) == (round(outworkspace.dataX(0)[90], 3)))
    print "DataX((0)[50] equals 0? : " + str((round(abs(outworkspace.dataX(0)[50]), 3)) == 0)
    print "DataY(0)[40] equals DataY(0)[60]? : " + str((round(abs(outworkspace.dataY(0)[40]), 5)) == (round(outworkspace.dataY(0)[60], 5)))
@@ -215,7 +218,7 @@ Output:
 
 .. testoutput:: FFTBackwards
 	
-   DataX(0)[0] equals DataX(0)[100]? : True
+   DataX(0)[1] equals DataX(0)[99]? : True
    DataX(0)[10] equals DataX(0)[90]? : True
    DataX((0)[50] equals 0? : True
    DataY(0)[40] equals DataY(0)[60]? : True

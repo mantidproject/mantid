@@ -392,13 +392,13 @@ public:
 
   static void destroySuite(ScaleXTestPerformance *suite) { delete suite; }
 
-  void setUp() {
+  void setUp() override {
     inputMatrix = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 1000);
     inputEvent =
         WorkspaceCreationHelper::CreateEventWorkspace(10000, 1000, 5000);
   }
 
-  void tearDown() {
+  void tearDown() override {
     Mantid::API::AnalysisDataService::Instance().remove("output");
     Mantid::API::AnalysisDataService::Instance().remove("output2");
   }

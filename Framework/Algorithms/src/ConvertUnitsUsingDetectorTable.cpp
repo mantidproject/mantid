@@ -34,8 +34,6 @@ using boost::bind;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertUnitsUsingDetectorTable)
 
-//----------------------------------------------------------------------------------------------
-
 /// Algorithms name for identification. @see Algorithm::name
 const std::string ConvertUnitsUsingDetectorTable::name() const {
   return "ConvertUnitsUsingDetectorTable";
@@ -54,7 +52,6 @@ const std::string ConvertUnitsUsingDetectorTable::summary() const {
   return "Performs a unit change on the X values of a workspace";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ConvertUnitsUsingDetectorTable::init() {

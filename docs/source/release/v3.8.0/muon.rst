@@ -20,12 +20,20 @@ Muon Analysis
 
 - *run_start* and *run_end* are now available as log values to use in the results table. They can be inserted either as text (ISO-formatted date strings) or as seconds since the start of the first run.
 
+- Documentation has been moved to the Mantid help system.
+
+- A bug was fixed where, when plotting the log of counts and then switching to plot counts or asymmetry, the y axis was left as a logarithmic axis.
+
 Algorithms
 ----------
 
 - :ref:`MaxEnt <algm-MaxEnt>`: MaxEnt has a new property, *ComplexImage*, which can be set
   to *False* when the imaginary part of the image should not be taken into account for the
   calculations.
+
+- :ref:`MaxEnt <algm-MaxEnt>`: The expression for the second derivative of real (pos/neg) images has been corrected.
+
+- :ref:`MaxEnt <algm-MaxEnt>`: The reconstructed image is always a point data workspace. The reconstructed data is of the same type as the input workspace.
 
 - :ref:`CalMuonDetectorPhases <algm-CalMuonDetectorPhases>`: the *Frequency* parameter is now supplied in MHz rather than megaradians per second.
 
@@ -34,6 +42,8 @@ Algorithms
 - :ref:`PlotAsymmetryByLogValue <algm-PlotAsymmetryByLogValue>`: If *run_start* or *run_end* are chosen as the log to use, the values are taken as seconds relative to the start time of the first run.
 
 - :ref:`LoadMuonNexus <algm-LoadMuonNexus>`: Fixed loading of certain v1 NeXus files converted from other formats that did not contain number of good frames.
+
+- :ref:`LoadMuonNexus <algm-LoadMuonNexus>`: Now loads the correct detector IDs, whether the whole file is loaded or just a selection of spectra. Correctly handles muon v2 Nexus files, in which one spectrum can map to multiple detectors.
 
 Fit Functions
 -------------

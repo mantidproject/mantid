@@ -1,10 +1,6 @@
 #ifndef MANTID_DATAOBJECTS_EVENTWORKSPACE_H_
 #define MANTID_DATAOBJECTS_EVENTWORKSPACE_H_ 1
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidDataObjects/EventList.h"
@@ -13,9 +9,6 @@
 #include <string>
 
 namespace Mantid {
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
 namespace API {
 class Progress;
 }
@@ -23,11 +16,6 @@ class Progress;
 namespace DataObjects {
 class EventWorkspaceMRU;
 
-/// EventList objects, with the detector ID as the index.
-typedef std::vector<EventList *> EventListVector;
-
-//============================================================================
-//============================================================================
 /** \class EventWorkspace
 
     This class is intended to fulfill the design specified in
@@ -55,10 +43,6 @@ public:
   // Initialize the pixels
   void init(const std::size_t &, const std::size_t &,
             const std::size_t &) override;
-
-  void copyDataFrom(const EventWorkspace &source,
-                    std::size_t sourceStartWorkspaceIndex = 0,
-                    std::size_t sourceEndWorkspaceIndex = size_t(-1));
 
   bool threadSafe() const override;
 
@@ -119,24 +103,9 @@ public:
                                   MantidVec &Y, MantidVec &E,
                                   bool skipError = false) const;
 
-  //------------------------------------------------------------
   // Set the x-axis data (histogram bins) for all pixels
   virtual void setAllX(const HistogramData::BinEdges &x);
 
-  // Get or add an EventList
-  EventList &getOrAddEventList(const std::size_t workspace_index);
-
-  // Resizes the workspace to contain the number of spectra/event lists given
-  virtual void resizeTo(const std::size_t numSpectra);
-  // Pad pixels in the workspace using the loaded spectra. Requires a non-empty
-  // spectra-detector map
-  void padSpectra();
-  // Pad pixels in the workspace using specList. Requires a non-empty vector
-  virtual void padSpectra(const std::vector<int32_t> &specList);
-  // Remove pixels in the workspace that do not contain events.
-  void deleteEmptyLists();
-
-  //------------------------------------------------------------
   // The total number of events across all of the spectra.
   std::size_t getNumberEvents() const override;
 
@@ -153,8 +122,6 @@ public:
   std::size_t MRUSize() const;
 
   void clearMRU() const override;
-
-  void clearData();
 
   EventSortType getSortType() const;
 
@@ -177,10 +144,7 @@ private:
   /** A vector that holds the event list for each spectrum; the key is
    * the workspace index, which is not necessarily the pixelid.
    */
-  EventListVector data;
-
-  /// The number of vectors in the workspace
-  std::size_t m_noVectors;
+  std::vector<EventList *> data;
 
   /// Container for the MRU lists of the event lists contained.
   mutable EventWorkspaceMRU *mru;
@@ -192,7 +156,6 @@ typedef boost::shared_ptr<EventWorkspace> EventWorkspace_sptr;
 typedef boost::shared_ptr<const EventWorkspace> EventWorkspace_const_sptr;
 
 } /// namespace DataObjects
-
 } /// namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_EVENTWORKSPACE_H_ */

@@ -404,7 +404,7 @@ template <typename... T> void Histogram::setFrequencies(T &&... data) & {
   checkSize(frequencies);
   if (selfAssignmentY(data...))
     return;
-  m_y = Counts(frequencies, binEdges()).cowData();
+  m_y = frequencies.cowData();
 }
 
 /// Sets the Histogram's frequency variances.
@@ -414,7 +414,7 @@ template <typename... T> void Histogram::setFrequencyVariances(T &&... data) & {
   checkSize(frequencies);
   if (selfAssignmentE(data...))
     return;
-  m_e = CountStandardDeviations(frequencies, binEdges()).cowData();
+  m_e = FrequencyStandardDeviations(std::move(frequencies)).cowData();
 }
 
 /// Sets the Histogram's frequency standard deviations.
@@ -425,7 +425,7 @@ void Histogram::setFrequencyStandardDeviations(T &&... data) & {
   checkSize(frequencies);
   if (selfAssignmentE(data...))
     return;
-  m_e = CountStandardDeviations(frequencies, binEdges()).cowData();
+  m_e = frequencies.cowData();
 }
 
 template <>
@@ -446,7 +446,7 @@ template <> inline bool Histogram::selfAssignmentX(const HistogramX &data) {
 
 template <>
 inline bool Histogram::selfAssignmentX(const std::vector<double> &data) {
-  return &data == &(m_x->rawData());
+  return static_cast<bool>(m_x) && &data == &(m_x->rawData());
 }
 
 template <> inline bool Histogram::selfAssignmentDx(const HistogramDx &data) {
@@ -455,7 +455,7 @@ template <> inline bool Histogram::selfAssignmentDx(const HistogramDx &data) {
 
 template <>
 inline bool Histogram::selfAssignmentDx(const std::vector<double> &data) {
-  return &data == &(m_dx->rawData());
+  return static_cast<bool>(m_dx) && &data == &(m_dx->rawData());
 }
 
 template <> inline bool Histogram::selfAssignmentY(const HistogramY &data) {
@@ -464,7 +464,7 @@ template <> inline bool Histogram::selfAssignmentY(const HistogramY &data) {
 
 template <>
 inline bool Histogram::selfAssignmentY(const std::vector<double> &data) {
-  return &data == &(m_y->rawData());
+  return static_cast<bool>(m_y) && &data == &(m_y->rawData());
 }
 
 template <> inline bool Histogram::selfAssignmentE(const HistogramE &data) {
@@ -473,7 +473,7 @@ template <> inline bool Histogram::selfAssignmentE(const HistogramE &data) {
 
 template <>
 inline bool Histogram::selfAssignmentE(const std::vector<double> &data) {
-  return &data == &(m_e->rawData());
+  return static_cast<bool>(m_e) && &data == &(m_e->rawData());
 }
 
 MANTID_HISTOGRAMDATA_DLL Histogram::XMode getHistogramXMode(size_t xLength,

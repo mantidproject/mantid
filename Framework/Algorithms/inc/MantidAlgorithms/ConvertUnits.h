@@ -83,6 +83,14 @@ public:
   const std::string category() const override { return "Transforms\\Units"; }
 
 protected:
+  /// Reverses the workspace if X values are in descending order
+  void reverse(API::MatrixWorkspace_sptr WS);
+
+  /// For conversions to energy transfer, removes bins corresponding to
+  /// inaccessible values
+  API::MatrixWorkspace_sptr
+  removeUnphysicalBins(const API::MatrixWorkspace_const_sptr workspace);
+
   const std::string workspaceMethodName() const override {
     return "convertUnits";
   }
@@ -90,6 +98,7 @@ protected:
     return "InputWorkspace";
   }
 
+private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
@@ -98,6 +107,11 @@ protected:
   virtual void storeEModeOnWorkspace(API::MatrixWorkspace_sptr outputWS);
   API::MatrixWorkspace_sptr
   setupOutputWorkspace(const API::MatrixWorkspace_const_sptr inputWS);
+
+  /// Executes the main part of the algorithm that handles the conversion of the
+  /// units
+  API::MatrixWorkspace_sptr
+  executeUnitConversion(const API::MatrixWorkspace_sptr inputWS);
 
   /// Convert the workspace units according to a simple output = a * (input^b)
   /// relationship
@@ -124,14 +138,6 @@ protected:
   alignBins(const API::MatrixWorkspace_sptr workspace);
   const std::vector<double>
   calculateRebinParams(const API::MatrixWorkspace_const_sptr workspace) const;
-
-  /// Reverses the workspace if X values are in descending order
-  void reverse(API::MatrixWorkspace_sptr WS);
-
-  /// For conversions to energy transfer, removes bins corresponding to
-  /// inaccessible values
-  API::MatrixWorkspace_sptr
-  removeUnphysicalBins(const API::MatrixWorkspace_const_sptr workspace);
 
   void putBackBinWidth(const API::MatrixWorkspace_sptr outputWS);
 

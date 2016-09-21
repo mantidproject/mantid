@@ -44,7 +44,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class TomographyIfaceModel {
+class MANTIDQT_CUSTOMINTERFACES_DLL TomographyIfaceModel {
   // For now, there is no need to  make this a Q_OBJECT (and derive from
   // QObject, but this class may become a "full" Q_OBJECT as soon as a Qt
   // model (table, tree, etc.), with its signals, is used here
@@ -153,12 +153,9 @@ public:
 
   void updateTomoPathsConfig(const TomoPathsConfig &tc) { m_pathsConfig = tc; }
 
-  // Names of image reconstruction tools
-  static const std::string g_TomoPyTool;
-  static const std::string g_AstraTool;
+  // tools not yet available/supported - TODO
   static const std::string g_CCPiTool;
   static const std::string g_SavuTool;
-  static const std::string g_customCmdTool;
 
 private:
   /// retrieve info from compute resource into status table
@@ -171,9 +168,7 @@ private:
                                std::vector<std::string> &opt) const;
 
   void checkWarningToolNotSetup(const std::string &tool,
-                                const std::string &settings,
-                                const std::string &cmd,
-                                const std::string &opt) const;
+                                const std::string &cmd) const;
 
   std::vector<std::string> makeTomoRecScriptOptions(bool local) const;
 
@@ -252,7 +247,17 @@ private:
   // Parameters set for the ROI, normalization region, etc.
   ImageStackPreParams m_imageStackPreParams;
 
+  // The main tomo_reconstruct.py or similar script (as it is distributed with
+  // Mantid). This is the entry point for reconstruction jobs.
+  static const std::string g_mainReconstructionScript;
+
+  // Names of reconstruction tools
+  static const std::string g_TomoPyTool;
+  static const std::string g_AstraTool;
+  static const std::string g_customCmdTool;
+
   // mutex for the job status info update operations
+  // TODO: replace with std::mutex+std::lock_guard
   QMutex *m_statusMutex;
 };
 

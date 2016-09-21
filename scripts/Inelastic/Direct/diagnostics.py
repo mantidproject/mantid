@@ -1,3 +1,6 @@
+#pylind: disable=too-many-instance-attributes
+#pylint: disable=too-many-branches
+#pylint: disable=too-many-locals
 """
 Provide functions to perform various diagnostic tests.
 
@@ -83,12 +86,17 @@ def diagnose(white_int,**kwargs):
         van_mask = CloneWorkspace(white_int)
 
     if not hardmask_file is None:
-        LoadMask(Instrument=kwargs.get('instr_name',''),InputFile=parser.hard_mask_file,
-                 OutputWorkspace='hard_mask_ws')
-        MaskDetectors(Workspace=white_int, MaskedWorkspace='hard_mask_ws')
-        MaskDetectors(Workspace=van_mask, MaskedWorkspace='hard_mask_ws')
+        if parser.mapmask_ref_ws is None:
+            ref_ws = white_int
+        else:
+            ref_ws = parser.mapmask_ref_ws
+
+        hm_ws = LoadMask(Instrument=kwargs.get('instr_name',''),InputFile=parser.hard_mask_file,\
+                 OutputWorkspace='hard_mask_ws',RefWorkspace = ref_ws)
+        MaskDetectors(Workspace=white_int, MaskedWorkspace=hm_ws)
+        MaskDetectors(Workspace=van_mask, MaskedWorkspace=hm_ws)
         # Find out how many detectors we hard masked
-        _dummy_ws,masked_list = ExtractMask(InputWorkspace='hard_mask_ws')
+        _dummy_ws,masked_list = ExtractMask(InputWorkspace=hm_ws)
         DeleteWorkspace('_dummy_ws')
         test_results['Hard mask:'] = [os.path.basename(parser.hard_mask_file),len(masked_list)]
         DeleteWorkspace('hard_mask_ws')

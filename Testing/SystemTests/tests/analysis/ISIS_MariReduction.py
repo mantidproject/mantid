@@ -266,6 +266,7 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
         prop['sample_mass'] = 10
         prop['sample_rmm'] = 435.96
 
+
         return prop
 
     @AdvancedProperties
@@ -285,6 +286,10 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
         prop['save_format'] = ''
         prop['load_monitors_with_workspace'] = False
         prop['nullify_negative_signal']=False
+        prop['mapmask_ref_ws'] = Load(Filename='MAR11001.RAW',\
+            OutputWorkspace='MAR11001.RAW',LoadMonitors='Include')
+
+
         return prop
       #
     @iliad

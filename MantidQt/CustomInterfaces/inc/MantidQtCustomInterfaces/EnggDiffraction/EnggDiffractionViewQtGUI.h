@@ -123,6 +123,8 @@ public:
 
   void enableTabs(bool enable) override;
 
+  void highlightRbNumber(bool isValid) override;
+
   void enableCalibrateFocusFitUserActions(bool enable) override;
 
   std::string focusingDir() const override;
@@ -238,6 +240,9 @@ private:
   void readSettings();
   /// save settings (before closing)
   void saveSettings() const override;
+
+  // when the interface is shown
+  void showEvent(QShowEvent *) override;
 
   // window (custom interface) close
   void closeEvent(QCloseEvent *ev) override;
