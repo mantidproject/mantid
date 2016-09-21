@@ -68,10 +68,8 @@ public:
   ~QWorkspaceDockView() override;
 
   void init() override;
-  MantidQt::MantidWidgets::WorkspacePresenter_wptr
+  MantidQt::MantidWidgets::WorkspacePresenterWN_wptr
   getPresenterWeakPtr() override;
-  MantidQt::MantidWidgets::WorkspacePresenter_sptr
-  getPresenterSharedPtr() override;
 
   SortDirection getSortDirection() const override;
   SortCriteria getSortCriteria() const override;
@@ -188,7 +186,7 @@ private slots:
   void plotContour();
 
 private:
-  MantidQt::MantidWidgets::WorkspacePresenter_sptr presenter;
+  MantidQt::MantidWidgets::WorkspacePresenterVN_sptr m_presenter;
 
 protected:
   MantidTreeWidget *m_tree;

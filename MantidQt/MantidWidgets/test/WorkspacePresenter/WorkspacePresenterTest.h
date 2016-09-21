@@ -432,7 +432,7 @@ public:
 
 private:
   boost::shared_ptr<NiceMock<MockWorkspaceDockView>> mockView;
-  boost::shared_ptr<WorkspacePresenter> presenter;
+  WorkspacePresenterVN_sptr presenter;
 
   void createGroup(std::string groupName) {
     auto group =

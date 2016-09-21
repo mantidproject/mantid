@@ -4,7 +4,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
 #include <MantidAPI/Workspace.h>
-#include <MantidQtMantidWidgets/WorkspacePresenter/WorkspaceDockView.h>
+#include <MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h>
 #include <MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/make_shared.hpp>
@@ -20,7 +20,8 @@ public:
   ~MockWorkspaceDockView() override {}
 
   void init() override {
-    presenter = boost::make_shared<WorkspacePresenter>(shared_from_this());
+    auto presenter = boost::make_shared<WorkspacePresenter>(shared_from_this());
+	m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
     presenter->init();
   }
 
@@ -62,11 +63,14 @@ public:
 
   // Methods which are not to be mocked
   void enableDeletePrompt(bool) override {}
-  WorkspacePresenter_wptr getPresenterWeakPtr() override { return presenter; }
-  WorkspacePresenter_sptr getPresenterSharedPtr() override { return presenter; }
+  WorkspacePresenterWN_wptr getPresenterWeakPtr() override {
+    return boost::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
+  }
+  
+  WorkspacePresenterVN_sptr getPresenterSharedPtr() { return m_presenter; }
 
 private:
-  WorkspacePresenter_sptr presenter;
+  WorkspacePresenterVN_sptr m_presenter;
 };
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE

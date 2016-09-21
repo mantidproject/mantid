@@ -11,10 +11,10 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 class WorkspaceProviderNotifiable;
-class WorkspacePresenter;
+class ViewNotifiable;
 
-using WorkspacePresenter_wptr = boost::weak_ptr<WorkspaceProviderNotifiable>;
-using WorkspacePresenter_sptr = boost::shared_ptr<WorkspacePresenter>;
+using WorkspacePresenterWN_wptr = boost::weak_ptr<WorkspaceProviderNotifiable>;
+using WorkspacePresenterVN_sptr = boost::shared_ptr<ViewNotifiable>;
 using StringList = std::vector<std::string>;
 /**
 \class  IWorkspaceDockView
@@ -53,8 +53,7 @@ public:
   virtual ~IWorkspaceDockView() = default;
 
   virtual void init() = 0;
-  virtual WorkspacePresenter_wptr getPresenterWeakPtr() = 0;
-  virtual WorkspacePresenter_sptr getPresenterSharedPtr() = 0;
+  virtual WorkspacePresenterWN_wptr getPresenterWeakPtr() = 0;
 
   virtual bool askUserYesNo(const std::string &caption,
                             const std::string &message) const = 0;
