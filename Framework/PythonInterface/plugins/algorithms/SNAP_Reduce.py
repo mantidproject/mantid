@@ -200,7 +200,10 @@ class SNAP_Reduce(PythonAlgorithm):
                              doc="Optional Prefix to be added to workspaces and output filenames")
 
         self.declareProperty("SaveData", False,
-                             "Save data in the following formats: Ascii- d-spacing ,Nexus Processed,GSAS and Fullprof")
+                             "Save data in the following formats: Ascii- "\
+                             +"d-spacing ,Nexus Processed,GSAS and Fullprof")
+
+        self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.OptionalDirectory))
 
     def validateInputs(self):
         issues = dict()
@@ -371,9 +374,19 @@ class SNAP_Reduce(PythonAlgorithm):
                                               NaNValue='0', NaNError='0',
                                               InfinityValue='0', InfinityError='0')
 
-            new_Tag = Tag + '_' + prefix
+            new_Tag = Tag
+            if len(prefix) > 0:
+                new_Tag += '_' + prefix
 
             if save_Data:
+                saveDir = self.getProperty("OutputDirectory").value.strip()
+                if len(saveDir) <= 0:
+                    self.log().notice('Using default save location')
+                    saveDir = os.path.join(self.get_IPTS_Local(r), 'shared', 'data')
+                self.log().notice('Writing to \'' + saveDir + '\'')
+
+                basename = '%s_%s_%s' % (new_Tag, r, group)
+
                 if norm == 'None':
                     WS_tof = ConvertUnits(InputWorkspace="WS_red", Target="TOF", AlignBins=False)
                 else:
@@ -381,20 +394,20 @@ class SNAP_Reduce(PythonAlgorithm):
 
                 if norm == 'None':
                     SaveNexusProcessed(InputWorkspace=WS_red,
-                                       Filename='%s/shared/data/nexus/%s_%s_%s.nxs' % (self.get_IPTS_Local(r), new_Tag, r, group))
+                                       Filename=os.path.join(saveDir, 'nexus',     basename+'.nxs'))
                     SaveAscii(InputWorkspace=WS_red,
-                              Filename='%s/shared/data/d_spacing/%s_%s_%s.dat' % (self.get_IPTS_Local(r), new_Tag, r, group))
+                              Filename=os.path.join(saveDir, 'd_spacing', basename+'.dat'))
                 else:
                     SaveNexusProcessed(InputWorkspace=WS_nor,
-                                       Filename='%s/shared/data/nexus/%s_%s_%s.nxs' % (self.get_IPTS_Local(r), new_Tag,  r, group))
+                                       Filename=os.path.join(saveDir, 'nexus', basename+'.nxs'))
                     SaveAscii(InputWorkspace=WS_nor,
-                              Filename='%s/shared/data/d_spacing/%s_%s_%s.dat' % (self.get_IPTS_Local(r), new_Tag, r, group))
+                              Filename=os.path.join(saveDir, 'd_spacing', basename+'.dat'))
 
                 SaveGSS(InputWorkspace=WS_tof,
-                        Filename='%s/shared/data/gsas/%s_%s_%s.gsa' % (self.get_IPTS_Local(r), new_Tag, r, group),
+                        Filename=os.path.join(saveDir, 'gsas', basename+'.gsa'),
                         Format='SLOG', SplitFiles=False, Append=False, ExtendedHeader=True)
                 SaveFocusedXYE(InputWorkspace=WS_tof,
-                               Filename='%s/shared/data/fullprof/%s_%s_%s.dat' % (self.get_IPTS_Local(r), new_Tag, r, group),
+                               Filename=os.path.join(saveDir, 'fullprof', basename+'.dat'),
                                SplitFiles=True, Append=False)
                 DeleteWorkspace(Workspace='WS_tof')
 
