@@ -31,8 +31,9 @@ MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
                                          const bool showTiledOption)
     : QWidget(parent, flags), m_spectra(false),
       m_waterfall(showWaterfallOption), m_tiled(showTiledOption),
-      m_wsNames(wsNames), m_wsIndexIntervals(), m_spectraNumIntervals(),
-      m_wsIndexChoice(), m_spectraIdChoice() {
+      m_waterfallOpt(nullptr), m_tiledOpt(nullptr), m_wsNames(wsNames),
+      m_wsIndexIntervals(), m_spectraNumIntervals(), m_wsIndexChoice(),
+      m_spectraIdChoice() {
   checkForSpectraAxes();
   // Generate the intervals allowed to be plotted by the user.
   generateWsIndexIntervals();

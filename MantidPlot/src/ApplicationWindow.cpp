@@ -6040,8 +6040,8 @@ void ApplicationWindow::savetoNexusFile() {
   if (!fileName.isEmpty()) {
     std::string wsName;
     MdiSubWindow *w = activeWindow();
-    const std::string windowClassName = w->metaObject()->className();
     if (w) {
+      const std::string windowClassName = w->metaObject()->className();
       if (windowClassName == "MantidMatrix") {
         wsName = dynamic_cast<MantidMatrix *>(w)->getWorkspaceName();
 

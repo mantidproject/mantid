@@ -47,6 +47,18 @@ SpectrumView::SpectrumView(QWidget *parent)
   observeADSClear();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       "Interface", "SpectrumView", false);
+
+#ifdef Q_OS_MAC
+  // Work around to ensure that floating windows remain on top of the main
+  // application window, but below other applications on Mac
+  // Note: Qt::Tool cannot have both a max and min button on OSX
+  auto flags = windowFlags();
+  flags |= Qt::Tool;
+  flags |= Qt::CustomizeWindowHint;
+  flags |= Qt::WindowMinimizeButtonHint;
+  flags |= Qt::WindowCloseButtonHint;
+  setWindowFlags(flags);
+#endif
 }
 
 SpectrumView::~SpectrumView() {
