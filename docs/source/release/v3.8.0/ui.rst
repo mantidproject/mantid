@@ -72,6 +72,9 @@ Options Window
 ###############
 - Within Preferences->Mantid->Options ticking a category off/on will now untick/tick all subcategories. Also having some subcategories on and off will now show a partially ticked box for that category. 
 
+Label Tool
+##########
+- Using the Label Tool on a plot to add Sample Logs as labels now opens up a dialogue for the selected workspace with all the available Sample Logs listed and the ability to import the selected one onto the plot as a label.
 
 Bugs Resolved
 -------------
