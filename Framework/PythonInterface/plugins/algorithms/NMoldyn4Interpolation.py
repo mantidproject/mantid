@@ -43,7 +43,7 @@ class NMoldyn4Interpolation(PythonAlgorithm):
 
     def PyExec(self):
         self.validate_enviroment()
-    
+
         e_fixed = float(self.getPropertyValue('EFixed'))
         # Loads simulated workspace
         simulation = self.getPropertyValue('InputWorkspace')
@@ -80,7 +80,6 @@ class NMoldyn4Interpolation(PythonAlgorithm):
         # can be removed
         python_version = version_info
         if python_version < (2,7,0):
-            from mantid import logger
             logger.warning("NMoldyn4Interpolation may not run correctly on Python 2.6 and below")
 
     def validate_bounds(self, sim_X, ref_X, sim_Q, ref_Q):
