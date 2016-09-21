@@ -121,7 +121,7 @@ IFunction_sptr FunctionFactoryImpl::createSimple(
       // set initial parameter value
       try {
         fun->setParameter(parName, boost::lexical_cast<double>(parValue));
-      } catch (boost::bad_lexical_cast &e) {
+      } catch (boost::bad_lexical_cast &) {
         throw std::runtime_error(
             "Error in value of parameter " + parName + ".\n" + parValue +
             " cannot be interpreted as a floating point value.");
