@@ -52,6 +52,8 @@ SampleLogDialogBase::SampleLogDialogBase(const QString &wsname,
       m_experimentInfoIndex(experimentInfoIndex), buttonPlot(nullptr),
       buttonClose(nullptr), m_spinNumber(nullptr) {
 
+  m_tree = new QTreeWidget();
+
   for (size_t i = 0; i < NUM_STATS; ++i) {
     statValues[i] = nullptr;
   }

@@ -48,8 +48,6 @@ LabelToolLogValuesDialog::LabelToolLogValuesDialog(const QString &wsname,
   ss << "MantidPlot - " << wsname.toStdString().c_str() << " sample logs";
   setWindowTitle(QString::fromStdString(ss.str()));
 
-  m_tree = new QTreeWidget;
-
   QStringList titles;
   titles << "Name"
          << "Type"
