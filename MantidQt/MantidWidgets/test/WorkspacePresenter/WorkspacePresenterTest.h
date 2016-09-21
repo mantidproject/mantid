@@ -139,7 +139,6 @@ public:
     AnalysisDataService::Instance().add("wksp", wksp);
 
 	EXPECT_CALL(*mockView.get(), clearView()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), updateTree(_)).Times(Exactly(1));
 
     AnalysisDataService::Instance().clear();
 

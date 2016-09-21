@@ -230,7 +230,15 @@ private:
   /// Keep a map of renamed workspaces between updates
   QHash<QString, QString> m_renameMap;
 
+private slots:
+  void
+  handleUpdateTree(const std::map<std::string, Mantid::API::Workspace_sptr> &);
+  void handleClearView();
 signals:
+  void enableSaveNexus(const QString &);
   void updateRecentFiles(const QString &);
+  void
+  signalUpdateTree(const std::map<std::string, Mantid::API::Workspace_sptr> &);
+  void signalClearView();
 };
 #endif // QWORKSPACEDOCKVIEW_H

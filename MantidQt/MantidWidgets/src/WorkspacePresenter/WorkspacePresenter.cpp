@@ -192,7 +192,6 @@ void WorkspacePresenter::workspacesDeleted() { updateView(); }
 void WorkspacePresenter::workspacesCleared() {
   auto view = lockView();
   view->clearView();
-  view->updateTree(m_adapter->topLevelItems());
 }
 
 DockView_sptr WorkspacePresenter::lockView() {

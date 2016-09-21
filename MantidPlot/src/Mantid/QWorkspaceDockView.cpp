@@ -134,25 +134,26 @@ void QWorkspaceDockView::setupConnections() {
   m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(popupMenu(const QPoint &)));
+  connect(
+      this, SIGNAL(signalUpdateTree(
+                const std::map<std::string, Mantid::API::Workspace_sptr> &)),
+      this, SLOT(updateTree(
+                const std::map<std::string, Mantid::API::Workspace_sptr> &)),
+      Qt::QueuedConnection);
 
-  //// call this slot directly after the signal is received. just increment the
-  //// update counter
-  // connect(m_mantidUI, SIGNAL(ADS_updated()), this,
-  // SLOT(incrementUpdateCount()),
-  //        Qt::DirectConnection);
-  //// this slot is called when the GUI thread is free. decrement the counter.
-  /// do
-  //// nothing until the counter == 0
-  // connect(m_mantidUI, SIGNAL(ADS_updated()), this, SLOT(updateTree()),
-  //        Qt::QueuedConnection);
-
-  /*connect(m_mantidUI, SIGNAL(workspaces_cleared()), m_tree, SLOT(clear()),
-          Qt::QueuedConnection);*/
+  connect(this, SIGNAL(signalClearView()), this, SLOT(handleClearView()),
+          Qt::QueuedConnection);
   connect(m_tree, SIGNAL(itemSelectionChanged()), this,
           SLOT(treeSelectionChanged()));
   connect(m_tree, SIGNAL(itemExpanded(QTreeWidgetItem *)), this,
           SLOT(populateChildData(QTreeWidgetItem *)));
 }
+
+void QWorkspaceDockView::setTreeUpdating(const bool state) {
+  m_treeUpdating = state;
+}
+
+void QWorkspaceDockView::incrementUpdateCount() { m_updateCount.ref(); }
 
 void QWorkspaceDockView::init() {
   auto presenter = boost::make_shared<WorkspacePresenter>(shared_from_this());
@@ -383,9 +384,9 @@ bool QWorkspaceDockView::deleteConfirmation() const {
 void QWorkspaceDockView::deleteWorkspaces(const StringList &wsNames) {
   MantidMatrix *m = dynamic_cast<MantidMatrix *>(m_appParent->activeWindow());
 
-  auto alg = createAlgorithm("DeleteWorkspace");
-
   try {
+    auto alg = createAlgorithm("DeleteWorkspace");
+
     if (alg != nullptr) {
       alg->setLogging(false);
 
@@ -398,7 +399,6 @@ void QWorkspaceDockView::deleteWorkspaces(const StringList &wsNames) {
       } else if ((m && (strcmp(m->metaObject()->className(), "MantidMatrix") ==
                         0)) &&
                  !m->workspaceName().isEmpty()) {
-        m_mantidUI->deleteWorkspace(m->workspaceName());
         alg->setPropertyValue("Workspace", m->workspaceName().toStdString());
         alg->executeAsync();
       }
@@ -409,7 +409,7 @@ void QWorkspaceDockView::deleteWorkspaces(const StringList &wsNames) {
   }
 }
 
-void QWorkspaceDockView::clearView() { m_tree->clear(); }
+void QWorkspaceDockView::clearView() { emit signalClearView(); }
 
 QWorkspaceDockView::SortDirection QWorkspaceDockView::getSortDirection() const {
   return SortDirection::Ascending;
@@ -756,27 +756,8 @@ void QWorkspaceDockView::populateChildData(QTreeWidgetItem *item) {
 
 void QWorkspaceDockView::updateTree(
     const std::map<std::string, Mantid::API::Workspace_sptr> &items) {
-  // do not update until the counter is zero
-  if (m_updateCount.deref())
-    return;
-
-  // find all expanded top-level entries
-  QStringList expanded;
-  int n = m_tree->topLevelItemCount();
-  for (int i = 0; i < n; ++i) {
-    auto item = m_tree->topLevelItem(i);
-    if (item->isExpanded()) {
-      expanded << item->text(0);
-    }
-  }
-
-  // create a new tree
-  setTreeUpdating(true);
-  populateTopLevel(items, expanded);
-  setTreeUpdating(false);
-
-  // Re-sort
-  m_tree->sort();
+  incrementUpdateCount();
+  emit signalUpdateTree(items);
 }
 
 void QWorkspaceDockView::populateTopLevel(
@@ -1049,12 +1030,12 @@ void QWorkspaceDockView::clickedWorkspace(QTreeWidgetItem *item, int) {
 }
 
 void QWorkspaceDockView::workspaceSelected() {
-  QList<QTreeWidgetItem *> selectedItems = m_tree->selectedItems();
-  if (selectedItems.isEmpty())
+	auto selectedNames = getSelectedWorkspaceNames();
+  if (selectedNames.empty())
     return;
 
   // If there are multiple workspaces selected group and save as Nexus
-  if (selectedItems.length() > 1) {
+  if (selectedNames.size() > 1) {
     connect(m_saveButton, SIGNAL(clicked()), this, SLOT(saveWorkspaceGroup()));
 
     // Don't display as a group
@@ -1076,11 +1057,9 @@ void QWorkspaceDockView::workspaceSelected() {
     m_saveButton->setMenu(m_saveMenu);
   }
 
-  // TODO figure this out later
-  /*QString wsName = selectedItems[0]->text(0);
-  if (m_ads.doesExist(wsName.toStdString())) {
-    m_mantidUI->enableSaveNexus(wsName);
-  }*/
+  auto wsName = selectedNames[0];
+  //TODO: Wire signal correctly in applicationwindow
+  emit enableSaveNexus(QString::fromStdString(wsName));
 }
 
 void QWorkspaceDockView::onClickGroupButton() {
@@ -1101,3 +1080,31 @@ void QWorkspaceDockView::onClickLoad() {
 void QWorkspaceDockView::onClickLiveData() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::LoadLiveDataWorkspace);
 }
+
+// Asynchronous signal handlers
+void QWorkspaceDockView::handleUpdateTree(
+    const std::map<std::string, Mantid::API::Workspace_sptr> &items) {
+  // do not update until the counter is zero
+  if (m_updateCount.deref())
+    return;
+
+  // find all expanded top-level entries
+  QStringList expanded;
+  int n = m_tree->topLevelItemCount();
+  for (int i = 0; i < n; ++i) {
+    auto item = m_tree->topLevelItem(i);
+    if (item->isExpanded()) {
+      expanded << item->text(0);
+    }
+  }
+
+  // create a new tree
+  setTreeUpdating(true);
+  populateTopLevel(items, expanded);
+  setTreeUpdating(false);
+
+  // Re-sort
+  m_tree->sort();
+}
+
+void QWorkspaceDockView::handleClearView() { m_tree->clear(); }
