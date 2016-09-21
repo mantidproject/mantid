@@ -70,6 +70,8 @@ QWorkspaceDockView::QWorkspaceDockView(MantidUI *mui, ApplicationWindow *parent)
 
 QWorkspaceDockView::~QWorkspaceDockView() {}
 
+void QWorkspaceDockView::dropEvent(QDropEvent *de) { m_tree->dropEvent(de); }
+
 void QWorkspaceDockView::setupWidgetLayout() {
   QFrame *f = new QFrame(this);
   setWidget(f);

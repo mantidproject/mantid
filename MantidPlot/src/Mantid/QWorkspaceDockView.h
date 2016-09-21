@@ -66,7 +66,7 @@ class QWorkspaceDockView : public MantidQt::MantidWidgets::IWorkspaceDockView,
 public:
   explicit QWorkspaceDockView(MantidUI *mui, ApplicationWindow *parent);
   ~QWorkspaceDockView() override;
-
+  void dropEvent(QDropEvent *de) override;
   void init() override;
   MantidQt::MantidWidgets::WorkspacePresenterWN_wptr
   getPresenterWeakPtr() override;
