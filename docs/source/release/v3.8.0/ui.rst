@@ -32,6 +32,10 @@ Workspace Matrix View
 
 Plotting Improvements
 #####################
+* A new option has been added to the "Plot Spectrum" and "Plot Spectrum with Errors" dialogs. The "Tiled plot" checkbox enables such a plot to be produced as a simple right-click option.
+
+  - When this option is used for a workspace group, each workspace will its own subplot, with all specified spectra in it.
+  - When the option is used for a single workspace, each of the specified spectra will have its own subplot.
 
 Algorithm Toolbox
 #################
@@ -71,7 +75,7 @@ Options Window
 
 Bugs Resolved
 -------------
-- Floating windows now always stay on top of the main window in OSX
+- Floating windows now always stay on top of the main window in OSX.
 - The sliceviewer will now rebin an existing binned workspace correctly.
 - 2D plots now display correctly for point data workspaces as well as for histogram data
 - Cuts aligned with an axis no longer generate an empty integrated line plot.

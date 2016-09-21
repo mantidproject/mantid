@@ -13,7 +13,9 @@ Framework Changes
   is almost identical, but a small number of cases (such as adding the workspaces ``Z`` and ``z``) will work
   in a more predictable manner.
 
-- A race condition when accessing a singleton from multiple threads was fixed. 
+- A race condition when accessing a singleton from multiple threads was fixed.
+
+- Log file buffers are no longer flushed by default for each newline received, increasing the speed of some system tests on Windows by 4.5x.
 
 HistogramData
 -------------
@@ -51,6 +53,8 @@ New
 - :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>` an algorithm which saves a TableWorkspace containing
   diffraction fitting results as an ASCII file
 
+- :ref:`UnwrapMonitorsInTOF <algm-UnwrapMonitorsInTOF>` handles the data which was collected beyond the end of a frame.
+
 
 Improved
 ########
@@ -77,14 +81,11 @@ Improved
 
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` had a bug in cases where the beam was larger than the
+  sample, which lead to the attenuation factor being too high. This has been fixed.
+
 - :ref:`ConvertUnits <algm-ConvertUnits>` now has the option to take a workspace with Points as input.
   A property has been added that will make the algorithm convert the workspace to Bins automatically. The output space will be converted back to Points.
-
-- :ref:`ConvertToHistogram <algm-ConvertToHistogram>`: Performance improvement using new HistogramData module,
-  3x to 4x speedup.
-
-- :ref:`ConvertToPointData <algm-ConvertToPointData>`: Performance improvement using new HistogramData module,
-  3x to 4x speedup.
 
 - :ref:`RenameWorkspace <algm-RenameWorkspace>` and `RenameWorkspaces <algm-RenameWorkspaces>`
   now check if a Workspace with that name already exists in the ADS and gives
@@ -92,11 +93,15 @@ Improved
 
 - :ref:`FindSXPeaks <algm-FindSXPeaks>`: Fixed a bug where peaks with an incorrect TOF would stored for some intrument geometries.
 
+- :ref: `LoadILL <algm-LoadILL>` was renamed to `LoadILLTOF <algm-LoadILLTOF>` to better reflect what it does. The new algorithm can also handle cases where the monitor IDs are greater than the detector IDs.
+
 - :ref:`FFT <algm-FFT>` deals correctly with histogram input data. Internally, it converts to point data, and the output is always a point data workspace. (It can be converted to histogram data using :ref:`ConvertToHistogram <algm-ConvertToHistogram>` if required).
 
 -  :ref:`StartLiveData <algm-StartLiveData>` has additional properties for specifying scripts to run for processing and post-processing.
 
 - :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` now also accepts a workspace name as input, as an alternative to an instrument definition xml file.
+
+- :ref:`Mergeruns <algm-MergeRuns>` can now also deal with non-time series sample logs when merging. Behaviour can be to create a time series, a list of values and warn or fail if different.
 
 Deprecated
 ##########
@@ -106,6 +111,8 @@ MD Algorithms (VATES CLI)
 
 - :ref:`MergeMD <algm-MergeMD>` now preserves the display normalization from the first workspace in the list
 
+- :ref:`BinMD <algm-BinMD>` fixed bug where algorithm would default to using orthogonal basis vectors when supplied with 4 bases and 4 dimensions
+
 Performance
 -----------
 
@@ -113,23 +120,44 @@ Performance
   AppendSpectra, ApplyTransmissionCorrection, CalculateEfficiency, CalculateFlatBackground, ConjoinSpectra, ConvertAxesToRealSpace, ConvertAxisByFormula, ConvertEmptyToTof, ConvertSpectrumAxis2, ConvertUnitsUsingDetectorTable, CorelliCrossCorrelate, DetectorEfficiencyVariation, EQSANSTofStructure, FilterEvents, FindCenterOfMassPosition, FindCenterOfMassPosition2, FindDetectorsOutsideLimits, GetEi, IntegrateByComponent, LorentzCorrection, MultipleScatteringCylinderAbsorption, NormaliseToMonitor, Q1D2, Q1DWeighted, RadiusSum, RemoveBackground, RemoveBins, RemoveMaskedSpectra, RingProfile, SANSDirectBeamScaling, SumSpectra, TOFSANSResolution, UnwrapMonitor, UnwrapSNS, VesuvioCalculateMS, and WeightedMeanOfWorkspace.
 
 - The introduction of the HistogramData module may have influenced the performance of some algorithms and many workflows.
-  A moderate number of algorithms should experience a speedup and reduced memory consumption.
+  Some algorithms (listed below) experience a speedup and reduced memory consumption.
   If you experience unusual slowdowns, please contact the developer team.
 
-- :ref:`StripPeaks <algm-StripPeaks>` has a slight performance improvement from these changes.
+  The following algorithms were adapted and show a noticeable speedup:
 
-- :ref:`ModeratorTzero <algm-ModeratorTzero>` 29% faster execution.
+  - :ref:`ApplyTransmissionCorrection <algm-ApplyTransmissionCorrection>`: 20% speedup
+  - :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`: 25% speedup
+  - :ref:`ConvertToHistogram <algm-ConvertToHistogram>`: 3x to 4x speedup
+  - :ref:`ConvertToPointData <algm-ConvertToPointData>`: 3x to 4x speedup
+  - :ref:`CorrectFlightPaths <algm-CorrectFlightPaths>`: 10% speedup
+  - :ref:`ExtractSpectra <algm-ExtractSpectra>`: no change when X-range changes, otherwise 50x to 100x speedup for Workspace2D and up to 3x speedup for EventWorkspace
+  - :ref:`GetAllEi <algm-GetAllEi>`: 5-10% speedup
+  - :ref:`GetDetOffsetsMultiPeaks <algm-GetDetOffsetsMultiPeaks>`: 5-10% speedup
+  - :ref:`GetEi <algm-GetEi>`: 20% speedup
+  - :ref:`MaxEnt <algm-MaxEnt>`: 5% speedup
+  - :ref:`ModeratorTzero <algm-ModeratorTzero>`: 30% speedup
+  - :ref:`ModeratorTzeroLinear <algm-ModeratorTzeroLinear>`: 40% speedup
+  - :ref:`RebinByPulseTimes <algm-RebinByPulseTimes>`: 5-10% speedup
+  - :ref:`ScaleX <algm-ScaleX>`: 20% speedup
 
-- :ref:`ModeratorTzeroLinear <algm-ModeratorTzeroLinear>` 38% faster execution.
+  In most of these cases memory consumption has also reduced.
+  The performance improvements will vary from machine to machine, and will be different or even non-existent depending on the type and size of the input workspace and algorithm parameters.
 
-- :ref:`MaxEnt <algm-MaxEnt>` slight improvement of 5% faster execution.
+  The following algorithms were adapted and do not show any speedup, however the memory consumption may have reduced slightly:
+
+  AbsorptionCorrection, CalculateEfficiency, CalculateFlatBackground, CalculateZscore, ConvertEmptyToTof, ConvertToMatrixWorkspace, CrossCorrelate, ExtractFFTSpectrum, FindPeaks, GeneratePeaks, PolarizationCorrection, Rebin2D, RebinByTimeAtSample, ReflectometryTransform, StripPeaks
+
+  Algorithms that are run after one of those listed above may also benefit from the improved data sharing that lead to speedup and reduced memory consumption.
+  In some cases, however, follow-up algorithms may run slower (typically this can happen for algorithms that do in-place modification of data).
+  However, the total runtime (sum of the runtimes of the improved *and* the degraded algorithm) should be unchanged in the worst case.
+
 
 CurveFitting
 ------------
 
 - Added two new minimizers belonging to the trust region family of algorithms: DTRS and More-Sorensen.
 - Added new property `EvaluationType` to Fit algorithm. If set to "Histogram" and the input dataset 
-is a histogram with large bins it can improve accuracy of the fit.
+  is a histogram with large bins it can improve accuracy of the fit.
 
 Improved
 ########

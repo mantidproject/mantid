@@ -187,9 +187,18 @@ def getDetIDsForBank(bank):
 
     detIDs = set()
 
+   
+    # less then zero indicates both banks, from line 98
     bank_int = int(bank)
+    if(bank_int < 0):
+        # both banks, north and south
+        bank_int = [1, 2]
+    else:
+        # make into list so that the `if in` check works
+        bank_int = [bank_int]
+
     for i in range(grouping.getNumberHistograms()):
-        if bank_int < 0 or grouping.readY(i)[0] == bank_int:
+        if grouping.readY(i)[0] in bank_int:
             detIDs.add(grouping.getDetector(i).getID())
 
     sapi.DeleteWorkspace(grouping)
