@@ -225,6 +225,8 @@ private:
   QAtomicInt m_updateCount;
   bool m_treeUpdating;
   bool m_promptDelete;
+  SortCriteria m_sortCriteria;
+  SortDirection m_sortDirection;
   /// Temporarily keeps names of selected workspaces during tree update
   /// in order to restore selection after update
   QStringList m_selectedNames;

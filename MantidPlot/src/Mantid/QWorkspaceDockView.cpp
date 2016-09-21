@@ -39,7 +39,8 @@ WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
 QWorkspaceDockView::QWorkspaceDockView(MantidUI *mui, ApplicationWindow *parent)
     : QDockWidget(tr("Workspaces"), parent), m_mantidUI(mui), m_updateCount(0),
       m_treeUpdating(false), m_promptDelete(false),
-      m_saveFileType(SaveFileType::Nexus) {
+      m_saveFileType(SaveFileType::Nexus), m_sortCriteria(SortCriteria::ByName),
+      m_sortDirection(SortDirection::Ascending) {
   setObjectName(
       "exploreMantid"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
@@ -413,6 +414,42 @@ void QWorkspaceDockView::deleteWorkspaces(const StringList &wsNames) {
 void QWorkspaceDockView::clearView() { emit signalClearView(); }
 
 QWorkspaceDockView::SortDirection QWorkspaceDockView::getSortDirection() const {
+  return m_sortDirection;
+}
+
+QWorkspaceDockView::SortCriteria QWorkspaceDockView::getSortCriteria() const {
+  return m_sortCriteria;
+}
+
+void QWorkspaceDockView::sortAscending() {
+  m_sortDirection = SortDirection::Ascending;
+  m_presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
+}
+
+void QWorkspaceDockView::sortDescending() {
+  m_sortDirection = SortDirection::Descending;
+  m_presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
+}
+
+void QWorkspaceDockView::chooseByName() {
+  m_sortCriteria = SortCriteria::ByName;
+  m_presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
+}
+
+void QWorkspaceDockView::chooseByLastModified() {
+  m_sortCriteria = SortCriteria::ByLastModified;
+  m_presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
+}
+
+void QWorkspaceDockView::excludeItemFromSort(MantidTreeWidgetItem *item) {
+  static int counter = 1;
+
+  item->setSortPos(counter);
+
+  counter++;
+}
+
+QWorkspaceDockView::SortDirection QWorkspaceDockView::getSortDirection() const {
   return SortDirection::Ascending;
 }
 
@@ -421,10 +458,20 @@ QWorkspaceDockView::SortCriteria QWorkspaceDockView::getSortCriteria() const {
 }
 
 void QWorkspaceDockView::sortWorkspaces(SortCriteria criteria,
-                                        SortDirection direction) {}
+                                        SortDirection direction) {
+  if (isTreeUpdating())
+    return;
+  m_tree->setSortScheme(criteria == SortCriteria::ByName
+                            ? MantidItemSortScheme::ByName
+                            : MantidItemSortScheme::ByLastModified);
+  m_tree->setSortOrder(direction == SortDirection::Ascending
+                           ? Qt::AscendingOrder
+                           : Qt::DescendingOrder);
+  m_tree->sort();
+}
 
 QWorkspaceDockView::SaveFileType QWorkspaceDockView::getSaveFileType() const {
-  return SaveFileType::Nexus;
+  return m_saveFileType;
 }
 
 void QWorkspaceDockView::saveWorkspaceCollection() {
