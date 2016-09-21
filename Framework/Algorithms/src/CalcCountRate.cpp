@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidDataObjects/Workspace2D.h"
+#include <numeric>
 
 namespace Mantid {
 namespace Algorithms {
@@ -300,12 +301,10 @@ void CalcCountRate::hisogramEvents(const DataObjects::EventList &el,
 void CalcCountRate::normalizeVisWs(int64_t wsIndex) {
 
   auto Y = m_visWs->dataY(wsIndex);
-  for (size_t i = 0; i < Y.size(); i++) {
-    Y[i] /= m_visNorm[wsIndex];
+  for (auto &yv : Y) {
+    yv /= m_visNorm[wsIndex];
   }
 }
-void CalcCountRate::buildVisWSNormalization(
-    std::vector<double> &normalization) {}
 /*Analyse input log parameters and logs, attached to the workspace and identify
  * the parameters of the target log, including experiment time.
  *
@@ -323,20 +322,22 @@ void CalcCountRate::setOutLogParameters(
   bool logPresent = InputWorkspace->run().hasProperty(NormLogName);
   if (!logPresent) {
     if (m_normalizeResult) {
-      g_log.warning() << "Normalization by log " << NormLogName
-                      << " values requested but the log is not attached to the "
-                         "workspace. Normalization disabled\n";
+      g_log.warning()
+          << "Normalization by log: '" << NormLogName
+          << "' values requested but the log is not attached to the "
+             "workspace. Normalization disabled\n";
       m_normalizeResult = false;
     }
     if (useLogDerivative) {
-      g_log.warning() << "Normalization by log " << NormLogName
-                      << " derivative requested but the log is not attached to "
-                         "the workspace. Normalization disabled\n";
+      g_log.warning() << "Normalization by log: '" << NormLogName
+                      << "' -- log derivative requested but the source log is "
+                         "not attached to "
+                         "the workspace. Log derivative will not be used.\n";
       useLogDerivative = false;
     }
     if (useLogAccuracy) {
-      g_log.warning() << "Using accuracy of the log " << NormLogName
-                      << " is requested but the log is not attached to the "
+      g_log.warning() << "Using accuracy of the log: '" << NormLogName
+                      << "' is requested but the log is not attached to the "
                          "workspace. Will use accuracy defined by "
                          "'NumTimeSteps' property value\n";
       useLogAccuracy = false;
@@ -419,7 +420,13 @@ void CalcCountRate::setOutLogParameters(
   }
 
   m_TRangeMin = runTMin;
-  m_TRangeMax = runTMax + int64_t(1);// *(1+std::numeric_limits<double>::epsilon());
+  // histogramming excludes rightmost events. Modify max limit to keep them
+  double t_epsilon = double(runTMax.totalNanoseconds() *
+                            (1 + std::numeric_limits<double>::epsilon()));
+  int64_t eps_increment =
+      static_cast<int64_t>(t_epsilon - double(runTMax.totalNanoseconds()));
+  m_TRangeMax =
+      runTMax + eps_increment; // *(1+std::numeric_limits<double>::epsilon());
 }
 
 /* Retrieve and define data search ranges from input workspace parameters and
@@ -479,7 +486,8 @@ void CalcCountRate::setSourceWSandXRanges(
   m_workingWS->getEventXMinMax(realMin, realMax);
   if (!m_rangeExplicit) { // The range is the whole workspace range
     m_XRangeMin = realMin;
-    m_XRangeMax = realMax;
+    // include rightmost limit into the histogramming
+    m_XRangeMax = realMax * (1. + std::numeric_limits<double>::epsilon());
     return;
   }
 
@@ -487,7 +495,8 @@ void CalcCountRate::setSourceWSandXRanges(
     m_XRangeMin = realMin;
   }
   if (m_XRangeMax == EMPTY_DBL()) {
-    m_XRangeMax = realMax;
+    // include rightmost limit into the histogramming
+    m_XRangeMax = realMax * (1. + std::numeric_limits<double>::epsilon());
   }
   if (m_XRangeMin < realMin) {
     g_log.debug() << "Workspace constrain min range changed from: "
@@ -497,7 +506,7 @@ void CalcCountRate::setSourceWSandXRanges(
   if (m_XRangeMax > realMax) {
     g_log.debug() << "Workspace constrain max range changed from: "
                   << m_XRangeMax << " To: " << realMax << std::endl;
-    m_XRangeMax = realMax;
+    m_XRangeMax = realMax * (1. + std::numeric_limits<double>::epsilon());
   }
 }
 
@@ -593,6 +602,99 @@ bool CalcCountRate::notmalizeCountRate() const { return m_normalizeResult; }
 /** Helper function, mainly for testing
 * @return  true if log derivative is used instead of log itself */
 bool CalcCountRate::useLogDerivative() const { return m_useLogDerivative; }
+
+/** method to prepare normalization vector for the visuzliation workspace using
+* data from normalization log with, usually, different number of time steps*/
+void CalcCountRate::buildVisWSNormalization(
+    std::vector<double> &normalization) {
+  if (!m_pNormalizationLog) {
+    m_normalizeResult = false;
+    g_log.warning() << "CalcCountRate::buildVisWSNormalization: No source "
+                       "normalization log is found. Will not normalize "
+                       "visualization workspace\n";
+    return;
+  }
+  // visualization workspace should be present and initialized at this stage:
+  auto ax = dynamic_cast<API::NumericAxis *>(m_visWs->getAxis(1));
+  if (!ax)
+    throw std::runtime_error(
+        "Can not retrieve Y-axis from visualization workspace");
+  normalization.resize(ax->length());
+
+  auto log_time = m_pNormalizationLog->timesAsVectorSeconds();
+  auto log_val = m_pNormalizationLog->valuesAsVector();
+  // has to be (and usually is equal step (? checks?).
+  // Logging has some bug in converting to time
+  double dtSource = log_time[2] - log_time[1];
+  // calculate source distribution
+  std::vector<double> source(log_time.size());
+  size_t last = log_time.size() - 1;
+  // log values are right shifted values
+  for (size_t i = 1; i < last; ++i) {
+    source[i] = log_val[i] / dtSource;
+  }
+  source[0] = 0.5 * log_val[0] / dtSource;
+  source[last] = 0.5 * log_val[last] / dtSource;
+
+  auto t_norm = ax->getValues();
+  double dt = t_norm[1] -
+              t_norm[0]; // equal step, axis points in the middle of the binning
+
+  int logSize = m_pNormalizationLog->realSize();
+  if (dt <= dtSource) {
+    // linearly interpolate to fine grid
+
+    for (size_t i = 0; i < normalization.size(); ++i) {
+      double tn = t_norm[0] + i * dt;
+      if (tn < log_time[0] || tn >= log_time[last]) {
+        normalization[i] = 0; // should not ever happen at this stage
+        continue;
+      }
+      size_t ind = static_cast<size_t>((tn - log_time[0]) / dtSource);
+      normalization[i] = dt * (source[ind] +
+                               (tn - log_time[ind]) *
+                                   (source[ind + 1] - source[ind]) / dtSource);
+    }
+  } else {
+    // Integrate to coarce grid.
+    // std::vector<double> log_edges;
+    // VectorHelper::convertToBinBoundary(log_time, log_edges);
+    auto t_bins = ax->createBinBoundaries();
+    dt = t_bins[1] - t_bins[0]; // equal bins
+
+    for (size_t i = 0; i < normalization.size(); i++) {
+      double t0 = t_bins[i];
+      double t1 = t_bins[i + 1];
+      if (t0 < log_time[0]) {
+        if (t1 <= log_time[0]) {
+          normalization[i] = 0; // should not ever happen at this stage
+          continue;
+        } else {
+          t0 = log_time[0];
+        }
+      }
+      if (t1 > log_time[last]) {
+        if (t0 >= log_time[last]) {
+          normalization[i] = 0; // should not ever happen at this stage
+          continue;
+        } else {
+          t1 = log_time[last] * (1 - std::numeric_limits<double>::epsilon());
+        }
+      }
+      size_t i0 = static_cast<size_t>((t0 - log_time[0]) / dtSource);
+      size_t i1 = static_cast<size_t>((t1 - log_time[0]) / dtSource);
+
+      normalization[i] =
+          dtSource *
+          (std::accumulate(source.begin() + i0 + 1, source.begin() + i1, 0.) +
+           0.5 * (source[i0] +
+                  (t0 - log_time[i0]) * (source[i0 + 1] - source[i0]) /
+                      dtSource) +
+           0.5 * (source[i1] +
+                  (t1 - log_time[i1]) * (source[i1 + 1] - source[i1])));
+    }
+  }
+}
 
 } // namespace Algorithms
 } // namespace Mantid

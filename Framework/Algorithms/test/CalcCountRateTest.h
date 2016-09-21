@@ -11,6 +11,7 @@
 #include "MantidAPI/NumericAxis.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <numeric>
 
 using namespace Mantid;
 using Mantid::DataObjects::Workspace2D_sptr;
@@ -39,8 +40,11 @@ public:
     return m_workingWS.get();
   }
   void setVisWS(const std::string &wsName) {
-      this->setProperty("VisualizationWsName", wsName);
-      this->checkAndInitVisWorkspace();
+    this->setProperty("VisualizationWsName", wsName);
+    this->checkAndInitVisWorkspace();
+  }
+  const std::vector<double> &getVisNormLog() {
+      return m_visNorm;
   }
 };
 
@@ -79,7 +83,7 @@ public:
 
     alg.getWorkingWS()->getEventXMinMax(XRangeMin, XRangeMax);
     TS_ASSERT_EQUALS(XRangeMin, std::get<0>(ranget));
-    TS_ASSERT_EQUALS(XRangeMax, std::get<1>(ranget));
+    TS_ASSERT_DELTA(XRangeMax, std::get<1>(ranget), 1.e-8);
 
     //--------------------------------------------------------------------
     // right crop range is specified. Top range is within the right
@@ -259,90 +263,184 @@ public:
     TS_ASSERT_EQUALS(newLog->size(), 100);
     auto val_vec = newLog->valuesAsVector();
 
-    for (size_t i=0;i<val_vec.size()-1;i++) {
-        TS_ASSERT_DELTA(val_vec[i],200.,1.e-4);
+    for (size_t i = 0; i < val_vec.size(); i++) {
+      TS_ASSERT_DELTA(val_vec[i], 200., 1.e-4);
     }
-
   }
   void test_visWS_creation() {
 
-      DataObjects::EventWorkspace_sptr sws =
-          WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10,
-              false);
+    DataObjects::EventWorkspace_sptr sws =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10,
+                                                                        false);
 
-      CalcCountRateTester alg;
-      alg.initialize();
+    CalcCountRateTester alg;
+    alg.initialize();
 
-      alg.setProperty("NumTimeSteps", 120);
-      alg.setProperty("XResolution",200);
-      alg.setProperty("XMin",10.);
-      alg.setProperty("XMax", 50.);
+    alg.setProperty("NumTimeSteps", 120);
+    alg.setProperty("XResolution", 200);
+    alg.setProperty("XMin", 10.);
+    alg.setProperty("XMax", 50.);
 
-      alg.setProperty("Workspace", sws);
-      alg.setSearchRanges(sws);
+    alg.setProperty("Workspace", sws);
+    alg.setSearchRanges(sws);
 
-      TS_ASSERT_THROWS_NOTHING(alg.setVisWS("testVisWSName"));
+    TS_ASSERT_THROWS_NOTHING(alg.setVisWS("testVisWSName"));
 
-      API::MatrixWorkspace_sptr testVisWS = alg.getProperty("VisualizationWs");
-      TS_ASSERT(testVisWS);
-      if(!testVisWS) return;
+    API::MatrixWorkspace_sptr testVisWS = alg.getProperty("VisualizationWs");
+    TS_ASSERT(testVisWS);
+    if (!testVisWS)
+      return;
 
-      TS_ASSERT_EQUALS(testVisWS->getNumberHistograms(),120);
-      auto X = testVisWS->readX(0);
-      auto Y = testVisWS->readY(0);
-      TS_ASSERT_EQUALS(X.size(),201);
-      TS_ASSERT_EQUALS(Y.size(), 200);
-
+    TS_ASSERT_EQUALS(testVisWS->getNumberHistograms(), 120);
+    auto X = testVisWS->readX(0);
+    auto Y = testVisWS->readY(0);
+    TS_ASSERT_EQUALS(X.size(), 201);
+    TS_ASSERT_EQUALS(Y.size(), 200);
   }
 
   void test_visWS_noNormalization() {
 
+    DataObjects::EventWorkspace_sptr sws =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10,
+                                                                        false);
+
+    CalcCountRateTester alg;
+    alg.initialize();
+
+    alg.setProperty("NumTimeSteps", 100);
+    alg.setProperty("XResolution", 200);
+
+    alg.setProperty("RangeUnits", "dSpacing");
+
+    alg.setProperty("NormalizeTheRate", false);
+    alg.setProperty("UseLogDerivative", true);
+    alg.setProperty("UseNormLogGranularity", true);
+
+    alg.setProperty("Workspace", sws);
+    alg.setProperty("VisualizationWsName", "testVisWSNoNorm");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    API::MatrixWorkspace_sptr testVisWS = alg.getProperty("VisualizationWs");
+    TS_ASSERT(testVisWS);
+    TS_ASSERT_EQUALS(testVisWS->getNumberHistograms(), 100);
+    const MantidVec &X = testVisWS->readX(0);
+    const MantidVec &Y = testVisWS->readY(0);
+    TS_ASSERT_EQUALS(X.size(), 201);
+    TS_ASSERT_EQUALS(Y.size(), 200);
+    auto Yax = dynamic_cast<API::NumericAxis *>(testVisWS->getAxis(1));
+    TS_ASSERT(Yax);
+    if (!Yax)
+      return;
+
+    auto &YaxVal = Yax->getValues();
+
+    auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+        sws->run().getLogData("block_count_rate"));
+    TS_ASSERT(newLog);
+    if (!newLog)
+      return;
+    // these times are shifted by start time so firts time is 0
+    // auto times = newLog->timesAsVectorSeconds();
+    MantidVec counts = newLog->valuesAsVector();
+    TS_ASSERT_EQUALS(counts.size(), testVisWS->getNumberHistograms());
+    if (counts.size() != testVisWS->getNumberHistograms())
+      return;
+
+    for (size_t i = 0; i < testVisWS->getNumberHistograms(); ++i) {
+      const MantidVec &Y = testVisWS->readY(i);
+      double sum = std::accumulate(Y.begin(), Y.end(), 0.);
+      TSM_ASSERT_DELTA("Incorrect counts at index: " +
+                           boost::lexical_cast<std::string>(i),
+                       counts[i], sum, 1.e-6);
+    }
+  }
+
+  void test_visWS_NormalizationFine() {
+
       DataObjects::EventWorkspace_sptr sws =
           WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10,
               false);
+      auto pTime_log = new Kernel::TimeSeriesProperty<double>("proton_charge");
+      Kernel::DateAndTime first("2010-01-01T00:00:00");
+      std::vector<Kernel::DateAndTime> times(240);
+      std::vector<double> values(240);
+
+      for (size_t i = 0; i < values.size(); ++i) {
+          times[i] = first - 10. + double(i);
+          values[i] = 2 * double(i);
+      }
+      pTime_log->addValues(times, values);
+      sws->mutableRun().addProperty(pTime_log, true);
 
 
       CalcCountRateTester alg;
       alg.initialize();
 
-      alg.setProperty("NumTimeSteps", 100);
+      alg.setProperty("NumTimeSteps", 300);
       alg.setProperty("XResolution", 200);
 
       alg.setProperty("RangeUnits", "dSpacing");
 
-      alg.setProperty("NormalizeTheRate", false);
+      alg.setProperty("NormalizeTheRate", true);
       alg.setProperty("UseLogDerivative", true);
       alg.setProperty("UseNormLogGranularity", true);
 
       alg.setProperty("Workspace", sws);
-      alg.setProperty("VisualizationWsName", "testVisWSNoNorm");
+
+      alg.setOutLogParameters(sws);
+      alg.setSearchRanges(sws);
+      TS_ASSERT_THROWS_NOTHING(alg.setVisWS("testVisWSNorm"));
+
+      auto visNormLog = alg.getVisNormLog();
+      TS_ASSERT_EQUALS(visNormLog.size(),300);
+      TS_ASSERT_DELTA(visNormLog[10],0.66,1.e-5);
+      auto sum = std::accumulate(visNormLog.begin(),visNormLog.end(),0.);
+
+      TS_ASSERT_DELTA(sum,195.9573,1.e-4);
+  }
+  void test_visWS_NormalizationCoarce() {
+
+      DataObjects::EventWorkspace_sptr sws =
+          WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10,
+              false);
+      auto pTime_log = new Kernel::TimeSeriesProperty<double>("proton_charge");
+      Kernel::DateAndTime first("2010-01-01T00:00:00");
+      std::vector<Kernel::DateAndTime> times(240);
+      std::vector<double> values(240);
+
+      for (size_t i = 0; i < values.size(); ++i) {
+          times[i] = first - 10. + double(i);
+          values[i] = 2 * double(i);
+      }
+      pTime_log->addValues(times, values);
+      sws->mutableRun().addProperty(pTime_log, true);
 
 
-      TS_ASSERT_THROWS_NOTHING(alg.execute());
+      CalcCountRateTester alg;
+      alg.initialize();
 
-      API::MatrixWorkspace_sptr testVisWS = alg.getProperty("VisualizationWs");
-      TS_ASSERT(testVisWS);
-      TS_ASSERT_EQUALS(testVisWS->getNumberHistograms(), 100);
-      const MantidVec &X = testVisWS->readX(0);
-      const MantidVec &Y = testVisWS->readY(0);
-      TS_ASSERT_EQUALS(X.size(), 201);
-      TS_ASSERT_EQUALS(Y.size(), 200);
-      auto Yax = dynamic_cast<API::NumericAxis *>(testVisWS->getAxis(1));
-      TS_ASSERT(Yax);
-      if(!Yax)return;
+      alg.setProperty("NumTimeSteps", 50);
+      alg.setProperty("XResolution", 200);
 
-      auto &YaxVal = Yax->getValues();
+      alg.setProperty("RangeUnits", "dSpacing");
 
-      auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-          sws->run().getLogData("block_count_rate"));
-      TS_ASSERT(newLog);
-      if (!newLog)return;
-      auto times = newLog->timesAsVectorSeconds();
-      MantidVec counts = newLog->valuesAsVector();
+      alg.setProperty("NormalizeTheRate", true);
+      alg.setProperty("UseLogDerivative", true);
+      alg.setProperty("UseNormLogGranularity", true);
 
+      alg.setProperty("Workspace", sws);
 
+      alg.setOutLogParameters(sws);
+      alg.setSearchRanges(sws);
+      TS_ASSERT_THROWS_NOTHING(alg.setVisWS("testVisWSNorm"));
 
+      auto visNormLog = alg.getVisNormLog();
+      TS_ASSERT_EQUALS(visNormLog.size(), 50);
+      TS_ASSERT_DELTA(visNormLog[10], 4, 1.e-5);
+      auto sum = std::accumulate(visNormLog.begin(), visNormLog.end(), 0.);
 
+      TS_ASSERT_DELTA(sum, 195., 1.e-4);
   }
 };
 
