@@ -546,29 +546,6 @@ void QWorkspaceDockView::saveWorkspaces(const StringList &wsNames) {
   }
 }
 
-void QWorkspaceDockView::saveWorkspacesToFolder(const QString &folder) {
-  QList<QTreeWidgetItem *> items = m_tree->selectedItems();
-
-  // Loop through multiple items selected from the mantid tree
-  QList<QTreeWidgetItem *>::iterator itr = items.begin();
-  for (itr = items.begin(); itr != items.end(); ++itr) {
-    QString workspaceName = (*itr)->text(0);
-    QString filename = folder + "/" + workspaceName + ".nxs";
-
-    IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus");
-    saveAlg->initialize();
-    try {
-      saveAlg->setProperty("InputWorkspace", workspaceName.toStdString());
-      saveAlg->setProperty("Filename", filename.toStdString());
-      saveAlg->execute();
-    } catch (std::runtime_error &rte) {
-      docklog.error() << "Error saving workspace "
-                      << workspaceName.toStdString() << ": " << rte.what()
-                      << '\n';
-    }
-  }
-}
-
 std::string QWorkspaceDockView::getFilterText() const {
   return m_workspaceFilter->text().toStdString();
 }

@@ -160,7 +160,6 @@ public slots:
   void sortDescending();
   void chooseByName();
   void chooseByLastModified();
-  void saveWorkspacesToFolder(const QString &folder);
 
 protected slots:
   void popupMenu(const QPoint &pos);
