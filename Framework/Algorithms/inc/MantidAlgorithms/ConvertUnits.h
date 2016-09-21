@@ -98,7 +98,6 @@ protected:
     return "InputWorkspace";
   }
 
-private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
