@@ -87,22 +87,6 @@ Test 6: sequential fit of simultaneous fits
 - This should fit the ``fwd`` and ``bwd`` groups simultaneously for each run 20918, 20919, 20920 in sequence.
 
 
-Test 7: simultaneous fit across periods
----------------------------------------
-The data used so far is single period, so here we will use MUSR data from the unit test data.
-
-- *Home* tab: set instrument to MUSR
-- Load run 15189 and switch to *Data Analysis* tab
-- (Use *Display/Clear Fit Curves* to remove any old fits from the graph)
-- An extra box should have appeared because this is multi-period data. Like this:
-
-.. image:: ../images/MuonAnalysisTests/multiperiod.png
-  :align: center
-
-- Check the boxes for periods 1 and 2.
-- Set fit function to LinearBackground and the label to "MUSRlabel"
-- Fit - periods will be fitted simultaneously
-
 Results table tests
 ^^^^^^^^^^^^^^^^^^^
 
@@ -153,6 +137,20 @@ Test 5: Multiple simultaneous fits
 - Global parameters should share a column - so just ``f1.A``, ``f1.Omega`` etc.
 
 
+Test of simultaneous fit across periods
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The data used so far is single period, so here we will use MUSR data from the unit test data.
 
+- Close and open the Muon Analysis interface again. 
+- This time, on the *Home* tab, set instrument to MUSR
+- Load run 15189 and switch to *Data Analysis* tab
+- An extra box should have appeared because this is multi-period data. Like this:
+
+.. image:: ../images/MuonAnalysisTests/multiperiod.png
+  :align: center
+
+- Check the boxes for periods 1 and 2.
+- Set fit function to LinearBackground and the label to "MUSRlabel"
+- Fit - periods will be fitted simultaneously
 
 
