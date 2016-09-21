@@ -341,14 +341,14 @@ class CrystalFieldTests(unittest.TestCase):
 class CrystalFieldFitTest(unittest.TestCase):
 
     def test_CrystalFieldFit(self):
-        from CrystalField.fitting import MakeWorkspace
+        from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
         origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
                   Temperature=44.0, FWHM=1.1)
         origin.background = Background(peak=Function('Gaussian', Height=10, Sigma=1),
                             background=Function('LinearBackground', A0=1.0, A1=0.01))
         x, y = origin.getSpectrum()
-        ws = MakeWorkspace(x, y)
+        ws = makeWorkspace(x, y)
 
         cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
                       Temperature=44.0, FWHM=1.0)
@@ -413,7 +413,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
 
     def test_CrystalFieldFit_multi_spectrum(self):
-        from CrystalField.fitting import MakeWorkspace
+        from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
         from mantid.simpleapi import FunctionFactory
         origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
@@ -450,8 +450,8 @@ class CrystalFieldFitTest(unittest.TestCase):
                          background=Function('FlatBackground', A0=1.0))
         cf.ties(IntensityScaling0 = 1.0, IntensityScaling1 = 1.0)
 
-        ws0 = MakeWorkspace(*origin.getSpectrum(0))
-        ws1 = MakeWorkspace(*origin.getSpectrum(1))
+        ws0 = makeWorkspace(*origin.getSpectrum(0))
+        ws1 = makeWorkspace(*origin.getSpectrum(1))
 
         chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws0,  InputWorkspace_1=ws1)[1]
 
@@ -499,7 +499,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
 
     def test_CrystalFieldFit_multi_spectrum_simple_background(self):
-        from CrystalField.fitting import MakeWorkspace
+        from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
         from mantid.simpleapi import FunctionFactory
         origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
@@ -530,8 +530,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.setBackground(background=Function('FlatBackground', A0=0.9))
         cf.ties(IntensityScaling0=1.0, IntensityScaling1=1.0)
 
-        ws0 = MakeWorkspace(*origin.getSpectrum(0))
-        ws1 = MakeWorkspace(*origin.getSpectrum(1))
+        ws0 = makeWorkspace(*origin.getSpectrum(0))
+        ws1 = makeWorkspace(*origin.getSpectrum(1))
 
         fit = CrystalFieldFit(cf, InputWorkspace=[ws0, ws1])
         fit.fit()
@@ -540,7 +540,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertAlmostEqual(cf.background[1].background.param['A0'], 1.2, 8)
 
     def test_CrystalFieldFit_multi_spectrum_peak_background(self):
-        from CrystalField.fitting import MakeWorkspace
+        from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
         from mantid.simpleapi import FunctionFactory
         origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
@@ -572,8 +572,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.setBackground(peak=Function('Gaussian', Height=10, Sigma=0.3))
         cf.ties(IntensityScaling0=1.0, IntensityScaling1=1.0)
 
-        ws0 = MakeWorkspace(*origin.getSpectrum(0))
-        ws1 = MakeWorkspace(*origin.getSpectrum(1))
+        ws0 = makeWorkspace(*origin.getSpectrum(0))
+        ws1 = makeWorkspace(*origin.getSpectrum(1))
 
         chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws0,  InputWorkspace_1=ws1)[1]
 
@@ -594,7 +594,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertNotEqual(cf.background[1].peak.param['Height'], 0.0)
 
     def test_multi_ion_single_spectrum(self):
-        from CrystalField.fitting import MakeWorkspace
+        from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit
         from mantid.simpleapi import FunctionFactory
         params = {'B20':0.37737, 'B22':3.9770, 'B40':-0.031787, 'B42':-0.11611, 'B44':-0.12544,
@@ -603,7 +603,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2
         x, y = cf.getSpectrum()
-        ws = MakeWorkspace(x, y)
+        ws = makeWorkspace(x, y)
 
         params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
                   'Temperature': 44.0, 'FWHM': 1.1}
@@ -634,7 +634,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertNotEqual(cf[1].param['B44'], 0.0)
 
     def test_multi_ion_multi_spectrum(self):
-        from CrystalField.fitting import MakeWorkspace
+        from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit
         from mantid.simpleapi import FunctionFactory
         params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
@@ -642,8 +642,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf1 = CrystalField('Ce', 'C2v', **params)
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2
-        ws1 = MakeWorkspace(*cf.getSpectrum(0))
-        ws2 = MakeWorkspace(*cf.getSpectrum(1))
+        ws1 = makeWorkspace(*cf.getSpectrum(0))
+        ws2 = makeWorkspace(*cf.getSpectrum(1))
 
         params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
                   'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}
@@ -873,7 +873,7 @@ class CrystalFieldFitTest(unittest.TestCase):
 
     def test_constraints_multi_ion_multi_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
-        from CrystalField.fitting import MakeWorkspace
+        from CrystalField.fitting import makeWorkspace
         from mantid.simpleapi import FunctionFactory
 
         params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
@@ -881,8 +881,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf1 = CrystalField('Ce', 'C2v', **params)
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2
-        ws1 = MakeWorkspace(*cf.getSpectrum(0))
-        ws2 = MakeWorkspace(*cf.getSpectrum(1))
+        ws1 = makeWorkspace(*cf.getSpectrum(0))
+        ws2 = makeWorkspace(*cf.getSpectrum(1))
 
         params = {'B20': 0.377, 'B22': 3.9, 'B40': -0.03, 'B42': -0.116, 'B44': -0.125,
                   'Temperature': [44.0, 50], 'FWHM': [1.1, 0.9]}

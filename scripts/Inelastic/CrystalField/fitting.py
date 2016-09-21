@@ -3,13 +3,13 @@ import re
 from mantid.kernel import ConfigService
 
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma.
-fnPattern = re.compile('f(\\d+)\\.(.+)')
+FN_PATTERN = re.compile('f(\\d+)\\.(.+)')
 
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma. Multi-spectrum case.
-fnMSPattern = re.compile('f(\\d+)\\.f(\\d+)\\.(.+)')
+FN_MS_PATTERN = re.compile('f(\\d+)\\.f(\\d+)\\.(.+)')
 
 
-def MakeWorkspace(xArray, yArray):
+def makeWorkspace(xArray, yArray):
     """Create a workspace that doesn't appear in the ADS"""
     from mantid.api import AlgorithmManager
     alg = AlgorithmManager.createUnmanaged('CreateWorkspace')
@@ -206,6 +206,7 @@ class CrystalField(object):
             out += ',constraints=(%s)' % constraints
         return out
 
+    # pylint: disable=too-many-public-branches
     def makeMultiSpectrumFunction(self):
         """Form a definition string for the CrystalFieldMultiSpectrum function"""
         out = 'name=CrystalFieldMultiSpectrum,Ion=%s,Symmetry=%s' % (self._ion, self._symmetry)
@@ -477,18 +478,21 @@ class CrystalField(object):
             if i in self._spectra:
                 return self._spectra[i]
             else:
-                x_min, x_max = self._calc_xmin_xmax(i)
+                x_min, x_max = self.calc_xmin_xmax(i)
                 xArray = np.linspace(x_min, x_max, self.default_spectrum_size)
 
         yArray = np.zeros_like(xArray)
-        wksp = MakeWorkspace(xArray, yArray)
+        wksp = makeWorkspace(xArray, yArray)
         self._spectra[i] = self._calcSpectrum(i, wksp, 0)
         return self._spectra[i]
 
     def plot(self, i=0, workspace=None, ws_index=0):
         """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
-        from mantid.simpleapi import CreateWorkspace
         from mantidplot import plotSpectrum
+        from mantid.api import AlgorithmManager
+        createWS = AlgorithmManager.createUnmanaged('CreateWorkspace')
+        createWS.initialize()
+
         xArray, yArray = self.getSpectrum(i, workspace, ws_index)
         ws_name = 'CrystalField_%s' % self._ion
 
@@ -496,19 +500,28 @@ class CrystalField(object):
             if workspace is None:
                 if i > 0:
                     ws_name += '_%s' % i
-                wksp = CreateWorkspace(xArray, yArray, OutputWorkspace=ws_name)
+                createWS.setProperty('DataX', xArray)
+                createWS.setProperty('DataY', yArray)
+                createWS.setProperty('OutputWorkspace', ws_name)
+                createWS.execute()
                 plot_window = self._plot_window[i] if i in self._plot_window else None
-                self._plot_window[i] = plotSpectrum(wksp, 0, window=plot_window, clearWindow=True)
+                self._plot_window[i] = plotSpectrum(ws_name, 0, window=plot_window, clearWindow=True)
             else:
                 ws_name += '_%s' % workspace
                 if i > 0:
                     ws_name += '_%s' % i
-                wksp = CreateWorkspace(xArray, yArray, OutputWorkspace=ws_name)
-                plotSpectrum(wksp, 0)
+                createWS.setProperty('DataX', xArray)
+                createWS.setProperty('DataY', yArray)
+                createWS.setProperty('OutputWorkspace', ws_name)
+                createWS.execute()
+                plotSpectrum(ws_name, 0)
         else:
             ws_name += '_%s' % i
-            wksp = CreateWorkspace(xArray, yArray, OutputWorkspace=ws_name)
-            plotSpectrum(wksp, 0)
+            createWS.setProperty('DataX', xArray)
+            createWS.setProperty('DataY', yArray)
+            createWS.setProperty('OutputWorkspace', ws_name)
+            createWS.execute()
+            plotSpectrum(ws_name, 0)
 
     def _setDefaultTies(self):
         for name in self.field_parameter_names:
@@ -533,7 +546,7 @@ class CrystalField(object):
             if par == 'IntensityScaling':
                 self._intensityScaling = value
             else:
-                match = re.match(fnPattern, par)
+                match = re.match(FN_PATTERN, par)
                 if match:
                     i = int(match.group(1))
                     par = match.group(2)
@@ -569,7 +582,7 @@ class CrystalField(object):
         for i in range(func.nParams()):
             par = func.parameterName(i)
             value = func.getParameterValue(i)
-            match = re.match(fnMSPattern, par)
+            match = re.match(FN_MS_PATTERN, par)
             if match:
                 ispec = int(match.group(1))
                 ipeak = int(match.group(2))
@@ -578,7 +591,7 @@ class CrystalField(object):
                     if self.background is None:
                         self.setBackground(background=Function(self.default_background))
                     background = self.background[ispec]
-                    bgMatch = re.match(fnPattern, par)
+                    bgMatch = re.match(FN_PATTERN, par)
                     if bgMatch:
                         i = int(bgMatch.group(1))
                         par = bgMatch.group(2)
@@ -641,7 +654,7 @@ class CrystalField(object):
         Protected method. Shouldn't be called directly by user code.
         """
         if self._dirty_eigensystem:
-            import energies
+            import CrystalField.energies as energies
             nre = self.ion_nre_map[self._ion]
             self._eigenvalues, self._eigenvectors, self._hamiltonian = energies.energies(nre, **self._fieldParameters)
             self._dirty_eigensystem = False
@@ -680,7 +693,7 @@ class CrystalField(object):
         # and x and y get deallocated
         return np.array(out.readX(0)), np.array(out.readY(1))
 
-    def _calc_xmin_xmax(self, i):
+    def calc_xmin_xmax(self, i):
         """Calculate the x-range containing interesting features of a spectrum (for plotting)
         @param i: If an integer is given then calculate the x-range for the i-th spectrum.
                   If None given get the range covering all the spectra.
@@ -740,7 +753,7 @@ class CrystalFieldMulti(object):
         x_min = 0.0
         x_max = 0.0
         for arg in self.args:
-            xmin, xmax = arg._calc_xmin_xmax(i)
+            xmin, xmax = arg.calc_xmin_xmax(i)
             if xmin < x_min:
                 x_min = xmin
             if xmax > x_max:
