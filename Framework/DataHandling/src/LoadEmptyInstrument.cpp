@@ -54,9 +54,15 @@ int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
 /// Initialisation method.
 void LoadEmptyInstrument::init() {
   declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".xml"),
-      "The filename (including its full or relative path) of an instrument\n"
-      "definition file");
+      make_unique<FileProperty>("Filename", "", FileProperty::OptionalLoad,
+                                ".xml"),
+      "The filename (including its full or relative path) of an instrument "
+      "definition file. The file extension must either be .xml or .XML when "
+      "specifying an instrument definition file. Note Filename or "
+      "InstrumentName must be specified but not both.");
+  declareProperty(
+      "InstrumentName", "",
+      "Name of instrument. Can be used instead of Filename to specify an IDF");
   declareProperty(
       make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "",
                                                       Direction::Output),
@@ -152,36 +158,15 @@ void LoadEmptyInstrument::exec() {
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
 API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument() {
   const std::string filename = getPropertyValue("Filename");
-  // Determine the search directory for XML instrument definition files (IDFs)
-  std::string directoryName =
-      Kernel::ConfigService::Instance().getInstrumentDirectory();
-  const std::string::size_type stripPath = filename.find_last_of("\\/");
-
-  std::string fullPathIDF;
-  if (stripPath != std::string::npos) {
-    fullPathIDF =
-        filename; // since if path already provided don't modify m_filename
-  } else {
-    // std::string instrumentID = m_filename.substr(stripPath+1);
-    fullPathIDF = directoryName + "/" + filename;
-  }
-
+  const std::string instrumentName = getPropertyValue("InstrumentName");
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument", 0, 1);
-  loadInst->setPropertyValue("Filename", fullPathIDF);
+  loadInst->setPropertyValue("Filename", filename);
+  loadInst->setPropertyValue("InstrumentName", instrumentName);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
-  MatrixWorkspace_sptr ws =
-      WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
+  auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 2, 1);
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
 
-  // Now execute the Child Algorithm. Catch and log any error and stop,
-  // because there is no point in continuing without a valid instrument.
-  try {
-    loadInst->execute();
-  } catch (std::runtime_error &exc) {
-    std::ostringstream os;
-    os << "Unable to run LoadInstrument: '" << exc.what() << "'\n";
-    throw std::runtime_error(os.str());
-  }
+  loadInst->execute();
 
   return ws;
 }

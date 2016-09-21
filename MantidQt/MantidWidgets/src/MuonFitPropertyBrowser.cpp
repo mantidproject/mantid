@@ -93,6 +93,16 @@ void MuonFitPropertyBrowser::init() {
   bool plotDiff = settings.value("Plot Difference", QVariant(true)).toBool();
   m_boolManager->setValue(m_plotDiff, plotDiff);
 
+  m_evaluationType = m_enumManager->addProperty("Evaluate Function As");
+  m_evaluationType->setToolTip(
+      "Consider using Histogram fit which may produce more accurate results.");
+  m_evaluationTypes << "CentrePoint"
+                    << "Histogram";
+  m_enumManager->setEnumNames(m_evaluationType, m_evaluationTypes);
+  int evaluationType =
+      settings.value(m_evaluationType->propertyName(), 0).toInt();
+  m_enumManager->setValue(m_evaluationType, evaluationType);
+
   settingsGroup->addSubProperty(m_workspace);
   settingsGroup->addSubProperty(m_workspaceIndex);
   settingsGroup->addSubProperty(m_startX);
@@ -124,6 +134,7 @@ void MuonFitPropertyBrowser::init() {
   customSettingsGroup->addSubProperty(m_plotDiff);
   customSettingsGroup->addSubProperty(m_rawData);
   customSettingsGroup->addSubProperty(m_showParamErrors);
+  customSettingsGroup->addSubProperty(m_evaluationType);
 
   m_customSettingsGroup = m_browser->addProperty(customSettingsGroup);
 

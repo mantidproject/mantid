@@ -6040,8 +6040,8 @@ void ApplicationWindow::savetoNexusFile() {
   if (!fileName.isEmpty()) {
     std::string wsName;
     MdiSubWindow *w = activeWindow();
-    const std::string windowClassName = w->metaObject()->className();
     if (w) {
+      const std::string windowClassName = w->metaObject()->className();
       if (windowClassName == "MantidMatrix") {
         wsName = dynamic_cast<MantidMatrix *>(w)->getWorkspaceName();
 
@@ -9068,6 +9068,35 @@ void ApplicationWindow::closeWindow(MdiSubWindow *window) {
     }
   }
   emit modified();
+}
+
+/** Add a serialisable window to the application
+ * @param window :: the window to add
+ */
+void ApplicationWindow::addSerialisableWindow(QObject *window) {
+  // Here we must store the window as a QObject to avoid multiple inheritence
+  // issues with Qt and the IProjectSerialisable class as well as being able
+  // to respond to the destroyed signal
+  // We can still check here that the window conforms to the interface and
+  // discard it if it does not.
+  if (!dynamic_cast<IProjectSerialisable *>(window))
+    return;
+
+  m_serialisableWindows.push_back(window);
+  // Note that destoryed is emitted directly before the QObject itself
+  // is destoryed. This means the destructor of the specific window type
+  // will have already been called.
+  connect(window, SIGNAL(destroyed(QObject *)), this,
+          SLOT(removeSerialisableWindow(QObject *)));
+}
+
+/** Remove a serialisable window from the application
+ * @param window :: the window to remove
+ */
+void ApplicationWindow::removeSerialisableWindow(QObject *window) {
+  if (m_serialisableWindows.contains(window)) {
+    m_serialisableWindows.removeAt(m_serialisableWindows.indexOf(window));
+  }
 }
 
 void ApplicationWindow::about() {
@@ -15859,6 +15888,8 @@ void ApplicationWindow::addMdiSubWindow(MdiSubWindow *w, bool showFloating,
       sw->showMinimized();
     }
   }
+
+  modifiedProject(w);
 }
 
 /**

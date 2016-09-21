@@ -153,6 +153,7 @@ set ( SRC_FILES
 	src/InvertMask.cpp
 	src/Logarithm.cpp
 	src/LorentzCorrection.cpp
+	src/MagFormFactorCorrection.cpp
 	src/MaskBins.cpp
 	src/MaskBinsFromTable.cpp
 	src/MaskDetectorsIf.cpp
@@ -168,6 +169,7 @@ set ( SRC_FILES
 	src/MaxMin.cpp
 	src/MedianDetectorTest.cpp
 	src/MergeRuns.cpp
+	src/MergeRuns/SampleLogsBehaviour.cpp
 	src/Min.cpp
 	src/Minus.cpp
 	src/ModeratorTzero.cpp
@@ -183,6 +185,7 @@ set ( SRC_FILES
 	src/NormaliseToMonitor.cpp
 	src/NormaliseToUnity.cpp
 	src/OneMinusExponentialCor.cpp
+	src/PDCalibration.cpp
 	src/PDDetermineCharacterizations.cpp
 	src/PDFFourierTransform.cpp
 	src/Pause.cpp
@@ -281,6 +284,7 @@ set ( SRC_FILES
 	src/UnGroupWorkspace.cpp
 	src/UnaryOperation.cpp
 	src/UnwrapMonitor.cpp
+	src/UnwrapMonitorsInTOF.cpp
 	src/UnwrapSNS.cpp
 	src/UpdateScriptRepository.cpp
 	src/VesuvioL1ThetaResolution.cpp
@@ -455,6 +459,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/InvertMask.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/LorentzCorrection.h
+	inc/MantidAlgorithms/MagFormFactorCorrection.h
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskBinsFromTable.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
@@ -473,6 +478,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MaxMin.h
 	inc/MantidAlgorithms/MedianDetectorTest.h
 	inc/MantidAlgorithms/MergeRuns.h
+	inc/MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h
 	inc/MantidAlgorithms/Min.h
 	inc/MantidAlgorithms/Minus.h
 	inc/MantidAlgorithms/ModeratorTzero.h
@@ -488,6 +494,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/NormaliseToMonitor.h
 	inc/MantidAlgorithms/NormaliseToUnity.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
+	inc/MantidAlgorithms/PDCalibration.h
 	inc/MantidAlgorithms/PDDetermineCharacterizations.h
 	inc/MantidAlgorithms/PDFFourierTransform.h
 	inc/MantidAlgorithms/Pause.h
@@ -590,6 +597,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/UnGroupWorkspace.h
 	inc/MantidAlgorithms/UnaryOperation.h
 	inc/MantidAlgorithms/UnwrapMonitor.h
+	inc/MantidAlgorithms/UnwrapMonitorsInTOF.h
 	inc/MantidAlgorithms/UnwrapSNS.h
 	inc/MantidAlgorithms/UpdateScriptRepository.h
 	inc/MantidAlgorithms/VesuvioL1ThetaResolution.h
@@ -762,6 +770,7 @@ set ( TEST_FILES
 	LorentzCorrectionTest.h
 	MCAbsorptionStrategyTest.h
 	MCInteractionVolumeTest.h
+	MagFormFactorCorrectionTest.h
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
 	MaxEnt/MaxentCalculatorTest.h
@@ -789,6 +798,7 @@ set ( TEST_FILES
 	NormaliseByDetectorTest.h
 	NormaliseToMonitorTest.h
 	OneMinusExponentialCorTest.h
+	PDCalibrationTest.h
 	PDDetermineCharacterizationsTest.h
 	PDFFourierTransformTest.h
 	PauseTest.h
@@ -871,6 +881,7 @@ set ( TEST_FILES
 	TransposeTest.h
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h
+	UnwrapMonitorsInTOFTest.h
 	UnwrapSNSTest.h
 	VesuvioL1ThetaResolutionTest.h
 	WeightedMeanOfWorkspaceTest.h

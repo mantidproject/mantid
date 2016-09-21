@@ -21,6 +21,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataTab.h"
@@ -52,8 +53,6 @@
 #include <QHeaderView>
 #include <QApplication>
 #include <QTemporaryFile>
-#include <QDesktopServices>
-#include <QUrl>
 
 #include <fstream>
 
@@ -322,16 +321,16 @@ void MuonAnalysis::initLayout() {
 * Muon Analysis help (slot)
 */
 void MuonAnalysis::muonAnalysisHelpClicked() {
-  QDesktopServices::openUrl(
-      QUrl(QString("http://www.mantidproject.org/") + "MuonAnalysis"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
+                                                 QString("Muon_Analysis"));
 }
 
 /**
 * Muon Analysis Grouping help (slot)
 */
 void MuonAnalysis::muonAnalysisHelpGroupingClicked() {
-  QDesktopServices::openUrl(
-      QUrl(QString("http://www.mantidproject.org/") + "MuonAnalysisGrouping"));
+  MantidQt::API::HelpWindow::showCustomInterface(
+      nullptr, QString("Muon_Analysis"), QString("grouping-options"));
 }
 
 /**
@@ -753,27 +752,6 @@ void MuonAnalysis::runLoadGroupButton() {
 void MuonAnalysis::runClearGroupingButton() { clearTablesAndCombo(); }
 
 /**
- * Group table plot button (slot)
- */
-void MuonAnalysis::runGroupTablePlotButton() {
-  if (m_updating)
-    return;
-
-  if (m_deadTimesChanged) {
-    inputFileChanged(m_previousFilenames);
-    return;
-  }
-
-  int groupNumber = getGroupNumberFromRow(m_groupTableRowInFocus);
-  if (groupNumber != -1) {
-    setGroupOrPairAndReplot(groupNumber);
-    // Update the combo box on the home tab
-    m_uiForm.frontPlotFuncs->setCurrentIndex(
-        m_uiForm.groupTablePlotChoice->currentIndex());
-  }
-}
-
-/**
  * Load current (slot)
  */
 void MuonAnalysis::runLoadCurrent() {
@@ -839,22 +817,55 @@ void MuonAnalysis::runLoadCurrent() {
 }
 
 /**
+ * Group table plot button (slot)
+ */
+void MuonAnalysis::runGroupTablePlotButton() {
+  runTablePlotButton(ItemType::Group);
+}
+
+/**
  * Pair table plot button (slot)
  */
 void MuonAnalysis::runPairTablePlotButton() {
-  if (m_updating)
+  runTablePlotButton(ItemType::Pair);
+}
+
+/**
+ * Called when one of the "Plot" buttons on the "Grouping Options" tab is
+ * pressed
+ * Update front tab and plot
+ * @param itemType :: [input] Group or pair
+ */
+void MuonAnalysis::runTablePlotButton(MuonAnalysis::ItemType itemType) {
+  if (m_updating) {
     return;
+  }
 
   if (m_deadTimesChanged) {
     inputFileChanged(m_previousFilenames);
     return;
   }
 
-  if (getPairNumberFromRow(m_pairTableRowInFocus) != -1) {
-    setGroupOrPairAndReplot(numGroups() + m_pairTableRowInFocus);
-    // Sync with selectors on the front
-    m_uiForm.frontPlotFuncs->setCurrentIndex(
-        m_uiForm.pairTablePlotChoice->currentIndex());
+  int plotChoiceIndex(-1), groupPairNumber(-1);
+  switch (itemType) {
+  case MantidQt::CustomInterfaces::MuonAnalysis::Pair:
+    plotChoiceIndex = m_uiForm.pairTablePlotChoice->currentIndex();
+    if (getPairNumberFromRow(m_pairTableRowInFocus) != -1) {
+      groupPairNumber = numGroups() + m_pairTableRowInFocus;
+    }
+    break;
+  case MantidQt::CustomInterfaces::MuonAnalysis::Group:
+  default:
+    plotChoiceIndex = m_uiForm.groupTablePlotChoice->currentIndex();
+    groupPairNumber = getGroupNumberFromRow(m_groupTableRowInFocus);
+    break;
+  }
+
+  if (groupPairNumber != -1 && plotChoiceIndex != -1) {
+    // Synchronise with selectors on the front
+    m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(groupPairNumber);
+    m_uiForm.frontPlotFuncs->setCurrentIndex(plotChoiceIndex);
+    runFrontPlotButton();
   }
 }
 
@@ -1603,7 +1614,7 @@ void MuonAnalysis::guessAlphaClicked() {
   m_updating = false;
 
   // See if auto-update is on and if so update the plot
-  groupTabUpdatePlot();
+  groupTabUpdatePlotPair();
 }
 
 /**
@@ -1631,15 +1642,18 @@ int MuonAnalysis::numPairs() {
  * now is
  */
 void MuonAnalysis::updateFront() {
-  // get current index
-  int index = getGroupOrPairToPlot();
+  // get current group/pair index
+  const int gpIndex = getGroupOrPairToPlot();
+
+  // Cache current selection of plot type
+  const int plotType = m_uiForm.frontPlotFuncs->currentIndex();
 
   m_uiForm.frontPlotFuncs->clear();
 
   int numG = numGroups();
 
-  if (index >= 0 && numG) {
-    if (index >= numG && numG >= 2) {
+  if (gpIndex >= 0 && numG) {
+    if (gpIndex >= numG && numG >= 2) {
       // i.e. index points to a pair
       m_uiForm.frontPlotFuncs->addItems(m_pairPlotFunc);
 
@@ -1647,7 +1661,7 @@ void MuonAnalysis::updateFront() {
       m_uiForm.frontAlphaNumber->setVisible(true);
 
       m_uiForm.frontAlphaNumber->setText(
-          m_uiForm.pairTable->item(m_pairToRow[index - numG], 3)->text());
+          m_uiForm.pairTable->item(m_pairToRow[gpIndex - numG], 3)->text());
 
       m_uiForm.frontAlphaNumber->setCursorPosition(0);
     } else {
@@ -1656,6 +1670,10 @@ void MuonAnalysis::updateFront() {
 
       m_uiForm.frontAlphaLabel->setVisible(false);
       m_uiForm.frontAlphaNumber->setVisible(false);
+    }
+    // Replace cached value
+    if (plotType != -1 && plotType < m_uiForm.frontPlotFuncs->count()) {
+      m_uiForm.frontPlotFuncs->setCurrentIndex(plotType);
     }
   }
 }
@@ -1884,6 +1902,8 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "    layer.setCurveLineColor(i, color)";
   s << "  if log_scale:";
   s << "    layer.logYlinX()";
+  s << "  else:";
+  s << "    layer.linearAxes()";
   s << "  if y_auto:";
   s << "    layer.setAutoScale()";
   s << "  else:";
@@ -2567,9 +2587,9 @@ void MuonAnalysis::connectAutoUpdate() {
 
   // Grouping tab Auto Updates
   connect(m_uiForm.groupTablePlotChoice, SIGNAL(activated(int)), this,
-          SLOT(groupTabUpdatePlot()));
+          SLOT(groupTabUpdatePlotGroup()));
   connect(m_uiForm.pairTablePlotChoice, SIGNAL(activated(int)), this,
-          SLOT(groupTabUpdatePlot()));
+          SLOT(groupTabUpdatePlotPair()));
 
   // Settings tab Auto Updates
   connect(m_optionTab, SIGNAL(settingsTabUpdatePlot()), this,
@@ -2674,10 +2694,30 @@ void MuonAnalysis::homeTabUpdatePlot() {
     runFrontPlotButton();
 }
 
-void MuonAnalysis::groupTabUpdatePlot() {
+/**
+ * Update plot based on changes made in "Grouping Options" tab
+ * (e.g. plot type combo box changed)
+ * For group selected
+ */
+void MuonAnalysis::groupTabUpdatePlotGroup() {
   if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.GroupingOptions &&
-      m_loaded)
-    runFrontPlotButton();
+      m_loaded) {
+    updateFront();
+    runTablePlotButton(ItemType::Group);
+  }
+}
+
+/**
+ * Update plot based on changes made in "Grouping Options" tab
+ * (e.g. plot type combo box changed)
+ * For pair selected
+ */
+void MuonAnalysis::groupTabUpdatePlotPair() {
+  if (isAutoUpdateEnabled() && m_currentTab == m_uiForm.GroupingOptions &&
+      m_loaded) {
+    updateFront();
+    runTablePlotButton(ItemType::Pair);
+  }
 }
 
 void MuonAnalysis::settingsTabUpdatePlot() {

@@ -117,4 +117,221 @@ private:
   }
 };
 
+class ComponentHelperTestPerformance : public CxxTest::TestSuite {
+
+private:
+  Mantid::Geometry::Instrument_sptr m_sansInstrument;
+  Mantid::Geometry::IComponent_const_sptr m_sansFrontTrolley;
+  Mantid::Geometry::IComponent_const_sptr m_sansBank;
+  boost::shared_ptr<Mantid::Geometry::ParameterMap> m_paramMap;
+  Mantid::Kernel::Quat m_zRotation;
+  Mantid::Kernel::V3D m_pos;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ComponentHelperTestPerformance *createSuite() {
+    return new ComponentHelperTestPerformance();
+  }
+  static void destroySuite(ComponentHelperTestPerformance *suite) {
+    delete suite;
+  }
+
+  ComponentHelperTestPerformance() {
+
+    using namespace Mantid::Geometry;
+    using namespace Mantid::Kernel;
+
+    Mantid::Kernel::V3D sourcePos(0, 0, 0);
+    Mantid::Kernel::V3D samplePos(0, 0, 1);
+    Mantid::Kernel::V3D trolley1Pos(0, 0, 3);
+    Mantid::Kernel::V3D trolley2Pos(0, 0, 6);
+
+    m_paramMap = boost::make_shared<Mantid::Geometry::ParameterMap>();
+
+    auto baseInstrument = ComponentCreationHelper::sansInstrument(
+        sourcePos, samplePos, trolley1Pos, trolley2Pos);
+
+    m_sansInstrument =
+        boost::make_shared<Instrument>(baseInstrument, m_paramMap);
+
+    // See component creation helper for instrument definition
+    m_sansFrontTrolley = m_sansInstrument->getComponentByName("Trolley1");
+    m_sansBank = m_sansInstrument->getComponentByName("Bank1");
+
+    m_zRotation =
+        Mantid::Kernel::Quat(180, V3D(0, 0, 1)); // rotate 180 degrees around z
+
+    m_pos = Mantid::Kernel::V3D(1, 1, 1);
+  }
+
+  void do_rotate_whole_instrument_x1000(
+      const Mantid::Geometry::ComponentHelper::TransformType transformType) {
+
+    using namespace Mantid::Geometry;
+
+    for (size_t i = 0; i < 1000; ++i) {
+      ComponentHelper::rotateComponent(*m_sansInstrument, *m_paramMap,
+                                       m_zRotation, transformType);
+    }
+  }
+
+  void do_rotate_trolley_x1000(
+      const Mantid::Geometry::ComponentHelper::TransformType transformType) {
+
+    using namespace Mantid::Geometry;
+
+    for (size_t i = 0; i < 1000; ++i) {
+
+      ComponentHelper::rotateComponent(*m_sansFrontTrolley, *m_paramMap,
+                                       m_zRotation, transformType);
+    }
+  }
+
+  void do_rotate_bank_x1000(
+      const Mantid::Geometry::ComponentHelper::TransformType transformType) {
+
+    using namespace Mantid::Geometry;
+
+    for (size_t i = 0; i < 1000; ++i) {
+      ComponentHelper::rotateComponent(*m_sansBank, *m_paramMap, m_zRotation,
+                                       transformType);
+    }
+  }
+
+  void do_translate_whole_instrument_x1000(
+      const Mantid::Geometry::ComponentHelper::TransformType transformType) {
+
+    using namespace Mantid::Geometry;
+
+    for (size_t i = 0; i < 1000; ++i) {
+      ComponentHelper::moveComponent(*m_sansInstrument, *m_paramMap, m_pos,
+                                     transformType);
+    }
+  }
+
+  void do_translate_trolley_x1000(
+      const Mantid::Geometry::ComponentHelper::TransformType transformType) {
+
+    using namespace Mantid::Geometry;
+
+    for (size_t i = 0; i < 1000; ++i) {
+      ComponentHelper::moveComponent(*m_sansFrontTrolley, *m_paramMap, m_pos,
+                                     transformType);
+    }
+  }
+
+  void do_translate_bank_x1000(
+      const Mantid::Geometry::ComponentHelper::TransformType transformType) {
+
+    using namespace Mantid::Geometry;
+
+    for (size_t i = 0; i < 1000; ++i) {
+      ComponentHelper::moveComponent(*m_sansBank, *m_paramMap, m_pos,
+                                     transformType);
+    }
+  }
+
+  void test_rotate_whole_instrument_absolute_x1000() {
+
+    do_rotate_whole_instrument_x1000(
+        Mantid::Geometry::ComponentHelper::Absolute);
+  }
+
+  void test_rotate_trolley_absolute_x1000() {
+
+    do_rotate_trolley_x1000(Mantid::Geometry::ComponentHelper::Absolute);
+  }
+
+  void test_rotate_bank_absolute_x1000() {
+
+    do_rotate_bank_x1000(Mantid::Geometry::ComponentHelper::Relative);
+  }
+
+  void test_rotate_whole_instrument_relative_x1000() {
+
+    do_rotate_whole_instrument_x1000(
+        Mantid::Geometry::ComponentHelper::Relative);
+  }
+
+  void test_rotate_trolley_relative_x1000() {
+
+    do_rotate_trolley_x1000(Mantid::Geometry::ComponentHelper::Relative);
+  }
+
+  void test_rotate_bank_relative_x1000() {
+
+    do_rotate_bank_x1000(Mantid::Geometry::ComponentHelper::Relative);
+  }
+
+  void test_translate_whole_instrument_absolute_x1000() {
+
+    do_translate_whole_instrument_x1000(
+        Mantid::Geometry::ComponentHelper::Absolute);
+  }
+
+  void test_translate_trolley_absolute_x1000() {
+
+    do_translate_trolley_x1000(Mantid::Geometry::ComponentHelper::Absolute);
+  }
+
+  void test_translate_bank_absolute_x1000() {
+
+    do_translate_bank_x1000(Mantid::Geometry::ComponentHelper::Relative);
+  }
+
+  void test_translate_whole_instrument_relative_x1000() {
+
+    do_translate_whole_instrument_x1000(
+        Mantid::Geometry::ComponentHelper::Relative);
+  }
+
+  void test_translate_trolley_relative_x1000() {
+
+    do_translate_trolley_x1000(Mantid::Geometry::ComponentHelper::Relative);
+  }
+
+  void test_translate_bank_relative_x1000() {
+
+    do_translate_bank_x1000(Mantid::Geometry::ComponentHelper::Relative);
+  }
+
+  /*
+   * This is a very typical scenario. No unpaired writes without reads.
+   */
+  void test_rotate_bank_and_read_positions() {
+
+    using namespace Mantid::Geometry;
+    using namespace Mantid::Kernel;
+
+    ComponentHelper::rotateComponent(
+        *m_sansBank, *m_paramMap, m_zRotation,
+        Mantid::Geometry::ComponentHelper::Relative);
+
+    V3D pos;
+    for (int i = 1;
+         i <= static_cast<int>(m_sansInstrument->getNumberDetectors()); ++i) {
+      pos += m_sansInstrument->getDetector(i)->getPos();
+    }
+  }
+
+  /*
+   * This is a very typical scenario. No unpaired writes without reads.
+   */
+  void test_move_bank_and_read_positions() {
+
+    using namespace Mantid::Geometry;
+    using namespace Mantid::Kernel;
+
+    ComponentHelper::moveComponent(*m_sansBank, *m_paramMap, m_pos,
+                                   Mantid::Geometry::ComponentHelper::Relative);
+
+    V3D pos;
+    for (int i = 1;
+         i <= static_cast<int>(m_sansInstrument->getNumberDetectors()); ++i) {
+      pos += m_sansInstrument->getDetector(i)->getPos();
+    }
+  }
+};
+
 #endif /* MANTID_GEOMETRY_COMPONENTHELPERTEST_H_ */

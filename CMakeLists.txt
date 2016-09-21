@@ -67,6 +67,8 @@ if ( NOT OPENGL_FOUND )
   message ( FATAL_ERROR "OpenGL was not found." )
 endif ()
 
+find_package(TBB REQUIRED)
+
 ###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
