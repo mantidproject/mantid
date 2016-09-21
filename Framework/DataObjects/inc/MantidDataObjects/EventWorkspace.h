@@ -44,10 +44,6 @@ public:
   void init(const std::size_t &, const std::size_t &,
             const std::size_t &) override;
 
-  void copyDataFrom(const EventWorkspace &source,
-                    std::size_t sourceStartWorkspaceIndex = 0,
-                    std::size_t sourceEndWorkspaceIndex = size_t(-1));
-
   bool threadSafe() const override;
 
   //------------------------------------------------------------
@@ -107,24 +103,9 @@ public:
                                   MantidVec &Y, MantidVec &E,
                                   bool skipError = false) const;
 
-  //------------------------------------------------------------
   // Set the x-axis data (histogram bins) for all pixels
   virtual void setAllX(const HistogramData::BinEdges &x);
 
-  // Get or add an EventList
-  EventList &getOrAddEventList(const std::size_t workspace_index);
-
-  // Resizes the workspace to contain the number of spectra/event lists given
-  virtual void resizeTo(const std::size_t numSpectra);
-  // Pad pixels in the workspace using the loaded spectra. Requires a non-empty
-  // spectra-detector map
-  void padSpectra();
-  // Pad pixels in the workspace using specList. Requires a non-empty vector
-  virtual void padSpectra(const std::vector<int32_t> &specList);
-  // Remove pixels in the workspace that do not contain events.
-  void deleteEmptyLists();
-
-  //------------------------------------------------------------
   // The total number of events across all of the spectra.
   std::size_t getNumberEvents() const override;
 
@@ -141,8 +122,6 @@ public:
   std::size_t MRUSize() const;
 
   void clearMRU() const override;
-
-  void clearData();
 
   EventSortType getSortType() const;
 

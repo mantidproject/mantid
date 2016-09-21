@@ -22,6 +22,8 @@ Muon Analysis
 
 - Documentation has been moved to the Mantid help system.
 
+- A bug was fixed where, when plotting the log of counts and then switching to plot counts or asymmetry, the y axis was left as a logarithmic axis.
+
 Algorithms
 ----------
 

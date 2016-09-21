@@ -15,6 +15,7 @@
 #include "MantidKernel/MantidVersion.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
+#include "MantidQtSpectrumViewer/SpectrumView.h"
 
 #include <QTextCodec>
 #include <QTextStream>
@@ -685,6 +686,14 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
     for (auto &section : tsv.sections("SliceViewer")) {
       auto win = SliceViewer::SliceViewerWindow::loadFromProject(
           section, window, fileVersion);
+      window->addSerialisableWindow(dynamic_cast<QObject *>(win));
+    }
+  }
+
+  if (tsv.hasSection("spectrumviewer")) {
+    for (const auto &section : tsv.sections("spectrumviewer")) {
+      auto win = SpectrumView::SpectrumView::loadFromProject(section, window,
+                                                             fileVersion);
       window->addSerialisableWindow(dynamic_cast<QObject *>(win));
     }
   }

@@ -79,7 +79,7 @@ void CompressEvents::exec() {
       // The input event list
       EventList &input_el = inputWS->getSpectrum(index);
       // And on the output side
-      EventList &output_el = outputWS->getOrAddEventList(index);
+      EventList &output_el = outputWS->getSpectrum(index);
       // Copy other settings into output
       output_el.setX(input_el.ptrX());
 

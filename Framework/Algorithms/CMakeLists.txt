@@ -153,6 +153,7 @@ set ( SRC_FILES
 	src/InvertMask.cpp
 	src/Logarithm.cpp
 	src/LorentzCorrection.cpp
+	src/MagFormFactorCorrection.cpp
 	src/MaskBins.cpp
 	src/MaskBinsFromTable.cpp
 	src/MaskDetectorsIf.cpp
@@ -283,6 +284,7 @@ set ( SRC_FILES
 	src/UnGroupWorkspace.cpp
 	src/UnaryOperation.cpp
 	src/UnwrapMonitor.cpp
+	src/UnwrapMonitorsInTOF.cpp
 	src/UnwrapSNS.cpp
 	src/UpdateScriptRepository.cpp
 	src/VesuvioL1ThetaResolution.cpp
@@ -457,6 +459,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/InvertMask.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/LorentzCorrection.h
+	inc/MantidAlgorithms/MagFormFactorCorrection.h
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskBinsFromTable.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
@@ -594,6 +597,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/UnGroupWorkspace.h
 	inc/MantidAlgorithms/UnaryOperation.h
 	inc/MantidAlgorithms/UnwrapMonitor.h
+	inc/MantidAlgorithms/UnwrapMonitorsInTOF.h
 	inc/MantidAlgorithms/UnwrapSNS.h
 	inc/MantidAlgorithms/UpdateScriptRepository.h
 	inc/MantidAlgorithms/VesuvioL1ThetaResolution.h
@@ -618,8 +622,6 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 set ( TEST_FILES
-	# CountEventsInPulsesTest.h
-	# UpdatePeakParameterTableTest.h
 	AddLogDerivativeTest.h
 	AddNoteTest.h
 	AddPeakTest.h
@@ -768,6 +770,7 @@ set ( TEST_FILES
 	LorentzCorrectionTest.h
 	MCAbsorptionStrategyTest.h
 	MCInteractionVolumeTest.h
+	MagFormFactorCorrectionTest.h
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
 	MaxEnt/MaxentCalculatorTest.h
@@ -878,6 +881,7 @@ set ( TEST_FILES
 	TransposeTest.h
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h
+	UnwrapMonitorsInTOFTest.h
 	UnwrapSNSTest.h
 	VesuvioL1ThetaResolutionTest.h
 	WeightedMeanOfWorkspaceTest.h

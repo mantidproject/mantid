@@ -774,6 +774,17 @@ void MantidUI::showVatesSimpleInterface() {
     } else {
       m_vatesSubWindow = new QMdiSubWindow;
       m_vatesSubWindow->setAttribute(Qt::WA_DeleteOnClose, false);
+#ifdef Q_OS_MAC
+      // Work around to ensure that floating windows remain on top of the main
+      // application window, but below other applications on Mac
+      // Note: Qt::Tool cannot have both a max and min button on OSX
+      Qt::WindowFlags flags = m_vatesSubWindow->windowFlags();
+      flags |= Qt::Tool;
+      flags |= Qt::CustomizeWindowHint;
+      flags |= Qt::WindowMinimizeButtonHint;
+      flags |= Qt::WindowCloseButtonHint;
+      m_vatesSubWindow->setWindowFlags(flags);
+#endif
       QIcon icon;
       icon.addFile(
           QString::fromUtf8(":/VatesSimpleGuiViewWidgets/icons/pvIcon.png"),
@@ -845,6 +856,8 @@ void MantidUI::showSpectrumViewer() {
 
       viewer->show();
       viewer->renderWorkspace(wksp);
+      // Add to the list of serialisable windows
+      appWindow()->addSerialisableWindow(viewer);
       appWindow()->modifiedProject();
     } else {
       g_log.information()

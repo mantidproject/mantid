@@ -91,6 +91,16 @@ if [[ $USE_CLANG ]]; then
   fi
 fi
 
+#for openmp support on OS X run
+# `brew install llvm`
+# `ln -s /usr/local/opt/llvm/lib/libomp.dylib /usr/local/lib/libomp.dylib`
+if [[ $(uname) == 'Darwin' ]] ; then
+  if [[ ${JOB_NAME} == *openmp* ]]; then
+    export CC=/usr/local/opt/llvm/bin/clang
+    export CXX=/usr/local/opt/llvm/bin/clang++
+  fi
+fi
+
 ###############################################################################
 # Set up the location for the local object store outside of the build and
 # source tree, which can be shared by multiple builds.
@@ -191,7 +201,7 @@ $SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENA
 # Coverity build should exit early
 ###############################################################################
 if [[ ${JOB_NAME} == *coverity_build_and_submit* ]]; then
-  ${COVERITY_DIR}/cov-build --dir cov-int scl enable mantidlibs34 "make -j${BUILD_THREADS}"
+  ${COVERITY_DIR}/cov-build --dir cov-int cmake --build . -- -j ${BUILD_THREADS}
   tar czvf mantid.tgz cov-int
   status=$(curl --form token=$COVERITY_TOKEN --form email=mantidproject@gmail.com \
        --form file=@mantid.tgz --form version=$GIT_COMMIT \

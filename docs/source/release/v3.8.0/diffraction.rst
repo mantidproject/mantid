@@ -47,6 +47,11 @@ Single Crystal Diffraction
   used in anvred3.py, so DetScaleList input can be pasted from the definition of detScale there.  The default values can be
   set in the instrument parameter file. Default values are in the parameter file for the TOPAZ instrument.
 
+- :ref:`SaveLauenorm <algm-SaveLauenorm>`
+  was modified to have an option to use the detector bank scales from the instrument parameters. The values can be
+  set to have defaults in the instrument parameter file or by
+  :ref:`SetDetScale <algm-SetDetScale>`.
+
 
 Engineering Diffraction
 -----------------------
@@ -86,8 +91,7 @@ Powder Diffraction
   ``CalibrationFile``. The documentation for this algorithm has been
   greatly expanded as well.
 
-- :ref:`PDFFourierTransformSNSPowderReduction
-  <algm-PDFFourierTransformSNSPowderReduction>` has been modified to
+- :ref:`PDFFourierTransform <algm-PDFFourierTransform>` has been modified to
   look at the signal as well when looking at the ``Q``-range to use
   for the transform.
 
