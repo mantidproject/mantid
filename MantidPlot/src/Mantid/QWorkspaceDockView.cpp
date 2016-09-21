@@ -38,7 +38,8 @@ WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
 
 QWorkspaceDockView::QWorkspaceDockView(MantidUI *mui, ApplicationWindow *parent)
     : QDockWidget(tr("Workspaces"), parent), m_mantidUI(mui), m_updateCount(0),
-      m_treeUpdating(false), m_promptDelete(false) {
+      m_treeUpdating(false), m_promptDelete(false),
+      m_saveFileType(SaveFileType::Nexus) {
   setObjectName(
       "exploreMantid"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
@@ -195,10 +196,10 @@ void QWorkspaceDockView::showCriticalUserMessage(
 }
 
 Mantid::API::IAlgorithm_sptr
-QWorkspaceDockView::createAlgorithm(const std::string &algName) {
+QWorkspaceDockView::createAlgorithm(const std::string &algName, int version) {
   Mantid::API::IAlgorithm_sptr alg;
   try {
-    alg = Mantid::API::AlgorithmManager::Instance().create(algName, -1);
+    alg = Mantid::API::AlgorithmManager::Instance().create(algName, version);
   } catch (...) {
     QMessageBox::warning(m_appParent, "MantidPlot",
                          "Cannot create algorithm \"" +
@@ -208,10 +209,10 @@ QWorkspaceDockView::createAlgorithm(const std::string &algName) {
   return alg;
 }
 
-void QWorkspaceDockView::showAlgorithm(const std::string &algName) {
+void QWorkspaceDockView::showAlgorithm(const std::string &algName,
+                                       int version) {
   try {
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create(algName, -1);
+    auto alg = createAlgorithm(algName, version);
     if (!alg)
       return;
 
@@ -426,10 +427,100 @@ QWorkspaceDockView::SaveFileType QWorkspaceDockView::getSaveFileType() const {
   return SaveFileType::Nexus;
 }
 
-void QWorkspaceDockView::saveWorkspace(const std::string &wsName,
-                                       SaveFileType type) {}
+void QWorkspaceDockView::saveWorkspaceCollection() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::SaveWorkspaceCollection);
+}
 
-void QWorkspaceDockView::saveWorkspaces(const StringList &wsNames) {}
+void QWorkspaceDockView::handleShowSaveAlgorithm() {
+  QAction *sendingAction = dynamic_cast<QAction *>(sender());
+
+  if (sendingAction) {
+    QString actionName = sendingAction->text();
+
+    if (actionName.compare("Nexus") == 0)
+      m_saveFileType = SaveFileType::Nexus;
+    else if (actionName.compare("ASCII") == 0)
+      m_saveFileType = SaveFileType::ASCII;
+    else if (actionName.compare("ASCII v1"))
+      m_saveFileType = SaveFileType::ASCIIv1;
+  }
+
+  m_presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
+}
+
+QWorkspaceDockView::SaveFileType QWorkspaceDockView::getSaveFileType() const {
+  return m_saveFileType;
+}
+
+void QWorkspaceDockView::saveWorkspace(const std::string &wsName,
+                                       SaveFileType type) {
+  int version = -1;
+  std::string algorithmName;
+
+  switch (type) {
+  case SaveFileType::Nexus:
+    algorithmName = "SaveNexus";
+    break;
+  case SaveFileType::ASCIIv1:
+    version = 1;
+  case SaveFileType::ASCII:
+    algorithmName = "SaveAscii";
+    break;
+  }
+
+  showAlgorithm(algorithmName, version);
+}
+
+void QWorkspaceDockView::saveWorkspaces(const StringList &wsNames) {
+  QList<QTreeWidgetItem *> items = m_tree->selectedItems();
+  if (items.size() < 2)
+    return;
+
+  m_saveFolderDialog->setWindowTitle("Select save folder");
+  m_saveFolderDialog->setLabelText(QFileDialog::Accept, "Select");
+  auto res = m_saveFolderDialog->exec();
+  auto folder = m_saveFolderDialog->selectedFiles()[0].toStdString();
+
+  IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus");
+  saveAlg->initialize();
+
+  if (res == QFileDialog::Accepted) {
+    for (auto &wsName : wsNames) {
+      std::string filename = folder + "/" + wsName + ".nxs";
+      try {
+        saveAlg->setProperty("InputWorkspace", wsName);
+        saveAlg->setProperty("Filename", filename);
+        saveAlg->execute();
+      } catch (std::runtime_error &rte) {
+        docklog.error() << "Error saving workspace " << wsName << ": "
+                        << rte.what() << '\n';
+      }
+    }
+  }
+}
+
+void QWorkspaceDockView::saveWorkspacesToFolder(const QString &folder) {
+  QList<QTreeWidgetItem *> items = m_tree->selectedItems();
+
+  // Loop through multiple items selected from the mantid tree
+  QList<QTreeWidgetItem *>::iterator itr = items.begin();
+  for (itr = items.begin(); itr != items.end(); ++itr) {
+    QString workspaceName = (*itr)->text(0);
+    QString filename = folder + "/" + workspaceName + ".nxs";
+
+    IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexus");
+    saveAlg->initialize();
+    try {
+      saveAlg->setProperty("InputWorkspace", workspaceName.toStdString());
+      saveAlg->setProperty("Filename", filename.toStdString());
+      saveAlg->execute();
+    } catch (std::runtime_error &rte) {
+      docklog.error() << "Error saving workspace "
+                      << workspaceName.toStdString() << ": " << rte.what()
+                      << '\n';
+    }
+  }
+}
 
 std::string QWorkspaceDockView::getFilterText() const {
   return m_workspaceFilter->text().toStdString();
@@ -1030,20 +1121,21 @@ void QWorkspaceDockView::clickedWorkspace(QTreeWidgetItem *item, int) {
 }
 
 void QWorkspaceDockView::workspaceSelected() {
-	auto selectedNames = getSelectedWorkspaceNames();
+  auto selectedNames = getSelectedWorkspaceNames();
   if (selectedNames.empty())
     return;
 
   // If there are multiple workspaces selected group and save as Nexus
   if (selectedNames.size() > 1) {
-    connect(m_saveButton, SIGNAL(clicked()), this, SLOT(saveWorkspaceGroup()));
+    connect(m_saveButton, SIGNAL(clicked()), this,
+            SLOT(saveWorkspaceCollection()));
 
     // Don't display as a group
     m_saveButton->setMenu(NULL);
   } else {
     // Don't run the save group function when clicked
     disconnect(m_saveButton, SIGNAL(clicked()), this,
-               SLOT(saveWorkspaceGroup()));
+               SLOT(saveWorkspaceCollection()));
 
     // Remove all existing save algorithms from list
     m_saveMenu->clear();
@@ -1058,7 +1150,7 @@ void QWorkspaceDockView::workspaceSelected() {
   }
 
   auto wsName = selectedNames[0];
-  //TODO: Wire signal correctly in applicationwindow
+  // TODO: Wire signal correctly in applicationwindow
   emit enableSaveNexus(QString::fromStdString(wsName));
 }
 

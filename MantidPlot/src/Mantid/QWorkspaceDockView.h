@@ -145,12 +145,13 @@ private:
   void setupLoadButtonMenu();
   void setupConnections();
 
-  void showAlgorithm(const std::string &algName);
-  Mantid::API::IAlgorithm_sptr createAlgorithm(const std::string &algName);
+  void showAlgorithm(const std::string &algName, int version = -1);
+  Mantid::API::IAlgorithm_sptr createAlgorithm(const std::string &algName,
+                                               int version = -1);
 
 public slots:
   void clickedWorkspace(QTreeWidgetItem *, int);
-  void saveWorkspaceGroup();
+  void saveWorkspaceCollection();
   void onClickDeleteWorkspaces();
   void renameWorkspace();
   void populateChildData(QTreeWidgetItem *item);
@@ -220,7 +221,7 @@ private:
       *m_clearUB, *m_plotSurface, *m_plotContour;
 
   ApplicationWindow *m_appParent;
-
+  SaveFileType m_saveFileType;
   QAtomicInt m_updateCount;
   bool m_treeUpdating;
   bool m_promptDelete;
