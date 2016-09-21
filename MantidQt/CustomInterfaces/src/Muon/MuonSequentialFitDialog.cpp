@@ -1,17 +1,22 @@
-#include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"
-#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
+#include "MantidQtCustomInterfaces/Muon/MuonSequentialFitDialog.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisFitDataPresenter.h"
+#include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 namespace MantidQt {
-namespace MantidWidgets {
+namespace CustomInterfaces {
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using MantidQt::CustomInterfaces::MuonAnalysisFitDataPresenter;
+using MantidQt::MantidWidgets::MuonFitPropertyBrowser;
 
 namespace {
 Logger g_log("MuonSequentialFitDialog");
@@ -20,11 +25,14 @@ const std::string MuonSequentialFitDialog::SEQUENTIAL_PREFIX("MuonSeqFit_");
 
 /**
  * Constructor
+ * @param fitPropBrowser :: [input] Pointer to fit property browser
+ * @param dataPresenter :: [input] Pointer to fit data presenter
  */
 MuonSequentialFitDialog::MuonSequentialFitDialog(
-    MuonFitPropertyBrowser *fitPropBrowser, Algorithm_sptr loadAlg)
+    MuonFitPropertyBrowser *fitPropBrowser,
+    MuonAnalysisFitDataPresenter *dataPresenter)
     : QDialog(fitPropBrowser), m_fitPropBrowser(fitPropBrowser),
-      m_loadAlg(loadAlg) {
+      m_dataPresenter(dataPresenter) {
   m_ui.setupUi(this);
 
   setState(Stopped);
@@ -317,7 +325,28 @@ void MuonSequentialFitDialog::continueFit() {
     return;
   }
 
+  // Get names of workspaces to fit
+  const auto wsNames = m_dataPresenter->generateWorkspaceNames(
+      m_ui.runs->getInstrumentOverride().toStdString(),
+      m_ui.runs->getText().toStdString(), false);
+  if (wsNames.size() == 0) {
+    QMessageBox::critical(
+        this, "No data to fit",
+        "No data was found to fit (the list of workspaces to fit was empty).");
+    setState(Stopped);
+    return;
+  }
+
+  // Create the workspaces to fit
+  m_dataPresenter->createWorkspacesToFit(wsNames);
+
   QStringList runFilenames = m_ui.runs->getFilenames();
+  const auto numRuns = static_cast<size_t>(runFilenames.size());
+
+  // This must divide with no remainder:
+  // datasets per run = groups * periods
+  assert(wsNames.size() % numRuns == 0);
+  const auto datasetsPerRun = wsNames.size() / numRuns;
 
   const std::string label = m_ui.labelInput->text().toStdString();
   const std::string labelGroupName = SEQUENTIAL_PREFIX + label;
@@ -361,8 +390,8 @@ void MuonSequentialFitDialog::continueFit() {
   setState(Running);
   m_stopRequested = false;
 
-  for (auto fileIt = runFilenames.constBegin();
-       fileIt != runFilenames.constEnd(); ++fileIt) {
+  // For each run, fit "datasetsPerRun" groups and periods simultaneously
+  for (size_t i = 0; i < numRuns; i++) {
     // Process events (so that Stop button press is processed)
     QApplication::processEvents();
 
@@ -370,79 +399,26 @@ void MuonSequentialFitDialog::continueFit() {
     if (m_stopRequested)
       break;
 
-    MatrixWorkspace_sptr ws;
+    // Workspaces to be fitted simultaneously for this run
+    std::vector<std::string> workspacesToFit;
+    const auto startIter = wsNames.begin() + i * datasetsPerRun;
+    std::copy(startIter, startIter + datasetsPerRun,
+              std::back_inserter(workspacesToFit));
 
+    // Get run title. Workspaces should be in ADS
+    MatrixWorkspace_sptr matrixWS;
     try {
-      // If ApplyDeadTimeCorrection is set but no dead time table is set,
-      // we need to load one from the file.
-      bool loadDeadTimesFromFile = false;
-      bool applyDTC = m_loadAlg->getProperty("ApplyDeadTimeCorrection");
-      if (applyDTC) {
-        if (auto deadTimes = m_loadAlg->getPointerToProperty("DeadTimeTable")) {
-          if (deadTimes->value() == "") {
-            // No workspace set for dead time table - we need to load one
-            loadDeadTimesFromFile = true;
-          }
-        }
-      }
-
-      // Use LoadMuonNexus to load the file
-      auto loadAlg = AlgorithmManager::Instance().create("LoadMuonNexus");
-      loadAlg->initialize();
-      loadAlg->setChild(true);
-      loadAlg->setRethrows(true);
-      loadAlg->setPropertyValue("Filename", fileIt->toStdString());
-      loadAlg->setPropertyValue("OutputWorkspace", "__NotUsed");
-      if (loadDeadTimesFromFile) {
-        loadAlg->setPropertyValue("DeadTimeTable", "__DeadTimes");
-      }
-      loadAlg->execute();
-      Workspace_sptr loadedWS = loadAlg->getProperty("OutputWorkspace");
-      double loadedTimeZero = loadAlg->getProperty("TimeZero");
-
-      // then use MuonProcess to process it
-      auto process = AlgorithmManager::Instance().create("MuonProcess");
-      process->initialize();
-      process->setChild(true);
-      process->setRethrows(true);
-      process->updatePropertyValues(*m_loadAlg);
-      process->setProperty("InputWorkspace", loadedWS);
-      process->setProperty("LoadedTimeZero", loadedTimeZero);
-      process->setPropertyValue("OutputWorkspace", "__YouDontSeeMeIAmNinja");
-      if (m_fitPropBrowser->rawData()) // TODO: or vice verca?
-        process->setPropertyValue("RebinParams", "");
-      if (loadDeadTimesFromFile) {
-        Workspace_sptr deadTimes = loadAlg->getProperty("DeadTimeTable");
-        ITableWorkspace_sptr deadTimesTable;
-        if (auto table =
-                boost::dynamic_pointer_cast<ITableWorkspace>(deadTimes)) {
-          deadTimesTable = table;
-        } else if (auto group =
-                       boost::dynamic_pointer_cast<WorkspaceGroup>(deadTimes)) {
-          deadTimesTable =
-              boost::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
-        }
-        process->setProperty("DeadTimeTable", deadTimesTable);
-      }
-
-      process->execute();
-
-      Workspace_sptr outputWS = process->getProperty("OutputWorkspace");
-      ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
-    } catch (const std::exception &ex) {
-      g_log.error(ex.what());
+      matrixWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          workspacesToFit.front());
+    } catch (const Mantid::Kernel::Exception::NotFoundError &err) {
       QMessageBox::critical(
-          this, "Loading failed",
-          "Unable to load one of the files.\n\nCheck log for details");
-
-    } catch (...) {
-      QMessageBox::critical(
-          this, "Loading failed",
-          "Unable to load one of the files.\n\nCheck log for details");
-      break;
+          this, "Data not found",
+          QString::fromStdString("Workspace to fit not found in ADS: " +
+                                 workspacesToFit.front() + err.what()));
+      setState(Stopped);
+      return;
     }
-
-    const std::string runTitle = getRunTitle(ws);
+    const std::string runTitle = getRunTitle(matrixWS);
     const std::string wsBaseName = labelGroupName + "_" + runTitle;
 
     IFunction_sptr functionToFit;
@@ -464,7 +440,7 @@ void MuonSequentialFitDialog::continueFit() {
       // Set function. Gets updated when fit is done.
       fit->setProperty("Function", functionToFit);
 
-      fit->setProperty("InputWorkspace", ws);
+      fit->setProperty("InputWorkspace", workspacesToFit.front());
       fit->setProperty("Output", wsBaseName);
 
       // We should have one spectrum only in the workspace, so use the first
@@ -477,23 +453,34 @@ void MuonSequentialFitDialog::continueFit() {
       fit->setProperty("Minimizer", m_fitPropBrowser->minimizer());
       fit->setProperty("CostFunction", m_fitPropBrowser->costFunction());
 
+      // If multiple groups/periods, set up simultaneous fit
+      if (datasetsPerRun > 1) {
+        for (size_t i = 1; i < workspacesToFit.size(); i++) {
+          std::string suffix = boost::lexical_cast<std::string>(i);
+          fit->setPropertyValue("InputWorkspace_" + suffix, workspacesToFit[i]);
+          fit->setProperty("WorkspaceIndex_" + suffix, 0);
+          fit->setProperty("StartX_" + suffix, m_fitPropBrowser->startX());
+          fit->setProperty("EndX_" + suffix, m_fitPropBrowser->endX());
+        }
+      }
+
       fit->execute();
-    } catch (...) {
+    } catch (const std::exception &err) {
+      g_log.error(err.what());
       QMessageBox::critical(
           this, "Fitting failed",
           "Unable to fit one of the files.\n\nCheck log for details");
       break;
     }
 
-    // Make sure created fit workspaces end up in the group
-    // TODO: this really should use loop
-    ads.addToGroup(labelGroupName, wsBaseName + "_NormalisedCovarianceMatrix");
-    ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");
-    ads.addToGroup(labelGroupName, wsBaseName + "_Workspace");
+    // Copy log values and group created fit workspaces
+    finishAfterRun(labelGroupName, fit, datasetsPerRun > 1, matrixWS);
 
-    // Copy log values
-    auto fitWs = ads.retrieveWS<MatrixWorkspace>(wsBaseName + "_Workspace");
-    fitWs->copyExperimentInfoFrom(ws.get());
+    // If fit was simultaneous, transform results
+    if (datasetsPerRun > 1) {
+      m_dataPresenter->handleFittedWorkspaces(wsBaseName, labelGroupName);
+      m_dataPresenter->extractFittedWorkspaces(wsBaseName, labelGroupName);
+    }
 
     // Add information about the fit to the diagnosis table
     addDiagnosisEntry(runTitle, fit->getProperty("OutputChi2OverDof"),
@@ -508,6 +495,67 @@ void MuonSequentialFitDialog::continueFit() {
 }
 
 /**
+ * Handle reorganising workspaces after fit of a single run has finished
+ * Group output together and copy log values
+ * @param labelGroupName :: [input] Label for group
+ * @param fitAlg :: [input] Pointer to fit algorithm
+ * @param simultaneous :: [input] Whether several groups/periods were fitted
+ * simultaneously or not
+ * @param firstWS :: [input] Pointer to first input workspace (to copy logs
+ * from)
+ */
+void MuonSequentialFitDialog::finishAfterRun(
+    const std::string &labelGroupName, const IAlgorithm_sptr &fitAlg,
+    bool simultaneous, const MatrixWorkspace_sptr &firstWS) const {
+  auto &ads = AnalysisDataService::Instance();
+  const std::string wsBaseName = fitAlg->getPropertyValue("Output");
+  if (simultaneous) {
+    // copy logs
+    auto fitWSGroup =
+        ads.retrieveWS<WorkspaceGroup>(wsBaseName + "_Workspaces");
+    for (size_t i = 0; i < fitWSGroup->size(); i++) {
+      auto fitWs =
+          boost::dynamic_pointer_cast<MatrixWorkspace>(fitWSGroup->getItem(i));
+      if (fitWs) {
+        fitWs->copyExperimentInfoFrom(firstWS.get());
+      }
+    }
+    // insert workspace names into table
+    try {
+      const std::string paramTableName =
+          fitAlg->getProperty("OutputParameters");
+      const auto paramTable = ads.retrieveWS<ITableWorkspace>(paramTableName);
+      if (paramTable) {
+        Mantid::API::TableRow f0Row = paramTable->appendRow();
+        f0Row << "f0=" + fitAlg->getPropertyValue("InputWorkspace") << 0.0
+              << 0.0;
+        for (size_t i = 1; i < fitWSGroup->size(); i++) {
+          const std::string suffix = boost::lexical_cast<std::string>(i);
+          const auto wsName =
+              fitAlg->getPropertyValue("InputWorkspace_" + suffix);
+          Mantid::API::TableRow row = paramTable->appendRow();
+          row << "f" + suffix + "=" + wsName << 0.0 << 0.0;
+        }
+      }
+    } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+      // Not a fatal error, but shouldn't happen
+      g_log.warning(
+          "Could not find output parameters table for simultaneous fit");
+    }
+    // Group output together
+    ads.addToGroup(labelGroupName, wsBaseName + "_NormalisedCovarianceMatrix");
+    ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");
+    ads.addToGroup(labelGroupName, wsBaseName + "_Workspaces");
+  } else {
+    ads.addToGroup(labelGroupName, wsBaseName + "_NormalisedCovarianceMatrix");
+    ads.addToGroup(labelGroupName, wsBaseName + "_Parameters");
+    ads.addToGroup(labelGroupName, wsBaseName + "_Workspace");
+    auto fitWs = ads.retrieveWS<MatrixWorkspace>(wsBaseName + "_Workspace");
+    fitWs->copyExperimentInfoFrom(firstWS.get());
+  }
+}
+
+/**
  * Stop fitting process.
  */
 void MuonSequentialFitDialog::stopFit() {
@@ -517,5 +565,5 @@ void MuonSequentialFitDialog::stopFit() {
   m_stopRequested = true;
 }
 
-} // namespace MantidWidgets
+} // namespace CustomInterfaces
 } // namespace Mantid

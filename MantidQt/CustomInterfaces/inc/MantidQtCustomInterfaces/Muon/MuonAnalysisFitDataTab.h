@@ -69,7 +69,7 @@ private slots:
   /// Open up the wiki help.
   void muonAnalysisHelpDataAnalysisClicked();
   /// Group all the workspaces made after a fitting.
-  void groupFittedWorkspaces(QString workspaceName);
+  void groupFittedWorkspaces(const QString &workspaceName);
 };
 }
 }

@@ -16,6 +16,19 @@ ALC
 Muon Analysis
 #############
 
+Multi-dataset fitting 
+*********************
+
+The *Data Analysis* tab of the Muon Analysis interface has been updated to enable simultaneous fits of multiple datasets.
+A full explanation of how to use this new functionality is contained in the interface's documentation.
+Results tables of these new kinds of fit can also be created.
+
+As this is a new change for this release, please report any bugs, or requests for enhancements, to the development team. 
+If you find a bug that stops you working, or would simply prefer to stick with the previous UI, just check the "Compatibility mode" box on the *Settings* tab and this will revert the interface to how it was in Mantid 3.7.
+
+Other fixes and enhancements:
+*****************************
+
 - When reusing the same plot window, an option has been added on the Settings tab to control how many previous fits are kept. It can be adjusted to 0 (remove all previous fits; default pre-Mantid 3.7), 1 (keep just one previous fit plus this one; new default) or higher.
 
 - *run_start* and *run_end* are now available as log values to use in the results table. They can be inserted either as text (ISO-formatted date strings) or as seconds since the start of the first run.
