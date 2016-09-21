@@ -313,7 +313,6 @@ class CrystalFieldTests(unittest.TestCase):
 
     def test_api_CrystalField_multi_spectrum_background(self):
         from CrystalField import CrystalField, PeaksFunction, Background, Function
-        import matplotlib.pyplot as plt
         cf = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
                           Temperature=[10.0, 10.0], FWHM=1.0)
         cf.setPeaks('Gaussian')
