@@ -230,6 +230,11 @@ public:
                MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
                bool errs = false);
 
+  MultiLayer *
+  plotSubplots(const QStringList &wsNames, const QList<int> &indexList,
+               MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
+               bool errs = false);
+
 public slots:
   // Create a 1d graph form specified MatrixWorkspace and index
   MultiLayer *

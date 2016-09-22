@@ -3576,6 +3576,41 @@ MultiLayer *MantidUI::plotSubplots(const QMultiMap<QString, int> &toPlot,
   return plotSubplots(spectraByWorkspace, distr, errs);
 }
 
+/**
+ * Plot a "tiled" plot (with subplots).
+ * Ask user for confirmation if lots of plots are chosen.
+ * If just one workspace, put each spectrum in its own subplot
+ * If multiple workspaces, each ws gets its own subplot
+ *
+ * This overload plots the same spectra for each workspace.
+ *
+ * @param wsNames :: A list of workspace names to be shown in the graph
+ * @param indexList :: list of workspace indices
+ * @param distr :: if true, workspace plot as distribution (y data/bin width)
+ * @param errs :: if true, plot the errors on the graph
+ * @return created MultiLayer, or null on failure
+ */
+MultiLayer *MantidUI::plotSubplots(const QStringList &wsNames,
+                                   const QList<int> &indexList,
+                                   MantidQt::DistributionFlag distr,
+                                   bool errs) {
+  // convert input into map of workspace->spectra
+  QMultiMap<QString, std::set<int>> spectraByWorkspace;
+  const std::set<int> wsIndices = [&indexList]() {
+    std::set<int> indexSet;
+    for (const auto &index : indexList) {
+      indexSet.insert(index);
+    }
+    return indexSet;
+  }();
+  for (const auto &wsName : wsNames) {
+    spectraByWorkspace.insert(wsName, wsIndices);
+  }
+
+  // Pass to the overloaded method
+  return plotSubplots(spectraByWorkspace, distr, errs);
+}
+
 Table *MantidUI::createTableFromBins(
     const QString &wsName, Mantid::API::MatrixWorkspace_const_sptr workspace,
     const QList<int> &bins, bool errs, int fromRow, int toRow) {
