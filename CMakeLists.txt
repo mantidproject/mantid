@@ -319,7 +319,7 @@ if ( ENABLE_CPACK )
                            "python-matplotlib,"
                            "python-scipy,"
                            "libtbb2,"
-                           "libpocofoundation31,libpocoutil31,libpoconet31,libpoconetssl31,libpococrypto31,libpocoxml31,"
+                           "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION},"
                            "python-pycifrw (>= 4.2.1)" )
         set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
         if( "${UNIX_CODENAME}" STREQUAL "xenial")
