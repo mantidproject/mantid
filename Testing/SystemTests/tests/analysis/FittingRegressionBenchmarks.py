@@ -4,159 +4,13 @@ Benchmarks for accuracy (and time / iterations).
 import unittest
 import stresstesting
 
-import fitting_benchmarking
-
-#### REORGANIZE
 import os
 import time
 
 import numpy as np
 
-def get_nist_problem_files():
-    """ Gets the problem files grouped in blocks """
-    # Grouped by "level of difficulty"
-    nist_lower = [ 'Misra1a.dat', 'Chwirut2.dat', 'Chwirut1.dat', 'Lanczos3.dat',
-                   'Gauss1.dat', 'Gauss2.dat', 'DanWood.dat', 'Misra1b.dat' ]
-    
-    nist_average = [ 'Kirby2.dat', 'Hahn1.dat',
-                     # 'Nelson.dat' needs log[y] parsing / DONE, needs x1, x2
-                     'MGH17.dat', 'Lanczos1.dat', 'Lanczos2.dat', 'Gauss3.dat',
-                     'Misra1c.dat', 'Misra1d.dat', 
-                     # 'Roszman1.dat' <=== needs handling the  'pi = 3.1415...' / DOME
-                     # And the 'arctan()'/ DONE, but generated lots of NaNs
-                     'ENSO.dat' ]
-    nist_higher = [ 'MGH09.dat','Thurber.dat', 'BoxBOD.dat', 'Rat42.dat',
-                    'MGH10.dat', 'Eckerle4.dat', 'Rat43.dat', 'Bennett5.dat' ]
-                    
-    nist_names = nist_lower + nist_average + nist_higher
-
-    nist_dir = os.path.join('fitting','NIST_nonlinear_regression') # 'reference/fitting/nist_nonlinear_regression/'
-    # Could use this list to generate a table for all the problems at once
-    # benchmark_problems = [os.path.join(ref_dir, nist_dir, fname) for fname in nist_names]
-
-    # Find ref_dir
-    data_search_dirs = msapi.ConfigService.Instance()["datasearch.directories"].split(';')
-    ref_dir = None
-    for data_dir in data_search_dirs:
-        if 'reference' in data_dir:
-            ref_dir = data_dir
-            print "Found ref dir: {0}".format(ref_dir)
-    if not ref_dir:
-        raise RuntimeError("Could not find the benchmark data directory")
-
-    ##### TEMPORAL OVERWRITE
-    ref_dir = r'/home/fedemp/mantid-repos/mantid-fitting-benchmarking/Testing/SystemTests/tests/analysis/reference'
-
-    nist_lower_files = [os.path.join(ref_dir, nist_dir, fname) for fname in nist_lower]
-    nist_average_files = [os.path.join(ref_dir, nist_dir, fname) for fname in nist_average]
-    nist_higher_files = [os.path.join(ref_dir, nist_dir, fname) for fname in nist_higher]
-    problem_files = [nist_lower_files, nist_average_files, nist_higher_files]
-
-    return problem_files
-
-def do_regression_fitting_benchmark(include_nist=True, include_cutest=False, minimizers=None):
-    problem_blocks = []
-
-    if include_nist:
-        problem_blocks.extend(get_nist_problem_files())
-
-    if include_cutest:
-        problem_blocks.extend([cutest_all])
-
-    fit_results = [do_regression_fitting_benchmark_block(block, minimizers) for block in problem_blocks]
-    return fit_results
-
-def do_regression_fitting_benchmark_block(benchmark_problems, minimizers):
-    """
-    Applies one minmizer to a block/list of test problems
-
-    @param problem_files :: a list of list of files that define a block of
-    test problems, for example the "lower difficulty" NIST files . The first list level
-    is for different blocks of test problems. The second level is for different individual
-    problems/files.
-    """
-
-    results_per_problem = []
-    for prob_file in benchmark_problems:
-        prob = parse_nist_fitting_problem_file(prob_file)
-        print "Testing fitting of problem {0} (file {1}".format(prob.name, prob_file)
-
-        results_prob = do_regresion_fitting_benchmark_one_problem(prob, minimizers)
-        results_per_problem.extend(results_prob)
-
-    return results_per_problem
-
-def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors = True):
-    """
-    One problem with potentially several starting points, returns a list (start points) of
-    lists (minimizers)
-    """
-
-    if use_errors:
-        wks = msapi.CreateWorkspace(DataX=prob.data_pattern_in, DataY=prob.data_pattern_out,
-                                    DataE=np.sqrt(prob.data_pattern_in))
-                                    # ERRORS. If all zeros, check Fit/IgnoreInvalidData
-                                    # DataE=np.zeros((1, len(prob.data_pattern_in))))
-        cost_function = 'Least squares'
-    else:
-        wks = msapi.CreateWorkspace(DataX=prob.data_pattern_in, DataY=prob.data_pattern_out)
-        cost_function = 'Unweighted least squares'
-
-    # For NIST problems this will generate two results per file (two different starting points)
-    results_fit_problem = []
-    num_starts = len(prob.starting_values[0][1])
-    for start_idx in range(0, num_starts):
-
-        print ("=================== starting values,: {0}, with idx: {1} ================".
-               format(prob.starting_values, start_idx))
-        start_string = '' # like: 'b1=250, b2=0.0005'
-        for param in prob.starting_values:
-            start_string += ('{0}={1},'.format(param[0], param[1][start_idx]))
-        user_func = "name=UserFunction, Formula={0}, {1}".format(prob.equation, start_string)
-
-        results_problem_start = []
-        for minimizer_name in minimizers:
-            t_start = time.clock()
-
-            status, chi2, fit_wks, params, errors = run_fit(wks, function=user_func,
-                                                            minimizer=minimizer_name,
-                                                            cost_function=cost_function)
-            t_end = time.clock()
-            print "*** with minimizer {0}, Status: {1}, chi2: {2}".format(minimizer_name, status, chi2)
-            print "   params: {0}, errors: {1}".format(params, errors)
-
-            def sum_of_squares(values):
-                return np.sum(np.square(values))
-
-            if fit_wks:
-                sum_err_sq = sum_of_squares(fit_wks.readY(2))
-                # print " output simulated values: {0}".format(fit_wks.readY(1))
-            else:
-                sum_err_sq = float("inf")
-                print " WARNING: no output fit workspace"
-
-            print "   sum sq: {0}".format(sum_err_sq)
-
-            result = FittingTestResult()
-            result.problem = prob
-            result.fit_status = status
-            result.fit_chi2 = chi2
-            result.params = params
-            result.errors = errors
-            result.sum_err_sq = sum_err_sq
-            result.runtime = t_end - t_start
-            print "Result object: {0}".format(result)
-            results_problem_start.append(result)
-        # meaningless, because not scaled/divided by n
-        #avg_sum_sq = np.average([res.sum_err_sq for res in result_fits_minimizer])
-        #avg_sum_sq = np.nanmean([res.sum_err_sq for res in result_fits_minimizer])
-        #print ("Results for this minimizer '{0}', avg sum errors sq: {1}".
-        #       format(minimizer_name, avg_sum_sq))
-        results_fit_problem.append(results_problem_start)
-
-    return results_fit_problem
-
-
+import mantid.simpleapi as msapi
+import fitting_benchmarking as fitbk
 
 #### REORGANIZE
 
@@ -192,20 +46,16 @@ class FittingBenchmarkTests(unittest.TestCase):
 
     # Rename this to what it does/can do
     def test_rank_by_chi2(self):
-        minimizers_alpha = ['Levenberg-Marquardt', 'Simplex', 'FABADA',
-                            'Conjugate gradient (Fletcher-Reeves imp.)',
-                            'Conjugate gradient (Polak-Ribiere imp.)',
-                            'BFGS', 'Levenberg-MarquardtMD', 'SteepestDescent']
-        # TODO: expose API::FuncMinimizerFactory to Python
+        # TO-DO related to this: expose API::FuncMinimizerFactory to Python
         # TOTHINK: use different interface as in the API::FunctionFactory?
+        # But still, do we want to enforce a particular ordering for the tables?
         minimizers_factory = ['BFGS', 'Conjugate gradient (Fletcher-Reeves imp.)',
                               'Conjugate gradient (Polak-Ribiere imp.)', 'Damping',
                                #'FABADA', # hide FABADA
                               'Levenberg-Marquardt', 'Levenberg-MarquardtMD',
-                              'Simplex', 'SteepestDescent']
+                              'Simplex', 'SteepestDescent', 'DTRS']
         minimizers = minimizers_factory
-        results_per_block = do_regression_fitting_benchmark(include_nist=True, minimizers=minimizers)
-        # do_regression_fitting_benchmark()
+        results_per_block = fitbk.do_regression_fitting_benchmark(include_nist=True, minimizers=minimizers)
 
 
         color_scale = [(1.1, 'ranking-top-1'), (1.33, 'ranking-top-2'), (1.75, 'ranking-med-3'), (3, 'ranking-low-4'), (float('nan'), 'ranking-low-5')]
