@@ -16,8 +16,6 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
         osiris = Rebin(osiris, [-0.6, 0.02, 0.6])
         self.osiris = osiris
 
-    @unittest.skipIf(version_info < (2,7,0),
-                    "Python 2.6.x not supported for testing...skipping.")
     def test_interpolation_change(self):
         x_data = np.arange(-2., 2., 0.05)
         q_data = np.arange(0.5, 1.3, 0.1)
@@ -104,4 +102,9 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
                           OutputWorkspace='__NMoldyn4Interpolation_test')
 
 if __name__=="__main__":
-    unittest.main()
+    python_version = version_info
+    if python_version < (2,7,0):
+        logger.warning("Not running this test as it requires Python >= 2.7. Version found: {0}".
+                        format(vers))
+    else:
+        unittest.main()
