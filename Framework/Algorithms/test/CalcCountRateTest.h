@@ -40,7 +40,7 @@ public:
     return m_workingWS.get();
   }
   void setVisWS(const std::string &wsName) {
-    this->setProperty("VisualizationWsName", wsName);
+    this->setProperty("VisualizationWs", wsName);
     this->checkAndInitVisWorkspace();
   }
   const std::vector<double> &getVisNormLog() { return m_visNorm; }
@@ -298,7 +298,7 @@ public:
     alg.setProperty("UseNormLogGranularity", true);
 
     alg.setProperty("Workspace", sws);
-    alg.setProperty("VisualizationWsName", "testVisWSNoNorm");
+    alg.setProperty("VisualizationWs", "testVisWSNoNorm");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -406,7 +406,7 @@ public:
 
     alg.setProperty("NumTimeSteps", 50);
     alg.setProperty("XResolution", 200);
-    alg.setProperty("VisualizationWsName", "testVisWSNormalized");
+    alg.setProperty("VisualizationWs", "testVisWSNormalized");
 
 
     alg.setProperty("RangeUnits", "dSpacing");

@@ -108,16 +108,12 @@ void CalcCountRate::init() {
       " to the source workspace");
   // visualisation group
   std::string spur_vis_mode("Spurion visualisation");
-  declareProperty(
-      "VisualizationWsName", "",
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>("VisualizationWs", "",
+      Kernel::Direction::Output,API::PropertyMode::Optional),
       "Optional name to build 2D matrix workspace for spurion visualization. "
       "If name is provided, a 2D workspace with this name will be created "
       "containing data to visualize counting rate as function of time in the "
-      "ranges "
-      "XMin-XMax");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
-      "VisualizationWs", "", Kernel::Direction::Output,
-      API::PropertyMode::Optional));
+      "ranges XMin-XMax");
 
   auto mustBeReasonable = boost::make_shared<Kernel::BoundedValidator<int>>();
   mustBeReasonable->setLower(3);
@@ -132,10 +128,9 @@ void CalcCountRate::init() {
           "XResolution", 100, mustBeReasonable, Kernel::Direction::Input),
       "Number of steps (accuracy) of the visualization workspace has along "
       "X-axis. ");
-  setPropertyGroup("VisualizationWsName", spur_vis_mode);
+  setPropertyGroup("VisualizationWs", spur_vis_mode);
   setPropertyGroup("NumTimeSteps", spur_vis_mode);
   setPropertyGroup("XResolution", spur_vis_mode);
-  setPropertyGroup("VisualizationWs", spur_vis_mode);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -420,7 +415,9 @@ void CalcCountRate::setOutLogParameters(
     }
   }
 
-  if (!useLogAccuracy) {
+  if (useLogAccuracy) {
+      m_numLogSteps = m_pNormalizationLog->realSize();
+  }else{
     m_numLogSteps = getProperty("NumTimeSteps");
   }
 
@@ -520,7 +517,7 @@ void CalcCountRate::setSourceWSandXRanges(
 * option.
 */
 void CalcCountRate::checkAndInitVisWorkspace() {
-  std::string visWSName = getProperty("VisualizationWsName");
+  std::string visWSName = getProperty("VisualizationWs");
   if (visWSName.empty()) {
     m_visWs.reset();
     m_doVis = false;
