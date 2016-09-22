@@ -429,7 +429,7 @@ void CalcCountRate::setOutLogParameters(
   m_TRangeMin = runTMin;
   // histogramming excludes rightmost events. Modify max limit to keep them
   double t_epsilon = double(runTMax.totalNanoseconds()) *
-                            (1 + std::numeric_limits<double>::epsilon());
+                     (1 + std::numeric_limits<double>::epsilon());
   int64_t eps_increment =
       static_cast<int64_t>(t_epsilon - double(runTMax.totalNanoseconds()));
   m_TRangeMax =
