@@ -14,6 +14,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
+#include "MantidCurveFitting/Functions/DiffSphere.h"
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -2270,6 +2271,254 @@ public:
 
     double chi_squared = fitalg.getProperty("OutputChi2overDoF");
     TS_ASSERT_LESS_THAN(chi_squared, 1e-4);
+  }
+
+  void runDiffSphereInelasticTest(const double S,
+                                  const double Q = Mantid::EMPTY_DBL()) {
+    // Target fitting parameters
+    const double I_0(47.014);
+    const double R_0(2.1);
+    const double D_0(0.049);
+
+    double simQ = Q;
+    if (Q == Mantid::EMPTY_DBL())
+      simQ = 0.20092;
+
+    // Initialize the fit function in the Fit algorithm
+    Algorithms::Fit fitalg;
+    TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
+    TS_ASSERT(fitalg.isInitialized());
+    std::ostringstream funtion_stream;
+    funtion_stream << "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                      "name=Gaussian,Height=1.0,"
+                   << "PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre="
+                   << S << ",Sigma=0.002);"
+                   << "name=InelasticDiffSphere,Q="
+                   << boost::lexical_cast<std::string>(simQ)
+                   << ",Intensity=" << boost::lexical_cast<std::string>(I_0)
+                   << ",Radius=" << boost::lexical_cast<std::string>(R_0)
+                   << ",Diffusion=" << boost::lexical_cast<std::string>(D_0)
+                   << ",Shift=" << boost::lexical_cast<std::string>(S) << ")";
+    fitalg.setProperty("Function", funtion_stream.str());
+
+    // Create the data workspace by evaluating the fit function
+    auto data_workspace = generateWorkspaceFromFitAlgorithm(fitalg);
+
+    // Override the function with new parameters, our initial guess.
+    double I = I_0 * 1.01;
+	double R = R_0 * 1.01;
+    double D = D_0 * 1.01;
+    funtion_stream.str(std::string());
+    funtion_stream.clear();
+    funtion_stream << "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                      "name=Gaussian,Height=1.0,"
+                   << "PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre="
+                   << S << ",Sigma=0.002);"
+                   << "name=InelasticDiffSphere";
+
+    if (Q != Mantid::EMPTY_DBL())
+      funtion_stream << ",Q=" << boost::lexical_cast<std::string>(Q);
+
+    funtion_stream << ",Intensity=" << boost::lexical_cast<std::string>(I)
+                   << ",Radius=" << boost::lexical_cast<std::string>(R)
+                   << ",Diffusion=" << boost::lexical_cast<std::string>(D)
+                   << ",Shift=" << boost::lexical_cast<std::string>(S) << ")";
+    fitalg.setProperty("Function", funtion_stream.str());
+
+    // Do the fit
+    fitalg.setProperty("InputWorkspace", data_workspace);
+    fitalg.setPropertyValue("WorkspaceIndex", "0");
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fitalg.execute()));
+    TS_ASSERT(fitalg.isExecuted());
+
+    // check Chi-square is small
+    const double chi_squared = fitalg.getProperty("OutputChi2overDoF");
+    TS_ASSERT_LESS_THAN(chi_squared, 0.001);
+
+    Mantid::API::IFunction_sptr fitalg_function =
+        fitalg.getProperty("Function");
+    auto fitalg_conv = boost::dynamic_pointer_cast<
+        Mantid::CurveFitting::Functions::Convolution>(fitalg_function);
+
+    // Check the parameters of the resolution did not change
+	Mantid::API::IFunction_sptr resolution = fitalg_conv->getFunction(0);
+	TS_ASSERT_DELTA(resolution->getParameter("PeakCentre"), S, 0.00001);
+    TS_ASSERT_DELTA(resolution->getParameter("Height"), 1.0, 1.0 * 0.001);
+    TS_ASSERT_DELTA(resolution->getParameter("Sigma"), 0.002, 0.002 * 0.001);
+
+    // Check the parameters of the inelastic part close to the target parameters
+    Mantid::API::IFunction_sptr struct_factor = fitalg_conv->getFunction(1);
+    TS_ASSERT_DELTA(struct_factor->getParameter("Intensity"), I_0, I_0 * 0.05);
+    TS_ASSERT_DELTA(struct_factor->getParameter("Radius"), R_0, R_0 * 0.05);
+    TS_ASSERT_DELTA(struct_factor->getParameter("Diffusion"), D_0, D_0 * 0.05);
+    TS_ASSERT_DELTA(struct_factor->getParameter("Shift"), S, 0.0005);
+  }
+
+  void testDiffSphereInelasticWithQParam() {
+    runDiffSphereInelasticTest(0.0, 0.20092);
+  }
+
+  void testDiffSphereInelasticWithWSIndex() { runDiffSphereInelasticTest(0.0); }
+
+  void testDiffSphereInelasticWithShiftWithQParam() {
+    runDiffSphereInelasticTest(0.2, 0.20092);
+  }
+
+  void testDiffSphereInelasticWithShiftWithWSIndex() {
+    runDiffSphereInelasticTest(0.2);
+  }
+
+  void testDiffSphere() {
+    // target parameters
+    const double I_0(47.014);
+    const double R_0(2.1);
+    const double D_0(0.049);
+    const double Q(0.5);
+
+    // Initialize the fit function in the Fit algorithm
+    Algorithms::Fit fitalg;
+    TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
+    TS_ASSERT(fitalg.isInitialized());
+    std::ostringstream funtion_stream;
+    funtion_stream << "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                      "name=Gaussian,Height=1.0,"
+                   << "PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre="
+                      "0.0,Sigma=0.002);"
+                   << "name=DiffSphere,Q="
+                   << boost::lexical_cast<std::string>(Q)
+                   << ",Intensity=" << boost::lexical_cast<std::string>(I_0)
+                   << ",Radius=" << boost::lexical_cast<std::string>(R_0)
+                   << ",Diffusion=" << boost::lexical_cast<std::string>(D_0)
+                   << ")";
+    fitalg.setProperty("Function", funtion_stream.str());
+
+    // Find out whether ties were correctly applied
+    Mantid::API::IFunction_sptr func = fitalg.getProperty("Function");
+    func->initialize();
+    auto fitalg_conv = boost::dynamic_pointer_cast<
+        Mantid::CurveFitting::Functions::Convolution>(func);
+    func = fitalg_conv->getFunction(1);
+    auto struct_factor = boost::dynamic_pointer_cast<
+        Mantid::CurveFitting::Functions::DiffSphere>(func);
+
+    func = struct_factor->getFunction(0);
+    auto elastic = boost::dynamic_pointer_cast<
+        Mantid::CurveFitting::Functions::ElasticDiffSphere>(func);
+    TS_ASSERT_DELTA(elastic->getParameter("Height"), I_0,
+                    std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(elastic->getParameter("Radius"), R_0,
+                    std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(elastic->getAttribute("Q").asDouble(), Q,
+                    std::numeric_limits<double>::epsilon());
+
+    func = struct_factor->getFunction(1);
+    auto fitalg_inelastic = boost::dynamic_pointer_cast<
+        Mantid::CurveFitting::Functions::InelasticDiffSphere>(func);
+    TS_ASSERT_DELTA(fitalg_inelastic->getParameter("Intensity"), I_0,
+                    std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(fitalg_inelastic->getParameter("Radius"), R_0,
+                    std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(fitalg_inelastic->getParameter("Diffusion"), D_0,
+                    std::numeric_limits<double>::epsilon());
+    TS_ASSERT_DELTA(fitalg_inelastic->getAttribute("Q").asDouble(), Q,
+                    std::numeric_limits<double>::epsilon());
+
+    // Override the function with new parameters, our initial guess.
+    double I = I_0 * 1.01;
+    double R = R_0 * 1.01;
+    double D = D_0 * 1.01;
+    funtion_stream.str(std::string());
+    funtion_stream.clear();
+    funtion_stream << "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                      "name=Gaussian,Height=1.0,"
+                   << "PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre="
+                      "0.0,Sigma=0.002);"
+                   << "name=DiffSphere,Q="
+                   << boost::lexical_cast<std::string>(Q)
+                   << ",Intensity=" << boost::lexical_cast<std::string>(I)
+                   << ",Radius=" << boost::lexical_cast<std::string>(R)
+                   << ",Diffusion=" << boost::lexical_cast<std::string>(D)
+                   << ")";
+    fitalg.setProperty("Function", funtion_stream.str());
+
+    // Create the data workspace by evaluating the fit function
+    auto data_workspace = generateWorkspaceFromFitAlgorithm(fitalg);
+
+    // Do the fit
+    fitalg.setProperty("InputWorkspace", data_workspace);
+    fitalg.setPropertyValue("WorkspaceIndex", "0");
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fitalg.execute()));
+    TS_ASSERT(fitalg.isExecuted());
+
+    // Check Chi-square is small
+    const double chi_squared = fitalg.getProperty("OutputChi2overDoF");
+    TS_ASSERT_LESS_THAN(chi_squared, 0.001);
+
+    // Check the parameters of the resolution did not change
+    Mantid::API::IFunction_sptr resolution = fitalg_conv->getFunction(0);
+    TS_ASSERT_DELTA(resolution->getParameter("PeakCentre"), 0.0, 0.00001);
+    TS_ASSERT_DELTA(resolution->getParameter("Height"), 1.0, 1.0 * 0.001);
+    TS_ASSERT_DELTA(resolution->getParameter("Sigma"), 0.002, 0.002 * 0.001);
+
+    // Check the parameters of the DiffSphere close to the target parameters
+    TS_ASSERT_DELTA(struct_factor->getParameter("Intensity"), I_0, I_0 * 0.05);
+    TS_ASSERT_DELTA(struct_factor->getParameter("Radius"), R_0, R_0 * 0.05);
+    TS_ASSERT_DELTA(struct_factor->getParameter("Diffusion"), D_0, D_0 * 0.05);
+  }
+
+  void testDiffSphereElastic() {
+    /// Convolve the elastic part with a resolution function, here a Gaussian
+
+    std::string funtion_string =
+        "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,"
+        "Height=1.0,PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre=0.0,"
+        "Sigma=0.002);name=ElasticDiffSphere,Q=0.5,Height=47.014,Radius=3.567)";
+
+    // Initialize the fit function in the Fit algorithm
+    Algorithms::Fit fitalg;
+    TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
+    TS_ASSERT(fitalg.isInitialized());
+    fitalg.setProperty("Function", funtion_string);
+
+    // Create the data workspace by evaluating the fit function in the Fit
+    // algorithm
+    auto data_workspace = generateWorkspaceFromFitAlgorithm(fitalg);
+
+    /* override the function with new parameters, then do the Fit. The effect of
+    * ElasticDiffSphere is to multiply the Gaussian by
+    * height*[3*j_1(Q*Radius)/(Q*Radius)]^2. Thus, an increase in
+    * parameter 'height' can be offset by an increase in the Radius. These
+    * parameters are coupled and thus no unique fit exists. Thus, we fix
+    * parameter height and fit the radius.
+    */
+    funtion_string = "(composite=Convolution,NumDeriv=true;name=Gaussian,"
+                     "Height=1.0,PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,"
+                     "PeakCentre=0.0,Sigma=0.002);name=ElasticDiffSphere,Q=0.5,"
+                     "Height=47.014,Radius=6.0,ties=(Height=47.014,Centre=0))";
+    fitalg.setProperty("Function", funtion_string);
+    fitalg.setProperty("InputWorkspace", data_workspace);
+    fitalg.setPropertyValue("WorkspaceIndex", "0");
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fitalg.execute()));
+    TS_ASSERT(fitalg.isExecuted());
+
+    // Check Chi-square is small
+    const double chi_squared = fitalg.getProperty("OutputChi2overDoF");
+    TS_ASSERT_LESS_THAN(chi_squared, 0.001);
+
+    Mantid::API::IFunction_sptr out_func = fitalg.getProperty("Function");
+    auto fitalg_conv = boost::dynamic_pointer_cast<
+        Mantid::CurveFitting::Functions::Convolution>(out_func);
+
+    // Check the parameters of the resolution did not change
+    Mantid::API::IFunction_sptr resolution = fitalg_conv->getFunction(0);
+    TS_ASSERT_DELTA(resolution->getParameter("PeakCentre"), 0.0, 0.00001);
+    TS_ASSERT_DELTA(resolution->getParameter("Height"), 1.0, 1.0 * 0.001);
+    TS_ASSERT_DELTA(resolution->getParameter("Sigma"), 0.002, 0.002 * 0.001);
+
+    // Check the parameters of the elastic part
+    Mantid::API::IFunction_sptr structure = fitalg_conv->getFunction(1);
+    TS_ASSERT_DELTA(structure->getParameter("Height"), 47.014, 47.014 * 0.05);
+    TS_ASSERT_DELTA(structure->getParameter("Radius"), 3.567, 3.567 * 0.05);
   }
 
 private:
