@@ -16,7 +16,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include <numeric>
 
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -402,8 +401,9 @@ void CalcCountRate::setOutLogParameters(
         useLogAccuracy = false;
       } else {
         if (!m_tmpLogHolder) {
-          m_tmpLogHolder = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
-              *m_pNormalizationLog->clone());
+          m_tmpLogHolder =
+              Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
+                  *m_pNormalizationLog->clone());
         }
         m_tmpLogHolder->filterByTime(runTMin, runTMax);
         m_pNormalizationLog = m_tmpLogHolder.get();
