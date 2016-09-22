@@ -84,25 +84,25 @@ public:
   }
 
   void testDeleteWorkspacesFromDockWithPromptUserDecline() {
-	  auto ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
-	  auto ws2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
-	  AnalysisDataService::Instance().add("ws1", ws1);
-	  AnalysisDataService::Instance().add("ws2", ws2);
+    auto ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    auto ws2 = WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().add("ws1", ws1);
+    AnalysisDataService::Instance().add("ws2", ws2);
 
-	  ::testing::DefaultValue<StringList>::Set(
-		  StringList(StringList{ "ws1", "ws2" }));
-	  ON_CALL(*mockView.get(), deleteConfirmation()).WillByDefault(Return(false));
-	  ON_CALL(*mockView.get(), isPromptDelete()).WillByDefault(Return(true));
+    ::testing::DefaultValue<StringList>::Set(
+        StringList(StringList{"ws1", "ws2"}));
+    ON_CALL(*mockView.get(), deleteConfirmation()).WillByDefault(Return(false));
+    ON_CALL(*mockView.get(), isPromptDelete()).WillByDefault(Return(true));
 
-	  EXPECT_CALL(*mockView.get(), isPromptDelete()).Times(Exactly(1));
-	  EXPECT_CALL(*mockView.get(), deleteConfirmation()).Times(Exactly(1));
-	  EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), isPromptDelete()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), deleteConfirmation()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
 
-	  presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
+    presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 
-	  TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-	  AnalysisDataService::Instance().remove("ws1");
-	  AnalysisDataService::Instance().remove("ws2");
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    AnalysisDataService::Instance().remove("ws1");
+    AnalysisDataService::Instance().remove("ws2");
   }
 
   void testDeleteWorkspacesFromDockWithoutPrompt() {

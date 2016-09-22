@@ -69,7 +69,7 @@ private:
   void saveSingleWorkspace();
   void saveWorkspaceCollection();
   void filterWorkspaces();
-  void populateWorkspaceContextMenu();
+  void populateAndShowWorkspaceContextMenu();
   void showWorkspaceData();
   void showInstrumentView();
   void plotSpectrum();

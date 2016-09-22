@@ -76,8 +76,8 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   case ViewNotifiable::Flag::FilterWorkspaces:
     filterWorkspaces();
     break;
-  case ViewNotifiable::Flag::PopulateWorkspaceContextMenu:
-    populateWorkspaceContextMenu();
+  case ViewNotifiable::Flag::PopulateAndShowWorkspaceContextMenu:
+    populateAndShowWorkspaceContextMenu();
     break;
   case ViewNotifiable::Flag::ShowWorkspaceData:
     showWorkspaceData();
@@ -241,7 +241,7 @@ void WorkspacePresenter::filterWorkspaces() {
   view->filterWorkspaces(view->getFilterText());
 }
 
-void WorkspacePresenter::populateWorkspaceContextMenu() {
+void WorkspacePresenter::populateAndShowWorkspaceContextMenu() {
   auto view = lockView();
   view->popupContextMenu();
 }
