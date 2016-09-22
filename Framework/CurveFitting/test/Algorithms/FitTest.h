@@ -13,10 +13,13 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
+#include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MultiDomainFunctionHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -89,9 +92,9 @@ public:
   }
 
   void test_empty_function() {
-    boost::shared_ptr<Mantid::API::MultiDomainFunction> multi;
+    boost::shared_ptr<MultiDomainFunction> multi;
 
-    auto alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    auto alg = AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     TS_ASSERT_THROWS(
         alg->setProperty("Function",
@@ -100,7 +103,7 @@ public:
   }
 
   void test_empty_function_str() {
-    auto alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    auto alg = AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     TS_ASSERT_THROWS(alg->setPropertyValue("Function", ""),
                      std::invalid_argument);
@@ -646,7 +649,7 @@ public:
     double dummy = fit.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA(dummy, 0.0, 0.01);
 
-    Mantid::API::IFunction_sptr outF = fit.getProperty("Function");
+    IFunction_sptr outF = fit.getProperty("Function");
 
     TS_ASSERT_DELTA(outF->getParameter("f0.PeakCentre"), 1.0, 0.001);
     TS_ASSERT_DELTA(outF->getParameter("f0.Height"), 3.0, 0.001);
@@ -936,7 +939,7 @@ public:
     fit.setProperty("Output", "out");
     fit.execute();
 
-    Mantid::API::IFunction_sptr outF = fit.getProperty("Function");
+    IFunction_sptr outF = fit.getProperty("Function");
 
     TS_ASSERT_DELTA(outF->getParameter("B20"), 0.366336, 0.0001);
     TS_ASSERT_DELTA(outF->getParameter("B22"), 3.98132, 0.0001);
@@ -1054,7 +1057,7 @@ public:
   void test_function_Multidomain_resetting_properties() {
     auto multi = Mantid::TestHelpers::makeMultiDomainFunction3();
 
-    auto alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    auto alg = AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     alg->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(multi));
     auto ws1 = Mantid::TestHelpers::makeMultiDomainWorkspace1();
@@ -1150,9 +1153,9 @@ public:
     mf->setDomainIndices(0, ind);
     TS_ASSERT_EQUALS(mf->getMaxIndex(), 1);
 
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmManager::Instance().create("Fit");
-    Mantid::API::IAlgorithm &fit = *alg;
+    IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("Fit");
+    IAlgorithm &fit = *alg;
     fit.initialize();
     fit.setProperty("Function", boost::dynamic_pointer_cast<IFunction>(mf));
     // at this point Fit knows the number of domains and creates additional
@@ -1726,7 +1729,7 @@ public:
 
   // A test for [-1, 1] range data
   void test_function_Chebyshev() {
-    Mantid::API::MatrixWorkspace_sptr ws =
+    MatrixWorkspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 11, 11);
 
     Mantid::MantidVec &X = ws->dataX(0);
@@ -1758,7 +1761,7 @@ public:
 
   // A test for a random number data
   void test_function_Chebyshev_Background() {
-    Mantid::API::MatrixWorkspace_sptr ws =
+    MatrixWorkspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 21, 21);
 
     Mantid::MantidVec &X = ws->dataX(0);
@@ -1807,7 +1810,7 @@ public:
     const int histogramNumber = 1;
     const int timechannels = 1000;
 
-    Mantid::API::MatrixWorkspace_sptr ws2D =
+    MatrixWorkspace_sptr ws2D =
         WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
                                             timechannels, timechannels);
 
@@ -1853,7 +1856,7 @@ public:
     // create mock data to test against
     const int histogramNumber = 1;
     const int timechannels = 5;
-    Mantid::API::MatrixWorkspace_sptr ws2D =
+    MatrixWorkspace_sptr ws2D =
         WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
                                             timechannels, timechannels);
 
@@ -1890,7 +1893,7 @@ public:
   void test_function_Polynomial_QuadraticBackground() {
     const int histogramNumber = 1;
     const int timechannels = 5;
-    Mantid::API::MatrixWorkspace_sptr ws2D =
+    MatrixWorkspace_sptr ws2D =
         WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
                                             timechannels, timechannels);
 
@@ -1929,7 +1932,7 @@ public:
     // create mock data to test against
     int histogramNumber = 1;
     int timechannels = 5;
-    Mantid::API::MatrixWorkspace_sptr ws2D =
+    MatrixWorkspace_sptr ws2D =
         WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
                                             timechannels, timechannels);
 
@@ -1964,6 +1967,309 @@ public:
     TS_ASSERT_DELTA(out->getParameter("A0"), 0.0, 0.01);
     TS_ASSERT_DELTA(out->getParameter("A1"), 0.0, 0.01);
     TS_ASSERT_DELTA(out->getParameter("A2"), 1.0, 0.0001);
+  }
+
+  // create a data workspace using a Fit algorithm
+  Mantid::DataObjects::Workspace2D_sptr
+  generateWorkspaceFromFitAlgorithm(Algorithms::Fit &fitalg) {
+    using namespace Mantid::Kernel;
+    using namespace Mantid::Geometry;
+
+    // Create the workspace
+    const size_t M = 1001;
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M);
+    auto &wsX = ws->mutableX(0);
+    auto &wsY = ws->mutableY(0);
+    auto &wsE = ws->mutableE(0);
+    // Typical bin width for BASIS@ORNL beamline, in micro-seconds
+    const double dw = 0.4;
+    for (size_t i = 0; i < M; i++)
+      wsX[i] = (static_cast<double>(i) - M / 2) * dw;
+
+    // Evaluate the fitting function
+    FunctionDomain1DView xValues(&wsX[0], M);
+    FunctionValues yValues(xValues);
+    IFunction_sptr func = fitalg.getProperty("Function");
+    func->function(xValues, yValues);
+
+    for (size_t i = 0; i < M; i++) {
+      double x = (static_cast<double>(i) - M / 2) * dw;
+      double y = yValues.getCalculated(i);
+      wsX[i] = x - dw / 2;
+      wsY[i] = y;
+      wsE[i] = 0.01 * y;
+    }
+    ws->dataX(0)[M] = (static_cast<double>(M - 1) - M / 2) * dw + dw / 2;
+
+    // Create the instrument
+    boost::shared_ptr<Instrument> inst =
+        boost::make_shared<Instrument>("BASIS");
+    inst->setReferenceFrame(boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
+
+    // Add the source position
+    ObjComponent *source = new ObjComponent(
+        "moderator",
+        ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"),
+        inst.get());
+    source->setPos(V3D(0.0, 0.0, -84.0));
+    inst->add(source);
+    inst->markAsSource(source);
+
+    // Add the sample position
+    ObjComponent *sample = new ObjComponent(
+        "samplePos",
+        ComponentCreationHelper::createSphere(0.1, V3D(0, 0, 0), "1"),
+        inst.get());
+    inst->setPos(0.0, 0.0, 0.0);
+    inst->add(sample);
+    inst->markAsSamplePos(sample);
+
+    // Add a detector
+    Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+        0.05, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
+    Detector *det =
+        new Detector("pixel-1", 1, pixelShape,
+                     inst.get()); // ID 5 is a valid detector for BASIS
+    det->setPos(0.942677, 0.0171308,
+                4.63343); // Position of first detector on BASIS
+    inst->add(det);
+    inst->markAsDetector(det);
+
+    // Set the instrument and spec-det mapping
+    ws->setInstrument(inst);
+    ws->getSpectrum(0).addDetectorID(det->getID());
+
+    // Set emergy mode and fixed energy
+    ws->mutableRun().addLogData(
+        new Mantid::Kernel::PropertyWithValue<std::string>("deltaE-mode",
+                                                           "Indirect"));
+    ws->setEFixed(det->getID(), 2.08275); // EFixed of first detector on BASIS
+
+    return ws;
+  }
+
+  void test_function_DiffRotDiscreteCircle() {
+    /// Fit the convolution of the jumping diffusion with a Gaussian resolution
+    /// function
+
+    // Parameter units are assumed in micro-eV, Angstroms, Angstroms**(-1), and
+    // nano-seconds. Intensities have arbitrary units
+    std::string funtion_string =
+        "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,"
+        "Height=1,PeakCentre=0,Sigma=20,ties=(Height=1,PeakCentre=0,Sigma=20);("
+        "name=DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.5,Intensity=47.014,"
+        "Radius=1.567,Decay=7.567))";
+
+    // Initialize the fit function in the Fit algorithm
+    Algorithms::Fit fitalg;
+    TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
+    TS_ASSERT(fitalg.isInitialized());
+    fitalg.setProperty("Function", funtion_string);
+
+    // Create the data workspace by evaluating the fit function in the Fit
+    // algorithm
+    auto data_workspace = generateWorkspaceFromFitAlgorithm(fitalg);
+
+    // override the function with new parameters, then do the Fit
+    funtion_string = "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                     "name=Gaussian,Height=1,PeakCentre=0,Sigma=20,ties=("
+                     "Height=1,PeakCentre=0,Sigma=20);(name="
+                     "DiffRotDiscreteCircle,N=3,NumDeriv=true,Q=0.5,Intensity="
+                     "10.0,Radius=1.567,Decay=20.0))";
+    fitalg.setProperty("Function", funtion_string);
+    fitalg.setProperty("InputWorkspace", data_workspace);
+    fitalg.setPropertyValue("WorkspaceIndex", "0");
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fitalg.execute()));
+    TS_ASSERT(fitalg.isExecuted());
+
+    // Check Chi-square is small
+    const double chi_squared = fitalg.getProperty("OutputChi2overDoF");
+    TS_ASSERT_LESS_THAN(chi_squared, 0.001);
+
+    // Check the parameters of the resolution did not change
+    IFunction_sptr out_function = fitalg.getProperty("Function");
+    auto fitalg_conv = boost::dynamic_pointer_cast<
+        Mantid::CurveFitting::Functions::Convolution>(out_function);
+    IFunction_sptr func = fitalg_conv->getFunction(0);
+    TS_ASSERT_DELTA(func->getParameter("PeakCentre"), 0.0, 0.00001);
+    TS_ASSERT_DELTA(func->getParameter("Height"), 1.0, 1.0 * 0.001);
+    TS_ASSERT_DELTA(func->getParameter("Sigma"), 20.0, 20.0 * 0.001);
+
+    // Check the parameters of the DiffRotDiscreteCircle
+    func = fitalg_conv->getFunction(1);
+    TS_ASSERT_DELTA(func->getParameter("Intensity"), 47.014, 47.014 * 0.05);
+    TS_ASSERT_DELTA(func->getParameter("Radius"), 1.567, 1.567 * 0.05);
+    TS_ASSERT_DELTA(func->getParameter("Decay"), 7.567, 7.567 * 0.05);
+  }
+
+  void
+  runDiffRotDiscreteCircleInelasticTest(const double S,
+                                        const double Q = Mantid::EMPTY_DBL()) {
+    /// Fit the convolution of the inelastic part with a Gaussian resolution
+    /// function
+
+    /* Note: it turns out that parameters Intensity and Radius are highly
+    * covariant, so that more than one minimum exists.
+    * Thus, I tied parameter Radius. This is OK since one usually knows the
+    * radius of the circle of the jumping diffusion
+    */
+    const double I(47.014);
+    const double R(1.567);
+    const double tao(7.567);
+
+    double simQ = Q;
+    if (Q == Mantid::EMPTY_DBL())
+      simQ = 0.20092;
+
+    // Initialize the fitting function in a Fit algorithm
+    // Parameter units are assumed in micro-eV, Angstroms, Angstroms**(-1), and
+    // nano-seconds. Intensities have arbitrary units
+    std::ostringstream function_stream;
+    function_stream
+        << "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+        << "name=Gaussian,Height=1.0,PeakCentre=0.0,Sigma=20.0,"
+        << "ties=(Height=1.0,PeakCentre=0.0,Sigma=20.0);"
+        << "name=InelasticDiffRotDiscreteCircle,N=3,Q=" << simQ
+        << ",Intensity=" << I << ",Radius=" << R << ",Decay=" << tao
+        << ",Shift=" << S << ")";
+
+    // Initialize the fit function in the Fit algorithm
+    Algorithms::Fit fitalg;
+    TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
+    TS_ASSERT(fitalg.isInitialized());
+    fitalg.setProperty("Function", function_stream.str());
+
+    function_stream.str(std::string());
+    function_stream.clear();
+
+    // Create the data workspace by evaluating the fit function
+    auto data_workspace = generateWorkspaceFromFitAlgorithm(fitalg);
+
+    // Override the function with new parameters, then do the Fit
+    function_stream
+        << "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+        << "name=Gaussian,Height=1.0,PeakCentre=0.0,Sigma=20.0,"
+        << "ties=(Height=1.0,PeakCentre=0.0,Sigma=20.0);"
+        << "name=InelasticDiffRotDiscreteCircle,N=3";
+
+    if (Q != Mantid::EMPTY_DBL())
+      function_stream << ",Q=" << Q;
+
+    function_stream << ",Intensity=10.0,Radius=1.567,Decay=20.0"
+                    << ",ties=(Radius=" << R << "))";
+    fitalg.setProperty("Function", function_stream.str());
+    fitalg.setProperty("InputWorkspace", data_workspace);
+    fitalg.setPropertyValue("WorkspaceIndex", "0");
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fitalg.execute()));
+    TS_ASSERT(fitalg.isExecuted());
+
+    // check Chi-square is small
+    const double chi_squared = fitalg.getProperty("OutputChi2overDoF");
+    TS_ASSERT_LESS_THAN(chi_squared, 0.001);
+
+    Mantid::API::IFunction_sptr out_function = fitalg.getProperty("Function");
+    auto fitalg_conv = boost::dynamic_pointer_cast<
+        Mantid::CurveFitting::Functions::Convolution>(out_function);
+    // Check the parameters of the resolution did not change
+    Mantid::API::IFunction_sptr resolution = fitalg_conv->getFunction(0);
+    TS_ASSERT_DELTA(resolution->getParameter("PeakCentre"), 0.0, 0.00001);
+    TS_ASSERT_DELTA(resolution->getParameter("Height"), 1.0, 1.0 * 0.001);
+    TS_ASSERT_DELTA(resolution->getParameter("Sigma"), 20.0, 20.0 * 0.001);
+    // Check the parameters of the inelastic part
+    Mantid::API::IFunction_sptr struc_factor = fitalg_conv->getFunction(1);
+    TS_ASSERT_DELTA(struc_factor->getParameter("Intensity"), I, I * 0.05);
+    TS_ASSERT_DELTA(struc_factor->getParameter("Radius"), R, R * 0.05);
+    TS_ASSERT_DELTA(struc_factor->getParameter("Decay"), tao, tao * 0.05);
+    TS_ASSERT_DELTA(struc_factor->getParameter("Shift"), S, 0.00001);
+  }
+
+  void test_DiffRotDiscreteCircleInelasticWithQParam() {
+	  runDiffRotDiscreteCircleInelasticTest(0.0, 0.20092);
+  }
+
+  void test_DiffRotDiscreteCircleInelasticWithWSIndex() {
+	  runDiffRotDiscreteCircleInelasticTest(0.0);
+  }
+
+  void test_DiffRotDiscreteCircleInelasticWithShiftWithQParam() {
+	  runDiffRotDiscreteCircleInelasticTest(0.5, 0.20092);
+  }
+
+  void test_DiffRotDiscreteCircleInelasticWithShiftWithWSIndex() {
+	  runDiffRotDiscreteCircleInelasticTest(0.5);
+  }
+
+  Workspace2D_sptr generateN3Workspace(double I, double R, double tao,
+                                       double Q) {
+
+    // Plank constant in meV*THz (or ueV*PHz)
+    const double hbar = 0.658211626;
+    // Conversion from picosec to mili-eV, or from nanosec to micro-eV
+    const double rate = hbar / tao;
+    // Calculate prefix A1. Better be verbose for clarity
+    const double x = Q * R * sqrt(3.0);
+    const double j0 = sin(x) / x;
+    const double A1 = (1.0 / 3.0) * (1.0 - j0);
+
+    // Typical bin width for BASIS@ORNL beamline, in micro-seconds
+    const double dw = 0.4;
+
+    // Create the workspace
+    const size_t M = 1001;
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M);
+    auto &X = ws->mutableX(0);
+    auto &Y = ws->mutableY(0);
+    auto &E = ws->mutableE(0);
+
+    for (size_t i = 0; i < M; i++) {
+      double x = (static_cast<double>(i) - M / 2) * dw;
+      double y =
+          I * (2.0 / M_PI) * A1 * (3.0 * rate / (9.0 * rate * rate + x * x));
+      X[i] = x - dw / 2.0;
+      Y[i] = y;
+      E[i] = 0.01 * y;
+    }
+    X[M] = X[M - 1] + dw / 2;
+    return ws;
+  }
+
+  void test_function_DiffRotDiscreteCircleInelastic_N3() {
+    /* Check the particular case for N = 3
+    * In this case, the inelastic part should reduce to a single Lorentzian in
+    * 'w':
+    *   ( 2 / pi ) * A1( Q ) * ( 3 * tao / ( 9 + ( w * tao )**2 ) )
+    *   A1( Q ) = ( 1 / 3 ) * ( 1 - j0( Q * R * sqrt( 3 ) ) )
+    *   j0( x ) = sin( x ) / x
+    */
+
+    // create mock data to test against
+    const double I = 2.9;
+    const double R = 2.3;
+    const double tao = 0.468;
+    const double Q = 0.9;
+    auto ws = generateN3Workspace(I, R, tao, Q);
+    // Set up fitting function
+    const std::string funcStr = "name=InelasticDiffRotDiscreteCircle,N=3,Q=0."
+                                "9,Intensity=2.9,Radius=2.3,Decay=0.468";
+
+    // Do a fit with no iterations
+    Fit fitalg;
+    TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
+    TS_ASSERT(fitalg.isInitialized());
+	fitalg.setProperty("Function", funcStr);
+	fitalg.setProperty("MaxIterations", 0);
+    fitalg.setProperty("InputWorkspace", ws);
+    fitalg.setPropertyValue("WorkspaceIndex", "0");
+    TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fitalg.execute()));
+    TS_ASSERT(fitalg.isExecuted());
+
+    IFunction_sptr out = fitalg.getProperty("Function");
+    TS_ASSERT_DELTA(out->getParameter("Intensity"), I, I * 0.01);
+    TS_ASSERT_DELTA(out->getParameter("Radius"), R, R * 0.01);
+    TS_ASSERT_DELTA(out->getParameter("Decay"), tao, tao * 0.01);
+
+    double chi_squared = fitalg.getProperty("OutputChi2overDoF");
+    TS_ASSERT_LESS_THAN(chi_squared, 1e-4);
   }
 
 private:
