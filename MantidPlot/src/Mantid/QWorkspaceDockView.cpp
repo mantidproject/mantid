@@ -1388,7 +1388,19 @@ void QWorkspaceDockView::plotSpectrum(bool showErrors) {
 }
 
 void QWorkspaceDockView::showColourFillPlot() {}
-void QWorkspaceDockView::showDetectorsTable() {}
+
+void QWorkspaceDockView::showDetectorTable() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowDetectorsTable);
+}
+
+void QWorkspaceDockView::showDetectorsTable() {
+  // get selected workspace
+  auto ws = getSelectedWorkspaceNames()[0];
+  // TODO: wire this signal with MantidUI
+  emit signalCreateDetectorTable(QString::fromStdString(ws), std::vector<int>(),
+                                 false);
+}
+
 void QWorkspaceDockView::showBoxDataTable() {}
 void QWorkspaceDockView::showVatesGUI() {}
 void QWorkspaceDockView::showMDPlot() {}

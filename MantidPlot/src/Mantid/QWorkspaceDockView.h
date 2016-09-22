@@ -266,5 +266,7 @@ signals:
   void
   signalUpdateTree(const std::map<std::string, Mantid::API::Workspace_sptr> &);
   void signalClearView();
+  void signalCreateDetectorTable(const QString &, const std::vector<int> &,
+                                 bool);
 };
 #endif // QWORKSPACEDOCKVIEW_H
