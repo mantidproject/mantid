@@ -82,43 +82,11 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
   }
   statsBox->setLayout(statsBoxLayout);
 
-  // -------------- The Import/Close buttons ------------------------
-  QHBoxLayout *topButtons = new QHBoxLayout;
-  buttonPlot = new QPushButton(tr("&Import selected log"));
-  buttonPlot->setAutoDefault(true);
-  buttonPlot->setToolTip(
-      "Import log file as a table and construct a 1D graph if appropriate");
-  topButtons->addWidget(buttonPlot);
-
-  buttonClose = new QPushButton(tr("Close"));
-  buttonClose->setToolTip("Close dialog");
-  topButtons->addWidget(buttonClose);
-
   QVBoxLayout *hbox = new QVBoxLayout;
-
-  // -------------- The ExperimentInfo selector------------------------
-  boost::shared_ptr<MultipleExperimentInfos> mei =
-      AnalysisDataService::Instance().retrieveWS<MultipleExperimentInfos>(
-          m_wsname);
-  if (mei) {
-    if (mei->getNumExperimentInfo() > 0) {
-      QHBoxLayout *numSelectorLayout = new QHBoxLayout;
-      QLabel *lbl = new QLabel("Experiment Info #");
-      m_spinNumber = new QSpinBox;
-      m_spinNumber->setMinimum(0);
-      m_spinNumber->setMaximum(int(mei->getNumExperimentInfo()) - 1);
-      m_spinNumber->setValue(int(m_experimentInfoIndex));
-      numSelectorLayout->addWidget(lbl);
-      numSelectorLayout->addWidget(m_spinNumber);
-      // Double-click imports a log file
-      connect(m_spinNumber, SIGNAL(valueChanged(int)), this,
-              SLOT(selectExpInfoNumber(int)));
-      hbox->addLayout(numSelectorLayout);
-    }
-  }
+  addImportAndCloseButtonsTo(hbox);
+  addExperimentInfoSelectorTo(hbox);
 
   // Finish laying out the right side
-  hbox->addLayout(topButtons);
   hbox->addWidget(groupBox);
   hbox->addWidget(statsBox);
   hbox->addStretch(1);

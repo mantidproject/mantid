@@ -11,6 +11,7 @@
 // Forward declarations
 //----------------------------------
 
+class QBoxLayout;
 class QTreeWidgetItem;
 class QTreeWidget;
 class QPushButton;
@@ -20,6 +21,7 @@ class ApplicationWindow;
 class QLabel;
 class QSpinBox;
 class QLineEdit;
+class QLayout;
 
 /**
 This is the base class for the Sample Log Dialog.
@@ -85,6 +87,14 @@ protected:
   /// without overriding
   /// This function initalises everything in the tree widget
   void init();
+
+  // TODO add documentation
+  //void addFilteringOptions(QLayout &qLayout) const; // doesn't work cos mantid sample log dialog needs the member
+  //void addStatisticsOnLogs(QLayout &qLayout) const;
+  void addImportAndCloseButtonsTo(QBoxLayout *qLayout);
+  void addExperimentInfoSelectorTo(QBoxLayout *qLayout);
+  void setUpLayoutWithTwoSides(QLayout &qLayout);
+
 
   /// A tree widget
   QTreeWidget *m_tree;

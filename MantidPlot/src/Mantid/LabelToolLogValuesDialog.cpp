@@ -72,51 +72,17 @@ LabelToolLogValuesDialog::LabelToolLogValuesDialog(const QString &wsname,
     statRadioChoice[i] = new QRadioButton(stats[i].c_str());
     statValues[i] = new QLineEdit("");
     statValues[i]->setReadOnly(true);
-
     statsBoxLayout->addRow(statRadioChoice[i], statValues[i]);
   }
   // Set default checked radio button
   statRadioChoice[0]->setChecked(true);
   statsBox->setLayout(statsBoxLayout);
 
-  // -------------- The Import/Close buttons ------------------------
-  QHBoxLayout *topButtons = new QHBoxLayout;
-  buttonPlot = new QPushButton(tr("&Import selected log"));
-  buttonPlot->setAutoDefault(true);
-  buttonPlot->setToolTip(
-      "Import log file as a table and construct a 1D graph if appropriate");
-  topButtons->addWidget(buttonPlot);
-
-  buttonClose = new QPushButton(tr("Close"));
-  buttonClose->setToolTip("Close dialog");
-  topButtons->addWidget(buttonClose);
-
   QVBoxLayout *hbox = new QVBoxLayout;
-
-  // -------------- The ExperimentInfo selector------------------------
-  boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei =
-      AnalysisDataService::Instance().retrieveWS<MultipleExperimentInfos>(
-          m_wsname);
-
-  if (mei) {
-    if (mei->getNumExperimentInfo() > 0) {
-      QHBoxLayout *numSelectorLayout = new QHBoxLayout;
-      QLabel *lbl = new QLabel("Experiment Info #");
-      m_spinNumber = new QSpinBox;
-      m_spinNumber->setMinimum(0);
-      m_spinNumber->setMaximum(int(mei->getNumExperimentInfo()) - 1);
-      m_spinNumber->setValue(int(m_experimentInfoIndex));
-      numSelectorLayout->addWidget(lbl);
-      numSelectorLayout->addWidget(m_spinNumber);
-      // Double-click imports a log file
-      connect(m_spinNumber, SIGNAL(valueChanged(int)), this,
-              SLOT(selectExpInfoNumber(int)));
-      hbox->addLayout(numSelectorLayout);
-    }
-  }
+  addImportAndCloseButtonsTo(hbox);
+  addExperimentInfoSelectorTo(hbox);
 
   // Finish laying out the right side
-  hbox->addLayout(topButtons);
   hbox->addWidget(statsBox);
   hbox->addStretch(1);
 
@@ -169,7 +135,7 @@ LabelToolLogValuesDialog::~LabelToolLogValuesDialog() {}
 *
 *	@param item :: The currently selected item from the log list
 *	@throws std::bad_cast :: The exception is throws if the dynamic_cast
-*fails
+*							fails
 *
 */
 void LabelToolLogValuesDialog::importItem(QTreeWidgetItem *item) {
@@ -177,8 +143,8 @@ void LabelToolLogValuesDialog::importItem(QTreeWidgetItem *item) {
   // Dynamic cast up to LegendWidget, which is the class of the
   // one containing the label, in order to use setText
   auto parentWidget = dynamic_cast<LegendWidget *>(m_parentContainer);
-  if (parentWidget == NULL) { // if dynamic cast fails, don't fail silently
-    throw new std::bad_cast;
+  if (NULL == parentWidget) { // if dynamic cast fails, don't fail silently
+    throw std::bad_cast();
   }
 
   // find which radio box is checked

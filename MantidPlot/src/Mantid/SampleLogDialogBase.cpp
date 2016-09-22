@@ -18,6 +18,12 @@
 #include <QFileInfo>
 #include <QLineEdit>
 #include <QMenu>
+#include <QRadioButton>
+#include <QGroupBox>
+#include <QLayout>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QLabel>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -183,6 +189,19 @@ void SampleLogDialogBase::popupMenu(const QPoint &pos) {
 }
 
 //------------------------------------------------------------------------------------------------
+/** Slot called when selecting a different experiment info number
+*
+*	@author Martyn Gigg, Tessella Support Services plc
+*	@date 05/11/2009
+*/
+void SampleLogDialogBase::selectExpInfoNumber(int num) {
+  m_experimentInfoIndex = size_t(num);
+  m_tree->blockSignals(true);
+  this->init();
+  m_tree->blockSignals(false);
+}
+
+//------------------------------------------------------------------------------------------------
 /**
 * Initialize everything in the tree. Must be called after a QTreeWidget
 *initialisation
@@ -342,14 +361,50 @@ void SampleLogDialogBase::init() {
   m_tree->sortByColumn(0, Qt::AscendingOrder);
 }
 
-/** Slot called when selecting a different experiment info number
-*
-*	@author Martyn Gigg, Tessella Support Services plc
-*	@date 05/11/2009
+//------------------------------------------------------------------------------------------------
+/** Adds the import and close buttons to the parameter layout
+*	@param qLayout The Layout to which the import and close buttons will be
+*					added
 */
-void SampleLogDialogBase::selectExpInfoNumber(int num) {
-  m_experimentInfoIndex = size_t(num);
-  m_tree->blockSignals(true);
-  this->init();
-  m_tree->blockSignals(false);
+void SampleLogDialogBase::addImportAndCloseButtonsTo(QBoxLayout *qLayout) {
+  // -------------- The Import/Close buttons ------------------------
+  QHBoxLayout *topButtons = new QHBoxLayout;
+  buttonPlot = new QPushButton(tr("&Import selected log"));
+  buttonPlot->setAutoDefault(true);
+  buttonPlot->setToolTip(
+      "Import log file as a table and construct a 1D graph if appropriate");
+  topButtons->addWidget(buttonPlot);
+
+  buttonClose = new QPushButton(tr("Close"));
+  buttonClose->setToolTip("Close dialog");
+  topButtons->addWidget(buttonClose);
+  qLayout->addLayout(topButtons);
+}
+//------------------------------------------------------------------------------------------------
+/** Adds the Experiment Info Selector to the paramenter layout
+*	@param qLayout The Layout to which the experiment info selector labels
+*					will be added
+*/
+void SampleLogDialogBase::addExperimentInfoSelectorTo(QBoxLayout *qLayout) {
+  // -------------- The ExperimentInfo selector------------------------
+  boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei =
+      AnalysisDataService::Instance().retrieveWS<MultipleExperimentInfos>(
+          m_wsname);
+
+  if (mei) {
+    if (mei->getNumExperimentInfo() > 0) {
+      QHBoxLayout *numSelectorLayout = new QHBoxLayout;
+      QLabel *lbl = new QLabel("Experiment Info #");
+      m_spinNumber = new QSpinBox;
+      m_spinNumber->setMinimum(0);
+      m_spinNumber->setMaximum(int(mei->getNumExperimentInfo()) - 1);
+      m_spinNumber->setValue(int(m_experimentInfoIndex));
+      numSelectorLayout->addWidget(lbl);
+      numSelectorLayout->addWidget(m_spinNumber);
+      // Double-click imports a log file
+      connect(m_spinNumber, SIGNAL(valueChanged(int)), this,
+              SLOT(selectExpInfoNumber(int)));
+      qLayout->addLayout(numSelectorLayout);
+    }
+  }
 }
