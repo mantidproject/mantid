@@ -23,7 +23,6 @@
 #include <QLineEdit>
 #include <QLayout>
 
-
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
