@@ -36,9 +36,8 @@ public:
     pNormLog = m_pNormalizationLog;
     numLogSteps = m_numLogSteps;
   }
-  DataObjects::EventWorkspace const *const getWorkingWS() {
-    return m_workingWS.get();
-  }
+
+  DataObjects::EventWorkspace *getWorkingWS() { return m_workingWS.get(); }
   void setVisWS(const std::string &wsName) {
     this->setProperty("VisualizationWs", wsName);
     this->checkAndInitVisWorkspace();
@@ -314,7 +313,7 @@ public:
     if (!Yax)
       return;
 
-    auto &YaxVal = Yax->getValues();
+    // auto &YaxVal = Yax->getValues();
 
     auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
         sws->run().getLogData("block_count_rate"));
@@ -432,7 +431,7 @@ public:
     if (!Yax)
       return;
 
-    auto &YaxVal = Yax->getValues();
+    // auto &YaxVal = Yax->getValues();
 
     auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
         sws->run().getLogData("block_count_rate"));
