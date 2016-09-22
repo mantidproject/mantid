@@ -44,20 +44,9 @@ LabelToolLogValuesDialog::LabelToolLogValuesDialog(const QString &wsname,
                                                    size_t experimentInfoIndex)
     : SampleLogDialogBase(wsname, parentContainer, flags, experimentInfoIndex) {
 
-  std::stringstream ss;
-  ss << "MantidPlot - " << wsname.toStdString().c_str() << " sample logs";
-  setWindowTitle(QString::fromStdString(ss.str()));
+  setDialogWindowTitle(wsname);
 
-  QStringList titles;
-  titles << "Name"
-         << "Type"
-         << "Value"
-         << "Units";
-  m_tree->setHeaderLabels(titles);
-  m_tree->setSelectionMode(QAbstractItemView::SingleSelection);
-  QHeaderView *hHeader = (QHeaderView *)m_tree->header();
-  hHeader->setResizeMode(2, QHeaderView::Stretch);
-  hHeader->setStretchLastSection(false);
+  setTreeWidgetColumnNames();
 
   QHBoxLayout *uiLayout = new QHBoxLayout;
   uiLayout->addWidget(m_tree);
@@ -98,25 +87,7 @@ LabelToolLogValuesDialog::LabelToolLogValuesDialog(const QString &wsname,
 
   resize(750, 400);
 
-  connect(buttonPlot, SIGNAL(clicked()), this, SLOT(importSelectedLogs()));
-  connect(buttonClose, SIGNAL(clicked()), this, SLOT(close()));
-  // want a custom context menu
-  m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint &)), this,
-          SLOT(popupMenu(const QPoint &)));
-
-  // Double-click imports a log file
-  connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this,
-          SLOT(importItem(QTreeWidgetItem *)));
-
-  // Selecting shows the stats of it
-  connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this,
-          SLOT(showLogStatistics()));
-
-  // Selecting shows the stats of it
-  connect(m_tree,
-          SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)),
-          this, SLOT(showLogStatistics()));
+  setUpTreeWidgetConnections();
 }
 
 //------------------------------------------------------------------------------------------------

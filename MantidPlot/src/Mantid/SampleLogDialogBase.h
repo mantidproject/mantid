@@ -88,13 +88,20 @@ protected:
   /// This function initalises everything in the tree widget
   void init();
 
-  // TODO add documentation
-  //void addFilteringOptions(QLayout &qLayout) const; // doesn't work cos mantid sample log dialog needs the member
-  //void addStatisticsOnLogs(QLayout &qLayout) const;
-  void addImportAndCloseButtonsTo(QBoxLayout *qLayout);
-  void addExperimentInfoSelectorTo(QBoxLayout *qLayout);
-  void setUpLayoutWithTwoSides(QLayout &qLayout);
+  /// Sets the dialog's window title
+  void setDialogWindowTitle(const QString &wsname);
 
+  /// Sets the QTreeWidget column names to the default values
+  void setTreeWidgetColumnNames();
+
+  /// Adds the import and close button to the layout and connects them
+  void addImportAndCloseButtonsTo(QBoxLayout *qLayout);
+
+  /// Adds the experiment info selector to the layout
+  void addExperimentInfoSelectorTo(QBoxLayout *qLayout);
+
+  /// Sets up the QTreeWidget's connections for functionality
+  void setUpTreeWidgetConnections();
 
   /// A tree widget
   QTreeWidget *m_tree;

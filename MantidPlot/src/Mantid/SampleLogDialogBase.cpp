@@ -362,6 +362,32 @@ void SampleLogDialogBase::init() {
 }
 
 //------------------------------------------------------------------------------------------------
+/** Sets the Sample Log Dialog window title
+*	@param wsname The workspace name
+*/
+void SampleLogDialogBase::setDialogWindowTitle(const QString &wsname) {
+  std::stringstream ss;
+  ss << "MantidPlot - " << wsname.toStdString().c_str() << " sample logs";
+  QWidget::setWindowTitle(QString::fromStdString(ss.str()));
+}
+
+//------------------------------------------------------------------------------------------------
+/** Sets the member QTreeWidget column names
+*/
+void SampleLogDialogBase::setTreeWidgetColumnNames() {
+  QStringList titles;
+  titles << "Name"
+         << "Type"
+         << "Value"
+         << "Units";
+  m_tree->setHeaderLabels(titles);
+  m_tree->setSelectionMode(QAbstractItemView::SingleSelection);
+  QHeaderView *hHeader = (QHeaderView *)m_tree->header();
+  hHeader->setResizeMode(2, QHeaderView::Stretch);
+  hHeader->setStretchLastSection(false);
+}
+
+//------------------------------------------------------------------------------------------------
 /** Adds the import and close buttons to the parameter layout
 *	@param qLayout The Layout to which the import and close buttons will be
 *					added
@@ -379,6 +405,9 @@ void SampleLogDialogBase::addImportAndCloseButtonsTo(QBoxLayout *qLayout) {
   buttonClose->setToolTip("Close dialog");
   topButtons->addWidget(buttonClose);
   qLayout->addLayout(topButtons);
+
+  connect(buttonPlot, SIGNAL(clicked()), this, SLOT(importSelectedLogs()));
+  connect(buttonClose, SIGNAL(clicked()), this, SLOT(close()));
 }
 //------------------------------------------------------------------------------------------------
 /** Adds the Experiment Info Selector to the paramenter layout
@@ -407,4 +436,26 @@ void SampleLogDialogBase::addExperimentInfoSelectorTo(QBoxLayout *qLayout) {
       qLayout->addLayout(numSelectorLayout);
     }
   }
+}
+
+/** Sets up the QTreeWidget Qt connections for necessary functionality
+*/
+void SampleLogDialogBase::setUpTreeWidgetConnections() {
+  // want a custom context menu
+  m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint &)), this,
+          SLOT(popupMenu(const QPoint &)));
+
+  // Double-click imports a log file
+  connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this,
+          SLOT(importItem(QTreeWidgetItem *)));
+
+  // Selecting shows the stats of it
+  connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this,
+          SLOT(showLogStatistics()));
+
+  // Selecting shows the stats of it
+  connect(m_tree,
+          SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)),
+          this, SLOT(showLogStatistics()));
 }
