@@ -2248,7 +2248,7 @@ void EventList::generateCountsHistogramPulseTime(const double &xMin,
   if (nBins == 0)
     return;
 
-  double step = (xMax - xMin) / nBins;
+  double step = (xMax - xMin) / static_cast<double>(nBins);
 
   for (const TofEvent &ev : this->events) {
     double pulsetime = static_cast<double>(ev.pulseTime().totalNanoseconds());

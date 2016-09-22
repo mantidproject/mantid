@@ -14,6 +14,7 @@
 
 #include "MantidDataObjects/Workspace2D.h"
 #include <numeric>
+#include <memory>
 
 namespace Mantid {
 namespace Algorithms {
@@ -212,16 +213,16 @@ void CalcCountRate::calcRateLog(
 #pragma omp single
     {
       // initialize thread's histogram buffer
-      nThreads = omp_get_num_threads();
+      nThreads = PARALLEL_NUMBER_OF_THREADS;
       Buff.resize(nThreads);
-      for (size_t i = 0; i < nThreads; i++) {
+      for (int i = 0; i < nThreads; i++) {
         Buff[i].assign(m_numLogSteps, 0);
       }
     }
 
 #pragma omp for
     for (int64_t i = 0; i < nHist; ++i) {
-      auto nThread = omp_get_thread_num();
+      auto nThread = PARALLEL_THREAD_NUMBER;
       PARALLEL_START_INTERUPT_REGION
 
       // Get a const event list reference. eventInputWS->dataY() doesn't work.
@@ -241,7 +242,7 @@ void CalcCountRate::calcRateLog(
 #pragma omp for
     for (int64_t j = 0; j < m_numLogSteps; j++) {
 
-      for (size_t i = 0; i < nThreads; i++) {
+      for (int i = 0; i < nThreads; i++) {
         countRate[j] += Buff[i][j];
       }
       // normalize if requested
@@ -251,7 +252,7 @@ void CalcCountRate::calcRateLog(
     }
     if (!countNormalization.empty() && this->buildVisWS()) {
 #pragma omp for
-      for (int64_t j = 0; j < m_visNorm.size(); j++) {
+      for (int64_t j = 0; j < int64_t(m_visNorm.size()); j++) {
         this->normalizeVisWs(j);
       }
     }
@@ -261,8 +262,9 @@ void CalcCountRate::calcRateLog(
 
   double dt = (dTRangeMax - dTRangeMin) / static_cast<double>(m_numLogSteps);
   auto t0 = m_TRangeMin.totalNanoseconds();
-  for (size_t i = 0; i < m_numLogSteps; i++) {
-    times[i] = Kernel::DateAndTime(t0 + static_cast<int64_t>((0.5 + i) * dt));
+  for (auto i = 0; i < m_numLogSteps; i++) {
+    times[i] =
+        Kernel::DateAndTime(t0 + static_cast<int64_t>((0.5 + double(i)) * dt));
   }
   // store calculated values within the target log.
   targLog->replaceValues(times, countRate);
@@ -426,8 +428,8 @@ void CalcCountRate::setOutLogParameters(
 
   m_TRangeMin = runTMin;
   // histogramming excludes rightmost events. Modify max limit to keep them
-  double t_epsilon = double(runTMax.totalNanoseconds() *
-                            (1 + std::numeric_limits<double>::epsilon()));
+  double t_epsilon = double(runTMax.totalNanoseconds()) *
+                            (1 + std::numeric_limits<double>::epsilon());
   int64_t eps_increment =
       static_cast<int64_t>(t_epsilon - double(runTMax.totalNanoseconds()));
   m_TRangeMax =
@@ -570,7 +572,7 @@ void CalcCountRate::checkAndInitVisWorkspace() {
   // define X-axis in target units
   double dX = (Xmax - m_XRangeMin) / numXBins;
   std::vector<double> xx(numXBins);
-  for (size_t i = 0; i < numXBins; ++i) {
+  for (int i = 0; i < numXBins; ++i) {
     xx[i] = m_XRangeMin + (0.5 + static_cast<double>(i)) * dX;
   }
   auto ax0 = new API::NumericAxis(xx);
@@ -583,7 +585,7 @@ void CalcCountRate::checkAndInitVisWorkspace() {
        (numTBins)) *
       1.e-9;
   xx.resize(numTBins);
-  for (size_t i = 0; i < numTBins; i++) {
+  for (int i = 0; i < numTBins; i++) {
     xx[i] = (0.5 + static_cast<double>(i)) * dt;
   }
   auto ax1 = new API::NumericAxis(xx);

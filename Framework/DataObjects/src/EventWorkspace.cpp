@@ -234,7 +234,7 @@ void EventWorkspace::getPulseTimeMinMax(
   Tmax = DateAndTime::minimum();
   Tmin = DateAndTime::maximum();
 
-  size_t numWorkspace = this->data.size();
+  int64_t numWorkspace = static_cast<int64_t>(this->data.size());
 #pragma omp parallel
   {
     DateAndTime tTmax = DateAndTime::minimum();

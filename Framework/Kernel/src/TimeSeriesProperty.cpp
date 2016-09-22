@@ -2171,7 +2171,7 @@ void TimeSeriesProperty<TYPE>::histogramData(
     if (time < t0 || time >= t1)
       continue;
     size_t ind = static_cast<size_t>((time - t0) / dt);
-    counts[ind] += ev.value();
+    counts[ind] += static_cast<double>(ev.value());
   }
 }
 
@@ -2179,6 +2179,9 @@ template <>
 void TimeSeriesProperty<std::string>::histogramData(
     const Kernel::DateAndTime &tMin, const Kernel::DateAndTime &tMax,
     std::vector<double> &counts) const {
+  UNUSED_ARG(tMin);
+  UNUSED_ARG(tMax);
+  UNUSED_ARG(counts);
   throw std::runtime_error("histogramData is not implememnted for time series "
                            "properties containing strings");
 }
