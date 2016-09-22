@@ -172,7 +172,6 @@ private:
   void showAlgorithm(const std::string &algName, int version = -1);
   Mantid::API::IAlgorithm_sptr createAlgorithm(const std::string &algName,
                                                int version = -1);
-
 public slots:
   void clickedWorkspace(QTreeWidgetItem *, int);
   void saveWorkspaceCollection();
@@ -268,5 +267,6 @@ signals:
   void signalClearView();
   void signalCreateDetectorTable(const QString &, const std::vector<int> &,
                                  bool);
+  void signalDrawColourFillPlot(const QStringList &);
 };
 #endif // QWORKSPACEDOCKVIEW_H

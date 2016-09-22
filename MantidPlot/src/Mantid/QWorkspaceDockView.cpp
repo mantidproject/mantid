@@ -1387,7 +1387,42 @@ void QWorkspaceDockView::plotSpectrum(bool showErrors) {
                      clearWindow, userInput.waterfall);
 }
 
-void QWorkspaceDockView::showColourFillPlot() {}
+/**
+* Draw a color fill plot of the workspaces that are currently selected.
+* NOTE: The drawing of 2D plots is currently intimately linked with MantidMatrix
+* meaning
+* that one of these must be generated first!
+*/
+void QWorkspaceDockView::drawColorFillPlot() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowColourFillPlot);
+}
+
+void QWorkspaceDockView::showColourFillPlot() {
+  // Get the selected workspaces
+  auto items = m_tree->selectedItems();
+  if (items.empty())
+    return;
+
+  // Extract child workspace names from any WorkspaceGroups selected.
+  // Use a list to preserve workspace order.
+  QStringList allWsNames;
+
+  for (auto &item : items) {
+    auto mItem = dynamic_cast<MantidTreeWidgetItem *>(item);
+    auto ws = item->data(0, Qt::UserRole).value<Workspace_sptr>();
+
+    if (auto wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+      for (auto &name : wsGroup->getNames())
+        allWsNames.append(QString::fromStdString(name));
+    } else
+      allWsNames.append(item->text(0));
+  }
+
+  // remove duplicate workspace entries
+  allWsNames.removeDuplicates();
+
+  emit signalDrawColourFillPlot(allWsNames);
+}
 
 void QWorkspaceDockView::showDetectorTable() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ShowDetectorsTable);
