@@ -6,6 +6,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/make_unique.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -14,7 +15,7 @@
 
 #include "MantidDataObjects/Workspace2D.h"
 #include <numeric>
-#include <memory>
+
 
 namespace Mantid {
 namespace Algorithms {
@@ -401,7 +402,7 @@ void CalcCountRate::setOutLogParameters(
         useLogAccuracy = false;
       } else {
         if (!m_tmpLogHolder) {
-          m_tmpLogHolder = std::make_unique<Kernel::TimeSeriesProperty<double>>(
+          m_tmpLogHolder = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
               *m_pNormalizationLog->clone());
         }
         m_tmpLogHolder->filterByTime(runTMin, runTMax);
@@ -580,10 +581,10 @@ void CalcCountRate::checkAndInitVisWorkspace() {
   m_visWs->replaceAxis(0, ax0);
 
   // define Y axis (in seconds);
-  double dt =
-      ((m_TRangeMax.totalNanoseconds() - m_TRangeMin.totalNanoseconds()) /
-       (numTBins)) *
-      1.e-9;
+  double dt = (static_cast<double>(m_TRangeMax.totalNanoseconds() -
+                                   m_TRangeMin.totalNanoseconds()) /
+               static_cast<double>(numTBins)) *
+              1.e-9;
   xx.resize(numTBins);
   for (int i = 0; i < numTBins; i++) {
     xx[i] = (0.5 + static_cast<double>(i)) * dt;

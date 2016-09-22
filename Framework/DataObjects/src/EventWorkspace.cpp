@@ -370,7 +370,7 @@ void EventWorkspace::getEventXMinMax(double &xmin, double &xmax) const {
   // set to crazy values to start
   xmin = std::numeric_limits<double>::max();
   xmax = -1.0 * xmin;
-  size_t numWorkspace = this->data.size();
+  int64_t numWorkspace = static_cast<int64_t>(this->data.size());
 #pragma omp parallel
   {
     double tXmin = xmin;
