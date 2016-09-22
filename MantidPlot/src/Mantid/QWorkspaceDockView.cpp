@@ -1362,7 +1362,31 @@ void QWorkspaceDockView::popupContextMenu() {
 
 void QWorkspaceDockView::showWorkspaceData() {}
 void QWorkspaceDockView::showInstrumentView() {}
-void QWorkspaceDockView::plotSpectrum(bool showErrors) {}
+
+/// Plots a single spectrum from each selected workspace
+void QWorkspaceDockView::plotSpectra() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrum);
+}
+/// Plots a single spectrum from each selected workspace with errors
+void QWorkspaceDockView::plotSpectraErr() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumWithErrors);
+}
+
+void QWorkspaceDockView::plotSpectrum(bool showErrors) {
+  const auto userInput = m_tree->chooseSpectrumFromSelected();
+  // An empty map will be returned if the user clicks cancel in the spectrum
+  // selection
+  if (userInput.plots.empty())
+    return;
+
+  bool spectrumPlot(true), clearWindow(false);
+  MultiLayer *window(NULL);
+  // TODO: Replace with signal?
+  m_mantidUI->plot1D(userInput.plots, spectrumPlot,
+                     MantidQt::DistributionDefault, showErrors, window,
+                     clearWindow, userInput.waterfall);
+}
+
 void QWorkspaceDockView::showColourFillPlot() {}
 void QWorkspaceDockView::showDetectorsTable() {}
 void QWorkspaceDockView::showBoxDataTable() {}
