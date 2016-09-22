@@ -108,8 +108,10 @@ void CalcCountRate::init() {
       " to the source workspace");
   // visualisation group
   std::string spur_vis_mode("Spurion visualisation");
-  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>("VisualizationWs", "",
-      Kernel::Direction::Output,API::PropertyMode::Optional),
+  declareProperty(
+      Kernel::make_unique<API::WorkspaceProperty<>>(
+          "VisualizationWs", "", Kernel::Direction::Output,
+          API::PropertyMode::Optional),
       "Optional name to build 2D matrix workspace for spurion visualization. "
       "If name is provided, a 2D workspace with this name will be created "
       "containing data to visualize counting rate as function of time in the "
@@ -247,12 +249,12 @@ void CalcCountRate::calcRateLog(
         countRate[j] /= countNormalization[j];
       }
     }
-    if (!countNormalization.empty() && this->buildVisWS()){
+    if (!countNormalization.empty() && this->buildVisWS()) {
 #pragma omp for
-        for (int64_t j = 0; j < m_visNorm.size(); j++) {
-          this->normalizeVisWs(j);
-        }
+      for (int64_t j = 0; j < m_visNorm.size(); j++) {
+        this->normalizeVisWs(j);
       }
+    }
   }
   // recover histogram timing, but start assuming run starts at
   std::vector<Kernel::DateAndTime> times(m_numLogSteps);
@@ -296,7 +298,8 @@ void CalcCountRate::hisogramEvents(const DataObjects::EventList &el,
 
 /** Normalize single spectra of the normalization workspace using prepared
  * normzlization log
- @param wsIndex -- appropriate visualization workspace index to normalize spectra
+ @param wsIndex -- appropriate visualization workspace index to normalize
+ spectra
  */
 void CalcCountRate::normalizeVisWs(int64_t wsIndex) {
 
@@ -416,8 +419,8 @@ void CalcCountRate::setOutLogParameters(
   }
 
   if (useLogAccuracy) {
-      m_numLogSteps = m_pNormalizationLog->realSize();
-  }else{
+    m_numLogSteps = m_pNormalizationLog->realSize();
+  } else {
     m_numLogSteps = getProperty("NumTimeSteps");
   }
 

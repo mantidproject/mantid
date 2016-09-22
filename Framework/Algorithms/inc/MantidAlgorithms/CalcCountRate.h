@@ -93,20 +93,19 @@ protected: // for testing, actually private
   void checkAndInitVisWorkspace();
 
   void hisogramEvents(const DataObjects::EventList &el,
-      std::mutex * spectraLocks);
+                      std::mutex *spectraLocks);
 
   void normalizeVisWs(int64_t wsIndex);
   void buildVisWSNormalization(std::vector<double> &normalization);
 
   /// should algo generate visualization VS
-  bool m_doVis{ false };
+  bool m_doVis{false};
   /// shared pointer to the optional visualization workspace
   DataObjects::Workspace2D_sptr m_visWs;
   // variables used in 2D histogramming of the visualization workspace
-  double m_visX0, m_visDX, m_visT0, m_visDT,m_visTmax;
+  double m_visX0, m_visDX, m_visT0, m_visDT, m_visTmax;
   // vector used in normalization of the visualization workspace
   std::vector<double> m_visNorm;
-
 };
 
 } // namespace Algorithms

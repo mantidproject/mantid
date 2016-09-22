@@ -408,7 +408,6 @@ public:
     alg.setProperty("XResolution", 200);
     alg.setProperty("VisualizationWs", "testVisWSNormalized");
 
-
     alg.setProperty("RangeUnits", "dSpacing");
 
     alg.setProperty("NormalizeTheRate", true);
@@ -421,7 +420,8 @@ public:
 
     API::MatrixWorkspace_sptr testVisWS = alg.getProperty("VisualizationWs");
     TS_ASSERT(testVisWS);
-    if(!testVisWS)return;
+    if (!testVisWS)
+      return;
     TS_ASSERT_EQUALS(testVisWS->getNumberHistograms(), 50);
     const MantidVec &X = testVisWS->readX(0);
     const MantidVec &Y = testVisWS->readY(0);
@@ -448,7 +448,7 @@ public:
       double sum = std::accumulate(Y.begin(), Y.end(), 0.);
       TSM_ASSERT_DELTA("Incorrect counts at index: " +
                            boost::lexical_cast<std::string>(i),
-                       4*counts[i], sum, 1.e-6);
+                       4 * counts[i], sum, 1.e-6);
     }
   }
   //----------------------------------------------------------------------
