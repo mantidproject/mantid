@@ -1364,11 +1364,11 @@ void QWorkspaceDockView::showWorkspaceData() {}
 void QWorkspaceDockView::showInstrumentView() {}
 
 /// Plots a single spectrum from each selected workspace
-void QWorkspaceDockView::plotSpectra() {
+void QWorkspaceDockView::onClickPlotSpectra() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrum);
 }
 /// Plots a single spectrum from each selected workspace with errors
-void QWorkspaceDockView::plotSpectraErr() {
+void QWorkspaceDockView::onClickPlotSpectraErr() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumWithErrors);
 }
 
@@ -1393,7 +1393,7 @@ void QWorkspaceDockView::plotSpectrum(bool showErrors) {
 * meaning
 * that one of these must be generated first!
 */
-void QWorkspaceDockView::drawColorFillPlot() {
+void QWorkspaceDockView::onClickDrawColorFillPlot() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ShowColourFillPlot);
 }
 
@@ -1424,7 +1424,7 @@ void QWorkspaceDockView::showColourFillPlot() {
   emit signalDrawColourFillPlot(allWsNames);
 }
 
-void QWorkspaceDockView::showDetectorTable() {
+void QWorkspaceDockView::onClickShowDetectorTable() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ShowDetectorsTable);
 }
 
@@ -1446,8 +1446,30 @@ void QWorkspaceDockView::showLogs() {}
 void QWorkspaceDockView::showSampleMaterialWindow() {}
 void QWorkspaceDockView::showAlgorithmHistory() {}
 void QWorkspaceDockView::showTransposed() {}
-void QWorkspaceDockView::convertToMatrixWorkspace() {}
-void QWorkspaceDockView::convertMDHistoToMatrixWorkspace() {}
+
+/**
+* Convert selected TableWorkspace to a MatrixWorkspace.
+*/
+void QWorkspaceDockView::onClickConvertToMatrixWorkspace() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ConvertToMatrixWorkspace);
+}
+
+/**
+* Convert selected MDHistoWorkspace to a MatrixWorkspace.
+*/
+void QWorkspaceDockView::onClickConvertMDHistoToMatrixWorkspace() {
+  m_presenter->notifyFromView(
+      ViewNotifiable::Flag::ConvertMDHistoToMatrixWorkspace);
+}
+
+void QWorkspaceDockView::convertToMatrixWorkspace() {
+  showAlgorithm("ConvertTableToMatrixWorkspace");
+}
+
+void QWorkspaceDockView::convertMDHistoToMatrixWorkspace() {
+        showAlgorithm("ConvertMDHistoToMatrixWorkspace"));
+}
+
 void QWorkspaceDockView::clearUBMatrix() {}
 void QWorkspaceDockView::showSurfacePlot() {}
 void QWorkspaceDockView::showContourPlot() {}

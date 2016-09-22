@@ -195,12 +195,12 @@ private slots:
   void onClickLoad();
   void onLoadAccept();
   void onClickLiveData();
-  void plotSpectra();
-  void plotSpectraErr();
-  void drawColorFillPlot();
-  void showDetectorTable();
-  void convertToMatrixWorkspace();
-  void convertMDHistoToMatrixWorkspace();
+  void onClickPlotSpectra();
+  void onClickPlotSpectraErr();
+  void onClickDrawColorFillPlot();
+  void onClickShowDetectorTable();
+  void onClickConvertToMatrixWorkspace();
+  void onClickConvertMDHistoToMatrixWorkspace();
   void updateTree();
   void incrementUpdateCount();
   void clearUB();
