@@ -1467,7 +1467,7 @@ void QWorkspaceDockView::convertToMatrixWorkspace() {
 }
 
 void QWorkspaceDockView::convertMDHistoToMatrixWorkspace() {
-        showAlgorithm("ConvertMDHistoToMatrixWorkspace"));
+  showAlgorithm("ConvertMDHistoToMatrixWorkspace");
 }
 
 void QWorkspaceDockView::clearUBMatrix() {}
@@ -1498,4 +1498,28 @@ void QWorkspaceDockView::showSurfacePlot() {
   }
 }
 
-void QWorkspaceDockView::showContourPlot() {}
+
+/**
+* Create a contour plot from the selected workspace group
+*/
+void QWorkspaceDockView::onClickPlotContour() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowContourPlot);
+}
+
+void QWorkspaceDockView::showContourPlot() {
+  auto items = m_tree->selectedItems();
+  if (!items.empty()) {
+    auto data = items[0]->data(0, Qt::UserRole).value<Workspace_sptr>();
+    const auto wsGroup =
+        boost::dynamic_pointer_cast<const WorkspaceGroup>(data);
+    if (wsGroup) {
+      auto options =
+          m_tree->chooseContourPlotOptions(wsGroup->getNumberOfEntries());
+
+      // TODO: Figure out how to remove the MantidUI dependency
+      auto plotter =
+          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(m_mantidUI);
+      plotter->plotContour(wsGroup, options);
+    }
+  }
+}
