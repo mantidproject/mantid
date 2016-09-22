@@ -84,7 +84,7 @@ void IndirectMoments::run() {
   // Set the workspace name for Python script export
   m_pythonExportWsName = outputWorkspaceName + "_M0";
 
-  // Execute algorithm on seperate thread
+  // Execute algorithm on separate thread
   runAlgorithm(momentsAlg);
 }
 
@@ -119,11 +119,10 @@ void IndirectMoments::handleSampleInputReady(const QString &filename) {
   QPair<double, double> range = m_uiForm.ppRawPlot->getCurveRange("Raw");
 
   auto xRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("XRange");
-  setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                   range);
   setPlotPropertyRange(xRangeSelector, m_properties["EMin"],
                        m_properties["EMax"], range);
-
+  setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"],
+                   range);
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateProperties(QtProperty *, double)));
 }
@@ -142,7 +141,7 @@ void IndirectMoments::rangeChanged(double min, double max) {
 /**
  * Handles when properties in the property manager are updated.
  *
- * Performs validation and uodated preview plot.
+ * Performs validation and updated preview plot.
  *
  * @param prop :: The property being updated
  * @param val :: The new value for the property
