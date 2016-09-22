@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
+#pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,redefined-builtin
 from __future__ import (absolute_import, division, print_function)
 from six.moves import range
 from six import next
