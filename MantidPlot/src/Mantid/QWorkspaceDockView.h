@@ -201,12 +201,12 @@ private slots:
   void onClickShowDetectorTable();
   void onClickConvertToMatrixWorkspace();
   void onClickConvertMDHistoToMatrixWorkspace();
-  void updateTree();
-  void incrementUpdateCount();
-  void clearUB();
-  void filterWorkspaceTree(const QString &text);
   void onClickPlotSurface();
   void onClickPlotContour();
+  void onClickClearUB();
+  void updateTree();
+  void incrementUpdateCount();
+  void filterWorkspaceTree(const QString &text);
 
 private:
   MantidQt::MantidWidgets::WorkspacePresenterVN_sptr m_presenter;

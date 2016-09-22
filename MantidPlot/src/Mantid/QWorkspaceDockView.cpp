@@ -1470,7 +1470,26 @@ void QWorkspaceDockView::convertMDHistoToMatrixWorkspace() {
   showAlgorithm("ConvertMDHistoToMatrixWorkspace");
 }
 
-void QWorkspaceDockView::clearUBMatrix() {}
+/**
+* Handler for the clear the UB matrix event.
+*/
+void QWorkspaceDockView::onClickClearUB() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ClearUBMatrix);
+}
+
+void QWorkspaceDockView::clearUBMatrix() {
+  auto wsNames = getSelectedWorkspaceNames();
+
+  for (auto &ws : wsNames) {
+    auto alg = createAlgorithm("ClearUB");
+    if (alg) {
+      alg->initialize();
+      alg->setPropertyValue("Workspace", ws);
+      alg->executeAsync();
+    } else
+      break;
+  }
+}
 
 /**
 * Create a 3D surface plot from the selected workspace group
@@ -1497,7 +1516,6 @@ void QWorkspaceDockView::showSurfacePlot() {
     }
   }
 }
-
 
 /**
 * Create a contour plot from the selected workspace group
