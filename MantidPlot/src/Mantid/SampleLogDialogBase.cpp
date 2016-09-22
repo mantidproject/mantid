@@ -13,17 +13,16 @@
 #include <MantidKernel/ArrayProperty.h>
 
 // Qt
-#include <QTreeWidget>
-#include <QHeaderView>
-#include <QFileInfo>
-#include <QLineEdit>
 #include <QMenu>
-#include <QRadioButton>
-#include <QGroupBox>
-#include <QLayout>
+#include <QFileInfo>
+#include <QHeaderView>
+#include <QTreeWidget>
 #include <QPushButton>
-#include <QSpinBox>
 #include <QLabel>
+#include <QSpinBox>
+#include <QLineEdit>
+#include <QLayout>
+
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -53,12 +52,10 @@ SampleLogDialogBase::SampleLogDialogBase(const QString &wsname,
                                          QWidget *parentContainer,
                                          Qt::WFlags flags,
                                          size_t experimentInfoIndex)
-    : QDialog(parentContainer, flags), m_tree(nullptr),
+    : QDialog(parentContainer, flags), m_tree(new QTreeWidget()),
       m_parentContainer(parentContainer), m_wsname(wsname.toStdString()),
       m_experimentInfoIndex(experimentInfoIndex), buttonPlot(nullptr),
       buttonClose(nullptr), m_spinNumber(nullptr) {
-
-  m_tree = new QTreeWidget();
 
   for (size_t i = 0; i < NUM_STATS; ++i) {
     statValues[i] = nullptr;
@@ -438,6 +435,7 @@ void SampleLogDialogBase::addExperimentInfoSelectorTo(QBoxLayout *qLayout) {
   }
 }
 
+//------------------------------------------------------------------------------------------------
 /** Sets up the QTreeWidget Qt connections for necessary functionality
 */
 void SampleLogDialogBase::setUpTreeWidgetConnections() {

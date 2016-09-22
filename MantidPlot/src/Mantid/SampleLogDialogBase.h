@@ -10,14 +10,15 @@
 //----------------------------------
 // Forward declarations
 //----------------------------------
+class MantidUI;
+class ApplicationWindow;
 
+// Qt
 class QBoxLayout;
+class QRadioButton;
 class QTreeWidgetItem;
 class QTreeWidget;
 class QPushButton;
-class QRadioButton;
-class MantidUI;
-class ApplicationWindow;
 class QLabel;
 class QSpinBox;
 class QLineEdit;

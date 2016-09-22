@@ -8,7 +8,6 @@
 #include "MantidUI.h"
 
 // Qt
-#include <QHeaderView>
 #include <QRadioButton>
 #include <QFormLayout>
 #include <QGroupBox>

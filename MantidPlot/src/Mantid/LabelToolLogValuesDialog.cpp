@@ -4,16 +4,11 @@
 
 #include "LabelToolLogValuesDialog.h"
 
-// STD
-#include <sstream>
-
 // Mantid
 #include <LegendWidget.h>
 #include <Mantid/MantidUI.h>
-#include <MantidAPI/MultipleExperimentInfos.h>
 
 // Qt
-#include <QHeaderView>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QRadioButton>
