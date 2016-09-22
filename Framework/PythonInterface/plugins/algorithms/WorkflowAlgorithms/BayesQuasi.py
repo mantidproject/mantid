@@ -1,4 +1,8 @@
 #pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+from six import next
+
 import os
 import numpy as np
 
@@ -663,7 +667,7 @@ class BayesQuasi(PythonAlgorithm):
 
         #iterate over each block of fit parameters in the file
         #each block corresponds to a single column in the final workspace
-        for block_num in xrange(num_blocks):
+        for block_num in range(num_blocks):
             lower_index = header_offset+(block_size*block_num)
             upper_index = lower_index+block_size
 
@@ -671,12 +675,12 @@ class BayesQuasi(PythonAlgorithm):
             line_pointer = self._yield_floats(asc[lower_index:upper_index])
 
             #Q,AMAX,HWHM,BSCL,GSCL
-            line = line_pointer.next()
+            line = next(line_pointer)
             Q, AMAX, HWHM, _, _ = line
             q_data.append(Q)
 
             #A0,A1,A2,A4
-            line = line_pointer.next()
+            line = next(line_pointer)
             block_height = AMAX*line[0]
 
             #parse peak data from block
@@ -684,7 +688,7 @@ class BayesQuasi(PythonAlgorithm):
             block_amplitude = []
             for _ in range(nl):
                 #Amplitude,FWHM for each peak
-                line = line_pointer.next()
+                line = next(line_pointer)
                 amp = AMAX*line[0]
                 FWHM = 2.*HWHM*line[1]
                 block_amplitude.append(amp)
@@ -692,7 +696,7 @@ class BayesQuasi(PythonAlgorithm):
 
             #next parse error data from block
             #SIG0
-            line = line_pointer.next()
+            line = next(line_pointer)
             block_height_e = line[0]
 
             block_FWHM_e = []
@@ -700,12 +704,12 @@ class BayesQuasi(PythonAlgorithm):
             for _ in range(nl):
                 #Amplitude error,FWHM error for each peak
                 #SIGIK
-                line = line_pointer.next()
+                line = next(line_pointer)
                 amp = AMAX*math.sqrt(math.fabs(line[0])+1.0e-20)
                 block_amplitude_e.append(amp)
 
                 #SIGFK
-                line = line_pointer.next()
+                line = next(line_pointer)
                 FWHM = 2.0*HWHM*math.sqrt(math.fabs(line[0])+1.0e-20)
                 block_FWHM_e.append(FWHM)
 
