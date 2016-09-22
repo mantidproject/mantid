@@ -69,6 +69,27 @@ private:
   void saveSingleWorkspace();
   void saveWorkspaceCollection();
   void filterWorkspaces();
+  void showWorkspaceData();
+  void showInstrumentView();
+  void plotSpectrum();
+  void plotSpectrumWithErrors();
+  void showColourFillPlot();
+  void showDetectorsTable();
+  void showBoxDataTable();
+  void showVatesGUI();
+  void showMDPlot();
+  void showListData();
+  void showSpectrumViewer();
+  void showSliceViewer();
+  void showLogs();
+  void showSampleMaterialWindow();
+  void showAlgorithmHistory();
+  void showTransposed();
+  void convertToMatrixWorkspace();
+  void convertMDHistoToMatrixWorkspace();
+  void clearUBMatrix();
+  void showSurfacePlot();
+  void showContourPlot();
 
   void workspaceLoaded();
   void workspaceRenamed();

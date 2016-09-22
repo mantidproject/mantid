@@ -85,6 +85,28 @@ public:
   virtual Mantid::API::Workspace_sptr getSelectedWorkspace() const = 0;
   virtual void updateTree(
       const std::map<std::string, Mantid::API::Workspace_sptr> &items) = 0;
+
+  // Workspace Context Menu Handlers
+  virtual void showWorkspaceData() = 0;
+  virtual void showInstrumentView() = 0;
+  virtual void plotSpectrum(bool showErrors) = 0;
+  virtual void showColourFillPlot() = 0;
+  virtual void showDetectorsTable() = 0;
+  virtual void showBoxDataTable() = 0;
+  virtual void showVatesGUI() = 0;
+  virtual void showMDPlot() = 0;
+  virtual void showListData() = 0;
+  virtual void showSpectrumViewer() = 0;
+  virtual void showSliceViewer() = 0;
+  virtual void showLogs() = 0;
+  virtual void showSampleMaterialWindow() = 0;
+  virtual void showAlgorithmHistory() = 0;
+  virtual void showTransposed() = 0;
+  virtual void convertToMatrixWorkspace() = 0;
+  virtual void convertMDHistoToMatrixWorkspace() = 0;
+  virtual void clearUBMatrix() = 0;
+  virtual void showSurfacePlot() = 0;
+  virtual void showContourPlot() = 0;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

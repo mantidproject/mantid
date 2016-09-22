@@ -26,6 +26,10 @@
 #include <QMessageBox>
 #include <QSignalMapper>
 
+#ifdef MAKE_VATES
+#include "vtkPVDisplayInformation.h"
+#endif
+
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
@@ -1226,3 +1230,25 @@ void QWorkspaceDockView::handleUpdateTree(
 }
 
 void QWorkspaceDockView::handleClearView() { m_tree->clear(); }
+
+// Context Menu Handlers
+void QWorkspaceDockView::showWorkspaceData() {}
+void QWorkspaceDockView::showInstrumentView() {}
+void QWorkspaceDockView::plotSpectrum(bool showErrors) {}
+void QWorkspaceDockView::showColourFillPlot() {}
+void QWorkspaceDockView::showDetectorsTable() {}
+void QWorkspaceDockView::showBoxDataTable() {}
+void QWorkspaceDockView::showVatesGUI() {}
+void QWorkspaceDockView::showMDPlot() {}
+void QWorkspaceDockView::showListData() {}
+void QWorkspaceDockView::showSpectrumViewer() {}
+void QWorkspaceDockView::showSliceViewer() {}
+void QWorkspaceDockView::showLogs() {}
+void QWorkspaceDockView::showSampleMaterialWindow() {}
+void QWorkspaceDockView::showAlgorithmHistory() {}
+void QWorkspaceDockView::showTransposed() {}
+void QWorkspaceDockView::convertToMatrixWorkspace() {}
+void QWorkspaceDockView::convertMDHistoToMatrixWorkspace() {}
+void QWorkspaceDockView::clearUBMatrix() {}
+void QWorkspaceDockView::showSurfacePlot() {}
+void QWorkspaceDockView::showContourPlot() {}

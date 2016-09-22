@@ -45,7 +45,28 @@ public:
     SortWorkspaces,
     SaveSingleWorkspace,
     SaveWorkspaceCollection,
-    FilterWorkspaces
+    FilterWorkspaces,
+	ShowWorkspaceData,
+	ShowInstrumentView,
+	PlotSpectrum,
+	PlotSpectrumWithErrors,
+	ShowColourFillPlot,
+	ShowDetectorsTable,
+	ShowBoxDataTable,
+	ShowVatesGUI,
+	ShowMDPlot,
+	ShowListData,
+	ShowSpectrumViewer,
+	ShowSliceViewer,
+	ShowLogs,
+	ShowSampleMaterialWindow,
+	ShowAlgorithmHistory,
+	ShowTransposed,
+	ConvertToMatrixWorkspace,
+	ConvertMDHistoToMatrixWorkspace,
+	ClearUBMatrix,
+	ShowSurfacePlot,
+	ShowContourPlot
   };
 
   virtual void notifyFromView(Flag flag) = 0;

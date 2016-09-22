@@ -109,6 +109,28 @@ public:
   void recordWorkspaceRename(const std::string &oldName,
                              const std::string &newName) override;
 
+  // Context Menu Handlers
+  void showWorkspaceData() override;
+  void showInstrumentView() override;
+  void plotSpectrum(bool showErrors) override;
+  void showColourFillPlot() override;
+  void showDetectorsTable() override;
+  void showBoxDataTable() override;
+  void showVatesGUI() override;
+  void showMDPlot() override;
+  void showListData() override;
+  void showSpectrumViewer() override;
+  void showSliceViewer() override;
+  void showLogs() override;
+  void showSampleMaterialWindow() override;
+  void showAlgorithmHistory() override;
+  void showTransposed() override;
+  void convertToMatrixWorkspace() override;
+  void convertMDHistoToMatrixWorkspace() override;
+  void clearUBMatrix() override;
+  void showSurfacePlot() override;
+  void showContourPlot() override;
+
 private:
   void addSaveMenuOption(QString algorithmString, QString menuEntryName = "");
   void setTreeUpdating(const bool state);

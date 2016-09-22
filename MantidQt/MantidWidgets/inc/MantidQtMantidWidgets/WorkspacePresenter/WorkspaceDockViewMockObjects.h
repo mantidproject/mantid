@@ -21,7 +21,7 @@ public:
 
   void init() override {
     auto presenter = boost::make_shared<WorkspacePresenter>(shared_from_this());
-	m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
+    m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
     presenter->init();
   }
 
@@ -61,12 +61,34 @@ public:
   MOCK_CONST_METHOD0(getSelectedWorkspaceNames, StringList());
   MOCK_CONST_METHOD0(getSelectedWorkspace, Mantid::API::Workspace_sptr());
 
+  // Context Menu Handlers
+  MOCK_METHOD0(showWorkspaceData, void());
+  MOCK_METHOD0(showInstrumentView, void());
+  MOCK_METHOD1(plotSpectrum, void(bool showErrors));
+  MOCK_METHOD0(showColourFillPlot, void());
+  MOCK_METHOD0(showDetectorsTable, void());
+  MOCK_METHOD0(showBoxDataTable, void());
+  MOCK_METHOD0(showVatesGUI, void());
+  MOCK_METHOD0(showMDPlot, void());
+  MOCK_METHOD0(showListData, void());
+  MOCK_METHOD0(showSpectrumViewer, void());
+  MOCK_METHOD0(showSliceViewer, void());
+  MOCK_METHOD0(showLogs, void());
+  MOCK_METHOD0(showSampleMaterialWindow, void());
+  MOCK_METHOD0(showAlgorithmHistory, void());
+  MOCK_METHOD0(showTransposed, void());
+  MOCK_METHOD0(convertToMatrixWorkspace, void());
+  MOCK_METHOD0(convertMDHistoToMatrixWorkspace, void());
+  MOCK_METHOD0(clearUBMatrix, void());
+  MOCK_METHOD0(showSurfacePlot, void());
+  MOCK_METHOD0(showContourPlot, void());
+
   // Methods which are not to be mocked
   void enableDeletePrompt(bool) override {}
   WorkspacePresenterWN_wptr getPresenterWeakPtr() override {
     return boost::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
   }
-  
+
   WorkspacePresenterVN_sptr getPresenterSharedPtr() { return m_presenter; }
 
 private:

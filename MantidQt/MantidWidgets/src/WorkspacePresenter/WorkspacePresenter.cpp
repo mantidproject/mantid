@@ -76,6 +76,69 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   case ViewNotifiable::Flag::FilterWorkspaces:
     filterWorkspaces();
     break;
+  case ViewNotifiable::Flag::ShowWorkspaceData:
+    showWorkspaceData();
+    break;
+  case ViewNotifiable::Flag::ShowInstrumentView:
+    showInstrumentView();
+    break;
+  case ViewNotifiable::Flag::PlotSpectrum:
+    plotSpectrum();
+    break;
+  case ViewNotifiable::Flag::PlotSpectrumWithErrors:
+    plotSpectrumWithErrors();
+    break;
+  case ViewNotifiable::Flag::ShowColourFillPlot:
+    showColourFillPlot();
+    break;
+  case ViewNotifiable::Flag::ShowDetectorsTable:
+    showDetectorsTable();
+    break;
+  case ViewNotifiable::Flag::ShowBoxDataTable:
+    showBoxDataTable();
+    break;
+  case ViewNotifiable::Flag::ShowVatesGUI:
+    showVatesGUI();
+    break;
+  case ViewNotifiable::Flag::ShowMDPlot:
+    showMDPlot();
+    break;
+  case ViewNotifiable::Flag::ShowListData:
+    showListData();
+    break;
+  case ViewNotifiable::Flag::ShowSpectrumViewer:
+    showSpectrumViewer();
+    break;
+  case ViewNotifiable::Flag::ShowSliceViewer:
+    showSliceViewer();
+    break;
+  case ViewNotifiable::Flag::ShowLogs:
+    showLogs();
+    break;
+  case ViewNotifiable::Flag::ShowSampleMaterialWindow:
+    showSampleMaterialWindow();
+    break;
+  case ViewNotifiable::Flag::ShowAlgorithmHistory:
+    showAlgorithmHistory();
+    break;
+  case ViewNotifiable::Flag::ShowTransposed:
+    showTransposed();
+    break;
+  case ViewNotifiable::Flag::ConvertToMatrixWorkspace:
+    convertToMatrixWorkspace();
+    break;
+  case ViewNotifiable::Flag::ConvertMDHistoToMatrixWorkspace:
+    convertMDHistoToMatrixWorkspace();
+    break;
+  case ViewNotifiable::Flag::ClearUBMatrix:
+    clearUBMatrix();
+    break;
+  case ViewNotifiable::Flag::ShowSurfacePlot:
+    showSurfacePlot();
+    break;
+  case ViewNotifiable::Flag::ShowContourPlot:
+    showContourPlot();
+    break;
   }
 }
 
@@ -174,6 +237,28 @@ void WorkspacePresenter::filterWorkspaces() {
   auto view = lockView();
   view->filterWorkspaces(view->getFilterText());
 }
+
+void WorkspacePresenter::showWorkspaceData() {}
+void WorkspacePresenter::showInstrumentView() {}
+void WorkspacePresenter::plotSpectrum() {}
+void WorkspacePresenter::plotSpectrumWithErrors() {}
+void WorkspacePresenter::showColourFillPlot() {}
+void WorkspacePresenter::showDetectorsTable() {}
+void WorkspacePresenter::showBoxDataTable() {}
+void WorkspacePresenter::showVatesGUI() {}
+void WorkspacePresenter::showMDPlot() {}
+void WorkspacePresenter::showListData() {}
+void WorkspacePresenter::showSpectrumViewer() {}
+void WorkspacePresenter::showSliceViewer() {}
+void WorkspacePresenter::showLogs() {}
+void WorkspacePresenter::showSampleMaterialWindow() {}
+void WorkspacePresenter::showAlgorithmHistory() {}
+void WorkspacePresenter::showTransposed() {}
+void WorkspacePresenter::convertToMatrixWorkspace() {}
+void WorkspacePresenter::convertMDHistoToMatrixWorkspace() {}
+void WorkspacePresenter::clearUBMatrix() {}
+void WorkspacePresenter::showSurfacePlot() {}
+void WorkspacePresenter::showContourPlot() {}
 
 void WorkspacePresenter::workspaceLoaded() { updateView(); }
 
