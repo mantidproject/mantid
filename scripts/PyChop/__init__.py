@@ -18,4 +18,8 @@ PyChop2.showGUI()
 """
 
 from .PyChop2 import PyChop2
-from .PyChopGui import show as showGUI
+# If the system doesn't have matplotlib, don't import the GUI.
+try:
+    from .PyChopGui import show as showGUI
+except ImportError:
+    pass
