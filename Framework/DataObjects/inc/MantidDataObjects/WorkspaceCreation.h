@@ -19,20 +19,35 @@ namespace DataObjects {
 class EventWorkspace;
 class Workspace2D;
 
-/** Factory methods for creating MatrixWorkspaces. A template parameter T specifies the type of (or a base type of) the created workspace:
-  - The type of the output workspace is identical to T for the variants without parent.
-  - The type of the output workspace is the dynamic type of the parent if T is a base of the parents dynamic type.
-  - If T is not a base of the parents dynamic type, a conversion is attempted. Currently this is the case only for EventWorkspace:
-    - If the dynamic type of the parent is EventWorkspace but T is not, either a Workspace2D or T is created, whichever is more derived. For example, a typical use-case is to drop events and create a Workspace2D from an EventWorkspace.  This can be achieved as follows:
+/** Factory methods for creating MatrixWorkspaces. A template parameter T
+  specifies the type of (or a base type of) the created workspace:
+  - The type of the output workspace is identical to T for the variants without
+    parent.
+  - The type of the output workspace is the dynamic type of the parent if T is a
+    base of the parents dynamic type.
+  - If T is not a base of the parents dynamic type, a conversion is attempted.
+    Currently this is the case only for EventWorkspace:
+    - If the dynamic type of the parent is EventWorkspace but T is not, either a
+      Workspace2D or T is created, whichever is more derived. For example, a
+      typical use-case is to drop events and create a Workspace2D from an
+      EventWorkspace.  This can be achieved as follows:
       ~~~{.cpp}
       auto ws = create<HistoWorkspace>(parent);
       ~~~
-      This is equivalent to the old way of using WorkspaceFactory::create(parent). In this case, Workspace2D is more derived than HistoWorkspace, so a Workspace2D is created.
+      This is equivalent to the old way of using
+      WorkspaceFactory::create(parent). In this case, Workspace2D is more
+      derived than HistoWorkspace, so a Workspace2D is created.
 
   Other arguments can include:
-  - The desired number of spectra (NumSpectra) to be created in the output workspace.
-  - A reference to an IndexInfo object, defining the number of spectra and spectrum number and detector IDs.
-  - A reference to a Histogram object, defining the size of the histograms as well as whether the workspace stores point data or histogram data. This is a replacement for an independent specification of the X and Y lengths. This is also used to initialize the workspace with X data and (optionally) Y and E data.
+  - The desired number of spectra (NumSpectra) to be created in the output
+    workspace.
+  - A reference to an IndexInfo object, defining the number of spectra and
+    spectrum number and detector IDs.
+  - A reference to a Histogram object, defining the size of the histograms as
+    well as whether the workspace stores point data or histogram data. This is a
+    replacement for an independent specification of the X and Y lengths. This is
+    also used to initialize the workspace with X data and (optionally) Y and E
+    data.
 
   Available variants are:
 
@@ -47,8 +62,11 @@ class Workspace2D;
   create<T>(ParentWS, IndexInfo, Histogram)
   ~~~
 
-  - If neither NumSpectra nor IndexInfo is given, the created workspace has the same number of spectra as the parent workspace and spectrum number as well as detector ID information is copied from the parent.
-  - If Histogram is not given, the created workspace has X identical to the parent workspace and Y and E are initialized to 0.
+  - If neither NumSpectra nor IndexInfo is given, the created workspace has the
+    same number of spectra as the parent workspace and spectrum number as well
+    as detector ID information is copied from the parent.
+  - If Histogram is not given, the created workspace has X identical to the
+    parent workspace and Y and E are initialized to 0.
   - If a Histogram with 'NULL' Y and E is given, Y and E are initialized to 0.
 
   In all cases a (smart) pointer to T is returned.
