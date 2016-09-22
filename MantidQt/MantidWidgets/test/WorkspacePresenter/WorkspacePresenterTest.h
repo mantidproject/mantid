@@ -429,6 +429,142 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
+  // Popup Context Menu Tests
+  void testShowPopupMenu() {
+    EXPECT_CALL(*mockView.get(), popupContextMenu()).Times(Exactly(1));
+    presenter->notifyFromView(
+        ViewNotifiable::Flag::PopulateWorkspaceContextMenu);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowWorkspaceData() {
+    EXPECT_CALL(*mockView.get(), showWorkspaceData()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowWorkspaceData);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowInstrumentView() {
+    EXPECT_CALL(*mockView.get(), showInstrumentView()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowInstrumentView);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testPlotSpectrum() {
+    EXPECT_CALL(*mockView.get(), plotSpectrum(false)).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrum);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testPlotSpectrumWithErrors() {
+    EXPECT_CALL(*mockView.get(), plotSpectrum(true)).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumWithErrors);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowColourFillPlot() {
+    EXPECT_CALL(*mockView.get(), showColourFillPlot()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowColourFillPlot);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowDetectorsTable() {
+    EXPECT_CALL(*mockView.get(), showDetectorsTable()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowDetectorsTable);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowBoxDataTable() {
+    EXPECT_CALL(*mockView.get(), showBoxDataTable()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowBoxDataTable);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowVatesGUI() {
+    EXPECT_CALL(*mockView.get(), showVatesGUI()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowVatesGUI);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowMDPlot() {
+    EXPECT_CALL(*mockView.get(), showMDPlot()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowMDPlot);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowListData() {
+    EXPECT_CALL(*mockView.get(), showListData()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowListData);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowSpectrumViewer() {
+    EXPECT_CALL(*mockView.get(), showSpectrumViewer()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowSpectrumViewer);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowSliceViewer() {
+    EXPECT_CALL(*mockView.get(), showSliceViewer()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowSliceViewer);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowLogs() {
+    EXPECT_CALL(*mockView.get(), showLogs()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowLogs);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowSampleMaterialWindow() {
+    EXPECT_CALL(*mockView.get(), showSampleMaterialWindow()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowSampleMaterialWindow);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowAlgorithmHistory() {
+    EXPECT_CALL(*mockView.get(), showAlgorithmHistory()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowAlgorithmHistory);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowTransposed() {
+    EXPECT_CALL(*mockView.get(), showTransposed()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowTransposed);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testConvertToMatrixWorkspace() {
+    EXPECT_CALL(*mockView.get(), convertToMatrixWorkspace()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ConvertToMatrixWorkspace);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testConvertMDHistoToMatrixWorkspace() {
+    EXPECT_CALL(*mockView.get(), convertMDHistoToMatrixWorkspace())
+        .Times(Exactly(1));
+    presenter->notifyFromView(
+        ViewNotifiable::Flag::ConvertMDHistoToMatrixWorkspace);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testClearUBMatrix() {
+    EXPECT_CALL(*mockView.get(), clearUBMatrix()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ClearUBMatrix);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowSurfacePlot() {
+    EXPECT_CALL(*mockView.get(), showSurfacePlot()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowSurfacePlot);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testShowContourPlot() {
+    EXPECT_CALL(*mockView.get(), showContourPlot()).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::ShowContourPlot);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
 private:
   boost::shared_ptr<NiceMock<MockWorkspaceDockView>> mockView;
   WorkspacePresenterVN_sptr presenter;

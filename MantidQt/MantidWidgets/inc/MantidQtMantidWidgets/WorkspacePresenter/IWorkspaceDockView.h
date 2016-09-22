@@ -87,6 +87,7 @@ public:
       const std::map<std::string, Mantid::API::Workspace_sptr> &items) = 0;
 
   // Workspace Context Menu Handlers
+  virtual void popupContextMenu() = 0;
   virtual void showWorkspaceData() = 0;
   virtual void showInstrumentView() = 0;
   virtual void plotSpectrum(bool showErrors) = 0;

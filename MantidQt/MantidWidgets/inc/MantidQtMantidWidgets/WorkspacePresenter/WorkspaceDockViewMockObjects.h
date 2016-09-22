@@ -62,6 +62,7 @@ public:
   MOCK_CONST_METHOD0(getSelectedWorkspace, Mantid::API::Workspace_sptr());
 
   // Context Menu Handlers
+  MOCK_METHOD0(popupContextMenu, void());
   MOCK_METHOD0(showWorkspaceData, void());
   MOCK_METHOD0(showInstrumentView, void());
   MOCK_METHOD1(plotSpectrum, void(bool showErrors));

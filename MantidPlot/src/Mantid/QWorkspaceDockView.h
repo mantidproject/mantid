@@ -110,6 +110,7 @@ public:
                              const std::string &newName) override;
 
   // Context Menu Handlers
+  void popupContextMenu() override;
   void showWorkspaceData() override;
   void showInstrumentView() override;
   void plotSpectrum(bool showErrors) override;
@@ -216,7 +217,7 @@ protected:
 
 private:
   QString selectedWsName;
-
+  QPoint m_menuPosition;
   MantidUI *const m_mantidUI;
 
   std::string m_filteredText;

@@ -1232,6 +1232,7 @@ void QWorkspaceDockView::handleUpdateTree(
 void QWorkspaceDockView::handleClearView() { m_tree->clear(); }
 
 // Context Menu Handlers
+void QWorkspaceDockView::popupContextMenu() {}
 void QWorkspaceDockView::showWorkspaceData() {}
 void QWorkspaceDockView::showInstrumentView() {}
 void QWorkspaceDockView::plotSpectrum(bool showErrors) {}

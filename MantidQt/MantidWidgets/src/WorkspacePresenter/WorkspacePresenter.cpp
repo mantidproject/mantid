@@ -76,6 +76,9 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   case ViewNotifiable::Flag::FilterWorkspaces:
     filterWorkspaces();
     break;
+  case ViewNotifiable::Flag::PopulateWorkspaceContextMenu:
+    populateWorkspaceContextMenu();
+    break;
   case ViewNotifiable::Flag::ShowWorkspaceData:
     showWorkspaceData();
     break;
@@ -238,27 +241,115 @@ void WorkspacePresenter::filterWorkspaces() {
   view->filterWorkspaces(view->getFilterText());
 }
 
-void WorkspacePresenter::showWorkspaceData() {}
-void WorkspacePresenter::showInstrumentView() {}
-void WorkspacePresenter::plotSpectrum() {}
-void WorkspacePresenter::plotSpectrumWithErrors() {}
-void WorkspacePresenter::showColourFillPlot() {}
-void WorkspacePresenter::showDetectorsTable() {}
-void WorkspacePresenter::showBoxDataTable() {}
-void WorkspacePresenter::showVatesGUI() {}
-void WorkspacePresenter::showMDPlot() {}
-void WorkspacePresenter::showListData() {}
-void WorkspacePresenter::showSpectrumViewer() {}
-void WorkspacePresenter::showSliceViewer() {}
-void WorkspacePresenter::showLogs() {}
-void WorkspacePresenter::showSampleMaterialWindow() {}
-void WorkspacePresenter::showAlgorithmHistory() {}
-void WorkspacePresenter::showTransposed() {}
-void WorkspacePresenter::convertToMatrixWorkspace() {}
-void WorkspacePresenter::convertMDHistoToMatrixWorkspace() {}
-void WorkspacePresenter::clearUBMatrix() {}
-void WorkspacePresenter::showSurfacePlot() {}
-void WorkspacePresenter::showContourPlot() {}
+void WorkspacePresenter::populateWorkspaceContextMenu() {
+  auto view = lockView();
+  view->popupContextMenu();
+}
+
+void WorkspacePresenter::showWorkspaceData() {
+  auto view = lockView();
+  view->showWorkspaceData();
+}
+
+void WorkspacePresenter::showInstrumentView() {
+  auto view = lockView();
+  view->showInstrumentView();
+}
+
+void WorkspacePresenter::plotSpectrum() {
+  auto view = lockView();
+  view->plotSpectrum(false);
+}
+
+void WorkspacePresenter::plotSpectrumWithErrors() {
+  auto view = lockView();
+  view->plotSpectrum(true);
+}
+
+void WorkspacePresenter::showColourFillPlot() {
+  auto view = lockView();
+  view->showColourFillPlot();
+}
+
+void WorkspacePresenter::showDetectorsTable() {
+  auto view = lockView();
+  view->showDetectorsTable();
+}
+
+void WorkspacePresenter::showBoxDataTable() {
+  auto view = lockView();
+  view->showBoxDataTable();
+}
+
+void WorkspacePresenter::showVatesGUI() {
+  auto view = lockView();
+  view->showVatesGUI();
+}
+
+void WorkspacePresenter::showMDPlot() {
+  auto view = lockView();
+  view->showMDPlot();
+}
+
+void WorkspacePresenter::showListData() {
+  auto view = lockView();
+  view->showListData();
+}
+
+void WorkspacePresenter::showSpectrumViewer() {
+  auto view = lockView();
+  view->showSpectrumViewer();
+}
+
+void WorkspacePresenter::showSliceViewer() {
+  auto view = lockView();
+  view->showSliceViewer();
+}
+
+void WorkspacePresenter::showLogs() {
+  auto view = lockView();
+  view->showLogs();
+}
+
+void WorkspacePresenter::showSampleMaterialWindow() {
+  auto view = lockView();
+  view->showSampleMaterialWindow();
+}
+
+void WorkspacePresenter::showAlgorithmHistory() {
+  auto view = lockView();
+  view->showAlgorithmHistory();
+}
+
+void WorkspacePresenter::showTransposed() {
+  auto view = lockView();
+  view->showTransposed();
+}
+
+void WorkspacePresenter::convertToMatrixWorkspace() {
+  auto view = lockView();
+  view->convertToMatrixWorkspace();
+}
+
+void WorkspacePresenter::convertMDHistoToMatrixWorkspace() {
+  auto view = lockView();
+  view->convertMDHistoToMatrixWorkspace();
+}
+
+void WorkspacePresenter::clearUBMatrix() {
+  auto view = lockView();
+  view->clearUBMatrix();
+}
+
+void WorkspacePresenter::showSurfacePlot() {
+  auto view = lockView();
+  view->showSurfacePlot();
+}
+
+void WorkspacePresenter::showContourPlot() {
+  auto view = lockView();
+  view->showContourPlot();
+}
 
 void WorkspacePresenter::workspaceLoaded() { updateView(); }
 

@@ -46,6 +46,7 @@ public:
     SaveSingleWorkspace,
     SaveWorkspaceCollection,
     FilterWorkspaces,
+	PopulateWorkspaceContextMenu,
 	ShowWorkspaceData,
 	ShowInstrumentView,
 	PlotSpectrum,
