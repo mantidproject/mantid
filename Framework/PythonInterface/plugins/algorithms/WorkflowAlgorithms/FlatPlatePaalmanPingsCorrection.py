@@ -1,4 +1,7 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+from six import iteritems
+
 import math
 import numpy as np
 from mantid.simpleapi import *
@@ -315,10 +318,10 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         @param sample_logs Dictionary of logs to append to the workspace.
         """
 
-        for key, value in sample_logs.iteritems():
+        for key, value in iteritems(sample_logs):
             if isinstance(value, bool):
                 log_type = 'String'
-            elif isinstance(value, (int, long, float)):
+            elif isinstance(value, (int, float)):
                 log_type = 'Number'
             else:
                 log_type = 'String'
