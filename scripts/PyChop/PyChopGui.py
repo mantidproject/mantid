@@ -2,6 +2,7 @@
 # pylint: disable=line-too-long, invalid-name, unused-argument, unused-import, multiple-statements
 # pylint: disable=attribute-defined-outside-init, protected-access, super-on-old-class, redefined-outer-name
 # pylint: disable=too-many-statements, too-many-instance-attributes, too-many-locals, too-many-branches
+# pylint: disable=too-many-public-methods
 
 """
 This module contains a class to create a graphical user interface for PyChop.
@@ -187,7 +188,7 @@ class PyChopGui(QtGui.QMainWindow):
             self.resaxes.hold(True)
             for ie, Ei in enumerate(Eis):
                 # For LET ignore reps above 40 meV in energy as there is no flux there.
-                if 'LET' in inst and Ei>40:
+                if 'LET' in inst and Ei > 40:
                     continue
                 en = np.linspace(0, 0.95*Ei, 200)
                 line, = self.resaxes.plot(en, self.res[ie])
@@ -479,6 +480,9 @@ class PyChopGui(QtGui.QMainWindow):
         fid.close()
 
     def onHelp(self):
+        """
+        Shows the help page
+        """
         try:
             from pymantidplot.proxies import showCustomInterfaceHelp
             showCustomInterfaceHelp("PyChop")
