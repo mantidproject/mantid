@@ -1471,5 +1471,31 @@ void QWorkspaceDockView::convertMDHistoToMatrixWorkspace() {
 }
 
 void QWorkspaceDockView::clearUBMatrix() {}
-void QWorkspaceDockView::showSurfacePlot() {}
+
+/**
+* Create a 3D surface plot from the selected workspace group
+*/
+void QWorkspaceDockView::onClickPlotSurface() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowSurfacePlot);
+}
+
+void QWorkspaceDockView::showSurfacePlot() {
+  // find the workspace group clicked on
+  auto items = m_tree->selectedItems();
+  if (!items.empty()) {
+    auto data = items[0]->data(0, Qt::UserRole).value<Workspace_sptr>();
+    const auto wsGroup =
+        boost::dynamic_pointer_cast<const WorkspaceGroup>(data);
+    if (wsGroup) {
+      auto options =
+          m_tree->chooseSurfacePlotOptions(wsGroup->getNumberOfEntries());
+
+      // TODO: Figure out how to get rid of MantidUI dependency here.
+      auto plotter =
+          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(m_mantidUI);
+      plotter->plotSurface(wsGroup, options);
+    }
+  }
+}
+
 void QWorkspaceDockView::showContourPlot() {}

@@ -205,8 +205,8 @@ private slots:
   void incrementUpdateCount();
   void clearUB();
   void filterWorkspaceTree(const QString &text);
-  void plotSurface();
-  void plotContour();
+  void onClickPlotSurface();
+  void onClickPlotContour();
 
 private:
   MantidQt::MantidWidgets::WorkspacePresenterVN_sptr m_presenter;
