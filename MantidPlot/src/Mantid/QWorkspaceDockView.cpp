@@ -948,6 +948,45 @@ bool QWorkspaceDockView::shouldBeSelected(QString name) const {
   return false;
 }
 
+void QWorkspaceDockView::treeSelectionChanged() {
+  // get selected workspaces
+  auto items = m_tree->selectedItems();
+
+  if (m_groupButton) {
+    if (items.size() == 1) {
+      // check it's group
+      auto wsSptr =
+          items.first()->data(0, Qt::UserRole).value<Workspace_sptr>();
+      auto grpSptr = boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
+      if (grpSptr) {
+        m_groupButton->setText("Ungroup");
+        m_groupButton->setEnabled(true);
+      } else
+        m_groupButton->setEnabled(false);
+
+    } else if (items.size() >= 2) {
+      m_groupButton->setText("Group");
+      m_groupButton->setEnabled(true);
+    } else if (items.size() == 0) {
+      m_groupButton->setText("Group");
+      m_groupButton->setEnabled(false);
+    }
+  }
+
+  if (m_deleteButton)
+    m_deleteButton->setEnabled(items.size() > 0);
+
+  if (m_saveButton)
+    m_saveButton->setEnabled(items.size() > 0);
+
+  if (items.size() > 0) {
+    auto item = *(items.begin());
+    m_mantidUI->enableSaveNexus(item->text(0));
+  } else {
+    m_mantidUI->disableSaveNexus();
+  }
+}
+
 /**
 * Add the actions that are appropriate for a MatrixWorkspace
 * @param menu :: The menu to store the items
