@@ -35,10 +35,12 @@
 #include "ApplicationWindow.h"
 #include "Mantid/MantidUI.h"
 
-#include <QApplication>
-#include <Qsci/qscilexerpython.h>
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/StringTokenizer.h"
+
+#include <QApplication>
+#include <Qsci/qscilexerpython.h>
 
 #include <cassert>
 
@@ -221,6 +223,7 @@ void PythonScripting::setupPythonPath() {
 //     behaviour of the vanilla python interpreter
 //   - the directory of MantidPlot is added after this to find our bundled
 //   - modules
+//
 #if PY_MAJOR_VERSION >= 3
   PyObject *syspath = PySys_GetObject("path");
 #else
@@ -228,8 +231,30 @@ void PythonScripting::setupPythonPath() {
   PyObject *syspath = PySys_GetObject(&path[0]);
 #endif
   PyList_Insert(syspath, 0, FROM_CSTRING(""));
-  // This should contain only / separators
+
   const auto appPath = ConfigService::Instance().getPropertiesDir();
+
+  // These should contain only / separators
+  // Python paths required by VTK and ParaView
+  const auto paraviewPythonPaths =
+      ConfigService::Instance().getString("paraview.pythonpaths");
+
+  if (!paraviewPythonPaths.empty()) {
+    Mantid::Kernel::StringTokenizer tokenizer(
+        paraviewPythonPaths, ";",
+        Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY |
+            Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    for (const auto &pythonPath : tokenizer) {
+#ifdef __APPLE__
+      std::string fullPath = appPath + pythonPath;
+      PyList_Insert(syspath, 1, FROM_CSTRING(fullPath.c_str()));
+#else
+      PyList_Insert(syspath, 1, FROM_CSTRING(pythonPath.c_str()));
+#endif
+    }
+  }
+
+  // MantidPlot Directory
   PyList_Insert(syspath, 1, FROM_CSTRING(appPath.c_str()));
 }
 
