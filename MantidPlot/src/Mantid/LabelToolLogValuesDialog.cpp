@@ -1,17 +1,26 @@
-//----------------------------------
+﻿//----------------------------------
 // Includes
 //----------------------------------
-#include "MantidSampleLogDialog.h"
+
+#include "LabelToolLogValuesDialog.h"
+
+// STD
+#include <sstream>
 
 // Mantid
+#include <LegendWidget.h>
+#include <Mantid/MantidUI.h>
 #include <MantidAPI/MultipleExperimentInfos.h>
-#include "MantidUI.h"
 
 // Qt
 #include <QHeaderView>
-#include <QRadioButton>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QRadioButton>
+
+//----------------------------------
+// Namespaces
+//----------------------------------
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -22,18 +31,19 @@ using namespace Mantid::Kernel;
 //----------------------------------
 /**
 * Construct an object of this type
-*	@param wsname :: The name of the workspace object from
-*			which to retrieve the log files
-*	@param mui :: The MantidUI area
-*	@param flags :: Window flags that are passed the the QDialog constructor
-*	@param experimentInfoIndex :: optional index in the array of
+* @param wsname :: The name of the workspace object from which to retrieve the
+* log files
+* @param parentContainer :: The widget that is the container this dialog
+* @param flags :: Window flags that are passed the the QDialog constructor
+* @param experimentInfoIndex :: optional index in the array of
 *        ExperimentInfo objects. Should only be non-zero for MDWorkspaces.
 */
-MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
-                                             MantidUI *mui, Qt::WFlags flags,
-                                             size_t experimentInfoIndex)
-    : SampleLogDialogBase(wsname, mui->appWindow(), flags, experimentInfoIndex),
-      m_mantidUI(mui) {
+LabelToolLogValuesDialog::LabelToolLogValuesDialog(const QString &wsname,
+                                                   QWidget *parentContainer,
+                                                   Qt::WFlags flags,
+                                                   size_t experimentInfoIndex)
+    : SampleLogDialogBase(wsname, parentContainer, flags, experimentInfoIndex) {
+
   std::stringstream ss;
   ss << "MantidPlot - " << wsname.toStdString().c_str() << " sample logs";
   setWindowTitle(QString::fromStdString(ss.str()));
@@ -44,7 +54,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
          << "Value"
          << "Units";
   m_tree->setHeaderLabels(titles);
-  m_tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  m_tree->setSelectionMode(QAbstractItemView::SingleSelection);
   QHeaderView *hHeader = (QHeaderView *)m_tree->header();
   hHeader->setResizeMode(2, QHeaderView::Stretch);
   hHeader->setStretchLastSection(false);
@@ -52,34 +62,21 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
   QHBoxLayout *uiLayout = new QHBoxLayout;
   uiLayout->addWidget(m_tree);
 
-  // ----- Filtering options --------------
-  QGroupBox *groupBox = new QGroupBox(tr("Filter log values by"));
-
-  filterNone = new QRadioButton("None");
-  filterStatus = new QRadioButton("Status");
-  filterPeriod = new QRadioButton("Period");
-  filterStatusPeriod = new QRadioButton("Status + Period");
-  filterStatusPeriod->setChecked(true);
-
-  QVBoxLayout *vbox = new QVBoxLayout;
-  vbox->addWidget(filterNone);
-  vbox->addWidget(filterStatus);
-  vbox->addWidget(filterPeriod);
-  vbox->addWidget(filterStatusPeriod);
-  // vbox->addStretch(1);
-  groupBox->setLayout(vbox);
-
   // -------------- Statistics on logs ------------------------
   std::string stats[NUM_STATS] = {
       "Min:", "Max:", "Mean:", "Time Avg:", "Median:", "Std Dev:", "Duration:"};
   QGroupBox *statsBox = new QGroupBox("Log Statistics");
   QFormLayout *statsBoxLayout = new QFormLayout;
+
   for (size_t i = 0; i < NUM_STATS; i++) {
-    statLabels[i] = new QLabel(stats[i].c_str());
+    statRadioChoice[i] = new QRadioButton(stats[i].c_str());
     statValues[i] = new QLineEdit("");
-    statValues[i]->setReadOnly(1);
-    statsBoxLayout->addRow(statLabels[i], statValues[i]);
+    statValues[i]->setReadOnly(true);
+
+    statsBoxLayout->addRow(statRadioChoice[i], statValues[i]);
   }
+  // Set default checked radio button
+  statRadioChoice[0]->setChecked(true);
   statsBox->setLayout(statsBoxLayout);
 
   // -------------- The Import/Close buttons ------------------------
@@ -97,9 +94,10 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
   QVBoxLayout *hbox = new QVBoxLayout;
 
   // -------------- The ExperimentInfo selector------------------------
-  boost::shared_ptr<MultipleExperimentInfos> mei =
+  boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei =
       AnalysisDataService::Instance().retrieveWS<MultipleExperimentInfos>(
           m_wsname);
+
   if (mei) {
     if (mei->getNumExperimentInfo() > 0) {
       QHBoxLayout *numSelectorLayout = new QHBoxLayout;
@@ -119,7 +117,6 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
 
   // Finish laying out the right side
   hbox->addLayout(topButtons);
-  hbox->addWidget(groupBox);
   hbox->addWidget(statsBox);
   hbox->addStretch(1);
 
@@ -130,6 +127,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
   // mainLayout->addLayout(bottomButtons);
   this->setLayout(mainLayout);
 
+  // Call initialisation from base class
   init();
 
   resize(750, 400);
@@ -155,54 +153,63 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
           this, SLOT(showLogStatistics()));
 }
 
-MantidSampleLogDialog::~MantidSampleLogDialog() {}
+//------------------------------------------------------------------------------------------------
+LabelToolLogValuesDialog::~LabelToolLogValuesDialog() {}
 
 //------------------------------------------------------------------------------------------------
-/**
-* Import an item from sample logs
+/** Changes the LabelWidget parent object by using the setText
+* method and constructing a label based on the selected log
+* and value or generated statistics, and then calls close()
+* inherited from the parent widget after importing the label.
 *
-*	@param item :: The item to be imported
-*	@throw invalid_argument if format identifier for the item is wrong
+* This is intentional because importing multiple labels will
+* place them on the same spot and it can get unreadable.
+*
+* The parent container variable is dynamically cast up to LegendWidget.
+*
+*	@param item :: The currently selected item from the log list
+*	@throws std::bad_cast :: The exception is throws if the dynamic_cast
+*fails
+*
 */
-void MantidSampleLogDialog::importItem(QTreeWidgetItem *item) {
-  // used in numeric time series below, the default filter value
-  int filter = 0;
-  int key = item->data(1, Qt::UserRole).toInt();
-  Mantid::Kernel::Property *logData = NULL;
-  QString caption = QString::fromStdString(m_wsname) +
-                    QString::fromStdString("-") + item->text(0);
-  switch (key) {
-  case numeric:
-  case string:
-    m_mantidUI->importString(
-        item->text(0), item->data(0, Qt::UserRole).toString(), QString(""),
-        QString::fromStdString(
-            m_wsname)); // Pretty much just print out the string
-    break;
-  case numTSeries:
-    if (filterStatus->isChecked())
-      filter = 1;
-    if (filterPeriod->isChecked())
-      filter = 2;
-    if (filterStatusPeriod->isChecked())
-      filter = 3;
-    m_mantidUI->importNumSeriesLog(QString::fromStdString(m_wsname),
-                                   item->text(0), filter);
-    break;
-  case stringTSeries:
-    m_mantidUI->importStrSeriesLog(item->text(0),
-                                   item->data(0, Qt::UserRole).toString(),
-                                   QString::fromStdString(m_wsname));
-    break;
-  case numericArray:
-    logData = m_ei->getLog(item->text(0).toStdString());
-    if (!logData)
-      return;
-    m_mantidUI->importString(
-        item->text(0), QString::fromStdString(logData->value()),
-        QString::fromStdString(","), QString::fromStdString(m_wsname));
-    break;
-  default:
-    throw std::invalid_argument("Error importing log entry, wrong data type");
+void LabelToolLogValuesDialog::importItem(QTreeWidgetItem *item) {
+
+  // Dynamic cast up to LegendWidget, which is the class of the
+  // one containing the label, in order to use setText
+  auto parentWidget = dynamic_cast<LegendWidget *>(m_parentContainer);
+  if (parentWidget == NULL) { // if dynamic cast fails, don't fail silently
+    throw new std::bad_cast;
   }
+
+  // find which radio box is checked
+  size_t activeRadioBoxPosition = 0;
+  for (size_t i = 0; i < NUM_STATS; ++i) {
+    if (statRadioChoice[i]->isChecked()) {
+      activeRadioBoxPosition = i;
+      break; // once found stop looking
+    }
+  }
+
+  // Container for the full log description,
+  // starts with the name of the item from the tree
+  QString logValuesString = item->text(0) + '\n';
+
+  // Get the text from the selected stat value to determine
+  // if the item has any statistics calculated for it
+  // It's in a local variable to avoid repetition
+  QString statValuesText = statValues[activeRadioBoxPosition]->text();
+
+  // NOTE:
+  // If the log has no log statistics, import value field(2) and units(3)
+  if (statValuesText.isEmpty()) {
+    logValuesString += "Value: " + item->text(2) + " " + item->text(3);
+  } else {
+    // else import the selected statistic
+    // constructing the log string using the hardcoded fields
+    logValuesString +=
+        statRadioChoice[activeRadioBoxPosition]->text() + "  " + statValuesText;
+  }
+
+  parentWidget->setText(logValuesString);
+  close();
 }
