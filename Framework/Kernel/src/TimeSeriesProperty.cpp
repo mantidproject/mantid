@@ -2139,6 +2139,49 @@ void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
   saveTimeVector(file);
   file->closeGroup();
 }
+/** Calculate constant step hystogram of the time series data.
+@param tMin    -- minimal time to include in histogram
+@param tMax    -- maximal time to constrain the histogram data
+@counts counts -- vector of output histogrammed data.
+On input, the size of the vector defines the number of points in the histogram.
+On output, adds all property elements belonging to the time interval [tMin
++n*dT;tMin+(n+1)*dT to initial values of each n-th element of the counts vector,
+where dT =
+(tMax-tMin)/conunts.size().
+*/
+template <typename TYPE>
+void TimeSeriesProperty<TYPE>::histogramData(
+    const Kernel::DateAndTime &tMin, const Kernel::DateAndTime &tMax,
+    std::vector<double> &counts) const {
+
+  size_t nPoints = counts.size();
+  if (nPoints == 0)
+    return; // nothing to do
+
+  double t0 = static_cast<double>(tMin.totalNanoseconds());
+  double t1 = static_cast<double>(tMax.totalNanoseconds());
+  if (t0 > t1)
+    throw std::invalid_argument(
+        "invalid arguments for histogramData; tMax<tMin");
+
+  double dt = (t1 - t0) / static_cast<double>(nPoints);
+
+  for (auto &ev : m_values) {
+    double time = static_cast<double>(ev.time().totalNanoseconds());
+    if (time < t0 || time >= t1)
+      continue;
+    size_t ind = static_cast<size_t>((time - t0) / dt);
+    counts[ind] += ev.value();
+  }
+}
+
+template <>
+void TimeSeriesProperty<std::string>::histogramData(
+    const Kernel::DateAndTime &tMin, const Kernel::DateAndTime &tMax,
+    std::vector<double> &counts) const {
+  throw std::runtime_error("histogramData is not implememnted for time series "
+                           "properties containing strings");
+}
 
 /// @cond
 // -------------------------- Macro to instantiation concrete types

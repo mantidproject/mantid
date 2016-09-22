@@ -250,11 +250,14 @@ void CalcCountRate::calcRateLog(
       // normalize if requested
       if (!countNormalization.empty()) {
         countRate[j] /= countNormalization[j];
-        if (this->buildVisWS()) {
+      }
+    }
+    if (!countNormalization.empty() && this->buildVisWS()){
+#pragma omp for
+        for (int64_t j = 0; j < m_visNorm.size(); j++) {
           this->normalizeVisWs(j);
         }
       }
-    }
   }
   // recover histogram timing, but start assuming run starts at
   std::vector<Kernel::DateAndTime> times(m_numLogSteps);
@@ -297,7 +300,9 @@ void CalcCountRate::hisogramEvents(const DataObjects::EventList &el,
 }
 
 /** Normalize single spectra of the normalization workspace using prepared
- * normzlization log*/
+ * normzlization log
+ @param wsIndex -- appropriate visualization workspace index to normalize spectra
+ */
 void CalcCountRate::normalizeVisWs(int64_t wsIndex) {
 
   auto Y = m_visWs->dataY(wsIndex);
@@ -524,6 +529,16 @@ void CalcCountRate::checkAndInitVisWorkspace() {
   m_doVis = true;
 
   int numTBins = getProperty("NumTimeSteps");
+  if (this->notmalizeCountRate()) {
+    if (numTBins > m_numLogSteps) {
+      g_log.information() << "Number of time step in normalized visualization "
+                             "workspace exceeds the number of points in the "
+                             "normalization log. This mode is not supported so "
+                             "number of time steps decreased to be equal to "
+                             "the number of normalization log points\n";
+      numTBins = m_numLogSteps;
+    }
+  }
   int numXBins = getProperty("XResolution");
   std::string RangeUnits = getProperty("RangeUnits");
 
@@ -604,7 +619,10 @@ bool CalcCountRate::notmalizeCountRate() const { return m_normalizeResult; }
 bool CalcCountRate::useLogDerivative() const { return m_useLogDerivative; }
 
 /** method to prepare normalization vector for the visuzliation workspace using
-* data from normalization log with, usually, different number of time steps*/
+* data from normalization log with, usually, different number of time steps
+* Here we assume that the numner of time points in the visualization workspace
+* is smaller or equal to the number of points in the normalization log.
+*/
 void CalcCountRate::buildVisWSNormalization(
     std::vector<double> &normalization) {
   if (!m_pNormalizationLog) {
@@ -619,81 +637,13 @@ void CalcCountRate::buildVisWSNormalization(
   if (!ax)
     throw std::runtime_error(
         "Can not retrieve Y-axis from visualization workspace");
-  normalization.resize(ax->length());
 
-  auto log_time = m_pNormalizationLog->timesAsVectorSeconds();
-  auto log_val = m_pNormalizationLog->valuesAsVector();
-  // has to be (and usually is equal step (? checks?).
-  // Logging has some bug in converting to time
-  double dtSource = log_time[2] - log_time[1];
-  // calculate source distribution
-  std::vector<double> source(log_time.size());
-  size_t last = log_time.size() - 1;
-  // log values are right shifted values
-  for (size_t i = 1; i < last; ++i) {
-    source[i] = log_val[i] / dtSource;
-  }
-  source[0] = 0.5 * log_val[0] / dtSource;
-  source[last] = 0.5 * log_val[last] / dtSource;
-
-  auto t_norm = ax->getValues();
-  double dt = t_norm[1] -
-              t_norm[0]; // equal step, axis points in the middle of the binning
-
-  int logSize = m_pNormalizationLog->realSize();
-  if (dt <= dtSource) {
-    // linearly interpolate to fine grid
-
-    for (size_t i = 0; i < normalization.size(); ++i) {
-      double tn = t_norm[0] + i * dt;
-      if (tn < log_time[0] || tn >= log_time[last]) {
-        normalization[i] = 0; // should not ever happen at this stage
-        continue;
-      }
-      size_t ind = static_cast<size_t>((tn - log_time[0]) / dtSource);
-      normalization[i] = dt * (source[ind] +
-                               (tn - log_time[ind]) *
-                                   (source[ind + 1] - source[ind]) / dtSource);
-    }
-  } else {
-    // Integrate to coarce grid.
-    // std::vector<double> log_edges;
-    // VectorHelper::convertToBinBoundary(log_time, log_edges);
-    auto t_bins = ax->createBinBoundaries();
-    dt = t_bins[1] - t_bins[0]; // equal bins
-
-    for (size_t i = 0; i < normalization.size(); i++) {
-      double t0 = t_bins[i];
-      double t1 = t_bins[i + 1];
-      if (t0 < log_time[0]) {
-        if (t1 <= log_time[0]) {
-          normalization[i] = 0; // should not ever happen at this stage
-          continue;
-        } else {
-          t0 = log_time[0];
-        }
-      }
-      if (t1 > log_time[last]) {
-        if (t0 >= log_time[last]) {
-          normalization[i] = 0; // should not ever happen at this stage
-          continue;
-        } else {
-          t1 = log_time[last] * (1 - std::numeric_limits<double>::epsilon());
-        }
-      }
-      size_t i0 = static_cast<size_t>((t0 - log_time[0]) / dtSource);
-      size_t i1 = static_cast<size_t>((t1 - log_time[0]) / dtSource);
-
-      normalization[i] =
-          dtSource *
-          (std::accumulate(source.begin() + i0 + 1, source.begin() + i1, 0.) +
-           0.5 * (source[i0] +
-                  (t0 - log_time[i0]) * (source[i0 + 1] - source[i0]) /
-                      dtSource) +
-           0.5 * (source[i1] +
-                  (t1 - log_time[i1]) * (source[i1 + 1] - source[i1])));
-    }
-  }
+  normalization.assign(ax->length(), 0.);
+  // For more accurate logging (in a future, if necessary:)
+  // auto t_bins = ax->createBinBoundaries();
+  // double dt = t_bins[2] - t_bins[1]; // equal bins, first bin may be werid.
+  //
+  m_pNormalizationLog->histogramData(m_TRangeMin, m_TRangeMax, normalization);
 }
 
 } // namespace Algorithms
