@@ -95,13 +95,6 @@ const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
   return *m_indexInfo;
 }
 
-void MatrixWorkspace::cacheIndexInfo() const {
-  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(
-      getNumberHistograms(),
-      std::bind(&MatrixWorkspace::spectrumNumber, this, std::placeholders::_1),
-      std::bind(&MatrixWorkspace::detectorIDs, this, std::placeholders::_1));
-}
-
 /** Sets the IndexInfo object of the workspace.
  *
  * Used for setting spectrum number and detector ID information of spectra */
@@ -2154,6 +2147,14 @@ specnum_t MatrixWorkspace::spectrumNumber(const size_t index) const {
 const std::set<detid_t> &
 MatrixWorkspace::detectorIDs(const size_t index) const {
   return getSpectrum(index).getDetectorIDs();
+}
+
+/// Private helper for IndexInfo. Not thread-safe, use only with std::call_once.
+void MatrixWorkspace::cacheIndexInfo() const {
+  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(
+      getNumberHistograms(),
+      std::bind(&MatrixWorkspace::spectrumNumber, this, std::placeholders::_1),
+      std::bind(&MatrixWorkspace::detectorIDs, this, std::placeholders::_1));
 }
 
 } // namespace API
