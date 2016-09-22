@@ -85,26 +85,9 @@ public:
     TS_ASSERT(c.isExecuted());
 
     // AFTER
-    Mantid::API::MatrixWorkspace_const_sptr input;
-    input = Mantid::API::AnalysisDataService::Instance()
-                .retrieveWS<Mantid::API::MatrixWorkspace>(inputWSName);
-
     Mantid::API::MatrixWorkspace_const_sptr output;
     output = Mantid::API::AnalysisDataService::Instance()
                  .retrieveWS<Mantid::API::MatrixWorkspace>(outputWSName);
-
-    // check some arbitrary values that shouldn't have been changed
-    for (size_t i = 0; i < polar.size(); ++i) {
-      const auto &inputY = input->y(i);
-      const auto &inputE = input->e(i);
-      const auto &outputY = output->y(i);
-      const auto &outputE = output->e(i);
-
-      for (size_t j = 0; j < azimutal.size(); ++j) {
-        TS_ASSERT_EQUALS(inputY[j], outputY[j])
-        TS_ASSERT_EQUALS(inputE[j], outputE[j])
-      }
-    }
 
     // test the first tube to see if distance was well corrected to l2
     for (int i = 0; i < 5; i++) {
