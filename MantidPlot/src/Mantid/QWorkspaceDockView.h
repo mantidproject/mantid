@@ -133,6 +133,7 @@ public:
   void showContourPlot() override;
 
 private:
+  bool hasUBMatrix(const std::string &wsName);
   void addSaveMenuOption(QString algorithmString, QString menuEntryName = "");
   void setTreeUpdating(const bool state);
   inline bool isTreeUpdating() const { return m_treeUpdating; }

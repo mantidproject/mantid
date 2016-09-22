@@ -1102,10 +1102,24 @@ void QWorkspaceDockView::addTableWorkspaceMenuItems(QMenu *menu) const {
 void QWorkspaceDockView::addClearMenuItems(QMenu *menu, const QString &wsName) {
   QMenu *clearMenu = new QMenu(tr("Clear Options"), this);
 
-  m_clearUB->setEnabled(m_mantidUI->hasUB(wsName));
+  m_clearUB->setEnabled(hasUBMatrix(wsName.toStdString()));
 
   clearMenu->addAction(m_clearUB);
   menu->addMenu(clearMenu);
+}
+
+bool QWorkspaceDockView::hasUBMatrix(const std::string &wsName) {
+  bool hasUB = false;
+  auto alg = createAlgorithm("HasUB");
+
+  if (alg) {
+    alg->setLogging(false);
+    alg->setPropertyValue("Workspace", wsName);
+    // TODO: may need an executeAsync with a wait as before check MantidUI.cpp
+    alg->execute();
+    hasUB = alg->getProperty("HasUB");
+  }
+  return hasUB;
 }
 
 /**
