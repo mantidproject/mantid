@@ -17,9 +17,12 @@ resolution, flux = PyChop2.calculate(inst='maps', chtyp='a', freq=500, ei=600, e
 PyChop2.showGUI()
 """
 
+import warnings
 from .PyChop2 import PyChop2
 # If the system doesn't have matplotlib, don't import the GUI.
 try:
     from .PyChopGui import show as showGUI
 except ImportError:
-    pass
+    def showGUI():
+        warnings.warn("PyChop GUI disabled: Cannot import Matplotlib.", RuntimeWarning)
+        return None
