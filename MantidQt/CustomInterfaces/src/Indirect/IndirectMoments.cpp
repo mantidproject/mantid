@@ -209,7 +209,7 @@ void IndirectMoments::plotClicked() {
       getWorkspaceBasename(m_uiForm.dsInput->getCurrentDataName()) + "_Moments";
   if (checkADSForPlotSaveWorkspace(outputWs.toStdString(), true)) {
     plotSpectrum(outputWs + "_M0");
-    plotSpectrum({outputWs + "_M0", outputWs + "_M2"});
+    plotSpectrum({outputWs + "_M2", outputWs + "_M4"});
   }
 }
 
