@@ -1,14 +1,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 #include <QLineEdit>
 #include <QSettings>
-#include <QDesktopServices>
-#include <QUrl>
-
 //-----------------------------------------------------------------------------
 using namespace Mantid::Kernel;
 
@@ -72,6 +70,8 @@ void MuonAnalysisOptionTab::initLayout() {
   m_autoSaver.registerWidget(m_uiForm.hideToolbars, "toolbars", true);
   m_autoSaver.registerWidget(m_uiForm.hideGraphs, "hiddenGraphs", true);
   m_autoSaver.registerWidget(m_uiForm.spinBoxNPlotsToKeep, "fitsToKeep", 1);
+  m_autoSaver.registerWidget(m_uiForm.chkCompatibilityMode, "compatibilityMode",
+                             false);
   m_autoSaver.endGroup();
 
   // Set validators for double fields
@@ -132,22 +132,24 @@ void MuonAnalysisOptionTab::initLayout() {
           SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.binBoundaries, SIGNAL(returnPressed()), this,
           SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.chkCompatibilityMode, SIGNAL(stateChanged(int)), this,
+          SIGNAL(compatibilityModeChanged(int)));
 }
 
 /**
 * Muon Analysis Settings help.
 */
 void MuonAnalysisOptionTab::muonAnalysisHelpSettingsClicked() {
-  QDesktopServices::openUrl(
-      QUrl(QString("http://www.mantidproject.org/") + "MuonAnalysisSettings"));
+  MantidQt::API::HelpWindow::showCustomInterface(
+      nullptr, QString("Muon_Analysis"), QString("settings"));
 }
 
 /*
-* Muon Analysis Rebin help (located on settings wiki).
+* Muon Analysis Rebin help (located in settings section).
 */
 void MuonAnalysisOptionTab::rebinHelpClicked() {
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-                                 "MuonAnalysisSettings#Variable_Rebin"));
+  MantidQt::API::HelpWindow::showCustomInterface(
+      nullptr, QString("Muon_Analysis"), QString("data-binning"));
 }
 
 /**
@@ -379,6 +381,14 @@ MuonAnalysisOptionTab::NewPlotPolicy MuonAnalysisOptionTab::newPlotPolicy() {
   } else {
     return policyMap[selectedPolicy];
   }
+}
+
+/**
+ * Returns whether or not "compatibility mode" is set.
+ * @returns whether the checkbox is ticked
+ */
+bool MuonAnalysisOptionTab::getCompatibilityMode() const {
+  return m_uiForm.chkCompatibilityMode->isChecked();
 }
 }
 }

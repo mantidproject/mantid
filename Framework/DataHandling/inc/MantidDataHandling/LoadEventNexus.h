@@ -7,14 +7,21 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
 #include "MantidDataObjects/Events.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
+
+#ifdef _WIN32 // fixing windows issue causing conflict between
+// winnt char and nexus char
+#undef CHAR
+#endif
+
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
+
 #include <memory>
 #include <mutex>
 #include <boost/lexical_cast.hpp>

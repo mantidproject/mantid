@@ -1341,33 +1341,30 @@ void MantidDockWidget::groupingButtonClick() {
 }
 
 /// Plots a single spectrum from each selected workspace
-void MantidDockWidget::plotSpectra() {
-  const auto userInput = m_tree->chooseSpectrumFromSelected();
-  // An empty map will be returned if the user clicks cancel in the spectrum
-  // selection
-  if (userInput.plots.empty())
-    return;
-
-  bool spectrumPlot(true), errs(false), clearWindow(false);
-  MultiLayer *window(NULL);
-  m_mantidUI->plot1D(userInput.plots, spectrumPlot,
-                     MantidQt::DistributionDefault, errs, window, clearWindow,
-                     userInput.waterfall);
-}
+void MantidDockWidget::plotSpectra() { doPlotSpectra(false); }
 
 /// Plots a single spectrum from each selected workspace with errors
-void MantidDockWidget::plotSpectraErr() {
+void MantidDockWidget::plotSpectraErr() { doPlotSpectra(true); }
+
+/**
+ * Plots a single spectrum from each selected workspace.
+ * Option to plot errors or not.
+ * @param errors :: [input] True if errors should be plotted, else false
+ */
+void MantidDockWidget::doPlotSpectra(bool errors) {
   const auto userInput = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum
   // selection
   if (userInput.plots.empty())
     return;
 
-  bool spectrumPlot(true), errs(true), clearWindow(false);
-  MultiLayer *window(NULL);
-  m_mantidUI->plot1D(userInput.plots, spectrumPlot,
-                     MantidQt::DistributionDefault, errs, window, clearWindow,
-                     userInput.waterfall);
+  if (userInput.tiled) {
+    m_mantidUI->plotSubplots(userInput.plots, MantidQt::DistributionDefault,
+                             errors);
+  } else {
+    m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
+                       errors, nullptr, false, userInput.waterfall);
+  }
 }
 
 /**
@@ -1521,4 +1518,6 @@ void MantidDockWidget::plotContour() {
       plotter->plotContour(wsGroup, options);
     }
   }
+}
+
 }

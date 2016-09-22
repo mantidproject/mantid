@@ -28,16 +28,24 @@ public:
   void setEditorData(QWidget *editor, const QModelIndex &index) const override;
   void setModelData(QWidget *editor, QAbstractItemModel *model,
                     const QModelIndex &index) const override;
+  void prepareForPastedData();
+
 signals:
   void setAllValues(double);
   void fixParameter(int, bool);
   void setAllFixed(bool);
   void setTie(int, QString);
   void setTieAll(QString);
+  void setValueToLog(int);
+  void setAllValuesToLog();
 
 protected:
   void paint(QPainter *painter, const QStyleOptionViewItem &option,
              const QModelIndex &index) const override;
+
+private slots:
+  void doSetValueToLog(int);
+  void doSetAllValuesToLog();
 
 private:
   bool eventFilter(QObject *obj, QEvent *ev) override;

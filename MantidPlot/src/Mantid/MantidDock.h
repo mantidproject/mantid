@@ -114,6 +114,7 @@ private:
   void addClearMenuItems(QMenu *menu, const QString &wsName);
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
+  void doPlotSpectra(bool errors);
 
 protected:
   MantidTreeWidget *m_tree;
@@ -156,4 +157,5 @@ private:
   /// Keep a map of renamed workspaces between updates
   QMap<QString, QString> m_renameMap;
 };
+
 #endif
