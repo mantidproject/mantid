@@ -191,9 +191,9 @@ void IndirectMoments::momentsAlgComplete(bool error) {
   m_uiForm.ppMomentsPreview->addSpectrum(
       "M0", QString::fromStdString(resultWsNames[0]), 0, Qt::green);
   m_uiForm.ppMomentsPreview->addSpectrum(
-      "M1", QString::fromStdString(resultWsNames[2]), 0, Qt::black);
+      "M1", QString::fromStdString(resultWsNames[1]), 0, Qt::black);
   m_uiForm.ppMomentsPreview->addSpectrum(
-      "M2", QString::fromStdString(resultWsNames[3]), 0, Qt::red);
+      "M2", QString::fromStdString(resultWsNames[2]), 0, Qt::red);
   m_uiForm.ppMomentsPreview->resizeX();
 
   // Enable plot and save buttons
