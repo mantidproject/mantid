@@ -1,4 +1,4 @@
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, invalid-name
 
 """
 Module containing classes to calculate the flux and resolution of direct geometry neutron time-of-flight spectrometers.
