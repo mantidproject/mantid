@@ -2225,10 +2225,10 @@ void EventList::generateCountsHistogramPulseTime(const MantidVec &X,
 * Number of bins is equal to number of elements in vector Y.
 * Appends values to existing Y values.
 *
-* @param Xmin :: Minimal Pulse time (in nanoseconds,
+* @param xMin :: Minimal Pulse time (in nanoseconds,
 *                i.e. DateTime->totalNanoseconds()) value to include
 *                in binning.
-* @param Xmax :: Maximal Pulse time value to constrain binning by (include the
+* @param xMax :: Maximal Pulse time value to constrain binning by (include the
 *                times smaller than right boundary, excluding equal)
 * @param Y :: The generated counts histogram
 * @param TOF_min -- min TOF used to constrain histogram ranges

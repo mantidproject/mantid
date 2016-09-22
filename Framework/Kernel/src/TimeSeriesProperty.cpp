@@ -2140,15 +2140,15 @@ void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
   file->closeGroup();
 }
 /** Calculate constant step hystogram of the time series data.
-@param tMin    -- minimal time to include in histogram
-@param tMax    -- maximal time to constrain the histogram data
-@counts counts -- vector of output histogrammed data.
-On input, the size of the vector defines the number of points in the histogram.
-On output, adds all property elements belonging to the time interval [tMin
-+n*dT;tMin+(n+1)*dT to initial values of each n-th element of the counts vector,
-where dT =
-(tMax-tMin)/conunts.size().
-*/
+* @param tMin    -- minimal time to include in histogram
+* @param tMax    -- maximal time to constrain the histogram data
+* @counts counts -- vector of output histogrammed data.
+*   On input, the size of the vector defines the number of points in the
+*   histogram.
+*   On output, adds all property elements belonging to the time interval
+*  [tMin+n*dT;tMin+(n+1)*dT]
+*  to the initial values of each n-th element of the counts vector,
+*  where dT = (tMax-tMin) divided by counts.size()  */
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::histogramData(
     const Kernel::DateAndTime &tMin, const Kernel::DateAndTime &tMax,
