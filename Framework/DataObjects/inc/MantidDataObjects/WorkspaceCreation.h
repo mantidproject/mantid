@@ -25,6 +25,8 @@ class Workspace2D;
     parent.
   - The type of the output workspace is the dynamic type of the parent if T is a
     base of the parents dynamic type.
+  - The type of the output workspace is T if the dynamic type of the parent is a
+    base of T.
   - If T is not a base of the parents dynamic type, a conversion is attempted.
     Currently this is the case only for EventWorkspace:
     - If the dynamic type of the parent is EventWorkspace but T is not, either a
@@ -37,6 +39,8 @@ class Workspace2D;
       This is equivalent to the old way of using
       WorkspaceFactory::create(parent). In this case, Workspace2D is more
       derived than HistoWorkspace, so a Workspace2D is created.
+    - If the dynamic type of the parent is derived from HistoWorkspace, and
+      EventWorkspace can be created from it.
 
   Other arguments can include:
   - The desired number of spectra (NumSpectra) to be created in the output

@@ -148,6 +148,12 @@ public:
     const auto ws = create<SpecialWorkspace2D>(*parent);
     TS_ASSERT_EQUALS(ws->id(), "SpecialWorkspace2D");
   }
+
+  void test_create_event_from_histo() {
+    const auto parent = create<Workspace2D>(2, Histogram(BinEdges(2)));
+    const auto ws = create<EventWorkspace>(*parent);
+    TS_ASSERT_EQUALS(ws->id(), "EventWorkspace");
+  }
 };
 
 #endif /* MANTID_DATAOBJECTS_WORKSPACECREATIONTEST_H_ */
