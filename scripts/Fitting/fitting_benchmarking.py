@@ -24,6 +24,8 @@ computation time (or iterations of the minimizers).
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
+from __future__ import (absolute_import, division, print_function)
+
 import os
 import time
 
@@ -61,7 +63,7 @@ def do_regression_fitting_benchmark_block(benchmark_problems, minimizers, use_er
     results_per_problem = []
     for prob_file in benchmark_problems:
         prob = iparsing.parse_nist_fitting_problem_file(prob_file)
-        print "Testing fitting of problem {0} (file {1}".format(prob.name, prob_file)
+        print("Testing fitting of problem {0} (file {1}".format(prob.name, prob_file))
 
         results_prob = do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors)
         results_per_problem.extend(results_prob)
@@ -94,7 +96,7 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors = Tr
     num_starts = len(prob.starting_values[0][1])
     for start_idx in range(0, num_starts):
 
-        print ("=================== starting values,: {0}, with idx: {1} ================".
+        print("=================== starting values,: {0}, with idx: {1} ================".
                format(prob.starting_values, start_idx))
         start_string = '' # like: 'b1=250, b2=0.0005'
         for param in prob.starting_values:
@@ -114,8 +116,8 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors = Tr
                                                             minimizer=minimizer_name,
                                                             cost_function=cost_function)
             t_end = time.clock()
-            print "*** with minimizer {0}, Status: {1}, chi2: {2}".format(minimizer_name, status, chi2)
-            print "   params: {0}, errors: {1}".format(params, errors)
+            print("*** with minimizer {0}, Status: {1}, chi2: {2}".format(minimizer_name, status, chi2))
+            print("   params: {0}, errors: {1}".format(params, errors))
 
             def sum_of_squares(values):
                 return np.sum(np.square(values))
@@ -125,9 +127,9 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors = Tr
                 # print " output simulated values: {0}".format(fit_wks.readY(1))
             else:
                 sum_err_sq = float("inf")
-                print " WARNING: no output fit workspace"
+                print(" WARNING: no output fit workspace")
 
-            print "   sum sq: {0}".format(sum_err_sq)
+            print("   sum sq: {0}".format(sum_err_sq))
 
             result = test_result.FittingTestResult()
             result.problem = prob
@@ -137,7 +139,7 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors = Tr
             result.errors = errors
             result.sum_err_sq = sum_err_sq
             result.runtime = t_end - t_start
-            print "Result object: {0}".format(result)
+            print("Result object: {0}".format(result))
             results_problem_start.append(result)
         # This would be meaningless, because not scaled/divided by n
         #avg_sum_sq = np.average([res.sum_err_sq for res in result_fits_minimizer])
@@ -175,10 +177,10 @@ def run_fit(wks, function, minimizer='Levenberg-Marquardt', cost_function='Least
 
         calc_chi2 = msapi.CalculateChiSquared(Function=function,
                                               InputWorkspace=wks, IgnoreInvalidData=ignore_invalid)
-        print "*** with minimizer {0}, calculated: chi2: {1}".format(minimizer, calc_chi2)
+        print("*** with minimizer {0}, calculated: chi2: {1}".format(minimizer, calc_chi2))
 
     except RuntimeError as rerr:
-        print "Warning, Fit probably failed. Going on. Error: {0}".format(str(rerr))
+        print("Warning, Fit probably failed. Going on. Error: {0}".format(str(rerr)))
 
     #param_tbl = mtd['ws_Parameters']
 
@@ -224,7 +226,7 @@ def get_nist_problem_files():
     for data_dir in data_search_dirs:
         if 'reference' in data_dir:
             ref_dir = data_dir
-            print "Found ref dir: {0}".format(ref_dir)
+            print("Found ref dir: {0}".format(ref_dir))
     if not ref_dir:
         raise RuntimeError("Could not find the benchmark data directory")
 

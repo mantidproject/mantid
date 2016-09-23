@@ -1,6 +1,8 @@
 """
 Benchmarks for accuracy (and time / iterations).
 """
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 import stresstesting
 
@@ -38,47 +40,52 @@ def fitting_problem_test_files():
 #pylint: disable=too-many-public-methods
 class FittingBenchmarkTests(unittest.TestCase):
 
-    result = None
-
     def setUp(self):
-        if not self.__class__.result:
-            problem_set = None
-            # result = fitting.RunProblems.do_calc()
-
-    # Rename this to what it does/can do
-    def test_rank_by_chi2_and_runtime(self):
+        self.use_errors = True
+        # result = fitting.RunProblems.do_calc()
         # TO-DO related to this: expose API::FuncMinimizerFactory to Python
         # TOTHINK: use different interface as in the API::FunctionFactory?
         # But still, do we want to enforce a particular ordering for the tables?
-        minimizers_factory = ['BFGS', 'Conjugate gradient (Fletcher-Reeves imp.)',
-                              'Conjugate gradient (Polak-Ribiere imp.)', 'Damping',
-                               #'FABADA', # hide FABADA
-                              'Levenberg-Marquardt', 'Levenberg-MarquardtMD',
-                              'Simplex', 'SteepestDescent', 'DTRS']
-        minimizers = minimizers_factory
-        results_per_block = fitbk.do_regression_fitting_benchmark(include_nist=True, minimizers=minimizers, use_errors=USE_ERRORS)
+        minimizers_pseudofactory = ['BFGS', 'Conjugate gradient (Fletcher-Reeves imp.)',
+                                    'Conjugate gradient (Polak-Ribiere imp.)', 'Damping',
+                                    #'FABADA', # hide FABADA
+                                    'Levenberg-Marquardt', 'Levenberg-MarquardtMD',
+                                    'Simplex', 'SteepestDescent', 'DTRS']
+        self.minimizers = minimizers_factory
+        self.group_names = ['NIST, "lower" difficulty', 'NIST, "average" difficulty', 'NIST, "higher" difficulty', "CUTEst"]
+        self.group_suffix_names = ['nist_lower', 'nist_average', 'nist_higher', 'cutest']
 
+    # Rename this to what it does/can do
+    def test_rank_by_chi2_and_runtime_with_error_weights(self):
+
+        results_per_group = fitbk.do_regression_fitting_benchmark(include_nist=True, minimizers=minimizers, use_errors=USE_ERRORS)
 
         color_scale = [(1.1, 'ranking-top-1'), (1.33, 'ranking-top-2'), (1.75, 'ranking-med-3'), (3, 'ranking-low-4'), (float('nan'), 'ranking-low-5')]
 
         for idx, block_results in enumerate(results_per_block):
             print("\n\n")
-            print("********************************************************").format(idx+1)
-            print("**************** RESULTS FOR BLOCK {0} *****************").format(idx+1)
-            print("********************************************************").format(idx+1)
-            self.print_block_results_tables(minimizers, block_results, simple_text=True, rst=True, color_scale=color_scale)
+            print("********************************************************".format(idx+1))
+            print("**************** RESULTS FOR BLOCK {0} *****************".format(idx+1))
+            print("********************************************************".format(idx+1))
+            self.print_block_results_tables(minimizers, block_results, group_name=self.group_suffix_names[idx],
+                                            simple_text=True, rst=True, color_scale=color_scale)
 
         header = "\n\n"
         header += '**************** OVERALL SUMMARY - ALL BLOCKS ******** \n\n'
         print(header)
-        self.print_overall_results_table(minimizers, results_per_block, rst=True)
+        self.print_overall_results_table(minimizers, results_per_block, self.group_names, rst=True)
 
         # Flush to prevent mix-up with system tests/runner output
         import sys
         sys.stdout.flush()
 
+    def disabled_test_rank_by_chi2_and_runtime_without_error_weights(self):
+        pass
+
+
     # TODO: split into prepare + print
-    def print_overall_results_table(self, minimizers, block_results, simple_text=True, rst=False):
+    def print_overall_results_table(self, minimizers, block_results, group_names, simple_text=True, rst=False):
+
 
         num_blocks = len(block_results)
         num_minimizers = len(minimizers)
@@ -110,9 +117,8 @@ class FittingBenchmarkTests(unittest.TestCase):
         header = '**************** Accuracy ******** \n\n'
         print(header)
 
-        block_names = ['NIST, "lower" difficulty', 'NIST, "average" difficulty', 'NIST, "higher" difficulty', "CUTEst"]
         linked_names = []
-        for name in block_names:
+        for name in group_names:
             linked_names.append("`{0} <http://www.itl.nist.gov/div898/strd/nls/nls_main.shtml>`__".format(name))
 
         tbl_all_summary_acc = self.build_rst_table(minimizers, linked_names, blocks_norm_acc, comparison_type='summary', using_errors=USE_ERRORS)
@@ -124,14 +130,15 @@ class FittingBenchmarkTests(unittest.TestCase):
         print(tbl_all_summary_runtime)
 
     # TODO: split into prepare + print
-    def print_block_results_tables(self, minimizers, results_per_test, simple_text=True, rst=False, color_scale=None):
+    def print_block_results_tables(self, minimizers, results_per_test, group_name, simple_text=True, rst=False, color_scale=None):
         """
         Prints in possibly several alternative formats.
 
         @param minimizers :: list of minimizer names
         @param results_per_test :: result objects
         @param simple_text :: whether to print the tables in a simple text format
-        @param rst :: whether to print the tables in rst format
+        @param rst :: whether to print the tables in rst format. They are printed to the standard outputs
+                      and to files following specific naming conventions
         """
 
         num_tests = len(results_per_test)
@@ -202,11 +209,26 @@ class FittingBenchmarkTests(unittest.TestCase):
             print(header)
             print (tbl_acc_indiv)
 
+            def weighted_suffix_string(use_errors):
+                values = {True: 'weighted', False: 'unweighted'}
+                return values[use_errors]
+
+            fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
+                     format(weighted=weighted_suffix_string(USE_ERRORS),
+                            version=BENCHMARK_VERSION_STR, metric_type='acc', group_name=group_name))
+            with open(fname, 'w') as tbl_file:
+                print(tbl_acc_indiv, file=tbl_file)
+
             # extended summary
             tbl_acc_summary = self.build_rst_table(summary_cols, summary_rows, summary_cells, comparison_type='', using_errors=USE_ERRORS, color_scale=color_scale)
             header = '**************** And Summary (accuracy): ******** \n\n'
             print(header)
             print(tbl_acc_summary)
+            fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
+                     format(weighted=weighted_suffix_string(USE_ERRORS),
+                            version=BENCHMARK_VERSION_STR, metric_type='acc', group_name='summary'))
+            with open(fname, 'w') as tbl_file:
+                print(tbl_acc_summary, file=tbl_file)
 
             tbl_runtime_indiv = self.build_rst_table(minimizers, linked_problems, norm_runtimes, comparison_type='runtime', using_errors=USE_ERRORS, color_scale=color_scale)
             header = " ************* Comparison of runtimes (RST): ****************\n"
@@ -214,12 +236,22 @@ class FittingBenchmarkTests(unittest.TestCase):
             header += "\n\n"
             print(header)
             print (tbl_runtime_indiv)
+            fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
+                     format(weighted=weighted_suffix_string(USE_ERRORS),
+                            version=BENCHMARK_VERSION_STR, metric_type='runtime', group_name=group_name))
+            with open(fname, 'w') as tbl_file:
+                print(tbl_runtime_indiv, file=tbl_file)
 
             # extended summary
-            tbl_summary_runtime = self.build_rst_table(summary_cols, summary_rows, summary_cells_runtime, comparison_type='', using_errors=USE_ERRORS, color_scale=color_scale)
+            tbl_runtime_summary = self.build_rst_table(summary_cols, summary_rows, summary_cells_runtime, comparison_type='', using_errors=USE_ERRORS, color_scale=color_scale)
             header = '**************** And Summary (runtime): ******** \n\n'
             print(header)
-            print(tbl_summary_runtime)
+            print(tbl_runtime_summary)
+            fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
+                     format(weighted=weighted_suffix_string(USE_ERRORS),
+                            version=BENCHMARK_VERSION_STR, metric_type='runtime', group_name='summary'))
+            with open(fname, 'w') as tbl_file:
+                print(tbl_runtime_summary, file=tbl_file)
 
 
     def print_tables_simple_text(self, minimizers, results_per_test, accuracy_tbl, time_tbl, norm_acc_rankings):
@@ -230,7 +262,7 @@ class FittingBenchmarkTests(unittest.TestCase):
         for minimiz in minimizers:
             header += " {0} |".format(minimiz)
         header +="\n"
-        print header
+        print(header)
 
         min_sum_err_sq = np.amin(accuracy_tbl, 1)
         num_tests = len(results_per_test)
@@ -257,9 +289,9 @@ class FittingBenchmarkTests(unittest.TestCase):
         results_text += 'First quartile: {0}\n'.format(np.nanpercentile(norm_acc_rankings, 25, axis=0))
         results_text += 'Third quartile: {0}\n'.format(np.nanpercentile(norm_acc_rankings, 75, axis=0))
 
-        print results_text
+        print(results_text)
 
-        print " ======== Time: ======="
+        print(" ======== Time: =======")
         time_text = ''
         for test_idx in range(0, num_tests):
             time_text += "{0}\t".format(results_per_test[test_idx][0].problem.name)
@@ -278,7 +310,7 @@ class FittingBenchmarkTests(unittest.TestCase):
         time_text += 'First quartile: {0}\n'.format(np.nanpercentile(norm_runtimes, 25, axis=0))
         time_text += 'Third quartile: {0}\n'.format(np.nanpercentile(norm_runtimes, 75, axis=0))
 
-        print time_text
+        print(time_text)
 
 
     def build_rst_table(self, columns_txt, rows_txt, cells, comparison_type, using_errors, color_scale=None):
@@ -308,8 +340,8 @@ class FittingBenchmarkTests(unittest.TestCase):
                 cell_len = new_len
 
 
-        print "*** comparison_type: ", comparison_type
-        print "*** with rows_txt: ", rows_txt
+        print("*** comparison_type: ", comparison_type)
+        print("*** with rows_txt: ", rows_txt)
         if 'summary' == comparison_type and 'using_errors':
             items_link = [ 'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_lower',
                            'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_average',
@@ -371,7 +403,7 @@ class FittingBenchmarkTests(unittest.TestCase):
         for row in range(0, cells.shape[0]):
             # Pick either individual or group link
             if isinstance(items_link, list):
-                print "** shape: {0}, idx: {1}, list: {2} ".format(cells.shape[0], row, items_link)
+                print("** shape: {0}, idx: {1}, list: {2} ".format(cells.shape[0], row, items_link))
                 link = items_link[row]
             else:
                 link = items_link
