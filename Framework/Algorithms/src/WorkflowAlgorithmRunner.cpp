@@ -204,30 +204,46 @@ void WorkflowAlgorithmRunner::configureRow(
     ITableWorkspace_sptr setupTable, ITableWorkspace_sptr propertyTable,
     const size_t currentRow, QUEUE &queue, const MAP &ioMap,
     std::shared_ptr<std::unordered_set<size_t>> rowsBeingQueued) const {
+  // This method works recursively with regards to dependency resolution.
+
   if (currentRow > setupTable->rowCount()) {
     throw std::runtime_error("Current row " + std::to_string(currentRow) +
                              " out of task table bounds " +
                              std::to_string(setupTable->rowCount()) + '.');
   }
+
+  // 1. currentRow is already in queue? Nothing to be done, then.
+  // Here we blindly assume that propertyTable has been configured as well.
   if (std::find(queue.cbegin(), queue.cend(), currentRow) != queue.cend()) {
     return;
   }
+
+  // 2. Check if currentRow is being processed already to prevent circular
+  // dependencies. If not, mark the row as such.
   if (!rowsBeingQueued) {
     rowsBeingQueued.reset(new std::unordered_set<size_t>());
   }
   const auto status = rowsBeingQueued->emplace(currentRow);
   if (!status.second) {
-    // This row is already being processed.
     throw std::runtime_error("Circular dependencies!");
   }
+
+  // 3a. Find the rows on which currentRow depends on. For each of them,
+  // call this method recursively to make sure they are in the queue
+  // before currentRow.
+  // 3b. Configure propertyTable for currentRow by adding the correct
+  // workspace names to input/output columns.
   for (const auto &ioPair : ioMap) {
     const auto &outputId =
         setupTable->getRef<std::string>(ioPair.first, currentRow);
     if (!outputId.empty()) {
       if (isHardCodedWorkspaceName(outputId)) {
+        // Handle hard-coded input.
         propertyTable->getRef<std::string>(ioPair.first, currentRow) =
             tidyWorkspaceName(outputId);
       } else {
+        // If input is not hard-coded, we have a dependency.
+        // Find the source row.
         size_t outputRow = -1;
         try {
           setupTable->find(outputId, outputRow, 0);
@@ -238,7 +254,7 @@ void WorkflowAlgorithmRunner::configureRow(
               std::to_string(currentRow) + ", column \"" + ioPair.first +
               "\").");
         }
-
+        // Configure the source row and recursively the rows it depends on.
         configureRow(setupTable, propertyTable, outputRow, queue, ioMap,
                      rowsBeingQueued);
         const auto outputCol = ioPair.second;
@@ -248,6 +264,7 @@ void WorkflowAlgorithmRunner::configureRow(
           throw std::runtime_error("No source workspace name found for " +
                                    ioPair.first + '.');
         }
+        // Handle forced output.
         if (isHardCodedWorkspaceName(outputWorkspaceName)) {
           outputWorkspaceName = tidyWorkspaceName(outputWorkspaceName);
         }
@@ -258,7 +275,12 @@ void WorkflowAlgorithmRunner::configureRow(
       }
     }
   }
+
+  // 4. Dependencies have been taken care of -> add currentRow to
+  // queue.
   queue.emplace_back(currentRow);
+
+  // 5. Finally, unmark currentRow as being processed.
   rowsBeingQueued->erase(currentRow);
 }
 
