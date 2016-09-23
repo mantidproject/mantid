@@ -1,4 +1,4 @@
-# pylint: disable=too-few-public-methods,disable=redefined-builtin
+# pylint: disable=too-few-public-methods,redefined-builtin
 """Holds classes that define the backgrounds for fitting
 """
 from __future__ import (absolute_import, division, print_function)

@@ -1,4 +1,4 @@
-#pylint: disable=too-many-arguments,disable=redefined-builtin
+#pylint: disable=too-many-arguments,redefined-builtin
 """Holds classes that define the mass profiles.
 This is all essentially about parsing the user input and putting it into a form
 the Mantid fitting algorithm will understand
