@@ -4,6 +4,8 @@
 This is all essentially about parsing the user input and putting it into a form
 the Mantid fitting algorithm will understand
 """
+from __future__ import (absolute_import, division, print_function)
+
 import ast
 import collections
 import re
@@ -293,7 +295,7 @@ class GramCharlierMassProfile(MassProfile):
         for key, parser in key_names:
             try:
                 parsed_values.append(parser(func_str, key))
-            except ValueError, exc:
+            except ValueError as exc:
                 raise TypeError(str(exc))
 
         params = {
@@ -356,7 +358,7 @@ class GramCharlierMassProfile(MassProfile):
             if self.fsecoeff is not None:
                 fitting_str += "FSECoeff={0}".format(self.fsecoeff)
             if self.hermite_coeff_vals is not None:
-                for i, coeff in self.hermite_coeff_vals.items():
+                for i, coeff in list(self.hermite_coeff_vals.items()):
                     if coeff > 0:
                         fitting_str += ",C_{0}={1:f}".format(i, coeff)
 
@@ -414,9 +416,9 @@ def create_from_str(func_str, mass):
     for cls in known_types:
         try:
             return cls.from_str(func_str, mass)
-        except TypeError, exc:
+        except TypeError as exc:
             errors[str(cls)] = str(exc)
 
     # if we get here we were unable to parse anything acceptable
-    msgs = ["{0}: {1}".format(name, error) for name, error in errors.iteritems()]
+    msgs = ["{0}: {1}".format(name, error) for name, error in errors.items()]
     raise ValueError("\n".join(msgs))
