@@ -96,8 +96,6 @@ void runCalculateFlatBackground(int functindex) {
   TS_ASSERT(flatBG.isExecuted())
 }
 
-double round(double value) { return floor(value * 100000 + 0.5) / 100000; }
-
 void addInstrument(DataObjects::Workspace2D_sptr &WS) {
   int ndets = static_cast<int>(WS->getNumberHistograms());
 

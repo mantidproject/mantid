@@ -131,7 +131,7 @@ private:
                                          const size_t pointSize = 200) {
     vector<double> data{};
     data.reserve(pointSize);
-    for (int i = 0; i < pointSize; ++i) {
+    for (size_t i = 0; i < pointSize; ++i) {
       data.push_back(theGiftThatKeepsOnGiving<double>());
     }
 
