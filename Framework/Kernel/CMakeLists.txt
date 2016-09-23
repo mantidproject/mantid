@@ -542,7 +542,7 @@ set ( PLUGINS "." )
 if ( MAKE_VATES )
   set ( PV_PLUGINS "./${PVPLUGINS_DIR}" )
   if ( MSVC )
-    set (PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
+    set (PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
   else()
     set ( PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/lib;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
   endif()
@@ -622,7 +622,6 @@ if(MSVC)
      ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
   )
 else()
-  # Then, at build time, copy into appropriate place
   file(GENERATE
      OUTPUT
      ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Mantid.properties
