@@ -70,13 +70,15 @@ public:
   }
 
   void test_create_IndexInfo_Histogram() {
-    const auto ws = create<Workspace2D>(make_indices(), Histogram(BinEdges{1, 2, 4}));
+    const auto ws =
+        create<Workspace2D>(make_indices(), Histogram(BinEdges{1, 2, 4}));
     check_indices(*ws);
     check_data(*ws);
   }
 
   void test_create_parent() {
-    const auto parent = create<Workspace2D>(make_indices(), Histogram(BinEdges{1, 2, 4}));
+    const auto parent =
+        create<Workspace2D>(make_indices(), Histogram(BinEdges{1, 2, 4}));
     const auto ws = create<Workspace2D>(*parent);
     check_indices(*ws);
     check_data(*ws);
@@ -100,8 +102,7 @@ public:
   }
 
   void test_create_parent_size() {
-    const auto parent =
-        create<Workspace2D>(3, Histogram(BinEdges{1, 2, 4}));
+    const auto parent = create<Workspace2D>(3, Histogram(BinEdges{1, 2, 4}));
     parent->getSpectrum(0).setSpectrumNo(7);
     const auto ws = create<Workspace2D>(*parent, 2);
     check_default_indices(*ws);
@@ -109,8 +110,7 @@ public:
   }
 
   void test_create_parent_IndexInfo_same_size() {
-    const auto parent =
-        create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4}));
+    const auto parent = create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4}));
     const auto ws = create<Workspace2D>(*parent, make_indices());
     // If parent has same size, data in IndexInfo is ignored
     check_default_indices(*ws);
@@ -118,8 +118,7 @@ public:
   }
 
   void test_create_parent_IndexInfo() {
-    const auto parent =
-        create<Workspace2D>(3, Histogram(BinEdges{1, 2, 4}));
+    const auto parent = create<Workspace2D>(3, Histogram(BinEdges{1, 2, 4}));
     const auto ws = create<Workspace2D>(*parent, make_indices());
     check_indices(*ws);
     check_data(*ws);

@@ -153,7 +153,8 @@ public:
 
     // Internally this references data in ISpectrum
     const auto &indexInfo = ws.indexInfo();
-    // This should create a copy, dropping any links to MatrixWorkspace or ISpectrum
+    // This should create a copy, dropping any links to MatrixWorkspace or
+    // ISpectrum
     const auto copy(indexInfo);
 
     TS_ASSERT_EQUALS(copy.spectrumNumber(0), 2);
