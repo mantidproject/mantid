@@ -149,7 +149,7 @@ BackgroundHelper::BackgroundHelper()
     : m_WSUnit(), m_bgWs(), m_wkWS(), m_pgLog(nullptr), m_inPlace(true),
       m_singleValueBackground(false), m_NBg(0), m_dtBg(1), m_ErrSq(0),
       m_Emode(0), m_Efix(0), m_nullifyNegative(false),
-      m_previouslyRemovedBkgMode(false) {}
+      m_previouslyRemovedBkgMode(false), m_spectrumInfo(nullptr) {}
 /// Destructor
 BackgroundHelper::~BackgroundHelper() { this->deleteUnitsConverters(); }
 

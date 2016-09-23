@@ -25,7 +25,7 @@ DECLARE_ALGORITHM(RemoveBins)
 
 RemoveBins::RemoveBins()
     : API::Algorithm(), m_inputWorkspace(), m_startX(DBL_MAX), m_endX(-DBL_MAX),
-      m_rangeUnit(), m_interpolate(false) {}
+      m_rangeUnit(), m_interpolate(false), m_spectrumInfo(nullptr) {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *

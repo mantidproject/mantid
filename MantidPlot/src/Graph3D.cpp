@@ -2869,7 +2869,7 @@ int Graph3D::read3DPlotStyle(MantidQt::API::TSVSerialiser &tsv) {
 
 Graph3D::SurfaceFunctionParams
 Graph3D::readSurfaceFunction(MantidQt::API::TSVSerialiser &tsv) {
-  SurfaceFunctionParams params;
+  SurfaceFunctionParams params = {};
   tsv >> params.formula;
   params.type = readSurfaceFunctionType(params.formula);
 
