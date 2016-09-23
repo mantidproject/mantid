@@ -21,6 +21,11 @@ CreateTransmissionWorkspace
 - A workflow diagram has been added to the documentation.
 - The rebinning in wavelength has been removed
 
+Instrument & IDF
+----------------
+
+- New CRISP data files are now recognised
+- POLREF IDF has been updated
 
 ISIS Reflectometry (Polref)
 ###########################

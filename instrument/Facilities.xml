@@ -27,6 +27,7 @@
   </instrument>
 
   <instrument name="CRISP" shortname="CSP">
+    <zeropadding size="8" startRunNumber="99778" prefix="CRISP"/>
     <technique>Reflectometry</technique>
     <livedata address="NDXCRISP:6789" />
   </instrument>
