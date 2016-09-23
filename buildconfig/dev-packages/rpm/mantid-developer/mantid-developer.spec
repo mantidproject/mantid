@@ -34,7 +34,7 @@ Requires: nexus-devel >= 4.2
 Requires: ninja-build
 Requires: numpy
 Requires: OCE-devel
-Requires: poco-devel
+Requires: poco-devel >= 1.4.6
 Requires: PyQt4-devel
 Requires: python-devel
 Requires: python-ipython >= 1.1
@@ -114,6 +114,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Fri Sep 23 2016 Stuart Campbell <campbellsi@ornl.gov>
+- Require poco >= 1.4.6
+
 * Thu Aug 04 2016 Peter Peterson <petersonpf@ornl.gov>
 - Require sphinx-bootstrap, ninja, and python3 packages on fedora
 
