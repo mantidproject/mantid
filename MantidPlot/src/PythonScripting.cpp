@@ -236,21 +236,20 @@ void PythonScripting::setupPythonPath() {
 
   // These should contain only / separators
   // Python paths required by VTK and ParaView
-  const auto paraviewPythonPaths =
+  const auto pvPythonPaths =
       ConfigService::Instance().getString("paraview.pythonpaths");
 
-  if (!paraviewPythonPaths.empty()) {
+  if (!pvPythonPaths.empty()) {
     Mantid::Kernel::StringTokenizer tokenizer(
-        paraviewPythonPaths, ";",
-        Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY |
-            Mantid::Kernel::StringTokenizer::TOK_TRIM);
-    for (const auto &pythonPath : tokenizer) {
-#ifdef __APPLE__
-      std::string fullPath = appPath + pythonPath;
-      PyList_Insert(syspath, 1, FROM_CSTRING(fullPath.c_str()));
-#else
-      PyList_Insert(syspath, 1, FROM_CSTRING(pythonPath.c_str()));
-#endif
+        pvPythonPaths, ";", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY |
+                                Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    for (const auto &pvPath : tokenizer) {
+      if (pvPath.substr(0, 3) == "../") {
+        std::string fullPath = appPath + pvPath;
+        PyList_Insert(syspath, 1, FROM_CSTRING(fullPath.c_str()));
+      } else {
+        PyList_Insert(syspath, 1, FROM_CSTRING(pvPath.c_str()));
+      }
     }
   }
 
