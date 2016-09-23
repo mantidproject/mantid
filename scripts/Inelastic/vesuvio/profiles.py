@@ -1,10 +1,10 @@
-#pylint: disable=too-many-arguments
+#pylint: disable=too-many-arguments,disable=redefined-builtin
 """Holds classes that define the mass profiles.
-
 This is all essentially about parsing the user input and putting it into a form
 the Mantid fitting algorithm will understand
 """
 from __future__ import (absolute_import, division, print_function)
+from six import iteritems
 
 import ast
 import collections
@@ -420,5 +420,5 @@ def create_from_str(func_str, mass):
             errors[str(cls)] = str(exc)
 
     # if we get here we were unable to parse anything acceptable
-    msgs = ["{0}: {1}".format(name, error) for name, error in errors.items()]
+    msgs = ["{0}: {1}".format(name, error) for name, error in iteritems(errors)]
     raise ValueError("\n".join(msgs))
