@@ -1,4 +1,7 @@
-#pylint: disable=no-init,invalid-name,too-many-locals,too-many-lines
+#pylint: disable=no-init,invalid-name,too-many-locals,too-many-lines, redefined-builtin
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+
 import numpy as np
 import re
 import os.path
@@ -488,7 +491,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         total_workspace = None
 
         # Output each contribution to it's own workspace
-        for ion_name, ions in partial_ions.items():
+        for ion_name, ions in list(partial_ions.items()):
             partial_ws_name = self._out_ws_name + '_'
 
             partial_ws = self._compute_partial(ions, frequencies, eigenvectors, weights)
@@ -611,7 +614,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         intensities = []
         for block_vectors in eigenvectors:
             block_intensities = []
-            for mode in xrange(self._num_branches):
+            for mode in range(self._num_branches):
                 # Only select vectors for the ions we're interested in
                 lower, upper = mode * self._num_ions, (mode + 1) * self._num_ions
                 vectors = block_vectors[lower:upper]

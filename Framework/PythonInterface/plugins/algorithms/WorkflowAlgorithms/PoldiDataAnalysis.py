@@ -1,4 +1,6 @@
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
