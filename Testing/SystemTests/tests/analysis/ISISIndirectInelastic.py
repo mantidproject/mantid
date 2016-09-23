@@ -905,7 +905,7 @@ class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
                     'Intensity=0.304185,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
         self.spec_max = 41
-        self.startx = 0.022861
+        self.startx = 0.0
         self.endx = 0.118877
 
     def get_reference_files(self):
@@ -927,11 +927,12 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.num_bins = 4
 
         # Iqt Seq Fit
-        self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
-                     'Intensity=0.355286,Tau=100;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'composite=CompositeFunction,NumDeriv=1;name=LinearBackground,A0=0,A1=0,ties=(A1=0);'\
+                    'name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
+                    'Intensity=0.355286,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
         self.spec_max = 50
-        self.startx = 0.013717
+        self.startx = 0.0
         self.endx = 0.169171
 
     def get_reference_files(self):
