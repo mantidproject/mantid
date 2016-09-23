@@ -35,7 +35,7 @@ import input_parsing as iparsing
 import test_result
 import test_problem
 
-def do_regression_fitting_benchmark(include_nist=True, include_cutest=False, minimizers=None):
+def do_regression_fitting_benchmark(include_nist=True, include_cutest=True, minimizers=None, use_errors=True):
     # Several blocks of problems. Results for each block will go into a separate table
     problem_blocks = []
 
@@ -43,12 +43,12 @@ def do_regression_fitting_benchmark(include_nist=True, include_cutest=False, min
         problem_blocks.extend(get_nist_problem_files())
 
     if include_cutest:
-        problem_blocks.extend([cutest_all])
+        problem_blocks.extend([get_cutest_problem_files()])
 
     fit_results = [do_regression_fitting_benchmark_block(block, minimizers) for block in problem_blocks]
     return fit_results
 
-def do_regression_fitting_benchmark_block(benchmark_problems, minimizers):
+def do_regression_fitting_benchmark_block(benchmark_problems, minimizers, use_errors = True):
     """
     Applies one minmizer to a block/list of test problems
 
@@ -63,7 +63,7 @@ def do_regression_fitting_benchmark_block(benchmark_problems, minimizers):
         prob = iparsing.parse_nist_fitting_problem_file(prob_file)
         print "Testing fitting of problem {0} (file {1}".format(prob.name, prob_file)
 
-        results_prob = do_regresion_fitting_benchmark_one_problem(prob, minimizers)
+        results_prob = do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors)
         results_per_problem.extend(results_prob)
 
     return results_per_problem
@@ -99,7 +99,12 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors = Tr
         start_string = '' # like: 'b1=250, b2=0.0005'
         for param in prob.starting_values:
             start_string += ('{0}={1},'.format(param[0], param[1][start_idx]))
-        user_func = "name=UserFunction, Formula={0}, {1}".format(prob.equation, start_string)
+
+
+        if 'name' in prob.equation:
+            user_func = prob.equation
+        else:
+            user_func = "name=UserFunction, Formula={0}, {1}".format(prob.equation, start_string)
 
         results_problem_start = []
         for minimizer_name in minimizers:
@@ -134,7 +139,7 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors = Tr
             result.runtime = t_end - t_start
             print "Result object: {0}".format(result)
             results_problem_start.append(result)
-        # meaningless, because not scaled/divided by n
+        # This would be meaningless, because not scaled/divided by n
         #avg_sum_sq = np.average([res.sum_err_sq for res in result_fits_minimizer])
         #avg_sum_sq = np.nanmean([res.sum_err_sq for res in result_fits_minimizer])
         #print ("Results for this minimizer '{0}', avg sum errors sq: {1}".
@@ -186,6 +191,7 @@ def run_fit(wks, function, minimizer='Levenberg-Marquardt', cost_function='Least
 
     return status, chi2, fit_wks, params, errors
 
+HARDCODED_REF_DIR = r'/home/fedemp/mantid-repos/mantid-fitting-benchmarking/Testing/SystemTests/tests/analysis/reference'
 def get_nist_problem_files():
     """
        Gets the problem files grouped in blocks, where the blocks would
@@ -223,7 +229,7 @@ def get_nist_problem_files():
         raise RuntimeError("Could not find the benchmark data directory")
 
     ##### TEMPORAL OVERWRITE
-    ref_dir = r'/home/fedemp/mantid-repos/mantid-fitting-benchmarking/Testing/SystemTests/tests/analysis/reference'
+    ref_dir = HARDCODED_REF_DIR
 
     nist_lower_files = [os.path.join(ref_dir, nist_dir, fname) for fname in nist_lower]
     nist_average_files = [os.path.join(ref_dir, nist_dir, fname) for fname in nist_average]
@@ -232,3 +238,12 @@ def get_nist_problem_files():
 
     return problem_files
 
+def get_cutest_problem_files():
+    # TODO - fix this
+    ref_dir = HARDCODED_REF_DIR
+
+    cutest_all = [ 'PALMER6C.dat', 'PALMER7C.dat', 'PALMER8C.dat', 'YFITU.dat', 'VESUVIOLS.dat', 'DMN15102LS.dat' ]
+    cutest_dir = os.path.join('fitting', 'CUTEst')
+    cutest_files = [os.path.join(ref_dir, cutest_dir, fname) for fname in cutest_all]
+
+    return cutest_files

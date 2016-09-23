@@ -12,10 +12,11 @@ import numpy as np
 import mantid.simpleapi as msapi
 import fitting_benchmarking as fitbk
 
-#### REORGANIZE
+BENCHMARK_VERSION_STR = 'v3.8'
+FILENAME_SUFFIX_ACCURACY = '_acc'
+FILENAME_SUFFIX_RUNTIME = '_runtime'
 
-#import fitting
-#FittingProblem, FittingProblemLoader, RunProblems
+USE_ERRORS = True
 
 def fitting_problems_all_nist_nlr():
     # 'reference/nist_nonlinear_regression/DanWood.dat'
@@ -45,7 +46,7 @@ class FittingBenchmarkTests(unittest.TestCase):
             # result = fitting.RunProblems.do_calc()
 
     # Rename this to what it does/can do
-    def test_rank_by_chi2(self):
+    def test_rank_by_chi2_and_runtime(self):
         # TO-DO related to this: expose API::FuncMinimizerFactory to Python
         # TOTHINK: use different interface as in the API::FunctionFactory?
         # But still, do we want to enforce a particular ordering for the tables?
@@ -55,7 +56,7 @@ class FittingBenchmarkTests(unittest.TestCase):
                               'Levenberg-Marquardt', 'Levenberg-MarquardtMD',
                               'Simplex', 'SteepestDescent', 'DTRS']
         minimizers = minimizers_factory
-        results_per_block = fitbk.do_regression_fitting_benchmark(include_nist=True, minimizers=minimizers)
+        results_per_block = fitbk.do_regression_fitting_benchmark(include_nist=True, minimizers=minimizers, use_errors=USE_ERRORS)
 
 
         color_scale = [(1.1, 'ranking-top-1'), (1.33, 'ranking-top-2'), (1.75, 'ranking-med-3'), (3, 'ranking-low-4'), (float('nan'), 'ranking-low-5')]
@@ -109,17 +110,17 @@ class FittingBenchmarkTests(unittest.TestCase):
         header = '**************** Accuracy ******** \n\n'
         print(header)
 
-        block_names = ['NIST, "lower" difficulty', 'NIST, "average" difficulty', 'NIST, "higher" difficulty']
+        block_names = ['NIST, "lower" difficulty', 'NIST, "average" difficulty', 'NIST, "higher" difficulty', "CUTEst"]
         linked_names = []
         for name in block_names:
             linked_names.append("`{0} <http://www.itl.nist.gov/div898/strd/nls/nls_main.shtml>`__".format(name))
 
-        tbl_all_summary_acc = self.build_rst_table(minimizers, linked_names, blocks_norm_acc)
+        tbl_all_summary_acc = self.build_rst_table(minimizers, linked_names, blocks_norm_acc, comparison_type='summary', using_errors=USE_ERRORS)
         print(tbl_all_summary_acc)
 
         header = '**************** Runtime ******** \n\n'
         print(header)
-        tbl_all_summary_runtime = self.build_rst_table(minimizers, linked_names, blocks_norm_runtime)
+        tbl_all_summary_runtime = self.build_rst_table(minimizers, linked_names, blocks_norm_runtime, comparison_type='summary', using_errors=USE_ERRORS)
         print(tbl_all_summary_runtime)
 
     # TODO: split into prepare + print
@@ -194,27 +195,28 @@ class FittingBenchmarkTests(unittest.TestCase):
             self.print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, time_tbl, norm_acc_rankings)
 
         if rst:
-            #tbl_indiv = self.calc_individual_table_rst(minimizers, results_per_minimizer, norm_acc_rankings)
-            tbl_indiv = self.build_rst_table(minimizers, linked_problems, norm_acc_rankings, color_scale)
+            tbl_acc_indiv = self.build_rst_table(minimizers, linked_problems, norm_acc_rankings, comparison_type='accuracy', using_errors=USE_ERRORS, color_scale=color_scale)
             header = " ************* Comparison of sum of square errors (RST): *********\n"
             header += " *****************************************************************\n"
             header += "\n\n"
             print(header)
-            print (tbl_indiv)
+            print (tbl_acc_indiv)
 
-            tbl_summary = self.build_rst_table(summary_cols, summary_rows, summary_cells, color_scale)
+            # extended summary
+            tbl_acc_summary = self.build_rst_table(summary_cols, summary_rows, summary_cells, comparison_type='', using_errors=USE_ERRORS, color_scale=color_scale)
             header = '**************** And Summary (accuracy): ******** \n\n'
             print(header)
-            print(tbl_summary)
+            print(tbl_acc_summary)
 
-            tbl_runtime_indiv = self.build_rst_table(minimizers, linked_problems, norm_runtimes, color_scale)
+            tbl_runtime_indiv = self.build_rst_table(minimizers, linked_problems, norm_runtimes, comparison_type='runtime', using_errors=USE_ERRORS, color_scale=color_scale)
             header = " ************* Comparison of runtimes (RST): ****************\n"
             header += " *****************************************************************\n"
             header += "\n\n"
             print(header)
             print (tbl_runtime_indiv)
 
-            tbl_summary_runtime = self.build_rst_table(summary_cols, summary_rows, summary_cells_runtime, color_scale)
+            # extended summary
+            tbl_summary_runtime = self.build_rst_table(summary_cols, summary_rows, summary_cells_runtime, comparison_type='', using_errors=USE_ERRORS, color_scale=color_scale)
             header = '**************** And Summary (runtime): ******** \n\n'
             print(header)
             print(tbl_summary_runtime)
@@ -279,17 +281,23 @@ class FittingBenchmarkTests(unittest.TestCase):
         print time_text
 
 
-    def build_rst_table(self, columns_txt, rows_txt, cells, color_scale=None):
+    def build_rst_table(self, columns_txt, rows_txt, cells, comparison_type, using_errors, color_scale=None):
         """"
         Builds an RST table, given the list of column and row headers,
-        and a 2D numpy array with values for the cells
+        and a 2D numpy array with values for the cells.
+        This can be tricky/counterintuitive, see:
+        http://docutils.sourceforge.net/docs/dev/rst/problems.html
 
-        See http://docutils.sourceforge.net/docs/dev/rst/problems.html
-
-        @param colums_txt :: the text for the columns
+        @param colums_txt :: the text for the columns, one item per column
         @param rows_txt :: the text for the rows (will go in the leftmost column)
         @param cells :: a 2D numpy array with as many rows as items have been given
         in rows_txt, and as many columns as items have been given in columns_txt
+
+        @param using_errors :: whether this comparison uses errors in the cost function
+        (weighted or unweighted), required to link the table properly
+
+        @param color_scale :: list with pairs of threshold value - color, to produce color
+        tags for the cells
         """
         # One length for all cells
         cell_len = 50
@@ -298,6 +306,42 @@ class FittingBenchmarkTests(unittest.TestCase):
             new_len = len(col) + 2
             if new_len > cell_len:
                 cell_len = new_len
+
+
+        print "*** comparison_type: ", comparison_type
+        print "*** with rows_txt: ", rows_txt
+        if 'summary' == comparison_type and 'using_errors':
+            items_link = [ 'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_lower',
+                           'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_average',
+                           'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_higher',
+                           'Minimizers_unweighted_comparison_in_terms_of_runtime_cutest' ]
+        elif 'summary' == comparison_type and not 'using_errors':
+            items_link = [ 'Minimizers_unweighted_comparison_in_terms_of_accuracy_nist_lower',
+                           'Minimizers_unweighted_comparison_in_terms_of_accuracy_nist_average',
+                           'Minimizers_unweighted_comparison_in_terms_of_accuracy_nist_higher',
+                           'Minimizers_unweighted_comparison_in_terms_of_accuracy_cutest' ]
+        elif 'accuracy' == comparison_type or 'runtime' == comparison_type:
+            # TODO: needs to know weighted or not!!!
+            # links for the cells of the summary tables (to the detailed results
+            if using_errors:
+                items_link = 'FittingMinimizersComparisonDetailedWithWeights'
+            else:
+                items_link = 'FittingMinimizersComparisonDetailed'
+        else:
+            items_link = ''
+
+
+        links_len = 0
+        if items_link and isinstance(items_link, list):
+            links_len = max([len(item) for item in items_link])
+        elif items_link:
+            links_len = len(items_link)
+
+        additional_len = 0
+        if items_link:
+            additional_len = links_len
+        cell_len += int(additional_len/1.2)
+
 
         # The first column tends to be disproportionately long if it has a link
         first_col_len = cell_len
@@ -323,21 +367,35 @@ class FittingBenchmarkTests(unittest.TestCase):
         # the footer is in general the delimiter between rows, including the last one
         tbl_footer = tbl_header_top + '\n'
 
-
         tbl_body = ''
         for row in range(0, cells.shape[0]):
+            # Pick either individual or group link
+            if isinstance(items_link, list):
+                print "** shape: {0}, idx: {1}, list: {2} ".format(cells.shape[0], row, items_link)
+                link = items_link[row]
+            else:
+                link = items_link
+
             tbl_body += '|' + rows_txt[row].ljust(first_col_len, ' ') + '|'
             for col in range(0, cells.shape[1]):
-                tbl_body += self.format_cell_value_rst(cells[row,col], cell_len, color_scale) + '|'
-                #tbl_body += ' {:.4g}'.format(cells[row, col]).ljust(cell_len, ' ') + '|'
+                tbl_body += self.format_cell_value_rst(cells[row,col], cell_len, color_scale, link) + '|'
+
             tbl_body += '\n'
             tbl_body += tbl_footer
 
         return tbl_header + tbl_body
 
-    def format_cell_value_rst(self, value, width, color_scale=None):
+    def format_cell_value_rst(self, value, width, color_scale=None, items_link=None):
+        """
+        Build the content string for a table cell, adding style/color tags
+        if required.
+
+        """
         if not color_scale:
-            value_text = ' {0:.4g}'.format(value).ljust(width, ' ')
+            if not items_link:
+                value_text = ' {0:.4g}'.format(value).ljust(width, ' ')
+            else:
+                value_text = ' :ref:`{0:.4g} <{1}>`'.format(value, items_link).ljust(width, ' ')
         else:
             color = ''
             for color_descr in color_scale:
@@ -349,9 +407,6 @@ class FittingBenchmarkTests(unittest.TestCase):
             value_text = " :{0}:`{1:.4g}`".format(color, value).ljust(width, ' ')
 
         return value_text
-
-    def disabled_test_rank_by_time(self):
-        pass
 
     
 # Run the unittest tests defined above as a Mantid system test

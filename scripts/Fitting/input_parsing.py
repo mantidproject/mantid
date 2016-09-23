@@ -31,6 +31,8 @@ import numpy as np
 import test_problem
 
 def parse_data_pattern(data_text):
+    if not data_text:
+        return None
 
     first = data_text[0].strip()
     dim = len(first.split())
@@ -87,11 +89,16 @@ def parse_starting_values(lines):
             break
 
         comps = line.split()
-        if 6 != len(comps):
+        if 6 != len(comps) and 5 != len(comps):
             raise RuntimeError("Failed to parse this line as starting "
                                "values information: {0}".format(line))
 
-        alt_values = [float(comps[2]), float(comps[3])]
+        # A bit weak/lax parsing, if there is one less column, assume only one start point
+        if 6 == len(comps):
+            alt_values = [float(comps[2]), float(comps[3])]
+        elif 5 == len(comps):
+            alt_values = [float(comps[2])]
+
         starting_vals.append([comps[0], alt_values])
 
     return starting_vals
@@ -121,8 +128,8 @@ def parse_nist_file(spec_file):
         if not line:
             continue
 
-        if line.startswith('Model'):
-            print "Found model"
+        if line.startswith('Model:'):
+            print "Found model, first line: {0}".format(line)
 
             # Would skip number of parameters, and empty line, but not
             # adequate for all test problems
@@ -132,7 +139,7 @@ def parse_nist_file(spec_file):
             while (not re.match(r'\s*y\s*=(.+)', lines[idx])\
                    and not re.match(r'\s*log\[y\]\s*=(.+)', lines[idx]))\
                    and idx < len(lines): # [\s*\+\s*e]
-                print "Didn't match: ", lines[idx]
+                print "Line didn't match: ", lines[idx]
                 idx += 1
             # Next non-empty lines are assumed to continue the equation
             equation_text = ''
@@ -146,22 +153,23 @@ def parse_nist_file(spec_file):
             idx += 2
             starting_values = parse_starting_values(lines[idx:])
             idx += len(starting_values)
+            print "Starting values, got: ", starting_values
 
         elif line.startswith('Residual Sum of Squares'):
             residual_sum_sq = float(line.split()[4])
 
         elif line.startswith('Data:'):
             if 0 == data_idx:
-                print "First data"
+                print "First data, line: {0}".format(line)
                 data_idx += 1
             elif 1 == data_idx:
                 print "Found second data, idx: {0}".format(idx)
                 data_pattern_text = lines[idx:]
                 idx = len(lines)
             else:
-                raise RuntimeError('Error')
+                raise RuntimeError('Error parsing data line: {}'.format(line))
         else:
-            print "unknown line"
+            print "unknown line: {0}".format(line)
 
 
     # print "Data pattern, text: {0}".format(data_pattern_text)
