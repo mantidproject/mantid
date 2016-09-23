@@ -541,8 +541,8 @@ endif ()
 set ( PLUGINS "." )
 if ( MAKE_VATES )
   set ( PV_PLUGINS "./${PVPLUGINS_DIR}" )
-  if ( WIN32 )
-    set (PARAVIEW_PYTHON_PATHS "$<$<CONFIG:Release>:${ParaView_DIR}/lib/Release>$<$<CONFIG:Debug>:${ParaView_DIR}/lib/Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
+  if ( MSVC )
+    set (PARAVIEW_PYTHON_PATHS "$<$<CONFIG:Release>:${ParaView_DIR}/bin/Release>$<$<CONFIG:Debug>:${ParaView_DIR}/bin/Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
   else()
     set ( PARAVIEW_PYTHON_PATHS "${ParaView_DIR}/lib;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk")
   endif()
@@ -613,12 +613,23 @@ configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
 )
 
-file(GENERATE
-   OUTPUT
-   ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>/Mantid.properties
-   INPUT
-   ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
-)
+ # Then, copy into appropriate place
+if(MSVC)
+  file(GENERATE
+     OUTPUT
+     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>/Mantid.properties
+     INPUT
+     ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
+  )
+else()
+  # Then, at build time, copy into appropriate place
+  file(GENERATE
+     OUTPUT
+     ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Mantid.properties
+     INPUT
+     ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
+  )
+endif()
 
 ###########################################################################
 # Installation settings
