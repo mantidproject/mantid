@@ -251,7 +251,9 @@ void EnggDiffFittingViewQtWidget::saveClicked() {
 
 void EnggDiffFittingViewQtWidget::setBankDir(int idx) {
 
-  if (m_fitting_runno_dir_vec.size() >= size_t(idx)) {
+  const size_t runNoDirSize = m_fitting_runno_dir_vec.size();
+  // idx must correspond to an element and the vector cant be empty
+  if (size_t(idx) < runNoDirSize && runNoDirSize > 0) {
 
     std::string bankDir = m_fitting_runno_dir_vec[idx];
     Poco::Path fpath(bankDir);
@@ -566,7 +568,6 @@ void EnggDiffFittingViewQtWidget::setBankIdComboBox(int idx) {
 }
 
 void EnggDiffFittingViewQtWidget::addBankItem(std::string bankID) {
-
   m_ui.comboBox_bank->addItem(QString::fromStdString(bankID));
 }
 

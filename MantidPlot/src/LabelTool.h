@@ -74,6 +74,7 @@ private slots:
   void insertYCoord();
   void insertDataCoord();
   void insertErrorValue();
+  void showLogValuesDialog();
 };
 
 #endif // ifndef LABEL_TOOL_H

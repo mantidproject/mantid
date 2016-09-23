@@ -1,16 +1,20 @@
-#ifndef MANTID_MANTIDWIDGETS_MUONSEQUENTIALFITDIALOG_H_
-#define MANTID_MANTIDWIDGETS_MUONSEQUENTIALFITDIALOG_H_
-
-#include "MantidKernel/System.h"
+#ifndef MANTID_CUSTOMINTERFACES_MUONSEQUENTIALFITDIALOG_H_
+#define MANTID_CUSTOMINTERFACES_MUONSEQUENTIALFITDIALOG_H_
 
 #include "ui_MuonSequentialFitDialog.h"
 
+#include "MantidAPI/GroupingLoader.h"
+#include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidQtMantidWidgets/MuonFitPropertyBrowser.h"
 
 #include <QDialog>
 
 namespace MantidQt {
-namespace MantidWidgets {
+namespace CustomInterfaces {
+
+class MuonAnalysisFitDataPresenter;
 
 /** MuonSequentialFitDialog : Dialog for running sequential fits for Muon data
 
@@ -35,14 +39,14 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MuonSequentialFitDialog
-    : public QDialog {
+class MANTIDQT_CUSTOMINTERFACES_DLL MuonSequentialFitDialog : public QDialog {
 
   Q_OBJECT
 
 public:
-  MuonSequentialFitDialog(MuonFitPropertyBrowser *fitPropBrowser,
-                          Mantid::API::Algorithm_sptr loadAlg);
+  MuonSequentialFitDialog(
+      MantidQt::MantidWidgets::MuonFitPropertyBrowser *fitPropBrowser,
+      MuonAnalysisFitDataPresenter *dataPresenter);
   ~MuonSequentialFitDialog() override;
 
   enum DialogState { Preparing, Running, Stopped };
@@ -57,7 +61,7 @@ signals:
 private:
   // -- FUNCTIONS -----------------------------------------------------------
 
-  /// Check if all the input field are valid
+  /// Check if all the input fields are valid
   bool isInputValid();
 
   /// Set current dialog state
@@ -73,13 +77,19 @@ private:
   /// Helper function to create new item for Diagnosis table
   QTableWidgetItem *createTableWidgetItem(const QString &text);
 
-  // -- VARIABLES -----------------------------------------------------------
+  /// Reorganise workspaces after fit of one run finished
+  void finishAfterRun(const std::string &labelGroupName,
+                      const Mantid::API::IAlgorithm_sptr &fitAlg,
+                      bool simultaneous,
+                      const Mantid::API::MatrixWorkspace_sptr &firstWS) const;
+
+  // -- MEMBER VARIABLES -----------------------------------------------
 
   /// UI form
   Ui::MuonSequentialFitDialog m_ui;
 
   /// Fit properties browser used to start the dialog
-  MuonFitPropertyBrowser *m_fitPropBrowser;
+  MantidQt::MantidWidgets::MuonFitPropertyBrowser *m_fitPropBrowser;
 
   /// Current state of the dialog
   DialogState m_state;
@@ -87,8 +97,8 @@ private:
   /// Whether user requested fitting to be stopped
   bool m_stopRequested;
 
-  /// Algorithm the dialog should use for loading
-  Mantid::API::Algorithm_sptr m_loadAlg;
+  /// Fit data presenter passed in to constructor
+  MuonAnalysisFitDataPresenter *m_dataPresenter;
 
   // -- STATIC MEMBERS ------------------------------------------------------
 
@@ -97,6 +107,8 @@ private:
 
   /// Returns displayable title for the given workspace
   static std::string getRunTitle(Mantid::API::Workspace_const_sptr ws);
+
+  // -- SLOTS ------------------------------------------------------
 
 private slots:
   /// Updates visibility/tooltip of label error asterisk
@@ -125,7 +137,7 @@ private slots:
   void continueFit();
 };
 
-} // namespace MantidWidgets
+} // namespace CustomInterfaces
 } // namespace Mantid
 
-#endif /* MANTID_MANTIDWIDGETS_MUONSEQUENTIALFITDIALOG_H_ */
+#endif /* MANTID_CUSTOMINTERFACES_MUONSEQUENTIALFITDIALOG_H_ */
