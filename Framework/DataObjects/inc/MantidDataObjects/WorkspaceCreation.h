@@ -62,9 +62,10 @@ class Workspace2D;
   create<T>(ParentWS, IndexInfo, Histogram)
   ~~~
 
-  - If neither NumSpectra nor IndexInfo is given, the created workspace has the
-    same number of spectra as the parent workspace and spectrum number as well
-    as detector ID information is copied from the parent.
+  - If neither NumSpectra nor IndexInfo is given, or if the new size is
+    identical to the size of the parent, the created workspace has the same
+    number of spectra as the parent workspace and spectrum number as well as
+    detector ID information is copied from the parent.
   - If Histogram is not given, the created workspace has X identical to the
     parent workspace and Y and E are initialized to 0.
   - If a Histogram with 'NULL' Y and E is given, Y and E are initialized to 0.

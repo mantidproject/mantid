@@ -6,12 +6,13 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidIndexing/IndexInfo.h"
 
-using namespace Mantid::DataObjects;
-using Mantid::API::HistoWorkspace;
-using Mantid::HistogramData::Histogram;
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
+using namespace Mantid;
+using namespace API;
+using namespace DataObjects;
+using namespace HistogramData;
+using Mantid::Indexing::IndexInfo;
 
 class WorkspaceCreationTest : public CxxTest::TestSuite {
 public:
@@ -22,14 +23,106 @@ public:
   }
   static void destroySuite(WorkspaceCreationTest *suite) { delete suite; }
 
-  void test_create_size_histogram() {
-    auto ws = create<Workspace2D>(2, Histogram(BinEdges(3)));
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2);
-    TS_ASSERT_EQUALS(ws->x(0).size(), 3);
-    TS_ASSERT_EQUALS(ws->y(0).rawData(), std::vector<double>({0, 0}));
-    TS_ASSERT_EQUALS(ws->y(1).rawData(), std::vector<double>({0, 0}));
-    TS_ASSERT_EQUALS(ws->e(0).rawData(), std::vector<double>({0, 0}));
-    TS_ASSERT_EQUALS(ws->e(1).rawData(), std::vector<double>({0, 0}));
+  IndexInfo make_indices() {
+    IndexInfo indices(2);
+    indices.setSpectrumNumbers({2, 4});
+    indices.setDetectorIDs({{0}, {2, 3}});
+    return indices;
+  }
+
+  void check_size(const MatrixWorkspace &ws) {
+    TS_ASSERT_EQUALS(ws.getNumberHistograms(), 2);
+  }
+
+  void check_default_indices(const MatrixWorkspace &ws) {
+    check_size(ws);
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(ws.getSpectrum(1).getSpectrumNo(), 2);
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs(),
+                     (std::set<detid_t>{1}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(1).getDetectorIDs(),
+                     (std::set<detid_t>{2}));
+  }
+
+  void check_indices(const MatrixWorkspace &ws) {
+    check_size(ws);
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getSpectrumNo(), 2);
+    TS_ASSERT_EQUALS(ws.getSpectrum(1).getSpectrumNo(), 4);
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs(),
+                     (std::set<detid_t>{0}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(1).getDetectorIDs(),
+                     (std::set<detid_t>{2, 3}));
+  }
+
+  void check_data(const MatrixWorkspace &ws) {
+    TS_ASSERT_EQUALS(ws.x(0).rawData(), std::vector<double>({1, 2, 4}));
+    TS_ASSERT_EQUALS(ws.x(1).rawData(), std::vector<double>({1, 2, 4}));
+    TS_ASSERT_EQUALS(ws.y(0).rawData(), std::vector<double>({0, 0}));
+    TS_ASSERT_EQUALS(ws.y(1).rawData(), std::vector<double>({0, 0}));
+    TS_ASSERT_EQUALS(ws.e(0).rawData(), std::vector<double>({0, 0}));
+    TS_ASSERT_EQUALS(ws.e(1).rawData(), std::vector<double>({0, 0}));
+  }
+
+  void test_create_size_Histogram() {
+    const auto ws = create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4}));
+    check_default_indices(*ws);
+    check_data(*ws);
+  }
+
+  void test_create_IndexInfo_Histogram() {
+    const auto ws = create<Workspace2D>(make_indices(), Histogram(BinEdges{1, 2, 4}));
+    check_indices(*ws);
+    check_data(*ws);
+  }
+
+  void test_create_parent() {
+    const auto parent = create<Workspace2D>(make_indices(), Histogram(BinEdges{1, 2, 4}));
+    const auto ws = create<Workspace2D>(*parent);
+    check_indices(*ws);
+    check_data(*ws);
+  }
+
+  void test_create_parent_Histogram() {
+    const auto parent =
+        create<Workspace2D>(make_indices(), Histogram(BinEdges{0, 1}));
+    const auto ws = create<Workspace2D>(*parent, Histogram(BinEdges{1, 2, 4}));
+    check_indices(*ws);
+    check_data(*ws);
+  }
+
+  void test_create_parent_same_size() {
+    const auto parent =
+        create<Workspace2D>(make_indices(), Histogram(BinEdges{1, 2, 4}));
+    const auto ws = create<Workspace2D>(*parent, 2);
+    // Same size -> Indices copied from parent
+    check_indices(*ws);
+    check_data(*ws);
+  }
+
+  void test_create_parent_size() {
+    const auto parent =
+        create<Workspace2D>(3, Histogram(BinEdges{1, 2, 4}));
+    parent->getSpectrum(0).setSpectrumNo(7);
+    const auto ws = create<Workspace2D>(*parent, 2);
+    check_default_indices(*ws);
+    check_data(*ws);
+  }
+
+  void test_create_parent_IndexInfo_same_size() {
+    const auto parent =
+        create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4}));
+    const auto ws = create<Workspace2D>(*parent, make_indices());
+    // If parent has same size, data in IndexInfo is ignored
+    check_default_indices(*ws);
+    check_data(*ws);
+  }
+
+  void test_create_parent_IndexInfo() {
+    const auto parent =
+        create<Workspace2D>(3, Histogram(BinEdges{1, 2, 4}));
+    const auto ws = create<Workspace2D>(*parent, make_indices());
+    check_indices(*ws);
+    check_data(*ws);
   }
 
   void test_create_drop_events() {
