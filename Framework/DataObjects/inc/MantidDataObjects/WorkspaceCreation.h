@@ -121,10 +121,12 @@ MANTID_DATAOBJECTS_DLL std::unique_ptr<API::MatrixWorkspace> createHelper();
 
 // Dummy specialization, should never be called, must exist for compilation.
 template <>
-MANTID_DATAOBJECTS_DLL std::unique_ptr<API::MatrixWorkspace> createConcreteHelper();
+MANTID_DATAOBJECTS_DLL std::unique_ptr<API::MatrixWorkspace>
+createConcreteHelper();
 // Dummy specialization, should never be called, must exist for compilation.
 template <>
-MANTID_DATAOBJECTS_DLL std::unique_ptr<API::HistoWorkspace> createConcreteHelper();
+MANTID_DATAOBJECTS_DLL std::unique_ptr<API::HistoWorkspace>
+createConcreteHelper();
 }
 
 template <class T, class P, class IndexArg,
