@@ -3,9 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAlgorithms/Stitch1DMany.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
@@ -72,6 +74,96 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
+  void test_throws_with_too_few_workspaces() {
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "ws1");
+    alg.setProperty("Params", "0.1, 0.1, 1.8");
+    alg.setProperty("StartOverlaps", "0.8");
+    alg.setProperty("EndOverlaps", "1.1");
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+  }
+
+  void test_throws_with_wrong_number_of_start_overlaps() {
+      Stitch1DMany alg;
+      alg.setChild(true);
+      alg.initialize();
+      alg.setProperty("InputWorkspaces", "ws1, ws2");
+      alg.setProperty("Params", "0.1");
+      alg.setProperty("StartOverlaps", "-0.5, -0.6");
+      alg.setProperty("EndOverlaps", "0.5");
+      alg.setPropertyValue("OutputWorkspace", "outws");
+      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+  }
+
+  void test_throws_with_wrong_number_of_end_overlaps() {
+      Stitch1DMany alg;
+      alg.setChild(true);
+      alg.initialize();
+      alg.setProperty("InputWorkspaces", "ws1, ws2");
+      alg.setProperty("Params", "0.1");
+      alg.setProperty("StartOverlaps", "-0.5");
+      alg.setProperty("EndOverlaps", "0.5, 0.6");
+      alg.setPropertyValue("OutputWorkspace", "outws");
+      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+  }
+
+  void test_throws_if_no_params() {
+      Stitch1DMany alg;
+      alg.setChild(true);
+      alg.initialize();
+      alg.setProperty("InputWorkspaces", "ws1, ws2");
+      alg.setProperty("StartOverlaps", "-0.5, -0.6");
+      alg.setProperty("EndOverlaps", "0.5, 0.6");
+      alg.setPropertyValue("OutputWorkspace", "outws");
+      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+  }
+
+  void test_workspace_types_differ_throws() {
+    // One table workspace, one matrix workspace
+    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
+    auto ws2 = WorkspaceFactory::Instance().createTable();
+    AnalysisDataService::Instance().add("ws1", ws1);
+    AnalysisDataService::Instance().add("ws2", ws2);
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "ws1, ws2");
+    alg.setProperty("Params", "0.1");
+    alg.setProperty("StartOverlaps", "-0.5, -0.6");
+    alg.setProperty("EndOverlaps", "0.5, 0.6");
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+  }
+
+  void test_workspace_group_size_differ_throws() {
+    
+    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
+    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
+    auto ws3 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
+    WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
+    group1->addWorkspace(ws1);
+    group1->addWorkspace(ws2);
+    WorkspaceGroup_sptr group2 = boost::make_shared<WorkspaceGroup>();
+    group2->addWorkspace(ws3);
+    // The algorithm needs the workspaces to be in the ADS
+    AnalysisDataService::Instance().addOrReplace("group1", group1);
+    AnalysisDataService::Instance().addOrReplace("group2", group2);
+
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "group1, group2");
+    alg.setProperty("Params", "0.1, 0.1, 2.6");
+    alg.setProperty("StartOverlaps", "0.8, 1.6");
+    alg.setProperty("EndOverlaps", "1.1, 1.8");
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+
+  }
+
   void test_two_workspaces() {
     // Two matrix workspaces with two spectra each
 
@@ -115,6 +207,23 @@ public:
     // Only scale factor for first spectrum is returned
     TS_ASSERT_DELTA(scales.front(), 0.90909, 0.00001);
     // If scale factor for second spectrum was returned it should be 0.952381
+
+    // Cross-check that the result of using Stitch1DMany with two workspaces
+    // is the same as using Stitch1D
+    Mantid::Algorithms::Stitch1D alg2;
+    alg2.setChild(true);
+    alg2.initialize();
+    alg2.setProperty("LHSWorkspace", ws1);
+    alg2.setProperty("RHSWorkspace", ws2);
+    alg2.setProperty("Params", "0.1, 0.1, 1.8");
+    alg2.setProperty("StartOverlap", "0.8");
+    alg2.setProperty("EndOverlap", "1.1");
+    alg2.setPropertyValue("OutputWorkspace", "outws");
+    alg2.execute();
+    MatrixWorkspace_sptr stitched2 = alg2.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(stitched->readX(0), stitched2->readX(0));
+    TS_ASSERT_EQUALS(stitched->readY(0), stitched2->readY(0));
+    TS_ASSERT_EQUALS(stitched->readE(0), stitched2->readE(0));
 
     // Remove workspaces from ADS
     AnalysisDataService::Instance().remove("ws1");
@@ -178,6 +287,25 @@ public:
     AnalysisDataService::Instance().remove("ws1");
     AnalysisDataService::Instance().remove("ws2");
     AnalysisDataService::Instance().remove("ws3");
+  }
+
+  void test_stitches_three_no_overlaps_specified_should_still_work() {
+
+    auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
+    auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
+    auto ws3 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
+    // The algorithm needs the workspaces to be in the ADS
+    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
+    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
+    AnalysisDataService::Instance().addOrReplace("ws3", ws3);
+
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "ws1, ws2, ws3");
+    alg.setProperty("Params", "0.1, 0.1, 2.6");
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
   }
 
   void test_three_workspaces_scale_factor_given() {
