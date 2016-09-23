@@ -21,6 +21,13 @@ template <> std::unique_ptr<API::HistoWorkspace> createHelper() {
 template <> std::unique_ptr<API::MatrixWorkspace> createHelper() {
   return {nullptr};
 }
+
+template <> std::unique_ptr<API::MatrixWorkspace> createConcreteHelper() {
+  return {nullptr};
+}
+template <> std::unique_ptr<API::HistoWorkspace> createConcreteHelper() {
+  return {nullptr};
+}
 }
 } // namespace DataObjects
 } // namespace Mantid

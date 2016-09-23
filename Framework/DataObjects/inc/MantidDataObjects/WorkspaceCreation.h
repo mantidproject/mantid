@@ -105,6 +105,10 @@ template <class T> std::unique_ptr<T> createHelper() {
   return Kernel::make_unique<T>();
 }
 
+template <class T> std::unique_ptr<T> createConcreteHelper() {
+  return Kernel::make_unique<T>();
+}
+
 template <>
 MANTID_DATAOBJECTS_DLL std::unique_ptr<API::HistoWorkspace> createHelper();
 
@@ -114,6 +118,13 @@ MANTID_DATAOBJECTS_DLL std::unique_ptr<EventWorkspace> createHelper();
 // Dummy specialization, should never be called, must exist for compilation.
 template <>
 MANTID_DATAOBJECTS_DLL std::unique_ptr<API::MatrixWorkspace> createHelper();
+
+// Dummy specialization, should never be called, must exist for compilation.
+template <>
+MANTID_DATAOBJECTS_DLL std::unique_ptr<API::MatrixWorkspace> createConcreteHelper();
+// Dummy specialization, should never be called, must exist for compilation.
+template <>
+MANTID_DATAOBJECTS_DLL std::unique_ptr<API::HistoWorkspace> createConcreteHelper();
 }
 
 template <class T, class P, class IndexArg,
@@ -131,8 +142,13 @@ boost::shared_ptr<T> create(const P &parent, const IndexArg &indexArg,
     // Drop events, create Workspace2D or T whichever is more derived.
     ws = detail::createHelper<T>();
   } else {
-    // This may throw std::bad_cast.
-    ws = dynamic_cast<const T &>(parent).cloneEmpty();
+    try {
+      // If parent is more derived than T: create type(parent)
+      ws = dynamic_cast<const T &>(parent).cloneEmpty();
+    } catch (std::bad_cast &) {
+      // If T is more derived than parent: create T
+      ws = detail::createConcreteHelper<T>();
+    }
   }
 
   ws->initialize(indexArg, histogram);

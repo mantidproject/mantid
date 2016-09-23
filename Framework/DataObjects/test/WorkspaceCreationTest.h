@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -134,6 +135,18 @@ public:
     const auto ws1 = create<EventWorkspace>(1, Histogram(BinEdges(3)));
     const auto ws2 = create<EventWorkspace>(*ws1, 1, Histogram(BinEdges(3)));
     TS_ASSERT_EQUALS(ws2->MRUSize(), 0);
+  }
+
+  void test_create_from_more_derived() {
+    const auto parent = create<SpecialWorkspace2D>(2, Histogram(Points(1)));
+    const auto ws = create<Workspace2D>(*parent);
+    TS_ASSERT_EQUALS(ws->id(), "SpecialWorkspace2D");
+  }
+
+  void test_create_from_less_derived() {
+    const auto parent = create<Workspace2D>(2, Histogram(Points(1)));
+    const auto ws = create<SpecialWorkspace2D>(*parent);
+    TS_ASSERT_EQUALS(ws->id(), "SpecialWorkspace2D");
   }
 };
 
