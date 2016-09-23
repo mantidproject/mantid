@@ -143,6 +143,34 @@ public:
     TS_ASSERT_EQUALS(indexInfo.detectorIDs(0), std::vector<detid_t>({0, 7}));
   }
 
+  void test_IndexInfo_copy() {
+    WorkspaceTester ws;
+    ws.initialize(3, 1, 1);
+    IndexInfo indices(3);
+    indices.setSpectrumNumbers({2, 4, 6});
+    indices.setDetectorIDs({{0}, {1}, {2, 3}});
+    ws.setIndexInfo(std::move(indices));
+
+    // Internally this references data in ISpectrum
+    const auto &indexInfo = ws.indexInfo();
+    // This should create a copy, dropping any links to MatrixWorkspace or ISpectrum
+    const auto copy(indexInfo);
+
+    TS_ASSERT_EQUALS(copy.spectrumNumber(0), 2);
+    TS_ASSERT_EQUALS(copy.spectrumNumber(1), 4);
+    TS_ASSERT_EQUALS(copy.spectrumNumber(2), 6);
+    TS_ASSERT_EQUALS(copy.detectorIDs(0), (std::vector<detid_t>{0}));
+    TS_ASSERT_EQUALS(copy.detectorIDs(1), (std::vector<detid_t>{1}));
+    TS_ASSERT_EQUALS(copy.detectorIDs(2), (std::vector<detid_t>{2, 3}));
+    // Changing data in workspace affects indexInfo, but not copy
+    ws.getSpectrum(0).setSpectrumNo(7);
+    ws.getSpectrum(0).addDetectorID(7);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 7);
+    TS_ASSERT_EQUALS(indexInfo.detectorIDs(0), (std::vector<detid_t>{0, 7}));
+    TS_ASSERT_EQUALS(copy.spectrumNumber(0), 2);
+    TS_ASSERT_EQUALS(copy.detectorIDs(0), (std::vector<detid_t>{0}));
+  }
+
   void test_toString_Produces_Expected_Contents() {
     auto testWS = boost::make_shared<WorkspaceTester>();
     testWS->initialize(1, 2, 1);
