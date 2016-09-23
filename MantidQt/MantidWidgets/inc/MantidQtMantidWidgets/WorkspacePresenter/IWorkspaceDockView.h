@@ -90,6 +90,7 @@ public:
   virtual void popupContextMenu() = 0;
   virtual void showWorkspaceData() = 0;
   virtual void showInstrumentView() = 0;
+  virtual void saveToProgram() = 0;
   virtual void plotSpectrum(bool showErrors) = 0;
   virtual void showColourFillPlot() = 0;
   virtual void showDetectorsTable() = 0;

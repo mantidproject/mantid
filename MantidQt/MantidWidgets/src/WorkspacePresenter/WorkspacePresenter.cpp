@@ -85,6 +85,9 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   case ViewNotifiable::Flag::ShowInstrumentView:
     showInstrumentView();
     break;
+  case ViewNotifiable::Flag::SaveToProgram:
+    saveToProgram();
+    break;
   case ViewNotifiable::Flag::PlotSpectrum:
     plotSpectrum();
     break;
@@ -254,6 +257,9 @@ void WorkspacePresenter::showWorkspaceData() {
 void WorkspacePresenter::showInstrumentView() {
   auto view = lockView();
   view->showInstrumentView();
+}
+
+void WorkspacePresenter::saveToProgram(){
 }
 
 void WorkspacePresenter::plotSpectrum() {

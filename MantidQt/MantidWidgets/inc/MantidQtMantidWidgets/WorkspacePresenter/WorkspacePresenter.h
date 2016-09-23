@@ -72,6 +72,7 @@ private:
   void populateAndShowWorkspaceContextMenu();
   void showWorkspaceData();
   void showInstrumentView();
+  void saveToProgram();
   void plotSpectrum();
   void plotSpectrumWithErrors();
   void showColourFillPlot();

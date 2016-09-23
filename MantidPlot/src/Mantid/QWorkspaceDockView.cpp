@@ -19,6 +19,9 @@
 #include <MantidAPI/IPeaksWorkspace.h>
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/WorkspaceGroup.h>
+#include <MantidAPI/FileProperty.h>
+
+#include <Poco/Path.h>
 
 #include <QFileDialog>
 #include <QHash>
@@ -32,6 +35,7 @@
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 namespace {
 /// static logger for dock widget
@@ -174,7 +178,7 @@ WorkspacePresenterWN_wptr QWorkspaceDockView::getPresenterWeakPtr() {
 }
 
 StringList QWorkspaceDockView::getSelectedWorkspaceNames() const {
-  QList<QTreeWidgetItem *> items = m_tree->selectedItems();
+  auto items = m_tree->selectedItems();
   StringList names;
 
   for (auto &item : items)
@@ -184,8 +188,10 @@ StringList QWorkspaceDockView::getSelectedWorkspaceNames() const {
 }
 
 Mantid::API::Workspace_sptr QWorkspaceDockView::getSelectedWorkspace() const {
-  // TODO: is this method really necessary?
-  return nullptr;
+  auto items = m_tree->selectedItems();
+  auto data = items[0]->data(0, Qt::UserRole).value<Workspace_sptr>();
+
+  return data;
 }
 
 bool QWorkspaceDockView::askUserYesNo(const std::string &caption,
@@ -301,6 +307,7 @@ void QWorkspaceDockView::showLiveDataDialog() {
 }
 
 void QWorkspaceDockView::showRenameDialog(const StringList &wsNames) const {}
+
 void QWorkspaceDockView::recordWorkspaceRename(const std::string &oldName,
                                                const std::string &newName) {
   // check if old_name has been recently a new name
@@ -1386,7 +1393,7 @@ void QWorkspaceDockView::popupContextMenu() {
     // is anything to connect it will be set to false)
     if (!firstPass)
       connect(m_programMapper, SIGNAL(mapped(const QString &)), this,
-              SLOT(saveToProgram(const QString &)));
+              SLOT(onClickSaveToProgram(const QString &)));
 
     // Rename is valid for all workspace types
     menu->addAction(m_rename);
@@ -1401,6 +1408,142 @@ void QWorkspaceDockView::popupContextMenu() {
 
 void QWorkspaceDockView::showWorkspaceData() {}
 void QWorkspaceDockView::showInstrumentView() {}
+
+void QWorkspaceDockView::onClickSaveToProgram(const QString &name) {
+  m_programName = name;
+  m_presenter->notifyFromView(ViewNotifiable::Flag::SaveToProgram);
+}
+
+void QWorkspaceDockView::saveToProgram() {
+  // Create a map for the keys and details to go into
+  std::map<std::string, std::string> programKeysAndDetails;
+  programKeysAndDetails["name"] = m_programName.toStdString();
+
+  // Get a list of the program detail keys (mandatory - target, saveusing)
+  // (optional - arguments, save parameters, workspace type)
+  std::vector<std::string> programKeys =
+      (Mantid::Kernel::ConfigService::Instance().getKeys(
+          ("workspace.sendto." + programKeysAndDetails.find("name")->second)));
+
+  for (size_t i = 0; i < programKeys.size(); i++) {
+    // Assign a key to its value using the map
+    programKeysAndDetails[programKeys[i]] =
+        (Mantid::Kernel::ConfigService::Instance().getString(
+            ("workspace.sendto." + programKeysAndDetails.find("name")->second +
+             "." + programKeys[i])));
+  }
+
+  // Check to see if mandatory information is included
+  if ((programKeysAndDetails.count("name") != 0) &&
+      (programKeysAndDetails.count("target") != 0) &&
+      (programKeysAndDetails.count("saveusing") != 0)) {
+    std::string expTarget =
+        Poco::Path::expand(programKeysAndDetails.find("target")->second);
+
+    QFileInfo target = QString::fromStdString(expTarget);
+    if (target.exists()) {
+      try {
+        // Convert to QString and create Algorithm
+        QString saveUsing = QString::fromStdString(
+            programKeysAndDetails.find("saveusing")->second);
+
+        // Create a new save based on what files the new program can open
+        auto alg = createAlgorithm(saveUsing.toStdString());
+
+        // Get the file extention based on the workspace
+        Property *prop = alg->getProperty("Filename");
+        FileProperty *fileProp = dynamic_cast<FileProperty *>(prop);
+        std::string ext;
+        if (fileProp) {
+          ext = fileProp->getDefaultExt();
+        }
+
+        // Save as.. default save + the file type i.e .nxs
+        alg->setPropertyValue(
+            "fileName", "auto_save_" + selectedWsName.toStdString() + ext);
+
+        // Save the workspace
+        alg->setPropertyValue("InputWorkspace", selectedWsName.toStdString());
+
+        // If there are any save parameters
+        if (programKeysAndDetails.count("saveparameters") != 0) {
+          QString saveParametersGrouped = QString::fromStdString(
+              programKeysAndDetails.find("saveparameters")->second);
+          QStringList saveParameters = saveParametersGrouped.split(',');
+
+          // For each one found split it up and assign the parameter
+          for (int i = 0; i < saveParameters.size(); i++) {
+            QStringList sPNameAndDetail = saveParameters[i].split('=');
+            std::string saveParameterName =
+                sPNameAndDetail[0].trimmed().toStdString();
+            std::string saveParameterDetail =
+                sPNameAndDetail[1].trimmed().toStdString();
+            if (saveParameterDetail == "True")
+              alg->setProperty(saveParameterName, true);
+            else if (saveParameterDetail == "False")
+              alg->setProperty(saveParameterName, false);
+            else // if not true or false then must be a value
+            {
+              alg->setPropertyValue(saveParameterName, saveParameterDetail);
+            }
+          }
+        }
+
+        // Execute the save
+        // TODO: you may need to take a look at this algorithm execution methods
+        // m_mantidUI->executeAlgorithmAsync(alg, true);
+        alg->execute();
+
+        // Get the save location of the file (should be default Mantid folder)
+        QString savedFile =
+            QString::fromStdString(alg->getProperty("Filename"));
+        QStringList arguments;
+
+        // Arguments for the program to take. Default will be the file anyway.
+        if (programKeysAndDetails.count("arguments") != 0) {
+          QString temp = QString::fromStdString(
+              programKeysAndDetails.find("arguments")->second);
+          temp.replace(QString("[file]"), savedFile);
+          // temp.replace(QString("[user]"), user;
+          arguments = temp.split(",");
+        } else
+          arguments.insert(0, savedFile);
+
+        // convert the list into a standard vector for compatibility with Poco
+        std::vector<std::string> argumentsV;
+
+        for (int i = 0; i < arguments.size(); i++) {
+          argumentsV.assign(1, (arguments[i].toStdString()));
+        }
+
+        // Execute the program
+        try {
+          Mantid::Kernel::ConfigService::Instance().launchProcess(expTarget,
+                                                                  argumentsV);
+        } catch (std::runtime_error &) {
+          QMessageBox::information(
+              this, "Error", "User tried to open program from: " +
+                                 QString::fromStdString(expTarget) +
+                                 " There was an error opening the program. "
+                                 "Please check the target and arguments list "
+                                 "to ensure that these are correct");
+        }
+      } catch (std::exception &) {
+        QMessageBox::information(
+            this, "Mantid - Send to Program",
+            "A file property wasn't found. Please check that the correct" +
+                QString("save algorithm was used.\n(View -> Preferences -> "
+                        "Mantid -> SendTo -> Edit -> SaveUsing)"));
+      }
+    } else
+      QMessageBox::information(this, "Target Path Error",
+                               "User tried to open program from: " +
+                                   QString::fromStdString(expTarget) +
+                                   " The target file path for the program "
+                                   "can't be found. Please check that the full "
+                                   "path is correct");
+  }
+}
 
 /// Plots a single spectrum from each selected workspace
 void QWorkspaceDockView::onClickPlotSpectra() {

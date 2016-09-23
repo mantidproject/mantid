@@ -1,30 +1,30 @@
 #include "MantidDock.h"
+#include "../ApplicationWindow.h"
+#include "../pixmaps.h"
+#include "FlowLayout.h"
+#include "MantidGroupPlotGenerator.h"
+#include "MantidMatrix.h"
 #include "MantidTreeWidget.h"
 #include "MantidTreeWidgetItem.h"
 #include "MantidUI.h"
-#include "MantidMatrix.h"
-#include "../ApplicationWindow.h"
-#include "../pixmaps.h"
 #include "MantidWSIndexDialog.h"
-#include "FlowLayout.h"
 #include "WorkspaceIcons.h"
-#include "MantidGroupPlotGenerator.h"
 
-#include <MantidAPI/FileProperty.h>
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
+#include <MantidAPI/FileProperty.h>
 #include <MantidKernel/make_unique.h>
-#include <MantidQtMantidWidgets/LineEditWithClear.h>
 #include <MantidQtAPI/InterfaceManager.h>
+#include <MantidQtMantidWidgets/LineEditWithClear.h>
 
 #include <Poco/Path.h>
 
+#include <QFileDialog>
 #include <QMenu>
 #include <QSignalMapper>
-#include <QFileDialog>
 
 #ifdef MAKE_VATES
 #include "vtkPVDisplayInformation.h"
@@ -1518,6 +1518,4 @@ void MantidDockWidget::plotContour() {
       plotter->plotContour(wsGroup, options);
     }
   }
-}
-
 }

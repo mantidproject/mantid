@@ -112,6 +112,7 @@ public:
   // Context Menu Handlers
   void popupContextMenu() override;
   void showWorkspaceData() override;
+  void saveToProgram() override;
   void showInstrumentView() override;
   void plotSpectrum(bool showErrors) override;
   void showColourFillPlot() override;
@@ -178,7 +179,7 @@ public slots:
   void onClickDeleteWorkspaces();
   void renameWorkspace();
   void populateChildData(QTreeWidgetItem *item);
-  void saveToProgram(const QString &name);
+  void onClickSaveToProgram(const QString &name);
   void sortAscending();
   void sortDescending();
   void chooseByName();
@@ -218,6 +219,7 @@ protected:
 private:
   QString selectedWsName;
   QPoint m_menuPosition;
+  QString m_programName;
   MantidUI *const m_mantidUI;
 
   std::string m_filteredText;
