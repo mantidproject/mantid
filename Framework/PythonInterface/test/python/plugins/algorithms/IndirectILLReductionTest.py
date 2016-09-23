@@ -20,27 +20,25 @@ class IndirectILLReductionTest(unittest.TestCase):
     _def_fac = config['default.facility']
     _data_dirs = config['datasearch.directories']
 
-    @classmethod
-    def setUp(cls):
+    def setUp(self):
         # set instrument and append datasearch directory
         #config.setFacility('ILL')
         #config.appendDataSearchSubdirs('ILL/IN16B')
 
-        cls._run_name = 'ILL/IN16B/146191.nxs'
-        cls._multi_runs = 'ILL/IN16B/146191.nxs,ILL/IN16B/146192.nxs'
-        cls._old_run = 'ILLIN16B_034745.nxs'
+        self._run_name = 'ILL/IN16B/146191.nxs'
+        self._multi_runs = 'ILL/IN16B/146191.nxs,ILL/IN16B/146192.nxs'
+        self._old_run = 'ILLIN16B_034745.nxs'
 
         # Reference workspace after loading (comparisons using blocksize(), getNumberHistograms(), ( SampleLogs, ...))
-        ws_loaded = Load(cls._run_name)
-        cls._run = ws_loaded
+        ws_loaded = Load(self._run_name)
+        self._run = ws_loaded
 
-    @classmethod
-    def tearDown(cls):
+    def tearDown(self):
         # set cached facility and datasearch directory
         #config.setFacility(cls._def_fac)
         #config.setDataSearchDirs(cls._data_dirs)
         #reset output workspaces list
-        cls._output_workspaces = []
+        self._output_workspaces = []
 
     def test_multifiles(self):
         self._args['Run'] = self._multi_runs
