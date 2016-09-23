@@ -154,7 +154,7 @@ class LRAutoReduction(PythonAlgorithm):
                 first_run_of_set = m.group(1)
                 sequence_number = int(m.group(2))
             else:
-                m = re.search(r"-(\d+)\.", title)
+                m = re.search(r"-(\d+)\.$", title)
                 if m is not None:
                     sequence_number = int(m.group(1))
                     first_run_of_set = int(run_number) - int(sequence_number) + 1
