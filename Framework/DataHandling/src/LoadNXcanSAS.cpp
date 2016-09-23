@@ -83,6 +83,16 @@ Mantid::API::MatrixWorkspace_sptr createWorkspace(H5::DataSet &dataSet) {
       dimInfo.dimBin /*xdata*/, dimInfo.dimBin /*ydata*/);
 }
 
+Mantid::API::MatrixWorkspace_sptr createWorkspaceForHistogram(H5::DataSet &dataSet) {
+  auto dimInfo = getDataSpaceInfo(dataSet);
+
+  // Create a workspace based on the dataSpace information
+  return Mantid::API::WorkspaceFactory::Instance().create(
+    "Workspace2D", dimInfo.dimSpectrumAxis /*NHisto*/,
+    dimInfo.dimBin + 1 /*xdata*/, dimInfo.dimBin /*ydata*/);
+}
+
+
 // ----- LOGS
 
 void loadLogs(H5::Group &entry, Mantid::API::MatrixWorkspace_sptr workspace) {
@@ -444,13 +454,15 @@ void loadTransmission(H5::Group &entry, const std::string &name) {
   if (!hasTransmissionEntry(entry, name)) {
     g_log.information("NXcanSAS file does not contain transmission for " +
                       name);
+    return;
   }
+
   auto transmission =
       entry.openGroup(sasTransmissionSpectrumGroupName + "_" + name);
 
   // Create a 1D workspace
   auto tDataSet = transmission.openDataSet(sasTransmissionSpectrumT);
-  auto workspace = createWorkspace(tDataSet);
+  auto workspace = createWorkspaceForHistogram(tDataSet);
 
   // Load logs
   loadLogs(entry, workspace);
@@ -464,6 +476,10 @@ void loadTransmission(H5::Group &entry, const std::string &name) {
 
   // Load transmission data
   loadTransmissionData(transmission, workspace);
+
+  // Set to distribution
+  workspace->setDistribution(true);
+  workspace->setYUnitLabel("Transmission");
 
   // Add the workspace to the ADS
   Mantid::API::AnalysisDataService::Instance().add(title, workspace);
