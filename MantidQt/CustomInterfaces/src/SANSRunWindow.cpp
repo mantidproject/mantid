@@ -446,6 +446,7 @@ void SANSRunWindow::setupSaveBox() {
   m_savFormats.insert(m_uiForm.saveCan_check, "SaveCanSAS1D");
   m_savFormats.insert(m_uiForm.saveRKH_check, "SaveRKH");
   m_savFormats.insert(m_uiForm.saveCSV_check, "SaveCSV");
+  m_savFormats.insert(m_uiForm.saveNXcanSAS_check, "SaveNXcanSAS");
 
   for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end();
        ++i) {
@@ -706,6 +707,7 @@ void SANSRunWindow::readSaveSettings(QSettings &valueStore) {
       valueStore.value("NIST_Qxy", false).toBool());
   m_uiForm.saveRKH_check->setChecked(valueStore.value("RKH", false).toBool());
   m_uiForm.saveCSV_check->setChecked(valueStore.value("CSV", false).toBool());
+  m_uiForm.saveNXcanSAS_check->setChecked(valueStore.value("NXcanSAS", false).toBool());
 }
 
 /**
@@ -748,6 +750,8 @@ void SANSRunWindow::saveSaveSettings(QSettings &valueStore) {
   valueStore.setValue("NIST_Qxy", m_uiForm.saveNIST_Qxy_check->isChecked());
   valueStore.setValue("RKH", m_uiForm.saveRKH_check->isChecked());
   valueStore.setValue("CSV", m_uiForm.saveCSV_check->isChecked());
+  valueStore.setValue("NXcanSAS", m_uiForm.saveNXcanSAS_check->isChecked());
+
 }
 /**
  * Run a function from the SANS reduction script, ensuring that the first call
