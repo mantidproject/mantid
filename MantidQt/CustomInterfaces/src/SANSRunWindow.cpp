@@ -165,6 +165,41 @@ bool convertPythonBoolStringToBool(QString input) {
 
   return value;
 }
+
+void setTransmissionOnSaveCommand(
+    QString &saveCommand, Mantid::API::MatrixWorkspace_sptr matrix_workspace,
+    const QString &detectorSelection) {
+  if (matrix_workspace->getInstrument()->getName() == "SANS2D")
+    saveCommand += "'front-detector, rear-detector'";
+  if (matrix_workspace->getInstrument()->getName() == "LOQ")
+    saveCommand += "'HAB, main-detector-bank'";
+  if (matrix_workspace->getInstrument()->getName() == "LARMOR")
+    saveCommand += "'" + detectorSelection + "'";
+
+  /* From v2, SaveCanSAS1D is able to save the Transmission workspaces
+  related to the
+  reduced data. The name of workspaces of the Transmission are
+  available at the
+  sample logs. This part add the parameters Transmission=trans_ws_name
+  and
+  TransmissionCan=trans_ws_name_can if they are available at the
+  Workspace Sample log
+  and still available inside MantidPlot. */
+  const Mantid::API::Run &run = matrix_workspace->run();
+  QStringList list;
+  list << "Transmission"
+       << "TransmissionCan";
+  foreach (QString property, list) {
+    if (run.hasProperty(property.toStdString())) {
+      std::string trans_ws_name =
+          run.getLogData(property.toStdString())->value();
+      if (AnalysisDataService::Instance().isValid(trans_ws_name).empty()) {
+        saveCommand += ", " + property + "=\"" +
+                       QString::fromStdString(trans_ws_name) + "\"";
+      }
+    }
+  }
+}
 }
 
 //----------------------------------------------
@@ -2921,38 +2956,8 @@ void SANSRunWindow::handleDefSaveClick() {
       MatrixWorkspace_sptr matrix_workspace =
           boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
       if (matrix_workspace) {
-        if (matrix_workspace->getInstrument()->getName() == "SANS2D")
-          saveCommand += "'front-detector, rear-detector'";
-        if (matrix_workspace->getInstrument()->getName() == "LOQ")
-          saveCommand += "'HAB, main-detector-bank'";
-        if (matrix_workspace->getInstrument()->getName() == "LARMOR")
-          saveCommand += "'" + m_uiForm.detbank_sel->currentText() + "'";
-
-        /* From v2, SaveCanSAS1D is able to save the Transmission workspaces
-           related to the
-           reduced data. The name of workspaces of the Transmission are
-           available at the
-           sample logs. This part add the parameters Transmission=trans_ws_name
-           and
-           TransmissionCan=trans_ws_name_can if they are available at the
-           Workspace Sample log
-           and still available inside MantidPlot. */
-        const Mantid::API::Run &run = matrix_workspace->run();
-        QStringList list;
-        list << "Transmission"
-             << "TransmissionCan";
-        foreach (QString property, list) {
-          if (run.hasProperty(property.toStdString())) {
-            std::string trans_ws_name =
-                run.getLogData(property.toStdString())->value();
-            if (AnalysisDataService::Instance()
-                    .isValid(trans_ws_name)
-                    .empty()) {
-              saveCommand += ", " + property + "=\"" +
-                             QString::fromStdString(trans_ws_name) + "\"";
-            }
-          }
-        }
+        auto detectorSelection = m_uiForm.detbank_sel->currentText();
+        setTransmissionOnSaveCommand(saveCommand, matrix_workspace, detectorSelection);
       }
 
       // Add the sample information to the output
@@ -2965,6 +2970,19 @@ void SANSRunWindow::handleDefSaveClick() {
       saveCommand += ", Geometry='" + geometryName + "', SampleHeight=" +
                      sampleHeight + ", SampleWidth=" + sampleWidth +
                      ", SampleThickness=" + sampleThickness;
+      saveCommand += ")\n";
+    } else if ((*alg) == "SaveNXcanSAS") {
+      saveCommand +=
+        (*alg) + "('" + m_outputWS + "','" + fname + "', DetectorNames=";
+      Workspace_sptr workspace_ptr =
+        AnalysisDataService::Instance().retrieve(m_outputWS.toStdString());
+      MatrixWorkspace_sptr matrix_workspace =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
+ 
+      if (matrix_workspace) {
+        auto detectorSelection = m_uiForm.detbank_sel->currentText();
+        setTransmissionOnSaveCommand(saveCommand, matrix_workspace, detectorSelection);
+      }
       saveCommand += ")\n";
     } else
       saveCommand += (*alg) + "('" + m_outputWS + "','" + fname + "')\n";
