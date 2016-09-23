@@ -13,6 +13,7 @@ import numpy as np
 
 import mantid.simpleapi as msapi
 import fitting_benchmarking as fitbk
+import results_output as fitout
 
 BENCHMARK_VERSION_STR = 'v3.8'
 FILENAME_SUFFIX_ACCURACY = '_acc'
@@ -51,29 +52,29 @@ class FittingBenchmarkTests(unittest.TestCase):
                                     #'FABADA', # hide FABADA
                                     'Levenberg-Marquardt', 'Levenberg-MarquardtMD',
                                     'Simplex', 'SteepestDescent', 'DTRS']
-        self.minimizers = minimizers_factory
+        self.minimizers = minimizers_pseudofactory
         self.group_names = ['NIST, "lower" difficulty', 'NIST, "average" difficulty', 'NIST, "higher" difficulty', "CUTEst"]
         self.group_suffix_names = ['nist_lower', 'nist_average', 'nist_higher', 'cutest']
 
     # Rename this to what it does/can do
     def test_rank_by_chi2_and_runtime_with_error_weights(self):
 
-        results_per_group = fitbk.do_regression_fitting_benchmark(include_nist=True, minimizers=minimizers, use_errors=USE_ERRORS)
+        results_per_group = fitbk.do_regression_fitting_benchmark(include_nist=True, minimizers=self.minimizers, use_errors=USE_ERRORS)
 
         color_scale = [(1.1, 'ranking-top-1'), (1.33, 'ranking-top-2'), (1.75, 'ranking-med-3'), (3, 'ranking-low-4'), (float('nan'), 'ranking-low-5')]
 
-        for idx, block_results in enumerate(results_per_block):
+        for idx, group_results in enumerate(results_per_group):
             print("\n\n")
             print("********************************************************".format(idx+1))
-            print("**************** RESULTS FOR BLOCK {0} *****************".format(idx+1))
+            print("**************** RESULTS FOR GROUP {0} *****************".format(idx+1))
             print("********************************************************".format(idx+1))
-            self.print_block_results_tables(minimizers, block_results, group_name=self.group_suffix_names[idx],
+            self.print_group_results_tables(self.minimizers, group_results, group_name=self.group_suffix_names[idx],
                                             simple_text=True, rst=True, color_scale=color_scale)
 
         header = "\n\n"
-        header += '**************** OVERALL SUMMARY - ALL BLOCKS ******** \n\n'
+        header += '**************** OVERALL SUMMARY - ALL GROUPS ******** \n\n'
         print(header)
-        self.print_overall_results_table(minimizers, results_per_block, self.group_names, rst=True)
+        self.print_overall_results_table(self.minimizers, results_per_group, self.group_names, rst=True)
 
         # Flush to prevent mix-up with system tests/runner output
         import sys
@@ -84,16 +85,16 @@ class FittingBenchmarkTests(unittest.TestCase):
 
 
     # TODO: split into prepare + print
-    def print_overall_results_table(self, minimizers, block_results, group_names, simple_text=True, rst=False):
+    def print_overall_results_table(self, minimizers, group_results, group_names, simple_text=True, rst=False):
 
 
-        num_blocks = len(block_results)
+        num_groups = len(group_results)
         num_minimizers = len(minimizers)
 
-        blocks_norm_acc = np.zeros((num_blocks, num_minimizers))
-        blocks_norm_runtime = np.zeros((num_blocks, num_minimizers))
-        for block_idx, block in enumerate(block_results):
-            results_per_test = block
+        groups_norm_acc = np.zeros((num_groups, num_minimizers))
+        groups_norm_runtime = np.zeros((num_groups, num_minimizers))
+        for group_idx, group_res in enumerate(group_results):
+            results_per_test = group_res
             num_tests = len(results_per_test)
 
             accuracy_tbl = np.zeros((num_tests, num_minimizers))
@@ -110,9 +111,9 @@ class FittingBenchmarkTests(unittest.TestCase):
             norm_runtime_rankings = time_tbl / min_runtime[:, None]
 
             #acc_mean = np.nanmedian(accuracy_tbl, 0)
-            blocks_norm_acc[block_idx, :] = np.nanmedian(norm_acc_rankings, 0)
+            groups_norm_acc[group_idx, :] = np.nanmedian(norm_acc_rankings, 0)
             #runtime_mean = np.nanmedian(time_tbl, 0)
-            blocks_norm_runtime[block_idx, :] = np.nanmedian(norm_runtime_rankings, 0)
+            groups_norm_runtime[group_idx, :] = np.nanmedian(norm_runtime_rankings, 0)
 
         header = '**************** Accuracy ******** \n\n'
         print(header)
@@ -121,16 +122,16 @@ class FittingBenchmarkTests(unittest.TestCase):
         for name in group_names:
             linked_names.append("`{0} <http://www.itl.nist.gov/div898/strd/nls/nls_main.shtml>`__".format(name))
 
-        tbl_all_summary_acc = self.build_rst_table(minimizers, linked_names, blocks_norm_acc, comparison_type='summary', using_errors=USE_ERRORS)
+        tbl_all_summary_acc = self.build_rst_table(minimizers, linked_names, groups_norm_acc, comparison_type='summary', using_errors=USE_ERRORS)
         print(tbl_all_summary_acc)
 
         header = '**************** Runtime ******** \n\n'
         print(header)
-        tbl_all_summary_runtime = self.build_rst_table(minimizers, linked_names, blocks_norm_runtime, comparison_type='summary', using_errors=USE_ERRORS)
+        tbl_all_summary_runtime = self.build_rst_table(minimizers, linked_names, groups_norm_runtime, comparison_type='summary', using_errors=USE_ERRORS)
         print(tbl_all_summary_runtime)
 
     # TODO: split into prepare + print
-    def print_block_results_tables(self, minimizers, results_per_test, group_name, simple_text=True, rst=False, color_scale=None):
+    def print_group_results_tables(self, minimizers, results_per_test, group_name, simple_text=True, rst=False, color_scale=None):
         """
         Prints in possibly several alternative formats.
 
@@ -340,8 +341,6 @@ class FittingBenchmarkTests(unittest.TestCase):
                 cell_len = new_len
 
 
-        print("*** comparison_type: ", comparison_type)
-        print("*** with rows_txt: ", rows_txt)
         if 'summary' == comparison_type and 'using_errors':
             items_link = [ 'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_lower',
                            'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_average',
@@ -403,42 +402,18 @@ class FittingBenchmarkTests(unittest.TestCase):
         for row in range(0, cells.shape[0]):
             # Pick either individual or group link
             if isinstance(items_link, list):
-                print("** shape: {0}, idx: {1}, list: {2} ".format(cells.shape[0], row, items_link))
                 link = items_link[row]
             else:
                 link = items_link
 
             tbl_body += '|' + rows_txt[row].ljust(first_col_len, ' ') + '|'
             for col in range(0, cells.shape[1]):
-                tbl_body += self.format_cell_value_rst(cells[row,col], cell_len, color_scale, link) + '|'
+                tbl_body += fitout.format_cell_value_rst(cells[row,col], cell_len, color_scale, link) + '|'
 
             tbl_body += '\n'
             tbl_body += tbl_footer
 
         return tbl_header + tbl_body
-
-    def format_cell_value_rst(self, value, width, color_scale=None, items_link=None):
-        """
-        Build the content string for a table cell, adding style/color tags
-        if required.
-
-        """
-        if not color_scale:
-            if not items_link:
-                value_text = ' {0:.4g}'.format(value).ljust(width, ' ')
-            else:
-                value_text = ' :ref:`{0:.4g} <{1}>`'.format(value, items_link).ljust(width, ' ')
-        else:
-            color = ''
-            for color_descr in color_scale:
-                if value <= color_descr[0]:
-                    color = color_descr[1]
-                    break
-            if not color:
-                color = color_scale[-1][1]
-            value_text = " :{0}:`{1:.4g}`".format(color, value).ljust(width, ' ')
-
-        return value_text
 
     
 # Run the unittest tests defined above as a Mantid system test
