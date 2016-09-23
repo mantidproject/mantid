@@ -135,9 +135,9 @@ void WorkflowAlgorithmRunner::exec() {
 
   // Execute the algorithm in the order specified by queue.
   const std::string algorithmName = getProperty(PropertyNames::ALGORITHM);
+  auto &algorithmFactory = AlgorithmFactory::Instance();
   while (!queue.empty()) {
     const auto row = queue.front();
-    auto &algorithmFactory = AlgorithmFactory::Instance();
     auto algorithm = algorithmFactory.create(
         algorithmName, algorithmFactory.highestVersion(algorithmName));
     algorithm->initialize();
