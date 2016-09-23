@@ -35,8 +35,8 @@ class IndirectILLReductionTest(unittest.TestCase):
 
     def tearDown(self):
         # set cached facility and datasearch directory
-        #config.setFacility(cls._def_fac)
-        #config.setDataSearchDirs(cls._data_dirs)
+        #config.setFacility(self._def_fac)
+        #config.setDataSearchDirs(self._data_dirs)
         #reset output workspaces list
         self._output_workspaces = []
 
