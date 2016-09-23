@@ -610,14 +610,14 @@ endif ()
 
 set ( CONSOLECHANNELCLASS "ConsoleChannel" )
 configure_file ( ../Properties/Mantid.properties.template
-                 ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
+                 ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
 )
 
-# Then, at build time, copy into appropriate place
-add_custom_command ( TARGET Kernel POST_BUILD
-                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                       ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
-                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+file(GENERATE
+   OUTPUT
+   ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>/Mantid.properties
+   INPUT
+   ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config
 )
 
 ###########################################################################
