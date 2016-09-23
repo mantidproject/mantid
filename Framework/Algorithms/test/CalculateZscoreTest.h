@@ -127,8 +127,8 @@ private:
     TS_ASSERT(alg.isExecuted());
   }
 
-  MatrixWorkspace_sptr create2DWorkspace(const int histSize = 200,
-                                         const int pointSize = 200) {
+  MatrixWorkspace_sptr create2DWorkspace(const size_t histSize = 200,
+                                         const size_t pointSize = 200) {
     vector<double> data{};
     data.reserve(pointSize);
     for (int i = 0; i < pointSize; ++i) {
