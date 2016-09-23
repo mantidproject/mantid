@@ -307,24 +307,30 @@ public:
     TS_ASSERT(!alg.isExecuted());
   }
 
-  void test_version2_withOld() {
-    const std::string CHAR_FILES("Test_characterizations_char.txt,/home/pf9/"
-                                 "Dropbox/2016/characterization_design/new/"
-                                 "PG3_char_2016_02_15-PAC-alt.txt");
-  }
+  void test_version2() {
+    const std::string CHAR_FILES("Test_characterizations_char.txt,"
+                                 "PG3_char_2016_02_15-PAC-single.txt");
 
-  void test_version2_2files() {
-    const std::string CHAR_FILES(
-        "/home/pf9/Dropbox/2016/characterization_design/new/"
-        "PG3_char_2016_02_15-general.txt,/home/pf9/Dropbox/2016/"
-        "characterization_design/new/PG3_char_2016_02_15-PAC-alt.txt");
+    std::cout << ">>>>>>>>>>>>>>>>>>>>test_version2" << std::endl;
+
+    // initialize and run the algorithm
+    ITableWorkspace_sptr wksp;
+    PDLoadCharacterizations alg;
+    runAlg(alg, wksp, CHAR_FILES);
+
+    checkPG3WithContainers(wksp);
+
+    std::cout << "<<<<<<<<<<<<<<<<<<<<" << std::endl;
   }
 
   void test_version2_wrongOrder() {
-    const std::string CHAR_FILES(
-        "/home/pf9/Dropbox/2016/characterization_design/new/"
-        "PG3_char_2016_02_15-general.txt,/home/pf9/Dropbox/2016/"
-        "characterization_design/new/PG3_char_2016_02_15-PAC-alt.txt");
+    const std::string CHAR_FILES("PG3_char_2016_02_15-PAC-single.txt,"
+                                 "Test_characterizations_char.txt");
+  }
+
+  void test_version2_extras() {
+    const std::string CHAR_FILES("Test_characterizations_char.txt,"
+                                 "PG3_char_2016_02_15-PAC-extras.txt");
   }
 };
 

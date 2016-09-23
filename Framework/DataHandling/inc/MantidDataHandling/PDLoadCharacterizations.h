@@ -55,6 +55,8 @@ private:
   void readVersion1(const std::string &filename,
                     API::ITableWorkspace_sptr &wksp);
   void readExpIni(const std::string &filename, API::ITableWorkspace_sptr &wksp);
+  bool hasExtras;
+  std::vector<std::string> canColumnNames;
 };
 
 } // namespace DataHandling

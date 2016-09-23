@@ -7,8 +7,11 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/StringTokenizer.h"
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 #include <fstream>
+#include <set>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -32,6 +35,54 @@ static const int F_INDEX_V0 = 0;
 static const int F_INDEX_V1 = 1;
 static const int F_INDEX_EXPINI = 2;
 static const int F_INDEX_SIZE = 3;
+/// matches the header line for the columns in the version=1 style file
+const boost::regex V1_TABLE_REG_EXP{"^freq.*\\s+w.*l.*\\s+"
+                                    "van\\s+van_back\\s+"
+                                    "mt_env\\s+mt_instr(.+)"};
+const boost::regex VERSION_REG_EXP{"^version=([0-9]+)"};
+
+/**
+ * Use the files to determine if there is any "extra" columns that need to be added to the output TableWorkspace.
+ */
+std::vector<std::string> extra_columns(const std::vector<std::string> &filenames) {
+  // only version1 files generate extra columns
+  if (filenames[F_INDEX_V1].empty())
+    return std::vector<std::string>();
+
+  std::set<std::string> columnSet;
+
+  // parse the version1 file
+  std::ifstream file(filenames[F_INDEX_V1].c_str());
+  if (!file) {
+    throw Exception::FileError("Unable to open file", filenames[F_INDEX_V1]);
+  }
+
+  for (std::string line = Strings::getLine(file); !file.eof();
+       line = Strings::getLine(file)) {
+    boost::smatch result;
+    // all instances of table headers
+    if (boost::regex_search(line, result, V1_TABLE_REG_EXP)) {
+      if (result.size() == 2) {
+        line = Strings::strip(result[1]);
+        Kernel::StringTokenizer tokenizer(line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        for (const auto & token : tokenizer) {
+          columnSet.insert(token);
+        }
+      }
+    }
+    // TODO need to get the "extras" line
+  }
+  file.close();
+
+
+  // convert the result to a sorted vector
+  std::vector<std::string> columnnames;
+  std::copy(columnSet.begin(), columnSet.end(), std::back_inserter(columnnames));
+  std::sort(columnnames.begin(), columnnames.end());
+
+  return columnnames;
+}
+
 }
 
 //----------------------------------------------------------------------------------------------
@@ -92,12 +143,16 @@ void PDLoadCharacterizations::init() {
 /** Execute the algorithm.
  */
 void PDLoadCharacterizations::exec() {
+  this->hasExtras = false;
   auto filenames = this->getFilenames();
 
-  for (const auto filename : filenames) {
-    std::cout << filename << std::endl;
-  }
+  for (const auto filename : filenames) { // REMOVE
+    std::cout << filename << std::endl;   // REMOVE
+  }                                       // REMOVE
 
+  this->canColumnNames = extra_columns(filenames);
+
+  // TODO number of columns changes with the addition of a version1 file
   // setup the default table workspace for the characterization runs
   ITableWorkspace_sptr wksp = WorkspaceFactory::Instance().createTable();
   wksp->addColumn("double", "frequency");
@@ -113,6 +168,9 @@ void PDLoadCharacterizations::exec() {
   wksp->addColumn("double", "tof_max");
   wksp->addColumn("double", "wavelength_min");
   wksp->addColumn("double", "wavelength_max");
+  for (const auto name : this->canColumnNames) {
+    wksp->addColumn("str", name); // all will be strings
+  }
 
   // first file is assumed to be version 0
   this->readVersion0(filenames[F_INDEX_V0], wksp);
@@ -250,14 +308,17 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     row << boost::lexical_cast<int32_t>(splitted[2]); // bank
     row << splitted[3];                               // vanadium
     row << splitted[4];                               // container
-    row << "0";                                      // empty_environment - TODO
-    row << splitted[5];                              // empty_instrument
+    row << "0";                                       // empty_environment - TODO
+    row << splitted[5];                               // empty_instrument
     row << splitted[6];                               // d_min
     row << splitted[7];                               // d_max
     row << boost::lexical_cast<double>(splitted[8]);  // tof_min
     row << boost::lexical_cast<double>(splitted[9]);  // tof_max
     row << boost::lexical_cast<double>(splitted[10]); // wavelength_min
     row << boost::lexical_cast<double>(splitted[11]); // wavelength_max
+    // pad all extras with empty string
+    for (const auto name : this->canColumnNames)
+      row << "0";
   }
 }
 
@@ -295,12 +356,46 @@ void PDLoadCharacterizations::readVersion1(const std::string &filename,
   if (filename.empty())
     return;
 
+  g_log.information() << "Opening \"" << filename << "\" as a version 1 file\n";
   std::ifstream file(filename.c_str());
   if (!file) {
     throw Exception::FileError("Unable to open file", filename);
   }
 
+  // first line must be version string
+  std::string line = Strings::getLine(file);
+  boost::smatch result;
+  if (boost::regex_search(line, result, VERSION_REG_EXP) && result.size() == 2) {
+    g_log.information() << "Found version " << result[1] << "\n";
+  } else {
+    file.close();
+    throw std::runtime_error("file must have \"version=1\" as the first line");
+  }
+
   // TODO
+  for (std::string line = Strings::getLine(file); !file.eof();
+       line = Strings::getLine(file)) {
+    if (line.empty())
+      continue;
+    if (line.substr(0,1) == "#")
+      continue;
+
+    boost::smatch result;
+    // all instances of table headers
+    if (boost::regex_search(line, result, V1_TABLE_REG_EXP)) {
+      std::cout << "found header: " << line << std::endl;
+      if (result.size() == 2) {
+        line = Strings::strip(result[1]);
+        Kernel::StringTokenizer tokenizer(line, " ", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+        for (const auto & token : tokenizer) {
+//          columnSet.insert(token);
+        }
+      }
+    } else {
+      std::cout << "not         : " << line << std::endl;
+    }
+    // TODO need to get the extras line
+  }
 
   file.close();
 }
