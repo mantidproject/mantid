@@ -12,6 +12,7 @@ from mantid import config, mtd, logger
 
 _ws_or_none = lambda s: mtd[s] if s != '' else None
 
+
 def extract_workspace(ws, ws_out, x_start, x_end):
     """
     Extracts a part of the workspace
@@ -22,6 +23,7 @@ def extract_workspace(ws, ws_out, x_start, x_end):
     """
     CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws_out, XMin=x_start, XMax=x_end)
     ScaleX(InputWorkspace=ws_out, OutputWorkspace=ws_out, Factor=-x_start, Operation='Add')
+
 
 def monitor_range(ws):
     """
@@ -39,8 +41,9 @@ def monitor_range(ws):
     # Maximum position left
     imin = np.nanargmax(np.array(y[0:mid])) - 1
     # Maximum position right
-    imax = np.nanargmax(np.array(y[mid:size])) + 1 + mid + 1
+    imax = np.nanargmax(np.array(y[mid:size])) + 1 + mid
     return x[imin], x[imax]
+
 
 # possibility to replace by the use of SelectNexusFilesByMetadata
 def check_QENS(ws):
@@ -84,147 +87,33 @@ def check_QENS(ws):
 
     return result
 
-# get_peak_positions with shift_spectra to move to separate algorithm
-def get_peak_position(ws, i):
+
+def mask_reduced_ws(ws_to_mask, xstart, xend):
     """
-    Gives bin of the peak of i-th spectrum in the ws
-    @param ws        :: input workspace
-    @param i         :: spectrum index of input workspace
-    @return          :: bin number of the peak position
-    """
-    temp = ExtractSingleSpectrum(InputWorkspace=ws, WorkspaceIndex=i)
-
-    fit_table = FindEPP(InputWorkspace=temp)
-
-    # Mid bin number
-    mid_bin = int(temp.blocksize() / 2)
-
-    # Bin number, where Y has its maximum
-    y_values = temp.readY(0)
-    x_values = temp.readX(0)
-
-    # Bin range: difference between mid bin and peak bin should be in this range
-    tolerance = int(mid_bin / 2)
-
-    # Peak bin (not in energy)
-    if fit_table.row(0)["PeakCentre"] < x_values[0] or\
-       fit_table.row(0)["PeakCentre"] > x_values[temp.blocksize()]:
-        peak_bin = -1
-    else:
-        peak_bin = temp.binIndexOf(fit_table.row(0)["PeakCentre"])
-
-    # Reliable check for peak bin
-    fit_status = fit_table.row(0)["FitStatus"]
-
-    if peak_bin < 0 or peak_bin > len(y_values) or \
-            (fit_status != 'success') or (abs(peak_bin - mid_bin) > tolerance):
-        # Fit failed (too narrow peak) or outside bin range
-        if abs(np.nanargmax(y_values) - mid_bin) < tolerance:
-            # Take bin of maximum peak
-            peak_bin = np.nanargmax(y_values)
-        else:
-            # Take the center (i.e. do no shift the spectrum)
-            peak_bin = mid_bin
-
-    # Clean-up
-    DeleteWorkspace(temp)
-    DeleteWorkspace(fit_table)
-
-    # Delete unused TableWorkspaces
-    try:
-        DeleteWorkspace('EPPfit_Parameters')
-    except ValueError:
-        logger.debug('No EPPfit_Parameters table available for deletion')
-
-    try:
-        DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
-    except ValueError:
-        logger.debug('No EPPfit_NormalisedCovarianceMatrix table available for deletion')
-
-    return peak_bin
-
-def shift_spectra(ws1, ws2=None, shift_option=False):
-    """
-    If only ws1 is given, each single spectrum will be centered
-    If in addition ws2 is given and shift_option is False, ws1 will be shifted to match the peak positions of ws2
-    If in addition ws2 is given and shift_option is True, ws1 will be shifted by the
-    number of bins that is required for ws2 to be centered
-    @param ws1                         ::   input workspace that will be shifted
-    @param ws2                         ::   optional workspace according to which ws1 will be shifted
-    @param shift_option                ::   option to shift ws1 by number of bins (ws2 to center)
-    @return                            ::   bin numbers for masking
-    """
-    number_spectra = mtd[ws1].getNumberHistograms()
-    size = mtd[ws1].blocksize()
-
-    if ws2 is not None and \
-            (size != mtd[ws2].blocksize() or number_spectra != mtd[ws2].getNumberHistograms()):
-        logger.warning('Input workspaces should have the same number of bins and spectra')
-
-    mid_bin = int(size / 2)
-
-    # Initial values for bin range of output workspace. Bins outside this range will be masked
-    start_bin = 0
-    end_bin = size
-
-    # Shift each single spectrum of the input workspace ws1
-    for i in range(number_spectra):
-
-        # Find peak positions in ws1
-        logger.debug('Get peak position of spectrum %d' % i)
-        peak_bin1 = get_peak_position(ws1, i)
-
-        # If only one workspace is given as an input, this workspace will be shifted
-        if ws2 is None:
-            to_shift = peak_bin1 - mid_bin
-        else:
-            # Find peak positions in ws2
-            peak_bin2 = get_peak_position(ws2, i)
-
-            if not shift_option:
-                # ws1 will be shifted according to peak position of ws2
-                to_shift = peak_bin1 - peak_bin2
-            else:
-                # ws1 will be shifted according to centered peak of ws2
-                to_shift = peak_bin2 - mid_bin
-
-
-        # Shift Y and E values of spectrum i by a number of to_shift bins
-        # Note the - sign, since np.roll shifts right if the argument is positive
-        # while here if to_shift is positive, it means we need to shift to the left
-        mtd[ws1].setY(i, np.roll(mtd[ws1].dataY(i), int(-to_shift)))
-        mtd[ws1].setE(i, np.roll(mtd[ws1].dataE(i), int(-to_shift)))
-
-        if (size - to_shift) < end_bin:
-            end_bin = size - to_shift
-            logger.debug('New right boundary for masking due to left shift by %d bins' % to_shift)
-        elif abs(to_shift) > start_bin:
-            start_bin = abs(to_shift)
-            logger.debug('New left boundary for masking due to right shift by %d bins' % abs(to_shift))
-        else:
-            logger.debug('Shifting does not result in a new range for masking')
-
-    logger.debug('Range after bin shift [%d %d]' % (start_bin, end_bin))
-    return start_bin, end_bin
-
-def mask_reduced_ws(red, xstart, xend):
-    """
+    Calls MaskBins twice, for masking the first and last bins of a workspace
     Args:
         red:      reduced workspace
-        xstart:   MaskBins between 0 and xstart
-        xend:     MaskBins between xend and x[-1]
+        xstart:   MaskBins between x[0] and x[xstart]
+        xend:     MaskBins between x[xend] and x[-1]
 
     """
-    x = mtd[red].readX(0)
+    x_values = ws_to_mask.readX(0)
 
     if xstart > 0:
-        logger.debug('Mask bins smaller than %d' % (xstart + 1))
-        MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[0], XMax=x[xstart])
-    if xend < len(x) - 1:
-        logger.debug('Mask bins larger than %d' % (xend - 1))
-        MaskBins(InputWorkspace=red, OutputWorkspace=red, XMin=x[xend], XMax=x[-1])
+        logger.debug('Mask bins smaller than {0}'.format(xstart))
+        MaskBins(InputWorkspace=ws_to_mask, OutputWorkspace=ws_to_mask, XMin=x_values[0], XMax=x_values[xstart])
+    else:
+        logger.debug('No masking due to x bin < 0!: {0}'.format(xstart))
+    if xend < len(x_values) - 1:
+        logger.debug('Mask bins larger than {0}'.format(xend))
+        MaskBins(InputWorkspace=ws_to_mask, OutputWorkspace=ws_to_mask, XMin=x_values[xend + 1], XMax=x_values[-1])
+    else:
+        logger.debug('No masking due to x bin >= len(x_values) - 1!: {0}'.format(xend))
 
-    logger.notice('Bins out of range [%f %f] [Unit of X-axis] are masked' % (x[xstart], x[xend - 1]))
+    if xstart > 0 and xend < len(x_values) - 1:
+        logger.notice('Bins out of range {0} {1} [Unit of X-axis] are masked'.format(x_values[xstart],
+                                                                                     x_values[xend + 1]))
+
 
 def convert_to_energy(ws):
     """
@@ -237,6 +126,7 @@ def convert_to_energy(ws):
     mtd[ws].getAxis(0).setUnit('DeltaE')  # in mev
     xnew = mtd[ws].readX(0)  # energy array
     logger.information('Energy range : %f to %f' % (xnew[0], xnew[-1]))
+
 
 def energy_formula(ws):
     """
@@ -266,6 +156,7 @@ def energy_formula(ws):
     logger.information('Energy transform formula: ' + formula)
 
     return formula
+
 
 def perform_unmirror(red, left, right, option):
     """
@@ -297,25 +188,60 @@ def perform_unmirror(red, left, right, option):
 
     elif option == 4:
         logger.information('Unmirror 4: Shift the right according to left')
-        start_bin, end_bin = shift_spectra(right, left)
+        _bin_range = 'bin_range'
+        MatchPeaks(InputWorkspace=right, OutputWorkspace=right, InputWorkspace2=left, BinRangeTable=_bin_range)
+        bin_table = mtd[_bin_range].row(0)
+        start_bin = bin_table['MinBin']
+        end_bin = bin_table['MaxBin']
+        DeleteWorkspace(_bin_range)
 
     elif option == 5:
         logger.information('Unmirror 5: Shift the right according to right of the vanadium and sum to left')
-        start_bin, end_bin = shift_spectra(right, 'right_van', True)
+        _bin_range = 'bin_range'
+        MatchPeaks(InputWorkspace=right, InputWorkspace2='right_van', OutputWorkspace=left, BinRangeTable=_bin_range)
+        bin_table = mtd[_bin_range].row(0)
+        start_bin = bin_table['MinBin']
+        end_bin = bin_table['MaxBin']
+        DeleteWorkspace(_bin_range)
 
     elif option == 6:
         logger.information('Unmirror 6: Center both the right and the left')
-        start_bin_left, endbin_left = shift_spectra(left)
-        start_bin_right, endbin_right = shift_spectra(right)
-        start_bin = np.maximum(start_bin_left, start_bin_right)
-        end_bin = np.minimum(endbin_left, endbin_right)
+        _bin_range_left = 'bin_range_left'
+        _bin_range_right = 'bin_range_right'
+        MatchPeaks(InputWorkspace=left, OutputWorkspace=left, BinRangeTable=_bin_range_left)
+        MatchPeaks(InputWorkspace=right, OutputWorkspace=right, BinRangeTable=_bin_range_right)
+        left_table = mtd[_bin_range_left].row(0)
+        right_table = mtd[_bin_range_right].row(0)
+        start_bin = np.max([left_table['MinBin'], right_table['MinBin']])
+        end_bin = np.min([left_table['MaxBin'], right_table['MaxBin']])
+        DeleteWorkspace(_bin_range_left)
+        DeleteWorkspace(_bin_range_right)
 
     elif option == 7:
         logger.information('Unmirror 7: Shift both the right and the left according to vanadium and sum')
-        start_bin_left, endbin_left = shift_spectra(left, 'left_van', True)
-        start_bin_right, endbin_right = shift_spectra(right, 'right_van', True)
-        start_bin = np.maximum(start_bin_left, start_bin_right)
-        end_bin = np.minimum(endbin_left, endbin_right)
+        _bin_range_left = 'bin_range_left'
+        _bin_range_right = 'bin_range_right'
+        MatchPeaks(InputWorkspace=left, InputWorkspace2='left_van', OutputWorkspace=left, MatchInput2ToCenter=True,
+                   BinRangeTable=_bin_range_left)
+        MatchPeaks(InputWorkspace=right, InputWorkspace2='right_van', OutputWorkspace=right, MatchInput2ToCenter=True,
+                   BinRangeTable=_bin_range_right)
+        left_table = mtd[_bin_range_left].row(0)
+        right_table = mtd[_bin_range_right].row(0)
+        start_bin1 = np.max([left_table['MinBin'], right_table['MinBin']])
+        end_bin1 = np.min([left_table['MaxBin'], right_table['MaxBin']])
+        # Now we force the peaks to be centered:
+        MatchPeaks(InputWorkspace=left, OutputWorkspace=left, BinRangeTable=_bin_range_left)
+        MatchPeaks(InputWorkspace=right, OutputWorkspace=right, BinRangeTable=_bin_range_right)
+        left_table = mtd[_bin_range_left].row(0)
+        right_table = mtd[_bin_range_right].row(0)
+        start_bin2 = np.max([left_table['MinBin'], right_table['MinBin']])
+        end_bin2 = np.min([left_table['MaxBin'], right_table['MaxBin']])
+
+        start_bin = np.max([start_bin1, start_bin2])
+        end_bin = np.min([end_bin1, end_bin2])
+
+        DeleteWorkspace(_bin_range_left)
+        DeleteWorkspace(_bin_range_right)
 
     if option > 3 or option == 1:
         # Perform unmirror option by summing left and right workspaces
@@ -323,6 +249,7 @@ def perform_unmirror(red, left, right, option):
         Scale(InputWorkspace=red, OutputWorkspace=red, Factor=0.5, Operation='Multiply')
 
     return start_bin, end_bin
+
 
 class IndirectILLReduction(DataProcessorAlgorithm):
 
@@ -514,7 +441,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         out_ws_names = []
 
         # check if it is a workspace or workspace group and perform reduction correspondingly
-        if isinstance(mtd[self._red_ws],WorkspaceGroup):
+        if isinstance(mtd[self._red_ws], WorkspaceGroup):
 
             # get instrument from the first ws in a group and load config files
             self._instrument = mtd[self._red_ws].getItem(0).getInstrument()
@@ -522,7 +449,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self._load_auxiliary_files()
 
             # figure out number of progress reports, i.e. one for each input workspace/file
-            progress = Progress(self, start=0.0, end=1.0, nreports = mtd[self._red_ws].size())
+            progress = Progress(self, start=0.0, end=1.0, nreports=mtd[self._red_ws].size())
 
             # traverse over items in workspace group and reduce individually
             for i in range(0, mtd[self._red_ws].size()):
@@ -536,7 +463,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
                 ws = run + '_' + self._red_ws
                 # prepend run number
-                RenameWorkspace(InputWorkspace = name, OutputWorkspace = ws)
+                RenameWorkspace(InputWorkspace=name, OutputWorkspace = ws)
 
                 progress.report("Reducing run #" + run)
                 # check if the run is QENS type and call reduction for each run
@@ -553,7 +480,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             run = '{0:06d}'.format(mtd[self._red_ws].getRunNumber())
             ws = run + '_' + self._red_ws
             # prepend run number
-            RenameWorkspace(InputWorkspace = self._red_ws, OutputWorkspace = ws)
+            RenameWorkspace(InputWorkspace=self._red_ws, OutputWorkspace = ws)
 
             # check if the run is QENS type and call reduction
             if check_QENS(ws):
@@ -712,9 +639,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # Mask bins out of monitor range (zero bins) for left and right wings
         xmin_left, xmax_left = monitor_range('__left_mon')
         xmin_right, xmax_right = monitor_range('__right_mon')
-        # Delete the left and right monitors
-        DeleteWorkspace('__left_mon')
-        DeleteWorkspace('__right_mon')
 
         # Check mirror_sense
         mirror_sense = 0
@@ -725,17 +649,21 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             mirror_sense = mtd[red].getRun().getLogData('Doppler.mirror_sense').value
 
         # left and right must be masked here, such that perform_unmirror will work ok
-        mask_reduced_ws(left, xmin_left, xmax_left)
-        mask_reduced_ws(right, xmin_right, xmax_right)
+        mask_reduced_ws(mtd[left], xmin_left, xmax_left)
+        mask_reduced_ws(mtd[right], xmin_right, xmax_right)
 
         # Energy transfer according to mirror_sense and unmirror_option
         start_bin = 0
         end_bin = 0
+
+        convert_to_energy(left)
+        convert_to_energy(right)
+
         if mirror_sense == 14 and self._unmirror_option == 0:
             self.log().warning('Input run #%s has two wings, no energy transfer can be performed' % run)
         elif mirror_sense == 14 and self._unmirror_option > 0:
+            # Reduced workspace will be in energy transfer since both, left and right workspaces are in energy transfer
             start_bin, end_bin = perform_unmirror(red, left, right, self._unmirror_option)
-            convert_to_energy(red)
         elif mirror_sense == 16:
             self.log().information('Input run #%s has one wing, perform energy transfer' % run)
             convert_to_energy(red)
@@ -743,19 +671,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self.log().warning('Input run #%s: no Doppler.mirror_sense defined' % run)
             convert_to_energy(red)
 
-        convert_to_energy(left)
-        convert_to_energy(right)
-
-
         ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
 
         # Mask corrupted bins according to shifted workspaces or monitor range
         # Reload X-values (now in meV, except for unmirror=0 and mirro_sense=14)
-        x = mtd[red].readX(0)
+
 
         # Initialisation, please note that masking with these values does not work
         xmin = 0
-        xmax = len(x) - 1
+        xmax = mtd[red].blocksize()
 
         # Mask bins out of final energy or monitor range
         if start_bin != 0 or end_bin != 0:
@@ -765,6 +689,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             xmin = np.maximum(xmin, start_bin)
             xmax = np.minimum(xmax, end_bin)
         elif mirror_sense == 14 and self._unmirror_option == 0:
+            x = mtd[red].readX(0)
             xmin = xmin_left
             xmax = xmax_right + int(x[-1] / 2)
             if xmin_right < size and xmax_left < size:
@@ -778,13 +703,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             # One wing, no right workspace
             xmin, xmax = monitor_range(mon)
 
-        mask_reduced_ws(red, xmin, xmax)
+        mask_reduced_ws(mtd[red], xmin, xmax)
 
         # cleanup by-products if not needed
         if not self._debug_mode:
             DeleteWorkspace(mon)
             DeleteWorkspace(left)
             DeleteWorkspace(right)
+        DeleteWorkspace('__left_mon')
+        DeleteWorkspace('__right_mon')
 
     def _debug(self, ws, name):
         """
