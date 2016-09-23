@@ -86,8 +86,8 @@ public:
 
   void showLoadDialog() override;
   void showLiveDataDialog() override;
-  void showRenameDialog(
-      const MantidQt::MantidWidgets::StringList &wsNames) const override;
+  void
+  showRenameDialog(const MantidQt::MantidWidgets::StringList &wsNames) override;
   void groupWorkspaces(const MantidQt::MantidWidgets::StringList &wsNames,
                        const std::string &groupName) const override;
   void ungroupWorkspaces(

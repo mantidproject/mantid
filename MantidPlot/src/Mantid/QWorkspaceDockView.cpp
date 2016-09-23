@@ -15,11 +15,11 @@
 #include <MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h>
 #include <MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h>
 
+#include <MantidAPI/FileProperty.h>
 #include <MantidAPI/IMDEventWorkspace.h>
 #include <MantidAPI/IPeaksWorkspace.h>
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/WorkspaceGroup.h>
-#include <MantidAPI/FileProperty.h>
 
 #include <Poco/Path.h>
 
@@ -306,7 +306,38 @@ void QWorkspaceDockView::showLiveDataDialog() {
   showAlgorithm("StartLiveData");
 }
 
-void QWorkspaceDockView::showRenameDialog(const StringList &wsNames) const {}
+void QWorkspaceDockView::renameWorkspace() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::RenameWorkspace);
+}
+
+void QWorkspaceDockView::showRenameDialog(const StringList &wsNames) {
+  // get selected workspace
+  std::string algName =
+      wsNames.size() > 1 ? "RenameWorkspaces" : "RenameWorkspace";
+  QString propName = wsNames.size() > 1 ? "InputWorkspaces" : "InputWorkspace";
+
+  QString propVal;
+
+  for (auto &ws : wsNames)
+    propVal += QString::fromStdString(ws) + ",";
+
+  propVal.remove(propVal.lastIndexOf(","));
+
+  QHash<QString, QString> presets;
+  QStringList enabled;
+
+  enabled.append(propVal);
+  presets.insert(propName, propVal);
+  auto alg = createAlgorithm(algName);
+
+  MantidQt::API::InterfaceManager interfaceManager;
+  MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(
+      alg, m_appParent, false, presets, alg->summary().c_str(), enabled);
+
+  dlg->show();
+  dlg->raise();
+  dlg->activateWindow();
+}
 
 void QWorkspaceDockView::recordWorkspaceRename(const std::string &oldName,
                                                const std::string &newName) {

@@ -259,7 +259,9 @@ void WorkspacePresenter::showInstrumentView() {
   view->showInstrumentView();
 }
 
-void WorkspacePresenter::saveToProgram(){
+void WorkspacePresenter::saveToProgram() {
+  auto view = lockView();
+  view->saveToProgram();
 }
 
 void WorkspacePresenter::plotSpectrum() {

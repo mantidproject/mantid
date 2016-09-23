@@ -61,7 +61,7 @@ public:
                                        const std::string &message) const = 0;
   virtual void showLoadDialog() = 0;
   virtual void showLiveDataDialog() = 0;
-  virtual void showRenameDialog(const StringList &wsNames) const = 0;
+  virtual void showRenameDialog(const StringList &wsNames) = 0;
   virtual void recordWorkspaceRename(const std::string &oldName,
                                      const std::string &newName) = 0;
   virtual void groupWorkspaces(const StringList &wsNames,
