@@ -200,7 +200,7 @@ class FittingBenchmarkTests(unittest.TestCase):
                                           ])
 
         if simple_text:
-            self.print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, time_tbl, norm_acc_rankings)
+            fitout.print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, time_tbl, norm_acc_rankings)
 
         if rst:
             tbl_acc_indiv = fitout.build_rst_table(minimizers, linked_problems, norm_acc_rankings, comparison_type='accuracy', using_errors=USE_ERRORS, color_scale=color_scale)
@@ -253,65 +253,6 @@ class FittingBenchmarkTests(unittest.TestCase):
                             version=BENCHMARK_VERSION_STR, metric_type='runtime', group_name='summary'))
             with open(fname, 'w') as tbl_file:
                 print(tbl_runtime_summary, file=tbl_file)
-
-
-    def print_tables_simple_text(self, minimizers, results_per_test, accuracy_tbl, time_tbl, norm_acc_rankings):
-        header = " ============= Comparison of sum of square errors: ===============\n"
-        header += " =================================================================\n"
-        header += "\n\n"
-
-        for minimiz in minimizers:
-            header += " {0} |".format(minimiz)
-        header +="\n"
-        print(header)
-
-        min_sum_err_sq = np.amin(accuracy_tbl, 1)
-        num_tests = len(results_per_test)
-        results_text = ''
-        for test_idx in range(0, num_tests):
-            results_text += "{0}\t".format(results_per_test[test_idx][0].problem.name)
-            for minimiz_idx, minimiz in enumerate(minimizers):
-                # 'e' format is easier to read in raw text output than 'g'
-                results_text += (" {0:.10g}".
-                                 format(results_per_test[test_idx][minimiz_idx].sum_err_sq /
-                                        min_sum_err_sq[test_idx]))
-            results_text += "\n"
-
-        # Beware for the statistics, if some of the fits fail badly, they'll produce 'nan'
-        # values => 'nan' errors. Requires np.nanmedian() and the like
-        
-        # summary lines
-        results_text += '---------------- Summary (accuracy): -------- \n'
-        results_text += 'Best ranking: {0}\n'.format(np.nanmin(norm_acc_rankings, 0))
-        results_text += 'Worst ranking: {0}\n'.format(np.nanmax(norm_acc_rankings, 0))
-        results_text += 'Average: {0}\n'.format(np.nanmean(norm_acc_rankings, 0))
-        results_text += 'Median: {0}\n'.format(np.nanmedian(norm_acc_rankings, 0))
-        results_text += '\n'
-        results_text += 'First quartile: {0}\n'.format(np.nanpercentile(norm_acc_rankings, 25, axis=0))
-        results_text += 'Third quartile: {0}\n'.format(np.nanpercentile(norm_acc_rankings, 75, axis=0))
-
-        print(results_text)
-
-        print(" ======== Time: =======")
-        time_text = ''
-        for test_idx in range(0, num_tests):
-            time_text += "{0}\t".format(results_per_test[test_idx][0].problem.name)
-            for minimiz_idx, minimiz in enumerate(minimizers):
-                time_text += " {0}".format(results_per_test[test_idx][minimiz_idx].runtime)
-            time_text += "\n"
-
-        min_runtime = np.amin(time_tbl, 1)
-        norm_runtimes = time_tbl / min_runtime[:, None]
-        time_text += '---------------- Summary (run time): -------- \n'
-        time_text += 'Best ranking: {0}\n'.format(np.nanmin(norm_runtimes, 0))
-        time_text += 'Worst ranking: {0}\n'.format(np.nanmax(norm_runtimes, 0))
-        time_text += 'Average: {0}\n'.format(np.average(norm_runtimes, 0))
-        time_text += 'Median: {0}\n'.format(np.nanmedian(norm_runtimes, 0))
-        time_text += '\n'
-        time_text += 'First quartile: {0}\n'.format(np.nanpercentile(norm_runtimes, 25, axis=0))
-        time_text += 'Third quartile: {0}\n'.format(np.nanpercentile(norm_runtimes, 75, axis=0))
-
-        print(time_text)
 
     
 # Run the unittest tests defined above as a Mantid system test

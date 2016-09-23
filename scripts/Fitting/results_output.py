@@ -1,5 +1,6 @@
 """
-Produce output tables from fitting benchmarking results.
+Produce output tables from fitting benchmarking results, in different
+formats such as RST and plain text.
 """
 # Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD
 # Oak Ridge National Laboratory & European Spallation Source
@@ -22,6 +23,8 @@ Produce output tables from fitting benchmarking results.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 from __future__ import (absolute_import, division, print_function)
+
+import numpy as np
 
 def build_rst_table(columns_txt, rows_txt, cells, comparison_type, using_errors, color_scale=None):
     """"
@@ -144,3 +147,61 @@ def format_cell_value_rst(value, width, color_scale=None, items_link=None):
         value_text = " :{0}:`{1:.4g}`".format(color, value).ljust(width, ' ')
 
     return value_text
+
+def print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, time_tbl, norm_acc_rankings):
+    header = " ============= Comparison of sum of square errors: ===============\n"
+    header += " =================================================================\n"
+    header += "\n\n"
+
+    for minimiz in minimizers:
+        header += " {0} |".format(minimiz)
+    header +="\n"
+    print(header)
+
+    min_sum_err_sq = np.amin(accuracy_tbl, 1)
+    num_tests = len(results_per_test)
+    results_text = ''
+    for test_idx in range(0, num_tests):
+        results_text += "{0}\t".format(results_per_test[test_idx][0].problem.name)
+        for minimiz_idx, minimiz in enumerate(minimizers):
+            # 'e' format is easier to read in raw text output than 'g'
+            results_text += (" {0:.10g}".
+                             format(results_per_test[test_idx][minimiz_idx].sum_err_sq /
+                                    min_sum_err_sq[test_idx]))
+        results_text += "\n"
+
+    # Beware for the statistics, if some of the fits fail badly, they'll produce 'nan'
+    # values => 'nan' errors. Requires np.nanmedian() and the like
+
+    # summary lines
+    results_text += '---------------- Summary (accuracy): -------- \n'
+    results_text += 'Best ranking: {0}\n'.format(np.nanmin(norm_acc_rankings, 0))
+    results_text += 'Worst ranking: {0}\n'.format(np.nanmax(norm_acc_rankings, 0))
+    results_text += 'Average: {0}\n'.format(np.nanmean(norm_acc_rankings, 0))
+    results_text += 'Median: {0}\n'.format(np.nanmedian(norm_acc_rankings, 0))
+    results_text += '\n'
+    results_text += 'First quartile: {0}\n'.format(np.nanpercentile(norm_acc_rankings, 25, axis=0))
+    results_text += 'Third quartile: {0}\n'.format(np.nanpercentile(norm_acc_rankings, 75, axis=0))
+
+    print(results_text)
+
+    print(" ======== Time: =======")
+    time_text = ''
+    for test_idx in range(0, num_tests):
+        time_text += "{0}\t".format(results_per_test[test_idx][0].problem.name)
+        for minimiz_idx, minimiz in enumerate(minimizers):
+            time_text += " {0}".format(results_per_test[test_idx][minimiz_idx].runtime)
+        time_text += "\n"
+
+    min_runtime = np.amin(time_tbl, 1)
+    norm_runtimes = time_tbl / min_runtime[:, None]
+    time_text += '---------------- Summary (run time): -------- \n'
+    time_text += 'Best ranking: {0}\n'.format(np.nanmin(norm_runtimes, 0))
+    time_text += 'Worst ranking: {0}\n'.format(np.nanmax(norm_runtimes, 0))
+    time_text += 'Average: {0}\n'.format(np.average(norm_runtimes, 0))
+    time_text += 'Median: {0}\n'.format(np.nanmedian(norm_runtimes, 0))
+    time_text += '\n'
+    time_text += 'First quartile: {0}\n'.format(np.nanpercentile(norm_runtimes, 25, axis=0))
+    time_text += 'Third quartile: {0}\n'.format(np.nanpercentile(norm_runtimes, 75, axis=0))
+
+    print(time_text)
