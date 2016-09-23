@@ -69,12 +69,14 @@ size_t IndexInfo::size() const {
   return m_spectrumNumbers->size();
 }
 
+/// Returns the spectrum number for given index.
 specnum_t IndexInfo::spectrumNumber(const size_t index) const {
   if (m_isLegacy)
     return m_getSpectrumNumber(index);
   return (*m_spectrumNumbers)[index];
 }
 
+/// Return a vector of the detector IDs for given index.
 std::vector<detid_t> IndexInfo::detectorIDs(const size_t index) const {
   if (m_isLegacy) {
     const auto &ids = m_getDetectorIDs(index);
@@ -83,6 +85,7 @@ std::vector<detid_t> IndexInfo::detectorIDs(const size_t index) const {
   return (*m_detectorIDs)[index];
 }
 
+/// Set a spectrum number for each indices.
 void IndexInfo::setSpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers) & {
   // No test of m_isLegacy, we cannot have non-const access in that case.
   if (m_spectrumNumbers->size() != spectrumNumbers.size())
@@ -91,6 +94,7 @@ void IndexInfo::setSpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers) & {
   m_spectrumNumbers.access() = std::move(spectrumNumbers);
 }
 
+/// Set a single detector ID for each indices.
 void IndexInfo::setDetectorIDs(const std::vector<detid_t> &detectorIDs) & {
   // No test of m_isLegacy, we cannot have non-const access in that case.
   if (m_detectorIDs->size() != detectorIDs.size())
@@ -102,6 +106,7 @@ void IndexInfo::setDetectorIDs(const std::vector<detid_t> &detectorIDs) & {
     detIDs[i] = {detectorIDs[i]};
 }
 
+/// Set a vector of detector IDs for each indices.
 void IndexInfo::setDetectorIDs(
     // No test of m_isLegacy, we cannot have non-const access in that case.
     std::vector<std::vector<detid_t>> &&detectorIDs) & {
