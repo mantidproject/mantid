@@ -10,14 +10,20 @@ several groupings and save in GSAS or Fullprof format
 
 """
 
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidator, \
+    IntArrayProperty, StringListValidator
+from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, \
+    FileProperty, PropertyMode, WorkspaceProperty
+from mantid.simpleapi import AlignDetectors, CloneWorkspace, CompressEvents, \
+    ConvertUnits, CropWorkspace, DeleteWorkspace, DiffractionFocussing, Divide, \
+    GetIPTS, GroupDetectors, Load, LoadDetectorsGroupingFile, LoadMask, \
+    NormaliseByCurrent, Rebin, RenameWorkspace, ReplaceSpecialValues, \
+    RemovePromptPulse, SaveAscii, SaveFocusedXYE, SaveGSS, SaveNexusProcessed, mtd
 import os
 import numpy as np
 
 
-class SNAP_Reduce(PythonAlgorithm):
+class SNAP_Reduce(DataProcessorAlgorithm):
     IPTS_dir = None
 
     def get_IPTS_Local(self, run):
@@ -123,6 +129,9 @@ class SNAP_Reduce(PythonAlgorithm):
 
         return output
 
+    def category(self):
+        return "Diffraction\\Reduction"
+
     def PyInit(self):
 
         validator = IntArrayBoundedValidator()
@@ -200,10 +209,12 @@ class SNAP_Reduce(PythonAlgorithm):
                              doc="Optional Prefix to be added to workspaces and output filenames")
 
         self.declareProperty("SaveData", False,
-                             "Save data in the following formats: Ascii- "\
-                             +"d-spacing ,Nexus Processed,GSAS and Fullprof")
+                             "Save data in the following formats: Ascii- "
+                             + "d-spacing ,Nexus Processed,GSAS and Fullprof")
 
-        self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.OptionalDirectory))
+        self.declareProperty(FileProperty(name="OutputDirectory", defaultValue="",
+                                          action=FileAction.OptionalDirectory),
+                             doc='Default value is proposal shared directory')
 
     def validateInputs(self):
         issues = dict()
@@ -284,12 +295,13 @@ class SNAP_Reduce(PythonAlgorithm):
         elif group == 'Modules':
             real_name = 'bank'
         elif group == '2_4 Grouping':
-            real_name = '2_4 Grouping'
+            real_name = '2_4_Grouping'
 
         if not mtd.doesExist(group):
             if group == "2_4 Grouping":
+                group = real_name
                 LoadDetectorsGroupingFile(InputFile=r'/SNS/SNAP/shared/libs/SNAP_group_2_4.xml',
-                                          OutputWorkspace='2_4 Grouping')
+                                          OutputWorkspace=group)
             else:
                 CreateGroupingWorkspace(InstrumentName='SNAP', GroupDetectorsBy=real_name,
                                         OutputWorkspace=group)
@@ -394,7 +406,7 @@ class SNAP_Reduce(PythonAlgorithm):
 
                 if norm == 'None':
                     SaveNexusProcessed(InputWorkspace=WS_red,
-                                       Filename=os.path.join(saveDir, 'nexus',     basename+'.nxs'))
+                                       Filename=os.path.join(saveDir, 'nexus', basename+'.nxs'))
                     SaveAscii(InputWorkspace=WS_red,
                               Filename=os.path.join(saveDir, 'd_spacing', basename+'.dat'))
                 else:
@@ -422,21 +434,26 @@ class SNAP_Reduce(PythonAlgorithm):
                 else:
                     RenameWorkspace(InputWorkspace=WS_red,
                                     OutputWorkspace='%s_%s_%s_red' % (new_Tag, r, group))
+
                 if norm == "Extracted from Data":
                     DeleteWorkspace(Workspace='peak_clip_WS')
-
             else:
-
                 RenameWorkspace(Inputworkspace='WS_d',
                                 OutputWorkspace='%s_%s_d' % (new_Tag, r))
                 RenameWorkspace(Inputworkspace='WS_red',
                                 OutputWorkspace='%s_%s_%s_red' % (new_Tag, r, group))
+
                 if norm != "None":
                     RenameWorkspace(Inputworkspace='WS_nor',
                                     OutputWorkspace='%s_%s_%s_nor' % (new_Tag, r, group))
+
                 if norm == "Extracted from Data":
                     RenameWorkspace(Inputworkspace='peak_clip_WS',
                                     OutputWorkspace='%s_%s_normalizer' % (new_Tag, r))
 
+            propertyName='OutputWorkspace'
+            wksp = '%s_%s_%s_nor' % (new_Tag, r, group)
+            self.declareProperty(WorkspaceProperty(propertyName, wksp, Direction.Output))
+            self.setProperty(propertyName, wksp)
 
 AlgorithmFactory.subscribe(SNAP_Reduce)
