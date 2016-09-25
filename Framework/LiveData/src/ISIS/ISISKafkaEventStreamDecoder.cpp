@@ -103,17 +103,20 @@ API::Workspace_sptr ISISKafkaEventStreamDecoder::extractData() {
   if (m_exception) {
     throw * m_exception;
   }
+  std::lock_guard<std::mutex> lock(m_mutex);
   if (m_localEvents.size() == 1) {
-    auto newBuffer = createBufferWorkspace(m_localEvents[0]);
-    { // mutex scope
-      std::lock_guard<std::mutex> lock(m_mutex);
-      std::swap(m_localEvents[0], newBuffer);
-    }
-    return newBuffer;
+    auto temp = createBufferWorkspace(m_localEvents.front());
+    std::swap(m_localEvents.front(), temp);
+    return temp;
   } else if (m_localEvents.size() > 1) {
-    // return a group
-    throw std::runtime_error(
-        "ISISKafkaEventStreamDecoder does not yet support multi-period data");
+    auto group = boost::make_shared<API::WorkspaceGroup>();
+    size_t index(0);
+    for (auto &filledBuffer : m_localEvents) {
+      auto temp = createBufferWorkspace(filledBuffer);
+      std::swap(m_localEvents[index++], temp);
+      group->addWorkspace(temp);
+    }
+    return group;
   } else {
     throw Exception::NotYet("Local buffers not initialized.");
   }
@@ -158,7 +161,6 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
     // No events, wait for some to come along...
     if (buffer.empty())
       continue;
-
     auto evtMsg = ISISStream::GetEventMessage(
         reinterpret_cast<const uint8_t *>(buffer.c_str()));
     if (evtMsg->message_type() == ISISStream::MessageTypes_FramePart) {
@@ -166,20 +168,15 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
           static_cast<const ISISStream::FramePart *>(evtMsg->message());
       DateAndTime pulseTime =
           m_runStart + static_cast<double>(frameData->frame_time());
-      if (frameData->period() > 1) {
-        throw std::runtime_error("Found period number == " +
-                                 std::to_string(frameData->period()) +
-                                 ". Multi-period data not yet supported.");
-      }
+      const auto eventData = frameData->n_events();
+      const auto &tofData = *(eventData->tof());
+      const auto &specData = *(eventData->spec());
+      auto nevents = tofData.size();
       std::lock_guard<std::mutex> lock(m_mutex);
       auto &periodBuffer = *m_localEvents[frameData->period() - 1];
       auto &mutableRunInfo = periodBuffer.mutableRun();
       mutableRunInfo.getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
           ->addValue(pulseTime, frameData->proton_charge());
-      const auto eventData = frameData->n_events();
-      const auto &tofData = *(eventData->tof());
-      const auto &specData = *(eventData->spec());
-      auto nevents = tofData.size();
       for (decltype(nevents) i = 0; i < nevents; ++i) {
         auto &spectrum = periodBuffer.getSpectrum(m_specToIdx[specData[i]]);
         spectrum.addEventQuickly(TofEvent(tofData[i], pulseTime));
@@ -259,8 +256,13 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
 
   // Buffers for each period
   std::lock_guard<std::mutex> lock(m_mutex);
-  m_localEvents.resize(static_cast<size_t>(runMsg->n_periods()));
+  const size_t nperiods(static_cast<size_t>(runMsg->n_periods()));
+  m_localEvents.resize(nperiods);
   m_localEvents[0] = eventBuffer;
+  for (size_t i = 1; i < nperiods; ++i) {
+    // A clone should be cheap here as there are no events yet
+    m_localEvents[i] = eventBuffer->clone();
+  }
 }
 
 /**
@@ -316,18 +318,17 @@ ISISKafkaEventStreamDecoder::createBufferWorkspace(const size_t nspectra,
  * @param parent A pointer to an existing workspace
  */
 DataObjects::EventWorkspace_sptr
-ISISKafkaEventStreamDecoder::createBufferWorkspace(const DataObjects::EventWorkspace_sptr &parent) {
+ISISKafkaEventStreamDecoder::createBufferWorkspace(
+    const DataObjects::EventWorkspace_sptr &parent) {
   auto buffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
       API::WorkspaceFactory::Instance().create(
           "EventWorkspace", parent->getNumberHistograms(), 2, 1));
   // Copy meta data
-  API::WorkspaceFactory::Instance().initializeFromParent(parent, buffer,
-                                                         false);
+  API::WorkspaceFactory::Instance().initializeFromParent(parent, buffer, false);
   // Clear out the old logs, except for the most recent entry
   buffer->mutableRun().clearOutdatedTimeSeriesLogValues();
   return buffer;
 }
-
 
 /**
  * Run LoadInstrument for the given instrument name. If it cannot succeed it

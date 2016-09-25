@@ -4,14 +4,16 @@ if ( CXXTEST_FOUND )
   include_directories ( ../../TestHelpers/inc )
   # This variable is used within the cxxtest_add_test macro to build this helper class into the test executable.
   # It will go out of scope at the end of this file so doesn't need un-setting
-  set ( TESTHELPER_SRCS TestDataListener.cpp
-                        TestGroupDataListener.cpp
-                        ../../TestHelpers/src/TearDownWorld.cpp
-                        ../../TestHelpers/src/ComponentCreationHelper.cpp
-                        ../../TestHelpers/src/InstrumentCreationHelper.cpp
-                        ../../TestHelpers/src/WorkspaceCreationHelper.cpp
-                        ../../TestHelpers/src/StartFrameworkManager.cpp
-      )
+  set ( TESTHELPER_SRCS
+    ISISKafkaTesting.h
+    TestDataListener.cpp
+    TestGroupDataListener.cpp
+    ../../TestHelpers/src/TearDownWorld.cpp
+    ../../TestHelpers/src/ComponentCreationHelper.cpp
+    ../../TestHelpers/src/InstrumentCreationHelper.cpp
+    ../../TestHelpers/src/WorkspaceCreationHelper.cpp
+    ../../TestHelpers/src/StartFrameworkManager.cpp
+  )
 
   cxxtest_add_test ( LiveDataTest ${TEST_FILES} )
   target_link_libraries( LiveDataTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 

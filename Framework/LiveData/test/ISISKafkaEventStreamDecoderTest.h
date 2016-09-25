@@ -62,7 +62,7 @@ public:
     MockKafkaBroker mockBroker;
     EXPECT_CALL(mockBroker, subscribe_(_))
         .Times(Exactly(3))
-        .WillOnce(Return(new FakeISISSinglePeriodEventSubscriber))
+        .WillOnce(Return(new FakeISISEventSubscriber(1)))
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
@@ -78,18 +78,18 @@ public:
     TS_ASSERT(!decoder->isRunning());
 
     // -- Workspace checks --
-    TS_ASSERT(workspace);
+    TSM_ASSERT(workspace,
+               "Expected non-null workspace pointer from extractData()");
     auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
-    TS_ASSERT(eventWksp);
+    TSM_ASSERT(
+        eventWksp,
+        "Expected an EventWorkspace from extractData(). Found something else");
 
     checkWorkspaceMetadata(*eventWksp);
-    // -- Data --
-    // A timer-based test and each message contains 6 events so the total should
-    // be divisible by 6
-    TS_ASSERT(eventWksp->getNumberEvents() % 6 == 0);
+    checkWorkspaceEventData(*eventWksp);
   }
 
-  void test_Multiple_Period_Event_Stream_Throws_RuntimeErrorOnExtract() {
+  void test_Multiple_Period_Event_Stream() {
     using namespace ::testing;
     using namespace ISISKafkaTesting;
     using Mantid::API::Workspace_sptr;
@@ -100,21 +100,34 @@ public:
     MockKafkaBroker mockBroker;
     EXPECT_CALL(mockBroker, subscribe_(_))
         .Times(Exactly(3))
-        .WillOnce(Return(new FakeISISMultiplePeriodEventSubscriber))
+        .WillOnce(Return(new FakeISISEventSubscriber(2)))
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(2)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
     TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     Workspace_sptr workspace;
-    TS_ASSERT_THROWS(workspace = decoder->extractData(), std::runtime_error);
+    TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isRunning());
 
-    //    // -- Workspace checks --
-    //    TS_ASSERT(workspace);
-    //    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
-    //    TS_ASSERT(group);
+    // --- Workspace checks ---
+    TSM_ASSERT(workspace,
+               "Expected non-null workspace pointer from extractData()");
+    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    TSM_ASSERT(
+        group,
+        "Expected a WorkspaceGroup from extractData(). Found something else.");
+
+    TS_ASSERT_EQUALS(2, group->size());
+    for (size_t i = 0; i < 2; ++i) {
+      auto eventWksp =
+          boost::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
+      TSM_ASSERT(eventWksp,
+                 "Expected an EventWorkspace for each member of the group");
+      checkWorkspaceMetadata(*eventWksp);
+      checkWorkspaceEventData(*eventWksp);
+    }
   }
 
   void test_Empty_Event_Stream_Waits() {
@@ -163,7 +176,7 @@ public:
     MockKafkaBroker mockBroker;
     EXPECT_CALL(mockBroker, subscribe_(_))
         .Times(Exactly(3))
-        .WillOnce(Return(new FakeISISSinglePeriodEventSubscriber))
+        .WillOnce(Return(new FakeISISEventSubscriber(1)))
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeEmptyStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
@@ -181,7 +194,7 @@ public:
     MockKafkaBroker mockBroker;
     EXPECT_CALL(mockBroker, subscribe_(_))
         .Times(Exactly(3))
-        .WillOnce(Return(new FakeISISSinglePeriodEventSubscriber))
+        .WillOnce(Return(new FakeISISEventSubscriber(1)))
         .WillOnce(Return(new FakeEmptyStreamSubscriber))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
@@ -216,6 +229,13 @@ private:
       const auto &sid = spec.getDetectorIDs();
       TS_ASSERT_EQUALS(ids[i], *(sid.begin()));
     }
+  }
+
+  void checkWorkspaceEventData(
+      const Mantid::DataObjects::EventWorkspace &eventWksp) {
+    // A timer-based test and each message contains 6 events so the total should
+    // be divisible by 6
+    TS_ASSERT(eventWksp.getNumberEvents() % 6 == 0);
   }
 };
 

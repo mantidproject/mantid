@@ -62,9 +62,11 @@ public:
 // -----------------------------------------------------------------------------
 // Fake ISIS event stream to provide event data
 // -----------------------------------------------------------------------------
-class FakeISISSinglePeriodEventSubscriber
+class FakeISISEventSubscriber
     : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
+  FakeISISEventSubscriber(int32_t nperiods)
+      : m_nperiods(nperiods), m_nextPeriod(1) {}
   void subscribe() override {}
   void consumeMessage(std::string *buffer) override {
     assert(buffer);
@@ -75,13 +77,13 @@ public:
     auto messageNEvents = ISISStream::CreateNEvents(
         builder, builder.CreateVector(tof), builder.CreateVector(spec));
 
-    int32_t frameNumber(2), period(1);
+    int32_t frameNumber(2);
     float frameTime(1.f), protonCharge(0.5f);
     bool endOfFrame(false), endOfRun(false);
     // No SE events
     auto messageFramePart = ISISStream::CreateFramePart(
         builder, frameNumber, frameTime, ISISStream::RunState_RUNNING,
-        protonCharge, period, endOfFrame, endOfRun, messageNEvents);
+        protonCharge, m_nextPeriod, endOfFrame, endOfRun, messageNEvents);
     auto messageFlatbuf = ISISStream::CreateEventMessage(
         builder, ISISStream::MessageTypes_FramePart, messageFramePart.Union());
     builder.Finish(messageFlatbuf);
@@ -89,17 +91,12 @@ public:
     // Copy to provided buffer
     buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
                    builder.GetSize());
+    m_nextPeriod = (m_nextPeriod % m_nperiods) + 1;
   }
-};
 
-// -----------------------------------------------------------------------------
-// Fake ISIS event stream to provide event data
-// -----------------------------------------------------------------------------
-class FakeISISMultiplePeriodEventSubscriber
-    : public Mantid::LiveData::IKafkaStreamSubscriber {
-public:
-  void subscribe() override {}
-  void consumeMessage(std::string *buffer) override { assert(buffer); }
+private:
+  const int32_t m_nperiods;
+  int32_t m_nextPeriod;
 };
 
 // -----------------------------------------------------------------------------
