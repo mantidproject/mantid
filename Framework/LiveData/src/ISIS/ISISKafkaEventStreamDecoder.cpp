@@ -104,17 +104,12 @@ API::Workspace_sptr ISISKafkaEventStreamDecoder::extractData() {
     throw * m_exception;
   }
   if (m_localEvents.size() == 1) {
-    DataObjects::EventWorkspace_sptr temp;
-    {
+    auto newBuffer = createBufferWorkspace(m_localEvents[0]);
+    { // mutex scope
       std::lock_guard<std::mutex> lock(m_mutex);
-      std::swap(m_localEvents[0], temp);
-      initLocalCaches();
+      std::swap(m_localEvents[0], newBuffer);
     }
-    if (temp->getNumberEvents() > 0) {
-      temp->setAllX(
-          HistogramData::BinEdges{temp->getTofMin(), temp->getTofMax()});
-    }
-    return temp;
+    return newBuffer;
   } else if (m_localEvents.size() > 1) {
     // return a group
     throw std::runtime_error(
@@ -263,6 +258,7 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
   m_specToIdx = eventBuffer->getSpectrumToWorkspaceIndexMap();
 
   // Buffers for each period
+  std::lock_guard<std::mutex> lock(m_mutex);
   m_localEvents.resize(static_cast<size_t>(runMsg->n_periods()));
   m_localEvents[0] = eventBuffer;
 }
@@ -314,6 +310,24 @@ ISISKafkaEventStreamDecoder::createBufferWorkspace(const size_t nspectra,
   }
   return eventBuffer;
 }
+
+/**
+ * Create new buffer workspace from an existing copy
+ * @param parent A pointer to an existing workspace
+ */
+DataObjects::EventWorkspace_sptr
+ISISKafkaEventStreamDecoder::createBufferWorkspace(const DataObjects::EventWorkspace_sptr &parent) {
+  auto buffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
+      API::WorkspaceFactory::Instance().create(
+          "EventWorkspace", parent->getNumberHistograms(), 2, 1));
+  // Copy meta data
+  API::WorkspaceFactory::Instance().initializeFromParent(parent, buffer,
+                                                         false);
+  // Clear out the old logs, except for the most recent entry
+  buffer->mutableRun().clearOutdatedTimeSeriesLogValues();
+  return buffer;
+}
+
 
 /**
  * Run LoadInstrument for the given instrument name. If it cannot succeed it

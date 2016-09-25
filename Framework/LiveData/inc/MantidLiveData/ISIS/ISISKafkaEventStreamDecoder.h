@@ -79,6 +79,8 @@ private:
                                                          const int32_t *spec,
                                                          const int32_t *udet,
                                                          const uint32_t length);
+  DataObjects::EventWorkspace_sptr
+  createBufferWorkspace(const DataObjects::EventWorkspace_sptr &parent);
   void loadInstrument(const std::string &name,
                       DataObjects::EventWorkspace_sptr workspace);
 
