@@ -312,6 +312,7 @@ set ( INC_FILES
     inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProvider.h
     inc/MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h
     inc/MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/MantidDisplayBase.h
 )
 
 # QtDesigner UI files to process

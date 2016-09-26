@@ -4,6 +4,7 @@
 #include "MantidUI.h"
 #include "MantidMatrix.h"
 #include "MantidDock.h"
+#include "MantidTreeWidget.h"
 #include "AlgorithmDockWidget.h"
 #include "ImportWorkspaceDlg.h"
 #include "AlgorithmMonitor.h"
@@ -13,6 +14,8 @@
 #include "MantidMatrixCurve.h"
 #include "MantidMDCurve.h"
 #include "MantidMDCurveDialog.h"
+#include "MantidSurfacePlotDialog.h"
+#include "MantidWSIndexDialog.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidTable.h"
 #include "ProjectSerialiser.h"
@@ -430,6 +433,25 @@ void MantidUI::deleteWorkspace(const QString &workspaceName) {
   executeAlgorithmAsync(alg);
 }
 
+void MantidUI::deleteWorkspaces(const QStringList &wsNames) {
+  MantidMatrix *m = dynamic_cast<MantidMatrix *>(m_appWindow->activeWindow());
+
+  try {
+    if (!wsNames.isEmpty()) {
+      for (auto &ws : wsNames) {
+        deleteWorkspace(ws);
+      }
+    } else if ((m &&
+                (strcmp(m->metaObject()->className(), "MantidMatrix") == 0)) &&
+               !m->workspaceName().isEmpty()) {
+      deleteWorkspace(m->workspaceName());
+    }
+  } catch (...) {
+    QMessageBox::warning(m_appWindow, "",
+                         "Could not delete selected workspaces.");
+  }
+}
+
 /**
 getSelectedWorkspaceName
 */
@@ -492,7 +514,7 @@ Graph3D *MantidUI::plot3DMatrix(int style) {
   return 0;
 }
 
-MultiLayer *MantidUI::plotSpectrogram(Graph::CurveType type) {
+MultiLayer *MantidUI::plotSpectrogram(GraphOptions::CurveType type) {
   MantidMatrix *m = dynamic_cast<MantidMatrix *>(appWindow()->activeWindow());
   if (m) {
     return drawSingleColorFillPlot(
@@ -1520,7 +1542,7 @@ void MantidUI::showAlgorithmDialog(const QString &algName, int version) {
 * attached to the finish notification
 * @param version :: version number, -1 for latest
 */
-void MantidUI::showAlgorithmDialog(QString algName,
+void MantidUI::showAlgorithmDialog(const QString &algName,
                                    QHash<QString, QString> paramList,
                                    Mantid::API::AlgorithmObserver *obs,
                                    int version) {
@@ -2645,7 +2667,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     colNames << t->colName(3);
   }
   colNames << t->colName(1);
-  MultiLayer *ml = appWindow()->multilayerPlot(t, colNames, Graph::Line);
+  MultiLayer *ml = appWindow()->multilayerPlot(t, colNames, GraphOptions::Line);
   // ml->askOnCloseEvent(false);
   ml->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -2881,7 +2903,7 @@ MultiLayer *MantidUI::createGraphFromTable(Table *t, int type) {
     }
   }
 
-  MultiLayer *ml = appWindow()->multilayerPlot(t, lst, Graph::Line);
+  MultiLayer *ml = appWindow()->multilayerPlot(t, lst, GraphOptions::Line);
   Graph *g = ml->activeGraph();
   appWindow()->polishGraph(g, type);
   for (int i = 0; i < g->curves(); i++)
@@ -2924,7 +2946,7 @@ Ignored if plotWindow == NULL
 MultiLayer *MantidUI::plot1D(const QStringList &ws_names,
                              const QList<int> &indexList, bool spectrumPlot,
                              MantidQt::DistributionFlag distr, bool errs,
-                             Graph::CurveType style, MultiLayer *plotWindow,
+                             GraphOptions::CurveType style, MultiLayer *plotWindow,
                              bool clearWindow, bool waterfallPlot) {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString, int> pairs;
@@ -2978,7 +3000,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, set<int>> &toPlot,
   }
 
   // Pass over to the overloaded method
-  return plot1D(pairs, spectrumPlot, distr, errs, Graph::Unspecified,
+  return plot1D(pairs, spectrumPlot, distr, errs, GraphOptions::Unspecified,
                 plotWindow, clearWindow, waterfallPlot);
 }
 
@@ -3009,7 +3031,7 @@ MultiLayer *MantidUI::plot1D(const QString &wsName,
   }
 
   // Pass over to the overloaded method
-  return plot1D(pairs, spectrumPlot, distr, errs, Graph::Unspecified,
+  return plot1D(pairs, spectrumPlot, distr, errs, GraphOptions::Unspecified,
                 plotWindow, clearWindow, waterfallPlot);
 }
 
@@ -3029,7 +3051,7 @@ not NULL - plotWindow
 MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
                              bool spectrumPlot,
                              MantidQt::DistributionFlag distr, bool errs,
-                             Graph::CurveType style, MultiLayer *plotWindow,
+                             GraphOptions::CurveType style, MultiLayer *plotWindow,
                              bool clearWindow, bool waterfallPlot) {
   if (toPlot.size() == 0)
     return NULL;
@@ -3188,7 +3210,7 @@ void MantidUI::showSequentialPlot(
 * @param curveType :: The curve type for each of the plots
 */
 void MantidUI::drawColorFillPlots(const QStringList &wsNames,
-                                  Graph::CurveType curveType) {
+                                  GraphOptions::CurveType curveType) {
   int nPlots = wsNames.size();
   if (nPlots > 1) {
     QList<MultiLayer *> plots;
@@ -3251,7 +3273,7 @@ void MantidUI::drawColorFillPlots(const QStringList &wsNames,
 * @returns A pointer to the created plot
 */
 MultiLayer *MantidUI::drawSingleColorFillPlot(const QString &wsName,
-                                              Graph::CurveType curveType,
+                                              GraphOptions::CurveType curveType,
                                               MultiLayer *window, bool hidden) {
   auto workspace =
       boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
@@ -3492,7 +3514,7 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
   QString legendText = wsName + '\n';
   int curveIndex(0);
   for (const int spec : spectra) {
-    layer->insertCurve(wsName, spec, plotErrors, Graph::Unspecified, plotDist);
+    layer->insertCurve(wsName, spec, plotErrors, GraphOptions::Unspecified, plotDist);
     legendText += "\\l(" + QString::number(++curveIndex) + ")" +
                   getLegendKey(wsName, spec) + "\n";
   }
@@ -3795,7 +3817,7 @@ void MantidUI::memoryImage() {
       }
     }
   }
-  appWindow()->plotSpectrogram(m, Graph::ColorMap);
+  appWindow()->plotSpectrogram(m, GraphOptions::ColorMap);
 }
 
 void MantidUI::memoryImage2() {
@@ -3862,3 +3884,36 @@ void MantidUI::test() {
   }
   std::cerr << "Failed...\n";
 }
+
+void MantidUI::updateRecentFilesList(const QString &fname) {
+	m_appWindow->updateRecentFilesList(fname);
+}
+
+MantidSurfacePlotDialog *
+MantidUI::createSurfacePlotDialog(int flags, QStringList wsNames,
+                                  const QString &plotType) {
+  QList<QString> names;
+
+  for (auto &name : wsNames)
+    names.append(name);
+
+  return new MantidSurfacePlotDialog(this, static_cast<Qt::WFlags>(flags),
+                                     names, plotType);
+}
+
+
+MantidWSIndexDialog *MantidUI::createWorkspaceIndexDialog(int flags,
+                                                          QStringList wsNames,
+                                                          bool showWaterfall,
+                                                          bool showPlotAll) {
+  QList<QString> names;
+
+  for (auto &name : wsNames)
+    names.append(name);
+
+  return new MantidWSIndexDialog(this, static_cast<Qt::WFlags>(flags), names,
+                                 showWaterfall, showPlotAll);
+}
+
+void MantidUI::showSurfacePlot() {}
+void MantidUI::showContourPlot() {}

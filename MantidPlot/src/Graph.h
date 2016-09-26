@@ -164,32 +164,6 @@ public:
 
   enum Ticks { NoTicks = 0, Out = 1, InOut = 2, In = 3 };
   enum MarkerType { None = -1, Text = 0, Arrow = 1, Image = 2 };
-  enum CurveType {
-    Unspecified = -1,
-    Line,
-    Scatter,
-    LineSymbols,
-    VerticalBars,
-    Area,
-    Pie,
-    VerticalDropLines,
-    Spline,
-    HorizontalSteps,
-    Histogram,
-    HorizontalBars,
-    VectXYXY,
-    ErrorBars,
-    Box,
-    VectXYAM,
-    VerticalSteps,
-    ColorMap,
-    GrayScale,
-    ColorMapContour,
-    Contour,
-    Function,
-    ImagePlot,
-    User
-  };
 
   bool hasSynchronizedScaleDivisions() { return d_synchronize_scales; };
   void setSynchronizedScaleDivisions(bool on) { d_synchronize_scales = on; };
@@ -290,7 +264,7 @@ public slots:
                          const QString &yColName, int style, int startRow = 0,
                          int endRow = -1);
   PlotCurve *insertCurve(QString workspaceName, int index, bool err = false,
-                         Graph::CurveType style = Graph::Unspecified,
+                         GraphOptions::CurveType style = GraphOptions::Unspecified,
                          bool distribution = false);
   PlotCurve *insertCurve(PlotCurve *c, int lineWidth = -1,
                          int curveType = User);
@@ -830,18 +804,18 @@ public slots:
   //! Returns a pointer to a 2D plot, if the Graph has one
   Spectrogram *spectrogram();
   //! Add a spectrogram to the graph
-  Spectrogram *plotSpectrogram(Matrix *m, CurveType type);
+  Spectrogram *plotSpectrogram(Matrix *m, GraphOptions::CurveType type);
   Spectrogram *plotSpectrogram(Function2D *f, int nrows, int ncols, double left,
                                double top, double width, double height,
                                double minz, double maxz,
-                               CurveType type); // Mantid
+                               GraphOptions::CurveType type); // Mantid
   Spectrogram *plotSpectrogram(Function2D *f, int nrows, int ncols,
                                QwtDoubleRect bRect, double minz, double maxz,
-                               CurveType type); // Mantid
+                               GraphOptions::CurveType type); // Mantid
   // Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int
   // ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type);//Mantid
   Spectrogram *plotSpectrogram(Spectrogram *d_spectrogram,
-                               CurveType type); // Mantid
+                               GraphOptions::CurveType type); // Mantid
   //! Add a matrix histogram  to the graph
   QwtHistogram *addHistogram(Matrix *m);
   //! Restores a histogram from a project file.
@@ -1007,6 +981,6 @@ private:
   boost::shared_ptr<Mantid::Kernel::Unit> m_yUnits;
 };
 
-Q_DECLARE_METATYPE(Graph::CurveType)
+Q_DECLARE_METATYPE(GraphOptions::CurveType)
 
 #endif // GRAPH_H

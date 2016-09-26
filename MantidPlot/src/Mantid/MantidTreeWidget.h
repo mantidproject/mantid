@@ -8,7 +8,12 @@
 #include <boost/shared_ptr.hpp>
 
 class QWorkspaceDockView;
-class MantidUI;
+
+namespace MantidQt {
+namespace MantidWidgets {
+class MantidDisplayBase;
+}
+}
 
 enum class MantidItemSortScheme { ByName, ByLastModified };
 
@@ -16,7 +21,8 @@ class MantidTreeWidget : public QTreeWidget {
   Q_OBJECT
 
 public:
-  MantidTreeWidget(QWorkspaceDockView *w, MantidUI *mui);
+  MantidTreeWidget(QWorkspaceDockView *w,
+                   MantidQt::MantidWidgets::MantidDisplayBase *mui);
   void mousePressEvent(QMouseEvent *e) override;
   void mouseMoveEvent(QMouseEvent *e) override;
   void mouseDoubleClickEvent(QMouseEvent *e) override;
@@ -49,7 +55,7 @@ protected:
 private:
   QPoint m_dragStartPosition;
   QWorkspaceDockView *m_dockWidget;
-  MantidUI *m_mantidUI;
+  MantidDisplayBase *m_mantidUI;
   Mantid::API::AnalysisDataServiceImpl &m_ads;
   MantidItemSortScheme m_sortScheme;
   Qt::SortOrder m_sortOrder;

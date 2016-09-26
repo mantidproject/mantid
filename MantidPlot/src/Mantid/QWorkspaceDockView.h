@@ -15,8 +15,7 @@
 #include <QMap>
 #include <boost/shared_ptr.hpp>
 
-class MantidUI;
-class ApplicationWindow;
+class QMainWindow;
 class MantidTreeWidgetItem;
 class MantidTreeWidget;
 class QLabel;
@@ -32,6 +31,12 @@ class QVBoxLayout;
 class QHBoxLayout;
 class QSignalMapper;
 class QSortFilterProxyModel;
+
+namespace MantidQt {
+namespace MantidWidgets {
+class MantidDisplayBase;
+}
+}
 
 /**
 \class  QWorkspaceDockView
@@ -64,7 +69,7 @@ class QWorkspaceDockView : public MantidQt::MantidWidgets::IWorkspaceDockView,
                            public QDockWidget {
   Q_OBJECT
 public:
-  explicit QWorkspaceDockView(MantidUI *mui, ApplicationWindow *parent);
+  explicit QWorkspaceDockView(MantidQt::MantidWidgets::MantidDisplayBase *mui, QMainWindow *parent);
   ~QWorkspaceDockView() override;
   void dropEvent(QDropEvent *de) override;
   void init() override;
@@ -169,10 +174,6 @@ private:
   void setupWidgetLayout();
   void setupLoadButtonMenu();
   void setupConnections();
-
-  void showAlgorithm(const std::string &algName, int version = -1);
-  Mantid::API::IAlgorithm_sptr createAlgorithm(const std::string &algName,
-                                               int version = -1);
 public slots:
   void clickedWorkspace(QTreeWidgetItem *, int);
   void saveWorkspaceCollection();
@@ -196,12 +197,25 @@ private slots:
   void onClickLoad();
   void onLoadAccept();
   void onClickLiveData();
+  void onClickShowData();
+  void onClickShowInstrument();
+  void onClickShowBoxData();
+  void onClickShowVates();
+  void onClickShowMDPlot();
+  void onClickShowListData();
+  void onClickShowSpectrumViewer();
+  void onClickShowSliceViewer();
+  void onClickShowFileLog();
+  void onClickSaveNexusWorkspace();
+  void onClickShowTransposed();
   void onClickPlotSpectra();
   void onClickPlotSpectraErr();
   void onClickDrawColorFillPlot();
   void onClickShowDetectorTable();
   void onClickConvertToMatrixWorkspace();
   void onClickConvertMDHistoToMatrixWorkspace();
+  void onClickShowAlgHistory();
+  void onClickShowSampleMaterial();
   void onClickPlotSurface();
   void onClickPlotContour();
   void onClickClearUB();
@@ -214,13 +228,14 @@ private:
 
 protected:
   MantidTreeWidget *m_tree;
-  friend class MantidUI;
+  //TODO:remove
+  friend class MantidDisplayBase;
 
 private:
   QString selectedWsName;
   QPoint m_menuPosition;
   QString m_programName;
-  MantidUI *const m_mantidUI;
+  MantidDisplayBase *const m_mantidUI;
 
   std::string m_filteredText;
   QPushButton *m_loadButton;
@@ -244,7 +259,7 @@ private:
       *m_convertToMatrixWorkspace, *m_convertMDHistoToMatrixWorkspace,
       *m_clearUB, *m_plotSurface, *m_plotContour;
 
-  ApplicationWindow *m_appParent;
+  QMainWindow *m_appParent;
   SaveFileType m_saveFileType;
   QAtomicInt m_updateCount;
   bool m_treeUpdating;
@@ -262,13 +277,8 @@ private slots:
   handleUpdateTree(const std::map<std::string, Mantid::API::Workspace_sptr> &);
   void handleClearView();
 signals:
-  void enableSaveNexus(const QString &);
-  void updateRecentFiles(const QString &);
+  void signalClearView();
   void
   signalUpdateTree(const std::map<std::string, Mantid::API::Workspace_sptr> &);
-  void signalClearView();
-  void signalCreateDetectorTable(const QString &, const std::vector<int> &,
-                                 bool);
-  void signalDrawColourFillPlot(const QStringList &);
 };
 #endif // QWORKSPACEDOCKVIEW_H

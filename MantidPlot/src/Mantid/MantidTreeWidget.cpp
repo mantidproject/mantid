@@ -1,10 +1,11 @@
 #include "MantidTreeWidget.h"
-#include "QWorkspaceDockView.h"
 #include "MantidGroupPlotGenerator.h"
 #include "MantidUI.h"
+#include "QWorkspaceDockView.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtMantidWidgets/WorkspacePresenter/MantidDisplayBase.h"
 
 #include <QApplication>
 #include <QDragMoveEvent>
@@ -12,13 +13,15 @@
 #include <QList>
 #include <QUrl>
 
+using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger treelog("MantidTreeWidget");
 }
 
-MantidTreeWidget::MantidTreeWidget(QWorkspaceDockView *w, MantidUI *mui)
+MantidTreeWidget::MantidTreeWidget(QWorkspaceDockView *w,
+                                   MantidDisplayBase *mui)
     : QTreeWidget(w), m_dockWidget(w), m_mantidUI(mui),
       m_ads(Mantid::API::AnalysisDataService::Instance()), m_sortScheme() {
   setObjectName("WorkspaceTree");
@@ -138,13 +141,13 @@ void MantidTreeWidget::mouseMoveEvent(QMouseEvent *e) {
 
 void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e) {
   try {
-    QString wsName = m_mantidUI->getSelectedWorkspaceName();
+    auto wsName = m_dockWidget->getSelectedWorkspaceNames()[0];
     Mantid::API::WorkspaceGroup_sptr grpWSPstr;
-    grpWSPstr = boost::dynamic_pointer_cast<WorkspaceGroup>(
-        m_ads.retrieve(wsName.toStdString()));
+    grpWSPstr =
+        boost::dynamic_pointer_cast<WorkspaceGroup>(m_ads.retrieve(wsName));
     if (!grpWSPstr) {
-      if (!wsName.isEmpty()) {
-        m_mantidUI->importWorkspace(wsName, false);
+      if (!wsName.empty()) {
+        m_mantidUI->importWorkspace(QString::fromStdString(wsName), false);
         return;
       }
     }
@@ -253,8 +256,8 @@ MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
   }
 
   // Else, one or more workspaces
-  MantidWSIndexDialog *dio = new MantidWSIndexDialog(
-      m_mantidUI, 0, selectedMatrixWsNameList, showWaterfallOpt, showPlotAll);
+  auto dio = m_mantidUI->createWorkspaceIndexDialog(
+      0, selectedMatrixWsNameList, showWaterfallOpt, showPlotAll);
   dio->exec();
   return dio->getSelections();
 }
@@ -275,8 +278,8 @@ MantidTreeWidget::choosePlotOptions(const QString &type,
   foreach (const auto matrixWs, selectedMatrixWsList) {
     selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->name()));
   }
-  MantidSurfacePlotDialog *dlg = new MantidSurfacePlotDialog(
-      m_mantidUI, 0, selectedMatrixWsNameList, type);
+  auto *dlg =
+      m_mantidUI->createSurfacePlotDialog(0, selectedMatrixWsNameList, type);
   dlg->exec();
   auto selections = dlg->getSelections();
   std::string errors =

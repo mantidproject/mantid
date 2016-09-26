@@ -12,6 +12,7 @@
 #include <MantidQtAPI/AlgorithmInputHistory.h>
 #include <MantidQtAPI/InterfaceManager.h>
 #include <MantidQtMantidWidgets/LineEditWithClear.h>
+#include <MantidQtMantidWidgets/WorkspacePresenter/MantidDisplayBase.h>
 #include <MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h>
 #include <MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h>
 
@@ -27,6 +28,7 @@
 #include <QHash>
 #include <QMenu>
 #include <QMessageBox>
+#include <QMainWindow>
 #include <QSignalMapper>
 
 #ifdef MAKE_VATES
@@ -44,7 +46,7 @@ Mantid::Kernel::Logger docklog("MantidDockWidget");
 WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
 }
 
-QWorkspaceDockView::QWorkspaceDockView(MantidUI *mui, ApplicationWindow *parent)
+QWorkspaceDockView::QWorkspaceDockView(MantidDisplayBase *mui, QMainWindow *parent)
     : QDockWidget(tr("Workspaces"), parent), m_mantidUI(mui), m_updateCount(0),
       m_treeUpdating(false), m_promptDelete(false),
       m_saveFileType(SaveFileType::Nexus), m_sortCriteria(SortCriteria::ByName),
@@ -208,85 +210,6 @@ void QWorkspaceDockView::showCriticalUserMessage(
                         QString::fromStdString(message));
 }
 
-Mantid::API::IAlgorithm_sptr
-QWorkspaceDockView::createAlgorithm(const std::string &algName, int version) {
-  Mantid::API::IAlgorithm_sptr alg;
-  try {
-    alg = Mantid::API::AlgorithmManager::Instance().create(algName, version);
-  } catch (...) {
-    QMessageBox::warning(m_appParent, "MantidPlot",
-                         "Cannot create algorithm \"" +
-                             QString::fromStdString(algName) + "\"");
-    alg = Mantid::API::IAlgorithm_sptr();
-  }
-  return alg;
-}
-
-void QWorkspaceDockView::showAlgorithm(const std::string &algName,
-                                       int version) {
-  try {
-    auto alg = createAlgorithm(algName, version);
-    if (!alg)
-      return;
-
-    QHash<QString, QString> presets;
-    QStringList enabled;
-    QString inputWsProp;
-    // If a property was explicitly set show it as preset in the dialog
-    const std::vector<Mantid::Kernel::Property *> props = alg->getProperties();
-    for (const auto &p : props) {
-      if (p->isDefault()) {
-        QString property_name = QString::fromStdString(p->name());
-        presets.insert(property_name, QString::fromStdString(p->value()));
-        enabled.append(property_name);
-      }
-
-      const Mantid::API::IWorkspaceProperty *ws_prop =
-          dynamic_cast<Mantid::API::IWorkspaceProperty *>(p);
-      if (ws_prop) {
-        unsigned int direction = p->direction();
-        if (direction == Mantid::Kernel::Direction::Input ||
-            direction == Mantid::Kernel::Direction::InOut) {
-          inputWsProp = QString::fromStdString(p->name());
-        }
-      }
-    }
-
-    // If a workspace is selected in the dock then set this as a preset for the
-    // dialog
-    QString selected = QString::fromStdString(getSelectedWorkspaceNames()[0]);
-    if (!selected.isEmpty()) {
-      if (!presets.contains(inputWsProp)) {
-        presets.insert(inputWsProp, selected);
-        // Keep it enabled
-        enabled.append(inputWsProp);
-      }
-    }
-
-    // Check if a workspace is selected in the dock and set this as a preference
-    // for the input workspace
-    // This is an optional message displayed at the top of the GUI.
-    QString optional_msg(alg->summary().c_str());
-
-    MantidQt::API::InterfaceManager interfaceManager;
-    MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(
-        alg, m_appParent, false, presets, optional_msg, enabled);
-
-    if (algName == "Load") {
-      // update recent files
-      connect(dlg, SIGNAL(accepted()), this, SLOT(onLoadAccept()));
-    }
-
-    dlg->show();
-    dlg->raise();
-    dlg->activateWindow();
-  } catch (...) {
-    QMessageBox::warning(m_appParent, "MantidPlot",
-                         "Cannot create algorithm \"" +
-                             QString::fromStdString(algName) + "\"");
-  }
-}
-
 void QWorkspaceDockView::onLoadAccept() {
   QObject *sender = QObject::sender();
   MantidQt::API::AlgorithmDialog *dlg =
@@ -297,13 +220,13 @@ void QWorkspaceDockView::onLoadAccept() {
   QString fn = MantidQt::API::AlgorithmInputHistory::Instance().previousInput(
       "Load", "Filename");
 
-  emit updateRecentFiles(fn);
+  m_mantidUI->updateRecentFilesList(fn);
 }
 
-void QWorkspaceDockView::showLoadDialog() { showAlgorithm("Load"); }
+void QWorkspaceDockView::showLoadDialog() { m_mantidUI->showAlgorithmDialog("Load"); }
 
 void QWorkspaceDockView::showLiveDataDialog() {
-  showAlgorithm("StartLiveData");
+  m_mantidUI->showAlgorithmDialog("StartLiveData");
 }
 
 void QWorkspaceDockView::renameWorkspace() {
@@ -311,44 +234,28 @@ void QWorkspaceDockView::renameWorkspace() {
 }
 
 void QWorkspaceDockView::showRenameDialog(const StringList &wsNames) {
-  // get selected workspace
-  std::string algName =
-      wsNames.size() > 1 ? "RenameWorkspaces" : "RenameWorkspace";
-  QString propName = wsNames.size() > 1 ? "InputWorkspaces" : "InputWorkspace";
-
-  QString propVal;
+  QStringList names;
 
   for (auto &ws : wsNames)
-    propVal += QString::fromStdString(ws) + ",";
+    names.append(QString::fromStdString(ws));
 
-  propVal.remove(propVal.lastIndexOf(","));
-
-  QHash<QString, QString> presets;
-  QStringList enabled;
-
-  enabled.append(propVal);
-  presets.insert(propName, propVal);
-  auto alg = createAlgorithm(algName);
-
-  MantidQt::API::InterfaceManager interfaceManager;
-  MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(
-      alg, m_appParent, false, presets, alg->summary().c_str(), enabled);
-
-  dlg->show();
-  dlg->raise();
-  dlg->activateWindow();
+  m_mantidUI->renameWorkspace(names);
 }
 
 void QWorkspaceDockView::recordWorkspaceRename(const std::string &oldName,
                                                const std::string &newName) {
+  QString qs_oldName = QString::fromStdString(oldName);
+  QString qs_newName = QString::fromStdString(newName);
+
   // check if old_name has been recently a new name
-  QList<QString> oldNames = m_renameMap.keys(oldName);
+  QList<QString> oldNames = m_renameMap.keys(qs_oldName);
   // non-empty list of oldNames become new_name
   if (!oldNames.isEmpty()) {
-    foreach (QString name, oldNames) { m_renameMap[name] = newName; }
+    for (auto &name : oldNames)
+      m_renameMap[name] = qs_newName;
   } else {
     // record a new rename pair
-    m_renameMap[oldName] = newName;
+    m_renameMap[qs_oldName] = qs_newName;
   }
 }
 
@@ -428,31 +335,10 @@ bool QWorkspaceDockView::deleteConfirmation() const {
 }
 
 void QWorkspaceDockView::deleteWorkspaces(const StringList &wsNames) {
-  MantidMatrix *m = dynamic_cast<MantidMatrix *>(m_appParent->activeWindow());
-
-  try {
-    auto alg = createAlgorithm("DeleteWorkspace");
-
-    if (alg != nullptr) {
-      alg->setLogging(false);
-
-      if ((m_deleteButton->hasFocus() || m_tree->hasFocus()) &&
-          !wsNames.empty()) {
-        for (auto &ws : wsNames) {
-          alg->setPropertyValue("Workspace", ws);
-          alg->executeAsync();
-        }
-      } else if ((m && (strcmp(m->metaObject()->className(), "MantidMatrix") ==
-                        0)) &&
-                 !m->workspaceName().isEmpty()) {
-        alg->setPropertyValue("Workspace", m->workspaceName().toStdString());
-        alg->executeAsync();
-      }
-    }
-  } catch (...) {
-    QMessageBox::warning(m_appParent, "",
-                         "Could not delete selected workspaces.");
-  }
+  QStringList names;
+  for (auto &ws : wsNames)
+    names.append(QString::fromStdString(ws));
+  m_mantidUI->deleteWorkspaces(names);
 }
 
 void QWorkspaceDockView::clearView() { emit signalClearView(); }
@@ -559,7 +445,8 @@ void QWorkspaceDockView::saveWorkspace(const std::string &wsName,
     break;
   }
 
-  showAlgorithm(algorithmName, version);
+  m_mantidUI->showAlgorithmDialog(QString::fromStdString(algorithmName),
+                                  version);
 }
 
 void QWorkspaceDockView::saveWorkspaces(const StringList &wsNames) {
@@ -713,11 +600,10 @@ void QWorkspaceDockView::setItemIcon(QTreeWidgetItem *item,
 */
 void QWorkspaceDockView::createWorkspaceMenuActions() {
   m_showData = new QAction(tr("Show Data"), this);
-  connect(m_showData, SIGNAL(triggered()), m_mantidUI, SLOT(importWorkspace()));
+  connect(m_showData, SIGNAL(triggered()), this, SLOT(onClickShowData()));
 
   m_showInst = new QAction(tr("Show Instrument"), this);
-  connect(m_showInst, SIGNAL(triggered()), m_mantidUI,
-          SLOT(showMantidInstrumentSelected()));
+  connect(m_showInst, SIGNAL(triggered()), this, SLOT(onClickShowInstrument()));
 
   m_plotSpec = new QAction(tr("Plot Spectrum..."), this);
   connect(m_plotSpec, SIGNAL(triggered()), this, SLOT(plotSpectra()));
@@ -733,8 +619,7 @@ void QWorkspaceDockView::createWorkspaceMenuActions() {
           SLOT(showDetectorTable()));
 
   m_showBoxData = new QAction(tr("Show Box Data Table"), this);
-  connect(m_showBoxData, SIGNAL(triggered()), m_mantidUI,
-          SLOT(importBoxDataTable()));
+  connect(m_showBoxData, SIGNAL(triggered()), this, SLOT(onClickShowBoxData()));
 
   m_showVatesGui = new QAction(tr("Show Vates Simple Interface"), this);
   {
@@ -744,19 +629,18 @@ void QWorkspaceDockView::createWorkspaceMenuActions() {
         QSize(), QIcon::Normal, QIcon::Off);
     m_showVatesGui->setIcon(icon);
   }
-  connect(m_showVatesGui, SIGNAL(triggered()), m_mantidUI,
-          SLOT(showVatesSimpleInterface()));
+  connect(m_showVatesGui, SIGNAL(triggered()), this, SLOT(onClickShowVates()));
 
   m_showMDPlot = new QAction(tr("Plot MD"), this);
-  connect(m_showMDPlot, SIGNAL(triggered()), m_mantidUI, SLOT(showMDPlot()));
+  connect(m_showMDPlot, SIGNAL(triggered()), this, SLOT(onClickShowMDPlot()));
 
   m_showListData = new QAction(tr("List Data"), this);
-  connect(m_showListData, SIGNAL(triggered()), m_mantidUI,
-          SLOT(showListData()));
+  connect(m_showListData, SIGNAL(triggered()), this,
+          SLOT(onClickShowListData()));
 
   m_showSpectrumViewer = new QAction(tr("Show Spectrum Viewer"), this);
-  connect(m_showSpectrumViewer, SIGNAL(triggered()), m_mantidUI,
-          SLOT(showSpectrumViewer()));
+  connect(m_showSpectrumViewer, SIGNAL(triggered()), this,
+          SLOT(onClickShowSpectrumViewer()));
 
   m_showSliceViewer = new QAction(tr("Show Slice Viewer"), this);
   {
@@ -766,24 +650,22 @@ void QWorkspaceDockView::createWorkspaceMenuActions() {
         QSize(), QIcon::Normal, QIcon::Off);
     m_showSliceViewer->setIcon(icon);
   }
-  connect(m_showSliceViewer, SIGNAL(triggered()), m_mantidUI,
-          SLOT(showSliceViewer()));
+  connect(m_showSliceViewer, SIGNAL(triggered()), this,
+          SLOT(onClickShowSliceViewer()));
 
   m_showLogs = new QAction(tr("Sample Logs..."), this);
-  connect(m_showLogs, SIGNAL(triggered()), m_mantidUI,
-          SLOT(showLogFileWindow()));
+  connect(m_showLogs, SIGNAL(triggered()), this, SLOT(onClickShowFileLog()));
 
   m_showSampleMaterial = new QAction(tr("Sample Material..."), this);
-  connect(m_showSampleMaterial, SIGNAL(triggered()), m_mantidUI,
-          SLOT(showSampleMaterialWindow()));
+  connect(m_showSampleMaterial, SIGNAL(triggered()), this,
+          SLOT(onClickShowSampleMaterial()));
 
   m_showHist = new QAction(tr("Show History"), this);
-  connect(m_showHist, SIGNAL(triggered()), m_mantidUI,
-          SLOT(showAlgorithmHistory()));
+  connect(m_showHist, SIGNAL(triggered()), this, SLOT(onClickShowAlgHistory()));
 
   m_saveNexus = new QAction(tr("Save Nexus"), this);
-  connect(m_saveNexus, SIGNAL(triggered()), m_mantidUI,
-          SLOT(saveNexusWorkspace()));
+  connect(m_saveNexus, SIGNAL(triggered()), this,
+          SLOT(onClickSaveNexusWorkspace()));
 
   m_rename = new QAction(tr("Rename"), this);
   connect(m_rename, SIGNAL(triggered()), this, SLOT(renameWorkspace()));
@@ -792,8 +674,8 @@ void QWorkspaceDockView::createWorkspaceMenuActions() {
   connect(m_delete, SIGNAL(triggered()), this, SLOT(deleteWorkspaces()));
 
   m_showTransposed = new QAction(tr("Show Transposed"), this);
-  connect(m_showTransposed, SIGNAL(triggered()), m_mantidUI,
-          SLOT(importTransposed()));
+  connect(m_showTransposed, SIGNAL(triggered()), this,
+          SLOT(onClickShowTransposed()));
 
   m_convertToMatrixWorkspace =
       new QAction(tr("Convert to MatrixWorkspace"), this);
@@ -1187,7 +1069,7 @@ void QWorkspaceDockView::addClearMenuItems(QMenu *menu, const QString &wsName) {
 
 bool QWorkspaceDockView::hasUBMatrix(const std::string &wsName) {
   bool hasUB = false;
-  auto alg = createAlgorithm("HasUB");
+  auto alg = m_mantidUI->createAlgorithm("HasUB");
 
   if (alg) {
     alg->setLogging(false);
@@ -1272,7 +1154,7 @@ void QWorkspaceDockView::workspaceSelected() {
 
   auto wsName = selectedNames[0];
   // TODO: Wire signal correctly in applicationwindow
-  emit enableSaveNexus(QString::fromStdString(wsName));
+  m_mantidUI->enableSaveNexus(QString::fromStdString(wsName));
 }
 
 void QWorkspaceDockView::onClickGroupButton() {
@@ -1437,8 +1319,19 @@ void QWorkspaceDockView::popupContextMenu() {
   menu->popup(QCursor::pos());
 }
 
-void QWorkspaceDockView::showWorkspaceData() {}
-void QWorkspaceDockView::showInstrumentView() {}
+void QWorkspaceDockView::onClickShowData() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowWorkspaceData);
+}
+
+void QWorkspaceDockView::showWorkspaceData() { m_mantidUI->importWorkspace(); }
+
+void QWorkspaceDockView::onClickShowInstrument() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowInstrumentView);
+}
+
+void QWorkspaceDockView::showInstrumentView() {
+  m_mantidUI->showMantidInstrumentSelected();
+}
 
 void QWorkspaceDockView::onClickSaveToProgram(const QString &name) {
   m_programName = name;
@@ -1479,7 +1372,7 @@ void QWorkspaceDockView::saveToProgram() {
             programKeysAndDetails.find("saveusing")->second);
 
         // Create a new save based on what files the new program can open
-        auto alg = createAlgorithm(saveUsing.toStdString());
+        auto alg = m_mantidUI->createAlgorithm(saveUsing);
 
         // Get the file extention based on the workspace
         Property *prop = alg->getProperty("Filename");
@@ -1634,7 +1527,7 @@ void QWorkspaceDockView::showColourFillPlot() {
   // remove duplicate workspace entries
   allWsNames.removeDuplicates();
 
-  emit signalDrawColourFillPlot(allWsNames);
+  m_mantidUI->drawColorFillPlots(allWsNames);
 }
 
 void QWorkspaceDockView::onClickShowDetectorTable() {
@@ -1644,22 +1537,84 @@ void QWorkspaceDockView::onClickShowDetectorTable() {
 void QWorkspaceDockView::showDetectorsTable() {
   // get selected workspace
   auto ws = getSelectedWorkspaceNames()[0];
-  // TODO: wire this signal with MantidUI
-  emit signalCreateDetectorTable(QString::fromStdString(ws), std::vector<int>(),
+  m_mantidUI->createDetectorTable(QString::fromStdString(ws), std::vector<int>(),
                                  false);
 }
 
-void QWorkspaceDockView::showBoxDataTable() {}
-void QWorkspaceDockView::showVatesGUI() {}
-void QWorkspaceDockView::showMDPlot() {}
-void QWorkspaceDockView::showListData() {}
-void QWorkspaceDockView::showSpectrumViewer() {}
-void QWorkspaceDockView::showSliceViewer() {}
-void QWorkspaceDockView::showLogs() {}
-void QWorkspaceDockView::showSampleMaterialWindow() {}
-void QWorkspaceDockView::showAlgorithmHistory() {}
-void QWorkspaceDockView::showTransposed() {}
+void QWorkspaceDockView::onClickShowBoxData() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowBoxDataTable);
+}
 
+void QWorkspaceDockView::showBoxDataTable() {
+  m_mantidUI->importBoxDataTable();
+}
+
+void QWorkspaceDockView::onClickShowVates() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowVatesGUI);
+}
+
+void QWorkspaceDockView::showVatesGUI() {
+  m_mantidUI->showVatesSimpleInterface();
+}
+
+void QWorkspaceDockView::onClickShowMDPlot() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowMDPlot);
+}
+
+void QWorkspaceDockView::showMDPlot() { m_mantidUI->showMDPlot(); }
+
+void QWorkspaceDockView::onClickShowListData() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowListData);
+}
+
+void QWorkspaceDockView::showListData() { m_mantidUI->showListData(); }
+
+void QWorkspaceDockView::onClickShowSpectrumViewer() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowSpectrumViewer);
+}
+
+void QWorkspaceDockView::showSpectrumViewer() {
+  m_mantidUI->showSpectrumViewer();
+}
+
+void QWorkspaceDockView::onClickShowSliceViewer() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowSliceViewer);
+}
+
+void QWorkspaceDockView::showSliceViewer() { m_mantidUI->showSliceViewer(); }
+
+void QWorkspaceDockView::onClickShowFileLog() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowLogs);
+}
+
+void QWorkspaceDockView::showLogs() { m_mantidUI->showLogFileWindow(); }
+
+void QWorkspaceDockView::onClickShowSampleMaterial() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowSampleMaterialWindow);
+}
+
+void QWorkspaceDockView::showSampleMaterialWindow() {
+  m_mantidUI->showSampleMaterialWindow();
+}
+
+void QWorkspaceDockView::onClickShowAlgHistory() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowAlgorithmHistory);
+}
+
+void QWorkspaceDockView::showAlgorithmHistory() {
+  m_mantidUI->showAlgorithmHistory();
+}
+
+void QWorkspaceDockView::onClickShowTransposed() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowTransposed);
+}
+
+void QWorkspaceDockView::showTransposed() { m_mantidUI->importTransposed(); }
+
+void QWorkspaceDockView::onClickSaveNexusWorkspace() {
+  m_saveFileType = SaveFileType::Nexus;
+  m_presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
+}
 /**
 * Convert selected TableWorkspace to a MatrixWorkspace.
 */
@@ -1676,11 +1631,11 @@ void QWorkspaceDockView::onClickConvertMDHistoToMatrixWorkspace() {
 }
 
 void QWorkspaceDockView::convertToMatrixWorkspace() {
-  showAlgorithm("ConvertTableToMatrixWorkspace");
+  m_mantidUI->showAlgorithmDialog("ConvertTableToMatrixWorkspace");
 }
 
 void QWorkspaceDockView::convertMDHistoToMatrixWorkspace() {
-  showAlgorithm("ConvertMDHistoToMatrixWorkspace");
+  m_mantidUI->showAlgorithmDialog("ConvertMDHistoToMatrixWorkspace");
 }
 
 /**
@@ -1694,11 +1649,11 @@ void QWorkspaceDockView::clearUBMatrix() {
   auto wsNames = getSelectedWorkspaceNames();
 
   for (auto &ws : wsNames) {
-    auto alg = createAlgorithm("ClearUB");
+    auto alg = m_mantidUI->createAlgorithm("ClearUB");
     if (alg) {
       alg->initialize();
       alg->setPropertyValue("Workspace", ws);
-      alg->executeAsync();
+	  m_mantidUI->executeAlgorithmAsync(alg);
     } else
       break;
   }
