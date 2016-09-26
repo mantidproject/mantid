@@ -173,7 +173,7 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
       const auto &specData = *(eventData->spec());
       auto nevents = tofData.size();
       std::lock_guard<std::mutex> lock(m_mutex);
-      auto &periodBuffer = *m_localEvents[frameData->period() - 1];
+      auto &periodBuffer = *m_localEvents[frameData->period()];
       auto &mutableRunInfo = periodBuffer.mutableRun();
       mutableRunInfo.getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
           ->addValue(pulseTime, frameData->proton_charge());
