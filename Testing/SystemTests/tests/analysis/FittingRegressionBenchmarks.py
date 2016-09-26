@@ -47,40 +47,63 @@ class FittingBenchmarkTests(unittest.TestCase):
                                     'Levenberg-Marquardt', 'Levenberg-MarquardtMD',
                                     'Simplex', 'SteepestDescent', 'DTRS']
         self.minimizers = minimizers_pseudofactory
-        self.group_names = ['NIST, "lower" difficulty', 'NIST, "average" difficulty', 'NIST, "higher" difficulty', "CUTEst"]
-        self.group_suffix_names = ['nist_lower', 'nist_average', 'nist_higher', 'cutest']
+        self.group_names = ['NIST, "lower" difficulty', 'NIST, "average" difficulty', 'NIST, "higher" difficulty', "Neutron data", "CUTEst"]
+        self.group_suffix_names = ['nist_lower', 'nist_average', 'nist_higher', 'cutest', 'neutron_data']
+        self.color_scale = [(1.1, 'ranking-top-1'), (1.33, 'ranking-top-2'), (1.75, 'ranking-med-3'), (3, 'ranking-low-4'), (float('nan'), 'ranking-low-5')]
 
     # Rename this to what it does/can do
     def test_rank_by_chi2_and_runtime_with_error_weights(self):
+        """
+        Run all benchmark problems, with weights (observational errors)
+        """
 
-        results_per_group = fitbk.do_regression_fitting_benchmark(include_nist=True, minimizers=self.minimizers, use_errors=self.use_errors)
+        problems, results_per_group = fitbk.do_regression_fitting_benchmark(include_nist=True, include_cutest=True,
+                                                                            data_groups_dirs = ['/home/fedemp/mantid-repos/mantid-fitting-systest/scripts/Fitting/test_examples/FittingNeutronData'],
+                                                                            minimizers=self.minimizers, use_errors=True)
 
-        color_scale = [(1.1, 'ranking-top-1'), (1.33, 'ranking-top-2'), (1.75, 'ranking-med-3'), (3, 'ranking-low-4'), (float('nan'), 'ranking-low-5')]
 
         for idx, group_results in enumerate(results_per_group):
             print("\n\n")
             print("********************************************************".format(idx+1))
-            print("**************** RESULTS FOR GROUP {0} *****************".format(idx+1))
+            print("**************** RESULTS FOR GROUP {0}, {1} ************".format(idx+1,
+                                                                                    self.group_names[idx]))
             print("********************************************************".format(idx+1))
-            fitout.print_group_results_tables(self.minimizers, group_results,
+            fitout.print_group_results_tables(self.minimizers, group_results, problems[idx],
                                               group_name=self.group_suffix_names[idx],
                                               use_errors=self.use_errors,
-                                              simple_text=True, rst=True, color_scale=color_scale)
+                                              simple_text=True, rst=True, color_scale=self.color_scale)
 
         header = "\n\n"
         header += '**************** OVERALL SUMMARY - ALL GROUPS ******** \n\n'
         print(header)
-        fitout.print_overall_results_table(self.minimizers, results_per_group, self.group_names,
+        fitout.print_overall_results_table(self.minimizers, results_per_group, problems, self.group_names,
                                            use_errors=self.use_errors, rst=True)
 
         # Flush to prevent mix-up with system tests/runner output
         import sys
         sys.stdout.flush()
 
-    def disabled_test_rank_by_chi2_and_runtime_without_error_weights(self):
-        pass
+    def test_rank_by_chi2_and_runtime_without_error_weights(self):
+        """
+        Run all benchmark problems, without weights (observational errors)
+        """
+        problems, results_per_group = fitbk.do_regression_fitting_benchmark(include_nist=True, include_cutest=True,
+                                                                            data_groups_dirs = ['/home/fedemp/mantid-repos/mantid-fitting-systest/scripts/Fitting/test_examples/FittingNeutronData'],
+                                                                            minimizers=self.minimizers, use_errors=False)
 
-    
+        for idx, group_results in enumerate(results_per_group):
+            print("\n\n")
+            print("********************************************************".format(idx+1))
+            print("**************** RESULTS FOR GROUP {0}, {1} ************".format(idx+1,
+                                                                                    self.group_names[idx]))
+            print("********************************************************".format(idx+1))
+            fitout.print_group_results_tables(self.minimizers, group_results, problems[idx],
+                                              group_name=self.group_suffix_names[idx],
+                                              use_errors=False,
+                                              simple_text=True, rst=True, color_scale=self.color_scale)
+
+        sys.stdout.flush()
+
 # Run the unittest tests defined above as a Mantid system test
 class FittingRegressionBenchmars(stresstesting.MantidStressTest):
 

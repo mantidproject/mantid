@@ -31,7 +31,7 @@ FILENAME_SUFFIX_ACCURACY = 'acc'
 FILENAME_SUFFIX_RUNTIME = 'runtime'
 
 # TO-DO: split into prepare + print
-def print_group_results_tables(minimizers, results_per_test, group_name, use_errors, simple_text=True, rst=False, color_scale=None):
+def print_group_results_tables(minimizers, results_per_test, problems_obj, group_name, use_errors, simple_text=True, rst=False, color_scale=None):
     """
     Prints in possibly several alternative formats.
 
@@ -49,6 +49,7 @@ def print_group_results_tables(minimizers, results_per_test, group_name, use_err
     linked_problems = []
     prev_name = ''
     prob_count = 1
+
     for test_idx in range(0, num_tests):
         raw_name = results_per_test[test_idx][0].problem.name
         name = raw_name.split('.')[0]
@@ -61,7 +62,14 @@ def print_group_results_tables(minimizers, results_per_test, group_name, use_err
         name_index = name + ' ' + str(prob_count)
         problems.append(name_index)
         # TODO: move this to the nist loader, not here!
-        linked_problems.append("`{0} <http://www.itl.nist.gov/div898/strd/nls/data/{1}.shtml>`__".format(name_index, name.lower()))
+        if 'nist_' in group_name:
+            linked_problems.append("`{0} <http://www.itl.nist.gov/div898/strd/nls/data/{1}.shtml>`__".format(name_index, name.lower()))
+        else:
+            linked_problems.append(name)
+        #print(" ***** DEBUG problems len:",len(problems_obj))
+        #print(" ***** DEBUG problems[test_idx]:",problems_obj[test_idx])
+        #if prob_count > 1:
+        #    linked_problems.append(problems_obj[test_idx].linked_name)
 
     # An np matrix for convenience
     # 1 row per problem+start, 1 column per minimizer
@@ -156,7 +164,7 @@ def print_group_results_tables(minimizers, results_per_test, group_name, use_err
             print(tbl_runtime_summary, file=tbl_file)
 
 # TO-DO: split into prepare + print
-def print_overall_results_table(minimizers, group_results, group_names, use_errors, simple_text=True, rst=False):
+def print_overall_results_table(minimizers, group_results, problems, group_names, use_errors, simple_text=True, rst=False):
 
     num_groups = len(group_results)
     num_minimizers = len(minimizers)
@@ -190,7 +198,13 @@ def print_overall_results_table(minimizers, group_results, group_names, use_erro
 
     linked_names = []
     for name in group_names:
-        linked_names.append("`{0} <http://www.itl.nist.gov/div898/strd/nls/nls_main.shtml>`__".format(name))
+        # This should be tidied up
+        if 'NIST' in name:
+            linked = "`{0} <http://www.itl.nist.gov/div898/strd/nls/nls_main.shtml>`__".format(name)
+        else:
+            linked = name
+
+        linked_names.append(linked)
 
     tbl_all_summary_acc = build_rst_table(minimizers, linked_names, groups_norm_acc, comparison_type='summary', using_errors=use_errors)
     print(tbl_all_summary_acc)
@@ -218,6 +232,11 @@ def build_rst_table(columns_txt, rows_txt, cells, comparison_type, using_errors,
     @param color_scale :: list with pairs of threshold value - color, to produce color
     tags for the cells
     """
+    # TODO: quick fix for DTRS name - REMOVE
+    for idx, minimizer in enumerate(columns_txt):
+        if 'DTRS' == minimizer:
+            columns_txt[idx] = 'Trust region'
+
     # One length for all cells
     cell_len = 50
     cell_len = 0
@@ -226,17 +245,22 @@ def build_rst_table(columns_txt, rows_txt, cells, comparison_type, using_errors,
         if new_len > cell_len:
             cell_len = new_len
 
+    # TODO: tidy this up and get it out of here!
     # links for the cells of the summary tables (to the detailed results
     if 'summary' == comparison_type and 'using_errors':
         items_link = [ 'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_lower',
                        'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_average',
                        'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_higher',
-                       'Minimizers_unweighted_comparison_in_terms_of_runtime_cutest' ]
+                       'Minimizers_unweighted_comparison_in_terms_of_runtime_neutron_data',
+                       'Minimizers_unweighted_comparison_in_terms_of_runtime_cutest'
+                     ]
     elif 'summary' == comparison_type and not 'using_errors':
-        items_link = [ 'Minimizers_unweighted_comparison_in_terms_of_accuracy_nist_lower',
-                       'Minimizers_unweighted_comparison_in_terms_of_accuracy_nist_average',
-                       'Minimizers_unweighted_comparison_in_terms_of_accuracy_nist_higher',
-                       'Minimizers_unweighted_comparison_in_terms_of_accuracy_cutest' ]
+        items_link = [ 'Minimizers_weighted_comparison_in_terms_of_accuracy_nist_lower',
+                       'Minimizers_weighted_comparison_in_terms_of_accuracy_nist_average',
+                       'Minimizers_weighted_comparison_in_terms_of_accuracy_nist_higher',
+                       'Minimizers_weighted_comparison_in_terms_of_accuracy_neutron_data',
+                       'Minimizers_weighted_comparison_in_terms_of_accuracy_cutest'
+                     ]
     elif 'accuracy' == comparison_type or 'runtime' == comparison_type:
         if using_errors:
             items_link = 'FittingMinimizersComparisonDetailedWithWeights'

@@ -183,6 +183,8 @@ def parse_nist_file(spec_file):
     print "Starting values: {0}".format(starting_values)
     prob = test_problem.FittingTestProblem()
     prob.name = os.path.basename(spec_file.name)
+    prob.linked_name = ("`{0} <http://www.itl.nist.gov/div898/strd/nls/data/{1}.shtml>`__".
+                        format(prob.name, prob.name.lower()))
     prob.equation = parsed_eq
     prob.starting_values = starting_values
     prob.data_pattern_in = data_pattern[:, 1:]
@@ -191,7 +193,61 @@ def parse_nist_file(spec_file):
 
     return prob
 
-
 def parse_nist_fitting_problem_file(problem_filename):
     with open(problem_filename) as spec_file:
         return parse_nist_file(spec_file)
+
+def parse_neutron_data_fitting_problem_file(fname):
+    """
+    Builds a FittingTestProblem object from a file. The file is expected to
+    have a list of variables (input filename, name, equation, etc.)
+
+    Other alternatives could be ConfigParser (ini format, parser not extermely
+    good), or JSON.
+
+    """
+    prob = test_problem.FittingTestProblem()
+    with open(fname) as probf:
+        entries = get_neutron_data_problem_entries(probf)
+        get_fitting_neutron_data(entries['input_file'], prob)
+        prob.name = entries['name']
+        prob.equation = entries['function']
+        prob.starting_values = None
+        if 'fit_parameters' in entries:
+            prob.start_x = entries['fit_parameters']['StartX']
+            prob.end_x = entries['fit_parameters']['EndX']
+
+    return prob
+
+def get_neutron_data_problem_entries(problem_file):
+    """
+    Get values from the lines of a "neutron fitting problem definition file",
+    They are returned as a dictionary of key (lhs) - value (rhs).
+    """
+    entries = {}
+    for line in problem_file:
+        # discard comments
+        line = line.partition('#')[0]
+        line = line.rstrip()
+        if not line:
+            continue
+
+        # take values (lhs = rhs)
+        lhs, rhs = line.split("=", 1)
+        # assumes it is safe to evaluate the rhs (it's a string for example)
+        entries[lhs.strip()] = eval(rhs.strip())
+
+    return entries
+
+def get_fitting_neutron_data(fname, prob):
+    """
+    Load the X-Y data from a file and get the values into a fitting problem
+    definition object.
+    """
+    import mantid.simpleapi as msapi
+
+    wks = msapi.Load(fname)
+    prob.data_pattern_in = wks.readX(0)
+    prob.data_pattern_out = wks.readY(0)
+    prob.data_pattern_obs_errors = wks.readE(0)
+    prob.ref_residual_sum_sq = 0
