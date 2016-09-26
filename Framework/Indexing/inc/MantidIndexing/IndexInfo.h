@@ -18,6 +18,17 @@ namespace Indexing {
 /** IndexInfo is an object for holding information about spectrum numbers and
   detector IDs associated to the spectra in a workspace.
 
+  Currently this class supports a legacy "wrapper mode": Spectrum numbers and
+  detector IDs are still stored inside the ISpectrums that are part of a
+  MatrixWorkspace. Ultimately this data will be moved into IndexInfo. For the
+  time being, while the old interface still exists, this cannot be done.
+  Instead, for any IndexInfo object that is part of a MatrixWorkspace, the
+  methods in IndexInfo will provide access to data stored in the associated
+  MatrixWorkspace (or the respective ISpectrum objects). The m_isLegacy flag
+  indicates that an instance of IndexInfo is in such a wrapping state. Taking a
+  copy of IndexInfo will cause a transition from this wrapping legacy state to a
+  stand-alone state without associated MatrixWorkspace.
+
   @author Simon Heybrock
   @date 2016
 
