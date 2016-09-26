@@ -1309,7 +1309,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     // prev_name = comp_name;
     const Geometry::IComponent *comp = nullptr;
     if (comp_name.find("detID:") != std::string::npos) {
-      int detID = atoi(comp_name.substr(6).c_str());
+      int detID = std::stoi(comp_name.substr(6).c_str());
       comp = instr->getDetector(detID).get();
       if (!comp) {
         g_log.warning() << "Cannot find detector " << detID << '\n';
