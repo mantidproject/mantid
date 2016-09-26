@@ -147,13 +147,13 @@ void SINQHMListener::loadDimensions() {
    */
   Element *bank = dynamic_cast<Element *>(bankList->item(0));
   std::string rankt = bank->getAttribute("rank");
-  rank = atoi(rankt.c_str());
+  rank = std::stoi(rankt.c_str());
 
   Poco::AutoPtr<NodeList> axisList = bank->getElementsByTagName("axis");
   for (unsigned int i = 0; i < axisList->length(); i++) {
     Element *axis = dynamic_cast<Element *>(axisList->item(i));
     std::string sdim = axis->getAttribute("length");
-    dim[i] = atoi(sdim.c_str());
+    dim[i] = std::stoi(sdim.c_str());
   }
 
   doSpecialDim();
