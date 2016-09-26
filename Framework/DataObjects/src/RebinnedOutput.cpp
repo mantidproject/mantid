@@ -45,7 +45,7 @@ void RebinnedOutput::init(const std::size_t &NVectors,
   std::size_t nHist = this->getNumberHistograms();
   this->fracArea.resize(nHist);
   for (std::size_t i = 0; i < nHist; ++i) {
-    this->fracArea[i].resize(histogram.y().size());
+    this->fracArea[i].resize(histogram.size());
   }
 }
 
