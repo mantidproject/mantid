@@ -38,12 +38,7 @@ options are available:
 
   A `Gauss-Newton <https://en.wikipedia.org/wiki/Gauss–Newton_algorithm#Improved_versions>`__ algorithm with damping.
 - :ref:`FABADA <FABADA>`
-- `DTRS <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__
-
-  A trust region minimizer (not listed in the comparison table)
-- `Mose-Sorensen <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__
-  
-  A trust region minimizer (not listed in the comparison table)
+- A `Trust region <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__ algorithm.
 
 All these algorithms are `iterative
 <https://en.wikipedia.org/wiki/Iterative_method>`__.  The *Simplex*
@@ -74,7 +69,9 @@ analysis. It is excluded from the comparison described below, as it is
 a substantially different algorithm.
 
 In most cases, the implementation of these algorithms is based on the
-`GNU Scientific Libraty routines for least-squares fitting
+`GSL (GNU Scientific Library) library
+https://www.gnu.org/software/gsl/`__, and more specifically on the
+`GSL routines for least-squares fitting
 <https://www.gnu.org/software/gsl/manual/html_node/Least_002dSquares-Fitting.html#Least_002dSquares-Fitting>`__
 
 
@@ -156,7 +153,8 @@ Summary, median ranking
 
 The summary table shows the median ranking across all the test
 problems. See :ref:`detailed results by test problem (accuracy)
-<Minimizers_unweighted_comparison_in_terms_of_accuracy>`.
+<Minimizers_unweighted_comparison_in_terms_of_accuracy>` (also
+accessible by clicking on the cells of the table).
 
 Alternatively, see the :ref:`detailed results when using weighted
 least squares as cost function
@@ -170,7 +168,7 @@ least squares as cost function
 
 .. summary splitting the NIST problems into three blocks as originally done in the NIST pages
 
-.. include:: minimizers_comparison/v3.7.0/comparison_unweighted_v3.7_acc_summary.txt
+.. include:: minimizers_comparison/v3.8.0/comparison_unweighted_v3.8_acc_summary.txt
 
 
 Comparison in terms of run time
@@ -187,8 +185,21 @@ Alternatively, see the :ref:`detailed results when using weighted
 least squares as cost function
 <Minimizers_weighted_comparison_in_terms_of_run_time>`.
 
-.. include:: minimizers_comparison/v3.7.0/comparison_unweighted_v3.7_runtime_summary.txt
+.. include:: minimizers_comparison/v3.8.0/comparison_unweighted_v3.8_runtime_summary.txt
 
+
+Technical details for reproducibility
+#####################################
+
+Note that fitting results may be sensitive to the platform and
+versions of the algorithms and underlying libraries used.  All the
+results shown here have been produced using the same version of Mantid
+and on the same system:
+
+- Mantid release 3.8
+
+- Debian 8 GNU/Linux system with an Intel Core i7-4790 processor,
+  using `GSL https://www.gnu.org/software/gsl/`__ version 1.16.
 
 References:
              
