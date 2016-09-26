@@ -5,6 +5,12 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
+Instrument & IDF
+----------------
+
+- New CRISP filename format, full name + 8 digits, is now recognised
+- POLREF IDF has been updated
+
 ReflectometryReductionOne
 -------------------------
 
@@ -20,7 +26,6 @@ CreateTransmissionWorkspace
 
 - A workflow diagram has been added to the documentation.
 - The rebinning in wavelength has been removed
-
 
 ISIS Reflectometry (Polref)
 ###########################

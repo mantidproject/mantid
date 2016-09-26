@@ -55,6 +55,8 @@ New
 
 - :ref:`UnwrapMonitorsInTOF <algm-UnwrapMonitorsInTOF>` handles the data which was collected beyond the end of a frame.
 
+- :ref:`ExtractMonitors <algm-ExtractMonitors>` an algorithm to extract the monitor spectra into a new workspace. Can also be 
+  used to create a workspace with just the detectors, or two workspaces, one with the monitors and one with the detectors.
 
 Improved
 ########
@@ -77,7 +79,7 @@ Improved
   had a bug where the table columns were in a reversed order in the dialogue's combo boxes.
   This is now fixed and the order is correct.
 
-- :ref:`ConvertUnits <algm-ConvertUnits>` will no longer corrupt an in place workspace if the algorithm fails.
+- :ref:`ConvertUnits <algm-ConvertUnits>` and `ConvertUnitsUsingDetectorTable <algm-ConvertUnitsUsingDetectorTable>` will no longer corrupt a workspace used as input and output if the algorithm fails.
 
 - :ref:`SetSample <algm-SetSample>`: Fixed a bug with interpreting the `Center` attribute for cylinders/annuli
 
