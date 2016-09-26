@@ -47,7 +47,7 @@ with a fit to the following model:
 
 :math:`S(Q,E) = I \cdot R(Q,E) \otimes [EISF\delta(E) + (1-EISF)\cdot TeixeiraWaterSQE(Q,E)] + (a+bE)`
 
-.. testcode:: TeixeiraWaterSQE
+.. testcode:: ExampleTeixeiraWaterSQE
 
     from __future__ import (absolute_import, division, print_function)
     import numpy as np
@@ -150,7 +150,7 @@ with a fit to the following model:
 
 Output:
 
-.. testoutput:: ExampleIsoRotDiff
+.. testoutput:: ExampleTeixeiraWaterSQE
 
     Optimal Length within 10% of nominal value
     Optimal Tau within 10% of nominal value
