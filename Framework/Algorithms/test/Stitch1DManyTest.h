@@ -87,38 +87,38 @@ public:
   }
 
   void test_throws_with_wrong_number_of_start_overlaps() {
-      Stitch1DMany alg;
-      alg.setChild(true);
-      alg.initialize();
-      alg.setProperty("InputWorkspaces", "ws1, ws2");
-      alg.setProperty("Params", "0.1");
-      alg.setProperty("StartOverlaps", "-0.5, -0.6");
-      alg.setProperty("EndOverlaps", "0.5");
-      alg.setPropertyValue("OutputWorkspace", "outws");
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "ws1, ws2");
+    alg.setProperty("Params", "0.1");
+    alg.setProperty("StartOverlaps", "-0.5, -0.6");
+    alg.setProperty("EndOverlaps", "0.5");
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
   void test_throws_with_wrong_number_of_end_overlaps() {
-      Stitch1DMany alg;
-      alg.setChild(true);
-      alg.initialize();
-      alg.setProperty("InputWorkspaces", "ws1, ws2");
-      alg.setProperty("Params", "0.1");
-      alg.setProperty("StartOverlaps", "-0.5");
-      alg.setProperty("EndOverlaps", "0.5, 0.6");
-      alg.setPropertyValue("OutputWorkspace", "outws");
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "ws1, ws2");
+    alg.setProperty("Params", "0.1");
+    alg.setProperty("StartOverlaps", "-0.5");
+    alg.setProperty("EndOverlaps", "0.5, 0.6");
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
   void test_throws_if_no_params() {
-      Stitch1DMany alg;
-      alg.setChild(true);
-      alg.initialize();
-      alg.setProperty("InputWorkspaces", "ws1, ws2");
-      alg.setProperty("StartOverlaps", "-0.5, -0.6");
-      alg.setProperty("EndOverlaps", "0.5, 0.6");
-      alg.setPropertyValue("OutputWorkspace", "outws");
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    Stitch1DMany alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "ws1, ws2");
+    alg.setProperty("StartOverlaps", "-0.5, -0.6");
+    alg.setProperty("EndOverlaps", "0.5, 0.6");
+    alg.setPropertyValue("OutputWorkspace", "outws");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
   void test_workspace_types_differ_throws() {
@@ -139,7 +139,7 @@ public:
   }
 
   void test_workspace_group_size_differ_throws() {
-    
+
     auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
     auto ws2 = createUniformWorkspace(0.8, 0.1, 1.1, 2.1);
     auto ws3 = createUniformWorkspace(1.6, 0.1, 1.5, 2.5);
@@ -161,7 +161,6 @@ public:
     alg.setProperty("EndOverlaps", "1.1, 1.8");
     alg.setPropertyValue("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
-
   }
 
   void test_two_workspaces() {
