@@ -27,6 +27,12 @@ DECLARE_ALGORITHM(CalculateFlatBackground)
 using namespace Kernel;
 using namespace API;
 
+enum class Modes {
+  LINEAR_FIT,
+  MEAN,
+  MOVING_AVERAGE
+};
+
 void CalculateFlatBackground::init() {
   declareProperty(
       make_unique<WorkspaceProperty<>>(
@@ -52,7 +58,7 @@ void CalculateFlatBackground::init() {
   declareProperty("EndX", Mantid::EMPTY_DBL(),
                   "The X value at which to end the background fit");
   setPropertySettings("EndX", make_unique<EnabledWhenProperty>("Mode", IS_NOT_EQUAL_TO, "Moving Average"));
-  declareProperty("AveragingWindowWidth", Mantid::EMPTY_DBL(), "The width of the moving average window in X axis units");
+  declareProperty("AveragingWindowWidth", Mantid::EMPTY_INT(), "The width of the moving average window in X axis units");
   setPropertySettings("AveragingWindowWidth", make_unique<EnabledWhenProperty>("Mode", IS_EQUAL_TO, "Moving Average"));
   declareProperty(
       make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
@@ -97,9 +103,32 @@ void CalculateFlatBackground::exec() {
 
   m_skipMonitors = getProperty("SkipMonitors");
   m_nullifyNegative = getProperty("NullifyNegativeValues");
-  // Get the required X range
+  std::string modeString = getProperty("Mode");
+  Modes mode = Modes::LINEAR_FIT;
+  if (modeString == "Mean") {
+    mode = Modes::MEAN;
+  }
+  else if (modeString == "Moving Average") {
+    mode = Modes::MOVING_AVERAGE;
+  }
   double startX, endX;
-  this->checkRange(startX, endX);
+  int windowWidth;
+  switch (mode) {
+  case Modes::LINEAR_FIT:
+  case Modes::MEAN:
+    // Get the required X range
+    this->checkRange(startX, endX);
+    break;
+  case Modes::MOVING_AVERAGE:
+    windowWidth = getProperty("AveragingWindowWidth");
+    if (windowWidth <= 0) {
+      throw std::runtime_error("AveragingWindowWidth zero or negative");
+    }
+    if (blocksize < windowWidth) {
+      throw std::runtime_error("AveragingWindowWidth is larger than the number of bins in InputWorkspace");
+    }
+    break;
+  }
 
   std::vector<int> wsInds = getProperty("WorkspaceIndexList");
   // check if the user passed an empty list, if so all of spec will be processed
@@ -161,11 +190,18 @@ void CalculateFlatBackground::exec() {
       double variance = -1;
 
       // Now call the function the user selected to calculate the background
-      const double background =
-          std::string(getProperty("mode")) == "Mean"
-              ? this->Mean(outputWS, currentSpec, startX, endX, variance)
-              : this->LinearFit(outputWS, currentSpec, startX, endX);
-
+      double background = -1;
+      switch (mode) {
+      case Modes::LINEAR_FIT:
+        background = LinearFit(outputWS, currentSpec, startX, endX);
+        break;
+      case Modes::MEAN:
+        background = Mean(outputWS, currentSpec, startX, endX, variance);
+        break;
+      case Modes::MOVING_AVERAGE:
+        background = movingAverage(outputWS, currentSpec, windowWidth);
+        break;
+      }
       if (background < 0) {
         g_log.warning() << "Problem with calculating the background number of "
                            "counts spectrum with index " << currentSpec
@@ -445,6 +481,30 @@ double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS,
   // Calculate the value of the flat background by taking the value at the
   // centre point of the fit
   return slope * centre + intercept;
+}
+
+double CalculateFlatBackground::movingAverage(API::MatrixWorkspace_const_sptr WS, int wsIndex, size_t windowWidth) const {
+  const auto &ys = WS->y(wsIndex);
+  // First and last points are not averaged.
+  double currentMin = std::min(ys.front(), ys.back());
+  for (size_t i = 1; i < windowWidth / 2; ++i) {
+    currentMin = std::min(currentMin, ys[i]);
+    currentMin = std::min(currentMin, ys[ys.size() - i - 1]);
+  }
+  // For the rest, average over the window.
+  // Initialize sum.
+  double sum = 0;
+  for (size_t i = 0; i < windowWidth; ++i) {
+    sum += ys[i];
+  }
+  // When moving the window, we need to subtract the single point "falling off"
+  // while adding a new point. Saves us summing all the points in the window.
+  for (size_t i = 1; i < ys.size() - windowWidth; ++i) {
+    currentMin = std::min(currentMin, sum / static_cast<double>(windowWidth));
+    sum = sum - ys[i] + ys[i + windowWidth];
+  }
+  currentMin = std::min(currentMin, sum / static_cast<double>(windowWidth));
+  return currentMin;
 }
 
 } // namespace Algorithms
