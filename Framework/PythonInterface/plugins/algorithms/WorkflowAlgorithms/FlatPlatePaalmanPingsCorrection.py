@@ -1,6 +1,7 @@
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 from six import iteritems
+from six import integer_types
 
 import math
 import numpy as np
@@ -321,7 +322,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         for key, value in iteritems(sample_logs):
             if isinstance(value, bool):
                 log_type = 'String'
-            elif isinstance(value, (int, float)):
+            elif isinstance(value, (integer_types, float)):
                 log_type = 'Number'
             else:
                 log_type = 'String'
