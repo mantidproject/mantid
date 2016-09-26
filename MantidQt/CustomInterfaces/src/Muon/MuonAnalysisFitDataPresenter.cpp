@@ -271,6 +271,11 @@ MuonAnalysisFitDataPresenter::generateWorkspaceNames(bool overwrite) const {
 std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
     const std::string &instrument, const std::string &runString,
     bool overwrite) const {
+  // If no instrument or runs, no workspaces needed
+  if (instrument.empty() || runString.empty()) {
+    return {};
+  }
+
   // From view, get names of all workspaces needed
   std::vector<std::string> workspaceNames;
   const auto groups = m_dataSelector->getChosenGroups();

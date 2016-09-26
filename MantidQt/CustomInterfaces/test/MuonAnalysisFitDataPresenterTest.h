@@ -318,6 +318,17 @@ public:
          "MUSR00015191; Pair; long; Asym; 1; #1_Raw"});
   }
 
+  void test_generateWorkspaceNames_noInstrument() {
+    const auto &names =
+        m_presenter->generateWorkspaceNames("", "15189-91", false);
+    TS_ASSERT(names.empty());
+  }
+
+  void test_generateWorkspaceNames_noRuns() {
+    const auto &names = m_presenter->generateWorkspaceNames("MUSR", "", false);
+    TS_ASSERT(names.empty());
+  }
+
   void test_createWorkspacesToFit_AlreadyExists() {
     // Put workspace into ADS under this name
     auto &ads = AnalysisDataService::Instance();
