@@ -1123,7 +1123,8 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.resolution = FileFinder.getFullPath('osi97935_graphite002_res.nxs')
         #ConvFit fit function
         self.func = 'name=LinearBackground,A0=0,A1=0;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
-                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=2,PeakCentre=0,FWHM=0.05)' % self.resolution
+                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=2,FWHM=0.002,ties=(PeakCentre=0)'\
+                    ',constraints=(FWHM>0.002))' % self.resolution
         self.startx = -0.2
         self.endx = 0.2
         self.bg = 'Fit Linear'
