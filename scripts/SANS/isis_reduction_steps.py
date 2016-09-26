@@ -56,6 +56,12 @@ def _issueInfo(msg):
     sanslog.notice(msg)
 
 
+def is_prompt_peak_instrument(reducer):
+    if reducer.instrument.name() == 'LOQ' or reducer.instrument.name() == 'LARMOR':
+        return True
+    else:
+        return False
+
 class LoadRun(object):
     UNSET_PERIOD = -1
 
@@ -1063,6 +1069,7 @@ class Mask_ISIS(ReductionStep):
 
         _output_ws, detector_list = ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
         _issueInfo("Mask check %s: %g masked pixels" % (workspace, len(detector_list)))
+        SaveNexus(Filename="C:/Users/pica/Desktop/masked_file.nxs", InputWorkspace=workspace)
 
     def view(self, instrum):
         """
@@ -1938,10 +1945,11 @@ class NormalizeToMonitor(ReductionStep):
         if str(mon) != self.output_wksp:
             RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
 
-        if reducer.instrument.name() == 'LOQ':
+        if (is_prompt_peak_instrument(reducer) and reducer.transmission_calculator.removePromptPeakMin is not None 
+            and reducer.transmission_calculator.removePromptPeakMax is not None):
             RemoveBins(InputWorkspace=self.output_wksp, OutputWorkspace=self.output_wksp,
-                       XMin=reducer.transmission_calculator.loq_removePromptPeakMin, XMax=
-                       reducer.transmission_calculator.loq_removePromptPeakMax, Interpolation="Linear")
+                       XMin=reducer.transmission_calculator.removePromptPeakMin, XMax=
+                       reducer.transmission_calculator.removePromptPeakMax, Interpolation="Linear")
 
         # Remove flat background
         TOF_start, TOF_end = reducer.inst.get_TOFs(normalization_spectrum)
@@ -2017,9 +2025,9 @@ class TransmissionCalc(ReductionStep):
         self.calculated_can = None
         # the result of this calculation that will be used by CalculateNorm() and the ConvertToQ
         self.output_wksp = None
-        # Use for removing LOQ prompt peak from monitors. Units of micro-seconds
-        self.loq_removePromptPeakMin = 19000.0
-        self.loq_removePromptPeakMax = 20500.0
+        # Use for removing LOQ/LARMOR prompt peak from monitors. Units of micro-seconds
+        self.removePromptPeakMin = None
+        self.removePromptPeakMax = None
 
     def set_trans_fit(self, fit_method, min_=None, max_=None, override=True, selector='both'):
         """
@@ -2117,9 +2125,9 @@ class TransmissionCalc(ReductionStep):
         # Perform the a dark run background correction if one was specified
         self._correct_dark_run_background(reducer, tmpWS, trans_det_ids)
 
-        if inst.name() == 'LOQ':
-            RemoveBins(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, XMin=self.loq_removePromptPeakMin,
-                       XMax=self.loq_removePromptPeakMax,
+        if is_prompt_peak_instrument(reducer) and self.removePromptPeakMin is not None and self.removePromptPeakMax is not None:
+            RemoveBins(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, XMin=self.removePromptPeakMin,
+                       XMax=self.removePromptPeakMax,
                        Interpolation='Linear')
 
         tmp = mtd[tmpWS]
@@ -2220,6 +2228,9 @@ class TransmissionCalc(ReductionStep):
             or estimates the proportion of neutrons that are transmitted
             through the sample
         """
+        # Set the prompt peak default values
+        self.set_prompt_parameter_if_not_set(reducer)
+
         _workspace = workspace
         self.output_wksp = None
 
@@ -2424,6 +2435,18 @@ class TransmissionCalc(ReductionStep):
             trans_ws = mtd[workspace_name]
             trans_ws = reducer.dark_run_subtraction.execute_transmission(trans_ws, trans_det_ids)
             mtd.addOrReplace(workspace_name, trans_ws)
+
+    def set_prompt_parameter_if_not_set(self, reducer):
+        """
+        This method sets default prompt peak values in case the user has not provided some. Currently
+        we only use default values for LOQ.
+        """
+        is_prompt_peak_not_set =  self.removePromptPeakMin is None and self.removePromptPeakMax is None
+        if is_prompt_peak_not_set:
+            if reducer.instrument.name() == "LOQ":
+                self.removePromptPeakMin = 19000.0 # Units of micro-seconds
+                self.removePromptPeakMax = 20500.0 # Units of micro-seconds
+
 
 class AbsoluteUnitsISIS(ReductionStep):
     DEFAULT_SCALING = 100.0
@@ -3193,7 +3216,8 @@ class UserFile(ReductionStep):
             'MON/': self._read_mon_line,
             'TUBECALIBFILE': self._read_calibfile_line,
             'MASKFILE': self._read_maskfile_line,
-            'QRESOL/': self._read_q_resolution_line}
+            'QRESOL/': self._read_q_resolution_line,
+            'UNWRAP': self._read_unwrap_monitors_line}
 
     def __deepcopy__(self, memo):
         """Called when a deep copy is requested
@@ -3207,7 +3231,8 @@ class UserFile(ReductionStep):
             'MON/': fresh._read_mon_line,
             'TUBECALIBFILE': self._read_calibfile_line,
             'MASKFILE': self._read_maskfile_line,
-            'QRESOL/': self._read_q_resolution_line
+            'QRESOL/': self._read_q_resolution_line,
+            'UNWRAP': self._read_unwrap_monitors_line
         }
         return fresh
 
@@ -3384,9 +3409,9 @@ class UserFile(ReductionStep):
         elif upper_line.startswith('FIT/MONITOR'):
             params = upper_line.split()
             nparams = len(params)
-            if nparams == 3 and reducer.instrument.name() == 'LOQ':
-                reducer.transmission_calculator.loq_removePromptPeakMin = float(params[1])
-                reducer.transmission_calculator.loq_removePromptPeakMax = float(params[2])
+            if nparams == 3 and is_prompt_peak_instrument(reducer):
+                reducer.transmission_calculator.removePromptPeakMin = float(params[1])
+                reducer.transmission_calculator.removePromptPeakMax = float(params[2])
             else:
                 if reducer.instrument.name() == 'LOQ':
                     _issueWarning('Incorrectly formatted FIT/MONITOR line, %s, line ignored' % upper_line)
