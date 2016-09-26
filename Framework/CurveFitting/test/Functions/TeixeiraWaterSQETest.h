@@ -23,7 +23,7 @@ public:
     TeixeiraWaterSQE func;
     const std::vector<std::string> categories = func.categories();
     TS_ASSERT(categories.size() == 1);
-    TS_ASSERT(categories[0] == "Quasielastic");
+    TS_ASSERT(categories[0] == "QuasiElastic");
   }
 
   /**
