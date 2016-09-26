@@ -1035,7 +1035,7 @@ class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.spec_max = 41
 
     def get_reference_files(self):
-        self.tolerance = 1e-4
+        self.tolerance = 1e-3
         return ['II.OSIRISIqt.nxs',
                 'II.OSIRISIqtFitMulti.nxs']
 
@@ -1057,7 +1057,7 @@ class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
 
         # Iqt Fit
         self.func = r'name=LinearBackground,A0=0.584488,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp( -(x/Tau)^Beta),'\
-                     'Intensity=0.415512,Tau=4.848013e-14,Beta=0.022653;ties=(f1.Intensity=1-f0.A0)'
+                     'Intensity=0.415512,Beta=0.022653;ties=(f1.Intensity=1-f0.A0,f1.Tau=0.05)'
         self.ftype = '1S_s'
         self.startx = 0.0
         self.endx = 0.156250
