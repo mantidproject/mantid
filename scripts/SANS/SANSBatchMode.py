@@ -124,6 +124,15 @@ def addRunToStore(parts, run_store):
     run_store.append(inputdata)
     return 0
 
+def get_transmission_properties(workspace):
+    transmission_properties = dict()
+    for prop in ['Transmission','TransmissionCan']:
+        if workspace.getRun().hasProperty(prop):
+            ws_name = workspace.getRun().getLogData(prop).value
+            if mtd.doesExist(ws_name): # ensure the workspace has not been deleted
+                transmission_properties[prop] = workspace.getRun().getLogData(prop).value
+    return transmission_properties
+
 def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False,
                 centreit=False, reducer=None, combineDet=None, save_as_zero_error_free=False):
     """
@@ -291,17 +300,19 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                         # From v2, SaveCanSAS1D is able to save the Transmission workspaces related to the
                         # reduced data. The name of workspaces of the Transmission are available at the
                         # sample logs.
-                        extra_param = dict()
                         _ws = mtd[workspace_name]
-                        for prop in ['Transmission','TransmissionCan']:
-                            if _ws.getRun().hasProperty(prop):
-                                ws_name = _ws.getRun().getLogData(prop).value
-                                if mtd.doesExist(ws_name): # ensure the workspace has not been deleted
-                                    extra_param[prop] = _ws.getRun().getLogData(prop).value
+                        transmission_properties = get_transmission_properties(_ws)
                         # Call the SaveCanSAS1D with the Transmission and TransmissionCan if they are
                         # available
                         SaveCanSAS1D(save_names_dict[workspace_name], workspace_name+ext, DetectorNames=detnames,
-                                     **extra_param)
+                                     **transmission_properties)
+                    elif algor == "SaveNXcanSAS":
+                        _ws = mtd[workspace_name]
+                        transmission_properties = get_transmission_properties(_ws)
+                        # Call the SaveNXcanSAS with the Transmission and TransmissionCan if they are
+                        # available
+                        SaveNXcanSAS(save_names_dict[workspace_name], workspace_name+ext, DetectorNames=detnames,
+                                     **transmission_properties)
                     elif algor == "SaveRKH":
                         SaveRKH(save_names_dict[workspace_name], workspace_name+ext, Append=False)
                     else:
