@@ -8,7 +8,11 @@ namespace Mantid {
 namespace API {
 
 /** HistoWorkspace is an abstract base class for MatrixWorkspace types that are
-  NOT event workspaces.
+  NOT event workspaces. This type has to exist as a helper for workspace
+  creation: Many algorithms create a new MatrixWorkspace from a parent workspace
+  without keeping the events, but keeping any potential sub type of
+  MatrixWorkspace. HistoWorkspace provides a common base type for all non-event
+  MatrixWorkspaces. See DataObjects/WorkspaceCreation.h for mor details.
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
