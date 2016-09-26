@@ -60,6 +60,7 @@ public:
     const size_t nData(20000); // number of energy values to evaluate the function
     // Create the domain of energy values
     std::vector<double> xValues(nData, 0);
+    std::iota(xValues.begin(), xValues.end(), -10000.0);
     std::transform(xValues.begin(), xValues.end(), xValues.begin(),
                    std::bind1st(std::multiplies<double>(), dE));
     // Evaluate the function on the domain
