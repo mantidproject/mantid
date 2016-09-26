@@ -58,8 +58,8 @@ void TeixeiraWaterSQE::init() {
  * @param nData size of the energy domain
  */
 void TeixeiraWaterSQE::function1D(double *out, const double *xValues,
-  const size_t nData) const {
-  double hbar(0.658211626);  // ps*meV
+                                  const size_t nData) const {
+  double hbar(0.658211626); // ps*meV
   auto H = this->getParameter("Height");
   auto L = this->getParameter("Length");
   auto T = this->getParameter("Tau");
@@ -70,21 +70,20 @@ void TeixeiraWaterSQE::function1D(double *out, const double *xValues,
   // when calculating the numeric derivative
   if (H < std::numeric_limits<double>::epsilon() ||
       L < std::numeric_limits<double>::epsilon() ||
-      T < std::numeric_limits<double>::epsilon()   ) {
-    for (size_t j = 0; j<nData; j++) {
-        out[j] = std::numeric_limits<double>::infinity();
+      T < std::numeric_limits<double>::epsilon()) {
+    for (size_t j = 0; j < nData; j++) {
+      out[j] = std::numeric_limits<double>::infinity();
     }
     return;
   }
 
   // Lorentzian intensities and HWHM
-  auto G = hbar/T * pow(Q*L,2)/(1+pow(Q*L,2));
-  for (size_t j=0; j<nData; j++) {
+  auto G = hbar / T * pow(Q * L, 2) / (1 + pow(Q * L, 2));
+  for (size_t j = 0; j < nData; j++) {
     auto E = xValues[j] - C;
-    out[j] += H * G/(G*G+E*E ) / M_PI;
+    out[j] += H * G / (G * G + E * E) / M_PI;
   }
 }
-
 
 } // namespace Functions
 } // namespace CurveFitting

@@ -42,7 +42,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
  * @brief Teixeira's model to describe the translational diffusion of water
  */
 class DLLExport TeixeiraWaterSQE : public API::ParamFunction,
-  public API::IFunction1D {
+                                   public API::IFunction1D {
 public:
   TeixeiraWaterSQE();
 
