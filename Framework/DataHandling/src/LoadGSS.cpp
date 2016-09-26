@@ -448,7 +448,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
   // Clean up
   if (prog)
-	delete prog;
+    delete prog;
 
   return outputWorkspace;
 }

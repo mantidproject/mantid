@@ -80,8 +80,8 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
   // Get the instrument up axis.
   const Kernel::V3D &instrumentUpAxis =
       m_instrument->getReferenceFrame()->vecPointingUp();
-  return getDetector(index).getSignedTwoTheta(samplePos, beamLine,
-                                              instrumentUpAxis);
+  return getDetector(index)
+      .getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
 }
 
 /// Returns the position of the spectrum with given index.

@@ -558,11 +558,9 @@ void MuonAnalysis::runSaveGroupButton() {
   // Get value for "dir". If the setting doesn't exist then use
   // the the path in "defaultsave.directory"
   QString prevPath =
-      prevValues
-          .value("dir",
-                 QString::fromStdString(ConfigService::Instance().getString(
-                     "defaultsave.directory")))
-          .toString();
+      prevValues.value("dir", QString::fromStdString(
+                                  ConfigService::Instance().getString(
+                                      "defaultsave.directory"))).toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
@@ -599,11 +597,9 @@ void MuonAnalysis::runLoadGroupButton() {
   // Get value for "dir". If the setting doesn't exist then use
   // the the path in "defaultsave.directory"
   QString prevPath =
-      prevValues
-          .value("dir",
-                 QString::fromStdString(ConfigService::Instance().getString(
-                     "defaultload.directory")))
-          .toString();
+      prevValues.value("dir", QString::fromStdString(
+                                  ConfigService::Instance().getString(
+                                      "defaultload.directory"))).toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
