@@ -534,7 +534,6 @@ void ReflectometryReductionOne::exec() {
 
   const MinMax wavelengthInterval =
       this->getMinMax("WavelengthMin", "WavelengthMax");
-  const double wavelengthStep = getProperty("WavelengthStep");
 
   const std::string processingCommands = getWorkspaceIndexList();
 
@@ -574,7 +573,7 @@ void ReflectometryReductionOne::exec() {
     // from it.
     DetectorMonitorWorkspacePair inLam =
         toLam(runWS, processingCommands, i0MonitorIndex, wavelengthInterval,
-              monitorBackgroundWavelengthInterval, wavelengthStep);
+              monitorBackgroundWavelengthInterval);
     auto detectorWS = inLam.get<0>();
     auto monitorWS = inLam.get<1>();
 
@@ -584,8 +583,8 @@ void ReflectometryReductionOne::exec() {
         WorkspaceIndexList db = directBeam.get();
         std::stringstream buffer;
         buffer << db.front() << "-" << db.back();
-        MatrixWorkspace_sptr regionOfDirectBeamWS = this->toLamDetector(
-            buffer.str(), runWS, wavelengthInterval, wavelengthStep);
+        MatrixWorkspace_sptr regionOfDirectBeamWS =
+            this->toLamDetector(buffer.str(), runWS, wavelengthInterval);
 
         // Rebin to the detector workspace
         auto rebinToWorkspaceAlg =
@@ -637,7 +636,7 @@ void ReflectometryReductionOne::exec() {
         monitorIntegrationWavelengthInterval, i0MonitorIndex,
         firstTransmissionRun.get(), secondTransmissionRun, stitchingStart,
         stitchingDelta, stitchingEnd, stitchingStartOverlap,
-        stitchingEndOverlap, wavelengthStep, processingCommands);
+        stitchingEndOverlap, processingCommands);
   } else if (getPropertyValue("CorrectionAlgorithm") != "None") {
     IvsLam = algorithmicCorrection(IvsLam);
   } else {
@@ -727,8 +726,6 @@ void ReflectometryReductionOne::exec() {
 * but dependent on secondTransmissionRun)
 * @param stitchingEndOverlap : Stitching end wavelength overlap (optional but
 * dependent on secondTransmissionRun)
-* @param wavelengthStep : Step in angstroms for rebinning for workspaces
-* converted into wavelength.
 * @param numeratorProcessingCommands: Processing commands used on detector
 * workspace.
 * @return Normalized run workspace by the transmission workspace, which have
@@ -745,7 +742,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
     const OptionalDouble &stitchingStart, const OptionalDouble &stitchingDelta,
     const OptionalDouble &stitchingEnd,
     const OptionalDouble &stitchingStartOverlap,
-    const OptionalDouble &stitchingEndOverlap, const double &wavelengthStep,
+    const OptionalDouble &stitchingEndOverlap,
     const std::string &numeratorProcessingCommands) {
   g_log.debug(
       "Extracting first transmission run workspace indexes from spectra");
@@ -797,7 +794,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
     }
     alg->setProperty("WavelengthMin", wavelengthInterval.get<0>());
     alg->setProperty("WavelengthMax", wavelengthInterval.get<1>());
-    alg->setProperty("WavelengthStep", wavelengthStep);
     if (wavelengthMonitorBackgroundInterval.is_initialized()) {
       alg->setProperty("MonitorBackgroundWavelengthMin",
                        wavelengthMonitorBackgroundInterval.get().get<0>());
