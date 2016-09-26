@@ -53,12 +53,12 @@ void CalculateFlatBackground::init() {
                   "minimum of a moving average (default: Linear Fit)");
 
   declareProperty("StartX", Mantid::EMPTY_DBL(),
-                  "The X value at which to start the background fit");
+                  "The X value at which to start the background fit. Mandatory for the Linear Fit and Mean modes, ignored by Moving Average.");
   setPropertySettings("StartX", make_unique<EnabledWhenProperty>("Mode", IS_NOT_EQUAL_TO, "Moving Average"));
   declareProperty("EndX", Mantid::EMPTY_DBL(),
-                  "The X value at which to end the background fit");
+                  "The X value at which to end the background fit. Mandatory for the Linear Fit and Mean modes, ignored by Moving Average.");
   setPropertySettings("EndX", make_unique<EnabledWhenProperty>("Mode", IS_NOT_EQUAL_TO, "Moving Average"));
-  declareProperty("AveragingWindowWidth", Mantid::EMPTY_INT(), "The width of the moving average window in X axis units");
+  declareProperty("AveragingWindowWidth", Mantid::EMPTY_INT(), "The width of the moving average window in bins. Mandatory for the Moving Average mode.");
   setPropertySettings("AveragingWindowWidth", make_unique<EnabledWhenProperty>("Mode", IS_EQUAL_TO, "Moving Average"));
   declareProperty(
       make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
