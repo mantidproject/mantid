@@ -520,11 +520,11 @@ std::map<int, signal_t> IntegratePeaksCWSD::getMonitorCounts() {
     std::string run_str = expinfo->run().getProperty("run_number")->value();
     g_log.information() << "run number of exp " << iexpinfo << " is " << run_str
                         << "\n";
-    int run_number = atoi(run_str.c_str());
+    int run_number = std::stoi(run_str.c_str());
     // FIXME - HACK FOE HB3A
     run_number = run_number % 1000;
     std::string mon_str = expinfo->run().getProperty("monitor")->value();
-    signal_t monitor = static_cast<signal_t>(atoi(mon_str.c_str()));
+    signal_t monitor = static_cast<signal_t>(std::stoi(mon_str.c_str()));
     run_monitor_map.insert(std::make_pair(run_number, monitor));
     g_log.information() << "From MD workspace add run " << run_number
                         << ", monitor = " << monitor << "\n";
@@ -547,7 +547,7 @@ std::map<int, double> IntegratePeaksCWSD::getMeasureTime() {
     ExperimentInfo_const_sptr expinfo =
         m_inputWS->getExperimentInfo(static_cast<uint16_t>(iexpinfo));
     std::string run_str = expinfo->run().getProperty("run_number")->value();
-    int run_number = atoi(run_str.c_str());
+    int run_number = std::stoi(run_str.c_str());
 
     // FIXME - HACK FOE HB3A
     run_number = run_number % 1000;

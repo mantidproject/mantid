@@ -111,7 +111,7 @@ void ConvertCWPDMDToSpectra::exec() {
 
     uint16_t numexpinfo = inputDataWS->getNumExperimentInfo();
     for (uint16_t iexp = 0; iexp < numexpinfo; ++iexp) {
-      int runid = atoi(inputDataWS->getExperimentInfo(iexp)
+      int runid = std::stoi(inputDataWS->getExperimentInfo(iexp)
                            ->run()
                            .getProperty("run_number")
                            ->value()
