@@ -34,6 +34,29 @@ ConvFit::ConvFit(QWidget *parent)
   m_uiForm.setupUi(parent);
 }
 
+/**
+* Populates the default parameter map with the initial default values
+* @param map :: The default value map to populate
+* @return The QMap populated with default values
+*/
+QMap<QString, double> ConvFit::createDefaultParamsMap(QMap<QString, double> map) {
+  // If the parameters from a One Lorentzian fit are present
+  if (map.contains("PeakCentre")) {
+    map.remove("PeakCentre");
+    map.remove("FWHM");
+  }
+  // Reset all parameters to default of 1
+  map.insert("Amplitude", 1.0);
+  map.insert("Beta", 1.0);
+  map.insert("Decay", 1.0);
+  map.insert("Diffusion", 1.0);
+  map.insert("Height", 1.0);
+  map.insert("Intensity", 1.0);
+  map.insert("Radius", 1.0);
+  map.insert("Tau", 1.0);
+  return map;
+}
+
 void ConvFit::setup() {
   // Create Property Managers
   m_stringManager = new QtStringPropertyManager();
@@ -43,8 +66,8 @@ void ConvFit::setup() {
   // Initialise fitTypeStrings
   m_fitStrings = {"", "1L", "2L", "IDS", "IDC", "EDS", "EDC", "SFT"};
   // All Parameters in tree that should be defaulting to 1
-  m_defaultParams = {"Amplitude", "Beta",      "Decay",  "Diffusion",
-                     "Height",    "Intensity", "Radius", "Tau"};
+  QMap<QString, double> m_defaultParams;
+  createDefaultParamsMap(m_defaultParams);
 
   // Create TreeProperty Widget
   m_cfTree = new QtTreePropertyBrowser();
@@ -1585,18 +1608,21 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
 * @param functionName Name of new fit function
 */
 void ConvFit::fitFunctionSelected(const QString &functionName) {
-  double oneLValues[3] = {0.0, 0.0,
-                          0.0}; // previous values for one Lorentzian fit
   bool previouslyOneL = false;
+  if (m_uiForm.dsResInput->getCurrentDataName().compare("") != 0) {
+    m_defaultParams["FWHM"] = getInstrumentResolution(m_cfInputWS->getName());
+  }
   // If the previous fit was One Lorentzian and the new fit is Two Lorentzian
   // preserve the values of One Lorentzian Fit
   if (m_previousFit.compare("One Lorentzian") == 0 &&
       m_uiForm.cbFitType->currentText().compare("Two Lorentzians") == 0) {
     previouslyOneL = true;
-    oneLValues[0] = m_dblManager->value(m_properties["Lorentzian 1.Amplitude"]);
-    oneLValues[1] =
-        m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
-    oneLValues[2] = m_dblManager->value(m_properties["Lorentzian 1.FWHM"]);
+    const double amplitude = m_dblManager->value(m_properties["Lorentzian 1.Amplitude"]);
+    const double peakCentre = m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
+    const double fwhm = m_dblManager->value(m_properties["Lorentzian 1.FWHM"]);
+    m_defaultParams.insert("PeakCentre", peakCentre);
+    m_defaultParams.insert("FWHM", fwhm);
+    m_defaultParams.replace("Amplitude", amplitude);
   }
 
   // Remove previous parameters from tree
@@ -1639,9 +1665,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
 
         if (paramName.compare("FWHM") == 0) {
           double resolution = 0.0;
-          if (m_uiForm.dsResInput->getCurrentDataName().compare("") != 0) {
-            resolution = getInstrumentResolution(m_cfInputWS->getName());
-          }
+
           if (previouslyOneL && count < 3) {
             m_dblManager->setValue(m_properties[fullPropName], oneLValues[2]);
           } else {

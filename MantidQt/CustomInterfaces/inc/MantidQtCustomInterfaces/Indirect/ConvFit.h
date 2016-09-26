@@ -86,7 +86,8 @@ private:
   QStringList m_fitStrings;
 
   // Used in auto generating defaults for parameters
-  QStringList m_defaultParams;
+  QMap<QString, double> m_defaultParams;
+  QMap<QString, double> ConvFit::createDefaultParamsMap(QMap<QString, double> map);
 };
 } // namespace IDA
 } // namespace CustomInterfaces
