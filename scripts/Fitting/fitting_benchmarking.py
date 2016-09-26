@@ -37,8 +37,10 @@ import input_parsing as iparsing
 import test_result
 import test_problem
 
-def do_regression_fitting_benchmark(include_nist=True, include_cutest=True, minimizers=None, use_errors=True):
-    # Several blocks of problems. Results for each block will go into a separate table
+def do_regression_fitting_benchmark(include_nist=True, include_cutest=True, data_groups_dirs=None,
+                                    minimizers=None, use_errors=True):
+    # Several blocks of problems. Results for each block will be calculated sequentially, and
+    # will go into a separate table
     problem_blocks = []
 
     if include_nist:
@@ -47,10 +49,19 @@ def do_regression_fitting_benchmark(include_nist=True, include_cutest=True, mini
     if include_cutest:
         problem_blocks.extend([get_cutest_problem_files()])
 
-    fit_results = [do_regression_fitting_benchmark_block(block, minimizers) for block in problem_blocks]
-    return fit_results
+    if data_groups_dirs:
+        problem_blocks.extend(get_data_groups(data_groups_dirs))
 
-def do_regression_fitting_benchmark_block(benchmark_problems, minimizers, use_errors = True):
+    prob_results = [do_regression_fitting_benchmark_block(block, minimizers) for block in problem_blocks]
+
+    probs, results = zip(*prob_results)
+
+    if len(probs) != len(results):
+        raise RuntimeError('probs : {0}, prob_results: {1}'.format(len(probs), len(results)))
+
+    return probs, results
+
+def do_regression_fitting_benchmark_block(benchmark_problems, minimizers, use_errors=True):
     """
     Applies one minmizer to a block/list of test problems
 
@@ -60,15 +71,21 @@ def do_regression_fitting_benchmark_block(benchmark_problems, minimizers, use_er
     problems/files.
     """
 
+    problems = []
     results_per_problem = []
     for prob_file in benchmark_problems:
-        prob = iparsing.parse_nist_fitting_problem_file(prob_file)
-        print("Testing fitting of problem {0} (file {1}".format(prob.name, prob_file))
+        try:
+            prob = iparsing.parse_nist_fitting_problem_file(prob_file)
+        except AttributeError, RuntimeError:
+            prob = iparsing.parse_neutron_data_fitting_problem_file(prob_file)
+
+        print("* Testing fitting for problem definition file {0}".format(prob_file))
+        print("* Testing fitting of problem {0}".format(prob.name))
 
         results_prob = do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors)
         results_per_problem.extend(results_prob)
 
-    return results_per_problem
+    return problems, results_per_problem
 
 def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors = True):
     """
@@ -81,9 +98,16 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors = Tr
                          cost function)
     """
 
+    data_e = None
     if use_errors:
+        if not isinstance(prob.data_pattern_obs_errors, np.ndarray):
+            # Fake observational errors
+            data_e = np.sqrt(prob.data_pattern_in)
+        else:
+            data_e = prob.data_pattern_obs_errors
+
         wks = msapi.CreateWorkspace(DataX=prob.data_pattern_in, DataY=prob.data_pattern_out,
-                                    DataE=np.sqrt(prob.data_pattern_in))
+                                    DataE=data_e)
                                     # ERRORS. If all zeros, check Fit/IgnoreInvalidData
                                     # DataE=np.zeros((1, len(prob.data_pattern_in))))
         cost_function = 'Least squares'
@@ -93,26 +117,34 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors = Tr
 
     # For NIST problems this will generate two results per file (two different starting points)
     results_fit_problem = []
-    num_starts = len(prob.starting_values[0][1])
-    for start_idx in range(0, num_starts):
 
-        print("=================== starting values,: {0}, with idx: {1} ================".
-               format(prob.starting_values, start_idx))
-        start_string = '' # like: 'b1=250, b2=0.0005'
-        for param in prob.starting_values:
-            start_string += ('{0}={1},'.format(param[0], param[1][start_idx]))
+    function_defs = []
+    if prob.starting_values:
+        num_starts = len(prob.starting_values[0][1])
+        for start_idx in range(0, num_starts):
+
+            print("=================== starting values,: {0}, with idx: {1} ================".
+                  format(prob.starting_values, start_idx))
+            start_string = '' # like: 'b1=250, b2=0.0005'
+            for param in prob.starting_values:
+                start_string += ('{0}={1},'.format(param[0], param[1][start_idx]))
 
 
-        if 'name' in prob.equation:
-            user_func = prob.equation
-        else:
-            user_func = "name=UserFunction, Formula={0}, {1}".format(prob.equation, start_string)
+            if 'name' in prob.equation:
+                function_defs.append(prob.equation)
+            else:
+                function_defs.append("name=UserFunction, Formula={0}, {1}".format(prob.equation, start_string))
+    else:
+        # Equation from a neutron data spec file. Ready to be used
+        function_defs.append(prob.equation)
 
+    # TODO: GRAB startx, endx!!!
+    for user_func in function_defs:
         results_problem_start = []
         for minimizer_name in minimizers:
             t_start = time.clock()
 
-            status, chi2, fit_wks, params, errors = run_fit(wks, function=user_func,
+            status, chi2, fit_wks, params, errors = run_fit(wks, prob, function=user_func,
                                                             minimizer=minimizer_name,
                                                             cost_function=cost_function)
             t_end = time.clock()
@@ -150,13 +182,14 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors = Tr
 
     return results_fit_problem
 
-def run_fit(wks, function, minimizer='Levenberg-Marquardt', cost_function='Least squares'):
+def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function='Least squares'):
     """
     Fits the data in a workspace with a function, using the algorithm Fit.
     Importantly, the option IgnoreInvalidData is enabled. Check the documentation of Fit for the
     implications of this.
 
     @param wks :: MatrixWorkspace with data to fit, in the format expected by the algorithm Fit
+    @param prob :: Problem definition
     @param function :: function definition as used in the algorithm Fit
     @param minimizer :: minimizer to use in Fit
     @param cost_function :: cost function to use in Fit
@@ -170,10 +203,11 @@ def run_fit(wks, function, minimizer='Levenberg-Marquardt', cost_function='Least
     fit_wks = None
     try:
         ignore_invalid = True
-        status, chi2, covar_tbl, param_tbl, fit_wks = msapi.Fit(function, wks, Output='ws',
+        status, chi2, covar_tbl, param_tbl, fit_wks = msapi.Fit(function, wks, Output='ws_fitting_test',
                                                                 Minimizer=minimizer,
                                                                 CostFunction=cost_function,
-                                                                IgnoreInvalidData=ignore_invalid)
+                                                                IgnoreInvalidData=ignore_invalid,
+                                                                StartX=prob.start_x, EndX=prob.end_x)
 
         calc_chi2 = msapi.CalculateChiSquared(Function=function,
                                               InputWorkspace=wks, IgnoreInvalidData=ignore_invalid)
@@ -249,3 +283,20 @@ def get_cutest_problem_files():
     cutest_files = [os.path.join(ref_dir, cutest_dir, fname) for fname in cutest_all]
 
     return cutest_files
+
+def get_data_groups(data_groups_dirs):
+    problem_groups = []
+    for grp_dir in data_groups_dirs:
+        problem_groups.append(get_data_group_problem_files(grp_dir))
+
+    return problem_groups
+
+def get_data_group_problem_files(grp_dir):
+    import glob
+
+    search_str = os.path.join(grp_dir, "*.txt")
+    probs = glob.glob(search_str)
+
+    probs.sort()
+    print ("Found test problem files: ", probs)
+    return probs
