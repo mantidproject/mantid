@@ -116,10 +116,19 @@ void CalculateFlatBackground::exec() {
   switch (mode) {
   case Modes::LINEAR_FIT:
   case Modes::MEAN:
+    if (getPointerToProperty("StartX")->isDefault()) {
+      throw std::runtime_error("StartX property not set to any value");
+    }
+    if (getPointerToProperty("EndX")->isDefault()) {
+      throw std::runtime_error("EndX property not set to any value");
+    }
     // Get the required X range
     this->checkRange(startX, endX);
     break;
   case Modes::MOVING_AVERAGE:
+    if (getPointerToProperty("AveragingWindowWidth")->isDefault()) {
+      throw std::runtime_error("AveragingWindowWidth property not set to any value");
+    }
     windowWidth = getProperty("AveragingWindowWidth");
     if (windowWidth <= 0) {
       throw std::runtime_error("AveragingWindowWidth zero or negative");
@@ -499,7 +508,7 @@ double CalculateFlatBackground::movingAverage(API::MatrixWorkspace_const_sptr WS
   }
   // When moving the window, we need to subtract the single point "falling off"
   // while adding a new point. Saves us summing all the points in the window.
-  for (size_t i = 1; i < ys.size() - windowWidth; ++i) {
+  for (size_t i = 0; i < ys.size() - windowWidth; ++i) {
     currentMin = std::min(currentMin, sum / static_cast<double>(windowWidth));
     sum = sum - ys[i] + ys[i + windowWidth];
   }
