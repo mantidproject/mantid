@@ -476,7 +476,7 @@ bool ConvFit::validate() {
   uiv.checkValidRange("Fitting Range", range);
 
   // Enforce the rule that at least one fit is needed; either a delta function,
-  // one or two lorentzian functions,
+  // one or two Lorentzian functions,
   // or both.  (The resolution function must be convolved with a model.)
   if (m_uiForm.cbFitType->currentIndex() == 0 &&
       !m_blnManager->value(m_properties["UseDeltaFunc"]))
@@ -724,8 +724,8 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
 
     // Add 1st Lorentzian
 
-    // if temperature not included then product is lorentzian * 1
-    // create product function for temp * lorentzian
+    // if temperature not included then product is Lorentzian * 1
+    // create product function for temp * Lorentzian
 
     std::string functionName = m_uiForm.cbFitType->currentText().toStdString();
 
@@ -741,8 +741,8 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
 
     // Add 2nd Lorentzian
     if (fitTypeIndex == 2) {
-      // if temperature not included then product is lorentzian * 1
-      // create product function for temp * lorentzian
+      // if temperature not included then product is Lorentzian * 1
+      // create product function for temp * Lorentzian
       auto product = boost::dynamic_pointer_cast<CompositeFunction>(
           FunctionFactory::Instance().createFunction("ProductFunction"));
 
@@ -867,9 +867,9 @@ double ConvFit::getInstrumentResolution(std::string workspaceName) {
 }
 
 /**
-* Intialises the property values for any of the fit type
+* Initialises the property values for any of the fit type
 * @param propName The name of the property group
-* @return The popuated property group representing a fit type
+* @return The populated property group representing a fit type
 */
 QtProperty *ConvFit::createFitType(const QString &propName) {
   QtProperty *fitTypeGroup = m_grpManager->addProperty(propName);
@@ -905,7 +905,7 @@ QtProperty *ConvFit::createFitType(const QString &propName) {
 void ConvFit::populateFunction(IFunction_sptr func, IFunction_sptr comp,
                                QtProperty *group, const std::string &pref,
                                bool tie) {
-  // Get subproperties of group and apply them as parameters on the function
+  // Get sub-properties of group and apply them as parameters on the function
   // object
   QList<QtProperty *> props = group->subProperties();
 
@@ -931,7 +931,7 @@ void ConvFit::populateFunction(IFunction_sptr func, IFunction_sptr comp,
 * Generate a string to describe the fit type selected by the user.
 * Used when naming the resultant workspaces.
 *
-* Assertions used to guard against any future changes that dont take
+* Assertions used to guard against any future changes that don't take
 * workspace naming into account.
 *
 * @returns the generated QString.
@@ -951,7 +951,7 @@ QString ConvFit::fitTypeString() const {
 * Generate a string to describe the background selected by the user.
 * Used when naming the resultant workspaces.
 *
-* Assertions used to guard against any future changes that dont take
+* Assertions used to guard against any future changes that don't take
 * workspace naming into account.
 *
 * @returns the generated QString.
@@ -1041,7 +1041,7 @@ void ConvFit::bgTypeSelection(int index) {
 }
 
 /**
-* Updates the plot in the gui window
+* Updates the plot in the GUI window
 */
 void ConvFit::updatePlot() {
   using Mantid::Kernel::Exception::NotFoundError;
@@ -1548,7 +1548,7 @@ void ConvFit::showTieCheckbox(QString fitType) {
 
 /**
 * Gets a list of parameters for a given fit function.
-* @return List fo parameters
+* @return List of parameters
 */
 QStringList ConvFit::getFunctionParameters(QString functionName) {
   QStringList parameters;
@@ -1586,7 +1586,7 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
 */
 void ConvFit::fitFunctionSelected(const QString &functionName) {
   double oneLValues[3] = {0.0, 0.0,
-                          0.0}; // previous values for one lorentzian fit
+                          0.0}; // previous values for one Lorentzian fit
   bool previouslyOneL = false;
   // If the previous fit was One Lorentzian and the new fit is Two Lorentzian
   // preserve the values of One Lorentzian Fit
