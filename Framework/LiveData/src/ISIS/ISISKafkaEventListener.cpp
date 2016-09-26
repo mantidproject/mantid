@@ -19,9 +19,9 @@ bool ISISKafkaEventListener::connect(
     const API::ILiveListener::ConnectionArgs &args) {
   KafkaBroker broker(address.toString());
   try {
-    const std::string eventTopic(args.instrumentName + "event_data"),
-        runInfoTopic(args.instrumentName + "run_data"),
-        spDetInfoTopic(args.instrumentName + "spdet_data");
+    const std::string eventTopic(args.instrumentName + "_event_topic"),
+        runInfoTopic(args.instrumentName + "_run_topic"),
+        spDetInfoTopic(args.instrumentName + "_det_spec_topic");
     m_decoder = Kernel::make_unique<ISISKafkaEventStreamDecoder>(
         broker, eventTopic, runInfoTopic, spDetInfoTopic);
   } catch (std::exception &exc) {
