@@ -909,6 +909,7 @@ class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.endx = 0.118877
 
     def get_reference_files(self):
+        self.tolerance = 1e-4
         return ['II.OSIRISFury.nxs',
                 'II.OSIRISFuryFitSeq.nxs']
 
@@ -936,6 +937,7 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.endx = 0.169171
 
     def get_reference_files(self):
+        self.tolerance = 1e-4
         return ['II.IRISFury.nxs',
                 'II.IRISFuryFitSeq.nxs']
 
@@ -1033,6 +1035,7 @@ class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.spec_max = 41
 
     def get_reference_files(self):
+        self.tolerance = 1e-4
         return ['II.OSIRISIqt.nxs',
                 'II.OSIRISIqtFitMulti.nxs']
 
@@ -1060,6 +1063,7 @@ class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.endx = 0.156250
 
     def get_reference_files(self):
+        self.tolerance = 1e-4
         return ['II.IRISFury.nxs',
                 'II.IRISFuryFitMulti.nxs']
 
@@ -1090,8 +1094,6 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
             SpecMin=self.spectra_min,
             SpecMax=self.spectra_max,
             OutputWorkspace='result')
-
-        SaveNexus('result', 'd:/tmp/win_%s.nxs' % self.__class__.__name__)
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
