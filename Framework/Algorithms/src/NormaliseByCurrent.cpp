@@ -55,7 +55,7 @@ double NormaliseByCurrent::extractCharge(
   if (nPeriods > 1) {
     // Fetch the period property
     Property *currentPeriodNumberProperty = run.getLogData("current_period");
-    int periodNumber = std::atoi(currentPeriodNumberProperty->value().c_str());
+    int periodNumber = std::stoi(currentPeriodNumberProperty->value().c_str());
 
     // Fetch the charge property
     Property *chargeProperty = run.getLogData("proton_charge_by_period");
