@@ -82,6 +82,10 @@ if(poco_version[0] > 1 || (poco_version[0] == 1 && poco_version[1] >= 6))
   library_filenames << "libPocoJSON.dylib"
 end
 
+if("@OPENMP_FOUND@" == "TRUE")
+  library_filenames << "libomp.dylib"
+end
+
 #This copies the libraries over, then changes permissions and the id from /usr/local/lib to @rpath
 library_filenames.each do |filename|
   if filename.include? "libssl.dylib"

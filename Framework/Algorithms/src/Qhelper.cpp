@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -116,17 +114,17 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
     // in the workspace is masked
 
     size_t num_histograms = dataWS->getNumberHistograms();
+    const auto &spectrumInfo = dataWS->spectrumInfo();
     for (size_t i = 0; i < num_histograms; i++) {
       double adj = static_cast<double>(detectAdj->readY(i)[0]);
       if (adj <= 0.0) {
         bool det_is_masked;
-
-        try {
-          det_is_masked = dataWS->getDetector(i)->isMasked();
-        } catch (...) {
+        if (!spectrumInfo.hasDetectors(i)) {
           // just ignore. There are times, when the detector is not masked
           // because it does not exist at all.
           det_is_masked = true;
+        } else {
+          det_is_masked = spectrumInfo.isMasked(i);
         }
         if (!det_is_masked) {
           throw std::invalid_argument(

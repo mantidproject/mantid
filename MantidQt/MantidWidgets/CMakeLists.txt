@@ -90,8 +90,9 @@ set ( SRC_FILES
 	src/MantidHelpWindow.cpp
 	src/MessageDisplay.cpp
 	src/MultifitSetupDialog.cpp
+	src/MuonFitDataSelector.cpp
 	src/MuonFitPropertyBrowser.cpp
-	src/MuonSequentialFitDialog.cpp
+	src/MuonFunctionBrowser.cpp
 	src/PeakPicker.cpp
 	src/PeriodicTableWidget.cpp
 	src/PreviewPlot.cpp
@@ -147,8 +148,9 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/MantidHelpWindow.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
+    inc/MantidQtMantidWidgets/MuonFitDataSelector.h
     inc/MantidQtMantidWidgets/MuonFitPropertyBrowser.h
-    inc/MantidQtMantidWidgets/MuonSequentialFitDialog.h
+    inc/MantidQtMantidWidgets/MuonFunctionBrowser.h
     inc/MantidQtMantidWidgets/MWDiag.h
     inc/MantidQtMantidWidgets/MWRunFiles.h
     inc/MantidQtMantidWidgets/MWView.h
@@ -245,6 +247,10 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h
 	inc/MantidQtMantidWidgets/ErrorCurve.h
 	inc/MantidQtMantidWidgets/HintStrategy.h
+	inc/MantidQtMantidWidgets/IFunctionBrowser.h
+	inc/MantidQtMantidWidgets/IMuonFitDataSelector.h
+	inc/MantidQtMantidWidgets/IMuonFitFunctionControl.h
+	inc/MantidQtMantidWidgets/IWorkspaceFitControl.h
 	inc/MantidQtMantidWidgets/InstrumentView/BinDialog.h
 	inc/MantidQtMantidWidgets/InstrumentView/CollapsiblePanel.h
 	inc/MantidQtMantidWidgets/InstrumentView/ColorMapWidget.h
@@ -293,6 +299,8 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/InstrumentView/Viewport.h
 	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
 	inc/MantidQtMantidWidgets/LogValueSelector.h
+	inc/MantidQtMantidWidgets/MuonFitDataSelector.h
+	inc/MantidQtMantidWidgets/MuonFunctionBrowser.h
 	inc/MantidQtMantidWidgets/ProgressPresenter.h
 	inc/MantidQtMantidWidgets/ProgressableView.h
 	inc/MantidQtMantidWidgets/WidgetDllOption.h
@@ -313,7 +321,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/MWRunFiles.ui
     inc/MantidQtMantidWidgets/MWView.ui
     inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
-    inc/MantidQtMantidWidgets/MuonSequentialFitDialog.ui
+    inc/MantidQtMantidWidgets/MuonFitDataSelector.ui
     inc/MantidQtMantidWidgets/ProcessingAlgoWidget.ui
     inc/MantidQtMantidWidgets/RenameParDialog.ui
     inc/MantidQtMantidWidgets/SelectFunctionDialog.ui
@@ -333,7 +341,7 @@ set ( TEST_PY_FILES
 )
 
 set ( TEST_FILES
-  AlgorithmHintStrategyTest.h
+	AlgorithmHintStrategyTest.h
   DataProcessorUI/DataProcessorPostprocessingAlgorithmTest.h
   DataProcessorUI/DataProcessorPreprocessingAlgorithmTest.h
   DataProcessorUI/DataProcessorProcessingAlgorithmBaseTest.h

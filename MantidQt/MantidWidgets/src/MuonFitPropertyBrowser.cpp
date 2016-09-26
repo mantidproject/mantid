@@ -2,6 +2,8 @@
 #include "MantidQtMantidWidgets/PropertyHandler.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidQtMantidWidgets/StringEditorFactory.h"
 
 // Suppress a warning coming out of code that isn't ours
@@ -38,11 +40,19 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QAction>
+#include <QLayout>
+#include <QSplitter>
+
+namespace {
+Mantid::Kernel::Logger g_log("MuonFitPropertyBrowser");
+}
 
 namespace MantidQt {
 namespace MantidWidgets {
 
 using namespace Mantid::API;
+
+const std::string MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX{"MuonSimulFit_"};
 
 /**
  * Constructor
@@ -93,6 +103,16 @@ void MuonFitPropertyBrowser::init() {
   bool plotDiff = settings.value("Plot Difference", QVariant(true)).toBool();
   m_boolManager->setValue(m_plotDiff, plotDiff);
 
+  m_evaluationType = m_enumManager->addProperty("Evaluate Function As");
+  m_evaluationType->setToolTip(
+      "Consider using Histogram fit which may produce more accurate results.");
+  m_evaluationTypes << "CentrePoint"
+                    << "Histogram";
+  m_enumManager->setEnumNames(m_evaluationType, m_evaluationTypes);
+  int evaluationType =
+      settings.value(m_evaluationType->propertyName(), 0).toInt();
+  m_enumManager->setValue(m_evaluationType, evaluationType);
+
   settingsGroup->addSubProperty(m_workspace);
   settingsGroup->addSubProperty(m_workspaceIndex);
   settingsGroup->addSubProperty(m_startX);
@@ -105,6 +125,10 @@ void MuonFitPropertyBrowser::init() {
 
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
+
+  // Don't show "Function" or "Data" sections as they have separate widgets
+  m_browser->setItemVisible(m_functionsGroup, false);
+  m_browser->setItemVisible(m_settingsGroup, false);
 
   // Custom settings that are specific and asked for by the muon scientists.
   QtProperty *customSettingsGroup = m_groupManager->addProperty("Settings");
@@ -124,11 +148,27 @@ void MuonFitPropertyBrowser::init() {
   customSettingsGroup->addSubProperty(m_plotDiff);
   customSettingsGroup->addSubProperty(m_rawData);
   customSettingsGroup->addSubProperty(m_showParamErrors);
+  customSettingsGroup->addSubProperty(m_evaluationType);
 
   m_customSettingsGroup = m_browser->addProperty(customSettingsGroup);
 
   // Initialise the layout.
   initLayout(w);
+
+  // Create an empty layout that can hold extra widgets
+  // and add it after the buttons but before the browser
+  m_additionalLayout = new QVBoxLayout();
+  auto parentLayout = qobject_cast<QVBoxLayout *>(w->layout());
+  if (parentLayout) {
+    const int index = parentLayout->count() - 2;
+    constexpr int stretchFactor = 10; // so these widgets get any extra space
+    parentLayout->insertLayout(index, m_additionalLayout, stretchFactor);
+  }
+  m_widgetSplitter = new QSplitter(w);
+  m_widgetSplitter->setOrientation(Qt::Vertical);
+  m_widgetSplitter->setSizePolicy(QSizePolicy::Policy::Expanding,
+                                  QSizePolicy::Policy::Expanding);
+  m_additionalLayout->addWidget(m_widgetSplitter);
 }
 
 /**
@@ -228,9 +268,16 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
 }
 
 /**
- * Creates an instance of Fit algorithm, sets its properties and launches it.
+ * Updates function prior to running a fit
  */
 void MuonFitPropertyBrowser::fit() {
+  emit functionUpdateAndFitRequested(false);
+}
+
+/**
+ * Creates an instance of Fit algorithm, sets its properties and launches it.
+ */
+void MuonFitPropertyBrowser::runFit() {
   std::string wsName = workspaceName();
 
   if (wsName.empty()) {
@@ -244,30 +291,33 @@ void MuonFitPropertyBrowser::fit() {
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    std::string funStr;
-    if (m_compositeFunction->name() == "MultiBG") {
-      funStr = "";
-    } else if (m_compositeFunction->nFunctions() > 1) {
-      funStr = m_compositeFunction->asString();
-    } else {
-      funStr = (m_compositeFunction->getFunction(0))->asString();
-    }
-
-    if (AnalysisDataService::Instance().doesExist(
-            wsName + "_NormalisedCovarianceMatrix")) {
-      FrameworkManager::Instance().deleteWorkspace(
-          wsName + "_NormalisedCovarianceMatrix");
-    }
-    if (AnalysisDataService::Instance().doesExist(wsName + "_Parameters")) {
-      FrameworkManager::Instance().deleteWorkspace(wsName + "_Parameters");
-    }
-    if (AnalysisDataService::Instance().doesExist(wsName + "_Workspace")) {
-      FrameworkManager::Instance().deleteWorkspace(wsName + "_Workspace");
+    // Delete any existing results for this workspace, UNLESS we are doing a
+    // simultaneous fit
+    if (m_workspacesToFit.size() < 2) {
+      if (AnalysisDataService::Instance().doesExist(
+              wsName + "_NormalisedCovarianceMatrix")) {
+        FrameworkManager::Instance().deleteWorkspace(
+            wsName + "_NormalisedCovarianceMatrix");
+      }
+      if (AnalysisDataService::Instance().doesExist(wsName + "_Parameters")) {
+        FrameworkManager::Instance().deleteWorkspace(wsName + "_Parameters");
+      }
+      if (AnalysisDataService::Instance().doesExist(wsName + "_Workspace")) {
+        FrameworkManager::Instance().deleteWorkspace(wsName + "_Workspace");
+      }
     }
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
     alg->initialize();
-    alg->setPropertyValue("Function", funStr);
+    if (m_compositeFunction->name() == "MultiBG") {
+      alg->setPropertyValue("Function", "");
+    } else if (m_compositeFunction->nFunctions() > 1) {
+      alg->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(
+                                       m_compositeFunction));
+    } else {
+      alg->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(
+                                       m_compositeFunction->getFunction(0)));
+    }
     if (rawData())
       alg->setPropertyValue("InputWorkspace", wsName + "_Raw");
     else
@@ -278,9 +328,27 @@ void MuonFitPropertyBrowser::fit() {
     alg->setPropertyValue("Output", outputName());
     alg->setPropertyValue("Minimizer", minimizer());
     alg->setPropertyValue("CostFunction", costFunction());
+
+    // If we are doing a simultaneous fit, set this up here
+    const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
+    if (nWorkspaces > 1) {
+      alg->setPropertyValue("InputWorkspace", m_workspacesToFit[0]);
+      // Remove existing results with the same name
+      if (AnalysisDataService::Instance().doesExist(outputName())) {
+        AnalysisDataService::Instance().deepRemoveGroup(outputName());
+      }
+      for (int i = 1; i < nWorkspaces; i++) {
+        std::string suffix = boost::lexical_cast<std::string>(i);
+        alg->setPropertyValue("InputWorkspace_" + suffix, m_workspacesToFit[i]);
+        alg->setProperty("WorkspaceIndex_" + suffix, workspaceIndex());
+        alg->setProperty("StartX_" + suffix, startX());
+        alg->setProperty("EndX_" + suffix, endX());
+      }
+    }
+
     observeFinish(alg);
     alg->executeAsync();
-  } catch (std::exception &e) {
+  } catch (const std::exception &e) {
     QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
     QMessageBox::critical(this, "Mantid - Error", msg);
   }
@@ -289,10 +357,19 @@ void MuonFitPropertyBrowser::fit() {
 /**
  * Show sequential fit dialog.
  */
-void MuonFitPropertyBrowser::sequentialFit() { emit sequentialFitRequested(); }
+void MuonFitPropertyBrowser::runSequentialFit() {
+  emit sequentialFitRequested();
+}
 
 /**
- * Connect to the AnalysisDataServis when shown
+ * Update function prior to running a sequential fit
+ */
+void MuonFitPropertyBrowser::sequentialFit() {
+  emit functionUpdateAndFitRequested(true);
+}
+
+/**
+ * Connect to the AnalysisDataService when shown
  */
 void MuonFitPropertyBrowser::showEvent(QShowEvent *e) {
   (void)e;
@@ -319,17 +396,162 @@ bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
 }
 
 void MuonFitPropertyBrowser::finishHandle(const IAlgorithm *alg) {
-  // Input workspace should be a MatrixWorkspace according to isWorkspaceValid
-  auto inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      static_cast<std::string>(alg->getProperty("InputWorkspace")));
+  // Copy experiment info to output workspace
+  if (AnalysisDataService::Instance().doesExist(outputName() + "_Workspace")) {
+    // Input workspace should be a MatrixWorkspace according to isWorkspaceValid
+    auto inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        static_cast<std::string>(alg->getProperty("InputWorkspace")));
+    auto outWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        outputName() + "_Workspace");
+    if (inWs && outWs) {
+      outWs->copyExperimentInfoFrom(inWs.get());
+    }
+  } else if (AnalysisDataService::Instance().doesExist(outputName() +
+                                                       "_Workspaces")) {
+    // Output workspace was a group
+    auto outGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        outputName() + "_Workspaces");
+    if (outGroup->size() == m_workspacesToFit.size()) {
+      for (size_t i = 0; i < outGroup->size(); i++) {
+        auto outWs =
+            boost::dynamic_pointer_cast<MatrixWorkspace>(outGroup->getItem(i));
+        auto inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            m_workspacesToFit[i]);
+        if (inWs && outWs) {
+          outWs->copyExperimentInfoFrom(inWs.get());
+        }
+      }
+    }
+  }
 
-  auto outWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      outputName() + "_Workspace");
-
-  if (inWs && outWs)
-    outWs->copyExperimentInfoFrom(inWs.get());
+  // If fit was simultaneous, insert extra information into params table
+  // and group the output workspaces
+  const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
+  if (nWorkspaces > 1) {
+    finishAfterSimultaneousFit(alg, nWorkspaces);
+  }
 
   FitPropertyBrowser::finishHandle(alg);
+}
+
+/**
+ * After a simultaneous fit, insert extra information into parameters table
+ * (i.e. what runs, groups, periods "f0", "f1" etc were)
+ * and group the output workspaces
+ * @param fitAlg :: [input] Pointer to fit algorithm that just finished
+ * @param nWorkspaces :: [input] Number of workspaces that were fitted
+ */
+void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
+    const Mantid::API::IAlgorithm *fitAlg, const int nWorkspaces) const {
+  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  try {
+    const std::string paramTableName = fitAlg->getProperty("OutputParameters");
+    const auto paramTable = ads.retrieveWS<ITableWorkspace>(paramTableName);
+    if (paramTable) {
+      Mantid::API::TableRow f0Row = paramTable->appendRow();
+      f0Row << "f0=" + fitAlg->getPropertyValue("InputWorkspace") << 0.0 << 0.0;
+      for (int i = 1; i < nWorkspaces; i++) {
+        const std::string suffix = boost::lexical_cast<std::string>(i);
+        const auto wsName =
+            fitAlg->getPropertyValue("InputWorkspace_" + suffix);
+        Mantid::API::TableRow row = paramTable->appendRow();
+        row << "f" + suffix + "=" + wsName << 0.0 << 0.0;
+      }
+    }
+  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+    // Not a fatal error, but shouldn't happen
+    g_log.warning(
+        "Could not find output parameters table for simultaneous fit");
+  }
+
+  // Group output together
+  std::string groupName = fitAlg->getPropertyValue("Output");
+  std::string baseName = groupName;
+  if (ads.doesExist(groupName)) {
+    ads.deepRemoveGroup(groupName);
+  }
+
+  // Create a group for label
+  try {
+    ads.add(groupName, boost::make_shared<WorkspaceGroup>());
+    ads.addToGroup(groupName, baseName + "_NormalisedCovarianceMatrix");
+    ads.addToGroup(groupName, baseName + "_Parameters");
+    ads.addToGroup(groupName, baseName + "_Workspaces");
+  } catch (const Mantid::Kernel::Exception::NotFoundError &err) {
+    g_log.warning(err.what());
+  }
+}
+
+/**
+ * Adds an extra widget in between the fit buttons and the browser
+ * @param widget :: [input] Pointer to widget to add
+ */
+void MuonFitPropertyBrowser::addExtraWidget(QWidget *widget) {
+  widget->setSizePolicy(QSizePolicy::Policy::Expanding,
+                        QSizePolicy::Policy::Expanding);
+  if (m_additionalLayout && m_widgetSplitter) {
+    m_widgetSplitter->addWidget(widget);
+  }
+}
+
+/**
+ * Called externally to set the function
+ * @param func :: [input] Fit function to use
+ */
+void MuonFitPropertyBrowser::setFunction(const IFunction_sptr func) {
+  createCompositeFunction(func);
+}
+
+/**
+ * Set the list of workspaces to fit to the given list
+ * @param wsNames :: [input] List of workspace names to fit
+ */
+void MuonFitPropertyBrowser::setWorkspaceNames(const QStringList &wsNames) {
+  // Extend base class behaviour
+  IWorkspaceFitControl::setWorkspaceNames(wsNames);
+
+  m_workspacesToFit.clear();
+  std::transform(wsNames.begin(), wsNames.end(),
+                 std::back_inserter(m_workspacesToFit),
+                 [](const QString &qs) { return qs.toStdString(); });
+  // Update listeners
+  emit workspacesToFitChanged(static_cast<int>(m_workspacesToFit.size()));
+}
+
+/**
+ * Override in the case of simultaneous fits to use a special prefix.
+ * Otherwise, use the parent class method.
+ * @returns :: output name for Fit algorithm
+ */
+std::string MuonFitPropertyBrowser::outputName() const {
+  const int nWorkspaces = static_cast<int>(m_workspacesToFit.size());
+  if (nWorkspaces > 1) {
+    // simultaneous fit
+    return SIMULTANEOUS_PREFIX + m_simultaneousLabel;
+  } else {
+    // use parent class behaviour
+    return FitPropertyBrowser::outputName();
+  }
+}
+
+/**
+ * Set "compatibility mode" (i.e. the behaviour pre-Mantid 3.8) on or off.
+ * In this mode, all parts of the fit property browser are shown and all extra
+ * widgets (like the function browser or data selector) are hidden, so it looks
+ * just like it used to before the changes.
+ * @param enabled :: [input] Whether to turn this mode on or off
+ */
+void MuonFitPropertyBrowser::setCompatibilityMode(bool enabled) {
+  // Show or hide "Function" and "Data" sections
+  m_browser->setItemVisible(m_functionsGroup, enabled);
+  m_browser->setItemVisible(m_settingsGroup, enabled);
+
+  // Show or hide additional widgets
+  for (int i = 0; i < m_additionalLayout->count(); ++i) {
+    if (auto *widget = m_additionalLayout->itemAt(i)->widget()) {
+      widget->setVisible(!enabled);
+    }
+  }
 }
 
 } // MantidQt

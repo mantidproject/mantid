@@ -140,6 +140,8 @@ void ExtractSpectra::execHistogram() {
                                                oldX.begin() + m_maxX);
   }
 
+  bool doCrop = ((m_minX != 0) || (m_maxX != m_inputWorkspace->x(0).size()));
+
   Progress prog(this, 0.0, 1.0, (m_workspaceIndexList.size()));
   // Loop over the required workspace indices, copying in the desired bins
   for (int j = 0; j < static_cast<int>(m_workspaceIndexList.size()); ++j) {
@@ -163,12 +165,17 @@ void ExtractSpectra::execHistogram() {
       outputWorkspace->setSharedDx(j, m_inputWorkspace->sharedDx(i));
     }
 
-    auto &oldY = m_inputWorkspace->y(i);
-    outputWorkspace->mutableY(j)
-        .assign(oldY.begin() + m_minX, oldY.begin() + (m_maxX - m_histogram));
-    auto &oldE = m_inputWorkspace->e(i);
-    outputWorkspace->mutableE(j)
-        .assign(oldE.begin() + m_minX, oldE.begin() + (m_maxX - m_histogram));
+    if (doCrop) {
+      auto &oldY = m_inputWorkspace->y(i);
+      outputWorkspace->mutableY(j)
+          .assign(oldY.begin() + m_minX, oldY.begin() + (m_maxX - m_histogram));
+      auto &oldE = m_inputWorkspace->e(i);
+      outputWorkspace->mutableE(j)
+          .assign(oldE.begin() + m_minX, oldE.begin() + (m_maxX - m_histogram));
+    } else {
+      outputWorkspace->setSharedY(j, m_inputWorkspace->sharedY(i));
+      outputWorkspace->setSharedE(j, m_inputWorkspace->sharedE(i));
+    }
 
     // copy over the axis entry for each spectrum, regardless of the type of
     // axes present
@@ -291,7 +298,7 @@ void ExtractSpectra::execEvent() {
     auto i = m_workspaceIndexList[j];
     const EventList &el = eventW->getSpectrum(i);
     // The output event list
-    EventList &outEL = outputWorkspace->getOrAddEventList(j);
+    EventList &outEL = outputWorkspace->getSpectrum(j);
     //    // left side of the crop - will erase 0 -> endLeft
     //    std::size_t endLeft;
     //    // right side of the crop - will erase endRight->numEvents+1

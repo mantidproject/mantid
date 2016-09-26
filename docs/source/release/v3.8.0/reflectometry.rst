@@ -1,9 +1,15 @@
-Doc=====================
+=====================
 Reflectometry Changes
 =====================
 
 .. contents:: Table of Contents
    :local:
+
+Instrument & IDF
+----------------
+
+- New CRISP filename format, full name + 8 digits, is now recognised
+- POLREF IDF has been updated
 
 ReflectometryReductionOne
 -------------------------
@@ -21,19 +27,13 @@ CreateTransmissionWorkspace
 - A workflow diagram has been added to the documentation.
 - The rebinning in wavelength has been removed
 
-ConvertToReflectometryQ
------------------------
-
-
-Reflectometry Reduction Interface
----------------------------------
-
 ISIS Reflectometry (Polref)
 ###########################
 
 - Interface now displays information in a tree where groups are parent items and runs are children. For more details, please check the updated documentation.
 - Global settings have been moved to a separate tab ("Settings")
 - Transfer progress bar no longer gives impression of running when clicked if no runs are selected
+- Updated instrument definition files.
 
 ISIS Reflectometry
 ##################

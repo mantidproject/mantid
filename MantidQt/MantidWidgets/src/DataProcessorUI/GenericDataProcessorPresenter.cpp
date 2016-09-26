@@ -1217,11 +1217,11 @@ std::vector<DataProcessorCommand_uptr>
 GenericDataProcessorPresenter::getTableList() {
 
   std::vector<DataProcessorCommand_uptr> workspaces;
-
+  workspaces.reserve(m_workspaceList.size());
   // Create a command for each of the workspaces in the ADS
-  for (auto it = m_workspaceList.begin(); it != m_workspaceList.end(); ++it) {
-    workspaces.push_back(std::move(
-        Mantid::Kernel::make_unique<DataProcessorWorkspaceCommand>(this, *it)));
+  for (const auto &name : m_workspaceList) {
+    workspaces.push_back(
+        Mantid::Kernel::make_unique<DataProcessorWorkspaceCommand>(this, name));
   }
   return workspaces;
 }

@@ -1,11 +1,7 @@
 #ifndef MANTID_ALGORITHMS_QXY_H_
 #define MANTID_ALGORITHMS_QXY_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAlgorithms/GravitySANSHelper.h"
 
 namespace Mantid {
 namespace Algorithms {
