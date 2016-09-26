@@ -55,9 +55,10 @@ public:
    */
   void test_normalization() {
     auto func = createTestTeixeiraWaterSQE();
+    func->setParameter("Tau", 50.0);  // make it peaky
     double dE(0.0001); // dE is 1micro-eV
     const size_t nData(
-        2E5); //  number of energy values to evaluate the function
+        2E4); //  number of energy values to evaluate the function
     // Create the domain of energy values
     std::vector<double> xValues(nData, 0);
     std::iota(xValues.begin(), xValues.end(), -1E5);
@@ -72,7 +73,7 @@ public:
                    std::bind1st(std::multiplies<double>(), dE));
     auto integral =
         std::accumulate(calculatedValues.begin(), calculatedValues.end(), 0.0);
-    TS_ASSERT_DELTA(integral, 1.0, 1e-8);
+    TS_ASSERT_DELTA(integral, 1.0, 0.01);
   }
 
 private:
