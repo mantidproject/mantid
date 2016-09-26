@@ -439,6 +439,62 @@ public:
     AnalysisDataService::Instance().remove("Removed1");
   }
 
+  void test_movingAverageModeWhenWindowWidthIsOne() {
+    const size_t spectraCount = 3;
+    const size_t binCount = 4;
+    Mantid::DataObjects::Workspace2D_sptr WS;
+    for (size_t i = 0; i < binCount; ++i) {
+      WS = movingAverageCreateWorkspace(spectraCount, binCount, i);
+      Mantid::Algorithms::CalculateFlatBackground flatBG;
+      TS_ASSERT_THROWS_NOTHING(flatBG.initialize())
+      TS_ASSERT(flatBG.isInitialized())
+      flatBG.setProperty("InputWorkspace", WS);
+      flatBG.setPropertyValue("OutputWorkspace", "Removed1");
+      flatBG.setPropertyValue("Mode", "Moving Average");
+      flatBG.setProperty("AveragingWindowWidth", 1);
+      flatBG.setPropertyValue("OutputMode", "Return Background");
+      TS_ASSERT_THROWS_NOTHING(flatBG.execute())
+      TS_ASSERT(flatBG.isExecuted())
+      MatrixWorkspace_sptr outputWS =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed1");
+      for (size_t j = 0; j < spectraCount; ++j) {
+        // The special background value (the correct answer) is taken from above.
+        TS_ASSERT_DELTA(outputWS->y(j)[0], movingAverageSpecialY(j), 1e-12)
+      }
+      AnalysisDataService::Instance().remove("Removed1");
+    }
+  }
+
+  void test_movingAverageModeWhenWindowWidthIsTwo() {
+    const size_t spectraCount = 2;
+    const size_t binCount = 7;
+    Mantid::DataObjects::Workspace2D_sptr WS;
+    for (size_t i = 0; i < binCount; ++i) {
+      WS = movingAverageCreateWorkspace(spectraCount, binCount, i);
+      Mantid::Algorithms::CalculateFlatBackground flatBG;
+      TS_ASSERT_THROWS_NOTHING(flatBG.initialize())
+      TS_ASSERT(flatBG.isInitialized())
+      flatBG.setProperty("InputWorkspace", WS);
+      flatBG.setPropertyValue("OutputWorkspace", "Removed1");
+      flatBG.setPropertyValue("Mode", "Moving Average");
+      flatBG.setProperty("AveragingWindowWidth", 2);
+      flatBG.setPropertyValue("OutputMode", "Return Background");
+      TS_ASSERT_THROWS_NOTHING(flatBG.execute())
+      TS_ASSERT(flatBG.isExecuted())
+      MatrixWorkspace_sptr outputWS =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed1");
+      for (size_t j = 0; j < spectraCount; ++j) {
+        if (i == 0 || i == binCount - 1) {
+          // If minimum at end or beginning, then no average is taken.
+          TS_ASSERT_DELTA(outputWS->y(j)[0], movingAverageSpecialY(j), 1e-12)
+        } else {
+          TS_ASSERT_DELTA(outputWS->y(j)[0], 0.5 * (movingAverageSpecialY(j) + movingAverageStandardY(j)), 1e-12)
+        }
+      }
+      AnalysisDataService::Instance().remove("Removed1");
+    }
+  }
+
 private:
   double bg;
 
@@ -476,6 +532,36 @@ private:
       testInst->markAsMonitor(physicalPixel);
       WS->getSpectrum(i).addDetectorID(physicalPixel->getID());
     }
+  }
+
+  /// Creates a  workspace with a single special value in each spectrum.
+  Mantid::DataObjects::Workspace2D_sptr movingAverageCreateWorkspace(const size_t spectraCount, const size_t binCount, const size_t specialIndex) {
+    Mantid::DataObjects::Workspace2D_sptr WS(new Mantid::DataObjects::Workspace2D);
+    WS->initialize(spectraCount, binCount + 1, binCount);
+    for (size_t i = 0; i < spectraCount; ++i) {
+      for (size_t j = 0; j < binCount; ++j) {
+        // Make non-trivial but still linear x axis.
+        WS->mutableX(i)[j] = 0.78 * (static_cast<double>(j) - static_cast<double>(binCount) / 3.0) - 0.31 * static_cast<double>(i);
+        // Compute some non-trivial y values.
+        WS->mutableY(i)[j] = movingAverageStandardY(i);
+        WS->mutableE(i)[j] = std::sqrt(WS->y(i)[j]);
+      }
+      // Add extra x value because histogram.
+      WS->mutableX(i)[binCount] = 0.78 * 2.0 / 3.0 * static_cast<double>(binCount) - 0.31 * static_cast<double>(i);
+      // The special background value is set here.
+      WS->mutableY(i)[specialIndex] = movingAverageSpecialY(i);
+    }
+    return WS;
+  }
+
+  double movingAverageSpecialY(const size_t wsIndex) {
+    // This value has to be smaller than what is returned by
+    // movingAverageStandardY().
+    return 0.23 * movingAverageStandardY(wsIndex);
+  }
+
+  double movingAverageStandardY(const size_t wsIndex) {
+    return 9.34 + 3.2 * static_cast<double>(wsIndex);
   }
 };
 
