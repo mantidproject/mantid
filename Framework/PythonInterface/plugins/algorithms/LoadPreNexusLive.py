@@ -2,7 +2,7 @@ from mantid import mtd
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, \
     FileProperty, WorkspaceProperty
 from mantid.kernel import Direction, EnabledWhenProperty, \
-    PropertyCriterion, StringListValidator
+    IntBoundedValidator, Property, PropertyCriterion, StringListValidator
 from mantid.simpleapi import *
 import os
 
@@ -24,6 +24,18 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
             raise RuntimeError("Failed to find live file for '%s'" % instrument)
 
         filenames.sort()
+
+        runNumber = self.getProperty('RunNumber').value
+        if runNumber != Property.EMPTY_INT:
+            # convert to substring to look for
+            runNumber = "%s_%d_live" % (instrument, runNumber)
+            self.log().information('Looking for ' + runNumber)
+
+            filenames = [name for name in filenames
+                         if runNumber in name]
+            if len(filenames) <= 0:
+                raise RuntimeError("Failed to find live file '%s'" \
+                                   % runNumber)
 
         return os.path.join(livepath, filenames[-1])
 
@@ -60,6 +72,11 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
                              StringListValidator(instruments),
                              'Empty uses default instrument')
 
+        runValidator = IntBoundedValidator()
+        runValidator.setLower(1)
+        self.declareProperty('RunNumber', Property.EMPTY_INT, runValidator,
+                             doc='Live run number to use (Optional, Default=most recent)')
+
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                direction=Direction.Output))
 
@@ -82,7 +99,7 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
 
         eventFilename = self.findLivefile(instrument)
 
-        self.log().information("Loading '%s'" % eventFilename)
+        self.log().notice("Loading '%s'" % eventFilename)
         wkspName = self.getPropertyValue('OutputWorkspace')
         LoadEventPreNexus(EventFilename=eventFilename,
                           OutputWorkspace=wkspName)

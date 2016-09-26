@@ -90,6 +90,11 @@ void IndirectDiffractionReduction::initLayout() {
   connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this,
           SLOT(individualGroupingToggled(int)));
 
+  // Handle plotting
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotResults()));
+  // Handle saving
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveReductions()));
+
   loadSettings();
 
   // Update invalid rebinning markers
@@ -136,22 +141,20 @@ void IndirectDiffractionReduction::run() {
 }
 
 /**
- * Handles plotting result spectra from algorithm chains.
+ * Handles completion of algorithm
  *
  * @param error True if the chain was stopped due to error
  */
-void IndirectDiffractionReduction::plotResults(bool error) {
+void IndirectDiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(plotResults(bool)));
+             SLOT(algorithmComplete(bool)));
 
-  // Nothing can be plotted
   if (error) {
     showInformationBox(
         "Error running diffraction reduction.\nSee Results Log for details.");
     return;
   }
-
   // Ungroup the output workspace if generic reducer was used
   if (AnalysisDataService::Instance().doesExist(
           "IndirectDiffraction_Workspaces")) {
@@ -164,9 +167,21 @@ void IndirectDiffractionReduction::plotResults(bool error) {
 
     diffResultsGroup->removeAll();
     AnalysisDataService::Instance().remove("IndirectDiffraction_Workspaces");
-
-    saveGenericReductions();
   }
+  // Enable plotting
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.cbPlotType->setEnabled(true);
+  // Enable saving
+  m_uiForm.ckAscii->setEnabled(true);
+  m_uiForm.ckGSS->setEnabled(true);
+  m_uiForm.ckNexus->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
+}
+
+/**
+ * Handles plotting result spectra from algorithm chains.
+ */
+void IndirectDiffractionReduction::plotResults() {
 
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
@@ -176,13 +191,27 @@ void IndirectDiffractionReduction::plotResults(bool error) {
   QString pyInput = "from mantidplot import plotSpectrum, plot2D\n";
 
   if (plotType == "Spectra" || plotType == "Both") {
-    for (auto it = m_plotWorkspaces.begin(); it != m_plotWorkspaces.end(); ++it)
-      pyInput += "plotSpectrum('" + QString::fromStdString(*it) + "', 0)\n";
+    for (const auto &it : m_plotWorkspaces) {
+      const auto workspaceExists =
+          AnalysisDataService::Instance().doesExist(it);
+      if (workspaceExists)
+        pyInput += "plotSpectrum('" + QString::fromStdString(it) + "', 0)\n";
+      else
+        showInformationBox(QString::fromStdString(
+            "Workspace '" + it + "' not found\nUnable to plot workspace"));
+    }
   }
 
   if (plotType == "Contour" || plotType == "Both") {
-    for (auto it = m_plotWorkspaces.begin(); it != m_plotWorkspaces.end(); ++it)
-      pyInput += "plot2D('" + QString::fromStdString(*it) + "')\n";
+    for (const auto &it : m_plotWorkspaces) {
+      const auto workspaceExists =
+          AnalysisDataService::Instance().doesExist(it);
+      if (workspaceExists)
+        pyInput += "plot2D('" + QString::fromStdString(it) + "')\n";
+      else
+        showInformationBox(QString::fromStdString(
+            "Workspace '" + it + "' not found\nUnable to plot workspace"));
+    }
   }
 
   runPythonCode(pyInput);
@@ -191,56 +220,79 @@ void IndirectDiffractionReduction::plotResults(bool error) {
 /**
  * Handles saving the reductions from the generic algorithm.
  */
-void IndirectDiffractionReduction::saveGenericReductions() {
-  for (auto it = m_plotWorkspaces.begin(); it != m_plotWorkspaces.end(); ++it) {
-    std::string wsName = *it;
+void IndirectDiffractionReduction::saveReductions() {
+  for (const auto wsName : m_plotWorkspaces) {
+    const auto workspaceExists =
+        AnalysisDataService::Instance().doesExist(wsName);
+    if (workspaceExists) {
 
-    if (m_uiForm.ckGSS->isChecked()) {
-      std::string tofWsName = wsName + "_tof";
-
-      // Convert to TOF for GSS
-      IAlgorithm_sptr convertUnits =
-          AlgorithmManager::Instance().create("ConvertUnits");
-      convertUnits->initialize();
-      convertUnits->setProperty("InputWorkspace", wsName);
-      convertUnits->setProperty("OutputWorkspace", tofWsName);
-      convertUnits->setProperty("Target", "TOF");
-      m_batchAlgoRunner->addAlgorithm(convertUnits);
-
+      QString tofWsName = QString::fromStdString(wsName) + "_tof";
+      std::string instName =
+          (m_uiForm.iicInstrumentConfiguration->getInstrumentName())
+              .toStdString();
+      std::string mode =
+          (m_uiForm.iicInstrumentConfiguration->getReflectionName())
+              .toStdString();
       BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvUnitsProps;
-      inputFromConvUnitsProps["InputWorkspace"] = tofWsName;
+      inputFromConvUnitsProps["InputWorkspace"] = tofWsName.toStdString();
+      BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromReductionProps;
+      inputFromReductionProps["InputWorkspace"] = (wsName + "_dRange");
 
-      // Save GSS
-      std::string gssFilename = wsName + ".gss";
-      IAlgorithm_sptr saveGSS = AlgorithmManager::Instance().create("SaveGSS");
-      saveGSS->initialize();
-      saveGSS->setProperty("Filename", gssFilename);
-      m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
-    }
+      if (m_uiForm.ckGSS->isChecked()) {
+        if (instName == "OSIRIS" && mode == "diffonly") {
 
-    if (m_uiForm.ckNexus->isChecked()) {
-      // Save NEXus using SaveNexusProcessed
-      std::string nexusFilename = wsName + ".nxs";
-      IAlgorithm_sptr saveNexus =
-          AlgorithmManager::Instance().create("SaveNexusProcessed");
-      saveNexus->initialize();
-      saveNexus->setProperty("InputWorkspace", wsName);
-      saveNexus->setProperty("Filename", nexusFilename);
-      m_batchAlgoRunner->addAlgorithm(saveNexus);
-    }
+          QString gssFilename = tofWsName + ".gss";
+          IAlgorithm_sptr saveGSS =
+              AlgorithmManager::Instance().create("SaveGSS");
+          saveGSS->initialize();
+          saveGSS->setProperty("Filename", gssFilename.toStdString());
+          m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
+        } else {
 
-    if (m_uiForm.ckAscii->isChecked()) {
-      // Save ASCII using SaveAscii version 1
-      std::string asciiFilename = wsName + ".dat";
-      IAlgorithm_sptr saveASCII =
-          AlgorithmManager::Instance().create("SaveAscii", 1);
-      saveASCII->initialize();
-      saveASCII->setProperty("InputWorkspace", wsName);
-      saveASCII->setProperty("Filename", asciiFilename);
-      m_batchAlgoRunner->addAlgorithm(saveASCII);
-    }
+          // Convert to TOF for GSS
+          IAlgorithm_sptr convertUnits =
+              AlgorithmManager::Instance().create("ConvertUnits");
+          convertUnits->initialize();
+          convertUnits->setProperty("InputWorkspace", wsName);
+          convertUnits->setProperty("OutputWorkspace", tofWsName.toStdString());
+          convertUnits->setProperty("Target", "TOF");
+          m_batchAlgoRunner->addAlgorithm(convertUnits);
+
+          // Save GSS
+          std::string gssFilename = wsName + ".gss";
+          IAlgorithm_sptr saveGSS =
+              AlgorithmManager::Instance().create("SaveGSS");
+          saveGSS->initialize();
+          saveGSS->setProperty("Filename", gssFilename);
+          m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
+        }
+      }
+
+      if (m_uiForm.ckNexus->isChecked()) {
+        // Save NEXus using SaveNexusProcessed
+        std::string nexusFilename = wsName + ".nxs";
+        IAlgorithm_sptr saveNexus =
+            AlgorithmManager::Instance().create("SaveNexusProcessed");
+        saveNexus->initialize();
+        saveNexus->setProperty("InputWorkspace", wsName);
+        saveNexus->setProperty("Filename", nexusFilename);
+        m_batchAlgoRunner->addAlgorithm(saveNexus);
+      }
+
+      if (m_uiForm.ckAscii->isChecked()) {
+        // Save ASCII using SaveAscii version 1
+        std::string asciiFilename = wsName + ".dat";
+        IAlgorithm_sptr saveASCII =
+            AlgorithmManager::Instance().create("SaveAscii", 1);
+        saveASCII->initialize();
+        saveASCII->setProperty("InputWorkspace", wsName);
+        saveASCII->setProperty("Filename", asciiFilename);
+        m_batchAlgoRunner->addAlgorithm(saveASCII);
+      }
+    } else
+      showInformationBox(QString::fromStdString(
+          "Workspace '" + wsName + "' not found\nUnable to plot workspace"));
   }
-
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -319,7 +371,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
 
   // Handles completion of the diffraction algorithm chain
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(plotResults(bool)));
+          SLOT(algorithmComplete(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -401,42 +453,13 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
   convertUnits->setProperty("Target", "TOF");
   m_batchAlgoRunner->addAlgorithm(convertUnits, inputFromReductionProps);
 
-  BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvUnitsProps;
-  inputFromConvUnitsProps["InputWorkspace"] = tofWsName.toStdString();
-
-  if (m_uiForm.ckGSS->isChecked()) {
-    QString gssFilename = tofWsName + ".gss";
-    IAlgorithm_sptr saveGSS = AlgorithmManager::Instance().create("SaveGSS");
-    saveGSS->initialize();
-    saveGSS->setProperty("Filename", gssFilename.toStdString());
-    m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
-  }
-
-  if (m_uiForm.ckNexus->isChecked()) {
-    QString nexusFilename = drangeWsName + ".nxs";
-    IAlgorithm_sptr saveNexus =
-        AlgorithmManager::Instance().create("SaveNexusProcessed");
-    saveNexus->initialize();
-    saveNexus->setProperty("Filename", nexusFilename.toStdString());
-    m_batchAlgoRunner->addAlgorithm(saveNexus, inputFromReductionProps);
-  }
-
-  if (m_uiForm.ckAscii->isChecked()) {
-    QString asciiFilename = drangeWsName + ".dat";
-    IAlgorithm_sptr saveASCII =
-        AlgorithmManager::Instance().create("SaveAscii");
-    saveASCII->initialize();
-    saveASCII->setProperty("Filename", asciiFilename.toStdString());
-    m_batchAlgoRunner->addAlgorithm(saveASCII, inputFromReductionProps);
-  }
-
   m_plotWorkspaces.clear();
   m_plotWorkspaces.push_back(tofWsName.toStdString());
   m_plotWorkspaces.push_back(drangeWsName.toStdString());
 
   // Handles completion of the diffraction algorithm chain
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(plotResults(bool)));
+          SLOT(algorithmComplete(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
 }
@@ -742,16 +765,16 @@ void IndirectDiffractionReduction::individualGroupingToggled(int state) {
 
   switch (state) {
   case Qt::Unchecked:
-    if (itemCount == 4) {
-      m_uiForm.cbPlotType->removeItem(3);
+    if (itemCount == 3) {
+      m_uiForm.cbPlotType->removeItem(1);
       m_uiForm.cbPlotType->removeItem(2);
     }
     break;
 
   case Qt::Checked:
-    if (itemCount == 2) {
-      m_uiForm.cbPlotType->insertItem(2, "Contour");
-      m_uiForm.cbPlotType->insertItem(3, "Both");
+    if (itemCount == 1) {
+      m_uiForm.cbPlotType->insertItem(1, "Contour");
+      m_uiForm.cbPlotType->insertItem(2, "Both");
     }
     break;
 

@@ -23,7 +23,6 @@ def _normalize_to_lowest_temp(elt_ws_name):
 
 class ElasticWindowMultiple(DataProcessorAlgorithm):
 
-    _plot = None
     _sample_log_name = None
     _sample_log_value = None
     _input_workspaces = None
@@ -35,7 +34,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
     _integration_range_end = None
     _background_range_start = None
     _background_range_end = None
-    _mtd_plot = None
 
 
     def category(self):
@@ -81,8 +79,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputELT', '', Direction.Output,
                                                PropertyMode.Optional),
                              doc='Output workspace ELT')
-
-        self.declareProperty(name='Plot', defaultValue=False, doc='Plot result spectra')
 
 
     def validateInputs(self):
@@ -256,26 +252,12 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self.setProperty('OutputInQ', self._q_workspace)
         self.setProperty('OutputInQSquared', self._q2_workspace)
 
-        # Plot spectra plots
-        if self._plot:
-            self._mtd_plot = import_mantidplot()
-
-            self._plot_spectra(self._q_workspace)
-            self._plot_spectra(self._q2_workspace)
-
-            if self._elf_workspace != '':
-                self._plot_spectra(self._elf_workspace)
-
-            if self._elt_workspace != '':
-                self._plot_spectra(self._elt_workspace)
-
 
     def _setup(self):
         """
         Gets algorithm properties.
         """
 
-        self._plot = self.getProperty('Plot').value
         self._sample_log_name = self.getPropertyValue('SampleEnvironmentLogName')
         self._sample_log_value = self.getPropertyValue('SampleEnvironmentLogValue')
 
@@ -290,27 +272,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         self._background_range_start = self.getProperty('BackgroundRangeStart').value
         self._background_range_end = self.getProperty('BackgroundRangeEnd').value
-
-
-    def _plot_spectra(self, ws_name):
-        """
-        Plots up to the first 10 spectra from a workspace.
-
-        @param ws_name Name of workspace to plot
-        """
-
-        num_hist = mtd[ws_name].getNumberHistograms()
-
-        # Limit number of plotted histograms to 10
-        if num_hist > 10:
-            num_hist = 10
-
-        # Build plot list
-        plot_list = []
-        for i in range(0, num_hist):
-            plot_list.append(i)
-
-        self._mtd_plot.plotSpectrum(ws_name, plot_list)
 
 
     def _get_temperature(self, ws_name):

@@ -29,6 +29,9 @@ private slots:
   void minChanged(double val);
   void maxChanged(double val);
   void updateRS(QtProperty *prop, double val);
+  void saveClicked();
+  void plotClicked();
+  void algorithmComplete(bool error);
 
 private:
   Ui::MSDFit m_uiForm;

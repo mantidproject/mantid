@@ -701,9 +701,6 @@ public:
     // factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
-    EXPECT_CALL(*pMockView, positionOnly())
-        .WillOnce(
-            Return(true)); // A peak repesentation without an absolute size.
     EXPECT_CALL(*pMockView, getOccupancyInView())
         .WillOnce(
             Return(occupancyInView)); // The occupancy that the VIEW returns.
@@ -738,9 +735,6 @@ public:
     // factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
-    EXPECT_CALL(*pMockView, positionOnly())
-        .WillOnce(
-            Return(true)); // A peak repesentation without an absolute size.
     EXPECT_CALL(*pMockView, getOccupancyIntoView())
         .WillOnce(
             Return(occupancyIntoView)); // The occupancy that the VIEW returns.

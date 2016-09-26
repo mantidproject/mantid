@@ -46,8 +46,8 @@ Example 1:
 .. code-block:: xml
 
    <?xml version="1.0" encoding="UTF-8" ?>
-   <detector-masking">
-     <group">
+   <detector-masking>
+     <group>
        <detids>3,34-44,47</detids>
        <component>bank123</component>
        <component>bank124</component>

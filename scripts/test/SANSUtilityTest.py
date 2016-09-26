@@ -1571,6 +1571,23 @@ class TestQuaternionToAngleAndAxis(unittest.TestCase):
         # There shouldn't be an axis for angle 0
         self._do_test_quaternion(angle, axis)
 
+class TestTransmissionName(unittest.TestCase):
+    def test_that_suffix_is_added_if_not_exists(self):
+        # Arrange
+        workspace_name = "test_workspace_name"
+        # Act
+        unfitted_workspace_name = su.get_unfitted_transmission_workspace_name(workspace_name)
+        # Assert
+        expected = workspace_name + "_unfitted"
+        self.assertTrue(unfitted_workspace_name == expected)
+    def test_that_suffix_is_not_added_if_exists(self):
+        # Arrange
+        workspace_name = "test_workspace_name_unfitted"
+        # Act
+        unfitted_workspace_name = su.get_unfitted_transmission_workspace_name(workspace_name)
+        # Assert
+        expected = workspace_name
+        self.assertTrue(unfitted_workspace_name == expected)
 
 if __name__ == "__main__":
     unittest.main()
