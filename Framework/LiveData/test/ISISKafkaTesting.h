@@ -66,7 +66,7 @@ class FakeISISEventSubscriber
     : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   FakeISISEventSubscriber(int32_t nperiods)
-      : m_nperiods(nperiods), m_nextPeriod(1) {}
+      : m_nperiods(nperiods), m_nextPeriod(0) {}
   void subscribe() override {}
   void consumeMessage(std::string *buffer) override {
     assert(buffer);
@@ -91,7 +91,7 @@ public:
     // Copy to provided buffer
     buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
                    builder.GetSize());
-    m_nextPeriod = (m_nextPeriod % m_nperiods) + 1;
+    m_nextPeriod = ((m_nextPeriod+1) % m_nperiods);
   }
 
 private:
