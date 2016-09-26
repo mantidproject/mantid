@@ -8,6 +8,7 @@ from mantid.simpleapi import *
 from testhelpers import run_algorithm
 import sys
 
+
 class MatchPeaksTest(unittest.TestCase):
 
     _args = {}

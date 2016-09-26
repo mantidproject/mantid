@@ -69,14 +69,6 @@ class MatchPeaks(PythonAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='Input workspace for extracting its peak positions')
 
-        # Maybe for future use
-        #self.declareProperty(ITableWorkspaceProperty('InputTable',
-        #                                             defaultValue='',
-        #                                             direction=Direction.Input,
-        #                                             optional=PropertyMode.Optional),
-        #                     doc='Input table according to which bins of the input workspace will be shifted. '
-        #                         'The table must contain columns called PeakCentre, FitStatus and PeakCentreError')
-
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace',
                                                      defaultValue='',
                                                      direction=Direction.Output),
@@ -100,7 +92,6 @@ class MatchPeaks(PythonAlgorithm):
         self._input_ws = self.getPropertyValue('InputWorkspace')
         self._input_2_ws = self.getPropertyValue('InputWorkspace2')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
-        #self._input_table = self.getPropertyValue('InputTable')
         self._masking = self.getProperty('MaskBins').value
         self._match_option = self.getProperty('MatchInput2ToCenter').value
         self._output_bin_range = self.getPropertyValue('BinRangeTable')
@@ -109,7 +100,6 @@ class MatchPeaks(PythonAlgorithm):
         issues = dict()
         input1 = self.getPropertyValue('InputWorkspace')
         input2 = self.getPropertyValue('InputWorkspace2')
-        #input3 = self.getPropertyValue('InputTable')
         if input2:
             if mtd[input1].blocksize() != mtd[input2].blocksize():
                 issues['InputWorkspace2'] = 'Incompatible same number of bins'
@@ -135,19 +125,6 @@ class MatchPeaks(PythonAlgorithm):
                 issues['InputWorkspace'] = 'Y-values contain infs'
             if np.any(np.isinf(mtd[input1].extractY())):
                 issues['InputWorkspace'] = 'E-values contain infs'
-
-        #if input3:
-        #    if mtd[input1].getNumberHistograms() != mtd[input3].rowCount():
-        #        issues['InputTable'] = 'Incompatible number of spectra'
-        #    if not mtd[input3].row(0)["PeakCentre"]:
-        #        issues['InputTable'] = 'Column PeakCentre required'
-        #    if not mtd[input3].row(0)["PeakCentreError"]:
-        #        issues['InputTable'] = 'Column PeakCentreError required'
-        #    if not mtd[input3].row(0)["FitStatus"]:
-        #        issues['InputTable'] = 'Column FitStatus required'
-
-        #if input2 and input3:
-        #    issues['InputTable'] = 'Choose either InputWorkspace2 or InputTable'
 
         return issues
 
