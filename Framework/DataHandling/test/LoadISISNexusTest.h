@@ -62,7 +62,7 @@ private:
     // Check that the logs also contain a current_period property.
     Property *current_period_log = fetchCurrentPeriodLog(workspace);
     TS_ASSERT_EQUALS(expectedPeriodNumber,
-                     atoi(current_period_log->value().c_str()));
+		std::stoi(current_period_log->value().c_str()));
 
     // Check time series properties have been filtered by period
     p = NULL;

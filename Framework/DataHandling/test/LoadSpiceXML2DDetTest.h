@@ -95,7 +95,7 @@ public:
     // monitor counts
     TS_ASSERT(outws->run().hasProperty("_monitor"));
     int monitorcount =
-        atoi(outws->run().getProperty("_monitor")->value().c_str());
+		std::stoi(outws->run().getProperty("_monitor")->value().c_str());
     TS_ASSERT_EQUALS(monitorcount, 29);
 
     // Check motor angles

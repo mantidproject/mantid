@@ -567,7 +567,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
         g_log.debug() << "Log name / xml node : " << xmlnode.getName()
                       << " (double) value = " << dvalue << "\n";
       } else if (xmlnode.isInteger()) {
-        int ivalue = atoi(nodevalue.c_str());
+        int ivalue = std::stoi(nodevalue.c_str());
         outws->mutableRun().addProperty(
             new PropertyWithValue<int>(nodename, ivalue));
         g_log.debug() << "Log name / xml node : " << xmlnode.getName()

@@ -141,7 +141,7 @@ public:
     std::string ipts = runinfows->run().getProperty("proposal")->value();
     TS_ASSERT_EQUALS(ipts, "IPTS-6174");
 
-    int mode = atoi(runinfows->run().getProperty("mode")->value().c_str());
+    int mode = std::stoi(runinfows->run().getProperty("mode")->value().c_str());
     TS_ASSERT_EQUALS(mode, 3);
 
     double comerr = atof(

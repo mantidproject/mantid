@@ -426,7 +426,7 @@ void SaveGSASInstrumentFile::processProperties() {
   m_2theta = getProperty("TwoTheta");
   m_L2 = getProperty("L2");
   string freqtempstr = getProperty("ChopperFrequency");
-  m_frequency = atoi(freqtempstr.c_str());
+  m_frequency = std::stoi(freqtempstr.c_str());
 
   /* Set default value for L1
   if (m_L1 == EMPTY_DBL())

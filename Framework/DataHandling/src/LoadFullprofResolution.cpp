@@ -332,7 +332,7 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines,
         string bankterm = level1s.back();
         boost::algorithm::trim(bankterm);
         boost::split(level2s, bankterm, boost::is_any_of(" "));
-        bankid = atoi(level2s[0].c_str());
+        bankid = std::stoi(level2s[0].c_str());
       } else { // Get bank ID as ordinal number of bank
         bankid++;
       }
@@ -642,7 +642,7 @@ void LoadFullprofResolution::parseBankLine(string line, double &cwl,
     iter_split(v, infostr, boost::algorithm::first_finder("CWL"));
 
     // Bank ID
-    bankid = atoi(v[0].c_str());
+    bankid = std::stoi(v[0].c_str());
 
     // CWL
     infostr = v[1];
