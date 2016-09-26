@@ -59,7 +59,7 @@ public:
   IndexInfo(std::vector<specnum_t> &&spectrumNumbers,
             std::vector<std::vector<detid_t>> &&detectorIDs);
   IndexInfo(
-      const size_t globalSize,
+      std::function<size_t()> getSize,
       std::function<specnum_t(const size_t)> getSpectrumNumber,
       std::function<const std::set<specnum_t> &(const size_t)> getDetectorIDs);
 
@@ -75,9 +75,16 @@ public:
   void setDetectorIDs(std::vector<std::vector<detid_t>> &&detectorIDs) & ;
 
 private:
+  /// True if class is legacy wrapper.
   bool m_isLegacy{false};
-  size_t m_legacySize;
+  /// Function bound to MatrixWorkspace::getNumbersHistograms(), used only in
+  /// legacy mode.
+  std::function<size_t()> m_getSize;
+  /// Function bound to MatrixWorkspace::spectrumNumber(), used only in legacy
+  /// mode.
   std::function<specnum_t(const size_t)> m_getSpectrumNumber;
+  /// Function bound to MatrixWorkspace::detectorIDs(), used only in legacy
+  /// mode.
   std::function<const std::set<specnum_t> &(const size_t)> m_getDetectorIDs;
 
   Kernel::cow_ptr<std::vector<specnum_t>> m_spectrumNumbers;

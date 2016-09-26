@@ -44,15 +44,28 @@ const std::string MatrixWorkspace::yDimensionId = "yDimension";
 /// Default constructor
 MatrixWorkspace::MatrixWorkspace(
     Mantid::Geometry::INearestNeighboursFactory *nnFactory)
-    : IMDWorkspace(), ExperimentInfo(), m_axes(), m_isInitialized(false),
-      m_YUnit(), m_YUnitLabel(), m_isCommonBinsFlagSet(false),
-      m_isCommonBinsFlag(false), m_masks(), m_indexCalculator(),
+    : IMDWorkspace(), ExperimentInfo(), m_axes(),
+      m_indexInfo(Kernel::make_unique<Indexing::IndexInfo>(
+          std::bind(&MatrixWorkspace::getNumberHistograms, this),
+          std::bind(&MatrixWorkspace::spectrumNumber, this,
+                    std::placeholders::_1),
+          std::bind(&MatrixWorkspace::detectorIDs, this,
+                    std::placeholders::_1))),
+      m_isInitialized(false), m_YUnit(), m_YUnitLabel(),
+      m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks(),
+      m_indexCalculator(),
       m_nearestNeighboursFactory(
           (nnFactory == nullptr) ? new NearestNeighboursFactory : nnFactory),
       m_nearestNeighbours() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
-    : IMDWorkspace(other), ExperimentInfo(other) {
+    : IMDWorkspace(other), ExperimentInfo(other),
+      m_indexInfo(Kernel::make_unique<Indexing::IndexInfo>(
+          std::bind(&MatrixWorkspace::getNumberHistograms, this),
+          std::bind(&MatrixWorkspace::spectrumNumber, this,
+                    std::placeholders::_1),
+          std::bind(&MatrixWorkspace::detectorIDs, this,
+                    std::placeholders::_1))) {
   m_axes.resize(other.m_axes.size());
   for (size_t i = 0; i < m_axes.size(); ++i)
     m_axes[i] = other.m_axes[i]->clone(this);
@@ -91,7 +104,6 @@ MatrixWorkspace::~MatrixWorkspace() {
  *
  * Used for access to spectrum number and detector ID information of spectra. */
 const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
-  std::call_once(m_indexInfoCached, &MatrixWorkspace::cacheIndexInfo, this);
   return *m_indexInfo;
 }
 
@@ -2147,14 +2159,6 @@ specnum_t MatrixWorkspace::spectrumNumber(const size_t index) const {
 const std::set<detid_t> &
 MatrixWorkspace::detectorIDs(const size_t index) const {
   return getSpectrum(index).getDetectorIDs();
-}
-
-/// Private helper for IndexInfo. Not thread-safe, use only with std::call_once.
-void MatrixWorkspace::cacheIndexInfo() const {
-  m_indexInfo = Kernel::make_unique<Indexing::IndexInfo>(
-      getNumberHistograms(),
-      std::bind(&MatrixWorkspace::spectrumNumber, this, std::placeholders::_1),
-      std::bind(&MatrixWorkspace::detectorIDs, this, std::placeholders::_1));
 }
 
 } // namespace API

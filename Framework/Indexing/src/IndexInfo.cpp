@@ -38,10 +38,10 @@ IndexInfo::IndexInfo(std::vector<specnum_t> &&spectrumNumbers,
 }
 
 IndexInfo::IndexInfo(
-    const size_t globalSize,
+    std::function<size_t()> getSize,
     std::function<specnum_t(const size_t)> getSpectrumNumber,
     std::function<const std::set<specnum_t> &(const size_t)> getDetectorIDs)
-    : m_isLegacy{true}, m_legacySize(globalSize),
+    : m_isLegacy{true}, m_getSize(getSize),
       m_getSpectrumNumber(getSpectrumNumber), m_getDetectorIDs(getDetectorIDs) {
 }
 
@@ -49,9 +49,10 @@ IndexInfo::IndexInfo(const IndexInfo &other) {
   if (other.m_isLegacy) {
     // Workaround while IndexInfo is not holding index data stored in
     // MatrixWorkspace: build IndexInfo based on data in ISpectrum.
+    auto size = other.m_getSize();
     auto &specNums = m_spectrumNumbers.access();
     auto &detIDs = m_detectorIDs.access();
-    for (size_t i = 0; i < other.m_legacySize; ++i) {
+    for (size_t i = 0; i < size; ++i) {
       specNums.push_back(other.m_getSpectrumNumber(i));
       const auto &set = other.m_getDetectorIDs(i);
       detIDs.emplace_back(set.begin(), set.end());
@@ -65,7 +66,7 @@ IndexInfo::IndexInfo(const IndexInfo &other) {
 /// The *local* size, i.e., the number of spectra in this partition.
 size_t IndexInfo::size() const {
   if (m_isLegacy)
-    return m_legacySize;
+    return m_getSize();
   return m_spectrumNumbers->size();
 }
 
