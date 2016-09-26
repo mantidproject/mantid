@@ -16,10 +16,10 @@ namespace Indexing {
 // We want to avoid complicated maps if it is just a simple offset, i.e.,
 // SpectrumNumber = WorkspaceIndex + 1 (will always be more complex with
 // MPI?).
-IndexInfo::IndexInfo(const size_t globalSize) {
+IndexInfo::IndexInfo(const size_t globalSize)
+    : m_spectrumNumbers(Kernel::make_cow<std::vector<specnum_t>>(globalSize)) {
   // Default to spectrum numbers 1...globalSize
-  auto &specNums = m_spectrumNumbers.access();
-  specNums.resize(globalSize);
+  auto specNums = m_spectrumNumbers.access();
   std::iota(specNums.begin(), specNums.end(), 1);
 
   // Default to detector IDs 1..globalSize, with 1:1 mapping to spectra
