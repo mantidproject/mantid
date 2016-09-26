@@ -158,16 +158,14 @@ class MatchPeaksTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         self._FindEPPtables_deleted
 
-    #def testValidatorSpecialValues(self):
-
     def testMatchCenter(self):
         # Input workspace should match its center
         # Bin ranges of each spectrum:
-        # spectrum 0 : [(32-35), 69] => [0, 67]      right shift
+        # spectrum 0 : [(32-35), 70] => [3, 70]      right shift
         # spectrum 1 : [0, 70]                       no shift
-        # spectrum 2 : [0, 69 - (40-35)] => [5, 70]  left shift
+        # spectrum 2 : [0, 70 - (40-35)] => [0, 65]  left shift
         # spectrum 3 : [0, 70]                       no shift
-        # Final bin range is [3, 65]
+        # Final bin range is [3, 65-1]
         self._args['InputWorkspace'] = self._ws_shift
         self._args['OutputWorkspace'] = 'output'
         alg_test = run_algorithm('MatchPeaks', **self._args)
@@ -194,8 +192,8 @@ class MatchPeaksTest(unittest.TestCase):
         columns = ['MinBin', 'MaxBin']
         self.assertEqual(columns, bin_range_table.getColumnNames())
         # Bin range
-        self.assertEqual(5, bin_range_table.row(0)["MinBin"])
-        self.assertEqual(66, bin_range_table.row(0)["MaxBin"])
+        self.assertEqual(3, bin_range_table.row(0)["MinBin"])
+        self.assertEqual(64, bin_range_table.row(0)["MaxBin"])
         DeleteWorkspace(bin_range_table)
         self._FindEPPtables_deleted
 
@@ -207,9 +205,9 @@ class MatchPeaksTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         masked = AnalysisDataService.retrieve('output')
         for i in range(4):
-            for k in range(5):
+            for k in range(3):
                 self.assertEqual(0.0, masked.readY(i)[k], 'Mask spectrum {0} bin {1} failed'.format(i, k))
-            for k in range(67, 70):
+            for k in range(65, 70):
                 self.assertEqual(0.0, masked.readY(i)[k], 'Mask spectrum {0} bin {1} failed'.format(i, k))
         DeleteWorkspace(masked)
         self._FindEPPtables_deleted
@@ -227,11 +225,11 @@ class MatchPeaksTest(unittest.TestCase):
     def testMatchInput2(self):
         # Input workspace should match the peak of input workspace 2:
         # has its peaks at bin 42
-        # shifts: 32-42 = -10
-        #         35-42 = -7
-        #         40-42 = -2
-        #         35-42 = -7
-        # new bin range [0, 60]
+        # shifts: 32-42 = -10 (right shift)
+        #         35-42 = -7  (right shift)
+        #         40-42 = -2  (right shift)
+        #         35-42 = -7  (right shift)
+        # new bin range [10, 70]
         self._args['InputWorkspace'] = self._ws_shift
         self._args['OutputWorkspace'] = 'output'
         self._args['InputWorkspace2'] = self._ws_in_2
@@ -244,26 +242,22 @@ class MatchPeaksTest(unittest.TestCase):
         self.assertEqual(42, shifted.binIndexOf(fit_table.row(0)["PeakCentre"]))
         self.assertEqual(42, np.argmax(shifted.readY(2)))
         # Bin range
-        self.assertEqual(0, bin_range_table.row(0)["MinBin"])
-        self.assertEqual(59, bin_range_table.row(0)["MaxBin"])
+        self.assertEqual(10, bin_range_table.row(0)["MinBin"])
+        self.assertEqual(70, bin_range_table.row(0)["MaxBin"])
         self._workspace_properties(shifted)
         self._FindEPPtables_deleted
         DeleteWorkspace(shifted)
         DeleteWorkspace(fit_table)
         DeleteWorkspace(bin_range_table)
 
-    # An equivalent test can be performed for an input table created using
-    # FindEPP(InputWorkspace=self._ws_in_2, OutputWorkspace='input_table')
-    # self._args['InputTable'] = 'input_table'
-
     def testMatchInput2MatchOption(self):
         # match option true:
-        #               right shifts
-        # spectrum 0:   42 - 35 = 7
-        # spectrum 1:   42 - 35 = 7
-        # spectrum 2:   42 - 35 = 7
-        # spectrum 3:   42 - 35 = 7
-        # new bin range [7, 70]
+        #               left shifts
+        # spectrum 0:   35 - 35 = 0 (no shift)
+        # spectrum 1:   42 - 35 = 7 (left shift)
+        # spectrum 2:   42 - 35 = 7 (left shift)
+        # spectrum 3:   42 - 35 = 7 (left shift)
+        # new bin range [0, 70-7-1]
         self._args['InputWorkspace'] = self._ws_shift
         self._args['InputWorkspace2'] = self._ws_in_2
         self._args['MatchInput2ToCenter'] = True
@@ -275,8 +269,8 @@ class MatchPeaksTest(unittest.TestCase):
         self.assertEqual(32-7, shifted.binIndexOf(fit_table.row(0)["PeakCentre"]))
         self.assertEqual(40-7, np.argmax(shifted.readY(2)))
         # Bin range
-        self.assertEqual(7, bin_range_table.row(0)["MinBin"])
-        self.assertEqual(70, bin_range_table.row(0)["MaxBin"])
+        self.assertEqual(0, bin_range_table.row(0)["MinBin"])
+        self.assertEqual(62, bin_range_table.row(0)["MaxBin"])
         self._workspace_properties(shifted)
         self._FindEPPtables_deleted
         DeleteWorkspace(shifted)

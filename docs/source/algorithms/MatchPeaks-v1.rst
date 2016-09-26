@@ -10,9 +10,9 @@ Description
 -----------
 
 This algorithm circular shifts the Y- and E-values of each spectrum of an input workspace while keeping its X-values.
-Peak positions of the input workspace can match the center bin, its difference to the elastic peak of a second input workspace, or the difference between a second input workspace and the center bin (option MatchInput2ToCenter).
-Bins smaller than the 'MinBin' and larger than the 'MaxBin' value specified in the BinRangeTable represent circular appended bins in any spectrum.
-MaskBins performs the masking accordingly.
+Peak positions of the input workspace can be aligned with the centre of the X-axis, its difference to the elastic peak of a second input workspace, or the difference between a second input workspace and the centre of the X-axis (option MatchInput2ToCenter).
+A BinRangeTable contains two values, 'MinBin' and 'MaxBin'. Bins smaller than the 'MinBin' value and larger than the 'MaxBin' value represent bins that can be masked. Those bins were circular shifted.
+Enabling MaskBins performs the masking accordingly.
 
 Restrictions
 ############
