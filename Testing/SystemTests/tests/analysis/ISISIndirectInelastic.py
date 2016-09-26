@@ -1091,6 +1091,8 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
             SpecMax=self.spectra_max,
             OutputWorkspace='result')
 
+        SaveNexus('result', 'd:/tmp/win_%s.nxs' % self.__class__.__name__)
+
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
 
@@ -1147,9 +1149,11 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.sample = 'irs53664_graphite002_red.nxs'
         self.resolution = FileFinder.getFullPath('irs53664_graphite002_res.nxs')
         #ConvFit fit function
-        self.func = 'name=LinearBackground,A0=0.060623,A1=0.001343;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
-                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=1.033150,PeakCentre=-0.000841,FWHM=0.001576)'\
-                    % (self.resolution)
+        self.func = 'name=LinearBackground,A0=0.060623,A1=0.001343;' \
+                    '(composite=Convolution,FixResolution=true,NumDeriv=true;' \
+                    'name=Resolution,Workspace="%s";name=Lorentzian,Amplitude=1.033150,FWHM=0.001576,'\
+                    'ties=(PeakCentre=0.0),constraints=(FWHM>0.001))' % self.resolution
+
         self.startx = -0.2
         self.endx = 0.2
         self.bg = 'Fit Linear'
@@ -1160,6 +1164,7 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.result_names = ['irs53664_graphite002_conv_1LFitL_s0_to_50_Result']
 
     def get_reference_files(self):
+        self.tolerance = 0.13
         return ['II.IRISConvFitSeq.nxs']
 
 #==============================================================================
