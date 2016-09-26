@@ -48,8 +48,11 @@ boost::shared_ptr<API::Workspace> ISISKafkaEventListener::extractData() {
   // and we may not be completely ready yet, wait upto a maximum of 5 seconds
   // to become ready
   auto checkEnd = std::chrono::system_clock::now() + std::chrono::seconds(5);
-  while (!m_decoder->hasData() || std::chrono::system_clock::now() < checkEnd) {
+  while (!m_decoder->hasData()) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    if (std::chrono::system_clock::now() > checkEnd) {
+      break;
+    }
   }
   return m_decoder->extractData();
 }
