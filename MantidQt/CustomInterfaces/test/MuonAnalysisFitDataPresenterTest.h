@@ -516,6 +516,48 @@ public:
                                   {"1", "2"}, true, true);
   }
 
+  void test_handleFitRawData_NoUpdate() {
+    const bool isRawData = true;
+    const bool updateWorkspaces = false;
+    EXPECT_CALL(*m_dataSelector, getInstrumentName()).Times(0);
+    EXPECT_CALL(*m_dataSelector, getChosenGroups()).Times(0);
+    EXPECT_CALL(*m_dataSelector, getPeriodSelections()).Times(0);
+    EXPECT_CALL(*m_dataSelector, getFitType()).Times(0);
+    m_presenter->handleFitRawData(isRawData, updateWorkspaces);
+    const auto &workspaces = AnalysisDataService::Instance().getObjectNames();
+    TS_ASSERT(workspaces.empty());
+  }
+
+  void test_handleFitRawData_updateWorkspaces() {
+    const bool isRawData = true;
+    const bool updateWorkspaces = true;
+    EXPECT_CALL(*m_dataSelector, getInstrumentName())
+        .Times(1)
+        .WillOnce(Return("MUSR"));
+    EXPECT_CALL(*m_dataSelector, getChosenGroups())
+        .Times(1)
+        .WillOnce(Return(QStringList({"long"})));
+    EXPECT_CALL(*m_dataSelector, getPeriodSelections())
+        .Times(1)
+        .WillOnce(Return(QStringList({"1"})));
+    EXPECT_CALL(*m_dataSelector, getFitType())
+        .Times(1)
+        .WillOnce(Return(IMuonFitDataSelector::FitType::Single));
+    ON_CALL(*m_dataSelector, getRuns()).WillByDefault(Return("15189"));
+    ON_CALL(*m_dataSelector, getStartTime()).WillByDefault(Return(0.55));
+    ON_CALL(*m_dataSelector, getEndTime()).WillByDefault(Return(10.0));
+    const QStringList expectedNames{
+        "MUSR00015189; Pair; long; Asym; 1; #1_Raw"};
+    EXPECT_CALL(*m_fitBrowser, setWorkspaceNames(expectedNames)).Times(1);
+    EXPECT_CALL(*m_dataSelector, setDatasetNames(expectedNames)).Times(1);
+    EXPECT_CALL(*m_fitBrowser, setWorkspaceName(expectedNames[0])).Times(1);
+    EXPECT_CALL(*m_fitBrowser, allowSequentialFits(true));
+    m_presenter->handleFitRawData(isRawData, updateWorkspaces);
+    const auto &workspaces = AnalysisDataService::Instance().getObjectNames();
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(
+        expectedNames[0].toStdString()));
+  }
+
 private:
   void
   doTest_generateWorkspaceNames(const IMuonFitDataSelector::FitType &fitType,
@@ -530,7 +572,8 @@ private:
     EXPECT_CALL(*m_dataSelector, getFitType())
         .Times(1)
         .WillOnce(Return(fitType));
-    m_presenter->handleFitRawData(isRawData);
+    m_presenter->handleFitRawData(isRawData,
+                                  false); // don't create the workspaces
     const auto &names =
         m_presenter->generateWorkspaceNames("MUSR", "15189-91", true);
     TS_ASSERT_EQUALS(names, expectedNames)

@@ -119,7 +119,7 @@ public slots:
   /// Updates label to avoid overwriting existing results
   void checkAndUpdateFitLabel(bool seq);
   /// Handles "fit raw data" selection/deselection
-  void handleFitRawData(bool enabled);
+  void handleFitRawData(bool enabled, bool updateWorkspaces = true);
 
 private:
   /// Generate names of workspaces to be created

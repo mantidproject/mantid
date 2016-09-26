@@ -738,10 +738,17 @@ bool MuonAnalysisFitDataPresenter::isMultipleRuns() const {
 /**
  * Handle "fit raw data" selected/deselected
  * Update stored value
+ * Create raw workspaces if necessary
  * @param enabled :: [input] Whether option has been selected or unselected
+ * @param updateWorkspaces :: [input] Whether to create workspaces if they don't
+ * exist
  */
-void MuonAnalysisFitDataPresenter::handleFitRawData(bool enabled) {
+void MuonAnalysisFitDataPresenter::handleFitRawData(bool enabled,
+                                                    bool updateWorkspaces) {
   m_fitRawData = enabled;
+  if (updateWorkspaces) {
+    handleSelectedDataChanged(false);
+  }
 }
 
 } // namespace CustomInterfaces
