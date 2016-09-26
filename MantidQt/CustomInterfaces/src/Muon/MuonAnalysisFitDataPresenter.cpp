@@ -24,6 +24,9 @@ typedef MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MuonAnalysisFitDataPresenter");
+/// log a warning
+void logWarning(const std::string &message) { g_log.warning(message); }
+
 /// suffix for raw data workspaces
 const std::string RAW_DATA_SUFFIX("_Raw");
 const size_t RAW_SUFFIX_LENGTH(4);
@@ -408,22 +411,34 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
 }
 
 /**
- * Generates rebin parameter string from options passed in by MuonAnalysis
+ * Generates rebin parameter string from options passed in by MuonAnalysis.
+ * On error, returns empty params (no rebinning).
  * @param ws :: [input] Workspace to get bin size from
  * @returns :: parameter string for rebinning
  */
 std::string MuonAnalysisFitDataPresenter::getRebinParams(
     const Mantid::API::Workspace_sptr ws) const {
+  // First check for workspace group. If it is, use first entry
+  if (const auto &group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+    if (group->size() > 0) {
+      return getRebinParams(group->getItem(0));
+    } else {
+      logWarning("Could not get rebin params from empty group");
+      return "";
+    }
+  }
+
   std::string params = "";
   if (m_rebinArgs.first == RebinType::FixedRebin) {
     try {
       const double step = std::stod(m_rebinArgs.second);
-      auto mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+      const auto &mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
       if (mws) {
         const double binSize = mws->dataX(0)[1] - mws->dataX(0)[0];
         params = boost::lexical_cast<std::string>(step * binSize);
       }
-    } catch (const std::exception &) {
+    } catch (const std::exception &err) {
+      logWarning("Could not get rebin params: " + std::string(err.what()));
       params = "";
     }
   } else if (m_rebinArgs.first == RebinType::VariableRebin) {
