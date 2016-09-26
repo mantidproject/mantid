@@ -24,6 +24,30 @@ typedef MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab::RebinType
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MuonAnalysisFitDataPresenter");
+/// suffix for raw data workspaces
+const std::string RAW_DATA_SUFFIX("_Raw");
+const size_t RAW_SUFFIX_LENGTH(4);
+
+/// Test if workspace contains raw data
+bool isRawData(const std::string &name) {
+  const size_t nameLength = name.length();
+  if (nameLength > RAW_SUFFIX_LENGTH) {
+    return 0 ==
+           name.compare(nameLength - RAW_SUFFIX_LENGTH, RAW_SUFFIX_LENGTH,
+                        RAW_DATA_SUFFIX);
+  } else {
+    return false;
+  }
+};
+
+/// Take off the "_Raw" suffix, if present
+std::string removeRawSuffix(const std::string &name) {
+  if (isRawData(name)) {
+    return name.substr(0, name.length() - RAW_SUFFIX_LENGTH);
+  } else {
+    return name;
+  }
+};
 }
 
 namespace MantidQt {
@@ -304,7 +328,8 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
         const std::string wsName =
             overwrite ? MuonAnalysisHelper::generateWorkspaceName(params)
                       : getUniqueName(params);
-        workspaceNames.push_back(wsName);
+        workspaceNames.push_back(m_fitRawData ? wsName + RAW_DATA_SUFFIX
+                                              : wsName);
       }
     }
   }
@@ -324,7 +349,7 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
   Mantid::API::Workspace_sptr outputWS;
 
   // parse name to get runs, periods, groups etc
-  auto params = MuonAnalysisHelper::parseWorkspaceName(name);
+  auto params = MuonAnalysisHelper::parseWorkspaceName(removeRawSuffix(name));
 
   // load original data - need to get filename(s) of individual run(s)
   QStringList filenames;
@@ -357,8 +382,9 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
       }
     }
 
-    // Rebin params: use the same as MuonAnalysis uses
-    analysisOptions.rebinArgs = getRebinParams(correctedData);
+    // Rebin params: use the same as MuonAnalysis uses, UNLESS this is raw data
+    analysisOptions.rebinArgs =
+        isRawData(name) ? "" : getRebinParams(correctedData);
     analysisOptions.loadedTimeZero = loadedData.timeZero;
     analysisOptions.timeZero = m_timeZero;
     analysisOptions.timeLimits.first = m_dataSelector->getStartTime();
