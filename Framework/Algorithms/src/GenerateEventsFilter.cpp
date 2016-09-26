@@ -312,7 +312,7 @@ void GenerateEventsFilter::processInputTime() {
     m_startTime = DateAndTime(s_inpt0);
   } else {
     // Relative time in double.
-    double inpt0 = atof(s_inpt0.c_str());
+    double inpt0 = std::stof(s_inpt0.c_str());
     if (inpt0 < 0) {
       stringstream errss;
       errss << "Input relative StartTime " << inpt0 << " cannot be negative. ";
@@ -332,7 +332,7 @@ void GenerateEventsFilter::processInputTime() {
     m_stopTime = DateAndTime(s_inptf);
   } else {
     // Relative time in double
-    double inptf = atof(s_inptf.c_str());
+    double inptf = std::stof(s_inptf.c_str());
     int64_t tf_ns = runstarttime.totalNanoseconds() +
                     static_cast<int64_t>(inptf * m_timeUnitConvertFactorToNS);
     m_stopTime = Kernel::DateAndTime(tf_ns);

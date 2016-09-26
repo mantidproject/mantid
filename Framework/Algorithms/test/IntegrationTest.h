@@ -406,10 +406,12 @@ public:
     TS_ASSERT_EQUALS(inWs->getNumberHistograms(), outWs->getNumberHistograms());
 
     if (checkRanges) {
-      TS_ASSERT_LESS_THAN_EQUALS(atof(rangeLower.c_str()),
-                                 outWs->dataX(0).front());
+	  TS_ASSERT_LESS_THAN_EQUALS(std::stod(rangeLower.c_str()),
+		  outWs->dataX(0).front());
+
       TS_ASSERT_LESS_THAN_EQUALS(outWs->dataX(0).back(),
-                                 atof(rangeUpper.c_str()));
+		  std::stod(rangeUpper.c_str()));
+
     }
     // At last, check numerical results
     TS_ASSERT_DELTA(outWs->dataY(0)[0], expectedVal, 1e-8);
