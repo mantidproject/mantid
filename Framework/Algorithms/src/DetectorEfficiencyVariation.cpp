@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/DetectorEfficiencyVariation.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -213,6 +211,7 @@ int DetectorEfficiencyVariation::doDetectorTests(
 
   const double deadValue(1.0);
   int numFailed(0);
+  const auto &spectrumInfo = counts1->spectrumInfo();
   PARALLEL_FOR3(counts1, counts2, maskWS)
   for (int i = 0; i < numSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -224,11 +223,9 @@ int DetectorEfficiencyVariation::doDetectorTests(
     }
 
     if (checkForMask) {
-      const std::set<detid_t> &detids =
-          counts1->getSpectrum(i).getDetectorIDs();
-      if (instrument->isMonitor(detids))
+      if (spectrumInfo.isMonitor(i))
         continue;
-      if (instrument->isDetectorMasked(detids)) {
+      if (spectrumInfo.isMasked(i)) {
         // Ensure it is masked on the output
         maskWS->mutableY(i)[0] = deadValue;
         continue;

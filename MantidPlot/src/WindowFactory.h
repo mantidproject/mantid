@@ -14,6 +14,7 @@
 #include <cstring>
 #include <map>
 #include <vector>
+#include <iterator>
 
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>

@@ -32,6 +32,8 @@ workspace index 'wsindex';
 4. SpectrumIDs[i], L2[i], Polar[i], Azimuthal[i] and optional
 DetectorIDs[i] correspond to the detector of a same spectrum.
 
+5. Angles are specified in degrees.
+
 Limitations
 -----------
 

@@ -16,6 +16,7 @@
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/VatesViewerInterface.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
+#include "MantidQtSpectrumViewer/SpectrumView.h"
 
 #include <QTextCodec>
 #include <QTextStream>
@@ -162,7 +163,12 @@ void ProjectSerialiser::loadWorkspaces(const TSVSerialiser &tsv) {
  */
 void ProjectSerialiser::loadWindows(const TSVSerialiser &tsv,
                                     const int fileVersion) {
-  for (auto &classname : WindowFactory::Instance().getKeys()) {
+  auto keys = WindowFactory::Instance().getKeys();
+  // Work around for graph-table dependance. Graph3D's currently rely on
+  // looking up tables. These must be loaded before the graphs, so work around
+  // by loading in reverse alphabetical order.
+  std::reverse(keys.begin(), keys.end());
+  for (auto &classname : keys) {
     if (tsv.hasSection(classname)) {
       for (auto &section : tsv.sections(classname)) {
         WindowFactory::Instance().loadFromProject(classname, section, window,
@@ -678,13 +684,20 @@ void ProjectSerialiser::loadAdditionalWindows(const std::string &lines,
                                               const int fileVersion) {
   TSVSerialiser tsv(lines);
 
-  if (tsv.selectSection("SliceViewer")) {
-    std::string sliceLines;
-    tsv >> sliceLines;
+  if (tsv.hasSection("SliceViewer")) {
+    for (auto &section : tsv.sections("SliceViewer")) {
+      auto win = SliceViewer::SliceViewerWindow::loadFromProject(
+          section, window, fileVersion);
+      window->addSerialisableWindow(dynamic_cast<QObject *>(win));
+    }
+  }
 
-    auto win = SliceViewer::SliceViewerWindow::loadFromProject(
-        sliceLines, window, fileVersion);
-    window->addSerialisableWindow(dynamic_cast<QObject *>(win));
+  if (tsv.hasSection("spectrumviewer")) {
+    for (const auto &section : tsv.sections("spectrumviewer")) {
+      auto win = SpectrumView::SpectrumView::loadFromProject(section, window,
+                                                             fileVersion);
+      window->addSerialisableWindow(dynamic_cast<QObject *>(win));
+    }
   }
 
   if (tsv.selectSection("vsi")) {

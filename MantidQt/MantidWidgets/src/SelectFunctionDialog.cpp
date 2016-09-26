@@ -24,6 +24,15 @@
  * @param parent :: A parent widget
  */
 SelectFunctionDialog::SelectFunctionDialog(QWidget *parent)
+    : SelectFunctionDialog(parent, std::vector<std::string>()) {}
+
+/**
+ * Constructor with categories to restrict to
+ * @param parent :: A parent widget
+ * @param restrictions :: List of categories to restrict to
+ */
+SelectFunctionDialog::SelectFunctionDialog(
+    QWidget *parent, const std::vector<std::string> &restrictions)
     : QDialog(parent), m_form(new Ui::SelectFunctionDialog) {
   m_form->setupUi(this);
 
@@ -46,26 +55,44 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent)
 
   // Construct the QTreeWidget based on the map information of categories and
   // their respective fit functions.
-  std::map<std::string, std::vector<std::string>>::const_iterator sItr =
-      categories.end();
-  for (std::map<std::string, std::vector<std::string>>::const_iterator itr =
-           categories.begin();
-       itr != sItr; ++itr) {
-    QTreeWidgetItem *category = new QTreeWidgetItem(m_form->fitTree);
-    category->setText(0, QString::fromStdString(itr->first));
-
-    std::vector<std::string>::const_iterator fitItrEnd = itr->second.end();
-    for (std::vector<std::string>::const_iterator fitItrBegin =
-             itr->second.begin();
-         fitItrBegin != fitItrEnd; ++fitItrBegin) {
-      QTreeWidgetItem *fit = new QTreeWidgetItem(category);
-      fit->setText(0, QString::fromStdString(fitItrBegin[0]));
-    }
-  }
+  constructFunctionTree(categories, restrictions);
 
   connect(m_form->fitTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)),
           this, SLOT(accept()));
   m_form->fitTree->setToolTip("Select a function type and press OK.");
+}
+
+/**
+ * Construct the QTreeWidget based on the map information of categories and
+ * their respective fit functions
+ * @param categoryFunctionsMap :: [input] Map of categories to functions
+ * @param restrictions :: [input] List of categories to restrict choice to. If
+ * empty, no restriction.
+ */
+void SelectFunctionDialog::constructFunctionTree(
+    const std::map<std::string, std::vector<std::string>> &categoryFunctionsMap,
+    const std::vector<std::string> &restrictions) {
+  // Don't show category if it's not in the list (unless list is empty)
+  auto showCategory = [&restrictions](const std::string &name) {
+    if (restrictions.empty()) {
+      return true;
+    } else {
+      return (std::find(restrictions.begin(), restrictions.end(), name) !=
+              restrictions.end());
+    }
+  };
+
+  for (const auto &entry : categoryFunctionsMap) {
+    if (showCategory(entry.first)) {
+      QTreeWidgetItem *category = new QTreeWidgetItem(m_form->fitTree);
+      category->setText(0, QString::fromStdString(entry.first));
+
+      for (const auto &function : entry.second) {
+        QTreeWidgetItem *fit = new QTreeWidgetItem(category);
+        fit->setText(0, QString::fromStdString(function));
+      }
+    }
+  }
 }
 
 SelectFunctionDialog::~SelectFunctionDialog() { delete m_form; }

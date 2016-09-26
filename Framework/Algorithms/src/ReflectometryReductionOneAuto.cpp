@@ -649,6 +649,10 @@ bool ReflectometryReductionOneAuto::processGroups() {
   const bool isPolarizationCorrectionOn =
       this->getPropertyValue("PolarizationAnalysis") !=
       noPolarizationCorrectionMode();
+
+  // this algorithm effectively behaves as MultiPeriodGroupAlgorithm
+  m_usingBaseProcessGroups = true;
+
   // Get our input workspace group
   auto group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
       getPropertyValue("InputWorkspace"));
@@ -833,9 +837,6 @@ bool ReflectometryReductionOneAuto::processGroups() {
   // setting output properties.
   this->setPropertyValue("OutputWorkspace", outputIvsQ);
   this->setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
-  setExecuted(true);
-  notificationCenter().postNotification(
-      new FinishedNotification(this, isExecuted()));
   return true;
 }
 } // namespace Algorithms
