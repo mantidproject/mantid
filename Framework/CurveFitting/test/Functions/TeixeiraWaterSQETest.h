@@ -32,7 +32,7 @@ public:
   void test_parameters() {
     auto func = createTestTeixeiraWaterSQE();
     TS_ASSERT_EQUALS(func->nParams(), 4);
-    TS_ASSERT_EQUALS(func->getParameter("Heigth"), 1);
+    TS_ASSERT_EQUALS(func->getParameter("Height"), 1);
     TS_ASSERT_EQUALS(func->getParameter("Length"), 1);
     TS_ASSERT_EQUALS(func->getParameter("Tau"), 1);
     TS_ASSERT_EQUALS(func->getParameter("Centre"), 0.001);
@@ -87,7 +87,7 @@ private:
   boost::shared_ptr<TestableTeixeiraWaterSQE> createTestTeixeiraWaterSQE() {
     auto func = boost::make_shared<TestableTeixeiraWaterSQE>();
     func->initialize();
-    func->setParameter("Heigth", 1.0);
+    func->setParameter("Height", 1.0);
     func->setParameter("Length", 1.0);   // 1Angstrom
     func->setParameter("Tau", 1.0);      // 1ps
     func->setParameter("Centre", 0.001); // shifted by 1micro-eV
