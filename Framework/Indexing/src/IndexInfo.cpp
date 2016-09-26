@@ -19,7 +19,7 @@ namespace Indexing {
 IndexInfo::IndexInfo(const size_t globalSize)
     : m_spectrumNumbers(Kernel::make_cow<std::vector<specnum_t>>(globalSize)) {
   // Default to spectrum numbers 1...globalSize
-  auto specNums = m_spectrumNumbers.access();
+  auto &specNums = m_spectrumNumbers.access();
   std::iota(specNums.begin(), specNums.end(), 1);
 
   // Default to detector IDs 1..globalSize, with 1:1 mapping to spectra
