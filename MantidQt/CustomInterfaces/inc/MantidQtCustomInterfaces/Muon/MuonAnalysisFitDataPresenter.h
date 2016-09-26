@@ -102,6 +102,8 @@ public:
                                const std::string &groupName = "") const;
   /// Set selected workspace
   void setSelectedWorkspace(const QString &wsName);
+  /// Updates "overwrite" setting
+  void setOverwrite(bool enabled) { m_overwrite = enabled; }
 
 public slots:
   /// Transforms fit results when a simultaneous fit finishes
@@ -165,6 +167,8 @@ private:
   Muon::PlotType m_plotType;
   /// Whether "fit raw data" is selected
   bool m_fitRawData;
+  /// Whether "overwrite" option is set or not
+  bool m_overwrite;
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

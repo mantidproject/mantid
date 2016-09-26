@@ -109,7 +109,7 @@ MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
     : m_fitBrowser(fitBrowser), m_dataSelector(dataSelector),
       m_dataLoader(dataLoader), m_timeZero(timeZero), m_rebinArgs(rebinArgs),
       m_grouping(grouping), m_plotType(plotType),
-      m_fitRawData(fitBrowser->rawData()) {
+      m_fitRawData(fitBrowser->rawData()), m_overwrite(false) {
   // Ensure this is set correctly at the start
   handleSimultaneousFitLabelChanged();
   doConnect();
@@ -767,7 +767,7 @@ void MuonAnalysisFitDataPresenter::handleFitRawData(bool enabled,
                                                     bool updateWorkspaces) {
   m_fitRawData = enabled;
   if (updateWorkspaces) {
-    handleSelectedDataChanged(false);
+    handleSelectedDataChanged(m_overwrite);
   }
 }
 
