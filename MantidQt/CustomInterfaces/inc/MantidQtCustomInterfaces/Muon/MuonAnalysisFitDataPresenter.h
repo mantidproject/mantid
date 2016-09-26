@@ -118,6 +118,8 @@ public slots:
   void openSequentialFitDialog();
   /// Updates label to avoid overwriting existing results
   void checkAndUpdateFitLabel(bool seq);
+  /// Handles "fit raw data" selection/deselection
+  void handleFitRawData(bool enabled);
 
 private:
   /// Generate names of workspaces to be created
@@ -161,6 +163,8 @@ private:
   Mantid::API::Grouping m_grouping;
   /// Stored plot type
   Muon::PlotType m_plotType;
+  /// Whether "fit raw data" is selected
+  bool m_fitRawData;
 };
 } // namespace CustomInterfaces
 } // namespace Mantid

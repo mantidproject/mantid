@@ -77,6 +77,7 @@ public:
   MOCK_METHOD1(workspacesToFitChanged, void(int));
   MOCK_METHOD1(setSimultaneousLabel, void(const std::string &));
   MOCK_METHOD1(userChangedDataset, void(int));
+  MOCK_CONST_METHOD0(rawData, bool());
 };
 
 class MuonAnalysisFitDataPresenterTest : public CxxTest::TestSuite {

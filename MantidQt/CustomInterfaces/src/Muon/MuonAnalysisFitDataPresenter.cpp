@@ -81,7 +81,8 @@ MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
     const RebinOptions &rebinArgs)
     : m_fitBrowser(fitBrowser), m_dataSelector(dataSelector),
       m_dataLoader(dataLoader), m_timeZero(timeZero), m_rebinArgs(rebinArgs),
-      m_grouping(grouping), m_plotType(plotType) {
+      m_grouping(grouping), m_plotType(plotType),
+      m_fitRawData(fitBrowser->rawData()) {
   // Ensure this is set correctly at the start
   handleSimultaneousFitLabelChanged();
   doConnect();
@@ -102,6 +103,8 @@ void MuonAnalysisFitDataPresenter::doConnect() {
             SLOT(openSequentialFitDialog()));
     connect(fitBrowser, SIGNAL(functionUpdateAndFitRequested(bool)), this,
             SLOT(checkAndUpdateFitLabel(bool)));
+    connect(fitBrowser, SIGNAL(fitRawDataClicked(bool)), this,
+            SLOT(handleFitRawData(bool)));
   }
   if (const QObject *dataSelector = dynamic_cast<QObject *>(m_dataSelector)) {
     connect(dataSelector, SIGNAL(dataPropertiesChanged()), this,
@@ -704,6 +707,15 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName) {
  */
 bool MuonAnalysisFitDataPresenter::isMultipleRuns() const {
   return m_dataSelector->getRuns().contains(QRegExp("-|,"));
+}
+
+/**
+ * Handle "fit raw data" selected/deselected
+ * Update stored value
+ * @param enabled :: [input] Whether option has been selected or unselected
+ */
+void MuonAnalysisFitDataPresenter::handleFitRawData(bool enabled) {
+  m_fitRawData = enabled;
 }
 
 } // namespace CustomInterfaces
