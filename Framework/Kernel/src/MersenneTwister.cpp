@@ -3,9 +3,7 @@
 //------------------------------------------------------------------------------
 #include "MantidKernel/MersenneTwister.h"
 
-#include <boost/random/uniform_int_distribution.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/variate_generator.hpp>
+#include <random>
 
 namespace Mantid {
 namespace Kernel {
@@ -44,7 +42,7 @@ MersenneTwister::~MersenneTwister() { delete m_savedStateGenerator; }
 void MersenneTwister::setSeed(const size_t seedValue) {
   // Bug in earlier versions of this implementation meant
   // that a unsigned int could not be past to the seed function
-  m_currentSeed = static_cast<boost::mt19937::result_type>(seedValue);
+  m_currentSeed = static_cast<std::mt19937::result_type>(seedValue);
   m_generator.seed(m_currentSeed);
   delete m_savedStateGenerator;
   m_savedStateGenerator = nullptr;
@@ -68,7 +66,7 @@ void MersenneTwister::setRange(const double start, const double end) {
  * @returns The next number in the pseudo-random sequence
  */
 double MersenneTwister::nextValue(double start, double end) {
-  boost::random::uniform_real_distribution<double> dist(start, end);
+  std::uniform_real_distribution<double> dist(start, end);
   return dist(m_generator);
 }
 
@@ -80,7 +78,7 @@ double MersenneTwister::nextValue(double start, double end) {
  * @return An integer in the defined range
  */
 int MersenneTwister::nextInt(int start, int end) {
-  boost::random::uniform_int_distribution<> dist(start, end);
+  std::uniform_int_distribution<> dist(start, end);
   return dist(m_generator);
 }
 
@@ -91,7 +89,7 @@ void MersenneTwister::restart() { setSeed(m_currentSeed); }
 
 /// Saves the current state of the generator
 void MersenneTwister::save() {
-  m_savedStateGenerator = new boost::mt19937(m_generator); // Copy the state
+  m_savedStateGenerator = new std::mt19937(m_generator); // Copy the state
 }
 
 /// Restores the generator to the last saved point, or the beginning if nothing
@@ -101,7 +99,7 @@ void MersenneTwister::restore() {
   // brings us
   // back to the originally saved point
   if (m_savedStateGenerator) {
-    m_generator = boost::mt19937(*m_savedStateGenerator);
+    m_generator = std::mt19937(*m_savedStateGenerator);
   } else {
     restart();
   }
