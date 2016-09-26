@@ -62,6 +62,11 @@ def is_prompt_peak_instrument(reducer):
     else:
         return False
 
+
+def get_wavelength_min_and_max(reducer):
+    return reducer.to_wavelen.wav_low, reducer.to_wavelen.wav_high
+
+
 class LoadRun(object):
     UNSET_PERIOD = -1
 
@@ -1890,6 +1895,18 @@ class CropDetBank(ReductionStep):
         # Get the detector bank that is to be used in this analysis leave the complete workspace
         reducer.instrument.cur_detector().crop_to_detector(in_wksp, workspace)
 
+        # Unwrap the monitors of the scatter workspace
+        if reducer.unwrap_monitors:
+            wavelength_min, wavelength_max = get_wavelength_min_and_max(reducer)
+            scatter_ws = getWorkspaceReference(workspace)
+            UnwrapMonitorsInTOF(InputWorkspace=scatter_ws, OutputWorkspace=scatter_ws,
+                                WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
+
+            monitor_ws = reducer.get_sample().get_monitor()
+            UnwrapMonitorsInTOF(InputWorkspace=scatter_ws, OutputWorkspace=scatter_ws,
+                                WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
+
+
         # If the workspace requires dark run subtraction for the detectors and monitors, then this will be performed here.
         if reducer.dark_run_subtraction.has_dark_runs():
             # Get the spectrum index range for spectra which are part of the current detector
@@ -2122,10 +2139,17 @@ class TransmissionCalc(ReductionStep):
         # problems if we don't.
         extract_spectra(mtd[inputWS], trans_det_ids, tmpWS)
 
+        # If the transmission and direct workspaces require an unwrapping of the monitors then do it here
+        if reducer.unwrap_monitors:
+            wavelength_min, wavelength_max = get_wavelength_min_and_max(reducer)
+            UnwrapMonitorsInTOF(InputWorkspace=tmpWS, OutputWorkspace=tmpWS,
+                                WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
+
         # Perform the a dark run background correction if one was specified
         self._correct_dark_run_background(reducer, tmpWS, trans_det_ids)
 
-        if is_prompt_peak_instrument(reducer) and self.removePromptPeakMin is not None and self.removePromptPeakMax is not None:
+        if is_prompt_peak_instrument(reducer) and self.removePromptPeakMin is not None and \
+                        self.removePromptPeakMax is not None:
             RemoveBins(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, XMin=self.removePromptPeakMin,
                        XMax=self.removePromptPeakMax,
                        Interpolation='Linear')
@@ -2441,7 +2465,7 @@ class TransmissionCalc(ReductionStep):
         This method sets default prompt peak values in case the user has not provided some. Currently
         we only use default values for LOQ.
         """
-        is_prompt_peak_not_set =  self.removePromptPeakMin is None and self.removePromptPeakMax is None
+        is_prompt_peak_not_set = self.removePromptPeakMin is None and self.removePromptPeakMax is None
         if is_prompt_peak_not_set:
             if reducer.instrument.name() == "LOQ":
                 self.removePromptPeakMin = 19000.0 # Units of micro-seconds
@@ -3949,7 +3973,7 @@ class UserFile(ReductionStep):
     def _read_q_resolution_line_on_off(self, arguments, reducer):
         '''
         Handles the ON/OFF setting for QResolution
-        @param arguements: the line arguments
+        @param arguments: the line arguments
         @param reducer: a reducer object
         '''
         # Remove white space
@@ -4008,6 +4032,27 @@ class UserFile(ReductionStep):
             return "Invalid input: \"%s\".  Expected \"MASKFILE = path to file\"." % line
 
         reducer.settings["MaskFiles"] = value
+
+    def _read_unwrap_monitors_line(self, arguments, reducer):
+        """
+        Checks if the montiors should be unwrapped. The arguments can be either ON or OFF. We don't care here about
+        any preceeding slash
+        Args:
+            arguments: the arguments string
+            reducer: a handle to the reducer (is not used)
+        """
+        # Remove the slash if
+        if arguments.find('/') == -1:
+            arguments.replace('/', "")
+        # Remove white space
+        on_off = "".join(arguments.split())
+        if on_off == "ON":
+            pass
+        elif on_off == "OFF":
+            pass
+        else:
+            return 'Unknown setting {0} UNWRAP command in line: '.format(on_off)
+        return ''
 
 
 class GetOutputName(ReductionStep):
