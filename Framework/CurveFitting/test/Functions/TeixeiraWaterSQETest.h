@@ -57,11 +57,10 @@ public:
     auto func = createTestTeixeiraWaterSQE();
     func->setParameter("Tau", 50.0); // make it peaky
     double dE(0.0001);               // dE is 1micro-eV
-    const size_t nData(
-        2E4); //  number of energy values to evaluate the function
+    const size_t nData(2E4);         // number of energy values to evaluate the function
     // Create the domain of energy values
     std::vector<double> xValues(nData, 0);
-    std::iota(xValues.begin(), xValues.end(), -1E5);
+    std::iota(xValues.begin(), xValues.end(), -1E4);
     std::transform(xValues.begin(), xValues.end(), xValues.begin(),
                    std::bind1st(std::multiplies<double>(), dE));
     // Evaluate the function on the domain
