@@ -244,7 +244,7 @@ class MatchPeaks(PythonAlgorithm):
                         logger.debug('Fit failed and peak outside tolerance, do not shift spectrum')
                 else:
                     logger.debug('Peak x-value {0} > x-end {1}, do not shift spectrum'.format(peak_pos_error,
-                                                                                            x_values[-1]))
+                                                                                              x_values[-1]))
             else:
                 logger.debug('Peak x-value {0} < x-begin {1}, do not shift spectrum'.format(peak_pos_error,
                                                                                             x_values[0]))
