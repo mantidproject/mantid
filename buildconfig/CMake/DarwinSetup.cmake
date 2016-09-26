@@ -69,11 +69,19 @@ if ( PYTHON_DEBUG_LIBRARIES )
   set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES} )
 endif ()
 
+
 # Generate a target to put a mantidpython wrapper in the appropriate directory
 if ( NOT TARGET mantidpython )
+  if(MAKE_VATES)
+    set ( PARAVIEW_PYTHON_PATHS ":${ParaView_DIR}/lib:${ParaView_DIR}/lib/site-packages:${ParaView_DIR}/lib/site-packages/vtk" )
+  else ()
+    set ( PARAVIEW_PYTHON_PATHS "" )
+  endif ()
+  configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx @ONLY )
+
   add_custom_target ( mantidpython ALL
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx
+      ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx
       ${PROJECT_BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/mantidpython
       COMMENT "Generating mantidpython" )
 endif ()
@@ -160,13 +168,21 @@ install ( DIRECTORY ${PYQT4_PYTHONPATH}/uic DESTINATION ${BIN_DIR}/PyQt4 )
 
 # done as part of packaging step in 10.9+ builds.
 
+if ( MAKE_VATES )
+  set ( PARAVIEW_PYTHON_PATHS ":\${SCRIPT_PATH}/../Libraries:\${SCRIPT_PATH}/../Python:\${SCRIPT_PATH}/../Python/vtk" )
+else ()
+  set ( PARAVIEW_PYTHON_PATHS "" )
+endif ()
+
 install ( FILES ${CMAKE_SOURCE_DIR}/images/MantidPlot.icns
           DESTINATION MantidPlot.app/Contents/Resources/
 )
 
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx_install @ONLY )
+
 # Add launcher script for mantid python
-install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython_osx
-          DESTINATION MantidPlot.app/Contents/MacOS/ 
+install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantidpython_osx_install
+          DESTINATION MantidPlot.app/Contents/MacOS/
           RENAME mantidpython )
 # Add launcher application for a Mantid IPython console
 install ( PROGRAMS ${CMAKE_MODULE_PATH}/Packaging/osx/MantidPython_osx_launcher
