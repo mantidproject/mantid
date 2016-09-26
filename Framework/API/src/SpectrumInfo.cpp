@@ -1,5 +1,5 @@
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -11,9 +11,9 @@ namespace Mantid {
 namespace API {
 
 SpectrumInfo::SpectrumInfo(const MatrixWorkspace &workspace)
-    : m_workspace(workspace), m_instrument(workspace.getInstrument()),
+    : m_workspace(workspace), m_instrument(workspace.getInstrument()), m_L1(0),
       m_detectors(PARALLEL_GET_MAX_THREADS),
-      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1), m_L1(0) {
+      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
   // Note: This does not seem possible currently (the instrument objects is
   // always allocated, even if it is empty), so this will not fail.
   if (!m_instrument)
@@ -80,8 +80,8 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
   // Get the instrument up axis.
   const Kernel::V3D &instrumentUpAxis =
       m_instrument->getReferenceFrame()->vecPointingUp();
-  return getDetector(index)
-      .getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
+  return getDetector(index).getSignedTwoTheta(samplePos, beamLine,
+                                              instrumentUpAxis);
 }
 
 /// Returns the position of the spectrum with given index.

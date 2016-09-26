@@ -5,8 +5,8 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -24,8 +24,9 @@ using namespace API;
 DECLARE_ALGORITHM(RemoveBins)
 
 RemoveBins::RemoveBins()
-    : API::Algorithm(), m_inputWorkspace(), m_startX(DBL_MAX), m_endX(-DBL_MAX),
-      m_rangeUnit(), m_interpolate(false), m_spectrumInfo(nullptr) {}
+    : API::Algorithm(), m_inputWorkspace(), m_spectrumInfo(nullptr),
+      m_startX(DBL_MAX), m_endX(-DBL_MAX), m_rangeUnit(), m_interpolate(false) {
+}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
