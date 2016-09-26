@@ -724,10 +724,8 @@ void SCDCalibratePanels::createResultWorkspace(const int numGroups,
     // get the column to update and the name of the field
     string fieldName = names[p];
     size_t dotPos = fieldName.find('_');
-    // int colNum = 1;
     if (dotPos < fieldName.size()) {
       // the 1 is to skip the leading 'f'
-      // colNum = atoi(fieldName.substr(1, dotPos).c_str()) + 1;
       // everything after is the field name
       fieldName = fieldName.substr(dotPos + 1);
     }

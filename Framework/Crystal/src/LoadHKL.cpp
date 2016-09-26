@@ -87,15 +87,15 @@ void LoadHKL::exec() {
     int run, bank;
     if (cosines) {
       tbar = atof(line.substr(40, 8).c_str()); // tbar
-      run = atoi(line.substr(102, 6).c_str());
+      run = std::stoi(line.substr(102, 6).c_str());
       trans = atof(line.substr(114, 7).c_str()); // transmission
-      bank = atoi(line.substr(121, 4).c_str());
+      bank = std::stoi(line.substr(121, 4).c_str());
       scattering = atof(line.substr(125, 9).c_str());
     } else {
       tbar = atof(line.substr(40, 7).c_str()); // tbar
-      run = atoi(line.substr(47, 7).c_str());
+      run = std::stoi(line.substr(47, 7).c_str());
       trans = atof(line.substr(61, 7).c_str()); // transmission
-      bank = atoi(line.substr(68, 4).c_str());
+      bank = std::stoi(line.substr(68, 4).c_str());
       scattering = atof(line.substr(72, 9).c_str());
     }
 
@@ -121,8 +121,8 @@ void LoadHKL::exec() {
 
     peak.setBankName(bankName);
     if (cosines) {
-      int col = atoi(line.substr(142, 7).c_str());
-      int row = atoi(line.substr(149, 7).c_str());
+      int col = std::stoi(line.substr(142, 7).c_str());
+      int row = std::stoi(line.substr(149, 7).c_str());
       peak.setCol(col);
       peak.setRow(row);
     }
