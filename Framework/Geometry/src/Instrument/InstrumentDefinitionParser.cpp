@@ -556,18 +556,18 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
   if (pElem->hasAttribute("rot")) {
     double rotAngle =
         angleConvertConst *
-        atof((pElem->getAttribute("rot")).c_str()); // assumed to be in degrees
+        std::stod((pElem->getAttribute("rot")).c_str()); // assumed to be in degrees
 
     double axis_x = 0.0;
     double axis_y = 0.0;
     double axis_z = 1.0;
 
     if (pElem->hasAttribute("axis-x"))
-      axis_x = atof((pElem->getAttribute("axis-x")).c_str());
+      axis_x = std::stod((pElem->getAttribute("axis-x")).c_str());
     if (pElem->hasAttribute("axis-y"))
-      axis_y = atof((pElem->getAttribute("axis-y")).c_str());
+      axis_y = std::stod((pElem->getAttribute("axis-y")).c_str());
     if (pElem->hasAttribute("axis-z"))
-      axis_z = atof((pElem->getAttribute("axis-z")).c_str());
+      axis_z = std::stod((pElem->getAttribute("axis-z")).c_str());
 
     comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(axis_x, axis_y, axis_z)));
   }
@@ -622,7 +622,7 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
 
     if (rElem) {
       double rotAngle =
-          angleConvertConst * atof((rElem->getAttribute("val"))
+          angleConvertConst * std::stod((rElem->getAttribute("val"))
                                        .c_str()); // assumed to be in degrees
 
       double axis_x = 0.0;
@@ -630,11 +630,11 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
       double axis_z = 1.0;
 
       if (rElem->hasAttribute("axis-x"))
-        axis_x = atof((rElem->getAttribute("axis-x")).c_str());
+        axis_x = std::stod((rElem->getAttribute("axis-x")).c_str());
       if (rElem->hasAttribute("axis-y"))
-        axis_y = atof((rElem->getAttribute("axis-y")).c_str());
+        axis_y = std::stod((rElem->getAttribute("axis-y")).c_str());
       if (rElem->hasAttribute("axis-z"))
-        axis_z = atof((rElem->getAttribute("axis-z")).c_str());
+        axis_z = std::stod((rElem->getAttribute("axis-z")).c_str());
 
       comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(axis_x, axis_y, axis_z)));
 
@@ -671,18 +671,18 @@ Kernel::V3D InstrumentDefinitionParser::getRelativeTranslation(
     double R = 0.0, theta = 0.0, phi = 0.0;
 
     if (pElem->hasAttribute("r"))
-      R = atof((pElem->getAttribute("r")).c_str());
+      R = std::stod((pElem->getAttribute("r")).c_str());
     if (pElem->hasAttribute("t"))
-      theta = angleConvertConst * atof((pElem->getAttribute("t")).c_str());
+      theta = angleConvertConst * std::stod((pElem->getAttribute("t")).c_str());
     if (pElem->hasAttribute("p"))
-      phi = angleConvertConst * atof((pElem->getAttribute("p")).c_str());
+      phi = angleConvertConst * std::stod((pElem->getAttribute("p")).c_str());
 
     if (pElem->hasAttribute("R"))
-      R = atof((pElem->getAttribute("R")).c_str());
+      R = std::stod((pElem->getAttribute("R")).c_str());
     if (pElem->hasAttribute("theta"))
-      theta = angleConvertConst * atof((pElem->getAttribute("theta")).c_str());
+      theta = angleConvertConst * std::stod((pElem->getAttribute("theta")).c_str());
     if (pElem->hasAttribute("phi"))
-      phi = angleConvertConst * atof((pElem->getAttribute("phi")).c_str());
+      phi = angleConvertConst * std::stod((pElem->getAttribute("phi")).c_str());
 
     if (deltaOffsets) {
       // In this case, locations given are radial offsets to the (radial)
@@ -735,11 +735,11 @@ Kernel::V3D InstrumentDefinitionParser::getRelativeTranslation(
     double x = 0.0, y = 0.0, z = 0.0;
 
     if (pElem->hasAttribute("x"))
-      x = atof((pElem->getAttribute("x")).c_str());
+      x = std::stod((pElem->getAttribute("x")).c_str());
     if (pElem->hasAttribute("y"))
-      y = atof((pElem->getAttribute("y")).c_str());
+      y = std::stod((pElem->getAttribute("y")).c_str());
     if (pElem->hasAttribute("z"))
-      z = atof((pElem->getAttribute("z")).c_str());
+      z = std::stod((pElem->getAttribute("z")).c_str());
 
     retVal(x, y, z);
   }
@@ -1309,15 +1309,15 @@ void InstrumentDefinitionParser::createRectangularDetector(
   if (pType->hasAttribute("xpixels"))
     xpixels = std::stoi((pType->getAttribute("xpixels")).c_str());
   if (pType->hasAttribute("xstart"))
-    xstart = atof((pType->getAttribute("xstart")).c_str());
+    xstart = std::stod((pType->getAttribute("xstart")).c_str());
   if (pType->hasAttribute("xstep"))
-    xstep = atof((pType->getAttribute("xstep")).c_str());
+    xstep = std::stod((pType->getAttribute("xstep")).c_str());
   if (pType->hasAttribute("ypixels"))
     ypixels = std::stoi((pType->getAttribute("ypixels")).c_str());
   if (pType->hasAttribute("ystart"))
-    ystart = atof((pType->getAttribute("ystart")).c_str());
+    ystart = std::stod((pType->getAttribute("ystart")).c_str());
   if (pType->hasAttribute("ystep"))
-    ystep = atof((pType->getAttribute("ystep")).c_str());
+    ystep = std::stod((pType->getAttribute("ystep")).c_str());
 
   // THESE parameters are in the INSTANCE of this type - since they will
   // change.
@@ -1471,9 +1471,9 @@ void InstrumentDefinitionParser::createStructuredDetector(
       Element *pVertElem = static_cast<Element *>(pNode);
 
       if (pVertElem->hasAttribute("x"))
-        xValues.push_back(atof(pVertElem->getAttribute("x").c_str()));
+        xValues.push_back(std::stod(pVertElem->getAttribute("x").c_str()));
       if (pVertElem->hasAttribute("y"))
-        yValues.push_back(atof(pVertElem->getAttribute("y").c_str()));
+        yValues.push_back(std::stod(pVertElem->getAttribute("y").c_str()));
     }
 
     pNode = it.nextNode();
@@ -1863,30 +1863,30 @@ InstrumentDefinitionParser::parseFacingElementToV3D(Poco::XML::Element *pElem) {
     double R = 0.0, theta = 0.0, phi = 0.0;
 
     if (pElem->hasAttribute("r"))
-      R = atof((pElem->getAttribute("r")).c_str());
+      R = std::stod((pElem->getAttribute("r")).c_str());
     if (pElem->hasAttribute("t"))
-      theta = m_angleConvertConst * atof((pElem->getAttribute("t")).c_str());
+      theta = m_angleConvertConst * std::stod((pElem->getAttribute("t")).c_str());
     if (pElem->hasAttribute("p"))
-      phi = m_angleConvertConst * atof((pElem->getAttribute("p")).c_str());
+      phi = m_angleConvertConst * std::stod((pElem->getAttribute("p")).c_str());
 
     if (pElem->hasAttribute("R"))
-      R = atof((pElem->getAttribute("R")).c_str());
+      R = std::stod((pElem->getAttribute("R")).c_str());
     if (pElem->hasAttribute("theta"))
       theta =
-          m_angleConvertConst * atof((pElem->getAttribute("theta")).c_str());
+          m_angleConvertConst * std::stod((pElem->getAttribute("theta")).c_str());
     if (pElem->hasAttribute("phi"))
-      phi = m_angleConvertConst * atof((pElem->getAttribute("phi")).c_str());
+      phi = m_angleConvertConst * std::stod((pElem->getAttribute("phi")).c_str());
 
     retV3D.spherical(R, theta, phi);
   } else {
     double x = 0.0, y = 0.0, z = 0.0;
 
     if (pElem->hasAttribute("x"))
-      x = atof((pElem->getAttribute("x")).c_str());
+      x = std::stod((pElem->getAttribute("x")).c_str());
     if (pElem->hasAttribute("y"))
-      y = atof((pElem->getAttribute("y")).c_str());
+      y = std::stod((pElem->getAttribute("y")).c_str());
     if (pElem->hasAttribute("z"))
-      z = atof((pElem->getAttribute("z")).c_str());
+      z = std::stod((pElem->getAttribute("z")).c_str());
 
     retV3D(x, y, z);
   }
@@ -1926,7 +1926,7 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp,
 
     if (facingElem->hasAttribute("rot")) {
       double rotAngle =
-          m_angleConvertConst * atof((facingElem->getAttribute("rot"))
+          m_angleConvertConst * std::stod((facingElem->getAttribute("rot"))
                                          .c_str()); // assumed to be in degrees
       comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(0, 0, 1)));
     }
@@ -2198,8 +2198,8 @@ void InstrumentDefinitionParser::setLogfile(
 
       for (unsigned long i = 0; i < numberPoint; i++) {
         Element *pPoint = static_cast<Element *>(pNLpoint->item(i));
-        double x = atof(pPoint->getAttribute("x").c_str());
-        double y = atof(pPoint->getAttribute("y").c_str());
+        double x = std::stod(pPoint->getAttribute("x").c_str());
+        double y = std::stod(pPoint->getAttribute("y").c_str());
         interpolation->addPoint(x, y);
       }
     }
@@ -2922,11 +2922,11 @@ V3D InstrumentDefinitionParser::parsePosition(Poco::XML::Element *pElem) {
     double R = 0.0, theta = 0.0, phi = 0.0;
 
     if (pElem->hasAttribute("R"))
-      R = atof((pElem->getAttribute("R")).c_str());
+      R = std::stod((pElem->getAttribute("R")).c_str());
     if (pElem->hasAttribute("theta"))
-      theta = atof((pElem->getAttribute("theta")).c_str());
+      theta = std::stod((pElem->getAttribute("theta")).c_str());
     if (pElem->hasAttribute("phi"))
-      phi = atof((pElem->getAttribute("phi")).c_str());
+      phi = std::stod((pElem->getAttribute("phi")).c_str());
 
     retVal.spherical(R, theta, phi);
   } else if (pElem->hasAttribute("r") || pElem->hasAttribute("t") ||
@@ -2938,22 +2938,22 @@ V3D InstrumentDefinitionParser::parsePosition(Poco::XML::Element *pElem) {
     double R = 0.0, theta = 0.0, phi = 0.0;
 
     if (pElem->hasAttribute("r"))
-      R = atof((pElem->getAttribute("r")).c_str());
+      R = std::stod((pElem->getAttribute("r")).c_str());
     if (pElem->hasAttribute("t"))
-      theta = atof((pElem->getAttribute("t")).c_str());
+      theta = std::stod((pElem->getAttribute("t")).c_str());
     if (pElem->hasAttribute("p"))
-      phi = atof((pElem->getAttribute("p")).c_str());
+      phi = std::stod((pElem->getAttribute("p")).c_str());
 
     retVal.spherical(R, theta, phi);
   } else {
     double x = 0.0, y = 0.0, z = 0.0;
 
     if (pElem->hasAttribute("x"))
-      x = atof((pElem->getAttribute("x")).c_str());
+      x = std::stod((pElem->getAttribute("x")).c_str());
     if (pElem->hasAttribute("y"))
-      y = atof((pElem->getAttribute("y")).c_str());
+      y = std::stod((pElem->getAttribute("y")).c_str());
     if (pElem->hasAttribute("z"))
-      z = atof((pElem->getAttribute("z")).c_str());
+      z = std::stod((pElem->getAttribute("z")).c_str());
 
     retVal(x, y, z);
   }
