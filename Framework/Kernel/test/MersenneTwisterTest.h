@@ -140,10 +140,10 @@ public:
 
 private:
   void assertSequenceCorrectForSeed_39857239(MersenneTwister &randGen) {
-    double expectedValues[10] = {
-        0.597970068269, 0.923726578038, 0.46738053759, 0.204503614938,
-        0.885743656775, 0.532315163407, 0.849185494256, 0.294648804097,
-        0.435378050559, 0.222489577528};
+    double expectedValues[10] = {0.597970068269, 0.923726578038, 0.46738053759,
+                                 0.204503614938, 0.885743656775, 0.532315163407,
+                                 0.849185494256, 0.294648804097, 0.435378050559,
+                                 0.222489577528};
     // Check 10 numbers
     for (std::size_t i = 0; i < 10; ++i) {
       TS_ASSERT_DELTA(randGen.nextValue(), expectedValues[i], 1e-12);
