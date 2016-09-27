@@ -183,6 +183,12 @@ void ProcessBankData::processEvents(bool &pulsetimesincreasing,
   }   //(for each event)
 }
 
+/** compress events or set the order of events in a sepctrum
+ * @brief ProcessBankData::compressOrSetOrder
+ * @param compress
+ * @param usedDetIds
+ * @param pulsetimesincreasing
+ */
 void ProcessBankData::compressOrSetOrder(bool compress,
                                          const std::vector<bool> &usedDetIds,
                                          double pulsetimesincreasing) {
@@ -198,6 +204,7 @@ void ProcessBankData::compressOrSetOrder(bool compress,
         if (compress)
           el.compressEvents(alg->compressTolerance, &el);
         else {
+            throw std::runtime_error("Can I be reached?");
           if (pulsetimesincreasing)
             el.setSortOrder(DataObjects::PULSETIME_SORT);
           else
