@@ -139,6 +139,7 @@ void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
     createWorkspacesToFit(names);
     updateWorkspaceNames(names);
     m_fitBrowser->allowSequentialFits(!isMultipleRuns());
+    updateFitLabelFromRuns();
   }
 }
 
@@ -720,6 +721,27 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName) {
  */
 bool MuonAnalysisFitDataPresenter::isMultipleRuns() const {
   return m_dataSelector->getRuns().contains(QRegExp("-|,"));
+}
+
+/**
+ * When run numbers are changed, update the simultaneous fit label.
+ * If it's a user-set label, leave it alone, otherwise set the label to the run
+ * number string.
+ *
+ * Assume labels with digits, '-', ',' are default (e.g. "15189-91") and
+ * anything else is user-set.
+ */
+void MuonAnalysisFitDataPresenter::updateFitLabelFromRuns() {
+  // Don't change the fit label if it's a user-set one
+  const auto &label = m_dataSelector->getSimultaneousFitLabel().toStdString();
+  const bool isDefault =
+      label.find_first_not_of("0123456789-,") == std::string::npos;
+  if (isDefault) {
+    // replace with current run string
+    const auto &runString = m_dataSelector->getRuns();
+    m_dataSelector->setSimultaneousFitLabel(runString);
+    m_fitBrowser->setSimultaneousLabel(runString.toStdString());
+  }
 }
 
 } // namespace CustomInterfaces

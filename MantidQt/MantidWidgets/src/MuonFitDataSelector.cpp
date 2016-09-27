@@ -251,8 +251,8 @@ void MuonFitDataSelector::setDefaultValues() {
   this->setStartTime(0.0);
   this->setEndTime(0.0);
   setPeriodCombination(false);
-  m_ui.txtSimFitLabel->setText("Label");
-  emit simulLabelChanged(); // make sure default "Label" is set
+  m_ui.txtSimFitLabel->setText("0");
+  emit simulLabelChanged(); // make sure default "0" is set
 }
 
 /**
