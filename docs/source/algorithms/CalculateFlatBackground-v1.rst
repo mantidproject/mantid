@@ -95,8 +95,10 @@ Output:
        z = x / 10.0 - 0.5
        return np.sin(5.5 * (z + 0.1) * pi) + 2.0 * np.exp(-((z / 0.1)**2)) + 1.0
 
-   x = np.arange(0.5, 9.1, 0.2) # Equidistant x grid
-   y = spectrum(x[:-1]) # There is one less y value than the length of x.
+   # Equidistant x grid. Represents bin boundaries
+   x = np.arange(0.5, 9.1, 0.2)
+   # y is a bin shorter than x and has to be evaluated at bin centres.
+   y = spectrum(x[:-1] + 0.5 * (x[1] - x[0]))
    input = CreateWorkspace(x,y)
 
    output = CalculateFlatBackground('input',
@@ -111,8 +113,8 @@ Output:
 
 .. testoutput:: ExReturnMovingAverage
 
-   Background using moving window average: 0.1027
-   True minimum: 0.05423
+   Background using moving window average: 0.09483
+   True minimum: 0.04894
 
 
 .. categories::
