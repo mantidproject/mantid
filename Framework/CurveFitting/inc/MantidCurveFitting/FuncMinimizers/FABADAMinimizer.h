@@ -117,12 +117,6 @@ private:
   size_t m_conv_point;
   /// Convergence of each parameter
   std::vector<bool> m_par_converged;
-  /// Lower bound for each parameter
-  std::vector<double> m_lower;
-  /// Upper bound for each parameter
-  std::vector<double> m_upper;
-  /// Bool that indicates if there is any boundary constraint
-  std::vector<bool> m_bound;
   /// Convergence criteria for each parameter
   std::vector<double> m_criteria;
   /// Maximum number of iterations
