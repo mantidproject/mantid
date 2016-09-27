@@ -62,13 +62,16 @@ public:
   /// Finalize minimization, eg store additional outputs
   void finalize() override;
 
-private:
-  /// Returns the step from a Gaussian given sigma = Jump
-  double gaussianStep(const double &jump);
+  /// Public methods only for testing purposes
+
   /// If the new point is out of its bounds, it is changed to fit in the bound
   /// limits
   void boundApplication(const size_t &parameterIndex, double &newValue,
                         double &step);
+
+private:
+  /// Returns the step from a Gaussian given sigma = Jump
+  double gaussianStep(const double &jump);
   /// Applied to the other parameters first and sequentially, finally to the
   /// current one
   void tieApplication(const size_t &parameterIndex, GSLVector &newParameters,

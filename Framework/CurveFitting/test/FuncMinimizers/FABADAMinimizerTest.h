@@ -6,18 +6,15 @@
 #include "MantidCurveFitting/FuncMinimizers/FABADAMinimizer.h"
 
 #include "MantidCurveFitting/Algorithms/Fit.h"
-#include "MantidAPI/AlgorithmManager.h"
-
+#include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/Functions/ExpDecay.h"
-#include "MantidKernel/PropertyManager.h"
 #include "MantidTestHelpers/FakeObjects.h"
-#include "MantidKernel/Exception.h"
 
 using Mantid::CurveFitting::FuncMinimisers::FABADAMinimizer;
 using namespace Mantid::API;
-using namespace Mantid;
-using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Algorithms;
+using namespace Mantid::CurveFitting::CostFunctions;
 using namespace Mantid::CurveFitting::Functions;
 
 class FABADAMinimizerTest : public CxxTest::TestSuite {
@@ -36,7 +33,7 @@ public:
     fun->setParameter("Height", 8.);
     fun->setParameter("Lifetime", 1.0);
 
-    Algorithms::Fit fit;
+    Fit fit;
     fit.initialize();
     fit.setChild(true);
     fit.setProperty("Function", fun);
@@ -139,7 +136,7 @@ public:
     fun->setParameter("Height", 1.);
     fun->setParameter("Lifetime", 1.0);
 
-    Algorithms::Fit fit;
+    Fit fit;
     fit.initialize();
 
     fit.setRethrows(true);
@@ -160,7 +157,7 @@ public:
 
     auto ws2 = createCosineWorkspace();
 
-    Algorithms::Fit fit;
+    Fit fit;
     fit.initialize();
     fit.setChild(true);
     fit.setPropertyValue("Function", "name=UserFunction, Formula=a*cos(b*x), "
@@ -207,6 +204,47 @@ public:
     TS_ASSERT_DELTA(param->Double(1, 3), 0.01, 0.1);
   }
 
+  void test_boundaryApplication() {
+
+    // Cost function
+    // Parameter 'Height' is constrained to [0.9, 1.1]
+    auto costFunc = createCostFunc(true);
+
+    FABADAMinimizer fabada;
+    fabada.initialize(costFunc, 10000);
+
+    // height is above upper bound
+    double height = 2.5;
+    double lifetime = 2.5;
+    double step = 0.1;
+    fabada.boundApplication(0, height, step);
+    fabada.boundApplication(1, lifetime, step);
+    TS_ASSERT_EQUALS(height, 1.1);
+    TS_ASSERT_EQUALS(lifetime, 2.5);
+
+    // height is below lower bound
+    height = -0.5;
+    fabada.boundApplication(0, height, step);
+    TS_ASSERT_EQUALS(height, 0.9);
+
+    // height is within range
+    height = 1.01;
+    fabada.boundApplication(0, height, step);
+    TS_ASSERT_EQUALS(height, 1.01);
+
+    // Now with bigger step
+    step = 105;
+    height = 2.5;
+    fabada.boundApplication(0, height, step);
+    TS_ASSERT_DELTA(height, 1.095, 0.001);
+    height = -2.5;
+    fabada.boundApplication(0, height, step);
+    TS_ASSERT_DELTA(height, 0.905, 0.001);
+    height = 1.002;
+    fabada.boundApplication(0, height, step);
+    TS_ASSERT_EQUALS(height, 1.002);
+  }
+
 private:
   API::MatrixWorkspace_sptr createExpDecayWorkspace() {
     MatrixWorkspace_sptr ws2(new WorkspaceTester);
@@ -235,6 +273,51 @@ private:
     }
 
     return ws2;
+  }
+
+  boost::shared_ptr<CostFuncLeastSquares>
+  createCostFunc(bool constraint = false, bool tie = false) {
+
+    // Domain
+    auto domain = boost::make_shared<API::FunctionDomain1DVector>(
+        API::FunctionDomain1DVector(0.1, 2.0, 20));
+
+    API::FunctionValues mockData(*domain);
+    ExpDecay dataMaker;
+    dataMaker.setParameter("Height", 1.);
+    dataMaker.setParameter("Lifetime", 0.5);
+    dataMaker.function(*domain, mockData);
+
+    // Values
+    auto values =
+        boost::make_shared<FunctionValues>(API::FunctionValues(*domain));
+    values->setFitDataFromCalculated(mockData);
+    values->setFitWeights(1.0);
+
+    // Function
+    boost::shared_ptr<ExpDecay> func = boost::make_shared<ExpDecay>();
+    func->setParameter("Height", 1.);
+    func->setParameter("Lifetime", 1.);
+
+    if (constraint) {
+      // Constraint on parameter Height
+      Mantid::CurveFitting::Constraints::BoundaryConstraint *constraint =
+          new Mantid::CurveFitting::Constraints::BoundaryConstraint(
+              func.get(), "Height", 0.9, 1.1);
+      func->addConstraint(constraint);
+    }
+
+    if (tie) {
+      func->addTies("Height=0.9");
+      func->addTies("Lifetime=0.4");
+    }
+
+    // Cost function
+    boost::shared_ptr<CostFuncLeastSquares> costFun =
+        boost::make_shared<CostFuncLeastSquares>();
+    costFun->setFittingFunction(func, domain, values);
+
+    return costFun;
   }
 };
 
