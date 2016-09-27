@@ -615,10 +615,16 @@ void MuonAnalysisFitDataPresenter::openSequentialFitDialog() {
  * If user chooses not to overwrite, increment the label to avoid overwriting
  * the previous fit.
  *
- * @param seq :: [input] Whether fit is sequential (UNUSED)
+ * If fit is sequential, do nothing because we will not use this label. Instead,
+ * user will choose a label in the sequential fit dialog.
+ *
+ * @param sequentialFit :: [input] Whether fit is sequential or not
  */
-void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool seq) {
-  Q_UNUSED(seq);
+void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool sequentialFit) {
+  if (sequentialFit) {
+    return; // label not used so no need to check it
+  }
+
   if (isSimultaneousFit()) {
     auto &ads = AnalysisDataService::Instance();
     const auto &label = m_dataSelector->getSimultaneousFitLabel().toStdString();

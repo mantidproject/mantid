@@ -507,6 +507,16 @@ public:
                                   {"1", "2"}, true, true);
   }
 
+  void test_checkAndUpdateFitLabel_SequentialFit_ShouldDoNothing() {
+    EXPECT_CALL(*m_dataSelector, getFitType()).Times(0);
+    EXPECT_CALL(*m_dataSelector, getChosenGroups()).Times(0);
+    EXPECT_CALL(*m_dataSelector, getPeriodSelections()).Times(0);
+    EXPECT_CALL(*m_dataSelector, askUserWhetherToOverwrite()).Times(0);
+    EXPECT_CALL(*m_fitBrowser, setSimultaneousLabel(_)).Times(0);
+    EXPECT_CALL(*m_dataSelector, setSimultaneousFitLabel(_)).Times(0);
+    m_presenter->checkAndUpdateFitLabel(true);
+  }
+
 private:
   void doTest_handleSelectedDataChanged(IMuonFitDataSelector::FitType fitType) {
     auto &ads = AnalysisDataService::Instance();

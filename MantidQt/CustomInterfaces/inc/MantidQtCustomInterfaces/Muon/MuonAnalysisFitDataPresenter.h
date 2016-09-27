@@ -117,7 +117,7 @@ public slots:
   /// Open sequential fit dialog
   void openSequentialFitDialog();
   /// Updates label to avoid overwriting existing results
-  void checkAndUpdateFitLabel(bool seq);
+  void checkAndUpdateFitLabel(bool sequentialFit);
 
 private:
   /// Generate names of workspaces to be created
