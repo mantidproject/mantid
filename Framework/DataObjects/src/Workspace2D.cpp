@@ -102,8 +102,14 @@ void Workspace2D::init(const std::size_t &NVectors,
 
   HistogramData::Histogram initializedHistogram(histogram);
   if (!histogram.sharedY()) {
-    initializedHistogram.setCounts(histogram.size(), 0.0);
-    initializedHistogram.setCountStandardDeviations(histogram.size(), 0.0);
+    if (histogram.yMode() == HistogramData::Histogram::YMode::Frequencies) {
+      initializedHistogram.setFrequencies(histogram.size(), 0.0);
+      initializedHistogram.setFrequencyStandardDeviations(histogram.size(),
+                                                          0.0);
+    } else { // YMode::Counts or YMode::Uninitialized -> default to Counts
+      initializedHistogram.setCounts(histogram.size(), 0.0);
+      initializedHistogram.setCountStandardDeviations(histogram.size(), 0.0);
+    }
   }
 
   for (size_t i = 0; i < m_noVectors; i++) {

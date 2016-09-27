@@ -258,15 +258,15 @@ void Histogram::setUncertainties(const FrequencyStandardDeviations &e) {
 
 void Histogram::checkAndSetYModeCounts() {
   if (yMode() == YMode::Frequencies)
-    throw std::logic_error("Histogram: Y is storing Counts, modifying "
-                           "Frequencies is not possible.");
+    throw std::logic_error("Histogram: Y is storing Frequencies, modifying "
+                           "Counts is not possible.");
   m_yMode = YMode::Counts;
 }
 
 void Histogram::checkAndSetYModeFrequencies() {
   if (yMode() == YMode::Counts)
-    throw std::logic_error("Histogram: Y is storing Frequencies, modifying "
-                           "Counts is not possible.");
+    throw std::logic_error("Histogram: Y is storing Counts, modifying "
+                           "Frequencies is not possible.");
   m_yMode = YMode::Frequencies;
 }
 

@@ -1,12 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/FractionalRebinning.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -31,8 +28,6 @@ using namespace Mantid::DataObjects;
 /// Default constructor
 SofQWNormalisedPolygon::SofQWNormalisedPolygon()
     : Rebin2D(), m_Qout(), m_thetaWidth(0.0), m_detNeighbourOffset(-1) {}
-
-//----------------------------------------------------------------------------------------------
 
 /**
  * @return the name of the Algorithm
@@ -72,7 +67,7 @@ void SofQWNormalisedPolygon::exec() {
   }
 
   RebinnedOutput_sptr outputWS =
-      this->setUpOutputWorkspace(inputWS, getProperty("QAxisBinning"), m_Qout);
+      this->setUpOutputWorkspace(*inputWS, getProperty("QAxisBinning"), m_Qout);
   g_log.debug() << "Workspace type: " << outputWS->id() << '\n';
   setProperty("OutputWorkspace", outputWS);
   const size_t nEnergyBins = inputWS->blocksize();
@@ -391,32 +386,19 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
  *  @return A pointer to the newly-created workspace
  */
 RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
-    API::MatrixWorkspace_const_sptr inputWorkspace,
+    const API::MatrixWorkspace &inputWorkspace,
     const std::vector<double> &binParams, std::vector<double> &newAxis) {
-  // Create vector to hold the new X axis values
-  HistogramData::BinEdges xAxis(inputWorkspace->refX(0));
-  const int xLength = static_cast<int>(xAxis.size());
   // Create a vector to temporarily hold the vertical ('y') axis and populate
   // that
   const int yLength = static_cast<int>(
       VectorHelper::createAxisFromRebinParams(binParams, newAxis));
 
-  // Create the output workspace
-  MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
-      "RebinnedOutput", yLength - 1, xLength, xLength - 1);
-  RebinnedOutput_sptr outputWorkspace =
-      boost::static_pointer_cast<RebinnedOutput>(temp);
-  WorkspaceFactory::Instance().initializeFromParent(*inputWorkspace,
-                                                    outputWorkspace, true);
+  // Create output workspace, bin edges are same as in inputWorkspace index 0
+  auto outputWorkspace = create<RebinnedOutput>(inputWorkspace, yLength - 1);
 
   // Create a binned numeric axis to replace the default vertical one
   Axis *const verticalAxis = new BinEdgeAxis(newAxis);
   outputWorkspace->replaceAxis(1, verticalAxis);
-
-  // Now set the axis values
-  for (int i = 0; i < yLength - 1; ++i) {
-    outputWorkspace->setBinEdges(i, xAxis);
-  }
 
   // Set the axis units
   verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
