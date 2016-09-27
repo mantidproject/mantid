@@ -34,29 +34,6 @@ ConvFit::ConvFit(QWidget *parent)
   m_uiForm.setupUi(parent);
 }
 
-/**
-* Populates the default parameter map with the initial default values
-* @param map :: The default value map to populate
-* @return The QMap populated with default values
-*/
-QMap<QString, double> ConvFit::createDefaultParamsMap(QMap<QString, double> map) {
-  // If the parameters from a One Lorentzian fit are present
-  if (map.contains("PeakCentre")) {
-    map.remove("PeakCentre");
-    map.remove("FWHM");
-  }
-  // Reset all parameters to default of 1
-  map.insert("Amplitude", 1.0);
-  map.insert("Beta", 1.0);
-  map.insert("Decay", 1.0);
-  map.insert("Diffusion", 1.0);
-  map.insert("Height", 1.0);
-  map.insert("Intensity", 1.0);
-  map.insert("Radius", 1.0);
-  map.insert("Tau", 1.0);
-  return map;
-}
-
 void ConvFit::setup() {
   // Create Property Managers
   m_stringManager = new QtStringPropertyManager();
@@ -67,7 +44,7 @@ void ConvFit::setup() {
   m_fitStrings = {"", "1L", "2L", "IDS", "IDC", "EDS", "EDC", "SFT"};
   // All Parameters in tree that should be defaulting to 1
   QMap<QString, double> m_defaultParams;
-  createDefaultParamsMap(m_defaultParams);
+  m_defaultParams = createDefaultParamsMap(m_defaultParams);
 
   // Create TreeProperty Widget
   m_cfTree = new QtTreePropertyBrowser();
@@ -249,73 +226,47 @@ void ConvFit::setup() {
 * algorithm
 */
 void ConvFit::run() {
-  if (m_cfInputWS == NULL) {
-    g_log.error("No workspace loaded");
-    return;
-  }
-
-  QString fitType = fitTypeString();
-  QString bgType = backgroundString();
-
-  if (fitType == "") {
-    g_log.error("No fit type defined");
-  }
-
-  bool useTies = m_uiForm.ckTieCentres->isChecked();
-  QString ties = (useTies ? "True" : "False");
-
-  CompositeFunction_sptr func = createFunction(useTies);
-  std::string function = std::string(func->asString());
-  std::string stX = m_properties["StartX"]->valueText().toStdString();
-  std::string enX = m_properties["EndX"]->valueText().toStdString();
+  // Get input from interface
+  const auto func = createFunction(m_uiForm.ckTieCentres->isChecked());
+  const auto function = std::string(func->asString());
   m_runMin = m_uiForm.spSpectraMin->value();
   m_runMax = m_uiForm.spSpectraMax->value();
-  std::string specMin = m_uiForm.spSpectraMin->text().toStdString();
-  std::string specMax = m_uiForm.spSpectraMax->text().toStdString();
-  int maxIterations =
-      static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
+  const auto specMin = m_uiForm.spSpectraMin->text().toStdString();
+  const auto specMax = m_uiForm.spSpectraMax->text().toStdString();
 
   // Construct expected name
   m_baseName = QString::fromStdString(m_cfInputWS->getName());
-  int pos = m_baseName.lastIndexOf("_");
-  if (pos != -1) {
-    m_baseName = m_baseName.left(pos + 1);
+  // Remove _red
+  const auto cutIndex = m_baseName.lastIndexOf("_");
+  if (cutIndex != -1) {
+    m_baseName = m_baseName.left(cutIndex + 1);
   }
+  // Add fit specific suffix
+  const auto bgType = backgroundString();
+  const auto fitType = fitTypeString();
   m_baseName += "conv_";
-  if (m_blnManager->value(m_properties["UseDeltaFunc"])) {
-    m_baseName += "Delta";
-  }
-  int fitIndex = m_uiForm.cbFitType->currentIndex();
-  if (fitIndex < 3 && fitIndex != 0) {
-    m_baseName += QString::number(fitIndex);
-    m_baseName += "L";
-  } else {
-    m_baseName += convertFuncToShort(m_uiForm.cbFitType->currentText());
-  }
-  m_baseName +=
-      convertBackToShort(m_uiForm.cbBackground->currentText().toStdString()) +
-      "_s";
+  m_baseName += fitType;
+  m_baseName += bgType;
   m_baseName += QString::fromStdString(specMin);
   m_baseName += "_to_";
   m_baseName += QString::fromStdString(specMax);
 
   // Run ConvolutionFitSequential Algorithm
-  IAlgorithm_sptr cfs =
-      AlgorithmManager::Instance().create("ConvolutionFitSequential");
+  auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   cfs->initialize();
-
   cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
   cfs->setProperty("Function", function);
   cfs->setProperty("BackgroundType",
                    m_uiForm.cbBackground->currentText().toStdString());
-  cfs->setProperty("StartX", stX);
-  cfs->setProperty("EndX", enX);
+  cfs->setProperty("StartX", m_properties["StartX"]->valueText().toStdString());
+  cfs->setProperty("EndX", m_properties["EndX"]->valueText().toStdString());
   cfs->setProperty("SpecMin", specMin);
   cfs->setProperty("SpecMax", specMax);
   cfs->setProperty("Convolve", true);
   cfs->setProperty("Minimizer",
                    minimizerString("$outputname_$wsindex").toStdString());
-  cfs->setProperty("MaxIterations", maxIterations);
+  cfs->setProperty("MaxIterations", static_cast<int>(m_dblManager->value(
+                                        m_properties["MaxIterations"])));
   cfs->setProperty("OutputWorkspace", (m_baseName.toStdString() + "_Result"));
   m_batchAlgoRunner->addAlgorithm(cfs);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -413,69 +364,33 @@ void ConvFit::algorithmComplete(bool error) {
   MatrixWorkspace_sptr resultWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
 
-  // Obtain WorkspaceGroup from ADS
-  std::string groupName = m_baseName.toStdString() + "_Workspaces";
-  WorkspaceGroup_sptr groupWs =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+  // Name for GroupWorkspace
+  const auto groupName = m_baseName.toStdString() + "_Workspaces";
+  // Add Sample logs for ResolutionFiles
+  const auto resFile = m_uiForm.dsResInput->getCurrentDataName().toStdString();
+  addSampleLogsToWorkspace(resultName, "resolution_filename", resFile,
+                           "String");
+  addSampleLogsToWorkspace(groupName, "resolution_filename", resFile, "String");
 
-  // Log for Resolution to result Ws
-  auto resLog = AlgorithmManager::Instance().create("AddSampleLog");
-  resLog->setProperty("Workspace", resultWs->getName());
-  resLog->setProperty("LogName", "resolution_filename");
-  resLog->setProperty("LogText",
-                      m_uiForm.dsResInput->getCurrentDataName().toStdString());
-  resLog->setProperty("LogType", "String");
-  m_batchAlgoRunner->addAlgorithm(resLog);
-
-  // Log for resolution to group Ws
-  auto resLogGrp = AlgorithmManager::Instance().create("AddSampleLog");
-  resLogGrp->setProperty("Workspace", groupWs->getName());
-  resLogGrp->setProperty("LogName", "resolution_filename");
-  resLogGrp->setProperty(
-      "LogText", m_uiForm.dsResInput->getCurrentDataName().toStdString());
-  resLogGrp->setProperty("LogType", "String");
-  m_batchAlgoRunner->addAlgorithm(resLogGrp);
-
-  // Handle Temperature logs
+  // Check if temperature is used and is valid
   if (m_uiForm.ckTempCorrection->isChecked()) {
-    QString temperature = m_uiForm.leTempCorrection->text();
+    const QString temperature = m_uiForm.leTempCorrection->text();
     double temp = 0.0;
     if (temperature.toStdString().compare("") != 0) {
       temp = temperature.toDouble();
     }
 
     if (temp != 0.0) {
-      // Log for temp value in result Ws
-      auto valMtx = AlgorithmManager::Instance().create("AddSampleLog");
-      valMtx->setProperty("Workspace", resultWs->getName());
-      valMtx->setProperty("LogName", "temperature_value");
-      valMtx->setProperty("LogText", temperature.toStdString());
-      valMtx->setProperty("LogType", "Number");
-      m_batchAlgoRunner->addAlgorithm(valMtx);
-
-      // Log for temp bool in result Ws
-      auto corrMtx = AlgorithmManager::Instance().create("AddSampleLog");
-      corrMtx->setProperty("Workspace", resultWs->getName());
-      corrMtx->setProperty("LogName", "temperature_correction");
-      corrMtx->setProperty("LogText", "true");
-      corrMtx->setProperty("LogType", "String");
-      m_batchAlgoRunner->addAlgorithm(corrMtx);
-
-      // Log for temp value in group Ws
-      auto valGrp = AlgorithmManager::Instance().create("AddSampleLog");
-      valGrp->setProperty("Workspace", groupWs->getName());
-      valGrp->setProperty("LogName", "temperature_value");
-      valGrp->setProperty("LogText", temperature.toStdString());
-      valGrp->setProperty("LogType", "Number");
-      m_batchAlgoRunner->addAlgorithm(valGrp);
-
-      // Log for temp bool in group Ws
-      auto corrGrp = AlgorithmManager::Instance().create("AddSampleLog");
-      corrGrp->setProperty("Workspace", groupWs->getName());
-      corrGrp->setProperty("LogName", "temperature_correction");
-      corrGrp->setProperty("LogText", "true");
-      corrGrp->setProperty("LogType", "String");
-      m_batchAlgoRunner->addAlgorithm(corrGrp);
+      // Add sample logs for temperature
+      const auto temperatureStr = temperature.toStdString();
+      addSampleLogsToWorkspace(resultName, "temperature_correction", "true",
+                               "String");
+      addSampleLogsToWorkspace(groupName, "temperature_correction", "true",
+                               "String");
+      addSampleLogsToWorkspace(resultName, "temperature_value", temperatureStr,
+                               "Number");
+      addSampleLogsToWorkspace(resultName, "temperature_value", temperatureStr,
+                               "Number");
     }
   }
   m_batchAlgoRunner->executeBatchAsync();
@@ -485,17 +400,43 @@ void ConvFit::algorithmComplete(bool error) {
 }
 
 /**
+* Sets up and adds an instance of the AddSampleLog algorithm to the batch
+* algorithm runner
+* @param workspaceName	:: The name of the workspace to add the log to
+* @param logName		:: The title of the log input
+* @param logText		:: The information to match the title
+* @param logType		:: The type of information (String, Number)
+*/
+void ConvFit::addSampleLogsToWorkspace(const std::string workspaceName,
+                                       const std::string logName,
+                                       const std::string logText,
+                                       const std::string logType) {
+
+  auto addSampleLog = AlgorithmManager::Instance().create("AddSampleLog");
+  addSampleLog->setProperty("Workspace", workspaceName);
+  addSampleLog->setProperty("LogName", logName);
+  addSampleLog->setProperty("LogText", logText);
+  addSampleLog->setProperty("LogType", logType);
+  m_batchAlgoRunner->addAlgorithm(addSampleLog);
+}
+
+/**
 * Validates the user's inputs in the ConvFit tab.
 * @return If the validation was successful
 */
 bool ConvFit::validate() {
   UserInputValidator uiv;
 
+  const QString fitType = fitTypeString();
+  if (fitType == "") {
+    uiv.addErrorMessage("No fit type defined");
+  }
+
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
   uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResInput);
 
-  auto range = std::make_pair(m_dblManager->value(m_properties["StartX"]),
-                              m_dblManager->value(m_properties["EndX"]));
+  const auto range = std::make_pair(m_dblManager->value(m_properties["StartX"]),
+                                    m_dblManager->value(m_properties["EndX"]));
   uiv.checkValidRange("Fitting Range", range);
 
   // Enforce the rule that at least one fit is needed; either a delta function,
@@ -512,7 +453,7 @@ bool ConvFit::validate() {
     }
   }
 
-  QString error = uiv.generateErrorMessage();
+  const auto error = uiv.generateErrorMessage();
   showMessageBox(error);
 
   return error.isEmpty();
@@ -539,7 +480,8 @@ void ConvFit::newDataLoaded(const QString wsName) {
   m_cfInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       m_cfInputWSName.toStdString());
 
-  int maxWsIndex = static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
+  const int maxWsIndex =
+      static_cast<int>(m_cfInputWS->getNumberHistograms()) - 1;
 
   m_uiForm.spPlotSpectrum->setMaximum(maxWsIndex);
   m_uiForm.spPlotSpectrum->setMinimum(0);
@@ -874,8 +816,8 @@ double ConvFit::getInstrumentResolution(std::string workspaceName) {
                  ->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }
@@ -1222,7 +1164,8 @@ void ConvFit::singleFit() {
       runPythonCode(
           QString(
               "from IndirectCommon import getWSprefix\nprint getWSprefix('") +
-          m_cfInputWSName + QString("')\n")).trimmed();
+          m_cfInputWSName + QString("')\n"))
+          .trimmed();
   m_singleFitOutputName +=
       QString("conv_") + fitType + bgType + m_uiForm.spPlotSpectrum->text();
   int maxIterations =
@@ -1279,7 +1222,7 @@ void ConvFit::singleFitComplete(bool error) {
   m_uiForm.ppPlot->addSpectrum("Fit", resultName, 1, Qt::red);
   m_uiForm.ppPlot->addSpectrum("Diff", resultName, 2, Qt::blue);
 
-  IFunction_sptr outputFunc = m_singleFitAlg->getProperty("Function");
+  IFunction_const_sptr outputFunc = m_singleFitAlg->getProperty("Function");
 
   QString functionName = m_uiForm.cbFitType->currentText();
 
@@ -1301,7 +1244,7 @@ void ConvFit::singleFitComplete(bool error) {
   m_dblManager->setValue(m_properties["BGA0"], parameters["f0.A0"]);
   m_dblManager->setValue(m_properties["BGA1"], parameters["f0.A1"]);
 
-  int fitTypeIndex = m_uiForm.cbFitType->currentIndex();
+  const int fitTypeIndex = m_uiForm.cbFitType->currentIndex();
 
   int funcIndex = 0;
   int subIndex = 0;
@@ -1312,13 +1255,13 @@ void ConvFit::singleFitComplete(bool error) {
     subIndex++;
   }
 
-  bool usingDeltaFunc = m_blnManager->value(m_properties["UseDeltaFunc"]);
+  const bool usingDeltaFunc = m_blnManager->value(m_properties["UseDeltaFunc"]);
 
   // If using a delta function with any fit type or using two Lorentzians
-  bool usingCompositeFunc =
+  const bool usingCompositeFunc =
       ((usingDeltaFunc && fitTypeIndex > 0) || fitTypeIndex == 2);
 
-  QString prefBase = "f1.f1.";
+  const QString prefBase = "f1.f1.";
 
   if (usingDeltaFunc) {
     QString key = prefBase;
@@ -1348,8 +1291,8 @@ void ConvFit::singleFitComplete(bool error) {
 
   if (fitTypeIndex == 2) {
     for (auto it = params.begin(); it != params.end() - 3; ++it) {
-      QString functionParam = functionName + "." + *it;
-      QString paramValue = pref + *it;
+      const QString functionParam = functionName + "." + *it;
+      const QString paramValue = pref + *it;
       m_dblManager->setValue(m_properties[functionParam],
                              parameters[paramValue]);
     }
@@ -1369,8 +1312,8 @@ void ConvFit::singleFitComplete(bool error) {
 
   } else {
     for (auto it = params.begin(); it != params.end(); ++it) {
-      QString functionParam = functionName + "." + *it;
-      QString paramValue = pref + *it;
+      const QString functionParam = functionName + "." + *it;
+      const QString paramValue = pref + *it;
       m_dblManager->setValue(m_properties[functionParam],
                              parameters[paramValue]);
     }
@@ -1417,7 +1360,11 @@ void ConvFit::hwhmChanged(double val) {
   // Update the property
   auto hwhmRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitHWHM");
   hwhmRangeSelector->blockSignals(true);
-  m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], hwhm * 2);
+  QString propName = "Lorentzian 1.FWHM";
+  if (m_uiForm.cbFitType->currentIndex() == 1) {
+    propName = "One Lorentzian";
+  }
+  m_dblManager->setValue(m_properties[propName], hwhm * 2);
   hwhmRangeSelector->blockSignals(false);
 }
 
@@ -1575,13 +1522,15 @@ void ConvFit::showTieCheckbox(QString fitType) {
 */
 QStringList ConvFit::getFunctionParameters(QString functionName) {
   QStringList parameters;
-  // Add Function parameters to QStringList
+  auto currentFitFunction = functionName;
+  // Add function parameters to QStringList
   if (functionName.compare("Zero Lorentzians") != 0) {
-    if (functionName.compare("One Lorentzian") == 0) {
-      functionName = "Lorentzian";
+    if (functionName.compare("One Lorentzian") == 0 ||
+        functionName.compare("Two Lorentzians") == 0) {
+      currentFitFunction = "Lorentzian";
     }
-    IFunction_sptr func =
-      FunctionFactory::Instance().createFunction(functionName.toStdString());
+    IFunction_sptr func = FunctionFactory::Instance().createFunction(
+        currentFitFunction.toStdString());
 
     for (size_t i = 0; i < func->nParams(); i++) {
       parameters << QString::fromStdString(func->parameterName(i));
@@ -1589,15 +1538,14 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
   }
   // Add another Lorentzian function parameter for two Lorentzian fit
   if (functionName.compare("Two Lorentzian") == 0) {
-    functionName = "Lorentzian";
+    currentFitFunction = "Lorentzian";
   }
-  IFunction_sptr func =
-    FunctionFactory::Instance().createFunction(functionName.toStdString());
-
-  for (size_t i = 0; i < func->nParams(); i++) {
-    parameters << QString::fromStdString(func->parameterName(i));
+  if (functionName.compare("Zero Lorentzians") == 0) {
+    parameters.append("Zero");
+  } else {
+    IFunction_sptr func = FunctionFactory::Instance().createFunction(
+        currentFitFunction.toStdString());
   }
-
   return parameters;
 }
 
@@ -1606,21 +1554,25 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
 * @param functionName Name of new fit function
 */
 void ConvFit::fitFunctionSelected(const QString &functionName) {
-  bool previouslyOneL = false;
+  // If resolution file has been entered update default FWHM to resolution
   if (m_uiForm.dsResInput->getCurrentDataName().compare("") != 0) {
-    m_defaultParams["FWHM"] = getInstrumentResolution(m_cfInputWS->getName());
+    const auto res = getInstrumentResolution(m_cfInputWS->getName());
+    m_defaultParams["FWHM"] = res;
+    m_defaultParams["default_FWHM"] = res;
   }
   // If the previous fit was One Lorentzian and the new fit is Two Lorentzian
   // preserve the values of One Lorentzian Fit
+  const QString currentFitFunction = m_uiForm.cbFitType->currentText();
   if (m_previousFit.compare("One Lorentzian") == 0 &&
-      m_uiForm.cbFitType->currentText().compare("Two Lorentzians") == 0) {
-    previouslyOneL = true;
-    const double amplitude = m_dblManager->value(m_properties["Lorentzian 1.Amplitude"]);
-    const double peakCentre = m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
+      currentFitFunction.compare("Two Lorentzians") == 0) {
+    const double amplitude =
+        m_dblManager->value(m_properties["Lorentzian 1.Amplitude"]);
+    const double peakCentre =
+        m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
     const double fwhm = m_dblManager->value(m_properties["Lorentzian 1.FWHM"]);
     m_defaultParams.insert("PeakCentre", peakCentre);
     m_defaultParams.insert("FWHM", fwhm);
-    m_defaultParams.replace("Amplitude", amplitude);
+    m_defaultParams.insert("Amplitude", amplitude);
   }
 
   // Remove previous parameters from tree
@@ -1630,13 +1582,10 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   m_uiForm.ckPlotGuess->setChecked(false);
   m_uiForm.ckTieCentres->setChecked(false);
 
-  // Add new parameter elements
-  int fitFunctionIndex = m_uiForm.cbFitType->currentIndex();
-  QStringList parameters = getFunctionParameters(functionName);
   updatePlotOptions();
 
   // Two Lorentzians Fit
-  if (fitFunctionIndex == 2) {
+  if (currentFitFunction.compare("Two Lorentzians") == 0) {
     m_properties["FitFunction1"] = m_grpManager->addProperty("Lorentzian 1");
     m_cfTree->addProperty(m_properties["FitFunction1"]);
     m_properties["FitFunction2"] = m_grpManager->addProperty("Lorentzian 2");
@@ -1646,95 +1595,47 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
     m_cfTree->addProperty(m_properties["FitFunction1"]);
   }
 
-  QString propName;
-  // No fit function parameters required for None
-  if (parameters[0].isEmpty() != true) {
-    // Two Lorentzians Fit
-    if (fitFunctionIndex == 2) {
-      int count = 0;
-      propName = "Lorentzian 1";
-      for (auto it = parameters.begin(); it != parameters.end(); ++it) {
-        if (count == 3) {
-          propName = "Lorentzian 2";
-        }
-        const QString paramName = QString(*it);
-        const QString fullPropName = propName + "." + *it;
-        m_properties[fullPropName] = m_dblManager->addProperty(*it);
-
-        if (paramName.compare("FWHM") == 0) {
-          double resolution = 0.0;
-
-          if (previouslyOneL && count < 3) {
-            m_dblManager->setValue(m_properties[fullPropName], oneLValues[2]);
-          } else {
-            m_dblManager->setValue(m_properties[fullPropName], resolution);
-          }
-        } else if (paramName.compare("Amplitude") == 0) {
-          if (previouslyOneL && count < 3) {
-            m_dblManager->setValue(m_properties[fullPropName], oneLValues[0]);
-          } else {
-            m_dblManager->setValue(m_properties[fullPropName], 1.0);
-          }
-        } else if (paramName.compare("PeakCentre") == 0) {
-          if (previouslyOneL && count < 3) {
-            m_dblManager->setValue(m_properties[fullPropName], oneLValues[1]);
-          } else {
-            m_dblManager->setValue(m_properties[fullPropName], 0.0);
-          }
-        } else {
-          if (m_defaultParams.contains(paramName, Qt::CaseInsensitive)) {
-            m_dblManager->setValue(m_properties[fullPropName], 1.0);
-          } else {
-            m_dblManager->setValue(m_properties[fullPropName], 0.0);
-          }
-        }
-
-        m_dblManager->setDecimals(m_properties[fullPropName], NUM_DECIMALS);
-        if (count < 3) {
-          m_properties["FitFunction1"]->addSubProperty(
-              m_properties[fullPropName]);
-        } else {
-          m_properties["FitFunction2"]->addSubProperty(
-              m_properties[fullPropName]);
-        }
-        count++;
-      }
-    } else {
-      if (fitFunctionIndex == 1) {
-        propName = "Lorentzian 1";
-      } else {
-        propName = functionName;
-      }
-      for (auto it = parameters.begin(); it != parameters.end(); ++it) {
-        const QString paramName = QString(*it);
-        const QString fullPropName = propName + "." + *it;
-        m_properties[fullPropName] = m_dblManager->addProperty(*it);
-        if (paramName.compare("FWHM") == 0) {
-          double resolution = 0.0;
-          if (m_uiForm.dsResInput->getCurrentDataName().compare("") != 0) {
-            resolution = getInstrumentResolution(m_cfInputWS->getName());
-          }
-          m_dblManager->setValue(m_properties[fullPropName], resolution);
-        } else if (QString(*it).compare("Amplitude") == 0 ||
-                   QString(*it).compare("Intensity") == 0) {
-          m_dblManager->setValue(m_properties[fullPropName], 1.0);
-        } else {
-          if (m_defaultParams.contains(paramName, Qt::CaseInsensitive)) {
-            m_dblManager->setValue(m_properties[fullPropName], 1.0);
-          } else {
-            m_dblManager->setValue(m_properties[fullPropName], 0.0);
-          }
-        }
-
-        m_dblManager->setDecimals(m_properties[fullPropName], NUM_DECIMALS);
-        m_properties["FitFunction1"]->addSubProperty(
-            m_properties[fullPropName]);
-      }
-    }
+  // If there are parameters in the list, add them
+  const QStringList parameters = getFunctionParameters(functionName);
+  if (parameters.isEmpty() != true) {
+    addParametersToTree(parameters, currentFitFunction);
   }
   m_previousFit = m_uiForm.cbFitType->currentText();
 }
 
+/**
+* Adds all the parameters that are required for the currentFitFunction to the
+* parameter tree
+* @param parameters			:: A QStringList of all the parameters
+* for
+* the current fit function
+* @param currentFitFunction	:: The name of the current fit function
+*/
+void ConvFit::addParametersToTree(const QStringList &parameters,
+                                  const QString &currentFitFunction) {
+  const QMap<QString, double> fullPropertyMap =
+      constructFullPropertyMap(m_defaultParams, parameters, currentFitFunction);
+  const QStringList keys = fullPropertyMap.keys();
+  for (auto i = keys.begin(); i != keys.end(); ++i) {
+    const auto fullPropertyName = QString(*i);
+    const auto paramName = fullPropertyName.right(
+        fullPropertyName.size() - fullPropertyName.lastIndexOf(".") - 1);
+    const auto propName =
+        fullPropertyName.left(fullPropertyName.lastIndexOf("."));
+    m_properties[fullPropertyName] = m_dblManager->addProperty(paramName);
+    m_dblManager->setValue(m_properties[fullPropertyName],
+                           fullPropertyMap[fullPropertyName]);
+    m_dblManager->setDecimals(m_properties[fullPropertyName], NUM_DECIMALS);
+    if (propName.compare("Lorentzian 2") == 0) {
+      m_properties["FitFunction2"]->addSubProperty(
+          m_properties[fullPropertyName]);
+
+    } else {
+      m_properties["FitFunction1"]->addSubProperty(
+          m_properties[fullPropertyName]);
+    }
+  }
+}
 /**
 * Populates the plot combobox
 */
@@ -1770,44 +1671,87 @@ void ConvFit::updatePlotOptions() {
 }
 
 /**
-* Converts the user input for function into short hand for use in the workspace
-* naming
-* @param original - The original user input to the function
-* @return The short hand of the users input
+* Populates the default parameter map with the initial default values
+* @param map :: The default value QMap to populate
+* @return The QMap populated with default values
 */
-QString ConvFit::convertFuncToShort(const QString &original) {
-  QString result = "";
-  if (m_uiForm.cbFitType->currentIndex() != 0) {
-    if (original.at(0) == 'E') {
-      result += "E";
-    } else if (original.at(0) == 'I') {
-      result += "I";
-    } else {
-      return "SFT";
-    }
-    auto pos = original.indexOf("Circle");
-    if (pos != -1) {
-      result += "DC";
-    } else {
-      result += "DS";
-    }
+QMap<QString, double>
+ConvFit::createDefaultParamsMap(QMap<QString, double> map) {
+  // If the parameters from a One Lorentzian fit are present
+  if (map.contains("PeakCentre")) {
+    map.remove("PeakCentre");
+    map.remove("FWHM");
   }
-  return result;
+  // Reset all parameters to default of 1
+  map.insert("Amplitude", 1.0);
+  map.insert("beta", 1.0);
+  map.insert("Decay", 1.0);
+  map.insert("Diffusion", 1.0);
+  map.insert("height", 1.0); // Lower case in StretchedExp - this can be
+                             // improved with a case insensitive check
+  map.insert("Height", 1.0);
+  map.insert("Intensity", 1.0);
+  map.insert("Radius", 1.0);
+  map.insert("tau", 1.0);
+  map.insert("default_Amplitude", 1.0); // Used in the case of 2L fit
+  return map;
 }
 
 /**
-* Converts the user input for background into short hand for use in the
-* workspace naming
-* @param original - The original user input to the function
-* @return The short hand of the users input
+* Populates a map with ALL parameters names and values for the current fit
+* function
+* @param map :: A QMap of any parameters that have non zero default values
+* @param parameters	:: A QStringList of all the parameters for the current
+* fit function
+* @param fitFunction :: The name of the current fit function
+* @return a QMap populated with name, value pairs for parameters where name =
+* fitFunction.parametername and value is either from the default map or 0
 */
-QString ConvFit::convertBackToShort(const std::string &original) {
-  QString result = QString::fromStdString(original.substr(0, 3));
-  auto pos = original.find(" ");
-  if (pos != std::string::npos) {
-    result += original.at(pos + 1);
+
+QMap<QString, double>
+ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
+                                  const QStringList parameters,
+                                  const QString &fitFunction) {
+  QMap<QString, double> fullMap;
+  QString fitFuncName = fitFunction;
+  // Special case for Two Lorentzian - as it is comprised of 2 single
+  // lorentzians
+  if (fitFunction.compare("Two Lorentzians") == 0) {
+    fitFuncName = "Lorentzian 1";
+    for (auto param = parameters.begin(); param != parameters.end(); ++param) {
+      const QString qStrParam = QString(*param);
+      QString fullPropName = fitFuncName + "." + qStrParam;
+      if (fullMap.contains(fullPropName)) {
+        // If current property is already in the Map then it's a 2L property
+        fullPropName = "Lorentzian 2." + qStrParam;
+        double value = 0;
+        // Check for default parameter (used for 2L case)
+        const auto defaultParam = "default_" + qStrParam;
+        if (defaultMap.contains(defaultParam)) {
+          value = defaultMap[defaultParam];
+        }
+        fullMap.insert(fullPropName, value);
+      } else {
+        if (defaultMap.contains(qStrParam)) {
+          fullMap.insert(fullPropName, defaultMap[qStrParam]);
+        } else {
+          // If property not in Map, assumed to default to value of 0
+          fullMap.insert(fullPropName, 0);
+        }
+      }
+    }
+  } else { // All Other fit functions
+    for (auto param = parameters.begin(); param != parameters.end(); ++param) {
+      const QString fullPropName = fitFuncName + "." + QString(*param);
+      if (defaultMap.contains(QString(*param))) {
+        fullMap.insert(fullPropName, defaultMap[*param]);
+      } else {
+        // If property not in Map, assumed to default to value of 0
+        fullMap.insert(fullPropName, 0);
+      }
+    }
   }
-  return result;
+  return fullMap;
 }
 
 } // namespace IDA
