@@ -165,15 +165,13 @@ public:
 private:
   API::MatrixWorkspace_sptr createTestWorkspace() {
     MatrixWorkspace_sptr ws2(new WorkspaceTester);
-    ws2->initialize(2, 20, 20);
+    ws2->initialize(1, 20, 20);
 
-    for (size_t is = 0; is < ws2->getNumberHistograms(); ++is) {
-      Mantid::MantidVec &x = ws2->dataX(is);
-      Mantid::MantidVec &y = ws2->dataY(is);
-      for (size_t i = 0; i < ws2->blocksize(); ++i) {
-        x[i] = 0.1 * double(i);
-        y[i] = (10.0 + double(is)) * exp(-(x[i]) / (0.5 * (1 + double(is))));
-      }
+    Mantid::MantidVec &x = ws2->dataX(0);
+    Mantid::MantidVec &y = ws2->dataY(0);
+    for (size_t i = 0; i < ws2->blocksize(); ++i) {
+      x[i] = 0.1 * double(i);
+      y[i] = 10.0 * exp(-(x[i]) / 0.5);
     }
     return ws2;
   }
