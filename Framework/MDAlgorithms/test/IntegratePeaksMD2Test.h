@@ -381,14 +381,14 @@ public:
         AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
 
     double actualPeakRadius =
-        atof(outWS->mutableRun().getProperty("PeakRadius")->value().c_str());
+        std::stod(outWS->mutableRun().getProperty("PeakRadius")->value().c_str());
     double actualBackgroundOutterRadius =
-        atof(outWS->mutableRun()
+        std::stod(outWS->mutableRun()
                  .getProperty("BackgroundOuterRadius")
                  ->value()
                  .c_str());
     double actualBackgroundInnerRadius =
-        atof(outWS->mutableRun()
+        std::stod(outWS->mutableRun()
                  .getProperty("BackgroundInnerRadius")
                  ->value()
                  .c_str());
