@@ -39,14 +39,15 @@ set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 ###########################################################################
 # VATES flag. Requires ParaView
 set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
-if (ENABLE_MANTIDPLOT AND MAKE_VATES )
-  find_package(ParaView)
-  if(ParaView_FOUND)
+if ( ENABLE_MANTIDPLOT AND MAKE_VATES )
+  find_package( ParaView )
+  if( ParaView_FOUND )
     add_definitions ( -DMAKE_VATES )
-    # Poco::File throws an exception when a backslash is used."
-    string(REPLACE "\\" "/" ParaView_DIR ${ParaView_DIR})
-endif()
-if (ENABLE_MANTIDPLOT)
+    # Poco::File throws an exception when a backslash is used.
+    string ( REPLACE "\\" "/" ParaView_DIR ${ParaView_DIR} )
+  endif ()
+endif ()
+if ( ENABLE_MANTIDPLOT )
   include ( ParaViewSetup )
 endif ()
 
