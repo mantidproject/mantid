@@ -100,8 +100,8 @@ configure_file ( ${WINDOWS_BUILDCONFIG}/visual-studio.bat ${PROJECT_BINARY_DIR}/
 set ( PACKAGING_DIR ${PROJECT_SOURCE_DIR}/buildconfig/CMake/Packaging )
 # build version
 set ( MANTIDPYTHON_PREAMBLE "call %~dp0..\\..\\buildenv.bat\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%" )
-# TODO Set PARAVIEW_PYTHON_PATH in the build directory
-set ( PARAVIEW_PYTHON_PATH "" )
+# TODO Set PARAVIEW_PYTHON_PATHS in the build directory
+set ( PARAVIEW_PYTHON_PATHS "" )
 configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in
     ${PROJECT_BINARY_DIR}/mantidpython.bat @ONLY )
 # build-time rule to place it in the appropriate directory
@@ -114,9 +114,9 @@ set ( MANTIDPYTHON_PREAMBLE "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BI
 
 if (MAKE_VATES)
   set ( PV_LIBS "%_BIN_DIR%\\..\\lib\\paraview-${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}")
-  set ( PARAVIEW_PYTHON_PATH "${PV_LIBS}\\site-packages;${PV_LIBS}\\site-packages\\vtk" )
+  set ( PARAVIEW_PYTHON_PATHS "${PV_LIBS}\\site-packages;${PV_LIBS}\\site-packages\\vtk" )
 else ()
-  set ( PARAVIEW_PYTHON_PATH "" )
+  set ( PARAVIEW_PYTHON_PATHS "" )
 endif ()
 
 configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in
