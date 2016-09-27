@@ -88,10 +88,10 @@ private:
     auto func = boost::make_shared<TestableTeixeiraWaterSQE>();
     func->initialize();
     func->setParameter("Height", 1.0);
-    func->setParameter("DiffCoeff", 1.0);   // 1Angstrom
-    func->setParameter("Tau", 1.0);      // 1ps
-    func->setParameter("Centre", 0.001); // shifted by 1micro-eV
-    func->setAttributeValue("Q", 1.0);   // 1Angstrom^{-1}
+    func->setParameter("DiffCoeff", 1.0); // 1Angstrom
+    func->setParameter("Tau", 1.0);       // 1ps
+    func->setParameter("Centre", 0.001);  // shifted by 1micro-eV
+    func->setAttributeValue("Q", 1.0);    // 1Angstrom^{-1}
     // HWHM=0.329105813
     return func;
   }

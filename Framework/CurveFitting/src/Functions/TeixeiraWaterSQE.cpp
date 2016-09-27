@@ -28,7 +28,8 @@ DECLARE_FUNCTION(TeixeiraWaterSQE)
  */
 TeixeiraWaterSQE::TeixeiraWaterSQE() {
   this->declareParameter("Height", 1.0, "scaling factor");
-  this->declareParameter("DiffCoeff", 2.3, "Diffusion coefficient (10^(-5)cm^2/s)");
+  this->declareParameter("DiffCoeff", 2.3,
+                         "Diffusion coefficient (10^(-5)cm^2/s)");
   this->declareParameter("Tau", 1.25, "Residence time (ps)");
   this->declareParameter("Centre", 0.0, "Shift along the X-axis");
   // Momentum transfer Q, an attribute (not a fitting parameter)
@@ -78,7 +79,7 @@ void TeixeiraWaterSQE::function1D(double *out, const double *xValues,
   }
 
   // Lorentzian intensities and HWHM
-  auto G = hbar * D*Q*Q/(1+D*Q*Q*T);
+  auto G = hbar * D * Q * Q / (1 + D * Q * Q * T);
   for (size_t j = 0; j < nData; j++) {
     auto E = xValues[j] - C;
     out[j] += H * G / (G * G + E * E) / M_PI;
