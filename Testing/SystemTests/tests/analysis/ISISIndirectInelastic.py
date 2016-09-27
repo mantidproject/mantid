@@ -800,14 +800,16 @@ class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.num_bins = 4
 
         # Iqt Seq Fit
-        self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
-                     'Intensity=0.304185,Tau=100;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'composite=CompositeFunction,NumDeriv=1;name=LinearBackground,A0=0,A1=0,ties=(A1=0);'\
+                    'name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
+                    'Intensity=0.304185,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
         self.spec_max = 41
-        self.startx = 0.022861
+        self.startx = 0.0
         self.endx = 0.118877
 
     def get_reference_files(self):
+        self.tolerance = 1e-4
         return ['II.OSIRISFury.nxs',
                 'II.OSIRISFuryFitSeq.nxs']
 
@@ -826,14 +828,16 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.num_bins = 4
 
         # Iqt Seq Fit
-        self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
-                     'Intensity=0.355286,Tau=100;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'composite=CompositeFunction,NumDeriv=1;name=LinearBackground,A0=0,A1=0,ties=(A1=0);'\
+                    'name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
+                    'Intensity=0.355286,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
         self.spec_max = 50
-        self.startx = 0.013717
+        self.startx = 0.0
         self.endx = 0.169171
 
     def get_reference_files(self):
+        self.tolerance = 1e-4
         return ['II.IRISFury.nxs',
                 'II.IRISFuryFitSeq.nxs']
 
@@ -931,6 +935,7 @@ class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.spec_max = 41
 
     def get_reference_files(self):
+        self.tolerance = 1e-3
         return ['II.OSIRISIqt.nxs',
                 'II.OSIRISIqtFitMulti.nxs']
 
@@ -952,12 +957,13 @@ class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
 
         # Iqt Fit
         self.func = r'name=LinearBackground,A0=0.584488,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp( -(x/Tau)^Beta),'\
-                     'Intensity=0.415512,Tau=4.848013e-14,Beta=0.022653;ties=(f1.Intensity=1-f0.A0)'
+                     'Intensity=0.415512,Beta=0.022653;ties=(f1.Intensity=1-f0.A0,f1.Tau=0.05)'
         self.ftype = '1S_s'
         self.startx = 0.0
         self.endx = 0.156250
 
     def get_reference_files(self):
+        self.tolerance = 1e-4
         return ['II.IRISFury.nxs',
                 'II.IRISFuryFitMulti.nxs']
 
@@ -1021,7 +1027,8 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.resolution = FileFinder.getFullPath('osi97935_graphite002_res.nxs')
         #ConvFit fit function
         self.func = 'name=LinearBackground,A0=0,A1=0;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
-                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=2,PeakCentre=0,FWHM=0.05)' % self.resolution
+                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=2,FWHM=0.002,ties=(PeakCentre=0)'\
+                    ',constraints=(FWHM>0.002))' % self.resolution
         self.startx = -0.2
         self.endx = 0.2
         self.bg = 'Fit Linear'
@@ -1032,6 +1039,7 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.result_names = ['osi97935_graphite002_conv_1LFitL_s0_to_41_Result']
 
     def get_reference_files(self):
+        self.tolerance = 0.015
         return ['II.OSIRISConvFitSeq.nxs']
 
 #------------------------- IRIS tests -----------------------------------------
@@ -1043,9 +1051,11 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.sample = 'irs53664_graphite002_red.nxs'
         self.resolution = FileFinder.getFullPath('irs53664_graphite002_res.nxs')
         #ConvFit fit function
-        self.func = 'name=LinearBackground,A0=0.060623,A1=0.001343;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
-                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=1.033150,PeakCentre=-0.000841,FWHM=0.001576)'\
-                    % (self.resolution)
+        self.func = 'name=LinearBackground,A0=0.060623,A1=0.001343;' \
+                    '(composite=Convolution,FixResolution=true,NumDeriv=true;' \
+                    'name=Resolution,Workspace="%s";name=Lorentzian,Amplitude=1.033150,FWHM=0.001576,'\
+                    'ties=(PeakCentre=0.0),constraints=(FWHM>0.001))' % self.resolution
+
         self.startx = -0.2
         self.endx = 0.2
         self.bg = 'Fit Linear'
@@ -1056,6 +1066,7 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.result_names = ['irs53664_graphite002_conv_1LFitL_s0_to_50_Result']
 
     def get_reference_files(self):
+        self.tolerance = 0.13
         return ['II.IRISConvFitSeq.nxs']
 
 #==============================================================================
