@@ -103,7 +103,7 @@ class BayesStretch(PythonAlgorithm):
         run_f2py_compatibility_test()
 
         from IndirectBayes import (CalcErange, GetXYE)
-        from IndirectCommon import (getEfixed, GetThetaQ, CheckHistZero)
+        from IndirectCommon import (getEfixed, GetThetaQ)
         setup_prog = Progress(self, start=0.0, end=0.3, nreports = 5)
         logger.information('BayesStretch input')
         logger.information('Sample is %s' % self._sam_name)
@@ -125,7 +125,7 @@ class BayesStretch(PythonAlgorithm):
         theta, Q = GetThetaQ(self._sam_name)
 
         setup_prog.report('Checking Histograms')
-        nsam,ntc = CheckHistZero(self._sam_name)
+        nsam,ntc = self.CheckHistZero(self._sam_name)
 
         #check if we're performing a sequential fit
         if self._loop != True:
@@ -367,8 +367,8 @@ class BayesStretch(PythonAlgorithm):
         Returns:
         @return None
         Raises:
-        @exception Valuerror - workspaces have different analysers
-        @exception Valuerror - workspaces have different reflections
+        @exception ValueError - workspaces have different analysers
+        @exception ValueError - workspaces have different reflections
         """
         ws1 = s_api.mtd[in1WS]
         try:
@@ -389,5 +389,29 @@ class BayesStretch(PythonAlgorithm):
             raise ValueError('Workspace %s and %s have different reflections' % (ws1, ws2))
         else:
             logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
+
+    def CheckHistZero(inWS):
+        """
+        Retrieves basic info on a workspace
+        Checks the workspace is not empty, then returns the number of histogram and
+        the number of X-points, which is the number of bin boundaries minus one
+        Args:
+          @param inWS  2D workspace
+        Returns:
+          @return num_hist - number of histograms in the workspace
+          @return ntc - number of X-points in the first histogram, which is the number of bin
+               boundaries minus one. It is assumed all histograms have the same
+               number of X-points.
+        Raises:
+          @exception ValueError - Workspace has no histograms
+        """
+        num_hist = s_api.mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
+        if num_hist == 0:
+            raise ValueError('Workspace ' + inWS + ' has NO histograms')
+        x_in = s_api.mtd[inWS].readX(0)
+        ntc = len(x_in) - 1  # no. points from length of x array
+        if ntc == 0:
+            raise ValueError('Workspace ' + inWS + ' has NO points')
+        return num_hist, ntc
 
 AlgorithmFactory.subscribe(BayesStretch)         # Register algorithm with Mantid

@@ -150,7 +150,6 @@ class Symmetrise(PythonAlgorithm):
         """
         Checks for invalid input properties.
         """
-        from IndirectCommon import CheckHistZero
         issues = dict()
 
         input_workspace_name = self.getPropertyValue('InputWorkspace')
@@ -164,7 +163,7 @@ class Symmetrise(PythonAlgorithm):
             spec_min = spectra_range[0]
             spec_max = spectra_range[1]
 
-            num_sample_spectra, _ = CheckHistZero(input_workspace_name)
+            num_sample_spectra, _ = self.CheckHistZero(input_workspace_name)
             min_spectra_number = mtd[input_workspace_name].getSpectrum(0).getSpectrumNo()
             max_spectra_number = mtd[input_workspace_name].getSpectrum(num_sample_spectra - 1).getSpectrumNo()
 
@@ -212,8 +211,6 @@ class Symmetrise(PythonAlgorithm):
         """
         Get the algorithm properties and validate them.
         """
-        from IndirectCommon import CheckHistZero
-
         self._sample = self.getPropertyValue('InputWorkspace')
 
         self._x_min = math.fabs(self.getProperty('XMin').value)
@@ -222,7 +219,7 @@ class Symmetrise(PythonAlgorithm):
         self._spectra_range = self.getProperty('SpectraRange').value
         # If the user did not enter a spectra range, use the spectra range of the workspace
         if len(self._spectra_range) == 0:
-            num_sample_spectra, _ = CheckHistZero(self._sample)
+            num_sample_spectra, _ = self.CheckHistZero(self._sample)
             min_spectra_number = mtd[self._sample].getSpectrum(0).getSpectrumNo()
             max_spectra_number = mtd[self._sample].getSpectrum(num_sample_spectra - 1).getSpectrumNo()
             self._spectra_range = [min_spectra_number, max_spectra_number]
@@ -288,6 +285,29 @@ class Symmetrise(PythonAlgorithm):
 
         self.setProperty('OutputPropertiesTable', self._props_output_workspace)
 
+    def CheckHistZero(inWS):
+        """
+        Retrieves basic info on a workspace
+        Checks the workspace is not empty, then returns the number of histogram and
+        the number of X-points, which is the number of bin boundaries minus one
+        Args:
+          @param inWS  2D workspace
+        Returns:
+          @return num_hist - number of histograms in the workspace
+          @return ntc - number of X-points in the first histogram, which is the number of bin
+               boundaries minus one. It is assumed all histograms have the same
+               number of X-points.
+        Raises:
+          @exception ValueError - Workspace has no histograms
+        """
+        num_hist = s_api.mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
+        if num_hist == 0:
+            raise ValueError('Workspace ' + inWS + ' has NO histograms')
+        x_in = s_api.mtd[inWS].readX(0)
+        ntc = len(x_in) - 1  # no. points from length of x array
+        if ntc == 0:
+            raise ValueError('Workspace ' + inWS + ' has NO points')
+        return num_hist, ntc
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(Symmetrise)

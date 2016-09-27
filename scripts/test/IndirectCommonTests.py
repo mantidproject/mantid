@@ -119,11 +119,6 @@ class IndirectCommonTests(unittest.TestCase):
         actual_result = indirect_common.PadArray(data, 10)
         self.assert_lists_match(expected_result, actual_result)
 
-
-    def test_CheckHistZero(self):
-        ws = self.make_dummy_QENS_workspace()
-        self.assert_does_not_raise(ValueError, indirect_common.CheckHistZero, ws)
-
     def test_CheckHistSame(self):
         ws1 = self.make_dummy_QENS_workspace(output_name='ws1')
         ws2 = self.make_dummy_QENS_workspace(output_name='ws2')

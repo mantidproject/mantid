@@ -77,7 +77,7 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
     array_len = 4096                                    # length of Fortran array
     CheckXrange(erange,'Energy')
     self.CheckAnalysers(vname,rname)
-    nvan,ntc = CheckHistZero(vname)
+    nvan,ntc = self.CheckHistZero(vname)
     theta = GetThetaQ(vname)[0]
     efix = getEfixed(vname)
     print "begining erange calc"
@@ -219,3 +219,27 @@ def CheckAnalysers(in1WS, in2WS):
         raise ValueError('Workspace %s and %s have different reflections' % (ws1, ws2))
     else:
         logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
+
+def CheckHistZero(inWS):
+    """
+    Retrieves basic info on a workspace
+    Checks the workspace is not empty, then returns the number of histogram and
+    the number of X-points, which is the number of bin boundaries minus one
+    Args:
+      @param inWS  2D workspace
+    Returns:
+      @return num_hist - number of histograms in the workspace
+      @return ntc - number of X-points in the first histogram, which is the number of bin
+           boundaries minus one. It is assumed all histograms have the same
+           number of X-points.
+    Raises:
+      @exception ValueError - Workspace has no histograms
+    """
+    num_hist = s_api.mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
+    if num_hist == 0:
+        raise ValueError('Workspace ' + inWS + ' has NO histograms')
+    x_in = s_api.mtd[inWS].readX(0)
+    ntc = len(x_in) - 1  # no. points from length of x array
+    if ntc == 0:
+        raise ValueError('Workspace ' + inWS + ' has NO points')
+    return num_hist, ntc

@@ -33,7 +33,7 @@ class SofQWMoments(DataProcessorAlgorithm):
 
     #pylint: disable=too-many-locals
     def PyExec(self):
-        from IndirectCommon import CheckHistZero, CheckElimits, getDefaultWorkingDirectory
+        from IndirectCommon import CheckElimits, getDefaultWorkingDirectory
 
         workflow_prog = Progress(self, start=0.0, end=1.0, nreports=20)
         workflow_prog.report('Setting up algorithm')
@@ -44,7 +44,7 @@ class SofQWMoments(DataProcessorAlgorithm):
         emax = self.getProperty('EnergyMax').value
         erange = [emin, emax]
         workflow_prog.report('Validating input')
-        num_spectra,num_w = CheckHistZero(sample_workspace)
+        num_spectra,num_w = self.CheckHistZero(sample_workspace)
 
         logger.information('Sample %s has %d Q values & %d w values' % (sample_workspace, num_spectra, num_w))
 
@@ -128,6 +128,29 @@ class SofQWMoments(DataProcessorAlgorithm):
         self.setProperty("OutputWorkspace", output_workspace)
         workflow_prog.report('Algorithm complete')
 
+    def CheckHistZero(inWS):
+        """
+        Retrieves basic info on a workspace
+        Checks the workspace is not empty, then returns the number of histogram and
+        the number of X-points, which is the number of bin boundaries minus one
+        Args:
+          @param inWS  2D workspace
+        Returns:
+          @return num_hist - number of histograms in the workspace
+          @return ntc - number of X-points in the first histogram, which is the number of bin
+               boundaries minus one. It is assumed all histograms have the same
+               number of X-points.
+        Raises:
+          @exception ValueError - Workspace has no histograms
+        """
+        num_hist = s_api.mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
+        if num_hist == 0:
+            raise ValueError('Workspace ' + inWS + ' has NO histograms')
+        x_in = s_api.mtd[inWS].readX(0)
+        ntc = len(x_in) - 1  # no. points from length of x array
+        if ntc == 0:
+            raise ValueError('Workspace ' + inWS + ' has NO points')
+        return num_hist, ntc
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SofQWMoments)

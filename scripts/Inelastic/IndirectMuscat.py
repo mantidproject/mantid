@@ -115,7 +115,7 @@ def CreateSqw(disp,coeff,grid,Verbose):
 
 def ReadSqw(sqw,Verbose):
     logger.notice('Reading S(q,w) from workspace : '+sqw)
-    nq,nw = CheckHistZero(sqw)
+    nq,nw = self.CheckHistZero(sqw)
     axis = mtd[sqw].getAxis(1)
     Q = []
     for i in range(0,nq):
@@ -196,7 +196,7 @@ def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
 #    beam = [THICK, WIDTH, HEIGHT, alfa]
 #   sam = [temp, dens, siga, sigb]
     workdir = config['defaultsave.directory']
-    hist,npt = CheckHistZero(sname)
+    hist,npt = self.CheckHistZero(sname)
     CheckNeut(neut)
     CheckBeam(beam)
     CheckSam(sam)
@@ -373,3 +373,27 @@ def plotMuscat(inWS,spec_list,Plot):
         tot_plot=mp.plotSpectrum(inWS+'_Totals',spec_list)
     if Plot == 'Scat1' or Plot == 'All':
         mp.importMatrixWorkspace(inWS+'_1').plotGraph2D()
+
+def CheckHistZero(inWS):
+    """
+    Retrieves basic info on a workspace
+    Checks the workspace is not empty, then returns the number of histogram and
+    the number of X-points, which is the number of bin boundaries minus one
+    Args:
+      @param inWS  2D workspace
+    Returns:
+      @return num_hist - number of histograms in the workspace
+      @return ntc - number of X-points in the first histogram, which is the number of bin
+           boundaries minus one. It is assumed all histograms have the same
+           number of X-points.
+    Raises:
+      @exception ValueError - Workspace has no histograms
+    """
+    num_hist = s_api.mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
+    if num_hist == 0:
+        raise ValueError('Workspace ' + inWS + ' has NO histograms')
+    x_in = s_api.mtd[inWS].readX(0)
+    ntc = len(x_in) - 1  # no. points from length of x array
+    if ntc == 0:
+        raise ValueError('Workspace ' + inWS + ' has NO points')
+    return num_hist, ntc
