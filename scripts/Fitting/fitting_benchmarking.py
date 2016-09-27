@@ -52,7 +52,8 @@ def do_regression_fitting_benchmark(include_nist=True, include_cutest=True, data
     if data_groups_dirs:
         problem_blocks.extend(get_data_groups(data_groups_dirs))
 
-    prob_results = [do_regression_fitting_benchmark_block(block, minimizers) for block in problem_blocks]
+    prob_results = [do_regression_fitting_benchmark_block(block, minimizers, use_errors=use_errors) for
+                    block in problem_blocks]
 
     probs, results = zip(*prob_results)
 
@@ -87,7 +88,7 @@ def do_regression_fitting_benchmark_block(benchmark_problems, minimizers, use_er
 
     return problems, results_per_problem
 
-def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors = True):
+def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors=True):
     """
     One problem with potentially several starting points, returns a list (start points) of
     lists (minimizers)

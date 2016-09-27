@@ -119,10 +119,6 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
         print(header)
         print (tbl_acc_indiv)
 
-        def weighted_suffix_string(use_errors):
-            values = {True: 'weighted', False: 'unweighted'}
-            return values[use_errors]
-
         fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
                  format(weighted=weighted_suffix_string(use_errors),
                         version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_ACCURACY, group_name=group_name))
@@ -131,14 +127,9 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
 
         # extended summary
         tbl_acc_summary = build_rst_table(summary_cols, summary_rows, summary_cells, comparison_type='', using_errors=use_errors, color_scale=color_scale)
-        header = '**************** And Summary (accuracy): ******** \n\n'
+        header = '**************** Statistics/Summary (accuracy): ******** \n\n'
         print(header)
         print(tbl_acc_summary)
-        fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
-                 format(weighted=weighted_suffix_string(use_errors),
-                        version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_ACCURACY, group_name='summary'))
-        with open(fname, 'w') as tbl_file:
-            print(tbl_acc_summary, file=tbl_file)
 
         tbl_runtime_indiv = build_rst_table(minimizers, linked_problems, norm_runtimes, comparison_type='runtime', using_errors=use_errors, color_scale=color_scale)
         header = " ************* Comparison of runtimes (RST): ****************\n"
@@ -154,14 +145,9 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
 
         # extended summary
         tbl_runtime_summary = build_rst_table(summary_cols, summary_rows, summary_cells_runtime, comparison_type='', using_errors=use_errors, color_scale=color_scale)
-        header = '**************** And Summary (runtime): ******** \n\n'
+        header = '**************** Statistics/Summary (runtime): ******** \n\n'
         print(header)
         print(tbl_runtime_summary)
-        fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
-                 format(weighted=weighted_suffix_string(use_errors),
-                        version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_RUNTIME, group_name='summary'))
-        with open(fname, 'w') as tbl_file:
-            print(tbl_runtime_summary, file=tbl_file)
 
 # TO-DO: split into prepare + print
 def print_overall_results_table(minimizers, group_results, problems, group_names, use_errors, simple_text=True, rst=False):
@@ -193,8 +179,6 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
         #runtime_mean = np.nanmedian(time_tbl, 0)
         groups_norm_runtime[group_idx, :] = np.nanmedian(norm_runtime_rankings, 0)
 
-    header = '**************** Accuracy ******** \n\n'
-    print(header)
 
     linked_names = []
     for name in group_names:
@@ -206,13 +190,30 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
 
         linked_names.append(linked)
 
+    header = '**************** Accuracy ******** \n\n'
+    print(header)
     tbl_all_summary_acc = build_rst_table(minimizers, linked_names, groups_norm_acc, comparison_type='summary', using_errors=use_errors)
     print(tbl_all_summary_acc)
+    fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
+             format(weighted=weighted_suffix_string(use_errors),
+                    version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_ACCURACY, group_name='summary'))
+    with open(fname, 'w') as tbl_file:
+        print(tbl_all_summary_acc, file=tbl_file)
 
     header = '**************** Runtime ******** \n\n'
     print(header)
     tbl_all_summary_runtime = build_rst_table(minimizers, linked_names, groups_norm_runtime, comparison_type='summary', using_errors=use_errors)
     print(tbl_all_summary_runtime)
+    fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
+             format(weighted=weighted_suffix_string(use_errors),
+                    version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_RUNTIME, group_name='summary'))
+    with open(fname, 'w') as tbl_file:
+        print(tbl_all_summary_runtime, file=tbl_file)
+
+
+def weighted_suffix_string(use_errors):
+    values = {True: 'weighted', False: 'unweighted'}
+    return values[use_errors]
 
 def build_rst_table(columns_txt, rows_txt, cells, comparison_type, using_errors, color_scale=None):
     """"
