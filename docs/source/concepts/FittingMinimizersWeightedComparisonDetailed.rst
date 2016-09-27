@@ -78,6 +78,6 @@ Run time for individual Neutron Data problems
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_runtime_neutron_data.txt
 
-Run time for individual @CUTEst@ problems
+Run time for individual "CUTEst" problems
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_runtime_cutest.txt
