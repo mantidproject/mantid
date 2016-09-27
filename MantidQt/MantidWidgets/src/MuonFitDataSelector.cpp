@@ -403,7 +403,9 @@ QStringList MuonFitDataSelector::getChosenGroups() const {
 void MuonFitDataSelector::setChosenGroup(const QString &group) {
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
-    iter.value()->setChecked(iter.key() == group);
+    if (iter.key() == group) {
+      iter.value()->setChecked(true);
+    }
   }
 }
 
