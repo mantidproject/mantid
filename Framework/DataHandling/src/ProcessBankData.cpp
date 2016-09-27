@@ -183,6 +183,33 @@ void ProcessBankData::processEvents(bool &pulsetimesincreasing,
   }   //(for each event)
 }
 
+void ProcessBankData::compressOrSetOrder(bool compress,
+                                         const std::vector<bool> &usedDetIds,
+                                         double pulsetimesincreasing) {
+  auto &outputWS = *(alg->m_ws);
+
+  // Do it on all the detector IDs we touched
+  if (compress) {
+    for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++) {
+      if (usedDetIds[pixID - m_min_id]) {
+        // Find the the workspace index corresponding to that pixel ID
+        size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
+        auto &el = outputWS.getSpectrum(wi);
+        if (compress)
+          el.compressEvents(alg->compressTolerance, &el);
+        else {
+          if (pulsetimesincreasing)
+            el.setSortOrder(DataObjects::PULSETIME_SORT);
+          else
+            el.setSortOrder(DataObjects::UNSORTED);
+        }
+      }
+    }
+  }
+
+  return;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Run the data processing on a subset of pixel IDs
 */
@@ -197,7 +224,7 @@ void ProcessBankData::run() {
   prog->report(entry_name + ": precount");
 
   // Pre-counting events per pixel ID and allocate the memory ----
-  auto &outputWS = *(alg->m_ws);
+  // auto &outputWS = *(alg->m_ws);
   if (alg->precount) {
     preAllocate();
   }
@@ -226,24 +253,8 @@ void ProcessBankData::run() {
                 my_longest_tof, badTofs, compress, usedDetIds);
 
   //------------ Compress Events (or set sort order) ------------------
-  // Do it on all the detector IDs we touched
-  if (compress) {
-    for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++) {
-      if (usedDetIds[pixID - m_min_id]) {
-        // Find the the workspace index corresponding to that pixel ID
-        size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
-        auto &el = outputWS.getSpectrum(wi);
-        if (compress)
-          el.compressEvents(alg->compressTolerance, &el);
-        else {
-          if (pulsetimesincreasing)
-            el.setSortOrder(DataObjects::PULSETIME_SORT);
-          else
-            el.setSortOrder(DataObjects::UNSORTED);
-        }
-      }
-    }
-  }
+  compressOrSetOrder(compress, usedDetIds, pulsetimesincreasing);
+
   prog->report(entry_name + ": filled events");
 
   alg->getLogger().debug() << entry_name

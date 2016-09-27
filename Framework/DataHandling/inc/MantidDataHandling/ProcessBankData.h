@@ -59,6 +59,9 @@ public:
                      size_t &badTofs, bool compress,
                      std::vector<bool> &usedDetIds);
 
+  void compressOrSetOrder(bool compress, const std::vector<bool> &usedDetIds,
+                          double pulsetimesincreasing);
+
 private:
   /// Algorithm being run
   LoadEventNexus *alg;
