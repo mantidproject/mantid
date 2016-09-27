@@ -25,6 +25,33 @@ ProcessBankData::ProcessBankData(
   m_cost = static_cast<double>(numEvents);
 }
 
+void ProcessBankData::preCount() {
+  auto &outputWS = *(alg->m_ws);
+
+  std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
+  for (size_t i = 0; i < numEvents; i++) {
+    detid_t thisId = detid_t(event_id[i]);
+    if (thisId >= m_min_id && thisId <= m_max_id)
+      counts[thisId - m_min_id]++;
+  }
+
+  // Now we pre-allocate (reserve) the vectors of events in each pixel
+  // counted
+  const size_t numEventLists = outputWS.getNumberHistograms();
+  for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++) {
+    if (counts[pixID - m_min_id] > 0) {
+      // Find the the workspace index corresponding to that pixel ID
+      size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
+      // Allocate it
+      if (wi < numEventLists) {
+        outputWS.reserveEventListAt(wi, counts[pixID - m_min_id]);
+      }
+      if (alg->getCancel())
+        break; // User cancellation
+    }
+  }
+}
+
 //----------------------------------------------------------------------------------------------
 /** Run the data processing
  * FIXME/TODO - split run() into readable methods
@@ -42,29 +69,7 @@ void ProcessBankData::run() { // override {
   // ---- Pre-counting events per pixel ID ----
   auto &outputWS = *(alg->m_ws);
   if (alg->precount) {
-
-    std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
-    for (size_t i = 0; i < numEvents; i++) {
-      detid_t thisId = detid_t(event_id[i]);
-      if (thisId >= m_min_id && thisId <= m_max_id)
-        counts[thisId - m_min_id]++;
-    }
-
-    // Now we pre-allocate (reserve) the vectors of events in each pixel
-    // counted
-    const size_t numEventLists = outputWS.getNumberHistograms();
-    for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++) {
-      if (counts[pixID - m_min_id] > 0) {
-        // Find the the workspace index corresponding to that pixel ID
-        size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
-        // Allocate it
-        if (wi < numEventLists) {
-          outputWS.reserveEventListAt(wi, counts[pixID - m_min_id]);
-        }
-        if (alg->getCancel())
-          break; // User cancellation
-      }
-    }
+    preCount();
   }
 
   // Check for canceled algorithm
