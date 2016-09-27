@@ -140,16 +140,15 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
 
   // The "real" parametersare got (not the active ones)
   m_nParams = m_fitFunction->nParams();
+  if (m_nParams == 0) {
+    throw std::invalid_argument("Function has 0 fitting parameters.");
+  }
   // The initial parameters are saved
   if (m_parameters.size() != m_nParams) {
     m_parameters.resize(m_nParams);
   }
   for (size_t i = 0; i < m_nParams; ++i) {
     m_parameters.set(i, m_fitFunction->getParameter(i));
-  }
-
-  if (m_nParams == 0) {
-    throw std::invalid_argument("Function has 0 fitting parameters.");
   }
 
   // Variable to calculate the total number of iterations required by the
@@ -172,7 +171,6 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
       Constraints::BoundaryConstraint *bcon =
           dynamic_cast<Constraints::BoundaryConstraint *>(iconstr);
       if (bcon) {
-
         if (bcon->hasLower()) {
           if (param < bcon->lower())
             m_parameters.set(i, bcon->lower());
@@ -188,7 +186,6 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
     std::vector<double> v;
     v.push_back(param);
     m_chain.push_back(v);
-    m_max_iter = maxIterations;
 
     // Initilize convergence and jump parameters
     m_changes.push_back(0);
