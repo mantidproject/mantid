@@ -41,7 +41,7 @@ bool isRawData(const std::string &name) {
   } else {
     return false;
   }
-};
+}
 
 /// Take off the "_Raw" suffix, if present
 std::string removeRawSuffix(const std::string &name) {
@@ -50,7 +50,7 @@ std::string removeRawSuffix(const std::string &name) {
   } else {
     return name;
   }
-};
+}
 }
 
 namespace MantidQt {

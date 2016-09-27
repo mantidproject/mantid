@@ -564,7 +564,6 @@ public:
     EXPECT_CALL(*m_fitBrowser, setWorkspaceName(expectedNames[0])).Times(1);
     EXPECT_CALL(*m_fitBrowser, allowSequentialFits(true));
     m_presenter->handleFitRawData(isRawData, updateWorkspaces);
-    const auto &workspaces = AnalysisDataService::Instance().getObjectNames();
     TS_ASSERT(AnalysisDataService::Instance().doesExist(
         expectedNames[0].toStdString()));
   }
