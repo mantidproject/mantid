@@ -8,6 +8,7 @@ set ( TEST_PY_FILES
   Example1DFunctionTest.py
   ExamplePeakFunctionTest.py
   FickDiffusionTest.py
+  HallRossTest.py
   StretchedExpFTTest.py
   AttributeTest.py
 )
