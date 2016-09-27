@@ -560,9 +560,8 @@ public:
     EXPECT_CALL(*m_dataSelector, setDatasetNames(wsNameList)).Times(1);
 
     // Expect it will update the UI from workspace details
-    EXPECT_CALL(*m_dataSelector,
-                setWorkspaceDetails(QString("00015189-91"), QString("MUSR")))
-        .Times(1);
+    EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189-91"),
+                                                     QString("MUSR"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0)).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("fwd"))).Times(1);
     EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
