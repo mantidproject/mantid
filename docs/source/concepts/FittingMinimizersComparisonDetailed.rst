@@ -66,9 +66,10 @@ Accuracy for individual Neutron Data problems
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. include:: minimizers_comparison/v3.8.0/comparison_unweighted_v3.8_acc_neutron_data.txt
 
-             Accuracy for individual "CUTEst" problems
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Accuracy for individual "CUTEst" problems
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. include:: minimizers_comparison/v3.8.0/comparison_unweighted_v3.8_acc_cutest.txt
+
 
 .. _Minimizers_unweighted_comparison_in_terms_of_run_time:
 

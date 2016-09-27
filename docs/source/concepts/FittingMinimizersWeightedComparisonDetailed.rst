@@ -34,20 +34,28 @@ Comparison in terms of accuracy
 
 Summary, median ranking
 ^^^^^^^^^^^^^^^^^^^^^^^
-.. include:: minimizers_comparison/v3.7.0/comparison_weighted_v3.7_acc_summary.txt
+.. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_acc_summary.txt
 
 Accuracy for individual NIST problems, "lower" difficulty
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. include:: minimizers_comparison/v3.7.0/comparison_weighted_v3.7_acc_nist_lower.txt
+.. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_acc_nist_lower.txt
 
 Accuracy for individual NIST problems, "average" difficulty
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. include:: minimizers_comparison/v3.7.0/comparison_weighted_v3.7_acc_nist_average.txt
+.. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_acc_nist_average.txt
 
 Accuracy for individual NIST problems, "higher" difficulty
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. include:: minimizers_comparison/v3.7.0/comparison_weighted_v3.7_acc_nist_higher.txt
+.. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_acc_nist_higher.txt
+
+Accuracy for individual Neutron Data problems
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_acc_neutron_data.txt
+
+Accuracy for individual "CUTEst" problems
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_acc_cutest.txt
 
 
 .. _Minimizers_weighted_comparison_in_terms_of_run_time:
@@ -57,19 +65,19 @@ Comparison in terms of run time
 
 Summary, median ranking
 ^^^^^^^^^^^^^^^^^^^^^^^
-.. include:: minimizers_comparison/v3.7.0/comparison_weighted_v3.7_runtime_summary.txt
+.. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_runtime_summary.txt
 
 Run time for individual NIST problems, "lower" difficulty
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. include:: minimizers_comparison/v3.7.0/comparison_weighted_v3.7_runtime_nist_lower.txt
+.. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_runtime_nist_lower.txt
 
 Run time for individual NIST problems, "average" difficulty
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. include:: minimizers_comparison/v3.7.0/comparison_weighted_v3.7_runtime_nist_average.txt
+.. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_runtime_nist_average.txt
 
 Run time for individual NIST problems, "higher" difficulty
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. include:: minimizers_comparison/v3.7.0/comparison_weighted_v3.7_runtime_nist_higher.txt
+.. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_runtime_nist_higher.txt
