@@ -13,15 +13,17 @@ for a particle undergoing jump diffusion [1]_.
 
    S(Q,E) = Height \cdot \frac{1}{\pi} \frac{\Gamma}{\Gamma^2+(E-Centre)^2}
 
-   \Gamma = \frac{\hbar}{Tau} \cdot \frac{(Q\cdot Length)^2}{1+(Q\cdot Length)^2}
+   \Gamma = \frac{\hbar\cdot DiffCoeff\cdot Q^2}{1+DiffCoeff\cdot Q^2\cdot Tau}
 
 where:
 
 -  :math:`Height` - Intensity scaling, a fit parameter
--  :math:`Length` - jump length, a fit parameter
+-  :math:`DiffCoeff` - diffusion coefficient, a fit parameter
 -  :math:`Centre` - Centre of peak, a fit parameter
 -  :math:`Tau` - Residence time, a fit parameter
 -  :math:`Q` - Momentum transfer, an attribute (non-fitting)
+
+At 298K and 1atm, water has :math:`DiffCoeff=2.30 10^{-5} cm^2/s` and :math:`Tau=1.25 ps`.
 
 .. attributes::
 
@@ -66,18 +68,18 @@ with a fit to the following model:
     resolution=CreateWorkspace(np.tile(dataX,nQ), np.tile(rdataY,nQ), NSpec=nQ, UnitX="deltaE",
         VerticalAxisUnit="MomentumTransfer", VerticalAxisValues=Qs)
     """Generate the signal of a particle undergoing jump diffusion.
-        1. jump length = 2.6 Angstroms
-        2. residence time = 4.3 ps
+        1. diffusion coefficient = 1.0 * 10^(-5) cm^2/s.
+        2. residence time = 50ps  (make it peaky in the selected dynamic range)
         3. linear background noise, up to 10% of the inelastic intensity
         4. Up to 10% of noise in the quasi-elastic signal
         5. Assume <u^2>=0.8 Angstroms^2 for the Debye-Waller factor
     """
-    length=2.6;  tau=4.3;  u2=0.8;  hbar=0.658211626  # units of hbar are ps*meV
+    diffCoeff=1.0;  tau=50.0;  u2=0.8;  hbar=0.658211626  # units of hbar are ps*meV
     qdataY=np.empty(0)  # will hold all Q-values (all spectra)
     for Q in Qs:
         centre=2*dE*(0.5-np.random.random())  # some shift along the energy axis
         EISF = np.exp(-u2*Q**2)  # Debye Waller factor
-        HWHM = hbar/tau * (Q*length)**2 / (1+(Q*length)**2)
+        HWHM = hbar * diffCoeff*Q**2 / (1+diffCoeff*Q**2*tau)
         dataY = (1-EISF)/np.pi * HWHM/(HWHM**2+(dataX-centre)**2)  # inelastic component
         dataY = dE*np.convolve(rdataY, dataY, mode="same")  # convolve with resolution
         dataYmax = max(dataY)  # maximum of the inelastic component
@@ -94,11 +96,11 @@ with a fit to the following model:
         We do a global fit (all spectra) to find out the radius and relaxation times.
     """
     # This is the template fitting model for each spectrum (each Q-value):
-    # Our initial guesses are length=1.0 and  tau=10
+    # Our initial guesses are diffCoeff=10 and  tau=10
     single_model_template="""(composite=Convolution,FixResolution=true,NumDeriv=true;
     name=TabulatedFunction,Workspace=resolution,WorkspaceIndex=_WI_,Scaling=1,Shift=0,XScaling=1;
     (name=DeltaFunction,Height=0.5,Centre=0,constraints=(0<Height<1);
-    name=TeixeiraWaterSQE,Q=_Q_,Height=0.5,Tau=10,Length=1.0,Centre=0;
+    name=TeixeiraWaterSQE,Q=_Q_,Height=0.5,Tau=10,DiffCoeff=10,Centre=0;
     ties=(f1.Height=1-f0.Height,f1.Centre=f0.Centre)));
     name=LinearBackground,A0=0,A1=0"""
     # Now create the string representation of the global model (all spectra, all Q-values):
@@ -109,8 +111,8 @@ with a fit to the following model:
         single_model = single_model.replace("_WI_", str(wi))  # insert workspace index
         global_model += "(composite=CompositeFunction,NumDeriv=true,$domains=i;{0});\n".format(single_model)
         wi+=1
-    # Parameters Length and Tau are the same for all spectra, thus tie them:
-    ties=['='.join(["f{0}.f0.f1.f1.Length".format(wi) for wi in reversed(range(nQ))]),
+    # Parameters DiffCoeff and Tau are the same for all spectra, thus tie them:
+    ties=['='.join(["f{0}.f0.f1.f1.DiffCoeff".format(wi) for wi in reversed(range(nQ))]),
         '='.join(["f{0}.f0.f1.f1.Tau".format(wi) for wi in reversed(range(nQ))]) ]
     global_model += "ties=("+','.join(ties)+')'  # insert ties in the global model string
     # Now relate each domain(i.e. spectrum) to each single model
@@ -125,13 +127,13 @@ with a fit to the following model:
     # Invoke the Fit algorithm using global_model and domain_model:
     output_workspace = "glofit_"+data.name()
     Fit(Function=global_model, Output=output_workspace, CreateOutput=True, MaxIterations=500, **domain_model)
-    # Extract Length and Tau from workspace glofit_data_Parameters, the output of Fit:
+    # Extract DiffCoeff and Tau from workspace glofit_data_Parameters, the output of Fit:
     nparms=0
     parameter_ws = mtd[output_workspace+"_Parameters"]
     for irow in range(parameter_ws.rowCount()):
         row = parameter_ws.row(irow)
-        if row["Name"]=="f0.f0.f1.f1.Length":
-            Length=row["Value"]
+        if row["Name"]=="f0.f0.f1.f1.DiffCoeff":
+            DiffCoeff=row["Value"]
             nparms+=1
         elif row["Name"]=="f0.f0.f1.f1.Tau":
             Tau=row["Value"]
@@ -139,10 +141,10 @@ with a fit to the following model:
         if nparms==2:
             break  # We got the three parameters we are interested in
     # Check nominal and optimal values are within error ranges:
-    if abs(length-Length)/length < 0.1:
+    if abs(diffCoeff-DiffCoeff)/diffCoeff < 0.1:
         print("Optimal Length within 10% of nominal value")
     else:
-        print("Error. Obtained Length=",Length," instead of",length)
+        print("Error. Obtained DiffCoeff=",DiffCoeff," instead of",diffCoeff)
     if abs(tau-Tau)/tau < 0.1:
         print("Optimal Tau within 10% of nominal value")
     else:

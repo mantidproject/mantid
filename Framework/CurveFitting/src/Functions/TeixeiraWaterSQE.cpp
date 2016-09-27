@@ -28,8 +28,8 @@ DECLARE_FUNCTION(TeixeiraWaterSQE)
  */
 TeixeiraWaterSQE::TeixeiraWaterSQE() {
   this->declareParameter("Height", 1.0, "scaling factor");
-  this->declareParameter("Length", 0.98, "jump length (Angstroms)");
-  this->declareParameter("Tau", 10.0, "Residence time (ps)");
+  this->declareParameter("DiffCoeff", 2.3, "Diffusion coefficient (10^(-5)cm^2/s)");
+  this->declareParameter("Tau", 1.25, "Residence time (ps)");
   this->declareParameter("Centre", 0.0, "Shift along the X-axis");
   // Momentum transfer Q, an attribute (not a fitting parameter)
   this->declareAttribute("Q", API::IFunction::Attribute(0.3));
@@ -43,9 +43,9 @@ void TeixeiraWaterSQE::init() {
   auto HeightConstraint = new BConstraint(
       this, "Height", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(HeightConstraint);
-  auto LengthConstraint = new BConstraint(
-      this, "Length", std::numeric_limits<double>::epsilon(), true);
-  this->addConstraint(LengthConstraint);
+  auto DiffCoeffConstraint = new BConstraint(
+      this, "DiffCoeff", std::numeric_limits<double>::epsilon(), true);
+  this->addConstraint(DiffCoeffConstraint);
   auto TauConstraint = new BConstraint(
       this, "Tau", std::numeric_limits<double>::epsilon(), true);
   this->addConstraint(TauConstraint);
@@ -61,7 +61,7 @@ void TeixeiraWaterSQE::function1D(double *out, const double *xValues,
                                   const size_t nData) const {
   double hbar(0.658211626); // ps*meV
   auto H = this->getParameter("Height");
-  auto L = this->getParameter("Length");
+  auto D = this->getParameter("DiffCoeff");
   auto T = this->getParameter("Tau");
   auto C = this->getParameter("Centre");
   auto Q = this->getAttribute("Q").asDouble();
@@ -69,7 +69,7 @@ void TeixeiraWaterSQE::function1D(double *out, const double *xValues,
   // Penalize negative parameters, just in case they show up
   // when calculating the numeric derivative
   if (H < std::numeric_limits<double>::epsilon() ||
-      L < std::numeric_limits<double>::epsilon() ||
+      D < std::numeric_limits<double>::epsilon() ||
       T < std::numeric_limits<double>::epsilon()) {
     for (size_t j = 0; j < nData; j++) {
       out[j] = std::numeric_limits<double>::infinity();
@@ -78,7 +78,7 @@ void TeixeiraWaterSQE::function1D(double *out, const double *xValues,
   }
 
   // Lorentzian intensities and HWHM
-  auto G = hbar / T * pow(Q * L, 2) / (1 + pow(Q * L, 2));
+  auto G = hbar * D*Q*Q/(1+D*Q*Q*T);
   for (size_t j = 0; j < nData; j++) {
     auto E = xValues[j] - C;
     out[j] += H * G / (G * G + E * E) / M_PI;
