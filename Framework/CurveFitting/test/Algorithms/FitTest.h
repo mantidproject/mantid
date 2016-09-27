@@ -1154,8 +1154,7 @@ public:
     mf->setDomainIndices(0, ind);
     TS_ASSERT_EQUALS(mf->getMaxIndex(), 1);
 
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("Fit");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
     IAlgorithm &fit = *alg;
     fit.initialize();
     fit.setProperty("Function", boost::dynamic_pointer_cast<IFunction>(mf));
@@ -1811,9 +1810,8 @@ public:
     const int histogramNumber = 1;
     const int timechannels = 1000;
 
-    MatrixWorkspace_sptr ws2D =
-        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
-                                            timechannels, timechannels);
+    MatrixWorkspace_sptr ws2D = WorkspaceFactory::Instance().create(
+        "Workspace2D", histogramNumber, timechannels, timechannels);
 
     double tof0 = 8000.;
     double dtof = 5.;
@@ -1857,9 +1855,8 @@ public:
     // create mock data to test against
     const int histogramNumber = 1;
     const int timechannels = 5;
-    MatrixWorkspace_sptr ws2D =
-        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
-                                            timechannels, timechannels);
+    MatrixWorkspace_sptr ws2D = WorkspaceFactory::Instance().create(
+        "Workspace2D", histogramNumber, timechannels, timechannels);
 
     for (int i = 0; i < timechannels; i++) {
       ws2D->dataX(0)[i] = i + 1;
@@ -1894,9 +1891,8 @@ public:
   void test_function_Polynomial_QuadraticBackground() {
     const int histogramNumber = 1;
     const int timechannels = 5;
-    MatrixWorkspace_sptr ws2D =
-        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
-                                            timechannels, timechannels);
+    MatrixWorkspace_sptr ws2D = WorkspaceFactory::Instance().create(
+        "Workspace2D", histogramNumber, timechannels, timechannels);
 
     for (int i = 0; i < timechannels; i++) {
       ws2D->dataX(0)[i] = i + 1;
@@ -1933,9 +1929,8 @@ public:
     // create mock data to test against
     int histogramNumber = 1;
     int timechannels = 5;
-    MatrixWorkspace_sptr ws2D =
-        WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
-                                            timechannels, timechannels);
+    MatrixWorkspace_sptr ws2D = WorkspaceFactory::Instance().create(
+        "Workspace2D", histogramNumber, timechannels, timechannels);
 
     for (int i = 0; i < timechannels; i++) {
       ws2D->dataX(0)[i] = i + 1;
@@ -2185,19 +2180,19 @@ public:
   }
 
   void test_DiffRotDiscreteCircleInelasticWithQParam() {
-	  runDiffRotDiscreteCircleInelasticTest(0.0, 0.20092);
+    runDiffRotDiscreteCircleInelasticTest(0.0, 0.20092);
   }
 
   void test_DiffRotDiscreteCircleInelasticWithWSIndex() {
-	  runDiffRotDiscreteCircleInelasticTest(0.0);
+    runDiffRotDiscreteCircleInelasticTest(0.0);
   }
 
   void test_DiffRotDiscreteCircleInelasticWithShiftWithQParam() {
-	  runDiffRotDiscreteCircleInelasticTest(0.5, 0.20092);
+    runDiffRotDiscreteCircleInelasticTest(0.5, 0.20092);
   }
 
   void test_DiffRotDiscreteCircleInelasticWithShiftWithWSIndex() {
-	  runDiffRotDiscreteCircleInelasticTest(0.5);
+    runDiffRotDiscreteCircleInelasticTest(0.5);
   }
 
   Workspace2D_sptr generateN3Workspace(double I, double R, double tao,
@@ -2257,8 +2252,8 @@ public:
     Fit fitalg;
     TS_ASSERT_THROWS_NOTHING(fitalg.initialize());
     TS_ASSERT(fitalg.isInitialized());
-	fitalg.setProperty("Function", funcStr);
-	fitalg.setProperty("MaxIterations", 0);
+    fitalg.setProperty("Function", funcStr);
+    fitalg.setProperty("MaxIterations", 0);
     fitalg.setProperty("InputWorkspace", ws);
     fitalg.setPropertyValue("WorkspaceIndex", "0");
     TS_ASSERT_THROWS_NOTHING(TS_ASSERT(fitalg.execute()));
@@ -2306,7 +2301,7 @@ public:
 
     // Override the function with new parameters, our initial guess.
     double I = I_0 * 1.01;
-	double R = R_0 * 1.01;
+    double R = R_0 * 1.01;
     double D = D_0 * 1.01;
     funtion_stream.str(std::string());
     funtion_stream.clear();
@@ -2341,8 +2336,8 @@ public:
         Mantid::CurveFitting::Functions::Convolution>(fitalg_function);
 
     // Check the parameters of the resolution did not change
-	Mantid::API::IFunction_sptr resolution = fitalg_conv->getFunction(0);
-	TS_ASSERT_DELTA(resolution->getParameter("PeakCentre"), S, 0.00001);
+    Mantid::API::IFunction_sptr resolution = fitalg_conv->getFunction(0);
+    TS_ASSERT_DELTA(resolution->getParameter("PeakCentre"), S, 0.00001);
     TS_ASSERT_DELTA(resolution->getParameter("Height"), 1.0, 1.0 * 0.001);
     TS_ASSERT_DELTA(resolution->getParameter("Sigma"), 0.002, 0.002 * 0.001);
 
