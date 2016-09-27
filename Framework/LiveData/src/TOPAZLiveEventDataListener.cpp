@@ -493,7 +493,7 @@ void TOPAZLiveEventDataListener::initWorkspace() {
 
   auto tmp = createWorkspace<DataObjects::EventWorkspace>(
       m_eventBuffer->getInstrument()->getDetectorIDs(true).size(), 2, 1);
-  WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, tmp, true);
+  WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *tmp, true);
   m_eventBuffer = std::move(tmp);
 
   // Set the units
@@ -516,7 +516,7 @@ void TOPAZLiveEventDataListener::initMonitorWorkspace() {
   auto monitorsBuffer = WorkspaceFactory::Instance().create(
       "EventWorkspace", monitors.size(), 1, 1);
   WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer,
-                                                    monitorsBuffer, true);
+                                                    *monitorsBuffer, true);
   // Set the id numbers
   for (size_t i = 0; i < monitors.size(); ++i) {
     monitorsBuffer->getSpectrum(i).setDetectorID(monitors[i]);
@@ -577,7 +577,7 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
           "EventWorkspace", m_eventBuffer->getNumberHistograms(), 2, 1));
 
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, temp,
+  API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *temp,
                                                          false);
 
   // Clear out the old logs, except for the most recent entry
@@ -597,7 +597,7 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
   auto newMonitorBuffer = WorkspaceFactory::Instance().create(
       "EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
   WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer,
-                                                    newMonitorBuffer, false);
+                                                    *newMonitorBuffer, false);
   temp->setMonitorWorkspace(newMonitorBuffer);
 
   // Lock the mutex and swap the workspaces

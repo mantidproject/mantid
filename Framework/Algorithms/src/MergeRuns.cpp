@@ -4,13 +4,13 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAlgorithms/MergeRuns/SampleLogsBehaviour.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 
 using Mantid::HistogramData::HistogramX;
 
@@ -310,9 +310,7 @@ void MergeRuns::execEvent() {
 
   // Create a new output event workspace, by copying the first WS in the list
   EventWorkspace_sptr inputWS = m_inEventWS[0];
-  auto outWS = createWorkspace<EventWorkspace>(
-      m_outputSize, inputWS->x(0).size(), inputWS->y(0).size());
-  WorkspaceFactory::Instance().initializeFromParent(*inputWS, outWS, false);
+  auto outWS = create<EventWorkspace>(*inputWS, m_outputSize);
   const auto inputSize = inputWS->getNumberHistograms();
   for (size_t i = 0; i < inputSize; ++i)
     outWS->getSpectrum(i) = inputWS->getSpectrum(i);

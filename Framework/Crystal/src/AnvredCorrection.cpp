@@ -9,6 +9,7 @@
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 
 /*  Following A.J.Schultz's anvred, the weight factors should be:
  *
@@ -257,15 +258,8 @@ void AnvredCorrection::execEvent() {
   const int64_t numHists =
       static_cast<int64_t>(m_inputWS->getNumberHistograms());
   std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
-  // Create a new outputworkspace with not much in it
-  DataObjects::EventWorkspace_sptr correctionFactors;
-  correctionFactors = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create("EventWorkspace", numHists, 2,
-                                               1));
+  auto correctionFactors = create<EventWorkspace>(*m_inputWS);
   correctionFactors->sortAll(TOF_SORT, nullptr);
-  // Copy required stuff from it
-  API::WorkspaceFactory::Instance().initializeFromParent(
-      *m_inputWS, correctionFactors, true);
   bool inPlace = (this->getPropertyValue("InputWorkspace") ==
                   this->getPropertyValue("OutputWorkspace"));
   if (inPlace)

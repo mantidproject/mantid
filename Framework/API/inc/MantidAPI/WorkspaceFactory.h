@@ -79,7 +79,7 @@ public:
                               const size_t &YLength) const;
 
   void initializeFromParent(const MatrixWorkspace &parent,
-                            const MatrixWorkspace_sptr &child,
+                            MatrixWorkspace &child,
                             const bool differentSize) const;
   /// Create a ITableWorkspace
   boost::shared_ptr<ITableWorkspace>

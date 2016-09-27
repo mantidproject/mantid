@@ -4,10 +4,10 @@
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
@@ -28,7 +28,6 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(ExportTimeSeriesLog)
 
-//----------------------------------------------------------------------------------------------
 /** Definition of all input arguments
  */
 void ExportTimeSeriesLog::init() {
@@ -73,7 +72,6 @@ void ExportTimeSeriesLog::init() {
                                             "is Workspace2D.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Main execution
  */
 void ExportTimeSeriesLog::exec() {
@@ -102,7 +100,6 @@ void ExportTimeSeriesLog::exec() {
   * @param outputeventws ::
  * true.
  */
-//----------------------------------------------------------------------------------------------
 /** Export part of designated log to an file in column format and a output file
  * @brief ExportTimeSeriesLog::exportLog
  * @param logname ::  name of log to export
@@ -257,7 +254,6 @@ void ExportTimeSeriesLog::setupWorkspace2D(
   xaxis->setUnit("Time");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Set up an Event workspace
  * @brief ExportTimeSeriesLog::setupEventWorkspace
  * @param start_index
@@ -275,24 +271,15 @@ void ExportTimeSeriesLog::setupEventWorkspace(
 
   // Get some stuff from the input workspace
   const size_t numberOfSpectra = 1;
-  const int YLength = static_cast<int>(m_inputWS->blocksize());
   // determine output size
   size_t outsize = stop_index - start_index + 1;
   if (outsize > static_cast<size_t>(numentries))
     outsize = static_cast<size_t>(numentries);
 
-  // Make a brand new EventWorkspace
-  EventWorkspace_sptr outEventWS = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create(
-          "EventWorkspace", numberOfSpectra, YLength + 1, YLength));
-  // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(*m_inputWS, outEventWS,
-                                                         false);
-
-  m_outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outEventWS);
-  if (!m_outWS)
-    throw runtime_error(
-        "Output workspace cannot be casted to a MatrixWorkspace.");
+  auto outEventWS = create<EventWorkspace>(
+      *m_inputWS, numberOfSpectra,
+      HistogramData::Histogram(HistogramData::BinEdges(2)));
+  m_outWS = outEventWS;
 
   // Create the output event list (empty)
   EventList &outEL = outEventWS->getSpectrum(0);

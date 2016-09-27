@@ -63,13 +63,8 @@ private:
   ///
   void retrieveInstrumentParameters();
 
-  /// Create output workspace
-  void createOutputWorkspace();
-
   /// Calculate detector resolution
   void estimateDetectorResolution();
-
-  //------------------------------------------------------
 
   /// Input workspace
   API::MatrixWorkspace_sptr m_inputWS;

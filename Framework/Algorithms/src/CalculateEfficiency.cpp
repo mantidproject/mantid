@@ -103,7 +103,7 @@ void CalculateEfficiency::exec() {
   rebinnedWS = childAlg->getProperty("OutputWorkspace");
 
   outputWS = WorkspaceFactory::Instance().create(rebinnedWS);
-  WorkspaceFactory::Instance().initializeFromParent(*inputWS, outputWS, false);
+  WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS, false);
   for (int i = 0; i < static_cast<int>(rebinnedWS->getNumberHistograms());
        i++) {
     outputWS->setSharedX(i, rebinnedWS->sharedX(i));

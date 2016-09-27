@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -39,7 +40,7 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
       "Workspace2D", totalHists, ws1->readX(0).size(), ws1->readY(0).size());
   // Copy over stuff from first input workspace. This will include the spectrum
   // masking
-  WorkspaceFactory::Instance().initializeFromParent(*ws1, output, true);
+  WorkspaceFactory::Instance().initializeFromParent(*ws1, *output, true);
 
   // Create the X values inside a cow pointer - they will be shared in the
   // output workspace
@@ -126,13 +127,8 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
   // Create the output workspace
   const size_t totalHists =
       event_ws1->getNumberHistograms() + event_ws2->getNumberHistograms();
-  // Have the minimum # of histograms in the output.
-  EventWorkspace_sptr output = boost::dynamic_pointer_cast<EventWorkspace>(
-      WorkspaceFactory::Instance().create("EventWorkspace", totalHists,
-                                          event_ws1->readX(0).size(),
-                                          event_ws1->readY(0).size()));
-  // Copy over geometry (but not data) from first input workspace
-  WorkspaceFactory::Instance().initializeFromParent(*event_ws1, output, true);
+  // Sets bins equal to those of input index 0
+  auto output = create<EventWorkspace>(*event_ws1, totalHists);
 
   // Initialize the progress reporting object
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
@@ -158,9 +154,6 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
 
     m_progress->report();
   }
-
-  // Set the same bins for all output pixels
-  output->setAllX(HistogramData::BinEdges(event_ws1->refX(0)));
 
   fixSpectrumNumbers(event_ws1, event_ws2, output);
 

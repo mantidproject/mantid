@@ -1,9 +1,4 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -11,6 +6,8 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 
 #include <cmath>
 
@@ -55,7 +52,6 @@ const std::string EstimateResolutionDiffraction::category() const {
   return "Diffraction\\Utility";
 }
 
-//----------------------------------------------------------------------------------------------
 void EstimateResolutionDiffraction::init() {
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -82,7 +78,6 @@ void EstimateResolutionDiffraction::init() {
                   "the dataset.");
 }
 
-//----------------------------------------------------------------------------------------------
 /**
   */
 void EstimateResolutionDiffraction::exec() {
@@ -90,14 +85,14 @@ void EstimateResolutionDiffraction::exec() {
 
   retrieveInstrumentParameters();
 
-  createOutputWorkspace();
+  m_outputWS = DataObjects::create<DataObjects::Workspace2D>(
+      *m_inputWS, HistogramData::Histogram(HistogramData::Points(1)));
 
   estimateDetectorResolution();
 
   setProperty("OutputWorkspace", m_outputWS);
 }
 
-//----------------------------------------------------------------------------------------------
 /**
   */
 void EstimateResolutionDiffraction::processAlgProperties() {
@@ -133,7 +128,6 @@ double EstimateResolutionDiffraction::getWavelength() {
   return cwltimeseries->timeAverageValue();
 }
 
-//----------------------------------------------------------------------------------------------
 /**
   */
 void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
@@ -155,19 +149,6 @@ void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
   g_log.notice() << "L1 = " << m_L1 << "\n";
 }
 
-//----------------------------------------------------------------------------------------------
-/**
-  */
-void EstimateResolutionDiffraction::createOutputWorkspace() {
-  size_t numspec = m_inputWS->getNumberHistograms();
-
-  m_outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", numspec, 1, 1));
-  // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(*m_inputWS, m_outputWS,
-                                                         false);
-}
-//----------------------------------------------------------------------------------------------
 /**
   */
 void EstimateResolutionDiffraction::estimateDetectorResolution() {

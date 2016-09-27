@@ -159,7 +159,7 @@ boost::shared_ptr<T> create(const P &parent, const IndexArg &indexArg,
 
   ws->initialize(indexArg, histogram);
   API::WorkspaceFactory::Instance().initializeFromParent(
-      parent, ws, parent.y(0).size() != ws->y(0).size());
+      parent, *ws, parent.y(0).size() != ws->y(0).size());
   // For EventWorkspace, `ws->y(0)` put entry 0 in the MRU. However, clients
   // would typically expect an empty MRU and fail to clear it. This dummy call
   // removes the entry from the MRU.
@@ -183,7 +183,8 @@ template <class T, class P,
           typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
                                                   P>::value>::type * = nullptr>
 boost::shared_ptr<T> create(const P &parent) {
-  return create<T>(parent, detail::stripData(parent.histogram(0)));
+  return create<T>(parent, parent.getNumberHistograms(),
+                   detail::stripData(parent.histogram(0)));
 }
 
 template <class T, class P, class IndexArg,

@@ -3,6 +3,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -427,13 +428,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
  */
 void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
                            std::set<int> &indices) {
-  // Make a brand new EventWorkspace
-  EventWorkspace_sptr outputWorkspace =
-      boost::dynamic_pointer_cast<EventWorkspace>(
-          API::WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1));
-  // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(*localworkspace,
-                                                         outputWorkspace, true);
+  auto outputWorkspace = create<EventWorkspace>(*localworkspace, 1);
 
   Progress progress(this, 0, 1, indices.size());
 
@@ -477,9 +472,6 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
 
     progress.report();
   }
-
-  // Set all X bins on the output
-  outputWorkspace->setAllX(HistogramData::BinEdges(localworkspace->refX(0)));
 
   outputWorkspace->mutableRun().addProperty("NumAllSpectra", int(numSpectra),
                                             "", true);
