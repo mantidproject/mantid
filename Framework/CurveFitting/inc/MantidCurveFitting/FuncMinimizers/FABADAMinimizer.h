@@ -64,21 +64,21 @@ public:
 
 private:
   /// Returns the step from a Gaussian given sigma = Jump
-  double gaussianStep(const double &Jump);
+  double gaussianStep(const double &jump);
   /// If the new point is out of its bounds, it is changed to fit in the bound
   /// limits
-  void boundApplication(const size_t &ParameterIndex, double &new_value,
+  void boundApplication(const size_t &parameterIndex, double &newValue,
                         double &step);
   /// Applied to the other parameters first and sequentially, finally to the
   /// current one
-  void tieApplication(const size_t &ParameterIndex, GSLVector &new_parameters,
-                      double &new_value);
+  void tieApplication(const size_t &parameterIndex, GSLVector &newParameters,
+                      double &newValue);
   /// Given the new chi2, next position is calculated and updated.
   /// m_changes[ParameterIndex] updated too
-  void algorithmDisplacement(const size_t &ParameterIndex,
-                             const double &chi2_new, GSLVector &new_parameters);
+  void algorithmDisplacement(const size_t &parameterIndex,
+                             const double &chi2New, GSLVector &newParameters);
   /// Updates the ParameterIndex-th parameter jump if appropriate
-  void jumpUpdate(const size_t &ParameterIndex);
+  void jumpUpdate(const size_t &parameterIndex);
   /// Check for convergence (including Overexploration convergence), updates
   /// m_converged
   void convergenceCheck();
