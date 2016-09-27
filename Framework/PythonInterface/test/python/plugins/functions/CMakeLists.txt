@@ -7,6 +7,7 @@ set ( TEST_PY_FILES
   DSFinterp1DFitTest.py
   Example1DFunctionTest.py
   ExamplePeakFunctionTest.py
+  FickDiffusionTest.py
   StretchedExpFTTest.py
   AttributeTest.py
 )
