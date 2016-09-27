@@ -41,9 +41,9 @@ public:
     const double muR(0.01), abs(0.0003);
     auto absFactor = mscat.calculateMS(irp, muR, abs);
 
-    const double delta = 1e-8;
-    TS_ASSERT_DELTA(0.00461391, absFactor.first, delta);
-    TS_ASSERT_DELTA(67.25351289, absFactor.second, delta);
+    const double delta(1e-8);
+    TS_ASSERT_DELTA(0.00463523, absFactor.first, delta);
+    TS_ASSERT_DELTA(82.86421374, absFactor.second, delta);
   }
 
   void test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Point_Data() {
@@ -64,11 +64,11 @@ public:
     TS_ASSERT_DELTA(100.0, tof.front(), delta);
     TS_ASSERT_DELTA(199.0, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.37497317, signal.front(), delta);
-    TS_ASSERT_DELTA(0.37629282, signal.back(), delta);
+    TS_ASSERT_DELTA(0.37514, signal.front(), delta);
+    TS_ASSERT_DELTA(0.376606, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.26514607, error.front(), delta);
-    TS_ASSERT_DELTA(0.2660792, error.back(), delta);
+    TS_ASSERT_DELTA(0.265264, error.front(), delta);
+    TS_ASSERT_DELTA(0.266301, error.back(), delta);
   }
 
   void
@@ -91,11 +91,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.37497317, signal.front(), delta);
-    TS_ASSERT_DELTA(0.37629282, signal.back(), delta);
+    TS_ASSERT_DELTA(0.37514, signal.front(), delta);
+    TS_ASSERT_DELTA(0.376606, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.26514607, error.front(), delta);
-    TS_ASSERT_DELTA(0.2660792, error.back(), delta);
+    TS_ASSERT_DELTA(0.265264, error.front(), delta);
+    TS_ASSERT_DELTA(0.266301, error.back(), delta);
   }
 
   void test_Corrects_For_Absorption_For_Histogram_Data() {

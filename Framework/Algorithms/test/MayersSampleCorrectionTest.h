@@ -8,6 +8,7 @@
 #include "MantidKernel/Material.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/MersenneTwister.h"
 
 using Mantid::Algorithms::MayersSampleCorrection;
 using Mantid::API::IAlgorithm_sptr;
@@ -40,11 +41,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.37497317, signal.front(), delta);
-    TS_ASSERT_DELTA(0.37629282, signal.back(), delta);
+    TS_ASSERT_DELTA(0.37514, signal.front(), delta);
+    TS_ASSERT_DELTA(0.376606, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.26514607, error.front(), delta);
-    TS_ASSERT_DELTA(0.2660792, error.back(), delta);
+    TS_ASSERT_DELTA(0.265264, error.front(), delta);
+    TS_ASSERT_DELTA(0.266301, error.back(), delta);
   }
 
   void test_Success_With_Just_Absorption_Correction() {

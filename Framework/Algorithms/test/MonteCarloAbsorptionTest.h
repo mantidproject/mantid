@@ -97,15 +97,15 @@ public:
     const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.019012, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.0021002, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.00010066, outputWS->y(0).back(), delta);
-    TS_ASSERT_DELTA(0.019074, outputWS->y(2).front(), delta);
-    TS_ASSERT_DELTA(0.001629, outputWS->y(2)[middle_index], delta);
-    TS_ASSERT_DELTA(9.4268e-05, outputWS->y(2).back(), delta);
-    TS_ASSERT_DELTA(0.019256, outputWS->y(4).front(), delta);
-    TS_ASSERT_DELTA(0.0014369, outputWS->y(4)[middle_index], delta);
-    TS_ASSERT_DELTA(9.8238e-05, outputWS->y(4).back(), delta);
+    TS_ASSERT_DELTA(0.0176638, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.00194808, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.000129304, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.0175918, outputWS->y(2).front(), delta);
+    TS_ASSERT_DELTA(0.00202576, outputWS->y(2)[middle_index], delta);
+    TS_ASSERT_DELTA(0.000141414, outputWS->y(2).back(), delta);
+    TS_ASSERT_DELTA(0.017851, outputWS->y(4).front(), delta);
+    TS_ASSERT_DELTA(0.00223242, outputWS->y(4)[middle_index], delta);
+    TS_ASSERT_DELTA(0.000208047, outputWS->y(4).back(), delta);
   }
 
   void test_Workspace_With_Just_Sample_For_Direct() {
@@ -118,9 +118,9 @@ public:
     const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.0087756, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.0031353, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.00087368, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.00845939, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.00306779, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.00099556, outputWS->y(0).back(), delta);
   }
 
   void test_Workspace_With_Just_Sample_For_Indirect() {
@@ -133,9 +133,9 @@ public:
     const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.0038337, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.0013434, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.00019552, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.00399636, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.0012619, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.000239975, outputWS->y(0).back(), delta);
   }
 
   void test_Workspace_With_Sample_And_Container() {
@@ -148,9 +148,9 @@ public:
     const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.016547, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.0022329, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.00024214, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.0185763, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.00305882, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.000341636, outputWS->y(0).back(), delta);
   }
 
   void test_Workspace_Beam_Size_Set() {
@@ -163,9 +163,9 @@ public:
     const double delta(1e-05);
     const size_t middle_index(4);
 
-    TS_ASSERT_DELTA(0.0045478, outputWS->y(0).front(), delta);
-    TS_ASSERT_DELTA(0.00036224, outputWS->y(0)[middle_index], delta);
-    TS_ASSERT_DELTA(6.5735e-05, outputWS->y(0).back(), delta);
+    TS_ASSERT_DELTA(0.0128107, outputWS->y(0).front(), delta);
+    TS_ASSERT_DELTA(0.000519085, outputWS->y(0)[middle_index], delta);
+    TS_ASSERT_DELTA(4.69767e-05, outputWS->y(0).back(), delta);
   }
 
   //---------------------------------------------------------------------------
