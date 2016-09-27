@@ -184,10 +184,9 @@ void ProcessBankData::processEvents(bool &pulsetimesincreasing,
 }
 
 /** compress events or set the order of events in a sepctrum
- * @brief ProcessBankData::compressOrSetOrder
+ * @brief ProcessBankData::compressEvents
  * @param compress
  * @param usedDetIds
- * @param pulsetimesincreasing
  */
 void ProcessBankData::compressEvents(bool compress,
                                      const std::vector<bool> &usedDetIds) {
@@ -251,7 +250,7 @@ void ProcessBankData::run() {
                 my_longest_tof, badTofs, compress, usedDetIds);
 
   //------------ Compress Events (or set sort order) ------------------
-  compressEvents(compress, usedDetIds); // , pulsetimesincreasing);
+  compressEvents(compress, usedDetIds);
 
   prog->report(entry_name + ": filled events");
 
