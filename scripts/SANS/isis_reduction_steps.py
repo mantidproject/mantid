@@ -1903,7 +1903,7 @@ class CropDetBank(ReductionStep):
                                 WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
 
             monitor_ws = reducer.get_sample().get_monitor()
-            UnwrapMonitorsInTOF(InputWorkspace=scatter_ws, OutputWorkspace=scatter_ws,
+            UnwrapMonitorsInTOF(InputWorkspace=monitor_ws, OutputWorkspace=monitor_ws,
                                 WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
 
 
@@ -4047,10 +4047,11 @@ class UserFile(ReductionStep):
         # Remove white space
         on_off = "".join(arguments.split())
         if on_off == "ON":
-            pass
+            reducer.unwrap_monitors = True
         elif on_off == "OFF":
-            pass
+            reducer.unwrap_monitors = False
         else:
+            reducer.unwrap_monitors = False
             return 'Unknown setting {0} UNWRAP command in line: '.format(on_off)
         return ''
 
