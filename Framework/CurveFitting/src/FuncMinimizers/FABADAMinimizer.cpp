@@ -51,7 +51,7 @@ DECLARE_FUNCMINIMIZER(FABADAMinimizer, FABADA)
 FABADAMinimizer::FABADAMinimizer()
     : m_counter(0), m_chainIterations(0), m_changes(), m_jump(), m_parameters(),
       m_chain(), m_chi2(0.), m_converged(false), m_conv_point(0),
-      m_par_converged(), m_lower(), m_upper(), m_bound(), m_criteria(),
+      m_par_converged(), m_criteria(),
       m_max_iter(0), m_par_changed(), m_temperature(0.), m_counterGlobal(0),
       m_simAnnealingItStep(0), m_leftRefrPoints(0), m_tempStep(0.),
       m_overexploration(false), m_nParams(0), m_innactConvCriterion(0),
@@ -164,41 +164,29 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
 
   // Save parameter constraints
   for (size_t i = 0; i < m_nParams; ++i) {
-    double p = m_parameters.get(i);
-    m_bound.push_back(false);
+
+    double param = m_parameters.get(i);
+
     API::IConstraint *iconstr = m_fitFunction->getConstraint(i);
     if (iconstr) {
       Constraints::BoundaryConstraint *bcon =
           dynamic_cast<Constraints::BoundaryConstraint *>(iconstr);
       if (bcon) {
-        m_bound[i] = true;
+
         if (bcon->hasLower()) {
-          m_lower.push_back(bcon->lower());
-        } else {
-          m_lower.push_back(-LARGE_NUMBER);
+          if (param < bcon->lower())
+            m_parameters.set(i, bcon->lower());
         }
         if (bcon->hasUpper()) {
-          m_upper.push_back(bcon->upper());
-        } else {
-          m_upper.push_back(LARGE_NUMBER);
-        }
-        if (p < m_lower[i]) {
-          p = m_lower[i];
-          m_parameters.set(i, p);
-        }
-        if (p > m_upper[i]) {
-          p = m_upper[i];
-          m_parameters.set(i, p);
+          if (param > bcon->upper())
+            m_parameters.set(i, bcon->upper());
         }
       }
-    } else {
-      m_lower.push_back(-LARGE_NUMBER);
-      m_upper.push_back(LARGE_NUMBER);
     }
 
     // Initialize chains
     std::vector<double> v;
-    v.push_back(p);
+    v.push_back(param);
     m_chain.push_back(v);
     m_max_iter = maxIterations;
 
@@ -207,8 +195,8 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
     m_numInactiveRegenerations.push_back(0);
     m_par_converged.push_back(false);
     m_criteria.push_back(getProperty("ConvergenceCriteria"));
-    if (p != 0.0) {
-      m_jump.push_back(std::abs(p / 10));
+    if (param != 0.0) {
+      m_jump.push_back(std::abs(param / 10));
     } else {
       m_jump.push_back(0.01);
     }
@@ -752,29 +740,37 @@ double FABADAMinimizer::gaussianStep(const double &jump) {
 */
 void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
                                        double &newValue, double &step) {
-  // Checks if it is inside the boundary constrinctions.
-  // If not, changes it.
   const size_t &i = parameterIndex;
-  if (m_bound[i]) {
-    while (newValue < m_lower[i]) {
-      if (std::abs(step) > m_upper[i] - m_lower[i]) {
-        newValue = m_parameters.get(i) + step / 10.0;
-        step = step / 10;
-        m_jump[i] = m_jump[i] / 10;
-      } else {
-        newValue =
-            m_lower[i] + std::abs(step) - (m_parameters.get(i) - m_lower[i]);
-      }
+  API::IConstraint *iconstr = m_fitFunction->getConstraint(i);
+  if (!iconstr)
+    return;
+  Constraints::BoundaryConstraint *bcon =
+      dynamic_cast<Constraints::BoundaryConstraint *>(iconstr);
+  if (!bcon)
+    return;
+
+  double lower = bcon->lower();
+  double upper = bcon->upper();
+  double delta = upper - lower;
+
+  // Lower
+  while (newValue < lower) {
+    if (std::abs(step) > delta) {
+      newValue = m_parameters.get(i) + step / 10.0;
+      step = step / 10;
+      m_jump[i] = m_jump[i] / 10;
+    } else {
+      newValue = lower + std::abs(step) - (m_parameters.get(i) - lower);
     }
-    while (newValue > m_upper[i]) {
-      if (std::abs(step) > m_upper[i] - m_lower[i]) {
-        newValue = m_parameters.get(i) + step / 10.0;
-        step = step / 10;
-        m_jump[i] = m_jump[i] / 10;
-      } else {
-        newValue =
-            m_upper[i] - (std::abs(step) + m_parameters.get(i) - m_upper[i]);
-      }
+  }
+  // Upper
+  while (newValue > upper) {
+    if (std::abs(step) > delta) {
+      newValue = m_parameters.get(i) + step / 10.0;
+      step = step / 10;
+      m_jump[i] = m_jump[i] / 10;
+    } else {
+      newValue = upper - (std::abs(step) + m_parameters.get(i) - upper);
     }
   }
 }
