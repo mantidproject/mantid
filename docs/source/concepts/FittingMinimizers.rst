@@ -38,7 +38,12 @@ options are available:
 
   A `Gauss-Newton <https://en.wikipedia.org/wiki/Gauss–Newton_algorithm#Improved_versions>`__ algorithm with damping.
 - :ref:`FABADA <FABADA>`
-- A `Trust region <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__ algorithm.
+- `Trust region
+  <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__: a `Trust
+  region <https://en.wikipedia.org/wiki/Trust_region> algorithm` that,
+  at each iteration, calculates and returns the step that reduces the
+  model by an acceptable amount by solving (or approximating a
+  solution to) the trust-region subproblem
 
 All these algorithms are `iterative
 <https://en.wikipedia.org/wiki/Iterative_method>`__.  The *Simplex*
@@ -70,7 +75,7 @@ a substantially different algorithm.
 
 In most cases, the implementation of these algorithms is based on the
 `GSL (GNU Scientific Library) library
-https://www.gnu.org/software/gsl/`__, and more specifically on the
+<https://www.gnu.org/software/gsl/>`__, and more specifically on the
 `GSL routines for least-squares fitting
 <https://www.gnu.org/software/gsl/manual/html_node/Least_002dSquares-Fitting.html#Least_002dSquares-Fitting>`__
 
@@ -206,7 +211,7 @@ and on the same system:
 - Mantid release 3.8
 
 - Debian 8 GNU/Linux system with an Intel Core i7-4790 processor,
-  using `GSL https://www.gnu.org/software/gsl/`__ version 1.16.
+  using `GSL <https://www.gnu.org/software/gsl/>`__ version 1.16.
 
 References:
              
