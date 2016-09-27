@@ -268,6 +268,8 @@ void ConvFit::run() {
   cfs->setProperty("MaxIterations", static_cast<int>(m_dblManager->value(
                                         m_properties["MaxIterations"])));
   cfs->setProperty("OutputWorkspace", (m_baseName.toStdString() + "_Result"));
+
+  // Add to batch alg runner and execute
   m_batchAlgoRunner->addAlgorithm(cfs);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
@@ -389,6 +391,7 @@ void ConvFit::algorithmComplete(bool error) {
                                "String");
       addSampleLogsToWorkspace(resultName, "temperature_value", temperatureStr,
                                "Number");
+
       addSampleLogsToWorkspace(resultName, "temperature_value", temperatureStr,
                                "Number");
     }
@@ -400,13 +403,13 @@ void ConvFit::algorithmComplete(bool error) {
 }
 
 /**
-* Sets up and adds an instance of the AddSampleLog algorithm to the batch
-* algorithm runner
-* @param workspaceName	:: The name of the workspace to add the log to
-* @param logName		:: The title of the log input
-* @param logText		:: The information to match the title
-* @param logType		:: The type of information (String, Number)
-*/
+ * Sets up and add an instance of the AddSampleLog algorithm to the batch
+ * algorithm runner
+ * @param workspaceName	:: The name of the workspace to add the log to
+ * @param logName		:: The title of the log input
+ * @param logText		:: The information to match the title
+ * @param logType		:: The type of information (String, Number)
+ */
 void ConvFit::addSampleLogsToWorkspace(const std::string workspaceName,
                                        const std::string logName,
                                        const std::string logText,
@@ -1228,11 +1231,12 @@ void ConvFit::singleFitComplete(bool error) {
 
   // Get params.
   QMap<QString, double> parameters;
-  std::vector<std::string> parNames = outputFunc->getParameterNames();
+  const std::vector<std::string> parNames = outputFunc->getParameterNames();
   std::vector<double> parVals;
 
   QStringList params = getFunctionParameters(functionName);
   params.reserve(static_cast<int>(parNames.size()));
+
   for (size_t i = 0; i < parNames.size(); ++i)
     parVals.push_back(outputFunc->getParameter(parNames[i]));
 
@@ -1285,7 +1289,7 @@ void ConvFit::singleFitComplete(bool error) {
     pref += "f" + QString::number(subIndex) + ".";
   }
 
-  if (fitTypeIndex == 1 || fitTypeIndex == 2) {
+  if (fitTypeIndex == 2) {
     functionName = "Lorentzian 1";
   }
 
@@ -1304,8 +1308,8 @@ void ConvFit::singleFitComplete(bool error) {
     functionName = "Lorentzian 2";
 
     for (auto it = params.begin() + 3; it != params.end(); ++it) {
-      QString functionParam = functionName + "." + *it;
-      QString paramValue = pref + *it;
+      const QString functionParam = functionName + "." + *it;
+      const QString paramValue = pref + *it;
       m_dblManager->setValue(m_properties[functionParam],
                              parameters[paramValue]);
     }
@@ -1573,34 +1577,34 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
     m_defaultParams.insert("PeakCentre", peakCentre);
     m_defaultParams.insert("FWHM", fwhm);
     m_defaultParams.insert("Amplitude", amplitude);
+
+    // Remove previous parameters from tree
+    m_cfTree->removeProperty(m_properties["FitFunction1"]);
+    m_cfTree->removeProperty(m_properties["FitFunction2"]);
+
+    m_uiForm.ckPlotGuess->setChecked(false);
+    m_uiForm.ckTieCentres->setChecked(false);
+
+    updatePlotOptions();
+
+    // Two Lorentzians Fit
+    if (currentFitFunction.compare("Two Lorentzians") == 0) {
+      m_properties["FitFunction1"] = m_grpManager->addProperty("Lorentzian 1");
+      m_cfTree->addProperty(m_properties["FitFunction1"]);
+      m_properties["FitFunction2"] = m_grpManager->addProperty("Lorentzian 2");
+      m_cfTree->addProperty(m_properties["FitFunction2"]);
+    } else {
+      m_properties["FitFunction1"] = m_grpManager->addProperty(functionName);
+      m_cfTree->addProperty(m_properties["FitFunction1"]);
+    }
+
+    // If there are parameters in the list, add them
+    const QStringList parameters = getFunctionParameters(functionName);
+    if (parameters.isEmpty() != true) {
+      addParametersToTree(parameters, currentFitFunction);
+    }
+    m_previousFit = m_uiForm.cbFitType->currentText();
   }
-
-  // Remove previous parameters from tree
-  m_cfTree->removeProperty(m_properties["FitFunction1"]);
-  m_cfTree->removeProperty(m_properties["FitFunction2"]);
-
-  m_uiForm.ckPlotGuess->setChecked(false);
-  m_uiForm.ckTieCentres->setChecked(false);
-
-  updatePlotOptions();
-
-  // Two Lorentzians Fit
-  if (currentFitFunction.compare("Two Lorentzians") == 0) {
-    m_properties["FitFunction1"] = m_grpManager->addProperty("Lorentzian 1");
-    m_cfTree->addProperty(m_properties["FitFunction1"]);
-    m_properties["FitFunction2"] = m_grpManager->addProperty("Lorentzian 2");
-    m_cfTree->addProperty(m_properties["FitFunction2"]);
-  } else {
-    m_properties["FitFunction1"] = m_grpManager->addProperty(functionName);
-    m_cfTree->addProperty(m_properties["FitFunction1"]);
-  }
-
-  // If there are parameters in the list, add them
-  const QStringList parameters = getFunctionParameters(functionName);
-  if (parameters.isEmpty() != true) {
-    addParametersToTree(parameters, currentFitFunction);
-  }
-  m_previousFit = m_uiForm.cbFitType->currentText();
 }
 
 /**
@@ -1629,7 +1633,6 @@ void ConvFit::addParametersToTree(const QStringList &parameters,
     if (propName.compare("Lorentzian 2") == 0) {
       m_properties["FitFunction2"]->addSubProperty(
           m_properties[fullPropertyName]);
-
     } else {
       m_properties["FitFunction1"]->addSubProperty(
           m_properties[fullPropertyName]);
@@ -1707,15 +1710,15 @@ ConvFit::createDefaultParamsMap(QMap<QString, double> map) {
 * @return a QMap populated with name, value pairs for parameters where name =
 * fitFunction.parametername and value is either from the default map or 0
 */
-
 QMap<QString, double>
 ConvFit::constructFullPropertyMap(const QMap<QString, double> defaultMap,
                                   const QStringList parameters,
                                   const QString &fitFunction) {
   QMap<QString, double> fullMap;
   QString fitFuncName = fitFunction;
+
   // Special case for Two Lorentzian - as it is comprised of 2 single
-  // lorentzians
+  // Lorentzians
   if (fitFunction.compare("Two Lorentzians") == 0) {
     fitFuncName = "Lorentzian 1";
     for (auto param = parameters.begin(); param != parameters.end(); ++param) {
