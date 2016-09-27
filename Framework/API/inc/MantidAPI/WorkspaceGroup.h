@@ -150,8 +150,7 @@ private:
                   Mantid::API::WorkspaceBeforeReplaceNotification>
       m_beforeReplaceObserver;
   /// Observer for workspace rename notifications
-  Poco::NObserver<WorkspaceGroup,
-                  Mantid::API::WorkspaceRenameNotification>
+  Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspaceRenameNotification>
       m_renameObserver;
   /// The list of workspace pointers in the group
   std::vector<Workspace_sptr> m_workspaces;
