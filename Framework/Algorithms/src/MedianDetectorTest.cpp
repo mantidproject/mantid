@@ -116,7 +116,7 @@ void MedianDetectorTest::exec() {
 
   // 1. Calculate the median
   std::vector<double> median =
-      calculateMedian(countsWS, excludeZeroes, specmap);
+      calculateMedian(*countsWS, excludeZeroes, specmap);
   std::vector<double>::iterator medit;
   for (medit = median.begin(); medit != median.end(); ++medit) {
     g_log.debug() << "Median value = " << (*medit) << "\n";
@@ -125,7 +125,7 @@ void MedianDetectorTest::exec() {
   int numFailed = maskOutliers(median, countsWS, specmap);
 
   // 3. Recalulate the median
-  median = calculateMedian(countsWS, excludeZeroes, specmap);
+  median = calculateMedian(*countsWS, excludeZeroes, specmap);
   for (medit = median.begin(); medit != median.end(); ++medit) {
     g_log.information() << "Median value with outliers removed = " << (*medit)
                         << "\n";
