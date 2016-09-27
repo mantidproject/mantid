@@ -710,7 +710,7 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName) {
   if (!groups.contains(groupToSet)) {
     m_dataSelector->setChosenGroup(groupToSet);
   }
-  if (!periods.contains(periodToSet)) {
+  if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
     m_dataSelector->setChosenPeriod(periodToSet);
   }
 }
