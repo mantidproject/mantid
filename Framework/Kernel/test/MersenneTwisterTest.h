@@ -1,7 +1,6 @@
 #ifndef MERSENNETWISTERTEST_H_
 #define MERSENNETWISTERTEST_H_
 
-#include <iomanip>
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/MersenneTwister.h"
 
