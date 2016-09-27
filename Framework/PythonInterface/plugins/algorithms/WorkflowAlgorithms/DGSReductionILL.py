@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from mantid.api import AlgorithmFactory, AnalysisDataServiceImpl, DataProcessorAlgorithm, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, PropertyMode, WorkspaceProperty
+from mantid.api import AlgorithmFactory, AnalysisDataServiceImpl, DataProcessorAlgorithm, FileAction, FileProperty, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, PropertyMode, WorkspaceProperty
 from mantid.kernel import Direct, Direction, UnitConversion
 from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
                              CloneWorkspace, ComputeCalibrationCoefVan,\
@@ -204,13 +204,16 @@ class DGSReductionILL(DataProcessorAlgorithm):
         if eppOutWs or not eppInWs:
             if not eppOutWs:
                 eppOutWs = eppWorkspaceName(identifier)
+            if not monitorEppOutWs:
                 monitorEppOutWs = monitorEppWorkspaceName(identifier)
-            eppWorkspace = FindEPP(InputWorkspace = workspace, 
+            eppWorkspace = FindEPP(InputWorkspace = workspace,
                                    OutputWorkspace = eppOutWs)
             monitorEppWorkspace = FindEPP(InputWorkspace = monitorWorkspace,
                                           OutputWorkspace = monitorEppOutWs)
-            self.setProperty(PROP_OUTPUT_EPP_WORKSPACE, eppWorkspace)
-            self.setProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE, monitorEppWorkspace)
+            if self.getPropertyValue(PROP_OUTPUT_EPP_WORKSPACE):
+                self.setProperty(PROP_OUTPUT_EPP_WORKSPACE, eppWorkspace)
+            if self.getPropertyValue(PROP_OUTPUT_MONITOR_EPP_WORKSPACE):
+                self.setProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE, monitorEppWorkspace)
         if eppInWs:
             eppWorkspace = self.getProperty(PROP_EPP_WORKSPACE).value
             monitorEppWorkspace = self.getProperty(PROP_MONITOR_EPP_WORKSPACE).value
@@ -221,7 +224,7 @@ class DGSReductionILL(DataProcessorAlgorithm):
                                                           DataValue = 0)
                 self.setProperty(PROP_OUTPUT_EPP_WORKSPACE, eppOutWs)
                 self.setProperty(PROP_OUTPUT_MONITOR_EPP_WORKSPACE, eppOutWs)
-        
+
         # Identify bad detectors & include user mask
         userMask = stringListToArray(self.getProperty(PROP_USER_MASK).value)
         outWs = badDetectorWorkspaceName(identifier)
@@ -294,7 +297,7 @@ class DGSReductionILL(DataProcessorAlgorithm):
                          NumberType='Double',
                          LogUnit='Ångström')
         else:
-            self.log.notice('Skipping incident energy calibration for ' + instrument)
+            self.log().information('Skipping incident energy calibration for ' + instrument)
 
         # Normalisation to monitor/time
         normalisationMethod = self.getProperty(PROP_NORMALISATION).value
@@ -383,10 +386,11 @@ class DGSReductionILL(DataProcessorAlgorithm):
 
         # Vanadium normalisation
         vanadiumNormFactors = self.getProperty(PROP_VANADIUM_WORKSPACE).value
-        outWs = vanadiumNormalisedWorkspaceName(identifier)
-        workspace = Divide(LHSWorkspace=workspace,
-                           RHSWorkspace=vanadiumNormFactors,
-                           OutputWorkspace=outWs)
+        if vanadiumNormFactors:
+            outWs = vanadiumNormalisedWorkspaceName(identifier)
+            workspace = Divide(LHSWorkspace=workspace,
+                               RHSWorkspace=vanadiumNormFactors,
+                               OutputWorkspace=outWs)
 
         # Convert units from TOF to energy
         outWs = energyConvertedWorkspaceName(identifier)
@@ -403,10 +407,11 @@ class DGSReductionILL(DataProcessorAlgorithm):
         # Rebinning
         # TODO automatize binning in w. Do we need rebinning in q as well?
         params = self.getProperty(PROP_BINNING_W).value
-        outWs = rebinnedWorkspaceName(identifier)
-        workspace = Rebin(InputWorkspace = workspace,
-                          OutputWorkspace = outWs,
-                          Params = params)
+        if params:
+            outWs = rebinnedWorkspaceName(identifier)
+            workspace = Rebin(InputWorkspace = workspace,
+                              OutputWorkspace = outWs,
+                              Params = params)
 
         # Detector efficiency correction
         outWs = detectorEfficiencyCorrectedWorkspaceName(identifier)
@@ -420,10 +425,10 @@ class DGSReductionILL(DataProcessorAlgorithm):
     def PyInit(self):
         # TODO Property validation.
         # Inputs
-        self.declareProperty(PROP_INPUT_FILE,
-                             '',
-                             direction=Direction.Input,
-                             doc='Filename for the data to be reduced')
+        self.declareProperty(FileProperty(PROP_INPUT_FILE,
+                                          '',
+                                          action=FileAction.Load,
+                                          extensions=['nxs']))
         self.declareProperty(PROP_OUTPUT_SUFFIX,
                              '',
                              direction=Direction.Input,
