@@ -144,7 +144,7 @@ public:
     int mode = std::stoi(runinfows->run().getProperty("mode")->value().c_str());
     TS_ASSERT_EQUALS(mode, 3);
 
-    double comerr = atof(
+    double comerr = std::stod(
         runinfows->run().getProperty("Center of Mass.error")->value().c_str());
     TS_ASSERT_DELTA(comerr, 0.009214, 0.000001);
 
