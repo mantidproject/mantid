@@ -29,13 +29,8 @@ DECLARE_ALGORITHM(CompareWorkspaces)
 /** Constructor
  */
 CompareWorkspaces::CompareWorkspaces()
-    : API::Algorithm(), m_Result(false), m_Prog(nullptr),
-      m_ParallelComparison(true) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CompareWorkspaces::~CompareWorkspaces() { delete m_Prog; }
+    : API::Algorithm(), m_result(false), m_progress(nullptr),
+      m_parallelComparison(true) {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithms name for identification. @see Algorithm::name
@@ -112,26 +107,26 @@ void CompareWorkspaces::init() {
           "Messages", "compare_msgs", Direction::Output),
       "TableWorkspace containing messages about any mismatches detected");
 
-  m_Messages = WorkspaceFactory::Instance().createTable("TableWorkspace");
-  m_Messages->addColumn("str", "Message");
-  m_Messages->addColumn("str", "Workspace 1");
-  m_Messages->addColumn("str", "Workspace 2");
+  m_messages = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_messages->addColumn("str", "Message");
+  m_messages->addColumn("str", "Workspace 1");
+  m_messages->addColumn("str", "Workspace 2");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CompareWorkspaces::exec() {
-  m_Result = true;
-  m_Messages->setRowCount(0); // Clear table
+  m_result = true;
+  m_messages->setRowCount(0); // Clear table
 
   if (g_log.is(Logger::Priority::PRIO_DEBUG))
-    m_ParallelComparison = false;
+    m_parallelComparison = false;
 
   this->doComparison();
 
-  if (!m_Result) {
-    std::string message = m_Messages->cell<std::string>(0, 0);
+  if (!m_result) {
+    std::string message = m_messages->cell<std::string>(0, 0);
     g_log.notice() << "The workspaces did not match: " << message << '\n';
   } else {
     std::string ws1 = Workspace_const_sptr(getProperty("Workspace1"))->name();
@@ -140,8 +135,8 @@ void CompareWorkspaces::exec() {
                    << "\" matched!\n";
   }
 
-  setProperty("Result", m_Result);
-  setProperty("Messages", m_Messages);
+  setProperty("Result", m_result);
+  setProperty("Messages", m_messages);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -153,7 +148,7 @@ void CompareWorkspaces::exec() {
  */
 bool CompareWorkspaces::processGroups() {
   m_Result = true;
-  m_Messages->setRowCount(0); // Clear table
+  m_messages->setRowCount(0); // Clear table
 
   // Get workspaces
   Workspace_const_sptr w1 = getProperty("Workspace1");
@@ -177,13 +172,13 @@ bool CompareWorkspaces::processGroups() {
         "Type mismatch. One workspace is a group, the other is not.");
   }
 
-  if (m_Result && ws1 && ws2) {
+  if (m_result && ws1 && ws2) {
     g_log.notice() << "All workspaces in workspace groups \"" << ws1->name()
                    << "\" and \"" << ws2->name() << "\" matched!\n";
   }
 
-  setProperty("Result", m_Result);
-  setProperty("Messages", m_Messages);
+  setProperty("Result", m_result);
+  setProperty("Messages", m_messages);
 
   return true;
 }
@@ -341,14 +336,14 @@ void CompareWorkspaces::doComparison() {
   size_t numhist = ws1->getNumberHistograms();
 
   if (ews1 && ews2) {
-    m_Prog = new Progress(this, 0.0, 1.0, numhist * 5);
+    m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numhist * 5);
 
     // Compare event lists to see whether 2 event workspaces match each other
     if (!compareEventWorkspaces(*ews1, *ews2))
       return;
   } else {
     // Fewer steps if not events
-    m_Prog = new Progress(this, 0.0, 1.0, numhist * 2);
+    m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numhist * 2);
   }
 
   // ==============================================================================
@@ -360,21 +355,21 @@ void CompareWorkspaces::doComparison() {
     return;
 
   // Now do the other ones if requested. Bail out as soon as we see a failure.
-  m_Prog->reportIncrement(numhist / 5, "Axes");
+  m_progress->reportIncrement(numhist / 5, "Axes");
   if (static_cast<bool>(getProperty("CheckAxes")) && !checkAxes(ws1, ws2))
     return;
-  m_Prog->reportIncrement(numhist / 5, "SpectraMap");
+  m_progress->reportIncrement(numhist / 5, "SpectraMap");
   if (static_cast<bool>(getProperty("CheckSpectraMap")) &&
       !checkSpectraMap(ws1, ws2))
     return;
-  m_Prog->reportIncrement(numhist / 5, "Instrument");
+  m_progress->reportIncrement(numhist / 5, "Instrument");
   if (static_cast<bool>(getProperty("CheckInstrument")) &&
       !checkInstrument(ws1, ws2))
     return;
-  m_Prog->reportIncrement(numhist / 5, "Masking");
+  m_progress->reportIncrement(numhist / 5, "Masking");
   if (static_cast<bool>(getProperty("CheckMasking")) && !checkMasking(ws1, ws2))
     return;
-  m_Prog->reportIncrement(numhist / 5, "Sample");
+  m_progress->reportIncrement(numhist / 5, "Sample");
   if (static_cast<bool>(getProperty("CheckSample"))) {
     if (!checkSample(ws1->sample(), ws2->sample()))
       return;
@@ -405,8 +400,8 @@ bool CompareWorkspaces::compareEventWorkspaces(
   }
 
   // Both will end up sorted anyway
-  ews1.sortAll(PULSETIMETOF_SORT, m_Prog);
-  ews2.sortAll(PULSETIMETOF_SORT, m_Prog);
+  ews1.sortAll(PULSETIMETOF_SORT, m_progress.get());
+  ews2.sortAll(PULSETIMETOF_SORT, m_progress.get());
 
   // Determine the tolerance for "tof" attribute and "weight" of events
   double toleranceWeight = Tolerance; // Standard tolerance
@@ -433,11 +428,11 @@ bool CompareWorkspaces::compareEventWorkspaces(
   size_t numUnequalBothEvents = 0;
 
   std::vector<int> vec_mismatchedwsindex;
-  PARALLEL_FOR_IF(m_ParallelComparison && ews1.threadSafe() &&
+  PARALLEL_FOR_IF(m_parallelComparison && ews1.threadSafe() &&
                   ews2.threadSafe())
   for (int i = 0; i < static_cast<int>(ews1.getNumberHistograms()); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    m_Prog->report("EventLists");
+    m_progress->report("EventLists");
     if (!mismatchedEvent ||
         checkallspectra) // This guard will avoid checking unnecessarily
     {
@@ -546,7 +541,7 @@ bool CompareWorkspaces::checkData(API::MatrixWorkspace_const_sptr ws1,
   const size_t numBins = ws1->blocksize();
   const bool histogram = ws1->isHistogramData();
   const bool checkAllData = getProperty("CheckAllData");
-  const bool RelErr = getProperty("ToleranceRelErr");
+  const bool checkRelativeError = getProperty("ToleranceRelErr");
 
   // First check that the workspace are the same size
   if (numHists != ws2->getNumberHistograms() || numBins != ws2->blocksize()) {
@@ -564,11 +559,11 @@ bool CompareWorkspaces::checkData(API::MatrixWorkspace_const_sptr ws1,
   bool resultBool = true;
 
   // Now check the data itself
-  PARALLEL_FOR_IF(m_ParallelComparison && ws1->threadSafe() &&
+  PARALLEL_FOR_IF(m_parallelComparison && ws1->threadSafe() &&
                   ws2->threadSafe())
   for (long i = 0; i < static_cast<long>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    m_Prog->report("Histograms");
+    m_progress->report("Histograms");
 
     if (resultBool || checkAllData) // Avoid checking unnecessarily
     {
@@ -582,10 +577,10 @@ bool CompareWorkspaces::checkData(API::MatrixWorkspace_const_sptr ws1,
 
       for (int j = 0; j < static_cast<int>(numBins); ++j) {
         bool err;
-        if (RelErr) {
-          err = (relErr(X1[j], X2[j], tolerance) ||
-                 relErr(Y1[j], Y2[j], tolerance) ||
-                 relErr(E1[j], E2[j], tolerance));
+        if (checkRelativeError) {
+          err = (relativeError(X1[j], X2[j], tolerance) ||
+                 relativeError(Y1[j], Y2[j], tolerance) ||
+                 relativeError(E1[j], E2[j], tolerance));
         } else
           err = (std::fabs(X1[j] - X2[j]) > tolerance ||
                  std::fabs(Y1[j] - Y2[j]) > tolerance ||
@@ -1168,9 +1163,9 @@ void CompareWorkspaces::recordMismatch(std::string msg, std::string ws1,
   }
 
   // Add new row and flag this comparison as a mismatch
-  TableRow row = m_Messages->appendRow();
+  TableRow row = m_messages->appendRow();
   row << msg << ws1 << ws2;
-  m_Result = false;
+  m_result = false;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1187,7 +1182,7 @@ then 0
 
 @returns true if error or false if the value is within the limits requested
 */
-bool CompareWorkspaces::relErr(double x1, double x2, double errorVal) const {
+bool CompareWorkspaces::relativeError(double x1, double x2, double errorVal) const {
   double num = std::fabs(x1 - x2);
   // how to treat x1<0 and x2 > 0 ?  probably this way
   double den = 0.5 * (std::fabs(x1) + std::fabs(x2));
