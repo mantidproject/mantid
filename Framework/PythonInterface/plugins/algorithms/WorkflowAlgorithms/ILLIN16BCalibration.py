@@ -64,6 +64,7 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
               Factor=self._intensity_scale,
               Operation='Multiply')
 
+        DeleteWorkspace(__temp)
         DeleteWorkspace(__ws_name)
 
         self.setProperty('OutputWorkspace', self._out_ws)
