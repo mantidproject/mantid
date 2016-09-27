@@ -10,6 +10,7 @@ set ( TEST_PY_FILES
   FickDiffusionTest.py
   HallRossTest.py
   StretchedExpFTTest.py
+  TeixeiraWaterTest.py
   AttributeTest.py
 )
 
