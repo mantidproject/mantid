@@ -50,7 +50,7 @@ class USANSSimulation(PythonAlgorithm):
         mon_e = mon_ws.dataE(0)
 
         # Number of pixels for the main detector
-        n_pixels = out_ws.getNumberHistograms()/2
+        n_pixels = int(out_ws.getNumberHistograms()/2)
         # Clean up the workspace
         for j in range(n_pixels):
             data_y = out_ws.dataY(j)
