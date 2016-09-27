@@ -119,25 +119,6 @@ class IndirectCommonTests(unittest.TestCase):
         actual_result = indirect_common.PadArray(data, 10)
         self.assert_lists_match(expected_result, actual_result)
 
-    def test_CheckHistSame(self):
-        ws1 = self.make_dummy_QENS_workspace(output_name='ws1')
-        ws2 = self.make_dummy_QENS_workspace(output_name='ws2')
-        self.assert_does_not_raise(ValueError, indirect_common.CheckHistSame, ws1, 'ws1', ws2, 'ws2')
-
-    def test_CheckHistSame_fails_on_x_range_mismatch(self):
-        ws1 = self.make_dummy_QENS_workspace(output_name='ws1')
-        ws2 = self.make_dummy_QENS_workspace(output_name='ws2')
-        CropWorkspace(ws2, XMin=10, OutputWorkspace=ws2)
-
-        self.assertRaises(ValueError, indirect_common.CheckHistSame, ws1, 'ws1', ws2, 'ws2')
-
-    def test_CheckHistSame_fails_on_spectrum_range_mismatch(self):
-        ws1 = self.make_dummy_QENS_workspace(output_name='ws1')
-        ws2 = self.make_dummy_QENS_workspace(output_name='ws2')
-        CropWorkspace(ws2, StartWorkspaceIndex=2, OutputWorkspace=ws2)
-
-        self.assertRaises(ValueError, indirect_common.CheckHistSame, ws1, 'ws1', ws2, 'ws2')
-
     def test_CheckElimits(self):
         energy_range = [-0.5, 0.5]
         x_range = np.arange(-0.6, 0.61, 0.01)

@@ -213,7 +213,7 @@ class BayesQuasi(PythonAlgorithm):
                 prog = 'QLr'                        # res file
             else:
                 prog = 'QLd'                        # data file
-                CheckHistSame(self._samWS,'Sample',self._resWS,'Resolution')
+                self.CheckHistSame(self._samWS,'Sample',self._resWS,'Resolution')
         elif self._program == 'QSe':
             if nres == 1:
                 prog = 'QSe'                        # res file
@@ -733,7 +733,7 @@ class BayesQuasi(PythonAlgorithm):
             if upper < lower:
                 raise ValueError('%s - input maximum (%f) < minimum (%f)' % (range_type, upper, lower))
 
-        def CheckAnalysers(in1WS, in2WS):
+        def CheckAnalysers(self, in1WS, in2WS):
             """
             Check workspaces have identical analysers and reflections
             Args:
@@ -765,7 +765,7 @@ class BayesQuasi(PythonAlgorithm):
             else:
                 logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
 
-    def CheckHistZero(inWS):
+    def CheckHistZero(self, inWS):
         """
         Retrieves basic info on a workspace
         Checks the workspace is not empty, then returns the number of histogram and
@@ -788,6 +788,37 @@ class BayesQuasi(PythonAlgorithm):
         if ntc == 0:
             raise ValueError('Workspace ' + inWS + ' has NO points')
         return num_hist, ntc
+
+    def CheckHistSame(self, in1WS, name1, in2WS, name2):
+        """
+        Check workspaces have same number of histograms and bin boundaries
+        Args:
+          @param in1WS - first 2D workspace
+          @param name1 - single-word descriptor of first 2D workspace
+          @param in2WS - second 2D workspace
+          @param name2 - single-word descriptor of second 2D workspace
+        Returns:
+          @return None
+        Raises:
+          ValueError: number of histograms is different
+          ValueError: number of bin boundaries in the histograms is different
+        """
+        num_hist_1 = s_api.mtd[in1WS].getNumberHistograms()  # no. of hist/groups in WS1
+        x_1 = s_api.mtd[in1WS].readX(0)
+        x_len_1 = len(x_1)
+        num_hist_2 = s_api.mtd[in2WS].getNumberHistograms()  # no. of hist/groups in WS2
+        x_2 = s_api.mtd[in2WS].readX(0)
+        x_len_2 = len(x_2)
+        if num_hist_1 != num_hist_2:  # Check that no. groups are the same
+            error_1 = '%s (%s) histograms (%d)' % (name1, in1WS, num_hist_1)
+            error_2 = '%s (%s) histograms (%d)' % (name2, in2WS, num_hist_2)
+            error = error_1 + ' not = ' + error_2
+            raise ValueError(error)
+        elif x_len_1 != x_len_2:
+            error_1 = '%s (%s) array length (%d)' % (name1, in1WS, x_len_1)
+            error_2 = '%s (%s) array length (%d)' % (name2, in2WS, x_len_2)
+            error = error_1 + ' not = ' + error_2
+            raise ValueError(error)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(BayesQuasi)

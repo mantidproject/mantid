@@ -252,41 +252,6 @@ def PadArray(inarray, nfixed):
     return outarray
 
 
-def CheckHistSame(in1WS, name1, in2WS, name2):
-    """
-    Check workspaces have same number of histograms and bin boundaries
-
-    Args:
-      @param in1WS - first 2D workspace
-      @param name1 - single-word descriptor of first 2D workspace
-      @param in2WS - second 2D workspace
-      @param name2 - single-word descriptor of second 2D workspace
-
-    Returns:
-      @return None
-
-    Raises:
-      Valuerror: number of histograms is different
-      Valuerror: number of bin boundaries in the histograms is different
-    """
-    num_hist_1 = s_api.mtd[in1WS].getNumberHistograms()  # no. of hist/groups in WS1
-    x_1 = s_api.mtd[in1WS].readX(0)
-    x_len_1 = len(x_1)
-    num_hist_2 = s_api.mtd[in2WS].getNumberHistograms()  # no. of hist/groups in WS2
-    x_2 = s_api.mtd[in2WS].readX(0)
-    x_len_2 = len(x_2)
-    if num_hist_1 != num_hist_2:  # Check that no. groups are the same
-        error_1 = '%s (%s) histograms (%d)' % (name1, in1WS, num_hist_1)
-        error_2 = '%s (%s) histograms (%d)' % (name2, in2WS, num_hist_2)
-        error = error_1 + ' not = ' + error_2
-        raise ValueError(error)
-    elif x_len_1 != x_len_2:
-        error_1 = '%s (%s) array length (%d)' % (name1, in1WS, x_len_1)
-        error_2 = '%s (%s) array length (%d)' % (name2, in2WS, x_len_2)
-        error = error_1 + ' not = ' + error_2
-        raise ValueError(error)
-
-
 def CheckElimits(erange, Xin):
     len_x = len(Xin) - 1
 
