@@ -204,7 +204,7 @@ void ProcessBankData::compressOrSetOrder(bool compress,
         if (compress)
           el.compressEvents(alg->compressTolerance, &el);
         else {
-            throw std::runtime_error("Can I be reached?");
+          throw std::runtime_error("Can I be reached?");
           if (pulsetimesincreasing)
             el.setSortOrder(DataObjects::PULSETIME_SORT);
           else
@@ -240,7 +240,6 @@ void ProcessBankData::run() {
   if (alg->getCancel()) {
     return;
   }
-
 
   bool pulsetimesincreasing = true;
 
