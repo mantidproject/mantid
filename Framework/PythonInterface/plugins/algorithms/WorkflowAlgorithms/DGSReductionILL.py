@@ -248,11 +248,11 @@ class DGSReductionILL(DataProcessorAlgorithm):
         # It should come from the same place as the epp workspace.
         # Or should it?
         instrument = workspace.getInstrument().getName()
-        if instrument in ['IN4', 'IN6']:
+        eiCalibrationDets = self.getProperty(PROP_DETECTORS_FOR_EI_CALIBRATION).value
+        if instrument in ['IN4', 'IN6']  and eiCalibrationDets:
             eiWsName = guessIncidentEnergyWorkspaceName(eppWorkspace)
             if not AnalysisDataServiceImpl.Instance().doesExist(eiWsName):
                 # TODO this should go into the LoadILL algorithm.
-                eiCalibrationDets = self.getProperty(PROP_DETECTORS_FOR_EI_CALIBRATION).value
                 instrument = workspace.getInstrument().getName()
                 if instrument == 'IN4':
                     fermiChopperSpeed = workspace.run().getLogData('FC.rotation_speed').value
