@@ -18,15 +18,32 @@ SAMPLE_GROUPING_XML = \
 
 class ILLIN16BCalibrationTest(unittest.TestCase):
 
+    # cache the def instrument and data search dirs
+    _def_fac = config['default.facility']
+    _def_inst = config['default.instrument']
+    _data_dirs = config['datasearch.directories']
+
+    def setUp(self):
+        # set instrument and append datasearch directory
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'IN16B'
+        config.appendDataSearchSubDir('ILL/IN16B/')
+
+    def tearDown(self):
+        # set cached facility and datasearch directory
+        config['default.facility'] = self._def_fac
+        config['default.instrument'] = self._def_inst
+        config['datasearch.directories'] = self._data_dirs
+
     def test_happy_case_normal(self):
-        calib_ws = ILLIN16BCalibration(Run='ILL/IN16B/146191.nxs',
+        calib_ws = ILLIN16BCalibration(Run='146191',
                                        PeakRange=[-0.001, 0.002])
 
         self.assertEqual(calib_ws.getNumberHistograms(), 18)
         self.assertEqual(calib_ws.blocksize(), 1)
 
     def test_multiple_files(self):
-        calib_ws = ILLIN16BCalibration(Run='ILL/IN16B/146191,ILL/IN16B/146192.nxs',
+        calib_ws = ILLIN16BCalibration(Run='146191,146192',
                                        PeakRange=[-0.001, 0.002])
 
         self.assertEqual(calib_ws.getNumberHistograms(), 18)
@@ -35,7 +52,7 @@ class ILLIN16BCalibrationTest(unittest.TestCase):
     def test_map_file(self):
         temp_map = TemporaryFileHelper(SAMPLE_GROUPING_XML, extension='.xml')
 
-        calib_ws = ILLIN16BCalibration(Run='ILL/IN16B/146191.nxs',
+        calib_ws = ILLIN16BCalibration(Run='146191',
                                        MapFile=temp_map.getName(),
                                        PeakRange=[-0.001, 0.002])
 
