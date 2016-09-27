@@ -269,7 +269,7 @@ void CalcCountRate::calcRateLog(
   // store calculated values within the target log.
   targLog->replaceValues(times, countRate);
 }
-/** hisogram event list into visualization workspace
+/** histogram event list into visualization workspace
 * @param el       :: event list to rebin into visualization workspace
 * @param spectraLocks :: pointer to the array of mutexes to lock modifyed
 *                        visualization workspace spectra for a thread
@@ -377,7 +377,7 @@ void CalcCountRate::setOutLogParameters(
   //
   if (useLogAccuracy) { // extract log times located inside the run time
     Kernel::DateAndTime tLogMin, tLogMax;
-    if (m_useLogDerivative) { // derivative moves events to the bin center,
+    if (m_useLogDerivative) { // derivative moves events to the bin centre,
                               // but we need initial range
       auto pSource =
           InputWorkspace->run().getTimeSeriesProperty<double>(NormLogName);
@@ -621,9 +621,9 @@ bool CalcCountRate::notmalizeCountRate() const { return m_normalizeResult; }
 * @return  true if log derivative is used instead of log itself */
 bool CalcCountRate::useLogDerivative() const { return m_useLogDerivative; }
 
-/** method to prepare normalization vector for the visuzliation workspace using
+/** method to prepare normalization vector for the visualisation workspace using
 * data from normalization log with, usually, different number of time steps
-* Here we assume that the numner of time points in the visualization workspace
+* Here we assume that the number of time points in the visualization workspace
 * is smaller or equal to the number of points in the normalization log.
 */
 void CalcCountRate::buildVisWSNormalization(
