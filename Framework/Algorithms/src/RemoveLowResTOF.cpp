@@ -34,9 +34,6 @@ RemoveLowResTOF::RemoveLowResTOF()
       m_sample(), m_L1(0.), m_Tmin(0.), m_wavelengthMin(0.),
       m_numberOfSpectra(0), m_progress(nullptr), m_outputLowResTOF(false) {}
 
-/// Destructor
-RemoveLowResTOF::~RemoveLowResTOF() { delete m_progress; }
-
 /// Algorithm's name for identification overriding a virtual method
 const string RemoveLowResTOF::name() const { return "RemoveLowResTOF"; }
 
@@ -135,7 +132,7 @@ void RemoveLowResTOF::exec() {
   }
 
   // set up the progress bar
-  m_progress = new Progress(this, 0.0, 1.0, m_numberOfSpectra);
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra);
 
   this->getTminData(false);
 
@@ -177,11 +174,12 @@ void RemoveLowResTOF::execEvent() {
                 << m_inputEvWS->getTofMax() << " microseconds\n";
 
   std::size_t numEventsOrig = outW->getNumberEvents();
+
   // set up the progress bar
-  m_progress = new Progress(this, 0.0, 1.0, m_numberOfSpectra * 2);
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, m_numberOfSpectra * 2);
 
   // algorithm assumes the data is sorted so it can jump out early
-  outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress);
+  outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress.get());
 
   this->getTminData(true);
   size_t numClearedEventLists = 0;
