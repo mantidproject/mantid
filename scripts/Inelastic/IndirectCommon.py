@@ -352,19 +352,6 @@ def CheckHistSame(in1WS, name1, in2WS, name2):
         raise ValueError(error)
 
 
-def CheckXrange(x_range, range_type):
-    if not ((len(x_range) == 2) or (len(x_range) == 4)):
-        raise ValueError(range_type + ' - Range must contain either 2 or 4 numbers')
-
-    for lower, upper in zip(x_range[::2], x_range[1::2]):
-        if math.fabs(lower) < 1e-5:
-            raise ValueError('%s - input minimum (%f) is zero' % (range_type, lower))
-        if math.fabs(upper) < 1e-5:
-            raise ValueError('%s - input maximum (%f) is zero' % (range_type, upper))
-        if upper < lower:
-            raise ValueError('%s - input maximum (%f) < minimum (%f)' % (range_type, upper, lower))
-
-
 def CheckElimits(erange, Xin):
     len_x = len(Xin) - 1
 

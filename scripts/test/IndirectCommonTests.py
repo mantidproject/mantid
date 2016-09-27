@@ -165,26 +165,6 @@ class IndirectCommonTests(unittest.TestCase):
 
         self.assertRaises(ValueError, indirect_common.CheckHistSame, ws1, 'ws1', ws2, 'ws2')
 
-    def test_CheckXrange(self):
-        x_range = [1,10]
-        self.assert_does_not_raise(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
-
-    def test_CheckXrange_with_two_ranges(self):
-        x_range = [1,10,15,20]
-        self.assert_does_not_raise(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
-
-    def test_CheckXrange_lower_close_to_zero(self):
-        x_range = [-5,0]
-        self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
-
-    def test_CheckXrange_upper_close_to_zero(self):
-        x_range = [0,5]
-        self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
-
-    def test_CheckXrange_invalid_range(self):
-        x_range = [10,5]
-        self.assertRaises(ValueError, indirect_common.CheckXrange, x_range, 'A Range')
-
     def test_CheckElimits(self):
         energy_range = [-0.5, 0.5]
         x_range = np.arange(-0.6, 0.61, 0.01)

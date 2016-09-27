@@ -39,7 +39,7 @@ class BayesQuasi(PythonAlgorithm):
     def summary(self):
         return "This algorithm runs the Fortran QLines programs which fits a Delta function of"+\
                " amplitude 0 and Lorentzians of amplitude A(j) and HWHM W(j) where j=1,2,3. The"+\
-               " whole function is then convoled with the resolution function."
+               " whole function is then convolved with the resolution function."
 
     def version(self):
         return 1
@@ -145,12 +145,12 @@ class BayesQuasi(PythonAlgorithm):
         erange = [self._e_min, self._e_max]
         nbins = [self._sam_bins, self._res_bins]
         setup_prog.report('Converting to binary for Fortran')
-        #convert true/false to 1/0 for fortran
+        #convert true/false to 1/0 for Fortran
         o_el = 1 if self._elastic else 0
         o_w1 = 1 if self._width else 0
         o_res = 1 if self._res_norm else 0
 
-        #fortran code uses background choices defined using the following numbers
+        #Fortran code uses background choices defined using the following numbers
         setup_prog.report('Encoding input options')
         if self._background == 'Sloping':
             o_bgd = 2
@@ -169,7 +169,7 @@ class BayesQuasi(PythonAlgorithm):
 
         array_len = 4096                           # length of array in Fortran
         setup_prog.report('Checking X Range')
-        CheckXrange(erange,'Energy')
+        self.CheckXrange(erange,'Energy')
 
         nbin,nrbin = nbins[0], nbins[1]
 
@@ -588,7 +588,7 @@ class BayesQuasi(PythonAlgorithm):
             amplitude_data, width_data = [], []
             amplitude_error, width_error  = [], []
 
-            #read data from file output by fortran code
+            #read data from file output by Fortran code
             file_name = sname + '.ql' +str(nl)
             x_data, peak_data, peak_error = self._read_ql_file(file_name, nl)
             x_data = np.asarray(x_data)
@@ -614,7 +614,7 @@ class BayesQuasi(PythonAlgorithm):
                 y.append(width)
                 y.append(EISF)
 
-            #iterlace amplitude and width errors of the peaks
+            #interlace amplitude and width errors of the peaks
             e.append(np.asarray(height_error))
             for amp, width, EISF in zip(amplitude_error, width_error, EISF_error):
                 e.append(amp)
@@ -649,7 +649,7 @@ class BayesQuasi(PythonAlgorithm):
 
 
     def _read_ql_file(self, file_name, nl):
-        #offet to ignore header
+        #offset to ignore header
         header_offset = 8
         block_size = 4+nl*3
 
@@ -720,6 +720,18 @@ class BayesQuasi(PythonAlgorithm):
             height_error.append(block_height_e)
 
         return q_data, (amp_data, FWHM_data, height_data), (amp_error, FWHM_error, height_error)
+
+    def CheckXrange(self, x_range, range_type):
+        if not ((len(x_range) == 2) or (len(x_range) == 4)):
+            raise ValueError(range_type + ' - Range must contain either 2 or 4 numbers')
+
+        for lower, upper in zip(x_range[::2], x_range[1::2]):
+            if math.fabs(lower) < 1e-5:
+                raise ValueError('%s - input minimum (%f) is zero' % (range_type, lower))
+            if math.fabs(upper) < 1e-5:
+                raise ValueError('%s - input maximum (%f) is zero' % (range_type, upper))
+            if upper < lower:
+                raise ValueError('%s - input maximum (%f) < minimum (%f)' % (range_type, upper, lower))
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(BayesQuasi)
