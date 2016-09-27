@@ -102,7 +102,7 @@ private:
   /// The number of chain iterations
   size_t m_chainIterations;
   /// The number of changes done on each parameter.
-  std::vector<double> m_changes;
+  std::vector<int> m_changes;
   /// The jump for each parameter
   std::vector<double> m_jump;
   /// Parameters' values.
@@ -146,7 +146,7 @@ private:
   /// steep minimum)
   std::vector<size_t> m_numInactiveRegenerations;
   /// To track convergence through immobility
-  std::vector<double> m_changesOld;
+  std::vector<int> m_changesOld;
 };
 
 /// Used to access the setDirty() protected member
