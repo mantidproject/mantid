@@ -1577,34 +1577,34 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
     m_defaultParams.insert("PeakCentre", peakCentre);
     m_defaultParams.insert("FWHM", fwhm);
     m_defaultParams.insert("Amplitude", amplitude);
-
-    // Remove previous parameters from tree
-    m_cfTree->removeProperty(m_properties["FitFunction1"]);
-    m_cfTree->removeProperty(m_properties["FitFunction2"]);
-
-    m_uiForm.ckPlotGuess->setChecked(false);
-    m_uiForm.ckTieCentres->setChecked(false);
-
-    updatePlotOptions();
-
-    // Two Lorentzians Fit
-    if (currentFitFunction.compare("Two Lorentzians") == 0) {
-      m_properties["FitFunction1"] = m_grpManager->addProperty("Lorentzian 1");
-      m_cfTree->addProperty(m_properties["FitFunction1"]);
-      m_properties["FitFunction2"] = m_grpManager->addProperty("Lorentzian 2");
-      m_cfTree->addProperty(m_properties["FitFunction2"]);
-    } else {
-      m_properties["FitFunction1"] = m_grpManager->addProperty(functionName);
-      m_cfTree->addProperty(m_properties["FitFunction1"]);
-    }
-
-    // If there are parameters in the list, add them
-    const QStringList parameters = getFunctionParameters(functionName);
-    if (parameters.isEmpty() != true) {
-      addParametersToTree(parameters, currentFitFunction);
-    }
-    m_previousFit = m_uiForm.cbFitType->currentText();
   }
+
+  // Remove previous parameters from tree
+  m_cfTree->removeProperty(m_properties["FitFunction1"]);
+  m_cfTree->removeProperty(m_properties["FitFunction2"]);
+
+  m_uiForm.ckPlotGuess->setChecked(false);
+  m_uiForm.ckTieCentres->setChecked(false);
+
+  updatePlotOptions();
+
+  // Two Lorentzians Fit
+  if (currentFitFunction.compare("Two Lorentzians") == 0) {
+    m_properties["FitFunction1"] = m_grpManager->addProperty("Lorentzian 1");
+    m_cfTree->addProperty(m_properties["FitFunction1"]);
+    m_properties["FitFunction2"] = m_grpManager->addProperty("Lorentzian 2");
+    m_cfTree->addProperty(m_properties["FitFunction2"]);
+  } else {
+    m_properties["FitFunction1"] = m_grpManager->addProperty(functionName);
+    m_cfTree->addProperty(m_properties["FitFunction1"]);
+  }
+
+  // If there are parameters in the list, add them
+  const QStringList parameters = getFunctionParameters(functionName);
+  if (parameters.isEmpty() != true) {
+    addParametersToTree(parameters, currentFitFunction);
+  }
+  m_previousFit = m_uiForm.cbFitType->currentText();
 }
 
 /**
