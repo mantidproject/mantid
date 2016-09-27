@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/ListValidator.h"
@@ -88,6 +89,29 @@ void SaveCanSAS1D::init() {
                   "given for a detector in the [[IDF|instrument definition "
                   "file (IDF)]]. \nIDFs are located in the instrument "
                   "sub-directory of the MantidPlot install directory.");
+
+  // Collimation information
+  std::vector<std::string> collimationGeometry{
+      "Cylinder", "Flat plate", "Disc",
+  };
+  declareProperty(
+      "Geometry", "Disc",
+      boost::make_shared<Kernel::StringListValidator>(collimationGeometry),
+      "The geometry type of the collimation.");
+  auto mustBePositiveOrZero =
+      boost::make_shared<Kernel::BoundedValidator<double>>();
+  mustBePositiveOrZero->setLower(0);
+  declareProperty("SampleHeight", 0.0, mustBePositiveOrZero,
+                  "The height of the collimation element in mm. If specified "
+                  "as 0 it will not be recorded.");
+  declareProperty("SampleWidth", 0.0, mustBePositiveOrZero,
+                  "The width of the collimation element in mm. If specified as "
+                  "0 it will not be recorded.");
+
+  // Sample information
+  declareProperty("SampleThickness", 0.0, mustBePositiveOrZero,
+                  "The thickness of the sample in mm. If specified as 0 it "
+                  "will not be recorded.");
 }
 /** Is called when the input workspace was actually a group, it sets the
  *  for all group members after the first so that the whole group is saved
@@ -147,37 +171,17 @@ void SaveCanSAS1D::exec() {
   createSASSampleElement(sasSample);
   m_outFile << sasSample;
 
-  std::string sasInstr = "\n\t\t<SASinstrument>";
-  m_outFile << sasInstr;
-  std::string sasInstrName = "\n\t\t\t<name>";
-  std::string instrname = m_workspace->getInstrument()->getName();
-  // look for xml special characters and replace with entity refrence
-  searchandreplaceSpecialChars(instrname);
-  sasInstrName += instrname;
-  sasInstrName += "</name>";
-  m_outFile << sasInstrName;
-
-  std::string sasSource;
-  createSASSourceElement(sasSource);
-  m_outFile << sasSource;
-
-  std::string sasCollimation = "\n\t\t\t<SAScollimation/>";
-  m_outFile << sasCollimation;
-
+  // Recording the SAS instrument can throw, if there
+  // are no detecors present
+  std::string sasInstrument;
   try {
-    std::string sasDet;
-    createSASDetectorElement(sasDet);
-    m_outFile << sasDet;
+    createSASInstrument(sasInstrument);
   } catch (Kernel::Exception::NotFoundError &) {
-    m_outFile.close();
     throw;
   } catch (std::runtime_error &) {
-    m_outFile.close();
     throw;
   }
-
-  sasInstr = "\n\t\t</SASinstrument>";
-  m_outFile << sasInstr;
+  m_outFile << sasInstrument;
 
   std::string sasProcess;
   createSASProcessElement(sasProcess);
@@ -498,7 +502,15 @@ void SaveCanSAS1D::createSASSampleElement(std::string &sasSample) {
   sasSampleId += sampleid;
   sasSampleId += "</ID>";
   sasSample += sasSampleId;
-  // outFile<<sasSampleId;
+  // Add sample thickness information here. We only add it if
+  // has been given a value larger than 0
+  double thickness = getProperty("SampleThickness");
+  if (thickness > 0) {
+    std::string thicknessTag = "\n\t\t\t<thickness unit=\"mm\">";
+    thicknessTag += std::to_string(thickness);
+    thicknessTag += "</thickness>";
+    sasSample += thicknessTag;
+  }
   sasSample += "\n\t\t</SASsample>";
 }
 
@@ -625,6 +637,49 @@ void SaveCanSAS1D::createSASProcessElement(std::string &sasProcess) {
   }
 
   sasProcess += "\n\t\t</SASprocess>";
+}
+
+/** This method creates an XML element named "SASinstrument"
+*  @param sasInstrument :: string for sasinstrument element in the xml
+*/
+void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
+  sasInstrument = "\n\t\t<SASinstrument>";
+  std::string sasInstrName = "\n\t\t\t<name>";
+  std::string instrname = m_workspace->getInstrument()->getName();
+  // look for xml special characters and replace with entity refrence
+  searchandreplaceSpecialChars(instrname);
+  sasInstrName += instrname;
+  sasInstrName += "</name>";
+  sasInstrument += sasInstrName;
+
+  std::string sasSource;
+  createSASSourceElement(sasSource);
+  sasInstrument += sasSource;
+
+  // Add the collimation. We add the collimation information if
+  // either the width of the height is different from 0
+  double collimationHeight = getProperty("SampleHeight");
+  double collimationWidth = getProperty("SampleWidth");
+  std::string sasCollimation = "\n\t\t\t<SAScollimation/>";
+  if (collimationHeight > 0 || collimationWidth > 0) {
+    sasCollimation = "\n\t\t\t<SAScollimation>";
+    // Geometry
+    std::string collimationGeometry = getProperty("Geometry");
+    sasCollimation += "\n\t\t\t\t<name>" + collimationGeometry + "</name>";
+    // Width
+    sasCollimation +=
+        "\n\t\t\t\t<X unit=\"mm\">" + std::to_string(collimationWidth) + "</X>";
+    // Height
+    sasCollimation += "\n\t\t\t\t<Y unit=\"mm\">" +
+                      std::to_string(collimationHeight) + "</Y>";
+    sasCollimation += "\n\t\t\t</SAScollimation>";
+  }
+  sasInstrument += sasCollimation;
+
+  std::string sasDet;
+  createSASDetectorElement(sasDet);
+  sasInstrument += sasDet;
+  sasInstrument += "\n\t\t</SASinstrument>";
 }
 }
 }

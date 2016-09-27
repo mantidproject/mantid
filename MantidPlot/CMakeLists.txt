@@ -91,7 +91,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
                    src/PolynomialFit.cpp
-		    src/ProjectSerialiser.cpp
+                   src/ProjectSerialiser.cpp
                    src/PythonScript.cpp
                    src/PythonScripting.cpp
                    src/QwtBarCurve.cpp
@@ -131,7 +131,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/TiledWindow.cpp
                    src/TitlePicker.cpp
                    src/TranslateCurveTool.cpp
-                   src/TSVSerialiser.cpp
                    src/UserFunction.cpp
                    src/VectorCurve.cpp
                    src/WindowFactory.cpp
@@ -169,6 +168,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/IFunctionWrapper.cpp
                    src/Mantid/ImportWorkspaceDlg.cpp
                    src/Mantid/InputHistory.cpp
+				   src/Mantid/LabelToolLogValuesDialog.cpp
                    src/Mantid/LoadDAEDlg.cpp
                    src/Mantid/ManageCustomMenus.cpp
                    src/Mantid/ManageInterfaceCategories.cpp
@@ -195,6 +195,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
+				   src/Mantid/SampleLogDialogBase.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
                    src/Mantid/WorkspaceIcons.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindow.cpp
@@ -333,7 +334,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/TiledWindow.h
                    src/TitlePicker.h
                    src/TranslateCurveTool.h
-                   src/TSVSerialiser.h
                    src/UserFunction.h
                    src/VectorCurve.h
                    src/WindowFactory.h
@@ -364,6 +364,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/ImportWorkspaceDlg.h
 		   src/Mantid/IMantidMatrixExtensionHandler.h
                    src/Mantid/InputHistory.h
+				   src/Mantid/LabelToolLogValuesDialog.h
                    src/Mantid/LoadDAEDlg.h
                    src/Mantid/ManageCustomMenus.h
                    src/Mantid/ManageInterfaceCategories.h
@@ -392,9 +393,9 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
+				   src/Mantid/SampleLogDialogBase.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/WorkspaceIcons.h
-                   src/Mantid/IProjectSerialisable.h
                    src/Mantid/InstrumentWidget/InstrumentWindow.h
 )
 
@@ -598,6 +599,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/FirstTimeSetup.h
                        src/Mantid/IFunctionWrapper.h
                        src/Mantid/ImportWorkspaceDlg.h
+					   src/Mantid/LabelToolLogValuesDialog.h
                        src/Mantid/LoadDAEDlg.h
                        src/Mantid/ManageCustomMenus.h
                        src/Mantid/ManageInterfaceCategories.h
@@ -620,6 +622,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidTable.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
+					   src/Mantid/SampleLogDialogBase.h
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
 )
@@ -670,6 +673,10 @@ qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Vates/VatesSimpleGui/ViewWid
 ###########################################################################
 # Add the dependencies
 ###########################################################################
+
+if(MAKE_VATES)
+  include( ${PARAVIEW_USE_FILE} )
+endif()
 
 include_directories ( SYSTEM ${MUPARSER_INCLUDE_DIR} )
 include_directories ( ${ZLIB_INCLUDE_DIRS} )
@@ -950,6 +957,9 @@ install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR}
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
 foreach(PY_FILE ${MTDPLOTPY_FILES} )
   install ( FILES pymantidplot/${PY_FILE} DESTINATION ${BIN_DIR}/pymantidplot )
+endforeach()
+foreach(PY_FILE ${MTDPLOTPYMPL_FILES} )
+  install ( FILES pymantidplot/mpl/${PY_FILE} DESTINATION ${BIN_DIR}/pymantidplot/mpl )
 endforeach()
 foreach(PY_FILE ${IPY_FILES} )
   install ( FILES ipython_widget/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_widget )

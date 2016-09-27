@@ -29,10 +29,10 @@
  ***************************************************************************/
 #include "ApplicationWindow.h"
 #include "TableStatistics.h"
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
-#include "Mantid/IProjectSerialisable.h"
 #include "MantidKernel/Strings.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 
 #include <QList>
 #include <QHeaderView>
@@ -273,9 +273,8 @@ void TableStatistics::removeCol(const QString &col) {
     }
 }
 
-IProjectSerialisable *TableStatistics::loadFromProject(const std::string &lines,
-                                                       ApplicationWindow *app,
-                                                       const int fileVersion) {
+MantidQt::API::IProjectSerialisable *TableStatistics::loadFromProject(
+    const std::string &lines, ApplicationWindow *app, const int fileVersion) {
   Q_UNUSED(fileVersion);
   std::vector<std::string> lineVec;
   boost::split(lineVec, lines, boost::is_any_of("\n"));
@@ -293,7 +292,7 @@ IProjectSerialisable *TableStatistics::loadFromProject(const std::string &lines,
   const std::string type = firstLineVec[2];
   QString birthDate = QString::fromStdString(firstLineVec[3]);
 
-  TSVSerialiser tsv(lines);
+  MantidQt::API::TSVSerialiser tsv(lines);
 
   if (!tsv.hasLine("Targets"))
     return nullptr;
@@ -406,7 +405,7 @@ IProjectSerialisable *TableStatistics::loadFromProject(const std::string &lines,
 }
 
 std::string TableStatistics::saveToProject(ApplicationWindow *app) {
-  TSVSerialiser tsv;
+  MantidQt::API::TSVSerialiser tsv;
   tsv.writeRaw("<TableStatistics>");
 
   tsv.writeLine(objectName().toStdString());

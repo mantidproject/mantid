@@ -1,6 +1,7 @@
 #ifndef MULTIDATASETFIT_H_
 #define MULTIDATASETFIT_H_
 
+#include "MantidKernel/Statistics.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "ui_MultiDatasetFit.h"
@@ -75,6 +76,8 @@ public:
   QString getLocalParameterTie(const QString &parName, int i) const;
   /// Set a tie for a local parameter.
   void setLocalParameterTie(const QString &parName, int i, QString tie);
+  /// Log a warning
+  static void logWarning(const std::string &msg);
 
   /// Make it public
   using API::UserSubWindow::runPythonCode;

@@ -7,6 +7,7 @@
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffFittingView.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionParam.h"
 
 #include <string>
 #include <vector>
@@ -47,14 +48,16 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTIDQT_CUSTOMINTERFACES_DLL EnggDiffFittingPresenter
     : public QObject,
       public IEnggDiffFittingPresenter,
-      public IEnggDiffractionCalibration {
+      public IEnggDiffractionCalibration,
+      public IEnggDiffractionParam {
   // Q_OBJECT for 'connect' with thread/worker
   Q_OBJECT
 
 public:
   EnggDiffFittingPresenter(
       IEnggDiffFittingView *view,
-      boost::shared_ptr<IEnggDiffractionCalibration> mainCalib);
+      boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+      boost::shared_ptr<IEnggDiffractionParam> mainParam);
   ~EnggDiffFittingPresenter() override;
 
   void notify(IEnggDiffFittingPresenter::Notification notif) override;
@@ -64,9 +67,17 @@ public:
   std::vector<GSASCalibrationParms> currentCalibration() const override;
   //@}
 
+  /// From the IEnggDiffractionCalibration interface
+  //@{
+  Poco::Path outFilesUserDir(const std::string &addToDir) override;
+  //@}
+
   /// the fitting hard work that a worker / thread will run
   void doFitting(const std::string &focusedRunNo,
                  const std::string &expectedPeaks);
+
+  void runLoadAlg(const std::string focusedFile,
+                  Mantid::API::MatrixWorkspace_sptr &focusedWS);
 
   void runFittingAlgs(std::string FocusedFitPeaksTableName,
                       std::string FocusedWSName);
@@ -76,7 +87,12 @@ public:
                      std::string tableName, size_t row, std::string &startX,
                      std::string &endX);
 
+  void plotFocusedFile(bool plotSinglePeaks);
+
   void plotFitPeaksCurves();
+
+  void runSaveDiffFittingAsciiAlg(const std::string &tableWorkspace,
+                                  std::string &filePath);
 
   void runEvaluateFunctionAlg(const std::string &bk2BkExpFunction,
                               const std::string &InputName,
@@ -104,7 +120,7 @@ public:
 
   void setDataToClonedWS(std::string &current_WS, const std::string &cloned_WS);
 
-  void setBankItems();
+  void setBankItems(const std::vector<std::string> &bankFiles);
 
   void setRunNoItems(const std::vector<std::string> &runNumVector,
                      bool multiRun);
@@ -114,7 +130,9 @@ public:
 
 protected:
   void processStart();
+  void processLoad();
   void processFitPeaks();
+  void processFitAllPeaks();
   void processShutDown();
   void processLogMsg();
 
@@ -127,23 +145,30 @@ protected slots:
   void fittingRunNoChanged();
 
 private:
-  bool isDigit(std::string text);
+  bool isDigit(const std::string text) const;
 
   // Methods related single peak fits
-  virtual void startAsyncFittingWorker(const std::string &focusedRunNo,
-                                       const std::string &expectedPeaks);
+  virtual void
+  startAsyncFittingWorker(const std::vector<std::string> &focusedRunNo,
+                          const std::string &expectedPeaks);
+
+  std::string getBaseNameFromStr(const std::string &filePath) const;
 
   std::string validateFittingexpectedPeaks(std::string &expectedPeaks) const;
 
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &expectedPeaks);
 
-  void updateFittingDirVec(const std::string &bankDir,
-                           const std::string &focusedFile, const bool multi_run,
-                           std::vector<std::string> &fittingRunNoDirVec);
+  // TODO make this const when the global is removed
+  bool findFilePathFromBaseName(const std::string &directoryToSearch,
+                                const std::string &baseFileNamesToFind,
+                                std::vector<std::string> &foundFullFilePath);
 
-  void enableMultiRun(std::string firstRun, std::string lastRun,
-                      std::vector<std::string> &fittingRunNoDirVec);
+  std::vector<std::string>
+  splitFittingDirectory(const std::string &selectedfPath);
+
+  std::vector<std::string> enableMultiRun(const std::string &firstRun,
+                                          const std::string &lastRun);
 
   void browsePeaksToFit();
 
@@ -155,22 +180,53 @@ private:
 
   void fittingWriteFile(const std::string &fileDir);
 
+  std::vector<std::string>
+  getAllBrowsedFilePaths(const std::string &inputFullPath,
+                         std::vector<std::string> &foundFullFilePaths);
+
+  std::vector<std::string> processMultiRun(const std::string userInput);
+
+  std::vector<std::string>
+  processSingleRun(const std::string &userInputBasename,
+                   const std::vector<std::string> &splitBaseName);
+
+  std::vector<std::string>
+  processFullPathInput(const Poco::Path &pocoFilePath,
+                       const std::vector<std::string> &splitBaseName);
+
   // whether to use AlignDetectors to convert units
   static const bool g_useAlignDetectors;
+
+  static int g_fitting_runno_counter;
 
   // name of the workspace with the focused ws being used for fitting
   static const std::string g_focusedFittingWSName;
 
+  // input run number - used for output file name
+  std::vector<std::string> g_multi_run;
+
+  // Holds the previous user input so we can short circuit further checks
+  std::string m_previousInput;
+
   /// true if the last fitting completed successfully
   bool m_fittingFinishedOK;
+
+  // directories of all the run numbers when multi-run option
+  std::vector<std::string> g_multi_run_directories;
 
   QThread *m_workerThread;
 
   /// interface for the 'current' calibration
   boost::shared_ptr<IEnggDiffractionCalibration> m_mainCalib;
 
+  /// interface for the 'current' calibration
+  boost::shared_ptr<IEnggDiffractionParam> m_mainParam;
+
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffFittingView *const m_view;
+
+  /// Holds if the view is in the process of being closed
+  bool m_viewHasClosed;
 };
 
 } // namespace CustomInterfaces

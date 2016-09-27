@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/FilterEvents.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
@@ -32,7 +33,6 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(FilterEvents)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 FilterEvents::FilterEvents()
@@ -46,7 +46,6 @@ FilterEvents::FilterEvents()
       m_specSkipType(), m_vecSkip(), m_isSplittersRelativeTime(false),
       m_filterStartTime(0) {}
 
-//----------------------------------------------------------------------------------------------
 /** Declare Inputs
  */
 void FilterEvents::init() {
@@ -143,7 +142,6 @@ void FilterEvents::init() {
       "Start time for splitters that can be parsed to DateAndTime.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execution body
  */
 void FilterEvents::exec() {
@@ -214,7 +212,6 @@ void FilterEvents::exec() {
   progress(m_progress, "Completed");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Process input properties
  */
 void FilterEvents::processAlgorithmProperties() {
@@ -326,7 +323,6 @@ void FilterEvents::processAlgorithmProperties() {
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Examine whether any spectrum does not have detector
   */
 void FilterEvents::examineEventWS() {
@@ -343,21 +339,9 @@ void FilterEvents::examineEventWS() {
     size_t numskipspec = 0;
     size_t numeventsskip = 0;
 
+    const auto &spectrumInfo = m_eventWS->spectrumInfo();
     for (size_t i = 0; i < numhist; ++i) {
-      bool skip = false;
-
-      // Access detector of the spectrum
-      try {
-        IDetector_const_sptr tempdet = m_eventWS->getDetector(i);
-        if (!tempdet)
-          skip = true;
-      } catch (const Kernel::Exception::NotFoundError &) {
-        // No detector found
-        skip = true;
-      }
-
-      // Output
-      if (skip) {
+      if (!spectrumInfo.hasDetectors(i)) {
         m_vecSkip[i] = true;
 
         ++numskipspec;
@@ -387,7 +371,6 @@ void FilterEvents::examineEventWS() {
   } // END-IF-ELSE
 }
 
-//----------------------------------------------------------------------------------------------
 /** Purpose:
  *    Convert SplitterWorkspace object to TimeSplitterType (sorted vector)
  *    and create a map for all workspace group number
@@ -431,7 +414,6 @@ void FilterEvents::processSplittersWorkspace() {
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /**
  * @brief FilterEvents::processMatrixSplitterWorkspace
  * Purpose:
@@ -473,7 +455,6 @@ void FilterEvents::processMatrixSplitterWorkspace() {
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Create a list of EventWorkspace for output
  */
 void FilterEvents::createOutputWorkspaces() {
@@ -588,7 +569,6 @@ void FilterEvents::createOutputWorkspaces() {
   g_log.information("Output workspaces are created. ");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Set up neutron event's TOF correction.
   * It can be (1) parsed from TOF-correction table workspace to vectors,
   * (2) created according to detector's position in instrument;
@@ -664,7 +644,6 @@ TimeAtSampleStrategy *FilterEvents::setupIndirectTOFCorrection() const {
   return new TimeAtSampleStrategyIndirect(m_eventWS);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Set up corrections with customized TOF correction input
   * The first column must be either DetectorID or Spectrum (from 0... as
  * workspace index)
@@ -813,7 +792,6 @@ void FilterEvents::setupCustomizedTOFCorrection() {
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Main filtering method
   * Structure: per spectrum --> per workspace
  */
@@ -909,7 +887,6 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Split events by splitters represented by vector
   */
 void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
@@ -975,7 +952,6 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
                "split sample logs. ");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Generate splitters for specified workspace index as a subset of
  * m_splitters
  */
@@ -990,7 +966,6 @@ Kernel::TimeSplitterType FilterEvents::generateSplitters(int wsindex) {
   return splitters;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Split a log by splitters
  */
 void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
@@ -1025,7 +1000,6 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Get all filterable logs' names (double and integer)
  * @returns Vector of names of logs
  */

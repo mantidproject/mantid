@@ -22,6 +22,17 @@ public:
   //----------------------------------------------------------------------------
   // Success cases
   //----------------------------------------------------------------------------
+  void test_Bounding_Volume_Matches_Sample() {
+    using namespace MonteCarloTesting;
+    auto sample = createTestSample(TestSampleType::SolidSphere);
+    MCInteractionVolume interactor(sample);
+
+    const auto sampleBox = sample.getShape().getBoundingBox();
+    const auto interactionBox = interactor.getBoundingBox();
+    TS_ASSERT_EQUALS(sampleBox.minPoint(), interactionBox.minPoint());
+    TS_ASSERT_EQUALS(sampleBox.maxPoint(), interactionBox.maxPoint());
+  }
+
   void test_Absorption_In_Solid_Sample_Gives_Expected_Answer() {
     using Mantid::Kernel::V3D;
     using namespace MonteCarloTesting;
@@ -106,7 +117,7 @@ public:
     Mock::VerifyAndClearExpectations(&rng);
   }
 
-  void test_Track_With_Zero_Intersections_Returns_Unity_Factor() {
+  void test_Track_With_Zero_Intersections_Returns_Negative_Factor() {
     using Mantid::Kernel::V3D;
     using namespace MonteCarloTesting;
     using namespace ::testing;
@@ -120,10 +131,8 @@ public:
 
     auto sample = createTestSample(TestSampleType::SolidSphere);
     MCInteractionVolume interactor(sample);
-    TS_ASSERT_DELTA(1.0,
-                    interactor.calculateAbsorption(rng, startPos, direc, endPos,
-                                                   lambdaBefore, lambdaAfter),
-                    1e-08);
+    TS_ASSERT(interactor.calculateAbsorption(rng, startPos, direc, endPos,
+                                             lambdaBefore, lambdaAfter) < 0.0);
   }
 
   //----------------------------------------------------------------------------

@@ -83,12 +83,18 @@ public:
   /// Return currently selected new plot policy
   NewPlotPolicy newPlotPolicy();
 
+  /// Return compatibility mode on/off selection
+  bool getCompatibilityMode() const;
+
 signals:
   /// Update the plot because something has changed.
   void settingsTabUpdatePlot();
 
   /// Emitted when plot style parameters has changed.
   void plotStyleChanged();
+
+  /// Emitted when compatibility mode is turned on/off
+  void compatibilityModeChanged(int state);
 
 private:
   /// Default widget values
