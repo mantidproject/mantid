@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -43,5 +44,11 @@ void TomoToolConfigDialogBase::okClicked() {}
 
 void TomoToolConfigDialogBase::cancelClicked() {}
 
+TomoToolConfigDialogBase *fromString(const std::string &toolName){
+	if (toolName == "") {
+		return new TomoToolConfigTomoPyDialog();
+	}
+	return nullptr;
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

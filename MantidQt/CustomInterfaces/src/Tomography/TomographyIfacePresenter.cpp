@@ -363,15 +363,9 @@ void TomographyIfacePresenter::processLogout() {
   m_view->updateLoginControls(false);
 }
 
-TomoToolConfigDialogBase *fromString(const std::string &toolName) {
-	if(toolName == "") {
-		return new TomoToolConfigTomoPyDialog();
-	}
-
-}
 void TomographyIfacePresenter::processSetupReconTool() {
   if (TomographyIfaceModel::g_CCPiTool != m_view->currentReconTool()) {
-	  TomoToolConfigDialogBase * base = fromString("");
+	  TomoToolConfigDialogBase * base = TomoToolConfigDialogBase::fromString("");
 	  delete base;
     m_view->showToolConfig(m_view->currentReconTool());
     m_model->updateReconToolsSettings(m_view->reconToolsSettings());

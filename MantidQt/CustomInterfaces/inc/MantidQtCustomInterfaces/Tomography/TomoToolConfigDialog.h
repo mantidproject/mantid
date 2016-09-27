@@ -74,6 +74,10 @@ public:
 	virtual int execute() {
 		return this->exec();
 	};
+
+	static TomoToolConfigDialogBase *fromString(const std::string &toolName);
+
+
 private:
   void initLayout();
 
