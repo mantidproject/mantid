@@ -123,7 +123,7 @@ void CalculateFlatBackground::exec() {
       throw std::runtime_error("EndX property not set to any value");
     }
     // Get the required X range
-    this->checkRange(startX, endX);
+    checkRange(startX, endX);
     break;
   case Modes::MOVING_AVERAGE:
     if (getPointerToProperty("AveragingWindowWidth")->isDefault()) {
@@ -141,7 +141,7 @@ void CalculateFlatBackground::exec() {
 
   std::vector<int> wsInds = getProperty("WorkspaceIndexList");
   // check if the user passed an empty list, if so all of spec will be processed
-  this->getWsInds(wsInds, numHists);
+  getWsInds(wsInds, numHists);
 
   // Are we removing the background?
   const bool removeBackground =
