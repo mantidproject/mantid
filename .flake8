@@ -1,5 +1,5 @@
 [flake8]
-ignore = E114,E115,E116,E12,E13,E2,E3,F403,F405
+ignore = E114,E115,E116,E12,E13,E2,E3,F403,F405,F999
 exclude =
     buildconfig,
     docs,
