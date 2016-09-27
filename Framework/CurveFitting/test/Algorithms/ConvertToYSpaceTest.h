@@ -63,9 +63,9 @@ public:
     TS_ASSERT_DELTA(-1.670937938, ySpOutX[npts / 2], 1e-08);
     TS_ASSERT_DELTA(17.99449408, ySpOutX.back(), 1e-08);
     // Y
-    TS_ASSERT_DELTA(-0.01152733, ySpOutY.front(), 1e-08);
-    TS_ASSERT_DELTA(5.56667697, ySpOutY[npts / 2], 1e-08);
-    TS_ASSERT_DELTA(-0.35141703, ySpOutY.back(), 1e-08);
+    TS_ASSERT_DELTA(0.48319776, ySpOutY.front(), 1e-08);
+    TS_ASSERT_DELTA(6.38061442, ySpOutY[npts / 2], 1e-08);
+    TS_ASSERT_DELTA(1.4251361, ySpOutY.back(), 1e-08);
     // E
     TS_ASSERT_DELTA(25.14204252, ySpOutE.front(), 1e-08);
     TS_ASSERT_DELTA(36.99940026, ySpOutE[npts / 2], 1e-08);

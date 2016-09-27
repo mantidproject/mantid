@@ -260,7 +260,7 @@ public:
     Mantid::Kernel::IntMatrix randMatrix(3, 3, false);
 
     for (int i = 1; i < 10; ++i) {
-      randMatrix.setRandom(-0, -i, i);
+      randMatrix.setRandom(1, -i, i);
       TS_ASSERT_THROWS(symOp.getOrderFromMatrix(randMatrix),
                        std::runtime_error);
     }

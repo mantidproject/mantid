@@ -71,13 +71,13 @@ public:
     TS_ASSERT_DELTA(175.0, outX[npts / 2], 1e-08);
     TS_ASSERT_DELTA(300.0, outX.back(), 1e-08);
     // Y
-    TS_ASSERT_DELTA(-0.00005081, outY.front(), 1e-08);
-    TS_ASSERT_DELTA(0.00301015, outY[npts / 2], 1e-08);
-    TS_ASSERT_DELTA(-0.00000917, outY.back(), 1e-08);
+    TS_ASSERT_DELTA(0.00020684, outY.front(), 1e-08);
+    TS_ASSERT_DELTA(0.00346369, outY[npts / 2], 1e-08);
+    TS_ASSERT_DELTA(0.00038601, outY.back(), 1e-08);
     // E
-    TS_ASSERT_DELTA(0.02000724, outE.front(), 1e-08);
-    TS_ASSERT_DELTA(0.02000724, outE[npts / 2], 1e-08);
-    TS_ASSERT_DELTA(0.02000724, outE.back(), 1e-08);
+    TS_ASSERT_DELTA(0.02008497, outE.front(), 1e-08);
+    TS_ASSERT_DELTA(0.02008497, outE[npts / 2], 1e-08);
+    TS_ASSERT_DELTA(0.02008497, outE.back(), 1e-08);
 
     // ====== Y-space =====
     const auto &ysX = yspaceWS->readX(0);
@@ -88,9 +88,9 @@ public:
     TS_ASSERT_DELTA(-1.670937938, ysX[npts / 2], 1e-08);
     TS_ASSERT_DELTA(17.99449408, ysX.back(), 1e-08);
     // Y
-    TS_ASSERT_DELTA(-0.01152733, ysY.front(), 1e-08);
-    TS_ASSERT_DELTA(5.56667697, ysY[npts / 2], 1e-08);
-    TS_ASSERT_DELTA(-0.35141703, ysY.back(), 1e-08);
+    TS_ASSERT_DELTA(0.48319776, ysY.front(), 1e-08);
+    TS_ASSERT_DELTA(6.38061442, ysY[npts / 2], 1e-08);
+    TS_ASSERT_DELTA(1.4251361, ysY.back(), 1e-08);
     // E
     TS_ASSERT_DELTA(25.14204252, ysE.front(), 1e-08);
     TS_ASSERT_DELTA(36.99940026, ysE[npts / 2], 1e-08);
@@ -106,9 +106,9 @@ public:
     TS_ASSERT_DELTA(-1.670937938, fitX[npts / 2], 1e-08);
     TS_ASSERT_DELTA(17.99449408, fitX.back(), 1e-08);
     // Y
-    TS_ASSERT_DELTA(-0.00556080, fitY.front(), 1e-08);
-    TS_ASSERT_DELTA(6.03793125, fitY[npts / 2], 1e-08);
-    TS_ASSERT_DELTA(-0.00656332, fitY.back(), 1e-08);
+    TS_ASSERT_DELTA(-0.00548538, fitY.front(), 1e-08);
+    TS_ASSERT_DELTA(6.06951398, fitY[npts / 2], 1e-08);
+    TS_ASSERT_DELTA(-0.00645323, fitY.back(), 1e-08);
     // E
     TS_ASSERT_DELTA(25.14204252, fitE.front(), 1e-08);
     TS_ASSERT_DELTA(36.99940026, fitE[npts / 2], 1e-08);
@@ -124,9 +124,9 @@ public:
     TS_ASSERT_DELTA(-1.670937938, symX[npts / 2], 1e-08);
     TS_ASSERT_DELTA(17.99449408, symX.back(), 1e-08);
     // Y
-    TS_ASSERT_DELTA(0.23992597, symY.front(), 1e-08);
-    TS_ASSERT_DELTA(6.19840840, symY[npts / 2], 1e-08);
-    TS_ASSERT_DELTA(-0.03738811, symY.back(), 1e-08);
+    TS_ASSERT_DELTA(0.38871577, symY.front(), 1e-08);
+    TS_ASSERT_DELTA(6.56372265, symY[npts / 2], 1e-08);
+    TS_ASSERT_DELTA(0.21596637, symY.back(), 1e-08);
     // E
     TS_ASSERT_DELTA(17.78587720, symE.front(), 1e-08);
     TS_ASSERT_DELTA(15.98016067, symE[npts / 2], 1e-08);
@@ -179,14 +179,13 @@ public:
     TS_ASSERT_DELTA(175.0, outX[npts / 2], 1e-08);
     TS_ASSERT_DELTA(300.0, outX.back(), 1e-08);
     // Y
-
-    TS_ASSERT_DELTA(-0.00000768, outY.front(), 1e-08);
-    TS_ASSERT_DELTA(0.00045496, outY[npts / 2], 1e-08);
-    TS_ASSERT_DELTA(-0.00000139, outY.back(), 1e-08);
+    TS_ASSERT_DELTA(3.124e-05, outY.front(), 1e-08);
+    TS_ASSERT_DELTA(0.00052321, outY[npts / 2], 1e-08);
+    TS_ASSERT_DELTA(5.831e-05, outY.back(), 1e-08);
     // E
-    TS_ASSERT_DELTA(0.00302395, outE.front(), 1e-08);
-    TS_ASSERT_DELTA(0.00302395, outE[npts / 2], 1e-08);
-    TS_ASSERT_DELTA(0.00302395, outE.back(), 1e-08);
+    TS_ASSERT_DELTA(0.00303394, outE.front(), 1e-08);
+    TS_ASSERT_DELTA(0.00303394, outE[npts / 2], 1e-08);
+    TS_ASSERT_DELTA(0.00303394, outE.back(), 1e-08);
 
     // ====== Y-space =====
     const auto &ysX = yspaceWS->readX(0);
@@ -199,9 +198,9 @@ public:
     TS_ASSERT_DELTA(0.03651144, ysX[npts / 2], 1e-08);
     TS_ASSERT_DELTA(17.89050276, ysX.back(), 1e-08);
     // Y
-    TS_ASSERT_DELTA(1.31080438, ysY.front(), 1e-08);
-    TS_ASSERT_DELTA(52.90062150, ysY[npts / 2], 1e-08);
-    TS_ASSERT_DELTA(1.70156893, ysY.back(), 1e-08);
+    TS_ASSERT_DELTA(1.06684471, ysY.front(), 1e-08);
+    TS_ASSERT_DELTA(53.17060919, ysY[npts / 2], 1e-08);
+    TS_ASSERT_DELTA(2.12962024, ysY.back(), 1e-08);
     // E
     TS_ASSERT_DELTA(52.17644100, ysE.front(), 1e-08);
     TS_ASSERT_DELTA(71.30383310, ysE[npts / 2], 1e-08);
@@ -219,9 +218,9 @@ public:
     // Y
     std::cerr << std::fixed << std::setprecision(8) << fitY.front() << " "
               << fitY[npts / 2] << "  " << fitY.back() << "\n";
-    TS_ASSERT_DELTA(-0.03802926, fitY.front(), 1e-08);
-    TS_ASSERT_DELTA(52.21878511, fitY[npts / 2], 1e-08);
-    TS_ASSERT_DELTA(-0.04418138, fitY.back(), 1e-08);
+    TS_ASSERT_DELTA(-0.03810116, fitY.front(), 1e-08);
+    TS_ASSERT_DELTA(52.54741763, fitY[npts / 2], 1e-08);
+    TS_ASSERT_DELTA(-0.04398723, fitY.back(), 1e-08);
     // E
     std::cerr << std::fixed << std::setprecision(8) << fitE.front() << " "
               << fitE[npts / 2] << "  " << fitE.back() << "\n";
@@ -241,9 +240,9 @@ public:
     // Y
     std::cerr << std::fixed << std::setprecision(8) << symY.front() << " "
               << symY[npts / 2] << "  " << symY.back() << "\n";
-    TS_ASSERT_DELTA(1.31080438, symY.front(), 1e-08);
-    TS_ASSERT_DELTA(52.90062150, symY[npts / 2], 1e-08);
-    TS_ASSERT_DELTA(0.34709778, symY.back(), 1e-08);
+    TS_ASSERT_DELTA(1.06684471, symY.front(), 1e-08);
+    TS_ASSERT_DELTA(53.17060919, symY[npts / 2], 1e-08);
+    TS_ASSERT_DELTA(0.82096809, symY.back(), 1e-08);
     // E
     std::cerr << std::fixed << std::setprecision(8) << symE.front() << " "
               << symE[npts / 2] << "  " << symE.back() << "\n";
