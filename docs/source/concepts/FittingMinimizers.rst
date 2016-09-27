@@ -134,14 +134,21 @@ following information:
 - Starting point or initial values of the function parameters
 - Certified or reference best values for the parameters, with an associated residual of the certified or best model 
 
-The problems have been obtained from the following benchmark:
+The problems have been obtained from the following benchmarks and
+sources:
 
-- `NIST nonlinear regression problems <http://itl.nist.gov/div898/strd/general/dataarchive.html>`__.
+- `NIST nonlinear regression problems
+  <http://itl.nist.gov/div898/strd/general/dataarchive.html>`__.
+- `CUTEst Constrained and Unconstrained Testing Environment on
+  steroids <https://ccpforge.cse.rl.ac.uk/gf/project/cutest/wiki/>`__
+- A set of problems extracted from Mantid usage examples and system
+  tests called here *Neutron data*.
 
-As the test problems do not define observational errors this
-comparison does not use the weights of the least squares cost
-function.  An :ref:`alternative comparison using simulated errors is
-also available <Minimizers_weighted_comparison>`, with similar results
+As the NIST and CUTEst test problems do not define observational
+errors the comparison shown below does not use the weights of the
+least squares cost function.  An :ref:`alternative comparison that
+uses observational errors as weights in the cost function is also
+available <Minimizers_weighted_comparison>`, with similar results
 overall.
 
 Comparison in terms of accuracy

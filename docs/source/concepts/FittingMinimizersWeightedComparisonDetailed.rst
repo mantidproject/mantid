@@ -19,10 +19,12 @@ in the list of cost functions available in Mantid as "Least
 squares". It is the default cost function in Mantid and the most
 commonly used for neutron data.
 
-As the NIST problems do not include measurement errors, assuming that
-these datasets would represent data from a typical Mantid workspace we
-introduce observational error estimates calculated as the square root
-of the observations.
+For the Neutron data problems true observational errors are used as
+weights, as commonly done in Mantid.  As the NIST and CUTEst problems
+do not include measurement errors, assuming that these datasets would
+represent data from a typical Mantid workspace we introduce
+observational error estimates calculated as the square root of the
+observations.
 
 .. _Minimizers_weighted_comparison_in_terms_of_accuracy:
 
