@@ -189,9 +189,8 @@ void ProcessBankData::processEvents(bool &pulsetimesincreasing,
  * @param usedDetIds
  * @param pulsetimesincreasing
  */
-void ProcessBankData::compressOrSetOrder(bool compress,
-                                         const std::vector<bool> &usedDetIds,
-                                         bool pulsetimesincreasing) {
+void ProcessBankData::compressEvents(bool compress,
+                                     const std::vector<bool> &usedDetIds) {
   auto &outputWS = *(alg->m_ws);
 
   // Do it on all the detector IDs we touched
@@ -201,15 +200,8 @@ void ProcessBankData::compressOrSetOrder(bool compress,
         // Find the the workspace index corresponding to that pixel ID
         size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
         auto &el = outputWS.getSpectrum(wi);
-        if (compress)
-          el.compressEvents(alg->compressTolerance, &el);
-        else {
-          throw std::runtime_error("Can I be reached?");
-          if (pulsetimesincreasing)
-            el.setSortOrder(DataObjects::PULSETIME_SORT);
-          else
-            el.setSortOrder(DataObjects::UNSORTED);
-        }
+
+        el.compressEvents(alg->compressTolerance, &el);
       }
     }
   }
@@ -259,7 +251,7 @@ void ProcessBankData::run() {
                 my_longest_tof, badTofs, compress, usedDetIds);
 
   //------------ Compress Events (or set sort order) ------------------
-  compressOrSetOrder(compress, usedDetIds, pulsetimesincreasing);
+  compressEvents(compress, usedDetIds); // , pulsetimesincreasing);
 
   prog->report(entry_name + ": filled events");
 

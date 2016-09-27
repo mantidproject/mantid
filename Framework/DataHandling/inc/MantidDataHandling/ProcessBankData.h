@@ -59,8 +59,7 @@ public:
                      size_t &badTofs, bool compress,
                      std::vector<bool> &usedDetIds);
 
-  void compressOrSetOrder(bool compress, const std::vector<bool> &usedDetIds,
-                          bool pulsetimesincreasing);
+  void compressOrSetOrder(bool compress, const std::vector<bool> &usedDetIds);
 
 private:
   /// Algorithm being run
