@@ -115,6 +115,17 @@ void MuonFitDataSelector::userChangedRuns() {
  * @param groups :: [input] List of group names
  */
 void MuonFitDataSelector::setAvailableGroups(const QStringList &groups) {
+  // If it's the same list, do nothing
+  if (groups.size() == m_groupBoxes.size()) {
+    auto existingGroups = m_groupBoxes.keys();
+    auto newGroups = groups;
+    qSort(existingGroups);
+    qSort(newGroups);
+    if (existingGroups == newGroups) {
+      return;
+    }
+  }
+
   clearGroupCheckboxes();
   for (const auto group : groups) {
     addGroupCheckbox(group);
