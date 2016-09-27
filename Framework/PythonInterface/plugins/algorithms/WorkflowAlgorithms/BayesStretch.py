@@ -103,7 +103,7 @@ class BayesStretch(PythonAlgorithm):
         run_f2py_compatibility_test()
 
         from IndirectBayes import (CalcErange, GetXYE)
-        from IndirectCommon import (CheckAnalysers, getEfixed, GetThetaQ, CheckHistZero)
+        from IndirectCommon import (getEfixed, GetThetaQ, CheckHistZero)
         setup_prog = Progress(self, start=0.0, end=0.3, nreports = 5)
         logger.information('BayesStretch input')
         logger.information('Sample is %s' % self._sam_name)
@@ -119,7 +119,7 @@ class BayesStretch(PythonAlgorithm):
         self.CheckXrange(self._erange, 'Energy')
 
         setup_prog.report('Checking Analysers')
-        CheckAnalysers(self._sam_name, self._res_name)
+        self.CheckAnalysers(self._sam_name, self._res_name)
         setup_prog.report('Obtaining EFixed, theta and Q')
         efix = getEfixed(self._sam_name)
         theta, Q = GetThetaQ(self._sam_name)
@@ -329,7 +329,6 @@ class BayesStretch(PythonAlgorithm):
         add_log.setProperty('ParseType', True) # Should determine String/Number type
         add_log.execute()
 
-
     def _get_properties(self):
         self._sam_name = self.getPropertyValue('SampleWorkspace')
         self._sam_ws = self.getProperty('SampleWorkspace').value
@@ -359,5 +358,36 @@ class BayesStretch(PythonAlgorithm):
             if upper < lower:
                 raise ValueError('%s - input maximum (%f) < minimum (%f)' % (range_type, upper, lower))
 
+    def CheckAnalysers(in1WS, in2WS):
+        """
+        Check workspaces have identical analysers and reflections
+        Args:
+        @param in1WS - first 2D workspace
+        @param in2WS - second 2D workspace
+        Returns:
+        @return None
+        Raises:
+        @exception Valuerror - workspaces have different analysers
+        @exception Valuerror - workspaces have different reflections
+        """
+        ws1 = s_api.mtd[in1WS]
+        try:
+            analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
+            reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
+        except IndexError:
+            raise RuntimeError('Could not find analyser or reflection for workspace %s' % in1WS)
+        ws2 = s_api.mtd[in2WS]
+        try:
+            analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
+            reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
+        except:
+            raise RuntimeError('Could not find analyser or reflection for workspace %s' % in2WS)
+
+        if analyser_1 != analyser_2:
+            raise ValueError('Workspace %s and %s have different analysers' % (ws1, ws2))
+        elif reflection_1 != reflection_2:
+            raise ValueError('Workspace %s and %s have different reflections' % (ws1, ws2))
+        else:
+            logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
 
 AlgorithmFactory.subscribe(BayesStretch)         # Register algorithm with Mantid

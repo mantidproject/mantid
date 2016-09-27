@@ -192,7 +192,7 @@ class BayesQuasi(PythonAlgorithm):
         erange = [self._e_min, self._e_max]
 
         setup_prog.report('Checking Analysers')
-        CheckAnalysers(self._samWS,self._resWS)
+        self.CheckAnalysers(self._samWS,self._resWS)
         setup_prog.report('Obtaining EFixed, theta and Q')
         efix = getEfixed(self._samWS)
         theta, Q = GetThetaQ(self._samWS)
@@ -732,6 +732,38 @@ class BayesQuasi(PythonAlgorithm):
                 raise ValueError('%s - input maximum (%f) is zero' % (range_type, upper))
             if upper < lower:
                 raise ValueError('%s - input maximum (%f) < minimum (%f)' % (range_type, upper, lower))
+
+        def CheckAnalysers(in1WS, in2WS):
+            """
+            Check workspaces have identical analysers and reflections
+            Args:
+            @param in1WS - first 2D workspace
+            @param in2WS - second 2D workspace
+            Returns:
+            @return None
+            Raises:
+            @exception Valuerror - workspaces have different analysers
+            @exception Valuerror - workspaces have different reflections
+            """
+            ws1 = s_api.mtd[in1WS]
+            try:
+                analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
+                reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
+            except IndexError:
+                raise RuntimeError('Could not find analyser or reflection for workspace %s' % in1WS)
+            ws2 = s_api.mtd[in2WS]
+            try:
+                analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
+                reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
+            except:
+                raise RuntimeError('Could not find analyser or reflection for workspace %s' % in2WS)
+
+            if analyser_1 != analyser_2:
+                raise ValueError('Workspace %s and %s have different analysers' % (ws1, ws2))
+            elif reflection_1 != reflection_2:
+                raise ValueError('Workspace %s and %s have different reflections' % (ws1, ws2))
+            else:
+                logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(BayesQuasi)
