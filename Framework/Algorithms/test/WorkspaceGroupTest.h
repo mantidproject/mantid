@@ -296,6 +296,38 @@ public:
     AnalysisDataService::Instance().remove("InputWS");
   }
 
+  void testRenameWorkspaceDuplicates() {
+    // Tests that setting a workspace to the name of an existing
+    // workspace in a group is correctly handled by the workspace group
+
+    constexpr int nHist = 20, nBins = 10;
+    // Register the workspace in the data service
+    MatrixWorkspace_sptr work_in1 =
+        WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins);
+    MatrixWorkspace_sptr work_in2 =
+        WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
+
+    const std::string ws1Name = "test_ws1";
+    const std::string ws2Name = "test_ws2";
+
+    WorkspaceGroup_sptr wsSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
+    if (wsSptr) {
+      AnalysisDataService::Instance().add("test_group", wsSptr);
+      AnalysisDataService::Instance().add(ws1Name, work_in1);
+      wsSptr->add(ws1Name);
+      AnalysisDataService::Instance().add(ws2Name, work_in2);
+      wsSptr->add(ws2Name);
+    }
+
+    TS_ASSERT_EQUALS(wsSptr->getNumberOfEntries(), 2);
+
+    // Rename workspace 2 to 1
+    AnalysisDataService::Instance().rename(ws2Name, ws1Name);
+
+    TS_ASSERT_EQUALS(wsSptr->getNumberOfEntries(), 1);
+    TS_ASSERT_EQUALS(wsSptr->contains(work_in2), false);
+  }
+
   void testTwoGroupWorkspaces() {
     int nHist = 10, nBins = 20;
     // Register the workspace in the data service

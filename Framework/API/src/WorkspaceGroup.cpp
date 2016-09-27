@@ -19,7 +19,9 @@ Kernel::Logger g_log("WorkspaceGroup");
 WorkspaceGroup::WorkspaceGroup()
     : Workspace(),
       m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
-      m_replaceObserver(*this, &WorkspaceGroup::workspaceReplaceHandle),
+      m_beforeReplaceObserver(*this,
+                              &WorkspaceGroup::workspaceBeforeReplaceHandle),
+      m_renameObserver(*this, &WorkspaceGroup::workspaceRenameHandle),
       m_workspaces(), m_observingADS(false) {}
 
 WorkspaceGroup::~WorkspaceGroup() { observeADSNotifications(false); }
@@ -54,7 +56,9 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS) {
       AnalysisDataService::Instance().notificationCenter.addObserver(
           m_deleteObserver);
       AnalysisDataService::Instance().notificationCenter.addObserver(
-          m_replaceObserver);
+          m_beforeReplaceObserver);
+      AnalysisDataService::Instance().notificationCenter.addObserver(
+          m_renameObserver);
       m_observingADS = true;
     }
   } else {
@@ -62,7 +66,9 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS) {
       AnalysisDataService::Instance().notificationCenter.removeObserver(
           m_deleteObserver);
       AnalysisDataService::Instance().notificationCenter.removeObserver(
-          m_replaceObserver);
+          m_beforeReplaceObserver);
+      AnalysisDataService::Instance().notificationCenter.removeObserver(
+          m_renameObserver);
       m_observingADS = false;
     }
   }
@@ -182,7 +188,7 @@ Workspace_sptr WorkspaceGroup::getItem(const size_t index) const {
 /**
  * Return the workspace by name
  * @param wsName The name of the workspace
- * @throws an out_of_range error if the workspace'sname not contained in the
+ * @throws an out_of_range error if the workspace's name not contained in the
  * group's list of workspace names
  */
 Workspace_sptr WorkspaceGroup::getItem(const std::string wsName) const {
@@ -251,7 +257,7 @@ void WorkspaceGroup::removeItem(const size_t index) {
  *
  * Removes any deleted entries from the group.
  * This also deletes the workspace group when the last member of it gets
- *deteleted.
+ * deleted.
  *
  * @param notice :: A pointer to a workspace delete notificiation object
  */
@@ -278,11 +284,11 @@ void WorkspaceGroup::workspaceDeleteHandle(
 }
 
 /**
- * Callback when a after-replace notification is received
+ * Callback when a before-replace notification is received
  * Replaces a member if it was replaced in the ADS.
- * @param notice :: A pointer to a workspace after-replace notificiation object
+ * @param notice :: A pointer to a workspace before-replace notification object
  */
-void WorkspaceGroup::workspaceReplaceHandle(
+void WorkspaceGroup::workspaceBeforeReplaceHandle(
     Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice) {
   std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
@@ -291,6 +297,36 @@ void WorkspaceGroup::workspaceReplaceHandle(
     if ((*workspace).name() == replacedName) {
       workspace = notice->newObject();
       break;
+    }
+  }
+}
+
+/**
+ * Callback when a rename notification is received
+ * Checks all members of a group and eliminates any duplicates
+ * from the renaming process
+ *
+ * @param notice :: A pointer to a workspace after-replace notification object
+ */
+void WorkspaceGroup::workspaceRenameHandle(
+    Mantid::API::WorkspaceRenameNotification_ptr notice) {
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+
+  const std::string replacedName = notice->objectName();
+
+  auto existingNameIter = m_workspaces.begin();
+  while (existingNameIter != m_workspaces.end()) {
+    // Use current position instead of begin so we don't search twice
+    existingNameIter = std::find_if(existingNameIter, m_workspaces.end(),
+                                    [&replacedName](const auto &ws) -> bool {
+                                      return ws->name() == replacedName;
+                                    });
+
+    if (existingNameIter == m_workspaces.end()) {
+      // No more workspaces which have the same name
+      break;
+    } else {
+      existingNameIter = m_workspaces.erase(existingNameIter);
     }
   }
 }

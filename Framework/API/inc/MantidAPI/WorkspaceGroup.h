@@ -134,16 +134,25 @@ private:
   /// Callback when a delete notification is received
   void workspaceDeleteHandle(
       Mantid::API::WorkspacePostDeleteNotification_ptr notice);
-  /// Observer for workspace delete notfications
+
+  /// Callback when a before-replace notification is received
+  void workspaceBeforeReplaceHandle(
+      Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice);
+  /// Callback when an after-replace notification is received
+  void
+  workspaceRenameHandle(Mantid::API::WorkspaceRenameNotification_ptr notice);
+
+  /// Observer for workspace delete notifications
   Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspacePostDeleteNotification>
       m_deleteObserver;
-  /// Callback when a before-replace notification is received
-  void workspaceReplaceHandle(
-      Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice);
-  /// Observer for workspace before-replace notfications
+  /// Observer for workspace before-replace notifications
   Poco::NObserver<WorkspaceGroup,
                   Mantid::API::WorkspaceBeforeReplaceNotification>
-      m_replaceObserver;
+      m_beforeReplaceObserver;
+  /// Observer for workspace rename notifications
+  Poco::NObserver<WorkspaceGroup,
+                  Mantid::API::WorkspaceRenameNotification>
+      m_renameObserver;
   /// The list of workspace pointers in the group
   std::vector<Workspace_sptr> m_workspaces;
   /// Flag as to whether the observers have been added to the ADS
