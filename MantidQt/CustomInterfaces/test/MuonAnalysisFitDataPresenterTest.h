@@ -148,6 +148,7 @@ public:
   }
 
   void test_setAssignedFirstRun_singleWorkspace() {
+    setupGroupPeriodSelections();
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189"),
                                                      QString("MUSR"))).Times(1);
@@ -156,6 +157,7 @@ public:
   }
 
   void test_setAssignedFirstRun_contiguousRange() {
+    setupGroupPeriodSelections();
     const QString wsName("MUSR00015189-91; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189-91"),
                                                      QString("MUSR"))).Times(1);
@@ -166,6 +168,7 @@ public:
   }
 
   void test_setAssignedFirstRun_nonContiguousRange() {
+    setupGroupPeriodSelections();
     const QString wsName("MUSR00015189-91, 15193; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91, 15193"),
@@ -177,6 +180,7 @@ public:
   }
 
   void test_setAssignedFirstRun_alreadySet() {
+    setupGroupPeriodSelections();
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
     m_presenter->setAssignedFirstRun(wsName);
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(_, _)).Times(0);
@@ -188,6 +192,7 @@ public:
   }
 
   void test_getAssignedFirstRun() {
+    setupGroupPeriodSelections();
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
     m_presenter->setAssignedFirstRun(wsName);
     TS_ASSERT_EQUALS(wsName, m_presenter->getAssignedFirstRun());
@@ -517,6 +522,57 @@ public:
     m_presenter->checkAndUpdateFitLabel(true);
   }
 
+  void test_setSelectedWorkspace() {
+    setupGroupPeriodSelections();
+    const QString wsName("MUSR00015189-91; Group; fwd; Asym; 1; #6");
+    const QStringList wsNameList{wsName};
+
+    // Expect it will update the workspace names
+    EXPECT_CALL(*m_fitBrowser, setWorkspaceNames(wsNameList)).Times(1);
+    EXPECT_CALL(*m_fitBrowser, setWorkspaceName(wsName)).Times(1);
+    EXPECT_CALL(*m_dataSelector, setDatasetNames(wsNameList)).Times(1);
+
+    // Expect it will update the UI from workspace details
+    EXPECT_CALL(*m_dataSelector,
+                setWorkspaceDetails(QString("00015189-91"), QString("MUSR")))
+        .Times(1);
+    EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0)).Times(1);
+    EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("fwd"))).Times(1);
+    EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
+
+    m_presenter->setSelectedWorkspace(wsName);
+  }
+
+  void test_setSelectedWorkspace_groupsAlreadySelected_shouldNotUnselect() {
+    const QString wsName("MUSR00015189-91; Group; fwd; Asym; 1; #6");
+
+    // Groups "fwd" and "bwd" are already selected
+    ON_CALL(*m_dataSelector, getChosenGroups())
+        .WillByDefault(Return(QStringList{"fwd", "bwd"}));
+    ON_CALL(*m_dataSelector, getPeriodSelections())
+        .WillByDefault(Return(QStringList{}));
+
+    // It should NOT deselect the already selected groups
+    EXPECT_CALL(*m_dataSelector, setChosenGroup(_)).Times(0);
+
+    m_presenter->setSelectedWorkspace(wsName);
+  }
+
+  void test_setSelectedWorkspace_periodsAlreadySelected_shouldNotUnselect() {
+    const QString wsName("MUSR00015189-91; Group; fwd; Asym; 1; #6");
+
+    // Periods 1 and 2 are already selected
+    ON_CALL(*m_dataSelector, getPeriodSelections())
+        .WillByDefault(Return(QStringList{"1", "2"}));
+    ON_CALL(*m_dataSelector, getChosenGroups())
+        .WillByDefault(Return(QStringList{}));
+
+    // It should NOT deselect the already selected periods
+    EXPECT_CALL(*m_dataSelector, setChosenPeriod(_)).Times(0);
+
+    m_presenter->setSelectedWorkspace(wsName);
+  }
+
 private:
   void doTest_handleSelectedDataChanged(IMuonFitDataSelector::FitType fitType) {
     auto &ads = AnalysisDataService::Instance();
@@ -775,6 +831,13 @@ private:
     }
     m_presenter->checkAndUpdateFitLabel(false);
     AnalysisDataService::Instance().clear();
+  }
+
+  void setupGroupPeriodSelections() {
+    ON_CALL(*m_dataSelector, getChosenGroups())
+        .WillByDefault(Return(QStringList{}));
+    ON_CALL(*m_dataSelector, getPeriodSelections())
+        .WillByDefault(Return(QStringList{}));
   }
 
   MockDataSelector *m_dataSelector;

@@ -111,7 +111,7 @@ void MuonFitDataSelector::userChangedRuns() {
 
 /**
  * Sets group names and updates checkboxes on UI
- * By default sets all checked
+ * By default sets all unchecked
  * @param groups :: [input] List of group names
  */
 void MuonFitDataSelector::setAvailableGroups(const QStringList &groups) {
@@ -266,13 +266,13 @@ void MuonFitDataSelector::setPeriodVisibility(bool visible) {
 
 /**
  * Add a new checkbox to the list of groups with given name
- * The new checkbox is checked by default
+ * The new checkbox is unchecked by default
  * @param name :: [input] Name of group to add
  */
 void MuonFitDataSelector::addGroupCheckbox(const QString &name) {
   auto checkBox = new QCheckBox(name);
   m_groupBoxes.insert(name, checkBox);
-  checkBox->setChecked(true);
+  checkBox->setChecked(false);
   m_ui.verticalLayoutGroups->addWidget(checkBox);
   connect(checkBox, SIGNAL(clicked(bool)), this,
           SIGNAL(selectedGroupsChanged()));
