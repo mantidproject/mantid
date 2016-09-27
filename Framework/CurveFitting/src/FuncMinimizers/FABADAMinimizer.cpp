@@ -117,7 +117,11 @@ FABADAMinimizer::FABADAMinimizer()
       " landscape");*/
 }
 
-/// Initialize minimizer. Set initial values for all private members.
+/** Initialize minimizer. Set initial values for all private members
+*
+* @param function :: the fit function
+* @param maxIterations :: maximum number of iterations
+*/
 void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
                                  size_t maxIterations) {
 
@@ -297,8 +301,10 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
   }
 }
 
-/// Do one iteration. Returns true if iterations to be continued,
-/// false if they must stop.
+/** Do one iteration. Returns true if iterations to be continued, false if they
+* must stop.
+*
+*/
 bool FABADAMinimizer::iterate(size_t) {
 
   if (!m_leastSquares) {
@@ -412,8 +418,9 @@ bool FABADAMinimizer::iterate(size_t) {
 
 double FABADAMinimizer::costFunctionVal() { return m_chi2; }
 
-/// When all the iterations have been done, calculate and show all the
-/// results.
+/** When all the iterations have been done, calculate and show all the results.
+*
+*/
 void FABADAMinimizer::finalize() {
 
   // Creating the reduced chain (considering only one each
@@ -721,75 +728,91 @@ void FABADAMinimizer::finalize() {
   }*/
 }
 
-// Returns the step from a Gaussian given sigma = Jump
-double FABADAMinimizer::gaussianStep(const double &Jump) {
+/** Returns the step from a Gaussian given sigma = jump
+*
+* @param jump :: sigma
+* @return :: the step
+*/
+double FABADAMinimizer::gaussianStep(const double &jump) {
   boost::mt19937 mt;
-  mt.seed(123 * (int(m_counter) + 45 * int(Jump)) +
+  mt.seed(123 * (int(m_counter) + 45 * int(jump)) +
           14 * int(time_t())); // Numbers for the seed
-  boost::normal_distribution<double> distr(0.0, std::abs(Jump));
+  boost::normal_distribution<double> distr(0.0, std::abs(jump));
   boost::variate_generator<boost::mt19937, boost::normal_distribution<double>>
       step(mt, distr);
   return step();
 }
 
-// If the new point is out of its bounds, it is changed to fit in the bound
-// limits
-void FABADAMinimizer::boundApplication(const size_t &ParameterIndex,
-                                       double &new_value, double &step) {
+/** If the new point is out of its bounds, it is changed to fit in the bound
+* limits
+*
+* @param parameterIndex :: the index of the parameter
+* @param newValue :: the value of the parameter
+* @param step :: a step used to modify the parameter value
+*/
+void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
+                                       double &newValue, double &step) {
   // Checks if it is inside the boundary constrinctions.
   // If not, changes it.
-  const size_t &i = ParameterIndex;
+  const size_t &i = parameterIndex;
   if (m_bound[i]) {
-    while (new_value < m_lower[i]) {
+    while (newValue < m_lower[i]) {
       if (std::abs(step) > m_upper[i] - m_lower[i]) {
-        new_value = m_parameters.get(i) + step / 10.0;
+        newValue = m_parameters.get(i) + step / 10.0;
         step = step / 10;
         m_jump[i] = m_jump[i] / 10;
       } else {
-        new_value =
+        newValue =
             m_lower[i] + std::abs(step) - (m_parameters.get(i) - m_lower[i]);
       }
     }
-    while (new_value > m_upper[i]) {
+    while (newValue > m_upper[i]) {
       if (std::abs(step) > m_upper[i] - m_lower[i]) {
-        new_value = m_parameters.get(i) + step / 10.0;
+        newValue = m_parameters.get(i) + step / 10.0;
         step = step / 10;
         m_jump[i] = m_jump[i] / 10;
       } else {
-        new_value =
+        newValue =
             m_upper[i] - (std::abs(step) + m_parameters.get(i) - m_upper[i]);
       }
     }
   }
 }
 
-void FABADAMinimizer::tieApplication(const size_t &ParameterIndex,
-                                     GSLVector &new_parameters,
-                                     double &new_value) {
-  const size_t &i = ParameterIndex;
+/** Applies ties to parameters. Ties are applied to other parameters first and
+*sequentially, finally ties are applied to the current parameter
+*
+* @param parameterIndex :: the index of the parameter
+* @param newParameters :: the value of the parameters after applying ties
+* @param newValue :: new value of the current parameter
+*/
+void FABADAMinimizer::tieApplication(const size_t &parameterIndex,
+                                     GSLVector &newParameters,
+                                     double &newValue) {
+  const size_t &i = parameterIndex;
   // Fulfill the ties of the other parameters
   for (size_t j = 0; j < m_nParams; ++j) {
     if (j != i) {
       API::ParameterTie *tie = m_fitFunction->getTie(j);
       if (tie) {
-        new_value = tie->eval();
-        if (boost::math::isnan(new_value)) { // maybe not needed
+        newValue = tie->eval();
+        if (boost::math::isnan(newValue)) { // maybe not needed
           throw std::runtime_error("Parameter value is NaN.");
         }
-        new_parameters.set(j, new_value);
-        m_fitFunction->setParameter(j, new_value);
+        newParameters.set(j, newValue);
+        m_fitFunction->setParameter(j, newValue);
       }
     }
   }
   // After all the other variables, the current one is updated to the ties
   API::ParameterTie *tie = m_fitFunction->getTie(i);
   if (tie) {
-    new_value = tie->eval();
-    if (boost::math::isnan(new_value)) { // maybe not needed
+    newValue = tie->eval();
+    if (boost::math::isnan(newValue)) { // maybe not needed
       throw std::runtime_error("Parameter value is NaN.");
     }
-    new_parameters.set(i, new_value);
-    m_fitFunction->setParameter(i, new_value);
+    newParameters.set(i, newValue);
+    m_fitFunction->setParameter(i, newValue);
   }
   //*ALTERNATIVE CODE
   //*To avoid creating the new class (way too slow)
@@ -817,27 +840,33 @@ void FABADAMinimizer::tieApplication(const size_t &ParameterIndex,
           leastSquaresMaleable);
 }
 
-void FABADAMinimizer::algorithmDisplacement(const size_t &ParameterIndex,
-                                            const double &chi2_new,
-                                            GSLVector &new_parameters) {
+/** Given the new chi2, next position is calculated and updated.
+*
+* @param parameterIndex :: the index of the parameter
+* @param chi2New :: the new value of chi2
+* @param newParameters :: new value of the fitting parameters
+*/
+void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
+                                            const double &chi2New,
+                                            GSLVector &newParameters) {
 
-  const size_t &i = ParameterIndex;
+  const size_t &i = parameterIndex;
 
   // If new Chi square value is lower, jumping directly to new parameter
-  if (chi2_new < m_chi2) {
+  if (chi2New < m_chi2) {
     for (size_t j = 0; j < m_nParams; j++) {
-      m_chain[j].push_back(new_parameters.get(j));
+      m_chain[j].push_back(newParameters.get(j));
     }
-    m_chain[m_nParams].push_back(chi2_new);
-    m_parameters = new_parameters;
-    m_chi2 = chi2_new;
+    m_chain[m_nParams].push_back(chi2New);
+    m_parameters = newParameters;
+    m_chi2 = chi2New;
     m_changes[i] += 1;
   }
 
   // If new Chi square value is higher, it depends on the probability
   else {
     // Calculate probability of change
-    double prob = exp((m_chi2 - chi2_new) / (2.0 * m_temperature));
+    double prob = exp((m_chi2 - chi2New) / (2.0 * m_temperature));
 
     // Decide if changing or not
     boost::mt19937 mt;
@@ -846,11 +875,11 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &ParameterIndex,
     double p = distr(mt);
     if (p <= prob) {
       for (size_t j = 0; j < m_nParams; j++) {
-        m_chain[j].push_back(new_parameters.get(j));
+        m_chain[j].push_back(newParameters.get(j));
       }
-      m_chain[m_nParams].push_back(chi2_new);
-      m_parameters = new_parameters;
-      m_chi2 = chi2_new;
+      m_chain[m_nParams].push_back(chi2New);
+      m_parameters = newParameters;
+      m_chi2 = chi2New;
       m_changes[i] += 1;
     } else {
       for (size_t j = 0; j < m_nParams; j++) {
@@ -876,8 +905,12 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &ParameterIndex,
   }
 }
 
-void FABADAMinimizer::jumpUpdate(const size_t &ParameterIndex) {
-  const size_t &i = ParameterIndex;
+/** Updates the parameterIndex-th parameter jump if appropriate
+*
+* @param parameterIndex :: the index of the current parameter
+*/
+void FABADAMinimizer::jumpUpdate(const size_t &parameterIndex) {
+  const size_t &i = parameterIndex;
   const double jumpAR = getProperty("JumpAcceptanceRate");
   double jnew;
 
@@ -919,8 +952,10 @@ void FABADAMinimizer::jumpUpdate(const size_t &ParameterIndex) {
   }
 }
 
-// Check if Chi square has converged for all the parameters
-// if overexploring or Simulated Annealing completed
+/** Check if Chi square has converged for all the parameters if overexploring or
+* Simulated Annealing completed
+*
+*/
 void FABADAMinimizer::convergenceCheck() {
   if (m_leftRefrPoints == 0 && m_counter > LOWER_CONVERGENCE_LIMIT &&
       !m_converged) {
@@ -970,6 +1005,9 @@ void FABADAMinimizer::convergenceCheck() {
   }
 }
 
+/** Refrigerates the system if appropriate
+*
+*/
 void FABADAMinimizer::simAnnealingRefrigeration() {
   // Update jump to separate different temperatures
   for (size_t i = 0; i < m_nParams; ++i)
@@ -990,6 +1028,9 @@ void FABADAMinimizer::simAnnealingRefrigeration() {
     m_temperature /= m_tempStep;
 }
 
+/* Returns true if iteration must continue. Returns false otherwise.
+*
+*/
 bool FABADAMinimizer::iterationContinuation() {
 
   // If still through Simulated Annealing
