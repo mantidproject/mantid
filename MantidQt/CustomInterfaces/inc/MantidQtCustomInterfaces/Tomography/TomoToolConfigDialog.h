@@ -37,13 +37,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class TomoToolConfigTomoPy : public QDialog {
-  Q_OBJECT
-
-public:
-  TomoToolConfigTomoPy(QWidget *parent = 0);
-};
-
 class TomoToolConfigSavu : public QMainWindow {
   Q_OBJECT
 public:
@@ -71,12 +64,16 @@ private:
   void initLayout();
 };
 
-class TomoToolConfigDialog : public QDialog {
+class TomoToolConfigDialogBase : public QDialog {
   Q_OBJECT
 
 public:
-  TomoToolConfigDialog(QWidget *parent = 0);
+	TomoToolConfigDialogBase(QWidget *parent = 0);
 
+	virtual void setUpDialog() {}
+	virtual int execute() {
+		return this->exec();
+	};
 private:
   void initLayout();
 

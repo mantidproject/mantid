@@ -11,6 +11,8 @@
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h"
+
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -1162,7 +1164,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
       std::string("/processed/") + "reconstruction_" + std::to_string(reconIdx);
 
   if (g_TomoPyTool == name) {
-    TomoToolConfigTomoPy tomopy;
+	  TomoToolConfigTomoPyDialog tomopy;
     m_uiTomoPy.setupUi(&tomopy);
     m_uiTomoPy.comboBox_method->clear();
     const auto methods = ToolConfigTomoPy::methods();

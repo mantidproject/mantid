@@ -133,6 +133,7 @@ set ( SRC_FILES
 	src/Tomography/TomographyIfaceModel.cpp
 	src/Tomography/TomographyIfacePresenter.cpp
 	src/Tomography/TomographyIfaceViewQtGUI.cpp
+	src/Tomography/TomoToolConfigTomoPyDialog.cpp
 	src/Tomography/ToolConfig.cpp
 	src/UserInputValidator.cpp
 	src/background.cpp
@@ -305,6 +306,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h
+	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h
 	inc/MantidQtCustomInterfaces/Updateable.h
 	inc/MantidQtCustomInterfaces/UserInputValidator.h
 	inc/MantidQtCustomInterfaces/deltaECalc.h

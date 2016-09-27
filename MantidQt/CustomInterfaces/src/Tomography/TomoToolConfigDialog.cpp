@@ -3,15 +3,13 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-TomoToolConfigTomoPy::TomoToolConfigTomoPy(QWidget *parent) : QDialog(parent) {}
-
 TomoToolConfigSavu::TomoToolConfigSavu(QWidget *parent) : QMainWindow(parent) {}
 
 TomoToolConfigAstra::TomoToolConfigAstra(QWidget *parent) : QDialog(parent) {}
 
 TomoToolConfigCustom::TomoToolConfigCustom(QWidget *parent) : QDialog(parent) {}
 
-TomoToolConfigDialog::TomoToolConfigDialog(QWidget *parent) : QDialog(parent) {
+TomoToolConfigDialogBase::TomoToolConfigDialogBase(QWidget *parent) : QDialog(parent) {
   labelRun = new QLabel("Runnable script");
   editRun = new QLineEdit("/work/imat/");
   hRun = new QHBoxLayout();
@@ -41,9 +39,9 @@ TomoToolConfigDialog::TomoToolConfigDialog(QWidget *parent) : QDialog(parent) {
   connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancelClicked()));
 }
 
-void TomoToolConfigDialog::okClicked() {}
+void TomoToolConfigDialogBase::okClicked() {}
 
-void TomoToolConfigDialog::cancelClicked() {}
+void TomoToolConfigDialogBase::cancelClicked() {}
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
