@@ -374,7 +374,7 @@ def plotMuscat(inWS,spec_list,Plot):
     if Plot == 'Scat1' or Plot == 'All':
         mp.importMatrixWorkspace(inWS+'_1').plotGraph2D()
 
-def CheckHistZero(inWS):
+def CheckHistZero(self, inWS):
     """
     Retrieves basic info on a workspace
     Checks the workspace is not empty, then returns the number of histogram and

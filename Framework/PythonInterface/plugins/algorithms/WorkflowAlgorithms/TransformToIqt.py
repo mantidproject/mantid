@@ -304,7 +304,7 @@ class TransformToIqt(PythonAlgorithm):
         DeleteWorkspace('__res_fft')
         DeleteWorkspace('__res')
 
-    def CheckAnalysers(in1WS, in2WS):
+    def CheckAnalysers(self, in1WS, in2WS):
         """
         Check workspaces have identical analysers and reflections
         Args:
@@ -336,7 +336,7 @@ class TransformToIqt(PythonAlgorithm):
         else:
             logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
 
-    def CheckHistZero(inWS):
+    def CheckHistZero(self, inWS):
         """
         Retrieves basic info on a workspace
         Checks the workspace is not empty, then returns the number of histogram and

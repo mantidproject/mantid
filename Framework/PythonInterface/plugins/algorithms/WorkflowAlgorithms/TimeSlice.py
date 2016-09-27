@@ -267,7 +267,7 @@ class TimeSlice(PythonAlgorithm):
 
         return slice_file
 
-    def CheckHistZero(inWS):
+    def CheckHistZero(self, inWS):
         """
         Retrieves basic info on a workspace
         Checks the workspace is not empty, then returns the number of histogram and
