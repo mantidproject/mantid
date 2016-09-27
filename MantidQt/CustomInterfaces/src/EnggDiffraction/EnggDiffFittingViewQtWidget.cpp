@@ -17,6 +17,7 @@
 #include <QFileDialog>
 #include <QSettings>
 
+#include <qevent.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>
 #include <qwt_symbol.h>
@@ -123,6 +124,9 @@ void EnggDiffFittingViewQtWidget::doSetup() {
 
   connect(m_ui.pushButton_plot_separate_window, SIGNAL(released()),
           SLOT(plotSeparateWindow()));
+
+  // Tool-tip button
+  connect(m_ui.pushButton_tooltip, SIGNAL(released()), SLOT(showToolTipHelp()));
 
   m_ui.dataPlot->setCanvasBackground(Qt::white);
   m_ui.dataPlot->setAxisTitle(QwtPlot::xBottom, "d-Spacing (A)");
@@ -247,7 +251,9 @@ void EnggDiffFittingViewQtWidget::saveClicked() {
 
 void EnggDiffFittingViewQtWidget::setBankDir(int idx) {
 
-  if (m_fitting_runno_dir_vec.size() >= size_t(idx)) {
+  const size_t runNoDirSize = m_fitting_runno_dir_vec.size();
+  // idx must correspond to an element and the vector cant be empty
+  if (size_t(idx) < runNoDirSize && runNoDirSize > 0) {
 
     std::string bankDir = m_fitting_runno_dir_vec[idx];
     Poco::Path fpath(bankDir);
@@ -531,6 +537,19 @@ void EnggDiffFittingViewQtWidget::plotSeparateWindow() {
   m_presenter->notify(IEnggDiffFittingPresenter::LogMsg);
 }
 
+void EnggDiffFittingViewQtWidget::showToolTipHelp() {
+  // We need a the mouse click position relative to the widget
+  // and relative to the screen. We will set the mouse click position
+  // relative to widget to 0 as the global position of the mouse
+  // is what is considered when the tool tip is displayed
+  const QPoint relWidgetPosition(0, 0);
+  const QPoint mousePos = QCursor::pos();
+  // Now fire the generated event to show a tool tip at the cursor
+  QEvent *toolTipEvent =
+      new QHelpEvent(QEvent::ToolTip, relWidgetPosition, mousePos);
+  QCoreApplication::sendEvent(m_ui.pushButton_tooltip, toolTipEvent);
+}
+
 std::string EnggDiffFittingViewQtWidget::fittingPeaksData() const {
 
   return m_ui.lineEdit_fitting_peaks->text().toStdString();
@@ -541,20 +560,6 @@ void EnggDiffFittingViewQtWidget::setPeakList(
   m_ui.lineEdit_fitting_peaks->setText(QString::fromStdString(peakList));
 }
 
-std::vector<std::string>
-EnggDiffFittingViewQtWidget::splitFittingDirectory(std::string &selectedfPath) {
-
-  Poco::Path PocofPath(selectedfPath);
-  std::string selectedbankfName = PocofPath.getBaseName();
-  std::vector<std::string> splitBaseName;
-  if (selectedbankfName.find("ENGINX_") != std::string::npos) {
-    // splits file by _ and .
-    // vector of (ENGINX, RUN-NUMBER, FOCUSED, BANK, NXS)
-    boost::split(splitBaseName, selectedbankfName, boost::is_any_of("_."));
-  }
-  return splitBaseName;
-}
-
 void EnggDiffFittingViewQtWidget::setBankEmit() { emit setBank(); }
 
 void EnggDiffFittingViewQtWidget::setBankIdComboBox(int idx) {
@@ -563,7 +568,6 @@ void EnggDiffFittingViewQtWidget::setBankIdComboBox(int idx) {
 }
 
 void EnggDiffFittingViewQtWidget::addBankItem(std::string bankID) {
-
   m_ui.comboBox_bank->addItem(QString::fromStdString(bankID));
 }
 

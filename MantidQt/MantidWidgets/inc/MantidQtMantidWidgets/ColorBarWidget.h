@@ -71,11 +71,11 @@ public:
   /// Check if logarithmic scale is selected
   bool getLog();
 
-  int getScale();
+  int getScale() const;
   void setScale(int);
 
   void setExponent(double);
-  double getExponent();
+  double getExponent() const;
 
   /// Set the label text for Auto Scale on Load checkbox label
   void setAutoScaleLabelText(const std::string &newText);
@@ -97,6 +97,12 @@ public:
 
   /// Set the Auto Scale for Current Slice checkbox state
   bool getAutoScaleforCurrentSlice() const;
+
+  /// Load the state of the color bar widget from a Mantid project file
+  void loadFromProject(const std::string &lines);
+
+  /// Save the state of the color bar widget to a Mantid project file
+  std::string saveToProject() const;
 
 public slots:
   void changedMinimum();
