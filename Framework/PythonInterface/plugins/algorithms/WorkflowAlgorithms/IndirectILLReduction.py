@@ -314,8 +314,17 @@ def perform_unmirror(red, left, right, option):
         logger.information('Unmirror 7: Shift both the right and the left according to vanadium and sum')
         start_bin_left, endbin_left = shift_spectra(left, 'left_van', True)
         start_bin_right, endbin_right = shift_spectra(right, 'right_van', True)
-        start_bin = np.maximum(start_bin_left, start_bin_right)
-        end_bin = np.minimum(endbin_left, endbin_right)
+        start_bin1 = np.maximum(start_bin_left, start_bin_right)
+        end_bin1 = np.minimum(endbin_left, endbin_right)
+
+        # Now we force the peaks to be centered:
+        start_bin_left, endbin_left = shift_spectra(left)
+        start_bin_right, endbin_right = shift_spectra(right)
+        start_bin2 = np.maximum(start_bin_left, start_bin_right)
+        end_bin2 = np.minimum(endbin_left, endbin_right)
+
+        start_bin = np.max([start_bin1, start_bin2])
+        end_bin = np.min([end_bin1, end_bin2])
 
     if option > 3 or option == 1:
         # Perform unmirror option by summing left and right workspaces
