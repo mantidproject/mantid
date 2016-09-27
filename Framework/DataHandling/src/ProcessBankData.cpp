@@ -191,7 +191,7 @@ void ProcessBankData::processEvents(bool &pulsetimesincreasing,
  */
 void ProcessBankData::compressOrSetOrder(bool compress,
                                          const std::vector<bool> &usedDetIds,
-                                         double pulsetimesincreasing) {
+                                         bool pulsetimesincreasing) {
   auto &outputWS = *(alg->m_ws);
 
   // Do it on all the detector IDs we touched

@@ -60,7 +60,7 @@ public:
                      std::vector<bool> &usedDetIds);
 
   void compressOrSetOrder(bool compress, const std::vector<bool> &usedDetIds,
-                          double pulsetimesincreasing);
+                          bool pulsetimesincreasing);
 
 private:
   /// Algorithm being run
