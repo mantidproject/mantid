@@ -912,7 +912,7 @@ void FABADAMinimizer::jumpUpdate(const size_t &parameterIndex) {
   else
     m_changesOld[i] = m_changes[i];
 
-  if (m_changes[i] == 0.0) {
+  if (m_changes[i] == 0) {
     jnew = m_jump[i] / JUMP_CHECKING_RATE;
     // JUST FOR THE CASE THERE HAS NOT BEEN ANY CHANGE
     //(treated as if only one acceptance).
