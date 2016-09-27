@@ -366,8 +366,8 @@ void TomographyIfacePresenter::processLogout() {
 void TomographyIfacePresenter::processSetupReconTool() {
   if (TomographyIfaceModel::g_CCPiTool != m_view->currentReconTool()) {
 	  TomoToolConfigDialogBase * base = TomoToolConfigDialogBase::fromString("");
-	  delete base;
-    m_view->showToolConfig(m_view->currentReconTool());
+
+    m_view->showToolConfig(base);
     m_model->updateReconToolsSettings(m_view->reconToolsSettings());
 
     // TODO: this would make sense if the reconstruct action/button

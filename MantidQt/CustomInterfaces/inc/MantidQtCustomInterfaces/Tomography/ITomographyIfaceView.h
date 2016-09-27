@@ -9,6 +9,7 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -290,7 +291,7 @@ public:
    *
    * @param name human readable name of the tool, as a string
    */
-  virtual void showToolConfig(const std::string &name) = 0;
+  virtual void showToolConfig(TomoToolConfigDialogBase * dialog) = 0;
 
   /**
    * Refresh the table, tree etc. that displays info on the running/finished

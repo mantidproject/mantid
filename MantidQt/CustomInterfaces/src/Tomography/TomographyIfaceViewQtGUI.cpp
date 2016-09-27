@@ -1155,7 +1155,8 @@ void TomographyIfaceViewQtGUI::updateSystemSettings(
  *
  * @param name Name of the (tomographic reconstruction) tool
  */
-void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
+void TomographyIfaceViewQtGUI::showToolConfig(TomoToolConfigDialogBase * dialog) {
+	const std::string name = "TomoPy";
   QString run = "/work/imat/phase_commissioning/scripts/Imaging/IMAT/"
                 "tomo_reconstruct.py"; // m_uiAstra.lineEdit_runnable->text();
   static size_t reconIdx = 1;
@@ -1164,15 +1165,16 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
       std::string("/processed/") + "reconstruction_" + std::to_string(reconIdx);
 
   if (g_TomoPyTool == name) {
-	  TomoToolConfigTomoPyDialog tomopy;
+	 dialog->setUpDialog();
+	  /* TomoToolConfigTomoPyDialog tomopy;
     m_uiTomoPy.setupUi(&tomopy);
     m_uiTomoPy.comboBox_method->clear();
     const auto methods = ToolConfigTomoPy::methods();
     for (size_t i = 0; i < methods.size(); i++) {
       m_uiTomoPy.comboBox_method->addItem(
           QString::fromStdString(methods[i].second));
-    }
-    int res = tomopy.exec();
+    }*/
+    int res = dialog->execute();
 
     if (QDialog::Accepted == res) {
       // TODO: move this
@@ -1187,7 +1189,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
               m_uiTabRun.lineEdit_experiment_reference->text().toStdString() +
               localOutNameAppendix,
           paths.pathDarks(), paths.pathOpenBeam(), paths.pathSamples());
-      m_tomopyMethod = methods[mi].first;
+      //m_tomopyMethod = methods[mi].first;
     }
   } else if (g_AstraTool == name) {
     TomoToolConfigAstra astra;

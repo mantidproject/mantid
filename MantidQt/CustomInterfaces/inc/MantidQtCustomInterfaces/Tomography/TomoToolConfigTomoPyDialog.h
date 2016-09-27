@@ -1,8 +1,8 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGTOMOPY_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGTOMOPY_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGTOMOPYDIALOG_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGTOMOPYDIALOG_H_
 
 #include "ui_TomoToolConfigTomoPy.h"
-#include <MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h>
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -19,4 +19,4 @@ private:
 };
 } // CustomInterfaces
 } // MantidQt
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGTOMOPY_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGTOMOPYDIALOG_H_

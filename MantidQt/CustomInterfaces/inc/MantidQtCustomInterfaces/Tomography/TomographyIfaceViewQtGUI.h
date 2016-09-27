@@ -275,7 +275,7 @@ private:
 
   void updatePathsConfig(const TomoPathsConfig &cfg) override;
 
-  void showToolConfig(const std::string &name) override;
+  void showToolConfig(TomoToolConfigDialogBase * dialog) override;
 
   void closeEvent(QCloseEvent *ev) override;
 

@@ -9,7 +9,7 @@ namespace CustomInterfaces {
 
 // pairs of name-in-the-tool, human-readable-name
 const std::vector<
-    std::pair<std::string, std::string>> ToolConfigTomoPy::g_tomopyMethods = {
+    std::pair<std::string, std::string> > ToolConfigTomoPy::g_tomopyMethods = {
     std::make_pair("gridrec", "gridrec: Fourier grid reconstruction "
                               "algorithm (Dowd, 19999; Rivers, 2006)"),
     std::make_pair("sirt",
