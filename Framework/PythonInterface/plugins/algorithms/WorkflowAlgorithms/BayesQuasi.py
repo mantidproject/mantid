@@ -357,7 +357,7 @@ class BayesQuasi(PythonAlgorithm):
                                   Nspec=3, UnitX='MomentumTransfer')
             outWS = self.C2Fw(fname)
         if self._program == 'QSe':
-            comp_prog.report('Runnning C2Se')
+            comp_prog.report('Running C2Se')
             outWS = self.C2Se(fname)
 
         log_prog = Progress(self, start=0.8, end =1.0, nreports=8)
@@ -370,7 +370,7 @@ class BayesQuasi(PythonAlgorithm):
         s_api.CopyLogs(InputWorkspace=self._samWS, OutputWorkspace=fitWS)
         log_prog.report('Adding sample logs to Fit workspace')
         self._add_sample_logs(fitWS, prog, erange, nbins)
-        log_prog.report('Finialising log copying')
+        log_prog.report('Finalising log copying')
 
         self.setProperty('OutputWorkspaceFit', fitWS)
         self.setProperty('OutputWorkspaceResult', outWS)

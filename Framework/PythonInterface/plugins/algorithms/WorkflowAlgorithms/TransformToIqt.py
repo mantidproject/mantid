@@ -6,7 +6,7 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProper
 from mantid.kernel import Direction, logger
 from mantid import config
 import math
-import os
+
 
 
 class TransformToIqt(PythonAlgorithm):
@@ -131,7 +131,7 @@ class TransformToIqt(PythonAlgorithm):
         Calculates the TransformToIqt parameters and saves in a table workspace.
         """
         workflow_prog = Progress(self, start=0.0, end=0.3, nreports=8)
-        workflow_prog.report('Croping Workspace')
+        workflow_prog.report('Cropping Workspace')
         CropWorkspace(InputWorkspace=self._sample,
                       OutputWorkspace='__TransformToIqt_sample_cropped',
                       Xmin=self._e_min,
@@ -142,7 +142,7 @@ class TransformToIqt(PythonAlgorithm):
         num_bins = int(number_input_points / self._number_points_per_bin)
         self._e_width = (abs(self._e_min) + abs(self._e_max)) / num_bins
 
-        workflow_prog.report('Attemping to Access IPF')
+        workflow_prog.report('Attempting to Access IPF')
         try:
             workflow_prog.report('Access IPF')
             instrument = mtd[self._sample].getInstrument()
@@ -254,7 +254,7 @@ class TransformToIqt(PythonAlgorithm):
                OutputWorkspace='__sam')
 
         # Resolution
-        trans_prog.report('Rebinnig Resolution')
+        trans_prog.report('Rebinning Resolution')
         Rebin(InputWorkspace=self._resolution,
               OutputWorkspace='__res_data',
               Params=rebin_param)
@@ -264,7 +264,7 @@ class TransformToIqt(PythonAlgorithm):
         trans_prog.report('Converting Resolution to data points')
         ConvertToPointData(InputWorkspace='__res_data',
                            OutputWorkspace='__res_data')
-        trans_prog.report('Extractig FFT Resolution spectrum')
+        trans_prog.report('Extracting FFT Resolution spectrum')
         ExtractFFTSpectrum(InputWorkspace='__res_data',
                            OutputWorkspace='__res_fft',
                            FFTPart=2)

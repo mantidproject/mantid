@@ -193,7 +193,7 @@ class Symmetrise(PythonAlgorithm):
             issues['XMin'] = 'XMin must be less than XMax'
             issues['XMax'] = 'XMax must be greater than XMin'
 
-        # Valudate X range against workspace X range
+        # Validate X range against workspace X range
         sample_x = mtd[input_workspace_name].readX(0)
         sample_x_min = sample_x.min()
         sample_x_max = sample_x.max()
@@ -233,7 +233,7 @@ class Symmetrise(PythonAlgorithm):
         Finds the points in the array that match the cut points.
 
         @param sample_x - Sample X axis data
-        @param sample_array_len - Lengh of data array for sample data
+        @param sample_array_len - Length of data array for sample data
         """
         delta_x = sample_x[1] - sample_x[0]
 

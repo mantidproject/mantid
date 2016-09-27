@@ -239,7 +239,7 @@ class BayesStretch(PythonAlgorithm):
 
         log_prog.report('Adding sample logs to Contour workspace')
         self._add_sample_logs(contour_ws, self._erange, self._nbins[0])
-        log_prog.report('Finialising log copying')
+        log_prog.report('Finalising log copying')
 
         self.setProperty('OutputWorkspaceFit', fit_ws)
         self.setProperty('OutputWorkspaceContour', contour_ws)

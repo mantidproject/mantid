@@ -2,7 +2,7 @@
 
 """
 Bayes routines
-Fortran programs use fixed length arrays whereas Python has variable lenght lists
+Fortran programs use fixed length arrays whereas Python has variable length lists
 Input : the Python list is padded to Fortrans length using procedure PadArray
 Output : the Fortran numpy array is sliced to Python length using dataY = yout[:ny]
 """
@@ -37,11 +37,11 @@ def CalcErange(inWS,ns,erange,binWidth):
     rangeMask = (Xdata >= erange[0]) & (Xdata <= erange[1])
     Xin = Xdata[rangeMask]
 
-    #get indicies of the bounds of our energy range
+    #get indices of the bounds of our energy range
     minIndex = np.where(Xdata==Xin[0])[0][0]+1
     maxIndex = np.where(Xdata==Xin[-1])[0][0]
 
-    #reshape array into sublists of bins
+    #reshape array into sub-lists of bins
     Xin = Xin.reshape(len(Xin)/binWidth, binWidth)
 
     #sum and normalise values in bins
@@ -80,9 +80,9 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
     nvan,ntc = self.CheckHistZero(vname)
     theta = GetThetaQ(vname)[0]
     efix = getEfixed(vname)
-    print "begining erange calc"
+    logger.notice("beginning erange calc")
     nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(vname,0,erange,nbin)
-    print "end of erange calc"
+    logger.notice("end of erange calc")
     Ndat = nout[0]
     Imin = nout[1]
     Imax = nout[2]
@@ -90,7 +90,7 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
     logger.information(' Number of spectra = '+str(nvan))
     logger.information(' lptfile : ' + wrks +'_resnrm.lpt')
     lwrk=len(wrks)
-    wrks.ljust(140,' ')                              # pad for fioxed Fortran length
+    wrks.ljust(140,' ')                              # pad for fixed Fortran length
     wrkr=rname
     wrkr.ljust(140,' ')
     Nb,Xb,Yb,_ = GetXYE(rname,0,array_len)
@@ -197,8 +197,8 @@ def CheckAnalysers(self, in1WS, in2WS):
     Returns:
       @return None
     Raises:
-      @exception Valuerror - workspaces have different analysers
-      @exception Valuerror - workspaces have different reflections
+      @exception ValueError - workspaces have different analysers
+      @exception ValueError - workspaces have different reflections
     """
     ws1 = s_api.mtd[in1WS]
     try:

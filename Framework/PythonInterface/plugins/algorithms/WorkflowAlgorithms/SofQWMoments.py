@@ -6,7 +6,6 @@ from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspace
 from mantid.kernel import Direction
 from mantid import logger
 
-import os.path
 import numpy as np
 
 class SofQWMoments(DataProcessorAlgorithm):
@@ -87,7 +86,7 @@ class SofQWMoments(DataProcessorAlgorithm):
 
         workflow_prog.report('Converting to Histogram')
         ConvertToHistogram(InputWorkspace=samWS, OutputWorkspace=samWS)
-        workflow_prog.report('Intergrating result')
+        workflow_prog.report('Integrating result')
         Integration(samWS, OutputWorkspace=moments_0)
 
         moments = [moments_1, moments_2, moments_4]
