@@ -177,7 +177,8 @@ class LRReflectivityOutput(PythonAlgorithm):
                 w = 1.0 / e_values[i]**2
                 total += w * y_values[i]
                 weights += w
-            scaling_factor = total / weights
+            if weights > 0:
+                scaling_factor = total / weights
 
         Scale(InputWorkspace=scaled_ws_list[0] + '_histo', OutputWorkspace=scaled_ws_list[0] + '_scaled',
               Factor=1.0 / scaling_factor, Operation='Multiply')
@@ -202,6 +203,7 @@ class LRReflectivityOutput(PythonAlgorithm):
         content += '# Run start time: %s\n' % start_time
         content += '# Reduction time: %s\n' % time.ctime()
         content += '# Mantid version: %s\n' % mantid.__version__
+        content += '# Scaling factor: %s\n' % scaling_factor
         content += header_info
 
         try:

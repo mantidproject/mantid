@@ -213,11 +213,11 @@ public:
       TS_ASSERT_THROWS_NOTHING(
           mprops1->addProperty<std::string>("TestProp1-3", "value1-3"));
       TS_ASSERT(mprops1->hasProperty("TestProp1-3"));
-      // THE CHANGES TO PW ARE APPLIED TO the COPY (PW1 too!!!!)
+      // The changes to pw should not affect pw1
       TS_ASSERT(pw->run().hasProperty("TestProp1-3"));
-      TS_ASSERT(pw1->run().hasProperty("TestProp1-3"));
+      TS_ASSERT(!pw1->run().hasProperty("TestProp1-3"));
     }
-    TS_ASSERT(pw1->run().hasProperty("TestProp1-3"));
+    TS_ASSERT(!pw1->run().hasProperty("TestProp1-3"));
     if (trueSwitch) {
       // but this will cause it to diverge
       LogManager_sptr mprops2 = pw1->logs();

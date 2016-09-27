@@ -1,7 +1,5 @@
 #include "MantidDataHandling/ProcessBankData.h"
 
-//#include "MantidDataObjects/Events.h"
-
 using namespace Mantid::DataObjects;
 
 namespace Mantid {

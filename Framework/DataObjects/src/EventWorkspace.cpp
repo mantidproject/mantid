@@ -39,11 +39,18 @@ EventWorkspace::EventWorkspace() : mru(new EventWorkspaceMRU) {}
 
 EventWorkspace::EventWorkspace(const EventWorkspace &other)
     : IEventWorkspace(other), mru(new EventWorkspaceMRU) {
-  copyDataFrom(other);
+  for (const auto &el : other.data) {
+    // Create a new event list, copying over the events
+    auto newel = new EventList(*el);
+    // Make sure to update the MRU to point to THIS event workspace.
+    newel->setMRU(this->mru);
+    this->data.push_back(newel);
+  }
 }
 
 EventWorkspace::~EventWorkspace() {
-  clearData();
+  for (auto &eventList : data)
+    delete eventList;
   delete mru;
 }
 
@@ -91,54 +98,6 @@ void EventWorkspace::init(const std::size_t &NVectors,
   m_axes.resize(2);
   m_axes[0] = new API::RefAxis(XLength, this);
   m_axes[1] = new API::SpectraAxis(this);
-}
-
-/**
- * Copy all of the data (event lists) from the source workspace to this
- *workspace.
- *
- * @param source: EventWorkspace from which we are taking data.
- * @param sourceStartWorkspaceIndex: index in the workspace of source where we
- *start
- *          copying the data. This index will be 0 in the "this" workspace.
- *          Default: -1, meaning copy all.
- * @param sourceEndWorkspaceIndex: index in the workspace of source where we
- *stop.
- *          It is inclusive = source[sourceEndWorkspaceIndex[ WILL be copied.
- *          Default: -1, meaning copy all.
- *
- */
-void EventWorkspace::copyDataFrom(const EventWorkspace &source,
-                                  std::size_t sourceStartWorkspaceIndex,
-                                  std::size_t sourceEndWorkspaceIndex) {
-  // Start with nothing.
-  this->clearData(); // properly de-allocates memory!
-
-  // Copy the vector of EventLists
-  const auto &source_data = source.data;
-  auto it_start = source_data.begin();
-  auto it_end = source_data.end();
-  size_t source_data_size = source_data.size();
-
-  // Do we copy only a range?
-  if (sourceEndWorkspaceIndex == size_t(-1))
-    sourceEndWorkspaceIndex = source_data_size - 1;
-  if ((sourceStartWorkspaceIndex < source_data_size) &&
-      (sourceEndWorkspaceIndex < source_data_size) &&
-      (sourceEndWorkspaceIndex >= sourceStartWorkspaceIndex)) {
-    it_start += sourceStartWorkspaceIndex;
-    it_end = source_data.begin() + sourceEndWorkspaceIndex + 1;
-  }
-
-  for (auto it = it_start; it != it_end; ++it) {
-    // Create a new event list, copying over the events
-    auto newel = new EventList(**it);
-    // Make sure to update the MRU to point to THIS event workspace.
-    newel->setMRU(this->mru);
-    this->data.push_back(newel);
-  }
-
-  this->clearMRU();
 }
 
 /// The total size of the workspace
@@ -442,15 +401,6 @@ size_t EventWorkspace::MRUSize() const { return mru->MRUSize(); }
 /** Clears the MRU lists */
 void EventWorkspace::clearMRU() const { mru->clear(); }
 
-/** Clear the data[] vector and delete
- * any EventList objects in it
- */
-void EventWorkspace::clearData() {
-  for (auto &eventList : data)
-    delete eventList;
-  data.clear();
-}
-
 /// Returns the amount of memory used in bytes
 size_t EventWorkspace::getMemorySize() const {
   // TODO: Add the MRU buffer
@@ -467,110 +417,6 @@ size_t EventWorkspace::getMemorySize() const {
 
   // Return in bytes
   return total;
-}
-
-/** Either return an existing EventList from the list, or
- * create a new one if needed and expand the list.
- *  to finalize the stuff that needs to.
- **
- * @param workspace_index :: The workspace index number.
- * @return An event list (new or existing) at the index provided
- */
-EventList &
-EventWorkspace::getOrAddEventList(const std::size_t workspace_index) {
-  size_t old_size = data.size();
-  if (workspace_index >= old_size) {
-    // Increase the size of the eventlist lists.
-    for (size_t wi = old_size; wi <= workspace_index; wi++) {
-      // Need to make a new one!
-      auto newel = new EventList(mru, specnum_t(wi));
-      // Add to list
-      this->data.push_back(newel);
-    }
-  }
-
-  // Now it should be safe to return the value
-  EventList *result = data[workspace_index];
-  if (!result)
-    throw std::runtime_error(
-        "EventWorkspace::getOrAddEventList: NULL EventList found.");
-  else
-    return *result;
-}
-
-/** Resizes the workspace to contain the number of spectra/events lists given.
- *  Any existing eventlists will be cleared first.
- *  Spectrum numbers will be set to count from 1
- *  @param numSpectra The number of spectra to resize the workspace to
- */
-void EventWorkspace::resizeTo(const std::size_t numSpectra) {
-  // Remove all old EventLists and resize the vector
-  this->clearData();
-  data.resize(numSpectra);
-  for (size_t i = 0; i < numSpectra; ++i) {
-    data[i] = new EventList(mru, static_cast<specnum_t>(i + 1));
-  }
-
-  // Put on a default set of X vectors, with one bin of 0 & extremely close to
-  // zero
-  HistogramData::BinEdges edges{0.0, std::numeric_limits<double>::min()};
-  this->setAllX(edges);
-
-  // Clearing the MRU list is a good idea too.
-  this->clearMRU();
-}
-
-/** Expands the workspace to a number of spectra corresponding to the number of
- *  pixels/detectors (not including monitors) contained in the instrument
- * attached
- *  to the workspace.
- *  All events lists will be empty after calling this method. Spectrum numbers
- * will
- *  count from 1 and detector IDs will be ordered as they are in the instrument.
- */
-void EventWorkspace::padSpectra() {
-  const std::vector<detid_t> pixelIDs = getInstrument()->getDetectorIDs(true);
-
-  resizeTo(pixelIDs.size());
-
-  for (size_t i = 0; i < pixelIDs.size(); ++i) {
-    getSpectrum(i).setDetectorID(pixelIDs[i]);
-  }
-}
-
-/** Expands the workspace to a number of spectra corresponding to the number of
-*  pixels/detectors contained in specList.
-*  All events lists will be empty after calling this method.
-*/
-void EventWorkspace::padSpectra(const std::vector<int32_t> &specList) {
-  if (specList.empty()) {
-    padSpectra();
-  } else {
-    resizeTo(specList.size());
-    for (size_t i = 0; i < specList.size(); ++i) {
-      // specList ranges from 1, ..., N
-      // detector ranges from 0, ..., N-1
-      getSpectrum(i).setDetectorID(specList[i] - 1);
-      getSpectrum(i).setSpectrumNo(specList[i]);
-    }
-  }
-}
-
-void EventWorkspace::deleteEmptyLists() {
-  // copy over the data
-  std::vector<EventList *> notEmpty;
-  for (auto &eventList : this->data) {
-    if (!eventList->empty())
-      notEmpty.push_back(eventList);
-    else
-      delete eventList;
-  }
-
-  // replace the old vector
-  this->data.swap(notEmpty);
-
-  // Clearing the MRU list is a good idea too.
-  this->clearMRU();
 }
 
 /// Deprecated, use mutableX() instead. Return the data X vector at a given

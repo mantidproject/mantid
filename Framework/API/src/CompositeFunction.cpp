@@ -755,5 +755,53 @@ CompositeFunction::getContainingFunction(const ParameterReference &ref) const {
   return IFunction_sptr();
 }
 
+/// Get number of domains required by this function
+size_t CompositeFunction::getNumberDomains() const {
+  auto n = nFunctions();
+  if (n == 0) {
+    return 1;
+  }
+  size_t nd = getFunction(0)->getNumberDomains();
+  for (size_t iFun = 1; iFun < n; ++iFun) {
+    if (getFunction(0)->getNumberDomains() != nd) {
+      throw std::runtime_error("CompositeFunction has members with "
+                               "inconsistent domain numbers.");
+    }
+  }
+  return nd;
+}
+
+/// Split this function (if needed) into a list of independent functions.
+/// The number of functions must be the number of domains this function is
+/// working on (== getNumberDomains()). The result of evaluation of the
+/// created functions on their domains must be the same as if this function
+/// was evaluated on the composition of those domains.
+std::vector<IFunction_sptr>
+CompositeFunction::createEquivalentFunctions() const {
+  auto nd = getNumberDomains();
+  if (nd == 1) {
+    return std::vector<IFunction_sptr>(
+        1, FunctionFactory::Instance().createInitialized(asString()));
+  }
+
+  auto nf = nFunctions();
+  std::vector<std::vector<IFunction_sptr>> equiv;
+  equiv.reserve(nf);
+  for (size_t i = 0; i < nf; ++i) {
+    equiv.push_back(getFunction(i)->createEquivalentFunctions());
+  }
+
+  std::vector<IFunction_sptr> funs;
+  funs.reserve(nd);
+  for (size_t i = 0; i < nd; ++i) {
+    auto comp = new CompositeFunction;
+    funs.push_back(IFunction_sptr(comp));
+    for (size_t j = 0; j < nf; ++j) {
+      comp->addFunction(equiv[j][i]);
+    }
+  }
+  return funs;
+}
+
 } // namespace API
 } // namespace Mantid

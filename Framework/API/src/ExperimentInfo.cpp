@@ -62,7 +62,7 @@ ExperimentInfo::ExperimentInfo(const ExperimentInfo &source) {
  */
 void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   m_sample = other->m_sample;
-  m_run = other->m_run;
+  m_run = other->m_run->clone();
   this->setInstrument(other->getInstrument());
   if (other->m_moderatorModel)
     m_moderatorModel = other->m_moderatorModel->clone();
