@@ -3,6 +3,7 @@
 ##
 
 set ( TEST_PY_FILES
+  ChudleyElliotTest.py
   DSFinterp1DFitTest.py
   Example1DFunctionTest.py
   ExamplePeakFunctionTest.py
