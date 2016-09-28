@@ -331,6 +331,8 @@ void UnwrapMonitorsInTOF::exec() {
   const auto workspaceIndices =
       getWorkspaceIndicesForMonitors(outputWorkspace.get());
 
+  bool spectrumIsHistogramData(true);
+
   for (const auto &workspaceIndex : workspaceIndices) {
     const auto minMaxTof =
         getMinAndMaxTof(outputWorkspace.get(), workspaceIndex,
@@ -338,25 +340,18 @@ void UnwrapMonitorsInTOF::exec() {
     auto points = getPoints(outputWorkspace.get(), workspaceIndex);
     auto counts =
         getCounts(outputWorkspace.get(), workspaceIndex, minMaxTof, points);
-    Mantid::HistogramData::Histogram histogram(points, counts);
-    outputWorkspace->setHistogram(workspaceIndex, histogram);
-  }
-  // We set the output type to the same as the input type.
-  if (inputWorkspace->isHistogramData() && !outputWorkspace->isHistogramData()) {
-    auto alg = createChildAlgorithm("ConvertToHistogram");
-    alg->initialize();
-    alg->setProperty("InputWorkspace", outputWorkspace);
-    alg->setProperty("OutputWorkspace", outputWorkspace);
-    alg->execute();
-    outputWorkspace = alg->getProperty("OutputWorkspace");
-  }
-  else if (!inputWorkspace->isHistogramData() && outputWorkspace->isHistogramData()) {
-    auto alg = createChildAlgorithm("ConvertToPointData");
-    alg->initialize();
-    alg->setProperty("InputWorkspace", outputWorkspace);
-    alg->setProperty("OutputWorkspace", outputWorkspace);
-    alg->execute();
-    outputWorkspace = alg->getProperty("OutputWorkspace");
+    // Get the input histogram
+    auto inputHistogram = inputWorkspace->histogram(workspaceIndex);
+    spectrumIsHistogramData = inputHistogram.xMode() == Mantid::HistogramData::Histogram::XMode::BinEdges;
+    if (spectrumIsHistogramData) {
+        Mantid::HistogramData::BinEdges binEdges(points);
+        Mantid::HistogramData::Histogram histogram(binEdges, counts);
+        outputWorkspace->setHistogram(workspaceIndex, histogram);
+    } else {
+        Mantid::HistogramData::Histogram histogram(points, counts);
+        outputWorkspace->setHistogram(workspaceIndex, histogram);
+    }
+
   }
   setProperty("OutputWorkspace", outputWorkspace);
 }
