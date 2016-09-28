@@ -10,7 +10,7 @@ Here we provide a summary and detailed results for a comparison of
 minimizers in Mantid when using weights in the cost function. For an
 explanation of the comparison approach and the results obtained when
 not using weights see the :ref:`General comparison of minimizers
-<FittingMinimizers>`.  In the alternative results presented here the
+<FittingMinimizers>`.  In the results presented here the
 cost function used is least squares and weigths are defined from input
 observational error estimates. See the :ref:`general concept page on
 fitting <Fitting>` for an explanation on how the error estimates are

@@ -59,8 +59,8 @@ function to drive the iterative process towards a local minimum.
 
 BFGS and the Levenberg-Marquardt algorithms belong to the second-order
 class of algorithms, in the sense that they use second-order
-information of the cost function (second derivatives or the Hessian
-matrix). Some algorithms like BFGS approximate the Hessian by the
+information of the cost function (second-order partial derivatives of 
+a Hessian matrix). Some algorithms like BFGS approximate the Hessian by the
 gradient values of successive iterations. The Levenberg-Marquard
 algorithm is a modified Gauss-Newton that introduces an adaptive term
 to prevent unstability when the approximated Hessian is not positive
@@ -106,8 +106,7 @@ exception of FABADA which belongs to a different class of methods and
 would not be compared in a fair manner. For all the minimizers
 compared here the algorithm :ref:`Fit <algm-Fit>` was run using the
 same initialization or starting points for test every problem, as
-specified in the test problem definitions. No constraints or ties were
-added.
+specified in the test problem definitions.
 
 Accuracy is measured using the sum of squared fitting errors as
 metric, or "ChiSquared" as defined in :ref:`Fit
@@ -115,9 +114,10 @@ metric, or "ChiSquared" as defined in :ref:`Fit
 difference between the expected outputs and the outputs calculated by
 the model fitted: :math:`\chi_{1}^{2} = \sum_{i} (y_i - f_i)^2` (see
 :ref:`CalculateChiSquared <algm-CalculateChiSquared>` for full details
-and different variants).  Run time is measured for the execution of
-the :ref:`Fit <algm-Fit>` algorithm for an equation and dataset
-previously created.
+and different variants).  Run time is measured as the time it takes to
+execute the :ref:`Fit <algm-Fit>` algorithm, i.e. the time it takes to
+fit one model with one set of initial values of the model parameters against 
+one dataset
 
 .. There would be two alternative for the errors:
    1. Without errors, as it is
@@ -133,14 +133,12 @@ Benchmark problems
 Each test problem included in this comparison is defined by the
 following information:
 
-- Input data (:math:`x_i` values)
-- Output data (:math:`y_i` values)
+- Dataset in the form of any number of pairs :math:`x_i`, :math:`y_i` with optional :math:`y_i` error estimates
 - Function to fit, with parameters
-- Starting point or initial values of the function parameters
-- Certified or reference best values for the parameters, with an associated residual of the certified or best model 
+- Initial values (starting point) of the function parameters
+- Optional: reference best values for the parameters (some may refer to these as certified values), i.e. target parameter values for the minimizers   
 
-The problems have been obtained from the following benchmarks and
-sources:
+The current problems have been obtained from the following benchmarks and sources:
 
 - `NIST nonlinear regression problems
   <http://itl.nist.gov/div898/strd/general/dataarchive.html>`__.
