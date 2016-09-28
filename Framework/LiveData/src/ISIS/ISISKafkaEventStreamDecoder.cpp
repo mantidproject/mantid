@@ -255,8 +255,13 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
   m_specToIdx = eventBuffer->getSpectrumToWorkspaceIndexMap();
 
   // Buffers for each period
-  std::lock_guard<std::mutex> lock(m_mutex);
   const size_t nperiods(static_cast<size_t>(runMsg->n_periods()));
+  if (nperiods == 0) {
+    throw std::runtime_error(
+        "ISISKafkaEventStreamDecoder - Message has n_periods==0. This is "
+        "an error by the data producer");
+  }
+  std::lock_guard<std::mutex> lock(m_mutex);
   m_localEvents.resize(nperiods);
   m_localEvents[0] = eventBuffer;
   for (size_t i = 1; i < nperiods; ++i) {
