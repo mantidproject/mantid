@@ -43,11 +43,11 @@ public:
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
     TS_ASSERT(outWS);
 
-    const double delta(1e-06);
+    const double delta(1e-05);
     const size_t middle_index = 4;
-    TS_ASSERT_DELTA(0.977298, outWS->readY(0).front(), delta);
-    TS_ASSERT_DELTA(0.841236, outWS->readY(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.729028, outWS->readY(0).back(), delta);
+    TS_ASSERT_DELTA(0.9773, outWS->readY(0).front(), delta);
+    TS_ASSERT_DELTA(0.84124, outWS->readY(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.72903, outWS->readY(0).back(), delta);
   }
 
   //-------------------- Failure cases --------------------------------
