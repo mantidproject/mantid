@@ -79,6 +79,7 @@ void TeixeiraWaterSQE::function1D(double *out, const double *xValues,
   }
 
   // Lorentzian intensities and HWHM
+  D *= 0.10;  // conversion from 10^{-5}cm^2/s to Angstrom^2/ps, the internal units used
   auto G = hbar * D * Q * Q / (1 + D * Q * Q * T);
   for (size_t j = 0; j < nData; j++) {
     auto E = xValues[j] - C;
