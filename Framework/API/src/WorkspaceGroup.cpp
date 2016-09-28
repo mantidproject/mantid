@@ -280,27 +280,34 @@ void WorkspaceGroup::workspaceDeleteHandle(
 
 /**
  * Callback when a before-replace notification is received
- * Replaces a member if it was replaced in the ADS.
+ * Replaces a member if it was replaced in the ADS and checks 
+ * for duplicate members within the group
  * @param notice :: A pointer to a workspace before-replace notification object
  */
 void WorkspaceGroup::workspaceBeforeReplaceHandle(
-	Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice) {
-	std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+    Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice) {
+  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
-	const std::string replacedName = notice->objectName();
+  const std::string replacedName = notice->objectName();
 
-	for (auto &workspace : m_workspaces) {
-		if ((*workspace).name() == replacedName) {
-			workspace = notice->newObject();
-			break;
-		}
-	}
+  for (auto &workspace : m_workspaces) {
+    if ((*workspace).name() == replacedName) {
+      workspace = notice->newObject();
+      break;
+    }
+  }
 
-	auto endIter = std::unique(m_workspaces.begin(), m_workspaces.end(), 
-		[](const auto &ws1, const auto &ws2) -> bool { return (!ws1->name().empty()) && (ws2->name() == ws1->name()); });
-	if (endIter != m_workspaces.end()) {
-		m_workspaces.resize(std::distance(m_workspaces.begin(), endIter));
-	}
+  // If the names aren't blank (as some algorithms use anonymously named
+  // workspaces as pointers) and match probably a duplicate
+  auto endIter = std::unique(m_workspaces.begin(), m_workspaces.end(),
+                             [](const auto &ws1, const auto &ws2) -> bool {
+                               return (!ws1->name().empty()) &&
+                                      (ws2->name() == ws1->name());
+                             });
+
+  if (endIter != m_workspaces.end()) {
+    m_workspaces.resize(std::distance(m_workspaces.begin(), endIter));
+  }
 }
 
 /**
