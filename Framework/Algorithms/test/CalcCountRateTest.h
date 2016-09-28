@@ -318,7 +318,6 @@ public:
     if (!Yax)
       return;
 
-
     auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
         sws->run().getLogData("block_count_rate"));
     TS_ASSERT(newLog);
@@ -435,20 +434,18 @@ public:
     if (!Yax)
       return;
 
-
     auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
         sws->run().getLogData("block_count_rate"));
     TS_ASSERT(newLog);
     if (!newLog)
       return;
- 
+
     MantidVec counts = newLog->valuesAsVector();
 
     for (size_t i = 0; i < testVisWS->getNumberHistograms(); ++i) {
       const HistogramData::HistogramY &Y = testVisWS->y(i);
       double sum = std::accumulate(Y.begin(), Y.end(), 0.);
-      TSM_ASSERT_DELTA("Incorrect counts at index: " +
-                           std::to_string(i),
+      TSM_ASSERT_DELTA("Incorrect counts at index: " + std::to_string(i),
                        4 * counts[i], sum, 1.e-6);
     }
   }

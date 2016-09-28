@@ -92,7 +92,7 @@ protected: // for testing, actually private
   void checkAndInitVisWorkspace();
 
   void histogramEvents(const DataObjects::EventList &el,
-                      std::mutex *spectraLocks);
+                       std::mutex *spectraLocks);
 
   void normalizeVisWs(int64_t wsIndex);
   void buildVisWSNormalization(std::vector<double> &normalization);
