@@ -15,11 +15,30 @@
 #include "MantidDataHandling/SaveNexus.h"
 
 #include <Poco/File.h>
+#include <Poco/TemporaryFile.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
+
+/// RAII class to temporarily rename a file for the duration of a test
+/// Original name is restored on destruction.
+class TemporaryRenamer {
+public:
+  /// Constructor: rename the file and store its original name
+  explicit TemporaryRenamer(const std::string &fileName)
+      : m_originalName(fileName), m_file(fileName) {
+    TS_ASSERT(m_file.exists() && m_file.canWrite() && m_file.isFile());
+    m_file.renameTo(Poco::TemporaryFile::tempName());
+  }
+  /// Destructor: restore the file's original name
+  ~TemporaryRenamer() { m_file.renameTo(m_originalName); }
+
+private:
+  const std::string m_originalName;
+  Poco::File m_file;
+};
 
 class PlotAsymmetryByLogValueTest : public CxxTest::TestSuite {
 public:
@@ -446,6 +465,36 @@ public:
     TS_ASSERT_DELTA(outputX[0], 101.0, 1.e-7);
     // 17:10:35 to 17:14:10 is 215 seconds
     TS_ASSERT_DELTA(outputX[1], 215.0, 1.e-7);
+  }
+
+  void test_skip_missing_file() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+
+    // Find path to data file by going via an algorithm property...
+    alg.setPropertyValue("FirstRun", "MUSR00015190.nxs");
+    const std::string &middleFile = alg.getPropertyValue("FirstRun");
+
+    // Temporarily rename MUSR00015190.nxs so it's "missing" for this test
+    TemporaryRenamer renamedFile(middleFile);
+
+    alg.setPropertyValue("FirstRun", "MUSR00015189.nxs");
+    alg.setPropertyValue("LastRun", "MUSR00015191.nxs");
+    alg.setPropertyValue("OutputWorkspace", "PlotAsymmetryByLogValueTest_WS");
+    alg.setPropertyValue("LogValue", "run_number");
+    alg.setPropertyValue("Red", "2");
+    alg.setPropertyValue("Green", "1");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "PlotAsymmetryByLogValueTest_WS"));
+    TS_ASSERT(outWS);
+    const auto &outputX = outWS->points(0);
+    TS_ASSERT_EQUALS(outputX.size(), 2);
+    TS_ASSERT_DELTA(outputX[0], 15189.0, 1.e-7);
+    TS_ASSERT_DELTA(outputX[1], 15191.0, 1.e-7);
   }
 
 private:
