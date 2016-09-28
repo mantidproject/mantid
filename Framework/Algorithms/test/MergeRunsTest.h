@@ -1354,7 +1354,8 @@ public:
     alg.setPropertyValue("OutputWorkspace", "outWS1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    do_test_mergeSampleLogs(ws, "prop1", mergeType, "2013-Jun-25 10:59:15  1\n", 1);
+    do_test_mergeSampleLogs(ws, "prop1", mergeType, "2013-Jun-25 10:59:15  1\n",
+                            1);
   }
 
 private:

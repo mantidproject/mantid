@@ -76,7 +76,8 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
       if (!ws) {
         throw Kernel::Exception::NotFoundError("Workspace", workspace);
       }
-      tryAddInputWorkspaceToInputGroups(ws, vecMultiPeriodWorkspaceGroups, vecWorkspaceGroups);
+      tryAddInputWorkspaceToInputGroups(ws, vecMultiPeriodWorkspaceGroups,
+                                        vecWorkspaceGroups);
     }
   } else {
     typedef std::vector<boost::shared_ptr<Workspace>> WorkspaceVector;
@@ -85,12 +86,15 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
     sourceAlg->findWorkspaceProperties(inWorkspaces, outWorkspaces);
     UNUSED_ARG(outWorkspaces);
     for (auto &inWorkspace : inWorkspaces) {
-      tryAddInputWorkspaceToInputGroups(inWorkspace, vecMultiPeriodWorkspaceGroups, vecWorkspaceGroups);
+      tryAddInputWorkspaceToInputGroups(
+          inWorkspace, vecMultiPeriodWorkspaceGroups, vecWorkspaceGroups);
     }
   }
 
-  if ((vecMultiPeriodWorkspaceGroups.size() != 0) && (vecWorkspaceGroups.size() != 0)) {
-    throw std::invalid_argument("The input contains a mix of multi-period and other workspaces.");
+  if ((vecMultiPeriodWorkspaceGroups.size() != 0) &&
+      (vecWorkspaceGroups.size() != 0)) {
+    throw std::invalid_argument(
+        "The input contains a mix of multi-period and other workspaces.");
   }
 
   validateMultiPeriodGroupInputs(vecMultiPeriodWorkspaceGroups);
