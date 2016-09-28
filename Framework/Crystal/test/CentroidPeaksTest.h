@@ -67,7 +67,7 @@ public:
       gens[d] = gen;
     }
 
-    auto retVal = create<EventWorkspace>(
+    boost::shared_ptr<EventWorkspace> retVal = create<EventWorkspace>(
         numPixels,
         Histogram(BinEdges(numBins, LinearGenerator(0.0, binDelta))));
 
@@ -76,7 +76,7 @@ public:
     loadInst->initialize();
     loadInst->setPropertyValue(
         "Filename", "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
-    loadInst->setProperty("Workspace", std::move(retVal));
+    loadInst->setProperty("Workspace", retVal);
     loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
