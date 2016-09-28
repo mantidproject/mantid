@@ -447,8 +447,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
                            detectorIDs, totalflightpaths, twothetas);
 
   // Clean up
-  if (prog)
-    delete prog;
+  delete prog;
 
   return outputWorkspace;
 }
