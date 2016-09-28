@@ -47,7 +47,7 @@ public:
   //----------------------------------------------------------------------
 
   /// The name of this listener
-  std::string name() const override { return "ISISKafaEventListener"; }
+  std::string name() const override { return "ISISKafkaEventListener"; }
   /// Does this listener support requests for (recent) past data
   bool supportsHistory() const override { return false; }
   /// Does this listener buffer events (true) or histogram data (false)
