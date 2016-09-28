@@ -315,7 +315,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
 
   auto retVal = create<Workspace2D>(indexInfo, Histogram(x, y, e));
   retVal->setInstrument(inst);
-  return retVal;
+  return std::move(retVal);
 }
 
 /** Create event workspace
@@ -371,7 +371,7 @@ EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
     workspaceIndex++;
   }
 
-  return retVal;
+  return std::move(retVal);
 }
 //----------------------------------------------------------------------------------------------
 /**
