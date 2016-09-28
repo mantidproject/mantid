@@ -268,7 +268,7 @@ void CalcCountRate::calcRateLog(
   // store calculated values within the target log.
   targLog->replaceValues(times, countRate);
 }
-/** histrogram event list into visualization workspace
+/** histogram event list into visualization workspace
 * @param el       :: event list to rebin into visualization workspace
 * @param spectraLocks :: pointer to the array of mutexes to lock modifyed
 *                        visualization workspace spectra for a thread

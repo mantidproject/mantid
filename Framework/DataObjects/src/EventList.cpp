@@ -1407,7 +1407,7 @@ size_t EventList::histogram_size() const {
 }
 
 // ==============================================================================================
-// --- Setting the Histrogram X axis, without recalculating the histogram
+// --- Setting the Histogram X axis, without recalculating the histogram
 // -----------------------
 // ==============================================================================================
 
@@ -2221,8 +2221,8 @@ void EventList::generateCountsHistogramPulseTime(const MantidVec &X,
   } // end if (there are any events to histogram)
 }
 
-/** With respect to PulseTime Fill a histogram given homogeneous histogram
-*   bounds.
+/** With respect to PulseTime fill a histogram given equal histogram
+*   bins.
 * Number of bins is equal to number of elements in vector Y.
 * Appends values to existing Y values.
 *
@@ -2232,8 +2232,8 @@ void EventList::generateCountsHistogramPulseTime(const MantidVec &X,
 * @param xMax :: Maximal Pulse time value to constrain binning by (include the
 *                times smaller than right boundary, excluding equal)
 * @param Y :: The generated counts histogram
-* @param TOF_min -- min TOF used to constrain histogram ranges
-* @param TOF_max -- max TOF used to constrain histogram ranges
+* @param TOF_min -- min TOF to include in histogram.
+* @param TOF_max -- max TOF to constrain values included in histogram.
 */
 void EventList::generateCountsHistogramPulseTime(const double &xMin,
                                                  const double &xMax,
@@ -2255,7 +2255,7 @@ void EventList::generateCountsHistogramPulseTime(const double &xMin,
     double pulsetime = static_cast<double>(ev.pulseTime().totalNanoseconds());
     if (pulsetime < xMin || pulsetime >= xMax)
       continue;
-    if (ev.tof() < TOF_min || ev.tof() > TOF_max)
+    if (ev.tof() < TOF_min || ev.tof() >= TOF_max)
       continue;
 
     size_t n_bin = static_cast<size_t>((pulsetime - xMin) / step);
@@ -3514,7 +3514,7 @@ void EventList::multiplyHistogramHelper(std::vector<T> &events,
     while (bin < x_size - 1) {
       // Event is Within range?
       if ((tof >= X[bin]) && (tof < X[bin + 1])) {
-        // Process this event. Multilpy and calculate error.
+        // Process this event. Multiply and calculate error.
         itev->m_errorSquared =
             static_cast<float>(itev->m_errorSquared * valueSquared +
                                errorSquared * itev->m_weight * itev->m_weight);
