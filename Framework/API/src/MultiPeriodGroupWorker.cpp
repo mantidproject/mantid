@@ -26,11 +26,14 @@ MultiPeriodGroupWorker::MultiPeriodGroupWorker(
  */
 void MultiPeriodGroupWorker::tryAddInputWorkspaceToInputGroups(
     Workspace_sptr ws,
+    MultiPeriodGroupWorker::VecWSGroupType &vecMultiPeriodWorkspaceGroups,
     MultiPeriodGroupWorker::VecWSGroupType &vecWorkspaceGroups) const {
   WorkspaceGroup_sptr inputGroup =
       boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
   if (inputGroup) {
     if (inputGroup->isMultiperiod()) {
+      vecMultiPeriodWorkspaceGroups.push_back(inputGroup);
+    } else {
       vecWorkspaceGroups.push_back(inputGroup);
     }
   }
@@ -42,6 +45,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
   if (!sourceAlg->isInitialized()) {
     throw std::invalid_argument("Algorithm must be initialized");
   }
+  VecWSGroupType vecMultiPeriodWorkspaceGroups;
   VecWSGroupType vecWorkspaceGroups;
 
   // Handles the case in which the algorithm is providing a non-workspace
@@ -72,7 +76,7 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
       if (!ws) {
         throw Kernel::Exception::NotFoundError("Workspace", workspace);
       }
-      tryAddInputWorkspaceToInputGroups(ws, vecWorkspaceGroups);
+      tryAddInputWorkspaceToInputGroups(ws, vecMultiPeriodWorkspaceGroups, vecWorkspaceGroups);
     }
   } else {
     typedef std::vector<boost::shared_ptr<Workspace>> WorkspaceVector;
@@ -81,13 +85,17 @@ MultiPeriodGroupWorker::findMultiPeriodGroups(
     sourceAlg->findWorkspaceProperties(inWorkspaces, outWorkspaces);
     UNUSED_ARG(outWorkspaces);
     for (auto &inWorkspace : inWorkspaces) {
-      tryAddInputWorkspaceToInputGroups(inWorkspace, vecWorkspaceGroups);
+      tryAddInputWorkspaceToInputGroups(inWorkspace, vecMultiPeriodWorkspaceGroups, vecWorkspaceGroups);
     }
   }
 
-  validateMultiPeriodGroupInputs(vecWorkspaceGroups);
+  if ((vecMultiPeriodWorkspaceGroups.size() != 0) && (vecWorkspaceGroups.size() != 0)) {
+    throw std::invalid_argument("The input contains a mix of multi-period and other workspaces.");
+  }
 
-  return vecWorkspaceGroups;
+  validateMultiPeriodGroupInputs(vecMultiPeriodWorkspaceGroups);
+
+  return vecMultiPeriodWorkspaceGroups;
 }
 
 bool MultiPeriodGroupWorker::useCustomWorkspaceProperty() const {

@@ -69,6 +69,7 @@ private:
   /// Try ot add a workspace to the group of input workspaces.
   void
   tryAddInputWorkspaceToInputGroups(Workspace_sptr ws,
+                                    VecWSGroupType &vecMultiPeriodWorkspaceGroups,
                                     VecWSGroupType &vecWorkspaceGroups) const;
 
   /// Copy input workspace properties to spawned algorithm.
