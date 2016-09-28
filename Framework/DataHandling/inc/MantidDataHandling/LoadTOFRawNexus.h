@@ -85,10 +85,6 @@ protected:
   /// Run LoadInstrument as a ChildAlgorithm
   void runLoadInstrument(DataObjects::Workspace2D_sptr);
 
-  /// Load in details about the sample
-  void loadSampleData(DataObjects::Workspace2D_sptr,
-                      Mantid::NeXus::NXEntry &entry);
-
   void loadBank(const std::string &nexusfilename, const std::string &entry_name,
                 const std::string &bankName, API::MatrixWorkspace_sptr WS,
                 const detid2index_map &id_to_wi);

@@ -354,7 +354,7 @@ void AlignAndFocusPowder::exec() {
   }
 
   // set up a progress bar with the "correct" number of steps
-  m_progress = new Progress(this, 0., 1., 22);
+  m_progress = Kernel::make_unique<Progress>(this, 0., 1., 22);
 
   if (m_inputEW) {
     double tolerance = getProperty("CompressTolerance");

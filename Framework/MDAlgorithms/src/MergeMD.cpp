@@ -55,7 +55,7 @@ void MergeMD::init() {
  */
 void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   auto it = inputs.begin();
-  for (; it != inputs.end(); it++) {
+  for (; it != inputs.end(); ++it) {
     IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve(*it));
     if (!ws)
@@ -115,9 +115,9 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   // OK, now create the blank MDWorkspace
 
   // Have the factory create it
-  out = MDEventFactory::CreateMDWorkspace(numDims, ws0->getEventTypeName());
-  out->setDisplayNormalization(displNorm);
-  out->setDisplayNormalizationHisto(displNormH);
+  m_outWS = MDEventFactory::CreateMDWorkspace(numDims, ws0->getEventTypeName());
+  m_outWS->setDisplayNormalization(displNorm);
+  m_outWS->setDisplayNormalizationHisto(displNormH);
 
   // Give all the dimensions
   for (size_t d = 0; d < numDims; d++) {
@@ -125,17 +125,17 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
     MDHistoDimension *dim = new MDHistoDimension(
         dim0->getName(), dim0->getDimensionId(), dim0->getMDFrame(), dimMin[d],
         dimMax[d], dim0->getNBins());
-    out->addDimension(MDHistoDimension_sptr(dim));
+    m_outWS->addDimension(MDHistoDimension_sptr(dim));
   }
 
   // Initialize it using the dimension
-  out->initialize();
+  m_outWS->initialize();
 
   // Set the box controller settings from the properties
-  this->setBoxController(out->getBoxController());
+  this->setBoxController(m_outWS->getBoxController());
 
   // Perform the initial box splitting
-  out->splitBox();
+  m_outWS->splitBox();
 
   // copy experiment infos
   uint16_t nExperiments(0);
@@ -150,14 +150,14 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
     for (uint16_t j = 0; j < nWSexperiments; j++) {
       API::ExperimentInfo_sptr ei = API::ExperimentInfo_sptr(
           m_workspaces[i]->getExperimentInfo(j)->cloneExperimentInfo());
-      out->addExperimentInfo(ei);
+      m_outWS->addExperimentInfo(ei);
     }
   }
 }
 
 //----------------------------------------------------------------------------------------------
 /** Perform the adding.
- * Will do out += ws
+ * Will do m_outWS += ws
  *
  * @param ws ::  MDEventWorkspace to clone
  */
@@ -165,7 +165,7 @@ template <typename MDE, size_t nd>
 void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // CPUTimer tim;
   typename MDEventWorkspace<MDE, nd>::sptr ws1 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(out);
+      boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(m_outWS);
   typename MDEventWorkspace<MDE, nd>::sptr ws2 = ws;
   if (!ws1 || !ws2)
     throw std::runtime_error("Incompatible workspace types passed to MergeMD.");
@@ -186,7 +186,7 @@ void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (ws2->isFileBacked())
     fileBasedSource = true;
 
-  // Add the boxes in parallel. They should be spread out enough on each
+  // Add the boxes in parallel. They should be spread m_outWS enough on each
   // core to avoid stepping on each other.
   // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for if (!ws2->isFileBacked()) )
@@ -208,9 +208,9 @@ void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     PARALLEL_CHECK_INTERUPT_REGION
 
     // Progress * prog2 = new Progress(this, 0.4, 0.9, 100);
-    Progress *prog2 = nullptr;
+	auto prog2 = Kernel::make_unique<Progress>();
     ThreadScheduler *ts = new ThreadSchedulerFIFO();
-    ThreadPool tp(ts, 0, prog2);
+    ThreadPool tp(ts, 0, prog2.get());
     ws1->splitAllIfNeeded(ts);
     // prog2->resetNumSteps( ts->size(), 0.4, 0.6);
     tp.joinAll();
@@ -263,9 +263,9 @@ void MergeMD::exec() {
   }
 
   this->progress(0.95, "Refreshing cache");
-  out->refreshCache();
+  m_outWS->refreshCache();
 
-  this->setProperty("OutputWorkspace", out);
+  this->setProperty("OutputWorkspace", m_outWS);
 
   g_log.debug() << tim << " to merge all workspaces.\n";
 }

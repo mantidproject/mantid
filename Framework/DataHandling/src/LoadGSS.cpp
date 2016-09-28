@@ -117,7 +117,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   std::vector<double> vecX, vecY, vecE;
 
   // progress
-  Progress *prog = nullptr;
+  std::unique_ptr<Progress> progress = nullptr;
 
   // Parameters for reading file
   char currentLine[256];
@@ -155,8 +155,8 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
   while (!input.eof() && input.getline(currentLine, 256)) {
     // Initialize progress after NSpec is imported
-    if (nSpec != 0 && prog == nullptr) {
-      prog = new Progress(this, 0.0, 1.0, nSpec);
+    if (nSpec != 0 && progress == nullptr) {
+      progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, nSpec);
     }
 
     // Set flag to test SLOG
@@ -260,8 +260,8 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         vecY.clear();
         vecE.clear();
 
-        if (prog != nullptr)
-          prog->report();
+        if (progress != nullptr)
+          progress->report();
       }
 
       // Parse the bank line in format
@@ -445,9 +445,6 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   // build instrument geometry
   createInstrumentGeometry(outputWorkspace, instrumentname, primaryflightpath,
                            detectorIDs, totalflightpaths, twothetas);
-
-  // Clean up
-  delete prog;
 
   return outputWorkspace;
 }

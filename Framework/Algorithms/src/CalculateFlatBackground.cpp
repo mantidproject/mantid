@@ -6,7 +6,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -14,7 +13,6 @@
 #include "MantidHistogramData/Histogram.h"
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
-#include <climits>
 #include <numeric>
 
 namespace Mantid {
@@ -106,7 +104,7 @@ void CalculateFlatBackground::exec() {
       std::string(getProperty("outputMode")) == "Subtract Background";
 
   // Initialize the progress reporting object
-  m_progress = new Progress(this, 0.0, 0.2, numHists);
+  m_progress = Kernel::make_unique<API::Progress>(this, 0.0, 0.2, numHists);
 
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   // If input and output workspaces are not the same, create a new workspace for

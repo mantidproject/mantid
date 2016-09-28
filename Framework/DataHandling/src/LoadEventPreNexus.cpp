@@ -6,7 +6,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileValidator.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Glob.h"
 #include "MantidAPI/FileProperty.h"
@@ -16,7 +15,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CPUTimer.h"
@@ -25,7 +23,6 @@
 #include "MantidKernel/ListValidator.h"
 
 #include <algorithm>
-#include <sstream>
 #include <stdexcept>
 #include <functional>
 #include <set>
@@ -78,18 +75,18 @@ static const double TOF_CONVERSION = .1;
 static const double CURRENT_CONVERSION = 1.e-6 / 3600.;
 
 LoadEventPreNexus::LoadEventPreNexus()
-    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), prog(nullptr),
-      spectra_list(), pulsetimes(), event_indices(), proton_charge(),
-      proton_charge_tot(0), pixel_to_wkspindex(), pixelmap(), detid_max(),
-      eventfile(nullptr), num_events(0), num_pulses(0), numpixel(0),
-      num_good_events(0), num_error_events(0), num_ignored_events(0),
-      first_event(0), max_events(0), using_mapping_file(false),
-      loadOnlySomeSpectra(false), spectraLoadMap(), longest_tof(0),
-      shortest_tof(0), parallelProcessing(false) {
+    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), m_progress(nullptr),
+      m_spectra_list(), m_pulsetimes(), m_event_indices(), m_proton_charge(),
+      m_proton_charge_tot(0), m_pixel_to_wkspindex(), m_pixelmap(), m_detid_max(),
+      m_eventfile(nullptr), m_num_events(0), m_num_pulses(0), m_numpixel(0),
+      m_num_good_events(0), m_num_error_events(0), m_num_ignored_events(0),
+      m_first_event(0), m_max_events(0), m_using_mapping_file(false),
+      m_loadOnlySomeSpectra(false), m_spectraLoadMap(), m_longest_tof(0),
+      m_shortest_tof(0), m_parallelProcessing(false) {
   this->useAlgorithm("LoadEventPreNexus", 2);
 }
 
-LoadEventPreNexus::~LoadEventPreNexus() { delete this->eventfile; }
+LoadEventPreNexus::~LoadEventPreNexus() { delete this->m_eventfile; }
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -178,26 +175,26 @@ void LoadEventPreNexus::init() {
 }
 
 //-----------------------------------------------------------------------------
-static string generatePulseidName(string eventfile) {
+static string generatePulseidName(string m_eventfile) {
   size_t start;
   string ending;
 
   // normal ending
   ending = "neutron_event.dat";
-  start = eventfile.find(ending);
+  start = m_eventfile.find(ending);
   if (start != string::npos)
-    return eventfile.replace(start, ending.size(), "pulseid.dat");
+    return m_eventfile.replace(start, ending.size(), "pulseid.dat");
 
   // split up event files - yes this is copy and pasted code
   ending = "neutron0_event.dat";
-  start = eventfile.find(ending);
+  start = m_eventfile.find(ending);
   if (start != string::npos)
-    return eventfile.replace(start, ending.size(), "pulseid0.dat");
+    return m_eventfile.replace(start, ending.size(), "pulseid0.dat");
 
   ending = "neutron1_event.dat";
-  start = eventfile.find(ending);
+  start = m_eventfile.find(ending);
   if (start != string::npos)
-    return eventfile.replace(start, ending.size(), "pulseid1.dat");
+    return m_eventfile.replace(start, ending.size(), "pulseid1.dat");
 
   return "";
 }
@@ -280,10 +277,10 @@ void LoadEventPreNexus::exec() {
     throw std::out_of_range("ChunkNumber cannot be larger than TotalChunks");
   }
 
-  prog = new Progress(this, 0.0, 1.0, 100);
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, 100);
 
   // what spectra (pixel ID's) to load
-  this->spectra_list = this->getProperty(PID_PARAM);
+  this->m_spectra_list = this->getProperty(PID_PARAM);
 
   // the event file is needed in case the pulseid fileanme is empty
   string event_filename = this->getPropertyValue(EVENT_PARAM);
@@ -302,12 +299,12 @@ void LoadEventPreNexus::exec() {
     }
   }
 
-  prog->report("Loading Pulse ID file");
+  m_progress->report("Loading Pulse ID file");
   this->readPulseidFile(pulseid_filename, throwError);
 
   this->openEventFile(event_filename);
 
-  prog->report("Creating output workspace");
+  m_progress->report("Creating output workspace");
   // prep the output workspace
   EventWorkspace_sptr localWorkspace =
       EventWorkspace_sptr(new EventWorkspace());
@@ -323,13 +320,13 @@ void LoadEventPreNexus::exec() {
 
   // Add the run_start property
   // Use the first pulse as the run_start time.
-  if (this->num_pulses > 0) {
+  if (this->m_num_pulses > 0) {
     // add the start of the run as a ISO8601 date/time string. The start = the
     // first pulse.
     // (this is used in LoadInstrument to find the right instrument file to
     // use).
     localWorkspace->mutableRun().addProperty(
-        "run_start", pulsetimes[0].toISO8601String(), true);
+        "run_start", m_pulsetimes[0].toISO8601String(), true);
   }
 
   // determine the run number and add it to the run object
@@ -337,11 +334,11 @@ void LoadEventPreNexus::exec() {
                                            getRunnumber(event_filename));
 
   // Get the instrument!
-  prog->report("Loading Instrument");
+  m_progress->report("Loading Instrument");
   this->runLoadInstrument(event_filename, localWorkspace);
 
   // load the mapping file
-  prog->report("Loading Mapping File");
+  m_progress->report("Loading Mapping File");
   string mapping_filename = this->getPropertyValue(MAP_PARAM);
   if (mapping_filename.empty()) {
     mapping_filename = generateMappingfileName(localWorkspace);
@@ -354,8 +351,8 @@ void LoadEventPreNexus::exec() {
   // Replace workspace by workspace of correct size
   // Number of non-monitors in instrument
   size_t nSpec = localWorkspace->getInstrument()->getDetectorIDs(true).size();
-  if (!this->spectra_list.empty())
-    nSpec = this->spectra_list.size();
+  if (!this->m_spectra_list.empty())
+    nSpec = this->m_spectra_list.size();
   auto tmp = createWorkspace<EventWorkspace>(nSpec, 2, 1);
   WorkspaceFactory::Instance().initializeFromParent(localWorkspace, tmp, true);
   localWorkspace = std::move(tmp);
@@ -366,8 +363,6 @@ void LoadEventPreNexus::exec() {
   // Save output
   this->setProperty<IEventWorkspace_sptr>(OUT_PARAM, localWorkspace);
 
-  // Cleanup
-  delete prog;
 }
 
 //-----------------------------------------------------------------------------
@@ -406,14 +401,14 @@ void LoadEventPreNexus::runLoadInstrument(const std::string &eventfilename,
  */
 inline void LoadEventPreNexus::fixPixelId(PixelType &pixel,
                                           uint32_t &period) const {
-  if (!this->using_mapping_file) { // nothing to do here
+  if (!this->m_using_mapping_file) { // nothing to do here
     period = 0;
     return;
   }
 
-  PixelType unmapped_pid = pixel % this->numpixel;
-  period = (pixel - unmapped_pid) / this->numpixel;
-  pixel = this->pixelmap[unmapped_pid];
+  PixelType unmapped_pid = pixel % this->m_numpixel;
+  period = (pixel - unmapped_pid) / this->m_numpixel;
+  pixel = this->m_pixelmap[unmapped_pid];
 }
 
 //-----------------------------------------------------------------------------
@@ -422,18 +417,18 @@ inline void LoadEventPreNexus::fixPixelId(PixelType &pixel,
  */
 void LoadEventPreNexus::procEvents(
     DataObjects::EventWorkspace_sptr &workspace) {
-  this->num_error_events = 0;
-  this->num_good_events = 0;
-  this->num_ignored_events = 0;
+  this->m_num_error_events = 0;
+  this->m_num_good_events = 0;
+  this->m_num_ignored_events = 0;
 
   // Default values in the case of no parallel
   size_t loadBlockSize = Mantid::Kernel::DEFAULT_BLOCK_SIZE * 2;
 
-  shortest_tof = static_cast<double>(MAX_TOF_UINT32) * TOF_CONVERSION;
-  longest_tof = 0.;
+  m_shortest_tof = static_cast<double>(MAX_TOF_UINT32) * TOF_CONVERSION;
+  m_longest_tof = 0.;
 
   // Initialize progress reporting.
-  size_t numBlocks = (max_events + loadBlockSize - 1) / loadBlockSize;
+  size_t numBlocks = (m_max_events + loadBlockSize - 1) / loadBlockSize;
 
   // We want to pad out empty pixels.
   detid2det_map detector_map;
@@ -442,9 +437,9 @@ void LoadEventPreNexus::procEvents(
   // -------------- Determine processing mode
   std::string procMode = getProperty("UseParallelProcessing");
   if (procMode == "Serial")
-    parallelProcessing = false;
+    m_parallelProcessing = false;
   else if (procMode == "Parallel")
-    parallelProcessing = true;
+    m_parallelProcessing = true;
   else {
     // Automatic determination. Loading serially (for me) is about 3 million
     // events per second,
@@ -453,44 +448,44 @@ void LoadEventPreNexus::procEvents(
     // compared to a setup time/merging time of about 10 seconds per million
     // detectors.
     double setUpTime = double(detector_map.size()) * 10e-6;
-    parallelProcessing = ((double(max_events) / 7e6) > setUpTime);
-    g_log.debug() << (parallelProcessing ? "Using" : "Not using")
+    m_parallelProcessing = ((double(m_max_events) / 7e6) > setUpTime);
+    g_log.debug() << (m_parallelProcessing ? "Using" : "Not using")
                   << " parallel processing.\n";
   }
 
   // determine maximum pixel id
   detid2det_map::iterator it;
-  detid_max = 0; // seems like a safe lower bound
+  m_detid_max = 0; // seems like a safe lower bound
   for (it = detector_map.begin(); it != detector_map.end(); it++)
-    if (it->first > detid_max)
-      detid_max = it->first;
+    if (it->first > m_detid_max)
+      m_detid_max = it->first;
 
   // For slight speed up
-  loadOnlySomeSpectra = (!this->spectra_list.empty());
+  m_loadOnlySomeSpectra = (!this->m_spectra_list.empty());
 
   // Turn the spectra list into a map, for speed of access
-  for (auto &spectrum : spectra_list)
-    spectraLoadMap[spectrum] = true;
+  for (auto &spectrum : m_spectra_list)
+    m_spectraLoadMap[spectrum] = true;
 
   // Pad all the pixels
-  prog->report("Padding Pixels");
-  this->pixel_to_wkspindex.reserve(
-      detid_max + 1); // starting at zero up to and including detid_max
+  m_progress->report("Padding Pixels");
+  this->m_pixel_to_wkspindex.reserve(
+      m_detid_max + 1); // starting at zero up to and including m_detid_max
   // Set to zero
-  this->pixel_to_wkspindex.assign(detid_max + 1, 0);
+  this->m_pixel_to_wkspindex.assign(m_detid_max + 1, 0);
   size_t workspaceIndex = 0;
   specnum_t spectrumNumber = 1;
   for (it = detector_map.begin(); it != detector_map.end(); it++) {
     if (!it->second->isMonitor()) {
-      if (!loadOnlySomeSpectra ||
-          (spectraLoadMap.find(it->first) != spectraLoadMap.end())) {
-        this->pixel_to_wkspindex[it->first] = workspaceIndex;
+      if (!m_loadOnlySomeSpectra ||
+          (m_spectraLoadMap.find(it->first) != m_spectraLoadMap.end())) {
+        this->m_pixel_to_wkspindex[it->first] = workspaceIndex;
         EventList &spec = workspace->getSpectrum(workspaceIndex);
         spec.setDetectorID(it->first);
         spec.setSpectrumNo(spectrumNumber);
         ++workspaceIndex;
       } else {
-        this->pixel_to_wkspindex[it->first] = -1;
+        this->m_pixel_to_wkspindex[it->first] = -1;
       }
       ++spectrumNumber;
     }
@@ -511,7 +506,7 @@ void LoadEventPreNexus::procEvents(
 
   /// How many threads will we use?
   size_t numThreads = 1;
-  if (parallelProcessing)
+  if (m_parallelProcessing)
     numThreads = size_t(PARALLEL_GET_MAX_THREADS);
 
   partWorkspaces.resize(numThreads);
@@ -519,12 +514,12 @@ void LoadEventPreNexus::procEvents(
   eventVectors = new EventVector_pt *[numThreads];
 
   // cppcheck-suppress syntaxError
-  PRAGMA_OMP( parallel for if (parallelProcessing) )
+  PRAGMA_OMP( parallel for if (m_parallelProcessing) )
   for (int i = 0; i < int(numThreads); i++) {
     // This is the partial workspace we are about to create (if in parallel)
     EventWorkspace_sptr partWS;
-    if (parallelProcessing) {
-      prog->report("Creating Partial Workspace");
+    if (m_parallelProcessing) {
+      m_progress->report("Creating Partial Workspace");
       // Create a partial workspace, copy all the spectra numbers and stuff
       // (no actual events to copy though).
       partWS = workspace->clone();
@@ -538,10 +533,10 @@ void LoadEventPreNexus::procEvents(
 
     // For each partial workspace, make an array where index = detector ID and
     // value = pointer to the events vector
-    eventVectors[i] = new EventVector_pt[detid_max + 1];
+    eventVectors[i] = new EventVector_pt[m_detid_max + 1];
     EventVector_pt *theseEventVectors = eventVectors[i];
-    for (detid_t j = 0; j < detid_max + 1; j++) {
-      size_t wi = pixel_to_wkspindex[j];
+    for (detid_t j = 0; j < m_detid_max + 1; j++) {
+      size_t wi = m_pixel_to_wkspindex[j];
       // Save a POINTER to the vector<tofEvent>
       if (wi != static_cast<size_t>(-1))
         theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
@@ -553,17 +548,17 @@ void LoadEventPreNexus::procEvents(
   g_log.debug() << tim << " to create " << partWorkspaces.size()
                 << " workspaces for parallel loading.\n";
 
-  prog->resetNumSteps(numBlocks, 0.1, 0.8);
+  m_progress->resetNumSteps(numBlocks, 0.1, 0.8);
 
   // ---------------------------------- LOAD THE DATA --------------------------
-  PRAGMA_OMP( parallel for schedule(dynamic, 1) if (parallelProcessing) )
+  PRAGMA_OMP( parallel for schedule(dynamic, 1) if (m_parallelProcessing) )
   for (int blockNum = 0; blockNum < int(numBlocks); blockNum++) {
     PARALLEL_START_INTERUPT_REGION
 
     // Find the workspace for this particular thread
     EventWorkspace_sptr ws;
     size_t threadNum = 0;
-    if (parallelProcessing) {
+    if (m_parallelProcessing) {
       threadNum = PARALLEL_THREAD_NUMBER;
       ws = partWorkspaces[threadNum];
     } else
@@ -576,16 +571,16 @@ void LoadEventPreNexus::procEvents(
     EventVector_pt *theseEventVectors = eventVectors[threadNum];
 
     // Where to start in the file?
-    size_t fileOffset = first_event + (loadBlockSize * blockNum);
+    size_t fileOffset = m_first_event + (loadBlockSize * blockNum);
     // May need to reduce size of last (or only) block
     size_t current_event_buffer_size =
         (blockNum == int(numBlocks - 1))
-            ? (max_events - (numBlocks - 1) * loadBlockSize)
+            ? (m_max_events - (numBlocks - 1) * loadBlockSize)
             : loadBlockSize;
 
     // Load this chunk of event data (critical block)
     PARALLEL_CRITICAL(LoadEventPreNexus_fileAccess) {
-      current_event_buffer_size = eventfile->loadBlockAt(
+      current_event_buffer_size = m_eventfile->loadBlockAt(
           event_buffer, fileOffset, current_event_buffer_size);
     }
 
@@ -594,7 +589,7 @@ void LoadEventPreNexus::procEvents(
                      current_event_buffer_size, fileOffset);
 
     // Report progress
-    prog->report("Load Event PreNeXus");
+    m_progress->report("Load Event PreNeXus");
 
     PARALLEL_END_INTERUPT_REGION
   }
@@ -603,9 +598,9 @@ void LoadEventPreNexus::procEvents(
 
   // ---------------------------------- MERGE WORKSPACES BACK TOGETHER
   // --------------------------
-  if (parallelProcessing) {
+  if (m_parallelProcessing) {
     PARALLEL_START_INTERUPT_REGION
-    prog->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
+    m_progress->resetNumSteps(workspace->getNumberHistograms(), 0.8, 0.95);
 
     // Merge all workspaces, index by index.
     PARALLEL_FOR_NO_WSP_CHECK()
@@ -630,7 +625,7 @@ void LoadEventPreNexus::procEvents(
         // Free up memory as you go along.
         partEl.clear(false);
       }
-      prog->report("Merging Workspaces");
+      m_progress->report("Merging Workspaces");
     }
     g_log.debug() << tim << " to merge workspaces together.\n";
     PARALLEL_END_INTERUPT_REGION
@@ -643,12 +638,12 @@ void LoadEventPreNexus::procEvents(
     delete[] eventVectors[i];
   }
   delete[] eventVectors;
-  // delete [] pulsetimes;
+  // delete [] m_pulsetimes;
 
-  prog->resetNumSteps(3, 0.94, 1.00);
+  m_progress->resetNumSteps(3, 0.94, 1.00);
 
   // finalize loading
-  prog->report("Setting proton charge");
+  m_progress->report("Setting proton charge");
   this->setProtonCharge(workspace);
   g_log.debug() << tim << " to set the proton charge log.\n";
 
@@ -656,21 +651,21 @@ void LoadEventPreNexus::procEvents(
   workspace->clearMRU();
 
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  auto axis = HistogramData::BinEdges{shortest_tof - 1, longest_tof + 1};
+  auto axis = HistogramData::BinEdges{m_shortest_tof - 1, m_longest_tof + 1};
   workspace->setAllX(axis);
-  this->pixel_to_wkspindex.clear();
+  this->m_pixel_to_wkspindex.clear();
 
-  g_log.information() << "Read " << this->num_good_events << " events + "
-                      << this->num_error_events << " errors"
-                      << ". Shortest TOF: " << shortest_tof
-                      << " microsec; longest TOF: " << longest_tof
+  g_log.information() << "Read " << this->m_num_good_events << " events + "
+                      << this->m_num_error_events << " errors"
+                      << ". Shortest TOF: " << m_shortest_tof
+                      << " microsec; longest TOF: " << m_longest_tof
                       << " microsec.\n";
 }
 
 //-----------------------------------------------------------------------------
 /** Linear-version of the procedure to process the event file properly.
  * @param workspace :: EventWorkspace to write to.
- * @param arrayOfVectors :: For speed up: this is an array, of size detid_max+1,
+ * @param arrayOfVectors :: For speed up: this is an array, of size m_detid_max+1,
  * where the
  *        index is a pixel ID, and the value is a pointer to the
  * vector<tofEvent> in the given EventList.
@@ -685,11 +680,11 @@ void LoadEventPreNexus::procEventsLinear(
   // Starting pulse time
   DateAndTime pulsetime;
   int64_t pulse_i = 0;
-  int64_t numPulses = static_cast<int64_t>(num_pulses);
-  if (event_indices.size() < num_pulses) {
+  int64_t numPulses = static_cast<int64_t>(m_num_pulses);
+  if (m_event_indices.size() < m_num_pulses) {
     g_log.warning()
-        << "Event_indices vector is smaller than the pulsetimes array.\n";
-    numPulses = static_cast<int64_t>(event_indices.size());
+        << "Event_indices vector is smaller than the m_pulsetimes array.\n";
+    numPulses = static_cast<int64_t>(m_event_indices.size());
   }
 
   size_t local_num_error_events = 0;
@@ -711,22 +706,22 @@ void LoadEventPreNexus::procEventsLinear(
     }
 
     // Covert the pixel ID from DAS pixel to our pixel ID
-    if (this->using_mapping_file) {
-      PixelType unmapped_pid = pid % this->numpixel;
-      pid = this->pixelmap[unmapped_pid];
+    if (this->m_using_mapping_file) {
+      PixelType unmapped_pid = pid % this->m_numpixel;
+      pid = this->m_pixelmap[unmapped_pid];
     }
 
     // Avoid segfaults for wrong pixel IDs
-    if (pid > static_cast<PixelType>(detid_max)) {
+    if (pid > static_cast<PixelType>(m_detid_max)) {
       local_num_error_events++;
       continue;
     }
 
     // Now check if this pid we want to load.
-    if (loadOnlySomeSpectra) {
+    if (m_loadOnlySomeSpectra) {
       std::map<int64_t, bool>::iterator it;
-      it = spectraLoadMap.find(pid);
-      if (it == spectraLoadMap.end()) {
+      it = m_spectraLoadMap.find(pid);
+      if (it == m_spectraLoadMap.end()) {
         // Pixel ID was not found, so the event is being ignored.
         local_num_ignored_events++;
         continue;
@@ -741,18 +736,18 @@ void LoadEventPreNexus::procEventsLinear(
       size_t total_i = i + fileOffset;
       // Go through event_index until you find where the index increases to
       // encompass the current index. Your pulse = the one before.
-      while (!((total_i >= event_indices[pulse_i]) &&
-               (total_i < event_indices[pulse_i + 1]))) {
+      while (!((total_i >= m_event_indices[pulse_i]) &&
+               (total_i < m_event_indices[pulse_i + 1]))) {
         pulse_i++;
         if (pulse_i >= (numPulses - 1))
           break;
       }
 
-      // if (pulsetimes[pulse_i] != pulsetime)    std::cout << pulse_i << " at "
-      // << pulsetimes[pulse_i] << "\n";
+      // if (m_pulsetimes[pulse_i] != pulsetime)    std::cout << pulse_i << " at "
+      // << m_pulsetimes[pulse_i] << "\n";
 
       // Save the pulse time at this index for creating those events
-      pulsetime = pulsetimes[pulse_i];
+      pulsetime = m_pulsetimes[pulse_i];
     }
 
     double tof = static_cast<double>(temp.tof) * TOF_CONVERSION;
@@ -766,10 +761,10 @@ void LoadEventPreNexus::procEventsLinear(
 
     // The addEventQuickly method does not clear the cache, making things
     // slightly faster.
-    // workspace->getSpectrum(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
+    // workspace->getSpectrum(this->m_pixel_to_wkspindex[pid]).addEventQuickly(event);
 
     // This is equivalent to
-    // workspace->getSpectrum(this->pixel_to_wkspindex[pid]).addEventQuickly(event);
+    // workspace->getSpectrum(this->m_pixel_to_wkspindex[pid]).addEventQuickly(event);
     // But should be faster as a bunch of these calls were cached.
     arrayOfVectors[pid]->push_back(event);
 
@@ -779,13 +774,13 @@ void LoadEventPreNexus::procEventsLinear(
   } // for each event
 
   PARALLEL_CRITICAL(LoadEventPreNexus_global_statistics) {
-    this->num_good_events += local_num_good_events;
-    this->num_ignored_events += local_num_ignored_events;
-    this->num_error_events += local_num_error_events;
-    if (local_shortest_tof < shortest_tof)
-      shortest_tof = local_shortest_tof;
-    if (local_longest_tof > longest_tof)
-      longest_tof = local_longest_tof;
+    this->m_num_good_events += local_num_good_events;
+    this->m_num_ignored_events += local_num_ignored_events;
+    this->m_num_error_events += local_num_error_events;
+    if (local_shortest_tof < m_shortest_tof)
+      m_shortest_tof = local_shortest_tof;
+    if (local_longest_tof > m_longest_tof)
+      m_longest_tof = local_longest_tof;
   }
 }
 
@@ -806,18 +801,18 @@ bool intermediatePixelIDComp(IntermediateEvent x, IntermediateEvent y) {
  */
 void LoadEventPreNexus::setProtonCharge(
     DataObjects::EventWorkspace_sptr &workspace) {
-  if (this->proton_charge.empty()) // nothing to do
+  if (this->m_proton_charge.empty()) // nothing to do
     return;
 
   Run &run = workspace->mutableRun();
 
   // Add the proton charge entries.
   TimeSeriesProperty<double> *log =
-      new TimeSeriesProperty<double>("proton_charge");
+      new TimeSeriesProperty<double>("m_proton_charge");
   log->setUnits("picoCoulombs");
 
   // Add the time and associated charge to the log
-  log->addValues(this->pulsetimes, this->proton_charge);
+  log->addValues(this->m_pulsetimes, this->m_proton_charge);
 
   /// TODO set the units for the log
   run.addLogData(log);
@@ -833,7 +828,7 @@ void LoadEventPreNexus::setProtonCharge(
  * @param filename :: Path to file.
  */
 void LoadEventPreNexus::loadPixelMap(const std::string &filename) {
-  this->using_mapping_file = false;
+  this->m_using_mapping_file = false;
 
   // check that there is a mapping file
   if (filename.empty()) {
@@ -848,25 +843,25 @@ void LoadEventPreNexus::loadPixelMap(const std::string &filename) {
   BinaryFile<PixelType> pixelmapFile(filename);
   PixelType max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
   // Load all the data
-  this->pixelmap = pixelmapFile.loadAllIntoVector();
+  this->m_pixelmap = pixelmapFile.loadAllIntoVector();
 
   // Check for funky file
-  if (std::find_if(pixelmap.begin(), pixelmap.end(),
+  if (std::find_if(m_pixelmap.begin(), m_pixelmap.end(),
                    std::bind2nd(std::greater<PixelType>(), max_pid)) !=
-      pixelmap.end()) {
+      m_pixelmap.end()) {
     this->g_log.warning("Pixel id in mapping file was out of bounds. Loading "
                         "without mapping file");
-    this->numpixel = 0;
-    this->pixelmap.clear();
-    this->using_mapping_file = false;
+    this->m_numpixel = 0;
+    this->m_pixelmap.clear();
+    this->m_using_mapping_file = false;
     return;
   }
 
   // If we got here, the mapping file was loaded correctly and we'll use it
-  this->using_mapping_file = true;
+  this->m_using_mapping_file = true;
   // Let's assume that the # of pixels in the instrument matches the mapping
   // file length.
-  this->numpixel = static_cast<uint32_t>(pixelmapFile.getNumElements());
+  this->m_numpixel = static_cast<uint32_t>(pixelmapFile.getNumElements());
 }
 
 //-----------------------------------------------------------------------------
@@ -875,27 +870,27 @@ void LoadEventPreNexus::loadPixelMap(const std::string &filename) {
  */
 void LoadEventPreNexus::openEventFile(const std::string &filename) {
   // Open the file
-  eventfile = new BinaryFile<DasEvent>(filename);
-  num_events = eventfile->getNumElements();
-  g_log.debug() << "File contains " << num_events << " event records.\n";
+  m_eventfile = new BinaryFile<DasEvent>(filename);
+  m_num_events = m_eventfile->getNumElements();
+  g_log.debug() << "File contains " << m_num_events << " event records.\n";
 
   // Check if we are only loading part of the event file
   const int chunk = getProperty("ChunkNumber");
   if (isEmpty(chunk)) // We are loading the whole file
   {
-    first_event = 0;
-    max_events = num_events;
+    m_first_event = 0;
+    m_max_events = m_num_events;
   } else // We are loading part - work out the event number range
   {
     const int totalChunks = getProperty("TotalChunks");
-    max_events = num_events / totalChunks;
-    first_event = (chunk - 1) * max_events;
+    m_max_events = m_num_events / totalChunks;
+    m_first_event = (chunk - 1) * m_max_events;
     // Need to add any remainder to the final chunk
     if (chunk == totalChunks)
-      max_events += num_events % totalChunks;
+      m_max_events += m_num_events % totalChunks;
   }
 
-  g_log.information() << "Reading " << max_events << " event records\n";
+  g_log.information() << "Reading " << m_max_events << " event records\n";
 }
 
 //-----------------------------------------------------------------------------
@@ -905,8 +900,8 @@ void LoadEventPreNexus::openEventFile(const std::string &filename) {
  */
 void LoadEventPreNexus::readPulseidFile(const std::string &filename,
                                         const bool throwError) {
-  this->proton_charge_tot = 0.;
-  this->num_pulses = 0;
+  this->m_proton_charge_tot = 0.;
+  this->m_num_pulses = 0;
 
   // jump out early if there isn't a filename
   if (filename.empty()) {
@@ -922,9 +917,9 @@ void LoadEventPreNexus::readPulseidFile(const std::string &filename,
     BinaryFile<Pulse> pulseFile(filename);
 
     // Get the # of pulse
-    this->num_pulses = pulseFile.getNumElements();
+    this->m_num_pulses = pulseFile.getNumElements();
     this->g_log.information() << "Using pulseid file \"" << filename
-                              << "\", with " << num_pulses << " pulses.\n";
+                              << "\", with " << m_num_pulses << " pulses.\n";
 
     // Load all the data
     pulses = pulseFile.loadAll();
@@ -941,23 +936,23 @@ void LoadEventPreNexus::readPulseidFile(const std::string &filename,
 
   double temp;
 
-  if (num_pulses > 0) {
-    this->pulsetimes.reserve(num_pulses);
+  if (m_num_pulses > 0) {
+    this->m_pulsetimes.reserve(m_num_pulses);
     for (const auto &pulse : pulses) {
-      this->pulsetimes.emplace_back(static_cast<int64_t>(pulse.seconds),
+      this->m_pulsetimes.emplace_back(static_cast<int64_t>(pulse.seconds),
                                     static_cast<int64_t>(pulse.nanoseconds));
-      this->event_indices.push_back(pulse.event_index);
+      this->m_event_indices.push_back(pulse.event_index);
 
       temp = pulse.pCurrent;
-      this->proton_charge.push_back(temp);
+      this->m_proton_charge.push_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");
       else
-        this->proton_charge_tot += temp;
+        this->m_proton_charge_tot += temp;
     }
   }
 
-  this->proton_charge_tot = this->proton_charge_tot * CURRENT_CONVERSION;
+  this->m_proton_charge_tot = this->m_proton_charge_tot * CURRENT_CONVERSION;
 }
 
 } // namespace DataHandling

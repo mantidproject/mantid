@@ -5,7 +5,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/cow_ptr.h"
 #include <nexus/NeXusFile.hpp>
@@ -497,7 +496,7 @@ void LoadTOFRawNexus::exec() {
   std::string entry_name = LoadTOFRawNexus::getEntryName(filename);
 
   // Count pixels and other setup
-  auto prog = new Progress(this, 0.0, 1.0, 10);
+  auto prog = Kernel::make_unique<Progress>(this, 0.0, 1.0, 10);
   prog->doReport("Counting pixels");
   std::vector<std::string> bankNames;
   countPixels(filename, entry_name, bankNames);
@@ -568,8 +567,6 @@ void LoadTOFRawNexus::exec() {
 
   // Set to the output
   setProperty("OutputWorkspace", WS);
-
-  delete prog;
 }
 
 } // namespace DataHandling

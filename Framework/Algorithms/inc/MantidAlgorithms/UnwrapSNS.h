@@ -49,7 +49,6 @@ namespace Algorithms {
 class DLLExport UnwrapSNS : public API::Algorithm {
 public:
   UnwrapSNS();
-  ~UnwrapSNS() override;
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -70,19 +69,35 @@ private:
 
   int unwrapX(const MantidVec &, MantidVec &, const double &Ld);
   void getTofRangeData(const bool);
-  double m_conversionConstant; ///< The constant used in the conversion from TOF
-  /// to wavelength
-  API::MatrixWorkspace_const_sptr m_inputWS; ///< Pointer to the input workspace
-  DataObjects::EventWorkspace_const_sptr
-      m_inputEvWS;       ///< Pointer to the input event workspace
-  double m_LRef;         ///< The 'reference' flightpath
-  double m_Tmin;         ///< The start of the time-of-flight frame
-  double m_Tmax;         ///< The end of the time-of-flight frame
-  double m_frameWidth;   ///< The width of the frame cached to speed up things
-  int m_numberOfSpectra; ///< The number of spectra in the workspace
-  int m_XSize;           ///< The size of the X vectors in the input workspace
+
+  /// The constant used in the conversion from TOF to wavelength
+  double m_conversionConstant;
+
+  /// Pointer to the input workspace
+  API::MatrixWorkspace_const_sptr m_inputWS;
+
+  /// Pointer to the input event workspace
+  DataObjects::EventWorkspace_const_sptr m_inputEvWS;
+
+  /// The 'reference' flightpath
+  double m_LRef;
+
+  /// The start of the time-of-flight frame
+  double m_Tmin;
+
+  /// The end of the time-of-flight frame
+  double m_Tmax;
+
+  /// The width of the frame cached to speed up things
+  double m_frameWidth;
+
+  /// The number of spectra in the workspace
+  int m_numberOfSpectra;
+
+  /// The size of the X vectors in the input workspace
+  int m_XSize;
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace Algorithm

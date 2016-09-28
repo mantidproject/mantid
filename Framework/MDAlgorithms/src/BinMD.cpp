@@ -2,9 +2,7 @@
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/Utils.h"
 #include "MantidDataObjects/CoordTransformAffineParser.h"
 #include "MantidDataObjects/CoordTransformAligned.h"
 #include "MantidDataObjects/MDBoxBase.h"
@@ -35,9 +33,9 @@ using namespace Mantid::DataObjects;
 /** Constructor
  */
 BinMD::BinMD()
-    : outWS(), prog(nullptr), implicitFunction(nullptr),
-      indexMultiplier(nullptr), signals(nullptr), errors(nullptr),
-      numEvents(nullptr) {}
+    : m_outWS(), m_progress(nullptr), m_implicitFunction(nullptr),
+      m_indexMultiplier(nullptr), m_signals(nullptr), m_errors(nullptr),
+      m_numEvents(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -128,7 +126,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
         // Within range (for this chunk)?
         if ((x >= 0) && (ix >= chunkMin[bd]) && (ix < chunkMax[bd])) {
           // Build up the linear index
-          linearIndex += indexMultiplier[bd] * ix;
+          linearIndex += m_indexMultiplier[bd] * ix;
         } else {
           // Outside the range
           badOne = true;
@@ -158,11 +156,11 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
       //        std::cout << "Box at " << box->getExtentsStr() << " is within a
       //        single bin.\n";
       // Add the CACHED signal from the entire box
-      signals[lastLinearIndex] += box->getSignal();
-      errors[lastLinearIndex] += box->getErrorSquared();
+      m_signals[lastLinearIndex] += box->getSignal();
+      m_errors[lastLinearIndex] += box->getErrorSquared();
       // TODO: If DataObjects get a weight, this would need to get the summed
       // weight.
-      numEvents[lastLinearIndex] += static_cast<signal_t>(box->getNPoints());
+      m_numEvents[lastLinearIndex] += static_cast<signal_t>(box->getNPoints());
 
       // And don't bother looking at each event. This may save lots of time
       // loading from disk.
@@ -195,7 +193,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
       // Within range (for this chunk)?
       if ((x >= 0) && (ix >= chunkMin[bd]) && (ix < chunkMax[bd])) {
         // Build up the linear index
-        linearIndex += indexMultiplier[bd] * ix;
+        linearIndex += m_indexMultiplier[bd] * ix;
       } else {
         // Outside the range
         badOne = true;
@@ -204,12 +202,12 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
     } // (for each dim in MDHisto)
 
     if (!badOne) {
-      // Sum the signals as doubles to preserve precision
-      signals[linearIndex] += static_cast<signal_t>(it->getSignal());
-      errors[linearIndex] += static_cast<signal_t>(it->getErrorSquared());
+      // Sum the m_signals as doubles to preserve precision
+      m_signals[linearIndex] += static_cast<signal_t>(it->getSignal());
+      m_errors[linearIndex] += static_cast<signal_t>(it->getErrorSquared());
       // TODO: If DataObjects get a weight, this would need to get the summed
       // weight.
-      numEvents[linearIndex] += 1.0;
+      m_numEvents[linearIndex] += 1.0;
     }
   }
   // Done with the events list
@@ -234,19 +232,19 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // bc->setCacheParameters(1,0);
 
   // Cache some data to speed up accessing them a bit
-  indexMultiplier = new size_t[m_outD];
+  m_indexMultiplier = new size_t[m_outD];
   for (size_t d = 0; d < m_outD; d++) {
     if (d > 0)
-      indexMultiplier[d] = outWS->getIndexMultiplier()[d - 1];
+      m_indexMultiplier[d] = m_outWS->getIndexMultiplier()[d - 1];
     else
-      indexMultiplier[d] = 1;
+      m_indexMultiplier[d] = 1;
   }
-  signals = outWS->getSignalArray();
-  errors = outWS->getErrorSquaredArray();
-  numEvents = outWS->getNumEventsArray();
+  m_signals = m_outWS->getSignalArray();
+  m_errors = m_outWS->getErrorSquaredArray();
+  m_numEvents = m_outWS->getNumEventsArray();
 
-  // Start with signal/error/numEvents at 0.0
-  outWS->setTo(0.0, 0.0, 0.0);
+  // Start with signal/error/m_numEvents at 0.0
+  m_outWS->setTo(0.0, 0.0, 0.0);
 
   // The dimension (in the output workspace) along which we chunk for parallel
   // processing
@@ -270,10 +268,10 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   // Total number of steps
   size_t progNumSteps = 0;
-  if (prog)
-    prog->setNotifyStep(0.1);
-  if (prog)
-    prog->resetNumSteps(100, 0.00, 1.0);
+  if (m_progress)
+    m_progress->setNotifyStep(0.1);
+  if (m_progress)
+    m_progress->resetNumSteps(100, 0.00, 1.0);
 
   // Run the chunks in parallel. There is no overlap in the output workspace so
   // it is thread safe to write to it..
@@ -315,12 +313,12 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         API::IMDNode::sortObjByID(boxes);
 
       // For progress reporting, the # of boxes
-      if (prog) {
+      if (m_progress) {
         PARALLEL_CRITICAL(BinMD_progress) {
           g_log.debug() << "Chunk " << chunk << ": found " << boxes.size()
                         << " boxes within the implicit function.\n";
           progNumSteps += boxes.size();
-          prog->setNumSteps(progNumSteps);
+          m_progress->setNumSteps(progNumSteps);
         }
       }
 
@@ -332,8 +330,8 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           this->binMDBox(box, chunkMin.data(), chunkMax.data());
 
         // Progress reporting
-        if (prog)
-          prog->report();
+        if (m_progress)
+          m_progress->report();
         // For early cancelling of the loop
         if (this->m_cancel)
           break;
@@ -343,11 +341,11 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     PARALLEL_CHECK_INTERUPT_REGION
 
     // Now the implicit function
-    if (implicitFunction) {
-      if (prog)
-        prog->report("Applying implicit function.");
+    if (m_implicitFunction) {
+      if (m_progress)
+        m_progress->report("Applying implicit function.");
       signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
-      outWS->applyImplicitFunction(implicitFunction, nan, nan);
+      m_outWS->applyImplicitFunction(m_implicitFunction, nan, nan);
     }
 
     // return the size of the input workspace write buffer to its initial value
@@ -366,31 +364,31 @@ void BinMD::exec() {
 
   // De serialize the implicit function
   std::string ImplicitFunctionXML = getPropertyValue("ImplicitFunctionXML");
-  implicitFunction = nullptr;
+  m_implicitFunction = nullptr;
   if (!ImplicitFunctionXML.empty())
-    implicitFunction =
+    m_implicitFunction =
         Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(
             ImplicitFunctionXML);
 
   // This gets deleted by the thread pool; don't delete it in here.
-  prog = new Progress(this, 0, 1.0, 1);
+  m_progress = Kernel::make_unique<Progress>(this, 0, 1.0, 1);
 
   // Create the dense histogram. This allocates the memory
-  outWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(m_binDimensions));
+  m_outWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(m_binDimensions));
 
   // Saves the geometry transformation from original to binned in the workspace
-  outWS->setTransformFromOriginal(this->m_transformFromOriginal, 0);
-  outWS->setTransformToOriginal(this->m_transformToOriginal, 0);
+  m_outWS->setTransformFromOriginal(this->m_transformFromOriginal, 0);
+  m_outWS->setTransformToOriginal(this->m_transformToOriginal, 0);
   for (size_t i = 0; i < m_bases.size(); i++)
-    outWS->setBasisVector(i, m_bases[i]);
-  outWS->setOrigin(this->m_translation);
-  outWS->setOriginalWorkspace(m_inWS, 0);
+    m_outWS->setBasisVector(i, m_bases[i]);
+  m_outWS->setOrigin(this->m_translation);
+  m_outWS->setOriginalWorkspace(m_inWS, 0);
 
   // And the intermediate WS one too, if any
   if (m_intermediateWS) {
-    outWS->setOriginalWorkspace(m_intermediateWS, 1);
-    outWS->setTransformFromOriginal(m_transformFromIntermediate, 1);
-    outWS->setTransformToOriginal(m_transformToIntermediate, 1);
+    m_outWS->setOriginalWorkspace(m_intermediateWS, 1);
+    m_outWS->setTransformFromOriginal(m_transformFromIntermediate, 1);
+    m_outWS->setTransformToOriginal(m_transformToIntermediate, 1);
   }
 
   // Wrapper to cast to MDEventWorkspace then call the function
@@ -421,23 +419,24 @@ void BinMD::exec() {
   IMDEventWorkspace_sptr inEWS =
       boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
   if (inEWS) {
-    outWS->setCoordinateSystem(inEWS->getSpecialCoordinateSystem());
+    m_outWS->setCoordinateSystem(inEWS->getSpecialCoordinateSystem());
     try {
-      outWS->copyExperimentInfos(*inEWS);
+      m_outWS->copyExperimentInfos(*inEWS);
     } catch (std::runtime_error &) {
       g_log.warning()
           << this->name()
           << " was not able to copy experiment info to output workspace "
-          << outWS->getName() << '\n';
+          << m_outWS->getName() << '\n';
     }
   }
 
   // Pass on the display normalization from the input workspace
-  outWS->setDisplayNormalization(m_inWS->displayNormalizationHisto());
+  m_outWS->setDisplayNormalization(m_inWS->displayNormalizationHisto());
 
-  outWS->updateSum();
+  m_outWS->updateSum();
   // Save the output
-  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outWS));
+  setProperty("OutputWorkspace",
+              boost::dynamic_pointer_cast<Workspace>(m_outWS));
 }
 
 } // namespace Mantid

@@ -1,8 +1,6 @@
 #ifndef LOADEVENTPRENEXUS_H_
 #define LOADEVENTPRENEXUS_H_
 
-#include <fstream>
-#include <string>
 #include <vector>
 #include "MantidAPI/IFileLoader.h"
 #include "MantidKernel/BinaryFile.h"
@@ -118,81 +116,6 @@ private:
   /// Execution code
   void exec() override;
 
-  Mantid::API::Progress *prog;
-
-  DataObjects::EventWorkspace_sptr localWorkspace; //< Output EventWorkspace
-  std::vector<int64_t> spectra_list;               ///<the list of Spectra
-
-  /// The times for each pulse.
-  std::vector<Kernel::DateAndTime> pulsetimes;
-  /// The index of the first event in each pulse.
-  std::vector<uint64_t> event_indices;
-  /// The proton charge on a pulse by pulse basis.
-  std::vector<double> proton_charge;
-  /// The total proton charge for the run.
-  double proton_charge_tot;
-  /// The value of the vector is the workspace index. The index into it is the
-  /// pixel ID from DAS
-  std::vector<std::size_t> pixel_to_wkspindex;
-  /// Map between the DAS pixel IDs and our pixel IDs, used while loading.
-  std::vector<PixelType> pixelmap;
-
-  /// The maximum detector ID possible
-  Mantid::detid_t detid_max;
-
-  /// Handles loading from the event file
-  Mantid::Kernel::BinaryFile<DasEvent> *eventfile;
-  std::size_t num_events; ///< The number of events in the file
-  std::size_t num_pulses; ///<the number of pulses
-  uint32_t numpixel;      ///<the number of pixels
-
-  std::size_t num_good_events;  ///< The number of good events loaded
-  std::size_t num_error_events; ///< The number of error events encountered
-  std::size_t num_bad_events; ///<The number of bad events. Part of error events
-  std::size_t num_wrongdetid_events; ///<The number of events with wrong
-  /// detector IDs. Part of error events.
-  std::set<PixelType> wrongdetids; ///<set of all wrong detector IDs
-  std::map<PixelType, size_t> wrongdetidmap;
-  std::vector<std::vector<Kernel::DateAndTime>> wrongdetid_pulsetimes;
-  std::vector<std::vector<double>> wrongdetid_tofs;
-
-  /// the number of events that were ignored (not loaded) because, e.g. of only
-  /// loading some spectra.
-  std::size_t num_ignored_events;
-  std::size_t first_event; ///< The first event to load (count from zero)
-  std::size_t max_events;  ///< Number of events to load
-
-  /// Set to true if a valid Mapping file was provided.
-  bool using_mapping_file;
-
-  /// For loading only some spectra
-  bool loadOnlySomeSpectra;
-  /// Handle to the loaded spectra map
-  std::map<int64_t, bool> spectraLoadMap;
-
-  /// Longest TOF limit
-  double longest_tof;
-  /// Shortest TOF limit
-  double shortest_tof;
-
-  /// Flag to allow for parallel loading
-  bool parallelProcessing;
-
-  /// Whether or not the pulse times are sorted in increasing order.
-  bool pulsetimesincreasing;
-
-  /// sample environment event
-  std::vector<detid_t> mSEids;
-  std::map<size_t, detid_t> mSEmap;
-  std::vector<std::vector<int64_t>> mSEpulseids;
-  std::vector<std::vector<double>> mSEtofs;
-
-  /// Investigation properties
-  bool m_dbOutput;
-  int m_dbOpBlockNumber;
-  size_t m_dbOpNumEvents;
-  size_t m_dbOpNumPulses;
-
   void loadPixelMap(const std::string &filename);
 
   void openEventFile(const std::string &filename);
@@ -228,6 +151,109 @@ private:
 
   /// Processing the input properties for purpose of investigation
   void processInvestigationInputs();
+
+  std::unique_ptr<Mantid::API::Progress> m_progress;
+
+  /// Output EventWorkspace
+  DataObjects::EventWorkspace_sptr m_localWorkspace;
+
+  /// The list of Spectra
+  std::vector<int64_t> m_spectra_list;
+
+  /// The times for each pulse.
+  std::vector<Kernel::DateAndTime> m_pulsetimes;
+
+  /// The index of the first event in each pulse.
+  std::vector<uint64_t> m_event_indices;
+
+  /// The proton charge on a pulse by pulse basis.
+  std::vector<double> m_proton_charge;
+
+  /// The total proton charge for the run.
+  double m_proton_charge_tot;
+
+  /// The value of the vector is the workspace index. The index into it is the
+  /// pixel ID from DAS
+  std::vector<std::size_t> m_pixel_to_wkspindex;
+
+  /// Map between the DAS pixel IDs and our pixel IDs, used while loading.
+  std::vector<PixelType> m_pixelmap;
+
+  /// The maximum detector ID possible
+  Mantid::detid_t m_detid_max;
+
+  /// Handles loading from the event file
+  Mantid::Kernel::BinaryFile<DasEvent> *m_eventfile;
+
+  /// The number of events in the file
+  std::size_t m_num_events;
+
+  /// The number of pulses
+  std::size_t m_num_pulses;
+
+  /// The number of pixels
+  uint32_t m_numpixel;
+
+  /// The number of good events loaded
+  std::size_t m_num_good_events;
+
+  /// The number of error events encountered
+  std::size_t m_num_error_events;
+
+  /// The number of bad events. Part of error events
+  std::size_t m_num_bad_events;
+
+  /// The number of events with wrong
+  std::size_t m_num_wrongdetid_events;
+
+  /// detector IDs. Part of error events.
+  /// Set of all wrong detector IDs
+  std::set<PixelType> m_wrongdetids;
+  std::map<PixelType, size_t> m_wrongdetidmap;
+  std::vector<std::vector<Kernel::DateAndTime>> m_wrongdetid_pulsetimes;
+  std::vector<std::vector<double>> m_wrongdetid_tofs;
+
+  /// the number of events that were ignored (not loaded) because, e.g. of only
+  /// loading some spectra.
+  std::size_t m_num_ignored_events;
+
+  /// The first event to load (count from zero)
+  std::size_t m_first_event;
+
+  /// Number of events to load
+  std::size_t m_max_events;
+
+  /// Set to true if a valid Mapping file was provided.
+  bool m_using_mapping_file;
+
+  /// For loading only some spectra
+  bool m_loadOnlySomeSpectra;
+
+  /// Handle to the loaded spectra map
+  std::map<int64_t, bool> m_spectraLoadMap;
+
+  /// Longest TOF limit
+  double m_longest_tof;
+  /// Shortest TOF limit
+  double m_shortest_tof;
+
+  /// Flag to allow for parallel loading
+  bool m_parallelProcessing;
+
+  /// Whether or not the pulse times are sorted in increasing order.
+  bool m_pulsetimesincreasing;
+
+  /// sample environment event
+  std::vector<detid_t> m_SEids;
+  std::map<size_t, detid_t> m_SEmap;
+  std::vector<std::vector<int64_t>> m_SEpulseids;
+  std::vector<std::vector<double>> m_SEtofs;
+
+  /// Investigation properties
+  bool m_dbOutput;
+  int m_dbOpBlockNumber;
+  size_t m_dbOpNumEvents;
+  size_t m_dbOpNumPulses;
 };
 }
 }

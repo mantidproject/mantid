@@ -43,7 +43,7 @@ DECLARE_ALGORITHM(FindPeaks)
 FindPeaks::FindPeaks()
     : API::Algorithm(), m_peakParameterNames(), m_bkgdParameterNames(),
       m_bkgdOrder(0), m_outPeakTableWS(), m_progress(nullptr), m_dataWS(),
-      m_inputPeakFWHM(0), m_wsIndex(0), singleSpectrum(false),
+      m_inputPeakFWHM(0), m_wsIndex(0), m_singleSpectrum(false),
       m_highBackground(false), m_rawPeaksTable(false), m_numTableParams(0),
       m_centreIndex(1) /* for Gaussian */, m_peakFuncType(""),
       m_backgroundType(""), m_vecPeakCentre(), m_vecFitWindows(),
@@ -215,8 +215,8 @@ void FindPeaks::processAlgorithmProperties() {
 
   // WorkspaceIndex
   m_wsIndex = getProperty("WorkspaceIndex");
-  singleSpectrum = !isEmpty(m_wsIndex);
-  if (singleSpectrum &&
+  m_singleSpectrum = !isEmpty(m_wsIndex);
+  if (m_singleSpectrum &&
       m_wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms())) {
     g_log.warning() << "The value of WorkspaceIndex provided (" << m_wsIndex
                     << ") is larger than the size of this workspace ("
@@ -335,11 +335,11 @@ void FindPeaks::findPeaksGivenStartingPoints(
   std::size_t numPeaks = peakcentres.size();
 
   // Loop over the spectra searching for peaks
-  const int start = singleSpectrum ? m_wsIndex : 0;
-  const int end = singleSpectrum
+  const int start = m_singleSpectrum ? m_wsIndex : 0;
+  const int end = m_singleSpectrum
                       ? m_wsIndex + 1
                       : static_cast<int>(m_dataWS->getNumberHistograms());
-  m_progress = new Progress(this, 0.0, 1.0, end - start);
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, end - start);
 
   for (int spec = start; spec < end; ++spec) {
     auto &vecX = m_dataWS->x(spec);
@@ -454,11 +454,11 @@ void FindPeaks::findPeaksUsingMariscotti() {
   //  setProperty("SmoothedData",smoothedData);
 
   // Loop over the spectra searching for peaks
-  const int start = singleSpectrum ? m_wsIndex : 0;
-  const int end = singleSpectrum
+  const int start = m_singleSpectrum ? m_wsIndex : 0;
+  const int end = m_singleSpectrum
                       ? m_wsIndex + 1
                       : static_cast<int>(smoothedData->getNumberHistograms());
-  m_progress = new Progress(this, 0.0, 1.0, end - start);
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, end - start);
   const int blocksize = static_cast<int>(smoothedData->blocksize());
 
   for (int k = start; k < end; ++k) {

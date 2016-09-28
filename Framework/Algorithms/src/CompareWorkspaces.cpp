@@ -147,7 +147,7 @@ void CompareWorkspaces::exec() {
  * @return A boolean true if execution was sucessful, false otherwise
  */
 bool CompareWorkspaces::processGroups() {
-  m_Result = true;
+  m_result = true;
   m_messages->setRowCount(0); // Clear table
 
   // Get workspaces
@@ -163,7 +163,7 @@ bool CompareWorkspaces::processGroups() {
   if (ws1 && ws2) { // Both are groups
     processGroups(ws1, ws2);
   } else if (!ws1 && !ws2) { // Neither are groups (shouldn't happen)
-    m_Result = false;
+    m_result = false;
     throw std::runtime_error("CompareWorkspaces::processGroups - Neither "
                              "input is a WorkspaceGroup. This is a logical "
                              "error in the code.");
@@ -190,8 +190,8 @@ bool CompareWorkspaces::processGroups() {
  * @param groupTwo
  */
 void CompareWorkspaces::processGroups(
-    boost::shared_ptr<const API::WorkspaceGroup> groupOne,
-    boost::shared_ptr<const API::WorkspaceGroup> groupTwo) {
+    const boost::shared_ptr<const API::WorkspaceGroup> groupOne,
+    const boost::shared_ptr<const API::WorkspaceGroup> groupTwo) {
 
   // Check their sizes
   const size_t totalNum = static_cast<size_t>(groupOne->getNumberOfEntries());
@@ -333,7 +333,7 @@ void CompareWorkspaces::doComparison() {
     }
   }
 
-  size_t numhist = ws1->getNumberHistograms();
+  const size_t numhist = ws1->getNumberHistograms();
 
   if (ews1 && ews2) {
     m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numhist * 5);

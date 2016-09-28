@@ -72,7 +72,6 @@ namespace Algorithms {
 class DLLExport CompareWorkspaces : public API::Algorithm {
 public:
   CompareWorkspaces();
-  ~CompareWorkspaces() override;
 
   /// Algorithm's name
   const std::string name() const override;

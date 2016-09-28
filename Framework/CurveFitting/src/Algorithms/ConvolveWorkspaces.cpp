@@ -20,10 +20,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(ConvolveWorkspaces)
 
 /// Constructor
-ConvolveWorkspaces::ConvolveWorkspaces() : API::Algorithm(), prog(nullptr) {}
-
-/// Virtual destructor
-ConvolveWorkspaces::~ConvolveWorkspaces() { delete prog; }
+ConvolveWorkspaces::ConvolveWorkspaces() : API::Algorithm(), m_progress(nullptr) {}
 
 using namespace Kernel;
 using namespace API;
@@ -61,12 +58,12 @@ void ConvolveWorkspaces::exec() {
     throw std::runtime_error("Size mismatch");
   }
 
-  prog = new Progress(this, 0.0, 1.0, numHists);
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numHists);
   // Now convolve the histograms
   PARALLEL_FOR3(ws1, ws2, outputWS)
   for (int l = 0; l < static_cast<int>(numHists); ++l) {
     PARALLEL_START_INTERUPT_REGION
-    prog->report();
+    m_progress->report();
     const MantidVec &X1 = ws1->readX(l);
     MantidVec &x = outputWS->dataX(l);
     x = X1;

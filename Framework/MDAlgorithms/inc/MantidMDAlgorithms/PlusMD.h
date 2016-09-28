@@ -72,9 +72,9 @@ private:
   void doPlus(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Workspace into which stuff will get added
-  Mantid::API::IMDEventWorkspace_sptr iws1;
+  Mantid::API::IMDEventWorkspace_sptr m_iws1;
   /// Workspace that will be added into ws1
-  Mantid::API::IMDEventWorkspace_sptr iws2;
+  Mantid::API::IMDEventWorkspace_sptr m_iws2;
 };
 
 } // namespace MDAlgorithms

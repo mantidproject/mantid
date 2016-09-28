@@ -34,7 +34,7 @@ DECLARE_ALGORITHM(SaveNexusProcessed)
 
 /// Empty default constructor
 SaveNexusProcessed::SaveNexusProcessed()
-    : Algorithm(), m_timeProgInit(0.0), prog() {}
+    : Algorithm(), m_timeProgInit(0.0), m_progress() {}
 
 //-----------------------------------------------------------------------------------------------
 /** Initialisation method.
@@ -360,8 +360,8 @@ void SaveNexusProcessed::appendEventListData(std::vector<T> events,
 void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
                                    const bool uniformSpectra,
                                    const std::vector<int> spec) {
-  prog = new Progress(this, m_timeProgInit, 1.0,
-                      m_eventWorkspace->getNumberEvents() * 2);
+  m_progress = Kernel::make_unique<Progress>(
+      this, m_timeProgInit, 1.0, m_eventWorkspace->getNumberEvents() * 2);
 
   // Start by writing out the axes and crap
   nexusFile->writeNexusProcessedData2D(m_eventWorkspace, uniformSpectra, spec,
@@ -444,7 +444,7 @@ void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
                           errorSquareds, pulsetimes);
       break;
     }
-    prog->reportIncrement(el.getNumberEvents(), "Copying EventList");
+	m_progress->reportIncrement(el.getNumberEvents(), "Copying EventList");
 
     PARALLEL_END_INTERUPT_REGION
   }

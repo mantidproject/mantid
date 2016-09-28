@@ -114,7 +114,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       oldFile.remove();
   }
 
-  auto prog = new Progress(this, 0.0, 0.05, 1);
+  auto prog = Kernel::make_unique<Progress>(this, 0.0, 0.05, 1);
   if (updateFileBackend) // workspace has its own file and ignores any changes
                          // to the
                          // algorithm parameters
@@ -219,8 +219,6 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (!copyFile) {
     BoxFlatStruct.saveBoxStructure(filename);
   }
-
-  delete prog;
 
   ws->setFileNeedsUpdating(false);
 }

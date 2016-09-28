@@ -78,7 +78,7 @@ void MinusMD::doMinus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // Perform a copy while flipping the signal
       std::vector<MDE> eventsCopy;
       eventsCopy.reserve(events.size());
-      for (auto it = events.begin(); it != events.end(); it++) {
+      for (auto it = events.begin(); it != events.end(); ++it) {
         MDE eventCopy(*it);
         eventCopy.setSignal(-eventCopy.getSignal());
         eventsCopy.push_back(eventCopy);
@@ -91,9 +91,9 @@ void MinusMD::doMinus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   } while (it2.next());
 
   this->progress(0.41, "Splitting Boxes");
-  auto prog2 = new Progress(this, 0.4, 0.9, 100);
+  auto prog2 = Kernel::make_unique<Progress>(this, 0.4, 0.9, 100);
   ThreadScheduler *ts = new ThreadSchedulerFIFO();
-  ThreadPool tp(ts, 0, prog2);
+  ThreadPool tp(ts, 0, prog2.get());
   ws1->splitAllIfNeeded(ts);
   prog2->resetNumSteps(ts->size(), 0.4, 0.6);
   tp.joinAll();

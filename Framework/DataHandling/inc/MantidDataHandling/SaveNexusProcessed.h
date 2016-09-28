@@ -8,7 +8,6 @@
 #include "MantidAPI/Progress.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidNexus/NexusFileIO.h"
-#include <climits>
 
 namespace Mantid {
 namespace DataHandling {
@@ -110,7 +109,7 @@ private:
   /// Proportion of progress time expected to write initial part
   double m_timeProgInit;
   /// Progress bar
-  API::Progress *prog;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace DataHandling

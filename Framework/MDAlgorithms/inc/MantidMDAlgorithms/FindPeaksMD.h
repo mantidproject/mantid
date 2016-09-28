@@ -62,13 +62,13 @@ private:
   void findPeaksHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws);
 
   /// Output PeaksWorkspace
-  Mantid::DataObjects::PeaksWorkspace_sptr peakWS;
+  Mantid::DataObjects::PeaksWorkspace_sptr m_peakWS;
 
   /// Estimated radius of peaks. Boxes closer than this are rejected
-  coord_t peakRadiusSquared;
+  coord_t m_peakRadiusSquared;
 
   /// Thresholding factor
-  double DensityThresholdFactor;
+  double m_densityThresholdFactor;
 
   /// Max # of peaks
   int64_t m_maxPeaks;
@@ -81,17 +81,20 @@ private:
   signal_t m_densityScaleFactor;
 
   /// Progress reporter.
-  Mantid::API::Progress *prog;
+  std::unique_ptr<Mantid::API::Progress> m_progress;
 
   /** Enum describing which type of dimensions in the MDEventWorkspace */
   enum eDimensionType { HKL, QLAB, QSAMPLE };
 
   /// Instrument
-  Mantid::Geometry::Instrument_const_sptr inst;
+  Mantid::Geometry::Instrument_const_sptr m_instrument;
+
   /// Run number of the peaks
   int m_runNumber;
+
   /// Dimension type
-  eDimensionType dimType;
+  eDimensionType m_dimType;
+
   /// Goniometer matrix
   Mantid::Kernel::Matrix<double> m_goniometer;
 };

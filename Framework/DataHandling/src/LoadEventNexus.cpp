@@ -1572,7 +1572,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   size_t numProg = bankNames.size() * (1 + 3); // 1 = disktask, 3 = proc task
   if (splitProcessing)
     numProg += bankNames.size() * 3; // 3 = second proc task
-  auto prog2 = new Progress(this, 0.3, 1.0, numProg);
+  auto prog2 = Kernel::make_unique<Progress>(this, 0.3, 1.0, numProg);
 
   const std::vector<int> periodLogVec = periodLog->valuesAsVector();
 
@@ -1581,12 +1581,11 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     if (bankNumEvents[i] > 0)
       pool.schedule(new LoadBankFromDiskTask(
           this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
-          prog2, diskIOMutex, scheduler, periodLogVec));
+          prog2.get(), diskIOMutex, scheduler, periodLogVec));
   }
   // Start and end all threads
   pool.joinAll();
   diskIOMutex.reset();
-  delete prog2;
 
   // Info reporting
   const std::size_t eventsLoaded = m_ws->getNumberEvents();

@@ -177,7 +177,7 @@ private:
   /// Perform statistics to event (wrong pixel ID) logs
   void doStatToEventLog(size_t mindex);
 
-  Mantid::API::Progress *m_prog;
+  std::unique_ptr<Mantid::API::Progress> m_progress;
 
   DataObjects::EventWorkspace_sptr m_localWorkspace; //< Output EventWorkspace
   std::vector<int64_t> m_spectraList;                ///<the list of Spectra

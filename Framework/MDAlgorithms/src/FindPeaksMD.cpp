@@ -5,7 +5,6 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/VMD.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/type_traits/integral_constant.hpp>
 
 #include <map>
@@ -106,9 +105,9 @@ DECLARE_ALGORITHM(FindPeaksMD)
 /** Constructor
  */
 FindPeaksMD::FindPeaksMD()
-    : peakWS(), peakRadiusSquared(), DensityThresholdFactor(0.0), m_maxPeaks(0),
-      m_addDetectors(true), m_densityScaleFactor(1e-6), prog(nullptr), inst(),
-      m_runNumber(-1), dimType(), m_goniometer() {}
+    : m_peakWS(), m_peakRadiusSquared(), m_densityThresholdFactor(0.0), m_maxPeaks(0),
+      m_addDetectors(true), m_densityScaleFactor(1e-6), m_progress(nullptr), m_instrument(),
+      m_runNumber(-1), m_dimType(), m_goniometer() {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -131,7 +130,7 @@ void FindPeaksMD::init() {
                   "Maximum number of peaks to find. Default: 500.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
-                      "DensityThresholdFactor", 10.0, Direction::Input),
+                      "m_densityThresholdFactor", 10.0, Direction::Input),
                   "The overall signal density of the workspace will be "
                   "multiplied by this factor \n"
                   "to get a threshold signal density below which boxes are NOT "
@@ -153,20 +152,20 @@ void FindPeaksMD::init() {
 void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr &ei,
                                      const IMDWorkspace_sptr &ws) {
   // Instrument associated with workspace
-  inst = ei->getInstrument();
+  m_instrument = ei->getInstrument();
   // Find the run number
   m_runNumber = ei->getRunNumber();
 
   // Check that the workspace dimensions are in Q-sample-frame or Q-lab-frame.
   std::string dim0 = ws->getDimension(0)->getName();
   if (dim0 == "H") {
-    dimType = HKL;
+    m_dimType = HKL;
     throw std::runtime_error(
         "Cannot find peaks in a workspace that is already in HKL space.");
   } else if (dim0 == "Q_lab_x") {
-    dimType = QLAB;
+    m_dimType = QLAB;
   } else if (dim0 == "Q_sample_x")
-    dimType = QSAMPLE;
+    m_dimType = QSAMPLE;
   else
     throw std::runtime_error(
         "Unexpected dimensions: need either Q_lab_x or Q_sample_x.");
@@ -193,7 +192,7 @@ void FindPeaksMD::addPeak(const V3D &Q, const double binCount) {
   try {
     auto p = this->createPeak(Q, binCount);
     if (p->getDetectorID() != -1)
-      peakWS->addPeak(*p);
+      m_peakWS->addPeak(*p);
   } catch (std::exception &e) {
     g_log.notice() << "Error creating peak at " << Q << " because of '"
                    << e.what() << "'. Peak will be skipped.\n";
@@ -206,14 +205,14 @@ void FindPeaksMD::addPeak(const V3D &Q, const double binCount) {
 boost::shared_ptr<DataObjects::Peak>
 FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount) {
   boost::shared_ptr<DataObjects::Peak> p;
-  if (dimType == QLAB) {
+  if (m_dimType == QLAB) {
     // Build using the Q-lab-frame constructor
-    p = boost::make_shared<Peak>(inst, Q);
+    p = boost::make_shared<Peak>(m_instrument, Q);
     // Save gonio matrix for later
     p->setGoniometerMatrix(m_goniometer);
-  } else if (dimType == QSAMPLE) {
+  } else if (m_dimType == QSAMPLE) {
     // Build using the Q-sample-frame constructor
-    p = boost::make_shared<Peak>(inst, Q, m_goniometer);
+    p = boost::make_shared<Peak>(m_instrument, Q, m_goniometer);
   } else {
     throw std::invalid_argument(
         "Cannot Integrate peaks unless the dimension is QLAB or QSAMPLE");
@@ -263,12 +262,12 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
     this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
     // Copy the instrument, sample, run to the peaks workspace.
-    peakWS->copyExperimentInfoFrom(ei.get());
+    m_peakWS->copyExperimentInfoFrom(ei.get());
 
     // Calculate a threshold below which a box is too diffuse to be considered a
     // peak.
     signal_t thresholdDensity = ws->getBox()->getSignalNormalized() *
-                                DensityThresholdFactor * m_densityScaleFactor;
+                                m_densityThresholdFactor * m_densityScaleFactor;
     if (boost::math::isnan(thresholdDensity) ||
         (thresholdDensity == std::numeric_limits<double>::infinity()) ||
         (thresholdDensity == -std::numeric_limits<double>::infinity())) {
@@ -311,7 +310,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // List of chosen possible peak boxes.
     std::vector<API::IMDNode *> peakBoxes;
 
-    prog = new Progress(this, 0.30, 0.95, m_maxPeaks);
+    m_progress = Kernel::make_unique<Progress>(this, 0.30, 0.95, m_maxPeaks);
 
     // used for selecting method for calculating BinCount
     bool isMDEvent(ws->id().find("MDEventWorkspace") != std::string::npos);
@@ -350,7 +349,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         }
 
         // Reject this box if it is too close to another previously found box.
-        if (distSquared < peakRadiusSquared) {
+        if (distSquared < m_peakRadiusSquared) {
           badBox = true;
           break;
         }
@@ -370,11 +369,11 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           g_log.debug() << (d > 0 ? "," : "") << boxCenter[d];
         g_log.debug() << "; Density = " << density << '\n';
         // Report progres for each box found.
-        prog->report("Finding Peaks");
+        m_progress->report("Finding Peaks");
       }
     }
 
-    prog->resetNumSteps(numBoxesFound, 0.95, 1.0);
+    m_progress->resetNumSteps(numBoxesFound, 0.95, 1.0);
 
     // --- Convert the "boxes" to peaks ----
     for (auto box : peakBoxes) {
@@ -406,7 +405,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           addDetectors(*p, *mdBox);
         }
         if (p->getDetectorID() != -1) {
-          peakWS->addPeak(*p);
+          m_peakWS->addPeak(*p);
           g_log.information() << "Add new peak with Q-center = " << Q[0] << ", "
                               << Q[1] << ", " << Q[2] << "\n";
         }
@@ -416,11 +415,11 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       }
 
       // Report progress for each box found.
-      prog->report("Adding Peaks");
+      m_progress->report("Adding Peaks");
 
     } // for each box found
   }
-  g_log.notice() << "Number of peaks found: " << peakWS->getNumberPeaks()
+  g_log.notice() << "Number of peaks found: " << m_peakWS->getNumberPeaks()
                  << '\n';
 }
 
@@ -447,7 +446,7 @@ void FindPeaksMD::findPeaksHisto(
     this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
     // Copy the instrument, sample, run to the peaks workspace.
-    peakWS->copyExperimentInfoFrom(ei.get());
+    m_peakWS->copyExperimentInfoFrom(ei.get());
 
     // This pair is the <density, box index>
     typedef std::pair<double, size_t> dens_box;
@@ -466,7 +465,7 @@ void FindPeaksMD::findPeaksHisto(
     // Calculate the threshold density
     double thresholdDensity =
         (totalSignal * ws->getInverseVolume() / double(numBoxes)) *
-        DensityThresholdFactor * m_densityScaleFactor;
+        m_densityThresholdFactor * m_densityScaleFactor;
     if ((thresholdDensity != thresholdDensity) ||
         (thresholdDensity == std::numeric_limits<double>::infinity()) ||
         (thresholdDensity == -std::numeric_limits<double>::infinity())) {
@@ -490,7 +489,7 @@ void FindPeaksMD::findPeaksHisto(
     // List of chosen possible peak boxes.
     std::vector<size_t> peakBoxes;
 
-    prog = new Progress(this, 0.30, 0.95, m_maxPeaks);
+    m_progress = Kernel::make_unique<Progress>(this, 0.30, 0.95, m_maxPeaks);
 
     int64_t numBoxesFound = 0;
     // Now we go (backwards) through the map
@@ -516,7 +515,7 @@ void FindPeaksMD::findPeaksHisto(
         }
 
         // Reject this box if it is too close to another previously found box.
-        if (distSquared < peakRadiusSquared) {
+        if (distSquared < m_peakRadiusSquared) {
           badBox = true;
           break;
         }
@@ -534,7 +533,7 @@ void FindPeaksMD::findPeaksHisto(
         g_log.debug() << "Found box at index " << index;
         g_log.debug() << "; Density = " << density << '\n';
         // Report progres for each box found.
-        prog->report("Finding Peaks");
+        m_progress->report("Finding Peaks");
       }
     }
     // --- Convert the "boxes" to peaks ----
@@ -552,11 +551,11 @@ void FindPeaksMD::findPeaksHisto(
       addPeak(Q, binCount);
 
       // Report progres for each box found.
-      prog->report("Adding Peaks");
+      m_progress->report("Adding Peaks");
 
     } // for each box found
   }
-  g_log.notice() << "Number of peaks found: " << peakWS->getNumberPeaks()
+  g_log.notice() << "Number of peaks found: " << m_peakWS->getNumberPeaks()
                  << '\n';
 }
 
@@ -567,9 +566,9 @@ void FindPeaksMD::exec() {
   bool AppendPeaks = getProperty("AppendPeaks");
 
   // Output peaks workspace, create if needed
-  peakWS = getProperty("OutputWorkspace");
-  if (!peakWS || !AppendPeaks)
-    peakWS = PeaksWorkspace_sptr(new PeaksWorkspace());
+  m_peakWS = getProperty("OutputWorkspace");
+  if (!m_peakWS || !AppendPeaks)
+    m_peakWS = PeaksWorkspace_sptr(new PeaksWorkspace());
 
   // The MDEventWorkspace as input
   IMDWorkspace_sptr inWS = getProperty("InputWorkspace");
@@ -580,10 +579,10 @@ void FindPeaksMD::exec() {
 
   // Other parameters
   double PeakDistanceThreshold = getProperty("PeakDistanceThreshold");
-  peakRadiusSquared =
+  m_peakRadiusSquared =
       static_cast<coord_t>(PeakDistanceThreshold * PeakDistanceThreshold);
 
-  DensityThresholdFactor = getProperty("DensityThresholdFactor");
+  m_densityThresholdFactor = getProperty("m_densityThresholdFactor");
   m_maxPeaks = getProperty("MaxPeaks");
 
   // Execute the proper algo based on the type of workspace
@@ -597,17 +596,15 @@ void FindPeaksMD::exec() {
                              "not work on a regular MatrixWorkspace.");
   }
 
-  delete prog;
-
   // Do a sort by bank name and then descending bin count (intensity)
   std::vector<std::pair<std::string, bool>> criteria;
   criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
   criteria.push_back(std::pair<std::string, bool>("BankName", true));
   criteria.push_back(std::pair<std::string, bool>("bincount", false));
-  peakWS->sort(criteria);
+  m_peakWS->sort(criteria);
 
   // Save the output
-  setProperty("OutputWorkspace", peakWS);
+  setProperty("OutputWorkspace", m_peakWS);
 }
 
 } // namespace Mantid

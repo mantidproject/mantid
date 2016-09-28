@@ -46,7 +46,6 @@ namespace Algorithms {
 class DLLExport UnwrapMonitor : public API::Algorithm {
 public:
   UnwrapMonitor();
-  ~UnwrapMonitor() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "UnwrapMonitor"; }
   /// Summary of algorithms purpose
@@ -80,15 +79,26 @@ private:
                                   const double &min, const double &max,
                                   const int &numBins);
 
-  double m_conversionConstant; ///< The constant used in the conversion from TOF
-  /// to wavelength
-  API::MatrixWorkspace_const_sptr m_inputWS; ///< Pointer to the input workspace
-  double m_LRef;                             ///< The 'reference' flightpath
-  double m_Tmin;  ///< The start of the time-of-flight frame
-  double m_Tmax;  ///< The end of the time-of-flight frame
-  size_t m_XSize; ///< The size of the X vectors in the input workspace
+  /// The constant used in the conversion from TOF to wavelength
+  double m_conversionConstant; 
+  
+  /// Pointer to the input workspace
+  API::MatrixWorkspace_const_sptr m_inputWS; 
+  
+  /// The 'reference' flightpath
+  double m_LRef;  
+  
+  /// The start of the time-of-flight frame
+  double m_Tmin;  
+
+  /// The end of the time-of-flight frame
+  double m_Tmax;  
+
+  /// The size of the X vectors in the input workspace
+  size_t m_XSize; 
+
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace Algorithm
