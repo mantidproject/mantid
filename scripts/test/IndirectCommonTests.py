@@ -65,7 +65,6 @@ class IndirectCommonTests(unittest.TestCase):
         self.assert_lists_almost_match(expected_theta_result, actual_theta_result)
         self.assert_lists_almost_match(expected_Q_result, actual_Q_result)
 
-
     def test_PadArray(self):
         data = [0,1,2,3,4,5]
         expected_result = [0,1,2,3,4,5,0,0,0,0]
@@ -91,63 +90,6 @@ class IndirectCommonTests(unittest.TestCase):
         energy_range = [0.5, -0.5]
         x_range = np.arange(-0.5, 0.51, 0.01)
         self.assertRaises(ValueError, indirect_common.CheckElimits, energy_range, x_range)
-
-    def test_convertToElasticQ(self):
-        ws = self.make_dummy_QENS_workspace()
-        indirect_common.convertToElasticQ(ws)
-        self.assert_workspace_units_match_expected('MomentumTransfer', ws)
-        self.assert_has_numeric_axis(ws)
-
-    def test_convertToElasticQ_output_in_different_workspace(self):
-        ws = self.make_dummy_QENS_workspace()
-        output_workspace = 'ws2'
-        indirect_common.convertToElasticQ(ws, output_ws=output_workspace)
-
-        #check original wasn't modified
-        self.assert_workspace_units_match_expected('Label', ws)
-        self.assert_has_spectrum_axis(ws)
-
-        #check new workspace matches what we expect
-        self.assert_workspace_units_match_expected('MomentumTransfer', output_workspace)
-        self.assert_has_numeric_axis(output_workspace)
-
-    def test_convertToElasticQ_workspace_already_in_Q(self):
-        ws = self.make_dummy_QENS_workspace()
-        e_fixed = indirect_common.getEfixed(ws)
-        ConvertSpectrumAxis(ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=ws)
-
-        indirect_common.convertToElasticQ(ws)
-
-        self.assert_workspace_units_match_expected('MomentumTransfer', ws)
-        self.assert_has_numeric_axis(ws)
-
-    def test_convertToElasticQ_with_numeric_axis_not_in_Q(self):
-        ws = self.make_dummy_QENS_workspace()
-
-        #convert spectrum axis to units of Q
-        e_fixed = indirect_common.getEfixed(ws)
-        ConvertSpectrumAxis(ws,Target='ElasticQ',EMode='Indirect',EFixed=e_fixed,OutputWorkspace=ws)
-        #set the units to be something we didn't expect
-        unit = mtd[ws].getAxis(1).setUnit("Label")
-        unit.setLabel('Random Units', '')
-
-        self.assertRaises(RuntimeError, indirect_common.convertToElasticQ, ws)
-
-    def test_transposeFitParametersTable(self):
-        ws = self.make_dummy_QENS_workspace()
-        params_table = self.make_multi_domain_parameter_table(ws)
-        indirect_common.transposeFitParametersTable(params_table)
-        self.assert_table_workspace_dimensions(params_table, expected_row_count=5, expected_column_count=11)
-
-    def test_transposeFitParametersTable_rename_output(self):
-        ws = self.make_dummy_QENS_workspace()
-        params_table = self.make_multi_domain_parameter_table(ws)
-        output_name = "new_table"
-
-        indirect_common.transposeFitParametersTable(params_table, output_name)
-
-        self.assert_table_workspace_dimensions(params_table, expected_row_count=26, expected_column_count=3)
-        self.assert_table_workspace_dimensions(output_name, expected_row_count=5, expected_column_count=11)
 
     #-----------------------------------------------------------
     # Custom assertion functions

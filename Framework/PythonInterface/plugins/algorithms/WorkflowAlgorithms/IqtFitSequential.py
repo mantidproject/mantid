@@ -100,7 +100,7 @@ class IqtFitSequential(PythonAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import (getWSprefix, convertToElasticQ)
+        from IndirectCommon import getWSprefix
 
         setup_prog = Progress(self, start=0.0, end=0.1, nreports=4)
         self._fit_type = self._fit_type[:-2]
@@ -133,7 +133,7 @@ class IqtFitSequential(PythonAlgorithm):
         mtd.addOrReplace(tmp_fit_name, convert_to_hist_alg.getProperty("OutputWorkspace").value)
 
         setup_prog.report('Convert to Elastic Q')
-        convertToElasticQ(tmp_fit_name)
+        self.convertToElasticQ(tmp_fit_name)
 
         # Build input string for PlotPeakByLogValue
         input_str = [tmp_fit_name + ',i%d' % i for i in range(self._spec_min, self._spec_max + 1)]
@@ -233,5 +233,30 @@ class IqtFitSequential(PythonAlgorithm):
         add_sample_log_multi.setProperty("LogNames", log_names)
         add_sample_log_multi.setProperty("LogValues", log_values)
         add_sample_log_multi.execute()
+
+    def convertToElasticQ(self.input_ws, output_ws=None):
+        from IndirectCommon import getEfixed
+        """
+        Helper function to convert the spectrum axis of a sample to ElasticQ.
+        @param input_ws - the name of the workspace to convert from
+        @param output_ws - the name to call the converted workspace
+        """
+        if output_ws is None:
+            output_ws = input_ws
+
+        axis = ms.mtd[input_ws].getAxis(1)
+        if axis.isSpectra():
+            e_fixed = getEfixed(input_ws)
+            ms.ConvertSpectrumAxis(input_ws, Target='ElasticQ', EMode='Indirect', EFixed=e_fixed,
+                                      OutputWorkspace=output_ws)
+
+        elif axis.isNumeric():
+            # Check that units are Momentum Transfer
+            if axis.getUnit().unitID() != 'MomentumTransfer':
+                raise RuntimeError('Input must have axis values of Q')
+
+            ms.CloneWorkspace(input_ws, OutputWorkspace=output_ws)
+        else:
+            raise RuntimeError('Input workspace must have either spectra or numeric axis.')
 
 AlgorithmFactory.subscribe(IqtFitSequential)

@@ -117,8 +117,6 @@ class IqtFitMultiple(PythonAlgorithm):
         self._fit_group_name = self.getPropertyValue('OutputWorkspaceGroup')
 
     def PyExec(self):
-        from IndirectCommon import (convertToElasticQ,
-                                    transposeFitParametersTable)
 
         setup_prog = Progress(self, start=0.0, end=0.1, nreports=4)
         setup_prog.report('generating output name')
@@ -147,7 +145,7 @@ class IqtFitMultiple(PythonAlgorithm):
         setup_prog.report('Converting to Histogram')
         ConvertToHistogram(tmp_fit_workspace, OutputWorkspace=tmp_fit_workspace)
         setup_prog.report('Convert to Elastic Q')
-        convertToElasticQ(tmp_fit_workspace)
+        self.convertToElasticQ(tmp_fit_workspace)
 
         #fit multi-domian functino to workspace
         fit_prog = Progress(self, start=0.1, end=0.8, nreports=2)
@@ -174,7 +172,7 @@ class IqtFitMultiple(PythonAlgorithm):
                             OutputWorkspace=self._parameter_name)
 
         conclusion_prog.report('Tansposing parameter table')
-        transposeFitParametersTable(self._parameter_name)
+        self.transposeFitParametersTable(self._parameter_name)
 
         #set first column of parameter table to be axis values
         x_axis = mtd[tmp_fit_workspace].getAxis(1)
@@ -235,5 +233,74 @@ class IqtFitMultiple(PythonAlgorithm):
 
         return multi, kwargs
 
+    def convertToElasticQ(self, input_ws, output_ws=None):
+        from IndirectCommon import getEfixed
+        """
+        Helper function to convert the spectrum axis of a sample to ElasticQ.
+        @param input_ws - the name of the workspace to convert from
+        @param output_ws - the name to call the converted workspace
+        """
+        if output_ws is None:
+            output_ws = input_ws
+
+        axis = mtd[input_ws].getAxis(1)
+        if axis.isSpectra():
+            e_fixed = getEfixed(input_ws)
+            ConvertSpectrumAxis(input_ws, Target='ElasticQ', EMode='Indirect', EFixed=e_fixed,
+                                      OutputWorkspace=output_ws)
+
+        elif axis.isNumeric():
+            # Check that units are Momentum Transfer
+            if axis.getUnit().unitID() != 'MomentumTransfer':
+                raise RuntimeError('Input must have axis values of Q')
+
+            CloneWorkspace(input_ws, OutputWorkspace=output_ws)
+        else:
+            raise RuntimeError('Input workspace must have either spectra or numeric axis.')
+            
+    def transposeFitParametersTable(self, params_table, output_table=None):
+        """
+        Transpose the parameter table created from a multi domain Fit.
+        This function will make the output consistent with PlotPeakByLogValue.
+        @param params_table - the parameter table output from Fit.
+        @param output_table - name to call the transposed table. If omitted,
+                the output_table will be the same as the params_table
+        """
+        params_table = mtd[params_table]
+        table_ws = '__tmp_table_ws'
+        table_ws = CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
+        param_names = params_table.column(0)[:-1]  # -1 to remove cost function
+        param_values = params_table.column(1)[:-1]
+        param_errors = params_table.column(2)[:-1]
+
+        # Find the number of parameters per function
+        func_index = param_names[0].split('.')[0]
+        num_params = 0
+        for i, name in enumerate(param_names):
+            if name.split('.')[0] != func_index:
+                num_params = i
+                break
+
+        # Create columns with parameter names for headers
+        column_names = ['.'.join(name.split('.')[1:]) for name in param_names[:num_params]]
+        column_error_names = [name + '_Err' for name in column_names]
+        column_names = zip(column_names, column_error_names)
+        table_ws.addColumn('double', 'axis-1')
+        for name, error_name in column_names:
+            table_ws.addColumn('double', name)
+            table_ws.addColumn('double', error_name)
+
+        # Output parameter values to table row
+        for i in xrange(0, params_table.rowCount() - 1, num_params):
+            row_values = param_values[i:i + num_params]
+            row_errors = param_errors[i:i + num_params]
+            row = [value for pair in zip(row_values, row_errors) for value in pair]
+            row = [i / num_params] + row
+            table_ws.addRow(row)
+
+        if output_table is None:
+            output_table = params_table.name()
+
+        RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
 
 AlgorithmFactory.subscribe(IqtFitMultiple)
