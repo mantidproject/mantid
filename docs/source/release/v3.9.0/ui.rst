@@ -35,6 +35,8 @@ Documentation
 Bugs Resolved
 -------------
 
+- Fixed a bug where checking or unchecking "show invisible workspaces" in View->Preferences->Mantid->Options would have no effect on workspaces loaded in the dock.
+
 SliceViewer Improvements
 ------------------------
 

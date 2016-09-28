@@ -80,8 +80,6 @@ Bugs Resolved
 - 2D plots now display correctly for point data workspaces as well as for histogram data
 - Cuts aligned with an axis no longer generate an empty integrated line plot.
 
-- Fixed a bug where checking or unchecking "show invisible workspaces" in View->Preferences->Mantid->Options would have no effect on workspaces loaded in the dock.
-
 SliceViewer Improvements
 ------------------------
 * When opening the SliceViewer, it will default to showing the first two non-integrated dimensions
