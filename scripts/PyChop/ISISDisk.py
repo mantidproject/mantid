@@ -9,7 +9,6 @@ spectrometer (LET) - using the functions in MulpyRep and additional tables of in
 import numpy as np
 from . import MulpyRep
 from .ISISFermi import ISISFermi
-from matplotlib import pyplot
 
 class ISISDisk:
     """
@@ -338,6 +337,14 @@ class ISISDisk:
         Plots the time-distance diagram into a given Matplotlib axes, i
         for a give focused incident energy (in meV) and chopper frequencies (in Hz).
         """
+        if h_plt is None:
+            try:
+                from matplotlib import pyplot
+            except ImportError:
+                raise RuntimeError('ISISDisk.plotFrame: Cannot import matplotlib')
+            plt = pyplot
+        else:
+            plt = h_plt
         Ei = self.Ei if Ei_in is None else Ei_in
         if Ei is None:
             raise ValueError('Incident energy has not been specified')
@@ -349,7 +356,6 @@ class ISISDisk:
         Eis, chop_times, _, lastChopDist, lines = MulpyRep.calcChopTimes(Ei, self.freq, instpars, self.Chop2Phase)
         if frequency:
             self.setFrequency(oldfreq)
-        plt = pyplot if h_plt is None else h_plt
         dist, samDist, DetDist, fracEi = tuple([self.dist, self.chop_samp, self.samp_det, self.frac_ei])
         modSamDist = dist[-1] + samDist
         totDist = modSamDist + DetDist

@@ -157,9 +157,9 @@ protected:
   virtual void updateTargetFunction() const = 0;
   /// Update target function if necessary.
   void checkTargetFunction() const;
-  /// Function that calculates peak centres and intensities.
+  /// Function that calculates parameters of the target function.
   API::IFunction_sptr m_source;
-  /// Function that actually callculates the spectrum.
+  /// Function that actually calculates the output.
   mutable API::IFunction_sptr m_target;
   /// Cached number of parameters in m_source.
   size_t m_nOwnParams;

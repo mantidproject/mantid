@@ -168,6 +168,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/IFunctionWrapper.cpp
                    src/Mantid/ImportWorkspaceDlg.cpp
                    src/Mantid/InputHistory.cpp
+				   src/Mantid/LabelToolLogValuesDialog.cpp
                    src/Mantid/LoadDAEDlg.cpp
                    src/Mantid/ManageCustomMenus.cpp
                    src/Mantid/ManageInterfaceCategories.cpp
@@ -194,6 +195,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
+				   src/Mantid/SampleLogDialogBase.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
                    src/Mantid/WorkspaceIcons.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindow.cpp
@@ -362,6 +364,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/ImportWorkspaceDlg.h
 		   src/Mantid/IMantidMatrixExtensionHandler.h
                    src/Mantid/InputHistory.h
+				   src/Mantid/LabelToolLogValuesDialog.h
                    src/Mantid/LoadDAEDlg.h
                    src/Mantid/ManageCustomMenus.h
                    src/Mantid/ManageInterfaceCategories.h
@@ -390,6 +393,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
+				   src/Mantid/SampleLogDialogBase.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/WorkspaceIcons.h
                    src/Mantid/InstrumentWidget/InstrumentWindow.h
@@ -595,6 +599,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/FirstTimeSetup.h
                        src/Mantid/IFunctionWrapper.h
                        src/Mantid/ImportWorkspaceDlg.h
+					   src/Mantid/LabelToolLogValuesDialog.h
                        src/Mantid/LoadDAEDlg.h
                        src/Mantid/ManageCustomMenus.h
                        src/Mantid/ManageInterfaceCategories.h
@@ -617,6 +622,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidTable.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
+					   src/Mantid/SampleLogDialogBase.h
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
 )
