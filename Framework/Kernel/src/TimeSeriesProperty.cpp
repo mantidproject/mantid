@@ -2139,7 +2139,7 @@ void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
   saveTimeVector(file);
   file->closeGroup();
 }
-/** Calculate constant step hystogram of the time series data.
+/** Calculate constant step histogram of the time series data.
 * @param tMin    -- minimal time to include in histogram
 * @param tMax    -- maximal time to constrain the histogram data
 * @param counts  -- vector of output histogrammed data.

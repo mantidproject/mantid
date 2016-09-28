@@ -2220,7 +2220,8 @@ void EventList::generateCountsHistogramPulseTime(const MantidVec &X,
     }
   } // end if (there are any events to histogram)
 }
-/** With respect to PulseTime Fill a histogram given homoheneopus histogram
+
+/** With respect to PulseTime Fill a histogram given homogeneous histogram
 *   bounds.
 * Number of bins is equal to number of elements in vector Y.
 * Appends values to existing Y values.

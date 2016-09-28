@@ -9,6 +9,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidHistogramData/HistogramX.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <numeric>
@@ -54,6 +55,8 @@ public:
 
   void test_Init() {
     CalcCountRate alg;
+
+    alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
@@ -72,14 +75,14 @@ public:
     alg.setSearchRanges(sws); // explicit ranges:
     //-- real workspace ranges returned
 
-    auto ranget = alg.getXRanges();
-    TS_ASSERT_DELTA(std::get<0>(ranget), 0.5, 1.e-8);
-    TS_ASSERT_DELTA(std::get<1>(ranget), 99.5, 1.e-8);
-    TS_ASSERT(!std::get<2>(ranget));
+    auto ranges = alg.getXRanges();
+    TS_ASSERT_DELTA(std::get<0>(ranges), 0.5, 1.e-8);
+    TS_ASSERT_DELTA(std::get<1>(ranges), 99.5, 1.e-8);
+    TS_ASSERT(!std::get<2>(ranges));
 
     alg.getWorkingWS()->getEventXMinMax(XRangeMin, XRangeMax);
-    TS_ASSERT_EQUALS(XRangeMin, std::get<0>(ranget));
-    TS_ASSERT_DELTA(XRangeMax, std::get<1>(ranget), 1.e-8);
+    TS_ASSERT_EQUALS(XRangeMin, std::get<0>(ranges));
+    TS_ASSERT_DELTA(XRangeMax, std::get<1>(ranges), 1.e-8);
 
     //--------------------------------------------------------------------
     // right crop range is specified. Top range is within the right
@@ -90,12 +93,12 @@ public:
 
     alg.setSearchRanges(sws);
 
-    ranget = alg.getXRanges();
-    TS_ASSERT_DELTA(std::get<0>(ranget), 0.5, 1.e-8); // left range is real
+    ranges = alg.getXRanges();
+    TS_ASSERT_DELTA(std::get<0>(ranges), 0.5, 1.e-8); // left range is real
     // range as not specified
-    TS_ASSERT_DELTA(std::get<1>(ranget), 20.,
+    TS_ASSERT_DELTA(std::get<1>(ranges), 20.,
                     1.e-8); // Right range is specified
-    TS_ASSERT(std::get<2>(ranget));
+    TS_ASSERT(std::get<2>(ranges));
 
     sws->getEventXMinMax(XRangeMin, XRangeMax);
     TS_ASSERT_DELTA(XRangeMin, 0.5, 1.e-5);
@@ -114,15 +117,15 @@ public:
 
     alg.setSearchRanges(sws);
 
-    ranget = alg.getXRanges();
-    TS_ASSERT_DELTA(std::get<0>(ranget), 19.9301, 1.e-4);
-    TS_ASSERT_DELTA(std::get<1>(ranget), 30., 1.e-8);
-    TS_ASSERT(std::get<2>(ranget));
+    ranges = alg.getXRanges();
+    TS_ASSERT_DELTA(std::get<0>(ranges), 19.9301, 1.e-4);
+    TS_ASSERT_DELTA(std::get<1>(ranges), 30., 1.e-8);
+    TS_ASSERT(std::get<2>(ranges));
 
     // units have been converted
     alg.getWorkingWS()->getEventXMinMax(XRangeMin, XRangeMax);
 
-    TS_ASSERT_DELTA(std::get<0>(ranget), XRangeMin, 1.e-4);
+    TS_ASSERT_DELTA(std::get<0>(ranges), XRangeMin, 1.e-4);
     TS_ASSERT(std::isinf(XRangeMax));
   }
 
@@ -162,7 +165,7 @@ public:
     alg.getAlgLogSettings(numLogSteps, pNormLog);
     TS_ASSERT_EQUALS(numLogSteps, 120);
     TS_ASSERT(!pNormLog);
-    TS_ASSERT(!alg.notmalizeCountRate());
+    TS_ASSERT(!alg.normalizeCountRate());
 
     // Check time series log outside of the data range
     auto pTime_log = new Kernel::TimeSeriesProperty<double>("proton_charge");
@@ -184,7 +187,7 @@ public:
     alg.getAlgLogSettings(numLogSteps, pNormLog);
     TS_ASSERT_EQUALS(numLogSteps, 120);
     TS_ASSERT(!pNormLog);
-    TS_ASSERT(!alg.notmalizeCountRate());
+    TS_ASSERT(!alg.normalizeCountRate());
     TS_ASSERT(!alg.useLogDerivative());
 
     // Check correct date and time
@@ -201,7 +204,7 @@ public:
     alg.getAlgLogSettings(numLogSteps, pNormLog);
     TS_ASSERT_EQUALS(numLogSteps, 99);
     TS_ASSERT(pNormLog);
-    TS_ASSERT(alg.notmalizeCountRate());
+    TS_ASSERT(alg.normalizeCountRate());
     TS_ASSERT(!alg.useLogDerivative());
 
     // check useLogDerivative
@@ -211,7 +214,7 @@ public:
     alg.getAlgLogSettings(numLogSteps, pNormLog);
     TS_ASSERT_EQUALS(numLogSteps, 100);
     TS_ASSERT(pNormLog);
-    TS_ASSERT(alg.notmalizeCountRate());
+    TS_ASSERT(alg.normalizeCountRate());
     TS_ASSERT(alg.useLogDerivative());
   }
 
@@ -229,6 +232,7 @@ public:
 
     alg.setProperty("Workspace", sws);
 
+    alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     TS_ASSERT(sws->run().hasProperty("block_count_rate"));
@@ -299,6 +303,7 @@ public:
     alg.setProperty("Workspace", sws);
     alg.setProperty("VisualizationWs", "testVisWSNoNorm");
 
+    alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     API::MatrixWorkspace_sptr testVisWS = alg.getProperty("VisualizationWs");
@@ -313,15 +318,13 @@ public:
     if (!Yax)
       return;
 
-    // auto &YaxVal = Yax->getValues();
 
     auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
         sws->run().getLogData("block_count_rate"));
     TS_ASSERT(newLog);
     if (!newLog)
       return;
-    // these times are shifted by start time so firts time is 0
-    // auto times = newLog->timesAsVectorSeconds();
+
     MantidVec counts = newLog->valuesAsVector();
     TS_ASSERT_EQUALS(counts.size(), testVisWS->getNumberHistograms());
     if (counts.size() != testVisWS->getNumberHistograms())
@@ -415,6 +418,7 @@ public:
 
     alg.setProperty("Workspace", sws);
 
+    alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     API::MatrixWorkspace_sptr testVisWS = alg.getProperty("VisualizationWs");
@@ -422,8 +426,8 @@ public:
     if (!testVisWS)
       return;
     TS_ASSERT_EQUALS(testVisWS->getNumberHistograms(), 50);
-    const MantidVec &X = testVisWS->readX(0);
-    const MantidVec &Y = testVisWS->readY(0);
+    const HistogramData::HistogramX &X = testVisWS->x(0);
+    const HistogramData::HistogramY &Y = testVisWS->y(0);
     TS_ASSERT_EQUALS(X.size(), 201);
     TS_ASSERT_EQUALS(Y.size(), 200);
     auto Yax = dynamic_cast<API::NumericAxis *>(testVisWS->getAxis(1));
@@ -431,27 +435,26 @@ public:
     if (!Yax)
       return;
 
-    // auto &YaxVal = Yax->getValues();
 
     auto newLog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
         sws->run().getLogData("block_count_rate"));
     TS_ASSERT(newLog);
     if (!newLog)
       return;
-    // these times are shifted by start time so firts time is 0
-    // auto times = newLog->timesAsVectorSeconds();
+ 
     MantidVec counts = newLog->valuesAsVector();
 
     for (size_t i = 0; i < testVisWS->getNumberHistograms(); ++i) {
-      const MantidVec &Y = testVisWS->readY(i);
+      const HistogramData::HistogramY &Y = testVisWS->y(i);
       double sum = std::accumulate(Y.begin(), Y.end(), 0.);
       TSM_ASSERT_DELTA("Incorrect counts at index: " +
-                           boost::lexical_cast<std::string>(i),
+                           std::to_string(i),
                        4 * counts[i], sum, 1.e-6);
     }
   }
   //----------------------------------------------------------------------
   DataObjects::EventWorkspace_sptr build_test_ws(bool addLog = false) {
+
     DataObjects::EventWorkspace_sptr sws =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10,
                                                                         false);

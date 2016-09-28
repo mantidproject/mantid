@@ -9,7 +9,7 @@
 Description
 -----------
 
-The algorithm works with event workspace produced by instrument operating in event mode and calculates the rate at which an instrument counts
+The algorithm works with event workspaces produced by instruments operating in event mode and calculates the rate at which an instrument counts
 neutrons as function of the experiment time. 
 Then it adds the time series log containing this rate, with the name, defined by 
 **CountRateLogName** property to the source workspace. 
@@ -28,6 +28,9 @@ which shows the spurious signal as function of experiment time and neutron energ
 
 The calculated log above can be used as input for :ref:`algm-FilterByLogValue` algorithm to filter events recorded around 200sec of experiment time to
 remove spurious signal at 2.9mEv.
+
+The algorithm can also be used to evaluate changes of sample reflectivity as function of some slow changing experiment's 
+parameter e.g. temperature, magnetic field or pressure.
 
 
 **NOTE:** Normally one wants to divide the count rate by a value, proportional to incident neutron flux to avoid count rate dependency from changing incident beam intensity. 

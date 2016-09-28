@@ -17,10 +17,9 @@ namespace Algorithms {
   filter these signals.
 
   The algorithm calculates neutrons counting rate as the function of the
-  experiment's time
-  and adds appropriate logs to the event workspace
+  experiment's time and adds appropriate logs to the event workspace
   for further event filtering on the basis of these logs, if the log values in
-  some parts differ strongly from average values.
+  some parts differ strongly from the average values.
 
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -52,7 +51,7 @@ public:
   const std::string summary() const override;
   /// Helper function: true if count rate should be normalized and false
   /// otherwise
-  bool notmalizeCountRate() const;
+  bool normalizeCountRate() const;
   /// Helper function to test if log derivative is used
   bool useLogDerivative() const;
   /// helper function to test if visualization workspace is requested
@@ -75,7 +74,7 @@ protected: // for testing, actually private
   /// or all frame should be used
   bool m_rangeExplicit{false};
   bool m_useLogDerivative{false};
-  /// spurion search ranges (TOF or unigs requested)
+  /// spurion search ranges (TOF or other units requested)
   double m_XRangeMin{0}, m_XRangeMax{0};
   /// experiment time ranges:
   Kernel::DateAndTime m_TRangeMin{0}, m_TRangeMax{0};
@@ -92,7 +91,7 @@ protected: // for testing, actually private
 
   void checkAndInitVisWorkspace();
 
-  void hisogramEvents(const DataObjects::EventList &el,
+  void histogramEvents(const DataObjects::EventList &el,
                       std::mutex *spectraLocks);
 
   void normalizeVisWs(int64_t wsIndex);

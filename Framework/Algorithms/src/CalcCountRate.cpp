@@ -32,7 +32,7 @@ int CalcCountRate::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CalcCountRate::category() const {
-  return "Inelastic\\Utility";
+  return "Inelastic\\Utility;Diagnostics;Events\\EventFiltering";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
@@ -67,15 +67,16 @@ void CalcCountRate::init() {
       "The units from Mantid Unit factory for calculating the "
       "counting rate and XMin-XMax ranges are in. If the "
       "X-axis of the input workspace is not expressed"
-      "in this units, unit conversion will be performed, so the "
+      "in these units, unit conversion will be performed, so the "
       "workspace should contain all necessary information for this "
       "conversion. E.g. if *RangeUnits* is *EnergyTransfer*, Ei "
       "log containing incident energy value should be attached to the "
-      "input workspace.");
+      "input workspace. See ConvertUnits algorithm for the details.");
   std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
-  declareProperty("EMode", "Elastic",
-                  boost::make_shared<Kernel::StringListValidator>(propOptions),
-                  "The range units above conversion mode (default: elastic)");
+  declareProperty(
+      "EMode", "Elastic",
+      boost::make_shared<Kernel::StringListValidator>(propOptions),
+      "The energy mode for 'RangeUnits' conversion mode (default: elastic)");
 
   // Used logs group
   std::string used_logs_mode("Used normalization logs");
@@ -107,8 +108,8 @@ void CalcCountRate::init() {
       boost::make_shared<Kernel::MandatoryValidator<std::string>>(),
       "The name of the processed time series log with count rate to be added"
       " to the source workspace");
-  // visualisation group
-  std::string spur_vis_mode("Spurion visualisation");
+  // visualization group
+  std::string spur_vis_mode("Spurion visualization");
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<>>(
           "VisualizationWs", "", Kernel::Direction::Output,
@@ -149,7 +150,7 @@ void CalcCountRate::exec() {
                              "information. Can not process counting rate");
   }
 
-  // Identity correct way to treat input logs and general properties of output
+  // Identify correct way to treat input logs and general properties of output
   // log
   this->setOutLogParameters(sourceWS);
 
@@ -191,7 +192,7 @@ void CalcCountRate::calcRateLog(
 
   MantidVec countRate(m_numLogSteps);
   std::vector<double> countNormalization;
-  if (this->notmalizeCountRate())
+  if (this->normalizeCountRate())
     countNormalization = m_pNormalizationLog->valuesAsVector();
 
   std::unique_ptr<std::mutex[]> pVisWS_locks;
@@ -215,11 +216,9 @@ void CalcCountRate::calcRateLog(
       // initialize thread's histogram buffer
       nThreads = PARALLEL_NUMBER_OF_THREADS;
       Buff.resize(nThreads);
-      for (int i = 0; i < nThreads; i++) {
-        Buff[i].assign(m_numLogSteps, 0);
-      }
     }
-
+    auto nThread = PARALLEL_THREAD_NUMBER;
+    Buff[nThread].assign(m_numLogSteps, 0);
 #pragma omp for
     for (int64_t i = 0; i < nHist; ++i) {
       auto nThread = PARALLEL_THREAD_NUMBER;
@@ -230,7 +229,7 @@ void CalcCountRate::calcRateLog(
       el.generateCountsHistogramPulseTime(dTRangeMin, dTRangeMax, Buff[nThread],
                                           m_XRangeMin, m_XRangeMax);
       if (this->buildVisWS()) {
-        this->hisogramEvents(el, pVisWS_locks.get());
+        this->histogramEvents(el, pVisWS_locks.get());
       }
 
       // Report progress
@@ -257,9 +256,9 @@ void CalcCountRate::calcRateLog(
       }
     }
   }
-  // recover histogram timing, but start assuming run starts at
-  std::vector<Kernel::DateAndTime> times(m_numLogSteps);
 
+  // generate target log timing
+  std::vector<Kernel::DateAndTime> times(m_numLogSteps);
   double dt = (dTRangeMax - dTRangeMin) / static_cast<double>(m_numLogSteps);
   auto t0 = m_TRangeMin.totalNanoseconds();
   for (auto i = 0; i < m_numLogSteps; i++) {
@@ -269,13 +268,13 @@ void CalcCountRate::calcRateLog(
   // store calculated values within the target log.
   targLog->replaceValues(times, countRate);
 }
-/** histogram event list into visualization workspace
+/** histrogram event list into visualization workspace
 * @param el       :: event list to rebin into visualization workspace
 * @param spectraLocks :: pointer to the array of mutexes to lock modifyed
 *                        visualization workspace spectra for a thread
 */
-void CalcCountRate::hisogramEvents(const DataObjects::EventList &el,
-                                   std::mutex *spectraLocks) {
+void CalcCountRate::histogramEvents(const DataObjects::EventList &el,
+                                    std::mutex *spectraLocks) {
 
   if (el.empty())
     return;
@@ -298,14 +297,14 @@ void CalcCountRate::hisogramEvents(const DataObjects::EventList &el,
   }
 }
 
-/** Normalize single spectra of the normalization workspace using prepared
- * normzlization log
+/** Normalize single spectrum of the normalization workspace using prepared
+ *  normzlization log
  @param wsIndex -- appropriate visualization workspace index to normalize
- spectra
+                   the spectrum
  */
 void CalcCountRate::normalizeVisWs(int64_t wsIndex) {
 
-  auto Y = m_visWs->dataY(wsIndex);
+  auto &Y = m_visWs->mutableY(wsIndex);
   for (auto &yv : Y) {
     yv /= m_visNorm[wsIndex];
   }
@@ -319,6 +318,12 @@ void CalcCountRate::setOutLogParameters(
     const DataObjects::EventWorkspace_sptr &InputWorkspace) {
 
   std::string NormLogName = getProperty("NormalizationLogName");
+  std::string TargetLog = getProperty("CountRateLogName");
+  if (NormLogName == TargetLog) {
+    throw std::invalid_argument("Target log name: " + TargetLog +
+                                " and normalization log name: " + NormLogName +
+                                " Can not be the same");
+  }
 
   m_normalizeResult = getProperty("NormalizeTheRate");
   bool useLogDerivative = getProperty("UseLogDerivative");
@@ -366,7 +371,7 @@ void CalcCountRate::setOutLogParameters(
     if (!useLogAccuracy) {
       g_log.warning() << "Change of the counting log accuracy while "
                          "normalizing by log values is not implemented. Will "
-                         "use log accuracy.";
+                         "use log accuracy.\n";
       useLogAccuracy = true;
     }
   } //---------------------------------------------------------------------
@@ -469,6 +474,7 @@ void CalcCountRate::setSourceWSandXRanges(
     conv->setProperty("Emode", Emode);
     conv->setProperty("Target", RangeUnits);
 
+    conv->setRethrows(true);
     conv->execute();
     wst = conv->getProperty("OutputWorkspace");
 
@@ -483,6 +489,10 @@ void CalcCountRate::setSourceWSandXRanges(
   // data ranges
   m_XRangeMin = getProperty("XMin");
   m_XRangeMax = getProperty("XMax");
+  if (m_XRangeMin > m_XRangeMax) {
+    throw std::invalid_argument(
+        " Minimal spurion search data range is bigger than the maximal range.");
+  }
 
   if (m_XRangeMin == EMPTY_DBL() && m_XRangeMax == EMPTY_DBL()) {
     m_rangeExplicit = false;
@@ -497,6 +507,10 @@ void CalcCountRate::setSourceWSandXRanges(
     // include rightmost limit into the histogramming
     m_XRangeMax = realMax * (1. + std::numeric_limits<double>::epsilon());
     return;
+  }
+  if (m_XRangeMax < realMin || m_XRangeMin > realMax) {
+    throw std::invalid_argument(
+        " Spurion data search range lies outsize of the workspace data range.");
   }
 
   if (m_XRangeMin == EMPTY_DBL()) {
@@ -532,7 +546,7 @@ void CalcCountRate::checkAndInitVisWorkspace() {
   m_doVis = true;
 
   int numTBins = getProperty("NumTimeSteps");
-  if (this->notmalizeCountRate()) {
+  if (this->normalizeCountRate()) {
     if (numTBins > m_numLogSteps) {
       g_log.information() << "Number of time step in normalized visualization "
                              "workspace exceeds the number of points in the "
@@ -553,7 +567,7 @@ void CalcCountRate::checkAndInitVisWorkspace() {
   double Xmax = m_XRangeMax;
   // a bit dodgy code. It can be generalized
   if (std::isinf(Xmax)) {
-    auto Xbin = m_workingWS->readX(0);
+    const auto &Xbin = m_workingWS->x(0);
     for (int64_t i = Xbin.size() - 1; i >= 0; --i) {
       if (!std::isinf(Xbin[i])) {
         Xmax = Xbin[i];
@@ -605,7 +619,7 @@ void CalcCountRate::checkAndInitVisWorkspace() {
   m_visTmax = static_cast<double>(m_TRangeMax.totalNanoseconds());
   m_visDT = (m_visTmax - m_visT0) / static_cast<double>(numTBins);
 
-  if (this->notmalizeCountRate()) {
+  if (this->normalizeCountRate()) {
     m_visNorm.resize(numTBins);
     this->buildVisWSNormalization(m_visNorm);
   }
@@ -616,7 +630,7 @@ bool CalcCountRate::buildVisWS() const { return m_doVis; }
 /** Helper function, mainly for testing
 * @return  true if count rate should be normalized and false
 * otherwise */
-bool CalcCountRate::notmalizeCountRate() const { return m_normalizeResult; }
+bool CalcCountRate::normalizeCountRate() const { return m_normalizeResult; }
 /** Helper function, mainly for testing
 * @return  true if log derivative is used instead of log itself */
 bool CalcCountRate::useLogDerivative() const { return m_useLogDerivative; }
@@ -625,6 +639,9 @@ bool CalcCountRate::useLogDerivative() const { return m_useLogDerivative; }
 * data from normalization log with, usually, different number of time steps
 * Here we assume that the number of time points in the visualization workspace
 * is smaller or equal to the number of points in the normalization log.
+*
+@param normalization -- on output, the vector containing normalization
+*                       coefficients for the visualization workspace spectra
 */
 void CalcCountRate::buildVisWSNormalization(
     std::vector<double> &normalization) {
@@ -644,7 +661,7 @@ void CalcCountRate::buildVisWSNormalization(
   normalization.assign(ax->length(), 0.);
   // For more accurate logging (in a future, if necessary:)
   // auto t_bins = ax->createBinBoundaries();
-  // double dt = t_bins[2] - t_bins[1]; // equal bins, first bin may be werid.
+  // double dt = t_bins[2] - t_bins[1]; // equal bins, first bin may be weird.
   //
   m_pNormalizationLog->histogramData(m_TRangeMin, m_TRangeMax, normalization);
 }
