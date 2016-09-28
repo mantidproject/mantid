@@ -21,26 +21,6 @@ class IndirectCommonTests(unittest.TestCase):
     def tearDown(self):
         config = self._config_defaults
 
-    def test_getInstrRun_from_name(self):
-        ws = self.make_dummy_QENS_workspace()
-        (instrument, run_number) = indirect_common.getInstrRun(ws)
-
-        self.assertEqual(run_number, '1')
-        self.assertEqual(instrument, 'irs')
-
-    def test_getInstrRun_from_workspace(self):
-        ws = self.make_dummy_QENS_workspace(add_logs=False)
-        ws = RenameWorkspace(ws, OutputWorkspace="IRS26173")
-
-        (instrument, run_number) = indirect_common.getInstrRun(ws.name())
-
-        self.assertEqual(run_number, '26173')
-        self.assertEqual(instrument, 'irs')
-
-    def test_getInstrRun_failure(self):
-        ws = self.make_dummy_QENS_workspace(add_logs=False)
-        self.assertRaises(RuntimeError, indirect_common.getInstrRun, ws)
-
     def test_getWSprefix_ISIS(self):
         config['default.facility'] = 'ISIS'
         ws = self.make_dummy_QENS_workspace()
@@ -70,22 +50,6 @@ class IndirectCommonTests(unittest.TestCase):
     def test_getEFixed_failure(self):
         ws = CreateSampleWorkspace()
         self.assertRaises(ValueError, indirect_common.getEfixed, ws.name())
-
-    def test_getDefaultWorkingDirectory(self):
-        config['defaultsave.directory'] = os.path.expanduser('~')
-        workdir = indirect_common.getDefaultWorkingDirectory()
-        self.assertEquals(os.path.expanduser('~'), workdir,
-                          "The working directory does not match the expected one")
-
-    def test_getDefaultWorkingDirectory_failure(self):
-        config['defaultsave.directory'] = ''
-        self.assertRaises(IOError, indirect_common.getDefaultWorkingDirectory)
-
-    def test_createQaxis(self):
-        ws = self.make_dummy_QENS_workspace()
-        expected_result = [0.48372274526965614, 0.5253047207470043, 0.5667692111215948, 0.6079351677527526, 0.6487809073399486]
-        actual_result = indirect_common.createQaxis(ws)
-        self.assert_lists_almost_match(expected_result, actual_result)
 
     def test_GetWSangles(self):
         ws = self.make_dummy_QENS_workspace()

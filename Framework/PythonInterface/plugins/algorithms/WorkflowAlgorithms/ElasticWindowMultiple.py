@@ -97,7 +97,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
 
     def PyExec(self):
-        from IndirectImport import import_mantidplot
 
         # Do setup
         self._setup()

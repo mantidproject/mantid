@@ -32,7 +32,7 @@ class SofQWMoments(DataProcessorAlgorithm):
 
     #pylint: disable=too-many-locals
     def PyExec(self):
-        from IndirectCommon import CheckElimits, getDefaultWorkingDirectory
+        from IndirectCommon import CheckElimits
 
         workflow_prog = Progress(self, start=0.0, end=1.0, nreports=20)
         workflow_prog.report('Setting up algorithm')

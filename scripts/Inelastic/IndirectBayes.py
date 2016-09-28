@@ -71,7 +71,9 @@ def GetXYE(inWS,n,array_len):
 def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
     StartTime('ResNorm')
 
-    workdir = getDefaultWorkingDirectory()
+    workdir = config['defaultsave.directory']
+    if not os.path.isdir(workdir):
+        raise IOError("Default save directory is not a valid path!")
 
     array_len = 4096                                    # length of Fortran array
     CheckXrange(erange,'Energy')

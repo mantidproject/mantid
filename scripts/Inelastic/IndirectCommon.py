@@ -76,56 +76,6 @@ def getEfixed(workspace):
     raise ValueError('No Efixed parameter found')
 
 
-def checkUnitIs(ws, unit_id, axis_index=0):
-    """
-    Check that the workspace has the correct units by comparing
-    against the UnitID.
-    """
-    axis = s_api.mtd[ws].getAxis(axis_index)
-    unit = axis.getUnit()
-    return unit.unitID() == unit_id
-
-def getDefaultWorkingDirectory():
-    """
-    Get the default save directory and check it's valid.
-    """
-    workdir = config['defaultsave.directory']
-
-    if not os.path.isdir(workdir):
-        raise IOError("Default save directory is not a valid path!")
-
-    return workdir
-
-
-def createQaxis(inputWS):
-    result = []
-    workspace = s_api.mtd[inputWS]
-    num_hist = workspace.getNumberHistograms()
-    if workspace.getAxis(1).isSpectra():
-        inst = workspace.getInstrument()
-        sample_pos = inst.getSample().getPos()
-        beam_pos = sample_pos - inst.getSource().getPos()
-        for i in range(0, num_hist):
-            efixed = getEfixed(inputWS)
-            detector = workspace.getDetector(i)
-            theta = detector.getTwoTheta(sample_pos, beam_pos) / 2
-            lamda = math.sqrt(81.787 / efixed)
-            q = 4 * math.pi * math.sin(theta) / lamda
-            result.append(q)
-    else:
-        axis = workspace.getAxis(1)
-        msg = 'Creating Axis based on Detector Q value: '
-        if not axis.isNumeric():
-            msg += 'Input workspace must have either spectra or numeric axis.'
-            raise ValueError(msg)
-        if axis.getUnit().unitID() != 'MomentumTransfer':
-            msg += 'Input must have axis values of Q'
-            raise ValueError(msg)
-        for i in range(0, num_hist):
-            result.append(float(axis.label(i)))
-    return result
-
-
 def GetWSangles(inWS):
     num_hist = s_api.mtd[inWS].getNumberHistograms()    					# get no. of histograms/groups
     source_pos = s_api.mtd[inWS].getInstrument().getSource().getPos()
