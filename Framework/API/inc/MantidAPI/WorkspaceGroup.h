@@ -131,6 +131,7 @@ private:
   void observeADSNotifications(const bool observeADS);
   /// Check if a workspace is included in any child groups and groups in them.
   bool isInChildGroup(const Workspace &workspaceToCheck) const;
+
   /// Callback when a delete notification is received
   void workspaceDeleteHandle(
       Mantid::API::WorkspacePostDeleteNotification_ptr notice);
@@ -138,9 +139,6 @@ private:
   /// Callback when a before-replace notification is received
   void workspaceBeforeReplaceHandle(
       Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice);
-  /// Callback when an after-replace notification is received
-  void
-  workspaceRenameHandle(Mantid::API::WorkspaceRenameNotification_ptr notice);
 
   /// Observer for workspace delete notifications
   Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspacePostDeleteNotification>
@@ -149,9 +147,6 @@ private:
   Poco::NObserver<WorkspaceGroup,
                   Mantid::API::WorkspaceBeforeReplaceNotification>
       m_beforeReplaceObserver;
-  /// Observer for workspace rename notifications
-  Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspaceRenameNotification>
-      m_renameObserver;
   /// The list of workspace pointers in the group
   std::vector<Workspace_sptr> m_workspaces;
   /// Flag as to whether the observers have been added to the ADS

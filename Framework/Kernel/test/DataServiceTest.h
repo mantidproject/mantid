@@ -129,19 +129,22 @@ public:
                      std::runtime_error);
   }
 
-  void handleAfterReplaceNotification(
-      const Poco::AutoPtr<FakeDataService::AfterReplaceNotification> &) {
-    ++notificationFlag;
+  void handleBeforeReplaceNotification(
+	  const Poco::AutoPtr<FakeDataService::BeforeReplaceNotification> &) {
+	  ++notificationFlag;
   }
+
 
   void handleRenameNotification(
       const Poco::AutoPtr<FakeDataService::RenameNotification> &) {
     ++notificationFlag;
   }
 
+
+
   void test_rename() {
-    Poco::NObserver<DataServiceTest, FakeDataService::AfterReplaceNotification>
-        observer(*this, &DataServiceTest::handleAfterReplaceNotification);
+    Poco::NObserver<DataServiceTest, FakeDataService::BeforeReplaceNotification>
+        observer(*this, &DataServiceTest::handleBeforeReplaceNotification);
     svc.notificationCenter.addObserver(observer);
     Poco::NObserver<DataServiceTest, FakeDataService::RenameNotification>
         observer2(*this, &DataServiceTest::handleRenameNotification);
@@ -157,7 +160,8 @@ public:
                               svc.rename("One", "One"));
     TSM_ASSERT_THROWS_NOTHING("Should be just a warning if object not there",
                               svc.rename("NotThere", "NewName"));
-
+	// We aren't doing anything so no notifications should post
+	TSM_ASSERT_EQUALS("No notifications should have been posted", notificationFlag, 0);
     svc.rename(
         "one",
         "anotherOne"); // Note: Rename is case-insensitive on the old name
@@ -167,17 +171,19 @@ public:
     TSM_ASSERT_EQUALS("One should have been renamed to anotherOne",
                       svc.retrieve("anotherOne"), one);
 
-    TSM_ASSERT_EQUALS("The observers should have been called 2 times in total",
-                      notificationFlag, 2);
-
+    TSM_ASSERT_EQUALS("The observers should have been called once",
+                      notificationFlag, 1);
+	
+	notificationFlag = 0;
     svc.rename("Two", "anotherOne");
     TS_ASSERT_EQUALS(svc.size(), 1);
     TSM_ASSERT_THROWS("Two should have been renamed to anotherOne",
                       svc.retrieve("two"), Exception::NotFoundError);
     TSM_ASSERT_EQUALS("Two should have been renamed to anotherOne",
                       svc.retrieve("anotherOne"), two);
-    TSM_ASSERT_EQUALS("The observers should have been called 4 times in total",
-                      notificationFlag, 4);
+	// As we are renaming to an existing workspace there should be 2 notifications
+    TSM_ASSERT_EQUALS("The observers should have been called 2 times in total",
+                      notificationFlag, 2);
 
     svc.notificationCenter.removeObserver(observer);
     svc.notificationCenter.removeObserver(observer2);

@@ -325,7 +325,8 @@ public:
     AnalysisDataService::Instance().rename(ws2Name, ws1Name);
 
     TS_ASSERT_EQUALS(wsSptr->getNumberOfEntries(), 1);
-    TS_ASSERT_EQUALS(wsSptr->contains(work_in2), false);
+    TS_ASSERT_EQUALS(wsSptr->contains(work_in2), true);
+	TS_ASSERT_EQUALS(wsSptr->contains(work_in1), false);
   }
 
   void testTwoGroupWorkspaces() {

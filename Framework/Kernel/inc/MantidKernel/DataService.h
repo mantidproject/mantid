@@ -310,28 +310,42 @@ public:
   void rename(const std::string &oldName, const std::string &newName) {
     checkForEmptyName(newName);
 
+    if (oldName == newName) {
+      g_log.warning("Rename: The existing name matches the new name");
+      return;
+    }
+
     // Make DataService access thread-safe
     std::unique_lock<std::recursive_mutex> lock(m_mutex);
 
-    auto it = datamap.find(oldName);
-    if (it == datamap.end()) {
+    auto oldNameWsIter = datamap.find(oldName);
+    if (oldNameWsIter == datamap.end()) {
       lock.unlock();
       g_log.warning(" rename '" + oldName + "' cannot be found");
       return;
     }
 
-    // delete the object with the old name
-    auto object = std::move(it->second);
-    datamap.erase(it);
+    auto oldNameWsObject = std::move(oldNameWsIter->second);
+    auto newNameWsIter = datamap.find(newName);
 
-    // if there is another object which has newName delete it
-    auto it2 = datamap.find(newName);
-    if (it2 != datamap.end()) {
-      notificationCenter.postNotification(
-          new AfterReplaceNotification(newName, object));
-      it2->second = std::move(object);
+    // If we are overriding send a notification for observers
+    if (newNameWsIter != datamap.end()) {
+      auto newNameObject = newNameWsIter->second;
+      notificationCenter.postNotification(new BeforeReplaceNotification(
+          newName, newNameObject, oldNameWsObject));
+    }
+
+    datamap.erase(oldNameWsIter);
+
+    // Set the oldNameWsIter to end to ensure nobody invokes undefined behavior
+    oldNameWsIter = datamap.end();
+    // Call find again as iterators have been invalidated
+    newNameWsIter = datamap.find(newName);
+
+    if (newNameWsIter != datamap.end()) {
+      newNameWsIter->second = std::move(oldNameWsObject);
     } else {
-      if (!(datamap.emplace(newName, std::move(object)).second)) {
+      if (!(datamap.emplace(newName, std::move(oldNameWsObject)).second)) {
         // should never happen
         lock.unlock();
         std::string error =

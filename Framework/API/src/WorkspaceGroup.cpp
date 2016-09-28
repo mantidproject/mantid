@@ -21,7 +21,6 @@ WorkspaceGroup::WorkspaceGroup()
       m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
       m_beforeReplaceObserver(*this,
                               &WorkspaceGroup::workspaceBeforeReplaceHandle),
-      m_renameObserver(*this, &WorkspaceGroup::workspaceRenameHandle),
       m_workspaces(), m_observingADS(false) {}
 
 WorkspaceGroup::~WorkspaceGroup() { observeADSNotifications(false); }
@@ -57,8 +56,6 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS) {
           m_deleteObserver);
       AnalysisDataService::Instance().notificationCenter.addObserver(
           m_beforeReplaceObserver);
-      AnalysisDataService::Instance().notificationCenter.addObserver(
-          m_renameObserver);
       m_observingADS = true;
     }
   } else {
@@ -67,8 +64,6 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS) {
           m_deleteObserver);
       AnalysisDataService::Instance().notificationCenter.removeObserver(
           m_beforeReplaceObserver);
-      AnalysisDataService::Instance().notificationCenter.removeObserver(
-          m_renameObserver);
       m_observingADS = false;
     }
   }
@@ -289,46 +284,23 @@ void WorkspaceGroup::workspaceDeleteHandle(
  * @param notice :: A pointer to a workspace before-replace notification object
  */
 void WorkspaceGroup::workspaceBeforeReplaceHandle(
-    Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice) {
-  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+	Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice) {
+	std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
-  const std::string replacedName = notice->objectName();
-  for (auto &workspace : m_workspaces) {
-    if ((*workspace).name() == replacedName) {
-      workspace = notice->newObject();
-      break;
-    }
-  }
-}
+	const std::string replacedName = notice->objectName();
 
-/**
- * Callback when a rename notification is received
- * Checks all members of a group and eliminates any duplicates
- * from the renaming process
- *
- * @param notice :: A pointer to a workspace after-replace notification object
- */
-void WorkspaceGroup::workspaceRenameHandle(
-    Mantid::API::WorkspaceRenameNotification_ptr notice) {
-  std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+	for (auto &workspace : m_workspaces) {
+		if ((*workspace).name() == replacedName) {
+			workspace = notice->newObject();
+			break;
+		}
+	}
 
-  const std::string replacedName = notice->objectName();
-
-  auto existingNameIter = m_workspaces.begin();
-  while (existingNameIter != m_workspaces.end()) {
-    // Use current position instead of begin so we don't search twice
-    existingNameIter = std::find_if(existingNameIter, m_workspaces.end(),
-                                    [&replacedName](const auto &ws) -> bool {
-                                      return ws->name() == replacedName;
-                                    });
-
-    if (existingNameIter == m_workspaces.end()) {
-      // No more workspaces which have the same name
-      break;
-    } else {
-      existingNameIter = m_workspaces.erase(existingNameIter);
-    }
-  }
+	auto endIter = std::unique(m_workspaces.begin(), m_workspaces.end(), 
+		[](const auto &ws1, const auto &ws2) -> bool { return (!ws1->name().empty()) && (ws2->name() == ws1->name()); });
+	if (endIter != m_workspaces.end()) {
+		m_workspaces.resize(std::distance(m_workspaces.begin(), endIter));
+	}
 }
 
 /**
