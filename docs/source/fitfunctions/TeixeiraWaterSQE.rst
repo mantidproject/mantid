@@ -1,10 +1,13 @@
 .. _func-TeixeiraWaterSQE:
 
-==========
+================
 TeixeiraWaterSQE
-==========
+================
 
 .. index:: TeixeiraWaterSQE
+
+Description
+-----------
 
 This fitting function models the dynamic structure factor
 for a particle undergoing jump diffusion [1]_.
@@ -25,14 +28,19 @@ where:
 
 At 298K and 1atm, water has :math:`DiffCoeff=2.30 10^{-5} cm^2/s` and :math:`Tau=1.25 ps`.
 
-.. attributes::
-
-:math:`Q` (double, default=0.3) Momentum transfer
+A jump length :math:`l` can be associated: :math:`l^2=2N\cdot DiffCoeff\cdot Tau`, where :math:`N` is the
+dimensionality of the diffusion problem (:math:`N=3` for diffusion in a volume).
 
 References
 ----------
 
 .. [1] J. Teixeira, M.-C. Bellissent-Funel, S. H. Chen, and A. J. Dianoux. `Phys. Rev. A, 31:1913–1917 <http://dx.doi.org/10.1103/PhysRevA.31.1913>`__
+
+.. properties::
+
+.. attributes::
+
+:math:`Q` (double, default=0.3) Momentum transfer
 
 Usage
 -----
