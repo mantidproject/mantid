@@ -63,7 +63,7 @@ void ConvolveWorkspaces::exec() {
 
   prog = new Progress(this, 0.0, 1.0, numHists);
   // Now convolve the histograms
-  PARALLEL_FOR_IF(ws1.get(), ws2.get(), outputWS.get())
+  PARALLEL_FOR_IF(Kernel::threadSafe(ws1.get(), ws2.get(), outputWS.get()))
   for (int l = 0; l < static_cast<int>(numHists); ++l) {
     PARALLEL_START_INTERUPT_REGION
     prog->report();

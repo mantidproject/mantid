@@ -574,7 +574,8 @@ void NormaliseToMonitor::normaliseBinByBin(
   bool hasZeroDivision = false;
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over spectra
-  PARALLEL_FOR_IF(inputWorkspace.get(), outputWorkspace.get(), m_monitor.get())
+  PARALLEL_FOR_IF(Kernel::threadSafe(inputWorkspace.get(),
+                                     outputWorkspace.get(), m_monitor.get()))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
     prog.report();
