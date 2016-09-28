@@ -158,8 +158,10 @@ boost::shared_ptr<T> create(const P &parent, const IndexArg &indexArg,
   }
 
   ws->initialize(indexArg, histogram);
-  API::WorkspaceFactory::Instance().initializeFromParent(
-      parent, *ws, parent.y(0).size() != ws->y(0).size());
+  bool differentSize = (parent.x(0).size() != ws->x(0).size()) ||
+                       (parent.y(0).size() != ws->y(0).size());
+  API::WorkspaceFactory::Instance().initializeFromParent(parent, *ws,
+                                                         differentSize);
   // For EventWorkspace, `ws->y(0)` put entry 0 in the MRU. However, clients
   // would typically expect an empty MRU and fail to clear it. This dummy call
   // removes the entry from the MRU.
