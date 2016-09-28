@@ -9,7 +9,9 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconFiltersSettings.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
+
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
+//class TomoToolConfigDialogBase; Why does it not work with forward declaration?
 
 namespace MantidQt {
 namespace CustomInterfaces {

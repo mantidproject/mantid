@@ -18,8 +18,7 @@
 #include <QString>
 #include <QThread>
 #include <QTimer>
-#include <MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h>
-#include <MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h>
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;

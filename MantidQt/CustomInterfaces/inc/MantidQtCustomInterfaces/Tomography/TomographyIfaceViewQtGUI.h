@@ -12,7 +12,6 @@
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 #include "ui_ImageSelectCoRAndRegions.h"
@@ -23,12 +22,21 @@
 #include "ui_TomographyIfaceQtTabSetup.h"
 #include "ui_TomographyIfaceQtTabVisualize.h"
 #include "ui_TomographyIfaceQtTabSystemSettings.h"
+#include "ui_TomoToolConfigAstra.h"
+#include "ui_TomoToolConfigCustom.h"
+#include "ui_TomoToolConfigSavu.h"
+#include "ui_TomoToolConfigTomoPy.h"
+
 
 #include <boost/scoped_ptr.hpp>
 #include <json/json.h>
 
 // widgets used in this interface
 class ImageROIViewQtWidget;
+
+// Tomography Dialog Base class
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
+//class TomoToolConfigDialogBase;
 
 // Qt classes forward declarations
 class QMutex;

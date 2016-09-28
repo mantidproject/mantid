@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGTOMOPYDIALOG_H_
 
 #include "ui_TomoToolConfigTomoPy.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

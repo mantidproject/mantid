@@ -1,16 +1,11 @@
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-TomoToolConfigSavu::TomoToolConfigSavu(QWidget *parent) : QMainWindow(parent) {}
-
-TomoToolConfigAstra::TomoToolConfigAstra(QWidget *parent) : QDialog(parent) {}
-
-TomoToolConfigCustom::TomoToolConfigCustom(QWidget *parent) : QDialog(parent) {}
-
-TomoToolConfigDialogBase::TomoToolConfigDialogBase(QWidget *parent) : QDialog(parent) {
+TomoToolConfigDialogBase::TomoToolConfigDialogBase(QWidget *parent)
+    : QDialog(parent) {
   labelRun = new QLabel("Runnable script");
   editRun = new QLineEdit("/work/imat/");
   hRun = new QHBoxLayout();
@@ -44,11 +39,12 @@ void TomoToolConfigDialogBase::okClicked() {}
 
 void TomoToolConfigDialogBase::cancelClicked() {}
 
-TomoToolConfigDialogBase *fromString(const std::string &toolName){
-	if (toolName == "") {
-		return new TomoToolConfigTomoPyDialog();
-	}
-	return nullptr;
+TomoToolConfigDialogBase *
+TomoToolConfigDialogBase::fromString(const std::string &toolName) {
+  if (toolName == "") {
+    return new TomoToolConfigTomoPyDialog();
+  }
+  return nullptr;
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

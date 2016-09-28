@@ -11,7 +11,12 @@
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
+
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigAstraDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigCustomDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigSavuDialog.h"
 
 
 using namespace Mantid::API;
@@ -1192,7 +1197,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(TomoToolConfigDialogBase * dialog)
       //m_tomopyMethod = methods[mi].first;
     }
   } else if (g_AstraTool == name) {
-    TomoToolConfigAstra astra;
+    TomoToolConfigAstraDialog astra;
     m_uiAstra.setupUi(&astra);
     m_uiAstra.comboBox_method->clear();
     const auto methods = ToolConfigAstraToolbox::methods();
@@ -1221,7 +1226,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(TomoToolConfigDialogBase * dialog)
   } else if (g_SavuTool == name) {
     // TODO: savu not ready. This is a temporary kludge, it just shows
     // the setup dialog so we can chat about it.
-    TomoToolConfigSavu savu;
+    TomoToolConfigSavuDialog savu;
     m_uiSavu.setupUi(&savu);
     doSetupSavu();
     savu.setWindowModality(Qt::ApplicationModal);
@@ -1230,7 +1235,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(TomoToolConfigDialogBase * dialog)
     connect(this, SIGNAL(destroyed()), &el, SLOT(quit()));
     el.exec();
   } else if (g_customCmdTool == name) {
-    TomoToolConfigCustom cmd;
+    TomoToolConfigCustomDialog cmd;
     m_uiCustom.setupUi(&cmd);
     int res = cmd.exec();
 

@@ -129,11 +129,14 @@ set ( SRC_FILES
 	src/Tomography/TomoSystemSettings.cpp
 	src/Tomography/TomoSystemSettingsLocal.cpp
 	src/Tomography/TomoSystemSettingsRemote.cpp
-	src/Tomography/TomoToolConfigDialog.cpp
+	src/Tomography/TomoToolConfigDialogBase.cpp
+    src/Tomography/TomoToolConfigTomoPyDialog.cpp
+    src/Tomography/TomoToolConfigCustomDialog.cpp
+    src/Tomography/TomoToolConfigSavuDialog.cpp
+    src/Tomography/TomoToolConfigAstraDialog.cpp
 	src/Tomography/TomographyIfaceModel.cpp
 	src/Tomography/TomographyIfacePresenter.cpp
 	src/Tomography/TomographyIfaceViewQtGUI.cpp
-	src/Tomography/TomoToolConfigTomoPyDialog.cpp
 	src/Tomography/ToolConfig.cpp
 	src/UserInputValidator.cpp
 	src/background.cpp
@@ -299,14 +302,17 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoSystemSettingsLocal.h
 	inc/MantidQtCustomInterfaces/Tomography/TomoSystemSettingsRemote.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h
+    inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h
+    inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h
+    inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigCustomDialog.h
+    inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigSavuDialog.h
+    inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigAstraDialog.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h
 	inc/MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h
-	inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h
 	inc/MantidQtCustomInterfaces/Updateable.h
 	inc/MantidQtCustomInterfaces/UserInputValidator.h
 	inc/MantidQtCustomInterfaces/deltaECalc.h
@@ -415,7 +421,11 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Tomography/ImggFormatsConvertViewQtWidget.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
-                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h
+                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h
+                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h
+                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigCustomDialog.h
+                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigSavuDialog.h
+                inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigAstraDialog.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
