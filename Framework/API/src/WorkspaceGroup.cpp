@@ -280,7 +280,7 @@ void WorkspaceGroup::workspaceDeleteHandle(
 
 /**
  * Callback when a before-replace notification is received
- * Replaces a member if it was replaced in the ADS and checks 
+ * Replaces a member if it was replaced in the ADS and checks
  * for duplicate members within the group
  * @param notice :: A pointer to a workspace before-replace notification object
  */

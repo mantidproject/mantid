@@ -130,17 +130,14 @@ public:
   }
 
   void handleBeforeReplaceNotification(
-	  const Poco::AutoPtr<FakeDataService::BeforeReplaceNotification> &) {
-	  ++notificationFlag;
+      const Poco::AutoPtr<FakeDataService::BeforeReplaceNotification> &) {
+    ++notificationFlag;
   }
-
 
   void handleRenameNotification(
       const Poco::AutoPtr<FakeDataService::RenameNotification> &) {
     ++notificationFlag;
   }
-
-
 
   void test_rename() {
     Poco::NObserver<DataServiceTest, FakeDataService::BeforeReplaceNotification>
@@ -160,8 +157,9 @@ public:
                               svc.rename("One", "One"));
     TSM_ASSERT_THROWS_NOTHING("Should be just a warning if object not there",
                               svc.rename("NotThere", "NewName"));
-	// We aren't doing anything so no notifications should post
-	TSM_ASSERT_EQUALS("No notifications should have been posted", notificationFlag, 0);
+    // We aren't doing anything so no notifications should post
+    TSM_ASSERT_EQUALS("No notifications should have been posted",
+                      notificationFlag, 0);
     svc.rename(
         "one",
         "anotherOne"); // Note: Rename is case-insensitive on the old name
@@ -173,15 +171,16 @@ public:
 
     TSM_ASSERT_EQUALS("The observers should have been called once",
                       notificationFlag, 1);
-	
-	notificationFlag = 0;
+
+    notificationFlag = 0;
     svc.rename("Two", "anotherOne");
     TS_ASSERT_EQUALS(svc.size(), 1);
     TSM_ASSERT_THROWS("Two should have been renamed to anotherOne",
                       svc.retrieve("two"), Exception::NotFoundError);
     TSM_ASSERT_EQUALS("Two should have been renamed to anotherOne",
                       svc.retrieve("anotherOne"), two);
-	// As we are renaming to an existing workspace there should be 2 notifications
+    // As we are renaming to an existing workspace there should be 2
+    // notifications
     TSM_ASSERT_EQUALS("The observers should have been called 2 times in total",
                       notificationFlag, 2);
 
