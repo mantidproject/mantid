@@ -27,11 +27,7 @@ DECLARE_ALGORITHM(CalculateFlatBackground)
 using namespace Kernel;
 using namespace API;
 
-enum class Modes {
-  LINEAR_FIT,
-  MEAN,
-  MOVING_AVERAGE
-};
+enum class Modes { LINEAR_FIT, MEAN, MOVING_AVERAGE };
 
 void CalculateFlatBackground::init() {
   declareProperty(
@@ -53,13 +49,23 @@ void CalculateFlatBackground::init() {
                   "minimum of a moving average (default: Linear Fit)");
 
   declareProperty("StartX", Mantid::EMPTY_DBL(),
-                  "The X value at which to start the background fit. Mandatory for the Linear Fit and Mean modes, ignored by Moving Average.");
-  setPropertySettings("StartX", make_unique<EnabledWhenProperty>("Mode", IS_NOT_EQUAL_TO, "Moving Average"));
+                  "The X value at which to start the background fit. Mandatory "
+                  "for the Linear Fit and Mean modes, ignored by Moving "
+                  "Average.");
+  setPropertySettings("StartX", make_unique<EnabledWhenProperty>(
+                                    "Mode", IS_NOT_EQUAL_TO, "Moving Average"));
   declareProperty("EndX", Mantid::EMPTY_DBL(),
-                  "The X value at which to end the background fit. Mandatory for the Linear Fit and Mean modes, ignored by Moving Average.");
-  setPropertySettings("EndX", make_unique<EnabledWhenProperty>("Mode", IS_NOT_EQUAL_TO, "Moving Average"));
-  declareProperty("AveragingWindowWidth", Mantid::EMPTY_INT(), "The width of the moving average window in bins. Mandatory for the Moving Average mode.");
-  setPropertySettings("AveragingWindowWidth", make_unique<EnabledWhenProperty>("Mode", IS_EQUAL_TO, "Moving Average"));
+                  "The X value at which to end the background fit. Mandatory "
+                  "for the Linear Fit and Mean modes, ignored by Moving "
+                  "Average.");
+  setPropertySettings("EndX", make_unique<EnabledWhenProperty>(
+                                  "Mode", IS_NOT_EQUAL_TO, "Moving Average"));
+  declareProperty("AveragingWindowWidth", Mantid::EMPTY_INT(),
+                  "The width of the moving average window in bins. Mandatory "
+                  "for the Moving Average mode.");
+  setPropertySettings(
+      "AveragingWindowWidth",
+      make_unique<EnabledWhenProperty>("Mode", IS_EQUAL_TO, "Moving Average"));
   declareProperty(
       make_unique<ArrayProperty<int>>("WorkspaceIndexList"),
       "Indices of the spectra that will have their background removed\n"
@@ -107,8 +113,7 @@ void CalculateFlatBackground::exec() {
   Modes mode = Modes::LINEAR_FIT;
   if (modeString == "Mean") {
     mode = Modes::MEAN;
-  }
-  else if (modeString == "Moving Average") {
+  } else if (modeString == "Moving Average") {
     mode = Modes::MOVING_AVERAGE;
   }
   double startX, endX;
@@ -127,14 +132,16 @@ void CalculateFlatBackground::exec() {
     break;
   case Modes::MOVING_AVERAGE:
     if (getPointerToProperty("AveragingWindowWidth")->isDefault()) {
-      throw std::runtime_error("AveragingWindowWidth property not set to any value");
+      throw std::runtime_error(
+          "AveragingWindowWidth property not set to any value");
     }
     windowWidth = getProperty("AveragingWindowWidth");
     if (windowWidth <= 0) {
       throw std::runtime_error("AveragingWindowWidth zero or negative");
     }
     if (blocksize < windowWidth) {
-      throw std::runtime_error("AveragingWindowWidth is larger than the number of bins in InputWorkspace");
+      throw std::runtime_error("AveragingWindowWidth is larger than the number "
+                               "of bins in InputWorkspace");
     }
     break;
   }
@@ -500,7 +507,9 @@ double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS,
 * @param windowWidth Width of the averaging window in bins
 * @return Minimum
 */
-double CalculateFlatBackground::movingAverage(API::MatrixWorkspace_const_sptr WS, int wsIndex, size_t windowWidth) const {
+double
+CalculateFlatBackground::movingAverage(API::MatrixWorkspace_const_sptr WS,
+                                       int wsIndex, size_t windowWidth) const {
   const auto &ys = WS->y(wsIndex);
   double currentMin = std::numeric_limits<double>::max();
 

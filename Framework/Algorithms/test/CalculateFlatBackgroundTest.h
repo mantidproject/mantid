@@ -506,19 +506,26 @@ private:
   }
 
   /// Creates a  workspace with a single special value in each spectrum.
-  Mantid::DataObjects::Workspace2D_sptr movingAverageCreateWorkspace(const size_t spectraCount, const size_t binCount, const size_t specialIndex) {
-    Mantid::DataObjects::Workspace2D_sptr WS(new Mantid::DataObjects::Workspace2D);
+  Mantid::DataObjects::Workspace2D_sptr
+  movingAverageCreateWorkspace(const size_t spectraCount, const size_t binCount,
+                               const size_t specialIndex) {
+    Mantid::DataObjects::Workspace2D_sptr WS(
+        new Mantid::DataObjects::Workspace2D);
     WS->initialize(spectraCount, binCount + 1, binCount);
     for (size_t i = 0; i < spectraCount; ++i) {
       for (size_t j = 0; j < binCount; ++j) {
         // Make non-trivial but still linear x axis.
-        WS->mutableX(i)[j] = 0.78 * (static_cast<double>(j) - static_cast<double>(binCount) / 3.0) - 0.31 * static_cast<double>(i);
+        WS->mutableX(i)[j] = 0.78 * (static_cast<double>(j) -
+                                     static_cast<double>(binCount) / 3.0) -
+                             0.31 * static_cast<double>(i);
         // Compute some non-trivial y values.
         WS->mutableY(i)[j] = movingAverageStandardY(i);
         WS->mutableE(i)[j] = std::sqrt(WS->y(i)[j]);
       }
       // Add extra x value because histogram.
-      WS->mutableX(i)[binCount] = 0.78 * 2.0 / 3.0 * static_cast<double>(binCount) - 0.31 * static_cast<double>(i);
+      WS->mutableX(i)[binCount] =
+          0.78 * 2.0 / 3.0 * static_cast<double>(binCount) -
+          0.31 * static_cast<double>(i);
       // The special background value is set here.
       WS->mutableY(i)[specialIndex] = movingAverageSpecialY(i);
     }
@@ -535,7 +542,8 @@ private:
     return 9.34 + 3.2 * static_cast<double>(wsIndex);
   }
 
-  void movingAverageTest(const size_t windowWidth, const size_t spectraCount, const size_t binCount) {
+  void movingAverageTest(const size_t windowWidth, const size_t spectraCount,
+                         const size_t binCount) {
     Mantid::DataObjects::Workspace2D_sptr WS;
     for (size_t i = 0; i < binCount; ++i) {
       WS = movingAverageCreateWorkspace(spectraCount, binCount, i);
@@ -551,16 +559,21 @@ private:
       TS_ASSERT_THROWS_NOTHING(flatBG.execute())
       TS_ASSERT(flatBG.isExecuted())
       MatrixWorkspace_sptr outputWS =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed1");
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              "Removed1");
       for (size_t j = 0; j < spectraCount; ++j) {
-        const double expected = (movingAverageSpecialY(j) + (static_cast<double>(windowWidth) - 1) * movingAverageStandardY(j)) / static_cast<double>(windowWidth);
+        const double expected = (movingAverageSpecialY(j) +
+                                 (static_cast<double>(windowWidth) - 1) *
+                                     movingAverageStandardY(j)) /
+                                static_cast<double>(windowWidth);
         TS_ASSERT_DELTA(outputWS->y(j)[0], expected, 1e-12)
       }
       AnalysisDataService::Instance().remove("Removed1");
     }
   }
 
-  void movingAverageWindowWidthTest(size_t windowWidth, size_t binCount, bool shouldThrow) {
+  void movingAverageWindowWidthTest(size_t windowWidth, size_t binCount,
+                                    bool shouldThrow) {
     Mantid::DataObjects::Workspace2D_sptr WS;
     WS = movingAverageCreateWorkspace(1, binCount, 0);
     Mantid::Algorithms::CalculateFlatBackground flatBG;
@@ -579,7 +592,7 @@ private:
       TS_ASSERT_THROWS_NOTHING(flatBG.execute())
       TS_ASSERT(flatBG.isExecuted())
     }
-  AnalysisDataService::Instance().remove("Removed1");
+    AnalysisDataService::Instance().remove("Removed1");
   }
 };
 

@@ -66,7 +66,8 @@ public:
   const std::string name() const override { return "CalculateFlatBackground"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Finds a constant background value of each desired spectrum and optionally subtracts that value from the entire spectrum.";
+    return "Finds a constant background value of each desired spectrum and "
+           "optionally subtracts that value from the entire spectrum.";
   }
 
   /// Algorithm's version
@@ -90,7 +91,8 @@ private:
               const double startX, const double endX, double &variance) const;
   double LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX,
                    double endX);
-  double movingAverage(API::MatrixWorkspace_const_sptr WS, int wsIndex, size_t windowWidth) const;
+  double movingAverage(API::MatrixWorkspace_const_sptr WS, int wsIndex,
+                       size_t windowWidth) const;
 
   /// variable bin width raw count data must be converted to distributions first
   /// and then converted back, keep track of this
