@@ -309,6 +309,14 @@ void CalcCountRate::normalizeVisWs(int64_t wsIndex) {
     yv /= m_visNorm[wsIndex];
   }
 }
+/** Disable normalization using normalization log.
+Helper function to avoid code duplication.
+@param NormLogError -- error to print if normalization log is disabled*/
+void CalcCountRate::disableNormalization(const std::string &NormLogError) {
+  g_log.warning() << NormLogError << std::endl;
+  m_pNormalizationLog = nullptr;
+  m_normalizeResult = false;
+};
 /*Analyse input log parameters and logs, attached to the workspace and identify
  * the parameters of the target log, including experiment time.
  *
@@ -332,11 +340,10 @@ void CalcCountRate::setOutLogParameters(
   bool logPresent = InputWorkspace->run().hasProperty(NormLogName);
   if (!logPresent) {
     if (m_normalizeResult) {
-      g_log.warning()
-          << "Normalization by log: '" << NormLogName
-          << "' values requested but the log is not attached to the "
-             "workspace. Normalization disabled\n";
-      m_normalizeResult = false;
+      this->disableNormalization(
+          "Normalization log " + NormLogName +
+          "' values requested but the log is not attached to the "
+          "workspace. Normalization disabled");
     }
     if (useLogDerivative) {
       g_log.warning() << "Normalization by log: '" << NormLogName
@@ -397,12 +404,10 @@ void CalcCountRate::setOutLogParameters(
       if (tLogMin > runTMax ||
           tLogMax < runTMin) { // log time is outside of the experiment time.
                                // Log normalization is impossible
-        g_log.warning()
-            << "Normalization log " << m_pNormalizationLog->name()
-            << " time lies outside of the the whole experiment time. "
-               "Log normalization impossible.\n";
-        m_pNormalizationLog = nullptr;
-        m_normalizeResult = false;
+        this->disableNormalization(
+            "Normalization log " + m_pNormalizationLog->name() +
+            " time lies outside of the the whole experiment time. "
+            "Log normalization impossible.");
         useLogAccuracy = false;
       } else {
         if (!m_tmpLogHolder) {
@@ -416,11 +421,10 @@ void CalcCountRate::setOutLogParameters(
       }
     } else {
       if (tLogMin > runTMin || tLogMax < runTMax) {
-        g_log.warning() << "Normalization log " << m_pNormalizationLog->name()
-                        << " time does not cover the whole experiment time. "
-                           "Log normalization impossible.\n";
-        m_pNormalizationLog = nullptr;
-        m_normalizeResult = false;
+        this->disableNormalization(
+            "Normalization log " + m_pNormalizationLog->name() +
+            " time does not cover the whole experiment time. "
+            "Log normalization impossible.");
         useLogAccuracy = false;
       }
     }
@@ -428,18 +432,56 @@ void CalcCountRate::setOutLogParameters(
 
   if (useLogAccuracy) {
     m_numLogSteps = m_pNormalizationLog->realSize();
+    if (m_numLogSteps < 2) { // should not ever happen but...
+
+      this->disableNormalization(
+          "Number of points in the Normalization log " +
+          m_pNormalizationLog->name() +
+          " smaller then 2. Can not normalize using this log.");
+      m_numLogSteps = getProperty("NumTimeSteps"); // Always > 2
+      useLogAccuracy = false;
+    }
   } else {
     m_numLogSteps = getProperty("NumTimeSteps");
   }
 
   m_TRangeMin = runTMin;
-  // histogramming excludes rightmost events. Modify max limit to keep them
-  double t_epsilon = double(runTMax.totalNanoseconds()) *
-                     (1 + std::numeric_limits<double>::epsilon());
-  int64_t eps_increment =
-      static_cast<int64_t>(t_epsilon - double(runTMax.totalNanoseconds()));
-  m_TRangeMax =
-      runTMax + eps_increment; // *(1+std::numeric_limits<double>::epsilon());
+  if (useLogAccuracy) {
+    // Let's try to establish log step (it should be constant in real applications) and define
+    // binning in such a way, that each historgam bin accomodates single log
+    // value
+    auto iTMax = runTMax.totalNanoseconds();
+    auto iTMin = m_TRangeMin.totalNanoseconds();
+    int64_t provDT = (iTMax - iTMin) / (m_numLogSteps - 1);
+    if (provDT < 1) { // something is fundamentally wrong. This can only happen
+                      // if the log is very short and the distance between log
+                      // boundaries is smaller than dt
+      this->disableNormalization("Time step of the log " +
+                                 m_pNormalizationLog->name() +
+                                 " is not consistent with number of log steps. "
+                                 "Can not use this log normalization");
+      useLogAccuracy = false;
+    } else {
+      auto iTMax1 = iTMin + provDT * m_numLogSteps;
+      if (iTMax1 <= iTMax) { // == is possible
+        m_numLogSteps++;
+        iTMax1 = iTMin + provDT * m_numLogSteps;
+      }
+      m_TRangeMax = Kernel::DateAndTime(iTMax1);
+    }
+  }
+
+  if (!useLogAccuracy) {
+    // histogramming excludes rightmost events. Modify max limit to keep them
+    double t_epsilon = double(runTMax.totalNanoseconds()) *
+                       (1 + std::numeric_limits<double>::epsilon());
+    int64_t eps_increment =
+        static_cast<int64_t>(t_epsilon - double(runTMax.totalNanoseconds()));
+    m_TRangeMax = runTMax + eps_increment; // Should be
+    // *(1+std::numeric_limits<double>::epsilon())
+    // but DateTime does not have multiplication
+    // operator
+  }
 }
 
 /* Retrieve and define data search ranges from input workspace parameters and
@@ -489,10 +531,6 @@ void CalcCountRate::setSourceWSandXRanges(
   // data ranges
   m_XRangeMin = getProperty("XMin");
   m_XRangeMax = getProperty("XMax");
-  if (m_XRangeMin > m_XRangeMax) {
-    throw std::invalid_argument(
-        " Minimal spurion search data range is bigger than the maximal range.");
-  }
 
   if (m_XRangeMin == EMPTY_DBL() && m_XRangeMax == EMPTY_DBL()) {
     m_rangeExplicit = false;
@@ -507,10 +545,6 @@ void CalcCountRate::setSourceWSandXRanges(
     // include rightmost limit into the histogramming
     m_XRangeMax = realMax * (1. + std::numeric_limits<double>::epsilon());
     return;
-  }
-  if (m_XRangeMax < realMin || m_XRangeMin > realMax) {
-    throw std::invalid_argument(
-        " Spurion data search range lies outsize of the workspace data range.");
   }
 
   if (m_XRangeMin == EMPTY_DBL()) {
@@ -529,6 +563,15 @@ void CalcCountRate::setSourceWSandXRanges(
     g_log.debug() << "Workspace constrain max range changed from: "
                   << m_XRangeMax << " To: " << realMax << std::endl;
     m_XRangeMax = realMax * (1. + std::numeric_limits<double>::epsilon());
+  }
+  // check final ranges valid
+  if (m_XRangeMin > m_XRangeMax) {
+    throw std::invalid_argument(
+        " Minimal spurion search data range is bigger than the maximal range.");
+  }
+  if (m_XRangeMax < realMin || m_XRangeMin > realMax) {
+    throw std::invalid_argument(
+        " Spurion data search range lies outsize of the workspace data range.");
   }
 }
 

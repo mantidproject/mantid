@@ -21,6 +21,7 @@ using namespace Mantid::Algorithms;
 
 class CalcCountRateTester : public CalcCountRate {
 public:
+  CalcCountRateTester() { this->setChild(true); }
   void setSearchRanges(DataObjects::EventWorkspace_sptr &InputWorkspace) {
     CalcCountRate::setSourceWSandXRanges(InputWorkspace);
   }
@@ -249,7 +250,7 @@ public:
     auto val_vec = newLog->valuesAsVector();
 
     for (size_t i = 0; i < val_vec.size(); i++) {
-      TS_ASSERT_DELTA(val_vec[i], 200., 1.e-4);
+      TS_ASSERT_DELTA(val_vec[i], 198., 1.e-4);
     }
   }
 
@@ -442,11 +443,14 @@ public:
 
     MantidVec counts = newLog->valuesAsVector();
 
-    for (size_t i = 0; i < testVisWS->getNumberHistograms(); ++i) {
+    // verify everywhere except boundaries
+    for (size_t i = 1; i < testVisWS->getNumberHistograms()-1; ++i) {
       const HistogramData::HistogramY &Y = testVisWS->y(i);
+      // const MantidVec &Y = testVisWS->readY(i); // -- better for debugging as
+      // one can see what is inside
       double sum = std::accumulate(Y.begin(), Y.end(), 0.);
       TSM_ASSERT_DELTA("Incorrect counts at index: " + std::to_string(i),
-                       4 * counts[i], sum, 1.e-6);
+                       counts[i], sum, 1.e-6);
     }
   }
   //----------------------------------------------------------------------
@@ -456,8 +460,10 @@ public:
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10,
                                                                         false);
 
-    if (!addLog)
+    if (!addLog) {
+      AnalysisDataService::Instance().addOrReplace("testSourceWorkspace", sws);
       return sws;
+    }
 
     auto pTime_log = new Kernel::TimeSeriesProperty<double>("proton_charge");
     Kernel::DateAndTime first("2010-01-01T00:00:00");
@@ -471,6 +477,8 @@ public:
     pTime_log->addValues(times, values);
     sws->mutableRun().addProperty(pTime_log, true);
 
+    AnalysisDataService::Instance().addOrReplace("testSourceWorkspaceWithLog",
+                                                 sws);
     return sws;
   }
 };

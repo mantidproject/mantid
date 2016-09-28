@@ -62,7 +62,8 @@ private:
   void exec() override;
   // holder of the temporary log, used for normalization, binning source etc...
   std::unique_ptr<Kernel::TimeSeriesProperty<double>> m_tmpLogHolder;
-
+  // diable log normalization
+  void disableNormalization(const std::string &NormLogError);
 protected: // for testing, actually private
   /// pointer to the log used to normalize results or NULL if no such log
   /// present on input workspace.
