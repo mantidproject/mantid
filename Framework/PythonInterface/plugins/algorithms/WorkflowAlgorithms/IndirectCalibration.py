@@ -88,7 +88,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import get_run_number
 
         self._setup()
         runs = []
@@ -106,7 +105,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
                      LoadLogFiles=self.getProperty('LoadLogFiles').value)
 
                 runs.append(root)
-                self._run_numbers.append(get_run_number(root))
+                self._run_numbers.append(self.get_run_number(root))
             except (RuntimeError,ValueError) as exc:
                 logger.error('Could not load raw file "%s": %s' % (in_file, str(exc)))
             load_prog.report('Loading file: ' + str(i))
@@ -210,6 +209,25 @@ class IndirectCalibration(DataProcessorAlgorithm):
         log_alg.setProperty('LogNames', [log[0] for log in sample_logs])
         log_alg.setProperty('LogValues', [log[1] for log in sample_logs])
 
+    def get_run_number(self, ws_name):
+        """
+        Gets the run number for a given workspace.
+        Attempts to get from logs and falls back to parsing the workspace name for
+        something that looks like a run number.
+        @param ws_name Name of workspace
+        @return Parsed run number
+        """
+        workspace = mtd[ws_name]
+        run_number = str(workspace.getRunNumber())
+        if run_number == '0':
+            # Attempt to parse run number off of name
+            match = re.match(r'([a-zA-Z]+)([0-9]+)', ws_name)
+            if match:
+                run_number = match.group(2)
+            else:
+                raise RuntimeError("Could not find run number associated with workspace.")
+
+        return run_number
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectCalibration)

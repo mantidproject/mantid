@@ -23,53 +23,6 @@ def EndTime(prog):
     logger.notice('----------')
 
 
-def get_run_number(ws_name):
-    """
-    Gets the run number for a given workspace.
-
-    Attempts to get from logs and falls back to parsing the workspace name for
-    something that looks like a run number.
-
-    @param ws_name Name of workspace
-    @return Parsed run number
-    """
-
-    workspace = s_api.mtd[ws_name]
-    run_number = str(workspace.getRunNumber())
-    if run_number == '0':
-        # Attempt to parse run number off of name
-        match = re.match(r'([a-zA-Z]+)([0-9]+)', ws_name)
-        if match:
-            run_number = match.group(2)
-        else:
-            raise RuntimeError("Could not find run number associated with workspace.")
-
-    return run_number
-
-
-def getInstrRun(ws_name):
-    """
-    Get the instrument name and run number from a workspace.
-
-    @param ws_name - name of the workspace
-    @return tuple of form (instrument, run number)
-    """
-
-    run_number = get_run_number(ws_name)
-
-    instrument = s_api.mtd[ws_name].getInstrument().getName()
-    if instrument != '':
-        for facility in config.getFacilities():
-            try:
-                instrument = facility.instrument(instrument).filePrefix(int(run_number))
-                instrument = instrument.lower()
-                break
-            except RuntimeError:
-                continue
-
-    return instrument, run_number
-
-
 def getWSprefix(wsname):
     """
     Returns a string of the form '<ins><run>_<analyser><refl>_' on which

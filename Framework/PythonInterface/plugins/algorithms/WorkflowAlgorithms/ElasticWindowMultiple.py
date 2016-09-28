@@ -98,7 +98,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
     def PyExec(self):
         from IndirectImport import import_mantidplot
-        from IndirectCommon import getInstrRun
 
         # Do setup
         self._setup()
@@ -143,7 +142,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             q2_workspaces.append(q2_ws)
 
             # Get the run number
-            run_no = getInstrRun(input_ws)[1]
+            run_no = self.getInstrRun(input_ws)[1]
             run_numbers.append(run_no)
 
             # Get the sample temperature
@@ -151,7 +150,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             if temp is not None:
                 temperatures.append(temp)
             else:
-                # No need to output a tmperature workspace if there are no temperatures
+                # No need to output a temperature workspace if there are no temperatures
                 self._elt_workspace = ''
 
         logger.information('Creating Q and Q^2 workspaces')
@@ -188,7 +187,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         logger.information('Setting vertical axis units and values')
 
-        # Set the verical axis units
+        # Set the vertical axis units
         v_axis_is_temp = len(input_workspace_names) == len(temperatures)
 
         if v_axis_is_temp:
@@ -281,9 +280,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         @param ws_name Name of workspace
         @returns Temperature in Kelvin or None if not found
         """
-        from IndirectCommon import getInstrRun
 
-        instr, run_number = getInstrRun(ws_name)
+        instr, run_number = self.getInstrRun(ws_name)
 
         facility = config.getFacility()
         pad_num = facility.instrument(instr).zeroPadding(int(run_number))
@@ -327,6 +325,34 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         logger.warning('No temperature found for run: %s' % run_name)
         return None
 
+    def getInstrRun(self, ws_name):
+        """
+        Get the instrument name and run number from a workspace.
+
+        @param ws_name - name of the workspace
+        @return tuple of form (instrument, run number)
+        """
+
+        run_number = str(workspace.getRunNumber())
+        if run_number == '0':
+            # Attempt to parse run number off of name
+            match = re.match(r'([a-zA-Z]+)([0-9]+)', ws_name)
+            if match:
+                run_number = match.group(2)
+            else:
+                raise RuntimeError("Could not find run number associated with workspace.")
+
+        instrument = s_api.mtd[ws_name].getInstrument().getName()
+        if instrument != '':
+            for facility in config.getFacilities():
+                try:
+                    instrument = facility.instrument(instrument).filePrefix(int(run_number))
+                    instrument = instrument.lower()
+                    break
+                except RuntimeError:
+                    continue
+
+        return instrument, run_number
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(ElasticWindowMultiple)
