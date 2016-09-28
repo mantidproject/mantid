@@ -54,7 +54,7 @@ Output:
 .. testoutput:: ExFilterWavelengthByMinMax
 
     1900 events before filtering
-    1118 events after filtering
+    1122 events after filtering
 
 
 .. categories::

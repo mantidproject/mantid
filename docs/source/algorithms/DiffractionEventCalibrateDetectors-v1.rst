@@ -39,7 +39,7 @@ Output:
 .. testoutput:: ExDiffractionEventCalibrateDetectors
 
     Peak in dSpace 2.69077317913
-    Peak from calibration 2.68342207235
+    Peak from calibration 2.67124691143
 
 
 .. categories::
