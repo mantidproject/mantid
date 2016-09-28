@@ -178,7 +178,7 @@ class BayesQuasi(PythonAlgorithm):
 
         # Check for trailing and leading zeros in data
         setup_prog.report('Checking for leading and trailing zeros in the data')
-        first_data_point, last_data_point = IndentifyDataBoundaries(self._samWS)
+        first_data_point, last_data_point = self.IndentifyDataBoundaries(self._samWS)
         if first_data_point > self._e_min:
             logger.warning("Sample workspace contains leading zeros within the energy range.")
             logger.warning("Updating eMin: eMin = " + str(first_data_point))
@@ -829,6 +829,41 @@ class BayesQuasi(PythonAlgorithm):
         values = data_string.split()
         values = [float(v) for v in values]
         return values
+
+    def IndentifyDataBoundaries(self, sample_ws):
+        """
+        Indentifies and returns the first and last no zero data point in a workspace
+        For multiple workspace spectra, the data points that are closest to the centre
+        out of all the spectra in the workspace are returned
+        """
+
+        sample_ws = s_api.mtd[sample_ws]
+        nhists = sample_ws.getNumberHistograms()
+        start_data_idx, end_data_idx = 0,0
+        # For all spectra in the workspace
+        for spectra in range(0, nhists):
+            # Obtain first and last non zero values
+            y_data = sample_ws.readY(spectra)
+            spectra_start_data = firstNonZero(self, y_data)
+            spectra_end_data = firstNonZero(list(reversed(self, y_data)))
+            # Replace workspace start and end if data is closer to the center
+            if spectra_start_data > start_data_idx:
+                start_data_idx = spectra_start_data
+            if spectra_end_data > end_data_idx:
+                end_data_idx = spectra_end_data
+        # Convert Bin index to data value
+        x_data = sample_ws.readX(0)
+        first_data_point = x_data[start_data_idx]
+        last_data_point = x_data[len(x_data) - end_data_idx - 2]
+        return first_data_point, last_data_point
+
+    def firstNonZero(self, data):
+        """
+        Returns the index of the first non zero value in the list
+        """
+        for i in range(len(data)):
+            if data[i] != 0:
+                return i
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(BayesQuasi)
