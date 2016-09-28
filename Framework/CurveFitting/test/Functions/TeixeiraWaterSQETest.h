@@ -47,7 +47,7 @@ public:
     std::vector<double> xValues(nData, 0.1); // Evaluate at E=0.1meV
     std::vector<double> calculatedValues(nData, 0);
     func->function1D(calculatedValues.data(), xValues.data(), nData);
-    TS_ASSERT_DELTA(calculatedValues[0], 0.88693745, 1e-8);
+    TS_ASSERT_DELTA(calculatedValues[0], 1.423369463, 1e-8);
   }
 
   /**
