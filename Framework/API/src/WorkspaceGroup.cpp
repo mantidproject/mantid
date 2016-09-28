@@ -299,11 +299,12 @@ void WorkspaceGroup::workspaceBeforeReplaceHandle(
 
   // If the names aren't blank (as some algorithms use anonymously named
   // workspaces as pointers) and match probably a duplicate
-  auto endIter = std::unique(m_workspaces.begin(), m_workspaces.end(),
-                             [](const auto &ws1, const auto &ws2) -> bool {
-                               return (!ws1->name().empty()) &&
-                                      (ws2->name() == ws1->name());
-                             });
+  auto endIter = std::unique(
+      m_workspaces.begin(), m_workspaces.end(),
+      [](const Mantid::API::Workspace_sptr &ws1,
+         const Mantid::API::Workspace_sptr &ws2) -> bool {
+        return (!ws1->name().empty()) && (ws2->name() == ws1->name());
+      });
 
   if (endIter != m_workspaces.end()) {
     m_workspaces.resize(std::distance(m_workspaces.begin(), endIter));
