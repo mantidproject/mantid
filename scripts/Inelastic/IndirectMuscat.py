@@ -1,19 +1,17 @@
-#pylint: disable=invalid-name,too-many-arguments,too-many-locals
+#pylint: disable=invalid-name,too-many-arguments,too-many-locals, unused-variable, unused-argument
 
 """
 MUSIC : Version of Minus for MIDAS
 """
-
+import sys, math, numpy as np
 from IndirectImport import *
+from mantid.simpleapi import *
+from mantid import config, logger, mtd
+from IndirectCommon import *
 if is_supported_f2py_platform():
     muscat = import_f2py("muscat")
 else:
     unsupported_message()
-
-from mantid.simpleapi import *
-from mantid import config, logger, mtd
-from IndirectCommon import *
-import sys, platform, math, os.path, numpy as np
 mp = import_mantidplot()
 
 def CalcW0(nq,dq,disp,coeff):
@@ -58,7 +56,7 @@ def CalcSqw(q0,nw2,nel,dw,w0):
         else:
             Qaxis += ','+str(q0[i])
     CreateWorkspace(OutputWorkspace='S(Q,w)', DataX=xSqw, DataY=ySqw, DataE=eSqw,\
-    	Nspec=nq, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
+        Nspec=nq, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
 
 def CheckCoeff(disp,coeff):
     if (disp == 'CE') or (disp == 'SS'):
@@ -108,7 +106,7 @@ def CreateSqw(disp,coeff,grid,Verbose):
     nq,dq,nw,dw = CheckQw(grid)
     q0,w0,e0 = CalcW0(nq,dq,disp,coeff)
     CreateWorkspace(OutputWorkspace=disp, DataX=q0, DataY=w0, DataE=e0,\
-    	Nspec=1, UnitX='MomentumTransfer')
+        Nspec=1, UnitX='MomentumTransfer')
     nw2 = 2*nw+1
     nel= nw+1
     CalcSqw(q0,nw2,nel,dw,w0)
@@ -144,7 +142,7 @@ def ReadSqw(sqw,Verbose):
     if Verbose:
         logger.notice('Q : '+str(nq)+' points from '+str(Q[0])+' to '+str(Q[nq-1])+' at '+str(dq))
         logger.notice('w : '+str(nw)+' points from '+str(Xw[0])+' to '+str(Xw[nw])+' at '+str(dw)\
-    		+' ; Elastic energy at : '+str(nel))
+            +' ; Elastic energy at : '+str(nel))
     X0 = []
     X0 = PadArray(X0,1000)              # zeroes
     for n in range(nq,500):                 # pad to Fortran Q size 500
@@ -192,6 +190,7 @@ def CheckSam(sam):
         sys.exit(error)
 
 def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
+    #pylint: disable=too-many-branches
 #    neut = [NRUN1, NRUN2, JRAND, MRAND, NMST]
 #    beam = [THICK, WIDTH, HEIGHT, alfa]
 #   sam = [temp, dens, siga, sigb]
@@ -213,7 +212,7 @@ def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
 #   rgeom = [thick, width, height]
     rgeom = [beam[0], beam[1], beam[2]]
     nran = [neut[0], neut[1], neut[2], neut[3]]
-    lpt = os.path.join(workdir, sname[:-3]+geom+'_ms.lpt')		# path name for lpt file
+    lpt = os.path.join(workdir, sname[:-3]+geom+'_ms.lpt')      # path name for lpt file
     if Verbose:
         logger.notice('Detectors/angles : '+str(mang))
         logger.notice('Sample geometry : '+geom)
@@ -246,7 +245,7 @@ def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
 #     2 totals,iw,energy,scat1,scatm,RR,S_out)
         idet = m+1
         kill,totals,iw,energy,scat1,scatm,RR,Sqw=muscat.muscat_data(idet,lpt,llpt,sqw,lsqw,rinstr,nran,\
-    							ijeom,rgeom,sam,ims,dqw,Q_in,Sqw_in)
+                                ijeom,rgeom,sam,ims,dqw,Q_in,Sqw_in)
         if kill != 0:
             error = 'Muscat error code : '+str(kill)
             logger.notice(error)
@@ -315,16 +314,16 @@ def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
     logger.notice('eTot : ' + str(len(eTot)))
     msname = sname+'_MS'
     CreateWorkspace(OutputWorkspace=msname+'_Totals', DataX=xTot, DataY=yTot, DataE=eTot,\
-    	Nspec=nt, UnitX='MomentumTransfer')
-#    	Nspec=nt, UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues='Taxis')
+        Nspec=nt, UnitX='MomentumTransfer')
+#       Nspec=nt, UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues='Taxis')
 # start output of MultScat
     eMs = np.zeros(iw*mang)
     CreateWorkspace(OutputWorkspace=msname+'_1', DataX=xMs, DataY=yMsc1, DataE=eMs,\
-    	Nspec=mang, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
+        Nspec=mang, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
     CreateWorkspace(OutputWorkspace=msname+'_M', DataX=xMs, DataY=yMscM, DataE=eMs,\
-    	Nspec=mang, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
+        Nspec=mang, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
     CreateWorkspace(OutputWorkspace=msname+'_R', DataX=xMs, DataY=yMr, DataE=eMs,\
-    	Nspec=mang, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
+        Nspec=mang, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
     group = msname+'_1,'+ msname+'_M,'+ msname+'_R'
     GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=msname+'_Scat')
 # start output
@@ -343,7 +342,7 @@ def MuscatFuncStart(sname,geom,neut,beam,sam,grid,disp,coeff,kr1,Verbose,Plot,Sa
     StartTime('Muscat Function')
     workdir = config['defaultsave.directory']
     sname = sname+'_red'
-    spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
+    spath = os.path.join(workdir, sname+'.nxs')     # path name for sample nxs file
     LoadNexusProcessed(FileName=spath, OutputWorkspace=sname)
     sqw = 'S(Q,w)'
     CreateSqw(disp,coeff,grid,Verbose)
@@ -357,10 +356,10 @@ def MuscatDataStart(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
     StartTime('Muscat Data')
     workdir = config['defaultsave.directory']
     sname = sname+'_red'
-    spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
+    spath = os.path.join(workdir, sname+'.nxs')     # path name for sample nxs file
     LoadNexusProcessed(FileName=spath, OutputWorkspace=sname)
     sqw = sqw+'_sqw'
-    qpath = os.path.join(workdir, sqw+'.nxs')		# path name for S(Q,w) nxs file
+    qpath = os.path.join(workdir, sqw+'.nxs')       # path name for S(Q,w) nxs file
     LoadNexusProcessed(FileName=qpath, OutputWorkspace=sqw)
     if Verbose:
         logger.notice('Sample run : '+spath)

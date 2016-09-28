@@ -734,6 +734,7 @@ class BayesQuasi(PythonAlgorithm):
                 raise ValueError('%s - input maximum (%f) < minimum (%f)' % (range_type, upper, lower))
 
         def CheckAnalysers(self, in1WS, in2WS):
+            #pylint: disable=unused-argument, unused-variable
             """
             Check workspaces have identical analysers and reflections
             Args:

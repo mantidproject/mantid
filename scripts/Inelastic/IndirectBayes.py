@@ -8,6 +8,11 @@ Output : the Fortran numpy array is sliced to Python length using dataY = yout[:
 """
 
 from IndirectImport import *
+from mantid.simpleapi import *
+from mantid import logger, mtd
+from IndirectCommon import *
+import sys, platform, math, numpy as np
+MTD_PLOT = import_mantidplot()
 if is_supported_f2py_platform():
     QLr     = import_f2py("QLres")
     QLd     = import_f2py("QLdata")
@@ -15,12 +20,6 @@ if is_supported_f2py_platform():
     resnorm = import_f2py("ResNorm")
 else:
     unsupported_message()
-
-from mantid.simpleapi import *
-from mantid import config, logger, mtd
-from IndirectCommon import *
-import sys, platform, math, os.path, numpy as np
-MTD_PLOT = import_mantidplot()
 
 def CalcErange(inWS,ns,erange,binWidth):
     #length of array in Fortran
@@ -76,8 +75,8 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
 
     array_len = 4096                                    # length of Fortran array
     CheckXrange(erange,'Energy')
-    self.CheckAnalysers(vname,rname)
-    nvan,ntc = self.CheckHistZero(vname)
+    CheckAnalysers(vname,rname)
+    nvan,ntc = CheckHistZero(vname)
     theta = GetThetaQ(vname)[0]
     efix = getEfixed(vname)
     logger.notice("beginning erange calc")
@@ -188,7 +187,7 @@ def ResNormPlot(inputWS,Plot):
         fWS = inputWS + '_ResNorm_Fit'
         MTD_PLOT.plotSpectrum(fWS,0,False)
 
-def CheckAnalysers(self, in1WS, in2WS):
+def CheckAnalysers(in1WS, in2WS):
     """
     Check workspaces have identical analysers and reflections
     Args:
@@ -220,7 +219,7 @@ def CheckAnalysers(self, in1WS, in2WS):
     else:
         logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
 
-def CheckHistZero(self, inWS):
+def CheckHistZero(inWS):
     """
     Retrieves basic info on a workspace
     Checks the workspace is not empty, then returns the number of histogram and
