@@ -1895,18 +1895,6 @@ class CropDetBank(ReductionStep):
         # Get the detector bank that is to be used in this analysis leave the complete workspace
         reducer.instrument.cur_detector().crop_to_detector(in_wksp, workspace)
 
-        # Unwrap the monitors of the scatter workspace
-        if reducer.unwrap_monitors:
-            wavelength_min, wavelength_max = get_wavelength_min_and_max(reducer)
-            scatter_ws = getWorkspaceReference(workspace)
-            UnwrapMonitorsInTOF(InputWorkspace=scatter_ws, OutputWorkspace=scatter_ws,
-                                WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
-
-            monitor_ws = reducer.get_sample().get_monitor()
-            UnwrapMonitorsInTOF(InputWorkspace=monitor_ws, OutputWorkspace=monitor_ws,
-                                WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
-
-
         # If the workspace requires dark run subtraction for the detectors and monitors, then this will be performed here.
         if reducer.dark_run_subtraction.has_dark_runs():
             # Get the spectrum index range for spectra which are part of the current detector
@@ -1956,6 +1944,14 @@ class NormalizeToMonitor(ReductionStep):
 
         self.output_wksp = str(workspace) + INCIDENT_MONITOR_TAG
         mon = reducer.get_sample().get_monitor(normalization_spectrum - 1)
+
+        # Unwrap the monitors of the scatter workspace
+        if reducer.unwrap_monitors:
+            wavelength_min, wavelength_max = get_wavelength_min_and_max(reducer)
+            temp_mon = UnwrapMonitorsInTOF(InputWorkspace=mon, WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
+            DeleteWorkspace(mon)
+            mon = temp_mon
+
         if reducer.event2hist.scale != 1:
             mon *= reducer.event2hist.scale
 

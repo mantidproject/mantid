@@ -341,6 +341,23 @@ void UnwrapMonitorsInTOF::exec() {
     Mantid::HistogramData::Histogram histogram(points, counts);
     outputWorkspace->setHistogram(workspaceIndex, histogram);
   }
+  // We set the output type to the same as the input type.
+  if (inputWorkspace->isHistogramData() && !outputWorkspace->isHistogramData()) {
+    auto alg = createChildAlgorithm("ConvertToHistogram");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", outputWorkspace);
+    alg->setProperty("OutputWorkspace", outputWorkspace);
+    alg->execute();
+    outputWorkspace = alg->getProperty("OutputWorkspace");
+  }
+  else if (!inputWorkspace->isHistogramData() && outputWorkspace->isHistogramData()) {
+    auto alg = createChildAlgorithm("ConvertToPointData");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", outputWorkspace);
+    alg->setProperty("OutputWorkspace", outputWorkspace);
+    alg->execute();
+    outputWorkspace = alg->getProperty("OutputWorkspace");
+  }
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
