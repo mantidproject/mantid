@@ -58,12 +58,6 @@ VesuvioCalculateGammaBackground::VesuvioCalculateGammaBackground()
       m_foilUpMin(0.0), m_foilUpMax(0.0), m_foils0(), m_foils1(),
       m_backgroundWS(), m_correctedWS(), m_progress(nullptr) {}
 
-/// Destructor
-VesuvioCalculateGammaBackground::~VesuvioCalculateGammaBackground() {
-  delete m_progress;
-  m_indices.clear();
-}
-
 //--------------------------------------------------------------------------------------------------------
 // Private members
 //--------------------------------------------------------------------------------------------------------
@@ -114,7 +108,7 @@ void VesuvioCalculateGammaBackground::exec() {
   const int64_t nhist = static_cast<int64_t>(m_indices.size());
   const int64_t nreports =
       10 + nhist * (m_npeaks + 2 * m_foils0.size() * NTHETA * NUP * m_npeaks);
-  m_progress = new Progress(this, 0.0, 1.0, nreports);
+  m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, nreports);
 
   PARALLEL_FOR3(m_inputWS, m_correctedWS, m_backgroundWS)
   for (int64_t i = 0; i < nhist; ++i) {

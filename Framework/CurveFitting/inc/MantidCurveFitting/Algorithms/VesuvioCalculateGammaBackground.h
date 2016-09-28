@@ -49,7 +49,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport VesuvioCalculateGammaBackground : public API::Algorithm {
 public:
   VesuvioCalculateGammaBackground();
-  ~VesuvioCalculateGammaBackground() override;
 
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -140,7 +139,7 @@ private:
   API::MatrixWorkspace_sptr m_correctedWS;
 
   /// Pointer to progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace Algorithms
