@@ -886,10 +886,11 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   size_t wsIndex1 = inputWS->getIndexFromSpectrumNumber(specNum2);
 
   // assuming equally binned ws.
-  auto working_ws = DataObjects::create<API::HistoWorkspace>(
-      *inputWS, Indexing::extract(inputWS->indexInfo(),
-                                  std::vector<size_t>{wsIndex0, wsIndex1}),
-      inputWS->histogram(wsIndex0));
+  boost::shared_ptr<API::HistoWorkspace> working_ws =
+      DataObjects::create<API::HistoWorkspace>(
+          *inputWS, Indexing::extract(inputWS->indexInfo(),
+                                      std::vector<size_t>{wsIndex0, wsIndex1}),
+          inputWS->histogram(wsIndex0));
 
   // signal 1
   working_ws->setSharedY(0, inputWS->sharedY(wsIndex0));

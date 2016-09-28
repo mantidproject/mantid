@@ -120,7 +120,7 @@ void GeneralisedSecondDifference::exec() {
     }
     progress->report();
   }
-  setProperty("OutputWorkspace", out);
+  setProperty("OutputWorkspace", std::move(out));
 }
 /** Compute the Cij
  *

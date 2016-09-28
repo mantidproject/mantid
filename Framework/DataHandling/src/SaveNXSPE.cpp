@@ -81,7 +81,7 @@ void SaveNXSPE::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
   // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(inputWS)) {
+  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
     g_log.error("The input workspace must have common bins");
     throw std::invalid_argument("The input workspace must have common bins");
   }

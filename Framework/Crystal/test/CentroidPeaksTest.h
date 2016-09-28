@@ -76,7 +76,7 @@ public:
     loadInst->initialize();
     loadInst->setPropertyValue(
         "Filename", "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
-    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", retVal);
+    loadInst->setProperty("Workspace", std::move(retVal));
     loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(true));
     loadInst->execute();

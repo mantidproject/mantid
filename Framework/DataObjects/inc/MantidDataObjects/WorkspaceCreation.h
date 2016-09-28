@@ -136,13 +136,13 @@ createConcreteHelper();
 template <class T, class P, class IndexArg,
           class = typename std::enable_if<
               std::is_base_of<API::MatrixWorkspace, P>::value>::type>
-boost::shared_ptr<T> create(const P &parent, const IndexArg &indexArg,
-                            const HistogramData::Histogram &histogram) {
+std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
+                          const HistogramData::Histogram &histogram) {
   // Figure out (dynamic) target type:
   // - Type is same as parent if T is base of parent
   // - If T is not base of parent, conversion may occur. Currently only
   //   supported for EventWorkspace
-  boost::shared_ptr<T> ws;
+  std::unique_ptr<T> ws;
   if (std::is_base_of<API::HistoWorkspace, T>::value &&
       parent.id() == "EventWorkspace") {
     // Drop events, create Workspace2D or T whichever is more derived.
@@ -174,8 +174,8 @@ template <class T, class IndexArg,
           typename std::enable_if<
               !std::is_base_of<API::MatrixWorkspace, IndexArg>::value>::type * =
               nullptr>
-boost::shared_ptr<T> create(const IndexArg &indexArg,
-                            const HistogramData::Histogram &histogram) {
+std::unique_ptr<T> create(const IndexArg &indexArg,
+                          const HistogramData::Histogram &histogram) {
   auto ws = Kernel::make_unique<T>();
   ws->initialize(indexArg, histogram);
   return std::move(ws);
@@ -184,7 +184,7 @@ boost::shared_ptr<T> create(const IndexArg &indexArg,
 template <class T, class P,
           typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
                                                   P>::value>::type * = nullptr>
-boost::shared_ptr<T> create(const P &parent) {
+std::unique_ptr<T> create(const P &parent) {
   return create<T>(parent, parent.getNumberHistograms(),
                    detail::stripData(parent.histogram(0)));
 }
@@ -192,15 +192,15 @@ boost::shared_ptr<T> create(const P &parent) {
 template <class T, class P, class IndexArg,
           typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
                                                   P>::value>::type * = nullptr>
-boost::shared_ptr<T> create(const P &parent, const IndexArg &indexArg) {
+std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg) {
   return create<T>(parent, indexArg, detail::stripData(parent.histogram(0)));
 }
 
 template <class T, class P,
           typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
                                                   P>::value>::type * = nullptr>
-boost::shared_ptr<T> create(const P &parent,
-                            const HistogramData::Histogram &histogram) {
+std::unique_ptr<T> create(const P &parent,
+                          const HistogramData::Histogram &histogram) {
   return create<T>(parent, parent.getNumberHistograms(), histogram);
 }
 

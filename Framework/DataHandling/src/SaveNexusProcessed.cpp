@@ -239,7 +239,7 @@ void SaveNexusProcessed::doExec(Workspace_sptr inputWorkspace,
 
     // check if all X() are in fact the same array
     const bool uniformSpectra =
-        API::WorkspaceHelpers::commonBoundaries(matrixWorkspace);
+        API::WorkspaceHelpers::commonBoundaries(*matrixWorkspace);
 
     // Retrieve the workspace indices (from params)
     std::vector<int> spec;

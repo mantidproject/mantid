@@ -409,8 +409,8 @@ MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr lhs,
  *  @param WS :: The workspace to check
  *  @return True if the bins match
  */
-bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS) {
-  if (!WS->blocksize() || WS->getNumberHistograms() < 2)
+bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace &WS) {
+  if (!WS.blocksize() || WS.getNumberHistograms() < 2)
     return true;
   // Quickest check is to see if they are actually all the same vector
   if (sharedXData(WS))
@@ -418,22 +418,22 @@ bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS) {
 
   // But even if they're not they could still match...
   const double commonSum =
-      std::accumulate(WS->readX(0).begin(), WS->readX(0).end(), 0.);
+      std::accumulate(WS.readX(0).begin(), WS.readX(0).end(), 0.);
   // If this results in infinity or NaN, then we can't tell - return false
   if (commonSum == std::numeric_limits<double>::infinity() ||
       commonSum != commonSum)
     return false;
-  const size_t numHist = WS->getNumberHistograms();
+  const size_t numHist = WS.getNumberHistograms();
   for (size_t j = 1; j < numHist; ++j) {
     const double sum =
-        std::accumulate(WS->readX(j).begin(), WS->readX(j).end(), 0.);
+        std::accumulate(WS.readX(j).begin(), WS.readX(j).end(), 0.);
     // If this results in infinity or NaN, then we can't tell - return false
     if (sum == std::numeric_limits<double>::infinity() || sum != sum)
       return false;
 
     if (std::abs(commonSum) < 1.0E-7 && std::abs(sum) < 1.0E-7) {
-      for (size_t i = 0; i < WS->blocksize(); i++) {
-        if (std::abs(WS->readX(0)[i] - WS->readX(j)[i]) > 1.0E-7)
+      for (size_t i = 0; i < WS.blocksize(); i++) {
+        if (std::abs(WS.readX(0)[i] - WS.readX(j)[i]) > 1.0E-7)
           return false;
       }
     } else if (std::abs(commonSum - sum) /
@@ -453,21 +453,21 @@ bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS) {
  * number of spectra
  *  @return True if the test passes
  */
-bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
-                                    const MatrixWorkspace_const_sptr ws2,
+bool WorkspaceHelpers::matchingBins(const MatrixWorkspace &ws1,
+                                    const MatrixWorkspace &ws2,
                                     const bool firstOnly) {
   // First of all, the first vector must be the same size
-  if (ws1->readX(0).size() != ws2->readX(0).size())
+  if (ws1.readX(0).size() != ws2.readX(0).size())
     return false;
 
   // Now check the first spectrum
   const double firstWS =
-      std::accumulate(ws1->readX(0).begin(), ws1->readX(0).end(), 0.);
+      std::accumulate(ws1.readX(0).begin(), ws1.readX(0).end(), 0.);
   const double secondWS =
-      std::accumulate(ws2->readX(0).begin(), ws2->readX(0).end(), 0.);
+      std::accumulate(ws2.readX(0).begin(), ws2.readX(0).end(), 0.);
   if (std::abs(firstWS) < 1.0E-7 && std::abs(secondWS) < 1.0E-7) {
-    for (size_t i = 0; i < ws1->readX(0).size(); i++) {
-      if (std::abs(ws1->readX(0)[i] - ws2->readX(0)[i]) > 1.0E-7)
+    for (size_t i = 0; i < ws1.readX(0).size(); i++) {
+      if (std::abs(ws1.readX(0)[i] - ws2.readX(0)[i]) > 1.0E-7)
         return false;
     }
   } else if (std::abs(firstWS - secondWS) /
@@ -480,7 +480,7 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
     return true;
 
   // Check that total size of workspace is the same
-  if (ws1->size() != ws2->size())
+  if (ws1.size() != ws2.size())
     return false;
   // If that passes then check whether all the X vectors are shared
   if (sharedXData(ws1) && sharedXData(ws2))
@@ -488,7 +488,7 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
 
   // If that didn't pass then explicitly check 1 in 10 of the vectors (min 10,
   // max 100)
-  const size_t numHist = ws1->getNumberHistograms();
+  const size_t numHist = ws1.getNumberHistograms();
   size_t numberToCheck = numHist / 10;
   if (numberToCheck < 10)
     numberToCheck = 10;
@@ -499,12 +499,12 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
     step = 1;
   for (size_t i = step; i < numHist; i += step) {
     const double firstWSLoop =
-        std::accumulate(ws1->readX(i).begin(), ws1->readX(i).end(), 0.);
+        std::accumulate(ws1.readX(i).begin(), ws1.readX(i).end(), 0.);
     const double secondWSLoop =
-        std::accumulate(ws2->readX(i).begin(), ws2->readX(i).end(), 0.);
+        std::accumulate(ws2.readX(i).begin(), ws2.readX(i).end(), 0.);
     if (std::abs(firstWSLoop) < 1.0E-7 && std::abs(secondWSLoop) < 1.0E-7) {
-      for (size_t j = 0; j < ws1->readX(i).size(); j++) {
-        if (std::abs(ws1->readX(i)[j] - ws2->readX(i)[j]) > 1.0E-7)
+      for (size_t j = 0; j < ws1.readX(i).size(); j++) {
+        if (std::abs(ws1.readX(i)[j] - ws2.readX(i)[j]) > 1.0E-7)
           return false;
       }
     } else if (std::abs(firstWSLoop - secondWSLoop) /
@@ -518,11 +518,11 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
 }
 
 /// Checks whether all the X vectors in a workspace are the same one underneath
-bool WorkspaceHelpers::sharedXData(const MatrixWorkspace_const_sptr WS) {
-  const double &first = WS->readX(0)[0];
-  const size_t numHist = WS->getNumberHistograms();
+bool WorkspaceHelpers::sharedXData(const MatrixWorkspace &WS) {
+  const double &first = WS.readX(0)[0];
+  const size_t numHist = WS.getNumberHistograms();
   for (size_t i = 1; i < numHist; ++i) {
-    if (&first != &(WS->readX(i)[0]))
+    if (&first != &(WS.readX(i)[0]))
       return false;
   }
   return true;

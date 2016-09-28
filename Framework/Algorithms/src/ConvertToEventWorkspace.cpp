@@ -72,7 +72,7 @@ void ConvertToEventWorkspace::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   // Set the output
-  setProperty("OutputWorkspace", outWS);
+  setProperty("OutputWorkspace", std::move(outWS));
 }
 
 } // namespace Mantid

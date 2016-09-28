@@ -110,7 +110,6 @@ void FilterByTime::exec() {
         "The stop time should be larger than the start time.");
 
   auto outputWS = DataObjects::create<EventWorkspace>(*inputWS);
-  setProperty("OutputWorkspace", outputWS);
 
   size_t numberOfSpectra = inputWS->getNumberHistograms();
 
@@ -137,6 +136,7 @@ void FilterByTime::exec() {
 
   // Now filter out the run, using the DateAndTime type.
   outputWS->mutableRun().filterByTime(start, stop);
+  setProperty("OutputWorkspace", std::move(outputWS));
 }
 
 } // namespace Algorithms

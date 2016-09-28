@@ -327,7 +327,7 @@ void NormaliseToMonitor::checkProperties(
   }
 
   // Do a check for common binning and store
-  m_commonBins = API::WorkspaceHelpers::commonBoundaries(inputWorkspace);
+  m_commonBins = API::WorkspaceHelpers::commonBoundaries(*inputWorkspace);
 
   int spec_num(-1);
   // Check the monitor spectrum or workspace and extract into new workspace
@@ -433,7 +433,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(
   // In this case we need to test whether the bins in the monitor workspace
   // match
   m_commonBins = (m_commonBins && API::WorkspaceHelpers::matchingBins(
-                                      inputWorkspace, monitorWS, true));
+                                      *inputWorkspace, *monitorWS, true));
 
   // If the workspace passes all these tests, make a local copy because it will
   // get changed

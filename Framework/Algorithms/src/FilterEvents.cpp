@@ -500,7 +500,8 @@ void FilterEvents::createOutputWorkspaces() {
         add2output = false;
     }
 
-    auto optws = create<DataObjects::EventWorkspace>(*m_eventWS);
+    boost::shared_ptr<EventWorkspace> optws =
+        create<DataObjects::EventWorkspace>(*m_eventWS);
     m_outputWS.emplace(wsgroup, optws);
 
     // Add information, including title and comment, to output workspace

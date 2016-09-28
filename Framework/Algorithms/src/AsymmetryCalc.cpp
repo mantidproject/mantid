@@ -166,7 +166,7 @@ void AsymmetryCalc::exec() {
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");
 
-  setProperty("OutputWorkspace", outputWS);
+  setProperty("OutputWorkspace", std::move(outputWS));
 }
 
 } // namespace Algorithm

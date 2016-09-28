@@ -243,7 +243,7 @@ void CalculateFlatBackground::convertToDistribution(
   bool variationFound(false);
   // the number of spectra we need to check to assess if the bin widths are all
   // the same
-  const size_t total = WorkspaceHelpers::commonBoundaries(workspace)
+  const size_t total = WorkspaceHelpers::commonBoundaries(*workspace)
                            ? 1
                            : workspace->getNumberHistograms();
 

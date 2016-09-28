@@ -114,7 +114,7 @@ void MaskBins::exec() {
 
     // If the binning is the same throughout, we only need to find the index
     // limits once
-    const bool commonBins = WorkspaceHelpers::commonBoundaries(inputWS);
+    const bool commonBins = WorkspaceHelpers::commonBoundaries(*inputWS);
     if (commonBins) {
       auto X = inputWS->binEdges(0);
       this->findIndices(X, startBin, endBin);

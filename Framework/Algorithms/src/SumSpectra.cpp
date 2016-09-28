@@ -481,8 +481,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
                                             true);
 
   // Assign it to the output workspace property
-  setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace));
+  setProperty("OutputWorkspace", std::move(outputWorkspace));
 }
 
 } // namespace Algorithms

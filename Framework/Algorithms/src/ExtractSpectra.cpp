@@ -100,7 +100,7 @@ void ExtractSpectra::exec() {
   m_inputWorkspace = getProperty("InputWorkspace");
   m_histogram = m_inputWorkspace->isHistogramData();
   // Check for common boundaries in input workspace
-  m_commonBoundaries = WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
+  m_commonBoundaries = WorkspaceHelpers::commonBoundaries(*m_inputWorkspace);
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputWorkspace);
   if (eventW != nullptr) {
@@ -351,8 +351,7 @@ void ExtractSpectra::execEvent() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace));
+  setProperty("OutputWorkspace", std::move(outputWorkspace));
 }
 
 /** Retrieves the optional input properties and checks that they have valid

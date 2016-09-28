@@ -482,8 +482,7 @@ void DiffractionFocussing2::execEvent() {
                          "groups. Histogram will be empty.\n";
   }
   out->clearMRU();
-  setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<MatrixWorkspace>(out));
+  setProperty("OutputWorkspace", std::move(out));
   delete prog;
 }
 

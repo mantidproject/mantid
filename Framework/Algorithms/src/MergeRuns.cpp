@@ -139,7 +139,7 @@ void MergeRuns::exec() {
       MatrixWorkspace_sptr addee;
       // Only do a rebinning if the bins don't already match - otherwise can
       // just add (see the 'else')
-      if (!WorkspaceHelpers::matchingBins(outWS, *it, true)) {
+      if (!WorkspaceHelpers::matchingBins(*outWS, **it, true)) {
         std::vector<double> rebinParams;
         this->calculateRebinParams(outWS, *it, rebinParams);
 
@@ -344,8 +344,7 @@ void MergeRuns::execEvent() {
   }
 
   // Set the final workspace to the output property
-  setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<MatrixWorkspace>(outWS));
+  setProperty("OutputWorkspace", std::move(outWS));
 }
 
 //------------------------------------------------------------------------------------------------
@@ -479,7 +478,7 @@ MergeRuns::validateInputs(const std::vector<std::string> &inputWorkspaces) {
       throw;
     }
     // Check that it has common binning
-    if (!WorkspaceHelpers::commonBoundaries(inWS.back())) {
+    if (!WorkspaceHelpers::commonBoundaries(*inWS.back())) {
       g_log.error("Input workspaces must have common binning for all spectra");
       throw std::invalid_argument(
           "Input workspaces must have common binning for all spectra");

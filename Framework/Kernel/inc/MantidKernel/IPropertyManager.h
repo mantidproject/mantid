@@ -145,6 +145,24 @@ public:
     return this;
   }
 
+  /** Templated method to set the value of a PropertyWithValue from a
+   * std::unique_ptr
+   *  @param name :: The name of the property (case insensitive)
+   *  @param value :: The value to assign to the property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename T>
+  IPropertyManager *setProperty(const std::string &name,
+                                std::unique_ptr<T> value) {
+    setTypedProperty(name, std::move(value),
+                     boost::is_convertible<std::unique_ptr<T>,
+                                           boost::shared_ptr<DataItem>>());
+    this->afterPropertySet(name);
+    return this;
+  }
+
   /** Specialised version of setProperty template method to handle const char *
   *  @param name :: The name of the property (case insensitive)
   *  @param value :: The value to assign to the property
@@ -461,6 +479,28 @@ private:
     // T is convertible to DataItem_sptr
     boost::shared_ptr<DataItem> data =
         boost::static_pointer_cast<DataItem>(value);
+    std::string error = getPointerToProperty(name)->setDataItem(data);
+    if (!error.empty()) {
+      throw std::invalid_argument(error);
+    }
+    return this;
+  }
+
+  /**
+   * Set a property value from std::unique_ptr that is convertible to a
+   * DataItem_sptr
+   *  @param name :: The name of the property (case insensitive)
+   *  @param value :: The value to assign to the property
+   *  @throw Exception::NotFoundError If the named property is unknown
+   *  @throw std::invalid_argument If an attempt is made to assign to a property
+   * of different type
+   */
+  template <typename T>
+  IPropertyManager *setTypedProperty(const std::string &name,
+                                     std::unique_ptr<T> value,
+                                     const boost::true_type &) {
+    // T is convertible to DataItem_sptr
+    boost::shared_ptr<DataItem> data(std::move(value));
     std::string error = getPointerToProperty(name)->setDataItem(data);
     if (!error.empty()) {
       throw std::invalid_argument(error);

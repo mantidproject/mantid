@@ -350,8 +350,7 @@ void AnvredCorrection::execEvent() {
   run.addProperty<double>("Radius", m_radius, true);
   if (!m_onlySphericalAbsorption && !m_returnTransmissionOnly)
     run.addProperty<bool>("LorentzCorrection", 1, true);
-  setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<MatrixWorkspace>(correctionFactors));
+  setProperty("OutputWorkspace", std::move(correctionFactors));
 
   // Now do some cleaning-up since destructor may not be called immediately
   this->cleanup();

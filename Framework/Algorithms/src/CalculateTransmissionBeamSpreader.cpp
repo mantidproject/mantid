@@ -101,9 +101,9 @@ void CalculateTransmissionBeamSpreader::exec() {
         "The input workspaces do not come from the same instrument");
   }
   // Check that the two inputs have matching binning
-  if (!WorkspaceHelpers::matchingBins(sample_spreaderWS, direct_spreaderWS) ||
-      !WorkspaceHelpers::matchingBins(sample_spreaderWS, sample_scatterWS) ||
-      !WorkspaceHelpers::matchingBins(sample_spreaderWS, direct_scatterWS)) {
+  if (!WorkspaceHelpers::matchingBins(*sample_spreaderWS, *direct_spreaderWS) ||
+      !WorkspaceHelpers::matchingBins(*sample_spreaderWS, *sample_scatterWS) ||
+      !WorkspaceHelpers::matchingBins(*sample_spreaderWS, *direct_scatterWS)) {
     g_log.error("Input workspaces do not have matching binning");
     throw std::invalid_argument(
         "Input workspaces do not have matching binning");
