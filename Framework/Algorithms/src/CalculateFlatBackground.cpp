@@ -492,6 +492,14 @@ double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS,
   return slope * centre + intercept;
 }
 
+/**
+* Utilizes cyclic boundary conditions when calculating the
+* average in the window.
+* @param WS The workspace to operate on
+* @param wsIndex The workspace index to operate on
+* @param windowWidth Width of the averaging window in bins
+* @return Minimum
+*/
 double CalculateFlatBackground::movingAverage(API::MatrixWorkspace_const_sptr WS, int wsIndex, size_t windowWidth) const {
   const auto &ys = WS->y(wsIndex);
   double currentMin = std::numeric_limits<double>::max();
