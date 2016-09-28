@@ -124,25 +124,6 @@ def GetThetaQ(ws):
 
     return theta, q
 
-
-def ExtractFloat(data_string):
-    """
-    Extract float values from an ASCII string
-    """
-    values = data_string.split()
-    values = [float(v) for v in values]
-    return values
-
-
-def ExtractInt(data_string):
-    """
-    Extract int values from an ASCII string
-    """
-    values = data_string.split()
-    values = [int(v) for v in values]
-    return values
-
-
 def PadArray(inarray, nfixed):
     """
     Pad a list to specified size.

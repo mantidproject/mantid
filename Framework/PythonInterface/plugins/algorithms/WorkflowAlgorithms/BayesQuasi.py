@@ -415,7 +415,8 @@ class BayesQuasi(PythonAlgorithm):
         asc = self._read_ascii_file(sname+'.qse')
         var = asc[3].split()                            #split line on spaces
         nspec = var[0]
-        var = ExtractInt(asc[6])
+        var = (asc[6]).split()
+        var = [int(v) for v in var]
         first = 7
         Xout = []
         Yf, Yi, Yb = [], [], []
@@ -478,30 +479,30 @@ class BayesQuasi(PythonAlgorithm):
 
     def SeBlock(self, a, index):                                 #read Ascii block of Integers
         index += 1
-        val = ExtractFloat(a[index])               #Q,AMAX,HWHM
+        val = self.ExtractFloat(a[index])               #Q,AMAX,HWHM
         Q = val[0]
         AMAX = val[1]
         HWHM = val[2]
         index += 1
-        val = ExtractFloat(a[index])               #A0
+        val = self.ExtractFloat(a[index])               #A0
         int0 = [AMAX*val[0]]
         index += 1
-        val = ExtractFloat(a[index])                #AI,FWHM index peak
+        val = self.ExtractFloat(a[index])                #AI,FWHM index peak
         fw = [2.*HWHM*val[1]]
         integer = [AMAX*val[0]]
         index += 1
-        val = ExtractFloat(a[index])                 #SIG0
+        val = self.ExtractFloat(a[index])                 #SIG0
         int0.append(val[0])
         index += 1
-        val = ExtractFloat(a[index])                  #SIG3K
+        val = self.ExtractFloat(a[index])                  #SIG3K
         integer.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
         index += 1
-        val = ExtractFloat(a[index])                  #SIG1K
+        val = self.ExtractFloat(a[index])                  #SIG1K
         fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
         index += 1
-        be = ExtractFloat(a[index])                  #EXPBET
+        be = self.ExtractFloat(a[index])                  #EXPBET
         index += 1
-        val = ExtractFloat(a[index])                  #SIG2K
+        val = self.ExtractFloat(a[index])                  #SIG2K
         be.append(math.sqrt(math.fabs(val[0])+1.0e-20))
         index += 1
         return index, Q, int0 ,fw , integer, be                                      #values as list
@@ -645,7 +646,7 @@ class BayesQuasi(PythonAlgorithm):
         #yield a list of floats from a list of lines of text
         #encapsulates the iteration over a block of lines
         for line in block:
-            yield ExtractFloat(line)
+            yield self.ExtractFloat(line)
 
 
     def _read_ql_file(self, file_name, nl):
@@ -655,7 +656,7 @@ class BayesQuasi(PythonAlgorithm):
 
         asc = self._read_ascii_file(file_name)
         #extract number of blocks from the file header
-        num_blocks = int(ExtractFloat(asc[3])[0])
+        num_blocks = int(self.ExtractFloat(asc[3])[0])
 
         q_data = []
         amp_data, FWHM_data, height_data = [], [], []
@@ -820,6 +821,14 @@ class BayesQuasi(PythonAlgorithm):
             error_2 = '%s (%s) array length (%d)' % (name2, in2WS, x_len_2)
             error = error_1 + ' not = ' + error_2
             raise ValueError(error)
+
+    def ExtractFloat(self, data_string):
+        """
+        Extract float values from an ASCII string
+        """
+        values = data_string.split()
+        values = [float(v) for v in values]
+        return values
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(BayesQuasi)

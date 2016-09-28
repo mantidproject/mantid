@@ -65,17 +65,6 @@ class IndirectCommonTests(unittest.TestCase):
         self.assert_lists_almost_match(expected_theta_result, actual_theta_result)
         self.assert_lists_almost_match(expected_Q_result, actual_Q_result)
 
-    def test_ExtractFloat(self):
-        data = "0.0 1 .2 3e-3 4.3 -5.5 6.0"
-        expected_result = [0, 1, 0.2, 3e-3, 4.3, -5.5, 6.0]
-        actual_result = indirect_common.ExtractFloat(data)
-        self.assert_lists_almost_match(expected_result, actual_result)
-
-    def test_ExtractInt(self):
-        data = "-2 -1 0 1 2 3 4 5"
-        expected_result = [-2, -1, 0, 1, 2, 3, 4, 5]
-        actual_result = indirect_common.ExtractInt(data)
-        self.assert_lists_match(expected_result, actual_result)
 
     def test_PadArray(self):
         data = [0,1,2,3,4,5]

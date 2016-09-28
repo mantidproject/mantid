@@ -8,7 +8,7 @@ from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd, FileFinder
 import sys, math, os.path, numpy as np
-from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt, getEfixed
+from IndirectCommon import StartTime, EndTime, getEfixed
 
 MTD_PLOT = import_mantidplot()
 
@@ -632,3 +632,19 @@ def IN13Paras(ascWS, run, title, wave):
     runTitle = ws.getRun()['run_title'].value.strip()
     logger.information('Run : ' + runNo + ' ; Title : ' + runTitle)
     logger.information('Wavelength : ' + str(wave))
+
+def ExtractFloat(data_string):
+    """
+    Extract float values from an ASCII string
+    """
+    values = data_string.split()
+    values = [float(v) for v in values]
+    return values
+
+def ExtractInt(data_string):
+    """
+    Extract int values from an ASCII string
+    """
+    values = data_string.split()
+    values = [int(v) for v in values]
+    return values
