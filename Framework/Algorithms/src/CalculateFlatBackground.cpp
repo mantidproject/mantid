@@ -117,7 +117,7 @@ void CalculateFlatBackground::exec() {
     mode = Modes::MOVING_AVERAGE;
   }
   double startX, endX;
-  int windowWidth;
+  int windowWidth = 0;
   switch (mode) {
   case Modes::LINEAR_FIT:
   case Modes::MEAN:
