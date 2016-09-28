@@ -222,7 +222,7 @@ void setSymmetryT(API::IFunction &fun) {
 }
 
 /// Maps symmetry group names to the symmetry setting functions
-const std::map<std::string, std::function<void(API::IFunction &)>> SYMMETRY_MAP {
+const std::map<std::string, std::function<void(API::IFunction &)>> SYMMETRY_MAP{
     // Set symmetry C1 or Ci
     {"C1", setSymmetryC1},
     {"Ci", setSymmetryC1},
