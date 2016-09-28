@@ -425,7 +425,11 @@ void GetEiMonDet2::parseIndices(std::vector<size_t> &detectorIndices,
         spectraListParser.parse(getProperty(PropertyNames::DETECTORS)));
     auto back = std::back_inserter(detectorIndices);
     std::copy(detectors.begin(), detectors.end(), back);
-    monitorIndex = getProperty(PropertyNames::MONITOR);
+    int monitor = getProperty(PropertyNames::MONITOR);
+    if (monitor < 0) {
+      throw std::runtime_error("Monitor cannot be negative.");
+    }
+    monitorIndex = static_cast<size_t>(monitor);
   }
 }
 
