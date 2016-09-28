@@ -439,60 +439,31 @@ public:
     AnalysisDataService::Instance().remove("Removed1");
   }
 
+  void test_movingAverageThrowsOnlyWithInvalidWindowWidth() {
+    size_t binCount = 5;
+    movingAverageWindowWidthTest(0, binCount, true);
+    movingAverageWindowWidthTest(1, binCount, false);
+    movingAverageWindowWidthTest(binCount - 1, binCount, false);
+    movingAverageWindowWidthTest(binCount, binCount, false);
+    movingAverageWindowWidthTest(binCount + 1, binCount, true);
+  }
+
   void test_movingAverageModeWhenWindowWidthIsOne() {
     const size_t spectraCount = 3;
     const size_t binCount = 4;
-    Mantid::DataObjects::Workspace2D_sptr WS;
-    for (size_t i = 0; i < binCount; ++i) {
-      WS = movingAverageCreateWorkspace(spectraCount, binCount, i);
-      Mantid::Algorithms::CalculateFlatBackground flatBG;
-      TS_ASSERT_THROWS_NOTHING(flatBG.initialize())
-      TS_ASSERT(flatBG.isInitialized())
-      flatBG.setProperty("InputWorkspace", WS);
-      flatBG.setPropertyValue("OutputWorkspace", "Removed1");
-      flatBG.setPropertyValue("Mode", "Moving Average");
-      flatBG.setProperty("AveragingWindowWidth", 1);
-      flatBG.setPropertyValue("OutputMode", "Return Background");
-      TS_ASSERT_THROWS_NOTHING(flatBG.execute())
-      TS_ASSERT(flatBG.isExecuted())
-      MatrixWorkspace_sptr outputWS =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed1");
-      for (size_t j = 0; j < spectraCount; ++j) {
-        // The special background value (the correct answer) is taken from above.
-        TS_ASSERT_DELTA(outputWS->y(j)[0], movingAverageSpecialY(j), 1e-12)
-      }
-      AnalysisDataService::Instance().remove("Removed1");
-    }
+    movingAverageTest(1, spectraCount, binCount);
   }
 
   void test_movingAverageModeWhenWindowWidthIsTwo() {
     const size_t spectraCount = 2;
     const size_t binCount = 7;
-    Mantid::DataObjects::Workspace2D_sptr WS;
-    for (size_t i = 0; i < binCount; ++i) {
-      WS = movingAverageCreateWorkspace(spectraCount, binCount, i);
-      Mantid::Algorithms::CalculateFlatBackground flatBG;
-      TS_ASSERT_THROWS_NOTHING(flatBG.initialize())
-      TS_ASSERT(flatBG.isInitialized())
-      flatBG.setProperty("InputWorkspace", WS);
-      flatBG.setPropertyValue("OutputWorkspace", "Removed1");
-      flatBG.setPropertyValue("Mode", "Moving Average");
-      flatBG.setProperty("AveragingWindowWidth", 2);
-      flatBG.setPropertyValue("OutputMode", "Return Background");
-      TS_ASSERT_THROWS_NOTHING(flatBG.execute())
-      TS_ASSERT(flatBG.isExecuted())
-      MatrixWorkspace_sptr outputWS =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed1");
-      for (size_t j = 0; j < spectraCount; ++j) {
-        if (i == 0 || i == binCount - 1) {
-          // If minimum at end or beginning, then no average is taken.
-          TS_ASSERT_DELTA(outputWS->y(j)[0], movingAverageSpecialY(j), 1e-12)
-        } else {
-          TS_ASSERT_DELTA(outputWS->y(j)[0], 0.5 * (movingAverageSpecialY(j) + movingAverageStandardY(j)), 1e-12)
-        }
-      }
-      AnalysisDataService::Instance().remove("Removed1");
-    }
+    movingAverageTest(2, spectraCount, binCount);
+  }
+
+  void test_movingAverageModeWithMaximalWindowWidth() {
+    const size_t spectraCount = 4;
+    const size_t binCount = 9;
+    movingAverageTest(binCount, spectraCount, binCount);
   }
 
 private:
@@ -562,6 +533,53 @@ private:
 
   double movingAverageStandardY(const size_t wsIndex) {
     return 9.34 + 3.2 * static_cast<double>(wsIndex);
+  }
+
+  void movingAverageTest(const size_t windowWidth, const size_t spectraCount, const size_t binCount) {
+    Mantid::DataObjects::Workspace2D_sptr WS;
+    for (size_t i = 0; i < binCount; ++i) {
+      WS = movingAverageCreateWorkspace(spectraCount, binCount, i);
+      Mantid::Algorithms::CalculateFlatBackground flatBG;
+      flatBG.setRethrows(true);
+      TS_ASSERT_THROWS_NOTHING(flatBG.initialize())
+      TS_ASSERT(flatBG.isInitialized())
+      flatBG.setProperty("InputWorkspace", WS);
+      flatBG.setPropertyValue("OutputWorkspace", "Removed1");
+      flatBG.setPropertyValue("Mode", "Moving Average");
+      flatBG.setProperty("AveragingWindowWidth", static_cast<int>(windowWidth));
+      flatBG.setPropertyValue("OutputMode", "Return Background");
+      TS_ASSERT_THROWS_NOTHING(flatBG.execute())
+      TS_ASSERT(flatBG.isExecuted())
+      MatrixWorkspace_sptr outputWS =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Removed1");
+      for (size_t j = 0; j < spectraCount; ++j) {
+        const double expected = (movingAverageSpecialY(j) + (static_cast<double>(windowWidth) - 1) * movingAverageStandardY(j)) / static_cast<double>(windowWidth);
+        TS_ASSERT_DELTA(outputWS->y(j)[0], expected, 1e-12)
+      }
+      AnalysisDataService::Instance().remove("Removed1");
+    }
+  }
+
+  void movingAverageWindowWidthTest(size_t windowWidth, size_t binCount, bool shouldThrow) {
+    Mantid::DataObjects::Workspace2D_sptr WS;
+    WS = movingAverageCreateWorkspace(1, binCount, 0);
+    Mantid::Algorithms::CalculateFlatBackground flatBG;
+    flatBG.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(flatBG.initialize())
+    TS_ASSERT(flatBG.isInitialized())
+    flatBG.setProperty("InputWorkspace", WS);
+    flatBG.setPropertyValue("OutputWorkspace", "Removed1");
+    flatBG.setPropertyValue("Mode", "Moving Average");
+    flatBG.setProperty("AveragingWindowWidth", static_cast<int>(windowWidth));
+    flatBG.setPropertyValue("OutputMode", "Return Background");
+    if (shouldThrow) {
+      TS_ASSERT_THROWS_ANYTHING(flatBG.execute())
+      TS_ASSERT(!flatBG.isExecuted())
+    } else {
+      TS_ASSERT_THROWS_NOTHING(flatBG.execute())
+      TS_ASSERT(flatBG.isExecuted())
+    }
+  AnalysisDataService::Instance().remove("Removed1");
   }
 };
 

@@ -494,13 +494,8 @@ double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS,
 
 double CalculateFlatBackground::movingAverage(API::MatrixWorkspace_const_sptr WS, int wsIndex, size_t windowWidth) const {
   const auto &ys = WS->y(wsIndex);
-  // First and last points are not averaged.
-  double currentMin = std::min(ys.front(), ys.back());
-  for (size_t i = 1; i < windowWidth / 2; ++i) {
-    currentMin = std::min(currentMin, ys[i]);
-    currentMin = std::min(currentMin, ys[ys.size() - i - 1]);
-  }
-  // For the rest, average over the window.
+  double currentMin = std::numeric_limits<double>::max();
+
   // Initialize sum.
   double sum = 0;
   for (size_t i = 0; i < windowWidth; ++i) {
@@ -508,9 +503,15 @@ double CalculateFlatBackground::movingAverage(API::MatrixWorkspace_const_sptr WS
   }
   // When moving the window, we need to subtract the single point "falling off"
   // while adding a new point. Saves us summing all the points in the window.
-  for (size_t i = 0; i < ys.size() - windowWidth; ++i) {
+  for (size_t i = 0; i < ys.size() - 1; ++i) {
     currentMin = std::min(currentMin, sum / static_cast<double>(windowWidth));
-    sum = sum - ys[i] + ys[i + windowWidth];
+    sum -= ys[i];
+    size_t j = i + windowWidth;
+    // Cyclic boundary conditions.
+    if (j >= ys.size()) {
+      j -= ys.size();
+    }
+    sum += ys[j];
   }
   currentMin = std::min(currentMin, sum / static_cast<double>(windowWidth));
   return currentMin;
