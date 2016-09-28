@@ -82,7 +82,8 @@ with a fit to the following model:
         4. Up to 10% of noise in the quasi-elastic signal
         5. Assume <u^2>=0.8 Angstroms^2 for the Debye-Waller factor
     """
-    diffCoeff=1.0;  tau=50.0;  u2=0.8;  hbar=0.658211626  # units of hbar are ps*meV
+    diffCoeff=1.0  # Units are Angstroms^2/ps
+    tau=50.0;  u2=0.8;  hbar=0.658211626  # units of hbar are ps*meV
     qdataY=np.empty(0)  # will hold all Q-values (all spectra)
     for Q in Qs:
         centre=2*dE*(0.5-np.random.random())  # some shift along the energy axis
@@ -149,6 +150,7 @@ with a fit to the following model:
         if nparms==2:
             break  # We got the three parameters we are interested in
     # Check nominal and optimal values are within error ranges:
+    DiffCoeff = DiffCoeff/10.0  # change units from 10^{-5}cm^2/s to Angstroms^2/ps
     if abs(diffCoeff-DiffCoeff)/diffCoeff < 0.1:
         print("Optimal Length within 10% of nominal value")
     else:
