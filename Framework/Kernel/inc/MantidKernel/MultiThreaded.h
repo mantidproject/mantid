@@ -12,8 +12,9 @@ namespace Kernel {
  * @param workspace pointer to workspace to verify.
  * @return Whether workspace is threadsafe.
  */
-template <typename Arg> inline bool threadSafe(Arg workspace) {
-  static_assert(std::is_pointer<Arg>::value, "Pass a non-owning raw pointer.");
+template <typename Arg>
+inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
+threadSafe(Arg workspace) {
   return !workspace || workspace->threadSafe();
 }
 
@@ -25,9 +26,34 @@ template <typename Arg> inline bool threadSafe(Arg workspace) {
   * @return whether workspace is threadsafe.
   */
 template <typename Arg, typename... Args>
-inline bool threadSafe(Arg workspace, Args... others) {
-  static_assert(std::is_pointer<Arg>::value, "Pass a non-owning raw pointer.");
+inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
+threadSafe(Arg workspace, Args... others) {
   return (!workspace || workspace->threadSafe()) && threadSafe(others...);
+}
+
+/** Thread-safety check
+ * Checks the workspace to ensure it is suitable for multithreaded access.
+ * @param workspace reference to workspace to verify.
+ * @return Whether workspace is threadsafe.
+ */
+template <typename Arg>
+inline
+    typename std::enable_if<std::is_lvalue_reference<Arg &>::value, bool>::type
+    threadSafe(const Arg &workspace) {
+  return workspace.threadSafe();
+}
+
+/** Thread-safety check
+ * Checks the workspace to ensure it is suitable for multithreaded access.
+ * @param workspace reference to workspace to verify.
+ * @param others references or pointers to all other workspaces which need to be
+ * checked.
+ * @return whether workspace is threadsafe.
+ */
+template <typename Arg, typename... Args>
+inline typename std::enable_if<std::is_lvalue_reference<Arg &>::value, bool>::type
+threadSafe(const Arg &workspace, Args... others) {
+  return workspace.threadSafe() && threadSafe(others...);
 }
 
 } // namespace Kernel
