@@ -39,8 +39,8 @@ options are available:
   A `Gauss-Newton <https://en.wikipedia.org/wiki/Gauss–Newton_algorithm#Improved_versions>`__ algorithm with damping.
 - :ref:`FABADA <FABADA>`
 - `Trust region
-  <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__: a `Trust
-  region <https://en.wikipedia.org/wiki/Trust_region> algorithm` that,
+  <https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls>`__: a `trust
+  region algorithm <https://en.wikipedia.org/wiki/Trust_region>`__ that,
   at each iteration, calculates and returns the step that reduces the
   model by an acceptable amount by solving (or approximating a
   solution to) the trust-region subproblem
