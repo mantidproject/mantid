@@ -42,11 +42,6 @@ AlignAndFocusPowder::AlignAndFocusPowder()
       tmin(0.0), tmax(0.0), m_preserveEvents(false), m_processLowResTOF(false),
       m_lowResSpecOffset(0), m_progress(nullptr) {}
 
-AlignAndFocusPowder::~AlignAndFocusPowder() {
-  if (m_progress)
-    delete m_progress;
-}
-
 const std::string AlignAndFocusPowder::name() const {
   return "AlignAndFocusPowder";
 }

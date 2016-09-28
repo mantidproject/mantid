@@ -64,8 +64,6 @@ class DLLExport AlignAndFocusPowder : public API::DataProcessorAlgorithm {
 public:
   /// Constructor
   AlignAndFocusPowder();
-  /// Destructor
-  ~AlignAndFocusPowder() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override;
   /// Algorithm's version for identification overriding a virtual method
