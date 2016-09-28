@@ -206,6 +206,8 @@ public:
 
   /// name of top level NXentry to use
   std::string m_top_entry_name;
+
+  // NEW...NEW...NEW... Replace m_file by hdf5 handler
   ::NeXus::File *m_file;
 
   /// whether or not to launch multiple ProcessBankData jobs per bank
@@ -263,6 +265,8 @@ private:
                             const std::string &binsName, size_t start_wi = 0,
                             size_t end_wi = 0);
   template <typename T> void filterDuringPause(T workspace);
+
+  void loadMonitorsToEventWS(API::Progress &prog);
 
   // Validate the optional spectra input properties and initialize m_specList
   void createSpectraList(int32_t min, int32_t max);

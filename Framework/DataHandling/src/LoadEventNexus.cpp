@@ -859,10 +859,18 @@ void LoadEventNexus::init() {
 
 //----------------------------------------------------------------------------------------------
 /** set the name of the top level NXentry m_top_entry_name
+ * Top entry name can be
+ * 1. user specified
+ * 2. entry
+ * 3. raw_data_1
 */
 void LoadEventNexus::setTopEntryName() {
+
+  // HDF5-REFACTOR
+
   std::string nxentryProperty = getProperty("NXentryName");
   if (nxentryProperty.size() > 0) {
+    // set m_top_entry_name to user-specified value if it is not empty
     m_top_entry_name = nxentryProperty;
     return;
   }
@@ -874,6 +882,8 @@ void LoadEventNexus::setTopEntryName() {
 
     // Choose the first entry as the default
     m_top_entry_name = entries.begin()->first;
+    //  g_log.warning() << "First get: top entry = " << entries.begin()->first
+    //  << ", " << entries.begin()->second << "\n";
 
     for (it = entries.begin(); it != entries.end(); ++it) {
       if (((it->first == "entry") || (it->first == "raw_data_1")) &&
@@ -882,11 +892,15 @@ void LoadEventNexus::setTopEntryName() {
         break;
       }
     }
+
+    // g_log.warning() << "top entry name = " << m_top_entry_name << "\n";
   } catch (const std::exception &) {
     g_log.error() << "Unable to determine name of top level NXentry - assuming "
                      "\"entry\".\n";
     m_top_entry_name = "entry";
   }
+
+  return;
 }
 
 template <typename T> void LoadEventNexus::filterDuringPause(T workspace) {
@@ -940,7 +954,7 @@ void LoadEventNexus::exec() {
   bool load_monitors = this->getProperty("LoadMonitors");
 
   // this must make absolutely sure that m_file is a valid (and open)
-  // NeXus::File object
+  // NeXus::File object: m_file
   safeOpenFile(m_filename);
 
   setTopEntryName();
@@ -952,6 +966,7 @@ void LoadEventNexus::exec() {
   Progress prog(this, 0.0, 0.3, reports);
 
   // Load the detector events
+  // create an EventWorkspace
   m_ws = boost::make_shared<EventWorkspaceCollection>(); // Algorithm currently
                                                          // relies on an
   // object-level workspace ptr
@@ -974,29 +989,33 @@ void LoadEventNexus::exec() {
   this->setProperty("OutputWorkspace", m_ws->combinedWorkspace());
   // Load the monitors
   if (load_monitors) {
-    prog.report("Loading monitors");
-    const bool monitorsAsEvents = getProperty("MonitorsAsEvents");
-
-    if (monitorsAsEvents && !this->hasEventMonitors()) {
-      g_log.warning()
-          << "The property MonitorsAsEvents has been enabled but "
-             "this file does not seem to have monitors with events.\n";
-    }
-    if (monitorsAsEvents) {
-      // no matter whether the file has events or not, the user has requested to
-      // load events from monitors
-      if (m_ws->nPeriods() > 1) {
-        throw std::runtime_error(
-            "Loading multi-period monitors in event mode is not supported.");
-      }
-      this->runLoadMonitorsAsEvents(&prog);
-    } else {
-      // this resorts to child algorithm 'LoadNexusMonitors', passing the
-      // property 'MonitorsAsEvents'
-      this->runLoadMonitors();
-    }
+    loadMonitorsToEventWS(prog);
   }
 }
+
+void LoadEventNexus::loadMonitorsToEventWS(Progress &prog) {
+  prog.report("Loading monitors");
+  const bool monitorsAsEvents = getProperty("MonitorsAsEvents");
+
+  if (monitorsAsEvents && !this->hasEventMonitors()) {
+    g_log.warning()
+        << "The property MonitorsAsEvents has been enabled but "
+           "this file does not seem to have monitors with events.\n";
+  }
+  if (monitorsAsEvents) {
+    // no matter whether the file has events or not, the user has requested to
+    // load events from monitors
+    if (m_ws->nPeriods() > 1) {
+      throw std::runtime_error(
+          "Loading multi-period monitors in event mode is not supported.");
+    }
+    this->runLoadMonitorsAsEvents(&prog);
+  } else {
+    // this resorts to child algorithm 'LoadNexusMonitors', passing the
+    // property 'MonitorsAsEvents'
+    this->runLoadMonitors();
+  }
+  }
 
 //-----------------------------------------------------------------------------
 /** Generate a look-up table where the index = the pixel ID of an event
