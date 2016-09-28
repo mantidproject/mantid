@@ -1,5 +1,5 @@
-#ifndef MANTID_MANTIDWIDGETS_WORKSPACEPRESENTER_H_
-#define MANTID_MANTIDWIDGETS_WORKSPACEPRESENTER_H_
+#ifndef MANTIDQT_MANTIDWIDGETS_WORKSPACEPRESENTER_H_
+#define MANTIDQT_MANTIDWIDGETS_WORKSPACEPRESENTER_H_
 
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "MantidQtMantidWidgets/WorkspacePresenter/ViewNotifiable.h"
@@ -110,4 +110,4 @@ private:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTID_MANTIDWIDGETS_WORKSPACEPRESENTER_H_
+#endif // MANTIDQT_MANTIDWIDGETS_WORKSPACEPRESENTER_H_

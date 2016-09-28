@@ -82,7 +82,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Note.cpp
                    src/nrutil.cpp
                    src/OpenProjectDialog.cpp
-                   src/pixmaps.cpp
                    src/Plot3DDialog.cpp
                    src/Plot.cpp
                    src/PlotCurve.cpp
@@ -165,7 +164,6 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmDockWidget.cpp
                    src/Mantid/ErrorBarSettings.cpp
                    src/Mantid/FirstTimeSetup.cpp
                    src/Mantid/FitParameterTie.cpp
-                   src/Mantid/FlowLayout.cpp
                    src/Mantid/IFunctionWrapper.cpp
                    src/Mantid/ImportWorkspaceDlg.cpp
                    src/Mantid/InputHistory.cpp
@@ -188,20 +186,14 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmDockWidget.cpp
                    src/Mantid/MantidMatrixDialog.cpp
                    src/Mantid/MantidSampleLogDialog.cpp
                    src/Mantid/MantidSampleMaterialDialog.cpp
-				   src/Mantid/MantidSurfacePlotDialog.cpp
 				   src/Mantid/MantidGroupPlotGenerator.cpp
                    src/Mantid/MantidUI.cpp
                    src/Mantid/MantidTable.cpp
-				   src/Mantid/MantidTreeWidget.cpp
-				   src/Mantid/MantidTreeWidgetItem.cpp
-                   src/Mantid/MantidWSIndexDialog.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
-                   src/Mantid/QWorkspaceDockView.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
 				   src/Mantid/SampleLogDialogBase.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
-                   src/Mantid/WorkspaceIcons.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindow.cpp
 )
 
@@ -287,7 +279,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Note.h
                    src/nrutil.h
                    src/OpenProjectDialog.h
-                   src/pixmaps.h
                    src/Plot3DDialog.h
                    src/PlotCurve.h
                    src/PlotDialog.h
@@ -364,7 +355,6 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmDockWidget.h
                    src/Mantid/ErrorBarSettings.h
                    src/Mantid/FirstTimeSetup.h
                    src/Mantid/FitParameterTie.h
-                   src/Mantid/FlowLayout.h
                    src/Mantid/IFunctionWrapper.h
                    src/Mantid/ImportWorkspaceDlg.h
 		   src/Mantid/IMantidMatrixExtensionHandler.h
@@ -390,20 +380,14 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmDockWidget.h
                    src/Mantid/MantidMatrixFunction.h
                    src/Mantid/MantidSampleLogDialog.h
                    src/Mantid/MantidSampleMaterialDialog.h
-				   src/Mantid/MantidSurfacePlotDialog.h
 				   src/Mantid/MantidGroupPlotGenerator.h
                    src/Mantid/MantidUI.h
-                   src/Mantid/MantidWSIndexDialog.h
                    src/Mantid/MantidTable.h
-				   src/Mantid/MantidTreeWidget.h
-				   src/Mantid/MantidTreeWidgetItem.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
-                   src/Mantid/QWorkspaceDockView.h
                    src/Mantid/RemoveErrorsDialog.h
 				   src/Mantid/SampleLogDialogBase.h
                    src/Mantid/UserFitFunctionDialog.h
-                   src/Mantid/WorkspaceIcons.h
                    src/Mantid/InstrumentWidget/InstrumentWindow.h
 )
 

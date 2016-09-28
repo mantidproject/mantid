@@ -84,10 +84,14 @@ set ( SRC_FILES
 	src/InstrumentView/XIntegrationControl.cpp
 	src/LineEditWithClear.cpp
 	src/LogValueSelector.cpp
+	src/MantidTreeWidget.cpp
+	src/MantidTreeWidgetItem.cpp
 	src/MWDiag.cpp
 	src/MWRunFiles.cpp
 	src/MWView.cpp
 	src/MantidHelpWindow.cpp
+	src/MantidSurfacePlotDialog.cpp
+	src/MantidWSIndexDialog.cpp
 	src/MessageDisplay.cpp
 	src/MultifitSetupDialog.cpp
 	src/MuonFitDataSelector.cpp
@@ -117,6 +121,7 @@ set ( SRC_FILES
 	src/pythonCalc.cpp
     src/WorkspacePresenter/WorkspacePresenter.cpp
     src/WorkspacePresenter/ADSAdapter.cpp
+	src/WorkspacePresenter/QWorkspaceDockView.cpp
 )
 
 # Header files with Q_OBJECT that qmake will "moc"
@@ -147,6 +152,10 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/InstrumentSelector.h
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.h
     inc/MantidQtMantidWidgets/InputController.h
+	inc/MantidQtMantidWidgets/MantidSurfacePlotDialog.h
+	inc/MantidQtMantidWidgets/MantidWSIndexDialog.h
+	inc/MantidQtMantidWidgets/MantidTreeWidget.h
+	inc/MantidQtMantidWidgets/MantidTreeWidgetItem.h
     inc/MantidQtMantidWidgets/MantidHelpWindow.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
@@ -201,6 +210,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.h
     inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
 	inc/MantidQtMantidWidgets/LogValueSelector.h
+	inc/MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h
 )
 
 # Add the include files are NOT already in MOC_FILES
@@ -301,6 +311,7 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/InstrumentView/Viewport.h
 	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
 	inc/MantidQtMantidWidgets/LogValueSelector.h
+	inc/MantidQtMantidWidgets/MantidDisplayBase.h
 	inc/MantidQtMantidWidgets/MuonFitDataSelector.h
 	inc/MantidQtMantidWidgets/MuonFunctionBrowser.h
 	inc/MantidQtMantidWidgets/ProgressPresenter.h
@@ -312,7 +323,6 @@ set ( INC_FILES
     inc/MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProvider.h
     inc/MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h
     inc/MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h
-	inc/MantidQtMantidWidgets/WorkspacePresenter/MantidDisplayBase.h
 )
 
 # QtDesigner UI files to process

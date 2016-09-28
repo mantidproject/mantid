@@ -1,19 +1,21 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidWSIndexDialog.h"
-#include "MantidUI.h"
+#include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 
-#include <stdlib.h>
+#include <QPalette>
+#include <QPushButton>
 #include <QRegExp>
 #include <QtAlgorithms>
 #include <boost/lexical_cast.hpp>
 #include <exception>
-#include <QPalette>
+#include <stdlib.h>
 
+namespace MantidQt {
+namespace MantidWidgets {
 //----------------------------------
 // MantidWSIndexWidget methods
 //----------------------------------
@@ -367,14 +369,14 @@ bool MantidWSIndexWidget::usingSpectraNumbers() const {
  * @param showPlotAll :: If true the "Plot all" button is created
  * @param showTiledOption :: If true the "Tiled" checkbox is created
  */
-MantidWSIndexDialog::MantidWSIndexDialog(MantidUI *mui, Qt::WFlags flags,
+MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, Qt::WFlags flags,
                                          QList<QString> wsNames,
                                          const bool showWaterfallOption,
                                          const bool showPlotAll,
                                          const bool showTiledOption)
-    : QDialog(mui->appWindow(), flags),
+    : QDialog(parent, flags),
       m_widget(this, flags, wsNames, showWaterfallOption, showTiledOption),
-      m_mantidUI(mui), m_plotAll(showPlotAll) {
+      m_plotAll(showPlotAll) {
   // Set up UI.
   init();
 }
@@ -853,4 +855,6 @@ void MantidWSIndexWidget::QLineEditWithErrorMark::setError(QString error) {
     m_validLbl->setVisible(true);
     m_validLbl->setToolTip(error.trimmed());
   }
+}
+}
 }

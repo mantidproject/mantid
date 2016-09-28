@@ -1,28 +1,26 @@
-#ifndef MANTIDTREEWIDGET_H
-#define MANTIDTREEWIDGET_H
+#ifndef MANTIDQT_MANTIDWIDGETS_MANTIDTREEWIDGET_H
+#define MANTIDQT_MANTIDWIDGETS_MANTIDTREEWIDGET_H
 
-#include "Mantid/MantidSurfacePlotDialog.h"
-#include "Mantid/MantidWSIndexDialog.h"
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
+#include <MantidAPI/MatrixWorkspace_fwd.h>
+#include <MantidQtMantidWidgets/MantidSurfacePlotDialog.h>
+#include <MantidQtMantidWidgets/MantidWSIndexDialog.h>
 
 #include <QTreeWidget>
 #include <boost/shared_ptr.hpp>
 
-class QWorkspaceDockView;
-
 namespace MantidQt {
 namespace MantidWidgets {
 class MantidDisplayBase;
-}
-}
+class QWorkspaceDockView;
 
 enum class MantidItemSortScheme { ByName, ByLastModified };
 
-class MantidTreeWidget : public QTreeWidget {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidTreeWidget : public QTreeWidget {
   Q_OBJECT
 
 public:
-  MantidTreeWidget(QWorkspaceDockView *w,
-                   MantidQt::MantidWidgets::MantidDisplayBase *mui);
+  MantidTreeWidget(QWorkspaceDockView *w, MantidDisplayBase *mui);
   void mousePressEvent(QMouseEvent *e) override;
   void mouseMoveEvent(QMouseEvent *e) override;
   void mouseDoubleClickEvent(QMouseEvent *e) override;
@@ -60,5 +58,6 @@ private:
   MantidItemSortScheme m_sortScheme;
   Qt::SortOrder m_sortOrder;
 };
-
-#endif // MANTIDTREEWIDGET_H
+}
+}
+#endif // MANTIDQT_MANTIDWIDGETS_MANTIDTREEWIDGET_H

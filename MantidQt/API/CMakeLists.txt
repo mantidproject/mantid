@@ -8,6 +8,7 @@
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
 	src/HelpWindow.cpp
+	src/FlowLayout.cpp
 	src/InterfaceFactory.cpp
 	src/InterfaceManager.cpp
 	src/ListPropertyWidget.cpp
@@ -23,6 +24,7 @@
 	src/MdSettings.cpp
 	src/Message.cpp
 	src/OptionsPropertyWidget.cpp
+	src/pixmaps.cpp
 	src/PlotAxis.cpp
 	src/PowerScaleEngine.cpp
 	src/PropertyWidget.cpp
@@ -47,6 +49,7 @@
 	src/VatesViewerInterface.cpp
         src/WidgetScrollbarDecorator.cpp
 	src/WorkspaceObserver.cpp
+	src/WorkspaceIcons.cpp
 )
 
 set ( MOC_FILES
@@ -56,6 +59,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/BatchAlgorithmRunner.h
   inc/MantidQtAPI/BoolPropertyWidget.h
   inc/MantidQtAPI/FilePropertyWidget.h
+  inc/MantidQtAPI/FlowLayout.h
   inc/MantidQtAPI/GenericDialog.h
   inc/MantidQtAPI/ListPropertyWidget.h
   inc/MantidQtAPI/ManageUserDirectories.h
@@ -99,6 +103,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/MdConstants.h
 	inc/MantidQtAPI/MdPlottingCmapsProvider.h
 	inc/MantidQtAPI/MdSettings.h
+	inc/MantidQtAPI/pixmaps.h
 	inc/MantidQtAPI/PlotAxis.h
 	inc/MantidQtAPI/PowerScaleEngine.h
 	inc/MantidQtAPI/PropertyWidgetFactory.h
@@ -116,6 +121,7 @@ set ( INC_FILES
   inc/MantidQtAPI/TSVSerialiser.h
 	inc/MantidQtAPI/qwt_compat.h
         inc/MantidQtAPI/WidgetScrollbarDecorator.h
+		inc/MantidQtAPI/WorkspaceIcons.h
 )
 
 set ( UI_FILES

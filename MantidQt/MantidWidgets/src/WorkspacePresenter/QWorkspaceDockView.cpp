@@ -1,19 +1,17 @@
-#include "QWorkspaceDockView.h"
-#include "FlowLayout.h"
-#include "MantidGroupPlotGenerator.h"
-#include "MantidMatrix.h"
-#include "MantidTreeWidget.h"
-#include "MantidTreeWidgetItem.h"
-#include "WorkspaceIcons.h"
-#include "pixmaps.h"
 #include <MantidGeometry/Instrument.h>
 #include <MantidKernel/make_unique.h>
 #include <MantidQtAPI/AlgorithmDialog.h>
 #include <MantidQtAPI/AlgorithmInputHistory.h>
+#include <MantidQtAPI/FlowLayout.h>
 #include <MantidQtAPI/InterfaceManager.h>
+#include <MantidQtAPI/WorkspaceIcons.h>
+#include <MantidQtAPI/pixmaps.h>
 #include <MantidQtMantidWidgets/LineEditWithClear.h>
-#include <MantidQtMantidWidgets/WorkspacePresenter/MantidDisplayBase.h>
+#include <MantidQtMantidWidgets/MantidDisplayBase.h>
+#include <MantidQtMantidWidgets/MantidTreeWidget.h>
+#include <MantidQtMantidWidgets/MantidTreeWidgetItem.h>
 #include <MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h>
+#include <MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h>
 #include <MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h>
 
 #include <MantidAPI/FileProperty.h>
@@ -26,16 +24,17 @@
 
 #include <QFileDialog>
 #include <QHash>
+#include <QMainWindow>
 #include <QMenu>
 #include <QMessageBox>
-#include <QMainWindow>
+#include <QPushButton>
 #include <QSignalMapper>
 
 #ifdef MAKE_VATES
 #include "vtkPVDisplayInformation.h"
 #endif
 
-using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::API;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -44,9 +43,32 @@ namespace {
 Mantid::Kernel::Logger docklog("MantidDockWidget");
 
 WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
+
+bool isAllMatrixWorkspaces(const WorkspaceGroup_const_sptr &wsGroup) {
+  bool allMatrixWSes = false;
+
+  if (wsGroup) {
+    if (!wsGroup->isEmpty()) {
+      allMatrixWSes = true;
+      for (int index = 0; index < wsGroup->getNumberOfEntries(); index++) {
+        if (nullptr == boost::dynamic_pointer_cast<MatrixWorkspace>(
+                           wsGroup->getItem(index))) {
+          allMatrixWSes = false;
+          break;
+        }
+      }
+    }
+  }
+
+  return allMatrixWSes;
+}
 }
 
-QWorkspaceDockView::QWorkspaceDockView(MantidDisplayBase *mui, QMainWindow *parent)
+namespace MantidQt {
+namespace MantidWidgets {
+
+QWorkspaceDockView::QWorkspaceDockView(MantidDisplayBase *mui,
+                                       QMainWindow *parent)
     : QDockWidget(tr("Workspaces"), parent), m_mantidUI(mui), m_updateCount(0),
       m_treeUpdating(false), m_promptDelete(false),
       m_saveFileType(SaveFileType::Nexus), m_sortCriteria(SortCriteria::ByName),
@@ -223,7 +245,9 @@ void QWorkspaceDockView::onLoadAccept() {
   m_mantidUI->updateRecentFilesList(fn);
 }
 
-void QWorkspaceDockView::showLoadDialog() { m_mantidUI->showAlgorithmDialog("Load"); }
+void QWorkspaceDockView::showLoadDialog() {
+  m_mantidUI->showAlgorithmDialog("Load");
+}
 
 void QWorkspaceDockView::showLiveDataDialog() {
   m_mantidUI->showAlgorithmDialog("StartLiveData");
@@ -343,14 +367,6 @@ void QWorkspaceDockView::deleteWorkspaces(const StringList &wsNames) {
 
 void QWorkspaceDockView::clearView() { emit signalClearView(); }
 
-QWorkspaceDockView::SortDirection QWorkspaceDockView::getSortDirection() const {
-  return m_sortDirection;
-}
-
-QWorkspaceDockView::SortCriteria QWorkspaceDockView::getSortCriteria() const {
-  return m_sortCriteria;
-}
-
 void QWorkspaceDockView::sortAscending() {
   m_sortDirection = SortDirection::Ascending;
   m_presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
@@ -398,10 +414,6 @@ void QWorkspaceDockView::sortWorkspaces(SortCriteria criteria,
                            ? Qt::AscendingOrder
                            : Qt::DescendingOrder);
   m_tree->sort();
-}
-
-QWorkspaceDockView::SaveFileType QWorkspaceDockView::getSaveFileType() const {
-  return m_saveFileType;
 }
 
 void QWorkspaceDockView::saveWorkspaceCollection() {
@@ -1028,7 +1040,7 @@ void QWorkspaceDockView::addWorkspaceGroupMenuItems(
   // - only one group is selected
   if (m_tree->selectedItems().size() == 1) {
     if (groupWS && groupWS->getNumberOfEntries() > 2) {
-      if (MantidGroupPlotGenerator::groupIsAllMatrixWorkspaces(groupWS)) {
+      if (isAllMatrixWorkspaces(groupWS)) {
         menu->addAction(m_plotSurface);
         m_plotSurface->setEnabled(true);
         menu->addAction(m_plotContour);
@@ -1230,7 +1242,7 @@ void QWorkspaceDockView::popupContextMenu() {
     menu->setObjectName("WorkspaceContextMenu");
     auto mantidTreeItem = dynamic_cast<MantidTreeWidgetItem *>(treeItem);
     auto ws = mantidTreeItem->data(0, Qt::UserRole)
-                  .value<Mantid::API::Workspace_const_sptr>();
+                  .value<Mantid::API::Workspace_sptr>();
 
     // Add the items that are appropriate for the type
     if (auto matrixWS =
@@ -1537,8 +1549,8 @@ void QWorkspaceDockView::onClickShowDetectorTable() {
 void QWorkspaceDockView::showDetectorsTable() {
   // get selected workspace
   auto ws = getSelectedWorkspaceNames()[0];
-  m_mantidUI->createDetectorTable(QString::fromStdString(ws), std::vector<int>(),
-                                 false);
+  m_mantidUI->createDetectorTable(QString::fromStdString(ws),
+                                  std::vector<int>(), false);
 }
 
 void QWorkspaceDockView::onClickShowBoxData() {
@@ -1653,7 +1665,7 @@ void QWorkspaceDockView::clearUBMatrix() {
     if (alg) {
       alg->initialize();
       alg->setPropertyValue("Workspace", ws);
-	  m_mantidUI->executeAlgorithmAsync(alg);
+      m_mantidUI->executeAlgorithmAsync(alg);
     } else
       break;
   }
@@ -1666,24 +1678,7 @@ void QWorkspaceDockView::onClickPlotSurface() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ShowSurfacePlot);
 }
 
-void QWorkspaceDockView::showSurfacePlot() {
-  // find the workspace group clicked on
-  auto items = m_tree->selectedItems();
-  if (!items.empty()) {
-    auto data = items[0]->data(0, Qt::UserRole).value<Workspace_sptr>();
-    const auto wsGroup =
-        boost::dynamic_pointer_cast<const WorkspaceGroup>(data);
-    if (wsGroup) {
-      auto options =
-          m_tree->chooseSurfacePlotOptions(wsGroup->getNumberOfEntries());
-
-      // TODO: Figure out how to get rid of MantidUI dependency here.
-      auto plotter =
-          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(m_mantidUI);
-      plotter->plotSurface(wsGroup, options);
-    }
-  }
-}
+void QWorkspaceDockView::showSurfacePlot() { m_mantidUI->showSurfacePlot(); }
 
 /**
 * Create a contour plot from the selected workspace group
@@ -1692,20 +1687,6 @@ void QWorkspaceDockView::onClickPlotContour() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ShowContourPlot);
 }
 
-void QWorkspaceDockView::showContourPlot() {
-  auto items = m_tree->selectedItems();
-  if (!items.empty()) {
-    auto data = items[0]->data(0, Qt::UserRole).value<Workspace_sptr>();
-    const auto wsGroup =
-        boost::dynamic_pointer_cast<const WorkspaceGroup>(data);
-    if (wsGroup) {
-      auto options =
-          m_tree->chooseContourPlotOptions(wsGroup->getNumberOfEntries());
-
-      // TODO: Figure out how to remove the MantidUI dependency
-      auto plotter =
-          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(m_mantidUI);
-      plotter->plotContour(wsGroup, options);
-    }
-  }
+void QWorkspaceDockView::showContourPlot() { m_mantidUI->showContourPlot(); }
+}
 }

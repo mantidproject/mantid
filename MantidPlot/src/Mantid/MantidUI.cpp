@@ -1,44 +1,44 @@
 // Python header must go first
 #include "MantidQtAPI/PythonThreading.h"
 
-#include "MantidUI.h"
-#include "MantidMatrix.h"
-#include "MantidDock.h"
-#include "MantidTreeWidget.h"
 #include "AlgorithmDockWidget.h"
-#include "ImportWorkspaceDlg.h"
-#include "AlgorithmMonitor.h"
-#include "MantidSampleLogDialog.h"
-#include "MantidSampleMaterialDialog.h"
 #include "AlgorithmHistoryWindow.h"
-#include "MantidMatrixCurve.h"
+#include "AlgorithmMonitor.h"
+#include "ImportWorkspaceDlg.h"
+#include "MantidDock.h"
+#include "MantidGroupPlotGenerator.h"
 #include "MantidMDCurve.h"
 #include "MantidMDCurveDialog.h"
-#include "MantidSurfacePlotDialog.h"
-#include "MantidWSIndexDialog.h"
+#include "MantidMatrix.h"
+#include "MantidMatrixCurve.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidSampleLogDialog.h"
+#include "MantidSampleMaterialDialog.h"
+#include "MantidQtMantidWidgets/MantidSurfacePlotDialog.h"
 #include "MantidTable.h"
+#include "MantidUI.h"
+#include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
 #include "ProjectSerialiser.h"
 
 #include "../../MantidQt/MantidWidgets/ui_SequentialFitDialog.h"
-#include "../Spectrogram.h"
-#include "../pixmaps.h"
-#include "../ScriptingWindow.h"
 #include "../Folder.h"
+#include "../ScriptingWindow.h"
+#include "../Spectrogram.h"
 #include "../TiledWindow.h"
+#include "MantidQtAPI/pixmaps.h"
 
+#include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidKernel/Property.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/LogFilter.h"
-#include "Mantid/InstrumentWidget/InstrumentWindow.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/UnitConversion.h"
+#include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitConversion.h"
 
 #include "InstrumentWidget/InstrumentWindow.h"
 
@@ -47,24 +47,26 @@
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/VatesViewerInterface.h"
 
-#include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidQtMantidWidgets/MantidTreeWidget.h"
 
-#include <QMessageBox>
-#include <QTextEdit>
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+
+#include <QApplication>
+#include <QInputDialog>
 #include <QListWidget>
 #include <QMdiArea>
-#include <QMenuBar>
-#include <QApplication>
-#include <QToolBar>
 #include <QMenu>
-#include <QInputDialog>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QTextEdit>
+#include <QToolBar>
 
-#include <qwt_plot_curve.h>
 #include <algorithm>
+#include <qwt_plot_curve.h>
 #include <time.h>
 
 #ifdef _WIN32
@@ -72,9 +74,9 @@
 #endif
 
 #include <algorithm>
+#include <fstream>
 #include <locale>
 #include <set>
-#include <fstream>
 #include <sstream>
 
 #include <boost/tokenizer.hpp>
@@ -82,8 +84,8 @@
 #include <Poco/ActiveResult.h>
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtFactory/WidgetFactory.h"
+#include "MantidQtSliceViewer/SliceViewerWindow.h"
 
 #include "MantidQtSpectrumViewer/SpectrumView.h"
 #include <typeinfo>
@@ -91,7 +93,11 @@
 using namespace std;
 
 using namespace Mantid::API;
+using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
+using MantidQt::MantidWidgets::MantidWSIndexDialog;
+using MantidQt::MantidWidgets::MantidSurfacePlotDialog;
+using MantidQt::MantidWidgets::MantidTreeWidget;
 using Mantid::Kernel::DateAndTime;
 using MantidQt::SliceViewer::SliceViewerWindow;
 
@@ -2946,8 +2952,9 @@ Ignored if plotWindow == NULL
 MultiLayer *MantidUI::plot1D(const QStringList &ws_names,
                              const QList<int> &indexList, bool spectrumPlot,
                              MantidQt::DistributionFlag distr, bool errs,
-                             GraphOptions::CurveType style, MultiLayer *plotWindow,
-                             bool clearWindow, bool waterfallPlot) {
+                             GraphOptions::CurveType style,
+                             MultiLayer *plotWindow, bool clearWindow,
+                             bool waterfallPlot) {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString, int> pairs;
   QListIterator<QString> ws_itr(ws_names);
@@ -3051,8 +3058,9 @@ not NULL - plotWindow
 MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
                              bool spectrumPlot,
                              MantidQt::DistributionFlag distr, bool errs,
-                             GraphOptions::CurveType style, MultiLayer *plotWindow,
-                             bool clearWindow, bool waterfallPlot) {
+                             GraphOptions::CurveType style,
+                             MultiLayer *plotWindow, bool clearWindow,
+                             bool waterfallPlot) {
   if (toPlot.size() == 0)
     return NULL;
 
@@ -3514,7 +3522,8 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
   QString legendText = wsName + '\n';
   int curveIndex(0);
   for (const int spec : spectra) {
-    layer->insertCurve(wsName, spec, plotErrors, GraphOptions::Unspecified, plotDist);
+    layer->insertCurve(wsName, spec, plotErrors, GraphOptions::Unspecified,
+                       plotDist);
     legendText += "\\l(" + QString::number(++curveIndex) + ")" +
                   getLegendKey(wsName, spec) + "\n";
   }
@@ -3886,7 +3895,7 @@ void MantidUI::test() {
 }
 
 void MantidUI::updateRecentFilesList(const QString &fname) {
-	m_appWindow->updateRecentFilesList(fname);
+  m_appWindow->updateRecentFilesList(fname);
 }
 
 MantidSurfacePlotDialog *
@@ -3901,7 +3910,6 @@ MantidUI::createSurfacePlotDialog(int flags, QStringList wsNames,
                                      names, plotType);
 }
 
-
 MantidWSIndexDialog *MantidUI::createWorkspaceIndexDialog(int flags,
                                                           QStringList wsNames,
                                                           bool showWaterfall,
@@ -3915,5 +3923,45 @@ MantidWSIndexDialog *MantidUI::createWorkspaceIndexDialog(int flags,
                                  showWaterfall, showPlotAll);
 }
 
-void MantidUI::showSurfacePlot() {}
-void MantidUI::showContourPlot() {}
+void MantidUI::showSurfacePlot() {
+  // find the workspace group clicked on
+  auto tree = m_exploreMantid->m_tree;
+  auto items = tree->selectedItems();
+  if (!items.empty()) {
+    auto data = items[0]->data(0, Qt::UserRole).value<Workspace_sptr>();
+    const auto wsGroup =
+        boost::dynamic_pointer_cast<const WorkspaceGroup>(data);
+    if (wsGroup) {
+      auto options =
+          tree->chooseSurfacePlotOptions(wsGroup->getNumberOfEntries());
+
+      // TODO: Figure out how to get rid of MantidUI dependency here.
+      auto plotter =
+          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
+      plotter->plotSurface(wsGroup, options);
+    }
+  }
+}
+
+void MantidUI::showContourPlot() {
+  auto tree = m_exploreMantid->m_tree;
+  auto items = tree->selectedItems();
+  if (!items.empty()) {
+    auto data = items[0]->data(0, Qt::UserRole).value<Workspace_sptr>();
+    const auto wsGroup =
+        boost::dynamic_pointer_cast<const WorkspaceGroup>(data);
+    if (wsGroup) {
+      auto options =
+          tree->chooseContourPlotOptions(wsGroup->getNumberOfEntries());
+
+      // TODO: Figure out how to remove the MantidUI dependency
+      auto plotter =
+          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
+      plotter->plotContour(wsGroup, options);
+    }
+  }
+}
+
+QWidget *MantidUI::getParent() {
+	return m_appWindow;
+}

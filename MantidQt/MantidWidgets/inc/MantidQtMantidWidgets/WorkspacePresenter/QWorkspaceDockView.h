@@ -1,23 +1,23 @@
-#ifndef QWORKSPACEDOCKVIEW_H
-#define QWORKSPACEDOCKVIEW_H
+#ifndef MANTIDQT_MANTIDWIDGETS_QWORKSPACEDOCKVIEW_H
+#define MANTIDQT_MANTIDWIDGETS_QWORKSPACEDOCKVIEW_H
 
-#include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/IAlgorithm_fwd.h"
-#include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/IPeaksWorkspace_fwd.h"
-#include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidQtMantidWidgets/WidgetDLLOption.h"
+#include <MantidAPI/ExperimentInfo.h>
+#include <MantidAPI/IAlgorithm_fwd.h>
+#include <MantidAPI/IMDEventWorkspace_fwd.h>
+#include <MantidAPI/IMDWorkspace.h>
+#include <MantidAPI/IPeaksWorkspace_fwd.h>
+#include <MantidAPI/ITableWorkspace_fwd.h>
+#include <MantidAPI/MatrixWorkspace_fwd.h>
+#include <MantidAPI/WorkspaceGroup_fwd.h>
 
 #include <MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h>
 #include <QDockWidget>
 #include <QMap>
+#include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 
 class QMainWindow;
-class MantidTreeWidgetItem;
-class MantidTreeWidget;
 class QLabel;
 class QFileDialog;
 class QLineEdit;
@@ -35,8 +35,8 @@ class QSortFilterProxyModel;
 namespace MantidQt {
 namespace MantidWidgets {
 class MantidDisplayBase;
-}
-}
+class MantidTreeWidgetItem;
+class MantidTreeWidget;
 
 /**
 \class  QWorkspaceDockView
@@ -65,12 +65,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class QWorkspaceDockView : public MantidQt::MantidWidgets::IWorkspaceDockView,
-                           public QDockWidget {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QWorkspaceDockView
+    : public QDockWidget,
+      public IWorkspaceDockView,
+      public boost::enable_shared_from_this<QWorkspaceDockView> {
   Q_OBJECT
 public:
-  explicit QWorkspaceDockView(MantidQt::MantidWidgets::MantidDisplayBase *mui, QMainWindow *parent);
-  ~QWorkspaceDockView() override;
+  explicit QWorkspaceDockView(MantidQt::MantidWidgets::MantidDisplayBase *mui,
+                              QMainWindow *parent);
+  ~QWorkspaceDockView();
   void dropEvent(QDropEvent *de) override;
   void init() override;
   MantidQt::MantidWidgets::WorkspacePresenterWN_wptr
@@ -219,7 +222,6 @@ private slots:
   void onClickPlotSurface();
   void onClickPlotContour();
   void onClickClearUB();
-  void updateTree();
   void incrementUpdateCount();
   void filterWorkspaceTree(const QString &text);
 
@@ -228,7 +230,7 @@ private:
 
 protected:
   MantidTreeWidget *m_tree;
-  //TODO:remove
+  // TODO:remove
   friend class MantidDisplayBase;
 
 private:
@@ -281,4 +283,6 @@ signals:
   void
   signalUpdateTree(const std::map<std::string, Mantid::API::Workspace_sptr> &);
 };
-#endif // QWORKSPACEDOCKVIEW_H
+}
+}
+#endif // MANTIDQT_MANTIDWIDGETS_QWORKSPACEDOCKVIEW_H

@@ -1,8 +1,7 @@
-#ifndef MANTID_MANTIDWIDGETS_IWORKSPACEDOCKVIEW_H_
-#define MANTID_MANTIDWIDGETS_IWORKSPACEDOCKVIEW_H_
+#ifndef MANTIDQT_MANTIDWIDGETS_IWORKSPACEDOCKVIEW_H_
+#define MANTIDQT_MANTIDWIDGETS_IWORKSPACEDOCKVIEW_H_
 
 #include <MantidAPI/Workspace_fwd.h>
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <map>
@@ -43,14 +42,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class IWorkspaceDockView
-    : public boost::enable_shared_from_this<IWorkspaceDockView> {
+class IWorkspaceDockView {
 public:
   enum class SortDirection { Ascending, Descending };
   enum class SortCriteria { ByName, ByLastModified };
   enum class SaveFileType { Nexus, ASCII, ASCIIv1 };
 
-  virtual ~IWorkspaceDockView() = default;
+  virtual ~IWorkspaceDockView(){};
 
   virtual void init() = 0;
   virtual WorkspacePresenterWN_wptr getPresenterWeakPtr() = 0;
@@ -113,4 +111,4 @@ public:
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif // MANTID_MANTIDWIDGETS_IWORKSPACEDOCKVIEW_H_
+#endif // MANTIDQT_MANTIDWIDGETS_IWORKSPACEDOCKVIEW_H_

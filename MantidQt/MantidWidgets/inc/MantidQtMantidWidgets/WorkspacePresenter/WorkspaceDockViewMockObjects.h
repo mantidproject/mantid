@@ -1,5 +1,5 @@
-#ifndef MANTID_MANTIDWIDGETS_WORKSPACEDOCKVIEWMOCKOBJECTS_H
-#define MANTID_MANTIDWIDGETS_WORKSPACEDOCKVIEWMOCKOBJECTS_H
+#ifndef MANTIDQT_MANTIDWIDGETS_WORKSPACEDOCKVIEWMOCKOBJECTS_H
+#define MANTIDQT_MANTIDWIDGETS_WORKSPACEDOCKVIEWMOCKOBJECTS_H
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/make_unique.h"
@@ -14,7 +14,9 @@ using namespace MantidQt::MantidWidgets;
 
 GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
-class MockWorkspaceDockView : public IWorkspaceDockView {
+class MockWorkspaceDockView
+    : public IWorkspaceDockView,
+	public boost::enable_shared_from_this<MockWorkspaceDockView> {
 public:
   MockWorkspaceDockView() {}
   ~MockWorkspaceDockView() override {}
@@ -99,4 +101,4 @@ private:
 
 GCC_DIAG_ON_SUGGEST_OVERRIDE
 
-#endif // MANTID_MANTIDWIDGETS_WORKSPACEDOCKVIEWMOCKOBJECTS_H
+#endif // MANTIDQT_MANTIDWIDGETS_WORKSPACEDOCKVIEWMOCKOBJECTS_H

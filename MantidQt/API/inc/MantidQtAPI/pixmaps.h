@@ -28,12 +28,17 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef PIXMAPS_H
-#define PIXMAPS_H
+#ifndef MANTIDQT_API_PIXMAPS_H
+#define MANTIDQT_API_PIXMAPS_H
 
+#include "DLLOption.h"
 #include "qpixmap.h"
 
+namespace MantidQt {
+namespace API {
 /** Function that returns a QPixmap given a string name. */
-QPixmap getQPixmap(const std::string &name);
+EXPORT_OPT_MANTIDQT_API QPixmap getQPixmap(const std::string &name);
+}
+}
 
-#endif
+#endif // MANTIDQT_API_PIXMAPS_H

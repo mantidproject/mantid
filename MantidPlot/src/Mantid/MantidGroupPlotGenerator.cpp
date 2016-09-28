@@ -2,7 +2,10 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidQtMantidWidgets/MantidDisplayBase.h"
 
+using MantidQt::MantidWidgets::MantidSurfacePlotDialog;
+using MantidQt::MantidWidgets::MantidDisplayBase;
 using Mantid::API::WorkspaceGroup_const_sptr;
 using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::API::MatrixWorkspace_const_sptr;
@@ -14,7 +17,7 @@ using Mantid::API::ExperimentInfo;
  * Constructor
  * @param mantidUI :: [input] Pointer to the Mantid UI
  */
-MantidGroupPlotGenerator::MantidGroupPlotGenerator(MantidUI *mantidUI)
+MantidGroupPlotGenerator::MantidGroupPlotGenerator(MantidDisplayBase *mantidUI)
     : m_mantidUI(mantidUI) {}
 
 /**
@@ -73,7 +76,8 @@ void MantidGroupPlotGenerator::plot(
       plot->setYAxisLabel(options.axisName);
       plot->setResolution(1); // If auto-set too high, appears empty
     } else if (graphType == Type::Contour) {
-      MultiLayer *plot = matrixToPlot->plotGraph2D(Graph::ColorMapContour);
+      MultiLayer *plot =
+          matrixToPlot->plotGraph2D(GraphOptions::ColorMapContour);
       plot->activeGraph()->setXAxisTitle(xLabelQ);
       plot->activeGraph()->setYAxisTitle(options.axisName);
       plot->activeGraph()->setTitle(QString("Contour ").append(title));

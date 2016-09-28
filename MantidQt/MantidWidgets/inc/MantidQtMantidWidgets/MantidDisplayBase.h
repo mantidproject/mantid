@@ -18,6 +18,7 @@ class QString;
 class QStringList;
 class Table;
 class MultiLayer;
+class MantidMatrix;
 class MantidSurfacePlotDialog;
 class MantidWSIndexDialog;
 
@@ -62,6 +63,10 @@ public:
   virtual void disableSaveNexus() = 0;
   virtual void deleteWorkspaces(const QStringList &wsNames = QStringList()) = 0;
   virtual void importWorkspace() = 0;
+  virtual MantidMatrix *
+  importMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr workspace,
+                        int lower = -1, int upper = -1,
+                        bool showDlg = true) = 0;
   virtual void importWorkspace(const QString &wsName, bool showDlg = true,
                                bool makeVisible = true) = 0;
   virtual void renameWorkspace(QStringList = QStringList()) = 0;
@@ -85,6 +90,11 @@ public:
   virtual void executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) = 0;
   virtual bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
                                      const bool wait = false) = 0;
+
+  virtual Mantid::API::Workspace_const_sptr
+  getWorkspace(const QString &workspaceName) = 0;
+
+  virtual QWidget *getParent() = 0;
 
   // Plotting Methods
   virtual MultiLayer *

@@ -1,15 +1,19 @@
 #ifndef MANTIDTREEWIDGETITEM_H
 #define MANTIDTREEWIDGETITEM_H
 
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include <MantidKernel/DateAndTime.h>
+#include <MantidQtAPI/WorkspaceObserver.h>
 #include <QTreeWidgetItem>
 
+namespace MantidQt {
+namespace MantidWidgets {
 class MantidTreeWidget;
 
 /**A class derived from QTreeWidgetItem, to accomodate
 * sorting on the items in a MantidTreeWidget.
 */
-class MantidTreeWidgetItem : public QTreeWidgetItem {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidTreeWidgetItem : public QTreeWidgetItem {
 public:
   explicit MantidTreeWidgetItem(MantidTreeWidget *);
   MantidTreeWidgetItem(QStringList, MantidTreeWidget *);
@@ -23,4 +27,6 @@ private:
   static Mantid::Kernel::DateAndTime getLastModified(const QTreeWidgetItem *);
   int m_sortPos;
 };
+}
+}
 #endif // MANTIDTREEWIDGETITEM_H

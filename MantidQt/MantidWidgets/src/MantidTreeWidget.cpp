@@ -1,11 +1,10 @@
-#include "MantidTreeWidget.h"
-#include "MantidGroupPlotGenerator.h"
-#include "MantidUI.h"
-#include "QWorkspaceDockView.h"
+#include "MantidQtMantidWidgets/MantidTreeWidget.h"
+#include "MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidQtMantidWidgets/WorkspacePresenter/MantidDisplayBase.h"
+#include "MantidQtMantidWidgets/MantidDisplayBase.h"
 
 #include <QApplication>
 #include <QDragMoveEvent>
@@ -13,12 +12,14 @@
 #include <QList>
 #include <QUrl>
 
-using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger treelog("MantidTreeWidget");
 }
+
+namespace MantidQt {
+namespace MantidWidgets {
 
 MantidTreeWidget::MantidTreeWidget(QWorkspaceDockView *w,
                                    MantidDisplayBase *mui)
@@ -141,7 +142,7 @@ void MantidTreeWidget::mouseMoveEvent(QMouseEvent *e) {
 
 void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e) {
   try {
-    auto wsName = m_dockWidget->getSelectedWorkspaceNames()[0];
+    std::string wsName = m_dockWidget->getSelectedWorkspaceNames()[0];
     Mantid::API::WorkspaceGroup_sptr grpWSPstr;
     grpWSPstr =
         boost::dynamic_pointer_cast<WorkspaceGroup>(m_ads.retrieve(wsName));
@@ -282,8 +283,20 @@ MantidTreeWidget::choosePlotOptions(const QString &type,
       m_mantidUI->createSurfacePlotDialog(0, selectedMatrixWsNameList, type);
   dlg->exec();
   auto selections = dlg->getSelections();
-  std::string errors =
-      MantidGroupPlotGenerator::validatePlotOptions(selections, nWorkspaces);
+  std::stringstream err;
+
+  if (selections.accepted) {
+    if (selections.logName == MantidSurfacePlotDialog::CUSTOM) {
+      // Check number of values supplied
+      if (static_cast<int>(selections.customLogValues.size()) != nWorkspaces) {
+        err << "Number of custom log values must be equal to "
+               "number of workspaces in group";
+        selections.accepted = false;
+      }
+    }
+  }
+
+  auto errors = err.str();
   if (!errors.empty()) {
     MantidSurfacePlotDialog::showPlotOptionsError(errors.c_str());
   }
@@ -339,4 +352,6 @@ void MantidTreeWidget::sort() { sortItems(sortColumn(), m_sortOrder); }
 */
 void MantidTreeWidget::logWarningMessage(const std::string &msg) {
   treelog.warning(msg);
+}
+}
 }

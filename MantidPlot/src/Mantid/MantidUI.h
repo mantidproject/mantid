@@ -7,7 +7,7 @@
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
 #include "MantidQtAPI/IProjectSerialisable.h"
-#include "MantidQtMantidWidgets/WorkspacePresenter/MantidDisplayBase.h"
+#include "MantidQtMantidWidgets/MantidDisplayBase.h"
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -148,12 +148,15 @@ public:
                              const bool wait = false) override;
 
   // Gets a pointer to workspace workspaceName
-  Mantid::API::Workspace_const_sptr getWorkspace(const QString &workspaceName);
+  Mantid::API::Workspace_const_sptr
+  getWorkspace(const QString &workspaceName) override;
+
+  QWidget *getParent() override;
 
   // Deletes workspace from QtiPlot
   void deleteWorkspace(const QString &workspaceName);
 
-  //Delete multiple workspaces from QtiPlot
+  // Delete multiple workspaces from QtiPlot
   void deleteWorkspaces(const QStringList &wsNames = QStringList()) override;
 
   // Returns the name of selected workspace in exploreMantid window
@@ -449,7 +452,8 @@ public slots:
   // Create a MantidMatrix from workspace
   MantidMatrix *
   importMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr workspace,
-                        int lower = -1, int upper = -1, bool showDlg = true);
+                        int lower = -1, int upper = -1,
+                        bool showDlg = true) override;
 
   // Create a Table from workspace wsName
   Table *importTableWorkspace(const QString &wsName, bool showDlg = true,

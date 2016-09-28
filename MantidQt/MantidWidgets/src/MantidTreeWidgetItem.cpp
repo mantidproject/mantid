@@ -1,11 +1,13 @@
-#include "MantidTreeWidgetItem.h"
-#include "MantidTreeWidget.h"
+#include "MantidQtMantidWidgets/MantidTreeWidgetItem.h"
+#include "MantidQtMantidWidgets/MantidTreeWidget.h"
 
 #include <MantidAPI/Workspace.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
+namespace MantidQt {
+namespace MantidWidgets {
 /**Constructor.
 * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
 */
@@ -98,4 +100,6 @@ DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem *item) {
   const size_t indexOfLast = wsHist.size() - 1;
   const auto lastAlgHist = wsHist.getAlgorithmHistory(indexOfLast);
   return lastAlgHist->executionDate();
+}
+}
 }

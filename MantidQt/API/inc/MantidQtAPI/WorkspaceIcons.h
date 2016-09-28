@@ -1,14 +1,17 @@
-#ifndef WORKSPACEICONS_H_
-#define WORKSPACEICONS_H_
+#ifndef MANTIDQT_API_WORKSPACEICONS_H_
+#define MANTIDQT_API_WORKSPACEICONS_H_
 
+#include "DllOption.h"
 #include <QMap>
 #include <QPixmap>
 
+namespace MantidQt {
+namespace API {
 /**
  * Defines a mapping between a workspace ID and a pixmap
  * to use for an icon.
  */
-class WorkspaceIcons {
+class EXPORT_OPT_MANTIDQT_API WorkspaceIcons {
 public:
   WorkspaceIcons();
 
@@ -22,5 +25,6 @@ private:
   /// Internal map instance
   QMap<std::string, std::string> m_idToPixmapName;
 };
-
-#endif
+}
+}
+#endif //MANTIDQT_API_WORKSPACEICONS_H_
