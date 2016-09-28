@@ -22,7 +22,9 @@ MultiPeriodGroupWorker::MultiPeriodGroupWorker(
 /**
  * Try to add the input workspace to the multiperiod input group list.
  * @param ws: candidate workspace
- * @param vecWorkspaceGroups: Vector of multi period workspace groups.
+ * @param vecMultiPeriodWorkspaceGroups: Vector of multi period workspace
+ * groups.
+ * @param vecWorkspaceGroups: Vector of non-multi period workspace groups.
  */
 void MultiPeriodGroupWorker::tryAddInputWorkspaceToInputGroups(
     Workspace_sptr ws,
