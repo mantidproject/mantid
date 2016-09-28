@@ -1702,7 +1702,7 @@ ConvFit::createDefaultParamsMap(QMap<QString, double> map) {
 /**
 * Populates a map with ALL parameters names and values for the current fit
 * function
-* @param map :: A QMap of any parameters that have non zero default values
+* @param defaultMap :: A QMap of any parameters that have non zero default values
 * @param parameters	:: A QStringList of all the parameters for the current
 * fit function
 * @param fitFunction :: The name of the current fit function
