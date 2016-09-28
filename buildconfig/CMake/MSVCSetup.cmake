@@ -101,7 +101,7 @@ set ( PACKAGING_DIR ${PROJECT_SOURCE_DIR}/buildconfig/CMake/Packaging )
 # build version
 set ( MANTIDPYTHON_PREAMBLE "call %~dp0..\\..\\buildenv.bat\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%" )
 
-if ( MAKES_VATES )
+if ( MAKE_VATES )
   set ( PARAVIEW_PYTHON_PATHS ":${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>:${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>:${ParaView_DIR}/lib/site-packages:${ParaView_DIR}/lib/site-packages/vtk" )
 else ()
   set (PARAVIEW_PYTHON_PATHS "" )
