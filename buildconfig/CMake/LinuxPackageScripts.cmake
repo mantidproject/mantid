@@ -135,7 +135,12 @@ endif ()
 
 # Local dev version
 set ( EXTRA_LDPATH "${ParaView_DIR}/lib" )
-set ( PARAVIEW_PYTHON_PATHS "${EXTRA_LDPATH}:${EXTRA_LDPATH}/site-packages:${EXTRA_LDPATH}/site-packages/vtk" )
+if ( MAKE_VATES )
+  set ( PARAVIEW_PYTHON_PATHS ":${EXTRA_LDPATH}:${EXTRA_LDPATH}/site-packages:${EXTRA_LDPATH}/site-packages/vtk" )
+else ()
+  set ( PARAVIEW_PYTHON_PATHS "" )
+endif ()
+
 if (ENABLE_MANTIDPLOT)
   set ( MANTIDPLOT_EXEC MantidPlot )
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
@@ -152,7 +157,12 @@ execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantid
 
 # Package version
 set ( EXTRA_LDPATH "\${INSTALLDIR}/../lib/paraview-5.1" )
-set ( PARAVIEW_PYTHON_PATHS "${EXTRA_LDPATH}:${EXTRA_LDPATH}/site-packages:${EXTRA_LDPATH}/site-packages/vtk" )
+if ( MAKE_VATES )
+  set ( PARAVIEW_PYTHON_PATHS ":${EXTRA_LDPATH}:${EXTRA_LDPATH}/site-packages:${EXTRA_LDPATH}/site-packages/vtk" )
+else ()
+  set ( PARAVIEW_PYTHON_PATHS "" )
+endif ()
+
 if (ENABLE_MANTIDPLOT)
   set ( MANTIDPLOT_EXEC MantidPlot_exe )
   configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
