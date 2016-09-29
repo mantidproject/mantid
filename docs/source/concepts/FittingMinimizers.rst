@@ -145,7 +145,10 @@ The current problems have been obtained from the following benchmarks and source
 - `CUTEst Constrained and Unconstrained Testing Environment on
   steroids <https://ccpforge.cse.rl.ac.uk/gf/project/cutest/wiki/>`__
 - A set of problems extracted from Mantid usage examples and system
-  tests called here *Neutron data*.
+  tests called here *Neutron data*. This is a first attempt at
+  evaluating different minimizers using specific neutron datasets with
+  real spectra and observational errors. Significant improvements are
+  expected for next releases of Mantid
 
 As the NIST and CUTEst test problems do not define observational
 errors the comparison shown below does not use the weights of the
