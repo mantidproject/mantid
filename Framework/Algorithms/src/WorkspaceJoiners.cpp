@@ -156,7 +156,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
 
   fixSpectrumNumbers(*event_ws1, *event_ws2, *output);
 
-  return output;
+  return std::move(output);
 }
 
 /** Checks that the two input workspace have common binning & size, the same

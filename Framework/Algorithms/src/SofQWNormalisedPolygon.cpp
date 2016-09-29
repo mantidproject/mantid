@@ -410,7 +410,7 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
   outputWorkspace->setYUnit("");
   outputWorkspace->setYUnitLabel("Intensity");
 
-  return outputWorkspace;
+  return std::move(outputWorkspace);
 }
 
 } // namespace Mantid

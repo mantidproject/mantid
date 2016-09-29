@@ -525,7 +525,7 @@ DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS) {
       *inputWS, HistogramData::Histogram(HistogramData::Points(1)));
   maskWS->setTitle(inputWS->getTitle());
 
-  return maskWS;
+  return std::move(maskWS);
 }
 
 std::vector<std::vector<size_t>>
