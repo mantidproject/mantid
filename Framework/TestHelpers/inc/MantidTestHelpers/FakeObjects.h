@@ -18,10 +18,6 @@
  *      Author: Janik Zikovsky
  */
 
-#include <fstream>
-#include <map>
-#include <string>
-
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"

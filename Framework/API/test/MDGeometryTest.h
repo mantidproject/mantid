@@ -2,15 +2,16 @@
 #define MANTID_API_MDGEOMETRYTEST_H_
 
 #include "MantidAPI/MDGeometry.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/NullCoordTransform.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/VMD.h"
-#include "MantidAPI/IMDWorkspace.h"
+
+#include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/FakeObjects.h"
-#include "MantidAPI/NullCoordTransform.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -24,6 +25,7 @@ public:
   static MDGeometryTest *createSuite() { return new MDGeometryTest(); }
   static void destroySuite(MDGeometryTest *suite) { delete suite; }
 
+  // note this is also tested in MDLeanGeometry
   void test_initGeometry() {
     MDGeometry g;
     std::vector<IMDDimension_sptr> dims;
@@ -50,39 +52,6 @@ public:
     TS_ASSERT_EQUALS(binSizes.size(), 2);
     TS_ASSERT_DELTA(binSizes[0], 0.2, 1e-6);
     TS_ASSERT_DELTA(binSizes[1], 0.1, 1e-6);
-  }
-
-  void test_clear_transforms_to_original() {
-    MDGeometry geometry;
-    geometry.setTransformToOriginal(new NullCoordTransform, 0);
-    geometry.setTransformToOriginal(new NullCoordTransform, 1);
-    TS_ASSERT_EQUALS(2, geometry.getNumberTransformsToOriginal());
-    TS_ASSERT_THROWS_NOTHING(geometry.clearTransforms());
-    TSM_ASSERT_EQUALS("Should have no transforms", 0,
-                      geometry.getNumberTransformsToOriginal());
-  }
-
-  void test_clear_transforms_from_original() {
-    MDGeometry geometry;
-    geometry.setTransformFromOriginal(new NullCoordTransform, 0);
-    geometry.setTransformFromOriginal(new NullCoordTransform, 1);
-    TS_ASSERT_EQUALS(2, geometry.getNumberTransformsFromOriginal());
-    TS_ASSERT_THROWS_NOTHING(geometry.clearTransforms());
-    TSM_ASSERT_EQUALS("Should have no transforms", 0,
-                      geometry.getNumberTransformsFromOriginal());
-  }
-
-  void test_clear_original_workspaces() {
-    MDGeometry geometry;
-    boost::shared_ptr<WorkspaceTester> ws0 =
-        boost::make_shared<WorkspaceTester>();
-    boost::shared_ptr<WorkspaceTester> ws1 =
-        boost::make_shared<WorkspaceTester>();
-    geometry.setOriginalWorkspace(ws0, 0);
-    geometry.setOriginalWorkspace(ws1, 1);
-    TS_ASSERT_EQUALS(2, geometry.numOriginalWorkspaces());
-    TS_ASSERT_THROWS_NOTHING(geometry.clearOriginalWorkspaces());
-    TS_ASSERT_EQUALS(0, geometry.numOriginalWorkspaces());
   }
 
   void test_copy_constructor() {
@@ -154,6 +123,67 @@ public:
     TS_ASSERT_EQUALS(g.getDimensionIndexByName("Qx"), 0);
     TS_ASSERT_EQUALS(g.getDimensionIndexByName("Qy"), 1);
     TS_ASSERT_THROWS_ANYTHING(g.getDimensionIndexByName("IDontExist"));
+  }
+
+  void test_all_normalized() {
+    MDGeometry geometry;
+    std::vector<IMDDimension_sptr> dims;
+    const Mantid::Geometry::QSample frame;
+    IMDDimension_sptr dim1(new MDHistoDimension("Qx", "Qx", frame, -1, +1, 10));
+    IMDDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", frame, -1, +1, 20));
+    dims.push_back(dim1);
+    dims.push_back(dim2);
+    geometry.initGeometry(dims);
+
+    //  Both basis vectors are not normalized
+    geometry.setBasisVector(0, VMD(2.0, 0.0));
+    geometry.setBasisVector(1, VMD(0.0, 4.0));
+    TSM_ASSERT("All Not all basis vectors are normalized",
+               !geometry.allBasisNormalized());
+
+    //  First basis vector is now normalized. The other is not.
+    geometry.setBasisVector(1, VMD(0.0, 1.0));
+    TSM_ASSERT("Not all basis vectors are normalized",
+               !geometry.allBasisNormalized());
+
+    // We overwrite the zeroth basis vector to be normalized. Now both are
+    // normalized
+    geometry.setBasisVector(0, VMD(1.0, 0.0));
+    TSM_ASSERT("All basis vectors are normalized",
+               geometry.allBasisNormalized());
+  }
+
+  void test_clear_transforms_to_original() {
+    MDGeometry geometry;
+    geometry.setTransformToOriginal(new NullCoordTransform, 0);
+    geometry.setTransformToOriginal(new NullCoordTransform, 1);
+    TS_ASSERT_EQUALS(2, geometry.getNumberTransformsToOriginal());
+    TS_ASSERT_THROWS_NOTHING(geometry.clearTransforms());
+    TSM_ASSERT_EQUALS("Should have no transforms", 0,
+                      geometry.getNumberTransformsToOriginal());
+  }
+
+  void test_clear_transforms_from_original() {
+    MDGeometry geometry;
+    geometry.setTransformFromOriginal(new NullCoordTransform, 0);
+    geometry.setTransformFromOriginal(new NullCoordTransform, 1);
+    TS_ASSERT_EQUALS(2, geometry.getNumberTransformsFromOriginal());
+    TS_ASSERT_THROWS_NOTHING(geometry.clearTransforms());
+    TSM_ASSERT_EQUALS("Should have no transforms", 0,
+                      geometry.getNumberTransformsFromOriginal());
+  }
+
+  void test_clear_original_workspaces() {
+    MDGeometry geometry;
+    boost::shared_ptr<WorkspaceTester> ws0 =
+        boost::make_shared<WorkspaceTester>();
+    boost::shared_ptr<WorkspaceTester> ws1 =
+        boost::make_shared<WorkspaceTester>();
+    geometry.setOriginalWorkspace(ws0, 0);
+    geometry.setOriginalWorkspace(ws1, 1);
+    TS_ASSERT_EQUALS(2, geometry.numOriginalWorkspaces());
+    TS_ASSERT_THROWS_NOTHING(geometry.clearOriginalWorkspaces());
+    TS_ASSERT_EQUALS(0, geometry.numOriginalWorkspaces());
   }
 
   void test_transformDimensions() {
@@ -270,34 +300,6 @@ public:
     g.setTransformToOriginal(new NullCoordTransform, 1);
     TSM_ASSERT_EQUALS("Wrong number of transforms to original reported.", 2,
                       g.getNumberTransformsToOriginal());
-  }
-
-  void test_all_normalized() {
-    MDGeometry geometry;
-    std::vector<IMDDimension_sptr> dims;
-    const Mantid::Geometry::QSample frame;
-    IMDDimension_sptr dim1(new MDHistoDimension("Qx", "Qx", frame, -1, +1, 10));
-    IMDDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", frame, -1, +1, 20));
-    dims.push_back(dim1);
-    dims.push_back(dim2);
-    geometry.initGeometry(dims);
-
-    //  Both basis vectors are not normalized
-    geometry.setBasisVector(0, VMD(2.0, 0.0));
-    geometry.setBasisVector(1, VMD(0.0, 4.0));
-    TSM_ASSERT("All Not all basis vectors are normalized",
-               !geometry.allBasisNormalized());
-
-    //  First basis vector is now normalized. The other is not.
-    geometry.setBasisVector(1, VMD(0.0, 1.0));
-    TSM_ASSERT("Not all basis vectors are normalized",
-               !geometry.allBasisNormalized());
-
-    // We overwrite the zeroth basis vector to be normalized. Now both are
-    // normalized
-    geometry.setBasisVector(0, VMD(1.0, 0.0));
-    TSM_ASSERT("All basis vectors are normalized",
-               geometry.allBasisNormalized());
   }
 };
 

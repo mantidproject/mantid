@@ -89,6 +89,7 @@ set ( SRC_FILES
 	src/LogManager.cpp
 	src/LogarithmScale.cpp
 	src/MDGeometry.cpp
+	src/MDLeanGeometry.cpp
 	src/MatrixWSIndexCalculator.cpp
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
@@ -232,6 +233,7 @@ set ( INC_FILES
 	inc/MantidAPI/ILiveListener.h
 	inc/MantidAPI/IMDEventWorkspace.h
 	inc/MantidAPI/IMDEventWorkspace_fwd.h
+	inc/MantidAPI/IMDLeanGeometry.h
 	inc/MantidAPI/IMDHistoWorkspace.h
 	inc/MantidAPI/IMDHistoWorkspace_fwd.h
 	inc/MantidAPI/IMDIterator.h
@@ -270,6 +272,7 @@ set ( INC_FILES
 	inc/MantidAPI/LogManager.h
 	inc/MantidAPI/LogarithmScale.h
 	inc/MantidAPI/MDGeometry.h
+	inc/MantidAPI/MDLeanGeometry.h
 	inc/MantidAPI/MatrixWSIndexCalculator.h
 	inc/MantidAPI/MatrixWorkspace.h
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
@@ -374,6 +377,7 @@ set ( TEST_FILES
 	ILatticeFunctionTest.h
 	ILiveListenerTest.h
 	IMDWorkspaceTest.h
+	IMDLeanGeometryTest.h
 	ISpectrumTest.h
 	IkedaCarpenterModeratorTest.h
 	ImmutableCompositeFunctionTest.h
@@ -385,6 +389,7 @@ set ( TEST_FILES
 	LiveListenerFactoryTest.h
 	LogManagerTest.h
 	MDGeometryTest.h
+	MDLeanGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
 	ModeratorModelTest.h
 	MuParserUtilsTest.h
