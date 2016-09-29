@@ -443,8 +443,9 @@ public:
 
     MantidVec counts = newLog->valuesAsVector();
 
-    // verify everywhere except boundaries
-    for (size_t i = 1; i < testVisWS->getNumberHistograms()-1; ++i) {
+    // verify everywhere except boundaries, where round-off errors and
+    // different time steps make results unstable
+    for (size_t i = 1; i < testVisWS->getNumberHistograms()-1 ; ++i) {
       const HistogramData::HistogramY &Y = testVisWS->y(i);
       // const MantidVec &Y = testVisWS->readY(i); // -- better for debugging as
       // one can see what is inside
@@ -461,7 +462,6 @@ public:
                                                                         false);
 
     if (!addLog) {
-      AnalysisDataService::Instance().addOrReplace("testSourceWorkspace", sws);
       return sws;
     }
 
@@ -477,8 +477,6 @@ public:
     pTime_log->addValues(times, values);
     sws->mutableRun().addProperty(pTime_log, true);
 
-    AnalysisDataService::Instance().addOrReplace("testSourceWorkspaceWithLog",
-                                                 sws);
     return sws;
   }
 };

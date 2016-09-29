@@ -444,10 +444,16 @@ void CalcCountRate::setOutLogParameters(
   } else {
     m_numLogSteps = getProperty("NumTimeSteps");
   }
+  // identify epsilon to use with current time
+  double t_epsilon = double(runTMax.totalNanoseconds()) *
+                     (1 + std::numeric_limits<double>::epsilon());
+  int64_t eps_increment =
+      static_cast<int64_t>(t_epsilon - double(runTMax.totalNanoseconds()));
 
-  m_TRangeMin = runTMin;
+  m_TRangeMin = runTMin - eps_increment;
   if (useLogAccuracy) {
-    // Let's try to establish log step (it should be constant in real applications) and define
+    // Let's try to establish log step (it should be constant in real
+    // applications) and define
     // binning in such a way, that each historgam bin accomodates single log
     // value
     auto iTMax = runTMax.totalNanoseconds();
@@ -473,10 +479,6 @@ void CalcCountRate::setOutLogParameters(
 
   if (!useLogAccuracy) {
     // histogramming excludes rightmost events. Modify max limit to keep them
-    double t_epsilon = double(runTMax.totalNanoseconds()) *
-                       (1 + std::numeric_limits<double>::epsilon());
-    int64_t eps_increment =
-        static_cast<int64_t>(t_epsilon - double(runTMax.totalNanoseconds()));
     m_TRangeMax = runTMax + eps_increment; // Should be
     // *(1+std::numeric_limits<double>::epsilon())
     // but DateTime does not have multiplication
