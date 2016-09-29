@@ -158,6 +158,11 @@ public:
     return m_jacobian[safeIndex(iY, iP)];
   }
 
+  /// Implements API::Jacobian::zero
+  void zero() override {
+    m_jacobian.assign(m_jacobian.size(), 0.0);
+  }
+
   /// Provides raw pointer access to the underlying std::vector. Required for
   /// adept-interface.
   double *rawValues() { return &m_jacobian[0]; }
