@@ -30,11 +30,21 @@ public:
   /// Constructor: rename the file and store its original name
   explicit TemporaryRenamer(const std::string &fileName)
       : m_originalName(fileName), m_file(fileName) {
-    TS_ASSERT(m_file.exists() && m_file.canWrite() && m_file.isFile());
-    m_file.renameTo(Poco::TemporaryFile::tempName());
+    try {
+      TS_ASSERT(m_file.exists() && m_file.canWrite() && m_file.isFile());
+      m_file.renameTo(Poco::TemporaryFile::tempName());
+    } catch (const Poco::FileException &ex) {
+      TS_FAIL(ex.displayText());
+    }
   }
   /// Destructor: restore the file's original name
-  ~TemporaryRenamer() { m_file.renameTo(m_originalName); }
+  ~TemporaryRenamer() {
+    try {
+      m_file.renameTo(m_originalName);
+    } catch (const Poco::FileException &ex) { // Do not throw in the destructor!
+      TS_FAIL(ex.displayText());
+    }
+  }
 
 private:
   const std::string m_originalName;
