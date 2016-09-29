@@ -1,4 +1,7 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,redefined-builtin
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+
 import mantid.simpleapi as s_api
 from mantid import config, logger
 
@@ -218,7 +221,7 @@ def plotSpectra(ws, y_axis_title, indicies=None):
 
     if len(indicies) == 0:
         num_spectra = s_api.mtd[ws].getNumberHistograms()
-        indicies = range(num_spectra)
+        indicies = list(range(num_spectra))
 
     try:
         mtd_plot = import_mantidplot()
@@ -228,3 +231,4 @@ def plotSpectra(ws, y_axis_title, indicies=None):
     except RuntimeError:
         # User clicked cancel on plot so don't do anything
         return
+

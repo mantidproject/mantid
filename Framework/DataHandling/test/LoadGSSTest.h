@@ -67,7 +67,8 @@ public:
     ScopedFile file(gss, "gss_large_x.txt");
     API::IAlgorithm_sptr loader = createAlgorithm();
     loader->setPropertyValue("Filename", file.getFileName());
-    TS_ASSERT(loader->execute())
+    TS_ASSERT(loader->execute());
+    TS_ASSERT_EQUALS(loader->isExecuted(), true);
     API::MatrixWorkspace_const_sptr ws = loader->getProperty("OutputWorkspace");
     auto x1 = ws->readX(0)[0];
     auto x2 = ws->readX(0)[1];
