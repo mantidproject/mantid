@@ -18,6 +18,7 @@ set ( TEST_PY_FILES
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
   DetectorFloodWeightingTest.py
+  DGSReductionILLTest.py
   IndirectCalibrationTest.py
   CorrectTOFTest.py
   CreateWorkspaceTest.py

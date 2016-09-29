@@ -27,6 +27,7 @@ PROP_FLAT_BACKGROUND_WINDOW           = 'FlatBackgroundAveragingWindow'
 PROP_FLAT_BACKGROUND_WORKSPACE        = 'FlatBackgroundWorkspace'
 PROP_INDEX_TYPE                       = 'IndexType'
 PROP_INPUT_FILE                       = 'InputFile'
+PROP_INPUT_WORKSPACE                  = 'InputWorkspace'
 PROP_MONITOR_EPP_WORKSPACE            = 'MonitorEPPWorkspace'
 PROP_MONITOR_INDEX                    = 'MonitorIndex'
 PROP_NORMALISATION                    = 'Normalisation'
@@ -128,16 +129,20 @@ class DGSReductionILL(DataProcessorAlgorithm):
         identifier = self.getProperty(PROP_OUTPUT_SUFFIX).value
         indexType = self.getProperty(PROP_INDEX_TYPE).value
 
-        # Load data
-        inputFilename = self.getProperty(PROP_INPUT_FILE).value
-        outWs = rawWorkspaceName(identifier)
-        # The variable 'workspace' shall hold the current 'main' data
-        # throughout the algorithm.
-        workspace = Load(Filename=inputFilename,
-                         OutputWorkspace=outWs)
+        if self.getProperty(PROP_INPUT_FILE).value:
+            # Load data
+            inputFilename = self.getProperty(PROP_INPUT_FILE).value
+            outWs = rawWorkspaceName(identifier)
+            # The variable 'workspace' shall hold the current 'main' data
+            # throughout the algorithm.
+            workspace = Load(Filename=inputFilename,
+                             OutputWorkspace=outWs)
 
-        # Now merge the loaded files (if required)
-        workspace = MergeRuns(workspace)
+            # Now merge the loaded files (if required)
+            workspace = MergeRuns(workspace)
+
+        elif self.getProperty(PROP_INPUT_WORKSPACE).value:
+            workspace = self.getProperty(PROP_INPUT_WORKSPACE).value
 
         # Extract monitors to a separate workspace
         workspace, monitorWorkspace = ExtractMonitors(workspace)
@@ -403,8 +408,12 @@ class DGSReductionILL(DataProcessorAlgorithm):
         # Inputs
         self.declareProperty(FileProperty(PROP_INPUT_FILE,
                                           '',
-                                          action=FileAction.Load,
+                                          action=FileAction.OptionalLoad,
                                           extensions=['nxs']))
+        self.declareProperty(MatrixWorkspaceProperty(PROP_INPUT_WORKSPACE,
+                                                     '',
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input))
         self.declareProperty(PROP_OUTPUT_SUFFIX,
                              '',
                              direction=Direction.Input,
@@ -504,6 +513,18 @@ class DGSReductionILL(DataProcessorAlgorithm):
                              '',
                              direction=Direction.Output),
                              doc='The output of the algorithm')
+
+    def validateInputs(self):
+        """
+        Checks for issues with user input.
+        """
+        issues = dict()
+
+        # Validate an input exists
+        if not self.getProperty(PROP_INPUT_FILE).value and not self.getProperty(PROP_INPUT_WORKSPACE).value:
+            issues[PROP_INPUT_FILE] = 'Must give either an input file or an input workspace.'
+
+        return issues
 
     def _calculateFlatBackground(self, ws, bkgWsName, window):
         # TODO this functionality should be moved to CalculateFlatBackground
