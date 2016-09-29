@@ -42,11 +42,6 @@ AlignAndFocusPowder::AlignAndFocusPowder()
       tmin(0.0), tmax(0.0), m_preserveEvents(false), m_processLowResTOF(false),
       m_lowResSpecOffset(0), m_progress(nullptr) {}
 
-AlignAndFocusPowder::~AlignAndFocusPowder() {
-  if (m_progress)
-    delete m_progress;
-}
-
 const std::string AlignAndFocusPowder::name() const {
   return "AlignAndFocusPowder";
 }
@@ -354,7 +349,7 @@ void AlignAndFocusPowder::exec() {
   }
 
   // set up a progress bar with the "correct" number of steps
-  m_progress = new Progress(this, 0., 1., 22);
+  m_progress = Kernel::make_unique<Progress>(this, 0., 1., 22);
 
   if (m_inputEW) {
     double tolerance = getProperty("CompressTolerance");
