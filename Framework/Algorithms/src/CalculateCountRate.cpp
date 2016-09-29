@@ -318,7 +318,7 @@ void CalculateCountRate::disableNormalization(const std::string &NormLogError) {
   g_log.warning() << NormLogError << std::endl;
   m_pNormalizationLog = nullptr;
   m_normalizeResult = false;
-};
+}
 /*Analyse input log parameters and logs, attached to the workspace and identify
  * the parameters of the target log, including experiment time.
  *
