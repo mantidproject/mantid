@@ -51,7 +51,9 @@ class CalculateCountRateTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculateCountRateTest *createSuite() { return new CalculateCountRateTest(); }
+  static CalculateCountRateTest *createSuite() {
+    return new CalculateCountRateTest();
+  }
   static void destroySuite(CalculateCountRateTest *suite) { delete suite; }
 
   void test_Init() {
@@ -445,7 +447,7 @@ public:
 
     // verify everywhere except boundaries, where round-off errors and
     // different time steps make results unstable
-    for (size_t i = 1; i < testVisWS->getNumberHistograms()-1 ; ++i) {
+    for (size_t i = 1; i < testVisWS->getNumberHistograms() - 1; ++i) {
       const HistogramData::HistogramY &Y = testVisWS->y(i);
       // const MantidVec &Y = testVisWS->readY(i); // -- better for debugging as
       // one can see what is inside

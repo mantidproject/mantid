@@ -25,7 +25,9 @@ DECLARE_ALGORITHM(CalculateCountRate)
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CalculateCountRate::name() const { return "CalculateCountRate"; }
+const std::string CalculateCountRate::name() const {
+  return "CalculateCountRate";
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int CalculateCountRate::version() const { return 1; }
@@ -274,7 +276,7 @@ void CalculateCountRate::calcRateLog(
 *                        visualization workspace spectra for a thread
 */
 void CalculateCountRate::histogramEvents(const DataObjects::EventList &el,
-                                    std::mutex *spectraLocks) {
+                                         std::mutex *spectraLocks) {
 
   if (el.empty())
     return;
@@ -675,7 +677,9 @@ bool CalculateCountRate::buildVisWS() const { return m_doVis; }
 /** Helper function, mainly for testing
 * @return  true if count rate should be normalized and false
 * otherwise */
-bool CalculateCountRate::normalizeCountRate() const { return m_normalizeResult; }
+bool CalculateCountRate::normalizeCountRate() const {
+  return m_normalizeResult;
+}
 /** Helper function, mainly for testing
 * @return  true if log derivative is used instead of log itself */
 bool CalculateCountRate::useLogDerivative() const { return m_useLogDerivative; }
