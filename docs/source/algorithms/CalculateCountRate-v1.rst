@@ -57,14 +57,14 @@ Usage
    
    # no rate log found:
    rez = CheckForSampleLogs(LogTest,log_name)
-   print ("{0}".format(rez))
+   print ("Initially, {0}".format(rez))
    
    # calculate number of events in the workspace
    CalculateCountRate(LogTest,CountRateLogName= log_name)
    
    rez = CheckForSampleLogs(LogTest,log_name)   
    if len(rez)==0:
-        print ("Calculated log: {0}".format(log_name))        
+        print ("The Algorithm produced log: {0}".format(log_name))        
         log = LogTest.run().getLogData(log_name)
         print ("log {0} contains {1} entries".format(log_name,log.size()))
         print ("log starts at {0} and records value: {1}".format(log.firstTime(),log.firstValue()))
@@ -75,10 +75,10 @@ Usage
    
 .. testoutput:: ExCalcCountRate
 
-    Property block_count_rate not found
-    Calculated log: block_count_rate
+    Initially, Property block_count_rate not found
+    The Algorithm produced log: block_count_rate
     log block_count_rate contains 200 entries
-    log starts at 2010-01-01T00:00:09.011891273  and records value: 991.0
+    log starts at 2010-01-01T00:00:09.011891145  and records value: 991.0
     log ends   at 2010-01-01T00:59:50.996493194  and records value: 1010.0
  
 .. categories::
