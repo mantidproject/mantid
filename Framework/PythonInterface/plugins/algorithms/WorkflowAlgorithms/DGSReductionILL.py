@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from mantid.api import AlgorithmFactory, AnalysisDataServiceImpl, DataProcessorAlgorithm, FileAction, FileProperty, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, PropertyMode, WorkspaceProperty
-from mantid.kernel import Direct, Direction, UnitConversion
+from mantid.api import AlgorithmFactory, AnalysisDataServiceImpl, DataProcessorAlgorithm, FileAction, FileProperty, ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, PropertyMode,  WorkspaceProperty
+from mantid.kernel import Direct, Direction, StringListValidator, UnitConversion
 from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
                              CloneWorkspace, ComputeCalibrationCoefVan,\
                              ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DetectorEfficiencyCorUser, Divide, ExtractMonitors, ExtractSpectra, \
@@ -411,6 +411,7 @@ class DGSReductionILL(DataProcessorAlgorithm):
                              doc='String to use as postfix in output workspace names')
         self.declareProperty(PROP_REDUCTION_TYPE,
                              REDUCTION_TYPE_SAMPLE,
+                             validator=StringListValidator([REDUCTION_TYPE_SAMPLE, REDUCTION_TYPE_VANADIUM, REDUCTION_TYPE_CD, REDUCTION_TYPE_EC]),
                              direction=Direction.Input,
                              doc='Type of reduction workflow to be run on ' + PROP_INPUT_FILE)
         self.declareProperty(PROP_NORMALISATION,
