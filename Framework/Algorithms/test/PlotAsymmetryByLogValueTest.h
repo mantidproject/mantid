@@ -29,26 +29,39 @@ class TemporaryRenamer {
 public:
   /// Constructor: rename the file and store its original name
   explicit TemporaryRenamer(const std::string &fileName)
-      : m_originalName(fileName), m_file(fileName) {
+      : m_originalName(fileName) {
     try {
-      TS_ASSERT(m_file.exists() && m_file.canWrite() && m_file.isFile());
-      m_file.renameTo(Poco::TemporaryFile::tempName());
+      Poco::File file(m_originalName);
+      TS_ASSERT(file.exists() && file.canWrite() && file.isFile());
+      m_tempName = Poco::TemporaryFile::tempName();
+      file.copyTo(m_tempName);
+      file.remove();
     } catch (const Poco::FileException &ex) {
-      TS_FAIL(ex.displayText());
+      failCopyWithError(m_originalName, m_tempName, ex);
     }
   }
   /// Destructor: restore the file's original name
   ~TemporaryRenamer() {
     try {
-      m_file.renameTo(m_originalName);
+      Poco::File file(m_tempName);
+      file.copyTo(m_originalName);
+      file.remove();
     } catch (const Poco::FileException &ex) { // Do not throw in the destructor!
-      TS_FAIL(ex.displayText());
+      failCopyWithError(m_tempName, m_originalName, ex);
     }
+  }
+  /// Fail with an error
+  void failCopyWithError(const std::string &from, const std::string &to,
+                         const Poco::FileException &error) const {
+    std::ostringstream message;
+    message << "Failed to copy " << from << " to " << to << ": "
+            << error.displayText();
+    TS_FAIL(message.str());
   }
 
 private:
   const std::string m_originalName;
-  Poco::File m_file;
+  std::string m_tempName;
 };
 
 /// Class to count number of progress reports given out by an algorithm
