@@ -543,7 +543,7 @@ void LoadEventNexus::loadMonitorsToEventWS(Progress &prog) {
     // property 'MonitorsAsEvents'
     this->runLoadMonitors();
   }
-  }
+}
 
 //-----------------------------------------------------------------------------
 /** Generate a look-up table where the index = the pixel ID of an event
@@ -2017,7 +2017,6 @@ void LoadEventNexus::createSpectraList(int32_t min, int32_t max) {
     }
   }
 }
-
 
 } // namespace DataHandling
 } // namespace Mantid
