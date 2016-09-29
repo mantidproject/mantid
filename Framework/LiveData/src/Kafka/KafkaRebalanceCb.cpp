@@ -21,6 +21,10 @@ bool endsWith(std::string const &fullString, std::string const &ending) {
 }
 }
 
+const std::string KafkaRebalanceCb::EVENT_TOPIC_SUFFIX = "_event_topic";
+const std::string KafkaRebalanceCb::RUN_TOPIC_SUFFIX = "_run_topic";
+const std::string KafkaRebalanceCb::DET_SPEC_TOPIC_SUFFIX = "_det_spec_topic";
+
 void KafkaRebalanceCb::rebalance_cb(
     RdKafka::KafkaConsumer *consumer, RdKafka::ErrorCode err,
     std::vector<RdKafka::TopicPartition *> &partitions) {
@@ -29,17 +33,18 @@ void KafkaRebalanceCb::rebalance_cb(
   if (err == RdKafka::ERR__ASSIGN_PARTITIONS) {
 
     for (auto partition : partitions) {
-      if (endsWith(partition->topic(), "")) {
+      if (endsWith(partition->topic(), RUN_TOPIC_SUFFIX) ||
+          endsWith(partition->topic(), DET_SPEC_TOPIC_SUFFIX)) {
         int64_t lowOffset = 0;
         int64_t highOffset = 0;
         consumer->query_watermark_offsets(partition->topic(),
                                           partition->partition(), &lowOffset,
                                           &highOffset, -1);
-        // Current offset-1 means that we will get the last message in each
+        // Current offset-1 means that we will get the last message in the
         // partition
         // This guarantees that we get the required run info and det spec map
-        // message, provided it has not been longer than the Kafka retention time
-        // since one of those was sent
+        // message, provided it has not been longer than the Kafka retention
+        // time since one of those was sent
         partition->set_offset(highOffset - 1);
         LOGGER().debug() << "Setting topic: " << partition->topic()
                          << " , partition: " << partition->partition()

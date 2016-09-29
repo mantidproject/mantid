@@ -1,6 +1,7 @@
 #include "MantidLiveData/ISIS/ISISKafkaEventListener.h"
 #include "MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h"
 #include "MantidLiveData/Kafka/KafkaBroker.h"
+#include <MantidLiveData/Kafka/KafkaRebalanceCb.h>
 
 #include "MantidAPI/LiveListenerFactory.h"
 
@@ -19,9 +20,11 @@ bool ISISKafkaEventListener::connect(
     const API::ILiveListener::ConnectionArgs &args) {
   KafkaBroker broker(address.toString());
   try {
-    const std::string eventTopic(args.instrumentName + "_event_topic"),
-        runInfoTopic(args.instrumentName + "_run_topic"),
-        spDetInfoTopic(args.instrumentName + "_det_spec_topic");
+    const std::string eventTopic(args.instrumentName +
+                                 KafkaRebalanceCb::EVENT_TOPIC_SUFFIX),
+        runInfoTopic(args.instrumentName + KafkaRebalanceCb::RUN_TOPIC_SUFFIX),
+        spDetInfoTopic(args.instrumentName +
+                       KafkaRebalanceCb::DET_SPEC_TOPIC_SUFFIX);
     m_decoder = Kernel::make_unique<ISISKafkaEventStreamDecoder>(
         broker, eventTopic, runInfoTopic, spDetInfoTopic);
   } catch (std::exception &exc) {
