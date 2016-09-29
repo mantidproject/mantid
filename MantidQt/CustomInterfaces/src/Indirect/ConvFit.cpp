@@ -1292,9 +1292,6 @@ void ConvFit::singleFitComplete(bool error) {
 
   if (fitTypeIndex == 2) {
     functionName = "Lorentzian 1";
-  }
-
-  if (fitTypeIndex == 2) {
     for (auto it = params.begin(); it != params.end() - 3; ++it) {
       const QString functionParam = functionName + "." + *it;
       const QString paramValue = pref + *it;
