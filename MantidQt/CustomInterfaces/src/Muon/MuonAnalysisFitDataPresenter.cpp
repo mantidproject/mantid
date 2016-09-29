@@ -169,6 +169,7 @@ void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
     createWorkspacesToFit(names);
     updateWorkspaceNames(names);
     m_fitBrowser->allowSequentialFits(!isMultipleRuns());
+    updateFitLabelFromRuns();
   }
 }
 
@@ -664,10 +665,16 @@ void MuonAnalysisFitDataPresenter::openSequentialFitDialog() {
  * If user chooses not to overwrite, increment the label to avoid overwriting
  * the previous fit.
  *
- * @param seq :: [input] Whether fit is sequential (UNUSED)
+ * If fit is sequential, do nothing because we will not use this label. Instead,
+ * user will choose a label in the sequential fit dialog.
+ *
+ * @param sequentialFit :: [input] Whether fit is sequential or not
  */
-void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool seq) {
-  Q_UNUSED(seq);
+void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool sequentialFit) {
+  if (sequentialFit) {
+    return; // label not used so no need to check it
+  }
+
   if (isSimultaneousFit()) {
     auto &ads = AnalysisDataService::Instance();
     const auto &label = m_dataSelector->getSimultaneousFitLabel().toStdString();
@@ -743,8 +750,18 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(const QString &wsName) {
   m_dataSelector->setWorkspaceIndex(0u); // always has only one spectrum
 
   // Set selected groups/pairs and periods here too
-  m_dataSelector->setChosenGroup(QString::fromStdString(wsParams.itemName));
-  m_dataSelector->setChosenPeriod(QString::fromStdString(wsParams.periods));
+  // (unless extra groups/periods are already selected, in which case don't
+  // unselect them)
+  const QString &groupToSet = QString::fromStdString(wsParams.itemName);
+  const QString &periodToSet = QString::fromStdString(wsParams.periods);
+  const auto &groups = m_dataSelector->getChosenGroups();
+  const auto &periods = m_dataSelector->getPeriodSelections();
+  if (!groups.contains(groupToSet)) {
+    m_dataSelector->setChosenGroup(groupToSet);
+  }
+  if (!periodToSet.isEmpty() && !periods.contains(periodToSet)) {
+    m_dataSelector->setChosenPeriod(periodToSet);
+  }
 }
 
 /**
@@ -768,6 +785,26 @@ void MuonAnalysisFitDataPresenter::handleFitRawData(bool enabled,
   m_fitRawData = enabled;
   if (updateWorkspaces) {
     handleSelectedDataChanged(m_overwrite);
+  }
+  
+/**
+ * When run numbers are changed, update the simultaneous fit label.
+ * If it's a user-set label, leave it alone, otherwise set the label to the run
+ * number string.
+ *
+ * Assume labels with digits, '-', ',' are default (e.g. "15189-91") and
+ * anything else is user-set.
+ */
+void MuonAnalysisFitDataPresenter::updateFitLabelFromRuns() {
+  // Don't change the fit label if it's a user-set one
+  const auto &label = m_dataSelector->getSimultaneousFitLabel().toStdString();
+  const bool isDefault =
+      label.find_first_not_of("0123456789-,") == std::string::npos;
+  if (isDefault) {
+    // replace with current run string
+    const auto &runString = m_dataSelector->getRuns();
+    m_dataSelector->setSimultaneousFitLabel(runString);
+    m_fitBrowser->setSimultaneousLabel(runString.toStdString());
   }
 }
 

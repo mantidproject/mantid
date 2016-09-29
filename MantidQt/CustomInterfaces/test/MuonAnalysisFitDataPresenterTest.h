@@ -55,9 +55,7 @@ public:
   MOCK_CONST_METHOD0(getFitType, IMuonFitDataSelector::FitType());
   MOCK_CONST_METHOD0(getInstrumentName, QString());
   MOCK_CONST_METHOD0(getRuns, QString());
-  QString getSimultaneousFitLabel() const override {
-    return QString("UserSelectedFitLabel");
-  }
+  MOCK_CONST_METHOD0(getSimultaneousFitLabel, QString());
   MOCK_METHOD1(setSimultaneousFitLabel, void(const QString &));
   MOCK_CONST_METHOD0(getDatasetIndex, int());
   MOCK_METHOD1(setDatasetNames, void(const QStringList &));
@@ -108,6 +106,8 @@ public:
     grouping.pairAlphas = {1.0};
     m_dataSelector = new NiceMock<MockDataSelector>();
     m_fitBrowser = new NiceMock<MockFitBrowser>();
+    ON_CALL(*m_dataSelector, getSimultaneousFitLabel())
+        .WillByDefault(Return(QString("Label")));
     m_presenter = new MuonAnalysisFitDataPresenter(
         m_fitBrowser, m_dataSelector, m_dataLoader, grouping,
         MantidQt::CustomInterfaces::Muon::PlotType::Asymmetry);
@@ -142,6 +142,26 @@ public:
     doTest_handleSelectedDataChanged(IMuonFitDataSelector::FitType::CoAdd);
   }
 
+  void test_handleSelectedDataChanged_shouldUpdateLabel() {
+    setupForDataChange();
+    ON_CALL(*m_dataSelector, getSimultaneousFitLabel())
+        .WillByDefault(Return(QString("15000-3"))); // the previous run numbers
+    EXPECT_CALL(*m_dataSelector, setSimultaneousFitLabel(QString("15189-91")))
+        .Times(1);
+    EXPECT_CALL(*m_fitBrowser, setSimultaneousLabel("15189-91")).Times(1);
+    m_presenter->handleSelectedDataChanged(false);
+  }
+
+  void
+  test_handleSelectedDataChanged_labelSetToNonDefaultValue_shouldNotUpdateLabel() {
+    setupForDataChange();
+    ON_CALL(*m_dataSelector, getSimultaneousFitLabel())
+        .WillByDefault(Return(QString("UserSelectedFitLabel")));
+    EXPECT_CALL(*m_dataSelector, setSimultaneousFitLabel(_)).Times(0);
+    EXPECT_CALL(*m_fitBrowser, setSimultaneousLabel(_)).Times(0);
+    m_presenter->handleSelectedDataChanged(false);
+  }
+
   void test_handleXRangeChangedGraphically() {
     EXPECT_CALL(*m_dataSelector, setStartTimeQuietly(0.4)).Times(1);
     EXPECT_CALL(*m_dataSelector, setEndTimeQuietly(9.4)).Times(1);
@@ -149,6 +169,7 @@ public:
   }
 
   void test_setAssignedFirstRun_singleWorkspace() {
+    setupGroupPeriodSelections();
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189"),
                                                      QString("MUSR"))).Times(1);
@@ -157,6 +178,7 @@ public:
   }
 
   void test_setAssignedFirstRun_contiguousRange() {
+    setupGroupPeriodSelections();
     const QString wsName("MUSR00015189-91; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189-91"),
                                                      QString("MUSR"))).Times(1);
@@ -167,6 +189,7 @@ public:
   }
 
   void test_setAssignedFirstRun_nonContiguousRange() {
+    setupGroupPeriodSelections();
     const QString wsName("MUSR00015189-91, 15193; Pair; long; Asym; 1; #1");
     EXPECT_CALL(*m_dataSelector,
                 setWorkspaceDetails(QString("00015189-91, 15193"),
@@ -178,6 +201,7 @@ public:
   }
 
   void test_setAssignedFirstRun_alreadySet() {
+    setupGroupPeriodSelections();
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
     m_presenter->setAssignedFirstRun(wsName);
     EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(_, _)).Times(0);
@@ -189,12 +213,15 @@ public:
   }
 
   void test_getAssignedFirstRun() {
+    setupGroupPeriodSelections();
     const QString wsName("MUSR00015189; Pair; long; Asym; 1; #1");
     m_presenter->setAssignedFirstRun(wsName);
     TS_ASSERT_EQUALS(wsName, m_presenter->getAssignedFirstRun());
   }
 
   void test_handleSimultaneousFitLabelChanged() {
+    ON_CALL(*m_dataSelector, getSimultaneousFitLabel())
+        .WillByDefault(Return("UserSelectedFitLabel"));
     EXPECT_CALL(*m_fitBrowser,
                 setSimultaneousLabel(std::string("UserSelectedFitLabel")))
         .Times(1);
@@ -202,6 +229,8 @@ public:
   }
 
   void test_handleFitFinished_nonSequential() {
+    ON_CALL(*m_dataSelector, getSimultaneousFitLabel())
+        .WillByDefault(Return("UserSelectedFitLabel"));
     EXPECT_CALL(*m_dataSelector, getFitType())
         .Times(1)
         .WillOnce(Return(IMuonFitDataSelector::FitType::Single));
@@ -211,9 +240,8 @@ public:
     EXPECT_CALL(*m_dataSelector, getPeriodSelections())
         .Times(1)
         .WillOnce(Return(QStringList({"1"})));
-    createFittedWorkspacesGroup(
-        m_dataSelector->getSimultaneousFitLabel().toStdString(),
-        {"MUSR00015189; Group; fwd; Asym; 1; #1"});
+    createFittedWorkspacesGroup("UserSelectedFitLabel",
+                                {"MUSR00015189; Group; fwd; Asym; 1; #1"});
     const auto workspacesBefore =
         AnalysisDataService::Instance().getObjectNames();
     m_presenter->handleFitFinished();
@@ -224,6 +252,8 @@ public:
   }
 
   void test_handleFitFinished_oneRunMultiplePeriods() {
+    ON_CALL(*m_dataSelector, getSimultaneousFitLabel())
+        .WillByDefault(Return("UserSelectedFitLabel"));
     EXPECT_CALL(*m_dataSelector, getFitType())
         .Times(1)
         .WillOnce(Return(IMuonFitDataSelector::FitType::Single));
@@ -233,10 +263,9 @@ public:
     EXPECT_CALL(*m_dataSelector, getPeriodSelections())
         .Times(1)
         .WillOnce(Return(QStringList({"1", "2"})));
-    createFittedWorkspacesGroup(
-        m_dataSelector->getSimultaneousFitLabel().toStdString(),
-        {"MUSR00015189; Group; fwd; Asym; 1; #1",
-         "MUSR00015189; Group; fwd; Asym; 2; #1"});
+    createFittedWorkspacesGroup("UserSelectedFitLabel",
+                                {"MUSR00015189; Group; fwd; Asym; 1; #1",
+                                 "MUSR00015189; Group; fwd; Asym; 2; #1"});
     const auto workspacesBefore =
         AnalysisDataService::Instance().getObjectNames();
     m_presenter->handleFitFinished();
@@ -247,6 +276,8 @@ public:
   }
 
   void test_handleFitFinished_oneRunMultipleGroups() {
+    ON_CALL(*m_dataSelector, getSimultaneousFitLabel())
+        .WillByDefault(Return("UserSelectedFitLabel"));
     EXPECT_CALL(*m_dataSelector, getFitType())
         .Times(1)
         .WillOnce(Return(IMuonFitDataSelector::FitType::CoAdd));
@@ -255,10 +286,9 @@ public:
         .WillOnce(Return(QStringList({"fwd", "bwd"})));
     ON_CALL(*m_dataSelector, getPeriodSelections())
         .WillByDefault(Return(QStringList({"1"})));
-    createFittedWorkspacesGroup(
-        m_dataSelector->getSimultaneousFitLabel().toStdString(),
-        {"MUSR00015189-90; Group; fwd; Asym; 1; #1",
-         "MUSR00015189-90; Group; bwd; Asym; 1; #1"});
+    createFittedWorkspacesGroup("UserSelectedFitLabel",
+                                {"MUSR00015189-90; Group; fwd; Asym; 1; #1",
+                                 "MUSR00015189-90; Group; bwd; Asym; 1; #1"});
     const auto workspacesBefore =
         AnalysisDataService::Instance().getObjectNames();
     m_presenter->handleFitFinished();
@@ -269,6 +299,8 @@ public:
   }
 
   void test_handleFitFinished_simultaneous() {
+    ON_CALL(*m_dataSelector, getSimultaneousFitLabel())
+        .WillByDefault(Return("UserSelectedFitLabel"));
     EXPECT_CALL(*m_dataSelector, getFitType())
         .Times(1)
         .WillOnce(Return(IMuonFitDataSelector::FitType::Simultaneous));
@@ -276,7 +308,7 @@ public:
         .WillByDefault(Return(QStringList({"long"})));
     ON_CALL(*m_dataSelector, getPeriodSelections())
         .WillByDefault(Return(QStringList({"1"})));
-    const auto label = m_dataSelector->getSimultaneousFitLabel().toStdString();
+    const std::string label = "UserSelectedFitLabel";
     const std::vector<std::string> inputNames{
         "MUSR00015189; Pair; long; Asym; 1; #1",
         "MUSR00015190; Pair; long; Asym; 1; #1"};
@@ -377,7 +409,7 @@ public:
   }
 
   void test_handleFittedWorkspaces_defaultGroupName() {
-    const auto label = m_dataSelector->getSimultaneousFitLabel().toStdString();
+    const std::string label = "UserSelectedFitLabel";
     const std::vector<std::string> inputNames{
         "MUSR00015189; Pair; long; Asym; 1; #1",
         "MUSR00015190; Pair; long; Asym; 1; #1"};
@@ -389,7 +421,7 @@ public:
   }
 
   void test_handleFittedWorkspaces_otherGroupName() {
-    const auto label = m_dataSelector->getSimultaneousFitLabel().toStdString();
+    const std::string label = "UserSelectedFitLabel";
     const std::vector<std::string> inputNames{
         "MUSR00015189; Pair; long; Asym; 1; #1",
         "MUSR00015189; Group; fwd; Asym; 1; #1"};
@@ -568,6 +600,66 @@ public:
         expectedNames[0].toStdString()));
   }
 
+  void test_checkAndUpdateFitLabel_SequentialFit_ShouldDoNothing() {
+    EXPECT_CALL(*m_dataSelector, getFitType()).Times(0);
+    EXPECT_CALL(*m_dataSelector, getChosenGroups()).Times(0);
+    EXPECT_CALL(*m_dataSelector, getPeriodSelections()).Times(0);
+    EXPECT_CALL(*m_dataSelector, askUserWhetherToOverwrite()).Times(0);
+    EXPECT_CALL(*m_fitBrowser, setSimultaneousLabel(_)).Times(0);
+    EXPECT_CALL(*m_dataSelector, setSimultaneousFitLabel(_)).Times(0);
+    m_presenter->checkAndUpdateFitLabel(true);
+  }
+
+  void test_setSelectedWorkspace() {
+    setupGroupPeriodSelections();
+    const QString wsName("MUSR00015189-91; Group; fwd; Asym; 1; #6");
+    const QStringList wsNameList{wsName};
+
+    // Expect it will update the workspace names
+    EXPECT_CALL(*m_fitBrowser, setWorkspaceNames(wsNameList)).Times(1);
+    EXPECT_CALL(*m_fitBrowser, setWorkspaceName(wsName)).Times(1);
+    EXPECT_CALL(*m_dataSelector, setDatasetNames(wsNameList)).Times(1);
+
+    // Expect it will update the UI from workspace details
+    EXPECT_CALL(*m_dataSelector, setWorkspaceDetails(QString("00015189-91"),
+                                                     QString("MUSR"))).Times(1);
+    EXPECT_CALL(*m_dataSelector, setWorkspaceIndex(0)).Times(1);
+    EXPECT_CALL(*m_dataSelector, setChosenGroup(QString("fwd"))).Times(1);
+    EXPECT_CALL(*m_dataSelector, setChosenPeriod(QString("1"))).Times(1);
+
+    m_presenter->setSelectedWorkspace(wsName);
+  }
+
+  void test_setSelectedWorkspace_groupsAlreadySelected_shouldNotUnselect() {
+    const QString wsName("MUSR00015189-91; Group; fwd; Asym; 1; #6");
+
+    // Groups "fwd" and "bwd" are already selected
+    ON_CALL(*m_dataSelector, getChosenGroups())
+        .WillByDefault(Return(QStringList{"fwd", "bwd"}));
+    ON_CALL(*m_dataSelector, getPeriodSelections())
+        .WillByDefault(Return(QStringList{}));
+
+    // It should NOT deselect the already selected groups
+    EXPECT_CALL(*m_dataSelector, setChosenGroup(_)).Times(0);
+
+    m_presenter->setSelectedWorkspace(wsName);
+  }
+
+  void test_setSelectedWorkspace_periodsAlreadySelected_shouldNotUnselect() {
+    const QString wsName("MUSR00015189-91; Group; fwd; Asym; 1; #6");
+
+    // Periods 1 and 2 are already selected
+    ON_CALL(*m_dataSelector, getPeriodSelections())
+        .WillByDefault(Return(QStringList{"1", "2"}));
+    ON_CALL(*m_dataSelector, getChosenGroups())
+        .WillByDefault(Return(QStringList{}));
+
+    // It should NOT deselect the already selected periods
+    EXPECT_CALL(*m_dataSelector, setChosenPeriod(_)).Times(0);
+
+    m_presenter->setSelectedWorkspace(wsName);
+  }
+
 private:
   void
   doTest_generateWorkspaceNames(const IMuonFitDataSelector::FitType &fitType,
@@ -606,6 +698,8 @@ private:
     ON_CALL(*m_dataSelector, getRuns()).WillByDefault(Return("15189-91"));
     ON_CALL(*m_dataSelector, getStartTime()).WillByDefault(Return(0.55));
     ON_CALL(*m_dataSelector, getEndTime()).WillByDefault(Return(10.0));
+    ON_CALL(*m_dataSelector, getSimultaneousFitLabel())
+        .WillByDefault(Return(QString("UserSelectedFitLabel")));
     const std::vector<QString> expectedNames = [&fitType]() {
       if (fitType == IMuonFitDataSelector::FitType::CoAdd) {
         return std::vector<QString>{
@@ -829,9 +923,11 @@ private:
         .WillByDefault(Return(periods));
     ON_CALL(*m_dataSelector, askUserWhetherToOverwrite())
         .WillByDefault(Return(overwrite));
+    ON_CALL(*m_dataSelector, getSimultaneousFitLabel())
+        .WillByDefault(Return("UserSelectedFitLabel"));
 
     if (shouldUpdate) {
-      const auto &label = m_dataSelector->getSimultaneousFitLabel();
+      const QString label = "UserSelectedFitLabel";
       QString groupName = QString("MuonSimulFit_").append(label);
       AnalysisDataService::Instance().add(groupName.toStdString(),
                                           boost::make_shared<WorkspaceGroup>());
@@ -846,6 +942,26 @@ private:
     }
     m_presenter->checkAndUpdateFitLabel(false);
     AnalysisDataService::Instance().clear();
+  }
+
+  void setupGroupPeriodSelections() {
+    ON_CALL(*m_dataSelector, getChosenGroups())
+        .WillByDefault(Return(QStringList{}));
+    ON_CALL(*m_dataSelector, getPeriodSelections())
+        .WillByDefault(Return(QStringList{}));
+  }
+
+  void setupForDataChange() {
+    ON_CALL(*m_dataSelector, getChosenGroups())
+        .WillByDefault(Return(QStringList{"fwd"}));
+    ON_CALL(*m_dataSelector, getPeriodSelections())
+        .WillByDefault(Return(QStringList{"1"}));
+    ON_CALL(*m_dataSelector, getFitType())
+        .WillByDefault(Return(IMuonFitDataSelector::FitType::Simultaneous));
+    ON_CALL(*m_dataSelector, getInstrumentName()).WillByDefault(Return("MUSR"));
+    ON_CALL(*m_dataSelector, getRuns()).WillByDefault(Return("15189-91"));
+    ON_CALL(*m_dataSelector, getStartTime()).WillByDefault(Return(0.55));
+    ON_CALL(*m_dataSelector, getEndTime()).WillByDefault(Return(10.0));
   }
 
   MockDataSelector *m_dataSelector;

@@ -130,6 +130,42 @@ bool drawXAxisLabel(const int row, const int col, const int nRows,
     return false;
   }
 }
+
+/// Spectra names for a fit results workspace
+const std::vector<std::string> FIT_RESULTS_SPECTRA_NAMES{"Data", "Calc",
+                                                         "Diff"};
+
+/// Decide whether the named workspace is the results from a fit
+/// (will have 3 spectra called "Data", "Calc" and "Diff")
+bool workspaceIsFitResult(const QString &wsName) {
+  bool isFit = false;
+  const auto &ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      wsName.toStdString());
+  if (ws) {
+    if (FIT_RESULTS_SPECTRA_NAMES.size() == ws->getNumberHistograms()) {
+      std::vector<std::string> spectraNames;
+      const auto specAxis = ws->getAxis(1); // y
+      for (size_t iSpec = 0; iSpec < FIT_RESULTS_SPECTRA_NAMES.size();
+           ++iSpec) {
+        spectraNames.push_back(specAxis->label(iSpec));
+      }
+      isFit = spectraNames == FIT_RESULTS_SPECTRA_NAMES;
+    }
+  }
+  return isFit;
+}
+
+/// Return curve type for spectrum of a set of fit results
+Graph::CurveType getCurveTypeForFitResult(const size_t spectrum) {
+  switch (spectrum) {
+  case 0:
+    return Graph::CurveType::LineSymbols;
+  case 1:
+    return Graph::CurveType::Line;
+  default:
+    return Graph::CurveType::Unspecified;
+  }
+}
 }
 
 MantidUI::MantidUI(ApplicationWindow *aw)
@@ -3486,12 +3522,16 @@ void MantidUI::plotLayerOfMultilayer(MultiLayer *multi, const bool plotErrors,
     }
   };
 
+  const bool isFitResult = workspaceIsFitResult(wsName);
+
   const int layerIndex = row * nCols + col + 1; // layers numbered from 1
   auto *layer = multi->layer(layerIndex);
   QString legendText = wsName + '\n';
   int curveIndex(0);
   for (const int spec : spectra) {
-    layer->insertCurve(wsName, spec, plotErrors, Graph::Unspecified, plotDist);
+    const auto plotType =
+        isFitResult ? getCurveTypeForFitResult(spec) : Graph::Unspecified;
+    layer->insertCurve(wsName, spec, plotErrors, plotType, plotDist);
     legendText += "\\l(" + QString::number(++curveIndex) + ")" +
                   getLegendKey(wsName, spec) + "\n";
   }
