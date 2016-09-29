@@ -75,6 +75,7 @@ public:
   MOCK_METHOD1(workspacesToFitChanged, void(int));
   MOCK_METHOD1(setSimultaneousLabel, void(const std::string &));
   MOCK_METHOD1(userChangedDataset, void(int));
+  MOCK_CONST_METHOD0(rawData, bool());
 };
 
 class MuonAnalysisFitDataPresenterTest : public CxxTest::TestSuite {
@@ -323,38 +324,41 @@ public:
   }
 
   void test_generateWorkspaceNames_CoAdd() {
-    EXPECT_CALL(*m_dataSelector, getChosenGroups())
-        .Times(1)
-        .WillOnce(Return(QStringList({"long"})));
-    EXPECT_CALL(*m_dataSelector, getPeriodSelections())
-        .Times(1)
-        .WillOnce(Return(QStringList({"1"})));
-    EXPECT_CALL(*m_dataSelector, getFitType())
-        .Times(1)
-        .WillOnce(Return(IMuonFitDataSelector::FitType::CoAdd));
-    auto names = m_presenter->generateWorkspaceNames("MUSR", "15189-91", true);
-    std::vector<std::string> expectedNames{
-        "MUSR00015189-91; Pair; long; Asym; 1; #1"};
-    TS_ASSERT_EQUALS(names, expectedNames)
+    doTest_generateWorkspaceNames(IMuonFitDataSelector::FitType::CoAdd, false,
+                                  {"MUSR00015189-91; Pair; long; Asym; 1; #1"});
+  }
+
+  void test_generateWorkspaceNames_CoAdd_Raw() {
+    doTest_generateWorkspaceNames(
+        IMuonFitDataSelector::FitType::CoAdd, true,
+        {"MUSR00015189-91; Pair; long; Asym; 1; #1_Raw"});
   }
 
   void test_generateWorkspaceNames_Simultaneous() {
-    EXPECT_CALL(*m_dataSelector, getChosenGroups())
-        .Times(1)
-        .WillOnce(Return(QStringList({"long"})));
-    EXPECT_CALL(*m_dataSelector, getPeriodSelections())
-        .Times(1)
-        .WillOnce(Return(QStringList({"1"})));
-    EXPECT_CALL(*m_dataSelector, getFitType())
-        .Times(1)
-        .WillOnce(Return(IMuonFitDataSelector::FitType::Simultaneous));
-    auto names = m_presenter->generateWorkspaceNames("MUSR", "15189-91", true);
-    std::vector<std::string> expectedNames{
-        "MUSR00015189; Pair; long; Asym; 1; #1",
-        "MUSR00015190; Pair; long; Asym; 1; #1",
-        "MUSR00015191; Pair; long; Asym; 1; #1"};
-    std::sort(names.begin(), names.end());
-    TS_ASSERT_EQUALS(names, expectedNames)
+    doTest_generateWorkspaceNames(IMuonFitDataSelector::FitType::Simultaneous,
+                                  false,
+                                  {"MUSR00015189; Pair; long; Asym; 1; #1",
+                                   "MUSR00015190; Pair; long; Asym; 1; #1",
+                                   "MUSR00015191; Pair; long; Asym; 1; #1"});
+  }
+
+  void test_generateWorkspaceNames_Simultaneous_Raw() {
+    doTest_generateWorkspaceNames(
+        IMuonFitDataSelector::FitType::Simultaneous, true,
+        {"MUSR00015189; Pair; long; Asym; 1; #1_Raw",
+         "MUSR00015190; Pair; long; Asym; 1; #1_Raw",
+         "MUSR00015191; Pair; long; Asym; 1; #1_Raw"});
+  }
+
+  void test_generateWorkspaceNames_noInstrument() {
+    const auto &names =
+        m_presenter->generateWorkspaceNames("", "15189-91", false);
+    TS_ASSERT(names.empty());
+  }
+
+  void test_generateWorkspaceNames_noRuns() {
+    const auto &names = m_presenter->generateWorkspaceNames("MUSR", "", false);
+    TS_ASSERT(names.empty());
   }
 
   void test_createWorkspacesToFit_AlreadyExists() {
@@ -379,6 +383,22 @@ public:
     const std::vector<std::string> names{
         "MUSR00015189; Pair; long; Asym; 1; #1",
         "MUSR00015189; Group; fwd; Asym; 1; #1"};
+    m_presenter->createWorkspacesToFit(names);
+    // Make sure workspaces have been created and grouped together
+    const auto group = ads.retrieveWS<WorkspaceGroup>("MUSR00015189");
+    TS_ASSERT(group);
+    for (const auto &name : names) {
+      TS_ASSERT(group->contains(name));
+    }
+  }
+
+  void test_createWorkspacesToFit_RawData() {
+    ON_CALL(*m_dataSelector, getStartTime()).WillByDefault(Return(0.1));
+    ON_CALL(*m_dataSelector, getEndTime()).WillByDefault(Return(9.9));
+    auto &ads = AnalysisDataService::Instance();
+    const std::vector<std::string> names{
+        "MUSR00015189; Pair; long; Asym; 1; #1_Raw",
+        "MUSR00015189; Group; fwd; Asym; 1; #1_Raw"};
     m_presenter->createWorkspacesToFit(names);
     // Make sure workspaces have been created and grouped together
     const auto group = ads.retrieveWS<WorkspaceGroup>("MUSR00015189");
@@ -539,6 +559,47 @@ public:
                                   {"1", "2"}, true, true);
   }
 
+  void test_handleFitRawData_NoUpdate() {
+    const bool isRawData = true;
+    const bool updateWorkspaces = false;
+    EXPECT_CALL(*m_dataSelector, getInstrumentName()).Times(0);
+    EXPECT_CALL(*m_dataSelector, getChosenGroups()).Times(0);
+    EXPECT_CALL(*m_dataSelector, getPeriodSelections()).Times(0);
+    EXPECT_CALL(*m_dataSelector, getFitType()).Times(0);
+    m_presenter->handleFitRawData(isRawData, updateWorkspaces);
+    const auto &workspaces = AnalysisDataService::Instance().getObjectNames();
+    TS_ASSERT(workspaces.empty());
+  }
+
+  void test_handleFitRawData_updateWorkspaces() {
+    const bool isRawData = true;
+    const bool updateWorkspaces = true;
+    EXPECT_CALL(*m_dataSelector, getInstrumentName())
+        .Times(1)
+        .WillOnce(Return("MUSR"));
+    EXPECT_CALL(*m_dataSelector, getChosenGroups())
+        .Times(1)
+        .WillOnce(Return(QStringList({"long"})));
+    EXPECT_CALL(*m_dataSelector, getPeriodSelections())
+        .Times(1)
+        .WillOnce(Return(QStringList({"1"})));
+    EXPECT_CALL(*m_dataSelector, getFitType())
+        .Times(1)
+        .WillOnce(Return(IMuonFitDataSelector::FitType::Single));
+    ON_CALL(*m_dataSelector, getRuns()).WillByDefault(Return("15189"));
+    ON_CALL(*m_dataSelector, getStartTime()).WillByDefault(Return(0.55));
+    ON_CALL(*m_dataSelector, getEndTime()).WillByDefault(Return(10.0));
+    const QStringList expectedNames{
+        "MUSR00015189; Pair; long; Asym; 1; #1_Raw"};
+    EXPECT_CALL(*m_fitBrowser, setWorkspaceNames(expectedNames)).Times(1);
+    EXPECT_CALL(*m_dataSelector, setDatasetNames(expectedNames)).Times(1);
+    EXPECT_CALL(*m_fitBrowser, setWorkspaceName(expectedNames[0])).Times(1);
+    EXPECT_CALL(*m_fitBrowser, allowSequentialFits(true));
+    m_presenter->handleFitRawData(isRawData, updateWorkspaces);
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(
+        expectedNames[0].toStdString()));
+  }
+
   void test_checkAndUpdateFitLabel_SequentialFit_ShouldDoNothing() {
     EXPECT_CALL(*m_dataSelector, getFitType()).Times(0);
     EXPECT_CALL(*m_dataSelector, getChosenGroups()).Times(0);
@@ -600,6 +661,26 @@ public:
   }
 
 private:
+  void
+  doTest_generateWorkspaceNames(const IMuonFitDataSelector::FitType &fitType,
+                                const bool isRawData,
+                                const std::vector<std::string> &expectedNames) {
+    EXPECT_CALL(*m_dataSelector, getChosenGroups())
+        .Times(1)
+        .WillOnce(Return(QStringList({"long"})));
+    EXPECT_CALL(*m_dataSelector, getPeriodSelections())
+        .Times(1)
+        .WillOnce(Return(QStringList({"1"})));
+    EXPECT_CALL(*m_dataSelector, getFitType())
+        .Times(1)
+        .WillOnce(Return(fitType));
+    m_presenter->handleFitRawData(isRawData,
+                                  false); // don't create the workspaces
+    const auto &names =
+        m_presenter->generateWorkspaceNames("MUSR", "15189-91", true);
+    TS_ASSERT_EQUALS(names, expectedNames)
+  }
+
   void doTest_handleSelectedDataChanged(IMuonFitDataSelector::FitType fitType) {
     auto &ads = AnalysisDataService::Instance();
     EXPECT_CALL(*m_dataSelector, getInstrumentName())
