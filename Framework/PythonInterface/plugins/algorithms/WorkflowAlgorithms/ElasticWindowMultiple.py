@@ -2,7 +2,7 @@
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
-
+from IndirectCommon import getInstrRun
 
 def _normalize_to_lowest_temp(elt_ws_name):
     """
@@ -141,7 +141,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             q2_workspaces.append(q2_ws)
 
             # Get the run number
-            run_no = self.getInstrRun(input_ws)[1]
+            run_no = getInstrRun(input_ws)[1]
             run_numbers.append(run_no)
 
             # Get the sample temperature
@@ -280,7 +280,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         @returns Temperature in Kelvin or None if not found
         """
 
-        instr, run_number = self.getInstrRun(ws_name)
+        instr, run_number = getInstrRun(ws_name)
 
         facility = config.getFacility()
         pad_num = facility.instrument(instr).zeroPadding(int(run_number))
@@ -324,34 +324,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         logger.warning('No temperature found for run: %s' % run_name)
         return None
 
-    def getInstrRun(self, ws_name):
-        """
-        Get the instrument name and run number from a workspace.
-
-        @param ws_name - name of the workspace
-        @return tuple of form (instrument, run number)
-        """
-
-        run_number = str(workspace.getRunNumber())
-        if run_number == '0':
-            # Attempt to parse run number off of name
-            match = re.match(r'([a-zA-Z]+)([0-9]+)', ws_name)
-            if match:
-                run_number = match.group(2)
-            else:
-                raise RuntimeError("Could not find run number associated with workspace.")
-
-        instrument = s_api.mtd[ws_name].getInstrument().getName()
-        if instrument != '':
-            for facility in config.getFacilities():
-                try:
-                    instrument = facility.instrument(instrument).filePrefix(int(run_number))
-                    instrument = instrument.lower()
-                    break
-                except RuntimeError:
-                    continue
-
-        return instrument, run_number
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(ElasticWindowMultiple)

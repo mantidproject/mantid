@@ -734,38 +734,37 @@ class BayesQuasi(PythonAlgorithm):
             if upper < lower:
                 raise ValueError('%s - input maximum (%f) < minimum (%f)' % (range_type, upper, lower))
 
-        def CheckAnalysers(self, in1WS, in2WS):
-            #pylint: disable=unused-argument, unused-variable
-            """
-            Check workspaces have identical analysers and reflections
-            Args:
-            @param in1WS - first 2D workspace
-            @param in2WS - second 2D workspace
-            Returns:
-            @return None
-            Raises:
-            @exception ValueError - workspaces have different analysers
-            @exception ValueError - workspaces have different reflections
-            """
-            ws1 = s_api.mtd[in1WS]
-            try:
-                analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
-                reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
-            except IndexError:
-                raise RuntimeError('Could not find analyser or reflection for workspace %s' % in1WS)
-            ws2 = s_api.mtd[in2WS]
-            try:
-                analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
-                reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
-            except:
-                raise RuntimeError('Could not find analyser or reflection for workspace %s' % in2WS)
+    def CheckAnalysers(self, in1WS, in2WS):
+        """
+        Check workspaces have identical analysers and reflections
+        Args:
+        @param in1WS - first 2D workspace
+        @param in2WS - second 2D workspace
+        Returns:
+        @return None
+        Raises:
+        @exception ValueError - workspaces have different analysers
+        @exception ValueError - workspaces have different reflections
+        """
+        ws1 = s_api.mtd[in1WS]
+        try:
+            analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
+            reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
+        except IndexError:
+            raise RuntimeError('Could not find analyser or reflection for workspace %s' % in1WS)
+        ws2 = s_api.mtd[in2WS]
+        try:
+            analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
+            reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
+        except:
+            raise RuntimeError('Could not find analyser or reflection for workspace %s' % in2WS)
 
-            if analyser_1 != analyser_2:
-                raise ValueError('Workspace %s and %s have different analysers' % (ws1, ws2))
-            elif reflection_1 != reflection_2:
-                raise ValueError('Workspace %s and %s have different reflections' % (ws1, ws2))
-            else:
-                logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
+        if analyser_1 != analyser_2:
+            raise ValueError('Workspace %s and %s have different analysers' % (ws1, ws2))
+        elif reflection_1 != reflection_2:
+            raise ValueError('Workspace %s and %s have different reflections' % (ws1, ws2))
+        else:
+            logger.information('Analyser is %s, reflection %s' % (analyser_1, reflection_1))
 
     def CheckHistZero(self, inWS):
         """
@@ -844,8 +843,8 @@ class BayesQuasi(PythonAlgorithm):
         for spectra in range(0, nhists):
             # Obtain first and last non zero values
             y_data = sample_ws.readY(spectra)
-            spectra_start_data = firstNonZero(self, y_data)
-            spectra_end_data = firstNonZero(list(reversed(self, y_data)))
+            spectra_start_data = self.firstNonZero(y_data)
+            spectra_end_data = self.firstNonZero(list(reversed(y_data)))
             # Replace workspace start and end if data is closer to the center
             if spectra_start_data > start_data_idx:
                 start_data_idx = spectra_start_data

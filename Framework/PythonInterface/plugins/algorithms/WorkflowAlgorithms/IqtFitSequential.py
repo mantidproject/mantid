@@ -234,7 +234,7 @@ class IqtFitSequential(PythonAlgorithm):
         add_sample_log_multi.setProperty("LogValues", log_values)
         add_sample_log_multi.execute()
 
-    def convertToElasticQ(self.input_ws, output_ws=None):
+    def convertToElasticQ(self, input_ws, output_ws=None):
         from IndirectCommon import getEfixed
         """
         Helper function to convert the spectrum axis of a sample to ElasticQ.

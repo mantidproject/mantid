@@ -22,6 +22,34 @@ def EndTime(prog):
     logger.notice(message)
     logger.notice('----------')
 
+def getInstrRun(ws_name):
+    """
+    Get the instrument name and run number from a workspace.
+    @param ws_name - name of the workspace
+    @return tuple of form (instrument, run number)
+    """
+
+    workspace = s_api.mtd[ws_name]
+    run_number = str(workspace.getRunNumber())
+    if run_number == '0':
+        # Attempt to parse run number off of name
+        match = re.match(r'([a-zA-Z]+)([0-9]+)', ws_name)
+        if match:
+            run_number = match.group(2)
+        else:
+            raise RuntimeError("Could not find run number associated with workspace.")
+
+    instrument = s_api.mtd[ws_name].getInstrument().getName()
+    if instrument != '':
+        for facility in config.getFacilities():
+            try:
+                instrument = facility.instrument(instrument).filePrefix(int(run_number))
+                instrument = instrument.lower()
+                break
+            except RuntimeError:
+                continue
+
+    return instrument, run_number
 
 def getWSprefix(wsname):
     """
@@ -77,15 +105,15 @@ def getEfixed(workspace):
 
 
 def GetWSangles(inWS):
-    num_hist = s_api.mtd[inWS].getNumberHistograms()    					# get no. of histograms/groups
+    num_hist = s_api.mtd[inWS].getNumberHistograms()                        # get no. of histograms/groups
     source_pos = s_api.mtd[inWS].getInstrument().getSource().getPos()
     sample_pos = s_api.mtd[inWS].getInstrument().getSample().getPos()
     beam_pos = sample_pos - source_pos
-    angles = []    									# will be list of angles
+    angles = []                                     # will be list of angles
     for index in range(0, num_hist):
-        detector = s_api.mtd[inWS].getDetector(index)    				# get index
-        two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi    	# calc angle
-        angles.append(two_theta)    					# add angle
+        detector = s_api.mtd[inWS].getDetector(index)                   # get index
+        two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi        # calc angle
+        angles.append(two_theta)                        # add angle
     return angles
 
 

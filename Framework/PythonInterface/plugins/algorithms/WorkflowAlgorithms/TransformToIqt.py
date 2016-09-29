@@ -316,13 +316,13 @@ class TransformToIqt(PythonAlgorithm):
         @exception ValueError - workspaces have different analysers
         @exception ValueError - workspaces have different reflections
         """
-        ws1 = s_api.mtd[in1WS]
+        ws1 = mtd[in1WS]
         try:
             analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
             reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
         except IndexError:
             raise RuntimeError('Could not find analyser or reflection for workspace %s' % in1WS)
-        ws2 = s_api.mtd[in2WS]
+        ws2 = mtd[in2WS]
         try:
             analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
             reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
@@ -351,10 +351,10 @@ class TransformToIqt(PythonAlgorithm):
         Raises:
           @exception ValueError - Workspace has no histograms
         """
-        num_hist = s_api.mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
+        num_hist = mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
         if num_hist == 0:
             raise ValueError('Workspace ' + inWS + ' has NO histograms')
-        x_in = s_api.mtd[inWS].readX(0)
+        x_in = mtd[inWS].readX(0)
         ntc = len(x_in) - 1  # no. points from length of x array
         if ntc == 0:
             raise ValueError('Workspace ' + inWS + ' has NO points')
@@ -374,11 +374,11 @@ class TransformToIqt(PythonAlgorithm):
           ValueError: number of histograms is different
           ValueError: number of bin boundaries in the histograms is different
         """
-        num_hist_1 = s_api.mtd[in1WS].getNumberHistograms()  # no. of hist/groups in WS1
-        x_1 = s_api.mtd[in1WS].readX(0)
+        num_hist_1 = mtd[in1WS].getNumberHistograms()  # no. of hist/groups in WS1
+        x_1 = mtd[in1WS].readX(0)
         x_len_1 = len(x_1)
-        num_hist_2 = s_api.mtd[in2WS].getNumberHistograms()  # no. of hist/groups in WS2
-        x_2 = s_api.mtd[in2WS].readX(0)
+        num_hist_2 = mtd[in2WS].getNumberHistograms()  # no. of hist/groups in WS2
+        x_2 = mtd[in2WS].readX(0)
         x_len_2 = len(x_2)
         if num_hist_1 != num_hist_2:  # Check that no. groups are the same
             error_1 = '%s (%s) histograms (%d)' % (name1, in1WS, num_hist_1)

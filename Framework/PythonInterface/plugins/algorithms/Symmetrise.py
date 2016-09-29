@@ -300,10 +300,10 @@ class Symmetrise(PythonAlgorithm):
         Raises:
           @exception ValueError - Workspace has no histograms
         """
-        num_hist = s_api.mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
+        num_hist = ms.mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
         if num_hist == 0:
             raise ValueError('Workspace ' + inWS + ' has NO histograms')
-        x_in = s_api.mtd[inWS].readX(0)
+        x_in = ms.mtd[inWS].readX(0)
         ntc = len(x_in) - 1  # no. points from length of x array
         if ntc == 0:
             raise ValueError('Workspace ' + inWS + ' has NO points')
