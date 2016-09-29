@@ -543,13 +543,13 @@ public:
     boost::shared_ptr<std::vector<uint64_t>> event_index_shrd(event_index_ptr);
 
     ProcessBankData *newTask1 = new ProcessBankData(
-        alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
+        alg, entry_name, prog.get(), event_id_shrd, event_time_of_flight_shrd,
         numEvents, startAt, event_index_shrd, thisBankPulseTimes, m_have_weight,
         event_weight_shrd, m_min_id, mid_id);
     scheduler->push(newTask1);
     if (alg->splitProcessing && (mid_id < m_max_id)) {
       ProcessBankData *newTask2 = new ProcessBankData(
-          alg, entry_name, prog, event_id_shrd, event_time_of_flight_shrd,
+          alg, entry_name, prog.get(), event_id_shrd, event_time_of_flight_shrd,
           numEvents, startAt, event_index_shrd, thisBankPulseTimes,
           m_have_weight, event_weight_shrd, (mid_id + 1), m_max_id);
       scheduler->push(newTask2);
@@ -579,7 +579,7 @@ private:
   /// NXS type
   std::string entry_type;
   /// Progress reporting
-  Progress *prog;
+  std::unique_ptr<Progress> prog;
   /// ThreadScheduler running this task
   ThreadScheduler *scheduler;
   /// Object with the pulse times for this bank

@@ -57,9 +57,12 @@ void PlusMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   } while (it2.next());
 
   this->progress(0.41, "Splitting Boxes");
-  auto prog2 = Kernel::make_unique<Progress>(this, 0.4, 0.9, 100);
+  auto prog2 = new Progress(this, 0.4, 0.9, 100);
   ThreadScheduler *ts = new ThreadSchedulerFIFO();
-  ThreadPool tp(ts, 0, prog2.get());
+  
+  // progress deleted in destructor, if using unique_ptr
+  // it segfaults in the unique_ptr destructor
+  ThreadPool tp(ts, 0, prog2); 
   ws1->splitAllIfNeeded(ts);
   prog2->resetNumSteps(ts->size(), 0.4, 0.6);
   tp.joinAll();

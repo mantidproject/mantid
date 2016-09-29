@@ -64,6 +64,8 @@ class DLLExport AlignAndFocusPowder : public API::DataProcessorAlgorithm {
 public:
   /// Constructor
   AlignAndFocusPowder();
+  /// Destructor
+  ~AlignAndFocusPowder() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override;
   /// Algorithm's version for identification overriding a virtual method
@@ -144,7 +146,7 @@ private:
   /// Offset to low resolution TOF spectra
   size_t m_lowResSpecOffset;
 
-  std::unique_ptr<API::Progress> m_progress; ///< Progress reporting
+  API::Progress *m_progress; ///< Progress reporting
 };
 
 } // namespace WorkflowAlgorithm

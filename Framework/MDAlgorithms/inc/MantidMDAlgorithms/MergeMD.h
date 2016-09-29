@@ -1,6 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_MERGEMD_H_
 #define MANTID_MDALGORITHMS_MERGEMD_H_
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
@@ -56,7 +57,7 @@ private:
   std::vector<Mantid::API::IMDEventWorkspace_sptr> m_workspaces;
 
   /// Output MDEventWorkspace
-  Mantid::API::IMDEventWorkspace_sptr m_outWS;
+  Mantid::API::IMDEventWorkspace_sptr out;
 };
 
 } // namespace MDAlgorithms
