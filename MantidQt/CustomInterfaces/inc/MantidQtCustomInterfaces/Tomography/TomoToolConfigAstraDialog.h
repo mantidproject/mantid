@@ -1,21 +1,38 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGASTRADIALOG_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGASTRADIALOG_H_
 
-#include "ui_TomoToolConfigTomoPy.h"
+#include "ui_TomoToolConfigAstra.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
+
+#include <QLabel>
+#include <QLineEdit>
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QGridLayout>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class TomoToolConfigAstraDialog : public TomoToolConfigDialogBase {
+class TomoToolConfigAstraDialog : public QDialog, public TomoToolConfigDialogBase {
   Q_OBJECT
 public:
   TomoToolConfigAstraDialog(QWidget *parent = 0);
-  virtual void setUpDialog() override {
-	  std::cout << "TODO" << std::endl;
-	  // TODO
-  }
+  ~TomoToolConfigAstraDialog();
+
+  void setUpDialog() override;
+  int execute() override;
+
+private slots:
+  void okClicked();
+  void cancelClicked();
+
 private:
-  void initLayout();
+  Ui::TomoToolConfigAstra m_astraUi;
+
+  QLabel *labelRun, *labelOpt;
+  QLineEdit *editRun, *editOpt;
+  QHBoxLayout *hRun, *hOpt, *hBut;
+  QGridLayout *layout;
+  QPushButton *okButton, *cancelButton;
 };
 
 } // CustomInterfaces

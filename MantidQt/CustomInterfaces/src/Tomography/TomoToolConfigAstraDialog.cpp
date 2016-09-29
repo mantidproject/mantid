@@ -1,7 +1,56 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigAstraDialog.h"
+#include <MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 TomoToolConfigAstraDialog::TomoToolConfigAstraDialog(QWidget *parent)
-    : TomoToolConfigDialogBase(parent) {}
+    : QDialog(parent) {
+
+  labelRun = new QLabel("Runnable script");
+  editRun = new QLineEdit("/work/imat/");
+  hRun = new QHBoxLayout();
+  hRun->addWidget(labelRun);
+  hRun->addWidget(editRun);
+
+  labelOpt = new QLabel("Command line options");
+  editOpt = new QLineEdit("/work/imat");
+  hOpt = new QHBoxLayout();
+  hOpt->addWidget(labelOpt);
+
+  hOpt->addWidget(editOpt);
+
+  okButton = new QPushButton("Ok");
+  cancelButton = new QPushButton("Cancel");
+  hBut = new QHBoxLayout();
+  hBut->insertStretch(0, 1);
+  hBut->addWidget(okButton);
+  hBut->addWidget(cancelButton);
+
+  layout = new QGridLayout();
+  layout->addLayout(hRun, 0, 0);
+  layout->addLayout(hOpt, 1, 0);
+  layout->addLayout(hOpt, 2, 0);
+
+  connect(okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
+  connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancelClicked()));
+}
+
+TomoToolConfigAstraDialog::~TomoToolConfigAstraDialog() {}
+
+void TomoToolConfigAstraDialog::setUpDialog() {
+  m_astraUi.setupUi(this);
+  m_astraUi.comboBox_method->clear();
+  const auto methods = ToolConfigAstraToolbox::methods();
+  for (size_t i = 0; i < methods.size(); i++) {
+    m_astraUi.comboBox_method->addItem(
+        QString::fromStdString(methods[i].second));
+  }
+}
+int TomoToolConfigAstraDialog::execute() { return this->exec(); }
+
+void TomoToolConfigAstraDialog::okClicked() {}
+
+void TomoToolConfigAstraDialog::cancelClicked() {}
+
 } // CustomInterfaces
 } // MantidQt

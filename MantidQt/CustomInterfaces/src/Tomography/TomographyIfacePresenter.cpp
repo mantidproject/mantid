@@ -363,10 +363,16 @@ void TomographyIfacePresenter::processLogout() {
 }
 
 void TomographyIfacePresenter::processSetupReconTool() {
-  if (TomographyIfaceModel::g_CCPiTool != m_view->currentReconTool()) {
-	  TomoToolConfigDialogBase * base = TomoToolConfigDialogBase::fromString("");
+  const std::string &currentReconTool = m_view->currentReconTool();
+  if (TomographyIfaceModel::g_CCPiTool != currentReconTool) {
 
-    m_view->showToolConfig(base);
+    // wrap in unique_ptr
+    auto base = std::unique_ptr<TomoToolConfigDialogBase>(
+        TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
+            currentReconTool));
+
+    // give pointer to showToolConfig
+    m_view->showToolConfig(base.get());
     m_model->updateReconToolsSettings(m_view->reconToolsSettings());
 
     // TODO: this would make sense if the reconstruct action/button

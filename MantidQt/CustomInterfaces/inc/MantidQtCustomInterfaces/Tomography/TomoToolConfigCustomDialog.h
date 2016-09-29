@@ -1,23 +1,38 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGCUSTOMDIALOG_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGCUSTOMDIALOG_H_
 
-#include "ui_TomoToolConfigTomoPy.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
+#include "ui_TomoToolConfigCustom.h"
+
+#include <QLabel>
+#include <QLineEdit>
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QGridLayout>
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class TomoToolConfigCustomDialog : public TomoToolConfigDialogBase {
+class TomoToolConfigCustomDialog : public QDialog, public TomoToolConfigDialogBase {
   Q_OBJECT
 public:
   TomoToolConfigCustomDialog(QWidget *parent = 0);
-  virtual void setUpDialog() override {
-	  std::cout << "TODO" << std::endl;
-	  //TODO
-  }
+  ~TomoToolConfigCustomDialog() override;
 
+  void setUpDialog() override;
+  int execute() override;
+
+  private slots:
+  void okClicked();
+  void cancelClicked();
 
 private:
-  void initLayout();
+	Ui::TomoToolConfigCustom m_customUi;
+
+	QLabel *labelRun, *labelOpt;
+	QLineEdit *editRun, *editOpt;
+	QHBoxLayout *hRun, *hOpt, *hBut;
+	QGridLayout *layout;
+	QPushButton *okButton, *cancelButton;
 };
 } // CustomInterfaces
 } // MantidQt

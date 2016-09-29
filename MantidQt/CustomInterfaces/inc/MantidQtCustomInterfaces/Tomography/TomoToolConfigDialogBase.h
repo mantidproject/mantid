@@ -1,16 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOG_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOG_H_
 
-#include "ui_TomoToolConfigAstra.h"
-#include "ui_TomoToolConfigCustom.h"
-#include "ui_TomoToolConfigSavu.h"
-#include "ui_TomoToolConfigTomoPy.h"
-
-#include <QDialog>
-
 namespace MantidQt {
 namespace CustomInterfaces {
-
 /**
 Third party tool configuration dialog(s) for the tomographic reconstruction
 GUI.
@@ -36,37 +28,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
-
-
-
-class TomoToolConfigDialogBase : public QDialog {
-  Q_OBJECT
-
+class TomoToolConfigDialogBase {
 public:
-	TomoToolConfigDialogBase(QWidget *parent = 0);
+  TomoToolConfigDialogBase(QWidget *parent = 0);
+  virtual ~TomoToolConfigDialogBase() {}
 
-	virtual void setUpDialog() = 0;
-	virtual int execute() {
-		return this->exec();
-	};
+  static TomoToolConfigDialogBase *
+  getCorrectDialogForToolFromString(const std::string &toolName);
 
-	static TomoToolConfigDialogBase *fromString(const std::string &toolName);
+  virtual void setUpDialog() = 0;
+  virtual int execute() = 0;
 
-
-private:
-  void initLayout();
-
-private slots:
-  void okClicked();
-  void cancelClicked();
-
-private:
-  QLabel *labelRun, *labelOpt;
-  QLineEdit *editRun, *editOpt;
-  QHBoxLayout *hRun, *hOpt, *hBut;
-  QGridLayout *layout;
-  QPushButton *okButton, *cancelButton;
 };
 }
 }

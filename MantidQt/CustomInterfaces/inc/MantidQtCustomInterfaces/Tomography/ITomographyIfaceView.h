@@ -12,7 +12,7 @@
 
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 //class TomoToolConfigDialogBase; Why does it not work with forward declaration?
-
+// maybe it has to be in namespaces!
 namespace MantidQt {
 namespace CustomInterfaces {
 

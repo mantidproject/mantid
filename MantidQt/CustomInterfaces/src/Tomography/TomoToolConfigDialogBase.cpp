@@ -1,50 +1,34 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigAstraDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigSavuDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigCustomDialog.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-TomoToolConfigDialogBase::TomoToolConfigDialogBase(QWidget *parent)
-    : QDialog(parent) {
-  labelRun = new QLabel("Runnable script");
-  editRun = new QLineEdit("/work/imat/");
-  hRun = new QHBoxLayout();
-  hRun->addWidget(labelRun);
-  hRun->addWidget(editRun);
+	TomoToolConfigDialogBase::TomoToolConfigDialogBase(QWidget *parent) {
+	}
 
-  labelOpt = new QLabel("Command line options");
-  editOpt = new QLineEdit("/work/imat");
-  hOpt = new QHBoxLayout();
-  hOpt->addWidget(labelOpt);
-
-  hOpt->addWidget(editOpt);
-
-  okButton = new QPushButton("Ok");
-  cancelButton = new QPushButton("Cancel");
-  hBut = new QHBoxLayout();
-  hBut->insertStretch(0, 1);
-  hBut->addWidget(okButton);
-  hBut->addWidget(cancelButton);
-
-  layout = new QGridLayout();
-  layout->addLayout(hRun, 0, 0);
-  layout->addLayout(hOpt, 1, 0);
-  layout->addLayout(hOpt, 2, 0);
-
-  connect(okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
-  connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancelClicked()));
-}
-
-void TomoToolConfigDialogBase::okClicked() {}
-
-void TomoToolConfigDialogBase::cancelClicked() {}
-
-TomoToolConfigDialogBase *
-TomoToolConfigDialogBase::fromString(const std::string &toolName) {
-  if (toolName == "") {
-    return new TomoToolConfigTomoPyDialog();
+	TomoToolConfigDialogBase *
+TomoToolConfigDialogBase::getCorrectDialogForToolFromString(
+    const std::string &toolName) {
+	std::cout << toolName << '\n';
+  // TODO move to global STRINGS from View!
+  if (toolName == "TomoPy") {
+    return new TomoToolConfigTomoPyDialog;
   }
-  return nullptr;
+  if (toolName == "Astra") {
+    return new TomoToolConfigAstraDialog;
+  }
+  if (toolName == "Savu") {
+    return new TomoToolConfigSavuDialog;
+  }
+  if (toolName == "Custom command") {
+    return new TomoToolConfigCustomDialog;
+  }
+  throw Mantid::Kernel::Exception::NotFoundError(
+      "Selected tool dialog not found!", toolName);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -9,15 +9,13 @@
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h"
-#include "MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoSystemSettings.h"
 
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigTomoPyDialog.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigAstraDialog.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigCustomDialog.h"
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigSavuDialog.h"
-
+#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -68,7 +66,6 @@ const std::string TomographyIfaceViewQtGUI::g_styleSheetOnline =
     "QPushButton:pressed { background-color: rgb(120, 255, 120); "
     "}";
 
-size_t TomographyIfaceViewQtGUI::g_nameSeqNo = 0;
 
 // For paths where Python third party tools are installed, if they're
 // not included in the system python path. For example you could have
@@ -181,13 +178,6 @@ TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
   // defaults from the tools
   m_tomopyMethod = ToolConfigTomoPy::methods().front().first;
   m_astraMethod = ToolConfigAstraToolbox::methods().front().first;
-
-  // TODO: find a better place for this Savu stuff when the tool is
-  // ready - see other TODOs
-  m_availPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
-  m_availPlugins->addColumns("str", "name", 4);
-  m_currPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
-  m_currPlugins->addColumns("str", "name", 4);
 }
 
 TomographyIfaceViewQtGUI::~TomographyIfaceViewQtGUI() {}
@@ -249,6 +239,20 @@ void TomographyIfaceViewQtGUI::initLayout() {
   // This view doesn't even know the names of compute resources, etc.
   m_presenter->notify(ITomographyIfacePresenter::SetupResourcesAndTools);
 }
+
+// Build a unique (and hidden) name for the table ws
+std::string TomographyIfaceViewQtGUI::createUniqueNameHidden() {
+	std::string name;
+	do {
+		// with __ prefix => hidden
+		name = "__TomoConfigTableWS_Seq_" +
+			boost::lexical_cast<std::string>(g_nameSeqNo++);
+	} while (AnalysisDataService::Instance().doesExist(name));
+
+	return name;
+}
+size_t TomographyIfaceViewQtGUI::g_nameSeqNo = 0;
+
 
 void TomographyIfaceViewQtGUI::doSetupGeneralWidgets() {
   // Menu Items
@@ -976,49 +980,6 @@ void TomographyIfaceViewQtGUI::saveSettings() const {
   qs.endGroup();
 }
 
-/**
- * Load a savu tomo config file into the current plugin list, overwriting it.
- * Uses the algorithm LoadSavuTomoConfig
- */
-void TomographyIfaceViewQtGUI::loadSavuTomoConfig(
-    std::string &filePath, Mantid::API::ITableWorkspace_sptr &currentPlugins) {
-  // try to load tomo reconstruction parametereization file
-  auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-      "LoadSavuTomoConfig");
-  alg->initialize();
-  alg->setPropertyValue("Filename", filePath);
-  alg->setPropertyValue("OutputWorkspace", createUniqueNameHidden());
-  try {
-    alg->execute();
-  } catch (std::runtime_error &e) {
-    throw std::runtime_error(
-        std::string("Error when trying to load tomographic reconstruction "
-                    "parameter file: ") +
-        e.what());
-  }
-
-  // new processing plugins list
-  try {
-    currentPlugins = alg->getProperty("OutputWorkspace");
-  } catch (std::exception &e) {
-    userError("Could not load config file", "Failed to load the file "
-                                            "with the following error: " +
-                                                std::string(e.what()));
-  }
-}
-
-// Build a unique (and hidden) name for the table ws
-std::string TomographyIfaceViewQtGUI::createUniqueNameHidden() {
-  std::string name;
-  do {
-    // with __ prefix => hidden
-    name = "__TomoConfigTableWS_Seq_" +
-           boost::lexical_cast<std::string>(g_nameSeqNo++);
-  } while (AnalysisDataService::Instance().doesExist(name));
-
-  return name;
-}
-
 /// needs to at least update the 'tool' combo box
 void TomographyIfaceViewQtGUI::compResourceIndexChanged(int /* i */) {
   QComboBox *rt = m_uiTabRun.comboBox_run_compute_resource;
@@ -1160,8 +1121,9 @@ void TomographyIfaceViewQtGUI::updateSystemSettings(
  *
  * @param name Name of the (tomographic reconstruction) tool
  */
-void TomographyIfaceViewQtGUI::showToolConfig(TomoToolConfigDialogBase * dialog) {
-	const std::string name = "TomoPy";
+void TomographyIfaceViewQtGUI::showToolConfig(
+    TomoToolConfigDialogBase *dialog) {
+  const std::string name = "Astra";
   QString run = "/work/imat/phase_commissioning/scripts/Imaging/IMAT/"
                 "tomo_reconstruct.py"; // m_uiAstra.lineEdit_runnable->text();
   static size_t reconIdx = 1;
@@ -1169,85 +1131,86 @@ void TomographyIfaceViewQtGUI::showToolConfig(TomoToolConfigDialogBase * dialog)
   const std::string localOutNameAppendix =
       std::string("/processed/") + "reconstruction_" + std::to_string(reconIdx);
 
-  if (g_TomoPyTool == name) {
-	 dialog->setUpDialog();
-	  /* TomoToolConfigTomoPyDialog tomopy;
-    m_uiTomoPy.setupUi(&tomopy);
-    m_uiTomoPy.comboBox_method->clear();
-    const auto methods = ToolConfigTomoPy::methods();
-    for (size_t i = 0; i < methods.size(); i++) {
-      m_uiTomoPy.comboBox_method->addItem(
-          QString::fromStdString(methods[i].second));
-    }*/
-    int res = dialog->execute();
+  dialog->setUpDialog();
+  int res = dialog->execute();
 
-    if (QDialog::Accepted == res) {
-      // TODO: move this
-      int mi = m_uiTomoPy.comboBox_method->currentIndex();
-
-      TomoPathsConfig paths = currentPathsConfig();
-      // TODO: for the output path, probably better to take the sample path,
-      // then up one level
-      m_toolsSettings.tomoPy = ToolConfigTomoPy(
-          run.toStdString(),
-          g_defOutPathLocal + "/" +
-              m_uiTabRun.lineEdit_experiment_reference->text().toStdString() +
-              localOutNameAppendix,
-          paths.pathDarks(), paths.pathOpenBeam(), paths.pathSamples());
-      //m_tomopyMethod = methods[mi].first;
-    }
-  } else if (g_AstraTool == name) {
-    TomoToolConfigAstraDialog astra;
-    m_uiAstra.setupUi(&astra);
-    m_uiAstra.comboBox_method->clear();
-    const auto methods = ToolConfigAstraToolbox::methods();
-    for (size_t i = 0; i < methods.size(); i++) {
-      m_uiAstra.comboBox_method->addItem(
-          QString::fromStdString(methods[i].second));
-    }
-    int res = astra.exec();
-
-    if (QDialog::Accepted == res) {
-      // TODO: move this
-      int mi = m_uiAstra.comboBox_method->currentIndex();
-
-      TomoPathsConfig paths = currentPathsConfig();
-      // TODO: for the output path, probably better to take the sample path,
-      // then up one level
-      m_toolsSettings.astra = ToolConfigAstraToolbox(
-          run.toStdString(),
-          Poco::Path::expand(
-              g_defOutPathLocal + "/" +
-              m_uiTabRun.lineEdit_experiment_reference->text().toStdString() +
-              localOutNameAppendix),
-          paths.pathDarks(), paths.pathOpenBeam(), paths.pathSamples());
-      m_astraMethod = methods[mi].first;
-    }
-  } else if (g_SavuTool == name) {
-    // TODO: savu not ready. This is a temporary kludge, it just shows
-    // the setup dialog so we can chat about it.
-    TomoToolConfigSavuDialog savu;
-    m_uiSavu.setupUi(&savu);
-    doSetupSavu();
-    savu.setWindowModality(Qt::ApplicationModal);
-    savu.show();
-    QEventLoop el;
-    connect(this, SIGNAL(destroyed()), &el, SLOT(quit()));
-    el.exec();
-  } else if (g_customCmdTool == name) {
-    TomoToolConfigCustomDialog cmd;
-    m_uiCustom.setupUi(&cmd);
-    int res = cmd.exec();
-
-    if (QDialog::Accepted == res) {
-      // TODO: move this
-      QString run = m_uiCustom.lineEdit_runnable->text();
-      QString opts = m_uiCustom.textEdit_cl_opts->toPlainText();
-
-      m_toolsSettings.custom =
-          ToolConfigCustom(run.toStdString(), opts.toStdString());
-    }
-  }
+  // TODO resolve result here? or notify presenter (it will have to keep the pointer somewhere)
+  //  if (g_TomoPyTool == name) {
+  //	 dialog->setUpDialog();
+  //    int res = dialog->execute();
+  //
+  //    if (QDialog::Accepted == res) {
+  //      // TODO: move this
+  //      int mi = m_uiTomoPy.comboBox_method->currentIndex();
+  //
+  //      TomoPathsConfig paths = currentPathsConfig();
+  //      // TODO: for the output path, probably better to take the sample path,
+  //      // then up one level
+  //      m_toolsSettings.tomoPy = ToolConfigTomoPy(
+  //          run.toStdString(),
+  //          g_defOutPathLocal + "/" +
+  //              m_uiTabRun.lineEdit_experiment_reference->text().toStdString()
+  //              +
+  //              localOutNameAppendix,
+  //          paths.pathDarks(), paths.pathOpenBeam(), paths.pathSamples());
+  //      //m_tomopyMethod = methods[mi].first;
+  //    }
+  //  } else if (g_AstraTool == name) {
+  //	  dialog->setUpDialog();
+  //	  int res = dialog->execute();
+  ///*
+  //    TomoToolConfigAstraDialog astra;
+  //    m_uiAstra.setupUi(&astra);
+  //    m_uiAstra.comboBox_method->clear();
+  //    const auto methods = ToolConfigAstraToolbox::methods();
+  //    for (size_t i = 0; i < methods.size(); i++) {
+  //      m_uiAstra.comboBox_method->addItem(
+  //          QString::fromStdString(methods[i].second));
+  //    }
+  //    int res = astra.exec();*/
+  //
+  //    if (QDialog::Accepted == res) {
+  //      // TODO: move this
+  //      int mi = m_uiAstra.comboBox_method->currentIndex();
+  //
+  //      TomoPathsConfig paths = currentPathsConfig();
+  //      // TODO: for the output path, probably better to take the sample path,
+  //      // then up one level
+  //      m_toolsSettings.astra = ToolConfigAstraToolbox(
+  //          run.toStdString(),
+  //          Poco::Path::expand(
+  //              g_defOutPathLocal + "/" +
+  //              m_uiTabRun.lineEdit_experiment_reference->text().toStdString()
+  //              +
+  //              localOutNameAppendix),
+  //          paths.pathDarks(), paths.pathOpenBeam(), paths.pathSamples());
+  ////      m_astraMethod = methods[mi].first;
+  //    }
+  //  } else if (g_SavuTool == name) {
+  ////    // TODO: savu not ready. This is a temporary kludge, it just shows
+  ////    // the setup dialog so we can chat about it.
+  ////    TomographyIfaceViewQtGUI savu;
+  ////    m_uiSavu.setupUi(&savu);
+  ////    doSetupSavu();
+  ////    savu.setWindowModality(Qt::ApplicationModal);
+  ////    savu.show();
+  ////    QEventLoop el;
+  ////    connect(this, SIGNAL(destroyed()), &el, SLOT(quit()));
+  ////    el.exec();
+  ////  } else if (g_customCmdTool == name) {
+  ////    TomoToolConfigCustomDialog cmd;
+  ////    m_uiCustom.setupUi(&cmd);
+  ////    int res = cmd.exec();
+  ////
+  ////    if (QDialog::Accepted == res) {
+  ////      // TODO: move this
+  ////      QString run = m_uiCustom.lineEdit_runnable->text();
+  ////      QString opts = m_uiCustom.textEdit_cl_opts->toPlainText();
+  ////
+  ////      m_toolsSettings.custom =
+  ////          ToolConfigCustom(run.toStdString(), opts.toStdString());
+  ////    }
+  //  }
   // TODO: 'CCPi CGLS' tool maybe in the future. Tool not ready.
 }
 
@@ -1305,6 +1268,39 @@ void TomographyIfaceViewQtGUI::jobCancelClicked() {
   }
 
   m_presenter->notify(ITomographyIfacePresenter::CancelJobFromTable);
+}
+
+/**
+* Load a savu tomo config file into the current plugin list, overwriting it.
+* Uses the algorithm LoadSavuTomoConfig
+*/
+void TomographyIfaceViewQtGUI::loadSavuTomoConfig(
+	std::string &filePath, Mantid::API::ITableWorkspace_sptr &currentPlugins) {
+	// try to load tomo reconstruction parametereization file
+	auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+		"LoadSavuTomoConfig");
+	alg->initialize();
+	alg->setPropertyValue("Filename", filePath);
+	alg->setPropertyValue("OutputWorkspace", createUniqueNameHidden());
+	try {
+		alg->execute();
+	}
+	catch (std::runtime_error &e) {
+		throw std::runtime_error(
+			std::string("Error when trying to load tomographic reconstruction "
+				"parameter file: ") +
+			e.what());
+	}
+
+	// new processing plugins list
+	try {
+		currentPlugins = alg->getProperty("OutputWorkspace");
+	}
+	catch (std::exception &e) {
+		userError("Could not load config file", "Failed to load the file "
+			"with the following error: " +
+			std::string(e.what()));
+	}
 }
 
 /**
