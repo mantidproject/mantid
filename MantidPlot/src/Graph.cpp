@@ -57,7 +57,7 @@
 #include "TitlePicker.h"
 #include "VectorCurve.h"
 #include "cursors.h"
-#include "pixmaps.h"
+#include <MantidQtAPI/pixmaps.h>
 
 #include "Mantid/ErrorBarSettings.h"
 #include "Mantid/MantidMDCurve.h"
@@ -110,6 +110,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+using namespace MantidQt::API;
 using CurveType = GraphOptions::CurveType;
 
 // We can safely ignore warnings about assuming signed overflow does not occur

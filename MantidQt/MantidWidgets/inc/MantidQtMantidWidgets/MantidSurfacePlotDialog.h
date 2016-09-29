@@ -1,6 +1,7 @@
-#ifndef MANTIDSURFACEPLOTDIALOG_H_
-#define MANTIDSURFACEPLOTDIALOG_H_
+#ifndef MANTIDQT_MANTIDWIDGETS_MANTIDSURFACEPLOTDIALOG_H_
+#define MANTIDQT_MANTIDWIDGETS_MANTIDSURFACEPLOTDIALOG_H_
 
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "MantidWSIndexDialog.h"
 #include <QComboBox>
 
@@ -18,7 +19,7 @@ class MantidDisplayBase;
  * - The user is offered the choice of only those logs that have single values
  * per workspace.
  */
-class DLLExport MantidSurfacePlotDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidSurfacePlotDialog : public QDialog {
   Q_OBJECT
 
 public:
@@ -86,4 +87,4 @@ private:
 };
 }
 }
-#endif
+#endif // MANTIDQT_MANTIDWIDGETS_MANTIDSURFACEPLOTDIALOG_H_

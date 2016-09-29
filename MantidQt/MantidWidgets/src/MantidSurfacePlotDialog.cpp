@@ -5,7 +5,6 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-using MantidQt::MantidWidgets::MantidDisplayBase;
 using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDWorkspace_sptr;
 using Mantid::API::ExperimentInfo;

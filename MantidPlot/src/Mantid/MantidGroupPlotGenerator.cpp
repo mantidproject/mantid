@@ -2,10 +2,9 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtMantidWidgets/MantidDisplayBase.h"
+#include <MantidQtMantidWidgets/MantidDisplayBase.h>
 
-using MantidQt::MantidWidgets::MantidSurfacePlotDialog;
-using MantidQt::MantidWidgets::MantidDisplayBase;
+using namespace MantidQt::MantidWidgets;
 using Mantid::API::WorkspaceGroup_const_sptr;
 using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::API::MatrixWorkspace_const_sptr;

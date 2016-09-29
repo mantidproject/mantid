@@ -5,19 +5,18 @@
 #include "AlgorithmHistoryWindow.h"
 #include "AlgorithmMonitor.h"
 #include "ImportWorkspaceDlg.h"
-#include "MantidDock.h"
 #include "MantidGroupPlotGenerator.h"
 #include "MantidMDCurve.h"
 #include "MantidMDCurveDialog.h"
 #include "MantidMatrix.h"
 #include "MantidMatrixCurve.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtMantidWidgets/MantidSurfacePlotDialog.h"
+#include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
 #include "MantidSampleLogDialog.h"
 #include "MantidSampleMaterialDialog.h"
-#include "MantidQtMantidWidgets/MantidSurfacePlotDialog.h"
 #include "MantidTable.h"
 #include "MantidUI.h"
-#include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
 #include "ProjectSerialiser.h"
 
 #include "../../MantidQt/MantidWidgets/ui_SequentialFitDialog.h"
@@ -48,6 +47,7 @@
 #include "MantidQtAPI/VatesViewerInterface.h"
 
 #include "MantidQtMantidWidgets/MantidTreeWidget.h"
+#include "MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -173,7 +173,8 @@ MantidUI::MantidUI(ApplicationWindow *aw)
     qRegisterMetaType<std::string>();
   }
 
-  m_exploreMantid = new MantidDockWidget(this, aw);
+  m_exploreMantid = boost::make_shared<QWorkspaceDockView>(this, aw);
+  m_exploreMantid->init();
   m_exploreAlgorithms = new AlgorithmDockWidget(this, aw);
 
   actionCopyRowToTable = new QAction(this);
@@ -462,7 +463,12 @@ void MantidUI::deleteWorkspaces(const QStringList &wsNames) {
 getSelectedWorkspaceName
 */
 QString MantidUI::getSelectedWorkspaceName() {
-  QString str = m_exploreMantid->getSelectedWorkspaceName();
+  auto names = m_exploreMantid->getSelectedWorkspaceNames();
+  QString str;
+
+  if (!names.empty())
+	  str = QString::fromStdString(names[0]);
+
   if (str.isEmpty()) {
     // Check if a mantid matrix is selected
     MantidMatrix *m = qobject_cast<MantidMatrix *>(appWindow()->activeWindow());
@@ -1419,7 +1425,9 @@ MantidUI::createDetectorTable(const QString &wsName,
  * Triggered by a delete key press, and attempts to delete a workspace if it
  * passes the focus checks
  */
-void MantidUI::deletePressEvent() { m_exploreMantid->deleteWorkspaces(); }
+void MantidUI::deletePressEvent() {
+  m_exploreMantid->onClickDeleteWorkspaces();
+}
 
 /**
  * Check if drop event can be accepted
@@ -1767,10 +1775,8 @@ void MantidUI::groupWorkspaces() {
   try {
     std::string sgrpName("NewGroup");
     QString qwsGrpName = QString::fromStdString(sgrpName);
-    std::vector<std::string> inputWSVec;
     // get selected workspaces
-    QList<QTreeWidgetItem *> selectedItems =
-        m_exploreMantid->m_tree->selectedItems();
+    auto selectedItems = m_exploreMantid->getSelectedWorkspaceNames();
     if (selectedItems.size() < 2) {
       throw std::runtime_error("Select atleast two workspaces to group ");
     }
@@ -1783,12 +1789,11 @@ void MantidUI::groupWorkspaces() {
         return;
     }
     //
-    copyWorkspacestoVector(selectedItems, inputWSVec);
     std::string algName("GroupWorkspaces");
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create(algName, 1);
     alg->initialize();
-    alg->setProperty("InputWorkspaces", inputWSVec);
+    alg->setProperty("InputWorkspaces", selectedItems);
     alg->setPropertyValue("OutputWorkspace", sgrpName);
     // execute the algorithm
     bool bStatus = alg->execute();
@@ -1816,14 +1821,13 @@ void MantidUI::groupWorkspaces() {
 }
 void MantidUI::ungroupWorkspaces() {
   try {
-    QList<QTreeWidgetItem *> selectedItems =
-        m_exploreMantid->m_tree->selectedItems();
-    if (selectedItems.isEmpty()) {
+    auto selectedItems = m_exploreMantid->getSelectedWorkspaceNames();
+    if (selectedItems.empty()) {
       throw std::runtime_error("Select a group workspace to Ungroup.");
     }
 
     // workspace name
-    std::string wsname = selectedItems[0]->text(0).toStdString();
+    std::string wsname = selectedItems[0];
 
     std::string algName("UnGroupWorkspace");
     Mantid::API::IAlgorithm_sptr alg =
@@ -2187,7 +2191,8 @@ void MantidUI::menuMantidMatrixAboutToShow() {
   menuMantidMatrix->addAction(action);
 
   action = new QAction("Plot spectrum...", this);
-  connect(action, SIGNAL(triggered()), m_exploreMantid, SLOT(plotSpectra()));
+  connect(action, SIGNAL(triggered()), m_exploreMantid.get(),
+          SLOT(plotSpectra()));
   menuMantidMatrix->addAction(action);
 
   action = new QAction("Plot as waterfall", this);
@@ -2218,7 +2223,7 @@ void MantidUI::menuMantidMatrixAboutToShow() {
   menuMantidMatrix->addSeparator();
 
   action = new QAction("Delete", this);
-  connect(action, SIGNAL(triggered()), m_exploreMantid,
+  connect(action, SIGNAL(triggered()), m_exploreMantid.get(),
           SLOT(deleteWorkspaces()));
   menuMantidMatrix->addAction(action);
 }
@@ -3672,7 +3677,8 @@ bool MantidUI::workspacesDockPlot1To1() {
  * @returns :: Name of selected workspace group, or empty if no group selected
  */
 QString MantidUI::getSelectedGroupName() const {
-  const QString &sel = m_exploreMantid->getSelectedWorkspaceName();
+  const QString &sel =
+      QString::fromStdString(m_exploreMantid->getSelectedWorkspaceNames()[0]);
   WorkspaceGroup_const_sptr gWs;
   if (!sel.isEmpty() &&
       AnalysisDataService::Instance().doesExist(sel.toStdString())) {
@@ -3919,21 +3925,20 @@ MantidWSIndexDialog *MantidUI::createWorkspaceIndexDialog(int flags,
   for (auto &name : wsNames)
     names.append(name);
 
-  return new MantidWSIndexDialog(this, static_cast<Qt::WFlags>(flags), names,
-                                 showWaterfall, showPlotAll);
+  return new MantidWSIndexDialog(m_appWindow, static_cast<Qt::WFlags>(flags),
+                                 names, showWaterfall, showPlotAll);
 }
 
 void MantidUI::showSurfacePlot() {
   // find the workspace group clicked on
-  auto tree = m_exploreMantid->m_tree;
-  auto items = tree->selectedItems();
-  if (!items.empty()) {
-    auto data = items[0]->data(0, Qt::UserRole).value<Workspace_sptr>();
+  auto wksp = m_exploreMantid->getSelectedWorkspace();
+
+  if (wksp) {
     const auto wsGroup =
-        boost::dynamic_pointer_cast<const WorkspaceGroup>(data);
+        boost::dynamic_pointer_cast<const WorkspaceGroup>(wksp);
     if (wsGroup) {
-      auto options =
-          tree->chooseSurfacePlotOptions(wsGroup->getNumberOfEntries());
+      auto options = m_exploreMantid->chooseSurfacePlotOptions(
+          wsGroup->getNumberOfEntries());
 
       // TODO: Figure out how to get rid of MantidUI dependency here.
       auto plotter =
@@ -3944,15 +3949,14 @@ void MantidUI::showSurfacePlot() {
 }
 
 void MantidUI::showContourPlot() {
-  auto tree = m_exploreMantid->m_tree;
-  auto items = tree->selectedItems();
-  if (!items.empty()) {
-    auto data = items[0]->data(0, Qt::UserRole).value<Workspace_sptr>();
+  auto wksp = m_exploreMantid->getSelectedWorkspace();
+
+  if (wksp) {
     const auto wsGroup =
-        boost::dynamic_pointer_cast<const WorkspaceGroup>(data);
+        boost::dynamic_pointer_cast<const WorkspaceGroup>(wksp);
     if (wsGroup) {
-      auto options =
-          tree->chooseContourPlotOptions(wsGroup->getNumberOfEntries());
+      auto options = m_exploreMantid->chooseContourPlotOptions(
+          wsGroup->getNumberOfEntries());
 
       // TODO: Figure out how to remove the MantidUI dependency
       auto plotter =
@@ -3962,6 +3966,4 @@ void MantidUI::showContourPlot() {
   }
 }
 
-QWidget *MantidUI::getParent() {
-	return m_appWindow;
-}
+QWidget *MantidUI::getParent() { return m_appWindow; }

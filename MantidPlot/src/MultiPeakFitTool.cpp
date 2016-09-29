@@ -29,16 +29,18 @@
  *                                                                         *
  ***************************************************************************/
 #include "MultiPeakFitTool.h"
-#include "RangeSelectorTool.h"
 #include "ApplicationWindow.h"
 #include "DataPickerTool.h"
 #include "Plot.h"
+#include "RangeSelectorTool.h"
 #include "cursors.h"
 
-#include <qwt_plot_curve.h>
 #include <QApplication>
+#include <qwt_plot_curve.h>
 
 #include <gsl/gsl_statistics.h>
+
+using namespace MantidQt::API;
 
 MultiPeakFitTool::MultiPeakFitTool(Graph *graph, ApplicationWindow *app,
                                    MultiPeakFit::PeakProfile profile,
@@ -99,7 +101,8 @@ void MultiPeakFitTool::selectPeak(QwtPlotCurve *curve, int point_index) {
   else
     emit statusText(tr("Peak %1 selected! Click to select a point and "
                        "double-click/press 'Enter' to set the position of the "
-                       "next peak!").arg(QString::number(d_selected_peaks)));
+                       "next peak!")
+                        .arg(QString::number(d_selected_peaks)));
 }
 
 void MultiPeakFitTool::finalize() {

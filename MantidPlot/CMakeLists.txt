@@ -174,7 +174,6 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmDockWidget.cpp
                    src/Mantid/MantidAbout.cpp
                    src/Mantid/MantidApplication.cpp
                    src/Mantid/MantidCurve.cpp
-                   src/Mantid/MantidDock.cpp
                    src/Mantid/MantidMatrix.cpp
                    src/Mantid/MantidMatrixCurve.cpp
 		   src/Mantid/MantidMatrixDxExtensionHandler.cpp
@@ -349,8 +348,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.h
 )
 
-set ( MANTID_HDRS  src/Mantid/AlgorithmDockWidget.h
-                   src/Mantid/AlgorithmMonitor.h
+set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/AlgorithmHistoryWindow.h
                    src/Mantid/ErrorBarSettings.h
                    src/Mantid/FirstTimeSetup.h
@@ -366,7 +364,6 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmDockWidget.h
                    src/Mantid/MantidAbout.h
                    src/Mantid/MantidApplication.h
                    src/Mantid/MantidCurve.h
-                   src/Mantid/MantidDock.h
                    src/Mantid/MantidMatrixCurve.h
 		   src/Mantid/MantidMatrixDxExtensionHandler.h
 		   src/Mantid/MantidMatrixExtensionRequest.h
@@ -585,7 +582,8 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/lib/3rdparty/qtcolorpicker/src/qtcolorpicker.h
 )
 
-set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
+set ( MANTID_MOC_FILES src/Mantid/AlgorithmDockWidget.h
+					   src/Mantid/AlgorithmMonitor.h
                        src/Mantid/AlgorithmHistoryWindow.h
                        src/Mantid/ErrorBarSettings.h
                        src/Mantid/FirstTimeSetup.h
@@ -598,7 +596,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidAbout.h
                        src/Mantid/MantidApplication.h
                        src/Mantid/MantidCurve.h
-                       src/Mantid/MantidDock.h
                        src/Mantid/MantidMatrixCurve.h
                        src/Mantid/MantidMDCurve.h
                        src/Mantid/MantidMDCurveDialog.h
@@ -608,9 +605,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
 		               src/Mantid/MantidMatrixModel.h
                        src/Mantid/MantidSampleLogDialog.h
                        src/Mantid/MantidSampleMaterialDialog.h
-					   src/Mantid/MantidSurfacePlotDialog.h
                        src/Mantid/MantidUI.h
-                       src/Mantid/MantidWSIndexDialog.h
                        src/Mantid/MantidTable.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h

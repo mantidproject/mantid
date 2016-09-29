@@ -39,7 +39,6 @@
 class Graph3D;
 class ScriptingEnv;
 class MantidMatrix;
-class MantidDockWidget;
 class AlgorithmDockWidget;
 class RemoteClusterDockWidget;
 class AlgorithmMonitor;
@@ -51,6 +50,7 @@ class Message;
 }
 namespace MantidWidgets {
 class FitPropertyBrowser;
+class QWorkspaceDockView;
 }
 namespace SliceViewer {
 class SliceViewerWindow;
@@ -204,10 +204,10 @@ public:
   // Table.
   Table *createTableFromSelectedRows(MantidMatrix *m, bool errs = true,
                                      bool binCentres = false);
-  MantidSurfacePlotDialog *
+  MantidQt::MantidWidgets::MantidSurfacePlotDialog *
   createSurfacePlotDialog(int flags, QStringList wsNames,
                           const QString &plotType) override;
-  MantidWSIndexDialog *createWorkspaceIndexDialog(int flags,
+  MantidQt::MantidWidgets::MantidWSIndexDialog *createWorkspaceIndexDialog(int flags,
                                                   QStringList wsNames,
                                                   bool showWaterfall,
                                                   bool showPlotAll) override;
@@ -650,8 +650,9 @@ private:
 
   // Private variables
 
-  ApplicationWindow *m_appWindow;    // QtiPlot main ApplicationWindow
-  MantidDockWidget *m_exploreMantid; // Dock window for manipulating workspaces
+  ApplicationWindow *m_appWindow; // QtiPlot main ApplicationWindow
+  boost::shared_ptr<MantidQt::MantidWidgets::QWorkspaceDockView>
+      m_exploreMantid; // Dock window for manipulating workspaces
   AlgorithmDockWidget *m_exploreAlgorithms; // Dock window for using algorithms
   RemoteClusterDockWidget
       *m_exploreRemoteTasks; // Dock window for using remote tasks

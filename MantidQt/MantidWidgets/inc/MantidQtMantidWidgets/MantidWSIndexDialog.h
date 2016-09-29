@@ -4,6 +4,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include <QCheckBox>
 #include <QDialog>
 #include <QLabel>
@@ -85,7 +86,7 @@ class IntervalList;
    <http://doxygen.mantidproject.org>
 */
 
-class DLLExport Interval {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS Interval {
 public:
   /// Constructor - starting and ending at single.
   explicit Interval(int single);
@@ -129,7 +130,7 @@ private:
   int m_start, m_end;
 };
 
-class DLLExport IntervalList {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IntervalList {
 public:
   /// Constructor - with empty list.
   IntervalList(void);
@@ -201,7 +202,7 @@ private:
   QList<Interval> m_list;
 };
 
-class DLLExport IntervalListValidator : public QValidator {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IntervalListValidator : public QValidator {
   Q_OBJECT
 
 public:
@@ -217,7 +218,7 @@ private:
   IntervalList m_intervalList;
 };
 
-class DLLExport MantidWSIndexWidget : public QWidget {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidWSIndexWidget : public QWidget {
   Q_OBJECT
 
   /** Auxiliar class to wrap the QLine allowing to have a warn to the user
@@ -331,7 +332,7 @@ private:
   IntervalList m_wsIndexChoice, m_spectraIdChoice;
 };
 
-class DLLExport MantidWSIndexDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidWSIndexDialog : public QDialog {
   Q_OBJECT
 
 public:

@@ -27,45 +27,47 @@
  *                                                                         *
  ***************************************************************************/
 #include "FitDialog.h"
-#include "pixmaps.h"
-#include "MyParser.h"
 #include "ApplicationWindow.h"
 #include "ColorBox.h"
-#include "Fit.h"
-#include "MultiPeakFit.h"
 #include "ExponentialFit.h"
-#include "PolynomialFit.h"
-#include "PluginFit.h"
-#include "NonLinearFit.h"
-#include "SigmoidalFit.h"
+#include "Fit.h"
 #include "LogisticFit.h"
-#include "Matrix.h"
 #include "MantidQtMantidWidgets/DoubleSpinBox.h"
+#include "Matrix.h"
+#include "MultiPeakFit.h"
+#include "MyParser.h"
+#include "NonLinearFit.h"
+#include "PluginFit.h"
+#include "PolynomialFit.h"
+#include "SigmoidalFit.h"
+#include <MantidQtAPI/pixmaps.h>
 
-#include <QListWidget>
 #include <QCloseEvent>
-#include <QTableWidget>
-#include <QHeaderView>
-#include <QLineEdit>
-#include <QLayout>
-#include <QSpinBox>
-#include <QPushButton>
-#include <QLabel>
-#include <QStackedWidget>
-#include <QWidget>
-#include <QMessageBox>
 #include <QComboBox>
-#include <QWidgetList>
-#include <QRadioButton>
 #include <QFileDialog>
 #include <QGroupBox>
+#include <QHeaderView>
+#include <QLabel>
+#include <QLayout>
 #include <QLibrary>
+#include <QLineEdit>
+#include <QListWidget>
 #include <QLocale>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSpinBox>
+#include <QStackedWidget>
+#include <QTableWidget>
+#include <QWidget>
+#include <QWidgetList>
 #include <stdio.h>
 
 #include <qwt_plot_curve.h>
 
 #include "MantidQtAPI/FileDialogHandler.h"
+
+using namespace MantidQt::API;
 
 FitDialog::FitDialog(Graph *g, QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl) {

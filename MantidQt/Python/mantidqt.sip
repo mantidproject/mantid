@@ -84,6 +84,33 @@ namespace GraphOptions
   enum ScaleType {Linear, Log10};
 
   enum Axis{Left, Right, Bottom, Top};
+  
+  enum CurveType {
+  Line,
+  Scatter,
+  LineSymbols,
+  VerticalBars,
+  Area,
+  Pie,
+  VerticalDropLines,
+  Spline,
+  HorizontalSteps,
+  Histogram,
+  HorizontalBars,
+  VectXYXY,
+  ErrorBars,
+  Box,
+  VectXYAM,
+  VerticalSteps,
+  ColorMap,
+  GrayScale,
+  ColorMapContour,
+  Contour,
+  Function,
+  ImagePlot,
+  User
+};
+
 };
 
 namespace Mantid

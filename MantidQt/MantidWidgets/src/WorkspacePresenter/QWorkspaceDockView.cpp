@@ -91,6 +91,13 @@ QWorkspaceDockView::QWorkspaceDockView(MantidDisplayBase *mui,
   m_saveFolderDialog->setFileMode(QFileDialog::DirectoryOnly);
   m_saveFolderDialog->setOption(QFileDialog::ShowDirsOnly);
 
+  // To be able to use them in queued signals they need to be registered
+  static bool registered_addtional_types = false;
+  if (!registered_addtional_types) {
+    registered_addtional_types = true;
+    qRegisterMetaType<TopLevelItems>();
+  }
+
   // SET UP SORT
   createSortMenuActions();
   createWorkspaceMenuActions();
@@ -147,9 +154,8 @@ void QWorkspaceDockView::setupLoadButtonMenu() {
 
   QAction *loadFileAction = new QAction("File", this);
   QAction *liveDataAction = new QAction("Live Data", this);
-  connect(liveDataAction, SIGNAL(triggered()), this, SLOT(onClickLoad()));
-  connect(loadFileAction, SIGNAL(triggered()), m_loadMapper,
-          SLOT(onClickLiveData()));
+  connect(loadFileAction, SIGNAL(triggered()), this, SLOT(onClickLoad()));
+  connect(liveDataAction, SIGNAL(triggered()), this, SLOT(onClickLiveData()));
 
   m_loadMenu->addAction(loadFileAction);
   m_loadMenu->addAction(liveDataAction);
@@ -170,12 +176,8 @@ void QWorkspaceDockView::setupConnections() {
   m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint &)), this,
           SLOT(popupMenu(const QPoint &)));
-  connect(
-      this, SIGNAL(signalUpdateTree(
-                const std::map<std::string, Mantid::API::Workspace_sptr> &)),
-      this, SLOT(updateTree(
-                const std::map<std::string, Mantid::API::Workspace_sptr> &)),
-      Qt::QueuedConnection);
+  connect(this, SIGNAL(signalUpdateTree(const TopLevelItems &)), this,
+          SLOT(handleUpdateTree(const TopLevelItems &)), Qt::QueuedConnection);
 
   connect(this, SIGNAL(signalClearView()), this, SLOT(handleClearView()),
           Qt::QueuedConnection);
@@ -201,6 +203,16 @@ WorkspacePresenterWN_wptr QWorkspaceDockView::getPresenterWeakPtr() {
   return boost::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
 }
 
+MantidSurfacePlotDialog::UserInputSurface
+QWorkspaceDockView::chooseContourPlotOptions(int nWorkspaces) const {
+  return m_tree->chooseContourPlotOptions(nWorkspaces);
+}
+
+MantidSurfacePlotDialog::UserInputSurface
+QWorkspaceDockView::chooseSurfacePlotOptions(int nWorkspaces) const {
+  return m_tree->chooseSurfacePlotOptions(nWorkspaces);
+}
+
 StringList QWorkspaceDockView::getSelectedWorkspaceNames() const {
   auto items = m_tree->selectedItems();
   StringList names;
@@ -208,7 +220,7 @@ StringList QWorkspaceDockView::getSelectedWorkspaceNames() const {
   for (auto &item : items)
     names.push_back(item->text(0).toStdString());
 
-  return StringList();
+  return names;
 }
 
 Mantid::API::Workspace_sptr QWorkspaceDockView::getSelectedWorkspace() const {
@@ -246,11 +258,15 @@ void QWorkspaceDockView::onLoadAccept() {
 }
 
 void QWorkspaceDockView::showLoadDialog() {
-  m_mantidUI->showAlgorithmDialog("Load");
+  QMetaObject::invokeMethod(dynamic_cast<QObject *>(m_mantidUI),
+                            "showAlgorithmDialog", Qt::QueuedConnection,
+                            Q_ARG(QString, "Load"));
 }
 
 void QWorkspaceDockView::showLiveDataDialog() {
-  m_mantidUI->showAlgorithmDialog("StartLiveData");
+  QMetaObject::invokeMethod(dynamic_cast<QObject *>(m_mantidUI),
+                            "showAlgorithmDialog", Qt::QueuedConnection,
+                            Q_ARG(QString, "StartLiveData"));
 }
 
 void QWorkspaceDockView::renameWorkspace() {
@@ -396,11 +412,11 @@ void QWorkspaceDockView::excludeItemFromSort(MantidTreeWidgetItem *item) {
 }
 
 QWorkspaceDockView::SortDirection QWorkspaceDockView::getSortDirection() const {
-  return SortDirection::Ascending;
+  return m_sortDirection;
 }
 
 QWorkspaceDockView::SortCriteria QWorkspaceDockView::getSortCriteria() const {
-  return SortCriteria::ByName;
+  return m_sortCriteria;
 }
 
 void QWorkspaceDockView::sortWorkspaces(SortCriteria criteria,
@@ -618,17 +634,19 @@ void QWorkspaceDockView::createWorkspaceMenuActions() {
   connect(m_showInst, SIGNAL(triggered()), this, SLOT(onClickShowInstrument()));
 
   m_plotSpec = new QAction(tr("Plot Spectrum..."), this);
-  connect(m_plotSpec, SIGNAL(triggered()), this, SLOT(plotSpectra()));
+  connect(m_plotSpec, SIGNAL(triggered()), this, SLOT(onClickPlotSpectra()));
 
   m_plotSpecErr = new QAction(tr("Plot Spectrum with Errors..."), this);
-  connect(m_plotSpecErr, SIGNAL(triggered()), this, SLOT(plotSpectraErr()));
+  connect(m_plotSpecErr, SIGNAL(triggered()), this,
+          SLOT(onClickPlotSpectraErr()));
 
   m_colorFill = new QAction(tr("Color Fill Plot"), this);
-  connect(m_colorFill, SIGNAL(triggered()), this, SLOT(drawColorFillPlot()));
+  connect(m_colorFill, SIGNAL(triggered()), this,
+          SLOT(onClickDrawColorFillPlot()));
 
   m_showDetectors = new QAction(tr("Show Detectors"), this);
   connect(m_showDetectors, SIGNAL(triggered()), this,
-          SLOT(showDetectorTable()));
+          SLOT(onClickShowDetectorTable()));
 
   m_showBoxData = new QAction(tr("Show Box Data Table"), this);
   connect(m_showBoxData, SIGNAL(triggered()), this, SLOT(onClickShowBoxData()));
@@ -683,7 +701,7 @@ void QWorkspaceDockView::createWorkspaceMenuActions() {
   connect(m_rename, SIGNAL(triggered()), this, SLOT(renameWorkspace()));
 
   m_delete = new QAction(tr("Delete"), this);
-  connect(m_delete, SIGNAL(triggered()), this, SLOT(deleteWorkspaces()));
+  connect(m_delete, SIGNAL(triggered()), this, SLOT(onClickDeleteWorkspaces()));
 
   m_showTransposed = new QAction(tr("Show Transposed"), this);
   connect(m_showTransposed, SIGNAL(triggered()), this,
@@ -693,30 +711,30 @@ void QWorkspaceDockView::createWorkspaceMenuActions() {
       new QAction(tr("Convert to MatrixWorkspace"), this);
   m_convertToMatrixWorkspace->setIcon(QIcon(getQPixmap("mantid_matrix_xpm")));
   connect(m_convertToMatrixWorkspace, SIGNAL(triggered()), this,
-          SLOT(convertToMatrixWorkspace()));
+          SLOT(onClickConvertToMatrixWorkspace()));
 
   m_convertMDHistoToMatrixWorkspace =
       new QAction(tr("Convert to MatrixWorkspace"), this);
   m_convertMDHistoToMatrixWorkspace->setIcon(
       QIcon(getQPixmap("mantid_matrix_xpm")));
   connect(m_convertMDHistoToMatrixWorkspace, SIGNAL(triggered()), this,
-          SLOT(convertMDHistoToMatrixWorkspace()));
+          SLOT(onClickConvertMDHistoToMatrixWorkspace()));
 
   m_clearUB = new QAction(tr("Clear UB Matrix"), this);
-  connect(m_clearUB, SIGNAL(triggered()), this, SLOT(clearUB()));
+  connect(m_clearUB, SIGNAL(triggered()), this, SLOT(onClickClearUB()));
 
   m_plotSurface = new QAction(tr("Plot Surface from Group"), this);
-  connect(m_plotSurface, SIGNAL(triggered()), this, SLOT(plotSurface()));
+  connect(m_plotSurface, SIGNAL(triggered()), this, SLOT(onClickPlotSurface()));
 
   m_plotContour = new QAction(tr("Plot Contour from Group"), this);
-  connect(m_plotContour, SIGNAL(triggered()), this, SLOT(plotContour()));
+  connect(m_plotContour, SIGNAL(triggered()), this, SLOT(onClickPlotContour()));
 }
 
 /**
 * Create actions for sorting.
 */
 void QWorkspaceDockView::createSortMenuActions() {
-  chooseByName();
+  m_sortCriteria = SortCriteria::ByName;
   m_sortMenu = new QMenu(this);
 
   QAction *m_ascendingSortAction = new QAction("Ascending", this);
@@ -807,15 +825,13 @@ void QWorkspaceDockView::populateChildData(QTreeWidgetItem *item) {
   }
 }
 
-void QWorkspaceDockView::updateTree(
-    const std::map<std::string, Mantid::API::Workspace_sptr> &items) {
+void QWorkspaceDockView::updateTree(const TopLevelItems &items) {
   incrementUpdateCount();
   emit signalUpdateTree(items);
 }
 
-void QWorkspaceDockView::populateTopLevel(
-    const std::map<std::string, Mantid::API::Workspace_sptr> &topLevelItems,
-    const QStringList &expanded) {
+void QWorkspaceDockView::populateTopLevel(const TopLevelItems &topLevelItems,
+                                          const QStringList &expanded) {
   // collect names of selected workspaces
   QList<QTreeWidgetItem *> selected = m_tree->selectedItems();
   m_selectedNames.clear(); // just in case
@@ -1189,8 +1205,7 @@ void QWorkspaceDockView::onClickLiveData() {
 }
 
 // Asynchronous signal handlers
-void QWorkspaceDockView::handleUpdateTree(
-    const std::map<std::string, Mantid::API::Workspace_sptr> &items) {
+void QWorkspaceDockView::handleUpdateTree(const TopLevelItems &items) {
   // do not update until the counter is zero
   if (m_updateCount.deref())
     return;

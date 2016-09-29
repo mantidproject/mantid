@@ -19,11 +19,13 @@ class QStringList;
 class Table;
 class MultiLayer;
 class MantidMatrix;
-class MantidSurfacePlotDialog;
-class MantidWSIndexDialog;
 
 namespace MantidQt {
 namespace MantidWidgets {
+
+class MantidSurfacePlotDialog;
+class MantidWSIndexDialog;
+
 /**
 \class  MantidBase
 \brief  Contains display methods which will be used by

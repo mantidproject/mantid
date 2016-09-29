@@ -1,14 +1,14 @@
-#include "MantidKernel/Logger.h"
-#include "MantidMatrixModel.h"
 #include "MantidMatrix.h"
-#include "MantidMatrixFunction.h"
-#include "MantidUI.h"
-#include "../Graph3D.h"
 #include "../ApplicationWindow.h"
+#include "../Graph3D.h"
 #include "../Spectrogram.h"
+#include "MantidKernel/Logger.h"
 #include "MantidMatrixDialog.h"
+#include "MantidMatrixFunction.h"
+#include "MantidMatrixModel.h"
+#include "MantidUI.h"
 #include "Preferences.h"
-#include "../pixmaps.h"
+#include <MantidQtAPI/pixmaps.h>
 
 #include "MantidQtAPI/TSVSerialiser.h"
 
@@ -22,9 +22,9 @@
 
 #include <QScrollBar>
 
-#include <stdlib.h>
 #include <algorithm>
 #include <limits>
+#include <stdlib.h>
 
 #include <boost/math/special_functions/fpclassify.hpp>
 using namespace Mantid;
@@ -642,15 +642,17 @@ QwtDoubleRect MantidMatrix::boundingRect() {
       } else {
         m_spectrogramCols = numCols() > 100 ? numCols() : 100;
       }
-      m_boundingRect = QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
-                                     qMin(y_start, y_end) - 0.5 * dy,
-                                     fabs(x_end - x_start) + dx,
-                                     fabs(y_end - y_start) + dy).normalized();
+      m_boundingRect =
+          QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
+                        qMin(y_start, y_end) - 0.5 * dy,
+                        fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy)
+              .normalized();
 
     } else {
       m_spectrogramCols = 0;
       m_boundingRect = QwtDoubleRect(0, qMin(y_start, y_end) - 0.5 * dy, 1,
-                                     fabs(y_end - y_start) + dy).normalized();
+                                     fabs(y_end - y_start) + dy)
+                           .normalized();
     }
   } // Define the spectrogram bounding box
   return m_boundingRect;
@@ -717,7 +719,7 @@ void MantidMatrix::attachMultilayer(MultiLayer *ml) {
 @param type :: The "curve" type.
 @return Pointer to the created graph.
 */
-MultiLayer *MantidMatrix::plotGraph2D(Graph::CurveType type) {
+MultiLayer *MantidMatrix::plotGraph2D(GraphOptions::CurveType type) {
   if (numRows() == 1) {
     QMessageBox::critical(0, "MantidPlot - Error",
                           "Cannot plot a workspace with only one spectrum.");
@@ -740,7 +742,8 @@ MultiLayer *MantidMatrix::plotGraph2D(Graph::CurveType type) {
 }
 
 Spectrogram *MantidMatrix::plotSpectrogram(Graph *plot, ApplicationWindow *app,
-                                           Graph::CurveType type, bool project,
+                                           GraphOptions::CurveType type,
+                                           bool project,
                                            const ProjectData *const prjData) {
   app->setPreferences(plot);
 

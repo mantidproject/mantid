@@ -1,5 +1,4 @@
 #include "AlgorithmDockWidget.h"
-#include "MantidDock.h"
 #include "MantidUI.h"
 
 //-------------------- AlgorithmDockWidget ----------------------//

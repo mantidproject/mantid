@@ -29,32 +29,32 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include <QEvent>
 #include <QList>
 #include <QPointer>
 #include <QPrinter>
-#include <QVector>
-#include <QEvent>
-#include <QSettings>
 #include <QSet>
+#include <QSettings>
+#include <QVector>
 
-#include <qwt_text.h>
-#include <qwt_plot.h>
-#include <qwt_plot_marker.h>
-#include <qwt_plot_curve.h>
-#include <qwt_plot_panner.h>
-#include <qwt_plot_magnifier.h>
 #include <qwt_global.h>
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
+#include <qwt_plot_magnifier.h>
+#include <qwt_plot_marker.h>
+#include <qwt_plot_panner.h>
+#include <qwt_text.h>
 #if QWT_VERSION >= 0x050200
 #include <qwt_plot_rescaler.h>
 #endif
-#include "Plot.h"
-#include "Table.h"
 #include "AxesDialog.h"
-#include "PlotToolInterface.h"
-#include "MultiLayer.h"
-#include "ScaleDraw.h"
 #include "MantidQtAPI/GraphOptions.h"
 #include "MantidQtAPI/ScaleEngine.h"
+#include "MultiLayer.h"
+#include "Plot.h"
+#include "PlotToolInterface.h"
+#include "ScaleDraw.h"
+#include "Table.h"
 #include <boost/shared_ptr.hpp>
 #include <set>
 
@@ -234,7 +234,9 @@ public slots:
   //! \name Pie Curves
   //@{
   //! Returns true if this Graph is a pie plot, false otherwise.
-  bool isPiePlot() { return (c_type.count() == 1 && c_type[0] == Pie); };
+  bool isPiePlot() {
+    return (c_type.count() == 1 && c_type[0] == GraphOptions::Pie);
+  };
   //! Used when creating a pie plot.
   QwtPieCurve *plotPie(Table *w, const QString &name, int startRow = 0,
                        int endRow = -1);
@@ -263,11 +265,12 @@ public slots:
   PlotCurve *insertCurve(Table *w, const QString &xColName,
                          const QString &yColName, int style, int startRow = 0,
                          int endRow = -1);
-  PlotCurve *insertCurve(QString workspaceName, int index, bool err = false,
-                         GraphOptions::CurveType style = GraphOptions::Unspecified,
-                         bool distribution = false);
+  PlotCurve *
+  insertCurve(QString workspaceName, int index, bool err = false,
+              GraphOptions::CurveType style = GraphOptions::Unspecified,
+              bool distribution = false);
   PlotCurve *insertCurve(PlotCurve *c, int lineWidth = -1,
-                         int curveType = User);
+                         int curveType = GraphOptions::User);
   void insertPlotItem(QwtPlotItem *i, int type);
 
   void insertCurve(Graph *g, int i);

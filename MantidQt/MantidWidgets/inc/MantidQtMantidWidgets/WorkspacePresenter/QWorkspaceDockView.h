@@ -11,11 +11,14 @@
 #include <MantidAPI/MatrixWorkspace_fwd.h>
 #include <MantidAPI/WorkspaceGroup_fwd.h>
 
+#include <MantidQtMantidWidgets/MantidSurfacePlotDialog.h>
 #include <MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h>
 #include <QDockWidget>
 #include <QMap>
+#include <QMetaType>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/shared_ptr.hpp>
+#include <map>
 
 class QMainWindow;
 class QLabel;
@@ -31,6 +34,9 @@ class QVBoxLayout;
 class QHBoxLayout;
 class QSignalMapper;
 class QSortFilterProxyModel;
+
+using TopLevelItems = std::map<std::string, Mantid::API::Workspace_sptr>;
+Q_DECLARE_METATYPE(TopLevelItems)
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -79,6 +85,11 @@ public:
   MantidQt::MantidWidgets::WorkspacePresenterWN_wptr
   getPresenterWeakPtr() override;
 
+  MantidSurfacePlotDialog::UserInputSurface
+  chooseContourPlotOptions(int nWorkspaces) const;
+  MantidSurfacePlotDialog::UserInputSurface
+  chooseSurfacePlotOptions(int nWorkspaces) const;
+
   SortDirection getSortDirection() const override;
   SortCriteria getSortCriteria() const override;
   void sortWorkspaces(SortCriteria criteria, SortDirection direction) override;
@@ -106,13 +117,11 @@ public:
   void
   deleteWorkspaces(const MantidQt::MantidWidgets::StringList &wsNames) override;
   void clearView() override;
+  std::string getFilterText() const override;
   SaveFileType getSaveFileType() const override;
   void saveWorkspace(const std::string &wsName, SaveFileType type) override;
   void
   saveWorkspaces(const MantidQt::MantidWidgets::StringList &wsNames) override;
-  void updateTree(
-      const std::map<std::string, Mantid::API::Workspace_sptr> &items) override;
-  std::string getFilterText() const override;
   void filterWorkspaces(const std::string &filterText) override;
   void recordWorkspaceRename(const std::string &oldName,
                              const std::string &newName) override;
@@ -146,9 +155,9 @@ private:
   void addSaveMenuOption(QString algorithmString, QString menuEntryName = "");
   void setTreeUpdating(const bool state);
   inline bool isTreeUpdating() const { return m_treeUpdating; }
-  void populateTopLevel(
-      const std::map<std::string, Mantid::API::Workspace_sptr> &topLevelItems,
-      const QStringList &expanded);
+  void updateTree(const TopLevelItems &items) override;
+  void populateTopLevel(const TopLevelItems &topLevelItems,
+                        const QStringList &expanded);
   MantidTreeWidgetItem *
   addTreeEntry(const std::pair<std::string, Mantid::API::Workspace_sptr> &item,
                QTreeWidgetItem *parent = NULL);
@@ -230,8 +239,6 @@ private:
 
 protected:
   MantidTreeWidget *m_tree;
-  // TODO:remove
-  friend class MantidDisplayBase;
 
 private:
   QString selectedWsName;
@@ -247,7 +254,7 @@ private:
   QPushButton *m_groupButton;
   QPushButton *m_sortButton;
   QLineEdit *m_workspaceFilter;
-  QSignalMapper *m_loadMapper, *m_programMapper;
+  QSignalMapper *m_programMapper;
   QActionGroup *m_sortChoiceGroup;
   QFileDialog *m_saveFolderDialog;
 
@@ -275,13 +282,11 @@ private:
   QHash<QString, QString> m_renameMap;
 
 private slots:
-  void
-  handleUpdateTree(const std::map<std::string, Mantid::API::Workspace_sptr> &);
+  void handleUpdateTree(const TopLevelItems &);
   void handleClearView();
 signals:
   void signalClearView();
-  void
-  signalUpdateTree(const std::map<std::string, Mantid::API::Workspace_sptr> &);
+  void signalUpdateTree(const TopLevelItems &);
 };
 }
 }

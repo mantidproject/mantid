@@ -4,7 +4,7 @@
 #include "Graph3D.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidMatrix.h"
-#include "MantidQtMantidWidgets/MantidSurfacePlotDialog.h"
+#include <MantidQtMantidWidgets/MantidSurfacePlotDialog.h>
 
 /**
 * This utility class generates a surface or contour plot from a group of
@@ -13,7 +13,7 @@
 class MantidGroupPlotGenerator {
 public:
   /// Constructor
-  explicit MantidGroupPlotGenerator(MantidDisplayBase *mantidUI);
+  explicit MantidGroupPlotGenerator(MantidQt::MantidWidgets::MantidDisplayBase *mantidUI);
 
   /// Plots a surface from the given workspace group
   void plotSurface(
@@ -73,7 +73,7 @@ private:
   void convertXData(Mantid::API::MatrixWorkspace_sptr ws, Type graphType) const;
 
   /// Pointer to the Mantid UI
-  MantidDisplayBase *const m_mantidUI;
+  MantidQt::MantidWidgets::MantidDisplayBase *const m_mantidUI;
 };
 
 #endif
