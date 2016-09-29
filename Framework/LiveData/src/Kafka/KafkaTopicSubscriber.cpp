@@ -1,5 +1,6 @@
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 #include "MantidKernel/Logger.h"
+#include "MantidLiveData/Kafka/KafkaRebalanceCb.h"
 
 #include <librdkafka/rdkafkacpp.h>
 
@@ -42,7 +43,9 @@ std::unique_ptr<Conf> createGlobalConfiguration(const std::string &brokerAddr) {
 std::unique_ptr<Conf> createTopicConfiguration(Conf *globalConf) {
   auto conf = std::unique_ptr<Conf>(Conf::create(Conf::CONF_TOPIC));
   std::string errorMsg;
-  conf->set("auto.offset.reset", "smallest", errorMsg);
+  // default to start consumption from the end of the topic
+  // NB, this behaviour may be overridden in the rebalance_cb
+  conf->set("auto.offset.reset", "largest", errorMsg);
 
   // tie the global config to this topic configuration
   globalConf->set("default_topic_conf", conf.get(), errorMsg);
@@ -95,8 +98,10 @@ void KafkaTopicSubscriber::subscribe() {
   auto globalConf = createGlobalConfiguration(m_brokerAddr);
   auto topicConf = createTopicConfiguration(globalConf.get());
 
-  // consumer
   std::string errorMsg;
+  globalConf->set("rebalance_cb", &m_rebalanceCb, errorMsg);
+
+  // consumer
   m_consumer = std::unique_ptr<KafkaConsumer>(
       KafkaConsumer::create(globalConf.get(), errorMsg));
   if (!m_consumer) {
