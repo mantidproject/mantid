@@ -13,6 +13,7 @@ public:
   StretchExpTest_Jacobian() { m_values.resize(3); }
   void set(size_t, size_t iP, double value) override { m_values[iP] = value; }
   double get(size_t, size_t iP) override { return m_values[iP]; }
+  void zero() override { m_values.assign(m_values.size(), 0.0); }
 };
 
 class StretchExpTest : public CxxTest::TestSuite {
