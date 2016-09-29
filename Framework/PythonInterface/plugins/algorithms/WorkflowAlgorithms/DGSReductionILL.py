@@ -4,9 +4,9 @@ from mantid.api import AlgorithmFactory, AnalysisDataServiceImpl, DataProcessorA
 from mantid.kernel import Direct, Direction, UnitConversion
 from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
                              CloneWorkspace, ComputeCalibrationCoefVan,\
-                             ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DetectorEfficiencyCorUser, Divide, ExtractSpectra,\
+                             ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DetectorEfficiencyCorUser, Divide, ExtractMonitors, ExtractSpectra, \
                              FindDetectorsOutsideLimits, FindEPP, GetEiMonDet, GroupWorkspaces, Integration, Load,\
-                             MaskDetectors, Minus, NormaliseToMonitor, Rebin, Scale
+                             MaskDetectors, MergeRuns, Minus, NormaliseToMonitor, Rebin, Scale
 import numpy
 
 INDEX_TYPE_DETECTOR_ID     = 'DetectorID'
@@ -135,30 +135,15 @@ class DGSReductionILL(DataProcessorAlgorithm):
         # throughout the algorithm.
         workspace = Load(Filename=inputFilename,
                          OutputWorkspace=outWs)
-        # TODO Merge runs
+
+        # Now merge the loaded files (if required)
+        workspace = MergeRuns(workspace)
+
         # Extract monitors to a separate workspace
-        # TODO use dedicated algorithm
-        monitors = list()
-        notMonitors = list()
-        for i in range(workspace.getNumberHistograms()):
-            det = workspace.getDetector(i)
-            if det.isMonitor():
-                monitors.append(i)
-            else:
-                notMonitors.append(i)
-        # The variable 'monitorWorkspace' shall hold the monitor
-        # data throughout the algorithm.
-        monitorWorkspace = monitorWorkspaceName(identifier)
-        monitorWorkspace = ExtractSpectra(InputWorkspace=workspace,
-                                          OutputWorkspace=monitorWorkspace,
-                                          WorkspaceIndexList=monitors)
-        workspace = ExtractSpectra(InputWorkspace=workspace,
-                                   OutputWorkspace=workspace,
-                                   WorkspaceIndexList=notMonitors)
-        workspace.setMonitorWorkspace(monitorWorkspace)
+        workspace, monitorWorkspace = ExtractMonitors(workspace)
+
         monitorIndex = self.getProperty(PROP_MONITOR_INDEX).value
         monitorIndex = self._convertToWorkspaceIndex(monitorIndex, monitorWorkspace)
-        
 
         # Fit time-independent background
         # ATM monitor background is ignored
