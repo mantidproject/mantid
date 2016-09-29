@@ -32,6 +32,7 @@ set ( SRC_FILES
 	src/LoadANSTOHelper.cpp
 	src/LoadAscii.cpp
 	src/LoadAscii2.cpp
+	src/LoadBankFromDisk.cpp
 	src/LoadBBY.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp

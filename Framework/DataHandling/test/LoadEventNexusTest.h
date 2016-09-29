@@ -590,7 +590,7 @@ public:
    * meaning different-sized pulse ID files.
    * DISABLED AS THE FILE ISN'T IN THE REPOSITORY
    */
-  void xtest_MultiplePreprocessors() {
+  void test_MultiplePreprocessors() {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
     std::string outws_name = "arcs";

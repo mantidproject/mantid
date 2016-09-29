@@ -5,14 +5,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/BankPulseTimes.h"
+#include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidDataHandling/EventWorkspaceCollection.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #ifdef _WIN32 // fixing windows issue causing conflict between
 // winnt char and nexus char
@@ -276,6 +277,10 @@ private:
 
   /// to open the nexus file with specific exception handling/message
   void safeOpenFile(const std::string fname);
+
+  Kernel::DateAndTime loadNexusLogs(
+      API::Progress *const prog, int &nPeriods,
+      std::unique_ptr<const Kernel::TimeSeriesProperty<int>> &periodLog);
 
   /// Was the instrument loaded?
   bool m_instrument_loaded_correctly;
