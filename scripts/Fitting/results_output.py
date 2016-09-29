@@ -30,6 +30,8 @@ BENCHMARK_VERSION_STR = 'v3.8'
 FILENAME_SUFFIX_ACCURACY = 'acc'
 FILENAME_SUFFIX_RUNTIME = 'runtime'
 
+import post_processing as postproc
+
 # TO-DO: split into prepare + print
 def print_group_results_tables(minimizers, results_per_test, problems_obj, group_name, use_errors, simple_text=True, rst=False, color_scale=None):
     """
@@ -152,33 +154,7 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
 # TO-DO: split into prepare + print
 def print_overall_results_table(minimizers, group_results, problems, group_names, use_errors, simple_text=True, rst=False):
 
-    num_groups = len(group_results)
-    num_minimizers = len(minimizers)
-
-    groups_norm_acc = np.zeros((num_groups, num_minimizers))
-    groups_norm_runtime = np.zeros((num_groups, num_minimizers))
-    for group_idx, group_res in enumerate(group_results):
-        results_per_test = group_res
-        num_tests = len(results_per_test)
-
-        accuracy_tbl = np.zeros((num_tests, num_minimizers))
-        time_tbl = np.zeros((num_tests, num_minimizers))
-        for test_idx in range(0, num_tests):
-            for minimiz_idx in range(0, num_minimizers):
-                accuracy_tbl[test_idx, minimiz_idx] = results_per_test[test_idx][minimiz_idx].sum_err_sq
-                time_tbl[test_idx, minimiz_idx] = results_per_test[test_idx][minimiz_idx].runtime
-        # Min across all minimizers
-        min_sum_err_sq = np.nanmin(accuracy_tbl, 1)
-        min_runtime = np.nanmin(time_tbl, 1)
-
-        norm_acc_rankings = accuracy_tbl / min_sum_err_sq[:, None]
-        norm_runtime_rankings = time_tbl / min_runtime[:, None]
-
-        #acc_mean = np.nanmedian(accuracy_tbl, 0)
-        groups_norm_acc[group_idx, :] = np.nanmedian(norm_acc_rankings, 0)
-        #runtime_mean = np.nanmedian(time_tbl, 0)
-        groups_norm_runtime[group_idx, :] = np.nanmedian(norm_runtime_rankings, 0)
-
+    groups_norm_acc, groups_norm_runtime = postproc.calc_summary_table(minimizers, group_results)
 
     linked_names = []
     for name in group_names:
@@ -192,7 +168,8 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
 
     header = '**************** Accuracy ******** \n\n'
     print(header)
-    tbl_all_summary_acc = build_rst_table(minimizers, linked_names, groups_norm_acc, comparison_type='summary', using_errors=use_errors)
+    tbl_all_summary_acc = build_rst_table(minimizers, linked_names, groups_norm_acc,
+                                          comparison_type='summary', using_errors=use_errors)
     print(tbl_all_summary_acc)
     fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
              format(weighted=weighted_suffix_string(use_errors),
@@ -202,7 +179,8 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
 
     header = '**************** Runtime ******** \n\n'
     print(header)
-    tbl_all_summary_runtime = build_rst_table(minimizers, linked_names, groups_norm_runtime, comparison_type='summary', using_errors=use_errors)
+    tbl_all_summary_runtime = build_rst_table(minimizers, linked_names, groups_norm_runtime,
+                                              comparison_type='summary', using_errors=use_errors)
     print(tbl_all_summary_runtime)
     fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
              format(weighted=weighted_suffix_string(use_errors),
@@ -348,6 +326,13 @@ def format_cell_value_rst(value, width, color_scale=None, items_link=None):
     return value_text
 
 def print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, time_tbl, norm_acc_rankings):
+    """
+    Produces tables in plain ascii, without any markup.  This is much
+    easier to read than RST and useful when developing or just
+    checking the output of the runs from the system test logs.
+
+    """
+
     header = " ============= Comparison of sum of square errors: ===============\n"
     header += " =================================================================\n"
     header += "\n\n"
@@ -370,7 +355,7 @@ def print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, time_tb
         results_text += "\n"
 
     # Beware for the statistics, if some of the fits fail badly, they'll produce 'nan'
-    # values => 'nan' errors. Requires np.nanmedian() and the like
+    # values => 'nan' errors. Requires np.nanmedian() and the like nan-safe functions.
 
     # summary lines
     results_text += '---------------- Summary (accuracy): -------- \n'

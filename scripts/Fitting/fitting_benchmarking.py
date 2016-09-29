@@ -109,8 +109,6 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors=True
 
         wks = msapi.CreateWorkspace(DataX=prob.data_pattern_in, DataY=prob.data_pattern_out,
                                     DataE=data_e)
-                                    # ERRORS. If all zeros, check Fit/IgnoreInvalidData
-                                    # DataE=np.zeros((1, len(prob.data_pattern_in))))
         cost_function = 'Least squares'
     else:
         wks = msapi.CreateWorkspace(DataX=prob.data_pattern_in, DataY=prob.data_pattern_out)
@@ -203,8 +201,8 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
     param_tbl = None
     fit_wks = None
     try:
-        # When not using 'Least squares' we need to enable the "ignore invalid" option for several
-        # minmizers to work (including Levenberg-Marquard). They will fail to fit anything otherwise.
+        # When using 'Least squares' (weighted by errors), ignore nans and zero errors, but don't
+        # ignore them when using 'Unweighted least squares' as that would ignore all values!
         ignore_invalid = cost_function == 'Least squares'
         status, chi2, covar_tbl, param_tbl, fit_wks = msapi.Fit(function, wks, Output='ws_fitting_test',
                                                                 Minimizer=minimizer,
@@ -218,8 +216,6 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
 
     except RuntimeError as rerr:
         print("Warning, Fit probably failed. Going on. Error: {0}".format(str(rerr)))
-
-    #param_tbl = mtd['ws_Parameters']
 
     if param_tbl:
         params = param_tbl.column(1)[:-1]

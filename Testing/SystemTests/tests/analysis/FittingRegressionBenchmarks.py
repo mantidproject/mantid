@@ -16,6 +16,9 @@ import fitting_benchmarking as fitbk
 import results_output as fitout
 
 def fitting_problems_all_nist_nlr():
+    """
+    Finds the files available in a directory of reference files
+    """
     # 'reference/nist_nonlinear_regression/DanWood.dat'
     file_paths = ['']
 
@@ -36,7 +39,6 @@ def fitting_problem_test_files():
 class FittingBenchmarkTests(unittest.TestCase):
 
     def setUp(self):
-        # result = fitting.RunProblems.do_calc()
         # TO-DO related to this: expose API::FuncMinimizerFactory to Python
         # TOTHINK: use different interface as in the API::FunctionFactory?
         # But still, do we want to enforce a particular ordering for the tables?
@@ -46,7 +48,7 @@ class FittingBenchmarkTests(unittest.TestCase):
                                     'Levenberg-Marquardt', 'Levenberg-MarquardtMD',
                                     'Simplex', 'SteepestDescent', 'DTRS']
         self.minimizers = minimizers_pseudofactory
-        self.group_names = ['NIST, "lower" difficulty', 'NIST, "average" difficulty', 'NIST, "higher" difficulty', "Neutron data", "CUTEst"]
+        self.group_names = ['NIST, "lower" difficulty', 'NIST, "average" difficulty', 'NIST, "higher" difficulty', "CUTEst", "Neutron data"]
         self.group_suffix_names = ['nist_lower', 'nist_average', 'nist_higher', 'cutest', 'neutron_data']
         self.color_scale = [(1.1, 'ranking-top-1'), (1.33, 'ranking-top-2'), (1.75, 'ranking-med-3'), (3, 'ranking-low-4'), (float('nan'), 'ranking-low-5')]
 
@@ -58,7 +60,6 @@ class FittingBenchmarkTests(unittest.TestCase):
 
         """
 
-        use_errors = True
         problems, results_per_group = fitbk.do_regression_fitting_benchmark(include_nist=True, include_cutest=True,
                                                                             data_groups_dirs = ['/home/fedemp/mantid-repos/mantid-fitting-systest/scripts/Fitting/test_examples/FittingNeutronData'],
                                                                             minimizers=self.minimizers, use_errors=use_errors)
@@ -76,8 +77,7 @@ class FittingBenchmarkTests(unittest.TestCase):
                                               simple_text=True, rst=True, color_scale=self.color_scale)
 
         # Results aggregated (median) by group (NIST, Neutron data, CUTEst, etc.)
-        header = "\n\n"
-        header += '**************** OVERALL SUMMARY - ALL GROUPS ******** \n\n'
+        header = '\n\n**************** OVERALL SUMMARY - ALL GROUPS ******** \n\n'
         print(header)
         fitout.print_overall_results_table(self.minimizers, results_per_group, problems, self.group_names,
                                            use_errors=use_errors, rst=True)
