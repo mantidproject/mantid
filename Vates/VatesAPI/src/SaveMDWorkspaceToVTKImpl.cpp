@@ -15,6 +15,7 @@
 
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 
 #include <vtkSmartPointer.h>
@@ -48,6 +49,8 @@ bool isNDWorkspace(Mantid::API::IMDWorkspace_sptr workspace,
       workspace->getNonIntegratedDimensions().size();
   return actualNonIntegratedDimensionality == dimensionality;
 }
+
+Kernel::Logger g_log("SaveMDWorkspaceToVTK");
 }
 
 namespace Mantid {
@@ -70,37 +73,52 @@ SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl() { setupMembers(); }
 void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
     Mantid::API::IMDWorkspace_sptr workspace, std::string filename,
     VisualNormalization normalization, ThresholdRange_scptr thresholdRange,
-    int recursionDepth) const {
+    int recursionDepth, const std::string &compressorType) const {
   auto isHistoWorkspace =
       boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(workspace) !=
       nullptr;
   auto fullFilename = getFullFilename(filename, isHistoWorkspace);
 
-  // Define a time slice.
-  auto time = selectTimeSliceValue(workspace);
+  const vtkWriter::CompressorType compressor = [&compressorType.& g_log] {
+    if compressorType == "NONE") {
+        return vtkXMLWriter::NONE;
+        else if (compressorTYpe == "ZLIB") {
+          return vtkXMLWriter::ZLIB;
+        }
+        else {
+          // This should never happen.
+          g_log.warning("Incorrect CompressorType: " + compressorType +
+                        ". Using CompressorType=NONE.");
+          return vtkXMLWriter::NONE;
+        }
+      }
+    ();
+    // Define a time slice.
+    auto time = selectTimeSliceValue(workspace);
 
-  // Get presenter and data set factory set up
-  auto factoryChain = getDataSetFactoryChain(isHistoWorkspace, thresholdRange,
-                                             normalization, time);
+    // Get presenter and data set factory set up
+    auto factoryChain = getDataSetFactoryChain(isHistoWorkspace, thresholdRange,
+                                               normalization, time);
 
-  auto presenter = getPresenter(isHistoWorkspace, workspace, recursionDepth);
+    auto presenter = getPresenter(isHistoWorkspace, workspace, recursionDepth);
 
-  // Create the vtk data
-  NullProgressAction nullProgressA;
-  NullProgressAction nullProgressB;
-  auto dataSet =
-      presenter->execute(factoryChain.get(), nullProgressA, nullProgressB);
+    // Create the vtk data
+    NullProgressAction nullProgressA;
+    NullProgressAction nullProgressB;
+    auto dataSet =
+        presenter->execute(factoryChain.get(), nullProgressA, nullProgressB);
 
-  // Do an orthogonal correction
-  dataSet = getDataSetWithOrthogonalCorrection(dataSet, presenter.get(),
-                                               workspace, isHistoWorkspace);
+    // Do an orthogonal correction
+    dataSet = getDataSetWithOrthogonalCorrection(dataSet, presenter.get(),
+                                                 workspace, isHistoWorkspace);
 
-  // Write the data to the file
-  vtkSmartPointer<vtkXMLWriter> writer = getXMLWriter(isHistoWorkspace);
-  auto writeSuccessFlag = writeDataSetToVTKFile(writer, dataSet, fullFilename);
-  if (!writeSuccessFlag) {
-    throw std::runtime_error("SaveMDWorkspaceToVTK: VTK could not write "
-                             "your data set to a file.");
+    // Write the data to the file
+    vtkSmartPointer<vtkXMLWriter> writer = getXMLWriter(isHistoWorkspace);
+    auto writeSuccessFlag =
+        writeDataSetToVTKFile(writer, dataSet, fullFilename, compressor);
+    if (!writeSuccessFlag) {
+      throw std::runtime_error("SaveMDWorkspaceToVTK: VTK could not write "
+                               "your data set to a file.");
   }
 }
 
@@ -165,9 +183,13 @@ SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace,
  * @returns a vtk error flag
  */
 int SaveMDWorkspaceToVTKImpl::writeDataSetToVTKFile(
-    vtkXMLWriter *writer, vtkDataSet *dataSet, std::string filename) const {
+    vtkXMLWriter * writer, vtkDataSet * dataSet, const std::string &filename,
+    vtkWriter::CompressorType compressor) const {
   writer->SetFileName(filename.c_str());
   writer->SetInputData(dataSet);
+  writer->SetCompressorType(compressor);
+  // Required for large (>4GB?) files.
+  writer->SetHeaderTypeToUInt64();
   return writer->Write();
 }
 
