@@ -416,6 +416,7 @@ void ConvFit::addSampleLogsToWorkspace(const std::string workspaceName,
                                        const std::string logType) {
 
   auto addSampleLog = AlgorithmManager::Instance().create("AddSampleLog");
+  addSampleLog->setLogging(false);
   addSampleLog->setProperty("Workspace", workspaceName);
   addSampleLog->setProperty("LogName", logName);
   addSampleLog->setProperty("LogText", logText);
@@ -518,6 +519,7 @@ void ConvFit::extendResolutionWorkspace() {
     for (size_t i = 0; i < numHist; i++) {
       IAlgorithm_sptr appendAlg =
           AlgorithmManager::Instance().create("AppendSpectra");
+      appendAlg->setLogging(false);
       appendAlg->initialize();
       appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
       appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
@@ -1702,7 +1704,8 @@ ConvFit::createDefaultParamsMap(QMap<QString, double> map) {
 /**
 * Populates a map with ALL parameters names and values for the current fit
 * function
-* @param defaultMap :: A QMap of any parameters that have non zero default values
+* @param defaultMap :: A QMap of any parameters that have non zero default
+* values
 * @param parameters	:: A QStringList of all the parameters for the current
 * fit function
 * @param fitFunction :: The name of the current fit function
