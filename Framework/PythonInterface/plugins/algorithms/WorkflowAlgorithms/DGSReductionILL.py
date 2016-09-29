@@ -162,16 +162,7 @@ class DGSReductionILL(DataProcessorAlgorithm):
             self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgOutWs)
         if bkgInWs:
             bkgWorkspace = self.getProperty(PROP_FLAT_BACKGROUND_WORKSPACE).value
-            # TODO: test if outputting empty workspaces is really needed.
-            if not bkgOutWs:
-                # Even if no background was fitted, we need to set some
-                # output.
-                bkgOutWs = "dummy_output"
-                emptyOutput = CreateWorkspace(OutputWorkspace=bkgOutWs,
-                                              DataX="",
-                                              DataY="",
-                                              DataE="",
-                                              NSpec=0)
+            if bkgWorkspace:
                 self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgOutWs)
         # Subtract time-independent background
         outWs = backgroundSubtractedWorkspaceName(identifier)
