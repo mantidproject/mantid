@@ -1,8 +1,9 @@
-#include <vector>
-#include <set>
-#include <string>
+#include <Poco/File.h>
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
+#include <set>
+#include <string>
+#include <vector>
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -933,9 +934,13 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
   QSettings settings;
   auto workingDir = settings.value("Project/WorkingDirectory", "").toString();
   auto fileName = workingDir.toStdString() + "/VSI.xml";
+  Poco::File file(fileName);
+  if (!file.exists())
+    return; // file path invalid.
+
   auto success = loadVSIState(fileName);
   if (!success)
-    return; // state could not be loaded. There's nothin left to do!
+    return; // state could not be loaded. There's nothing left to do!
 
   // Get the active objects from the last session
   auto model = pqApplicationCore::instance()->getServerManagerModel();
@@ -974,7 +979,14 @@ bool MdViewerWidget::loadVSIState(const std::string &fileName) {
   int error = parser->Parse();
   if (!error)
     return false;
-  proxyManager->LoadXMLState(parser->GetRootElement(), NULL, true);
+
+  try {
+    proxyManager->LoadXMLState(parser->GetRootElement(), NULL, true);
+  } catch (...) {
+    parser->Delete();
+    return false;
+  }
+
   parser->Delete();
   return true;
 }
