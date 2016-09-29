@@ -60,7 +60,7 @@ Usage
    print ("{0}".format(rez))
    
    # calculate number of events in the workspace
-   CalcCountRate(LogTest,CountRateLogName= log_name)
+   CalculateCountRate(LogTest,CountRateLogName= log_name)
    
    rez = CheckForSampleLogs(LogTest,log_name)   
    if len(rez)==0:
