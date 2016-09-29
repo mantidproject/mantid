@@ -116,6 +116,10 @@ public:
                                   value * m_factors[m_factorOffset + iY]);
   }
 
+  void zero() override {
+      m_jacobian.zero();
+  }
+
 protected:
   API::Jacobian &m_jacobian;
   size_t m_offset;

@@ -71,6 +71,9 @@ public:
   double get(size_t, size_t) override {
     throw std::runtime_error("Get method shouldn't be called.");
   }
+  void zero() override {
+      throw std::runtime_error("Zero method shouldn't be called.");
+  }
 };
 
 DECLARE_FUNCTION(ResolutionTest_Gauss)

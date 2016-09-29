@@ -298,6 +298,11 @@ public:
   double get(size_t iY, size_t iP) override {
     return m_J->get(m_iY0 + iY, m_iP0 + iP);
   }
+  /** Zero all matrix elements.
+  */
+  void zero() override {
+      throw Kernel::Exception::NotImplementedError("zero() is not implemented for PartialJacobian");
+  }
   /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
    *   @param value :: Value to add
    *   @param iP :: The index of an active parameter.

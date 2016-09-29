@@ -88,6 +88,10 @@ public:
     }
     return m_data[iY * m_np + iP];
   }
+  /// overwrite base method
+  void zero() override {
+      m_data.assign(m_data.size(), 0.0);
+  }
 };
 
 } // namespace CurveFitting
