@@ -117,7 +117,7 @@ public slots:
   /// Open sequential fit dialog
   void openSequentialFitDialog();
   /// Updates label to avoid overwriting existing results
-  void checkAndUpdateFitLabel(bool seq);
+  void checkAndUpdateFitLabel(bool sequentialFit);
 
 private:
   /// Generate names of workspaces to be created
@@ -145,6 +145,8 @@ private:
   void setUpDataSelector(const QString &wsName);
   /// Check if multiple runs are selected
   bool isMultipleRuns() const;
+  /// Update fit label to match run number(s)
+  void updateFitLabelFromRuns();
   /// Fit browser to update (non-owning pointer)
   MantidQt::MantidWidgets::IWorkspaceFitControl *m_fitBrowser;
   /// Data selector to get input from (non-owning pointer)
