@@ -1,4 +1,6 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 import os
 from mantid.kernel import ConfigService, Logger
 from mantid.api import FileFinder
@@ -105,4 +107,4 @@ def find_data(file, instrument='', allow_multiple=False):
 
     # If we didn't find anything, raise an exception
     Logger('find_data').error("\n\nCould not find a file for %s: check your reduction parameters\n\n" % str(file))
-    raise RuntimeError, "Could not find a file for %s" % str(file)
+    raise RuntimeError("Could not find a file for %s" % str(file))
