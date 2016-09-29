@@ -27,7 +27,7 @@ threadSafe(Arg workspace) {
   */
 template <typename Arg, typename... Args>
 inline typename std::enable_if<std::is_pointer<Arg>::value, bool>::type
-threadSafe(Arg workspace, Args... others) {
+threadSafe(const Arg &workspace, Args... others) {
   return (!workspace || workspace->threadSafe()) && threadSafe(others...);
 }
 
