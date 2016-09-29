@@ -51,8 +51,9 @@ inline
  * @return whether workspace is threadsafe.
  */
 template <typename Arg, typename... Args>
-inline typename std::enable_if<std::is_lvalue_reference<Arg &>::value, bool>::type
-threadSafe(const Arg &workspace, Args... others) {
+inline
+    typename std::enable_if<std::is_lvalue_reference<Arg &>::value, bool>::type
+    threadSafe(const Arg &workspace, Args... others) {
   return workspace.threadSafe() && threadSafe(others...);
 }
 
