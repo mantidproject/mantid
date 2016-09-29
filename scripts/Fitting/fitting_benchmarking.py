@@ -203,7 +203,9 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
     param_tbl = None
     fit_wks = None
     try:
-        ignore_invalid = True
+        # When not using 'Least squares' we need to enable the "ignore invalid" option for several
+        # minmizers to work (including Levenberg-Marquard). They will fail to fit anything otherwise.
+        ignore_invalid = cost_function == 'Least squares'
         status, chi2, covar_tbl, param_tbl, fit_wks = msapi.Fit(function, wks, Output='ws_fitting_test',
                                                                 Minimizer=minimizer,
                                                                 CostFunction=cost_function,
