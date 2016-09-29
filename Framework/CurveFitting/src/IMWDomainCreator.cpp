@@ -44,9 +44,7 @@ public:
     return m_data[iY * m_nParams + iP];
   }
   /// Zero
-  void zero() override {
-      m_data.assign(m_data.size(), 0.0);
-  }
+  void zero() override { m_data.assign(m_data.size(), 0.0); }
 
 private:
   size_t m_nParams;           ///< number of parameters / second dimension

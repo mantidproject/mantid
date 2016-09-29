@@ -72,7 +72,7 @@ public:
     throw std::runtime_error("Get method shouldn't be called.");
   }
   void zero() override {
-      throw std::runtime_error("Zero method shouldn't be called.");
+    throw std::runtime_error("Zero method shouldn't be called.");
   }
 };
 

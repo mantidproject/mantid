@@ -116,9 +116,7 @@ public:
                                   value * m_factors[m_factorOffset + iY]);
   }
 
-  void zero() override {
-      m_jacobian.zero();
-  }
+  void zero() override { m_jacobian.zero(); }
 
 protected:
   API::Jacobian &m_jacobian;
@@ -159,9 +157,7 @@ public:
   }
 
   /// Implements API::Jacobian::zero
-  void zero() override {
-    m_jacobian.assign(m_jacobian.size(), 0.0);
-  }
+  void zero() override { m_jacobian.assign(m_jacobian.size(), 0.0); }
 
   /// Provides raw pointer access to the underlying std::vector. Required for
   /// adept-interface.

@@ -301,7 +301,8 @@ public:
   /** Zero all matrix elements.
   */
   void zero() override {
-      throw Kernel::Exception::NotImplementedError("zero() is not implemented for PartialJacobian");
+    throw Kernel::Exception::NotImplementedError(
+        "zero() is not implemented for PartialJacobian");
   }
   /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
    *   @param value :: Value to add

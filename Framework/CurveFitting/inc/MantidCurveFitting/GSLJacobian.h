@@ -94,9 +94,7 @@ public:
     return 0.0;
   }
   /// overwrite base method
-  void zero() override {
-      m_J.zero();
-  }
+  void zero() override { m_J.zero(); }
 };
 
 /// The implementation of Jacobian
@@ -141,9 +139,7 @@ public:
     return 0.0;
   }
   /// overwrite base method
-  void zero() override {
-      gsl_matrix_set_zero(m_J);
-  }
+  void zero() override { gsl_matrix_set_zero(m_J); }
 };
 
 } // namespace CurveFitting

@@ -20,18 +20,18 @@ void MultiDomainFunctionTest_Function::function1D(double *out,
 
   for (size_t i = 0; i < nData; ++i) {
     double x = xValues[i];
-    switch(order) {
+    switch (order) {
     case 1:
-        out[i] = A + B * x;
-        break;
+      out[i] = A + B * x;
+      break;
     case 3:
-        out[i] = (A + B * x) * pow(x, 2);
-        break;
+      out[i] = (A + B * x) * pow(x, 2);
+      break;
     case 5:
-        out[i] = (A + B * x) * pow(x, 4);
-        break;
+      out[i] = (A + B * x) * pow(x, 4);
+      break;
     default:
-        throw std::runtime_error("Unknown attribute value.");
+      throw std::runtime_error("Unknown attribute value.");
     };
   }
 }
@@ -40,21 +40,21 @@ void MultiDomainFunctionTest_Function::functionDeriv1D(
   const int order = getAttribute("Order").asInt();
   for (size_t i = 0; i < nData; ++i) {
     double x = xValues[i];
-    switch(order) {
+    switch (order) {
     case 1:
-        out->set(i, 0, 1.0);
-        out->set(i, 1, x);
-        break;
+      out->set(i, 0, 1.0);
+      out->set(i, 1, x);
+      break;
     case 3:
-        out->set(i, 0, pow(x, 2));
-        out->set(i, 1, pow(x, 3));
-        break;
+      out->set(i, 0, pow(x, 2));
+      out->set(i, 1, pow(x, 3));
+      break;
     case 5:
-        out->set(i, 0, pow(x, 4));
-        out->set(i, 1, pow(x, 5));
-        break;
+      out->set(i, 0, pow(x, 4));
+      out->set(i, 1, pow(x, 5));
+      break;
     default:
-        throw std::runtime_error("Unknown attribute value.");
+      throw std::runtime_error("Unknown attribute value.");
     };
   }
 }
@@ -106,9 +106,10 @@ Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace1() {
     Mantid::MantidVec &y = ws1->dataY(0);
     // Mantid::MantidVec& e = ws1->dataE(0);
     for (size_t i = 0; i < ws1->blocksize(); ++i) {
-      x[i] = -1.0 + dX*double(i);
+      x[i] = -1.0 + dX * double(i);
       const double t = x[i];
-      y[i] = A0 + B0 * t + (A1 + B1 * t) * pow(t, 2) + (A2 + B2 * t) * pow(t, 4);
+      y[i] =
+          A0 + B0 * t + (A1 + B1 * t) * pow(t, 2) + (A2 + B2 * t) * pow(t, 4);
     }
   }
 
@@ -123,7 +124,7 @@ Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace2() {
     Mantid::MantidVec &y = ws2->dataY(0);
     // Mantid::MantidVec& e = ws2->dataE(0);
     for (size_t i = 0; i < ws2->blocksize(); ++i) {
-      x[i] = -1.0 + dX*double(i);
+      x[i] = -1.0 + dX * double(i);
       const double t = x[i];
       y[i] = A0 + B0 * t + (A1 + B1 * t) * pow(t, 2);
     }
@@ -140,7 +141,7 @@ Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace3() {
     Mantid::MantidVec &y = ws3->dataY(0);
     // Mantid::MantidVec& e = ws3->dataE(0);
     for (size_t i = 0; i < ws3->blocksize(); ++i) {
-      x[i] = -1.0 + dX*double(i);
+      x[i] = -1.0 + dX * double(i);
       const double t = x[i];
       y[i] = A0 + B0 * t + (A2 + B2 * t) * pow(t, 4);
     }

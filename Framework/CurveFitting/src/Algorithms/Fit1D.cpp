@@ -67,9 +67,7 @@ public:
   }
   /** Zero all matrix elements.
   */
-  void zero() override {
-      gsl_matrix_set_zero(m_J);
-  }
+  void zero() override { gsl_matrix_set_zero(m_J); }
   /// Set the pointer to the GSL's jacobian
   void setJ(gsl_matrix *J) { m_J = J; }
 

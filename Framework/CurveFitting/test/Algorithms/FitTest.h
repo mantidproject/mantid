@@ -21,7 +21,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
-#include <gsl/gsl_version.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -1103,7 +1102,6 @@ public:
     TS_ASSERT_DELTA(fun->getParameter("f1.B"), -20, 1e-8);
     TS_ASSERT_DELTA(fun->getParameter("f2.A"), 4, 1e-8);
     TS_ASSERT_DELTA(fun->getParameter("f2.B"), 16, 1e-8);
-
   }
 
   void test_function_Multidomain_one_function_to_two_parts_of_workspace() {

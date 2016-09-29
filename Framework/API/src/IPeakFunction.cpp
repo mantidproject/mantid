@@ -45,7 +45,8 @@ public:
   /** Zero all matrix elements.
   */
   void zero() override {
-      throw Kernel::Exception::NotImplementedError("zero() is not implemented for PartialJacobian1");
+    throw Kernel::Exception::NotImplementedError(
+        "zero() is not implemented for PartialJacobian1");
   }
 };
 
@@ -69,9 +70,7 @@ public:
 
     return maxIndex;
   }
-  void zero() override {
-      m_J.assign(m_J.size(), 0.0);
-  }
+  void zero() override { m_J.assign(m_J.size(), 0.0); }
 
 protected:
   size_t m_y;
