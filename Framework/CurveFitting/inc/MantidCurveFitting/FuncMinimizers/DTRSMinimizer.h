@@ -39,7 +39,7 @@ public:
 
 private:
   void
-  calculate_step(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
+  calculateStep(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
                  const DoubleFortranMatrix &hf, const DoubleFortranVector &g,
                  double Delta, DoubleFortranVector &d, double &normd,
                  const NLLS::nlls_options &options, NLLS::nlls_inform &inform,

@@ -51,15 +51,15 @@ public:
 
 private:
   /// Evaluate the fitting function and calculate the residuals.
-  void eval_F(const DoubleFortranVector &x, DoubleFortranVector &f) const;
+  void evalF(const DoubleFortranVector &x, DoubleFortranVector &f) const;
   /// Evaluate the Jacobian
-  void eval_J(const DoubleFortranVector &x, DoubleFortranMatrix &J) const;
+  void evalJ(const DoubleFortranVector &x, DoubleFortranMatrix &J) const;
   /// Evaluate the Hessian
-  void eval_HF(const DoubleFortranVector &x, const DoubleFortranVector &f,
+  void evalHF(const DoubleFortranVector &x, const DoubleFortranVector &f,
                DoubleFortranMatrix &h) const;
   /// Find a correction vector to the parameters.
   virtual void
-  calculate_step(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
+  calculateStep(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
                  const DoubleFortranMatrix &hf, const DoubleFortranVector &g,
                  double Delta, DoubleFortranVector &d, double &normd,
                  const NLLS::nlls_options &options, NLLS::nlls_inform &inform,
