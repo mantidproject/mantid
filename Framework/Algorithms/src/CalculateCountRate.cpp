@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/CalcCountRate.h"
+#include "MantidAlgorithms/CalculateCountRate.h"
 
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -20,23 +20,23 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(CalcCountRate)
+DECLARE_ALGORITHM(CalculateCountRate)
 
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CalcCountRate::name() const { return "CalcCountRate"; }
+const std::string CalculateCountRate::name() const { return "CalculateCountRate"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CalcCountRate::version() const { return 1; }
+int CalculateCountRate::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CalcCountRate::category() const {
+const std::string CalculateCountRate::category() const {
   return "Inelastic\\Utility;Diagnostics;Events\\EventFiltering";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string CalcCountRate::summary() const {
+const std::string CalculateCountRate::summary() const {
   return "Calculates instrument count rate as the function of the "
          "experiment time and adds CountRate log to the source workspace.";
 }
@@ -44,7 +44,7 @@ const std::string CalcCountRate::summary() const {
 //----------------------------------------------------------------------------------------------
 /** Declare the algorithm's properties.
  */
-void CalcCountRate::init() {
+void CalculateCountRate::init() {
 
   declareProperty(
       Kernel::make_unique<API::WorkspaceProperty<DataObjects::EventWorkspace>>(
@@ -140,7 +140,7 @@ void CalcCountRate::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void CalcCountRate::exec() {
+void CalculateCountRate::exec() {
 
   DataObjects::EventWorkspace_sptr sourceWS = getProperty("Workspace");
   API::EventType et = sourceWS->getEventType();
@@ -186,7 +186,7 @@ void CalcCountRate::exec() {
 *with
 *                         counting rate log on output.
 */
-void CalcCountRate::calcRateLog(
+void CalculateCountRate::calcRateLog(
     DataObjects::EventWorkspace_sptr &InputWorkspace,
     Kernel::TimeSeriesProperty<double> *const targLog) {
 
@@ -273,7 +273,7 @@ void CalcCountRate::calcRateLog(
 * @param spectraLocks :: pointer to the array of mutexes to lock modifyed
 *                        visualization workspace spectra for a thread
 */
-void CalcCountRate::histogramEvents(const DataObjects::EventList &el,
+void CalculateCountRate::histogramEvents(const DataObjects::EventList &el,
                                     std::mutex *spectraLocks) {
 
   if (el.empty())
@@ -302,7 +302,7 @@ void CalcCountRate::histogramEvents(const DataObjects::EventList &el,
  @param wsIndex -- appropriate visualization workspace index to normalize
                    the spectrum
  */
-void CalcCountRate::normalizeVisWs(int64_t wsIndex) {
+void CalculateCountRate::normalizeVisWs(int64_t wsIndex) {
 
   auto &Y = m_visWs->mutableY(wsIndex);
   for (auto &yv : Y) {
@@ -312,7 +312,7 @@ void CalcCountRate::normalizeVisWs(int64_t wsIndex) {
 /** Disable normalization using normalization log.
 Helper function to avoid code duplication.
 @param NormLogError -- error to print if normalization log is disabled*/
-void CalcCountRate::disableNormalization(const std::string &NormLogError) {
+void CalculateCountRate::disableNormalization(const std::string &NormLogError) {
   g_log.warning() << NormLogError << std::endl;
   m_pNormalizationLog = nullptr;
   m_normalizeResult = false;
@@ -322,7 +322,7 @@ void CalcCountRate::disableNormalization(const std::string &NormLogError) {
  *
  @param InputWorkspace -- input workspace to analyse logs
  */
-void CalcCountRate::setOutLogParameters(
+void CalculateCountRate::setOutLogParameters(
     const DataObjects::EventWorkspace_sptr &InputWorkspace) {
 
   std::string NormLogName = getProperty("NormalizationLogName");
@@ -495,7 +495,7 @@ void CalcCountRate::setOutLogParameters(
  *           requested by the user
  *
 */
-void CalcCountRate::setSourceWSandXRanges(
+void CalculateCountRate::setSourceWSandXRanges(
     DataObjects::EventWorkspace_sptr &InputWorkspace) {
 
   std::string RangeUnits = getProperty("RangeUnits");
@@ -581,7 +581,7 @@ void CalcCountRate::setSourceWSandXRanges(
 * Sets or clears up internal m_visWS pointer and "do-visualization workspace"
 * option.
 */
-void CalcCountRate::checkAndInitVisWorkspace() {
+void CalculateCountRate::checkAndInitVisWorkspace() {
   std::string visWSName = getProperty("VisualizationWs");
   if (visWSName.empty()) {
     m_visWs.reset();
@@ -635,9 +635,9 @@ void CalcCountRate::checkAndInitVisWorkspace() {
   for (int i = 0; i < numXBins; ++i) {
     xx[i] = m_XRangeMin + (0.5 + static_cast<double>(i)) * dX;
   }
-  auto ax0 = new API::NumericAxis(xx);
+  auto ax0 = Kernel::make_unique<API::NumericAxis>(xx);
   ax0->setUnit(RangeUnits);
-  m_visWs->replaceAxis(0, ax0);
+  m_visWs->replaceAxis(0, ax0.release());
 
   // define Y axis (in seconds);
   double dt = (static_cast<double>(m_TRangeMax.totalNanoseconds() -
@@ -648,12 +648,12 @@ void CalcCountRate::checkAndInitVisWorkspace() {
   for (int i = 0; i < numTBins; i++) {
     xx[i] = (0.5 + static_cast<double>(i)) * dt;
   }
-  auto ax1 = new API::NumericAxis(xx);
+  auto ax1 = Kernel::make_unique<API::NumericAxis>(xx);
   auto labelY = boost::dynamic_pointer_cast<Kernel::Units::Label>(
       Kernel::UnitFactory::Instance().create("Label"));
   labelY->setLabel("sec");
   ax1->unit() = labelY;
-  m_visWs->replaceAxis(1, ax1);
+  m_visWs->replaceAxis(1, ax1.release());
 
   setProperty("VisualizationWs", m_visWs);
 
@@ -670,15 +670,15 @@ void CalcCountRate::checkAndInitVisWorkspace() {
   }
 }
 /** Helper function to check if visualization workspace should be used*/
-bool CalcCountRate::buildVisWS() const { return m_doVis; }
+bool CalculateCountRate::buildVisWS() const { return m_doVis; }
 
 /** Helper function, mainly for testing
 * @return  true if count rate should be normalized and false
 * otherwise */
-bool CalcCountRate::normalizeCountRate() const { return m_normalizeResult; }
+bool CalculateCountRate::normalizeCountRate() const { return m_normalizeResult; }
 /** Helper function, mainly for testing
 * @return  true if log derivative is used instead of log itself */
-bool CalcCountRate::useLogDerivative() const { return m_useLogDerivative; }
+bool CalculateCountRate::useLogDerivative() const { return m_useLogDerivative; }
 
 /** method to prepare normalization vector for the visualisation workspace using
 * data from normalization log with, usually, different number of time steps
@@ -688,11 +688,11 @@ bool CalcCountRate::useLogDerivative() const { return m_useLogDerivative; }
 @param normalization -- on output, the vector containing normalization
 *                       coefficients for the visualization workspace spectra
 */
-void CalcCountRate::buildVisWSNormalization(
+void CalculateCountRate::buildVisWSNormalization(
     std::vector<double> &normalization) {
   if (!m_pNormalizationLog) {
     m_normalizeResult = false;
-    g_log.warning() << "CalcCountRate::buildVisWSNormalization: No source "
+    g_log.warning() << "CalculateCountRate::buildVisWSNormalization: No source "
                        "normalization log is found. Will not normalize "
                        "visualization workspace\n";
     return;

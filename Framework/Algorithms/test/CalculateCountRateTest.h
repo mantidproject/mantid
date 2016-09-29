@@ -5,7 +5,7 @@
 
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidAlgorithms/CalcCountRate.h"
+#include "MantidAlgorithms/CalculateCountRate.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/NumericAxis.h"
@@ -19,11 +19,11 @@ using Mantid::DataObjects::Workspace2D_sptr;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 
-class CalcCountRateTester : public CalcCountRate {
+class CalculateCountRateTester : public CalculateCountRate {
 public:
-  CalcCountRateTester() { this->setChild(true); }
+  CalculateCountRateTester() { this->setChild(true); }
   void setSearchRanges(DataObjects::EventWorkspace_sptr &InputWorkspace) {
-    CalcCountRate::setSourceWSandXRanges(InputWorkspace);
+    CalculateCountRate::setSourceWSandXRanges(InputWorkspace);
   }
   std::tuple<double, double, bool> getXRanges() const {
     return std::tuple<double, double, bool>(m_XRangeMin, m_XRangeMax,
@@ -31,7 +31,7 @@ public:
   }
   void
   setOutLogParameters(const DataObjects::EventWorkspace_sptr &InputWorkspace) {
-    CalcCountRate::setOutLogParameters(InputWorkspace);
+    CalculateCountRate::setOutLogParameters(InputWorkspace);
   }
   void getAlgLogSettings(size_t &numLogSteps,
                          Kernel::TimeSeriesProperty<double> const *&pNormLog) {
@@ -47,15 +47,15 @@ public:
   const std::vector<double> &getVisNormLog() { return m_visNorm; }
 };
 
-class CalcCountRateTest : public CxxTest::TestSuite {
+class CalculateCountRateTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalcCountRateTest *createSuite() { return new CalcCountRateTest(); }
-  static void destroySuite(CalcCountRateTest *suite) { delete suite; }
+  static CalculateCountRateTest *createSuite() { return new CalculateCountRateTest(); }
+  static void destroySuite(CalculateCountRateTest *suite) { delete suite; }
 
   void test_Init() {
-    CalcCountRate alg;
+    CalculateCountRate alg;
 
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -67,7 +67,7 @@ public:
 
     double XRangeMin, XRangeMax;
 
-    CalcCountRateTester alg;
+    CalculateCountRateTester alg;
 
     alg.initialize();
     alg.setProperty("Workspace", sws);
@@ -137,7 +137,7 @@ public:
     size_t numLogSteps;
     Kernel::TimeSeriesProperty<double> const *pNormLog;
 
-    CalcCountRateTester alg;
+    CalculateCountRateTester alg;
     alg.initialize();
 
     //-------- check defaults
@@ -223,7 +223,7 @@ public:
 
     auto sws = build_test_ws(true);
 
-    CalcCountRateTester alg;
+    CalculateCountRateTester alg;
     alg.initialize();
 
     alg.setProperty("NumTimeSteps", 120);
@@ -258,7 +258,7 @@ public:
 
     auto sws = build_test_ws(false);
 
-    CalcCountRateTester alg;
+    CalculateCountRateTester alg;
     alg.initialize();
 
     alg.setProperty("NumTimeSteps", 120);
@@ -289,7 +289,7 @@ public:
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 10,
                                                                         false);
 
-    CalcCountRateTester alg;
+    CalculateCountRateTester alg;
     alg.initialize();
 
     alg.setProperty("NumTimeSteps", 100);
@@ -343,7 +343,7 @@ public:
 
     auto sws = build_test_ws(true);
 
-    CalcCountRateTester alg;
+    CalculateCountRateTester alg;
     alg.initialize();
 
     alg.setProperty("NumTimeSteps", 300);
@@ -373,7 +373,7 @@ public:
 
     auto sws = build_test_ws(true);
 
-    CalcCountRateTester alg;
+    CalculateCountRateTester alg;
     alg.initialize();
 
     alg.setProperty("NumTimeSteps", 50);
@@ -403,7 +403,7 @@ public:
 
     auto sws = build_test_ws(true);
 
-    CalcCountRateTester alg;
+    CalculateCountRateTester alg;
     alg.initialize();
 
     alg.setProperty("NumTimeSteps", 50);

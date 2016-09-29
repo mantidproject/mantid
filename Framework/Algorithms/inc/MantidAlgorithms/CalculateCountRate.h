@@ -43,7 +43,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CalcCountRate : public API::Algorithm {
+class DLLExport CalculateCountRate : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

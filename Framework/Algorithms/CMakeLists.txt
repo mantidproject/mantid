@@ -18,7 +18,7 @@ set ( SRC_FILES
 	src/AverageLogData.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
-	src/CalcCountRate.cpp
+	src/CalculateCountRate.cpp
 	src/CalMuonDeadTime.cpp
 	src/CalMuonDetectorPhases.cpp
 	src/CalculateDIFC.cpp
@@ -324,7 +324,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
-	inc/MantidAlgorithms/CalcCountRate.h
+	inc/MantidAlgorithms/CalculateCountRate.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalMuonDetectorPhases.h
 	inc/MantidAlgorithms/CalculateDIFC.h
@@ -642,7 +642,7 @@ set ( TEST_FILES
 	AverageLogDataTest.h
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
-	CalcCountRateTest.h
+	CalculateCountRateTest.h
 	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
 	CalculateDIFCTest.h
