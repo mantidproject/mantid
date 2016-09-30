@@ -85,8 +85,8 @@ Knowing the temperature allows us to calculate a peak list: a list of transition
   
 The output is::
 
- [[  0.00000000e+00   2.44006198e+01   4.24977124e+01   1.80970926e+01 -2.44006198e+01  -1.80970926e+01]
-  [  2.16711565e+02   8.83098530e+01   5.04430056e+00   1.71153708e-01  1.41609425e-01   1.44708285e-03]]
+ [[  0.00000000e+00   2.44006198e+01   4.24977124e+01   1.80970926e+01 -2.44006198e+01]
+  [  2.16711565e+02   8.83098530e+01   5.04430056e+00   1.71153708e-01  1.41609425e-01]]
 
 The first row are the energies (in meV) and the second row are the integrated intensities (in milibarn per steradian).
 
