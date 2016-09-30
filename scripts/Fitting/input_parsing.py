@@ -138,7 +138,6 @@ def parse_nist_file(spec_file):
 
     return prob
 
-
 def parse_nist_file_line_by_line(lines):
     """
     Get several relevant pieces of information from the lines of a NIST problem file

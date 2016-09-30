@@ -23,7 +23,7 @@ import numpy as np
 def calc_summary_table(minimizers, group_results):
     """
     Calculates a summary from problem-individual results. At the moment the only summary
-    statistics calculated is the median. The output is produced as numpy matrices.
+    statistic calculated is the median. The output is produced as numpy matrices.
 
     @param minimizers :: list of minimizers used (their names)
 
@@ -61,3 +61,44 @@ def calc_summary_table(minimizers, group_results):
         groups_norm_runtime[group_idx, :] = np.nanmedian(norm_runtime_rankings, 0)
 
     return groups_norm_acc, groups_norm_runtime
+
+def calc_accuracy_runtime_tbls(results_per_test):
+    """
+    This produces a numpy matrix for convenience, with
+    1 row per problem+start, 1 column per minimizer
+    """
+    num_tests = len(results_per_test)
+    accuracy_tbl = np.zeros((num_tests, num_minimizers))
+    time_tbl = np.zeros((num_tests, num_minimizers))
+    for test_idx in range(0, num_tests):
+        for minimiz_idx in range(0, num_minimizers):
+            accuracy_tbl[test_idx, minimiz_idx] = results_per_test[test_idx][minimiz_idx].sum_err_sq
+            time_tbl[test_idx, minimiz_idx] = results_per_test[test_idx][minimiz_idx].runtime
+
+    return accuracy_tbl, time_tbl
+
+def calc_norm_summary_tables(accuracy_tbl, time_tbl):
+    # Min across all minimizers
+    min_sum_err_sq = np.nanmin(accuracy_tbl, 1)
+    min_runtime = np.nanmin(time_tbl, 1)
+
+    norm_acc_rankings = accuracy_tbl / min_sum_err_sq[:, None]
+    norm_runtimes = time_tbl / min_runtime[:, None]
+
+    summary_cells_acc = np.array([np.nanmin(norm_acc_rankings, 0),
+                              np.nanmax(norm_acc_rankings, 0),
+                              np.nanmean(norm_acc_rankings, 0),
+                              np.nanmedian(norm_acc_rankings, 0),
+                              np.nanpercentile(norm_acc_rankings, 25, axis=0),
+                              np.nanpercentile(norm_acc_rankings, 75, axis=0)
+                             ])
+
+    summary_cells_runtime =  np.array([np.nanmin(norm_runtimes, 0),
+                                       np.nanmax(norm_runtimes, 0),
+                                       np.nanmean(norm_runtimes, 0),
+                                       np.nanmedian(norm_runtimes, 0),
+                                       np.nanpercentile(norm_runtimes, 25, axis=0),
+                                       np.nanpercentile(norm_runtimes, 75, axis=0)
+                                      ])
+
+    return norm_acc_rankings, norm_runtimes, summary_cells_acc, summary_cells_runtime

@@ -33,7 +33,6 @@ FILENAME_SUFFIX_RUNTIME = 'runtime'
 
 import post_processing as postproc
 
-# TO-DO: split into prepare + print
 def print_group_results_tables(minimizers, results_per_test, problems_obj, group_name, use_errors,
                                simple_text=True, rst=False, color_scale=None):
     """
@@ -52,72 +51,22 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
                           must be consistent with the style sheet used in the documentation pages (5
                           at the moment).
     """
+    linked_problems = build_indiv_linked_problems(results_per_test, group_name)
 
     num_tests = len(results_per_test)
     num_minimizers = len(minimizers)
 
-    problems = []
-    linked_problems = []
-    prev_name = ''
-    prob_count = 1
-
-    for test_idx in range(0, num_tests):
-        raw_name = results_per_test[test_idx][0].problem.name
-        name = raw_name.split('.')[0]
-        if name == prev_name:
-            prob_count += 1
-        else:
-            prob_count = 1
-
-        prev_name = name
-        name_index = name + ' ' + str(prob_count)
-        problems.append(name_index)
-        # TODO: move this to the nist loader, not here!
-        if 'nist_' in group_name:
-            linked_problems.append("`{0} <http://www.itl.nist.gov/div898/strd/nls/data/{1}.shtml>`__".
-                                   format(name_index, name.lower()))
-        else:
-            linked_problems.append(name)
-
-    # An np matrix for convenience
-    # 1 row per problem+start, 1 column per minimizer
-    accuracy_tbl = np.zeros((num_tests, num_minimizers))
-    time_tbl = np.zeros((num_tests, num_minimizers))
-    for test_idx in range(0, num_tests):
-        for minimiz_idx in range(0, num_minimizers):
-            accuracy_tbl[test_idx, minimiz_idx] = results_per_test[test_idx][minimiz_idx].sum_err_sq
-            time_tbl[test_idx, minimiz_idx] = results_per_test[test_idx][minimiz_idx].runtime
-    # Min across all minimizers
-    min_sum_err_sq = np.nanmin(accuracy_tbl, 1)
-    min_runtime = np.nanmin(time_tbl, 1)
-
-    norm_acc_rankings = accuracy_tbl / min_sum_err_sq[:, None]
-    norm_runtimes = time_tbl / min_runtime[:, None]
-
-    # Calculate summary table
-    summary_cols = minimizers
-    summary_rows = ['Best ranking', 'Worst ranking', 'Average', 'Median', 'First quartile', 'Third quartile']
-    summary_cells = np.array([np.nanmin(norm_acc_rankings, 0),
-                              np.nanmax(norm_acc_rankings, 0),
-                              np.nanmean(norm_acc_rankings, 0),
-                              np.nanmedian(norm_acc_rankings, 0),
-                              np.nanpercentile(norm_acc_rankings, 25, axis=0),
-                              np.nanpercentile(norm_acc_rankings, 75, axis=0)
-                             ])
-
-    summary_cells_runtime =  np.array([np.nanmin(norm_runtimes, 0),
-                                       np.nanmax(norm_runtimes, 0),
-                                       np.nanmean(norm_runtimes, 0),
-                                       np.nanmedian(norm_runtimes, 0),
-                                       np.nanpercentile(norm_runtimes, 25, axis=0),
-                                       np.nanpercentile(norm_runtimes, 75, axis=0)
-                                      ])
+    # Calculate summary tables
+    accuracy_tbl, runtime_tbl = postproc.calc_accuracy_runtime_tbls(results_per_test)
+    norm_acc_rankings, norm_runtimes, summary_cells_acc, summary_cells_runtime = postproc.calc_norm_summary_tables(accuracy_tbl, runtime_tbl)
 
     if simple_text:
-        print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, time_tbl, norm_acc_rankings)
+        print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, runtime_tbl, norm_acc_rankings)
 
     if rst:
-        tbl_acc_indiv = build_rst_table(minimizers, linked_problems, norm_acc_rankings, comparison_type='accuracy', using_errors=use_errors, color_scale=color_scale)
+        tbl_acc_indiv = build_rst_table(minimizers, linked_problems, norm_acc_rankings,
+                                        comparison_type='accuracy', comparison_dim='',
+                                        using_errors=use_errors, color_scale=color_scale)
         header = " ************* Comparison of sum of square errors (RST): *********\n"
         header += " *****************************************************************\n"
         header += "\n\n"
@@ -131,12 +80,18 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
             print(tbl_acc_indiv, file=tbl_file)
 
         # extended summary
-        tbl_acc_summary = build_rst_table(summary_cols, summary_rows, summary_cells, comparison_type='', using_errors=use_errors, color_scale=color_scale)
+        ext_summary_cols = minimizers
+        ext_summary_rows = ['Best ranking', 'Worst ranking', 'Average', 'Median', 'First quartile', 'Third quartile']
+        tbl_acc_summary = build_rst_table(ext_summary_cols, ext_summary_rows, summary_cells_acc,
+                                          comparison_type='accuracy', comparison_dim='',
+                                          using_errors=use_errors, color_scale=color_scale)
         header = '**************** Statistics/Summary (accuracy): ******** \n\n'
         print(header)
         print(tbl_acc_summary)
 
-        tbl_runtime_indiv = build_rst_table(minimizers, linked_problems, norm_runtimes, comparison_type='runtime', using_errors=use_errors, color_scale=color_scale)
+        tbl_runtime_indiv = build_rst_table(minimizers, linked_problems, norm_runtimes,
+                                            comparison_type='runtime', comparison_dim='',
+                                            using_errors=use_errors, color_scale=color_scale)
         header = " ************* Comparison of runtimes (RST): ****************\n"
         header += " *****************************************************************\n"
         header += "\n\n"
@@ -149,19 +104,60 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
             print(tbl_runtime_indiv, file=tbl_file)
 
         # extended summary
-        tbl_runtime_summary = build_rst_table(summary_cols, summary_rows, summary_cells_runtime, comparison_type='', using_errors=use_errors, color_scale=color_scale)
+        tbl_runtime_summary = build_rst_table(ext_summary_cols, ext_summary_rows, summary_cells_runtime,
+                                              comparison_type='runtime', comparison_dim='',
+                                              using_errors=use_errors, color_scale=color_scale)
         header = '**************** Statistics/Summary (runtime): ******** \n\n'
         print(header)
         print(tbl_runtime_summary)
 
-# TO-DO: split into prepare + print
-def print_overall_results_table(minimizers, group_results, problems, group_names, use_errors, simple_text=True, rst=False):
 
-    groups_norm_acc, groups_norm_runtime = postproc.calc_summary_table(minimizers, group_results)
+def build_indiv_linked_problems(results_per_test, group_name):
+    """
+    Makes a list of linked problem names which would be used for the
+    rows of the first column of the tables of individual results.
 
+    @param results_per_test :: results as produces by the fitting tests
+    @param group_name :: name of the group (NIST, Neutron data, etc.) this problem is part of
+
+    @returns :: list of problems with their description link tags
+    """
+    num_tests = len(results_per_test)
+    prev_name = ''
+    prob_count = 1
+    linked_problems = []
+    for test_idx in range(0, num_tests):
+        raw_name = results_per_test[test_idx][0].problem.name
+        name = raw_name.split('.')[0]
+        if name == prev_name:
+            prob_count += 1
+        else:
+            prob_count = 1
+
+        prev_name = name
+        name_index = name + ' ' + str(prob_count)
+
+        # TO-DO: move this to the nist loader, not here!
+        if 'nist_' in group_name:
+            linked_problems.append("`{0} <http://www.itl.nist.gov/div898/strd/nls/data/{1}.shtml>`__".
+                                   format(name_index, name.lower()))
+        else:
+            linked_problems.append(name)
+
+    return linked_problems
+
+
+def build_group_linked_names(group_names):
+    """
+    Add a link for RST tables if there is a website or similar describing the group.
+
+    @param group_names :: names as plain text
+
+    @returns :: names with RST links if available
+    """
     linked_names = []
     for name in group_names:
-        # This should be tidied up
+        # This should be tidied up. We currently don't have links for groups other than NIST
         if 'NIST' in name:
             linked = "`{0} <http://www.itl.nist.gov/div898/strd/nls/nls_main.shtml>`__".format(name)
         else:
@@ -169,10 +165,20 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
 
         linked_names.append(linked)
 
+    return linked_names
+
+def print_overall_results_table(minimizers, group_results, problems, group_names, use_errors,
+                                simple_text=True, rst=False):
+
+    groups_norm_acc, groups_norm_runtime = postproc.calc_summary_table(minimizers, group_results)
+
+    grp_linked_names = build_group_linked_names(group_names)
+
     header = '**************** Accuracy ******** \n\n'
     print(header)
-    tbl_all_summary_acc = build_rst_table(minimizers, linked_names, groups_norm_acc,
-                                          comparison_type='summary', using_errors=use_errors)
+    tbl_all_summary_acc = build_rst_table(minimizers, grp_linked_names, groups_norm_acc,
+                                          comparison_type='summary', comparison_dim='accuracy',
+                                          using_errors=use_errors)
     print(tbl_all_summary_acc)
     fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
              format(weighted=weighted_suffix_string(use_errors),
@@ -182,8 +188,9 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
 
     header = '**************** Runtime ******** \n\n'
     print(header)
-    tbl_all_summary_runtime = build_rst_table(minimizers, linked_names, groups_norm_runtime,
-                                              comparison_type='summary', using_errors=use_errors)
+    tbl_all_summary_runtime = build_rst_table(minimizers, grp_linked_names, groups_norm_runtime,
+                                              comparison_type='summary', comparison_dim='runtime',
+                                              using_errors=use_errors)
     print(tbl_all_summary_runtime)
     fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
              format(weighted=weighted_suffix_string(use_errors),
@@ -242,7 +249,8 @@ def calc_cell_len_rst_table(columns_txt, items_link):
 
     return cell_len
 
-def build_rst_table(columns_txt, rows_txt, cells, comparison_type, using_errors, color_scale=None):
+def build_rst_table(columns_txt, rows_txt, cells, comparison_type, comparison_dim,
+                    using_errors, color_scale=None):
     """"
     Builds an RST table as a string, given the list of column and row headers,
     and a 2D numpy array with values for the cells.
@@ -254,6 +262,9 @@ def build_rst_table(columns_txt, rows_txt, cells, comparison_type, using_errors,
     @param cells :: a 2D numpy array with as many rows as items have been given
     in rows_txt, and as many columns as items have been given in columns_txt
 
+    @param comparison_type :: whether this is a 'summary', or a full 'accuracy', or 'runtime'
+                              table.
+    @param comparison_dim :: dimension (accuracy / runtime)
     @param using_errors :: whether this comparison uses errors in the cost function
     (weighted or unweighted), required to link the table properly
 
@@ -262,53 +273,14 @@ def build_rst_table(columns_txt, rows_txt, cells, comparison_type, using_errors,
     """
     columns_txt = display_name_for_minimizers(columns_txt)
 
-    #items_link = build_items_links(comparison_type, )
-
-    # TO-DO: this doesn't belong in here. Tidy this up and get it out of here!
-    # links for the cells of the summary tables (to the detailed results
-    if 'summary' == comparison_type and using_errors:
-        items_link = [ 'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_lower',
-                       'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_average',
-                       'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_higher',
-                       'Minimizers_unweighted_comparison_in_terms_of_runtime_neutron_data',
-                       'Minimizers_unweighted_comparison_in_terms_of_runtime_cutest'
-                     ]
-    elif 'summary' == comparison_type and not using_errors:
-        items_link = [ 'Minimizers_weighted_comparison_in_terms_of_accuracy_nist_lower',
-                       'Minimizers_weighted_comparison_in_terms_of_accuracy_nist_average',
-                       'Minimizers_weighted_comparison_in_terms_of_accuracy_nist_higher',
-                       'Minimizers_weighted_comparison_in_terms_of_accuracy_neutron_data',
-                       'Minimizers_weighted_comparison_in_terms_of_accuracy_cutest'
-                     ]
-    elif 'accuracy' == comparison_type or 'runtime' == comparison_type:
-        if using_errors:
-            items_link = 'FittingMinimizersComparisonDetailedWithWeights'
-        else:
-            items_link = 'FittingMinimizersComparisonDetailed'
-    else:
-        items_link = ''
+    items_link = build_items_links(comparison_type, comparison_dim, using_errors)
 
     cell_len = calc_cell_len_rst_table(columns_txt, items_link)
 
     # The first column tends to be disproportionately long if it has a link
-    first_col_len = cell_len
-    for row_name in rows_txt:
-        name_len = len(row_name)
-        if name_len > first_col_len:
-            first_col_len = name_len
+    first_col_len = calc_first_col_len(cell_len, rows_txt)
 
-    tbl_header_top = '+'
-    tbl_header_text = '|'
-    tbl_header_bottom = '+'
-
-    # First column in the header for the name of the test or statistics
-    tbl_header_top += '-'.ljust(first_col_len, '-') + '+'
-    tbl_header_text += ' '.ljust(first_col_len, ' ') + '|'
-    tbl_header_bottom += '='.ljust(first_col_len,'=') + '+'
-    for col_name in columns_txt:
-        tbl_header_top += '-'.ljust(cell_len, '-') + '+'
-        tbl_header_text += col_name.ljust(cell_len, ' ') + '|'
-        tbl_header_bottom += '='.ljust(cell_len,'=') + '+'
+    tbl_header_top, tbl_header_text, tbl_header_bottom = build_rst_table_header_chunks(first_col_len, cell_len)
 
     tbl_header = tbl_header_top + '\n' + tbl_header_text + '\n' + tbl_header_bottom + '\n'
     # the footer is in general the delimiter between rows, including the last one
@@ -330,6 +302,70 @@ def build_rst_table(columns_txt, rows_txt, cells, comparison_type, using_errors,
         tbl_body += tbl_footer
 
     return tbl_header + tbl_body
+
+def build_rst_table_header_chunks(first_col_len, cell_len):
+    """
+    Prepare the horizontal and vertical lines in the RST headers.
+
+    @param first_col_len :: length (in characters) of the first column
+    @param cell_len :: length of all other cells
+    """
+    tbl_header_top = '+'
+    tbl_header_text = '|'
+    tbl_header_bottom = '+'
+
+    # First column in the header for the name of the test or statistics
+    tbl_header_top += '-'.ljust(first_col_len, '-') + '+'
+    tbl_header_text += ' '.ljust(first_col_len, ' ') + '|'
+    tbl_header_bottom += '='.ljust(first_col_len,'=') + '+'
+    for col_name in columns_txt:
+        tbl_header_top += '-'.ljust(cell_len, '-') + '+'
+        tbl_header_text += col_name.ljust(cell_len, ' ') + '|'
+        tbl_header_bottom += '='.ljust(cell_len,'=') + '+'
+
+    return tbl_header_top, tbl_header_text, tbl_header_bottom
+
+def calc_first_col_len(cell_len, rows_txt):
+    first_col_len = cell_len
+    for row_name in rows_txt:
+        name_len = len(row_name)
+        if name_len > first_col_len:
+            first_col_len = name_len
+
+    return first_col_len
+
+def build_items_links(comparison_type, comparison_dim, using_errors):
+    """
+    Figure out the links from rst table cells to other pages/sections of pages.
+
+    @param comparison_type :: whether this is a 'summary', or a full 'accuracy', or 'runtime' table.
+    @param comparison_dim :: dimension (accuracy / runtime)
+    @param using_errors :: whether using observational errors in cost functions
+
+    @returns :: link or links to use from table cells.
+    """
+    dim_suffix = comparison_dim
+    if 'summary' == comparison_type:
+        items_link = [ 'Minimizers_{0}_comparison_in_terms_of_{1}_nist_lower'.
+                       format(weighted_suffix_string(using_errors), comparison_dim),
+                       'Minimizers_{0}_comparison_in_terms_of_{1}_nist_average'.
+                       format(weighted_suffix_string(using_errors), comparison_dim),
+                       'Minimizers_{0}_comparison_in_terms_of_{1}_nist_higher'.
+                       format(weighted_suffix_string(using_errors), comparison_dim),
+                       'Minimizers_{0}_comparison_in_terms_of_{1}_cutest'.
+                       format(weighted_suffix_string(using_errors), comparison_dim),
+                       'Minimizers_{0}_comparison_in_terms_of_{1}_neutron_data'.
+                       format(weighted_suffix_string(using_errors), comparison_dim),
+                     ]
+    elif 'accuracy' == comparison_type or 'runtime' == comparison_type:
+        if using_errors:
+            items_link = 'FittingMinimizersComparisonDetailedWithWeights'
+        else:
+            items_link = 'FittingMinimizersComparisonDetailed'
+    else:
+        items_link = ''
+
+    return items_link
 
 def format_cell_value_rst(value, width, color_scale=None, items_link=None):
     """
