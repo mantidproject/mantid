@@ -20,7 +20,6 @@ using BConstraint = Mantid::CurveFitting::Constraints::BoundaryConstraint;
 
 class InelasticIsoRotDiffTest : public CxxTest::TestSuite {
 public:
-
   void test_categories() {
     InelasticIsoRotDiff func;
     const std::vector<std::string> categories = func.categories();
@@ -38,8 +37,8 @@ public:
     TS_ASSERT_EQUALS(func->getParameter("Radius"), 1.06);
     TS_ASSERT_EQUALS(func->getParameter("Tau"), 2.03);
     TS_ASSERT_EQUALS(func->getParameter("Centre"), 0.0004);
-    TS_ASSERT_EQUALS(func->getAttribute("Q").asDouble(),0.7);
-    TS_ASSERT_EQUALS(func->getAttribute("N").asInt(),9);
+    TS_ASSERT_EQUALS(func->getAttribute("Q").asDouble(), 0.7);
+    TS_ASSERT_EQUALS(func->getAttribute("N").asInt(), 9);
   }
 
   /**
@@ -50,10 +49,11 @@ public:
     std::vector<std::string> parameters{"Height", "Radius", "Tau"};
     for (auto parameter : parameters) {
       auto i = func->parameterIndex(parameter);
-      auto constraint = static_cast<BConstraint*>(func->getConstraint(i));
+      auto constraint = static_cast<BConstraint *>(func->getConstraint(i));
       TS_ASSERT(constraint);
       TS_ASSERT_EQUALS(constraint->hasLower(), true);
-      TS_ASSERT_EQUALS(constraint->lower(), std::numeric_limits<double>::epsilon());
+      TS_ASSERT_EQUALS(constraint->lower(),
+                       std::numeric_limits<double>::epsilon());
     }
   }
 
@@ -74,9 +74,9 @@ public:
    */
   void test_normalization() {
     auto func = createTestInelasticIsoRotDiff();
-    func->setParameter("Tau", 50.0); // make it peaky
+    func->setParameter("Tau", 50.0);  // make it peaky
     func->setAttributeValue("N", 25); // more terms for more precission
-    double dE(0.0001);               // dE is 1micro-eV
+    double dE(0.0001);                // dE is 1micro-eV
     const size_t nData(20000);
     // Create the domain of energy values
     std::vector<double> xValues(nData, 0);
@@ -92,7 +92,7 @@ public:
                    std::bind1st(std::multiplies<double>(), dE));
     auto integral =
         std::accumulate(calculatedValues.begin(), calculatedValues.end(), 0.0);
-    std::cout << integral <<std::endl;
+    std::cout << integral << std::endl;
     TS_ASSERT_DELTA(integral, 0.147393, 1e-5);
   }
 
@@ -105,14 +105,15 @@ private:
     }
   };
 
-  boost::shared_ptr<TestableInelasticIsoRotDiff> createTestInelasticIsoRotDiff() {
+  boost::shared_ptr<TestableInelasticIsoRotDiff>
+  createTestInelasticIsoRotDiff() {
     auto func = boost::make_shared<TestableInelasticIsoRotDiff>();
     func->initialize();
     func->setParameter("Height", 0.88);
     func->setParameter("Radius", 1.06); // Angstrom
-    func->setParameter("Tau", 2.03);  // picosecond
+    func->setParameter("Tau", 2.03);    // picosecond
     func->setParameter("Centre", 0.0004);
-    func->setAttributeValue("Q", 0.7);    // inverse Angstrom
+    func->setAttributeValue("Q", 0.7); // inverse Angstrom
     func->setAttributeValue("N", 9);
     return func;
   }

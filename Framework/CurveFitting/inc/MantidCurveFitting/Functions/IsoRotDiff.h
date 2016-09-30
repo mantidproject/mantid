@@ -71,7 +71,6 @@ private:
       m_elastic; // elastic intensity of the DiffSphere structure factor
   boost::shared_ptr<Mantid::CurveFitting::Functions::InelasticIsoRotDiff>
       m_inelastic; // inelastic intensity of the DiffSphere structure factor
-
 };
 
 } // namespace Functions

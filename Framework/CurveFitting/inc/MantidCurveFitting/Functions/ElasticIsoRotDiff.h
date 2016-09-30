@@ -61,7 +61,4 @@ public:
 } // namespace CurveFitting
 } // namespace Mantid
 
-
 #endif // MANTID_ELASTICISOROTDIFF_H_
-
-

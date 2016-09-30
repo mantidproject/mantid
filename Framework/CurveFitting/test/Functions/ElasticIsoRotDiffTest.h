@@ -20,12 +20,11 @@ using BConstraint = Mantid::CurveFitting::Constraints::BoundaryConstraint;
 
 class ElasticIsoRotDiffTest : public CxxTest::TestSuite {
 public:
-
   void test_categories() {
     ElasticIsoRotDiff func;
     const std::vector<std::string> categories = func.categories();
     TS_ASSERT(categories.size() == 1);
-   TS_ASSERT(categories[0] == "QuasiElastic");
+    TS_ASSERT(categories[0] == "QuasiElastic");
   }
 
   /**
@@ -37,7 +36,7 @@ public:
     TS_ASSERT_EQUALS(func->getParameter("Height"), 0.88);
     TS_ASSERT_EQUALS(func->getParameter("Radius"), 1.06);
     TS_ASSERT_EQUALS(func->getParameter("Centre"), 0.0004);
-    TS_ASSERT_EQUALS(func->getAttribute("Q").asDouble(),0.7);
+    TS_ASSERT_EQUALS(func->getAttribute("Q").asDouble(), 0.7);
   }
 
   /**
@@ -48,16 +47,17 @@ public:
     std::vector<std::string> parameters{"Height", "Radius"};
     for (auto parameter : parameters) {
       auto i = func->parameterIndex(parameter);
-      auto constraint = static_cast<BConstraint*>(func->getConstraint(i));
+      auto constraint = static_cast<BConstraint *>(func->getConstraint(i));
       TS_ASSERT(constraint);
       TS_ASSERT_EQUALS(constraint->hasLower(), true);
-      TS_ASSERT_EQUALS(constraint->lower(), std::numeric_limits<double>::epsilon());
+      TS_ASSERT_EQUALS(constraint->lower(),
+                       std::numeric_limits<double>::epsilon());
     }
   }
 
- /**
-  * @brief Evaluate the prefactor
-  */
+  /**
+   * @brief Evaluate the prefactor
+   */
   void test_function_gives_expected_prefactor() {
     auto func = createTestElasticIsoRotDiff();
     TS_ASSERT_DELTA(func->HeightPrefactor(), 0.829433650, 1e-8);
@@ -77,7 +77,7 @@ private:
     func->setParameter("Height", 0.88);
     func->setParameter("Radius", 1.06); // 1Angstrom
     func->setParameter("Centre", 0.0004);
-    func->setAttributeValue("Q", 0.7);    // 1Angstrom^{-1}
+    func->setAttributeValue("Q", 0.7); // 1Angstrom^{-1}
     return func;
   }
 };

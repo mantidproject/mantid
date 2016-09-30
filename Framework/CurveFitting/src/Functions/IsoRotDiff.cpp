@@ -46,8 +46,8 @@ void IsoRotDiff::trickleDownAttribute(const std::string &name) {
 /**
  * @brief Overwrite attributes of member functions with same name
  */
-void IsoRotDiff::declareAttribute(
-    const std::string &name, const Attribute &defaultValue) {
+void IsoRotDiff::declareAttribute(const std::string &name,
+                                  const Attribute &defaultValue) {
   ImmutableCompositeFunction::declareAttribute(name, defaultValue);
   this->trickleDownAttribute(name);
 }
@@ -69,7 +69,7 @@ void IsoRotDiff::init() {
   m_elastic = boost::dynamic_pointer_cast<ElasticIsoRotDiff>(
       API::FunctionFactory::Instance().createFunction("ElasticIsoRotDiff"));
   this->addFunction(m_elastic);
-    m_inelastic = boost::dynamic_pointer_cast<InelasticIsoRotDiff>(
+  m_inelastic = boost::dynamic_pointer_cast<InelasticIsoRotDiff>(
       API::FunctionFactory::Instance().createFunction("InelasticIsoRotDiff"));
   this->addFunction(m_inelastic);
 
