@@ -48,14 +48,13 @@ Accuracy for individual NIST problems, "higher" difficulty
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_acc_nist_higher.txt
 
-Accuracy for individual Neutron Data problems
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_acc_neutron_data.txt
-
 Accuracy for individual "CUTEst" problems
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_acc_cutest.txt
 
+Accuracy for individual Neutron Data problems
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_acc_neutron_data.txt
 
 .. _Minimizers_weighted_comparison_in_terms_of_run_time:
 
@@ -74,10 +73,16 @@ Run time for individual NIST problems, "average" difficulty
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_runtime_nist_average.txt
 
-Run time for individual Neutron Data problems
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_runtime_neutron_data.txt
+
+Run time for individual NIST problems, "higher" difficulty
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_runtime_nist_higher.txt
 
 Run time for individual "CUTEst" problems
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_runtime_cutest.txt
+
+Run time for individual Neutron Data problems
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. include:: minimizers_comparison/v3.8.0/comparison_weighted_v3.8_runtime_neutron_data.txt
+
