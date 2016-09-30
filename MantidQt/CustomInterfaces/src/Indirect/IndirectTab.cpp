@@ -228,7 +228,7 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int wsIndex) {
   pyInput += workspaceNames.join("','");
   pyInput += "'], ";
   pyInput += QString::number(wsIndex);
-  pyInput += ")\n";
+  pyInput += ", error_bars = True)\n";
 
   m_pythonRunner.runPythonCode(pyInput);
 }
@@ -272,7 +272,7 @@ void IndirectTab::plotSpectrum(const QStringList &workspaceNames, int specStart,
   pyInput += QString::number(specStart);
   pyInput += ",";
   pyInput += QString::number(specEnd + 1);
-  pyInput += "))\n";
+  pyInput += "), error_bars = True)\n";
 
   m_pythonRunner.runPythonCode(pyInput);
 }
@@ -324,7 +324,7 @@ void IndirectTab::plotSpectra(const QStringList &workspaceNames,
     pyInput += " ,";
     pyInput += QString::number(wsIndices[i]);
   }
-  pyInput += "])\n";
+  pyInput += "], error_bars = True)\n";
   m_pythonRunner.runPythonCode(pyInput);
 }
 
@@ -493,7 +493,7 @@ double IndirectTab::getEFixed(Mantid::API::MatrixWorkspace_sptr ws) {
 }
 
 /**
- * Checks the workspace's intrument for a resolution parameter to use as
+ * Checks the workspace's instrument for a resolution parameter to use as
  * a default for the energy range on the mini plot
  *
  * @param workspace :: Name of the workspace to use
@@ -509,7 +509,7 @@ bool IndirectTab::getResolutionRangeFromWs(const QString &workspace,
 }
 
 /**
- * Checks the workspace's intrument for a resolution parameter to use as
+ * Checks the workspace's instrument for a resolution parameter to use as
  * a default for the energy range on the mini plot
  *
  * @param ws :: Pointer to the workspace to use
@@ -586,7 +586,7 @@ QString IndirectTab::runPythonCode(QString code, bool no_output) {
  * @param workspaceName The name of the workspace to look for
  * @param plotting if true use plotting error message, false use saving error
  * message
- * @return False if no workpsace found, True if workspace found
+ * @return False if no workspace found, True if workspace found
  */
 bool IndirectTab::checkADSForPlotSaveWorkspace(const std::string &workspaceName,
                                                const bool &plotting) {
