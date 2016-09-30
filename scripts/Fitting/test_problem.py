@@ -37,4 +37,6 @@ class FittingTestProblem:
         self.data_pattern_out = None
         # The Mantid E
         self.data_pattern_obs_errors = None
+        # The 'certified' or reference sum of squares, if provided (for example
+        # in NIST tests).
         self.ref_residual_sum_sq = None

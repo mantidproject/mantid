@@ -76,9 +76,9 @@ def do_regression_fitting_benchmark_block(benchmark_problems, minimizers, use_er
     results_per_problem = []
     for prob_file in benchmark_problems:
         try:
-            prob = iparsing.parse_nist_fitting_problem_file(prob_file)
-        except AttributeError, RuntimeError:
-            prob = iparsing.parse_neutron_data_fitting_problem_file(prob_file)
+            prob = iparsing.load_nist_fitting_problem_file(prob_file)
+        except (AttributeError, RuntimeError):
+            prob = iparsing.load_neutron_data_fitting_problem_file(prob_file)
 
         print("* Testing fitting for problem definition file {0}".format(prob_file))
         print("* Testing fitting of problem {0}".format(prob.name))
@@ -172,11 +172,7 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors=True
             result.runtime = t_end - t_start
             print("Result object: {0}".format(result))
             results_problem_start.append(result)
-        # This would be meaningless, because not scaled/divided by n
-        #avg_sum_sq = np.average([res.sum_err_sq for res in result_fits_minimizer])
-        #avg_sum_sq = np.nanmean([res.sum_err_sq for res in result_fits_minimizer])
-        #print ("Results for this minimizer '{0}', avg sum errors sq: {1}".
-        #       format(minimizer_name, avg_sum_sq))
+
         results_fit_problem.append(results_problem_start)
 
     return results_fit_problem
@@ -204,6 +200,11 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
         # When using 'Least squares' (weighted by errors), ignore nans and zero errors, but don't
         # ignore them when using 'Unweighted least squares' as that would ignore all values!
         ignore_invalid = cost_function == 'Least squares'
+
+        # Note the ugly adhoc exception:
+        if 'WISH17701' in prob.name:
+            ignore_invalid = False
+
         status, chi2, covar_tbl, param_tbl, fit_wks = msapi.Fit(function, wks, Output='ws_fitting_test',
                                                                 Minimizer=minimizer,
                                                                 CostFunction=cost_function,

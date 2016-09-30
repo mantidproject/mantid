@@ -23,6 +23,8 @@ information into problem objects
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
+from __future__ import (absolute_import, division, print_function)
+
 import os
 import re
 
@@ -30,7 +32,16 @@ import numpy as np
 
 import test_problem
 
+def load_nist_fitting_problem_file(problem_filename):
+    with open(problem_filename) as spec_file:
+        return parse_nist_file(spec_file)
+
 def parse_data_pattern(data_text):
+    """
+    Parses the data part of a NIST test problem file (the columns of
+    values) and produces a numpy array with the data.
+
+    """
     if not data_text:
         return None
 
@@ -69,21 +80,16 @@ def parse_equation(eq_text):
         raise RuntimeError("Unrecognized equation syntax when trying to parse a NIST "
                            "equation: " + equation_text)
 
-    print "groups captured: ", match.groups()
-    print "group 0: ", match.group(0)
-
     # 'NIST equation syntax' => muparser syntax
     # brackets for muparser
     equation = equation.replace('[', '(')
     equation = equation.replace(']', ')')
     equation = equation.replace('arctan', 'atan')
     equation = equation.replace('**', '^')
-    print "group 2: ", equation
     return equation
 
 def parse_starting_values(lines):
     starting_vals = []
-    print "parse starting values"
     for line in lines:
         if not line.strip() or line.startswith('Residual'):
             break
@@ -104,21 +110,51 @@ def parse_starting_values(lines):
     return starting_vals
 
 def parse_nist_file(spec_file):
-    # spec_text = spec_file.read()
-    # print problem_text
+    """
+    Produce a fitting test problem definition object from a NIST text file.
 
-    #data_lines = re.search(r'Data.+\(lines[[:space:]]+(\d+).+to.+(\d+)\)', problem_text)
-    #print "data_lines: " , data_lines.group(1)
+    @param spec_file :: input file, as a standard NIST text (.dat) file
+    """
 
     lines = spec_file.readlines()
+    equation_text, data_pattern_text, starting_values, residual_sum_sq = parse_nist_file_line_by_line(lines)
 
-    idx = 0
-    data_idx = 0
-    data_pattern_text = []
+    if not  equation_text or not data_pattern_text:
+        raise RuntimeError('Could not find the equation and data after parsing the lines of this file: {0}'.
+                           format(spec_file.name))
+
+    data_pattern = parse_data_pattern(data_pattern_text)
+    parsed_eq = parse_equation(equation_text)
+
+    prob = test_problem.FittingTestProblem()
+    prob.name = os.path.basename(spec_file.name)
+    prob.linked_name = ("`{0} <http://www.itl.nist.gov/div898/strd/nls/data/{1}.shtml>`__".
+                        format(prob.name, prob.name.lower()))
+    prob.equation = parsed_eq
+    prob.starting_values = starting_values
+    prob.data_pattern_in = data_pattern[:, 1:]
+    prob.data_pattern_out = data_pattern[:, 0]
+    prob.ref_residual_sum_sq = residual_sum_sq
+
+    return prob
+
+
+def parse_nist_file_line_by_line(lines):
+    """
+    Get several relevant pieces of information from the lines of a NIST problem file
+    This parser is far from great but it does the job.
+
+    @param lines :: lines as directly loaded from a file
+
+    @returns :: the equation string, the data string, the starting values, and the
+    certified chi^2, as found in the text lines
+    """
+
+    idx, data_idx = 0, 0
+    data_pattern_text = None
     residual_sum_sq = 0
     equation_text = None
     starting_values = None
-
     # The first line should be:
     # NIST/ITL StRD
     while idx < len(lines):
@@ -129,8 +165,6 @@ def parse_nist_file(spec_file):
             continue
 
         if line.startswith('Model:'):
-            print "Found model, first line: {0}".format(line)
-
             # Would skip number of parameters, and empty line, but not
             # adequate for all test problems
             # idx += 3
@@ -139,76 +173,49 @@ def parse_nist_file(spec_file):
             while (not re.match(r'\s*y\s*=(.+)', lines[idx])\
                    and not re.match(r'\s*log\[y\]\s*=(.+)', lines[idx]))\
                    and idx < len(lines): # [\s*\+\s*e]
-                print "Line didn't match: ", lines[idx]
                 idx += 1
             # Next non-empty lines are assumed to continue the equation
             equation_text = ''
             while lines[idx].strip():
                 equation_text += lines[idx].strip()
                 idx += 1
-            print "Equation lines found: {0}".format(equation_text)
 
         elif 'Starting values' in line or 'Starting Values' in line:
             # 1 empty line, and one heading line before values
             idx += 2
             starting_values = parse_starting_values(lines[idx:])
             idx += len(starting_values)
-            print "Starting values, got: ", starting_values
 
         elif line.startswith('Residual Sum of Squares'):
             residual_sum_sq = float(line.split()[4])
 
         elif line.startswith('Data:'):
             if 0 == data_idx:
-                print "First data, line: {0}".format(line)
                 data_idx += 1
             elif 1 == data_idx:
-                print "Found second data, idx: {0}".format(idx)
                 data_pattern_text = lines[idx:]
                 idx = len(lines)
             else:
                 raise RuntimeError('Error parsing data line: {}'.format(line))
         else:
-            print "unknown line: {0}".format(line)
+            print("unknown line in supposedly NIST test file, ignoring: {0}".format(line))
 
+    return equation_text, data_pattern_text, starting_values, residual_sum_sq
 
-    # print "Data pattern, text: {0}".format(data_pattern_text)
-    data_pattern = parse_data_pattern(data_pattern_text)
-    #print "data_pattern: ", data_pattern
-    print "data_pattern_shape: ", data_pattern.shape
-    res_sum_sq = residual_sum_sq
-    print "Residual sum of squares: {0}".format(res_sum_sq)
-    parsed_eq = parse_equation(equation_text)
-    print "Parsed equation: {0}".format(parsed_eq)
-    print "Starting values: {0}".format(starting_values)
-    prob = test_problem.FittingTestProblem()
-    prob.name = os.path.basename(spec_file.name)
-    prob.linked_name = ("`{0} <http://www.itl.nist.gov/div898/strd/nls/data/{1}.shtml>`__".
-                        format(prob.name, prob.name.lower()))
-    prob.equation = parsed_eq
-    prob.starting_values = starting_values
-    prob.data_pattern_in = data_pattern[:, 1:]
-    prob.data_pattern_out = data_pattern[:, 0]
-    prob.ref_residual_sum_sq = res_sum_sq
-
-    return prob
-
-def parse_nist_fitting_problem_file(problem_filename):
-    with open(problem_filename) as spec_file:
-        return parse_nist_file(spec_file)
-
-def parse_neutron_data_fitting_problem_file(fname):
+def load_neutron_data_fitting_problem_file(fname):
     """
-    Builds a FittingTestProblem object from a file. The file is expected to
+    Builds a FittingTestProblem object from a text file. The file is expected to
     have a list of variables (input filename, name, equation, etc.)
 
     Other alternatives could be ConfigParser (ini format, parser not extermely
     good), or JSON.
 
+    @param fname :: name of the file to load
     """
-    prob = test_problem.FittingTestProblem()
     with open(fname) as probf:
         entries = get_neutron_data_problem_entries(probf)
+
+        prob = test_problem.FittingTestProblem()
         get_fitting_neutron_data(entries['input_file'], prob)
         prob.name = entries['name']
         prob.equation = entries['function']
@@ -241,8 +248,11 @@ def get_neutron_data_problem_entries(problem_file):
 
 def get_fitting_neutron_data(fname, prob):
     """
-    Load the X-Y data from a file and get the values into a fitting problem
+    Load the X-Y-E data from a file and put the values into a fitting problem
     definition object.
+
+    @param fname :: file name to load (using mantid loaders)
+    @param prob :: problem definition to populate with X-Y-E data.
     """
     import mantid.simpleapi as msapi
 
