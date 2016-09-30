@@ -128,16 +128,16 @@ void GetEiMonDet2::init() {
   auto monitorValidator = boost::make_shared<CompositeValidator>();
   monitorValidator->add(mandatoryIntProperty);
   monitorValidator->add(mustBePositiveInt);
-  declareProperty(PropertyNames::MONITOR, EMPTY_INT(),
-                      monitorValidator,
+  declareProperty(PropertyNames::MONITOR, EMPTY_INT(), monitorValidator,
                   "Monitor's detector id/spectrum number/workspace index.");
   declareProperty(PropertyNames::PULSE_INTERVAL, EMPTY_DBL(),
                   "Interval between neutron pulses, in microseconds.");
   declareProperty(
       PropertyNames::NOMINAL_ENERGY, EMPTY_DBL(), mustBePositiveDouble,
       "Incident energy guess. Taken from the sample logs, if not specified.");
-  declareProperty(PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositiveDouble,
-                  "Calculated incident energy.", Direction::Output);
+  declareProperty(PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(),
+                  mustBePositiveDouble, "Calculated incident energy.",
+                  Direction::Output);
 }
 
 /** Executes the algorithm.

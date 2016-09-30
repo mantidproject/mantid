@@ -1,0 +1,37 @@
+From cf655f5fef5161be2ecbf3ae987d48d6149c6cd1 Mon Sep 17 00:00:00 2001
+From: mantid-builder <mantid-buildserver@mantidproject.org>
+Date: Fri, 30 Sep 2016 08:03:28 -0400
+Subject: [PATCH] clang-format PR17626 eb1cdbc
+
+---
+ Framework/Algorithms/src/GetEiMonDet2.cpp | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/Framework/Algorithms/src/GetEiMonDet2.cpp b/Framework/Algorithms/src/GetEiMonDet2.cpp
+index fce5aa5..e71ec99 100644
+--- a/Framework/Algorithms/src/GetEiMonDet2.cpp
++++ b/Framework/Algorithms/src/GetEiMonDet2.cpp
+@@ -128,16 +128,16 @@ void GetEiMonDet2::init() {
+   auto monitorValidator = boost::make_shared<CompositeValidator>();
+   monitorValidator->add(mandatoryIntProperty);
+   monitorValidator->add(mustBePositiveInt);
+-  declareProperty(PropertyNames::MONITOR, EMPTY_INT(),
+-                      monitorValidator,
++  declareProperty(PropertyNames::MONITOR, EMPTY_INT(), monitorValidator,
+                   "Monitor's detector id/spectrum number/workspace index.");
+   declareProperty(PropertyNames::PULSE_INTERVAL, EMPTY_DBL(),
+                   "Interval between neutron pulses, in microseconds.");
+   declareProperty(
+       PropertyNames::NOMINAL_ENERGY, EMPTY_DBL(), mustBePositiveDouble,
+       "Incident energy guess. Taken from the sample logs, if not specified.");
+-  declareProperty(PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(), mustBePositiveDouble,
+-                  "Calculated incident energy.", Direction::Output);
++  declareProperty(PropertyNames::INCIDENT_ENERGY, EMPTY_DBL(),
++                  mustBePositiveDouble, "Calculated incident energy.",
++                  Direction::Output);
+ }
+ 
+ /** Executes the algorithm.
+-- 
+1.9.1
+
