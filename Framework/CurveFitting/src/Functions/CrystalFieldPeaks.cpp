@@ -5,9 +5,6 @@
 #include <functional>
 #include <map>
 
-// Conversion factor from barn to milibarn per steradian (=1000/4pi)
-#define BARNTOMBSR 79.577471546
-
 namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
@@ -61,7 +58,7 @@ void CrystalFieldPeaks::functionGeneral(const API::FunctionDomainGeneral &,
   }
 
   m_defaultDomainSize = n;
-  double scaling = getParameter("IntensityScaling") * BARNTOMBSR;
+  double scaling = getParameter("IntensityScaling");
 
   for (size_t i = 0; i < n; ++i) {
     values.setCalculated(i, eExcitations.get(i));

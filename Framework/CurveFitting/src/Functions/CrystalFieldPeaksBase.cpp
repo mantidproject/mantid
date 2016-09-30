@@ -274,7 +274,7 @@ CrystalFieldPeaksBase::CrystalFieldPeaksBase()
   declareAttribute("Ion", Attribute("Ce"));
   declareAttribute("Symmetry", Attribute("Ci"));
   declareAttribute("ToleranceEnergy", Attribute(1.0e-10));
-  declareAttribute("ToleranceIntensity", Attribute(1.0e-3));
+  declareAttribute("ToleranceIntensity", Attribute(1.0e-1));
   declareAttribute("MaxPeakCount", Attribute(0));
 
   declareParameter("BmolX", 0.0, "The x-component of the molecular field.");
