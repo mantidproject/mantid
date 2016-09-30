@@ -13,19 +13,20 @@
 class MantidGroupPlotGenerator {
 public:
   /// Constructor
-  explicit MantidGroupPlotGenerator(MantidQt::MantidWidgets::MantidDisplayBase *mantidUI);
+  explicit MantidGroupPlotGenerator(
+      MantidQt::MantidWidgets::MantidDisplayBase *mantidUI);
 
   /// Plots a surface from the given workspace group
   void plotSurface(
       const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
-      const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface
-          &options) const;
+      const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
+          options) const;
 
   /// Plots a contour plot from the given workspace group
   void plotContour(
       const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
-      const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface
-          &options) const;
+      const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
+          options) const;
 
   /// Tests if WorkspaceGroup contains only MatrixWorkspaces
   static bool groupIsAllMatrixWorkspaces(
@@ -33,8 +34,8 @@ public:
 
   /// Validates the given options and returns an error string
   static std::string validatePlotOptions(
-      MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface
-          &options,
+      MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
+          options,
       int nWorkspaces);
 
 private:
@@ -42,16 +43,16 @@ private:
   enum class Type { Surface, Contour };
 
   /// Plots a graph from the given workspace group
-  void
-  plot(Type graphType, const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
-       const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface
-           &options) const;
+  void plot(
+      Type graphType, const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
+      const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
+          options) const;
 
   /// Creates a single workspace to plot from
   const Mantid::API::MatrixWorkspace_sptr createWorkspaceForGroupPlot(
       boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup,
-      const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface
-          &options,
+      const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
+          options,
       QString *xAxisTitle) const;
 
   /// Returns a single log value from the given workspace

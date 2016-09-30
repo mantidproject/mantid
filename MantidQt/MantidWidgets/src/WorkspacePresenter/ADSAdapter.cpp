@@ -17,41 +17,31 @@ ADSAdapter::ADSAdapter()
       m_ungroupworkspaceObserver(*this, &ADSAdapter::handleUnGroupWorkspace),
       m_workspaceGroupUpdateObserver(*this,
                                      &ADSAdapter::handleWorkspaceGroupUpdate) {
-
-  AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
-  dataStore.notificationCenter.addObserver(m_addObserver);
-  dataStore.notificationCenter.addObserver(m_deleteObserver);
-  dataStore.notificationCenter.addObserver(m_clearADSObserver);
-  dataStore.notificationCenter.addObserver(m_renameObserver);
-  dataStore.notificationCenter.addObserver(m_groupworkspacesObserver);
-  dataStore.notificationCenter.addObserver(m_ungroupworkspaceObserver);
-  dataStore.notificationCenter.addObserver(m_workspaceGroupUpdateObserver);
+  // Register all observers.
+  auto &nc = AnalysisDataService::Instance().notificationCenter;
+  nc.addObserver(m_addObserver);
+  nc.addObserver(m_deleteObserver);
+  nc.addObserver(m_clearADSObserver);
+  nc.addObserver(m_renameObserver);
+  nc.addObserver(m_groupworkspacesObserver);
+  nc.addObserver(m_ungroupworkspaceObserver);
+  nc.addObserver(m_workspaceGroupUpdateObserver);
 }
 
 ADSAdapter::~ADSAdapter() {
-  Mantid::API::AnalysisDataService::Instance()
-      .notificationCenter.removeObserver(m_addObserver);
-  Mantid::API::AnalysisDataService::Instance()
-      .notificationCenter.removeObserver(m_deleteObserver);
-  Mantid::API::AnalysisDataService::Instance()
-      .notificationCenter.removeObserver(m_clearADSObserver);
-  Mantid::API::AnalysisDataService::Instance()
-      .notificationCenter.removeObserver(m_renameObserver);
-  Mantid::API::AnalysisDataService::Instance()
-      .notificationCenter.removeObserver(m_groupworkspacesObserver);
-  Mantid::API::AnalysisDataService::Instance()
-      .notificationCenter.removeObserver(m_ungroupworkspaceObserver);
-  Mantid::API::AnalysisDataService::Instance()
-      .notificationCenter.removeObserver(m_workspaceGroupUpdateObserver);
+  // remove all observers
+  auto &nc = AnalysisDataService::Instance().notificationCenter;
+  nc.removeObserver(m_addObserver);
+  nc.removeObserver(m_deleteObserver);
+  nc.removeObserver(m_clearADSObserver);
+  nc.removeObserver(m_renameObserver);
+  nc.removeObserver(m_groupworkspacesObserver);
+  nc.removeObserver(m_ungroupworkspaceObserver);
+  nc.removeObserver(m_workspaceGroupUpdateObserver);
 }
 
 void ADSAdapter::registerPresenter(Presenter_wptr presenter) {
   m_presenter = std::move(presenter);
-}
-
-Mantid::API::Workspace_sptr
-ADSAdapter::getWorkspace(const std::string &wsname) const {
-  return AnalysisDataService::Instance().retrieve(wsname);
 }
 
 bool ADSAdapter::doesWorkspaceExist(const std::string &wsname) const {
@@ -63,6 +53,7 @@ ADSAdapter::topLevelItems() const {
   return AnalysisDataService::Instance().topLevelItems();
 }
 
+/// Locks the presenter as shared_ptr for use internally.
 Presenter_sptr ADSAdapter::lockPresenter() {
   auto psptr = m_presenter.lock();
 
@@ -97,6 +88,7 @@ void ADSAdapter::handleClearADS(Mantid::API::ClearADSNotification_ptr pNf) {
 
 void ADSAdapter::handleRenameWorkspace(
     Mantid::API::WorkspaceRenameNotification_ptr pNf) {
+  // store old and new names when workspace rename occurs.
   m_oldName = pNf->objectName();
   m_newName = pNf->newObjectName();
   auto presenter = lockPresenter();

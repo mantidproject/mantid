@@ -997,8 +997,7 @@ void ConfigDialog::initMantidOptionsTab() {
 
   setting = QString::fromStdString(
                 Mantid::Kernel::ConfigService::Instance().getString(
-                    "MantidOptions.InstrumentView.UseOpenGL"))
-                .toUpper();
+                    "MantidOptions.InstrumentView.UseOpenGL")).toUpper();
   if (setting == "ON") {
     m_useOpenGL->setChecked(true);
   } else {
@@ -1142,8 +1141,7 @@ void ConfigDialog::deleteDialog() {
     int status = QMessageBox::question(
         this, tr("Delete save options?"),
         tr("Are you sure you want to delete \nthe (%1) selected save "
-           "option(s)?")
-            .arg(selectedItems.size()),
+           "option(s)?").arg(selectedItems.size()),
         QMessageBox::Yes | QMessageBox::Default,
         QMessageBox::No | QMessageBox::Escape, QMessageBox::NoButton);
 
@@ -2724,9 +2722,8 @@ void ConfigDialog::updateMdPlottingSettings() {
   if (mdPlottingGeneralColorMap) {
     QString generalTabColorMapName = mdPlottingGeneralColorMap->currentText();
     QString generalTabColorMapFile =
-        mdPlottingGeneralColorMap
-            ->itemData(mdPlottingGeneralColorMap->currentIndex())
-            .toString();
+        mdPlottingGeneralColorMap->itemData(mdPlottingGeneralColorMap
+                                                ->currentIndex()).toString();
 
     m_mdSettings.setGeneralMdColorMap(generalTabColorMapName,
                                       generalTabColorMapFile);

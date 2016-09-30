@@ -2,7 +2,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "MantidQtMantidWidgets/WorkspacePresenter/WorkspaceDockViewMockObjects.h"
+#include "MantidQtMantidWidgets/WorkspacePresenter/WorkspaceDockMockObjects.h"
 #include "MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h"
 
 #include <MantidAPI/AlgorithmManager.h>
@@ -23,7 +23,7 @@ public:
   }
   static void destroySuite(WorkspacePresenterTest *suite) { delete suite; }
 
-  void setUp() {
+  void setUp() override {
     mockView.reset();
     mockView = boost::make_shared<NiceMock<MockWorkspaceDockView>>();
     mockView->init();
@@ -278,22 +278,19 @@ public:
   void testWorkspacesGroupedExternal() {
     EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
 
-    createGroup("group");
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    AnalysisDataService::Instance().notificationCenter.postNotification(
+        new WorkspacesGroupedNotification(std::vector<std::string>()));
 
-    removeGroup("group");
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
   void testWorkspacesUnGroupedExternal() {
-    createGroup("group");
-
     EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
 
-    AnalysisDataService::Instance().remove("group");
+    AnalysisDataService::Instance().notificationCenter.postNotification(
+        new Mantid::API::WorkspaceUnGroupingNotification("", nullptr));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-
-    AnalysisDataService::Instance().clear();
   }
 
   void testWorkspaceGroupUpdated() {

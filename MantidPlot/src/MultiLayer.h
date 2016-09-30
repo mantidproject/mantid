@@ -199,7 +199,7 @@ public slots:
   bool isWaterfallPlot() { return d_is_waterfall_plot; }
   QColor waterfallFillColor() { return d_waterfall_fill_color; }
   void setWaterfallFillColor(const QColor &c);
-  //@}
+//@}
 
 signals:
   void showTextDialog();

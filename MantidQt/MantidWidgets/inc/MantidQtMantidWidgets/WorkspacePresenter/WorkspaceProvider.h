@@ -45,8 +45,6 @@ public:
   virtual ~WorkspaceProvider() = default;
 
   virtual void registerPresenter(Presenter_wptr presenter) = 0;
-  virtual Mantid::API::Workspace_sptr
-  getWorkspace(const std::string &wsname) const = 0;
   virtual bool doesWorkspaceExist(const std::string &wsname) const = 0;
   virtual std::map<std::string, Mantid::API::Workspace_sptr>
   topLevelItems() const = 0;

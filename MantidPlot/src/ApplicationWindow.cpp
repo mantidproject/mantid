@@ -2699,7 +2699,8 @@ void ApplicationWindow::loadScriptRepo() {
 }
 
 void ApplicationWindow::polishGraph(Graph *g, int style) {
-  if (style == GraphOptions::VerticalBars || style == GraphOptions::HorizontalBars ||
+  if (style == GraphOptions::VerticalBars ||
+      style == GraphOptions::HorizontalBars ||
       style == GraphOptions::Histogram) {
     QList<int> ticksList;
     int ticksStyle = ScaleDraw::Out;
@@ -5104,7 +5105,8 @@ void ApplicationWindow::readSettings() {
   settings.endGroup(); // General
 
   settings.beginGroup("/Curves");
-  defaultCurveStyle = settings.value("/Style", GraphOptions::LineSymbols).toInt();
+  defaultCurveStyle =
+      settings.value("/Style", GraphOptions::LineSymbols).toInt();
   defaultCurveLineWidth = settings.value("/LineWidth", 1).toDouble();
   defaultSymbolSize = settings.value("/SymbolSize", 3).toInt();
   applyCurveStyleToMantid = settings.value("/ApplyMantid", true).toBool();
@@ -7720,8 +7722,8 @@ void ApplicationWindow::showFitDialog() {
   else if (w->inherits("Table")) {
     Table *t = dynamic_cast<Table *>(w);
     if (t)
-      plot =
-          multilayerPlot(t, t->drawableColumnSelection(), GraphOptions::LineSymbols);
+      plot = multilayerPlot(t, t->drawableColumnSelection(),
+                            GraphOptions::LineSymbols);
   }
 
   if (!plot)

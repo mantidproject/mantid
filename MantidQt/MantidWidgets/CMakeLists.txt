@@ -375,6 +375,7 @@ set ( TEST_FILES
   DataProcessorUI/QDataProcessorOneLevelTreeModelTest.h
   DataProcessorUI/QDataProcessorTwoLevelTreeModelTest.h
   WorkspacePresenter/WorkspacePresenterTest.h
+  WorkspacePresenter/ADSAdapterTest.h
 )
 
 find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)

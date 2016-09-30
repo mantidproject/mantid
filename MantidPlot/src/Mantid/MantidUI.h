@@ -207,10 +207,9 @@ public:
   MantidQt::MantidWidgets::MantidSurfacePlotDialog *
   createSurfacePlotDialog(int flags, QStringList wsNames,
                           const QString &plotType) override;
-  MantidQt::MantidWidgets::MantidWSIndexDialog *createWorkspaceIndexDialog(int flags,
-                                                  QStringList wsNames,
-                                                  bool showWaterfall,
-                                                  bool showPlotAll) override;
+  MantidQt::MantidWidgets::MantidWSIndexDialog *
+  createWorkspaceIndexDialog(int flags, QStringList wsNames, bool showWaterfall,
+                             bool showPlotAll) override;
 
   /// Create a 1d graph form a Table
   MultiLayer *createGraphFromTable(Table *t, int type = 0);
@@ -654,8 +653,8 @@ private:
   boost::shared_ptr<MantidQt::MantidWidgets::QWorkspaceDockView>
       m_exploreMantid; // Dock window for manipulating workspaces
   AlgorithmDockWidget *m_exploreAlgorithms; // Dock window for using algorithms
-  RemoteClusterDockWidget
-      *m_exploreRemoteTasks; // Dock window for using remote tasks
+  RemoteClusterDockWidget *
+      m_exploreRemoteTasks; // Dock window for using remote tasks
   /// Current fit property browser being used
   MantidQt::MantidWidgets::FitPropertyBrowser *m_fitFunction;
   /// Default fit property browser (the one docked on the left)
@@ -696,8 +695,8 @@ private:
   // Stores dependent mdi windows. If the 'key' window closes, all 'value' ones
   // must be closed as well.
   std::unordered_multimap<MdiSubWindow *, MdiSubWindow *> m_mdiDependency;
-  QMdiSubWindow
-      *m_vatesSubWindow; ///< Holder for the Vates interface sub-window
+  QMdiSubWindow *
+      m_vatesSubWindow; ///< Holder for the Vates interface sub-window
 
   // prevents some repeated code realtating to log names
   void formatLogName(QString &label, const QString &wsName);

@@ -1383,8 +1383,8 @@ QwtDoubleRect Matrix::boundingRect() {
 
   return QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
                        qMin(y_start, y_end) - 0.5 * dy,
-                       fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy)
-      .normalized();
+                       fabs(x_end - x_start) + dx,
+                       fabs(y_end - y_start) + dy).normalized();
 }
 
 void Matrix::fft(bool inverse) {
@@ -1409,8 +1409,7 @@ bool Matrix::exportASCII(const QString &fname, const QString &separator,
     QMessageBox::critical(
         this, tr("MantidPlot - ASCII Export Error"),
         tr("Could not write to file: <br><h4>%1</h4><p>Please verify that you "
-           "have the right to write to this location!")
-            .arg(fname));
+           "have the right to write to this location!").arg(fname));
     return false;
   }
 

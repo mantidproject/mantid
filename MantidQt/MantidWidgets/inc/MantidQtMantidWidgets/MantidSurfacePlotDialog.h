@@ -19,7 +19,8 @@ class MantidDisplayBase;
  * - The user is offered the choice of only those logs that have single values
  * per workspace.
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidSurfacePlotDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidSurfacePlotDialog
+    : public QDialog {
   Q_OBJECT
 
 public:

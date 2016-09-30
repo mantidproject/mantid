@@ -109,6 +109,10 @@ QWorkspaceDockView::QWorkspaceDockView(MantidDisplayBase *mui,
 
 QWorkspaceDockView::~QWorkspaceDockView() {}
 
+/**
+* Accept a drag drop event and process the data appropriately
+* @param de :: The drag drop event
+*/
 void QWorkspaceDockView::dropEvent(QDropEvent *de) { m_tree->dropEvent(de); }
 
 void QWorkspaceDockView::setupWidgetLayout() {
@@ -187,6 +191,12 @@ void QWorkspaceDockView::setupConnections() {
           SLOT(populateChildData(QTreeWidgetItem *)));
 }
 
+/**
+* Flips the flag indicating whether a tree update is in progress. Actions such
+* as sorting
+* are disabled while an update is in progress.
+* @param state The required state for the flag
+*/
 void QWorkspaceDockView::setTreeUpdating(const bool state) {
   m_treeUpdating = state;
 }
@@ -213,6 +223,9 @@ QWorkspaceDockView::chooseSurfacePlotOptions(int nWorkspaces) const {
   return m_tree->chooseSurfacePlotOptions(nWorkspaces);
 }
 
+/** Returns the names of the selected workspaces
+*   in the dock.
+*/
 StringList QWorkspaceDockView::getSelectedWorkspaceNames() const {
   auto items = m_tree->selectedItems();
   StringList names;
@@ -223,6 +236,9 @@ StringList QWorkspaceDockView::getSelectedWorkspaceNames() const {
   return names;
 }
 
+/** Returns a pointer to the selected workspace (the first if multiple
+*   workspaces selected)
+*/
 Mantid::API::Workspace_sptr QWorkspaceDockView::getSelectedWorkspace() const {
   auto items = m_tree->selectedItems();
   auto data = items[0]->data(0, Qt::UserRole).value<Workspace_sptr>();
@@ -282,6 +298,13 @@ void QWorkspaceDockView::showRenameDialog(const StringList &wsNames) {
   m_mantidUI->renameWorkspace(names);
 }
 
+/**
+* Save the old and the new name in m_renameMap. This is needed to restore
+* selection
+*   of the renamed workspace (if it was selected before renaming).
+* @param old_name :: Old name of a renamed workspace.
+* @param new_name :: New name of a renamed workspace.
+*/
 void QWorkspaceDockView::recordWorkspaceRename(const std::string &oldName,
                                                const std::string &newName) {
   QString qs_oldName = QString::fromStdString(oldName);
@@ -614,6 +637,11 @@ void QWorkspaceDockView::filterWorkspaces(const std::string &filterText) {
   }
 }
 
+/**
+* Set tree item's icon based on the ID of the workspace.
+* @param item :: A workspace tree item.
+* @param wsID :: An icon type code.
+*/
 void QWorkspaceDockView::setItemIcon(QTreeWidgetItem *item,
                                      const std::string &wsID) {
   try {
@@ -780,6 +808,10 @@ void QWorkspaceDockView::createSortMenuActions() {
   m_sortButton->setMenu(m_sortMenu);
 }
 
+/**
+* When an item is expanded, populate the child data for this item
+* @param item :: The tree item being expanded
+*/
 void QWorkspaceDockView::populateChildData(QTreeWidgetItem *item) {
   QVariant userData = item->data(0, Qt::UserRole);
   if (userData.isNull())
@@ -825,11 +857,21 @@ void QWorkspaceDockView::populateChildData(QTreeWidgetItem *item) {
   }
 }
 
+/**
+* Update the workspace tree to match the current state of the ADS.
+* It is important that the workspace tree is modified only by this method.
+* @param items Items which are currently in the ADS.
+*/
 void QWorkspaceDockView::updateTree(const TopLevelItems &items) {
   incrementUpdateCount();
   emit signalUpdateTree(items);
 }
 
+/**
+* Clears the tree and re-populates it with the given top level items
+* @param topLevelItems The map of names to workspaces
+* @param expanded Names of items who should expanded after being populated
+*/
 void QWorkspaceDockView::populateTopLevel(const TopLevelItems &topLevelItems,
                                           const QStringList &expanded) {
   // collect names of selected workspaces
@@ -858,6 +900,13 @@ void QWorkspaceDockView::populateTopLevel(const TopLevelItems &topLevelItems,
   filterWorkspaceTree(m_workspaceFilter->text());
 }
 
+/**
+* Adds a node for the given named item, including a single child ID item to make
+* each node have a expandable button
+* and allowing plotting to work from non-expanded items
+* @param item A name/workspace pair to add.
+* @param parent If not null then add the new items as a child of the given item
+*/
 MantidTreeWidgetItem *QWorkspaceDockView::addTreeEntry(
     const std::pair<std::string, Mantid::API::Workspace_sptr> &item,
     QTreeWidgetItem *parent) {
@@ -882,6 +931,10 @@ MantidTreeWidgetItem *QWorkspaceDockView::addTreeEntry(
   return node;
 }
 
+/**
+* Check if a workspace should be selected after dock update.
+* @param name :: Name of a workspace to check.
+*/
 bool QWorkspaceDockView::shouldBeSelected(QString name) const {
   QStringList renamed = m_renameMap.keys(name);
   if (!renamed.isEmpty()) {
@@ -1143,6 +1196,7 @@ void QWorkspaceDockView::filterWorkspaceTree(const QString &text) {
   m_presenter->notifyFromView(ViewNotifiable::Flag::FilterWorkspaces);
 }
 
+/// Handles delete button/menu item triggers
 void QWorkspaceDockView::onClickDeleteWorkspaces() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 }
@@ -1185,6 +1239,7 @@ void QWorkspaceDockView::workspaceSelected() {
   m_mantidUI->enableSaveNexus(QString::fromStdString(wsName));
 }
 
+/// Handles group button clicks
 void QWorkspaceDockView::onClickGroupButton() {
   if (m_groupButton) {
     QString qButtonName = m_groupButton->text();
@@ -1196,15 +1251,18 @@ void QWorkspaceDockView::onClickGroupButton() {
   }
 }
 
+/// Handles Load File menu trigger
 void QWorkspaceDockView::onClickLoad() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::LoadWorkspace);
 }
 
+/// handles Live Data menu trigger
 void QWorkspaceDockView::onClickLiveData() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::LoadLiveDataWorkspace);
 }
 
 // Asynchronous signal handlers
+/// Handle asynchronous tree update.
 void QWorkspaceDockView::handleUpdateTree(const TopLevelItems &items) {
   // do not update until the counter is zero
   if (m_updateCount.deref())
@@ -1232,6 +1290,8 @@ void QWorkspaceDockView::handleUpdateTree(const TopLevelItems &items) {
 void QWorkspaceDockView::handleClearView() { m_tree->clear(); }
 
 // Context Menu Methods
+
+/// Handles display of the workspace context menu.
 void QWorkspaceDockView::popupMenu(const QPoint &pos) {
   m_menuPosition = pos;
   m_presenter->notifyFromView(
@@ -1365,6 +1425,9 @@ void QWorkspaceDockView::onClickSaveToProgram(const QString &name) {
   m_presenter->notifyFromView(ViewNotifiable::Flag::SaveToProgram);
 }
 
+/**
+* Saves a workspace based on the program the user chooses to save to.
+*/
 void QWorkspaceDockView::saveToProgram() {
   // Create a map for the keys and details to go into
   std::map<std::string, std::string> programKeysAndDetails;
@@ -1496,15 +1559,18 @@ void QWorkspaceDockView::saveToProgram() {
   }
 }
 
-/// Plots a single spectrum from each selected workspace
 void QWorkspaceDockView::onClickPlotSpectra() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrum);
 }
-/// Plots a single spectrum from each selected workspace with errors
+
 void QWorkspaceDockView::onClickPlotSpectraErr() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumWithErrors);
 }
 
+/** Plots a single spectrum from each selected workspace
+* @param showErrors If true, show error bars. Otherswise no error bars are
+* displayed.
+*/
 void QWorkspaceDockView::plotSpectrum(bool showErrors) {
   const auto userInput = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum
@@ -1520,16 +1586,16 @@ void QWorkspaceDockView::plotSpectrum(bool showErrors) {
                      clearWindow, userInput.waterfall);
 }
 
+void QWorkspaceDockView::onClickDrawColorFillPlot() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowColourFillPlot);
+}
+
 /**
 * Draw a color fill plot of the workspaces that are currently selected.
 * NOTE: The drawing of 2D plots is currently intimately linked with MantidMatrix
 * meaning
 * that one of these must be generated first!
 */
-void QWorkspaceDockView::onClickDrawColorFillPlot() {
-  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowColourFillPlot);
-}
-
 void QWorkspaceDockView::showColourFillPlot() {
   // Get the selected workspaces
   auto items = m_tree->selectedItems();
@@ -1672,6 +1738,9 @@ void QWorkspaceDockView::onClickClearUB() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ClearUBMatrix);
 }
 
+/**
+* Handler for the clear UB matrix event.
+*/
 void QWorkspaceDockView::clearUBMatrix() {
   auto wsNames = getSelectedWorkspaceNames();
 
@@ -1686,22 +1755,22 @@ void QWorkspaceDockView::clearUBMatrix() {
   }
 }
 
-/**
-* Create a 3D surface plot from the selected workspace group
-*/
 void QWorkspaceDockView::onClickPlotSurface() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ShowSurfacePlot);
 }
 
+/**
+* Create a 3D surface plot from the selected workspace group
+*/
 void QWorkspaceDockView::showSurfacePlot() { m_mantidUI->showSurfacePlot(); }
 
-/**
-* Create a contour plot from the selected workspace group
-*/
 void QWorkspaceDockView::onClickPlotContour() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ShowContourPlot);
 }
 
+/**
+* Create a contour plot from the selected workspace group
+*/
 void QWorkspaceDockView::showContourPlot() { m_mantidUI->showContourPlot(); }
 }
 }

@@ -1,6 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_ADSADAPTER_H_
 #define MANTID_MANTIDWIDGETS_ADSADAPTER_H_
 
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "MantidQtMantidWidgets/WorkspacePresenter/WorkspaceProvider.h"
 #include <MantidQtAPI/WorkspaceObserver.h>
 #include <Poco/NObserver.h>
@@ -34,13 +35,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
 */
-class ADSAdapter : public WorkspaceProvider {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ADSAdapter : public WorkspaceProvider {
 public:
   explicit ADSAdapter();
   ~ADSAdapter() override;
   void registerPresenter(Presenter_wptr presenter) override;
-  Mantid::API::Workspace_sptr
-  getWorkspace(const std::string &wsname) const override;
   bool doesWorkspaceExist(const std::string &wsname) const override;
 
   std::map<std::string, Mantid::API::Workspace_sptr>

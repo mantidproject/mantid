@@ -27,4 +27,4 @@ private:
 };
 }
 }
-#endif //MANTIDQT_API_WORKSPACEICONS_H_
+#endif // MANTIDQT_API_WORKSPACEICONS_H_

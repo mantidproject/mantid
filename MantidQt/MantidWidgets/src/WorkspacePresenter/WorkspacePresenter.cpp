@@ -13,10 +13,12 @@ WorkspacePresenter::WorkspacePresenter(DockView_wptr view)
 
 WorkspacePresenter::~WorkspacePresenter() {}
 
+/// Initialises the view weak pointer for the Workspace Provider.
 void WorkspacePresenter::init() {
   m_adapter->registerPresenter(std::move(m_view.lock()->getPresenterWeakPtr()));
 }
 
+/// Handle WorkspaceProvider (ADS) notifications
 void WorkspacePresenter::notifyFromWorkspaceProvider(
     WorkspaceProviderNotifiable::Flag flag) {
   switch (flag) {
@@ -44,6 +46,7 @@ void WorkspacePresenter::notifyFromWorkspaceProvider(
   }
 }
 
+/// Handle notifications from the view.
 void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   switch (flag) {
   case ViewNotifiable::Flag::LoadWorkspace:
@@ -378,6 +381,7 @@ void WorkspacePresenter::workspacesCleared() {
   view->clearView();
 }
 
+/// Lock the view weak_ptr and return the shared_ptr generated.
 DockView_sptr WorkspacePresenter::lockView() {
   auto view_sptr = m_view.lock();
 
@@ -387,6 +391,7 @@ DockView_sptr WorkspacePresenter::lockView() {
   return std::move(view_sptr);
 }
 
+/// Update the view by publishing the ADS contents.
 void WorkspacePresenter::updateView() {
   auto view = lockView();
   view->updateTree(m_adapter->topLevelItems());

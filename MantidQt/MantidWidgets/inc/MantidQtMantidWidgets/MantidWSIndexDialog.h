@@ -202,7 +202,8 @@ private:
   QList<Interval> m_list;
 };
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IntervalListValidator : public QValidator {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS IntervalListValidator
+    : public QValidator {
   Q_OBJECT
 
 public:

@@ -642,17 +642,15 @@ QwtDoubleRect MantidMatrix::boundingRect() {
       } else {
         m_spectrogramCols = numCols() > 100 ? numCols() : 100;
       }
-      m_boundingRect =
-          QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
-                        qMin(y_start, y_end) - 0.5 * dy,
-                        fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy)
-              .normalized();
+      m_boundingRect = QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
+                                     qMin(y_start, y_end) - 0.5 * dy,
+                                     fabs(x_end - x_start) + dx,
+                                     fabs(y_end - y_start) + dy).normalized();
 
     } else {
       m_spectrogramCols = 0;
       m_boundingRect = QwtDoubleRect(0, qMin(y_start, y_end) - 0.5 * dy, 1,
-                                     fabs(y_end - y_start) + dy)
-                           .normalized();
+                                     fabs(y_end - y_start) + dy).normalized();
     }
   } // Define the spectrogram bounding box
   return m_boundingRect;

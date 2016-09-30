@@ -467,7 +467,7 @@ QString MantidUI::getSelectedWorkspaceName() {
   QString str;
 
   if (!names.empty())
-	  str = QString::fromStdString(names[0]);
+    str = QString::fromStdString(names[0]);
 
   if (str.isEmpty()) {
     // Check if a mantid matrix is selected

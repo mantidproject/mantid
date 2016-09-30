@@ -1401,8 +1401,8 @@ QString ImportOPJ::parseOriginTags(const QString &str) {
                      "\\\\\\s*\\+\\s*\\(",    "\\\\\\s*\\-\\s*\\(",
                      "\\\\\\s*f\\:[^\\(]*\\("};
   int postag[] = {0, 0, 0, 0, 0, 0, 0};
-  QString ltag[] = {"<b>",   "<i>",   "<u>",           "<font face=Symbol>",
-                    "<sup>", "<sub>", "<font face=%1>"};
+  QString ltag[] = {"<b>", "<i>", "<u>", "<font face=Symbol>", "<sup>", "<sub>",
+                    "<font face=%1>"};
   QString rtag[] = {"</b>",   "</i>",   "</u>",   "</font>",
                     "</sup>", "</sub>", "</font>"};
   QRegExp rxtags[7];
