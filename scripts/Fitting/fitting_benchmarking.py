@@ -34,11 +34,63 @@ import numpy as np
 import mantid.simpleapi as msapi
 
 import input_parsing as iparsing
+import results_output as fitout
 import test_result
 import test_problem
 
+def run_all_with_or_without_errors(problem_files_path, use_errors, minimizers, group_names, group_suffix_names, color_scale):
+    """
+    Run all benchmark problems available, with/without using weights in the cost
+    function (observational errors). This is just a convenience
+    function meant to be used by system/unit tests, or other scripts.
+
+    Be warned this function ca be extremely verbose.
+
+    @param minimizers :: list of minimizers to test
+    @param group_names :: names for display purposes
+    @param group_suffix_names :: group names to use as suffixes, for example in file names
+    @param color_scale :: list with pairs of threshold value - color, to produce color
+    """
+
+    problems, results_per_group = do_regression_fitting_benchmark(include_nist=True, include_cutest=True,
+                                                                  data_groups_dirs = problem_files_path,
+                                                                  minimizers=minimizers, use_errors=use_errors)
+
+    # Results for every test problem in each group
+    for idx, group_results in enumerate(results_per_group):
+        print("\n\n")
+        print("********************************************************".format(idx+1))
+        print("**************** RESULTS FOR GROUP {0}, {1} ************".format(idx+1,
+                                                                                group_names[idx]))
+        print("********************************************************".format(idx+1))
+        fitout.print_group_results_tables(minimizers, group_results, problems[idx],
+                                          group_name=group_suffix_names[idx],
+                                          use_errors=use_errors,
+                                          simple_text=True, rst=True, color_scale=color_scale)
+
+    # Results aggregated (median) by group (NIST, Neutron data, CUTEst, etc.)
+    header = '\n\n**************** OVERALL SUMMARY - ALL GROUPS ******** \n\n'
+    print(header)
+    fitout.print_overall_results_table(minimizers, results_per_group, problems, group_names,
+                                       use_errors=use_errors, rst=True)
+
+    # Flush to reduce mix-up with system tests/runner output
+    import sys
+    sys.stdout.flush()
+
 def do_regression_fitting_benchmark(include_nist=True, include_cutest=True, data_groups_dirs=None,
                                     minimizers=None, use_errors=True):
+    """
+    Run a fitting benchmark made of different groups (NIST, CUTEst,
+    Neutron data, etc.)  This gets the groups of files that look like
+    test problem definitions and runs tests for every group.
+
+    @param include_nist :: whether to try to load NIST problems
+    @param include_nist :: whether to try to load CUTEst problems
+    @param data_groups_dirs :: list of directories where to load other / neutron data problems
+    @param minimizers :: list of minimizers to test
+    @param use_errors :: whether to use observational errors as weights in the cost function
+    """
     # Several blocks of problems. Results for each block will be calculated sequentially, and
     # will go into a separate table
     problem_blocks = []
@@ -52,7 +104,7 @@ def do_regression_fitting_benchmark(include_nist=True, include_cutest=True, data
     if data_groups_dirs:
         problem_blocks.extend(get_data_groups(data_groups_dirs))
 
-    prob_results = [do_regression_fitting_benchmark_block(block, minimizers, use_errors=use_errors) for
+    prob_results = [do_regression_fitting_benchmark_group(block, minimizers, use_errors=use_errors) for
                     block in problem_blocks]
 
     probs, results = zip(*prob_results)
@@ -62,7 +114,7 @@ def do_regression_fitting_benchmark(include_nist=True, include_cutest=True, data
 
     return probs, results
 
-def do_regression_fitting_benchmark_block(benchmark_problems, minimizers, use_errors=True):
+def do_regression_fitting_benchmark_group(problem_files, minimizers, use_errors=True):
     """
     Applies one minmizer to a block/list of test problems
 
@@ -70,11 +122,17 @@ def do_regression_fitting_benchmark_block(benchmark_problems, minimizers, use_er
     test problems, for example the "lower difficulty" NIST files . The first list level
     is for different blocks of test problems. The second level is for different individual
     problems/files.
+
+    @param minimizers :: list of minimizers to test
+    @param use_errors :: whether to use observational errors as weights in the cost function
+
+    @returns :: problem definitions loaded from the files, and results of running them with
+    the minimizers requested
     """
 
     problems = []
     results_per_problem = []
-    for prob_file in benchmark_problems:
+    for prob_file in problem_files:
         try:
             prob = iparsing.load_nist_fitting_problem_file(prob_file)
         except (AttributeError, RuntimeError):
@@ -117,27 +175,8 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors=True
     # For NIST problems this will generate two results per file (two different starting points)
     results_fit_problem = []
 
-    function_defs = []
-    if prob.starting_values:
-        num_starts = len(prob.starting_values[0][1])
-        for start_idx in range(0, num_starts):
+    function_defs = get_function_definitions(prob)
 
-            print("=================== starting values,: {0}, with idx: {1} ================".
-                  format(prob.starting_values, start_idx))
-            start_string = '' # like: 'b1=250, b2=0.0005'
-            for param in prob.starting_values:
-                start_string += ('{0}={1},'.format(param[0], param[1][start_idx]))
-
-
-            if 'name' in prob.equation:
-                function_defs.append(prob.equation)
-            else:
-                function_defs.append("name=UserFunction, Formula={0}, {1}".format(prob.equation, start_string))
-    else:
-        # Equation from a neutron data spec file. Ready to be used
-        function_defs.append(prob.equation)
-
-    # TODO: GRAB startx, endx!!!
     for user_func in function_defs:
         results_problem_start = []
         for minimizer_name in minimizers:
@@ -177,6 +216,29 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors=True
 
     return results_fit_problem
 
+
+def get_function_definitions(prob):
+    function_defs = []
+    if prob.starting_values:
+        num_starts = len(prob.starting_values[0][1])
+        for start_idx in range(0, num_starts):
+
+            print("=================== starting values,: {0}, with idx: {1} ================".
+                  format(prob.starting_values, start_idx))
+            start_string = '' # like: 'b1=250, b2=0.0005'
+            for param in prob.starting_values:
+                start_string += ('{0}={1},'.format(param[0], param[1][start_idx]))
+
+            if 'name' in prob.equation:
+                function_defs.append(prob.equation)
+            else:
+                function_defs.append("name=UserFunction, Formula={0}, {1}".format(prob.equation, start_string))
+    else:
+        # Equation from a neutron data spec file. Ready to be used
+        function_defs.append(prob.equation)
+
+    return function_defs
+
 def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function='Least squares'):
     """
     Fits the data in a workspace with a function, using the algorithm Fit.
@@ -201,7 +263,7 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
         # ignore them when using 'Unweighted least squares' as that would ignore all values!
         ignore_invalid = cost_function == 'Least squares'
 
-        # Note the ugly adhoc exception:
+        # Note the ugly adhoc exception. We need to reconsider these WISH problems:
         if 'WISH17701' in prob.name:
             ignore_invalid = False
 
@@ -264,7 +326,7 @@ def get_nist_problem_files():
     if not ref_dir:
         raise RuntimeError("Could not find the benchmark data directory")
 
-    ##### TEMPORAL OVERWRITE
+    ##### TODO: TEMPORAL OVERWRITE
     ref_dir = HARDCODED_REF_DIR
 
     nist_lower_files = [os.path.join(ref_dir, nist_dir, fname) for fname in nist_lower]
