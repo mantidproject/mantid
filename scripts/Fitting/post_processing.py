@@ -79,6 +79,15 @@ def calc_accuracy_runtime_tbls(results_per_test, minimizers):
     return accuracy_tbl, time_tbl
 
 def calc_norm_summary_tables(accuracy_tbl, time_tbl):
+    """
+    Calculate normalized performance/ranking summary, as numpy
+    matrices as usual for convenience, and matrices of additional
+    statistics (min, max, percentiles, etc.)
+
+    Here normalized means relative to the best which gets a 1, all
+    others get the ratio resulting from dividing by the performance of
+    the best.
+    """
     # Min across all alternative solutions/minimizers
     min_sum_err_sq = np.nanmin(accuracy_tbl, 1)
     min_runtime = np.nanmin(time_tbl, 1)

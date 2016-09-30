@@ -38,7 +38,8 @@ import results_output as fitout
 import test_result
 import test_problem
 
-def run_all_with_or_without_errors(problem_files_path, use_errors, minimizers, group_names, group_suffix_names, color_scale):
+def run_all_with_or_without_errors(problem_files_path, use_errors, minimizers,
+                                   group_names, group_suffix_names, color_scale):
     """
     Run all benchmark problems available, with/without using weights in the cost
     function (observational errors). This is just a convenience
@@ -52,7 +53,7 @@ def run_all_with_or_without_errors(problem_files_path, use_errors, minimizers, g
     @param color_scale :: list with pairs of threshold value - color, to produce color
     """
 
-    problems, results_per_group = do_regression_fitting_benchmark(include_nist=True, include_cutest=True,
+    problems, results_per_group = do_fitting_benchmark(include_nist=True, include_cutest=True,
                                                                   data_groups_dirs = problem_files_path,
                                                                   minimizers=minimizers, use_errors=use_errors)
 
@@ -78,7 +79,7 @@ def run_all_with_or_without_errors(problem_files_path, use_errors, minimizers, g
     import sys
     sys.stdout.flush()
 
-def do_regression_fitting_benchmark(include_nist=True, include_cutest=True, data_groups_dirs=None,
+def do_fitting_benchmark(include_nist=True, include_cutest=True, data_groups_dirs=None,
                                     minimizers=None, use_errors=True):
     """
     Run a fitting benchmark made of different groups (NIST, CUTEst,
@@ -104,7 +105,7 @@ def do_regression_fitting_benchmark(include_nist=True, include_cutest=True, data
     if data_groups_dirs:
         problem_blocks.extend(get_data_groups(data_groups_dirs))
 
-    prob_results = [do_regression_fitting_benchmark_group(block, minimizers, use_errors=use_errors) for
+    prob_results = [do_fitting_benchmark_group(block, minimizers, use_errors=use_errors) for
                     block in problem_blocks]
 
     probs, results = zip(*prob_results)
@@ -114,7 +115,7 @@ def do_regression_fitting_benchmark(include_nist=True, include_cutest=True, data
 
     return probs, results
 
-def do_regression_fitting_benchmark_group(problem_files, minimizers, use_errors=True):
+def do_fitting_benchmark_group(problem_files, minimizers, use_errors=True):
     """
     Applies one minmizer to a block/list of test problems
 
@@ -157,20 +158,7 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors=True
                          cost function)
     """
 
-    data_e = None
-    if use_errors:
-        if not isinstance(prob.data_pattern_obs_errors, np.ndarray):
-            # Fake observational errors
-            data_e = np.sqrt(prob.data_pattern_in)
-        else:
-            data_e = prob.data_pattern_obs_errors
-
-        wks = msapi.CreateWorkspace(DataX=prob.data_pattern_in, DataY=prob.data_pattern_out,
-                                    DataE=data_e)
-        cost_function = 'Least squares'
-    else:
-        wks = msapi.CreateWorkspace(DataX=prob.data_pattern_in, DataY=prob.data_pattern_out)
-        cost_function = 'Unweighted least squares'
+    wks, cost_function = prepare_wks_cost_function(prob)
 
     # For NIST problems this will generate two results per file (two different starting points)
     results_fit_problem = []
@@ -215,28 +203,6 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors=True
         results_fit_problem.append(results_problem_start)
 
     return results_fit_problem
-
-def get_function_definitions(prob):
-    function_defs = []
-    if prob.starting_values:
-        num_starts = len(prob.starting_values[0][1])
-        for start_idx in range(0, num_starts):
-
-            print("=================== starting values,: {0}, with idx: {1} ================".
-                  format(prob.starting_values, start_idx))
-            start_string = '' # like: 'b1=250, b2=0.0005'
-            for param in prob.starting_values:
-                start_string += ('{0}={1},'.format(param[0], param[1][start_idx]))
-
-            if 'name' in prob.equation:
-                function_defs.append(prob.equation)
-            else:
-                function_defs.append("name=UserFunction, Formula={0}, {1}".format(prob.equation, start_string))
-    else:
-        # Equation from a neutron data spec file. Ready to be used
-        function_defs.append(prob.equation)
-
-    return function_defs
 
 def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function='Least squares'):
     """
@@ -287,6 +253,60 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
         errors = None
 
     return status, chi2, fit_wks, params, errors
+
+def prepare_wks_cost_function(prob):
+    """
+    Build a workspace ready for Fit() and a cost function string according to the problem
+    definition.
+    """
+    data_e = None
+    if use_errors:
+        if not isinstance(prob.data_pattern_obs_errors, np.ndarray):
+            # Fake observational errors
+            data_e = np.sqrt(prob.data_pattern_in)
+        else:
+            data_e = prob.data_pattern_obs_errors
+
+        wks = msapi.CreateWorkspace(DataX=prob.data_pattern_in, DataY=prob.data_pattern_out,
+                                    DataE=data_e)
+        cost_function = 'Least squares'
+    else:
+        wks = msapi.CreateWorkspace(DataX=prob.data_pattern_in, DataY=prob.data_pattern_out)
+        cost_function = 'Unweighted least squares'
+
+    return wks, cost_function
+
+def get_function_definitions(prob):
+    """
+    Produces function definition strings (as a full definition in
+    muparser format, including the function and the initial values for
+    the parameters), one for every different starting point defined in
+    the test problem.
+
+    @param prob :: fitting test problem object
+
+    @returns :: list of function strings ready for Fit()
+    """
+    function_defs = []
+    if prob.starting_values:
+        num_starts = len(prob.starting_values[0][1])
+        for start_idx in range(0, num_starts):
+
+            print("=================== starting values,: {0}, with idx: {1} ================".
+                  format(prob.starting_values, start_idx))
+            start_string = '' # like: 'b1=250, b2=0.0005'
+            for param in prob.starting_values:
+                start_string += ('{0}={1},'.format(param[0], param[1][start_idx]))
+
+            if 'name' in prob.equation:
+                function_defs.append(prob.equation)
+            else:
+                function_defs.append("name=UserFunction, Formula={0}, {1}".format(prob.equation, start_string))
+    else:
+        # Equation from a neutron data spec file. Ready to be used
+        function_defs.append(prob.equation)
+
+    return function_defs
 
 HARDCODED_REF_DIR = r'/home/fedemp/mantid-repos/mantid-fitting-benchmarking/Testing/SystemTests/tests/analysis/reference'
 def get_nist_problem_files():
