@@ -37,8 +37,8 @@ namespace {
 /// @param x :: A vector that receives the solution.
 /// @param inform :: The information struct.
 void solveSpd(const DoubleFortranMatrix &A, const DoubleFortranVector &b,
-               DoubleFortranMatrix &LtL, DoubleFortranVector &x,
-               nlls_inform &inform) {
+              DoubleFortranMatrix &LtL, DoubleFortranVector &x,
+              nlls_inform &inform) {
   // Fortran code uses this:
   // dposv('L', n, 1, LtL, n, x, n, inform.external_return)
   // This is the GSL replacement:
@@ -57,7 +57,7 @@ void solveSpd(const DoubleFortranMatrix &A, const DoubleFortranVector &b,
 ///        eigenvalue.
 /// @param y :: A vector that receives the corresponding eigenvector.
 void minEigSymm(const DoubleFortranMatrix &A, double &sigma,
-                  DoubleFortranVector &y) {
+                DoubleFortranVector &y) {
   auto M = A;
   DoubleFortranVector ew;
   DoubleFortranMatrix ev;
@@ -76,7 +76,7 @@ void minEigSymm(const DoubleFortranMatrix &A, double &sigma,
 /// @param sigma :: The value of the diagonal shift.
 /// @param AplusSigma :: The resulting matrix.
 void shiftMatrix(const DoubleFortranMatrix &A, double sigma,
-                  DoubleFortranMatrix &AplusSigma) {
+                 DoubleFortranMatrix &AplusSigma) {
   AplusSigma = A;
   auto n = A.len1();
   for (int i = 1; i <= n; ++i) { // for_do(i,1,n)
@@ -101,8 +101,8 @@ DoubleFortranVector negative(const DoubleFortranVector &v) {
 /// @param inform :: The inform struct.
 /// @param w :: The work struct.
 void getPdShift(double &sigma, DoubleFortranVector &d,
-                  const nlls_options &options, nlls_inform &inform,
-                  more_sorensen_work &w) {
+                const nlls_options &options, nlls_inform &inform,
+                more_sorensen_work &w) {
   int no_shifts = 0;
   bool successful_shift = false;
   while (!successful_shift) {
@@ -176,10 +176,10 @@ void findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
 /// @param inform :: The inform struct.
 /// @param w :: The work struct.
 void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-                   const DoubleFortranMatrix &hf, double Delta,
-                   DoubleFortranVector &d, double &nd,
-                   const nlls_options &options, nlls_inform &inform,
-                   more_sorensen_work &w) {
+                  const DoubleFortranMatrix &hf, double Delta,
+                  DoubleFortranVector &d, double &nd,
+                  const nlls_options &options, nlls_inform &inform,
+                  more_sorensen_work &w) {
 
   // The code finds
   //  d = arg min_p   v^T p + 0.5 * p^T A p

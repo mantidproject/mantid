@@ -56,14 +56,14 @@ private:
   void evalJ(const DoubleFortranVector &x, DoubleFortranMatrix &J) const;
   /// Evaluate the Hessian
   void evalHF(const DoubleFortranVector &x, const DoubleFortranVector &f,
-               DoubleFortranMatrix &h) const;
+              DoubleFortranMatrix &h) const;
   /// Find a correction vector to the parameters.
   virtual void
   calculateStep(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-                 const DoubleFortranMatrix &hf, const DoubleFortranVector &g,
-                 double Delta, DoubleFortranVector &d, double &normd,
-                 const NLLS::nlls_options &options, NLLS::nlls_inform &inform,
-                 NLLS::calculate_step_work &w) = 0;
+                const DoubleFortranMatrix &hf, const DoubleFortranVector &g,
+                double Delta, DoubleFortranVector &d, double &normd,
+                const NLLS::nlls_options &options, NLLS::nlls_inform &inform,
+                NLLS::calculate_step_work &w) = 0;
 
   /// Stored cost function
   boost::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;

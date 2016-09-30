@@ -61,7 +61,7 @@ void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
 /// @param x :: The fitting parameters as a fortran 1d array.
 /// @param f :: The output fortran vector with the weighted residuals.
 void TrustRegionMinimizer::evalF(const DoubleFortranVector &x,
-                                  DoubleFortranVector &f) const {
+                                 DoubleFortranVector &f) const {
   m_leastSquares->setParameters(x);
   auto &domain = *m_leastSquares->getDomain();
   auto &values = *m_leastSquares->getValues();
@@ -80,7 +80,7 @@ void TrustRegionMinimizer::evalF(const DoubleFortranVector &x,
 /// @param x :: The fitting parameters as a fortran 1d array.
 /// @param J :: The output fortran matrix with the weighted Jacobian.
 void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x,
-                                  DoubleFortranMatrix &J) const {
+                                 DoubleFortranMatrix &J) const {
   m_leastSquares->setParameters(x);
   auto &domain = *m_leastSquares->getDomain();
   auto &values = *m_leastSquares->getValues();
@@ -104,8 +104,8 @@ void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x,
 /// @param f :: The fortran vector with the weighted residuals.
 /// @param h :: The fortran matrix with the Hessian.
 void TrustRegionMinimizer::evalHF(const DoubleFortranVector &x,
-                                   const DoubleFortranVector &f,
-                                   DoubleFortranMatrix &h) const {
+                                  const DoubleFortranVector &f,
+                                  DoubleFortranMatrix &h) const {
   UNUSED_ARG(x);
   UNUSED_ARG(f);
   int n = static_cast<int>(m_leastSquares->nParams());
@@ -240,7 +240,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
     }
     // Calculate the step d that the model thinks we should take next
     calculateStep(w.J, w.f, w.hf, w.g, w.Delta, w.d, w.normd, options, inform,
-                   w.calculate_step_ws);
+                  w.calculate_step_ws);
 
     // Accept the step?
     w.Xnew = X;
@@ -253,7 +253,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
     //      md :=   m_k(d)
     // evaluated at the new step
     double md =
-      evaluateModel(w.f, w.J, w.hf, w.d, options, w.evaluate_model_ws);
+        evaluateModel(w.f, w.J, w.hf, w.d, options, w.evaluate_model_ws);
 
     // Calculate the quantity
     //   rho = 0.5||f||^2 - 0.5||fnew||^2 =   actual_reduction
@@ -267,8 +267,8 @@ bool TrustRegionMinimizer::iterate(size_t) {
           (no_reductions == 1)) {
         // recalculate rho based on the approx GN model
         // (i.e. the Gauss-Newton model evaluated at the Quasi-Newton step)
-        double rho_gn = calculateRho(w.normF, normFnew,
-                                      w.evaluate_model_ws.md_gn, options);
+        double rho_gn =
+            calculateRho(w.normF, normFnew, w.evaluate_model_ws.md_gn, options);
         if (rho_gn > options.eta_successful) {
           // switch back to gauss-newton
           w.use_second_derivatives = false;

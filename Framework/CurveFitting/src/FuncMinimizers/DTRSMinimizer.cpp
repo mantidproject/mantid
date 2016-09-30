@@ -250,7 +250,7 @@ double twoNorm(const DoubleFortranVector &v) {
 /// @param v1 :: The first vector.
 /// @param v2 :: The second vector.
 double dotProduct(const DoubleFortranVector &v1,
-                   const DoubleFortranVector &v2) {
+                  const DoubleFortranVector &v2) {
   return v1.dot(v2);
 }
 
@@ -281,7 +281,7 @@ double maxVal(const DoubleFortranVector &v, int n) {
 /// @param root1 :: The first real root if nroots > 0.
 /// @param root2 :: The second real root if nroots = 2.
 void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots,
-                     double &root1, double &root2) {
+                    double &root1, double &root2) {
 
   auto rhs = tol * a1 * a1;
   if (fabs(a0 * a2) > rhs) { // really is quadratic
@@ -365,7 +365,7 @@ void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots,
 /// @param root2 :: The second real root if nroots > 1.
 /// @param root3 :: The third real root if nroots == 3.
 void rootsCubic(double a0, double a1, double a2, double a3, double tol,
-                 int &nroots, double &root1, double &root2, double &root3) {
+                int &nroots, double &root1, double &root2, double &root3) {
 
   //  Check to see if the cubic is actually a quadratic
   if (a3 == zero) {
@@ -503,8 +503,8 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
 /// @param pi_beta :: (0) value of ||x||^beta,
 ///                   (i) ith derivative of ||x||^beta, i = 1, max_order
 void dtrsPiDerivs(int max_order, double beta,
-                    const DoubleFortranVector &x_norm2,
-                    DoubleFortranVector &pi_beta) {
+                  const DoubleFortranVector &x_norm2,
+                  DoubleFortranVector &pi_beta) {
   double hbeta = half * beta;
   pi_beta(0) = pow(x_norm2(0), hbeta);
   pi_beta(1) = hbeta * (pow(x_norm2(0), (hbeta - one))) * x_norm2(1);
@@ -546,10 +546,9 @@ void dtrsInitialize(dtrs_control_type &control, dtrs_inform_type &inform) {
 /// @param control :: A structure containing control information.
 /// @param inform :: A structure containing information.
 ///
-void dtrsSolveMain(int n, double radius, double f,
-                     const DoubleFortranVector &c, const DoubleFortranVector &h,
-                     DoubleFortranVector &x, const dtrs_control_type &control,
-                     dtrs_inform_type &inform) {
+void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
+                   const DoubleFortranVector &h, DoubleFortranVector &x,
+                   const dtrs_control_type &control, dtrs_inform_type &inform) {
 
   //  set initial values
 
@@ -881,8 +880,8 @@ void dtrsSolveMain(int n, double radius, double f,
 /// @param inform :: A structure containing information.
 ///
 void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
-                const DoubleFortranVector &h, DoubleFortranVector &x,
-                const dtrs_control_type &control, dtrs_inform_type &inform) {
+               const DoubleFortranVector &h, DoubleFortranVector &x,
+               const dtrs_control_type &control, dtrs_inform_type &inform) {
   //  scale the problem to solve instead
   //      minimize    q_s(x_s) = 1/2 <x_s, H_s x_s> + <c_s, x_s> + f_s
   //      subject to    ||x_s||_2 <= radius_s  or ||x_s||_2 = radius_s
@@ -945,7 +944,7 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
   //  solve the scaled problem
 
   dtrsSolveMain(n, radius_scale, f_scale, c_scale, h_scale, x, control_scale,
-                  inform);
+                inform);
 
   //  unscale the solution, function value, multiplier and related values
 
@@ -979,10 +978,10 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
 /// @param inform :: The inform struct.
 /// @param w :: The work struct.
 void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-                const DoubleFortranMatrix &hf, double Delta,
-                DoubleFortranVector &d, double &normd,
-                const nlls_options &options, nlls_inform &inform,
-                solve_dtrs_work &w) {
+               const DoubleFortranMatrix &hf, double Delta,
+               DoubleFortranVector &d, double &normd,
+               const nlls_options &options, nlls_inform &inform,
+               solve_dtrs_work &w) {
 
   dtrs_control_type dtrs_options;
   dtrs_inform_type dtrs_inform;
@@ -1049,7 +1048,7 @@ void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   }
 
   dtrsSolve(n, Delta, zero, w.v_trans, w.ew, w.d_trans, dtrs_options,
-             dtrs_inform);
+            dtrs_inform);
   if (dtrs_inform.status != ErrorCode::ral_nlls_ok) {
     inform.external_return = int(dtrs_inform.status);
     inform.external_name = "galahad_dtrs";
