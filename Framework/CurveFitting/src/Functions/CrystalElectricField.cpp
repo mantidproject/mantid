@@ -531,7 +531,7 @@ void intcalc(double pi, double r0, double gj, double z,
              const DoubleFortranMatrix &jt2, const DoubleFortranVector &e,
              DoubleFortranMatrix &inten, int dim, double temp) {
   // Original code from FOCUS calculated integrated intensity in barn
-  //auto constant = 4.0 * pi * pow(0.5 * r0 * gj, 2);
+  // auto constant = 4.0 * pi * pow(0.5 * r0 * gj, 2);
   // ISIS normalised data is in milibarn/steradian - need to multiply
   // by 1000 / 4 / PI
   auto constant = pow(0.5 * r0 * gj, 2) * 1000.;
