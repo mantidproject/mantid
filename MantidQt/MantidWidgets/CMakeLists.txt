@@ -389,6 +389,10 @@ include_directories ( ../../MantidQt/SpectrumViewer/inc )
 include_directories ( ../../MantidQt/Factory/inc )
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
+if(MAKE_VATES)
+  include( ${PARAVIEW_USE_FILE} )
+endif()
+
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
