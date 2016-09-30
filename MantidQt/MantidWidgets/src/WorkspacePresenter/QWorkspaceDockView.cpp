@@ -302,8 +302,8 @@ void QWorkspaceDockView::showRenameDialog(const StringList &wsNames) {
 * Save the old and the new name in m_renameMap. This is needed to restore
 * selection
 *   of the renamed workspace (if it was selected before renaming).
-* @param old_name :: Old name of a renamed workspace.
-* @param new_name :: New name of a renamed workspace.
+* @param oldName :: Old name of a renamed workspace.
+* @param newName :: New name of a renamed workspace.
 */
 void QWorkspaceDockView::recordWorkspaceRename(const std::string &oldName,
                                                const std::string &newName) {

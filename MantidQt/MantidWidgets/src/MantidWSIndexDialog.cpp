@@ -362,7 +362,7 @@ bool MantidWSIndexWidget::usingSpectraNumbers() const {
 //----------------------------------
 /**
  * Construct an object of this type
- * @param mui :: The MantidUI area
+ * @param parent :: The MantidUI area
  * @param flags :: Window flags that are passed the the QDialog constructor
  * @param wsNames :: the names of the workspaces to be plotted
  * @param showWaterfallOption :: If true the waterfall checkbox is created
