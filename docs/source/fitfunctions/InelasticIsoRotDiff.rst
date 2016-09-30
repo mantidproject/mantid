@@ -167,7 +167,7 @@ and the overal intensity of the signal with a fit to the following model:
 
 Output:
 
-.. testoutput:: ExampleElasticIsoRotDiff
+.. testoutput:: ExampleInelasticIsoRotDiff
 
     Optimal Height within 10% of nominal value
     Optimal Radius within 5% of nominal value
