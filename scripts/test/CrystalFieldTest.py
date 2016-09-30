@@ -372,6 +372,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.background = Background(peak=Function('Gaussian', Height=10*c_mbsr, Sigma=1),
                         background=Function('LinearBackground', A0=1.0, A1=0.01))
         cf.ties(B20=0.37737, B60=0, B62=0, B64=0, B66=0, IntensityScaling=1)
+        cf.ToleranceIntensity = 0.001
         fit = CrystalFieldFit(cf, InputWorkspace=ws)
         fit.fit()
         self.assertAlmostEqual(cf.background.peak.param['PeakCentre'], 7.62501442212e-10, 8)
@@ -460,6 +461,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.setBackground(peak=Function('Gaussian', Height=10, Sigma=0.3),
                          background=Function('FlatBackground', A0=1.0))
         cf.ties(IntensityScaling0 = 1.0, IntensityScaling1 = 1.0)
+        cf.ToleranceIntensity = 0.001
 
         ws0 = makeWorkspace(*origin.getSpectrum(0))
         ws1 = makeWorkspace(*origin.getSpectrum(1))
