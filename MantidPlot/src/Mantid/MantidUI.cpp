@@ -4011,6 +4011,6 @@ QWidget *MantidUI::getParent() { return m_appWindow; }
 
 #ifdef MAKE_VATES
 bool MantidUI::doesVatesSupportOpenGL() {
-  return vtkPVDisplayInformation::SupportsOpenGLLocally()
+	return vtkPVDisplayInformation::SupportsOpenGLLocally();
 }
 #endif
