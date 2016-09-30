@@ -13,6 +13,7 @@
 // third party library headers (n/a)
 // standard library headers (n/a)
 #include <limits>
+#include <numeric>
 
 #include <boost/make_shared.hpp>
 using Mantid::CurveFitting::Functions::InelasticIsoRotDiff;
