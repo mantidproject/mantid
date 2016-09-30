@@ -111,7 +111,7 @@ class CalculateSampleTransmission(PythonAlgorithm):
         """
         Calculates transmission and scattering at a given wavelength.
 
-        @param wavelength Wavelength at which to calculate (in Angstrom)
+        @param wavelength Wavelength at which to calculate (in Angstroms)
         @return Tuple of transmission and scattering percentages
         """
 

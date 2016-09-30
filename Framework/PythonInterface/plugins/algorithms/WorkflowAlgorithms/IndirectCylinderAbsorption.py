@@ -111,9 +111,11 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
             builder = MaterialBuilder()
             mat = builder.setFormula(self._sample_chemical_formula).setMassDensity(self._sample_mass_density).build()
             self._sample_number_density = mat.numberDensity
-            SetSampleMaterial(sample_wave_ws, ChemicalFormula=self._sample_chemical_formula, SampleNumberDensity=self._sample_number_density, SampleMassDensity = self._sample_mass_density)
+            SetSampleMaterial(sample_wave_ws, ChemicalFormula=self._sample_chemical_formula,
+                              SampleNumberDensity=self._sample_number_density, SampleMassDensity = self._sample_mass_density)
         else:
-            SetSampleMaterial(sample_wave_ws, ChemicalFormula=self._sample_chemical_formula, SampleNumberDensity=self._sample_number_density)
+            SetSampleMaterial(sample_wave_ws, ChemicalFormula=self._sample_chemical_formula,
+                              SampleNumberDensity=self._sample_number_density)
 
         prog.report('Calculating sample corrections')
         CylinderAbsorption(InputWorkspace=sample_wave_ws,
@@ -147,7 +149,8 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                     builder = MaterialBuilder()
                     mat = builder.setFormula(self._can_chemical_formula).setMassDensity(self._can_mass_density).build()
                     self._can_number_density = mat.numberDensity
-                    SetSampleMaterial(can_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_number_density, SampleMassDensity = self._can_mass_density)
+                    SetSampleMaterial(can_wave_ws, ChemicalFormula=self._can_chemical_formula,
+                                      SampleNumberDensity=self._can_number_density, SampleMassDensity = self._can_mass_density)
                 else:
                     SetSampleMaterial(can_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_number_density)
 
