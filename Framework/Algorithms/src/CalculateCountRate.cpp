@@ -88,28 +88,30 @@ void CalculateCountRate::init() {
       "rate related to the source beam intensity. Change this to "
       "'false' if appropriate time series log is broken || not attached to "
       "the input workspace.");
-  declareProperty("UseLogDerivative", false, "If the normalization log gives "
-                                             "cumulative counting, derivative "
-                                             "of this log is necessary to get "
-                                             "correct normalization values.");
+  declareProperty("UseLogDerivative", false,
+                  "If the normalization log contains "
+                  "cumulative counting, derivative "
+                  "of this log is necessary to get "
+                  "correct normalization values.");
   declareProperty(
       "NormalizationLogName", "proton_charge",
       "The name of the log, used in the counting rate normalization. ");
-  declareProperty(
-      "UseNormLogGranularity", true,
-      "If true, the calculated log will have the normalization log "
-      "accuracy; If false, the 'NumTimeSteps' in the visualization "
-      "workspace below will be used for the target log granularity too.");
   setPropertyGroup("NormalizeTheRate", used_logs_mode);
   setPropertyGroup("UseLogDerivative", used_logs_mode);
   setPropertyGroup("NormalizationLogName", used_logs_mode);
-  setPropertyGroup("UseNormLogGranularity", used_logs_mode);
 
+  // Results
+  declareProperty("CountRateLogName", "block_count_rate",
+                  boost::make_shared<Kernel::MandatoryValidator<std::string>>(),
+                  "The name of the processed time series log with instrument "
+                  "count rate to be added"
+                  " to the source workspace");
   declareProperty(
-      "CountRateLogName", "block_count_rate",
-      boost::make_shared<Kernel::MandatoryValidator<std::string>>(),
-      "The name of the processed time series log with count rate to be added"
-      " to the source workspace");
+      "UseNormLogGranularity", true,
+      "If true, the count rate log will have the normalization log "
+      "accuracy; If false, the 'NumTimeSteps' in the visualization "
+      "workspace below will be used for the target log granularity too.");
+
   // visualization group
   std::string spur_vis_mode("Spurion visualization");
   declareProperty(
@@ -332,7 +334,7 @@ void CalculateCountRate::setOutLogParameters(
   if (NormLogName == TargetLog) {
     throw std::invalid_argument("Target log name: " + TargetLog +
                                 " and normalization log name: " + NormLogName +
-                                " Can not be the same");
+                                " can not be the same");
   }
 
   m_normalizeResult = getProperty("NormalizeTheRate");
@@ -343,7 +345,7 @@ void CalculateCountRate::setOutLogParameters(
   if (!logPresent) {
     if (m_normalizeResult) {
       this->disableNormalization(
-          "Normalization log " + NormLogName +
+          "Normalization log '" + NormLogName +
           "' values requested but the log is not attached to the "
           "workspace. Normalization disabled");
     }
@@ -358,7 +360,7 @@ void CalculateCountRate::setOutLogParameters(
       g_log.warning() << "Using accuracy of the log: '" << NormLogName
                       << "' is requested but the log is not attached to the "
                          "workspace. Will use accuracy defined by "
-                         "'NumTimeSteps' property value\n";
+                         "'NumTimeSteps' property value.\n";
       useLogAccuracy = false;
     }
   } else {
@@ -456,8 +458,8 @@ void CalculateCountRate::setOutLogParameters(
   if (useLogAccuracy) {
     // Let's try to establish log step (it should be constant in real
     // applications) and define
-    // binning in such a way, that each historgam bin accomodates single log
-    // value
+    // binning in such a way, that each historgam bin accomodates
+    // single log value.
     auto iTMax = runTMax.totalNanoseconds();
     auto iTMin = m_TRangeMin.totalNanoseconds();
     int64_t provDT = (iTMax - iTMin) / (m_numLogSteps - 1);
@@ -569,13 +571,19 @@ void CalculateCountRate::setSourceWSandXRanges(
     m_XRangeMax = realMax * (1. + std::numeric_limits<double>::epsilon());
   }
   // check final ranges valid
-  if (m_XRangeMin > m_XRangeMax) {
-    throw std::invalid_argument(
-        " Minimal spurion search data range is bigger than the maximal range.");
-  }
   if (m_XRangeMax < realMin || m_XRangeMin > realMax) {
     throw std::invalid_argument(
-        " Spurion data search range lies outsize of the workspace data range.");
+        " Spurion data search range: [" + std::to_string(m_XRangeMin) + "," +
+        std::to_string(m_XRangeMin) +
+        "] lies outside of the workspace's real data range: [" +
+        std::to_string(realMin) + "," + std::to_string(realMax) + "]");
+  }
+
+  if (m_XRangeMin > m_XRangeMax) {
+    throw std::invalid_argument(" Minimal spurion search data limit is bigger "
+                                "than the maximal limit. ( Min: " +
+                                std::to_string(m_XRangeMin) + "> Max: " +
+                                std::to_string(m_XRangeMax) + ")");
   }
 }
 
