@@ -31,7 +31,7 @@
 #ifndef MANTIDQT_API_PIXMAPS_H
 #define MANTIDQT_API_PIXMAPS_H
 
-#include "DLLOption.h"
+#include "MantidQtAPI/DLLOption.h"
 #include "qpixmap.h"
 
 namespace MantidQt {
