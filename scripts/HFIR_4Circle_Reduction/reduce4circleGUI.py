@@ -351,16 +351,15 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tableWidget_kShift.setup()
 
         # Radio buttons
-        self.ui.comboBox_indexFrom.clear()
-        self.ui.comboBox_indexFrom.addItem('By calculation')
-        self.ui.comboBox_indexFrom.addItem('From SPICE')
-
-        # self.ui.radioButton_hklFromSPICE.setChecked(True)
-        # self.ui.radioButton_indexFromCalUB.setChecked(False)
+        self.ui.radioButton_ubFromTab1.setChecked(True)
 
         # combo-box
         self.ui.comboBox_kVectors.clear()
         self.ui.comboBox_kVectors.addItem('0: (0, 0, 0)')
+
+        self.ui.comboBox_indexFrom.clear()
+        self.ui.comboBox_indexFrom.addItem('By calculation')
+        self.ui.comboBox_indexFrom.addItem('From SPICE')
 
         # tab
         self.ui.tabWidget.setCurrentIndex(0)
@@ -2313,14 +2312,16 @@ class MainWindow(QtGui.QMainWindow):
         elif self.ui.radioButton_loadUBmatrix.isChecked():
             # load ub matrix from a file
             # VZ-FUTURE: Implement this next!
-            ub_matrix = set_ub_from_file()
+            ub_matrix = read_ub_from_file()
 
         elif self.ui.radioButton_ubFromList.isChecked():
             # load ub matrix from text editor
             ub_matrix = self.set_ub_from_text()
 
         else:
-            raise
+            raise RuntimeError('None radio button is selected for UB')
+
+        print '[DB...BAT] UB to set: ', ub_matrix
 
         # set to in-use UB matrix and control
         self.ui.tableWidget_ubInUse.set_from_matrix(ub_matrix)
