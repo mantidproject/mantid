@@ -624,6 +624,12 @@ public:
     TS_ASSERT(p.isValid().empty());
   }
 
+  void test_multiFileOptionalLoadEmpty() {
+    MultipleFileProperty p("Filename", FileProperty::OptionalLoad);
+    p.setValue("");
+    TS_ASSERT(p.isValid().empty());
+  }
+
 private:
   //////////////////////////////////////////////////////////////////////////////////////////////
   // Private helper functions.
