@@ -60,6 +60,7 @@ public:
   MOCK_CONST_METHOD0(getWorkspaceNamesToFit, std::vector<std::string>());
   MOCK_METHOD1(userChangedDatasetIndex, void(int));
   MOCK_METHOD1(setCompatibilityMode, void(bool));
+  MOCK_METHOD1(fitRawDataClicked, void(bool));
 };
 
 class MuonAnalysisFitFunctionPresenterTest : public CxxTest::TestSuite {

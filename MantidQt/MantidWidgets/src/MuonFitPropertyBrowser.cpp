@@ -231,6 +231,19 @@ void MuonFitPropertyBrowser::doubleChanged(QtProperty *prop) {
   }
 }
 
+/** Called when a bool property changed
+ * @param prop :: A pointer to the property
+ */
+void MuonFitPropertyBrowser::boolChanged(QtProperty *prop) {
+  if (prop == m_rawData) {
+    const bool val = m_boolManager->value(prop);
+    emit fitRawDataClicked(val);
+  } else {
+    // defer to parent class
+    FitPropertyBrowser::boolChanged(prop);
+  }
+}
+
 /**
 *Get the registered function names
 */

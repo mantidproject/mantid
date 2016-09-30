@@ -2081,6 +2081,9 @@ void MuonAnalysis::loadFittings() {
           SLOT(dataToFitChanged()));
   connect(m_dataSelector, SIGNAL(workspaceChanged()), this,
           SLOT(dataToFitChanged()));
+  connect(m_uiForm.plotCreation, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(updateDataPresenterOverwrite(int)));
+  m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
   // Set compatibility mode on/off as appropriate
   const bool isCompMode = m_optionTab->getCompatibilityMode();
   m_fitFunctionPresenter->setCompatibilityMode(isCompMode);
@@ -2966,6 +2969,17 @@ void MuonAnalysis::setLoadCurrentRunEnabled(bool enabled) {
 void MuonAnalysis::compatibilityModeChanged(int state) {
   m_fitFunctionPresenter->setCompatibilityMode(state ==
                                                Qt::CheckState::Checked);
+}
+
+/**
+ * Update the fit data presenter with current overwrite setting
+ * @param state :: [input] (not used) Setting of combo box
+ */
+void MuonAnalysis::updateDataPresenterOverwrite(int state) {
+  Q_UNUSED(state);
+  if (m_fitDataPresenter) {
+    m_fitDataPresenter->setOverwrite(isOverwriteEnabled());
+  }
 }
 
 } // namespace MantidQt
