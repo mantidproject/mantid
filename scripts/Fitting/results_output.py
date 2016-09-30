@@ -26,6 +26,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
 
+# Some naming conventions for the output files
 BENCHMARK_VERSION_STR = 'v3.8'
 FILENAME_SUFFIX_ACCURACY = 'acc'
 FILENAME_SUFFIX_RUNTIME = 'runtime'
@@ -33,15 +34,23 @@ FILENAME_SUFFIX_RUNTIME = 'runtime'
 import post_processing as postproc
 
 # TO-DO: split into prepare + print
-def print_group_results_tables(minimizers, results_per_test, problems_obj, group_name, use_errors, simple_text=True, rst=False, color_scale=None):
+def print_group_results_tables(minimizers, results_per_test, problems_obj, group_name, use_errors,
+                               simple_text=True, rst=False, color_scale=None):
     """
     Prints in possibly several alternative formats.
 
     @param minimizers :: list of minimizer names
     @param results_per_test :: result objects
+    @param problems_obj :: definitions of the test problems
+    @param group_name :: name of this group of problems (example 'NIST "lower difficulty"', or
+                         'Neutron data')
+    @param use_errors :: whether to use observational errors
     @param simple_text :: whether to print the tables in a simple text format
     @param rst :: whether to print the tables in rst format. They are printed to the standard outputs
                   and to files following specific naming conventions
+    @param color_scale :: threshold-color pairs. This is used for RST tables. The number of levels
+                          must be consistent with the style sheet used in the documentation pages (5
+                          at the moment).
     """
 
     num_tests = len(results_per_test)
@@ -65,13 +74,10 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
         problems.append(name_index)
         # TODO: move this to the nist loader, not here!
         if 'nist_' in group_name:
-            linked_problems.append("`{0} <http://www.itl.nist.gov/div898/strd/nls/data/{1}.shtml>`__".format(name_index, name.lower()))
+            linked_problems.append("`{0} <http://www.itl.nist.gov/div898/strd/nls/data/{1}.shtml>`__".
+                                   format(name_index, name.lower()))
         else:
             linked_problems.append(name)
-        #print(" ***** DEBUG problems len:",len(problems_obj))
-        #print(" ***** DEBUG problems[test_idx]:",problems_obj[test_idx])
-        #if prob_count > 1:
-        #    linked_problems.append(problems_obj[test_idx].linked_name)
 
     # An np matrix for convenience
     # 1 row per problem+start, 1 column per minimizer
@@ -84,9 +90,6 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
     # Min across all minimizers
     min_sum_err_sq = np.nanmin(accuracy_tbl, 1)
     min_runtime = np.nanmin(time_tbl, 1)
-
-    #prec_digits = 5
-    #np.set_printoptions(precision=prec_digits)
 
     norm_acc_rankings = accuracy_tbl / min_sum_err_sq[:, None]
     norm_runtimes = time_tbl / min_runtime[:, None]
@@ -190,17 +193,63 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
 
 
 def weighted_suffix_string(use_errors):
+    """
+    Produces a suffix weighted/unweighted. Used to generate names of
+    output files.
+    """
     values = {True: 'weighted', False: 'unweighted'}
     return values[use_errors]
 
+def display_name_for_minimizers(names):
+    """
+    Converts minimizer names into their "display names". For example
+    to rename DTRS to "Trust region" or similar
+
+    """
+    display_names = names
+    # Quick fix for DTRS name in version 3.8 - REMOVE
+    for idx, minimizer in enumerate(names):
+        if 'DTRS' == minimizer:
+            display_names[idx] = 'Trust Region'
+
+    return display_names
+
+def calc_cell_len_rst_table(columns_txt, items_link):
+    """
+    Calculate what width in ascii characters we need for an RST table.
+
+    @param columns_txt :: list of the contents of the column headers
+    """
+    # One length for all cells
+    cell_len = 50
+    cell_len = 0
+    for col in columns_txt:
+        new_len = len(col) + 2
+        if new_len > cell_len:
+            cell_len = new_len
+
+    # Beware of the long links
+    links_len = 0
+    if items_link and isinstance(items_link, list):
+        links_len = max([len(item) for item in items_link])
+    elif items_link:
+        links_len = len(items_link)
+
+    additional_len = 0
+    if items_link:
+        additional_len = links_len
+    cell_len += int(additional_len/1.2)
+
+    return cell_len
+
 def build_rst_table(columns_txt, rows_txt, cells, comparison_type, using_errors, color_scale=None):
     """"
-    Builds an RST table, given the list of column and row headers,
+    Builds an RST table as a string, given the list of column and row headers,
     and a 2D numpy array with values for the cells.
     This can be tricky/counterintuitive, see:
     http://docutils.sourceforge.net/docs/dev/rst/problems.html
 
-    @param colums_txt :: the text for the columns, one item per column
+    @param columns_txt :: the text for the columns, one item per column
     @param rows_txt :: the text for the rows (will go in the leftmost column)
     @param cells :: a 2D numpy array with as many rows as items have been given
     in rows_txt, and as many columns as items have been given in columns_txt
@@ -211,29 +260,20 @@ def build_rst_table(columns_txt, rows_txt, cells, comparison_type, using_errors,
     @param color_scale :: list with pairs of threshold value - color, to produce color
     tags for the cells
     """
-    # TODO: quick fix for DTRS name - REMOVE
-    for idx, minimizer in enumerate(columns_txt):
-        if 'DTRS' == minimizer:
-            columns_txt[idx] = 'Trust region'
+    columns_txt = display_name_for_minimizers(columns_txt)
 
-    # One length for all cells
-    cell_len = 50
-    cell_len = 0
-    for col in columns_txt:
-        new_len = len(col) + 2
-        if new_len > cell_len:
-            cell_len = new_len
+    #items_link = build_items_links(comparison_type, )
 
-    # TODO: tidy this up and get it out of here!
+    # TO-DO: this doesn't belong in here. Tidy this up and get it out of here!
     # links for the cells of the summary tables (to the detailed results
-    if 'summary' == comparison_type and 'using_errors':
+    if 'summary' == comparison_type and using_errors:
         items_link = [ 'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_lower',
                        'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_average',
                        'Minimizers_unweighted_comparison_in_terms_of_runtime_nist_higher',
                        'Minimizers_unweighted_comparison_in_terms_of_runtime_neutron_data',
                        'Minimizers_unweighted_comparison_in_terms_of_runtime_cutest'
                      ]
-    elif 'summary' == comparison_type and not 'using_errors':
+    elif 'summary' == comparison_type and not using_errors:
         items_link = [ 'Minimizers_weighted_comparison_in_terms_of_accuracy_nist_lower',
                        'Minimizers_weighted_comparison_in_terms_of_accuracy_nist_average',
                        'Minimizers_weighted_comparison_in_terms_of_accuracy_nist_higher',
@@ -248,18 +288,7 @@ def build_rst_table(columns_txt, rows_txt, cells, comparison_type, using_errors,
     else:
         items_link = ''
 
-
-    links_len = 0
-    if items_link and isinstance(items_link, list):
-        links_len = max([len(item) for item in items_link])
-    elif items_link:
-        links_len = len(items_link)
-
-    additional_len = 0
-    if items_link:
-        additional_len = links_len
-    cell_len += int(additional_len/1.2)
-
+    cell_len = calc_cell_len_rst_table(columns_txt, items_link)
 
     # The first column tends to be disproportionately long if it has a link
     first_col_len = cell_len
@@ -354,8 +383,9 @@ def print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, time_tb
                                     min_sum_err_sq[test_idx]))
         results_text += "\n"
 
-    # Beware for the statistics, if some of the fits fail badly, they'll produce 'nan'
-    # values => 'nan' errors. Requires np.nanmedian() and the like nan-safe functions.
+    # If some of the fits fail badly, they'll produce 'nan' values =>
+    # 'nan' errors. Requires np.nanmedian() and the like nan-safe
+    # functions.
 
     # summary lines
     results_text += '---------------- Summary (accuracy): -------- \n'
