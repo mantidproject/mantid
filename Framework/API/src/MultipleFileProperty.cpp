@@ -37,7 +37,7 @@ bool doesNotContainWildCard(const std::string &ext) {
 namespace Mantid {
 namespace API {
 /**
- * Default constructor with action
+ * Alternative constructor with action
  *
  * @param name   :: The name of the property
  * @param action :: File action
@@ -50,9 +50,7 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
           name, std::vector<std::vector<std::string>>(),
           boost::make_shared<MultiFileValidator>(
               exts, (action == FileProperty::Load)),
-          Direction::Input),
-      m_multiFileLoadingEnabled(), m_exts(), m_parser(), m_defaultExt(""),
-      m_action() {
+          Direction::Input) {
   if (action != FileProperty::Load && action != FileProperty::OptionalLoad) {
     /// raise error for unsupported actions
     throw std::runtime_error(
@@ -74,7 +72,7 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
 }
 
 /**
- * Alternative constructor with no action
+ * Default constructor with default action
  *
  * @param name :: The name of the property
  * @param exts ::  The allowed/suggested extensions
@@ -92,7 +90,7 @@ bool MultipleFileProperty::isOptional() const {
 }
 
 /**
- * @returns a string depending on whether an empty value is valid
+ * @returns Empty string if empty value is valid, error message otherwise
  */
 std::string MultipleFileProperty::isEmptyValueValid() const {
   if (isOptional()) {

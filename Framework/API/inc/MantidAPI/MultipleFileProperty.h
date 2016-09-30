@@ -119,27 +119,21 @@ namespace API {
 class DLLExport MultipleFileProperty
     : public Kernel::PropertyWithValue<std::vector<std::vector<std::string>>> {
 public:
-  /// Default constructor
   MultipleFileProperty(
       const std::string &name, unsigned int action,
       const std::vector<std::string> &exts = std::vector<std::string>());
 
-  /// Alternative constructor with default action
   MultipleFileProperty(
       const std::string &name,
       const std::vector<std::string> &exts = std::vector<std::string>());
 
-  /// 'Virtual copy constructor
   MultipleFileProperty *clone() const override {
     return new MultipleFileProperty(*this);
   }
 
-  /// Overridden functions to accomodate std::vector<std::vector<std::string>>>
-  /// structure of this property.
   std::string setValue(const std::string &propValue) override;
   std::string value() const override;
   std::string getDefault() const override;
-  /// Checks if this property is optional
   bool isOptional() const;
 
   /// @return the vector of suggested extensions. For use in GUIs showing files.
