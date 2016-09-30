@@ -26,6 +26,8 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
           SLOT(updateCan()));
   connect(m_uiForm.spShift, SIGNAL(valueChanged(double)), this,
           SLOT(updateCan()));
+  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
   m_uiForm.spPreviewSpec->setMinimum(0);
   m_uiForm.spPreviewSpec->setMaximum(0);
@@ -388,15 +390,6 @@ void ContainerSubtraction::postProcessComplete(bool error) {
   // Handle preview plot
   plotPreview(m_uiForm.spPreviewSpec->value());
 
-  // Handle Mantid plotting
-  QString plotType = m_uiForm.cbPlotOutput->currentText();
-
-  if (plotType == "Spectra" || plotType == "Both")
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
-
-  if (plotType == "Contour" || plotType == "Both")
-    plot2D(QString::fromStdString(m_pythonExportWsName));
-
   // Clean up unwanted workspaces
   IAlgorithm_sptr deleteAlg =
       AlgorithmManager::Instance().create("DeleteWorkspace");
@@ -436,11 +429,6 @@ void ContainerSubtraction::absCorComplete(bool error) {
     addConvertUnitsStep(ws, m_originalSampleUnits, "", eMode);
   }
 
-  // Add save algorithms if required
-  bool save = m_uiForm.ckSave->isChecked();
-  if (save)
-    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
-
   if (m_uiForm.ckShiftCan->isChecked()) {
     IAlgorithm_sptr shiftLog =
         AlgorithmManager::Instance().create("AddSampleLog");
@@ -453,11 +441,42 @@ void ContainerSubtraction::absCorComplete(bool error) {
         "LogText", boost::lexical_cast<std::string>(m_uiForm.spShift->value()));
     m_batchAlgoRunner->addAlgorithm(shiftLog);
   }
+  // Enable post process plotting and saving
+  m_uiForm.cbPlotOutput->setEnabled(true);
+  m_uiForm.pbPlot->setEnabled(true);
+  m_uiForm.pbSave->setEnabled(true);
 
   // Run algorithm queue
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(postProcessComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Handles saving of workspace
+ */
+void ContainerSubtraction::saveClicked() {
+
+  // Check workspace exists
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Handles Mantid plotting of workspace
+ */
+void ContainerSubtraction::plotClicked() {
+  QString plotType = m_uiForm.cbPlotOutput->currentText();
+
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true)) {
+
+    if (plotType == "Spectra" || plotType == "Both")
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+
+    if (plotType == "Contour" || plotType == "Both")
+      plot2D(QString::fromStdString(m_pythonExportWsName));
+  }
 }
 
 } // namespace CustomInterfaces

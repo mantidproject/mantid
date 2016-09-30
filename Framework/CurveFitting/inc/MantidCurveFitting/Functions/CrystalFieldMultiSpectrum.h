@@ -37,6 +37,7 @@ public:
   std::string name() const override { return "CrystalFieldMultiSpectrum"; }
   const std::string category() const override { return "General"; }
   size_t getNumberDomains() const override;
+  void setAttribute(const std::string &name, const Attribute &) override;
   std::vector<API::IFunction_sptr> createEquivalentFunctions() const override;
   void buildTargetFunction() const override;
 
@@ -47,16 +48,22 @@ private:
   /// Build a function for a single spectrum.
   API::IFunction_sptr buildSpectrum(int nre, const DoubleFortranVector &en,
                                     const ComplexFortranMatrix &wf,
-                                    double temperature, double fwhm) const;
+                                    double temperature, double fwhm,
+                                    size_t i) const;
   /// Update a function for a single spectrum.
-  bool updateSpectrum(API::IFunction &spectrum, int nre,
+  void updateSpectrum(API::IFunction &spectrum, int nre,
                       const DoubleFortranVector &en,
-                      const ComplexFortranMatrix &wf, double temperature) const;
+                      const ComplexFortranMatrix &wf, double temperature,
+                      size_t i) const;
   /// Calculate excitations at given temperature
   void calcExcitations(int nre, const DoubleFortranVector &en,
                        const ComplexFortranMatrix &wf, double temperature,
                        DoubleFortranVector &eExcitations,
                        DoubleFortranVector &iExcitations) const;
+  /// Cache number of fitted peaks
+  mutable std::vector<size_t> m_nPeaks;
+  /// Cache number of all peaks
+  mutable std::vector<size_t> m_maxNPeaks;
 };
 
 } // namespace Functions

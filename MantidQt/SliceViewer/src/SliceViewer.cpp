@@ -26,6 +26,7 @@
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/SignalBlocker.h"
 #include "MantidQtAPI/SignalRange.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
@@ -540,15 +541,6 @@ void SliceViewer::initMenus() {
 //------------------------------------------------------------------------------
 /** Intialize the zooming/panning tools */
 void SliceViewer::initZoomer() {
-  //  QwtPlotZoomer * zoomer = new CustomZoomer(m_plot->canvas());
-  //  zoomer->setMousePattern(QwtEventPattern::MouseSelect1,  Qt::LeftButton);
-  //  zoomer->setTrackerMode(QwtPicker::AlwaysOff);
-  //  const QColor c(Qt::darkBlue);
-  //  zoomer->setRubberBandPen(c);
-  //  zoomer->setTrackerPen(c);
-  //  QObject::connect(zoomer, SIGNAL(zoomed(const QRectF &)),
-  //      this, SLOT(zoomRectSlot(const QRectF &)));
-
   QwtPlotPicker *zoomer = new QwtPlotPicker(m_plot->canvas());
   zoomer->setSelectionFlags(QwtPicker::RectSelection |
                             QwtPicker::DragSelection);
@@ -2611,6 +2603,176 @@ void SliceViewer::applyColorScalingForCurrentSliceIfRequired() {
   if (useAutoColorScaleforCurrentSlice) {
     setColorScaleAutoSlice();
   }
+}
+
+/**
+ * Load the state of the slice viewer from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
+void SliceViewer::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+
+  int dimX, dimY, aspectRatio, normalization;
+  double xMin, yMin, xMax, yMax;
+  bool dynamicRebin, fastRender, autoRebin, overlayVisible;
+  std::vector<float> slicePoints;
+
+  // read in settings from project file
+  tsv.selectLine("LineMode");
+  tsv >> overlayVisible;
+  tsv.selectLine("Dimensions");
+  tsv >> dimX >> dimY;
+  tsv.selectLine("SlicePoint");
+  tsv >> slicePoints;
+  tsv.selectLine("DynamicRebinMode");
+  tsv >> dynamicRebin;
+  tsv.selectLine("FasterRendering");
+  tsv >> fastRender;
+  tsv.selectLine("Normalization");
+  tsv >> normalization;
+  auto norm = static_cast<Mantid::API::MDNormalization>(normalization);
+  tsv.selectLine("AspectRatioType");
+  tsv >> aspectRatio;
+  auto ratio = static_cast<AspectRatioType>(aspectRatio);
+  tsv.selectLine("AutoRebin");
+  tsv >> autoRebin;
+  tsv.selectLine("Limits");
+  tsv >> xMin >> yMin >> xMax >> yMax;
+
+  // set slice points for each dimension
+  for (size_t i = 0; i < slicePoints.size(); ++i) {
+    setSlicePoint(static_cast<int>(i), slicePoints[i]);
+  }
+
+  // setup dimension widgets
+  if (tsv.selectSection("dimensionwidgets")) {
+    std::string dimensionLines;
+    tsv >> dimensionLines;
+    loadDimensionWidgets(dimensionLines);
+  }
+
+  setXYDim(dimX, dimY);
+  setAspectRatio(ratio);
+  setXYLimits(xMin, xMax, yMin, yMax);
+  setRebinMode(dynamicRebin);
+  setFastRender(fastRender);
+  setNormalization(norm);
+  ui.btnAutoRebin->setChecked(autoRebin);
+  m_syncLineMode->toggle(overlayVisible);
+
+  // setup color map
+  if (tsv.selectSection("colormap")) {
+    std::string colorMapLines;
+    tsv >> colorMapLines;
+    m_colorBar->loadFromProject(colorMapLines);
+  }
+
+  // setup line overlay
+  if (tsv.selectSection("overlay")) {
+    std::string overlayLines;
+    tsv >> overlayLines;
+    m_lineOverlay->loadFromProject(overlayLines);
+  }
+
+  // set any peak workspaces here
+  // this ensures the presenter and the slice viewer are linked properly
+  if (tsv.selectSection("peaksviewer")) {
+    std::string peaksViewerLines;
+    tsv >> peaksViewerLines;
+    API::TSVSerialiser peaks(peaksViewerLines);
+
+    QStringList names;
+    for (auto section : peaks.sections("peaksworkspace")) {
+      API::TSVSerialiser sec(section);
+      QString name;
+
+      sec.selectLine("Name");
+      sec >> name;
+      names << name;
+    }
+
+    setPeaksWorkspaces(names);
+  }
+
+  // handle overlay workspace
+  if (tsv.selectLine("OverlayWorkspace")) {
+    std::string workspace_name;
+    tsv >> workspace_name;
+
+    m_overlayWSName = workspace_name;
+    dynamicRebinComplete(false);
+  }
+}
+
+/** Load the current state of the dimension widgets from a string
+ * @param lines :: a string containing the state of the widgets
+ */
+void SliceViewer::loadDimensionWidgets(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+
+  size_t nDims;
+  tsv.selectLine("NumDimensions");
+  tsv >> nDims;
+
+  for (size_t i = 0; i < nDims; i++) {
+    double thickness;
+    int numBins;
+    tsv.selectLine("Dimension", i);
+    tsv >> thickness >> numBins;
+
+    m_dimWidgets[i]->setNumBins(numBins);
+    m_dimWidgets[i]->setThickness(thickness);
+  }
+
+  updateDimensionSliceWidgets();
+}
+
+/**
+ * Save the state of th slice viewer to a Mantid project file
+ * @return a string representing the current state
+ */
+std::string SliceViewer::saveToProject() const {
+  API::TSVSerialiser tsv;
+
+  tsv.writeLine("LineMode") << m_lineOverlay->isShown();
+  tsv.writeLine("Dimensions") << m_dimX << m_dimY;
+  tsv.writeLine("SlicePoint") << m_slicePoint.toString("\t");
+  tsv.writeLine("DynamicRebinMode") << m_rebinMode;
+  tsv.writeLine("FasterRendering") << m_fastRender;
+  tsv.writeLine("Normalization") << static_cast<int>(getNormalization());
+  tsv.writeLine("AspectRatioType") << static_cast<int>(m_aspectRatioType);
+  tsv.writeLine("AutoRebin") << isAutoRebinSet();
+
+  auto xLimits = getXLimits();
+  auto yLimits = getYLimits();
+
+  tsv.writeLine("Limits");
+  tsv << xLimits.minValue() << yLimits.minValue();
+  tsv << xLimits.maxValue() << yLimits.maxValue();
+
+  tsv.writeSection("dimensionwidgets", saveDimensionWidgets());
+  tsv.writeSection("colormap", m_colorBar->saveToProject());
+  tsv.writeSection("overlay", m_lineOverlay->saveToProject());
+
+  if (m_overlayWS)
+    tsv.writeLine("OverlayWorkspace") << m_overlayWS->name();
+
+  return tsv.outputLines();
+}
+
+/** Save the current state of the dimension widgets to string
+ * @return a string containing the state of the widgets
+ */
+std::string SliceViewer::saveDimensionWidgets() const {
+  API::TSVSerialiser tsv;
+  tsv.writeLine("NumDimensions") << m_dimWidgets.size();
+
+  for (const auto &dim : m_dimWidgets) {
+    tsv.writeLine("Dimension");
+    tsv << dim->getThickness() << dim->getNumBins();
+  }
+
+  return tsv.outputLines();
 }
 
 } // namespace

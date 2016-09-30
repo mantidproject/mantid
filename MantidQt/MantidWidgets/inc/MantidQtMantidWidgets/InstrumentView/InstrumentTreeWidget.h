@@ -30,6 +30,9 @@ public:
                               double &ymin, double &zmin);
   // Mantid::Kernel::V3D getSamplePos()const;
   QModelIndex findComponentByName(const QString &name) const;
+  /// Find all expanded components
+  QStringList
+  findExpandedComponents(const QModelIndex &parent = QModelIndex()) const;
 public slots:
   void sendComponentSelectedSignal(const QModelIndex);
 signals:

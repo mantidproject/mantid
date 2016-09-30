@@ -49,7 +49,7 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libTKernel.dylib",
                      "libTKBO.dylib",
                      "libTKernel.dylib",
-                     "libTKBO.dylib",
+                     "libTKShHealing.dylib",
                      "libTKPrim.dylib",
                      "libTKMesh.dylib",
                      "libTKBRep.dylib",
@@ -66,6 +66,7 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libhdf5.dylib",
                      "libhdf5_hl.dylib",
                      "libhdf5_cpp.dylib",
+                     "libhdf5_hl_cpp.dylib",
                      "libmfhdf.dylib",
                      "libdf.dylib",
                      "libsz.dylib",
@@ -79,6 +80,10 @@ library_filenames = ["libboost_regex-mt.dylib",
 poco_version = "@POCO_VERSION@".split(".").map(&:to_i)
 if(poco_version[0] > 1 || (poco_version[0] == 1 && poco_version[1] >= 6))
   library_filenames << "libPocoJSON.dylib"
+end
+
+if("@OPENMP_FOUND@" == "TRUE")
+  library_filenames << "libomp.dylib"
 end
 
 #This copies the libraries over, then changes permissions and the id from /usr/local/lib to @rpath
@@ -113,7 +118,7 @@ if( "@MAKE_VATES@" == "ON" )
   end
 
   `mkdir Contents/Libraries`
-  vatesfiles = ["Contents/MacOS/VatesSimpleGui","Contents/MacOS/libMantidParaViewQtWidgets.dylib","Contents/MacOS/libMantidVatesAPI.dylib","pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib"]+Dir["pvplugins/pvplugins/*.dylib"] 
+  vatesfiles = ["Contents/MacOS/MantidPlot","Contents/MacOS/libMantidQtAPI.dylib","Contents/MacOS/VatesSimpleGui","Contents/MacOS/libMantidParaViewQtWidgets.dylib","Contents/MacOS/libMantidVatesAPI.dylib","pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib"]+Dir["pvplugins/pvplugins/*.dylib"] 
   vatesfiles.each do |file|
     add_ParaView_Libraries(file)
   end
@@ -187,6 +192,11 @@ else
   exit 1
 end
 
+# We only need one copy of openssl
+`install_name_tool -change @loader_path/../../../libssl.1.0.0.dylib @loader_path/../../../../MacOS/libssl.dylib Contents/Frameworks/QtNetwork.framework/Versions/4/QtNetwork`
+`install_name_tool -change @loader_path/../../../libcrypto.1.0.0.dylib @loader_path/../../../../MacOS/libcrypto.dylib Contents/Frameworks/QtNetwork.framework/Versions/4/QtNetwork`
+`rm Contents/Frameworks/libssl.1.0.0.dylib`
+`rm Contents/Frameworks/libcrypto.1.0.0.dylib`
 
 #change id of all libraries that match patterns
 def change_id(patterns, lib_path)
@@ -315,7 +325,19 @@ search_patterns.each do |pattern|
         p "issue with library: #{library} linked against: #{dependency}"
         exit 1
       end
+      if dependency.include? "@loader_path/libTK"
+        p "issue with library: #{library} linked against: #{dependency}"
+        p "Is an OpenCascade library missing?"
+        exit 1
+      end
+
       if( "@MAKE_VATES@" == "ON" )
+        if dependency.include? "@loader_path"
+          if dependency.include? "libvtk"
+            p "ParaView libraries found Contents/Libraries. Is the vatesfiles list is complete?"
+            exit 1
+          end
+        end
         if dependency.include? "#{ParaView_dir}"
           p "issue with library: #{library} linking against: #{dependency}"
           exit 1

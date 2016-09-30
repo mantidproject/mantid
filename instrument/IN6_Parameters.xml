@@ -10,7 +10,7 @@
 		<!-- Distance between sample and equatorial line of the detector. Mandatory 
 			if you want to correct the flight paths. -->
 		<parameter name="l2" type="string">
-			<value val="2.48" />
+			<value val="2.483" />
 		</parameter>
 
 		<!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser 

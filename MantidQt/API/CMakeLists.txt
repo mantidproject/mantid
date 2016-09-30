@@ -42,6 +42,7 @@
 	src/SignalRange.cpp
 	src/SyncedCheckboxes.cpp
 	src/TextPropertyWidget.cpp
+  src/TSVSerialiser.cpp
 	src/UserSubWindow.cpp
 	src/VatesViewerInterface.cpp
         src/WidgetScrollbarDecorator.cpp
@@ -90,6 +91,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/HelpWindow.h
 	inc/MantidQtAPI/InterfaceFactory.h
 	inc/MantidQtAPI/InterfaceManager.h
+  inc/MantidQtAPI/IProjectSerialisable.h
 	inc/MantidQtAPI/MantidColorMap.h
 	inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
 	inc/MantidQtAPI/MantidQwtWorkspaceData.h
@@ -111,6 +113,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/SelectionNotificationService.h
 	inc/MantidQtAPI/SignalBlocker.h
 	inc/MantidQtAPI/SignalRange.h
+  inc/MantidQtAPI/TSVSerialiser.h
 	inc/MantidQtAPI/qwt_compat.h
         inc/MantidQtAPI/WidgetScrollbarDecorator.h
 )
@@ -152,7 +155,7 @@ add_library ( MantidQtAPI ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 set_target_properties ( MantidQtAPI PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_API )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidQtAPI PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties ( MantidQtAPI PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
 endif ()
 
 target_link_libraries ( MantidQtAPI LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}

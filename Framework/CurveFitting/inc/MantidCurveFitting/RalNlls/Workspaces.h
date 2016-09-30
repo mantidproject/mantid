@@ -146,7 +146,7 @@ struct nlls_options {
   bool scale_trim_min = true;
   bool scale_trim_max = true;
   bool scale_require_increase = false;
-  bool calculate_svd_J = true;
+  bool calculate_svd_J = false;
 
   /// M O R E - S O R E N S E N   C O N T R O L S
   int more_sorensen_maxits = 500;
@@ -258,6 +258,7 @@ struct solve_general_work {
 /// workspace for subroutine evaluate_model
 struct evaluate_model_work {
   DoubleFortranVector Jd, Hd;
+  double md_gn = 0.0;
 };
 
 /// workspace for subroutine solve_LLS
