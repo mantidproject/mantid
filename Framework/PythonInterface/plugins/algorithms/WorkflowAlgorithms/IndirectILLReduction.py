@@ -189,6 +189,8 @@ def shift_spectra(ws1, ws2=None, shift_option=False):
                 to_shift = peak_bin2 - mid_bin
 
 
+        logger.information("%d-th spectrum of %s to be shifted by %d" % (i,ws1,int(-to_shift)))
+
         # Shift Y and E values of spectrum i by a number of to_shift bins
         # Note the - sign, since np.roll shifts right if the argument is positive
         # while here if to_shift is positive, it means we need to shift to the left
@@ -314,17 +316,8 @@ def perform_unmirror(red, left, right, option):
         logger.information('Unmirror 7: Shift both the right and the left according to vanadium and sum')
         start_bin_left, endbin_left = shift_spectra(left, 'left_van', True)
         start_bin_right, endbin_right = shift_spectra(right, 'right_van', True)
-        start_bin1 = np.maximum(start_bin_left, start_bin_right)
-        end_bin1 = np.minimum(endbin_left, endbin_right)
-
-        # Now we force the peaks to be centered:
-        start_bin_left, endbin_left = shift_spectra(left)
-        start_bin_right, endbin_right = shift_spectra(right)
-        start_bin2 = np.maximum(start_bin_left, start_bin_right)
-        end_bin2 = np.minimum(endbin_left, endbin_right)
-
-        start_bin = np.max([start_bin1, start_bin2])
-        end_bin = np.min([end_bin1, end_bin2])
+        start_bin = np.maximum(start_bin_left, start_bin_right)
+        end_bin = np.minimum(endbin_left, endbin_right)
 
     if option > 3 or option == 1:
         # Perform unmirror option by summing left and right workspaces
@@ -621,19 +614,19 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.log().notice('Loading vanadium run #%s' % self._vanadium_file)
         # call IndirectILLReduction for vanadium run with unmirror 2 and 3 to get left and right
 
-        left_van = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
-                                        Reflection=self._reflection, SumRuns=True, UnmirrorOption=2)
+        left_vanadium = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
+                                             Reflection=self._reflection, SumRuns=True, UnmirrorOption=2)
 
-        right_van = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
-                                         Reflection=self._reflection, SumRuns=True, UnmirrorOption=3)
+        right_vanadium = IndirectILLReduction(Run=self._vanadium_file, MapFile=self._map_file, Analyser=self._analyser,
+                                              Reflection=self._reflection, SumRuns=True, UnmirrorOption=3)
 
         # if vanadium run is not of QENS type, output will be empty, exit with error
-        if not left_van or not right_van:
+        if not left_vanadium or not right_vanadium:
             self.log().error('Failed to load vanadium run #%s. Not a QENS type? Aborting.' % self._vanadium_file)
         else:
             # note, that run number will be prepended, so need to rename
-            RenameWorkspace(left_van.getItem(0).getName(),'left_van')
-            RenameWorkspace(right_van.getItem(0).getName(), 'right_van')
+            RenameWorkspace(left_vanadium.getItem(0).getName(),'left_van')
+            RenameWorkspace(right_vanadium.getItem(0).getName(), 'right_van')
 
     def _load_background_run(self):
         """
@@ -737,6 +730,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         mask_reduced_ws(left, xmin_left, xmax_left)
         mask_reduced_ws(right, xmin_right, xmax_right)
 
+        # it is crucial to convert the y-axis of all the three here, before perform_unmirror
+        ConvertSpectrumAxis(InputWorkspace=left, OutputWorkspace=left, Target='Theta', EMode='Indirect')
+        ConvertSpectrumAxis(InputWorkspace=right, OutputWorkspace=right, Target='Theta', EMode='Indirect')
+        ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
+
         # Energy transfer according to mirror_sense and unmirror_option
         start_bin = 0
         end_bin = 0
@@ -749,14 +747,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             self.log().information('Input run #%s has one wing, perform energy transfer' % run)
             convert_to_energy(red)
         else:
-            self.log().warning('Input run #%s: no Doppler.mirror_sense defined' % run)
+            self.log().warning('Input run #%s: no Doppler.mirror_sense defined.' % run)
             convert_to_energy(red)
 
         convert_to_energy(left)
         convert_to_energy(right)
-
-
-        ConvertSpectrumAxis(InputWorkspace=red, OutputWorkspace=red, Target='Theta', EMode='Indirect')
 
         # Mask corrupted bins according to shifted workspaces or monitor range
         # Reload X-values (now in meV, except for unmirror=0 and mirro_sense=14)

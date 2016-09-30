@@ -1,6 +1,5 @@
 import stresstesting
 from mantid.simpleapi import *
-#from mantid.api import *
 from mantid import config
 
 class ILLIndirectReductionTest(stresstesting.MantidStressTest):
@@ -28,9 +27,8 @@ class ILLIndirectReductionTest(stresstesting.MantidStressTest):
 
         calib = ILLIN16BCalibration("090662-090663")
         result = IndirectILLReduction(Run="091515-091516",
-                                      UnmirrorOption=7,
+                                      UnmirrorOption=6,
                                       CalibrationWorkspace='calib',
-                                      VanadiumRun="090661",
                                       BackgroundRun="090658")
         # tear down
         config['default.facility'] = self.facility
