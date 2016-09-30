@@ -408,32 +408,6 @@ def getInstrumentParameter(ws, param_name):
 
     return param
 
-
-def plotSpectra(ws, y_axis_title, indicies=None):
-    """
-    Plot a selection of spectra given a list of indicies
-
-    @param ws - the workspace to plot
-    @param y_axis_title - label for the y axis
-    @param indicies - list of spectrum indicies to plot
-    """
-    if indicies is None:
-        indicies = []
-
-    if len(indicies) == 0:
-        num_spectra = s_api.mtd[ws].getNumberHistograms()
-        indicies = list(range(num_spectra))
-
-    try:
-        mtd_plot = import_mantidplot()
-        plot = mtd_plot.plotSpectrum(ws, indicies, True)
-        layer = plot.activeLayer()
-        layer.setAxisTitle(mtd_plot.Layer.Left, y_axis_title)
-    except RuntimeError:
-        # User clicked cancel on plot so don't do anything
-        return
-
-
 def plotParameters(ws, *param_names):
     """
     Plot a number of spectra given a list of parameter names
