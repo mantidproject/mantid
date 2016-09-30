@@ -62,12 +62,13 @@ def calc_summary_table(minimizers, group_results):
 
     return groups_norm_acc, groups_norm_runtime
 
-def calc_accuracy_runtime_tbls(results_per_test):
+def calc_accuracy_runtime_tbls(results_per_test, minimizers):
     """
     This produces a numpy matrix for convenience, with
     1 row per problem+start, 1 column per minimizer
     """
     num_tests = len(results_per_test)
+    num_minimizers = len(minimizers)
     accuracy_tbl = np.zeros((num_tests, num_minimizers))
     time_tbl = np.zeros((num_tests, num_minimizers))
     for test_idx in range(0, num_tests):
@@ -78,7 +79,7 @@ def calc_accuracy_runtime_tbls(results_per_test):
     return accuracy_tbl, time_tbl
 
 def calc_norm_summary_tables(accuracy_tbl, time_tbl):
-    # Min across all minimizers
+    # Min across all alternative solutions/minimizers
     min_sum_err_sq = np.nanmin(accuracy_tbl, 1)
     min_runtime = np.nanmin(time_tbl, 1)
 

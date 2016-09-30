@@ -57,7 +57,7 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
     num_minimizers = len(minimizers)
 
     # Calculate summary tables
-    accuracy_tbl, runtime_tbl = postproc.calc_accuracy_runtime_tbls(results_per_test)
+    accuracy_tbl, runtime_tbl = postproc.calc_accuracy_runtime_tbls(results_per_test, minimizers)
     norm_acc_rankings, norm_runtimes, summary_cells_acc, summary_cells_runtime = postproc.calc_norm_summary_tables(accuracy_tbl, runtime_tbl)
 
     if simple_text:
@@ -280,7 +280,8 @@ def build_rst_table(columns_txt, rows_txt, cells, comparison_type, comparison_di
     # The first column tends to be disproportionately long if it has a link
     first_col_len = calc_first_col_len(cell_len, rows_txt)
 
-    tbl_header_top, tbl_header_text, tbl_header_bottom = build_rst_table_header_chunks(first_col_len, cell_len)
+    tbl_header_top, tbl_header_text, tbl_header_bottom = build_rst_table_header_chunks(first_col_len, cell_len,
+                                                                                       columns_txt)
 
     tbl_header = tbl_header_top + '\n' + tbl_header_text + '\n' + tbl_header_bottom + '\n'
     # the footer is in general the delimiter between rows, including the last one
@@ -303,7 +304,7 @@ def build_rst_table(columns_txt, rows_txt, cells, comparison_type, comparison_di
 
     return tbl_header + tbl_body
 
-def build_rst_table_header_chunks(first_col_len, cell_len):
+def build_rst_table_header_chunks(first_col_len, cell_len, columns_txt):
     """
     Prepare the horizontal and vertical lines in the RST headers.
 

@@ -216,7 +216,6 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors=True
 
     return results_fit_problem
 
-
 def get_function_definitions(prob):
     function_defs = []
     if prob.starting_values:
