@@ -54,7 +54,6 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
-
 #include <QApplication>
 #include <QInputDialog>
 #include <QListWidget>
@@ -166,14 +165,14 @@ bool workspaceIsFitResult(const QString &wsName) {
 }
 
 /// Return curve type for spectrum of a set of fit results
-Graph::CurveType getCurveTypeForFitResult(const size_t spectrum) {
+GraphOptions::CurveType getCurveTypeForFitResult(const size_t spectrum) {
   switch (spectrum) {
   case 0:
-    return Graph::CurveType::LineSymbols;
+    return GraphOptions::CurveType::LineSymbols;
   case 1:
-    return Graph::CurveType::Line;
+    return GraphOptions::CurveType::Line;
   default:
-    return Graph::CurveType::Unspecified;
+    return GraphOptions::CurveType::Unspecified;
   }
 }
 }
