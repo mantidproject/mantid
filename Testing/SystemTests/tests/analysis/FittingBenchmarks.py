@@ -33,7 +33,10 @@ class FittingBenchmarkTests(unittest.TestCase):
 
 
     def run_all_with_or_without_errors(self, use_errors):
-        problem_files_path = '/home/fedemp/mantid-repos/mantid-fitting-systest/scripts/Fitting/test_examples/FittingNeutronData'
+        # pick data file from system tests path
+        input_data_dir = msapi.config['datasearch.directories'].split(';')[0]
+        # Look for the specific fitting test files location
+        problem_files_path = os.path.join(input_data_dir, 'fitting_test_problems','Neutron_data')
         fitbk.run_all_with_or_without_errors([problem_files_path], use_errors, self.minimizers,
                                              self.group_names, self.group_suffix_names, self.color_scale)
 
@@ -45,7 +48,7 @@ class FittingBenchmarkTests(unittest.TestCase):
 
 
 # Run the unittest tests defined above as a Mantid system test
-class FittingRegressionBenchmars(stresstesting.MantidStressTest):
+class FittingBenchmars(stresstesting.MantidStressTest):
 
     _success = False
 

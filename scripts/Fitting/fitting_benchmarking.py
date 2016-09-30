@@ -80,7 +80,7 @@ def run_all_with_or_without_errors(problem_files_path, use_errors, minimizers,
     sys.stdout.flush()
 
 def do_fitting_benchmark(include_nist=True, include_cutest=True, data_groups_dirs=None,
-                                    minimizers=None, use_errors=True):
+                         minimizers=None, use_errors=True):
     """
     Run a fitting benchmark made of different groups (NIST, CUTEst,
     Neutron data, etc.)  This gets the groups of files that look like
@@ -92,15 +92,20 @@ def do_fitting_benchmark(include_nist=True, include_cutest=True, data_groups_dir
     @param minimizers :: list of minimizers to test
     @param use_errors :: whether to use observational errors as weights in the cost function
     """
+    if data_groups_dir:
+        search_dir = os.path.split(data_groups_dirs[0])[0]
+    else:
+        search_dir = os.getcwd()
+
     # Several blocks of problems. Results for each block will be calculated sequentially, and
     # will go into a separate table
     problem_blocks = []
 
     if include_nist:
-        problem_blocks.extend(get_nist_problem_files())
+        problem_blocks.extend(get_nist_problem_files(search_dir))
 
     if include_cutest:
-        problem_blocks.extend([get_cutest_problem_files()])
+        problem_blocks.extend([get_cutest_problem_files(search_dir)])
 
     if data_groups_dirs:
         problem_blocks.extend(get_data_groups(data_groups_dirs))
@@ -158,7 +163,7 @@ def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors=True
                          cost function)
     """
 
-    wks, cost_function = prepare_wks_cost_function(prob)
+    wks, cost_function = prepare_wks_cost_function(prob, use_errors)
 
     # For NIST problems this will generate two results per file (two different starting points)
     results_fit_problem = []
@@ -254,7 +259,7 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
 
     return status, chi2, fit_wks, params, errors
 
-def prepare_wks_cost_function(prob):
+def prepare_wks_cost_function(prob, use_errors):
     """
     Build a workspace ready for Fit() and a cost function string according to the problem
     definition.
@@ -308,8 +313,7 @@ def get_function_definitions(prob):
 
     return function_defs
 
-HARDCODED_REF_DIR = r'/home/fedemp/mantid-repos/mantid-fitting-benchmarking/Testing/SystemTests/tests/analysis/reference'
-def get_nist_problem_files():
+def get_nist_problem_files(search_dir):
     """
        Gets the problem files grouped in blocks, where the blocks would
        normally be the different levels of difficulty (lower, average,
@@ -331,41 +335,25 @@ def get_nist_problem_files():
                     
     nist_names = nist_lower + nist_average + nist_higher
 
-    nist_dir = os.path.join('fitting','NIST_nonlinear_regression') # 'reference/fitting/nist_nonlinear_regression/'
-    # Could use this list to generate a table for all the problems at once
-    # benchmark_problems = [os.path.join(ref_dir, nist_dir, fname) for fname in nist_names]
+    nist_subdir = 'NIST_nonlinear_regression'
 
-    # Find ref_dir
-    data_search_dirs = msapi.ConfigService.Instance()["datasearch.directories"].split(';')
-    ref_dir = None
-    for data_dir in data_search_dirs:
-        if 'reference' in data_dir:
-            ref_dir = data_dir
-            print("Found ref dir: {0}".format(ref_dir))
-    if not ref_dir:
-        raise RuntimeError("Could not find the benchmark data directory")
-
-    ##### TODO: TEMPORAL OVERWRITE
-    ref_dir = HARDCODED_REF_DIR
-
-    nist_lower_files = [os.path.join(ref_dir, nist_dir, fname) for fname in nist_lower]
-    nist_average_files = [os.path.join(ref_dir, nist_dir, fname) for fname in nist_average]
-    nist_higher_files = [os.path.join(ref_dir, nist_dir, fname) for fname in nist_higher]
+    nist_lower_files = [os.path.join(search_dir, nist_subdir, fname) for fname in nist_lower]
+    nist_average_files = [os.path.join(search_dir, nist_subdir, fname) for fname in nist_average]
+    nist_higher_files = [os.path.join(search_dir, nist_subdir, fname) for fname in nist_higher]
     problem_files = [nist_lower_files, nist_average_files, nist_higher_files]
 
     return problem_files
 
-def get_cutest_problem_files():
-    # TODO - fix this
-    ref_dir = HARDCODED_REF_DIR
+def get_cutest_problem_files(search_dir):
 
     cutest_all = [ 'PALMER6C.dat', 'PALMER7C.dat', 'PALMER8C.dat', 'YFITU.dat', 'VESUVIOLS.dat', 'DMN15102LS.dat' ]
-    cutest_dir = os.path.join('fitting', 'CUTEst')
-    cutest_files = [os.path.join(ref_dir, cutest_dir, fname) for fname in cutest_all]
+    cutest_subdir = 'CUTEst'
+    cutest_files = [os.path.join(search_dir, cutest_subdir, fname) for fname in cutest_all]
 
     return cutest_files
 
 def get_data_groups(data_groups_dirs):
+
     problem_groups = []
     for grp_dir in data_groups_dirs:
         problem_groups.append(get_data_group_problem_files(grp_dir))
