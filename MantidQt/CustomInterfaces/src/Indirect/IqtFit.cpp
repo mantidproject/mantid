@@ -383,7 +383,7 @@ CompositeFunction_sptr IqtFit::createFunction(bool tie) {
     fname = "Exponential1";
   }
 
-  result->addFunction(createUserFunction(fname, tie));
+  result->addFunction(createExponentialFunction(fname, tie));
 
   if (fitType == 1 || fitType == 3) {
     if (fitType == 1) {
@@ -391,7 +391,7 @@ CompositeFunction_sptr IqtFit::createFunction(bool tie) {
     } else {
       fname = "StretchedExp";
     }
-    result->addFunction(createUserFunction(fname, tie));
+    result->addFunction(createExponentialFunction(fname, tie));
   }
 
   // Return CompositeFunction object to caller.
@@ -399,34 +399,41 @@ CompositeFunction_sptr IqtFit::createFunction(bool tie) {
   return result;
 }
 
-IFunction_sptr IqtFit::createUserFunction(const QString &name, bool tie) {
+IFunction_sptr IqtFit::createExponentialFunction(const QString &name, bool tie) {
   IFunction_sptr result =
-      FunctionFactory::Instance().createFunction("UserFunction");
-  std::string formula;
-
-  if (name.startsWith("Exp")) {
-    formula = "Intensity*exp(-(x/Tau))";
-  } else {
-    formula = "Intensity*exp(-(x/Tau)^Beta)";
-  }
-
-  IFunction::Attribute att(formula);
-  result->setAttribute("Formula", att);
-
-  QList<QtProperty *> props = m_properties[name]->subProperties();
-  for (int i = 0; i < props.size(); i++) {
-    std::string name = props[i]->propertyName().toStdString();
-    result->setParameter(name, m_dblManager->value(props[i]));
-
-    // add tie if parameter is fixed
-    if (tie || !props[i]->subProperties().isEmpty()) {
-      std::string value = props[i]->valueText().toStdString();
-      result->tie(name, value);
+    FunctionFactory::Instance().createFunction("ExpDecay");
+    if (name.startsWith("Exp")) {
+      result->setParameter("Height", m_dblManager->value(m_properties["Intensity"]));
+      result->setParameter("Lifetime", m_dblManager->value(m_properties["Tau"]));
+      result->tie("Height", (m_properties["Intensity"])->valueText().toStdString());
+      result->tie("LifeTime", m_properties["Tau"]->valueText().toStdString());
     }
-  }
+    else {
+      IFunction_sptr result =
+        FunctionFactory::Instance().createFunction("UserFunction");
+      std::string formula;
+      formula = "Intensity*exp(-(x/Tau)^Beta)";
+      IFunction::Attribute att(formula);
+      result->setAttribute("Formula", att);
 
-  result->applyTies();
-  return result;
+
+      QList<QtProperty *> props = m_properties[name]->subProperties();
+      for (int i = 0; i < props.size(); i++) {
+        std::string propName = props[i]->propertyName().toStdString();
+        if (!(name.startsWith("Exp"))) {
+          result->setParameter(propName, m_dblManager->value(props[i]));
+        }
+
+        // add tie if parameter is fixed
+        if (tie || !props[i]->subProperties().isEmpty()) {
+          std::string value = props[i]->valueText().toStdString();
+          result->tie(propName, value);
+        }
+      }
+    }
+
+    result->applyTies();
+    return result;
 }
 
 QtProperty *IqtFit::createExponential(const QString &name) {
@@ -906,7 +913,7 @@ void IqtFit::singleFitComplete(bool error) {
                            parameters[fval + "Beta"]);
   }
 
-  // Can start upddating the guess curve again
+  // Can start updating the guess curve again
   connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(plotGuess(QtProperty *)));
 
