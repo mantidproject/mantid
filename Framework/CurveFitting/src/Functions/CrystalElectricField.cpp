@@ -527,7 +527,7 @@ double exp_(double z) {
 // calculates all transition intensities for
 // a polycrystalline sample (powder)
 //------------------------------------------
-void intcalc(double pi, double r0, double gj, double z,
+void intcalc(double r0, double gj, double z,
              const DoubleFortranMatrix &jt2, const DoubleFortranVector &e,
              DoubleFortranMatrix &inten, int dim, double temp) {
   // Original code from FOCUS calculated integrated intensity in barn
@@ -880,7 +880,7 @@ void calculateIntensities(int nre, const DoubleFortranVector &energies,
   auto r0 = c_r0();
   auto gj = ggj[nre - 1];
   DoubleFortranMatrix mat(1, dim, 1, dim);
-  intcalc(pi, r0, gj, occupation_factor, jt2mat, energies, mat, dim,
+  intcalc(r0, gj, occupation_factor, jt2mat, energies, mat, dim,
           temperature);
 
   deg_on(energies, mat, degeneration, e_energies, i_energies, de);
