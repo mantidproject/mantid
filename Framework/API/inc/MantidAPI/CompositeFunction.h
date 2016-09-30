@@ -160,6 +160,11 @@ public:
   void setUpForFit() override;
   /// Remove a constraint
   void removeConstraint(const std::string &parName) override;
+  /// Get number of domains required by this function
+  size_t getNumberDomains() const override;
+  /// Split this function (if needed) into a list of independent functions.
+  std::vector<boost::shared_ptr<IFunction>>
+  createEquivalentFunctions() const override;
 
   /* CompositeFunction own methods */
 
@@ -292,6 +297,12 @@ public:
    */
   double get(size_t iY, size_t iP) override {
     return m_J->get(m_iY0 + iY, m_iP0 + iP);
+  }
+  /** Zero all matrix elements.
+  */
+  void zero() override {
+    throw Kernel::Exception::NotImplementedError(
+        "zero() is not implemented for PartialJacobian");
   }
   /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
    *   @param value :: Value to add

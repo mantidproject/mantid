@@ -274,9 +274,9 @@ public:
     objects = svc.getObjects();
     TS_ASSERT_EQUALS(names.size(), 4);
     TS_ASSERT_EQUALS(objects.size(), 4);
-    TS_ASSERT_DIFFERS(std::find(names.cbegin(), names.cend(), "__Three"),
-                      names.end());
-    TS_ASSERT_EQUALS(objects.at(3), three);
+    auto cit = std::find(names.cbegin(), names.cend(), "__Three");
+    TS_ASSERT_DIFFERS(cit, names.cend());
+    TS_ASSERT_EQUALS(objects.at(std::distance(names.cbegin(), cit)), three);
   }
 
   void test_sortedAndHiddenGetNames() {

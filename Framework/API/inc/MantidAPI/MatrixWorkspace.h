@@ -1,9 +1,6 @@
 #ifndef MANTID_API_MATRIXWORKSPACE_H_
 #define MANTID_API_MATRIXWORKSPACE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #ifndef Q_MOC_RUN
 #include <boost/scoped_ptr.hpp>
 #endif
@@ -28,6 +25,7 @@ class INearestNeighboursFactory;
 namespace API {
 class Axis;
 class SpectrumDetectorMapping;
+class SpectrumInfo;
 
 /// typedef for the image type
 typedef std::vector<std::vector<double>> MantidImage;
@@ -35,6 +33,9 @@ typedef std::vector<std::vector<double>> MantidImage;
 typedef boost::shared_ptr<MantidImage> MantidImage_sptr;
 /// shared pointer to const MantidImage
 typedef boost::shared_ptr<const MantidImage> MantidImage_const_sptr;
+
+/// Helper for MatrixWorkspace::spectrumInfo()
+enum class ThreadedContextCheck { Check, Skip };
 
 //----------------------------------------------------------------------
 /** Base MatrixWorkspace Abstract Class.
@@ -88,6 +89,9 @@ public:
   using IMDWorkspace::toString;
   /// String description of state
   const std::string toString() const override;
+
+  const SpectrumInfo &spectrumInfo(
+      ThreadedContextCheck contextCheck = ThreadedContextCheck::Check) const;
 
   /**@name Instrument queries */
   //@{
@@ -606,6 +610,8 @@ private:
   /// A workspace holding monitor data relating to the main data in the
   /// containing workspace (null if none).
   boost::shared_ptr<MatrixWorkspace> m_monitorWorkspace;
+
+  mutable std::unique_ptr<SpectrumInfo> m_spectrumInfo;
 
 protected:
   /// Assists conversions to and from 2D histogram indexing to 1D indexing.

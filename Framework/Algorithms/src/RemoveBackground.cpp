@@ -1,14 +1,11 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/RemoveBackground.h"
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidAPI/GeometryInfo.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -149,9 +146,9 @@ void RemoveBackground::exec() {
 //-------------------------------------------------------------------------------------------------------------------------------
 /// Constructor
 BackgroundHelper::BackgroundHelper()
-    : m_WSUnit(), m_bgWs(), m_wkWS(), m_pgLog(nullptr), m_inPlace(true),
-      m_singleValueBackground(false), m_NBg(0), m_dtBg(1), m_ErrSq(0),
-      m_Emode(0), m_Efix(0), m_nullifyNegative(false),
+    : m_WSUnit(), m_bgWs(), m_wkWS(), m_spectrumInfo(nullptr), m_pgLog(nullptr),
+      m_inPlace(true), m_singleValueBackground(false), m_NBg(0), m_dtBg(1),
+      m_ErrSq(0), m_Emode(0), m_Efix(0), m_nullifyNegative(false),
       m_previouslyRemovedBkgMode(false) {}
 /// Destructor
 BackgroundHelper::~BackgroundHelper() { this->deleteUnitsConverters(); }
@@ -204,7 +201,7 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
     throw std::invalid_argument(" Source Workspace: " + sourceWS->getName() +
                                 " should have units");
 
-  m_geometryInfoFactory = Kernel::make_unique<GeometryInfoFactory>(*sourceWS);
+  m_spectrumInfo = &sourceWS->spectrumInfo();
 
   // just in case.
   this->deleteUnitsConverters();
@@ -264,10 +261,9 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
   }
 
   try {
-    auto geometryInfo = m_geometryInfoFactory->create(nHist);
-    double twoTheta = geometryInfo.getTwoTheta();
-    double L1 = geometryInfo.getL1();
-    double L2 = geometryInfo.getL2();
+    double twoTheta = m_spectrumInfo->twoTheta(nHist);
+    double L1 = m_spectrumInfo->l1();
+    double L2 = m_spectrumInfo->l2(nHist);
     double delta(std::numeric_limits<double>::quiet_NaN());
     // get access to source workspace in case if target is different from source
     const MantidVec &XValues = m_wkWS->readX(nHist);

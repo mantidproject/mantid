@@ -26,6 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
+#include "PlotCurve.h"
 #include "Graph.h"
 #include "Grid.h"
 #include "Mantid/ErrorBarSettings.h"
@@ -35,7 +36,6 @@
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "MantidQtAPI/ScaleEngine.h"
 #include "PatternBox.h"
-#include "PlotCurve.h"
 #include "ScaleDraw.h"
 #include "SymbolBox.h"
 #include <QDateTime>
@@ -1043,10 +1043,10 @@ PlotMarker::PlotMarker(int index, double angle)
 void PlotMarker::draw(QPainter *p, const QwtScaleMap &xMap,
                       const QwtScaleMap &yMap, const QRect &) const {
   p->save();
+  int x = xMap.transform(xValue());
+  int y = yMap.transform(yValue());
 
-  xMap.transform(xValue());
-  yMap.transform(yValue());
-
+  p->translate(x, y);
   p->rotate(-d_angle);
 
   QwtText text = label();

@@ -68,7 +68,7 @@ createDiffractionData(const int nPixels = 100, const int nEventsPerPeak = 20,
   // Give the spectra-detector mapping for all event lists
   const int nPixelsTotal = nPixels * nPixels;
   for (int i = 0; i < nPixelsTotal; ++i) {
-    EventList &el = eventWS->getOrAddEventList(i);
+    EventList &el = eventWS->getSpectrum(i);
     el.setDetectorID(i + nPixelsTotal);
   }
 

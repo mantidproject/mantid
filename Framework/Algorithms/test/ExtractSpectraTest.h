@@ -703,4 +703,45 @@ private:
   }
 };
 
+class ExtractSpectraTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ExtractSpectraTestPerformance *createSuite() {
+    return new ExtractSpectraTestPerformance();
+  }
+  static void destroySuite(ExtractSpectraTestPerformance *suite) {
+    AnalysisDataService::Instance().clear();
+    delete suite;
+  }
+
+  ExtractSpectraTestPerformance() {
+    input = WorkspaceCreationHelper::Create2DWorkspaceBinned(40000, 10000);
+    inputEvent =
+        WorkspaceCreationHelper::CreateEventWorkspace(40000, 10000, 2000);
+  }
+
+  void testExec2D() {
+    Algorithms::ExtractSpectra alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", input);
+    alg.setProperty("EndWorkspaceIndex", 30000);
+    alg.setPropertyValue("OutputWorkspace", "ExtractSpectra2DOut");
+    alg.execute();
+  }
+
+  void testExecEvent() {
+    Algorithms::ExtractSpectra alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inputEvent);
+    alg.setProperty("EndWorkspaceIndex", 30000);
+    alg.setPropertyValue("OutputWorkspace", "ExtractSpectraEventOut");
+    alg.execute();
+  }
+
+private:
+  MatrixWorkspace_sptr input;
+  EventWorkspace_sptr inputEvent;
+};
+
 #endif /* MANTID_ALGORITHMS_EXTRACTSPECTRATEST_H_ */

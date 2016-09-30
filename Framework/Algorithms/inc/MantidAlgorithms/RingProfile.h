@@ -72,7 +72,7 @@ private:
   /// identify the bin position for the given pixel in the image based workspace
   void getBinForPixel(const API::MatrixWorkspace_sptr, int, std::vector<int> &);
   //// identify the bin position for the pixel related to the given detector
-  int getBinForPixel(Mantid::Geometry::IDetector_const_sptr);
+  int getBinForPixel(const Kernel::V3D &position);
   /// copy of the minRadius input
   double min_radius;
   /// copy of the maxRadius input

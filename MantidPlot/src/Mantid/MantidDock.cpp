@@ -10,6 +10,8 @@
 
 #include <MantidAPI/FileProperty.h>
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -928,28 +930,43 @@ void MantidDockWidget::saveWorkspacesToFolder(const QString &folder) {
  * most recent version.
  */
 void MantidDockWidget::handleShowSaveAlgorithm() {
-  QAction *sendingAction = dynamic_cast<QAction *>(sender());
+  const QAction *sendingAction = dynamic_cast<QAction *>(sender());
 
   if (sendingAction) {
-    QString wsName = getSelectedWorkspaceName();
-    QVariant data = sendingAction->data();
+    const auto inputWorkspace = getSelectedWorkspace();
+    const QString wsName = QString::fromStdString(inputWorkspace->getName());
+    const QVariant data = sendingAction->data();
 
     if (data.canConvert<QString>()) {
       QString algorithmName;
       int version = -1;
 
-      QStringList splitData = data.toString().split(".");
-      switch (splitData.length()) {
-      case 2:
-        version = splitData[1].toInt();
-      case 1:
-        algorithmName = splitData[0];
-        break;
-      default:
-        m_mantidUI->saveNexusWorkspace();
-        return;
-      }
+      // Check if workspace is MD, this is the same check used in
+      // SaveNexusProcessed.cpp in the doExec()
+      if (bool(boost::dynamic_pointer_cast<const IMDEventWorkspace>(
+              inputWorkspace)) ||
+          bool(boost::dynamic_pointer_cast<const IMDHistoWorkspace>(
+              inputWorkspace))) {
+        // This will also be executed if the user clicks Save to ASCII or ASCII
+        // v1, therefore overwriting their choice and running
+        // SaveMD. SaveASCII doesn't support MD Workspaces, but if an issue,
+        // move the MD check to case 1: below
+        algorithmName = "SaveMD";
 
+      } else {
+        QStringList splitData = data.toString().split(".");
+        switch (splitData.length()) {
+        case 2:
+          version = splitData[1].toInt();
+        // intentional fall through to get algorithm name
+        case 1:
+          algorithmName = splitData[0];
+          break;
+        default:
+          m_mantidUI->saveNexusWorkspace();
+          return;
+        }
+      }
       QHash<QString, QString> presets;
       if (!wsName.isEmpty())
         presets["InputWorkspace"] = wsName;
@@ -1336,33 +1353,30 @@ void MantidDockWidget::groupingButtonClick() {
 }
 
 /// Plots a single spectrum from each selected workspace
-void MantidDockWidget::plotSpectra() {
-  const auto userInput = m_tree->chooseSpectrumFromSelected();
-  // An empty map will be returned if the user clicks cancel in the spectrum
-  // selection
-  if (userInput.plots.empty())
-    return;
-
-  bool spectrumPlot(true), errs(false), clearWindow(false);
-  MultiLayer *window(NULL);
-  m_mantidUI->plot1D(userInput.plots, spectrumPlot,
-                     MantidQt::DistributionDefault, errs, window, clearWindow,
-                     userInput.waterfall);
-}
+void MantidDockWidget::plotSpectra() { doPlotSpectra(false); }
 
 /// Plots a single spectrum from each selected workspace with errors
-void MantidDockWidget::plotSpectraErr() {
+void MantidDockWidget::plotSpectraErr() { doPlotSpectra(true); }
+
+/**
+ * Plots a single spectrum from each selected workspace.
+ * Option to plot errors or not.
+ * @param errors :: [input] True if errors should be plotted, else false
+ */
+void MantidDockWidget::doPlotSpectra(bool errors) {
   const auto userInput = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum
   // selection
   if (userInput.plots.empty())
     return;
 
-  bool spectrumPlot(true), errs(true), clearWindow(false);
-  MultiLayer *window(NULL);
-  m_mantidUI->plot1D(userInput.plots, spectrumPlot,
-                     MantidQt::DistributionDefault, errs, window, clearWindow,
-                     userInput.waterfall);
+  if (userInput.tiled) {
+    m_mantidUI->plotSubplots(userInput.plots, MantidQt::DistributionDefault,
+                             errors);
+  } else {
+    m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
+                       errors, nullptr, false, userInput.waterfall);
+  }
 }
 
 /**
@@ -1719,12 +1733,12 @@ MantidTreeWidget::getSelectedMatrixWorkspaces() const {
 * @param showWaterfallOpt If true, show the waterfall option on the dialog
 * @param showPlotAll :: [input] If true, show the "Plot All" button on the
 * dialog
+* @param showTiledOpt :: [input] If true, show the "Tiled" option on the dialog
 * @return :: A MantidWSIndexDialog::UserInput structure listing the selected
 * options
 */
-MantidWSIndexWidget::UserInput
-MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
-                                             bool showPlotAll) const {
+MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
+    bool showWaterfallOpt, bool showPlotAll, bool showTiledOpt) const {
   auto selectedMatrixWsList = getSelectedMatrixWorkspaces();
   QList<QString> selectedMatrixWsNameList;
   foreach (const auto matrixWs, selectedMatrixWsList) {
@@ -1751,12 +1765,14 @@ MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
     MantidWSIndexWidget::UserInput selections;
     selections.plots = spectrumToPlot;
     selections.waterfall = false;
+    selections.tiled = false;
     return selections;
   }
 
   // Else, one or more workspaces
-  MantidWSIndexDialog *dio = new MantidWSIndexDialog(
-      m_mantidUI, 0, selectedMatrixWsNameList, showWaterfallOpt, showPlotAll);
+  MantidWSIndexDialog *dio =
+      new MantidWSIndexDialog(m_mantidUI, 0, selectedMatrixWsNameList,
+                              showWaterfallOpt, showPlotAll, showTiledOpt);
   dio->exec();
   return dio->getSelections();
 }

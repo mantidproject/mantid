@@ -1756,6 +1756,14 @@ def quaternion_to_angle_and_axis(quaternion):
         axis.append(quaternion[3]/s_parameter)
     return math.degrees(angle), axis
 
+def get_unfitted_transmission_workspace_name(workspace_name):
+    suffix = "_unfitted"
+    if workspace_name.endswith(suffix):
+        unfitted_workspace_name = workspace_name
+    else:
+        unfitted_workspace_name = workspace_name + suffix
+    return unfitted_workspace_name
+
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

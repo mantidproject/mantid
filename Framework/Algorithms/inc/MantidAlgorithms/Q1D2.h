@@ -1,13 +1,13 @@
 #ifndef MANTID_ALGORITHMS_Q1D2_H_
 #define MANTID_ALGORITHMS_Q1D2_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+namespace API {
+class SpectrumInfo;
+}
 namespace Algorithms {
 /** Takes account of the effects of gravity for instruments where the y-axis
    points upwards, for
@@ -84,9 +84,9 @@ private:
   void normToMask(const size_t offSet, const size_t wsIndex,
                   const MantidVec::iterator theNorms,
                   const MantidVec::iterator errorSquared) const;
-  void convertWavetoQ(const size_t wsInd, const bool doGravity,
-                      const size_t offset, MantidVec::iterator Qs,
-                      const double extraLength) const;
+  void convertWavetoQ(const API::SpectrumInfo &spectrumInfo, const size_t wsInd,
+                      const bool doGravity, const size_t offset,
+                      MantidVec::iterator Qs, const double extraLength) const;
   void getQBinPlus1(const MantidVec &OutQs, const double QToFind,
                     MantidVec::const_iterator &loc) const;
   void normalize(const MantidVec &normSum, const MantidVec &normError2,

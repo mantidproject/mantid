@@ -13,7 +13,8 @@ Features
 - Enable the CanSAS1D algorithms to handle geometry inforamtion.
 - Add sort option to :ref:`CropToComponent <algm-CropToComponent>`
 - Provide warning when users try to use a 2D reduction together with a merged reduction selection.
-
+- Processing of LOQ M4 in the SANS reduction was added
+- :ref:`UnwrapMonitorsInTOF <algm-UnwrapMonitorsInTOF>` handles the data which was collected beyond the end of a frame.
 
 
 Bug Fixes
@@ -27,6 +28,7 @@ Bug Fixes
 - Fix the loading of RKH files
 - Fix wrong initial position of LARMOR data in the beam centre finder
 - Allow loading of CanSAS data without error data
+- Fix saving CanSAS with transmission data from the ISIS SANS GUI
 
 X uncertainties (delta-Q)
 -------------------------

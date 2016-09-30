@@ -31,6 +31,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/Iterable.h
 	inc/MantidHistogramData/LinearGenerator.h
 	inc/MantidHistogramData/LogarithmicGenerator.h
+	inc/MantidHistogramData/Multipliable.h
 	inc/MantidHistogramData/Offsetable.h
 	inc/MantidHistogramData/PointStandardDeviations.h
 	inc/MantidHistogramData/PointVariances.h
@@ -64,6 +65,7 @@ set ( TEST_FILES
 	IterableTest.h
 	LinearGeneratorTest.h
 	LogarithmicGeneratorTest.h
+	MultipliableTest.h
 	OffsetableTest.h
 	PointStandardDeviationsTest.h
 	PointVariancesTest.h
