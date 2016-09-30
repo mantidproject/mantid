@@ -33,6 +33,10 @@
 #include <QTreeWidget>
 #include <unordered_map>
 
+#ifdef MAKE_VATES
+#include "vtkPVDisplayInformation.h"
+#endif
+
 //----------------------------------
 // Forward declarations
 //----------------------------------
@@ -248,6 +252,10 @@ public:
 
   void showSurfacePlot() override;
   void showContourPlot() override;
+
+#ifdef MAKE_VATES
+  bool doesVatesSupportOpenGL() override;
+#endif
 
 public slots:
   // Create a 1d graph form specified MatrixWorkspace and index

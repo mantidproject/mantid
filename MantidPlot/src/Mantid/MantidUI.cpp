@@ -4008,3 +4008,9 @@ void MantidUI::showContourPlot() {
 }
 
 QWidget *MantidUI::getParent() { return m_appWindow; }
+
+#ifdef MAKE_VATES
+bool MantidUI::doesVatesSupportOpenGL() {
+  return vtkPVDisplayInformation::SupportsOpenGLLocally()
+}
+#endif

@@ -30,10 +30,6 @@
 #include <QPushButton>
 #include <QSignalMapper>
 
-#ifdef MAKE_VATES
-#include "vtkPVDisplayInformation.h"
-#endif
-
 using namespace MantidQt::API;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -1040,7 +1036,7 @@ void QWorkspaceDockView::addMDEventWorkspaceMenuItems(
   if (!MantidQt::API::InterfaceManager::hasVatesLibraries()) {
     m_showVatesGui->setEnabled(false);
 #ifdef MAKE_VATES
-  } else if (!vtkPVDisplayInformation::SupportsOpenGLLocally()) {
+  } else if (!m_mantidUI->doesVatesSupportOpenGL()) {
     m_showVatesGui->setEnabled(false);
 #endif
   } else {
@@ -1061,7 +1057,7 @@ void QWorkspaceDockView::addMDHistoWorkspaceMenuItems(
   if (!MantidQt::API::InterfaceManager::hasVatesLibraries()) {
     m_showVatesGui->setEnabled(false);
 #ifdef MAKE_VATES
-  } else if (!vtkPVDisplayInformation::SupportsOpenGLLocally()) {
+  } else if (!m_mantidUI->doesVatesSupportOpenGL()) {
     m_showVatesGui->setEnabled(false);
 #endif
   } else {

@@ -126,6 +126,9 @@ public:
                                                           QStringList wsNames,
                                                           bool showWaterfall,
                                                           bool showPlotAll) = 0;
+#ifdef MAKE_VATES
+  virtual bool doesVatesSupportOpenGL() = 0;
+#endif
 };
 }
 }
