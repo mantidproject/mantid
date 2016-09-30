@@ -101,8 +101,8 @@ private:
 
     // Create a parameter file, with a root equation that will apply to all
     // detectors.
-    const std::string parameterFileContents = boost::str(
-        boost::format("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
+    const std::string parameterFileContents =
+        boost::str(boost::format("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
        <parameter-file instrument = \"%1%\" date = \"2012-01-31T00:00:00\">\n\
           <component-link name=\"%1%\">\n\
            <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
@@ -115,7 +115,7 @@ private:
            </parameter>\n\
            </component-link>\n\
         </parameter-file>\n") %
-        instrumentName % result_unit);
+                   instrumentName % result_unit);
 
     // Create a temporary Instrument Parameter file.
     ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
@@ -141,8 +141,8 @@ private:
 
     // Create a parameter file, with a root equation that will apply to all
     // detectors. NOTE THAT A0 IS SPECIFIED, but A1 IS NOT.
-    const std::string parameterFileContents = boost::str(
-        boost::format("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
+    const std::string parameterFileContents =
+        boost::str(boost::format("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
        <parameter-file instrument = \"%1%\" date = \"2012-01-31T00:00:00\">\n\
           <component-link name=\"%1%\">\n\
            <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
@@ -151,7 +151,7 @@ private:
            </parameter>\n\
            </component-link>\n\
         </parameter-file>\n") %
-        instrumentName);
+                   instrumentName);
 
     // Create a temporary Instrument Parameter file.
     ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
