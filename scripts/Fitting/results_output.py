@@ -53,12 +53,10 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
     """
     linked_problems = build_indiv_linked_problems(results_per_test, group_name)
 
-    num_tests = len(results_per_test)
-    num_minimizers = len(minimizers)
-
     # Calculate summary tables
     accuracy_tbl, runtime_tbl = postproc.calc_accuracy_runtime_tbls(results_per_test, minimizers)
-    norm_acc_rankings, norm_runtimes, summary_cells_acc, summary_cells_runtime = postproc.calc_norm_summary_tables(accuracy_tbl, runtime_tbl)
+    norm_acc_rankings, norm_runtimes, summary_cells_acc, summary_cells_runtime = postproc.calc_norm_summary_tables(accuracy_tbl, 
+                                                                                                                   runtime_tbl)
 
     if simple_text:
         print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, runtime_tbl, norm_acc_rankings)
@@ -345,7 +343,6 @@ def build_items_links(comparison_type, comparison_dim, using_errors):
 
     @returns :: link or links to use from table cells.
     """
-    dim_suffix = comparison_dim
     if 'summary' == comparison_type:
         items_link = [ 'Minimizers_{0}_comparison_in_terms_of_{1}_nist_lower'.
                        format(weighted_suffix_string(using_errors), comparison_dim),
