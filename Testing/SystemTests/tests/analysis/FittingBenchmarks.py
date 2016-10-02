@@ -7,9 +7,6 @@ import unittest
 import stresstesting
 
 import os
-import time
-
-import numpy as np
 
 import mantid.simpleapi as msapi
 import fitting_benchmarking as fitbk
@@ -29,10 +26,20 @@ class FittingBenchmarkTests(unittest.TestCase):
         self.minimizers = minimizers_pseudofactory
         self.group_names = ['NIST, "lower" difficulty', 'NIST, "average" difficulty', 'NIST, "higher" difficulty', "CUTEst", "Neutron data"]
         self.group_suffix_names = ['nist_lower', 'nist_average', 'nist_higher', 'cutest', 'neutron_data']
-        self.color_scale = [(1.1, 'ranking-top-1'), (1.33, 'ranking-top-2'), (1.75, 'ranking-med-3'), (3, 'ranking-low-4'), (float('nan'), 'ranking-low-5')]
-
+        self.color_scale = [(1.1, 'ranking-top-1'),
+                            (1.33, 'ranking-top-2'),
+                            (1.75, 'ranking-med-3'),
+                            (3, 'ranking-low-4'),
+                            (float('nan'), 'ranking-low-5')
+                           ]
 
     def run_all_with_or_without_errors(self, use_errors):
+        """
+        Runs benchmark on all the available tes problems.
+        
+        @param use_errors : whether to use errors as weights in the cost funtion
+                            (weighted least squares)
+        """
         # pick data file from system tests path
         input_data_dir = msapi.config['datasearch.directories'].split(';')[0]
         # Look for the specific fitting test files location
@@ -40,11 +47,11 @@ class FittingBenchmarkTests(unittest.TestCase):
         fitbk.run_all_with_or_without_errors([problem_files_path], use_errors, self.minimizers,
                                              self.group_names, self.group_suffix_names, self.color_scale)
 
-    def test_rank_by_accuracy_and_runtime_with_error_weights(self):
-        self.run_all_with_or_without_errors(True)
+    def test_rank_accuracy_runtime_with_errors(self):
+        self.run_all_with_or_without_errors(use_errors=True)
 
-    def test_rank_by_accuracy_and_runtime_without_error_weights(self):
-        self.run_all_with_or_without_errors(False)
+    def test_rank_accuracy_runtime_without_errors(self):
+        self.run_all_with_or_without_errors(use_errors=False)
 
 
 # Run the unittest tests defined above as a Mantid system test
