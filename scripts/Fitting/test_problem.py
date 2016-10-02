@@ -18,7 +18,7 @@
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
-class FittingTestProblem:
+class FittingTestProblem(object):
     """
     Definition of a fitting test problem, normally loaded from a problem definition file.
     """
