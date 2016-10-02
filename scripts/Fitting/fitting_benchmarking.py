@@ -36,7 +36,6 @@ import mantid.simpleapi as msapi
 import input_parsing as iparsing
 import results_output as fitout
 import test_result
-import test_problem
 
 def run_all_with_or_without_errors(problem_files_path, use_errors, minimizers,
                                    group_names, group_suffix_names, color_scale):
@@ -54,16 +53,16 @@ def run_all_with_or_without_errors(problem_files_path, use_errors, minimizers,
     """
 
     problems, results_per_group = do_fitting_benchmark(include_nist=True, include_cutest=True,
-                                                                  data_groups_dirs = problem_files_path,
-                                                                  minimizers=minimizers, use_errors=use_errors)
+                                                       data_groups_dirs = problem_files_path,
+                                                       minimizers=minimizers, use_errors=use_errors)
 
     # Results for every test problem in each group
     for idx, group_results in enumerate(results_per_group):
         print("\n\n")
-        print("********************************************************".format(idx+1))
+        print("********************************************************")
         print("**************** RESULTS FOR GROUP {0}, {1} ************".format(idx+1,
                                                                                 group_names[idx]))
-        print("********************************************************".format(idx+1))
+        print("********************************************************")
         fitout.print_group_results_tables(minimizers, group_results, problems[idx],
                                           group_name=group_suffix_names[idx],
                                           use_errors=use_errors,
@@ -147,12 +146,12 @@ def do_fitting_benchmark_group(problem_files, minimizers, use_errors=True):
         print("* Testing fitting for problem definition file {0}".format(prob_file))
         print("* Testing fitting of problem {0}".format(prob.name))
 
-        results_prob = do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors)
+        results_prob = do_fitting_benchmark_one_problem(prob, minimizers, use_errors)
         results_per_problem.extend(results_prob)
 
     return problems, results_per_problem
 
-def do_regresion_fitting_benchmark_one_problem(prob, minimizers, use_errors=True):
+def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True):
     """
     One problem with potentially several starting points, returns a list (start points) of
     lists (minimizers)
@@ -225,7 +224,6 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
     """
     status = None
     chi2 = None
-    covar_tbl = None
     param_tbl = None
     fit_wks = None
     try:
@@ -322,17 +320,17 @@ def get_nist_problem_files(search_dir):
     # Grouped by "level of difficulty"
     nist_lower = [ 'Misra1a.dat', 'Chwirut2.dat', 'Chwirut1.dat', 'Lanczos3.dat',
                    'Gauss1.dat', 'Gauss2.dat', 'DanWood.dat', 'Misra1b.dat' ]
-    
+
     nist_average = [ 'Kirby2.dat', 'Hahn1.dat',
                      # 'Nelson.dat' needs log[y] parsing / DONE, needs x1, x2
                      'MGH17.dat', 'Lanczos1.dat', 'Lanczos2.dat', 'Gauss3.dat',
-                     'Misra1c.dat', 'Misra1d.dat', 
+                     'Misra1c.dat', 'Misra1d.dat',
                      # 'Roszman1.dat' <=== needs handling the  'pi = 3.1415...' / DOME
                      # And the 'arctan()'/ DONE, but generated lots of NaNs
                      'ENSO.dat' ]
     nist_higher = [ 'MGH09.dat','Thurber.dat', 'BoxBOD.dat', 'Rat42.dat',
                     'MGH10.dat', 'Eckerle4.dat', 'Rat43.dat', 'Bennett5.dat' ]
-                    
+
     nist_names = nist_lower + nist_average + nist_higher
 
     nist_subdir = 'NIST_nonlinear_regression'
