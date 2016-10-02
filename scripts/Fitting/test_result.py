@@ -18,7 +18,8 @@
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
-class FittingTestResult:
+#pylint: disable=too-few-public-methods, too-many-instance-attributes
+class FittingTestResult(object):
     """
     Minimal definition of a class to hold results from a fitting problem test.
     """
