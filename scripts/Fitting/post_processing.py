@@ -96,12 +96,12 @@ def calc_norm_summary_tables(accuracy_tbl, time_tbl):
     norm_runtimes = time_tbl / min_runtime[:, None]
 
     summary_cells_acc = np.array([np.nanmin(norm_acc_rankings, 0),
-                              np.nanmax(norm_acc_rankings, 0),
-                              np.nanmean(norm_acc_rankings, 0),
-                              np.nanmedian(norm_acc_rankings, 0),
-                              np.nanpercentile(norm_acc_rankings, 25, axis=0),
-                              np.nanpercentile(norm_acc_rankings, 75, axis=0)
-                             ])
+                                  np.nanmax(norm_acc_rankings, 0),
+                                  np.nanmean(norm_acc_rankings, 0),
+                                  np.nanmedian(norm_acc_rankings, 0),
+                                  np.nanpercentile(norm_acc_rankings, 25, axis=0),
+                                  np.nanpercentile(norm_acc_rankings, 75, axis=0)
+                                 ])
 
     summary_cells_runtime =  np.array([np.nanmin(norm_runtimes, 0),
                                        np.nanmax(norm_runtimes, 0),
