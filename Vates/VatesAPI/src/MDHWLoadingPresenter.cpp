@@ -24,7 +24,7 @@
 #include <vtkDataSet.h>
 
 namespace {
-  Mantid::Kernel::Logger g_log("MDHWLoadingPresenter");
+Mantid::Kernel::Logger g_log("MDHWLoadingPresenter");
 }
 
 namespace Mantid {

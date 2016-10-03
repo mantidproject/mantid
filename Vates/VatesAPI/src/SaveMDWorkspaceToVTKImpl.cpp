@@ -80,11 +80,10 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
       nullptr;
   auto fullFilename = getFullFilename(filename, isHistoWorkspace);
 
-  const vtkXMLWriter::CompressorType compressor = [&compressorType]{
+  const vtkXMLWriter::CompressorType compressor = [&compressorType] {
     if (compressorType == "NONE") {
-        return vtkXMLWriter::NONE;
-    }
-    else if (compressorType == "ZLIB") {
+      return vtkXMLWriter::NONE;
+    } else if (compressorType == "ZLIB") {
       return vtkXMLWriter::ZLIB;
     } else {
       // This should never happen.
@@ -93,8 +92,7 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
                     ". Using CompressorType=NONE.");
       return vtkXMLWriter::NONE;
     }
-  }
-  ();
+  }();
   // Define a time slice.
   auto time = selectTimeSliceValue(workspace);
 

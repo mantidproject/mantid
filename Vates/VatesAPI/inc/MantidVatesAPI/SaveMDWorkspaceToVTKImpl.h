@@ -46,10 +46,11 @@ class DLLExport SaveMDWorkspaceToVTKImpl {
 public:
   SaveMDWorkspaceToVTKImpl();
   ~SaveMDWorkspaceToVTKImpl() {}
-  void saveMDWorkspace(
-      Mantid::API::IMDWorkspace_sptr workspace, const std::string &filename,
-      VisualNormalization normalization, ThresholdRange_scptr thresholdRange,
-      int recursionDepth, const std::string &compressorType) const;
+  void saveMDWorkspace(Mantid::API::IMDWorkspace_sptr workspace,
+                       const std::string &filename,
+                       VisualNormalization normalization,
+                       ThresholdRange_scptr thresholdRange, int recursionDepth,
+                       const std::string &compressorType) const;
 
   const static std::string structuredGridExtension;
   const static std::string unstructuredGridExtension;
