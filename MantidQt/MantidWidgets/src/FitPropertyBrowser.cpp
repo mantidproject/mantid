@@ -169,8 +169,7 @@ void FitPropertyBrowser::init() {
   m_minimizer = m_enumManager->addProperty("Minimizer");
   m_minimizers << "Levenberg-Marquardt"
                << "Levenberg-MarquardtMD"
-               << "More-Sorensen"
-               << "DTRS"
+               << "Trust Region"
                << "Simplex"
                << "FABADA"
                << "Conjugate gradient (Fletcher-Reeves imp.)"

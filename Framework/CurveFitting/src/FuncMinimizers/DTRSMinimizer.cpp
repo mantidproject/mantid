@@ -16,7 +16,7 @@ namespace FuncMinimisers {
 
 // clang-format off
 ///@cond nodoc
-DECLARE_FUNCMINIMIZER(DTRSMinimizer, DTRS)
+DECLARE_FUNCMINIMIZER(DTRSMinimizer, Trust Region)
 ///@endcond
 // clang-format on
 
@@ -25,7 +25,7 @@ using namespace NLLS;
 DTRSMinimizer::DTRSMinimizer() : TrustRegionMinimizer() {}
 
 /// Name of the minimizer.
-std::string DTRSMinimizer::name() const { return "DTRS"; }
+std::string DTRSMinimizer::name() const { return "Trust Region"; }
 
 namespace {
 
