@@ -147,9 +147,6 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
   if (m_parameters.size() != m_nParams) {
     m_parameters.resize(m_nParams);
   }
-  for (size_t i = 0; i < m_nParams; ++i) {
-    m_parameters.set(i, m_fitFunction->getParameter(i));
-  }
 
   // Variable to calculate the total number of iterations required by the
   // SimulatedAnnealing and the posterior chain plus the burn in required
@@ -164,7 +161,8 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
   // Save parameter constraints
   for (size_t i = 0; i < m_nParams; ++i) {
 
-    double param = m_parameters.get(i);
+    double param = m_fitFunction->getParameter(i);
+	m_parameters.set(i, param);
 
     API::IConstraint *iconstr = m_fitFunction->getConstraint(i);
     if (iconstr) {
@@ -197,7 +195,6 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
     } else {
       m_jump.push_back(0.01);
     }
-    m_par_changed.push_back(false);
   }
   m_changesOld = m_changes;
   m_chi2 = m_leastSquares->val();
@@ -207,6 +204,8 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
   m_converged = false;
   m_max_iter = maxIterations;
   m_innactConvCriterion = getProperty("InnactiveConvergenceCriterion");
+
+  m_par_changed = std::vector<bool>(m_nParams, false);
 
   // Simulated Annealing
   // Obs: Simulated Annealing with maximum temperature = 1.0, 1step,
