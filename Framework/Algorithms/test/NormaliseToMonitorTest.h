@@ -97,18 +97,24 @@ void dotestExec(bool events, bool sameOutputWS, bool performance = false) {
 
     // Check the non-monitor spectra
     for (size_t i = 1; i < output->getNumberHistograms(); ++i) {
+      const auto &x = output->x(i);
+      const auto &y = output->y(i);
+      const auto &e = output->e(i);
       for (size_t j = 0; j < output->blocksize(); ++j) {
-        TS_ASSERT_EQUALS(output->readX(i)[j], j)
-        TS_ASSERT_DELTA(output->readY(i)[j], 2, 0.00001)
-        TS_ASSERT_DELTA(output->readE(i)[j], 3.05941, 0.00001)
+        TS_ASSERT_EQUALS(x[j], j)
+        TS_ASSERT_DELTA(y[j], 2, 0.00001)
+        TS_ASSERT_DELTA(e[j], 3.05941, 0.00001)
       }
     }
 
     // Now check the monitor one
+    const auto &monX = output->x(0);
+    const auto &monY = output->y(0);
+    const auto &monE = output->e(0);
     for (size_t k = 0; k < output->blocksize(); ++k) {
-      TS_ASSERT_EQUALS(output->readX(0)[k], k)
-      TS_ASSERT_DELTA(output->readY(0)[k], 10, 0.00001)
-      TS_ASSERT_DELTA(output->readE(0)[k], 4.24264, 0.00001)
+      TS_ASSERT_EQUALS(monX[k], k)
+      TS_ASSERT_DELTA(monY[k], 10, 0.00001)
+      TS_ASSERT_DELTA(monE[k], 4.24264, 0.00001)
     }
 
     if (events) {
@@ -418,25 +424,10 @@ public:
     delete suite;
   }
 
-  void testExec() {
-    setUpWorkspace(100, 1000);
-    dotestExec(false, false, performance);
-  }
+  NormaliseToMonitorTestPerformance() { setUpWorkspace(100, 1000); }
+  void testExec() { dotestExec(false, false, performance); }
 
-  void testExec_Events() {
-    setUpWorkspace(100, 1000);
-    dotestExec(true, false, performance);
-  }
-
-  void testExec_inplace() {
-    setUpWorkspace(100, 1000);
-    dotestExec(false, true, performance);
-  }
-
-  void testExec_Events_inplace() {
-    setUpWorkspace(100, 1000);
-    dotestExec(true, true, performance);
-  }
+  void testExec_Events() { dotestExec(true, false, performance); }
 
 private:
   const bool performance = true;
