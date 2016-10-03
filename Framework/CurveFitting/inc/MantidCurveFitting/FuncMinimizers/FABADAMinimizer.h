@@ -91,6 +91,8 @@ private:
   bool iterationContinuation();
   /// Output Markov chains
   void outputChains();
+  /// Output converged chains
+  void outputConvergedChains(size_t convLength, int nSteps);
 
   // Variables declarations
   /// Pointer to the cost function. Must be the least squares.
