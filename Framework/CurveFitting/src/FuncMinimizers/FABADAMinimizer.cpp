@@ -286,27 +286,27 @@ void FABADAMinimizer::finalize() {
   // Creating the reduced chain (considering only one each
   // "Steps between values" values)
   size_t chainLength = getProperty("ChainLength");
-  int n_steps = getProperty("StepsBetweenValues");
-  if (n_steps <= 0) {
+  int nSteps = getProperty("StepsBetweenValues");
+  if (nSteps <= 0) {
     g_log.warning() << "StepsBetweenValues has a non valid value"
                        " (<= 0). Default one used"
                        " (StepsBetweenValues = 10).\n";
-    n_steps = 10;
+    nSteps = 10;
   }
-  size_t conv_length = size_t(double(chainLength) / double(n_steps));
+  size_t convLength = size_t(double(chainLength) / double(nSteps));
 
   // Reduced chain
   std::vector<std::vector<double>> red_conv_chain;
   // Declaring vectors for best values
   std::vector<double> bestParameters(m_nParams);
-  std::vector<double> error_left(m_nParams);
-  std::vector<double> error_rigth(m_nParams);
+  std::vector<double> errorLeft(m_nParams);
+  std::vector<double> errorRight(m_nParams);
 
-  calculateConvChainAndBestParameters(conv_length, n_steps, red_conv_chain,
-                                      bestParameters, error_left, error_rigth);
+  calculateConvChainAndBestParameters(convLength, nSteps, red_conv_chain,
+                                      bestParameters, errorLeft, errorRight);
 
   if (!getPropertyValue("Parameters").empty()) {
-    outputParameterTable(bestParameters, error_left, error_rigth);
+    outputParameterTable(bestParameters, errorLeft, errorRight);
   }
 
   // Set the best parameter values
@@ -329,14 +329,14 @@ void FABADAMinimizer::finalize() {
     outputChains();
   }
 
-  double mostPchi2 = outputPDF(conv_length, red_conv_chain);
+  double mostPchi2 = outputPDF(convLength, red_conv_chain);
 
   if (!getPropertyValue("ConvergedChain").empty()) {
-    outputConvergedChains(conv_length, n_steps);
+    outputConvergedChains(convLength, nSteps);
   }
 
   if (!getPropertyValue("CostFunctionTable").empty()) {
-    outputCostFunctionTable(conv_length, mostPchi2);
+    outputCostFunctionTable(convLength, mostPchi2);
   }
 
   // Set the best parameter values
@@ -814,35 +814,35 @@ FABADAMinimizer::outputPDF(size_t convLength,
   double mostPchi2;
 
   // Create the workspace for the Probability Density Functions
-  int pdf_length = getProperty(
+  int pdfLength = getProperty(
       "NumberBinsPDF"); // histogram length for the PDF output workspace
-  if (pdf_length <= 0) {
+  if (pdfLength <= 0) {
     g_log.warning() << "Non valid Number of bins for the PDF (<= 0)."
                        " Default value (20 bins) taken\n";
-    pdf_length = 20;
+    pdfLength = 20;
   }
   API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", m_nParams + 1, pdf_length + 1, pdf_length);
+      "Workspace2D", m_nParams + 1, pdfLength + 1, pdfLength);
 
   // Calculate the cost function Probability Density Function
   if (convLength > 0) {
     std::sort(reducedChain[m_nParams].begin(), reducedChain[m_nParams].end());
-    std::vector<double> pdf_y(pdf_length, 0);
+    std::vector<double> pdf_y(pdfLength, 0);
     double start = reducedChain[m_nParams][0];
     double bin =
-        (reducedChain[m_nParams][convLength - 1] - start) / double(pdf_length);
+        (reducedChain[m_nParams][convLength - 1] - start) / double(pdfLength);
     size_t step = 0;
     MantidVec &X = ws->dataX(m_nParams);
     MantidVec &Y = ws->dataY(m_nParams);
     X[0] = start;
-    for (size_t i = 1; i < static_cast<size_t>(pdf_length) + 1; i++) {
-      double bin_end = start + double(i) * bin;
-      X[i] = bin_end;
-      while (step < convLength && reducedChain[m_nParams][step] <= bin_end) {
+    for (size_t i = 1; i < static_cast<size_t>(pdfLength) + 1; i++) {
+      double binEnd = start + double(i) * bin;
+      X[i] = binEnd;
+      while (step < convLength && reducedChain[m_nParams][step] <= binEnd) {
         pdf_y[i - 1] += 1;
         ++step;
       }
-      // Divided by conv_length * bin to normalize
+      // Divided by convLength * bin to normalize
       Y[i - 1] = pdf_y[i - 1] / (double(convLength) * bin);
     }
 
@@ -853,18 +853,18 @@ FABADAMinimizer::outputPDF(size_t convLength,
     // Do one iteration for each parameter.
     for (size_t j = 0; j < m_nParams; ++j) {
       // Calculate the Probability Density Function
-      std::vector<double> pdf_y(pdf_length, 0);
+      std::vector<double> pdf_y(pdfLength, 0);
       double start = reducedChain[j][0];
       double bin =
-          (reducedChain[j][convLength - 1] - start) / double(pdf_length);
+          (reducedChain[j][convLength - 1] - start) / double(pdfLength);
       size_t step = 0;
       MantidVec &X = ws->dataX(j);
       MantidVec &Y = ws->dataY(j);
       X[0] = start;
-      for (size_t i = 1; i < static_cast<size_t>(pdf_length) + 1; i++) {
-        double bin_end = start + double(i) * bin;
-        X[i] = bin_end;
-        while (step < convLength && reducedChain[j][step] <= bin_end) {
+      for (size_t i = 1; i < static_cast<size_t>(pdfLength) + 1; i++) {
+        double binEnd = start + double(i) * bin;
+        X[i] = binEnd;
+        while (step < convLength && reducedChain[j][step] <= binEnd) {
           pdf_y[i - 1] += 1;
           ++step;
         }
@@ -877,7 +877,7 @@ FABADAMinimizer::outputPDF(size_t convLength,
       //*double mostP = X[pos_MP - pdf_y.begin()] + (bin / 2.0);
       //*m_leastSquares->setParameter(j, mostP);
     }
-  } // if conv_length > 0
+  } // if convLength > 0
   else {
     g_log.warning() << "No points to create PDF. Empty Wokspace returned.\n";
     mostPchi2 = -1;
