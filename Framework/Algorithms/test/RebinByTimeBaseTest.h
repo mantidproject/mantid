@@ -162,7 +162,7 @@ private:
     for (int i = 0; i < nSpectra; ++i) {
       // Check that the x-axis has been set-up properly. It should mirror the
       // original rebin parameters.
-      const Mantid::MantidVec &X = outWS->readX(i);
+      auto &X = outWS->x(i);
       TS_ASSERT_EQUALS(nBinsToBinTo + 1, X.size());
       for (uint64_t j = 0; j < X.size(); ++j) {
         TS_ASSERT_EQUALS(static_cast<int>(step * j), static_cast<int>(X[j]));
@@ -170,7 +170,7 @@ private:
 
       // Check that the y-axis has been set-up properly.
 
-      const Mantid::MantidVec &Y = outWS->readY(i);
+      auto &Y = outWS->y(i);
       TS_ASSERT_EQUALS(nBinsToBinTo, Y.size());
       for (uint64_t j = 0; j < Y.size(); ++j) {
         TS_ASSERT_EQUALS(nUniformDistributedEvents / nBinsToBinTo, Y[j]);
@@ -405,7 +405,7 @@ public:
 
     MatrixWorkspace_sptr outWS =
         AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
-    const Mantid::MantidVec &X = outWS->readX(0);
+    auto &X = outWS->x(0);
 
     // Check that xmin and xmax have been caclulated correctly.
     TS_ASSERT_EQUALS(nBinsToBinTo, X.size());
@@ -459,14 +459,14 @@ public:
 
     MatrixWorkspace_sptr outWS =
         AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
-    const Mantid::MantidVec &X = outWS->readX(0);
+    auto &X = outWS->x(0);
 
     // Check that xmin and xmax have been caclulated correctly.
     TS_ASSERT_EQUALS(nBinsToBinTo + 1, X.size());
     TS_ASSERT_EQUALS(pulseTimeMin, X.front());
     TS_ASSERT_EQUALS(pulseTimeMax, X.back());
 
-    const Mantid::MantidVec &Y = outWS->readY(0);
+    auto &Y = outWS->y(0);
     TS_ASSERT_EQUALS(nBinsToBinTo, Y.size());
 
     TS_ASSERT_EQUALS(nUniformDistributedEvents / nBinsToBinTo, Y[0]);
