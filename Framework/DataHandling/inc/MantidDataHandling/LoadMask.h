@@ -83,7 +83,7 @@ private:
                        std::vector<detid_t> &detectors);
 
   void processMaskOnDetectors(const detid2index_map &indexmap, bool tomask,
-                              std::vector<detid_t> singledetids);
+                              const std::vector<detid_t> &singledetids);
   /// Convert spectrum to detector
   void processMaskOnWorkspaceIndex(bool mask,
                                    std::vector<specnum_t> &maskedSpecID,
@@ -110,6 +110,9 @@ private:
 
   /// Default setup.  If true, not masking, but use the pixel
   bool m_defaultToUse;
+  /// input property contains name of instrument definition file rather than
+  /// instrument name itself
+  bool m_IDF_provided;
 
   // detector id-s to mask
   std::vector<detid_t> m_maskDetID;

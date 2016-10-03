@@ -187,6 +187,7 @@ private slots:
   void browseClicked();
   void saveClicked();
   void plotSeparateWindow();
+  void showToolTipHelp();
   void setBankDir(int idx);
   void listViewFittingRun();
 

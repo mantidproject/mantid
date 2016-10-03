@@ -2834,9 +2834,9 @@ PlotCurve *Graph::insertCurve(Table *w, const QString &xColName,
 }
 
 PlotCurve *Graph::insertCurve(QString workspaceName, int index, bool err,
-                              Graph::CurveType style) {
+                              Graph::CurveType style, bool distribution) {
   return (new MantidMatrixCurve(workspaceName, this, index,
-                                MantidMatrixCurve::Spectrum, err, false,
+                                MantidMatrixCurve::Spectrum, err, distribution,
                                 style));
 }
 
@@ -6197,6 +6197,9 @@ void Graph::loadFromProject(const std::string &lines, ApplicationWindow *app,
         * to the graph for us, and then loading the settings into the
         * spectrogram.
         */
+      if (!s)
+        continue;
+
       plotSpectrogram(s, Graph::ColorMap);
       s->loadFromProject(*it);
       curveID++;

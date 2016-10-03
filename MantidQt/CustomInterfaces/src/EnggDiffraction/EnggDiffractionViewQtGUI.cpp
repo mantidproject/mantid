@@ -369,23 +369,28 @@ void EnggDiffractionViewQtGUI::readSettings() {
   // EnggDiffCalibSettings
   m_calibSettings.m_inputDirCalib =
       qs.value("input-dir-calib-files", lastPath).toString().toStdString();
+
   m_calibSettings.m_inputDirRaw =
       qs.value("input-dir-raw-files", lastPath).toString().toStdString();
+
   const std::string fullCalib = guessDefaultFullCalibrationPath();
   m_calibSettings.m_pixelCalibFilename =
       qs.value("pixel-calib-filename", QString::fromStdString(fullCalib))
           .toString()
           .toStdString();
+
   // 'advanced' block
   m_calibSettings.m_forceRecalcOverwrite =
       qs.value("force-recalc-overwrite", false).toBool();
+
   const std::string templ = guessGSASTemplatePath();
   m_calibSettings.m_templateGSAS_PRM =
       qs.value("template-gsas-prm", QString::fromStdString(templ))
           .toString()
           .toStdString();
-  m_calibSettings.m_forceRecalcOverwrite =
-      qs.value("rebin-calib", g_defaultRebinWidth).toBool();
+
+  m_calibSettings.m_rebinCalibrate =
+      qs.value("rebin-calib", g_defaultRebinWidth).toFloat();
 
   // 'focusing' block
   m_focusDir = qs.value("focus-dir").toString().toStdString();
@@ -1099,6 +1104,7 @@ void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
   if (answer == QMessageBox::AcceptRole && m_ui.pushButton_close->isEnabled()) {
     m_presenter->notify(IEnggDiffractionPresenter::ShutDown);
     delete m_splashMsg;
+    m_splashMsg = nullptr;
     event->accept();
   } else {
     event->ignore();
