@@ -54,7 +54,7 @@ FABADAMinimizer::FABADAMinimizer()
       m_par_converged(), m_criteria(), m_max_iter(0), m_par_changed(),
       m_temperature(0.), m_counterGlobal(0), m_simAnnealingItStep(0),
       m_leftRefrPoints(0), m_tempStep(0.), m_overexploration(false),
-      m_nParams(0), m_innactConvCriterion(0), m_numInactiveRegenerations(),
+      m_nParams(0), m_numInactiveRegenerations(),
       m_changesOld() {
   declareProperty("ChainLength", static_cast<size_t>(10000),
                   "Length of the converged chain.");
@@ -182,22 +182,13 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
 
     // Initialize chains
     m_chain.push_back(std::vector<double>(1, param));
-
-    // Initilize convergence and jump parameters
-    if (param != 0.0) {
-      m_jump.push_back(std::abs(param / 10));
-    } else {
-      m_jump.push_back(0.01);
-    }
+    // Initilize jump parameters
+    m_jump.push_back(param != 0.0 ? std::abs(param / 10) : 0.01);
   }
   m_chi2 = m_leastSquares->val();
-  std::vector<double> v;
-  v.push_back(m_chi2);
-  m_chain.push_back(v);
+  m_chain.push_back(std::vector<double>(1, m_chi2));
   m_converged = false;
   m_max_iter = maxIterations;
-  m_innactConvCriterion = getProperty("InnactiveConvergenceCriterion");
-
   m_par_changed = std::vector<bool>(m_nParams, false);
   m_changes = std::vector<int>(m_nParams, 0);
   m_changesOld = m_changes;
@@ -706,6 +697,8 @@ void FABADAMinimizer::jumpUpdate(const size_t &parameterIndex) {
 *
 */
 void FABADAMinimizer::convergenceCheck() {
+  size_t innactConvCriterion = getProperty("InnactiveConvergenceCriterion");
+
   if (m_leftRefrPoints == 0 && m_counter > LOWER_CONVERGENCE_LIMIT &&
       !m_converged) {
     size_t t = 0;
@@ -713,7 +706,7 @@ void FABADAMinimizer::convergenceCheck() {
     for (size_t i = 0; i < m_nParams; i++) {
       if (m_par_converged[i]) {
         t += 1;
-      } else if (m_numInactiveRegenerations[i] >= m_innactConvCriterion) {
+      } else if (m_numInactiveRegenerations[i] >= innactConvCriterion) {
         ++t;
         ImmobilityConv = true;
       }
