@@ -17,7 +17,7 @@ using namespace Mantid::API;
 
 // Anonymous namespace to share methods with Performance test
 namespace {
-void setupWorkspaces(int N, double dX, double XX) {
+void setupWorkspaces(int N, double dX) {
   FrameworkManager::Instance();
   Mantid::DataObjects::Workspace2D_sptr ws =
       boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
@@ -71,7 +71,7 @@ public:
   static RealFFTTest *createSuite() { return new RealFFTTest(); }
   static void destroySuite(RealFFTTest *suite) { delete suite; }
 
-  RealFFTTest() : N(116), dX(0.3), XX(N * dX) { setupWorkspaces(N, dX, XX); }
+  RealFFTTest() : N(116), dX(0.3), XX(N * dX) { setupWorkspaces(N, dX); }
   ~RealFFTTest() override { deleteWorkspacesFromADS(); }
 
   void dotestForward(std::string IgnoreXBins, bool performance = false) {
