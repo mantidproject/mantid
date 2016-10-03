@@ -50,8 +50,8 @@ DECLARE_FUNCMINIMIZER(FABADAMinimizer, FABADA)
 /// Constructor
 FABADAMinimizer::FABADAMinimizer()
     : m_counter(0), m_chainIterations(0), m_changes(), m_jump(), m_parameters(),
-      m_chain(), m_chi2(0.), m_converged(false), m_conv_point(0),
-      m_par_converged(), m_criteria(), m_max_iter(0), m_par_changed(),
+      m_chain(), m_chi2(0.), m_converged(false), m_convPoint(0),
+      m_parConverged(), m_criteria(), m_maxIter(0), m_parChanged(),
       m_temperature(0.), m_counterGlobal(0), m_simAnnealingItStep(0),
       m_leftRefrPoints(0), m_tempStep(0.), m_overexploration(false),
       m_nParams(0), m_numInactiveRegenerations(),
@@ -188,12 +188,12 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
   m_chi2 = m_leastSquares->val();
   m_chain.push_back(std::vector<double>(1, m_chi2));
   m_converged = false;
-  m_max_iter = maxIterations;
-  m_par_changed = std::vector<bool>(m_nParams, false);
+  m_maxIter = maxIterations;
+  m_parChanged = std::vector<bool>(m_nParams, false);
   m_changes = std::vector<int>(m_nParams, 0);
   m_changesOld = m_changes;
   m_numInactiveRegenerations = std::vector<size_t>(m_nParams, 0);
-  m_par_converged = std::vector<bool>(m_nParams, false);
+  m_parConverged = std::vector<bool>(m_nParams, false);
   m_criteria = std::vector<double>(m_nParams, getProperty("ConvergenceCriteria"));
 
   // Simulated Annealing
@@ -331,8 +331,8 @@ bool FABADAMinimizer::iterate(size_t) {
     tieApplication(i, new_parameters, new_value);
 
     // To track "unmovable" parameters (=> cannot converge)
-    if (!m_par_changed[i] && new_parameters.get(i) != m_parameters.get(i))
-      m_par_changed[i] = true;
+    if (!m_parChanged[i] && new_parameters.get(i) != m_parameters.get(i))
+      m_parChanged[i] = true;
 
     // Calculate the new chi2 value
     double chi2_new = m_leastSquares->val();
@@ -356,16 +356,16 @@ bool FABADAMinimizer::iterate(size_t) {
     // since it starts to check if convergence is reached)
 
     // Take the unmovable parameters to be converged
-    if (m_leftRefrPoints == 0 && !m_par_changed[i] &&
+    if (m_leftRefrPoints == 0 && !m_parChanged[i] &&
         m_counter > LOWER_CONVERGENCE_LIMIT)
-      m_par_converged[i] = true;
+      m_parConverged[i] = true;
 
-    if (m_leftRefrPoints == 0 && !m_par_converged[i] &&
+    if (m_leftRefrPoints == 0 && !m_parConverged[i] &&
         m_counter > LOWER_CONVERGENCE_LIMIT) {
       if (chi2_old != m_chi2) {
         double chi2_quotient = fabs(m_chi2 - chi2_old) / chi2_old;
         if (chi2_quotient < m_criteria[i]) {
-          m_par_converged[i] = true;
+          m_parConverged[i] = true;
         }
       }
     }
@@ -704,7 +704,7 @@ void FABADAMinimizer::convergenceCheck() {
     size_t t = 0;
     bool ImmobilityConv = false;
     for (size_t i = 0; i < m_nParams; i++) {
-      if (m_par_converged[i]) {
+      if (m_parConverged[i]) {
         t += 1;
       } else if (m_numInactiveRegenerations[i] >= innactConvCriterion) {
         ++t;
@@ -723,7 +723,7 @@ void FABADAMinimizer::convergenceCheck() {
         g_log.warning() << "Convergence detected through immobility."
                            " It might be a bad convergence.\n";
 
-      m_conv_point = m_counterGlobal * m_nParams + 1;
+      m_convPoint = m_counterGlobal * m_nParams + 1;
       m_counter = 0;
       for (size_t i = 0; i < m_nParams; ++i) {
         m_changes[i] = 0;
@@ -740,9 +740,9 @@ void FABADAMinimizer::convergenceCheck() {
     // All parameters should converge at the same iteration
     else {
       // The not converged parameters can be identified at the last iteration
-      if (m_counterGlobal < m_max_iter - m_chainIterations)
+      if (m_counterGlobal < m_maxIter - m_chainIterations)
         for (size_t i = 0; i < m_nParams; ++i)
-          m_par_converged[i] = false;
+          m_parConverged[i] = false;
     }
   }
 }
@@ -782,7 +782,7 @@ bool FABADAMinimizer::iterationContinuation() {
   if (!m_converged) {
 
     // If there is not convergence continue the iterations.
-    if (m_counterGlobal < m_max_iter - m_chainIterations) {
+    if (m_counterGlobal < m_maxIter - m_chainIterations) {
       return true;
     }
     // If there is not convergence, but it has been made
@@ -790,14 +790,14 @@ bool FABADAMinimizer::iterationContinuation() {
     else {
       std::string failed = "";
       for (size_t i = 0; i < m_nParams; ++i) {
-        if (!m_par_converged[i]) {
+        if (!m_parConverged[i]) {
           failed = failed + m_fitFunction->parameterName(i) + ", ";
         }
       }
       failed.replace(failed.end() - 2, failed.end(), ".");
       throw std::runtime_error(
           "Convegence NOT reached after " +
-          std::to_string(m_max_iter - m_chainIterations) +
+          std::to_string(m_maxIter - m_chainIterations) +
           " iterations.\n   Try to set better initial values for parameters: " +
           failed + " Or increase the maximum number of iterations "
                    "(MaxIterations property).");
@@ -858,7 +858,7 @@ void FABADAMinimizer::outputConvergedChains(size_t convLength, int nSteps) {
   // Do one iteration for each parameter plus one for Chi square.
   for (size_t j = 0; j < m_nParams + 1; ++j) {
     std::vector<double>::const_iterator first =
-        m_chain[j].begin() + m_conv_point;
+        m_chain[j].begin() + m_convPoint;
     std::vector<double>::const_iterator last = m_chain[j].end();
     std::vector<double> conv_chain(first, last);
     auto &X = wsConv->mutableX(j);
@@ -1051,12 +1051,12 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
     // Write first element of the reduced chain
     for (size_t e = 0; e <= m_nParams; ++e) {
       std::vector<double> v;
-      v.push_back(m_chain[e][m_conv_point]);
+      v.push_back(m_chain[e][m_convPoint]);
       reducedChain.push_back(v);
     }
 
     // Calculate the red_conv_chain for the cost fuction.
-    auto first = m_chain[m_nParams].begin() + m_conv_point;
+    auto first = m_chain[m_nParams].begin() + m_convPoint;
     auto last = m_chain[m_nParams].end();
     std::vector<double> conv_chain(first, last);
     for (size_t k = 1; k < convLength; ++k) {
@@ -1070,7 +1070,7 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
 
     // Calculate the parameter value and the errors
     for (size_t j = 0; j < m_nParams; ++j) {
-      auto first = m_chain[j].begin() + m_conv_point;
+      auto first = m_chain[j].begin() + m_convPoint;
       auto last = m_chain[j].end();
       // red_conv_chain calculated for each parameter
       std::vector<double> conv_chain(first, last);

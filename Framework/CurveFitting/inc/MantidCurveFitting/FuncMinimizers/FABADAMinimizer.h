@@ -133,15 +133,15 @@ private:
   /// Boolean that indicates global convergence
   bool m_converged;
   /// The point when convergence has been reached
-  size_t m_conv_point;
+  size_t m_convPoint;
   /// Convergence of each parameter
-  std::vector<bool> m_par_converged;
+  std::vector<bool> m_parConverged;
   /// Convergence criteria for each parameter
   std::vector<double> m_criteria;
   /// Maximum number of iterations
-  size_t m_max_iter;
+  size_t m_maxIter;
   /// Bool that idicates if a varible has changed at some self iteration
-  std::vector<bool> m_par_changed;
+  std::vector<bool> m_parChanged;
   /// Simulated Annealing temperature
   double m_temperature;
   /// The global number of iterations done
