@@ -913,17 +913,15 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
   TSVSerialiser tsv(lines);
 
   int viewType;
-  size_t viewIdSizet, sourceIdSizet;
-  tsv.selectLine("ViewId");
-  tsv >> viewIdSizet;
-  tsv.selectLine("SourceId");
-  tsv >> sourceIdSizet;
+  std::string viewName, sourceName;
+  tsv.selectLine("ViewName");
+  tsv >> viewName;
+  tsv.selectLine("SourceName");
+  tsv >> sourceName;
   tsv.selectLine("ViewType");
   tsv >> viewType;
 
   auto vtype = static_cast<ModeControlWidget::Views>(viewType);
-  auto viewId = static_cast<vtkTypeUInt32>(viewIdSizet);
-  auto sourceId = static_cast<vtkTypeUInt32>(sourceIdSizet);
 
   // Set the view type on the widget
   this->ui.modeControlWidget->blockSignals(true);
@@ -942,12 +940,25 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
   if (!success)
     return; // state could not be loaded. There's nothing left to do!
 
+  auto &activeObjects = pqActiveObjects::instance();
+  auto proxyManager = activeObjects.activeServer()->proxyManager();
+  auto viewProxy = proxyManager->GetProxy("views", viewName.c_str());
+  auto sourceProxy = proxyManager->GetProxy("sources", sourceName.c_str());
+
+  if (!viewProxy || !sourceProxy)
+    return; // could not find the active view/source from last session.
+
   // Get the active objects from the last session
   auto model = pqApplicationCore::instance()->getServerManagerModel();
-  auto view = model->findItem<pqView *>(viewId);
-  auto source = model->findItem<pqPipelineSource *>(sourceId);
-  setupViewFromProject(vtype, view, source);
+  auto view = model->findItem<pqRenderView *>(viewProxy);
+  auto source = model->findItem<pqPipelineSource *>(sourceProxy);
+
+
+  if (!view || !source)
+    return; // could not find the active PV view/source from last session.
+
   setActiveObjects(view, source);
+  setupViewFromProject(vtype, view, source);
 
   if (tsv.selectSection("colormap")) {
     std::string colorMapLines;
@@ -981,7 +992,7 @@ bool MdViewerWidget::loadVSIState(const std::string &fileName) {
     return false;
 
   try {
-    proxyManager->LoadXMLState(parser->GetRootElement(), NULL, true);
+    proxyManager->LoadXMLState(parser->GetRootElement(), NULL, false);
   } catch (...) {
     parser->Delete();
     return false;
@@ -1061,14 +1072,15 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   contents.writeLine("ViewType") << static_cast<int>(vtype);
 
   auto &activeObjects = pqActiveObjects::instance();
+  auto proxyManager = activeObjects.activeServer()->proxyManager();
   auto view = activeObjects.activeView()->getProxy();
   auto source = activeObjects.activeSource()->getProxy();
 
-  // These two IDs let use retrieve the source & view currently
-  // being looked at in VSI. Note: the XML must be reloaded with the option to
-  // use the same global IDs.
-  contents.writeLine("ViewID") << view->GetGlobalIDAsString();
-  contents.writeLine("SourceID") << source->GetGlobalIDAsString();
+  auto viewName = proxyManager->GetProxyName("views", view);
+  auto sourceName = proxyManager->GetProxyName("sources", source);
+
+  contents.writeLine("ViewName") << viewName;
+  contents.writeLine("SourceName") << sourceName;
 
   // Now serialise the color map
   contents.writeSection("colormap", ui.colorSelectionWidget->saveToProject());
