@@ -85,24 +85,24 @@ Knowing the temperature allows us to calculate a peak list: a list of transition
   
 The output is::
 
- [[  0.00000000e+00   2.44006198e+01   4.24977124e+01   1.80970926e+01  -2.44006198e+01]
-  [  2.72327784e+00   1.10973434e+00   6.33885503e-02   2.15078093e-03   1.77951652e-03]]
+ [[  0.00000000e+00   2.44006198e+01   4.24977124e+01   1.80970926e+01 -2.44006198e+01]
+  [  2.16711565e+02   8.83098530e+01   5.04430056e+00   1.71153708e-01  1.41609425e-01]]
 
-The first row are the energies and the second row are the intensities.
+The first row are the energies (in meV) and the second row are the integrated intensities (in milibarn per steradian).
 
 The number of peaks that the function returns is controlled by two tolerance parameters: `ToleranceEnergy` and
 `ToleranceIntensity`. If a peak has an intensity below the value of `ToleranceIntensity` the peak is ignored.
 It two peaks have a difference in the energies smaller than `ToleranceEnergy` they are combined into a single peak.
 
-If we set `ToleranceIntensity` of the above crystal field object to 1e-2 we'll have only three peaks in the list::
+If we set `ToleranceIntensity` of the above crystal field object to 1 mb/sr we'll have only three peaks in the list::
 
-  cf.ToleranceIntensity = 1e-2
+  cf.ToleranceIntensity = 1
   print cf.getPeakList()
   
 The new output::
 
- [[  0.          24.40061976  42.49771237]
-  [  2.72327784   1.10973434   0.06338855]]
+ [[   0.           24.40061976   42.49771237]
+  [ 216.71156467   88.30985303    5.04430056]]
   
 To calcualte a spectrum we need to define a shape of each peak (peak profile function) and its default width (`FWHM`).
 The width can be set either via a keyword argument or a property with name `FWHM`. If the peak shape isn't set the default
