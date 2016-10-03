@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -32,10 +33,10 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  size_t determineQminIndex(const std::vector<double> &Q,
-                            const std::vector<double> &FofQ);
-  size_t determineQmaxIndex(const std::vector<double> &Q,
-                            const std::vector<double> &FofQ);
+  size_t determineQminIndex(const HistogramData::HistogramX &Q,
+                            const HistogramData::HistogramY &FofQ);
+  size_t determineQmaxIndex(const HistogramData::HistogramX &Q,
+                            const HistogramData::HistogramY &FofQ);
   double determineRho0();
 };
 

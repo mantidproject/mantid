@@ -60,8 +60,8 @@ public:
     }
     this->detid = *(detIds.begin());
 
-    const MantidVec &X = spectrum.readX();
-    const MantidVec &Y = spectrum.readY();
+    const auto &X = spectrum.x();
+    const auto &Y = spectrum.y();
     tofMin = X.front();
     tofMax = X.back();
 
@@ -806,7 +806,7 @@ void PDCalibration::createNewCalTable() {
     const size_t wi = it->second;
     API::TableRow newRow = m_calibrationTable->appendRow();
     newRow << detID;
-    newRow << difcWS->readY(wi)[0];
+    newRow << difcWS->y(wi)[0];
     newRow << 0.;      // difa
     newRow << 0.;      // tzero
     newRow << 0.;      // tofmin

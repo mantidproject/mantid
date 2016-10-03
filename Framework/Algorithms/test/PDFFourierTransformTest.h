@@ -75,8 +75,8 @@ public:
     DataObjects::Workspace2D_sptr pdfws =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::AnalysisDataService::Instance().retrieve("PDFGofR"));
-    MantidVec &R = pdfws->dataX(0);
-    MantidVec &GofR = pdfws->dataY(0);
+    const auto R = pdfws->x(0);
+    const auto GofR = pdfws->y(0);
 
     TS_ASSERT_DELTA(R[0], 0.01, 0.0001);
     TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
@@ -109,8 +109,8 @@ public:
     DataObjects::Workspace2D_sptr pdfws =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::AnalysisDataService::Instance().retrieve("PDFGofR"));
-    MantidVec &R = pdfws->dataX(0);
-    MantidVec &GofR = pdfws->dataY(0);
+    const auto R = pdfws->x(0);
+    const auto GofR = pdfws->y(0);
 
     TS_ASSERT_DELTA(R[0], 0.01, 0.0001);
     TS_ASSERT_DELTA(R[249], 2.5, 0.0001);
@@ -145,7 +145,7 @@ public:
     DataObjects::Workspace2D_sptr pdfws =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             API::AnalysisDataService::Instance().retrieve("PDFGofR"));
-    MantidVec &GofR = pdfws->dataY(0);
+    const auto GofR = pdfws->y(0);
 
     TS_ASSERT(GofR[0] > 40.0);
     for (size_t i = 1; i < GofR.size(); i++) {
@@ -170,9 +170,9 @@ private:
             Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 1,
                                                              n, n));
 
-    Mantid::MantidVec &X = ws->dataX(0);
-    Mantid::MantidVec &Y = ws->dataY(0);
-    Mantid::MantidVec &E = ws->dataE(0);
+    auto &X = ws->mutableX(0);
+    auto &Y = ws->mutableY(0);
+    auto &E = ws->mutableE(0);
 
     for (size_t i = 0; i < n; i++) {
       X[i] = double(i) * dx;

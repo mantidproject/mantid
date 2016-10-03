@@ -49,7 +49,7 @@ void PointByPointVCorrection::exec() {
   check_validity(inputWS1, inputWS2, outputWS);
 
   // Now do the normalisation
-  const int size = static_cast<int>(inputWS1->readX(0).size());
+  const int size = static_cast<int>(inputWS1->x(0).size());
   const int nHist = static_cast<int>(inputWS1->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, nHist);
 
@@ -58,15 +58,15 @@ void PointByPointVCorrection::exec() {
   {
     PARALLEL_START_INTERUPT_REGION
 
-    const MantidVec &X = inputWS1->readX(i);
-    outputWS->setX(i, inputWS1->refX(i));
+    outputWS->setSharedX(i, inputWS1->sharedX(i));
 
-    const MantidVec &Y1 = inputWS1->readY(i);
-    const MantidVec &Y2 = inputWS2->readY(i);
-    const MantidVec &E1 = inputWS1->readE(i);
-    const MantidVec &E2 = inputWS2->readE(i);
-    MantidVec &resultY = outputWS->dataY(i);
-    MantidVec &resultE = outputWS->dataE(i);
+    const auto X = inputWS1->x(i);
+    const auto Y1 = inputWS1->y(i);
+    const auto Y2 = inputWS2->y(i);
+    const auto E1 = inputWS1->e(i);
+    const auto E2 = inputWS2->e(i);
+    auto &resultY = outputWS->mutableY(i);
+    auto &resultE = outputWS->mutableE(i);
 
     // Work on the Y data
     MantidVec binwidths(size);  // MantidVec for bin widths

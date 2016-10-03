@@ -60,10 +60,10 @@ public:
     TS_ASSERT_EQUALS(outputWs->getSpectrum(1).readX(),
                      inputWs->getSpectrum(1).readX());
 
-    auto specReY = outputWs->getSpectrum(0).readY();
-    auto specReE = outputWs->getSpectrum(0).readE();
-    auto specImY = outputWs->getSpectrum(1).readY();
-    auto specImE = outputWs->getSpectrum(1).readE();
+    const auto specReY = outputWs->getSpectrum(0).y();
+    const auto specReE = outputWs->getSpectrum(0).e();
+    const auto specImY = outputWs->getSpectrum(1).y();
+    const auto specImE = outputWs->getSpectrum(1).e();
     // Check real Y values
     TS_ASSERT_DELTA(specReY[0], -0.9982, 0.0001);
     TS_ASSERT_DELTA(specReY[20], -0.0252, 0.0001);
