@@ -466,7 +466,7 @@ class DGSReductionILL(DataProcessorAlgorithm):
                                                      PropertyMode.Optional),
                              doc='Workspace from which to get flat background data')
         self.declareProperty(PROP_MONITOR_INDEX,
-                             1,
+                             0,
                              direction=Direction.Input,
                              doc='Index of the main monitor spectrum.')
         self.declareProperty(PROP_USER_MASK,
@@ -537,10 +537,13 @@ class DGSReductionILL(DataProcessorAlgorithm):
     def _convertToWorkspaceIndex(self, i, workspace):
         indexType = self.getProperty(PROP_INDEX_TYPE).value
         if indexType == INDEX_TYPE_WORKSPACE_INDEX:
+            print 'INDEX_TYPE_WORKSPACE_INDEX:' + str(i)
             return i
         elif indexType == INDEX_TYPE_SPECTRUM_NUMBER:
+            print 'INDEX_TYPE_SPECTRUM_NUMBER:' + str(i)
             return workspace.getIndexFromSpectrumNumber(i)
         else: # INDEX_TYPE_DETECTOR_ID
+            print 'INDEX_TYPE_DETECTOR_ID:' + str(i)
             for j in len(workspace.getNumberHistograms()):
                 if workspace.getSpectrum(j).hasDetectorID(i):
                     return j
