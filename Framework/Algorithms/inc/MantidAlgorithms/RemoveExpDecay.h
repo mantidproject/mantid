@@ -5,13 +5,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
 /**Takes a muon workspace as input and removes the exponential decay from a time
 channel.
-     This is done by multipling the data by exp(t/tmuon).
+     This is done by multiplying the data by exp(t/tmuon).
 
 Required Properties:
 <UL>
@@ -65,10 +66,12 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  void removeDecayError(const MantidVec &inX, const MantidVec &inY,
-                        MantidVec &outY);
-  void removeDecayData(const MantidVec &inX, const MantidVec &inY,
-                       MantidVec &outY);
+  void removeDecayError(const HistogramData::HistogramX &inX,
+                        const HistogramData::HistogramE &inE,
+                        HistogramData::HistogramE &outE);
+  void removeDecayData(const HistogramData::HistogramX &inX,
+                       const HistogramData::HistogramY &inY,
+                       HistogramData::HistogramY &outY);
   // calculate Muon normalisation constant
   double calNormalisationConst(API::MatrixWorkspace_sptr ws, int wsIndex);
 };

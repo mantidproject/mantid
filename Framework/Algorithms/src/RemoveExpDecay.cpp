@@ -12,6 +12,14 @@
 #include <cmath>
 #include <vector>
 
+namespace {
+/// Number of microseconds in one second (10^6)
+constexpr double MICROSECONDS_PER_SECOND{1000000.0};
+/// Muon lifetime in microseconds
+constexpr double MUON_LIFETIME_MICROSECONDS{
+    Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND};
+}
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -53,16 +61,10 @@ void MuonRemoveExpDecay::exec() {
   if (inputWS != outputWS) {
     outputWS = API::WorkspaceFactory::Instance().create(inputWS);
   }
-  // Copy over the X vaules to avoid a race-condition in main the loop
-  PARALLEL_FOR2(inputWS, outputWS)
-  for (int i = 0; i < numSpectra; ++i) {
-    PARALLEL_START_INTERUPT_REGION
-
-    outputWS->dataX(i) = inputWS->readX(i);
-
-    PARALLEL_END_INTERUPT_REGION
+  // Share the X values
+  for (size_t i = 0; i < static_cast<size_t>(numSpectra); ++i) {
+    outputWS->setSharedX(i, inputWS->sharedX(i));
   }
-  PARALLEL_CHECK_INTERUPT_REGION
 
   if (spectra.empty()) {
 
@@ -71,22 +73,22 @@ void MuonRemoveExpDecay::exec() {
     PARALLEL_FOR2(inputWS, outputWS)
     for (int i = 0; i < numSpectra; ++i) {
       PARALLEL_START_INTERUPT_REGION
-
+      const auto index = static_cast<size_t>(i);
       // Make sure reference to input X vector is obtained after output one
       // because in the case
       // where the input & output workspaces are the same, it might move if the
       // vectors were shared.
-      const MantidVec &xIn = inputWS->readX(i);
+      const auto &xIn = inputWS->x(index);
 
-      MantidVec &yOut = outputWS->dataY(i);
-      MantidVec &eOut = outputWS->dataE(i);
+      auto &yOut = outputWS->mutableY(index);
+      auto &eOut = outputWS->mutableE(index);
 
-      removeDecayData(xIn, inputWS->readY(i), yOut);
-      removeDecayError(xIn, inputWS->readE(i), eOut);
+      removeDecayData(xIn, inputWS->y(index), yOut);
+      removeDecayError(xIn, inputWS->e(index), eOut);
       double normConst = calNormalisationConst(outputWS, i);
 
       // do scaling and substract by minus 1.0
-      const size_t nbins = outputWS->dataY(i).size();
+      const size_t nbins = outputWS->y(index).size();
       for (size_t j = 0; j < nbins; j++) {
         yOut[j] /= normConst;
         yOut[j] -= 1.0;
@@ -105,8 +107,9 @@ void MuonRemoveExpDecay::exec() {
       PARALLEL_FOR2(inputWS, outputWS)
       for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
         PARALLEL_START_INTERUPT_REGION
-        outputWS->dataY(i) = inputWS->readY(i);
-        outputWS->dataE(i) = inputWS->readE(i);
+        const auto index = static_cast<size_t>(i);
+        outputWS->setSharedY(index, inputWS->sharedY(index));
+        outputWS->setSharedE(index, inputWS->sharedE(index));
         prog.report();
         PARALLEL_END_INTERUPT_REGION
       }
@@ -124,17 +127,17 @@ void MuonRemoveExpDecay::exec() {
             "Spectra size greater than the number of spectra!");
       }
       // Get references to the x data
-      const MantidVec &xIn = inputWS->readX(spectra[i]);
-      MantidVec &yOut = outputWS->dataY(spectra[i]);
-      MantidVec &eOut = outputWS->dataE(spectra[i]);
+      const auto &xIn = inputWS->x(spectra[i]);
+      auto &yOut = outputWS->mutableY(spectra[i]);
+      auto &eOut = outputWS->mutableE(spectra[i]);
 
-      removeDecayData(xIn, inputWS->readY(spectra[i]), yOut);
-      removeDecayError(xIn, inputWS->readE(spectra[i]), eOut);
+      removeDecayData(xIn, inputWS->y(spectra[i]), yOut);
+      removeDecayError(xIn, inputWS->e(spectra[i]), eOut);
 
       double normConst = calNormalisationConst(outputWS, spectra[i]);
 
       // do scaling and substract by minus 1.0
-      const size_t nbins = outputWS->dataY(i).size();
+      const size_t nbins = outputWS->y(i).size();
       for (size_t j = 0; j < nbins; j++) {
         yOut[j] /= normConst;
         yOut[j] -= 1.0;
@@ -153,30 +156,27 @@ void MuonRemoveExpDecay::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-/** This method corrects the errors for one spectra.
+/** This method corrects the errors for one spectrum.
  *	 The muon lifetime is in microseconds not seconds, i.e. 2.1969811 rather
  *   than 0.0000021969811.
  *   This is because the data is in microseconds.
  *   @param inX ::  The X vector
- *   @param inY ::  The input error vector
- *   @param outY :: The output error vector
+ *   @param inE ::  The input error vector
+ *   @param outE :: The output error vector
  */
-void MuonRemoveExpDecay::removeDecayError(const MantidVec &inX,
-                                          const MantidVec &inY,
-                                          MantidVec &outY) {
+void MuonRemoveExpDecay::removeDecayError(const HistogramData::HistogramX &inX,
+                                          const HistogramData::HistogramE &inE,
+                                          HistogramData::HistogramE &outE) {
   // Do the removal
-  for (size_t i = 0; i < inY.size(); ++i) {
-    if (inY[i] != 0.0)
-      outY[i] =
-          inY[i] *
-          exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
+  for (size_t i = 0; i < inE.size(); ++i) {
+    if (inE[i] != 0.0)
+      outE[i] = inE[i] * exp(inX[i] / MUON_LIFETIME_MICROSECONDS);
     else
-      outY[i] =
-          exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
+      outE[i] = exp(inX[i] / MUON_LIFETIME_MICROSECONDS);
   }
 }
 
-/** This method corrects the data for one spectra.
+/** This method corrects the data for one spectrum.
  *	 The muon lifetime is in microseconds not seconds, i.e. 2.1969811 rather
  *   than 0.0000021969811.
  *   This is because the data is in microseconds.
@@ -184,19 +184,15 @@ void MuonRemoveExpDecay::removeDecayError(const MantidVec &inX,
  *   @param inY ::  The input data vector
  *   @param outY :: The output data vector
  */
-void MuonRemoveExpDecay::removeDecayData(const MantidVec &inX,
-                                         const MantidVec &inY,
-                                         MantidVec &outY) {
+void MuonRemoveExpDecay::removeDecayData(const HistogramData::HistogramX &inX,
+                                         const HistogramData::HistogramY &inY,
+                                         HistogramData::HistogramY &outY) {
   // Do the removal
   for (size_t i = 0; i < inY.size(); ++i) {
     if (inY[i] != 0.0)
-      outY[i] =
-          inY[i] *
-          exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
+      outY[i] = inY[i] * exp(inX[i] / MUON_LIFETIME_MICROSECONDS);
     else
-      outY[i] =
-          0.1 *
-          exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
+      outY[i] = 0.1 * exp(inX[i] / MUON_LIFETIME_MICROSECONDS);
   }
 }
 
@@ -215,7 +211,7 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws,
   fit = createChildAlgorithm("Fit", -1, -1, true);
 
   std::stringstream ss;
-  ss << "name=LinearBackground,A0=" << ws->readY(wsIndex)[0] << ",A1=" << 0.0
+  ss << "name=LinearBackground,A0=" << ws->y(wsIndex)[0] << ",A1=" << 0.0
      << ",ties=(A1=0.0)";
   std::string function = ss.str();
 
