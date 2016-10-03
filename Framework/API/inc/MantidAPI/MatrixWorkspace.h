@@ -9,7 +9,6 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
-#include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
@@ -626,9 +625,6 @@ private:
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfo;
 
 protected:
-  /// Assists conversions to and from 2D histogram indexing to 1D indexing.
-  MatrixWSIndexCalculator m_indexCalculator;
-
   /// Scoped pointer to NearestNeighbours factory
   boost::scoped_ptr<Mantid::Geometry::INearestNeighboursFactory>
       m_nearestNeighboursFactory;
