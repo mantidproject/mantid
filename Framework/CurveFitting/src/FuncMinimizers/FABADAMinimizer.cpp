@@ -52,11 +52,11 @@ DECLARE_FUNCMINIMIZER(FABADAMinimizer, FABADA)
 FABADAMinimizer::FABADAMinimizer()
     : m_counter(0), m_chainIterations(0), m_changes(), m_jump(), m_parameters(),
       m_chain(), m_chi2(0.), m_converged(false), m_conv_point(0),
-      m_par_converged(), m_criteria(),
-      m_max_iter(0), m_par_changed(), m_temperature(0.), m_counterGlobal(0),
-      m_simAnnealingItStep(0), m_leftRefrPoints(0), m_tempStep(0.),
-      m_overexploration(false), m_nParams(0), m_innactConvCriterion(0),
-      m_numInactiveRegenerations(), m_changesOld() {
+      m_par_converged(), m_criteria(), m_max_iter(0), m_par_changed(),
+      m_temperature(0.), m_counterGlobal(0), m_simAnnealingItStep(0),
+      m_leftRefrPoints(0), m_tempStep(0.), m_overexploration(false),
+      m_nParams(0), m_innactConvCriterion(0), m_numInactiveRegenerations(),
+      m_changesOld() {
   declareProperty("ChainLength", static_cast<size_t>(10000),
                   "Length of the converged chain.");
   declareProperty("StepsBetweenValues", 10,
@@ -256,7 +256,7 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
 
     // m_simAnnealingItStep stores the number of iterations per step
     if (!m_overexploration)
-		totalRequiredIterations += m_simAnnealingItStep * m_leftRefrPoints;
+      totalRequiredIterations += m_simAnnealingItStep * m_leftRefrPoints;
 
     // 50 for pseudo-continuous temperature decrease
     // without hindering the fitting algorithm itself
@@ -357,8 +357,8 @@ bool FABADAMinimizer::iterate(size_t) {
 
     // Update the jump once each JUMP_CHECKING_RATE iterations
     if (m_counter % JUMP_CHECKING_RATE == 150) // JUMP CHECKING RATE IS 200, BUT
-                                             // IS NOT CHECKED AT FIRST STEP, IT
-                                             // IS AT 150
+    // IS NOT CHECKED AT FIRST STEP, IT
+    // IS AT 150
     {
       jumpUpdate(i);
     }
@@ -459,7 +459,7 @@ void FABADAMinimizer::finalize() {
         rc_chain_j.push_back(conv_chain[n_steps * k]);
       }
       // best fit parameters taken
-	  bestParameters[j] =
+      bestParameters[j] =
           rc_chain_j[position_min_chi2 - red_conv_chain[m_nParams].begin()];
       std::sort(rc_chain_j.begin(), rc_chain_j.end());
       auto pos_par =
@@ -488,7 +488,7 @@ void FABADAMinimizer::finalize() {
                        " Thus the parameters' errors are not"
                        " computed.\n";
     for (size_t k = 0; k < m_nParams; ++k) {
-		bestParameters[k] = *(m_chain[k].end() - 1);
+      bestParameters[k] = *(m_chain[k].end() - 1);
     }
   }
 
@@ -529,29 +529,8 @@ void FABADAMinimizer::finalize() {
           leastSquaresMaleable);
 
   // If required, output the complete chain
-<<<<<<< HEAD
-  const bool outputChains = !getPropertyValue("Chains").empty();
-
-  if (outputChains) {
-
-    // Create the workspace for the complete parameters' chain (the last
-    // histogram is for the Chi square).
-    size_t chain_length = m_chain[0].size();
-    API::MatrixWorkspace_sptr wsC = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", m_nParams + 1, chain_length, chain_length);
-
-    // Do one iteration for each parameter plus one for Chi square.
-    for (size_t j = 0; j < m_nParams + 1; ++j) {
-      wsC->setPoints(j, chain_length, HistogramData::LinearGenerator(0.0, 1.0));
-      wsC->mutableY(j) = m_chain[j];
-    }
-
-    // Set and name the workspace for the complete chain
-    setProperty("Chains", wsC);
-=======
   if (!getPropertyValue("Chains").empty()) {
     outputChains();
->>>>>>> Re #17509 Method to output chains
   }
 
   // Create the workspace for the Probability Density Functions
@@ -631,40 +610,8 @@ void FABADAMinimizer::finalize() {
   // Set and name the PDF workspace.
   setProperty("PDF", ws);
 
-  // Read if necessary to show the workspace for the converged part of the
-  // chain.
-  const bool outputConvergedChains =
-      !getPropertyValue("ConvergedChain").empty();
-
-  // OK eventhough conv_length = 0
-  if (outputConvergedChains) {
-    // Create the workspace for the converged part of the chain.
-    API::MatrixWorkspace_sptr wsConv;
-    if (conv_length > 0) {
-      wsConv = API::WorkspaceFactory::Instance().create(
-          "Workspace2D", m_nParams + 1, conv_length, conv_length);
-    } else {
-      g_log.warning() << "Empty converged chain, empty Workspace returned.";
-      wsConv = API::WorkspaceFactory::Instance().create("Workspace2D",
-                                                        m_nParams + 1, 1, 1);
-    }
-
-    // Do one iteration for each parameter plus one for Chi square.
-    for (size_t j = 0; j < m_nParams + 1; ++j) {
-      std::vector<double>::const_iterator first =
-          m_chain[j].begin() + m_conv_point;
-      std::vector<double>::const_iterator last = m_chain[j].end();
-      std::vector<double> conv_chain(first, last);
-      auto &X = wsConv->mutableX(j);
-      auto &Y = wsConv->mutableY(j);
-      for (size_t k = 0; k < conv_length; ++k) {
-        X[k] = double(k);
-        Y[k] = conv_chain[n_steps * k];
-      }
-    }
-
-    // Set and name the workspace for the converged part of the chain.
-    setProperty("ConvergedChain", wsConv);
+  if (!getPropertyValue("ConvergedChain").empty()) {
+    outputConvergedChains(conv_length, n_steps);
   }
 
   // Read if necessary to show the workspace for the Chi square values.
@@ -1085,6 +1032,43 @@ void FABADAMinimizer::outputChains() {
 
   // Set and name the workspace for the complete chain
   setProperty("Chains", wsC);
+}
+
+/** Create the workspace containing the converged chain
+*
+* @param convLength :: length of the converged chain
+* @param nSteps :: number of steps done between chain points to avoid
+*correlation
+*/
+void FABADAMinimizer::outputConvergedChains(size_t convLength, int nSteps) {
+
+  // Create the workspace for the converged part of the chain.
+  API::MatrixWorkspace_sptr wsConv;
+  if (convLength > 0) {
+    wsConv = API::WorkspaceFactory::Instance().create(
+        "Workspace2D", m_nParams + 1, convLength, convLength);
+  } else {
+    g_log.warning() << "Empty converged chain, empty Workspace returned.";
+    wsConv = API::WorkspaceFactory::Instance().create("Workspace2D",
+                                                      m_nParams + 1, 1, 1);
+  }
+
+  // Do one iteration for each parameter plus one for Chi square.
+  for (size_t j = 0; j < m_nParams + 1; ++j) {
+    std::vector<double>::const_iterator first =
+        m_chain[j].begin() + m_conv_point;
+    std::vector<double>::const_iterator last = m_chain[j].end();
+    std::vector<double> conv_chain(first, last);
+    auto &X = wsConv->mutableX(j);
+    auto &Y = wsConv->mutableY(j);
+    for (size_t k = 0; k < convLength; ++k) {
+      X[k] = double(k);
+      Y[k] = conv_chain[nSteps * k];
+    }
+  }
+
+  // Set and name the workspace for the converged part of the chain.
+  setProperty("ConvergedChain", wsConv);
 }
 
 } // namespace FuncMinimisers
