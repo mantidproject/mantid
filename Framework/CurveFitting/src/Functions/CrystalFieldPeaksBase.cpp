@@ -26,7 +26,7 @@ const std::map<std::string, int> ION_2_NRE{{"Ce", 1},
                                            {"Yb", 13}};
 
 const bool REAL_PARAM_PART = true;
-const bool CMPLX_PARAM_PART = false;
+const bool IMAG_PARAM_PART = false;
 
 void fixx(API::IFunction &fun, const std::string &par) {
   fun.setParameter(par, 0.0);
@@ -67,15 +67,15 @@ void setSymmetryC2(API::IFunction &fun) {
   fixx(fun, "B21");
   free(fun, "B22", REAL_PARAM_PART);
   fixx(fun, "B41");
-  free(fun, "B42", CMPLX_PARAM_PART);
+  free(fun, "B42", IMAG_PARAM_PART);
   fixx(fun, "B43");
-  free(fun, "B44", CMPLX_PARAM_PART);
+  free(fun, "B44", IMAG_PARAM_PART);
   fixx(fun, "B61");
-  free(fun, "B62", CMPLX_PARAM_PART);
+  free(fun, "B62", IMAG_PARAM_PART);
   fixx(fun, "B63");
-  free(fun, "B64", CMPLX_PARAM_PART);
+  free(fun, "B64", IMAG_PARAM_PART);
   fixx(fun, "B65");
-  free(fun, "B66", CMPLX_PARAM_PART);
+  free(fun, "B66", IMAG_PARAM_PART);
 }
 
 // Set symmetry C2v, D2 or D2h
@@ -113,7 +113,7 @@ void setSymmetryC4(API::IFunction &fun) {
   fixx(fun, "B61");
   fixx(fun, "B62");
   fixx(fun, "B63");
-  free(fun, "B64", CMPLX_PARAM_PART);
+  free(fun, "B64", IMAG_PARAM_PART);
   fixx(fun, "B65");
   fixx(fun, "B66");
 }
@@ -152,10 +152,10 @@ void setSymmetryC3(API::IFunction &fun) {
   fixx(fun, "B44");
   fixx(fun, "B61");
   fixx(fun, "B62");
-  free(fun, "B63", CMPLX_PARAM_PART);
+  free(fun, "B63", IMAG_PARAM_PART);
   fixx(fun, "B64");
   fixx(fun, "B65");
-  free(fun, "B66", CMPLX_PARAM_PART);
+  free(fun, "B66", IMAG_PARAM_PART);
 }
 
 // Set symmetry D3, C3v or D3d
