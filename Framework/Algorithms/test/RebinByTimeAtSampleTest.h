@@ -248,13 +248,13 @@ public:
     TSM_ASSERT_EQUALS("Should not loose spectrum", 3,
                       result->getNumberHistograms());
 
-    auto y1 = result->readY(0);
+    auto y1 = result->y(0);
     auto y1Sum = std::accumulate(y1.begin(), y1.end(), 0.0);
 
-    auto y2 = result->readY(1);
+    auto y2 = result->y(1);
     auto y2Sum = std::accumulate(y2.begin(), y2.end(), 0.0);
 
-    auto y3 = result->readY(2);
+    auto y3 = result->y(2);
     auto y3Sum = std::accumulate(y3.begin(), y3.end(), 0.0);
 
     TSM_ASSERT_EQUALS("Spectrum 1 not rebinned to sample time correctly", 1.0,

@@ -1,9 +1,9 @@
 #include "MantidAlgorithms/RebinByTimeAtSample.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <boost/make_shared.hpp>
 
@@ -11,6 +11,8 @@
 #include <cmath>
 
 namespace Mantid {
+using namespace HistogramData;
+
 namespace Algorithms {
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -76,11 +78,11 @@ void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS,
                                      tofOffset);
 
     // Set the X axis for each output histogram
-    outputWS->setX(i, x);
+    outputWS->setSharedX(i, x);
 
     // Copy the data over.
-    outputWS->dataY(i).assign(y_data.begin(), y_data.end());
-    outputWS->dataE(i).assign(e_data.begin(), e_data.end());
+    outputWS->mutableY(i) = std::move(y_data);
+    outputWS->mutableE(i) = std::move(e_data);
 
     // Report progress
     prog.report(name());
