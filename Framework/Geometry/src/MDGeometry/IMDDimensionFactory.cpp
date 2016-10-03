@@ -108,9 +108,9 @@ IMDDimension_sptr createDimension(const Poco::XML::Element &dimensionXML) {
   Poco::XML::Element *integrationXML =
       dimensionXML.getChildElement("Integrated");
   if (nullptr != integrationXML) {
-    double upperLimit = std::stod(
+    double upperLimit = atof(
         integrationXML->getChildElement("UpperLimit")->innerText().c_str());
-    double lowerLimit = std::stod(
+    double lowerLimit = atof(
         integrationXML->getChildElement("LowerLimit")->innerText().c_str());
 
     // As it is not currently possible to set integration ranges on a
