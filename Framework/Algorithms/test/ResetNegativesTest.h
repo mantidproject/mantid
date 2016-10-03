@@ -59,8 +59,8 @@ public:
       return;
 
     // verify the results
-    const MantidVec &yIn = inputWS->readY(0);
-    const MantidVec &yOut = outputWS->readY(0);
+    const auto &yIn = inputWS->y(0);
+    const auto &yOut = outputWS->y(0);
     for (size_t i = 0; i < yIn.size(); i++)
       TS_ASSERT_DELTA(yOut[i], yIn[i], .000001);
 
@@ -94,7 +94,7 @@ public:
       return;
 
     // verify the results
-    const MantidVec &yOut = outputWS->readY(0);
+    const auto &yOut = outputWS->y(0);
     for (size_t i = 0; i < yOut.size(); i++)
       TS_ASSERT_DELTA(yOut[i], 0., .000001);
 
@@ -131,7 +131,7 @@ public:
       return;
 
     // verify the results
-    const MantidVec &yOut = outputWS->readY(0);
+    const auto &yOut = outputWS->y(0);
     for (size_t i = 0; i < yOut.size(); i++)
       TS_ASSERT(yOut[i] >= 0.);
 
@@ -149,7 +149,7 @@ private:
         WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, nbins, 1., .2);
     for (int i = 0; i < nhist; i++) {
       double value = offset + static_cast<double>(i);
-      MantidVec &y = inputWS->dataY(i);
+      auto &y = inputWS->mutableY(i);
       for (size_t j = 0; j < y.size(); j++) {
         y[j] = value + delta * static_cast<double>(j);
       }
