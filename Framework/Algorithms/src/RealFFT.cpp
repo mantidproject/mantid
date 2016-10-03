@@ -9,17 +9,17 @@
 
 #include <boost/shared_array.hpp>
 #include <gsl/gsl_errno.h>
-#include <gsl/gsl_fft_real.h>
 #include <gsl/gsl_fft_halfcomplex.h>
+#include <gsl/gsl_fft_real.h>
 
 #define REAL(z, i) ((z)[2 * (i)])
 #define IMAG(z, i) ((z)[2 * (i) + 1])
 
-#include <sstream>
-#include <numeric>
 #include <algorithm>
-#include <functional>
 #include <cmath>
+#include <functional>
+#include <numeric>
+#include <sstream>
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -71,7 +71,7 @@ void RealFFT::exec() {
 
   int spec = (transform == "Forward") ? getProperty("WorkspaceIndex") : 0;
 
-  const MantidVec &X = inWS->readX(spec);
+  const auto &X = inWS->x(spec);
   int ySize = static_cast<int>(inWS->blocksize());
 
   if (spec >= ySize)
@@ -106,8 +106,9 @@ void RealFFT::exec() {
     gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(ySize);
     boost::shared_array<double> data(new double[2 * ySize]);
 
+    auto &yData = inWS->mutableY(spec);
     for (int i = 0; i < ySize; i++) {
-      data[i] = inWS->dataY(spec)[i];
+      data[i] = yData[i];
     }
 
     gsl_fft_real_wavetable *wavetable = gsl_fft_real_wavetable_alloc(ySize);
@@ -115,20 +116,24 @@ void RealFFT::exec() {
     gsl_fft_real_wavetable_free(wavetable);
     gsl_fft_real_workspace_free(workspace);
 
+    auto &x = outWS->mutableX(0);
+    auto &y1 = outWS->mutableY(0);
+    auto &y2 = outWS->mutableY(1);
+    auto &y3 = outWS->mutableY(2);
     for (int i = 0; i < yOutSize; i++) {
       int j = i * 2;
-      outWS->dataX(0)[i] = df * i;
+      x[i] = df * i;
       double re = i != 0 ? data[j - 1] : data[0];
       double im = (i != 0 && (odd || i != yOutSize - 1)) ? data[j] : 0;
-      outWS->dataY(0)[i] = re * dx;                      // real part
-      outWS->dataY(1)[i] = im * dx;                      // imaginary part
-      outWS->dataY(2)[i] = dx * sqrt(re * re + im * im); // modulus
+      y1[i] = re * dx;                      // real part
+      y2[i] = im * dx;                      // imaginary part
+      y3[i] = dx * sqrt(re * re + im * im); // modulus
     }
     if (inWS->isHistogramData()) {
-      outWS->dataX(0)[yOutSize] = outWS->dataX(0)[yOutSize - 1] + df;
+      outWS->mutableX(0)[yOutSize] = outWS->mutableX(0)[yOutSize - 1] + df;
     }
-    outWS->dataX(1) = outWS->dataX(0);
-    outWS->dataX(2) = outWS->dataX(0);
+    outWS->mutableX(1) = outWS->mutableX(0);
+    outWS->mutableX(2) = outWS->mutableX(0);
     // outWS->getAxis(1)->spectraNo(0)=inWS->getAxis(1)->spectraNo(spec);
     // outWS->getAxis(1)->spectraNo(1)=inWS->getAxis(1)->spectraNo(spec);
   } else // Backward
@@ -139,7 +144,7 @@ void RealFFT::exec() {
           "The input workspace must have at least 2 spectra.");
 
     int yOutSize = (ySize - 1) * 2;
-    if (inWS->readY(1).back() != 0.0)
+    if (inWS->y(1).back() != 0.0)
       yOutSize++;
     int xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
     bool odd = yOutSize % 2 != 0;
@@ -154,16 +159,19 @@ void RealFFT::exec() {
     gsl_fft_real_workspace *workspace = gsl_fft_real_workspace_alloc(yOutSize);
     boost::shared_array<double> data(new double[yOutSize]);
 
+    auto &xData = outWS->mutableX(0);
+    auto &y0 = inWS->mutableY(0);
+    auto &y1 = inWS->mutableY(1);
     for (int i = 0; i < ySize; i++) {
       int j = i * 2;
-      outWS->dataX(0)[i] = df * i;
+      xData[i] = df * i;
       if (i != 0) {
-        data[j - 1] = inWS->dataY(0)[i];
+        data[j - 1] = y0[i];
         if (odd || i != ySize - 1) {
-          data[j] = inWS->dataY(1)[i];
+          data[j] = y1[i];
         }
       } else {
-        data[0] = inWS->dataY(0)[0];
+        data[0] = y0[0];
       }
     }
 
@@ -173,13 +181,14 @@ void RealFFT::exec() {
     gsl_fft_halfcomplex_wavetable_free(wavetable);
     gsl_fft_real_workspace_free(workspace);
 
+    auto &y = outWS->mutableY(0);
     for (int i = 0; i < yOutSize; i++) {
       double x = df * i;
-      outWS->dataX(0)[i] = x;
-      outWS->dataY(0)[i] = data[i] / df;
+      xData[i] = x; // xData used from above
+      y[i] = data[i] / df;
     }
     if (outWS->isHistogramData())
-      outWS->dataX(0)[yOutSize] = outWS->dataX(0)[yOutSize - 1] + df;
+      outWS->mutableX(0)[yOutSize] = outWS->mutableX(0)[yOutSize - 1] + df;
     // outWS->getAxis(1)->spectraNo(0)=inWS->getAxis(1)->spectraNo(spec);
   }
 
