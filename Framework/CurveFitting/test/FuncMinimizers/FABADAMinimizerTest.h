@@ -171,8 +171,8 @@ public:
                                  "CostFunction,Chains=Chain,ConvergedChain"
                                  "=ConvergedChain,Parameters=Parameters");
     TS_ASSERT_THROWS_NOTHING(fit.execute());
-	TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
-	IFunction_sptr fun = fit.getProperty("Function");
+    TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
+    IFunction_sptr fun = fit.getProperty("Function");
     TS_ASSERT_DELTA(fun->getParameter("a"), 0.9, 0.1);
     TS_ASSERT_DELTA(fun->getParameter("b"), 0.9, 0.1);
 
