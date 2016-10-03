@@ -49,8 +49,6 @@ bool isNDWorkspace(Mantid::API::IMDWorkspace_sptr workspace,
       workspace->getNonIntegratedDimensions().size();
   return actualNonIntegratedDimensionality == dimensionality;
 }
-
-Kernel::Logger g_log("SaveMDWorkspaceToVTK");
 }
 
 namespace Mantid {
@@ -71,7 +69,7 @@ SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl() { setupMembers(); }
  * from which level data should be displayed
  */
 void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
-    Mantid::API::IMDWorkspace_sptr workspace, std::string filename,
+    Mantid::API::IMDWorkspace_sptr workspace, const std::string &filename,
     VisualNormalization normalization, ThresholdRange_scptr thresholdRange,
     int recursionDepth, const std::string &compressorType) const {
   auto isHistoWorkspace =
@@ -79,14 +77,15 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
       nullptr;
   auto fullFilename = getFullFilename(filename, isHistoWorkspace);
 
-  const vtkWriter::CompressorType compressor = [&compressorType.& g_log] {
-    if compressorType == "NONE") {
+  const vtkXMLWriter::CompressorType compressor = [&compressorType]{
+    if (compressorType == "NONE") {
         return vtkXMLWriter::NONE;
     }
-    else if (compressorTYpe == "ZLIB") {
+    else if (compressorType == "ZLIB") {
       return vtkXMLWriter::ZLIB;
     } else {
       // This should never happen.
+      Mantid::Kernel::Logger g_log("SaveMDWorkspaceToVTK");
       g_log.warning("Incorrect CompressorType: " + compressorType +
                     ". Using CompressorType=NONE.");
       return vtkXMLWriter::NONE;
@@ -184,7 +183,7 @@ SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace,
  */
 int SaveMDWorkspaceToVTKImpl::writeDataSetToVTKFile(
     vtkXMLWriter *writer, vtkDataSet *dataSet, const std::string &filename,
-    vtkWriter::CompressorType compressor) const {
+    vtkXMLWriter::CompressorType compressor) const {
   writer->SetFileName(filename.c_str());
   writer->SetInputData(dataSet);
   writer->SetCompressorType(compressor);

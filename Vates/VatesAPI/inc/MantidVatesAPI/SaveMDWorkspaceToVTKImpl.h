@@ -49,7 +49,7 @@ public:
   void saveMDWorkspace(
       Mantid::API::IMDWorkspace_sptr workspace, const std::string &filename,
       VisualNormalization normalization, ThresholdRange_scptr thresholdRange,
-      int recursionDepth const std::string &compressorType) const;
+      int recursionDepth, const std::string &compressorType) const;
 
   const static std::string structuredGridExtension;
   const static std::string unstructuredGridExtension;
@@ -72,7 +72,7 @@ private:
   bool is4DWorkspace(Mantid::API::IMDWorkspace_sptr workspace) const;
   int writeDataSetToVTKFile(vtkXMLWriter *writer, vtkDataSet *dataSet,
                             const std::string &filename,
-                            vtkWriter::CompressorType compressor) const;
+                            vtkXMLWriter::CompressorType compressor) const;
   double selectTimeSliceValue(Mantid::API::IMDWorkspace_sptr workspace) const;
   std::string getFullFilename(std::string filename,
                               bool isHistoWorkspace) const;

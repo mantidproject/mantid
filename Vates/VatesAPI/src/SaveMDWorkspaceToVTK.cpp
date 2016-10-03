@@ -76,7 +76,7 @@ void SaveMDWorkspaceToVTK::init() {
 
   declareProperty(
       "CompressorType", "NONE",
-      boost::make_shared<Mantid::Kernel::StringListValidator>({"NONE", "ZLIB"}),
+                  boost::make_shared<Mantid::Kernel::StringListValidator>(std::vector<std::string>{"NONE", "ZLIB"}),
       "Select which compression library to use");
 }
 
