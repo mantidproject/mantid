@@ -2,8 +2,8 @@
 // Includes
 //------------------------------
 #include "MantidAlgorithms/RebinToWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -78,7 +78,7 @@ std::vector<double> RebinToWorkspace::createRebinParameters(
     Mantid::API::MatrixWorkspace_sptr toMatch) {
   using namespace Mantid::API;
 
-  const MantidVec &matchXdata = toMatch->readX(0);
+  auto &matchXdata = toMatch->x(0);
   // params vector should have the form [x_1, delta_1,x_2, ...
   // ,x_n-1,delta_n-1,x_n), see Rebin.cpp
   std::vector<double> rb_params;

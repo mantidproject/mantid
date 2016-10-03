@@ -4,9 +4,9 @@
 //-------------------
 // Includes
 //--------------------
-#include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/RebinToWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include <numeric>
 
@@ -96,11 +96,11 @@ public:
         boost::dynamic_pointer_cast<Workspace2D>(workspace);
 
     // Test x-vectors from this and "matchToThis" are the same
-    TS_ASSERT_EQUALS(output2D->dataX(0).size(), matchToThis->dataX(0).size());
-    TS_ASSERT_DIFFERS(output2D->dataX(0).size(), rebinThis->dataX(0).size());
+    TS_ASSERT_EQUALS(output2D->x(0).size(), matchToThis->x(0).size());
+    TS_ASSERT_DIFFERS(output2D->x(0).size(), rebinThis->x(0).size());
 
     // Test a random x bin for matching value
-    TS_ASSERT_EQUALS(output2D->dataX(0)[22], matchToThis->dataX(0)[22]);
+    TS_ASSERT_EQUALS(output2D->x(0)[22], matchToThis->x(0)[22]);
   }
 
 private:
