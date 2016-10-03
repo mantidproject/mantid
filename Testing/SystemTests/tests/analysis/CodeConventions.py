@@ -50,6 +50,7 @@ FUNC_BAD_PARAMS = {
     "CubicSpline":("y0", "y1", "y2"),
     "DiffRotDiscreteCircle":("f0.Height", "f0.Radius", "f0.Centre"),
     "DiffSphere":("f0.Height", "f0.Radius", "f0.Centre"),
+    "IsoRotDiff":("f0.Height", "f0.Radius", "f0.Centre"),
     "LatticeErrors":("p0", "p1", "p2", "p3", "p4", "p5"),
     "Muon_ExpDecayOscTest":("lambda", "frequency", "phi"),
     "SCDPanelErrors":("f0_detWidthScale", "f0_detHeightScale",
