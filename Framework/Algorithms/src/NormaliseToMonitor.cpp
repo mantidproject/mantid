@@ -666,7 +666,7 @@ void NormaliseToMonitor::normalisationFactor(const BinEdges &X, Counts &Y,
   auto &yNew = Y.mutableRawData();
   auto &eNew = E.mutableRawData();
 
-  for (auto j = 0; j < specLength; ++j) {
+  for (size_t j = 0; j < specLength; ++j) {
     const double factor = range / ((X[j + 1] - X[j]) * monitorSum);
     yNew[j] *= factor;
     eNew[j] *= factor;
