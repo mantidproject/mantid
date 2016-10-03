@@ -152,8 +152,11 @@ private:
     datatable->addColumn("int", "Pt. No");
     datatable->addColumn("str", "File Name");
     datatable->addColumn("int", "Starting DetID");
+    datatable->addColumn("int", "Monitor");
+    datatable->addColumn("double", "Time");
     TableRow row0 = datatable->appendRow();
-    row0 << 1 << 522 << "HB3A_exp355_scan0001_0522.xml" << 256 * 256;
+    row0 << 1 << 522 << "HB3A_exp355_scan0001_0522.xml" << 256 * 256 << 1000
+         << 1.1;
     m_dataTableWS = boost::dynamic_pointer_cast<ITableWorkspace>(datatable);
     TS_ASSERT(m_dataTableWS);
 

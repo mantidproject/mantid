@@ -42,6 +42,9 @@ public:
   /// Returns a clone of the workspace
   IEventWorkspace_uptr clone() const { return IEventWorkspace_uptr(doClone()); }
 
+  IEventList &getSpectrum(const size_t index) override = 0;
+  const IEventList &getSpectrum(const size_t index) const override = 0;
+
   /// Return the workspace typeID
   const std::string id() const override { return "IEventWorkspace"; }
   virtual std::size_t getNumberEvents() const = 0;
@@ -54,7 +57,6 @@ public:
   virtual Mantid::Kernel::DateAndTime
   getTimeAtSampleMin(double tofOffset = 0) const = 0;
   virtual EventType getEventType() const = 0;
-  virtual IEventList *getEventListPtr(const std::size_t workspace_index) = 0;
   void generateHistogram(const std::size_t index, const MantidVec &X,
                          MantidVec &Y, MantidVec &E,
                          bool skipError = false) const override = 0;

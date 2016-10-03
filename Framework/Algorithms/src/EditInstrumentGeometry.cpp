@@ -18,17 +18,6 @@ namespace Algorithms {
 
 DECLARE_ALGORITHM(EditInstrumentGeometry)
 
-//----------------------------------------------
-//------------------------------------------------
-/** Constructor
- */
-EditInstrumentGeometry::EditInstrumentGeometry() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-EditInstrumentGeometry::~EditInstrumentGeometry() {}
-
 const std::string EditInstrumentGeometry::name() const {
   return "EditInstrumentGeometry";
 }
@@ -90,8 +79,6 @@ void EditInstrumentGeometry::init() {
   declareProperty("InstrumentName", "",
                   "Name of the newly built instrument.  If left empty, "
                   "the original instrument will be used. ");
-
-  return;
 }
 
 template <typename NumT>
@@ -194,10 +181,9 @@ void EditInstrumentGeometry::exec() {
   {
     size_t numHist = workspace->getNumberHistograms();
     for (size_t i = 0; i < numHist; ++i) {
-      specids.push_back(workspace->getSpectrum(i)->getSpectrumNo());
+      specids.push_back(workspace->getSpectrum(i).getSpectrumNo());
       g_log.information() << "Add spectrum "
-                          << workspace->getSpectrum(i)->getSpectrumNo()
-                          << ".\n";
+                          << workspace->getSpectrum(i).getSpectrumNo() << ".\n";
     }
   }
 
@@ -226,7 +212,7 @@ void EditInstrumentGeometry::exec() {
   // Validate
   for (size_t ib = 0; ib < l2s.size(); ib++) {
     g_log.information() << "Detector " << specids[ib] << "  L2 = " << l2s[ib]
-                        << "  2Theta = " << tths[ib] << std::endl;
+                        << "  2Theta = " << tths[ib] << '\n';
     if (specids[ib] < 0) {
       // Invalid spectrum Number : less than 0.
       stringstream errmsgss;
@@ -258,7 +244,7 @@ void EditInstrumentGeometry::exec() {
     if (it == spec2indexmap.end()) {
       stringstream errss;
       errss << "Spectrum Number " << specids[i] << " is not found. "
-            << "Instrument won't be edited for this spectrum. " << std::endl;
+            << "Instrument won't be edited for this spectrum. \n";
       g_log.error(errss.str());
       throw std::runtime_error(errss.str());
     }
@@ -273,7 +259,7 @@ void EditInstrumentGeometry::exec() {
       storDetIDs[workspaceindex] = vec_detids[i];
 
     g_log.debug() << "workspace index = " << workspaceindex
-                  << " is for Spectrum " << specids[i] << std::endl;
+                  << " is for Spectrum " << specids[i] << '\n';
   }
 
   // Generate a new instrument
@@ -338,33 +324,17 @@ void EditInstrumentGeometry::exec() {
     detector->setPos(pos);
 
     // Add new detector to spectrum and instrument
-    API::ISpectrum *spectrum = workspace->getSpectrum(i);
-    if (!spectrum) {
-      // Error!
-      delete detector;
+    auto &spectrum = workspace->getSpectrum(i);
+    // Good and do some debug output
+    g_log.debug() << "Orignal spectrum " << spectrum.getSpectrumNo() << "has "
+                  << spectrum.getDetectorIDs().size() << " detectors. \n";
 
-      stringstream errss;
-      errss << "Spectrum Number " << specids[i]
-            << " does not exist!  Skip setting "
-               "detector parameters to this "
-               "spectrum. ";
-      g_log.error(errss.str());
-      throw runtime_error(errss.str());
-    } else {
-      // Good and do some debug output
-      g_log.debug() << "Orignal spectrum " << spectrum->getSpectrumNo()
-                    << "has " << spectrum->getDetectorIDs().size()
-                    << " detectors. \n";
-    }
-
-    spectrum->clearDetectorIDs();
-    spectrum->addDetectorID(newdetid);
+    spectrum.clearDetectorIDs();
+    spectrum.addDetectorID(newdetid);
     instrument->add(detector);
     instrument->markAsDetector(detector);
 
   } // ENDFOR workspace index
-
-  return;
 }
 
 } // namespace Mantid

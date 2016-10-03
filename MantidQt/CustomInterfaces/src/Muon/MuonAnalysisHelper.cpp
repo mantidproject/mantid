@@ -1,28 +1,65 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
-#include "MantidKernel/InstrumentInfo.h"
-#include "MantidKernel/EmptyValues.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QSpinBox>
 
+#include <boost/lexical_cast.hpp>
 #include <boost/scope_exit.hpp>
 #include <stdexcept>
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-namespace MuonAnalysisHelper
-{
+namespace {
+/// Colors for workspace (Black, Red, Green, Blue, Orange, Purple, if there are
+/// more than this then use black as default.)
+QColor getWorkspaceColor(size_t index) {
+  switch (index) {
+  case (1):
+    return QColor("red");
+  case (2):
+    return QColor("green");
+  case (3):
+    return QColor("blue");
+  case (4):
+    return QColor("orange");
+  case (5):
+    return QColor("purple");
+  default:
+    return QColor("black");
+  }
+}
+
+/// Get keys from parameter table
+std::vector<std::string>
+getKeysFromTable(const Mantid::API::ITableWorkspace_sptr &tab) {
+  std::vector<std::string> keys;
+  if (tab) {
+    Mantid::API::TableRow row = tab->getFirstRow();
+    do {
+      std::string key;
+      row >> key;
+      keys.push_back(key);
+    } while (row.next());
+  }
+  return keys;
+}
+}
+
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace MuonAnalysisHelper {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -32,16 +69,12 @@ using namespace Mantid::API;
  * @param field :: Field to set validator for
  * @param allowEmpty :: Whether the validator should accept empty inputs as well
  */
-void setDoubleValidator(QLineEdit* field, bool allowEmpty)
-{
-  QDoubleValidator* newValidator;
+void setDoubleValidator(QLineEdit *field, bool allowEmpty) {
+  QDoubleValidator *newValidator;
 
-  if (allowEmpty)
-  {
+  if (allowEmpty) {
     newValidator = new DoubleOrEmptyValidator(field);
-  }
-  else
-  {
+  } else {
     newValidator = new QDoubleValidator(field);
   }
 
@@ -49,20 +82,16 @@ void setDoubleValidator(QLineEdit* field, bool allowEmpty)
   field->setValidator(newValidator);
 }
 
-
 /**
- * Return a first period MatrixWorkspace in a run workspace. If the run workspace has one period
+ * Return a first period MatrixWorkspace in a run workspace. If the run
+ * workspace has one period
  * only - it is returned.
  * @param ws :: Run workspace
  */
-MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws)
-{
-  if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws) )
-  {
-    return boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(0) );
-  }
-  else
-  {
+MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws) {
+  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+    return boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+  } else {
     return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
   }
 }
@@ -72,14 +101,10 @@ MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws)
  * @param ws :: Run wokspace
  * @return Number of periods
  */
-size_t numPeriods(Workspace_sptr ws)
-{
-  if ( auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws) )
-  {
+size_t numPeriods(Workspace_sptr ws) {
+  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
     return group->size();
-  }
-  else
-  {
+  } else {
     return 1;
   }
 }
@@ -89,14 +114,12 @@ size_t numPeriods(Workspace_sptr ws)
  * @param runWs :: Run workspace to retrieve information from
  * @param out :: Stream to print to
  */
-void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out)
-{
+void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   // Remember current out stream format
   std::ios_base::fmtflags outFlags(out.flags());
   std::streamsize outPrecision(out.precision());
 
-  BOOST_SCOPE_EXIT((&out)(&outFlags)(&outPrecision))
-  {
+  BOOST_SCOPE_EXIT((&out)(&outFlags)(&outPrecision)) {
     // Restore the flags when exiting the function
     out.precision(outPrecision);
     out.flags(outFlags);
@@ -109,68 +132,57 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out)
   out << "\nTitle: " << runWs->getTitle();
   out << "\nComment: " << runWs->getComment();
 
-  const Run& run = runWs->run();
+  const Run &run = runWs->run();
 
   Mantid::Kernel::DateAndTime start, end;
 
   // Add the start time for the run
   out << "\nStart: ";
-  if ( run.hasProperty("run_start") )
-  {
+  if (run.hasProperty("run_start")) {
     start = run.getProperty("run_start")->value();
     out << start.toSimpleString();
   }
 
   // Add the end time for the run
   out << "\nEnd: ";
-  if ( run.hasProperty("run_end") )
-  {
+  if (run.hasProperty("run_end")) {
     end = run.getProperty("run_end")->value();
     out << end.toSimpleString();
   }
 
   // Add the end time for the run
   out << "\nGood frames: ";
-  if ( run.hasProperty("goodfrm") )
-  {
+  if (run.hasProperty("goodfrm")) {
     out << run.getProperty("goodfrm")->value();
   }
 
   // Add counts to run information
   out << "\nCounts: ";
   double counts(0.0);
-  for (size_t i=0; i<runWs->getNumberHistograms(); ++i)
-  {
-    for (size_t j=0; j<runWs->blocksize(); ++j)
-    {
+  for (size_t i = 0; i < runWs->getNumberHistograms(); ++i) {
+    for (size_t j = 0; j < runWs->blocksize(); ++j) {
       counts += runWs->dataY(i)[j];
     }
   }
   // output this number to three decimal places
   out << std::setprecision(3);
-  out << counts/1000000 << " MEv";
+  out << counts / 1000000 << " MEv";
   out << std::setprecision(12);
   // Add average temperature.
   out << "\nAverage Temperature: ";
-  if ( run.hasProperty("Temp_Sample") )
-  {
+  if (run.hasProperty("Temp_Sample")) {
     // Filter the temperatures by the start and end times for the run.
     run.getProperty("Temp_Sample")->filterByTime(start, end);
 
     // Get average of the values
     double average = run.getPropertyAsSingleValue("Temp_Sample");
 
-    if (average != 0.0)
-    {
+    if (average != 0.0) {
       out << average;
-    }
-    else
-    {
+    } else {
       out << "Not set";
     }
-  }
-  else
-  {
+  } else {
     out << "Not found";
   }
 
@@ -197,8 +209,7 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out)
  * Constructor
  * @param groupName :: The top-level group to use for all the widgets
  */
-WidgetAutoSaver::WidgetAutoSaver(const QString& groupName)
-{
+WidgetAutoSaver::WidgetAutoSaver(const QString &groupName) {
   m_settings.beginGroup(groupName);
 }
 
@@ -208,37 +219,35 @@ WidgetAutoSaver::WidgetAutoSaver(const QString& groupName)
  * @param name :: A name to use when saving/loading
  * @param defaultValue :: A value to load when the widget has not been saved yet
  */
-void WidgetAutoSaver::registerWidget(QWidget *widget, const QString& name, QVariant defaultValue)
-{
+void WidgetAutoSaver::registerWidget(QWidget *widget, const QString &name,
+                                     QVariant defaultValue) {
   m_registeredWidgets.push_back(widget);
   m_widgetNames[widget] = name;
   m_widgetDefaultValues[widget] = defaultValue;
-  m_widgetGroups[widget] = m_settings.group(); // Current group set up using beginGroup and endGroup
+  m_widgetGroups[widget] =
+      m_settings.group(); // Current group set up using beginGroup and endGroup
 }
 
 /**
- * Return a signal (which can be used instead of SIGNAL()) which is emmited when given widget is
+ * Return a signal (which can be used instead of SIGNAL()) which is emitted when
+ * given widget is
  * changed.
  * @param widget
- * @return A signal you can use instead of SIGNAL() to determine when widget value was changed
+ * @return A signal you can use instead of SIGNAL() to determine when widget
+ * value was changed
  */
-const char* WidgetAutoSaver::changedSignal(QWidget *widget)
-{
-  if ( qobject_cast<QLineEdit*>(widget) )
-  {
+const char *WidgetAutoSaver::changedSignal(QWidget *widget) {
+  if (qobject_cast<QLineEdit *>(widget)) {
     return SIGNAL(textChanged(QString));
-  }
-  else if ( qobject_cast<QCheckBox*>(widget) )
-  {
+  } else if (qobject_cast<QCheckBox *>(widget)) {
     return SIGNAL(stateChanged(int));
-  }
-  else if ( qobject_cast<QComboBox*>(widget) )
-  {
+  } else if (qobject_cast<QComboBox *>(widget)) {
     return SIGNAL(currentIndexChanged(int));
+  } else if (qobject_cast<QSpinBox *>(widget)) {
+    return SIGNAL(valueChanged(int));
   }
-  // ... add more as neccessary
-  else
-  {
+  // ... add more as necessary
+  else {
     throw std::runtime_error("Unsupported widget type");
   }
 }
@@ -247,12 +256,8 @@ const char* WidgetAutoSaver::changedSignal(QWidget *widget)
  * Enable/disable auto-saving of all the registered widgets.
  * @param enabled :: Whether auto-saving should be enabled or disabled
  */
-void WidgetAutoSaver::setAutoSaveEnabled(bool enabled)
-{
-  foreach (QWidget* w, m_registeredWidgets)
-  {
-    setAutoSaveEnabled(w, enabled);
-  }
+void WidgetAutoSaver::setAutoSaveEnabled(bool enabled) {
+  foreach (QWidget *w, m_registeredWidgets) { setAutoSaveEnabled(w, enabled); }
 }
 
 /**
@@ -260,8 +265,7 @@ void WidgetAutoSaver::setAutoSaveEnabled(bool enabled)
  * @param widget :: Registered widget for which to enable/disable auto-saving
  * @param enabled :: Whether auto-saving should be enabled or disabled
  */
-void WidgetAutoSaver::setAutoSaveEnabled(QWidget* widget, bool enabled)
-{
+void WidgetAutoSaver::setAutoSaveEnabled(QWidget *widget, bool enabled) {
   if (enabled)
     connect(widget, changedSignal(widget), this, SLOT(saveWidgetValue()));
   else
@@ -271,30 +275,24 @@ void WidgetAutoSaver::setAutoSaveEnabled(QWidget* widget, bool enabled)
 /**
  * Saves the value of the registered widget which signalled the slot
  */
-void WidgetAutoSaver::saveWidgetValue()
-{
+void WidgetAutoSaver::saveWidgetValue() {
   // Get the widget which called the slot
-  QWidget* sender = qobject_cast<QWidget*>(QObject::sender());
+  QWidget *sender = qobject_cast<QWidget *>(QObject::sender());
 
-  if(!sender)
+  if (!sender)
     throw std::runtime_error("Unable to save value of non-widget QObject");
 
-  const QString& senderName = m_widgetNames[sender];
-  const QString& senderGroup = m_widgetGroups[sender];
+  const QString &senderName = m_widgetNames[sender];
+  const QString &senderGroup = m_widgetGroups[sender];
 
   QSettings settings;
   settings.beginGroup(senderGroup);
 
-  if ( auto w = qobject_cast<QLineEdit*>(sender) )
-  {
+  if (auto w = qobject_cast<QLineEdit *>(sender)) {
     settings.setValue(senderName, w->text());
-  }
-  else if ( auto w = qobject_cast<QCheckBox*>(sender) )
-  {
+  } else if (auto w = qobject_cast<QCheckBox *>(sender)) {
     settings.setValue(senderName, w->isChecked());
-  }
-  else if ( auto w = qobject_cast<QComboBox*>(sender) )
-  {
+  } else if (auto w = qobject_cast<QComboBox *>(sender)) {
     settings.setValue(senderName, w->currentIndex());
   }
   // ... add more as neccessary
@@ -304,10 +302,9 @@ void WidgetAutoSaver::saveWidgetValue()
  * Load the auto-saved (or default) value of the given widget.
  * @param widget :: Widget to load saved value for
  */
-void WidgetAutoSaver::loadWidgetValue(QWidget *widget)
-{
-  const QString& name = m_widgetNames[widget];
-  const QString& group = m_widgetGroups[widget];
+void WidgetAutoSaver::loadWidgetValue(QWidget *widget) {
+  const QString &name = m_widgetNames[widget];
+  const QString &group = m_widgetGroups[widget];
   QVariant defaultValue = m_widgetDefaultValues[widget];
 
   QSettings settings;
@@ -315,16 +312,11 @@ void WidgetAutoSaver::loadWidgetValue(QWidget *widget)
 
   QVariant value = settings.value(name, defaultValue);
 
-  if ( auto w = qobject_cast<QLineEdit*>(widget) )
-  {
+  if (auto w = qobject_cast<QLineEdit *>(widget)) {
     w->setText(value.toString());
-  }
-  else if ( auto w = qobject_cast<QCheckBox*>(widget) )
-  {
+  } else if (auto w = qobject_cast<QCheckBox *>(widget)) {
     w->setChecked(value.toBool());
-  }
-  else if ( auto w = qobject_cast<QComboBox*>(widget) )
-  {
+  } else if (auto w = qobject_cast<QComboBox *>(widget)) {
     w->setCurrentIndex(value.toInt());
   }
   // ... add more as neccessary
@@ -333,91 +325,102 @@ void WidgetAutoSaver::loadWidgetValue(QWidget *widget)
 /**
  * Load the auto-saved (or default) value of all the registered widgets.
  */
-void WidgetAutoSaver::loadWidgetValues()
-{
-  foreach (QWidget* w, m_registeredWidgets)
-  {
-    loadWidgetValue(w);
-  }
+void WidgetAutoSaver::loadWidgetValues() {
+  foreach (QWidget *w, m_registeredWidgets) { loadWidgetValue(w); }
 }
 
 /**
- * Begin new-auto save group. All the registerWidget calls between this and next beginGroup will be
+ * Begin new-auto save group. All the registerWidget calls between this and next
+ * beginGroup will be
  * put in the given group.
  * @param name :: The name of the group
  */
-void WidgetAutoSaver::beginGroup(const QString &name)
-{
+void WidgetAutoSaver::beginGroup(const QString &name) {
   m_settings.beginGroup(name);
 }
 
 /**
  * Ends the scope of the previous begin group.
  */
-void WidgetAutoSaver::endGroup()
-{
-  m_settings.endGroup();
-}
+void WidgetAutoSaver::endGroup() { m_settings.endGroup(); }
 
 /**
  * Get a run label for the workspace.
  * E.g. for MUSR data of run 15189 it will look like MUSR00015189.
  * @param ws :: Workspace to get label for.
- * @return
+ * @return :: run label
  */
-std::string getRunLabel(const Workspace_sptr& ws)
-{
-  MatrixWorkspace_const_sptr firstPrd = firstPeriod(ws);
-
-  int runNumber = firstPrd->getRunNumber();
-  std::string instrName = firstPrd->getInstrument()->getName();
-
-  int zeroPadding = ConfigService::Instance().getInstrument(instrName).zeroPadding(runNumber);
-
-  std::ostringstream label;
-  label << instrName;
-  label << std::setw(zeroPadding) << std::setfill('0') << std::right << runNumber;
-  return label.str();
+std::string getRunLabel(const Workspace_sptr &ws) {
+  const std::vector<Workspace_sptr> wsList{ws};
+  return getRunLabel(wsList);
 }
 
 /**
  * Get a run label for a list of workspaces.
  * E.g. for MUSR data of runs 15189, 15190, 15191 it will look like
  * MUSR00015189-91.
- * @param wsList
- * @return
+ * (Assumes all runs have the same instrument)
+ * @param wsList :: [input] Vector of workspace pointers
+ * @return :: run label
+ * @throws std::invalid_argument if empty list given
  */
-std::string getRunLabel(std::vector<Workspace_sptr> wsList) {
+std::string getRunLabel(const std::vector<Workspace_sptr> &wsList) {
   if (wsList.empty())
     throw std::invalid_argument("Unable to run on an empty list");
 
-  // Extract the run numbers and find the first run in the list
+  const std::string instrument =
+      firstPeriod(wsList.front())->getInstrument()->getName();
+
+  // Extract the run numbers
   std::vector<int> runNumbers;
-  int firstRunIndex = 0;
-  int firstRunNumber = firstPeriod(wsList.front())->getRunNumber();
   int numWorkspaces = static_cast<int>(wsList.size());
   for (int i = 0; i < numWorkspaces; i++) {
     int runNumber = firstPeriod(wsList[i])->getRunNumber();
     runNumbers.push_back(runNumber);
-    if (runNumber < firstRunNumber) {
-      firstRunNumber = runNumber;
-      firstRunIndex = i;
-    }
+  }
+
+  return getRunLabel(instrument, runNumbers);
+}
+
+/**
+ * Get a run label for a given instrument and list of runs.
+ * E.g. for MUSR data of runs 15189, 15190, 15191 it will look like
+ * MUSR00015189-91.
+ * (Assumes all runs have the same instrument)
+ * @param instrument :: [input] instrument name
+ * @param runNumbers :: [input] List of run numbers
+ * @return :: run label
+ * @throws std::invalid_argument if empty run list given
+ */
+std::string getRunLabel(const std::string &instrument,
+                        const std::vector<int> &runNumbers) {
+  if (runNumbers.empty()) {
+    throw std::invalid_argument("Cannot run on an empty list");
   }
 
   // Find ranges of consecutive runs
   auto ranges = findConsecutiveRuns(runNumbers);
 
+  // Zero-padding for the first run
+  int zeroPadding;
+  try {
+    zeroPadding = ConfigService::Instance()
+                      .getInstrument(instrument)
+                      .zeroPadding(ranges.begin()->first);
+  } catch (const Mantid::Kernel::Exception::NotFoundError &) {
+    // Old muon instrument without an IDF - default to 3 zeros
+    zeroPadding = 3;
+  }
+
   // Begin string output with full label of first run
   std::ostringstream label;
-  label << getRunLabel(wsList[firstRunIndex]);
+  label << instrument;
+  label << std::setw(zeroPadding) << std::setfill('0') << std::right;
 
   for (auto range : ranges) {
     std::string firstRun = std::to_string(range.first);
     std::string lastRun = std::to_string(range.second);
-    if (range != ranges.front()) {
-      label << firstRun;
-    }
+    label << firstRun;
     if (range.second != range.first) {
       // Remove the common part of the first and last run, so we get e.g.
       // "12345-56" instead of "12345-12356"
@@ -475,8 +478,7 @@ findConsecutiveRuns(const std::vector<int> &runs) {
  * @param workspaces :: List of workspaces
  * @return Result workspace
  */
-Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
-{
+Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
   if (workspaces.size() < 1)
     throw std::invalid_argument("Couldn't sum an empty list of workspaces");
 
@@ -489,24 +491,27 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
   };
 
   // Comparison function for doubles
-  auto numericalCompare = [](const std::string &first,
-                             const std::string &second) {
-    try {
-      return boost::lexical_cast<double>(first) <
-             boost::lexical_cast<double>(second);
-    } catch (boost::bad_lexical_cast & /*e*/) {
-      return false;
-    }
-  };
+  auto numericalCompare =
+      [](const std::string &first, const std::string &second) {
+        try {
+          return boost::lexical_cast<double>(first) <
+                 boost::lexical_cast<double>(second);
+        } catch (boost::bad_lexical_cast & /*e*/) {
+          return false;
+        }
+      };
 
   // Range of log values
+  auto runNumRange = findLogRange(workspaces, "run_number", numericalCompare);
   auto startRange = findLogRange(workspaces, "run_start", dateCompare);
   auto endRange = findLogRange(workspaces, "run_end", dateCompare);
   auto tempRange = findLogRange(workspaces, "sample_temp", numericalCompare);
-  auto fieldRange = findLogRange(workspaces, "sample_magn_field", numericalCompare);
+  auto fieldRange =
+      findLogRange(workspaces, "sample_magn_field", numericalCompare);
 
   // Create accumulator workspace by cloning the first one from the list
-  IAlgorithm_sptr cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
+  IAlgorithm_sptr cloneAlg =
+      AlgorithmManager::Instance().create("CloneWorkspace");
   cloneAlg->setLogging(false);
   cloneAlg->setRethrows(true);
   cloneAlg->setPropertyValue("InputWorkspace", firstEntry.name());
@@ -546,37 +551,48 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces)
                   rangeString(tempRange));
   replaceLogValue(accumulatorEntry.name(), "sample_magn_field",
                   rangeString(fieldRange));
+  // Construct range of run numbers differently
+  replaceLogValue(accumulatorEntry.name(), "run_number",
+                  [](std::pair<std::string, std::string> range) {
+                    for (size_t i = 0;
+                         i < range.first.size() && i < range.second.size();
+                         ++i) {
+                      if (range.first[i] != range.second[i]) {
+                        range.second.erase(0, i);
+                        break;
+                      }
+                    }
+                    return range.first + "-" + range.second;
+                  }(runNumRange));
 
   return accumulatorEntry.retrieve();
 }
 
 /*
- * Validates and returns a double value. If it is not invalid, the widget is set to default value,
+ * Validates and returns a double value. If it is not invalid, the widget is set
+ * to default value,
  * appropriate warning is printed and default value is returned.
  * @param field :: Field to get value from
  * @param defaultValue :: Default value to return/set if field value is invalid
  * @param valueDescr :: Description of the value
  * @param log :: Log to print warning to in case value is invalid
- * @return Value if field is valid, default value otherwise. If default value is empty, EMPTY_DBL() is returned
+ * @return Value if field is valid, default value otherwise. If default value is
+ * empty, EMPTY_DBL() is returned
  */
-double getValidatedDouble(QLineEdit* field, const QString& defaultValue,
-                          const QString& valueDescr, Logger& log)
-{
+double getValidatedDouble(QLineEdit *field, const QString &defaultValue,
+                          const QString &valueDescr, Logger &log) {
   bool ok;
   double value = field->text().toDouble(&ok);
 
-  if (!ok)
-  {
-    log.warning() << "The value of " << valueDescr.toStdString() << " is invalid. ";
+  if (!ok) {
+    log.warning() << "The value of " << valueDescr.toStdString()
+                  << " is invalid. ";
     log.warning() << "Reset to default.\n";
     field->setText(defaultValue);
 
-    if(defaultValue.isEmpty())
-    {
+    if (defaultValue.isEmpty()) {
       return Mantid::EMPTY_DBL();
-    }
-    else
-    {
+    } else {
       return defaultValue.toDouble();
     }
   }
@@ -585,37 +601,34 @@ double getValidatedDouble(QLineEdit* field, const QString& defaultValue,
 }
 
 /**
- * Makes sure the specified workspaces are in specified group. If group exists already - missing
- * workspaces are added to it, otherwise new group is created. If ws exists in ADS under groupName,
+ * Makes sure the specified workspaces are in specified group. If group exists
+ * already - missing
+ * workspaces are added to it, otherwise new group is created. If ws exists in
+ * ADS under groupName,
  * and it is not a group - it's overwritten.
  * @param groupName :: Name of the group workspaces should be in
  * @param inputWorkspaces :: Names of the workspaces to group
  */
-void groupWorkspaces(const std::string& groupName, const std::vector<std::string>& inputWorkspaces)
-{
-  auto& ads = AnalysisDataService::Instance();
+void groupWorkspaces(const std::string &groupName,
+                     const std::vector<std::string> &inputWorkspaces) {
+  auto &ads = AnalysisDataService::Instance();
 
   WorkspaceGroup_sptr group;
-  if (ads.doesExist(groupName))
-  {
+  if (ads.doesExist(groupName)) {
     group = ads.retrieveWS<WorkspaceGroup>(groupName);
   }
 
-  if(group)
-  {
+  if (group) {
     // Exists and is a group -> add missing workspaces to it
-    for (auto it = inputWorkspaces.begin(); it != inputWorkspaces.end(); ++it)
-    {
-      if (!group->contains(*it))
-      {
+    for (auto it = inputWorkspaces.begin(); it != inputWorkspaces.end(); ++it) {
+      if (!group->contains(*it)) {
         group->add(*it);
       }
     }
-  }
-  else
-  {
+  } else {
     // Doesn't exist or isn't a group -> create/overwrite
-    IAlgorithm_sptr groupingAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+    IAlgorithm_sptr groupingAlg =
+        AlgorithmManager::Instance().create("GroupWorkspaces");
     groupingAlg->setProperty("InputWorkspaces", inputWorkspaces);
     groupingAlg->setPropertyValue("OutputWorkspace", groupName);
     groupingAlg->execute();
@@ -797,6 +810,333 @@ void appendTimeSeriesLogs(Workspace_sptr toAppend, Workspace_sptr resultant,
   }
 }
 
+/**
+ * Uses the format of the workspace name
+ * (INST00012345-8; Pair; long; Asym; [1+2-3+4]; #2)
+ * to get a string in the format "run number: period"
+ * @param workspaceName :: [input] Name of the workspace
+ * @param firstRun :: [input] First run number - use this if tokenizing fails
+ * @returns Run number/period string
+ */
+QString runNumberString(const std::string &workspaceName,
+                        const std::string &firstRun) {
+  std::string periods = "";        // default
+  std::string instRuns = firstRun; // default
+
+  Mantid::Kernel::StringTokenizer tokenizer(
+      workspaceName, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  const size_t numTokens = tokenizer.count();
+  if (numTokens > 4) { // format is ok
+    instRuns = tokenizer[0];
+    // Remove "INST000" off the start
+    // No muon instruments have numbers in their names
+    size_t numPos = instRuns.find_first_of("123456789");
+    if (numPos != std::string::npos) {
+      instRuns = instRuns.substr(numPos, instRuns.size());
+    } else { // run number was zero?
+      instRuns = "0";
+    }
+    if (numTokens > 5) { // periods included
+      periods = tokenizer[4];
+    }
+  }
+
+  QString ret(instRuns.c_str());
+  if (!periods.empty()) {
+    ret.append(": ").append(periods.c_str());
+  }
+  return ret;
+}
+
+/**
+ * Determines if the grouping already loaded can be reused, or if
+ * grouping must be re-loaded.
+ * Criteria: reload if
+ * - instrument has changed
+ * - instrument same, but field direction has changed
+ * - number of histograms has changed
+ * @param currentWorkspace :: [input] Data already in interface
+ * @param loadedWorkspace :: [input] New data just loaded
+ * @returns :: True or false to load new grouping
+ * @throws std::invalid_argument if loadedWorkspace is null
+ */
+bool isReloadGroupingNecessary(
+    const boost::shared_ptr<Mantid::API::Workspace> currentWorkspace,
+    const boost::shared_ptr<Mantid::API::Workspace> loadedWorkspace) {
+  if (!loadedWorkspace) {
+    throw std::invalid_argument("No loaded workspace to get grouping for!");
+  }
+  if (!currentWorkspace) {
+    // No previous data, so we need to load grouping from scratch
+    return true;
+  }
+
+  bool reloadNecessary = false;
+  const auto loadedData = firstPeriod(loadedWorkspace);
+  const auto currentData = firstPeriod(currentWorkspace);
+
+  // Check if instrument has changed
+  const auto loadedInstrument = loadedData->getInstrument()->getName();
+  const auto currentInstrument = currentData->getInstrument()->getName();
+  if (loadedInstrument != currentInstrument) {
+    reloadNecessary = true;
+  }
+
+  // Check if field direction has changed, even if instrument hasn't
+  // (e.g. MUSR - same instrument can have different field directions)
+  if (!reloadNecessary) {
+    Mantid::Kernel::Property *loadedField = nullptr, *currentField = nullptr;
+    try {
+      loadedField = loadedData->run().getLogData("main_field_direction");
+      currentField = currentData->run().getLogData("main_field_direction");
+    } catch (std::exception &) {
+      // Log not found in one or both workspaces - ignore it
+    }
+    if (loadedField && currentField &&
+        loadedField->value() != currentField->value()) {
+      reloadNecessary = true;
+    }
+  }
+
+  // Check if number of spectra have changed
+  if (!reloadNecessary) {
+    const auto loadedNumSpectra = loadedData->getNumberHistograms();
+    const auto currentNumSpectra = currentData->getNumberHistograms();
+    reloadNecessary = (loadedNumSpectra != currentNumSpectra);
+  }
+
+  return reloadNecessary;
+}
+
+/**
+ * Parse a workspace name into dataset parameters
+ * Format: "INST00012345; Pair; long; Asym;[ 1;] #1"
+ * @param wsName :: [input] Name of workspace
+ * @returns :: Struct containing dataset parameters
+ */
+Muon::DatasetParams parseWorkspaceName(const std::string &wsName) {
+  Muon::DatasetParams params;
+
+  Mantid::Kernel::StringTokenizer tokenizer(
+      wsName, ";", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+  const size_t numTokens = tokenizer.count();
+  if (numTokens < 5) {
+    throw std::invalid_argument("Could not parse workspace name: " + wsName);
+  }
+
+  params.label = tokenizer[0];
+  parseRunLabel(params.label, params.instrument, params.runs);
+  const std::string itemType = tokenizer[1];
+  params.itemType = (itemType == "Group") ? Muon::Group : Muon::Pair;
+  params.itemName = tokenizer[2];
+  const std::string plotType = tokenizer[3];
+  if (plotType == "Asym") {
+    params.plotType = Muon::Asymmetry;
+  } else if (plotType == "Counts") {
+    params.plotType = Muon::Counts;
+  } else {
+    params.plotType = Muon::Logarithm;
+  }
+  std::string versionString;
+  if (numTokens > 5) { // periods included
+    params.periods = tokenizer[4];
+    versionString = tokenizer[5];
+  } else {
+    versionString = tokenizer[4];
+  }
+  // Remove the # from the version string
+  versionString.erase(
+      std::remove(versionString.begin(), versionString.end(), '#'),
+      versionString.end());
+
+  try {
+    params.version = boost::lexical_cast<size_t>(versionString);
+  } catch (const boost::bad_lexical_cast &) {
+    params.version = 1; // Set to 1 and ignore the error
+  }
+
+  return params;
+}
+
+/**
+ * Parse a run label e.g. "MUSR00015189-91, 15193" into instrument
+ * ("MUSR") and set of runs (15189, 15190, 15191, 15193).
+ * Assumes instrument name doesn't contain a digit (true for muon instruments).
+ * @param label :: [input] Label to parse
+ * @param instrument :: [output] Name of instrument
+ * @param runNumbers :: [output] Vector to fill with run numbers
+ * @throws std::invalid_argument if input cannot be parsed
+ */
+void parseRunLabel(const std::string &label, std::string &instrument,
+                   std::vector<int> &runNumbers) {
+  const size_t instPos = label.find_first_of("0123456789");
+  instrument = label.substr(0, instPos);
+  const size_t numPos = label.find_first_not_of('0', instPos);
+  if (numPos != std::string::npos) {
+    std::string runString = label.substr(numPos, label.size());
+    // sets of continuous ranges
+    Mantid::Kernel::StringTokenizer rangeTokenizer(
+        runString, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    for (const auto &range : rangeTokenizer.asVector()) {
+      Mantid::Kernel::StringTokenizer pairTokenizer(
+          range, "-", Mantid::Kernel::StringTokenizer::TOK_TRIM);
+      try {
+        if (pairTokenizer.count() == 2) {
+          // Range of run numbers
+          // Deal with common part of string: "151" in "15189-91"
+          const size_t diff =
+              pairTokenizer[0].length() - pairTokenizer[1].length();
+          const std::string endRun =
+              pairTokenizer[0].substr(0, diff) + pairTokenizer[1];
+          const int start = boost::lexical_cast<int>(pairTokenizer[0]);
+          const int end = boost::lexical_cast<int>(endRun);
+          for (int run = start; run < end + 1; run++) {
+            runNumbers.push_back(run);
+          }
+        } else if (pairTokenizer.count() == 1) {
+          // Single run
+          runNumbers.push_back(boost::lexical_cast<int>(pairTokenizer[0]));
+        } else {
+          throw std::invalid_argument("Failed to parse run label: " + label);
+        }
+      } catch (const boost::bad_lexical_cast &) {
+        throw std::invalid_argument("Failed to parse run label: " + label);
+      }
+    }
+  } else {
+    // The string was "INST000" or similar...
+    runNumbers = {0};
+  }
+}
+
+/**
+ * Generate a workspace name from the given parameters
+ * Format: "INST00012345; Pair; long; Asym;[ 1;] #1"
+ * @param params :: [input] Struct containing dataset parameters
+ * @returns :: Name for analysis workspace
+ */
+std::string generateWorkspaceName(const Muon::DatasetParams &params) {
+  std::ostringstream workspaceName;
+  const static std::string sep("; ");
+
+  // Instrument and run number
+  if (params.label.empty()) {
+    workspaceName << getRunLabel(params.instrument, params.runs) << sep;
+  } else {
+    workspaceName << params.label << sep;
+  }
+
+  // Pair/group and name of pair/group
+  if (params.itemType == Muon::ItemType::Pair) {
+    workspaceName << "Pair" << sep;
+  } else if (params.itemType == Muon::ItemType::Group) {
+    workspaceName << "Group" << sep;
+  }
+  workspaceName << params.itemName << sep;
+
+  // Type of plot
+  switch (params.plotType) {
+  case Muon::PlotType::Asymmetry:
+    workspaceName << "Asym";
+    break;
+  case Muon::PlotType::Counts:
+    workspaceName << "Counts";
+    break;
+  case Muon::PlotType::Logarithm:
+    workspaceName << "Logs";
+    break;
+  }
+
+  // Period(s)
+  const auto periods = params.periods;
+  if (!periods.empty()) {
+    workspaceName << sep << periods;
+  }
+
+  // Version - always "#1" if overwrite is on, otherwise increment
+  workspaceName << sep << "#" << params.version;
+
+  return workspaceName.str();
+}
+
+/**
+ * Get the colors corresponding to their position in the workspace list.
+ * Used in fittings table on results table tab.
+ *
+ * New color if:
+ * - different model used for fit
+ * - different number of runs (groups, periods) used in fit
+ *
+ * Colors: black, red, green, blue, orange, purple (if more, use black as
+ * default).
+ *
+ * @param workspaces :: Vector of either workspace groups (containing parameter
+ * tables) or parameter tables themselves
+ * @return :: List of colors with the key being position in input vector.
+ */
+QMap<int, QColor>
+getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
+  QMap<int, QColor> colors; // position, color
+
+  // Vector of <number of runs in fit, parameters in fit> pairs
+  typedef std::pair<size_t, std::vector<std::string>> FitProp;
+  std::vector<FitProp> fitProperties;
+
+  // Get fit properties for each input workspace
+  for (const auto &ws : workspaces) {
+    size_t nRuns = 0;
+    std::vector<std::string> params;
+    if (const auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+      for (size_t i = 0; i < group->size(); ++i) {
+        const auto &ws = group->getItem(i);
+        if (ws->name().find("_Parameters") != std::string::npos) {
+          params = getKeysFromTable(
+              boost::dynamic_pointer_cast<ITableWorkspace>(ws));
+        } else if (ws->name().find("_Workspace") != std::string::npos) {
+          ++nRuns;
+        }
+      }
+    } else if (const auto table =
+                   boost::dynamic_pointer_cast<ITableWorkspace>(ws)) {
+      nRuns = 1;
+      params = getKeysFromTable(table);
+    } else {
+      throw std::invalid_argument(
+          "Unexpected workspace type for " + ws->name() +
+          " (expected WorkspaceGroup or ITableWorkspace)");
+    }
+    fitProperties.emplace_back(nRuns, params);
+  }
+
+  size_t colorCount(0);
+  colors[0] = getWorkspaceColor(colorCount);
+
+  if (fitProperties.size() > 1) {
+    FitProp firstProps = fitProperties.front();
+
+    while (static_cast<size_t>(colors.size()) < fitProperties.size()) {
+      // Go through and assign same color to all similar sets
+      for (size_t i = 1; i < fitProperties.size(); ++i) {
+        if (fitProperties[i] == firstProps) {
+          colors[static_cast<int>(i)] = getWorkspaceColor(colorCount);
+        }
+      }
+
+      // Increment color for next set
+      ++colorCount;
+
+      // Get the first unassigned one to compare to next time
+      for (size_t i = 1; i < fitProperties.size(); ++i) {
+        if (!colors.contains(static_cast<int>(i))) {
+          firstProps = fitProperties[i];
+          break;
+        }
+      }
+    }
+  }
+
+  return colors;
+}
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces
 } // namespace Mantid

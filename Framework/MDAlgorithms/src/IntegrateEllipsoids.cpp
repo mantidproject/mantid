@@ -68,7 +68,7 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
 
     std::vector<double> buffer(DIMS);
     // get a reference to the event list
-    EventList &events = wksp->getEventList(i);
+    EventList &events = wksp->getSpectrum(i);
 
     events.switchTo(WEIGHTED_NOTIME);
     events.compressEvents(1e-5, &events);
@@ -195,16 +195,6 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegrateEllipsoids)
-
-//----------------------------------------------------------------------
-/** Constructor
- */
-IntegrateEllipsoids::IntegrateEllipsoids() {}
-
-//---------------------------------------------------------------------
-/** Destructor
- */
-IntegrateEllipsoids::~IntegrateEllipsoids() {}
 
 //---------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -341,7 +331,7 @@ void IntegrateEllipsoids::exec() {
   Mantid::DataObjects::PeaksWorkspace_sptr peak_ws =
       getProperty("OutputWorkspace");
   if (peak_ws != in_peak_ws) {
-    peak_ws.reset(in_peak_ws->clone().release());
+    peak_ws = in_peak_ws->clone();
   }
 
   // get UBinv and the list of

@@ -5,12 +5,9 @@
 
 #include <string>
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 /**
  *
   This class provides a container for a given data axis information.
@@ -18,7 +15,8 @@ namespace SimpleGui
   @author Michael Reuter
   @date 24/05/2011
 
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
   This file is part of Mantid.
 
@@ -38,8 +36,7 @@ namespace SimpleGui
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS AxisInformation
-{
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_QTWIDGETS AxisInformation {
 public:
   /// Default constructor.
   AxisInformation();
@@ -80,10 +77,9 @@ public:
 
 private:
   std::string title; ///< The axis title (or label)
-  double minimum; ///< The minimum extent of the axis
-  double maximum; ///< The maximum extent of the axis
+  double minimum;    ///< The minimum extent of the axis
+  double maximum;    ///< The maximum extent of the axis
 };
-
 }
 }
 }

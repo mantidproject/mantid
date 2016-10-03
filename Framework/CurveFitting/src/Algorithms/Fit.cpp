@@ -197,8 +197,7 @@ void Fit::execConcrete() {
     if (!errorString.empty()) {
       errorString += '\n';
     }
-    errorString += "Failed to converge after " +
-                   boost::lexical_cast<std::string>(maxIterations) +
+    errorString += "Failed to converge after " + std::to_string(maxIterations) +
                    " iterations.";
   }
 

@@ -2,6 +2,8 @@
 MantidPlot module to gain access to plotting functions etc.
 Requires that the main script be run from within MantidPlot
 """
+from __future__ import (absolute_import, division,
+                        print_function)
 # Requires MantidPlot
 try:
     import _qti
@@ -18,11 +20,15 @@ import time
 import mantid.api
 import mantidqtpython
 from mantidqtpython import GraphOptions
+# historical names in MantidPlot
+from mantidqtpython import MantidQt as _MantidQt
+InstrumentViewMaskTab = _MantidQt.MantidWidgets.InstrumentWidgetMaskTab
+InstrumentViewPickTab = _MantidQt.MantidWidgets.InstrumentWidgetPickTab
 
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
 from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker, InstrumentView)
-				  
+
 # Make the ApplicationWindow instance accessible from the mantidplot namespace
 from _qti import app
 
@@ -199,7 +205,7 @@ def newTiledWindow(name=None, sources = None, ncols = None):
 
     if ncols is None:
         ncols = proxy.columnCount()
- 
+
     if not sources is None:
         row = 0
         col = 0
@@ -677,7 +683,7 @@ def getMantidMatrix(name):
     """Get a handle to the named Mantid matrix"""
     return new_proxy(proxies.MantidMatrix, _qti.app.mantidUI.getMantidMatrix, name)
 
-	
+
 InstrumentWidget = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidget
 InstrumentWidgetRenderTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetRenderTab
 InstrumentWidgetPickTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetPickTab
@@ -772,12 +778,6 @@ def plotSlice(source, label="", xydim=None, slicepoint=None,
     workspace_names = getWorkspaceNames(source)
     __checkPlotSliceWorkspaces(workspace_names)
 
-    try:
-        import mantidqtpython
-    except:
-        print "Could not find module mantidqtpython. Cannot open the SliceViewer."
-        return
-
     # Make a list of widgets to return
     out = []
     for wsname in workspace_names:
@@ -829,19 +829,51 @@ def closeAllSliceViewers():
     Closes all currently open SliceViewer windows. This might be useful to
     clean up your desktop after opening many windows.
     """
-    import mantidqtpython
     threadsafe_call(mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().closeAllSliceViewerWindows)
 
+
+# -----------------------------------------------------------------------------
+def openProject(file_name, file_version=0):
+    """Open a mantid project file.
+
+    This will load all associated workspaces and plots.
+
+    Args:
+        file_name :: file path to a mantid project file
+        file_version :: file version to use when loading (default 0).
+    """
+    working_dir = os.path.dirname(os.path.abspath(file_name))
+    threadsafe_call(_qti.app.openProject, working_dir, file_name, file_version)
+
+
+# -----------------------------------------------------------------------------
+def saveProjectAs(file_name, compress=False):
+    """Save a mantid project
+
+    This will serialise all associated workspaces and windows
+
+    Args:
+        file_name :: file path to save to
+        compress :: whether to compress the project after saving
+    """
+    threadsafe_call(_qti.app.saveProjectAs, file_name, compress)
+
+
+# -----------------------------------------------------------------------------
+def newProject():
+    """Start a new mantid project
+
+    This will clear all existing unsaved projects
+    """
+    threadsafe_call(_qti.app.newProject)
 
 # -----------------------------------------------------------------------------
 # Legacy function
 plotTimeBin = plotBin
 
-# import 'safe' methods (i.e. no proxy required) of ApplicationWindow into the global namespace
-# Only 1 at the moment!
-appImports = [
-    'saveProjectAs'
-]
+# import 'safe' methods (i.e. no proxy required) of ApplicationWindow into
+# the global namespace. None at the moment!
+appImports = []
 for name in appImports:
     globals()[name] = getattr(_qti.app, name)
 
@@ -925,7 +957,7 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
     try:
         threadsafe_call(sv.setColorScaleLog, colorscalelog)
     except:
-        print "Log color scale not possible."
+        print("Log color scale not possible.")
 
     # --- XY limits ---
     if not limits is None:
@@ -944,9 +976,7 @@ def get_screenshot_dir():
         if not os.path.exists(dest):
             os.mkdir(dest)
     else:
-        errormsg = "The expected environmental does not exist: " + expected_env_var
-        print errormsg
-        raise RuntimeError(errormsg)
+        raise RuntimeError("The expected environmental does not exist: " + expected_env_var)
     return dest
 
 
@@ -1183,7 +1213,7 @@ def createDetectorTable(source):
     try:
         import mantidqtpython
     except:
-        print "Could not find module mantidqtpython. Cannot open the detector table."
+        print("Could not find module mantidqtpython. Cannot open the detector table.")
         return
 
     workspace_names = getWorkspaceNames(source)

@@ -44,7 +44,7 @@ MatrixWSDataSource::MatrixWSDataSource(MatrixWorkspace_const_sptr matWs)
   m_totalXMin = matWs->getXMin();
   m_totalXMax = matWs->getXMax();
 
-  m_totalYMin = 0;  // Y direction is workspace index
+  m_totalYMin = 0; // Y direction is workspace index
   m_totalYMax = (double)matWs->getNumberHistograms();
 
   m_totalRows = matWs->getNumberHistograms();
@@ -234,9 +234,9 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
   int row = (int)y;
   restrictRow(row);
 
-  const ISpectrum *spec = m_matWs->getSpectrum(row);
+  const auto &spec = m_matWs->getSpectrum(row);
 
-  double spec_num = spec->getSpectrumNo();
+  double spec_num = spec.getSpectrumNo();
   SVUtils::PushNameValue("Spec Num", 8, 0, spec_num, list);
 
   std::string x_label = "";
@@ -246,7 +246,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
     SVUtils::PushNameValue(x_label, 8, 3, x, list);
   }
 
-  auto ids = spec->getDetectorIDs();
+  auto ids = spec.getDetectorIDs();
   if (!ids.empty()) {
     list.emplace_back("Det ID");
     const int64_t id = static_cast<int64_t>(*(ids.begin()));
@@ -268,8 +268,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
 
     auto det = m_matWs->getDetector(row);
     if (det == 0) {
-      g_log.debug() << "No DETECTOR for row " << row << " in MatrixWorkspace"
-                    << std::endl;
+      g_log.debug() << "No DETECTOR for row " << row << " in MatrixWorkspace\n";
       return list;
     }
 
@@ -282,12 +281,12 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
       l2 = l2 - l1;
     } else {
       l2 = det->getDistance(*m_sample);
-      two_theta = m_matWs->detectorTwoTheta(det);
+      two_theta = m_matWs->detectorTwoTheta(*det);
       azi = det->getPhi();
     }
     SVUtils::PushNameValue("L2", 8, 4, l2, list);
-    SVUtils::PushNameValue("TwoTheta", 8, 2, two_theta * 180. / M_PI, list);
-    SVUtils::PushNameValue("Azimuthal", 8, 2, azi * 180. / M_PI, list);
+    SVUtils::PushNameValue("TwoTheta", 8, 2, two_theta * deg2rad, list);
+    SVUtils::PushNameValue("Azimuthal", 8, 2, azi * deg2rad, list);
 
     /* For now, only support diffractometers and monitors. */
     /* We need a portable way to determine emode and */
@@ -341,8 +340,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
           }
         } catch (std::runtime_error &) {
           g_log.debug() << "Failed to get Efixed from detector ID: "
-                        << det->getID() << " in MatrixWSDataSource"
-                        << std::endl;
+                        << det->getID() << " in MatrixWSDataSource\n";
           efixed = 0;
         }
       }
@@ -398,7 +396,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
     }
   } catch (std::exception &e) {
     g_log.debug() << "Failed to get information from Workspace:" << e.what()
-                  << std::endl;
+                  << '\n';
   }
   return list;
 }

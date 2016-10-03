@@ -13,12 +13,9 @@ class pqPipelineSource;
 class pqRenderView;
 class QAction;
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 
 class RebinnedSourcesManager;
 
@@ -29,7 +26,8 @@ class RebinnedSourcesManager;
 
  @date 24/05/2011
 
- Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -49,13 +47,14 @@ class RebinnedSourcesManager;
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS StandardView : public ViewBase
-{
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS StandardView
+    : public ViewBase {
   Q_OBJECT
 
 public:
   /// Default constructor.
-  StandardView(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
+  StandardView(QWidget *parent = 0,
+               RebinnedSourcesManager *rebinnedSourcesManager = 0);
   /// Default destructor.
   ~StandardView() override;
 
@@ -80,7 +79,7 @@ public:
 
 public slots:
   /// Listen to a change in the active source.
-  void activeSourceChangeListener(pqPipelineSource* source);
+  void activeSourceChangeListener(pqPipelineSource *source);
 
 protected slots:
   /// Add a slice to the current dataset.
@@ -92,7 +91,8 @@ protected slots:
   /// On BinMD button clicked
   void onRebin();
   /// On scale completed
-  void onScaleRepresentationAdded(pqPipelineSource *, pqDataRepresentation* , int);
+  void onScaleRepresentationAdded(pqPipelineSource *, pqDataRepresentation *,
+                                  int);
 
 private:
   Q_DISABLE_COPY(StandardView)
@@ -101,8 +101,8 @@ private:
 
   bool m_cameraReset;
   QPointer<pqPipelineSource> m_scaler; ///< Holder for the ScaleWorkspace
-  Ui::StandardView m_ui; ///< The standard view's UI form
-  QPointer<pqRenderView> m_view; ///< The main view
+  Ui::StandardView m_ui;               ///< The standard view's UI form
+  QPointer<pqRenderView> m_view;       ///< The main view
 
   /// Set the rebin and unbin button visibility
   void setRebinAndUnbinButtons();
@@ -113,10 +113,10 @@ private:
   ///  Allow the user the ability to unbin
   void allowUnbinOption(bool allow);
 
-  QAction* m_binMDAction;
-  QAction* m_sliceMDAction;
-  QAction* m_cutMDAction;
-  QAction* m_unbinAction;
+  QAction *m_binMDAction;
+  QAction *m_sliceMDAction;
+  QAction *m_cutMDAction;
+  QAction *m_unbinAction;
 
   // name to show for the rebin actions on the rebin menu
   static QString g_binMDName;

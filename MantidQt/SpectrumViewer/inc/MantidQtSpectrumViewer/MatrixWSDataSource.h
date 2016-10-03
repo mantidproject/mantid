@@ -9,19 +9,15 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-namespace Mantid
-{
-  namespace Geometry
-  {
-    class IComponent;
-    class Instrument;
-  }
+namespace Mantid {
+namespace Geometry {
+class IComponent;
+class Instrument;
+}
 }
 
-namespace MantidQt
-{
-namespace SpectrumView
-{
+namespace MantidQt {
+namespace SpectrumView {
 class EModeHandler;
 
 /**
@@ -53,55 +49,59 @@ class EModeHandler;
     Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public SpectrumDataSource
-{
-  public:
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource
+    : public SpectrumDataSource {
+public:
+  /// Construct a DataSource object around the specifed MatrixWorkspace
+  MatrixWSDataSource(Mantid::API::MatrixWorkspace_const_sptr matWs);
 
-    /// Construct a DataSource object around the specifed MatrixWorkspace
-    MatrixWSDataSource( Mantid::API::MatrixWorkspace_const_sptr matWs );
+  ~MatrixWSDataSource() override;
 
-    ~MatrixWSDataSource() override;
+  bool hasData(const std::string &wsName,
+               const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
-    bool hasData(const std::string &wsName,
-                 const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+  /// Get the smallest 'x' value covered by the data
+  double getXMin() override;
 
-    /// Get the smallest 'x' value covered by the data
-    double getXMin() override;
+  /// Get the largest 'x' value covered by the data
+  double getXMax() override;
 
-    /// Get the largest 'x' value covered by the data
-    double getXMax() override;
+  /// Get the largest 'y' value covered by the data
+  double getYMax() override;
 
-    /// Get the largest 'y' value covered by the data
-    double getYMax() override;
+  /// Get the total number of rows of data
+  size_t getNRows() override;
 
-    /// Get the total number of rows of data
-    size_t getNRows() override;
+  /// Get DataArray covering full range of data in x, and y directions
+  DataArray_const_sptr getDataArray(bool isLogX) override;
 
-    /// Get DataArray covering full range of data in x, and y directions
-    DataArray_const_sptr getDataArray(bool isLogX) override;
+  /// Get DataArray covering restricted range of data
+  DataArray_const_sptr getDataArray(double xMin, double xMax, double yMin,
+                                    double yMax, size_t nRows, size_t nCols,
+                                    bool isLogX) override;
 
-    /// Get DataArray covering restricted range of data
-    DataArray_const_sptr getDataArray(double xMin, double xMax, double yMin,
-                                      double yMax, size_t nRows, size_t nCols,
-                                      bool isLogX) override;
+  /// Set the class that gets the emode & efixed info from the user.
+  void setEModeHandler(EModeHandler *emodeHandler);
 
-    /// Set the class that gets the emode & efixed info from the user.
-    void setEModeHandler( EModeHandler* emodeHandler );
+  /// Get a list containing pairs of strings with information about x,y
+  std::vector<std::string> getInfoList(double x, double y) override;
 
-    /// Get a list containing pairs of strings with information about x,y
-    std::vector<std::string> getInfoList(double x, double y) override;
+  /// Get a pointer to the workspace
+  Mantid::API::MatrixWorkspace_const_sptr getWorkspace() const {
+    return m_matWs;
+  }
 
-  private:
-    Mantid::API::MatrixWorkspace_const_sptr m_matWs;
-    EModeHandler* m_emodeHandler;
-    boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
-    boost::shared_ptr<const Mantid::Geometry::IComponent> m_source;
-    boost::shared_ptr<const Mantid::Geometry::IComponent> m_sample;
-
+private:
+  Mantid::API::MatrixWorkspace_const_sptr m_matWs;
+  EModeHandler *m_emodeHandler;
+  boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
+  boost::shared_ptr<const Mantid::Geometry::IComponent> m_source;
+  boost::shared_ptr<const Mantid::Geometry::IComponent> m_sample;
 };
 
 typedef boost::shared_ptr<MatrixWSDataSource> MatrixWSDataSource_sptr;
-typedef boost::shared_ptr<const MatrixWSDataSource> MatrixWSDataSource_const_sptr;
+typedef boost::shared_ptr<const MatrixWSDataSource>
+    MatrixWSDataSource_const_sptr;
 
 } // namespace SpectrumView
 } // namespace MantidQt

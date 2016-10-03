@@ -13,7 +13,7 @@
 
 namespace Mantid {
 namespace DataHandling {
-/**
+/*
 Loads a Bilby data file. Implements API::IFileLoader and its file check methods
 to recognise a file as the one containing Bilby data.
 
@@ -49,20 +49,21 @@ class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
     //
     int32_t bm_counts;
     int32_t att_pos;
+    bool is_tof; // tof or wavelength data
+    double wavelength;
     //
     double period_master;
     double period_slave;
     double phase_slave;
     //
     double L1_chopper_value;
+    double L1_source_value;
     double L2_det_value;
     //
     double L2_curtainl_value;
     double L2_curtainr_value;
     double L2_curtainu_value;
     double L2_curtaind_value;
-    //
-    double D_det_value;
     //
     double D_curtainl_value;
     double D_curtainr_value;
@@ -71,16 +72,12 @@ class DLLExport LoadBBY : public API::IFileLoader<Kernel::FileDescriptor> {
   };
 
 public:
-  // construction
-  LoadBBY() {}
-  ~LoadBBY() override {}
-
   // description
   int version() const override { return 1; }
   const std::string name() const override { return "LoadBBY"; }
-  const std::string category() const override { return "DataHandling"; }
+  const std::string category() const override { return "DataHandling\\ANSTO"; }
   const std::string summary() const override {
-    return "Loads a BilBy data file into a workspace.";
+    return "Loads a Bilby data file into a workspace.";
   }
 
   // returns a confidence value that this algorithm can load a specified file
@@ -97,13 +94,15 @@ private:
   static std::vector<bool> createRoiVector(const std::string &maskfile);
 
   // instrument creation
-  Geometry::Instrument_sptr createInstrument(ANSTO::Tar::File &tarFile,
-                                             InstrumentInfo &instrumentInfo);
+  void createInstrument(ANSTO::Tar::File &tarFile,
+                        InstrumentInfo &instrumentInfo);
 
   // load nx dataset
   template <class T>
   static bool loadNXDataSet(NeXus::NXEntry &entry, const std::string &path,
                             T &value);
+  static bool loadNXString(NeXus::NXEntry &entry, const std::string &path,
+                           std::string &value);
 
   // binary file access
   template <class EventProcessor>

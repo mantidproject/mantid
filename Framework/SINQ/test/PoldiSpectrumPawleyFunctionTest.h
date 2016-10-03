@@ -7,19 +7,21 @@
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumPawleyFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/FunctionFactory.h"
 
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
-using namespace Mantid::Kernel;
+
+using Mantid::Kernel::V3D;
 
 using ::testing::_;
 using ::testing::Mock;
+
+GCC_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockPawleyFunction : public IPawleyFunction {
 public:
@@ -43,7 +45,7 @@ public:
 
   MOCK_METHOD4(setMatrixWorkspace,
                void(MatrixWorkspace_const_sptr, size_t, double, double));
-
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
 protected:
   void init() override { setDecoratedFunction("Gaussian"); }
 };
@@ -149,26 +151,12 @@ public:
 
     fn.function(domain, values);
 
-    std::vector<double> reference;
-    reference.push_back(0.214381692355321);
-    reference.push_back(1.4396533098854);
-    reference.push_back(7.69011673999647);
-    reference.push_back(32.6747845396612);
-    reference.push_back(110.432605589092);
-    reference.push_back(296.883931458002);
-    reference.push_back(634.864220660384);
-    reference.push_back(1079.89069118744);
-    reference.push_back(1461.11207069126);
-    reference.push_back(1572.50503614829);
-    reference.push_back(1346.18685763306);
-    reference.push_back(916.691981263516);
-    reference.push_back(496.502218342172);
-    reference.push_back(213.861997764049);
-    reference.push_back(73.2741206547921);
-    reference.push_back(19.9697293956518);
-    reference.push_back(4.32910692237627);
-    reference.push_back(0.746498624291666);
-    reference.push_back(0.102391587633906);
+    std::array<double, 19> reference{
+        {0.214381692355321, 1.4396533098854, 7.69011673999647, 32.6747845396612,
+         110.432605589092, 296.883931458002, 634.864220660384, 1079.89069118744,
+         1461.11207069126, 1572.50503614829, 1346.18685763306, 916.691981263516,
+         496.502218342172, 213.861997764049, 73.2741206547921, 19.9697293956518,
+         4.32910692237627, 0.746498624291666, 0.102391587633906}};
 
     for (size_t i = 0; i < reference.size(); ++i) {
       TS_ASSERT_DELTA(values[479 + i] / reference[i], 1.0, 1e-12);

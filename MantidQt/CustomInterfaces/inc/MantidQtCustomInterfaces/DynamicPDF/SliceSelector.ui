@@ -52,7 +52,7 @@
       <number>9</number>
      </property>
      <item row="0" column="0">
-      <widget class="MantidQt::MantidWidgets::DataSelector" name="dataSelector"/>
+      <widget class="MantidQt::MantidWidgets::DataSelector" name="dataSelector" native="true"/>
      </item>
     </layout>
    </widget>
@@ -112,7 +112,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="MantidQt::MantidWidgets::MWView" name="slices2DPlot">
+   <widget class="MantidQt::MantidWidgets::MWView" name="slices2DPlot" native="true">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -128,7 +128,7 @@
      </sizepolicy>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget1">
+   <widget class="QWidget" name="layoutWidget2">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -139,14 +139,14 @@
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="MantidQt::MantidWidgets::PreviewPlot" name="previewPlotSelectedSlice">
+      <widget class="MantidQt::MantidWidgets::PreviewPlot" name="previewPlotSelectedSlice" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="canvasColour">
+       <property name="canvasColour" stdset="0">
         <color>
          <red>255</red>
          <green>255</green>
@@ -210,12 +210,12 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="pushLaunchBackgroundRemover">
+        <widget class="QPushButton" name="pushButtonFit">
          <property name="toolTip">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Launch the background removal tool.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
-          <string>Launch Background Remover</string>
+          <string>Fit</string>
          </property>
         </widget>
        </item>

@@ -5,6 +5,12 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+
+namespace HistogramData {
+class Histogram;
+class Points;
+}
+
 namespace Algorithms {
 
 /** DetectorEfficiencyCorUser :
@@ -39,14 +45,13 @@ namespace Algorithms {
  */
 class DLLExport DetectorEfficiencyCorUser : public API::Algorithm {
 public:
-  DetectorEfficiencyCorUser();
-  ~DetectorEfficiencyCorUser() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "This algorithm calculates the detector efficiency according the "
-           "formula set in the instrument definition file/parameters.";
+    return "Corrects for detector efficiency. The correction factor is "
+           "calculated using an instrument specific formula as a function "
+           "of the final neutron energy E_f=E_i-E. Note that the formula "
+           "is implemented only for a limited number of TOF instruments.";
   }
 
   int version() const override;
@@ -56,21 +61,22 @@ private:
   void init() override;
   void exec() override;
   void retrieveProperties();
-  double calculateFormulaValue(const std::string &, double);
-  MantidVec calculateEfficiency(double, const std::string &, const MantidVec &);
+  double calculateFormulaValue(const std::string &formula, double energy);
+  MantidVec calculateEfficiency(double eff0, const std::string &formula,
+                                const HistogramData::Points &xIn);
 
-  std::string getValFromInstrumentDef(const std::string &);
+  std::string getValFromInstrumentDef(const std::string &parameterName);
 
-  void applyDetEfficiency(const size_t numberOfChannels, const MantidVec &yIn,
-                          const MantidVec &eIn, const MantidVec &effVec,
-                          MantidVec &yOut, MantidVec &eOut);
+  HistogramData::Histogram
+  applyDetEfficiency(const size_t nChans, const Mantid::MantidVec &effVec,
+                     const HistogramData::Histogram &histogram);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr m_inputWS;
   /// The output workspace, maybe the same as the input one
   API::MatrixWorkspace_sptr m_outputWS;
   /// stores the user selected value for incidient energy of the neutrons
-  double m_Ei;
+  double m_Ei = 0.0;
 };
 
 } // namespace Algorithms

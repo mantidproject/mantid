@@ -132,12 +132,12 @@ void CompareWorkspaces::exec() {
 
   if (!m_Result) {
     std::string message = m_Messages->cell<std::string>(0, 0);
-    g_log.notice() << "The workspaces did not match: " << message << std::endl;
+    g_log.notice() << "The workspaces did not match: " << message << '\n';
   } else {
     std::string ws1 = Workspace_const_sptr(getProperty("Workspace1"))->name();
     std::string ws2 = Workspace_const_sptr(getProperty("Workspace2"))->name();
     g_log.notice() << "The workspaces \"" << ws1 << "\" and \"" << ws2
-                   << "\" matched!" << std::endl;
+                   << "\" matched!\n";
   }
 
   setProperty("Result", m_Result);
@@ -179,19 +179,11 @@ bool CompareWorkspaces::processGroups() {
 
   if (m_Result && ws1 && ws2) {
     g_log.notice() << "All workspaces in workspace groups \"" << ws1->name()
-                   << "\" and \"" << ws2->name() << "\" matched!" << std::endl;
+                   << "\" and \"" << ws2->name() << "\" matched!\n";
   }
 
   setProperty("Result", m_Result);
   setProperty("Messages", m_Messages);
-
-  // Store output workspace in AnalysisDataService
-  if (!isChild())
-    this->store();
-
-  setExecuted(true);
-  notificationCenter().postNotification(
-      new FinishedNotification(this, this->isExecuted()));
 
   return true;
 }
@@ -352,7 +344,7 @@ void CompareWorkspaces::doComparison() {
     m_Prog = new Progress(this, 0.0, 1.0, numhist * 5);
 
     // Compare event lists to see whether 2 event workspaces match each other
-    if (!compareEventWorkspaces(ews1, ews2))
+    if (!compareEventWorkspaces(*ews1, *ews2))
       return;
   } else {
     // Fewer steps if not events
@@ -395,36 +387,36 @@ void CompareWorkspaces::doComparison() {
 /** Check whether 2 event lists are identical
   */
 bool CompareWorkspaces::compareEventWorkspaces(
-    DataObjects::EventWorkspace_const_sptr ews1,
-    DataObjects::EventWorkspace_const_sptr ews2) {
+    const DataObjects::EventWorkspace &ews1,
+    const DataObjects::EventWorkspace &ews2) {
   bool checkallspectra = getProperty("CheckAllData");
   int numspec2print = getProperty("NumberMismatchedSpectraToPrint");
   int wsindex2print = getProperty("DetailedPrintIndex");
 
   // Compare number of spectra
-  if (ews1->getNumberHistograms() != ews2->getNumberHistograms()) {
+  if (ews1.getNumberHistograms() != ews2.getNumberHistograms()) {
     recordMismatch("Mismatched number of histograms.");
     return false;
   }
 
-  if (ews1->getEventType() != ews2->getEventType()) {
+  if (ews1.getEventType() != ews2.getEventType()) {
     recordMismatch("Mismatched type of events in the EventWorkspaces.");
     return false;
   }
 
   // Both will end up sorted anyway
-  ews1->sortAll(PULSETIMETOF_SORT, m_Prog);
-  ews2->sortAll(PULSETIMETOF_SORT, m_Prog);
+  ews1.sortAll(PULSETIMETOF_SORT, m_Prog);
+  ews2.sortAll(PULSETIMETOF_SORT, m_Prog);
 
   // Determine the tolerance for "tof" attribute and "weight" of events
   double toleranceWeight = Tolerance; // Standard tolerance
   int64_t tolerancePulse = 1;
   double toleranceTOF = 0.05;
-  if ((ews1->getAxis(0)->unit()->label().ascii() != "microsecond") ||
-      (ews2->getAxis(0)->unit()->label().ascii() != "microsecond")) {
+  if ((ews1.getAxis(0)->unit()->label().ascii() != "microsecond") ||
+      (ews2.getAxis(0)->unit()->label().ascii() != "microsecond")) {
     g_log.warning() << "Event workspace has unit as "
-                    << ews1->getAxis(0)->unit()->label().ascii() << " and "
-                    << ews2->getAxis(0)->unit()->label().ascii()
+                    << ews1.getAxis(0)->unit()->label().ascii() << " and "
+                    << ews2.getAxis(0)->unit()->label().ascii()
                     << ".  Tolerance of TOF is set to 0.05 still. "
                     << "\n";
     toleranceTOF = 0.05;
@@ -441,16 +433,16 @@ bool CompareWorkspaces::compareEventWorkspaces(
   size_t numUnequalBothEvents = 0;
 
   std::vector<int> vec_mismatchedwsindex;
-  PARALLEL_FOR_IF(m_ParallelComparison && ews1->threadSafe() &&
-                  ews2->threadSafe())
-  for (int i = 0; i < static_cast<int>(ews1->getNumberHistograms()); ++i) {
+  PARALLEL_FOR_IF(m_ParallelComparison && ews1.threadSafe() &&
+                  ews2.threadSafe())
+  for (int i = 0; i < static_cast<int>(ews1.getNumberHistograms()); ++i) {
     PARALLEL_START_INTERUPT_REGION
     m_Prog->report("EventLists");
     if (!mismatchedEvent ||
         checkallspectra) // This guard will avoid checking unnecessarily
     {
-      const EventList &el1 = ews1->getEventList(i);
-      const EventList &el2 = ews2->getEventList(i);
+      const EventList &el1 = ews1.getSpectrum(i);
+      const EventList &el2 = ews2.getSpectrum(i);
       bool printdetail = (i == wsindex2print);
       if (printdetail) {
         g_log.information() << "Spectrum " << i
@@ -506,7 +498,7 @@ bool CompareWorkspaces::compareEventWorkspaces(
              << " spectra have different number of events. "
              << "\n";
 
-      mess << "Total " << numUnequalEvents << " (in " << ews1->getNumberEvents()
+      mess << "Total " << numUnequalEvents << " (in " << ews1.getNumberEvents()
            << ") events are differrent. " << numUnequalTOFEvents
            << " have different TOF; " << numUnequalPulseEvents
            << " have different pulse time; " << numUnequalBothEvents
@@ -515,7 +507,7 @@ bool CompareWorkspaces::compareEventWorkspaces(
 
       mess << "Mismatched event lists include " << vec_mismatchedwsindex.size()
            << " of "
-           << "total " << ews1->getNumberHistograms() << " spectra. "
+           << "total " << ews1.getNumberHistograms() << " spectra. "
            << "\n";
 
       std::sort(vec_mismatchedwsindex.begin(), vec_mismatchedwsindex.end());
@@ -727,23 +719,23 @@ bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
   }
 
   for (size_t i = 0; i < ws1->getNumberHistograms(); i++) {
-    const ISpectrum *spec1 = ws1->getSpectrum(i);
-    const ISpectrum *spec2 = ws2->getSpectrum(i);
-    if (spec1->getSpectrumNo() != spec2->getSpectrumNo()) {
+    const auto &spec1 = ws1->getSpectrum(i);
+    const auto &spec2 = ws2->getSpectrum(i);
+    if (spec1.getSpectrumNo() != spec2.getSpectrumNo()) {
       recordMismatch("Spectrum number mismatch");
       return false;
     }
-    if (spec1->getDetectorIDs().size() != spec2->getDetectorIDs().size()) {
+    if (spec1.getDetectorIDs().size() != spec2.getDetectorIDs().size()) {
       std::ostringstream out;
       out << "Number of detector IDs mismatch: "
-          << spec1->getDetectorIDs().size() << " vs "
-          << spec2->getDetectorIDs().size() << " at workspace index " << i;
+          << spec1.getDetectorIDs().size() << " vs "
+          << spec2.getDetectorIDs().size() << " at workspace index " << i;
       recordMismatch(out.str());
       return false;
     }
-    auto it2 = spec2->getDetectorIDs().cbegin();
-    for (auto it1 = spec1->getDetectorIDs().cbegin();
-         it1 != spec1->getDetectorIDs().cend(); ++it1, ++it2) {
+    auto it2 = spec2.getDetectorIDs().cbegin();
+    for (auto it1 = spec1.getDetectorIDs().cbegin();
+         it1 != spec1.getDetectorIDs().cend(); ++it1, ++it2) {
       if (*it1 != *it2) {
         recordMismatch("Detector IDs mismatch");
         return false;

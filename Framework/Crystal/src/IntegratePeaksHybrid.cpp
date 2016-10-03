@@ -82,16 +82,6 @@ using namespace ConnectedComponentMappingTypes;
 DECLARE_ALGORITHM(IntegratePeaksHybrid)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IntegratePeaksHybrid::IntegratePeaksHybrid() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IntegratePeaksHybrid::~IntegratePeaksHybrid() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string IntegratePeaksHybrid::name() const {
   return "IntegratePeaksHybrid";
@@ -164,7 +154,7 @@ void IntegratePeaksHybrid::exec() {
   const double peakOuterRadius = getProperty("BackgroundOuterRadius");
   const double halfPeakOuterRadius = peakOuterRadius / 2;
   if (peakWS != inPeakWS) {
-    peakWS = IPeaksWorkspace_sptr(inPeakWS->clone().release());
+    peakWS = inPeakWS->clone();
   }
 
   {
@@ -245,13 +235,13 @@ void IntegratePeaksHybrid::exec() {
     if (boost::math::isnan(signalValue)) {
       g_log.warning()
           << "Warning: image for integration is off edge of detector for peak "
-          << i << std::endl;
+          << i << '\n';
     } else if (signalValue <
                static_cast<Mantid::signal_t>(analysis.getStartLabelId())) {
       g_log.information() << "Peak: " << i
                           << " Has no corresponding cluster/blob detected on "
                              "the image. This could be down to your Threshold "
-                             "settings." << std::endl;
+                             "settings.\n";
     } else {
       const size_t labelIdAtPeak = static_cast<size_t>(signalValue);
       ICluster *const cluster = clusterMap[labelIdAtPeak].get();

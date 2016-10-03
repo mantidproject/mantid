@@ -1,0 +1,11 @@
+digraph DPDFBackgroundRemoverSliceSelected {
+  label = "User Case - Loading data in the Slice Selector"
+
+  subgraph algorithms {
+    $algorithm_style
+    SliceSelector   [label="SliceSelector"]
+    InputDataControl [label="InputDataControl::updateWorkspace"]
+}
+
+  SliceSelector -> InputDataControl  [label="signalSlicesLoaded"]
+}

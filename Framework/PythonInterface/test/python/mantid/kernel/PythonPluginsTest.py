@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 import os
 import shutil
@@ -31,7 +33,7 @@ class PythonPluginsTest(unittest.TestCase):
             pass # Already exists, maybe it was not removed when a test failed?
         filename = os.path.join(self._testdir, 'TestPyAlg.py')
         if not os.path.exists(filename):
-            plugin = file(filename, 'w')
+            plugin = open(filename, 'w')
             plugin.write(__TESTALG__)
             plugin.close()
 
@@ -55,7 +57,7 @@ class PythonPluginsTest(unittest.TestCase):
             test_alg = AlgorithmManager.createUnmanaged(expected_name)
             self.assertEquals(expected_name, test_alg.name())
             self.assertEquals(1, test_alg.version())
-        except RuntimeError, exc:
+        except RuntimeError as exc:
             self.fail("Failed to create plugin algorithm from the manager: '%s' " %s)
 
 

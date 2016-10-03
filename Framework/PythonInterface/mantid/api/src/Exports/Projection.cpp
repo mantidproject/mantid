@@ -23,7 +23,7 @@ std::string getUnit(Projection &p, size_t nd) {
   return (p.getUnit(nd) == RLU ? "r" : "a");
 }
 
-void setUnit(Projection &p, size_t nd, std::string unit) {
+void setUnit(Projection &p, size_t nd, const std::string &unit) {
   if (unit == "r")
     p.setUnit(nd, RLU);
   else if (unit == "a")
@@ -62,7 +62,7 @@ object createWorkspace() {
 
       "  if OutputWorkspace is None:\n"
       "    lhs = "
-      "kernel.funcreturns.process_frame(inspect.currentframe().f_back)\n"
+      "kernel.funcinspect.process_frame(inspect.currentframe().f_back)\n"
       "    if lhs[0] > 0:\n"
       "      OutputWorkspace = lhs[1][0]\n"
       "    else:\n"
@@ -109,10 +109,12 @@ void export_Projection() {
       .def(init<const Mantid::Kernel::V3D &, const Mantid::Kernel::V3D &,
                 const Mantid::Kernel::V3D &>(
           "Constructs a 3 dimensional projection", args("u", "v", "w")))
-      .def("__init__", make_constructor(&projCtor2),
+      .def("__init__", make_constructor(&projCtor2, default_call_policies(),
+                                        (arg("u"), arg("v"))),
            "Constructs a 3 dimensional projection, with w as the cross product "
            "of u and v.")
-      .def("__init__", make_constructor(&projCtor3),
+      .def("__init__", make_constructor(&projCtor3, default_call_policies(),
+                                        (arg("u"), arg("v"), arg("w"))),
            "Constructs a 3 dimensional projection")
       .def("getOffset", &Projection::getOffset, (arg("self"), arg("nd")),
            "Returns the offset for the given dimension", args("dimension"))

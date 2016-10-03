@@ -26,13 +26,14 @@ private slots:
   void updateRS(QtProperty *prop, double val);
   void updatePropertyValues(QtProperty *prop, double val);
   void calculateBinning();
-
-private:
+  void saveClicked();
+  void plotClicked();
   void PlotTiled();
 
+private:
   Ui::Iqt m_uiForm;
-  QtTreePropertyBrowser *m_furTree;
-  bool m_furyResFileType;
+  QtTreePropertyBrowser *m_iqtTree;
+  bool m_iqtResFileType;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

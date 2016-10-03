@@ -1,7 +1,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtAPI/MantidColorMap.h"
 
 #include "MantidQtCustomInterfaces/Tomography/ImageROIViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageROIPresenter.h"
@@ -24,8 +26,8 @@ const std::string ImageROIViewQtWidget::m_settingsGroup =
     "CustomInterfaces/ImageROIView";
 
 ImageROIViewQtWidget::ImageROIViewQtWidget(QWidget *parent)
-    : QWidget(parent), IImageROIView(), m_imgWidth(0), m_imgHeight(0),
-      m_selectionState(SelectNone), m_presenter(NULL) {
+    : QWidget(parent), IImageROIView(), m_colorMapFilename(), m_imgWidth(0),
+      m_imgHeight(0), m_selectionState(SelectNone), m_presenter(NULL) {
   initLayout();
 
   // using an event filter. might be worth refactoring into a specific
@@ -34,9 +36,185 @@ ImageROIViewQtWidget::ImageROIViewQtWidget(QWidget *parent)
   m_ui.label_img->installEventFilter(this);
 }
 
+ImageROIViewQtWidget::~ImageROIViewQtWidget() {
+  m_presenter->notify(ImageROIPresenter::ShutDown);
+}
+
 void ImageROIViewQtWidget::setParams(ImageStackPreParams &params) {
   m_params = params;
   setParamWidgets(m_params);
+}
+
+void ImageROIViewQtWidget::initLayout() {
+  // setup container ui
+  m_ui.setupUi(this);
+
+  QList<int> sizes;
+  sizes.push_back(1000);
+  sizes.push_back(200);
+  // between image and right panel
+  m_ui.splitter_main_horiz->setSizes(sizes);
+
+  sizes.clear();
+  sizes.push_back(200);
+  sizes.push_back(50);
+  // between color bar and coordinates panel
+  m_ui.splitter_right_horiz->setSizes(sizes);
+
+  m_ui.comboBox_image_type->setCurrentIndex(0);
+  m_ui.comboBox_rotation->setCurrentIndex(0);
+
+  sizes.clear();
+  sizes.push_back(10);
+  sizes.push_back(1000);
+  m_ui.splitter_img_vertical->setSizes(sizes);
+  m_ui.horizontalScrollBar_img_stack->setEnabled(false);
+  m_ui.lineEdit_img_seq->setText("---");
+  m_ui.label_img_name->setText("none");
+
+  enableParamWidgets(false);
+  m_ui.colorBarWidget->setEnabled(false);
+
+  m_ui.colorBarWidget->setViewRange(1, 65536);
+  m_ui.colorBarWidget->setAutoScale(true);
+  m_ui.colorBarWidget->setCheckBoxMode(
+      MantidWidgets::ColorBarWidget::ADD_AUTOSCALE_ON_LOAD);
+  m_ui.colorBarWidget->setAutoScaleTooltipText(
+      "This flag signals that the color scale range\n"
+      "will be set automatically to the current slice range\n"
+      "when an image is loaded. Note that auto\n"
+      "scaling will be applied when an image is loaded\n"
+      "for the very first time.");
+
+  readSettings();
+
+  setupConnections();
+
+  initParamWidgets(1, 1);
+  grabCoRFromWidgets();
+  grabROIFromWidgets();
+  grabNormAreaFromWidgets();
+
+  // presenter that knows how to handle a IImageROIView should take care
+  // of all the logic. Note the view needs to now the concrete presenter here
+  m_presenter.reset(new ImageROIPresenter(this));
+
+  // it will know what compute resources and tools we have available:
+  // This view doesn't even know the names of compute resources, etc.
+  m_presenter->notify(ImageROIPresenter::Init);
+}
+
+void ImageROIViewQtWidget::setupConnections() {
+
+  // 'browse' buttons
+  connect(m_ui.pushButton_browse_img, SIGNAL(released()), this,
+          SLOT(browseImageClicked()));
+
+  connect(m_ui.pushButton_browse_stack, SIGNAL(released()), this,
+          SLOT(browseStackClicked()));
+
+  connect(m_ui.pushButton_cor, SIGNAL(released()), this, SLOT(corClicked()));
+  connect(m_ui.pushButton_cor_reset, SIGNAL(released()), this,
+          SLOT(corResetClicked()));
+
+  connect(m_ui.pushButton_roi, SIGNAL(released()), this, SLOT(roiClicked()));
+  connect(m_ui.pushButton_roi_reset, SIGNAL(released()), this,
+          SLOT(roiResetClicked()));
+
+  connect(m_ui.pushButton_norm_area, SIGNAL(released()), this,
+          SLOT(normAreaClicked()));
+  connect(m_ui.pushButton_norm_area_reset, SIGNAL(released()), this,
+          SLOT(normAreaResetClicked()));
+
+  // "Play" the stack for quick visualization of input images
+  connect(m_ui.pushButton_play, SIGNAL(released()), this, SLOT(playClicked()));
+
+  // image sequence scroll/slide:
+  connect(m_ui.horizontalScrollBar_img_stack, SIGNAL(valueChanged(int)), this,
+          SLOT(updateFromImagesSlider(int)));
+
+  // image rotation
+  connect(m_ui.comboBox_rotation, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(rotationUpdated(int)));
+
+  // image type
+  connect(m_ui.comboBox_image_type, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(imageTypeUpdated(int)));
+
+  // parameter (points) widgets
+  connect(m_ui.spinBox_cor_x, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdatedCoR(int)));
+  connect(m_ui.spinBox_cor_y, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdatedCoR(int)));
+
+  connect(m_ui.spinBox_roi_top_x, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdatedROI(int)));
+  connect(m_ui.spinBox_roi_top_y, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdatedROI(int)));
+  connect(m_ui.spinBox_roi_bottom_x, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdatedROI(int)));
+  connect(m_ui.spinBox_roi_bottom_y, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdatedROI(int)));
+
+  connect(m_ui.spinBox_norm_top_x, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdatedNormArea(int)));
+  connect(m_ui.spinBox_norm_top_y, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdatedNormArea(int)));
+  connect(m_ui.spinBox_norm_bottom_x, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdatedNormArea(int)));
+  connect(m_ui.spinBox_norm_bottom_y, SIGNAL(valueChanged(int)), this,
+          SLOT(valueUpdatedNormArea(int)));
+
+  // colors
+  connect(m_ui.colorBarWidget, SIGNAL(colorBarDoubleClicked()), this,
+          SLOT(loadColorMapRequest()));
+
+  connect(m_ui.colorBarWidget, SIGNAL(changedColorRange(double, double, bool)),
+          this, SLOT(colorRangeChanged()));
+}
+
+void ImageROIViewQtWidget::readSettings() {
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(m_settingsGroup));
+
+  // Color bar widget settings
+  // The factory default would be "Gray.map"
+  const auto mapsDir = QString::fromStdString(
+      Mantid::Kernel::ConfigService::Instance().getString(
+          "colormaps.directory"));
+  const auto defMapFile =
+      QFileInfo(mapsDir).absoluteDir().filePath("Gamma1.map");
+  const auto filepath = qs.value("colorbar-file", defMapFile).toString();
+  m_ui.colorBarWidget->getColorMap().loadMap(filepath);
+  m_ui.colorBarWidget->updateColorMap();
+
+  m_ui.colorBarWidget->setScale(qs.value("colorbar-scale-type", 0).toInt());
+  m_ui.colorBarWidget->setExponent(
+      qs.value("colorbar-power-exponent", 2.0).toDouble());
+  m_ui.colorBarWidget->setAutoScale(
+      qs.value("colorbar-autoscale", false).toBool());
+  // ColorBarWidget doesn't support setting "AutoColorScaleforCurrentSlice"
+  // qsetting: "colorbar-autoscale-current-slice"
+
+  restoreGeometry(qs.value("interface-win-geometry").toByteArray());
+  qs.endGroup();
+}
+
+void ImageROIViewQtWidget::saveSettings() const {
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(m_settingsGroup));
+
+  // Color bar widget settings
+  qs.setValue("colorbar-file",
+              m_ui.colorBarWidget->getColorMap().getFilePath());
+  qs.setValue("colorbar-scale-type", m_ui.colorBarWidget->getScale());
+  qs.setValue("colorbar-power-exponent", m_ui.colorBarWidget->getExponent());
+  qs.setValue("colorbar-autoscale", m_ui.colorBarWidget->getAutoScale());
+  qs.setValue("colorbar-autoscale-current-slice",
+              m_ui.colorBarWidget->getAutoScaleforCurrentSlice());
+
+  qs.setValue("interface-win-geometry", saveGeometry());
+  qs.endGroup();
 }
 
 ImageStackPreParams ImageROIViewQtWidget::userSelection() const {
@@ -139,7 +317,11 @@ void ImageROIViewQtWidget::userError(const std::string &err,
 
 void ImageROIViewQtWidget::enableActions(bool enable) {
   m_ui.pushButton_browse_img->setEnabled(enable);
+  m_ui.pushButton_browse_stack->setEnabled(enable);
   m_ui.pushButton_play->setEnabled(enable);
+
+  m_ui.colorBarWidget->setEnabled(enable);
+
   m_ui.comboBox_image_type->setEnabled(enable);
   m_ui.comboBox_rotation->setEnabled(enable);
   m_ui.groupBox_cor->setEnabled(enable);
@@ -161,12 +343,37 @@ std::string ImageROIViewQtWidget::askImgOrStackPath() {
   QString prevPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   QString path(QFileDialog::getExistingDirectory(
-      this, tr("Open stack of images"), prevPath, QFileDialog::ShowDirsOnly));
+      this, tr("Open a stack of images (directory containing sample, dark and "
+               "flat images, or a directory containing images)"),
+      prevPath, QFileDialog::ShowDirsOnly));
   if (!path.isEmpty()) {
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
   }
 
   return path.toStdString();
+}
+
+std::string ImageROIViewQtWidget::askSingleImagePath() {
+  // get path
+  QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
+                            "(*.fits *.fit *.tiff *.tif *.png);;"
+                            "FITS, Flexible Image Transport System images "
+                            "(*.fits *.fit);;"
+                            "TIFF, Tagged Image File Format "
+                            "(*.tif *.tiff);;"
+                            "PNG, Portable Network Graphics "
+                            "(*.png);;"
+                            "Other extensions/all files (*.*)");
+  QString prevPath =
+      MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  QString filepath(
+      QFileDialog::getOpenFileName(this, tr("Open image"), prevPath, fitsStr));
+  if (!filepath.isEmpty()) {
+    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
+        filepath);
+  }
+
+  return filepath.toStdString();
 }
 
 void ImageROIViewQtWidget::enableImageTypes(bool enableSamples,
@@ -190,14 +397,6 @@ void ImageROIViewQtWidget::enableImageTypes(bool enableSamples,
   }
 }
 
-void ImageROIViewQtWidget::saveSettings() const {
-  QSettings qs;
-  qs.beginGroup(QString::fromStdString(m_settingsGroup));
-
-  qs.setValue("interface-win-geometry", saveGeometry());
-  qs.endGroup();
-}
-
 void ImageROIViewQtWidget::resetCoR() {
   int midx =
       (m_ui.spinBox_cor_x->minimum() + m_ui.spinBox_cor_x->maximum()) / 2;
@@ -219,103 +418,6 @@ void ImageROIViewQtWidget::resetNormArea() {
   m_ui.spinBox_norm_top_y->setValue(0);
   m_ui.spinBox_norm_bottom_x->setValue(0);
   m_ui.spinBox_norm_bottom_y->setValue(0);
-}
-
-void ImageROIViewQtWidget::initLayout() {
-  // setup container ui
-  m_ui.setupUi(this);
-
-  QList<int> sizes;
-  sizes.push_back(1000);
-  sizes.push_back(100);
-  m_ui.splitter_main_horiz->setSizes(sizes);
-
-  m_ui.comboBox_image_type->setCurrentIndex(0);
-  m_ui.comboBox_rotation->setCurrentIndex(0);
-
-  sizes.clear();
-  sizes.push_back(10);
-  sizes.push_back(1000);
-  m_ui.splitter_img_vertical->setSizes(sizes);
-  m_ui.horizontalScrollBar_img_stack->setEnabled(false);
-  m_ui.lineEdit_img_seq->setText("---");
-  m_ui.label_img_name->setText("none");
-
-  enableParamWidgets(false);
-
-  setupConnections();
-
-  initParamWidgets(1, 1);
-  grabCoRFromWidgets();
-  grabROIFromWidgets();
-  grabNormAreaFromWidgets();
-
-  // presenter that knows how to handle a IImageROIView should take care
-  // of all the logic. Note the view needs to now the concrete presenter here
-  m_presenter.reset(new ImageROIPresenter(this));
-
-  // it will know what compute resources and tools we have available:
-  // This view doesn't even know the names of compute resources, etc.
-  m_presenter->notify(ImageROIPresenter::Init);
-}
-
-void ImageROIViewQtWidget::setupConnections() {
-
-  // 'browse' buttons
-  connect(m_ui.pushButton_browse_img, SIGNAL(released()), this,
-          SLOT(browseImgClicked()));
-
-  connect(m_ui.pushButton_cor, SIGNAL(released()), this, SLOT(corClicked()));
-  connect(m_ui.pushButton_cor_reset, SIGNAL(released()), this,
-          SLOT(corResetClicked()));
-
-  connect(m_ui.pushButton_roi, SIGNAL(released()), this, SLOT(roiClicked()));
-  connect(m_ui.pushButton_roi_reset, SIGNAL(released()), this,
-          SLOT(roiResetClicked()));
-
-  connect(m_ui.pushButton_norm_area, SIGNAL(released()), this,
-          SLOT(normAreaClicked()));
-  connect(m_ui.pushButton_norm_area_reset, SIGNAL(released()), this,
-          SLOT(normAreaResetClicked()));
-
-  // "Play" the stack for quick visualization of input images
-  connect(m_ui.pushButton_play, SIGNAL(released()), this, SLOT(playClicked()));
-
-  // image sequence scroll/slide:
-  connect(m_ui.horizontalScrollBar_img_stack, SIGNAL(valueChanged(int)), this,
-          SLOT(updateFromImagesSlider(int)));
-
-  // image rotation
-  connect(m_ui.comboBox_rotation, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(rotationUpdated(int)));
-
-  // image type
-  connect(m_ui.comboBox_image_type, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(imageTypeUpdated(int)));
-
-  // parameter (points) widgets
-  connect(m_ui.spinBox_cor_x, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdatedCoR(int)));
-  connect(m_ui.spinBox_cor_y, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdatedCoR(int)));
-
-  connect(m_ui.spinBox_roi_top_x, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdatedROI(int)));
-  connect(m_ui.spinBox_roi_top_y, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdatedROI(int)));
-  connect(m_ui.spinBox_roi_bottom_x, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdatedROI(int)));
-  connect(m_ui.spinBox_roi_bottom_y, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdatedROI(int)));
-
-  connect(m_ui.spinBox_norm_top_x, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdatedNormArea(int)));
-  connect(m_ui.spinBox_norm_top_y, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdatedNormArea(int)));
-  connect(m_ui.spinBox_norm_bottom_x, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdatedNormArea(int)));
-  connect(m_ui.spinBox_norm_bottom_y, SIGNAL(valueChanged(int)), this,
-          SLOT(valueUpdatedNormArea(int)));
 }
 
 void ImageROIViewQtWidget::resetWidgetsOnNewStack() {
@@ -603,8 +705,12 @@ void ImageROIViewQtWidget::updatePlay() {
   showProjectionImage(m_stackSamples, val, currentRotationAngle());
 }
 
-void ImageROIViewQtWidget::browseImgClicked() {
-  m_presenter->notify(IImageROIPresenter::BrowseImgOrStack);
+void ImageROIViewQtWidget::browseStackClicked() {
+  m_presenter->notify(IImageROIPresenter::BrowseStack);
+}
+
+void ImageROIViewQtWidget::browseImageClicked() {
+  m_presenter->notify(IImageROIPresenter::BrowseImage);
 }
 
 void ImageROIViewQtWidget::updateFromImagesSlider(int /* current */) {
@@ -684,35 +790,51 @@ ImageROIViewQtWidget::transferWSImageToQPixmap(const MatrixWorkspace_sptr ws,
                                                size_t width, size_t height,
                                                float rotationAngle) {
 
-  // find min and max to scale pixel values
-  double min = std::numeric_limits<double>::max(),
-         max = std::numeric_limits<double>::min();
-  getPixelMinMax(ws, min, max);
-  if (max <= min) {
-    QMessageBox::warning(
-        this, "Empty image!",
-        "The image could be loaded but it contains "
-        "effectively no information, all pixels have the same value.");
-    // black picture
-    QPixmap pix(static_cast<int>(width), static_cast<int>(height));
-    pix.fill(QColor(0, 0, 0));
-    return pix;
-  }
-
   QImage rawImg(QSize(static_cast<int>(width), static_cast<int>(height)),
                 QImage::Format_RGB32);
-  const double max_min = max - min;
+
+  double minVal = std::numeric_limits<double>::max(),
+         maxVal = std::numeric_limits<double>::min();
+  // find min and max to scale pixel values, whether from user-given
+  // range, or auto-range
+  if (!m_ui.colorBarWidget->getAutoScale()) {
+    minVal = m_ui.colorBarWidget->getMinimum();
+    maxVal = m_ui.colorBarWidget->getMaximum();
+  } else {
+
+    getPixelMinMax(ws, minVal, maxVal);
+    if (maxVal <= minVal) {
+      QMessageBox::warning(
+          this, "Empty image!",
+          "The image could be loaded but it contains "
+          "effectively no information, all pixels have the same value.");
+      // black picture
+      QPixmap pix(static_cast<int>(width), static_cast<int>(height));
+      pix.fill(QColor(0, 0, 0));
+      return pix;
+    }
+    m_ui.colorBarWidget->setViewRange(minVal, maxVal);
+  }
+  const double max_min = maxVal - minVal;
   const double scaleFactor = 255.0 / max_min;
+
+  // normal Qt rgb values
+  QwtDoubleInterval rgbInterval(0.0, 255.0);
+  const QVector<QRgb> colorTable =
+      m_ui.colorBarWidget->getColorMap().colorTable(rgbInterval);
+  rawImg.setColorTable(colorTable);
 
   for (size_t yi = 0; yi < width; ++yi) {
     const auto &yvec = ws->readY(yi);
     for (size_t xi = 0; xi < width; ++xi) {
       const double &v = yvec[xi];
-      // color the range min-max in gray scale. To apply different color
-      // maps you'd need to use rawImg.setColorTable() or similar.
-      const int scaled = static_cast<int>(scaleFactor * (v - min));
-      QRgb vRgb = qRgb(scaled, scaled, scaled);
-
+      const int scaled = static_cast<int>(scaleFactor * (v - minVal));
+      // You would use this for a trivial mapping of valus to colors:
+      // Coloring the range min-max in gray scale. But setColorTable()
+      // is used to apply different color maps from files QRgb vRgb =
+      // qRgb(scaled, scaled, scaled);
+      // rawImg.setPixel(static_cast<int>(rotX), static_cast<int>(rotY),
+      // scaled);
       size_t rotX = 0, rotY = 0;
       if (0 == rotationAngle) {
         rotX = xi;
@@ -727,7 +849,14 @@ ImageROIViewQtWidget::transferWSImageToQPixmap(const MatrixWorkspace_sptr ws,
         rotX = yi;
         rotY = width - (xi + 1);
       }
-      rawImg.setPixel(static_cast<int>(rotX), static_cast<int>(rotY), vRgb);
+
+      const auto rgb =
+          m_ui.colorBarWidget->getColorMap().rgb(rgbInterval, scaled);
+      rawImg.setPixel(static_cast<int>(rotX), static_cast<int>(rotY), rgb);
+      // This would be faster, using the look-up color table, but for unknown
+      // reasons MantidColorMap::colorTable forces linear scale.
+      // rawImg.setPixel(static_cast<int>(rotX), static_cast<int>(rotY),
+      // colorTable[scaled]);
     }
   }
 
@@ -1081,11 +1210,39 @@ void ImageROIViewQtWidget::mouseFinishNormArea(int x, int y) {
   m_presenter->notify(IImageROIPresenter::FinishedNormalization);
 }
 
-void ImageROIViewQtWidget::readSettings() {
-  QSettings qs;
-  qs.beginGroup(QString::fromStdString(m_settingsGroup));
-  restoreGeometry(qs.value("interface-win-geometry").toByteArray());
-  qs.endGroup();
+/**
+ * Slot for the signal emitted by the color bar widget when the user
+ * requests a new color map.
+ */
+void ImageROIViewQtWidget::loadColorMapRequest() {
+  m_presenter->notify(IImageROIPresenter::UpdateColorMap);
+}
+
+std::string ImageROIViewQtWidget::askColorMapFile() {
+  QString filename = MantidColorMap::loadMapDialog(
+      QString::fromStdString(m_colorMapFilename), this);
+  return filename.toStdString();
+}
+
+void ImageROIViewQtWidget::updateColorMap(const std::string &filename) {
+  // Load from file
+  m_ui.colorBarWidget->getColorMap().loadMap(QString::fromStdString(filename));
+  m_ui.colorBarWidget->updateColorMap();
+
+  // if (!m_colorMapFilename.empty())
+  //  updateColorMap(m_colorMapFilename);
+  m_ui.colorBarWidget->setViewRange(1, 65536);
+
+  m_presenter->notify(IImageROIPresenter::ColorRangeUpdated);
+}
+
+/**
+ * Slot for the signal emitted by the color bar widget when there's an
+ * update in the values
+ */
+void ImageROIViewQtWidget::colorRangeChanged() {
+  // the presenter should handle the image display update
+  m_presenter->notify(IImageROIPresenter::ColorRangeUpdated);
 }
 
 void ImageROIViewQtWidget::closeEvent(QCloseEvent *event) {

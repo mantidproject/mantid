@@ -64,12 +64,12 @@ void MantidSurfacePlotDialog::initLogs() {
   m_customLogLabel = new QLabel(tr("<br>Custom log values:"));
   m_logValues = new QLineEdit();
 
-  m_logBox->add(m_logLabel);
-  m_logBox->add(m_logSelector);
-  m_logBox->add(m_customLogLabel);
-  m_logBox->add(m_logValues);
-  m_logBox->add(m_axisLabel);
-  m_logBox->add(m_axisNameEdit);
+  m_logBox->addWidget(m_logLabel);
+  m_logBox->addWidget(m_logSelector);
+  m_logBox->addWidget(m_customLogLabel);
+  m_logBox->addWidget(m_logValues);
+  m_logBox->addWidget(m_axisLabel);
+  m_logBox->addWidget(m_axisNameEdit);
   m_outer->addItem(m_logBox);
 
   m_logValues->setEnabled(false);

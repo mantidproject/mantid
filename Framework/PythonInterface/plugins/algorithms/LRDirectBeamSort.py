@@ -1,4 +1,5 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import mantid
 from mantid.api import *
 from mantid.simpleapi import *
@@ -22,14 +23,19 @@ class CompareTwoNXSDataForSFcalculator(object):
         self.nexusToCompareWithRun = nxsdataToCompareWith.getRun()
         self.nexusToPositionRun = nxsdataToPosition.getRun()
 
-        compare1 = self.compareParameter('LambdaRequest', 'descending')
-        if compare1 != 0:
-            self.resultComparison = compare1
+        compare = self.compareParameter('LambdaRequest', 'descending')
+        if compare != 0:
+            self.resultComparison = compare
             return
 
-        compare2 = self.compareParameter('vAtt', 'ascending')
-        if compare2 != 0:
-            self.resultComparison = compare2
+        compare = self.compareParameter('thi', 'descending')
+        if compare != 0:
+            self.resultComparison = compare
+            return
+
+        compare = self.compareParameter('vAtt', 'ascending')
+        if compare != 0:
+            self.resultComparison = compare
             return
 
         pcharge1 = self.nexusToCompareWithRun.getProperty('gd_prtn_chrg').value/nxsdataToCompareWith.getNEvents()
@@ -105,6 +111,7 @@ class LRDirectBeamSort(PythonAlgorithm):
                              "Ordered list of run numbers")
         self.declareProperty(StringArrayProperty("OrderedNameList", [], direction=Direction.Output),
                              "Ordered list of workspace names corresponding to the run list")
+        self.declareProperty("SlitTolerance", 0.02, doc="Tolerance for matching slit positions")
 
     def PyExec(self):
         compute = self.getProperty("ComputeScalingFactors").value
@@ -144,7 +151,9 @@ class LRDirectBeamSort(PythonAlgorithm):
         current_group = []
         group_wl = None
         for r in lr_data_sorted:
-            wl = r.getRun().getProperty('LambdaRequest').value[0]
+            wl_ = r.getRun().getProperty('LambdaRequest').value[0]
+            thi = r.getRun().getProperty('thi').value[0]
+            wl = "%g%-5.2g" % (wl_, thi)
 
             if not group_wl == wl:
                 # New group
@@ -199,6 +208,8 @@ class LRDirectBeamSort(PythonAlgorithm):
                     low_res = [0, number_of_pixels_x]
 
                 att = run.getRun().getProperty('vAtt').value[0]-1
+                wl = run.getRun().getProperty('LambdaRequest').value[0]
+                thi = run.getRun().getProperty('thi').value[0]
                 direct_beam_runs.append(run.getRunNumber())
                 peak_ranges.append(int(peak[0]))
                 peak_ranges.append(int(peak[1]))
@@ -207,7 +218,8 @@ class LRDirectBeamSort(PythonAlgorithm):
                 bck_ranges.append(int(peak[0])-3)
                 bck_ranges.append(int(peak[1])+3)
 
-                summary += "%10s %s %5s,%5s %5s,%5s\n" % (run.getRunNumber(), att, peak[0], peak[1], low_res[0], low_res[1])
+                summary += "%10s wl=%5s thi=%5s att=%s %5s,%5s %5s,%5s\n" % \
+                    (run.getRunNumber(), wl, thi, att, peak[0], peak[1], low_res[0], low_res[1])
 
             # Determine TOF range from first file
             sample = g[0].getInstrument().getSample()
@@ -225,16 +237,18 @@ class LRDirectBeamSort(PythonAlgorithm):
             tof_max = source_detector_distance / h * m * (wl + wl_offset*60.0/chopper_speed + 1.7*60.0/chopper_speed) * 1e-4
             tof_range = [tof_min, tof_max]
 
-            summary += "TOF: %s\n\n" % tof_range
+            summary += "      TOF: %s\n\n" % tof_range
 
             # Compute the scaling factors
             logger.notice("Computing scaling factors for %s" % str(direct_beam_runs))
+            slit_tolerance = self.getProperty("SlitTolerance").value
             LRScalingFactors(DirectBeamRuns=direct_beam_runs,
                              TOFRange=tof_range, TOFSteps=tof_steps,
                              SignalPeakPixelRange=peak_ranges,
                              SignalBackgroundPixelRange=bck_ranges,
                              LowResolutionPixelRange=x_ranges,
                              IncidentMedium=incident_medium,
+                             SlitTolerance=slit_tolerance,
                              ScalingFactorFile=scaling_file)
         logger.notice(summary)
 

@@ -68,10 +68,6 @@ namespace Algorithms {
 */
 class DLLExport CalculateTransmission : public API::Algorithm {
 public:
-  /// Constructor
-  CalculateTransmission();
-  /// Virtual destructor
-  ~CalculateTransmission() override;
   /// Algorithm's name
   const std::string name() const override { return "CalculateTransmission"; }
   /// Summary of algorithms purpose
@@ -91,7 +87,7 @@ public:
 private:
   /// stores an estimate of the progress so far as a proportion (starts at zero
   /// goes to 1.0)
-  mutable double m_done;
+  mutable double m_done = 0.0;
 
   /// Initialisation code
   void init() override;
@@ -104,7 +100,7 @@ private:
   /// Returns a workspace with the evaulation of the fit to the calculated
   /// transmission fraction
   API::MatrixWorkspace_sptr fit(API::MatrixWorkspace_sptr raw,
-                                std::vector<double> rebinParams,
+                                const std::vector<double> &rebinParams,
                                 const std::string fitMethod);
   /// Call the Linear fitting algorithm as a child algorithm
   API::MatrixWorkspace_sptr fitData(API::MatrixWorkspace_sptr WS, double &grad,
@@ -114,7 +110,7 @@ private:
                                           int order,
                                           std::vector<double> &coeficients);
   /// Calls the rebin algorithm
-  API::MatrixWorkspace_sptr rebin(std::vector<double> &binParams,
+  API::MatrixWorkspace_sptr rebin(const std::vector<double> &binParams,
                                   API::MatrixWorkspace_sptr ws);
   /// Outpus message to log if the detector at the given index is not a monitor
   /// in both input workspaces.

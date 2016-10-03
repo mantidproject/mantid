@@ -1,7 +1,7 @@
 #include "MantidLiveData/ADARA/ADARAPackets.h"
 
 #include <boost/lexical_cast.hpp>
-#include <string.h>
+#include <cstring>
 
 using namespace ADARA;
 
@@ -556,10 +556,6 @@ BeamlineInfoPkt::BeamlineInfoPkt(const uint8_t *data, uint32_t len)
   m_longName.assign(info, longName_len);
 }
 
-BeamlineInfoPkt::BeamlineInfoPkt(const BeamlineInfoPkt &pkt)
-    : Packet(pkt), m_targetStationNumber(pkt.m_targetStationNumber),
-      m_id(pkt.m_id), m_shortName(pkt.m_shortName), m_longName(pkt.m_longName) {
-}
 /* ------------------------------------------------------------------------ */
 
 BeamMonitorConfigPkt::BeamMonitorConfigPkt(const uint8_t *data, uint32_t len)
@@ -570,13 +566,13 @@ BeamMonitorConfigPkt::BeamMonitorConfigPkt(const uint8_t *data, uint32_t len)
   if (m_version == 0x00 &&
       m_payload_len != (sizeof(uint32_t) + (beamMonCount() * sectionSize))) {
     std::string msg("BeamMonitorConfig V0 packet is incorrect length: ");
-    msg += boost::lexical_cast<std::string>(m_payload_len);
+    msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
   } else if (m_version > ADARA::PacketType::BEAM_MONITOR_CONFIG_VERSION &&
              m_payload_len <
                  (sizeof(uint32_t) + (beamMonCount() * sectionSize))) {
     std::string msg("Newer BeamMonitorConfig packet is too short: ");
-    msg += boost::lexical_cast<std::string>(m_payload_len);
+    msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
   }
 }
@@ -595,12 +591,12 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
 
   if (m_version == 0x00 && m_payload_len < sizeof(uint32_t)) {
     std::string msg("DetectorBankSets V0 packet is too short for Count! ");
-    msg += boost::lexical_cast<std::string>(m_payload_len);
+    msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
   } else if (m_version > ADARA::PacketType::DETECTOR_BANK_SETS_VERSION &&
              m_payload_len < sizeof(uint32_t)) {
     std::string msg("Newer DetectorBankSets packet is too short for Count! ");
-    msg += boost::lexical_cast<std::string>(m_payload_len);
+    msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
   }
 
@@ -638,15 +634,15 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
         m_payload_len <
             ((sectionOffset + baseSectionOffsetNoBanks) * sizeof(uint32_t))) {
       std::string msg("DetectorBankSets V0 packet: too short for Set ");
-      msg += boost::lexical_cast<std::string>(i + 1);
+      msg += std::to_string(i + 1);
       msg += " of ";
-      msg += boost::lexical_cast<std::string>(numSets);
+      msg += std::to_string(numSets);
       msg += " sectionOffset=";
-      msg += boost::lexical_cast<std::string>(sectionOffset);
+      msg += std::to_string(sectionOffset);
       msg += " baseSectionOffsetNoBanks=";
-      msg += boost::lexical_cast<std::string>(baseSectionOffsetNoBanks);
+      msg += std::to_string(baseSectionOffsetNoBanks);
       msg += " payload_len=";
-      msg += boost::lexical_cast<std::string>(m_payload_len);
+      msg += std::to_string(m_payload_len);
       delete[] m_sectionOffsets;
       m_sectionOffsets = nullptr;
       delete[] m_after_banks_offset;
@@ -656,15 +652,15 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
                m_payload_len < ((sectionOffset + baseSectionOffsetNoBanks) *
                                 sizeof(uint32_t))) {
       std::string msg("Newer DetectorBankSets packet: too short for Set ");
-      msg += boost::lexical_cast<std::string>(i + 1);
+      msg += std::to_string(i + 1);
       msg += " of ";
-      msg += boost::lexical_cast<std::string>(numSets);
+      msg += std::to_string(numSets);
       msg += " sectionOffset=";
-      msg += boost::lexical_cast<std::string>(sectionOffset);
+      msg += std::to_string(sectionOffset);
       msg += " baseSectionOffsetNoBanks=";
-      msg += boost::lexical_cast<std::string>(baseSectionOffsetNoBanks);
+      msg += std::to_string(baseSectionOffsetNoBanks);
       msg += " payload_len=";
-      msg += boost::lexical_cast<std::string>(m_payload_len);
+      msg += std::to_string(m_payload_len);
       delete[] m_sectionOffsets;
       m_sectionOffsets = nullptr;
       delete[] m_after_banks_offset;
@@ -687,13 +683,13 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
   if (m_version == 0x00 && m_payload_len < (sectionOffset * sizeof(uint32_t))) {
     std::string msg("DetectorBankSets V0 packet: overall too short ");
     msg += " numSets=";
-    msg += boost::lexical_cast<std::string>(numSets);
+    msg += std::to_string(numSets);
     msg += " baseSectionOffsetNoBanks=";
-    msg += boost::lexical_cast<std::string>(baseSectionOffsetNoBanks);
+    msg += std::to_string(baseSectionOffsetNoBanks);
     msg += " final sectionOffset=";
-    msg += boost::lexical_cast<std::string>(sectionOffset);
+    msg += std::to_string(sectionOffset);
     msg += " payload_len=";
-    msg += boost::lexical_cast<std::string>(m_payload_len);
+    msg += std::to_string(m_payload_len);
     delete[] m_sectionOffsets;
     m_sectionOffsets = nullptr;
     delete[] m_after_banks_offset;
@@ -703,13 +699,13 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
              m_payload_len < (sectionOffset * sizeof(uint32_t))) {
     std::string msg("Newer DetectorBankSets packet: overall too short ");
     msg += " numSets=";
-    msg += boost::lexical_cast<std::string>(numSets);
+    msg += std::to_string(numSets);
     msg += " baseSectionOffsetNoBanks=";
-    msg += boost::lexical_cast<std::string>(baseSectionOffsetNoBanks);
+    msg += std::to_string(baseSectionOffsetNoBanks);
     msg += " final sectionOffset=";
-    msg += boost::lexical_cast<std::string>(sectionOffset);
+    msg += std::to_string(sectionOffset);
     msg += " payload_len=";
-    msg += boost::lexical_cast<std::string>(m_payload_len);
+    msg += std::to_string(m_payload_len);
     delete[] m_sectionOffsets;
     m_sectionOffsets = nullptr;
     delete[] m_after_banks_offset;
@@ -788,24 +784,24 @@ VariableU32Pkt::VariableU32Pkt(const uint8_t *data, uint32_t len)
       m_fields(reinterpret_cast<const uint32_t *>(payload())) {
   if (m_version == 0x00 && m_payload_len != (4 * sizeof(uint32_t))) {
     std::string msg("VariableValue (U32) V0 packet is incorrect length: ");
-    msg += boost::lexical_cast<std::string>(m_payload_len);
+    msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
   } else if (m_version > ADARA::PacketType::VAR_VALUE_U32_VERSION &&
              m_payload_len < (4 * sizeof(uint32_t))) {
     std::string msg("Newer VariableValue (U32) packet is too short: ");
-    msg += boost::lexical_cast<std::string>(m_payload_len);
+    msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
   }
 
   if (validate_status(status())) {
     std::string msg("VariableValue (U32) packet has invalid status: ");
-    msg += boost::lexical_cast<std::string>(status());
+    msg += std::to_string(status());
     throw invalid_packet(msg);
   }
 
   if (validate_severity(severity())) {
     std::string msg("VariableValue (U32) packet has invalid severity: ");
-    msg += boost::lexical_cast<std::string>(severity());
+    msg += std::to_string(severity());
     throw invalid_packet(msg);
   }
 }
@@ -821,24 +817,24 @@ VariableDoublePkt::VariableDoublePkt(const uint8_t *data, uint32_t len)
   if (m_version == 0x00 &&
       m_payload_len != (sizeof(double) + (3 * sizeof(uint32_t)))) {
     std::string msg("VariableValue (Double) V0 packet is incorrect length: ");
-    msg += boost::lexical_cast<std::string>(m_payload_len);
+    msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
   } else if (m_version > ADARA::PacketType::VAR_VALUE_DOUBLE_VERSION &&
              m_payload_len < (sizeof(double) + (3 * sizeof(uint32_t)))) {
     std::string msg("Newer VariableValue (Double) packet is too short: ");
-    msg += boost::lexical_cast<std::string>(m_payload_len);
+    msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
   }
 
   if (validate_status(status())) {
     std::string msg("VariableValue (double) packet has invalid status: ");
-    msg += boost::lexical_cast<std::string>(status());
+    msg += std::to_string(status());
     throw invalid_packet(msg);
   }
 
   if (validate_severity(severity())) {
     std::string msg("VariableValue (double) packet has invalid severity: ");
-    msg += boost::lexical_cast<std::string>(severity());
+    msg += std::to_string(severity());
     throw invalid_packet(msg);
   }
 }
@@ -855,41 +851,41 @@ VariableStringPkt::VariableStringPkt(const uint8_t *data, uint32_t len)
 
   if (m_version == 0x00 && m_payload_len < (4 * sizeof(uint32_t))) {
     std::string msg("VariableValue (String) V0 packet is too short ");
-    msg += boost::lexical_cast<std::string>(m_payload_len);
+    msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
   } else if (m_version > ADARA::PacketType::VAR_VALUE_STRING_VERSION &&
              m_payload_len < (4 * sizeof(uint32_t))) {
     std::string msg("Newer VariableValue (String) packet is too short ");
-    msg += boost::lexical_cast<std::string>(m_payload_len);
+    msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
   }
 
   size = m_fields[3];
   if (m_version == 0x00 && m_payload_len < (size + (4 * sizeof(uint32_t)))) {
     std::string msg("VariableValue (String) V0 packet has oversize string: ");
-    msg += boost::lexical_cast<std::string>(size);
+    msg += std::to_string(size);
     msg += " vs payload ";
-    msg += boost::lexical_cast<std::string>(m_payload_len);
+    msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
   } else if (m_version > ADARA::PacketType::VAR_VALUE_STRING_VERSION &&
              m_payload_len < (size + (4 * sizeof(uint32_t)))) {
     std::string msg(
         "Newer VariableValue (String) packet has oversize string: ");
-    msg += boost::lexical_cast<std::string>(size);
+    msg += std::to_string(size);
     msg += " vs payload ";
-    msg += boost::lexical_cast<std::string>(m_payload_len);
+    msg += std::to_string(m_payload_len);
     throw invalid_packet(msg);
   }
 
   if (validate_status(status())) {
     std::string msg("VariableValue (string) packet has invalid status: ");
-    msg += boost::lexical_cast<std::string>(status());
+    msg += std::to_string(status());
     throw invalid_packet(msg);
   }
 
   if (validate_severity(severity())) {
     std::string msg("VariableValue (string) packet has invalid severity: ");
-    msg += boost::lexical_cast<std::string>(severity());
+    msg += std::to_string(severity());
     throw invalid_packet(msg);
   }
 

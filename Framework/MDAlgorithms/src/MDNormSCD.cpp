@@ -177,7 +177,7 @@ std::string MDNormSCD::inputEnergyMode() const {
   const size_t nalgs = hist.size();
   const auto &lastAlgorithm = hist.lastAlgorithm();
 
-  std::string emode("");
+  std::string emode;
   if (lastAlgorithm->name() == "ConvertToMD") {
     emode = lastAlgorithm->getPropertyValue("dEAnalysisMode");
   } else if ((lastAlgorithm->name() == "Load" ||
@@ -226,7 +226,7 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
  */
 void MDNormSCD::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  m_normWS.reset(dataWS.clone().release());
+  m_normWS = dataWS.clone();
   m_normWS->setTo(0., 0., 0.);
 }
 

@@ -18,7 +18,8 @@
 #include "MantidKernel/VMD.h"
 
 using namespace Mantid;
-using namespace Mantid::API;;
+using namespace Mantid::API;
+;
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
 using Mantid::Geometry::MDHistoDimension_sptr;
@@ -35,35 +36,33 @@ using Mantid::Kernel::VMD;
 // Little hack to avoid repeating code
 #include "main_common.cpp"
 
-
 /** Main application
  *
  * @param argc :: ignored
  * @param argv :: ignored
  * @return return code
  */
-int main( int argc, char ** argv )
-{
+int main(int argc, char **argv) {
   QApplication app(argc, argv);
   app.setOrganizationName("JanikTech");
   app.setApplicationName("Application Example");
-  QMainWindow * mainWin = new QMainWindow();
+  QMainWindow *mainWin = new QMainWindow();
 
   IMDWorkspace_sptr mdew = makeDemoData();
 
-  QFrame * frame = new QFrame(mainWin);
+  QFrame *frame = new QFrame(mainWin);
   mainWin->setCentralWidget(frame);
 
-  QLayout * layout = new QVBoxLayout(frame);
+  QLayout *layout = new QVBoxLayout(frame);
   frame->setLayout(layout);
 
-  LineViewer * line = new LineViewer(frame);
-  line->resize(600,600);
+  LineViewer *line = new LineViewer(frame);
+  line->resize(600, 600);
   layout->addWidget(line);
   line->setWorkspace(mdew);
-  line->setStart(VMD(-1,0,0));
-  line->setEnd(VMD(+1,0,0));
-  line->setWidth(VMD(+0.3,0,0.3));
+  line->setStart(VMD(-1, 0, 0));
+  line->setEnd(VMD(+1, 0, 0));
+  line->setWidth(VMD(+0.3, 0, 0.3));
   line->setPlanarWidth(0.2);
   line->setNumBins(1000);
   line->setFreeDimensions(false, 0, 1);

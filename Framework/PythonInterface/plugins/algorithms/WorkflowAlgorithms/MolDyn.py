@@ -1,4 +1,6 @@
 #pylint: disable=invalid-name,no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -36,13 +38,6 @@ class MolDyn(PythonAlgorithm):
         self.declareProperty(name='SymmetriseEnergy', defaultValue=False,
                              doc='Symmetrise functions in energy about x=0')
 
-        self.declareProperty(name='Plot', defaultValue='None',
-                             validator=StringListValidator(['None', 'Spectra', 'Contour', 'Both']),
-                             doc='Plot result workspace')
-
-        self.declareProperty(name='Save', defaultValue=False,
-                             doc='Save result workspace to nexus file in the default save directory')
-
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
                              doc='Output workspace name')
 
@@ -52,7 +47,7 @@ class MolDyn(PythonAlgorithm):
 
         try:
             self._get_version_and_data_path()
-        except ValueError, vex:
+        except ValueError as vex:
             issues['Data'] = str(vex)
 
         res_ws = self.getPropertyValue('Resolution')
@@ -133,28 +128,8 @@ class MolDyn(PythonAlgorithm):
             # Remove the generated resolution workspace
             DeleteWorkspace(resolution_ws)
 
-        # Save result workspace group
-        if self.getProperty('Save').value:
-            workdir = config['defaultsave.directory']
-            out_filename = os.path.join(workdir, output_ws_name + '.nxs')
-            logger.information('Creating file: %s' % out_filename)
-            SaveNexus(InputWorkspace=output_ws_name, Filename=out_filename)
-
         # Set the output workspace
         self.setProperty('OutputWorkspace', output_ws_name)
-
-        plot = self.getProperty('Plot').value
-        # Plot spectra plots
-        if plot == 'Spectra' or plot == 'Both':
-            if isinstance(mtd[output_ws_name], WorkspaceGroup):
-                for ws_name in mtd[output_ws_name].getNames():
-                    self._plot_spectra(ws_name)
-            else:
-                self._plot_spectra(output_ws_name)
-
-        # Plot contour plot
-        if plot == 'Contour' or plot == 'Both':
-            self._mtd_plot.plot2D(output_ws_name)
 
 
     def _get_version_and_data_path(self):

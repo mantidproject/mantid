@@ -147,13 +147,18 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
   snappedPMax += offset;
   snappedPMin += offset;
 
-  if (pMin != snappedPMin) {
+  if (snappedPMin < dimension->getMinimum()) {
+    snappedPMin = dimension->getMinimum();
+  } else if (pMin != snappedPMin) {
     std::stringstream buffer;
     buffer << "Rounding min from: " << pMin
            << " to the nearest whole width at: " << snappedPMin;
     logger.warning(buffer.str());
   }
-  if (pMax != snappedPMax) {
+
+  if (snappedPMax > dimension->getMaximum()) {
+    snappedPMax = dimension->getMaximum();
+  } else if (pMax != snappedPMax) {
     std::stringstream buffer;
     buffer << "Rounding max from: " << pMax
            << " to the nearest whole width at: " << snappedPMax;
@@ -208,7 +213,7 @@ MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
     }
     dimensions[i] = outDim;
   }
-  return MDHistoWorkspace_sptr(new MDHistoWorkspace(dimensions));
+  return boost::make_shared<MDHistoWorkspace>(dimensions);
 }
 
 /**
@@ -240,16 +245,6 @@ using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegrateMDHistoWorkspace)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-IntegrateMDHistoWorkspace::IntegrateMDHistoWorkspace() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-IntegrateMDHistoWorkspace::~IntegrateMDHistoWorkspace() {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -319,8 +314,8 @@ void IntegrateMDHistoWorkspace::exec() {
   if (emptyCount == pbins.size()) {
     // No work to do.
     g_log.information(this->name() + " Direct clone of input.");
-    this->setProperty("OutputWorkspace", boost::shared_ptr<IMDHistoWorkspace>(
-                                             inWS->clone().release()));
+    this->setProperty("OutputWorkspace",
+                      boost::shared_ptr<IMDHistoWorkspace>(inWS->clone()));
   } else {
 
     /* Create the output workspace in the right shape. This allows us to iterate
@@ -409,7 +404,6 @@ void IntegrateMDHistoWorkspace::exec() {
         performWeightedSum(inIterator.get(), box, sumSignal, sumSQErrors,
                            sumNEvents); // Use the present position. neighbours
                                         // below exclude the current position.
-
         // Look at all of the neighbours of our position. We previously
         // calculated what the width vector would need to be.
         auto neighbourIndexes =

@@ -1,4 +1,5 @@
 #include "MantidPythonInterface/kernel/DataServiceExporter.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -6,6 +7,8 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(AnalysisDataServiceImpl)
 
 void export_AnalysisDataService() {
   typedef DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr>

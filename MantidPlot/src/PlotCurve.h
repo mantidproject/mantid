@@ -101,7 +101,7 @@ protected:
   void drawSymbols(QPainter *p, const QwtSymbol &, const QwtScaleMap &xMap,
                    const QwtScaleMap &yMap, int from, int to) const override;
 
-  void computeWaterfallOffsets();
+  void computeWaterfallOffsets(double &xDataOffset, double &yDataOffset);
 
   int d_type;
   double d_x_offset, d_y_offset;

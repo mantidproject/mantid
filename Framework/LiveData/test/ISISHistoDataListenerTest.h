@@ -1,8 +1,8 @@
 #ifndef MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
 #define MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
 
-#include "MantidLiveData/ISISHistoDataListener.h"
-#include "MantidLiveData/FakeISISHistoDAE.h"
+#include "MantidLiveData/ISIS/ISISHistoDataListener.h"
+#include "MantidLiveData/ISIS/FakeISISHistoDAE.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -109,15 +109,15 @@ public:
     TS_ASSERT_EQUALS(e[5], sqrt(97.0));
     TS_ASSERT_EQUALS(e[29], sqrt(97.0));
 
-    auto spec = ws->getSpectrum(0);
-    TS_ASSERT_EQUALS(spec->getSpectrumNo(), 1)
-    auto dets = spec->getDetectorIDs();
+    auto &spec = ws->getSpectrum(0);
+    TS_ASSERT_EQUALS(spec.getSpectrumNo(), 1)
+    auto dets = spec.getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
     TS_ASSERT_EQUALS(*dets.begin(), 1);
 
-    spec = ws->getSpectrum(3);
-    TS_ASSERT_EQUALS(spec->getSpectrumNo(), 10)
-    dets = spec->getDetectorIDs();
+    auto &spec2 = ws->getSpectrum(3);
+    TS_ASSERT_EQUALS(spec2.getSpectrumNo(), 10)
+    dets = spec2.getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
     TS_ASSERT_EQUALS(*dets.begin(), 4);
 
@@ -213,27 +213,27 @@ public:
     TS_ASSERT_EQUALS(y[5], 1078);
     TS_ASSERT_EQUALS(y[29], 1078);
 
-    auto spec = ws1->getSpectrum(0);
-    TS_ASSERT_EQUALS(spec->getSpectrumNo(), 1)
-    auto dets = spec->getDetectorIDs();
+    auto &spec10 = ws1->getSpectrum(0);
+    TS_ASSERT_EQUALS(spec10.getSpectrumNo(), 1)
+    auto dets = spec10.getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
     TS_ASSERT_EQUALS(*dets.begin(), 1);
 
-    spec = ws1->getSpectrum(3);
-    TS_ASSERT_EQUALS(spec->getSpectrumNo(), 4)
-    dets = spec->getDetectorIDs();
+    auto &spec13 = ws1->getSpectrum(3);
+    TS_ASSERT_EQUALS(spec13.getSpectrumNo(), 4)
+    dets = spec13.getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
     TS_ASSERT_EQUALS(*dets.begin(), 4);
 
-    spec = ws2->getSpectrum(0);
-    TS_ASSERT_EQUALS(spec->getSpectrumNo(), 1)
-    dets = spec->getDetectorIDs();
+    auto &spec20 = ws2->getSpectrum(0);
+    TS_ASSERT_EQUALS(spec20.getSpectrumNo(), 1)
+    dets = spec20.getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
     TS_ASSERT_EQUALS(*dets.begin(), 1);
 
-    spec = ws2->getSpectrum(3);
-    TS_ASSERT_EQUALS(spec->getSpectrumNo(), 4)
-    dets = spec->getDetectorIDs();
+    auto &spec23 = ws2->getSpectrum(3);
+    TS_ASSERT_EQUALS(spec23.getSpectrumNo(), 4)
+    dets = spec23.getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
     TS_ASSERT_EQUALS(*dets.begin(), 4);
 

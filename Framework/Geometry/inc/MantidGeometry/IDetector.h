@@ -110,8 +110,8 @@ public:
   virtual det_topology getTopology(Kernel::V3D &center) const = 0;
 
   /// (Empty) Constructor.
-  /// prevent Warning C4436
-  IDetector() {}
+  /// prevent Warning C4436 and many failing unit tests on MSVC 2015.
+  IDetector() {} // NOLINT
 };
 
 /// Shared pointer to IDetector

@@ -64,10 +64,15 @@ public:
   /// Build square matrix from a linear vector. Throw if the vector.size() !=
   /// nx*nx;
   Matrix(const std::vector<T> &);
+  /// Build a non-square matrix from vector and dimensions
+  Matrix(const std::vector<T> &, const size_t nrow, const size_t ncol);
+
   Matrix(const Matrix<T> &, const size_t nrow, const size_t ncol);
 
   Matrix(const Matrix<T> &);
   Matrix<T> &operator=(const Matrix<T> &);
+  Matrix(Matrix<T> &&) noexcept;
+  Matrix<T> &operator=(Matrix<T> &&) noexcept;
   ~Matrix();
 
   /// const Array accessor

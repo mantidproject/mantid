@@ -21,6 +21,11 @@ Kernel::UnitLabel GeneralFrame::getUnitLabel() const {
 
 const Kernel::MDUnit &GeneralFrame::getMDUnit() const { return *m_unit; }
 
+bool GeneralFrame::setMDUnit(const Mantid::Kernel::MDUnit &newUnit) {
+  m_unit = std::unique_ptr<Kernel::MDUnit>(newUnit.clone());
+  return true;
+}
+
 bool GeneralFrame::canConvertTo(const Kernel::MDUnit &otherUnit) const {
   return *this->m_unit == otherUnit;
 }

@@ -10,15 +10,15 @@ namespace MantidQt {
 namespace CustomInterfaces {
 /**
     This class defines a abstract base class for the different tabs of the
-	Indirect Foreign interface.
+        Indirect Foreign interface.
     Any joint functionality shared between each of the tabs should be
-	implemented here as well as defining
+        implemented here as well as defining
     shared member functions.
 
     @author Samuel Jackson, STFC
 
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak
-	Ridge National Laboratory & European Spallation Source
+        Ridge National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -32,12 +32,12 @@ namespace CustomInterfaces {
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
+        You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at:
-	<https://github.com/mantidproject/mantid>
-	Code Documentation is available at: <http://doxygen.mantidproject.org>
+        <https://github.com/mantidproject/mantid>
+        Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class DLLExport IndirectToolsTab : public IndirectTab {

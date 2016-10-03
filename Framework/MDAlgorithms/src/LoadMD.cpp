@@ -26,6 +26,7 @@
 #include "MantidKernel/ConfigService.h"
 #include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 #include <vector>
 
 typedef std::unique_ptr<Mantid::API::IBoxControllerIO> file_holder_type;
@@ -48,11 +49,6 @@ LoadMD::LoadMD()
       m_coordSystem(None),
       m_BoxStructureAndMethadata(true), // this is faster but rarely needed.
       m_saveMDVersion(false), m_requiresMDFrameCorrection(false) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
-*/
-LoadMD::~LoadMD() {}
 
 /**
 * Return the confidence with which this algorithm can load the file
@@ -105,6 +101,9 @@ void LoadMD::init() {
       "If not specified, a default of 40% of free physical memory is used.");
   setPropertySettings("Memory", make_unique<EnabledWhenProperty>(
                                     "FileBackEnd", IS_EQUAL_TO, "1"));
+
+  declareProperty("LoadHistory", true,
+                  "If true, the workspace history will be loaded");
 
   declareProperty(make_unique<WorkspaceProperty<IMDWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -235,14 +234,16 @@ void LoadMD::exec() {
     g_log.information() << "Convention for Q in Preferences is "
                         << pref_QConvention
                         << "; Convention of Q in NeXus file is "
-                        << m_QConvention << std::endl;
+                        << m_QConvention << '\n';
 
     if (pref_QConvention != m_QConvention) {
-      g_log.information() << "Transforming Q" << std::endl;
+      std::vector<double> scaling(m_numDims);
+      scaling = qDimensions(ws);
+      g_log.information() << "Transforming Q\n";
       Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
       transform_alg->setProperty("InputWorkspace",
                                  boost::dynamic_pointer_cast<IMDWorkspace>(ws));
-      transform_alg->setProperty("Scaling", "-1.0");
+      transform_alg->setProperty("Scaling", scaling);
       transform_alg->executeAsChildAlg();
       IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
       ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(tmp);
@@ -286,7 +287,7 @@ void LoadMD::loadSlab(std::string name, void *data, MDHistoWorkspace_sptr ws,
   try {
     m_file->getSlab(data, start, size);
   } catch (...) {
-    std::cout << " start: " << start[0] << " size: " << size[0] << std::endl;
+    std::cout << " start: " << start[0] << " size: " << size[0] << '\n';
   }
   m_file->closeData();
 }
@@ -314,7 +315,9 @@ void LoadMD::loadHisto() {
   ws->setCoordinateSystem(m_coordSystem);
 
   // Load the WorkspaceHistory "process"
-  ws->history().loadNexus(m_file.get());
+  if (this->getProperty("LoadHistory")) {
+    ws->history().loadNexus(m_file.get());
+  }
 
   this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
@@ -342,14 +345,16 @@ void LoadMD::loadHisto() {
   g_log.information() << "Convention for Q in Preferences is "
                       << pref_QConvention
                       << "; Convention of Q in NeXus file is " << m_QConvention
-                      << std::endl;
+                      << '\n';
 
   if (pref_QConvention != m_QConvention) {
-    g_log.information() << "Transforming Q" << std::endl;
+    std::vector<double> scaling(m_numDims);
+    scaling = qDimensions(ws);
+    g_log.information() << "Transforming Q\n";
     Algorithm_sptr transform_alg = createChildAlgorithm("TransformMD");
     transform_alg->setProperty("InputWorkspace",
                                boost::dynamic_pointer_cast<IMDWorkspace>(ws));
-    transform_alg->setProperty("Scaling", "-1.0");
+    transform_alg->setProperty("Scaling", scaling);
     transform_alg->executeAsChildAlg();
     IMDWorkspace_sptr tmp = transform_alg->getProperty("OutputWorkspace");
     ws = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
@@ -501,7 +506,9 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   ws->setTitle(title);
 
   // Load the WorkspaceHistory "process"
-  ws->history().loadNexus(m_file.get());
+  if (this->getProperty("LoadHistory")) {
+    ws->history().loadNexus(m_file.get());
+  }
 
   this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
@@ -557,8 +564,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       bc->getFileIO()->setWriteBufferSize(cacheMemory);
 
       g_log.information() << "Setting a DiskBuffer cache size of " << mb
-                          << " MB, or " << cacheMemory << " events."
-                          << std::endl;
+                          << " MB, or " << cacheMemory << " events.\n";
     }
   } // Not file back end
   else if (!m_BoxStructureAndMethadata) {
@@ -593,8 +599,8 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   } else // box structure and metadata only
   {
   }
-  g_log.debug() << tim << " to create all the boxes and fill them with events."
-                << std::endl;
+  g_log.debug() << tim
+                << " to create all the boxes and fill them with events.\n";
 
   // Box of ID 0 is the head box.
   ws->setBox(boxTree[0]);
@@ -606,9 +612,9 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // TODO:if(!fileBackEnd)ws->refreshCache();
   ws->refreshCache();
   g_log.debug() << tim << " to refreshCache(). " << ws->getNPoints()
-                << " points after refresh." << std::endl;
+                << " points after refresh.\n";
 
-  g_log.debug() << tim << " to finish up." << std::endl;
+  g_log.debug() << tim << " to finish up.\n";
   delete prog;
 }
 
@@ -649,10 +655,10 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
   m_file->getAttr<int>("rows", outD);
   m_file->getAttr<int>("columns", inD);
   m_file->closeData();
+  Matrix<coord_t> mat(vec, outD, inD);
   // Adjust dimensions
   inD--;
   outD--;
-  Matrix<coord_t> mat(vec);
   CoordTransform *transform = nullptr;
   if (("CoordTransformAffine" == type) || ("CoordTransformAligned" == type)) {
     auto affine = new CoordTransformAffine(inD, outD);
@@ -674,7 +680,7 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
   g_log.information()
       << "LoadMD: Encountered a legacy file which has a mismatch between "
          "its MDFrames and its Special Coordinate System. "
-         "Attempting to convert MDFrames." << std::endl;
+         "Attempting to convert MDFrames.\n";
   auto numberOfDimensions = ws->getNumDims();
 
   // Select an MDFrame based on the special coordinates.
@@ -725,7 +731,7 @@ void LoadMD::setMDFrameOnWorkspaceFromLegacyFile(API::IMDWorkspace_sptr ws) {
     }
   } catch (...) {
     g_log.warning() << "LoadMD: An issue occured while trying to correct "
-                       "MDFrames. Trying to revert to original." << std::endl;
+                       "MDFrames. Trying to revert to original.\n";
     // Revert to the old frames.
     Algorithm_sptr setMDFrameAlg = this->createChildAlgorithm("SetMDFrame");
     int axesCounter = 0;
@@ -765,6 +771,26 @@ void LoadMD::checkForRequiredLegacyFixup(API::IMDWorkspace_sptr ws) {
   if (isQBasedSpecialCoordinateSystem && containsOnlyUnkownFrames) {
     m_requiresMDFrameCorrection = true;
   }
+}
+
+/**
+ * Find scaling for Q dimensions
+ */
+std::vector<double> LoadMD::qDimensions(API::IMDWorkspace_sptr ws) {
+  std::vector<double> scaling(m_numDims);
+  for (size_t d = 0; d < m_numDims; d++) {
+    std::string dimd = ws->getDimension(d)->getName();
+
+    // Assume the Q dimensions are those that have names starting with [
+    // such as [H,0.5H,0], or Q_ such as Q_sample_x.
+    // The change in sign should apply only to those.
+    boost::regex re("\\[.*|Q_");
+    if (boost::regex_search(dimd.begin(), dimd.begin() + 2, re))
+      scaling[d] = -1.0;
+    else
+      scaling[d] = 1.0;
+  }
+  return scaling;
 }
 const std::string LoadMD::VISUAL_NORMALIZATION_KEY = "visual_normalization";
 const std::string LoadMD::VISUAL_NORMALIZATION_KEY_HISTO =

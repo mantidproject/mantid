@@ -40,7 +40,7 @@ public:
                                                                         false);
     if ((type == WEIGHTED) || (type == WEIGHTED_NOTIME)) {
       for (size_t i = 0; i < in_ws->getNumberHistograms(); i++) {
-        EventList &el = in_ws->getEventList(i);
+        EventList &el = in_ws->getSpectrum(i);
         if (type == WEIGHTED)
           el.multiply(2.0);
         else

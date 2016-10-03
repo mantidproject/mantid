@@ -9,37 +9,33 @@
 #include <QMap>
 #include <QStringList>
 
-namespace MantidQt
-{
-	namespace CustomInterfaces
-	{
-		class DLLExport IndirectLoadILL : public IndirectToolsTab
-		{
-			Q_OBJECT
+namespace MantidQt {
+namespace CustomInterfaces {
+class DLLExport IndirectLoadILL : public IndirectToolsTab {
+  Q_OBJECT
 
-		public:
-			IndirectLoadILL(QWidget * parent = 0);
+public:
+  IndirectLoadILL(QWidget *parent = 0);
 
-			/// Load default settings into the interface
-                        void loadSettings(const QSettings &settings) override;
+  /// Load default settings into the interface
+  void loadSettings(const QSettings &settings) override;
 
-                      protected:
-                        void setup() override;
-                        bool validate() override;
-                        void run() override;
+protected:
+  void setup() override;
+  bool validate() override;
+  void run() override;
 
-                      private slots:
-			/// Set the instrument based on the file name if possible
-			void handleFilesFound();
+private slots:
+  /// Set the instrument based on the file name if possible
+  void handleFilesFound();
 
-		private:
-			/// Map to store instrument analysers and reflections for this instrument
-			QMap<QString, QStringList> m_paramMap;
-			/// The ui form
-			Ui::IndirectLoadILL m_uiForm;
-
-		};
-	} // namespace CustomInterfaces
+private:
+  /// Map to store instrument analysers and reflections for this instrument
+  QMap<QString, QStringList> m_paramMap;
+  /// The ui form
+  Ui::IndirectLoadILL m_uiForm;
+};
+} // namespace CustomInterfaces
 } // namespace MantidQt
 
 #endif

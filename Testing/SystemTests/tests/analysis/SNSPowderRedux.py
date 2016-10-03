@@ -56,7 +56,7 @@ class PG3Analysis(stresstesting.MantidStressTest):
         savedir = getSaveDir()
 
         # run the actual code
-        SNSPowderReduction(Instrument="PG3", RunNumber=4844, Extension="_event.nxs",
+        SNSPowderReduction(Filename="PG3_4844",
                            PreserveEvents=True,
                            CalibrationFile=self.cal_file,
                            CharacterizationRunsFile=self.char_file,
@@ -207,7 +207,7 @@ class SeriesAndConjoinFilesTest(stresstesting.MantidStressTest):
         savedir = getSaveDir()
 
         # reduce a sum of runs - and drop it
-        SNSPowderReduction(Instrument="PG3", RunNumber=[9829,9830], Extension="_event.nxs",
+        SNSPowderReduction(Filename="PG3_9829,9830",
                            Sum=True, # This is the difference with the next call
                            PreserveEvents=True, VanadiumNumber=-1,
                            CalibrationFile=self.cal_file,
@@ -218,7 +218,7 @@ class SeriesAndConjoinFilesTest(stresstesting.MantidStressTest):
                            FinalDataUnits="dSpacing")
 
         # reduce a series of runs
-        SNSPowderReduction(Instrument="PG3", RunNumber=[9829,9830], Extension="_event.nxs",
+        SNSPowderReduction(Filename="PG3_9829,PG3_9830",
                            PreserveEvents=True, VanadiumNumber=-1,
                            CalibrationFile=self.cal_file,
                            CharacterizationRunsFile=self.char_file,

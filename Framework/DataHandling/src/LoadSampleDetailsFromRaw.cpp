@@ -65,7 +65,7 @@ void LoadSampleDetailsFromRaw::exec() {
                 << "\tsample height: " << data_ws->mutableSample().getHeight()
                 << "\n"
                 << "\tsample width: " << data_ws->mutableSample().getWidth()
-                << std::endl;
+                << '\n';
 
   // Free the used memory
   delete isis_raw;

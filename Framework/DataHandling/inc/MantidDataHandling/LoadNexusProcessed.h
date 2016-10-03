@@ -8,8 +8,11 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidHistogramData/BinEdges.h"
 
 #include "MantidNexus/NexusClasses.h"
+
+#include <map>
 
 namespace NeXus {
 class File;
@@ -80,6 +83,8 @@ public:
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
+  /// Validates the input Min < Max and Max < Maximum_Int
+  std::map<std::string, std::string> validateInputs() override;
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method
@@ -87,7 +92,7 @@ private:
 
   /// Create the workspace name if it's part of a group workspace
   std::string buildWorkspaceName(const std::string &name,
-                                 const std::string &baseName, int64_t wsIndex,
+                                 const std::string &baseName, size_t wsIndex,
                                  bool commonStem);
 
   /// Add an index to the name if it already exists in the workspace
@@ -167,7 +172,7 @@ private:
                  Mantid::NeXus::NXDataSetTyped<double> &errors,
                  Mantid::NeXus::NXDataSetTyped<double> &farea, bool hasFArea,
                  Mantid::NeXus::NXDouble &xErrors, bool hasXErrors,
-                 int64_t blocksize, int64_t nchannels, int64_t &hist,
+                 int blocksize, int nchannels, int &hist,
                  API::MatrixWorkspace_sptr local_workspace);
 
   /// Load a block of data into the workspace where it is assumed that the x
@@ -176,15 +181,15 @@ private:
                  Mantid::NeXus::NXDataSetTyped<double> &errors,
                  Mantid::NeXus::NXDataSetTyped<double> &farea, bool hasFArea,
                  Mantid::NeXus::NXDouble &xErrors, bool hasXErrors,
-                 int64_t blocksize, int64_t nchannels, int64_t &hist,
-                 int64_t &wsIndex, API::MatrixWorkspace_sptr local_workspace);
+                 int blocksize, int nchannels, int &hist, int &wsIndex,
+                 API::MatrixWorkspace_sptr local_workspace);
   /// Load a block of data into the workspace
   void loadBlock(Mantid::NeXus::NXDataSetTyped<double> &data,
                  Mantid::NeXus::NXDataSetTyped<double> &errors,
                  Mantid::NeXus::NXDataSetTyped<double> &farea, bool hasFArea,
                  Mantid::NeXus::NXDouble &xErrors, bool hasXErrors,
-                 Mantid::NeXus::NXDouble &xbins, int64_t blocksize,
-                 int64_t nchannels, int64_t &hist, int64_t &wsIndex,
+                 Mantid::NeXus::NXDouble &xbins, int blocksize, int nchannels,
+                 int &hist, int &wsIndex,
                  API::MatrixWorkspace_sptr local_workspace);
 
   /// Load the data from a non-spectra axis (Numeric/Text) into the workspace
@@ -202,12 +207,12 @@ private:
   Mantid::API::Workspace_sptr doAccelleratedMultiPeriodLoading(
       Mantid::NeXus::NXRoot &root, const std::string &entryName,
       Mantid::API::MatrixWorkspace_sptr &tempMatrixWorkspace,
-      const int64_t nWorkspaceEntries, const int64_t p);
+      const size_t nWorkspaceEntries, const size_t p);
 
   /// Does the current workspace have uniform binning
   bool m_shared_bins;
   /// The cached x binning if we have bins
-  MantidVecPtr m_xbins;
+  HistogramData::BinEdges m_xbins;
   /// Numeric values for the second axis, if applicable
   MantidVec m_axis1vals;
 
@@ -217,15 +222,15 @@ private:
   bool m_interval;
 
   /// The value of the spectrum_min property
-  int64_t m_spec_min;
+  int m_spec_min;
   /// The value of the spectrum_max property
-  int64_t m_spec_max;
+  int m_spec_max;
 
   /// The value of the spectrum_list property
-  std::vector<int64_t> m_spec_list;
+  std::vector<int> m_spec_list;
   /// list of spectra filtered by min/max/list, currently
   /// used only when loading data into event_workspace
-  std::vector<int64_t> m_filtered_spec_idxs;
+  std::vector<int> m_filtered_spec_idxs;
 
   // C++ interface to the NXS file
   ::NeXus::File *m_cppFile;

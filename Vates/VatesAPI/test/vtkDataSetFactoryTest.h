@@ -2,40 +2,38 @@
 #ifndef VTKDATASETFACTORYTEST_H_
 #define VTKDATASETFACTORYTEST_H_
 
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
+#include "vtkDataSet.h"
+#include "vtkFloatArray.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "vtkDataSet.h"
-#include "vtkFloatArray.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace testing;
 using Mantid::VATES::vtkDataSetFactory;
 
-class vtkDataSetFactoryTest : public CxxTest::TestSuite
-{
+class vtkDataSetFactoryTest : public CxxTest::TestSuite {
 private:
-
   /// Mocked helper type
-  class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory
-  {
+  class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory {
   public:
+    GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(
         create, vtkSmartPointer<vtkDataSet>(Mantid::VATES::ProgressAction &));
-    MOCK_METHOD1(initialize,
-      void(boost::shared_ptr<Mantid::API::Workspace>));
-    MOCK_CONST_METHOD0(validate,
-      void());
+    MOCK_METHOD1(initialize, void(boost::shared_ptr<Mantid::API::Workspace>));
+    MOCK_CONST_METHOD0(validate, void());
     MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
+    GCC_DIAG_ON_SUGGEST_OVERRIDE
     void setSuccessorConcrete(std::unique_ptr<vtkDataSetFactory> pSuccessor) {
       vtkDataSetFactory::setSuccessor(pSuccessor);
     }
@@ -44,9 +42,8 @@ private:
     }
   };
 
-  ///Fake helper type.
-  class FakeProgressAction : public Mantid::VATES::ProgressAction
-  {
+  /// Fake helper type.
+  class FakeProgressAction : public Mantid::VATES::ProgressAction {
     void eventRaised(double) override {}
   };
 
@@ -84,8 +81,7 @@ public:
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(successor));
   }
 
-  void testEnumValues()
-  {
+  void testEnumValues() {
     using Mantid::VATES::vtkDataSetFactory;
     int oneD = vtkDataSetFactory::OneDimensional;
     int twoD = vtkDataSetFactory::TwoDimensional;
@@ -97,14 +93,12 @@ public:
     TS_ASSERT_EQUALS(4, fourD);
   }
 
-  void testCheckDimensionalityByDefault()
-  {
+  void testCheckDimensionalityByDefault() {
     MockvtkDataSetFactory factory;
     TS_ASSERT(factory.doesCheckDimensionality());
   }
 
-  void testSetCheckDimensionality()
-  {
+  void testSetCheckDimensionality() {
     MockvtkDataSetFactory factory;
     factory.setCheckDimensionality(false);
     TS_ASSERT(!factory.doesCheckDimensionality());
@@ -112,8 +106,7 @@ public:
     TS_ASSERT(factory.doesCheckDimensionality());
   }
 
-  void testOneStepCreate()
-  {
+  void testOneStepCreate() {
     FakeProgressAction progressUpdater;
 
     MockvtkDataSetFactory factory;
@@ -122,13 +115,15 @@ public:
         .Times(1)
         .WillOnce(Return(vtkSmartPointer<vtkStructuredGrid>::New()));
 
-    IMDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
+    IMDHistoWorkspace_sptr ws_sptr =
+        MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2);
     auto product = factory.oneStepCreate(ws_sptr, progressUpdater);
     TS_ASSERT(product != nullptr);
-    TSM_ASSERT_EQUALS("Output not wired up correctly to ::create() method", "vtkStructuredGrid", std::string(product->GetClassName()));
+    TSM_ASSERT_EQUALS("Output not wired up correctly to ::create() method",
+                      "vtkStructuredGrid",
+                      std::string(product->GetClassName()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
   }
-
 };
 
 #endif

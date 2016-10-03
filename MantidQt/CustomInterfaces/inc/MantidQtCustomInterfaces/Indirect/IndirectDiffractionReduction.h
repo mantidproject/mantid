@@ -32,11 +32,13 @@ public slots:
   void run();
   void openDirectoryDialog();
   void help();
-  void plotResults(bool error);
+  void plotResults();
+  void saveReductions();
   void runFilesChanged();
   void runFilesFinding();
   void runFilesFound();
   void individualGroupingToggled(int state);
+  void algorithmComplete(bool error);
 
 private:
   void initLayout() override;
@@ -47,12 +49,12 @@ private:
 
   bool validateRebin();
   bool validateVanCal();
+  bool validateCalOnly();
 
   Mantid::API::MatrixWorkspace_sptr loadInstrument(std::string instrumentName,
                                                    std::string reflection = "");
 
   void runGenericReduction(QString instName, QString mode);
-  void saveGenericReductions();
   void runOSIRISdiffonlyReduction();
 
 private:

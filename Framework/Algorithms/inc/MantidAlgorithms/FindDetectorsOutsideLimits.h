@@ -65,11 +65,6 @@ namespace Algorithms {
 */
 class DLLExport FindDetectorsOutsideLimits : public DetectorDiagnostic {
 public:
-  /// Default constructor
-  FindDetectorsOutsideLimits() : DetectorDiagnostic() {}
-
-  /// Destructor
-  ~FindDetectorsOutsideLimits() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override {
     return "FindDetectorsOutsideLimits";

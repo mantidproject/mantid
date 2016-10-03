@@ -3,7 +3,6 @@ import stresstesting
 
 from mantid.simpleapi import *
 from ISISCommandInterface import *
-from mantid.simpleapi import *
 from SANSBatchMode import *
 
 # test batch mode with sans2d and selecting a period in batch mode

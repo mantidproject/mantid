@@ -1,5 +1,5 @@
-#ifndef  SPECTRUM_VIEW_H
-#define  SPECTRUM_VIEW_H
+#ifndef SPECTRUM_VIEW_H
+#define SPECTRUM_VIEW_H
 
 #include <QMainWindow>
 #include <QMdiSubWindow>
@@ -8,6 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtAPI/IProjectSerialisable.h"
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
 #include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtSpectrumViewer/MatrixWSDataSource.h"
@@ -44,15 +45,12 @@
                  <http://doxygen.mantidproject.org>
  */
 
-namespace Ui
-{
+namespace Ui {
 class SpectrumViewer; // Forward declaration of UI file
 }
 
-namespace MantidQt
-{
-namespace SpectrumView
-{
+namespace MantidQt {
+namespace SpectrumView {
 
 // Forward declarations
 class EModeHandler;
@@ -62,21 +60,31 @@ class SpectrumDisplay;
 class SVConnections;
 class MatrixWSDataSource;
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumView : public QMainWindow, public MantidQt::API::WorkspaceObserver
-{
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumView
+    : public QMainWindow,
+      public MantidQt::API::WorkspaceObserver,
+      public MantidQt::API::IProjectSerialisable {
   Q_OBJECT
 
 public:
   /// Construct a SpectrumView to display data from the specified data source
-  SpectrumView( QWidget * parent = 0 );
+  SpectrumView(QWidget *parent = 0);
 
   ~SpectrumView() override;
   void renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp);
-  QList<boost::shared_ptr<SpectrumDisplay>> getSpectrumDisplays() const { return m_spectrumDisplay; }
+  QList<boost::shared_ptr<SpectrumDisplay>> getSpectrumDisplays() const {
+    return m_spectrumDisplay;
+  }
   bool isTrackingOn() const;
+  /// Load the state of the spectrum viewer from a Mantid project file
+  static API::IProjectSerialisable *loadFromProject(const std::string &lines,
+                                                    ApplicationWindow *app,
+                                                    const int fileVersion);
+  /// Save the state of the spectrum viewer to a Mantid project file
+  virtual std::string saveToProject(ApplicationWindow *app) override;
 
 signals:
-  void spectrumDisplayChanged(SpectrumDisplay*);
+  void spectrumDisplayChanged(SpectrumDisplay *);
 
 protected slots:
   void closeWindow();
@@ -108,11 +116,10 @@ private:
   boost::shared_ptr<GraphDisplay> m_vGraph;
   boost::shared_ptr<SVConnections> m_svConnections;
 
-
   Ui::SpectrumViewer *m_ui;
-  SliderHandler      *m_sliderHandler;
-  RangeHandler       *m_rangeHandler;
-  EModeHandler       *m_emodeHandler;
+  SliderHandler *m_sliderHandler;
+  RangeHandler *m_rangeHandler;
+  EModeHandler *m_emodeHandler;
 
 signals:
   void needToClose();
@@ -122,4 +129,4 @@ signals:
 } // namespace SpectrumView
 } // namespace MantidQt
 
-#endif   // SPECTRUM_VIEW_H
+#endif // SPECTRUM_VIEW_H

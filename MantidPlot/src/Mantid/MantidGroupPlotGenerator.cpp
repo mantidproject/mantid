@@ -117,7 +117,6 @@ MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
       xAxisLabel = firstWS->getXDimension()->getName();
       xAxisUnits = firstWS->getXDimension()->getUnits();
 
-
       // For each workspace in group, add data and log values
       std::vector<double> logValues;
       for (int i = 0; i < nWorkspaces; i++) {

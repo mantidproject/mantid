@@ -4,8 +4,9 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include <QMainWindow>
+#include "MantidQtAPI/IProjectSerialisable.h"
 #include "Script.h"
+#include <QMainWindow>
 
 //----------------------------------------------------------
 // Forward declarations
@@ -51,13 +52,17 @@ public:
   /// automatically
   /// running a script loaded with open
   void executeCurrentTab(const Script::ExecutionMode mode);
-  /// saves scripts file names to a string
-  QString saveToString();
   /// Set whether to accept/reject close events
   void acceptCloseEvent(const bool value);
   /// Opens a script providing a copy is not already open
   void openUnique(QString filename);
-
+  /// Saves the open script names to the current project
+  std::string saveToProject(ApplicationWindow *app);
+  /// Loads the open script names for the current project
+  void loadFromProject(const std::string &lines, ApplicationWindow *app,
+                       const int fileVersion);
+  // Loads the scripts from a list of filenames
+  void loadFromFileList(const QStringList &files);
 signals:
   /// Show the scripting language dialog
   void chooseScriptingLanguage();
@@ -172,8 +177,8 @@ private:
   QMenu *m_windowMenu;
   /// Window actions
   QAction *m_alwaysOnTop, *m_hide, *m_zoomIn, *m_zoomOut, *m_resetZoom,
-      *m_toggleProgress, *m_toggleFolding, *m_toggleWrapping, *m_toggleWhitespace,
-      *m_openConfigTabs, *m_selectFont;
+      *m_toggleProgress, *m_toggleFolding, *m_toggleWrapping,
+      *m_toggleWhitespace, *m_openConfigTabs, *m_selectFont;
   /// Help menu
   QMenu *m_helpMenu;
   /// Help actions

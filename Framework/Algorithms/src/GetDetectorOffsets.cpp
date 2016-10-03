@@ -9,9 +9,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <sstream>
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -22,14 +19,6 @@ using namespace Kernel;
 using namespace API;
 using std::size_t;
 using namespace DataObjects;
-
-/// Constructor
-GetDetectorOffsets::GetDetectorOffsets()
-    : API::Algorithm(), m_Xmin(DBL_MAX), m_Xmax(-DBL_MIN), m_maxOffset(0.),
-      m_dreference(0.), m_dideal(0.), m_step(0.) {}
-
-/// Destructor
-GetDetectorOffsets::~GetDetectorOffsets() {}
 
 //-----------------------------------------------------------------------------------------
 /** Initialisation method. Declares properties to be used in algorithm.
@@ -131,7 +120,7 @@ void GetDetectorOffsets::exec() {
     }
 
     // Get the list of detectors in this pixel
-    const auto &dets = inputW->getSpectrum(wi)->getDetectorIDs();
+    const auto &dets = inputW->getSpectrum(wi).getDetectorIDs();
 
     // Most of the exec time is in FitSpectra, so this critical block should not
     // be a problem.
@@ -146,10 +135,10 @@ void GetDetectorOffsets::exec() {
         if (mask == 1.) {
           // Being masked
           maskWS->maskWorkspaceIndex(workspaceIndex);
-          maskWS->dataY(workspaceIndex)[0] = mask;
+          maskWS->mutableY(workspaceIndex)[0] = mask;
         } else {
           // Using the detector
-          maskWS->dataY(workspaceIndex)[0] = mask;
+          maskWS->mutableY(workspaceIndex)[0] = mask;
         }
       }
     }
@@ -183,10 +172,10 @@ void GetDetectorOffsets::exec() {
  */
 double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
   // Find point of peak centre
-  const MantidVec &yValues = inputW->readY(s);
+  const auto &yValues = inputW->y(s);
   auto it = std::max_element(yValues.cbegin(), yValues.cend());
   const double peakHeight = *it;
-  const double peakLoc = inputW->readX(s)[it - yValues.begin()];
+  const double peakLoc = inputW->x(s)[it - yValues.begin()];
   // Return if peak of Cross Correlation is nan (Happens when spectra is zero)
   // Pixel with large offset will be masked
   if (boost::math::isnan(peakHeight))
@@ -249,7 +238,7 @@ IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight,
   peak->setHeight(peakHeight);
   peak->setCentre(peakLoc);
   const double sigma(10.0);
-  peak->setFwhm(2.0 * std::sqrt(2.0 * std::log(2.0)) * sigma);
+  peak->setFwhm(2.0 * std::sqrt(2.0 * M_LN2) * sigma);
 
   auto fitFunc = new CompositeFunction(); // Takes ownership of the functions
   fitFunc->addFunction(background);

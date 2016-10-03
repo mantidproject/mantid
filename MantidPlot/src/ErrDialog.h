@@ -2,7 +2,8 @@
     File                 : ErrDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Add error bars dialog
 
@@ -43,8 +44,7 @@ class MdiSubWindow;
 class ApplicationWindow;
 
 //! Add error bars dialog
-class ErrDialog : public QDialog
-{
+class ErrDialog : public QDialog {
   Q_OBJECT
 
 public:
@@ -53,25 +53,25 @@ public:
    * @param parent :: parent widget
    * @param fl :: window flags
    */
-  ErrDialog( ApplicationWindow* parent, Qt::WFlags fl = 0 );
+  ErrDialog(ApplicationWindow *parent, Qt::WFlags fl = 0);
 
 private:
-  QLabel* textLabel1;
-  QComboBox* nameLabel, *tableNamesBox, *colNamesBox;
+  QLabel *textLabel1;
+  QComboBox *nameLabel, *tableNamesBox, *colNamesBox;
   QGroupBox *groupBox2;
   QGroupBox *groupBox1, *groupBox3;
   QButtonGroup *buttonGroup1, *buttonGroup2;
-  QRadioButton* standardBox, *columnBox;
-  QRadioButton* percentBox;
-  QLineEdit* valueBox;
-  QRadioButton* xErrBox;
-  QRadioButton* yErrBox;
-  QPushButton* buttonAdd;
-  QPushButton* buttonCancel;
-  QList<MdiSubWindow*> srcTables;
+  QRadioButton *standardBox, *columnBox;
+  QRadioButton *percentBox;
+  QLineEdit *valueBox;
+  QRadioButton *xErrBox;
+  QRadioButton *yErrBox;
+  QPushButton *buttonAdd;
+  QPushButton *buttonCancel;
+  QList<MdiSubWindow *> srcTables;
 
-  QRadioButton* mantidBox;
-  QCheckBox* drawAllErrors;
+  QRadioButton *mantidBox;
+  QCheckBox *drawAllErrors;
 
 protected slots:
   //! Set all string in the current language
@@ -81,7 +81,7 @@ public slots:
   //! Add a plot definition
   void add();
   //! Supply the dialog with a curves list
-  void setCurveNames(const QStringList& names);
+  void setCurveNames(const QStringList &names);
   //! Supply the dialog with a tables list
   void setSrcTables(QList<MdiSubWindow *> tables);
   //! Select a table
@@ -89,9 +89,11 @@ public slots:
 
 signals:
   //! This is usually connected to the main window's defineErrorBars() slot
-  void options(const QString& curveName, int type, const QString& percent,int direction,bool all);
+  void options(const QString &curveName, int type, const QString &percent,
+               int direction, bool all);
   //! This is usually connected to the main window's defineErrorBars() slot
-  void options(const QString& curveName, const QString& errColumnName, int direction);
+  void options(const QString &curveName, const QString &errColumnName,
+               int direction);
 };
 
 #endif // ERRDIALOG_H

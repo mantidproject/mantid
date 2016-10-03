@@ -60,7 +60,7 @@ void UploadRemoteFile2::exec() {
 
   g_log.information() << "Uploaded '" << getPropertyValue("RemoteFileName")
                       << "' to '" << getPropertyValue("LocalFileName") << "'"
-                      << " on the compute resource " << comp << std::endl;
+                      << " on the compute resource " << comp << '\n';
 }
 
 } // end namespace RemoteAlgorithms

@@ -74,14 +74,12 @@ LeBailFunction::LeBailFunction(std::string peaktype) {
   // Importing peak position tolerance
   m_minTOFPeakCentre = 0;
   m_maxTOFPeakCentre = DBL_MAX;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
   */
-LeBailFunction::~LeBailFunction() { return; }
+LeBailFunction::~LeBailFunction() {}
 
 //----------------------------------------------------------------------------------------------
 /** Return the composite function
@@ -137,8 +135,6 @@ void LeBailFunction::function(std::vector<double> &out,
     for (size_t i = 0; i < numpts; ++i)
       out[i] += values[i];
   }
-
-  return;
 }
 
 /**  Calculate a single peak's value
@@ -156,8 +152,6 @@ void LeBailFunction::calPeak(size_t ipk, std::vector<double> &out,
   ::fill(out.begin(), out.end(), 0.);
   IPowderDiffPeakFunction_sptr peak = m_vecPeaks[ipk];
   peak->function(out, xvalues);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -227,8 +221,6 @@ void LeBailFunction::calculatePeakParameterValues() const {
   }
 
   m_hasNewPeakValue = false;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -242,8 +234,6 @@ void LeBailFunction::setPeakCentreTolerance(double peakpostol, double tofmin,
   // m_usePeakPosTol = true;
   m_minTOFPeakCentre = tofmin - peakpostol;
   m_maxTOFPeakCentre = tofmax + peakpostol;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -303,8 +293,6 @@ void LeBailFunction::addPeaks(std::vector<std::vector<int>> peakhkls) {
 
   g_log.information() << "Total " << m_numPeaks << " after trying to add "
                       << peakhkls.size() << " peaks. \n";
-
-  return;
 } // END of addPeaks()
 
 //----------------------------------------------------------------------------------------------
@@ -736,8 +724,6 @@ void LeBailFunction::setProfileParameterValues(
   // Set the flag to indicate that client has input parameters
   if (m_hasNewPeakValue && !m_isInputValue)
     m_isInputValue = true;
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -852,8 +838,6 @@ void LeBailFunction::groupPeaks(
 
   g_log.debug() << "[Calculate Peak Intensity]:  Number of Peak Groups = "
                 << peakgroupvec.size() << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -916,8 +900,6 @@ void LeBailFunction::addBackgroundFunction(
     if (endx > 0.)
       m_background->setAttributeValue("EndX", endx);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -947,8 +929,6 @@ void LeBailFunction::setFitProfileParameter(string paramname, double minvalue,
   Constraints::BoundaryConstraint *bc = new Constraints::BoundaryConstraint(
       m_compsiteFunction.get(), parnamef0, minvalue, maxvalue);
   m_compsiteFunction->addConstraint(bc);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -977,8 +957,6 @@ void LeBailFunction::fixPeakParameter(string paramname, double paramvalue) {
     --*/
 
   } // For each peak
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -989,8 +967,6 @@ void LeBailFunction::fixBackgroundParameters() {
 
   for (size_t iparam = 0; iparam < numbkgdparams; ++iparam)
     m_background->fix(iparam);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1002,8 +978,6 @@ void LeBailFunction::setFixPeakHeights() {
     IPowderDiffPeakFunction_sptr thispeak = m_dspPeakVec[ipk].second;
     thispeak->fix(0);
   } // For each peak
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1017,7 +991,7 @@ void LeBailFunction::setPeakHeights(std::vector<double> inheights) {
       if (inheights.size() != heights.size())
       {
         g_log.error() << "Input number of peaks (height) is not same as peaks. "
-     << std::endl;
+     << '\n';
         throw std::logic_error("Input number of peaks (height) is not same as
      peaks. ");
       }

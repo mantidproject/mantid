@@ -3,42 +3,32 @@
 
 #include <QtGui/QWidget>
 #include "ui_ColorBarWidget.h"
-#include <qwt_color_map.h>
 #include <qwt_scale_widget.h>
 #include "MantidQtAPI/MantidColorMap.h"
-#include <QKeyEvent>
 #include <QtGui>
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
+namespace MantidQt {
+namespace MantidWidgets {
 
 //=============================================================================
 /** Extended version of QwtScaleWidget */
-class QwtScaleWidgetExtended : public QwtScaleWidget
-{
+class QwtScaleWidgetExtended : public QwtScaleWidget {
   Q_OBJECT
 
 public:
-  QwtScaleWidgetExtended(QWidget *parent = NULL)
-  : QwtScaleWidget(parent)
-  {
+  QwtScaleWidgetExtended(QWidget *parent = NULL) : QwtScaleWidget(parent) {
     this->setMouseTracking(true);
   }
 
-  void mouseMoveEvent(QMouseEvent * event) override
-  {
+  void mouseMoveEvent(QMouseEvent *event) override {
     double val = 1.0 - double(event->y()) / double(this->height());
     emit mouseMoved(event->globalPos(), val);
   }
 
 signals:
   void mouseMoved(QPoint, double);
-
 };
-
 
 //=============================================================================
 /** Widget for showing a color bar, modifying its
@@ -47,8 +37,7 @@ signals:
  * @author Janik Zikovsky
  * @date Oct 31, 2011.
  */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ColorBarWidget : public QWidget
-{
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ColorBarWidget : public QWidget {
   Q_OBJECT
   Q_PROPERTY(double minimum READ getMinimum WRITE setMinimum)
   Q_PROPERTY(double maximum READ getMaximum WRITE setMaximum)
@@ -56,6 +45,12 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ColorBarWidget : public QWidget
 public:
   ColorBarWidget(QWidget *parent = 0);
   ~ColorBarWidget() override;
+
+  enum CheckboxStrategy {
+    ADD_AUTOSCALE_CURRENT_SLICE = 0,
+    ADD_AUTOSCALE_ON_LOAD = 1,
+    ADD_AUTOSCALE_BOTH = 2
+  };
 
   void updateColorMap();
 
@@ -65,23 +60,49 @@ public:
   void setMaximum(double max);
   void setRenderMode(bool rendering);
 
+  /// Set which checkboxes are shown in the window
+  void setCheckBoxMode(CheckboxStrategy strategy);
+
   double getMinimum() const;
   double getMaximum() const;
   QwtDoubleInterval getViewRange() const;
-  MantidColorMap & getColorMap();
+  MantidColorMap &getColorMap();
 
+  /// Check if logarithmic scale is selected
   bool getLog();
 
-  int getScale();
+  int getScale() const;
   void setScale(int);
 
   void setExponent(double);
-  double getExponent();
+  double getExponent() const;
 
+  /// Set the label text for Auto Scale on Load checkbox label
+  void setAutoScaleLabelText(const std::string &newText);
+
+  /// Set the tooltip text for Auto Scale on Load checkbox label
+  void setAutoScaleTooltipText(const std::string &newText);
+
+  /// Set the tooltip text for Auto Scale for Current Slice checkbox label
+  void setAutoScaleForCurrentSliceLabelText(const std::string &newText);
+
+  /// Set the tooltip text for Auto Scale for Current Slice checkbox label
+  void setAutoScaleForCurrentSliceTooltipText(const std::string &newText);
+
+  /// Set the Auto Scale on Load checkbox state
   void setAutoScale(bool autoscale);
+
+  /// Get the Auto Scale on Load checkbox state
   bool getAutoScale() const;
 
-  bool getAutoColorScaleforCurrentSlice() const;
+  /// Set the Auto Scale for Current Slice checkbox state
+  bool getAutoScaleforCurrentSlice() const;
+
+  /// Load the state of the color bar widget from a Mantid project file
+  void loadFromProject(const std::string &lines);
+
+  /// Save the state of the color bar widget to a Mantid project file
+  std::string saveToProject() const;
 
 public slots:
   void changedMinimum();
@@ -98,15 +119,15 @@ signals:
 
 private:
   void setSpinBoxesSteps();
-  void mouseDoubleClickEvent(QMouseEvent * event) override;
+  void mouseDoubleClickEvent(QMouseEvent *event) override;
   void updateMinMaxGUI();
-  void resizeEvent(QResizeEvent * event) override;
+  void resizeEvent(QResizeEvent *event) override;
 
   /// Auto-gen UI classes
   Ui::ColorBarWidgetClass ui;
 
   /// The color bar widget from QWT
-  QwtScaleWidget * m_colorBar;
+  QwtScaleWidget *m_colorBar;
 
   /// Color map being displayed
   MantidColorMap m_colorMap;

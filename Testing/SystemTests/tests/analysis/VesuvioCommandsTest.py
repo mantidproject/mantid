@@ -4,6 +4,7 @@ and that mantid can be imported
 """
 import stresstesting
 import platform
+import numpy as np
 
 from mantid.api import (WorkspaceGroup, MatrixWorkspace)
 from mantid.simpleapi import *
@@ -12,13 +13,28 @@ from vesuvio.commands import fit_tof
 
 #=====================================Helper Function=================================
 
-def _create_test_flags(background):
+def _is_old_boost_version():
+    # It appears that a difference in boost version is causing different
+    # random number generation. As such an OS check is used.
+    # Older boost (earlier than 56): Ubuntu 14.04, RHEL7
+    dist = platform.linux_distribution()
+    if any(dist):
+        if 'Red Hat' in dist[0] and dist[1].startswith('7'):
+            return True
+        if dist[0] == 'Ubuntu' and dist[1] == '14.04':
+            return True
+
+    return False
+
+def _create_test_flags(background, multivariate=False):
     flags = dict()
     flags['fit_mode'] = 'spectrum'
     flags['spectra'] = '135'
-
-    mass1 = {'value': 1.0079, 'function': 'GramCharlier', 'width': [2, 5, 7],
-             'hermite_coeffs': [1, 0, 0], 'k_free': 0, 'sears_flag': 1}
+    if multivariate:
+        mass1 = {'value': 1.0079, 'function': 'MultivariateGaussian', 'SigmaX':5, 'SigmaY':5, 'SigmaZ':5}
+    else:
+        mass1 = {'value': 1.0079, 'function': 'GramCharlier', 'width': [2, 5, 7],
+                 'hermite_coeffs': [1, 0, 0], 'k_free': 0, 'sears_flag': 1}
     mass2 = {'value': 16.0, 'function': 'Gaussian', 'width': 10}
     mass3 = {'value': 27.0, 'function': 'Gaussian', 'width': 13}
     mass4 = {'value': 133.0, 'function': 'Gaussian', 'width': 30}
@@ -40,27 +56,24 @@ def _create_test_flags(background):
 
     return flags
 
-def _equal_within_tolerance(expected, actual, tolerance=0.05):
+def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     """
     Checks the expected value is equal to the actual value with in a percentage of tolerance
     """
     tolerance_value = expected * tolerance
     abs_difference = abs(expected - actual)
-    return abs_difference <= abs(tolerance_value)
+    self.assertTrue(abs_difference <= abs(tolerance_value))
 
-def skip_due_to_os():
+def _get_peak_height_and_index(workspace, ws_index):
     """
-    Skip tests on some operating systems
-    Currenty tests are only being run on windows and RHEL7
-    @return true if tests SHOULD be skipped
+    returns the maximum height in y of a given spectrum of a workspace
+    workspace is assumed to be a matrix workspace
     """
-    dist = platform.linux_distribution()
-    is_rhel7 = (('Red Hat' in dist[0]) or ('CentOS' in dist[0])) and (dist[1].startswith('7'))
-    is_windows = (platform.system() == "Windows")
-    if is_rhel7 or is_windows:
-        return False # Tests should not be skipped
-    else:
-        return True # Tests should be skipped
+    y_data = workspace.readY(ws_index)
+    peak_height = np.amax(y_data)
+    peak_bin = np.argmax(y_data)
+
+    return peak_height, peak_bin
 
 #====================================================================================
 
@@ -72,9 +85,6 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         flags = _create_test_flags(background=False)
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
-
-    def skipTests(self):
-        return skip_due_to_os()
 
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
@@ -91,18 +101,17 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        index_one_first = -0.016289703
-        index_one_last = 0.0072029933
-        index_two_first = 1.057476742e-05
-        index_two_last = 7.023179770e-05
-        dist = platform.linux_distribution()
-        if dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '7.2':
-            index_one_first = 7.798020e-04
+        index_one_first = -0.013011414483
+        index_one_last = 0.00720741862173
+        index_two_first = 1.12713408816e-05
+        index_two_last = 6.90222280789e-05
+        if _is_old_boost_version():
+            index_one_first = 0.000631295911554
 
-        self.assertTrue(_equal_within_tolerance(index_one_first, fitted_ws.readY(0)[0]))
-        self.assertTrue(_equal_within_tolerance(index_one_last, fitted_ws.readY(0)[-1]))
-        self.assertTrue(_equal_within_tolerance(index_two_first, fitted_ws.readY(1)[0]))
-        self.assertTrue(_equal_within_tolerance(index_two_last, fitted_ws.readY(1)[-1]))
+        _equal_within_tolerance(self, index_one_first, fitted_ws.readY(0)[0])
+        _equal_within_tolerance(self, index_one_last, fitted_ws.readY(0)[-1])
+        _equal_within_tolerance(self, index_two_first, fitted_ws.readY(1)[0])
+        _equal_within_tolerance(self, index_two_last, fitted_ws.readY(1)[-1])
 
         fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))
@@ -117,6 +126,28 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
 
 #====================================================================================
 
+class FitSingleSpectrumBivariateGaussianTiesTest(stresstesting.MantidStressTest):
+    """
+    Test ensures that internal ties for mass profiles work correctly
+    This test ties SigmaX to SigmaY making the multivariate gaussian
+    a Bivariate Gaussian
+    """
+
+    def runTest(self):
+        flags = _create_test_flags(background=False, multivariate=True)
+        flags['masses'][0]['ties'] = 'SigmaX=SigmaY'
+        runs = "15039-15045"
+        self._fit_results = fit_tof(runs, flags)
+
+    def validate(self):
+        #Get fit workspace
+        fit_params = mtd['15039-15045_params_iteration_1']
+        f0_sigma_x = fit_params.readY(2)[0]
+        f0_sigma_y = fit_params.readY(3)[0]
+        self.assertAlmostEqual(f0_sigma_x, f0_sigma_y)
+
+#====================================================================================
+
 class SingleSpectrumBackground(stresstesting.MantidStressTest):
 
     _fit_results = None
@@ -125,9 +156,6 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         flags = _create_test_flags(background=True)
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
-
-    def skipTests(self):
-        return skip_due_to_os()
 
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
@@ -144,21 +172,19 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        index_one_first = -0.0221362198069
-        index_one_last = 0.00720728978699
-        index_two_first = 0.00571520523979
-        index_two_last = -0.00211277263055
-        dist = platform.linux_distribution()
-        if dist[0] == 'Red Hat Enterprise Linux Workstation' and dist[1] == '7.2':
-            index_one_first = 6.809169e-04
-            index_one_last = 7.206634e-03
-            index_two_first = 3.360576e-03
-            index_two_last = -1.431954e-03
+        index_one_first = -0.00553133541138
+        index_one_last = 0.00722053823154
+        calc_data_height_expected = 0.13302098172
+        calc_data_bin_expected = 635
+        if _is_old_boost_version():
+            index_one_first = 0.000605572768745
 
-        self.assertTrue(_equal_within_tolerance(index_one_first, fitted_ws.readY(0)[0]))
-        self.assertTrue(_equal_within_tolerance(index_one_last, fitted_ws.readY(0)[-1]))
-        self.assertTrue(_equal_within_tolerance(index_two_first, fitted_ws.readY(1)[0]))
-        self.assertTrue(_equal_within_tolerance(index_two_last, fitted_ws.readY(1)[-1]))
+        _equal_within_tolerance(self, index_one_first, fitted_ws.readY(0)[0])
+        _equal_within_tolerance(self, index_one_last, fitted_ws.readY(0)[-1])
+
+        calc_data_height_actual, calc_data_bin_actual = _get_peak_height_and_index(fitted_ws, 1)
+        _equal_within_tolerance(self, calc_data_height_expected, calc_data_height_actual)
+        self.assertTrue(abs(calc_data_bin_expected - calc_data_bin_actual) <= 1)
 
         fitted_params = self._fit_results[1]
         self.assertTrue(isinstance(fitted_params, MatrixWorkspace))
@@ -184,9 +210,6 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
 
-    def skipTests(self):
-        return skip_due_to_os()
-
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
         self.assertEquals(4, len(self._fit_results))
@@ -204,8 +227,8 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, bank1_data.readX(0)[0])
         self.assertAlmostEqual(562.0, bank1_data.readX(0)[-1])
 
-        self.assertTrue(_equal_within_tolerance(8.03245852426e-05, bank1_data.readY(1)[0]))
-        self.assertTrue(_equal_within_tolerance(0.000559789299755, bank1_data.readY(1)[-1]))
+        _equal_within_tolerance(self, 8.23840378769e-05, bank1_data.readY(1)[0])
+        _equal_within_tolerance(self, 0.000556695665501, bank1_data.readY(1)[-1])
 
         bank8 = fitted_banks[-1]
         self.assertTrue(isinstance(bank8, WorkspaceGroup))
@@ -216,8 +239,8 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         self.assertAlmostEqual(50.0, bank8_data.readX(0)[0])
         self.assertAlmostEqual(562.0, bank8_data.readX(0)[-1])
 
-        self.assertTrue(_equal_within_tolerance(0.000279169151321, bank8_data.readY(1)[0]))
-        self.assertTrue(_equal_within_tolerance(0.000505355349359, bank8_data.readY(1)[-1]))
+        _equal_within_tolerance(self, 0.00025454613205, bank8_data.readY(1)[0])
+        _equal_within_tolerance(self, 0.00050412575393, bank8_data.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))
@@ -239,9 +262,6 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         runs = "15039-15045"
         self._fit_results = fit_tof(runs, flags)
 
-    def skipTests(self):
-        return skip_due_to_os()
-
     def validate(self):
         self.assertTrue(isinstance(self._fit_results, tuple))
         self.assertEquals(4, len(self._fit_results))
@@ -259,8 +279,8 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         self.assertAlmostEqual(50.0, spec143_data.readX(0)[0])
         self.assertAlmostEqual(562.0, spec143_data.readX(0)[-1])
 
-        self.assertTrue(_equal_within_tolerance(2.3090594752e-06, spec143_data.readY(1)[0]))
-        self.assertTrue(_equal_within_tolerance(3.51960367895e-05, spec143_data.readY(1)[-1]))
+        _equal_within_tolerance(self, 2.27289862507e-06, spec143_data.readY(1)[0])
+        _equal_within_tolerance(self, 3.49287467421e-05, spec143_data.readY(1)[-1])
 
         spec144 = fitted_spec[-1]
         self.assertTrue(isinstance(spec144, WorkspaceGroup))
@@ -271,8 +291,8 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
         self.assertAlmostEqual(50.0, spec144_data.readX(0)[0])
         self.assertAlmostEqual(562.0, spec144_data.readX(0)[-1])
 
-        self.assertTrue(_equal_within_tolerance(7.79185212491e-06, spec144_data.readY(1)[0]))
-        self.assertTrue(_equal_within_tolerance(4.79448882168e-05, spec144_data.readY(1)[-1]))
+        _equal_within_tolerance(self, 5.9811662524e-06, spec144_data.readY(1)[0])
+        _equal_within_tolerance(self, 4.7479831769e-05, spec144_data.readY(1)[-1])
 
         chisq_values = self._fit_results[2]
         self.assertTrue(isinstance(chisq_values, list))

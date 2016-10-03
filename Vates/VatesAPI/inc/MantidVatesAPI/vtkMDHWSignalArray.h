@@ -25,8 +25,6 @@
 #define vtkMDHWSignalArray_h
 
 #include "vtkMappedDataArray.h"
-
-#include "vtkTypeTemplate.h"  // For templated vtkObject API
 #include "vtkObjectFactory.h" // for vtkStandardNewMacro
 #include "vtkIdList.h"
 #include "vtkVariant.h"
@@ -38,11 +36,14 @@ namespace Mantid {
 namespace VATES {
 
 template <class Scalar>
-class vtkMDHWSignalArray : public vtkTypeTemplate<vtkMDHWSignalArray<Scalar>,
-                                                  vtkMappedDataArray<Scalar>> {
+class vtkMDHWSignalArray : public vtkMappedDataArray<Scalar> {
 public:
-  vtkMappedDataArrayNewInstanceMacro(
-      vtkMDHWSignalArray<Scalar>) static vtkMDHWSignalArray *New();
+  // clang-format off
+  vtkAbstractTemplateTypeMacro(vtkMDHWSignalArray<Scalar>,
+                               vtkMappedDataArray<Scalar>)
+  vtkMappedDataArrayNewInstanceMacro(vtkMDHWSignalArray<Scalar>)
+  static vtkMDHWSignalArray *New();
+  // clang-format on
   void PrintSelf(ostream &os, vtkIndent indent) override;
 
   void InitializeArray(
@@ -63,9 +64,9 @@ public:
   void GetTuple(vtkIdType i, double *tuple) override;
   vtkIdType LookupTypedValue(Scalar value) override;
   void LookupTypedValue(Scalar value, vtkIdList *ids) override;
-  Scalar GetValue(vtkIdType idx) override;
+  Scalar GetValue(vtkIdType idx) const override;
   Scalar &GetValueReference(vtkIdType idx) override;
-  void GetTupleValue(vtkIdType idx, Scalar *t) override;
+  void GetTypedTuple(vtkIdType idx, Scalar *t) const override;
 
   // Description:
   // This container is read only -- this method does nothing but print a
@@ -97,9 +98,9 @@ public:
   void RemoveTuple(vtkIdType id) override;
   void RemoveFirstTuple() override;
   void RemoveLastTuple() override;
-  void SetTupleValue(vtkIdType i, const Scalar *t) override;
-  void InsertTupleValue(vtkIdType i, const Scalar *t) override;
-  vtkIdType InsertNextTupleValue(const Scalar *t) override;
+  void SetTypedTuple(vtkIdType i, const Scalar *t) override;
+  void InsertTypedTuple(vtkIdType i, const Scalar *t) override;
+  vtkIdType InsertNextTypedTuple(const Scalar *t) override;
   void SetValue(vtkIdType idx, Scalar value) override;
   vtkIdType InsertNextValue(Scalar v) override;
   void InsertVariantValue(vtkIdType idx, vtkVariant value) override;
@@ -223,15 +224,13 @@ void vtkMDHWSignalArray<Scalar>::LookupValue(vtkVariant value, vtkIdList *ids) {
   bool valid = true;
   Scalar val = vtkVariantCast<Scalar>(value, &valid);
   ids->Reset();
-  if (valid)
-    {
+  if (valid) {
     vtkIdType index = 0;
-    while ((index = this->Lookup(val, index)) >= 0)
-      {
+    while ((index = this->Lookup(val, index)) >= 0) {
       ids->InsertNextId(index);
       ++index;
-      }
     }
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -272,11 +271,10 @@ void vtkMDHWSignalArray<Scalar>::LookupTypedValue(Scalar value,
                                                   vtkIdList *ids) {
   ids->Reset();
   vtkIdType index = 0;
-  while ((index = this->Lookup(value, index)) >= 0)
-    {
+  while ((index = this->Lookup(value, index)) >= 0) {
     ids->InsertNextId(index);
     ++index;
-    }
+  }
 }
 
 template <class Scalar>
@@ -293,7 +291,7 @@ vtkIdType vtkMDHWSignalArray<Scalar>::Lookup(const Scalar &val,
 
 //------------------------------------------------------------------------------
 template <class Scalar>
-Scalar vtkMDHWSignalArray<Scalar>::GetValue(vtkIdType idx) {
+Scalar vtkMDHWSignalArray<Scalar>::GetValue(vtkIdType idx) const {
   m_iterator->jumpTo(m_offset + idx);
   return m_iterator->getNormalizedSignal();
 }
@@ -307,8 +305,8 @@ Scalar &vtkMDHWSignalArray<Scalar>::GetValueReference(vtkIdType idx) {
 
 //------------------------------------------------------------------------------
 template <class Scalar>
-void vtkMDHWSignalArray<Scalar>::GetTupleValue(vtkIdType tupleId,
-                                               Scalar *tuple) {
+void vtkMDHWSignalArray<Scalar>::GetTypedTuple(vtkIdType tupleId,
+                                               Scalar *tuple) const {
   m_iterator->jumpTo(m_offset + tupleId);
   tuple[0] = m_iterator->getNormalizedSignal();
 }
@@ -454,19 +452,19 @@ template <class Scalar> void vtkMDHWSignalArray<Scalar>::RemoveLastTuple() {
 
 //------------------------------------------------------------------------------
 template <class Scalar>
-void vtkMDHWSignalArray<Scalar>::SetTupleValue(vtkIdType, const Scalar *) {
+void vtkMDHWSignalArray<Scalar>::SetTypedTuple(vtkIdType, const Scalar *) {
   vtkErrorMacro("Read only container.") return;
 }
 
 //------------------------------------------------------------------------------
 template <class Scalar>
-void vtkMDHWSignalArray<Scalar>::InsertTupleValue(vtkIdType, const Scalar *) {
+void vtkMDHWSignalArray<Scalar>::InsertTypedTuple(vtkIdType, const Scalar *) {
   vtkErrorMacro("Read only container.") return;
 }
 
 //------------------------------------------------------------------------------
 template <class Scalar>
-vtkIdType vtkMDHWSignalArray<Scalar>::InsertNextTupleValue(const Scalar *) {
+vtkIdType vtkMDHWSignalArray<Scalar>::InsertNextTypedTuple(const Scalar *) {
   vtkErrorMacro("Read only container.") return -1;
 }
 

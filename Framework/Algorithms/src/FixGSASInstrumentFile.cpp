@@ -27,16 +27,6 @@ DECLARE_ALGORITHM(FixGSASInstrumentFile)
 const size_t LINESIZE = 80;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-FixGSASInstrumentFile::FixGSASInstrumentFile() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-FixGSASInstrumentFile::~FixGSASInstrumentFile() {}
-
-//----------------------------------------------------------------------------------------------
 /** Implement abstract Algorithm methods
  */
 void FixGSASInstrumentFile::init() {
@@ -55,8 +45,6 @@ void FixGSASInstrumentFile::init() {
                                         FileProperty::Save, exts),
       "Name of the output GSAS instrument parameter file to have format "
       "fixed. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -108,8 +96,6 @@ void FixGSASInstrumentFile::exec() {
   }
 
   ofile.close();
-
-  return;
 }
 
 } // namespace Algorithms

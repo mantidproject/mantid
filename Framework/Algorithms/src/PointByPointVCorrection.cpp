@@ -25,7 +25,7 @@ using namespace API;
 PointByPointVCorrection::PointByPointVCorrection() : Algorithm() {}
 
 // Destructor
-PointByPointVCorrection::~PointByPointVCorrection() {}
+PointByPointVCorrection::~PointByPointVCorrection() = default;
 
 void PointByPointVCorrection::init() {
   declareProperty(
@@ -135,7 +135,7 @@ void PointByPointVCorrection::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   outputWS->setYUnitLabel("Counts normalised to a vanadium");
-  outputWS->isDistribution(false);
+  outputWS->setDistribution(false);
 }
 
 /** Checks that the axes of the input workspaces match and creates the output

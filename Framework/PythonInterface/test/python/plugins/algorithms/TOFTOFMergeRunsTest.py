@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.simpleapi import Load, DeleteWorkspace, AddSampleLogMultiple, \
     DeleteLog
@@ -33,11 +35,11 @@ class TOFTOFMergeRunsTest(unittest.TestCase):
 
         run_out = wsoutput.getRun()
         run_in = self._input_ws_base.getRun()
-        self.assertEqual(run_out.getLogData('wavelength').value, run_in.getLogData('wavelength').value)
+        self.assertAlmostEqual(run_out.getLogData('wavelength').value, run_in.getLogData('wavelength').value)
         self.assertEqual(run_out.getLogData('chopper_speed').value, run_in.getLogData('chopper_speed').value)
         self.assertEqual(run_out.getLogData('chopper_ratio').value, run_in.getLogData('chopper_ratio').value)
         self.assertEqual(run_out.getLogData('channel_width').value, run_in.getLogData('channel_width').value)
-        self.assertEqual(run_out.getLogData('Ei').value, run_in.getLogData('Ei').value)
+        self.assertAlmostEqual(run_out.getLogData('Ei').value, run_in.getLogData('Ei').value)
         self.assertEqual(run_out.getLogData('EPP').value, run_in.getLogData('EPP').value)
         self.assertEqual(run_out.getLogData('proposal_number').value, run_in.getLogData('proposal_number').value)
         self.assertEqual(run_out.getLogData('proposal_title').value, run_in.getLogData('proposal_title').value)
@@ -48,7 +50,7 @@ class TOFTOFMergeRunsTest(unittest.TestCase):
         self.assertEqual(run_out.getLogData('run_number').value,
                          str([run_in.getLogData('run_number').value, run_in_good.getLogData('run_number').value]))
 
-        self.assertEqual(run_out.getLogData('temperature').value, float(run_in.getLogData('temperature').value))
+        self.assertAlmostEqual(run_out.getLogData('temperature').value, float(run_in.getLogData('temperature').value))
         self.assertEqual(run_out.getLogData('duration').value,
                          float(run_in.getLogData('duration').value) + float(run_in_good.getLogData('duration').value))
         self.assertEqual(run_out.getLogData('run_start').value, run_in.getLogData('run_start').value)

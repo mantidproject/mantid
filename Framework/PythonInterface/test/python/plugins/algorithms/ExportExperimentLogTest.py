@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 import numpy
 from numpy import *
@@ -36,7 +38,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             lines = ifile.readlines()
             ifile.close()
         except IOError as err:
-            print "Unable to open file %s. " % (outfilename)
+            print("Unable to open file {0}.".format(outfilename))
             self.assertTrue(False)
             return
 
@@ -103,12 +105,11 @@ class ExportExperimentLogTest(unittest.TestCase):
         # Locate file
         outfilename = alg_test.getProperty("OutputFilename").value
         try:
-            print "Output file is %s. " % (outfilename)
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
         except IOError as err:
-            print "Unable to open file %s. " % (outfilename)
+            print("Unable to open file {0}.".format(outfilename))
             self.assertTrue(False)
             return
 
@@ -163,12 +164,11 @@ class ExportExperimentLogTest(unittest.TestCase):
         # Locate file
         outfilename = alg_test.getProperty("OutputFilename").value
         try:
-            print "Output file is %s. " % (outfilename)
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
         except IOError as err:
-            print "Unable to open file %s. " % (outfilename)
+            print("Unable to open file {0}.".format(outfilename))
             self.assertTrue(False)
             return
 
@@ -229,12 +229,11 @@ class ExportExperimentLogTest(unittest.TestCase):
         # Locate file
         outfilename = alg_test.getProperty("OutputFilename").value
         try:
-            print "Output file is %s. " % (outfilename)
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
         except IOError as err:
-            print "Unable to open file %s. " % (outfilename)
+            print("Unable to open file {0}.".format(outfilename))
             self.assertTrue(False)
             return
 
@@ -260,7 +259,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         now = datetime.datetime.now()
         nowstr = time.strftime("%Y_%B_%d_%H_%M")
         oldfilename = fileName + "_" + nowstr + fileExtension
-        print "Saved old file is %s. " % (oldfilename)
+        print("Saved old file is {0}. ".format(oldfilename))
         self.assertTrue(os.path.exists(oldfilename))
 
         # Remove generated files
@@ -294,12 +293,11 @@ class ExportExperimentLogTest(unittest.TestCase):
         # Locate file
         outfilename = alg_test.getProperty("OutputFilename").value.split(".txt")[0] + ".csv"
         try:
-            print "Output file is %s. " % (outfilename)
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
         except IOError as err:
-            print "Unable to open file %s. " % (outfilename)
+            print("Unable to open file {0}.".format(outfilename))
             self.assertTrue(False)
             return
 
@@ -377,7 +375,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             lines = ifile.readlines()
             ifile.close()
         except IOError as err:
-            print "Unable to open file %s. " % (outfilename)
+            print("Unable to open file {0}.".format(outfilename))
             self.assertTrue(False)
             return
 
@@ -493,7 +491,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             lines = ifile.readlines()
             ifile.close()
         except IOError as err:
-            print "Unable to open file %s. " % (outfilename)
+            print("Unable to open file {0}.".format(outfilename))
             self.assertTrue(False)
             return
 
@@ -589,7 +587,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             lines = ifile.readlines()
             ifile.close()
         except IOError as err:
-            print "Unable to open file %s. " % (outfilename)
+            print("Unable to open file {0}.".format(outfilename))
             self.assertTrue(False)
             return
 
@@ -650,12 +648,11 @@ class ExportExperimentLogTest(unittest.TestCase):
         # Locate file
         outfilename = alg_test.getProperty("OutputFilename").value
         try:
-            print "Output file is %s. " % (outfilename)
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
         except IOError as err:
-            print "Unable to open file %s. " % (outfilename)
+            print("Unable to open file {0}.".format(outfilename))
             self.assertTrue(False)
             return
 

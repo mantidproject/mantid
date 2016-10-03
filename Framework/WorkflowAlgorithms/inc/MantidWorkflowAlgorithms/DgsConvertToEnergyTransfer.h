@@ -35,8 +35,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport DgsConvertToEnergyTransfer : public API::Algorithm {
 public:
-  DgsConvertToEnergyTransfer();
-  ~DgsConvertToEnergyTransfer() override;
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

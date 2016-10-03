@@ -167,8 +167,7 @@ public:
                       groupWS->size());
 
     for (size_t i = 0; i < outWS->size(); ++i) {
-      std::cout << "Checking equivalent workspaces at index : " << i
-                << std::endl;
+      std::cout << "Checking equivalent workspaces at index : " << i << '\n';
       auto checkAlg =
           AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
       checkAlg->initialize();
@@ -203,8 +202,7 @@ public:
                       groupWS->size());
 
     for (size_t i = 0; i < outWS->size(); ++i) {
-      std::cout << "Checking equivalent workspaces at index : " << i
-                << std::endl;
+      std::cout << "Checking equivalent workspaces at index : " << i << '\n';
       auto checkAlg =
           AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
       checkAlg->initialize();

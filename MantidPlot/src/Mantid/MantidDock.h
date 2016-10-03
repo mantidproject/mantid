@@ -43,13 +43,9 @@ class QHBoxLayout;
 class QSignalMapper;
 class QSortFilterProxyModel;
 
-enum MantidItemSortScheme
-{
-  ByName, ByLastModified
-};
+enum MantidItemSortScheme { ByName, ByLastModified };
 
-class MantidDockWidget: public QDockWidget
-{
+class MantidDockWidget : public QDockWidget {
   Q_OBJECT
 public:
   MantidDockWidget(MantidUI *mui, ApplicationWindow *parent);
@@ -59,12 +55,12 @@ public:
   void dropEvent(QDropEvent *de) override;
 
 public slots:
-  void clickedWorkspace(QTreeWidgetItem*, int);
+  void clickedWorkspace(QTreeWidgetItem *, int);
   void saveWorkspaceGroup();
   void deleteWorkspaces();
   void renameWorkspace();
-  void populateChildData(QTreeWidgetItem* item);
-  void saveToProgram(const QString & name);
+  void populateChildData(QTreeWidgetItem *item);
+  void saveToProgram(const QString &name);
   void sortAscending();
   void sortDescending();
   void chooseByName();
@@ -72,7 +68,7 @@ public slots:
   void saveWorkspacesToFolder(const QString &folder);
 
 protected slots:
-  void popupMenu(const QPoint & pos);
+  void popupMenu(const QPoint &pos);
   void workspaceSelected();
 
 private slots:
@@ -85,9 +81,9 @@ private slots:
   void showDetectorTable();
   void convertToMatrixWorkspace();
   void convertMDHistoToMatrixWorkspace();
-  void updateTree();
+  void updateTreeOnADSUpdate();
   void incrementUpdateCount();
-  void recordWorkspaceRename(QString,QString);
+  void recordWorkspaceRename(QString, QString);
   void clearUB();
   void filterWorkspaceTree(const QString &text);
   void plotSurface();
@@ -97,32 +93,44 @@ private:
   void addSaveMenuOption(QString algorithmString, QString menuEntryName = "");
   void setTreeUpdating(const bool state);
   inline bool isTreeUpdating() const { return m_treeUpdating; }
-  void populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems, const QStringList & expanded);
-  MantidTreeWidgetItem * addTreeEntry(const std::pair<std::string,Mantid::API::Workspace_sptr> & item, QTreeWidgetItem* parent = NULL);
+  void updateTree();
+  void populateTopLevel(
+      const std::map<std::string, Mantid::API::Workspace_sptr> &topLevelItems,
+      const QStringList &expanded);
+  MantidTreeWidgetItem *
+  addTreeEntry(const std::pair<std::string, Mantid::API::Workspace_sptr> &item,
+               QTreeWidgetItem *parent = NULL);
   bool shouldBeSelected(QString name) const;
   void createWorkspaceMenuActions();
   void createSortMenuActions();
-  void setItemIcon(QTreeWidgetItem *item,  const std::string & wsID);
+  void setItemIcon(QTreeWidgetItem *item, const std::string &wsID);
 
-  void addMatrixWorkspaceMenuItems(QMenu *menu, const Mantid::API::MatrixWorkspace_const_sptr & matrixWS) const;
-  void addMDEventWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDEventWorkspace_const_sptr & mdeventWS) const;
-  void addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr & WS) const;
-  void addPeaksWorkspaceMenuItems(QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr & WS) const;
+  void addMatrixWorkspaceMenuItems(
+      QMenu *menu,
+      const Mantid::API::MatrixWorkspace_const_sptr &matrixWS) const;
+  void addMDEventWorkspaceMenuItems(
+      QMenu *menu,
+      const Mantid::API::IMDEventWorkspace_const_sptr &mdeventWS) const;
+  void addMDHistoWorkspaceMenuItems(
+      QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr &WS) const;
+  void addPeaksWorkspaceMenuItems(
+      QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr &WS) const;
   void addWorkspaceGroupMenuItems(
       QMenu *menu, const Mantid::API::WorkspaceGroup_const_sptr &groupWS) const;
-  void addTableWorkspaceMenuItems(QMenu * menu) const;
-  void addClearMenuItems(QMenu* menu, const QString& wsName);
+  void addTableWorkspaceMenuItems(QMenu *menu) const;
+  void addClearMenuItems(QMenu *menu, const QString &wsName);
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
+  void doPlotSpectra(bool errors);
 
 protected:
-  MantidTreeWidget * m_tree;
+  MantidTreeWidget *m_tree;
   friend class MantidUI;
 
 private:
   QString selectedWsName;
-  
-  MantidUI * const m_mantidUI;
+
+  MantidUI *const m_mantidUI;
 
   QPushButton *m_loadButton;
   QPushButton *m_saveButton;
@@ -149,16 +157,15 @@ private:
 
   QAtomicInt m_updateCount;
   bool m_treeUpdating;
-  Mantid::API::AnalysisDataServiceImpl & m_ads;
+  Mantid::API::AnalysisDataServiceImpl &m_ads;
   /// Temporarily keeps names of selected workspaces during tree update
   /// in order to restore selection after update
   QStringList m_selectedNames;
   /// Keep a map of renamed workspaces between updates
-  QMap<QString,QString> m_renameMap;
+  QMap<QString, QString> m_renameMap;
 };
 
-class MantidTreeWidget:public QTreeWidget
-{
+class MantidTreeWidget : public QTreeWidget {
   Q_OBJECT
 
 public:
@@ -170,12 +177,13 @@ public:
   QStringList getSelectedWorkspaceNames() const;
   MantidWSIndexWidget::UserInput
   chooseSpectrumFromSelected(bool showWaterfallOpt = true,
-                             bool showPlotAll = true) const;
+                             bool showPlotAll = true,
+                             bool showTiledOpt = true) const;
   void setSortScheme(MantidItemSortScheme);
   void setSortOrder(Qt::SortOrder);
   MantidItemSortScheme getSortScheme() const;
   Qt::SortOrder getSortOrder() const;
-  void logWarningMessage(const std::string&);
+  void logWarningMessage(const std::string &);
   void disableNodes(bool);
   void sort();
   void dropEvent(QDropEvent *de) override;
@@ -196,55 +204,53 @@ private:
   QPoint m_dragStartPosition;
   MantidDockWidget *m_dockWidget;
   MantidUI *m_mantidUI;
-  Mantid::API::AnalysisDataServiceImpl & m_ads;
+  Mantid::API::AnalysisDataServiceImpl &m_ads;
   MantidItemSortScheme m_sortScheme;
-  Qt::SortOrder m_sortOrder;  
+  Qt::SortOrder m_sortOrder;
 };
 
 /**A class derived from QTreeWidgetItem, to accomodate
  * sorting on the items in a MantidTreeWidget.
  */
-class MantidTreeWidgetItem : public QTreeWidgetItem
-{
+class MantidTreeWidgetItem : public QTreeWidgetItem {
 public:
   explicit MantidTreeWidgetItem(MantidTreeWidget *);
-  MantidTreeWidgetItem(QStringList, MantidTreeWidget*);
+  MantidTreeWidgetItem(QStringList, MantidTreeWidget *);
   void disableIfNode(bool);
-  void setSortPos(int o) {m_sortPos = o;}
-  int getSortPos() const {return m_sortPos;}
-
+  void setSortPos(int o) { m_sortPos = o; }
+  int getSortPos() const { return m_sortPos; }
 
 private:
   bool operator<(const QTreeWidgetItem &other) const override;
-  MantidTreeWidget* m_parent;
-  static Mantid::Kernel::DateAndTime getLastModified(const QTreeWidgetItem*);
+  MantidTreeWidget *m_parent;
+  static Mantid::Kernel::DateAndTime getLastModified(const QTreeWidgetItem *);
   int m_sortPos;
 };
 
-
-class AlgorithmDockWidget: public QDockWidget
-{
-    Q_OBJECT
+class AlgorithmDockWidget : public QDockWidget {
+  Q_OBJECT
 public:
-    AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w);
+  AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w);
 public slots:
-    void update();
-    void updateProgress(void* alg, const double p, const QString& msg, double estimatedTime, int progressPrecision);
-    void algorithmStarted(void* alg);
-    void algorithmFinished(void* alg);
+  void update();
+  void updateProgress(void *alg, const double p, const QString &msg,
+                      double estimatedTime, int progressPrecision);
+  void algorithmStarted(void *alg);
+  void algorithmFinished(void *alg);
+
 protected:
-    void showProgressBar();
-    void hideProgressBar();
+  void showProgressBar();
+  void hideProgressBar();
 
-    MantidQt::MantidWidgets::AlgorithmSelectorWidget * m_selector;
-    QPushButton *m_runningButton;
-    QProgressBar* m_progressBar;
-    QHBoxLayout * m_runningLayout;
-    QList<void*> m_algID;
-    friend class MantidUI;
+  MantidQt::MantidWidgets::AlgorithmSelectorWidget *m_selector;
+  QPushButton *m_runningButton;
+  QProgressBar *m_progressBar;
+  QHBoxLayout *m_runningLayout;
+  QList<void *> m_algID;
+  friend class MantidUI;
+
 private:
-    MantidUI *m_mantidUI;
+  MantidUI *m_mantidUI;
 };
-
 
 #endif

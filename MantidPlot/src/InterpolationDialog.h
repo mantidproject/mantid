@@ -2,7 +2,8 @@
     File                 : InterpolationDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Interpolation options dialog
 
@@ -39,32 +40,28 @@ class Graph;
 class ColorBox;
 
 //! Interpolation options dialog
-class InterpolationDialog : public QDialog
-{
-    Q_OBJECT
+class InterpolationDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    InterpolationDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
+  InterpolationDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
 
 public slots:
-	void activateCurve(const QString& curveName);
-	void setGraph(Graph *g);
-	void interpolate();
-	void changeDataRange();
+  void activateCurve(const QString &curveName);
+  void setGraph(Graph *g);
+  void interpolate();
+  void changeDataRange();
 
 private:
-	Graph *graph;
-	QPushButton* buttonFit;
-	QPushButton* buttonCancel;
-	QComboBox* boxName;
-	QComboBox* boxMethod;
-	QSpinBox* boxPoints;
-	QLineEdit* boxStart;
-	QLineEdit* boxEnd;
-	ColorBox* boxColor;
+  Graph *graph;
+  QPushButton *buttonFit;
+  QPushButton *buttonCancel;
+  QComboBox *boxName;
+  QComboBox *boxMethod;
+  QSpinBox *boxPoints;
+  QLineEdit *boxStart;
+  QLineEdit *boxEnd;
+  ColorBox *boxColor;
 };
 
 #endif
-
-
-

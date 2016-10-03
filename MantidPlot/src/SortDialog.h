@@ -2,7 +2,8 @@
     File                 : SortDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Sort table dialog
 
@@ -35,26 +36,25 @@ class QPushButton;
 class QComboBox;
 
 //! Sorting options dialog
-class SortDialog : public QDialog
-{
+class SortDialog : public QDialog {
   Q_OBJECT
 
 public:
-  SortDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
-  void insertColumnsList(const QStringList& cols);
+  SortDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
+  void insertColumnsList(const QStringList &cols);
 
 private slots:
   void accept() override;
   void changeType(int index);
 
 signals:
-  void sort(int, int, const QString&);
+  void sort(int, int, const QString &);
 
 private:
-  QPushButton* buttonOk;
-  QPushButton* buttonCancel;
-  QComboBox* boxType;
-  QComboBox* boxOrder;
+  QPushButton *buttonOk;
+  QPushButton *buttonCancel;
+  QComboBox *boxType;
+  QComboBox *boxOrder;
   QComboBox *columnsList;
 };
 

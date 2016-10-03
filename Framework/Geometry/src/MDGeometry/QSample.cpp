@@ -17,6 +17,8 @@ Kernel::UnitLabel QSample::getUnitLabel() const {
 
 const Kernel::MDUnit &QSample::getMDUnit() const { return *m_unit; }
 
+bool QSample::setMDUnit(const Mantid::Kernel::MDUnit &) { return false; }
+
 bool QSample::canConvertTo(const Kernel::MDUnit &otherUnit) const {
   return this->getMDUnit() == otherUnit;
 }

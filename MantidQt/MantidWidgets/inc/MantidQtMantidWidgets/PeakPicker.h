@@ -10,87 +10,85 @@
 #include <qwt_plot_marker.h>
 #include <qwt_plot_picker.h>
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
+namespace MantidQt {
+namespace MantidWidgets {
 
-  /** PeakPicker : A simplified version of PeakPickerTool, available for use on general QwtPlots.
-    
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+/** PeakPicker : A simplified version of PeakPickerTool, available for use on
+  general QwtPlots.
 
-    This file is part of Mantid.
+  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+  This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PeakPicker : public QwtPlotPicker, public QwtPlotItem
-  {
-    Q_OBJECT
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  public:
-    /// Constructor
-    PeakPicker(QwtPlot* plot, QColor color);
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PeakPicker : public QwtPlotPicker,
+                                                     public QwtPlotItem {
+  Q_OBJECT
 
-    /// Correct QwtPlotItem type info
-    int rtti() const override { return QwtPlotItem::Rtti_PlotMarker; }
+public:
+  /// Constructor
+  PeakPicker(QwtPlot *plot, QColor color);
 
-    /// Draw the peak picker
-    /// @see QwtPlotItem::draw
-    void draw(QPainter *painter, const QwtScaleMap &xMap,
-              const QwtScaleMap &yMap, const QRect &canvasRect) const override;
+  /// Correct QwtPlotItem type info
+  int rtti() const override { return QwtPlotItem::Rtti_PlotMarker; }
 
-    /// @return Currently represented peak
-    Mantid::API::IPeakFunction_const_sptr peak() const;
+  /// Draw the peak picker
+  /// @see QwtPlotItem::draw
+  void draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+            const QRect &canvasRect) const override;
 
-    /// @param peak :: New peak to represent
-    void setPeak(const Mantid::API::IPeakFunction_const_sptr& peak);
+  /// @return Currently represented peak
+  Mantid::API::IPeakFunction_const_sptr peak() const;
 
-  signals:
-    /// Emitted when the peak picker is moved or resized in any way
-    void changed();
+  /// @param peak :: New peak to represent
+  void setPeak(const Mantid::API::IPeakFunction_const_sptr &peak);
 
-  private:
-    /// Size of the dragging region. Bigger value means it's easier to hit the dragging area, though
-    /// harder to get to the right element if there are lots of them.
-    static const double DRAG_SENSITIVITY;
+signals:
+  /// Emitted when the peak picker is moved or resized in any way
+  void changed();
 
-    /// Default cursor to use when not dragging
-    static const Qt::CursorShape DEFAULT_CURSOR;
+private:
+  /// Size of the dragging region. Bigger value means it's easier to hit the
+  /// dragging area, though
+  /// harder to get to the right element if there are lots of them.
+  static const double DRAG_SENSITIVITY;
 
-    /// Event filter installed for the plot
-    bool eventFilter(QObject *object, QEvent *event) override;
+  /// Default cursor to use when not dragging
+  static const Qt::CursorShape DEFAULT_CURSOR;
 
-    /// The plot peak picker operates on
-    QwtPlot* m_plot;
+  /// Event filter installed for the plot
+  bool eventFilter(QObject *object, QEvent *event) override;
 
-    /// Pens used for drawing
-    QPen m_basePen, m_widthPen;
+  /// The plot peak picker operates on
+  QwtPlot *m_plot;
 
-    /// Dragging status flags
-    bool m_isMoving, m_isResizing;
+  /// Pens used for drawing
+  QPen m_basePen, m_widthPen;
 
-    /// Currently represented peak
-    Mantid::API::IPeakFunction_sptr m_peak;
-  };
+  /// Dragging status flags
+  bool m_isMoving, m_isResizing;
 
-
-
+  /// Currently represented peak
+  Mantid::API::IPeakFunction_sptr m_peak;
+};
 
 } // namespace MantidWidgets
 } // namespace MantidQt
 
-#endif  /* MANTIDQT_MANTIDWIDGETS_PEAKPICKER_H_ */
+#endif /* MANTIDQT_MANTIDWIDGETS_PEAKPICKER_H_ */

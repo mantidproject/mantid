@@ -2,15 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/LogManager.h"
-#include "MantidAPI/PropertyNexus.h"
+#include "MantidKernel/PropertyNexus.h"
 
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-
-#include <nexus/NeXusFile.hpp>
-
-#include <algorithm>
 
 namespace Mantid {
 namespace API {
@@ -20,6 +14,75 @@ using namespace Kernel;
 namespace {
 /// static logger
 Logger g_log("LogManager");
+
+/// Templated method to convert property to double
+template <typename T>
+bool convertSingleValue(const Property *property, double &value) {
+  if (auto log = dynamic_cast<const PropertyWithValue<T> *>(property)) {
+    value = static_cast<double>(*log);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/// Templated method to convert time series property to single double
+template <typename T>
+bool convertTimeSeriesToDouble(const Property *property, double &value,
+                               const Math::StatisticType &function) {
+  if (const auto *log = dynamic_cast<const TimeSeriesProperty<T> *>(property)) {
+    switch (function) {
+    case Math::TimeAveragedMean:
+      value = static_cast<double>(log->timeAverageValue());
+      break;
+    case Math::FirstValue:
+      value = static_cast<double>(log->firstValue());
+      break;
+    case Math::LastValue:
+      value = static_cast<double>(log->lastValue());
+      break;
+    case Math::Maximum:
+      value = static_cast<double>(log->maxValue());
+      break;
+    case Math::Minimum:
+      value = static_cast<double>(log->minValue());
+      break;
+    case Math::Mean:
+      value = log->getStatistics().mean;
+      break;
+    case Math::Median:
+      value = log->getStatistics().median;
+      break;
+    default: // should not happen
+      throw std::invalid_argument("Statistic type not recognised/supported");
+    }
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/// Templated method to convert a property to a single double
+template <typename T>
+bool convertPropertyToDouble(const Property *property, double &value,
+                             const Math::StatisticType &function) {
+  return convertSingleValue<T>(property, value) ||
+         convertTimeSeriesToDouble<T>(property, value, function);
+}
+
+/// Converts a property to a single double
+bool convertPropertyToDouble(const Property *property, double &value,
+                             const Math::StatisticType &function) {
+  // Order these with double and int first, and less likely options later.
+  // The first one to succeed short-circuits and the value is returned.
+  // If all fail, returns false.
+  return convertPropertyToDouble<double>(property, value, function) ||
+         convertPropertyToDouble<int32_t>(property, value, function) ||
+         convertPropertyToDouble<int64_t>(property, value, function) ||
+         convertPropertyToDouble<uint32_t>(property, value, function) ||
+         convertPropertyToDouble<uint64_t>(property, value, function) ||
+         convertPropertyToDouble<float>(property, value, function);
+}
 }
 
 /// Name of the log entry containing the proton charge when retrieved using
@@ -268,20 +331,53 @@ double LogManager::getPropertyAsSingleValue(
   const auto key = std::make_pair(name, statistic);
   if (!m_singleValueCache.getCache(key, singleValue)) {
     const Property *log = getProperty(name);
-    if (auto singleDouble =
-            dynamic_cast<const PropertyWithValue<double> *>(log)) {
-      singleValue = (*singleDouble)();
-    } else if (auto seriesDouble =
-                   dynamic_cast<const TimeSeriesProperty<double> *>(log)) {
-      singleValue = Mantid::Kernel::filterByStatistic(seriesDouble, statistic);
-    } else {
-      throw std::invalid_argument(
-          "Run::getPropertyAsSingleValue - Property \"" + name +
-          "\" is not a single double or time series double.");
+    if (!convertPropertyToDouble(log, singleValue, statistic)) {
+      if (const auto stringLog =
+              dynamic_cast<const PropertyWithValue<std::string> *>(log)) {
+        // Try to lexically cast string to a double
+        try {
+          singleValue = std::stod(stringLog->value());
+        } catch (const std::invalid_argument &) {
+          throw std::invalid_argument(
+              "Run::getPropertyAsSingleValue - Property \"" + name +
+              "\" cannot be converted to a numeric value.");
+        }
+      } else {
+        throw std::invalid_argument(
+            "Run::getPropertyAsSingleValue - Property \"" + name +
+            "\" is not a single numeric value or numeric time series.");
+      }
     }
     // Put it in the cache
     m_singleValueCache.setCache(key, singleValue);
   }
+  return singleValue;
+}
+
+/**
+ * Returns a property as a n integer, if the underlying value is an integer.
+ * Throws otherwise.
+ * @param name :: The name of the property
+ * @return A single integer value
+ * @throws std::invalid_argument if property is not an integer type
+ */
+int LogManager::getPropertyAsIntegerValue(const std::string &name) const {
+  int singleValue(0);
+  double discard(0);
+
+  Property *prop = getProperty(name);
+
+  if (convertSingleValue<int32_t>(prop, discard) ||
+      convertSingleValue<int64_t>(prop, discard) ||
+      convertSingleValue<uint32_t>(prop, discard) ||
+      convertSingleValue<uint64_t>(prop, discard)) {
+    singleValue = std::stoi(prop->value());
+  } else {
+    throw std::invalid_argument("Run::getPropertyAsIntegerValue - Property \"" +
+                                name +
+                                "\" cannot be converted to an integer value.");
+  }
+
   return singleValue;
 }
 
@@ -343,7 +439,7 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group,
   std::vector<Property *> props = m_manager.getProperties();
   for (auto &prop : props) {
     try {
-      PropertyNexus::saveProperty(file, prop);
+      prop->saveProperty(file);
     } catch (std::invalid_argument &exc) {
       g_log.warning(exc.what());
     }
@@ -371,8 +467,7 @@ void LogManager::loadNexus(::NeXus::File *file, const std::string &group,
   for (const auto &name_class : entries) {
     // NXLog types are the main one.
     if (name_class.second == "NXlog") {
-      auto prop = std::unique_ptr<Property>(
-          PropertyNexus::loadProperty(file, name_class.first));
+      auto prop = PropertyNexus::loadProperty(file, name_class.first);
       if (prop) {
         if (m_manager.existsProperty(prop->name())) {
           m_manager.removeProperty(prop->name());
@@ -403,8 +498,8 @@ void LogManager::clearLogs() { m_manager.clear(); }
   LogManager::getPropertyValueAsType(const std::string &) const;
 
 INSTANTIATE(double)
-INSTANTIATE(int)
-INSTANTIATE(long)
+INSTANTIATE(int32_t)
+INSTANTIATE(int64_t)
 INSTANTIATE(uint32_t)
 INSTANTIATE(uint64_t)
 INSTANTIATE(std::string)

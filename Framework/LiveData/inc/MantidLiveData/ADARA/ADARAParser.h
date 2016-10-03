@@ -1,10 +1,10 @@
 #ifndef __ADARA_PARSER_H
 #define __ADARA_PARSER_H
 
-#include <string>
-#include <stdint.h>
-#include <stdexcept>
+#include <cstdint>
 #include <map>
+#include <stdexcept>
+#include <string>
 
 #include "ADARA.h"
 #include "ADARAPackets.h"
@@ -71,13 +71,13 @@ protected:
     * new data has been placed in the buffer.
     **/
   /**@{*/
-  uint8_t *bufferFillAddress(void) const {
+  uint8_t *bufferFillAddress() const {
     if (bufferFillLength())
       return m_buffer + m_len;
     return nullptr;
   }
 
-  unsigned int bufferFillLength(void) const { return m_size - m_len; }
+  unsigned int bufferFillLength() const { return m_size - m_len; }
 
   void bufferBytesAppended(unsigned int count) {
     if (bufferFillLength() < count) {
@@ -106,7 +106,7 @@ protected:
 
   /** Flush the internal buffers and get ready to restart parsing.
     **/
-  virtual void reset(void);
+  virtual void reset();
 
   /** @name Generic rxPacket Functions
     * The rxPacket function gets called for every packet that fits in the
@@ -180,7 +180,7 @@ protected:
 
   /* Reset the collected "discarded packet" statistics.
     */
-  void resetDiscardedPacketsStats(void);
+  void resetDiscardedPacketsStats();
 
 private:
   uint8_t *m_buffer;

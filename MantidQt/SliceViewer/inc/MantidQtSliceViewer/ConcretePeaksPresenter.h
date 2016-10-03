@@ -18,7 +18,7 @@ typedef std::vector<boost::shared_ptr<PeakOverlayView>> VecPeakOverlayView;
 
 /// Coordinate System Enum to String.
 std::string DLLExport
-    coordinateToString(Mantid::Kernel::SpecialCoordinateSystem coordSystem);
+coordinateToString(Mantid::Kernel::SpecialCoordinateSystem coordSystem);
 
 /*---------------------------------------------------------
 ConcretePeaksPresenter
@@ -111,10 +111,8 @@ private:
   /// Find visible peak indexes.
   std::vector<size_t> findVisiblePeakIndexes(const PeakBoundingBox &box);
   /// Set the visible peak list.
-  void setVisiblePeaks(const std::vector<size_t>& indexes);
+  void setVisiblePeaks(const std::vector<size_t> &indexes);
 };
-
-
 }
 }
 

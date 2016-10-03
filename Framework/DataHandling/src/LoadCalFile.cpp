@@ -22,16 +22,6 @@ namespace DataHandling {
 DECLARE_ALGORITHM(LoadCalFile)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadCalFile::LoadCalFile() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadCalFile::~LoadCalFile() {}
-
-//----------------------------------------------------------------------------------------------
 /** For use by getInstrument3Ways, initializes the properties
  * @param alg :: algorithm to which to add the properties.
  * */

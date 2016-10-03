@@ -15,12 +15,6 @@ DECLARE_ALGORITHM(MaskDetectorsInShape)
 using namespace Kernel;
 using namespace API;
 
-/// (Empty) Constructor
-MaskDetectorsInShape::MaskDetectorsInShape() {}
-
-/// Destructor
-MaskDetectorsInShape::~MaskDetectorsInShape() {}
-
 void MaskDetectorsInShape::init() {
   declareProperty(
       make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),

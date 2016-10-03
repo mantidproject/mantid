@@ -1,15 +1,12 @@
 #ifndef TIMECONTROLWIDGET_H_
-#define	TIMECONTROLWIDGET_H_
+#define TIMECONTROLWIDGET_H_
 
 #include "ui_TimeControlWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
-namespace Mantid
-{
-namespace Vates
-{
-namespace SimpleGui
-{
+namespace Mantid {
+namespace Vates {
+namespace SimpleGui {
 
 /**
  *
@@ -18,7 +15,8 @@ namespace SimpleGui
  @author Michael Reuter
  @date 24/05/2011
 
- Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -38,8 +36,8 @@ namespace SimpleGui
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS TimeControlWidget : public QWidget
-{
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS TimeControlWidget
+    : public QWidget {
   Q_OBJECT
 
 public:
@@ -58,9 +56,8 @@ public slots:
 private:
   Ui::TimeControlWidgetClass ui; ///< The time control widget's UI form
 };
-
 }
 }
 }
 
-#endif	// TIMECONTROLWIDGET_H_
+#endif // TIMECONTROLWIDGET_H_

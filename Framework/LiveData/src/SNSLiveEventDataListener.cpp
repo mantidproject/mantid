@@ -1,7 +1,7 @@
-#include <time.h>
+#include <ctime>
+#include <exception>
 #include <sstream> // for ostringstream
 #include <string>
-#include <exception>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -110,7 +110,7 @@ SNSLiveEventDataListener::~SNSLiveEventDataListener() {
       g_log.fatal() << "SNSLiveEventDataListener failed to shut down its "
                     << "background thread!  This should never happen and "
                     << "Mantid is pretty much guaranteed to crash shortly.  "
-                    << "Talk to the Mantid developer team." << std::endl;
+                    << "Talk to the Mantid developer team.\n";
     }
   }
 }
@@ -140,24 +140,22 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     try {
       m_socket.connect(tempAddress); // BLOCKING connect
     } catch (...) {
-      g_log.error() << "Connection to " << tempAddress.toString() << " failed."
-                    << std::endl;
+      g_log.error() << "Connection to " << tempAddress.toString()
+                    << " failed.\n";
       return false;
     }
   } else {
     try {
       m_socket.connect(address); // BLOCKING connect
     } catch (...) {
-      g_log.debug() << "Connection to " << address.toString() << " failed."
-                    << std::endl;
+      g_log.debug() << "Connection to " << address.toString() << " failed.\n";
       return false;
     }
   }
 
   m_socket.setReceiveTimeout(Poco::Timespan(
       RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
-  g_log.debug() << "Connected to " << m_socket.address().toString()
-                << std::endl;
+  g_log.debug() << "Connected to " << m_socket.address().toString() << '\n';
 
   rv = m_isConnected = true;
   return rv;
@@ -332,11 +330,9 @@ void SNSLiveEventDataListener::run() {
         " Thread is exiting.");
     m_isConnected = false;
 
-    m_backgroundException = boost::shared_ptr<std::runtime_error>(
-        new std::runtime_error("Unknown error in backgound thread"));
+    m_backgroundException = boost::make_shared<std::runtime_error>(
+        "Unknown error in backgound thread");
   }
-
-  return;
 }
 
 /// Parse a banked event packet
@@ -479,11 +475,11 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
     if (monitorID > 5) {
       // Currently, we only handle monitors 0-5.  At the present time, that's
       // sufficient.
-      g_log.error() << "Mantid cannot handle monitor ID's higher than 5.  If "
-                    << monitorID << " is actually valid, then an appropriate "
-                                    "entry must be made to the "
-                    << " ADDABLE list at the top of Framework/API/src/Run.cpp"
-                    << std::endl;
+      g_log.error()
+          << "Mantid cannot handle monitor ID's higher than 5.  If "
+          << monitorID << " is actually valid, then an appropriate "
+                          "entry must be made to the "
+          << " ADDABLE list at the top of Framework/API/src/Run.cpp\n";
     } else {
       std::string monName("monitor");
       monName += static_cast<char>(
@@ -513,7 +509,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
         while (pkt.nextEvent(risingEdge, cycle, tof)) {
           // Add the event. Note that they're in units of 100 ns in the packet,
           // need to change to microseconds.
-          monitorBuffer->getEventList(it->second)
+          monitorBuffer->getSpectrum(it->second)
               .addEventQuickly(DataObjects::TofEvent(tof / 10.0, pktTime));
         }
       } else {
@@ -655,7 +651,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
       // not.
       g_log.warning()
           << "Unexpected start of run.  Run status should have been " << NoRun
-          << " (NoRun), but was " << m_status << std::endl;
+          << " (NoRun), but was " << m_status << '\n';
     }
 
     if (m_workspaceInitialized) {
@@ -768,8 +764,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
       // warning if it's not.  (If it's BeginRun, that's fine.  Itjust means
       // that the run ended before extractData() was called.)
       g_log.warning() << "Unexpected end of run.  Run status should have been "
-                      << Running << " (Running), but was " << m_status
-                      << std::endl;
+                      << Running << " (Running), but was " << m_status << '\n';
     }
     m_status = EndRun;
 
@@ -823,7 +818,7 @@ void SNSLiveEventDataListener::setRunDetails(const ADARA::RunStatusPkt &pkt) {
   m_runNumber = pkt.runNumber();
   m_eventBuffer->mutableRun().addProperty(
       "run_number", Strings::toString<int>(pkt.runNumber()));
-  g_log.notice() << "Run number is " << m_runNumber << std::endl;
+  g_log.notice() << "Run number is " << m_runNumber << '\n';
 
   // runStart() is in the EPICS epoch - ie Jan 1, 1990.  Convert to Unix epoch
   time_t runStartTime = pkt.runStart() + ADARA::EPICS_EPOCH_OFFSET;
@@ -862,11 +857,10 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableU32Pkt &pkt) {
         m_nameMap.find(std::make_pair(devId, pvId));
 
     if (it == m_nameMap.end()) {
-      g_log.error()
-          << "Ignoring variable value packet for device " << devId
-          << ", variable " << pvId
-          << " because we haven't received a device descriptor packet for it."
-          << std::endl;
+      g_log.error() << "Ignoring variable value packet for device " << devId
+                    << ", variable " << pvId
+                    << " because we haven't received a device descriptor "
+                       "packet for it.\n";
     } else {
       {
         std::lock_guard<std::mutex> scopedLock(m_mutex);
@@ -913,11 +907,10 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableDoublePkt &pkt) {
         m_nameMap.find(std::make_pair(devId, pvId));
 
     if (it == m_nameMap.end()) {
-      g_log.error()
-          << "Ignoring variable value packet for device " << devId
-          << ", variable " << pvId
-          << " because we haven't received a device descriptor packet for it."
-          << std::endl;
+      g_log.error() << "Ignoring variable value packet for device " << devId
+                    << ", variable " << pvId
+                    << " because we haven't received a device descriptor "
+                       "packet for it.\n";
     } else {
       {
         std::lock_guard<std::mutex> scopedLock(m_mutex);
@@ -967,11 +960,10 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::VariableStringPkt &pkt) {
         m_nameMap.find(std::make_pair(devId, pvId));
 
     if (it == m_nameMap.end()) {
-      g_log.error()
-          << "Ignoring variable value packet for device " << devId
-          << ", variable " << pvId
-          << " because we haven't received a device descriptor packet for it."
-          << std::endl;
+      g_log.error() << "Ignoring variable value packet for device " << devId
+                    << ", variable " << pvId
+                    << " because we haven't received a device descriptor "
+                       "packet for it.\n";
     } else {
       {
         std::lock_guard<std::mutex> scopedLock(m_mutex);
@@ -1078,8 +1070,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
           pvName = "<UNKNOWN>";
         }
         g_log.warning() << "Ignoring process variable " << pvName
-                        << " because it was missing required fields."
-                        << std::endl;
+                        << " because it was missing required fields.\n";
       } else {
         // Check the nameMap - we may have already received a description for
         // this
@@ -1112,7 +1103,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
             // invalid type string
             g_log.warning() << "Ignoring process variable " << pvName
                             << " because it had an unrecognized type ("
-                            << pvType << ")." << std::endl;
+                            << pvType << ").\n";
           }
 
           if (prop) {
@@ -1173,21 +1164,21 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
       m_eventBuffer->mutableRun()
           .getTimeSeriesProperty<int>(SCAN_PROPERTY)
           ->addValue(timeFromPacket(pkt), pkt.scanIndex());
-      g_log.information() << "Scan Start: " << pkt.scanIndex() << std::endl;
+      g_log.information() << "Scan Start: " << pkt.scanIndex() << '\n';
       break;
 
     case ADARA::MarkerType::SCAN_STOP:
       m_eventBuffer->mutableRun()
           .getTimeSeriesProperty<int>(SCAN_PROPERTY)
           ->addValue(timeFromPacket(pkt), 0);
-      g_log.information() << "Scan Stop:  " << pkt.scanIndex() << std::endl;
+      g_log.information() << "Scan Stop:  " << pkt.scanIndex() << '\n';
       break;
 
     case ADARA::MarkerType::PAUSE:
       m_eventBuffer->mutableRun()
           .getTimeSeriesProperty<int>(PAUSE_PROPERTY)
           ->addValue(timeFromPacket(pkt), 1);
-      g_log.information() << "Run paused" << std::endl;
+      g_log.information() << "Run paused\n";
       m_runPaused = true;
       break;
 
@@ -1195,7 +1186,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
       m_eventBuffer->mutableRun()
           .getTimeSeriesProperty<int>(PAUSE_PROPERTY)
           ->addValue(timeFromPacket(pkt), 0);
-      g_log.information() << "Run resumed" << std::endl;
+      g_log.information() << "Run resumed\n";
       m_runPaused = false;
       break;
 
@@ -1208,7 +1199,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
   // if there's a comment in the packet, log it at the info level
   std::string comment = pkt.comment();
   if (comment.size() > 0) {
-    g_log.information() << "Annotation: " << comment << std::endl;
+    g_log.information() << "Annotation: " << comment << '\n';
   }
 
   return false;
@@ -1261,8 +1252,14 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
   // (at the start of another run, for example), the list will be
   // repopulated when we receive the next geometry packet.
 
-  m_eventBuffer->padSpectra(); // expands the workspace to the size of the just
-                               // loaded instrument
+  auto tmp = createWorkspace<DataObjects::EventWorkspace>(
+      m_eventBuffer->getInstrument()->getDetectorIDs(true).size(), 2, 1);
+  WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer, tmp, true);
+  if (m_eventBuffer->getNumberHistograms() != tmp->getNumberHistograms()) {
+    // need to generate the spectra to detector map
+    tmp->rebuildSpectraMapping();
+  }
+  m_eventBuffer = std::move(tmp);
 
   // Set the units
   m_eventBuffer->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
@@ -1299,7 +1296,7 @@ void SNSLiveEventDataListener::initMonitorWorkspace() {
                                                     monitorsBuffer, true);
   // Set the id numbers
   for (size_t i = 0; i < monitors.size(); ++i) {
-    monitorsBuffer->getSpectrum(i)->setDetectorID(monitors[i]);
+    monitorsBuffer->getSpectrum(i).setDetectorID(monitors[i]);
   }
 
   m_monitorIndexMap = monitorsBuffer->getDetectorIDToWorkspaceIndexMap(true);
@@ -1342,10 +1339,10 @@ void SNSLiveEventDataListener::appendEvent(
   if (it != m_indexMap.end()) {
     std::size_t workspaceIndex = it->second;
     Mantid::DataObjects::TofEvent event(tof, pulseTime);
-    m_eventBuffer->getEventList(workspaceIndex).addEventQuickly(event);
+    m_eventBuffer->getSpectrum(workspaceIndex).addEventQuickly(event);
   } else {
     g_log.warning() << "Invalid pixel ID: " << pixelId << " (TofF: " << tof
-                    << " microseconds)" << std::endl;
+                    << " microseconds)\n";
   }
 }
 

@@ -5,6 +5,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/DateAndTime.h"
 
@@ -13,44 +14,69 @@
 #include <QDoubleValidator>
 #include <QLineEdit>
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-namespace MuonAnalysisHelper
-{
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace Muon {
+/// Types of entities we are dealing with
+enum ItemType { Pair, Group };
 
-using namespace Mantid::API;
-using namespace Mantid::Kernel;
+/// Possible plot types users might request
+enum PlotType { Asymmetry, Counts, Logarithm };
+
+/// Parameters from parsed workspace name
+struct DatasetParams {
+  std::string label;
+  std::string instrument;
+  std::vector<int> runs;
+  ItemType itemType;
+  std::string itemName;
+  PlotType plotType;
+  std::string periods;
+  size_t version;
+};
+}
+namespace MuonAnalysisHelper {
 
 /// Sets double validator for specified field
-MANTIDQT_CUSTOMINTERFACES_DLL void setDoubleValidator(QLineEdit* field, bool allowEmpty = false);
+MANTIDQT_CUSTOMINTERFACES_DLL void setDoubleValidator(QLineEdit *field,
+                                                      bool allowEmpty = false);
 
 /// Returns a first period MatrixWorkspace in a run workspace
-MANTIDQT_CUSTOMINTERFACES_DLL MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws);
+MANTIDQT_CUSTOMINTERFACES_DLL Mantid::API::MatrixWorkspace_sptr
+firstPeriod(Mantid::API::Workspace_sptr ws);
 
 /// Validates the field and returns the value
-MANTIDQT_CUSTOMINTERFACES_DLL double getValidatedDouble(QLineEdit* field, const QString& defaultValue,
-                                    const QString& valueDescr, Logger& log);
+MANTIDQT_CUSTOMINTERFACES_DLL double
+getValidatedDouble(QLineEdit *field, const QString &defaultValue,
+                   const QString &valueDescr, Mantid::Kernel::Logger &log);
 
 /// Returns a number of periods in a run workspace
-MANTIDQT_CUSTOMINTERFACES_DLL size_t numPeriods(Workspace_sptr ws);
+MANTIDQT_CUSTOMINTERFACES_DLL size_t numPeriods(Mantid::API::Workspace_sptr ws);
 
 /// Print various information about the run
-MANTIDQT_CUSTOMINTERFACES_DLL void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream& out);
+MANTIDQT_CUSTOMINTERFACES_DLL void
+printRunInfo(Mantid::API::MatrixWorkspace_sptr runWs, std::ostringstream &out);
 
 /// Get a run label for the workspace
-MANTIDQT_CUSTOMINTERFACES_DLL std::string getRunLabel(const Workspace_sptr& ws);
+MANTIDQT_CUSTOMINTERFACES_DLL std::string
+getRunLabel(const Mantid::API::Workspace_sptr &ws);
 
 /// Get a run label for a list of workspaces
-MANTIDQT_CUSTOMINTERFACES_DLL std::string getRunLabel(std::vector<Workspace_sptr> wsList);
+MANTIDQT_CUSTOMINTERFACES_DLL std::string
+getRunLabel(const std::vector<Mantid::API::Workspace_sptr> &wsList);
+
+/// Get a run label given instrument and run numbers
+MANTIDQT_CUSTOMINTERFACES_DLL std::string
+getRunLabel(const std::string &instrument, const std::vector<int> &runNumbers);
 
 /// Sums a list of workspaces together
-MANTIDQT_CUSTOMINTERFACES_DLL Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr>& workspaces);
+MANTIDQT_CUSTOMINTERFACES_DLL Mantid::API::Workspace_sptr
+sumWorkspaces(const std::vector<Mantid::API::Workspace_sptr> &workspaces);
 
 /// Makes sure the specified workspaces are in specified group
-MANTIDQT_CUSTOMINTERFACES_DLL void groupWorkspaces(const std::string& groupName,
-                                                   const std::vector<std::string>& inputWorkspaces);
+MANTIDQT_CUSTOMINTERFACES_DLL void
+groupWorkspaces(const std::string &groupName,
+                const std::vector<std::string> &inputWorkspaces);
 
 /// Finds runs of consecutive numbers
 MANTIDQT_CUSTOMINTERFACES_DLL std::vector<std::pair<int, int>>
@@ -82,24 +108,50 @@ appendTimeSeriesLogs(boost::shared_ptr<Mantid::API::Workspace> toAppend,
                      boost::shared_ptr<Mantid::API::Workspace> resultant,
                      const std::string &logName);
 
+/// Parse analysis workspace name
+MANTIDQT_CUSTOMINTERFACES_DLL MantidQt::CustomInterfaces::Muon::DatasetParams
+parseWorkspaceName(const std::string &wsName);
+
+/// Generate new analysis workspace name
+MANTIDQT_CUSTOMINTERFACES_DLL std::string generateWorkspaceName(
+    const MantidQt::CustomInterfaces::Muon::DatasetParams &params);
+
+/// Get "run: period" string from workspace name
+MANTIDQT_CUSTOMINTERFACES_DLL QString
+runNumberString(const std::string &workspaceName, const std::string &firstRun);
+
+/// Decide if grouping needs to be reloaded
+MANTIDQT_CUSTOMINTERFACES_DLL bool isReloadGroupingNecessary(
+    const boost::shared_ptr<Mantid::API::Workspace> currentWorkspace,
+    const boost::shared_ptr<Mantid::API::Workspace> loadedWorkspace);
+
+/// Parse run label into instrument and runs
+MANTIDQT_CUSTOMINTERFACES_DLL void parseRunLabel(const std::string &label,
+                                                 std::string &instrument,
+                                                 std::vector<int> &runNumbers);
+
+/// Get colors for workspaces to go in table
+MANTIDQT_CUSTOMINTERFACES_DLL QMap<int, QColor> getWorkspaceColors(
+    const std::vector<boost::shared_ptr<Mantid::API::Workspace>> &workspaces);
+
 /**
  * A class which deals with auto-saving the widget values. Widgets are
  * registered and then on any
  * change, their value is stored using QSettings.
  */
-class MANTIDQT_CUSTOMINTERFACES_DLL WidgetAutoSaver : QObject
-{
+class MANTIDQT_CUSTOMINTERFACES_DLL WidgetAutoSaver : QObject {
   Q_OBJECT
 
 public:
   /// Constructor
-  WidgetAutoSaver(const QString& groupName);
+  WidgetAutoSaver(const QString &groupName);
 
   /// Register new widget for auto-saving
-  void registerWidget(QWidget* widget, const QString& name, QVariant defaultValue);
+  void registerWidget(QWidget *widget, const QString &name,
+                      QVariant defaultValue);
 
   /// Begin new auto-save group
-  void beginGroup(const QString& name);
+  void beginGroup(const QString &name);
 
   /// End current auto-save group
   void endGroup();
@@ -108,55 +160,53 @@ public:
   void setAutoSaveEnabled(bool enabled);
 
   /// Enable/disable auto-saving of the given widget
-  void setAutoSaveEnabled(QWidget* widget, bool enabled);
+  void setAutoSaveEnabled(QWidget *widget, bool enabled);
 
   /// Load the auto-saved (or default) value of all the registered widgets
   void loadWidgetValues();
 
   /// Load the auto-saved (or default) value of the given widget
-  void loadWidgetValue(QWidget* widget);
+  void loadWidgetValue(QWidget *widget);
 
 private slots:
   /// Save the caller value
   void saveWidgetValue();
 
 private:
-  /// Return a signal (which can be used instead of SIGNAL()) which is emmited when given widget is changed
-  const char* changedSignal(QWidget* widget);
+  /// Return a signal (which can be used instead of SIGNAL()) which is emmited
+  /// when given widget is changed
+  const char *changedSignal(QWidget *widget);
 
   /// A list of all the registered widgets
-  QVector<QWidget*> m_registeredWidgets;
+  QVector<QWidget *> m_registeredWidgets;
 
   /// Names of registered widgets
-  QMap<QWidget*, QString> m_widgetNames;
+  QMap<QWidget *, QString> m_widgetNames;
 
   /// Default values of registered widgets
-  QMap<QWidget*, QVariant> m_widgetDefaultValues;
+  QMap<QWidget *, QVariant> m_widgetDefaultValues;
 
   /// Groups of registered widgets
-  QMap<QWidget*, QString> m_widgetGroups;
+  QMap<QWidget *, QString> m_widgetGroups;
 
   /// Settings used to keep track of the groups
   QSettings m_settings;
 };
 
 /// Validator which accepts valid doubles OR empty strings
-class MANTIDQT_CUSTOMINTERFACES_DLL DoubleOrEmptyValidator : public QDoubleValidator
-{
+class MANTIDQT_CUSTOMINTERFACES_DLL DoubleOrEmptyValidator
+    : public QDoubleValidator {
   Q_OBJECT
 
 public:
-
-  DoubleOrEmptyValidator(QObject* parent = NULL)
-    : QDoubleValidator(parent)
-  {}
+  DoubleOrEmptyValidator(QObject *parent = NULL) : QDoubleValidator(parent) {}
 
   // See QValidator
   QValidator::State validate(QString &input, int &pos) const override {
     if (input.isEmpty())
       return QValidator::Acceptable;
     else
-      return QDoubleValidator::validate(input,pos);
+      return QDoubleValidator::validate(input, pos);
   }
 };
 
@@ -164,4 +214,4 @@ public:
 } // namespace CustomInterfaces
 } // namespace Mantid
 
-#endif  /* MANTIDQT_CUSTOMINTERFACES_MUONANALYSISHELPER_H_ */
+#endif /* MANTIDQT_CUSTOMINTERFACES_MUONANALYSISHELPER_H_ */

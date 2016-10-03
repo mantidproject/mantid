@@ -33,7 +33,8 @@ ImageROIPresenter::ImageROIPresenter(IImageROIView *view)
                              "with an empty/null view (tomography interface). "
                              "Cannot continue.");
   }
-  m_algRunner.reset(new MantidQt::API::BatchAlgorithmRunner());
+  m_algRunner =
+      Mantid::Kernel::make_unique<MantidQt::API::BatchAlgorithmRunner>();
 }
 
 ImageROIPresenter::~ImageROIPresenter() { cleanup(); }
@@ -48,12 +49,12 @@ void ImageROIPresenter::notify(Notification notif) {
     processInit();
     break;
 
-  case IImageROIPresenter::BrowseImgOrStack:
-    processBrowseImg();
+  case IImageROIPresenter::BrowseImage:
+    processBrowseImage();
     break;
 
-  case IImageROIPresenter::NewImgOrStack:
-    processNewStack();
+  case IImageROIPresenter::BrowseStack:
+    processBrowseStack();
     break;
 
   case IImageROIPresenter::ChangeImageType:
@@ -70,6 +71,14 @@ void ImageROIPresenter::notify(Notification notif) {
 
   case IImageROIPresenter::PlayStartStop:
     processPlayStartStop();
+    break;
+
+  case IImageROIPresenter::UpdateColorMap:
+    processUpdateColorMap();
+    break;
+
+  case IImageROIPresenter::ColorRangeUpdated:
+    processColorRangeUpdated();
     break;
 
   case IImageROIPresenter::SelectCoR:
@@ -119,14 +128,24 @@ void ImageROIPresenter::processInit() {
   m_view->setParams(p);
 }
 
-void ImageROIPresenter::processBrowseImg() {
+void ImageROIPresenter::processBrowseImage() {
+  const std::string path = m_view->askSingleImagePath();
+
+  if (path.empty())
+    return;
+
+  m_stackPath = path;
+  processNewStack(true);
+}
+
+void ImageROIPresenter::processBrowseStack() {
   const std::string path = m_view->askImgOrStackPath();
 
   if (path.empty())
     return;
 
   m_stackPath = path;
-  processNewStack();
+  processNewStack(false);
 }
 
 /**
@@ -158,34 +177,61 @@ StackOfImagesDirs ImageROIPresenter::checkInputStack(const std::string &path) {
   return soid;
 }
 
-void ImageROIPresenter::processNewStack() {
-  StackOfImagesDirs soid("");
-  try {
-    soid = checkInputStack(m_stackPath);
-  } catch (std::exception &e) {
-    // Poco::FileNotFoundException: this should never happen, unless
-    // the open dir dialog misbehaves unexpectedly, or in tests
-    m_view->userWarning("Error trying to open directories/files",
-                        "The path selected via the dialog cannot be openend or "
-                        "there was a problem while trying to access it. This "
-                        "is an unexpected inconsistency. Error details: " +
-                            std::string(e.what()));
+void ImageROIPresenter::processNewStack(bool singleImg) {
+  if (!singleImg) {
+
+    StackOfImagesDirs soid("");
+    try {
+      soid = checkInputStack(m_stackPath);
+    } catch (std::exception &e) {
+      // Poco::FileNotFoundException: this should never happen, unless
+      // the open dir dialog misbehaves unexpectedly, or in tests
+      m_view->userWarning(
+          "Error trying to open directories/files",
+          "The path selected via the dialog cannot be openend or "
+          "there was a problem while trying to access it. This "
+          "is an unexpected inconsistency. Error details: " +
+              std::string(e.what()));
+    }
+
+    if (!soid.isValid())
+      return;
+
+    std::vector<std::string> imgs = soid.sampleFiles();
+    if (0 >= imgs.size()) {
+      m_view->userWarning(
+          "Error while trying to find image/projection files in the stack "
+          "directories",
+          "Could not find any (image) file in the samples subdirectory: " +
+              soid.sampleImagesDir());
+      return;
+    }
+
+    loadFITSStack(soid, g_wsgName, g_wsgFlatsName, g_wsgDarksName);
+    m_stackFlats = nullptr;
+    m_stackDarks = nullptr;
+
+  } else {
+    // TODO: find a better place for this
+    try {
+      auto &ads = Mantid::API::AnalysisDataService::Instance();
+      if (ads.doesExist(g_wsgName)) {
+        ads.remove(g_wsgName);
+      }
+      if (ads.doesExist(g_wsgFlatsName)) {
+        ads.remove(g_wsgFlatsName);
+      }
+      if (ads.doesExist(g_wsgDarksName)) {
+        ads.remove(g_wsgDarksName);
+      }
+    } catch (std::runtime_error &rexc) {
+      g_log.warning("There was a problem while trying to remove apparently "
+                    "existing workspaces. Error details: " +
+                    std::string(rexc.what()));
+    }
+
+    loadFITSImage(m_stackPath, g_wsgName);
   }
-
-  if (!soid.isValid())
-    return;
-
-  std::vector<std::string> imgs = soid.sampleFiles();
-  if (0 >= imgs.size()) {
-    m_view->userWarning(
-        "Error while trying to find image/projection files in the stack "
-        "directories",
-        "Could not find any (image) file in the samples subdirectory: " +
-            soid.sampleImagesDir());
-    return;
-  }
-
-  loadFITSStack(soid, g_wsgName, g_wsgFlatsName, g_wsgDarksName);
 
   connect(m_algRunner.get(), SIGNAL(batchComplete(bool)), this,
           SLOT(finishedLoadStack(bool)), Qt::QueuedConnection);
@@ -316,6 +362,7 @@ void ImageROIPresenter::processPlayStartStop() {
     m_view->userWarning(
         "Cannot \"play\" a single image",
         "The stack currently loaded has a single image. Cannot play it.");
+    return;
   }
 
   if (m_playStatus) {
@@ -327,6 +374,18 @@ void ImageROIPresenter::processPlayStartStop() {
     m_playStatus = true;
     m_view->playStart();
   }
+}
+
+void ImageROIPresenter::processUpdateColorMap() {
+  std::string filename = m_view->askColorMapFile();
+  if (filename.empty())
+    return;
+
+  m_view->updateColorMap(filename);
+}
+
+void ImageROIPresenter::processColorRangeUpdated() {
+  m_view->updateImgWithIndex(m_view->currentImgIndex());
 }
 
 void ImageROIPresenter::processSelectCoR() {
@@ -497,7 +556,8 @@ std::string ImageROIPresenter::filterImagePathsForFITSStack(
         "stack ( " +
         m_stackPath + "). Ignoring them under the assumption that these are "
                       "note original images. Please make sure that this is "
-                      "correct. The files ignored are: " + filesStrMsg;
+                      "correct. The files ignored are: " +
+        filesStrMsg;
 
     if (g_warnIfUnexpectedFileExtensions) {
       m_view->userWarning("Files that presumably are summed images have been "

@@ -24,16 +24,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(SpecularReflectionCalculateTheta)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-SpecularReflectionCalculateTheta::SpecularReflectionCalculateTheta() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SpecularReflectionCalculateTheta::~SpecularReflectionCalculateTheta() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SpecularReflectionCalculateTheta::name() const {
   return "SpecularReflectionCalculateTheta";

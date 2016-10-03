@@ -34,9 +34,6 @@ namespace DataHandling {
 class DLLExport LoadPDFgetNFile
     : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-  LoadPDFgetNFile();
-  ~LoadPDFgetNFile() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadPDFgetNFile"; }
   /// Summary of algorithms purpose

@@ -1320,8 +1320,21 @@ p, li { white-space: pre-wrap; }
  the user to fit data </string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
-        <item row="1" column="0">
+        <item row="2" column="0">
          <layout class="QGridLayout" name="gridLayout_7">
+          <item row="0" column="1">
+           <spacer name="horizontalSpacer_16">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
           <item row="0" column="0">
            <widget class="QPushButton" name="muonAnalysisHelpDataAnalysis">
             <property name="maximumSize">
@@ -1341,30 +1354,21 @@ p, li { white-space: pre-wrap; }
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <spacer name="horizontalSpacer_16">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
          </layout>
         </item>
-        <item row="0" column="0">
-         <widget class="MantidQt::MantidWidgets::MuonFitPropertyBrowser" name="fitBrowser">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
+        <item row="1" column="0">
+         <layout class="QVBoxLayout" name="verticalLayoutFitBrowser">
+          <item>
+           <widget class="MantidQt::MantidWidgets::MuonFitPropertyBrowser" name="fitBrowser">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -1613,6 +1617,45 @@ p, li { white-space: pre-wrap; }
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="simultaneousFit">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Simultaneous fits:</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">fitType</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="cmbFitLabelSimultaneous">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="multipleSimFits">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Multiple fits</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">fitType</string>
+               </attribute>
               </widget>
              </item>
              <item>
@@ -2411,23 +2454,17 @@ p, li { white-space: pre-wrap; }
             <layout class="QGridLayout" name="gridLayout_20">
              <item row="3" column="0">
               <layout class="QGridLayout" name="gridLayout_21">
-               <item row="0" column="2">
-                <spacer name="horizontalSpacer_23">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
+               <item row="3" column="0">
+                <widget class="QLabel" name="lblCompatMode">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When selected, uses the old style &amp;quot;Data Analysis&amp;quot; tab that was present pre-Mantid 3.8.&lt;/p&gt;&lt;p&gt;Simultaneous fits are not possible in this mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
-                 <property name="sizeType">
-                  <enum>QSizePolicy::Fixed</enum>
+                 <property name="text">
+                  <string>Compatibility mode:</string>
                  </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>200</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
+                </widget>
                </item>
-               <item row="0" column="1">
+               <item row="0" column="2">
                 <widget class="QComboBox" name="plotCreation">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -2457,6 +2494,22 @@ p, li { white-space: pre-wrap; }
                  </item>
                 </widget>
                </item>
+               <item row="0" column="3">
+                <spacer name="horizontalSpacer_23">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Fixed</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>200</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
                <item row="0" column="0">
                 <widget class="QLabel" name="label_7">
                  <property name="toolTip">
@@ -2471,7 +2524,7 @@ p, li { white-space: pre-wrap; }
                  </property>
                 </widget>
                </item>
-               <item row="1" column="1">
+               <item row="1" column="2">
                 <widget class="QComboBox" name="newPlotPolicy">
                  <item>
                   <property name="text">
@@ -2495,7 +2548,7 @@ p, li { white-space: pre-wrap; }
                  </property>
                 </widget>
                </item>
-               <item row="1" column="2">
+               <item row="1" column="3">
                 <widget class="QStackedWidget" name="newPlotPolicyOptions">
                  <property name="currentIndex">
                   <number>0</number>
@@ -2518,11 +2571,39 @@ p, li { white-space: pre-wrap; }
                   </layout>
                  </widget>
                  <widget class="QWidget" name="page_2">
-                  <layout class="QHBoxLayout" name="horizontalLayout_15">
-                   <property name="margin">
-                    <number>0</number>
+                  <widget class="QWidget" name="layoutWidget">
+                   <property name="geometry">
+                    <rect>
+                     <x>0</x>
+                     <y>0</y>
+                     <width>131</width>
+                     <height>22</height>
+                    </rect>
                    </property>
-                  </layout>
+                   <layout class="QHBoxLayout" name="horizontalLayout_KeepNPlots">
+                    <item>
+                     <widget class="QLabel" name="lblKeepLast">
+                      <property name="text">
+                       <string>Keep last</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QSpinBox" name="spinBoxNPlotsToKeep">
+                      <property name="value">
+                       <number>1</number>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="lblPlots">
+                      <property name="text">
+                       <string>plot(s)</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
                  </widget>
                 </widget>
                </item>
@@ -2536,8 +2617,18 @@ p, li { white-space: pre-wrap; }
                  </property>
                 </widget>
                </item>
-               <item row="2" column="1">
+               <item row="2" column="2">
                 <widget class="QCheckBox" name="hideToolbars">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="2">
+                <widget class="QCheckBox" name="chkCompatibilityMode">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When selected, uses the old style &amp;quot;Data Analysis&amp;quot; tab that was present pre-Mantid 3.8.&lt;/p&gt;&lt;p&gt;Simultaneous fits are not possible in this mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
                  <property name="text">
                   <string/>
                  </property>

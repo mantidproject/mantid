@@ -10,7 +10,7 @@
 using namespace MantidQt::MantidWidgets;
 
 namespace // anonymous
-{
+    {
 template <typename T> void sortPair(std::pair<T, T> &pair) {
   if (pair.first > pair.second) {
     T temp = pair.first;
@@ -157,9 +157,8 @@ bool UserInputValidator::checkValidRange(const QString &name,
  * @param rangeB :: the end of the range
  * @returns True if the input was valid
  */
-bool
-UserInputValidator::checkRangesDontOverlap(std::pair<double, double> rangeA,
-                                           std::pair<double, double> rangeB) {
+bool UserInputValidator::checkRangesDontOverlap(
+    std::pair<double, double> rangeA, std::pair<double, double> rangeB) {
   sortPair(rangeA);
   sortPair(rangeB);
 

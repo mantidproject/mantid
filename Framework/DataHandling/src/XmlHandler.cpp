@@ -27,6 +27,11 @@ XmlHandler::~XmlHandler() {
   // pDoc->release();
 }
 
+/**
+ * Build dictionary {string : string } of all tags in the dictionary
+ * Composed tags: / replaced by _
+ *
+ */
 std::map<std::string, std::string>
 XmlHandler::get_metadata(const std::string &tag_to_ignore) {
   std::map<std::string, std::string> metadata;
@@ -51,7 +56,7 @@ std::string XmlHandler::get_text_from_tag(const std::string &xpath) {
   Poco::XML::NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
   Poco::XML::Node *pNode = it.nextNode();
   Poco::XML::Node *detectorNode = pNode->getNodeByPath(xpath);
-  std::string value("");
+  std::string value;
   if (detectorNode)
     value = detectorNode->innerText();
   return value;
@@ -71,6 +76,28 @@ XmlHandler::get_attributes_from_tag(const std::string &xpath) {
     }
   }
   return attributes_map;
+}
+
+/**
+ * Returns list of sub-nodes for a xpath node
+ * For: xpath = //Data/
+ * Returns: Detector , DetectorWing
+ */
+std::vector<std::string> XmlHandler::get_subnodes(const std::string &xpath) {
+
+  std::vector<std::string> subnodes;
+  Poco::XML::Node *xpathNode = pDoc->getNodeByPath(xpath);
+
+  Poco::XML::NodeIterator it(xpathNode, Poco::XML::NodeFilter::SHOW_ELEMENT);
+  Poco::XML::Node *pNode = it.nextNode();
+
+  while (pNode) {
+    if (pNode->childNodes()->length() == 1) {
+      subnodes.push_back(pNode->nodeName());
+    }
+    pNode = it.nextNode();
+  }
+  return subnodes;
 }
 
 } /* namespace DataHandling */

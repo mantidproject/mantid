@@ -71,7 +71,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
 
   if (m_mu > muMax) {
     // m_errorString = "Failed to converge, maximum mu reached";
-    // g_log.warning() << m_errorString << std::endl;
+    // g_log.warning() << m_errorString << '\n';
     return false;
   }
 
@@ -92,10 +92,8 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
 
   if (debug) {
     g_log.warning()
-        << "==========================================================="
-        << std::endl;
-    g_log.warning() << "mu=" << m_mu << std::endl
-                    << std::endl;
+        << "===========================================================\n";
+    g_log.warning() << "mu=" << m_mu << "\n\n";
   }
 
   if (m_D.empty()) {
@@ -145,8 +143,8 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
     for (size_t j = 0; j < n; ++j) {
       g_log.warning() << dd.get(j) << ' ';
     }
-    g_log.warning() << std::endl;
-    g_log.warning() << "Determinant=" << H.det() << std::endl;
+    g_log.warning() << '\n';
+    g_log.warning() << "Determinant=" << H.det() << '\n';
   }
 
   // Parameter corrections
@@ -156,17 +154,16 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
   H.solve(dd, dx);
 
   if (debug) {
-    g_log.warning() << "\nScaling factors:" << std::endl;
+    g_log.warning() << "\nScaling factors:\n";
     for (size_t j = 0; j < n; ++j) {
       g_log.warning() << sf[j] << ' ';
     }
-    g_log.warning() << std::endl;
-    g_log.warning() << "Corrections:" << std::endl;
+    g_log.warning() << '\n';
+    g_log.warning() << "Corrections:\n";
     for (size_t j = 0; j < n; ++j) {
       g_log.warning() << dx.get(j) << ' ';
     }
-    g_log.warning() << std::endl
-                    << std::endl;
+    g_log.warning() << "\n\n";
   }
 
   // restore scaling
@@ -184,7 +181,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
     double d = m_leastSquares->getParameter(i) + dx.get(i);
     m_leastSquares->setParameter(i, d);
     if (debug) {
-      g_log.warning() << "Parameter(" << i << ")=" << d << std::endl;
+      g_log.warning() << "Parameter(" << i << ")=" << d << '\n';
     }
   }
   m_leastSquares->getFittingFunction()->applyTies();
@@ -201,10 +198,10 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
 
   double F1 = m_leastSquares->val();
   if (debug) {
-    g_log.warning() << std::endl;
-    g_log.warning() << "Old cost function " << m_F << std::endl;
-    g_log.warning() << "New cost function " << F1 << std::endl;
-    g_log.warning() << "Linear part " << dL << std::endl;
+    g_log.warning() << '\n';
+    g_log.warning() << "Old cost function " << m_F << '\n';
+    g_log.warning() << "New cost function " << F1 << '\n';
+    g_log.warning() << "Linear part " << dL << '\n';
   }
 
   // Try the stop condition
@@ -215,18 +212,17 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
     if (dx_norm < absError) {
       if (debug) {
         g_log.warning() << "Successful fit, parameters changed by less than "
-                        << absError << std::endl;
+                        << absError << '\n';
       }
       return false;
     }
     if (m_rho == 0) {
       if (m_F != F1) {
         this->m_errorString = "Failed to converge, rho == 0";
-        g_log.warning() << m_errorString << std::endl;
+        g_log.warning() << m_errorString << '\n';
       }
       if (debug) {
-        g_log.warning() << "Successful fit, cost function didn't change."
-                        << std::endl;
+        g_log.warning() << "Successful fit, cost function didn't change.\n";
       }
       return false;
     }
@@ -244,7 +240,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
     }
   }
   if (debug) {
-    g_log.warning() << "rho=" << m_rho << std::endl;
+    g_log.warning() << "rho=" << m_rho << '\n';
   }
 
   if (m_rho > 0) { // good progress, decrease m_mu but no more than by 1/3
@@ -260,8 +256,8 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
     m_nu = 2.0;
     m_F = F1;
     if (debug) {
-      g_log.warning() << "Good iteration, accept new parameters." << std::endl;
-      g_log.warning() << "rho=" << m_rho << std::endl;
+      g_log.warning() << "Good iteration, accept new parameters.\n";
+      g_log.warning() << "rho=" << m_rho << '\n';
     }
     // drop saved state, accept new parameters
     m_leastSquares->drop();
@@ -273,8 +269,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
     m_F = m_leastSquares->val();
     if (debug) {
       g_log.warning()
-          << "Bad iteration, increase mu and revert changes to parameters."
-          << std::endl;
+          << "Bad iteration, increase mu and revert changes to parameters.\n";
     }
   }
 

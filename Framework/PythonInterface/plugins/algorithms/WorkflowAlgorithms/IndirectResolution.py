@@ -1,4 +1,6 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -16,7 +18,7 @@ class IndirectResolution(DataProcessorAlgorithm):
     _background = None
     _rebin_string = None
     _scale_factor = None
-
+    _load_logs = None
 
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Indirect'
@@ -51,6 +53,9 @@ class IndirectResolution(DataProcessorAlgorithm):
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
                              doc='Factor to scale resolution curve by')
 
+        self.declareProperty(name = "LoadLogFiles", defaultValue=True,
+                             doc='Option to load log files')
+
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                direction=Direction.Output),
                              doc='Output resolution workspace.')
@@ -68,6 +73,7 @@ class IndirectResolution(DataProcessorAlgorithm):
         iet_alg.setProperty('SumFiles', True)
         iet_alg.setProperty('InputFiles', self._input_files)
         iet_alg.setProperty('SpectraRange', self._detector_range)
+        iet_alg.setProperty('LoadLogFiles', self._load_logs)
         iet_alg.execute()
 
         group_ws = iet_alg.getProperty('OutputWorkspace').value
@@ -115,7 +121,7 @@ class IndirectResolution(DataProcessorAlgorithm):
         self._background = self.getProperty('BackgroundRange').value
         self._rebin_string = self.getProperty('RebinParam').value
         self._scale_factor = self.getProperty('ScaleFactor').value
-
+        self._load_logs = self.getProperty('LoadLogFiles').value
 
     def _post_process(self):
         """
@@ -139,8 +145,9 @@ class IndirectResolution(DataProcessorAlgorithm):
         log_alg.setProperty('Workspace', self._out_ws)
         log_alg.setProperty('LogNames', [log[0] for log in sample_logs])
         log_alg.setProperty('LogValues',[log[1] for log in sample_logs])
-
         self.setProperty('OutputWorkspace', self._out_ws)
+        log_alg.execute()
+
 
 
 AlgorithmFactory.subscribe(IndirectResolution)

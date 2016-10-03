@@ -15,14 +15,6 @@ using DataObjects::PeaksWorkspace_const_sptr;
 using DataObjects::PeaksWorkspace_sptr;
 using DataObjects::Peak;
 
-/** Constructor
- */
-CombinePeaksWorkspaces::CombinePeaksWorkspaces() {}
-
-/** Destructor
- */
-CombinePeaksWorkspaces::~CombinePeaksWorkspaces() {}
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CombinePeaksWorkspaces::name() const {
   return "CombinePeaksWorkspaces";
@@ -81,7 +73,7 @@ void CombinePeaksWorkspaces::exec() {
   }
 
   // Copy the first workspace to our output workspace
-  PeaksWorkspace_sptr output(LHSWorkspace->clone().release());
+  PeaksWorkspace_sptr output(LHSWorkspace->clone());
   // Get hold of the peaks in the second workspace
   auto &rhsPeaks = RHSWorkspace->getPeaks();
 

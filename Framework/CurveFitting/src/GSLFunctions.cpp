@@ -66,7 +66,7 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
     f->data[i] = (values->getCalculated(i) - values->getFitData(i)) *
                  values->getFitWeight(i);
     // std::cerr << values.getCalculated(i) << ' ' << values.getFitData(i) << '
-    // ' << values.getFitWeight(i) << std::endl;
+    // ' << values.getFitWeight(i) << '\n';
   }
 
   return GSL_SUCCESS;
@@ -101,7 +101,7 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
   // p->function->addPenaltyDeriv(&p->J);
   // add penalty
-  size_t n = p->costFunction->getDomain()->size() - 1;
+  size_t n = p->costFunction->getValues()->size() - 1;
   size_t ia = 0;
   for (size_t i = 0; i < p->function->nParams(); ++i) {
     if (!p->function->isActive(i))
@@ -136,7 +136,7 @@ int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
     for (size_t iP = 0; iP < p->p; iP++) {
       J->data[iY * p->p + iP] *= values->getFitWeight(iY);
       // std::cerr << iY << ' ' << iP << ' ' << J->data[iY*p->p + iP] <<
-      // std::endl;
+      // '\n';
     }
 
   return GSL_SUCCESS;

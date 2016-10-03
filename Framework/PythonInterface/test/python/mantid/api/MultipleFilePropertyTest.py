@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.api import MultipleFileProperty, mtd
 from testhelpers import create_algorithm
@@ -12,7 +14,10 @@ class MultipleFilePropertyTest(unittest.TestCase):
         algorithm = create_algorithm('Load', Filename='LOQ48127.raw',OutputWorkspace='w',
                                   SpectrumMin=1,SpectrumMax=1,child=True)
         prop = algorithm.getProperty("Filename")
-        self.assertTrue(isinstance(prop.value, str))
+        filenames = prop.value
+        self.assertTrue(isinstance(filenames, list))
+        self.assertTrue(isinstance(filenames[0], str))
+        self.assertEquals(len(filenames), 1)
 
     def test_value_member_returns_python_list_for_multiple_files(self):
         algorithm = create_algorithm('Load', Filename='MUSR15189,15190,15191.nxs',OutputWorkspace='w',

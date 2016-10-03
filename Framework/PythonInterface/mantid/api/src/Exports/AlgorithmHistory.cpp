@@ -87,6 +87,11 @@ void export_AlgorithmHistory() {
       .def("getProperties", &getPropertiesAsList, arg("self"),
            "Returns properties for this algorithm history.")
 
+      .def("getPropertyValue", &AlgorithmHistory::getPropertyValue,
+           (arg("self"), arg("index")),
+           return_value_policy<copy_const_reference>(),
+           "Returns the string representation of a specified property.")
+
       .def("getChildAlgorithm", &AlgorithmHistory::getChildAlgorithm,
            (arg("self"), arg("index")),
            "Returns the algorithm at the given index in the history")

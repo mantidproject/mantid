@@ -19,18 +19,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Crystal;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CentroidPeaks::CentroidPeaks() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CentroidPeaks::~CentroidPeaks() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CentroidPeaks::init() {
@@ -73,7 +61,7 @@ void CentroidPeaks::integrate() {
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
       getProperty("OutPeaksWorkspace");
   if (peakWS != inPeakWS)
-    peakWS.reset(inPeakWS->clone().release());
+    peakWS = inPeakWS->clone();
 
   /// Radius to use around peaks
   int PeakRadius = getProperty("PeakRadius");
@@ -209,7 +197,7 @@ void CentroidPeaks::integrateEvent() {
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
       getProperty("OutPeaksWorkspace");
   if (peakWS != inPeakWS)
-    peakWS.reset(inPeakWS->clone().release());
+    peakWS = inPeakWS->clone();
 
   /// Radius to use around peaks
   int PeakRadius = getProperty("PeakRadius");
@@ -267,7 +255,7 @@ void CentroidPeaks::integrateEvent() {
           continue;
         it = wi_to_detid_map.find(findPixelID(bankName, icol, irow));
         size_t workspaceIndex = (it->second);
-        EventList el = eventW->getEventList(workspaceIndex);
+        EventList el = eventW->getSpectrum(workspaceIndex);
         el.switchTo(WEIGHTED_NOTIME);
         std::vector<WeightedEventNoTime> events = el.getWeightedEventsNoTime();
 

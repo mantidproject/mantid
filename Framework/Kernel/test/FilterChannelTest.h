@@ -180,9 +180,9 @@ public:
             TS_FAIL("Message incorrectly passed the filter criteria");
           else
             TS_FAIL("Message incorrectly stopped by the filter criteria");
-          std::cerr << "Message Priority=" << msgPriority << std::endl;
-          std::cerr << "Channel Priority=" << channelPriority << std::endl;
-          std::cerr << "addedMessageCount=" << addedMessageCount << std::endl;
+          std::cerr << "Message Priority=" << msgPriority << '\n';
+          std::cerr << "Channel Priority=" << channelPriority << '\n';
+          std::cerr << "addedMessageCount=" << addedMessageCount << '\n';
         }
       }
     }

@@ -11,18 +11,17 @@
 #include "WidgetDllOption.h"
 #include <string>
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
+namespace MantidQt {
+namespace MantidWidgets {
 
-/** 
+/**
     This is a dialog for selecting workspaces.
 
     @author Roman Tolchenov, Tessella plc
     @date 22/06/2010
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -40,21 +39,24 @@ namespace MantidWidgets
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SelectWorkspacesDialog : public QDialog
-{
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SelectWorkspacesDialog
+    : public QDialog {
   Q_OBJECT
 
 public:
-  ///return value of the Custom button
-  static const int CustomButton = 45654;  //do not use this number direct, just refer to this static constant
-  
+  /// return value of the Custom button
+  static const int CustomButton = 45654; // do not use this number direct, just
+                                         // refer to this static constant
+
   /// Constructor
-  SelectWorkspacesDialog (QWidget* parent = NULL, const std::string& typeFilter = "", const std::string& customButtonLabel = "");
+  SelectWorkspacesDialog(QWidget *parent = NULL,
+                         const std::string &typeFilter = "",
+                         const std::string &customButtonLabel = "");
 
   /// Return the selected names
-  QStringList getSelectedNames()const;
+  QStringList getSelectedNames() const;
 
 private slots:
 
@@ -65,16 +67,13 @@ private slots:
   void customButtonPress();
 
 private:
-
   /// Displays available workspace names
-  QListWidget* m_wsList;
+  QListWidget *m_wsList;
   /// The OK button
-  QPushButton* m_okButton;
+  QPushButton *m_okButton;
   /// The OK button
-  QPushButton* m_customButton;
-
+  QPushButton *m_customButton;
 };
-
 }
 }
 

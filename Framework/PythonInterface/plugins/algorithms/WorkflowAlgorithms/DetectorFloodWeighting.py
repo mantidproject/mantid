@@ -1,9 +1,9 @@
+import numpy as np
+
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceUnitValidator, \
 PropertyMode, Progress
 
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayBoundedValidator
-
-import numpy as np
 
 class DetectorFloodWeighting(DataProcessorAlgorithm):
 
@@ -22,11 +22,11 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
                                                      direction=Direction.Input, validator=WorkspaceUnitValidator("Wavelength")),
-                                                     doc='Flood weighting measurement')
+                             doc='Flood weighting measurement')
         self.declareProperty(MatrixWorkspaceProperty('TransmissionWorkspace', '',
                                                      direction=Direction.Input, optional=PropertyMode.Optional,
                                                      validator=WorkspaceUnitValidator("Wavelength")),
-                                                     doc='Flood weighting measurement')
+                             doc='Flood weighting measurement')
 
         validator = FloatArrayBoundedValidator()
         validator.setLower(0.)

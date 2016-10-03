@@ -30,7 +30,7 @@ void ComponentParser::startElement(const Poco::XML::XMLString &,
     current = m_current.back();
 
   // for (int i=0; i<attr.getLength(); i++)  std::cout << i << " : "<<
-  // attr.getQName(i) << "," << attr.getLocalName(i) << std::endl;
+  // attr.getQName(i) << "," << attr.getLocalName(i) << '\n';
 
   // Find the name in the attributes
   std::string name = attr.getValue("", "name");
@@ -67,12 +67,12 @@ void ComponentParser::endElement(const Poco::XML::XMLString &,
   if (localName == "pos") {
     V3D pos;
     pos.fromString(m_innerText);
-    // std::cout << "found pos " << pos << std::endl;
+    // std::cout << "found pos " << pos << '\n';
     current->setPos(pos);
   } else if (localName == "rot") {
     Quat rot;
     rot.fromString(m_innerText);
-    // std::cout << "found rot " << rot << std::endl;
+    // std::cout << "found rot " << rot << '\n';
     current->setRot(rot);
   }
 }

@@ -38,7 +38,6 @@ class DLLExport LoadILLReflectometry
     : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   LoadILLReflectometry();
-  ~LoadILLReflectometry() override;
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 

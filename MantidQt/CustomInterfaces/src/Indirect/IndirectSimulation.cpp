@@ -10,27 +10,21 @@
 #include <QUrl>
 
 // Add this class to the list of specialised dialogs in this namespace
-namespace MantidQt
-{
-  namespace CustomInterfaces
-  {
-    DECLARE_SUBWINDOW(IndirectSimulation)
-  }
+namespace MantidQt {
+namespace CustomInterfaces {
+DECLARE_SUBWINDOW(IndirectSimulation)
+}
 }
 
 using namespace MantidQt::CustomInterfaces;
 
-IndirectSimulation::IndirectSimulation(QWidget *parent) : UserSubWindow(parent),
-  m_changeObserver(*this, &IndirectSimulation::handleDirectoryChange)
-{
-}
+IndirectSimulation::IndirectSimulation(QWidget *parent)
+    : UserSubWindow(parent),
+      m_changeObserver(*this, &IndirectSimulation::handleDirectoryChange) {}
 
-IndirectSimulation::~IndirectSimulation()
-{
-}
+IndirectSimulation::~IndirectSimulation() {}
 
-void IndirectSimulation::initLayout()
-{
+void IndirectSimulation::initLayout() {
   m_uiForm.setupUi(this);
 
   // Connect Poco Notification Observer
@@ -47,19 +41,23 @@ void IndirectSimulation::initLayout()
       DOS, new DensityOfStates(m_uiForm.IndirectSimulationTabs->widget(DOS)));
 
   // Connect each tab to the actions available in this GUI
-  std::map<unsigned int, IndirectSimulationTab*>::iterator iter;
-  for (iter = m_simulationTabs.begin(); iter != m_simulationTabs.end(); ++iter)
-  {
-    connect(iter->second, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
-    connect(iter->second, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
+  std::map<unsigned int, IndirectSimulationTab *>::iterator iter;
+  for (iter = m_simulationTabs.begin(); iter != m_simulationTabs.end();
+       ++iter) {
+    connect(iter->second, SIGNAL(runAsPythonScript(const QString &, bool)),
+            this, SIGNAL(runAsPythonScript(const QString &, bool)));
+    connect(iter->second, SIGNAL(showMessageBox(const QString &)), this,
+            SLOT(showMessageBox(const QString &)));
   }
 
   loadSettings();
 
-  // Connect statements for the buttons shared between all tabs on the Indirect Bayes interface
+  // Connect statements for the buttons shared between all tabs on the Indirect
+  // Bayes interface
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
-  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
+  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this,
+          SLOT(manageUserDirectories()));
 }
 
 /**
@@ -67,8 +65,7 @@ void IndirectSimulation::initLayout()
  *
  * @param :: the detected close event
  */
-void IndirectSimulation::closeEvent(QCloseEvent*)
-{
+void IndirectSimulation::closeEvent(QCloseEvent *) {
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 
@@ -77,11 +74,10 @@ void IndirectSimulation::closeEvent(QCloseEvent*)
  *
  * @param pNf :: notification
  */
-void IndirectSimulation::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
-{
+void IndirectSimulation::handleDirectoryChange(
+    Mantid::Kernel::ConfigValChangeNotification_ptr pNf) {
   std::string key = pNf->key();
-  if ( key == "defaultsave.directory" )
-  {
+  if (key == "defaultsave.directory") {
     loadSettings();
   }
 }
@@ -89,20 +85,22 @@ void IndirectSimulation::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNo
 /**
  * Load the setting for each tab on the interface.
  *
- * This includes setting the default browsing directory to be the default save directory.
+ * This includes setting the default browsing directory to be the default save
+ *directory.
  */
-void IndirectSimulation::loadSettings()
-{
+void IndirectSimulation::loadSettings() {
   QSettings settings;
   QString settingsGroup = "CustomInterfaces/IndirectAnalysis/";
-  QString saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+  QString saveDir = QString::fromStdString(
+      Mantid::Kernel::ConfigService::Instance().getString(
+          "defaultsave.directory"));
 
   settings.beginGroup(settingsGroup + "ProcessedFiles");
   settings.setValue("last_directory", saveDir);
 
-  std::map<unsigned int, IndirectSimulationTab*>::iterator iter;
-  for (iter = m_simulationTabs.begin(); iter != m_simulationTabs.end(); ++iter)
-  {
+  std::map<unsigned int, IndirectSimulationTab *>::iterator iter;
+  for (iter = m_simulationTabs.begin(); iter != m_simulationTabs.end();
+       ++iter) {
     iter->second->loadSettings(settings);
   }
 
@@ -116,8 +114,7 @@ void IndirectSimulation::loadSettings()
  * This method checks the tabs validate method is passing before calling
  * the run method.
  */
-void IndirectSimulation::runClicked()
-{
+void IndirectSimulation::runClicked() {
   int tabIndex = m_uiForm.IndirectSimulationTabs->currentIndex();
   m_simulationTabs[tabIndex]->runTab();
 }
@@ -126,18 +123,18 @@ void IndirectSimulation::runClicked()
  * Slot to open a new browser window and navigate to the help page
  * on the wiki for the currently selected tab.
  */
-void IndirectSimulation::helpClicked()
-{
-  MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Indirect_Simulation"));
+void IndirectSimulation::helpClicked() {
+  MantidQt::API::HelpWindow::showCustomInterface(
+      NULL, QString("Indirect_Simulation"));
 }
 
 /**
  * Slot to show the manage user dicrectories dialog when the user clicks
  * the button on the interface.
  */
-void IndirectSimulation::manageUserDirectories()
-{
-  MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
+void IndirectSimulation::manageUserDirectories() {
+  MantidQt::API::ManageUserDirectories *ad =
+      new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();
 }
@@ -148,7 +145,6 @@ void IndirectSimulation::manageUserDirectories()
  *
  * @param message :: The message to display in the message box
  */
-void IndirectSimulation::showMessageBox(const QString& message)
-{
+void IndirectSimulation::showMessageBox(const QString &message) {
   showInformationBox(message);
 }

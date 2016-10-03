@@ -692,66 +692,66 @@ private:
   void mkICP() {
     std::ofstream f(icp_file.path().c_str());
     int dt = 0;
-    f << "2000-09-05T12:22:28   START_SE_WAIT" << '\n';
-    f << "2000-09-05T12:22:33   BEGIN" << '\n';
+    f << "2000-09-05T12:22:28   START_SE_WAIT\n";
+    f << "2000-09-05T12:22:33   BEGIN\n";
     dt += 8;
-    f << "2000-09-05T12:22:41   PAUSE" << '\n';
+    f << "2000-09-05T12:22:41   PAUSE\n";
     dt += 4;
-    f << "2000-09-05T12:22:55   CHANGE PERIOD 2" << '\n';
+    f << "2000-09-05T12:22:55   CHANGE PERIOD 2\n";
     dt += 3;
-    f << "2000-09-05T12:22:58   RESUME" << '\n';
+    f << "2000-09-05T12:22:58   RESUME\n";
     dt += 6;
-    f << "2000-09-05T12:23:04   PAUSE" << '\n';
+    f << "2000-09-05T12:23:04   PAUSE\n";
     dt += 4;
-    f << "2000-09-05T12:23:08   CHANGE PERIOD 1" << '\n';
+    f << "2000-09-05T12:23:08   CHANGE PERIOD 1\n";
     dt += 2;
-    f << "2000-09-05T12:23:10   RESUME" << '\n';
+    f << "2000-09-05T12:23:10   RESUME\n";
     dt += 8;
-    f << "2000-09-05T12:23:18   START_SE_WAIT" << '\n';
+    f << "2000-09-05T12:23:18   START_SE_WAIT\n";
     dt += 4;
-    f << "2000-09-05T12:23:22   CHANGE PERIOD 2" << '\n';
+    f << "2000-09-05T12:23:22   CHANGE PERIOD 2\n";
     dt += 5;
-    f << "2000-09-05T12:23:27   RESUME" << '\n';
+    f << "2000-09-05T12:23:27   RESUME\n";
     dt += 7;
-    f << "2000-09-05T12:23:34   ABORT" << '\n';
+    f << "2000-09-05T12:23:34   ABORT\n";
     dt += 3;
-    f << "2000-09-05T12:23:37   CHANGE PERIOD 1" << '\n';
+    f << "2000-09-05T12:23:37   CHANGE PERIOD 1\n";
     dt += 5;
-    f << "2000-09-05T12:23:42   END_SE_WAIT" << '\n';
-    f << "2000-09-05T14:03:54   END" << '\n';
+    f << "2000-09-05T12:23:42   END_SE_WAIT\n";
+    f << "2000-09-05T14:03:54   END\n";
     f.close();
   }
 
   void mkICPVariant() {
     std::ofstream f(icp_file.path().c_str());
     int dt = 0;
-    f << "2000-09-05T12:22:28   START_SE_WAIT" << '\n';
-    f << "2000-09-05T12:22:33   BEGIN" << '\n';
+    f << "2000-09-05T12:22:28   START_SE_WAIT\n";
+    f << "2000-09-05T12:22:33   BEGIN\n";
     dt += 8;
-    f << "2000-09-05T12:22:41   PAUSE" << '\n';
+    f << "2000-09-05T12:22:41   PAUSE\n";
     dt += 4;
-    f << "2000-09-05T12:22:55   CHANGE_PERIOD 2" << '\n';
+    f << "2000-09-05T12:22:55   CHANGE_PERIOD 2\n";
     dt += 3;
-    f << "2000-09-05T12:22:58   RESUME" << '\n';
+    f << "2000-09-05T12:22:58   RESUME\n";
     dt += 6;
-    f << "2000-09-05T12:23:04   PAUSE" << '\n';
+    f << "2000-09-05T12:23:04   PAUSE\n";
     dt += 4;
-    f << "2000-09-05T12:23:08   CHANGE_PERIOD 1" << '\n';
+    f << "2000-09-05T12:23:08   CHANGE_PERIOD 1\n";
     dt += 2;
-    f << "2000-09-05T12:23:10   RESUME" << '\n';
+    f << "2000-09-05T12:23:10   RESUME\n";
     dt += 8;
-    f << "2000-09-05T12:23:18   START_SE_WAIT" << '\n';
+    f << "2000-09-05T12:23:18   START_SE_WAIT\n";
     dt += 4;
-    f << "2000-09-05T12:23:22   CHANGE_PERIOD 2" << '\n';
+    f << "2000-09-05T12:23:22   CHANGE_PERIOD 2\n";
     dt += 5;
-    f << "2000-09-05T12:23:27   RESUME" << '\n';
+    f << "2000-09-05T12:23:27   RESUME\n";
     dt += 7;
-    f << "2000-09-05T12:23:34   ABORT" << '\n';
+    f << "2000-09-05T12:23:34   ABORT\n";
     dt += 3;
-    f << "2000-09-05T12:23:37   CHANGE_PERIOD 1" << '\n';
+    f << "2000-09-05T12:23:37   CHANGE_PERIOD 1\n";
     dt += 5;
-    f << "2000-09-05T12:23:42   END_SE_WAIT" << '\n';
-    f << "2000-09-05T14:03:54   END" << '\n';
+    f << "2000-09-05T12:23:42   END_SE_WAIT\n";
+    f << "2000-09-05T14:03:54   END\n";
     f.close();
   }
 
@@ -845,33 +845,33 @@ private:
 
   void mkStrContinuations() {
     std::ofstream f(log_str_continuations.path().c_str());
-    f << "2000-09-05T12:22:31   First line" << std::endl;
-    f << "Second line" << std::endl;
-    f << "2000-09-05T12:22:34   First line" << std::endl;
-    f << "2000-09-05T12:22:34   Second line" << std::endl;
-    f << "Third line" << std::endl;
+    f << "2000-09-05T12:22:31   First line\n";
+    f << "Second line\n";
+    f << "2000-09-05T12:22:34   First line\n";
+    f << "2000-09-05T12:22:34   Second line\n";
+    f << "Third line\n";
     f.close();
   }
 
   void mkStrRepeat() {
     std::ofstream f(log_str_repeat.path().c_str());
-    f << "2000-09-05T12:22:34   First line" << std::endl;
-    f << "2000-09-05T12:22:34   Second line" << std::endl;
-    f << "2000-09-05T12:23:33   First line" << std::endl;
-    f << "2000-09-05T12:23:33   Second line" << std::endl;
-    f << "2000-09-05T12:23:33   Third line" << std::endl;
-    f << "2000-09-05T12:23:33   Fourth line" << std::endl;
+    f << "2000-09-05T12:22:34   First line\n";
+    f << "2000-09-05T12:22:34   Second line\n";
+    f << "2000-09-05T12:23:33   First line\n";
+    f << "2000-09-05T12:23:33   Second line\n";
+    f << "2000-09-05T12:23:33   Third line\n";
+    f << "2000-09-05T12:23:33   Fourth line\n";
     f.close();
   }
 
   void mkNumRepeat() {
     std::ofstream f(log_str_repeat.path().c_str());
-    f << "2000-09-05T12:22:34   1" << std::endl;
-    f << "2000-09-05T12:22:34   2" << std::endl;
-    f << "2000-09-05T12:23:33   3" << std::endl;
-    f << "2000-09-05T12:23:33   4" << std::endl;
-    f << "2000-09-05T12:23:33   5" << std::endl;
-    f << "2000-09-05T12:23:33   6" << std::endl;
+    f << "2000-09-05T12:22:34   1\n";
+    f << "2000-09-05T12:22:34   2\n";
+    f << "2000-09-05T12:23:33   3\n";
+    f << "2000-09-05T12:23:33   4\n";
+    f << "2000-09-05T12:23:33   5\n";
+    f << "2000-09-05T12:23:33   6\n";
     f.close();
   }
 

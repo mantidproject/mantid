@@ -14,12 +14,16 @@ if ( CXXTEST_FOUND )
     cxxtest_add_test ( CustomInterfacesTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
     target_link_libraries( CustomInterfacesTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             CustomInterfaces
+            MantidWidgets
             API
             DataObjects
             Geometry
+            HistogramData
             Kernel
+			MantidWidgets
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
+            ${QWT_LIBRARIES}
             ${QT_LIBRARIES}
             ${GMOCK_LIBRARIES}
             ${GTEST_LIBRARIES} )

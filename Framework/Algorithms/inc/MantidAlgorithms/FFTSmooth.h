@@ -37,10 +37,6 @@ namespace Algorithms {
  */
 class DLLExport FFTSmooth : public API::Algorithm {
 public:
-  /// Default constructor
-  FFTSmooth() : API::Algorithm(){};
-  /// Destructor
-  ~FFTSmooth() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FFTSmooth"; }
   /// Summary of algorithms purpose

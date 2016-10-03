@@ -11,9 +11,6 @@ namespace Algorithms {
  */
 class DLLExport PDFFourierTransform : public API::Algorithm {
 public:
-  PDFFourierTransform();
-  ~PDFFourierTransform() override;
-
   /// Algorithm's name for identification
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -34,6 +31,12 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
+
+  size_t determineQminIndex(const std::vector<double> &Q,
+                            const std::vector<double> &FofQ);
+  size_t determineQmaxIndex(const std::vector<double> &Q,
+                            const std::vector<double> &FofQ);
+  double determineRho0();
 };
 
 } // namespace Mantid

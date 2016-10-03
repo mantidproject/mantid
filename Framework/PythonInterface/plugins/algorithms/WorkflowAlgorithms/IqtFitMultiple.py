@@ -1,9 +1,11 @@
 #pylint: disable=no-init, too-many-instance-attributes
-from mantid import logger, AlgorithmFactory
-from mantid.api import *
-from mantid.kernel import *
+from __future__ import (absolute_import, division, print_function)
+
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
+                        ITableWorkspaceProperty, WorkspaceGroupProperty, Progress)
+from mantid.kernel import Direction, FloatBoundedValidator, IntBoundedValidator, logger
 from mantid.simpleapi import *
-import os.path
+
 
 class IqtFitMultiple(PythonAlgorithm):
 
@@ -117,9 +119,8 @@ class IqtFitMultiple(PythonAlgorithm):
         self._fit_group_name = self.getPropertyValue('OutputWorkspaceGroup')
 
     def PyExec(self):
-        from IndirectDataAnalysis import (convertToElasticQ,
-                                          createFuryMultiDomainFunction,
-                                          transposeFitParametersTable)
+        from IndirectCommon import (convertToElasticQ,
+                                    transposeFitParametersTable)
 
         setup_prog = Progress(self, start=0.0, end=0.1, nreports=4)
         setup_prog.report('generating output name')
@@ -152,7 +153,7 @@ class IqtFitMultiple(PythonAlgorithm):
 
         #fit multi-domian functino to workspace
         fit_prog = Progress(self, start=0.1, end=0.8, nreports=2)
-        multi_domain_func, kwargs = createFuryMultiDomainFunction(self._function, tmp_fit_workspace)
+        multi_domain_func, kwargs = self._create_mutli_domain_func(self._function, tmp_fit_workspace)
         fit_prog.report('Fitting...')
         Fit(Function=multi_domain_func,
             InputWorkspace=tmp_fit_workspace,
@@ -168,9 +169,11 @@ class IqtFitMultiple(PythonAlgorithm):
         conclusion_prog.report('Renaming workspaces')
         # rename workspaces to match user input
         if output_workspace + "_Workspaces" != self._fit_group_name:
-            RenameWorkspace(InputWorkspace=output_workspace + "_Workspaces", OutputWorkspace=self._fit_group_name)
+            RenameWorkspace(InputWorkspace=output_workspace + "_Workspaces",
+                            OutputWorkspace=self._fit_group_name)
         if output_workspace + "_Parameters" != self._parameter_name:
-            RenameWorkspace(InputWorkspace=output_workspace + "_Parameters", OutputWorkspace=self._parameter_name)
+            RenameWorkspace(InputWorkspace=output_workspace + "_Parameters",
+                            OutputWorkspace=self._parameter_name)
 
         conclusion_prog.report('Tansposing parameter table')
         transposeFitParametersTable(self._parameter_name)
@@ -184,30 +187,55 @@ class IqtFitMultiple(PythonAlgorithm):
         #convert parameters to matrix workspace
         parameter_names = 'A0,Intensity,Tau,Beta'
         conclusion_prog.report('Processing indirect fit parameters')
-        self._result_name = ProcessIndirectFitParameters(InputWorkspace=self._parameter_name,
-                                                         ColumnX="axis-1", XAxisUnit="MomentumTransfer",
-                                                         ParameterNames=parameter_names)
+        result_workspace = ProcessIndirectFitParameters(InputWorkspace=self._parameter_name,
+                                                        ColumnX="axis-1", XAxisUnit="MomentumTransfer",
+                                                        ParameterNames=parameter_names,
+                                                        OutputWorkspace=self._result_name)
 
         # create and add sample logs
-        sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type,
+        sample_logs  = {'start_x': self._start_x, 'end_x': self._end_x, 'fit_type': self._fit_type[:-2],
                         'intensities_constrained': self._intensities_constrained, 'beta_constrained': True}
 
         conclusion_prog.report('Copying sample logs')
-        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._result_name)
+        CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=result_workspace)
         CopyLogs(InputWorkspace=self._input_ws, OutputWorkspace=self._fit_group_name)
 
-        log_names = [item[0] for item in sample_logs]
-        log_values = [item[1] for item in sample_logs]
+        log_names = [item for item in sample_logs]
+        log_values = [sample_logs[item] for item in sample_logs]
         conclusion_prog.report('Adding sample logs')
-        AddSampleLogMultiple(Workspace=self._result_name, LogNames=log_names, LogValues=log_values)
+        AddSampleLogMultiple(Workspace=result_workspace, LogNames=log_names, LogValues=log_values)
         AddSampleLogMultiple(Workspace=self._fit_group_name, LogNames=log_names, LogValues=log_values)
 
         DeleteWorkspace(tmp_fit_workspace)
 
-        self.setProperty('OutputResultWorkspace', self._result_name)
+        self.setProperty('OutputResultWorkspace', result_workspace)
         self.setProperty('OutputParameterWorkspace', self._parameter_name)
         self.setProperty('OutputWorkspaceGroup', self._fit_group_name)
         conclusion_prog.report('Algorithm complete')
+
+
+    def _create_mutli_domain_func(self, function, input_ws):
+        multi= 'composite=MultiDomainFunction,NumDeriv=true;'
+        comp = '(composite=CompositeFunction,NumDeriv=true,$domains=i;' + function + ');'
+
+        ties = []
+        kwargs = {}
+        num_spectra = mtd[input_ws].getNumberHistograms()
+        for i in range(0, num_spectra):
+            multi += comp
+            kwargs['WorkspaceIndex_' + str(i)] = i
+
+            if i > 0:
+                kwargs['InputWorkspace_' + str(i)] = input_ws
+
+                #tie beta for every spectrum
+                tie = 'f%d.f1.Beta=f0.f1.Beta' % i
+                ties.append(tie)
+
+        ties = ','.join(ties)
+        multi += 'ties=(' + ties + ')'
+
+        return multi, kwargs
 
 
 AlgorithmFactory.subscribe(IqtFitMultiple)

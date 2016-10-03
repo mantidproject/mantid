@@ -415,6 +415,14 @@ public:
   virtual void fix(size_t i) = 0;
   /// Restores a declared parameter i to the active status
   virtual void unfix(size_t i) = 0;
+  /// Fix a parameter
+  void fixParameter(const std::string &name);
+  /// Free a parameter
+  void unfixParameter(const std::string &name);
+  /// Fix all parameters
+  void fixAll();
+  /// Free all parameters
+  void unfixAll();
 
   /// Return parameter index from a parameter reference. Usefull for constraints
   /// and ties in composite functions
@@ -456,6 +464,8 @@ public:
   virtual bool removeTie(size_t i) = 0;
   /// Get the tie of i-th parameter
   virtual ParameterTie *getTie(size_t i) const = 0;
+  /// Add a new tie. Derived classes must provide storage for ties
+  virtual void addTie(ParameterTie *tie) = 0;
   //@}
 
   /** @name Constraints */
@@ -493,7 +503,13 @@ public:
 
   /// Set up the function for a fit.
   virtual void setUpForFit() = 0;
-
+  /// Get number of values for a given domain.
+  virtual size_t getValuesSize(const FunctionDomain &domain) const;
+  /// Get number of domains required by this function
+  virtual size_t getNumberDomains() const;
+  /// Split this function (if needed) into a list of independent functions.
+  virtual std::vector<boost::shared_ptr<IFunction>>
+  createEquivalentFunctions() const;
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian);
   /// Set the covariance matrix
@@ -532,9 +548,6 @@ protected:
   void convertValue(std::vector<double> &values, Kernel::Unit_sptr &outUnit,
                     boost::shared_ptr<const MatrixWorkspace> ws,
                     size_t wsIndex) const;
-
-  /// Add a new tie. Derived classes must provide storage for ties
-  virtual void addTie(ParameterTie *tie) = 0;
 
   /// Override to declare function attributes
   virtual void declareAttributes() {}

@@ -1,7 +1,7 @@
 #include "MantidWorkflowAlgorithms/DgsProcessDetectorVanadium.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -17,16 +17,6 @@ namespace WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsProcessDetectorVanadium)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsProcessDetectorVanadium::DgsProcessDetectorVanadium() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsProcessDetectorVanadium::~DgsProcessDetectorVanadium() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -73,7 +63,7 @@ void DgsProcessDetectorVanadium::init() {
 /** Execute the algorithm.
  */
 void DgsProcessDetectorVanadium::exec() {
-  g_log.notice() << "Starting DgsProcessDetectorVanadium" << std::endl;
+  g_log.notice() << "Starting DgsProcessDetectorVanadium\n";
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
@@ -154,7 +144,7 @@ void DgsProcessDetectorVanadium::exec() {
   if (reductionManager->existsProperty("SaveProcessedDetVan")) {
     bool saveProc = reductionManager->getProperty("SaveProcessedDetVan");
     if (saveProc) {
-      std::string outputFile("");
+      std::string outputFile;
       if (reductionManager->existsProperty("SaveProcDetVanFilename")) {
         outputFile =
             reductionManager->getPropertyValue("SaveProcDetVanFilename");

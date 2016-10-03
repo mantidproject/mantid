@@ -27,14 +27,13 @@ vtkStandardNewMacro(vtkMDHWNexusReader)
 using Mantid::Geometry::IMDDimension_sptr;
 
 vtkMDHWNexusReader::vtkMDHWNexusReader()
-    : m_loadInMemory(false), m_depth(1), m_time(0),
+    : FileName{nullptr}, m_loadInMemory(false), m_depth(1), m_time(0),
       m_normalizationOption(AutoSelect) {
-  this->FileName = NULL;
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
 }
 
-vtkMDHWNexusReader::~vtkMDHWNexusReader() { this->SetFileName(0); }
+vtkMDHWNexusReader::~vtkMDHWNexusReader() { this->SetFileName(nullptr); }
 
 void vtkMDHWNexusReader::SetDepth(int depth) {
   size_t temp = depth;
@@ -66,14 +65,14 @@ void vtkMDHWNexusReader::SetInMemory(bool inMemory) {
  * themeselves.
  * @return geometry xml const * char reference.
  */
-const char *vtkMDHWNexusReader::GetInputGeometryXML() {
+std::string vtkMDHWNexusReader::GetInputGeometryXML() {
   if (m_presenter == nullptr) {
-    return "";
+    return std::string();
   }
   try {
     return m_presenter->getGeometryXML().c_str();
   } catch (std::runtime_error &) {
-    return "";
+    return std::string();
   }
 }
 
@@ -217,8 +216,7 @@ void vtkMDHWNexusReader::setTimeRange(vtkInformationVector *outputVector) {
 /*
 Getter for the workspace type name.
 */
-char *vtkMDHWNexusReader::GetWorkspaceTypeName() {
+std::string vtkMDHWNexusReader::GetWorkspaceTypeName() {
   // Forward request on to MVP presenter
-  typeName = m_presenter->getWorkspaceTypeName();
-  return const_cast<char *>(typeName.c_str());
+  return m_presenter->getWorkspaceTypeName();
 }

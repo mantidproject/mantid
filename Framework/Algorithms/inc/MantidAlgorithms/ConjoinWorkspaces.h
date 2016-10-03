@@ -52,10 +52,6 @@ namespace Algorithms {
 */
 class DLLExport ConjoinWorkspaces : public WorkspaceJoiners {
 public:
-  /// Empty constructor
-  ConjoinWorkspaces();
-  /// Destructor
-  ~ConjoinWorkspaces() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ConjoinWorkspaces"; }
   /// Algorithm's version for identification overriding a virtual method
@@ -75,7 +71,7 @@ private:
   bool processGroups() override;
 
   /// True if spectra overlap
-  bool m_overlapChecked;
+  bool m_overlapChecked = false;
 };
 
 } // namespace Algorithm

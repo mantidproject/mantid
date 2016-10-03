@@ -16,9 +16,9 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtMantidWidgets/IWorkspaceFitControl.h"
 
-
-    /* Forward declarations */
+/* Forward declarations */
 
 class QtTreePropertyBrowser;
 class QtGroupPropertyManager;
@@ -41,55 +41,55 @@ class QMenu;
 class QAction;
 class QTreeWidget;
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
+namespace MantidQt {
+namespace MantidWidgets {
 
 class PropertyHandler;
 /**
- * Class FitPropertyBrowser implements QtPropertyBrowser to display 
+ * Class FitPropertyBrowser implements QtPropertyBrowser to display
  * and control fitting function parameters and settings.
- * 
+ *
  * @date 13/11/2009
  */
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FitPropertyBrowser: public QDockWidget, public Mantid::API::AlgorithmObserver,
-                          public MantidQt::API::WorkspaceObserver
-{
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FitPropertyBrowser
+    : public QDockWidget,
+      public Mantid::API::AlgorithmObserver,
+      public MantidQt::API::WorkspaceObserver,
+      public IWorkspaceFitControl {
   Q_OBJECT
 public:
   /// Constructor
-  FitPropertyBrowser(QWidget *parent = NULL, QObject* mantidui = NULL);
+  FitPropertyBrowser(QWidget *parent = NULL, QObject *mantidui = NULL);
   /// Destructor
   ~FitPropertyBrowser() override;
   /// Get handler to the root composite function
-  PropertyHandler* getHandler()const;
+  PropertyHandler *getHandler() const;
   /// Initialise layout
   virtual void init();
 
   /// Centre of the current peak
-  double centre()const;
+  double centre() const;
   /// Set centre of the current peak
   void setCentre(double value);
   /// Height of the current peak
-  double height()const;
+  double height() const;
   /// Set height of the current peak
   void setHeight(double value);
   /// Width of the current peak
-  double fwhm()const;
+  double fwhm() const;
   /// Set width of the current peak
   void setFwhm(double value);
   /// Get count
-  int count()const;
+  int count() const;
   /// Is the current function a peak?
-  bool isPeak()const;
+  bool isPeak() const;
   /// Get the current function
-  PropertyHandler* currentHandler()const;
+  PropertyHandler *currentHandler() const;
   /// Set new current function
-  void setCurrentFunction(PropertyHandler* h)const;
+  void setCurrentFunction(PropertyHandler *h) const;
   /// Get the current function
-  boost::shared_ptr<const Mantid::API::IFunction> theFunction()const;
+  boost::shared_ptr<const Mantid::API::IFunction> theFunction() const;
   /// Update the function parameters
   void updateParameters();
   /// Get function parameter values
@@ -98,120 +98,132 @@ public:
   QStringList getParameterNames() const;
 
   /// Create a new function
-  PropertyHandler* addFunction(const std::string& fnName);
+  PropertyHandler *addFunction(const std::string &fnName);
 
   /// Get Composite Function
-  boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction()const{return m_compositeFunction;}
+  boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction() const {
+    return m_compositeFunction;
+  }
 
   /// Return the fitting function
   Mantid::API::IFunction_sptr getFittingFunction() const;
 
   /// Get the default function type
-  std::string defaultFunctionType()const;
+  std::string defaultFunctionType() const;
   /// Set the default function type
-  void setDefaultFunctionType(const std::string& fnType);
+  void setDefaultFunctionType(const std::string &fnType);
   /// Get the default peak type
-  std::string defaultPeakType()const;
+  std::string defaultPeakType() const;
   /// Set the default peak type
-  void setDefaultPeakType(const std::string& fnType);
+  void setDefaultPeakType(const std::string &fnType);
   /// Get the default background type
-  std::string defaultBackgroundType()const;
+  std::string defaultBackgroundType() const;
   /// Set the default background type
-  void setDefaultBackgroundType(const std::string& fnType);
+  void setDefaultBackgroundType(const std::string &fnType);
 
   /// Get the workspace
   boost::shared_ptr<Mantid::API::Workspace> getWorkspace() const;
   /// Get the input workspace name
-  std::string workspaceName()const;
+  std::string workspaceName() const;
   /// Set the input workspace name
-  virtual void setWorkspaceName(const QString& wsName);
+  virtual void setWorkspaceName(const QString &wsName) override;
   /// Get workspace index
-  int workspaceIndex()const;
+  int workspaceIndex() const;
   /// Set workspace index
-  void setWorkspaceIndex(int i);
+  void setWorkspaceIndex(int i) override;
   /// Get the output name
-  std::string outputName()const;
+  virtual std::string outputName() const;
   /// Set the output name
-  void setOutputName(const std::string&);
+  void setOutputName(const std::string &);
   /// Get the minimizer
-  std::string minimizer(bool withProperties = false)const;
+  std::string minimizer(bool withProperties = false) const;
   /// Get the ignore invalid data option
   bool ignoreInvalidData() const;
   /// Set the ignore invalid data option
   void setIgnoreInvalidData(bool on);
   /// Get the cost function
-  std::string costFunction()const;
+  std::string costFunction() const;
   /// Get the "ConvolveMembers" option
-  bool convolveMembers()const;
+  bool convolveMembers() const;
+  /// Get "HistogramFit" option
+  bool isHistogramFit() const;
   /// Set if the data must be normalised before fitting
-  void normaliseData(bool on) {m_shouldBeNormalised = on;}
+  void normaliseData(bool on) { m_shouldBeNormalised = on; }
   /// Get the max number of iterations
   int maxIterations() const;
 
   /// Get the start X
-  double startX()const;
+  double startX() const;
   /// Set the start X
-  void setStartX(double);
+  void setStartX(double start) override;
   /// Get the end X
-  double endX()const;
+  double endX() const;
   /// Set the end X
-  void setEndX(double);
+  void setEndX(double end) override;
   /// Set LogValue for PlotPeakByLogValue
-  void setLogValue(const QString& lv = "");
+  void setLogValue(const QString &lv = "");
   /// Get LogValue
-  std::string getLogValue()const;
+  std::string getLogValue() const;
   /// Remove LogValue from the browser
   void removeLogValue();
 
   /// Return a list of registered functions
-  const QStringList& registeredFunctions()const{return m_registeredFunctions;}
+  const QStringList &registeredFunctions() const {
+    return m_registeredFunctions;
+  }
   /// Return a list of registered peaks
-  const QStringList& registeredPeaks()const{return m_registeredPeaks;}
+  const QStringList &registeredPeaks() const { return m_registeredPeaks; }
   /// Return a list of registered backgrounds
-  const QStringList& registeredBackgrounds()const{return m_registeredBackgrounds;}
+  const QStringList &registeredBackgrounds() const {
+    return m_registeredBackgrounds;
+  }
   /// Return a list of registered other functions
-  const QStringList& registeredOthers()const{return m_registeredOther;}
+  const QStringList &registeredOthers() const { return m_registeredOther; }
 
   /// Tells if undo can be done
-  bool isUndoEnabled()const;
+  bool isUndoEnabled() const;
   /// Returns true if the function is ready for a fit
-  bool isFitEnabled()const;
+  bool isFitEnabled() const;
 
   /// Display a tip
-  void setTip(const QString& txt);
+  void setTip(const QString &txt);
 
   /// return groupMember
-  //const std::string groupMember() const {return m_groupMember;};
-  /// alter text of Plot Guess 
+  // const std::string groupMember() const {return m_groupMember;};
+  /// alter text of Plot Guess
   void setTextPlotGuess(const QString text);
 
   /// Creates the "Ties" property value for the Fit algorithm
-  QString getTieString()const;
+  QString getTieString() const;
 
   /// Creates the "Constraints" property value for the Fit algorithm
-  QString getConstraintsString()const;
+  QString getConstraintsString() const;
 
   // send parameterChanged signal
-  void sendParameterChanged(const Mantid::API::IFunction* f){emit parameterChanged(f);}
+  void sendParameterChanged(const Mantid::API::IFunction *f) {
+    emit parameterChanged(f);
+  }
 
   /// Creates and adds the autobackground
   void addAutoBackground();
-  bool isAutoBack()const{return m_autoBackground!=NULL;}
-  void setAutoBackgroundName(const QString& aName);
+  bool isAutoBack() const { return m_autoBackground != NULL; }
+  void setAutoBackgroundName(const QString &aName);
   void refitAutoBackground();
-  QString getAutoBackgroundString()const{return m_autoBgName + " " + m_autoBgAttributes;}
+  QString getAutoBackgroundString() const {
+    return m_autoBgName + " " + m_autoBgAttributes;
+  }
 
   /// Number of decimal places in double properties
-  int getDecimals()const{return m_decimals;}
+  int getDecimals() const { return m_decimals; }
   void setDecimals(int d);
 
   /// Returns true if the difference plot should be drawn
-  bool plotDiff()const;
+  bool plotDiff() const;
   /// Returns true if a composite's member functions should be plotted also
   bool plotCompositeMembers() const;
 
-  /// Returns true if the fit should be done against binned (bunched) data.  	
-  bool rawData()const;
+  /// Returns true if the fit should be done against binned (bunched) data.
+  bool rawData() const override;
 
   void setADSObserveEnabled(bool enabled);
 
@@ -222,12 +234,15 @@ public:
   /// Called when the Fit is finished
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
 
-  /// Returns the list of workspaces that are currently been worked on by the fit property browser.
+  /// Returns the list of workspaces that are currently been worked on by the
+  /// fit property browser.
   QStringList getWorkspaceNames();
   /// Create a MatrixWorkspace from a TableWorkspace
-  Mantid::API::Workspace_sptr createMatrixFromTableWorkspace()const;
+  Mantid::API::Workspace_sptr createMatrixFromTableWorkspace() const;
 
-
+  /// Allow or disallow sequential fits (depending on whether other conditions
+  /// are met)
+  void allowSequentialFits(bool allow) override;
 public slots:
   virtual void fit();
   virtual void sequentialFit();
@@ -236,60 +251,65 @@ public slots:
   void clearBrowser();
   void setPeakToolOn(bool on);
   void findPeaks();
-  void executeFitMenu(const QString&);
-  void executeDisplayMenu(const QString&);
-  void executeSetupMenu(const QString&);
-  void executeSetupManageMenu(const QString&);
+  void executeFitMenu(const QString &);
+  void executeDisplayMenu(const QString &);
+  void executeSetupMenu(const QString &);
+  void executeSetupManageMenu(const QString &);
 
 signals:
-  void currentChanged()const;
+  void currentChanged() const;
   void functionRemoved();
-  void algorithmFinished(const QString&);
+  void algorithmFinished(const QString &);
   void workspaceIndexChanged(int i);
-  void workspaceNameChanged(const QString&);
+  void workspaceNameChanged(const QString &);
 
-  void wsChangePPAssign(const QString&);
+  void wsChangePPAssign(const QString &);
   void functionChanged();
 
   void startXChanged(double);
   void endXChanged(double);
   void xRangeChanged(double, double);
-  void parameterChanged(const Mantid::API::IFunction*);
+  void parameterChanged(const Mantid::API::IFunction *);
   void functionCleared();
   void plotGuess();
   void plotCurrentGuess();
   void removeGuess();
   void removeCurrentGuess();
-  void changeWindowTitle(const QString&);
-  void removePlotSignal(MantidQt::MantidWidgets::PropertyHandler*);
+  void changeWindowTitle(const QString &);
+  void removePlotSignal(MantidQt::MantidWidgets::PropertyHandler *);
   void removeFitCurves();
 
-  void executeFit(QString,QHash<QString,QString>,Mantid::API::AlgorithmObserver*);
+  void executeFit(QString, QHash<QString, QString>,
+                  Mantid::API::AlgorithmObserver *);
   void multifitFinished();
 
-  /// signal which can optionally be caught for customization after a fit has 
+  /// signal which can optionally be caught for customization after a fit has
   /// been done
-  void fittingDone(QString);
+  void fittingDone(const QString &);
   void functionFactoryUpdateReceived();
+  void errorsEnabled(bool enabled);
+  void fitUndone();
+  void functionLoaded(const QString &);
 
 protected slots:
   /// Get the registered function names
   virtual void populateFunctionNames();
+  /// Called when a bool property is changed
+  virtual void boolChanged(QtProperty *prop);
 
 private slots:
 
-  void enumChanged(QtProperty* prop);
-  void boolChanged(QtProperty* prop);
-  void intChanged(QtProperty* prop);
-  virtual void doubleChanged(QtProperty* prop);
+  void enumChanged(QtProperty *prop);
+  void intChanged(QtProperty *prop);
+  virtual void doubleChanged(QtProperty *prop);
   /// Called when one of the parameter values gets changed
-  void parameterChanged(QtProperty* prop);
-  void stringChanged(QtProperty* prop);
-  void filenameChanged(QtProperty* prop);
-  void columnChanged(QtProperty* prop);
-  void currentItemChanged(QtBrowserItem*);
-  void vectorDoubleChanged(QtProperty* prop);
-  void vectorSizeChanged(QtProperty* prop);
+  void parameterChanged(QtProperty *prop);
+  void stringChanged(QtProperty *prop);
+  void filenameChanged(QtProperty *prop);
+  void columnChanged(QtProperty *prop);
+  void currentItemChanged(QtBrowserItem *);
+  void vectorDoubleChanged(QtProperty *prop);
+  void vectorSizeChanged(QtProperty *prop);
   void addTie();
   void addTieToFunction();
   void addFixTie();
@@ -297,7 +317,7 @@ private slots:
   void addLowerBound10();
   void addLowerBound50();
   void addLowerBound();
-  void addConstraint(int f,bool lo,bool up);
+  void addConstraint(int f, bool lo, bool up);
   void addUpperBound10();
   void addUpperBound50();
   void addUpperBound();
@@ -316,11 +336,14 @@ private slots:
   void loadFunctionFromString();
   void acceptFit();
   void closeFit();
-  void copy();///< Copy the function string to the clipboard
-  void paste();///< Paste a function string from the clipboard
-  void reset();///< reset the function part, renew function, all handlers are new
-  void functionHelp(); ///< Open a web page with description of the current function
-  void browserHelp();  ///< Open a web page with description of FitPropertyBrowser
+  void copy();  ///< Copy the function string to the clipboard
+  void paste(); ///< Paste a function string from the clipboard
+  void
+  reset(); ///< reset the function part, renew function, all handlers are new
+  void
+  functionHelp(); ///< Open a web page with description of the current function
+  void
+  browserHelp(); ///< Open a web page with description of FitPropertyBrowser
 
   void popupMenu(const QPoint &);
   /* Context menu slots */
@@ -331,8 +354,8 @@ private slots:
   /// Process and create some output if it is a MultiBG fit
   void processMultiBGResults();
 
-  void executeCustomSetupLoad(const QString& name);
-  void executeCustomSetupRemove(const QString& name);
+  void executeCustomSetupLoad(const QString &name);
+  void executeCustomSetupRemove(const QString &name);
 
   /// Update structure tooltips for all functions
   void updateStructureTooltips();
@@ -351,19 +374,24 @@ protected:
   ///
   void updateDecimals();
   /// Sets the workspace to a function
-  void setWorkspace(boost::shared_ptr<Mantid::API::IFunction> f)const;
+  void setWorkspace(boost::shared_ptr<Mantid::API::IFunction> f) const;
   /// Display properties relevant to the selected workspace
   void setWorkspaceProperties();
 
   /// Create a double property and set some settings
-  QtProperty* addDoubleProperty(const QString& name, QtDoublePropertyManager *manager = NULL)const;
+  QtProperty *addDoubleProperty(const QString &name,
+                                QtDoublePropertyManager *manager = NULL) const;
   /// Called when the minimizer changes. Creates minimizes's properties.
   void minimizerChanged();
   /// Do the fitting
   void doFit(int maxIterations);
+  /// Create CompositeFunction from string
+  void createCompositeFunction(const QString &str = "");
+  /// Create CompositeFunction from pointer
+  void createCompositeFunction(const Mantid::API::IFunction_sptr func);
 
   /// Property managers:
-  QtGroupPropertyManager  *m_groupManager;
+  QtGroupPropertyManager *m_groupManager;
   QtDoublePropertyManager *m_doubleManager;
   QtEnumPropertyManager *m_enumManager;
   QtIntPropertyManager *m_intManager;
@@ -372,7 +400,7 @@ protected:
   QtStringPropertyManager *m_filenameManager;
   QtStringPropertyManager *m_formulaManager;
   QtEnumPropertyManager *m_columnManager;
-  QtGroupPropertyManager  *m_vectorManager;
+  QtGroupPropertyManager *m_vectorManager;
   QtIntPropertyManager *m_vectorSizeManager;
   QtDoublePropertyManager *m_vectorDoubleManager;
   ParameterPropertyManager *m_parameterManager;
@@ -395,31 +423,34 @@ protected:
   QtProperty *m_yColumn;
   QtProperty *m_errColumn;
   QtProperty *m_showParamErrors;
-  QList<QtProperty*> m_minimizerProperties;
+  QtProperty *m_evaluationType;
+  QList<QtProperty *> m_minimizerProperties;
 
   /// A copy of the edited function
   boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
 
-  QtTreePropertyBrowser* m_browser;
+  QtTreePropertyBrowser *m_browser;
 
-  QAction* m_fitActionUndoFit;
-  QAction* m_fitActionSeqFit;
-  QAction* m_fitActionFit;
-  QAction* m_fitActionEvaluate;
+  QAction *m_fitActionUndoFit;
+  QAction *m_fitActionSeqFit;
+  QAction *m_fitActionFit;
+  QAction *m_fitActionEvaluate;
 
   /// Group for functions
-  QtBrowserItem* m_functionsGroup;
+  QtBrowserItem *m_functionsGroup;
   /// Group for input/output settings
-  QtBrowserItem* m_settingsGroup;
+  QtBrowserItem *m_settingsGroup;
   /// Group for custom options available on muon analysis widget
-  QtBrowserItem* m_customSettingsGroup;
+  QtBrowserItem *m_customSettingsGroup;
 
-  /// If false the change-slots (such as enumChanged(), doubleChanged()) are disabled
+  /// If false the change-slots (such as enumChanged(), doubleChanged()) are
+  /// disabled
   bool m_changeSlotsEnabled;
-  /// if true the output name will be guessed every time workspace name is changeed
+  /// if true the output name will be guessed every time workspace name is
+  /// changeed
   bool m_guessOutputName;
   /// Check if the input workspace is a group
-  bool isWorkspaceAGroup()const;
+  bool isWorkspaceAGroup() const;
 
   /// A list of registered functions
   mutable QStringList m_registeredFunctions;
@@ -430,25 +461,25 @@ protected:
   /// A list of registered functions that are neither peaks nor backgrounds
   mutable QStringList m_registeredOther;
   /// A list of available minimizers
-  mutable QStringList m_minimizers;  
+  mutable QStringList m_minimizers;
   /// A list of available workspaces
   mutable QStringList m_workspaceNames;
   /// A list of available cost functions
   mutable QStringList m_costFunctions;
+  /// A list of possible function evaluation types
+  mutable QStringList m_evaluationTypes;
 
   /// To keep a copy of the initial parameters in case for undo fit
   std::vector<double> m_initialParameters;
 
 private:
   /// load and save function
-  void loadFunction(const QString& funcString);
-  void saveFunction(const QString& fnName);
-  /// Create CompositeFunction
-  void createCompositeFunction(const QString& str = "");
+  void loadFunction(const QString &funcString);
+  void saveFunction(const QString &fnName);
   /// Check if the workspace can be used in the fit
-  virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr)const;
-  /// Find QtBrowserItem for a property prop among the chidren of 
-  QtBrowserItem* findItem(QtBrowserItem* parent,QtProperty* prop)const;
+  virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr) const;
+  /// Find QtBrowserItem for a property prop among the chidren of
+  QtBrowserItem *findItem(QtBrowserItem *parent, QtProperty *prop) const;
   /// Set the parameters to the fit outcome
   void getFitResults();
   /// disable undo when the function changes
@@ -456,58 +487,59 @@ private:
   /// Enable/disable the Fit button;
   virtual void setFitEnabled(bool yes);
   /// Create a string property and set some settings
-  QtProperty* addStringProperty(const QString& name)const;
-  void setStringPropertyValue(QtProperty* prop,const QString& value)const;
-  QString getStringPropertyValue(QtProperty* prop)const;
+  QtProperty *addStringProperty(const QString &name) const;
+  void setStringPropertyValue(QtProperty *prop, const QString &value) const;
+  QString getStringPropertyValue(QtProperty *prop) const;
   /// Check that the properties match the function
   void checkFunction();
 
-  void setCurrentFunction(Mantid::API::IFunction_const_sptr f)const;
+  void setCurrentFunction(Mantid::API::IFunction_const_sptr f) const;
 
   /// Sets the new workspace to the current one
-  virtual void workspaceChange(const QString& wsName);
+  virtual void workspaceChange(const QString &wsName);
 
   /// Does a parameter have a tie
-  void hasConstraints(QtProperty* parProp,bool& hasTie,bool& hasBounds)const;
+  void hasConstraints(QtProperty *parProp, bool &hasTie, bool &hasBounds) const;
   /// Returns the tie property for a parameter property, or NULL
-  QtProperty* getTieProperty(QtProperty* parProp)const;
+  QtProperty *getTieProperty(QtProperty *parProp) const;
 
   /// Callback for FunctionFactory update notifications
   void handleFactoryUpdate(Mantid::API::FunctionFactoryUpdateNotification_ptr);
   /// Observes algorithm factory update notifications
   Poco::NObserver<FitPropertyBrowser,
-                  Mantid::API::FunctionFactoryUpdateNotification> m_updateObserver;
-
+                  Mantid::API::FunctionFactoryUpdateNotification>
+      m_updateObserver;
 
   /// Make sure m_groupMember belongs to the group
-  //void validateGroupMember();
+  // void validateGroupMember();
 
   /// Fit and Display menu
-  QSignalMapper* m_fitMapper;
-  QMenu* m_fitMenu;
-  QAction* m_displayActionPlotGuess;
-  QAction* m_displayActionQuality;
-  QAction* m_displayActionClearAll;
+  QSignalMapper *m_fitMapper;
+  QMenu *m_fitMenu;
+  QAction *m_displayActionPlotGuess;
+  QAction *m_displayActionQuality;
+  QAction *m_displayActionClearAll;
   QString m_windowBaseString;
 
   /// Setup menu
-  QAction* m_setupActionCustomSetup;
-  QAction* m_setupActionRemove; 
+  QAction *m_setupActionCustomSetup;
+  QAction *m_setupActionRemove;
   void updateSetupMenus();
 
   /// To display a tip text
-  QLabel* m_tip;
+  QLabel *m_tip;
 
   // The widget for choosing the fit function.
-  QDialog* m_fitSelector;
+  QDialog *m_fitSelector;
   // The tree widget containing the fit functions.
-  QTreeWidget* m_fitTree;
-  
-  /// String property managers for special case attributes such as Filename or Formula
-  /// <attribute_name,string_manager>
-  QMap<QString,QtStringPropertyManager*> m_stringManagers;
+  QTreeWidget *m_fitTree;
 
-  mutable PropertyHandler* m_currentHandler;
+  /// String property managers for special case attributes such as Filename or
+  /// Formula
+  /// <attribute_name,string_manager>
+  QMap<QString, QtStringPropertyManager *> m_stringManagers;
+
+  mutable PropertyHandler *m_currentHandler;
 
   /// A list of available data types
   mutable QStringList m_dataTypes;
@@ -530,15 +562,17 @@ private:
 
   /// Name of the autobackground function
   QString m_autoBgName;
-  /// List of attributes of the autobackground function as name=value pairs separated by spaces
+  /// List of attributes of the autobackground function as name=value pairs
+  /// separated by spaces
   QString m_autoBgAttributes;
 
   /// The autobackground handler
-  PropertyHandler* m_autoBackground;
+  PropertyHandler *m_autoBackground;
 
-  /// if isWorkspaceAGroup() is true m_groupMember keeps name of the MatrixWorkspace
-  /// fitted with theFunction() 
-  //std::string m_groupMember;
+  /// if isWorkspaceAGroup() is true m_groupMember keeps name of the
+  /// MatrixWorkspace
+  /// fitted with theFunction()
+  // std::string m_groupMember;
 
   /// Log names
   QStringList m_logs;
@@ -547,7 +581,7 @@ private:
   int m_decimals;
 
   /// holds effectively a MantidUI for connecting
-  QObject* m_mantidui;
+  QObject *m_mantidui;
 
   /// store current workspace name
   std::string m_storedWorkspaceName;
@@ -560,9 +594,7 @@ private:
   friend class SetAttribute;
   friend class SetAttributeProperty;
   friend class SequentialFitDialog;
-
 };
-
 
 } // MantidQt
 } // API

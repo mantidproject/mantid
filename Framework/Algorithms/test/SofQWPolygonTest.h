@@ -74,11 +74,11 @@ public:
     expectedIDs[5] = s6;
 
     for (size_t i = 0; i < nspectra; ++i) {
-      const auto *spectrum = result->getSpectrum(i);
-      Mantid::specnum_t specNoActual = spectrum->getSpectrumNo();
+      const auto &spectrum = result->getSpectrum(i);
+      Mantid::specnum_t specNoActual = spectrum.getSpectrumNo();
       Mantid::specnum_t specNoExpected = static_cast<Mantid::specnum_t>(i + 1);
       TS_ASSERT_EQUALS(specNoExpected, specNoActual);
-      TS_ASSERT_EQUALS(expectedIDs[i], spectrum->getDetectorIDs());
+      TS_ASSERT_EQUALS(expectedIDs[i], spectrum.getDetectorIDs());
     }
   }
 };

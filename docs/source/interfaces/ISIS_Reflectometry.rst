@@ -48,7 +48,7 @@ Open MantidPlot, and open the ISIS Reflectometry (Polref) interface.
 **Interfaces -> Reflectometry -> ISIS Reflectometry (Polref)**
 
 Within the interface, we first want to import the tbl file as a TableWorkspace.
-To do this, click on **Reflectometry -> Import .TBL**. A :ref:`LoadReflTBL <algm-LoadReflTBL>`
+To do this, click on **Reflectometry -> Import .TBL**. A :ref:`LoadTBL <algm-LoadTBL>`
 dialog will open. Select ``INTER_NR_test2.tbl`` as the file, and enter ``MyTable``
 as the output workspace.
 
@@ -56,12 +56,14 @@ A table workspace called ``MyTable`` should now exist in the ADS (:ref:`Analysis
 To open the table workspace go to **Reflectometry -> Open Table -> MyTable**.
 The processing table (shown below) should now contain four rows (13460, 13462, 13469, 13470).
 
-.. interface:: ISIS Reflectometry (Polref)
-  :widget: viewTable
+.. figure:: /images/ISISReflectometryPolref_INTER_table.JPG
+  :align: center
 
 Let's process the first group, which consists of the first two rows of the
 table (13460 and 13462). The simplest way to do this is simply to select the
-two rows we want to process, and then click on **Process**.
+two rows we want to process, and then click on **Process**. Note that for the reduction
+to be successful, at least the bin size must be specified to :ref:`Stitch1DMany <algm-Stitch1DMany>`,
+as shown above.
 
 .. tip::
   If you receive an error, consult the `Troubleshooting`_ section of this document for guidance on fixing it.
@@ -92,10 +94,15 @@ IvsQ_13460_13462
 Layout
 ------
 
+Runs tab
+~~~~~~~~
+
+This section describes the different elements in the *Runs* tab.
+
 .. interface:: ISIS Reflectometry (Polref)
 
 Menu bar
-~~~~~~~~
+^^^^^^^^
 
 .. interface:: ISIS Reflectometry (Polref)
   :widget: menuBar
@@ -118,11 +125,11 @@ The **Reflectometry** menu provides access to the following functionality:
 | Save Table As    | Saves the current contents of the `Processing Table`_ to |
 |                  | a new *TableWorkspace*.                                  |
 +------------------+----------------------------------------------------------+
-| Import .TBL      | Opens a :ref:`LoadReflTBL <algm-LoadReflTBL>` dialog,    |
+| Import .TBL      | Opens a :ref:`LoadTBL <algm-LoadTBL>` dialog,            |
 |                  | enabling you to load a ``.tbl`` file into a              |
 |                  | *TableWorkspace*.                                        |
 +------------------+----------------------------------------------------------+
-| Export .TBL      | Opens a :ref:`SaveReflTBL <algm-SaveReflTBL>` dialog,    |
+| Export .TBL      | Opens a :ref:`SaveTBL <algm-SaveTBL>` dialog,            |
 |                  | enabling you to save a *TableWorkspace* to a ``.tbl``    |
 |                  | file.                                                    |
 +------------------+----------------------------------------------------------+
@@ -138,7 +145,7 @@ The **Edit** menu provides access to the same actions found in the tool bar.
 These are documented in the `Tool Bar`_ section of this document.
 
 Processing Table
-~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^
 
 .. interface:: ISIS Reflectometry (Polref)
   :widget: groupProcessPane
@@ -148,10 +155,9 @@ specify which runs to process, the properties that should be used to process
 them, and how the different runs should be joined together.
 
 Each row represents a single reduction (i.e. execution of
-:ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`).
-Rows may be grouped together by setting their **Group** column to the same
-value. Rows that are grouped together will have their output stitched
-together using :ref:`Stitch1D <algm-Stitch1D>`.
+:ref:`ReflectometryReductionOneAuto <algm-ReflectometryReductionOneAuto>`),
+and belongs to a group. Rows that are grouped together will have their output stitched
+together using :ref:`Stitch1DMany <algm-Stitch1DMany>`.
 
 Above the processing table is a tool bar containing various actions for
 manipulating the processing table.
@@ -168,24 +174,24 @@ complete. A generated notebook contains python code to repeat the processing
 steps and output relevant plots.
 
 Tool Bar
-~~~~~~~~
+^^^^^^^^
 
 This table details the behaviour of the actions in the tool bar, from left to right.
 
 .. interface:: ISIS Reflectometry (Polref)
   :widget: rowToolBar
 
-.. WARNING If you're updating this documentation, you probably also want to update the "What's This" tips in ReflMainWidget.ui
+.. WARNING If you're updating this documentation, you probably also want to update the "What's This" tips in DataProcessorWidget.ui
 
 +------------------+----------------------------------------------------------+
 | Action           | Effect                                                   |
 +==================+==========================================================+
 | Process          | Processes the selected runs, or, if no runs are selected,|
-|                  | all of the runs in the table.                            |
+|                  | all of the runs in the table. When a group is selected,  |
+|                  | runs belonging to the same group are stitched together.  |
 +------------------+----------------------------------------------------------+
-| Expand Selection | Expands your selection such that any rows in the same    |
-|                  | group as a row you have selected are added to your       |
-|                  | selection.                                               |
+| Expand Selection | Expands your selection such that the group containing the|
+|                  | row you have selected is selected.                       |
 +------------------+----------------------------------------------------------+
 | Plot Selected    | Creates a plot of the IvsQ workspaces generated by any of|
 | Rows             | the selected rows.                                       |
@@ -194,9 +200,18 @@ This table details the behaviour of the actions in the tool bar, from left to ri
 | Groups           | by any of the selected groups.                           |
 +------------------+----------------------------------------------------------+
 | Insert Row       | Adds a new row after the first selected row, or at the   |
-|                  | end of the table if no rows are selected.                |
+|                  | end of the group if a group was selected. If nothing     |
+|                  | was selected the new row is appended at the end of the   |
+|                  | last group.                                              |
++------------------+----------------------------------------------------------+
+| Insert Group     | Adds a new group after the first selected group, or at   |
+|                  | the end of the table if no groups were selected.         |
 +------------------+----------------------------------------------------------+
 | Delete Row       | Deletes any selected rows. If no rows are selected,      |
+|                  | nothing happens. If the single row of a group is selected|
+|                  | for deletion, the group will also be deleted.            |
++------------------+----------------------------------------------------------+
+| Delete Group     | Deletes any selected Groups. If no groups are selected,  |
 |                  | nothing happens.                                         |
 +------------------+----------------------------------------------------------+
 | Group Rows       | Takes all the selected rows and places them in a group   |
@@ -221,93 +236,90 @@ This table details the behaviour of the actions in the tool bar, from left to ri
 +------------------+----------------------------------------------------------+
 
 Columns
-~~~~~~~
+^^^^^^^
 
 .. WARNING If you're updating this documentation, you probably also want to update the "What's This" tips for the columns in QReflTableModel.cpp
 
-+---------------------+-----------+-----------------------------------------------+
-| Column Title        | Required? |  Description                                  |
-+=====================+===========+===============================================+
-| Run(s)              | **Yes**   | Contains the sample runs to be processed.     |
-|                     |           | Runs may be given as run numbers or workspace |
-|                     |           | names. Multiple runs may be added together by |
-|                     |           | separating them with a '+'.                   |
-|                     |           |                                               |
-|                     |           | Example: ``1234+1235+1236``                   |
-+---------------------+-----------+-----------------------------------------------+
-| Angle               | No        | Contains the angle used during the run, in    |
-|                     |           | degrees. If left blank, this is set to the    |
-|                     |           | last value for ``THETA`` in the run's sample  |
-|                     |           | log. If multiple runs were given in the Run(s)|
-|                     |           | column, the first listed run's sample log will|
-|                     |           | be used.                                      |
-|                     |           |                                               |
-|                     |           | Example: ``0.7``                              |
-+---------------------+-----------+-----------------------------------------------+
-| Transmission Run(s) | No        | Contains the transmission run(s) used to      |
-|                     |           | normalise the sample runs. To specify two     |
-|                     |           | transmission runs, separate them with a comma.|
-|                     |           | If left blank, the sample runs will be        |
-|                     |           | normalised by monitor only.                   |
-|                     |           |                                               |
-|                     |           | Example: ``1234,1235``                        |
-+---------------------+-----------+-----------------------------------------------+
-| Q min               | No        | Contains the minimum value of Q to be used in |
-|                     |           | Å\ :sup:`−1`\ . Data with a value of Q lower  |
-|                     |           | than this will be discarded. If left blank,   |
-|                     |           | this is set to the lowest Q value found. This |
-|                     |           | is useful for discarding noisy data.          |
-|                     |           |                                               |
-|                     |           | Example: ``0.1``                              |
-+---------------------+-----------+-----------------------------------------------+
-| Q max               | No        | Contains the maximum value of Q to be used in |
-|                     |           | Å\ :sup:`−1`\ . Data with a value of Q higher |
-|                     |           | than this will be discarded. If left blank,   |
-|                     |           | this is set to the highest Q value found. This|
-|                     |           | is useful for discarding noisy data.          |
-|                     |           |                                               |
-|                     |           | Example: ``0.9``                              |
-+---------------------+-----------+-----------------------------------------------+
-| dQ/Q                | No        | Contains the resolution used when rebinning   |
-|                     |           | output workspaces. If left blank, this is     |
-|                     |           | calculated for you using the                  |
-|                     |           | CalculateResolution algorithm. This value is  |
-|                     |           | negated so that Logarithmic binning can be    |
-|                     |           | applied for the IvsQ workspace.               |
-|                     |           | If you desire linear binning then you         |
-|                     |           | may negate the value in the processing table  |
-|                     |           | and a linear binning will be applied.         |
-|                     |           |                                               |
-|                     |           | Example: ``0.9``                              |
-+---------------------+-----------+-----------------------------------------------+
-| Scale               | **Yes**   | Contains the factor used to scale output      |
-|                     |           | IvsQ workspaces. The IvsQ workspaces are      |
-|                     |           | scaled by ``1/i`` where i is the value of     |
-|                     |           | this column.                                  |
-|                     |           |                                               |
-|                     |           | Example: ``1.0``                              |
-+---------------------+-----------+-----------------------------------------------+
-| Group               | **Yes**   | Contains the group number used for stitching  |
-|                     |           | output workspaces. The value of this column   |
-|                     |           | determines which other rows this row's output |
-|                     |           | will be stitched with. All rows with the same |
-|                     |           | group number are stitched together.           |
-+---------------------+-----------+-----------------------------------------------+
-| Options             | No        | Contains options that allow you to override   |
-|                     |           | ReflectometryReductionOne's properties. To    |
-|                     |           | override a property, just use the property's  |
-|                     |           | name as a key, and the desired value as the   |
-|                     |           | value.                                        |
-|                     |           | Options are specified in ``key=value`` pairs, |
-|                     |           | separated by commas. Values containing commas |
-|                     |           | must be quoted.                               |
-|                     |           |                                               |
-|                     |           | Example: ``StrictSpectrumChecking=0,``        |
-|                     |           | ``RegionOfDirectBeam="0,2", Params="1,2,3"``  |
-+---------------------+-----------+-----------------------------------------------+
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Column Title        | Required? |  Description                                                                    |
++=====================+===========+=================================================================================+
+| Run(s)              | **Yes**   | Contains the sample runs to be processed.                                       |
+|                     |           | Runs may be given as run numbers or workspace                                   |
+|                     |           | names. Multiple runs may be added together by                                   |
+|                     |           | separating them with a '+'.                                                     |
+|                     |           |                                                                                 |
+|                     |           | Example: ``1234+1235+1236``                                                     |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Angle               | No        | Contains the angle used during the run, in                                      |
+|                     |           | degrees. If left blank,                                                         |
+|                     |           | :ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`               |
+|                     |           | will calculate theta using                                                      |
+|                     |           | :ref:`SpecularReflectionCalculateTheta <algm-SpecularReflectionCalculateTheta>`.|
+|                     |           |                                                                                 |
+|                     |           |                                                                                 |
+|                     |           | Example: ``0.7``                                                                |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Transmission Run(s) | No        | Contains the transmission run(s) used to                                        |
+|                     |           | normalise the sample runs. To specify two                                       |
+|                     |           | transmission runs, separate them with a comma.                                  |
+|                     |           | If left blank, the sample runs will be                                          |
+|                     |           | normalised by monitor only.                                                     |
+|                     |           |                                                                                 |
+|                     |           | Example: ``1234,1235``                                                          |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Q min               | No        | Contains the minimum value of Q to be used in                                   |
+|                     |           | Å\ :sup:`−1`\ . Data with a value of Q lower                                    |
+|                     |           | than this will be discarded. If left blank,                                     |
+|                     |           | this is set to the lowest Q value found. This                                   |
+|                     |           | is useful for discarding noisy data.                                            |
+|                     |           |                                                                                 |
+|                     |           | Example: ``0.1``                                                                |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Q max               | No        | Contains the maximum value of Q to be used in                                   |
+|                     |           | Å\ :sup:`−1`\ . Data with a value of Q higher                                   |
+|                     |           | than this will be discarded. If left blank,                                     |
+|                     |           | this is set to the highest Q value found. This                                  |
+|                     |           | is useful for discarding noisy data.                                            |
+|                     |           |                                                                                 |
+|                     |           | Example: ``0.9``                                                                |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| dQ/Q                | No        | Contains the resolution used when rebinning                                     |
+|                     |           | output workspaces. If left blank, this is                                       |
+|                     |           | calculated for you using the                                                    |
+|                     |           | CalculateResolution algorithm. This value is                                    |
+|                     |           | negated so that Logarithmic binning can be                                      |
+|                     |           | applied for the IvsQ workspace.                                                 |
+|                     |           | If you desire linear binning then you                                           |
+|                     |           | may negate the value in the processing table                                    |
+|                     |           | and a linear binning will be applied.                                           |
+|                     |           |                                                                                 |
+|                     |           | Example: ``0.9``                                                                |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Scale               | No        | Contains the factor used to scale output                                        |
+|                     |           | IvsQ workspaces. The IvsQ workspaces are                                        |
+|                     |           | scaled by ``1/i`` where i is the value of                                       |
+|                     |           | this column.                                                                    |
+|                     |           |                                                                                 |
+|                     |           | Example: ``1.0``                                                                |
++---------------------+-----------+---------------------------------------------------------------------------------+
+| Options             | No        | Contains options that allow you to override                                     |
+|                     |           | ReflectometryReductionOne's properties. To                                      |
+|                     |           | override a property, just use the property's                                    |
+|                     |           | name as a key, and the desired value as the                                     |
+|                     |           | value.                                                                          |
+|                     |           | Options are specified in ``key=value`` pairs,                                   |
+|                     |           | separated by commas. Values containing commas                                   |
+|                     |           | must be quoted. Options specified via this                                      |
+|                     |           | column will prevail over global options                                         |
+|                     |           | specified in the                                                                |
+|                     |           | **ReflectometryReductionOneAuto** text box.                                     |
+|                     |           |                                                                                 |
+|                     |           | Example: ``StrictSpectrumChecking=0,``                                          |
+|                     |           | ``RegionOfDirectBeam="0,2", Params="1,2,3"``                                    |
++---------------------+-----------+---------------------------------------------------------------------------------+
 
 Search Interface
-~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^
 
 .. interface:: ISIS Reflectometry (Polref)
   :widget: groupSearchPane
@@ -373,6 +385,26 @@ Hovering over the highlighted run with your cursor will allow you to see why the
    :alt: Showing tooltip from failed transfer.
 
 
+Settings tab
+~~~~~~~~~~~~
+
+The *Settings* tab can be used to specify global options for the reduction and post-processing. It shows the algorithms used
+by the interface to reduce the data, together with a text box allowing the specification of pre-processing,
+processing and post-processing options. Pre-processing options refer to the algorithms :ref:`Plus <algm-Plus>` (applied
+to the **Run(s)** column when multiple runs are specified) and :ref:`CreateTransmissionWorkspaceAuto <algm-CreateTransmissionWorkspaceAuto>`
+(applied to **Transmission Run(s)**). Options to the main reduction algorithm,
+:ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>`, can also be
+supplied using the corresponding text box. Note that when conflicting options are specified
+for the reduction, i.e. different values for the same property are specified via this
+text box and the **Options** column in the *Runs* tab, the latter will prevail. Therefore,
+the **ReflectometryReductionOneAuto** text box should be used to specify global options that will be
+applied to all the rows in the table, whereas the **Options** column will only be applicable
+to the specific row for which those options are defined. Finally, post-processing instructions,
+i.e. instructions to :ref:`Stitch1DMany <algm-Stitch1DMany>`, can also be supplied similarly (note
+that at least a bin width must be specified for this algorithm to run successfully, for instance *Params="-0.03"*). Pre-processing,
+processing and post-processing options are specified in ``key=value`` pairs separated by commas.
+Values containing commas must be quoted.
+
 .. _ISIS_Reflectomety-Options:
 
 Options
@@ -426,12 +458,26 @@ If the run still isn't loading check Mantid's user directories are set
 correctly, and that the desired run is in one of the given directories. To
 manage the user directories, open **File -> Manage User Directories**.
 
+When I try to process I get an error: "Error encountered while stitching group ..."
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This occurs when Mantid is unable to stitch a group. Please check that at you have
+specified at least the bin width in the *Stitch1DMany* text box. To specify the bin width please
+use the *Params* input property like this: ``Params="-0.03"``  (you may want to replace
+``0.03`` with a bin size suitable for your reduction). Note that the "-" sign will produce
+a logarithmic binning in the stitched workspace. For linear binning, use ``Params="0.03"``.
+
 When I try to process I get an error: "Invalid key value pair, '...'"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This occurs when the contents of the options column are invalid.
 Key value pairs must be given in the form ``key = value``, and if the value
 contains commas it **must** be quoted, like so: ``key = "v,a,l,u,e"``.
+
+When I try to process I get an error: "Invalid value for property ... Can not convert "False/True" to boolean"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This occurs when a boolean property is set to "True" or "False". Please, use ``1`` or ``0`` instead.
 
 The *Open Table* menu doesn't do anything
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -446,9 +492,9 @@ My IvsQ workspaces are not being stitched correctly
 Stitching is controlled by the group a row is in. For stitching to occur, the
 rows must be in the same group, and be processed simultaneously.
 
-An easy way to check the runs are in the same group is to select one of the
+An easy way to select all the rows in the same group for stitching is to select one of the
 rows you want stitched, and then in the menu bar select **Edit -> Expand Selection**.
-All the rows in that group will be selected. If you have another row that you
+This will select the group your row is in. If you have another row that you
 would like to add to the group, you can do this easily by adding it to the
 selection, and then in the menu bar selecting **Edit -> Group Selected**.
 

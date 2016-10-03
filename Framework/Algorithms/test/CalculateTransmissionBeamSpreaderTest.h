@@ -4,10 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CalculateTransmissionBeamSpreader.h"
-#include "MantidDataHandling/LoadRaw3.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CropWorkspace.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
 
 using namespace Mantid::API;
@@ -34,7 +34,7 @@ public:
         SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(
             sample_spreader);
     sample_spreaderWS *= 5.0;
-    sample_spreaderWS->dataY(1)[0] = 1.0;
+    sample_spreaderWS->mutableY(1)[0] = 1.0;
     Mantid::API::AnalysisDataService::Instance().addOrReplace(
         sample_spreader, sample_spreaderWS);
 
@@ -44,7 +44,7 @@ public:
         SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(
             sample_scatt);
     sample_scattWS *= 4.0;
-    sample_scattWS->dataY(1)[0] = 1.0;
+    sample_scattWS->mutableY(1)[0] = 1.0;
     Mantid::API::AnalysisDataService::Instance().addOrReplace(sample_scatt,
                                                               sample_scattWS);
 
@@ -54,7 +54,7 @@ public:
         SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(
             empty_spreader);
     empty_spreaderWS *= 3.0;
-    empty_spreaderWS->dataY(1)[0] = 1.0;
+    empty_spreaderWS->mutableY(1)[0] = 1.0;
     Mantid::API::AnalysisDataService::Instance().addOrReplace(empty_spreader,
                                                               empty_spreaderWS);
 
@@ -65,13 +65,13 @@ public:
             empty_scatt);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(empty_scatt,
                                                               empty_scattWS);
-    empty_scattWS->dataY(1)[0] = 1.0;
+    empty_scattWS->mutableY(1)[0] = 1.0;
 
-    TS_ASSERT_EQUALS(empty_scattWS->dataY(0).size(), 1)
-    TS_ASSERT_EQUALS(sample_spreaderWS->dataY(3)[0], 10);
-    TS_ASSERT_EQUALS(sample_scattWS->dataY(3)[0], 8);
-    TS_ASSERT_EQUALS(empty_spreaderWS->dataY(3)[0], 6);
-    TS_ASSERT_EQUALS(empty_scattWS->dataY(3)[0], 2);
+    TS_ASSERT_EQUALS(empty_scattWS->y(0).size(), 1)
+    TS_ASSERT_EQUALS(sample_spreaderWS->y(3)[0], 10);
+    TS_ASSERT_EQUALS(sample_scattWS->y(3)[0], 8);
+    TS_ASSERT_EQUALS(empty_spreaderWS->y(3)[0], 6);
+    TS_ASSERT_EQUALS(empty_scattWS->y(3)[0], 2);
 
     Mantid::Algorithms::CalculateTransmissionBeamSpreader trans;
     if (!trans.isInitialized())
@@ -98,19 +98,13 @@ public:
             outputWS))
     if (!output)
       return;
-    TS_ASSERT_DELTA(output->readY(0)[0], 0.5, 0.010)
+    TS_ASSERT_DELTA(output->y(0)[0], 0.5, 0.010)
 
     Mantid::API::AnalysisDataService::Instance().remove(sample_spreader);
     Mantid::API::AnalysisDataService::Instance().remove(empty_spreader);
     Mantid::API::AnalysisDataService::Instance().remove(sample_scatt);
     Mantid::API::AnalysisDataService::Instance().remove(empty_scatt);
   }
-
-  //  void test_above_abunchatimes()
-  //  {
-  //    for (int i=0; i<100; i++)
-  //      testSingleBin();
-  //  }
 
 private:
   Mantid::Algorithms::CalculateTransmissionBeamSpreader trans;

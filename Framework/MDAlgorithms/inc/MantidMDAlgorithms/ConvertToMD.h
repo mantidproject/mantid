@@ -50,9 +50,6 @@ namespace MDAlgorithms {
 /// Convert to MD Events class itself:
 class DLLExport ConvertToMD : public ConvertToMDParent {
 public:
-  ConvertToMD();
-  ~ConvertToMD() override;
-
   /// Algorithm's name for identification
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -73,6 +70,9 @@ private:
   /// progress reporter
   boost::scoped_ptr<API::Progress> m_Progress;
 
+  void setupFileBackend(std::string filebackPath,
+                        API::IMDEventWorkspace_sptr outputWS);
+
   //------------------------------------------------------------------------------------------------------------------------------------------
 protected: // for testing, otherwise private:
   /// pointer to the input workspace;
@@ -87,7 +87,8 @@ protected: // for testing, otherwise private:
   bool doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws);
   /**Create new MD workspace using existing parameters for algorithm */
   API::IMDEventWorkspace_sptr
-  createNewMDWorkspace(const MDAlgorithms::MDWSDescription &targWSDescr);
+  createNewMDWorkspace(const MDAlgorithms::MDWSDescription &targWSDescr,
+                       const bool filebackend, const std::string &filename);
 
   bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,
                                 const std::string &QModReq,

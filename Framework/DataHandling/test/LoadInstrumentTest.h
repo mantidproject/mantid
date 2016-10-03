@@ -1,6 +1,7 @@
 #ifndef LOADINSTRUMENTTEST_H_
 #define LOADINSTRUMENTTEST_H_
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -29,6 +30,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::LinearGenerator;
 
 class LoadInstrumentTest : public CxxTest::TestSuite {
 public:
@@ -49,30 +52,27 @@ public:
     Workspace_sptr ws = WorkspaceFactory::Instance().create(
         "Workspace2D", histogramNumber, timechannels, timechannels);
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Points timeChannelsVec(timechannels, LinearGenerator(0.0, 100.0));
     // loop to create data
     for (int i = 0; i < histogramNumber; i++) {
-      boost::shared_ptr<Mantid::MantidVec> timeChannelsVec(
-          new Mantid::MantidVec),
-          v(new Mantid::MantidVec), e(new Mantid::MantidVec);
-      timeChannelsVec->resize(timechannels);
-      v->resize(timechannels);
-      e->resize(timechannels);
+      std::vector<double> v(timechannels);
+      std::vector<double> e(timechannels);
       // timechannels
       for (int j = 0; j < timechannels; j++) {
-        (*timeChannelsVec)[j] = j * 100;
-        (*v)[j] = (i + j) % 256;
-        (*e)[j] = (i + j) % 78;
+        v[j] = (i + j) % 256;
+        e[j] = (i + j) % 78;
       }
       // Populate the workspace.
-      ws2D->setX(i, timeChannelsVec);
-      ws2D->setData(i, v, e);
+      ws2D->setPoints(i, timeChannelsVec);
+      ws2D->dataY(i) = v;
+      ws2D->dataE(i) = e;
     }
 
     // put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
     // We want to test id the spectra mapping changes
-    TS_ASSERT_EQUALS(ws2D->getSpectrum(0)->getSpectrumNo(), 1);
-    TS_ASSERT_EQUALS(ws2D->getSpectrum(256)->getSpectrumNo(), 257);
+    TS_ASSERT_EQUALS(ws2D->getSpectrum(0).getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(ws2D->getSpectrum(256).getSpectrumNo(), 257);
     TS_ASSERT_EQUALS(ws2D->getNumberHistograms(), 2584);
 
     loader.setPropertyValue("Filename", "HET_Definition.xml");
@@ -95,10 +95,10 @@ public:
 
     //    std::vector<detid_t> dets = ws2D->getInstrument()->getDetectorIDs();
     //    std::cout << dets.size() << " detectors in the instrument" <<
-    //    std::endl;
+    //    '\n';
     //    for (size_t i=0; i<dets.size(); i++)
     //    {
-    //      if (i % 10 == 0) std::cout << std::endl;
+    //      if (i % 10 == 0) std::cout << '\n';
     //      std::cout << dets[i] << ", ";
     //    }
 
@@ -138,7 +138,7 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(256), 257);
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(257), 258);
 
-    auto ids_from_map = output->getSpectrum(257)->getDetectorIDs();
+    auto ids_from_map = output->getSpectrum(257).getDetectorIDs();
     IDetector_const_sptr det_from_ws = output->getDetector(257);
     TS_ASSERT_EQUALS(ids_from_map.size(), 1);
     TS_ASSERT_EQUALS(*ids_from_map.begin(), 602);

@@ -1,10 +1,11 @@
 #ifndef MANTID_GEOMETRY_PEAKSHAPE_H_
 #define MANTID_GEOMETRY_PEAKSHAPE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include <string>
+#include "MantidKernel/System.h"
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
+#include <string>
 
 namespace Mantid {
 namespace Geometry {
@@ -46,6 +47,10 @@ public:
   virtual int algorithmVersion() const = 0;
   /// Shape name
   virtual std::string shapeName() const = 0;
+  /// For selecting different radius types.
+  enum RadiusType { Radius = 0, OuterRadius = 1, InnerRadius = 2 };
+  /// Radius
+  virtual boost::optional<double> radius(RadiusType type) const = 0;
   /// Destructor
   virtual ~PeakShape() = default;
 };

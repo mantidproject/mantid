@@ -45,7 +45,9 @@ private slots:
   void singleFitComplete(bool error);
   void fitFunctionSelected(const QString &);
   void algorithmComplete(bool error);
-
+  void saveClicked();
+  void plotClicked();
+  void plotCurrentPreview();
 
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
@@ -64,11 +66,13 @@ private:
   void updatePlotOptions();
   QString convertFuncToShort(const QString &);
   QString convertBackToShort(const std::string &original);
+
   Ui::ConvFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
   QtTreePropertyBrowser *m_cfTree;
   QMap<QtProperty *, QtProperty *> m_fixedProps;
   Mantid::API::MatrixWorkspace_sptr m_cfInputWS;
+  Mantid::API::MatrixWorkspace_sptr m_previewPlotData;
   QString m_cfInputWSName;
   bool m_confitResFileType;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
@@ -83,7 +87,6 @@ private:
 
   // Used in auto generating defaults for parameters
   QStringList m_defaultParams;
-
 };
 } // namespace IDA
 } // namespace CustomInterfaces

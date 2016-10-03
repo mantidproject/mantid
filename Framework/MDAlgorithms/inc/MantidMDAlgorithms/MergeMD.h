@@ -36,9 +36,6 @@ namespace MDAlgorithms {
 */
 class DLLExport MergeMD : public BoxControllerSettingsAlgorithm {
 public:
-  MergeMD();
-  ~MergeMD() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

@@ -36,9 +36,6 @@ namespace Algorithms {
 */
 class DLLExport RemovePromptPulse : public API::Algorithm {
 public:
-  RemovePromptPulse();
-  ~RemovePromptPulse() override;
-
   /// Algorithm's name for identification
   const std::string name() const override;
 

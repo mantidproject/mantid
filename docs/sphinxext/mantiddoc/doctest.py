@@ -430,7 +430,7 @@ class DocTestOutputParser(object):
             success_markers.append(len(results))
 
         # Parse successful tests that have unique names
-        start, end = success_markers
+        start, end = success_markers[0], success_markers[1]
         passcases = self.__parse_success(fullname, results[start:end])
 
         # The final puzzle piece is that some tests that have failed

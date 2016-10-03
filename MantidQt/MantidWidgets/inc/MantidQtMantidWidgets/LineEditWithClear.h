@@ -16,30 +16,25 @@
 
 class QToolButton;
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
+namespace MantidQt {
+namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS LineEditWithClear : public QLineEdit
-{
-    Q_OBJECT
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS LineEditWithClear : public QLineEdit {
+  Q_OBJECT
 
 public:
-    LineEditWithClear(QWidget *parent = 0);
+  LineEditWithClear(QWidget *parent = 0);
 
 protected:
   void resizeEvent(QResizeEvent *) override;
 
 private slots:
-    void updateCloseButton(const QString &text);
+  void updateCloseButton(const QString &text);
 
 private:
-    QToolButton *clearButton;
+  QToolButton *clearButton;
 };
-
 }
-
 }
 
 #endif // LINEEDITWITHCLEAR_H

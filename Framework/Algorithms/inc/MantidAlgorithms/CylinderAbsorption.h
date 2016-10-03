@@ -88,10 +88,8 @@ namespace Algorithms {
 */
 class DLLExport CylinderAbsorption : public AbsorptionCorrection {
 public:
-  /// (Empty) Constructor
+  /// Default constructor
   CylinderAbsorption();
-  /// Virtual destructor
-  ~CylinderAbsorption() override {}
   /// Algorithm's name
   const std::string name() const override { return "CylinderAbsorption"; }
   /// Summary of algorithms purpose

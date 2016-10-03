@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.simpleapi import *
 from mantid.api import *
@@ -98,10 +100,10 @@ class EnggFitPeaksTest(unittest.TestCase):
 
         # some values
         # note approx comparison - fitting results differences of ~5% between glinux/win/osx
-        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(0,0), cell00, 5e-3))
-        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(0,1), cell01, 5e-3))
-        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(1,0), cell10, 5e-3))
-        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(1,4), cell14, 5e-3))
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(0,0), cell00, 5e-2))
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(0,1), cell01, 5e-2))
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(1,0), cell10, 5e-2))
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(1,4), cell14, 5e-2))
 
     def test_fitting_fails_ok(self):
         """
@@ -190,8 +192,8 @@ class EnggFitPeaksTest(unittest.TestCase):
         Tests fitting a couple of peaks.
         """
 
-        peak_def1 = "name=BackToBackExponential, I=15000, A=1, B=1.7, X0=15000, S=100"
-        peak_def2 = "name=BackToBackExponential, I=8000, A=1, B=1.7, X0=20000, S=300"
+        peak_def1 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=15000, A=0.1, B=0.14, X0=15000, S=50"
+        peak_def2 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=6000, A=0.02, B=0.021, X0=20000, S=40"
         sws = CreateSampleWorkspace(Function="User Defined",
                                     UserDefinedFunction=peak_def1 + ";" + peak_def2,
                                     NumBanks=1, BankPixelWidth=1,
@@ -208,17 +210,17 @@ class EnggFitPeaksTest(unittest.TestCase):
         self.assertEquals(test_fit_peaks_table.rowCount(), 2)
 
         # check 'OutFittedPeaksTable' table workspace
-        self._check_outputs_ok(peaksTblName, 2, [ep1, -1.5602448495e-06,
-                                                 ep2, 1.723902507582676e-07])
+        self._check_outputs_ok(peaksTblName, 2, [ep1, 1.98624796464,
+                                                 ep2, 0.00180987932115])
 
     def test_runs_ok_3peaks(self):
         """
         Tests fitting three clean peaks and different widths.
         """
 
-        peak_def1 = "name=BackToBackExponential, I=15000, A=1, B=1.7, X0=15000, S=100"
-        peak_def2 = "name=BackToBackExponential, I=8000, A=1, B=1.2, X0=20000, S=800"
-        peak_def3 = "name=BackToBackExponential, I=10000, A=1, B=0.9, X0=25000, S=350"
+        peak_def1 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=15000, A=0.1, B=0.14, X0=15000, S=50"
+        peak_def2 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=6000, A=0.02, B=0.021, X0=20000, S=40"
+        peak_def3 = "name=FlatBackground,A0=1;name=BackToBackExponential, I=10000, A=0.1, B=0.09, X0=25000, S=60"
         sws = CreateSampleWorkspace(Function="User Defined",
                                     UserDefinedFunction=
                                     peak_def1 + ";" + peak_def2 + ";" + peak_def3,
@@ -241,8 +243,8 @@ class EnggFitPeaksTest(unittest.TestCase):
         self.assertEquals(3, len(test_fit_peaks_table.column('S')))
 
         # check 'OutFittedPeaksTable' table workspace
-        self._check_outputs_ok(peaksTblName, 3, [ep1, -0.000162978436217,
-                                                 ep2, 3.94317157133e-05])
+        self._check_outputs_ok(peaksTblName, 3, [ep1, 2.98294345043,
+                                                 ep2, 0.00212603392105])
 
 
 if __name__ == '__main__':

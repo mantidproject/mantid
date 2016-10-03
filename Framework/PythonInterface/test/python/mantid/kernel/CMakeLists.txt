@@ -1,7 +1,7 @@
 ##
 ## mantid.kernel tests
 ##
-set ( TEST_PY_FILES 
+set ( TEST_PY_FILES
   ArrayPropertyTest.py
   ArrayBoundedValidatorTest.py
   ArrayLengthValidatorTest.py
@@ -26,6 +26,7 @@ set ( TEST_PY_FILES
   PropertyHistoryTest.py
   PropertyWithValueTest.py
   PropertyManagerTest.py
+  PropertyManagerPropertyTest.py
   PythonPluginsTest.py
   StatisticsTest.py
   TimeSeriesPropertyTest.py

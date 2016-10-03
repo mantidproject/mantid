@@ -41,47 +41,47 @@ public:
   /// constructor
   ICat3Catalog();
   /// destructor
-  virtual ~ICat3Catalog();
+  ~ICat3Catalog() override;
   /// login to isis catalog
-  virtual API::CatalogSession_sptr login(const std::string &username,
-                                         const std::string &password,
-                                         const std::string &endpoint,
-                                         const std::string &facility);
+  API::CatalogSession_sptr login(const std::string &username,
+                                 const std::string &password,
+                                 const std::string &endpoint,
+                                 const std::string &facility) override;
   /// logout from isis catalog
-  virtual void logout();
+  void logout() override;
   /// search isis data
-  virtual void search(const CatalogSearchParam &inputs,
-                      Mantid::API::ITableWorkspace_sptr &ws_sptr,
-                      const int &offset, const int &limit);
+  void search(const CatalogSearchParam &inputs,
+              Mantid::API::ITableWorkspace_sptr &ws_sptr, const int &offset,
+              const int &limit) override;
   /// Obtain the number of results returned by the search method.
-  virtual int64_t getNumberOfSearchResults(const CatalogSearchParam &inputs);
+  int64_t getNumberOfSearchResults(const CatalogSearchParam &inputs) override;
   /// logged in user's investigations search
-  virtual void myData(Mantid::API::ITableWorkspace_sptr &mydataws_sptr);
+  void myData(Mantid::API::ITableWorkspace_sptr &mydataws_sptr) override;
   /// get datasets
-  virtual void getDataSets(const std::string &investigationId,
-                           Mantid::API::ITableWorkspace_sptr &datasetsws_sptr);
+  void getDataSets(const std::string &investigationId,
+                   Mantid::API::ITableWorkspace_sptr &datasetsws_sptr) override;
   /// get datafiles
-  virtual void
+  void
   getDataFiles(const std::string &investigationId,
-               Mantid::API::ITableWorkspace_sptr &datafilesws_sptr);
+               Mantid::API::ITableWorkspace_sptr &datafilesws_sptr) override;
   /// get instruments list
-  virtual void listInstruments(std::vector<std::string> &instruments);
+  void listInstruments(std::vector<std::string> &instruments) override;
   /// get investigationtypes list
-  virtual void listInvestigationTypes(std::vector<std::string> &invstTypes);
+  void listInvestigationTypes(std::vector<std::string> &invstTypes) override;
   /// get file location strings
-  virtual const std::string getFileLocation(const long long &fileID);
+  const std::string getFileLocation(const long long &fileID) override;
   /// get urls
-  virtual const std::string getDownloadURL(const long long &fileID);
+  const std::string getDownloadURL(const long long &fileID) override;
   /// get URL of where to PUT (publish) files.
-  virtual const std::string
+  const std::string
   getUploadURL(const std::string &investigationID,
                const std::string &createFileName,
-               const std::string &dataFileDescription);
+               const std::string &dataFileDescription) override;
   /// keep alive
-  virtual void keepAlive();
+  void keepAlive() override;
   /// Obtains the investigations that the user can publish to and saves related
   /// information to a workspace.
-  virtual API::ITableWorkspace_sptr getPublishInvestigations();
+  API::ITableWorkspace_sptr getPublishInvestigations() override;
 
 private:
   /// The helper class that accesses ICAT functionality.

@@ -44,9 +44,6 @@ namespace Algorithms {
 */
 class DLLExport CopyLogs : public API::Algorithm {
 public:
-  CopyLogs();
-  ~CopyLogs() override;
-
   const std::string name() const override;
   /// Summary of algorithms purpose
   const std::string summary() const override {

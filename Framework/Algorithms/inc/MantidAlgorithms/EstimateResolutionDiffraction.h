@@ -33,9 +33,6 @@ namespace Algorithms {
 */
 class DLLExport EstimateResolutionDiffraction : public API::Algorithm {
 public:
-  EstimateResolutionDiffraction();
-  ~EstimateResolutionDiffraction() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override;
 
@@ -81,13 +78,13 @@ private:
   API::MatrixWorkspace_sptr m_outputWS;
 
   /// Centre neutron velocity
-  double m_centreVelocity;
+  double m_centreVelocity = 0.0;
 
   /// L1, source to sample
-  double m_L1;
+  double m_L1 = 0.0;
 
   /// Delta T
-  double m_deltaT;
+  double m_deltaT = 0.0;
 };
 
 } // namespace Algorithms

@@ -38,7 +38,7 @@ private:
                                                                  9));
     // Make sure the detector IDs are ok
     for (int i = 0; i < NUMPIXELS; i++)
-      test_in->getSpectrum(i)->setDetectorID(i + 1);
+      test_in->getSpectrum(i).setDetectorID(i + 1);
 
     // Add it to the workspace
     AnalysisDataService::Instance().add(wsName, test_in);
@@ -65,10 +65,10 @@ public:
     EventWorkspace_sptr ws =
         AnalysisDataService::Instance().retrieveWS<EventWorkspace>(name);
     size_t num_events = ws->getNumberEvents();
-    double min_event0 = ws->getEventList(0).getTofMin();
-    double max_event0 = ws->getEventList(0).getTofMax();
-    double min_eventN = ws->getEventList(NUMPIXELS - 1).getTofMin();
-    double max_eventN = ws->getEventList(NUMPIXELS - 1).getTofMax();
+    double min_event0 = ws->getSpectrum(0).getTofMin();
+    double max_event0 = ws->getSpectrum(0).getTofMax();
+    double min_eventN = ws->getSpectrum(NUMPIXELS - 1).getTofMin();
+    double max_eventN = ws->getSpectrum(NUMPIXELS - 1).getTofMax();
 
     // run the algorithm
     RemoveLowResTOF algo;
@@ -87,12 +87,12 @@ public:
     TS_ASSERT(num_events > ws->getNumberEvents()); // should drop events
 
     // pixel 0 shouldn't be adjusted
-    TS_ASSERT_EQUALS(min_event0, ws->getEventList(0).getTofMin());
-    TS_ASSERT_EQUALS(max_event0, ws->getEventList(0).getTofMax());
+    TS_ASSERT_EQUALS(min_event0, ws->getSpectrum(0).getTofMin());
+    TS_ASSERT_EQUALS(max_event0, ws->getSpectrum(0).getTofMax());
 
     // pixel NUMPIXELS - 1 should be moved
-    TS_ASSERT(min_eventN < ws->getEventList(NUMPIXELS - 1).getTofMin());
-    TS_ASSERT_EQUALS(max_eventN, ws->getEventList(NUMPIXELS - 1).getTofMax());
+    TS_ASSERT(min_eventN < ws->getSpectrum(NUMPIXELS - 1).getTofMin());
+    TS_ASSERT_EQUALS(max_eventN, ws->getSpectrum(NUMPIXELS - 1).getTofMax());
   }
 
   /** Test the functionality to output the removed low resolution TOF events to
@@ -106,10 +106,10 @@ public:
     EventWorkspace_sptr ws =
         AnalysisDataService::Instance().retrieveWS<EventWorkspace>(name);
     size_t num_events = ws->getNumberEvents();
-    double min_event0 = ws->getEventList(0).getTofMin();
-    double max_event0 = ws->getEventList(0).getTofMax();
-    double min_eventN = ws->getEventList(NUMPIXELS - 1).getTofMin();
-    double max_eventN = ws->getEventList(NUMPIXELS - 1).getTofMax();
+    double min_event0 = ws->getSpectrum(0).getTofMin();
+    double max_event0 = ws->getSpectrum(0).getTofMax();
+    double min_eventN = ws->getSpectrum(NUMPIXELS - 1).getTofMin();
+    double max_eventN = ws->getSpectrum(NUMPIXELS - 1).getTofMax();
 
     // run the algorithm
     RemoveLowResTOF algo;
@@ -153,16 +153,16 @@ public:
                      num_events);
 
     // pixel 0 shouldn't be adjusted
-    TS_ASSERT_EQUALS(min_event0, ws->getEventList(0).getTofMin());
-    TS_ASSERT_EQUALS(max_event0, ws->getEventList(0).getTofMax());
-    TS_ASSERT_EQUALS(lowresws->getEventList(0).getNumberEvents(), 0);
+    TS_ASSERT_EQUALS(min_event0, ws->getSpectrum(0).getTofMin());
+    TS_ASSERT_EQUALS(max_event0, ws->getSpectrum(0).getTofMax());
+    TS_ASSERT_EQUALS(lowresws->getSpectrum(0).getNumberEvents(), 0);
 
     // pixel NUMPIXELS - 1 should be moved
-    TS_ASSERT(min_eventN < ws->getEventList(NUMPIXELS - 1).getTofMin());
-    TS_ASSERT_EQUALS(max_eventN, ws->getEventList(NUMPIXELS - 1).getTofMax());
+    TS_ASSERT(min_eventN < ws->getSpectrum(NUMPIXELS - 1).getTofMin());
+    TS_ASSERT_EQUALS(max_eventN, ws->getSpectrum(NUMPIXELS - 1).getTofMax());
     TS_ASSERT_EQUALS(min_eventN,
-                     lowresws->getEventList(NUMPIXELS - 1).getTofMin());
-    TS_ASSERT(max_eventN > lowresws->getEventList(NUMPIXELS - 1).getTofMax());
+                     lowresws->getSpectrum(NUMPIXELS - 1).getTofMin());
+    TS_ASSERT(max_eventN > lowresws->getSpectrum(NUMPIXELS - 1).getTofMax());
   }
 };
 

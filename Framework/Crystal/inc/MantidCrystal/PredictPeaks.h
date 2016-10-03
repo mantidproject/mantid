@@ -23,7 +23,6 @@ namespace Crystal {
 class DLLExport PredictPeaks : public API::Algorithm {
 public:
   PredictPeaks();
-  ~PredictPeaks() override;
 
   /// Algorithm's name for identification
   const std::string name() const override { return "PredictPeaks"; };
@@ -73,8 +72,9 @@ private:
   Geometry::Instrument_const_sptr m_inst;
   /// Output peaks workspace
   Mantid::DataObjects::PeaksWorkspace_sptr m_pw;
-
   Geometry::StructureFactorCalculator_sptr m_sfCalculator;
+
+  double m_qConventionFactor;
 };
 
 } // namespace Mantid

@@ -26,7 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
- //Heavily edited and refactored to fix bugs by Keith Brown
+// Heavily edited and refactored to fix bugs by Keith Brown
 #ifndef AXESDIALOG_H
 #define AXESDIALOG_H
 
@@ -68,65 +68,63 @@ class ApplicationWindow;
 /**
  * Remark: Don't use this dialog as a non modal dialog!
  */
-class AxesDialog: public QDialog
-{
+class AxesDialog : public QDialog {
   Q_OBJECT
 
-  public:
-    AxesDialog(ApplicationWindow* app, Graph* g, Qt::WFlags fl = 0);
-    ~AxesDialog() override;
+public:
+  AxesDialog(ApplicationWindow *app, Graph *g, Qt::WFlags fl = 0);
+  ~AxesDialog() override;
 
-  public slots:
-    void setCurrentScale(int axisPos);
-    void showGeneralPage();
-    void showAxesPage();
-    void showGridPage();
-    int exec();
+public slots:
+  void setCurrentScale(int axisPos);
+  void showGeneralPage();
+  void showAxesPage();
+  void showGridPage();
+  int exec();
 
-  private slots:
-    bool pressToGraph();
-    void apply();
-    void accept() override;
-    void updateGrid();
-    void changeMinorTicksLength(int minLength);
-    void changeMajorTicksLength(int majLength);
-    void pageChanged(QWidget *page);
-    void setModified();
+private slots:
+  bool pressToGraph();
+  void apply();
+  void accept() override;
+  void updateGrid();
+  void changeMinorTicksLength(int minLength);
+  void changeMajorTicksLength(int majLength);
+  void pageChanged(QWidget *page);
+  void setModified();
 
-  protected:
-    //! generate UI for the axes page
-    void initAxesPage();
-    //! generate UI for the scales page
-    void initScalesPage();
-    //! generate UI for the grid page
-    void initGridPage();
-    //! generate UI for the general page
-    void initGeneralPage();
+protected:
+  //! generate UI for the axes page
+  void initAxesPage();
+  //! generate UI for the scales page
+  void initScalesPage();
+  //! generate UI for the grid page
+  void initGridPage();
+  //! generate UI for the general page
+  void initGeneralPage();
 
-    ApplicationWindow* m_app;
-    Graph *m_graph;
-	  QStackedLayout *m_scalePrefsArea, *m_axesPrefsArea, *m_gridPrefsArea;
+  ApplicationWindow *m_app;
+  Graph *m_graph;
+  QStackedLayout *m_scalePrefsArea, *m_axesPrefsArea, *m_gridPrefsArea;
 
-    //common widgets
-    QPushButton *m_btnApply, *m_btnOk, *m_btnCancel;
-    QTabWidget *m_generalDialog;
-    QWidget *m_scalesPage, *m_gridPage, *m_axesPage, *m_generalPage, *m_lastPage;
+  // common widgets
+  QPushButton *m_btnApply, *m_btnOk, *m_btnCancel;
+  QTabWidget *m_generalDialog;
+  QWidget *m_scalesPage, *m_gridPage, *m_axesPage, *m_generalPage, *m_lastPage;
 
-    QHBoxLayout *scalesLayout, *axesLayout;
-    QListWidget *m_lstScales, *m_lstGrid, *m_lstAxes;
-    QSpinBox *m_spnAxesLinewidth, *m_spnMajorTicksLength, *m_spnMinorTicksLength;
-    QCheckBox *m_chkBackbones, *m_chkAntialiseGrid;
-    QComboBox *m_cmbApplyGridFormat;
+  QHBoxLayout *scalesLayout, *axesLayout;
+  QListWidget *m_lstScales, *m_lstGrid, *m_lstAxes;
+  QSpinBox *m_spnAxesLinewidth, *m_spnMajorTicksLength, *m_spnMinorTicksLength;
+  QCheckBox *m_chkBackbones, *m_chkAntialiseGrid;
+  QComboBox *m_cmbApplyGridFormat;
 
-  private:
-
-    ///A map of QListWidgetItem objects to their Axis details objects
-    QList<AxisDetails*> m_Axis_list;
-    ///A map of QListWidgetItem objects to their Scale details objects
-    QList<ScaleDetails*> m_Scale_list;
-    ///A map of QListWidgetItem objects to their Scale details objects
-    QList<GridDetails*> m_Grid_list;
-    bool m_generalModified;
+private:
+  /// A map of QListWidgetItem objects to their Axis details objects
+  QList<AxisDetails *> m_Axis_list;
+  /// A map of QListWidgetItem objects to their Scale details objects
+  QList<ScaleDetails *> m_Scale_list;
+  /// A map of QListWidgetItem objects to their Scale details objects
+  QList<GridDetails *> m_Grid_list;
+  bool m_generalModified;
 };
 
 #endif

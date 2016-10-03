@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/LibraryManager.h"
 #include <MantidKernel/StringTokenizer.h>
+#include <boost/lexical_cast.hpp>
 #include <sstream>
 
 namespace Mantid {
@@ -118,7 +119,13 @@ IFunction_sptr FunctionFactoryImpl::createSimple(
       parentAttributes[parName] = parValue;
     } else {
       // set initial parameter value
-      fun->setParameter(parName, atof(parValue.c_str()));
+      try {
+        fun->setParameter(parName, boost::lexical_cast<double>(parValue));
+      } catch (boost::bad_lexical_cast &) {
+        throw std::runtime_error(
+            "Error in value of parameter " + parName + ".\n" + parValue +
+            " cannot be interpreted as a floating point value.");
+      }
     }
   } // for term
 
@@ -216,7 +223,14 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
     cfun->addFunction(fun);
     size_t i = cfun->nFunctions() - 1;
     for (auto &pAttribute : pAttributes) {
-      cfun->setLocalAttributeValue(i, pAttribute.first, pAttribute.second);
+      // Apply parent attributes of the child function to this function. If this
+      // function doesn't have those attributes, they get passed up the chain to
+      // this function's parent.
+      if (cfun->hasLocalAttribute(pAttribute.first)) {
+        cfun->setLocalAttributeValue(i, pAttribute.first, pAttribute.second);
+      } else {
+        parentAttributes[pAttribute.first] = pAttribute.second;
+      }
     }
   }
 
@@ -290,7 +304,7 @@ void FunctionFactoryImpl::addTies(IFunction_sptr fun,
 void FunctionFactoryImpl::addTie(IFunction_sptr fun,
                                  const Expression &expr) const {
   if (expr.size() > 1) { // if size > 2 it is interpreted as setting a tie (last
-                         // expr.term) to multiple parameters, e.g
+    // expr.term) to multiple parameters, e.g
     // f1.alpha = f2.alpha = f3.alpha = f0.beta^2/2
     const std::string value = expr[expr.size() - 1].str();
     for (size_t i = expr.size() - 1; i != 0;) {

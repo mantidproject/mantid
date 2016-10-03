@@ -5,8 +5,9 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "MantidGeometry/Crystal/StructureFactorCalculator.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidGeometry/Crystal/StructureFactorCalculator.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -98,9 +99,11 @@ private:
    */
   class MockStructureFactorCalculator : public StructureFactorCalculator {
   public:
+    GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD1(getF, StructureFactor(const V3D &hkl));
     MOCK_METHOD1(crystalStructureSetHook,
                  void(const CrystalStructure &crystalStructure));
+    GCC_DIAG_ON_SUGGEST_OVERRIDE
   };
 };
 

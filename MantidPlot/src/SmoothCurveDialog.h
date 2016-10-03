@@ -2,7 +2,8 @@
     File                 : SmoothCurveDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Smoothing options dialog
 
@@ -38,29 +39,25 @@ class Graph;
 class ColorBox;
 
 //! Smoothing options dialog
-class SmoothCurveDialog : public QDialog
-{
-    Q_OBJECT
+class SmoothCurveDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    SmoothCurveDialog(int method, QWidget* parent = 0, Qt::WFlags fl = 0 );
+  SmoothCurveDialog(int method, QWidget *parent = 0, Qt::WFlags fl = 0);
 
 public slots:
-	void setGraph(Graph *g);
-	void smooth();
-	void activateCurve(const QString& curveName);
+  void setGraph(Graph *g);
+  void smooth();
+  void activateCurve(const QString &curveName);
 
 private:
-	Graph *graph;
-	int smooth_method;
-    QPushButton* btnSmooth;
-	QPushButton* buttonCancel;
-	QComboBox* boxName;
-	QSpinBox *boxPointsLeft, *boxPointsRight, *boxOrder;
-	ColorBox* boxColor;
+  Graph *graph;
+  int smooth_method;
+  QPushButton *btnSmooth;
+  QPushButton *buttonCancel;
+  QComboBox *boxName;
+  QSpinBox *boxPointsLeft, *boxPointsRight, *boxOrder;
+  ColorBox *boxColor;
 };
 
 #endif
-
-
-

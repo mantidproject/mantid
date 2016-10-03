@@ -367,9 +367,9 @@ void CalculateChiSquared::estimateErrors() {
   }
 
   if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-    g_log.debug() << "chi0=" << chi0 << std::endl;
-    g_log.debug() << "sigma2=" << sigma2 << std::endl;
-    g_log.debug() << "dof=" << dof << std::endl;
+    g_log.debug() << "chi0=" << chi0 << '\n';
+    g_log.debug() << "sigma2=" << sigma2 << '\n';
+    g_log.debug() << "dof=" << dof << '\n';
   }
 
   // Parameter bounds that define a volume in the parameter
@@ -428,14 +428,13 @@ void CalculateChiSquared::estimateErrors() {
     bool ok = true;
     auto base = slice.makeApprox(lBound, rBound, P, A, ok);
     if (!ok) {
-      g_log.warning() << "Approximation failed for parameter " << ip
-                      << std::endl;
+      g_log.warning() << "Approximation failed for parameter " << ip << '\n';
     }
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-      g_log.debug() << "Parameter " << ip << std::endl;
+      g_log.debug() << "Parameter " << ip << '\n';
       g_log.debug() << "Slice approximated by polynomial of order "
                     << base->size() - 1;
-      g_log.debug() << " between " << lBound << " and " << rBound << std::endl;
+      g_log.debug() << " between " << lBound << " and " << rBound << '\n';
     }
 
     // Write n slice points into the output table.
@@ -478,9 +477,9 @@ void CalculateChiSquared::estimateErrors() {
       }
     }
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-      g_log.debug() << std::endl;
+      g_log.debug() << '\n';
       g_log.debug() << "Smallest minimum at " << parMin << " is " << chiMin
-                    << std::endl;
+                    << '\n';
     }
 
     // Points of intersections with line chi^2 = 1/2 give an estimate of
@@ -517,7 +516,7 @@ void CalculateChiSquared::estimateErrors() {
       for (double root : roots) {
         g_log.debug() << root << ' ';
       }
-      g_log.debug() << std::endl;
+      g_log.debug() << '\n';
     }
 
     // Output parameter info to the table.
@@ -541,7 +540,7 @@ void CalculateChiSquared::estimateErrors() {
   // If parameters are correlated the found deviations
   // most likely underestimate the true values.
   unfixParameters();
-  GSLJacobian J(m_function, values->size());
+  GSLJacobian J(*m_function, values->size());
   m_function->functionDeriv(*domain, J);
   refixParameters();
   // Calculate the hessian at the current point.
@@ -586,16 +585,16 @@ void CalculateChiSquared::estimateErrors() {
   for (size_t i = 0; i < nParams; ++i) {
     auto dir = Q.copyColumn(i);
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-      g_log.debug() << "Direction " << i << std::endl;
-      g_log.debug() << dir << std::endl;
+      g_log.debug() << "Direction " << i << '\n';
+      g_log.debug() << dir << '\n';
     }
     // Make a slice in that direction
     ChiSlice slice(*m_function, dir, *domain, *values, chi0, sigma2);
     double rBound0 = dir.dot(rBounds);
     double lBound0 = dir.dot(lBounds);
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-      g_log.debug() << "lBound " << lBound0 << std::endl;
-      g_log.debug() << "rBound " << rBound0 << std::endl;
+      g_log.debug() << "lBound " << lBound0 << '\n';
+      g_log.debug() << "rBound " << rBound0 << '\n';
     }
     double lBound = slice.findBound(lBound0);
     double rBound = slice.findBound(rBound0);
@@ -604,7 +603,7 @@ void CalculateChiSquared::estimateErrors() {
     bool ok = true;
     auto base = slice.makeApprox(lBound, rBound, P, A, ok);
     if (!ok) {
-      g_log.warning() << "Approximation failed in direction " << i << std::endl;
+      g_log.warning() << "Approximation failed in direction " << i << '\n';
     }
     // Find the deviation points where the chi^2 = 1/2
     A[0] -= 0.5;
@@ -626,7 +625,7 @@ void CalculateChiSquared::estimateErrors() {
     }
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
       g_log.debug() << "Roots " << roots[0] << " (" << slice(roots[0]) << ") "
-                    << roots[1] << " (" << slice(roots[1]) << ") " << std::endl;
+                    << roots[1] << " (" << slice(roots[1]) << ") \n";
     }
     // Loop over the parameters and see if there deviations along
     // this direction is greater than any previous value.
@@ -639,14 +638,14 @@ void CalculateChiSquared::estimateErrors() {
       if (lError < leftErrColumn->toDouble(ip)) {
         if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
           g_log.debug() << "  left for  " << ip << ' ' << lError << ' '
-                        << leftErrColumn->toDouble(ip) << std::endl;
+                        << leftErrColumn->toDouble(ip) << '\n';
         }
         leftErrColumn->fromDouble(ip, lError);
       }
       if (rError > rightErrColumn->toDouble(ip)) {
         if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
           g_log.debug() << "  right for " << ip << ' ' << rError << ' '
-                        << rightErrColumn->toDouble(ip) << std::endl;
+                        << rightErrColumn->toDouble(ip) << '\n';
         }
         rightErrColumn->fromDouble(ip, rError);
       }

@@ -43,13 +43,13 @@ MDHistoWorkspace::MDHistoWorkspace(
       m_coordSystem(None), m_displayNormalization(displayNormalization) {
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
   if (dimX)
-    dimensions.push_back(dimX);
+    dimensions.push_back(std::move(dimX));
   if (dimY)
-    dimensions.push_back(dimY);
+    dimensions.push_back(std::move(dimY));
   if (dimZ)
-    dimensions.push_back(dimZ);
+    dimensions.push_back(std::move(dimZ));
   if (dimT)
-    dimensions.push_back(dimT);
+    dimensions.push_back(std::move(dimT));
   this->init(dimensions);
 }
 
@@ -89,7 +89,10 @@ MDHistoWorkspace::MDHistoWorkspace(
  * @param other :: MDHistoWorkspace to copy from.
  */
 MDHistoWorkspace::MDHistoWorkspace(const MDHistoWorkspace &other)
-    : IMDHistoWorkspace(other) {
+    : IMDHistoWorkspace(other),
+      m_nEventsContributed(other.m_nEventsContributed),
+      m_coordSystem(other.m_coordSystem),
+      m_displayNormalization(other.m_displayNormalization) {
   // Dimensions are copied by the copy constructor of MDGeometry
   this->cacheValues();
   // Allocate the linear arrays
@@ -97,16 +100,11 @@ MDHistoWorkspace::MDHistoWorkspace(const MDHistoWorkspace &other)
   m_errorsSquared = new signal_t[m_length];
   m_numEvents = new signal_t[m_length];
   m_masks = new bool[m_length];
-  m_nEventsContributed = other.m_nEventsContributed;
-  this->setCoordinateSystem(other.getSpecialCoordinateSystem());
-  m_displayNormalization = other.displayNormalization();
   // Now copy all the data
-  for (size_t i = 0; i < m_length; ++i) {
-    m_signals[i] = other.m_signals[i];
-    m_errorsSquared[i] = other.m_errorsSquared[i];
-    m_numEvents[i] = other.m_numEvents[i];
-    m_masks[i] = other.m_masks[i];
-  }
+  std::copy_n(other.m_signals, m_length, m_signals);
+  std::copy_n(other.m_errorsSquared, m_length, m_errorsSquared);
+  std::copy_n(other.m_numEvents, m_length, m_numEvents);
+  std::copy_n(other.m_masks, m_length, m_masks);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -205,7 +203,6 @@ void MDHistoWorkspace::initVertexesArray() {
   size_t nd = numDimensions;
   // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd
   // bits
-  // cppcheck-suppress constStatement
   size_t numVertices = size_t{1} << numDimensions;
 
   // Allocate the array of the right size
@@ -220,7 +217,6 @@ void MDHistoWorkspace::initVertexesArray() {
     for (size_t d = 0; d < nd; d++) {
       // Use a bit mask to look at each bit of the integer we are iterating
       // through.
-      // cppcheck-suppress constStatement
       size_t mask = size_t{1} << d;
       if ((i & mask) > 0) {
         // Bit is 1, use the max of the dimension
@@ -258,13 +254,11 @@ void MDHistoWorkspace::initVertexesArray() {
  */
 void MDHistoWorkspace::setTo(signal_t signal, signal_t errorSquared,
                              signal_t numEvents) {
-  for (size_t i = 0; i < m_length; i++) {
-    m_signals[i] = signal;
-    m_errorsSquared[i] = errorSquared;
-    m_numEvents[i] = numEvents;
-    m_masks[i] = false; // Not masked by default;
-    m_nEventsContributed += uint64_t(numEvents);
-  }
+  std::fill_n(m_signals, m_length, signal);
+  std::fill_n(m_errorsSquared, m_length, errorSquared);
+  std::fill_n(m_numEvents, m_length, numEvents);
+  std::fill_n(m_masks, m_length, false);
+  m_nEventsContributed = static_cast<uint64_t>(numEvents) * m_length;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -391,7 +385,8 @@ signal_t MDHistoWorkspace::getSignalWithMaskAtCoord(
     const coord_t *coords,
     const Mantid::API::MDNormalization &normalization) const {
   size_t linearIndex = this->getLinearIndexAtCoord(coords);
-  if (this->getIsMaskedAt(linearIndex)) {
+  if (linearIndex == std::numeric_limits<size_t>::max() ||
+      this->getIsMaskedAt(linearIndex)) {
     return MDMaskValue;
   }
   return getSignalAtCoord(coords, normalization);
@@ -602,7 +597,9 @@ IMDWorkspace::LinePlot MDHistoWorkspace::getLinePoints(
       const auto linearIndex =
           this->getLinearIndexAtCoord(middle.getBareArray());
 
-      if (bin_centres && !this->getIsMaskedAt(linearIndex)) {
+      if (bin_centres &&
+          !(linearIndex == std::numeric_limits<size_t>::max() ||
+            this->getIsMaskedAt(linearIndex))) {
         coord_t bin_centrePos =
             static_cast<coord_t>((linePos + lastLinePos) * 0.5);
         line.x.push_back(bin_centrePos);
@@ -851,6 +848,9 @@ MDHistoWorkspace &MDHistoWorkspace::operator*=(const MDHistoWorkspace &b_ws) {
  *
  * Error propagation of \f$ f = a * b \f$  is given by:
  * \f$ df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) \f$
+ * Rewritten as:
+ * \f$ df^2 = b^2 da^2 + a^2 * db^2 \f$
+ * to avoid problems when a or b are 0
  *
  * @param b_ws :: workspace on the RHS of the operation
  * */
@@ -864,7 +864,7 @@ void MDHistoWorkspace::multiply(const MDHistoWorkspace &b_ws) {
     signal_t db2 = b_ws.m_errorsSquared[i];
 
     signal_t f = a * b;
-    signal_t df2 = (f * f) * (da2 / (a * a) + db2 / (b * b));
+    signal_t df2 = da2 * b * b + db2 * a * a;
 
     m_signals[i] = f;
     m_errorsSquared[i] = df2;
@@ -876,6 +876,9 @@ void MDHistoWorkspace::multiply(const MDHistoWorkspace &b_ws) {
  *
  * Error propagation of \f$ f = a * b \f$  is given by:
  * \f$ df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) \f$
+ *  Rewritten as:
+ * \f$ df^2 = b^2 da^2 + a^2 * db^2 \f$
+ * to avoid problems when a or b are 0
  *
  * @param signal :: signal to apply
  * @param error :: error (not squared) to apply
@@ -883,13 +886,13 @@ void MDHistoWorkspace::multiply(const MDHistoWorkspace &b_ws) {
 void MDHistoWorkspace::multiply(const signal_t signal, const signal_t error) {
   signal_t b = signal;
   signal_t db2 = error * error;
-  signal_t db2_relative = db2 / (b * b);
+
   for (size_t i = 0; i < m_length; ++i) {
     signal_t a = m_signals[i];
     signal_t da2 = m_errorsSquared[i];
 
     signal_t f = a * b;
-    signal_t df2 = (f * f) * (da2 / (a * a) + db2_relative);
+    signal_t df2 = da2 * b * b + db2 * a * a;
 
     m_signals[i] = f;
     m_errorsSquared[i] = df2;
@@ -914,6 +917,9 @@ MDHistoWorkspace &MDHistoWorkspace::operator/=(const MDHistoWorkspace &b_ws) {
  *
  * Error propagation of \f$ f = a / b \f$  is given by:
  * \f$ df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) \f$
+ * Rewritten as:
+ * \f$ df^2 = da^2 / b^2 + db^2 *f^2 / b^2 \f$
+ * to avoid problems when a or b are 0
  *
  * @param b_ws :: workspace on the RHS of the operation
  **/
@@ -927,7 +933,7 @@ void MDHistoWorkspace::divide(const MDHistoWorkspace &b_ws) {
     signal_t db2 = b_ws.m_errorsSquared[i];
 
     signal_t f = a / b;
-    signal_t df2 = (f * f) * (da2 / (a * a) + db2 / (b * b));
+    signal_t df2 = da2 / (b * b) + db2 * f * f / (b * b);
 
     m_signals[i] = f;
     m_errorsSquared[i] = df2;
@@ -939,6 +945,9 @@ void MDHistoWorkspace::divide(const MDHistoWorkspace &b_ws) {
  *
  * Error propagation of \f$ f = a / b \f$  is given by:
  * \f$ df^2 = f^2 * (da^2 / a^2 + db^2 / b^2) \f$
+ * Rewritten as:
+ * \f$ df^2 = da^2 / b^2 + db^2 *f^2 / b^2 \f$
+ * to avoid problems when a or b are 0
  *
  * @param signal :: signal to apply
  * @param error :: error (not squared) to apply
@@ -952,7 +961,7 @@ void MDHistoWorkspace::divide(const signal_t signal, const signal_t error) {
     signal_t da2 = m_errorsSquared[i];
 
     signal_t f = a / b;
-    signal_t df2 = (f * f) * (da2 / (a * a) + db2_relative);
+    signal_t df2 = da2 / (b * b) + db2_relative * f * f;
 
     m_signals[i] = f;
     m_errorsSquared[i] = df2;

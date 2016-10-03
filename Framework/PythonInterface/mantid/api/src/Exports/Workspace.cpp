@@ -1,5 +1,6 @@
 #include "MantidAPI/Workspace.h"
 
+#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
@@ -11,6 +12,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::PythonInterface;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
+
+GET_POINTER_SPECIALIZATION(Workspace)
 
 namespace {
 ///@cond

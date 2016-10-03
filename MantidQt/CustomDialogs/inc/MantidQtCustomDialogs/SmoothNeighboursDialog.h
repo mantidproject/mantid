@@ -4,15 +4,12 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmPropertiesWidget.h"
 
-using namespace MantidQt::API;
-
-class SmoothNeighboursDialog : public AlgorithmDialog
-{
-Q_OBJECT
+class SmoothNeighboursDialog : public MantidQt::API::AlgorithmDialog {
+  Q_OBJECT
 
 public:
   /// Constructor
-  SmoothNeighboursDialog(QWidget* parent = 0);
+  SmoothNeighboursDialog(QWidget *parent = 0);
 
 protected:
   /// Overridden to enable validators
@@ -20,8 +17,8 @@ protected:
 
 private slots:
   /// Called when input workspace get changed
-  void inputWorkspaceChanged(const QString& pName);
- 
+  void inputWorkspaceChanged(const QString &pName);
+
 private:
   /// Non rectangular detector group name
   static const QString NON_UNIFORM_GROUP;
@@ -34,10 +31,10 @@ private:
   void initLayout() override;
 
   /// Widget for all the PropertyWidgets
-  AlgorithmPropertiesWidget* m_propertiesWidget;
+  MantidQt::API::AlgorithmPropertiesWidget *m_propertiesWidget;
 
   /// Main layout for the dialog
-  QVBoxLayout* m_dialogLayout;
+  QVBoxLayout *m_dialogLayout;
 };
 
 #endif

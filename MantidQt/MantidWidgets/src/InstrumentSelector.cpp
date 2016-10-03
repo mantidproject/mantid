@@ -226,7 +226,7 @@ void InstrumentSelector::updateInstrument(const QString &name) {
   if (name != m_selectedInstrument) {
     m_selectedInstrument = name;
     g_log.debug() << "New instrument selected: "
-                  << m_selectedInstrument.toStdString() << std::endl;
+                  << m_selectedInstrument.toStdString() << '\n';
     emit instrumentSelectionChanged(m_selectedInstrument);
   }
 }

@@ -8,7 +8,7 @@
 #include "Poco/Path.h"
 #include "Poco/String.h"
 #include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyManager.h"
 
 namespace Mantid {
@@ -45,7 +45,7 @@ void HFIRDarkCurrentSubtraction::init() {
 }
 
 void HFIRDarkCurrentSubtraction::exec() {
-  std::string output_message = "";
+  std::string output_message;
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
   boost::shared_ptr<PropertyManager> reductionManager;

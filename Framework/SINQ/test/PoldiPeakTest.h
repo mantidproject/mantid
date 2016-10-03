@@ -103,7 +103,7 @@ public:
 
     peak->setFwhm(UncertainValue(0.01, 0.001));
     UncertainValue fwhm = peak->fwhm();
-    std::cout << fwhm.value() << " " << fwhm.error() << std::endl;
+    std::cout << fwhm.value() << " " << fwhm.error() << '\n';
     TS_ASSERT_EQUALS(fwhm.value(), 0.01);
     TS_ASSERT_EQUALS(fwhm.error(), 0.001);
 

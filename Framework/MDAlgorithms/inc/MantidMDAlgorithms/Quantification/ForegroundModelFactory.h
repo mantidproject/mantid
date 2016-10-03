@@ -64,16 +64,16 @@ private:
   using BaseClass::createUnwrapped;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// ForegroundModelFactoryImpl (needed for dllexport/dllimport).
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_MDALGORITHMS_DLL
-    Kernel::SingletonHolder<ForegroundModelFactoryImpl>;
-#endif /* _WIN32 */
 /// Typedef singleton instance to ForegroundFactory
-typedef MANTID_MDALGORITHMS_DLL
-    Kernel::SingletonHolder<ForegroundModelFactoryImpl> ForegroundModelFactory;
+typedef Kernel::SingletonHolder<ForegroundModelFactoryImpl>
+    ForegroundModelFactory;
+}
+}
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_MDALGORITHMS template class MANTID_MDALGORITHMS_DLL
+    Kernel::SingletonHolder<Mantid::MDAlgorithms::ForegroundModelFactoryImpl>;
 }
 }
 

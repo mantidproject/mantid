@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/DetectorEfficiencyVariation.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -21,11 +19,6 @@ using namespace Kernel;
 using namespace API;
 using DataObjects::MaskWorkspace_sptr;
 using Geometry::IDetector_const_sptr;
-
-/// Default constructor initialises all data members and runs the base class
-/// constructor
-DetectorEfficiencyVariation::DetectorEfficiencyVariation()
-    : DetectorDiagnostic() {}
 
 /// Initialize the algorithm
 void DetectorEfficiencyVariation::init() {
@@ -107,11 +100,11 @@ void DetectorEfficiencyVariation::exec() {
     throw;
   }
   double average =
-      calculateMedian(countRatio, false, makeInstrumentMap(countRatio))
+      calculateMedian(*countRatio, false, makeInstrumentMap(*countRatio))
           .at(0); // Include zeroes
   g_log.notice() << name()
                  << ": The median of the ratio of the integrated counts is: "
-                 << average << std::endl;
+                 << average << '\n';
   //
   int numFailed = doDetectorTests(counts1, counts2, average, variation);
 
@@ -218,6 +211,7 @@ int DetectorEfficiencyVariation::doDetectorTests(
 
   const double deadValue(1.0);
   int numFailed(0);
+  const auto &spectrumInfo = counts1->spectrumInfo();
   PARALLEL_FOR3(counts1, counts2, maskWS)
   for (int i = 0; i < numSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -229,24 +223,22 @@ int DetectorEfficiencyVariation::doDetectorTests(
     }
 
     if (checkForMask) {
-      const std::set<detid_t> &detids =
-          counts1->getSpectrum(i)->getDetectorIDs();
-      if (instrument->isMonitor(detids))
+      if (spectrumInfo.isMonitor(i))
         continue;
-      if (instrument->isDetectorMasked(detids)) {
+      if (spectrumInfo.isMasked(i)) {
         // Ensure it is masked on the output
-        maskWS->dataY(i)[0] = deadValue;
+        maskWS->mutableY(i)[0] = deadValue;
         continue;
       }
     }
 
-    const double signal1 = counts1->readY(i)[0];
-    const double signal2 = counts2->readY(i)[0];
+    const double signal1 = counts1->y(i)[0];
+    const double signal2 = counts2->y(i)[0];
 
     // Mask out NaN and infinite
     if (boost::math::isinf(signal1) || boost::math::isnan(signal1) ||
         boost::math::isinf(signal2) || boost::math::isnan(signal2)) {
-      maskWS->dataY(i)[0] = deadValue;
+      maskWS->mutableY(i)[0] = deadValue;
       PARALLEL_ATOMIC
       ++numFailed;
       continue;
@@ -255,7 +247,7 @@ int DetectorEfficiencyVariation::doDetectorTests(
     // Check the ratio is within the given range
     const double ratio = signal1 / signal2;
     if (ratio < lowest || ratio > largest) {
-      maskWS->dataY(i)[0] = deadValue;
+      maskWS->mutableY(i)[0] = deadValue;
       PARALLEL_ATOMIC
       ++numFailed;
     }

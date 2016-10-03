@@ -46,29 +46,25 @@
                  <http://doxygen.mantidproject.org>
  */
 
-namespace MantidQt
-{
-namespace RefDetectorViewer
-{
+namespace MantidQt {
+namespace RefDetectorViewer {
 
-class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefIVConnections: public QWidget
-{
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefIVConnections : public QWidget {
   Q_OBJECT
 
 public:
   /// Construct the object that links the GUI components to the other specifed
   /// higher level objects.
-  RefIVConnections( Ui_RefImageViewer*          ui,
-                    RefImageView*               imageView,
-                    RefImageDisplay*            imageDisplay,
-                    SpectrumView::GraphDisplay* hGraphDisplay,
-                    SpectrumView::GraphDisplay* vGraphDisplay );
+  RefIVConnections(Ui_RefImageViewer *ui, RefImageView *imageView,
+                   RefImageDisplay *imageDisplay,
+                   SpectrumView::GraphDisplay *hGraphDisplay,
+                   SpectrumView::GraphDisplay *vGraphDisplay);
 
   ~RefIVConnections() override;
 
   /// Set the pix map that shows the color scale from the specified color maps
-  void showColorScale( std::vector<QRgb> & positiveColorTable,
-                       std::vector<QRgb> & negativeColorTable );
+  void showColorScale(std::vector<QRgb> &positiveColorTable,
+                      std::vector<QRgb> &negativeColorTable);
 
 public slots:
   void closeViewer();
@@ -105,21 +101,19 @@ private:
                      MantidQt::SpectrumView::ColorMaps::ColorScale negative);
 
 private:
-
-  Ui_RefImageViewer*            m_ivUI;
-  RefImageView*                 m_ivMainWindow;
-  RefImageDisplay*              m_imageDisplay;
-  SpectrumView::GraphDisplay*   m_hGraphDisplay;
-  SpectrumView::GraphDisplay*   m_vGraphDisplay;
-  SpectrumView::TrackingPicker* m_imagePicker;
-  SpectrumView::TrackingPicker* m_imagePicker2;
-  SpectrumView::TrackingPicker* m_hGraphPicker;
-  SpectrumView::TrackingPicker* m_vGraphPicker;
-  QActionGroup*                 m_colorGroup;
-
+  Ui_RefImageViewer *m_ivUI;
+  RefImageView *m_ivMainWindow;
+  RefImageDisplay *m_imageDisplay;
+  SpectrumView::GraphDisplay *m_hGraphDisplay;
+  SpectrumView::GraphDisplay *m_vGraphDisplay;
+  SpectrumView::TrackingPicker *m_imagePicker;
+  SpectrumView::TrackingPicker *m_imagePicker2;
+  SpectrumView::TrackingPicker *m_hGraphPicker;
+  SpectrumView::TrackingPicker *m_vGraphPicker;
+  QActionGroup *m_colorGroup;
 };
 
 } // namespace RefDetectorViewer
 } // namespace MantidQt
 
-#endif  // REF_IV_CONNECTIONS_H
+#endif // REF_IV_CONNECTIONS_H

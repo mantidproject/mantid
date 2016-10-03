@@ -258,19 +258,22 @@ void WorkspaceSelector::refresh() {
   if (m_optional)
     addItem("");
   auto &ads = Mantid::API::AnalysisDataService::Instance();
-  std::unordered_set<std::string> items;
+  std::vector<std::string> items;
   if (showHiddenWorkspaces()) {
-    items = ads.getObjectNamesInclHidden();
+    items = ads.getObjectNames(Mantid::Kernel::DataServiceSort::Sorted,
+                               Mantid::Kernel::DataServiceHidden::Include);
   } else {
     items = ads.getObjectNames();
   }
 
+  QStringList namesToAdd;
   for (auto it = items.begin(); it != items.end(); ++it) {
     QString name = QString::fromStdString(*it);
     if (checkEligibility(name, ads.retrieve(*it))) {
-      addItem(name);
+      namesToAdd << name;
     }
   }
+  this->addItems(namesToAdd);
 }
 
 /**

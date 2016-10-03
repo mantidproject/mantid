@@ -7,7 +7,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
-namespace ReflTableSchema{
+namespace ReflTableSchema {
 
 typedef std::string ColumnNameType;
 typedef std::string ColumnValueType;

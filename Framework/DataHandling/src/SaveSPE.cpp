@@ -354,7 +354,7 @@ void SaveSPE::logMissingMasked(const std::vector<int> &inds,
                         << " spectra without associated detectors, probably "
                            "the detectors are not present in the instrument "
                            "definition, this is not unusual. The Y values for "
-                           "those spectra have been set to zero." << std::endl;
+                           "those spectra have been set to zero.\n";
   }
   g_log.debug() << "Wrote " << nonMasked << " histograms and " << masked
                 << " masked histograms to the output SPE file\n";

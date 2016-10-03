@@ -35,9 +35,6 @@ namespace Algorithms {
 */
 class DLLExport ExtractSpectra : public API::Algorithm {
 public:
-  ExtractSpectra();
-  ~ExtractSpectra() override;
-
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;
@@ -59,15 +56,15 @@ private:
   API::MatrixWorkspace_sptr m_inputWorkspace;
   DataObjects::EventWorkspace_sptr eventW;
   /// The bin index to start the cropped workspace from
-  std::size_t m_minX;
+  std::size_t m_minX = 0;
   /// The bin index to end the cropped workspace at
-  std::size_t m_maxX;
+  std::size_t m_maxX = 0;
   /// Flag indicating whether the input workspace has common boundaries
-  bool m_commonBoundaries;
+  bool m_commonBoundaries = false;
   /// Flag indicating whether we're dealing with histogram data
-  bool m_histogram;
+  bool m_histogram = false;
   /// Flag indicating whether XMin and/or XMax has been set
-  bool m_croppingInX;
+  bool m_croppingInX = false;
   /// The list of workspaces to extract.
   std::vector<size_t> m_workspaceIndexList;
 };

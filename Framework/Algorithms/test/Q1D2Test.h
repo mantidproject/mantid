@@ -441,7 +441,7 @@ public:
     // into this
     // bin. We make sure that there is at least one bin with a count
     // of sqrt(1 + 0.5^2/12) ~ 1.01036297108
-    auto &dataDX = result->dataDx(0);
+    auto &dataDX = result->dx(0);
     unsigned int counter = 0;
     for (auto it = dataDX.begin(); it != dataDX.end(); ++it) {
 
@@ -491,12 +491,7 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)))
 
     // Make sure that the Q resolution is not calculated
-    auto &dataDX = result->dataDx(0);
-    for (auto it = dataDX.begin(); it != dataDX.end(); ++it) {
-      TSM_ASSERT(
-          "All Dx values should be 0, as we didn't use the QResolution ooption",
-          (*it == 0.0));
-    }
+    TS_ASSERT(!result->sharedDx(0));
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 
@@ -626,8 +621,8 @@ void createQResolutionWorkspace(Mantid::API::MatrixWorkspace_sptr &qResolution,
                                 double value1, double value2) {
   // The q resolution workspace is almost the same to the input workspace,
   // except for the y value, we set all Y values to 1
-  qResolution = Mantid::API::MatrixWorkspace_sptr(input->clone().release());
-  alteredInput = Mantid::API::MatrixWorkspace_sptr(input->clone().release());
+  qResolution = input->clone();
+  alteredInput = input->clone();
 
   // Populate Y with Value1
   for (size_t i = 0; i < qResolution->getNumberHistograms(); ++i) {

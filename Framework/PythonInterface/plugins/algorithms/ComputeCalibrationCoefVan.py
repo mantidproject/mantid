@@ -1,5 +1,6 @@
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress, InstrumentValidator
-import mantid.simpleapi as api
+from __future__ import (absolute_import, division, print_function)
+
+from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress, InstrumentValidator, ITableWorkspaceProperty
 from mantid.kernel import Direction
 import numpy as np
 from scipy import integrate
@@ -38,6 +39,8 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", direction=Direction.Input,
                                                      validator=InstrumentValidator()),
                              "Input Vanadium workspace")
+        self.declareProperty(ITableWorkspaceProperty("EPPTable", "", direction=Direction.Input),
+                             "Input EPP table. May be produced by FindEPP algorithm.")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              "Name the workspace that will contain the calibration coefficients")
         return
@@ -55,6 +58,15 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
             except ValueError:
                 issues['VanadiumWorkspace'] = "Invalid value for wavelength sample log. Wavelength must be a number."
 
+        table = self.getProperty("EPPTable").value
+        if table.rowCount() != inws.getNumberHistograms():
+            issues['EPPTable'] = "Number of rows in the table must match to the input workspace dimension."
+        # table must have 'PeakCentre' and 'Sigma' columns
+        if not 'PeakCentre' in table.getColumnNames():
+            issues['EPPTable'] = "EPP Table must have the PeakCentre column."
+        if not 'Sigma' in table.getColumnNames():
+            issues['EPPTable'] = "EPP Table must have the Sigma column."
+
         return issues
 
     def get_temperature(self):
@@ -69,7 +81,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
             return self.defaultT
         try:
             temperature = float(run.getProperty('temperature').value)
-        except ValueError, err:
+        except ValueError as err:
             self.log().warning("Error of getting temperature: " + err +
                                " T=293K is assumed for Debye-Waller factor.")
             return self.defaultT
@@ -82,6 +94,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
 
         self.vanaws = self.getProperty("VanadiumWorkspace").value       # returns workspace instance
         outws_name = self.getPropertyValue("OutputWorkspace")           # returns workspace name (string)
+        eppws = self.getProperty("EPPTable").value
         nhist = self.vanaws.getNumberHistograms()
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=nhist+1)
 
@@ -95,6 +108,9 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         coefE = np.zeros(nhist)
         instrument = self.vanaws.getInstrument()
         detID_offset = self.get_detID_offset()
+        peak_centre = eppws.column('PeakCentre')
+        sigma = eppws.column('Sigma')
+
         for idx in range(nhist):
             prog_reporter.report("Setting %dth spectrum" % idx)
             dataY = self.vanaws.readY(idx)
@@ -104,10 +120,9 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
                 coefE[idx] = 0.
             else:
                 dataE = self.vanaws.readE(idx)
-                peak_centre, sigma = api.FitGaussian(self.vanaws, idx)
-                fwhm = sigma*2.*np.sqrt(2.*np.log(2.))
-                idxmin = (np.fabs(dataX-peak_centre+3.*fwhm)).argmin()
-                idxmax = (np.fabs(dataX-peak_centre-3.*fwhm)).argmin()
+                fwhm = sigma[idx]*2.*np.sqrt(2.*np.log(2.))
+                idxmin = (np.fabs(dataX-peak_centre[idx]+3.*fwhm)).argmin()
+                idxmax = (np.fabs(dataX-peak_centre[idx]-3.*fwhm)).argmin()
                 coefY[idx] = dwf[idx]*sum(dataY[idxmin:idxmax+1])
                 coefE[idx] = dwf[idx]*sum(dataE[idxmin:idxmax+1])
 

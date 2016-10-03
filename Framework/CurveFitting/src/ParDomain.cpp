@@ -42,7 +42,7 @@ void ParDomain::leastSquaresVal(
     leastSquares.addVal(domain, values);
     // PARALLEL_CRITICAL(printout)
     //{
-    //  std::cerr << "val= " << leastSquares.m_value << std::endl;
+    //  std::cerr << "val= " << leastSquares.m_value << '\n';
     //}
   }
 }

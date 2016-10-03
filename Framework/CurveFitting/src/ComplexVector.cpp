@@ -13,7 +13,10 @@ namespace Mantid {
 namespace CurveFitting {
 
 /// Constructor
-ComplexVector::ComplexVector() { m_vector = gsl_vector_complex_alloc(1); }
+ComplexVector::ComplexVector() {
+  m_vector = gsl_vector_complex_alloc(1);
+  zero();
+}
 
 /// Destructor
 ComplexVector::~ComplexVector() { gsl_vector_complex_free(m_vector); }
@@ -82,6 +85,9 @@ void ComplexVector::resize(const size_t n) {
   size_t m = oldVector->size < n ? oldVector->size : n;
   for (size_t i = 0; i < m; ++i) {
     gsl_vector_complex_set(m_vector, i, gsl_vector_complex_get(oldVector, i));
+  }
+  for (size_t i = m; i < n; ++i) {
+    gsl_vector_complex_set(m_vector, i, gsl_complex{{0, 0}});
   }
   gsl_vector_complex_free(oldVector);
 }

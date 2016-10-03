@@ -92,14 +92,14 @@ void AsciiPointBase::data(std::ofstream &file, const std::vector<double> &XData,
       outputval(yData[i], file);
       outputval(eData[i], file);
       outputval(dq, file);
-      file << std::endl;
+      file << '\n';
     }
   } else {
     for (size_t i = 0; i < m_xlength; ++i) {
       outputval(XData[i], file, leadingSep());
       outputval(yData[i], file);
       outputval(eData[i], file);
-      file << std::endl;
+      file << '\n';
     }
   }
 }

@@ -151,7 +151,7 @@ DateAndTime::DateAndTime(const int64_t total_nanoseconds) {
  *@param displayLogs :: if the logs should be dsiplayed during the execution of
  *the constructor
  */
-DateAndTime::DateAndTime(const std::string ISO8601_string, bool displayLogs)
+DateAndTime::DateAndTime(const std::string &ISO8601_string, bool displayLogs)
     : _nanoseconds(0) {
   this->setFromISO8601(ISO8601_string, displayLogs);
 }
@@ -358,8 +358,9 @@ DateAndTime DateAndTime::maximum() { return DateAndTime(MAX_NANOSECONDS); }
 DateAndTime DateAndTime::minimum() { return DateAndTime(MIN_NANOSECONDS); }
 
 /// A default date and time to use when time is not specified
-const DateAndTime DateAndTime::defaultTime() {
-  return DateAndTime("1970-01-01T00:00:00");
+const DateAndTime &DateAndTime::defaultTime() {
+  static DateAndTime time("1970-01-01T00:00:00");
+  return time;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -368,10 +369,9 @@ const DateAndTime DateAndTime::defaultTime() {
  * @param str :: ISO8601 format string: "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"
  * @param displayLogs :: flag to indiciate if the logs should be displayed
  */
-void DateAndTime::setFromISO8601(const std::string str, bool displayLogs) {
+void DateAndTime::setFromISO8601(const std::string &str, bool displayLogs) {
   // Make a copy
   std::string time = str;
-
   // Some ARGUS files have an invalid date with a space instead of zero.
   // To enable such files to be loaded we correct the date and issue a warning
   // (ticket #4017).
@@ -390,7 +390,7 @@ void DateAndTime::setFromISO8601(const std::string str, bool displayLogs) {
     if (nSecondSpace != std::string::npos)
       time[nSecondSpace] = '0';
     if (displayLogs) {
-      g_log.warning() << " corrected to " << time << std::endl;
+      g_log.warning() << " corrected to " << time << '\n';
     }
   }
 

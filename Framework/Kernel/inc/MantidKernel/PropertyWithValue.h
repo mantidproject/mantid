@@ -16,10 +16,12 @@
 #include <boost/algorithm/string/trim.hpp>
 #endif
 
-#include <MantidKernel/StringTokenizer.h>
-#include <vector>
-#include <type_traits>
+#include <nexus/NeXusFile.hpp>
+
 #include "MantidKernel/IPropertySettings.h"
+#include <MantidKernel/StringTokenizer.h>
+#include <type_traits>
+#include <vector>
 
 namespace Mantid {
 
@@ -148,8 +150,24 @@ void toValue(const std::string &, boost::shared_ptr<T> &) {
   throw boost::bad_lexical_cast();
 }
 
+namespace detail {
+// vector<int> specializations
 template <typename T>
-void toValue(const std::string &strvalue, std::vector<T> &value) {
+void toValue(const std::string &strvalue, std::vector<T> &value,
+             std::true_type) {
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  tokenizer values(strvalue, ",",
+                   tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+  value.clear();
+  value.reserve(values.count());
+  for (const auto &token : values) {
+    appendValue(token, value);
+  }
+}
+
+template <typename T>
+void toValue(const std::string &strvalue, std::vector<T> &value,
+             std::false_type) {
   // Split up comma-separated properties
   typedef Mantid::Kernel::StringTokenizer tokenizer;
   tokenizer values(strvalue, ",",
@@ -160,6 +178,30 @@ void toValue(const std::string &strvalue, std::vector<T> &value) {
   std::transform(
       values.cbegin(), values.cend(), std::back_inserter(value),
       [](const std::string &str) { return boost::lexical_cast<T>(str); });
+}
+
+// bool and char don't make sense as types to generate a range of values.
+// This is similar to std::is_integral<T>, but bool and char are std::false_type
+template <class T> struct is_range_type : public std::false_type {};
+template <class T> struct is_range_type<const T> : public is_range_type<T> {};
+template <class T>
+struct is_range_type<volatile const T> : public is_range_type<T> {};
+template <class T>
+struct is_range_type<volatile T> : public is_range_type<T> {};
+
+template <> struct is_range_type<unsigned short> : public std::true_type {};
+template <> struct is_range_type<unsigned int> : public std::true_type {};
+template <> struct is_range_type<unsigned long> : public std::true_type {};
+template <> struct is_range_type<unsigned long long> : public std::true_type {};
+
+template <> struct is_range_type<short> : public std::true_type {};
+template <> struct is_range_type<int> : public std::true_type {};
+template <> struct is_range_type<long> : public std::true_type {};
+template <> struct is_range_type<long long> : public std::true_type {};
+}
+template <typename T>
+void toValue(const std::string &strvalue, std::vector<T> &value) {
+  detail::toValue(strvalue, value, detail::is_range_type<T>());
 }
 
 template <typename T>
@@ -194,32 +236,6 @@ template <typename T> T extractToValueVector(const std::string &strvalue) {
   toValue(strvalue, valueVec);
   return valueVec;
 }
-
-/// Macro for the vector<int> specializations
-#define PROPERTYWITHVALUE_TOVALUE(type)                                        \
-  template <>                                                                  \
-  inline void toValue<type>(const std::string &strvalue,                       \
-                            std::vector<type> &value) {                        \
-    typedef Mantid::Kernel::StringTokenizer tokenizer;                         \
-    tokenizer values(strvalue, ",",                                            \
-                     tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);       \
-    value.clear();                                                             \
-    value.reserve(values.count());                                             \
-    for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it) {  \
-      appendValue(*it, value);                                                 \
-    }                                                                          \
-  }
-
-PROPERTYWITHVALUE_TOVALUE(int)
-PROPERTYWITHVALUE_TOVALUE(long)
-PROPERTYWITHVALUE_TOVALUE(uint32_t)
-PROPERTYWITHVALUE_TOVALUE(uint64_t)
-#if defined(__APPLE__)
-PROPERTYWITHVALUE_TOVALUE(unsigned long);
-#endif
-
-// Clear up the namespace
-#undef PROPERTYWITHVALUE_TOVALUE
 
 //------------------------------------------------------------------------------------------------
 // Templated += operator functions for specific types
@@ -348,6 +364,8 @@ public:
   PropertyWithValue<TYPE> *clone() const override {
     return new PropertyWithValue<TYPE>(*this);
   }
+
+  void saveProperty(::NeXus::File *file) override;
 
   /** Get the value of the property as a string
    *  @return The property's value
@@ -528,6 +546,15 @@ public:
     return determineAllowedValues(m_value, *m_validator);
   }
 
+  /** Returns the set of valid values for this property, if such a set exists.
+  *  If not, it returns an empty vector.
+  *  @return Returns the set of valid values for this property, or it returns
+  * an empty vector.
+  */
+  bool isMultipleSelectionAllowed() override {
+    return m_validator->isMultipleSelectionAllowed();
+  }
+
   /**
    * Replace the current validator with the given one
    * @param newValidator :: A replacement validator
@@ -622,6 +649,29 @@ private:
   /// Private default constructor
   PropertyWithValue();
 };
+
+template <> void PropertyWithValue<float>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<double>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<int32_t>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<uint32_t>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<int64_t>::saveProperty(::NeXus::File *file);
+template <> void PropertyWithValue<uint64_t>::saveProperty(::NeXus::File *file);
+template <>
+void PropertyWithValue<std::string>::saveProperty(::NeXus::File *file);
+template <>
+void PropertyWithValue<std::vector<double>>::saveProperty(::NeXus::File *file);
+template <>
+void PropertyWithValue<std::vector<int32_t>>::saveProperty(::NeXus::File *file);
+
+template <typename TYPE>
+void PropertyWithValue<TYPE>::saveProperty(::NeXus::File * /*file*/) {
+  // AppleClang 7.3 and later gives a -Winfinite-recursion warning if I call the
+  // base class method. The function is small enough that reimplementing it
+  // isn't a big deal.
+  throw std::invalid_argument(
+      "PropertyWithValue::saveProperty - Cannot save '" + this->name() +
+      "', property type not implemented.");
+}
 
 template <typename TYPE>
 Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");

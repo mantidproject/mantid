@@ -280,10 +280,10 @@ public:
     bbox.realign(&cs);
     TS_ASSERT_EQUALS(bbox.isAxisAligned(), false);
 
-    TSM_ASSERT_EQUALS("min point should be (0,-sqrt(2.)/2,-1)",
-                      bbox.minPoint() == V3D(0, -sqrt(2.) / 2, -1), true);
-    TSM_ASSERT_EQUALS("max point should be (sqrt(2.),sqrt(2.)/2,0)",
-                      bbox.maxPoint() == V3D(sqrt(2.), sqrt(2.) / 2, 0), true);
+    TSM_ASSERT_EQUALS("min point should be (0,-sqrt(2)/2,-1)",
+                      bbox.minPoint() == V3D(0, -0.5 * M_SQRT2, -1), true);
+    TSM_ASSERT_EQUALS("max point should be (sqrt(2),sqrt(2)/2,0)",
+                      bbox.maxPoint() == V3D(M_SQRT2, 0.5 * M_SQRT2, 0), true);
   }
   void testBBComplexRealignment2OK() {
     BoundingBox bbox(2, 2, 2, 1, 1, 1);
@@ -298,10 +298,10 @@ public:
     bbox.realign(&cs);
     TS_ASSERT_EQUALS(bbox.isAxisAligned(), false);
 
-    TSM_ASSERT_EQUALS("min point should be (0,0,-sqrt(2.)/2)",
-                      bbox.minPoint() == V3D(0, 0, -sqrt(2.) / 2), true);
-    TSM_ASSERT_EQUALS("max point should be (1,sqrt(2.),sqrt(2.)/2)",
-                      bbox.maxPoint() == V3D(1, sqrt(2.), sqrt(2.) / 2), true);
+    TSM_ASSERT_EQUALS("min point should be (0,0,-sqrt(2)/2)",
+                      bbox.minPoint() == V3D(0, 0, -0.5 * M_SQRT2), true);
+    TSM_ASSERT_EQUALS("max point should be (1,sqrt(2),sqrt(2)/2)",
+                      bbox.maxPoint() == V3D(1, M_SQRT2, 0.5 * M_SQRT2), true);
   }
 
 private:

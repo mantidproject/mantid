@@ -43,21 +43,13 @@ using namespace Mantid::API;
 /**
 * Default Constructor
 */
-GenericDialog::GenericDialog(QWidget* parent) : AlgorithmDialog(parent),
-  m_algoPropertiesWidget(NULL)
-{
-}
+GenericDialog::GenericDialog(QWidget *parent)
+    : AlgorithmDialog(parent), m_algoPropertiesWidget(NULL) {}
 
 /**
 * Destructor
 */
-GenericDialog::~GenericDialog()
-{
-}
-
-
-
-
+GenericDialog::~GenericDialog() {}
 
 //----------------------------------
 // Protected member functions
@@ -65,14 +57,13 @@ GenericDialog::~GenericDialog()
 /**
 * Create the layout for this dialog.
 */
-void GenericDialog::initLayout()
-{
+void GenericDialog::initLayout() {
 
   // Add a layout for QDialog
   QVBoxLayout *dialog_layout = new QVBoxLayout();
   setLayout(dialog_layout);
   // Add the helpful summary message
-  if( isMessageAvailable() )
+  if (isMessageAvailable())
     this->addOptionalMessage(dialog_layout);
 
   // Make the widget with all the properties
@@ -90,11 +81,11 @@ void GenericDialog::initLayout()
   disabled += m_python_arguments;
   m_algoPropertiesWidget->addEnabledAndDisableLists(enabled, disabled);
 
-
   // At this point, all the widgets have been added and are visible.
-  // This makes sure the viewport does not get scaled smaller, even if some controls are hidden.
-  QWidget * viewport = m_algoPropertiesWidget->m_viewport;
-  //QScrollArea * scroll = m_algoPropertiesWidget->m_scroll;
+  // This makes sure the viewport does not get scaled smaller, even if some
+  // controls are hidden.
+  QWidget *viewport = m_algoPropertiesWidget->m_viewport;
+  // QScrollArea * scroll = m_algoPropertiesWidget->m_scroll;
   viewport->layout()->update();
   // This makes the layout minimum size = that of the widgets inside
   viewport->layout()->setSizeConstraint(QLayout::SetMinimumSize);
@@ -106,16 +97,16 @@ void GenericDialog::initLayout()
 
   // If the thing won't end up too big compared to the screen height,
   // resize the scroll area so we don't get a scroll bar
-  if ( (dialogHeight+100) < 0.8*screenHeight )
-  {
-    m_algoPropertiesWidget->m_scroll->setMinimumHeight(dialogHeight+10);
+  if ((dialogHeight + 100) < 0.8 * screenHeight) {
+    m_algoPropertiesWidget->m_scroll->setMinimumHeight(dialogHeight + 10);
 
     // Find the size that the dialog WANTS to be.
     dialogHeight = this->sizeHint().height();
 
     // Choose a width given the desired size, but limit it
     int dialogWidth = this->sizeHint().width() + 25;
-    if (dialogWidth > 640) dialogWidth = 640;
+    if (dialogWidth > 640)
+      dialogWidth = 640;
 
     // But allow the scroll area to resize smaller again
     m_algoPropertiesWidget->m_scroll->setMinimumHeight(60);
@@ -124,25 +115,21 @@ void GenericDialog::initLayout()
   }
 
   // Set all previous values (from history, etc.)
-  for( auto it = m_algoPropertiesWidget->m_propWidgets.begin(); it != m_algoPropertiesWidget->m_propWidgets.end(); it++)
-  {
+  for (auto it = m_algoPropertiesWidget->m_propWidgets.begin();
+       it != m_algoPropertiesWidget->m_propWidgets.end(); it++) {
     this->setPreviousValue(it.value(), it.key());
   }
 
   // Using the default values, hide or disable the dynamically shown properties
   m_algoPropertiesWidget->hideOrDisableProperties();
-
 }
-
 
 //-----------------------------------------------------------------------------
 /** Parse out information from the dialog
  */
-void GenericDialog::parseInput()
-{
+void GenericDialog::parseInput() {
   auto itr = m_algoPropertiesWidget->m_propWidgets.begin();
-  for(; itr != m_algoPropertiesWidget->m_propWidgets.end(); itr++ )
-  {
+  for (; itr != m_algoPropertiesWidget->m_propWidgets.end(); itr++) {
     // Get the value from each widget and store it
     storePropertyValue(itr.key(), itr.value()->getValue());
   }
@@ -153,33 +140,30 @@ void GenericDialog::parseInput()
  * A slot that can be used to connect a button that accepts the dialog if
  * all of the properties are valid
  */
-void GenericDialog::accept()
-{
+void GenericDialog::accept() {
   // Get property values
   parse();
 
-  //Try and set and validate the properties and
-  if( setPropertyValues() )
-  {
-    //Store input for next time
+  // Try and set and validate the properties and
+  if (setPropertyValues()) {
+    // Store input for next time
     saveInput();
     if (!this->m_keepOpen) {
       QDialog::accept();
+    } else {
+      executeAlgorithmAsync();
     }
-    else {
-       executeAlgorithmAsync();
-    }
-  }
-  else
-  {
-    // Highlight the validators that are in error (combined from them + whole algorithm)
+  } else {
+    // Highlight the validators that are in error (combined from them + whole
+    // algorithm)
     // If got there, there were errors
-    for(auto it = m_errors.begin(); it != m_errors.end(); it++)
-      m_algoPropertiesWidget->m_propWidgets[it.key()]->updateIconVisibility(it.value());
+    for (auto it = m_errors.begin(); it != m_errors.end(); it++)
+      m_algoPropertiesWidget->m_propWidgets[it.key()]->updateIconVisibility(
+          it.value());
 
-    QMessageBox::critical(this, "",
-              "One or more properties are invalid. The invalid properties are\n"
-        "marked with a *, hold your mouse over the * for more information." );
+    QMessageBox::critical(
+        this, "",
+        "One or more properties are invalid. The invalid properties are\n"
+        "marked with a *, hold your mouse over the * for more information.");
   }
 }
-

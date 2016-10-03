@@ -1,104 +1,120 @@
 set ( SRC_FILES
-    src/AlgorithmSelectorWidget.cpp
-    src/CatalogHelper.cpp
-    src/CatalogSearch.cpp
-    src/CatalogSelector.cpp
-    src/CheckboxHeader.cpp
-    src/ColorBarWidget.cpp
-    src/DataSelector.cpp
-    src/DiagResults.cpp
-    src/DisplayCurveFit.cpp
-    src/DoubleDialogEditor.cpp
-    src/DoubleSpinBox.cpp
-    src/ErrorCurve.cpp
-    src/FilenameDialogEditor.cpp
-    src/FindDialog.cpp
-    src/FindReplaceDialog.cpp
-    src/FitPropertyBrowser.cpp
-    src/FormulaDialogEditor.cpp
-    src/FitOptionsBrowser.cpp
-    src/FunctionBrowser.cpp
-    src/HintingLineEdit.cpp
-    src/InstrumentSelector.cpp
-    src/IndirectInstrumentConfig.cpp
-    src/InputController.cpp
-    src/MantidHelpWindow.cpp
-    src/MWDiag.cpp
-    src/MWRunFiles.cpp
-    src/MWView.cpp
-    src/MessageDisplay.cpp
-    src/MultifitSetupDialog.cpp
-    src/MuonFitPropertyBrowser.cpp
-    src/MuonSequentialFitDialog.cpp
-    src/PeakPicker.cpp
-    src/PeriodicTableWidget.cpp
-    src/PreviewPlot.cpp
-    src/ProcessingAlgoWidget.cpp
-    src/PropertyHandler.cpp
-    src/RangeSelector.cpp
-    src/RenameParDialog.cpp
-    src/SafeQwtPlot.cpp
-    src/SaveWorkspaces.cpp
-    src/ScriptEditor.cpp
-    src/SelectFunctionDialog.cpp
-    src/SelectWorkspacesDialog.cpp
-    src/SequentialFitDialog.cpp
-    src/SlicingAlgorithmDialog.cpp
-    src/SlitCalculator.cpp
-    src/StringDialogEditor.cpp
-    src/StringEditorFactory.cpp
-    src/UserFunctionDialog.cpp
-    src/WorkspaceEditorFactory.cpp
-    src/WorkspaceSelector.cpp
-    src/pqHelpWindow.cxx
-    src/pythonCalc.cpp
-    src/LineEditWithClear.cpp
-    src/InstrumentView/BinDialog.cpp
-    src/InstrumentView/CollapsiblePanel.cpp
-    src/InstrumentView/ColorMapWidget.cpp
-    src/InstrumentView/CompAssemblyActor.cpp
-    src/InstrumentView/ComponentActor.cpp
-    src/InstrumentView/DetXMLFile.cpp
-    src/InstrumentView/GLActor.cpp
-    src/InstrumentView/GLActorCollection.cpp
-    src/InstrumentView/GLActorVisitor.cpp
-    src/InstrumentView/GLColor.cpp
-    src/InstrumentView/GLObject.cpp
-    src/InstrumentView/ICompAssemblyActor.cpp
-    src/InstrumentView/InstrumentActor.cpp
-    src/InstrumentView/InstrumentTreeModel.cpp
-    src/InstrumentView/InstrumentTreeWidget.cpp
-    src/InstrumentView/InstrumentWidget.cpp
-    src/InstrumentView/InstrumentWidgetMaskTab.cpp
-    src/InstrumentView/InstrumentWidgetPickTab.cpp
-    src/InstrumentView/InstrumentWidgetRenderTab.cpp
-    src/InstrumentView/InstrumentWidgetTab.cpp
-    src/InstrumentView/InstrumentWidgetTreeTab.cpp
-    src/InstrumentView/MantidGLWidget.cpp
-    src/InstrumentView/MaskBinsData.cpp
-    src/InstrumentView/ObjCompAssemblyActor.cpp
-    src/InstrumentView/ObjComponentActor.cpp
-    src/InstrumentView/OneCurvePlot.cpp
-    src/InstrumentView/OpenGLError.cpp
-    src/InstrumentView/PanelsSurface.cpp
-    src/InstrumentView/PeakMarker2D.cpp
-    src/InstrumentView/PeakOverlay.cpp
-    src/InstrumentView/Projection3D.cpp
-    src/InstrumentView/ProjectionSurface.cpp
-    src/InstrumentView/RectangularDetectorActor.cpp
-    src/InstrumentView/StructuredDetectorActor.cpp
-    src/InstrumentView/RectF.cpp
-    src/InstrumentView/RotationSurface.cpp
-    src/InstrumentView/SampleActor.cpp
-    src/InstrumentView/Shape2D.cpp
-    src/InstrumentView/Shape2DCollection.cpp
-    src/InstrumentView/SimpleWidget.cpp
-    src/InstrumentView/UCorrectionDialog.cpp
-    src/InstrumentView/UnwrappedCylinder.cpp
-    src/InstrumentView/UnwrappedSphere.cpp
-    src/InstrumentView/UnwrappedSurface.cpp
-    src/InstrumentView/Viewport.cpp
-    src/InstrumentView/XIntegrationControl.cpp
+	src/AlgorithmSelectorWidget.cpp
+	src/CatalogHelper.cpp
+	src/CatalogSearch.cpp
+	src/CatalogSelector.cpp
+	src/CheckboxHeader.cpp
+	src/ColorBarWidget.cpp
+	src/DataProcessorUI/DataProcessorGenerateNotebook.cpp
+	src/DataProcessorUI/DataProcessorOneLevelTreeManager.cpp
+	src/DataProcessorUI/DataProcessorPostprocessingAlgorithm.cpp
+	src/DataProcessorUI/DataProcessorPreprocessingAlgorithm.cpp
+	src/DataProcessorUI/DataProcessorProcessingAlgorithm.cpp
+	src/DataProcessorUI/DataProcessorProcessingAlgorithmBase.cpp
+	src/DataProcessorUI/DataProcessorTwoLevelTreeManager.cpp
+	src/DataProcessorUI/DataProcessorWhiteList.cpp
+	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
+	src/DataProcessorUI/ParseKeyValueString.cpp
+	src/DataProcessorUI/QDataProcessorOneLevelTreeModel.cpp
+	src/DataProcessorUI/QDataProcessorTwoLevelTreeModel.cpp
+	src/DataProcessorUI/QDataProcessorWidget.cpp
+	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
+	src/DataSelector.cpp
+	src/DiagResults.cpp
+	src/DisplayCurveFit.cpp
+	src/DoubleDialogEditor.cpp
+	src/DoubleSpinBox.cpp
+	src/ErrorCurve.cpp
+	src/FilenameDialogEditor.cpp
+	src/FindDialog.cpp
+	src/FindReplaceDialog.cpp
+	src/FitOptionsBrowser.cpp
+	src/FitPropertyBrowser.cpp
+	src/FormulaDialogEditor.cpp
+	src/FunctionBrowser.cpp
+	src/HintingLineEdit.cpp
+	src/IndirectInstrumentConfig.cpp
+	src/InputController.cpp
+	src/InstrumentSelector.cpp
+	src/InstrumentView/BinDialog.cpp
+	src/InstrumentView/CollapsiblePanel.cpp
+	src/InstrumentView/ColorMapWidget.cpp
+	src/InstrumentView/CompAssemblyActor.cpp
+	src/InstrumentView/ComponentActor.cpp
+	src/InstrumentView/DetXMLFile.cpp
+	src/InstrumentView/GLActor.cpp
+	src/InstrumentView/GLActorCollection.cpp
+	src/InstrumentView/GLActorVisitor.cpp
+	src/InstrumentView/GLColor.cpp
+	src/InstrumentView/GLObject.cpp
+	src/InstrumentView/ICompAssemblyActor.cpp
+	src/InstrumentView/InstrumentActor.cpp
+	src/InstrumentView/InstrumentTreeModel.cpp
+	src/InstrumentView/InstrumentTreeWidget.cpp
+	src/InstrumentView/InstrumentWidget.cpp
+	src/InstrumentView/InstrumentWidgetMaskTab.cpp
+	src/InstrumentView/InstrumentWidgetPickTab.cpp
+	src/InstrumentView/InstrumentWidgetRenderTab.cpp
+	src/InstrumentView/InstrumentWidgetTab.cpp
+	src/InstrumentView/InstrumentWidgetTreeTab.cpp
+	src/InstrumentView/MantidGLWidget.cpp
+	src/InstrumentView/MaskBinsData.cpp
+	src/InstrumentView/ObjCompAssemblyActor.cpp
+	src/InstrumentView/ObjComponentActor.cpp
+	src/InstrumentView/OneCurvePlot.cpp
+	src/InstrumentView/OpenGLError.cpp
+	src/InstrumentView/PanelsSurface.cpp
+	src/InstrumentView/PeakMarker2D.cpp
+	src/InstrumentView/PeakOverlay.cpp
+	src/InstrumentView/Projection3D.cpp
+	src/InstrumentView/ProjectionSurface.cpp
+	src/InstrumentView/RectF.cpp
+	src/InstrumentView/RectangularDetectorActor.cpp
+	src/InstrumentView/RotationSurface.cpp
+	src/InstrumentView/SampleActor.cpp
+	src/InstrumentView/Shape2D.cpp
+	src/InstrumentView/Shape2DCollection.cpp
+	src/InstrumentView/SimpleWidget.cpp
+	src/InstrumentView/StructuredDetectorActor.cpp
+	src/InstrumentView/UCorrectionDialog.cpp
+	src/InstrumentView/UnwrappedCylinder.cpp
+	src/InstrumentView/UnwrappedSphere.cpp
+	src/InstrumentView/UnwrappedSurface.cpp
+	src/InstrumentView/Viewport.cpp
+	src/InstrumentView/XIntegrationControl.cpp
+	src/LineEditWithClear.cpp
+	src/LogValueSelector.cpp
+	src/MWDiag.cpp
+	src/MWRunFiles.cpp
+	src/MWView.cpp
+	src/MantidHelpWindow.cpp
+	src/MessageDisplay.cpp
+	src/MultifitSetupDialog.cpp
+	src/MuonFitDataSelector.cpp
+	src/MuonFitPropertyBrowser.cpp
+	src/MuonFunctionBrowser.cpp
+	src/PeakPicker.cpp
+	src/PeriodicTableWidget.cpp
+	src/PreviewPlot.cpp
+	src/ProcessingAlgoWidget.cpp
+	src/PropertyHandler.cpp
+	src/RangeSelector.cpp
+	src/RenameParDialog.cpp
+	src/SafeQwtPlot.cpp
+	src/SaveWorkspaces.cpp
+	src/ScriptEditor.cpp
+	src/SelectFunctionDialog.cpp
+	src/SelectWorkspacesDialog.cpp
+	src/SequentialFitDialog.cpp
+	src/SlicingAlgorithmDialog.cpp
+	src/SlitCalculator.cpp
+	src/StringDialogEditor.cpp
+	src/StringEditorFactory.cpp
+	src/UserFunctionDialog.cpp
+	src/WorkspaceEditorFactory.cpp
+	src/WorkspaceSelector.cpp
+	src/pqHelpWindow.cxx
+	src/pythonCalc.cpp
 )
 
 # Header files with Q_OBJECT that qmake will "moc"
@@ -106,6 +122,11 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/AlgorithmSelectorWidget.h
     inc/MantidQtMantidWidgets/CheckboxHeader.h
     inc/MantidQtMantidWidgets/ColorBarWidget.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorOneLevelTreeModel.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/QtDataProcessorOptionsDialog.h
     inc/MantidQtMantidWidgets/DataSelector.h
     inc/MantidQtMantidWidgets/DiagResults.h
     inc/MantidQtMantidWidgets/DisplayCurveFit.h
@@ -127,8 +148,9 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/MantidHelpWindow.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
+    inc/MantidQtMantidWidgets/MuonFitDataSelector.h
     inc/MantidQtMantidWidgets/MuonFitPropertyBrowser.h
-    inc/MantidQtMantidWidgets/MuonSequentialFitDialog.h
+    inc/MantidQtMantidWidgets/MuonFunctionBrowser.h
     inc/MantidQtMantidWidgets/MWDiag.h
     inc/MantidQtMantidWidgets/MWRunFiles.h
     inc/MantidQtMantidWidgets/MWView.h
@@ -176,78 +198,130 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h
     inc/MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.h
 	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
+	inc/MantidQtMantidWidgets/LogValueSelector.h
 )
 
 # Add the include files are NOT already in MOC_FILES
 set ( INC_FILES
-    ${MOC_FILES}
-    inc/MantidQtMantidWidgets/AlgorithmHintStrategy.h
-    inc/MantidQtMantidWidgets/CatalogHelper.h
-    inc/MantidQtMantidWidgets/ErrorCurve.h
-    inc/MantidQtMantidWidgets/WidgetDllOption.h
-    inc/MantidQtMantidWidgets/HintStrategy.h
-    inc/MantidQtMantidWidgets/InstrumentView/BinDialog.h
-    inc/MantidQtMantidWidgets/InstrumentView/CollapsiblePanel.h
-    inc/MantidQtMantidWidgets/InstrumentView/ColorMapWidget.h
-    inc/MantidQtMantidWidgets/InstrumentView/CompAssemblyActor.h
-    inc/MantidQtMantidWidgets/InstrumentView/ComponentActor.h
-    inc/MantidQtMantidWidgets/InstrumentView/DetXMLFile.h
-    inc/MantidQtMantidWidgets/InstrumentView/GLActor.h
-    inc/MantidQtMantidWidgets/InstrumentView/GLActorCollection.h
-    inc/MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h
-    inc/MantidQtMantidWidgets/InstrumentView/GLColor.h
-    inc/MantidQtMantidWidgets/InstrumentView/GLObject.h
-    inc/MantidQtMantidWidgets/InstrumentView/ICompAssemblyActor.h
-    inc/MantidQtMantidWidgets/InstrumentView/InstrumentActor.h
-    inc/MantidQtMantidWidgets/InstrumentView/InstrumentTreeModel.h
-    inc/MantidQtMantidWidgets/InstrumentView/InstrumentTreeWidget.h
-    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h
-    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetMaskTab.h
-    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetPickTab.h
-    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetRenderTab.h
-    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTab.h
-    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTreeTab.h
-    inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTypes.h
-    inc/MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h
-    inc/MantidQtMantidWidgets/InstrumentView/MaskBinsData.h
-    inc/MantidQtMantidWidgets/InstrumentView/ObjCompAssemblyActor.h
-    inc/MantidQtMantidWidgets/InstrumentView/ObjComponentActor.h
-    inc/MantidQtMantidWidgets/InstrumentView/OneCurvePlot.h
-    inc/MantidQtMantidWidgets/InstrumentView/OpenGLError.h
-    inc/MantidQtMantidWidgets/InstrumentView/PanelsSurface.h
-    inc/MantidQtMantidWidgets/InstrumentView/PeakMarker2D.h
-    inc/MantidQtMantidWidgets/InstrumentView/PeakOverlay.h
-    inc/MantidQtMantidWidgets/InstrumentView/Projection3D.h
-    inc/MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h
-    inc/MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h
-    inc/MantidQtMantidWidgets/InstrumentView/StructuredDetectorActor.h
-    inc/MantidQtMantidWidgets/InstrumentView/RectF.h
-    inc/MantidQtMantidWidgets/InstrumentView/RotationSurface.h
-    inc/MantidQtMantidWidgets/InstrumentView/SampleActor.h
-    inc/MantidQtMantidWidgets/InstrumentView/Shape2D.h
-    inc/MantidQtMantidWidgets/InstrumentView/Shape2DCollection.h
-    inc/MantidQtMantidWidgets/InstrumentView/SimpleWidget.h
-    inc/MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.h
-    inc/MantidQtMantidWidgets/InstrumentView/UnwrappedCylinder.h
-    inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSphere.h
-    inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h
-    inc/MantidQtMantidWidgets/InstrumentView/Viewport.h
-    inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
+	${MOC_FILES}
+	inc/MantidQtMantidWidgets/AlgorithmHintStrategy.h
+	inc/MantidQtMantidWidgets/CatalogHelper.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGenerateNotebook.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOneLevelTreeManager.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableAsCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorTwoLevelTreeManager.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorVectorString.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenterFactory.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h
+	inc/MantidQtMantidWidgets/ErrorCurve.h
+	inc/MantidQtMantidWidgets/HintStrategy.h
+	inc/MantidQtMantidWidgets/IFunctionBrowser.h
+	inc/MantidQtMantidWidgets/IMuonFitDataSelector.h
+	inc/MantidQtMantidWidgets/IMuonFitFunctionControl.h
+	inc/MantidQtMantidWidgets/IWorkspaceFitControl.h
+	inc/MantidQtMantidWidgets/InstrumentView/BinDialog.h
+	inc/MantidQtMantidWidgets/InstrumentView/CollapsiblePanel.h
+	inc/MantidQtMantidWidgets/InstrumentView/ColorMapWidget.h
+	inc/MantidQtMantidWidgets/InstrumentView/CompAssemblyActor.h
+	inc/MantidQtMantidWidgets/InstrumentView/ComponentActor.h
+	inc/MantidQtMantidWidgets/InstrumentView/DetXMLFile.h
+	inc/MantidQtMantidWidgets/InstrumentView/GLActor.h
+	inc/MantidQtMantidWidgets/InstrumentView/GLActorCollection.h
+	inc/MantidQtMantidWidgets/InstrumentView/GLActorVisitor.h
+	inc/MantidQtMantidWidgets/InstrumentView/GLColor.h
+	inc/MantidQtMantidWidgets/InstrumentView/GLObject.h
+	inc/MantidQtMantidWidgets/InstrumentView/ICompAssemblyActor.h
+	inc/MantidQtMantidWidgets/InstrumentView/InstrumentActor.h
+	inc/MantidQtMantidWidgets/InstrumentView/InstrumentTreeModel.h
+	inc/MantidQtMantidWidgets/InstrumentView/InstrumentTreeWidget.h
+	inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h
+	inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetMaskTab.h
+	inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetPickTab.h
+	inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetRenderTab.h
+	inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTab.h
+	inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTreeTab.h
+	inc/MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTypes.h
+	inc/MantidQtMantidWidgets/InstrumentView/MantidGLWidget.h
+	inc/MantidQtMantidWidgets/InstrumentView/MaskBinsData.h
+	inc/MantidQtMantidWidgets/InstrumentView/ObjCompAssemblyActor.h
+	inc/MantidQtMantidWidgets/InstrumentView/ObjComponentActor.h
+	inc/MantidQtMantidWidgets/InstrumentView/OneCurvePlot.h
+	inc/MantidQtMantidWidgets/InstrumentView/OpenGLError.h
+	inc/MantidQtMantidWidgets/InstrumentView/PanelsSurface.h
+	inc/MantidQtMantidWidgets/InstrumentView/PeakMarker2D.h
+	inc/MantidQtMantidWidgets/InstrumentView/PeakOverlay.h
+	inc/MantidQtMantidWidgets/InstrumentView/Projection3D.h
+	inc/MantidQtMantidWidgets/InstrumentView/ProjectionSurface.h
+	inc/MantidQtMantidWidgets/InstrumentView/RectF.h
+	inc/MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h
+	inc/MantidQtMantidWidgets/InstrumentView/RotationSurface.h
+	inc/MantidQtMantidWidgets/InstrumentView/SampleActor.h
+	inc/MantidQtMantidWidgets/InstrumentView/Shape2D.h
+	inc/MantidQtMantidWidgets/InstrumentView/Shape2DCollection.h
+	inc/MantidQtMantidWidgets/InstrumentView/SimpleWidget.h
+	inc/MantidQtMantidWidgets/InstrumentView/StructuredDetectorActor.h
+	inc/MantidQtMantidWidgets/InstrumentView/UCorrectionDialog.h
+	inc/MantidQtMantidWidgets/InstrumentView/UnwrappedCylinder.h
+	inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSphere.h
+	inc/MantidQtMantidWidgets/InstrumentView/UnwrappedSurface.h
+	inc/MantidQtMantidWidgets/InstrumentView/Viewport.h
+	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
+	inc/MantidQtMantidWidgets/LogValueSelector.h
+	inc/MantidQtMantidWidgets/MuonFitDataSelector.h
+	inc/MantidQtMantidWidgets/MuonFunctionBrowser.h
+	inc/MantidQtMantidWidgets/ProgressPresenter.h
+	inc/MantidQtMantidWidgets/ProgressableView.h
+	inc/MantidQtMantidWidgets/WidgetDllOption.h
 )
 
 # QtDesigner UI files to process
 set ( UI_FILES 
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsDialog.ui
+    inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorWidget.ui
     inc/MantidQtMantidWidgets/DataSelector.ui
     inc/MantidQtMantidWidgets/CatalogSearch.ui
     inc/MantidQtMantidWidgets/CatalogSelector.ui
     inc/MantidQtMantidWidgets/ColorBarWidget.ui
     inc/MantidQtMantidWidgets/DisplayCurveFit.ui
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.ui
+	inc/MantidQtMantidWidgets/LogValueSelector.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui
     inc/MantidQtMantidWidgets/MWView.ui
     inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
-    inc/MantidQtMantidWidgets/MuonSequentialFitDialog.ui
+    inc/MantidQtMantidWidgets/MuonFitDataSelector.ui
     inc/MantidQtMantidWidgets/ProcessingAlgoWidget.ui
     inc/MantidQtMantidWidgets/RenameParDialog.ui
     inc/MantidQtMantidWidgets/SelectFunctionDialog.ui
@@ -267,7 +341,20 @@ set ( TEST_PY_FILES
 )
 
 set ( TEST_FILES
-  AlgorithmHintStrategyTest.h
+	AlgorithmHintStrategyTest.h
+  DataProcessorUI/DataProcessorPostprocessingAlgorithmTest.h
+  DataProcessorUI/DataProcessorPreprocessingAlgorithmTest.h
+  DataProcessorUI/DataProcessorProcessingAlgorithmBaseTest.h
+  DataProcessorUI/DataProcessorProcessingAlgorithmTest.h
+  DataProcessorUI/DataProcessorCommandsTest.h
+  DataProcessorUI/DataProcessorGenerateNotebookTest.h
+  DataProcessorUI/DataProcessorOneLevelTreeManagerTest.h
+  DataProcessorUI/DataProcessorTwoLevelTreeManagerTest.h
+  DataProcessorUI/DataProcessorWhiteListTest.h
+  DataProcessorUI/GenericDataProcessorPresenterTest.h
+  DataProcessorUI/ParseKeyValueStringTest.h
+  DataProcessorUI/QDataProcessorOneLevelTreeModelTest.h
+  DataProcessorUI/QDataProcessorTwoLevelTreeModelTest.h
 )
 
 find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
@@ -291,10 +378,12 @@ add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (
 
 
 # For Windows:
-add_definitions ( -DIN_MANTIDQT_MANTIDWIDGETS -DQT_QTPROPERTYBROWSER_IMPORT )
+add_definitions ( -DQT_QTPROPERTYBROWSER_IMPORT )
 # Use a precompiled header where they are supported
 enable_precompiled_headers( inc/MantidQtMantidWidgets/PrecompiledHeader.h ALL_SRC )
 add_library ( MantidWidgets ${ALL_SRC} ${INC_FILES} ${UI_HDRS} ${RES_FILES} )
+
+set_target_properties ( MantidWidgets PROPERTIES COMPILE_DEFINITIONS "IN_MANTIDQT_MANTIDWIDGETS")
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidWidgets PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")

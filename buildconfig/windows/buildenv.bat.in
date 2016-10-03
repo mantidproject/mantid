@@ -6,15 +6,15 @@
 :: script.
 :: It is assumed that tools such as CMake & Git are already on the PATH
 
-:: Third Party 
+:: Third Party
 set CM_THIRD_PARTY_DIR=@THIRD_PARTY_DIR@
 set THIRD_PARTY_DIR=%CM_THIRD_PARTY_DIR:/=\%
 
 :: Qt4 - exes are in bin & dlls are in lib
 set QT4_BIN=%THIRD_PARTY_DIR%\lib\qt4\bin;%THIRD_PARTY_DIR%\lib\qt4\lib
 
-:: Python - 
-set PYTHONHOME=%THIRD_PARTY_DIR%\lib\python2.7
+:: Python -
+set PYTHONHOME=%THIRD_PARTY_DIR%\lib\python@PYTHON_MAJOR_VERSION@.@PYTHON_MINOR_VERSION@
 
 :: Misc bin -
 set MISC_BIN=%THIRD_PARTY_DIR%\bin;%THIRD_PARTY_DIR%\bin\mingw

@@ -5,6 +5,12 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+
+namespace HistogramData {
+class HistogramX;
+class HistogramY;
+}
+
 namespace Algorithms {
 
 /** FindPeakBackground : Calculate Zscore for a Matrix Workspace
@@ -32,9 +38,6 @@ namespace Algorithms {
 */
 class DLLExport FindPeakBackground : public API::Algorithm {
 public:
-  FindPeakBackground();
-  ~FindPeakBackground() override;
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FindPeakBackground"; }
   /// Summary of algorithms purpose
@@ -56,7 +59,8 @@ private:
   /// Implement abstract Algorithm methods
   void exec() override;
   double moment4(MantidVec &X, size_t n, double mean);
-  void estimateBackground(const MantidVec &X, const MantidVec &Y,
+  void estimateBackground(const HistogramData::HistogramX &X,
+                          const HistogramData::HistogramY &Y,
                           const size_t i_min, const size_t i_max,
                           const size_t p_min, const size_t p_max,
                           const bool hasPeak, double &out_bg0, double &out_bg1,

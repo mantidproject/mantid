@@ -8,8 +8,6 @@ namespace Mantid {
 namespace CurveFitting {
 
 /// Constructor
-GSLMatrix::GSLMatrix() {}
-/// Constructor
 /// @param nx :: First dimension
 /// @param ny :: Second dimension
 GSLMatrix::GSLMatrix(const size_t nx, const size_t ny)
@@ -57,9 +55,6 @@ GSLMatrix::GSLMatrix(std::vector<double> &&data, size_t nx, size_t ny)
     : m_data(std::move(data)),
       m_view(gsl_matrix_view_array(m_data.data(), nx, ny)) {}
 
-/// Destructor.
-GSLMatrix::~GSLMatrix() {}
-
 /// Copy assignment operator
 GSLMatrix &GSLMatrix::operator=(const GSLMatrix &M) {
   m_data = M.m_data;
@@ -84,14 +79,10 @@ void GSLMatrix::resize(const size_t nx, const size_t ny) {
 }
 
 /// First size of the matrix
-size_t GSLMatrix::size1() const {
-  return &m_view.matrix ? m_view.matrix.size1 : 0;
-}
+size_t GSLMatrix::size1() const { return m_view.matrix.size1; }
 
 /// Second size of the matrix
-size_t GSLMatrix::size2() const {
-  return &m_view.matrix ? m_view.matrix.size2 : 0;
-}
+size_t GSLMatrix::size2() const { return m_view.matrix.size2; }
 
 /// set an element
 /// @param i :: The row

@@ -36,19 +36,11 @@ message (STATUS "Operating System: Mac OS X ${OSX_VERSION} (${OSX_CODENAME})")
 # Enable the use of the -isystem flag to mark headers in Third_Party as system headers
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 
-execute_process(COMMAND python-config --prefix OUTPUT_VARIABLE PYTHON_PREFIX)
-string(STRIP ${PYTHON_PREFIX} PYTHON_PREFIX)
-set( PYTHON_LIBRARY "${PYTHON_PREFIX}/lib/libpython2.7.dylib" CACHE FILEPATH "PYTHON_LIBRARY")
-set( PYTHON_INCLUDE_DIR "${PYTHON_PREFIX}/include/python2.7" CACHE PATH "PYTHON_INCLUDE_DIR")
+###########################################################################
+# Use python libraries associated with PYTHON_EXECUTABLE
+# If unspecified, use first python executable in the PATH.
+###########################################################################
 
-###########################################################################
-# Use the system-installed version of Python.
-###########################################################################
-find_package ( PythonLibs REQUIRED )
-# If found, need to add debug library into libraries variable
-if ( PYTHON_DEBUG_LIBRARIES )
-  set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES} )
-endif ()
 # Find the python interpreter to get the version we're using (needed for install commands below)
 find_package ( PythonInterp )
 if ( PYTHON_VERSION_MAJOR )
@@ -57,6 +49,24 @@ if ( PYTHON_VERSION_MAJOR )
 else ()
   # Older versions of CMake don't set these variables so just assume 2.7
   set ( PY_VER 2.7 )
+endif ()
+
+execute_process(COMMAND python${PY_VER}-config --prefix OUTPUT_VARIABLE PYTHON_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+if(${PYTHON_VERSION_MAJOR} GREATER 2)
+  execute_process(COMMAND python${PY_VER}-config --abiflags OUTPUT_VARIABLE PY_ABI OUTPUT_STRIP_TRAILING_WHITESPACE)
+else()
+  # --abiflags option not available in python 2
+  set(PY_ABI "")
+endif()
+
+set( PYTHON_LIBRARY "${PYTHON_PREFIX}/lib/libpython${PY_VER}${PY_ABI}.dylib" CACHE FILEPATH "PYTHON_LIBRARY" FORCE )
+set( PYTHON_INCLUDE_DIR "${PYTHON_PREFIX}/include/python${PY_VER}${PY_ABI}" CACHE PATH "PYTHON_INCLUDE_DIR" FORCE )
+
+find_package ( PythonLibs REQUIRED )
+# If found, need to add debug library into libraries variable
+if ( PYTHON_DEBUG_LIBRARIES )
+  set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES} )
 endif ()
 
 # Generate a target to put a mantidpython wrapper in the appropriate directory
@@ -120,6 +130,10 @@ string(REGEX REPLACE "/$" "" SITEPACKAGES "${SITEPACKAGES}")
 if (NOT OPENSSL_ROOT_DIR)
   set ( OPENSSL_ROOT_DIR /usr/local/opt/openssl )
 endif(NOT OPENSSL_ROOT_DIR)
+
+if (NOT HDF5_ROOT)
+  set ( HDF5_ROOT /usr/local/opt/hdf5 )
+endif()
 
 # Python packages
 

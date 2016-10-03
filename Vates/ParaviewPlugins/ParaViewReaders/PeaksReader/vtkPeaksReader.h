@@ -5,23 +5,24 @@
 
 class vtkImplicitFunction;
 // cppcheck-suppress class_X_Y
-class VTK_EXPORT vtkPeaksReader : public vtkPolyDataAlgorithm
-{
+class VTK_EXPORT vtkPeaksReader : public vtkPolyDataAlgorithm {
 public:
   static vtkPeaksReader *New();
+  vtkPeaksReader(const vtkPeaksReader &) = delete;
+
+  void operator=(const vtkPeaksReader &) = delete;
   vtkTypeMacro(vtkPeaksReader,
                vtkPolyDataAlgorithm) void PrintSelf(ostream &os,
                                                     vtkIndent indent) override;
   vtkSetStringMacro(FileName)
-  vtkGetStringMacro(FileName)
-  int CanReadFile(const char* fname);
+      vtkGetStringMacro(FileName) int CanReadFile(const char *fname);
   void SetDimensions(int dimensions);
   /// Setter for the unitegrated peak marker size
   void SetUnintPeakMarkerSize(double mSize);
   /// Called by presenter to force progress information updating.
-  void updateAlgorithmProgress(double progress, const std::string& message);
+  void updateAlgorithmProgress(double progress, const std::string &message);
   /// Getter for the workspace type
-  char* GetWorkspaceTypeName();
+  const std::string &GetWorkspaceTypeName();
 
 protected:
   vtkPeaksReader();
@@ -30,21 +31,17 @@ protected:
                          vtkInformationVector *) override;
   int RequestData(vtkInformation *, vtkInformationVector **,
                   vtkInformationVector *) override;
-  ///Handle time variation.
+  /// Handle time variation.
   unsigned long GetMTime() override;
 
 private:
-  
-  vtkPeaksReader(const vtkPeaksReader&);
-  
-  void operator = (const vtkPeaksReader&);
-
   /// File name from which to read.
   char *FileName;
 
-  /// Flag indicates when set up is complete wrt  the conversion of the nexus file to a MDEventWorkspace stored in ADS.
+  /// Flag indicates when set up is complete wrt  the conversion of the nexus
+  /// file to a MDEventWorkspace stored in ADS.
   bool m_isSetup;
-  
+
   /// Cached PeaksWs Name
   std::string m_wsTypeName;
 
@@ -52,12 +49,9 @@ private:
   double m_uintPeakMarkerSize;
 
   /// Cached PeaksWS
-  Mantid::API::IPeaksWorkspace_sptr  m_PeakWS;
+  Mantid::API::IPeaksWorkspace_sptr m_PeakWS;
 
   /// Int representing an enum for q_lab, etc.
   int m_dimensions;
-
-  
-
 };
 #endif

@@ -1,9 +1,11 @@
 #pylint: disable=no-init,invalid-name,too-many-branches
+from __future__ import (absolute_import, division, print_function)
+
+import os
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 from reduction_workflow.find_data import find_data
-import os
 
 class HFIRSANSReduction(PythonAlgorithm):
 
@@ -407,18 +409,18 @@ class HFIRSANSReduction(PythonAlgorithm):
                     process_file = property_manager.getProperty("ProcessInfo").value
                     if os.path.isfile(process_file):
                         proc = open(process_file, 'r')
-                        proc_xml = proc.read()
+                        proc_xml = "<SASprocessnote>\n%s</SASprocessnote>\n" % proc.read()
                     elif len(process_file)>0:
                         Logger("HFIRSANSReduction").error("Could not read %s\n" % process_file)
                 if property_manager.existsProperty("SetupAlgorithm"):
                     setup_info = property_manager.getProperty("SetupAlgorithm").value
-                    proc_xml += "\n<Reduction>\n"
+                    proc_xml += "\n<SASprocessnote>\n<Reduction>\n"
                         # The instrument name refers to the UI, which is named BIOSANS for all HFIR SANS
                     proc_xml += "  <instrument_name>BIOSANS</instrument_name>\n"
                     proc_xml += "  <SetupInfo>%s</SetupInfo>\n" % setup_info
                     filename = self.getProperty("Filename").value
                     proc_xml += "  <Filename>%s</Filename>\n" % filename
-                    proc_xml += "</Reduction>\n"
+                    proc_xml += "</Reduction>\n</SASprocessnote>\n"
 
                 filename = os.path.join(output_dir, iq_ws+'.txt')
 
@@ -448,7 +450,8 @@ class HFIRSANSReduction(PythonAlgorithm):
         # Save I(Q), including all wedges
         ws_list = AnalysisDataService.getObjectNames()
         for item in ws_list:
-            if iq_output is not None and item.startswith(iq_output) and not item.startswith(iqxy_output):
+            if iq_output is not None and item.startswith(iq_output) and \
+                (iqxy_output is None or not item.startswith(iqxy_output)):
                 filename = _save_ws(item)
                 if filename is not None:
                     output_msg += "I(Q) saved in %s\n" % (filename)

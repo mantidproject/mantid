@@ -180,9 +180,4 @@ class DgsReductionScripter(BaseReductionScripter):
         alg = mantid.api.AlgorithmManager.createUnmanaged("Load")
         alg.initialize()
         alg.setPropertyValue('Filename',str(filename))
-        fnames=alg.getProperty('Filename').value
-        if not isinstance(fnames,list):
-            fnames=[fnames] #make a list with one element
-        return fnames
-
-
+        return alg.getProperty('Filename').value

@@ -19,40 +19,41 @@ public:
   static void destroySuite(SaveNXTomoTest *suite) { delete suite; }
 
   SaveNXTomoTest() {
-    inputWS = "saveNXTomo_test";
-    outputFile = "SaveNXTomoTestFile.nxs";
-    axisSize = 50;
-    saver = FrameworkManager::Instance().createAlgorithm("SaveNXTomo");
+    m_inputWS = "saveNXTomo_test";
+    m_outputFile = "SaveNXTomoTestFile.nxs";
+    m_axisSize = 50;
+    m_saver = FrameworkManager::Instance().createAlgorithm("SaveNXTomo");
   }
 
-  void testName() { TS_ASSERT_EQUALS(saver->name(), "SaveNXTomo"); }
+  void testName() { TS_ASSERT_EQUALS(m_saver->name(), "SaveNXTomo"); }
 
-  void testVersion() { TS_ASSERT_EQUALS(saver->version(), 1); }
+  void testVersion() { TS_ASSERT_EQUALS(m_saver->version(), 1); }
 
   void testInit() {
-    TS_ASSERT_THROWS_NOTHING(saver->initialize());
-    TS_ASSERT(saver->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(m_saver->initialize());
+    TS_ASSERT(m_saver->isInitialized());
   }
 
   void testWriteSingleCreating(bool deleteWhenComplete = true) {
     // Test creating a new file from a single WS
     // Create a small test workspace
-    Workspace_sptr input = makeWorkspaceSingle(inputWS);
+    Workspace_sptr input = makeWorkspaceSingle(m_inputWS);
 
     TS_ASSERT_THROWS_NOTHING(
-        saver->setProperty<Workspace_sptr>("InputWorkspaces", input));
-    TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("Filename", outputFile));
-    outputFile = saver->getPropertyValue("Filename"); // get absolute path
+        m_saver->setProperty<Workspace_sptr>("InputWorkspaces", input));
+    TS_ASSERT_THROWS_NOTHING(
+        m_saver->setPropertyValue("Filename", m_outputFile));
+    m_outputFile = m_saver->getPropertyValue("Filename"); // get absolute path
 
     // Set to overwrite to ensure creation not append
-    TS_ASSERT_THROWS_NOTHING(saver->setProperty("OverwriteFile", true));
-    TS_ASSERT_THROWS_NOTHING(saver->setProperty("IncludeError", false));
+    TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("OverwriteFile", true));
+    TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("IncludeError", false));
 
-    TS_ASSERT_THROWS_NOTHING(saver->execute());
-    TS_ASSERT(saver->isExecuted());
+    TS_ASSERT_THROWS_NOTHING(m_saver->execute());
+    TS_ASSERT(m_saver->isExecuted());
 
     // Check file exists
-    Poco::File file(outputFile);
+    Poco::File file(m_outputFile);
     TS_ASSERT(file.exists());
 
     // Check that the structure of the nxTomo file is correct
@@ -77,37 +78,61 @@ public:
     // Test creating a new file from a WS Group
     // Create small test workspaces
     std::vector<Workspace2D_sptr> wspaces(3);
-    WorkspaceGroup_sptr input = makeWorkspacesInGroup(inputWS, wspaces);
-    AnalysisDataService::Instance().add(inputWS + "0", input);
+    WorkspaceGroup_sptr input = makeWorkspacesInGroup(m_inputWS, wspaces);
+    AnalysisDataService::Instance().add(m_inputWS + "0", input);
 
     TS_ASSERT_THROWS_NOTHING(
-        saver->setPropertyValue("InputWorkspaces", input->name()));
-    TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("Filename", outputFile));
-    outputFile = saver->getPropertyValue("Filename"); // get absolute path
+        m_saver->setPropertyValue("InputWorkspaces", input->name()));
+    TS_ASSERT_THROWS_NOTHING(
+        m_saver->setPropertyValue("Filename", m_outputFile));
+    m_outputFile = m_saver->getPropertyValue("Filename"); // get absolute path
 
     // Set to overwrite to ensure creation not append
-    TS_ASSERT_THROWS_NOTHING(saver->setProperty("OverwriteFile", true));
-    TS_ASSERT_THROWS_NOTHING(saver->setProperty("IncludeError", false));
+    TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("OverwriteFile", true));
+    TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("IncludeError", false));
 
-    TS_ASSERT_THROWS_NOTHING(saver->execute());
-    // TODO:: uncomment - currently fails due to 10519
-    // TS_ASSERT( saver->isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(m_saver->execute());
+    TS_ASSERT(m_saver->isExecuted());
 
     // Check file exists
-    Poco::File file(outputFile);
+    Poco::File file(m_outputFile);
     TS_ASSERT(file.exists());
 
-    // Check that the structure of the nxTomo file is correct
-    checkNXTomoStructure();
+    checksOnNXTomoFormat(3);
 
-    // Check count of entries for data / run_title / rotation_angle / image_key
-    checkNXTomoDimensions(3);
+    // Tidy up
+    AnalysisDataService::Instance().remove(input->name());
+    if (file.exists())
+      file.remove();
+  }
 
-    // Check rotation values
-    checkNXTomoRotations(3);
+  // using image workspaces with one spectrum per row (as opposed to
+  // one spectrum per pixel)
+  void testWriteGroupCreatingFromRectImage() {
+    std::vector<Workspace2D_sptr> wspaces(2);
+    const std::string wsgName = "dummy_test_rect_images";
+    WorkspaceGroup_sptr input =
+        makeWorkspacesInGroup(wsgName, wspaces, 0, true);
+    AnalysisDataService::Instance().add(wsgName + "0", input);
 
-    // Check main data values
-    checkNXTomoData(3);
+    TS_ASSERT_THROWS_NOTHING(
+        m_saver->setPropertyValue("InputWorkspaces", input->name()));
+    TS_ASSERT_THROWS_NOTHING(
+        m_saver->setPropertyValue("Filename", m_outputFile));
+    m_outputFile = m_saver->getPropertyValue("Filename"); // get absolute path
+
+    // Set to overwrite to ensure creation not append
+    TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("OverwriteFile", true));
+    TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("IncludeError", false));
+
+    TS_ASSERT_THROWS_NOTHING(m_saver->execute());
+    TS_ASSERT(m_saver->isExecuted());
+
+    // Check file exists
+    Poco::File file(m_outputFile);
+    TS_ASSERT(file.exists());
+
+    checksOnNXTomoFormat(2);
 
     // Tidy up
     AnalysisDataService::Instance().remove(input->name());
@@ -116,49 +141,41 @@ public:
   }
 
   void testWriteGroupAppending() {
+    // this needs to be called, cxxtest won't run it when it has an argument
+    testWriteSingleCreating(true);
+
     // Run the single workspace test again, without deleting the file at the end
     // (to test append)
     testWriteSingleCreating(false);
 
     // Test appending a ws group to an existing file
-    if (Poco::File(outputFile).exists()) {
+    if (Poco::File(m_outputFile).exists()) {
       int numberOfPriorWS = 1; // Count of current workspaces in the file
       // Create small test workspaces
       std::vector<Workspace2D_sptr> wspaces(3);
       WorkspaceGroup_sptr input =
-          makeWorkspacesInGroup(inputWS, wspaces, numberOfPriorWS);
+          makeWorkspacesInGroup(m_inputWS, wspaces, numberOfPriorWS);
       AnalysisDataService::Instance().add(
-          inputWS + boost::lexical_cast<std::string>(numberOfPriorWS), input);
+          m_inputWS + boost::lexical_cast<std::string>(numberOfPriorWS), input);
 
       TS_ASSERT_THROWS_NOTHING(
-          saver->setPropertyValue("InputWorkspaces", input->name()));
-      TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("Filename", outputFile));
-      outputFile = saver->getPropertyValue("Filename"); // get absolute path
+          m_saver->setPropertyValue("InputWorkspaces", input->name()));
+      TS_ASSERT_THROWS_NOTHING(
+          m_saver->setPropertyValue("Filename", m_outputFile));
+      m_outputFile = m_saver->getPropertyValue("Filename"); // get absolute path
 
       // Ensure append not create
-      TS_ASSERT_THROWS_NOTHING(saver->setProperty("OverwriteFile", false));
-      TS_ASSERT_THROWS_NOTHING(saver->setProperty("IncludeError", false));
+      TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("OverwriteFile", false));
+      TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("IncludeError", false));
 
-      TS_ASSERT_THROWS_NOTHING(saver->execute());
-      // TODO:: uncomment - currently fails due to 10519
-      // TS_ASSERT( saver->isExecuted() );
+      TS_ASSERT_THROWS_NOTHING(m_saver->execute());
+      TS_ASSERT(m_saver->isExecuted());
 
       // Check file exists
-      Poco::File file(outputFile);
+      Poco::File file(m_outputFile);
       TS_ASSERT(file.exists());
 
-      // Check that the structure of the nxTomo file is correct
-      checkNXTomoStructure();
-
-      // Check count of entries for data / run_title / rotation_angle /
-      // image_key
-      checkNXTomoDimensions(static_cast<int>(wspaces.size()) + numberOfPriorWS);
-
-      // Check rotation values
-      checkNXTomoRotations(static_cast<int>(wspaces.size()) + numberOfPriorWS);
-
-      // Check main data values
-      checkNXTomoData(static_cast<int>(wspaces.size()) + numberOfPriorWS);
+      checksOnNXTomoFormat(static_cast<int>(wspaces.size()) + numberOfPriorWS);
 
       // Tidy up
       AnalysisDataService::Instance().remove(input->name());
@@ -170,12 +187,14 @@ private:
   Workspace_sptr makeWorkspaceSingle(const std::string &input) {
     // Create a single workspace
     Workspace2D_sptr ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(
-        axisSize * axisSize, 1, 1.0);
+        m_axisSize * m_axisSize, 1, 1.0);
     ws->setTitle(input);
 
     // Add axis sizes
-    ws->mutableRun().addLogData(new PropertyWithValue<int>("Axis1", axisSize));
-    ws->mutableRun().addLogData(new PropertyWithValue<int>("Axis2", axisSize));
+    ws->mutableRun().addLogData(
+        new PropertyWithValue<int>("Axis1", m_axisSize));
+    ws->mutableRun().addLogData(
+        new PropertyWithValue<int>("Axis2", m_axisSize));
 
     // Add log values
     ws->mutableRun().addLogData(
@@ -184,10 +203,22 @@ private:
     return ws;
   }
 
+  /**
+   * Builds a group
+   *
+   * @param input name of the input workspace
+   * @param wspaces workspaces to populate
+   * @param wsIndOffset start/offset of workspace, to calculate the
+   * rotation value
+   * @param specPerRow If true, the images are in the workspaces with
+   * one spectrum per row. By default, there is one spectrum per pixel
+   *
+   * @return a group of workspaces with properties set
+   */
   WorkspaceGroup_sptr
   makeWorkspacesInGroup(const std::string &input,
                         std::vector<Workspace2D_sptr> &wspaces,
-                        int wsIndOffset = 0) {
+                        int wsIndOffset = 0, bool specPerRow = false) {
     // Create a ws group with 3 workspaces.
     WorkspaceGroup_sptr wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup());
     std::string groupName =
@@ -195,14 +226,20 @@ private:
     wsGroup->setTitle(groupName);
 
     for (uint32_t i = 0; i < static_cast<uint32_t>(wspaces.size()); ++i) {
-      wspaces[i] = WorkspaceCreationHelper::Create2DWorkspaceBinned(
-          axisSize * axisSize, 1, 1.0);
+      if (specPerRow) {
+        wspaces[i] = WorkspaceCreationHelper::Create2DWorkspaceBinned(
+            m_axisSize, m_axisSize + 1, 1.0);
+
+      } else {
+        wspaces[i] = WorkspaceCreationHelper::Create2DWorkspaceBinned(
+            m_axisSize * m_axisSize, 1, 1.0);
+      }
       wspaces[i]->setTitle(
           groupName + boost::lexical_cast<std::string>(wsIndOffset + (i + 1)));
       wspaces[i]->mutableRun().addLogData(
-          new PropertyWithValue<int>("Axis1", axisSize));
+          new PropertyWithValue<int>("Axis1", m_axisSize));
       wspaces[i]->mutableRun().addLogData(
-          new PropertyWithValue<int>("Axis2", axisSize));
+          new PropertyWithValue<int>("Axis2", m_axisSize));
       wspaces[i]->mutableRun().addLogData(new PropertyWithValue<double>(
           "Rotation", ((i + 1) + wsIndOffset) * 5));
       wsGroup->addWorkspace(wspaces[i]);
@@ -214,7 +251,7 @@ private:
   void checkNXTomoStructure() {
     // Checks the structure of the file - not interested in the data content
     NXhandle fileHandle;
-    NXstatus status = NXopen(outputFile.c_str(), NXACC_RDWR, &fileHandle);
+    NXstatus status = NXopen(m_outputFile.c_str(), NXACC_RDWR, &fileHandle);
 
     TS_ASSERT(status != NX_ERROR);
 
@@ -279,19 +316,33 @@ private:
     }
   }
 
+  void checksOnNXTomoFormat(int wsCount) {
+    // Check that the structure of the nxTomo file is correct
+    checkNXTomoStructure();
+
+    // Check count of entries for data / run_title / rotation_angle / image_key
+    checkNXTomoDimensions(wsCount);
+
+    // Check rotation values
+    checkNXTomoRotations(wsCount);
+
+    // Check main data values
+    checkNXTomoData(wsCount);
+  }
+
   void checkNXTomoDimensions(int wsCount) {
     // Check that the dimensions for the datasets are correct for the number of
     // workspaces
     NXhandle fileHandle;
-    NXstatus status = NXopen(outputFile.c_str(), NXACC_RDWR, &fileHandle);
+    NXstatus status = NXopen(m_outputFile.c_str(), NXACC_RDWR, &fileHandle);
     if (status != NX_ERROR) {
       ::NeXus::File nxFile(fileHandle);
 
       nxFile.openPath("/entry1/tomo_entry/data");
       nxFile.openData("data");
       TS_ASSERT_EQUALS(nxFile.getInfo().dims[0], wsCount);
-      TS_ASSERT_EQUALS(nxFile.getInfo().dims[1], axisSize);
-      TS_ASSERT_EQUALS(nxFile.getInfo().dims[2], axisSize);
+      TS_ASSERT_EQUALS(nxFile.getInfo().dims[1], m_axisSize);
+      TS_ASSERT_EQUALS(nxFile.getInfo().dims[2], m_axisSize);
       nxFile.closeData();
       nxFile.openData("rotation_angle");
       TS_ASSERT_EQUALS(nxFile.getInfo().dims[0], wsCount);
@@ -315,7 +366,7 @@ private:
     // Check that the rotation values are correct for the rotation dataset for
     // the number of workspaces
     NXhandle fileHandle;
-    NXstatus status = NXopen(outputFile.c_str(), NXACC_RDWR, &fileHandle);
+    NXstatus status = NXopen(m_outputFile.c_str(), NXACC_RDWR, &fileHandle);
     if (status != NX_ERROR) {
       ::NeXus::File nxFile(fileHandle);
 
@@ -336,7 +387,7 @@ private:
     // Checks the first {wsCount} data entries are correct - All test data is
     // value 2.0
     NXhandle fileHandle;
-    NXstatus status = NXopen(outputFile.c_str(), NXACC_RDWR, &fileHandle);
+    NXstatus status = NXopen(m_outputFile.c_str(), NXACC_RDWR, &fileHandle);
     if (status != NX_ERROR) {
       ::NeXus::File nxFile(fileHandle);
 
@@ -354,10 +405,10 @@ private:
   }
 
 private:
-  IAlgorithm *saver;
-  std::string outputFile;
-  std::string inputWS;
-  int axisSize;
+  IAlgorithm *m_saver;
+  std::string m_outputFile;
+  std::string m_inputWS;
+  int m_axisSize;
 };
 
 #endif /*SAVENXTOMOTEST_H_*/

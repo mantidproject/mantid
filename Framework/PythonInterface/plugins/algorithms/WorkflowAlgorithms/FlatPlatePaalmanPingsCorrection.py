@@ -1,10 +1,15 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+from six import iteritems
+from six import integer_types
+
+import math
+import numpy as np
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty, \
                        WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator, Progress
 from mantid.kernel import StringListValidator, StringMandatoryValidator, IntBoundedValidator, \
                           FloatBoundedValidator, Direction, logger, CompositeValidator
-import math, numpy as np
 
 #pylint: disable=too-many-instance-attributes
 class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
@@ -86,8 +91,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                              doc='Interpolate the correction workspaces to match the sample workspace')
 
         self.declareProperty(name='Emode', defaultValue='Elastic',
-                             validator=StringListValidator(['Elastic', 'Indirect']),
-                             doc='Emode: Elastic or Indirect')
+                             validator=StringListValidator(['Elastic', 'Indirect', 'Direct']),
+                             doc='Energy transfer mode')
         self.declareProperty(name='Efixed', defaultValue=1.0,
                              doc='Analyser energy')
 
@@ -280,7 +285,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         if self._emode == 'Elastic':
             self._elastic = self._waves[int(number_waves / 2)]
-        elif self._emode == 'Indirect':
+        else:
             self._elastic = math.sqrt(81.787 / self._efixed)  # elastic wavelength
 
         logger.information('Elastic lambda %f' % self._elastic)
@@ -314,10 +319,10 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         @param sample_logs Dictionary of logs to append to the workspace.
         """
 
-        for key, value in sample_logs.iteritems():
+        for key, value in iteritems(sample_logs):
             if isinstance(value, bool):
                 log_type = 'String'
-            elif isinstance(value, (int, long, float)):
+            elif isinstance(value, (integer_types, float)):
                 log_type = 'Number'
             else:
                 log_type = 'String'

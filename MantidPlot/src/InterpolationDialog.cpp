@@ -2,7 +2,8 @@
     File                 : InterpolationDialog.cpp
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Interpolation options dialog
 
@@ -41,164 +42,161 @@
 #include <QComboBox>
 #include <QLayout>
 
-InterpolationDialog::InterpolationDialog( QWidget* parent, Qt::WFlags fl )
-  : QDialog( parent, fl ), graph(NULL)
-{
-    setName( "InterpolationDialog" );
-    setWindowTitle(tr("MantidPlot - Interpolation Options"));
+InterpolationDialog::InterpolationDialog(QWidget *parent, Qt::WFlags fl)
+    : QDialog(parent, fl), graph(NULL) {
+  setObjectName("InterpolationDialog");
+  setWindowTitle(tr("MantidPlot - Interpolation Options"));
 
-    QGroupBox *gb1 = new QGroupBox();
-    QGridLayout *gl1 = new QGridLayout(gb1);
-    gl1->addWidget(new QLabel(tr("Make curve from")), 0, 0);
+  QGroupBox *gb1 = new QGroupBox();
+  QGridLayout *gl1 = new QGridLayout(gb1);
+  gl1->addWidget(new QLabel(tr("Make curve from")), 0, 0);
 
-    boxName = new QComboBox();
-    gl1->addWidget(boxName, 0, 1);
+  boxName = new QComboBox();
+  gl1->addWidget(boxName, 0, 1);
 
-    gl1->addWidget(new QLabel(tr("Spline")), 1, 0);
-    boxMethod = new QComboBox();
-    boxMethod->insertItem(tr("Linear"));
-    boxMethod->insertItem(tr("Cubic"));
-    boxMethod->insertItem(tr("Non-rounded Akima"));
-    gl1->addWidget(boxMethod, 1, 1);
+  gl1->addWidget(new QLabel(tr("Spline")), 1, 0);
+  boxMethod = new QComboBox();
+  boxMethod->addItem(tr("Linear"));
+  boxMethod->addItem(tr("Cubic"));
+  boxMethod->addItem(tr("Non-rounded Akima"));
+  gl1->addWidget(boxMethod, 1, 1);
 
-    gl1->addWidget(new QLabel(tr("Points")), 2, 0);
-    boxPoints = new QSpinBox();
-    boxPoints->setRange(3,100000);
-    boxPoints->setSingleStep(10);
-    boxPoints->setValue(1000);
-    gl1->addWidget(boxPoints, 2, 1);
+  gl1->addWidget(new QLabel(tr("Points")), 2, 0);
+  boxPoints = new QSpinBox();
+  boxPoints->setRange(3, 100000);
+  boxPoints->setSingleStep(10);
+  boxPoints->setValue(1000);
+  gl1->addWidget(boxPoints, 2, 1);
 
-    gl1->addWidget(new QLabel(tr("From Xmin")), 3, 0);
-    boxStart = new QLineEdit();
-    boxStart->setText(tr("0"));
-    gl1->addWidget(boxStart, 3, 1);
+  gl1->addWidget(new QLabel(tr("From Xmin")), 3, 0);
+  boxStart = new QLineEdit();
+  boxStart->setText(tr("0"));
+  gl1->addWidget(boxStart, 3, 1);
 
-    gl1->addWidget(new QLabel(tr("To Xmax")), 4, 0);
-    boxEnd = new QLineEdit();
-    gl1->addWidget(boxEnd, 4, 1);
+  gl1->addWidget(new QLabel(tr("To Xmax")), 4, 0);
+  boxEnd = new QLineEdit();
+  gl1->addWidget(boxEnd, 4, 1);
 
-    gl1->addWidget(new QLabel(tr("Color")), 5, 0);
+  gl1->addWidget(new QLabel(tr("Color")), 5, 0);
 
-    boxColor = new ColorBox();
-    boxColor->setColor(QColor(Qt::red));
-    gl1->addWidget(boxColor, 5, 1);
-    gl1->setRowStretch(6, 1);
+  boxColor = new ColorBox();
+  boxColor->setColor(QColor(Qt::red));
+  gl1->addWidget(boxColor, 5, 1);
+  gl1->setRowStretch(6, 1);
 
-    buttonFit = new QPushButton(tr( "&Make" ));
-    buttonFit->setDefault( true );
-    buttonCancel = new QPushButton(tr( "&Close" ));
+  buttonFit = new QPushButton(tr("&Make"));
+  buttonFit->setDefault(true);
+  buttonCancel = new QPushButton(tr("&Close"));
 
-    QVBoxLayout *vl = new QVBoxLayout();
-    vl->addWidget(buttonFit);
-    vl->addWidget(buttonCancel);
-    vl->addStretch();
+  QVBoxLayout *vl = new QVBoxLayout();
+  vl->addWidget(buttonFit);
+  vl->addWidget(buttonCancel);
+  vl->addStretch();
 
-    QHBoxLayout *hb = new QHBoxLayout(this);
-    hb->addWidget(gb1);
-    hb->addLayout(vl);
+  QHBoxLayout *hb = new QHBoxLayout(this);
+  hb->addWidget(gb1);
+  hb->addLayout(vl);
 
-    connect( boxName, SIGNAL(activated(const QString&)), this, SLOT( activateCurve(const QString&)));
-    connect( buttonFit, SIGNAL( clicked() ), this, SLOT( interpolate() ) );
-    connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
+  connect(boxName, SIGNAL(activated(const QString &)), this,
+          SLOT(activateCurve(const QString &)));
+  connect(buttonFit, SIGNAL(clicked()), this, SLOT(interpolate()));
+  connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
 }
 
-void InterpolationDialog::interpolate()
-{
-QString curve = boxName->currentText();
-QStringList curvesList = graph->analysableCurvesList();
-if (!curvesList.contains(curve))
-	{
-	QMessageBox::critical(this,tr("MantidPlot - Warning"),
-		tr("The curve <b> %1 </b> doesn't exist anymore! Operation aborted!").arg(curve));
-	boxName->clear();
-	boxName->addItems(curvesList);
-	return;
-	}
+void InterpolationDialog::interpolate() {
+  QString curve = boxName->currentText();
+  QStringList curvesList = graph->analysableCurvesList();
+  if (!curvesList.contains(curve)) {
+    QMessageBox::critical(
+        this, tr("MantidPlot - Warning"),
+        tr("The curve <b> %1 </b> doesn't exist anymore! Operation aborted!")
+            .arg(curve));
+    boxName->clear();
+    boxName->addItems(curvesList);
+    return;
+  }
 
-double from, to;
-try
-	{
-	MyParser parser;
-	parser.SetExpr(boxStart->text().replace(",", ".").ascii());
-	from = parser.Eval();
-	}
-catch(mu::ParserError &e)
-	{
-	QMessageBox::critical(this, tr("MantidPlot - Start limit error"), QString::fromStdString(e.GetMsg()));
-	boxStart->setFocus();
-	return;
-	}
+  double from, to;
+  try {
+    MyParser parser;
+    parser.SetExpr(boxStart->text().replace(",", ".").toAscii().constData());
+    from = parser.Eval();
+  } catch (mu::ParserError &e) {
+    QMessageBox::critical(this, tr("MantidPlot - Start limit error"),
+                          QString::fromStdString(e.GetMsg()));
+    boxStart->setFocus();
+    return;
+  }
 
-try
-	{
-	MyParser parser;
-	parser.SetExpr(boxEnd->text().replace(",", ".").ascii());
-	to = parser.Eval();
-	}
-catch(mu::ParserError &e)
-	{
-	QMessageBox::critical(this, tr("MantidPlot - End limit error"), QString::fromStdString(e.GetMsg()));
-	boxEnd->setFocus();
-	return;
-	}
+  try {
+    MyParser parser;
+    parser.SetExpr(boxEnd->text().replace(",", ".").toAscii().constData());
+    to = parser.Eval();
+  } catch (mu::ParserError &e) {
+    QMessageBox::critical(this, tr("MantidPlot - End limit error"),
+                          QString::fromStdString(e.GetMsg()));
+    boxEnd->setFocus();
+    return;
+  }
 
-if (from >= to)
-	{
-	QMessageBox::critical(this, tr("MantidPlot - Input error"), tr("Please enter x limits that satisfy: from < to!"));
-	boxEnd->setFocus();
-	return;
-	}
+  if (from >= to) {
+    QMessageBox::critical(this, tr("MantidPlot - Input error"),
+                          tr("Please enter x limits that satisfy: from < to!"));
+    boxEnd->setFocus();
+    return;
+  }
 
-Interpolation *i = new Interpolation(dynamic_cast<ApplicationWindow *>(this->parent()), graph, curve,
-                                      from, to, boxMethod->currentIndex());
-i->setOutputPoints(boxPoints->value());
-i->setColor(boxColor->currentIndex());
-i->run();
-delete i;
+  Interpolation *i =
+      new Interpolation(dynamic_cast<ApplicationWindow *>(this->parent()),
+                        graph, curve, from, to, boxMethod->currentIndex());
+  i->setOutputPoints(boxPoints->value());
+  i->setColor(boxColor->currentIndex());
+  i->run();
+  delete i;
 }
 
-void InterpolationDialog::setGraph(Graph *g)
-{
-	graph = g;
-	boxName->addItems(g->analysableCurvesList());
+void InterpolationDialog::setGraph(Graph *g) {
+  graph = g;
+  boxName->addItems(g->analysableCurvesList());
 
-    QString selectedCurve = g->selectedCurveTitle();
-	if (!selectedCurve.isEmpty())
-	{
-	    int index = boxName->findText (selectedCurve);
-		boxName->setCurrentItem(index);
-	}
+  QString selectedCurve = g->selectedCurveTitle();
+  if (!selectedCurve.isEmpty()) {
+    int index = boxName->findText(selectedCurve);
+    boxName->setCurrentIndex(index);
+  }
 
-    activateCurve(boxName->currentText());
+  activateCurve(boxName->currentText());
 
-	connect (graph, SIGNAL(closedGraph()), this, SLOT(close()));
-	connect (graph, SIGNAL(dataRangeChanged()), this, SLOT(changeDataRange()));
+  connect(graph, SIGNAL(closedGraph()), this, SLOT(close()));
+  connect(graph, SIGNAL(dataRangeChanged()), this, SLOT(changeDataRange()));
 }
 
-void InterpolationDialog::activateCurve(const QString& curveName)
-{
-	QwtPlotCurve *c = graph->curve(curveName);
-	if (!c)
-		return;
-
-    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
-    if(!app)
-        return;
-
-	double start, end;
-	graph->range(graph->curveIndex(curveName), &start, &end);
-	boxStart->setText(QString::number(QMIN(start, end), 'g', app->d_decimal_digits));
-	boxEnd->setText(QString::number(QMAX(start, end), 'g', app->d_decimal_digits));
-}
-
-void InterpolationDialog::changeDataRange()
-{
-ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
-if(!app)
+void InterpolationDialog::activateCurve(const QString &curveName) {
+  QwtPlotCurve *c = graph->curve(curveName);
+  if (!c)
     return;
 
-double start = graph->selectedXStartValue();
-double end = graph->selectedXEndValue();
-boxStart->setText(QString::number(QMIN(start, end), 'g', app->d_decimal_digits));
-boxEnd->setText(QString::number(QMAX(start, end), 'g', app->d_decimal_digits));
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+  if (!app)
+    return;
+
+  double start, end;
+  graph->range(graph->curveIndex(curveName), &start, &end);
+  boxStart->setText(
+      QString::number(qMin(start, end), 'g', app->d_decimal_digits));
+  boxEnd->setText(
+      QString::number(qMax(start, end), 'g', app->d_decimal_digits));
+}
+
+void InterpolationDialog::changeDataRange() {
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+  if (!app)
+    return;
+
+  double start = graph->selectedXStartValue();
+  double end = graph->selectedXEndValue();
+  boxStart->setText(
+      QString::number(qMin(start, end), 'g', app->d_decimal_digits));
+  boxEnd->setText(
+      QString::number(qMax(start, end), 'g', app->d_decimal_digits));
 }

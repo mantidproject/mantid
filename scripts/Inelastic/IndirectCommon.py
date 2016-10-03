@@ -1,6 +1,8 @@
-#pylint: disable=invalid-name
-from mantid.simpleapi import *
-from mantid.api import TextAxis
+#pylint: disable=invalid-name,redefined-builtin
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+
+import mantid.simpleapi as s_api
 from mantid import config, logger
 
 from IndirectImport import import_mantidplot
@@ -10,7 +12,6 @@ import math
 import datetime
 import re
 import numpy as np
-import itertools
 
 
 def StartTime(prog):
@@ -36,7 +37,7 @@ def get_run_number(ws_name):
     @return Parsed run number
     """
 
-    workspace = mtd[ws_name]
+    workspace = s_api.mtd[ws_name]
     run_number = str(workspace.getRunNumber())
     if run_number == '0':
         # Attempt to parse run number off of name
@@ -59,7 +60,7 @@ def getInstrRun(ws_name):
 
     run_number = get_run_number(ws_name)
 
-    instrument = mtd[ws_name].getInstrument().getName()
+    instrument = s_api.mtd[ws_name].getInstrument().getName()
     if instrument != '':
         for facility in config.getFacilities():
             try:
@@ -81,7 +82,7 @@ def getWSprefix(wsname):
     if wsname == '':
         return ''
 
-    workspace = mtd[wsname]
+    workspace = s_api.mtd[wsname]
     facility = config['default.facility']
 
     ws_run = workspace.getRun()
@@ -110,7 +111,7 @@ def getWSprefix(wsname):
 
 
 def getEfixed(workspace):
-    inst = mtd[workspace].getInstrument()
+    inst = s_api.mtd[workspace].getInstrument()
 
     if inst.hasParameter('Efixed'):
         return inst.getNumberParameter('EFixed')[0]
@@ -130,7 +131,7 @@ def checkUnitIs(ws, unit_id, axis_index=0):
     Check that the workspace has the correct units by comparing
     against the UnitID.
     """
-    axis = mtd[ws].getAxis(axis_index)
+    axis = s_api.mtd[ws].getAxis(axis_index)
     unit = axis.getUnit()
     return unit.unitID() == unit_id
 
@@ -148,7 +149,7 @@ def getDefaultWorkingDirectory():
 
 def createQaxis(inputWS):
     result = []
-    workspace = mtd[inputWS]
+    workspace = s_api.mtd[inputWS]
     num_hist = workspace.getNumberHistograms()
     if workspace.getAxis(1).isSpectra():
         inst = workspace.getInstrument()
@@ -176,13 +177,13 @@ def createQaxis(inputWS):
 
 
 def GetWSangles(inWS):
-    num_hist = mtd[inWS].getNumberHistograms()    					# get no. of histograms/groups
-    source_pos = mtd[inWS].getInstrument().getSource().getPos()
-    sample_pos = mtd[inWS].getInstrument().getSample().getPos()
+    num_hist = s_api.mtd[inWS].getNumberHistograms()    					# get no. of histograms/groups
+    source_pos = s_api.mtd[inWS].getInstrument().getSource().getPos()
+    sample_pos = s_api.mtd[inWS].getInstrument().getSample().getPos()
     beam_pos = sample_pos - source_pos
     angles = []    									# will be list of angles
     for index in range(0, num_hist):
-        detector = mtd[inWS].getDetector(index)    				# get index
+        detector = s_api.mtd[inWS].getDetector(index)    				# get index
         two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi    	# calc angle
         angles.append(two_theta)    					# add angle
     return angles
@@ -200,7 +201,7 @@ def GetThetaQ(ws):
     wavelas = math.sqrt(81.787 / e_fixed)  # Elastic wavelength
     k0 = 4.0 * math.pi / wavelas
 
-    axis = mtd[ws].getAxis(1)
+    axis = s_api.mtd[ws].getAxis(1)
 
     # If axis is in spec number need to retrieve angles and calculate Q
     if axis.isSpectra():
@@ -269,13 +270,13 @@ def CheckAnalysers(in1WS, in2WS):
       @exception Valuerror - workspaces have different analysers
       @exception Valuerror - workspaces have different reflections
     """
-    ws1 = mtd[in1WS]
+    ws1 = s_api.mtd[in1WS]
     try:
         analyser_1 = ws1.getInstrument().getStringParameter('analyser')[0]
         reflection_1 = ws1.getInstrument().getStringParameter('reflection')[0]
     except IndexError:
         raise RuntimeError('Could not find analyser or reflection for workspace %s' % in1WS)
-    ws2 = mtd[in2WS]
+    ws2 = s_api.mtd[in2WS]
     try:
         analyser_2 = ws2.getInstrument().getStringParameter('analyser')[0]
         reflection_2 = ws2.getInstrument().getStringParameter('reflection')[0]
@@ -309,10 +310,10 @@ def CheckHistZero(inWS):
     Raises:
       @exception ValueError - Worskpace has no histograms
     """
-    num_hist = mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
+    num_hist = s_api.mtd[inWS].getNumberHistograms()  # no. of hist/groups in WS
     if num_hist == 0:
         raise ValueError('Workspace ' + inWS + ' has NO histograms')
-    x_in = mtd[inWS].readX(0)
+    x_in = s_api.mtd[inWS].readX(0)
     ntc = len(x_in) - 1  # no. points from length of x array
     if ntc == 0:
         raise ValueError('Workspace ' + inWS + ' has NO points')
@@ -336,11 +337,11 @@ def CheckHistSame(in1WS, name1, in2WS, name2):
       Valuerror: number of histograms is different
       Valuerror: number of bin boundaries in the histograms is different
     """
-    num_hist_1 = mtd[in1WS].getNumberHistograms()  # no. of hist/groups in WS1
-    x_1 = mtd[in1WS].readX(0)
+    num_hist_1 = s_api.mtd[in1WS].getNumberHistograms()  # no. of hist/groups in WS1
+    x_1 = s_api.mtd[in1WS].readX(0)
     x_len_1 = len(x_1)
-    num_hist_2 = mtd[in2WS].getNumberHistograms()  # no. of hist/groups in WS2
-    x_2 = mtd[in2WS].readX(0)
+    num_hist_2 = s_api.mtd[in2WS].getNumberHistograms()  # no. of hist/groups in WS2
+    x_2 = s_api.mtd[in2WS].readX(0)
     x_len_2 = len(x_2)
     if num_hist_1 != num_hist_2:  # Check that no. groups are the same
         error_1 = '%s (%s) histograms (%d)' % (name1, in1WS, num_hist_1)
@@ -389,7 +390,7 @@ def getInstrumentParameter(ws, param_name):
       @param ws The workspace to get the instrument from.
       @param param_name The name of the parameter to look up.
     """
-    inst = mtd[ws].getInstrument()
+    inst = s_api.mtd[ws].getInstrument()
 
     # Create a map of type parameters to functions. This is so we avoid writing lots of
     # if statements becuase there's no way to dynamically get the type.
@@ -420,8 +421,8 @@ def plotSpectra(ws, y_axis_title, indicies=None):
         indicies = []
 
     if len(indicies) == 0:
-        num_spectra = mtd[ws].getNumberHistograms()
-        indicies = range(num_spectra)
+        num_spectra = s_api.mtd[ws].getNumberHistograms()
+        indicies = list(range(num_spectra))
 
     try:
         mtd_plot = import_mantidplot()
@@ -441,9 +442,9 @@ def plotParameters(ws, *param_names):
     @param ws - the workspace to plot from
     @param param_names - list of names to search for
     """
-    axis = mtd[ws].getAxis(1)
+    axis = s_api.mtd[ws].getAxis(1)
     if axis.isText() and len(param_names) > 0:
-        num_spectra = mtd[ws].getNumberHistograms()
+        num_spectra = s_api.mtd[ws].getNumberHistograms()
 
         for name in param_names:
             indicies = [i for i in range(num_spectra) if name in axis.label(i)]
@@ -462,18 +463,18 @@ def convertToElasticQ(input_ws, output_ws=None):
     if output_ws is None:
         output_ws = input_ws
 
-    axis = mtd[input_ws].getAxis(1)
+    axis = s_api.mtd[input_ws].getAxis(1)
     if axis.isSpectra():
         e_fixed = getEfixed(input_ws)
-        ConvertSpectrumAxis(input_ws, Target='ElasticQ', EMode='Indirect', EFixed=e_fixed,
-                            OutputWorkspace=output_ws)
+        s_api.ConvertSpectrumAxis(input_ws, Target='ElasticQ', EMode='Indirect', EFixed=e_fixed,
+                                  OutputWorkspace=output_ws)
 
     elif axis.isNumeric():
         # Check that units are Momentum Transfer
         if axis.getUnit().unitID() != 'MomentumTransfer':
             raise RuntimeError('Input must have axis values of Q')
 
-        CloneWorkspace(input_ws, OutputWorkspace=output_ws)
+        s_api.CloneWorkspace(input_ws, OutputWorkspace=output_ws)
 
     else:
         raise RuntimeError('Input workspace must have either spectra or numeric axis.')
@@ -488,10 +489,10 @@ def transposeFitParametersTable(params_table, output_table=None):
     @param output_table - name to call the transposed table. If omitted,
             the output_table will be the same as the params_table
     """
-    params_table = mtd[params_table]
+    params_table = s_api.mtd[params_table]
 
     table_ws = '__tmp_table_ws'
-    table_ws = CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
+    table_ws = s_api.CreateEmptyTableWorkspace(OutputWorkspace=table_ws)
 
     param_names = params_table.column(0)[:-1]  # -1 to remove cost function
     param_values = params_table.column(1)[:-1]
@@ -508,14 +509,14 @@ def transposeFitParametersTable(params_table, output_table=None):
     # Create columns with parameter names for headers
     column_names = ['.'.join(name.split('.')[1:]) for name in param_names[:num_params]]
     column_error_names = [name + '_Err' for name in column_names]
-    column_names = zip(column_names, column_error_names)
+    column_names = list(zip(column_names, column_error_names))
     table_ws.addColumn('double', 'axis-1')
     for name, error_name in column_names:
         table_ws.addColumn('double', name)
         table_ws.addColumn('double', error_name)
 
     # Output parameter values to table row
-    for i in xrange(0, params_table.rowCount() - 1, num_params):
+    for i in range(0, params_table.rowCount() - 1, num_params):
         row_values = param_values[i:i + num_params]
         row_errors = param_errors[i:i + num_params]
         row = [value for pair in zip(row_values, row_errors) for value in pair]
@@ -525,70 +526,8 @@ def transposeFitParametersTable(params_table, output_table=None):
     if output_table is None:
         output_table = params_table.name()
 
-    RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
+    s_api.RenameWorkspace(table_ws.name(), OutputWorkspace=output_table)
 
-
-def search_for_fit_params(suffix, table_ws):
-    """
-    Find all fit parameters in a table workspace with the given suffix.
-
-    @param suffix - the name of the parameter to find.
-    @param table_ws - the name of the table workspace to search.
-    """
-    return [name for name in mtd[table_ws].getColumnNames() if name.endswith(suffix)]
-
-
-def convertParametersToWorkspace(params_table, x_column, param_names, output_name):
-    """
-    Convert a parameter table output by PlotPeakByLogValue to a MatrixWorkspace.
-
-    This will make a spectrum for each parameter name using the x_column vairable as the
-    x values for the spectrum.
-
-    @param params_table - the table workspace to convert to a MatrixWorkspace.
-    @param x_column - the column in the table to use for the x values.
-    @param parameter_names - list of parameter names to add to the workspace
-    @param output_name - name to call the output workspace.
-    """
-    # Search for any parameters in the table with the given parameter names,
-    # ignoring their function index and output them to a workspace
-    workspace_names = []
-    for param_name in param_names:
-        column_names = search_for_fit_params(param_name, params_table)
-        column_error_names = search_for_fit_params(param_name + '_Err', params_table)
-        param_workspaces = []
-        for name, error_name in zip(column_names, column_error_names):
-            ConvertTableToMatrixWorkspace(params_table, x_column, name, error_name,
-                                          OutputWorkspace=name)
-            param_workspaces.append(name)
-        workspace_names.append(param_workspaces)
-
-    # Transpose list of workspaces, ignoring unequal length of lists
-    # this handles the case where a parameter occurs only once in the whole workspace
-    workspace_names = map(list, itertools.izip_longest(*workspace_names))
-    workspace_names = [filter(None, sublist) for sublist in workspace_names]
-
-    # Join all the parameters for each peak into a single workspace per peak
-    temp_workspaces = []
-    for peak_params in workspace_names:
-        temp_peak_ws = peak_params[0]
-        for param_ws in peak_params[1:]:
-            ConjoinWorkspaces(temp_peak_ws, param_ws, False)
-        temp_workspaces.append(temp_peak_ws)
-
-    # Join all peaks into a single workspace
-    temp_workspace = temp_workspaces[0]
-    for temp_ws in temp_workspaces[1:]:  # TODO: fairly certain something is wrong here
-        ConjoinWorkspaces(temp_workspace, temp_peak_ws, False)
-
-    RenameWorkspace(temp_workspace, OutputWorkspace=output_name)
-
-    # Replace axis on workspaces with text axis
-    axis = TextAxis.create(mtd[output_name].getNumberHistograms())
-    workspace_names = [name for sublist in workspace_names for name in sublist]
-    for i, name in enumerate(workspace_names):
-        axis.setLabel(i, name)
-    mtd[output_name].replaceAxis(1, axis)
 
 def IndentifyDataBoundaries(sample_ws):
     """
@@ -598,7 +537,7 @@ def IndentifyDataBoundaries(sample_ws):
     out of all the spectra in the workspace are returned
     """
 
-    sample_ws = mtd[sample_ws]
+    sample_ws = s_api.mtd[sample_ws]
     nhists = sample_ws.getNumberHistograms()
     start_data_idx, end_data_idx = 0,0
     # For all spectra in the workspace

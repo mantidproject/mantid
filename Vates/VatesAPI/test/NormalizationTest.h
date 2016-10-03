@@ -10,7 +10,6 @@ using namespace Mantid::VATES;
 class NormalizationTest : public CxxTest::TestSuite {
 
 public:
-
   void test_emum_to_enum() {
     // Ensure that enum definitions do not change. They should remain synched.
     TS_ASSERT_EQUALS(static_cast<int>(Mantid::API::NoNormalization),

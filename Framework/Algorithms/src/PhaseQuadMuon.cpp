@@ -90,7 +90,7 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
     result["PhaseTable"] = "PhaseTable must have one row per spectrum";
   }
 
-  // PhaseTable should have two columns: (detector, phase)
+  // PhaseTable should have three columns: (detector, asymmetry, phase)
   if (tabWS->columnCount() != 3) {
     result["PhaseTable"] = "PhaseTable must have three columns";
   }
@@ -123,9 +123,9 @@ PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 
   for (size_t h = 0; h < ws->getNumberHistograms(); h++) {
 
-    MantidVec X = ws->getSpectrum(h)->readX();
-    MantidVec Y = ws->getSpectrum(h)->readY();
-    MantidVec E = ws->getSpectrum(h)->readE();
+    const auto &X = ws->getSpectrum(h).readX();
+    const auto &Y = ws->getSpectrum(h).readY();
+    const auto &E = ws->getSpectrum(h).readE();
 
     double s, sx, sy;
     s = sx = sy = 0;
@@ -240,7 +240,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     imagE[i] = sqrt(imagE[i]);
 
     // Regain exponential decay
-    double X = ws->getSpectrum(0)->readX()[i];
+    double X = ws->getSpectrum(0).readX()[i];
     double e = exp(-(X - X0) / muLife);
     realY[i] /= e;
     imagY[i] /= e;

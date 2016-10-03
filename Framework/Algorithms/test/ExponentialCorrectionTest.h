@@ -152,7 +152,7 @@ public:
     for (size_t i = 0; i < 5; ++i) {
       double t = static_cast<double>(i) + 0.5;
       double w = 1. / 3. / std::exp(-2. * t);
-      TS_ASSERT_DELTA(evout->getEventList(0).getEvent(i).m_weight, w, w * 1e-6);
+      TS_ASSERT_DELTA(evout->getSpectrum(0).getEvent(i).m_weight, w, w * 1e-6);
     }
 
     AnalysisDataService::Instance().remove("test_ev_ec");

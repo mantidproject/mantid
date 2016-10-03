@@ -6,25 +6,25 @@
 #include "MantidWSIndexDialog.h"
 #include "FlowLayout.h"
 #include "WorkspaceIcons.h"
-#include "Graph3D.h"
 #include "MantidGroupPlotGenerator.h"
 
-#include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/FileProperty.h>
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
-#include <MantidGeometry/MDGeometry/IMDDimension.h>
-#include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidKernel/make_unique.h>
 #include <MantidQtMantidWidgets/LineEditWithClear.h>
 #include <MantidQtAPI/InterfaceManager.h>
-#include <MantidQtAPI/Message.h>
 
 #include <Poco/Path.h>
+
+#ifdef MAKE_VATES
+#include "vtkPVDisplayInformation.h"
+#endif
 
 #include <algorithm>
 #include <sstream>
@@ -100,8 +100,8 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent)
   m_loadMapper = new QSignalMapper(this);
   m_loadMapper->setMapping(liveDataAction, "StartLiveData");
   m_loadMapper->setMapping(loadFileAction, "Load");
-  connect(liveDataAction, SIGNAL(activated()), m_loadMapper, SLOT(map()));
-  connect(loadFileAction, SIGNAL(activated()), m_loadMapper, SLOT(map()));
+  connect(liveDataAction, SIGNAL(triggered()), m_loadMapper, SLOT(map()));
+  connect(loadFileAction, SIGNAL(triggered()), m_loadMapper, SLOT(map()));
   connect(m_loadMapper, SIGNAL(mapped(const QString &)), m_mantidUI,
           SLOT(showAlgorithmDialog(const QString &)));
   m_loadMenu->addAction(loadFileAction);
@@ -138,8 +138,8 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent)
           Qt::DirectConnection);
   // this slot is called when the GUI thread is free. decrement the counter. do
   // nothing until the counter == 0
-  connect(m_mantidUI, SIGNAL(ADS_updated()), this, SLOT(updateTree()),
-          Qt::QueuedConnection);
+  connect(m_mantidUI, SIGNAL(ADS_updated()), this,
+          SLOT(updateTreeOnADSUpdate()), Qt::QueuedConnection);
 
   connect(m_mantidUI, SIGNAL(workspaces_cleared()), m_tree, SLOT(clear()),
           Qt::QueuedConnection);
@@ -198,11 +198,11 @@ void MantidDockWidget::createWorkspaceMenuActions() {
   connect(m_colorFill, SIGNAL(triggered()), this, SLOT(drawColorFillPlot()));
 
   m_showDetectors = new QAction(tr("Show Detectors"), this);
-  connect(m_showDetectors, SIGNAL(activated()), this,
+  connect(m_showDetectors, SIGNAL(triggered()), this,
           SLOT(showDetectorTable()));
 
   m_showBoxData = new QAction(tr("Show Box Data Table"), this);
-  connect(m_showBoxData, SIGNAL(activated()), m_mantidUI,
+  connect(m_showBoxData, SIGNAL(triggered()), m_mantidUI,
           SLOT(importBoxDataTable()));
 
   m_showVatesGui = new QAction(tr("Show Vates Simple Interface"), this);
@@ -213,18 +213,18 @@ void MantidDockWidget::createWorkspaceMenuActions() {
         QSize(), QIcon::Normal, QIcon::Off);
     m_showVatesGui->setIcon(icon);
   }
-  connect(m_showVatesGui, SIGNAL(activated()), m_mantidUI,
+  connect(m_showVatesGui, SIGNAL(triggered()), m_mantidUI,
           SLOT(showVatesSimpleInterface()));
 
   m_showMDPlot = new QAction(tr("Plot MD"), this);
-  connect(m_showMDPlot, SIGNAL(activated()), m_mantidUI, SLOT(showMDPlot()));
+  connect(m_showMDPlot, SIGNAL(triggered()), m_mantidUI, SLOT(showMDPlot()));
 
   m_showListData = new QAction(tr("List Data"), this);
-  connect(m_showListData, SIGNAL(activated()), m_mantidUI,
+  connect(m_showListData, SIGNAL(triggered()), m_mantidUI,
           SLOT(showListData()));
 
   m_showSpectrumViewer = new QAction(tr("Show Spectrum Viewer"), this);
-  connect(m_showSpectrumViewer, SIGNAL(activated()), m_mantidUI,
+  connect(m_showSpectrumViewer, SIGNAL(triggered()), m_mantidUI,
           SLOT(showSpectrumViewer()));
 
   m_showSliceViewer = new QAction(tr("Show Slice Viewer"), this);
@@ -235,7 +235,7 @@ void MantidDockWidget::createWorkspaceMenuActions() {
         QSize(), QIcon::Normal, QIcon::Off);
     m_showSliceViewer->setIcon(icon);
   }
-  connect(m_showSliceViewer, SIGNAL(activated()), m_mantidUI,
+  connect(m_showSliceViewer, SIGNAL(triggered()), m_mantidUI,
           SLOT(showSliceViewer()));
 
   m_showLogs = new QAction(tr("Sample Logs..."), this);
@@ -251,11 +251,11 @@ void MantidDockWidget::createWorkspaceMenuActions() {
           SLOT(showAlgorithmHistory()));
 
   m_saveNexus = new QAction(tr("Save Nexus"), this);
-  connect(m_saveNexus, SIGNAL(activated()), m_mantidUI,
+  connect(m_saveNexus, SIGNAL(triggered()), m_mantidUI,
           SLOT(saveNexusWorkspace()));
 
   m_rename = new QAction(tr("Rename"), this);
-  connect(m_rename, SIGNAL(activated()), this, SLOT(renameWorkspace()));
+  connect(m_rename, SIGNAL(triggered()), this, SLOT(renameWorkspace()));
 
   m_delete = new QAction(tr("Delete"), this);
   connect(m_delete, SIGNAL(triggered()), this, SLOT(deleteWorkspaces()));
@@ -278,7 +278,7 @@ void MantidDockWidget::createWorkspaceMenuActions() {
           SLOT(convertMDHistoToMatrixWorkspace()));
 
   m_clearUB = new QAction(tr("Clear UB Matrix"), this);
-  connect(m_clearUB, SIGNAL(activated()), this, SLOT(clearUB()));
+  connect(m_clearUB, SIGNAL(triggered()), this, SLOT(clearUB()));
 
   m_plotSurface = new QAction(tr("Plot Surface from Group"), this);
   connect(m_plotSurface, SIGNAL(triggered()), this, SLOT(plotSurface()));
@@ -301,11 +301,9 @@ void MantidDockWidget::createSortMenuActions() {
 
   m_ascendingSortAction->setCheckable(true);
   m_ascendingSortAction->setEnabled(true);
-  m_ascendingSortAction->setToggleAction(true);
 
   m_descendingSortAction->setCheckable(true);
   m_descendingSortAction->setEnabled(true);
-  m_descendingSortAction->setToggleAction(true);
 
   QActionGroup *sortDirectionGroup = new QActionGroup(m_sortMenu);
   sortDirectionGroup->addAction(m_ascendingSortAction);
@@ -315,11 +313,9 @@ void MantidDockWidget::createSortMenuActions() {
 
   m_byNameChoice->setCheckable(true);
   m_byNameChoice->setEnabled(true);
-  m_byNameChoice->setToggleAction(true);
 
   m_byLastModifiedChoice->setCheckable(true);
   m_byLastModifiedChoice->setEnabled(true);
-  m_byLastModifiedChoice->setToggleAction(true);
 
   m_sortChoiceGroup = new QActionGroup(m_sortMenu);
   m_sortChoiceGroup->addAction(m_byNameChoice);
@@ -327,12 +323,12 @@ void MantidDockWidget::createSortMenuActions() {
   m_sortChoiceGroup->setExclusive(true);
   m_byNameChoice->setChecked(true);
 
-  connect(m_ascendingSortAction, SIGNAL(activated()), this,
+  connect(m_ascendingSortAction, SIGNAL(triggered()), this,
           SLOT(sortAscending()));
-  connect(m_descendingSortAction, SIGNAL(activated()), this,
+  connect(m_descendingSortAction, SIGNAL(triggered()), this,
           SLOT(sortDescending()));
-  connect(m_byNameChoice, SIGNAL(activated()), this, SLOT(chooseByName()));
-  connect(m_byLastModifiedChoice, SIGNAL(activated()), this,
+  connect(m_byNameChoice, SIGNAL(triggered()), this, SLOT(chooseByName()));
+  connect(m_byLastModifiedChoice, SIGNAL(triggered()), this,
           SLOT(chooseByLastModified()));
 
   m_sortMenu->addActions(sortDirectionGroup->actions());
@@ -404,15 +400,18 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem *item,
   }
 }
 
+void MantidDockWidget::updateTreeOnADSUpdate() {
+  // do not update until the counter is zero
+  if (m_updateCount.deref())
+    return;
+  updateTree();
+}
+
 /**
 * Update the workspace tree to match the current state of the ADS.
 * It is important that the workspace tree is modified only by this method.
 */
 void MantidDockWidget::updateTree() {
-  // do not update until the counter is zero
-  if (m_updateCount.deref())
-    return;
-
   // find all expanded top-level entries
   QStringList expanded;
   int n = m_tree->topLevelItemCount();
@@ -602,6 +601,10 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
   if (!MantidQt::API::InterfaceManager::hasVatesLibraries()) {
     m_showVatesGui->setEnabled(false);
+#ifdef MAKE_VATES
+  } else if (!vtkPVDisplayInformation::SupportsOpenGLLocally()) {
+    m_showVatesGui->setEnabled(false);
+#endif
   } else {
     std::size_t nDim = WS->getNonIntegratedDimensions().size();
     m_showVatesGui->setEnabled(nDim >= 3 && nDim < 5);
@@ -619,6 +622,10 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
   if (!MantidQt::API::InterfaceManager::hasVatesLibraries()) {
     m_showVatesGui->setEnabled(false);
+#ifdef MAKE_VATES
+  } else if (!vtkPVDisplayInformation::SupportsOpenGLLocally()) {
+    m_showVatesGui->setEnabled(false);
+#endif
   } else {
     std::size_t nDim = WS->getNonIntegratedDimensions().size();
     m_showVatesGui->setEnabled(nDim >= 3 && nDim < 5);
@@ -708,8 +715,8 @@ void MantidDockWidget::addClearMenuItems(QMenu *menu, const QString &wsName) {
 * @param text : the string to filter on.
 */
 void MantidDockWidget::filterWorkspaceTree(const QString &text) {
-  const QString filterText = text.stripWhiteSpace();
-  QRegExp filterRegEx(filterText, false);
+  const QString filterText = text.trimmed();
+  QRegExp filterRegEx(filterText, Qt::CaseInsensitive);
 
   // show all items
   QTreeWidgetItemIterator it(m_tree);
@@ -913,7 +920,7 @@ void MantidDockWidget::saveWorkspacesToFolder(const QString &folder) {
     } catch (std::runtime_error &rte) {
       docklog.error() << "Error saving workspace "
                       << workspaceName.toStdString() << ": " << rte.what()
-                      << std::endl;
+                      << '\n';
     }
   }
 }
@@ -926,28 +933,43 @@ void MantidDockWidget::saveWorkspacesToFolder(const QString &folder) {
  * most recent version.
  */
 void MantidDockWidget::handleShowSaveAlgorithm() {
-  QAction *sendingAction = dynamic_cast<QAction *>(sender());
+  const QAction *sendingAction = dynamic_cast<QAction *>(sender());
 
   if (sendingAction) {
-    QString wsName = getSelectedWorkspaceName();
-    QVariant data = sendingAction->data();
+    const auto inputWorkspace = getSelectedWorkspace();
+    const QString wsName = QString::fromStdString(inputWorkspace->getName());
+    const QVariant data = sendingAction->data();
 
     if (data.canConvert<QString>()) {
       QString algorithmName;
       int version = -1;
 
-      QStringList splitData = data.toString().split(".");
-      switch (splitData.length()) {
-      case 2:
-        version = splitData[1].toInt();
-      case 1:
-        algorithmName = splitData[0];
-        break;
-      default:
-        m_mantidUI->saveNexusWorkspace();
-        return;
-      }
+      // Check if workspace is MD, this is the same check used in
+      // SaveNexusProcessed.cpp in the doExec()
+      if (bool(boost::dynamic_pointer_cast<const IMDEventWorkspace>(
+              inputWorkspace)) ||
+          bool(boost::dynamic_pointer_cast<const IMDHistoWorkspace>(
+              inputWorkspace))) {
+        // This will also be executed if the user clicks Save to ASCII or ASCII
+        // v1, therefore overwriting their choice and running
+        // SaveMD. SaveASCII doesn't support MD Workspaces, but if an issue,
+        // move the MD check to case 1: below
+        algorithmName = "SaveMD";
 
+      } else {
+        QStringList splitData = data.toString().split(".");
+        switch (splitData.length()) {
+        case 2:
+          version = splitData[1].toInt();
+        // intentional fall through to get algorithm name
+        case 1:
+          algorithmName = splitData[0];
+          break;
+        default:
+          m_mantidUI->saveNexusWorkspace();
+          return;
+        }
+      }
       QHash<QString, QString> presets;
       if (!wsName.isEmpty())
         presets["InputWorkspace"] = wsName;
@@ -976,7 +998,7 @@ void MantidDockWidget::deleteWorkspaces() {
   if ((m_deleteButton->hasFocus() || m_tree->hasFocus()) && !items.empty()) {
     deleteExplorer = true;
   }
-  if ((m && m->isA("MantidMatrix")) &&
+  if ((m && (strcmp(m->metaObject()->className(), "MantidMatrix") == 0)) &&
       (!m->workspaceName().isEmpty() &&
        m_ads.doesExist(m->workspaceName().toStdString()))) {
     deleteActive = true;
@@ -1014,14 +1036,14 @@ void MantidDockWidget::deleteWorkspaces() {
 void MantidDockWidget::sortAscending() {
   if (isTreeUpdating())
     return;
-  m_tree->setSortOrder(Qt::Ascending);
+  m_tree->setSortOrder(Qt::AscendingOrder);
   m_tree->sort();
 }
 
 void MantidDockWidget::sortDescending() {
   if (isTreeUpdating())
     return;
-  m_tree->setSortOrder(Qt::Descending);
+  m_tree->setSortOrder(Qt::DescendingOrder);
   m_tree->sort();
 }
 
@@ -1292,8 +1314,8 @@ void MantidDockWidget::popupMenu(const QPoint &pos) {
           }
           QString name = QString::fromStdString(programNames[i]);
           // Setup new menu option for the program
-          m_program = new QAction(tr(name), this);
-          connect(m_program, SIGNAL(activated()), m_programMapper, SLOT(map()));
+          m_program = new QAction(name, this);
+          connect(m_program, SIGNAL(triggered()), m_programMapper, SLOT(map()));
           // Send name of program when clicked
           m_programMapper->setMapping(m_program, name);
           m_saveToProgram->addAction(m_program);
@@ -1334,33 +1356,30 @@ void MantidDockWidget::groupingButtonClick() {
 }
 
 /// Plots a single spectrum from each selected workspace
-void MantidDockWidget::plotSpectra() {
-  const auto userInput = m_tree->chooseSpectrumFromSelected();
-  // An empty map will be returned if the user clicks cancel in the spectrum
-  // selection
-  if (userInput.plots.empty())
-    return;
-
-  bool spectrumPlot(true), errs(false), clearWindow(false);
-  MultiLayer *window(NULL);
-  m_mantidUI->plot1D(userInput.plots, spectrumPlot,
-                     MantidQt::DistributionDefault, errs, window, clearWindow,
-                     userInput.waterfall);
-}
+void MantidDockWidget::plotSpectra() { doPlotSpectra(false); }
 
 /// Plots a single spectrum from each selected workspace with errors
-void MantidDockWidget::plotSpectraErr() {
+void MantidDockWidget::plotSpectraErr() { doPlotSpectra(true); }
+
+/**
+ * Plots a single spectrum from each selected workspace.
+ * Option to plot errors or not.
+ * @param errors :: [input] True if errors should be plotted, else false
+ */
+void MantidDockWidget::doPlotSpectra(bool errors) {
   const auto userInput = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum
   // selection
   if (userInput.plots.empty())
     return;
 
-  bool spectrumPlot(true), errs(true), clearWindow(false);
-  MultiLayer *window(NULL);
-  m_mantidUI->plot1D(userInput.plots, spectrumPlot,
-                     MantidQt::DistributionDefault, errs, window, clearWindow,
-                     userInput.waterfall);
+  if (userInput.tiled) {
+    m_mantidUI->plotSubplots(userInput.plots, MantidQt::DistributionDefault,
+                             errors);
+  } else {
+    m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
+                       errors, nullptr, false, userInput.waterfall);
+  }
 }
 
 /**
@@ -1578,17 +1597,17 @@ void MantidTreeWidget::dropEvent(QDropEvent *de) {
       treelog.error() << "Failed to Load the file "
                       << filenames[i].toStdString()
                       << " . The reason for failure is: " << error.what()
-                      << std::endl;
+                      << '\n';
     } catch (std::logic_error &error) {
       treelog.error() << "Failed to Load the file "
                       << filenames[i].toStdString()
                       << " . The reason for failure is: " << error.what()
-                      << std::endl;
+                      << '\n';
     } catch (std::exception &error) {
       treelog.error() << "Failed to Load the file "
                       << filenames[i].toStdString()
                       << " . The reason for failure is: " << error.what()
-                      << std::endl;
+                      << '\n';
     }
   }
 }
@@ -1717,12 +1736,12 @@ MantidTreeWidget::getSelectedMatrixWorkspaces() const {
 * @param showWaterfallOpt If true, show the waterfall option on the dialog
 * @param showPlotAll :: [input] If true, show the "Plot All" button on the
 * dialog
+* @param showTiledOpt :: [input] If true, show the "Tiled" option on the dialog
 * @return :: A MantidWSIndexDialog::UserInput structure listing the selected
 * options
 */
-MantidWSIndexWidget::UserInput
-MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
-                                             bool showPlotAll) const {
+MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
+    bool showWaterfallOpt, bool showPlotAll, bool showTiledOpt) const {
   auto selectedMatrixWsList = getSelectedMatrixWorkspaces();
   QList<QString> selectedMatrixWsNameList;
   foreach (const auto matrixWs, selectedMatrixWsList) {
@@ -1749,12 +1768,14 @@ MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt,
     MantidWSIndexWidget::UserInput selections;
     selections.plots = spectrumToPlot;
     selections.waterfall = false;
+    selections.tiled = false;
     return selections;
   }
 
   // Else, one or more workspaces
-  MantidWSIndexDialog *dio = new MantidWSIndexDialog(
-      m_mantidUI, 0, selectedMatrixWsNameList, showWaterfallOpt, showPlotAll);
+  MantidWSIndexDialog *dio =
+      new MantidWSIndexDialog(m_mantidUI, 0, selectedMatrixWsNameList,
+                              showWaterfallOpt, showPlotAll, showTiledOpt);
   dio->exec();
   return dio->getSelections();
 }
@@ -1872,17 +1893,17 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other) const {
     return false;
 
   if (!thisShouldBeSorted && !otherShouldBeSorted) {
-    if (m_parent->getSortOrder() == Qt::Ascending)
+    if (m_parent->getSortOrder() == Qt::AscendingOrder)
       return m_sortPos < otherSortPos;
     else
       return m_sortPos >= otherSortPos;
   } else if (thisShouldBeSorted && !otherShouldBeSorted) {
-    if (m_parent->getSortOrder() == Qt::Ascending)
+    if (m_parent->getSortOrder() == Qt::AscendingOrder)
       return false;
     else
       return true;
   } else if (!thisShouldBeSorted && otherShouldBeSorted) {
-    if (m_parent->getSortOrder() == Qt::Ascending)
+    if (m_parent->getSortOrder() == Qt::AscendingOrder)
       return true;
     else
       return false;
@@ -1953,7 +1974,7 @@ AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w)
           m_mantidUI, SLOT(showAlgorithmDialog(const QString &, const int)));
 
   m_runningLayout = new QHBoxLayout();
-  m_runningLayout->setName("testA");
+  m_runningLayout->setObjectName("testA");
 
   m_runningButton = new QPushButton("Details");
   m_runningLayout->addStretch();
@@ -1962,7 +1983,9 @@ AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w)
           SLOT(showAlgMonitor()));
 
   QFrame *f = new QFrame(this);
-  QVBoxLayout *layout = new QVBoxLayout(f, 4 /*border*/, 4 /*spacing*/);
+  QVBoxLayout *layout = new QVBoxLayout(f);
+  layout->setSpacing(4);
+  layout->setMargin(4);
   f->setLayout(layout);
   layout->setMargin(0);
   layout->addWidget(m_selector);

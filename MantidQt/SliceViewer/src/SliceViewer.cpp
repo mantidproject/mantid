@@ -5,6 +5,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 
+#include "MantidKernel/UsageService.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -25,6 +26,7 @@
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/SignalBlocker.h"
 #include "MantidQtAPI/SignalRange.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
@@ -63,7 +65,6 @@ using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
 using MantidQt::API::AlgorithmRunner;
-
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -171,6 +172,9 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // --------- Rescaler --------------------
   m_rescaler = new QwtPlotRescaler(m_plot->canvas());
+
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      "Interface", "SliceViewer", false);
 }
 
 void SliceViewer::updateAspectRatios() {
@@ -311,7 +315,8 @@ void SliceViewer::initMenus() {
     bar = parentWindow->menuBar();
   else {
     // Widget is not in a QMainWindow. Make a menu bar
-    bar = new QMenuBar(this, "Main Menu Bar");
+    bar = new QMenuBar(this);
+    bar->setObjectName("Main Menu Bar");
     ui.verticalLayout->insertWidget(0, bar);
   }
 
@@ -536,15 +541,6 @@ void SliceViewer::initMenus() {
 //------------------------------------------------------------------------------
 /** Intialize the zooming/panning tools */
 void SliceViewer::initZoomer() {
-  //  QwtPlotZoomer * zoomer = new CustomZoomer(m_plot->canvas());
-  //  zoomer->setMousePattern(QwtEventPattern::MouseSelect1,  Qt::LeftButton);
-  //  zoomer->setTrackerMode(QwtPicker::AlwaysOff);
-  //  const QColor c(Qt::darkBlue);
-  //  zoomer->setRubberBandPen(c);
-  //  zoomer->setTrackerPen(c);
-  //  QObject::connect(zoomer, SIGNAL(zoomed(const QRectF &)),
-  //      this, SLOT(zoomRectSlot(const QRectF &)));
-
   QwtPlotPicker *zoomer = new QwtPlotPicker(m_plot->canvas());
   zoomer->setSelectionFlags(QwtPicker::RectSelection |
                             QwtPicker::DragSelection);
@@ -622,6 +618,25 @@ void SliceViewer::updateDimensionSliceWidgets() {
     widget->hide();
   }
 
+  bool dimXset = false;
+  bool dimYset = false;
+  // put non integrated dimensions first
+  for (size_t d = 0; d < m_dimensions.size(); d++) {
+    if ((dimXset == false) &&
+        (m_ws->getDimension(d)->getIsIntegrated() == false)) {
+      m_dimX = d;
+      dimXset = true;
+    }
+    if ((dimYset == false) &&
+        (m_ws->getDimension(d)->getIsIntegrated() == false) && (d != m_dimX)) {
+      m_dimY = d;
+      dimYset = true;
+    }
+    if ((dimXset == true) && (dimYset == true)) {
+      break;
+    }
+  }
+
   int maxLabelWidth = 10;
   int maxUnitsWidth = 10;
   // Set each dimension
@@ -647,6 +662,13 @@ void SliceViewer::updateDimensionSliceWidgets() {
     if (w > maxUnitsWidth)
       maxUnitsWidth = w;
 
+    // if the workspace is already binned, update the interface with the
+    // existing number of bins
+    if (m_ws->isMDHistoWorkspace()) {
+      auto dim = m_ws->getDimension(d);
+      int numBins = static_cast<int>(dim->getNBins());
+      widget->setNumBins(numBins);
+    }
     widget->blockSignals(false);
   }
 
@@ -701,8 +723,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
     // MDEWs)
     coord_t min = m_ws->getDimension(d)->getMinimum();
     coord_t max = m_ws->getDimension(d)->getMaximum();
-    if (max < min)
-    {
+    if (max < min) {
       coord_t tmp = max;
       max = min;
       min = tmp;
@@ -711,7 +732,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
         boost::math::isnan(max) || boost::math::isinf(max)) {
       mess << "Dimension " << m_ws->getDimension(d)->getName()
            << " has a bad range: (";
-      mess << min << ", " << max << ")" << std::endl;
+      mess << min << ", " << max << ")\n";
     }
     size_t numBins = static_cast<size_t>((max - min) / binSizes[d]);
     MDHistoDimension_sptr dim(
@@ -722,9 +743,8 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 
   if (!mess.str().empty()) {
     mess << "Bad ranges could cause memory allocation errors. Please fix the "
-            "workspace.";
-    mess << std::endl
-         << "You can continue using Mantid.";
+            "workspace.\n"
+            "You can continue using Mantid.";
     throw std::out_of_range(mess.str());
   }
 
@@ -742,12 +762,13 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   // Build up the widgets
   this->updateDimensionSliceWidgets();
 
-
-  // This will auto scale the color bar to the current slice when the workspace is
+  // This will auto scale the color bar to the current slice when the workspace
+  // is
   // loaded. This always happens when a workspace is loaded for the first time.
   // For live event data workspaces subsequent updates might not lead to an auto
   // scaling of the color scale range (if this is explicitly turned off).
-  if (shouldAutoScaleForNewlySetWorkspace(m_firstWorkspaceOpen, m_colorBar->getAutoScale())) {
+  if (shouldAutoScaleForNewlySetWorkspace(m_firstWorkspaceOpen,
+                                          m_colorBar->getAutoScale())) {
     findRangeFull();
     m_colorBar->setViewRange(m_colorRangeFull);
     m_colorBar->updateColorMap();
@@ -951,7 +972,7 @@ void SliceViewer::setNormalization(Mantid::API::MDNormalization norm,
     if (norm == Mantid::API::NoNormalization) {
       comboNormalization->setCurrentIndex(0);
     } else if (norm == Mantid::API::VolumeNormalization) {
-      comboNormalization->setCurrentItem(1);
+      comboNormalization->setCurrentIndex(1);
     } else {
       comboNormalization->setCurrentIndex(2);
     }
@@ -1093,8 +1114,9 @@ void SliceViewer::SnapToGrid_toggled(bool checked) {
 //------------------------------------------------------------------------------
 /** Slot called when going into or out of dynamic rebinning mode */
 void SliceViewer::RebinMode_toggled(bool checked) {
-  for (size_t d = 0; d < m_dimWidgets.size(); d++)
+  for (size_t d = 0; d < m_dimWidgets.size(); d++) {
     m_dimWidgets[d]->showRebinControls(checked);
+  }
   ui.btnRebinRefresh->setEnabled(checked);
   m_syncAutoRebin->setEnabled(checked);
   m_actionRefreshRebin->setEnabled(checked);
@@ -1196,7 +1218,7 @@ void SliceViewer::updateDisplaySlot(int index, double value) {
   UNUSED_ARG(value)
   this->updateDisplay();
   // Trigger a rebin on each movement of the slice point
-  if (m_rebinMode && ui.btnAutoRebin->isOn())
+  if (m_rebinMode && ui.btnAutoRebin->isChecked())
     this->rebinParamsChanged();
 
   // Update the colors scale if required
@@ -1244,7 +1266,7 @@ void SliceViewer::copyImageToClipboard() {
   // Create the image
   QPixmap pix = this->getImage();
   // Set the clipboard
-  QApplication::clipboard()->setImage(pix, QClipboard::Clipboard);
+  QApplication::clipboard()->setImage(pix.toImage(), QClipboard::Clipboard);
 }
 
 /**
@@ -1389,8 +1411,7 @@ void SliceViewer::findRangeSlice() {
     // the rebin selection and continue to use the original WS
     if (!isRebinInConsistentState(m_overlayWS.get(), m_rebinMode)) {
       setRebinMode(false);
-    }
-    else {
+    } else {
       workspace_used = this->m_overlayWS;
     }
   }
@@ -1439,16 +1460,16 @@ void SliceViewer::findRangeSlice() {
 
     // Iterate through the slice
     m_colorRangeSlice = API::SignalRange(*workspace_used, *function,
-      this->getNormalization()).interval();
+                                         this->getNormalization()).interval();
     delete function;
 
     // In case of failure, use the full range instead
     if (m_colorRangeSlice == QwtDoubleInterval(0.0, 1.0)) {
       m_colorRangeSlice = m_colorRangeFull;
     }
-  }
-  else {
-    // If the slice does not cut through the workspace we make use fo the full workspace
+  } else {
+    // If the slice does not cut through the workspace we make use fo the full
+    // workspace
     m_colorRangeSlice = m_colorRangeFull;
   }
 }
@@ -2138,7 +2159,7 @@ void SliceViewer::rebinParamsChanged() {
   // If we are rebinning from an existing MDHistoWorkspace, and that workspace
   // has been created with basis vectors normalized, then we reapply that
   // setting here.
-  if (boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)) {
+  if (m_ws->isMDHistoWorkspace()) {
     alg->setProperty("NormalizeBasisVectors", m_ws->allBasisNormalized());
   }
 
@@ -2153,7 +2174,15 @@ void SliceViewer::rebinParamsChanged() {
     double min = 0;
     double max = 1;
     int numBins = 1;
-    if (widget->getShownDim() < 0) {
+    if (m_ws->isMDHistoWorkspace()) {
+      // If rebinning from an existing MDHistoWorkspaces we should take exents
+      // from the existing workspace.
+      auto dim = m_ws->getDimension(d);
+      min = dim->getMinimum();
+      max = dim->getMaximum();
+      // And the user-entered number of bins
+      numBins = widget->getNumBins();
+    } else if (widget->getShownDim() < 0) {
       // Slice point. So integrate with a thickness
       min = widget->getSlicePoint() - widget->getThickness();
       max = widget->getSlicePoint() + widget->getThickness();
@@ -2349,18 +2378,13 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
 
     // Peak View factory, displays peaks on a peak by peak basis
     auto peakViewFactory = boost::make_shared<PeakViewFactory>(
-                                  m_ws, peaksWS,
-                                  m_plot,
-                                  m_plot->canvas(),
-                                  m_spect->xAxis(),
-                                  m_spect->yAxis(),
-                                  numberOfChildPresenters);
+        m_ws, peaksWS, m_plot, m_plot->canvas(), m_spect->xAxis(),
+        m_spect->yAxis(), numberOfChildPresenters);
 
     try {
       m_peaksPresenter->addPeaksPresenter(
-          boost::make_shared<ConcretePeaksPresenter>(
-              peakViewFactory, peaksWS, m_ws,
-              transformFactory));
+          boost::make_shared<ConcretePeaksPresenter>(peakViewFactory, peaksWS,
+                                                     m_ws, transformFactory));
     } catch (std::logic_error &ex) {
       // Incompatible PeaksWorkspace.
       disablePeakOverlays();
@@ -2574,12 +2598,182 @@ void SliceViewer::setColorBarAutoScale(bool autoscale) {
 * be applied only if it is explicitly requested
 */
 void SliceViewer::applyColorScalingForCurrentSliceIfRequired() {
-  auto useAutoColorScaleforCurrentSlice = m_colorBar->getAutoColorScaleforCurrentSlice();
+  auto useAutoColorScaleforCurrentSlice =
+      m_colorBar->getAutoScaleforCurrentSlice();
   if (useAutoColorScaleforCurrentSlice) {
     setColorScaleAutoSlice();
   }
 }
 
+/**
+ * Load the state of the slice viewer from a Mantid project file
+ * @param lines :: lines from the project file to load state from
+ */
+void SliceViewer::loadFromProject(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+
+  int dimX, dimY, aspectRatio, normalization;
+  double xMin, yMin, xMax, yMax;
+  bool dynamicRebin, fastRender, autoRebin, overlayVisible;
+  std::vector<float> slicePoints;
+
+  // read in settings from project file
+  tsv.selectLine("LineMode");
+  tsv >> overlayVisible;
+  tsv.selectLine("Dimensions");
+  tsv >> dimX >> dimY;
+  tsv.selectLine("SlicePoint");
+  tsv >> slicePoints;
+  tsv.selectLine("DynamicRebinMode");
+  tsv >> dynamicRebin;
+  tsv.selectLine("FasterRendering");
+  tsv >> fastRender;
+  tsv.selectLine("Normalization");
+  tsv >> normalization;
+  auto norm = static_cast<Mantid::API::MDNormalization>(normalization);
+  tsv.selectLine("AspectRatioType");
+  tsv >> aspectRatio;
+  auto ratio = static_cast<AspectRatioType>(aspectRatio);
+  tsv.selectLine("AutoRebin");
+  tsv >> autoRebin;
+  tsv.selectLine("Limits");
+  tsv >> xMin >> yMin >> xMax >> yMax;
+
+  // set slice points for each dimension
+  for (size_t i = 0; i < slicePoints.size(); ++i) {
+    setSlicePoint(static_cast<int>(i), slicePoints[i]);
+  }
+
+  // setup dimension widgets
+  if (tsv.selectSection("dimensionwidgets")) {
+    std::string dimensionLines;
+    tsv >> dimensionLines;
+    loadDimensionWidgets(dimensionLines);
+  }
+
+  setXYDim(dimX, dimY);
+  setAspectRatio(ratio);
+  setXYLimits(xMin, xMax, yMin, yMax);
+  setRebinMode(dynamicRebin);
+  setFastRender(fastRender);
+  setNormalization(norm);
+  ui.btnAutoRebin->setChecked(autoRebin);
+  m_syncLineMode->toggle(overlayVisible);
+
+  // setup color map
+  if (tsv.selectSection("colormap")) {
+    std::string colorMapLines;
+    tsv >> colorMapLines;
+    m_colorBar->loadFromProject(colorMapLines);
+  }
+
+  // setup line overlay
+  if (tsv.selectSection("overlay")) {
+    std::string overlayLines;
+    tsv >> overlayLines;
+    m_lineOverlay->loadFromProject(overlayLines);
+  }
+
+  // set any peak workspaces here
+  // this ensures the presenter and the slice viewer are linked properly
+  if (tsv.selectSection("peaksviewer")) {
+    std::string peaksViewerLines;
+    tsv >> peaksViewerLines;
+    API::TSVSerialiser peaks(peaksViewerLines);
+
+    QStringList names;
+    for (auto section : peaks.sections("peaksworkspace")) {
+      API::TSVSerialiser sec(section);
+      QString name;
+
+      sec.selectLine("Name");
+      sec >> name;
+      names << name;
+    }
+
+    setPeaksWorkspaces(names);
+  }
+
+  // handle overlay workspace
+  if (tsv.selectLine("OverlayWorkspace")) {
+    std::string workspace_name;
+    tsv >> workspace_name;
+
+    m_overlayWSName = workspace_name;
+    dynamicRebinComplete(false);
+  }
+}
+
+/** Load the current state of the dimension widgets from a string
+ * @param lines :: a string containing the state of the widgets
+ */
+void SliceViewer::loadDimensionWidgets(const std::string &lines) {
+  API::TSVSerialiser tsv(lines);
+
+  size_t nDims;
+  tsv.selectLine("NumDimensions");
+  tsv >> nDims;
+
+  for (size_t i = 0; i < nDims; i++) {
+    double thickness;
+    int numBins;
+    tsv.selectLine("Dimension", i);
+    tsv >> thickness >> numBins;
+
+    m_dimWidgets[i]->setNumBins(numBins);
+    m_dimWidgets[i]->setThickness(thickness);
+  }
+
+  updateDimensionSliceWidgets();
+}
+
+/**
+ * Save the state of th slice viewer to a Mantid project file
+ * @return a string representing the current state
+ */
+std::string SliceViewer::saveToProject() const {
+  API::TSVSerialiser tsv;
+
+  tsv.writeLine("LineMode") << m_lineOverlay->isShown();
+  tsv.writeLine("Dimensions") << m_dimX << m_dimY;
+  tsv.writeLine("SlicePoint") << m_slicePoint.toString("\t");
+  tsv.writeLine("DynamicRebinMode") << m_rebinMode;
+  tsv.writeLine("FasterRendering") << m_fastRender;
+  tsv.writeLine("Normalization") << static_cast<int>(getNormalization());
+  tsv.writeLine("AspectRatioType") << static_cast<int>(m_aspectRatioType);
+  tsv.writeLine("AutoRebin") << isAutoRebinSet();
+
+  auto xLimits = getXLimits();
+  auto yLimits = getYLimits();
+
+  tsv.writeLine("Limits");
+  tsv << xLimits.minValue() << yLimits.minValue();
+  tsv << xLimits.maxValue() << yLimits.maxValue();
+
+  tsv.writeSection("dimensionwidgets", saveDimensionWidgets());
+  tsv.writeSection("colormap", m_colorBar->saveToProject());
+  tsv.writeSection("overlay", m_lineOverlay->saveToProject());
+
+  if (m_overlayWS)
+    tsv.writeLine("OverlayWorkspace") << m_overlayWS->name();
+
+  return tsv.outputLines();
+}
+
+/** Save the current state of the dimension widgets to string
+ * @return a string containing the state of the widgets
+ */
+std::string SliceViewer::saveDimensionWidgets() const {
+  API::TSVSerialiser tsv;
+  tsv.writeLine("NumDimensions") << m_dimWidgets.size();
+
+  for (const auto &dim : m_dimWidgets) {
+    tsv.writeLine("Dimension");
+    tsv << dim->getThickness() << dim->getNumBins();
+  }
+
+  return tsv.outputLines();
+}
 
 } // namespace
 }

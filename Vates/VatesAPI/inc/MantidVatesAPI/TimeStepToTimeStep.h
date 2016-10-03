@@ -4,12 +4,14 @@
 #include "MantidKernel/System.h"
 #include <functional>
 
-/** Maps from a timestep to a timestep. Provides the static compile time polymorphism required by vtkDataSetFactory type classes.
+/** Maps from a timestep to a timestep. Provides the static compile time
+ polymorphism required by vtkDataSetFactory type classes.
 
  @author Owen Arnold, Tessella plc
  @date 14/03/2011
 
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
  This file is part of Mantid.
 
@@ -30,28 +32,24 @@
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-namespace Mantid
-{
-namespace VATES
-{
-class DLLExport TimeStepToTimeStep: std::unary_function<int, int>
-{
+namespace Mantid {
+namespace VATES {
+class DLLExport TimeStepToTimeStep : std::unary_function<int, int> {
 private:
   double m_timeRange;
 
   size_t m_nIntervalSteps;
-  
+
   TimeStepToTimeStep(double timeMin, double timeMax, size_t intervalStep);
 
 public:
-
   /// Constructional method.
-  static TimeStepToTimeStep construct(double timeMin, double timeMax, size_t nIntervalSteps);
+  static TimeStepToTimeStep construct(double timeMin, double timeMax,
+                                      size_t nIntervalSteps);
 
   TimeStepToTimeStep();
 
   size_t operator()(double timeStep) const;
-
 };
 }
 }

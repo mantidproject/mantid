@@ -8,6 +8,9 @@
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+}
 namespace Algorithms {
 /**
   This is an abstract base class for sharing methods between algorithms that
@@ -53,15 +56,12 @@ protected:
   /// Returns true if the algorithm needs to be run.
   virtual bool
   isProcessingRequired(const API::MatrixWorkspace_sptr inputWS) const = 0;
-  /// Checks the input workspace is consistent, throwing if not
-  virtual bool
-  isWorkspaceLogical(const API::MatrixWorkspace_sptr inputWS) const = 0;
   /// Returns the size of the new X vector
   virtual std::size_t
   getNewXSize(const API::MatrixWorkspace_sptr inputWS) const = 0;
   /// Calculate the X point values. Implement in an inheriting class.
-  virtual void calculateXPoints(const MantidVec &inputX,
-                                MantidVec &outputX) const = 0;
+  virtual Kernel::cow_ptr<HistogramData::HistogramX> calculateXPoints(
+      const Kernel::cow_ptr<HistogramData::HistogramX> inputX) const = 0;
 
 private:
   /// Override init
@@ -76,7 +76,7 @@ private:
   /// Flag if the X data is shared
   bool m_sharedX;
   /// Cached data for shared X values
-  MantidVecPtr m_cachedX;
+  Kernel::cow_ptr<HistogramData::HistogramX> m_cachedX{nullptr};
 };
 
 } // namespace Algorithm

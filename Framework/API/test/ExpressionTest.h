@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Expression.h"
+#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -375,6 +376,33 @@ public:
       Expression e;
       e.parse(" ((  ) )  ");
       TS_ASSERT_EQUALS(e.name(), "EMPTY");
+    }
+  }
+
+  void testEndOnOperator() {
+    {
+      Expression e;
+      TS_ASSERT_THROWS(e.parse("x+y+z +  "), std::runtime_error);
+    }
+    {
+      Expression e;
+      TS_ASSERT_THROWS(e.parse("x*z-"), std::runtime_error);
+    }
+    {
+      Expression e;
+      TS_ASSERT_THROWS(e.parse("x*z="), std::runtime_error);
+    }
+    {
+      Expression e;
+      TS_ASSERT_THROWS_NOTHING(e.parse("x;y;z;"));
+      TS_ASSERT_EQUALS(e.size(), 3);
+      TS_ASSERT_EQUALS(e[2].str(), "z");
+    }
+    {
+      Expression e;
+      TS_ASSERT_THROWS_NOTHING(e.parse("z,y,x,"));
+      TS_ASSERT_EQUALS(e.size(), 3);
+      TS_ASSERT_EQUALS(e[2].str(), "x");
     }
   }
 };

@@ -5,6 +5,7 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -144,8 +145,6 @@ public:
     TS_ASSERT_EQUALS(statistics.m_rMerge, 0.0);
     TS_ASSERT_EQUALS(statistics.m_rPim, 0.0);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 0.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 0.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 0.0);
   }
 
   void test_PeaksStatisticsOneObservation() {
@@ -160,8 +159,6 @@ public:
     TS_ASSERT_EQUALS(statistics.m_rMerge, 0.0);
     TS_ASSERT_EQUALS(statistics.m_rPim, 0.0);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 56.0 / 4.5);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 1.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 1.0);
   }
 
   void test_PeaksStatisticsOneObservationTwoUnique() {
@@ -177,8 +174,6 @@ public:
     TS_ASSERT_EQUALS(statistics.m_rMerge, 0.0);
     TS_ASSERT_EQUALS(statistics.m_rPim, 0.0);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 56.0 / 4.5);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 1.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 1.0);
   }
 
   void test_PeaksStatisticsTwoObservationTwoUnique() {
@@ -195,8 +190,6 @@ public:
     TS_ASSERT_EQUALS(statistics.m_rMerge, 0.0);
     TS_ASSERT_EQUALS(statistics.m_rPim, 0.0);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 15.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 1.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 2.0);
   }
 
   void test_PeaksStatisticsTwoObservationOneUnique() {
@@ -213,8 +206,6 @@ public:
     // For 2 observations this is the same since sqrt(1 / (2 - 1)) = 1
     TS_ASSERT_EQUALS(statistics.m_rPim, 1.0 / 3.0);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 150.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 1.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 1.0);
   }
 
   void test_PeaksStatisticsThreeObservationOneUnique() {
@@ -232,8 +223,6 @@ public:
     // For rpim the factor is  sqrt(1 / (3 - 1)) = sqrt(0.5)
     TS_ASSERT_EQUALS(statistics.m_rPim, sqrt(0.5) / 4.5);
     TS_ASSERT_EQUALS(statistics.m_meanIOverSigma, 150.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMin, 1.0);
-    TS_ASSERT_EQUALS(statistics.m_lambdaMax, 1.0);
   }
 
   void test_Init() {
@@ -308,15 +297,13 @@ public:
     TS_ASSERT_DELTA(p.getWavelength(), 1.5, 1e-4);
     TS_ASSERT_EQUALS(p.getRunNumber(), 1000.);
     TS_ASSERT_DELTA(p.getDSpacing(), 3.5933, 1e-4);
-    const Kernel::Material *m_sampleMaterial = &(wsout->sample().getMaterial());
-    if (m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) !=
+    const auto sampleMaterial = wsout->sample().getMaterial();
+    if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
         0.0) {
-      double rho = m_sampleMaterial->numberDensity();
-      smu =
-          m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) *
-          rho;
-      amu =
-          m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+      double rho = sampleMaterial.numberDensity();
+      smu = sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) *
+            rho;
+      amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
     } else {
       throw std::invalid_argument(
           "Could not retrieve LinearScatteringCoef from material");

@@ -10,25 +10,22 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-namespace Ui
-{
-  class MuonAnalysis;
+namespace Ui {
+class MuonAnalysis;
 }
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-namespace Muon
-{
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace Muon {
 
-/** 
+/**
 This is a Helper class for MuonAnalysis. In particular this helper class deals
-callbacks from the Plot Options tab.    
+callbacks from the Plot Options tab.
 
 @author Robert Whitley, ISIS, RAL
 
-Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+National Laboratory & European Spallation Source
 
 This file is part of Mantid.
 
@@ -46,20 +43,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>    
+Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MuonAnalysisFitDataTab : MantidQt::API::UserSubWindow
-{
- Q_OBJECT
+class MuonAnalysisFitDataTab : MantidQt::API::UserSubWindow {
+  Q_OBJECT
 
 public:
   /// Constructor.
-  MuonAnalysisFitDataTab(Ui::MuonAnalysis& uiForm) : m_uiForm(uiForm) {}
+  MuonAnalysisFitDataTab(Ui::MuonAnalysis &uiForm) : m_uiForm(uiForm) {}
   /// Initialise.
   void init();
   /// Copy the given raw workspace and keep for later.
-  void makeRawWorkspace(const std::string & wsName);
+  void makeRawWorkspace(const std::string &wsName);
 
 signals:
 
@@ -67,18 +63,16 @@ private:
   /// Initialize the layout.
   void initLayout() override{};
   /// Reference to MuonAnalysis form.
-  Ui::MuonAnalysis& m_uiForm;
+  Ui::MuonAnalysis &m_uiForm;
 
 private slots:
   /// Open up the wiki help.
   void muonAnalysisHelpDataAnalysisClicked();
   /// Group all the workspaces made after a fitting.
-  void groupFittedWorkspaces(QString workspaceName);
+  void groupFittedWorkspaces(const QString &workspaceName);
 };
-
-
 }
 }
 }
 
-#endif //MANTIDQTCUSTOMINTERFACES_MUONANALYSISFITDATATAB_H_
+#endif // MANTIDQTCUSTOMINTERFACES_MUONANALYSISFITDATATAB_H_

@@ -7,8 +7,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -45,13 +45,13 @@ const detid_t LOQ_TRANSMISSION_MONITOR_UDET = 3;
  *
  * @returns workspace index corresponding to the given detector ID
  */
-size_t getIndexFromDetectorID(MatrixWorkspace_sptr ws, detid_t detid) {
+size_t getIndexFromDetectorID(const MatrixWorkspace &ws, detid_t detid) {
   const std::vector<detid_t> input = {detid};
-  std::vector<size_t> result = ws->getIndicesFromDetectorIDs(input);
+  std::vector<size_t> result = ws.getIndicesFromDetectorIDs(input);
   if (result.empty())
     throw std::invalid_argument(
         "Could not find the spectra corresponding to detector ID " +
-        boost::lexical_cast<std::string>(detid));
+        std::to_string(detid));
 
   return result[0];
 }
@@ -59,11 +59,6 @@ size_t getIndexFromDetectorID(MatrixWorkspace_sptr ws, detid_t detid) {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateTransmission)
-
-CalculateTransmission::CalculateTransmission()
-    : API::Algorithm(), m_done(0.0) {}
-
-CalculateTransmission::~CalculateTransmission() {}
 
 void CalculateTransmission::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -166,7 +161,7 @@ void CalculateTransmission::exec() {
   std::vector<size_t> transmissionIndices;
   if (usingMonitor) {
     const size_t transmissionMonitorIndex =
-        getIndexFromDetectorID(sampleWS, transMonitorID);
+        getIndexFromDetectorID(*sampleWS, transMonitorID);
     transmissionIndices.push_back(transmissionMonitorIndex);
     logIfNotMonitor(sampleWS, directWS, transmissionMonitorIndex);
   } else if (usingROI) {
@@ -187,15 +182,15 @@ void CalculateTransmission::exec() {
   const bool normaliseToMonitor = !isEmpty(beamMonitorID);
   size_t beamMonitorIndex = 0;
   if (normaliseToMonitor) {
-    beamMonitorIndex = getIndexFromDetectorID(sampleWS, beamMonitorID);
+    beamMonitorIndex = getIndexFromDetectorID(*sampleWS, beamMonitorID);
     logIfNotMonitor(sampleWS, directWS, beamMonitorIndex);
 
     BOOST_FOREACH (size_t transmissionIndex, transmissionIndices)
       if (transmissionIndex == beamMonitorIndex)
-        throw std::invalid_argument(
-            "The IncidentBeamMonitor UDET (" +
-            boost::lexical_cast<std::string>(transmissionIndex) +
-            ") matches a UDET given in " + transPropName + ".");
+        throw std::invalid_argument("The IncidentBeamMonitor UDET (" +
+                                    std::to_string(transmissionIndex) +
+                                    ") matches a UDET given in " +
+                                    transPropName + ".");
   }
 
   MatrixWorkspace_sptr sampleInc;
@@ -244,7 +239,7 @@ void CalculateTransmission::exec() {
 
   // Check that there are more than a single bin in the transmission
   // workspace. Skip the fit if there isn't.
-  if (transmission->dataY(0).size() > 1) {
+  if (transmission->y(0).size() > 1) {
     transmission =
         fit(transmission, getProperty("RebinParams"), getProperty("FitMethod"));
   }
@@ -301,7 +296,7 @@ CalculateTransmission::extractSpectra(API::MatrixWorkspace_sptr ws,
 */
 API::MatrixWorkspace_sptr
 CalculateTransmission::fit(API::MatrixWorkspace_sptr raw,
-                           std::vector<double> rebinParams,
+                           const std::vector<double> &rebinParams,
                            const std::string fitMethod) {
   MatrixWorkspace_sptr output =
       this->extractSpectra(raw, std::vector<size_t>(1, 0));
@@ -316,8 +311,8 @@ CalculateTransmission::fit(API::MatrixWorkspace_sptr raw,
   if (logFit) {
     g_log.debug("Fitting to the logarithm of the transmission");
 
-    MantidVec &Y = output->dataY(0);
-    MantidVec &E = output->dataE(0);
+    auto &Y = output->mutableY(0);
+    auto &E = output->mutableE(0);
     double start = m_done;
     Progress prog2(this, start, m_done += 0.1, Y.size());
     for (size_t i = 0; i < Y.size(); ++i) {
@@ -355,14 +350,14 @@ CalculateTransmission::fit(API::MatrixWorkspace_sptr raw,
   // otherwise we can just use the workspace kicked out by the fitData()'s call
   // to Linear
   if ((!rebinParams.empty()) || logFit) {
-    const MantidVec &X = output->readX(0);
-    MantidVec &Y = output->dataY(0);
+    auto &X = output->x(0);
+    auto &Y = output->mutableY(0);
     if (logFit) {
       // Need to transform back to 'unlogged'
       const double m(std::pow(10, grad));
       const double factor(std::pow(10, offset));
 
-      MantidVec &E = output->dataE(0);
+      auto &E = output->mutableE(0);
       for (size_t i = 0; i < Y.size(); ++i) {
         // the relationship between the grad and interspt of the log fit and the
         // un-logged value of Y contain this dependence on the X (bin center
@@ -471,7 +466,7 @@ CalculateTransmission::fitPolynomial(API::MatrixWorkspace_sptr WS, int order,
 *  @throw runtime_error if the rebin algorithm fails during execution
 */
 API::MatrixWorkspace_sptr
-CalculateTransmission::rebin(std::vector<double> &binParams,
+CalculateTransmission::rebin(const std::vector<double> &binParams,
                              API::MatrixWorkspace_sptr ws) {
   double start = m_done;
   IAlgorithm_sptr childAlg =
@@ -495,8 +490,7 @@ CalculateTransmission::rebin(std::vector<double> &binParams,
 void CalculateTransmission::logIfNotMonitor(API::MatrixWorkspace_sptr sampleWS,
                                             API::MatrixWorkspace_sptr directWS,
                                             size_t index) {
-  const std::string message = "The detector at index " +
-                              boost::lexical_cast<std::string>(index) +
+  const std::string message = "The detector at index " + std::to_string(index) +
                               " is not a monitor in the ";
   if (!sampleWS->getDetector(index)->isMonitor())
     g_log.information(message + "sample workspace.");

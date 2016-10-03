@@ -439,7 +439,7 @@ public:
     ins.open(filename.c_str());
     char line[256];
     // std::cout << "File " << filename << " isOpen = " << ins.is_open() <<
-    // std::endl;
+    // '\n';
     while (ins.getline(line, 256)) {
       if (line[0] != '#') {
         double x, y;

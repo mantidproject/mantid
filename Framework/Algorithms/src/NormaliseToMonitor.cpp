@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -64,7 +62,7 @@ bool MonIDPropChanger::isConditionChanged(const IPropertyManager *algo) const {
   bool monitors_changed = monitorIdReader(inputWS);
 
   //       std::cout << "MonIDPropChanger::isConditionChanged() called  ";
-  //       std::cout << monitors_changed << std::endl;
+  //       std::cout << monitors_changed << '\n';
 
   return monitors_changed;
 }
@@ -159,16 +157,6 @@ DECLARE_ALGORITHM(NormaliseToMonitor)
 using namespace Kernel;
 using namespace API;
 using std::size_t;
-
-/// Default constructor
-NormaliseToMonitor::NormaliseToMonitor()
-    : Algorithm(), m_monitor(), m_commonBins(false),
-      m_integrationMin(EMPTY_DBL()), // EMPTY_DBL() is a tag to say that the
-                                     // value hasn't been set
-      m_integrationMax(EMPTY_DBL()) {}
-
-/// Destructor
-NormaliseToMonitor::~NormaliseToMonitor() {}
 
 void NormaliseToMonitor::init() {
   auto val = boost::make_shared<CompositeValidator>();
@@ -315,7 +303,7 @@ void NormaliseToMonitor::checkProperties(
   if (!inWS && !sepWS && !monIDs) {
     const std::string mess("Neither the MonitorSpectrum, nor the MonitorID or "
                            "the MonitorWorkspace property has been set");
-    g_log.error() << mess << std::endl;
+    g_log.error() << mess << '\n';
     throw std::runtime_error(mess);
   }
   // One and only one of these properties should have been set
@@ -349,8 +337,7 @@ void NormaliseToMonitor::checkProperties(
   // Check that the 'monitor' spectrum actually relates to a monitor - warn if
   // not
   try {
-    Geometry::IDetector_const_sptr mon = m_monitor->getDetector(0);
-    if (!mon->isMonitor()) {
+    if (!m_monitor->spectrumInfo().isMonitor(0)) {
       g_log.warning() << "The spectrum N: " << spec_num
                       << " in MonitorWorkspace does not refer to a monitor.\n"
                       << "Continuing with normalization regardless.";
@@ -506,13 +493,13 @@ bool NormaliseToMonitor::setIntegrationProps() {
   if (isEmpty(m_integrationMin) ||
       m_integrationMin < m_monitor->readX(0).front()) {
     g_log.warning() << "Integration range minimum set to workspace min: "
-                    << m_integrationMin << std::endl;
+                    << m_integrationMin << '\n';
     m_integrationMin = m_monitor->readX(0).front();
   }
   if (isEmpty(m_integrationMax) ||
       m_integrationMax > m_monitor->readX(0).back()) {
     g_log.warning() << "Integration range maximum set to workspace max: "
-                    << m_integrationMax << std::endl;
+                    << m_integrationMax << '\n';
     m_integrationMax = m_monitor->readX(0).back();
   }
 
@@ -566,7 +553,7 @@ void NormaliseToMonitor::normaliseBinByBin(
   // Only create output workspace if different to input one
   if (outputWorkspace != inputWorkspace) {
     if (inputEvent) {
-      outputWorkspace = MatrixWorkspace_sptr(inputWorkspace->clone().release());
+      outputWorkspace = inputWorkspace->clone();
     } else
       outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
   }
@@ -613,7 +600,7 @@ void NormaliseToMonitor::normaliseBinByBin(
     if (inputEvent) {
       // ----------------------------------- EventWorkspace
       // ---------------------------------------
-      EventList &outEL = outputEvent->getEventList(i);
+      EventList &outEL = outputEvent->getSpectrum(i);
       outEL.divide(X, *Y, *E);
     } else {
       // ----------------------------------- Workspace2D
@@ -660,7 +647,7 @@ void NormaliseToMonitor::normaliseBinByBin(
   } // end loop over spectra
   PARALLEL_CHECK_INTERUPT_REGION
   if (hasZeroDivision) {
-    g_log.warning() << "Division by zero in some of the bins." << std::endl;
+    g_log.warning() << "Division by zero in some of the bins.\n";
   }
 }
 

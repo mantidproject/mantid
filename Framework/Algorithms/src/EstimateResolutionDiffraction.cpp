@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -12,7 +12,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
 
-#include <math.h>
+#include <cmath>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -35,17 +35,6 @@ const double WAVELENGTH_TO_VELOCITY =
 /// This is an absurd number for even ultra cold neutrons
 const double WAVELENGTH_MAX = 1000.;
 }
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-EstimateResolutionDiffraction::EstimateResolutionDiffraction()
-    : m_inputWS(), m_outputWS(), m_centreVelocity(0.), m_L1(0.), m_deltaT(0.) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-EstimateResolutionDiffraction::~EstimateResolutionDiffraction() {}
 
 const std::string EstimateResolutionDiffraction::name() const {
   return "EstimateResolutionDiffraction";
@@ -164,8 +153,6 @@ void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
   V3D sourcepos = instrument->getSource()->getPos();
   m_L1 = samplepos.distance(sourcepos);
   g_log.notice() << "L1 = " << m_L1 << "\n";
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -179,7 +166,6 @@ void EstimateResolutionDiffraction::createOutputWorkspace() {
   // Copy geometry over.
   API::WorkspaceFactory::Instance().initializeFromParent(m_inputWS, m_outputWS,
                                                          false);
-  return;
 }
 //----------------------------------------------------------------------------------------------
 /**
@@ -226,10 +212,9 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     double centraltof = (m_L1 + l2) / m_centreVelocity;
 
     // Angle
-    double twotheta = m_inputWS->detectorTwoTheta(det);
+    double twotheta = m_inputWS->detectorTwoTheta(*det);
     double theta = 0.5 * twotheta;
 
-    // double solidangle = m_solidangleWS->readY(i)[0];
     double solidangle = det->solidAngle(samplepos);
     double deltatheta = sqrt(solidangle);
 
@@ -240,8 +225,8 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
 
     double resolution = sqrt(t1 * t1 + t2 * t2 + t3 * t3);
 
-    m_outputWS->dataX(i)[0] = static_cast<double>(i);
-    m_outputWS->dataY(i)[0] = resolution;
+    m_outputWS->mutableX(i)[0] = static_cast<double>(i);
+    m_outputWS->mutableY(i)[0] = resolution;
 
     if (twotheta > maxtwotheta)
       maxtwotheta = twotheta;
@@ -263,8 +248,6 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
   g_log.notice() << "t3 range: " << mint3 << ", " << maxt3 << "\n";
   g_log.notice() << "Number of detector having NO size information = "
                  << count_nodetsize << "\n";
-
-  return;
 }
 
 } // namespace Algorithms

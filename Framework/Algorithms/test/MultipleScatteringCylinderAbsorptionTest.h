@@ -116,7 +116,7 @@ public:
          3.49139}};
 
     // do the final comparison
-    const MantidVec &y_actual = test_output_WS->readY(0);
+    auto &y_actual = test_output_WS->y(0);
     for (size_t i = 0; i < size; i++)
       TS_ASSERT_DELTA(y_actual[i], y_expected[i], 0.00001);
 
@@ -137,7 +137,7 @@ public:
                                                                         false);
     wksp->getAxis(0)
         ->setUnit("Wavelength"); // cheat and set the units to Wavelength
-    wksp->getEventList(0)
+    wksp->getSpectrum(0)
         .convertTof(.09, 1.); // convert to be from 1->10 (about)
     const std::size_t NUM_EVENTS = wksp->getNumberEvents();
     AnalysisDataService::Instance().add(outName, wksp);
@@ -165,7 +165,7 @@ public:
 
     // do the final comparison - this is done by bounding
     std::vector<double> y_actual;
-    wksp->getEventList(0).getWeights(y_actual);
+    wksp->getSpectrum(0).getWeights(y_actual);
     for (size_t i = 0; i < y_actual.size(); ++i) {
       TS_ASSERT_LESS_THAN(1.19811, y_actual[i]);
       TS_ASSERT_LESS_THAN(y_actual[i], 3.3324);

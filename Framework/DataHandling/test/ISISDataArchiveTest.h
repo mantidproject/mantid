@@ -19,7 +19,7 @@ public:
     filename.insert("hrpd273");
     std::vector<std::string> extension = std::vector<std::string>(1, "");
     std::string path = arch.getArchivePath(filename, extension);
-    std::cout << "(hrpd273)= " << path << std::endl;
+    std::cout << "(hrpd273)= " << path << '\n';
     TS_ASSERT_EQUALS(path.substr(path.size() - 18, 10), "cycle_98_0");
 
     filename.clear();

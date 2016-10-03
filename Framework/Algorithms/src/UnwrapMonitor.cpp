@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/UnwrapMonitor.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -79,7 +77,7 @@ void UnwrapMonitor::exec() {
   const int numberOfSpectra =
       static_cast<int>(m_inputWS->getNumberHistograms());
   g_log.debug() << "Number of spectra in input workspace: " << numberOfSpectra
-                << std::endl;
+                << '\n';
 
   // Get the "reference" flightpath (currently passed in as a property)
   m_LRef = getProperty("LRef");
@@ -87,11 +85,8 @@ void UnwrapMonitor::exec() {
   m_Tmin = m_inputWS->readX(0).front();
   m_Tmax = m_inputWS->readX(0).back();
   g_log.debug() << "Frame range in microseconds is: " << m_Tmin << " - "
-                << m_Tmax << std::endl;
+                << m_Tmax << '\n';
   m_XSize = m_inputWS->readX(0).size();
-
-  // Retrieve the source-sample distance
-  const double L1 = this->getPrimaryFlightpath();
 
   // Need a new workspace. Will just be used temporarily until the data is
   // rebinned.
@@ -103,17 +98,17 @@ void UnwrapMonitor::exec() {
   // This will be used later to store the maximum number of bin BOUNDARIES for
   // the rebinning
   int max_bins = 0;
+
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const double L1 = spectrumInfo.l1();
+
   m_progress = new Progress(this, 0.0, 1.0, numberOfSpectra);
   // Loop over the histograms (detector spectra)
   for (int i = 0; i < numberOfSpectra; ++i) {
-    // Flag indicating whether the current detector is a monitor, Set in
-    // calculateFlightpath below.
-    bool isMonitor;
-    const double Ld = this->calculateFlightpath(i, L1, isMonitor);
-    if (Ld < 0.0) {
+    if (!spectrumInfo.hasDetectors(i)) {
       // If the detector flightpath is missing, zero the data
       g_log.debug() << "Detector information for workspace index " << i
-                    << " is not available." << std::endl;
+                    << " is not available.\n";
       tempWS->dataX(i).assign(tempWS->dataX(i).size(), 0.0);
       tempWS->dataY(i).assign(tempWS->dataY(i).size(), 0.0);
       tempWS->dataE(i).assign(tempWS->dataE(i).size(), 0.0);
@@ -121,6 +116,7 @@ void UnwrapMonitor::exec() {
     }
 
     // Unwrap the x data. Returns the bin ranges that end up being used
+    const double Ld = L1 + spectrumInfo.l2(i);
     const std::vector<int> rangeBounds = this->unwrapX(tempWS, i, Ld);
     // Unwrap the y & e data according to the ranges found above
     this->unwrapYandE(tempWS, i, rangeBounds);
@@ -128,7 +124,7 @@ void UnwrapMonitor::exec() {
 
     // Get the maximum number of bins (excluding monitors) for the rebinning
     // below
-    if (!isMonitor) {
+    if (!spectrumInfo.isMonitor(i)) {
       const int XLen = static_cast<int>(tempWS->dataX(i).size());
       if (XLen > max_bins)
         max_bins = XLen;
@@ -147,68 +143,12 @@ void UnwrapMonitor::exec() {
 
     g_log.debug() << "Rebinned workspace has "
                   << outputWS->getNumberHistograms() << " histograms of "
-                  << outputWS->blocksize() << " bins each" << std::endl;
+                  << outputWS->blocksize() << " bins each\n";
     setProperty("OutputWorkspace", outputWS);
   } else
     setProperty("OutputWorkspace", tempWS);
 
   m_inputWS.reset();
-}
-
-/** Gets the primary flightpath (L1)
- *  @return L1
- *  @throw Kernel::Exception::InstrumentDefinitionError if L1 is not available
- */
-double UnwrapMonitor::getPrimaryFlightpath() const {
-  // Get a pointer to the instrument contained in the input workspace
-  Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
-  // Get the distance between the source and the sample
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  double L1;
-  try {
-    L1 = instrument->getSource()->getDistance(*sample);
-    g_log.debug() << "Source-sample distance (in metres): " << L1 << std::endl;
-  } catch (Exception::NotFoundError &) {
-    g_log.error("Unable to calculate source-sample distance");
-    throw Exception::InstrumentDefinitionError(
-        "Unable to calculate source-sample distance", m_inputWS->getTitle());
-  }
-  return L1;
-}
-
-/** Calculates the total flightpath for the given detector.
- *  This is L1+L2 normally, but is the source-detector distance for a monitor.
- *  @param spectrum ::  The workspace index
- *  @param L1 ::        The primary flightpath
- *  @param isMonitor :: Output: true is this detector is a monitor
- *  @return The flightpath (Ld) for the detector linked to spectrum
- *  @throw Kernel::Exception::InstrumentDefinitionError if the detector position
- * can't be obtained
- */
-double UnwrapMonitor::calculateFlightpath(const int &spectrum, const double &L1,
-                                          bool &isMonitor) const {
-  double Ld = -1.0;
-  try {
-    // Get the detector object for this histogram
-    Geometry::IDetector_const_sptr det = m_inputWS->getDetector(spectrum);
-    // Get the sample-detector distance for this detector (or source-detector if
-    // a monitor)
-    // This is the total flightpath
-    isMonitor = det->isMonitor();
-    // Get the L2 distance if this detector is not a monitor
-    if (!isMonitor) {
-      double L2 = det->getDistance(*(m_inputWS->getInstrument()->getSample()));
-      Ld = L1 + L2;
-    }
-    // If it is a monitor, then the flightpath is the distance to the source
-    else {
-      Ld = det->getDistance(*(m_inputWS->getInstrument()->getSource()));
-    }
-  } catch (Exception::NotFoundError &) {
-    // If the detector information is missing, return a negative number
-  }
-
-  return Ld;
 }
 
 /** Unwraps an X array, converting the units to wavelength along the way.
@@ -419,7 +359,7 @@ UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr &workspace,
   childAlg->setProperty<std::vector<double>>("Params", paramArray);
   g_log.debug() << "Rebinning unwrapped data into " << numBins
                 << " bins of width " << step << " Angstroms, running from "
-                << min << " to " << max << std::endl;
+                << min << " to " << max << '\n';
 
   childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");

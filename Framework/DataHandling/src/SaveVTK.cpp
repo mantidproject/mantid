@@ -52,7 +52,7 @@ void SaveVTK::init() {
 */
 void SaveVTK::exec() {
   std::string filename = getProperty("Filename");
-  g_log.debug() << "Parameters: Filename='" << filename << "'" << std::endl;
+  g_log.debug() << "Parameters: Filename='" << filename << "'\n";
   // add extension
   filename += ".vtu";
 

@@ -300,7 +300,7 @@ void JSONValue::prettyPrint(ostream &ostr, unsigned indentLevel) const {
       }
       ostr << " ]";
     } else {
-      ostr << "[" << endl;
+      ostr << "[\n";
 
       it = mp_array->begin();
       while (it != mp_array->end()) {
@@ -308,7 +308,7 @@ void JSONValue::prettyPrint(ostream &ostr, unsigned indentLevel) const {
           ostr << "\t";
         }
         it->prettyPrint(ostr, indentLevel + 1);
-        ostr << endl;
+        ostr << '\n';
         ++it;
       }
 
@@ -327,7 +327,7 @@ void JSONValue::prettyPrint(ostream &ostr, unsigned indentLevel) const {
       ostr << " }";
 
     } else {
-      ostr << "{" << endl;
+      ostr << "{\n";
       ::prettyPrint(*mp_object, ostr, indentLevel + 1);
 
       for (unsigned i = 0; i < indentLevel + 1; i++) {
@@ -674,8 +674,8 @@ string readUntilCloseChar(istream &istr) {
   }
 
   // Strip any whitespace off the end of the value string
-  while (isspace(value[value.size() - 1])) {
-    value.resize(value.size() - 1);
+  while (isspace(value.back())) {
+    value.pop_back();
   }
 
   return value;
@@ -696,7 +696,7 @@ void prettyPrint(const JSONObject &obj, std::ostream &ostr,
       // if there's only one key/value pair in the object, then don't print
       // a trailing newline.  (The rationale being that such small objects
       // will be printed with their key, value and braces all on one line.)
-      ostr << endl;
+      ostr << '\n';
     }
     ++it;
   }

@@ -22,14 +22,14 @@ AlgorithmManagerImpl::AlgorithmManagerImpl() : m_managed_algs() {
     m_max_no_algs = 100; // Default to keeping 100 algorithms if not specified
   }
 
-  g_log.debug() << "Algorithm Manager created." << std::endl;
+  g_log.debug() << "Algorithm Manager created.\n";
 }
 
 /** Private destructor
 *  Prevents client from calling 'delete' on the pointer handed
 *  out by Instance
 */
-AlgorithmManagerImpl::~AlgorithmManagerImpl() {}
+AlgorithmManagerImpl::~AlgorithmManagerImpl() = default;
 
 /** Creates an instance of an algorithm, but does not own that instance
 *
@@ -92,12 +92,12 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
             << "All algorithms in the AlgorithmManager are running. "
             << "Cannot pop oldest algorithm. "
             << "You should increase your 'algorithms.retained' value. "
-            << m_managed_algs.size() << " in queue." << std::endl;
+            << m_managed_algs.size() << " in queue.\n";
         break;
       } else {
         // Normal; erase that algorithm
         g_log.debug() << "Popping out oldest algorithm " << (*it)->name()
-                      << std::endl;
+                      << '\n';
         m_managed_algs.erase(it);
       }
     }
@@ -108,7 +108,7 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
 
   } catch (std::runtime_error &ex) {
     g_log.error() << "AlgorithmManager:: Unable to create algorithm " << algName
-                  << ' ' << ex.what() << std::endl;
+                  << ' ' << ex.what() << '\n';
     throw std::runtime_error("AlgorithmManager:: Unable to create algorithm " +
                              algName + ' ' + ex.what());
   }
@@ -116,12 +116,17 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
 }
 
 /**
- * Clears all managed algorithm objects.
+ * Clears all managed algorithm objects that are not currently running.
  */
 void AlgorithmManagerImpl::clear() {
   std::lock_guard<std::mutex> _lock(this->m_managedMutex);
-  m_managed_algs.clear();
-  return;
+  for (auto itAlg = m_managed_algs.begin(); itAlg != m_managed_algs.end();) {
+    if (!(*itAlg)->isRunning()) {
+      itAlg = m_managed_algs.erase(itAlg);
+    } else {
+      ++itAlg;
+    }
+  }
 }
 
 std::size_t AlgorithmManagerImpl::size() const { return m_managed_algs.size(); }
@@ -163,11 +168,11 @@ void AlgorithmManagerImpl::removeById(AlgorithmID id) {
   for (auto it = m_managed_algs.begin(); it != itend; ++it) {
     if ((**it).getAlgorithmID() == id) {
       if (!(*it)->isRunning()) {
-        g_log.debug() << "Removing algorithm " << (*it)->name() << std::endl;
+        g_log.debug() << "Removing algorithm " << (*it)->name() << '\n';
         m_managed_algs.erase(it);
       } else {
         g_log.debug() << "Unable to remove algorithm " << (*it)->name()
-                      << ". The algorithm is running." << std::endl;
+                      << ". The algorithm is running.\n";
       }
       break;
     }

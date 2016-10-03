@@ -106,15 +106,15 @@ public:
   Peak &getPeak(int peakNum) override;
   const Peak &getPeak(int peakNum) const override;
 
-  Geometry::IPeak *createPeak(Kernel::V3D QLabFrame,
-                              boost::optional<double> detectorDistance =
-                                  boost::optional<double>()) const override;
+  Geometry::IPeak *createPeak(
+      const Kernel::V3D &QLabFrame,
+      boost::optional<double> detectorDistance = boost::none) const override;
   std::vector<std::pair<std::string, std::string>>
-  peakInfo(Kernel::V3D qFrame, bool labCoords) const override;
+  peakInfo(const Kernel::V3D &qFrame, bool labCoords) const override;
 
-  Peak *createPeakHKL(Kernel::V3D HKL) const override;
+  Peak *createPeakHKL(const Kernel::V3D &HKL) const override;
 
-  int peakInfoNumber(Kernel::V3D qFrame, bool labCoords) const override;
+  int peakInfoNumber(const Kernel::V3D &qFrame, bool labCoords) const override;
 
   std::vector<Peak> &getPeaks();
   const std::vector<Peak> &getPeaks() const;
@@ -185,6 +185,8 @@ protected:
 
 private:
   PeaksWorkspace *doClone() const override { return new PeaksWorkspace(*this); }
+  ITableWorkspace *
+  doCloneColumns(const std::vector<std::string> &colNames) const override;
 
   /// Initialize the table structure
   void initColumns();

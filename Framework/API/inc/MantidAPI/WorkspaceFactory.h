@@ -22,6 +22,7 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace API {
@@ -98,17 +99,23 @@ private:
   using Kernel::DynamicFactory<Workspace>::create;
 };
 
-/// Forward declaration of a specialisation of SingletonHolder for
-/// AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
-#ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>;
-#endif /* _WIN32 */
-typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>
-    WorkspaceFactory;
+typedef Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl> WorkspaceFactory;
 
-} // namespace Kernel
+template <class T, class... InitArgs>
+boost::shared_ptr<T> createWorkspace(InitArgs... args) {
+  auto ws = boost::make_shared<T>();
+  ws->initialize(args...);
+  return ws;
+}
+
+} // namespace API
 } // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::API::WorkspaceFactoryImpl>;
+}
+}
 
 #endif /*MANTID_KERNEL_WORKSPACEFACTORY_H_*/

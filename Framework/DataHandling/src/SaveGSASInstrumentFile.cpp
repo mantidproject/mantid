@@ -6,7 +6,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/TableRow.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -218,8 +218,6 @@ void ChopperConfiguration::setParameter(unsigned int bankid,
       throw runtime_error(errss.str());
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -240,7 +238,7 @@ ChopperConfiguration::parseStringDbl(const string &instring) const {
   }
 
   // cout << "[C]* Input: " << instring << ": size of double vector: " <<
-  // vecdouble.size() << endl;
+  // vecdouble.size() << '\n';
 
   return vecdouble;
 }
@@ -266,7 +264,7 @@ ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
   }
 
   // cout << "[C]* Input : " << instring << ": size of string vector: " <<
-  // vecinteger.size() << endl;
+  // vecinteger.size() << '\n';
 
   return vecinteger;
 }
@@ -279,13 +277,6 @@ SaveGSASInstrumentFile::SaveGSASInstrumentFile()
       m_frequency(0), m_id_line(), m_sample(), m_vecBankID2File(),
       m_gsasFileName(), m_configuration(), m_profileMap(), m_gdsp(), m_gdt(),
       m_galpha(), m_gbeta(), m_bank_mndsp(), m_bank_mxtof() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-SaveGSASInstrumentFile::~SaveGSASInstrumentFile() {}
-
-//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 /** Declare properties
@@ -340,8 +331,6 @@ void SaveGSASInstrumentFile::init() {
   declareProperty("TwoTheta", EMPTY_DBL(), mustBePositive,
                   "Angle of the detector bank. "
                   "It must be given if L2 is not given. ");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -389,8 +378,6 @@ void SaveGSASInstrumentFile::exec() {
     g_log.error(errorstr);
     throw std::runtime_error(errorstr);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -503,8 +490,6 @@ void SaveGSASInstrumentFile::initConstants(
     throw runtime_error(errss.str());
   }
   */
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -558,8 +543,6 @@ void SaveGSASInstrumentFile::parseProfileTableWorkspace(
     unsigned int bankid = vecbankindex[i];
     profilemap.emplace(bankid, vec_maptemp[i]);
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -738,8 +721,6 @@ void SaveGSASInstrumentFile::convertToGSAS(
       throw runtime_error(errss.str());
     }
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -816,8 +797,6 @@ void SaveGSASInstrumentFile::buildGSASTabulatedProfile(
                   << "\t  " << setw(20) << setprecision(10) << instC << "\t "
                   << setw(20) << setprecision(10) << m_gdt[k] << ".\n";
   }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -842,8 +821,6 @@ void SaveGSASInstrumentFile::writePRMHeader(const vector<unsigned int> &banks,
   fprintf(pFile, "INS   FPATH1     %f \n", m_L1);
   fprintf(pFile, "INS   HTYPE   PNTR \n");
   fclose(pFile);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -983,8 +960,6 @@ void SaveGSASInstrumentFile::writePRMSingleBank(
   }
 
   fclose(pFile);
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1123,8 +1098,6 @@ void SaveGSASInstrumentFile::loadFullprofResolutionFile(
   if (!m_inpWS)
     throw runtime_error("Failed to obtain a table workspace from "
                         "LoadFullprofResolution's output.");
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

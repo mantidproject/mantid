@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidCurveFitting/Algorithms/PlotPeakByLogValue.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -27,6 +28,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Algorithms;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::LinearGenerator;
 
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
 typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
@@ -549,20 +552,81 @@ public:
       TS_ASSERT_EQUALS((*prop)->value(),
                        "Levenberg-Marquardt,AbsError=0.01,RelError=1");
     }
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_histogram_fit() {
+    size_t nbins = 10;
+    auto ws =
+        WorkspaceFactory::Instance().create("Workspace2D", 3, nbins + 1, nbins);
+    double x0 = -10.0;
+    double x1 = 10.0;
+    double dx = (x1 - x0) / static_cast<double>(nbins);
+    ws->setBinEdges(0, nbins + 1, HistogramData::LinearGenerator(x0, dx));
+    ws->setSharedX(1, ws->sharedX(0));
+    ws->setSharedX(2, ws->sharedX(0));
+
+    std::vector<double> amps{20.0, 30.0, 25.0};
+    std::vector<double> cents{0.0, 0.1, -1.0};
+    std::vector<double> fwhms{1.0, 1.1, 0.6};
+    for (size_t i = 0; i < 3; ++i) {
+      std::string fun = "name=FlatBackground,A0=" + std::to_string(fwhms[i]);
+      auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
+      alg->initialize();
+      alg->setProperty("EvaluationType", "Histogram");
+      alg->setProperty("Function", fun);
+      alg->setProperty("InputWorkspace", ws);
+      alg->setProperty("OutputWorkspace", "out");
+      alg->execute();
+      auto calc =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+      ws->dataY(i) = calc->readY(1);
+    }
+    AnalysisDataService::Instance().addOrReplace("InputWS", ws);
+
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setProperty("EvaluationType", "Histogram");
+    alg.setPropertyValue("Input", "InputWS,v1:3");
+    alg.setPropertyValue("OutputWorkspace", "out");
+    alg.setProperty("CreateOutput", true);
+    alg.setPropertyValue("Function", "name=FlatBackground,A0=2");
+    alg.execute();
+
+    {
+      auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+          "InputWS_0_Parameters");
+      TS_ASSERT_DELTA(params->Double(0, 1), 1.0, 1e-15);
+    }
+
+    {
+      auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+          "InputWS_1_Parameters");
+      TS_ASSERT_DELTA(params->Double(0, 1), 1.1, 1e-15);
+    }
+
+    {
+      auto params = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+          "InputWS_2_Parameters");
+      TS_ASSERT_DELTA(params->Double(0, 1), 0.6, 1e-15);
+    }
+
+    AnalysisDataService::Instance().clear();
   }
 
 private:
   WorkspaceGroup_sptr m_wsg;
 
-  void createData() {
+  void createData(bool hist = false) {
     m_wsg.reset(new WorkspaceGroup);
     AnalysisDataService::Instance().add("PlotPeakGroup", m_wsg);
     const int N = 3;
     for (int iWS = 0; iWS < N; ++iWS) {
       auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-          PlotPeak_Expression(iWS), 3, 0, 10, 0.005);
+          PlotPeak_Expression(iWS), 3, 0, 10, 0.005, hist);
       for (int i = 0; i < 3; ++i) {
-        ws->getSpectrum(i)->setSpectrumNo(0);
+        ws->getSpectrum(i).setSpectrumNo(0);
       }
       Kernel::TimeSeriesProperty<double> *logd =
           new Kernel::TimeSeriesProperty<double>("var");
@@ -583,29 +647,24 @@ private:
             numHists, numBins, true);
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("TOF");
-    MantidVecPtr xdata;
-    xdata.access().resize(numBins + 1);
     // Update X data  to a sensible values. Looks roughly like the MARI binning
+    BinEdges xdata(numBins + 1, LinearGenerator(5.0, 5.5));
     // Update the Y values. We don't care about errors here
 
     // We'll simply use a gaussian as a test
     const double peakOneCentre(6493.0), sigmaSqOne(250 * 250.),
         peakTwoCentre(10625.), sigmaSqTwo(50 * 50);
     const double peakOneHeight(3000.), peakTwoHeight(1000.);
-    for (int i = 0; i <= numBins; ++i) {
-      const double xValue = 5.0 + 5.5 * i;
-      if (i < numBins) {
-        testWS->dataY(0)[i] =
-            peakOneHeight *
-            exp(-0.5 * pow(xValue - peakOneCentre, 2.) / sigmaSqOne);
-        testWS->dataY(1)[i] =
-            peakTwoHeight *
-            exp(-0.5 * pow(xValue - peakTwoCentre, 2.) / sigmaSqTwo);
-      }
-      xdata.access()[i] = xValue;
+    for (int i = 0; i < numBins; ++i) {
+      testWS->dataY(0)[i] =
+          peakOneHeight *
+          exp(-0.5 * pow(xdata[i] - peakOneCentre, 2.) / sigmaSqOne);
+      testWS->dataY(1)[i] =
+          peakTwoHeight *
+          exp(-0.5 * pow(xdata[i] - peakTwoCentre, 2.) / sigmaSqTwo);
     }
-    testWS->setX(0, xdata);
-    testWS->setX(1, xdata);
+    testWS->setBinEdges(0, xdata);
+    testWS->setBinEdges(1, xdata);
 
     std::vector<double> edges;
     edges.push_back(0.0);

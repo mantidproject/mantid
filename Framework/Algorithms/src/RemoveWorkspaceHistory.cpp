@@ -11,16 +11,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(RemoveWorkspaceHistory)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-RemoveWorkspaceHistory::RemoveWorkspaceHistory() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-RemoveWorkspaceHistory::~RemoveWorkspaceHistory() {}
-
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string RemoveWorkspaceHistory::name() const {
   return "RemoveWorkspaceHistory";

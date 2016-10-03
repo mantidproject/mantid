@@ -1,15 +1,9 @@
 #include "MantidAlgorithms/GetTimeSeriesLogInformation.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/IEventList.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/Events.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <algorithm>
@@ -33,11 +27,6 @@ GetTimeSeriesLogInformation::GetTimeSeriesLogInformation()
     : API::Algorithm(), m_dataWS(), mRunStartTime(), mFilterT0(), mFilterTf(),
       m_intInfoMap(), m_dblInfoMap(), m_log(nullptr), m_timeVec(), m_valueVec(),
       m_starttime(), m_endtime(), m_ignoreNegativeTime(false) {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-GetTimeSeriesLogInformation::~GetTimeSeriesLogInformation() {}
 
 /** Definition of all input arguments
  */
@@ -81,8 +70,6 @@ void GetTimeSeriesLogInformation::init() {
   declareProperty("IgnoreNegativeTimeInterval", false,
                   "If true, then the time interval with negative number will "
                   "be neglected in doing statistic.");
-
-  return;
 }
 
 /** Main execution
@@ -154,8 +141,6 @@ void GetTimeSeriesLogInformation::exec() {
   // 4. Do more staticts (examine)
   // std::string outputdir = this->getProperty("OutputDirectory");
   // examLog(logname, outputdir);
-
-  return;
 }
 
 /** Do statistic on user proposed range and examine the log
@@ -240,8 +225,6 @@ void GetTimeSeriesLogInformation::processTimeRange() {
     g_log.error(errmsg.str());
     throw std::invalid_argument(errmsg.str());
   }
-
-  return;
 }
 
 /** Convert a value in nanosecond to DateAndTime.  The value is treated as an
@@ -310,11 +293,11 @@ void GetTimeSeriesLogInformation::exportErrorLog(MatrixWorkspace_sptr ws,
                                                  vector<DateAndTime> abstimevec,
                                                  double dts) {
   std::string outputdir = getProperty("OutputDirectory");
-  if (!outputdir.empty() && outputdir[outputdir.size() - 1] != '/')
+  if (!outputdir.empty() && outputdir.back() != '/')
     outputdir += "/";
 
   std::string ofilename = outputdir + "errordeltatime.txt";
-  g_log.notice() << ofilename << std::endl;
+  g_log.notice() << ofilename << '\n';
   std::ofstream ofs;
   ofs.open(ofilename.c_str(), std::ios::out);
 
@@ -344,9 +327,9 @@ void GetTimeSeriesLogInformation::exportErrorLog(MatrixWorkspace_sptr ws,
       int index2 = static_cast<int>(deltapulsetimeSec2 * 60);
 
       ofs << "Error d(T) = " << tempdts << "   vs   Correct d(T) = " << dts
-          << std::endl;
+          << '\n';
       ofs << index1 << "\t\t" << abstimevec[i - 1].totalNanoseconds() << "\t\t"
-          << index2 << "\t\t" << abstimevec[i].totalNanoseconds() << std::endl;
+          << index2 << "\t\t" << abstimevec[i].totalNanoseconds() << '\n';
     }
   }
 
@@ -392,8 +375,8 @@ Workspace2D_sptr GetTimeSeriesLogInformation::calDistributions(
   Workspace2D_sptr distws = boost::dynamic_pointer_cast<Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, numbins,
                                                numbins));
-  MantidVec &vecDeltaT = distws->dataX(0);
-  MantidVec &vecCount = distws->dataY(0);
+  auto &vecDeltaT = distws->mutableX(0);
+  auto &vecCount = distws->mutableY(0);
 
   double countmin = dtmin;
   if (m_ignoreNegativeTime && dtmin < 0)
@@ -525,7 +508,7 @@ void GetTimeSeriesLogInformation::checkLogBasicInforamtion() {
 
   // 4. Output
   /* Temporily disabled
-  g_log.notice() << "Run Start = " << t0.totalNanoseconds() << std::endl;
+  g_log.notice() << "Run Start = " << t0.totalNanoseconds() << '\n';
   g_log.notice() << "First Log: " << "Absolute Time = " <<
   m_timeVec[0].totalNanoseconds() << "(ns), "
                  << "Relative Time = " <<
@@ -534,22 +517,20 @@ void GetTimeSeriesLogInformation::checkLogBasicInforamtion() {
   m_timeVec[f].totalNanoseconds() << "(ns), "
                  << "Relative Time = " <<
   DateAndTime::nanosecondsFromDuration(dtf) << "(ns) \n";
-  g_log.notice() << "Normal   dt = " << numnormal << std::endl;
-  g_log.notice() << "Zero     dt = " << numsame << std::endl;
-  g_log.notice() << "Negative dt = " << numinvert << std::endl;
+  g_log.notice() << "Normal   dt = " << numnormal << '\n';
+  g_log.notice() << "Zero     dt = " << numsame << '\n';
+  g_log.notice() << "Negative dt = " << numinvert << '\n';
   g_log.notice() << "Avg d(T) = " << dt << " seconds +/- " << stddt << ",
-  Frequency = " << 1.0/dt << std::endl;
+  Frequency = " << 1.0/dt << '\n';
   g_log.notice() << "d(T) (unit ms) is in range [" << mindtms << ", " << maxdtms
-  << "]"<< std::endl;
+  << "]"<< '\n';
   g_log.notice() << "Number of d(T) 10% larger than average  = " <<
-  numdtabove10p << std::endl;
+  numdtabove10p << '\n';
   g_log.notice() << "Number of d(T) 10% smaller than average = " <<
-  numdtbelow10p << std::endl;
+  numdtbelow10p << '\n';
 
-  g_log.notice() << "Size of timevec = " << m_timeVec.size() << std::endl;
+  g_log.notice() << "Size of timevec = " << m_timeVec.size() << '\n';
   */
-
-  return;
 }
 
 /** Check whether log values are changing from 2 adjacent time stamps
@@ -563,7 +544,7 @@ void GetTimeSeriesLogInformation::checkLogBasicInforamtion() {
 void GetTimeSeriesLogInformation::checkLogValueChanging(
     vector<DateAndTime> timevec, vector<double> values, double delta) {
   std::stringstream ss;
-  ss << "Alternating Threashold = " << delta << std::endl;
+  ss << "Alternating Threashold = " << delta << '\n';
 
   size_t numchange = 0;
   for (size_t i = 1; i < values.size(); i++) {
@@ -575,15 +556,13 @@ void GetTimeSeriesLogInformation::checkLogValueChanging(
       // An error message
       ss << "@ " << i << "\tDelta = " << tempdelta << "\t\tTime From "
          << timevec[i - 1].totalNanoseconds() << " to "
-         << timevec[i].totalNanoseconds() << std::endl;
+         << timevec[i].totalNanoseconds() << '\n';
     }
   }
 
   m_intInfoMap.insert(
       make_pair("Number of adjacent time stamp w/o value change", numchange));
   g_log.debug() << ss.str();
-
-  return;
 }
 
 } // namespace Mantid

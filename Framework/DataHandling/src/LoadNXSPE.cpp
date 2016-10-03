@@ -33,16 +33,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadNXSPE::LoadNXSPE() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadNXSPE::~LoadNXSPE() {}
-
-//----------------------------------------------------------------------------------------------
 
 /**
  * Calculate the confidence in the string value. This is used for file

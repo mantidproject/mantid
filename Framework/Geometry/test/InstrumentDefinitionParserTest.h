@@ -1,15 +1,16 @@
 #ifndef MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_
 #define MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
+#include <cxxtest/TestSuite.h>
 
 #include <gmock/gmock.h>
 #include <boost/algorithm/string/replace.hpp>
@@ -21,7 +22,7 @@ using namespace testing;
 using ScopedFileHelper::ScopedFile;
 
 class InstrumentDefinitionParserTest : public CxxTest::TestSuite {
-
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
 private:
   /// Mock Type to act as IDF files.
   class MockIDFObject : public Mantid::Geometry::IDFObject {
@@ -39,7 +40,7 @@ private:
     MOCK_CONST_METHOD0(exists, bool());
     MOCK_CONST_METHOD0(getParentDirectory, const Poco::Path());
   };
-
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
   /**
   Helper type to pass around related IDF environment information in a
   collection.

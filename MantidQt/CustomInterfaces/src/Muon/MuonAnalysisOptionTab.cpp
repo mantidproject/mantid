@@ -1,28 +1,23 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisOptionTab.h"
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 #include <QLineEdit>
 #include <QSettings>
-#include <QDesktopServices>
-#include <QUrl>
-
 //-----------------------------------------------------------------------------
 using namespace Mantid::Kernel;
 
-namespace MantidQt
-{
-  using namespace API;
-  using namespace MantidWidgets;
+namespace MantidQt {
+using namespace API;
+using namespace MantidWidgets;
 
-namespace CustomInterfaces
-{
-  using namespace MuonAnalysisHelper;
+namespace CustomInterfaces {
+using namespace MuonAnalysisHelper;
 
-namespace Muon
-{
+namespace Muon {
 
 const QString MuonAnalysisOptionTab::START_TIME_DEFAULT("0.3");
 const QString MuonAnalysisOptionTab::FINISH_TIME_DEFAULT("16.0");
@@ -31,36 +26,41 @@ const QString MuonAnalysisOptionTab::MAX_Y_DEFAULT("");
 const QString MuonAnalysisOptionTab::FIXED_REBIN_DEFAULT("2");
 const QString MuonAnalysisOptionTab::VARIABLE_REBIN_DEFAULT("0.032");
 
-namespace
-{
-  /// static logger instance
-  Logger g_log("MuonAnalysis");
+namespace {
+/// static logger instance
+Logger g_log("MuonAnalysis");
 }
 
-MuonAnalysisOptionTab::MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm, const QString &settingsGroup)
-  : m_uiForm(uiForm), m_autoSaver(settingsGroup)
-{}
+MuonAnalysisOptionTab::MuonAnalysisOptionTab(Ui::MuonAnalysis &uiForm,
+                                             const QString &settingsGroup)
+    : m_uiForm(uiForm), m_autoSaver(settingsGroup) {}
 
 /**
  * Initialise the layout of the tab
  */
-void MuonAnalysisOptionTab::initLayout()
-{
+void MuonAnalysisOptionTab::initLayout() {
   // Register all the widgets for auto-saving
   m_autoSaver.beginGroup("PlotStyleOptions");
   m_autoSaver.registerWidget(m_uiForm.connectPlotType, "connectPlotStyle", 0);
-  m_autoSaver.registerWidget(m_uiForm.timeAxisStartAtInput, "timeAxisStart", START_TIME_DEFAULT);
-  m_autoSaver.registerWidget(m_uiForm.timeAxisFinishAtInput, "timeAxisFinish", FINISH_TIME_DEFAULT);
+  m_autoSaver.registerWidget(m_uiForm.timeAxisStartAtInput, "timeAxisStart",
+                             START_TIME_DEFAULT);
+  m_autoSaver.registerWidget(m_uiForm.timeAxisFinishAtInput, "timeAxisFinish",
+                             FINISH_TIME_DEFAULT);
   m_autoSaver.registerWidget(m_uiForm.timeComboBox, "timeComboBoxIndex", 0);
-  m_autoSaver.registerWidget(m_uiForm.yAxisMinimumInput, "yAxisStart", MIN_Y_DEFAULT);
-  m_autoSaver.registerWidget(m_uiForm.yAxisMaximumInput, "yAxisFinish", MAX_Y_DEFAULT);
-  m_autoSaver.registerWidget(m_uiForm.yAxisAutoscale, "axisAutoScaleOnOff", true);
+  m_autoSaver.registerWidget(m_uiForm.yAxisMinimumInput, "yAxisStart",
+                             MIN_Y_DEFAULT);
+  m_autoSaver.registerWidget(m_uiForm.yAxisMaximumInput, "yAxisFinish",
+                             MAX_Y_DEFAULT);
+  m_autoSaver.registerWidget(m_uiForm.yAxisAutoscale, "axisAutoScaleOnOff",
+                             true);
   m_autoSaver.registerWidget(m_uiForm.showErrorBars, "errorBars", 0);
   m_autoSaver.endGroup();
 
   m_autoSaver.beginGroup("BinningOptions");
-  m_autoSaver.registerWidget(m_uiForm.optionStepSizeText, "rebinFixed", FIXED_REBIN_DEFAULT);
-  m_autoSaver.registerWidget(m_uiForm.binBoundaries, "rebinVariable", VARIABLE_REBIN_DEFAULT);
+  m_autoSaver.registerWidget(m_uiForm.optionStepSizeText, "rebinFixed",
+                             FIXED_REBIN_DEFAULT);
+  m_autoSaver.registerWidget(m_uiForm.binBoundaries, "rebinVariable",
+                             VARIABLE_REBIN_DEFAULT);
   m_autoSaver.registerWidget(m_uiForm.rebinComboBox, "rebinComboBoxIndex", 0);
   m_autoSaver.endGroup();
 
@@ -69,6 +69,9 @@ void MuonAnalysisOptionTab::initLayout()
   m_autoSaver.registerWidget(m_uiForm.newPlotPolicy, "newPlotPolicy", 0);
   m_autoSaver.registerWidget(m_uiForm.hideToolbars, "toolbars", true);
   m_autoSaver.registerWidget(m_uiForm.hideGraphs, "hiddenGraphs", true);
+  m_autoSaver.registerWidget(m_uiForm.spinBoxNPlotsToKeep, "fitsToKeep", 1);
+  m_autoSaver.registerWidget(m_uiForm.chkCompatibilityMode, "compatibilityMode",
+                             false);
   m_autoSaver.endGroup();
 
   // Set validators for double fields
@@ -84,62 +87,76 @@ void MuonAnalysisOptionTab::initLayout()
   // Run slots manually, because default values might not have been changed
   onTimeAxisChanged(m_uiForm.timeComboBox->currentIndex());
   onAutoscaleToggled(m_uiForm.yAxisAutoscale->isChecked());
-  m_uiForm.rebinEntryState->setCurrentIndex(m_uiForm.rebinComboBox->currentIndex());
+  m_uiForm.rebinEntryState->setCurrentIndex(
+      m_uiForm.rebinComboBox->currentIndex());
 
   // Enable auto-saving
   m_autoSaver.setAutoSaveEnabled(true);
 
   // Connect various sync stuff
-  connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onTimeAxisChanged(int)));
-  connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this, SLOT(onAutoscaleToggled(bool)));
-  connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), m_uiForm.rebinEntryState,
-          SLOT(setCurrentIndex(int)));
+  connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(onTimeAxisChanged(int)));
+  connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this,
+          SLOT(onAutoscaleToggled(bool)));
+  connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)),
+          m_uiForm.rebinEntryState, SLOT(setCurrentIndex(int)));
 
   // Connect help clicked
-  connect(m_uiForm.muonAnalysisHelpPlotting, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpSettingsClicked()));
-  connect(m_uiForm.binBoundariesHelp, SIGNAL(clicked()), this, SLOT(rebinHelpClicked()));
+  connect(m_uiForm.muonAnalysisHelpPlotting, SIGNAL(clicked()), this,
+          SLOT(muonAnalysisHelpSettingsClicked()));
+  connect(m_uiForm.binBoundariesHelp, SIGNAL(clicked()), this,
+          SLOT(rebinHelpClicked()));
 
   // Connect auto-updates for plot style
-  connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this, SIGNAL(plotStyleChanged()));
-  connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this, SIGNAL(plotStyleChanged()));
-  connect(m_uiForm.yAxisAutoscale, SIGNAL(clicked()), this, SIGNAL(plotStyleChanged()));
-  connect(m_uiForm.yAxisMinimumInput, SIGNAL(returnPressed ()), this, SIGNAL(plotStyleChanged()));
-  connect(m_uiForm.yAxisMaximumInput, SIGNAL(returnPressed ()), this, SIGNAL(plotStyleChanged()));
-  
+  connect(m_uiForm.connectPlotType, SIGNAL(currentIndexChanged(int)), this,
+          SIGNAL(plotStyleChanged()));
+  connect(m_uiForm.showErrorBars, SIGNAL(clicked()), this,
+          SIGNAL(plotStyleChanged()));
+  connect(m_uiForm.yAxisAutoscale, SIGNAL(clicked()), this,
+          SIGNAL(plotStyleChanged()));
+  connect(m_uiForm.yAxisMinimumInput, SIGNAL(returnPressed()), this,
+          SIGNAL(plotStyleChanged()));
+  connect(m_uiForm.yAxisMaximumInput, SIGNAL(returnPressed()), this,
+          SIGNAL(plotStyleChanged()));
+
   // Connect auto updates of plot data
-  connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.timeAxisStartAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.optionStepSizeText, SIGNAL(returnPressed()), this, SIGNAL(settingsTabUpdatePlot()));
-  connect(m_uiForm.binBoundaries, SIGNAL(returnPressed()), this, SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this,
+          SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.timeAxisStartAtInput, SIGNAL(returnPressed()), this,
+          SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(returnPressed()), this,
+          SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this,
+          SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.optionStepSizeText, SIGNAL(returnPressed()), this,
+          SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.binBoundaries, SIGNAL(returnPressed()), this,
+          SIGNAL(settingsTabUpdatePlot()));
+  connect(m_uiForm.chkCompatibilityMode, SIGNAL(stateChanged(int)), this,
+          SIGNAL(compatibilityModeChanged(int)));
 }
 
 /**
 * Muon Analysis Settings help.
 */
-void MuonAnalysisOptionTab::muonAnalysisHelpSettingsClicked()
-{
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-            "MuonAnalysisSettings"));
+void MuonAnalysisOptionTab::muonAnalysisHelpSettingsClicked() {
+  MantidQt::API::HelpWindow::showCustomInterface(
+      nullptr, QString("Muon_Analysis"), QString("settings"));
 }
 
-
 /*
-* Muon Analysis Rebin help (located on settings wiki).
+* Muon Analysis Rebin help (located in settings section).
 */
-void MuonAnalysisOptionTab::rebinHelpClicked()
-{
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-            "MuonAnalysisSettings#Variable_Rebin"));
+void MuonAnalysisOptionTab::rebinHelpClicked() {
+  MantidQt::API::HelpWindow::showCustomInterface(
+      nullptr, QString("Muon_Analysis"), QString("data-binning"));
 }
 
 /**
  * Run when autoscale check-box state is changed
  * @param state :: New state of the check-box
  */
-void MuonAnalysisOptionTab::onAutoscaleToggled(bool state)
-{
+void MuonAnalysisOptionTab::onAutoscaleToggled(bool state) {
   // Max and min input widgets
   auto maxInput = m_uiForm.yAxisMaximumInput;
   auto minInput = m_uiForm.yAxisMinimumInput;
@@ -152,13 +169,10 @@ void MuonAnalysisOptionTab::onAutoscaleToggled(bool state)
   m_autoSaver.setAutoSaveEnabled(maxInput, !state);
   m_autoSaver.setAutoSaveEnabled(minInput, !state);
 
-  if(state)
-  {
+  if (state) {
     maxInput->setText("N/A");
     minInput->setText("N/A");
-  }
-  else
-  {
+  } else {
     m_autoSaver.loadWidgetValue(maxInput);
     m_autoSaver.loadWidgetValue(minInput);
   }
@@ -168,8 +182,7 @@ void MuonAnalysisOptionTab::onAutoscaleToggled(bool state)
  * Run when time axis combo-box is changed
  * @param index :: New index selected in the combo box
  */
-void MuonAnalysisOptionTab::onTimeAxisChanged(int index)
-{
+void MuonAnalysisOptionTab::onTimeAxisChanged(int index) {
   // Start input widget
   auto startInput = m_uiForm.timeAxisStartAtInput;
 
@@ -180,31 +193,28 @@ void MuonAnalysisOptionTab::onTimeAxisChanged(int index)
   m_autoSaver.setAutoSaveEnabled(startInput, index == 2);
 
   // Get new value of the Start input
-  switch(index)
-  {
-  case(0): // Start at First Good Data
+  switch (index) {
+  case (0): // Start at First Good Data
     startInput->setText(m_uiForm.firstGoodBinFront->text());
     break;
-  case(1): // Start at Time Zero
+  case (1): // Start at Time Zero
     startInput->setText("0.0");
     break;
-  case(2): // Custom Value
+  case (2): // Custom Value
     m_autoSaver.loadWidgetValue(startInput);
     break;
   }
 
-  if(index == 0)
-  {
-    // Synchronize First Good Data box on Home tab with the one on this tab, if Start at First Good
+  if (index == 0) {
+    // Synchronize First Good Data box on Home tab with the one on this tab, if
+    // Start at First Good
     // Data is enabled.
-    connect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString&)),
-            startInput, SLOT(setText(const QString&)));
-  }
-  else
-  {
+    connect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString &)),
+            startInput, SLOT(setText(const QString &)));
+  } else {
     // Disable synchronization otherwise
-    disconnect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString&)),
-               startInput, SLOT(setText(const QString&)));
+    disconnect(m_uiForm.firstGoodBinFront, SIGNAL(textChanged(const QString &)),
+               startInput, SLOT(setText(const QString &)));
   }
 }
 
@@ -215,11 +225,11 @@ void MuonAnalysisOptionTab::onTimeAxisChanged(int index)
  *   - YAxisAuto: True or False
  *   - YAxisMin/YAxisMax: Double values
  */
-QMap<QString, QString> MuonAnalysisOptionTab::parsePlotStyleParams() const
-{
+QMap<QString, QString> MuonAnalysisOptionTab::parsePlotStyleParams() const {
   QMap<QString, QString> params;
 
-  params["ConnectType"] = QString::number(m_uiForm.connectPlotType->currentIndex());
+  params["ConnectType"] =
+      QString::number(m_uiForm.connectPlotType->currentIndex());
 
   params["ShowErrors"] = m_uiForm.showErrorBars->isChecked() ? "True" : "False";
 
@@ -229,99 +239,86 @@ QMap<QString, QString> MuonAnalysisOptionTab::parsePlotStyleParams() const
 
   params["YAxisMin"] = params["YAxisMax"] = "";
 
-  if ( ! isAutoScaleEnabled )
-  {
+  if (!isAutoScaleEnabled) {
     // If auto-scale not enabled, retrieve start/end values
 
-    QLineEdit* minY = m_uiForm.yAxisMinimumInput;
-    QLineEdit* maxY = m_uiForm.yAxisMaximumInput;
+    QLineEdit *minY = m_uiForm.yAxisMinimumInput;
+    QLineEdit *maxY = m_uiForm.yAxisMaximumInput;
 
     double minYVal(Mantid::EMPTY_DBL());
     double maxYVal(Mantid::EMPTY_DBL());
 
-    if ( ! minY->text().isEmpty() )
-    {
-      minYVal = getValidatedDouble(minY, MIN_Y_DEFAULT, "Y axis minimum", g_log);
+    if (!minY->text().isEmpty()) {
+      minYVal =
+          getValidatedDouble(minY, MIN_Y_DEFAULT, "Y axis minimum", g_log);
     }
 
-    if ( ! maxY->text().isEmpty() )
-    {
-      maxYVal = getValidatedDouble(maxY, MAX_Y_DEFAULT, "Y axis maximum", g_log);
+    if (!maxY->text().isEmpty()) {
+      maxYVal =
+          getValidatedDouble(maxY, MAX_Y_DEFAULT, "Y axis maximum", g_log);
     }
 
     // If both specified, check if min is less than max
-    if ( minYVal != Mantid::EMPTY_DBL() && maxYVal != Mantid::EMPTY_DBL() && minYVal >= maxYVal )
-    {
+    if (minYVal != Mantid::EMPTY_DBL() && maxYVal != Mantid::EMPTY_DBL() &&
+        minYVal >= maxYVal) {
       g_log.warning("Y min should be less than Y max. Reset to default.");
       minY->setText(MIN_Y_DEFAULT);
       maxY->setText(MAX_Y_DEFAULT);
-    }
-    else
-    {
-      if ( minYVal != Mantid::EMPTY_DBL() )
+    } else {
+      if (minYVal != Mantid::EMPTY_DBL())
         params["YAxisMin"] = QString::number(minYVal);
 
-      if ( maxYVal != Mantid::EMPTY_DBL() )
+      if (maxYVal != Mantid::EMPTY_DBL())
         params["YAxisMax"] = QString::number(maxYVal);
     }
   }
 
-  return(params);
+  return (params);
 }
 
 /**
  * Retrieve selected type of the start time
  * @return Type of the start time as selected by user
  */
-MuonAnalysisOptionTab::StartTimeType MuonAnalysisOptionTab::getStartTimeType()
-{
+MuonAnalysisOptionTab::StartTimeType MuonAnalysisOptionTab::getStartTimeType() {
   QString selectedType = m_uiForm.timeComboBox->currentText();
 
-  if (selectedType == "Start at First Good Data")
-  {
+  if (selectedType == "Start at First Good Data") {
     return FirstGoodData;
-  }
-  else if (selectedType == "Start at Time Zero")
-  {
+  } else if (selectedType == "Start at Time Zero") {
     return TimeZero;
-  }
-  else if (selectedType == "Custom Value")
-  {
+  } else if (selectedType == "Custom Value") {
     return Custom;
-  }
-  else
-  {
+  } else {
     // Just in case misspelled type or added a new one
     throw std::runtime_error("Unknown start time type selection");
   }
 }
 
 /**
- * Retrieve custom start time value. This only makes sense when getStartTimeType() is Custom.
+ * Retrieve custom start time value. This only makes sense when
+ * getStartTimeType() is Custom.
  * @return Value in the custom start time field
  */
-double MuonAnalysisOptionTab::getCustomStartTime()
-{
-  QLineEdit* w = m_uiForm.timeAxisStartAtInput;
+double MuonAnalysisOptionTab::getCustomStartTime() {
+  QLineEdit *w = m_uiForm.timeAxisStartAtInput;
 
   return getValidatedDouble(w, START_TIME_DEFAULT, "custom start time", g_log);
 }
 
 /**
- * Retrieve custom finish time value. If the value is not specified - returns EMPTY_DBL().
+ * Retrieve custom finish time value. If the value is not specified - returns
+ * EMPTY_DBL().
  * @return Value in the custom finish field or EMPTY_DBL()
  */
-double MuonAnalysisOptionTab::getCustomFinishTime()
-{
-  QLineEdit* w = m_uiForm.timeAxisFinishAtInput;
+double MuonAnalysisOptionTab::getCustomFinishTime() {
+  QLineEdit *w = m_uiForm.timeAxisFinishAtInput;
 
-  if (w->text().isEmpty())
-  {
+  if (w->text().isEmpty()) {
     return Mantid::EMPTY_DBL();
-  }
-  else
-  {
-    return getValidatedDouble(w, FINISH_TIME_DEFAULT, "custom finish time", g_log);
+  } else {
+    return getValidatedDouble(w, FINISH_TIME_DEFAULT, "custom finish time",
+                              g_log);
   }
 }
 
@@ -329,77 +326,70 @@ double MuonAnalysisOptionTab::getCustomFinishTime()
  * Returns rebin type as selected by user
  * @return Rebin type
  */
-MuonAnalysisOptionTab::RebinType MuonAnalysisOptionTab::getRebinType()
-{
+MuonAnalysisOptionTab::RebinType MuonAnalysisOptionTab::getRebinType() {
   QString selectedType = m_uiForm.rebinComboBox->currentText();
 
-  if (selectedType == "None")
-  {
+  if (selectedType == "None") {
     return NoRebin;
-  }
-  else if (selectedType == "Fixed")
-  {
+  } else if (selectedType == "Fixed") {
     return FixedRebin;
-  }
-  else if (selectedType == "Variable")
-  {
+  } else if (selectedType == "Variable") {
     return VariableRebin;
-  }
-  else
-  {
+  } else {
     throw std::runtime_error("Unknow rebin type selection");
   }
 }
 
 /**
- * Returns variable rebing params as set by user. Makes sense only if getRebinType() is VariableRebin
+ * Returns variable rebing params as set by user. Makes sense only if
+ * getRebinType() is VariableRebin
  * @return Rebin params string
  */
-std::string MuonAnalysisOptionTab::getRebinParams()
-{
-  QLineEdit* w = m_uiForm.binBoundaries;
+std::string MuonAnalysisOptionTab::getRebinParams() {
+  QLineEdit *w = m_uiForm.binBoundaries;
 
-  if (w->text().isEmpty())
-  {
+  if (w->text().isEmpty()) {
     g_log.warning("Binning parameters are empty. Reset to default value.");
     w->setText(VARIABLE_REBIN_DEFAULT);
     return VARIABLE_REBIN_DEFAULT.toStdString();
-  }
-  else
-  {
+  } else {
     return w->text().toStdString();
   }
 }
 
 /**
- * Returns rebin step size as set by user. Make sense only if getRebinType() is FixedRebin
+ * Returns rebin step size as set by user. Make sense only if getRebinType() is
+ * FixedRebin
  * @return Rebin step size
  */
-double MuonAnalysisOptionTab::getRebinStep()
-{
-  return getValidatedDouble(m_uiForm.optionStepSizeText, FIXED_REBIN_DEFAULT, "binning step", g_log);
+double MuonAnalysisOptionTab::getRebinStep() {
+  return getValidatedDouble(m_uiForm.optionStepSizeText, FIXED_REBIN_DEFAULT,
+                            "binning step", g_log);
 }
 
 /**
  * @return Currently selected new plot policy
  */
-MuonAnalysisOptionTab::NewPlotPolicy MuonAnalysisOptionTab::newPlotPolicy()
-{
+MuonAnalysisOptionTab::NewPlotPolicy MuonAnalysisOptionTab::newPlotPolicy() {
   QMap<QString, NewPlotPolicy> policyMap;
   policyMap["Create new window"] = NewWindow;
   policyMap["Use previous window"] = PreviousWindow;
 
   QString selectedPolicy = m_uiForm.newPlotPolicy->currentText();
-  if ( !policyMap.contains(selectedPolicy) )
-  {
+  if (!policyMap.contains(selectedPolicy)) {
     throw std::runtime_error("Unknown new plot policy selection");
-  }
-  else
-  {
+  } else {
     return policyMap[selectedPolicy];
   }
 }
 
+/**
+ * Returns whether or not "compatibility mode" is set.
+ * @returns whether the checkbox is ticked
+ */
+bool MuonAnalysisOptionTab::getCompatibilityMode() const {
+  return m_uiForm.chkCompatibilityMode->isChecked();
+}
 }
 }
 }

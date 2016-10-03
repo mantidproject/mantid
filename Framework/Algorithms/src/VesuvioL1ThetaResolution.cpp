@@ -38,16 +38,6 @@ public:
 DECLARE_ALGORITHM(VesuvioL1ThetaResolution)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-VesuvioL1ThetaResolution::VesuvioL1ThetaResolution() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-VesuvioL1ThetaResolution::~VesuvioL1ThetaResolution() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string VesuvioL1ThetaResolution::name() const {
@@ -194,7 +184,7 @@ void VesuvioL1ThetaResolution::exec() {
     std::stringstream report;
     report << "Detector " << det->getID();
     prog.report(report.str());
-    g_log.information() << "Detector ID " << det->getID() << std::endl;
+    g_log.information() << "Detector ID " << det->getID() << '\n';
 
     // Do simulation
     calculateDetector(det, l1, theta);
@@ -205,13 +195,12 @@ void VesuvioL1ThetaResolution::exec() {
 
     g_log.information() << "l0: mean=" << l1Stats.mean
                         << ", std.dev.=" << l1Stats.standard_deviation
-                        << std::endl
-                        << "theta: mean=" << thetaStats.mean
+                        << "\ntheta: mean=" << thetaStats.mean
                         << ", std.dev.=" << thetaStats.standard_deviation
-                        << std::endl;
+                        << '\n';
 
     // Set values in output workspace
-    const int specNo = m_instWorkspace->getSpectrum(i)->getSpectrumNo();
+    const int specNo = m_instWorkspace->getSpectrum(i).getSpectrumNo();
     m_outputWorkspace->dataX(0)[i] = specNo;
     m_outputWorkspace->dataX(1)[i] = specNo;
     m_outputWorkspace->dataX(2)[i] = specNo;
@@ -231,9 +220,9 @@ void VesuvioL1ThetaResolution::exec() {
 
       m_l1DistributionWs->dataY(i) = y;
 
-      auto spec = m_l1DistributionWs->getSpectrum(i);
-      spec->setSpectrumNo(specNo);
-      spec->addDetectorID(det->getID());
+      auto &spec = m_l1DistributionWs->getSpectrum(i);
+      spec.setSpectrumNo(specNo);
+      spec.addDetectorID(det->getID());
     }
 
     // Process data for theta distribution
@@ -246,9 +235,9 @@ void VesuvioL1ThetaResolution::exec() {
 
       m_thetaDistributionWs->dataY(i) = y;
 
-      auto spec = m_thetaDistributionWs->getSpectrum(i);
-      spec->setSpectrumNo(specNo);
-      spec->addDetectorID(det->getID());
+      auto &spec = m_thetaDistributionWs->getSpectrum(i);
+      spec.setSpectrumNo(specNo);
+      spec.addDetectorID(det->getID());
     }
   }
 
@@ -292,7 +281,7 @@ void VesuvioL1ThetaResolution::loadInstrument() {
   // Load the PAR file if provided
   const std::string parFilename = getPropertyValue("PARFile");
   if (!parFilename.empty()) {
-    g_log.information() << "Loading PAR file: " << parFilename << std::endl;
+    g_log.information() << "Loading PAR file: " << parFilename << '\n';
 
     // Get header format
     std::map<size_t, std::string> headerFormats;
@@ -305,13 +294,13 @@ void VesuvioL1ThetaResolution::loadInstrument() {
     }
     std::string header;
     getline(parFile, header);
-    g_log.debug() << "PAR file header: " << header << std::endl;
+    g_log.debug() << "PAR file header: " << header << '\n';
     boost::trim(header);
     std::vector<std::string> headers;
     boost::split(headers, header, boost::is_any_of("\t "),
                  boost::token_compress_on);
     size_t numCols = headers.size();
-    g_log.debug() << "PAR file columns: " << numCols << std::endl;
+    g_log.debug() << "PAR file columns: " << numCols << '\n';
 
     std::string headerFormat = headerFormats[numCols];
     if (headerFormat.empty()) {
@@ -320,7 +309,7 @@ void VesuvioL1ThetaResolution::loadInstrument() {
             << " (expected either 5 or 6.";
       throw std::runtime_error(error.str());
     }
-    g_log.debug() << "PAR file header format: " << headerFormat << std::endl;
+    g_log.debug() << "PAR file header format: " << headerFormat << '\n';
 
     // Update instrument
     IAlgorithm_sptr updateInst =
@@ -382,12 +371,11 @@ void VesuvioL1ThetaResolution::calculateDetector(
   const double detWidth = detBoxWidth.X() * 100;
   const double detHeight = detBoxWidth.Y() * 100;
 
-  g_log.debug() << "detWidth=" << detWidth << std::endl
-                << "detHeight=" << detHeight << std::endl;
+  g_log.debug() << "detWidth=" << detWidth << "\ndetHeight=" << detHeight
+                << '\n';
 
   // Scattering angle in rad
-  const double theta =
-      m_instWorkspace->detectorTwoTheta(IDetector_const_sptr(detector));
+  const double theta = m_instWorkspace->detectorTwoTheta(*detector);
   if (theta == 0.0)
     return;
 
@@ -442,10 +430,8 @@ VesuvioL1ThetaResolution::processDistribution(MatrixWorkspace_sptr ws,
   double xMax(DBL_MIN);
   for (size_t i = 0; i < numHist; i++) {
     const std::vector<double> &x = ws->readX(i);
-    if (x[0] < xMin)
-      xMin = x[0];
-    if (x[x.size() - 1] > xMax)
-      xMax = x[x.size() - 1];
+    xMin = std::min(xMin, x.front());
+    xMax = std::max(xMax, x.back());
   }
 
   std::stringstream binParams;

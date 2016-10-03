@@ -133,7 +133,7 @@ void *DllOpen::OpenDllImpl(const std::string &filePath) {
     _snprintf((char *)lpDisplayBuf, n, "failed with error %lu: %s", dw,
               (char *)lpMsgBuf);
     g_log.error() << "Could not open library " << filePath << ": "
-                  << (LPCTSTR)lpDisplayBuf << std::endl;
+                  << (LPCTSTR)lpDisplayBuf << '\n';
 
     LocalFree(lpMsgBuf);
     LocalFree(lpDisplayBuf);

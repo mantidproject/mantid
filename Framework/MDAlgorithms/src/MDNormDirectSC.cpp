@@ -96,6 +96,13 @@ void MDNormDirectSC::init() {
       "An input workspace containing integrated vanadium (a measure of the "
       "solid angle).");
 
+  declareProperty(make_unique<PropertyWithValue<bool>>("SkipSafetyCheck", false,
+                                                       Direction::Input),
+                  "If set to true, the algorithm does "
+                  "not check history if the workspace was modified since the"
+                  "ConvertToMD algorithm was run, and assume that the direct "
+                  "geometry inelastic mode is used.");
+
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
@@ -141,7 +148,8 @@ void MDNormDirectSC::exec() {
  */
 void MDNormDirectSC::cacheInputs() {
   m_inputWS = getProperty("InputWorkspace");
-  if (inputEnergyMode() != "Direct") {
+  bool skipCheck = getProperty("SkipSafetyCheck");
+  if (!skipCheck && (inputEnergyMode() != "Direct")) {
     throw std::invalid_argument("Invalid energy transfer mode. Algorithm only "
                                 "supports direct geometry spectrometers.");
   }
@@ -206,23 +214,17 @@ void MDNormDirectSC::cacheInputs() {
 std::string MDNormDirectSC::inputEnergyMode() const {
   const auto &hist = m_inputWS->getHistory();
   const size_t nalgs = hist.size();
-  const auto &lastAlgorithm = hist.lastAlgorithm();
+  const auto &lastAlgHist = hist.getAlgorithmHistory(nalgs - 1);
+  const auto &penultimateAlgHist = hist.getAlgorithmHistory(nalgs - 2);
 
-  std::string emode("");
-  if (lastAlgorithm->name() == "ConvertToMD") {
-    emode = lastAlgorithm->getPropertyValue("dEAnalysisMode");
-  } else if ((lastAlgorithm->name() == "Load" ||
-              hist.lastAlgorithm()->name() == "LoadMD") &&
-             hist.getAlgorithmHistory(nalgs - 2)->name() == "ConvertToMD") {
+  std::string emode;
+  if (lastAlgHist->name() == "ConvertToMD") {
+    emode = lastAlgHist->getPropertyValue("dEAnalysisMode");
+  } else if ((lastAlgHist->name() == "Load" ||
+              lastAlgHist->name() == "LoadMD") &&
+             penultimateAlgHist->name() == "ConvertToMD") {
     // get dEAnalysisMode
-    PropertyHistories histvec =
-        hist.getAlgorithmHistory(nalgs - 2)->getProperties();
-    for (auto &hist : histvec) {
-      if (hist->name() == "dEAnalysisMode") {
-        emode = hist->value();
-        break;
-      }
-    }
+    emode = penultimateAlgHist->getPropertyValue("dEAnalysisMode");
   } else {
     throw std::invalid_argument("The last algorithm in the history of the "
                                 "input workspace is not ConvertToMD");
@@ -242,7 +244,8 @@ MDHistoWorkspace_sptr MDNormDirectSC::binInputWS() {
   for (auto prop : props) {
     const auto &propName = prop->name();
     if (propName != "SolidAngleWorkspace" &&
-        propName != "OutputNormalizationWorkspace") {
+        propName != "OutputNormalizationWorkspace" &&
+        propName != "SkipSafetyCheck") {
       binMD->setPropertyValue(propName, prop->value());
     }
   }
@@ -257,7 +260,7 @@ MDHistoWorkspace_sptr MDNormDirectSC::binInputWS() {
  */
 void MDNormDirectSC::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  m_normWS.reset(dataWS.clone().release());
+  m_normWS = dataWS.clone();
   m_normWS->setTo(0., 0., 0.);
 }
 
@@ -317,10 +320,8 @@ Kernel::Matrix<coord_t> MDNormDirectSC::findIntergratedDimensions(
     if (affineMat[row][0] == 1.) {
       m_hIntegrated = false;
       m_hIdx = row;
-      if (m_hmin < dimMin)
-        m_hmin = dimMin;
-      if (m_hmax > dimMax)
-        m_hmax = dimMax;
+      m_hmin = std::max(m_hmin, dimMin);
+      m_hmax = std::min(m_hmax, dimMax);
       if (m_hmin > dimMax || m_hmax < dimMin) {
         skipNormalization = true;
       }
@@ -328,10 +329,8 @@ Kernel::Matrix<coord_t> MDNormDirectSC::findIntergratedDimensions(
     if (affineMat[row][1] == 1.) {
       m_kIntegrated = false;
       m_kIdx = row;
-      if (m_kmin < dimMin)
-        m_kmin = dimMin;
-      if (m_kmax > dimMax)
-        m_kmax = dimMax;
+      m_kmin = std::max(m_kmin, dimMin);
+      m_kmax = std::min(m_kmax, dimMax);
       if (m_kmin > dimMax || m_kmax < dimMin) {
         skipNormalization = true;
       }
@@ -339,10 +338,8 @@ Kernel::Matrix<coord_t> MDNormDirectSC::findIntergratedDimensions(
     if (affineMat[row][2] == 1.) {
       m_lIntegrated = false;
       m_lIdx = row;
-      if (m_lmin < dimMin)
-        m_lmin = dimMin;
-      if (m_lmax > dimMax)
-        m_lmax = dimMax;
+      m_lmin = std::max(m_lmin, dimMin);
+      m_lmax = std::min(m_lmax, dimMax);
       if (m_lmin > dimMax || m_lmax < dimMin) {
         skipNormalization = true;
       }
@@ -351,10 +348,8 @@ Kernel::Matrix<coord_t> MDNormDirectSC::findIntergratedDimensions(
     if (affineMat[row][3] == 1.) {
       m_dEIntegrated = false;
       m_eIdx = row;
-      if (m_dEmin < dimMin)
-        m_dEmin = dimMin;
-      if (m_dEmax > dimMax)
-        m_dEmax = dimMax;
+      m_dEmin = std::max(m_dEmin, dimMin);
+      m_dEmax = std::min(m_dEmax, dimMax);
       if (m_dEmin > dimMax || m_dEmax < dimMin) {
         skipNormalization = true;
       }
@@ -377,9 +372,10 @@ Kernel::Matrix<coord_t> MDNormDirectSC::findIntergratedDimensions(
  * Stores the X values from each H,K,L dimension as member variables
  */
 void MDNormDirectSC::cacheDimensionXValues() {
-  const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass *
-                           PhysicalConstants::meV * 1e-20 /
-                           (PhysicalConstants::h * PhysicalConstants::h);
+  constexpr double energyToK = 8.0 * M_PI * M_PI *
+                               PhysicalConstants::NeutronMass *
+                               PhysicalConstants::meV * 1e-20 /
+                               (PhysicalConstants::h * PhysicalConstants::h);
   if (!m_hIntegrated) {
     auto &hDim = *m_normWS->getDimension(m_hIdx);
     m_hX.resize(hDim.getNBins());
@@ -407,9 +403,8 @@ void MDNormDirectSC::cacheDimensionXValues() {
     m_eX.resize(eDim.getNBins());
     for (size_t i = 0; i < m_eX.size(); ++i) {
       double temp = m_Ei - eDim.getX(i);
-      if (temp <= 0)
-        temp = 0.;
-      m_eX[i] = std::sqrt(energyToK * (temp));
+      temp = std::max(temp, 0.);
+      m_eX[i] = std::sqrt(energyToK * temp);
     }
   }
 }
@@ -423,9 +418,10 @@ void MDNormDirectSC::cacheDimensionXValues() {
 void MDNormDirectSC::calculateNormalization(
     const std::vector<coord_t> &otherValues,
     const Kernel::Matrix<coord_t> &affineTrans) {
-  const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass *
-                           PhysicalConstants::meV * 1e-20 /
-                           (PhysicalConstants::h * PhysicalConstants::h);
+  constexpr double energyToK = 8.0 * M_PI * M_PI *
+                               PhysicalConstants::NeutronMass *
+                               PhysicalConstants::meV * 1e-20 /
+                               (PhysicalConstants::h * PhysicalConstants::h);
   const auto &exptInfoZero = *(m_inputWS->getExperimentInfo(0));
   typedef Kernel::PropertyWithValue<std::vector<double>> VectorDoubleProperty;
   auto *rubwLog =
@@ -648,8 +644,7 @@ MDNormDirectSC::calculateIntersections(const double theta, const double phi) {
           if ((ki >= m_kmin) && (ki <= m_kmax) && (li >= m_lmin) &&
               (li <= m_lmax)) {
             double momi = fmom * (hi - hStart) + m_kfmin;
-            Mantid::Kernel::VMD v(hi, ki, li, momi);
-            intersections.push_back(v);
+            intersections.emplace_back(hi, ki, li, momi);
           }
         }
       }
@@ -662,8 +657,7 @@ MDNormDirectSC::calculateIntersections(const double theta, const double phi) {
       double lhmin = fl * (m_hmin - hStart) + lStart;
       if ((khmin >= m_kmin) && (khmin <= m_kmax) && (lhmin >= m_lmin) &&
           (lhmin <= m_lmax)) {
-        Mantid::Kernel::VMD v(m_hmin, khmin, lhmin, momhMin);
-        intersections.push_back(v);
+        intersections.emplace_back(m_hmin, khmin, lhmin, momhMin);
       }
     }
     double momhMax = fmom * (m_hmax - hStart) + m_kfmin;
@@ -673,8 +667,7 @@ MDNormDirectSC::calculateIntersections(const double theta, const double phi) {
       double lhmax = fl * (m_hmax - hStart) + lStart;
       if ((khmax >= m_kmin) && (khmax <= m_kmax) && (lhmax >= m_lmin) &&
           (lhmax <= m_lmax)) {
-        Mantid::Kernel::VMD v(m_hmax, khmax, lhmax, momhMax);
-        intersections.push_back(v);
+        intersections.emplace_back(m_hmax, khmax, lhmax, momhMax);
       }
     }
   }
@@ -697,8 +690,7 @@ MDNormDirectSC::calculateIntersections(const double theta, const double phi) {
           if ((hi >= m_hmin) && (hi <= m_hmax) && (li >= m_lmin) &&
               (li <= m_lmax)) {
             double momi = fmom * (ki - kStart) + m_kfmin;
-            Mantid::Kernel::VMD v(hi, ki, li, momi);
-            intersections.push_back(v);
+            intersections.emplace_back(hi, ki, li, momi);
           }
         }
       }
@@ -710,8 +702,7 @@ MDNormDirectSC::calculateIntersections(const double theta, const double phi) {
       double lkmin = fl * (m_kmin - kStart) + lStart;
       if ((hkmin >= m_hmin) && (hkmin <= m_hmax) && (lkmin >= m_lmin) &&
           (lkmin <= m_lmax)) {
-        Mantid::Kernel::VMD v(hkmin, m_kmin, lkmin, momkMin);
-        intersections.push_back(v);
+        intersections.emplace_back(hkmin, m_kmin, lkmin, momkMin);
       }
     }
     double momkMax = fmom * (m_kmax - kStart) + m_kfmin;
@@ -721,8 +712,7 @@ MDNormDirectSC::calculateIntersections(const double theta, const double phi) {
       double lkmax = fl * (m_kmax - kStart) + lStart;
       if ((hkmax >= m_hmin) && (hkmax <= m_hmax) && (lkmax >= m_lmin) &&
           (lkmax <= m_lmax)) {
-        Mantid::Kernel::VMD v(hkmax, m_kmax, lkmax, momkMax);
-        intersections.push_back(v);
+        intersections.emplace_back(hkmax, m_kmax, lkmax, momkMax);
       }
     }
   }
@@ -742,8 +732,7 @@ MDNormDirectSC::calculateIntersections(const double theta, const double phi) {
           if ((hi >= m_hmin) && (hi <= m_hmax) && (ki >= m_kmin) &&
               (ki <= m_kmax)) {
             double momi = fmom * (li - lStart) + m_kfmin;
-            Mantid::Kernel::VMD v(hi, ki, li, momi);
-            intersections.push_back(v);
+            intersections.emplace_back(hi, ki, li, momi);
           }
         }
       }
@@ -755,8 +744,7 @@ MDNormDirectSC::calculateIntersections(const double theta, const double phi) {
       double klmin = fk * (m_lmin - lStart) + kStart;
       if ((hlmin >= m_hmin) && (hlmin <= m_hmax) && (klmin >= m_kmin) &&
           (klmin <= m_kmax)) {
-        Mantid::Kernel::VMD v(hlmin, klmin, m_lmin, momlMin);
-        intersections.push_back(v);
+        intersections.emplace_back(hlmin, klmin, m_lmin, momlMin);
       }
     }
     double momlMax = fmom * (m_lmax - lStart) + m_kfmin;
@@ -766,8 +754,7 @@ MDNormDirectSC::calculateIntersections(const double theta, const double phi) {
       double klmax = fk * (m_lmax - lStart) + kStart;
       if ((hlmax >= m_hmin) && (hlmax <= m_hmax) && (klmax >= m_kmin) &&
           (klmax <= m_kmax)) {
-        Mantid::Kernel::VMD v(hlmax, klmax, m_lmax, momlMax);
-        intersections.push_back(v);
+        intersections.emplace_back(hlmax, klmax, m_lmax, momlMax);
       }
     }
   }
@@ -782,8 +769,7 @@ MDNormDirectSC::calculateIntersections(const double theta, const double phi) {
         double l = qin.Z() - qout.Z() * kfi;
         if ((h >= m_hmin) && (h <= m_hmax) && (k >= m_kmin) && (k <= m_kmax) &&
             (l >= m_lmin) && (l <= m_lmax)) {
-          Mantid::Kernel::VMD v(h, k, l, kfi);
-          intersections.push_back(v);
+          intersections.emplace_back(h, k, l, kfi);
         }
       }
     }
@@ -792,21 +778,15 @@ MDNormDirectSC::calculateIntersections(const double theta, const double phi) {
   // endpoints
   if ((hStart >= m_hmin) && (hStart <= m_hmax) && (kStart >= m_kmin) &&
       (kStart <= m_kmax) && (lStart >= m_lmin) && (lStart <= m_lmax)) {
-    Mantid::Kernel::VMD v(hStart, kStart, lStart, m_kfmin);
-    intersections.push_back(v);
+    intersections.emplace_back(hStart, kStart, lStart, m_kfmin);
   }
   if ((hEnd >= m_hmin) && (hEnd <= m_hmax) && (kEnd >= m_kmin) &&
       (kEnd <= m_kmax) && (lEnd >= m_lmin) && (lEnd <= m_lmax)) {
-    Mantid::Kernel::VMD v(hEnd, kEnd, lEnd, m_kfmax);
-    intersections.push_back(v);
+    intersections.emplace_back(hEnd, kEnd, lEnd, m_kfmax);
   }
 
   // sort intersections by final momentum
-  typedef std::vector<Mantid::Kernel::VMD>::iterator IterType;
-  std::stable_sort<IterType, bool (*)(const Mantid::Kernel::VMD &,
-                                      const Mantid::Kernel::VMD &)>(
-      intersections.begin(), intersections.end(), compareMomentum);
-
+  std::stable_sort(intersections.begin(), intersections.end(), compareMomentum);
   return intersections;
 }
 

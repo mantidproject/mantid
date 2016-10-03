@@ -7,16 +7,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(Segfault)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-Segfault::Segfault() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-Segfault::~Segfault() {}
-
-//----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string Segfault::name() const { return "Segfault"; }

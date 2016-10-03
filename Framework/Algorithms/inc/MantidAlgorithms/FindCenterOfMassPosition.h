@@ -41,10 +41,6 @@ namespace Algorithms {
 */
 class DLLExport FindCenterOfMassPosition : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  FindCenterOfMassPosition() : API::Algorithm() {}
-  /// Virtual destructor
-  ~FindCenterOfMassPosition() override {}
   /// Algorithm's name
   const std::string name() const override { return "FindCenterOfMassPosition"; }
   /// Summary of algorithms purpose

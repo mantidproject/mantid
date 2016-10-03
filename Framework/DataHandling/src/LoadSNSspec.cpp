@@ -7,10 +7,9 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
-
-#include <boost/tokenizer.hpp>
+#include "MantidKernel/StringTokenizer.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <cstring>
 #include <fstream>
@@ -20,21 +19,22 @@ namespace DataHandling {
 DECLARE_FILELOADER_ALGORITHM(LoadSNSspec)
 
 /**
- * Return the confidence with with this algorithm can load the file
- * @param descriptor A descriptor for the file
- * @returns An integer specifying the confidence level. 0 indicates it will not
- * be used
- */
+* Return the confidence with with this algorithm can load the file
+* @param descriptor A descriptor for the file
+* @returns An integer specifying the confidence level. 0 indicates it will not
+* be used
+*/
 int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
   if (!descriptor.isAscii())
     return 0;
 
   auto &file = descriptor.data();
 
-  int confidence(0), axiscols(0), datacols(0);
+  int confidence(0);
+  size_t axiscols(0), datacols(0);
   std::string str;
-  typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-  boost::char_separator<char> sep(" ");
+  typedef Mantid::Kernel::StringTokenizer tokenizer;
+  const std::string sep = " ";
   bool snsspec(false);
 
   while (std::getline(file, str)) {
@@ -45,12 +45,11 @@ int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
 
     try {
       // if it's comment line
+      tokenizer tok(str, sep,
+                    Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
       if (str.at(0) == '#') {
         if (str.at(1) == 'L') {
-          tokenizer tok(str, sep);
-          for (tokenizer::iterator beg = tok.begin(); beg != tok.end(); ++beg) {
-            ++axiscols;
-          }
+          axiscols = tok.count();
           // if the file contains a comment line starting with "#L" followed
           // by three columns this could be loadsnsspec file
           if (axiscols > 2) {
@@ -59,10 +58,7 @@ int LoadSNSspec::confidence(Kernel::FileDescriptor &descriptor) const {
         }
       } else {
         // check first data line is a 3 column line
-        tokenizer tok(str, sep);
-        for (tokenizer::iterator beg = tok.begin(); beg != tok.end(); ++beg) {
-          ++datacols;
-        }
+        datacols = tok.count();
         break;
       }
     } catch (std::out_of_range &) {
@@ -132,7 +128,9 @@ void LoadSNSspec::exec() {
     }
   }
 
-  spectra.resize(spectra_nbr);
+  spectra.resize(spectra_nbr, DataObjects::Histogram1D(
+                                  HistogramData::Histogram::XMode::BinEdges,
+                                  HistogramData::Histogram::YMode::Counts));
   file.clear(); // end of file has been reached so we need to clear file state
   file.seekg(0, std::ios::beg); // go back to beginning of file
 
@@ -142,15 +140,12 @@ void LoadSNSspec::exec() {
 
     // line with data, need to be parsed by white spaces
     if (!str.empty() && str[0] != '#') {
-      typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-      boost::char_separator<char> sep(" ");
-      tokenizer tok(str, sep);
-      for (tokenizer::iterator beg = tok.begin(); beg != tok.end(); ++beg) {
-        std::stringstream ss;
-        ss << *beg;
-        double d;
-        ss >> d;
-        input.push_back(d);
+      typedef Mantid::Kernel::StringTokenizer tokenizer;
+      const std::string sep = " ";
+      tokenizer tok(str, sep,
+                    Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+      for (const auto &beg : tok) {
+        input.push_back(std::stod(beg));
       }
     }
 
@@ -164,8 +159,7 @@ void LoadSNSspec::exec() {
           spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
           nBins = j / 3;
         }
-        spectra[working_with_spectrum_nbr].dataX().push_back(
-            input[input.size() - 1]);
+        spectra[working_with_spectrum_nbr].dataX().push_back(input.back());
       }
       working_with_spectrum_nbr++;
       input.clear();
@@ -186,8 +180,7 @@ void LoadSNSspec::exec() {
         spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
         nBins = j / 3;
       }
-      spectra[working_with_spectrum_nbr].dataX().push_back(
-          input[input.size() - 1]);
+      spectra[working_with_spectrum_nbr].dataX().push_back(input.back());
     }
   } catch (...) {
   }
@@ -207,7 +200,7 @@ void LoadSNSspec::exec() {
       localWorkspace->dataY(i) = spectra[i].dataY();
       localWorkspace->dataE(i) = spectra[i].dataE();
       // Just have spectrum number start at 1 and count up
-      localWorkspace->getSpectrum(i)->setSpectrumNo(i + 1);
+      localWorkspace->getSpectrum(i).setSpectrumNo(i + 1);
     }
 
     setProperty("OutputWorkspace", localWorkspace);

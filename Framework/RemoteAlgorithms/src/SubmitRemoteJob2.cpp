@@ -97,7 +97,7 @@ void SubmitRemoteJob2::exec() {
                              e.what());
   }
   g_log.information() << "Job submitted.  Job ID =  " << jid
-                      << " on (remote) compute resource " << comp << std::endl;
+                      << " on (remote) compute resource " << comp << '\n';
 }
 
 } // end namespace RemoteAlgorithms

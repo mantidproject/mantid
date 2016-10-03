@@ -37,8 +37,6 @@ class DLLExport LoadPreNexusMonitors : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   LoadPreNexusMonitors();
-  /// Virtual destructor
-  ~LoadPreNexusMonitors() override {}
   /// Algorithm's name
   const std::string name() const override { return "LoadPreNexusMonitors"; }
   /// Summary of algorithms purpose

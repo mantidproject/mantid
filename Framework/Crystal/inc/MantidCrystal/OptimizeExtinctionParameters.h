@@ -43,8 +43,6 @@ class DLLExport OptimizeExtinctionParameters : public API::Algorithm {
 public:
   /// Default constructorMatrix
   OptimizeExtinctionParameters();
-  /// Destructor
-  ~OptimizeExtinctionParameters() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override {
     return "OptimizeExtinctionParameters";

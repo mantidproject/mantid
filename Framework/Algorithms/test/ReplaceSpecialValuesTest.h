@@ -252,12 +252,12 @@ public:
                             1, 5, 10, 0, 1, 3),
                         evout;
     AnalysisDataService::Instance().add("test_ev_rep", evin);
-    EventList *evlist = evin->getEventListPtr(0);
-    evlist->switchTo(WEIGHTED);
-    evlist->getWeightedEvents().at(0).m_weight = static_cast<float>(0.01);
-    evlist->getWeightedEvents().at(1).m_weight =
+    auto &evlist = evin->getSpectrum(0);
+    evlist.switchTo(WEIGHTED);
+    evlist.getWeightedEvents().at(0).m_weight = static_cast<float>(0.01);
+    evlist.getWeightedEvents().at(1).m_weight =
         std::numeric_limits<float>::infinity();
-    evlist->getWeightedEvents().at(2).m_weight =
+    evlist.getWeightedEvents().at(2).m_weight =
         std::numeric_limits<float>::quiet_NaN();
 
     Mantid::Algorithms::ReplaceSpecialValues alg;
@@ -283,10 +283,10 @@ public:
             AnalysisDataService::Instance().retrieve("test_ev_rep_out")));
 
     TS_ASSERT(evout); // should be an event workspace
-    TS_ASSERT_DELTA(evout->getEventList(0).getEvent(0).m_weight, 0.01, 1e-8);
-    TS_ASSERT_EQUALS(evout->getEventList(0).getEvent(1).m_weight, 9);
-    TS_ASSERT_EQUALS(evout->getEventList(0).getEvent(2).m_weight, 7);
-    TS_ASSERT_EQUALS(evout->getEventList(0).getEvent(3).m_weight, -11);
+    TS_ASSERT_DELTA(evout->getSpectrum(0).getEvent(0).m_weight, 0.01, 1e-8);
+    TS_ASSERT_EQUALS(evout->getSpectrum(0).getEvent(1).m_weight, 9);
+    TS_ASSERT_EQUALS(evout->getSpectrum(0).getEvent(2).m_weight, 7);
+    TS_ASSERT_EQUALS(evout->getSpectrum(0).getEvent(3).m_weight, -11);
     AnalysisDataService::Instance().remove("test_ev_rep");
     AnalysisDataService::Instance().remove("test_ev_rep_out");
   }

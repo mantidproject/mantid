@@ -56,15 +56,14 @@ void EQSANSMonitorTOF::exec() {
       inputWS->getInstrument()->getMonitors();
   if (monitor_list.size() != 1) {
     g_log.error() << "EQSANS workspace does not have exactly ones monitor! "
-                     "This should not happen" << std::endl;
+                     "This should not happen\n";
   }
   IDetector_const_sptr mon;
   try {
     mon = inputWS->getInstrument()->getDetector(monitor_list[0]);
   } catch (Exception::NotFoundError &) {
     g_log.error() << "Spectrum number " << monitor_list[0]
-                  << " has no detector assigned to it - discarding"
-                  << std::endl;
+                  << " has no detector assigned to it - discarding\n";
     return;
   }
 
@@ -127,19 +126,18 @@ void EQSANSMonitorTOF::exec() {
       tof_bin_range = i;
   }
   g_log.information() << "Cutoff=" << cutoff << "; Threshold=" << threshold
-                      << std::endl;
+                      << '\n';
   g_log.information() << "Low TOFs: old = [" << (cutoff + 1) << ", "
                       << (tof_bin_range - 2) << "]  ->  new = [0, "
-                      << (tof_bin_range - 3 - cutoff) << "]" << std::endl;
+                      << (tof_bin_range - 3 - cutoff) << "]\n";
   g_log.information() << "High bin boundary of the Low TOFs: old = "
                       << tof_bin_range - 1
-                      << "; new = " << (tof_bin_range - 2 - cutoff)
-                      << std::endl;
+                      << "; new = " << (tof_bin_range - 2 - cutoff) << '\n';
   g_log.information() << "High TOFs: old = [0, " << (cutoff - 1)
                       << "]  ->  new = [" << (tof_bin_range - 1 - cutoff)
-                      << ", " << (tof_bin_range - 2) << "]" << std::endl;
+                      << ", " << (tof_bin_range - 2) << "]\n";
   g_log.information() << "Overlap: new = [" << (tof_bin_range - 1) << ", "
-                      << (nTOF - 2) << "]" << std::endl;
+                      << (nTOF - 2) << "]\n";
 
   // Keep a copy of the input data since we may end up overwriting it
   // if the input workspace is equal to the output workspace.
@@ -420,22 +418,19 @@ double EQSANSMonitorTOF::getTofOffset(MatrixWorkspace_const_sptr inputWS,
 
   double frame_tof0 = frame_srcpulse_wl_1 / 3.9560346 * source_to_monitor;
 
-  g_log.information() << "Frame width " << tmp_frame_width << std::endl;
-  g_log.information() << "TOF offset = " << frame_tof0 << " microseconds"
-                      << std::endl;
+  g_log.information() << "Frame width " << tmp_frame_width << '\n';
+  g_log.information() << "TOF offset = " << frame_tof0 << " microseconds\n";
   g_log.information() << "Band defined by T1-T4 " << frame_wl_1 << " "
                       << frame_wl_2;
   if (frame_skipping)
     g_log.information() << " + " << frameskip_wl_1 << " " << frameskip_wl_2
-                        << std::endl;
+                        << '\n';
   else
-    g_log.information() << std::endl;
-  g_log.information() << "Chopper    Actual Phase    Lambda1    Lambda2"
-                      << std::endl;
+    g_log.information() << '\n';
+  g_log.information() << "Chopper    Actual Phase    Lambda1    Lambda2\n";
   for (int i = 0; i < 4; i++)
     g_log.information() << i << "    " << chopper_actual_phase[i] << "  "
-                        << chopper_wl_1[i] << "  " << chopper_wl_2[i]
-                        << std::endl;
+                        << chopper_wl_1[i] << "  " << chopper_wl_2[i] << '\n';
 
   setProperty("FrameSkipping", frame_skipping);
 

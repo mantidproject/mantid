@@ -30,19 +30,19 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename Type>
-class EXPORT_OPT_MANTIDQT_API SignalBlocker {
+template <typename Type> class EXPORT_OPT_MANTIDQT_API SignalBlocker {
 
 private:
   /// Object to manage blocking
   Type *m_obj;
+
 public:
   /// Constructor
   SignalBlocker(Type *obj);
   /// Destructor
   ~SignalBlocker();
   /// Overriden function like behavior.
-  Type* operator->();
+  Type *operator->();
   /// Release management
   void release();
 };

@@ -1,6 +1,6 @@
 #include "MantidWorkflowAlgorithms/DgsAbsoluteUnitsReduction.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
-#include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/Atom.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/NeutronAtom.h"
@@ -16,16 +16,6 @@ namespace Mantid {
 namespace WorkflowAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsAbsoluteUnitsReduction)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-DgsAbsoluteUnitsReduction::DgsAbsoluteUnitsReduction() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-DgsAbsoluteUnitsReduction::~DgsAbsoluteUnitsReduction() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -88,7 +78,7 @@ void DgsAbsoluteUnitsReduction::init() {
 /** Execute the algorithm.
  */
 void DgsAbsoluteUnitsReduction::exec() {
-  g_log.notice() << "Starting DgsAbsoluteUnitsReduction" << std::endl;
+  g_log.notice() << "Starting DgsAbsoluteUnitsReduction\n";
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");

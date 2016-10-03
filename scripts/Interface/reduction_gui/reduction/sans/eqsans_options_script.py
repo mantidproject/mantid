@@ -3,14 +3,14 @@
 """
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
-from hfir_options_script import ReductionOptions as BaseOptions
+from reduction_gui.reduction.sans.hfir_options_script import ReductionOptions as BaseOptions
 
 class ReductionOptions(BaseOptions):
     instrument_name = "EQSANS"
     nx_pixels = None
     ny_pixels = None
     pixel_size = None
-    detector_offset = 0.0
+    default_detector_offset = 0.0
 
     # Use TOF cuts from configuration file
     use_config_cutoff = True
@@ -52,7 +52,7 @@ class ReductionOptions(BaseOptions):
         self.nx_pixels = ReductionOptions.nx_pixels
         self.ny_pixels = ReductionOptions.ny_pixels
         self.pixel_size = ReductionOptions.pixel_size
-        self.detector_offset = ReductionOptions.detector_offset
+        self.detector_offset = ReductionOptions.default_detector_offset
 
         self.use_config_cutoff = ReductionOptions.use_config_cutoff
         self.low_TOF_cut = ReductionOptions.low_TOF_cut
@@ -160,30 +160,30 @@ class ReductionOptions(BaseOptions):
         """
             Create XML from the current data.
         """
-        xml = super(ReductionOptions, self).to_xml()
+        xml_out = super(ReductionOptions, self).to_xml()
 
         # TOF cutoff and correction
-        xml += "<TOFcorr>\n"
-        xml += "  <low_tof_cut>%g</low_tof_cut>\n" % self.low_TOF_cut
-        xml += "  <high_tof_cut>%g</high_tof_cut>\n" % self.high_TOF_cut
-        xml += "  <use_config_cutoff>%s</use_config_cutoff>\n" % str(self.use_config_cutoff)
-        xml += "  <perform_flight_path_corr>%s</perform_flight_path_corr>\n" % str(self.correct_for_flight_path)
-        xml += "</TOFcorr>\n"
+        xml_out += "<TOFcorr>\n"
+        xml_out += "  <low_tof_cut>%g</low_tof_cut>\n" % self.low_TOF_cut
+        xml_out += "  <high_tof_cut>%g</high_tof_cut>\n" % self.high_TOF_cut
+        xml_out += "  <use_config_cutoff>%s</use_config_cutoff>\n" % str(self.use_config_cutoff)
+        xml_out += "  <perform_flight_path_corr>%s</perform_flight_path_corr>\n" % str(self.correct_for_flight_path)
+        xml_out += "</TOFcorr>\n"
 
         # Mask
-        xml += "<UseConfigMask>%s</UseConfigMask>\n" % self.use_config_mask
+        xml_out += "<UseConfigMask>%s</UseConfigMask>\n" % self.use_config_mask
 
         # Resolution
-        xml += "<ComputeResolution>%s</ComputeResolution>\n" % self.compute_resolution
-        xml += "<SampleApertureDiameter>%g</SampleApertureDiameter>\n" % self.sample_aperture_diameter
+        xml_out += "<ComputeResolution>%s</ComputeResolution>\n" % self.compute_resolution
+        xml_out += "<SampleApertureDiameter>%g</SampleApertureDiameter>\n" % self.sample_aperture_diameter
 
         # TOF correction
-        xml += "<PerformTOFCorrection>%s</PerformTOFCorrection>\n" % self.perform_TOF_correction
+        xml_out += "<PerformTOFCorrection>%s</PerformTOFCorrection>\n" % self.perform_TOF_correction
         # Normalization option
-        xml += "<UseBeamMonitor>%s</UseBeamMonitor>\n" % self.use_beam_monitor
-        xml += "<BeamMonitorRef>%s</BeamMonitorRef>\n" % self.beam_monitor_reference
+        xml_out += "<UseBeamMonitor>%s</UseBeamMonitor>\n" % self.use_beam_monitor
+        xml_out += "<BeamMonitorRef>%s</BeamMonitorRef>\n" % self.beam_monitor_reference
 
-        return xml
+        return xml_out
 
     def from_xml(self, xml_str):
         """
@@ -194,6 +194,11 @@ class ReductionOptions(BaseOptions):
         super(ReductionOptions, self).from_xml(xml_str)
 
         dom = xml.dom.minidom.parseString(xml_str)
+
+        instrument_dom = dom.getElementsByTagName("Instrument")[0]
+        self.detector_offset = BaseScriptElement.getFloatElement(instrument_dom, "detector_offset",
+                                                                 default=ReductionOptions.default_detector_offset)
+
 
         # TOF cutoff and correction
         element_list = dom.getElementsByTagName("TOFcorr")
@@ -237,12 +242,9 @@ class ReductionOptions(BaseOptions):
         self.reset()
         super(ReductionOptions, self).from_setup_info(xml_str)
 
-        from mantid.api import Algorithm
-        dom = xml.dom.minidom.parseString(xml_str)
-
-        process_dom = dom.getElementsByTagName("SASProcess")[0]
-        setup_alg_str = BaseScriptElement.getStringElement(process_dom, 'SetupInfo')
-        alg=Algorithm.fromString(str(setup_alg_str))
+        (alg, _) = BaseScriptElement.getAlgorithmFromXML(xml_str)
+        self.detector_offset = BaseScriptElement.getPropertyValue(
+            alg, "SampleDetectorDistanceOffset", default=ReductionOptions.default_detector_offset)
         self.use_config_cutoff = BaseScriptElement.getPropertyValue(alg, "UseConfigTOFCuts",
                                                                     default=ReductionOptions.use_config_cutoff)
         self.correct_for_flight_path = BaseScriptElement.getPropertyValue(alg, "CorrectForFlightPath",

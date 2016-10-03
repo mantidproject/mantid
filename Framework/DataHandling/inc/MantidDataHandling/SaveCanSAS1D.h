@@ -96,10 +96,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SaveCanSAS1D : public API::Algorithm {
 public:
-  /// default constructor
-  SaveCanSAS1D();
-  ~SaveCanSAS1D() override;
-
   const std::string name() const override { return "SaveCanSAS1D"; }
   const std::string summary() const override {
     return "Save a MatrixWorkspace to a file in the canSAS 1-D format";
@@ -138,26 +134,29 @@ protected:
   /// sasroot element
   virtual void createSASRootElement(std::string &rootElem);
 
-  /// this method creates sastitle element
+  /// this method creates a sasTitle element
   void createSASTitleElement(std::string &sasTitle);
 
-  /// this method creates sassample element
+  /// this method creates a sasSample element
   void createSASSampleElement(std::string &sasSample);
 
-  /// this method creates sasRun Element
+  /// this method creates a sasRun Element
   void createSASRunElement(std::string &sasRun);
 
-  /// this method creates SASData element
+  /// this method creates a sasData element
   void createSASDataElement(std::string &sasData);
 
-  /// this method creates SASSourcelement
+  /// this method creates a sasSource element
   void createSASSourceElement(std::string &sasSource);
 
-  /// this method creates sasDetector element
+  /// this method creates a sasDetector element
   void createSASDetectorElement(std::string &sasDet);
 
-  /// this method creates sasProcess element
+  /// this method creates a sasProcess element
   void createSASProcessElement(std::string &sasProcess);
+
+  /// this method creates a sasInstrument element
+  void createSASInstrument(std::string &sasInstrument);
 
   /// points to the workspace that will be written to file
   API::MatrixWorkspace_const_sptr m_workspace;

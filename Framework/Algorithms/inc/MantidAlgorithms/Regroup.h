@@ -46,10 +46,6 @@ namespace Algorithms {
  */
 class DLLExport Regroup : public API::Algorithm {
 public:
-  /// Default constructor
-  Regroup() : API::Algorithm(){};
-  /// Destructor
-  ~Regroup() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Regroup"; }
   /// Summary of algorithms purpose

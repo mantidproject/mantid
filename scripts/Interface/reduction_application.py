@@ -469,12 +469,17 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             if isinstance(action, QtGui.QAction):
                 file_path = unicode(action.data())
 
+        # don't try to load if the file doesn't exist
+        if not os.path.exists(file_path):
+            return
+
         # Check whether the file describes the current instrument
         try:
             found_instrument = self._interface.scripter.verify_instrument(file_path)
         except:
-            msg = "The file you attempted to load doesn't have a recognized format.\n\n"
-            msg += "Please make sure it has been produced by this application."
+            msg = "The file you attempted to load doesn't have a recognized format:\n" \
+                  + file_path+"\n\n" \
+                  + "Please make sure it has been produced by this application."
             QtGui.QMessageBox.warning(self, "Error loading reduction parameter file", msg)
             print sys.exc_value
             return
@@ -611,4 +616,3 @@ def start(argv):
 
 if __name__ == '__main__':
     start(argv=sys.argv)
-

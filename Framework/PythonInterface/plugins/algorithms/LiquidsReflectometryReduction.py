@@ -7,12 +7,14 @@
       - Keep the same parameters and work as a drop-in replacement for the old algorithm.
       - Reproduce the output of the old algorithm.
 """
+from __future__ import (absolute_import, division, print_function)
 import time
 import math
 import os
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
+from functools import reduce #pylint: disable=redefined-builtin
 
 class LiquidsReflectometryReduction(PythonAlgorithm):
     number_of_pixels_x=0
@@ -525,7 +527,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             s2h_key = keys[3]
             s2w_key = keys[5]
             if 'IncidentMedium' in data_dict \
-                and data_dict['IncidentMedium'] == incident_medium.strip() \
+                and data_dict['IncidentMedium'].lower() == incident_medium.strip().lower() \
                 and _value_check('LambdaRequested', data_dict, lr_value) \
                 and _value_check('S1H', data_dict, s1h) \
                 and _value_check(s2h_key, data_dict, s2h):
@@ -564,7 +566,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # Avoid leaving trash behind
             AnalysisDataService.remove(str(normalization))
         else:
-            logger.error("Could not find scaling factor for %s" % str(workspace))
+            logger.error("Could not find scaling factor for %s" % str(incident_medium))
         return workspace
 
 AlgorithmFactory.subscribe(LiquidsReflectometryReduction)

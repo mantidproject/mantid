@@ -139,7 +139,7 @@ QCoordinate::scatteringIntensity(const API::ExperimentInfo &exptSetup,
            twoPiDet;
   else
     throw std::invalid_argument("Logical error. Invalid coord type " +
-                                boost::lexical_cast<std::string>(m_coord));
+                                std::to_string(m_coord));
 }
 }
 }

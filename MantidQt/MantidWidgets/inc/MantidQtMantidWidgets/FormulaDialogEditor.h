@@ -3,20 +3,17 @@
 
 #include "MantidQtMantidWidgets/StringDialogEditor.h"
 
-namespace MantidQt
-{
-namespace MantidWidgets
-{
+namespace MantidQt {
+namespace MantidWidgets {
 
 /**
  * A stringDialogEditor for editing UserFunction.
  */
-class FormulaDialogEditor: public StringDialogEditor
-{
+class FormulaDialogEditor : public StringDialogEditor {
   Q_OBJECT
 public:
   FormulaDialogEditor(QtProperty *property, QWidget *parent)
-    :StringDialogEditor(property,parent){}
+      : StringDialogEditor(property, parent) {}
 protected slots:
   void runDialog() override;
 };
@@ -24,19 +21,19 @@ protected slots:
 /**
  * The factory for the FormulaDialogEditor.
  */
-class FormulaDialogEditorFactory: public StringDialogEditorFactory
-{
+class FormulaDialogEditorFactory : public StringDialogEditorFactory {
   Q_OBJECT
 public:
-  FormulaDialogEditorFactory(QObject* parent):StringDialogEditorFactory(parent){}
+  FormulaDialogEditorFactory(QObject *parent)
+      : StringDialogEditorFactory(parent) {}
+
 protected:
   QWidget *createEditorForManager(QtStringPropertyManager *,
                                   QtProperty *property,
                                   QWidget *parent) override {
-    return new FormulaDialogEditor(property,parent);
+    return new FormulaDialogEditor(property, parent);
   }
 };
-
 }
 }
 

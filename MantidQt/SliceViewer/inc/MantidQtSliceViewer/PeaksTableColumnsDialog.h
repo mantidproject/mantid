@@ -8,22 +8,19 @@ namespace Ui {
 class PeaksTableColumnsDialog;
 }
 
-namespace MantidQt
-{
-namespace SliceViewer
-{
+namespace MantidQt {
+namespace SliceViewer {
 
-class PeaksTableColumnsDialog : public QDialog
-{
+class PeaksTableColumnsDialog : public QDialog {
   Q_OBJECT
-  
+
 public:
   explicit PeaksTableColumnsDialog(QWidget *parent = 0);
   ~PeaksTableColumnsDialog() override;
 
-  void setVisibleColumns(std::set<QString> & cols);
+  void setVisibleColumns(const std::set<QString> &cols);
   std::set<QString> getVisibleColumns();
-  
+
 private:
   Ui::PeaksTableColumnsDialog *ui;
   std::set<QString> m_origVisible;

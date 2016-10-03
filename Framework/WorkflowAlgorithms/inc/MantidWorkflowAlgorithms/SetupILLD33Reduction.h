@@ -38,10 +38,6 @@ namespace WorkflowAlgorithms {
 
 class DLLExport SetupILLD33Reduction : public API::Algorithm {
 public:
-  /// Constructor
-  SetupILLD33Reduction() : API::Algorithm() {}
-  /// Virtual destructor
-  ~SetupILLD33Reduction() override {}
   /// Algorithm's name
   const std::string name() const override { return "SetupILLD33Reduction"; }
   /// Summary of algorithms purpose

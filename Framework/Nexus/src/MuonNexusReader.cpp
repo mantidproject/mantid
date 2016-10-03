@@ -78,9 +78,9 @@ void MuonNexusReader::readFromFile(const string &filename) {
   // find all of the NXdata in the entry
   std::vector<string> nxdataname;
   std::map<string, string> entries = handle.getEntries();
-  for (auto &entrie : entries) {
-    if (entrie.second == NXDATA) {
-      nxdataname.push_back(entrie.first);
+  for (auto &entry : entries) {
+    if (entry.second == NXDATA) {
+      nxdataname.push_back(entry.first);
     }
   }
   handle.openGroup(nxdataname.front(), NXDATA);
@@ -169,7 +169,7 @@ string MuonNexusReader::getInstrumentName() const {
 //            Zero or more NXlog entries which are of the form: <time>,<value>
 //            <time> is 32bit float time wrt start_time and <value> either 32bit
 //            float
-//            or sting.
+//            or string.
 //
 // @param filename ::  name of existing NeXus Muon file to read
 void MuonNexusReader::readLogData(const string &filename) {

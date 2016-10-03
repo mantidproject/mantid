@@ -1,33 +1,33 @@
 #include <fstream>
 #include <sstream>
 
-#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ChecksumHelper.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/UnitFactory.h"
 
-#include <Poco/Path.h>
-#include <Poco/String.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
+#include <Poco/Path.h>
 #include <Poco/SAX/AttributesImpl.h>
+#include <Poco/String.h>
 
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
@@ -152,7 +152,7 @@ void InstrumentDefinitionParser::initialise(const std::string &filename,
  * */
 std::string InstrumentDefinitionParser::getMangledName() {
 
-  std::string retVal = "";
+  std::string retVal;
   // use the xml in preference if available
   auto xml = Poco::trim(m_instrument->getXmlText());
   if (!(xml.empty())) {
@@ -940,7 +940,7 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
     XMLString s_alongBeam("z");
     XMLString s_pointingUp("y");
     XMLString s_handedness("right");
-    XMLString s_origin("");
+    XMLString s_origin;
 
     // Make extractions from sub elements where possible.
     if (alongElement) {
@@ -1067,7 +1067,7 @@ void InstrumentDefinitionParser::appendAssembly(
       m_instrument
           ->getLogfileCache()); // params specified within specific <location>
 
-  std::string category = "";
+  std::string category;
   if (pType->hasAttribute("is"))
     category = pType->getAttribute("is");
 
@@ -1401,6 +1401,7 @@ void InstrumentDefinitionParser::createStructuredDetector(
   const std::string shapeType = pType->getAttribute("type");
   boost::shared_ptr<Geometry::Object> shape = mapTypeNameToShape[shapeType];
 
+  std::string typeName = pType->getAttribute("name");
   // These parameters are in the TYPE defining StructuredDetector
   if (pType->hasAttribute("xpixels"))
     xpixels = atoi((pType->getAttribute("xpixels")).c_str());
@@ -1433,8 +1434,9 @@ void InstrumentDefinitionParser::createStructuredDetector(
   while (pNode) {
     Element *check = static_cast<Element *>(pNode);
     if (pNode->nodeName().compare("type") == 0 && check->hasAttribute("is")) {
-      std::string is = check->getAttribute("is").c_str();
-      if (StructuredDetector::compareName(is)) {
+      std::string is = check->getAttribute("is");
+      if (StructuredDetector::compareName(is) &&
+          typeName.compare(check->getAttribute("name")) == 0) {
         pElem = check;
         break;
       }
@@ -1449,7 +1451,6 @@ void InstrumentDefinitionParser::createStructuredDetector(
 
   // Ensure vertices are present within the IDF
   Poco::AutoPtr<NodeList> pNL = pElem->getElementsByTagName("vertex");
-
   if (pNL->length() == 0)
     throw Kernel::Exception::InstrumentDefinitionError(
         "StructuredDetector must contain vertices.", filename);
@@ -1471,9 +1472,12 @@ void InstrumentDefinitionParser::createStructuredDetector(
     pNode = it.nextNode();
   }
 
+  V3D zVector(0, 0, 1); // Z aligned beam
+  bool isZBeam =
+      m_instrument->getReferenceFrame()->isVectorPointingAlongBeam(zVector);
   // Now, initialize all the pixels in the bank
-  bank->initialize(xpixels, ypixels, xValues, yValues, idstart, idfillbyfirst_y,
-                   idstepbyrow, idstep);
+  bank->initialize(xpixels, ypixels, xValues, yValues, isZBeam, idstart,
+                   idfillbyfirst_y, idstepbyrow, idstep);
 
   // Loop through all detectors in the newly created bank and mark those in
   // the instrument.
@@ -1559,11 +1563,11 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
   std::string typeName = pCompElem->getAttribute("type");
   Element *pType = getTypeElement[typeName];
 
-  std::string category = "";
+  std::string category;
   if (pType->hasAttribute("is"))
     category = pType->getAttribute("is");
 
-  boost::regex exp("(Detector)|(detector)|(Monitor)|(monitor)");
+  static const boost::regex exp("Detector|detector|Monitor|monitor");
 
   // do stuff a bit differently depending on which category the type belong to
   if (RectangularDetector::compareName(category)) {
@@ -2001,12 +2005,12 @@ void InstrumentDefinitionParser::setLogfile(
       continue;
     }
 
-    std::string logfileID = "";
-    std::string value = "";
+    std::string logfileID;
+    std::string value;
 
     std::string type = "double";               // default
     std::string extractSingleValueAs = "mean"; // default
-    std::string eq = "";
+    std::string eq;
 
     Poco::AutoPtr<NodeList> pNLvalue =
         pParamElem->getElementsByTagName("value");
@@ -2089,8 +2093,8 @@ void InstrumentDefinitionParser::setLogfile(
 
     // some processing
 
-    std::string fittingFunction = "";
-    std::string tie = "";
+    std::string fittingFunction;
+    std::string tie;
 
     if (type.compare("fitting") == 0) {
       size_t found = paramName.find(':');
@@ -2195,9 +2199,9 @@ void InstrumentDefinitionParser::setLogfile(
 
     // Check if formula is specified
 
-    std::string formula = "";
-    std::string formulaUnit = "";
-    std::string resultUnit = "";
+    std::string formula;
+    std::string formulaUnit;
+    std::string resultUnit;
 
     if (numberFormula >= 1) {
       Element *pFormula = static_cast<Element *>(pNLFormula->item(0));
@@ -2217,7 +2221,7 @@ void InstrumentDefinitionParser::setLogfile(
         resultUnit = pFormula->getAttribute("result-unit");
     }
     // Check if parameter description is
-    std::string description = "";
+    std::string description;
 
     Poco::AutoPtr<NodeList> pNLDescription =
         pParamElem->getElementsByTagName("description");
@@ -2299,9 +2303,9 @@ void InstrumentDefinitionParser::setComponentLinks(
         // user, and throw an exception.
         if (!detector) {
           g_log.error() << "Error whilst loading parameters. No detector "
-                           "found with id '" << detid << "'" << std::endl;
-          g_log.error() << "Please check that your detectors' ids are correct."
-                        << std::endl;
+                           "found with id '" << detid << "'\n";
+          g_log.error()
+              << "Please check that your detectors' ids are correct.\n";
           throw Kernel::Exception::InstrumentDefinitionError(
               "Invalid detector id in component-link tag.");
         }
@@ -2319,11 +2323,10 @@ void InstrumentDefinitionParser::setComponentLinks(
             if (!consistent) {
               g_log.warning() << "Error whilst loading parameters. Name '"
                               << name << "' does not match id '" << detid
-                              << "'." << std::endl;
+                              << "'.\n";
               g_log.warning()
                   << "Parameters have been applied to detector with id '"
-                  << detid << "'. Please check the name is correct."
-                  << std::endl;
+                  << detid << "'. Please check the name is correct.\n";
             }
           }
         }
@@ -2459,24 +2462,23 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
   m_instrument->setPhysicalInstrument(physical);
 
   // Now we manipulate the original instrument (m_instrument) to hold
-  // neutronic
-  // positions
-  std::map<IComponent *, Poco::XML::Element *>::const_iterator it;
-  for (it = m_neutronicPos.begin(); it != m_neutronicPos.end(); ++it) {
-    if (it->second) {
-      setLocation(it->first, it->second, m_angleConvertConst, m_deltaOffsets);
+  // neutronic positions
+  for (const auto &component : m_neutronicPos) {
+    if (component.second) {
+      setLocation(component.first, component.second, m_angleConvertConst,
+                  m_deltaOffsets);
       // TODO: Do we need to deal with 'facing'???
 
       // Check for a 'type' attribute, indicating that we want to set the
       // neutronic shape
-      if (it->second->hasAttribute("type") &&
-          dynamic_cast<ObjComponent *>(it->first)) {
-        const Poco::XML::XMLString shapeName = it->second->getAttribute("type");
-        std::map<std::string, Object_sptr>::const_iterator shapeIt =
-            mapTypeNameToShape.find(shapeName);
+      if (component.second->hasAttribute("type") &&
+          dynamic_cast<ObjComponent *>(component.first)) {
+        const Poco::XML::XMLString shapeName =
+            component.second->getAttribute("type");
+        auto shapeIt = mapTypeNameToShape.find(shapeName);
         if (shapeIt != mapTypeNameToShape.end()) {
           // Change the shape on the current component to the one requested
-          auto objCmpt = dynamic_cast<ObjComponent *>(it->first);
+          auto objCmpt = dynamic_cast<ObjComponent *>(component.first);
           if (objCmpt)
             objCmpt->setShape(shapeIt->second);
         } else {
@@ -2488,7 +2490,7 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
            // neutronic position
     {
       // This should only happen for detectors
-      Detector *det = dynamic_cast<Detector *>(it->first);
+      Detector *det = dynamic_cast<Detector *>(component.first);
       if (det)
         m_instrument->removeDetector(det);
     }
@@ -2638,9 +2640,8 @@ void InstrumentDefinitionParser::adjust(
   }
 
   // delete all <component> found in pElem
-  for (auto it = allComponentInType.begin(); it != allComponentInType.end();
-       ++it)
-    pElem->removeChild(*it);
+  for (const auto &component : allComponentInType)
+    pElem->removeChild(component);
 }
 
 /// Returns a translated and rotated \<cuboid\> element with "id" attribute
@@ -2770,7 +2771,7 @@ InstrumentDefinitionParser::convertLocationsElement(
         "www.mantidproject.org/IDF.");
   }
 
-  std::string name("");
+  std::string name;
   if (pElem->hasAttribute("name")) {
     name = pElem->getAttribute("name");
   }
@@ -2839,8 +2840,7 @@ InstrumentDefinitionParser::convertLocationsElement(
 
     if (!name.empty()) {
       // Add name with appropriate numeric postfix
-      pLoc->setAttribute(
-          "name", name + boost::lexical_cast<std::string>(nameCountStart + i));
+      pLoc->setAttribute("name", name + std::to_string(nameCountStart + i));
     }
 
     // Copy values of all the attributes set

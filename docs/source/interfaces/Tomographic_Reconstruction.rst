@@ -25,11 +25,10 @@ login and through its `web portal
 <https://portal.scarf.rl.ac.uk/>`_. This resource is available for
 ISIS users.
 
-.. warning:: This interface is undergoing heavy works. The sections or
-             tabs are subject to changes and reorganization.New
-             functionality is being added and the pre-post-processing
-             and reconstruction workflow is being modified based on
-             feedback from initial test data.
+.. warning:: This interface is undergoing heavy works. The tabs are
+  subject to changes and reorganization. New functionality is being added
+  and the pre-post-processing and reconstruction workflow is being
+  modified based on feedback from initial test data.
 
 Interface at a glance
 ---------------------
@@ -42,7 +41,7 @@ jobs submitted recently.
    :align: right
    :scale: 50%
 
-In the setup tab you can set the details of the remote and/or local
+In the *Setup* tab you can set the details of the remote and/or local
 compute resources. Importantly, here is where you can set you username
 and password to log into the remote compute resource. To be able to
 run jobs remotely you first need to log into the remote compute
@@ -50,7 +49,7 @@ resource. Once you log in, an automatic mechanism will periodically
 query the status of jobs (for example every minute). You can also
 update it at any time by clicking on the refresh button.
 
-In this tab you also have to set the folders/directories where the
+In the *Setup* tab you also have to set the folders/directories where the
 input data for reconstruction jobs is found. This information is
 required every time you start analyzing a new dataset. The required
 fields are:
@@ -87,7 +86,7 @@ SCARF and some ISIS machines:
 * `TomoPy
   <https://www1.aps.anl.gov/Science/Scientific-Software/TomoPy>`_
 
-* `Astra Toolbox <http://visielab.uantwerpen.be/software>`_ found from
+* `Astra Toolbox <http://visielab.uantwerpen.be/astra-toolbox>`_ found from
   `here <http://sourceforge.net/p/astra-toolbox/wiki/Home/>`_.
 
 References for the Astra Toolbox:
@@ -131,8 +130,7 @@ relevant file and data formats is given here:
 * FITS: `Flexible Image Transport System format
   <http://en.wikipedia.org/wiki/FITS>`__ used to store images in
   files. You can see the details on how FITS images can be loaded into
-  Mantid in the documentation of the algorithm LoadFITS
-  `<http://docs.mantidproject.org/nightly/algorithms/LoadFITS-v1.html>`__.
+  Mantid in the documentation of the algorithm :ref:`LoadFITS <algm-LoadFITS>`.
 
 * TIFF: `Tagged Image File Format
   <http://en.wikipedia.org/wiki/Tagged_Image_File_Format>`__ images
@@ -146,7 +144,7 @@ relevant file and data formats is given here:
 
 These formats are used in different processing steps and parts of this
 interface. For example, you can visualize FITS and TIFF images in the
-**Run** tab and also in the **ROI, etc.** tab. As another example, the
+**Run** tab and also in the **ROI etc.** tab. As another example, the
 reconstruction tools typically need as inputs at least a stack of
 images which can be in different formats, including a set of FITS or
 TIFF files, or a single DLS NXTomo file. Other third party tools use
@@ -164,7 +162,7 @@ This is dependent on the facility and instrument.
 
 The path to the files of a particular tomographic reconstruction
 consists of several components. An example path would be (on a Windows
-system where the input/output data is on the drive "D":
+system where the input/output data is on the drive "D"):
 
 * D:/data/RB987654321/experiment_foo/
 
@@ -174,21 +172,20 @@ where:
   or directory is synchronized (at least partially) between the remote
   compute resource and the (local) instrument analysis machine.
 
-* *RB987654321* is the experiment reference number (or so-called RB
-number) which usually starts with the prefix "RB".
+* *RB987654321* is the experiment reference number (or so-called RB number) which usually starts with the prefix "RB".
 
 * *experiment_foo* is a name given by the user to the particular
   experiment the data comes from. This is specified in free form.
 
-* inside the path there will normally be at least three folders or
-subdirectories for the sample, flat, and dark images:
+* inside the path there will normally be at least three folders or subdirectories for the sample, flat, and dark images:
 
   - data
   - flat
   - dark
 
+
 As the files are mirrored on the remote computer cluster, if a network
-drive have been added (or mapped) in the local system, for example
+drive has been added (or mapped) in the local system, for example
 using the drive "S:", then the following path would contain a similar
 tree of image files:
 
@@ -199,10 +196,11 @@ The equivalent on a non-Windows system would be for example:
 * /media/scarf/data/RB987654321/experiment_foo/
 
 These and related parameters can be inspected and modified in the
-sytem settings section (or **System** tab). Their default values are
+**System** tab. Their default values are
 set for the current setup of the IMAT analysis machine. The "Reset
 all" button resets all these settings to their factory defaults.  Note
-that the **System** section of the interface is currently work in
+that the **Reset all** button currently requires **no confirmation**.
+The **System** tab of the interface is currently a work in
 progress and it may change significantly as required during
 commissioning of IMAT.
 
@@ -219,7 +217,7 @@ To be able to run jobs on a remote compute resource (cluster, supercomputer, etc
 * Log into the resource (in **Setup**)
 * Then in **Run** select the compute resource and setup one
   reconstruction tool
-* Use the **reconstruct** button in the **Run** tab of the interface
+* Use the *Reconstruct* button in the **Run** tab of the interface
 
 You can monitor the status of the jobs currently running (and recently
 run) on remote compute resources in the same tab.
@@ -230,13 +228,13 @@ Setting common parameters for the reconstruction jobs
 Before any reconstruction job is started several pre-/post-processing
 options would normally need to be fine tuned for the sample data to be
 processed correctly. The region of interest and the "air" region (or
-region for normalization) can be set visually in a specific tab. All
-other pre- and post-processing settings are defined in a separate tab.
+region for normalization) can be set visually in the *ROI etc* tab. All
+other pre- and post-processing settings are defined in the *Filters* tab.
 
 Regions
 ~~~~~~~
 
-Several parameters can be set in the **ROI etc.** section or tab. These
+Several parameters can be set in the **ROI etc.** tab. These
 parameters will be used for all the reconstruction jobs, regardless of
 the tool and/or reconstruction method used.
 
@@ -258,10 +256,13 @@ At any stage during the process of selecting the regions it is also
 possible to see how the selections fit different images by sliding
 through the images of the stack (using the slider or scroll bar).
 
+The angle of the image can be changed by changing the Rotate(clockwise)
+option. This will affect how the image is displayed locally and reconstructed.
+
 The center of rotation can be selected interactively by clicking on
 the select button and then clicking on an image pixel. To select the
 regions of interest or the area of normalization, just click on the
-respective "select" button and then click and drag with the mouse to
+respective "Select" button and then click and drag with the mouse to
 select a rectangle. The precise coordinates of the center and regions
 can be set via the boxes of the right panel as well.
 
@@ -269,16 +270,22 @@ Once you have selected or set one of the regions, or the center, they
 can be selected again by pushing the respective "Select" buttons
 and/or editing their coordinates manually.
 
-The default values, set in principle when a new stack of images is
-loaded, are as follows. The region of intererest is set to cover all
-the images. The regions of normalization is not set (empty), and the
-center of rotation is set to the center of the image. The option to
-find the center of rotation automatically is disabled at present.
+There is also the option to change the ColorMap that is used to show
+the images ONLY **locally**. This can be done by **double** clicking
+the ColorBar on the side and selecting a different ColorMap file.
+The changes are only local and will NOT affect the reconstruction.
 
-If when selection a region the mouse is moved outside of the images,
+The default values, set in principle when a new stack of images is
+loaded, are as follows. The rotate angle is set to 0 degrees,
+the region of interest is set to cover all the images. The region
+of normalization is not set (empty), and the center of rotation is
+set to the center of the image. The option to find the center of
+rotation automatically is disabled at present.
+
+While selecting a region, if the mouse is moved outside of the images,
 it is possible to continue the selection of the region (second corner)
 by clicking again inside the image. Alternatively, any selection can
-be reset at any point by using the "reset" buttons.
+be reset at any point by using the "Reset" buttons.
 
 When loading a stack of images, note that when the images are loaded
 from the folder(s) (directorie(s)) any files with unrecognized
@@ -286,7 +293,7 @@ extension or type (for example .txt) will be ignored. Normally a
 warning about this will be shown in the Mantid logs. Image files with
 the string **_SummedImg** at the end of their names will be skipped as
 well, as this is a convention used by some detectors/control software
-to generate summed images
+to generate summed images.
 
 Pre-/post-processing
 ~~~~~~~~~~~~~~~~~~~~
@@ -304,7 +311,7 @@ applied on the reconstructed volume produced by the algorithm.
 
 Among other options, normalization by flat and/or dark images can be
 enabled here. Note that this setting is global and will be effective
-for any input dataset. In the **Setup** section it is possible to
+for any input dataset. In the **Setup** tab it is possible to
 enable or disable them specifically for the dataset being processed.
 
 The tab also shows options to define what outputs should be produced
@@ -318,7 +325,7 @@ Results from reconstruction jobs
 --------------------------------
 
 The results are written into the output paths selected in the
-interface (in the *setup* section or tab). For every reconstructed
+interface (in the *Setup* tab). For every reconstructed
 volume a sequence of images (slices along the vertical axis) are
 written. In addition, two complementary outputs are generated in the
 same location:
@@ -362,27 +369,80 @@ Energy bands
              of combining energy bands from energy selective experiments.
              This is work in progress.
 
+Here it is possible to aggregate stacks of images normally acquired as
+energy/wavelength selective data. This interface is based on the
+algorithm :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>` which
+supports different ways of aggregating the input images. In the
+simplest case, a number of output bands can be produced by aggregating
+the input bands split into uniform segments. This is called "uniform
+bands". When the number of uniform bands is one, all the wavelengths
+are aggregated into a single output stack.  It is also possible to
+specify a list of boundaries or ranges of image indices. For example
+if an input dataset consists of 1000 images per projection angle (here
+indexed from 0 to 999), three partially (50%) overlapping output bands
+could by produced by specifying the ranges as "0-499, 250-749,
+500-999". In principle it is also possible to aggregate images by time
+of flight ranges, based on specific extension headers that must be
+included in the input (FITS) images. This option is disabled at the
+moment.  Please refer to the documentation of :ref:`ImggAggregateWavelengths
+<algm-ImggAggregateWavelengths>` for lower level details on how the
+algorithm processes the input directories and files.
+
 .. figure:: /images/tomo_tab7_energy_bands.png
    :align: center
    :scale: 60%
 
-Conversion between formats
---------------------------
-
-.. warning:: The interface is being extended to provide a simple graphical
-             interface to convert between different image formats for
-             convenience and interoperability with third party tools.
-             This is work in progress as support for new formats is being
-             integrated.
+Convert image formats
+---------------------
 
 .. figure:: /images/tomo_tab6_formats_convert.png
    :align: center
    :scale: 60%
 
+This interface provides a simple way of converting stacks of images
+between diferent formats. This is for convenience and interoperability
+with third party tools that for example may not be able to load FITS
+images but require them in TIFF format. All the images found under the
+input path (directory) will be converted from the input format
+selected into the output format. The output images will be created
+under the output path (directory) with the same tree structure as the
+input images.
+
+The conversion process will look for images recursively inside the
+input directory. That is, it will process all its subdirectories and
+the subdirectories of these up to a given maximum depth.  To limit the
+search depth. The usual default value is 3 which is sufficient for
+stacks of images and sets of stacks of images from a series of samples
+for an experiment, following the conventions for IMAT tomography
+data. If higher depth values than the default are used we recommend to
+take extreme care, making sure the input path given makes sense. This
+process can be lengthy and demanding in terms of disk space when
+processing more than one or a small number of experiments (RB
+reference numbers), and especially so for wavelength dependent
+experiments.
+
+System
+------
+
+.. figure:: /images/tomo_tab8_system_options.png
+   :align: center
+   :scale: 60%
+
+In the System tab you can specify the input folder names
+for the sample, flat, and dark images, and also the names of the output folders.
+The base paths for the SCARF file system can also be set here. Two options
+are included. The first one specifies where the Tomography data is found in the
+cluster, and the second specifies where the reconstruction tools and scripts
+can be found.
+The path can be changed to point to your own specific data and scripts on the
+SCARF cluster, so it could be helpful to create different directories for
+different scripts rather than changing the default script located in the default
+directory.
+
 Example
 -------
 
-TODO: there should be an example using a small data set.
+TODO: there should be a worked out example using a small data set.
 
 TomoPy
 ------
@@ -394,8 +454,8 @@ Astra Toolbox
 
 TODO: how to use it. Hints.
 
-Astra Toolbox
--------------
+MuhRec
+------
 
 TODO: how to use it. Hints.
 

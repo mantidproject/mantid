@@ -1,7 +1,9 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
+import os
 from mantid.api import *
 from mantid.kernel import *
-import os
 
 class EQSANSDirectBeamTransmission(PythonAlgorithm):
 

@@ -235,8 +235,7 @@ void SINQHMListener::readHMData(IMDHistoWorkspace_sptr ws) {
   }
   istr.read(reinterpret_cast<char *>(data), length * sizeof(int));
   if (!istr.good()) {
-    std::cout << "Encountered Problem before reading all SINQHM data"
-              << std::endl;
+    std::cout << "Encountered Problem before reading all SINQHM data\n";
   }
   for (int i = 0; i < length; i++) {
     data[i] = ntohl(data[i]);

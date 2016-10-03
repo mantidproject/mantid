@@ -41,7 +41,7 @@ public:
     }
   }
 
-  virtual ~Command() {}
+  virtual ~Command() = default;
 };
 
 /// Helper typedef
@@ -56,7 +56,6 @@ class NullCommand : public Command {
     throw std::runtime_error(
         "Should not be attempting ::execute on a NullCommand");
   }
-  ~NullCommand() override {}
 };
 
 /**
@@ -86,8 +85,6 @@ public:
     }
     return outWS;
   }
-
-  ~AdditionCommand() override {}
 };
 
 /**
@@ -130,7 +127,6 @@ public:
     }
     return outWS;
   }
-  ~CropCommand() override {}
 };
 
 /**
@@ -140,7 +136,7 @@ class CommandParser {
 public:
   virtual Command *interpret(const std::string &instruction) const = 0;
 
-  virtual ~CommandParser() {}
+  virtual ~CommandParser() = default;
 };
 
 /// Helper typedef for vector of command parsers
@@ -163,7 +159,6 @@ public:
     }
     return command;
   }
-  ~CommandParserBase() override {}
 
 private:
   virtual std::string getSeparator() const = 0;
@@ -175,8 +170,6 @@ private:
  */
 class AdditionParserRange : public CommandParserBase<AdditionCommand> {
 public:
-  ~AdditionParserRange() override {}
-
 private:
   boost::regex getRegex() const override {
     return boost::regex("^\\s*[0-9]+\\s*\\-\\s*[0-9]+\\s*$");
@@ -189,8 +182,6 @@ private:
  */
 class AdditionParser : public CommandParser {
 public:
-  ~AdditionParser() override {}
-
   Command *interpret(const std::string &instruction) const override {
     Command *command = nullptr;
     boost::regex ex("^\\s*[0-9]+\\s*\\+\\s*[0-9]+\\s*$");
@@ -217,8 +208,6 @@ public:
  */
 class CropParserRange : public CommandParserBase<CropCommand> {
 public:
-  ~CropParserRange() override {}
-
 private:
   boost::regex getRegex() const override {
     return boost::regex("^\\s*[0-9]+\\s*:\\s*[0-9]+\\s*$");
@@ -231,8 +220,6 @@ private:
  */
 class CropParserIndex : public CommandParser {
 public:
-  ~CropParserIndex() override {}
-
   Command *interpret(const std::string &instruction) const override {
     Command *command = nullptr;
     boost::regex ex("^\\s*[0-9]+\\s*$");
@@ -254,16 +241,6 @@ namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PerformIndexOperations)
-
-//------------------------------------------------------------------------------
-/** Constructor
- */
-PerformIndexOperations::PerformIndexOperations() {}
-
-//------------------------------------------------------------------------------
-/** Destructor
- */
-PerformIndexOperations::~PerformIndexOperations() {}
 
 //------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -309,16 +286,15 @@ VecCommands interpret(const std::string &processingInstructions) {
   boost::split(processingInstructionsSplit, processingInstructions,
                boost::is_any_of(","));
 
-  VecCommandParsers commandParsers;
-  commandParsers.push_back(boost::make_shared<AdditionParserRange>());
-  commandParsers.push_back(boost::make_shared<CropParserRange>());
-  commandParsers.push_back(boost::make_shared<CropParserIndex>());
-  commandParsers.push_back(boost::make_shared<AdditionParser>());
+  VecCommandParsers commandParsers{boost::make_shared<AdditionParserRange>(),
+                                   boost::make_shared<CropParserRange>(),
+                                   boost::make_shared<CropParserIndex>(),
+                                   boost::make_shared<AdditionParser>()};
 
   VecCommands commands;
   for (const auto &candidate : processingInstructionsSplit) {
     bool parserFound = false;
-    for (auto commandParser : commandParsers) {
+    for (const auto &commandParser : commandParsers) {
       Command *command = commandParser->interpret(candidate);
       boost::shared_ptr<Command> commandSptr(command);
       if (commandSptr->isValid()) // Do not record invalid commands.

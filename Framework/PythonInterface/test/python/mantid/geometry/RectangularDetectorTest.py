@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from mantid.geometry import *
 from testhelpers import can_be_instantiated, WorkspaceCreationHelper

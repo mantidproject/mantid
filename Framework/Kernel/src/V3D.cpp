@@ -1,5 +1,5 @@
+#include <cfloat>
 #include <cmath>
-#include <float.h>
 #include <vector>
 
 #include "MantidKernel/V3D.h"
@@ -28,7 +28,7 @@ V3D::V3D(const double xx, const double yy, const double zz)
   along +X and rotates counter-clockwise in the XY plane
 */
 void V3D::spherical(const double &R, const double &theta, const double &phi) {
-  const double deg2rad = M_PI / 180.0;
+  constexpr double deg2rad = M_PI / 180.0;
   z = R * cos(theta * deg2rad);
   const double ct = sin(theta * deg2rad);
   x = R * ct * cos(phi * deg2rad);
@@ -280,7 +280,6 @@ void V3D::operator()(const double xx, const double yy, const double zz) {
   x = xx;
   y = yy;
   z = zz;
-  return;
 }
 
 /**
@@ -345,13 +344,12 @@ double &V3D::operator[](const size_t Index) {
  *  @param phi ::   Returns the phi (azimuthal) angle in degrees
  */
 void V3D::getSpherical(double &R, double &theta, double &phi) const {
-  const double rad2deg = 180.0 / M_PI;
+  constexpr double rad2deg = 180.0 / M_PI;
   R = norm();
   theta = 0.0;
   if (R != 0.0)
     theta = acos(z / R) * rad2deg;
   phi = atan2(y, x) * rad2deg;
-  return;
 }
 
 /**
@@ -379,9 +377,9 @@ double V3D::normalize() {
 
 /** Round each component to the nearest integer */
 void V3D::round() {
-  x = double(long(x + (x < 0 ? -0.5 : +0.5)));
-  y = double(long(y + (y < 0 ? -0.5 : +0.5)));
-  z = double(long(z + (z < 0 ? -0.5 : +0.5)));
+  x = std::round(x);
+  y = std::round(y);
+  z = std::round(z);
 }
 
 /**
@@ -587,10 +585,7 @@ std::vector<V3D> V3D::makeVectorsOrthogonal(std::vector<V3D> &vectors) {
   \todo Check Error handling
   @param IX :: Input Stream
 */
-void V3D::read(std::istream &IX) {
-  IX >> x >> y >> z;
-  return;
-}
+void V3D::read(std::istream &IX) { IX >> x >> y >> z; }
 
 void V3D::write(std::ostream &OX) const
 /**
@@ -599,7 +594,6 @@ void V3D::write(std::ostream &OX) const
 */
 {
   OX << x << " " << y << " " << z;
-  return;
 }
 
 /** @return the vector as a string "X Y Z" */
@@ -622,7 +616,6 @@ void V3D::fromString(const std::string &str) {
 */
 void V3D::printSelf(std::ostream &os) const {
   os << "[" << x << "," << y << "," << z << "]";
-  return;
 }
 
 /**
@@ -648,8 +641,6 @@ void V3D::readPrinted(std::istream &IX) {
   x = atof(in.substr(i + 1, c1 - i - 1).c_str());
   y = atof(in.substr(c1 + 1, c2 - c1 - 1).c_str());
   z = atof(in.substr(c2 + 1, j - c2 - 1).c_str());
-
-  return;
 }
 
 /**

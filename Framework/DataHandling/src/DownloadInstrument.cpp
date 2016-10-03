@@ -1,7 +1,7 @@
 #include "MantidDataHandling/DownloadInstrument.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/InternetHelper.h"
+#include "MantidKernel/GitHubApiHelper.h"
 
 // Poco
 #include <Poco/DateTimeFormat.h>
@@ -21,7 +21,7 @@
 #else
 #include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
-#include <stdlib.h>
+#include <cstdlib>
 #endif
 
 // jsoncpp
@@ -87,14 +87,13 @@ void DownloadInstrument::exec() {
   } catch (Mantid::Kernel::Exception::InternetError &ex) {
     std::string errorText(ex.what());
     if (errorText.find("rate limit") != std::string::npos) {
-      g_log.notice() << "Instrument Definition Update: " << errorText
-                     << std::endl;
+      g_log.notice() << "Instrument Definition Update: " << errorText << '\n';
     } else {
       // log the failure at Notice Level
-      g_log.notice() << "Internet Connection Failed - cannot update instrument "
-                        "definitions." << std::endl;
+      g_log.notice("Internet Connection Failed - cannot update instrument "
+                   "definitions.");
       // log this error at information level
-      g_log.information() << errorText << std::endl;
+      g_log.information() << errorText << '\n';
     }
     return;
   }
@@ -104,7 +103,7 @@ void DownloadInstrument::exec() {
   } else {
     std::string s = (fileMap.size() > 1) ? "s" : "";
     g_log.notice() << "Downloading " << fileMap.size() << " file" << s
-                   << " from the instrument repository" << std::endl;
+                   << " from the instrument repository\n";
   }
 
   for (auto &itMap : fileMap) {
@@ -119,7 +118,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   // get the instrument directories
   auto instrumentDirs =
       Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
-  Poco::Path installPath(instrumentDirs[instrumentDirs.size() - 1]);
+  Poco::Path installPath(instrumentDirs.back());
   installPath.makeDirectory();
   Poco::Path localPath(instrumentDirs[0]);
   localPath.makeDirectory();
@@ -140,7 +139,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
                       gitHubJsonDate, Poco::DateTimeFormat::HTTP_FORMAT));
   std::string gitHubInstrumentRepoUrl =
       ConfigService::Instance().getString("UpdateInstrumentDefinitions.URL");
-  if (gitHubInstrumentRepoUrl == "") {
+  if (gitHubInstrumentRepoUrl.empty()) {
     throw std::runtime_error(
         "Property UpdateInstrumentDefinitions.URL is not defined, "
         "this should point to the location of the instrument "
@@ -249,7 +248,7 @@ DownloadInstrument::getFileShas(const std::string &directoryPath) {
   } catch (Poco::Exception &ex) {
     g_log.error() << "DownloadInstrument: failed to parse the directory: "
                   << directoryPath << " : " << ex.className() << " : "
-                  << ex.displayText() << std::endl;
+                  << ex.displayText() << '\n';
     // silently ignore this exception.
   } catch (std::exception &ex) {
     std::stringstream ss;
@@ -283,14 +282,14 @@ size_t DownloadInstrument::removeOrphanedFiles(
       if (filenamesToKeep.find(entryPath.getFileName()) ==
           filenamesToKeep.end()) {
         g_log.debug() << "File not found in remote instrument repository, will "
-                         "be deleted: " << entryPath.getFileName() << std::endl;
+                         "be deleted: " << entryPath.getFileName() << '\n';
         filesToDelete.push_back(it->path());
       }
     }
   } catch (Poco::Exception &ex) {
     g_log.error() << "DownloadInstrument: failed to list the directory: "
                   << directoryPath << " : " << ex.className() << " : "
-                  << ex.displayText() << std::endl;
+                  << ex.displayText() << '\n';
     // silently ignore this exception.
   } catch (std::exception &ex) {
     std::stringstream ss;
@@ -307,16 +306,15 @@ size_t DownloadInstrument::removeOrphanedFiles(
     }
   } catch (Poco::Exception &ex) {
     g_log.error() << "DownloadInstrument: failed to delete file: "
-                  << " : " << ex.className() << " : " << ex.displayText()
-                  << std::endl;
+                  << ex.className() << " : " << ex.displayText() << '\n';
     // silently ignore this exception.
   } catch (std::exception &ex) {
     std::stringstream ss;
-    ss << "unknown exception while deleting  file. " << ex.what();
+    ss << "unknown exception while deleting file: " << ex.what();
     throw std::runtime_error(ss.str());
   }
 
-  g_log.debug() << filesToDelete.size() << " Files deleted." << std::endl;
+  g_log.debug() << filesToDelete.size() << " Files deleted.\n";
 
   return filesToDelete.size();
 }
@@ -363,8 +361,8 @@ int DownloadInstrument::doDownloadFile(const std::string &urlFile,
   }
 
   int retStatus = 0;
-  InternetHelper inetHelper;
-  inetHelper.headers() = headers;
+  GitHubApiHelper inetHelper;
+  inetHelper.headers().insert(headers.begin(), headers.end());
   retStatus = inetHelper.downloadFile(urlFile, localFilePath);
   return retStatus;
 }

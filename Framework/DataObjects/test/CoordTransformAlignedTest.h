@@ -132,9 +132,9 @@ public:
 
     // Do the inverted conversion
     coord_t input2[3] = {2, 4, -3};
-    // std::cout << "Original\n" << mat << std::endl;
+    // std::cout << "Original\n" << mat << '\n';
     mat.Invert();
-    // std::cout << "Inverted\n" << mat << std::endl;
+    // std::cout << "Inverted\n" << mat << '\n';
     ct.setMatrix(mat);
     ct.apply(input2, output);
     TS_ASSERT_DELTA(output[0], 2.0, 1e-6);

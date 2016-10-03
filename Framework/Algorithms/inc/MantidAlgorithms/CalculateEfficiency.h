@@ -44,10 +44,6 @@ namespace Algorithms {
  */
 class DLLExport CalculateEfficiency : public API::Algorithm {
 public:
-  /// Default constructor
-  CalculateEfficiency() : API::Algorithm(){};
-  /// Destructor
-  ~CalculateEfficiency() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CalculateEfficiency"; }
   /// Summary of algorithms purpose
@@ -76,6 +72,11 @@ private:
                           API::MatrixWorkspace_sptr outputWS, double sum,
                           double error, int nPixels, double min_eff,
                           double max_eff);
+
+  void maskComponent(API::MatrixWorkspace &ws,
+                     const std::string &componentName);
+  void maskEdges(API::MatrixWorkspace_sptr ws, int high, int low, int left,
+                 int right, const std::string &componentName);
 };
 
 } // namespace Algorithm

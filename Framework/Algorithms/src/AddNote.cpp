@@ -44,8 +44,6 @@ DECLARE_ALGORITHM(AddNote)
 //----------------------------------------------------------------------------------------------
 AddNote::AddNote() { useAlgorithm("Comment", 1); }
 
-AddNote::~AddNote() {}
-
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name

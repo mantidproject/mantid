@@ -30,12 +30,12 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Kernel::Exception;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using Mantid::HistogramData::HistogramX;
 
 using std::runtime_error;
 using std::size_t;
 using std::vector;
 using std::cout;
-using std::endl;
 
 //==========================================================================================
 class LoadEventPreNexus2Test : public CxxTest::TestSuite {
@@ -115,7 +115,7 @@ public:
     struct stat filestatus;
     stat(eventfile.c_str(), &filestatus);
 
-    // std::cout << "***** executing *****" << std::endl;
+    // std::cout << "***** executing *****\n";
     TS_ASSERT(eventLoader->execute());
 
     EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(
@@ -130,7 +130,7 @@ public:
     it = logMap.begin();
     Kernel::DateAndTime start = it->first;
 
-    std::vector<TofEvent> events1 = ew->getEventListPtr(1000)->getEvents();
+    std::vector<TofEvent> events1 = ew->getSpectrum(1000).getEvents();
     for (size_t i = 0; i < events1.size(); i++) {
       std::cout << (events1[i].pulseTime() - start) << " sec \n";
     }
@@ -153,7 +153,7 @@ public:
     struct stat filestatus;
     stat(eventfile.c_str(), &filestatus);
 
-    // std::cout << "***** executing *****" << std::endl;
+    // std::cout << "***** executing *****\n";
     TS_ASSERT(eventLoader->execute());
 
     EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(
@@ -181,17 +181,7 @@ public:
     TS_ASSERT_EQUALS(inputWS->getInstrument()->getName(), "CNCS");
 
     // Create a new one
-    EventWorkspace_sptr outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    TS_ASSERT(outputWS); // non-null pointer
-
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS,
-                                                           false);
-
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom(*inputWS);
+    auto outputWS = inputWS->clone();
 
     // Bunch of checks
     TS_ASSERT_EQUALS(outputWS->getNumberEvents(), inputWS->getNumberEvents());
@@ -200,24 +190,23 @@ public:
     TS_ASSERT_EQUALS(outputWS->getInstrument()->getName(), "CNCS");
 
     std::size_t wkspIndex = 4348; // a good workspace index (with events)
-    TS_ASSERT_EQUALS(outputWS->getEventList(wkspIndex).getNumberEvents(), 11);
-    if (outputWS->getEventList(wkspIndex).getNumberEvents() != 11)
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(wkspIndex).getNumberEvents(), 11);
+    if (outputWS->getSpectrum(wkspIndex).getNumberEvents() != 11)
       return;
 
-    TS_ASSERT_EQUALS(outputWS->getEventList(wkspIndex).getEvents()[0].tof(),
-                     inputWS->getEventList(wkspIndex).getEvents()[0].tof());
+    TS_ASSERT_EQUALS(outputWS->getSpectrum(wkspIndex).getEvents()[0].tof(),
+                     inputWS->getSpectrum(wkspIndex).getEvents()[0].tof());
     // It should be possible to change an event list and not affect the other
     // one
-    outputWS->getEventList(wkspIndex).convertTof(1.5, 0.2);
-    TS_ASSERT_DIFFERS(outputWS->getEventList(wkspIndex).getEvents()[0].tof(),
-                      inputWS->getEventList(wkspIndex).getEvents()[0].tof());
+    outputWS->getSpectrum(wkspIndex).convertTof(1.5, 0.2);
+    TS_ASSERT_DIFFERS(outputWS->getSpectrum(wkspIndex).getEvents()[0].tof(),
+                      inputWS->getSpectrum(wkspIndex).getEvents()[0].tof());
 
     // Setting X should still be possible
-    Kernel::cow_ptr<MantidVec> x;
+    Kernel::cow_ptr<HistogramX> x;
     TS_ASSERT_THROWS_NOTHING(outputWS->setX(0, x));
     // Accessing Y is still possible
-    const MantidVec Y =
-        boost::dynamic_pointer_cast<const EventWorkspace>(outputWS)->dataY(0);
+    static_cast<void>(outputWS->y(0));
 
     // Check the run_start property exists and is right.
     Property *p = NULL;
@@ -253,13 +242,13 @@ public:
     TS_ASSERT_EQUALS(ew->getAxis(1)->length(), 2);
 
     // Are the pixel IDs ok?
-    TS_ASSERT_EQUALS(ew->getSpectrum(0)->getSpectrumNo(), 46);
-    auto dets = ew->getSpectrum(0)->getDetectorIDs();
+    TS_ASSERT_EQUALS(ew->getSpectrum(0).getSpectrumNo(), 46);
+    auto dets = ew->getSpectrum(0).getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
     TS_ASSERT_EQUALS(*dets.begin(), 45);
 
-    TS_ASSERT_EQUALS(ew->getSpectrum(1)->getSpectrumNo(), 111);
-    dets = ew->getSpectrum(1)->getDetectorIDs();
+    TS_ASSERT_EQUALS(ew->getSpectrum(1).getSpectrumNo(), 111);
+    dets = ew->getSpectrum(1).getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 1);
     TS_ASSERT_EQUALS(*dets.begin(), 110);
   }

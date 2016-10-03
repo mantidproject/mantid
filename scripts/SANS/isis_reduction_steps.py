@@ -341,11 +341,11 @@ class LoadRun(object):
             return workspace
         if len(groupW) < period:
             raise ValueError('Period number ' + str(period) + ' doesn\'t exist in workspace ' + groupW.getName())
-        ws_name = groupW[period].name()
+        ws_name = groupW[period - 1].name()
 
         # If we are dealing with event data, then we also want to extract and rename the according monitor data set
         monitor_name = ""
-        if isEventWorkspace(groupW[period]):
+        if isEventWorkspace(groupW[period - 1]):
             # Check if the monitor ws exists and extract it
             expected_mon_name = ws_name + appendix
             expected_mon_group_name = groupW.name() + appendix
@@ -1053,9 +1053,12 @@ class Mask_ISIS(ReductionStep):
             MaskDetectorsInShape(Workspace=workspace, ShapeXML=self._lim_phi_xml)
 
         if self.arm_width and self.arm_angle:
-            if instrument.name() == "SANS2D":
+            # Currently SANS2D and LOQ are supported
+            instrument_name = instrument.name()
+            if instrument_name == "SANS2D" or instrument_name == "LOQ":
+                component_name = 'rear-detector' if instrument_name == "SANS2D" else 'main-detector-bank'
                 ws = mtd[str(workspace)]
-                det = ws.getInstrument().getComponentByName('rear-detector')
+                det = ws.getInstrument().getComponentByName(component_name)
                 det_Z = det.getPos().getZ()
                 start_point = [self.arm_x, self.arm_y, det_Z]
                 MaskDetectorsInShape(Workspace=workspace, ShapeXML= \

@@ -42,6 +42,12 @@ public:
    * @param iP :: The parameter index of an individual function.
    */
   double get(size_t iY, size_t iP) override { return m_J->get(m_iY0 + iY, iP); }
+  /** Zero all matrix elements.
+  */
+  void zero() override {
+    throw Kernel::Exception::NotImplementedError(
+        "zero() is not implemented for PartialJacobian1");
+  }
 };
 
 class TempJacobian : public Jacobian {
@@ -64,6 +70,7 @@ public:
 
     return maxIndex;
   }
+  void zero() override { m_J.assign(m_J.size(), 0.0); }
 
 protected:
   size_t m_y;
@@ -155,7 +162,7 @@ void IPeakFunction::functionDeriv1D(Jacobian *out, const double *xValues,
 void IPeakFunction::setPeakRadius(const int &r) {
   if (r > 0) {
     s_peakRadius = r;
-    std::string setting = boost::lexical_cast<std::string>(r);
+    std::string setting = std::to_string(r);
     Kernel::ConfigService::Instance().setString("curvefitting.peakRadius",
                                                 setting);
   }

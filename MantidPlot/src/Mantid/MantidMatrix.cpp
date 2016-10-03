@@ -2,7 +2,6 @@
 #include "MantidMatrixModel.h"
 #include "MantidMatrix.h"
 #include "MantidMatrixFunction.h"
-#include "MantidKernel/Timer.h"
 #include "MantidUI.h"
 #include "../Graph3D.h"
 #include "../ApplicationWindow.h"
@@ -11,43 +10,16 @@
 #include "Preferences.h"
 #include "../pixmaps.h"
 
-#include "TSVSerialiser.h"
+#include "MantidQtAPI/TSVSerialiser.h"
 
-#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/RefAxis.h"
-#include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidKernel/ReadLock.h"
 
 #include "MantidQtAPI/PlotAxis.h"
 
-#include <QtGlobal>
-#include <QTextStream>
-#include <QList>
-#include <QEvent>
-#include <QContextMenuEvent>
-#include <QVBoxLayout>
-#include <QMouseEvent>
-#include <QHeaderView>
 #include <QApplication>
-#include <QVarLengthArray>
 #include <QClipboard>
-#include <QShortcut>
-#include <QPrinter>
-#include <QPrintDialog>
-#include <QPainter>
-#include <QLocale>
-#include <QItemDelegate>
-#include <QLabel>
-#include <QStackedWidget>
-#include <QImageWriter>
-#include <QSvgGenerator>
-#include <QFile>
-#include <QUndoStack>
-#include <QCheckBox>
-#include <QTabWidget>
+
 #include <QScrollBar>
 
 #include <stdlib.h>
@@ -55,10 +27,14 @@
 #include <limits>
 
 #include <boost/math/special_functions/fpclassify.hpp>
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::API;
 using namespace Mantid::Geometry;
+
+// Register the window into the WindowFactory
+DECLARE_WINDOW(MantidMatrix)
 
 namespace {
 Logger g_log("MantidMatrix");
@@ -111,13 +87,14 @@ int modelTypeToInt(MantidMatrixModel::Type type) {
 }
 
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
-                           ApplicationWindow *parent, const QString &label,
+                           QWidget *parent, const QString &label,
                            const QString &name, int start, int end)
     : MdiSubWindow(parent, label, name, 0), WorkspaceObserver(),
-      m_appWindow(parent), m_workspace(ws), y_start(0.0), y_end(0.0),
-      m_histogram(false), m_min(0), m_max(0), m_are_min_max_set(false),
-      m_boundingRect(), m_strName(name.toStdString()), m_selectedRows(),
-      m_selectedCols() {
+      m_workspace(ws), y_start(0.0), y_end(0.0), m_histogram(false), m_min(0),
+      m_max(0), m_are_min_max_set(false), m_boundingRect(),
+      m_strName(name.toStdString()), m_selectedRows(), m_selectedCols() {
+  m_workspace = ws;
+
   setup(ws, start, end);
   setWindowTitle(name);
   setName(name);
@@ -167,10 +144,10 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
   connect(m_tabs, SIGNAL(currentChanged(int)), this, SLOT(viewChanged(int)));
 
   setGeometry(50, 50,
-              QMIN(5, numCols()) *
+              qMin(5, numCols()) *
                       m_table_viewY->horizontalHeader()->sectionSize(0) +
                   55,
-              (QMIN(10, numRows()) + 1) *
+              (qMin(10, numRows()) + 1) *
                       m_table_viewY->verticalHeader()->sectionSize(0) +
                   100);
 
@@ -275,7 +252,7 @@ void MantidMatrix::connectTableView(QTableView *view,
   view->setFocusPolicy(Qt::StrongFocus);
 
   QPalette pal = view->palette();
-  pal.setColor(QColorGroup::Base, m_bk_color);
+  pal.setColor(QPalette::Base, m_bk_color);
   view->setPalette(pal);
 
   // set header properties
@@ -534,7 +511,7 @@ void MantidMatrix::goToRow(int row) {
     return;
 
   //	activeView()->selectRow(row - 1); //For some reason, this did not
-  //highlight the row at all, hence the stupid line below
+  // highlight the row at all, hence the stupid line below
   activeView()->selectionModel()->select(
       QItemSelection(activeModel()->index(row - 1, 0),
                      activeModel()->index(row - 1, numCols() - 1)),
@@ -549,7 +526,7 @@ void MantidMatrix::goToColumn(int col) {
     return;
 
   //	activeView()->selectColumn(col - 1); //For some reason, this did not
-  //highlight the row at all, hence the stupid line below
+  // highlight the row at all, hence the stupid line below
   activeView()->selectionModel()->select(
       QItemSelection(activeModel()->index(0, col - 1),
                      activeModel()->index(numRows() - 1, col - 1)),
@@ -665,17 +642,15 @@ QwtDoubleRect MantidMatrix::boundingRect() {
       } else {
         m_spectrogramCols = numCols() > 100 ? numCols() : 100;
       }
-      m_boundingRect =
-          QwtDoubleRect(QMIN(x_start, x_end) - 0.5 * dx,
-                        QMIN(y_start, y_end) - 0.5 * dy,
-                        fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy)
-              .normalized();
+      m_boundingRect = QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
+                                     qMin(y_start, y_end) - 0.5 * dy,
+                                     fabs(x_end - x_start) + dx,
+                                     fabs(y_end - y_start) + dy).normalized();
 
     } else {
       m_spectrogramCols = 0;
-      m_boundingRect = QwtDoubleRect(0, QMIN(y_start, y_end) - 0.5 * dy, 1,
-                                     fabs(y_end - y_start) + dy)
-                           .normalized();
+      m_boundingRect = QwtDoubleRect(0, qMin(y_start, y_end) - 0.5 * dy, 1,
+                                     fabs(y_end - y_start) + dy).normalized();
     }
   } // Define the spectrogram bounding box
   return m_boundingRect;
@@ -755,7 +730,7 @@ MultiLayer *MantidMatrix::plotGraph2D(Graph::CurveType type) {
   MultiLayer *g = a->multilayerPlot(a->generateUniqueName(tr("Graph")));
   attachMultilayer(g);
   //#799 fix for  multiple dialog creation on double clicking/ on right click
-  //menu scale on  2d plot
+  // menu scale on  2d plot
   //   a->connectMultilayerPlot(g);
   Graph *plot = g->activeGraph();
   plotSpectrogram(plot, a, type, false, NULL);
@@ -873,7 +848,7 @@ bool MantidMatrix::setSelectedColumns() {
 }
 
 void MantidMatrix::dependantClosed(MdiSubWindow *w) {
-  if (w->isA("Table")) {
+  if (strcmp(w->metaObject()->className(), "Table") == 0) {
     QMap<MultiLayer *, Table *>::iterator itr;
     for (itr = m_plots1D.begin(); itr != m_plots1D.end(); ++itr) {
       if (itr.value() == dynamic_cast<Table *>(w)) {
@@ -881,7 +856,7 @@ void MantidMatrix::dependantClosed(MdiSubWindow *w) {
         break;
       }
     }
-  } else if (w->isA("MultiLayer")) {
+  } else if (strcmp(w->metaObject()->className(), "MultiLayer") == 0) {
     int i = m_plots2D.indexOf(dynamic_cast<MultiLayer *>(w));
     if (i >= 0)
       m_plots2D.remove(i);
@@ -1110,7 +1085,8 @@ QChar MantidMatrix::numberFormat() { return activeModel()->format(); }
 int MantidMatrix::precision() { return activeModel()->precision(); }
 
 void MantidMatrix::setMatrixProperties() {
-  MantidMatrixDialog dlg(m_appWindow);
+  QWidget *parent = parentWidget();
+  MantidMatrixDialog dlg(parent);
   dlg.setMatrix(this);
   dlg.exec();
 }
@@ -1209,14 +1185,51 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
   }
 }
 
-void MantidMatrix::loadFromProject(const std::string &lines,
-                                   ApplicationWindow *app,
-                                   const int fileVersion) {
-  Q_UNUSED(lines);
-  Q_UNUSED(app);
+MantidQt::API::IProjectSerialisable *
+MantidMatrix::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                              const int fileVersion) {
   Q_UNUSED(fileVersion);
-  // We don't actually need to do any loading. It's all taken care of by
-  // ApplicationWindow.
+  TSVSerialiser tsv(lines);
+
+  MantidMatrix *matrix = nullptr;
+  if (tsv.selectLine("WorkspaceName")) {
+    const std::string wsName = tsv.asString(1);
+    MatrixWorkspace_sptr ws;
+
+    if (AnalysisDataService::Instance().doesExist(wsName))
+      ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+
+    if (!ws)
+      return nullptr;
+
+    matrix = new MantidMatrix(ws, app, "Mantid", QString::fromStdString(wsName),
+                              -1, -1);
+  }
+
+  if (!matrix)
+    return nullptr;
+
+  // Append to the list of mantid matrix apps
+  app->addMantidMatrixWindow(matrix);
+  app->addMdiSubWindow(matrix);
+
+  if (tsv.selectLine("geometry")) {
+    const std::string geometry = tsv.lineAsString("geometry");
+    app->restoreWindowGeometry(app, matrix, QString::fromStdString(geometry));
+  }
+
+  if (tsv.selectLine("tgeometry")) {
+    const std::string geometry = tsv.lineAsString("tgeometry");
+    app->restoreWindowGeometry(app, matrix, QString::fromStdString(geometry));
+  }
+
+  if (tsv.selectLine("SelectedTab")) {
+    int index;
+    tsv >> index;
+    matrix->m_tabs->setCurrentIndex(index);
+  }
+
+  return matrix;
 }
 
 std::string MantidMatrix::saveToProject(ApplicationWindow *app) {
@@ -1225,6 +1238,7 @@ std::string MantidMatrix::saveToProject(ApplicationWindow *app) {
   tsv.writeRaw("<mantidmatrix>");
   tsv.writeLine("WorkspaceName") << m_strName;
   tsv.writeRaw(app->windowGeometryInfo(this));
+  tsv.writeLine("SelectedTab") << m_tabs->currentIndex();
   tsv.writeRaw("</mantidmatrix>");
 
   return tsv.outputLines();

@@ -138,10 +138,10 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
   Mantid::API::MatrixWorkspace_sptr ws2d;
   if (isModerator) {
     ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        twos(), static_cast<int>(nhist), x0, x1, dx);
+        twos(), static_cast<int>(nhist), x0, x1, dx, true);
   } else {
     ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
-        ones(), static_cast<int>(nhist), x0, x1, dx);
+        ones(), static_cast<int>(nhist), x0, x1, dx, true);
   }
 
   // Set the units to Wavelength (is needed for both types of worspaces)
@@ -173,10 +173,10 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
   // Link workspace with detector
   for (size_t i = 0; i < nhist; ++i) {
     const Mantid::specnum_t specID = static_cast<Mantid::specnum_t>(id + i);
-    auto *spec = ws2d->getSpectrum(i);
-    spec->setSpectrumNo(specID);
-    spec->clearDetectorIDs();
-    spec->addDetectorID(id);
+    auto &spec = ws2d->getSpectrum(i);
+    spec.setSpectrumNo(specID);
+    spec.clearDetectorIDs();
+    spec.addDetectorID(id);
   }
   return ws2d;
 }

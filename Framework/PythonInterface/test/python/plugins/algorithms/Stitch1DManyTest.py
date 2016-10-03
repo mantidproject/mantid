@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 import numpy
 from mantid.simpleapi import *
@@ -29,10 +31,10 @@ class Stitch1DManyTest(unittest.TestCase):
         DeleteWorkspace(self.b)
 
     def do_check_ydata(self, expectedYData, targetWS):
-        print "expected"
-        print expectedYData
-        print "target"
-        print targetWS.readY(0)
+        print("expected")
+        print(expectedYData)
+        print("target")
+        print(targetWS.readY(0))
         yDataRounded = [ round(elem, 4) for elem in targetWS.readY(0) ]
         same = all([(x == y)  for x,y in zip(yDataRounded, expectedYData)])
         self.assertTrue(same)

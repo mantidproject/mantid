@@ -9,4 +9,4 @@
 #include <set>
 #include <string>
 
-#endif //VATESAPITEST_PRECOMPILEDHEADER_H_
+#endif // VATESAPITEST_PRECOMPILEDHEADER_H_

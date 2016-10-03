@@ -21,6 +21,11 @@ set PYTHONPATH=%MANTIDPATH%;%PYTHONPATH%
 set _PYTHON_EXE=%PYTHONHOME%\python.exe
 set _IPYTHON_CMD=%PYTHONHOME%\Scripts\ipython.cmd
 
+:: Matplotlib backend should default to Qt if not set (requires matplotlib >= 1.5)
+if "%MPLBACKEND%"=="" (
+  set MPLBACKEND=qt4agg
+)
+
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Start python
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -34,6 +39,7 @@ if "%1"=="--classic" (
 
 :: Start ipython and pass through all arguments to it
 start "Mantid Python" /B /WAIT %_IPYTHON_CMD% %*
+if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
 goto TheEnd
 
 :StartPython
@@ -48,5 +54,7 @@ shift
 if not "%~1"=="" goto ArgumentsLoop
 
 start "Mantid Python" /B /WAIT %_PYTHON_EXE%%ArgsExceptFirst%
+if %ERRORLEVEL% NEQ 0 exit /B %ERRORLEVEL%
 
 :TheEnd
+exit /B 0

@@ -8,93 +8,96 @@
 
 using namespace MantidQt::CustomInterfaces;
 
-class UserInputValidatorTest : public CxxTest::TestSuite
-{
+class UserInputValidatorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static UserInputValidatorTest *createSuite() { return new UserInputValidatorTest(); }
-  static void destroySuite( UserInputValidatorTest *suite ) { delete suite; }
-
-  UserInputValidatorTest()
-  {
+  static UserInputValidatorTest *createSuite() {
+    return new UserInputValidatorTest();
   }
+  static void destroySuite(UserInputValidatorTest *suite) { delete suite; }
 
-  void test_validRebin()
-  {
+  UserInputValidatorTest() {}
+
+  void test_validRebin() {
     UserInputValidator uiv;
     TS_ASSERT(uiv.checkBins(0.6, 0.1, 1.8));
     TS_ASSERT(uiv.isAllInputValid());
   }
 
-  void test_negativeWidthRebin()
-  {
+  void test_negativeWidthRebin() {
     UserInputValidator uiv;
     TS_ASSERT(!uiv.checkBins(0.6, -0.1, 1.8));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nBin width must be a positive value.");
+    TS_ASSERT_EQUALS(
+        uiv.generateErrorMessage(),
+        "Please correct the following:\nBin width must be a positive value.");
   }
 
-  void test_zeroWidthRebin()
-  {
+  void test_zeroWidthRebin() {
     UserInputValidator uiv;
     TS_ASSERT(!uiv.checkBins(0.6, 0.0, 1.8));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nBin width must be non-zero.");
+    TS_ASSERT_EQUALS(
+        uiv.generateErrorMessage(),
+        "Please correct the following:\nBin width must be non-zero.");
   }
 
-  void test_zeroRangeRebin()
-  {
+  void test_zeroRangeRebin() {
     UserInputValidator uiv;
     TS_ASSERT(!uiv.checkBins(0.6, 0.1, 0.6));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nBinning ranges must be non-zero.");
+    TS_ASSERT_EQUALS(
+        uiv.generateErrorMessage(),
+        "Please correct the following:\nBinning ranges must be non-zero.");
   }
 
-  void test_reverseRangeRebin()
-  {
+  void test_reverseRangeRebin() {
     UserInputValidator uiv;
     TS_ASSERT(!uiv.checkBins(1.8, 0.1, 0.6));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nThe start of a binning range must be less than the end.");
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(),
+                     "Please correct the following:\nThe start of a binning "
+                     "range must be less than the end.");
   }
 
-  void test_binsNotFactorsRebin()
-  {
+  void test_binsNotFactorsRebin() {
     UserInputValidator uiv;
     TS_ASSERT(!uiv.checkBins(0.0, 0.2, 0.7));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nBin width must allow for even splitting of the range.");
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(),
+                     "Please correct the following:\nBin width must allow for "
+                     "even splitting of the range.");
   }
 
-  void test_validRange()
-  {
+  void test_validRange() {
     UserInputValidator uiv;
     std::pair<double, double> range(1, 5);
     TS_ASSERT(uiv.checkValidRange("test range", range));
     TS_ASSERT(uiv.isAllInputValid());
   }
 
-  void test_invalidRangeReversed()
-  {
+  void test_invalidRangeReversed() {
     UserInputValidator uiv;
     std::pair<double, double> range(10, 5);
     TS_ASSERT(!uiv.checkValidRange("test range", range));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nThe start of test range must be less than the end.");
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(),
+                     "Please correct the following:\nThe start of test range "
+                     "must be less than the end.");
   }
 
-  void test_invalidRangeZeroWidth()
-  {
+  void test_invalidRangeZeroWidth() {
     UserInputValidator uiv;
     std::pair<double, double> range(5, 5);
     TS_ASSERT(!uiv.checkValidRange("test range", range));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\ntest range must have a non-zero width.");
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the "
+                                                 "following:\ntest range must "
+                                                 "have a non-zero width.");
   }
 
-  void test_nonOverlappingRanges()
-  {
+  void test_nonOverlappingRanges() {
     UserInputValidator uiv;
     std::pair<double, double> rangeA(1, 5);
     std::pair<double, double> rangeB(6, 10);
@@ -102,35 +105,37 @@ public:
     TS_ASSERT(uiv.isAllInputValid());
   }
 
-  void test_overlappingRanges()
-  {
+  void test_overlappingRanges() {
     UserInputValidator uiv;
     std::pair<double, double> rangeA(1, 5);
     std::pair<double, double> rangeB(3, 8);
     TS_ASSERT(!uiv.checkRangesDontOverlap(rangeA, rangeB));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nThe ranges must not overlap: [1,5], [3,8].");
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the "
+                                                 "following:\nThe ranges must "
+                                                 "not overlap: [1,5], [3,8].");
   }
 
-  void test_enclosedRange()
-  {
+  void test_enclosedRange() {
     UserInputValidator uiv;
     std::pair<double, double> outer(1, 10);
     std::pair<double, double> inner(3, 8);
-    TS_ASSERT(uiv.checkRangeIsEnclosed("outer range", outer, "inner range", inner));
+    TS_ASSERT(
+        uiv.checkRangeIsEnclosed("outer range", outer, "inner range", inner));
     TS_ASSERT(uiv.isAllInputValid());
   }
 
-  void test_nonEnclosedRange()
-  {
+  void test_nonEnclosedRange() {
     UserInputValidator uiv;
     std::pair<double, double> outer(1, 10);
     std::pair<double, double> inner(3, 15);
-    TS_ASSERT(!uiv.checkRangeIsEnclosed("outer range", outer, "inner range", inner));
+    TS_ASSERT(
+        !uiv.checkRangeIsEnclosed("outer range", outer, "inner range", inner));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nouter range must completely enclose inner range.");
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(),
+                     "Please correct the following:\nouter range must "
+                     "completely enclose inner range.");
   }
-
 };
 
 #endif

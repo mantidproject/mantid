@@ -261,7 +261,7 @@ void TobyFitResolutionModel::setAttribute(
       throw std::invalid_argument("TobyFitResolutionModel: Invalid MCType "
                                   "argument, valid values are 0-4. Current "
                                   "value=" +
-                                  boost::lexical_cast<std::string>(m_mcType));
+                                  std::to_string(m_mcType));
     }
   } else if (name == CRYSTAL_MOSAIC) {
     m_mosaicActive = (value.asInt() != 0);

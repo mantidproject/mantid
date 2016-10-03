@@ -36,15 +36,6 @@ using namespace Kernel;
 using namespace DataObjects;
 using namespace Geometry;
 
-/** Constructor
- */
-PoldiFitPeaks2D::PoldiFitPeaks2D()
-    : Algorithm(), m_poldiInstrument(), m_timeTransformer(), m_deltaT(0.0) {}
-
-/** Destructor
- */
-PoldiFitPeaks2D::~PoldiFitPeaks2D() {}
-
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PoldiFitPeaks2D::name() const { return "PoldiFitPeaks2D"; }
 

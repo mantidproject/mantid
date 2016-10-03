@@ -1,21 +1,8 @@
 ###########################################################################
 # CMake version check.
-# Require >= 3.3 for Windows as previous versions contained a bug that
-# prevented external data from working correctly. Other systems require
-# 2.8.12 to avoid recompiling system packages
+# Require CMake 3.5, required by ParaView 5.1.0
 ###########################################################################
-if (CMAKE_HOST_WIN32)
-  cmake_minimum_required ( VERSION 3.3.0 )
-else()
-  cmake_minimum_required ( VERSION 2.8.12 )
-endif()
-
-if(POLICY CMP0053)
-  #Simplify variable reference and escape sequence evaluation.
-  #Claims to dramatically improve CMake configure and generate time
-  #requires CMake 3.1 or later
-  cmake_policy(SET CMP0053 NEW)
-endif()
+cmake_minimum_required ( VERSION 3.5 )
 
 # Define the project name.
 project ( Mantid )
@@ -25,6 +12,8 @@ set ( SYSTEM_PACKAGE_TARGET "")
 
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
+
+set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Switch for compiling the gui components")
 
 SET (CPACK_INSTALL_CMAKE_PROJECTS
      "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
@@ -58,11 +47,6 @@ if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
 endif ()
 
 ###########################################################################
-# Set working Python versions
-###########################################################################
-set ( Python_ADDITIONAL_VERSIONS 2.7 2.6 )
-
-###########################################################################
 # Cross-platform setup
 ###########################################################################
 include ( CommonSetup )
@@ -70,11 +54,9 @@ include ( CommonSetup )
 ###########################################################################
 # Check for Qt (DarwinSetup below needs a variable from this)
 ###########################################################################
-find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUIRED )
-option(WITH_QT3_SUPPORT_WARNINGS "Enable warnings about used Qt3Support functions" OFF)
-if(WITH_QT3_SUPPORT_WARNINGS)
-  add_definitions(-DQT3_SUPPORT_WARNINGS)
-endif()
+if (ENABLE_MANTIDPLOT)
+  find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg REQUIRED )
+endif ()
 
 ###########################################################################
 # Find OpenGL
@@ -85,10 +67,14 @@ if ( NOT OPENGL_FOUND )
   message ( FATAL_ERROR "OpenGL was not found." )
 endif ()
 
+find_package(TBB REQUIRED)
+
 ###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
-include ( ParaViewSetup )
+if (ENABLE_MANTIDPLOT)
+  include ( ParaViewSetup )
+endif ()
 
 # We probably don't want this to run on every build.
 option(COVERALLS "Generate coveralls data" OFF)
@@ -101,18 +87,22 @@ endif()
 ###########################################################################
 # Find qwt. Needs to be version 5
 ###########################################################################
-find_package ( Qwt REQUIRED )
-if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR
-    QWT_VERSION VERSION_GREATER 6.0 )
-  message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT_VERSION}" )
+if (ENABLE_MANTIDPLOT)
+  find_package ( Qwt REQUIRED )
+  if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR
+      QWT_VERSION VERSION_GREATER 6.0 )
+    message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT_VERSION}" )
+  endif()
 endif()
 
 ###########################################################################
 # Find PyQt & sip
 ###########################################################################
-find_package ( PyQt4 REQUIRED )
-find_package ( SIP REQUIRED )
-separate_arguments ( PYQT4_SIP_FLAGS )
+if (ENABLE_MANTIDPLOT)
+  find_package ( PyQt4 REQUIRED )
+  find_package ( SIP REQUIRED )
+  separate_arguments ( PYQT4_SIP_FLAGS )
+endif()
 
 ###########################################################################
 # gsl is currently needed by Geometry, Algorithms, Curvefitting, & MantidPlot
@@ -122,7 +112,9 @@ find_package ( GSL REQUIRED )
 ###########################################################################
 # Add QtPropertyBrowser to build
 ###########################################################################
-add_subdirectory ( QtPropertyBrowser )
+if (ENABLE_MANTIDPLOT)
+  add_subdirectory ( QtPropertyBrowser )
+endif(ENABLE_MANTIDPLOT)
 
 ###########################################################################
 # Now add in all the components
@@ -137,36 +129,42 @@ set( DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs )
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
 set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to the list of tests run by ctest?")
 
+
+# VATES flag. Requires ParaView
+set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
+if (ENABLE_MANTIDPLOT AND MAKE_VATES )
+  find_package(ParaView)
+  if(ParaView_FOUND)
+    add_definitions ( -DMAKE_VATES )
+  endif()
+endif()
+
 add_subdirectory ( Framework )
 
 include_directories ( Framework/Kernel/inc )
+include_directories ( Framework/HistogramData/inc )
 include_directories ( Framework/Geometry/inc )
 include_directories ( Framework/API/inc )
 
-set ( CORE_MANTIDLIBS Kernel Geometry API )
+set ( CORE_MANTIDLIBS Kernel HistogramData Geometry API )
 
-# Add a target for all GUI tests
-add_custom_target ( GUITests )
-add_dependencies ( GUITests MantidWidgetsTest)
-add_dependencies ( check GUITests )
-# Collect all tests together
-add_custom_target ( AllTests )
-add_dependencies ( AllTests FrameworkTests GUITests )
+if (ENABLE_MANTIDPLOT)
+  # Add a target for all GUI tests
+  add_custom_target ( GUITests )
+  add_dependencies ( GUITests MantidWidgetsTest)
+  add_dependencies ( check GUITests )
+  # Collect all tests together
+  add_custom_target ( AllTests )
+  add_dependencies ( AllTests FrameworkTests GUITests )
+endif()
 
 if ( UNIX )
   #Experimental feature. Unix only at this point.
   set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
 endif ( UNIX )
 
-# VATES flag. Requires ParaView
-set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
-
-if ( MAKE_VATES )
-  find_package( ParaView )
+if (ENABLE_MANTIDPLOT AND MAKE_VATES )
   add_subdirectory ( Vates )
-  if(ParaView_FOUND)
-    add_definitions ( -DMAKE_VATES )
-  endif()
   if (NOT APPLE)
     LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
           "${ParaView_DIR}" "ParaView Runtime Libs" "Runtime" "${INBUNDLE}/"
@@ -182,18 +180,23 @@ if ( MAKE_VATES )
     )
   endif()
 
-endif ( MAKE_VATES )
+endif ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 
 if ( MSVC )
   add_definitions ( -DQWT_DLL )
 endif ()
-add_subdirectory ( MantidQt )
 
-add_subdirectory ( MantidPlot )
+if (ENABLE_MANTIDPLOT)
+  add_subdirectory ( MantidQt )
+
+  add_subdirectory ( MantidPlot )
+endif()
 
 add_subdirectory ( scripts )
 
-add_subdirectory ( docs )
+if (ENABLE_MANTIDPLOT)
+  add_subdirectory ( docs )
+endif()
 
 # System test data target
 add_subdirectory ( Testing/SystemTests/scripts )
@@ -206,7 +209,7 @@ if (COVERALLS)
         endforeach()
         #remove initial \n
         string(SUBSTRING ${SRCS_FILE} 1 -1 SRCS_FILE)
-  set( SRCS_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/sources.txt") 
+  set( SRCS_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/sources.txt")
   file(WRITE ${SRCS_FILENAME} ${SRCS_FILE})
   coveralls_setup(
     ${SRCS_FILENAME}
@@ -220,10 +223,10 @@ endif ()
 ###########################################################################
 
 # N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
-install ( DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps PATTERN ".svn" EXCLUDE )
+install ( DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
 
 # Install the files (.desktop and icon) to create a menu item, but only if installing to /opt/Mantid
-if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_INSTALL_PREFIX STREQUAL "/opt/Mantid" )
+if ( ENABLE_MANTIDPLOT AND ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND CMAKE_INSTALL_PREFIX STREQUAL "/opt/Mantid" )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/installers/LinuxInstaller/mantidplot.desktop
             DESTINATION /usr/share/applications )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/MantidPlot_Icon_32offset.png
@@ -234,6 +237,13 @@ endif()
 # THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See Framework/PostInstall/CMakeLists
 # for an explanation
 add_subdirectory( Framework/PostInstall )
+
+
+# Conda
+set ( ENABLE_CONDA CACHE BOOL "Switch to enable conda package generation")
+if ( ENABLE_CONDA )
+  include ( conda )
+endif ( ENABLE_CONDA )
 
 ###########################################################################
 # CPack settings
@@ -255,11 +265,11 @@ if ( ENABLE_CPACK )
       message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
       # rhel requirements
-      set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,nexus-python >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,nexus-python >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb" )
       # OCE
       set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
-      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-ipython >= 1.1.0,python-ipython-notebook" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},python-six,python-ipython >= 1.1.0,python-ipython-notebook" )
       # scipy & matplotlib
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy,python-matplotlib" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},mxml,hdf,hdf5,jsoncpp >= 0.7.0" )
@@ -294,10 +304,12 @@ if ( ENABLE_CPACK )
                            "qt4-dev-tools,"
                            "libqwt5-qt4,"
                            "libqwtplot3d-qt4-0,"
+                           "python-h5py,"
                            "python-numpy,"
                            "python-sip,"
                            "python-qt4,"
                            "python-nxs (>= 4.3),"
+                           "python-six,"
                            "libjsoncpp0 (>=0.7.0),"
                            "libqscintilla2-11,"
                            "liboce-foundation8,liboce-modeling8,"
@@ -306,11 +318,13 @@ if ( ENABLE_CPACK )
                            "ipython-notebook,"
                            "python-matplotlib,"
                            "python-scipy,"
-                           "libpocofoundation11,libpocoutil11,libpoconet11,libpoconetssl11,libpococrypto11,libpocoxml11" )
+                           "libtbb2,"
+                           "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION},"
+                           "python-pycifrw (>= 4.2.1)" )
         set ( PERFTOOLS_DEB_PACKAGE "libgoogle-perftools4 (>= 1.7)" )
-        if( "${UNIX_CODENAME}" STREQUAL "wily"  OR "${UNIX_CODENAME}" STREQUAL "xenial")
-            list ( APPEND DEPENDS_LIST ", libnexus0v5 (>= 4.3),libjsoncpp0v5 (>= 0.7.0),libqscintilla2-12v5, libmuparser2v5,libqwtplot3d-qt4-0v5")
-            list (REMOVE_ITEM DEPENDS_LIST "libjsoncpp0 (>=0.7.0)," "libqscintilla2-11," "libmuparser2," "libnexus0 (>= 4.3)," "libqwtplot3d-qt4-0,")
+        if( "${UNIX_CODENAME}" STREQUAL "xenial")
+            list ( APPEND DEPENDS_LIST ", libnexus0v5 (>= 4.3),libjsoncpp1,libqscintilla2-12v5, libmuparser2v5,libqwtplot3d-qt4-0v5,libgsl2,liboce-foundation10,liboce-modeling10")
+            list (REMOVE_ITEM DEPENDS_LIST "libjsoncpp0 (>=0.7.0)," "libqscintilla2-11," "libmuparser2," "libnexus0 (>= 4.3)," "libqwtplot3d-qt4-0," "libgsl0ldbl," "liboce-foundation8,liboce-modeling8,")
         endif()
         # parse list to string required for deb package
         string ( REPLACE ";" "" CPACK_DEBIAN_PACKAGE_DEPENDS ${DEPENDS_LIST} )

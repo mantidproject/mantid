@@ -38,7 +38,6 @@ const double radtodeg_half = 180.0 / M_PI / 2.;
 class DLLExport TOFExtinction : public API::Algorithm {
 public:
   TOFExtinction();
-  ~TOFExtinction() override;
 
   /// Algorithm's name for identification
   const std::string name() const override { return "TOFExtinction"; };
@@ -82,9 +81,9 @@ private:
                     double tbar, double fsq, double sigfsq,
                     double relSigRg = 0.03);
   double absor_sphere(double &twoth, double &wl);
-  double m_smu;    ///< linear scattering coefficient in 1/cm
-  double m_amu;    ///< linear absoprtion coefficient in 1/cm
-  double m_radius; ///< sample radius in cm
+  double m_smu = 0.0;    ///< linear scattering coefficient in 1/cm
+  double m_amu = 0.0;    ///< linear absoprtion coefficient in 1/cm
+  double m_radius = 0.0; ///< sample radius in cm
 };
 } // namespace Mantid;
 } // namespace Crystal;

@@ -10,6 +10,7 @@
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/IFunctionWithLocation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -314,9 +315,7 @@ protected:
     return (m_quoteString) ? std::string("\"" + str + "\"") : str;
   }
   /// Apply if int
-  std::string apply(const int &i) const override {
-    return boost::lexical_cast<std::string>(i);
-  }
+  std::string apply(const int &i) const override { return std::to_string(i); }
   /// Apply if double
   std::string apply(const double &d) const override {
     return boost::lexical_cast<std::string>(d);
@@ -572,7 +571,7 @@ protected:
     }
     if (m_value.size() > 2) {
       // check if the value is in barckets (...)
-      if (m_value[0] == '(' && m_value[m_value.size() - 1] == ')') {
+      if (m_value.front() == '(' && m_value.back() == ')') {
         m_value.erase(0, 1);
         m_value.erase(m_value.size() - 1);
       }
@@ -651,15 +650,19 @@ void IFunction::calNumericalDeriv(const FunctionDomain &domain,
   double step;                   // real step
   double cutoff = 100.0 * minDouble / stepPercentage;
   size_t nParam = nParams();
-  size_t nData = domain.size();
+  size_t nData = getValuesSize(domain);
 
-  FunctionValues minusStep(domain);
-  FunctionValues plusStep(domain);
+  FunctionValues minusStep(nData);
+  FunctionValues plusStep(nData);
 
   // PARALLEL_CRITICAL(numeric_deriv)
   {
     applyTies(); // just in case
     function(domain, minusStep);
+  }
+
+  if (nData == 0) {
+    nData = minusStep.size();
   }
 
   for (size_t iP = 0; iP < nParam; iP++) {
@@ -713,7 +716,7 @@ void IFunction::setMatrixWorkspace(
     const Geometry::ParameterMap &paramMap = workspace->instrumentParameters();
 
     Geometry::IDetector_const_sptr det;
-    size_t numDetectors = workspace->getSpectrum(wi)->getDetectorIDs().size();
+    size_t numDetectors = workspace->getSpectrum(wi).getDetectorIDs().size();
     if (numDetectors > 1) {
       // If several detectors are on this workspace index, just use the ID of
       // the first detector
@@ -721,7 +724,7 @@ void IFunction::setMatrixWorkspace(
       // and not the group. Ask Roman.
       Instrument_const_sptr inst = workspace->getInstrument();
       det = inst->getDetector(
-          *workspace->getSpectrum(wi)->getDetectorIDs().begin());
+          *workspace->getSpectrum(wi).getDetectorIDs().begin());
     } else
       // Get the detector (single) at this workspace index
       det = workspace->getDetector(wi);
@@ -772,12 +775,12 @@ void IFunction::setMatrixWorkspace(
                 g_log.debug()
                     << "For FitParameter " << parameterName(i)
                     << " centre of peak before any unit convertion is "
-                    << centreValue << std::endl;
+                    << centreValue << '\n';
                 centreValue =
                     convertValue(centreValue, centreUnit, workspace, wi);
                 g_log.debug() << "For FitParameter " << parameterName(i)
                               << " centre of peak after any unit convertion is "
-                              << centreValue << std::endl;
+                              << centreValue << '\n';
               }
 
               double paramValue = fitParam.getValue(centreValue);
@@ -793,11 +796,11 @@ void IFunction::setMatrixWorkspace(
                     fitParam.getLookUpTable().getYUnit(); // from table
                 g_log.debug() << "The FitParameter " << parameterName(i)
                               << " = " << paramValue
-                              << " before y-unit convertion" << std::endl;
+                              << " before y-unit convertion\n";
                 paramValue /= convertValue(1.0, resultUnit, workspace, wi);
                 g_log.debug() << "The FitParameter " << parameterName(i)
                               << " = " << paramValue
-                              << " after y-unit convertion" << std::endl;
+                              << " after y-unit convertion\n";
               } else {
                 // so from formula
 
@@ -824,19 +827,18 @@ void IFunction::setMatrixWorkspace(
                     g_log.debug() << "The FitParameter " << parameterName(i)
                                   << " = " << paramValue
                                   << " before result-unit convertion (using "
-                                  << resultUnitStr << ")" << std::endl;
+                                  << resultUnitStr << ")\n";
                     paramValue *= p.Eval();
                     g_log.debug() << "The FitParameter " << parameterName(i)
                                   << " = " << paramValue
-                                  << " after result-unit convertion"
-                                  << std::endl;
+                                  << " after result-unit convertion\n";
                   } catch (mu::Parser::exception_type &e) {
                     g_log.error()
                         << "Cannot convert formula unit to workspace unit"
                         << " Formula unit which cannot be passed is "
                         << resultUnitStr
                         << ". Muparser error message is: " << e.GetMsg()
-                        << std::endl;
+                        << '\n';
                   }
                 } // end if
               } // end trying to convert result-unit from formula or y-unit for
@@ -945,7 +947,7 @@ void IFunction::convertValue(std::vector<double> &values,
     double l2(-1.0), twoTheta(0.0);
     if (!det->isMonitor()) {
       l2 = det->getDistance(*sample);
-      twoTheta = ws->detectorTwoTheta(det);
+      twoTheta = ws->detectorTwoTheta(*det);
     } else // If this is a monitor then make l1+l2 = source-detector distance
            // and twoTheta=0
     {
@@ -1004,11 +1006,10 @@ void IFunction::setAttributeValue(const std::string &attName,
 
 /// Returns a list of attribute names
 std::vector<std::string> IFunction::getAttributeNames() const {
-  std::vector<std::string> names(m_attrs.size(), "");
-  size_t index(0);
+  std::vector<std::string> names;
+  names.reserve(m_attrs.size());
   for (const auto &attr : m_attrs) {
-    names[index] = attr.first;
-    ++index;
+    names.push_back(attr.first);
   }
   return names;
 }
@@ -1094,6 +1095,56 @@ void IFunction::setCovarianceMatrix(
         "IFunction: Covariance matrix has a wrong size");
   }
   m_covar = covar;
+}
+
+/// Get number of values for a given domain.
+/// @param domain :: A domain.
+size_t IFunction::getValuesSize(const FunctionDomain &domain) const {
+  return domain.size();
+}
+
+/// Fix a parameter
+/// @param name :: A name of a parameter to fix
+void IFunction::fixParameter(const std::string &name) {
+  auto i = parameterIndex(name);
+  fix(i);
+}
+
+/// Free a parameter
+/// @param name :: A name of a parameter to free
+void IFunction::unfixParameter(const std::string &name) {
+  auto i = parameterIndex(name);
+  unfix(i);
+}
+
+/// Fix all parameters
+void IFunction::fixAll() {
+  for (size_t i = 0; i < nParams(); ++i) {
+    fix(i);
+  }
+}
+
+/// Free all parameters
+void IFunction::unfixAll() {
+  for (size_t i = 0; i < nParams(); ++i) {
+    fix(i);
+  }
+}
+
+/// Get number of domains required by this function.
+/// If it returns a number greater than 1 then the domain
+/// passed to function(domain, values) method must have a
+/// CompositeDomain type with the same number of parts.
+size_t IFunction::getNumberDomains() const { return 1; }
+
+/// Split this function (if needed) into a list of independent functions.
+/// The number of functions must be the number of domains this function is
+/// working on (== getNumberDomains()). The result of evaluation of the
+/// created functions on their domains must be the same as if this function
+/// was evaluated on the composition of those domains.
+std::vector<IFunction_sptr> IFunction::createEquivalentFunctions() const {
+  return std::vector<IFunction_sptr>(
+      1, FunctionFactory::Instance().createInitialized(asString()));
 }
 
 } // namespace API

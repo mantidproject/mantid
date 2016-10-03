@@ -188,12 +188,12 @@ private:
       TS_ASSERT_EQUALS(vAxis->getValue(vAxis->length() - 1), 198);
     }
 
-    auto firstSpecDetIDs = ws->getSpectrum(0)->getDetectorIDs();
+    auto firstSpecDetIDs = ws->getSpectrum(0).getDetectorIDs();
     TS_ASSERT_EQUALS(firstSpecDetIDs.size(), 1);
     TS_ASSERT_DIFFERS(firstSpecDetIDs.find(2101), firstSpecDetIDs.end());
 
     auto lastSpecDetIDs =
-        ws->getSpectrum(ws->getNumberHistograms() - 1)->getDetectorIDs();
+        ws->getSpectrum(ws->getNumberHistograms() - 1).getDetectorIDs();
     TS_ASSERT_EQUALS(lastSpecDetIDs.size(), 1);
     TS_ASSERT_DIFFERS(lastSpecDetIDs.find(3232), lastSpecDetIDs.end());
   }

@@ -22,7 +22,8 @@ const char *MultivariateGaussianComptonProfile::STEPS_ATTR = "IntegrationSteps";
 /**
  */
 MultivariateGaussianComptonProfile::MultivariateGaussianComptonProfile()
-    : ComptonProfile(), m_integrationSteps(256) {}
+    : ComptonProfile(), m_integrationSteps(256), m_thetaStep(0.0),
+      m_phiStep(0.0) {}
 
 /**
  * @returns A string containing the name of the function

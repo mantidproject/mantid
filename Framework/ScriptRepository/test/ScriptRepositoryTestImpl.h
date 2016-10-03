@@ -104,8 +104,6 @@ public:
     tofconv_tofconverter_content = TOFCONV_CONVERTER;
     fail = false;
   }
-  ~ScriptRepositoryImplLocal() throw() override{};
-
   std::string repository_json_content;
   std::string tofconv_readme_content;
   std::string tofconv_tofconverter_content;
@@ -484,7 +482,7 @@ public:
          it != list_of_files.end(); it++) {
       std::cout << *it << ", ";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
     TS_ASSERT(list_of_files.size() == 1);
     TS_ASSERT(list_of_files[0] == "README.md");
   }
@@ -590,7 +588,7 @@ public:
     std::string file_name_conv = folder_name + "/TofConverter.py";
 
     // remove the folder
-    std::cout << "Removing children files" << std::endl;
+    std::cout << "Removing children files\n";
     {
 
       {
@@ -606,7 +604,7 @@ public:
         f.remove();
       }
     }
-    std::cout << "children files removed" << std::endl;
+    std::cout << "children files removed\n";
 
     // without internal files, the folder should lose the auto_update flag.
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());

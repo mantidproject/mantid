@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/WorkspaceJoiners.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
@@ -45,8 +43,7 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
 
   // Create the X values inside a cow pointer - they will be shared in the
   // output workspace
-  cow_ptr<MantidVec> XValues;
-  XValues.access() = ws1->readX(0);
+  auto XValues = ws1->refX(0);
 
   // Initialize the progress reporting object
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
@@ -56,14 +53,15 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
   PARALLEL_FOR2(ws1, output)
   for (int64_t i = 0; i < nhist1; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    ISpectrum *outSpec = output->getSpectrum(i);
-    const ISpectrum *inSpec = ws1->getSpectrum(i);
+    auto &outSpec = output->getSpectrum(i);
+    const auto &inSpec = ws1->getSpectrum(i);
 
     // Copy X,Y,E
-    outSpec->setX(XValues);
-    outSpec->setData(inSpec->dataY(), inSpec->dataE());
+    outSpec.setX(XValues);
+    outSpec.dataY() = inSpec.dataY();
+    outSpec.dataE() = inSpec.dataE();
     // Copy the spectrum number/detector IDs
-    outSpec->copyInfoFrom(*inSpec);
+    outSpec.copyInfoFrom(inSpec);
 
     // Propagate binmasking, if needed
     if (ws1->hasMaskedBins(i)) {
@@ -81,20 +79,21 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
 
   // For second loop we use the offset from the first
   const int64_t &nhist2 = ws2->getNumberHistograms();
-
+  const auto &spectrumInfo = ws2->spectrumInfo();
   PARALLEL_FOR2(ws2, output)
   for (int64_t j = 0; j < nhist2; ++j) {
     PARALLEL_START_INTERUPT_REGION
     // The spectrum in the output workspace
-    ISpectrum *outSpec = output->getSpectrum(nhist1 + j);
+    auto &outSpec = output->getSpectrum(nhist1 + j);
     // Spectrum in the second workspace
-    const ISpectrum *inSpec = ws2->getSpectrum(j);
+    const auto &inSpec = ws2->getSpectrum(j);
 
     // Copy X,Y,E
-    outSpec->setX(XValues);
-    outSpec->setData(inSpec->dataY(), inSpec->dataE());
+    outSpec.setX(XValues);
+    outSpec.dataY() = inSpec.dataY();
+    outSpec.dataE() = inSpec.dataE();
     // Copy the spectrum number/detector IDs
-    outSpec->copyInfoFrom(*inSpec);
+    outSpec.copyInfoFrom(inSpec);
 
     // Propagate masking, if needed
     if (ws2->hasMaskedBins(j)) {
@@ -105,14 +104,8 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
       }
     }
     // Propagate spectrum masking
-    Geometry::IDetector_const_sptr ws2Det;
-    try {
-      ws2Det = ws2->getDetector(j);
-    } catch (Exception::NotFoundError &) {
-    }
-    if (ws2Det && ws2Det->isMasked()) {
+    if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j))
       output->maskWorkspaceIndex(nhist1 + j);
-    }
 
     m_progress->report();
     PARALLEL_END_INTERUPT_REGION
@@ -135,60 +128,39 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
       event_ws1->getNumberHistograms() + event_ws2->getNumberHistograms();
   // Have the minimum # of histograms in the output.
   EventWorkspace_sptr output = boost::dynamic_pointer_cast<EventWorkspace>(
-      WorkspaceFactory::Instance().create("EventWorkspace", 1,
+      WorkspaceFactory::Instance().create("EventWorkspace", totalHists,
                                           event_ws1->readX(0).size(),
                                           event_ws1->readY(0).size()));
   // Copy over geometry (but not data) from first input workspace
   WorkspaceFactory::Instance().initializeFromParent(event_ws1, output, true);
-
-  // Create the X values inside a cow pointer - they will be shared in the
-  // output workspace
-  cow_ptr<MantidVec> XValues;
-  XValues.access() = event_ws1->readX(0);
 
   // Initialize the progress reporting object
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
 
   const int64_t &nhist1 = event_ws1->getNumberHistograms();
   for (int64_t i = 0; i < nhist1; ++i) {
-    // Copy the events over
-    output->getOrAddEventList(i) =
-        event_ws1->getEventList(i); // Should fire the copy constructor
-    ISpectrum *outSpec = output->getSpectrum(i);
-    const ISpectrum *inSpec = event_ws1->getSpectrum(i);
-    outSpec->copyInfoFrom(*inSpec);
-
+    output->getSpectrum(i) = event_ws1->getSpectrum(i);
     m_progress->report();
   }
 
   // For second loop we use the offset from the first
   const int64_t &nhist2 = event_ws2->getNumberHistograms();
+  const auto &spectrumInfo = event_ws2->spectrumInfo();
   for (int64_t j = 0; j < nhist2; ++j) {
     // This is the workspace index at which we assign in the output
     int64_t output_wi = j + nhist1;
-    // Copy the events over
-    output->getOrAddEventList(output_wi) =
-        event_ws2->getEventList(j); // Should fire the copy constructor
-    ISpectrum *outSpec = output->getSpectrum(output_wi);
-    const ISpectrum *inSpec = event_ws2->getSpectrum(j);
-    outSpec->copyInfoFrom(*inSpec);
+    output->getSpectrum(output_wi) = event_ws2->getSpectrum(j);
 
     // Propagate spectrum masking. First workspace will have been done by the
     // factory
-    Geometry::IDetector_const_sptr ws2Det;
-    try {
-      ws2Det = event_ws2->getDetector(j);
-    } catch (Exception::NotFoundError &) {
-    }
-    if (ws2Det && ws2Det->isMasked()) {
+    if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j))
       output->maskWorkspaceIndex(output_wi);
-    }
 
     m_progress->report();
   }
 
   // Set the same bins for all output pixels
-  output->setAllX(XValues);
+  output->setAllX(HistogramData::BinEdges(event_ws1->refX(0)));
 
   fixSpectrumNumbers(event_ws1, event_ws2, output);
 
@@ -259,9 +231,9 @@ void WorkspaceJoiners::getMinMax(MatrixWorkspace_const_sptr ws, specnum_t &min,
   specnum_t temp;
   size_t length = ws->getNumberHistograms();
   // initial values
-  min = max = ws->getSpectrum(0)->getSpectrumNo();
+  min = max = ws->getSpectrum(0).getSpectrumNo();
   for (size_t i = 0; i < length; i++) {
-    temp = ws->getSpectrum(i)->getSpectrumNo();
+    temp = ws->getSpectrum(i).getSpectrumNo();
     // Adjust min/max
     if (temp < min)
       min = temp;

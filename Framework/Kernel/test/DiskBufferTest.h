@@ -262,7 +262,7 @@ public:
     for (int i = 0; i < int(bigNum); i++) {
       dbuf.toWrite(bigData[i]);
     }
-    // std::cout << ISaveableTester::fakeFile << std::endl;
+    // std::cout << ISaveableTester::fakeFile << '\n';
     for (size_t i = 0; i < size_t(bigNum); i++)
       delete bigData[i];
   }
@@ -588,7 +588,7 @@ public:
     delete blockB;
     delete blockC;
     delete blockD;
-    // std::cout <<  SaveableTesterWithFile::fakeFile << "!" << std::endl;
+    // std::cout <<  SaveableTesterWithFile::fakeFile << "!\n";
   }
 
   void test_allocate_with_file() {
@@ -666,7 +666,7 @@ public:
     delete blockB;
     delete blockC;
     delete blockD;
-    // std::cout <<  ISaveableTesterWithFile::fakeFile << "!" << std::endl;
+    // std::cout <<  ISaveableTesterWithFile::fakeFile << "!\n";
   }
 };
 //====================================================================================
@@ -700,7 +700,7 @@ public:
   virtual void load(DiskBuffer & /*dbuf*/) {
     uint64_t myFilePos = this->getFilePosition();
     // std::cout << "Block " << getFileId() << " loading at " << myFilePos <<
-    // std::endl;
+    // '\n';
     SaveableTesterWithSeek::fakeSeekAndWrite(myFilePos);
     this->setLoaded(true);
   }
@@ -709,7 +709,7 @@ public:
     // Pretend to seek to the point and write
     uint64_t myFilePos = this->getFilePosition();
     // std::cout << "Block " << getFileId() << " saving at " << myFilePos <<
-    // std::endl;
+    // '\n';
     fakeSeekAndWrite(myFilePos);
   }
   void clearDataFromMemory() override {
@@ -721,12 +721,12 @@ public:
     // OK first you seek to where the OLD data was and load it.
     uint64_t myFilePos = this->getFilePosition();
     // std::cout << "Block " << getFileId() << " loading at " << myFilePos <<
-    // std::endl;
+    // '\n';
     SaveableTesterWithSeek::fakeSeekAndWrite(myFilePos);
     // Simulate that the data is growing and so needs to be written out
     size_t newfilePos = dbuf.relocate(myFilePos, m_memory, m_memory + 1);
     // std::cout << "Block " << getFileId() << " has moved from " << myFilePos
-    // << " to " << newfilePos << std::endl;
+    // << " to " << newfilePos << '\n';
     myFilePos = newfilePos;
     // Grow the size by 1
     m_memory++;
@@ -801,7 +801,7 @@ public:
       dataSeek[i]->load(dbuf);
     }
     std::cout << tim << " to load " << dataSeek.size()
-              << " into MRU with fake seeking. " << std::endl;
+              << " into MRU with fake seeking. \n";
   }
 
   /** Use a 0-sized write buffer so that it constantly needs to seek and write
@@ -814,7 +814,7 @@ public:
       dataSeek[i]->load(dbuf);
     }
     std::cout << tim << " to load " << dataSeek.size()
-              << " into MRU with fake seeking. " << std::endl;
+              << " into MRU with fake seeking. \n";
   }
 
   /** Example of a situation where vectors grew, meaning that they need to be
@@ -828,10 +828,10 @@ public:
       dataSeek[i]->grow(dbuf, true);
       dbuf.toWrite(dataSeek[i]);
     }
-    std::cout << "About to flush the cache to finish writes." << std::endl;
+    std::cout << "About to flush the cache to finish writes.\n";
     dbuf.flushCache();
     std::cout << tim << " to grow " << dataSeek.size()
-              << " into MRU with fake seeking. " << std::endl;
+              << " into MRU with fake seeking. \n";
   }
 
   /** Demonstrate that calling "save" manually without using the MRU write
@@ -846,7 +846,7 @@ public:
       dataSeek[i]->save();
     }
     std::cout << tim << " to grow " << dataSeek.size()
-              << " into MRU with fake seeking. " << std::endl;
+              << " into MRU with fake seeking. \n";
   }
 
   /** Speed of freeing a lot of blocks and putting them in the free space map */
@@ -859,7 +859,7 @@ public:
     // dbuf.defragFreeBlocks();
     TS_ASSERT_EQUALS(dbuf.getFreeSpaceMap().size(), 66667);
     std::cout << tim << " to add " << 100000
-              << " blocks in the free space list." << std::endl;
+              << " blocks in the free space list.\n";
   }
 };
 

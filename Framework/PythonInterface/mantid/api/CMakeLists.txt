@@ -51,6 +51,7 @@ set ( EXPORT_FILES
   src/Exports/WorkspaceGroup.cpp
   src/Exports/WorkspaceGroupProperty.cpp
   src/Exports/WorkspaceValidators.cpp
+  src/Exports/ADSValidator.cpp
   src/Exports/InstrumentValidator.cpp
   src/Exports/Axis.cpp
   src/Exports/IPeak.cpp
@@ -65,8 +66,8 @@ set ( EXPORT_FILES
   src/Exports/IFunction.cpp
   src/Exports/IFunction1D.cpp
   src/Exports/IPeakFunction.cpp
+  src/Exports/CompositeFunction.cpp
   src/Exports/Jacobian.cpp
-  src/Exports/PropertyManagerDataService.cpp
   src/Exports/FunctionFactory.cpp
   src/Exports/Progress.cpp
   src/Exports/Projection.cpp
@@ -141,6 +142,7 @@ target_link_libraries ( PythonAPIModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTI
             PythonKernelModule
             API
             Kernel
+            HistogramData
             Geometry
             ${PYTHON_LIBRARIES}
             ${POCO_LIBRARIES}

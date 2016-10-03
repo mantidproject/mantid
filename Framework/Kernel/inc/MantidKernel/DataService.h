@@ -13,12 +13,33 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
-#include <unordered_set>
 
 #include <mutex>
 
+#ifdef _WIN32
+#define strcasecmp _stricmp
+#else
+#include "Strings.h"
+#endif
+
 namespace Mantid {
 namespace Kernel {
+
+/// Flag for whether to sort items before returning
+enum class DataServiceSort { Sorted, Unsorted };
+/**
+ * Flag for whether to include hidden items when returning,
+ * Auto queries the class to determine this behavior
+ */
+enum class DataServiceHidden { Auto, Include, Exclude };
+
+// Case-insensitive comparison functor for std::map
+struct CaseInsensitiveCmp {
+  bool operator()(const std::string &lhs, const std::string &rhs) const {
+    return strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
+  }
+};
+
 /** DataService stores instances of a given type.
     This is a templated class, designed to be implemented as a
     singleton. For simplicity and naming conventions, specialized classes must
@@ -54,7 +75,8 @@ namespace Kernel {
 template <typename T> class DLLExport DataService {
 private:
   /// Typedef for the map holding the names of and pointers to the data objects
-  typedef std::map<std::string, boost::shared_ptr<T>> svcmap;
+  typedef std::map<std::string, boost::shared_ptr<T>, CaseInsensitiveCmp>
+      svcmap;
   /// Iterator for the data store map
   typedef typename svcmap::iterator svc_it;
   /// Const iterator for the data store map
@@ -194,26 +216,25 @@ public:
     checkForEmptyName(name);
     checkForNullPointer(Tobject);
 
-    // Make DataService access thread-safe
-    m_mutex.lock();
-
-    // At the moment, you can't overwrite an object (i.e. pass in a name
-    // that's already in the map with a pointer to a different object).
-    // Also, there's nothing to stop the same object from being added
-    // more than once with different names.
-    if (!datamap.insert(typename svcmap::value_type(name, Tobject)).second) {
+    bool success = false;
+    {
+      // Make DataService access thread-safe
+      std::lock_guard<std::recursive_mutex> lock(m_mutex);
+      // At the moment, you can't overwrite an object (i.e. pass in a name
+      // that's already in the map with a pointer to a different object).
+      // Also, there's nothing to stop the same object from being added
+      // more than once with different names.
+      success = datamap.insert(std::make_pair(name, Tobject)).second;
+    }
+    if (!success) {
       std::string error =
           " add : Unable to insert Data Object : '" + name + "'";
       g_log.error(error);
-      m_mutex.unlock();
       throw std::runtime_error(error);
     } else {
-      g_log.debug() << "Add Data Object " << name << " successful" << std::endl;
-      m_mutex.unlock();
-
+      g_log.debug() << "Add Data Object " << name << " successful\n";
       notificationCenter.postNotification(new AddNotification(name, Tobject));
     }
-    return;
   }
 
   //--------------------------------------------------------------------------
@@ -229,31 +250,28 @@ public:
     checkForNullPointer(Tobject);
 
     // Make DataService access thread-safe
-    m_mutex.lock();
+    std::unique_lock<std::recursive_mutex> lock(m_mutex);
 
     // find if the Tobject already exists
-    std::string foundName;
-    svc_it it = findNameWithCaseSearch(name, foundName);
+    auto it = datamap.find(name);
     if (it != datamap.end()) {
-      g_log.debug("Data Object '" + foundName +
-                  "' replaced in data service.\n");
-      m_mutex.unlock();
+      lock.unlock();
+      g_log.debug("Data Object '" + name + "' replaced in data service.\n");
 
       notificationCenter.postNotification(
           new BeforeReplaceNotification(name, it->second, Tobject));
 
-      m_mutex.lock();
-      datamap[foundName] = Tobject;
-      m_mutex.unlock();
+      lock.lock();
+      it->second = Tobject;
+      lock.unlock();
 
       notificationCenter.postNotification(
           new AfterReplaceNotification(name, Tobject));
     } else {
       // Avoid double-locking
-      m_mutex.unlock();
+      lock.unlock();
       DataService::add(name, Tobject);
     }
-    return;
   }
 
   //--------------------------------------------------------------------------
@@ -261,36 +279,27 @@ public:
    * @param name :: name of the object */
   void remove(const std::string &name) {
     // Make DataService access thread-safe
-    m_mutex.lock();
+    std::unique_lock<std::recursive_mutex> lock(m_mutex);
 
-    std::string foundName;
-    svc_it it = findNameWithCaseSearch(name, foundName);
+    auto it = datamap.find(name);
     if (it == datamap.end()) {
+      lock.unlock();
       g_log.debug(" remove '" + name + "' cannot be found");
-      m_mutex.unlock();
       return;
     }
     // The map is shared across threads so the item is erased from the map
-    // before
-    // unlocking the mutex and is held in a local stack variable.
+    // before unlocking the mutex and is held in a local stack variable.
     // This protects it from being modified by another thread.
-    auto data = it->second;
+    auto data = std::move(it->second);
     datamap.erase(it);
 
     // Do NOT use "it" iterator after this point. Other threads may modify the
     // map
-    m_mutex.unlock();
-    notificationCenter.postNotification(
-        new PreDeleteNotification(foundName, data));
-    m_mutex.lock();
-
+    lock.unlock();
+    notificationCenter.postNotification(new PreDeleteNotification(name, data));
     data.reset(); // DataService now has no references to the object
-    g_log.information("Data Object '" + foundName +
-                      "' deleted from data service.");
-
-    m_mutex.unlock();
-    notificationCenter.postNotification(new PostDeleteNotification(foundName));
-    return;
+    g_log.information("Data Object '" + name + "' deleted from data service.");
+    notificationCenter.postNotification(new PostDeleteNotification(name));
   }
 
   //--------------------------------------------------------------------------
@@ -302,54 +311,50 @@ public:
     checkForEmptyName(newName);
 
     // Make DataService access thread-safe
-    m_mutex.lock();
+    std::unique_lock<std::recursive_mutex> lock(m_mutex);
 
-    std::string foundName;
-    svc_it it = findNameWithCaseSearch(oldName, foundName);
+    auto it = datamap.find(oldName);
     if (it == datamap.end()) {
+      lock.unlock();
       g_log.warning(" rename '" + oldName + "' cannot be found");
-      m_mutex.unlock();
       return;
     }
 
     // delete the object with the old name
-    auto object = it->second;
+    auto object = std::move(it->second);
     datamap.erase(it);
 
     // if there is another object which has newName delete it
-    it = datamap.find(newName);
-    if (it != datamap.end()) {
+    auto it2 = datamap.find(newName);
+    if (it2 != datamap.end()) {
       notificationCenter.postNotification(
           new AfterReplaceNotification(newName, object));
-      datamap.erase(it);
+      it2->second = std::move(object);
+    } else {
+      if (!(datamap.emplace(newName, std::move(object)).second)) {
+        // should never happen
+        lock.unlock();
+        std::string error =
+            " add : Unable to insert Data Object : '" + newName + "'";
+        g_log.error(error);
+        throw std::runtime_error(error);
+      }
     }
-
-    // insert the old object with the new name
-    if (!datamap.insert(typename svcmap::value_type(newName, object)).second) {
-      std::string error =
-          " add : Unable to insert Data Object : '" + newName + "'";
-      g_log.error(error);
-      m_mutex.unlock();
-      throw std::runtime_error(error);
-    }
-    g_log.information("Data Object '" + foundName + "' renamed to '" + newName +
+    lock.unlock();
+    g_log.information("Data Object '" + oldName + "' renamed to '" + newName +
                       "'");
-
-    m_mutex.unlock();
     notificationCenter.postNotification(
         new RenameNotification(oldName, newName));
-
-    return;
   }
 
   //--------------------------------------------------------------------------
   /// Empty the service
   void clear() {
-    // Make DataService access thread-safe
-    m_mutex.lock();
-
-    datamap.clear();
-    m_mutex.unlock();
+    {
+      // Make DataService access thread-safe
+      std::lock_guard<std::recursive_mutex> lock(m_mutex);
+      datamap.clear();
+    }
     notificationCenter.postNotification(new ClearNotification());
     g_log.debug() << typeid(this).name() << " cleared.\n";
   }
@@ -364,8 +369,7 @@ public:
     // Make DataService access thread-safe
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
-    std::string foundName;
-    svc_it it = findNameWithCaseSearch(name, foundName);
+    auto it = datamap.find(name);
     if (it != datamap.end()) {
       return it->second;
     } else {
@@ -380,9 +384,7 @@ public:
   bool doesExist(const std::string &name) const {
     // Make DataService access thread-safe
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-
-    std::string foundName;
-    svc_it it = findNameWithCaseSearch(name, foundName);
+    auto it = datamap.find(name);
     return it != datamap.end();
   }
 
@@ -394,39 +396,64 @@ public:
       return datamap.size();
     } else {
       size_t count = 0;
-      for (svc_constit it = datamap.begin(); it != datamap.end(); ++it) {
-        if (!isHiddenDataServiceObject(it->first))
+      for (auto &it : datamap) {
+        if (!isHiddenDataServiceObject(it.first))
           ++count;
       }
       return count;
     }
   }
 
-  /// Get the names of the data objects stored by the service
-  std::unordered_set<std::string> getObjectNames() const {
-    if (showingHiddenObjects())
-      return getObjectNamesInclHidden();
+  /**
+   * Returns a vector of strings containing all object names in the ADS
+   * @param sortState Whether to sort the output before returning. Defaults
+   * to unsorted
+   * @param hiddenState Whether to include hidden objects, Defaults to
+   * Auto which checks the current configuration to determine behavior.
+   * @return A vector of strings containing object names in the ADS
+   */
+  std::vector<std::string> getObjectNames(
+      DataServiceSort sortState = DataServiceSort::Unsorted,
+      DataServiceHidden hiddenState = DataServiceHidden::Auto) const {
 
-    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+    std::vector<std::string> foundNames;
 
-    std::unordered_set<std::string> names;
-    for (svc_constit it = datamap.begin(); it != datamap.end(); ++it) {
-      if (!isHiddenDataServiceObject(it->first)) {
-        names.insert(it->first);
+    // First test if auto flag is set whether to include hidden
+    if (hiddenState == DataServiceHidden::Auto) {
+      if (showingHiddenObjects()) {
+        hiddenState = DataServiceHidden::Include;
+      } else {
+        hiddenState = DataServiceHidden::Exclude;
       }
     }
-    return names;
-  }
 
-  /// Get the names of the data objects stored by the service
-  std::unordered_set<std::string> getObjectNamesInclHidden() const {
-    std::lock_guard<std::recursive_mutex> _lock(m_mutex);
-
-    std::unordered_set<std::string> names;
-    for (svc_constit it = datamap.begin(); it != datamap.end(); ++it) {
-      names.insert(it->first);
+    // Use the scoping of an if to handle our lock for duration
+    if (hiddenState == DataServiceHidden::Include) {
+      // Getting hidden items
+      std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+      foundNames.reserve(datamap.size());
+      for (const auto &item : datamap) {
+        foundNames.push_back(item.first);
+      }
+      // Lock released at end of scope here
+    } else {
+      std::lock_guard<std::recursive_mutex> _lock(m_mutex);
+      foundNames.reserve(datamap.size());
+      for (const auto &item : datamap) {
+        if (!isHiddenDataServiceObject(item.first)) {
+          // This item is not hidden add it
+          foundNames.push_back(item.first);
+        }
+      }
+      // Lock released at end of scope here
     }
-    return names;
+
+    // Now sort if told to
+    if (sortState == DataServiceSort::Sorted) {
+      std::sort(foundNames.begin(), foundNames.end());
+    }
+
+    return foundNames;
   }
 
   /// Get a vector of the pointers to the data objects stored by the service
@@ -466,6 +493,10 @@ public:
   /// using Poco::NotificationCenter::addObserver(...)
   ///@return nothing
   Poco::NotificationCenter notificationCenter;
+  /// Deleted copy constructor
+  DataService(const DataService &) = delete;
+  /// Deleted copy assignment operator
+  DataService &operator=(const DataService &) = delete;
 
 protected:
   /// Protected constructor (singleton)
@@ -473,15 +504,10 @@ protected:
   virtual ~DataService() = default;
 
 private:
-  /// Private, unimplemented copy constructor
-  DataService(const DataService &);
-  /// Private, unimplemented copy assignment operator
-  DataService &operator=(const DataService &);
-
   void checkForEmptyName(const std::string &name) {
     if (name.empty()) {
       const std::string error = "Add Data Object with empty name";
-      g_log.debug() << error << std::endl;
+      g_log.debug() << error << '\n';
       throw std::runtime_error(error);
     }
   }
@@ -489,57 +515,9 @@ private:
   void checkForNullPointer(const boost::shared_ptr<T> &Tobject) {
     if (!Tobject) {
       const std::string error = "Attempt to add empty shared pointer";
-      g_log.debug() << error << std::endl;
+      g_log.debug() << error << '\n';
       throw std::runtime_error(error);
     }
-  }
-
-  /**
-   * Find a name in the map and return an iterator pointing to it. This takes
-   * the string and if it does not find it then it looks for a match
-   * disregarding
-   * the case (const version)
-   * @param name The string name to search for
-   * @param foundName [Output] Stores the name here if one was found. It will be
-   * empty if not
-   * @returns An iterator pointing at the element or the end iterator
-   */
-  svc_it findNameWithCaseSearch(const std::string &name,
-                                std::string &foundName) const {
-    const svcmap &constdata = datamap;
-    svcmap &data = const_cast<svcmap &>(constdata);
-    if (name.empty())
-      return data.end();
-
-    // Exact match
-    foundName = name;
-    svc_it match = data.find(name);
-    if (match != data.end())
-      return match;
-
-    // Try UPPER case
-    std::transform(foundName.begin(), foundName.end(), foundName.begin(),
-                   toupper);
-    match = data.find(foundName);
-    if (match != data.end())
-      return match;
-
-    // Try lower case
-    std::transform(foundName.begin(), foundName.end(), foundName.begin(),
-                   tolower);
-    match = data.find(foundName);
-    if (match != data.end())
-      return match;
-
-    // Try Sentence case
-    foundName = name;
-    // Upper cases the first letter
-    std::transform(foundName.begin(), foundName.begin() + 1, foundName.begin(),
-                   toupper);
-    match = data.find(foundName);
-    if (match == data.end())
-      foundName = "";
-    return match;
   }
 
   /// DataService name. This is set only at construction. DataService name

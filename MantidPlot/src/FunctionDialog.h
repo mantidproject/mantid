@@ -2,7 +2,8 @@
     File                 : FunctionDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Function dialog
 
@@ -42,60 +43,61 @@ class QTextEdit;
 class ApplicationWindow;
 
 //! Function dialog
-class FunctionDialog : public QDialog
-{
-    Q_OBJECT
+class FunctionDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    FunctionDialog( ApplicationWindow* app, Graph* g = NULL, Qt::WFlags fl = 0 );
+  FunctionDialog(ApplicationWindow *app, Graph *g = NULL, Qt::WFlags fl = 0);
 
 protected:
-	QComboBox* boxXFunction;
-    QComboBox* boxYFunction;
-    QComboBox* boxPolarRadius;
-    QComboBox* boxPolarTheta;
-    QComboBox* boxType;
-    QLineEdit* boxFrom;
-    QLineEdit* boxTo;
-	QLineEdit* boxParameter;
-    QLineEdit* boxParFrom;
-    QLineEdit* boxParTo;
-	QLineEdit* boxPolarParameter;
-    QLineEdit* boxPolarFrom;
-    QLineEdit* boxPolarTo;
-    QPushButton* buttonClear;
-    QPushButton* buttonCancel;
-    QPushButton* buttonOk;
-	QSpinBox* boxPoints;
-	QSpinBox* boxParPoints;
-	QSpinBox* boxPolarPoints;
-	QStackedWidget* optionStack;
-    QTextEdit* boxFunction;
-	QWidget* functionPage;
-	QWidget* polarPage;
-	QWidget* parametricPage;
+  QComboBox *boxXFunction;
+  QComboBox *boxYFunction;
+  QComboBox *boxPolarRadius;
+  QComboBox *boxPolarTheta;
+  QComboBox *boxType;
+  QLineEdit *boxFrom;
+  QLineEdit *boxTo;
+  QLineEdit *boxParameter;
+  QLineEdit *boxParFrom;
+  QLineEdit *boxParTo;
+  QLineEdit *boxPolarParameter;
+  QLineEdit *boxPolarFrom;
+  QLineEdit *boxPolarTo;
+  QPushButton *buttonClear;
+  QPushButton *buttonCancel;
+  QPushButton *buttonOk;
+  QSpinBox *boxPoints;
+  QSpinBox *boxParPoints;
+  QSpinBox *boxPolarPoints;
+  QStackedWidget *optionStack;
+  QTextEdit *boxFunction;
+  QWidget *functionPage;
+  QWidget *polarPage;
+  QWidget *parametricPage;
 
 protected slots:
-	void raiseWidget(int index);
+  void raiseWidget(int index);
 
 public slots:
   void accept() override;
-        void acceptFunction();
-	void acceptParametric();
-	void acceptPolar();
-	void setCurveToModify(Graph *g, int curve);
-	void insertParamFunctionsList(const QStringList& xList, const QStringList& yList);
-	void insertPolarFunctionsList(const QStringList& rList, const QStringList& thetaList);
-	void clearList();
+  void acceptFunction();
+  void acceptParametric();
+  void acceptPolar();
+  void setCurveToModify(Graph *g, int curve);
+  void insertParamFunctionsList(const QStringList &xList,
+                                const QStringList &yList);
+  void insertPolarFunctionsList(const QStringList &rList,
+                                const QStringList &thetaList);
+  void clearList();
 
 signals:
-	void clearParamFunctionsList();
-	void clearPolarFunctionsList();
+  void clearParamFunctionsList();
+  void clearPolarFunctionsList();
 
 private:
-  ApplicationWindow* d_app;
-	Graph *graph;
-	int curveID;
+  ApplicationWindow *d_app;
+  Graph *graph;
+  int curveID;
 };
 
 #endif // FUNCTIONDIALOG_H

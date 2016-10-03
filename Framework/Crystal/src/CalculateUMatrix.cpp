@@ -15,18 +15,6 @@ using namespace Mantid::DataObjects;
 using Mantid::Geometry::OrientedLattice;
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CalculateUMatrix::CalculateUMatrix() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CalculateUMatrix::~CalculateUMatrix() {}
-
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void CalculateUMatrix::init() {

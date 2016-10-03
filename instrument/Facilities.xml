@@ -27,6 +27,7 @@
   </instrument>
 
   <instrument name="CRISP" shortname="CSP">
+    <zeropadding size="8" startRunNumber="99778" prefix="CRISP"/> 	
     <technique>Reflectometry</technique>
     <livedata address="NDXCRISP:6789" />
   </instrument>
@@ -359,13 +360,15 @@
       <technique>technique</technique>
    </instrument>
 
-   <instrument name="TOF-USANS" beamline="1A">
+   <instrument name="USANS" shortname="USANS" beamline="1A">
       <technique>Small Angle Scattering</technique>
+      <livedata address="bl1a-daq1.sns.gov:31415" />
    </instrument>
 
    <instrument name="NOMAD" shortname="NOM" beamline="1B">
    	<technique>Neutron Diffraction</technique>
    	<technique>Neutron Amorphous</technique>
+        <livedata address="bl1b-daq1.sns.gov:31415" />
    </instrument>
 
    <instrument name="BASIS" shortname="BSS" beamline="2">
@@ -397,11 +400,6 @@
       <technique>Small Angle Scattering</technique>
    </instrument>
 
-   <instrument name="USANS" shortname="USANS" beamline="1A">
-      <technique>Small Angle Scattering</technique>
-      <livedata address="usans-daq1.sns.gov:31415" />
-   </instrument>
-
    <instrument name="VULCAN" beamline="7">
 	<technique>Neutron Diffraction</technique>
    </instrument>
@@ -409,11 +407,12 @@
    <instrument name="CORELLI" beamline="9">
 	<technique>Neutron Diffraction</technique>
 	<technique>Diffuse Scattering</technique>
-	<livedata address="corelli-daq1.sns.gov:31415" />
+	<livedata address="bl9-daq1.sns.gov:31415" />
    </instrument>
 
    <instrument name="POWGEN" shortname="PG3" beamline="11A">
 	<technique>Neutron Diffraction</technique>
+        <livedata address="bl11a-daq1.sns.gov:31415" />
    </instrument>
 
    <instrument name="MANDI" beamline="11B">
@@ -439,7 +438,7 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
-    <livedata address="vision-daq1.sns.gov:31415" />
+    <livedata address="bl16b-daq1.sns.gov:31415" />
   </instrument>
 
    <instrument name="SEQUOIA" shortname="SEQ" beamline="17">
@@ -459,7 +458,7 @@
       <technique>Imaging</technique>
       <technique>Tomography</technique>
    </instrument>
-   
+
    <instrument name="SWANS" shortname="SWANS" beamline="7">
       <technique>Small Wide Angle Scattering</technique>
    </instrument>
@@ -481,7 +480,7 @@
 
 </facility>
 
-<facility name="ILL" zeropadding="6" FileExtensions=".nxs,.hdf,.inx,.asc">
+<facility name="ILL" zeropadding="6" FileExtensions=".nxs,.hdf,.inx,.asc" nofileprefix="True">
 
   <instrument name="IN4">
     <technique>Neutron Spectroscopy</technique>

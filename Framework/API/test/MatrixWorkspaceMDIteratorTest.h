@@ -41,7 +41,7 @@ public:
           new Detector("pixel", static_cast<detid_t>(i), inst.get());
       inst->add(det);
       inst->markAsDetector(det);
-      ws->getSpectrum(i)->addDetectorID(static_cast<detid_t>(i));
+      ws->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
     }
     ws->replaceAxis(1, ax1);
 

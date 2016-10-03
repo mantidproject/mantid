@@ -8,7 +8,7 @@
 
 /**
 * This utility class generates a surface or contour plot from a group of
-* workspaces. 
+* workspaces.
 */
 class MantidGroupPlotGenerator {
 public:
@@ -68,8 +68,7 @@ private:
   void convertXData(Mantid::API::MatrixWorkspace_sptr ws, Type graphType) const;
 
   /// Pointer to the Mantid UI
-  MantidUI * const m_mantidUI;
+  MantidUI *const m_mantidUI;
 };
-
 
 #endif

@@ -8,6 +8,7 @@
  algorithm.
  *WIKI*/
 
+#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -25,16 +26,6 @@ namespace Algorithms {
 DECLARE_ALGORITHM(CreateTransmissionWorkspaceAuto)
 
 //----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CreateTransmissionWorkspaceAuto::CreateTransmissionWorkspaceAuto() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CreateTransmissionWorkspaceAuto::~CreateTransmissionWorkspaceAuto() {}
-
-//----------------------------------------------------------------------------------------------
 /// Sets documentation strings for this algorithm
 const std::string CreateTransmissionWorkspaceAuto::summary() const {
   return "Creates a transmission run workspace in Wavelength from input TOF "
@@ -46,8 +37,9 @@ const std::string CreateTransmissionWorkspaceAuto::summary() const {
  */
 void CreateTransmissionWorkspaceAuto::init() {
 
-  std::vector<std::string> analysis_modes{"PointDetectorAnalysis",
-                                          "MultiDetectorAnalysis"};
+  std::vector<std::string> analysis_modes;
+  analysis_modes.push_back("PointDetectorAnalysis");
+  analysis_modes.push_back("MultiDetectorAnalysis");
   declareProperty("AnalysisMode", analysis_modes.at(0),
                   boost::make_shared<StringListValidator>(analysis_modes),
                   "Analysis Mode to Choose", Direction::Input);
@@ -81,13 +73,9 @@ void CreateTransmissionWorkspaceAuto::init() {
       make_unique<PropertyWithValue<double>>("EndOverlap", Mantid::EMPTY_DBL(),
                                              Direction::Input),
       "End wavelength (angstroms) for stitching transmission runs together");
-
-  auto boundedIndex = boost::make_shared<BoundedValidator<int>>();
-  boundedIndex->setLower(0);
-
   declareProperty(make_unique<PropertyWithValue<int>>(
-                      "I0MonitorIndex", Mantid::EMPTY_INT(), boundedIndex),
-                  "I0 monitor index");
+                      "I0MonitorIndex", Mantid::EMPTY_INT(), Direction::Input),
+                  "I0 monitor workspace index. Optional.");
 
   declareProperty(make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "", Direction::Input),
@@ -98,26 +86,28 @@ void CreateTransmissionWorkspaceAuto::init() {
                   "Wavelength Min in angstroms", Direction::Input);
   declareProperty("WavelengthMax", Mantid::EMPTY_DBL(),
                   "Wavelength Max in angstroms", Direction::Input);
-  declareProperty("WavelengthStep", Mantid::EMPTY_DBL(),
-                  "Wavelength step in angstroms", Direction::Input);
-  declareProperty("MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
-                  "Monitor wavelength background min in angstroms",
-                  Direction::Input);
-  declareProperty("MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
-                  "Monitor wavelength background max in angstroms",
-                  Direction::Input);
-  declareProperty("MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
-                  "Monitor integral min in angstroms", Direction::Input);
-  declareProperty("MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
-                  "Monitor integral max in angstroms", Direction::Input);
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "MonitorBackgroundWavelengthMin", Mantid::EMPTY_DBL(),
+                      Direction::Input),
+                  "Monitor wavelength background min in angstroms");
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "MonitorBackgroundWavelengthMax", Mantid::EMPTY_DBL(),
+                      Direction::Input),
+                  "Monitor wavelength background max in angstroms");
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "MonitorIntegrationWavelengthMin", Mantid::EMPTY_DBL(),
+                      Direction::Input),
+                  "Monitor integral min in angstroms");
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "MonitorIntegrationWavelengthMax", Mantid::EMPTY_DBL(),
+                      Direction::Input),
+                  "Monitor integral max in angstroms");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CreateTransmissionWorkspaceAuto::exec() {
-  // auto firstWS =
-  // AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(this->getPointerToProperty("FirstTransmissionRun")->value());
   MatrixWorkspace_sptr firstWS = this->getProperty("FirstTransmissionRun");
   auto instrument = firstWS->getInstrument();
 
@@ -131,28 +121,27 @@ void CreateTransmissionWorkspaceAuto::exec() {
   auto start_overlap = isSet<double>("StartOverlap");
   auto end_overlap = isSet<double>("EndOverlap");
   auto params = isSet<std::vector<double>>("Params");
-  auto i0_monitor_index = static_cast<int>(
-      checkForDefault("I0MonitorIndex", instrument, "I0MonitorIndex"));
+  auto i0_monitor_index = checkForOptionalInstrumentDefault<int>(
+      this, "I0MonitorIndex", instrument, "I0MonitorIndex");
 
   std::string processing_commands;
   if (this->getPointerToProperty("ProcessingInstructions")->isDefault()) {
-    const int start = static_cast<int>(
-        instrument->getNumberParameter("PointDetectorStart")[0]);
-    const int stop = static_cast<int>(
-        instrument->getNumberParameter("PointDetectorStop")[0]);
     if (analysis_mode == "PointDetectorAnalysis") {
+      const int start = static_cast<int>(
+          instrument->getNumberParameter("PointDetectorStart")[0]);
+      const int stop = static_cast<int>(
+          instrument->getNumberParameter("PointDetectorStop")[0]);
       if (start == stop) {
-        processing_commands = boost::lexical_cast<std::string>(start);
+        processing_commands = std::to_string(start);
       } else {
-        processing_commands = boost::lexical_cast<std::string>(start) + "," +
-                              boost::lexical_cast<std::string>(stop);
+        processing_commands =
+            std::to_string(start) + ":" + std::to_string(stop);
       }
     } else {
       processing_commands =
-          boost::lexical_cast<std::string>(static_cast<int>(
+          std::to_string(static_cast<int>(
               instrument->getNumberParameter("MultiDetectorStart")[0])) +
-          "," +
-          boost::lexical_cast<std::string>(firstWS->getNumberHistograms() - 1);
+          ":" + std::to_string(firstWS->getNumberHistograms() - 1);
     }
   } else {
     std::string processing_commands_temp =
@@ -160,19 +149,22 @@ void CreateTransmissionWorkspaceAuto::exec() {
     processing_commands = processing_commands_temp;
   }
 
-  double wavelength_min =
-      checkForDefault("WavelengthMin", instrument, "LambdaMin");
-  double wavelength_max =
-      checkForDefault("WavelengthMax", instrument, "LambdaMax");
-  auto wavelength_step = isSet<double>("WavelengthStep");
-  double wavelength_back_min = checkForDefault(
-      "MonitorBackgroundWavelengthMin", instrument, "MonitorBackgroundMin");
-  double wavelength_back_max = checkForDefault(
-      "MonitorBackgroundWavelengthMax", instrument, "MonitorBackgroundMax");
-  double wavelength_integration_min = checkForDefault(
-      "MonitorIntegrationWavelengthMin", instrument, "MonitorIntegralMin");
-  double wavelength_integration_max = checkForDefault(
-      "MonitorIntegrationWavelengthMax", instrument, "MonitorIntegralMax");
+  double wavelength_min = checkForMandatoryInstrumentDefault<double>(
+      this, "WavelengthMin", instrument, "LambdaMin");
+  double wavelength_max = checkForMandatoryInstrumentDefault<double>(
+      this, "WavelengthMax", instrument, "LambdaMax");
+  auto wavelength_back_min = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorBackgroundWavelengthMin", instrument,
+      "MonitorBackgroundMin");
+  auto wavelength_back_max = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorBackgroundWavelengthMax", instrument,
+      "MonitorBackgroundMax");
+  auto wavelength_integration_min = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorIntegrationWavelengthMin", instrument,
+      "MonitorIntegralMin");
+  auto wavelength_integration_max = checkForOptionalInstrumentDefault<double>(
+      this, "MonitorIntegrationWavelengthMax", instrument,
+      "MonitorIntegralMax");
 
   // construct the algorithm
 
@@ -200,25 +192,31 @@ void CreateTransmissionWorkspaceAuto::exec() {
     if (params.is_initialized()) {
       algCreateTransWS->setProperty("Params", params.get());
     }
-
-    algCreateTransWS->setProperty("I0MonitorIndex", i0_monitor_index);
+    if (i0_monitor_index.is_initialized()) {
+      algCreateTransWS->setProperty("I0MonitorIndex", i0_monitor_index.get());
+    } else {
+      algCreateTransWS->setProperty("I0MonitorIndex", Mantid::EMPTY_INT());
+    }
     algCreateTransWS->setProperty("ProcessingInstructions",
                                   processing_commands);
     algCreateTransWS->setProperty("WavelengthMin", wavelength_min);
-
-    if (wavelength_step.is_initialized()) {
-      algCreateTransWS->setProperty("WavelengthStep", wavelength_step.get());
-    }
-
     algCreateTransWS->setProperty("WavelengthMax", wavelength_max);
-    algCreateTransWS->setProperty("MonitorBackgroundWavelengthMin",
-                                  wavelength_back_min);
-    algCreateTransWS->setProperty("MonitorBackgroundWavelengthMax",
-                                  wavelength_back_max);
-    algCreateTransWS->setProperty("MonitorIntegrationWavelengthMin",
-                                  wavelength_integration_min);
-    algCreateTransWS->setProperty("MonitorIntegrationWavelengthMax",
-                                  wavelength_integration_max);
+    if (wavelength_back_min.is_initialized()) {
+      algCreateTransWS->setProperty("MonitorBackgroundWavelengthMin",
+                                    wavelength_back_min.get());
+    }
+    if (wavelength_back_max.is_initialized()) {
+      algCreateTransWS->setProperty("MonitorBackgroundWavelengthMax",
+                                    wavelength_back_max.get());
+    }
+    if (wavelength_integration_min.is_initialized()) {
+      algCreateTransWS->setProperty("MonitorIntegrationWavelengthMin",
+                                    wavelength_integration_min.get());
+    }
+    if (wavelength_integration_max.is_initialized()) {
+      algCreateTransWS->setProperty("MonitorIntegrationWavelengthMax",
+                                    wavelength_integration_max.get());
+    }
 
     algCreateTransWS->execute();
     if (!algCreateTransWS->isExecuted()) {
@@ -246,23 +244,5 @@ CreateTransmissionWorkspaceAuto::isSet(std::string propName) const {
     return boost::optional<T>(value);
   }
 }
-
-double CreateTransmissionWorkspaceAuto::checkForDefault(
-    std::string propName, Mantid::Geometry::Instrument_const_sptr instrument,
-    std::string idf_name) const {
-  auto algProperty = this->getPointerToProperty(propName);
-  if (algProperty->isDefault()) {
-    auto defaults = instrument->getNumberParameter(idf_name);
-    if (defaults.empty()) {
-      throw std::runtime_error("No data could be retrieved from the parameters "
-                               "and argument wasn't provided: " +
-                               propName);
-    }
-    return defaults[0];
-  } else {
-    return boost::lexical_cast<double, std::string>(algProperty->value());
-  }
-}
-
 } // namespace Algorithms
 } // namespace Mantid

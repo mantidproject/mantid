@@ -2,10 +2,12 @@
 #define TESTSAMPLE_H_
 
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/SampleEnvironment.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Container.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Material.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 
@@ -15,7 +17,6 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using Mantid::API::Sample;
-using Mantid::API::SampleEnvironment;
 
 class SampleTest : public CxxTest::TestSuite {
 public:
@@ -53,8 +54,9 @@ public:
   test_That_An_Environment_Can_Be_Set_And_The_Same_Environment_Is_Returned() {
     Sample sample;
     const std::string envName("TestKit");
-    SampleEnvironment *kit = new SampleEnvironment(envName);
-    kit->add(Object());
+    SampleEnvironment *kit =
+        new SampleEnvironment(envName, boost::make_shared<const Container>(""));
+    kit->add(boost::make_shared<const Object>());
 
     TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(kit));
 
@@ -62,7 +64,7 @@ public:
     // Test that this references the correct object
     TS_ASSERT_EQUALS(&sampleKit, kit);
     TS_ASSERT_EQUALS(sampleKit.name(), envName);
-    TS_ASSERT_EQUALS(sampleKit.nelements(), 1);
+    TS_ASSERT_EQUALS(sampleKit.nelements(), 2);
   }
 
   void test_OrientedLattice() {

@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 # pylint: disable=no-init,invalid-name,too-few-public-methods,unused-import
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -24,7 +26,7 @@ class PoldiCompound(object):
                 self._atomString = ';'.join(c[1:])
             elif c[0] == "lattice":
                 cellNames = ['a', 'b', 'c', 'alpha', 'beta', 'gamma']
-                self._cellDict = dict(zip(cellNames, c[1:]))
+                self._cellDict = dict(list(zip(cellNames, c[1:])))
             elif c[0] == "spacegroup":
                 self._spacegroup = c[1]
 

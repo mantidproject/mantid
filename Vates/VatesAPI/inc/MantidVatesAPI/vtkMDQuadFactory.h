@@ -7,74 +7,71 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace Mantid
-{
-  namespace VATES
-  {
+namespace Mantid {
+namespace VATES {
 
-   /** Factory for creating a vtkDataSet from an IMDEventWorkspace with two non-integrated dimensions.
-    Delegates processing to a successor if these conditions are not met.
-    
-    @date 2012-02-09
+/** Factory for creating a vtkDataSet from an IMDEventWorkspace with two
+ non-integrated dimensions.
+ Delegates processing to a successor if these conditions are not met.
 
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+ @date 2012-02-09
 
-    This file is part of Mantid.
+ Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ National Laboratory & European Spallation Source
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+ This file is part of Mantid.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+ Mantid is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ Mantid is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-    File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-    class DLLExport vtkMDQuadFactory : public vtkDataSetFactory
-    {
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    public:
-      /// Constructor
-      vtkMDQuadFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption);
+ File change history is stored at: <https://github.com/mantidproject/mantid>
+ Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport vtkMDQuadFactory : public vtkDataSetFactory {
 
-      /// Destructor
-      ~vtkMDQuadFactory() override;
+public:
+  /// Constructor
+  vtkMDQuadFactory(ThresholdRange_scptr thresholdRange,
+                   const VisualNormalization normalizationOption);
 
-      /// Factory Method. Should also handle delegation to successors.
-      vtkSmartPointer<vtkDataSet>
-      create(ProgressAction &progressUpdating) const override;
+  /// Destructor
+  ~vtkMDQuadFactory() override;
 
-      /// Initalize with a target workspace.
-      void initialize(Mantid::API::Workspace_sptr) override;
+  /// Factory Method. Should also handle delegation to successors.
+  vtkSmartPointer<vtkDataSet>
+  create(ProgressAction &progressUpdating) const override;
 
-      /// Get the name of the type.
-      std::string getFactoryTypeName() const override;
+  /// Initalize with a target workspace.
+  void initialize(Mantid::API::Workspace_sptr) override;
 
-    protected:
+  /// Get the name of the type.
+  std::string getFactoryTypeName() const override;
 
-      /// Template Method pattern to validate the factory before use.
-      void validate() const override;
+protected:
+  /// Template Method pattern to validate the factory before use.
+  void validate() const override;
 
-    private:
+private:
+  /// ThresholdRange functor.
+  ThresholdRange_scptr m_thresholdRange;
 
-      ///ThresholdRange functor.
-      ThresholdRange_scptr m_thresholdRange;
+  /// Name of the scalar.
+  const VisualNormalization m_normalizationOption;
 
-      ///Name of the scalar.
-      const VisualNormalization m_normalizationOption;
-
-      /// Data source for the visualisation.
-      Mantid::API::Workspace_sptr m_workspace;
-
-    };
-  }
+  /// Data source for the visualisation.
+  Mantid::API::Workspace_sptr m_workspace;
+};
+}
 }
 
 #endif

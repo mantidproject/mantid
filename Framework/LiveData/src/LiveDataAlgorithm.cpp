@@ -1,5 +1,6 @@
 #include "MantidLiveData/LiveDataAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DateAndTime.h"
@@ -7,26 +8,14 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Strings.h"
 
-#include "boost/tokenizer.hpp"
 #include <boost/algorithm/string/trim.hpp>
 #include <unordered_set>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using boost::tokenizer;
 
 namespace Mantid {
 namespace LiveData {
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LiveDataAlgorithm::LiveDataAlgorithm() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LiveDataAlgorithm::~LiveDataAlgorithm() {}
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LiveDataAlgorithm::category() const {
@@ -83,6 +72,12 @@ void LiveDataAlgorithm::initProps() {
                   "data. Only for command line usage, does not appear on the "
                   "user interface.");
 
+  declareProperty(make_unique<FileProperty>("ProcessingScriptFilename", "",
+                                            FileProperty::OptionalLoad, "py"),
+                  "A Python script that will be run to process each chunk of "
+                  "data. Only for command line usage, does not appear on the "
+                  "user interface.");
+
   std::vector<std::string> propOptions{"Add", "Replace", "Append"};
   declareProperty(
       "AccumulationMethod", "Add",
@@ -119,6 +114,10 @@ void LiveDataAlgorithm::initProps() {
       make_unique<PropertyWithValue<std::string>>("PostProcessingScript", "",
                                                   Direction::Input),
       "A Python script that will be run to process the accumulated data.");
+  declareProperty(
+      make_unique<FileProperty>("PostProcessingScriptFilename", "",
+                                FileProperty::OptionalLoad, "py"),
+      " Python script that will be run to process the accumulated data.");
 
   std::vector<std::string> runOptions{"Restart", "Stop", "Rename"};
   declareProperty("RunTransitionBehavior", "Restart",
@@ -166,7 +165,8 @@ void LiveDataAlgorithm::copyPropertyValuesFrom(const LiveDataAlgorithm &other) {
 /// @return true if there is a post-processing step
 bool LiveDataAlgorithm::hasPostProcessing() const {
   return (!this->getPropertyValue("PostProcessingAlgorithm").empty() ||
-          !this->getPropertyValue("PostProcessingScript").empty());
+          !this->getPropertyValue("PostProcessingScript").empty() ||
+          !this->getPropertyValue("PostProcessingScriptFilename").empty());
 }
 
 //----------------------------------------------------------------------------------------------
@@ -222,7 +222,7 @@ Mantid::Kernel::DateAndTime LiveDataAlgorithm::getStartTime() const {
  *         Returns a NULL pointer if no algorithm was chosen.
  */
 IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
-  std::string prefix = "";
+  std::string prefix;
   if (postProcessing)
     prefix = "Post";
 
@@ -234,7 +234,13 @@ IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
   std::string script = this->getPropertyValue(prefix + "ProcessingScript");
   script = Strings::strip(script);
 
+  std::string scriptfile =
+      this->getPropertyValue(prefix + "ProcessingScriptFilename");
+
   if (!algoName.empty()) {
+    g_log.information() << "Creating algorithm from name \'" << algoName
+                        << "\'\n";
+
     // Properties to pass to algo
     std::string props = this->getPropertyValue(prefix + "ProcessingProperties");
 
@@ -247,22 +253,32 @@ IAlgorithm_sptr LiveDataAlgorithm::makeAlgorithm(bool postProcessing) {
     ignoreProps.insert("OutputWorkspace");
 
     // ...and pass it the properties
-    alg->setPropertiesWithSimpleString(props, ignoreProps);
+    alg->setPropertiesWithString(props, ignoreProps);
 
     // Warn if someone put both values.
     if (!script.empty())
       g_log.warning() << "Running algorithm " << algoName
                       << " and ignoring the script code in "
-                      << prefix + "ProcessingScript" << std::endl;
+                      << prefix + "ProcessingScript\n";
     return alg;
-  } else if (!script.empty()) {
+  } else if (!script.empty() || !scriptfile.empty()) {
     // Run a snippet of python
     IAlgorithm_sptr alg = this->createChildAlgorithm("RunPythonScript");
     alg->setLogging(false);
-    alg->setPropertyValue("Code", script);
+    if (scriptfile.empty()) {
+      g_log.information("Creating python algorithm from string");
+      alg->setPropertyValue("Code", script);
+    } else {
+      g_log.information() << "Creating python algorithm from file \'"
+                          << scriptfile << "\'\n";
+      alg->setPropertyValue("Filename", scriptfile);
+    }
+    g_log.information("    stack traces will be off by 5"
+                      " lines because of boiler-plate");
     return alg;
-  } else
+  } else {
     return IAlgorithm_sptr();
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -288,6 +304,21 @@ std::map<std::string, std::string> LiveDataAlgorithm::validateInputs() {
   if (this->getPropertyValue("OutputWorkspace").empty())
     out["OutputWorkspace"] = "Must specify the OutputWorkspace.";
 
+  // check that only one method was specified for specifying processing
+  int numProc = 0;
+  if (!this->getPropertyValue("ProcessingAlgorithm").empty())
+    numProc += 1;
+  if (!this->getPropertyValue("ProcessingScript").empty())
+    numProc += 1;
+  if (!this->getPropertyValue("ProcessingScriptFilename").empty())
+    numProc += 1;
+  if (numProc > 1) {
+    std::string msg("Only specify one processing method");
+    out["ProcessingAlgorithm"] = msg;
+    out["ProcessingScript"] = msg;
+    out["ProcessingScriptFilename"] = msg;
+  }
+
   // Validate inputs
   if (this->hasPostProcessing()) {
     if (this->getPropertyValue("AccumulationWorkspace").empty())
@@ -299,6 +330,21 @@ std::map<std::string, std::string> LiveDataAlgorithm::validateInputs() {
       out["AccumulationWorkspace"] = "The AccumulationWorkspace must be "
                                      "different than the OutputWorkspace, when "
                                      "using PostProcessing.";
+
+    // check that only one method was specified for specifying processing
+    int numPostProc = 0;
+    if (!this->getPropertyValue("PostProcessingAlgorithm").empty())
+      numPostProc += 1;
+    if (!this->getPropertyValue("PostProcessingScript").empty())
+      numPostProc += 1;
+    if (!this->getPropertyValue("PostProcessingScriptFilename").empty())
+      numPostProc += 1;
+    if (numPostProc > 1) {
+      std::string msg("Only specify one post processing method");
+      out["PostProcessingAlgorithm"] = msg;
+      out["PostProcessingScript"] = msg;
+      out["PostProcessingScriptFilename"] = msg;
+    }
   }
 
   // For StartLiveData and MonitorLiveData, make sure another thread is not

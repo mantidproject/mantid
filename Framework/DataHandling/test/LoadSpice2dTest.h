@@ -106,9 +106,6 @@ public:
     TS_ASSERT_DELTA(ws2d->dataY(1)[0], 3600.0, tolerance);
     TS_ASSERT_DELTA(ws2d->dataE(1)[0], 0.0, tolerance);
 
-    // First non-monitor spectrum is detector ID 1 million
-    TS_ASSERT_EQUALS(ws2d->getDetector(0 + nmon)->getID(), 1000000);
-
     // Check instrument
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check Child Algorithm is running
@@ -152,8 +149,10 @@ public:
     TS_ASSERT_EQUALS(*dp, 6000.0);
 
     prop = ws2d->run().getProperty("beam-trap-diameter");
-    dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
-    TS_ASSERT_EQUALS(*dp, 76.2);
+    TS_ASSERT_EQUALS(prop->type(), "number");
+    double beam_trap_diameter =
+        ws2d->run().getPropertyValueAsType<double>("beam-trap-diameter");
+    TS_ASSERT_DELTA(beam_trap_diameter, 76.2, tolerance);
 
     prop = ws2d->run().getProperty("source-aperture-diameter");
     dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);

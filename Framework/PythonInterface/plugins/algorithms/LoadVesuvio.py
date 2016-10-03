@@ -1,6 +1,7 @@
 #pylint: disable=no-init, unused-variable, too-many-lines
 # we need to disable unused_variable because ws.dataY(n) returns a reference  to the underlying c++ object
 # that can be modified inplace
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi as ms
@@ -162,7 +163,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         # Validate SpectrumList
         grp_spectra_list = self.getProperty(SPECTRA_PROP).value
-        if ";" in grp_spectra_list:
+        if "," in grp_spectra_list:
+            # Split on ',' if in form of 2-3,6-7
+            grp_spectra_list = grp_spectra_list.split(",")
+        elif ";" in grp_spectra_list:
             # Split on ';' if in form of 2-3;6-7
             grp_spectra_list = grp_spectra_list.split(";")
         else:
@@ -176,9 +180,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 spectra_list = spectra_grp.split("-")
                 # Validate format
                 issues = self._validate_range_formatting(spectra_list[0], spectra_list[1], SPECTRA_PROP, issues)
-            elif "," in spectra_grp:
-                # Split comma separated lists
-                spectra_list = spectra_grp.split(",")
             else:
                 # Single spectra (put into list for use in loop)
                 spectra_list = [spectra_grp]
@@ -352,7 +353,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 indices_thick = foil_map.get_indices(spectrum_no, foil_thin_periods)
                 raw_grp_indices = indices_thin + indices_thick
             elif self._diff_opt == "FoilInOut":
-                raw_grp_indices = range(0, self._nperiods)
+                raw_grp_indices = list(range(0, self._nperiods))
             else:
                 raise RuntimeError("Unknown single foil mode: %s." % (self._diff_opt))
 
@@ -421,7 +422,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         def to_int_list(str_param):
             """Return the list of numbers described by the string range"""
             elements = str_param.split("-")
-            return range(int(elements[0]),int(elements[1]) + 1) # range goes x_l,x_h-1
+            return list(range(int(elements[0]),int(elements[1]) + 1)) # range goes x_l,x_h-1
 
         # Attach parameters as attributes
         self._inst_prefix = isis.instrument("VESUVIO").shortName()
@@ -595,10 +596,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
                          OutputWorkspace=SUMMED_WS,
                          XMax=x_max,
                          EnableLogging=_LOGGING_)
-        ms.CropWorkspace(Inputworkspace= SUMMED_WS + '_monitors',
-                         OutputWorkspace=SUMMED_WS + '_monitors',
-                         XMax=self._mon_tof_max,
-                         EnableLogging=_LOGGING_)
 
         summed_data, summed_mon = mtd[SUMMED_WS], mtd[SUMMED_WS + '_monitors']
 
@@ -648,7 +645,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         if "-" in run_str:
             lower, upper = run_str.split("-")
             # Range goes lower to up-1 but we want to include the last number
-            runs = range(int(lower), int(upper)+1)
+            runs = list(range(int(lower), int(upper)+1))
 
         elif "," in run_str:
             runs =  run_str.split(",")
@@ -1040,13 +1037,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
             crop.setProperty("XMax", self._tof_max)
             crop.execute()
             self.foil_out = crop.getProperty("OutputWorkspace").value
-            if self._load_monitors:
-                crop_mon = self.createChildAlgorithm("CropWorkspace")
-                crop.setProperty("InputWorkspace" , self._load_monitors_workspace)
-                crop.setProperty("OutputWorkspace", self._load_monitors_workspace)
-                crop.setProperty("XMax", self._tof_max)
-                crop.execute()
-                self._load_monitors_workspace = crop.getProperty("OutputWorkspace").value
 
         self.setProperty(WKSP_PROP, self.foil_out)
         # Add OutputWorkspace property for Monitors
@@ -1107,7 +1097,7 @@ class SpectraToFoilPeriodMap(object):
            it reorders the 1:1 map to match this order
            numpy
         """
-        vals = np.array(self._one_to_one.values())
+        vals = np.array(list(self._one_to_one.values()))
         sorted_indices = arr.argsort()
         vals = vals[sorted_indices]
         arr = arr[sorted_indices]

@@ -8,6 +8,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
@@ -30,9 +31,17 @@ MinMax getDimensionExtents(IMDEventWorkspace_sptr ws, size_t index) {
   return std::make_pair(dim->getMinimum(), dim->getMaximum());
 }
 
+std::string numToStringWithPrecision(const double num) {
+  std::stringstream s;
+  s.precision(2);
+  s.setf(std::ios::fixed, std::ios::floatfield);
+  s << num;
+  return s.str();
+}
+
 DblMatrix scaleProjection(const DblMatrix &inMatrix,
                           const std::vector<std::string> &inUnits,
-                          const std::vector<std::string> &outUnits,
+                          std::vector<std::string> &outUnits,
                           IMDEventWorkspace_sptr inWS) {
   DblMatrix ret(inMatrix);
   // Check if we actually need to do anything
@@ -43,6 +52,7 @@ DblMatrix scaleProjection(const DblMatrix &inMatrix,
     throw std::runtime_error(
         "scaleProjection given different quantity of input and output units");
 
+  assert(inWS->getNumExperimentInfo() > 0);
   const OrientedLattice &orientedLattice =
       inWS->getExperimentInfo(0)->sample().getOrientedLattice();
 
@@ -55,6 +65,7 @@ DblMatrix scaleProjection(const DblMatrix &inMatrix,
       continue;
     else if (inUnits[i] == Mantid::MDAlgorithms::CutMD::InvAngstromSymbol) {
       // inv angstroms to rlu
+      outUnits[i] = "in " + numToStringWithPrecision(dStar) + " A^-1";
       for (size_t j = 0; j < numDims; ++j)
         ret[i][j] *= dStar;
     } else {
@@ -145,8 +156,7 @@ calculateSteps(const std::vector<MinMax> &inExtents,
       outExtents[i].first = dimMin;
 
     } else {
-      throw std::runtime_error("Cannot handle " +
-                               boost::lexical_cast<std::string>(nArgs) +
+      throw std::runtime_error("Cannot handle " + std::to_string(nArgs) +
                                " bins.");
     }
     if (outBin < 0)
@@ -172,12 +182,7 @@ std::vector<std::string> labelProjection(const DblMatrix &projection) {
       else if (in == 0)
         labels[j] = "0";
       else {
-        // We have to be explicit about precision, so lexical cast won't work
-        std::stringstream s;
-        s.precision(2);
-        s.setf(std::ios::fixed, std::ios::floatfield);
-        s << "'" << in << replacements[i] << "'";
-        labels[j] = s.str();
+        labels[j] = "'" + numToStringWithPrecision(in) + replacements[i] + "'";
       }
     }
     ret[i] = "[" + boost::algorithm::join(labels, ", ") + "]";
@@ -185,18 +190,23 @@ std::vector<std::string> labelProjection(const DblMatrix &projection) {
   return ret;
 }
 
+} // anonymous namespace
+
+namespace Mantid {
+namespace MDAlgorithms {
+
 /**
 Determine the original q units. Assumes first 3 dimensions by index are r,l,d
 @param inws : Input workspace to extract dimension info from
 @param logger : logging object
 @return vector of markers
 */
-std::vector<std::string> findOriginalQUnits(IMDWorkspace const *const inws,
+std::vector<std::string> findOriginalQUnits(IMDWorkspace_const_sptr inws,
                                             Mantid::Kernel::Logger &logger) {
   std::vector<std::string> unitMarkers(3);
   for (size_t i = 0; i < inws->getNumDims() && i < 3; ++i) {
     auto units = inws->getDimension(i)->getUnits();
-    const boost::regex re("A\\^-1", boost::regex::icase);
+    const boost::regex re("(Angstrom\\^-1)|(A\\^-1)", boost::regex::icase);
     // Does the unit label look like it's in Angstroms?
     std::string unitMarker;
     if (boost::regex_match(units.ascii(), re)) {
@@ -207,15 +217,10 @@ std::vector<std::string> findOriginalQUnits(IMDWorkspace const *const inws,
     unitMarkers[i] = unitMarker;
     logger.debug() << "In dimension with index " << i << " and units "
                    << units.ascii() << " taken to be of type " << unitMarker
-                   << std::endl;
+                   << '\n';
   }
   return unitMarkers;
 }
-
-} // anonymous namespace
-
-namespace Mantid {
-namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CutMD)
@@ -225,16 +230,6 @@ const std::string CutMD::RLUSymbol = "r";
 const std::string CutMD::AutoMethod = "Auto";
 const std::string CutMD::RLUMethod = "RLU";
 const std::string CutMD::InvAngstromMethod = "Q in A^-1";
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-CutMD::CutMD() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CutMD::~CutMD() {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -267,6 +262,13 @@ void CutMD::init() {
                                   "MDHistoWorkspace as output. This is DND "
                                   "only in Horace terminology.");
 
+  auto mustBePositiveInteger = boost::make_shared<BoundedValidator<int>>();
+  mustBePositiveInteger->setLower(0);
+
+  declareProperty("MaxRecursionDepth", 1, mustBePositiveInteger,
+                  "Sets the maximum recursion depth to use. Can be used to "
+                  "constrain the workspaces internal structure");
+
   std::vector<std::string> propOptions{AutoMethod, RLUMethod,
                                        InvAngstromMethod};
   char buffer[1024];
@@ -296,7 +298,7 @@ void CutMD::exec() {
       getProperty("P1Bin"), getProperty("P2Bin"), getProperty("P3Bin"),
       getProperty("P4Bin"), getProperty("P5Bin")};
 
-  Workspace_sptr sliceWS; // output worskpace
+  Workspace_sptr sliceWS; // output workspace
 
   // Histogram workspaces can be sliced axis-aligned only.
   if (auto histInWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
@@ -327,14 +329,14 @@ void CutMD::exec() {
     for (size_t i = 0; i < 5; ++i) {
       if (i < numDims && pbins[i].empty())
         throw std::runtime_error(
-            "P" + boost::lexical_cast<std::string>(i + 1) +
+            "P" + std::to_string(i + 1) +
             "Bin must be set when processing a workspace with " +
-            boost::lexical_cast<std::string>(numDims) + " dimensions.");
+            std::to_string(numDims) + " dimensions.");
       if (i >= numDims && !pbins[i].empty())
         throw std::runtime_error(
-            "P" + boost::lexical_cast<std::string>(i + 1) +
+            "P" + std::to_string(i + 1) +
             "Bin must NOT be set when processing a workspace with " +
-            boost::lexical_cast<std::string>(numDims) + " dimensions.");
+            std::to_string(numDims) + " dimensions.");
     }
 
     // Get extents in projection
@@ -357,7 +359,7 @@ void CutMD::exec() {
         this->getProperty("InterpretQDimensionUnits");
     std::vector<std::string> originUnits;
     if (determineUnitsMethod == AutoMethod) {
-      originUnits = findOriginalQUnits(inWS.get(), g_log);
+      originUnits = findOriginalQUnits(inWS, g_log);
     } else if (determineUnitsMethod == RLUMethod) {
       originUnits = std::vector<std::string>(3, RLUSymbol);
     } else {
@@ -401,7 +403,7 @@ void CutMD::exec() {
     }
 
     // Make labels
-    std::vector<std::string> labels = labelProjection(scaledProjectionMatrix);
+    std::vector<std::string> labels = labelProjection(projectionMatrix);
 
     // Either run RebinMD or SliceMD
     const std::string cutAlgName = noPix ? "BinMD" : "SliceMD";
@@ -411,6 +413,11 @@ void CutMD::exec() {
     cutAlg->setProperty("OutputWorkspace", "sliced");
     cutAlg->setProperty("NormalizeBasisVectors", false);
     cutAlg->setProperty("AxisAligned", false);
+    if (!noPix) {
+      int recursion_depth = getProperty("MaxRecursionDepth");
+      cutAlg->setProperty("TakeMaxRecursionDepthFromInput", false);
+      cutAlg->setProperty("MaxRecursionDepth", recursion_depth);
+    }
 
     for (size_t i = 0; i < numDims; ++i) {
       std::string label;
@@ -438,8 +445,7 @@ void CutMD::exec() {
       }
 
       const std::string value = label + ", " + unit + ", " + vecStr;
-      cutAlg->setProperty("BasisVector" + boost::lexical_cast<std::string>(i),
-                          value);
+      cutAlg->setProperty("BasisVector" + std::to_string(i), value);
     }
 
     // Translate extents into a single vector

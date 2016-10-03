@@ -1,4 +1,6 @@
 # pylint: disable=no-init,too-many-public-methods,invalid-name,protected-access
+from __future__ import (absolute_import, division, print_function)
+
 import unittest
 from testhelpers import assertRaisesNothing
 
@@ -7,7 +9,9 @@ from LoadCIF import SpaceGroupBuilder, UnitCellBuilder, AtomListBuilder, UBMatri
 from mantid.api import AlgorithmFactory
 from mantid.geometry import UnitCell
 
+from six import iteritems
 import numpy as np
+import sys
 
 
 def merge_dicts(lhs, rhs):
@@ -148,8 +152,13 @@ class AtomListBuilderTest(unittest.TestCase):
                                    (u'_atom_site_occupancy', [u'1.0', u'1.0(0)']),
                                    (u'_atom_site_b_iso_or_equiv', [u'1.0', u'2.0'])]))
 
-        self.assertEqual(self.builder._getAtoms(data),
-                         'Si 1/8 1/8 1/8 1.0 0.0126651479553;Al 0.34 0.56 0.23 1.0 0.0253302959106')
+        # python 2 & 3 convert float to str with different precision
+        if sys.version_info[0] < 3:
+            self.assertEqual(self.builder._getAtoms(data),
+                             'Si 1/8 1/8 1/8 1.0 0.0126651479553;Al 0.34 0.56 0.23 1.0 0.0253302959106')
+        else:
+            self.assertEqual(self.builder._getAtoms(data),
+                             'Si 1/8 1/8 1/8 1.0 0.012665147955292222;Al 0.34 0.56 0.23 1.0 0.025330295910584444')
 
     def test_getAtoms_no_occupancy(self):
         data = self._getData(dict([(u'_atom_site_label', [u'Si', u'Al']),
@@ -177,14 +186,19 @@ class AtomListBuilderTest(unittest.TestCase):
                                    (u'_atom_site_occupancy', [u'1.0', u'1.0(0)']),
                                    (u'_atom_site_b_iso_or_equiv', [u'1.0', u'sdfsdfs'])]))
 
-        self.assertEqual(self.builder._getAtoms(data),
-                         'Si 1/8 1/8 1/8 1.0 0.0126651479553;Al 0.34 0.56 0.23 1.0')
+        # python 2 & 3 convert float to str with different precision
+        if sys.version_info[0] < 3:
+            self.assertEqual(self.builder._getAtoms(data),
+                             'Si 1/8 1/8 1/8 1.0 0.0126651479553;Al 0.34 0.56 0.23 1.0')
+        else:
+            self.assertEqual(self.builder._getAtoms(data),
+                             'Si 1/8 1/8 1/8 1.0 0.012665147955292222;Al 0.34 0.56 0.23 1.0')
 
     def test_getAtoms_aniso_u_orthogonal(self):
         uElements = {'11': [u'0.01', u'0.02'], '12': [u'0.0', u'0.0'], '13': [u'0.0', u'0.0'], '22': [u'0.01', u'0.02'],
                      '23': [u'0.0', u'0.0'], '33': [u'0.04', u'0.05']}
 
-        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.iteritems()])
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in iteritems(uElements)])
         uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
                            (u'_atom_site_aniso_label', [u'Si', u'Al'])
                            ]))
@@ -201,7 +215,7 @@ class AtomListBuilderTest(unittest.TestCase):
                      '22': [u'0.01', u'0.02'],
                      '23': [u'0.0', u'0.0'], '33': [u'0.04', u'0.05']}
 
-        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.iteritems()])
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in iteritems(uElements)])
         uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
                            (u'_atom_site_aniso_label', [u'Si', u'Al'])
                            ]))
@@ -217,7 +231,7 @@ class AtomListBuilderTest(unittest.TestCase):
         bElements = {'11': [u'1.0', u'2.0'], '12': [u'0.0', u'0.0'], '13': [u'0.0', u'0.0'],
                      '22': [u'1.0', u'2.0'], '23': [u'0.0', u'0.0'], '33': [u'4.0', u'5.0']}
 
-        bDict = dict([(u'_atom_site_aniso_b_{0}'.format(key), value) for key, value in bElements.iteritems()])
+        bDict = dict([(u'_atom_site_aniso_b_{0}'.format(key), value) for key, value in iteritems(bElements)])
         bDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
                            (u'_atom_site_aniso_label', [u'Si', u'Al'])
                            ]))
@@ -232,7 +246,7 @@ class AtomListBuilderTest(unittest.TestCase):
         uElements = {'11': [u'0.01'], '12': [u'0.0'], '13': [u'0.0'], '22': [u'0.01'],
                      '23': [u'0.0'], '33': [u'0.04']}
 
-        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.iteritems()])
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in iteritems(uElements)])
         uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
                            (u'_atom_site_aniso_label', [u'Al']),
                            (u'_atom_site_u_iso_or_equiv', [u'0.01', u'invalid'])
@@ -248,7 +262,7 @@ class AtomListBuilderTest(unittest.TestCase):
         uElements = {'11': [u'0.01', u'0.02'], '12': [u'0.0', u'0.0'], '13': [u'0.0', u'0.0'],
                      '22': [u'0.01', u'0.02'], '23': [u'0.0', u'0.0'], '33': [u'0.04', u'0.05']}
 
-        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in uElements.iteritems()])
+        uDict = dict([(u'_atom_site_aniso_u_{0}'.format(key), value) for key, value in iteritems(uElements)])
         uDict.update(dict([(u'_atom_site_label', [u'Si', u'Al']),
                            (u'_atom_site_aniso_label', [u'Si', u'Al']),
                            (u'_atom_site_u_iso_or_equiv', [u'0.01', u'0.02'])

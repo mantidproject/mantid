@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/GetEi.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
@@ -10,6 +11,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <cmath>
+#include <numeric>
 
 namespace Mantid {
 namespace Algorithms {
@@ -81,7 +83,7 @@ void GetEi::init() {
 * does not have common binning
 */
 void GetEi::exec() {
-  MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const specnum_t mon1Spec = getProperty("Monitor1Spec");
   const specnum_t mon2Spec = getProperty("Monitor2Spec");
   double dist2moni0 = -1, dist2moni1 = -1;
@@ -113,7 +115,7 @@ void GetEi::exec() {
 
   g_log.information()
       << "Looking for a peak in the first monitor spectrum, spectra index "
-      << indexes[0] << std::endl;
+      << indexes[0] << '\n';
   double t_monitor0 = getPeakCentre(inWS, indexes[0], peakLoc0);
   g_log.notice() << "The first peak has been found at TOF = " << t_monitor0
                  << " microseconds\n";
@@ -121,7 +123,7 @@ void GetEi::exec() {
 
   g_log.information()
       << "Looking for a peak in the second monitor spectrum, spectra index "
-      << indexes[1] << std::endl;
+      << indexes[1] << '\n';
   double t_monitor1 = getPeakCentre(inWS, indexes[1], peakLoc1);
   g_log.information() << "The second peak has been found at TOF = "
                       << t_monitor1 << " microseconds\n";
@@ -139,6 +141,10 @@ void GetEi::exec() {
                  << " (your estimate was " << E_est << " meV)\n";
 
   setProperty("IncidentEnergy", E_i);
+  // store property in input workspace
+  Property *incident_energy =
+      new PropertyWithValue<double>("Ei", E_i, Direction::Input);
+  inWS->mutableRun().addProperty(incident_energy, true);
 }
 /** Gets the distances between the source and detectors whose IDs you pass to it
 *  @param WS :: the input workspace
@@ -163,24 +169,24 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
     g_log.error()
         << "Could not find the workspace index for the monitor at spectrum "
         << mon0Spec << "\n";
-    g_log.error() << "Error retrieving data for the first monitor" << std::endl;
+    g_log.error() << "Error retrieving data for the first monitor\n";
     throw std::bad_cast();
   }
-  const auto &dets = WS->getSpectrum(monWI)->getDetectorIDs();
 
-  if (dets.size() != 1) {
+  const auto &spectrumInfo = WS->spectrumInfo();
+
+  if (!spectrumInfo.hasUniqueDetector(monWI)) {
     g_log.error() << "The detector for spectrum number " << mon0Spec
                   << " was either not found or is a group, grouped monitors "
                      "are not supported by this algorithm\n";
-    g_log.error() << "Error retrieving data for the first monitor" << std::endl;
+    g_log.error() << "Error retrieving data for the first monitor\n";
     throw std::bad_cast();
   }
-  IDetector_const_sptr det = WS->getInstrument()->getDetector(*dets.begin());
-  monitor0Dist = det->getDistance(*(source.get()));
+  monitor0Dist = spectrumInfo.l1() + spectrumInfo.l2(monWI);
 
   // repeat for the second detector
   try {
-    monWI = WS->getIndexFromSpectrumNumber(mon0Spec);
+    monWI = WS->getIndexFromSpectrumNumber(mon1Spec);
   } catch (std::runtime_error &) {
     g_log.error()
         << "Could not find the workspace index for the monitor at spectrum "
@@ -188,16 +194,14 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
     g_log.error() << "Error retrieving data for the second monitor\n";
     throw std::bad_cast();
   }
-  const auto &dets2 = WS->getSpectrum(monWI)->getDetectorIDs();
-  if (dets2.size() != 1) {
+  if (!spectrumInfo.hasUniqueDetector(monWI)) {
     g_log.error() << "The detector for spectrum number " << mon1Spec
                   << " was either not found or is a group, grouped monitors "
                      "are not supported by this algorithm\n";
     g_log.error() << "Error retrieving data for the second monitor\n";
     throw std::bad_cast();
   }
-  det = WS->getInstrument()->getDetector(*dets2.begin());
-  monitor1Dist = det->getDistance(*(source.get()));
+  monitor1Dist = spectrumInfo.l1() + spectrumInfo.l2(monWI);
 }
 /** Converts detector IDs to spectra indexes
 *  @param WS :: the workspace on which the calculations are being performed
@@ -221,9 +225,9 @@ std::vector<size_t> GetEi::getMonitorWsIndexs(
   auto wsInds = WS->getIndicesFromSpectra(specNumTemp);
 
   if (wsInds.size() != 1) { // the monitor spectrum isn't present in the
-                            // workspace, we can't continue from here
-    g_log.error() << "Couldn't find the first monitor spectrum, number "
-                  << specNum1 << std::endl;
+    // workspace, we can't continue from here
+    g_log.error() << "Couldn't find the first monitor "
+                     "spectrum, number " << specNum1 << '\n';
     throw Exception::NotFoundError("GetEi::getMonitorWsIndexs()", specNum1);
   }
 
@@ -231,13 +235,13 @@ std::vector<size_t> GetEi::getMonitorWsIndexs(
   specNumTemp[0] = specNum2;
   auto wsIndexTemp = WS->getIndicesFromSpectra(specNumTemp);
   if (wsIndexTemp.size() != 1) { // the monitor spectrum isn't present in the
-                                 // workspace, we can't continue from here
-    g_log.error() << "Couldn't find the second monitor spectrum, number "
-                  << specNum2 << std::endl;
+    // workspace, we can't continue from here
+    g_log.error() << "Couldn't find the second "
+                     "monitor spectrum, number " << specNum2 << '\n';
     throw Exception::NotFoundError("GetEi::getMonitorWsIndexs()", specNum2);
   }
 
-  wsInds.push_back(specNumTemp[0]);
+  wsInds.push_back(wsIndexTemp[0]);
   return wsInds;
 }
 /** Uses E_KE = mv^2/2 and s = vt to calculate the time required for a neutron
@@ -273,14 +277,23 @@ double GetEi::timeToFly(double s, double E_KE) const {
 *  @throw runtime_error a Child Algorithm just falls over
 */
 double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS,
-                            const int64_t monitIn, const double peakTime) {
-  const MantidVec &timesArray = WS->readX(monitIn);
+                            const size_t monitIn, const double peakTime) {
+  const auto &timesArray = WS->x(monitIn);
   // we search for the peak only inside some window because there are often more
   // peaks in the monitor histogram
   double halfWin = (timesArray.back() - timesArray.front()) * HALF_WINDOW;
-  // runs CropWorkspace as a Child Algorithm to and puts the result in a new
-  // temporary workspace that will be deleted when this algorithm has finished
-  extractSpec(monitIn, peakTime - halfWin, peakTime + halfWin);
+  if (monitIn < std::numeric_limits<int>::max()) {
+    int ivsInd = static_cast<int>(monitIn);
+
+    // runs CropWorkspace as a Child Algorithm to and puts the result in a new
+    // temporary workspace that will be deleted when this algorithm has finished
+    extractSpec(ivsInd, peakTime - halfWin, peakTime + halfWin);
+  } else {
+    throw Kernel::Exception::NotImplementedError(
+        "Spectra number exceeds maximal"
+        " integer number defined for this OS."
+        " This behaviour is not yet supported");
+  }
   // converting the workspace to count rate is required by the fitting algorithm
   // if the bin widths are not all the same
   WorkspaceHelpers::makeDistribution(m_tempWS);
@@ -318,13 +331,14 @@ double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS,
 *  @throw runtime_error if the algorithm just falls over
 *  @throw invalid_argument if the input workspace does not have common binning
 */
-void GetEi::extractSpec(int64_t wsInd, double start, double end) {
+void GetEi::extractSpec(int wsInd, double start, double end) {
   IAlgorithm_sptr childAlg = createChildAlgorithm(
       "CropWorkspace", 100 * m_fracCompl, 100 * (m_fracCompl + CROP));
   m_fracCompl += CROP;
 
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
                                               getProperty("InputWorkspace"));
+
   childAlg->setProperty("XMin", start);
   childAlg->setProperty("XMax", end);
   childAlg->setProperty("StartWorkspaceIndex", wsInd);
@@ -352,22 +366,24 @@ void GetEi::extractSpec(int64_t wsInd, double start, double end) {
 */
 void GetEi::getPeakEstimates(double &height, int64_t &centreInd,
                              double &background) const {
+
+  const auto &X = m_tempWS->x(0);
+  const auto &Y = m_tempWS->y(0);
   // take note of the number of background counts as error checking, do we have
   // a peak or just a bump in the background
   background = 0;
   // start at the first Y value
-  height = m_tempWS->readY(0)[0];
+  height = Y[0];
   centreInd = 0;
-  // then loop through all the Y values and find the tallest peak
-  for (MantidVec::size_type i = 1; i < m_tempWS->readY(0).size() - 1; ++i) {
-    background += m_tempWS->readY(0)[i];
-    if (m_tempWS->readY(0)[i] > height) {
-      centreInd = i;
-      height = m_tempWS->readY(0)[centreInd];
-    }
-  }
 
-  background = background / static_cast<double>(m_tempWS->readY(0).size());
+  background = std::accumulate(Y.begin(), Y.end(), 0.0);
+  // then loop through all the Y values and find the tallest peak
+  // Todo use std::max to find max element and record index?
+  auto maxHeight = std::max_element(Y.begin(), Y.end());
+  height = *maxHeight;
+  centreInd = std::distance(Y.begin(), maxHeight);
+
+  background = background / static_cast<double>(Y.size());
   if (height < PEAK_THRESH_H * background) {
     throw std::invalid_argument(
         "No peak was found or its height is less than the threshold of " +
@@ -378,10 +394,8 @@ void GetEi::getPeakEstimates(double &height, int64_t &centreInd,
 
   g_log.debug() << "Peak position is the bin that has the maximum Y value in "
                    "the monitor spectrum, which is at TOF "
-                << (m_tempWS->readX(0)[centreInd] +
-                    m_tempWS->readX(0)[centreInd + 1]) /
-                       2 << " (peak height " << height
-                << " counts/microsecond)\n";
+                << (X[centreInd] + X[centreInd + 1]) / 2 << " (peak height "
+                << height << " counts/microsecond)\n";
 }
 /** Estimates the closest time, looking either or back, when the number of
 * counts is
@@ -397,11 +411,13 @@ void GetEi::getPeakEstimates(double &height, int64_t &centreInd,
 * is found
 *  @throw invalid_argument if the peak is too thin
 */
-double GetEi::findHalfLoc(MantidVec::size_type startInd, const double height,
+double GetEi::findHalfLoc(size_t startInd, const double height,
                           const double noise, const direction go) const {
-  MantidVec::size_type endInd = startInd;
+  auto endInd = startInd;
 
-  while (m_tempWS->readY(0)[endInd] > (height + noise) / 2.0) {
+  const auto &X = m_tempWS->x(0);
+  const auto &Y = m_tempWS->y(0);
+  while (Y[endInd] > (height + noise) / 2.0) {
     endInd += go;
     if (endInd < 1) {
       throw std::out_of_range(
@@ -410,7 +426,7 @@ double GetEi::findHalfLoc(MantidVec::size_type startInd, const double height,
           "% window, at TOF values that are too low. Was the energy estimate "
           "close enough?");
     }
-    if (endInd > m_tempWS->readY(0).size() - 2) {
+    if (endInd > Y.size() - 2) {
       throw std::out_of_range(
           "Can't analyse peak, some of the peak is outside the " +
           boost::lexical_cast<std::string>(HALF_WINDOW * 100) +
@@ -442,8 +458,7 @@ double GetEi::findHalfLoc(MantidVec::size_type startInd, const double height,
   }
   // get the TOF value in the middle of the bin with the first value below the
   // half height
-  double halfTime =
-      (m_tempWS->readX(0)[endInd] + m_tempWS->readX(0)[endInd + 1]) / 2;
+  double halfTime = (X[endInd] + X[endInd + 1]) / 2;
   // interpolate back between the first bin with less than half the counts to
   // the bin before it
   if (endInd != startInd) { // let the bin that we found have coordinates (x_1,
@@ -452,11 +467,10 @@ double GetEi::findHalfLoc(MantidVec::size_type startInd, const double height,
                             // (y_3-y_1)/(x_3-x_1) where (x_3, y_3) are the
                             // coordinates of the other bin we are using
     double gradient =
-        (m_tempWS->readY(0)[endInd] - m_tempWS->readY(0)[endInd - go]) /
-        (m_tempWS->readX(0)[endInd] - m_tempWS->readX(0)[endInd - go]);
+        (Y[endInd] - Y[endInd - go]) / (X[endInd] - X[endInd - go]);
     // we don't need to check for a zero or negative gradient if we assume the
     // endInd bin was found when the Y-value dropped below the threshold
-    double deltaY = m_tempWS->readY(0)[endInd] - (height + noise) / 2.0;
+    double deltaY = Y[endInd] - (height + noise) / 2.0;
     // correct for the interpolation back in the direction towards the peak
     // centre
     halfTime -= deltaY / gradient;

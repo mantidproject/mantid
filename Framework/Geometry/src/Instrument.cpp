@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <boost/make_shared.hpp>
 #include <queue>
@@ -1053,7 +1054,7 @@ void Instrument::saveNexus(::NeXus::File *file,
     g_log.warning() << "Saving Instrument with no XML data. If this was "
                        "instrument data you may not be able to load this data "
                        "back into Mantid, for fitted/analysed data this "
-                       "warning can be ignored." << std::endl;
+                       "warning can be ignored.\n";
   file->writeData("data", xmlText);
   file->writeData("type", "text/xml"); // mimetype
   file->writeData("description", "XML contents of the instrument IDF file.");
@@ -1066,10 +1067,8 @@ void Instrument::saveNexus(::NeXus::File *file,
   }
 
   // Add physical detector and monitor data
-  std::vector<detid_t> detectorIDs;
-  std::vector<detid_t> detmonIDs;
-  detectorIDs = getDetectorIDs(true);
-  detmonIDs = getDetectorIDs(false);
+  auto detectorIDs = getDetectorIDs(true);
+  auto detmonIDs = getDetectorIDs(false);
   if (!detmonIDs.empty()) {
     // Add detectors group
     file->makeGroup("physical_detectors", "NXdetector", true);
@@ -1078,8 +1077,7 @@ void Instrument::saveNexus(::NeXus::File *file,
     file->closeGroup(); // detectors
 
     // Create Monitor IDs vector
-    std::vector<IDetector_const_sptr> detmons;
-    detmons = getDetectors(detmonIDs);
+    auto detmons = getDetectors(detmonIDs);
     std::vector<detid_t> monitorIDs;
     for (size_t i = 0; i < detmonIDs.size(); i++) {
       if (detmons[i]->isMonitor())
@@ -1103,14 +1101,13 @@ void Instrument::saveNexus(::NeXus::File *file,
 *                 a group must be open that has only one call of this function.
 *  @param detIDs :: the dectector IDs of the detectors belonging to the set
 */
-void Instrument::saveDetectorSetInfoToNexus(::NeXus::File *file,
-                                            std::vector<detid_t> detIDs) const {
+void Instrument::saveDetectorSetInfoToNexus(
+    ::NeXus::File *file, const std::vector<detid_t> &detIDs) const {
 
   size_t nDets = detIDs.size();
   if (nDets == 0)
     return;
-  std::vector<IDetector_const_sptr> detectors;
-  detectors = getDetectors(detIDs);
+  auto detectors = getDetectors(detIDs);
 
   Geometry::IComponent_const_sptr sample = getSample();
   Kernel::V3D sample_pos;
@@ -1197,7 +1194,7 @@ void Instrument::setDefaultView(const std::string &type) {
     g_log.warning()
         << type
         << " is not allowed as an instrument view type. Default to \"3D\""
-        << std::endl;
+        << '\n';
   }
 }
 

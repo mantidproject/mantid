@@ -125,8 +125,7 @@ void Expression::parse(const std::string &str) {
   m_expr = str;
   trim(m_expr);
 
-  if (m_expr.size() > 1 && m_expr[0] == '(' &&
-      m_expr[m_expr.size() - 1] == ')') {
+  if (m_expr.size() > 1 && m_expr.front() == '(' && m_expr.back() == ')') {
     if (m_expr.find('(', 1) == std::string::npos) {
       m_expr.erase(0, 1);
       m_expr.erase(m_expr.size() - 1, 1);
@@ -216,8 +215,15 @@ void Expression::tokenize() {
       if (lvl == 0 && !isNumber && is_op_symbol(c)) // insert new token
       {
         if (i == last) {
-          break;
-          // throw std::runtime_error("Expression: syntax error");
+          if (c == ',' || c == ';') {
+            m_expr.resize(last);
+            break;
+          } else {
+            throw std::runtime_error(
+                "Syntax error in expression.\n\nA binary "
+                "operator isn't followed by a value:\n    " +
+                m_expr);
+          }
         }
 
         if (is_op_symbol(m_expr[i + 1])) {
@@ -314,7 +320,7 @@ void Expression::tokenize() {
 
   if (!tokens.empty()) {
     // remove operators of higher prec
-    m_tokens.push_back(Token(tokens[0]));
+    m_tokens.emplace_back(tokens[0]);
     for (size_t i = 0; i < tokens.size(); i++) {
       Token &tok = tokens[i];
       std::string op = m_expr.substr(tok.ie + 1, tok.is1 - tok.ie - 1); //?
@@ -323,7 +329,7 @@ void Expression::tokenize() {
         last_tok.ie = tok.ie;
         last_tok.is1 = tok.is1;
         if (i != tokens.size() - 1)
-          m_tokens.push_back(Token(tokens[i + 1]));
+          m_tokens.emplace_back(tokens[i + 1]);
       }
     }
   }
@@ -357,17 +363,17 @@ std::string Expression::GetOp(size_t i) {
 void Expression::logPrint(const std::string &pads) const {
   std::string myPads = pads + "   ";
   if (!m_terms.empty()) {
-    std::cerr << myPads << m_op << '[' << m_funct << ']' << "(" << '\n';
+    std::cerr << myPads << m_op << '[' << m_funct << ']' << "(\n";
     for (const auto &term : m_terms)
       term.logPrint(myPads);
-    std::cerr << myPads << ")" << '\n';
+    std::cerr << myPads << ")\n";
   } else
     std::cerr << myPads << m_op << m_funct << '\n';
 }
 
 void Expression::setFunct(const std::string &name) {
   if (!op_prec(name)) {
-    std::string op = "";
+    std::string op;
     if (name.size() > 1 && is_op_symbol(name[0])) {
       op = name.substr(0, 1);
       if (name.size() > 2 && is_op_symbol(name[1])) {

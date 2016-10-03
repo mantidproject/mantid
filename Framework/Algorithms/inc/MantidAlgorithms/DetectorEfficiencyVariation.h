@@ -59,10 +59,6 @@ namespace Algorithms {
 */
 class DLLExport DetectorEfficiencyVariation : public DetectorDiagnostic {
 public:
-  /// Default constructor
-  DetectorEfficiencyVariation();
-  /// Destructor
-  ~DetectorEfficiencyVariation() override{};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override {
     return "DetectorEfficiencyVariation";

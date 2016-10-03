@@ -9,22 +9,21 @@
  * chunk of code. They can be created directly from strings
  * and are also implicitly convertible to strings
  */
-class ScriptCode
-{
+class ScriptCode {
 public:
   /// Empty code
   ScriptCode();
   /// Code from a C-string with zero offset
   explicit ScriptCode(const char *codeStr);
   /// Code from a C-string with a defined offset
-  ScriptCode(const char * codeStr, const int offset);
+  ScriptCode(const char *codeStr, const int offset);
   /// Code from a QString with zero offset
   explicit ScriptCode(const QString &codeStr);
   /// Code from a QString with a defined offset
-  ScriptCode(const QString & codeStr, const int offset);
+  ScriptCode(const QString &codeStr, const int offset);
 
   /// Code string
-  inline const std::string & codeString() const { return m_code; }
+  inline const std::string &codeString() const { return m_code; }
   /// Return the offset
   inline int offset() const { return m_offset; }
   /// Is the string empty

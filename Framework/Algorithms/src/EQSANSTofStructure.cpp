@@ -1,7 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/EQSANSTofStructure.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/EventList.h"
@@ -128,38 +126,24 @@ void EQSANSTofStructure::execEvent(
   }
   const double SDD = *dp / 1000.0;
 
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  const auto l1 = spectrumInfo.l1();
+
   // Loop through the spectra and apply correction
   PARALLEL_FOR1(inputWS)
   for (int64_t ispec = 0; ispec < int64_t(numHists); ++ispec) {
-
-    IDetector_const_sptr det;
-    try {
-      det = inputWS->getDetector(ispec);
-    } catch (Exception::NotFoundError &) {
-      g_log.warning() << "Workspace index " << ispec
-                      << " has no detector assigned to it - discarding"
-                      << std::endl;
-      // 'continue' statement moved outside catch block because Mac Intel
-      // compiler has a problem with it being here in an openmp block.
-    }
-    if (!det)
-      continue;
-
-    // Get the flight path from the sample to the detector pixel
-    const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
-    const V3D scattered_flight_path = det->getPos() - samplePos;
-
-    // Sample-to-source distance
-    const V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
-    const V3D SSD = samplePos - sourcePos;
-    double tof_factor =
-        (SSD.norm() + scattered_flight_path.norm()) / (SSD.norm() + SDD);
-
     PARALLEL_START_INTERUPT_REGION
 
+    if (!spectrumInfo.hasDetectors(ispec)) {
+      g_log.warning() << "Workspace index " << ispec
+                      << " has no detector assigned to it - discarding\n";
+      continue;
+    }
+    const auto l2 = spectrumInfo.l2(ispec);
+    double tof_factor = (l1 + l2) / (l1 + SDD);
+
     // Get the pointer to the output event list
-    EventList *outEL = inputWS->getEventListPtr(ispec);
-    std::vector<TofEvent> &events = outEL->getEvents();
+    std::vector<TofEvent> &events = inputWS->getSpectrum(ispec).getEvents();
     std::vector<TofEvent>::iterator it;
     std::vector<TofEvent> clean_events;
 
@@ -184,7 +168,7 @@ void EQSANSTofStructure::execEvent(
       // At this point the events in the second frame are still off by a frame
       if (frame_skipping && rel_tof > tof_frame_width)
         newtof += tof_frame_width;
-      clean_events.push_back(TofEvent(newtof, it->pulseTime()));
+      clean_events.emplace_back(newtof, it->pulseTime());
     }
     events.clear();
     events.reserve(clean_events.size());
@@ -453,22 +437,19 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
   double source_to_detector = (detector_z - source_z) * 1000.0;
   frame_tof0 = frame_srcpulse_wl_1 / 3.9560346 * source_to_detector;
 
-  g_log.information() << "Frame width " << tmp_frame_width << std::endl;
-  g_log.information() << "TOF offset = " << frame_tof0 << " microseconds"
-                      << std::endl;
+  g_log.information() << "Frame width " << tmp_frame_width << '\n';
+  g_log.information() << "TOF offset = " << frame_tof0 << " microseconds\n";
   g_log.information() << "Band defined by T1-T4 " << frame_wl_1 << " "
                       << frame_wl_2;
   if (frame_skipping)
     g_log.information() << " + " << frameskip_wl_1 << " " << frameskip_wl_2
-                        << std::endl;
+                        << '\n';
   else
-    g_log.information() << std::endl;
-  g_log.information() << "Chopper    Actual Phase    Lambda1    Lambda2"
-                      << std::endl;
+    g_log.information() << '\n';
+  g_log.information() << "Chopper    Actual Phase    Lambda1    Lambda2\n";
   for (int i = 0; i < 4; i++)
     g_log.information() << i << "    " << chopper_actual_phase[i] << "  "
-                        << chopper_wl_1[i] << "  " << chopper_wl_2[i]
-                        << std::endl;
+                        << chopper_wl_1[i] << "  " << chopper_wl_2[i] << '\n';
 
   double low_wl_discard = 3.9560346 * low_tof_cut / source_to_detector;
   double high_wl_discard = 3.9560346 * high_tof_cut / source_to_detector;

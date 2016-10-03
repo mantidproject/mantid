@@ -9,80 +9,56 @@
 Description
 -----------
 
-This algorithm calibrates sets of Rectangular Detectors in one
-instrument. The initial path, time offset,panel widths, panel heights,
-panel locations and orientation are all adjusted so the error in q
-positions from the theoretical q positions is minimized. Also, there are
-optimize options that take into account sample position and the need for
-rigid rotations.
+This algorithm calibrates panels of Rectangular Detectors 
+or packs of tubes in an instrument.  The initial path,
+panel centers and orientations are adjusted so the error in Q
+positions from the theoretical Q positions is minimized. 
+Given a set of peaks indexed by :math:`(h_i, k_i, l_i)`, we
+modify the instrument parameters, p, and then find  Q in the sample frame,
+:math:`\rm Q_{sample}` that mininizes the following:
 
-Some features:
+.. math::
 
-1) Panels can be grouped.
+   \left\vert 2\pi \rm U \rm B \left(
+                               \begin{array}{c}
+                                 NINT(h_i) \\
+                                 NINT(k_i) \\
+                                 NINT(l_i) \\
+                               \end{array}
+                             \right) - \rm Q_{sample,i}(p) \right\vert ^2
 
-| ``  All panels in a group will move the same way and rotate the same way.  If rigid rotations are``
-| ``   used, each panel is rotated about the center of the instrument, along with panel pixels rotating``
-| ``   around the panel's center. The height and  widths of the panels in a group will``
-| ``    all change by the same factor``
+NINT is the nearest integer function.
+B is fixed from the input lattice parameters, but U is modified by :ref:`CalculateUMatrix <algm-CalculateUMatrix>` 
+for all peaks before and after optimization.
+The initial path, L1, is optimized for all peaks before and after each panel or pack's parameters are optimized.
+The panels and packs' parameters are optimized in parallel.
+An option is available to adjust the panel widths and heights for Rectangular Detectors in a second iteration with all the other parameters fixed.
 
-2) The user can select which quantities to keep fixed during the
-optimization.
+OUTPUT workspaces and files:
+============================
 
-3) The results can be saved to an ISAW-like DetCal file or in an xml
-file that can be used with the LoadParameter algorithm.
+1) The results are saved to an ISAW-like DetCal file and optionally in an xml
+   file that can be used with the :ref:`LoadParameterFile <algm-LoadParameterFile>` algorithm.
 
-4) Results from a previous optimization can be applied before another
-optimization is done.
+2) There are two output workspace groups that are output when this algorithm calls the :ref:`Fit <algm-Fit>` algorithm.
 
-| ``  The Levenberg-Marquardt optimization algorithm is used. Later iterations may have too small of changes for the parameters to``
-| ``  get to another optimum value.  Restarting allows for the consideration of parameter values further away and also can change``
-| ``  constraints for the parameter values. This is also useful when fine tuning parameters that do not influence the errors as``
-| ``  much as other parameters.``
+   a. Fit_Parameters: workspaces beginning with 'params' contains the results from fitting for each bank and for L1.
 
-5) There are several output tables indicating the results of the fit
+      * XShift, YShift,and ZShift are in meters.
 
-| ``  A) ResultWorkspace contains the results from fitting.``
-| ``    -t0 is in microseconds``
-| ``    -L0 is in meters``
-| ``    -*Xoffset,*Yoffset,and *Zoffset are in meters``
-| ``    -*Xrot,*Yrot, and *Zrot are in degrees. Note that Zrot is done first, then Yrot , the Xrot.``
+      * XRotate, YRotate, and ZRotate are in degrees. 
 
-``  B)QErrorWorkspace contains the Error in Q values for each peak, along with other associated information about the peak``
+   b. Fit_Residuals: workspaces beginning with 'fit' contain the differences in the calculated and theoretical Q vectors for each peak.
+      
+3) There are three output files that show the goodness of the calibration.
 
-``  C)CovarianceInfo contains the "correlations"(*100) between each of the parameters``
+   a. ColFilename contains the calculated and theoretical column for each peak. Each spectra is labeled by the bank. To plot use python script, scripts/SCD_Reduction/SCDCalibratePanelsResults.py
 
-``6) Maximum changes in the quantities that are altered during optimization are now settable.``
+   b. RowFilename contains the calculated and theoretical row for each peak. Each spectra is labeled by the bank. To plot use python script, scripts/SCD_Reduction/SCDCalibratePanelsResults.py
 
-"A" Workflow
-------------
+   c. TofFilename contains the calculated and theoretical TOF for each peak.  Each spectra is labeled by the bank.
 
-Optimizing all variables at once may not be the best option. The errors
-become too large, so optimization in several stages subsets of the
-variables are optimized at each stage.
 
-First: NOTE that the input PeaksWorkspace does NOT CHANGE. This means
-you should be able to keep trying different sets of variables until
-things look good.
-
-To work on another set of variables with the optimized first round of
-optimized values
-
-#. Use Preprocessinstrument to apply the previous DetCal or xml file
-   before optimizing AND
-
-#. Change the name of the target DetCal file, in case the choice of
-   variables is not good. Then you will not clobber the good
-
-DetCal file. AND
-
-#. Change the name of the ResultWorkspace in the properties list. This
-   means you will have a copy of the results from the
-
-previous trial(s)( along with chiSq values) to compare results.
-
-Do check the chiSquared values. If they do not decrease, you were close
-to a minimum and the optimization could not get back to that minimum. It
-makes a large jump at the beginning.
 
 After Calibration
 -----------------
@@ -103,7 +79,7 @@ Usage
     #Calibrate peaks file and load to workspace
     LoadIsawPeaks(Filename='MANDI_801.peaks', OutputWorkspace='peaks')
     #TimeOffset is not stored in xml file, so use DetCal output if you need TimeOffset
-    SCDCalibratePanels(PeakWorkspace='peaks',DetCalFilename='mandi_801.DetCal',XmlFilename='mandi_801.xml',a=74,b=74.5,c=99.9,alpha=90,beta=90,gamma=60,usetimeOffset=False)
+    SCDCalibratePanels(PeakWorkspace='peaks',DetCalFilename='mandi_801.DetCal',XmlFilename='mandi_801.xml',a=74,b=74.5,c=99.9,alpha=90,beta=90,gamma=60)
     LoadEmptyInstrument(Filename=config.getInstrumentDirectory() + 'MANDI_Definition_2013_08_01.xml', OutputWorkspace='MANDI_801_event_DetCal')
     CloneWorkspace(InputWorkspace='MANDI_801_event_DetCal', OutputWorkspace='MANDI_801_event_xml')
     LoadParameterFile(Workspace='MANDI_801_event_xml', Filename='mandi_801.xml')
@@ -129,7 +105,7 @@ Output:
 .. testoutput:: SCDCalibratePanels
 
     matches
-    	
+      
 .. categories::
 
 .. sourcelink::

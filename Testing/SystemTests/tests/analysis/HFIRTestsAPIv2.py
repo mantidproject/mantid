@@ -25,7 +25,7 @@ for item in data_search_dirs:
     if item.endswith("SANS2D/"):
         TEST_DIR = item
 if len(TEST_DIR) == 0:
-    raise RuntimeError, "Could not locate test data directory: [...]/Data/SANS2D"
+    raise RuntimeError("Could not locate test data directory: [...]/Data/SANS2D")
 
 
 def _diff_iq(x, y):
@@ -145,11 +145,11 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def assertTrue(self, condition):
         if not condition:
-            raise RuntimeError, "Condition failed"
+            raise RuntimeError("Condition failed")
 
     def assertEqual(self, a, b):
         if not a == b:
-            raise RuntimeError, "%s != %s" % (a, b)
+            raise RuntimeError("%s != %s" % (a, b))
 
     def _assertAlmostEqual(self, first, second, places=None, msg=None, delta=None, rel_delta=None):
         return self.assertAlmostEqual(first, second, places, msg, delta, rel_delta)
@@ -158,7 +158,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         if not assertAlmostEqual(first, second, places, msg, delta, rel_delta):
             if msg is None:
                 msg = "Failed condition"
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
 
     def _cleanup(self):
         ws_list = AnalysisDataService.getObjectNames()
@@ -221,9 +221,10 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_set_detector_offset(self):
         GPSANS()
+        SetSampleDetectorDistance(6500)
         DataPath(TEST_DIR)
         AppendDataFile("BioSANS_test_data.xml")
-        SetSampleDetectorOffset(500.0)
+        #SetSampleDetectorOffset(500.0)
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data")
@@ -235,6 +236,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
             If both detector distance and offset are set, use only the distance
         """
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         AppendDataFile("BioSANS_test_data.xml")
         SetSampleDetectorDistance(2500.0)
@@ -247,6 +249,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_set_wavelength(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         AppendDataFile("BioSANS_test_data.xml")
         SetWavelength(5.0, 1.2)
@@ -259,6 +262,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_direct_beam_center(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -279,6 +283,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_hand_beam_center(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         SetBeamCenter(1.1, 2.2)
         Reduce()
 
@@ -293,6 +298,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_load_run(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         self.assertEqual(len(ReductionSingleton()._data_files), 0)
         AppendDataFile("BioSANS_test_data.xml")
@@ -300,6 +306,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_to_steps(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -317,6 +324,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_reduction_1(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -348,6 +356,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_no_solid_angle(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -364,6 +373,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_reduction_2(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -401,6 +411,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_straight_Q1D(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -433,6 +444,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_transmission(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -468,6 +480,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_spreader_transmission(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
@@ -487,6 +500,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_transmission_by_hand(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -502,6 +516,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_center_by_hand(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
@@ -515,6 +530,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_background(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
@@ -536,6 +552,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
             into account the normalization.
         """
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
@@ -554,6 +571,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_bck_w_transmission(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml", "test_data")
@@ -573,6 +591,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_transmission_by_hand_w_sensitivity(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -611,6 +630,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         return
         # pylint: disable=unreachable
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         AppendDataFile("BioSANS_test_data.xml")
         SampleGeometry('cuboid')
@@ -653,7 +673,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                -1666.47199, -1608.86707, -1544.26178, -1492.78389, -1438.69256,
                -1358.60437, -1299.34476, -1221.57010, -1080.69421, -609.77891, -77.72765]
         BIOSANS()
-        SetSampleDetectorOffset(837.9)
+        #SetSampleDetectorOffset(837.9)
+        SetSampleDetectorDistance(6837.9)
         # SolidAngle() # name clash with SolidAngle algorithm
         MonitorNormalization()
         AzimuthalAverage(n_bins=100, n_subpix=1, log_binning=True)
@@ -696,7 +717,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                -1768.67, -1721.61, -1666.51, -1608.91, -1544.31,
                -1492.83, -1438.74, -1358.65, -1299.39, -1221.61, -1080.73, -609.821, -77.7712]
         BIOSANS()
-        SetSampleDetectorOffset(837.9)
+        #SetSampleDetectorOffset(837.9)
+        SetSampleDetectorDistance(6837.9)
         # SolidAngle()
         DarkCurrent("BioSANS_dark_current.xml")
         MonitorNormalization()
@@ -738,7 +760,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                -1874.31, -1819.05, -1767.14, -1722.35, -1670.38, -1606.61,
                -1544.51, -1496.24, -1438.21, -1360.12, -1299.68, -1221.61, -1080.91, -610.638, -71.9557]
         BIOSANS()
-        SetSampleDetectorOffset(837.9)
+        #SetSampleDetectorOffset(837.9)
+        SetSampleDetectorDistance(6837.9)
         # SolidAngle()
         DarkCurrent("BioSANS_dark_current.xml")
         MonitorNormalization()
@@ -765,6 +788,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_transmission_beam_center(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml", "test_data")
@@ -785,6 +809,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_bck_transmission_default_beam_center(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml", "test_data")
@@ -804,6 +829,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_bck_transmission_set_beam_center(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml", "test_data")
@@ -823,6 +849,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_bck_transmission_direct_beam_center(self):
         GPSANS()
+        SetSampleDetectorDistance(6000)
         DataPath(TEST_DIR)
         # DirectBeamCenter("BioSANS_empty_cell.xml")
         SetBeamCenter(100, 15)

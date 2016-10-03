@@ -44,9 +44,6 @@ namespace DataHandling {
 class DLLExport SaveSavuTomoConfig : public API::Algorithm {
 public:
   SaveSavuTomoConfig();
-  /// Virtual dtor
-  ~SaveSavuTomoConfig() override {}
-
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SaveSavuTomoConfig"; }
 
@@ -60,7 +57,7 @@ public:
 
   /// Algorithm's category for identification
   const std::string category() const override {
-    return "DataHandling\\Tomography;";
+    return "DataHandling\\Imaging;";
   }
 
 private:

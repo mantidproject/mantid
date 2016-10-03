@@ -187,7 +187,7 @@ class RunSetupScript(BaseScriptElement):
             self.calibfilename = BaseScriptElement.getStringElement(instrument_dom,\
                     "calibrationfile", default=RunSetupScript.calibfilename)
 
-            self.exp_ini_file_name = BaseScriptElement.getStringElement(instrument_dom,
+            self.exp_ini_file_name = BaseScriptElement.getStringElement(instrument_dom,\
                     'expinifilename', default=RunSetupScript.exp_ini_file_name)
 
             self.charfilename = BaseScriptElement.getStringElement(instrument_dom,\

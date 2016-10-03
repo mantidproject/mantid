@@ -13,7 +13,7 @@ CompositePeaksPresenter::CompositePeaksPresenter(
     ZoomablePeaksView *const zoomablePlottingWidget,
     PeaksPresenter_sptr defaultPresenter)
     : m_zoomablePlottingWidget(zoomablePlottingWidget),
-      m_default(defaultPresenter), m_owner(NULL), m_zoomedPeakIndex(-1){
+      m_default(defaultPresenter), m_owner(NULL), m_zoomedPeakIndex(-1) {
   if (m_zoomablePlottingWidget == NULL) {
     throw std::runtime_error("Zoomable Plotting Widget is NULL");
   }
@@ -41,8 +41,8 @@ void CompositePeaksPresenter::update() {
 Overriden updateWithSlicePoint
 @param point : Slice point to update with
 */
-void
-CompositePeaksPresenter::updateWithSlicePoint(const PeakBoundingBox &point) {
+void CompositePeaksPresenter::updateWithSlicePoint(
+    const PeakBoundingBox &point) {
   if (useDefault()) {
     m_default->updateWithSlicePoint(point);
     return;
@@ -70,8 +70,8 @@ bool CompositePeaksPresenter::changeShownDim() {
 Determine wheter a given axis label correponds to the free peak axis.
 @return True only if the label is that of the free peak axis.
 */
-bool
-CompositePeaksPresenter::isLabelOfFreeAxis(const std::string &label) const {
+bool CompositePeaksPresenter::isLabelOfFreeAxis(
+    const std::string &label) const {
   if (useDefault()) {
     return m_default->isLabelOfFreeAxis(label);
   }
@@ -237,7 +237,6 @@ void CompositePeaksPresenter::setBackgroundColor(
   (*iterator)->setBackgroundColor(color);
 }
 
-
 /**
 Getter for the name of the transform.
 @return transform name.
@@ -255,7 +254,6 @@ std::string CompositePeaksPresenter::getTransformName() const {
 PeakPalette<PeakViewColor> CompositePeaksPresenter::getPalette() const {
   return this->m_palettePeakViewColor;
 }
-
 
 /**
 @param ws: PeakWorkspace to get the colour for.
@@ -351,6 +349,8 @@ void CompositePeaksPresenter::zoomToPeak(
   auto subjectPresenter = *iterator;
   auto boundingBox = subjectPresenter->getBoundingBox(peakIndex);
   m_zoomablePlottingWidget->zoomToRectangle(boundingBox);
+  m_zoomedPeakIndex = peakIndex;
+  m_zoomedPresenter = subjectPresenter;
 }
 
 /**
@@ -390,13 +390,13 @@ void CompositePeaksPresenter::setPeakSizeOnProjection(const double fraction) {
  * @param mode : Mode to enter.
  */
 void CompositePeaksPresenter::peakEditMode(EditMode mode) {
-    if (useDefault()) {
-      return m_default->peakEditMode(mode);
-    }
-    for (auto presenterIterator = m_subjects.begin();
-         presenterIterator != m_subjects.end(); ++presenterIterator) {
-      (*presenterIterator)->peakEditMode(mode);
-    }
+  if (useDefault()) {
+    return m_default->peakEditMode(mode);
+  }
+  for (auto presenterIterator = m_subjects.begin();
+       presenterIterator != m_subjects.end(); ++presenterIterator) {
+    (*presenterIterator)->peakEditMode(mode);
+  }
 }
 
 /**
@@ -522,8 +522,8 @@ CompositePeaksPresenter::getPeaksPresenter(const QString &name) {
  * Register an owning presenter for this object.
  * @param owner
  */
-void
-CompositePeaksPresenter::registerOwningPresenter(UpdateableOnDemand *owner) {
+void CompositePeaksPresenter::registerOwningPresenter(
+    UpdateableOnDemand *owner) {
   m_owner = owner;
 }
 
@@ -536,8 +536,10 @@ void CompositePeaksPresenter::performUpdate() {
     auto presenter = (*presenterIterator);
     const int pos =
         static_cast<int>(std::distance(m_subjects.begin(), presenterIterator));
-    m_palettePeakViewColor.setBackgroundColour(pos, presenter->getBackgroundPeakViewColor());
-    m_palettePeakViewColor.setForegroundColour(pos, presenter->getForegroundPeakViewColor());
+    m_palettePeakViewColor.setBackgroundColour(
+        pos, presenter->getBackgroundPeakViewColor());
+    m_palettePeakViewColor.setForegroundColour(
+        pos, presenter->getForegroundPeakViewColor());
 
     if (m_owner) {
       m_owner->performUpdate();
@@ -621,7 +623,7 @@ CompositePeaksPresenter::getZoomedPeakPresenter() const {
  * @return a zoomed peak index.
  */
 int CompositePeaksPresenter::getZoomedPeakIndex() const {
-    return m_zoomedPeakIndex;
+  return m_zoomedPeakIndex;
 }
 
 void CompositePeaksPresenter::editCommand(
@@ -688,54 +690,53 @@ void CompositePeaksPresenter::notifyWorkspaceChanged(
   }
 }
 
-bool CompositePeaksPresenter::deletePeaksIn(PeakBoundingBox box){
-    if (useDefault()) {
-      return m_default->deletePeaksIn(box);
-    }
-    // Forward the request onwards
-    bool result = false;
-    for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
-      result |= (*it)->deletePeaksIn(box);
-    }
-    return result;
+bool CompositePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
+  if (useDefault()) {
+    return m_default->deletePeaksIn(box);
+  }
+  // Forward the request onwards
+  bool result = false;
+  for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
+    result |= (*it)->deletePeaksIn(box);
+  }
+  return result;
 }
 
-bool CompositePeaksPresenter::hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target){
-    bool hasMode  = false;
-    if(auto temp = target.lock()) {
-        auto it = this->getPresenterIteratorFromWorkspace(temp);
-        if(it != m_subjects.end()) {
-            hasMode = (*it)->hasPeakAddMode();
-        }
+bool CompositePeaksPresenter::hasPeakAddModeFor(
+    boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target) {
+  bool hasMode = false;
+  if (auto temp = target.lock()) {
+    auto it = this->getPresenterIteratorFromWorkspace(temp);
+    if (it != m_subjects.end()) {
+      hasMode = (*it)->hasPeakAddMode();
     }
-    return hasMode;
+  }
+  return hasMode;
 }
 
-bool CompositePeaksPresenter::hasPeakAddMode() const{
-    if (useDefault()) {
-      return m_default->hasPeakAddMode();
-    }
-    // Forward the request onwards
-    bool hasMode = false;
-    for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
-      hasMode |= (*it)->hasPeakAddMode();
-    }
-    return hasMode;
+bool CompositePeaksPresenter::hasPeakAddMode() const {
+  if (useDefault()) {
+    return m_default->hasPeakAddMode();
+  }
+  // Forward the request onwards
+  bool hasMode = false;
+  for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
+    hasMode |= (*it)->hasPeakAddMode();
+  }
+  return hasMode;
 }
 
-bool CompositePeaksPresenter::addPeakAt(double plotCoordsPointX, double plotCoordsPointY)
-{
-    if (useDefault()) {
-      return m_default->addPeakAt(plotCoordsPointX, plotCoordsPointY);
-    }
-    // Forward the request onwards
-    bool result = false;
-    for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
-      result |= (*it)->addPeakAt(plotCoordsPointX, plotCoordsPointY);
-    }
-    return result;
-}
-
+bool CompositePeaksPresenter::addPeakAt(double plotCoordsPointX,
+                                        double plotCoordsPointY) {
+  if (useDefault()) {
+    return m_default->addPeakAt(plotCoordsPointX, plotCoordsPointY);
+  }
+  // Forward the request onwards
+  bool result = false;
+  for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
+    result |= (*it)->addPeakAt(plotCoordsPointX, plotCoordsPointY);
+  }
+  return result;
 }
 }
-
+}

@@ -60,13 +60,13 @@ void ElasticWindow::exec() {
   // Determine if we are converting from spectra number (red) or Q (Sqw)
   const bool axisIsSpectrumNumber = inputWorkspace->getAxis(1)->isSpectra();
   g_log.information() << "Axis is spectrum number: " << axisIsSpectrumNumber
-                      << std::endl;
+                      << '\n';
 
   // Determine if we need to use the second time range...
   const bool backgroundSubtraction =
       !((bgRangeStart == bgRangeEnd) && (bgRangeStart == EMPTY_DBL()));
   g_log.information() << "Use background subtraction: " << backgroundSubtraction
-                      << std::endl;
+                      << '\n';
 
   // Calculate number of steps
   size_t numSteps = 4;

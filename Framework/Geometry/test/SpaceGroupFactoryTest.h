@@ -7,9 +7,10 @@
 
 using ::testing::Return;
 
-#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
-#include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/CyclicGroup.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
@@ -397,9 +398,9 @@ private:
     MockSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
                             const std::string &generatorInformation)
         : AbstractSpaceGroupGenerator(number, hmSymbol, generatorInformation) {}
-    ~MockSpaceGroupGenerator() override {}
-
+    GCC_DIAG_OFF_SUGGEST_OVERRIDE
     MOCK_CONST_METHOD0(generateGroup, Group_const_sptr());
+    GCC_DIAG_ON_SUGGEST_OVERRIDE
   };
 
   /* Testing TransformationSpaceGroupGenerator is a bit hard in the sense that

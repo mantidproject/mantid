@@ -43,7 +43,7 @@ using Mantid::Kernel::NetworkProxy;
 #else
 #include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
-#include <stdlib.h>
+#include <cstdlib>
 #endif
 #include <Poco/StreamCopier.h>
 #include <Poco/DirectoryIterator.h>
@@ -64,6 +64,9 @@ namespace {
 Kernel::Logger g_log("ScriptRepositoryImpl");
 }
 
+/// Default timeout
+int DEFAULT_TIMEOUT_SEC = 30;
+
 const char *timeformat = "%Y-%b-%d %H:%M:%S";
 
 const char *emptyURL =
@@ -79,7 +82,7 @@ void writeJsonFile(const std::string &filename, Json::Value json,
                    const std::string &error) {
   Poco::FileOutputStream filestream(filename);
   if (!filestream.good()) {
-    g_log.error() << error << std::endl;
+    g_log.error() << error << '\n';
   }
   Json::StyledWriter writer;
   filestream << writer.write(json);
@@ -93,7 +96,7 @@ Json::Value readJsonFile(const std::string &filename,
                          const std::string &error) {
   Poco::FileInputStream filestream(filename);
   if (!filestream.good()) {
-    g_log.error() << error << std::endl;
+    g_log.error() << error << '\n';
   }
   Json::Reader json_reader;
   Json::Value read;
@@ -113,7 +116,7 @@ void writeStringFile(const std::string &filename,
                      const std::string &error) {
   Poco::FileStream filestream(filename);
   if (!filestream.good()) {
-    g_log.error() << error << std::endl;
+    g_log.error() << error << '\n';
   }
   filestream << stringToWrite;
   filestream.close();
@@ -184,18 +187,18 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep,
 
   // empty remote url is not allowed
   if (remote_url.empty()) {
-    g_log.error() << emptyURL << std::endl;
+    g_log.error() << emptyURL << '\n';
     throw ScriptRepoException(emptyURL, "Constructor Failed: remote_url.empty");
   }
 
-  if (remote_url[remote_url.size() - 1] != '/')
+  if (remote_url.back() != '/')
     remote_url.append("/");
 
   // if no folder is given, the repository is invalid.
   if (local_repository.empty())
     return;
 
-  if (local_repository[local_repository.size() - 1] != '/')
+  if (local_repository.back() != '/')
     local_repository.append("/");
 
   g_log.debug() << "ScriptRepository creation pointing to " << local_repository
@@ -233,7 +236,7 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep,
       Poco::File rep_json(repository_json);
       if (!local_rep_dir.exists() || !rep_json.exists()) {
         g_log.information() << "ScriptRepository was not installed at "
-                            << local_repository << std::endl;
+                            << local_repository << '\n';
         return; // this is an invalid repository, because it was not created
                 // (installed)
       }
@@ -246,20 +249,19 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep,
       if (!rep_json.exists()) {
         g_log.error() << "Corrupted ScriptRepository at " << local_repository
                       << ". Please, remove this folder, and install "
-                         "ScriptRepository again" << std::endl;
+                         "ScriptRepository again\n";
       }
     }
   } catch (Poco::FileNotFoundException & /*ex*/) {
     g_log.error()
-        << "Testing the existence of repository.json and local.json failed"
-        << std::endl;
+        << "Testing the existence of repository.json and local.json failed\n";
     return;
   }
 
   // this is necessary because in windows, the absolute path is given
   // with \ slash.
   boost::replace_all(local_repository, "\\", "/");
-  if (local_repository[local_repository.size() - 1] != '/')
+  if (local_repository.back() != '/')
     local_repository.append("/");
 
   repo.clear();
@@ -318,18 +320,17 @@ void ScriptRepositoryImpl::install(const std::string &path) {
 
   // install the two files inside the given folder
   g_log.debug() << "ScriptRepository attempt to doDownload file " << path
-                << std::endl;
+                << '\n';
   // download the repository json
   doDownloadFile(std::string(remote_url).append("repository.json"),
                  rep_json_file);
-  g_log.debug() << "ScriptRepository downloaded repository information"
-                << std::endl;
+  g_log.debug() << "ScriptRepository downloaded repository information\n";
   // creation of the instance of local_json file
   if (!fileExists(local_json_file)) {
     writeStringFile(local_json_file, "{\n}",
                     "ScriptRepository failed to create local repository");
-    g_log.debug() << "ScriptRepository created the local repository information"
-                  << std::endl;
+    g_log.debug()
+        << "ScriptRepository created the local repository information\n";
   }
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -351,7 +352,7 @@ void ScriptRepositoryImpl::install(const std::string &path) {
   // this is necessary because in windows, the absolute path is given
   // with \ slash.
   boost::replace_all(local_repository, "\\", "/");
-  if (local_repository[local_repository.size() - 1] != '/')
+  if (local_repository.back() != '/')
     local_repository.append("/");
 
   valid = true;
@@ -453,7 +454,7 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
   ensureValidRepository();
 
   repo.clear();
-  assert(repo.size() == 0);
+  assert(repo.empty());
   try {
     parseCentralRepository(repo);
     parseLocalRepository(repo);
@@ -464,10 +465,10 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
   } catch (Poco::Exception &ex) {
     g_log.error() << "ScriptRepository failed to list all entries inside the "
                      "repository. Details: " << ex.className() << ":> "
-                  << ex.displayText() << std::endl;
+                  << ex.displayText() << '\n';
   } catch (std::exception &ex) {
     g_log.error() << "ScriptRepository failed to list all entries inside the "
-                     "repository. Details: " << ex.what() << std::endl;
+                     "repository. Details: " << ex.what() << '\n';
   }
   std::vector<std::string> out(repo.size());
   size_t i = repo.size();
@@ -475,15 +476,15 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
   // evaluate the status for all entries
   // and also fill up the output vector (in reverse order)
   Mantid::API::SCRIPTSTATUS acc_status = Mantid::API::BOTH_UNCHANGED;
-  std::string last_directory = "";
+  std::string last_directory;
   for (auto it = repo.rbegin(); it != repo.rend(); ++it) {
     // for every entry, it takes the path and RepositoryEntry
     std::string entry_path = it->first;
     RepositoryEntry &entry = it->second;
-    // g_log.debug() << "Evaluating the status of " << entry_path << std::endl;
+    // g_log.debug() << "Evaluating the status of " << entry_path << '\n';
     // fill up the output vector
     out[--i] = it->first;
-    // g_log.debug() << "inserting file: " << it->first << std::endl;
+    // g_log.debug() << "inserting file: " << it->first << '\n';
 
     // for the directories, update the status of this directory
     if (entry.directory) {
@@ -694,7 +695,7 @@ void ScriptRepositoryImpl::download_file(const std::string &file_path,
 
   std::string local_path = std::string(local_repository).append(file_path);
   g_log.debug() << "ScriptRepository download url_path: " << url_path << " to "
-                << local_path << std::endl;
+                << local_path << '\n';
 
   std::string dir_path;
 
@@ -707,7 +708,7 @@ void ScriptRepositoryImpl::download_file(const std::string &file_path,
       g_log.notice() << "The current file " << f.path()
                      << " has some local changes"
                      << " so, a back up copy will be created at " << bck
-                     << std::endl;
+                     << '\n';
       f.copyTo(bck);
     }
 
@@ -765,8 +766,7 @@ void ScriptRepositoryImpl::download_file(const std::string &file_path,
   }
 
   updateLocalJson(file_path, entry); /// FIXME: performance!
-  g_log.debug() << "ScriptRepository download " << local_path << " success!"
-                << std::endl;
+  g_log.debug() << "ScriptRepository download " << local_path << " success!\n";
 }
 
 /**
@@ -778,7 +778,7 @@ SCRIPTSTATUS ScriptRepositoryImpl::fileStatus(const std::string &input_path) {
   ensureValidRepository();
   std::string file_path = convertPath(input_path);
   // g_log.debug() << "Attempt to ask for the status of "<< file_path <<
-  // std::endl;
+  // '\n';
   try {
     RepositoryEntry &entry = repo.at(file_path);
     return entry.status;
@@ -815,8 +815,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
 {
   using namespace Poco::Net;
   try {
-    g_log.notice() << "ScriptRepository uploading " << file_path << " ..."
-                   << std::endl;
+    g_log.notice() << "ScriptRepository uploading " << file_path << " ...\n";
 
     Kernel::InternetHelper inetHelper;
 
@@ -834,9 +833,9 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
     size_t pos = relative_path.rfind('/');
     if (pos != std::string::npos)
       folder += std::string(relative_path.begin(), relative_path.begin() + pos);
-    if (folder[folder.size() - 1] != '/')
+    if (folder.back() != '/')
       folder += "/";
-    g_log.information() << "Uploading to folder: " << folder << std::endl;
+    g_log.information() << "Uploading to folder: " << folder << '\n';
     form.add("path", folder);
 
     // inserting the file
@@ -853,8 +852,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       status = ie.errorCode();
     }
 
-    g_log.information() << "ScriptRepository upload status: " << status
-                        << std::endl;
+    g_log.information() << "ScriptRepository upload status: " << status << '\n';
     std::stringstream answer;
     { // remove the status message from the end of the reply, in order not to
       // get exception from the read_json parser
@@ -867,7 +865,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       else
         answer << server_reply_str;
     }
-    g_log.debug() << "Form Output: " << answer.str() << std::endl;
+    g_log.debug() << "Form Output: " << answer.str() << '\n';
 
     std::string info;
     std::string detail;
@@ -886,8 +884,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       detail.append("\nFrom Command: ").append(cmd);
 
     if (info == "success") {
-      g_log.notice() << "ScriptRepository:" << file_path << " uploaded!"
-                     << std::endl;
+      g_log.notice() << "ScriptRepository:" << file_path << " uploaded!\n";
 
       // update the file
       RepositoryEntry &entry = repo.at(file_path);
@@ -903,7 +900,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
         entry.downloaded_pubdate = entry.pub_date;
         entry.status = BOTH_UNCHANGED;
       }
-      g_log.information() << "ScriptRepository update local json " << std::endl;
+      g_log.information() << "ScriptRepository update local json \n";
       updateLocalJson(file_path, entry); /// FIXME: performance!
 
       // add the entry to the repository.json. The
@@ -915,8 +912,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       if (!published_date.empty())
         remote_entry.pub_date = DateAndTime(published_date);
       remote_entry.status = BOTH_UNCHANGED;
-      g_log.debug() << "ScriptRepository updating repository json "
-                    << std::endl;
+      g_log.debug() << "ScriptRepository updating repository json \n";
       updateRepositoryJson(file_path, remote_entry);
 
     } else
@@ -957,7 +953,7 @@ void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
     repository_json[path] = entry_json;
   }
 
-  g_log.debug() << "Update LOCAL JSON FILE" << std::endl;
+  g_log.debug() << "Update LOCAL JSON FILE\n";
 #if defined(_WIN32) || defined(_WIN64)
   // set the .repository.json and .local.json not hidden to be able to edit it
   SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
@@ -1041,8 +1037,7 @@ void ScriptRepositoryImpl::remove(const std::string &file_path,
   if (raise_exc)
     throw ScriptRepoException(ss.str());
 
-  g_log.information() << "ScriptRepository deleting " << file_path << " ..."
-                      << std::endl;
+  g_log.information() << "ScriptRepository deleting " << file_path << " ...\n";
 
   {
     // request to remove the file from the central repository
@@ -1058,7 +1053,7 @@ void ScriptRepositoryImpl::remove(const std::string &file_path,
     std::stringstream answer;
     answer << doDeleteRemoteFile(remote_upload, file_path, author, email,
                                  comment);
-    g_log.debug() << "Answer from doDelete: " << answer.str() << std::endl;
+    g_log.debug() << "Answer from doDelete: " << answer.str() << '\n';
 
     // analyze the answer from the server, to see if the file was removed or
     // not.
@@ -1077,13 +1072,13 @@ void ScriptRepositoryImpl::remove(const std::string &file_path,
     if (!cmd.empty())
       detail.append("\nFrom Command: ").append(cmd);
 
-    g_log.debug() << "Checking if success info=" << info << std::endl;
+    g_log.debug() << "Checking if success info=" << info << '\n';
     // check if the server removed the file from the central repository
     if (info != "success")
       throw ScriptRepoException(info, detail); // no
 
     g_log.notice() << "ScriptRepository " << file_path
-                   << " removed from central repository" << std::endl;
+                   << " removed from central repository\n";
 
     // delete the entry from the repository.json. In reality, the
     // repository.json should change at the
@@ -1150,7 +1145,7 @@ std::string ScriptRepositoryImpl::doDeleteRemoteFile(
   std::stringstream answer;
   try {
     g_log.debug() << "Receive request to delete file " << file_path << " using "
-                  << url << std::endl;
+                  << url << '\n';
 
     Kernel::InternetHelper inetHelper;
 
@@ -1173,7 +1168,7 @@ std::string ScriptRepositoryImpl::doDeleteRemoteFile(
       status = ie.errorCode();
     }
 
-    g_log.debug() << "ScriptRepository delete status: " << status << std::endl;
+    g_log.debug() << "ScriptRepository delete status: " << status << '\n';
 
     {
       // get the answer from the server
@@ -1188,7 +1183,7 @@ std::string ScriptRepositoryImpl::doDeleteRemoteFile(
       else
         answer << server_reply_str;
     }
-    g_log.debug() << "Form Output: " << answer.str() << std::endl;
+    g_log.debug() << "Form Output: " << answer.str() << '\n';
   } catch (Poco::Exception &ex) {
     throw ScriptRepoException(ex.displayText(), ex.className());
   }
@@ -1201,7 +1196,7 @@ std::string ScriptRepositoryImpl::doDeleteRemoteFile(
 
  An invalid repository accepts only the ::install method.
  */
-bool ScriptRepositoryImpl::isValid(void) { return valid; }
+bool ScriptRepositoryImpl::isValid() { return valid; }
 
 /**
  * Implements ScriptRepository::check4Update. It downloads the file
@@ -1216,7 +1211,7 @@ bool ScriptRepositoryImpl::isValid(void) { return valid; }
  *
  *  @return List of all files automatically downloaded.
  */
-std::vector<std::string> ScriptRepositoryImpl::check4Update(void) {
+std::vector<std::string> ScriptRepositoryImpl::check4Update() {
   g_log.debug() << "ScriptRepositoryImpl checking for update\n";
   // download the new repository json file
   // download the repository json
@@ -1228,8 +1223,8 @@ std::vector<std::string> ScriptRepositoryImpl::check4Update(void) {
     f.moveTo(backup);
   }
   try {
-    g_log.debug() << "Download information from the Central Repository status"
-                  << std::endl;
+    g_log.debug()
+        << "Download information from the Central Repository status\n";
     doDownloadFile(std::string(remote_url).append("repository.json"),
                    rep_json_file);
   } catch (...) {
@@ -1251,7 +1246,7 @@ std::vector<std::string> ScriptRepositoryImpl::check4Update(void) {
 #endif
 
   // re list the files
-  g_log.debug() << "Check the status of all files again" << std::endl;
+  g_log.debug() << "Check the status of all files again\n";
   listFiles();
   std::vector<std::string> output_list;
   // look for all the files in the list, to check those that
@@ -1263,7 +1258,7 @@ std::vector<std::string> ScriptRepositoryImpl::check4Update(void) {
         download(file.first);
         output_list.push_back(file.first);
         g_log.debug() << "Update file " << file.first
-                      << " to more recently version available" << std::endl;
+                      << " to more recently version available\n";
       }
     }
   }
@@ -1291,7 +1286,7 @@ void ScriptRepositoryImpl::setIgnorePatterns(const std::string &patterns) {
 /**
  @todo describe
  */
-std::string ScriptRepositoryImpl::ignorePatterns(void) {
+std::string ScriptRepositoryImpl::ignorePatterns() {
   ConfigServiceImpl &config = ConfigService::Instance();
   std::string ignore_string = config.getString("ScriptRepositoryIgnore", false);
   return ignore_string;
@@ -1321,7 +1316,7 @@ int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path,
       files_to_update.push_back(entry_path);
   }
 
-  // g_log.debug() << "SetAutoUpdate... begin" << std::endl;
+  // g_log.debug() << "SetAutoUpdate... begin\n";
   try {
     BOOST_FOREACH (auto &path, files_to_update) {
       RepositoryEntry &entry = repo.at(path);
@@ -1333,7 +1328,7 @@ int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path,
     // fixme: readable exception
     throw ScriptRepoException(ex.what());
   }
-  // g_log.debug() << "SetAutoUpdate... end" << std::endl;
+  // g_log.debug() << "SetAutoUpdate... end\n";
   return static_cast<int>(files_to_update.size());
 }
 
@@ -1375,7 +1370,7 @@ int ScriptRepositoryImpl::setAutoUpdate(const std::string &input_path,
 void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
                                           const std::string &local_file_path) {
   g_log.debug() << "DoDownloadFile : " << url_file
-                << " to file: " << local_file_path << std::endl;
+                << " to file: " << local_file_path << '\n';
 
   // get the information from url_file
   std::string path(url_file);
@@ -1394,14 +1389,14 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
     int timeout;
     if (!ConfigService::Instance().getValue("network.scriptrepo.timeout",
                                             timeout)) {
-      timeout = 5; // the default value if the key is not found
+      timeout = DEFAULT_TIMEOUT_SEC;
     }
     inetHelper.setTimeout(timeout);
 
     // std::stringstream ss;
     int status = inetHelper.downloadFile(url_file, local_file_path);
 
-    g_log.debug() << "Answer from mantid web: " << status << std::endl;
+    g_log.debug() << "Answer from mantid web: " << status << '\n';
   } catch (Kernel::Exception::InternetError &ie) {
     std::stringstream info;
     info << "Failed to download " << given_path
@@ -1448,11 +1443,11 @@ void ScriptRepositoryImpl::parseCentralRepository(Repository &repo) {
     std::stringstream ss;
     ss << "RuntimeError: checking database >> " << ex.what();
     g_log.error() << "ScriptRepository: " << ss.str() << ". Input: " << filename
-                  << std::endl;
+                  << '\n';
     throw ScriptRepoException(ss.str(), filename);
   } catch (...) {
     g_log.error() << "FATAL Unknown error (checking database): " << filename
-                  << std::endl;
+                  << '\n';
     throw;
   }
 }
@@ -1567,11 +1562,11 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
     std::stringstream ss;
     ss << "RuntimeError: checking downloaded entries >> " << ex.what();
     g_log.error() << "ScriptRepository: " << ss.str() << ". Input: " << filename
-                  << std::endl;
+                  << '\n';
     throw ScriptRepoException(ss.str(), filename);
   } catch (...) {
     g_log.error() << "FATAL Unknown error (checking downloaded entries): "
-                  << filename << std::endl;
+                  << filename << '\n';
     throw;
   }
 }
@@ -1652,7 +1647,7 @@ void ScriptRepositoryImpl::recursiveParsingDirectories(const std::string &path,
         continue;
 
       // g_log.debug() << "RecursiveParsing: insert : " << entry_path <<
-      // std::endl;
+      // '\n';
       RepositoryEntry &entry = repo[entry_path];
       entry.local = true;
       entry.current_date = DateAndTime(
@@ -1664,20 +1659,20 @@ void ScriptRepositoryImpl::recursiveParsingDirectories(const std::string &path,
   } catch (Poco::Exception &ex) {
     g_log.error() << "ScriptRepository: failed to parse the directory: " << path
                   << " : " << ex.className() << " : " << ex.displayText()
-                  << std::endl;
+                  << '\n';
     // silently ignore this exception.
     // throw ScriptRepoException(ex.displayText());
   } catch (std::exception &ex) {
     std::stringstream ss;
     ss << "unknown exception while checking local file system. " << ex.what()
        << ". Input = " << path;
-    g_log.error() << "ScriptRepository: " << ss.str() << std::endl;
+    g_log.error() << "ScriptRepository: " << ss.str() << '\n';
     throw ScriptRepoException(ss.str());
   }
 }
 
 bool ScriptRepositoryImpl::isEntryValid(const std::string &path) {
-  // g_log.debug() << "Is valid entry? " << path << std::endl;
+  // g_log.debug() << "Is valid entry? " << path << '\n';
   if (path == ".repository.json")
     return false;
   if (path == ".local.json")
@@ -1694,7 +1689,7 @@ bool ScriptRepositoryImpl::isEntryValid(const std::string &path) {
     // TODO: apply the pattern ingore checking
   } catch (std::exception &ex) {
     g_log.warning() << "Pattern exception : " << ignoreregex << ": "
-                    << ex.what() << std::endl;
+                    << ex.what() << '\n';
   }
   return true;
 }
@@ -1745,7 +1740,7 @@ std::string ScriptRepositoryImpl::convertPath(const std::string &path) {
   else
     absolute_path = path;
   // g_log.debug() << "ConvertPath: Entered: " << path << " and
-  // local_repository: " << local_repository << std::endl; this is
+  // local_repository: " << local_repository << '\n'; this is
   // necessary because in windows, the absolute path is given
   // with \ slash.
   boost::replace_all(absolute_path, "\\", "/");
@@ -1764,7 +1759,7 @@ std::string ScriptRepositoryImpl::convertPath(const std::string &path) {
     std::string retpath(absolute_path.begin() + pos + local_repository.size(),
                         absolute_path.end());
     // g_log.debug() << "ConvertPath: Entered: " << path << " return: " <<
-    // retpath << std::endl;
+    // retpath << '\n';
     return retpath;
   }
   return path;

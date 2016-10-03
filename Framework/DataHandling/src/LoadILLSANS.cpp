@@ -24,14 +24,8 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadILLSANS::LoadILLSANS() : m_defaultBinning(2) {
-  m_supportedInstruments.emplace_back("D33");
-}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-LoadILLSANS::~LoadILLSANS() {}
+LoadILLSANS::LoadILLSANS()
+    : m_supportedInstruments{"D33"}, m_defaultBinning{0, 0} {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -117,7 +111,7 @@ void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry,
   }
   m_instrumentName =
       m_loader.getStringFromNexusPath(firstEntry, instrumentNamePath + "/name");
-  g_log.debug() << "Instrument name set to: " + m_instrumentName << std::endl;
+  g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 }
 
 /**
@@ -252,7 +246,7 @@ LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
       NXInt data = dataGroup.openIntData();
       data.load();
       g_log.debug() << "Monitor: " << it->nxname << " dims = " << data.dim0()
-                    << "x" << data.dim1() << "x" << data.dim2() << std::endl;
+                    << "x" << data.dim1() << "x" << data.dim2() << '\n';
 
       const size_t vectorSize = data.dim2() + 1;
       std::vector<double> positionsBinning;
@@ -293,17 +287,15 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
 
   g_log.debug("Loading the data into the workspace:");
   g_log.debug() << "\t"
-                << "firstIndex = " << firstIndex << std::endl;
+                << "firstIndex = " << firstIndex << '\n';
   g_log.debug() << "\t"
-                << "Number of Pixels : data.dim0() = " << data.dim0()
-                << std::endl;
+                << "Number of Pixels : data.dim0() = " << data.dim0() << '\n';
   g_log.debug() << "\t"
-                << "Number of Tubes : data.dim1() = " << data.dim1()
-                << std::endl;
+                << "Number of Tubes : data.dim1() = " << data.dim1() << '\n';
   g_log.debug() << "\t"
-                << "data.dim2() = " << data.dim2() << std::endl;
+                << "data.dim2() = " << data.dim2() << '\n';
   g_log.debug() << "\t"
-                << "First bin = " << timeBinning[0] << std::endl;
+                << "First bin = " << timeBinning[0] << '\n';
 
   // Workaround to get the number of tubes / pixels
   size_t numberOfTubes = data.dim1();
@@ -336,7 +328,7 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromHorizontalTubes(
     }
   }
 
-  g_log.debug() << "Data loading into WS done...." << std::endl;
+  g_log.debug() << "Data loading into WS done....\n";
 
   return spec;
 }
@@ -347,17 +339,15 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
 
   g_log.debug("Loading the data into the workspace:");
   g_log.debug() << "\t"
-                << "firstIndex = " << firstIndex << std::endl;
+                << "firstIndex = " << firstIndex << '\n';
   g_log.debug() << "\t"
-                << "Number of Tubes : data.dim0() = " << data.dim0()
-                << std::endl;
+                << "Number of Tubes : data.dim0() = " << data.dim0() << '\n';
   g_log.debug() << "\t"
-                << "Number of Pixels : data.dim1() = " << data.dim1()
-                << std::endl;
+                << "Number of Pixels : data.dim1() = " << data.dim1() << '\n';
   g_log.debug() << "\t"
-                << "data.dim2() = " << data.dim2() << std::endl;
+                << "data.dim2() = " << data.dim2() << '\n';
   g_log.debug() << "\t"
-                << "First bin = " << timeBinning[0] << std::endl;
+                << "First bin = " << timeBinning[0] << '\n';
 
   // Workaround to get the number of tubes / pixels
   size_t numberOfTubes = data.dim0();
@@ -390,7 +380,7 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
     }
   }
 
-  g_log.debug() << "Data loading inti WS done...." << std::endl;
+  g_log.debug() << "Data loading inti WS done....\n";
 
   return spec;
 }
@@ -457,11 +447,11 @@ void LoadILLSANS::moveDetectorDistance(double distance,
     mover->setProperty("RelativePosition", false);
     mover->executeAsChildAlg();
     g_log.debug() << "Moving component '" << componentName
-                  << "' to Z = " << distance << std::endl;
+                  << "' to Z = " << distance << '\n';
   } catch (std::exception &e) {
     g_log.error() << "Cannot move the component '" << componentName
-                  << "' to Z = " << distance << std::endl;
-    g_log.error() << e.what() << std::endl;
+                  << "' to Z = " << distance << '\n';
+    g_log.error() << e.what() << '\n';
   }
 }
 
@@ -482,11 +472,11 @@ void LoadILLSANS::moveDetectorHorizontal(double shift,
     mover->setProperty("RelativePosition", false);
     mover->executeAsChildAlg();
     g_log.debug() << "Moving component '" << componentName
-                  << "' to X = " << shift << std::endl;
+                  << "' to X = " << shift << '\n';
   } catch (std::exception &e) {
     g_log.error() << "Cannot move the component '" << componentName
-                  << "' to X = " << shift << std::endl;
-    g_log.error() << e.what() << std::endl;
+                  << "' to X = " << shift << '\n';
+    g_log.error() << e.what() << '\n';
   }
 }
 
@@ -504,11 +494,11 @@ void LoadILLSANS::moveDetectorVertical(double shift,
     mover->setProperty("RelativePosition", false);
     mover->executeAsChildAlg();
     g_log.debug() << "Moving component '" << componentName
-                  << "' to Y = " << shift << std::endl;
+                  << "' to Y = " << shift << '\n';
   } catch (std::exception &e) {
     g_log.error() << "Cannot move the component '" << componentName
-                  << "' to Y = " << shift << std::endl;
-    g_log.error() << e.what() << std::endl;
+                  << "' to Y = " << shift << '\n';
+    g_log.error() << e.what() << '\n';
   }
 }
 
@@ -534,7 +524,7 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
   int runNum = entry.getInt("run_number");
-  std::string run_num = boost::lexical_cast<std::string>(runNum);
+  std::string run_num = std::to_string(runNum);
   runDetails.addProperty("run_number", run_num);
 
   if (entry.getFloat("mode") == 0.0) { // Not TOF
@@ -560,11 +550,10 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
 
   double wavelength =
       entry.getFloat(instrumentNamePath + "/selector/wavelength");
-  g_log.debug() << "Wavelength found in the nexus file: " << wavelength
-                << std::endl;
+  g_log.debug() << "Wavelength found in the nexus file: " << wavelength << '\n';
 
   if (wavelength <= 0) {
-    g_log.debug() << "Mode = " << entry.getFloat("mode") << std::endl;
+    g_log.debug() << "Mode = " << entry.getFloat("mode") << '\n';
     g_log.information("The wavelength present in the NeXus file <= 0.");
     if (entry.getFloat("mode") == 0.0) { // Not TOF
       throw std::runtime_error("Working in Non TOF mode and the wavelength in "
@@ -616,7 +605,7 @@ std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
       double v2 = calculateQ(*(lambdaBinning.end() - 1), theta);
       // std::cout << "i=" << i << " theta="<<theta << " lambda_i=" <<
       // *(lambdaBinning.begin()) << " lambda_f=" << *(lambdaBinning.end()-1) <<
-      // " v1=" << v1 << " v2=" << v2 << std::endl;
+      // " v1=" << v1 << " v2=" << v2 << '\n';
       if (i == 0) {
         min = v1;
         max = v1;
@@ -635,11 +624,11 @@ std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {
       }
     } else
       g_log.debug() << "Detector " << i << " is a Monitor : " << det->getID()
-                    << std::endl;
+                    << '\n';
   }
 
-  g_log.debug() << "Calculating Qmin Qmax. Done : [" << min << "," << max << "]"
-                << std::endl;
+  g_log.debug() << "Calculating Qmin Qmax. Done : [" << min << "," << max
+                << "]\n";
 
   return std::pair<double, double>(min, max);
 }

@@ -48,10 +48,6 @@ namespace RemoteAlgorithms {
 
 class DLLExport Authenticate : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  Authenticate() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  ~Authenticate() override {}
   /// Algorithm's name
   const std::string name() const override { return "Authenticate"; }
   /// Summary of algorithms purpose

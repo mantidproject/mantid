@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        1.14
+Version:        1.18
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -8,10 +8,10 @@ License:        GPL
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-%{?fc20:Requires: rpmfusion-nonfree-release}
+%{?fedora:Requires: rpmfusion-nonfree-release}
 Requires: clang
 Requires: cmake-gui >= 2.8.12
-%{?el6:Requires: epel-release}
+%{?rhel:Requires: epel-release}
 %if 0%{?el6}
 Requires: boost157-devel
 %else
@@ -25,21 +25,26 @@ Requires: git-all
 Requires: gsl-devel
 Requires: hdf-devel
 Requires: hdf5-devel
+Requires: h5py >= 2.3.1
 Requires: jsoncpp-devel >= 0.7.0
 Requires: muParser-devel
 Requires: mxml-devel
 Requires: nexus >= 4.2
 Requires: nexus-devel >= 4.2
+Requires: ninja-build
 Requires: numpy
 Requires: OCE-devel
-Requires: poco-devel
+Requires: poco-devel >= 1.4.6
 Requires: PyQt4-devel
 Requires: python-devel
 Requires: python-ipython >= 1.1
 %{?el6:Conflicts: python-ipython >= 2.0}
 Requires: python-matplotlib
+%{?fedora:Requires: python2-matplotlib-qt4}
+%{?rhel:Requires: python-matplotlib-qt4}
 Requires: python-pip
 Requires: python-sphinx
+Requires: python-sphinx-theme-bootstrap
 Requires: qscintilla-devel
 Requires: qt-devel >= 4.6
 %if 0%{?el6}
@@ -52,6 +57,8 @@ Requires: redhat-lsb
 Requires: rpmdevtools
 Requires: scipy
 Requires: sip-devel
+Requires: tbb
+Requires: tbb-devel
 Requires: git
 Requires: openssl-devel
 Requires: texlive-latex
@@ -72,6 +79,19 @@ Requires: qt-devel
 Requires: qtwebkit-devel
 %endif
 Requires: graphviz
+%if 0%{?fedora}
+Requires: python3-sip-devel
+Requires: python3-PyQt4-devel
+Requires: python3-numpy
+Requires: python3-scipy
+Requires: python3-sphinx
+Requires: python3-sphinx-theme-bootstrap
+Requires: python3-dateutil
+Requires: python3-matplotlib
+Requires: python3-ipython-gui
+Requires: boost-python3-devel
+%endif
+
 
 BuildArch: noarch
 
@@ -94,6 +114,21 @@ required for Mantid development.
 %files
 
 %changelog
+* Fri Sep 23 2016 Stuart Campbell <campbellsi@ornl.gov>
+- Require poco >= 1.4.6
+
+* Thu Aug 04 2016 Peter Peterson <petersonpf@ornl.gov>
+- Require sphinx-bootstrap, ninja, and python3 packages on fedora
+
+* Tue Aug 02 2016 Peter Peterson <petersonpf@ornl.gov>
+- Require tbb
+
+* Wed May 18 2016 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Require h5py >= 2.3.1
+
+* Tue May 03 2016 Pete Peterson <petersonpf@ornl.gov>
+- Require python-matplotlib-qt4 and h5py
+
 * Mon Nov 30 2015 Steven Hahn <hahnse@ornl.gov>
 - Require jsoncpp-devel >= 0.7.0
 

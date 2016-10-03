@@ -76,8 +76,6 @@ class DLLExport LoadISISNexus2
 public:
   /// Default constructor
   LoadISISNexus2();
-  /// Destructor
-  ~LoadISISNexus2() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadISISNexus"; }
   /// Algorithm's version for identification overriding a virtual method
@@ -187,7 +185,7 @@ private:
   std::vector<SpectraBlock> m_spectraBlocks;
 
   /// Time channels
-  boost::shared_ptr<MantidVec> m_tof_data;
+  boost::shared_ptr<HistogramData::HistogramX> m_tof_data;
   /// Proton charge
   double m_proton_charge;
   /// Spectra numbers

@@ -2,7 +2,8 @@
     File                 : TableDialog.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
+    Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu
+ Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Column options dialog
 
@@ -40,57 +41,56 @@ class QTextEdit;
 class QSpinBox;
 
 //! Column options dialog
-class TableDialog : public QDialog
-{
-    Q_OBJECT
+class TableDialog : public QDialog {
+  Q_OBJECT
 
 public:
-    TableDialog(Table *t, Qt::WFlags fl = 0 );
+  TableDialog(Table *t, Qt::WFlags fl = 0);
 
 private slots:
-	void prevColumn();
-	void nextColumn();
-	void updateColumn(int);
-	void setColumnWidth(int width);
-	void showPrecisionBox(int item);
-	void updatePrecision(int prec);
-	void setPlotDesignation(int i);
-        void accept() override;
-        void apply();
-	void updateDisplay(int item);
-	void enablePrecision(int f);
-	void setNumericFormat(int type, int prec, bool allRightColumns);
-	void setDayFormat(const QString& format, bool allRightColumns);
-	void setMonthFormat(const QString& format, bool allRightColumns);
+  void prevColumn();
+  void nextColumn();
+  void updateColumn(int);
+  void setColumnWidth(int width);
+  void showPrecisionBox(int item);
+  void updatePrecision(int prec);
+  void setPlotDesignation(int i);
+  void accept() override;
+  void apply();
+  void updateDisplay(int item);
+  void enablePrecision(int f);
+  void setNumericFormat(int type, int prec, bool allRightColumns);
+  void setDayFormat(const QString &format, bool allRightColumns);
+  void setMonthFormat(const QString &format, bool allRightColumns);
 
 signals:
-	void nameChanged(const QString&);
-	void enumRightCols(bool);
-	void changeWidth(const QString&, bool);
+  void nameChanged(const QString &);
+  void enumRightCols(bool);
+  void changeWidth(const QString &, bool);
 
 private:
-    void setDateTimeFormat(int type, const QString& format, bool allRightColumns);
-	void setTextFormat(bool allRightColumns);
-        void closeEvent(QCloseEvent *) override;
+  void setDateTimeFormat(int type, const QString &format, bool allRightColumns);
+  void setTextFormat(bool allRightColumns);
+  void closeEvent(QCloseEvent *) override;
 
-    Table * d_table;
+  Table *d_table;
 
-    QPushButton* buttonOk;
-    QPushButton* buttonCancel;
-	QPushButton* buttonApply;
-	QPushButton* buttonPrev;
-	QPushButton* buttonNext;
-    QLineEdit* colName;
-    QCheckBox* enumerateAllBox;
-    QCheckBox* applyToRightCols;
-    QCheckBox* applyToAllBox;
-    QComboBox* formatBox;
-	QComboBox* displayBox;
-    QComboBox* columnsBox;
-    QSpinBox* colWidth, *precisionBox;
-	QLabel *labelNumeric, *labelFormat;
-	QTextEdit *comments;
-	QCheckBox *boxShowTableComments, *boxReadOnly, *boxHideColumn;
+  QPushButton *buttonOk;
+  QPushButton *buttonCancel;
+  QPushButton *buttonApply;
+  QPushButton *buttonPrev;
+  QPushButton *buttonNext;
+  QLineEdit *colName;
+  QCheckBox *enumerateAllBox;
+  QCheckBox *applyToRightCols;
+  QCheckBox *applyToAllBox;
+  QComboBox *formatBox;
+  QComboBox *displayBox;
+  QComboBox *columnsBox;
+  QSpinBox *colWidth, *precisionBox;
+  QLabel *labelNumeric, *labelFormat;
+  QTextEdit *comments;
+  QCheckBox *boxShowTableComments, *boxReadOnly, *boxHideColumn;
 };
 
 #endif // TABLEDIALOG_H

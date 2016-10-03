@@ -25,9 +25,10 @@ if ( "${UNIX_DIST}" MATCHES "Ubuntu" )
     execute_process( COMMAND ${DPKG_CMD} --print-architecture
       OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
       OUTPUT_STRIP_TRAILING_WHITESPACE )
-    # according to debian <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
-    set( CPACK_PACKAGE_FILE_NAME
-      "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+    # following Ubuntu convention <foo>_<VersionNumber>-<DebianRevisionNumber>ubuntu1~<UbuntuCodeName>1_<DebianArchitecture>.deb
+    set ( UBUNTU_PACKAGE_RELEASE "ubuntu1~${UNIX_CODENAME}1" )
+    set ( CPACK_PACKAGE_FILE_NAME
+          "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}${UBUNTU_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
   endif ( DPKG_CMD )
 endif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
 
@@ -39,13 +40,21 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "Fedora
     set ( CPACK_RPM_PACKAGE_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}" )
     set ( CPACK_RPM_PACKAGE_URL "http://www.mantidproject.org" )
 
-    # reset the release name to include the RHEL version if known
-    if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" )
-      string ( REGEX REPLACE "^([0-9])\\.[0-9]+$" "\\1" TEMP ${UNIX_RELEASE} )
-      set ( CPACK_RPM_PACKAGE_RELEASE "1.el${TEMP}" )
-    elseif ( "${UNIX_DIST}" MATCHES "Fedora" )
-      set ( CPACK_RPM_PACKAGE_RELEASE "1.fc${UNIX_RELEASE}" )
-    endif ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" )
+    # determine the distribution number
+    if(NOT CPACK_RPM_DIST)
+      execute_process(COMMAND ${RPMBUILD_CMD} -E %{?dist}
+                      OUTPUT_VARIABLE CPACK_RPM_DIST
+                      ERROR_QUIET
+                      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
+
+    # release number defaults to 1
+    if(NOT CPACK_RPM_PACKAGE_RELEASE_NUMBER)
+      set(CPACK_RPM_PACKAGE_RELEASE_NUMBER "1")
+    endif()
+
+    # reset the release name
+    set( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE_NUMBER}${CPACK_RPM_DIST}" )
 
     # If CPACK_SET_DESTDIR is ON then the Prefix doesn't get put in the spec file
     if( CPACK_SET_DESTDIR )

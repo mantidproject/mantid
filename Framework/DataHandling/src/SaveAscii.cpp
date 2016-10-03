@@ -127,7 +127,7 @@ void SaveAscii::exec() {
   }
   std::string comment = getPropertyValue("CommentIndicator");
   std::string errstr = "E";
-  std::string errstr2 = "";
+  std::string errstr2;
   std::string comstr = " , ";
   bool ice = getProperty("ICEFormat");
   if (ice) {
@@ -189,7 +189,7 @@ void SaveAscii::exec() {
         if (write_dx)
           file << " , DX" << spec;
       }
-    file << std::endl;
+    file << '\n';
   }
 
   bool isHistogram = ws->isHistogramData();
@@ -200,6 +200,7 @@ void SaveAscii::exec() {
     file.precision(prec);
 
   Progress progress(this, 0, 1, nBins);
+  auto pointDeltas = ws->pointStandardDeviations(0);
   for (int bin = 0; bin < nBins; bin++) {
     if (isHistogram) // bin centres
     {
@@ -225,17 +226,10 @@ void SaveAscii::exec() {
       }
 
     if (write_dx) {
-      if (isHistogram) // bin centres
-      {
-        file << sep;
-        file << (ws->readDx(0)[bin] + ws->readDx(0)[bin + 1]) / 2;
-      } else // data points
-      {
-        file << sep;
-        file << ws->readDx(0)[bin];
-      }
+      file << sep;
+      file << pointDeltas[bin];
     }
-    file << std::endl;
+    file << '\n';
     progress.report();
   }
 }

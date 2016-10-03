@@ -113,7 +113,7 @@ public:
   // Constructor
   NXObject(const NXhandle fileID, const NXClass *parent,
            const std::string &name);
-  virtual ~NXObject(){};
+  virtual ~NXObject() = default;
   /// Return the NX class name for a class (HDF group) or "SDS" for a data set;
   virtual std::string NX_class() const = 0;
   // True if complies with our understanding of the www.nexusformat.org
@@ -599,11 +599,11 @@ public:
   int getInt(const std::string &name) const;
 
   /// Returns a list of all classes (or groups) in this NXClass
-  std::vector<NXClassInfo> &groups() const { return *m_groups.get(); }
+  std::vector<NXClassInfo> &groups() const { return *m_groups; }
   /// Returns whether an individual group (or group) is present
   bool containsGroup(const std::string &query) const;
   /// Returns a list of all datasets in this NXClass
-  std::vector<NXInfo> &datasets() const { return *m_datasets.get(); }
+  std::vector<NXInfo> &datasets() const { return *m_datasets; }
   /** Returns NXInfo for a dataset
   *  @param name :: The name of the dataset
   *  @return NXInfo::stat is set to NX_ERROR if the dataset does not exist
@@ -680,8 +680,7 @@ private:
       return nullptr;
 
     if (vinfo.type == NX_CHAR) {
-      Kernel::TimeSeriesProperty<std::string> *logv =
-          new Kernel::TimeSeriesProperty<std::string>(logName);
+      auto logv = new Kernel::TimeSeriesProperty<std::string>(logName);
       NXChar value(*this, "value");
       value.openLocal();
       value.load();
@@ -700,8 +699,7 @@ private:
     } else if (vinfo.type == NX_FLOAT64) {
       if (logName.find("running") != std::string::npos ||
           logName.find("period ") != std::string::npos) {
-        Kernel::TimeSeriesProperty<bool> *logv =
-            new Kernel::TimeSeriesProperty<bool>(logName);
+        auto logv = new Kernel::TimeSeriesProperty<bool>(logName);
         NXDouble value(*this, "value");
         value.openLocal();
         value.load();
@@ -735,8 +733,7 @@ private:
                                Kernel::DateAndTime start_t,
                                const TIME_TYPE &times) {
     value.openLocal();
-    Kernel::TimeSeriesProperty<double> *logv =
-        new Kernel::TimeSeriesProperty<double>(logName);
+    auto logv = new Kernel::TimeSeriesProperty<double>(logName);
     value.load();
     for (int i = 0; i < value.dim0(); i++) {
       if (i == 0 || value[i] != value[i - 1] || times[i] != times[i - 1]) {

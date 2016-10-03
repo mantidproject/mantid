@@ -200,7 +200,15 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
     xmlstring += InfinitePlaneXML(p1id, centre, plane1Axis)
     p2id = 'pl-b'
     xmlstring += InfinitePlaneXML(p2id, centre, plane2Axis)
-    xmlstring += '<algebra val="(#((#(' + cout_id + ':(#' + cin_id  + '))) ' + p1id + ' ' + p2id + '))"/>\n'
+    
+    # The composition of the shape is "(cyl-out (#cyl-in) (pl-a:pl-b))". The breakdown is:
+    # 1. Create an infinite hollow cylinder by performing "cyl-out (#cyl-in)". This is the intersection of the
+    #    outer radius cylinder with the inverse inner radius cylinder. We have a shell-like selection
+    # 2. Create a three-quarter wedge selection by performing (pl-a:pl-b). This selects everything except
+    #    for the slice region we don't want to be masked.
+    # 3. Create the intersection between 1 and 2. This will provide a three-quarter wedge of the hollow
+    #    cylinder.
+    xmlstring += '<algebra val="((' + cout_id + ' (#' + cin_id  + ')) (' + p1id + ':' + p2id + '))"/>\n'
     return xmlstring
 
 def getWorkspaceReference(ws_pointer):
@@ -974,7 +982,7 @@ def transfer_special_sample_logs(from_ws, to_ws):
     # Populate the time series
     for time_series_name in time_series_names:
         if (run_from.hasProperty(time_series_name) and
-            run_to.hasProperty(time_series_name)):
+                run_to.hasProperty(time_series_name)):
 
             times = run_from.getProperty(time_series_name).times
             values = run_from.getProperty(time_series_name).value
@@ -990,7 +998,7 @@ def transfer_special_sample_logs(from_ws, to_ws):
     alg_log.setChild(True)
     for single_valued_name in single_valued_names:
         if (run_from.hasProperty(single_valued_name) and
-            run_to.hasProperty(single_valued_name)):
+                run_to.hasProperty(single_valued_name)):
             value = run_from.getProperty(single_valued_name).value
             alg_log.setProperty("Workspace", to_ws)
             alg_log.setProperty("LogName", single_valued_name)
@@ -1034,7 +1042,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         # Get the cummulative time s
         for element in self._time_series:
             if (run_lhs.hasProperty(element) and
-                run_rhs.hasProperty(element)):
+                    run_rhs.hasProperty(element)):
                 # Get values for lhs
                 property_lhs = run_lhs.getProperty(element)
                 self._original_times_lhs[element] = property_lhs.times
@@ -1047,7 +1055,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
 
         for element in self._single_valued:
             if (run_lhs.hasProperty(element) and
-                run_rhs.hasProperty(element)):
+                    run_rhs.hasProperty(element)):
                 # Get the values for lhs
                 property_lhs = run_lhs.getProperty(element)
                 self._original_single_valued_lhs[element] = property_lhs.value
@@ -1058,7 +1066,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
 
         log_name_start_time = "start_time"
         if (run_lhs.hasProperty(log_name_start_time) and
-            run_rhs.hasProperty(log_name_start_time)):
+                run_rhs.hasProperty(log_name_start_time)):
             convert_to_date = lambda val: DateAndTime(val) if isinstance(val, str) else val
             self._start_time_lhs = convert_to_date(run_lhs.getProperty(log_name_start_time).value)
             self._start_time_rhs = convert_to_date(run_rhs.getProperty(log_name_start_time).value)
@@ -1070,7 +1078,7 @@ class CummulativeTimeSeriesPropertyAdder(object):
         '''
         for element in self._time_series:
             if (element in self._original_times_rhs and
-                element in self._original_values_rhs):
+                    element in self._original_values_rhs):
                 run = workspace.getRun()
                 prop = run.getProperty(element)
                 prop.clear()
@@ -1526,7 +1534,7 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
 
     # We need to make sure that the workspaces match in length
     if ((len(q_resolution_front) != len(q_resolution_rear)) or
-        (len(counts_front) != len(counts_rear))):
+            (len(counts_front) != len(counts_rear))):
         return
 
     # Get everything for the FRONT detector
@@ -1723,6 +1731,48 @@ def extract_fit_parameters(rAnds):
     else:
         fit_mode = "None"
     return scale_factor, shift_factor, fit_mode
+
+
+def check_has_bench_rot(workspace, log_dict=None):
+    if log_dict:
+        run = workspace.run()
+        if not run.hasProperty("Bench_Rot"):
+            raise RuntimeError("LARMOR Instrument: Bench_Rot does not seem to be available on {0}. There might be "
+                               "an issue with your data aquisition. Make sure that the sample_log entry "
+                               "Bench_Rot is available.".format(workspace.name()))
+
+
+def quaternion_to_angle_and_axis(quaternion):
+    """
+    Converts a quaterion to an angle + an axis
+
+    The conversion from a quaternion to an angle + axis is explained here:
+    http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/
+    """
+    angle = 2*math.acos(quaternion[0])
+    s_parameter = math.sqrt(1 - quaternion[0]*quaternion[0])
+
+    axis = []
+    # If the the angle is zero, then it does not make sense to have an axis
+    if s_parameter < 1e-8:
+        axis.append(quaternion[1])
+        axis.append(quaternion[2])
+        axis.append(quaternion[3])
+    else:
+        axis.append(quaternion[1]/s_parameter)
+        axis.append(quaternion[2]/s_parameter)
+        axis.append(quaternion[3]/s_parameter)
+    return math.degrees(angle), axis
+
+def get_unfitted_transmission_workspace_name(workspace_name):
+    suffix = "_unfitted"
+    if workspace_name.endswith(suffix):
+        unfitted_workspace_name = workspace_name
+    else:
+        unfitted_workspace_name = workspace_name + suffix
+    return unfitted_workspace_name
+
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################
