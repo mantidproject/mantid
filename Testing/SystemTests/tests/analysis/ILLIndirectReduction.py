@@ -27,7 +27,7 @@ class ILLIndirectReductionTest(stresstesting.MantidStressTest):
 
         calib = ILLIN16BCalibration("090662-090663")
         result = IndirectILLReduction(Run="091515-091516",
-                                      UnmirrorOption=6,
+                                      UnmirrorOption=7,
                                       CalibrationWorkspace='calib',
                                       BackgroundRun="090658")
         # tear down
