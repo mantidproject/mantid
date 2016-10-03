@@ -4,7 +4,7 @@ from mantid.api import AlgorithmFactory, AnalysisDataServiceImpl, DataProcessorA
 from mantid.kernel import Direct, Direction, StringListValidator, UnitConversion
 from mantid.simpleapi import AddSampleLog, CalculateFlatBackground,\
                              CloneWorkspace, ComputeCalibrationCoefVan,\
-                             ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DetectorEfficiencyCorUser, Divide, ExtractMonitors, ExtractSpectra, \
+                             ConvertUnits, CorrectKiKf, CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace, DetectorEfficiencyCorUser, Divide, ExtractMonitors, ExtractSpectra, \
                              FindDetectorsOutsideLimits, FindEPP, GetEiMonDet, GroupWorkspaces, Integration, Load,\
                              MaskDetectors, MergeRuns, Minus, NormaliseToMonitor, Rebin, Scale
 import numpy
@@ -19,6 +19,7 @@ NORM_METHOD_TIME    = 'AcquisitionTime'
 PROP_BINNING_Q                        = 'QBinning'
 PROP_BINNING_W                        = 'WBinning'
 PROP_CD_WORKSPACE                     = 'CadmiumWorkspace'
+PROP_CONTROL_MODE                     = 'ControlMode'
 PROP_DETECTORS_FOR_EI_CALIBRATION     = 'IncidentEnergyCalibrationDetectors'
 PROP_EC_WORKSPACE                     = 'EmptyCanWorkspace'
 PROP_EPP_WORKSPACE                    = 'EPPWorkspace'
@@ -45,6 +46,8 @@ REDUCTION_TYPE_CD = 'Empty can/cadmium'
 REDUCTION_TYPE_EC = REDUCTION_TYPE_CD
 REDUCTION_TYPE_SAMPLE = 'Sample'
 REDUCTION_TYPE_VANADIUM = 'Vanadium'
+
+temp_workspaces = []
 
 # Name generators for temporary workspaces.
 # TODO We may want to hide these and delete afterwards.
@@ -164,10 +167,11 @@ class DGSReductionILL(DataProcessorAlgorithm):
             bkgWorkspace = Scale(InputWorkspace = bkgWorkspace,
                                  OutputWorkspace = bkgWorkspace,
                                  Factor = bkgScaling)
-            self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgOutWs)
+            if self.getProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE).value:
+                self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgOutWs)
         if bkgInWs:
             bkgWorkspace = self.getProperty(PROP_FLAT_BACKGROUND_WORKSPACE).value
-            if bkgWorkspace:
+            if bkgWorkspace and self.getProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE).value:
                 self.setProperty(PROP_OUTPUT_FLAT_BACKGROUND_WORKSPACE, bkgOutWs)
         # Subtract time-independent background
         outWs = backgroundSubtractedWorkspaceName(identifier)
@@ -418,6 +422,10 @@ class DGSReductionILL(DataProcessorAlgorithm):
                              '',
                              direction=Direction.Input,
                              doc='String to use as postfix in output workspace names')
+        self.declareProperty(PROP_CONTROL_MODE,
+                             False,
+                             direction=Direction.Input,
+                             doc='Whether or not to clean up intermediate workspaces')
         self.declareProperty(PROP_REDUCTION_TYPE,
                              REDUCTION_TYPE_SAMPLE,
                              validator=StringListValidator([REDUCTION_TYPE_SAMPLE, REDUCTION_TYPE_VANADIUM, REDUCTION_TYPE_CD, REDUCTION_TYPE_EC]),
@@ -425,6 +433,7 @@ class DGSReductionILL(DataProcessorAlgorithm):
                              doc='Type of reduction workflow to be run on ' + PROP_INPUT_FILE)
         self.declareProperty(PROP_NORMALISATION,
                              NORM_METHOD_MONITOR,
+                             validator=StringListValidator([NORM_METHOD_MONITOR, NORM_METHOD_TIME]),
                              direction=Direction.Input,
                              doc='Normalisation method')
         self.declareProperty(MatrixWorkspaceProperty(PROP_VANADIUM_WORKSPACE,
@@ -537,13 +546,10 @@ class DGSReductionILL(DataProcessorAlgorithm):
     def _convertToWorkspaceIndex(self, i, workspace):
         indexType = self.getProperty(PROP_INDEX_TYPE).value
         if indexType == INDEX_TYPE_WORKSPACE_INDEX:
-            print 'INDEX_TYPE_WORKSPACE_INDEX:' + str(i)
             return i
         elif indexType == INDEX_TYPE_SPECTRUM_NUMBER:
-            print 'INDEX_TYPE_SPECTRUM_NUMBER:' + str(i)
             return workspace.getIndexFromSpectrumNumber(i)
         else: # INDEX_TYPE_DETECTOR_ID
-            print 'INDEX_TYPE_DETECTOR_ID:' + str(i)
             for j in len(workspace.getNumberHistograms()):
                 if workspace.getSpectrum(j).hasDetectorID(i):
                     return j
@@ -551,7 +557,38 @@ class DGSReductionILL(DataProcessorAlgorithm):
 
     def _finalize(self, outputWorkspace):
         self.setProperty(PROP_OUTPUT_WORKSPACE, outputWorkspace)
+
+        if not self.getProperty(PROP_CONTROL_MODE).value:
+            token = self.getProperty(PROP_OUTPUT_SUFFIX).value
+            # TODO: what can we delete earlier from this list?
+            for ws in [backgroundWorkspaceName(token),
+                       backgroundSubtractedWorkspaceName(token),
+                       badDetectorWorkspaceName(token),
+                       detectorEfficiencyCorrectedWorkspaceName(token),
+                       ecSubtractedWorkspaceName(token),
+                       eiCalibratedWorkspaceName(token),
+                       energyConvertedWorkspaceName(token),
+                       eppWorkspaceName(token),
+                       incidentEnergyWorkspaceName(token),
+                       kikfConvertedWorkspaceName(token),
+                       maskedWorkspaceName(token),
+                       monitorEppWorkspaceName(token),
+                       monitorWorkspaceName(token),
+                       normalisedWorkspaceName(token),
+                       rawWorkspaceName(token),
+                       rebinnedWorkspaceName(token),
+                       vanadiumNormalisedWorkspaceName(token),
+                       'EPPfit_NormalisedCovarianceMatrix',
+                       'EPPfit_Parameters',
+                       'normFactor',
+                       'workspace',
+                       'dectectorWorkspace',
+                       'monitorWorkspace']:
+                if mtd.doesExist(ws):
+                    DeleteWorkspace(Workspace = ws)
+
         self.log().debug('Finished')
+
 
     def _runningMeanMinimum(self, x, window):
         # TODO this functionality should be moved to CalculateFlatBackground
