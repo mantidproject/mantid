@@ -102,6 +102,12 @@ private:
   void outputParameterTable(const std::vector<double> &bestParameters,
                             const std::vector<double> &errorsLeft,
                             const std::vector<double> &errorsRight);
+  /// Calculated converged chain and parameters
+  void calculateConvChainAndBestParameters(
+      size_t convLength, int nSteps,
+      std::vector<std::vector<double>> &reducedChain,
+      std::vector<double> &bestParameters, std::vector<double> &errorLeft,
+      std::vector<double> &errorRight);
 
   // Variables declarations
   /// Pointer to the cost function. Must be the least squares.

@@ -419,79 +419,16 @@ void FABADAMinimizer::finalize() {
     n_steps = 10;
   }
   size_t conv_length = size_t(double(chainLength) / double(n_steps));
-  std::vector<std::vector<double>> red_conv_chain;
 
+  // Reduced chain
+  std::vector<std::vector<double>> red_conv_chain;
   // Declaring vectors for best values
   std::vector<double> bestParameters(m_nParams);
   std::vector<double> error_left(m_nParams);
   std::vector<double> error_rigth(m_nParams);
 
-  // In case of reduced chain
-  if (conv_length > 0) {
-    // Write first element of the reduced chain
-    for (size_t e = 0; e <= m_nParams; ++e) {
-      std::vector<double> v;
-      v.push_back(m_chain[e][m_conv_point]);
-      red_conv_chain.push_back(v);
-    }
-
-    // Calculate the red_conv_chain for the cost fuction.
-    auto first = m_chain[m_nParams].begin() + m_conv_point;
-    auto last = m_chain[m_nParams].end();
-    std::vector<double> conv_chain(first, last);
-    for (size_t k = 1; k < conv_length; ++k) {
-      red_conv_chain[m_nParams].push_back(conv_chain[n_steps * k]);
-    }
-
-    // Calculate the position of the minimum Chi square value
-    auto position_min_chi2 = std::min_element(red_conv_chain[m_nParams].begin(),
-                                              red_conv_chain[m_nParams].end());
-    m_chi2 = *position_min_chi2;
-
-    // Calculate the parameter value and the errors
-    for (size_t j = 0; j < m_nParams; ++j) {
-      auto first = m_chain[j].begin() + m_conv_point;
-      auto last = m_chain[j].end();
-      // red_conv_chain calculated for each parameter
-      std::vector<double> conv_chain(first, last);
-      auto &rc_chain_j = red_conv_chain[j];
-      // Obs: Starts at 1 (0 already added)
-      for (size_t k = 1; k < conv_length; ++k) {
-        rc_chain_j.push_back(conv_chain[n_steps * k]);
-      }
-      // best fit parameters taken
-      bestParameters[j] =
-          rc_chain_j[position_min_chi2 - red_conv_chain[m_nParams].begin()];
-      std::sort(rc_chain_j.begin(), rc_chain_j.end());
-      auto pos_par =
-          std::find(rc_chain_j.begin(), rc_chain_j.end(), bestParameters[j]);
-      auto pos_left = rc_chain_j.begin();
-      auto pos_right = rc_chain_j.end() - 1;
-      // sigma characaterization for a Gaussian (0.34 comes from
-      // percentage of area under the curve of a Gaussian from 0 to sigma)
-      size_t sigma = static_cast<size_t>(0.34 * double(conv_length));
-
-      // make sure the iterator is valid in any case
-      if (sigma < static_cast<size_t>(std::distance(pos_left, pos_par))) {
-        pos_left = pos_par - sigma;
-      }
-      if (sigma < static_cast<size_t>(std::distance(pos_par, pos_right))) {
-        pos_right = pos_par + sigma;
-      }
-      error_left[j] = *pos_left - *pos_par;
-      error_rigth[j] = *pos_right - *pos_par;
-    }
-  } // End if there is converged chain
-
-  // If the converged chain is empty
-  else {
-    g_log.warning() << "There is no converged chain."
-                       " Thus the parameters' errors are not"
-                       " computed.\n";
-    for (size_t k = 0; k < m_nParams; ++k) {
-      bestParameters[k] = *(m_chain[k].end() - 1);
-    }
-  }
+  calculateConvChainAndBestParameters(conv_length, n_steps, red_conv_chain,
+                                      bestParameters, error_left, error_rigth);
 
   if (!getPropertyValue("Parameters").empty()) {
     outputParameterTable(bestParameters, error_left, error_rigth);
@@ -1100,6 +1037,91 @@ void FABADAMinimizer::outputParameterTable(
   }
   // Set and name the Parameter Errors workspace.
   setProperty("Parameters", wsPdfE);
+}
+
+/** Create the reduced convergence chain and calculate the best parameter values
+*and errors
+*
+* @param convLength :: length of the converged chain
+* @param nSteps :: number of steps done between chain points to avoid
+* @param reducedChain :: [output] the reduced chain
+* @param bestParameters :: [output] vector containing best values for fitting
+*parameters
+* @param errorsLeft :: [output] vector containing the errors (left)
+* @param errorsRight :: [output] vector containing the errors (right)
+*/
+void FABADAMinimizer::calculateConvChainAndBestParameters(
+    size_t convLength, int nSteps,
+    std::vector<std::vector<double>> &reducedChain,
+    std::vector<double> &bestParameters, std::vector<double> &errorLeft,
+    std::vector<double> &errorRight) {
+
+  // In case of reduced chain
+  if (convLength > 0) {
+    // Write first element of the reduced chain
+    for (size_t e = 0; e <= m_nParams; ++e) {
+      std::vector<double> v;
+      v.push_back(m_chain[e][m_conv_point]);
+      reducedChain.push_back(v);
+    }
+
+    // Calculate the red_conv_chain for the cost fuction.
+    auto first = m_chain[m_nParams].begin() + m_conv_point;
+    auto last = m_chain[m_nParams].end();
+    std::vector<double> conv_chain(first, last);
+    for (size_t k = 1; k < convLength; ++k) {
+      reducedChain[m_nParams].push_back(conv_chain[nSteps * k]);
+    }
+
+    // Calculate the position of the minimum Chi square value
+    auto position_min_chi2 = std::min_element(reducedChain[m_nParams].begin(),
+                                              reducedChain[m_nParams].end());
+    m_chi2 = *position_min_chi2;
+
+    // Calculate the parameter value and the errors
+    for (size_t j = 0; j < m_nParams; ++j) {
+      auto first = m_chain[j].begin() + m_conv_point;
+      auto last = m_chain[j].end();
+      // red_conv_chain calculated for each parameter
+      std::vector<double> conv_chain(first, last);
+      auto &rc_chain_j = reducedChain[j];
+      // Obs: Starts at 1 (0 already added)
+      for (size_t k = 1; k < convLength; ++k) {
+        rc_chain_j.push_back(conv_chain[nSteps * k]);
+      }
+      // best fit parameters taken
+      bestParameters[j] =
+          rc_chain_j[position_min_chi2 - reducedChain[m_nParams].begin()];
+      std::sort(rc_chain_j.begin(), rc_chain_j.end());
+      auto pos_par =
+          std::find(rc_chain_j.begin(), rc_chain_j.end(), bestParameters[j]);
+      auto pos_left = rc_chain_j.begin();
+      auto pos_right = rc_chain_j.end() - 1;
+      // sigma characaterization for a Gaussian (0.34 comes from
+      // percentage of area under the curve of a Gaussian from 0 to sigma)
+      size_t sigma = static_cast<size_t>(0.34 * double(convLength));
+
+      // make sure the iterator is valid in any case
+      if (sigma < static_cast<size_t>(std::distance(pos_left, pos_par))) {
+        pos_left = pos_par - sigma;
+      }
+      if (sigma < static_cast<size_t>(std::distance(pos_par, pos_right))) {
+        pos_right = pos_par + sigma;
+      }
+      errorLeft[j] = *pos_left - *pos_par;
+      errorRight[j] = *pos_right - *pos_par;
+    }
+  } // End if there is converged chain
+
+  // If the converged chain is empty
+  else {
+    g_log.warning() << "There is no converged chain."
+                       " Thus the parameters' errors are not"
+                       " computed.\n";
+    for (size_t k = 0; k < m_nParams; ++k) {
+      bestParameters[k] = *(m_chain[k].end() - 1);
+    }
+  }
 }
 
 } // namespace FuncMinimisers
