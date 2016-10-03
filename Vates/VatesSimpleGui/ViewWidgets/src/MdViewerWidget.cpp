@@ -1005,8 +1005,6 @@ bool MdViewerWidget::loadVSIState(const std::string &fileName) {
  * loaded project state.
  *
  * @param vtype :: the type of view to be created (e.g. Multislice)
- * @param view :: the view display
- * @param source :: the source used by the view
  */
 void MdViewerWidget::setupViewFromProject(ModeControlWidget::Views vtype) {
   // Initilise the current view to something and setup
