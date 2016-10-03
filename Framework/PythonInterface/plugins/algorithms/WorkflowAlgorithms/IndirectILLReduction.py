@@ -250,8 +250,8 @@ def energy_formula(ws):
     size = len(x)
     mid = float((size - 1) / 2)
     gRun = mtd[ws].getRun()
-    delta_energy = 0
-    scale = 1.e-3  # from micro ev to milli ev
+    delta_energy = 0.
+    scale = 1000 # from micro ev to milli ev
 
     if gRun.hasProperty('Doppler.maximum_delta_energy'):
         delta_energy = gRun.getLogData('Doppler.maximum_delta_energy').value  # max energy in micro eV
@@ -263,7 +263,7 @@ def energy_formula(ws):
         logger.warning('Input run has no property Doppler.mirror_sense. Check your input file.')
         logger.warning('Doppler maximum delta energy is 0 micro eV')
 
-    formula = '(x-%f)*%f' % (mid, delta_energy / mid * scale)
+    formula = '(x/%f-1)*%f' % (mid, delta_energy / scale)
 
     logger.information('Energy transform formula: ' + formula)
 
@@ -464,18 +464,25 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              doc="Group name for the left workspace(s).")
 
     def validateInputs(self):
-
-        # this is run before setUp, so need to get properties also here!
+        # This is run before setUp, so need to get properties also here!
         issues = dict()
         # Unmirror options 5 and 7 require a Vanadium run as input workspace
         if (self.getProperty('UnmirrorOption').value == 5 or self.getProperty('UnmirrorOption').value == 7) \
                 and not self.getPropertyValue('VanadiumRun'):
             issues['VanadiumRun'] = 'Given unmirror option requires vanadium run to be set'
 
+        # Check if calibration workspace seems of correct shape, if specified
         if self.getPropertyValue('CalibrationWorkspace'):
-            if mtd[self.getPropertyValue('CalibrationWorkspace')].blocksize() != 1:
-                issues['CalibrationWorkspace'] = 'Calibration workspace should contain only ' \
-                                                 'one column of calibration constants.'
+            __calib = mtd[self.getPropertyValue('CalibrationWorkspace')]
+            if __calib is None:
+                issues['CalibrationWorkspace'] = 'Calibration workspace does not exist.'
+            else:
+                if isinstance(__calib,WorkspaceGroup):
+                    issues['CalibrationWorkspace'] = 'Calibration workspace should not be a workspace group.'
+                else:
+                    if __calib.blocksize() != 1:
+                        issues['CalibrationWorkspace'] = 'Calibration workspace should contain only ' \
+                                                         'one column of calibration constants.'
 
         return issues
 
