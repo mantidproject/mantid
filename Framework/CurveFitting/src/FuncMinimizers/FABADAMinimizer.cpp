@@ -1055,8 +1055,8 @@ void FABADAMinimizer::outputChains() {
 
   // Do one iteration for each parameter plus one for Chi square.
   for (size_t j = 0; j < m_nParams + 1; ++j) {
-    MantidVec &X = wsC->dataX(j);
-    MantidVec &Y = wsC->dataY(j);
+    auto &X = wsC->mutableX(j);
+    auto &Y = wsC->mutableY(j);
     for (size_t k = 0; k < chain_length; ++k) {
       X[k] = double(k);
       Y[k] = m_chain[j][k];
