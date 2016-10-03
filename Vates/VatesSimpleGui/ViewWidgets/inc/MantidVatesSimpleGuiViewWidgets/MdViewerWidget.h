@@ -275,8 +275,7 @@ private:
   /// Load the state of VSI from an XML file
   bool loadVSIState(const std::string &fileName);
   /// Setup the view using the last active view and source from a project
-  void setupViewFromProject(ModeControlWidget::Views vtype, pqView *view,
-                            pqPipelineSource *source);
+  void setupViewFromProject(ModeControlWidget::Views vtype);
   /// Set the active objects on the current server
   void setActiveObjects(pqView *view, pqPipelineSource *source);
 };

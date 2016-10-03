@@ -953,19 +953,21 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
   auto view = model->findItem<pqRenderView *>(viewProxy);
   auto source = model->findItem<pqPipelineSource *>(sourceProxy);
 
-
   if (!view || !source)
     return; // could not find the active PV view/source from last session.
 
   setActiveObjects(view, source);
-  setupViewFromProject(vtype, view, source);
+  setupViewFromProject(vtype);
+
+  // Work around to force the update of the shader preset.
+  auto rep = pqActiveObjects::instance().activeRepresentation()->getProxy();
+  rep->UpdateProperty("ShaderPreset", 1);
 
   if (tsv.selectSection("colormap")) {
     std::string colorMapLines;
     tsv >> colorMapLines;
     ui.colorSelectionWidget->loadFromProject(colorMapLines);
   }
-
   currentView->show();
 
   // Don't call render on ViewBase here as that will reset the camera.
@@ -982,23 +984,17 @@ void MdViewerWidget::loadFromProject(const std::string &lines) {
 bool MdViewerWidget::loadVSIState(const std::string &fileName) {
   auto proxyManager =
       pqActiveObjects::instance().activeServer()->proxyManager();
-  // We cannot directly load the XML using LoadXMLState(filename) because
-  // there is no option to retain global IDs with that method.
-  // So here we do the same thing but pass the desired option
-  auto *parser = vtkPVXMLParser::New();
-  parser->SetFileName(fileName.c_str());
-  int error = parser->Parse();
-  if (!error)
-    return false;
 
   try {
-    proxyManager->LoadXMLState(parser->GetRootElement(), NULL, false);
+    proxyManager->LoadXMLState(fileName.c_str());
   } catch (...) {
-    parser->Delete();
     return false;
   }
 
-  parser->Delete();
+  // Update all registered proxies.
+  // Some things may have been incorrectly setup during the loading step
+  // due to the load order.
+  proxyManager->UpdateRegisteredProxiesInOrder(0);
   return true;
 }
 
@@ -1012,9 +1008,7 @@ bool MdViewerWidget::loadVSIState(const std::string &fileName) {
  * @param view :: the view display
  * @param source :: the source used by the view
  */
-void MdViewerWidget::setupViewFromProject(ModeControlWidget::Views vtype,
-                                          pqView *view,
-                                          pqPipelineSource *source) {
+void MdViewerWidget::setupViewFromProject(ModeControlWidget::Views vtype) {
   // Initilise the current view to something and setup
   currentView = createAndSetMainViewWidget(ui.viewWidget, vtype, false);
   initialView = vtype;
@@ -1024,6 +1018,8 @@ void MdViewerWidget::setupViewFromProject(ModeControlWidget::Views vtype,
   viewLayout->setStretch(0, 1);
   viewLayout->addWidget(currentView);
 
+  auto source = pqActiveObjects::instance().activeSource();
+  auto view = pqActiveObjects::instance().activeView();
   // Swap out the existing view for the newly loaded source and representation
   currentView->origSrc = qobject_cast<pqPipelineSource *>(source);
   currentView->setView(qobject_cast<pqRenderView *>(view));
