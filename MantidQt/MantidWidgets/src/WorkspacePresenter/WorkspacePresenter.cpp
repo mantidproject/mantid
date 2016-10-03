@@ -148,6 +148,9 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   case ViewNotifiable::Flag::ShowContourPlot:
     showContourPlot();
     break;
+  case ViewNotifiable::Flag::RefreshWorkspaces:
+    refreshWorkspaces();
+    break;
   }
 }
 
@@ -360,6 +363,8 @@ void WorkspacePresenter::showContourPlot() {
   auto view = lockView();
   view->showContourPlot();
 }
+
+void WorkspacePresenter::refreshWorkspaces() { updateView(); }
 
 void WorkspacePresenter::workspaceLoaded() { updateView(); }
 

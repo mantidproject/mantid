@@ -92,6 +92,7 @@ private:
   void clearUBMatrix();
   void showSurfacePlot();
   void showContourPlot();
+  void refreshWorkspaces();
 
   void workspaceLoaded();
   void workspaceRenamed();

@@ -59,7 +59,6 @@ set ( MOC_FILES
   inc/MantidQtAPI/BatchAlgorithmRunner.h
   inc/MantidQtAPI/BoolPropertyWidget.h
   inc/MantidQtAPI/FilePropertyWidget.h
-  inc/MantidQtAPI/FlowLayout.h
   inc/MantidQtAPI/GenericDialog.h
   inc/MantidQtAPI/ListPropertyWidget.h
   inc/MantidQtAPI/ManageUserDirectories.h
@@ -90,6 +89,7 @@ set ( INC_FILES
 	inc/MantidQtAPI/BatchAlgorithmRunner.h
 	inc/MantidQtAPI/DllOption.h
 	inc/MantidQtAPI/FileDialogHandler.h
+	inc/MantidQtAPI/FlowLayout.h
 	inc/MantidQtAPI/GraphOptions.h
         inc/MantidQtAPI/DistributionOptions.h
 	inc/MantidQtAPI/HelpWindow.h

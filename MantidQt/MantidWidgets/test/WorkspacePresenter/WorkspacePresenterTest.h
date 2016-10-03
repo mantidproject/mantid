@@ -193,8 +193,9 @@ public:
     ::testing::DefaultValue<StringList>::Set(StringList{"ws1", "ws2"});
 
     EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), groupWorkspaces(StringList{"ws1", "ws2"},
-                                                 "NewGroup")).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(),
+                groupWorkspaces(StringList{"ws1", "ws2"}, "NewGroup"))
+        .Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
 
@@ -221,8 +222,9 @@ public:
 
     EXPECT_CALL(*mockView.get(), askUserYesNo(_, _)).Times(1);
     EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), groupWorkspaces(StringList{"ws1", "ws2"},
-                                                 "NewGroup")).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(),
+                groupWorkspaces(StringList{"ws1", "ws2"}, "NewGroup"))
+        .Times(Exactly(1));
 
     presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
 
@@ -433,6 +435,12 @@ public:
 
     presenter->notifyFromView(ViewNotifiable::Flag::FilterWorkspaces);
 
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testRefreshWorkspaces() {
+    EXPECT_CALL(*mockView.get(), updateTree(_)).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::RefreshWorkspaces);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 

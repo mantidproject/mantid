@@ -81,6 +81,7 @@ public:
   virtual void filterWorkspaces(const std::string &filterText) = 0;
   virtual StringList getSelectedWorkspaceNames() const = 0;
   virtual Mantid::API::Workspace_sptr getSelectedWorkspace() const = 0;
+  virtual void refreshWorkspaces() = 0;
   virtual void updateTree(
       const std::map<std::string, Mantid::API::Workspace_sptr> &items) = 0;
 

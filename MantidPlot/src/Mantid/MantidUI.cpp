@@ -343,7 +343,7 @@ void MantidUI::x_range_from_picker(double xmin, double xmax) {
 void MantidUI::updateAlgorithms() { m_exploreAlgorithms->update(); }
 
 /// Updates the workspace tree
-void MantidUI::updateWorkspaces() { m_exploreMantid->updateTree(); }
+void MantidUI::updateWorkspaces() { m_exploreMantid->refreshWorkspaces(); }
 
 /// Show / hide the AlgorithmDockWidget
 void MantidUI::showAlgWidget(bool on) {

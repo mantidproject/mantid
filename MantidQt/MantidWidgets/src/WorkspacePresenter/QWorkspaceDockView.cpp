@@ -318,6 +318,10 @@ void QWorkspaceDockView::recordWorkspaceRename(const std::string &oldName,
   }
 }
 
+void QWorkspaceDockView::refreshWorkspaces() {
+  m_presenter->notifyFromView(ViewNotifiable::Flag::RefreshWorkspaces);
+}
+
 void QWorkspaceDockView::groupWorkspaces(const StringList &wsNames,
                                          const std::string &groupName) const {
   try {

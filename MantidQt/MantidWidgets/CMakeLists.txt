@@ -155,7 +155,6 @@ set ( MOC_FILES
 	inc/MantidQtMantidWidgets/MantidSurfacePlotDialog.h
 	inc/MantidQtMantidWidgets/MantidWSIndexDialog.h
 	inc/MantidQtMantidWidgets/MantidTreeWidget.h
-	inc/MantidQtMantidWidgets/MantidTreeWidgetItem.h
     inc/MantidQtMantidWidgets/MantidHelpWindow.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h
@@ -312,6 +311,7 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/InstrumentView/XIntegrationControl.h
 	inc/MantidQtMantidWidgets/LogValueSelector.h
 	inc/MantidQtMantidWidgets/MantidDisplayBase.h
+	inc/MantidQtMantidWidgets/MantidTreeWidgetItem.h
 	inc/MantidQtMantidWidgets/MuonFitDataSelector.h
 	inc/MantidQtMantidWidgets/MuonFunctionBrowser.h
 	inc/MantidQtMantidWidgets/ProgressPresenter.h

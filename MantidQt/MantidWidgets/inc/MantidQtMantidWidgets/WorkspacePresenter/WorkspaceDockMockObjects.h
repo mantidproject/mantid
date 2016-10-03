@@ -92,6 +92,8 @@ public:
     return boost::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
   }
 
+  void refreshWorkspaces() override {}
+
   WorkspacePresenterVN_sptr getPresenterSharedPtr() { return m_presenter; }
 
 private:

@@ -125,6 +125,7 @@ public:
   void filterWorkspaces(const std::string &filterText) override;
   void recordWorkspaceRename(const std::string &oldName,
                              const std::string &newName) override;
+  void refreshWorkspaces() override;
 
   // Context Menu Handlers
   void popupContextMenu() override;
