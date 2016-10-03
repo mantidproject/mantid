@@ -12,12 +12,17 @@ class LoadCASTEP(GeneralDFTProgram):
     Functions to read phonon file taken from SimulatedDensityOfStates (credits for Elliot Oram.).
     """
 
-    def __init__(self, input_DFT_filename):
+    def __init__(self, input_DFT_filename, sample_form=None):
         """
 
         @param input_DFT_filename: name of file with phonon data (foo.phonon)
         """
         super(LoadCASTEP, self).__init__(input_DFT_filename=input_DFT_filename)
+
+        if  sample_form in AbinsParameters.all_sample_forms:
+            self._sample_form = sample_form
+        else:
+            raise  ValueError("Invalid sample form %s"%sample_form)
 
         # Regex pattern for a floating point number
         self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'

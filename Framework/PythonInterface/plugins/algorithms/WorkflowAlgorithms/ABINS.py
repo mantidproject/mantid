@@ -2,6 +2,7 @@ import multiprocessing
 import numpy as np
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
+from mantid.api._api import WorkspaceGroup
 from mantid.simpleapi import CreateWorkspace, CloneWorkspace, GroupWorkspaces, Scale, SetSampleMaterial, DeleteWorkspace, Rebin, Load, SaveAscii
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty
 
@@ -150,7 +151,7 @@ class ABINS(PythonAlgorithm):
 
         if self._dft_program == "CASTEP":
 
-            dft_reader = LoadCASTEP(input_DFT_filename=self._phononFile)
+            dft_reader = LoadCASTEP(input_DFT_filename=self._phononFile, sample_form=self._sampleForm)
 
         else:
 
@@ -163,7 +164,7 @@ class ABINS(PythonAlgorithm):
         # 3) calculate S
         s_calculator = CalculateS(filename=self._phononFile, temperature=self._temperature,
                                   instrument_name=self._instrument, abins_data=dft_data,
-                                  sample_form=self._sampleForm)
+                                  sample_form=self._sampleForm, overtones=self._overtones)
 
         s_data = s_calculator.getData()
 
@@ -187,26 +188,27 @@ class ABINS(PythonAlgorithm):
 
         # at the moment only types of atom, e.g, for  benzene three options -> 1) C, H;  2) C; 3) H
         # 5) create workspaces for atoms in interest
-        _workspaces = None
+        workspaces = []
         if self._sampleForm == "Powder":
-            _workspaces = self._create_partial_s_powder_workspaces(atoms_symbol=atoms_symbol, s_data=s_data)
-            if self._overtones:
-                _workspaces.extend(self._create_partial_s_overtones_workspaces(atoms_symbol=atoms_symbol, s_data=s_data))
+            workspaces.extend(self._create_partial_s_per_type_workspaces(atoms_symbols=atoms_symbol, s_data=s_data))
         prog_reporter.report("Workspaces with partial dynamical structure factors have been constructed.")
 
         # 6) Create a workspace with sum of all atoms if required
         if self._sum_contributions:
-
-            total_workspace = self._set_total_workspace(partial_workspaces=_workspaces[:len(atoms_symbol)])
-            _workspaces.insert(0, total_workspace)
+            total_atom_workspaces = []
+            for ws in workspaces:
+                if "total" in ws:  total_atom_workspaces.append(ws)
+            total_workspace = self._create_total_workspace(partial_workspaces=total_atom_workspaces,
+                                                           workspace_core_name=self._out_ws_name)
+            workspaces.insert(0, total_workspace)
             prog_reporter.report("Workspace with total S  has been constructed.")
 
         # 7) add experimental data if available to the collection of workspaces
         if self._experimentalFile != "":
-            _workspaces.insert(0, self._set_experimental_data_workspace().getName())
+            workspaces.insert(0, self._create_experimental_data_workspace().getName())
             prog_reporter.report("Workspace with the experimental data has been constructed.")
 
-        group = ','.join(_workspaces)
+        group = ','.join(workspaces)
         GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
 
         # 8) save workspaces to ascii_file
@@ -221,191 +223,268 @@ class ABINS(PythonAlgorithm):
         prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
 
 
-    def _create_partial_s_overtones_workspaces(self, atoms_symbol=None, s_data=None):
-
+    def _create_workspaces(self, atoms_symbols=None, s_data=None):
         """
+        Creates workspaces for all types of atoms. Creates both partial and total workspaces for all types of atoms.
 
-        @param atoms_symbol: list of atom types for which overtones should be created
+        @param atoms_symbols: list of atom types for which overtones should be created
+        @param s_data: dynamical factor data of type SData
+        @return: workspaces for list of atoms types, S for the particular type of atom
+        """
+        s_data_extracted = s_data.extract()
+
+
+
+        #freq = s_data_extracted["frequencies"]
+
+        # find max dimension of frequencies
+        max_freq_dim = s_data_extracted["frequencies"]["order_1"].size
+        for item in s_data_extracted["frequencies"]:
+            temp = s_data_extracted["frequencies"][item].size
+            if temp > max_freq_dim:
+                max_freq_dim = temp
+        if self._overtones:
+            s_total_dim = AbinsParameters.fundamentals + AbinsParameters.higher_order_quantum_effects
+        else:
+            s_total_dim = AbinsParameters.fundamentals
+
+        # initialize frequencies array
+        freq = np.zeros(shape=(s_total_dim, max_freq_dim), dtype=AbinsParameters.float_type)
+
+        last_order = 1
+        for order in range(AbinsParameters.fundamentals, s_total_dim + last_order):
+            order_indx = order - AbinsParameters.python_index_shift
+            temp_f = s_data_extracted["frequencies"]["order_%s"%order]
+            freq[order_indx, :temp_f.size] = temp_f
+
+        atoms_data = s_data_extracted["atoms_data"]
+        num_atoms = len(atoms_data)
+
+        result_workspaces = []
+        s_atom_data = np.copy(freq)
+        temp_s_atom_data = np.copy(freq)
+        for atom_symbol in atoms_symbols:
+            # create partial workspaces for the given type of atom
+            atom_workspaces = []
+            s_atom_data.fill(0.0)
+            for atom in range(num_atoms):
+                if atoms_data["atom_%s"%atom]["symbol"] == atom_symbol:
+                    temp_s_atom_data.fill(0)
+                    for order in range(AbinsParameters.fundamentals, s_total_dim + last_order):
+                        order_indx = order - AbinsParameters.python_index_shift
+                        temp_order = atoms_data["atom_%s"%atom]["s"]["order_%s"%order]
+                        temp_s_atom_data[order_indx, :temp_order.size] = np.copy(temp_order)
+                    np.add(s_atom_data, temp_s_atom_data, s_atom_data)  # sum S over the atoms of the same type
+
+            atom_workspaces.append(self._create_workspace(atom_name=atom_symbol, frequencies=freq, s_points=np.copy(s_atom_data)))
+
+            # create total workspace for the given type of atom
+            ws_name = self._out_ws_name + "_" + atom_symbol
+            atom_workspaces.insert(0, self._create_total_workspace(partial_workspaces=atom_workspaces, workspace_core_name=ws_name))
+            result_workspaces.extend(atom_workspaces)
+
+        return result_workspaces
+
+
+    def _create_partial_s_per_type_workspaces(self, atoms_symbols=None, s_data=None):
+        """
+        Creates workspaces for all types of atoms. Each workspace stores fundamentals and overtones for S for the given 
+        type of atom. It also stores total workspace for the given type of atom. 
+         
+        @param atoms_symbols: list of atom types for which overtones should be created
         @param s_data: dynamical factor data of type SData
         @return: workspaces for list of atoms types, each workspace contains overtones of S for the particular atom type
         """
-        s_data_extracted = s_data.extract()
-        freq = s_data_extracted["convoluted_frequencies"]
-        dim = freq.shape[0]
-        s_atom_data = np.zeros((dim, AbinsParameters.overtones_num), dtype=AbinsParameters.float_type)  # stores all overtones for the particular type of atom
-        s_all_atoms = s_data_extracted["atoms_data"]
-        num_atoms = len(s_all_atoms)
 
-        partial_workspaces = []
-
-        for atom_symbol in atoms_symbol:
-            s_atom_data.fill(0.0)
-            for num_atom in range(num_atoms):
-                if s_all_atoms[num_atom]["symbol"] == atom_symbol:
-                    np.add(s_atom_data, s_all_atoms[num_atom]["value"][:, :AbinsParameters.overtones_num], s_atom_data)  # we sum S for all overtones over the atoms of the same type
-
-            # all overtones of  S for the given atom
-            partial_workspaces.append(self._set_workspace(atom_name=atom_symbol,
-                                                          postfix="_overtones",
-                                                          frequencies=freq,
-                                                          s_points=s_atom_data))
+        return self._create_workspaces(atoms_symbols=atoms_symbols, s_data=s_data)
 
 
-        return partial_workspaces
-
-
-    def _create_partial_s_powder_workspaces(self, atoms_symbol=None, s_data=None):
-
+    def _fill_s_workspace(self, freq=None, s_points=None, workspace=None):
         """
-        Creates workspaces for all types of atoms. Each workspace stores total S for the given atom.
-        @param atoms_symbol: list of atom types for which overtones should be created
-        @param s_data: dynamical factor data of type SData
-        @return: workspaces for list of atoms types, each workspace contains total S for the particular type of atom
-        """
-        s_data_extracted = s_data.extract()
-        freq = s_data_extracted["convoluted_frequencies"]
-        dim = freq.shape[0]
-        s_atom_data = np.zeros(dim, dtype=AbinsParameters.float_type)
-        s_all_atoms = s_data_extracted["atoms_data"]
-        num_atoms = len(s_all_atoms)
-
-        partial_workspaces = []
-
-
-        for atom_symbol in atoms_symbol:
-            s_atom_data.fill(0.0)
-            for num_atom in range(num_atoms):
-                if s_all_atoms[num_atom]["symbol"] == atom_symbol:
-                    np.add(s_atom_data, s_all_atoms[num_atom]["value"][:, AbinsParameters.overtones_num], s_atom_data)  # we sum total S over the atoms of the same type
-
-            # total S for the given atom
-            partial_workspaces.append(self._set_workspace(atom_name=atom_symbol,
-                                                          frequencies=freq,
-                                                          s_points=s_atom_data))
-
-
-        return partial_workspaces
-
-
-    def _create_s_workspace(self, freq=None, s_points=None, workspace=None):
-        """
-        Puts S for the given atom into workspace.
+        Puts S into workspace(s).
         @param freq:  frequencies
         @param s_points: dynamical factor for the given atom
         @param workspace:  workspace to be filled with S
         """
 
-        # order x and y values before saving to workspace
-        sorted_indices = freq.argsort()
-        freq = freq[sorted_indices]
-        dim = None
-        if len(s_points.shape) == 2:
-            dim = s_points.shape[1]
-        else:
-            dim = 1
+        # only fundamentals
+        if s_points.shape[0] == 1:
 
-        if dim > 1:
+            freq_0, s_points_0 = self._reduce_array_size(array_x=freq[0], array_y=s_points[0])
+            CreateWorkspace(DataX=freq_0,
+                            DataY=s_points_0,
+                            NSpec=1,
+                            YUnitLabel="S",
+                            OutputWorkspace=workspace,
+                            EnableLogging=False)
+
+            # Set correct units on workspace
+            self._set_workspace_units(wrk=workspace)
+
+        # total workspaces
+        elif len(s_points.shape) == 1:
+
+            freq_0, s_points_0 = self._reduce_array_size(array_x=freq, array_y=s_points)
+            CreateWorkspace(DataX=freq_0,
+                            DataY=s_points_0,
+                            NSpec=1,
+                            YUnitLabel="S",
+                            OutputWorkspace=workspace,
+                            EnableLogging=False)
+
+            # Set correct units on workspace
+            self._set_workspace_units(wrk=workspace)
+
+        # fundamentals and overtones
+        else:
+
+            dim = s_points.shape[0]
+            partial_wrk_names = []
             for n in range(dim):
-                s_points[:, n] = s_points[sorted_indices, n]
-        else:
-            s_points = s_points[sorted_indices]
 
-        s_points_raveled = np.ravel(s_points)
+                wrk_name = workspace + "_quantum_order_effect_%s"%(n + 1) # here we count from 1 because n=1 is fundamental, n=2 first overtone etc....
+                freq_n, s_points_n = self._reduce_array_size(array_x=freq[n], array_y=s_points[n])
+                partial_wrk_names.append(wrk_name)
+                CreateWorkspace(DataX=freq_n,
+                                DataY=s_points_n,
+                                NSpec=1,
+                                YUnitLabel="S",
+                                OutputWorkspace=wrk_name,
+                                EnableLogging=False)
 
-        CreateWorkspace(DataX=freq,
-                        DataY=s_points_raveled,
-                        NSpec=dim,
-                        YUnitLabel="S",
-                        OutputWorkspace=workspace,
-                        EnableLogging=False)
+                # Set correct units on workspace
+                self._set_workspace_units(wrk=wrk_name)
+
+            group = ','.join(partial_wrk_names)
+            GroupWorkspaces(group, OutputWorkspace=workspace)
 
 
-    def _set_total_workspace(self, partial_workspaces=None):
+    def _create_total_workspace(self, partial_workspaces=None, workspace_core_name=None):
 
         """
+        Sets workspace with total S.
         @param partial_workspaces: list of workspaces which should be summed up to obtain total workspace
         @return: workspace with total S from partial_workspaces
         """
-        total_workspace = self._out_ws_name + "_Total"
-        # If there is more than one partial workspace need to sum first spectrum of all
-        if len(partial_workspaces) > 1:
-            _freq = mtd[partial_workspaces[0]].dataX(0)
-            _s_atoms = np.zeros_like(mtd[partial_workspaces[0]].dataY(0))
 
-            for partial_ws in partial_workspaces:
-                _s_atoms += mtd[partial_ws].dataY(0)
+        total_workspace = workspace_core_name + "_total"
 
-            self._create_s_workspace(_freq, _s_atoms, total_workspace)
-
-            # Set correct units on total workspace
-            self._set_workspace_units(wrk=total_workspace)
-
-        # Otherwise just repackage the WS we have as the total
+        if isinstance(mtd[partial_workspaces[0]], WorkspaceGroup):
+            local_partial_workspaces = mtd[partial_workspaces[0]].getNames()
         else:
-            CloneWorkspace(InputWorkspace=partial_workspaces[0],
-                           OutputWorkspace=total_workspace)
+            local_partial_workspaces = partial_workspaces
 
+        if len(local_partial_workspaces) > 1:
+
+            freq = np.zeros(AbinsParameters.total_workspace_size, dtype=AbinsParameters.float_type)
+            s_atoms = np.zeros(AbinsParameters.total_workspace_size, dtype=AbinsParameters.float_type)
+            ws_x = mtd[local_partial_workspaces[0]].dataX(0) # all total workspaces have the same x values
+            freq[:ws_x.size] = ws_x
+            for partial_ws in local_partial_workspaces:
+                ws_y = mtd[partial_ws].dataY(0)
+                size = min (s_atoms.size, ws_y.size)
+                s_atoms[:size] += ws_y[:size]
+            self._fill_s_workspace(freq, s_atoms, total_workspace)
+
+        # Otherwise just repackage the workspace we have as the total
+        else:
+            CloneWorkspace(InputWorkspace=local_partial_workspaces[0],
+                           OutputWorkspace=total_workspace)
         return total_workspace
 
 
-    def _set_workspace(self, atom_name=None, postfix="" , frequencies=None, s_points=None):
+    def _create_workspace(self, atom_name=None, frequencies=None, s_points=None):
 
         """
         Creates workspace for the given frequencies and s_points with S data. After workspace is created it is rebined,
         scaled by cross-section factor and optionally multiplied by the user defined scaling factor.
 
         @param atom_name: symbol of atom for which workspace should be created
-        @param postfix: optional part of workspace name
         @param frequencies: frequencies in the form of numpy array for which S(Q, omega) can be plotted
         @param s_points: S(Q, omega)
         @return: workspace for the given frequency and S data
 
         """
-        _ws_name = self._out_ws_name + "_" + atom_name + postfix
 
-        self._create_s_workspace(freq=frequencies, s_points=np.copy(s_points), workspace=_ws_name)
-
-        # Set correct units on workspace
-        self._set_workspace_units(wrk=_ws_name)
+        ws_name = self._out_ws_name + "_" + atom_name
+        self._fill_s_workspace(freq=frequencies, s_points=s_points, workspace=ws_name)
 
         # rebining
-        Rebin(InputWorkspace=_ws_name, Params=[AbinsParameters.bin_width], OutputWorkspace=_ws_name)
+        Rebin(InputWorkspace=ws_name, Params=[AbinsParameters.bin_width], OutputWorkspace=ws_name)
 
+        if s_points.shape[0] == 1:
+            self._scale_workspace(atom_name=atom_name, ws_name=ws_name)
+        else:
+            gr_wrk = mtd[ws_name]
+            num_wrk = gr_wrk.getNumberOfEntries()
+            for n in range(num_wrk):
+                self._scale_workspace(atom_name=atom_name, ws_name=gr_wrk.getItem(n).getName())
+
+        return ws_name
+
+
+    def _scale_workspace(self, atom_name=None, ws_name=None):
+        """
+        Performs scaling  workspace by scattering factor and user defined scaling factor.
+        """
         # Add the sample material to the workspace
-        SetSampleMaterial(InputWorkspace=_ws_name, ChemicalFormula=atom_name)
+        SetSampleMaterial(InputWorkspace=ws_name, ChemicalFormula=atom_name)
 
         # Multiply intensity by scattering cross section
         scattering_x_section = None
         if self._scale_by_cross_section == 'Incoherent':
-            scattering_x_section = mtd[_ws_name].mutableSample().getMaterial().incohScatterXSection()
+            scattering_x_section = mtd[ws_name].mutableSample().getMaterial().incohScatterXSection()
         elif self._scale_by_cross_section == 'Coherent':
-            scattering_x_section = mtd[_ws_name].mutableSample().getMaterial().cohScatterXSection()
+            scattering_x_section = mtd[ws_name].mutableSample().getMaterial().cohScatterXSection()
         elif self._scale_by_cross_section == 'Total':
-            scattering_x_section = mtd[_ws_name].mutableSample().getMaterial().totalScatterXSection()
+            scattering_x_section = mtd[ws_name].mutableSample().getMaterial().totalScatterXSection()
 
-        Scale(InputWorkspace=_ws_name,
-              OutputWorkspace=_ws_name,
+        Scale(InputWorkspace=ws_name,
+              OutputWorkspace=ws_name,
               Operation='Multiply',
               Factor=scattering_x_section)
 
         # additional scaling  the workspace if user wants it
         if self._scale != 1:
-            Scale(InputWorkspace=_ws_name,
-                  OutputWorkspace=_ws_name,
+            Scale(InputWorkspace=ws_name,
+                  OutputWorkspace=ws_name,
                   Operation='Multiply',
                   Factor=self._scale)
 
-        return _ws_name
 
-
-    def _set_experimental_data_workspace(self):
+    def _create_experimental_data_workspace(self):
         """
         Loads experimental data into workspaces.
         @return: workspace with experimental data
         """
         experimental_wrk = Load(self._experimentalFile)
         self._set_workspace_units(wrk=experimental_wrk.getName())
+
         return experimental_wrk
+
+
+    def _reduce_array_size(self, array_x=None, array_y=None, ):
+        """Reduces size of two  1D numpy arrays  (first array is  x-values and second array is y-values).
+        @param array_x: array with x-values which size should be reduced (type numpy.ndarray),
+        @param array_y: array with y-values which size should be reduced (type numpy.ndarray),
+        """
+
+        # make sure we work on local copies
+        local_array_x = np.copy(array_x)
+        local_array_y = np.copy(array_y)
+
+        indices = local_array_x.argsort()
+        local_array_x = local_array_x[indices]
+        local_array_y = local_array_y[indices]
+        size = local_array_y.size - 1 # because first element of array has index 0
+        end = size
+        for n in range(size, 0, -1):
+
+            if local_array_x[n] < AbinsParameters.max_wavenumber:
+                end = max(1,n)
+                break
+
+        return  local_array_x[:end], local_array_y[:end]
 
 
     def _set_workspace_units(self, wrk=None):

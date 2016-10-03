@@ -1,3 +1,4 @@
+import numpy as np
 from mantid.kernel import logger
 
 # ABINS modules
@@ -19,6 +20,7 @@ class GeneralDFTProgram(IOmodule):
 
         self._num_k = None
         self._num_atoms = None
+        self._sample_form = None
 
 
     def readPhononFile(self):
@@ -144,21 +146,41 @@ class GeneralDFTProgram(IOmodule):
         @param k_data: dictionary with the data to rearrange
         @return: Returns an object of type AbinsData
         """
-        _number_of_phonons = 3 * self._num_atoms
-        k_points = KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
+
+        # in case sample is in the from of powder use only data for Gamma point
+        if self._sample_form == "Powder":
+            gamma_pkt_index = -1
+            # look for index of Gamma point
+            for k in range(self._num_k):
+                if np.linalg.norm(data["k_vectors"][k]) < AbinsParameters.small_k:
+                    gamma_pkt_index = k
+                    break
+            if gamma_pkt_index == -1:
+                raise ValueError("Gamma point not found.")
+
+            k_points = KpointsData(num_atoms=self._num_atoms, num_k=1)
+            k_points.set({"weights": np.asarray([data["weights"][gamma_pkt_index]]),
+                          "k_vectors": np.asarray([data["k_vectors"][gamma_pkt_index]]),
+                          "frequencies": np.asarray([data["frequencies"][gamma_pkt_index]]) * AbinsParameters.cm1_2_hartree,
+                          "atomic_displacements": np.asarray([data["atomic_displacements"][gamma_pkt_index]])})
+        # for Single crystal  use case use all k-points
+        else:
+
+            k_points = KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)
+            k_points.set({"weights": data["weights"],  # 1D [k] (one entry corresponds to weight of one k-point)
+                          "k_vectors": data["k_vectors"],  # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
+                          "frequencies": data["frequencies"] * AbinsParameters.cm1_2_hartree,  # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
+                          "atomic_displacements": data["atomic_displacements"]}) # 4D array [k][atom_n][freq][3] (one entry corresponds to one coordinate for atom atom_n, frequency  freq and k-point k )
+
 
         atoms = AtomsDaTa(num_atoms=self._num_atoms)
         for atom in data["atoms"]:
             atom["mass"] = atom["mass"] * AbinsParameters.m_2_hartree
         atoms.set(data["atoms"])
 
-        k_points.set({"weights": data["weights"],  # 1D [k] (one entry corresponds to weight of one k-point)
-                      "k_vectors": data["k_vectors"],  # 2D [k][3] (one entry corresponds to one coordinate of particular k-point)
-                      "frequencies": data["frequencies"] * AbinsParameters.cm1_2_hartree,  # 2D  array [k][freq] (one entry corresponds to one frequency for the k-point k)
-                      "atomic_displacements": data["atomic_displacements"]}) # 4D array [k][atom_n][freq][3] (one entry corresponds to one coordinate for atom atom_n, frequency  freq and k-point k )
-        _data = AbinsData()
-        _data.set(k_points_data=k_points, atoms_data=atoms)
-        return _data
+        result_data = AbinsData()
+        result_data.set(k_points_data=k_points, atoms_data=atoms)
+        return result_data
 
 
     def getData(self):

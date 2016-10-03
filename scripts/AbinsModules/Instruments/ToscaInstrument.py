@@ -4,6 +4,7 @@ import math
 from Instrument import Instrument
 from AbinsModules import AbinsParameters
 from AbinsModules.KpointsData import KpointsData
+import AbinsModules.FrequencyGenerator as FrequencyGenerator
 
 class ToscaInstrument(Instrument):
     """
@@ -14,13 +15,34 @@ class ToscaInstrument(Instrument):
         self._k_points_data = None
 
 
-    def calculate_q_powder(self):
+    def calculate_q_powder(self, overtones=None):
         """
         Calculates squared Q vectors for TOSCA and TOSCA-like instruments.
         """
-        _k_data = self._k_points_data.extract()
-        frequencies = np.multiply(_k_data["frequencies"], 1.0 / AbinsParameters.cm1_2_hartree)
-        return np.multiply(np.multiply(frequencies, frequencies), AbinsParameters.TOSCA_constant)
+        if not isinstance(overtones, bool):
+            raise ValueError("Invalid value of overtones. Expected values are: True, False.")
+
+        k_data = self._k_points_data.extract()
+        fundamental_frequencies = np.multiply(k_data["frequencies"][0], 1.0 / AbinsParameters.cm1_2_hartree)
+
+        # fundamentals and higher quantum order effects
+        if overtones:
+            q_dim = AbinsParameters.fundamentals + AbinsParameters.higher_order_quantum_effects
+
+        # only fundamentals
+        else:
+            q_dim = AbinsParameters.fundamentals
+
+        q_data= dict(order_1=None)
+        last_quantum_order = 1 # range function is exclusive with respect to the last element so need to add this
+        previous_frequencies = None
+        for quantum_order in range(AbinsParameters.fundamentals, q_dim + last_quantum_order):
+
+            local_frequencies =  FrequencyGenerator.expand_freq(previous_array=previous_frequencies, reference_array=fundamental_frequencies, quantum_order=quantum_order, start=3)
+            previous_frequencies = local_frequencies
+            q_data["order_%s"%quantum_order] = np.multiply(np.multiply(local_frequencies, local_frequencies),  AbinsParameters.TOSCA_constant)
+
+        return q_data
 
 
     def collect_K_data(self, k_points_data=None):
@@ -46,46 +68,23 @@ class ToscaInstrument(Instrument):
         # noinspection PyTypeChecker
         all_points = AbinsParameters.pkt_per_peak * frequencies.shape[0]
 
-        broadened_spectrum = np.zeros(all_points, dtype=AbinsParameters.float_type)
+        broadened_spectrum = np.zeros(shape=all_points, dtype=AbinsParameters.float_type)
+        points_freq = np.zeros(shape=all_points, dtype=AbinsParameters.float_type)
+
         start_broaden = start * AbinsParameters.pkt_per_peak
         for indx, freq in np.ndenumerate(frequencies[start:]):
 
             sigma = AbinsParameters.TOSCA_A * freq * freq + AbinsParameters.TOSCA_B * freq + AbinsParameters.TOSCA_C
+            local_start = indx[0] * AbinsParameters.pkt_per_peak + start_broaden
 
-            points_freq = np.array(np.linspace(freq - AbinsParameters.fwhm * sigma,
-                                               freq + AbinsParameters.fwhm * sigma,
-                                               num=AbinsParameters.pkt_per_peak))
+            temp = np.array(np.linspace(freq - AbinsParameters.fwhm * sigma,
+                                        freq + AbinsParameters.fwhm * sigma,
+                                        num=AbinsParameters.pkt_per_peak))
 
-            start = indx[0] * AbinsParameters.pkt_per_peak + start_broaden
-            broadened_spectrum[start:start + AbinsParameters.pkt_per_peak] = np.convolve(s_dft[indx[0]], self._gaussian(sigma=sigma, points=points_freq, center=freq))
+            points_freq[local_start:local_start + AbinsParameters.pkt_per_peak] = temp
+            broadened_spectrum[local_start:local_start + AbinsParameters.pkt_per_peak] = np.convolve(s_dft[indx[0]], self._gaussian(sigma=sigma, points=temp, center=freq))
 
-        return broadened_spectrum
-
-
-    def produce_abscissa(self, frequencies=None, start=None):
-        """
-        Creates abscissa for convoluted spectrum in case of TOSCA.
-        @param frequencies:  DFT frequencies for which frequencies which correspond to broadened spectrum should be regenerated (frequencies in cm-1)
-        @return: abscissa for convoluted S
-        @param start: 3 if acoustic modes at Gamma point, otherwise this should be set to zero
-        """
-        all_points = AbinsParameters.pkt_per_peak * frequencies.shape[0]
-        abscissa = np.zeros(all_points, dtype=AbinsParameters.float_type)
-        # noinspection PyTypeChecker
-        start_broaden = start * AbinsParameters.pkt_per_peak
-
-        for indx, freq in np.ndenumerate(frequencies[start:]):
-
-            sigma = AbinsParameters.TOSCA_A * freq * freq + AbinsParameters.TOSCA_B * freq + AbinsParameters.TOSCA_C
-
-            points_freq = np.array(np.linspace(freq - AbinsParameters.fwhm * sigma,
-                                               freq + AbinsParameters.fwhm * sigma,
-                                               num=AbinsParameters.pkt_per_peak))
-
-            start = indx[0] * AbinsParameters.pkt_per_peak + start_broaden
-            abscissa[start:start + AbinsParameters.pkt_per_peak] = points_freq
-
-        return abscissa
+        return points_freq, broadened_spectrum
 
 
     def _gaussian(self, sigma=None, points=None, center=None):

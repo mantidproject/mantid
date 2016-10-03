@@ -13,13 +13,13 @@ class CalculateQ(IOmodule):
     Class for calculating Q vectors for instrument of choice.
     """
 
-    def __init__(self, filename=None, instrument=None, sample_form=None, k_points_data=None):
+    def __init__(self, filename=None, instrument=None, sample_form=None, k_points_data=None, overtones=None):
         """
-
         @param filename: name of input filename (CASTEP: foo.phonon)
         @param instrument: object of type  Instrument
         @param sample_form: form in which sample is (Powder or SingleCrystal)
         @param k_points_data: object of type KpointsData with data from DFT calculations
+        @param overtones: True if overtones should be included in calculations, otherwise False
         """
         if not isinstance(instrument, Instrument):
             raise ValueError("Invalid instrument.")
@@ -33,9 +33,19 @@ class CalculateQ(IOmodule):
             raise ValueError("Invalid value of k-points data.")
         self._k_points_data = k_points_data
 
+        if isinstance(overtones, bool):
+            self._overtones = overtones
+        else:
+            raise ValueError("Invalid value of overtones. Expected values are: True, False ")
+
+        if self._overtones:
+            overtones_folder = "overtones_true"
+        else:
+            overtones_folder = "overtones_false"
+
         self._Qvectors = None # data with Q vectors
 
-        super(CalculateQ, self).__init__(input_filename=filename, group_name=AbinsParameters.Q_data_group + "/%s"%self._instrument + "/" + self._sample_form)
+        super(CalculateQ, self).__init__(input_filename=filename, group_name=AbinsParameters.Q_data_group + "/%s"%self._instrument + "/" + self._sample_form + "/" + overtones_folder)
 
 
     def _calculate_qvectors_instrument(self):
@@ -43,10 +53,10 @@ class CalculateQ(IOmodule):
         Calculates Q vectors for the given instrument.
         """
         num_k = self._k_points_data.extract()["k_vectors"].shape[0]
-        self._Qvectors = QData(num_k=num_k)
+        self._Qvectors = QData(num_k=num_k, overtones=self._overtones)
         self._instrument.collect_K_data(k_points_data=self._k_points_data)
         if self._sample_form == "Powder":
-            self._Qvectors.set(self._instrument.calculate_q_powder())
+            self._Qvectors.set(self._instrument.calculate_q_powder(overtones=self._overtones))
         else:
             raise ValueError("SingleCrystal user case is not implemented.")
 
@@ -59,7 +69,7 @@ class CalculateQ(IOmodule):
         if isinstance(self._instrument, Instrument):
             self._calculate_qvectors_instrument()
         else:
-            raise ValueError("General case of Q data not implemented yet.")
+            raise ValueError("Invalid instrument.")
 
         self.addData("data", self._Qvectors.extract()) # Q vectors in the form of numpy array
         self.addFileAttributes()
@@ -74,7 +84,7 @@ class CalculateQ(IOmodule):
         @return: QData object
         """
         data = self.load(list_of_datasets=["data"])
-        results = QData(num_k=data["datasets"]["data"].shape[0])
+        results = QData(num_k = self._k_points_data.extract()["k_vectors"].shape[0])
         results.set(data["datasets"]["data"])
 
         return results

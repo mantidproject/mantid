@@ -2,9 +2,11 @@ class Instrument(object):
 
     _name  = None
 
-    def calculate_q_powder(self):
+    def calculate_q_powder(self, overtones=None):
         """
         Calculates q vectors.
+
+        @param overtones: True if overtones should be included in calculations, otherwise False
         @return:  numpy array with Q data
         """
         ""
@@ -28,16 +30,6 @@ class Instrument(object):
         @param start: 3 if acoustic modes at Gamma point, otherwise this should be set to zero
 
        """
-        return None
-
-
-    def produce_abscissa(self, frequencies=None, start=None):
-        """
-        Creates abscissa for convoluted spectrum.
-        @param frequencies: DFT frequencies for which frequencies which correspond to broadened spectrum should be regenerated (frequencies in cm-1)
-        @param start: 3 if acoustic modes at Gamma point, otherwise this should be set to zero
-        @return: abscissa for convoluted S
-        """
         return None
 
 
