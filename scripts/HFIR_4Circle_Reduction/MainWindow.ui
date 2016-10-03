@@ -223,7 +223,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>8</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1195,7 +1195,7 @@ p, li { white-space: pre-wrap; }
             <item row="0" column="0">
              <layout class="QGridLayout" name="gridLayout_3">
               <item row="0" column="0">
-               <widget class="Detector2DView" name="graphicsView">
+               <widget class="Detector2DView" name="graphicsView_detector2dPlot">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                   <horstretch>0</horstretch>
@@ -1472,43 +1472,49 @@ p, li { white-space: pre-wrap; }
                    <string>Region of Interest</string>
                   </property>
                   <layout class="QGridLayout" name="gridLayout_18">
-                   <item row="5" column="0">
+                   <item row="3" column="0">
                     <widget class="QPushButton" name="pushButton_cancelROI">
-                     <property name="text">
-                      <string>Cancel</string>
+                     <property name="font">
+                      <font>
+                       <pointsize>10</pointsize>
+                      </font>
                      </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="0">
-                    <widget class="QCheckBox" name="checkBox_keepRoi">
                      <property name="text">
-                      <string>Keep on canvas</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="QPushButton" name="pushButton_saveROI">
-                     <property name="text">
-                      <string>Apply</string>
+                      <string>Reset ROI</string>
                      </property>
                     </widget>
                    </item>
                    <item row="0" column="0">
                     <widget class="QPushButton" name="pushButton_addROI">
+                     <property name="font">
+                      <font>
+                       <pointsize>10</pointsize>
+                      </font>
+                     </property>
                      <property name="text">
-                      <string>Add ROI</string>
+                      <string>Edit ROI</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="3" column="0">
+                   <item row="1" column="0">
                     <widget class="QPushButton" name="pushButton_maskScanPt">
+                     <property name="font">
+                      <font>
+                       <pointsize>10</pointsize>
+                      </font>
+                     </property>
                      <property name="text">
                       <string>Mask</string>
                      </property>
                     </widget>
                    </item>
-                   <item row="4" column="0">
+                   <item row="2" column="0">
                     <widget class="QPushButton" name="pushButton_saveMask">
+                     <property name="font">
+                      <font>
+                       <pointsize>10</pointsize>
+                      </font>
+                     </property>
                      <property name="toolTip">
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pop up a window to allow user to specify the name of the mask;&lt;/p&gt;&lt;p&gt;And it will be added to the combo box for available mask names in tab 'merge scan' and 'peak integration'&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>

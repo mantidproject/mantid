@@ -108,8 +108,6 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_add_peak_to_find)
         self.connect(self.ui.pushButton_addROI, QtCore.SIGNAL('clicked()'),
                      self.do_add_roi)
-        self.connect(self.ui.pushButton_saveROI, QtCore.SIGNAL('clicked()'),
-                     self.do_apply_roi)
         self.connect(self.ui.pushButton_cancelROI, QtCore.SIGNAL('clicked()'),
                      self.do_del_roi)
         self.connect(self.ui.pushButton_nextScanNumber, QtCore.SIGNAL('clicked()'),
@@ -380,6 +378,9 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.progressBar_mergeScans.setRange(0, 20)
         self.ui.progressBar_mergeScans.setValue(0)
 
+        # check boxes
+        self.ui.graphicsView_detector2dPlot.set_parent_window(self)
+
         return
 
     def _build_peak_info_list(self):
@@ -514,16 +515,16 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # set the button to next mode
-        if str(self.ui.pushButton_addROI.text()) == 'Add ROI':
+        if str(self.ui.pushButton_addROI.text()) == 'Edit ROI':
             # enter adding ROI mode
-            self.ui.graphicsView.enter_roi_mode(state=True)
+            self.ui.graphicsView_detector2dPlot.enter_roi_mode(state=True)
             # rename the button
             self.ui.pushButton_addROI.setText('Quit ROI')
         else:
             # quit editing ROI mode
-            self.ui.graphicsView.enter_roi_mode(state=False)
+            self.ui.graphicsView_detector2dPlot.enter_roi_mode(state=False)
             # rename the button
-            self.ui.pushButton_addROI.setText('Add ROI')
+            self.ui.pushButton_addROI.setText('Edit ROI')
         # END-IF-ELSE
 
         return
@@ -843,7 +844,7 @@ class MainWindow(QtGui.QMainWindow):
         """ Delete ROI
         :return:
         """
-        self.ui.graphicsView.remove_roi()
+        self.ui.graphicsView_detector2dPlot.remove_roi()
 
         return
 
@@ -1974,7 +1975,10 @@ class MainWindow(QtGui.QMainWindow):
         """ Save current selection of region of interest
         :return:
         """
-        lower_left_c, upper_right_c = self.ui.graphicsView.get_roi()
+        lower_left_c, upper_right_c = self.ui.graphicsView_detector2dPlot.get_roi()
+        # at the very beginning, the lower left and upper right are same
+        if lower_left_c[0] == upper_right_c[0] or lower_left_c[1] == upper_right_c[1]:
+            return
 
         status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
         assert status, str(par_val_list)
@@ -2851,17 +2855,16 @@ class MainWindow(QtGui.QMainWindow):
         # Get data and plot
         raw_det_data = self._myControl.get_raw_detector_counts(exp_no, scan_no, pt_no)
         # raw_det_data = numpy.rot90(raw_det_data, 1)
-        self.ui.graphicsView.clear_canvas()
-        self.ui.graphicsView.add_plot_2d(raw_det_data, x_min=0, x_max=256, y_min=0, y_max=256,
-                                         hold_prev_image=False)
-        if self.ui.checkBox_keepRoi.isChecked():
-            # get region of interest from control
-            status, roi = self._myControl.get_region_of_interest(exp_no, scan_number=None)
-            if status:
-                self.ui.graphicsView.add_roi(roi[0], roi[1])
-            else:
-                error_msg = roi
-                self.pop_one_button_dialog(error_msg)
+        self.ui.graphicsView_detector2dPlot.clear_canvas()
+        self.ui.graphicsView_detector2dPlot.add_plot_2d(raw_det_data, x_min=0, x_max=256, y_min=0, y_max=256,
+                                                        hold_prev_image=False)
+        status, roi = self._myControl.get_region_of_interest(exp_no, scan_number=None)
+        if status:
+            self.ui.graphicsView_detector2dPlot.add_roi(roi[0], roi[1])
+        else:
+            error_msg = roi
+            # self.pop_one_button_dialog(error_msg)
+            print '[DB] %s' % error_message
         # END-IF
 
         # Information

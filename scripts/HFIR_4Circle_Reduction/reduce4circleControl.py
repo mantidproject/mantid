@@ -1188,6 +1188,11 @@ class CWSCDReductionControl(object):
             if mask_ws_name is None:
                 # get default mask workspace name
                 mask_ws_name = get_mask_ws_name(exp, scan)
+            elif not AnalysisDataService.doesExist(mask_ws_name):
+                # the appointed mask workspace has not been loaded
+                # then load it from saved mask
+                self.check_generate_mask_workspace(exp, scan, mask_ws_name)
+
             assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace %s does not exist.' \
                                                                 '' % mask_ws_name
 
@@ -1636,7 +1641,8 @@ class CWSCDReductionControl(object):
         ll_y = int(lower_left_corner[1])
         ur_x = int(upper_right_corner[0])
         ur_y = int(upper_right_corner[1])
-        assert ll_x < ur_x and ll_y < ur_y
+        assert ll_x < ur_x and ll_y < ur_y, 'Lower left corner (%.5f, %.5f) vs. upper right corner ' \
+                                            '(%.5f, %.5f)' % (ll_x, ll_y, ur_x, ur_y)
 
         # Add to dictionary.  Because usually one ROI is defined for all scans in an experiment,
         # then it is better and easier to support client to search this ROI by experiment number
