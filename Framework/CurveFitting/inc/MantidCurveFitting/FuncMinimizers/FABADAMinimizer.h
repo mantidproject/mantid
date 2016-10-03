@@ -157,12 +157,7 @@ private:
   /// Number of parameters of the FittingFunction (not necessarily the
   /// CostFunction)
   size_t m_nParams;
-  /// Number of consecutive innactive regenerations needed to consider
-  /// convergence
-  size_t m_innactConvCriterion;
-  /// Number of consecutive regenerations without changes (>=
-  /// m_InnactConvCriterion it is considered to have arrived to convergence at a
-  /// steep minimum)
+  /// Number of consecutive regenerations without changes
   std::vector<size_t> m_numInactiveRegenerations;
   /// To track convergence through immobility
   std::vector<int> m_changesOld;
