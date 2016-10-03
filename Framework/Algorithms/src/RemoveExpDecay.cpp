@@ -134,7 +134,7 @@ void MuonRemoveExpDecay::exec() {
       removeDecayData(xIn, inputWS->y(spectra[i]), yOut);
       removeDecayError(xIn, inputWS->e(spectra[i]), eOut);
 
-      double normConst = calNormalisationConst(outputWS, spectra[i]);
+      const double normConst = calNormalisationConst(outputWS, spectra[i]);
 
       // do scaling and substract by minus 1.0
       const size_t nbins = outputWS->y(i).size();

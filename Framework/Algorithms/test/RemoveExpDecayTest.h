@@ -57,31 +57,31 @@ public:
 
     // First spectrum
     // Test some X values
-    TS_ASSERT_DELTA(outWS->readX(0)[10], 0.2000, 0.0001);
-    TS_ASSERT_DELTA(outWS->readX(0)[19], 0.3800, 0.0001);
-    TS_ASSERT_DELTA(outWS->readX(0)[49], 0.9800, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(0)[10], 0.2000, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(0)[19], 0.3800, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(0)[49], 0.9800, 0.0001);
     // Test some Y values
-    TS_ASSERT_DELTA(outWS->readY(0)[10], -0.0992, 0.0001);
-    TS_ASSERT_DELTA(outWS->readY(0)[19], -0.0111, 0.0001);
-    TS_ASSERT_DELTA(outWS->readY(0)[49], -0.0625, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(0)[10], -0.0992, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(0)[19], -0.0111, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(0)[49], -0.0625, 0.0001);
     // Test some E values
-    TS_ASSERT_DELTA(outWS->readE(0)[10], 0.0054, 0.0001);
-    TS_ASSERT_DELTA(outWS->readE(0)[19], 0.0059, 0.0001);
-    TS_ASSERT_DELTA(outWS->readE(0)[49], 0.0077, 0.0001);
+    TS_ASSERT_DELTA(outWS->e(0)[10], 0.0054, 0.0001);
+    TS_ASSERT_DELTA(outWS->e(0)[19], 0.0059, 0.0001);
+    TS_ASSERT_DELTA(outWS->e(0)[49], 0.0077, 0.0001);
 
     // Second spectrum
     // Test some X values
-    TS_ASSERT_DELTA(outWS->readX(1)[10], 0.2000, 0.0001);
-    TS_ASSERT_DELTA(outWS->readX(1)[19], 0.3800, 0.0001);
-    TS_ASSERT_DELTA(outWS->readX(1)[49], 0.9800, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(1)[10], 0.2000, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(1)[19], 0.3800, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(1)[49], 0.9800, 0.0001);
     // Test some Y values
-    TS_ASSERT_DELTA(outWS->readY(1)[10], 0.0276, 0.0001);
-    TS_ASSERT_DELTA(outWS->readY(1)[19], -0.1003, 0.0001);
-    TS_ASSERT_DELTA(outWS->readY(1)[49], 0.0798, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(1)[10], 0.0276, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(1)[19], -0.1003, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(1)[49], 0.0798, 0.0001);
     // Test some E values
-    TS_ASSERT_DELTA(outWS->readE(1)[10], 0.0054, 0.0001);
-    TS_ASSERT_DELTA(outWS->readE(1)[19], 0.0059, 0.0001);
-    TS_ASSERT_DELTA(outWS->readE(1)[49], 0.0078, 0.0001);
+    TS_ASSERT_DELTA(outWS->e(1)[10], 0.0054, 0.0001);
+    TS_ASSERT_DELTA(outWS->e(1)[19], 0.0059, 0.0001);
+    TS_ASSERT_DELTA(outWS->e(1)[49], 0.0078, 0.0001);
   }
 
   void test_SpectrumList() {
@@ -116,14 +116,14 @@ public:
     TS_ASSERT_EQUALS(out2->getNumberHistograms(), ws->getNumberHistograms());
 
     // Compare results, they should match for the selected spectrum
-    TS_ASSERT_EQUALS(out1->readX(1), out2->readX(1));
-    TS_ASSERT_EQUALS(out1->readY(1), out2->readY(1));
-    TS_ASSERT_EQUALS(out1->readE(1), out2->readE(1));
+    TS_ASSERT_EQUALS(out1->x(1).rawData(), out2->x(1).rawData());
+    TS_ASSERT_EQUALS(out1->y(1).rawData(), out2->y(1).rawData());
+    TS_ASSERT_EQUALS(out1->e(1).rawData(), out2->e(1).rawData());
 
     // Compare non-selected spectra, the should match the input ones
-    TS_ASSERT_EQUALS(ws->readX(0), out2->readX(0));
-    TS_ASSERT_EQUALS(ws->readY(0), out2->readY(0));
-    TS_ASSERT_EQUALS(ws->readE(0), out2->readE(0));
+    TS_ASSERT_EQUALS(ws->x(0).rawData(), out2->x(0).rawData());
+    TS_ASSERT_EQUALS(ws->y(0).rawData(), out2->y(0).rawData());
+    TS_ASSERT_EQUALS(ws->e(0).rawData(), out2->e(0).rawData());
   }
 
   void test_yUnitLabel() {
