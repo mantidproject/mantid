@@ -108,6 +108,10 @@ private:
       std::vector<std::vector<double>> &reducedChain,
       std::vector<double> &bestParameters, std::vector<double> &errorLeft,
       std::vector<double> &errorRight);
+  /// Initialize member variables related to fitting parameters
+  void initChainsAndParameters();
+  /// Initialize member variables related to simulated annealing
+  void initSimulatedAnnealing();
 
   // Variables declarations
   /// Pointer to the cost function. Must be the least squares.

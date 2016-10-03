@@ -37,8 +37,6 @@ namespace {
 Kernel::Logger g_log("FABADAMinimizer");
 // number of iterations when convergence isn't expected
 const size_t LOWER_CONVERGENCE_LIMIT = 350;
-// very large number
-const double LARGE_NUMBER = 1e100;
 // jump checking rate
 const size_t JUMP_CHECKING_RATE = 200;
 // low jump limit
@@ -54,8 +52,7 @@ FABADAMinimizer::FABADAMinimizer()
       m_parConverged(), m_criteria(), m_maxIter(0), m_parChanged(),
       m_temperature(0.), m_counterGlobal(0), m_simAnnealingItStep(0),
       m_leftRefrPoints(0), m_tempStep(0.), m_overexploration(false),
-      m_nParams(0), m_numInactiveRegenerations(),
-      m_changesOld() {
+      m_nParams(0), m_numInactiveRegenerations(), m_changesOld() {
   declareProperty("ChainLength", static_cast<size_t>(10000),
                   "Length of the converged chain.");
   declareProperty("StepsBetweenValues", 10,
@@ -134,135 +131,25 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
   }
 
   m_fitFunction = m_leastSquares->getFittingFunction();
-
   m_counter = 0;
   m_counterGlobal = 0;
+  m_converged = false;
+  m_maxIter = maxIterations;
 
-  // The "real" parametersare got (not the active ones)
-  m_nParams = m_fitFunction->nParams();
-  if (m_nParams == 0) {
-    throw std::invalid_argument("Function has 0 fitting parameters.");
-  }
-  // The initial parameters are saved
-  if (m_parameters.size() != m_nParams) {
-    m_parameters.resize(m_nParams);
-  }
+  // Initialize member variables related to fitting parameters, such as
+  // m_chains, m_jump, etc
+  initChainsAndParameters();
+
+  // Initialize member variables related to simulated annealing, such as
+  // m_temperature, m_overexploration, etc
+  initSimulatedAnnealing();
 
   // Variable to calculate the total number of iterations required by the
   // SimulatedAnnealing and the posterior chain plus the burn in required
   // for the adaptation of the jump
-  size_t totalRequiredIterations = 350;
-
-  size_t n = getProperty("ChainLength");
-  m_chainIterations = size_t(ceil(double(n) / double(m_nParams)));
-
-  totalRequiredIterations += m_chainIterations;
-
-  // Save parameter constraints
-  for (size_t i = 0; i < m_nParams; ++i) {
-
-    double param = m_fitFunction->getParameter(i);
-    m_parameters.set(i, param);
-
-    API::IConstraint *iconstr = m_fitFunction->getConstraint(i);
-    if (iconstr) {
-      Constraints::BoundaryConstraint *bcon =
-          dynamic_cast<Constraints::BoundaryConstraint *>(iconstr);
-      if (bcon) {
-        if (bcon->hasLower()) {
-          if (param < bcon->lower())
-            m_parameters.set(i, bcon->lower());
-        }
-        if (bcon->hasUpper()) {
-          if (param > bcon->upper())
-            m_parameters.set(i, bcon->upper());
-        }
-      }
-    }
-
-    // Initialize chains
-    m_chain.push_back(std::vector<double>(1, param));
-    // Initilize jump parameters
-    m_jump.push_back(param != 0.0 ? std::abs(param / 10) : 0.01);
-  }
-  m_chi2 = m_leastSquares->val();
-  m_chain.push_back(std::vector<double>(1, m_chi2));
-  m_converged = false;
-  m_maxIter = maxIterations;
-  m_parChanged = std::vector<bool>(m_nParams, false);
-  m_changes = std::vector<int>(m_nParams, 0);
-  m_changesOld = m_changes;
-  m_numInactiveRegenerations = std::vector<size_t>(m_nParams, 0);
-  m_parConverged = std::vector<bool>(m_nParams, false);
-  m_criteria = std::vector<double>(m_nParams, getProperty("ConvergenceCriteria"));
-
-  // Simulated Annealing
-  // Obs: Simulated Annealing with maximum temperature = 1.0, 1step,
-  // could be used to increase the "burn-in" period before beginning to
-  // check for convergence (Not the ideal way -> Think something)
-  if (getProperty("SimAnnealingApplied")) {
-
-    m_temperature = getProperty("MaximumTemperature");
-    if (m_temperature == 0.0) {
-      g_log.warning() << "MaximumTemperature not a valid temperature"
-                         " (T = 0). Default (T = 10.0) taken.\n";
-      m_temperature = 10.0;
-    }
-    if (m_temperature < 0) {
-      g_log.warning() << "MaximumTemperature not a temperature"
-                         " (< 0), absolute value taken\n";
-      m_temperature = -m_temperature;
-    }
-    m_overexploration = getProperty("Overexploration");
-    if (!m_overexploration && m_temperature < 1) {
-      m_temperature = 1 / m_temperature;
-      g_log.warning() << "MaximumTemperature reduces proper"
-                         " exploration (0 < T < 1), product inverse taken ("
-                      << m_temperature << ")\n";
-    }
-    if (m_overexploration && m_temperature > 1) {
-      m_overexploration = false;
-      g_log.warning()
-          << "Overexploration wrong temperature. Not"
-             " overexploring. Applying usual Simulated Annealing.\n";
-    }
-    // Obs: The result is truncated to not have more iterations than
-    // the chosen by the user and for all temperatures have the same
-    // number of iterations
-    m_leftRefrPoints = getProperty("NumRefrigerationSteps");
-    if (m_leftRefrPoints <= 0) {
-      g_log.warning()
-          << "Wrong value for the number of refrigeration"
-             " points (<= 0). Therefore, default value (5 points) taken.\n";
-      m_leftRefrPoints = 5;
-    }
-
-    m_simAnnealingItStep = getProperty("SimAnnealingIterations");
-    m_simAnnealingItStep /= m_leftRefrPoints;
-
-    m_tempStep = pow(m_temperature, 1.0 / double(m_leftRefrPoints));
-
-    // m_simAnnealingItStep stores the number of iterations per step
-    if (!m_overexploration)
-      totalRequiredIterations += m_simAnnealingItStep * m_leftRefrPoints;
-
-    // 50 for pseudo-continuous temperature decrease
-    // without hindering the fitting algorithm itself
-    if (m_simAnnealingItStep < 50 && !m_overexploration) {
-      g_log.warning()
-          << "SimAnnealingIterations/NumRefrigerationSteps too small"
-             " (< 50 it). Simulated Annealing not applied\n";
-      m_leftRefrPoints = 0;
-      m_temperature = 1.0;
-    }
-
-    // During Overexploration, the temperature will not be changed
-    if (m_overexploration)
-      m_leftRefrPoints = 0;
-  } else {
-    m_temperature = 1.0;
-    m_leftRefrPoints = 0;
-  }
+  size_t totalRequiredIterations = 350 + m_chainIterations;
+  if (!m_overexploration)
+    totalRequiredIterations += m_simAnnealingItStep * m_leftRefrPoints;
 
   // Throw error if there are not enough iterations
   if (totalRequiredIterations >= maxIterations) {
@@ -1114,6 +1001,130 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
   }
 }
 
+/** Initialze member variables related to fitting parameters
+*
+*/
+void FABADAMinimizer::initChainsAndParameters() {
+  // The "real" parametersare got (not the active ones)
+  m_nParams = m_fitFunction->nParams();
+  if (m_nParams == 0) {
+    throw std::invalid_argument("Function has 0 fitting parameters.");
+  }
+  // The initial parameters are saved
+  if (m_parameters.size() != m_nParams) {
+    m_parameters.resize(m_nParams);
+  }
+
+  size_t n = getProperty("ChainLength");
+  m_chainIterations = size_t(ceil(double(n) / double(m_nParams)));
+
+  // Save parameter constraints
+  for (size_t i = 0; i < m_nParams; ++i) {
+
+    double param = m_fitFunction->getParameter(i);
+    m_parameters.set(i, param);
+
+    API::IConstraint *iconstr = m_fitFunction->getConstraint(i);
+    if (iconstr) {
+      Constraints::BoundaryConstraint *bcon =
+          dynamic_cast<Constraints::BoundaryConstraint *>(iconstr);
+      if (bcon) {
+        if (bcon->hasLower()) {
+          if (param < bcon->lower())
+            m_parameters.set(i, bcon->lower());
+        }
+        if (bcon->hasUpper()) {
+          if (param > bcon->upper())
+            m_parameters.set(i, bcon->upper());
+        }
+      }
+    }
+
+    // Initialize chains
+    m_chain.push_back(std::vector<double>(1, param));
+    // Initilize jump parameters
+    m_jump.push_back(param != 0.0 ? std::abs(param / 10) : 0.01);
+  }
+  m_chi2 = m_leastSquares->val();
+  m_chain.push_back(std::vector<double>(1, m_chi2));
+  m_parChanged = std::vector<bool>(m_nParams, false);
+  m_changes = std::vector<int>(m_nParams, 0);
+  m_changesOld = m_changes;
+  m_numInactiveRegenerations = std::vector<size_t>(m_nParams, 0);
+  m_parConverged = std::vector<bool>(m_nParams, false);
+  m_criteria =
+      std::vector<double>(m_nParams, getProperty("ConvergenceCriteria"));
+}
+
+/** Initialize member variables used for simulated annealing
+*
+*/
+void FABADAMinimizer::initSimulatedAnnealing() {
+
+  // Obs: Simulated Annealing with maximum temperature = 1.0, 1step,
+  // could be used to increase the "burn-in" period before beginning to
+  // check for convergence (Not the ideal way -> Think something)
+  if (getProperty("SimAnnealingApplied")) {
+
+    m_temperature = getProperty("MaximumTemperature");
+    if (m_temperature == 0.0) {
+      g_log.warning() << "MaximumTemperature not a valid temperature"
+                         " (T = 0). Default (T = 10.0) taken.\n";
+      m_temperature = 10.0;
+    }
+    if (m_temperature < 0) {
+      g_log.warning() << "MaximumTemperature not a temperature"
+                         " (< 0), absolute value taken\n";
+      m_temperature = -m_temperature;
+    }
+    m_overexploration = getProperty("Overexploration");
+    if (!m_overexploration && m_temperature < 1) {
+      m_temperature = 1 / m_temperature;
+      g_log.warning() << "MaximumTemperature reduces proper"
+                         " exploration (0 < T < 1), product inverse taken ("
+                      << m_temperature << ")\n";
+    }
+    if (m_overexploration && m_temperature > 1) {
+      m_overexploration = false;
+      g_log.warning()
+          << "Overexploration wrong temperature. Not"
+             " overexploring. Applying usual Simulated Annealing.\n";
+    }
+    // Obs: The result is truncated to not have more iterations than
+    // the chosen by the user and for all temperatures have the same
+    // number of iterations
+    m_leftRefrPoints = getProperty("NumRefrigerationSteps");
+    if (m_leftRefrPoints <= 0) {
+      g_log.warning()
+          << "Wrong value for the number of refrigeration"
+             " points (<= 0). Therefore, default value (5 points) taken.\n";
+      m_leftRefrPoints = 5;
+    }
+
+    m_simAnnealingItStep = getProperty("SimAnnealingIterations");
+    m_simAnnealingItStep /= m_leftRefrPoints;
+
+    m_tempStep = pow(m_temperature, 1.0 / double(m_leftRefrPoints));
+
+    // m_simAnnealingItStep stores the number of iterations per step
+    // 50 for pseudo-continuous temperature decrease
+    // without hindering the fitting algorithm itself
+    if (m_simAnnealingItStep < 50 && !m_overexploration) {
+      g_log.warning()
+          << "SimAnnealingIterations/NumRefrigerationSteps too small"
+             " (< 50 it). Simulated Annealing not applied\n";
+      m_leftRefrPoints = 0;
+      m_temperature = 1.0;
+    }
+
+    // During Overexploration, the temperature will not be changed
+    if (m_overexploration)
+      m_leftRefrPoints = 0;
+  } else {
+    m_temperature = 1.0;
+    m_leftRefrPoints = 0;
+  }
+}
 } // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
