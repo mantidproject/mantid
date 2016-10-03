@@ -18,9 +18,12 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/make_unique.h"
 
-#include <vtkSmartPointer.h>
-#include <vtkXMLStructuredGridWriter.h>
-#include <vtkXMLUnstructuredGridWriter.h>
+#include "vtkFloatArray.h"
+#include "vtkNew.h"
+#include "vtkSmartPointer.h"
+#include "vtkStructuredGrid.h"
+#include "vtkXMLStructuredGridWriter.h"
+#include "vtkXMLUnstructuredGridWriter.h"
 
 #include <boost/make_shared.hpp>
 #include <memory>
@@ -110,6 +113,26 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
   // Do an orthogonal correction
   dataSet = getDataSetWithOrthogonalCorrection(dataSet, presenter.get(),
                                                workspace, isHistoWorkspace);
+
+  // ParaView 5.1 checks the range of the entire signal array, including blank
+  // cells.
+  if (isHistoWorkspace) {
+    auto structuredGrid = vtkStructuredGrid::SafeDownCast(dataSet);
+    vtkIdType imageSize = structuredGrid->GetNumberOfCells();
+    vtkNew<vtkFloatArray> signal;
+    signal->SetNumberOfComponents(1);
+    signal->SetNumberOfTuples(imageSize);
+
+    auto oldSignal = structuredGrid->GetCellData()->GetScalars();
+    for (vtkIdType index = 0; index < imageSize; ++index) {
+      if (structuredGrid->IsCellVisible(index)) {
+        signal->SetComponent(index, 0, oldSignal->GetTuple1(index));
+      } else {
+        signal->SetComponent(index, 0, 0.0);
+      }
+    }
+    structuredGrid->GetCellData()->SetScalars(signal.GetPointer());
+  }
 
   // Write the data to the file
   vtkSmartPointer<vtkXMLWriter> writer = getXMLWriter(isHistoWorkspace);
