@@ -276,8 +276,8 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem *> &wspaces,
         emit updateGeometryInformation();
         // Remove the first three characters, since they are unwanted
         saveCommands += ", Geometry='" + m_geometryID + "', SampleHeight=" +
-          m_sampleHeight + ", SampleWidth=" + m_sampleWidth +
-          ", SampleThickness=" + m_sampleThickness;
+                        m_sampleHeight + ", SampleWidth=" + m_sampleWidth +
+                        ", SampleThickness=" + m_sampleThickness;
       }
     }
 

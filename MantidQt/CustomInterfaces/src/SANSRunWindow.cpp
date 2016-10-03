@@ -4039,8 +4039,8 @@ bool SANSRunWindow::isValidWsForRemovingZeroErrors(QString &wsName) {
   if (result != m_constants.getPythonSuccessKeyword()) {
     result.replace(m_constants.getPythonSuccessKeyword(), "");
     g_log.notice("Not a valid workspace for zero error replacement. Will save "
-                  "original workspace. More info: " +
-                  result.toStdString());
+                 "original workspace. More info: " +
+                 result.toStdString());
     isValid = false;
   }
   return isValid;
