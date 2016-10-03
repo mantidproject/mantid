@@ -126,7 +126,6 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
   // Create the output workspace
   const size_t totalHists =
       event_ws1->getNumberHistograms() + event_ws2->getNumberHistograms();
-  // Sets bins equal to those of input index 0
   auto output = create<EventWorkspace>(*event_ws1, totalHists);
 
   // Initialize the progress reporting object
@@ -153,6 +152,9 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
 
     m_progress->report();
   }
+
+  // Set the same bins for all output pixels
+  output->setAllX(HistogramData::BinEdges(event_ws1->refX(0)));
 
   fixSpectrumNumbers(*event_ws1, *event_ws2, *output);
 
