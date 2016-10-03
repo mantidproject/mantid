@@ -1,5 +1,5 @@
 #include "MantidQtMantidWidgets/MantidTreeWidget.h"
-#include "MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h"
+#include <MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h>
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"

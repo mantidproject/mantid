@@ -1,6 +1,8 @@
 #ifndef MANTIDQT_MANTIDWIDGETS_QWORKSPACEDOCKVIEW_H
 #define MANTIDQT_MANTIDWIDGETS_QWORKSPACEDOCKVIEW_H
 
+#include "MantidQtMantidWidgets/WidgetDllOption.h"
+
 #include <MantidAPI/ExperimentInfo.h>
 #include <MantidAPI/IAlgorithm_fwd.h>
 #include <MantidAPI/IMDEventWorkspace_fwd.h>
@@ -9,7 +11,6 @@
 #include <MantidAPI/ITableWorkspace_fwd.h>
 #include <MantidAPI/MatrixWorkspace_fwd.h>
 #include <MantidAPI/WorkspaceGroup_fwd.h>
-#include <MantidQtMantidWidgets/WidgetDLLOption.h>
 
 #include <MantidQtMantidWidgets/MantidSurfacePlotDialog.h>
 #include <MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h>

@@ -1,3 +1,4 @@
+#include "MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h"
 #include <MantidGeometry/Instrument.h>
 #include <MantidKernel/make_unique.h>
 #include <MantidQtAPI/AlgorithmDialog.h>
@@ -11,7 +12,6 @@
 #include <MantidQtMantidWidgets/MantidTreeWidget.h>
 #include <MantidQtMantidWidgets/MantidTreeWidgetItem.h>
 #include <MantidQtMantidWidgets/WorkspacePresenter/ADSAdapter.h>
-#include <MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h>
 #include <MantidQtMantidWidgets/WorkspacePresenter/WorkspacePresenter.h>
 
 #include <MantidAPI/FileProperty.h>

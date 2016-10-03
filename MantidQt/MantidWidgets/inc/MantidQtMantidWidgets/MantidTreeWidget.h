@@ -2,10 +2,10 @@
 #define MANTIDQT_MANTIDWIDGETS_MANTIDTREEWIDGET_H
 
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
+#include <MantidAPI/AnalysisDataService.h>
 #include <MantidAPI/MatrixWorkspace_fwd.h>
 #include <MantidQtMantidWidgets/MantidSurfacePlotDialog.h>
 #include <MantidQtMantidWidgets/MantidWSIndexDialog.h>
-#include <MantidAPI/AnalysisDataService.h>
 
 #include <QTreeWidget>
 #include <boost/shared_ptr.hpp>
