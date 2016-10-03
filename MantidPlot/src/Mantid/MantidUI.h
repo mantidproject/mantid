@@ -208,6 +208,8 @@ public:
   AlgorithmMonitor *getAlgMonitor() { return m_algMonitor; }
   /// updates the algorithms tree
   void updateAlgorithms();
+  /// updates the workspaces tree
+  void updateWorkspaces();
   /// Show the algorithm dock widget
   void showAlgWidget(bool on = true);
 
