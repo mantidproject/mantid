@@ -184,9 +184,6 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
     m_chain.push_back(std::vector<double>(1, param));
 
     // Initilize convergence and jump parameters
-    m_numInactiveRegenerations.push_back(0);
-    m_par_converged.push_back(false);
-    m_criteria.push_back(getProperty("ConvergenceCriteria"));
     if (param != 0.0) {
       m_jump.push_back(std::abs(param / 10));
     } else {
@@ -204,6 +201,9 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
   m_par_changed = std::vector<bool>(m_nParams, false);
   m_changes = std::vector<int>(m_nParams, 0);
   m_changesOld = m_changes;
+  m_numInactiveRegenerations = std::vector<size_t>(m_nParams, 0);
+  m_par_converged = std::vector<bool>(m_nParams, false);
+  m_criteria = std::vector<double>(m_nParams, getProperty("ConvergenceCriteria"));
 
   // Simulated Annealing
   // Obs: Simulated Annealing with maximum temperature = 1.0, 1step,
