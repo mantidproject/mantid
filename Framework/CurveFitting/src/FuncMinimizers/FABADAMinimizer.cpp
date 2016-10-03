@@ -162,7 +162,7 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
   for (size_t i = 0; i < m_nParams; ++i) {
 
     double param = m_fitFunction->getParameter(i);
-	m_parameters.set(i, param);
+    m_parameters.set(i, param);
 
     API::IConstraint *iconstr = m_fitFunction->getConstraint(i);
     if (iconstr) {
@@ -181,12 +181,9 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
     }
 
     // Initialize chains
-    std::vector<double> v;
-    v.push_back(param);
-    m_chain.push_back(v);
+    m_chain.push_back(std::vector<double>(1, param));
 
     // Initilize convergence and jump parameters
-    m_changes.push_back(0);
     m_numInactiveRegenerations.push_back(0);
     m_par_converged.push_back(false);
     m_criteria.push_back(getProperty("ConvergenceCriteria"));
@@ -196,7 +193,6 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
       m_jump.push_back(0.01);
     }
   }
-  m_changesOld = m_changes;
   m_chi2 = m_leastSquares->val();
   std::vector<double> v;
   v.push_back(m_chi2);
@@ -206,6 +202,8 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
   m_innactConvCriterion = getProperty("InnactiveConvergenceCriterion");
 
   m_par_changed = std::vector<bool>(m_nParams, false);
+  m_changes = std::vector<int>(m_nParams, 0);
+  m_changesOld = m_changes;
 
   // Simulated Annealing
   // Obs: Simulated Annealing with maximum temperature = 1.0, 1step,
