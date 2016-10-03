@@ -147,6 +147,19 @@ class IndirectILLReductionTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted(), "IndirectILLReduction not executed")
         self._workspace_properties(mtd['red'])
 
+    def _test_unmirror_6_7(self):
+        self._args['Run'] = '146007'
+        self._args['UnmirrorOption'] = 6
+
+        vana6 = IndirectILLReduction(**self._args)
+
+        self._args['VanadiumRun'] = '146007'
+        self._args['UnmirrorOption'] = 7
+
+        vana7 = IndirectILLReduction(**self._args)
+
+        CheckWorkspacesMatch(mtd['vana6'].getItem(0),mtd['vana7'].getItem(0),0.0000001)
+
     def _workspace_properties(self, ws):
 
         self.assertTrue(isinstance(ws, WorkspaceGroup), "Should be a group workspace")
