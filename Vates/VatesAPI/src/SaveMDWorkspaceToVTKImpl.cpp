@@ -69,6 +69,7 @@ SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl() { setupMembers(); }
  * @param normalization: the visual normalization option
  * @param thresholdRange: a plolicy for the threshold range
  * @param recursionDepth: the recursion depth for MDEvent Workspaces determines
+ * @param compressorType: the compression type used by VTK
  * from which level data should be displayed
  */
 void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
@@ -126,7 +127,7 @@ void SaveMDWorkspaceToVTKImpl::saveMDWorkspace(
       if (structuredGrid->IsCellVisible(index)) {
         signal->SetComponent(index, 0, oldSignal->GetTuple1(index));
       } else {
-        signal->SetComponent(index, 0, 0.0);
+        signal->SetComponent(index, 0, std::numeric_limits<float>::quiet_NaN());
       }
     }
     structuredGrid->GetCellData()->SetScalars(signal.GetPointer());
@@ -200,6 +201,7 @@ SaveMDWorkspaceToVTKImpl::getPresenter(bool isHistoWorkspace,
  * @param writer: a vtk xml writer
  * @param dataSet: the data set which is to be saved out
  * @param filename: the file name
+ * @param compressor: the compression type used by VTK
  * @returns a vtk error flag
  */
 int SaveMDWorkspaceToVTKImpl::writeDataSetToVTKFile(
