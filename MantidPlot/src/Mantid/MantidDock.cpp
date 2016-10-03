@@ -143,8 +143,8 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent)
           Qt::DirectConnection);
   // this slot is called when the GUI thread is free. decrement the counter. do
   // nothing until the counter == 0
-  connect(m_mantidUI, SIGNAL(ADS_updated()), this, SLOT(updateTree()),
-          Qt::QueuedConnection);
+  connect(m_mantidUI, SIGNAL(ADS_updated()), this,
+          SLOT(updateTreeOnADSUpdate()), Qt::QueuedConnection);
 
   connect(m_mantidUI, SIGNAL(workspaces_cleared()), m_tree, SLOT(clear()),
           Qt::QueuedConnection);
@@ -405,15 +405,18 @@ void MantidDockWidget::setItemIcon(QTreeWidgetItem *item,
   }
 }
 
+void MantidDockWidget::updateTreeOnADSUpdate() {
+  // do not update until the counter is zero
+  if (m_updateCount.deref())
+    return;
+  updateTree();
+}
+
 /**
 * Update the workspace tree to match the current state of the ADS.
 * It is important that the workspace tree is modified only by this method.
 */
 void MantidDockWidget::updateTree() {
-  // do not update until the counter is zero
-  if (m_updateCount.deref())
-    return;
-
   // find all expanded top-level entries
   QStringList expanded;
   int n = m_tree->topLevelItemCount();
