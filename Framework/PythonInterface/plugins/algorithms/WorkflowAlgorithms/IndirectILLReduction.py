@@ -469,8 +469,13 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         issues = dict()
         # Unmirror options 5 and 7 require a Vanadium run as input workspace
         if (self.getProperty('UnmirrorOption').value == 5 or self.getProperty('UnmirrorOption').value == 7) \
-                and self.getPropertyValue('VanadiumRun') == "":
+                and not self.getPropertyValue('VanadiumRun'):
             issues['VanadiumRun'] = 'Given unmirror option requires vanadium run to be set'
+
+        if self.getPropertyValue('CalibrationWorkspace'):
+            if mtd[self.getPropertyValue('CalibrationWorkspace')].blocksize() != 1:
+                issues['CalibrationWorkspace'] = 'Calibration workspace should contain only ' \
+                                                 'one column of calibration constants.'
 
         return issues
 
@@ -698,8 +703,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         # Calibrate to vanadium calibration workspace if specified
         # note, this is a one-column calibration workspace
         if self._calib_ws is not None:
-            Divide(LHSWorkspace=red, RHSWorkspace=self._calib_ws, OutputWorkspace=red)
-            self._debug(red, vnorm)
+            if self._calib_ws.getNumberHistograms() == mtd[red].getNumberHistograms():
+                Divide(LHSWorkspace=red, RHSWorkspace=self._calib_ws, OutputWorkspace=red)
+                self._debug(red, vnorm)
+            else:
+                self.log().error("Calibration workspace has wrong dimensions.")
 
         # Number of bins
         size = mtd[red].blocksize()
@@ -739,22 +747,22 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         start_bin = 0
         end_bin = 0
         if mirror_sense == 14 and self._unmirror_option == 0:
-            self.log().warning('Input run #%s has two wings, no energy transfer can be performed' % run)
+            self.log().warning('Input run #%s has two wings, no energy transfer can be performed with unmirror 0' % run)
         elif mirror_sense == 14 and self._unmirror_option > 0:
             start_bin, end_bin = perform_unmirror(red, left, right, self._unmirror_option)
             convert_to_energy(red)
         elif mirror_sense == 16:
-            self.log().information('Input run #%s has one wing, perform energy transfer' % run)
+            self.log().warning('Input run #%s has one wing, perform energy transfer. No unmirroring can be done.' % run)
             convert_to_energy(red)
         else:
-            self.log().warning('Input run #%s: no Doppler.mirror_sense defined.' % run)
+            self.log().warning('Input run #%s: no Doppler.mirror_sense defined. No unmirroring can be done.' % run)
             convert_to_energy(red)
 
         convert_to_energy(left)
         convert_to_energy(right)
 
         # Mask corrupted bins according to shifted workspaces or monitor range
-        # Reload X-values (now in meV, except for unmirror=0 and mirro_sense=14)
+        # Reload X-values (now in meV, except for unmirror=0 and mirror_sense=14)
         x = mtd[red].readX(0)
 
         # Initialisation, please note that masking with these values does not work
