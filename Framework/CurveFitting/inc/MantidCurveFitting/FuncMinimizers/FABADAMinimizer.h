@@ -93,6 +93,11 @@ private:
   void outputChains();
   /// Output converged chains
   void outputConvergedChains(size_t convLength, int nSteps);
+  /// Output cost function
+  void outputCostFunctionTable(size_t convLength, double mostProbableChi2);
+  /// Output PDF
+  double outputPDF(size_t convLength,
+                   std::vector<std::vector<double>> &reducedChain);
 
   // Variables declarations
   /// Pointer to the cost function. Must be the least squares.
