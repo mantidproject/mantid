@@ -493,25 +493,8 @@ void FABADAMinimizer::finalize() {
     }
   }
 
-  const bool outputParametersTable = !getPropertyValue("Parameters").empty();
-
-  if (outputParametersTable) {
-
-    // Create the workspace for the parameters' value and errors.
-    API::ITableWorkspace_sptr wsPdfE =
-        API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-    wsPdfE->addColumn("str", "Name");
-    wsPdfE->addColumn("double", "Value");
-    wsPdfE->addColumn("double", "Left's error");
-    wsPdfE->addColumn("double", "Rigth's error");
-
-    for (size_t j = 0; j < m_nParams; ++j) {
-      API::TableRow row = wsPdfE->appendRow();
-      row << m_fitFunction->parameterName(j) << bestParameters[j]
-          << error_left[j] << error_rigth[j];
-    }
-    // Set and name the Parameter Errors workspace.
-    setProperty("Parameters", wsPdfE);
+  if (!getPropertyValue("Parameters").empty()) {
+    outputParameterTable(bestParameters, error_left, error_rigth);
   }
 
   // Set the best parameter values
@@ -1089,6 +1072,34 @@ FABADAMinimizer::outputPDF(size_t convLength,
   // Set and name the PDF workspace.
   setProperty("PDF", ws);
   return mostPchi2;
+}
+
+/** Create the table workspace containing parameter values
+*
+* @param bestParameters :: vector containing best values for fitting parameters
+* @param errorsLeft :: the errors (left)
+* @param errorsRight :: the errors (right)
+*/
+void FABADAMinimizer::outputParameterTable(
+    const std::vector<double> &bestParameters,
+    const std::vector<double> &errorsLeft,
+    const std::vector<double> &errorsRight) {
+
+  // Create the workspace for the parameters' value and errors.
+  API::ITableWorkspace_sptr wsPdfE =
+      API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  wsPdfE->addColumn("str", "Name");
+  wsPdfE->addColumn("double", "Value");
+  wsPdfE->addColumn("double", "Left's error");
+  wsPdfE->addColumn("double", "Rigth's error");
+
+  for (size_t j = 0; j < m_nParams; ++j) {
+    API::TableRow row = wsPdfE->appendRow();
+    row << m_fitFunction->parameterName(j) << bestParameters[j] << errorsLeft[j]
+        << errorsRight[j];
+  }
+  // Set and name the Parameter Errors workspace.
+  setProperty("Parameters", wsPdfE);
 }
 
 } // namespace FuncMinimisers

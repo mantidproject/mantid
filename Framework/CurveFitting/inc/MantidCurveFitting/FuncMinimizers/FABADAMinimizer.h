@@ -98,6 +98,10 @@ private:
   /// Output PDF
   double outputPDF(size_t convLength,
                    std::vector<std::vector<double>> &reducedChain);
+  /// Output parameter table
+  void outputParameterTable(const std::vector<double> &bestParameters,
+                            const std::vector<double> &errorsLeft,
+                            const std::vector<double> &errorsRight);
 
   // Variables declarations
   /// Pointer to the cost function. Must be the least squares.
