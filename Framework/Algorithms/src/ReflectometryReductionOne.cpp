@@ -699,6 +699,7 @@ void ReflectometryReductionOne::exec() {
   setProperty("OutputWorkspace", IvsQ);
   // setting these values so the Interface can retrieve them from
   // ReflectometryReductionOneAuto.
+  setProperty("ThetaIn", theta.get() / 2.);
   setProperty("MomentumTransferMinimum", momentumTransferMinimum);
   setProperty("MomentumTransferStep", momentumTransferStep);
   setProperty("MomentumTransferMaximum", momentumTransferMaximum);
